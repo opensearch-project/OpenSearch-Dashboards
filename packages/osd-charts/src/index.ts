@@ -1,10 +1,5 @@
-// import './style.css';
-
-// console.log('hello worxsssld');
-
-function square(val: number): number {
-  return val * val * val;
-}
-
-square(1);
-// console.log(square(2));
+export * from './specs';
+export { Chart } from './components/chart';
+export { getAxisId, getGroupId, getSpecId } from './lib/utils/ids';
+export { ScaleType } from './lib/utils/scales/scales';
+export { Position, Rotation } from './lib/series/specs';

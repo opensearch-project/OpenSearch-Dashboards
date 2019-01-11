@@ -1,11 +1,11 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const webpack = require('webpack');
 module.exports = {
   mode: 'production',
   entry: {
-    app: './src/index.js',
+    lib: './src/index.ts',
+    playground: './src/playground/index.tsx',
   },
   devtool: 'source-map',
   output: {
@@ -25,12 +25,27 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.css$/,
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/
+      },
+      {
+        test: /\.scss$/,
         use: [
-          'style-loader',
-          'css-loader'
+          {
+            loader: "style-loader"
+          },
+          {
+            loader: "css-loader"
+          },
+          {
+            loader: "sass-loader",
+          }
         ]
       }
     ]
-  }
+  },
+  resolve: {
+    extensions: [ '.tsx', '.ts', '.js' ]
+  },
 };

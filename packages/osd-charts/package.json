@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "build": "webpack --config webpack.prod.js",
-    "start": "webpack-dev-server --open --config webpack.dev.js",
+    "start": "webpack-dashboard -- webpack-dev-server --open --config webpack.dev.js",
     "lint": "tslint -c ./tslint.yaml -p ./tsconfig.json && tsc -p ./tsconfig.json",
     "test": "jest --coverage --watch "
   },

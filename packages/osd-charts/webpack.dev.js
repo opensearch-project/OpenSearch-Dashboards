@@ -2,6 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const webpack = require('webpack');
+
 module.exports = {
   mode: 'development',
   entry: {
@@ -35,13 +36,6 @@ module.exports = {
         exclude: /node_modules/
       },
       {
-        test: /\.css$/,
-        use: [
-          'style-loader',
-          'css-loader',
-        ]
-      },
-      {
         test: /\.scss$/,
         use: [
           {
@@ -52,9 +46,6 @@ module.exports = {
           },
           {
             loader: "sass-loader",
-            // options: {
-            //   includePaths: ['src/']
-            // }
           }
         ]
       }
