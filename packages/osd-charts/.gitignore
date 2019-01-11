@@ -8,6 +8,7 @@ test/failure-screenshots/**/*.png
 reports/
 tmp/
 dist/
+coverage/
 .idea
 .vscode/
 .DS_Store
