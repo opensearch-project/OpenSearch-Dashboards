@@ -2,11 +2,11 @@ import { ScaleType } from './scales';
 import { Scale } from './scales';
 
 export class ScaleBand implements Scale {
-  public readonly bandwidth: number;
-  public readonly step: number;
-  public readonly type: ScaleType;
-  public readonly domain: any[];
-  public readonly range: number[];
+  readonly bandwidth: number;
+  readonly step: number;
+  readonly type: ScaleType;
+  readonly domain: any[];
+  readonly range: number[];
   private readonly modelDomain: Map<any, any>;
   private readonly modelRange: number[];
   private readonly paddingInner: number;
@@ -63,12 +63,12 @@ export class ScaleBand implements Scale {
     this.domain = [...this.modelDomain.keys()];
   }
 
-  public scale(value: any) {
+  scale(value: any) {
     const index = this.modelDomain.get(value);
     return this.modelRange[(index) % this.modelRange.length];
   }
 
-  public ticks() {
+  ticks() {
     return this.domain;
   }
 }

@@ -1,0 +1,49 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  background: lightgray;
+}
+
+#chart {
+  width: 100%;
+}
+
+
+.app {
+  width: 100%;  
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 70px;
+  padding: 10px;
+  z-index: 1000;
+  user-select: none;
+  background: white;
+}
+.chartContainers {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 100%;
+  padding: 15px;
+  margin-top: 35px;
+}
+.chartContainer {
+  width: 100%;
+  height: 300px;
+  flex-shrink: 0;
+  flex-grow: 0;
+  flex-basis: auto;
+  position: relative;
+  box-shadow: 6px 6px 14px -2px rgba(0,0,0,0.75);
+  background: white;
+  box-sizing: border-box;
+}

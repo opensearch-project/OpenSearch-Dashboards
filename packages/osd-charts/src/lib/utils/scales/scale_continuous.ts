@@ -10,12 +10,12 @@ const SCALES = {
 };
 
 export class ScaleContinuous implements Scale {
-  public readonly bandwidth: number;
-  public readonly minInterval: number;
-  public readonly step: number;
-  public readonly type: ScaleType;
-  public readonly domain: any[];
-  public readonly range: number[];
+  readonly bandwidth: number;
+  readonly minInterval: number;
+  readonly step: number;
+  readonly type: ScaleType;
+  readonly domain: any[];
+  readonly range: number[];
   private readonly d3Scale: any;
 
   constructor(
@@ -39,11 +39,11 @@ export class ScaleContinuous implements Scale {
     this.minInterval = minInterval || 0;
   }
 
-  public scale(value: any) {
+  scale(value: any) {
     return this.d3Scale(value);
   }
 
-  public ticks() {
+  ticks() {
     if (this.minInterval > 0) {
       const intervalCount = (this.domain[1] - this.domain[0]) / this.minInterval;
       return new Array(intervalCount + 1).fill(0).map((d, i) => {

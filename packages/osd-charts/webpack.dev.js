@@ -5,7 +5,8 @@ const webpack = require('webpack');
 module.exports = {
   mode: 'development',
   entry: {
-    app: './src/index.ts',
+    lib: './src/index.ts',
+    playground: './src/playground/index.tsx',
   },
   devtool: 'inline-source-map',
   devServer: {
@@ -37,7 +38,24 @@ module.exports = {
         test: /\.css$/,
         use: [
           'style-loader',
-          'css-loader'
+          'css-loader',
+        ]
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          {
+            loader: "style-loader"
+          },
+          {
+            loader: "css-loader"
+          },
+          {
+            loader: "sass-loader",
+            // options: {
+            //   includePaths: ['src/']
+            // }
+          }
         ]
       }
     ]

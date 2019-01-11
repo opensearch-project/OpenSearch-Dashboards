@@ -9,10 +9,10 @@ declare global {
 }
 
 export class SvgTextBBoxCalculator implements BBoxCalculator {
-  public svgElem: SVGSVGElement;
-  public textElem: SVGTextElement;
-  public attachedRoot: HTMLElement;
-  public textNode: Text;
+  svgElem: SVGSVGElement;
+  textElem: SVGTextElement;
+  attachedRoot: HTMLElement;
+  textNode: Text;
   // TODO specify styles for text
   // TODO specify how to hide the svg from the current dom view
   // like moving it a -9999999px
@@ -26,7 +26,7 @@ export class SvgTextBBoxCalculator implements BBoxCalculator {
     this.attachedRoot = rootElement || document.documentElement;
     this.attachedRoot.appendChild(this.svgElem);
   }
-  public compute(text: string): Option<BBox> {
+  compute(text: string): Option<BBox> {
     this.textNode.textContent = text;
     const rect = this.textElem.getBoundingClientRect();
     return some({
@@ -34,7 +34,7 @@ export class SvgTextBBoxCalculator implements BBoxCalculator {
       height: rect.height,
     });
   }
-  public destroy(): void {
+  destroy(): void {
     this.attachedRoot.removeChild(this.svgElem);
   }
 }

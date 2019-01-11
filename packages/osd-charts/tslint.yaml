@@ -12,4 +12,4 @@ rules:
   no-default-export: true
   no-irregular-whitespace: true
   quotemark: [true, "single", "jsx-double"]
-
+  member-access: [true, "no-public"]

@@ -14,7 +14,7 @@ export class CanvasTextBBoxCalculator implements BBoxCalculator {
     this.attachedRoot = rootElement || document.documentElement;
     this.attachedRoot.appendChild(this.offscreenCanvas);
   }
-  public compute(text: string, fontSize = 16, fontFamily = 'Arial'): Option<BBox> {
+  compute(text: string, fontSize = 16, fontFamily = 'Arial'): Option<BBox> {
     if (!this.context) {
       return none;
     }
@@ -25,7 +25,7 @@ export class CanvasTextBBoxCalculator implements BBoxCalculator {
       height: fontSize,
     });
   }
-  public destroy(): void {
+  destroy(): void {
     this.attachedRoot.removeChild(this.offscreenCanvas);
   }
 }
