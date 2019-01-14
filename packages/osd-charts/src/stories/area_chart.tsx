@@ -18,7 +18,7 @@ import './stories.scss';
 storiesOf('Area Chart', module)
   .add('basic', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]}>
+      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
         <AreaSeries
           id={getSpecId('lines')}
           xScaleType={ScaleType.Linear}
@@ -37,7 +37,7 @@ storiesOf('Area Chart', module)
   })
   .add('w axis', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]}>
+      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -69,7 +69,7 @@ storiesOf('Area Chart', module)
   })
   .add('with 4 axes', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]}>
+      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -113,7 +113,7 @@ storiesOf('Area Chart', module)
   })
   .add('w axis and legend', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]}>
+      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
         <Settings
           showLegend={true}
           legendPosition={Position.Right}
@@ -149,7 +149,7 @@ storiesOf('Area Chart', module)
   })
   .add('stacked w axis and legend', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]}>
+      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
         <Settings
           showLegend={true}
           legendPosition={Position.Right}

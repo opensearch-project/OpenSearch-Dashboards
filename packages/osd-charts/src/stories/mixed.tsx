@@ -16,7 +16,7 @@ import './stories.scss';
 storiesOf('Mixed Charts', module)
   .add('bar and lines', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]}>
+      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
         <Settings
           showLegend={true}
           legendPosition={Position.Right}
@@ -68,7 +68,7 @@ storiesOf('Mixed Charts', module)
   })
   .add('lines and areas', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]}>
+      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
         <Settings
           showLegend={true}
           legendPosition={Position.Right}

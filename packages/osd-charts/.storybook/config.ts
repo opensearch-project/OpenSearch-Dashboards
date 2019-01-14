@@ -11,6 +11,7 @@ addDecorator(
           display: 'inline',
         },
         body: {
+          marginTop: 0,
           paddingTop: 0,
           paddingBottom: 0,
         },
@@ -20,6 +21,8 @@ addDecorator(
         },
       },
       infoBody: {
+        marginTop: 0,
+        marginBottom: 0,
         backgroundColor: '#eee',
         padding: '0px 5px',
         lineHeight: '2',

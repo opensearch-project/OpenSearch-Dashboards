@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import { Provider } from 'mobx-react';
 import React, { Fragment } from 'react';
 import { SpecsParser } from '../specs/specs_parser';
@@ -11,6 +12,7 @@ import { Tooltips } from './tooltips';
 interface ChartProps {
   renderer: 'svg' | 'canvas' | 'canvas_old';
   size?: [number, number];
+  className?: string;
 }
 
 export class Chart extends React.Component<ChartProps> {
@@ -23,7 +25,7 @@ export class Chart extends React.Component<ChartProps> {
     this.chartSpecStore = new ChartStore();
   }
   render() {
-    const { renderer, size } = this.props;
+    const { renderer, size, className } = this.props;
     let containerStyle;
     if (size) {
       containerStyle = {
@@ -34,13 +36,14 @@ export class Chart extends React.Component<ChartProps> {
     } else {
       containerStyle = {};
     }
+    const chartClass = classNames(className);
     return (
       <Provider chartStore={this.chartSpecStore}>
         <Fragment>
           <SpecsParser>
             { this.props.children }
           </SpecsParser>
-          <div style={containerStyle}>
+          <div style={containerStyle} className={chartClass}>
             <ChartResizer/>
             {
               renderer === 'svg' && <SVGChart />

@@ -19,7 +19,7 @@ import './stories.scss';
 storiesOf('Axis', module)
   .add('basic', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]}>
+      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -51,7 +51,7 @@ storiesOf('Axis', module)
   })
   .add('4 axes', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]}>
+      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -95,7 +95,7 @@ storiesOf('Axis', module)
   })
   .add('with multi axis (TO FIX)', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]}>
+      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
         <Settings
           showLegend={false}
         />
@@ -149,7 +149,7 @@ storiesOf('Axis', module)
   })
   .add('with multi axis bar/lines', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]}>
+      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
         <Settings
           showLegend={false}
         />

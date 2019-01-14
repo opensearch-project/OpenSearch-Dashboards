@@ -20,7 +20,7 @@ import './stories.scss';
 storiesOf('Legend', module)
   .add('right', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]}>
+      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
         <Settings
           showLegend={true}
           legendPosition={Position.Right}
@@ -52,7 +52,7 @@ storiesOf('Legend', module)
   })
   .add('bottom', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]}>
+      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
         <Settings
           showLegend={true}
           legendPosition={Position.Bottom}
@@ -84,7 +84,7 @@ storiesOf('Legend', module)
   })
   .add('left', () => {
     return (
-      <Chart renderer="canvas" size={[500, 150]}>
+      <Chart renderer="canvas"  size={[500, 150]} className={'story-chart'}>
         <Settings
           showLegend={true}
           legendPosition={Position.Left}
@@ -116,7 +116,7 @@ storiesOf('Legend', module)
   })
   .add('top', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]}>
+      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
         <Settings
           showLegend={true}
           legendPosition={Position.Top}
