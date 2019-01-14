@@ -27,6 +27,7 @@
     "@types/luxon": "^1.4.1",
     "@types/react": "^16.7.18",
     "@types/react-dom": "^16.0.11",
+    "@types/storybook__addon-info": "^3.4.2",
     "@types/storybook__react": "^4.0.0",
     "babel-loader": "^8.0.5",
     "clean-webpack-plugin": "^1.0.0",

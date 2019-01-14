@@ -1513,6 +1513,13 @@
     "@types/prop-types" "*"
     csstype "^2.2.0"
 
+"@types/storybook__addon-info@^3.4.2":
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/@types/storybook__addon-info/-/storybook__addon-info-3.4.2.tgz#31a27e66867f02e593579cc58f54d22e726b0925"
+  integrity sha512-1af9u42JAMbi54MOkfzZt2+RTbUnpVJCN6vkkcAEtlyML4tXpmW482d3TZNiYPk3ePHKkielNZUtfpijT/XJ+A==
+  dependencies:
+    "@types/react" "*"
+
 "@types/storybook__react@^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@types/storybook__react/-/storybook__react-4.0.0.tgz#52cc452fbab599568d595075a90142ef4a1233f6"

@@ -1,7 +1,5 @@
-import { configure } from '@storybook/react';
-import {addDecorator} from "@storybook/react";
-import {withInfo} from '@storybook/addon-info';
-
+import { withInfo } from '@storybook/addon-info';
+import { addDecorator, configure } from '@storybook/react';
 
 addDecorator(
   withInfo({
@@ -28,8 +26,8 @@ addDecorator(
       },
     },
     inline: true,
-    source: false,
-  })
+    source: true,
+  }),
 );
 
 function loadStories() {
