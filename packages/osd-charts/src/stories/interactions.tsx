@@ -133,4 +133,6 @@ storiesOf('Interactions', module)
           yScaleToDataExtent ={false}
         />
     </Chart>);
-  });
+  })
+  .add('click/hovers on legend items (TO DO)', () => (<h1>TO DO</h1>))
+  .add('brush selection tool (TO DO)', () => (<h1>TO DO</h1>));
