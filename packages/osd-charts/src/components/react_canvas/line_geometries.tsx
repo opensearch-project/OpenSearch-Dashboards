@@ -14,7 +14,10 @@ interface LineGeometriesDataProps {
   onElementOver: ((tooltip: TooltipData) => void) & IAction;
   onElementOut: (() => void) & IAction;
 }
-export class LineGeometries extends React.PureComponent<LineGeometriesDataProps> {
+interface LineGeometriesDataState {
+  overPoint?: PointGeometry;
+}
+export class LineGeometries extends React.PureComponent<LineGeometriesDataProps, LineGeometriesDataState> {
   static defaultProps: Partial<LineGeometriesDataProps> = {
     animated: false,
   };
@@ -22,6 +25,9 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps>
   constructor(props: LineGeometriesDataProps) {
     super(props);
     this.barSeriesRef = React.createRef();
+    this.state = {
+      overPoint: undefined,
+    };
   }
   render() {
     return (
@@ -35,37 +41,82 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps>
       </Group>
     );
   }
+  private onOverPoint = (point: PointGeometry) => () => {
+    const { onElementOver } = this.props;
+    const { x, y, value, transform } = point;
+    this.setState(() => {
+      return {
+        overPoint: point,
+      };
+    });
+    onElementOver({
+      value,
+      position: {
+        left: transform.x + x,
+        top: y,
+      },
+    });
+  }
+  private onOutPoint = () => {
+    const { onElementOut } = this.props;
+
+    this.setState(() => {
+      return {
+        overPoint: undefined,
+      };
+    });
+    onElementOut();
+  }
   private renderLinePoints = (): JSX.Element[] => {
     const { lines } = this.props;
     return lines.reduce((acc, glyph, i) => {
       const { points } = glyph;
-      return [...acc, ...this.renderPoints(points)];
+      return [...acc, ...this.renderPoints(points, i)];
     }, [] as JSX.Element[]);
   }
-  private renderPoints = (points: PointGeometry[]): JSX.Element[] => {
-    const { style, onElementOver, onElementOut } = this.props;
-    return points.map((point) => {
+  private renderPoints = (points: PointGeometry[], i: number): JSX.Element[] => {
+    const { style } = this.props;
+    const { overPoint } = this.state;
+
+    return points.map((point, index) => {
       const { x, y, color, value, transform } = point;
-      return <Circle
-        x={transform.x + x}
-        y={y}
-        radius={style.dataPointsRadius}
-        stroke={color}
-        strokeWidth={style.dataPointsStrokeWidth}
-        // fill={point.color}
-        onMouseOver={() => {
-          onElementOver({
-            value,
-            position: {
-              left: transform.x + x,
-              top: y,
-            },
-          });
-        }}
-        onMouseLeave={() => {
-          onElementOut();
-        }}
-        /> ;
+      return (
+        <Group key={`point-${i}-${index}`}>
+          <Circle
+            x={transform.x + x}
+            y={y}
+            radius={style.dataPointsRadius * 2.5}
+            onMouseOver={this.onOverPoint(point)}
+            onMouseLeave={this.onOutPoint}
+            fill={'gray'}
+            opacity={overPoint === point ? 0.3 : 0}
+          />
+          <Circle
+            x={transform.x + x}
+            y={y}
+            radius={style.dataPointsRadius}
+            strokeWidth={0}
+            fill={color}
+            opacity={overPoint === point ? 0.5 : 0}
+            strokeHitEnabled={false}
+            listening={false}
+            perfectDrawEnabled={true}
+          />
+           <Circle
+            x={transform.x + x}
+            y={y}
+            radius={style.dataPointsRadius}
+            onMouseOver={this.onOverPoint(point)}
+            onMouseLeave={this.onOutPoint}
+            fill={'transparent'}
+            stroke={style.dataPointsStroke}
+            strokeWidth={style.dataPointsStrokeWidth}
+            opacity={overPoint === point ? 1 : 0}
+            strokeHitEnabled={false}
+            listening={false}
+            perfectDrawEnabled={true}
+          />
+        </Group>);
     });
   }
   private renderLineGeoms = (): JSX.Element[] => {

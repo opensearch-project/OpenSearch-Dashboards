@@ -15,7 +15,10 @@ interface AreaGeometriesDataProps {
   onElementOver: ((tooltip: TooltipData) => void) & IAction;
   onElementOut: (() => void) & IAction;
 }
-export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps> {
+interface AreaGeometriesDataState {
+  overPoint?: PointGeometry;
+}
+export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps, AreaGeometriesDataState> {
   static defaultProps: Partial<AreaGeometriesDataProps> = {
     animated: false,
     num: 1,
@@ -24,6 +27,9 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps>
   constructor(props: AreaGeometriesDataProps) {
     super(props);
     this.barSeriesRef = React.createRef();
+    this.state = {
+      overPoint: undefined,
+    };
   }
   render() {
     return (
@@ -37,47 +43,91 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps>
       </Group>
     );
   }
+  private onOverPoint = (point: PointGeometry) => () => {
+    const { onElementOver } = this.props;
+    const { x, y, value, transform } = point;
+    this.setState(() => {
+      return {
+        overPoint: point,
+      };
+    });
+    onElementOver({
+      value,
+      position: {
+        left: transform.x + x,
+        top: y,
+      },
+    });
+  }
+  private onOutPoint = () => {
+    const { onElementOut } = this.props;
+
+    this.setState(() => {
+      return {
+        overPoint: undefined,
+      };
+    });
+    onElementOut();
+  }
   private renderAreaPoints = (): JSX.Element[] => {
     const { areas } = this.props;
     return areas.reduce((acc, glyph, i) => {
       const { points } = glyph;
-      return [...acc, ...this.renderPoints(points)];
+      return [...acc, ...this.renderPoints(points, i)];
     }, [] as JSX.Element[]);
   }
-  private renderPoints = (points: PointGeometry[]): JSX.Element[] => {
-    const { style, onElementOver, onElementOut } = this.props;
+  private renderPoints = (points: PointGeometry[], i: number): JSX.Element[] => {
+    const { style } = this.props;
+    const { overPoint } = this.state;
+
     return points.map((point, index) => {
       const { x, y, color, value, transform } = point;
-      return <Circle
-        key={index}
-        x={transform.x + x}
-        y={y}
-        radius={style.dataPointsRadius}
-        stroke={color}
-        strokeWidth={style.dataPointsStrokeWidth}
-        // fill={point.color}
-        onMouseOver={() => {
-          onElementOver({
-            value,
-            position: {
-              left: transform.x + x,
-              top: y,
-            },
-          });
-        }}
-        onMouseLeave={() => {
-          onElementOut();
-        }}
-        /> ;
+      return (
+        <Group key={`point-${i}-${index}`}>
+          <Circle
+            x={transform.x + x}
+            y={y}
+            radius={style.dataPointsRadius * 2.5}
+            onMouseOver={this.onOverPoint(point)}
+            onMouseLeave={this.onOutPoint}
+            fill={'gray'}
+            opacity={overPoint === point ? 0.3 : 0}
+          />
+          <Circle
+            x={transform.x + x}
+            y={y}
+            radius={style.dataPointsRadius}
+            strokeWidth={0}
+            fill={color}
+            opacity={overPoint === point ? 0.5 : 0}
+            strokeHitEnabled={false}
+            listening={false}
+            perfectDrawEnabled={true}
+          />
+           <Circle
+            x={transform.x + x}
+            y={y}
+            radius={style.dataPointsRadius}
+            onMouseOver={this.onOverPoint(point)}
+            onMouseLeave={this.onOutPoint}
+            fill={'transparent'}
+            stroke={style.dataPointsStroke}
+            strokeWidth={style.dataPointsStrokeWidth}
+            opacity={overPoint === point ? 1 : 0}
+            strokeHitEnabled={false}
+            listening={false}
+            perfectDrawEnabled={true}
+          />
+        </Group>);
     });
   }
   private renderAreaGeoms = (): JSX.Element[] => {
     const { areas } = this.props;
-    return areas.reverse().map((glyph, i) => {
+    return areas.map((glyph, i) => {
       const { area, color, transform } = glyph;
       if (this.props.animated) {
         return (
-          <Group key={i} x={transform.x}>
+          <Group key={`area-group-${i}`} x={transform.x}>
             <Spring
               native
               from={{ area }}
@@ -98,7 +148,7 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps>
         );
       } else {
         return <Path
-          key="area"
+          key={`area-${i}`}
           data={area}
           fill={color}
           listening={false}

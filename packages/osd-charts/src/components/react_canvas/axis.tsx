@@ -62,7 +62,7 @@ export class Axis extends React.PureComponent<AxisProps> {
       textProps.verticalAlign = position === Position.Top ? 'bottom' : 'top';
     }
     return (
-      <Group>
+      <Group  key={`tick-${i}`}>
         {
           debug && <Rect
             {...textProps}
@@ -72,7 +72,6 @@ export class Axis extends React.PureComponent<AxisProps> {
           />
         }
         <Text
-          key={`tick-${i}`}
           {...textProps}
           fill="gray"
           fontFamily={tickFontFamily}
@@ -121,17 +120,17 @@ export class Axis extends React.PureComponent<AxisProps> {
     } = this.props;
     return (
       <Group x={axisPosition.left} y={axisPosition.top}>
-        <Group>
+        <Group key="lines">
           {
             this.renderLine()
           }
         </Group>
-        <Group>
+        <Group key="tick-lines">
           {
             ticks.map(this.renderTickLine)
           }
         </Group>
-        <Group>
+        <Group  key="ticks">
           {
             ticks.filter((tick) => tick.label !== null)
               .map(this.renderTickLabel)
