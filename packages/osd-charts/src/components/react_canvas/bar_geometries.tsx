@@ -1,15 +1,15 @@
 import { Group as KonvaGroup } from 'konva';
 import { IAction } from 'mobx';
-import { over } from 'newtype-ts';
 import React from 'react';
 import { Group, Rect } from 'react-konva';
 import { animated, Spring } from 'react-spring/konva';
-import { BarGeometry } from '../../lib/series/rendering';
-import { TooltipData } from '../../state/chart_state';
+import { BarGeometry, GeometryValue } from '../../lib/series/rendering';
+import { TooltipData, ValueClickListener } from '../../state/chart_state';
 
 interface BarGeometriesDataProps {
   animated?: boolean;
   bars: BarGeometry[];
+  onElementClick?: ValueClickListener;
   onElementOver: ((tooltip: TooltipData) => void) & IAction;
   onElementOut: (() => void) & IAction;
 }
@@ -37,6 +37,11 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps, B
         }
       </Group>
     );
+  }
+  private onElementClick = (value: GeometryValue) => () => {
+    if (this.props.onElementClick) {
+      this.props.onElementClick(value);
+    }
   }
   private onOverBar = (point: BarGeometry) => () => {
     const { onElementOver } = this.props;
@@ -93,6 +98,7 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps, B
                     perfectDrawEnabled={true}
                     onMouseOver={this.onOverBar(bar)}
                     onMouseLeave={this.onOutBar}
+                    onClick={this.onElementClick(bar.value)}
                   />
                 )}
             </Spring>
@@ -111,6 +117,7 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps, B
           perfectDrawEnabled={false}
           onMouseOver={this.onOverBar(bar)}
           onMouseLeave={this.onOutBar}
+          onClick={this.onElementClick(bar.value)}
         />;
       }
     });

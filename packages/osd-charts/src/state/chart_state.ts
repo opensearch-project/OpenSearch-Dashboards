@@ -36,6 +36,7 @@ export interface TooltipData {
   value: GeometryValue;
   position: TooltipPosition;
 }
+export type ValueClickListener = (value: GeometryValue) => void;
 // const MAX_ANIMATABLE_GLYPHS = 500;
 
 export class ChartStore {
@@ -72,6 +73,8 @@ export class ChartStore {
   tooltipData = observable.box<Array<[any, any]> | null>(null);
   tooltipPosition = observable.box<{x: number, y: number} | null>();
   showTooltip = observable.box(false);
+
+  onValueClickListener?: ValueClickListener;
 
   geometries: {
     points: PointGeometry[];
@@ -119,6 +122,13 @@ export class ChartStore {
   setShowLegend = action((showLegend: boolean) => {
     this.showLegend.set(showLegend);
   });
+
+  setOnValueClickListener(listener: ValueClickListener) {
+    this.onValueClickListener = listener;
+  }
+  removeValueClickListener() {
+    this.onValueClickListener = undefined;
+  }
 
   updateParentDimensions(width: number, height: number, top: number, left: number) {
     let isChanged = false;

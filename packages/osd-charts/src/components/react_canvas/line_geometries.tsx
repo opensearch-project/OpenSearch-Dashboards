@@ -3,14 +3,15 @@ import { IAction } from 'mobx';
 import React from 'react';
 import { Circle, Group, Path } from 'react-konva';
 import { animated, Spring } from 'react-spring/konva';
-import { LineGeometry, PointGeometry } from '../../lib/series/rendering';
+import { GeometryValue, LineGeometry, PointGeometry } from '../../lib/series/rendering';
 import { LineSeriesStyle } from '../../lib/themes/theme';
-import { TooltipData } from '../../state/chart_state';
+import { TooltipData, ValueClickListener } from '../../state/chart_state';
 
 interface LineGeometriesDataProps {
   animated?: boolean;
   lines: LineGeometry[];
   style: LineSeriesStyle;
+  onElementClick?: ValueClickListener;
   onElementOver: ((tooltip: TooltipData) => void) & IAction;
   onElementOut: (() => void) & IAction;
 }
@@ -40,6 +41,11 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps,
         }
       </Group>
     );
+  }
+  private onElementClick = (value: GeometryValue) => () => {
+    if (this.props.onElementClick) {
+      this.props.onElementClick(value);
+    }
   }
   private onOverPoint = (point: PointGeometry) => () => {
     const { onElementOver } = this.props;
@@ -86,6 +92,7 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps,
             x={transform.x + x}
             y={y}
             radius={style.dataPointsRadius * 2.5}
+            onClick={this.onElementClick(point.value)}
             onMouseOver={this.onOverPoint(point)}
             onMouseLeave={this.onOutPoint}
             fill={'gray'}

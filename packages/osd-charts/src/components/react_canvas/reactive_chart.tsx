@@ -27,7 +27,13 @@ class Chart extends React.Component<ReactiveChartProps> {
   }
 
   renderBarSeries = () => {
-    const { geometries, canDataBeAnimated, onOverElement, onOutElement } = this.props.chartStore!;
+    const {
+      geometries,
+      canDataBeAnimated,
+      onOverElement,
+      onOutElement,
+      onValueClickListener,
+    } = this.props.chartStore!;
     if (!geometries) {
       return;
     }
@@ -37,6 +43,7 @@ class Chart extends React.Component<ReactiveChartProps> {
         bars={geometries.bars}
         onElementOver={onOverElement}
         onElementOut={onOutElement}
+        onElementClick={onValueClickListener}
       />
     );
   }
@@ -47,6 +54,7 @@ class Chart extends React.Component<ReactiveChartProps> {
       chartTheme,
       onOverElement,
       onOutElement,
+      onValueClickListener,
     } = this.props.chartStore!;
     if (!geometries) {
       return;
@@ -58,6 +66,7 @@ class Chart extends React.Component<ReactiveChartProps> {
         style={chartTheme.chart.styles.lineSeries}
         onElementOver={onOverElement}
         onElementOut={onOutElement}
+        onElementClick={onValueClickListener}
       />
     );
   }
@@ -68,6 +77,7 @@ class Chart extends React.Component<ReactiveChartProps> {
       chartTheme,
       onOverElement,
       onOutElement,
+      onValueClickListener,
     } = this.props.chartStore!;
     if (!geometries) {
       return;
@@ -79,6 +89,7 @@ class Chart extends React.Component<ReactiveChartProps> {
         style={chartTheme.chart.styles.areaSeries}
         onElementOver={onOverElement}
         onElementOut={onOutElement}
+        onElementClick={onValueClickListener}
       />
     );
   }
@@ -208,8 +219,16 @@ class Chart extends React.Component<ReactiveChartProps> {
       <Rect
         x={0}
         y={0}
-        width={[90, -90].includes(chartRotation) ? chartDimensions.height : chartDimensions.width}
-        height={[90, -90].includes(chartRotation) ? chartDimensions.width : chartDimensions.height}
+        width={
+          [90, -90].includes(chartRotation)
+            ? chartDimensions.height
+            : chartDimensions.width
+        }
+        height={
+          [90, -90].includes(chartRotation)
+            ? chartDimensions.width
+            : chartDimensions.height
+        }
         stroke="red"
         strokeWidth={0.5}
         listening={false}

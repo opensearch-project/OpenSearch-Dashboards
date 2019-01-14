@@ -1,7 +1,8 @@
 import { inject } from 'mobx-react';
 import React from 'react';
 import { Position, Rendering, Rotation } from '../lib/series/specs';
-import { ChartStore } from '../state/chart_state';
+import { SpecId } from '../lib/utils/ids';
+import { ChartStore, ValueClickListener } from '../state/chart_state';
 
 interface SettingSpecProps {
   chartStore?: ChartStore;
@@ -11,6 +12,7 @@ interface SettingSpecProps {
   showLegend: boolean;
   debug: boolean;
   legendPosition?: Position;
+  onValueClick?: ValueClickListener;
 }
 
 type DefaultProps = 'rendering' | 'rotation' | 'animateData' | 'showLegend' | 'debug';
@@ -31,6 +33,7 @@ export class SettingsComponent extends React.PureComponent<SettingSpecProps> {
       animateData,
       showLegend,
       legendPosition,
+      onValueClick,
       debug,
     } = this.props;
     chartStore!.chartRotation = rotation;
@@ -40,6 +43,10 @@ export class SettingsComponent extends React.PureComponent<SettingSpecProps> {
 
     chartStore!.setShowLegend(showLegend);
     chartStore!.legendPosition = legendPosition;
+
+    if (onValueClick) {
+      chartStore!.setOnValueClickListener(onValueClick);
+    }
   }
   componentDidUpdate() {
     const {
@@ -49,6 +56,7 @@ export class SettingsComponent extends React.PureComponent<SettingSpecProps> {
       animateData,
       showLegend,
       legendPosition,
+      onValueClick,
       debug,
     } = this.props;
     chartStore!.chartRotation = rotation;
@@ -57,6 +65,11 @@ export class SettingsComponent extends React.PureComponent<SettingSpecProps> {
     chartStore!.debug = debug;
     chartStore!.setShowLegend(showLegend);
     chartStore!.legendPosition = legendPosition;
+    if (onValueClick) {
+      chartStore!.setOnValueClickListener(onValueClick);
+    } else {
+      chartStore!.removeValueClickListener();
+    }
   }
   render() {
     return null;

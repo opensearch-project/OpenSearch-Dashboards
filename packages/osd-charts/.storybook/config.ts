@@ -40,6 +40,7 @@ function loadStories() {
   require('../src/stories/axis.tsx');
   require('../src/stories/mixed.tsx');
   require('../src/stories/legend.tsx');
+  require('../src/stories/interactions.tsx');
 }
 
 configure(loadStories, module);

@@ -3,15 +3,16 @@ import { IAction } from 'mobx';
 import React from 'react';
 import { Circle, Group, Path } from 'react-konva';
 import { animated, Spring } from 'react-spring/konva';
-import { AreaGeometry, PointGeometry } from '../../lib/series/rendering';
+import { AreaGeometry, GeometryValue, PointGeometry } from '../../lib/series/rendering';
 import { AreaSeriesStyle } from '../../lib/themes/theme';
-import { TooltipData } from '../../state/chart_state';
+import { TooltipData, ValueClickListener } from '../../state/chart_state';
 
 interface AreaGeometriesDataProps {
   animated?: boolean;
   areas: AreaGeometry[];
   num?: number;
   style: AreaSeriesStyle;
+  onElementClick?: ValueClickListener;
   onElementOver: ((tooltip: TooltipData) => void) & IAction;
   onElementOut: (() => void) & IAction;
 }
@@ -42,6 +43,11 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
         }
       </Group>
     );
+  }
+  private onElementClick = (value: GeometryValue) => () => {
+    if (this.props.onElementClick) {
+      this.props.onElementClick(value);
+    }
   }
   private onOverPoint = (point: PointGeometry) => () => {
     const { onElementOver } = this.props;
@@ -88,6 +94,7 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
             x={transform.x + x}
             y={y}
             radius={style.dataPointsRadius * 2.5}
+            onClick={this.onElementClick(point.value)}
             onMouseOver={this.onOverPoint(point)}
             onMouseLeave={this.onOutPoint}
             fill={'gray'}
