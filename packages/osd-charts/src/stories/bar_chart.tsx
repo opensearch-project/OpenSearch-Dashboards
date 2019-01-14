@@ -13,6 +13,7 @@ import {
   ScaleType,
   Settings,
 } from '..';
+import { niceTimeFormatter, timeFormatter } from '../utils/data/formatters';
 import './stories.scss';
 
 storiesOf('Bar Chart', module)
@@ -64,6 +65,137 @@ storiesOf('Bar Chart', module)
             { x: 3, y: 6 },
           ]}
           yScaleToDataExtent ={false}
+        />
+    </Chart>);
+  })
+  .add('with ordinal x axis', () => {
+    return (
+      <Chart renderer="canvas" size={[500, 300]}>
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Ordinal}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data = {[
+            { x: 'a', y: 2 },
+            { x: 'b', y: 7 },
+            { x: 'c', y: 3 },
+            { x: 'd', y: 6 },
+          ]}
+          yScaleToDataExtent ={false}
+        />
+    </Chart>);
+  })
+  .add('with linear x axis', () => {
+    return (
+      <Chart renderer="canvas" size={[500, 300]}>
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data = {[
+            { x: 1, y: 2 },
+            { x: 2, y: 7 },
+            { x: 4, y: 3 },
+            { x: 9, y: 6 },
+          ]}
+          yScaleToDataExtent ={false}
+        />
+    </Chart>);
+  })
+  .add('with time x axis', () => {
+    const now = new Date().getTime();
+    const max = now + 1000 * 60 * 60 * 24 * 90;
+    return (
+      <Chart renderer="canvas" size={[500, 300]}>
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+          tickFormat={niceTimeFormatter([now, max])}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data = {[
+            { x: now, y: 2 },
+            { x: now + 36000000000, y: 7 },
+            { x: now + 36000000000 * 2, y: 3 },
+            { x: now + 36000000000 * 5, y: 6 },
+          ]}
+          yScaleToDataExtent ={false}
+        />
+    </Chart>);
+  })
+  .add('with log y axis (TO FIX)', () => {
+    return (
+      <Chart renderer="canvas" size={[500, 300]}>
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Log}
+          xAccessor="x"
+          yAccessors={['y']}
+          data = {[
+            { x: 1, y: 2 },
+            { x: 2, y: 7 },
+            { x: 4, y: 3 },
+            { x: 9, y: 6 },
+          ]}
+          yScaleToDataExtent ={true}
         />
     </Chart>);
   })

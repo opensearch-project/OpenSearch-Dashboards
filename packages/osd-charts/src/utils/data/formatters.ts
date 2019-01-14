@@ -1,26 +1,25 @@
-import { DateTime, Duration } from 'luxon';
+import { DateTime, Duration, Interval } from 'luxon';
 
 type Formatter = (value: any) => string;
 
 export function timeFormatter(format: string): Formatter {
   return (value: any): string => {
-    return DateTime.fromISO(value).toFormat(format);
+    return DateTime.fromMillis(value).toFormat(format);
   };
 }
 
 export function niceTimeFormatter(domain: [number, number]): Formatter {
-  const minDate = domain[0];
-  const maxDate = domain[1];
-  const diff = maxDate - minDate;
+  const minDate = DateTime.fromMillis(domain[0]);
+  const maxDate = DateTime.fromMillis(domain[1]);
+  const diff = Interval.fromDateTimes(minDate, maxDate);
   const format = niceTimeFormat(diff);
   return timeFormatter(format);
 }
 
-function niceTimeFormat(millis: number) {
-  const duration = Duration.fromMillis(millis);
-  const { days } = duration;
+function niceTimeFormat(interval: Interval) {
+  const days = interval.count('days');
   if (days > 30) {
-    return 'YYYY-MM-DD';
+    return 'yyyy-MM-DD';
   }
   if (days > 7 && days <= 30) {
     return 'MMM-DD';
