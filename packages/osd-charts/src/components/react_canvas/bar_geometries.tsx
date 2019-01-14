@@ -1,5 +1,6 @@
 import { Group as KonvaGroup } from 'konva';
 import { IAction } from 'mobx';
+import { over } from 'newtype-ts';
 import React from 'react';
 import { Group, Rect } from 'react-konva';
 import { animated, Spring } from 'react-spring/konva';
@@ -12,7 +13,10 @@ interface BarGeometriesDataProps {
   onElementOver: ((tooltip: TooltipData) => void) & IAction;
   onElementOut: (() => void) & IAction;
 }
-export class BarGeometries extends React.PureComponent<BarGeometriesDataProps> {
+interface BarGeometriesDataState {
+  overBar?: BarGeometry;
+}
+export class BarGeometries extends React.PureComponent<BarGeometriesDataProps, BarGeometriesDataState> {
   static defaultProps: Partial<BarGeometriesDataProps> = {
     animated: false,
   };
@@ -20,6 +24,9 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps> {
   constructor(props: BarGeometriesDataProps) {
     super(props);
     this.barSeriesRef = React.createRef();
+    this.state = {
+      overBar: undefined,
+    };
   }
   render() {
     const { bars } = this.props;
@@ -31,10 +38,40 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps> {
       </Group>
     );
   }
+  private onOverBar = (point: BarGeometry) => () => {
+    const { onElementOver } = this.props;
+    const { x, y, value } = point;
+    this.setState(() => {
+      return {
+        overBar: point,
+      };
+    });
+    onElementOver({
+      value,
+      position: {
+        left: x,
+        top: y,
+      },
+    });
+  }
+  private onOutBar = () => {
+    const { onElementOut } = this.props;
+
+    this.setState(() => {
+      return {
+        overBar: undefined,
+      };
+    });
+    onElementOut();
+  }
   private renderBarGeoms = (bars: BarGeometry[]): JSX.Element[] => {
-    const { onElementOver, onElementOut } = this.props;
-    return bars.map((glyph, i) => {
-      const { x, y, width, height, color, value } = glyph;
+    const { overBar } = this.state;
+    return bars.map((bar, i) => {
+      const { x, y, width, height, color, value } = bar;
+      let opacity = 1;
+      if (overBar && overBar !== bar) {
+        opacity = 0.6;
+      }
       if (this.props.animated) {
         return (
           <Group key={i}>
@@ -52,21 +89,10 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps> {
                     height={props.height}
                     fill={color}
                     strokeWidth={0}
-                    // listening={false}
-                    // opacity={0.2}
+                    opacity={opacity}
                     perfectDrawEnabled={true}
-                    onMouseOver={() => {
-                      onElementOver({
-                        value,
-                        position: {
-                          left: x,
-                          top: y,
-                        },
-                      });
-                    }}
-                    onMouseLeave={() => {
-                      onElementOut();
-                    }}
+                    onMouseOver={this.onOverBar(bar)}
+                    onMouseLeave={this.onOutBar}
                   />
                 )}
             </Spring>
@@ -81,20 +107,10 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps> {
           height={height}
           fill={color}
           strokeWidth={0}
-          opacity={1}
+          opacity={opacity}
           perfectDrawEnabled={false}
-          onMouseOver={() => {
-            onElementOver({
-              value,
-              position: {
-                left: x,
-                top: y,
-              },
-            });
-          }}
-          onMouseLeave={() => {
-            onElementOut();
-          }}
+          onMouseOver={this.onOverBar(bar)}
+          onMouseLeave={this.onOutBar}
         />;
       }
     });
