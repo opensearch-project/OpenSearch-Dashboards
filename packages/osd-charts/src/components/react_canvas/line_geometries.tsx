@@ -5,13 +5,13 @@ import { Circle, Group, Path } from 'react-konva';
 import { animated, Spring } from 'react-spring/konva';
 import { GeometryValue, LineGeometry, PointGeometry } from '../../lib/series/rendering';
 import { LineSeriesStyle } from '../../lib/themes/theme';
-import { TooltipData, ValueClickListener } from '../../state/chart_state';
+import { ElementClickListener, TooltipData } from '../../state/chart_state';
 
 interface LineGeometriesDataProps {
   animated?: boolean;
   lines: LineGeometry[];
   style: LineSeriesStyle;
-  onElementClick?: ValueClickListener;
+  onElementClick?: ElementClickListener;
   onElementOver: ((tooltip: TooltipData) => void) & IAction;
   onElementOut: (() => void) & IAction;
 }

@@ -32,7 +32,7 @@ class Chart extends React.Component<ReactiveChartProps> {
       canDataBeAnimated,
       onOverElement,
       onOutElement,
-      onValueClickListener,
+      onElementClickListener,
     } = this.props.chartStore!;
     if (!geometries) {
       return;
@@ -43,7 +43,7 @@ class Chart extends React.Component<ReactiveChartProps> {
         bars={geometries.bars}
         onElementOver={onOverElement}
         onElementOut={onOutElement}
-        onElementClick={onValueClickListener}
+        onElementClick={onElementClickListener}
       />
     );
   }
@@ -54,7 +54,7 @@ class Chart extends React.Component<ReactiveChartProps> {
       chartTheme,
       onOverElement,
       onOutElement,
-      onValueClickListener,
+      onElementClickListener,
     } = this.props.chartStore!;
     if (!geometries) {
       return;
@@ -66,7 +66,7 @@ class Chart extends React.Component<ReactiveChartProps> {
         style={chartTheme.chart.styles.lineSeries}
         onElementOver={onOverElement}
         onElementOut={onOutElement}
-        onElementClick={onValueClickListener}
+        onElementClick={onElementClickListener}
       />
     );
   }
@@ -77,7 +77,7 @@ class Chart extends React.Component<ReactiveChartProps> {
       chartTheme,
       onOverElement,
       onOutElement,
-      onValueClickListener,
+      onElementClickListener,
     } = this.props.chartStore!;
     if (!geometries) {
       return;
@@ -89,7 +89,7 @@ class Chart extends React.Component<ReactiveChartProps> {
         style={chartTheme.chart.styles.areaSeries}
         onElementOver={onOverElement}
         onElementOut={onOutElement}
-        onElementClick={onValueClickListener}
+        onElementClick={onElementClickListener}
       />
     );
   }

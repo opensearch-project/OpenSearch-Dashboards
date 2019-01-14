@@ -36,7 +36,8 @@ export interface TooltipData {
   value: GeometryValue;
   position: TooltipPosition;
 }
-export type ValueClickListener = (value: GeometryValue) => void;
+export type ElementClickListener = (value: GeometryValue) => void;
+export type ElementOverListener = (value: GeometryValue) => void;
 // const MAX_ANIMATABLE_GLYPHS = 500;
 
 export class ChartStore {
@@ -74,7 +75,9 @@ export class ChartStore {
   tooltipPosition = observable.box<{x: number, y: number} | null>();
   showTooltip = observable.box(false);
 
-  onValueClickListener?: ValueClickListener;
+  onElementClickListener?: ElementClickListener;
+  onElementOverListener?: ElementOverListener;
+  onElementOutListener?: () => undefined;
 
   geometries: {
     points: PointGeometry[];
@@ -98,6 +101,9 @@ export class ChartStore {
     this.computeChart();
   });
   onOverElement = action((tooltip: TooltipData) => {
+    if (this.onElementOverListener) {
+      this.onElementOverListener(tooltip.value);
+    }
     const { specId } = tooltip.value;
     const spec = this.seriesSpecs.get(specId);
     if (!spec) {
@@ -111,6 +117,9 @@ export class ChartStore {
   });
 
   onOutElement = action(() => {
+    if (this.onElementOutListener) {
+      this.onElementOutListener();
+    }
     this.showTooltip.set(false);
     document.body.style.cursor = 'default';
   });
@@ -123,11 +132,17 @@ export class ChartStore {
     this.showLegend.set(showLegend);
   });
 
-  setOnValueClickListener(listener: ValueClickListener) {
-    this.onValueClickListener = listener;
+  setOnElementClickListener(listener: ElementClickListener) {
+    this.onElementClickListener = listener;
+  }
+  setOnElementOverListener(listener: ElementOverListener) {
+    this.onElementOverListener = listener;
+  }
+  setOnElementOutListener(listener: () => undefined) {
+    this.onElementOutListener = listener;
   }
   removeValueClickListener() {
-    this.onValueClickListener = undefined;
+    this.onElementClickListener = undefined;
   }
 
   updateParentDimensions(width: number, height: number, top: number, left: number) {

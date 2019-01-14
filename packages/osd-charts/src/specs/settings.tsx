@@ -1,8 +1,7 @@
 import { inject } from 'mobx-react';
 import React from 'react';
 import { Position, Rendering, Rotation } from '../lib/series/specs';
-import { SpecId } from '../lib/utils/ids';
-import { ChartStore, ValueClickListener } from '../state/chart_state';
+import { ChartStore, ElementClickListener, ElementOverListener } from '../state/chart_state';
 
 interface SettingSpecProps {
   chartStore?: ChartStore;
@@ -12,7 +11,9 @@ interface SettingSpecProps {
   showLegend: boolean;
   debug: boolean;
   legendPosition?: Position;
-  onValueClick?: ValueClickListener;
+  onElementClick?: ElementClickListener;
+  onElementOver?: ElementOverListener;
+  onElementOut?: () => undefined;
 }
 
 type DefaultProps = 'rendering' | 'rotation' | 'animateData' | 'showLegend' | 'debug';
@@ -33,7 +34,9 @@ export class SettingsComponent extends React.PureComponent<SettingSpecProps> {
       animateData,
       showLegend,
       legendPosition,
-      onValueClick,
+      onElementClick,
+      onElementOver,
+      onElementOut,
       debug,
     } = this.props;
     chartStore!.chartRotation = rotation;
@@ -44,8 +47,14 @@ export class SettingsComponent extends React.PureComponent<SettingSpecProps> {
     chartStore!.setShowLegend(showLegend);
     chartStore!.legendPosition = legendPosition;
 
-    if (onValueClick) {
-      chartStore!.setOnValueClickListener(onValueClick);
+    if (onElementOver) {
+      chartStore!.setOnElementOverListener(onElementOver);
+    }
+    if (onElementClick) {
+      chartStore!.setOnElementClickListener(onElementClick);
+    }
+    if (onElementOut) {
+      chartStore!.setOnElementOutListener(onElementOut);
     }
   }
   componentDidUpdate() {
@@ -56,7 +65,9 @@ export class SettingsComponent extends React.PureComponent<SettingSpecProps> {
       animateData,
       showLegend,
       legendPosition,
-      onValueClick,
+      onElementClick,
+      onElementOver,
+      onElementOut,
       debug,
     } = this.props;
     chartStore!.chartRotation = rotation;
@@ -65,10 +76,14 @@ export class SettingsComponent extends React.PureComponent<SettingSpecProps> {
     chartStore!.debug = debug;
     chartStore!.setShowLegend(showLegend);
     chartStore!.legendPosition = legendPosition;
-    if (onValueClick) {
-      chartStore!.setOnValueClickListener(onValueClick);
-    } else {
-      chartStore!.removeValueClickListener();
+    if (onElementOver) {
+      chartStore!.setOnElementOverListener(onElementOver);
+    }
+    if (onElementClick) {
+      chartStore!.setOnElementClickListener(onElementClick);
+    }
+    if (onElementOut) {
+      chartStore!.setOnElementOutListener(onElementOut);
     }
   }
   render() {

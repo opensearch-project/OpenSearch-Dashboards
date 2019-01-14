@@ -4,12 +4,12 @@ import React from 'react';
 import { Group, Rect } from 'react-konva';
 import { animated, Spring } from 'react-spring/konva';
 import { BarGeometry, GeometryValue } from '../../lib/series/rendering';
-import { TooltipData, ValueClickListener } from '../../state/chart_state';
+import { ElementClickListener, TooltipData } from '../../state/chart_state';
 
 interface BarGeometriesDataProps {
   animated?: boolean;
   bars: BarGeometry[];
-  onElementClick?: ValueClickListener;
+  onElementClick?: ElementClickListener;
   onElementOver: ((tooltip: TooltipData) => void) & IAction;
   onElementOut: (() => void) & IAction;
 }

@@ -5,14 +5,14 @@ import { Circle, Group, Path } from 'react-konva';
 import { animated, Spring } from 'react-spring/konva';
 import { AreaGeometry, GeometryValue, PointGeometry } from '../../lib/series/rendering';
 import { AreaSeriesStyle } from '../../lib/themes/theme';
-import { TooltipData, ValueClickListener } from '../../state/chart_state';
+import { ElementClickListener, TooltipData } from '../../state/chart_state';
 
 interface AreaGeometriesDataProps {
   animated?: boolean;
   areas: AreaGeometry[];
   num?: number;
   style: AreaSeriesStyle;
-  onElementClick?: ValueClickListener;
+  onElementClick?: ElementClickListener;
   onElementOver: ((tooltip: TooltipData) => void) & IAction;
   onElementOut: (() => void) & IAction;
 }

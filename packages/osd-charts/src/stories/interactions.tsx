@@ -15,16 +15,21 @@ import {
 import { AreaSeries, LineSeries } from '../specs';
 import './stories.scss';
 
-const onValueClick = action('onValueClick');
+// const onValueClick = action('onValueClick');
+const onElementListeners = {
+  onElementClick: action('onElementClick'),
+  onElementOver: action('onElementOver'),
+  onElementOut: action('onElementOut'),
+};
 
 storiesOf('Interactions', module)
-  .add('bar clicks', () => {
+  .add('bar clicks and hovers', () => {
     return (
       <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
         <Settings
           showLegend={true}
           legendPosition={Position.Right}
-          onValueClick={onValueClick}
+          {...onElementListeners}
         />
         <Axis
           id={getAxisId('bottom')}
@@ -55,13 +60,13 @@ storiesOf('Interactions', module)
         />
     </Chart>);
   })
-  .add('area point clicks', () => {
+  .add('area point clicks and hovers', () => {
     return (
       <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
         <Settings
           showLegend={true}
           legendPosition={Position.Right}
-          onValueClick={onValueClick}
+          {...onElementListeners}
         />
         <Axis
           id={getAxisId('bottom')}
@@ -92,13 +97,13 @@ storiesOf('Interactions', module)
         />
     </Chart>);
   })
-  .add('line point clicks', () => {
+  .add('line point clicks and hovers', () => {
     return (
       <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
         <Settings
           showLegend={true}
           legendPosition={Position.Right}
-          onValueClick={onValueClick}
+          {...onElementListeners}
         />
         <Axis
           id={getAxisId('bottom')}
