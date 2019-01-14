@@ -1,25 +1,24 @@
-import moment, { Duration } from 'moment';
+import { DateTime, Duration } from 'luxon';
 
 type Formatter = (value: any) => string;
 
 export function timeFormatter(format: string): Formatter {
   return (value: any): string => {
-    return moment.utc(value).format(format);
+    return DateTime.fromISO(value).toFormat(format);
   };
 }
 
 export function niceTimeFormatter(domain: [number, number]): Formatter {
-  const minDate = moment.utc(domain[0]);
-  const maxDate = moment.utc(domain[1]);
-  const duration = moment.duration(maxDate.diff(minDate));
-  const format = niceTimeFormat(duration);
-  return (value: any): string => {
-    return moment.utc(value).format(format);
-  };
+  const minDate = domain[0];
+  const maxDate = domain[1];
+  const diff = maxDate - minDate;
+  const format = niceTimeFormat(diff);
+  return timeFormatter(format);
 }
 
-function niceTimeFormat(duration: Duration) {
-  const days = duration.get('days');
+function niceTimeFormat(millis: number) {
+  const duration = Duration.fromMillis(millis);
+  const { days } = duration;
   if (days > 30) {
     return 'YYYY-MM-DD';
   }

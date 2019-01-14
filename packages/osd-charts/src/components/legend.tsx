@@ -52,7 +52,7 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
       debug,
     } = this.props.chartStore!;
 
-    if (!showLegend || !initialized.get() || legendItems.length === 0) {
+    if (!showLegend.get() || !initialized.get() || legendItems.length === 0) {
       return null;
     }
 

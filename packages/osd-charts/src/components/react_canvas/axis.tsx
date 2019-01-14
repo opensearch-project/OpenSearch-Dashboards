@@ -296,7 +296,7 @@ export class Axis extends React.PureComponent<AxisProps> {
           width={width}
           height={height}
           verticalAlign="middle"
-          text={`title: ${title}`}
+          text={title}
           fill="gray"
           fontStyle="bold"
           fontSize={titleFontSize}

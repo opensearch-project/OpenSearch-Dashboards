@@ -20,7 +20,7 @@ import {
   randomizeData,
   uniformRandomizer,
 } from '../utils/data_generators/randomizers';
-import './index.scss';
+import './playground.scss';
 
 const dataGenerator = new DataGenerator();
 class App extends Component {

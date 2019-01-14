@@ -10,6 +10,7 @@ import { Tooltips } from './tooltips';
 
 interface ChartProps {
   renderer: 'svg' | 'canvas' | 'canvas_old';
+  size?: [number, number];
 }
 
 export class Chart extends React.Component<ChartProps> {
@@ -22,22 +23,34 @@ export class Chart extends React.Component<ChartProps> {
     this.chartSpecStore = new ChartStore();
   }
   render() {
-    const { renderer } = this.props;
+    const { renderer, size } = this.props;
+    let containerStyle;
+    if (size) {
+      containerStyle = {
+        position: 'relative' as 'relative',
+        width: size[0],
+        height: size[1],
+      };
+    } else {
+      containerStyle = {};
+    }
     return (
       <Provider chartStore={this.chartSpecStore}>
         <Fragment>
           <SpecsParser>
             { this.props.children }
           </SpecsParser>
-          <ChartResizer />
-          {
-            renderer === 'svg' && <SVGChart />
-          }
-          {
-            renderer === 'canvas' && <ReactChart />
-          }
-          <Tooltips />
-          <Legend />
+          <div style={containerStyle}>
+            <ChartResizer/>
+            {
+              renderer === 'svg' && <SVGChart />
+            }
+            {
+              renderer === 'canvas' && <ReactChart />
+            }
+            <Tooltips />
+            <Legend />
+          </div>
         </Fragment>
       </Provider>
     );

@@ -6,11 +6,15 @@
   "license": "MIT",
   "scripts": {
     "build": "webpack --config webpack.prod.js",
-    "start": "webpack-dashboard -- webpack-dev-server --open --config webpack.dev.js",
+    "start": "webpack-dev-server --open --config webpack.dev.js",
+    "storybook": "start-storybook -p 9001 -c .storybook",
     "lint": "tslint -c ./tslint.yaml -p ./tsconfig.json && tsc -p ./tsconfig.json",
     "test": "jest --coverage --watch "
   },
   "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@storybook/addon-info": "^4.1.6",
+    "@storybook/react": "^4.1.6",
     "@types/classnames": "^2.2.7",
     "@types/d3-array": "^1.2.4",
     "@types/d3-collection": "^1.0.7",
@@ -20,9 +24,11 @@
     "@types/enzyme": "^3.1.15",
     "@types/jest": "^23.3.12",
     "@types/lodash": "^4.14.119",
-    "@types/moment": "^2.13.0",
+    "@types/luxon": "^1.4.1",
     "@types/react": "^16.7.18",
     "@types/react-dom": "^16.0.11",
+    "@types/storybook__react": "^4.0.0",
+    "babel-loader": "^8.0.5",
     "clean-webpack-plugin": "^1.0.0",
     "css-loader": "^2.1.0",
     "d3-random": "^1.1.2",
@@ -33,6 +39,8 @@
     "jest": "^23.6.0",
     "newtype-ts": "^0.2.3",
     "node-sass": "^4.11.0",
+    "react-docgen-typescript-loader": "^3.0.0",
+    "react-docgen-typescript-webpack-plugin": "^1.1.0",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
     "ts-jest": "^23.10.5",
@@ -41,6 +49,7 @@
     "tslint-microsoft-contrib": "^6.0.0",
     "typescript": "^3.2.2",
     "webpack": "^4.28.4",
+    "webpack-bundle-analyzer": "^3.0.3",
     "webpack-cli": "^3.2.1",
     "webpack-dev-server": "^3.1.14"
   },
@@ -55,6 +64,7 @@
     "fp-ts": "^1.12.3",
     "konva": "^2.6.0",
     "lodash": "^4.17.11",
+    "luxon": "^1.10.0",
     "mobx": "^4.8.0",
     "mobx-react": "^5.4.3",
     "moment": "^2.23.0",
@@ -63,5 +73,8 @@
     "react-konva": "^16.7.1",
     "react-spring": "^7.2.8",
     "resize-observer-polyfill": "^1.5.1"
+  },
+  "peerDependencies": {
+    "moment": "^2.23.0"
   }
 }
