@@ -73,8 +73,5 @@
     "react-konva": "^16.7.1",
     "react-spring": "^7.2.8",
     "resize-observer-polyfill": "^1.5.1"
-  },
-  "peerDependencies": {
-    "moment": "^2.23.0"
   }
 }
