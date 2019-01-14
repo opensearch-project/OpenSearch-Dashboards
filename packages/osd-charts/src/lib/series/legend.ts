@@ -1,6 +1,7 @@
-import { SpecId } from '../utils/ids';
+import { getAxesSpecForSpecId } from '../../state/utils';
+import { AxisId, SpecId } from '../utils/ids';
 import { DataSeriesColorsValues } from './series';
-import { BasicSeriesSpec } from './specs';
+import { AxisSpec, BasicSeriesSpec } from './specs';
 export interface LegendItem {
   color: string;
   label: string;
@@ -10,6 +11,7 @@ export function computeLegend(
   seriesColor: Map<string, DataSeriesColorsValues>,
   seriesColorMap: Map<string, string>,
   specs: Map<SpecId, BasicSeriesSpec>,
+  axes: Map<AxisId, AxisSpec>,
   defaultColor: string,
 ): LegendItem[] {
   const legendItems: LegendItem[] = [];
@@ -19,9 +21,20 @@ export function computeLegend(
     if (!spec) {
       return;
     }
+    let label = '';
+    if (seriesColor.size === 1) {
+      const axis = getAxesSpecForSpecId(axes, spec.groupId);
+      if (axis.yAxis) {
+        label = `${axis.yAxis.title}`;
+      } else {
+        label = `${spec.id}`;
+      }
+    } else {
+      label = series.colorValues.join(' - ');
+    }
     legendItems.push({
       color,
-      label: series.colorValues.join(' - '),
+      label,
       value: series,
     });
   });

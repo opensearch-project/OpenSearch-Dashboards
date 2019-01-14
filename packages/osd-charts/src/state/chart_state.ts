@@ -26,7 +26,7 @@ import { DEFAULT_THEME, Theme } from '../lib/themes/theme';
 import { computeChartDimensions, Dimensions } from '../lib/utils/dimensions';
 import { SpecDomains } from '../lib/utils/domain';
 import { AxisId, GroupId, SpecId } from '../lib/utils/ids';
-import { computeSeriesDomains, computeSeriesGeometries } from './utils';
+import { computeSeriesDomains, computeSeriesGeometries, getAxesSpecForSpecId } from './utils';
 export interface TooltipPosition {
   top?: number;
   left?: number;
@@ -101,7 +101,7 @@ export class ChartStore {
     if (!spec) {
       return;
     }
-    const { xAxis, yAxis } = this.getAxesSpecForSpecId(spec.groupId);
+    const { xAxis, yAxis } = getAxesSpecForSpecId(this.axesSpecs, spec.groupId);
     const formattedTooltip = formatTooltip(tooltip, spec, xAxis, yAxis);
     this.tooltipData.set(formattedTooltip);
     this.showTooltip.set(true);
@@ -160,25 +160,6 @@ export class ChartStore {
     this.axesSpecs.delete(axisId);
   }
 
-  getAxesSpecForSpecId(groupId: GroupId) {
-    let xAxis;
-    let yAxis;
-    for (const axisSpec of this.axesSpecs.values()) {
-      if (axisSpec.groupId !== groupId) {
-        continue;
-      }
-      if (isVertical(axisSpec.position)) {
-        yAxis = axisSpec;
-      } else {
-        xAxis = axisSpec;
-      }
-    }
-    return {
-      xAxis,
-      yAxis,
-    };
-  }
-
   computeChart() {
     this.initialized.set(false);
     // compute only if parent dimensions are computed
@@ -197,6 +178,7 @@ export class ChartStore {
       seriesDomains.seriesColors,
       seriesColorMap,
       this.seriesSpecs,
+      this.axesSpecs,
       this.chartTheme.colors.defaultVizColor,
     );
     // tslint:disable-next-line:no-console

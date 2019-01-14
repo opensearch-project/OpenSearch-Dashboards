@@ -1,3 +1,4 @@
+import { isVertical } from '../lib/axes/axis_utils';
 import { CurveType } from '../lib/series/curves';
 import { mergeXDomain, XDomain } from '../lib/series/domains/x_domain';
 import { mergeYDomain, YDomain } from '../lib/series/domains/y_domain';
@@ -20,10 +21,10 @@ import {
   getSplittedSeries,
   RawDataSeries,
 } from '../lib/series/series';
-import { AreaSeriesSpec, BasicSeriesSpec, LineSeriesSpec } from '../lib/series/specs';
+import { AreaSeriesSpec, AxisSpec, BasicSeriesSpec, LineSeriesSpec } from '../lib/series/specs';
 import { ColorConfig } from '../lib/themes/theme';
 import { Dimensions } from '../lib/utils/dimensions';
-import { SpecId } from '../lib/utils/ids';
+import { AxisId, GroupId, SpecId } from '../lib/utils/ids';
 import { Scale } from '../lib/utils/scales/scales';
 
 export function computeSeriesDomains(seriesSpecs: Map<SpecId, BasicSeriesSpec>): {
@@ -232,4 +233,23 @@ export function renderGeometries(
 
 export function getSpecById(seriesSpecs: Map<SpecId, BasicSeriesSpec>, specId: SpecId) {
   return seriesSpecs.get(specId);
+}
+
+export function getAxesSpecForSpecId(axesSpecs: Map<AxisId, AxisSpec>, groupId: GroupId) {
+  let xAxis;
+  let yAxis;
+  for (const axisSpec of axesSpecs.values()) {
+    if (axisSpec.groupId !== groupId) {
+      continue;
+    }
+    if (isVertical(axisSpec.position)) {
+      yAxis = axisSpec;
+    } else {
+      xAxis = axisSpec;
+    }
+  }
+  return {
+    xAxis,
+    yAxis,
+  };
 }
