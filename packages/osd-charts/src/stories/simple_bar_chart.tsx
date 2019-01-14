@@ -20,7 +20,7 @@ storiesOf('Bar Chart', module)
     return (
       <Chart renderer="canvas" size={[500, 300]}>
         <BarSeries
-          id={getSpecId('lines')}
+          id={getSpecId('bars')}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
@@ -52,7 +52,7 @@ storiesOf('Bar Chart', module)
         />
 
         <BarSeries
-          id={getSpecId('lines')}
+          id={getSpecId('bars')}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
@@ -88,7 +88,7 @@ storiesOf('Bar Chart', module)
         />
 
         <BarSeries
-          id={getSpecId('lines')}
+          id={getSpecId('bars')}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
@@ -124,7 +124,7 @@ storiesOf('Bar Chart', module)
         />
 
         <BarSeries
-          id={getSpecId('lines')}
+          id={getSpecId('bars')}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
@@ -166,7 +166,7 @@ storiesOf('Bar Chart', module)
         />
 
         <BarSeries
-          id={getSpecId('lines')}
+          id={getSpecId('bars')}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
@@ -181,6 +181,58 @@ storiesOf('Bar Chart', module)
             { x: 1, y: 5, g: 'b' },
             { x: 2, y: 8, g: 'b' },
             { x: 3, y: 2, g: 'b' },
+          ]}
+          yScaleToDataExtent ={false}
+        />
+    </Chart>);
+  })
+  .add('clustered multi series', () => {
+    return (
+      <Chart renderer="canvas" size={[500, 300]}>
+        <Settings
+          showLegend={true}
+          legendPosition={Position.Right}
+        />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId('bars1')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          splitSeriesAccessors={['g']}
+          data = {[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
+          yScaleToDataExtent ={false}
+        />
+        <BarSeries
+          id={getSpecId('bars2')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          splitSeriesAccessors={['g']}
+          data = {[
+            { x: 0, y: 1 },
+            { x: 1, y: 2 },
+            { x: 2, y: 3 },
+            { x: 3, y: 4 },
           ]}
           yScaleToDataExtent ={false}
         />

@@ -15,27 +15,8 @@ import {
 } from '..';
 import './stories.scss';
 
-storiesOf('Area Chart', module)
+storiesOf('Axis', module)
   .add('basic', () => {
-    return (
-      <Chart renderer="canvas" size={[500, 300]}>
-        <AreaSeries
-          id={getSpecId('lines')}
-          xScaleType={ScaleType.Linear}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          data = {[
-            { x: 0, y: 2 },
-            { x: 1, y: 7 },
-            { x: 2, y: 3 },
-            { x: 3, y: 6 },
-          ]}
-          yScaleToDataExtent ={false}
-        />
-    </Chart>);
-  })
-  .add('w axis', () => {
     return (
       <Chart renderer="canvas" size={[500, 300]}>
         <Axis
@@ -67,7 +48,7 @@ storiesOf('Area Chart', module)
         />
     </Chart>);
   })
-  .add('with 4 axes', () => {
+  .add('4 axes', () => {
     return (
       <Chart renderer="canvas" size={[500, 300]}>
         <Axis
@@ -111,12 +92,11 @@ storiesOf('Area Chart', module)
         />
     </Chart>);
   })
-  .add('w axis and legend', () => {
+  .add('with multi axis', () => {
     return (
       <Chart renderer="canvas" size={[500, 300]}>
         <Settings
-          showLegend={true}
-          legendPosition={Position.Right}
+          showLegend={false}
         />
         <Axis
           id={getAxisId('bottom')}
@@ -125,67 +105,44 @@ storiesOf('Area Chart', module)
           showOverlappingTicks={true}
         />
         <Axis
-          id={getAxisId('left2')}
-          title={'Left axis'}
+          id={getAxisId('left1')}
+          title={'First left axis'}
           position={Position.Left}
           tickFormat={(d) => Number(d).toFixed(2)}
         />
-
-        <AreaSeries
-          id={getSpecId('lines')}
+        <Axis
+          id={getAxisId('left2')}
+          title={'Second left axis'}
+          groupId={getGroupId('group2')}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <BarSeries
+          id={getSpecId('barseries1')}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
           data = {[
-            { x: 0, y: 2 },
-            { x: 1, y: 7 },
+            { x: 0, y: 1 },
+            { x: 1, y: 2 },
             { x: 2, y: 3 },
-            { x: 3, y: 6 },
+            { x: 3, y: 4 },
           ]}
-          yScaleToDataExtent ={false}
         />
-    </Chart>);
-  })
-  .add('stacked w axis and legend', () => {
-    return (
-      <Chart renderer="canvas" size={[500, 300]}>
-        <Settings
-          showLegend={true}
-          legendPosition={Position.Right}
-        />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'Bottom axis'}
-          showOverlappingTicks={true}
-        />
-        <Axis
-          id={getAxisId('left2')}
-          title={'Left axis'}
-          position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
-        />
-
-        <AreaSeries
-          id={getSpecId('lines')}
+        <BarSeries
+          id={getSpecId('barseries2')}
+          groupId={getGroupId('group2')}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          stackAccessors={['x']}
-          splitSeriesAccessors={['g']}
           data = {[
-            { x: 0, y: 2, g: 'a' },
-            { x: 1, y: 7, g: 'a' },
-            { x: 2, y: 3, g: 'a' },
-            { x: 3, y: 6, g: 'a' },
-            { x: 0, y: 4, g: 'b' },
-            { x: 1, y: 5, g: 'b' },
-            { x: 2, y: 8, g: 'b' },
-            { x: 3, y: 2, g: 'b' },
+            { x: 0, y: 8 },
+            { x: 1, y: 7 },
+            { x: 2, y: 6 },
+            { x: 3, y: 5 },
           ]}
-          yScaleToDataExtent ={false}
         />
     </Chart>);
   });

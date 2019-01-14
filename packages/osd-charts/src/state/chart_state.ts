@@ -4,7 +4,6 @@ import {
   AxisTicksDimensions,
   computeAxisTicksDimensions,
   getAxisTicksPositions,
-  isVertical,
 } from '../lib/axes/axis_utils';
 import { CanvasTextBBoxCalculator } from '../lib/axes/canvas_text_bbox_calculator';
 import { computeLegend, LegendItem } from '../lib/series/legend';
@@ -25,7 +24,7 @@ import { formatTooltip } from '../lib/series/tooltip';
 import { DEFAULT_THEME, Theme } from '../lib/themes/theme';
 import { computeChartDimensions, Dimensions } from '../lib/utils/dimensions';
 import { SpecDomains } from '../lib/utils/domain';
-import { AxisId, GroupId, SpecId } from '../lib/utils/ids';
+import { AxisId, SpecId } from '../lib/utils/ids';
 import { computeSeriesDomains, computeSeriesGeometries, getAxesSpecForSpecId } from './utils';
 export interface TooltipPosition {
   top?: number;

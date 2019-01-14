@@ -36,7 +36,7 @@ function loadStories() {
   require('../src/stories/simple_bar_chart.tsx');
   require('../src/stories/simple_line_chart.tsx');
   require('../src/stories/simple_area_chart.tsx');
-  // You can require as many stories as you need.
+  require('../src/stories/axis.tsx');
 }
 
 configure(loadStories, module);

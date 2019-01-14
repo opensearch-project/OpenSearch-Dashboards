@@ -22,7 +22,7 @@ export function computeLegend(
       return;
     }
     let label = '';
-    if (seriesColor.size === 1) {
+    if (seriesColor.size === 1 || series.colorValues.length === 0 || !series.colorValues[0] ) {
       const axis = getAxesSpecForSpecId(axes, spec.groupId);
       if (axis.yAxis) {
         label = `${axis.yAxis.title}`;
