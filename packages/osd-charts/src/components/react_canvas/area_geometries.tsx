@@ -46,9 +46,10 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps>
   }
   private renderPoints = (points: PointGeometry[]): JSX.Element[] => {
     const { style, onElementOver, onElementOut } = this.props;
-    return points.map((point) => {
+    return points.map((point, index) => {
       const { x, y, color, value, transform } = point;
       return <Circle
+        key={index}
         x={transform.x + x}
         y={y}
         radius={style.dataPointsRadius}
@@ -90,7 +91,6 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps>
                     listening={false}
                     // areaCap="round"
                     // areaJoin="round"
-                    opacity={0.4}
                   />
                 )}
             </Spring>
@@ -104,7 +104,6 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps>
           listening={false}
           // areaCap="round"
           // areaJoin="round"
-          opacity={0.4}
         />;
       }
     });

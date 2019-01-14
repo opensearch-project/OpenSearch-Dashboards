@@ -91,5 +91,6 @@ $euiChartLegendMaxHeight: $euiSize * 4 + $euiSize;
   height: 100%;
 }
 .euiChartLegendListItem__title {
+  width: $euiChartLegendMaxWidth - 4 * $euiSize;
   max-width: $euiChartLegendMaxWidth - 4 * $euiSize;
 }
