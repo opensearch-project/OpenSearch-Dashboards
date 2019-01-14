@@ -37,6 +37,7 @@ function loadStories() {
   require('../src/stories/simple_line_chart.tsx');
   require('../src/stories/simple_area_chart.tsx');
   require('../src/stories/axis.tsx');
+  require('../src/stories/mixed.tsx');
 }
 
 configure(loadStories, module);
