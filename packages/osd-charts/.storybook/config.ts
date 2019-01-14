@@ -41,6 +41,7 @@ function loadStories() {
   require('../src/stories/mixed.tsx');
   require('../src/stories/legend.tsx');
   require('../src/stories/interactions.tsx');
+  require('../src/stories/rotations.tsx');
 }
 
 configure(loadStories, module);
