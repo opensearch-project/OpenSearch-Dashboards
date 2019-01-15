@@ -1,6 +1,7 @@
 import { withInfo } from '@storybook/addon-info';
+import { withKnobs } from '@storybook/addon-knobs';
 import { addDecorator, configure } from '@storybook/react';
-
+addDecorator(withKnobs);
 addDecorator(
   withInfo({
     styles: {

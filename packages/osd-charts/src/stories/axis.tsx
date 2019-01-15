@@ -1,3 +1,4 @@
+import { boolean } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import {
@@ -9,17 +10,18 @@ import {
   getGroupId,
   getSpecId,
   Position,
-  Rotation,
   ScaleType,
   Settings,
 } from '..';
 import { LineSeries } from '../specs';
+
 import './stories.scss';
 
 storiesOf('Axis', module)
   .add('basic', () => {
     return (
       <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
+        <Settings debug={boolean('debug', false)} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
