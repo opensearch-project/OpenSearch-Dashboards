@@ -2,7 +2,10 @@ import { Layer as KonvaLayer } from 'konva';
 import { inject, observer } from 'mobx-react';
 import React from 'react';
 import { Layer, Rect, Stage } from 'react-konva';
-import { ChartStore } from '../../state/chart_state';
+import { isVertical } from '../../lib/axes/axis_utils';
+import { Dimensions } from '../../lib/utils/dimensions';
+import { ChartStore, Point } from '../../state/chart_state';
+import { BrushExtent, Transform } from '../../state/utils';
 import { AreaGeometries } from './area_geometries';
 import { Axis } from './axis';
 import { BarGeometries } from './bar_geometries';
@@ -11,11 +14,43 @@ import { LineGeometries } from './line_geometries';
 interface ReactiveChartProps {
   chartStore?: ChartStore; // FIX until we find a better way on ts mobx
 }
-class Chart extends React.Component<ReactiveChartProps> {
+
+interface ReactiveChartState {
+  brushing: boolean;
+  brushStart: Point;
+  brushEnd: Point;
+}
+function limitPoint(value: number, min: number, max: number) {
+  if (value > max) {
+    return max;
+  } else if (value < min) {
+    return min;
+  } else {
+    return value;
+  }
+}
+function getPoint(event: MouseEvent, extent: BrushExtent): Point {
+    const point = {
+      x: limitPoint(event.layerX, extent.minX, extent.maxX),
+      y: limitPoint(event.layerY, extent.minY, extent.maxY),
+    };
+    return point;
+}
+class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
   static displayName = 'ReactiveChart';
   firstRender = true;
+  state = {
+    brushing: false,
+    brushStart: {
+      x: 0,
+      y: 0,
+    },
+    brushEnd: {
+      x: 0,
+      y: 0,
+    },
+  };
   private renderingLayerRef: React.RefObject<KonvaLayer> = React.createRef();
-
   componentDidMount() {
     // tslint:disable-next-line:no-console
     console.log('Chart mounted');
@@ -125,6 +160,69 @@ class Chart extends React.Component<ReactiveChartProps> {
     });
     return axesComponents;
   }
+  renderBrushTool = () => {
+    const { brushing, brushStart, brushEnd } = this.state;
+    const { chartDimensions, chartRotation, chartTransform } = this.props.chartStore!;
+    if (!brushing) {
+      return null;
+    }
+    let x = 0;
+    let y = 0;
+    let width = 0;
+    let height = 0;
+    // x = {chartDimensions.left + chartTransform.x};
+    // y = {chartDimensions.top + chartTransform.y};
+    if (chartRotation === 0 || chartRotation === 180) {
+      x = brushStart.x;
+      y = chartDimensions.top + chartTransform.y;
+      width = brushEnd.x - brushStart.x;
+      height = chartDimensions.height;
+    } else {
+      x = chartDimensions.left + chartTransform.x;
+      y = brushStart.y;
+      width = chartDimensions.width;
+      height = brushEnd.y - brushStart.y;
+    }
+    return (
+      <Rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        fill="gray"
+        opacity={0.6}
+      >
+      </Rect>
+    );
+  }
+  onStartBrusing = (event: { evt: MouseEvent}) => {
+    const { brushExtent } = this.props.chartStore!;
+    const point = getPoint(event.evt, brushExtent);
+    this.setState(() => ({
+      brushing: true,
+      brushStart: point,
+      brushEnd: point,
+    }));
+  }
+  onEndBrushing = () => {
+    const { brushStart, brushEnd } = this.state;
+    this.props.chartStore!.onBrushEnd(brushStart, brushEnd);
+    this.setState(() => ({
+      brushing: false,
+      brushStart: { x: 0, y: 0 },
+      brushEnd: { x: 0, y: 0 },
+    }));
+  }
+  onBrushing = (event: { evt: MouseEvent}) => {
+    if (!this.state.brushing) {
+      return;
+    }
+    const { brushExtent } = this.props.chartStore!;
+    const point = getPoint(event.evt, brushExtent);
+    this.setState(() => ({
+      brushEnd: point,
+    }));
+  }
 
   render() {
     const { initialized, debug } = this.props.chartStore!;
@@ -136,26 +234,11 @@ class Chart extends React.Component<ReactiveChartProps> {
       parentDimensions,
       chartDimensions,
       chartRotation,
+      chartTransform,
       tooltipData,
       setTooltipPosition,
     } = this.props.chartStore!;
 
-    const chartTransform = {
-      x: 0,
-      y: 0,
-      rotate: 0,
-    };
-    if (chartRotation === 90) {
-      chartTransform.x = chartDimensions.width;
-      chartTransform.rotate = 90;
-    } else if (chartRotation === -90) {
-      chartTransform.y = chartDimensions.height;
-      chartTransform.rotate = -90;
-    } else if (chartRotation === 180) {
-      chartTransform.x = chartDimensions.width;
-      chartTransform.y = chartDimensions.height;
-      chartTransform.rotate = 180;
-    }
     // disable clippings when debugging
     const clippings = debug
       ? {}
@@ -169,6 +252,15 @@ class Chart extends React.Component<ReactiveChartProps> {
             ? chartDimensions.width
             : chartDimensions.height,
         };
+    let brushProps = {};
+    const isBrushEnabled = this.props.chartStore!.isBrushEnabled();
+    if (isBrushEnabled) {
+      brushProps = {
+        onMouseDown: this.onStartBrusing,
+        onMouseUp: this.onEndBrushing,
+        onMouseMove: this.onBrushing,
+      };
+    }
 
     return (
       <div
@@ -188,6 +280,7 @@ class Chart extends React.Component<ReactiveChartProps> {
             width: '100%',
             height: '100%',
           }}
+          {...brushProps}
         >
           <Layer
             ref={this.renderingLayerRef}
@@ -195,6 +288,7 @@ class Chart extends React.Component<ReactiveChartProps> {
             y={chartDimensions.top + chartTransform.y}
             rotation={chartRotation}
             {...clippings}
+            listening={!this.state.brushing}
             onMouseMove={({ evt }) => {
               if (tooltipData != null) {
                 setTooltipPosition(evt.layerX, evt.layerY);
@@ -207,6 +301,12 @@ class Chart extends React.Component<ReactiveChartProps> {
 
             {debug && this.renderDebugChartBorders()}
           </Layer>
+          {
+            isBrushEnabled && <Layer listening={false}>
+              {this.renderBrushTool()}
+            </Layer>
+          }
+
           <Layer hitGraphEnabled={false}>{this.renderAxes()}</Layer>
         </Stage>
       </div>

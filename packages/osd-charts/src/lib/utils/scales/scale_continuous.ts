@@ -1,4 +1,5 @@
 import { scaleLinear, scaleLog, scaleSqrt, scaleTime } from 'd3-scale';
+import { DateTime } from 'luxon';
 import { ScaleContinuousType, ScaleType } from './scales';
 import { Scale } from './scales';
 
@@ -51,5 +52,13 @@ export class ScaleContinuous implements Scale {
       });
     }
     return this.d3Scale.ticks();
+  }
+  invert(value: number) {
+    if (this.type === ScaleType.Time) {
+      const invertedDate = this.d3Scale.invert(value);
+      return DateTime.fromJSDate(invertedDate).toISO();
+    } else {
+      return this.d3Scale.invert(value);
+    }
   }
 }

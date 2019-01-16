@@ -71,4 +71,8 @@ export class ScaleBand implements Scale {
   ticks() {
     return this.domain;
   }
+  invert(value: any) {
+    // TODO fix
+    return null;
+  }
 }

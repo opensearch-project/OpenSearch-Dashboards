@@ -6,7 +6,9 @@ export interface Scale {
   range: number[];
   ticks: () => any[];
   scale: (value: any) => number;
+  invert: (value: number) => any;
   bandwidth: number;
+  type: ScaleType;
 }
 export type ScaleFunction = (value: any) => number;
 

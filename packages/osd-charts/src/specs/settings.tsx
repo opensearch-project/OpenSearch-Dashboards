@@ -1,7 +1,7 @@
 import { inject } from 'mobx-react';
 import React from 'react';
 import { Position, Rendering, Rotation } from '../lib/series/specs';
-import { ChartStore, ElementClickListener, ElementOverListener } from '../state/chart_state';
+import { BrushEndListener, ChartStore, ElementClickListener, ElementOverListener } from '../state/chart_state';
 
 interface SettingSpecProps {
   chartStore?: ChartStore;
@@ -14,6 +14,7 @@ interface SettingSpecProps {
   onElementClick?: ElementClickListener;
   onElementOver?: ElementOverListener;
   onElementOut?: () => undefined;
+  onBrushEnd?: BrushEndListener;
 }
 
 type DefaultProps = 'rendering' | 'rotation' | 'animateData' | 'showLegend' | 'debug';
@@ -37,6 +38,7 @@ export class SettingsComponent extends React.PureComponent<SettingSpecProps> {
       onElementClick,
       onElementOver,
       onElementOut,
+      onBrushEnd,
       debug,
     } = this.props;
     chartStore!.chartRotation = rotation;
@@ -55,6 +57,9 @@ export class SettingsComponent extends React.PureComponent<SettingSpecProps> {
     }
     if (onElementOut) {
       chartStore!.setOnElementOutListener(onElementOut);
+    }
+    if (onBrushEnd) {
+      chartStore!.setOnBrushEndListener(onBrushEnd);
     }
   }
   componentDidUpdate() {
@@ -68,6 +73,7 @@ export class SettingsComponent extends React.PureComponent<SettingSpecProps> {
       onElementClick,
       onElementOver,
       onElementOut,
+      onBrushEnd,
       debug,
     } = this.props;
     chartStore!.chartRotation = rotation;
@@ -84,6 +90,9 @@ export class SettingsComponent extends React.PureComponent<SettingSpecProps> {
     }
     if (onElementOut) {
       chartStore!.setOnElementOutListener(onElementOut);
+    }
+    if (onBrushEnd) {
+      chartStore!.setOnBrushEndListener(onBrushEnd);
     }
   }
   render() {

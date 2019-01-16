@@ -12,7 +12,11 @@ import {
   renderLine,
   renderPoints,
 } from '../lib/series/rendering';
-import { computeXScale, computeYScales, countClusteredSeries } from '../lib/series/scales';
+import {
+  computeXScale,
+  computeYScales,
+  countClusteredSeries,
+} from '../lib/series/scales';
 import {
   DataSeries,
   DataSeriesColorsValues,
@@ -21,30 +25,55 @@ import {
   getSplittedSeries,
   RawDataSeries,
 } from '../lib/series/series';
-import { AreaSeriesSpec, AxisSpec, BasicSeriesSpec, LineSeriesSpec } from '../lib/series/specs';
+import {
+  AreaSeriesSpec,
+  AxisSpec,
+  BasicSeriesSpec,
+  LineSeriesSpec,
+  Rotation,
+} from '../lib/series/specs';
 import { ColorConfig } from '../lib/themes/theme';
 import { Dimensions } from '../lib/utils/dimensions';
 import { AxisId, GroupId, SpecId } from '../lib/utils/ids';
 import { Scale } from '../lib/utils/scales/scales';
 
-export function computeSeriesDomains(seriesSpecs: Map<SpecId, BasicSeriesSpec>): {
+export interface Transform {
+  x: number;
+  y: number;
+  rotate: number;
+}
+export interface BrushExtent {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+}
+
+export function computeSeriesDomains(
+  seriesSpecs: Map<SpecId, BasicSeriesSpec>,
+): {
   xDomain: XDomain;
   yDomain: YDomain[];
   splittedDataSeries: RawDataSeries[][];
   formattedDataSeries: {
-      stacked: FormattedDataSeries[];
-      nonStacked: FormattedDataSeries[];
+    stacked: FormattedDataSeries[];
+    nonStacked: FormattedDataSeries[];
   };
   seriesColors: Map<string, DataSeriesColorsValues>;
 } {
-  const { splittedSeries, xValues, seriesColors } = getSplittedSeries(seriesSpecs);
+  const { splittedSeries, xValues, seriesColors } = getSplittedSeries(
+    seriesSpecs,
+  );
   // tslint:disable-next-line:no-console
   // console.log({ splittedSeries, xValues, seriesColors });
   const splittedDataSeries = [...splittedSeries.values()];
   const specsArray = [...seriesSpecs.values()];
   const xDomain = mergeXDomain(specsArray, xValues);
   const yDomain = mergeYDomain(splittedSeries, specsArray);
-  const formattedDataSeries = getFormattedDataseries(specsArray, splittedSeries);
+  const formattedDataSeries = getFormattedDataseries(
+    specsArray,
+    splittedSeries,
+  );
 
   // console.log({ formattedDataSeries, xDomain, yDomain });
 
@@ -68,12 +97,26 @@ export function computeSeriesGeometries(
   seriesColorMap: Map<string, string>,
   chartColors: ColorConfig,
   chartDims: Dimensions,
-) {
+): {
+  scales: {
+    xScale: Scale,
+    yScales: Map<GroupId, Scale>,
+  },
+  geometries: {
+    points: PointGeometry[];
+    bars: BarGeometry[];
+    areas: AreaGeometry[];
+    lines: LineGeometry[];
+  },
+} {
   const { width, height } = chartDims;
   const { stacked, nonStacked } = formattedDataSeries;
 
   // compute how many series are clustered
-  const { stackedGroupCount, totalGroupCount } = countClusteredSeries(stacked, nonStacked);
+  const { stackedGroupCount, totalGroupCount } = countClusteredSeries(
+    stacked,
+    nonStacked,
+  );
 
   // compute scales
   const xScale = computeXScale(xDomain, totalGroupCount, 0, width);
@@ -137,10 +180,16 @@ export function computeSeriesGeometries(
     points.push(...geometries.points);
   });
   return {
-    points,
-    areas,
-    bars,
-    lines,
+    scales: {
+      xScale,
+      yScales,
+    },
+    geometries: {
+      points,
+      areas,
+      bars,
+      lines,
+    },
   };
 }
 
@@ -178,7 +227,7 @@ export function renderGeometries(
         const pointShift = clusteredCount > 0 ? clusteredCount : 1;
 
         const point = renderPoints(
-          xScale.bandwidth * pointShift / 2,
+          (xScale.bandwidth * pointShift) / 2,
           ds.data,
           xScale,
           yScale,
@@ -190,13 +239,21 @@ export function renderGeometries(
         break;
       case 'bar':
         const shift = isStacked ? indexOffset : indexOffset + i;
-        const bar = renderBars(shift, ds.data, xScale, yScale, color, ds.specId, ds.key);
+        const bar = renderBars(
+          shift,
+          ds.data,
+          xScale,
+          yScale,
+          color,
+          ds.specId,
+          ds.key,
+        );
         bars.push(...bar);
         break;
       case 'line':
         const lineShift = clusteredCount > 0 ? clusteredCount : 1;
         const line = renderLine(
-          xScale.bandwidth * lineShift / 2,
+          (xScale.bandwidth * lineShift) / 2,
           ds.data,
           xScale,
           yScale,
@@ -210,7 +267,7 @@ export function renderGeometries(
       case 'area':
         const areaShift = clusteredCount > 0 ? clusteredCount : 1;
         const area = renderArea(
-          xScale.bandwidth * areaShift / 2,
+          (xScale.bandwidth * areaShift) / 2,
           ds.data,
           xScale,
           yScale,
@@ -231,11 +288,17 @@ export function renderGeometries(
   };
 }
 
-export function getSpecById(seriesSpecs: Map<SpecId, BasicSeriesSpec>, specId: SpecId) {
+export function getSpecById(
+  seriesSpecs: Map<SpecId, BasicSeriesSpec>,
+  specId: SpecId,
+) {
   return seriesSpecs.get(specId);
 }
 
-export function getAxesSpecForSpecId(axesSpecs: Map<AxisId, AxisSpec>, groupId: GroupId) {
+export function getAxesSpecForSpecId(
+  axesSpecs: Map<AxisId, AxisSpec>,
+  groupId: GroupId,
+) {
   let xAxis;
   let yAxis;
   for (const axisSpec of axesSpecs.values()) {
@@ -251,5 +314,57 @@ export function getAxesSpecForSpecId(axesSpecs: Map<AxisId, AxisSpec>, groupId: 
   return {
     xAxis,
     yAxis,
+  };
+}
+
+export function computeChartTransform(
+  chartDimensions: Dimensions,
+  chartRotation: Rotation,
+): Transform {
+  if (chartRotation === 90) {
+    return {
+      x: chartDimensions.width,
+      y: 0,
+      rotate: 90,
+    };
+  } else if (chartRotation === -90) {
+    return {
+      x: 0,
+      y: chartDimensions.height,
+      rotate: -90,
+    };
+  } else if (chartRotation === 180) {
+    return {
+      x: chartDimensions.width,
+      y: chartDimensions.height,
+      rotate: 180,
+    };
+  } else {
+    return {
+      x: 0,
+      y: 0,
+      rotate: 0,
+    };
+  }
+}
+
+export function computeBrushExtent(
+  chartDimensions: Dimensions,
+  chartRotation: Rotation,
+  chartTransform: Transform,
+): BrushExtent {
+  const minX = [0, 180].includes(chartRotation)
+    ? chartDimensions.left + chartTransform.x
+    : chartDimensions.top + chartTransform.y;
+  const minY = [0, 180].includes(chartRotation)
+    ? chartDimensions.top + chartTransform.y
+    : chartDimensions.left + chartTransform.x;
+  const maxX = minX + chartDimensions.width;
+  const maxY = minY + chartDimensions.height;
+  return {
+    minX,
+    minY,
+    maxX,
+    maxY,
   };
 }

@@ -6,10 +6,18 @@ import {
   getAxisTicksPositions,
 } from '../lib/axes/axis_utils';
 import { CanvasTextBBoxCalculator } from '../lib/axes/canvas_text_bbox_calculator';
+import { XDomain } from '../lib/series/domains/x_domain';
+import { YDomain } from '../lib/series/domains/y_domain';
 import { computeLegend, LegendItem } from '../lib/series/legend';
-import { AreaGeometry, BarGeometry, GeometryValue, LineGeometry, PointGeometry } from '../lib/series/rendering';
-import { countClusteredSeries } from '../lib/series/scales';
-import { getSeriesColorMap } from '../lib/series/series';
+import {
+  AreaGeometry,
+  BarGeometry,
+  GeometryValue,
+  LineGeometry,
+  PointGeometry,
+} from '../lib/series/rendering';
+import { computeXScale, countClusteredSeries } from '../lib/series/scales';
+import { DataSeriesColorsValues, FormattedDataSeries, getSeriesColorMap, RawDataSeries } from '../lib/series/series';
 import {
   AreaSeriesSpec,
   AxisSpec,
@@ -24,8 +32,17 @@ import { formatTooltip } from '../lib/series/tooltip';
 import { DEFAULT_THEME, Theme } from '../lib/themes/theme';
 import { computeChartDimensions, Dimensions } from '../lib/utils/dimensions';
 import { SpecDomains } from '../lib/utils/domain';
-import { AxisId, SpecId } from '../lib/utils/ids';
-import { computeSeriesDomains, computeSeriesGeometries, getAxesSpecForSpecId } from './utils';
+import { AxisId, GroupId, SpecId } from '../lib/utils/ids';
+import { Scale, ScaleType } from '../lib/utils/scales/scales';
+import {
+  BrushExtent,
+  computeBrushExtent,
+  computeChartTransform,
+  computeSeriesDomains,
+  computeSeriesGeometries,
+  getAxesSpecForSpecId,
+  Transform,
+} from './utils';
 export interface TooltipPosition {
   top?: number;
   left?: number;
@@ -36,8 +53,24 @@ export interface TooltipData {
   value: GeometryValue;
   position: TooltipPosition;
 }
+export interface Point {
+  x: number;
+  y: number;
+}
+export interface SeriesDomainsAndData {
+  xDomain: XDomain;
+  yDomain: YDomain[];
+  splittedDataSeries: RawDataSeries[][];
+  formattedDataSeries: {
+      stacked: FormattedDataSeries[];
+      nonStacked: FormattedDataSeries[];
+  };
+  seriesColors: Map<string, DataSeriesColorsValues>;
+}
+
 export type ElementClickListener = (value: GeometryValue) => void;
 export type ElementOverListener = (value: GeometryValue) => void;
+export type BrushEndListener = (min: number, max: number) => void;
 // const MAX_ANIMATABLE_GLYPHS = 500;
 
 export class ChartStore {
@@ -56,6 +89,18 @@ export class ChartStore {
     top: 0,
     left: 0,
   }; // updated from jsx
+  chartTransform: Transform = {
+    x: 0,
+    y: 0,
+    rotate: 0,
+  };
+  brushExtent: BrushExtent = {
+    minX: 0,
+    minY: 0,
+    maxX: 0,
+    maxY: 0,
+  };
+
   chartRotation: Rotation = 0; // updated from jsx
   chartRendering: Rendering = 'canvas'; // updated from jsx
   chartTheme: Theme = DEFAULT_THEME; // updated from jsx
@@ -68,16 +113,20 @@ export class ChartStore {
   seriesSpecs: Map<SpecId, BasicSeriesSpec> = new Map(); // readed from jsx
 
   seriesSpecDomains: Map<SpecId, SpecDomains> = new Map(); // computed
+  seriesDomainsAndData?: SeriesDomainsAndData; // computed
+  xScale?: Scale;
+  yScales?: Map<GroupId, Scale>;
 
   legendItems: LegendItem[] = [];
 
   tooltipData = observable.box<Array<[any, any]> | null>(null);
-  tooltipPosition = observable.box<{x: number, y: number} | null>();
+  tooltipPosition = observable.box<{ x: number; y: number } | null>();
   showTooltip = observable.box(false);
 
   onElementClickListener?: ElementClickListener;
   onElementOverListener?: ElementOverListener;
   onElementOutListener?: () => undefined;
+  onBrushEndListener?: BrushEndListener;
 
   geometries: {
     points: PointGeometry[];
@@ -125,7 +174,7 @@ export class ChartStore {
   });
 
   setTooltipPosition = action((x: number, y: number) => {
-    this.tooltipPosition.set({ x, y});
+    this.tooltipPosition.set({ x, y });
   });
 
   setShowLegend = action((showLegend: boolean) => {
@@ -141,11 +190,47 @@ export class ChartStore {
   setOnElementOutListener(listener: () => undefined) {
     this.onElementOutListener = listener;
   }
-  removeValueClickListener() {
+  setOnBrushEndListener(listener: BrushEndListener) {
+    this.onBrushEndListener = listener;
+  }
+  removeElementClickListener() {
     this.onElementClickListener = undefined;
   }
+  removeElementOverListener() {
+    this.onElementOverListener = undefined;
+  }
+  removeElementOutListener() {
+    this.onElementOutListener = undefined;
+  }
+  onBrushEnd(start: Point, end: Point) {
+    if (!this.onBrushEndListener) {
+      return;
+    }
+    const minValue = start.x < end.x ? start.x : end.x;
+    const maxValue = start.x > end.x ? start.x : end.x;
+    if (maxValue === minValue) {
+      // if 0 size brush, avoid computing the value
+      return;
+    }
+    const min = this.xScale!.invert(minValue - this.chartDimensions.left);
+    const max = this.xScale!.invert(maxValue - this.chartDimensions.left);
+    console.log({min, max});
+    this.onBrushEndListener(min, max);
+  }
 
-  updateParentDimensions(width: number, height: number, top: number, left: number) {
+  isBrushEnabled(): boolean {
+    if (!this.xScale) {
+      return false;
+    }
+    return this.xScale.type !== ScaleType.Ordinal && Boolean(this.onBrushEndListener);
+  }
+
+  updateParentDimensions(
+    width: number,
+    height: number,
+    top: number,
+    left: number,
+  ) {
     let isChanged = false;
     if (width !== this.parentDimensions.width) {
       isChanged = true;
@@ -167,7 +252,13 @@ export class ChartStore {
       this.computeChart();
     }
   }
-  addSeriesSpec(seriesSpec: BasicSeriesSpec | LineSeriesSpec | AreaSeriesSpec | BarSeriesSpec) {
+  addSeriesSpec(
+    seriesSpec:
+      | BasicSeriesSpec
+      | LineSeriesSpec
+      | AreaSeriesSpec
+      | BarSeriesSpec,
+  ) {
     this.seriesSpecs.set(seriesSpec.id, seriesSpec);
   }
   removeSeriesSpec(specId: SpecId) {
@@ -187,17 +278,24 @@ export class ChartStore {
   computeChart() {
     this.initialized.set(false);
     // compute only if parent dimensions are computed
-    if (this.parentDimensions.width === 0 || this.parentDimensions.height === 0) {
+    if (
+      this.parentDimensions.width === 0 ||
+      this.parentDimensions.height === 0
+    ) {
       return;
     }
 
     const seriesDomains = computeSeriesDomains(this.seriesSpecs);
+    this.seriesDomainsAndData = seriesDomains;
     // tslint:disable-next-line:no-console
     // console.log({colors: seriesDomains.seriesColors});
 
     // tslint:disable-next-line:no-console
     // console.log({seriesDomains});
-    const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, this.chartTheme.colors);
+    const seriesColorMap = getSeriesColorMap(
+      seriesDomains.seriesColors,
+      this.chartTheme.colors,
+    );
     this.legendItems = computeLegend(
       seriesDomains.seriesColors,
       seriesColorMap,
@@ -208,7 +306,11 @@ export class ChartStore {
     // tslint:disable-next-line:no-console
     // console.log({legendItems: this.legendItems});
 
-    const { xDomain, yDomain, formattedDataSeries: { stacked, nonStacked } } = seriesDomains;
+    const {
+      xDomain,
+      yDomain,
+      formattedDataSeries: { stacked, nonStacked },
+    } = seriesDomains;
     // compute how many series are clustered
     const { totalGroupCount } = countClusteredSeries(stacked, nonStacked);
 
@@ -243,7 +345,17 @@ export class ChartStore {
       this.legendPosition,
     );
 
-    const geometries = computeSeriesGeometries(
+    this.chartTransform = computeChartTransform(
+      this.chartDimensions,
+      this.chartRotation,
+    );
+    this.brushExtent = computeBrushExtent(
+      this.chartDimensions,
+      this.chartRotation,
+      this.chartTransform,
+    );
+
+    const seriesGeometries = computeSeriesGeometries(
       this.seriesSpecs,
       seriesDomains.xDomain,
       seriesDomains.yDomain,
@@ -255,7 +367,9 @@ export class ChartStore {
 
     // tslint:disable-next-line:no-console
     // console.log({geometries});
-    this.geometries = geometries;
+    this.geometries = seriesGeometries.geometries;
+    this.xScale = seriesGeometries.scales.xScale;
+    this.yScales = seriesGeometries.scales.yScales;
 
     // // compute visible ticks and their positions
     const axisTicksPositions = getAxisTicksPositions(
