@@ -45,7 +45,7 @@ export function formatTooltip(
     yAccessors = seriesKey.slice(-1);
   }
   // format y value
-  const yValues = formatAccessor(datum, yAccessors, yAxis ? yAxis.tickFormat :  emptyFormatter);
+  const yValues = formatAccessor(datum, yAccessors, yAxis ? yAxis.tickFormat : emptyFormatter);
   let yTitle = 'Value';
   if (spec.yAccessors.length > 1) {
     yTitle = `${yAccessors[0]}`;
@@ -53,7 +53,11 @@ export function formatTooltip(
     yTitle = yAxis.title;
   }
 
-  const xValues = formatAccessor(datum, [spec.xAccessor], xAxis ? xAxis.tickFormat : emptyFormatter);
+  const xValues = formatAccessor(
+    datum,
+    [spec.xAccessor],
+    xAxis ? xAxis.tickFormat : emptyFormatter,
+  );
   let xTitle = 'X Value';
   if (xAxis && xAxis.title) {
     xTitle = xAxis.title;
@@ -68,10 +72,12 @@ function formatAccessor(
   datum: Datum,
   accessors: Accessor[] = [],
   formatter: TickFormatter,
-  ): Array<[any, any]> {
-  return accessors.map((accessor): [any, any] => {
-    return [accessor, formatter(datum[accessor])];
-  });
+): Array<[any, any]> {
+  return accessors.map(
+    (accessor): [any, any] => {
+      return [accessor, formatter(datum[accessor])];
+    },
+  );
 }
 
 function emptyFormatter(value: any): any {

@@ -156,14 +156,10 @@ function getMinMaxRange(
   return null;
 }
 
-export function getAvailableTicks(
-  axisSpec: AxisSpec,
-  scale: Scale,
-  totalGroupCount: number,
-) {
+export function getAvailableTicks(axisSpec: AxisSpec, scale: Scale, totalGroupCount: number) {
   const ticks = scale.ticks();
   const shift = totalGroupCount > 0 ? totalGroupCount : 1;
-  const offset = (scale.bandwidth * shift ) / 2;
+  const offset = (scale.bandwidth * shift) / 2;
   return ticks.map((tick) => {
     return {
       value: tick,

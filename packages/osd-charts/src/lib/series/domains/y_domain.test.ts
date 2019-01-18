@@ -3,7 +3,7 @@ import { ScaleType } from '../../utils/scales/scales';
 import { RawDataSeries } from '../series';
 import { BasicSeriesSpec } from '../specs';
 import { BARCHART_1Y0G } from '../utils/test_dataset';
-import {mergeYDomain, splitSpecsByGroupId } from './y_domain';
+import { mergeYDomain, splitSpecsByGroupId } from './y_domain';
 
 describe('Y Domain', () => {
   test('Should merge Y domain', () => {

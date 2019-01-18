@@ -30,7 +30,11 @@ export interface ScaleConfig {
   clamp?: boolean;
 }
 
-export type ScaleContinuousType = ScaleType.Linear | ScaleType.Sqrt | ScaleType.Log | ScaleType.Time;
+export type ScaleContinuousType =
+  | ScaleType.Linear
+  | ScaleType.Sqrt
+  | ScaleType.Log
+  | ScaleType.Time;
 export type ScaleOrdinalType = ScaleType.Ordinal;
 export type ScaleTypes = ScaleContinuousType | ScaleOrdinalType;
 
@@ -67,6 +71,6 @@ export function createOrdinalScale(
   padding?: number,
   overrideBandwidth?: number,
 ): Scale {
-  const paddingOption = padding ? [padding, padding] as [number, number] : undefined;
+  const paddingOption = padding ? ([padding, padding] as [number, number]) : undefined;
   return new ScaleBand(domain, [minRange, maxRange], paddingOption, false, overrideBandwidth);
 }

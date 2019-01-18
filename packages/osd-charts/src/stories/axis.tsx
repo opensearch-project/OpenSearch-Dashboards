@@ -1,4 +1,3 @@
-import { action } from '@storybook/addon-actions';
 import { boolean } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
@@ -20,7 +19,7 @@ import './stories.scss';
 storiesOf('Axis', module)
   .add('basic', () => {
     return (
-      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
         <Settings debug={boolean('debug', false)} />
         <Axis
           id={getAxisId('bottom')}
@@ -41,19 +40,15 @@ storiesOf('Axis', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data = {[
-            { x: 0, y: 2 },
-            { x: 1, y: 7 },
-            { x: 2, y: 3 },
-            { x: 3, y: 6 },
-          ]}
-          yScaleToDataExtent ={false}
+          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   })
   .add('4 axes', () => {
     return (
-      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -85,22 +80,16 @@ storiesOf('Axis', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data = {[
-            { x: 0, y: 2 },
-            { x: 1, y: 7 },
-            { x: 2, y: 3 },
-            { x: 3, y: 6 },
-          ]}
-          yScaleToDataExtent ={false}
+          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   })
   .add('with multi axis (TO FIX)', () => {
     return (
-      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
-        <Settings
-          showLegend={false}
-        />
+      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+        <Settings showLegend={false} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -126,12 +115,7 @@ storiesOf('Axis', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data = {[
-            { x: 0, y: 1 },
-            { x: 1, y: 2 },
-            { x: 2, y: 3 },
-            { x: 3, y: 4 },
-          ]}
+          data={[{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }, { x: 3, y: 4 }]}
         />
         <BarSeries
           id={getSpecId('barseries2')}
@@ -140,21 +124,15 @@ storiesOf('Axis', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data = {[
-            { x: 0, y: 8 },
-            { x: 1, y: 7 },
-            { x: 2, y: 6 },
-            { x: 3, y: 5 },
-          ]}
+          data={[{ x: 0, y: 8 }, { x: 1, y: 7 }, { x: 2, y: 6 }, { x: 3, y: 5 }]}
         />
-    </Chart>);
+      </Chart>
+    );
   })
   .add('with multi axis bar/lines', () => {
     return (
-      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
-        <Settings
-          showLegend={false}
-        />
+      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+        <Settings showLegend={false} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -180,15 +158,10 @@ storiesOf('Axis', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data = {[
-            { x: 0, y: 2 },
-            { x: 1, y: 7 },
-            { x: 2, y: 3 },
-            { x: 3, y: 6 },
-          ]}
-          yScaleToDataExtent ={false}
+          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          yScaleToDataExtent={false}
         />
-         <LineSeries
+        <LineSeries
           id={getSpecId('lines')}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
@@ -197,13 +170,9 @@ storiesOf('Axis', module)
           yAccessors={['y']}
           stackAccessors={['x']}
           splitSeriesAccessors={['g']}
-          data = {[
-            { x: 0, y: 3 },
-            { x: 1, y: 2 },
-            { x: 2, y: 4 },
-            { x: 3, y: 10 },
-          ]}
-          yScaleToDataExtent ={false}
+          data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   });

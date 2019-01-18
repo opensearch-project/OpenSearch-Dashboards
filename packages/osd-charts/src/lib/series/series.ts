@@ -146,10 +146,7 @@ function getColorValues(
 /**
  * Get the array of values that forms a series key
  */
-function getColorValuesAsString(
-  colorValues: any[],
-  specId: SpecId,
-): string {
+function getColorValuesAsString(colorValues: any[], specId: SpecId): string {
   return `specId:{${specId}},colors:{${colorValues}}`;
 }
 
@@ -321,14 +318,16 @@ export function formatStackedDataSeriesValues(
   });
 
   const stackedDataSeries: DataSeries[] = dataseries.map((ds, index) => {
-    const newData = ds.data.filter((datum) => stackedValues.get(datum.x) !== undefined).map((datum) => {
-      const stack = stackedValues.get(datum.x)!;
-      if (index === 0) {
-        return { x: datum.x, y0: scaleToExtent ? datum.y : 0, y1: datum.y, datum: datum.datum };
-      } else {
-        return { x: datum.x, y0: stack[index], y1: stack[index] + datum.y, datum: datum.datum };
-      }
-    });
+    const newData = ds.data
+      .filter((datum) => stackedValues.get(datum.x) !== undefined)
+      .map((datum) => {
+        const stack = stackedValues.get(datum.x)!;
+        if (index === 0) {
+          return { x: datum.x, y0: scaleToExtent ? datum.y : 0, y1: datum.y, datum: datum.datum };
+        } else {
+          return { x: datum.x, y0: stack[index], y1: stack[index] + datum.y, datum: datum.datum };
+        }
+      });
     return {
       specId: ds.specId,
       key: ds.key,
@@ -377,7 +376,10 @@ export function getSeriesColorMap(
   const seriesColorMap = new Map<string, string>();
   let counter = 0;
   seriesColors.forEach((value, seriesColorKey) => {
-    seriesColorMap.set(seriesColorKey, chartColors.vizColors[counter % chartColors.vizColors.length]);
+    seriesColorMap.set(
+      seriesColorKey,
+      chartColors.vizColors[counter % chartColors.vizColors.length],
+    );
     counter++;
   });
   return seriesColorMap;

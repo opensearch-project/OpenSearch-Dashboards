@@ -35,44 +35,46 @@ export function mergeYDomain(
   // const groupDomains = new Map<GroupId, {}>();
   const specsByGroupIdsEntries = [...specsByGroupIds.entries()];
 
-  const yDomains = specsByGroupIdsEntries.map(([groupId, groupSpecs]): YDomain => {
-    const groupYScaleType = coerchYScaleTypes([...groupSpecs.stacked, ...groupSpecs.nonStacked]);
-    if (groupYScaleType === null) {
-      throw new Error(`Cannot merge ${groupId} domain. Missing Y scale types`);
-    }
+  const yDomains = specsByGroupIdsEntries.map(
+    ([groupId, groupSpecs]): YDomain => {
+      const groupYScaleType = coerchYScaleTypes([...groupSpecs.stacked, ...groupSpecs.nonStacked]);
+      if (groupYScaleType === null) {
+        throw new Error(`Cannot merge ${groupId} domain. Missing Y scale types`);
+      }
 
-    // compute stacked domain
-    const isStackedScaleToExtent = groupSpecs.stacked.some((spec) => {
-      return spec.yScaleToDataExtent;
-    });
-    const stackedDataSeries = getDataSeriesOnGroup(dataSeries, groupSpecs.stacked);
-    const stackedDomain = computeYStackedDomain(stackedDataSeries, isStackedScaleToExtent);
+      // compute stacked domain
+      const isStackedScaleToExtent = groupSpecs.stacked.some((spec) => {
+        return spec.yScaleToDataExtent;
+      });
+      const stackedDataSeries = getDataSeriesOnGroup(dataSeries, groupSpecs.stacked);
+      const stackedDomain = computeYStackedDomain(stackedDataSeries, isStackedScaleToExtent);
 
-    // compute non stacked domain
-    const isNonStackedScaleToExtent = groupSpecs.nonStacked.some((spec) => {
-      return spec.yScaleToDataExtent;
-    });
-    const nonStackedDataSeries = getDataSeriesOnGroup(dataSeries, groupSpecs.nonStacked);
-    const nonStackedDomain = computeYNonStackedDomain(
-      nonStackedDataSeries,
-      isNonStackedScaleToExtent,
-    );
+      // compute non stacked domain
+      const isNonStackedScaleToExtent = groupSpecs.nonStacked.some((spec) => {
+        return spec.yScaleToDataExtent;
+      });
+      const nonStackedDataSeries = getDataSeriesOnGroup(dataSeries, groupSpecs.nonStacked);
+      const nonStackedDomain = computeYNonStackedDomain(
+        nonStackedDataSeries,
+        isNonStackedScaleToExtent,
+      );
 
-    // merge stacked and non stacked domain together
-    const groupDomain = computeContinuousDataDomain(
-      [...stackedDomain, ...nonStackedDomain],
-      identity,
-      isStackedScaleToExtent || isNonStackedScaleToExtent,
-    );
+      // merge stacked and non stacked domain together
+      const groupDomain = computeContinuousDataDomain(
+        [...stackedDomain, ...nonStackedDomain],
+        identity,
+        isStackedScaleToExtent || isNonStackedScaleToExtent,
+      );
 
-    return {
-      type: 'yDomain',
-      isBandScale: false,
-      scaleType: groupYScaleType as ScaleContinuousType,
-      groupId,
-      domain: groupDomain,
-    };
-  });
+      return {
+        type: 'yDomain',
+        isBandScale: false,
+        scaleType: groupYScaleType as ScaleContinuousType,
+        groupId,
+        domain: groupDomain,
+      };
+    },
+  );
 
   return yDomains;
 }
@@ -90,10 +92,7 @@ function getDataSeriesOnGroup(
   );
 }
 
-function computeYStackedDomain(
-  dataseries: RawDataSeries[],
-  scaleToExtent: boolean,
-): number[] {
+function computeYStackedDomain(dataseries: RawDataSeries[], scaleToExtent: boolean): number[] {
   const stackMap = new Map<any, any[]>();
   dataseries.forEach((ds, index) => {
     ds.data.forEach((datum) => {

@@ -42,13 +42,13 @@ export function computeOrdinalDataDomain(
   sorted?: boolean,
   removeNull?: boolean,
 ): string[] | number[] {
-  const domain = data
-    .map(accessor)
-    .filter((d) => removeNull ? d !== null : true);
+  const domain = data.map(accessor).filter((d) => (removeNull ? d !== null : true));
   const uniqueValues = [...new Set(domain)];
-  return sorted ? uniqueValues.sort((a, b) => {
-    return `${a}`.localeCompare(`${b}`);
-  }) : uniqueValues;
+  return sorted
+    ? uniqueValues.sort((a, b) => {
+        return `${a}`.localeCompare(`${b}`);
+      })
+    : uniqueValues;
 }
 
 export function computeContinuousDataDomain(

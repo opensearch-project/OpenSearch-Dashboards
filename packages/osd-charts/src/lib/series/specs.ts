@@ -79,7 +79,7 @@ export type BarSeriesSpec = BasicSeriesSpec & {
 /**
  * This spec describe the dataset configuration used to display a line series.
  */
-export type LineSeriesSpec = BasicSeriesSpec  & {
+export type LineSeriesSpec = BasicSeriesSpec & {
   /** @default line */
   seriesType: 'line';
   curve?: CurveType;

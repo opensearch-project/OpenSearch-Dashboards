@@ -4,7 +4,12 @@ import { Position } from '../series/specs';
 // import { ScalesConfig } from '../themes/theme';
 import { getAxisId, getGroupId } from '../utils/ids';
 import { ScaleType } from '../utils/scales/scales';
-import { computeAxisTicksDimensions, getAvailableTicks, getScaleForAxisSpec, getVisibleTicks } from './axis_utils';
+import {
+  computeAxisTicksDimensions,
+  getAvailableTicks,
+  getScaleForAxisSpec,
+  getVisibleTicks,
+} from './axis_utils';
 import { SvgTextBBoxCalculator } from './svg_text_bbox_calculator';
 
 // const chartScalesConfig: ScalesConfig = {
@@ -25,10 +30,13 @@ describe('Axis computational utils', () => {
     toJSON: () => '',
   };
   const originalGetBBox = SVGElement.prototype.getBoundingClientRect;
-  beforeEach(() => SVGElement.prototype.getBoundingClientRect = function() {
-    const text = this.textContent || 0;
-    return { ...mockedRect, width: Number(text) * 10, heigh: Number(text) * 10 };
-  });
+  beforeEach(
+    () =>
+      (SVGElement.prototype.getBoundingClientRect = function() {
+        const text = this.textContent || 0;
+        return { ...mockedRect, width: Number(text) * 10, heigh: Number(text) * 10 };
+      }),
+  );
   afterEach(() => (SVGElement.prototype.getBoundingClientRect = originalGetBBox));
 
   const chartDim = {
@@ -41,17 +49,17 @@ describe('Axis computational utils', () => {
     axisScaleType: ScaleType.Linear,
     axisScaleDomain: [0, 1],
     ticksDimensions: [
-      { width:  0, height: 10 },
-      { width:  1, height: 10 },
-      { width:  2, height: 10 },
-      { width:  3, height: 10 },
-      { width:  4, height: 10 },
-      { width:  5, height: 10 },
-      { width:  6, height: 10 },
-      { width:  7, height: 10 },
-      { width:  8, height: 10 },
-      { width:  9, height: 10 },
-      { width:  10, height: 10 },
+      { width: 0, height: 10 },
+      { width: 1, height: 10 },
+      { width: 2, height: 10 },
+      { width: 3, height: 10 },
+      { width: 4, height: 10 },
+      { width: 5, height: 10 },
+      { width: 6, height: 10 },
+      { width: 7, height: 10 },
+      { width: 8, height: 10 },
+      { width: 9, height: 10 },
+      { width: 10, height: 10 },
     ],
     tickValues: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
     tickLabels: ['0', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1'],
@@ -90,21 +98,20 @@ describe('Axis computational utils', () => {
 
   test('should compute axis dimensions', () => {
     const bboxCalculator = new SvgTextBBoxCalculator();
-    const axisDimensions = computeAxisTicksDimensions(verticalAxisSpec, xDomain, [yDomain], 1, bboxCalculator, 0);
+    const axisDimensions = computeAxisTicksDimensions(
+      verticalAxisSpec,
+      xDomain,
+      [yDomain],
+      1,
+      bboxCalculator,
+      0,
+    );
     expect(axisDimensions).toEqual(axis1Dims);
     bboxCalculator.destroy();
   });
 
   test('should generate a valid scale', () => {
-    const scale = getScaleForAxisSpec(
-      verticalAxisSpec,
-      xDomain,
-      [yDomain],
-      0,
-      0,
-      0,
-      100,
-    );
+    const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 0, 100);
     expect(scale).toBeDefined();
     expect(scale!.bandwidth).toBe(0);
     expect(scale!.domain).toEqual([0, 1]);
@@ -113,15 +120,7 @@ describe('Axis computational utils', () => {
   });
 
   test('should compute available ticks', () => {
-    const scale = getScaleForAxisSpec(
-      verticalAxisSpec,
-      xDomain,
-      [yDomain],
-      0,
-      0,
-      0,
-      100,
-    );
+    const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 0, 100);
     const axisPositions = getAvailableTicks(verticalAxisSpec, scale!, 0);
     const expectedAxisPositions = [
       { label: '0', position: 100, value: 0 },
@@ -186,17 +185,17 @@ describe('Axis computational utils', () => {
       axisScaleType: ScaleType.Linear,
       axisScaleDomain: [0, 1],
       ticksDimensions: [
-        { width:  0, height: 20 },
-        { width:  1, height: 20 },
-        { width:  2, height: 20 },
-        { width:  3, height: 20 },
-        { width:  4, height: 20 },
-        { width:  5, height: 20 },
-        { width:  6, height: 20 },
-        { width:  7, height: 20 },
-        { width:  8, height: 20 },
-        { width:  9, height: 20 },
-        { width:  10, height: 20 },
+        { width: 0, height: 20 },
+        { width: 1, height: 20 },
+        { width: 2, height: 20 },
+        { width: 3, height: 20 },
+        { width: 4, height: 20 },
+        { width: 5, height: 20 },
+        { width: 6, height: 20 },
+        { width: 7, height: 20 },
+        { width: 8, height: 20 },
+        { width: 9, height: 20 },
+        { width: 10, height: 20 },
       ],
       tickValues: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
       tickLabels: ['0', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1'],

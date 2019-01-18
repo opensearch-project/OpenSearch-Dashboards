@@ -2,10 +2,8 @@ import { Layer as KonvaLayer } from 'konva';
 import { inject, observer } from 'mobx-react';
 import React from 'react';
 import { Layer, Rect, Stage } from 'react-konva';
-import { isVertical } from '../../lib/axes/axis_utils';
-import { Dimensions } from '../../lib/utils/dimensions';
 import { ChartStore, Point } from '../../state/chart_state';
-import { BrushExtent, Transform } from '../../state/utils';
+import { BrushExtent } from '../../state/utils';
 import { AreaGeometries } from './area_geometries';
 import { Axis } from './axis';
 import { BarGeometries } from './bar_geometries';
@@ -30,11 +28,11 @@ function limitPoint(value: number, min: number, max: number) {
   }
 }
 function getPoint(event: MouseEvent, extent: BrushExtent): Point {
-    const point = {
-      x: limitPoint(event.layerX, extent.minX, extent.maxX),
-      y: limitPoint(event.layerY, extent.minY, extent.maxY),
-    };
-    return point;
+  const point = {
+    x: limitPoint(event.layerX, extent.minX, extent.maxX),
+    y: limitPoint(event.layerY, extent.minY, extent.maxY),
+  };
+  return point;
 }
 class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
   static displayName = 'ReactiveChart';
@@ -183,19 +181,9 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
       width = chartDimensions.width;
       height = brushEnd.y - brushStart.y;
     }
-    return (
-      <Rect
-        x={x}
-        y={y}
-        width={width}
-        height={height}
-        fill="gray"
-        opacity={0.6}
-      >
-      </Rect>
-    );
+    return <Rect x={x} y={y} width={width} height={height} fill="gray" opacity={0.6} />;
   }
-  onStartBrusing = (event: { evt: MouseEvent}) => {
+  onStartBrusing = (event: { evt: MouseEvent }) => {
     const { brushExtent } = this.props.chartStore!;
     const point = getPoint(event.evt, brushExtent);
     this.setState(() => ({
@@ -213,7 +201,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
       brushEnd: { x: 0, y: 0 },
     }));
   }
-  onBrushing = (event: { evt: MouseEvent}) => {
+  onBrushing = (event: { evt: MouseEvent }) => {
     if (!this.state.brushing) {
       return;
     }
@@ -301,11 +289,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
 
             {debug && this.renderDebugChartBorders()}
           </Layer>
-          {
-            isBrushEnabled && <Layer listening={false}>
-              {this.renderBrushTool()}
-            </Layer>
-          }
+          {isBrushEnabled && <Layer listening={false}>{this.renderBrushTool()}</Layer>}
 
           <Layer hitGraphEnabled={false}>{this.renderAxes()}</Layer>
         </Stage>
@@ -319,16 +303,8 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
       <Rect
         x={0}
         y={0}
-        width={
-          [90, -90].includes(chartRotation)
-            ? chartDimensions.height
-            : chartDimensions.width
-        }
-        height={
-          [90, -90].includes(chartRotation)
-            ? chartDimensions.width
-            : chartDimensions.height
-        }
+        width={[90, -90].includes(chartRotation) ? chartDimensions.height : chartDimensions.width}
+        height={[90, -90].includes(chartRotation) ? chartDimensions.width : chartDimensions.height}
         stroke="red"
         strokeWidth={0.5}
         listening={false}

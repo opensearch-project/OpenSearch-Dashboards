@@ -13,13 +13,8 @@ describe('IDs', () => {
     const groupSeries: Map<GroupId, string> = new Map();
     groupSeries.set(groupId1, 'data1');
     groupSeries.set(groupId2, 'data2');
-    const expectedAxisSeries = [
-      [ 'axisId1', 'data1' ],
-      [ 'axisId2', 'data2' ],
-    ];
-    const expectedGroupSeries = [
-      [ 'groupId', 'data2' ],
-    ];
+    const expectedAxisSeries = [['axisId1', 'data1'], ['axisId2', 'data2']];
+    const expectedGroupSeries = [['groupId', 'data2']];
     expect(expectedAxisSeries).toEqual([...axisSeries]);
     expect(expectedGroupSeries).toEqual([...groupSeries]);
   });

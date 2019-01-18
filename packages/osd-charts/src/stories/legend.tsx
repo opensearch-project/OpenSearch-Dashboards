@@ -1,30 +1,14 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import {
-  AreaSeries,
-  Axis,
-  BarSeries,
-  Chart,
-  getAxisId,
-  getGroupId,
-  getSpecId,
-  Position,
-  Rotation,
-  ScaleType,
-  Settings,
-} from '..';
+import { Axis, BarSeries, Chart, getAxisId, getSpecId, Position, ScaleType, Settings } from '..';
 import * as TestDatasets from '../lib/series/utils/test_dataset';
-import { LineSeries } from '../specs';
 import './stories.scss';
 
 storiesOf('Legend', module)
   .add('right', () => {
     return (
-      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
-        <Settings
-          showLegend={true}
-          legendPosition={Position.Right}
-        />
+      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+        <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -45,18 +29,16 @@ storiesOf('Legend', module)
           xAccessor="x"
           yAccessors={['y1', 'y2']}
           splitSeriesAccessors={['g1', 'g2']}
-          data = {TestDatasets.BARCHART_2Y2G}
-          yScaleToDataExtent ={false}
+          data={TestDatasets.BARCHART_2Y2G}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   })
   .add('bottom', () => {
     return (
-      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
-        <Settings
-          showLegend={true}
-          legendPosition={Position.Bottom}
-        />
+      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+        <Settings showLegend={true} legendPosition={Position.Bottom} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -77,18 +59,16 @@ storiesOf('Legend', module)
           xAccessor="x"
           yAccessors={['y1', 'y2']}
           splitSeriesAccessors={['g1', 'g2']}
-          data = {TestDatasets.BARCHART_2Y2G}
-          yScaleToDataExtent ={false}
+          data={TestDatasets.BARCHART_2Y2G}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   })
   .add('left', () => {
     return (
-      <Chart renderer="canvas"  size={[500, 150]} className={'story-chart'}>
-        <Settings
-          showLegend={true}
-          legendPosition={Position.Left}
-        />
+      <Chart renderer="canvas" size={[500, 150]} className={'story-chart'}>
+        <Settings showLegend={true} legendPosition={Position.Left} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -109,18 +89,16 @@ storiesOf('Legend', module)
           xAccessor="x"
           yAccessors={['y1', 'y2']}
           splitSeriesAccessors={['g1', 'g2']}
-          data = {TestDatasets.BARCHART_2Y2G}
-          yScaleToDataExtent ={false}
+          data={TestDatasets.BARCHART_2Y2G}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   })
   .add('top', () => {
     return (
-      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
-        <Settings
-          showLegend={true}
-          legendPosition={Position.Top}
-        />
+      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+        <Settings showLegend={true} legendPosition={Position.Top} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -141,8 +119,9 @@ storiesOf('Legend', module)
           xAccessor="x"
           yAccessors={['y1', 'y2']}
           splitSeriesAccessors={['g1', 'g2']}
-          data = {TestDatasets.BARCHART_2Y2G}
-          yScaleToDataExtent ={false}
+          data={TestDatasets.BARCHART_2Y2G}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   });

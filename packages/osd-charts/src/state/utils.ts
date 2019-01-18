@@ -12,11 +12,7 @@ import {
   renderLine,
   renderPoints,
 } from '../lib/series/rendering';
-import {
-  computeXScale,
-  computeYScales,
-  countClusteredSeries,
-} from '../lib/series/scales';
+import { computeXScale, computeYScales, countClusteredSeries } from '../lib/series/scales';
 import {
   DataSeries,
   DataSeriesColorsValues,
@@ -61,19 +57,14 @@ export function computeSeriesDomains(
   };
   seriesColors: Map<string, DataSeriesColorsValues>;
 } {
-  const { splittedSeries, xValues, seriesColors } = getSplittedSeries(
-    seriesSpecs,
-  );
+  const { splittedSeries, xValues, seriesColors } = getSplittedSeries(seriesSpecs);
   // tslint:disable-next-line:no-console
   // console.log({ splittedSeries, xValues, seriesColors });
   const splittedDataSeries = [...splittedSeries.values()];
   const specsArray = [...seriesSpecs.values()];
   const xDomain = mergeXDomain(specsArray, xValues);
   const yDomain = mergeYDomain(splittedSeries, specsArray);
-  const formattedDataSeries = getFormattedDataseries(
-    specsArray,
-    splittedSeries,
-  );
+  const formattedDataSeries = getFormattedDataseries(specsArray, splittedSeries);
 
   // console.log({ formattedDataSeries, xDomain, yDomain });
 
@@ -99,24 +90,21 @@ export function computeSeriesGeometries(
   chartDims: Dimensions,
 ): {
   scales: {
-    xScale: Scale,
-    yScales: Map<GroupId, Scale>,
-  },
+    xScale: Scale;
+    yScales: Map<GroupId, Scale>;
+  };
   geometries: {
     points: PointGeometry[];
     bars: BarGeometry[];
     areas: AreaGeometry[];
     lines: LineGeometry[];
-  },
+  };
 } {
   const { width, height } = chartDims;
   const { stacked, nonStacked } = formattedDataSeries;
 
   // compute how many series are clustered
-  const { stackedGroupCount, totalGroupCount } = countClusteredSeries(
-    stacked,
-    nonStacked,
-  );
+  const { stackedGroupCount, totalGroupCount } = countClusteredSeries(stacked, nonStacked);
 
   // compute scales
   const xScale = computeXScale(xDomain, totalGroupCount, 0, width);
@@ -239,15 +227,7 @@ export function renderGeometries(
         break;
       case 'bar':
         const shift = isStacked ? indexOffset : indexOffset + i;
-        const bar = renderBars(
-          shift,
-          ds.data,
-          xScale,
-          yScale,
-          color,
-          ds.specId,
-          ds.key,
-        );
+        const bar = renderBars(shift, ds.data, xScale, yScale, color, ds.specId, ds.key);
         bars.push(...bar);
         break;
       case 'line':
@@ -288,17 +268,11 @@ export function renderGeometries(
   };
 }
 
-export function getSpecById(
-  seriesSpecs: Map<SpecId, BasicSeriesSpec>,
-  specId: SpecId,
-) {
+export function getSpecById(seriesSpecs: Map<SpecId, BasicSeriesSpec>, specId: SpecId) {
   return seriesSpecs.get(specId);
 }
 
-export function getAxesSpecForSpecId(
-  axesSpecs: Map<AxisId, AxisSpec>,
-  groupId: GroupId,
-) {
+export function getAxesSpecForSpecId(axesSpecs: Map<AxisId, AxisSpec>, groupId: GroupId) {
   let xAxis;
   let yAxis;
   for (const axisSpec of axesSpecs.values()) {

@@ -7,17 +7,8 @@ import { SpecProps } from './specs_parser';
 
 type LineSpecProps = SpecProps & LineSeriesSpec;
 
-type DefaultProps =
-  | 'seriesType'
-  | 'groupId'
-  | 'xScaleType'
-  | 'yScaleType'
-  | 'xAccessor'
-  | 'yAccessors'
-  | 'yScaleToDataExtent';
-
 export class LineSeriesSpecComponent extends PureComponent<LineSpecProps> {
-  static defaultProps: Pick<LineSpecProps, DefaultProps> = {
+  static defaultProps: Partial<LineSpecProps> = {
     seriesType: 'line',
     groupId: getGroupId('__global__'),
     xScaleType: ScaleType.Ordinal,
@@ -29,12 +20,10 @@ export class LineSeriesSpecComponent extends PureComponent<LineSpecProps> {
   componentDidMount() {
     const { chartStore, children, ...config } = this.props;
     chartStore!.addSeriesSpec({ ...config });
-
   }
   componentDidUpdate() {
     const { chartStore, children, ...config } = this.props;
     chartStore!.addSeriesSpec({ ...config });
-
   }
   componentWillUnmount() {
     const { chartStore, id } = this.props;

@@ -41,13 +41,6 @@ interface SettingSpecProps {
   onBrushEnd?: BrushEndListener;
 }
 
-type DefaultProps =
-  | 'rendering'
-  | 'rotation'
-  | 'animateData'
-  | 'showLegend'
-  | 'debug';
-
 function updateChartStore(props: SettingSpecProps) {
   const {
     chartStore,
@@ -66,7 +59,7 @@ function updateChartStore(props: SettingSpecProps) {
   if (!chartStore) {
     return;
   }
-  chartStore.chartTheme = theme ? deepmerge.all([DEFAULT_THEME, theme]) as Theme : DEFAULT_THEME;
+  chartStore.chartTheme = theme ? (deepmerge.all([DEFAULT_THEME, theme]) as Theme) : DEFAULT_THEME;
   chartStore.chartRotation = rotation;
   chartStore.chartRendering = rendering;
   chartStore.animateData = animateData;
@@ -90,7 +83,7 @@ function updateChartStore(props: SettingSpecProps) {
 }
 
 export class SettingsComponent extends PureComponent<SettingSpecProps> {
-  static defaultProps: Pick<SettingSpecProps, DefaultProps> = {
+  static defaultProps: Partial<SettingSpecProps> = {
     rendering: 'canvas',
     rotation: 0,
     animateData: true,

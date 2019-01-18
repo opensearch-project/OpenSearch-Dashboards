@@ -1,16 +1,7 @@
 import { boolean, number, select } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import {
-  Axis,
-  BarSeries,
-  Chart,
-  getAxisId,
-  getSpecId,
-  Position,
-  ScaleType,
-  Settings,
-} from '..';
+import { Axis, BarSeries, Chart, getAxisId, getSpecId, Position, ScaleType, Settings } from '..';
 import './stories.scss';
 
 function createThemeAction(title: string, min: number, max: number, value: number) {
@@ -42,10 +33,7 @@ storiesOf('Stylings', module)
     };
     return (
       <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
-        <Settings
-          theme={theme}
-          debug={boolean('debug', true)}
-        />
+        <Settings theme={theme} debug={boolean('debug', true)} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -64,15 +52,11 @@ storiesOf('Stylings', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data = {[
-            { x: 0, y: 2 },
-            { x: 1, y: 7 },
-            { x: 2, y: 3 },
-            { x: 3, y: 6 },
-          ]}
-          yScaleToDataExtent ={false}
+          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   })
   .add('axis (TOFIX)', () => {
     const theme = {
@@ -91,7 +75,7 @@ storiesOf('Stylings', module)
         <Settings
           theme={theme}
           debug={boolean('debug', true)}
-          rotation={select('rotation', { '0': 0, '90': 90, '-90': -90, '180': 180}, 0)}
+          rotation={select('rotation', { '0': 0, '90': 90, '-90': -90, '180': 180 }, 0)}
         />
         <Axis
           id={getAxisId('bottom')}
@@ -112,13 +96,9 @@ storiesOf('Stylings', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data = {[
-            { x: 0, y: 2 },
-            { x: 1, y: 7 },
-            { x: 2, y: 3 },
-            { x: 3, y: 6 },
-          ]}
-          yScaleToDataExtent ={false}
+          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   });

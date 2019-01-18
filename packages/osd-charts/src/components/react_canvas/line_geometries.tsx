@@ -18,7 +18,10 @@ interface LineGeometriesDataProps {
 interface LineGeometriesDataState {
   overPoint?: PointGeometry;
 }
-export class LineGeometries extends React.PureComponent<LineGeometriesDataProps, LineGeometriesDataState> {
+export class LineGeometries extends React.PureComponent<
+  LineGeometriesDataProps,
+  LineGeometriesDataState
+> {
   static defaultProps: Partial<LineGeometriesDataProps> = {
     animated: false,
   };
@@ -33,12 +36,8 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps,
   render() {
     return (
       <Group ref={this.barSeriesRef} key={'bar_series'}>
-        {
-          this.renderLineGeoms()
-        }
-        {
-          this.renderLinePoints()
-        }
+        {this.renderLineGeoms()}
+        {this.renderLinePoints()}
       </Group>
     );
   }
@@ -75,10 +74,13 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps,
   }
   private renderLinePoints = (): JSX.Element[] => {
     const { lines } = this.props;
-    return lines.reduce((acc, glyph, i) => {
-      const { points } = glyph;
-      return [...acc, ...this.renderPoints(points, i)];
-    }, [] as JSX.Element[]);
+    return lines.reduce(
+      (acc, glyph, i) => {
+        const { points } = glyph;
+        return [...acc, ...this.renderPoints(points, i)];
+      },
+      [] as JSX.Element[],
+    );
   }
   private renderPoints = (points: PointGeometry[], i: number): JSX.Element[] => {
     const { style } = this.props;
@@ -92,7 +94,7 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps,
             x={transform.x + x}
             y={y}
             radius={style.dataPointsRadius * 2.5}
-            onClick={this.onElementClick(point.value)}
+            onClick={this.onElementClick(value)}
             onMouseOver={this.onOverPoint(point)}
             onMouseLeave={this.onOutPoint}
             fill={'gray'}
@@ -109,7 +111,7 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps,
             listening={false}
             perfectDrawEnabled={true}
           />
-           <Circle
+          <Circle
             x={transform.x + x}
             y={y}
             radius={style.dataPointsRadius}
@@ -123,7 +125,8 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps,
             listening={false}
             perfectDrawEnabled={true}
           />
-        </Group>);
+        </Group>
+      );
     });
   }
   private renderLineGeoms = (): JSX.Element[] => {
@@ -133,36 +136,33 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps,
       if (this.props.animated) {
         return (
           <Group key={i} x={transform.x}>
-            <Spring
-              native
-              from={{ line }}
-              to={{ line }}
-              >
-                {(props: {line: string}) => (
-                  <animated.Path
-                    key="line"
-                    data={props.line}
-                    strokeWidth={style.lineWidth}
-                    stroke={color}
-                    listening={false}
-                    lineCap="round"
-                    lineJoin="round"
-
-                  />
-                )}
+            <Spring native from={{ line }} to={{ line }}>
+              {(props: { line: string }) => (
+                <animated.Path
+                  key="line"
+                  data={props.line}
+                  strokeWidth={style.lineWidth}
+                  stroke={color}
+                  listening={false}
+                  lineCap="round"
+                  lineJoin="round"
+                />
+              )}
             </Spring>
           </Group>
         );
       } else {
-        return <Path
-          key="line"
-          data={line}
-          strokeWidth={style.lineWidth}
-          stroke={color}
-          listening={false}
-          lineCap="round"
-          lineJoin="round"
-        />;
+        return (
+          <Path
+            key="line"
+            data={line}
+            strokeWidth={style.lineWidth}
+            stroke={color}
+            listening={false}
+            lineCap="round"
+            lineJoin="round"
+          />
+        );
       }
     });
   }

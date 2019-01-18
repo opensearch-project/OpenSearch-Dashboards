@@ -40,17 +40,11 @@ export class Chart extends React.Component<ChartProps> {
     return (
       <Provider chartStore={this.chartSpecStore}>
         <Fragment>
-          <SpecsParser>
-            { this.props.children }
-          </SpecsParser>
+          <SpecsParser>{this.props.children}</SpecsParser>
           <div style={containerStyle} className={chartClass}>
-            <ChartResizer/>
-            {
-              renderer === 'svg' && <SVGChart />
-            }
-            {
-              renderer === 'canvas' && <ReactChart />
-            }
+            <ChartResizer />
+            {renderer === 'svg' && <SVGChart />}
+            {renderer === 'canvas' && <ReactChart />}
             <Tooltips />
             <Legend />
           </div>

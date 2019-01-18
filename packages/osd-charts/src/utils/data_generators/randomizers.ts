@@ -20,5 +20,5 @@ export function randomizeData(
 }
 
 export const uniformRandomizer = (amplitude: number) => (value: number) => {
-  return value + randomUniform(- amplitude / 2, amplitude / 2)();
+  return value + randomUniform(-amplitude / 2, amplitude / 2)();
 };

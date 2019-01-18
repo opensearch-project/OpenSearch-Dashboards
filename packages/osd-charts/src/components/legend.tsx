@@ -67,10 +67,7 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
       'euiChartLegendCollapser',
       `euiChartLegendCollapser--${legendPosition}`,
     );
-    const collapseArrowType = getCollapseArrowType(
-      legendPosition,
-      legendCollapsed.get(),
-    );
+    const collapseArrowType = getCollapseArrowType(legendPosition, legendCollapsed.get());
 
     return (
       <div className={legendClasses}>
@@ -78,9 +75,7 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
           <EuiButtonIcon
             onClick={this.onCollapseLegend}
             iconType={collapseArrowType}
-            aria-label={
-              legendCollapsed.get() ? 'Expand legend' : 'Collapse legend'
-            }
+            aria-label={legendCollapsed.get() ? 'Expand legend' : 'Collapse legend'}
           />
         </div>
         <div className="euiChartLegendList">
@@ -110,10 +105,7 @@ function LegendElement({ color, label }: Partial<LegendItem>) {
         <EuiIcon type="dot" color={color} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="right"
-          content={<EuiText size="xs">{label}</EuiText>}
-        >
+        <EuiToolTip position="right" content={<EuiText size="xs">{label}</EuiText>}>
           <EuiFlexItem grow={true} className="euiChartLegendListItem__title">
             <EuiText size="xs" className="eui-textTruncate">
               {label}

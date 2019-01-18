@@ -4,8 +4,8 @@ export interface ChartConfig {
   margins: Margins;
   paddings: Margins;
   styles: {
-    lineSeries: LineSeriesStyle,
-    areaSeries: AreaSeriesStyle,
+    lineSeries: LineSeriesStyle;
+    areaSeries: AreaSeriesStyle;
   };
 }
 export interface AxisConfig {

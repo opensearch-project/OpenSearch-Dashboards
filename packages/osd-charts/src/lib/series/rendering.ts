@@ -15,8 +15,8 @@ export interface PointGeometry {
   color: string;
   value: GeometryValue;
   transform: {
-    x: number,
-    y: number,
+    x: number;
+    y: number;
   };
 }
 export interface BarGeometry {
@@ -32,8 +32,8 @@ export interface LineGeometry {
   points: PointGeometry[];
   color: string;
   transform: {
-    x: number,
-    y: number,
+    x: number;
+    y: number;
   };
 }
 export interface AreaGeometry {
@@ -42,8 +42,8 @@ export interface AreaGeometry {
   points: PointGeometry[];
   color: string;
   transform: {
-    x: number,
-    y: number,
+    x: number;
+    y: number;
   };
 }
 

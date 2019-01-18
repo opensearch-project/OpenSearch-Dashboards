@@ -16,9 +16,12 @@ describe('Chart Store', () => {
     toJSON: () => '',
   };
   const originalGetBBox = SVGElement.prototype.getBBox;
-  beforeEach(() => SVGElement.prototype.getBBox = () => {
-    return mockedRect;
-  });
+  beforeEach(
+    () =>
+      (SVGElement.prototype.getBBox = () => {
+        return mockedRect;
+      }),
+  );
   afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
 
   const store = new ChartStore();
@@ -32,11 +35,7 @@ describe('Chart Store', () => {
     groupId: GROUP_ID,
     seriesType: 'bar',
     yScaleToDataExtent: false,
-    data: [
-      { x: 1, y: 1 },
-      { x: 2, y: 2 },
-      { x: 3, y: 3 },
-    ],
+    data: [{ x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }],
     xAccessor: 'x',
     yAccessors: ['y'],
     xScaleType: ScaleType.Linear,

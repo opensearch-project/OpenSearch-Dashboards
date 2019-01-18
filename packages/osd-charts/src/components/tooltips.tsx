@@ -68,22 +68,19 @@ class TooltipsComponent extends React.Component<ReactiveChartProps> {
         {/* <p>{tooltipData.value.specId}</p> */}
         <table>
           <tbody>
-            {
-              tooltip.map(([field, value], index) => {
-                return (
-                  <tr key={`row-${index}`}>
-                    <td className="euiChartTooltip__label">{field}</td>
-                    <td>{value}</td>
-                  </tr>
-                );
-              })
-            }
+            {tooltip.map(([field, value], index) => {
+              return (
+                <tr key={`row-${index}`}>
+                  <td className="euiChartTooltip__label">{field}</td>
+                  <td>{value}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
     );
   }
-
 }
 
 export const Tooltips = inject('chartStore')(observer(TooltipsComponent));

@@ -47,7 +47,7 @@ describe('Scale Test', () => {
     const scaledValue1 = logScale.scale(1);
     expect(scaledValue1).toBe(0);
     const scaledValue3 = logScale.scale(5);
-    expect(scaledValue3).toBe(Math.log(5) / Math.log(10) * 100);
+    expect(scaledValue3).toBe((Math.log(5) / Math.log(10)) * 100);
   });
   test('Create an sqrt scale', () => {
     const data = [0, 10];
@@ -60,6 +60,6 @@ describe('Scale Test', () => {
     const scaledValue1 = sqrtScale.scale(0);
     expect(scaledValue1).toBe(0);
     const scaledValue3 = sqrtScale.scale(5);
-    expect(scaledValue3).toBe(Math.sqrt(5) / Math.sqrt(10) * 100);
+    expect(scaledValue3).toBe((Math.sqrt(5) / Math.sqrt(10)) * 100);
   });
 });

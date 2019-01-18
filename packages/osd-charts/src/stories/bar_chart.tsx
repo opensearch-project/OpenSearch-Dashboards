@@ -1,15 +1,6 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import {
-  Axis,
-  BarSeries,
-  Chart,
-  getAxisId,
-  getSpecId,
-  Position,
-  ScaleType,
-  Settings,
-} from '..';
+import { Axis, BarSeries, Chart, getAxisId, getSpecId, Position, ScaleType, Settings } from '..';
 import { niceTimeFormatter } from '../utils/data/formatters';
 import './stories.scss';
 
@@ -23,15 +14,11 @@ storiesOf('Bar Chart', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data = {[
-            { x: 0, y: 2 },
-            { x: 1, y: 7 },
-            { x: 2, y: 3 },
-            { x: 3, y: 6 },
-          ]}
-          yScaleToDataExtent ={false}
+          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   })
   .add('with axis', () => {
     return (
@@ -55,15 +42,11 @@ storiesOf('Bar Chart', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data = {[
-            { x: 0, y: 2 },
-            { x: 1, y: 7 },
-            { x: 2, y: 3 },
-            { x: 3, y: 6 },
-          ]}
-          yScaleToDataExtent ={false}
+          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   })
   .add('with ordinal x axis', () => {
     return (
@@ -87,15 +70,11 @@ storiesOf('Bar Chart', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data = {[
-            { x: 'a', y: 2 },
-            { x: 'b', y: 7 },
-            { x: 'c', y: 3 },
-            { x: 'd', y: 6 },
-          ]}
-          yScaleToDataExtent ={false}
+          data={[{ x: 'a', y: 2 }, { x: 'b', y: 7 }, { x: 'c', y: 3 }, { x: 'd', y: 6 }]}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   })
   .add('with linear x axis', () => {
     return (
@@ -119,15 +98,11 @@ storiesOf('Bar Chart', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data = {[
-            { x: 1, y: 2 },
-            { x: 2, y: 7 },
-            { x: 4, y: 3 },
-            { x: 9, y: 6 },
-          ]}
-          yScaleToDataExtent ={false}
+          data={[{ x: 1, y: 2 }, { x: 2, y: 7 }, { x: 4, y: 3 }, { x: 9, y: 6 }]}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   })
   .add('with time x axis', () => {
     const now = new Date().getTime();
@@ -154,15 +129,16 @@ storiesOf('Bar Chart', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data = {[
+          data={[
             { x: now, y: 2 },
             { x: now + 36000000000, y: 7 },
             { x: now + 36000000000 * 2, y: 3 },
             { x: now + 36000000000 * 5, y: 6 },
           ]}
-          yScaleToDataExtent ={false}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   })
   .add('with log y axis (TO FIX)', () => {
     return (
@@ -186,23 +162,16 @@ storiesOf('Bar Chart', module)
           yScaleType={ScaleType.Log}
           xAccessor="x"
           yAccessors={['y']}
-          data = {[
-            { x: 1, y: 2 },
-            { x: 2, y: 7 },
-            { x: 4, y: 3 },
-            { x: 9, y: 6 },
-          ]}
-          yScaleToDataExtent ={true}
+          data={[{ x: 1, y: 2 }, { x: 2, y: 7 }, { x: 4, y: 3 }, { x: 9, y: 6 }]}
+          yScaleToDataExtent={true}
         />
-    </Chart>);
+      </Chart>
+    );
   })
   .add('with axis and legend', () => {
     return (
       <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
-        <Settings
-          showLegend={true}
-          legendPosition={Position.Right}
-        />
+        <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -222,23 +191,16 @@ storiesOf('Bar Chart', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data = {[
-            { x: 0, y: 2 },
-            { x: 1, y: 7 },
-            { x: 2, y: 3 },
-            { x: 3, y: 6 },
-          ]}
-          yScaleToDataExtent ={false}
+          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   })
   .add('stacked with axis and legend', () => {
     return (
       <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
-        <Settings
-          showLegend={true}
-          legendPosition={Position.Right}
-        />
+        <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -260,7 +222,7 @@ storiesOf('Bar Chart', module)
           yAccessors={['y']}
           stackAccessors={['x']}
           splitSeriesAccessors={['g']}
-          data = {[
+          data={[
             { x: 0, y: 2, g: 'a' },
             { x: 1, y: 7, g: 'a' },
             { x: 2, y: 3, g: 'a' },
@@ -270,17 +232,15 @@ storiesOf('Bar Chart', module)
             { x: 2, y: 8, g: 'b' },
             { x: 3, y: 2, g: 'b' },
           ]}
-          yScaleToDataExtent ={false}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   })
   .add('clustered with axis and legend', () => {
     return (
-      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
-        <Settings
-          showLegend={true}
-          legendPosition={Position.Right}
-        />
+      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+        <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -301,7 +261,7 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y']}
           splitSeriesAccessors={['g']}
-          data = {[
+          data={[
             { x: 0, y: 2, g: 'a' },
             { x: 1, y: 7, g: 'a' },
             { x: 2, y: 3, g: 'a' },
@@ -311,17 +271,15 @@ storiesOf('Bar Chart', module)
             { x: 2, y: 8, g: 'b' },
             { x: 3, y: 2, g: 'b' },
           ]}
-          yScaleToDataExtent ={false}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   })
   .add('clustered multi series', () => {
     return (
-      <Chart renderer="canvas"  size={[500, 300]} className={'story-chart'}>
-        <Settings
-          showLegend={true}
-          legendPosition={Position.Right}
-        />
+      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+        <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -342,13 +300,8 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y']}
           splitSeriesAccessors={['g']}
-          data = {[
-            { x: 0, y: 2 },
-            { x: 1, y: 7 },
-            { x: 2, y: 3 },
-            { x: 3, y: 6 },
-          ]}
-          yScaleToDataExtent ={false}
+          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          yScaleToDataExtent={false}
         />
         <BarSeries
           id={getSpecId('bars2')}
@@ -357,13 +310,9 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y']}
           splitSeriesAccessors={['g']}
-          data = {[
-            { x: 0, y: 1 },
-            { x: 1, y: 2 },
-            { x: 2, y: 3 },
-            { x: 3, y: 4 },
-          ]}
-          yScaleToDataExtent ={false}
+          data={[{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }, { x: 3, y: 4 }]}
+          yScaleToDataExtent={false}
         />
-    </Chart>);
+      </Chart>
+    );
   });

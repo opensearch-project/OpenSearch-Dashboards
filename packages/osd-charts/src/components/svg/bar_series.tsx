@@ -18,16 +18,8 @@ export class BarSeries extends React.PureComponent<BarSeriesDataProps> {
     }
   }
   private renderBars = (bars: BarGeometry[]) => {
-    return bars.map(({x, y, width, height, color}, index) => {
-      return (
-        <rect
-          key={`rect-${index}`}
-          x={x}
-          y={y}
-          width={width}
-          height={height}
-          fill={color}
-        />);
+    return bars.map(({ x, y, width, height, color }, index) => {
+      return <rect key={`rect-${index}`} x={x} y={y} width={width} height={height} fill={color} />;
     });
   }
   private renderAnimatedBars = (geoms: BarGeometry[]) => {

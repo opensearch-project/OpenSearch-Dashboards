@@ -3,10 +3,12 @@ import { withKnobs } from '@storybook/addon-knobs';
 import { addDecorator, configure } from '@storybook/react';
 
 addDecorator(withKnobs);
-addDecorator(withInfo({
-  inline: true,
-  source: true,
-}));
+addDecorator(
+  withInfo({
+    inline: true,
+    source: true,
+  }),
+);
 
 function loadStories() {
   require('../src/stories/bar_chart.tsx');

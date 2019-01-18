@@ -5,7 +5,10 @@ import { ColorConfig } from './theme';
 export interface ColorScales {
   [key: string]: string;
 }
-export function computeColorScales(colorDomain: ColorDomain, chartColors: ColorConfig): ColorScales {
+export function computeColorScales(
+  colorDomain: ColorDomain,
+  chartColors: ColorConfig,
+): ColorScales {
   return colorDomain.domain.reduce(
     (acc, domainKey, index) => {
       acc[domainKey] = chartColors.vizColors[index % chartColors.vizColors.length];

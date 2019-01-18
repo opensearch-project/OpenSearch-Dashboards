@@ -14,18 +14,18 @@ export class Simple1DNoise {
     const scaledX = x * this.scale;
     const xFloor = Math.floor(scaledX);
     const t = scaledX - xFloor;
-    const tRemapSmoothstep = t * t * ( 3 - 2 * t );
+    const tRemapSmoothstep = t * t * (3 - 2 * t);
 
-      // tslint:disable-next-line:no-bitwise
+    // tslint:disable-next-line:no-bitwise
     const xMin = xFloor & this.maxVerticesMask;
-      // tslint:disable-next-line:no-bitwise
-    const xMax = ( xMin + 1 ) & this.maxVerticesMask;
+    // tslint:disable-next-line:no-bitwise
+    const xMax = (xMin + 1) & this.maxVerticesMask;
 
-    const y = this.lerp( r[ xMin ], r[ xMax ], tRemapSmoothstep );
+    const y = this.lerp(r[xMin], r[xMax], tRemapSmoothstep);
 
     return y * this.amplitude;
   }
-  private lerp(a: number, b: number, t: number ) {
-    return a * ( 1 - t ) + b * t;
+  private lerp(a: number, b: number, t: number) {
+    return a * (1 - t) + b * t;
   }
 }

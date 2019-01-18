@@ -45,8 +45,7 @@ class Resizer extends React.Component<ResizerProps> {
           right: 0,
           boxSizing: 'border-box',
         }}
-      >
-      </div>
+      />
     );
   }
 }

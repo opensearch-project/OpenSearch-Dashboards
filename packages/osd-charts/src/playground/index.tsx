@@ -16,10 +16,7 @@ import {
 } from '../';
 import * as TestDatasets from '../lib/series/utils/test_dataset';
 import { DataGenerator } from '../utils/data_generators/data_generator';
-import {
-  randomizeData,
-  uniformRandomizer,
-} from '../utils/data_generators/randomizers';
+import { randomizeData, uniformRandomizer } from '../utils/data_generators/randomizers';
 import './playground.scss';
 
 const dataGenerator = new DataGenerator();
@@ -31,11 +28,7 @@ class App extends Component {
   };
   onChangeData = () => {
     this.setState({
-      randomData: randomizeData(
-        TestDatasets.BARCHART_2Y2G,
-        ['y1', 'y2'],
-        uniformRandomizer(1000),
-      ),
+      randomData: randomizeData(TestDatasets.BARCHART_2Y2G, ['y1', 'y2'], uniformRandomizer(1000)),
       highVolume: dataGenerator.generateGroupedSeries(10, 2),
     });
   }
@@ -69,10 +62,7 @@ class App extends Component {
           </EuiFlexGrid>
         </div>
         <div className="chartContainers">
-          <div
-            className="chartContainer"
-            key={`renderTest-${renderer}-${rotation}`}
-          >
+          <div className="chartContainer" key={`renderTest-${renderer}-${rotation}`}>
             <Chart renderer={renderer}>
               <Settings
                 rotation={rotation}

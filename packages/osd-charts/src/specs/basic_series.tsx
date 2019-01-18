@@ -7,17 +7,8 @@ import { SpecProps } from './specs_parser';
 
 type BasicSpecProps = SpecProps & BasicSeriesSpec;
 
-type DefaultProps =
-  | 'seriesType'
-  | 'groupId'
-  | 'xScaleType'
-  | 'yScaleType'
-  | 'xAccessor'
-  | 'yAccessors'
-  | 'yScaleToDataExtent';
-
 export class BasicSeriesSpecComponent extends PureComponent<BasicSpecProps> {
-  static defaultProps: Pick<BasicSpecProps, DefaultProps> = {
+  static defaultProps: Partial<BasicSpecProps> = {
     seriesType: 'basic',
     groupId: getGroupId('__global__'),
     xScaleType: ScaleType.Ordinal,

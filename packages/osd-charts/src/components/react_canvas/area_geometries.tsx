@@ -1,4 +1,4 @@
-import {  Group as KonvaGroup } from 'konva';
+import { Group as KonvaGroup } from 'konva';
 import { IAction } from 'mobx';
 import React from 'react';
 import { Circle, Group, Path } from 'react-konva';
@@ -19,7 +19,10 @@ interface AreaGeometriesDataProps {
 interface AreaGeometriesDataState {
   overPoint?: PointGeometry;
 }
-export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps, AreaGeometriesDataState> {
+export class AreaGeometries extends React.PureComponent<
+  AreaGeometriesDataProps,
+  AreaGeometriesDataState
+> {
   static defaultProps: Partial<AreaGeometriesDataProps> = {
     animated: false,
     num: 1,
@@ -35,12 +38,8 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
   render() {
     return (
       <Group ref={this.barSeriesRef} key={'bar_series'}>
-        {
-          this.renderAreaGeoms()
-        }
-        {
-          this.renderAreaPoints()
-        }
+        {this.renderAreaGeoms()}
+        {this.renderAreaPoints()}
       </Group>
     );
   }
@@ -77,10 +76,13 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
   }
   private renderAreaPoints = (): JSX.Element[] => {
     const { areas } = this.props;
-    return areas.reduce((acc, glyph, i) => {
-      const { points } = glyph;
-      return [...acc, ...this.renderPoints(points, i)];
-    }, [] as JSX.Element[]);
+    return areas.reduce(
+      (acc, glyph, i) => {
+        const { points } = glyph;
+        return [...acc, ...this.renderPoints(points, i)];
+      },
+      [] as JSX.Element[],
+    );
   }
   private renderPoints = (points: PointGeometry[], i: number): JSX.Element[] => {
     const { style } = this.props;
@@ -94,7 +96,7 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
             x={transform.x + x}
             y={y}
             radius={style.dataPointsRadius * 2.5}
-            onClick={this.onElementClick(point.value)}
+            onClick={this.onElementClick(value)}
             onMouseOver={this.onOverPoint(point)}
             onMouseLeave={this.onOutPoint}
             fill={'gray'}
@@ -111,7 +113,7 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
             listening={false}
             perfectDrawEnabled={true}
           />
-           <Circle
+          <Circle
             x={transform.x + x}
             y={y}
             radius={style.dataPointsRadius}
@@ -125,7 +127,8 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
             listening={false}
             perfectDrawEnabled={true}
           />
-        </Group>);
+        </Group>
+      );
     });
   }
   private renderAreaGeoms = (): JSX.Element[] => {
@@ -135,33 +138,31 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
       if (this.props.animated) {
         return (
           <Group key={`area-group-${i}`} x={transform.x}>
-            <Spring
-              native
-              from={{ area }}
-              to={{ area }}
-              >
-                {(props: {area: string}) => (
-                  <animated.Path
-                    key="area"
-                    data={props.area}
-                    fill={color}
-                    listening={false}
-                    // areaCap="round"
-                    // areaJoin="round"
-                  />
-                )}
+            <Spring native from={{ area }} to={{ area }}>
+              {(props: { area: string }) => (
+                <animated.Path
+                  key="area"
+                  data={props.area}
+                  fill={color}
+                  listening={false}
+                  // areaCap="round"
+                  // areaJoin="round"
+                />
+              )}
             </Spring>
           </Group>
         );
       } else {
-        return <Path
-          key={`area-${i}`}
-          data={area}
-          fill={color}
-          listening={false}
-          // areaCap="round"
-          // areaJoin="round"
-        />;
+        return (
+          <Path
+            key={`area-${i}`}
+            data={area}
+            fill={color}
+            listening={false}
+            // areaCap="round"
+            // areaJoin="round"
+          />
+        );
       }
     });
   }

@@ -44,11 +44,11 @@ export function computeChartDimensions(
     }
     const { position, tickSize, tickPadding } = axisSpec;
     switch (position) {
-      case  Position.Top:
+      case Position.Top:
         hTopAxisSpecHeight += maxTickHeight + tickSize + tickPadding + chartMargins.top;
         break;
       case Position.Bottom:
-        hBottomAxisSpecHeight += maxTickHeight + tickSize + tickPadding  + chartMargins.bottom;
+        hBottomAxisSpecHeight += maxTickHeight + tickSize + tickPadding + chartMargins.bottom;
         break;
       case Position.Left:
         vLeftAxisSpecWidth += maxTickWidth + tickSize + tickPadding + chartMargins.left;

@@ -3,6 +3,7 @@
     "outDir": "./dist/",
     "noEmit": false,
     "noImplicitAny": true,
+    "noUnusedLocals": true,
     "sourceMap": true,
     "module": "es6",
     "strict": true,
@@ -14,7 +15,5 @@
     "esModuleInterop": true,
     "skipLibCheck": true
   },
-  "include": [
-    "src/**/*",
-  ]
+  "include": ["src/**/*", ".storybook"]
 }

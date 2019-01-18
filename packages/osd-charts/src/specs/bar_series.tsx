@@ -7,15 +7,6 @@ import { SpecProps } from './specs_parser';
 
 type BarSpecProps = SpecProps & BarSeriesSpec;
 
-type DefaultProps =
-  | 'seriesType'
-  | 'groupId'
-  | 'xScaleType'
-  | 'yScaleType'
-  | 'xAccessor'
-  | 'yAccessors'
-  | 'yScaleToDataExtent';
-
 export class BarSeriesSpecComponent extends PureComponent<BarSpecProps> {
   static defaultProps: Partial<BarSpecProps> = {
     seriesType: 'bar',

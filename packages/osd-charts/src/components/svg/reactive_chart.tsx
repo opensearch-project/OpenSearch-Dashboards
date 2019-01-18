@@ -90,11 +90,7 @@ class Chart extends React.Component<ReactiveChartProps> {
     if (!geometries) {
       return;
     }
-    return <BarSeries
-      key="data bars"
-      animated={canDataBeAnimated}
-      bars={geometries.bars}
-    />;
+    return <BarSeries key="data bars" animated={canDataBeAnimated} bars={geometries.bars} />;
   }
   // public renderAreaSeries = () => {
   //   const { seriesGlyphs } = this.props.chartStore!;
@@ -164,7 +160,6 @@ class Chart extends React.Component<ReactiveChartProps> {
           <g
             className="euiSeriesChartChart_group"
             transform={`translate(${chartDimensions.left} ${chartDimensions.top})`}
-
           >
             {/* <rect
               x={0}
@@ -176,10 +171,9 @@ class Chart extends React.Component<ReactiveChartProps> {
             /> */}
             {/* <g className="euiSeriesChartSeries_lineSeries">{this.renderLineSeries()}</g>
             <g className="euiSeriesChartSeries_pointSeries">{this.renderPointSeries()}</g> */}
-            <g
-              className="euiSeriesChartSeries_barSeries"
-              transform={chartTransform}
-            >{this.renderBarSeries()}</g>
+            <g className="euiSeriesChartSeries_barSeries" transform={chartTransform}>
+              {this.renderBarSeries()}
+            </g>
             {/* <g className="euiSeriesChartSeries_areaSeries">{this.renderAreaSeries()}</g> */}
           </g>
           <g className="euiSeriesChartAxis_group">{this.renderAxes()}</g>

@@ -2,10 +2,9 @@ import { getGroupId, getSpecId, SpecId } from '../../utils/ids';
 import { ScaleType } from '../../utils/scales/scales';
 import { getSplittedSeries } from '../series';
 import { BasicSeriesSpec } from '../specs';
-import { convertXScaleTypes, mergeXDomain} from './x_domain';
+import { convertXScaleTypes, mergeXDomain } from './x_domain';
 
 describe('X Domain', () => {
-
   test('Should return null when missing specs or specs types', () => {
     const seriesSpecs: BasicSeriesSpec[] = [];
     const mainXScale = convertXScaleTypes(seriesSpecs);
@@ -213,12 +212,15 @@ describe('X Domain', () => {
     specDataSeries.set(ds1.id, ds1);
     specDataSeries.set(ds2.id, ds2);
     const { xValues } = getSplittedSeries(specDataSeries);
-    const mergedDomain = mergeXDomain([
-      {
-        seriesType: 'line',
-        xScaleType: ScaleType.Linear,
-      },
-    ], xValues);
+    const mergedDomain = mergeXDomain(
+      [
+        {
+          seriesType: 'line',
+          xScaleType: ScaleType.Linear,
+        },
+      ],
+      xValues,
+    );
     expect(mergedDomain.domain).toEqual([0, 7]);
   });
   test('Should merge bar series correctly', () => {
@@ -248,12 +250,15 @@ describe('X Domain', () => {
     specDataSeries.set(ds1.id, ds1);
     specDataSeries.set(ds2.id, ds2);
     const { xValues } = getSplittedSeries(specDataSeries);
-    const mergedDomain = mergeXDomain([
-      {
-        seriesType: 'bar',
-        xScaleType: ScaleType.Linear,
-      },
-    ], xValues);
+    const mergedDomain = mergeXDomain(
+      [
+        {
+          seriesType: 'bar',
+          xScaleType: ScaleType.Linear,
+        },
+      ],
+      xValues,
+    );
     expect(mergedDomain.domain).toEqual([0, 7]);
   });
   test('Should merge multi bar series correctly', () => {
@@ -283,16 +288,19 @@ describe('X Domain', () => {
     specDataSeries.set(ds1.id, ds1);
     specDataSeries.set(ds2.id, ds2);
     const { xValues } = getSplittedSeries(specDataSeries);
-    const mergedDomain = mergeXDomain([
-      {
-        seriesType: 'bar',
-        xScaleType: ScaleType.Linear,
-      },
-      {
-        seriesType: 'bar',
-        xScaleType: ScaleType.Linear,
-      },
-    ], xValues);
+    const mergedDomain = mergeXDomain(
+      [
+        {
+          seriesType: 'bar',
+          xScaleType: ScaleType.Linear,
+        },
+        {
+          seriesType: 'bar',
+          xScaleType: ScaleType.Linear,
+        },
+      ],
+      xValues,
+    );
     expect(mergedDomain.domain).toEqual([0, 7]);
   });
   test('Should merge multi bar series correctly', () => {
@@ -322,16 +330,19 @@ describe('X Domain', () => {
     specDataSeries.set(ds1.id, ds1);
     specDataSeries.set(ds2.id, ds2);
     const { xValues } = getSplittedSeries(specDataSeries);
-    const mergedDomain = mergeXDomain([
-      {
-        seriesType: 'bar',
-        xScaleType: ScaleType.Time,
-      },
-      {
-        seriesType: 'bar',
-        xScaleType: ScaleType.Time,
-      },
-    ], xValues);
+    const mergedDomain = mergeXDomain(
+      [
+        {
+          seriesType: 'bar',
+          xScaleType: ScaleType.Time,
+        },
+        {
+          seriesType: 'bar',
+          xScaleType: ScaleType.Time,
+        },
+      ],
+      xValues,
+    );
     expect(mergedDomain.domain).toEqual([0, 7]);
   });
   test('Should merge multi bar linear/bar ordinal series correctly', () => {
@@ -361,16 +372,19 @@ describe('X Domain', () => {
     specDataSeries.set(ds1.id, ds1);
     specDataSeries.set(ds2.id, ds2);
     const { xValues } = getSplittedSeries(specDataSeries);
-    const mergedDomain = mergeXDomain([
-      {
-        seriesType: 'bar',
-        xScaleType: ScaleType.Linear,
-      },
-      {
-        seriesType: 'bar',
-        xScaleType: ScaleType.Ordinal,
-      },
-    ], xValues);
+    const mergedDomain = mergeXDomain(
+      [
+        {
+          seriesType: 'bar',
+          xScaleType: ScaleType.Linear,
+        },
+        {
+          seriesType: 'bar',
+          xScaleType: ScaleType.Ordinal,
+        },
+      ],
+      xValues,
+    );
     expect(mergedDomain.domain).toEqual([0, 1, 2, 5, 7]);
   });
   test('Should merge multi bar/line ordinal series correctly', () => {
@@ -400,16 +414,19 @@ describe('X Domain', () => {
     specDataSeries.set(ds1.id, ds1);
     specDataSeries.set(ds2.id, ds2);
     const { xValues } = getSplittedSeries(specDataSeries);
-    const mergedDomain = mergeXDomain([
-      {
-        seriesType: 'bar',
-        xScaleType: ScaleType.Linear,
-      },
-      {
-        seriesType: 'line',
-        xScaleType: ScaleType.Ordinal,
-      },
-    ], xValues);
+    const mergedDomain = mergeXDomain(
+      [
+        {
+          seriesType: 'bar',
+          xScaleType: ScaleType.Linear,
+        },
+        {
+          seriesType: 'line',
+          xScaleType: ScaleType.Ordinal,
+        },
+      ],
+      xValues,
+    );
     expect(mergedDomain.domain).toEqual([0, 1, 2, 5, 7]);
   });
   test('Should merge multi bar/line time series correctly', () => {
@@ -439,16 +456,19 @@ describe('X Domain', () => {
     specDataSeries.set(ds1.id, ds1);
     specDataSeries.set(ds2.id, ds2);
     const { xValues } = getSplittedSeries(specDataSeries);
-    const mergedDomain = mergeXDomain([
-      {
-        seriesType: 'bar',
-        xScaleType: ScaleType.Ordinal,
-      },
-      {
-        seriesType: 'line',
-        xScaleType: ScaleType.Time,
-      },
-    ], xValues);
+    const mergedDomain = mergeXDomain(
+      [
+        {
+          seriesType: 'bar',
+          xScaleType: ScaleType.Ordinal,
+        },
+        {
+          seriesType: 'line',
+          xScaleType: ScaleType.Time,
+        },
+      ],
+      xValues,
+    );
     expect(mergedDomain.domain).toEqual([0, 1, 2, 5, 7]);
   });
   test('Should merge multi lines series correctly', () => {
@@ -478,16 +498,19 @@ describe('X Domain', () => {
     specDataSeries.set(ds1.id, ds1);
     specDataSeries.set(ds2.id, ds2);
     const { xValues } = getSplittedSeries(specDataSeries);
-    const mergedDomain = mergeXDomain( [
-      {
-        seriesType: 'line',
-        xScaleType: ScaleType.Ordinal,
-      },
-      {
-        seriesType: 'line',
-        xScaleType: ScaleType.Linear,
-      },
-    ], xValues);
+    const mergedDomain = mergeXDomain(
+      [
+        {
+          seriesType: 'line',
+          xScaleType: ScaleType.Ordinal,
+        },
+        {
+          seriesType: 'line',
+          xScaleType: ScaleType.Linear,
+        },
+      ],
+      xValues,
+    );
     expect(mergedDomain.domain).toEqual([0, 1, 2, 5, 7]);
   });
   test('Should merge multi lines log/linear series correctly', () => {
@@ -517,16 +540,19 @@ describe('X Domain', () => {
     specDataSeries.set(ds1.id, ds1);
     specDataSeries.set(ds2.id, ds2);
     const { xValues } = getSplittedSeries(specDataSeries);
-    const mergedDomain = mergeXDomain( [
-      {
-        seriesType: 'line',
-        xScaleType: ScaleType.Log,
-      },
-      {
-        seriesType: 'line',
-        xScaleType: ScaleType.Linear,
-      },
-    ], xValues);
+    const mergedDomain = mergeXDomain(
+      [
+        {
+          seriesType: 'line',
+          xScaleType: ScaleType.Log,
+        },
+        {
+          seriesType: 'line',
+          xScaleType: ScaleType.Linear,
+        },
+      ],
+      xValues,
+    );
     expect(mergedDomain.domain).toEqual([0, 7]);
   });
 
@@ -558,18 +584,20 @@ describe('X Domain', () => {
     specDataSeries.set(ds1.id, ds1);
     specDataSeries.set(ds2.id, ds2);
     const { xValues } = getSplittedSeries(specDataSeries);
-    const mergedDomain = mergeXDomain([
-      {
-        seriesType: 'area',
-        xScaleType: ScaleType.Linear,
-        xDomain: [0, 10],
-      },
-      {
-        seriesType: 'line',
-        xScaleType: ScaleType.Ordinal,
-      },
-    ], xValues);
+    const mergedDomain = mergeXDomain(
+      [
+        {
+          seriesType: 'area',
+          xScaleType: ScaleType.Linear,
+          xDomain: [0, 10],
+        },
+        {
+          seriesType: 'line',
+          xScaleType: ScaleType.Ordinal,
+        },
+      ],
+      xValues,
+    );
     expect(mergedDomain.domain.length).toEqual(maxValues);
   });
-
 });

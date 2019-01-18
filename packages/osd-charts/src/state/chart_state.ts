@@ -16,8 +16,13 @@ import {
   LineGeometry,
   PointGeometry,
 } from '../lib/series/rendering';
-import { computeXScale, countClusteredSeries } from '../lib/series/scales';
-import { DataSeriesColorsValues, FormattedDataSeries, getSeriesColorMap, RawDataSeries } from '../lib/series/series';
+import { countClusteredSeries } from '../lib/series/scales';
+import {
+  DataSeriesColorsValues,
+  FormattedDataSeries,
+  getSeriesColorMap,
+  RawDataSeries,
+} from '../lib/series/series';
 import {
   AreaSeriesSpec,
   AxisSpec,
@@ -62,8 +67,8 @@ export interface SeriesDomainsAndData {
   yDomain: YDomain[];
   splittedDataSeries: RawDataSeries[][];
   formattedDataSeries: {
-      stacked: FormattedDataSeries[];
-      nonStacked: FormattedDataSeries[];
+    stacked: FormattedDataSeries[];
+    nonStacked: FormattedDataSeries[];
   };
   seriesColors: Map<string, DataSeriesColorsValues>;
 }
@@ -224,12 +229,7 @@ export class ChartStore {
     return this.xScale.type !== ScaleType.Ordinal && Boolean(this.onBrushEndListener);
   }
 
-  updateParentDimensions(
-    width: number,
-    height: number,
-    top: number,
-    left: number,
-  ) {
+  updateParentDimensions(width: number, height: number, top: number, left: number) {
     let isChanged = false;
     if (width !== this.parentDimensions.width) {
       isChanged = true;
@@ -251,13 +251,7 @@ export class ChartStore {
       this.computeChart();
     }
   }
-  addSeriesSpec(
-    seriesSpec:
-      | BasicSeriesSpec
-      | LineSeriesSpec
-      | AreaSeriesSpec
-      | BarSeriesSpec,
-  ) {
+  addSeriesSpec(seriesSpec: BasicSeriesSpec | LineSeriesSpec | AreaSeriesSpec | BarSeriesSpec) {
     this.seriesSpecs.set(seriesSpec.id, seriesSpec);
   }
   removeSeriesSpec(specId: SpecId) {
@@ -277,10 +271,7 @@ export class ChartStore {
   computeChart() {
     this.initialized.set(false);
     // compute only if parent dimensions are computed
-    if (
-      this.parentDimensions.width === 0 ||
-      this.parentDimensions.height === 0
-    ) {
+    if (this.parentDimensions.width === 0 || this.parentDimensions.height === 0) {
       return;
     }
 
@@ -291,10 +282,7 @@ export class ChartStore {
 
     // tslint:disable-next-line:no-console
     // console.log({seriesDomains});
-    const seriesColorMap = getSeriesColorMap(
-      seriesDomains.seriesColors,
-      this.chartTheme.colors,
-    );
+    const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, this.chartTheme.colors);
     this.legendItems = computeLegend(
       seriesDomains.seriesColors,
       seriesColorMap,
@@ -344,10 +332,7 @@ export class ChartStore {
       this.legendPosition,
     );
 
-    this.chartTransform = computeChartTransform(
-      this.chartDimensions,
-      this.chartRotation,
-    );
+    this.chartTransform = computeChartTransform(this.chartDimensions, this.chartRotation);
     this.brushExtent = computeBrushExtent(
       this.chartDimensions,
       this.chartRotation,

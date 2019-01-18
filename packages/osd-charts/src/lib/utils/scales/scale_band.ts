@@ -65,7 +65,7 @@ export class ScaleBand implements Scale {
 
   scale(value: any) {
     const index = this.modelDomain.get(value);
-    return this.modelRange[(index) % this.modelRange.length];
+    return this.modelRange[index % this.modelRange.length];
   }
 
   ticks() {

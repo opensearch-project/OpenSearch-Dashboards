@@ -16,7 +16,10 @@ interface BarGeometriesDataProps {
 interface BarGeometriesDataState {
   overBar?: BarGeometry;
 }
-export class BarGeometries extends React.PureComponent<BarGeometriesDataProps, BarGeometriesDataState> {
+export class BarGeometries extends React.PureComponent<
+  BarGeometriesDataProps,
+  BarGeometriesDataState
+> {
   static defaultProps: Partial<BarGeometriesDataProps> = {
     animated: false,
   };
@@ -32,9 +35,7 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps, B
     const { bars } = this.props;
     return (
       <Group ref={this.barSeriesRef} key={'bar_series'}>
-        {
-          this.renderBarGeoms(bars)
-        }
+        {this.renderBarGeoms(bars)}
       </Group>
     );
   }
@@ -80,45 +81,43 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps, B
       if (this.props.animated) {
         return (
           <Group key={i}>
-            <Spring
-              native
-              from={{ y: y + height, height: 0 }}
-              to={{ y, height }}
-              >
-                {(props: {y: number, height: number}) => (
-                  <animated.Rect
-                    key="animatedRect"
-                    x={x}
-                    y={props.y}
-                    width={width}
-                    height={props.height}
-                    fill={color}
-                    strokeWidth={0}
-                    opacity={opacity}
-                    perfectDrawEnabled={true}
-                    onMouseOver={this.onOverBar(bar)}
-                    onMouseLeave={this.onOutBar}
-                    onClick={this.onElementClick(bar.value)}
-                  />
-                )}
+            <Spring native from={{ y: y + height, height: 0 }} to={{ y, height }}>
+              {(props: { y: number; height: number }) => (
+                <animated.Rect
+                  key="animatedRect"
+                  x={x}
+                  y={props.y}
+                  width={width}
+                  height={props.height}
+                  fill={color}
+                  strokeWidth={0}
+                  opacity={opacity}
+                  perfectDrawEnabled={true}
+                  onMouseOver={this.onOverBar(bar)}
+                  onMouseLeave={this.onOutBar}
+                  onClick={this.onElementClick(value)}
+                />
+              )}
             </Spring>
           </Group>
         );
       } else {
-        return <Rect
-          key={i}
-          x={x}
-          y={y}
-          width={width}
-          height={height}
-          fill={color}
-          strokeWidth={0}
-          opacity={opacity}
-          perfectDrawEnabled={false}
-          onMouseOver={this.onOverBar(bar)}
-          onMouseLeave={this.onOutBar}
-          onClick={this.onElementClick(bar.value)}
-        />;
+        return (
+          <Rect
+            key={i}
+            x={x}
+            y={y}
+            width={width}
+            height={height}
+            fill={color}
+            strokeWidth={0}
+            opacity={opacity}
+            perfectDrawEnabled={false}
+            onMouseOver={this.onOverBar(bar)}
+            onMouseLeave={this.onOutBar}
+            onClick={this.onElementClick(bar.value)}
+          />
+        );
       }
     });
   }

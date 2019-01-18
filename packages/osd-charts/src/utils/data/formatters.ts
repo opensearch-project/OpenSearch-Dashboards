@@ -1,4 +1,4 @@
-import { DateTime, Duration, Interval } from 'luxon';
+import { DateTime, Interval } from 'luxon';
 
 type Formatter = (value: any) => string;
 

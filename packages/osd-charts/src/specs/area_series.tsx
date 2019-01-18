@@ -7,17 +7,8 @@ import { SpecProps } from './specs_parser';
 
 type AreaSpecProps = SpecProps & AreaSeriesSpec;
 
-type DefaultProps =
-  | 'seriesType'
-  | 'groupId'
-  | 'xScaleType'
-  | 'yScaleType'
-  | 'xAccessor'
-  | 'yAccessors'
-  | 'yScaleToDataExtent';
-
 export class AreaSeriesSpecComponent extends PureComponent<AreaSpecProps> {
-  static defaultProps: Pick<AreaSpecProps, DefaultProps> = {
+  static defaultProps: Partial<AreaSpecProps> = {
     seriesType: 'area',
     groupId: getGroupId('__global__'),
     xScaleType: ScaleType.Ordinal,

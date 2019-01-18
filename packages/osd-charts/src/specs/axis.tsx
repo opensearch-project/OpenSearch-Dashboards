@@ -1,24 +1,13 @@
 import { inject } from 'mobx-react';
-import { PureComponent } from 'react'; import { AxisSpec as AxisSpecType, Position } from '../lib/series/specs';
+import { PureComponent } from 'react';
+import { AxisSpec as AxisSpecType, Position } from '../lib/series/specs';
 import { getGroupId } from '../lib/utils/ids';
 import { SpecProps } from './specs_parser';
 
-type AxisSpecProps =
-  SpecProps &
-  AxisSpecType;
-
-type DefaultProps =
-  | 'groupId'
-  | 'hide'
-  | 'showOverlappingTicks'
-  | 'showOverlappingLabels'
-  | 'position'
-  | 'tickSize'
-  | 'tickPadding'
-  | 'tickFormat';
+type AxisSpecProps = SpecProps & AxisSpecType;
 
 class AxisSpec extends PureComponent<AxisSpecProps> {
-  static defaultProps: Pick<AxisSpecProps, DefaultProps> = {
+  static defaultProps: Partial<AxisSpecProps> = {
     groupId: getGroupId('__global__'),
     hide: false,
     showOverlappingTicks: false,
