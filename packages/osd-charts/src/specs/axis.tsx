@@ -1,6 +1,5 @@
 import { inject } from 'mobx-react';
-import React from 'react';
-import { AxisSpec as AxisSpecType, Position } from '../lib/series/specs';
+import { PureComponent } from 'react'; import { AxisSpec as AxisSpecType, Position } from '../lib/series/specs';
 import { getGroupId } from '../lib/utils/ids';
 import { SpecProps } from './specs_parser';
 
@@ -18,7 +17,7 @@ type DefaultProps =
   | 'tickPadding'
   | 'tickFormat';
 
-class AxisSpec extends React.PureComponent<AxisSpecProps> {
+class AxisSpec extends PureComponent<AxisSpecProps> {
   static defaultProps: Pick<AxisSpecProps, DefaultProps> = {
     groupId: getGroupId('__global__'),
     hide: false,

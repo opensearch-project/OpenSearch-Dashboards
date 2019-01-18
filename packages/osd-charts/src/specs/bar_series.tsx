@@ -1,5 +1,5 @@
 import { inject } from 'mobx-react';
-import React from 'react';
+import { PureComponent } from 'react';
 import { BarSeriesSpec } from '../lib/series/specs';
 import { getGroupId } from '../lib/utils/ids';
 import { ScaleType } from '../lib/utils/scales/scales';
@@ -16,8 +16,8 @@ type DefaultProps =
   | 'yAccessors'
   | 'yScaleToDataExtent';
 
-export class BarSeriesSpecComponent extends React.PureComponent<BarSpecProps> {
-  static defaultProps: Pick<BarSpecProps, DefaultProps> = {
+export class BarSeriesSpecComponent extends PureComponent<BarSpecProps> {
+  static defaultProps: Partial<BarSpecProps> = {
     seriesType: 'bar',
     groupId: getGroupId('__global__'),
     xScaleType: ScaleType.Ordinal,

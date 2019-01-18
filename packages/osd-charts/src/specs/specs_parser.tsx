@@ -1,12 +1,12 @@
 import { inject } from 'mobx-react';
-import React from 'react';
+import { PureComponent } from 'react';
 import { ChartStore } from '../state/chart_state';
 
 export interface SpecProps {
   chartStore?: ChartStore; // FIX
 }
 
-export class SpecsSpecRootComponent extends React.PureComponent<SpecProps> {
+export class SpecsSpecRootComponent extends PureComponent<SpecProps> {
   static getDerivedStateFromProps(props: SpecProps) {
     props.chartStore!.specsInitialized.set(false);
     return null;

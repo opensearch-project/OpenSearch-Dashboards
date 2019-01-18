@@ -1,5 +1,5 @@
 import { inject } from 'mobx-react';
-import React from 'react';
+import { PureComponent } from 'react';
 import { AreaSeriesSpec } from '../lib/series/specs';
 import { getGroupId } from '../lib/utils/ids';
 import { ScaleType } from '../lib/utils/scales/scales';
@@ -16,7 +16,7 @@ type DefaultProps =
   | 'yAccessors'
   | 'yScaleToDataExtent';
 
-export class AreaSeriesSpecComponent extends React.PureComponent<AreaSpecProps> {
+export class AreaSeriesSpecComponent extends PureComponent<AreaSpecProps> {
   static defaultProps: Pick<AreaSpecProps, DefaultProps> = {
     seriesType: 'area',
     groupId: getGroupId('__global__'),

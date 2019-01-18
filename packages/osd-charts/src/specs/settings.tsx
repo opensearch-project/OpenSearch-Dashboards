@@ -1,6 +1,6 @@
 import * as deepmerge from 'deepmerge';
 import { inject } from 'mobx-react';
-import React from 'react';
+import { PureComponent } from 'react';
 import { Position, Rendering, Rotation } from '../lib/series/specs';
 import {
   AxisConfig,
@@ -89,7 +89,7 @@ function updateChartStore(props: SettingSpecProps) {
   }
 }
 
-export class SettingsComponent extends React.PureComponent<SettingSpecProps> {
+export class SettingsComponent extends PureComponent<SettingSpecProps> {
   static defaultProps: Pick<SettingSpecProps, DefaultProps> = {
     rendering: 'canvas',
     rotation: 0,

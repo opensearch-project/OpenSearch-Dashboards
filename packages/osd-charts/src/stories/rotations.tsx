@@ -1,19 +1,15 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import {
-  AreaSeries,
   Axis,
   BarSeries,
   Chart,
   getAxisId,
-  getGroupId,
   getSpecId,
   Position,
-  Rotation,
   ScaleType,
   Settings,
 } from '..';
-import { niceTimeFormatter, timeFormatter } from '../utils/data/formatters';
 import './stories.scss';
 
 storiesOf('Rotations', module)

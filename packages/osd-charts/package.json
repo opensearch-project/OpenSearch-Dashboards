@@ -16,6 +16,7 @@
     "@storybook/addon-actions": "^4.1.6",
     "@storybook/addon-info": "^4.1.6",
     "@storybook/addon-knobs": "^4.1.6",
+    "@storybook/addon-storysource": "^4.1.7",
     "@storybook/react": "^4.1.6",
     "@types/classnames": "^2.2.7",
     "@types/d3-array": "^1.2.4",

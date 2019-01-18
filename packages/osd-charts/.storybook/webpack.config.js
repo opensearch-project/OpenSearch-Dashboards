@@ -13,6 +13,21 @@ module.exports = (baseConfig, env, config) => {
     ]
   });
   config.module.rules.push({
+    test: /\.tsx?$/,
+    include: [
+      path.resolve(__dirname, '../src/stories')
+    ],
+    loaders: [
+      {
+        loader: require.resolve('@storybook/addon-storysource/loader'),
+        options: {
+          parser: 'typescript',
+        },
+      },
+    ],
+    enforce: 'pre',
+  });
+  config.module.rules.push({
     test: /\.scss$/,
     use: [
       {
@@ -27,6 +42,9 @@ module.exports = (baseConfig, env, config) => {
     ]
   });
   config.resolve.extensions.push('.ts', '.tsx');
+
+
+
   return config;
 };
 

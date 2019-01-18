@@ -20,42 +20,47 @@ export interface GeomDatum {
   datum: Datum;
   tooltipPosition: TooltipPosition;
 }
-/**
- * A Bar series spec. This specs specify how the bar series is configured
- * and provides data together with all configured accessors.
- */
+
 export interface SeriesSpec {
-  /* The ID of the spec, generated via getSpecId method */
+  /** The ID of the spec, generated via getSpecId method */
   id: SpecId;
-  /* The ID of the spec, generated via getGroupId method, default to __global__ */
+  /** The ID of the spec group, generated via getGroupId method
+   * @default __global__
+   */
   groupId: GroupId;
-  /* An array of data */
+  /** An array of data */
   data: Datum[];
-  /* If specified, it constrant the x domain to these values */
+  /** If specified, it constrant the x domain to these values */
   xDomain?: Domain;
-  /* If specified, it constrant the y Domain to these values */
+  /** If specified, it constrant the y Domain to these values */
   yDomain?: Domain;
-  /* The type of series you are looking to render */
+  /** The type of series you are looking to render */
   seriesType: 'bar' | 'line' | 'area' | 'basic';
 }
 
 export interface SeriesAccessors {
-  /* The field name of the x value on Datum object */
+  /** The field name of the x value on Datum object */
   xAccessor: Accessor;
-  /* An array of field names one per y metric value */
+  /** An array of field names one per y metric value */
   yAccessors: Accessor[];
-  /* An array of fields thats indicates the datum series membership */
+  /** An array of fields thats indicates the datum series membership */
   splitSeriesAccessors?: Accessor[];
-  /* An array of fields thats indicates the stack membership */
+  /** An array of fields thats indicates the stack membership */
   stackAccessors?: Accessor[];
-  /* An optional array of field name thats indicates the stack membership */
+  /** An optional array of field name thats indicates the stack membership */
   colorAccessors?: Accessor[];
 }
 
 export interface SeriesScales {
-  /* The x axis scale type */
+  /**
+   * The x axis scale type
+   * @default ScaleType.Ordinal
+   */
   xScaleType: ScaleType;
-  /* The y axis scale type */
+  /**
+   * The y axis scale type
+   * @default ScaleType.Linear
+   */
   yScaleType: ScaleContinuousType;
   /** if true, the min y value is set to the minimum domain value, 0 otherwise */
   yScaleToDataExtent: boolean;
@@ -63,29 +68,56 @@ export interface SeriesScales {
 
 export type BasicSeriesSpec = SeriesSpec & SeriesAccessors & SeriesScales;
 
+/**
+ * This spec describe the dataset configuration used to display a bar series.
+ */
 export type BarSeriesSpec = BasicSeriesSpec & {
+  /** @default bar */
   seriesType: 'bar';
 };
 
+/**
+ * This spec describe the dataset configuration used to display a line series.
+ */
 export type LineSeriesSpec = BasicSeriesSpec  & {
+  /** @default line */
   seriesType: 'line';
   curve?: CurveType;
 };
 
+/**
+ * This spec describe the dataset configuration used to display an area series.
+ */
 export type AreaSeriesSpec = BasicSeriesSpec & {
+  /** @default area */
   seriesType: 'area';
+  /** The type of interpolator to be used to interpolate values between points */
   curve?: CurveType;
 };
 
+/**
+ * This spec describe the configuration for a chart axis.
+ */
 export interface AxisSpec {
+  /** The ID of the spec, generated via getSpecId method */
   id: AxisId;
+  /** The ID of the axis group, generated via getGroupId method
+   * @default __global__
+   */
   groupId: GroupId;
+  /** Hide this axis */
   hide: boolean;
+  /** shows all ticks, also the one from the overlapping labels */
   showOverlappingTicks: boolean;
+  /** Shows all labels, also the overlapping ones */
   showOverlappingLabels: boolean;
+  /** Where the axis appear on the chart */
   position: Position;
+  /** The length of the tick line */
   tickSize: number;
+  /** The padding between the label and the tick */
   tickPadding: number;
+  /** A function called to format each single tick label */
   tickFormat: TickFormatter;
   /** The axis title */
   title?: string;

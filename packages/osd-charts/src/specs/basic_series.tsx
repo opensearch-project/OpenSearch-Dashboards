@@ -1,5 +1,5 @@
 import { inject } from 'mobx-react';
-import React from 'react';
+import { PureComponent } from 'react';
 import { BasicSeriesSpec } from '../lib/series/specs';
 import { getGroupId } from '../lib/utils/ids';
 import { ScaleType } from '../lib/utils/scales/scales';
@@ -16,7 +16,7 @@ type DefaultProps =
   | 'yAccessors'
   | 'yScaleToDataExtent';
 
-export class BasicSeriesSpecComponent extends React.PureComponent<BasicSpecProps> {
+export class BasicSeriesSpecComponent extends PureComponent<BasicSpecProps> {
   static defaultProps: Pick<BasicSpecProps, DefaultProps> = {
     seriesType: 'basic',
     groupId: getGroupId('__global__'),
