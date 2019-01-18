@@ -11,5 +11,7 @@ rules:
   interface-name: false
   no-default-export: true
   no-irregular-whitespace: true
+  no-unused-variable: true
+  no-unused-expression: true
   quotemark: [true, "single", "jsx-double"]
   member-access: [true, "no-public"]

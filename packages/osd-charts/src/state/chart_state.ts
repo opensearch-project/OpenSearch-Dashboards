@@ -214,7 +214,6 @@ export class ChartStore {
     }
     const min = this.xScale!.invert(minValue - this.chartDimensions.left);
     const max = this.xScale!.invert(maxValue - this.chartDimensions.left);
-    console.log({min, max});
     this.onBrushEndListener(min, max);
   }
 

@@ -43,6 +43,7 @@ function loadStories() {
   require('../src/stories/legend.tsx');
   require('../src/stories/interactions.tsx');
   require('../src/stories/rotations.tsx');
+  require('../src/stories/styling.tsx');
 }
 
 configure(loadStories, module);

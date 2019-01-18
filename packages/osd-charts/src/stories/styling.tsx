@@ -1,0 +1,124 @@
+import { boolean, number, select } from '@storybook/addon-knobs';
+import { storiesOf } from '@storybook/react';
+import React from 'react';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  getAxisId,
+  getSpecId,
+  Position,
+  ScaleType,
+  Settings,
+} from '..';
+import './stories.scss';
+
+function createThemeAction(title: string, min: number, max: number, value: number) {
+  return number(title, value, {
+    range: true,
+    min,
+    max,
+    step: 1,
+  });
+}
+
+storiesOf('Stylings', module)
+  .add('margins and paddings', () => {
+    const theme = {
+      chart: {
+        margins: {
+          left: createThemeAction('margin left', 0, 50, 10),
+          right: createThemeAction('margin right', 0, 50, 10),
+          top: createThemeAction('margin top', 0, 50, 10),
+          bottom: createThemeAction('margin bottom', 0, 50, 10),
+        },
+        paddings: {
+          left: createThemeAction('padding left', 0, 50, 10),
+          right: createThemeAction('padding right', 0, 50, 10),
+          top: createThemeAction('padding top', 0, 50, 10),
+          bottom: createThemeAction('padding bottom', 0, 50, 10),
+        },
+      },
+    };
+    return (
+      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+        <Settings
+          theme={theme}
+          debug={boolean('debug', true)}
+        />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data = {[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
+          yScaleToDataExtent ={false}
+        />
+    </Chart>);
+  })
+  .add('axis (TOFIX)', () => {
+    const theme = {
+      axes: {
+        tickFontSize: createThemeAction('tickFontSize', 0, 40, 10),
+        tickFontFamily: `'Open Sans', Helvetica, Arial, sans-serif`,
+        tickFontStyle: 'normal',
+        titleFontSize: createThemeAction('titleFontSize', 0, 40, 12),
+        titleFontStyle: 'bold',
+        titleFontFamily: `'Open Sans', Helvetica, Arial, sans-serif`,
+        titlePadding: createThemeAction('titlePadding', 0, 40, 5),
+      },
+    };
+    return (
+      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+        <Settings
+          theme={theme}
+          debug={boolean('debug', true)}
+          rotation={select('rotation', { '0': 0, '90': 90, '-90': -90, '180': 180}, 0)}
+        />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data = {[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
+          yScaleToDataExtent ={false}
+        />
+    </Chart>);
+  });
