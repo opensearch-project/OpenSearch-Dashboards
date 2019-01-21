@@ -53,20 +53,23 @@ export function computeXScale(
   maxRange: number,
 ): Scale {
   const { scaleType, minInterval, domain, isBandScale } = xDomain;
+  const rangeDiff = Math.abs(maxRange - minRange);
+  const isInverse = maxRange < minRange;
   if (scaleType === ScaleType.Ordinal) {
     const dividend = totalGroupCount > 0 ? totalGroupCount : 1;
-    const bandwitdh = maxRange / (domain.length * dividend);
+    const bandwitdh = rangeDiff / (domain.length * dividend);
     return createOrdinalScale(domain, minRange, maxRange, 0, bandwitdh);
   } else {
     if (isBandScale && minInterval !== null) {
       const intervalCount = (domain[1] - domain[0]) / minInterval;
-      const bandwidth = maxRange / (intervalCount + 1);
-      const finalLength = maxRange - bandwidth;
+      const bandwidth = rangeDiff / (intervalCount + 1);
+      const start = isInverse ? minRange - bandwidth : minRange;
+      const end = isInverse ? maxRange : maxRange - bandwidth;
       return createContinuousScale(
         scaleType,
         domain,
-        minRange,
-        finalLength,
+        start,
+        end,
         bandwidth / totalGroupCount,
         false,
         minInterval,

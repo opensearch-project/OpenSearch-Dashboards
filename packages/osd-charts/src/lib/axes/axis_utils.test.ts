@@ -7,6 +7,7 @@ import { ScaleType } from '../utils/scales/scales';
 import {
   computeAxisTicksDimensions,
   getAvailableTicks,
+  getMinMaxRange,
   getScaleForAxisSpec,
   getVisibleTicks,
 } from './axis_utils';
@@ -212,5 +213,41 @@ describe('Axis computational utils', () => {
       { label: '1', position: 0, value: 1 },
     ];
     expect(visibleTicks).toEqual(expectedVisibleTicks);
+  });
+  test('should compute min max range for on 0 deg bottom', () => {
+    const minMax = getMinMaxRange(Position.Bottom, 0, {
+      width: 100,
+      height: 50,
+      top: 0,
+      left: 0,
+    });
+    expect(minMax).toEqual({ minRange: 0, maxRange: 100 });
+  });
+  test('should compute min max range for on 90 deg Left', () => {
+    const minMax = getMinMaxRange(Position.Left, 90, {
+      width: 100,
+      height: 50,
+      top: 0,
+      left: 0,
+    });
+    expect(minMax).toEqual({ minRange: 0, maxRange: 50 });
+  });
+  test('should compute min max range for on -90 deg Right', () => {
+    const minMax = getMinMaxRange(Position.Bottom, -90, {
+      width: 100,
+      height: 50,
+      top: 0,
+      left: 0,
+    });
+    expect(minMax).toEqual({ minRange: 100, maxRange: 0 });
+  });
+  test('should compute min max range for on 180 deg bottom', () => {
+    const minMax = getMinMaxRange(Position.Bottom, 180, {
+      width: 100,
+      height: 50,
+      top: 0,
+      left: 0,
+    });
+    expect(minMax).toEqual({ minRange: 100, maxRange: 0 });
   });
 });

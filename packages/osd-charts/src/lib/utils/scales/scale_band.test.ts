@@ -1,8 +1,19 @@
 import { ScaleBand } from './scale_band';
 
 describe.only('Scale Band', () => {
+  it('shall clone domain and range arrays', () => {
+    const domain = [0, 1, 2, 3];
+    const range = [0, 100] as [number, number];
+    const scale = new ScaleBand(domain, range);
+    expect(scale.domain).not.toBe(domain);
+    expect(scale.range).not.toBe(range);
+    expect(scale.domain).toEqual(domain);
+    expect(scale.range).toEqual(range);
+  });
   it('shall scale a numeric domain', () => {
-    const scale = new ScaleBand([0, 1, 2, 3], [0, 100]);
+    const domain = [0, 1, 2, 3];
+    const range = [0, 100] as [number, number];
+    const scale = new ScaleBand(domain, range);
     expect(scale.bandwidth).toBe(25);
     expect(scale.scale(0)).toBe(0);
     expect(scale.scale(1)).toBe(25);
@@ -37,10 +48,10 @@ describe.only('Scale Band', () => {
   it('shall scale a domain with inverted range', () => {
     const scale = new ScaleBand(['a', 'b', 'c', 'd'], [100, 0]);
     expect(scale.bandwidth).toBe(25);
-    expect(scale.scale('a')).toBe(100);
-    expect(scale.scale('b')).toBe(75);
-    expect(scale.scale('c')).toBe(50);
-    expect(scale.scale('d')).toBe(25);
+    expect(scale.scale('a')).toBe(75);
+    expect(scale.scale('b')).toBe(50);
+    expect(scale.scale('c')).toBe(25);
+    expect(scale.scale('d')).toBe(0);
   });
   it('shall return undefined for out of domain values', () => {
     const scale = new ScaleBand(['a', 'b', 'c', 'd'], [0, 100]);

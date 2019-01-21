@@ -88,6 +88,7 @@ export function computeSeriesGeometries(
   seriesColorMap: Map<string, string>,
   chartColors: ColorConfig,
   chartDims: Dimensions,
+  chartRotation: Rotation,
 ): {
   scales: {
     xScale: Scale;
@@ -100,7 +101,9 @@ export function computeSeriesGeometries(
     lines: LineGeometry[];
   };
 } {
-  const { width, height } = chartDims;
+  const width = [0, 180].includes(chartRotation) ? chartDims.width : chartDims.height;
+  const height = [0, 180].includes(chartRotation) ? chartDims.height : chartDims.width;
+  // const { width, height } = chartDims;
   const { stacked, nonStacked } = formattedDataSeries;
 
   // compute how many series are clustered

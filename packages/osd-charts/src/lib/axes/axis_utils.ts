@@ -71,13 +71,12 @@ export function getScaleForAxisSpec(
 ): Scale | null {
   const axisDomain = getAxisDomain(axisSpec.position, xDomain, yDomain, chartRotation);
   if (axisDomain && Array.isArray(axisDomain)) {
-    const yScales = computeYScales(yDomain, maxRange, minRange);
+    const yScales = computeYScales(yDomain, minRange, maxRange);
     if (yScales.has(axisSpec.groupId)) {
       return yScales.get(axisSpec.groupId)!;
     }
     return null;
   } else {
-    // console.log({xDomain, totalGroupCount, minRange, maxRange});
     return computeXScale(xDomain, totalGroupCount, minRange, maxRange);
   }
 }
@@ -113,47 +112,56 @@ function computeTickDimensions(
   };
 }
 
-function getMinMaxRange(
-  axisSpec: AxisSpec,
+export function getMinMaxRange(
+  axisPosition: Position,
   chartRotation: Rotation,
   chartDimensions: Dimensions,
 ): {
   minRange: number;
   maxRange: number;
-} | null {
+} {
   const { width, height } = chartDimensions;
-  if (isVertical(axisSpec.position)) {
-    switch (chartRotation) {
-      case 0:
-      case -90:
-        return {
-          minRange: height,
-          maxRange: 0,
-        };
-      case 90:
-      case 180:
-        return {
-          minRange: 0,
-          maxRange: height,
-        };
-    }
-  } else {
-    switch (chartRotation) {
-      case 0:
-      case 90:
-        return {
-          minRange: 0,
-          maxRange: width,
-        };
-      case 180:
-      case -90:
-        return {
-          minRange: width,
-          maxRange: 0,
-        };
-    }
+  switch (axisPosition) {
+    case Position.Bottom:
+    case Position.Top:
+      return getBottomTopAxisMinMaxRange(chartRotation, width);
+    case Position.Left:
+    case Position.Right:
+      return getLeftAxisMinMaxRange(chartRotation, height);
   }
-  return null;
+}
+
+export function getBottomTopAxisMinMaxRange(chartRotation: Rotation, width: number) {
+  switch (chartRotation) {
+    case 0:
+      // dealing with x domain
+      return { minRange: 0, maxRange: width };
+    case 90:
+      // dealing with y domain
+      return { minRange: 0, maxRange: width };
+    case -90:
+      // dealing with y domain
+      return { minRange: width, maxRange: 0 };
+    case 180:
+      // dealing with x domain
+      return { minRange: width, maxRange: 0 };
+  }
+}
+export function getLeftAxisMinMaxRange(chartRotation: Rotation, height: number) {
+  switch (chartRotation) {
+    case 0:
+      // dealing with y domain
+      return { minRange: height, maxRange: 0 };
+    case 90:
+      // dealing with x domain
+      return { minRange: 0, maxRange: height };
+    case -90:
+      // dealing with x domain
+      return { minRange: height, maxRange: 0 };
+    case 180:
+      // dealing with y domain
+      return { minRange: 0, maxRange: height };
+  }
 }
 
 export function getAvailableTicks(axisSpec: AxisSpec, scale: Scale, totalGroupCount: number) {
@@ -316,19 +324,9 @@ export function getAxisTicksPositions(
     if (!axisSpec) {
       return;
     }
-    const minMaxRanges = getMinMaxRange(axisSpec, chartRotation, chartDimensions);
+    const minMaxRanges = getMinMaxRange(axisSpec.position, chartRotation, chartDimensions);
     if (minMaxRanges === null) {
       throw new Error(`cannot comput min and max ranges for spec ${axisSpec.id}`);
-    }
-
-    let minRange;
-    let maxRange;
-    if (isVertical(axisSpec.position)) {
-      minRange = minMaxRanges.maxRange;
-      maxRange = minMaxRanges.minRange;
-    } else {
-      minRange = minMaxRanges.minRange;
-      maxRange = minMaxRanges.maxRange;
     }
     const scale = getScaleForAxisSpec(
       axisSpec,
@@ -336,8 +334,10 @@ export function getAxisTicksPositions(
       yDomain,
       totalGroupsCount,
       chartRotation,
-      minRange,
-      maxRange,
+      minMaxRanges.minRange,
+      minMaxRanges.maxRange,
+      // minRange,
+      // maxRange,
     );
     if (!scale) {
       throw new Error(`cannot compute scale for spec ${axisSpec.id}`);
