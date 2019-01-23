@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "author": "Marco Vettorello <marco.vettorello@elastic.co>",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "scripts": {
     "build": "webpack --config webpack.prod.js",
     "start": "webpack-dev-server --open --config webpack.dev.js",
