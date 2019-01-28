@@ -18,6 +18,11 @@
     "format-check": "yarn prettier && yarn lint",
     "style-fix": "tsc -p ./tsconfig.json && yarn prettier-tslint fix \"{,!(node_modules)/}**/*.{ts,tsx}\""
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn run test"
+    }
+  },
   "devDependencies": {
     "@babel/core": "^7.2.2",
     "@storybook/addon-actions": "^4.1.6",
@@ -51,6 +56,7 @@
     "enzyme-adapter-react-16": "^1.7.1",
     "html-webpack-plugin": "^3.2.0",
     "html-webpack-template": "^6.2.0",
+    "husky": "^1.3.1",
     "jest": "23",
     "newtype-ts": "^0.2.3",
     "node-sass": "^4.11.0",
