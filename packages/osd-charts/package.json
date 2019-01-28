@@ -85,8 +85,8 @@
     "mobx": "^4.8.0",
     "mobx-react": "^5.4.3",
     "moment": "^2.23.0",
-    "react": "16",
-    "react-dom": "16",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
     "react-konva": "^16.7.1",
     "react-spring": "^7.2.8",
     "resize-observer-polyfill": "^1.5.1"
