@@ -25,7 +25,7 @@ describe('Chart Store', () => {
   afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
 
   const store = new ChartStore();
-  store.updateParentDimensions(600, 600, 0, 0);
+
   const SPEC_ID = getSpecId('spec_1');
   const AXIS_ID = getAxisId('axis_1');
   const GROUP_ID = getGroupId('group_1');
@@ -44,9 +44,10 @@ describe('Chart Store', () => {
 
   test('can add a single spec', () => {
     store.addSeriesSpec(spec);
-    const { seriesSpecDomains } = store;
-    const computedSpecDomain = seriesSpecDomains.get(SPEC_ID);
-    expect(computedSpecDomain).not.toBeUndefined();
+    store.updateParentDimensions(600, 600, 0, 0);
+    store.computeChart();
+    const { seriesDomainsAndData } = store;
+    expect(seriesDomainsAndData).not.toBeUndefined();
   });
 
   test('can add an axis', () => {

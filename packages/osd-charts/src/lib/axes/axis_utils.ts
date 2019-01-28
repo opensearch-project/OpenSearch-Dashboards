@@ -30,8 +30,11 @@ export interface AxisTicksDimensions {
  * Compute the ticks values and identify max width and height of the labels
  * so we can compute the max space occupied by the axis component.
  * @param axisSpec tbe spec of the axis
- * @param specDomains the domain associated
+ * @param xDomain the x domain associated
+ * @param yDomain the y domain array
+ * @param totalGroupCount the total number of grouped series
  * @param bboxCalculator an instance of the boundingbox calculator
+ * @param chartRotation the rotation of the chart
  */
 export function computeAxisTicksDimensions(
   axisSpec: AxisSpec,

@@ -112,7 +112,7 @@ describe('Axis computational utils', () => {
   });
 
   test('should generate a valid scale', () => {
-    const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 0, 100);
+    const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
     expect(scale).toBeDefined();
     expect(scale!.bandwidth).toBe(0);
     expect(scale!.domain).toEqual([0, 1]);
@@ -121,7 +121,7 @@ describe('Axis computational utils', () => {
   });
 
   test('should compute available ticks', () => {
-    const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 0, 100);
+    const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
     const axisPositions = getAvailableTicks(verticalAxisSpec, scale!, 0);
     const expectedAxisPositions = [
       { label: '0', position: 100, value: 0 },

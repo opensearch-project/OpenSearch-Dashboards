@@ -1,0 +1,6 @@
+{
+  "roots": ["<rootDir>/src"],
+  "preset": "ts-jest",
+  "testEnvironment": "jsdom",
+  "setupTestFrameworkScriptFile": "<rootDir>scripts/setupEnzyme.ts"
+}

@@ -20,12 +20,6 @@ export interface ColorDomain {
   scaleType: ScaleType;
 }
 
-export interface SpecDomains {
-  xDomains: SpecDomain[];
-  yDomain: SpecDomain;
-  colorDomain: ColorDomain;
-}
-
 export interface SeriesScales {
   groupLevel: number;
   xDomain: Domain;

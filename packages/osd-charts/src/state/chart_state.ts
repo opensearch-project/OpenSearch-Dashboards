@@ -36,7 +36,6 @@ import {
 import { formatTooltip } from '../lib/series/tooltip';
 import { DEFAULT_THEME, Theme } from '../lib/themes/theme';
 import { computeChartDimensions, Dimensions } from '../lib/utils/dimensions';
-import { SpecDomains } from '../lib/utils/domain';
 import { AxisId, GroupId, SpecId } from '../lib/utils/ids';
 import { Scale, ScaleType } from '../lib/utils/scales/scales';
 import {
@@ -117,7 +116,6 @@ export class ChartStore {
 
   seriesSpecs: Map<SpecId, BasicSeriesSpec> = new Map(); // readed from jsx
 
-  seriesSpecDomains: Map<SpecId, SpecDomains> = new Map(); // computed
   seriesDomainsAndData?: SeriesDomainsAndData; // computed
   xScale?: Scale;
   yScales?: Map<GroupId, Scale>;
@@ -272,6 +270,10 @@ export class ChartStore {
     this.initialized.set(false);
     // compute only if parent dimensions are computed
     if (this.parentDimensions.width === 0 || this.parentDimensions.height === 0) {
+      return;
+    }
+    // avoid compute if no specs are specified
+    if (this.seriesSpecs.size === 0) {
       return;
     }
 
