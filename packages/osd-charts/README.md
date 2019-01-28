@@ -1,4 +1,6 @@
-# elastic-charts
+# Elastic Charts
+
+🚨 **WARNING** While open source, the intended consumers of this repository are Elastic products. Read the [FAQ][faq] for details.
 
 This library is a complete rewrite of the current vislib in Kibana and EUISeriesChart in EUI.
 The rationale behind this refactoring is the need of a testable and decoupled architecture for displaying data as charts. The current EUI implementation is based on ReactVis that directly manipulate data series inside components, without a clear rendering pipeline and without a clean way to extend it. Some of the down side of using react vis are:
@@ -66,6 +68,69 @@ A spec can be something like the following:
   />
 </Chart>
 ```
+
+## Setting Up Your Development Environment
+
+Fork, then clone the `elastic-chart` repo and change directory into it
+
+```bash
+git clone git@github.com:<YOUR_GITHUB_NAME>/elastic-charts.git elastic-charts
+cd kibana
+```
+
+Install the latest version of [yarn](https://yarnpkg.com)
+
+We depend upon the version of node defined in [.nvmrc](.nvmrc).
+
+You will probably want to install a node version manager. [nvm](https://github.com/creationix/nvm) is recommended.
+
+To install and use the correct node version with `nvm`:
+
+```bash
+nvm install
+```
+
+Install all the dependencies
+
+```bash
+yarn install
+```
+
+### Storybook
+
+We develop using [storybook](https://storybook.js.org) to document API, edge-cases, and usage of the library.
+An hosted version will be available soon at [Elastic Charts](https://elastic.github.io/elastic-charts/).
+You can run locally at [http://localhost:9001/](http://localhost:9001/) by running:
+
+```
+yarn storybook
+```
+
+## Installation
+
+To install the Elastic UI Framework into an existing project, use the `yarn` CLI (`npm` is not supported).
+
+```
+yarn add @elastic/charts
+```
+
+## Contributing
+
+We are trying to enforce some good practice on this library:
+
+- All commits must follow the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0-beta.2/)
+- [semantic-release](https://semantic-release.gitbook.io) is used as an automated release manager suite.
+  This will automatically publish on NPM on every push on master, will automatically create the changelog and bump the correct semversion depending on the commits. To avoid too many new releases, specially in this initial phase of the project, we are going to work against a `dev` branch and then merge on master periodically.
+- Every commit count in the version bump: this means that we can merge a PR with two methods:
+  - merge all the PR commit history (please follow the commit convention or squash partial commits)
+  - squash and merge all commits using a single commit that follow the conventions.
+
+The following tools are used to ensure this convention:
+
+- `commitlint` hook ensure that you are following correctly the convention
+- `yarn commit` can be used to start `commitizen` as a cli tool that prompt you with selections and questions
+  to help you on writing a conventional commit
+- `commitlint-bot` is a github app that checks PR commits to help you on writing the correct commit message
 
 ## Concepts
 
