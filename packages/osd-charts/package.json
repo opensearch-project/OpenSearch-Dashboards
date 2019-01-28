@@ -20,11 +20,14 @@
   },
   "husky": {
     "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
       "pre-commit": "yarn run test"
     }
   },
   "devDependencies": {
     "@babel/core": "^7.2.2",
+    "@commitlint/cli": "^7.4.0",
+    "@commitlint/config-conventional": "^7.3.1",
     "@storybook/addon-actions": "^4.1.6",
     "@storybook/addon-info": "^4.1.6",
     "@storybook/addon-knobs": "^4.1.6",
