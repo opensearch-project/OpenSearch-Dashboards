@@ -2,6 +2,7 @@ import { boolean, number, select } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { Axis, BarSeries, Chart, getAxisId, getSpecId, Position, ScaleType, Settings } from '..';
+import { PartialTheme } from '../lib/themes/theme';
 import './stories.scss';
 
 function createThemeAction(title: string, min: number, max: number, value: number) {
@@ -15,7 +16,7 @@ function createThemeAction(title: string, min: number, max: number, value: numbe
 
 storiesOf('Stylings', module)
   .add('margins and paddings', () => {
-    const theme = {
+    const theme: PartialTheme = {
       chart: {
         margins: {
           left: createThemeAction('margin left', 0, 50, 10),
@@ -59,7 +60,7 @@ storiesOf('Stylings', module)
     );
   })
   .add('axis (TOFIX)', () => {
-    const theme = {
+    const theme: PartialTheme = {
       axes: {
         tickFontSize: createThemeAction('tickFontSize', 0, 40, 10),
         tickFontFamily: `'Open Sans', Helvetica, Arial, sans-serif`,

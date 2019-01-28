@@ -1,17 +1,7 @@
-import * as deepmerge from 'deepmerge';
 import { inject } from 'mobx-react';
 import { PureComponent } from 'react';
 import { Position, Rendering, Rotation } from '../lib/series/specs';
-import {
-  AxisConfig,
-  ChartConfig,
-  ColorConfig,
-  DEFAULT_THEME,
-  InteractionConfig,
-  LegendStyle,
-  ScalesConfig,
-  Theme,
-} from '../lib/themes/theme';
+import { DEFAULT_THEME, mergeWithDefaultTheme, PartialTheme } from '../lib/themes/theme';
 import {
   BrushEndListener,
   ChartStore,
@@ -21,14 +11,7 @@ import {
 
 interface SettingSpecProps {
   chartStore?: ChartStore;
-  theme?: Partial<{
-    chart: Partial<ChartConfig>;
-    axes: Partial<AxisConfig>;
-    scales: Partial<ScalesConfig>;
-    colors: Partial<ColorConfig>;
-    interactions: Partial<InteractionConfig>;
-    legend: Partial<LegendStyle>;
-  }>;
+  theme?: PartialTheme;
   rendering: Rendering;
   rotation: Rotation;
   animateData: boolean;
@@ -59,7 +42,7 @@ function updateChartStore(props: SettingSpecProps) {
   if (!chartStore) {
     return;
   }
-  chartStore.chartTheme = theme ? (deepmerge.all([DEFAULT_THEME, theme]) as Theme) : DEFAULT_THEME;
+  chartStore.chartTheme = theme ? mergeWithDefaultTheme(theme) : DEFAULT_THEME;
   chartStore.chartRotation = rotation;
   chartStore.chartRendering = rendering;
   chartStore.animateData = animateData;

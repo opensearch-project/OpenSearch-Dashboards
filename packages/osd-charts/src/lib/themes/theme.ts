@@ -65,6 +65,14 @@ export interface AreaSeriesStyle {
   dataPointsStroke: string;
   dataPointsStrokeWidth: number;
 }
+export interface PartialTheme {
+  chart?: Partial<ChartConfig>;
+  axes?: Partial<AxisConfig>;
+  scales?: Partial<ScalesConfig>;
+  colors?: Partial<ColorConfig>;
+  interactions?: Partial<InteractionConfig>;
+  legend?: Partial<LegendStyle>;
+}
 
 export const DEFAULT_THEME: Theme = {
   chart: {
@@ -144,3 +152,90 @@ export const DEFAULT_THEME: Theme = {
     horizontalHeight: 50,
   },
 };
+
+export function mergeWithDefaultTheme(theme: PartialTheme): Theme {
+  const chart: ChartConfig = {
+    ...DEFAULT_THEME.chart,
+  };
+  if (theme.chart) {
+    chart.margins = {
+      ...DEFAULT_THEME.chart.margins,
+      ...theme.chart.margins,
+    };
+    chart.paddings = {
+      ...DEFAULT_THEME.chart.paddings,
+      ...theme.chart.paddings,
+    };
+    if (theme.chart.styles) {
+      if (theme.chart.styles.areaSeries) {
+        chart.styles.areaSeries = {
+          ...DEFAULT_THEME.chart.styles.areaSeries,
+          ...theme.chart.styles.areaSeries,
+        };
+      }
+      if (theme.chart.styles.lineSeries) {
+        chart.styles.lineSeries = {
+          ...DEFAULT_THEME.chart.styles.lineSeries,
+          ...theme.chart.styles.lineSeries,
+        };
+      }
+    }
+  }
+  const scales: ScalesConfig = {
+    ...DEFAULT_THEME.scales,
+  };
+  if (theme.scales) {
+    scales.ordinal = {
+      ...DEFAULT_THEME.scales.ordinal,
+      ...theme.scales.ordinal,
+    };
+  }
+  let axes: AxisConfig = {
+    ...DEFAULT_THEME.axes,
+  };
+  if (theme.axes) {
+    axes = {
+      ...DEFAULT_THEME.axes,
+      ...theme.axes,
+    };
+  }
+  const colors: ColorConfig = {
+    ...DEFAULT_THEME.colors,
+  };
+  if (theme.colors) {
+    if (theme.colors.defaultVizColor) {
+      colors.defaultVizColor = theme.colors.defaultVizColor;
+    }
+    if (theme.colors.vizColors) {
+      colors.vizColors = theme.colors.vizColors;
+    }
+  }
+
+  let interactions: InteractionConfig = {
+    ...DEFAULT_THEME.interactions,
+  };
+  if (theme.interactions) {
+    interactions = {
+      ...DEFAULT_THEME.interactions,
+      ...theme.interactions,
+    };
+  }
+
+  let legend: LegendStyle = {
+    ...DEFAULT_THEME.legend,
+  };
+  if (theme.legend) {
+    legend = {
+      ...DEFAULT_THEME.legend,
+      ...theme.legend,
+    };
+  }
+  return {
+    chart,
+    scales,
+    axes,
+    colors,
+    interactions,
+    legend,
+  };
+}
