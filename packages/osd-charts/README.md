@@ -1,5 +1,7 @@
 # Elastic Charts
 
+[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
+
 🚨 **WARNING** While open source, the intended consumers of this repository are Elastic products. Read the [FAQ][faq] for details.
 
 This library is a complete rewrite of the current vislib in Kibana and EUISeriesChart in EUI.
@@ -128,7 +130,7 @@ We are trying to enforce some good practice on this library:
 The following tools are used to ensure this convention:
 
 - `commitlint` hook ensure that you are following correctly the convention
-- `yarn commit` can be used to start `commitizen` as a cli tool that prompt you with selections and questions
+- `yarn cz` can be used to start `commitizen` as a cli tool that prompt you with selections and questions
   to help you on writing a conventional commit
 - `commitlint-bot` is a github app that checks PR commits to help you on writing the correct commit message
 

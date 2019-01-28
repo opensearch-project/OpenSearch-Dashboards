@@ -5,6 +5,7 @@
   "author": "Marco Vettorello <marco.vettorello@elastic.co>",
   "license": "Apache-2.0",
   "scripts": {
+    "cz": "git-cz",
     "build": "webpack --config webpack.prod.js",
     "start": "webpack-dev-server --open --config webpack.dev.js",
     "storybook": "start-storybook -p 9001 -c .storybook",
@@ -53,7 +54,9 @@
     "babel-loader": "^8.0.5",
     "canvas": "^2.3.1",
     "clean-webpack-plugin": "^1.0.0",
+    "commitizen": "^3.0.5",
     "css-loader": "^2.1.0",
+    "cz-conventional-changelog": "^2.1.0",
     "d3-random": "^1.1.2",
     "enzyme": "^3.8.0",
     "enzyme-adapter-react-16": "^1.7.1",
@@ -99,5 +102,10 @@
     "react-konva": "^16.7.1",
     "react-spring": "^7.2.8",
     "resize-observer-polyfill": "^1.5.1"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
