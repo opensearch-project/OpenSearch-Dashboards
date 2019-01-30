@@ -121,6 +121,6 @@ export function computeChartDimensions(
     top,
     left,
     width: chartWidth - hMargin - chartPaddings.left - chartPaddings.right,
-    height: chartHeight - vMargin - chartPaddings.bottom - chartPaddings.bottom,
+    height: chartHeight - vMargin - chartPaddings.top - chartPaddings.bottom,
   };
 }
