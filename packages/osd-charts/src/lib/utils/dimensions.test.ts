@@ -25,18 +25,17 @@ describe('Computed chart dimensions', () => {
     bottom: 10,
   };
 
-  const axis1Dims = {
+  const axis1Dims: AxisTicksDimensions = {
     axisScaleType: ScaleType.Linear,
     axisScaleDomain: [0, 1],
     tickValues: [0, 1],
-    ticksDimensions: [{ width: 10, height: 10 }, { width: 10, height: 10 }],
     tickLabels: ['first', 'second'],
     maxLabelBboxWidth: 10,
     maxLabelBboxHeight: 10,
     maxLabelTextWidth: 10,
     maxLabelTextHeight: 10,
   };
-  const axis1Spec = {
+  const axisLeftSpec: AxisSpec = {
     id: getAxisId('axis_1'),
     groupId: getGroupId('group_1'),
     hide: false,
@@ -50,8 +49,8 @@ describe('Computed chart dimensions', () => {
     },
   };
   const legend: LegendStyle = {
-    verticalWidth: 0,
-    horizontalHeight: 0,
+    verticalWidth: 10,
+    horizontalHeight: 10,
   };
   const showLegend = false;
 
@@ -61,6 +60,11 @@ describe('Computed chart dimensions', () => {
       ...DEFAULT_THEME.chart,
       margins: chartMargins,
       paddings: chartPaddings,
+    },
+    axes: {
+      ...DEFAULT_THEME.axes,
+      titleFontSize: 10,
+      titlePadding: 10,
     },
     ...legend,
   };
@@ -77,10 +81,12 @@ describe('Computed chart dimensions', () => {
     expect(chartDimensions).toMatchSnapshot();
   });
   test('should be padded by a left axis', () => {
+    // |margin|titleFontSize|titlePadding|maxLabelBboxWidth|tickPadding|tickSize|padding|
+    // \10|10|10|10|10|10|10| = 70px from left
     const axisDims = new Map<AxisId, AxisTicksDimensions>();
     const axisSpecs = new Map<AxisId, AxisSpec>();
     axisDims.set(getAxisId('axis_1'), axis1Dims);
-    axisSpecs.set(getAxisId('axis_1'), axis1Spec);
+    axisSpecs.set(getAxisId('axis_1'), axisLeftSpec);
     const chartDimensions = computeChartDimensions(
       parentDim,
       chartTheme,
@@ -91,10 +97,12 @@ describe('Computed chart dimensions', () => {
     expect(chartDimensions).toMatchSnapshot();
   });
   test('should be padded by a right axis', () => {
+    // |padding|tickSize|tickPadding|maxLabelBBoxWidth|titlePadding|titleFontSize\margin|
+    // \10|10|10|10|10|10|10| = 70px from right
     const axisDims = new Map<AxisId, AxisTicksDimensions>();
     const axisSpecs = new Map<AxisId, AxisSpec>();
     axisDims.set(getAxisId('axis_1'), axis1Dims);
-    axisSpecs.set(getAxisId('axis_1'), { ...axis1Spec, position: Position.Right });
+    axisSpecs.set(getAxisId('axis_1'), { ...axisLeftSpec, position: Position.Right });
     const chartDimensions = computeChartDimensions(
       parentDim,
       chartTheme,
@@ -105,11 +113,13 @@ describe('Computed chart dimensions', () => {
     expect(chartDimensions).toMatchSnapshot();
   });
   test('should be padded by a top axis', () => {
+    // |margin|titleFontSize|titlePadding|maxLabelBboxHeight|tickPadding|tickSize|padding|
+    // \10|10|10|10|10|10|10| = 70px from top
     const axisDims = new Map<AxisId, AxisTicksDimensions>();
     const axisSpecs = new Map<AxisId, AxisSpec>();
     axisDims.set(getAxisId('axis_1'), axis1Dims);
     axisSpecs.set(getAxisId('axis_1'), {
-      ...axis1Spec,
+      ...axisLeftSpec,
       position: Position.Top,
     });
     const chartDimensions = computeChartDimensions(
@@ -122,11 +132,13 @@ describe('Computed chart dimensions', () => {
     expect(chartDimensions).toMatchSnapshot();
   });
   test('should be padded by a bottom axis', () => {
+    // |margin|titleFontSize|titlePadding|maxLabelBboxHeight|tickPadding|tickSize|padding|
+    // \10|10|10|10|10|10|10| = 70px from bottom
     const axisDims = new Map<AxisId, AxisTicksDimensions>();
     const axisSpecs = new Map<AxisId, AxisSpec>();
     axisDims.set(getAxisId('axis_1'), axis1Dims);
     axisSpecs.set(getAxisId('axis_1'), {
-      ...axis1Spec,
+      ...axisLeftSpec,
       position: Position.Bottom,
     });
     const chartDimensions = computeChartDimensions(

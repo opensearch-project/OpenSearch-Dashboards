@@ -36,7 +36,7 @@ describe('Axis computational utils', () => {
   const originalGetBBox = SVGElement.prototype.getBoundingClientRect;
   beforeEach(
     () =>
-      (SVGElement.prototype.getBoundingClientRect = function () {
+      (SVGElement.prototype.getBoundingClientRect = function() {
         const text = this.textContent || 0;
         return { ...mockedRect, width: Number(text) * 10, heigh: Number(text) * 10 };
       }),
@@ -107,7 +107,10 @@ describe('Axis computational utils', () => {
   });
 
   test('should compute dimensions for the bounding box containing a rotated label', () => {
-    expect(computeRotatedLabelDimensions({ width: 1, height: 2 }, 0)).toEqual({ width: 1, height: 2 });
+    expect(computeRotatedLabelDimensions({ width: 1, height: 2 }, 0)).toEqual({
+      width: 1,
+      height: 2,
+    });
 
     const dims90 = computeRotatedLabelDimensions({ width: 1, height: 2 }, 90);
     expect(dims90.width).toBeCloseTo(2);
@@ -250,12 +253,15 @@ describe('Axis computational utils', () => {
   });
 
   test('should compute coordinates and offsets to anchor rotation origin from the center', () => {
-    const simpleCenteredProps = centerRotationOrigin({
-      maxLabelBboxWidth: 10,
-      maxLabelBboxHeight: 20,
-      maxLabelTextWidth: 10,
-      maxLabelTextHeight: 20,
-    }, { x: 0, y: 0 });
+    const simpleCenteredProps = centerRotationOrigin(
+      {
+        maxLabelBboxWidth: 10,
+        maxLabelBboxHeight: 20,
+        maxLabelTextWidth: 10,
+        maxLabelTextHeight: 20,
+      },
+      { x: 0, y: 0 },
+    );
 
     expect(simpleCenteredProps).toEqual({
       offsetX: 5,
@@ -264,12 +270,15 @@ describe('Axis computational utils', () => {
       y: 10,
     });
 
-    const rotatedCenteredProps = centerRotationOrigin({
-      maxLabelBboxWidth: 10,
-      maxLabelBboxHeight: 20,
-      maxLabelTextWidth: 20,
-      maxLabelTextHeight: 10,
-    }, { x: 30, y: 40 });
+    const rotatedCenteredProps = centerRotationOrigin(
+      {
+        maxLabelBboxWidth: 10,
+        maxLabelBboxHeight: 20,
+        maxLabelTextWidth: 20,
+        maxLabelTextHeight: 10,
+      },
+      { x: 30, y: 40 },
+    );
 
     expect(rotatedCenteredProps).toEqual({
       offsetX: 10,

@@ -16,6 +16,7 @@ export interface Margins {
   left: number;
   right: number;
 }
+
 /**
  * Compute the chart dimension padding the parent dimension by the specified set of axis
  * @param parentDimensions the parent dimension
@@ -50,16 +51,20 @@ export function computeChartDimensions(
     const { position, tickSize, tickPadding } = axisSpec;
     switch (position) {
       case Position.Top:
-        hTopAxisSpecHeight += maxLabelBboxHeight + tickSize + tickPadding + chartMargins.top + axisTitleHeight;
+        hTopAxisSpecHeight +=
+          maxLabelBboxHeight + tickSize + tickPadding + chartMargins.top + axisTitleHeight;
         break;
       case Position.Bottom:
-        hBottomAxisSpecHeight += maxLabelBboxHeight + tickSize + tickPadding + chartMargins.bottom + axisTitleHeight;
+        hBottomAxisSpecHeight +=
+          maxLabelBboxHeight + tickSize + tickPadding + chartMargins.bottom + axisTitleHeight;
         break;
       case Position.Left:
-        vLeftAxisSpecWidth += maxLabelBboxWidth + tickSize + tickPadding + chartMargins.left + axisTitleHeight;
+        vLeftAxisSpecWidth +=
+          maxLabelBboxWidth + tickSize + tickPadding + chartMargins.left + axisTitleHeight;
         break;
       case Position.Right:
-        vRightAxisSpecWidth += maxLabelBboxWidth + tickSize + tickPadding + chartMargins.right + axisTitleHeight;
+        vRightAxisSpecWidth +=
+          maxLabelBboxWidth + tickSize + tickPadding + chartMargins.right + axisTitleHeight;
         break;
     }
   });
@@ -84,18 +89,18 @@ export function computeChartDimensions(
   let legendLeftMargin = 0;
   if (showLegend) {
     switch (legendPosition) {
-      case 'right':
+      case Position.Right:
         hMargin += legendStyle.verticalWidth;
         break;
-      case 'left':
+      case Position.Left:
         hMargin += legendStyle.verticalWidth;
         legendLeftMargin = legendStyle.verticalWidth;
         break;
-      case 'top':
+      case Position.Top:
         vMargin += legendStyle.horizontalHeight;
         legendTopMargin = legendStyle.horizontalHeight;
         break;
-      case 'bottom':
+      case Position.Bottom:
         vMargin += legendStyle.horizontalHeight;
         break;
     }
