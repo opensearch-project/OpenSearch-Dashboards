@@ -9,6 +9,9 @@
     "build": "webpack --config webpack.prod.js",
     "start": "webpack-dev-server --open --config webpack.dev.js",
     "storybook": "start-storybook -p 9001 -c .storybook",
+    "storybook-build": "build-storybook -c .storybook -o .out",
+    "storybook-local-deploy": "storybook-to-ghpages --remote upstream",
+    "storybook-deploy": "storybook-to-ghpages",
     "lint": "tslint -c ./tslint.yaml -p ./tsconfig.json",
     "lint-fix": "tslint -c ./tslint.yaml -p ./tsconfig.json --fix",
     "prettier": "prettier -l \"{,!(node_modules)/}**/*.{ts,tsx}\"",
@@ -22,7 +25,7 @@
   "husky": {
     "hooks": {
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-      "pre-commit": "yarn run test"
+      "pre-commit": "yarn run lint && yarn run test"
     }
   },
   "devDependencies": {
@@ -34,6 +37,7 @@
     "@storybook/addon-knobs": "^4.1.6",
     "@storybook/addon-storysource": "^4.1.7",
     "@storybook/react": "^4.1.6",
+    "@storybook/storybook-deployer": "^2.8.1",
     "@types/classnames": "^2.2.7",
     "@types/d3-array": "^1.2.4",
     "@types/d3-collection": "^1.0.7",
