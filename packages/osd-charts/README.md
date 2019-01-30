@@ -107,7 +107,7 @@ yarn install
 ### Storybook
 
 We develop using [storybook](https://storybook.js.org) to document API, edge-cases, and usage of the library.
-A hosted version will be available soon at [Elastic Charts](https://elastic.github.io/elastic-charts/).
+A hosted version is available at [https://elastic.github.io/elastic-charts](https://elastic.github.io/elastic-charts).
 You can run locally at [http://localhost:9001/](http://localhost:9001/) by running:
 
 ```
@@ -270,3 +270,11 @@ for example:
 - a dataset with 2 split variables, each with 3 different values (a dataset with 3 \* 2 series) will have 6 different colors if the two variables are defined in `colorAccessors`
 - a dataset with 2 split variables, each with 3 different values, but only one specified in the `colorAccessors` will have only 3 colors.
 - if no `colorAccessors` is specified, `splitAccessors` will be used to identify how to coloring the series
+
+
+## License
+
+[Apache Licensed.][license] Read the [FAQ][faq] for details.
+
+[license]: LICENSE.md
+[faq]: FAQ.md
