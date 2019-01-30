@@ -111,6 +111,8 @@ export interface AxisSpec {
   showOverlappingTicks: boolean;
   /** Shows all labels, also the overlapping ones */
   showOverlappingLabels: boolean;
+  /** Shows grid lines for axis; default false */
+  showGridLines?: boolean;
   /** Where the axis appear on the chart */
   position: Position;
   /** The length of the tick line */
@@ -119,6 +121,8 @@ export interface AxisSpec {
   tickPadding: number;
   /** A function called to format each single tick label */
   tickFormat: TickFormatter;
+  /** The degrees of rotation of the tick labels */
+  tickLabelRotation?: number;
   /** The axis title */
   title?: string;
 }

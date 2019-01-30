@@ -1,6 +1,9 @@
 import React from 'react';
 import { Group, Line, Rect, Text } from 'react-konva';
-import { AxisTick, AxisTicksDimensions, isHorizontal, isVertical } from '../../lib/axes/axis_utils';
+import {
+  AxisTick, AxisTicksDimensions, centerRotationOrigin, getHorizontalAxisTickLineProps,
+  getTickLabelProps, getVerticalAxisTickLineProps, isHorizontal, isVertical,
+} from '../../lib/axes/axis_utils';
 import { AxisSpec, Position } from '../../lib/series/specs';
 import { Theme } from '../../lib/themes/theme';
 import { Dimensions } from '../../lib/utils/dimensions';
@@ -12,6 +15,7 @@ interface AxisProps {
   axisPosition: Dimensions;
   ticks: AxisTick[];
   debug: boolean;
+  chartDimensions: Dimensions;
 }
 
 export class Axis extends React.PureComponent<AxisProps> {
@@ -23,33 +27,37 @@ export class Axis extends React.PureComponent<AxisProps> {
       axes: { tickFontFamily, tickFontSize, tickFontStyle },
     } = this.props.chartTheme;
     const {
-      axisSpec: { tickSize, tickPadding, position },
-      axisTicksDimensions: { maxTickHeight, maxTickWidth },
+      axisSpec: {
+        tickSize,
+        tickPadding,
+        position,
+      },
+      axisTicksDimensions,
       debug,
     } = this.props;
 
+    const tickLabelRotation = this.props.axisSpec.tickLabelRotation || 0;
+
+    const tickLabelProps = getTickLabelProps(
+      tickLabelRotation,
+      tickSize,
+      tickPadding,
+      tick.position,
+      position,
+      axisTicksDimensions,
+    );
+
+    const { maxLabelTextWidth, maxLabelTextHeight } = axisTicksDimensions;
+    const centeredRectProps = centerRotationOrigin(axisTicksDimensions, { x: tickLabelProps.x, y: tickLabelProps.y });
+
     const textProps = {
-      x: 0,
-      y: 0,
-      align: 'center',
-      width: 0,
-      height: 0,
-      verticalAlign: 'middle',
+      width: maxLabelTextWidth,
+      height: maxLabelTextHeight,
+      rotation: tickLabelRotation,
+      ...tickLabelProps,
+      ...centeredRectProps,
     };
-    if (isVertical(position)) {
-      textProps.y = tick.position - maxTickHeight / 2;
-      textProps.align = position === Position.Left ? 'right' : 'left';
-      textProps.x = position === Position.Left ? -maxTickWidth : tickSize + tickPadding;
-      textProps.height = maxTickHeight;
-      textProps.width = maxTickWidth;
-    } else {
-      textProps.y = position === Position.Top ? 0 : tickSize + tickPadding;
-      textProps.x = tick.position - maxTickWidth / 2;
-      textProps.align = 'center';
-      textProps.height = maxTickHeight;
-      textProps.width = maxTickWidth;
-      textProps.verticalAlign = position === Position.Top ? 'bottom' : 'top';
-    }
+
     return (
       <Group key={`tick-${i}`}>
         {debug && <Rect {...textProps} stroke="black" strokeWidth={1} fill="violet" />}
@@ -68,22 +76,32 @@ export class Axis extends React.PureComponent<AxisProps> {
   private renderTickLine = (tick: AxisTick, i: number) => {
     const {
       axisSpec: { tickSize, tickPadding, position },
-      axisTicksDimensions: { maxTickHeight },
+      axisTicksDimensions: { maxLabelBboxHeight },
+      chartDimensions,
+      chartTheme: { chart: { paddings } },
     } = this.props;
 
-    const lineProps = [];
+    const showGridLines = this.props.axisSpec.showGridLines || false;
 
-    if (isVertical(position)) {
-      lineProps[0] = position === Position.Left ? tickPadding : 0;
-      lineProps[1] = tick.position;
-      lineProps[2] = position === Position.Left ? tickSize + tickPadding : tickSize;
-      lineProps[3] = tick.position;
-    } else {
-      lineProps[0] = tick.position;
-      lineProps[1] = position === Position.Top ? maxTickHeight + tickPadding : 0;
-      lineProps[2] = tick.position;
-      lineProps[3] = position === Position.Top ? maxTickHeight + tickPadding + tickSize : tickSize;
-    }
+    const lineProps = isVertical(position) ?
+      getVerticalAxisTickLineProps(
+        showGridLines,
+        position,
+        tickPadding,
+        tickSize,
+        tick.position,
+        chartDimensions.width,
+        paddings,
+      ) : getHorizontalAxisTickLineProps(
+        showGridLines,
+        position,
+        tickPadding,
+        tickSize,
+        tick.position,
+        maxLabelBboxHeight,
+        chartDimensions.height,
+        paddings,
+      );
 
     return <Line key={`tick-${i}`} points={lineProps} stroke={'gray'} strokeWidth={1} />;
   }
@@ -91,7 +109,7 @@ export class Axis extends React.PureComponent<AxisProps> {
     const { ticks, axisPosition } = this.props;
     return (
       <Group x={axisPosition.left} y={axisPosition.top}>
-        <Group key="lines">{this.renderLine()}</Group>
+        <Group key="lines">{this.renderAxisLine()}</Group>
         <Group key="tick-lines">{ticks.map(this.renderTickLine)}</Group>
         <Group key="ticks">
           {ticks.filter((tick) => tick.label !== null).map(this.renderTickLabel)}
@@ -100,7 +118,7 @@ export class Axis extends React.PureComponent<AxisProps> {
       </Group>
     );
   }
-  private renderLine = () => {
+  private renderAxisLine = () => {
     const {
       axisSpec: { tickSize, tickPadding, position },
       axisPosition,
@@ -116,9 +134,9 @@ export class Axis extends React.PureComponent<AxisProps> {
       lineProps[0] = 0;
       lineProps[2] = axisPosition.width;
       lineProps[1] =
-        position === Position.Top ? axisTicksDimensions.maxTickHeight + tickSize + tickPadding : 0;
+        position === Position.Top ? axisTicksDimensions.maxLabelBboxHeight + tickSize + tickPadding : 0;
       lineProps[3] =
-        position === Position.Top ? axisTicksDimensions.maxTickHeight + tickSize + tickPadding : 0;
+        position === Position.Top ? axisTicksDimensions.maxLabelBboxHeight + tickSize + tickPadding : 0;
     }
     return <Line points={lineProps} stroke={'gray'} strokeWidth={1} />;
   }
@@ -138,7 +156,7 @@ export class Axis extends React.PureComponent<AxisProps> {
     const {
       axisPosition: { height },
       axisSpec: { title, position, tickSize, tickPadding },
-      axisTicksDimensions: { maxTickWidth },
+      axisTicksDimensions: { maxLabelBboxWidth },
       chartTheme: {
         axes: { titleFontFamily, titleFontSize, titleFontStyle, titlePadding },
       },
@@ -150,8 +168,8 @@ export class Axis extends React.PureComponent<AxisProps> {
     const top = height;
     const left =
       position === Position.Left
-        ? -(maxTickWidth + titleFontSize + titlePadding)
-        : tickSize + tickPadding + maxTickWidth + titlePadding;
+        ? -(maxLabelBboxWidth + titleFontSize + titlePadding)
+        : tickSize + tickPadding + maxLabelBboxWidth + titlePadding;
 
     return (
       <Group>
@@ -186,7 +204,7 @@ export class Axis extends React.PureComponent<AxisProps> {
     const {
       axisPosition: { width, height },
       axisSpec: { title, position, tickSize, tickPadding },
-      axisTicksDimensions: { maxTickHeight },
+      axisTicksDimensions: { maxLabelBboxHeight },
       chartTheme: {
         axes: { titleFontSize },
       },
@@ -197,7 +215,7 @@ export class Axis extends React.PureComponent<AxisProps> {
       return;
     }
 
-    const top = position === Position.Top ? -maxTickHeight : maxTickHeight + tickPadding + tickSize;
+    const top = position === Position.Top ? -maxLabelBboxHeight : maxLabelBboxHeight + tickPadding + tickSize;
     const left = 0;
     return (
       <Group>
@@ -206,7 +224,7 @@ export class Axis extends React.PureComponent<AxisProps> {
             x={left}
             y={top}
             width={width}
-            height={maxTickHeight}
+            height={maxLabelBboxHeight}
             stroke="black"
             strokeWidth={1}
             fill="violet"

@@ -315,6 +315,7 @@ export class ChartStore {
         totalGroupCount,
         bboxCalculator,
         this.chartRotation,
+        this.chartTheme.axes,
       );
       if (dimensions) {
         this.axesTicksDimensions.set(id, dimensions);
@@ -325,9 +326,7 @@ export class ChartStore {
     // // compute chart dimensions
     this.chartDimensions = computeChartDimensions(
       this.parentDimensions,
-      this.chartTheme.chart.margins,
-      this.chartTheme.chart.paddings,
-      this.chartTheme.legend,
+      this.chartTheme,
       this.axesTicksDimensions,
       this.axesSpecs,
       this.showLegend.get() && !this.legendCollapsed.get(),
@@ -361,9 +360,8 @@ export class ChartStore {
     // // compute visible ticks and their positions
     const axisTicksPositions = getAxisTicksPositions(
       this.chartDimensions,
-      this.chartTheme.chart,
+      this.chartTheme,
       this.chartRotation,
-      this.chartTheme.legend,
       this.showLegend.get() && !this.legendCollapsed.get(),
       this.axesSpecs,
       this.axesTicksDimensions,

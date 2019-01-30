@@ -1,6 +1,6 @@
 import { AxisTicksDimensions } from '../axes/axis_utils';
 import { AxisSpec, Position } from '../series/specs';
-import { LegendStyle } from '../themes/theme';
+import { Theme } from '../themes/theme';
 import { AxisId } from './ids';
 
 export interface Dimensions {
@@ -24,20 +24,25 @@ export interface Margins {
  */
 export function computeChartDimensions(
   parentDimensions: Dimensions,
-  chartMargins: Margins,
-  chartPaddings: Margins,
-  legendStyle: LegendStyle,
+  chartTheme: Theme,
   axisDimensions: Map<AxisId, AxisTicksDimensions>,
   axisSpecs: Map<AxisId, AxisSpec>,
   showLegend: boolean,
   legendPosition?: Position,
 ): Dimensions {
+  const chartMargins = chartTheme.chart.margins;
+  const chartPaddings = chartTheme.chart.paddings;
+  const legendStyle = chartTheme.legend;
+  const { titleFontSize, titlePadding } = chartTheme.axes;
+
+  const axisTitleHeight = titleFontSize + titlePadding;
+
   let vLeftAxisSpecWidth = 0;
   let vRightAxisSpecWidth = 0;
   let hTopAxisSpecHeight = 0;
   let hBottomAxisSpecHeight = 0;
 
-  axisDimensions.forEach(({ maxTickWidth = 0, maxTickHeight = 0 }, id) => {
+  axisDimensions.forEach(({ maxLabelBboxWidth = 0, maxLabelBboxHeight = 0 }, id) => {
     const axisSpec = axisSpecs.get(id);
     if (!axisSpec) {
       return;
@@ -45,16 +50,16 @@ export function computeChartDimensions(
     const { position, tickSize, tickPadding } = axisSpec;
     switch (position) {
       case Position.Top:
-        hTopAxisSpecHeight += maxTickHeight + tickSize + tickPadding + chartMargins.top;
+        hTopAxisSpecHeight += maxLabelBboxHeight + tickSize + tickPadding + chartMargins.top + axisTitleHeight;
         break;
       case Position.Bottom:
-        hBottomAxisSpecHeight += maxTickHeight + tickSize + tickPadding + chartMargins.bottom;
+        hBottomAxisSpecHeight += maxLabelBboxHeight + tickSize + tickPadding + chartMargins.bottom + axisTitleHeight;
         break;
       case Position.Left:
-        vLeftAxisSpecWidth += maxTickWidth + tickSize + tickPadding + chartMargins.left;
+        vLeftAxisSpecWidth += maxLabelBboxWidth + tickSize + tickPadding + chartMargins.left + axisTitleHeight;
         break;
       case Position.Right:
-        vRightAxisSpecWidth += maxTickWidth + tickSize + tickPadding + chartMargins.right;
+        vRightAxisSpecWidth += maxLabelBboxWidth + tickSize + tickPadding + chartMargins.right + axisTitleHeight;
         break;
     }
   });

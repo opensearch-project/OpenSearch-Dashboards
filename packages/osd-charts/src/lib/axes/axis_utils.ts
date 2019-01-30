@@ -1,14 +1,14 @@
-import { max } from 'd3-array';
+
 import { XDomain } from '../series/domains/x_domain';
 import { YDomain } from '../series/domains/y_domain';
 import { computeXScale, computeYScales } from '../series/scales';
 import { AxisSpec, Position, Rotation, TickFormatter } from '../series/specs';
-import { ChartConfig, LegendStyle } from '../themes/theme';
+import { AxisConfig, Theme } from '../themes/theme';
 import { Dimensions, Margins } from '../utils/dimensions';
 import { Domain } from '../utils/domain';
 import { AxisId } from '../utils/ids';
 import { Scale, ScaleType } from '../utils/scales/scales';
-import { BBoxCalculator } from './bbox_calculator';
+import { BBox, BBoxCalculator } from './bbox_calculator';
 
 export interface AxisTick {
   value: number | string;
@@ -20,10 +20,18 @@ export interface AxisTicksDimensions {
   axisScaleType: ScaleType;
   axisScaleDomain: Domain;
   tickValues: string[] | number[];
-  ticksDimensions: Array<{ width: number; height: number }>;
   tickLabels: string[];
-  maxTickWidth: number;
-  maxTickHeight: number;
+  maxLabelBboxWidth: number;
+  maxLabelBboxHeight: number;
+  maxLabelTextWidth: number;
+  maxLabelTextHeight: number;
+}
+
+export interface TickLabelProps {
+  x: number;
+  y: number;
+  align: string;
+  verticalAlign: string;
 }
 
 /**
@@ -43,6 +51,7 @@ export function computeAxisTicksDimensions(
   totalGroupCount: number,
   bboxCalculator: BBoxCalculator,
   chartRotation: Rotation,
+  axisConfig: AxisConfig,
 ): AxisTicksDimensions | null {
   const scale = getScaleForAxisSpec(
     axisSpec,
@@ -56,7 +65,14 @@ export function computeAxisTicksDimensions(
   if (!scale) {
     throw new Error(`Cannot compute scale for axis spec ${axisSpec.id}`);
   }
-  const dimensions = computeTickDimensions(scale, axisSpec.tickFormat, bboxCalculator);
+  const dimensions = computeTickDimensions(
+    scale,
+    axisSpec.tickFormat,
+    bboxCalculator,
+    axisConfig,
+    axisSpec.tickLabelRotation,
+  );
+
   return {
     axisScaleDomain: xDomain.domain,
     axisScaleType: xDomain.scaleType,
@@ -84,35 +100,196 @@ export function getScaleForAxisSpec(
   }
 }
 
+export function computeRotatedLabelDimensions(unrotatedDims: BBox, degreesRotation: number): BBox {
+  const { width, height } = unrotatedDims;
+
+  const radians = degreesRotation * Math.PI / 180;
+
+  const rotatedHeight = Math.abs(width * Math.sin(radians)) + Math.abs(height * Math.cos(radians));
+  const rotatedWidth = Math.abs(width * Math.cos(radians)) + Math.abs(height * Math.sin(radians));
+
+  return {
+    width: rotatedWidth,
+    height: rotatedHeight,
+  };
+}
+
 function computeTickDimensions(
   scale: Scale,
   tickFormat: TickFormatter,
   bboxCalculator: BBoxCalculator,
+  axisConfig: AxisConfig,
+  tickLabelRotation: number = 0,
 ) {
   const tickValues = scale.ticks();
   const tickLabels = tickValues.map(tickFormat);
 
-  const ticksDimensions = tickLabels
-    .map((tickLabel: string) => {
-      const bbox = bboxCalculator.compute(tickLabel).getOrElse({
+  const { tickFontSize, tickFontFamily } = axisConfig;
+
+  const { maxLabelBboxWidth, maxLabelBboxHeight, maxLabelTextWidth, maxLabelTextHeight } = tickLabels
+    .reduce((acc: { [key: string]: number }, tickLabel: string) => {
+      const bbox = bboxCalculator.compute(tickLabel, tickFontSize, tickFontFamily).getOrElse({
         width: 0,
         height: 0,
       });
+
+      const rotatedBbox = computeRotatedLabelDimensions(bbox, tickLabelRotation);
+
+      const width = Math.ceil(rotatedBbox.width);
+      const height = Math.ceil(rotatedBbox.height);
+      const labelWidth = Math.ceil(bbox.width);
+      const labelHeight = Math.ceil(bbox.height);
+
+      const prevWidth = acc.maxLabelBboxWidth;
+      const prevHeight = acc.maxLabelBboxHeight;
+      const prevLabelWidth = acc.maxLabelTextWidth;
+      const prevLabelHeight = acc.maxLabelTextHeight;
+
       return {
-        width: Math.ceil(bbox.width),
-        height: Math.ceil(bbox.height),
+        maxLabelBboxWidth: prevWidth > width ? prevWidth : width,
+        maxLabelBboxHeight: prevHeight > height ? prevHeight : height,
+        maxLabelTextWidth: prevLabelWidth > labelWidth ? prevLabelWidth : labelWidth,
+        maxLabelTextHeight: prevLabelHeight > labelHeight ? prevLabelHeight : labelHeight,
       };
-    })
-    .filter((d) => d);
-  const maxTickWidth = max(ticksDimensions, (bbox) => bbox.width) || 0;
-  const maxTickHeight = max(ticksDimensions, (bbox) => bbox.height) || 0;
+    }, { maxLabelBboxWidth: 0, maxLabelBboxHeight: 0, maxLabelTextWidth: 0, maxLabelTextHeight: 0 });
+
   return {
     tickValues,
     tickLabels,
-    ticksDimensions,
-    maxTickWidth,
-    maxTickHeight,
+    maxLabelBboxWidth,
+    maxLabelBboxHeight,
+    maxLabelTextWidth,
+    maxLabelTextHeight,
   };
+}
+
+/**
+ * The Konva api sets the top right corner of a shape as the default origin of rotation.
+ * In order to apply rotation to tick labels while preserving their relative position to the axis,
+ * we compute offsets to apply to the Text element as well as adjust the x/y coordinates to adjust
+ * for these offsets.
+ */
+export function centerRotationOrigin(
+  axisTicksDimensions: {
+    maxLabelBboxWidth: number,
+    maxLabelBboxHeight: number,
+    maxLabelTextWidth: number,
+    maxLabelTextHeight: number,
+  },
+  coordinates: { x: number, y: number }): { x: number, y: number, offsetX: number, offsetY: number } {
+
+  const { maxLabelBboxWidth, maxLabelBboxHeight, maxLabelTextWidth, maxLabelTextHeight } = axisTicksDimensions;
+
+  const offsetX = maxLabelTextWidth / 2;
+  const offsetY = maxLabelTextHeight / 2;
+  const x = coordinates.x + maxLabelBboxWidth / 2;
+  const y = coordinates.y + maxLabelBboxHeight / 2;
+
+  return { offsetX, offsetY, x, y };
+}
+
+/**
+ * Gets the computed x/y coordinates & alignment properties for an axis tick label.
+ * @param isVerticalAxis if the axis is vertical (in contrast to horizontal)
+ * @param tickLabelRotation degree of rotation of the tick label
+ * @param tickSize length of tick line
+ * @param tickPadding amount of padding between label and tick line
+ * @param tickPosition position of tick relative to axis line origin and other ticks along it
+ * @param axisPosition position of where the axis sits relative to the visualization
+ * @param axisTicksDimensions computed axis dimensions and values (from computeTickDimensions)
+ */
+export function getTickLabelProps(
+  tickLabelRotation: number,
+  tickSize: number,
+  tickPadding: number,
+  tickPosition: number,
+  axisPosition: Position,
+  axisTicksDimensions: AxisTicksDimensions,
+): TickLabelProps {
+  const { maxLabelBboxWidth, maxLabelBboxHeight } = axisTicksDimensions;
+  const isVerticalAxis = isVertical(axisPosition);
+  const isRotated = tickLabelRotation !== 0;
+  let align = 'center';
+  let verticalAlign = 'middle';
+
+  if (isVerticalAxis) {
+    const isAxisLeft = axisPosition === Position.Left;
+
+    if (!isRotated) {
+      align = isAxisLeft ? 'right' : 'left';
+    }
+
+    return {
+      x: isAxisLeft ? - (maxLabelBboxWidth) : tickSize + tickPadding,
+      y: tickPosition - maxLabelBboxHeight / 2,
+      align,
+      verticalAlign,
+    };
+  }
+
+  const isAxisTop = axisPosition === Position.Top;
+
+  if (!isRotated) {
+    verticalAlign = isAxisTop ? 'bottom' : 'top';
+  }
+
+  return {
+    x: tickPosition - maxLabelBboxWidth / 2,
+    y: isAxisTop ? 0 : tickSize + tickPadding,
+    align,
+    verticalAlign,
+  };
+}
+
+export function getVerticalAxisTickLineProps(
+  showGridLine: boolean,
+  position: Position,
+  tickPadding: number,
+  tickSize: number,
+  tickPosition: number,
+  chartWidth: number,
+  paddings: Margins,
+): number[] {
+  const isLeftAxis = position === Position.Left;
+  const y = tickPosition;
+  const x1 = isLeftAxis ? tickPadding : 0;
+  const x2 = isLeftAxis ? tickSize + tickPadding : tickSize;
+
+  if (showGridLine) {
+    if (isLeftAxis) {
+      return [x1, y, x2 + chartWidth + paddings.left, y];
+    }
+
+    return [x1 - chartWidth - paddings.right, y, x2, y];
+  }
+
+  return [x1, y, x2, y];
+}
+
+export function getHorizontalAxisTickLineProps(
+  showGridLine: boolean,
+  position: Position,
+  tickPadding: number,
+  tickSize: number,
+  tickPosition: number,
+  labelHeight: number,
+  chartHeight: number,
+  paddings: Margins,
+): number[] {
+  const isTopAxis = position === Position.Top;
+  const x = tickPosition;
+  const y1 = isTopAxis ? labelHeight + tickPadding : 0;
+  const y2 = isTopAxis ? labelHeight + tickPadding + tickSize : tickSize;
+
+  if (showGridLine) {
+    if (isTopAxis) {
+      return [x, y1, x, y2 + chartHeight + paddings.top];
+    }
+
+    return [x, y1 - chartHeight - paddings.bottom, x, y2];
+  }
+
+  return [x, y1, x, y2];
 }
 
 export function getMinMaxRange(
@@ -187,9 +364,9 @@ export function getVisibleTicks(
   chartRotation: Rotation,
 ): AxisTick[] {
   const { showOverlappingTicks, showOverlappingLabels } = axisSpec;
-  const { maxTickHeight, maxTickWidth } = axisDim;
+  const { maxLabelBboxHeight, maxLabelBboxWidth } = axisDim;
   const { width, height } = chartDimensions;
-  const requiredSpace = isVertical(axisSpec.position) ? maxTickHeight / 2 : maxTickWidth / 2;
+  const requiredSpace = isVertical(axisSpec.position) ? maxLabelBboxHeight / 2 : maxLabelBboxWidth / 2;
   let firstTickPosition;
 
   firstTickPosition = 0;
@@ -237,6 +414,7 @@ export function getVisibleTicks(
 export function getAxisPosition(
   chartDimensions: Dimensions,
   chartMargins: Margins,
+  axisTitleHeight: number,
   axisSpec: AxisSpec,
   axisDim: AxisTicksDimensions,
   cumTopSum: number,
@@ -244,9 +422,8 @@ export function getAxisPosition(
   cumLeftSum: number,
   cumRightSum: number,
 ) {
-  // TODO add title space
   const { position, tickSize, tickPadding } = axisSpec;
-  const { maxTickHeight, maxTickWidth } = axisDim;
+  const { maxLabelBboxHeight, maxLabelBboxWidth } = axisDim;
   const { top, left, height, width } = chartDimensions;
   const dimensions = {
     top,
@@ -261,31 +438,30 @@ export function getAxisPosition(
 
   if (isVertical(position)) {
     if (position === Position.Left) {
-      leftIncrement = maxTickWidth + tickSize + tickPadding + chartMargins.left;
-      dimensions.left = maxTickWidth + cumLeftSum + chartMargins.left;
+      leftIncrement = maxLabelBboxWidth + tickSize + tickPadding + chartMargins.left;
+      dimensions.left = maxLabelBboxWidth + cumLeftSum + chartMargins.left + axisTitleHeight;
     } else {
-      rightIncrement = maxTickWidth + tickSize + tickPadding + chartMargins.right;
+      rightIncrement = maxLabelBboxWidth + tickSize + tickPadding + chartMargins.right;
       dimensions.left = left + width + cumRightSum;
     }
-    dimensions.width = maxTickWidth;
+    dimensions.width = maxLabelBboxWidth;
   } else {
     if (position === Position.Top) {
-      topIncrement = maxTickHeight + tickSize + tickPadding + chartMargins.top;
-      dimensions.top = cumTopSum + chartMargins.top;
+      topIncrement = maxLabelBboxHeight + tickSize + tickPadding + chartMargins.top;
+      dimensions.top = cumTopSum + chartMargins.top + axisTitleHeight;
     } else {
-      bottomIncrement = maxTickHeight + tickSize + tickPadding + chartMargins.bottom;
+      bottomIncrement = maxLabelBboxHeight + tickSize + tickPadding + chartMargins.bottom;
       dimensions.top = top + height + cumBottomSum;
     }
-    dimensions.height = maxTickHeight;
+    dimensions.height = maxLabelBboxHeight;
   }
   return { dimensions, topIncrement, bottomIncrement, leftIncrement, rightIncrement };
 }
 
 export function getAxisTicksPositions(
   chartDimensions: Dimensions,
-  chartConfig: ChartConfig,
+  chartTheme: Theme,
   chartRotation: Rotation,
-  legendStyle: LegendStyle,
   showLegend: boolean,
   axisSpecs: Map<AxisId, AxisSpec>,
   axisDimensions: Map<AxisId, AxisTicksDimensions>,
@@ -294,9 +470,12 @@ export function getAxisTicksPositions(
   totalGroupsCount: number,
   legendPosition?: Position,
 ) {
+  const chartConfig = chartTheme.chart;
+  const legendStyle = chartTheme.legend;
   const axisPositions: Map<AxisId, Dimensions> = new Map();
   const axisVisibleTicks: Map<AxisId, AxisTick[]> = new Map();
   const axisTicks: Map<AxisId, AxisTick[]> = new Map();
+
   let cumTopSum = 0;
   let cumBottomSum = chartConfig.paddings.bottom;
   let cumLeftSum = 0;
@@ -354,9 +533,14 @@ export function getAxisTicksPositions(
       chartDimensions,
       chartRotation,
     );
+
+    const { titleFontSize, titlePadding } = chartTheme.axes;
+    const axisTitleHeight = titleFontSize + titlePadding;
+
     const axisPosition = getAxisPosition(
       chartDimensions,
       chartConfig.margins,
+      axisTitleHeight,
       axisSpec,
       axisDim,
       cumTopSum,
@@ -364,6 +548,7 @@ export function getAxisTicksPositions(
       cumLeftSum,
       cumRightSum,
     );
+
     cumTopSum += axisPosition.topIncrement;
     cumBottomSum += axisPosition.bottomIncrement;
     cumLeftSum += axisPosition.leftIncrement;

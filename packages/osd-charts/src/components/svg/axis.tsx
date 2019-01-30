@@ -40,9 +40,9 @@ export class Axis extends React.PureComponent<AxisProps> {
         className="euiSeriesChartAxis_tickLabel"
         key={`tick-${i}`}
         {...textProps}
-        // textAnchor={textProps.textAnchor}
-        // dominantBaseline={textProps.dominantBaseline}
-        // transform={transform}
+      // textAnchor={textProps.textAnchor}
+      // dominantBaseline={textProps.dominantBaseline}
+      // transform={transform}
       >
         {tick.label}
       </text>
@@ -52,7 +52,7 @@ export class Axis extends React.PureComponent<AxisProps> {
   private renderTickLine = (tick: AxisTick, i: number) => {
     const {
       axisSpec: { tickSize, tickPadding, position },
-      axisTicksDimensions: { maxTickHeight },
+      axisTicksDimensions: { maxLabelBboxHeight },
     } = this.props;
 
     const lineProps: SVGProps<SVGLineElement> = {};
@@ -65,8 +65,8 @@ export class Axis extends React.PureComponent<AxisProps> {
     } else {
       lineProps.x1 = tick.position;
       lineProps.x2 = tick.position;
-      lineProps.y1 = position === 'top' ? maxTickHeight + tickPadding : 0;
-      lineProps.y2 = position === 'top' ? maxTickHeight + tickPadding + tickSize : tickSize;
+      lineProps.y1 = position === 'top' ? maxLabelBboxHeight + tickPadding : 0;
+      lineProps.y2 = position === 'top' ? maxLabelBboxHeight + tickPadding + tickSize : tickSize;
     }
 
     return <line className="euiSeriesChartAxis_tickLine" key={`tick-${i}`} {...lineProps} />;
@@ -101,9 +101,9 @@ export class Axis extends React.PureComponent<AxisProps> {
       lineProps.x1 = 0;
       lineProps.x2 = axisPosition.width;
       lineProps.y1 =
-        position === 'top' ? axisTicksDimensions.maxTickHeight + tickSize + tickPadding : 0;
+        position === 'top' ? axisTicksDimensions.maxLabelBboxHeight + tickSize + tickPadding : 0;
       lineProps.y2 =
-        position === 'top' ? axisTicksDimensions.maxTickHeight + tickSize + tickPadding : 0;
+        position === 'top' ? axisTicksDimensions.maxLabelBboxHeight + tickSize + tickPadding : 0;
     }
     return <line className="euiSeriesChartAxis_line" {...lineProps} />;
   }
@@ -123,7 +123,7 @@ export class Axis extends React.PureComponent<AxisProps> {
     const {
       axisPosition: { height },
       axisSpec: { title, position, tickSize, tickPadding },
-      axisTicksDimensions: { maxTickWidth },
+      axisTicksDimensions: { maxLabelBboxWidth },
       chartTheme: {
         chart: { margins },
       },
@@ -132,8 +132,8 @@ export class Axis extends React.PureComponent<AxisProps> {
     const top = height / 2;
     const left =
       position === Position.Left
-        ? -(maxTickWidth + margins.left / 2)
-        : tickSize + tickPadding + maxTickWidth + +margins.right / 2;
+        ? -(maxLabelBboxWidth + margins.left / 2)
+        : tickSize + tickPadding + maxLabelBboxWidth + +margins.right / 2;
     const translate = `translate(${left} ${top}) rotate(-90)`;
     return (
       <g className="euiSeriesChartAxis_axisTitle">
@@ -147,7 +147,7 @@ export class Axis extends React.PureComponent<AxisProps> {
     const {
       axisPosition: { width },
       axisSpec: { title, position, tickSize, tickPadding },
-      axisTicksDimensions: { maxTickHeight },
+      axisTicksDimensions: { maxLabelBboxHeight },
       chartTheme: {
         chart: { margins },
       },
@@ -156,7 +156,7 @@ export class Axis extends React.PureComponent<AxisProps> {
     const top =
       position === Position.Top
         ? -margins.top / 2
-        : maxTickHeight + tickPadding + tickSize + margins.bottom / 2;
+        : maxLabelBboxHeight + tickPadding + tickSize + margins.bottom / 2;
     const left = width / 2;
     const translate = `translate(${left} ${top} )`;
     return (

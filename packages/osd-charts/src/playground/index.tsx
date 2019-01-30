@@ -78,6 +78,7 @@ class App extends Component {
                 showOverlappingTicks={true}
               />
               <Axis
+                tickLabelRotation={-90}
                 id={getAxisId('left2')}
                 title={'count'}
                 position={Position.Left}

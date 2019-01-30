@@ -1,7 +1,12 @@
 import { Margins } from '../utils/dimensions';
 
 export interface ChartConfig {
+  /* Space btw parent DOM element and first available element of the chart (axis
+   * if exists, else the chart itself)
+   */
   margins: Margins;
+
+  /* Space btw the chart geometries and axis; if no axis, pads space btw chart & container */
   paddings: Margins;
   styles: {
     lineSeries: LineSeriesStyle;

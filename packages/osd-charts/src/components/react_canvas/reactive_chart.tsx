@@ -134,7 +134,9 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
       axesPositions,
       chartTheme,
       debug,
+      chartDimensions,
     } = this.props.chartStore!;
+
     const axesComponents: JSX.Element[] = [];
     axesVisibleTicks.forEach((axisTicks, axisId) => {
       const axisSpec = axesSpecs.get(axisId);
@@ -153,6 +155,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
           ticks={ticks}
           chartTheme={chartTheme}
           debug={debug}
+          chartDimensions={chartDimensions}
         />,
       );
     });
@@ -231,15 +234,15 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
     const clippings = debug
       ? {}
       : {
-          clipX: 0,
-          clipY: 0,
-          clipWidth: [90, -90].includes(chartRotation)
-            ? chartDimensions.height
-            : chartDimensions.width,
-          clipHeight: [90, -90].includes(chartRotation)
-            ? chartDimensions.width
-            : chartDimensions.height,
-        };
+        clipX: 0,
+        clipY: 0,
+        clipWidth: [90, -90].includes(chartRotation)
+          ? chartDimensions.height
+          : chartDimensions.width,
+        clipHeight: [90, -90].includes(chartRotation)
+          ? chartDimensions.width
+          : chartDimensions.height,
+      };
     let brushProps = {};
     const isBrushEnabled = this.props.chartStore!.isBrushEnabled();
     if (isBrushEnabled) {

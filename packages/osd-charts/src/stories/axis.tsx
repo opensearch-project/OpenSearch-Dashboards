@@ -1,4 +1,4 @@
-import { boolean } from '@storybook/addon-knobs';
+import { boolean, number } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import {
@@ -45,6 +45,74 @@ storiesOf('Axis', module)
         />
       </Chart>
     );
+  })
+  .add('tick label rotation', () => {
+    return (
+      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+          tickLabelRotation={number('bottom axis tick label rotation', 0, {
+            range: true,
+            min: -90,
+            max: 90,
+            step: 1,
+          })}
+        />
+        <Axis
+          id={getAxisId('left')}
+          title={'Bar axis'}
+          position={Position.Left}
+          tickLabelRotation={number('left axis tick label rotation', 0, {
+            range: true,
+            min: -90,
+            max: 90,
+            step: 1,
+          })}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <Axis
+          id={getAxisId('top')}
+          title={'Bar axis'}
+          position={Position.Top}
+          tickLabelRotation={number('top axis tick label rotation', 0, {
+            range: true,
+            min: -90,
+            max: 90,
+            step: 1,
+          })}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <Axis
+          id={getAxisId('right')}
+          title={'Bar axis'}
+          position={Position.Right}
+          tickLabelRotation={number('right axis tick label rotation', 0, {
+            range: true,
+            min: -90,
+            max: 90,
+            step: 1,
+          })}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <AreaSeries
+          id={getSpecId('lines')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
+          yScaleToDataExtent={false}
+        />
+        <Settings debug={boolean('debug', false)} />
+      </Chart>);
   })
   .add('4 axes', () => {
     return (
