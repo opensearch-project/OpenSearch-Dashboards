@@ -4,8 +4,6 @@ import { Axis, BarSeries, Chart, getAxisId, getSpecId, Position, ScaleType, Sett
 import * as TestDatasets from '../lib/series/utils/test_dataset';
 import { niceTimeFormatter } from '../utils/data/formatters';
 
-import './stories.scss';
-
 storiesOf('Bar Chart', module)
   .add('basic', () => {
     return (

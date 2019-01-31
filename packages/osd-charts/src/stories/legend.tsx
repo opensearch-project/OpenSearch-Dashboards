@@ -2,7 +2,6 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { Axis, BarSeries, Chart, getAxisId, getSpecId, Position, ScaleType, Settings } from '..';
 import * as TestDatasets from '../lib/series/utils/test_dataset';
-import './stories.scss';
 
 storiesOf('Legend', module)
   .add('right', () => {

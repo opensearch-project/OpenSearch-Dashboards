@@ -14,7 +14,6 @@ import {
   Settings,
 } from '..';
 import { LineSeries } from '../specs';
-import './stories.scss';
 
 storiesOf('Axis', module)
   .add('basic', () => {
@@ -103,16 +102,12 @@ storiesOf('Axis', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[
-            { x: 0, y: 2 },
-            { x: 1, y: 7 },
-            { x: 2, y: 3 },
-            { x: 3, y: 6 },
-          ]}
+          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
           yScaleToDataExtent={false}
         />
         <Settings debug={boolean('debug', false)} />
-      </Chart>);
+      </Chart>
+    );
   })
   .add('4 axes', () => {
     return (

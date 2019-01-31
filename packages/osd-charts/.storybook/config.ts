@@ -1,12 +1,22 @@
 import { withInfo } from '@storybook/addon-info';
 import { withKnobs } from '@storybook/addon-knobs';
+import { withOptions } from '@storybook/addon-options';
 import { addDecorator, configure } from '@storybook/react';
+import './style.css';
 
+addDecorator(
+  withOptions({
+    name: 'Elastic Charts',
+    url: 'https://github.com/elastic/elastic-charts',
+    addonPanelInRight: true,
+    sidebarAnimations: true,
+  }),
+);
 addDecorator(withKnobs);
 addDecorator(
   withInfo({
     inline: true,
-    source: true,
+    source: false,
   }),
 );
 

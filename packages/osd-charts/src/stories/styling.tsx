@@ -3,7 +3,6 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { Axis, BarSeries, Chart, getAxisId, getSpecId, Position, ScaleType, Settings } from '..';
 import { GridLineConfig, PartialTheme } from '../lib/themes/theme';
-import './stories.scss';
 
 function createThemeAction(title: string, min: number, max: number, value: number) {
   return number(title, value, {

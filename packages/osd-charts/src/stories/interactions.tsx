@@ -7,9 +7,7 @@ import { boolean } from '@storybook/addon-knobs';
 import { DateTime } from 'luxon';
 import { AreaSeries, LineSeries } from '../specs';
 import { niceTimeFormatter } from '../utils/data/formatters';
-import './stories.scss';
 
-// const onValueClick = action('onValueClick');
 const onElementListeners = {
   onElementClick: action('onElementClick'),
   onElementOver: action('onElementOver'),

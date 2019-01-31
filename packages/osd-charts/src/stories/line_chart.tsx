@@ -2,7 +2,6 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { Axis, Chart, getAxisId, getSpecId, LineSeries, Position, ScaleType, Settings } from '..';
 import { CurveType } from '../lib/series/curves';
-import './stories.scss';
 
 storiesOf('Line Chart', module)
   .add('basic', () => {

@@ -1,7 +1,6 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { AreaSeries, Axis, Chart, getAxisId, getSpecId, Position, ScaleType, Settings } from '..';
-import './stories.scss';
 
 storiesOf('Area Chart', module)
   .add('basic', () => {

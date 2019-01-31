@@ -1,0 +1,20 @@
+.story-chart {
+  background: white;
+}
+#root {
+  background-color: blanchedalmond;
+}
+#story-root {
+  padding: 20px;
+}
+#story-root + div table {
+  border: 1px solid gray;
+}
+#story-root + div table th {
+  border: 1px solid gray;
+  padding: 5px;
+}
+#story-root + div table td {
+  border: 1px solid gray;
+  padding: 5px;
+}

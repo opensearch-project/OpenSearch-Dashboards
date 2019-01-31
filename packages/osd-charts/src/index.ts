@@ -1,3 +1,4 @@
+import './index.scss';
 export * from './specs';
 export { Chart } from './components/chart';
 export { getAxisId, getGroupId, getSpecId } from './lib/utils/ids';
