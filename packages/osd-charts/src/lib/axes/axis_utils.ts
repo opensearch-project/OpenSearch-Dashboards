@@ -3,7 +3,7 @@ import { XDomain } from '../series/domains/x_domain';
 import { YDomain } from '../series/domains/y_domain';
 import { computeXScale, computeYScales } from '../series/scales';
 import { AxisSpec, Position, Rotation, TickFormatter } from '../series/specs';
-import { AxisConfig, Theme } from '../themes/theme';
+import { AxisConfig, DEFAULT_GRID_LINE_CONFIG, GridLineConfig, Theme } from '../themes/theme';
 import { Dimensions, Margins } from '../utils/dimensions';
 import { Domain } from '../utils/domain';
 import { AxisId } from '../utils/ids';
@@ -242,7 +242,35 @@ export function getTickLabelProps(
 }
 
 export function getVerticalAxisTickLineProps(
-  showGridLine: boolean,
+  position: Position,
+  tickPadding: number,
+  tickSize: number,
+  tickPosition: number,
+): number[] {
+  const isLeftAxis = position === Position.Left;
+  const y = tickPosition;
+  const x1 = isLeftAxis ? tickPadding : 0;
+  const x2 = isLeftAxis ? tickSize + tickPadding : tickSize;
+
+  return [x1, y, x2, y];
+}
+
+export function getHorizontalAxisTickLineProps(
+  position: Position,
+  tickPadding: number,
+  tickSize: number,
+  tickPosition: number,
+  labelHeight: number,
+): number[] {
+  const isTopAxis = position === Position.Top;
+  const x = tickPosition;
+  const y1 = isTopAxis ? labelHeight + tickPadding : 0;
+  const y2 = isTopAxis ? labelHeight + tickPadding + tickSize : tickSize;
+
+  return [x, y1, x, y2];
+}
+
+export function getVerticalAxisGridLineProps(
   position: Position,
   tickPadding: number,
   tickSize: number,
@@ -252,22 +280,16 @@ export function getVerticalAxisTickLineProps(
 ): number[] {
   const isLeftAxis = position === Position.Left;
   const y = tickPosition;
-  const x1 = isLeftAxis ? tickPadding : 0;
-  const x2 = isLeftAxis ? tickSize + tickPadding : tickSize;
 
-  if (showGridLine) {
-    if (isLeftAxis) {
-      return [x1, y, x2 + chartWidth + paddings.left, y];
-    }
+  const leftX1 = tickSize + tickPadding + paddings.left;
+  const rightX1 = - chartWidth - paddings.right;
 
-    return [x1 - chartWidth - paddings.right, y, x2, y];
-  }
+  const x1 = isLeftAxis ? leftX1 : rightX1;
 
-  return [x1, y, x2, y];
+  return [x1, y, x1 + chartWidth, y];
 }
 
-export function getHorizontalAxisTickLineProps(
-  showGridLine: boolean,
+export function getHorizontalAxisGridLineProps(
   position: Position,
   tickPadding: number,
   tickSize: number,
@@ -278,18 +300,22 @@ export function getHorizontalAxisTickLineProps(
 ): number[] {
   const isTopAxis = position === Position.Top;
   const x = tickPosition;
-  const y1 = isTopAxis ? labelHeight + tickPadding : 0;
-  const y2 = isTopAxis ? labelHeight + tickPadding + tickSize : tickSize;
 
-  if (showGridLine) {
-    if (isTopAxis) {
-      return [x, y1, x, y2 + chartHeight + paddings.top];
-    }
+  const topY1 = labelHeight + tickPadding + tickSize + paddings.top;
+  const bottomY1 = - chartHeight - paddings.bottom;
 
-    return [x, y1 - chartHeight - paddings.bottom, x, y2];
-  }
+  const y1 = isTopAxis ? topY1 : bottomY1;
 
-  return [x, y1, x, y2];
+  return [x, y1, x, y1 + chartHeight];
+}
+
+export function mergeWithDefaultGridLineConfig(config: GridLineConfig): GridLineConfig {
+  return {
+    stroke: config.stroke || DEFAULT_GRID_LINE_CONFIG.stroke,
+    strokeWidth: config.strokeWidth || DEFAULT_GRID_LINE_CONFIG.strokeWidth,
+    opacity: config.opacity || DEFAULT_GRID_LINE_CONFIG.opacity,
+    dash: config.dash || DEFAULT_GRID_LINE_CONFIG.dash,
+  };
 }
 
 export function getMinMaxRange(

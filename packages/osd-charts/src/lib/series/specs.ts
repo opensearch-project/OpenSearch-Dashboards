@@ -1,3 +1,4 @@
+import { GridLineConfig } from '../themes/theme';
 import { Accessor } from '../utils/accessor';
 import { Domain } from '../utils/domain';
 import { AxisId, GroupId, SpecId } from '../utils/ids';
@@ -101,6 +102,8 @@ export type AreaSeriesSpec = BasicSeriesSpec & {
 export interface AxisSpec {
   /** The ID of the spec, generated via getSpecId method */
   id: AxisId;
+  /** Style options for grid line */
+  gridLineStyle?: GridLineConfig;
   /** The ID of the axis group, generated via getGroupId method
    * @default __global__
    */

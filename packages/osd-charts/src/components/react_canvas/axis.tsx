@@ -1,11 +1,12 @@
 import React from 'react';
 import { Group, Line, Rect, Text } from 'react-konva';
 import {
-  AxisTick, AxisTicksDimensions, centerRotationOrigin, getHorizontalAxisTickLineProps,
-  getTickLabelProps, getVerticalAxisTickLineProps, isHorizontal, isVertical,
+  AxisTick, AxisTicksDimensions, centerRotationOrigin, getHorizontalAxisGridLineProps,
+  getHorizontalAxisTickLineProps, getTickLabelProps, getVerticalAxisGridLineProps,
+  getVerticalAxisTickLineProps, isHorizontal, isVertical, mergeWithDefaultGridLineConfig,
 } from '../../lib/axes/axis_utils';
 import { AxisSpec, Position } from '../../lib/series/specs';
-import { Theme } from '../../lib/themes/theme';
+import { DEFAULT_GRID_LINE_CONFIG, Theme } from '../../lib/themes/theme';
 import { Dimensions } from '../../lib/utils/dimensions';
 
 interface AxisProps {
@@ -73,27 +74,31 @@ export class Axis extends React.PureComponent<AxisProps> {
     );
   }
 
-  private renderTickLine = (tick: AxisTick, i: number) => {
+  private renderGridLine = (tick: AxisTick, i: number) => {
+    const showGridLines = this.props.axisSpec.showGridLines || false;
+
+    if (!showGridLines) {
+      return null;
+    }
+
     const {
-      axisSpec: { tickSize, tickPadding, position },
+      axisSpec: { tickSize, tickPadding, position, gridLineStyle },
       axisTicksDimensions: { maxLabelBboxHeight },
       chartDimensions,
       chartTheme: { chart: { paddings } },
     } = this.props;
 
-    const showGridLines = this.props.axisSpec.showGridLines || false;
+    const config = gridLineStyle ? mergeWithDefaultGridLineConfig(gridLineStyle) : DEFAULT_GRID_LINE_CONFIG;
 
     const lineProps = isVertical(position) ?
-      getVerticalAxisTickLineProps(
-        showGridLines,
+      getVerticalAxisGridLineProps(
         position,
         tickPadding,
         tickSize,
         tick.position,
         chartDimensions.width,
         paddings,
-      ) : getHorizontalAxisTickLineProps(
-        showGridLines,
+      ) : getHorizontalAxisGridLineProps(
         position,
         tickPadding,
         tickSize,
@@ -101,6 +106,29 @@ export class Axis extends React.PureComponent<AxisProps> {
         maxLabelBboxHeight,
         chartDimensions.height,
         paddings,
+      );
+
+    return <Line key={`tick-${i}`} points={lineProps} {...config} />;
+  }
+
+  private renderTickLine = (tick: AxisTick, i: number) => {
+    const {
+      axisSpec: { tickSize, tickPadding, position },
+      axisTicksDimensions: { maxLabelBboxHeight },
+    } = this.props;
+
+    const lineProps = isVertical(position) ?
+      getVerticalAxisTickLineProps(
+        position,
+        tickPadding,
+        tickSize,
+        tick.position,
+      ) : getHorizontalAxisTickLineProps(
+        position,
+        tickPadding,
+        tickSize,
+        tick.position,
+        maxLabelBboxHeight,
       );
 
     return <Line key={`tick-${i}`} points={lineProps} stroke={'gray'} strokeWidth={1} />;
@@ -111,6 +139,7 @@ export class Axis extends React.PureComponent<AxisProps> {
       <Group x={axisPosition.left} y={axisPosition.top}>
         <Group key="lines">{this.renderAxisLine()}</Group>
         <Group key="tick-lines">{ticks.map(this.renderTickLine)}</Group>
+        <Group key="grid-lines">{ticks.map(this.renderGridLine)}</Group>
         <Group key="ticks">
           {ticks.filter((tick) => tick.label !== null).map(this.renderTickLabel)}
         </Group>

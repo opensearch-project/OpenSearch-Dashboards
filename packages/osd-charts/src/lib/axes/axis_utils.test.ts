@@ -2,6 +2,7 @@ import { XDomain } from '../series/domains/x_domain';
 import { YDomain } from '../series/domains/y_domain';
 import { Position } from '../series/specs';
 import { DEFAULT_THEME } from '../themes/theme';
+import { Margins } from '../utils/dimensions';
 import { getAxisId, getGroupId } from '../utils/ids';
 import { ScaleType } from '../utils/scales/scales';
 import {
@@ -9,9 +10,13 @@ import {
   computeAxisTicksDimensions,
   computeRotatedLabelDimensions,
   getAvailableTicks,
+  getHorizontalAxisGridLineProps,
+  getHorizontalAxisTickLineProps,
   getMinMaxRange,
   getScaleForAxisSpec,
   getTickLabelProps,
+  getVerticalAxisGridLineProps,
+  getVerticalAxisTickLineProps,
   getVisibleTicks,
 } from './axis_utils';
 import { SvgTextBBoxCalculator } from './svg_text_bbox_calculator';
@@ -34,6 +39,7 @@ describe('Axis computational utils', () => {
     toJSON: () => '',
   };
   const originalGetBBox = SVGElement.prototype.getBoundingClientRect;
+
   beforeEach(
     () =>
       (SVGElement.prototype.getBoundingClientRect = function() {
@@ -121,7 +127,6 @@ describe('Axis computational utils', () => {
     expect(dims45.height).toBeCloseTo(Math.sqrt(2));
   });
 
-  // TODO: these tests appear to be failing (also on master)
   test('should generate a valid scale', () => {
     const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
     expect(scale).toBeDefined();
@@ -131,7 +136,6 @@ describe('Axis computational utils', () => {
     expect(scale!.ticks()).toEqual([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]);
   });
 
-  // TODO: these tests appear to be failing (also on master)
   test('should compute available ticks', () => {
     const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
     const axisPositions = getAvailableTicks(verticalAxisSpec, scale!, 0);
@@ -402,5 +406,111 @@ describe('Axis computational utils', () => {
       align: 'center',
       verticalAlign: 'middle',
     });
+  });
+
+  test('should compute axis tick line positions', () => {
+    const tickPadding = 5;
+    const tickSize = 10;
+    const tickPosition = 10;
+    const maxLabelBboxHeight = 20;
+
+    const leftAxisTickLinePositions = getVerticalAxisTickLineProps(
+      Position.Left,
+      tickPadding,
+      tickSize,
+      tickPosition,
+    );
+
+    expect(leftAxisTickLinePositions).toEqual([5, 10, 15, 10]);
+
+    const rightAxisTickLinePositions = getVerticalAxisTickLineProps(
+      Position.Right,
+      tickPadding,
+      tickSize,
+      tickPosition,
+    );
+
+    expect(rightAxisTickLinePositions).toEqual([0, 10, 10, 10]);
+
+    const topAxisTickLinePositions = getHorizontalAxisTickLineProps(
+      Position.Top,
+      tickPadding,
+      tickSize,
+      tickPosition,
+      maxLabelBboxHeight,
+    );
+
+    expect(topAxisTickLinePositions).toEqual([10, 25, 10, 35]);
+
+    const bottomAxisTickLinePositions = getHorizontalAxisTickLineProps(
+      Position.Bottom,
+      tickPadding,
+      tickSize,
+      tickPosition,
+      maxLabelBboxHeight,
+    );
+
+    expect(bottomAxisTickLinePositions).toEqual([10, 0, 10, 10]);
+  });
+
+  test('should compute axis grid line positions', () => {
+    const tickPadding = 5;
+    const tickSize = 10;
+    const tickPosition = 10;
+    const maxLabelBboxHeight = 20;
+    const chartWidth = 100;
+    const chartHeight = 200;
+    const paddings: Margins = {
+      top: 3,
+      left: 6,
+      bottom: 9,
+      right: 12,
+    };
+
+    const leftAxisGridLinePositions = getVerticalAxisGridLineProps(
+      Position.Left,
+      tickPadding,
+      tickSize,
+      tickPosition,
+      chartWidth,
+      paddings,
+    );
+
+    expect(leftAxisGridLinePositions).toEqual([21, 10, 121, 10]);
+
+    const rightAxisGridLinePositions = getVerticalAxisGridLineProps(
+      Position.Right,
+      tickPadding,
+      tickSize,
+      tickPosition,
+      chartWidth,
+      paddings,
+    );
+
+    expect(rightAxisGridLinePositions).toEqual([-112, 10, -12, 10]);
+
+    const topAxisGridLinePositions = getHorizontalAxisGridLineProps(
+      Position.Top,
+      tickPadding,
+      tickSize,
+      tickPosition,
+      maxLabelBboxHeight,
+      chartHeight,
+      paddings,
+    );
+
+    expect(topAxisGridLinePositions).toEqual([10, 38, 10, 238]);
+
+    const bottomAxisGridLinePositions = getHorizontalAxisGridLineProps(
+      Position.Bottom,
+      tickPadding,
+      tickSize,
+      tickPosition,
+      maxLabelBboxHeight,
+      chartHeight,
+      paddings,
+    );
+
+    expect(bottomAxisGridLinePositions).toEqual([10, -209, 10, -9]);
   });
 });

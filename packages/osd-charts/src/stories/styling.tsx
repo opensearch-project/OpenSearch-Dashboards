@@ -2,7 +2,7 @@ import { boolean, number, select } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { Axis, BarSeries, Chart, getAxisId, getSpecId, Position, ScaleType, Settings } from '..';
-import { PartialTheme } from '../lib/themes/theme';
+import { GridLineConfig, PartialTheme } from '../lib/themes/theme';
 import './stories.scss';
 
 function createThemeAction(title: string, min: number, max: number, value: number) {
@@ -32,6 +32,37 @@ storiesOf('Stylings', module)
         },
       },
     };
+
+    const leftAxisGridLine: GridLineConfig = {
+      stroke: 'purple',
+      strokeWidth: number('left axis grid line stroke width', 1, {
+        range: true,
+        min: 0,
+        max: 10,
+        step: 1,
+      }),
+      opacity: number('left axis grid line stroke opacity', 1, {
+        range: true,
+        min: 0,
+        max: 1,
+        step: 0.01,
+      }),
+      dash: [
+        number('left axis grid line dash length', 1, {
+          range: true,
+          min: 0,
+          max: 10,
+          step: 1,
+        }),
+        number('left axis grid line dash spacing', 1, {
+          range: true,
+          min: 0,
+          max: 10,
+          step: 1,
+        }),
+      ],
+    };
+
     return (
       <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
         <Settings theme={theme} debug={boolean('debug', true)} />
@@ -40,14 +71,29 @@ storiesOf('Stylings', module)
           position={Position.Bottom}
           title={'Bottom axis'}
           showOverlappingTicks={true}
-          showGridLines={boolean('show horizontal axis grid lines', false)}
+          showGridLines={boolean('show bottom axis grid lines', false)}
         />
         <Axis
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
           tickFormat={(d) => Number(d).toFixed(2)}
-          showGridLines={boolean('show vertical axis grid lines', false)}
+          showGridLines={boolean('show left axis grid lines', false)}
+          gridLineStyle={leftAxisGridLine}
+        />
+        <Axis
+          id={getAxisId('top')}
+          position={Position.Top}
+          title={'Top axis'}
+          showOverlappingTicks={true}
+          showGridLines={boolean('show top axis grid lines', false)}
+        />
+        <Axis
+          id={getAxisId('right')}
+          title={'Right axis'}
+          position={Position.Right}
+          tickFormat={(d) => Number(d).toFixed(2)}
+          showGridLines={boolean('show right axis grid lines', false)}
         />
         <BarSeries
           id={getSpecId('bars')}
