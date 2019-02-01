@@ -276,25 +276,25 @@ storiesOf('Bar Chart', module)
       </Chart>
     );
   })
-  .add('clustered multi series', () => {
+  .add('clustered multiple series specs', () => {
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
-          title={'Bottom axis'}
+          title={'elements'}
           showOverlappingTicks={true}
         />
         <Axis
           id={getAxisId('left2')}
-          title={'Left axis'}
+          title={'count'}
           position={Position.Left}
           tickFormat={(d) => Number(d).toFixed(2)}
         />
 
         <BarSeries
-          id={getSpecId('bars1')}
+          id={getSpecId('bar series 1')}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
@@ -304,7 +304,17 @@ storiesOf('Bar Chart', module)
           yScaleToDataExtent={false}
         />
         <BarSeries
-          id={getSpecId('bars2')}
+          id={getSpecId('bar series 2')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          splitSeriesAccessors={['g']}
+          data={[{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }, { x: 3, y: 4 }]}
+          yScaleToDataExtent={false}
+        />
+        <BarSeries
+          id={getSpecId('bar series 3')}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
