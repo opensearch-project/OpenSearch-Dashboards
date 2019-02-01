@@ -299,7 +299,6 @@ storiesOf('Bar Chart', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          splitSeriesAccessors={['g']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
           yScaleToDataExtent={false}
         />
@@ -309,7 +308,6 @@ storiesOf('Bar Chart', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          splitSeriesAccessors={['g']}
           data={[{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }, { x: 3, y: 4 }]}
           yScaleToDataExtent={false}
         />
@@ -320,7 +318,16 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y']}
           splitSeriesAccessors={['g']}
-          data={[{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }, { x: 3, y: 4 }]}
+          data={[
+            { x: 0, y: 1, g: 'a' },
+            { x: 1, y: 2, g: 'a' },
+            { x: 2, y: 3, g: 'a' },
+            { x: 3, y: 4, g: 'a' },
+            { x: 0, y: 5, g: 'b' },
+            { x: 1, y: 8, g: 'b' },
+            { x: 2, y: 9, g: 'b' },
+            { x: 3, y: 2, g: 'b' },
+          ]}
           yScaleToDataExtent={false}
         />
       </Chart>
