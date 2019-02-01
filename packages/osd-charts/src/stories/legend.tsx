@@ -6,7 +6,7 @@ import * as TestDatasets from '../lib/series/utils/test_dataset';
 storiesOf('Legend', module)
   .add('right', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -36,7 +36,7 @@ storiesOf('Legend', module)
   })
   .add('bottom', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Bottom} />
         <Axis
           id={getAxisId('bottom')}
@@ -96,7 +96,7 @@ storiesOf('Legend', module)
   })
   .add('top', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Top} />
         <Axis
           id={getAxisId('bottom')}

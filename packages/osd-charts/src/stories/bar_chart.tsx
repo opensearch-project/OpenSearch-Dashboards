@@ -7,7 +7,7 @@ import { niceTimeFormatter } from '../utils/data/formatters';
 storiesOf('Bar Chart', module)
   .add('basic', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <BarSeries
           id={getSpecId('bars')}
           xScaleType={ScaleType.Linear}
@@ -22,7 +22,7 @@ storiesOf('Bar Chart', module)
   })
   .add('with axis', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -50,7 +50,7 @@ storiesOf('Bar Chart', module)
   })
   .add('with ordinal x axis', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -78,7 +78,7 @@ storiesOf('Bar Chart', module)
   })
   .add('with linear x axis', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -108,7 +108,7 @@ storiesOf('Bar Chart', module)
     const now = new Date().getTime();
     const max = now + 1000 * 60 * 60 * 24 * 90;
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -142,7 +142,7 @@ storiesOf('Bar Chart', module)
   })
   .add('with log y axis (TO FIX)', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -170,7 +170,7 @@ storiesOf('Bar Chart', module)
   })
   .add('with axis and legend', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -199,7 +199,7 @@ storiesOf('Bar Chart', module)
   })
   .add('stacked with axis and legend', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -239,7 +239,7 @@ storiesOf('Bar Chart', module)
   })
   .add('clustered with axis and legend', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -278,7 +278,7 @@ storiesOf('Bar Chart', module)
   })
   .add('clustered multi series', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -318,7 +318,7 @@ storiesOf('Bar Chart', module)
   })
   .add('1y0g', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -347,7 +347,7 @@ storiesOf('Bar Chart', module)
   })
   .add('1y1g', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -377,7 +377,7 @@ storiesOf('Bar Chart', module)
   })
   .add('1y2g', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -407,7 +407,7 @@ storiesOf('Bar Chart', module)
   })
   .add('2y0g', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -436,7 +436,7 @@ storiesOf('Bar Chart', module)
   })
   .add('2y1g', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -466,7 +466,7 @@ storiesOf('Bar Chart', module)
   })
   .add('2y2g', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}

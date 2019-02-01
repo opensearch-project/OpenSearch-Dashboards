@@ -3,3 +3,9 @@
 @import 'components/chart';
 @import 'components/legend';
 @import 'components/tooltip';
+
+.elasticcharts {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}

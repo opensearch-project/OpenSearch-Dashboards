@@ -6,7 +6,7 @@ import { CurveType } from '../lib/series/curves';
 storiesOf('Line Chart', module)
   .add('basic', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <LineSeries
           id={getSpecId('lines')}
           xScaleType={ScaleType.Linear}
@@ -21,7 +21,7 @@ storiesOf('Line Chart', module)
   })
   .add('w axis', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -49,7 +49,7 @@ storiesOf('Line Chart', module)
   })
   .add('w axis and legend', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -78,7 +78,7 @@ storiesOf('Line Chart', module)
   })
   .add('curved w axis and legend', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -158,7 +158,7 @@ storiesOf('Line Chart', module)
   })
   .add('stacked w axis and legend', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}

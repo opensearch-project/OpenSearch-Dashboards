@@ -63,7 +63,7 @@ storiesOf('Stylings', module)
     };
 
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings theme={theme} debug={boolean('debug', true)} />
         <Axis
           id={getAxisId('bottom')}
@@ -119,7 +119,7 @@ storiesOf('Stylings', module)
       },
     };
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings
           theme={theme}
           debug={boolean('debug', true)}

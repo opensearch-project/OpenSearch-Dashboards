@@ -18,7 +18,7 @@ import { LineSeries } from '../specs';
 storiesOf('Axis', module)
   .add('basic', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings debug={boolean('debug', false)} />
         <Axis
           id={getAxisId('bottom')}
@@ -47,7 +47,7 @@ storiesOf('Axis', module)
   })
   .add('tick label rotation', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -111,7 +111,7 @@ storiesOf('Axis', module)
   })
   .add('4 axes', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -151,7 +151,7 @@ storiesOf('Axis', module)
   })
   .add('with multi axis (TO FIX)', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={false} />
         <Axis
           id={getAxisId('bottom')}
@@ -194,7 +194,7 @@ storiesOf('Axis', module)
   })
   .add('with multi axis bar/lines', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={false} />
         <Axis
           id={getAxisId('bottom')}

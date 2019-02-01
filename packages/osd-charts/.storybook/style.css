@@ -6,6 +6,9 @@
 }
 #story-root {
   padding: 20px;
+  width: 100%;
+  height: 400px;
+  position: relative;
 }
 #story-root + div table {
   border: 1px solid gray;

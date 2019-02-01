@@ -17,7 +17,7 @@ const onElementListeners = {
 storiesOf('Interactions', module)
   .add('bar clicks and hovers', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} {...onElementListeners} />
         <Axis
           id={getAxisId('bottom')}
@@ -46,7 +46,7 @@ storiesOf('Interactions', module)
   })
   .add('area point clicks and hovers', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} {...onElementListeners} />
         <Axis
           id={getAxisId('bottom')}
@@ -75,7 +75,7 @@ storiesOf('Interactions', module)
   })
   .add('line point clicks and hovers', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} {...onElementListeners} />
         <Axis
           id={getAxisId('bottom')}
@@ -105,7 +105,7 @@ storiesOf('Interactions', module)
   .add('click/hovers on legend items (TO DO)', () => <h1>TO DO</h1>)
   .add('brush selection tool on linear', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings onBrushEnd={action('onBrushEnd')} />
         <Axis
           id={getAxisId('bottom')}
@@ -148,7 +148,7 @@ storiesOf('Interactions', module)
     const now = DateTime.fromISO('2019-01-11T00:00:00.000').toMillis();
     const oneDay = 1000 * 60 * 60 * 24;
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings debug={boolean('debug', false)} onBrushEnd={action('onBrushEnd')} />
         <Axis
           id={getAxisId('bottom')}
@@ -183,7 +183,7 @@ storiesOf('Interactions', module)
   })
   .add('brush disabled on ordinal x axis', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings onBrushEnd={action('onBrushEnd')} />
         <Axis
           id={getAxisId('bottom')}

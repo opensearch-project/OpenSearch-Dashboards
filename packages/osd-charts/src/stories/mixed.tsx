@@ -6,7 +6,7 @@ import { AreaSeries, LineSeries } from '../specs';
 storiesOf('Mixed Charts', module)
   .add('bar and lines', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -46,7 +46,7 @@ storiesOf('Mixed Charts', module)
   })
   .add('lines and areas', () => {
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
