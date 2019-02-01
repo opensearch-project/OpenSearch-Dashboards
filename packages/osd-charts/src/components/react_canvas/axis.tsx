@@ -256,7 +256,7 @@ export class Axis extends React.PureComponent<AxisProps> {
             x={left}
             y={top}
             width={width}
-            height={maxLabelBboxHeight}
+            height={titleFontSize}
             stroke="black"
             strokeWidth={1}
             fill="violet"
