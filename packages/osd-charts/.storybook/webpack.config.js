@@ -1,6 +1,7 @@
 const path = require('path');
 
 module.exports = (baseConfig, env, config) => {
+  config.devtool = 'inline-source-map';
   config.module.rules.push({
     test: /\.(ts|tsx)$/,
     use: [
