@@ -153,7 +153,7 @@ storiesOf('Bar Chart', module)
       </Chart>
     );
   })
-  .add('with log y axis (TO FIX)', () => {
+  .add('with log y axis', () => {
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <Axis
@@ -175,7 +175,16 @@ storiesOf('Bar Chart', module)
           yScaleType={ScaleType.Log}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 1, y: 2 }, { x: 2, y: 7 }, { x: 4, y: 3 }, { x: 9, y: 6 }]}
+          data={[
+            { x: 1, y: 0 },
+            { x: 2, y: 1 },
+            { x: 3, y: 2 },
+            { x: 4, y: 3 },
+            { x: 5, y: 4 },
+            { x: 6, y: 5 },
+            { x: 7, y: 6 },
+            { x: 8, y: 7 },
+          ]}
           yScaleToDataExtent={true}
         />
       </Chart>

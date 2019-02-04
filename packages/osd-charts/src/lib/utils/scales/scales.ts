@@ -9,6 +9,7 @@ export interface Scale {
   invert: (value: number) => any;
   bandwidth: number;
   type: ScaleType;
+  isInverted: boolean;
 }
 export type ScaleFunction = (value: any) => number;
 

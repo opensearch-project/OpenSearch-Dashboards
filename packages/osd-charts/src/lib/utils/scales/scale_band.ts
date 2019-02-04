@@ -8,6 +8,7 @@ export class ScaleBand implements Scale {
   readonly type: ScaleType;
   readonly domain: any[];
   readonly range: number[];
+  readonly isInverted: boolean;
   private readonly d3Scale: any;
 
   constructor(
@@ -35,6 +36,7 @@ export class ScaleBand implements Scale {
     if (overrideBandwidth) {
       this.bandwidth = overrideBandwidth;
     }
+    this.isInverted = this.domain[0] > this.domain[1];
   }
 
   scale(value: any) {
