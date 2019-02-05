@@ -2,13 +2,19 @@ import { getGroupId, getSpecId, SpecId } from '../../utils/ids';
 import { ScaleType } from '../../utils/scales/scales';
 import { getSplittedSeries } from '../series';
 import { BasicSeriesSpec } from '../specs';
-import { convertXScaleTypes, mergeXDomain } from './x_domain';
+import { convertXScaleTypes, findMinInterval, mergeXDomain } from './x_domain';
 
 describe('X Domain', () => {
   test('Should return null when missing specs or specs types', () => {
     const seriesSpecs: BasicSeriesSpec[] = [];
     const mainXScale = convertXScaleTypes(seriesSpecs);
     expect(mainXScale).toBe(null);
+  });
+
+  test('should throw if we miss calling merge X domain without specs configured', () => {
+    expect(() => {
+      mergeXDomain([], new Set());
+    }).toThrow();
   });
 
   test('Should return correct scale type with single bar', () => {
@@ -599,5 +605,29 @@ describe('X Domain', () => {
       xValues,
     );
     expect(mergedDomain.domain.length).toEqual(maxValues);
+  });
+  test('should compute minInterval an ordered list of numbers', () => {
+    const minInterval = findMinInterval([0, 1, 2, 3, 4, 5]);
+    expect(minInterval).toBe(1);
+  });
+  test('should compute minInterval an unordered list of numbers', () => {
+    const minInterval = findMinInterval([2, 10, 3, 1, 5]);
+    expect(minInterval).toBe(1);
+  });
+  test('should compute minInterval an list grether than 9', () => {
+    const minInterval = findMinInterval([0, 2, 4, 6, 8, 10, 20, 30, 40, 50, 80]);
+    expect(minInterval).toBe(2);
+  });
+  test('should compute minInterval an list with negative numbers', () => {
+    const minInterval = findMinInterval([-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12]);
+    expect(minInterval).toBe(1);
+  });
+  test('should compute minInterval an list with negative and positive numbers', () => {
+    const minInterval = findMinInterval([-2, -4, -6, -8, -10, -12, 0, 2, 4, 6, 8, 10, 12]);
+    expect(minInterval).toBe(2);
+  });
+  test('should compute minInterval a single element array', () => {
+    const minInterval = findMinInterval([100]);
+    expect(minInterval).toBe(1);
   });
 });
