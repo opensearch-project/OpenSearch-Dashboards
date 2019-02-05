@@ -1,4 +1,4 @@
-import { identity } from '../../utils/commons';
+import { compareByValueAsc, identity } from '../../utils/commons';
 import { computeContinuousDataDomain, computeOrdinalDataDomain } from '../../utils/domain';
 import { ScaleType } from '../../utils/scales/scales';
 import { BasicSeriesSpec } from '../specs';
@@ -49,14 +49,17 @@ export function mergeXDomain(
  * to display a bar chart in a linear scale.
  */
 export function findMinInterval(xValues: number[]): number | null {
-  const sortedValues = xValues.slice().sort();
+  if (xValues.length === 1) {
+    return 1;
+  }
+  const sortedValues = xValues.slice().sort(compareByValueAsc);
   const sortedValuesLength = sortedValues.length - 1;
   let i;
   let minInterval = null;
   for (i = 0; i < sortedValuesLength; i++) {
     const current = sortedValues[i];
     const next = sortedValues[i + 1];
-    const interval = next - current;
+    const interval = Math.abs(next - current);
     if (minInterval === null) {
       minInterval = interval;
     } else {
