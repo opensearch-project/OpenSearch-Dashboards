@@ -283,7 +283,7 @@ export class ChartStore {
     // console.log({colors: seriesDomains.seriesColors});
 
     // tslint:disable-next-line:no-console
-    // console.log({seriesDomains});
+    // console.log({ seriesDomains });
     const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, this.chartTheme.colors);
     this.legendItems = computeLegend(
       seriesDomains.seriesColors,
@@ -292,7 +292,7 @@ export class ChartStore {
       this.chartTheme.colors.defaultVizColor,
     );
     // tslint:disable-next-line:no-console
-    // console.log({legendItems: this.legendItems});
+    // console.log({ legendItems: this.legendItems });
 
     const {
       xDomain,
@@ -351,7 +351,7 @@ export class ChartStore {
     );
 
     // tslint:disable-next-line:no-console
-    // console.log({geometries});
+    // console.log({ seriesGeometries });
     this.geometries = seriesGeometries.geometries;
     this.xScale = seriesGeometries.scales.xScale;
     this.yScales = seriesGeometries.scales.yScales;

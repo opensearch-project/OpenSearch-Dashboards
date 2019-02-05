@@ -65,7 +65,7 @@ export function computeSeriesDomains(
   const xDomain = mergeXDomain(specsArray, xValues);
   const yDomain = mergeYDomain(splittedSeries, specsArray);
   const formattedDataSeries = getFormattedDataseries(specsArray, splittedSeries);
-
+  // tslint:disable-next-line:no-console
   // console.log({ formattedDataSeries, xDomain, yDomain });
 
   return {
