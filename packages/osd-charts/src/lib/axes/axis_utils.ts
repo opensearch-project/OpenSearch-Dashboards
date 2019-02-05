@@ -464,23 +464,24 @@ export function getAxisPosition(
 
   if (isVertical(position)) {
     if (position === Position.Left) {
-      leftIncrement = maxLabelBboxWidth + tickSize + tickPadding + chartMargins.left;
+      leftIncrement = maxLabelBboxWidth + tickSize + tickPadding + chartMargins.left + axisTitleHeight;
       dimensions.left = maxLabelBboxWidth + cumLeftSum + chartMargins.left + axisTitleHeight;
     } else {
-      rightIncrement = maxLabelBboxWidth + tickSize + tickPadding + chartMargins.right;
+      rightIncrement = maxLabelBboxWidth + tickSize + tickPadding + chartMargins.right + axisTitleHeight;
       dimensions.left = left + width + cumRightSum;
     }
     dimensions.width = maxLabelBboxWidth;
   } else {
     if (position === Position.Top) {
-      topIncrement = maxLabelBboxHeight + tickSize + tickPadding + chartMargins.top;
+      topIncrement = maxLabelBboxHeight + tickSize + tickPadding + chartMargins.top + axisTitleHeight;
       dimensions.top = cumTopSum + chartMargins.top + axisTitleHeight;
     } else {
-      bottomIncrement = maxLabelBboxHeight + tickSize + tickPadding + chartMargins.bottom;
+      bottomIncrement = maxLabelBboxHeight + tickSize + tickPadding + chartMargins.bottom + axisTitleHeight;
       dimensions.top = top + height + cumBottomSum;
     }
     dimensions.height = maxLabelBboxHeight;
   }
+
   return { dimensions, topIncrement, bottomIncrement, leftIncrement, rightIncrement };
 }
 

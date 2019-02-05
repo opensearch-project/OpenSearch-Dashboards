@@ -13,7 +13,36 @@ import {
   ScaleType,
   Settings,
 } from '..';
+import { PartialTheme } from '../lib/themes/theme';
 import { LineSeries } from '../specs';
+
+function createThemeAction(title: string, min: number, max: number, value: number) {
+  return number(title, value, {
+    range: true,
+    min,
+    max,
+    step: 1,
+  }, 'theme');
+}
+
+function renderAxisWithOptions(position: Position, seriesGroup: string, show: boolean) {
+  const axisTitle = `${position} axis (${seriesGroup})`;
+
+  const showAxis = boolean(`show ${axisTitle} axis`, show, `${position} axes`);
+
+  if (!showAxis) {
+    return null;
+  }
+
+  const axisProps = {
+    id: getAxisId(axisTitle),
+    position,
+    title: axisTitle,
+    showOverlappingTicks: true,
+  };
+
+  return <Axis {...axisProps} />;
+}
 
 storiesOf('Axis', module)
   .add('basic', () => {
@@ -149,29 +178,37 @@ storiesOf('Axis', module)
       </Chart>
     );
   })
-  .add('with multi axis (TO FIX)', () => {
+  .add('with multi axis', () => {
+    const theme: PartialTheme = {
+      chart: {
+        margins: {
+          left: createThemeAction('margin left', 0, 50, 0),
+          right: createThemeAction('margin right', 0, 50, 0),
+          top: createThemeAction('margin top', 0, 50, 0),
+          bottom: createThemeAction('margin bottom', 0, 50, 0),
+        },
+        paddings: {
+          left: createThemeAction('padding left', 0, 50, 0),
+          right: createThemeAction('padding right', 0, 50, 0),
+          top: createThemeAction('padding top', 0, 50, 0),
+          bottom: createThemeAction('padding bottom', 0, 50, 0),
+        },
+      },
+    };
+
+    const seriesGroup1 = 'group1';
+    const seriesGroup2 = 'group2';
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
-        <Settings showLegend={false} />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'Bottom axis'}
-          showOverlappingTicks={true}
-        />
-        <Axis
-          id={getAxisId('left1')}
-          title={'First left axis'}
-          position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
-        />
-        <Axis
-          id={getAxisId('left2')}
-          title={'Second left axis'}
-          groupId={getGroupId('group2')}
-          position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
-        />
+      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+        <Settings showLegend={false} theme={theme} debug={boolean('debug', true)} />
+        {renderAxisWithOptions(Position.Top, seriesGroup1, false)}
+        {renderAxisWithOptions(Position.Top, seriesGroup2, true)}
+        {renderAxisWithOptions(Position.Left, seriesGroup1, false)}
+        {renderAxisWithOptions(Position.Left, seriesGroup2, true)}
+        {renderAxisWithOptions(Position.Bottom, seriesGroup1, false)}
+        {renderAxisWithOptions(Position.Bottom, seriesGroup2, true)}
+        {renderAxisWithOptions(Position.Right, seriesGroup1, false)}
+        {renderAxisWithOptions(Position.Right, seriesGroup2, true)}
         <BarSeries
           id={getSpecId('barseries1')}
           xScaleType={ScaleType.Linear}
@@ -179,15 +216,6 @@ storiesOf('Axis', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }, { x: 3, y: 4 }]}
-        />
-        <BarSeries
-          id={getSpecId('barseries2')}
-          groupId={getGroupId('group2')}
-          xScaleType={ScaleType.Linear}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          data={[{ x: 0, y: 8 }, { x: 1, y: 7 }, { x: 2, y: 6 }, { x: 3, y: 5 }]}
         />
       </Chart>
     );
