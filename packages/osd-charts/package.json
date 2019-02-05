@@ -16,7 +16,7 @@
     "lint-fix": "tslint -c ./tslint.yaml -p ./tsconfig.json --fix",
     "prettier": "prettier -l \"{,!(node_modules)/}**/*.{ts,tsx}\"",
     "prettier-fix": "prettier --write \"{,!(node_modules)/}**/*.{ts,tsx}\"",
-    "test": "jest --config jest.config.json --coverage",
+    "test": "jest --config jest.config.json",
     "watch": "yarn test --watch",
     "format-fix": "yarn prettier-fix && yarn lint-fix",
     "format-check": "yarn prettier && yarn lint",
