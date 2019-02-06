@@ -15,6 +15,7 @@ import {
 } from '..';
 import { PartialTheme } from '../lib/themes/theme';
 import { LineSeries } from '../specs';
+import { DataGenerator } from '../utils/data_generators/data_generator';
 
 function createThemeAction(title: string, min: number, max: number, value: number) {
   return number(title, value, {
@@ -262,6 +263,30 @@ storiesOf('Axis', module)
           stackAccessors={['x']}
           splitSeriesAccessors={['g']}
           data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('w many tick labels', () => {
+    const dg = new DataGenerator();
+    const data = dg.generateSimpleSeries(31);
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Settings debug={true} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+        />
+        <AreaSeries
+          id={getSpecId('lines')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={data}
           yScaleToDataExtent={false}
         />
       </Chart>
