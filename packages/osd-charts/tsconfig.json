@@ -1,19 +1,20 @@
 {
   "compilerOptions": {
+    "declaration": true,
     "outDir": "./dist/",
-    "noEmit": false,
     "noImplicitAny": true,
     "noUnusedLocals": true,
     "sourceMap": true,
-    "module": "es6",
+    "preserveConstEnums": true,
     "strict": true,
-    "target": "esnext",
-    "jsx": "react",
-    "allowJs": true,
-    "moduleResolution": "node",
-    "lib": ["esnext", "dom"],
     "esModuleInterop": true,
+    "module": "es6",
+    "target": "es6",
+    "lib": ["esnext", "dom"],
+    "moduleResolution": "node",
+    "jsx": "react",
+    "allowJs": false,
     "skipLibCheck": true
   },
-  "include": ["src/**/*", ".storybook"]
+  "include": ["src/**/*"]
 }

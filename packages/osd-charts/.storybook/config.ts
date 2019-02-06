@@ -2,6 +2,7 @@ import { withInfo } from '@storybook/addon-info';
 import { withKnobs } from '@storybook/addon-knobs';
 import { withOptions } from '@storybook/addon-options';
 import { addDecorator, configure } from '@storybook/react';
+import '../src/index.scss';
 import './style.css';
 
 addDecorator(
