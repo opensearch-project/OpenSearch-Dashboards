@@ -22,16 +22,16 @@ addDecorator(
 );
 
 function loadStories() {
-  require('../src/stories/bar_chart.tsx');
-  require('../src/stories/line_chart.tsx');
-  require('../src/stories/area_chart.tsx');
-  require('../src/stories/axis.tsx');
-  require('../src/stories/mixed.tsx');
-  require('../src/stories/legend.tsx');
-  require('../src/stories/interactions.tsx');
-  require('../src/stories/rotations.tsx');
-  require('../src/stories/styling.tsx');
-  require('../src/stories/grid.tsx');
+  require('../stories/bar_chart.tsx');
+  require('../stories/line_chart.tsx');
+  require('../stories/area_chart.tsx');
+  require('../stories/axis.tsx');
+  require('../stories/mixed.tsx');
+  require('../stories/legend.tsx');
+  require('../stories/interactions.tsx');
+  require('../stories/rotations.tsx');
+  require('../stories/styling.tsx');
+  require('../stories/grid.tsx');
 }
 
 configure(loadStories, module);

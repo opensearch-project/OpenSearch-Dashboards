@@ -1,7 +1,16 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { Axis, BarSeries, Chart, getAxisId, getSpecId, Position, ScaleType, Settings } from '..';
-import { AreaSeries, LineSeries } from '../specs';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  getAxisId,
+  getSpecId,
+  Position,
+  ScaleType,
+  Settings,
+} from '../src/';
+import { AreaSeries, LineSeries } from '../src/specs';
 
 storiesOf('Mixed Charts', module)
   .add('bar and lines', () => {

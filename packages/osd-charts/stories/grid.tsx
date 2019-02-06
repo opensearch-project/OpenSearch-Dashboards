@@ -1,40 +1,70 @@
 import { boolean, color, number } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { Axis, BarSeries, Chart, getAxisId, getSpecId, LineSeries, Position, ScaleType, Settings } from '..';
-import { GridLineConfig } from '../lib/themes/theme';
-import { getGroupId } from '../lib/utils/ids';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  getAxisId,
+  getSpecId,
+  LineSeries,
+  Position,
+  ScaleType,
+  Settings,
+} from '../src/';
+import { GridLineConfig } from '../src/lib/themes/theme';
+import { getGroupId } from '../src/lib/utils/ids';
 
 function generateGridLineConfig(group: string): GridLineConfig {
   const groupId = `${group} axis`;
 
   return {
     stroke: color(`${groupId} grid line stroke color`, 'purple', groupId),
-    strokeWidth: number(`${groupId} grid line stroke width`, 1, {
-      range: true,
-      min: 0,
-      max: 10,
-      step: 1,
-    }, groupId),
-    opacity: number(`${groupId} grid line stroke opacity`, 1, {
-      range: true,
-      min: 0,
-      max: 1,
-      step: 0.01,
-    }, groupId),
+    strokeWidth: number(
+      `${groupId} grid line stroke width`,
+      1,
+      {
+        range: true,
+        min: 0,
+        max: 10,
+        step: 1,
+      },
+      groupId,
+    ),
+    opacity: number(
+      `${groupId} grid line stroke opacity`,
+      1,
+      {
+        range: true,
+        min: 0,
+        max: 1,
+        step: 0.01,
+      },
+      groupId,
+    ),
     dash: [
-      number(`${groupId} grid line dash length`, 1, {
-        range: true,
-        min: 0,
-        max: 10,
-        step: 1,
-      }, groupId),
-      number(`${groupId} grid line dash spacing`, 1, {
-        range: true,
-        min: 0,
-        max: 10,
-        step: 1,
-      }, groupId),
+      number(
+        `${groupId} grid line dash length`,
+        1,
+        {
+          range: true,
+          min: 0,
+          max: 10,
+          step: 1,
+        },
+        groupId,
+      ),
+      number(
+        `${groupId} grid line dash spacing`,
+        1,
+        {
+          range: true,
+          min: 0,
+          max: 10,
+          step: 1,
+        },
+        groupId,
+      ),
     ],
   };
 }

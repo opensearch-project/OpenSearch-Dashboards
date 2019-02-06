@@ -1,8 +1,17 @@
 import { boolean, number, select } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { Axis, BarSeries, Chart, getAxisId, getSpecId, Position, ScaleType, Settings } from '..';
-import { PartialTheme } from '../lib/themes/theme';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  getAxisId,
+  getSpecId,
+  Position,
+  ScaleType,
+  Settings,
+} from '../src/';
+import { PartialTheme } from '../src/lib/themes/theme';
 
 function createThemeAction(title: string, min: number, max: number, value: number) {
   return number(title, value, {

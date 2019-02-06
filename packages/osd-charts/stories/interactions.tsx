@@ -1,12 +1,21 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { Axis, BarSeries, Chart, getAxisId, getSpecId, Position, ScaleType, Settings } from '..';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  getAxisId,
+  getSpecId,
+  Position,
+  ScaleType,
+  Settings,
+} from '../src/';
 
 import { boolean } from '@storybook/addon-knobs';
 import { DateTime } from 'luxon';
-import { AreaSeries, LineSeries } from '../specs';
-import { niceTimeFormatter } from '../utils/data/formatters';
+import { AreaSeries, LineSeries } from '../src/specs';
+import { niceTimeFormatter } from '../src/utils/data/formatters';
 
 const onElementListeners = {
   onElementClick: action('onElementClick'),

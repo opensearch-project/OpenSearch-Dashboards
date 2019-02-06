@@ -12,18 +12,23 @@ import {
   Position,
   ScaleType,
   Settings,
-} from '..';
-import { PartialTheme } from '../lib/themes/theme';
-import { LineSeries } from '../specs';
-import { DataGenerator } from '../utils/data_generators/data_generator';
+} from '../src/';
+import { PartialTheme } from '../src/lib/themes/theme';
+import { LineSeries } from '../src/specs';
+import { DataGenerator } from '../src/utils/data_generators/data_generator';
 
 function createThemeAction(title: string, min: number, max: number, value: number) {
-  return number(title, value, {
-    range: true,
-    min,
-    max,
-    step: 1,
-  }, 'theme');
+  return number(
+    title,
+    value,
+    {
+      range: true,
+      min,
+      max,
+      step: 1,
+    },
+    'theme',
+  );
 }
 
 function renderAxisWithOptions(position: Position, seriesGroup: string, show: boolean) {

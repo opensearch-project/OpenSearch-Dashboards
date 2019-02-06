@@ -1,9 +1,18 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { Axis, BarSeries, Chart, getAxisId, getSpecId, Position, ScaleType, Settings } from '..';
-import * as TestDatasets from '../lib/series/utils/test_dataset';
-import { niceTimeFormatter } from '../utils/data/formatters';
-import { DataGenerator } from '../utils/data_generators/data_generator';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  getAxisId,
+  getSpecId,
+  Position,
+  ScaleType,
+  Settings,
+} from '../src/';
+import * as TestDatasets from '../src/lib/series/utils/test_dataset';
+import { niceTimeFormatter } from '../src/utils/data/formatters';
+import { DataGenerator } from '../src/utils/data_generators/data_generator';
 
 storiesOf('Bar Chart', module)
   .add('basic', () => {
