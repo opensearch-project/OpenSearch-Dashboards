@@ -10,6 +10,8 @@ import { AxisId } from '../utils/ids';
 import { Scale, ScaleType } from '../utils/scales/scales';
 import { BBox, BBoxCalculator } from './bbox_calculator';
 
+export type AxisLinePosition = [number, number, number, number];
+
 export interface AxisTick {
   value: number | string;
   label: string;
@@ -246,7 +248,7 @@ export function getVerticalAxisTickLineProps(
   tickPadding: number,
   tickSize: number,
   tickPosition: number,
-): number[] {
+): AxisLinePosition {
   const isLeftAxis = position === Position.Left;
   const y = tickPosition;
   const x1 = isLeftAxis ? tickPadding : 0;
@@ -261,7 +263,7 @@ export function getHorizontalAxisTickLineProps(
   tickSize: number,
   tickPosition: number,
   labelHeight: number,
-): number[] {
+): AxisLinePosition {
   const isTopAxis = position === Position.Top;
   const x = tickPosition;
   const y1 = isTopAxis ? labelHeight + tickPadding : 0;
@@ -271,42 +273,17 @@ export function getHorizontalAxisTickLineProps(
 }
 
 export function getVerticalAxisGridLineProps(
-  position: Position,
-  tickPadding: number,
-  tickSize: number,
   tickPosition: number,
   chartWidth: number,
-  paddings: Margins,
-): number[] {
-  const isLeftAxis = position === Position.Left;
-  const y = tickPosition;
-
-  const leftX1 = tickSize + tickPadding + paddings.left;
-  const rightX1 = - chartWidth - paddings.right;
-
-  const x1 = isLeftAxis ? leftX1 : rightX1;
-
-  return [x1, y, x1 + chartWidth, y];
+): AxisLinePosition {
+  return [0, tickPosition, chartWidth, tickPosition];
 }
 
 export function getHorizontalAxisGridLineProps(
-  position: Position,
-  tickPadding: number,
-  tickSize: number,
   tickPosition: number,
-  labelHeight: number,
   chartHeight: number,
-  paddings: Margins,
-): number[] {
-  const isTopAxis = position === Position.Top;
-  const x = tickPosition;
-
-  const topY1 = labelHeight + tickPadding + tickSize + paddings.top;
-  const bottomY1 = - chartHeight - paddings.bottom;
-
-  const y1 = isTopAxis ? topY1 : bottomY1;
-
-  return [x, y1, x, y1 + chartHeight];
+): AxisLinePosition {
+  return [tickPosition, 0, tickPosition, chartHeight];
 }
 
 export function mergeWithDefaultGridLineConfig(config: GridLineConfig): GridLineConfig {
@@ -502,6 +479,7 @@ export function getAxisTicksPositions(
   const axisPositions: Map<AxisId, Dimensions> = new Map();
   const axisVisibleTicks: Map<AxisId, AxisTick[]> = new Map();
   const axisTicks: Map<AxisId, AxisTick[]> = new Map();
+  const axisGridLinesPositions: Map<AxisId, AxisLinePosition[]> = new Map();
 
   let cumTopSum = 0;
   let cumBottomSum = chartConfig.paddings.bottom;
@@ -561,6 +539,14 @@ export function getAxisTicksPositions(
       chartRotation,
     );
 
+    if (axisSpec.showGridLines) {
+      const isVerticalAxis = isVertical(axisSpec.position);
+      const gridLines = visibleTicks.map((tick: AxisTick): AxisLinePosition => {
+        return computeAxisGridLinePositions(isVerticalAxis, tick.position, chartDimensions);
+      });
+      axisGridLinesPositions.set(id, gridLines);
+    }
+
     const { titleFontSize, titlePadding } = chartTheme.axes;
     const axisTitleHeight = titleFontSize + titlePadding;
 
@@ -588,7 +574,25 @@ export function getAxisTicksPositions(
     axisPositions,
     axisTicks,
     axisVisibleTicks,
+    axisGridLinesPositions,
   };
+}
+
+function computeAxisGridLinePositions(
+  isVerticalAxis: boolean,
+  tickPosition: number,
+  chartDimensions: Dimensions,
+): AxisLinePosition {
+  const positions = isVerticalAxis ?
+    getVerticalAxisGridLineProps(
+      tickPosition,
+      chartDimensions.width,
+    ) : getHorizontalAxisGridLineProps(
+      tickPosition,
+      chartDimensions.height,
+    );
+
+  return positions;
 }
 
 function getVerticalDomain(

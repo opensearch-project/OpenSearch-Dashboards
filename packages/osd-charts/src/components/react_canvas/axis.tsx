@@ -1,12 +1,12 @@
 import React from 'react';
 import { Group, Line, Rect, Text } from 'react-konva';
 import {
-  AxisTick, AxisTicksDimensions, centerRotationOrigin, getHorizontalAxisGridLineProps,
-  getHorizontalAxisTickLineProps, getTickLabelProps, getVerticalAxisGridLineProps,
-  getVerticalAxisTickLineProps, isHorizontal, isVertical, mergeWithDefaultGridLineConfig,
+  AxisTick, AxisTicksDimensions, centerRotationOrigin,
+  getHorizontalAxisTickLineProps, getTickLabelProps,
+  getVerticalAxisTickLineProps, isHorizontal, isVertical,
 } from '../../lib/axes/axis_utils';
 import { AxisSpec, Position } from '../../lib/series/specs';
-import { DEFAULT_GRID_LINE_CONFIG, Theme } from '../../lib/themes/theme';
+import { Theme } from '../../lib/themes/theme';
 import { Dimensions } from '../../lib/utils/dimensions';
 
 interface AxisProps {
@@ -74,43 +74,6 @@ export class Axis extends React.PureComponent<AxisProps> {
     );
   }
 
-  private renderGridLine = (tick: AxisTick, i: number) => {
-    const showGridLines = this.props.axisSpec.showGridLines || false;
-
-    if (!showGridLines) {
-      return null;
-    }
-
-    const {
-      axisSpec: { tickSize, tickPadding, position, gridLineStyle },
-      axisTicksDimensions: { maxLabelBboxHeight },
-      chartDimensions,
-      chartTheme: { chart: { paddings } },
-    } = this.props;
-
-    const config = gridLineStyle ? mergeWithDefaultGridLineConfig(gridLineStyle) : DEFAULT_GRID_LINE_CONFIG;
-
-    const lineProps = isVertical(position) ?
-      getVerticalAxisGridLineProps(
-        position,
-        tickPadding,
-        tickSize,
-        tick.position,
-        chartDimensions.width,
-        paddings,
-      ) : getHorizontalAxisGridLineProps(
-        position,
-        tickPadding,
-        tickSize,
-        tick.position,
-        maxLabelBboxHeight,
-        chartDimensions.height,
-        paddings,
-      );
-
-    return <Line key={`tick-${i}`} points={lineProps} {...config} />;
-  }
-
   private renderTickLine = (tick: AxisTick, i: number) => {
     const {
       axisSpec: { tickSize, tickPadding, position },
@@ -139,7 +102,6 @@ export class Axis extends React.PureComponent<AxisProps> {
       <Group x={axisPosition.left} y={axisPosition.top}>
         <Group key="lines">{this.renderAxisLine()}</Group>
         <Group key="tick-lines">{ticks.map(this.renderTickLine)}</Group>
-        <Group key="grid-lines">{ticks.map(this.renderGridLine)}</Group>
         <Group key="ticks">
           {ticks.filter((tick) => tick.label !== null).map(this.renderTickLabel)}
         </Group>

@@ -7,6 +7,7 @@ import { BrushExtent } from '../../state/utils';
 import { AreaGeometries } from './area_geometries';
 import { Axis } from './axis';
 import { BarGeometries } from './bar_geometries';
+import { Grid } from './grid';
 import { LineGeometries } from './line_geometries';
 
 interface ReactiveChartProps {
@@ -161,6 +162,33 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
     });
     return axesComponents;
   }
+
+  renderGrids = () => {
+    const {
+      axesGridLinesPositions,
+      axesSpecs,
+      chartDimensions,
+      debug,
+    } = this.props.chartStore!;
+
+    const gridComponents: JSX.Element[] = [];
+    axesGridLinesPositions.forEach((axisGridLinesPositions, axisId) => {
+      const axisSpec = axesSpecs.get(axisId);
+      if (axisSpec && axisGridLinesPositions.length > 0) {
+        gridComponents.push(
+          <Grid
+            key={`axis-grid-${axisId}`}
+            chartDimensions={chartDimensions}
+            debug={debug}
+            gridLineStyle={axisSpec.gridLineStyle}
+            linesPositions={axisGridLinesPositions}
+          />,
+        );
+      }
+    });
+    return gridComponents;
+  }
+
   renderBrushTool = () => {
     const { brushing, brushStart, brushEnd } = this.state;
     const { chartDimensions, chartRotation, chartTransform } = this.props.chartStore!;
@@ -243,6 +271,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
           ? chartDimensions.width
           : chartDimensions.height,
       };
+
     let brushProps = {};
     const isBrushEnabled = this.props.chartStore!.isBrushEnabled();
     if (isBrushEnabled) {
@@ -252,6 +281,13 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
         onMouseMove: this.onBrushing,
       };
     }
+
+    const gridClippings = {
+      clipX: chartDimensions.left,
+      clipY: chartDimensions.top,
+      clipWidth: chartDimensions.width,
+      clipHeight: chartDimensions.height,
+    };
 
     return (
       <div
@@ -273,6 +309,8 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
           }}
           {...brushProps}
         >
+          <Layer hitGraphEnabled={false} {...gridClippings}>{this.renderGrids()}</Layer>
+
           <Layer
             ref={this.renderingLayerRef}
             x={chartDimensions.left + chartTransform.x}

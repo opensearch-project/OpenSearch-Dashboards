@@ -1,5 +1,6 @@
 import { action, observable } from 'mobx';
 import {
+  AxisLinePosition,
   AxisTick,
   AxisTicksDimensions,
   computeAxisTicksDimensions,
@@ -113,6 +114,7 @@ export class ChartStore {
   axesPositions: Map<AxisId, Dimensions> = new Map(); // computed
   axesVisibleTicks: Map<AxisId, AxisTick[]> = new Map(); // computed
   axesTicks: Map<AxisId, AxisTick[]> = new Map(); // computed
+  axesGridLinesPositions: Map<AxisId, AxisLinePosition[]> = new Map(); // computed
 
   seriesSpecs: Map<SpecId, BasicSeriesSpec> = new Map(); // readed from jsx
 
@@ -374,6 +376,7 @@ export class ChartStore {
     this.axesPositions = axisTicksPositions.axisPositions;
     this.axesTicks = axisTicksPositions.axisTicks;
     this.axesVisibleTicks = axisTicksPositions.axisVisibleTicks;
+    this.axesGridLinesPositions = axisTicksPositions.axisGridLinesPositions;
     // if (glyphsCount > MAX_ANIMATABLE_GLYPHS) {
     //   this.canDataBeAnimated = false;
     // } else {

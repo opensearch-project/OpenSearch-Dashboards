@@ -30,6 +30,7 @@ function loadStories() {
   require('../src/stories/interactions.tsx');
   require('../src/stories/rotations.tsx');
   require('../src/stories/styling.tsx');
+  require('../src/stories/grid.tsx');
 }
 
 configure(loadStories, module);
