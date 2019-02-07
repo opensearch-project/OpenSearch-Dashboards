@@ -7,10 +7,7 @@
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/elastic/elastic-charts.git"
-  },
+  "repository": "git@github.com:elastic/elastic-charts.git",
   "scripts": {
     "cz": "git-cz",
     "build:clean": "rm -rf ./dist",
@@ -33,6 +30,11 @@
     "style:fix": "tsc -p ./tsconfig.json --noEmit && yarn prettier-tslint fix \"{,!(node_modules)/}**/*.{ts,tsx}\"",
     "semantic-release": "semantic-release"
   },
+  "files": [
+    "dist/**/*",
+    "FAQ.md",
+    "yarn.lock"
+  ],
   "husky": {
     "hooks": {
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
@@ -43,6 +45,12 @@
     "@babel/core": "^7.2.2",
     "@commitlint/cli": "^7.4.0",
     "@commitlint/config-conventional": "^7.3.1",
+    "@semantic-release/changelog": "^3.0.2",
+    "@semantic-release/commit-analyzer": "^6.1.0",
+    "@semantic-release/git": "^7.0.8",
+    "@semantic-release/github": "^5.2.10",
+    "@semantic-release/npm": "^5.1.4",
+    "@semantic-release/release-notes-generator": "^7.1.4",
     "@storybook/addon-actions": "^4.1.6",
     "@storybook/addon-info": "^4.1.6",
     "@storybook/addon-knobs": "^4.1.6",
@@ -89,6 +97,7 @@
     "react-docgen-typescript-webpack-plugin": "^1.1.0",
     "sass-loader": "^7.1.0",
     "semantic-release": "^15.13.3",
+    "semantic-release-cli": "^4.1.0",
     "style-loader": "^0.23.1",
     "ts-jest": "23",
     "ts-loader": "^5.3.3",

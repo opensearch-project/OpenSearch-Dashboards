@@ -1,2 +1,9 @@
 language: node_js
 cache: yarn
+# nodejs version from nvmrc
+# yarn install is default install lifecycle
+# yarn test is the main script, default with yarn.lock file on repo
+after_success:
+  - yarn semantic-release
+deploy:
+  - yarn storybook-deploy
