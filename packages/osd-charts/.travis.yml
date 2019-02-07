@@ -3,11 +3,13 @@ cache: yarn
 # nodejs version from nvmrc
 # yarn install is default install lifecycle
 # yarn test is the main script, default with yarn.lock file on repo
-after_success:
-  - yarn semantic-release
+script: yarn build:ts --noEmit && yarn lint && yarn test
+after_success: yarn semantic-release
+before_deploy: yarn storybook:build
 deploy:
-  provider: script
-  script: yarn storybook:deploy --ci
+  provider: pages
   skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  local_dir: .out
   on:
     branch: master
