@@ -8,6 +8,9 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": "git@github.com:elastic/elastic-charts.git",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "cz": "git-cz",
     "build:clean": "rm -rf ./dist",
@@ -17,8 +20,7 @@
     "start": "webpack-dev-server --open --config webpack.dev.js",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "storybook:build": "build-storybook -c .storybook -o .out",
-    "storybook:deploy-from-home": "storybook-to-ghpages --remote upstream",
-    "storybook-deploy": "storybook-to-ghpages",
+    "storybook:deploy": "storybook-to-ghpages",
     "lint": "tslint -c ./tslint.yaml -p ./tsconfig.json",
     "lint:fix": "yarn lint --fix",
     "prettier": "prettier -l \"{,!(node_modules)/}**/*.{ts,tsx}\"",
