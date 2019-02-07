@@ -1,3 +1,4 @@
+import '@elastic/eui/dist/eui_theme_light.css';
 import { withInfo } from '@storybook/addon-info';
 import { withKnobs } from '@storybook/addon-knobs';
 import { withOptions } from '@storybook/addon-options';
