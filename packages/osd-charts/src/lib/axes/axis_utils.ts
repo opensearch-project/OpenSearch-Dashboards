@@ -370,11 +370,8 @@ export function getVisibleTicks(
   const { maxLabelBboxHeight, maxLabelBboxWidth } = axisDim;
   const { width, height } = chartDimensions;
   const requiredSpace = isVertical(axisSpec.position) ? maxLabelBboxHeight / 2 : maxLabelBboxWidth / 2;
-  let firstTickPosition;
 
-  firstTickPosition = 0;
-
-  let previousOccupiedSpace = firstTickPosition;
+  let previousOccupiedSpace = 0;
   const visibleTicks = [];
   for (let i = 0; i < allTicks.length; i++) {
     const { position } = allTicks[i];
@@ -396,7 +393,7 @@ export function getVisibleTicks(
     }
     if (i === 0) {
       visibleTicks.push(allTicks[i]);
-      previousOccupiedSpace = firstTickPosition + requiredSpace;
+      previousOccupiedSpace = relativeTickPosition + requiredSpace;
     } else if (relativeTickPosition - requiredSpace >= previousOccupiedSpace) {
       visibleTicks.push(allTicks[i]);
       previousOccupiedSpace = relativeTickPosition + requiredSpace;

@@ -1,3 +1,4 @@
+import { boolean } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import {
@@ -119,11 +120,13 @@ storiesOf('Bar Chart', module)
     const max = now + 1000 * 60 * 60 * 24 * 90;
     return (
       <Chart renderer="canvas" className={'story-chart'}>
+        <Settings debug={boolean('debug', false)} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
           title={'Bottom axis'}
-          showOverlappingTicks={true}
+          showOverlappingTicks={boolean('showOverlappingTicks bottom axis', false)}
+          showOverlappingLabels={boolean('showOverlappingLabels bottom axis', false)}
           tickFormat={niceTimeFormatter([now, max])}
         />
         <Axis
