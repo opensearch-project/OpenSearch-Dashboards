@@ -6,4 +6,7 @@ cache: yarn
 after_success:
   - yarn semantic-release
 deploy:
-  - yarn storybook-deploy
+  provider: script
+  script: yarn storybook-deploy
+  on:
+    branch: master
