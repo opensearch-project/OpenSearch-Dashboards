@@ -1,7 +1,11 @@
 const path = require('path');
 
 module.exports = (baseConfig, env, config) => {
-  config.devtool = 'inline-source-map';
+  if (env === 'DEVELOPMENT') {
+    config.devtool = 'inline-source-map';
+  } else {
+    config.devtool = 'source-map';
+  }
   config.module.rules.push({
     test: /\.(ts|tsx)$/,
     use: [
@@ -9,15 +13,13 @@ module.exports = (baseConfig, env, config) => {
         loader: require.resolve('ts-loader'),
       },
       {
-        loader: require.resolve('react-docgen-typescript-loader')
+        loader: require.resolve('react-docgen-typescript-loader'),
       },
-    ]
+    ],
   });
   config.module.rules.push({
     test: /\.tsx?$/,
-    include: [
-      path.resolve(__dirname, '../src/stories')
-    ],
+    include: [path.resolve(__dirname, '../src/stories')],
     loaders: [
       {
         loader: require.resolve('@storybook/addon-storysource/loader'),
@@ -32,20 +34,17 @@ module.exports = (baseConfig, env, config) => {
     test: /\.scss$/,
     use: [
       {
-        loader: "style-loader"
+        loader: 'style-loader',
       },
       {
-        loader: "css-loader"
+        loader: 'css-loader',
       },
       {
-        loader: "sass-loader",
-      }
-    ]
+        loader: 'sass-loader',
+      },
+    ],
   });
   config.resolve.extensions.push('.ts', '.tsx');
 
-
-
   return config;
 };
-
