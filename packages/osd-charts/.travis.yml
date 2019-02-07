@@ -9,7 +9,7 @@ before_deploy: yarn storybook:build
 deploy:
   provider: pages
   skip_cleanup: true
-  github_token: $GITHUB_TOKEN
+  github_token: $GH_TOKEN
   target-branch: gh-pages
   keep-history: false # always force push
   local_dir: .out
