@@ -9,6 +9,9 @@ export class CanvasTextBBoxCalculator implements BBoxCalculator {
 
   constructor(rootElement?: HTMLElement) {
     this.offscreenCanvas = document.createElement('canvas');
+    this.offscreenCanvas.style.position = 'absolute';
+    this.offscreenCanvas.style.top = '-9999px';
+
     this.context = this.offscreenCanvas.getContext('2d');
     this.attachedRoot = rootElement || document.documentElement;
     this.attachedRoot.appendChild(this.offscreenCanvas);
