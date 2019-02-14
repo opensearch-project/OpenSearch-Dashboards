@@ -48,7 +48,7 @@ $euiChartLegendMaxHeight: $euiSize * 4 + $euiSize;
   top: 0;
   bottom: 0;
   left: 0;
-  width: $euiChartLegendMaxWidth;  
+  width: $euiChartLegendMaxWidth;
   order: 1;
   .euiChartLegend__listItem {
     min-width: 100%;
@@ -58,7 +58,7 @@ $euiChartLegendMaxHeight: $euiSize * 4 + $euiSize;
   top: 0;
   bottom: 0;
   right: 0;
-  width: $euiChartLegendMaxWidth;  
+  width: $euiChartLegendMaxWidth;
   .euiChartLegend__listItem {
     min-width: 100%;
   }
@@ -93,4 +93,9 @@ $euiChartLegendMaxHeight: $euiSize * 4 + $euiSize;
 .euiChartLegendListItem__title {
   width: $euiChartLegendMaxWidth - 4 * $euiSize;
   max-width: $euiChartLegendMaxWidth - 4 * $euiSize;
+}
+.euiChartLegendList__item {
+  &:hover {
+    text-decoration: underline;
+  }
 }

@@ -1,4 +1,4 @@
-import { action, observable } from 'mobx';
+import { action, computed, IObservableValue, observable } from 'mobx';
 import {
   AxisLinePosition,
   AxisTick,
@@ -76,6 +76,7 @@ export interface SeriesDomainsAndData {
 export type ElementClickListener = (value: GeometryValue) => void;
 export type ElementOverListener = (value: GeometryValue) => void;
 export type BrushEndListener = (min: number, max: number) => void;
+export type LegendItemListener = (dataSeriesIdentifiers: DataSeriesColorsValues | null) => void;
 // const MAX_ANIMATABLE_GLYPHS = 500;
 
 export class ChartStore {
@@ -123,6 +124,7 @@ export class ChartStore {
   yScales?: Map<GroupId, Scale>;
 
   legendItems: LegendItem[] = [];
+  highlightedLegendItemIndex: IObservableValue<number | null> = observable.box(null);
 
   tooltipData = observable.box<Array<[any, any]> | null>(null);
   tooltipPosition = observable.box<{ x: number; y: number } | null>();
@@ -132,6 +134,9 @@ export class ChartStore {
   onElementOverListener?: ElementOverListener;
   onElementOutListener?: () => undefined;
   onBrushEndListener?: BrushEndListener;
+
+  onLegendItemOverListener?: LegendItemListener;
+  onLegendItemOutListener?: () => undefined;
 
   geometries: {
     points: PointGeometry[];
@@ -186,6 +191,27 @@ export class ChartStore {
     this.showLegend.set(showLegend);
   });
 
+  highlightedLegendItem = computed(() => {
+    const index = this.highlightedLegendItemIndex.get();
+    return index == null ? null : this.legendItems[index];
+  });
+
+  onLegendItemOver = action((legendItemIndex: number) => {
+    this.highlightedLegendItemIndex.set(legendItemIndex);
+    if (this.onLegendItemOverListener) {
+      const currentLegendItem = this.highlightedLegendItem.get();
+      const listenerData = currentLegendItem ? currentLegendItem.value : null;
+      this.onLegendItemOverListener(listenerData);
+    }
+  });
+
+  onLegendItemOut = action(() => {
+    this.highlightedLegendItemIndex.set(null);
+    if (this.onLegendItemOutListener) {
+      this.onLegendItemOutListener();
+    }
+  });
+
   setOnElementClickListener(listener: ElementClickListener) {
     this.onElementClickListener = listener;
   }
@@ -198,6 +224,12 @@ export class ChartStore {
   setOnBrushEndListener(listener: BrushEndListener) {
     this.onBrushEndListener = listener;
   }
+  setOnLegendItemOverListener(listener: LegendItemListener) {
+    this.onLegendItemOverListener = listener;
+  }
+  setOnLegendItemOutListener(listener: () => undefined) {
+    this.onLegendItemOutListener = listener;
+  }
   removeElementClickListener() {
     this.onElementClickListener = undefined;
   }
@@ -206,6 +238,12 @@ export class ChartStore {
   }
   removeElementOutListener() {
     this.onElementOutListener = undefined;
+  }
+  removeOnLegendItemOverListener() {
+    this.onLegendItemOverListener = undefined;
+  }
+  removeOnLegendItemOutListener() {
+    this.onLegendItemOutListener = undefined;
   }
   onBrushEnd(start: Point, end: Point) {
     if (!this.onBrushEndListener) {

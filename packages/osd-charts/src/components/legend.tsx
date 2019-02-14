@@ -4,7 +4,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { inject, observer } from 'mobx-react';
@@ -86,8 +85,15 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
             responsive={false}
           >
             {legendItems.map((item, index) => {
+              const legendItemProps = {
+                key: index,
+                className: 'euiChartLegendList__item',
+                onMouseEnter: this.onLegendItemMouseover(index),
+                onMouseLeave: this.onLegendItemMouseout,
+              };
+
               return (
-                <EuiFlexItem key={index} className="euiChartLegendList__item">
+                <EuiFlexItem {...legendItemProps}>
                   <LegendElement color={item.color} label={item.label} />
                 </EuiFlexItem>
               );
@@ -97,6 +103,14 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
       </div>
     );
   }
+
+  private onLegendItemMouseover = (legendItemIndex: number) => () => {
+    this.props.chartStore!.onLegendItemOver(legendItemIndex);
+  }
+
+  private onLegendItemMouseout = () => {
+    this.props.chartStore!.onLegendItemOut();
+  }
 }
 function LegendElement({ color, label }: Partial<LegendItem>) {
   return (
@@ -105,13 +119,11 @@ function LegendElement({ color, label }: Partial<LegendItem>) {
         <EuiIcon type="dot" color={color} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip position="right" content={<EuiText size="xs">{label}</EuiText>}>
-          <EuiFlexItem grow={true} className="euiChartLegendListItem__title">
-            <EuiText size="xs" className="eui-textTruncate">
-              {label}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiToolTip>
+        <EuiFlexItem grow={true} className="euiChartLegendListItem__title" title={label}>
+          <EuiText size="xs" className="eui-textTruncate">
+            {label}
+          </EuiText>
+        </EuiFlexItem>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

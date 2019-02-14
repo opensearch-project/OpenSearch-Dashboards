@@ -1,3 +1,4 @@
+import { GeometryStyle } from '../series/rendering';
 import { Margins } from '../utils/dimensions';
 
 export interface ChartConfig {
@@ -11,6 +12,7 @@ export interface ChartConfig {
   styles: {
     lineSeries: LineSeriesStyle;
     areaSeries: AreaSeriesStyle;
+    shared: { [key: string]: GeometryStyle };
   };
 }
 export interface AxisConfig {
@@ -91,6 +93,18 @@ export const DEFAULT_GRID_LINE_CONFIG: GridLineConfig = {
   opacity: 1,
 };
 
+export const GEOMETRY_STYLES: { [key: string]: GeometryStyle } = {
+  default: {
+    opacity: 1,
+  },
+  highlighted: {
+    opacity: 1,
+  },
+  unhighlighted: {
+    opacity: 0.25,
+  },
+};
+
 export const DEFAULT_THEME: Theme = {
   chart: {
     paddings: {
@@ -130,6 +144,7 @@ export const DEFAULT_THEME: Theme = {
         dataPointsStroke: 'white',
         dataPointsStrokeWidth: 1,
       },
+      shared: GEOMETRY_STYLES,
     },
   },
   scales: {

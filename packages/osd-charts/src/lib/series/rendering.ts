@@ -1,14 +1,26 @@
 import { area, line } from 'd3-shape';
+import { DEFAULT_THEME } from '../themes/theme';
 import { SpecId } from '../utils/ids';
 import { Scale } from '../utils/scales/scales';
 import { CurveType, getCurveFactory } from './curves';
+import { LegendItem } from './legend';
 import { DataSeriesDatum } from './series';
+import { belongsToDataSeries } from './series_utils';
 
-export interface GeometryValue {
+export interface GeometryId {
   specId: SpecId;
-  datum: any;
   seriesKey: any[];
 }
+
+export interface GeometryValue extends GeometryId {
+  datum: any;
+}
+
+/** Shared style properties for varies geometries */
+export interface GeometryStyle {
+  opacity: number;
+}
+
 export interface PointGeometry {
   x: number;
   y: number;
@@ -26,6 +38,7 @@ export interface BarGeometry {
   height: number;
   color: string;
   value: GeometryValue;
+  geometryId: GeometryId;
 }
 export interface LineGeometry {
   line: string;
@@ -35,6 +48,7 @@ export interface LineGeometry {
     x: number;
     y: number;
   };
+  geometryId: GeometryId;
 }
 export interface AreaGeometry {
   area: string;
@@ -45,6 +59,7 @@ export interface AreaGeometry {
     x: number;
     y: number;
   };
+  geometryId: GeometryId;
 }
 
 export function renderPoints(
@@ -95,6 +110,10 @@ export function renderBars(
         datum: datum.datum,
         seriesKey,
       },
+      geometryId: {
+        specId,
+        seriesKey,
+      },
     };
   });
 }
@@ -123,6 +142,10 @@ export function renderLine(
       x,
       y,
     },
+    geometryId: {
+      specId,
+      seriesKey,
+    },
   };
 }
 
@@ -148,5 +171,33 @@ export function renderArea(
     points: lineGeometry.points,
     color,
     transform: lineGeometry.transform,
+    geometryId: {
+      specId,
+      seriesKey,
+    },
   };
+}
+
+export function getGeometryStyle(
+  geometryId: GeometryId,
+  highlightedLegendItem: LegendItem | null,
+  individualHighlight?: { [key: string]: boolean },
+): GeometryStyle {
+  const { shared } = DEFAULT_THEME.chart.styles;
+
+  if (highlightedLegendItem != null) {
+    const isPartOfHighlightedSeries = belongsToDataSeries(geometryId, highlightedLegendItem.value);
+
+    return isPartOfHighlightedSeries ? shared.highlighted : shared.unhighlighted;
+  }
+
+  if (individualHighlight) {
+    const { hasHighlight, hasGeometryHover } = individualHighlight;
+    if (!hasGeometryHover) {
+      return shared.highlighted;
+    }
+    return hasHighlight ? shared.highlighted : shared.unhighlighted;
+  }
+
+  return shared.default;
 }

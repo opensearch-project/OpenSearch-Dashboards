@@ -3,7 +3,8 @@ import { IAction } from 'mobx';
 import React from 'react';
 import { Circle, Group, Path } from 'react-konva';
 import { animated, Spring } from 'react-spring/konva';
-import { AreaGeometry, GeometryValue, PointGeometry } from '../../lib/series/rendering';
+import { LegendItem } from '../../lib/series/legend';
+import { AreaGeometry, GeometryValue, getGeometryStyle, PointGeometry } from '../../lib/series/rendering';
 import { AreaSeriesStyle } from '../../lib/themes/theme';
 import { ElementClickListener, TooltipData } from '../../state/chart_state';
 
@@ -15,6 +16,7 @@ interface AreaGeometriesDataProps {
   onElementClick?: ElementClickListener;
   onElementOver: ((tooltip: TooltipData) => void) & IAction;
   onElementOut: (() => void) & IAction;
+  highlightedLegendItem: LegendItem | null;
 }
 interface AreaGeometriesDataState {
   overPoint?: PointGeometry;
@@ -22,7 +24,7 @@ interface AreaGeometriesDataState {
 export class AreaGeometries extends React.PureComponent<
   AreaGeometriesDataProps,
   AreaGeometriesDataState
-> {
+  > {
   static defaultProps: Partial<AreaGeometriesDataProps> = {
     animated: false,
     num: 1,
@@ -131,10 +133,14 @@ export class AreaGeometries extends React.PureComponent<
       );
     });
   }
+
   private renderAreaGeoms = (): JSX.Element[] => {
     const { areas } = this.props;
     return areas.map((glyph, i) => {
-      const { area, color, transform } = glyph;
+      const { area, color, transform, geometryId } = glyph;
+
+      const geometryStyle = getGeometryStyle(geometryId, this.props.highlightedLegendItem);
+
       if (this.props.animated) {
         return (
           <Group key={`area-group-${i}`} x={transform.x}>
@@ -145,8 +151,9 @@ export class AreaGeometries extends React.PureComponent<
                   data={props.area}
                   fill={color}
                   listening={false}
-                  // areaCap="round"
-                  // areaJoin="round"
+                  {...geometryStyle}
+                // areaCap="round"
+                // areaJoin="round"
                 />
               )}
             </Spring>
@@ -159,8 +166,9 @@ export class AreaGeometries extends React.PureComponent<
             data={area}
             fill={color}
             listening={false}
-            // areaCap="round"
-            // areaJoin="round"
+            {...geometryStyle}
+          // areaCap="round"
+          // areaJoin="round"
           />
         );
       }

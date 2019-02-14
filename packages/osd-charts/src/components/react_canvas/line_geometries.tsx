@@ -3,7 +3,8 @@ import { IAction } from 'mobx';
 import React from 'react';
 import { Circle, Group, Path } from 'react-konva';
 import { animated, Spring } from 'react-spring/konva';
-import { GeometryValue, LineGeometry, PointGeometry } from '../../lib/series/rendering';
+import { LegendItem } from '../../lib/series/legend';
+import { GeometryValue, getGeometryStyle, LineGeometry, PointGeometry } from '../../lib/series/rendering';
 import { LineSeriesStyle } from '../../lib/themes/theme';
 import { ElementClickListener, TooltipData } from '../../state/chart_state';
 
@@ -14,6 +15,7 @@ interface LineGeometriesDataProps {
   onElementClick?: ElementClickListener;
   onElementOver: ((tooltip: TooltipData) => void) & IAction;
   onElementOut: (() => void) & IAction;
+  highlightedLegendItem: LegendItem | null;
 }
 interface LineGeometriesDataState {
   overPoint?: PointGeometry;
@@ -21,7 +23,7 @@ interface LineGeometriesDataState {
 export class LineGeometries extends React.PureComponent<
   LineGeometriesDataProps,
   LineGeometriesDataState
-> {
+  > {
   static defaultProps: Partial<LineGeometriesDataProps> = {
     animated: false,
   };
@@ -129,10 +131,14 @@ export class LineGeometries extends React.PureComponent<
       );
     });
   }
+
   private renderLineGeoms = (): JSX.Element[] => {
     const { style, lines } = this.props;
     return lines.map((glyph, i) => {
-      const { line, color, transform } = glyph;
+      const { line, color, transform, geometryId } = glyph;
+
+      const geometryStyle = getGeometryStyle(geometryId, this.props.highlightedLegendItem);
+
       if (this.props.animated) {
         return (
           <Group key={i} x={transform.x}>
@@ -146,6 +152,7 @@ export class LineGeometries extends React.PureComponent<
                   listening={false}
                   lineCap="round"
                   lineJoin="round"
+                  {...geometryStyle}
                 />
               )}
             </Spring>
@@ -161,6 +168,7 @@ export class LineGeometries extends React.PureComponent<
             listening={false}
             lineCap="round"
             lineJoin="round"
+            {...geometryStyle}
           />
         );
       }
