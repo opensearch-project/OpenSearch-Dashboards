@@ -10,11 +10,11 @@ import { Axis, BarSeries, Chart, getAxisId, getSpecId, Position, ScaleType } fro
 
 ## Requirements and dependencies
 
-Elastic Charts depends on EUI framework for styles and it's subsequent peer dependencies (`moment` and `@elastic/datemath`). These are already loaded in most Elastic repos, but make sure to install them if you are starting from scratch.
+Elastic Charts depends on EUI framework for styles and its subsequent peer dependencies (`moment` and `@elastic/datemath`). These are already loaded in most Elastic repos, but make sure to install them if you are starting from scratch.
 
 ## Using Elastic Charts in Kibana
 
-TTo use Elastic Charts code in Kibana, check if `@elastic/charts` packages is already configured as dependency in `package.json` and simply import the components you want.
+To use Elastic Charts code in Kibana, check if `@elastic/charts` packages is already configured as dependency in `package.json` and simply import the components you want.
 
 ## Using Elastic Charts in a standalone project
 
