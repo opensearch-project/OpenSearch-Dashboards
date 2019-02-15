@@ -1,101 +1,122 @@
-$euiChartLegendMaxWidth: $euiSize * 10 + $euiSize;
-$euiChartLegendMaxHeight: $euiSize * 4 + $euiSize;
+$elasticChartsLegendMaxWidth: $euiSize * 10 + $euiSize;
+$elasticChartsLegendMaxHeight: $euiSize * 4 + $euiSize;
 
-.euiChartLegend {
+.elasticChartsLegend {
   position: absolute;
   display: flex;
   align-items: flex-start;
   flex-direction: row;
 }
-.euiChartLegend--collapsed {
+.elasticChartsLegend--collapsed {
   width: $euiSize * 2 !important;
   height: $euiSize * 2 !important;
-  .euiChartLegendList {
+  .elasticChartsLegendList {
     display: none;
   }
 }
-.euiChartLegend--debug {
+.elasticChartsLegend--debug {
   background: red;
 }
-.euiChartLegend--top {
+.elasticChartsLegend--top {
   top: 0;
   left: 0;
   right: 0;
   width: auto;
-  height: $euiChartLegendMaxHeight;
+  height: $elasticChartsLegendMaxHeight;
   flex-direction: column;
   order: 1;
-  .euiChartLegend__listItem {
+  .elasticChartsLegend__listItem {
     min-height: 50%;
-    width: $euiChartLegendMaxWidth;
-    min-width: $euiChartLegendMaxWidth;
+    width: $elasticChartsLegendMaxWidth;
+    min-width: $elasticChartsLegendMaxWidth;
   }
 }
-.euiChartLegend--bottom {
+.elasticChartsLegend--bottom {
   bottom: 0;
   left: 0;
   right: 0;
   width: auto;
-  height: $euiChartLegendMaxHeight;
+  height: $elasticChartsLegendMaxHeight;
   flex-direction: column;
-  .euiChartLegend__listItem {
+  .elasticChartsLegend__listItem {
     min-height: 50%;
-    width: $euiChartLegendMaxWidth;
-    min-width: $euiChartLegendMaxWidth;
+    width: $elasticChartsLegendMaxWidth;
+    min-width: $elasticChartsLegendMaxWidth;
   }
 }
-.euiChartLegend--left {
+.elasticChartsLegend--left {
   top: 0;
   bottom: 0;
   left: 0;
-  width: $euiChartLegendMaxWidth;
+  width: $elasticChartsLegendMaxWidth;
   order: 1;
-  .euiChartLegend__listItem {
+  .elasticChartsLegend__listItem {
     min-width: 100%;
   }
 }
-.euiChartLegend--right {
+.elasticChartsLegend--right {
   top: 0;
   bottom: 0;
   right: 0;
-  width: $euiChartLegendMaxWidth;
-  .euiChartLegend__listItem {
+  width: $elasticChartsLegendMaxWidth;
+  .elasticChartsLegend__listItem {
     min-width: 100%;
   }
 }
 
-
-.euiChartLegendCollapser {
+.elasticChartsLegendCollapser {
   width: 2 * $euiSize;
   height: 2 * $euiSize;
   flex-shrink: 0;
   flex-grow: 0;
 }
-.euiChartLegendCollapser--top {
+.elasticChartsLegendCollapser--top {
   order: 2;
 }
-.euiChartLegendCollapser--left {
+.elasticChartsLegendCollapser--left {
   order: 2;
 }
 
-
-
-.euiChartLegendListContainer {
+.elasticChartsLegendListContainer {
   overflow: hidden;
   flex-shrink: 1;
   flex-grow: 0;
 }
-.euiChartLegendList {
+.elasticChartsLegendList {
   overflow-y: auto;
   overflow-x: hidden;
   height: 100%;
+  @include euiScrollBar;
 }
-.euiChartLegendListItem__title {
-  width: $euiChartLegendMaxWidth - 4 * $euiSize;
-  max-width: $euiChartLegendMaxWidth - 4 * $euiSize;
-}
-.euiChartLegendList__item {
+
+.elasticChartsLegendList__item {
   &:hover {
     text-decoration: underline;
   }
+}
+
+.elasticChartsLegendListItem__title {
+  width: $elasticChartsLegendMaxWidth - 4 * $euiSize;
+  max-width: $elasticChartsLegendMaxWidth - 4 * $euiSize;
+}
+
+.elasticChartsLegend__toggle {
+  border-radius: $euiBorderRadius;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  opacity: 0;
+  background-color: $euiColorEmptyShade;
+  transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance,
+    background-color $euiAnimSpeedFast $euiAnimSlightResistance $euiAnimSpeedExtraSlow;
+  &:focus {
+    box-shadow: none;
+    background-color: $euiFocusBackgroundColor !important;
+  }
+}
+.elasticChartsLegend__toggle--isOpen {
+  background-color: transparentize($euiColorDarkestShade, 0.9);
 }

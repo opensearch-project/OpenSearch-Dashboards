@@ -22,7 +22,7 @@ class TooltipsComponent extends React.Component<ReactiveChartProps> {
     const tooltipPos = tooltipPosition.get();
     let hPosition;
     if (!initialized.get() || !tooltip || !tooltipPos) {
-      return <div className="euiChartTooltip euiChartTooltip--hidden" />;
+      return <div className="elasticChartsTooltip elasticChartsTooltip--hidden" />;
     }
     if (tooltipPos.x <= parentDimensions.width / 2) {
       hPosition = {
@@ -56,9 +56,12 @@ class TooltipsComponent extends React.Component<ReactiveChartProps> {
     vPosition: { position: string; value: number },
     hPosition: { position: string; value: number },
   ) => {
+    const className = classNames('elasticChartsTooltip', {
+      'elasticChartsTooltip--hidden': !showTooltip,
+    });
     return (
       <div
-        className={classNames('euiChartTooltip', showTooltip ? null : 'euiChartTooltip--hidden')}
+        className={className}
         style={{
           position: 'absolute',
           [vPosition.position]: vPosition.value,
@@ -71,7 +74,7 @@ class TooltipsComponent extends React.Component<ReactiveChartProps> {
             {tooltip.map(([field, value], index) => {
               return (
                 <tr key={`row-${index}`}>
-                  <td className="euiChartTooltip__label">{field}</td>
+                  <td className="elasticChartsTooltip__label">{field}</td>
                   <td>{value}</td>
                 </tr>
               );

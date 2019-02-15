@@ -1,4 +1,4 @@
-.euiChartTooltip {
+.elasticChartsTooltip {
   @include euiBottomShadow($color: $euiColorFullShade);
   @include euiFontSizeXS;
   pointer-events: none;
@@ -28,12 +28,12 @@
     }
   }
 }
-.euiChartTooltip__label {
+.elasticChartsTooltip__label {
   // max-width: $euiSizeXL * 3;
   font-weight: $euiFontWeightMedium;
   color: shade($euiColorGhost, 20%);
 }
 
-.euiChartTooltip--hidden {
+.elasticChartsTooltip--hidden {
   opacity: 0;
 }

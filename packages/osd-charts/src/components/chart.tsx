@@ -5,6 +5,7 @@ import { SpecsParser } from '../specs/specs_parser';
 import { ChartStore } from '../state/chart_state';
 import { ChartResizer } from './chart_resizer';
 import { Legend } from './legend';
+import { LegendButton } from './legend_button';
 import { ReactiveChart as ReactChart } from './react_canvas/reactive_chart';
 import { ReactiveChart as SVGChart } from './svg/reactive_chart';
 import { Tooltips } from './tooltips';
@@ -36,7 +37,7 @@ export class Chart extends React.Component<ChartProps> {
     } else {
       containerStyle = {};
     }
-    const chartClass = classNames('elasticcharts', className);
+    const chartClass = classNames('elasticCharts', className);
     return (
       <Provider chartStore={this.chartSpecStore}>
         <Fragment>
@@ -47,6 +48,7 @@ export class Chart extends React.Component<ChartProps> {
             {renderer === 'canvas' && <ReactChart />}
             <Tooltips />
             <Legend />
+            <LegendButton />
           </div>
         </Fragment>
       </Provider>
