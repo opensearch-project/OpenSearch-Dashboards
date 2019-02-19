@@ -2,9 +2,12 @@ language: node_js
 cache: yarn
 # nodejs version from nvmrc
 # yarn install is default install lifecycle
-script: yarn build:ts --noEmit && yarn lint && yarn test
-# skipping this to check the deploy
-after_success: yarn semantic-release
+script:
+  - yarn global add codecov -g
+  - yarn build:ts --noEmit && yarn lint && yarn test --coverage
+after_success:
+  - codecov
+  - yarn semantic-release
 before_deploy: yarn storybook:build
 deploy:
   provider: pages
