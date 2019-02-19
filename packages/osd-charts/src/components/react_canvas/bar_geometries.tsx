@@ -5,11 +5,14 @@ import { Group, Rect } from 'react-konva';
 import { animated, Spring } from 'react-spring/konva';
 import { LegendItem } from '../../lib/series/legend';
 import { BarGeometry, GeometryValue, getGeometryStyle } from '../../lib/series/rendering';
+import { BarSeriesStyle, SharedGeometryStyle } from '../../lib/themes/theme';
 import { ElementClickListener, TooltipData } from '../../state/chart_state';
 
 interface BarGeometriesDataProps {
   animated?: boolean;
   bars: BarGeometry[];
+  style: BarSeriesStyle;
+  sharedStyle: SharedGeometryStyle;
   onElementClick?: ElementClickListener;
   onElementOver: ((tooltip: TooltipData) => void) & IAction;
   onElementOut: (() => void) & IAction;
@@ -21,7 +24,7 @@ interface BarGeometriesDataState {
 export class BarGeometries extends React.PureComponent<
   BarGeometriesDataProps,
   BarGeometriesDataState
-  > {
+> {
   static defaultProps: Partial<BarGeometriesDataProps> = {
     animated: false,
   };
@@ -75,6 +78,10 @@ export class BarGeometries extends React.PureComponent<
 
   private renderBarGeoms = (bars: BarGeometry[]): JSX.Element[] => {
     const { overBar } = this.state;
+    const {
+      style: { border },
+      sharedStyle,
+    } = this.props;
     return bars.map((bar, i) => {
       const { x, y, width, height, color, value } = bar;
 
@@ -86,8 +93,15 @@ export class BarGeometries extends React.PureComponent<
         hasHighlight,
       };
 
-      const geometryStyle = getGeometryStyle(bar.geometryId, this.props.highlightedLegendItem, individualHighlight);
+      const geometryStyle = getGeometryStyle(
+        bar.geometryId,
+        this.props.highlightedLegendItem,
+        sharedStyle,
+        individualHighlight,
+      );
 
+      // min 5px bars with white border
+      const borderEnabled = border.visible && width > border.strokeWidth * 7;
       if (this.props.animated) {
         return (
           <Group key={i}>
@@ -100,7 +114,9 @@ export class BarGeometries extends React.PureComponent<
                   width={width}
                   height={props.height}
                   fill={color}
-                  strokeWidth={0}
+                  strokeWidth={border.strokeWidth}
+                  stroke={border.stroke}
+                  strokeEnabled={borderEnabled}
                   perfectDrawEnabled={true}
                   onMouseOver={this.onOverBar(bar)}
                   onMouseLeave={this.onOutBar}
@@ -120,7 +136,9 @@ export class BarGeometries extends React.PureComponent<
             width={width}
             height={height}
             fill={color}
-            strokeWidth={0}
+            strokeWidth={border.strokeWidth}
+            stroke={border.stroke}
+            strokeEnabled={borderEnabled}
             perfectDrawEnabled={false}
             onMouseOver={this.onOverBar(bar)}
             onMouseLeave={this.onOutBar}

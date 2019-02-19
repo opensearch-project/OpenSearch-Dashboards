@@ -1,5 +1,10 @@
+@import '../node_modules/@elastic/eui/src/themes/eui/eui_colors_dark.scss';
+
 .story-chart {
   background: white;
+}
+.story-chart-dark {
+  background: $euiColorEmptyShade;
 }
 #root {
   background-color: blanchedalmond;
@@ -20,4 +25,7 @@
 #story-root + div table td {
   border: 1px solid gray;
   padding: 5px;
+}
+.Pane.vertical.Pane1 {
+  background: red;
 }

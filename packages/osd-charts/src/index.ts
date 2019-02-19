@@ -2,5 +2,10 @@ export * from './specs';
 export { Chart } from './components/chart';
 export { getAxisId, getGroupId, getSpecId } from './lib/utils/ids';
 export { ScaleType } from './lib/utils/scales/scales';
-
-export { Position, Rotation } from './lib/series/specs';
+export { Position, Rendering, Rotation } from './lib/series/specs';
+export * from './lib/themes/theme';
+export { LIGHT_THEME } from './lib/themes/light_theme';
+export { DARK_THEME } from './lib/themes/dark_theme';
+export { CurveType } from './lib/series/curves';
+export { niceTimeFormatter } from './utils/data/formatters';
+export { DataGenerator } from './utils/data_generators/data_generator';

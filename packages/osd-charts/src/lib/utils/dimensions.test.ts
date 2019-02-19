@@ -1,6 +1,7 @@
 import { AxisTicksDimensions } from '../axes/axis_utils';
 import { AxisSpec, Position } from '../series/specs';
-import { DEFAULT_THEME, LegendStyle } from '../themes/theme';
+import { LIGHT_THEME } from '../themes/light_theme';
+import { LegendStyle } from '../themes/theme';
 import { computeChartDimensions, Margins } from './dimensions';
 import { AxisId, getAxisId, getGroupId } from './ids';
 import { ScaleType } from './scales/scales';
@@ -53,21 +54,18 @@ describe('Computed chart dimensions', () => {
     horizontalHeight: 10,
   };
   const showLegend = false;
-
+  const defaultTheme = LIGHT_THEME;
   const chartTheme = {
-    ...DEFAULT_THEME,
-    chart: {
-      ...DEFAULT_THEME.chart,
-      margins: chartMargins,
-      paddings: chartPaddings,
-    },
+    ...defaultTheme,
+    chartMargins,
+    chartPaddings,
     axes: {
-      ...DEFAULT_THEME.axes,
-      titleFontSize: 10,
-      titlePadding: 10,
+      ...defaultTheme.axes,
     },
     ...legend,
   };
+  chartTheme.axes.axisTitleStyle.fontSize = 10;
+  chartTheme.axes.axisTitleStyle.padding = 10;
   test('should be equal to parent dimension with no axis minus margins', () => {
     const axisDims = new Map<AxisId, AxisTicksDimensions>();
     const axisSpecs = new Map<AxisId, AxisSpec>();

@@ -35,7 +35,8 @@ import {
   Rotation,
 } from '../lib/series/specs';
 import { formatTooltip } from '../lib/series/tooltip';
-import { DEFAULT_THEME, Theme } from '../lib/themes/theme';
+import { LIGHT_THEME } from '../lib/themes/light_theme';
+import { Theme } from '../lib/themes/theme';
 import { computeChartDimensions, Dimensions } from '../lib/utils/dimensions';
 import { AxisId, GroupId, SpecId } from '../lib/utils/ids';
 import { Scale, ScaleType } from '../lib/utils/scales/scales';
@@ -109,7 +110,7 @@ export class ChartStore {
 
   chartRotation: Rotation = 0; // updated from jsx
   chartRendering: Rendering = 'canvas'; // updated from jsx
-  chartTheme: Theme = DEFAULT_THEME; // updated from jsx
+  chartTheme: Theme = LIGHT_THEME; // updated from jsx
   axesSpecs: Map<AxisId, AxisSpec> = new Map(); // readed from jsx
   axesTicksDimensions: Map<AxisId, AxisTicksDimensions> = new Map(); // computed
   axesPositions: Map<AxisId, Dimensions> = new Map(); // computed

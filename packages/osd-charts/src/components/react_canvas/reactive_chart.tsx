@@ -64,6 +64,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
     const {
       geometries,
       canDataBeAnimated,
+      chartTheme,
       onOverElement,
       onOutElement,
       onElementClickListener,
@@ -77,6 +78,8 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
       <BarGeometries
         animated={canDataBeAnimated}
         bars={geometries.bars}
+        style={chartTheme.barSeriesStyle}
+        sharedStyle={chartTheme.sharedStyle}
         onElementOver={onOverElement}
         onElementOut={onOutElement}
         onElementClick={onElementClickListener}
@@ -103,7 +106,8 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
       <LineGeometries
         animated={canDataBeAnimated}
         lines={geometries.lines}
-        style={chartTheme.chart.styles.lineSeries}
+        style={chartTheme.lineSeriesStyle}
+        sharedStyle={chartTheme.sharedStyle}
         onElementOver={onOverElement}
         onElementOut={onOutElement}
         onElementClick={onElementClickListener}
@@ -130,7 +134,8 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
       <AreaGeometries
         animated={canDataBeAnimated}
         areas={geometries.areas}
-        style={chartTheme.chart.styles.areaSeries}
+        style={chartTheme.areaSeriesStyle}
+        sharedStyle={chartTheme.sharedStyle}
         onElementOver={onOverElement}
         onElementOut={onOutElement}
         onElementClick={onElementClickListener}
@@ -175,12 +180,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
   }
 
   renderGrids = () => {
-    const {
-      axesGridLinesPositions,
-      axesSpecs,
-      chartDimensions,
-      debug,
-    } = this.props.chartStore!;
+    const { axesGridLinesPositions, axesSpecs, chartDimensions, debug } = this.props.chartStore!;
 
     const gridComponents: JSX.Element[] = [];
     axesGridLinesPositions.forEach((axisGridLinesPositions, axisId) => {
@@ -273,15 +273,15 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
     const clippings = debug
       ? {}
       : {
-        clipX: 0,
-        clipY: 0,
-        clipWidth: [90, -90].includes(chartRotation)
-          ? chartDimensions.height
-          : chartDimensions.width,
-        clipHeight: [90, -90].includes(chartRotation)
-          ? chartDimensions.width
-          : chartDimensions.height,
-      };
+          clipX: 0,
+          clipY: 0,
+          clipWidth: [90, -90].includes(chartRotation)
+            ? chartDimensions.height
+            : chartDimensions.width,
+          clipHeight: [90, -90].includes(chartRotation)
+            ? chartDimensions.width
+            : chartDimensions.height,
+        };
 
     let brushProps = {};
     const isBrushEnabled = this.props.chartStore!.isBrushEnabled();
@@ -320,7 +320,9 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
           }}
           {...brushProps}
         >
-          <Layer hitGraphEnabled={false} {...gridClippings}>{this.renderGrids()}</Layer>
+          <Layer hitGraphEnabled={false} {...gridClippings}>
+            {this.renderGrids()}
+          </Layer>
 
           <Layer
             ref={this.renderingLayerRef}

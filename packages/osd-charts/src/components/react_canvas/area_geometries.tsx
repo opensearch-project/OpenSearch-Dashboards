@@ -4,8 +4,13 @@ import React from 'react';
 import { Circle, Group, Path } from 'react-konva';
 import { animated, Spring } from 'react-spring/konva';
 import { LegendItem } from '../../lib/series/legend';
-import { AreaGeometry, GeometryValue, getGeometryStyle, PointGeometry } from '../../lib/series/rendering';
-import { AreaSeriesStyle } from '../../lib/themes/theme';
+import {
+  AreaGeometry,
+  GeometryValue,
+  getGeometryStyle,
+  PointGeometry,
+} from '../../lib/series/rendering';
+import { AreaSeriesStyle, SharedGeometryStyle } from '../../lib/themes/theme';
 import { ElementClickListener, TooltipData } from '../../state/chart_state';
 
 interface AreaGeometriesDataProps {
@@ -13,6 +18,7 @@ interface AreaGeometriesDataProps {
   areas: AreaGeometry[];
   num?: number;
   style: AreaSeriesStyle;
+  sharedStyle: SharedGeometryStyle;
   onElementClick?: ElementClickListener;
   onElementOver: ((tooltip: TooltipData) => void) & IAction;
   onElementOut: (() => void) & IAction;
@@ -24,7 +30,7 @@ interface AreaGeometriesDataState {
 export class AreaGeometries extends React.PureComponent<
   AreaGeometriesDataProps,
   AreaGeometriesDataState
-  > {
+> {
   static defaultProps: Partial<AreaGeometriesDataProps> = {
     animated: false,
     num: 1,
@@ -86,31 +92,31 @@ export class AreaGeometries extends React.PureComponent<
       [] as JSX.Element[],
     );
   }
-  private renderPoints = (points: PointGeometry[], i: number): JSX.Element[] => {
-    const { style } = this.props;
+  private renderPoints = (areaPoints: PointGeometry[], i: number): JSX.Element[] => {
+    const { radius, stroke, strokeWidth } = this.props.style.point;
     const { overPoint } = this.state;
 
-    return points.map((point, index) => {
-      const { x, y, color, value, transform } = point;
+    return areaPoints.map((areaPoint, index) => {
+      const { x, y, color, value, transform } = areaPoint;
       return (
         <Group key={`point-${i}-${index}`}>
           <Circle
             x={transform.x + x}
             y={y}
-            radius={style.dataPointsRadius * 2.5}
+            radius={radius * 2.5}
             onClick={this.onElementClick(value)}
-            onMouseOver={this.onOverPoint(point)}
+            onMouseOver={this.onOverPoint(areaPoint)}
             onMouseLeave={this.onOutPoint}
             fill={'gray'}
-            opacity={overPoint === point ? 0.3 : 0}
+            opacity={overPoint === areaPoint ? 0.3 : 0}
           />
           <Circle
             x={transform.x + x}
             y={y}
-            radius={style.dataPointsRadius}
+            radius={radius}
             strokeWidth={0}
             fill={color}
-            opacity={overPoint === point ? 0.5 : 0}
+            opacity={overPoint === areaPoint ? 0.5 : 0}
             strokeHitEnabled={false}
             listening={false}
             perfectDrawEnabled={true}
@@ -118,13 +124,13 @@ export class AreaGeometries extends React.PureComponent<
           <Circle
             x={transform.x + x}
             y={y}
-            radius={style.dataPointsRadius}
-            onMouseOver={this.onOverPoint(point)}
+            radius={radius}
+            onMouseOver={this.onOverPoint(areaPoint)}
             onMouseLeave={this.onOutPoint}
             fill={'transparent'}
-            stroke={style.dataPointsStroke}
-            strokeWidth={style.dataPointsStrokeWidth}
-            opacity={overPoint === point ? 1 : 0}
+            stroke={stroke}
+            strokeWidth={strokeWidth}
+            opacity={overPoint === areaPoint ? 1 : 0}
             strokeHitEnabled={false}
             listening={false}
             perfectDrawEnabled={true}
@@ -135,11 +141,15 @@ export class AreaGeometries extends React.PureComponent<
   }
 
   private renderAreaGeoms = (): JSX.Element[] => {
-    const { areas } = this.props;
+    const { areas, sharedStyle } = this.props;
     return areas.map((glyph, i) => {
       const { area, color, transform, geometryId } = glyph;
 
-      const geometryStyle = getGeometryStyle(geometryId, this.props.highlightedLegendItem);
+      const geometryStyle = getGeometryStyle(
+        geometryId,
+        this.props.highlightedLegendItem,
+        sharedStyle,
+      );
 
       if (this.props.animated) {
         return (
@@ -152,8 +162,6 @@ export class AreaGeometries extends React.PureComponent<
                   fill={color}
                   listening={false}
                   {...geometryStyle}
-                // areaCap="round"
-                // areaJoin="round"
                 />
               )}
             </Spring>
@@ -161,15 +169,7 @@ export class AreaGeometries extends React.PureComponent<
         );
       } else {
         return (
-          <Path
-            key={`area-${i}`}
-            data={area}
-            fill={color}
-            listening={false}
-            {...geometryStyle}
-          // areaCap="round"
-          // areaJoin="round"
-          />
+          <Path key={`area-${i}`} data={area} fill={color} listening={false} {...geometryStyle} />
         );
       }
     });

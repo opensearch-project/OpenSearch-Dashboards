@@ -1,10 +1,12 @@
-import '@elastic/eui/dist/eui_theme_light.css';
 import { withInfo } from '@storybook/addon-info';
 import { withKnobs } from '@storybook/addon-knobs';
 import { withOptions } from '@storybook/addon-options';
 import { addDecorator, configure } from '@storybook/react';
 import '../src/index.scss';
-import './style.css';
+import './style.scss';
+import { switchTheme } from './theme_service';
+
+switchTheme('light');
 
 addDecorator(
   withOptions({
@@ -19,6 +21,12 @@ addDecorator(
   withInfo({
     inline: true,
     source: false,
+    styles: {
+      infoBody: {
+        marginTop: 0,
+        marginBottom: 0,
+      },
+    },
   }),
 );
 

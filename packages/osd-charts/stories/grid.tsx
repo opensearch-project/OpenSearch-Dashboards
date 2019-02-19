@@ -6,14 +6,14 @@ import {
   BarSeries,
   Chart,
   getAxisId,
+  getGroupId,
   getSpecId,
+  GridLineConfig,
   LineSeries,
   Position,
   ScaleType,
   Settings,
 } from '../src/';
-import { GridLineConfig } from '../src/lib/themes/theme';
-import { getGroupId } from '../src/lib/utils/ids';
 
 function generateGridLineConfig(group: string): GridLineConfig {
   const groupId = `${group} axis`;

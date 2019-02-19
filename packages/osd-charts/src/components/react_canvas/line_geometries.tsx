@@ -4,14 +4,20 @@ import React from 'react';
 import { Circle, Group, Path } from 'react-konva';
 import { animated, Spring } from 'react-spring/konva';
 import { LegendItem } from '../../lib/series/legend';
-import { GeometryValue, getGeometryStyle, LineGeometry, PointGeometry } from '../../lib/series/rendering';
-import { LineSeriesStyle } from '../../lib/themes/theme';
+import {
+  GeometryValue,
+  getGeometryStyle,
+  LineGeometry,
+  PointGeometry,
+} from '../../lib/series/rendering';
+import { LineSeriesStyle, SharedGeometryStyle } from '../../lib/themes/theme';
 import { ElementClickListener, TooltipData } from '../../state/chart_state';
 
 interface LineGeometriesDataProps {
   animated?: boolean;
   lines: LineGeometry[];
   style: LineSeriesStyle;
+  sharedStyle: SharedGeometryStyle;
   onElementClick?: ElementClickListener;
   onElementOver: ((tooltip: TooltipData) => void) & IAction;
   onElementOut: (() => void) & IAction;
@@ -23,7 +29,7 @@ interface LineGeometriesDataState {
 export class LineGeometries extends React.PureComponent<
   LineGeometriesDataProps,
   LineGeometriesDataState
-  > {
+> {
   static defaultProps: Partial<LineGeometriesDataProps> = {
     animated: false,
   };
@@ -85,7 +91,7 @@ export class LineGeometries extends React.PureComponent<
     );
   }
   private renderPoints = (points: PointGeometry[], i: number): JSX.Element[] => {
-    const { style } = this.props;
+    const { radius, stroke, strokeWidth } = this.props.style.point;
     const { overPoint } = this.state;
 
     return points.map((point, index) => {
@@ -95,7 +101,7 @@ export class LineGeometries extends React.PureComponent<
           <Circle
             x={transform.x + x}
             y={y}
-            radius={style.dataPointsRadius * 2.5}
+            radius={radius * 2.5}
             onClick={this.onElementClick(value)}
             onMouseOver={this.onOverPoint(point)}
             onMouseLeave={this.onOutPoint}
@@ -105,7 +111,7 @@ export class LineGeometries extends React.PureComponent<
           <Circle
             x={transform.x + x}
             y={y}
-            radius={style.dataPointsRadius}
+            radius={radius}
             strokeWidth={0}
             fill={color}
             opacity={overPoint === point ? 0.5 : 0}
@@ -116,12 +122,12 @@ export class LineGeometries extends React.PureComponent<
           <Circle
             x={transform.x + x}
             y={y}
-            radius={style.dataPointsRadius}
+            radius={radius}
             onMouseOver={this.onOverPoint(point)}
             onMouseLeave={this.onOutPoint}
             fill={'transparent'}
-            stroke={style.dataPointsStroke}
-            strokeWidth={style.dataPointsStrokeWidth}
+            stroke={stroke}
+            strokeWidth={strokeWidth}
             opacity={overPoint === point ? 1 : 0}
             strokeHitEnabled={false}
             listening={false}
@@ -133,11 +139,16 @@ export class LineGeometries extends React.PureComponent<
   }
 
   private renderLineGeoms = (): JSX.Element[] => {
-    const { style, lines } = this.props;
+    const { style, lines, sharedStyle } = this.props;
+    const { strokeWidth } = style.line;
     return lines.map((glyph, i) => {
       const { line, color, transform, geometryId } = glyph;
 
-      const geometryStyle = getGeometryStyle(geometryId, this.props.highlightedLegendItem);
+      const geometryStyle = getGeometryStyle(
+        geometryId,
+        this.props.highlightedLegendItem,
+        sharedStyle,
+      );
 
       if (this.props.animated) {
         return (
@@ -147,7 +158,7 @@ export class LineGeometries extends React.PureComponent<
                 <animated.Path
                   key="line"
                   data={props.line}
-                  strokeWidth={style.lineWidth}
+                  strokeWidth={strokeWidth}
                   stroke={color}
                   listening={false}
                   lineCap="round"
@@ -163,7 +174,7 @@ export class LineGeometries extends React.PureComponent<
           <Path
             key="line"
             data={line}
-            strokeWidth={style.lineWidth}
+            strokeWidth={strokeWidth}
             stroke={color}
             listening={false}
             lineCap="round"

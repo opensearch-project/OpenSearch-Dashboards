@@ -6,16 +6,18 @@ import {
   Axis,
   BarSeries,
   Chart,
+  DataGenerator,
   getAxisId,
   getGroupId,
   getSpecId,
+  LIGHT_THEME,
+  LineSeries,
+  mergeWithDefaultTheme,
+  PartialTheme,
   Position,
   ScaleType,
   Settings,
 } from '../src/';
-import { PartialTheme } from '../src/lib/themes/theme';
-import { LineSeries } from '../src/specs';
-import { DataGenerator } from '../src/utils/data_generators/data_generator';
 
 function createThemeAction(title: string, min: number, max: number, value: number) {
   return number(
@@ -186,27 +188,26 @@ storiesOf('Axis', module)
   })
   .add('with multi axis', () => {
     const theme: PartialTheme = {
-      chart: {
-        margins: {
-          left: createThemeAction('margin left', 0, 50, 0),
-          right: createThemeAction('margin right', 0, 50, 0),
-          top: createThemeAction('margin top', 0, 50, 0),
-          bottom: createThemeAction('margin bottom', 0, 50, 0),
-        },
-        paddings: {
-          left: createThemeAction('padding left', 0, 50, 0),
-          right: createThemeAction('padding right', 0, 50, 0),
-          top: createThemeAction('padding top', 0, 50, 0),
-          bottom: createThemeAction('padding bottom', 0, 50, 0),
-        },
+      chartMargins: {
+        left: createThemeAction('margin left', 0, 50, 0),
+        right: createThemeAction('margin right', 0, 50, 0),
+        top: createThemeAction('margin top', 0, 50, 0),
+        bottom: createThemeAction('margin bottom', 0, 50, 0),
+      },
+      chartPaddings: {
+        left: createThemeAction('padding left', 0, 50, 0),
+        right: createThemeAction('padding right', 0, 50, 0),
+        top: createThemeAction('padding top', 0, 50, 0),
+        bottom: createThemeAction('padding bottom', 0, 50, 0),
       },
     };
+    const customTheme = mergeWithDefaultTheme(theme, LIGHT_THEME);
 
     const seriesGroup1 = 'group1';
     const seriesGroup2 = 'group2';
     return (
       <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
-        <Settings showLegend={false} theme={theme} debug={boolean('debug', true)} />
+        <Settings showLegend={false} theme={customTheme} debug={boolean('debug', true)} />
         {renderAxisWithOptions(Position.Top, seriesGroup1, false)}
         {renderAxisWithOptions(Position.Top, seriesGroup2, true)}
         {renderAxisWithOptions(Position.Left, seriesGroup1, false)}

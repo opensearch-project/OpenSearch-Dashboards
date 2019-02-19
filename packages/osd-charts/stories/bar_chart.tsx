@@ -5,20 +5,24 @@ import {
   Axis,
   BarSeries,
   Chart,
+  DARK_THEME,
+  DataGenerator,
   getAxisId,
   getSpecId,
+  LIGHT_THEME,
+  niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
 } from '../src/';
 import * as TestDatasets from '../src/lib/series/utils/test_dataset';
-import { niceTimeFormatter } from '../src/utils/data/formatters';
-import { DataGenerator } from '../src/utils/data_generators/data_generator';
 
 storiesOf('Bar Chart', module)
   .add('basic', () => {
+    const darkmode = boolean('darkmode', false);
+    const className = darkmode ? 'story-chart-dark' : 'story-chart';
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart renderer="canvas" className={className}>
         <BarSeries
           id={getSpecId('bars')}
           xScaleType={ScaleType.Linear}
@@ -32,8 +36,12 @@ storiesOf('Bar Chart', module)
     );
   })
   .add('with axis', () => {
+    const darkmode = boolean('darkmode', false);
+    const className = darkmode ? 'story-chart-dark' : 'story-chart';
+    const defaultTheme = darkmode ? DARK_THEME : LIGHT_THEME;
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart renderer="canvas" className={className}>
+        <Settings theme={defaultTheme} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}

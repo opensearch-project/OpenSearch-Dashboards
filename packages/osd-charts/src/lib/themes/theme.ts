@@ -1,28 +1,44 @@
 import { GeometryStyle } from '../series/rendering';
 import { Margins } from '../utils/dimensions';
+import { LIGHT_THEME } from './light_theme';
 
-export interface ChartConfig {
-  /* Space btw parent DOM element and first available element of the chart (axis
-   * if exists, else the chart itself)
-   */
-  margins: Margins;
-
-  /* Space btw the chart geometries and axis; if no axis, pads space btw chart & container */
-  paddings: Margins;
-  styles: {
-    lineSeries: LineSeriesStyle;
-    areaSeries: AreaSeriesStyle;
-    shared: { [key: string]: GeometryStyle };
-  };
+interface Visible {
+  visible: boolean;
 }
+interface Radius {
+  radius: number;
+}
+export interface TextStyle {
+  fontSize: number;
+  fontFamily: string;
+  fontStyle?: string;
+  fill: string;
+  padding: number;
+}
+export interface GeometryStyle {
+  stroke: string;
+  strokeWidth: number;
+  fill?: string;
+  opacity?: number;
+}
+
+export interface SharedGeometryStyle {
+  [key: string]: GeometryStyle;
+}
+
+export interface StrokeStyle {
+  stroke: string;
+  strokeWidth: number;
+}
+export interface FillStyle {
+  fill: string;
+}
+
 export interface AxisConfig {
-  tickFontSize: number;
-  tickFontFamily: string;
-  tickFontStyle: string;
-  titleFontSize: number;
-  titleFontFamily: string;
-  titleFontStyle: string;
-  titlePadding: number;
+  axisTitleStyle: TextStyle;
+  axisLineStyle: StrokeStyle;
+  tickLabelStyle: TextStyle;
+  tickLineStyle: StrokeStyle;
 }
 export interface GridLineConfig {
   stroke?: string;
@@ -39,51 +55,52 @@ export interface ColorConfig {
   vizColors: string[];
   defaultVizColor: string;
 }
-export interface InteractionConfig {
-  dimmingOpacity: number;
-}
 export interface LegendStyle {
   verticalWidth: number;
   horizontalHeight: number;
 }
 export interface Theme {
-  chart: ChartConfig;
+  /**
+   * Space btw parent DOM element and first available element of the chart (axis if exists, else the chart itself)
+   */
+  chartMargins: Margins;
+  /**
+   * Space btw the chart geometries and axis; if no axis, pads space btw chart & container
+   */
+  chartPaddings: Margins;
+  lineSeriesStyle: LineSeriesStyle;
+  areaSeriesStyle: AreaSeriesStyle;
+  barSeriesStyle: BarSeriesStyle;
+  sharedStyle: SharedGeometryStyle;
   axes: AxisConfig;
   scales: ScalesConfig;
   colors: ColorConfig;
-  interactions: InteractionConfig;
   legend: LegendStyle;
 }
+export interface BarSeriesStyle {
+  border: StrokeStyle & Visible;
+}
 export interface LineSeriesStyle {
-  hideLine: boolean;
-  lineWidth: number;
-  hideBorder: boolean;
-  borderStrokeColor: string;
-  borderWidth: number;
-  hideDataPoints: boolean;
-  dataPointsRadius: number;
-  dataPointsStroke: string;
-  dataPointsStrokeWidth: number;
+  line: StrokeStyle & Visible;
+  border: StrokeStyle & Visible;
+  point: StrokeStyle & Visible & Radius;
 }
 export interface AreaSeriesStyle {
-  hideArea: boolean;
-  hideLine: boolean;
-  lineStrokeColor: string;
-  lineWidth: number;
-  hideBorder: boolean;
-  borderStrokeColor: string;
-  borderWidth: number;
-  hideDataPoints: boolean;
-  dataPointsRadius: number;
-  dataPointsStroke: string;
-  dataPointsStrokeWidth: number;
+  area: FillStyle & Visible;
+  line: StrokeStyle & Visible;
+  border: StrokeStyle & Visible;
+  point: StrokeStyle & Visible & Radius;
 }
 export interface PartialTheme {
-  chart?: Partial<ChartConfig>;
+  chartMargins?: Margins;
+  chartPaddings?: Margins;
+  lineSeriesStyle?: LineSeriesStyle;
+  areaSeriesStyle?: AreaSeriesStyle;
+  barSeriesStyle?: BarSeriesStyle;
+  sharedStyle?: SharedGeometryStyle;
   axes?: Partial<AxisConfig>;
   scales?: Partial<ScalesConfig>;
   colors?: Partial<ColorConfig>;
-  interactions?: Partial<InteractionConfig>;
   legend?: Partial<LegendStyle>;
 }
 
@@ -93,181 +110,74 @@ export const DEFAULT_GRID_LINE_CONFIG: GridLineConfig = {
   opacity: 1,
 };
 
-export const GEOMETRY_STYLES: { [key: string]: GeometryStyle } = {
-  default: {
-    opacity: 1,
-  },
-  highlighted: {
-    opacity: 1,
-  },
-  unhighlighted: {
-    opacity: 0.25,
-  },
-};
-
-export const DEFAULT_THEME: Theme = {
-  chart: {
-    paddings: {
-      left: 5,
-      right: 5,
-      top: 5,
-      bottom: 5,
-    },
-    margins: {
-      left: 30,
-      right: 30,
-      top: 30,
-      bottom: 30,
-    },
-    styles: {
-      lineSeries: {
-        hideLine: false,
-        lineWidth: 1,
-        hideBorder: true,
-        borderWidth: 2,
-        borderStrokeColor: 'gray',
-        hideDataPoints: true,
-        dataPointsRadius: 5,
-        dataPointsStroke: 'white',
-        dataPointsStrokeWidth: 1,
-      },
-      areaSeries: {
-        hideArea: false,
-        hideLine: true,
-        lineWidth: 1,
-        lineStrokeColor: 'white',
-        hideBorder: true,
-        borderWidth: 2,
-        borderStrokeColor: 'gray',
-        hideDataPoints: true,
-        dataPointsRadius: 4,
-        dataPointsStroke: 'white',
-        dataPointsStrokeWidth: 1,
-      },
-      shared: GEOMETRY_STYLES,
-    },
-  },
-  scales: {
-    ordinal: {
-      padding: 0.25,
-    },
-  },
-  axes: {
-    tickFontSize: 10,
-    tickFontFamily: `'Open Sans', Helvetica, Arial, sans-serif`,
-    tickFontStyle: 'normal',
-    titleFontSize: 12,
-    titleFontStyle: 'bold',
-    titleFontFamily: `'Open Sans', Helvetica, Arial, sans-serif`,
-    titlePadding: 5,
-  },
-  colors: {
-    vizColors: [
-      '#00B3A4',
-      '#3185FC',
-      '#DB1374',
-      '#490092',
-      '#FEB6DB',
-      '#E6C220',
-      '#F98510',
-      '#BFA180',
-      '#461A0A',
-      '#920000',
-    ],
-    defaultVizColor: 'red',
-  },
-  interactions: {
-    dimmingOpacity: 0.1,
-  },
-  legend: {
-    verticalWidth: 150,
-    horizontalHeight: 50,
-  },
-};
-
-export function mergeWithDefaultTheme(theme: PartialTheme): Theme {
-  const chart: ChartConfig = {
-    ...DEFAULT_THEME.chart,
+export function mergeWithDefaultTheme(
+  theme: PartialTheme,
+  defaultTheme: Theme = LIGHT_THEME,
+): Theme {
+  const customTheme: Theme = {
+    ...defaultTheme,
   };
-  if (theme.chart) {
-    chart.margins = {
-      ...DEFAULT_THEME.chart.margins,
-      ...theme.chart.margins,
+  if (theme.chartMargins) {
+    customTheme.chartMargins = {
+      ...defaultTheme.chartMargins,
+      ...theme.chartMargins,
     };
-    chart.paddings = {
-      ...DEFAULT_THEME.chart.paddings,
-      ...theme.chart.paddings,
-    };
-    if (theme.chart.styles) {
-      if (theme.chart.styles.areaSeries) {
-        chart.styles.areaSeries = {
-          ...DEFAULT_THEME.chart.styles.areaSeries,
-          ...theme.chart.styles.areaSeries,
-        };
-      }
-      if (theme.chart.styles.lineSeries) {
-        chart.styles.lineSeries = {
-          ...DEFAULT_THEME.chart.styles.lineSeries,
-          ...theme.chart.styles.lineSeries,
-        };
-      }
-    }
   }
-  const scales: ScalesConfig = {
-    ...DEFAULT_THEME.scales,
-  };
+  if (theme.chartPaddings) {
+    customTheme.chartPaddings = {
+      ...defaultTheme.chartPaddings,
+      ...theme.chartPaddings,
+    };
+  }
+  if (theme.areaSeriesStyle) {
+    customTheme.areaSeriesStyle = {
+      ...defaultTheme.areaSeriesStyle,
+      ...theme.areaSeriesStyle,
+    };
+  }
+  if (theme.lineSeriesStyle) {
+    customTheme.lineSeriesStyle = {
+      ...defaultTheme.lineSeriesStyle,
+      ...theme.lineSeriesStyle,
+    };
+  }
+  if (theme.barSeriesStyle) {
+    customTheme.barSeriesStyle = {
+      ...defaultTheme.barSeriesStyle,
+      ...theme.barSeriesStyle,
+    };
+  }
+  if (theme.sharedStyle) {
+    customTheme.sharedStyle = {
+      ...defaultTheme.sharedStyle,
+      ...theme.sharedStyle,
+    };
+  }
   if (theme.scales) {
-    scales.ordinal = {
-      ...DEFAULT_THEME.scales.ordinal,
+    customTheme.scales.ordinal = {
+      ...defaultTheme.scales.ordinal,
       ...theme.scales.ordinal,
     };
   }
-  let axes: AxisConfig = {
-    ...DEFAULT_THEME.axes,
-  };
   if (theme.axes) {
-    axes = {
-      ...DEFAULT_THEME.axes,
+    customTheme.axes = {
+      ...defaultTheme.axes,
       ...theme.axes,
     };
   }
-  const colors: ColorConfig = {
-    ...DEFAULT_THEME.colors,
-  };
   if (theme.colors) {
     if (theme.colors.defaultVizColor) {
-      colors.defaultVizColor = theme.colors.defaultVizColor;
+      customTheme.colors.defaultVizColor = theme.colors.defaultVizColor;
     }
     if (theme.colors.vizColors) {
-      colors.vizColors = theme.colors.vizColors;
+      customTheme.colors.vizColors = theme.colors.vizColors;
     }
   }
-
-  let interactions: InteractionConfig = {
-    ...DEFAULT_THEME.interactions,
-  };
-  if (theme.interactions) {
-    interactions = {
-      ...DEFAULT_THEME.interactions,
-      ...theme.interactions,
-    };
-  }
-
-  let legend: LegendStyle = {
-    ...DEFAULT_THEME.legend,
-  };
   if (theme.legend) {
-    legend = {
-      ...DEFAULT_THEME.legend,
+    customTheme.legend = {
+      ...defaultTheme.legend,
       ...theme.legend,
     };
   }
-  return {
-    chart,
-    scales,
-    axes,
-    colors,
-    interactions,
-    legend,
-  };
+  return customTheme;
 }

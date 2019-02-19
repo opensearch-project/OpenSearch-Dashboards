@@ -1,5 +1,5 @@
 import { area, line } from 'd3-shape';
-import { DEFAULT_THEME } from '../themes/theme';
+import { SharedGeometryStyle } from '../themes/theme';
 import { SpecId } from '../utils/ids';
 import { Scale, ScaleType } from '../utils/scales/scales';
 import { CurveType, getCurveFactory } from './curves';
@@ -198,23 +198,22 @@ export function renderArea(
 export function getGeometryStyle(
   geometryId: GeometryId,
   highlightedLegendItem: LegendItem | null,
+  sharedStyle: SharedGeometryStyle,
   individualHighlight?: { [key: string]: boolean },
 ): GeometryStyle {
-  const { shared } = DEFAULT_THEME.chart.styles;
-
   if (highlightedLegendItem != null) {
     const isPartOfHighlightedSeries = belongsToDataSeries(geometryId, highlightedLegendItem.value);
 
-    return isPartOfHighlightedSeries ? shared.highlighted : shared.unhighlighted;
+    return isPartOfHighlightedSeries ? sharedStyle.highlighted : sharedStyle.unhighlighted;
   }
 
   if (individualHighlight) {
     const { hasHighlight, hasGeometryHover } = individualHighlight;
     if (!hasGeometryHover) {
-      return shared.highlighted;
+      return sharedStyle.highlighted;
     }
-    return hasHighlight ? shared.highlighted : shared.unhighlighted;
+    return hasHighlight ? sharedStyle.highlighted : sharedStyle.unhighlighted;
   }
 
-  return shared.default;
+  return sharedStyle.default;
 }

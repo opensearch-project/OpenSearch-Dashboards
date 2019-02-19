@@ -3,6 +3,7 @@ import React from 'react';
 import {
   Axis,
   Chart,
+  CurveType,
   getAxisId,
   getSpecId,
   LineSeries,
@@ -10,7 +11,6 @@ import {
   ScaleType,
   Settings,
 } from '../src/';
-import { CurveType } from '../src/lib/series/curves';
 
 storiesOf('Line Chart', module)
   .add('basic', () => {

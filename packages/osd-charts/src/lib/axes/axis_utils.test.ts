@@ -1,7 +1,7 @@
 import { XDomain } from '../series/domains/x_domain';
 import { YDomain } from '../series/domains/y_domain';
 import { Position } from '../series/specs';
-import { DEFAULT_THEME } from '../themes/theme';
+import { LIGHT_THEME } from '../themes/light_theme';
 import { getAxisId, getGroupId } from '../utils/ids';
 import { ScaleType } from '../utils/scales/scales';
 import {
@@ -94,7 +94,7 @@ describe('Axis computational utils', () => {
     isBandScale: false,
   };
 
-  const { axes } = DEFAULT_THEME;
+  const { axes } = LIGHT_THEME;
 
   test('should compute axis dimensions', () => {
     const bboxCalculator = new SvgTextBBoxCalculator();
@@ -457,10 +457,7 @@ describe('Axis computational utils', () => {
     const chartWidth = 100;
     const chartHeight = 200;
 
-    const verticalAxisGridLinePositions = getVerticalAxisGridLineProps(
-      tickPosition,
-      chartWidth,
-    );
+    const verticalAxisGridLinePositions = getVerticalAxisGridLineProps(tickPosition, chartWidth);
 
     expect(verticalAxisGridLinePositions).toEqual([0, 10, 100, 10]);
 

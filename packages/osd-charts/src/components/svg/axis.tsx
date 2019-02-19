@@ -40,9 +40,9 @@ export class Axis extends React.PureComponent<AxisProps> {
         className="euiSeriesChartAxis_tickLabel"
         key={`tick-${i}`}
         {...textProps}
-      // textAnchor={textProps.textAnchor}
-      // dominantBaseline={textProps.dominantBaseline}
-      // transform={transform}
+        // textAnchor={textProps.textAnchor}
+        // dominantBaseline={textProps.dominantBaseline}
+        // transform={transform}
       >
         {tick.label}
       </text>
@@ -124,16 +124,14 @@ export class Axis extends React.PureComponent<AxisProps> {
       axisPosition: { height },
       axisSpec: { title, position, tickSize, tickPadding },
       axisTicksDimensions: { maxLabelBboxWidth },
-      chartTheme: {
-        chart: { margins },
-      },
+      chartTheme: { chartMargins },
     } = this.props;
 
     const top = height / 2;
     const left =
       position === Position.Left
-        ? -(maxLabelBboxWidth + margins.left / 2)
-        : tickSize + tickPadding + maxLabelBboxWidth + +margins.right / 2;
+        ? -(maxLabelBboxWidth + chartMargins.left / 2)
+        : tickSize + tickPadding + maxLabelBboxWidth + +chartMargins.right / 2;
     const translate = `translate(${left} ${top}) rotate(-90)`;
     return (
       <g className="euiSeriesChartAxis_axisTitle">
@@ -148,15 +146,13 @@ export class Axis extends React.PureComponent<AxisProps> {
       axisPosition: { width },
       axisSpec: { title, position, tickSize, tickPadding },
       axisTicksDimensions: { maxLabelBboxHeight },
-      chartTheme: {
-        chart: { margins },
-      },
+      chartTheme: { chartMargins },
     } = this.props;
 
     const top =
       position === Position.Top
-        ? -margins.top / 2
-        : maxLabelBboxHeight + tickPadding + tickSize + margins.bottom / 2;
+        ? -chartMargins.top / 2
+        : maxLabelBboxHeight + tickPadding + tickSize + chartMargins.bottom / 2;
     const left = width / 2;
     const translate = `translate(${left} ${top} )`;
     return (

@@ -48,13 +48,13 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
     let paddingStyle;
     if (isVertical(legendPosition)) {
       paddingStyle = {
-        paddingTop: chartTheme.chart.margins.top,
-        paddingBottom: chartTheme.chart.margins.bottom,
+        paddingTop: chartTheme.chartMargins.top,
+        paddingBottom: chartTheme.chartMargins.bottom,
       };
     } else {
       paddingStyle = {
-        paddingLeft: chartTheme.chart.margins.left,
-        paddingRight: chartTheme.chart.margins.right,
+        paddingLeft: chartTheme.chartMargins.left,
+        paddingRight: chartTheme.chartMargins.right,
       };
     }
     return (

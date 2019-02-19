@@ -31,12 +31,11 @@ export function computeChartDimensions(
   showLegend: boolean,
   legendPosition?: Position,
 ): Dimensions {
-  const chartMargins = chartTheme.chart.margins;
-  const chartPaddings = chartTheme.chart.paddings;
+  const { chartMargins, chartPaddings } = chartTheme;
   const legendStyle = chartTheme.legend;
-  const { titleFontSize, titlePadding } = chartTheme.axes;
+  const { axisTitleStyle } = chartTheme.axes;
 
-  const axisTitleHeight = titleFontSize + titlePadding;
+  const axisTitleHeight = axisTitleStyle.fontSize + axisTitleStyle.padding;
 
   let vLeftAxisSpecWidth = 0;
   let vRightAxisSpecWidth = 0;

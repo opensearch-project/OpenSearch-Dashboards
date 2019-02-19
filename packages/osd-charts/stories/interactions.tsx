@@ -2,11 +2,14 @@ import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import {
+  AreaSeries,
   Axis,
   BarSeries,
   Chart,
   getAxisId,
   getSpecId,
+  LineSeries,
+  niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
@@ -16,8 +19,6 @@ import { boolean } from '@storybook/addon-knobs';
 import { DateTime } from 'luxon';
 import { CurveType } from '../src/lib/series/curves';
 import * as TestDatasets from '../src/lib/series/utils/test_dataset';
-import { AreaSeries, LineSeries } from '../src/specs';
-import { niceTimeFormatter } from '../src/utils/data/formatters';
 
 const onElementListeners = {
   onElementClick: action('onElementClick'),
