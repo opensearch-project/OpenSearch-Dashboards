@@ -1,3 +1,22 @@
+# [2.0.0](https://github.com/elastic/elastic-charts/compare/v1.1.1...v2.0.0) (2019-02-19)
+
+
+### Features
+
+* add dark theme ([#44](https://github.com/elastic/elastic-charts/issues/44)) ([766f1ad](https://github.com/elastic/elastic-charts/commit/766f1ad)), closes [#35](https://github.com/elastic/elastic-charts/issues/35)
+
+
+### BREAKING CHANGES
+
+* The `Theme.AxisConfig` type has a different signature.
+It now contains `axisTitleStyle`, `axisLineStyle`, `tickLabelStyle` and
+`tickLineStyle` defined as `TextStyle` or `StrokeStyle` elements.
+The `Theme` interface is changed in a more flat structure.
+`darkMode` prop from `Setting` is removed.
+`theme` prop in `Setting` is now a `Theme` type object, not a `PartialTheme`.
+You can use `mergeWithDefaultTheme` function to merge an existing theme
+with a partial one.
+
 ## [1.1.1](https://github.com/elastic/elastic-charts/compare/v1.1.0...v1.1.1) (2019-02-15)
 
 
