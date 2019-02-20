@@ -166,12 +166,10 @@ export function mergeWithDefaultTheme(
     };
   }
   if (theme.colors) {
-    if (theme.colors.defaultVizColor) {
-      customTheme.colors.defaultVizColor = theme.colors.defaultVizColor;
-    }
-    if (theme.colors.vizColors) {
-      customTheme.colors.vizColors = theme.colors.vizColors;
-    }
+    customTheme.colors = {
+      defaultVizColor: theme.colors.defaultVizColor || defaultTheme.colors.defaultVizColor,
+      vizColors: theme.colors.vizColors || defaultTheme.colors.vizColors,
+    };
   }
   if (theme.legend) {
     customTheme.legend = {
