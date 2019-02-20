@@ -9,6 +9,7 @@ import {
   LegendStyle,
   LineSeriesStyle,
   mergeWithDefaultTheme,
+  ScalesConfig,
   SharedGeometryStyle,
   Theme,
 } from './theme';
@@ -180,6 +181,25 @@ describe('Themes', () => {
       DARK_THEME,
     );
     expect(customDarkTheme.sharedStyle).toEqual(sharedStyle);
+  });
+
+  it('should merge partial theme: scales', () => {
+    const scales: ScalesConfig = {
+      ordinal: {
+        padding: 314571,
+      },
+    };
+    const customTheme = mergeWithDefaultTheme({
+      scales,
+    });
+    expect(customTheme.scales).toEqual(scales);
+    const customDarkTheme = mergeWithDefaultTheme(
+      {
+        scales,
+      },
+      DARK_THEME,
+    );
+    expect(customDarkTheme.scales).toEqual(scales);
   });
 
   it('should merge partial theme: axes', () => {
