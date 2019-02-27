@@ -2,7 +2,7 @@ import { Group as KonvaGroup } from 'konva';
 import { IAction } from 'mobx';
 import React from 'react';
 import { Group, Rect } from 'react-konva';
-import { animated, Spring } from 'react-spring/konva';
+import { animated, Spring } from 'react-spring/renderprops-konva';
 import { LegendItem } from '../../lib/series/legend';
 import { BarGeometry, GeometryValue, getGeometryStyle } from '../../lib/series/rendering';
 import { BarSeriesStyle, SharedGeometryStyle } from '../../lib/themes/theme';

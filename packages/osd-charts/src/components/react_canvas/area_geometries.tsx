@@ -2,7 +2,7 @@ import { Group as KonvaGroup } from 'konva';
 import { IAction } from 'mobx';
 import React from 'react';
 import { Circle, Group, Path } from 'react-konva';
-import { animated, Spring } from 'react-spring/konva';
+import { animated, Spring } from 'react-spring/renderprops-konva';
 import { LegendItem } from '../../lib/series/legend';
 import {
   AreaGeometry,
