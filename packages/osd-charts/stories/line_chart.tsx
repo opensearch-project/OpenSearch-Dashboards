@@ -11,18 +11,20 @@ import {
   ScaleType,
   Settings,
 } from '../src/';
-
+import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
+import { niceTimeFormatByDay, timeFormatter } from '../src/utils/data/formatters';
+const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
 storiesOf('Line Chart', module)
   .add('basic', () => {
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <LineSeries
           id={getSpecId('lines')}
-          xScaleType={ScaleType.Linear}
+          xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
           yScaleToDataExtent={false}
         />
       </Chart>
@@ -34,23 +36,22 @@ storiesOf('Line Chart', module)
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
-          title={'Bottom axis'}
           showOverlappingTicks={true}
+          tickFormat={dateFormatter}
         />
         <Axis
-          id={getAxisId('left2')}
-          title={'Left axis'}
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d) => `${Number(d).toFixed(0)}%`}
         />
-
         <LineSeries
           id={getSpecId('lines')}
-          xScaleType={ScaleType.Linear}
+          xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
           yScaleToDataExtent={false}
         />
       </Chart>
@@ -63,23 +64,22 @@ storiesOf('Line Chart', module)
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
-          title={'Bottom axis'}
           showOverlappingTicks={true}
+          tickFormat={dateFormatter}
         />
         <Axis
-          id={getAxisId('left2')}
-          title={'Left axis'}
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d) => `${Number(d).toFixed(0)}%`}
         />
-
         <LineSeries
           id={getSpecId('lines')}
-          xScaleType={ScaleType.Linear}
+          xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
           yScaleToDataExtent={false}
         />
       </Chart>
@@ -92,75 +92,122 @@ storiesOf('Line Chart', module)
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
-          title={'Bottom axis'}
           showOverlappingTicks={true}
+          tickFormat={dateFormatter}
         />
         <Axis
-          id={getAxisId('left2')}
-          title={'Left axis'}
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d) => `${Number(d).toFixed(0)}%`}
         />
 
         <LineSeries
-          id={getSpecId('lines1')}
-          xScaleType={ScaleType.Linear}
+          id={getSpecId('monotone x')}
+          xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
           curve={CurveType.CURVE_MONOTONE_X}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
           yScaleToDataExtent={false}
         />
         <LineSeries
-          id={getSpecId('lines2')}
-          xScaleType={ScaleType.Linear}
+          id={getSpecId('basis')}
+          xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
           curve={CurveType.CURVE_BASIS}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
           yScaleToDataExtent={false}
         />
         <LineSeries
-          id={getSpecId('lines3')}
-          xScaleType={ScaleType.Linear}
+          id={getSpecId('cardinal')}
+          xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
           curve={CurveType.CURVE_CARDINAL}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
           yScaleToDataExtent={false}
         />
         <LineSeries
-          id={getSpecId('lines4')}
-          xScaleType={ScaleType.Linear}
+          id={getSpecId('catmull rom')}
+          xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
           curve={CurveType.CURVE_CATMULL_ROM}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
           yScaleToDataExtent={false}
         />
         <LineSeries
-          id={getSpecId('lines5')}
-          xScaleType={ScaleType.Linear}
+          id={getSpecId('natural')}
+          xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
           curve={CurveType.CURVE_NATURAL}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
           yScaleToDataExtent={false}
         />
         <LineSeries
-          id={getSpecId('lines6')}
-          xScaleType={ScaleType.Linear}
+          id={getSpecId('linear')}
+          xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
           curve={CurveType.LINEAR}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
           yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('multiple w axis and legend', () => {
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Settings showLegend={true} legendPosition={Position.Right} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          showOverlappingTicks={true}
+          tickFormat={dateFormatter}
+        />
+        <Axis
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+          position={Position.Left}
+          tickFormat={(d) => `${Number(d).toFixed(0)}%`}
+        />
+
+        <LineSeries
+          id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[0].metric.label)}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
+          curve={CurveType.LINEAR}
+        />
+        <LineSeries
+          id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[1].metric.label)}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[1].data}
+          curve={CurveType.LINEAR}
+        />
+        <LineSeries
+          id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[2].metric.label)}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[2].data}
+          curve={CurveType.LINEAR}
         />
       </Chart>
     );
@@ -172,35 +219,44 @@ storiesOf('Line Chart', module)
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
-          title={'Bottom axis'}
           showOverlappingTicks={true}
+          tickFormat={dateFormatter}
         />
         <Axis
-          id={getAxisId('left2')}
-          title={'Left axis'}
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d) => `${Number(d).toFixed(0)}%`}
         />
-
         <LineSeries
-          id={getSpecId('lines')}
-          xScaleType={ScaleType.Linear}
+          id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[2].metric.label)}
+          xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          stackAccessors={['x']}
-          splitSeriesAccessors={['g']}
-          data={[
-            { x: 0, y: 2, g: 'a' },
-            { x: 1, y: 7, g: 'a' },
-            { x: 2, y: 3, g: 'a' },
-            { x: 3, y: 6, g: 'a' },
-            { x: 0, y: 4, g: 'b' },
-            { x: 1, y: 5, g: 'b' },
-            { x: 2, y: 8, g: 'b' },
-            { x: 3, y: 2, g: 'b' },
-          ]}
-          yScaleToDataExtent={false}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[2].data}
+          curve={CurveType.LINEAR}
+          stackAccessors={[0]}
+        />
+        <LineSeries
+          id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[1].metric.label)}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[1].data}
+          curve={CurveType.LINEAR}
+          stackAccessors={[0]}
+        />
+        <LineSeries
+          id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[0].metric.label)}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
+          curve={CurveType.LINEAR}
+          stackAccessors={[0]}
         />
       </Chart>
     );

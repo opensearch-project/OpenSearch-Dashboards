@@ -68,6 +68,7 @@ export class ScaleContinuous implements Scale {
   readonly domain: any[];
   readonly range: number[];
   readonly isInverted: boolean;
+  readonly tickValues: number[];
   private readonly d3Scale: any;
 
   constructor(
@@ -95,6 +96,13 @@ export class ScaleContinuous implements Scale {
     this.range = range;
     this.minInterval = minInterval || 0;
     this.isInverted = this.domain[0] > this.domain[1];
+    if (type === ScaleType.Time) {
+      this.tickValues = this.d3Scale.ticks().map((d: Date) => {
+        return d.getTime();
+      });
+    } else {
+      this.tickValues = this.d3Scale.ticks();
+    }
   }
 
   scale(value: any) {
@@ -108,7 +116,7 @@ export class ScaleContinuous implements Scale {
         return this.domain[0] + i * this.minInterval;
       });
     }
-    return this.d3Scale.ticks();
+    return this.tickValues;
   }
   invert(value: number) {
     if (this.type === ScaleType.Time) {

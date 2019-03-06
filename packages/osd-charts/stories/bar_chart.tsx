@@ -10,12 +10,13 @@ import {
   getAxisId,
   getSpecId,
   LIGHT_THEME,
-  niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
 } from '../src/';
 import * as TestDatasets from '../src/lib/series/utils/test_dataset';
+import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
+import { niceTimeFormatByDay, timeFormatter } from '../src/utils/data/formatters';
 
 storiesOf('Bar Chart', module)
   .add('basic', () => {
@@ -124,8 +125,7 @@ storiesOf('Bar Chart', module)
     );
   })
   .add('with time x axis', () => {
-    const now = new Date().getTime();
-    const max = now + 1000 * 60 * 60 * 24 * 90;
+    const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <Settings debug={boolean('debug', false)} />
@@ -135,7 +135,7 @@ storiesOf('Bar Chart', module)
           title={'Bottom axis'}
           showOverlappingTicks={boolean('showOverlappingTicks bottom axis', false)}
           showOverlappingLabels={boolean('showOverlappingLabels bottom axis', false)}
-          tickFormat={niceTimeFormatter([now, max])}
+          tickFormat={dateFormatter}
         />
         <Axis
           id={getAxisId('left2')}
@@ -148,14 +148,9 @@ storiesOf('Bar Chart', module)
           id={getSpecId('bars')}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          data={[
-            { x: now, y: 2 },
-            { x: now + 36000000000, y: 7 },
-            { x: now + 36000000000 * 2, y: 3 },
-            { x: now + 36000000000 * 5, y: 6 },
-          ]}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
           yScaleToDataExtent={false}
         />
       </Chart>
@@ -405,6 +400,109 @@ storiesOf('Bar Chart', module)
             { x: 2, y: 9, g: 'b' },
             { x: 3, y: 2, g: 'b' },
           ]}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('time clustered using various specs', () => {
+    const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Settings debug={boolean('debug', false)} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={boolean('showOverlappingTicks bottom axis', false)}
+          showOverlappingLabels={boolean('showOverlappingLabels bottom axis', false)}
+          tickFormat={dateFormatter}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[0].metric.label)}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
+          yScaleToDataExtent={false}
+        />
+        <BarSeries
+          id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[1].metric.label)}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[1].data}
+          yScaleToDataExtent={false}
+        />
+        <BarSeries
+          id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[2].metric.label)}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[2].data}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('time stacked using various specs', () => {
+    const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Settings debug={boolean('debug', false)} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={boolean('showOverlappingTicks bottom axis', false)}
+          showOverlappingLabels={boolean('showOverlappingLabels bottom axis', false)}
+          tickFormat={dateFormatter}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[2].metric.label)}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          stackAccessors={[0]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[2].data.slice(0, 20)}
+          yScaleToDataExtent={false}
+        />
+        <BarSeries
+          id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[1].metric.label)}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          stackAccessors={[0]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[1].data.slice(0, 20)}
+          yScaleToDataExtent={false}
+        />
+        <BarSeries
+          id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[0].metric.label)}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          stackAccessors={[0]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 20)}
           yScaleToDataExtent={false}
         />
       </Chart>
