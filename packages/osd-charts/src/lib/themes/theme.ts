@@ -110,6 +110,18 @@ export const DEFAULT_GRID_LINE_CONFIG: GridLineConfig = {
   opacity: 1,
 };
 
+export function mergeWithDefaultGridLineConfig(config: GridLineConfig): GridLineConfig {
+  const strokeWidth = config.strokeWidth != null ? config.strokeWidth : DEFAULT_GRID_LINE_CONFIG.strokeWidth;
+  const opacity = config.opacity != null ? config.opacity : DEFAULT_GRID_LINE_CONFIG.opacity;
+
+  return {
+    stroke: config.stroke || DEFAULT_GRID_LINE_CONFIG.stroke,
+    dash: config.dash || DEFAULT_GRID_LINE_CONFIG.dash,
+    strokeWidth,
+    opacity,
+  };
+}
+
 export function mergeWithDefaultTheme(
   theme: PartialTheme,
   defaultTheme: Theme = LIGHT_THEME,

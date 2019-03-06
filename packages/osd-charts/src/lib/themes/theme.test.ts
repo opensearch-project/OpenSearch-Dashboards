@@ -6,8 +6,10 @@ import {
   AxisConfig,
   BarSeriesStyle,
   ColorConfig,
+  DEFAULT_GRID_LINE_CONFIG,
   LegendStyle,
   LineSeriesStyle,
+  mergeWithDefaultGridLineConfig,
   mergeWithDefaultTheme,
   ScalesConfig,
   SharedGeometryStyle,
@@ -292,5 +294,16 @@ describe('Themes', () => {
       DARK_THEME,
     );
     expect(customDarkTheme.legend).toEqual(legend);
+  });
+
+  it('should merge partial grid line configs', () => {
+    const fullConfig = {
+      stroke: 'foo',
+      strokeWidth: 1,
+      opacity: 0,
+      dash: [0, 0],
+    };
+    expect(mergeWithDefaultGridLineConfig(fullConfig)).toEqual(fullConfig);
+    expect(mergeWithDefaultGridLineConfig({})).toEqual(DEFAULT_GRID_LINE_CONFIG);
   });
 });

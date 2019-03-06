@@ -6,18 +6,25 @@ import { getAxisId, getGroupId } from '../utils/ids';
 import { ScaleType } from '../utils/scales/scales';
 import {
   centerRotationOrigin,
+  computeAxisGridLinePositions,
   computeAxisTicksDimensions,
   computeRotatedLabelDimensions,
   getAvailableTicks,
+  getAxisPosition,
+  getAxisTicksPositions,
   getHorizontalAxisGridLineProps,
   getHorizontalAxisTickLineProps,
+  getHorizontalDomain,
+  getMaxBboxDimensions,
   getMinMaxRange,
   getScaleForAxisSpec,
   getTickLabelProps,
   getVerticalAxisGridLineProps,
   getVerticalAxisTickLineProps,
+  getVerticalDomain,
   getVisibleTicks,
 } from './axis_utils';
+import { CanvasTextBBoxCalculator } from './canvas_text_bbox_calculator';
 import { SvgTextBBoxCalculator } from './svg_text_bbox_calculator';
 
 // const chartScalesConfig: ScalesConfig = {
@@ -76,6 +83,21 @@ describe('Axis computational utils', () => {
     tickFormat: (value: any) => {
       return `${value}`;
     },
+    showGridLines: true,
+  };
+
+  const horizontalAxisSpec = {
+    id: getAxisId('axis_2'),
+    groupId: getGroupId('group_1'),
+    hide: false,
+    showOverlappingTicks: false,
+    showOverlappingLabels: false,
+    position: Position.Top,
+    tickSize: 10,
+    tickPadding: 10,
+    tickFormat: (value: any) => {
+      return `${value}`;
+    },
   };
 
   const xDomain: XDomain = {
@@ -108,6 +130,22 @@ describe('Axis computational utils', () => {
       axes,
     );
     expect(axisDimensions).toEqual(axis1Dims);
+
+    const computeScalelessSpec = () => {
+      computeAxisTicksDimensions(
+        ungroupedAxisSpec,
+        xDomain,
+        [yDomain],
+        1,
+        bboxCalculator,
+        0,
+        axes,
+      );
+    };
+
+    const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: getGroupId('foo') };
+    expect(computeScalelessSpec).toThrowError('Cannot compute scale for axis spec axis_1');
+
     bboxCalculator.destroy();
   });
 
@@ -127,12 +165,19 @@ describe('Axis computational utils', () => {
   });
 
   test('should generate a valid scale', () => {
-    const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
-    expect(scale).toBeDefined();
-    expect(scale!.bandwidth).toBe(0);
-    expect(scale!.domain).toEqual([0, 1]);
-    expect(scale!.range).toEqual([100, 0]);
-    expect(scale!.ticks()).toEqual([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]);
+    const yScale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
+    expect(yScale).toBeDefined();
+    expect(yScale!.bandwidth).toBe(0);
+    expect(yScale!.domain).toEqual([0, 1]);
+    expect(yScale!.range).toEqual([100, 0]);
+    expect(yScale!.ticks()).toEqual([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]);
+
+    const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: getGroupId('foo') };
+    const nullYScale = getScaleForAxisSpec(ungroupedAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
+    expect(nullYScale).toBe(null);
+
+    const xScale = getScaleForAxisSpec(horizontalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
+    expect(xScale).toBeDefined();
   });
 
   test('should compute available ticks', () => {
@@ -153,7 +198,7 @@ describe('Axis computational utils', () => {
     ];
     expect(axisPositions).toEqual(expectedAxisPositions);
   });
-  test('should compute visible ticks', () => {
+  test('should compute visible ticks for a vertical axis', () => {
     const allTicks = [
       { label: '0', position: 100, value: 0 },
       { label: '0.1', position: 90, value: 0.1 },
@@ -167,8 +212,24 @@ describe('Axis computational utils', () => {
       { label: '0.9', position: 10, value: 0.9 },
       { label: '1', position: 0, value: 1 },
     ];
-    const visibleTicks = getVisibleTicks(allTicks, verticalAxisSpec, axis1Dims, chartDim, 0);
+    const visibleTicks = getVisibleTicks(allTicks, verticalAxisSpec, axis1Dims);
     const expectedVisibleTicks = [
+      { label: '1', position: 0, value: 1 },
+      { label: '0.9', position: 10, value: 0.9 },
+      { label: '0.8', position: 20, value: 0.8 },
+      { label: '0.7', position: 30, value: 0.7 },
+      { label: '0.6', position: 40, value: 0.6 },
+      { label: '0.5', position: 50, value: 0.5 },
+      { label: '0.4', position: 60, value: 0.4 },
+      { label: '0.3', position: 70, value: 0.3 },
+      { label: '0.2', position: 80, value: 0.2 },
+      { label: '0.1', position: 90, value: 0.1 },
+      { label: '0', position: 100, value: 0 },
+    ];
+    expect(visibleTicks).toEqual(expectedVisibleTicks);
+  });
+  test('should compute visible ticks for a horizontal axis', () => {
+    const allTicks = [
       { label: '0', position: 100, value: 0 },
       { label: '0.1', position: 90, value: 0.1 },
       { label: '0.2', position: 80, value: 0.2 },
@@ -181,6 +242,21 @@ describe('Axis computational utils', () => {
       { label: '0.9', position: 10, value: 0.9 },
       { label: '1', position: 0, value: 1 },
     ];
+    const visibleTicks = getVisibleTicks(allTicks, horizontalAxisSpec, axis1Dims);
+    const expectedVisibleTicks = [
+      { label: '1', position: 0, value: 1 },
+      { label: '0.9', position: 10, value: 0.9 },
+      { label: '0.8', position: 20, value: 0.8 },
+      { label: '0.7', position: 30, value: 0.7 },
+      { label: '0.6', position: 40, value: 0.6 },
+      { label: '0.5', position: 50, value: 0.5 },
+      { label: '0.4', position: 60, value: 0.4 },
+      { label: '0.3', position: 70, value: 0.3 },
+      { label: '0.2', position: 80, value: 0.2 },
+      { label: '0.1', position: 90, value: 0.1 },
+      { label: '0', position: 100, value: 0 },
+    ];
+
     expect(visibleTicks).toEqual(expectedVisibleTicks);
   });
   test('should hide some ticks', () => {
@@ -207,16 +283,77 @@ describe('Axis computational utils', () => {
       maxLabelTextWidth: 10,
       maxLabelTextHeight: 20,
     };
-    const visibleTicks = getVisibleTicks(allTicks, verticalAxisSpec, axis2Dims, chartDim, 0);
+    const visibleTicks = getVisibleTicks(allTicks, verticalAxisSpec, axis2Dims);
     const expectedVisibleTicks = [
-      { label: '0', position: 100, value: 0 },
-      { label: '0.2', position: 80, value: 0.2 },
-      { label: '0.4', position: 60, value: 0.4 },
-      { label: '0.6', position: 40, value: 0.6 },
-      { label: '0.8', position: 20, value: 0.8 },
       { label: '1', position: 0, value: 1 },
+      { label: '0.8', position: 20, value: 0.8 },
+      { label: '0.6', position: 40, value: 0.6 },
+      { label: '0.4', position: 60, value: 0.4 },
+      { label: '0.2', position: 80, value: 0.2 },
+      { label: '0', position: 100, value: 0 },
     ];
     expect(visibleTicks).toEqual(expectedVisibleTicks);
+  });
+  test('should show all overlapping ticks and labels if configured to', () => {
+    const allTicks = [
+      { label: '0', position: 100, value: 0 },
+      { label: '0.1', position: 90, value: 0.1 },
+      { label: '0.2', position: 80, value: 0.2 },
+      { label: '0.3', position: 70, value: 0.3 },
+      { label: '0.4', position: 60, value: 0.4 },
+      { label: '0.5', position: 50, value: 0.5 },
+      { label: '0.6', position: 40, value: 0.6 },
+      { label: '0.7', position: 30, value: 0.7 },
+      { label: '0.8', position: 20, value: 0.8 },
+      { label: '0.9', position: 10, value: 0.9 },
+      { label: '1', position: 0, value: 1 },
+    ];
+    const axis2Dims = {
+      axisScaleType: ScaleType.Linear,
+      axisScaleDomain: [0, 1],
+      tickValues: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+      tickLabels: ['0', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1'],
+      maxLabelBboxWidth: 10,
+      maxLabelBboxHeight: 20,
+      maxLabelTextWidth: 10,
+      maxLabelTextHeight: 20,
+    };
+
+    verticalAxisSpec.showOverlappingTicks = true;
+    verticalAxisSpec.showOverlappingLabels = true;
+    const visibleOverlappingTicks = getVisibleTicks(allTicks, verticalAxisSpec, axis2Dims);
+    const expectedVisibleOverlappingTicks = [
+      { label: '1', position: 0, value: 1 },
+      { label: '0.9', position: 10, value: 0.9 },
+      { label: '0.8', position: 20, value: 0.8 },
+      { label: '0.7', position: 30, value: 0.7 },
+      { label: '0.6', position: 40, value: 0.6 },
+      { label: '0.5', position: 50, value: 0.5 },
+      { label: '0.4', position: 60, value: 0.4 },
+      { label: '0.3', position: 70, value: 0.3 },
+      { label: '0.2', position: 80, value: 0.2 },
+      { label: '0.1', position: 90, value: 0.1 },
+      { label: '0', position: 100, value: 0 },
+    ];
+    expect(visibleOverlappingTicks).toEqual(expectedVisibleOverlappingTicks);
+
+    verticalAxisSpec.showOverlappingTicks = true;
+    verticalAxisSpec.showOverlappingLabels = false;
+    const visibleOverlappingTicksAndLabels = getVisibleTicks(allTicks, verticalAxisSpec, axis2Dims);
+    const expectedVisibleOverlappingTicksAndLabels = [
+      { label: '1', position: 0, value: 1 },
+      { label: '', position: 10, value: 0.9 },
+      { label: '0.8', position: 20, value: 0.8 },
+      { label: '', position: 30, value: 0.7 },
+      { label: '0.6', position: 40, value: 0.6 },
+      { label: '', position: 50, value: 0.5 },
+      { label: '0.4', position: 60, value: 0.4 },
+      { label: '', position: 70, value: 0.3 },
+      { label: '0.2', position: 80, value: 0.2 },
+      { label: '', position: 90, value: 0.1 },
+      { label: '0', position: 100, value: 0 },
+    ];
+    expect(visibleOverlappingTicksAndLabels).toEqual(expectedVisibleOverlappingTicksAndLabels);
   });
   test('should compute min max range for on 0 deg bottom', () => {
     const minMax = getMinMaxRange(Position.Bottom, 0, {
@@ -227,23 +364,14 @@ describe('Axis computational utils', () => {
     });
     expect(minMax).toEqual({ minRange: 0, maxRange: 100 });
   });
-  test('should compute min max range for on 90 deg Left', () => {
-    const minMax = getMinMaxRange(Position.Left, 90, {
+  test('should compute min max range for on 90 deg bottom', () => {
+    const minMax = getMinMaxRange(Position.Bottom, 90, {
       width: 100,
       height: 50,
       top: 0,
       left: 0,
     });
-    expect(minMax).toEqual({ minRange: 0, maxRange: 50 });
-  });
-  test('should compute min max range for on -90 deg Right', () => {
-    const minMax = getMinMaxRange(Position.Bottom, -90, {
-      width: 100,
-      height: 50,
-      top: 0,
-      left: 0,
-    });
-    expect(minMax).toEqual({ minRange: 100, maxRange: 0 });
+    expect(minMax).toEqual({ minRange: 0, maxRange: 100 });
   });
   test('should compute min max range for on 180 deg bottom', () => {
     const minMax = getMinMaxRange(Position.Bottom, 180, {
@@ -253,6 +381,54 @@ describe('Axis computational utils', () => {
       left: 0,
     });
     expect(minMax).toEqual({ minRange: 100, maxRange: 0 });
+  });
+  test('should compute min max range for on -90 deg bottom', () => {
+    const minMax = getMinMaxRange(Position.Bottom, -90, {
+      width: 100,
+      height: 50,
+      top: 0,
+      left: 0,
+    });
+    expect(minMax).toEqual({ minRange: 100, maxRange: 0 });
+  });
+  test('should compute min max range for on 90 deg Left', () => {
+    const minMax = getMinMaxRange(Position.Left, 90, {
+      width: 100,
+      height: 50,
+      top: 0,
+      left: 0,
+    });
+    expect(minMax).toEqual({ minRange: 0, maxRange: 50 });
+  });
+  test('should compute min max range for on 180 deg Left', () => {
+    const minMax = getMinMaxRange(Position.Left, 180, {
+      width: 100,
+      height: 50,
+      top: 0,
+      left: 0,
+    });
+    expect(minMax).toEqual({ minRange: 0, maxRange: 50 });
+  });
+  test('should compute min max range for on -90 deg Right', () => {
+    const minMax = getMinMaxRange(Position.Right, -90, {
+      width: 100,
+      height: 50,
+      top: 0,
+      left: 0,
+    });
+    expect(minMax).toEqual({ minRange: 50, maxRange: 0 });
+  });
+  test('should get max bbox dimensions for a tick in comparison to previous values', () => {
+    const bboxCalculator = new CanvasTextBBoxCalculator();
+    const reducer = getMaxBboxDimensions(bboxCalculator, 16, 'Arial', 0);
+
+    const accWithGreaterValues = {
+      maxLabelBboxWidth: 100,
+      maxLabelBboxHeight: 100,
+      maxLabelTextWidth: 100,
+      maxLabelTextHeight: 100,
+    };
+    expect(reducer(accWithGreaterValues, 'foo')).toEqual(accWithGreaterValues);
   });
 
   test('should compute coordinates and offsets to anchor rotation origin from the center', () => {
@@ -347,6 +523,23 @@ describe('Axis computational utils', () => {
       align: 'center',
       verticalAlign: 'middle',
     });
+
+    tickLabelRotation = 0;
+    const rightUnrotatedLabelProps = getTickLabelProps(
+      tickLabelRotation,
+      tickSize,
+      tickPadding,
+      tickPosition,
+      axisPosition,
+      axis1Dims,
+    );
+
+    expect(rightUnrotatedLabelProps).toEqual({
+      x: 15,
+      y: -5,
+      align: 'left',
+      verticalAlign: 'middle',
+    });
   });
 
   test('should compute positions and alignment of tick labels along a horizontal axis', () => {
@@ -404,6 +597,23 @@ describe('Axis computational utils', () => {
       y: 15,
       align: 'center',
       verticalAlign: 'middle',
+    });
+
+    tickLabelRotation = 0;
+    const bottomUnrotatedLabelProps = getTickLabelProps(
+      tickLabelRotation,
+      tickSize,
+      tickPadding,
+      tickPosition,
+      axisPosition,
+      axis1Dims,
+    );
+
+    expect(bottomUnrotatedLabelProps).toEqual({
+      x: -5,
+      y: 15,
+      align: 'center',
+      verticalAlign: 'top',
     });
   });
 
@@ -467,5 +677,250 @@ describe('Axis computational utils', () => {
     );
 
     expect(horizontalAxisGridLinePositions).toEqual([10, 0, 10, 200]);
+  });
+
+  test('should compute left axis position', () => {
+    const axisTitleHeight = 10;
+    const cumTopSum = 10;
+    const cumBottomSum = 10;
+    const cumLeftSum = 10;
+    const cumRightSum = 10;
+
+    const leftAxisPosition = getAxisPosition(
+      chartDim,
+      LIGHT_THEME.chartMargins,
+      axisTitleHeight,
+      verticalAxisSpec,
+      axis1Dims,
+      cumTopSum,
+      cumBottomSum,
+      cumLeftSum,
+      cumRightSum,
+    );
+
+    const expectedLeftAxisPosition = {
+      dimensions: {
+        height: 100,
+        width: 10,
+        left: 40,
+        top: 0,
+      },
+      topIncrement: 0,
+      bottomIncrement: 0,
+      leftIncrement: 50,
+      rightIncrement: 0,
+    };
+
+    expect(leftAxisPosition).toEqual(expectedLeftAxisPosition);
+  });
+
+  test('should compute right axis position', () => {
+    const axisTitleHeight = 10;
+    const cumTopSum = 10;
+    const cumBottomSum = 10;
+    const cumLeftSum = 10;
+    const cumRightSum = 10;
+
+    verticalAxisSpec.position = Position.Right;
+    const rightAxisPosition = getAxisPosition(
+      chartDim,
+      LIGHT_THEME.chartMargins,
+      axisTitleHeight,
+      verticalAxisSpec,
+      axis1Dims,
+      cumTopSum,
+      cumBottomSum,
+      cumLeftSum,
+      cumRightSum,
+    );
+
+    const expectedRightAxisPosition = {
+      dimensions: {
+        height: 100,
+        width: 10,
+        left: 110,
+        top: 0,
+      },
+      topIncrement: 0,
+      bottomIncrement: 0,
+      leftIncrement: 0,
+      rightIncrement: 50,
+    };
+
+    expect(rightAxisPosition).toEqual(expectedRightAxisPosition);
+  });
+
+  test('should compute top axis position', () => {
+    const axisTitleHeight = 10;
+    const cumTopSum = 10;
+    const cumBottomSum = 10;
+    const cumLeftSum = 10;
+    const cumRightSum = 10;
+
+    horizontalAxisSpec.position = Position.Top;
+    const topAxisPosition = getAxisPosition(
+      chartDim,
+      LIGHT_THEME.chartMargins,
+      axisTitleHeight,
+      horizontalAxisSpec,
+      axis1Dims,
+      cumTopSum,
+      cumBottomSum,
+      cumLeftSum,
+      cumRightSum,
+    );
+
+    const expectedTopAxisPosition = {
+      dimensions: {
+        height: 10,
+        width: 100,
+        left: 0,
+        top: 30,
+      },
+      topIncrement: 50,
+      bottomIncrement: 0,
+      leftIncrement: 0,
+      rightIncrement: 0,
+    };
+
+    expect(topAxisPosition).toEqual(expectedTopAxisPosition);
+  });
+
+  test('should compute bottom axis position', () => {
+    const axisTitleHeight = 10;
+    const cumTopSum = 10;
+    const cumBottomSum = 10;
+    const cumLeftSum = 10;
+    const cumRightSum = 10;
+
+    horizontalAxisSpec.position = Position.Bottom;
+    const bottomAxisPosition = getAxisPosition(
+      chartDim,
+      LIGHT_THEME.chartMargins,
+      axisTitleHeight,
+      horizontalAxisSpec,
+      axis1Dims,
+      cumTopSum,
+      cumBottomSum,
+      cumLeftSum,
+      cumRightSum,
+    );
+
+    const expectedBottomAxisPosition = {
+      dimensions: {
+        height: 10,
+        width: 100,
+        left: 0,
+        top: 110,
+      },
+      topIncrement: 0,
+      bottomIncrement: 50,
+      leftIncrement: 0,
+      rightIncrement: 0,
+    };
+
+    expect(bottomAxisPosition).toEqual(expectedBottomAxisPosition);
+  });
+
+  test('should compute axis ticks positions', () => {
+    const chartRotation = 0;
+    const showLegend = true;
+    const leftLegendPosition = Position.Left;
+    const topLegendPosition = Position.Top;
+
+    const axisSpecs = new Map();
+    axisSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+
+    const axisDims = new Map();
+    axisDims.set(verticalAxisSpec.id, axis1Dims);
+
+    const axisTicksPosition = getAxisTicksPositions(
+      chartDim,
+      LIGHT_THEME,
+      chartRotation,
+      showLegend,
+      axisSpecs,
+      axisDims,
+      xDomain,
+      [yDomain],
+      1,
+      leftLegendPosition,
+    );
+
+    const expectedVerticalAxisGridLines = [
+      [0, 0, 100, 0],
+      [0, 10, 100, 10],
+      [0, 20, 100, 20],
+      [0, 30, 100, 30],
+      [0, 40, 100, 40],
+      [0, 50, 100, 50],
+      [0, 60, 100, 60],
+      [0, 70, 100, 70],
+      [0, 80, 100, 80],
+      [0, 90, 100, 90],
+      [0, 100, 100, 100],
+    ];
+
+    expect(axisTicksPosition.axisGridLinesPositions.get(verticalAxisSpec.id)).toEqual(expectedVerticalAxisGridLines);
+
+    const axisTicksPositionWithTopLegend = getAxisTicksPositions(
+      chartDim,
+      LIGHT_THEME,
+      chartRotation,
+      showLegend,
+      axisSpecs,
+      axisDims,
+      xDomain,
+      [yDomain],
+      1,
+      topLegendPosition,
+    );
+
+    const expectedPositionWithTopLegend = {
+      height: 100,
+      width: 10,
+      left: 100,
+      top: 0,
+    };
+    const verticalAxisWithTopLegendPosition = axisTicksPositionWithTopLegend.axisPositions.get(verticalAxisSpec.id);
+    expect(verticalAxisWithTopLegendPosition).toEqual(expectedPositionWithTopLegend);
+
+    const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: getGroupId('foo') };
+    const invalidSpecs = new Map();
+    invalidSpecs.set(verticalAxisSpec.id, ungroupedAxisSpec);
+    const computeScalelessSpec = () => {
+      getAxisTicksPositions(
+        chartDim,
+        LIGHT_THEME,
+        chartRotation,
+        showLegend,
+        invalidSpecs,
+        axisDims,
+        xDomain,
+        [yDomain],
+        1,
+        leftLegendPosition,
+      );
+    };
+
+    expect(computeScalelessSpec).toThrowError('Cannot compute scale for axis spec axis_1');
+  });
+
+  test('should compute positions for grid lines', () => {
+    const verticalAxisGridLines = computeAxisGridLinePositions(true, 25, chartDim);
+    expect(verticalAxisGridLines).toEqual([0, 25, 100, 25]);
+
+    const horizontalAxisGridLines = computeAxisGridLinePositions(false, 25, chartDim);
+    expect(horizontalAxisGridLines).toEqual([25, 0, 25, 100]);
+  });
+
+  test('should return correct domain based on rotation', () => {
+    const chartRotation = 180;
+    expect(getHorizontalDomain(xDomain, [yDomain], chartRotation)).toEqual(xDomain);
+    expect(getVerticalDomain(xDomain, [yDomain], chartRotation)).toEqual([yDomain]);
+
+    const skewChartRotation = 45;
+    expect(getHorizontalDomain(xDomain, [yDomain], skewChartRotation)).toEqual([yDomain]);
+    expect(getVerticalDomain(xDomain, [yDomain], skewChartRotation)).toEqual(xDomain);
   });
 });
