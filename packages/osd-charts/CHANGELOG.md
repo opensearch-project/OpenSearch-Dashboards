@@ -1,3 +1,15 @@
+# [3.0.0](https://github.com/elastic/elastic-charts/compare/v2.1.0...v3.0.0) (2019-03-06)
+
+
+### Bug Fixes
+
+* **scale:** return ticks in millis for time scales for line/area charts ([8b46283](https://github.com/elastic/elastic-charts/commit/8b46283))
+
+
+### BREAKING CHANGES
+
+* **scale:** The  props callback is called with millis instead of Date for axis on line or area only charts.
+
 # [2.1.0](https://github.com/elastic/elastic-charts/compare/v2.0.0...v2.1.0) (2019-03-06)
 
 
