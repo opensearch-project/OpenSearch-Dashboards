@@ -1,8 +1,18 @@
+import { LegendItem } from '../lib/series/legend';
+import { DataSeriesColorsValues } from '../lib/series/series';
 import { BasicSeriesSpec } from '../lib/series/specs';
+
 import { BARCHART_1Y0G, BARCHART_1Y1G } from '../lib/series/utils/test_dataset';
+
 import { getGroupId, getSpecId, SpecId } from '../lib/utils/ids';
 import { ScaleType } from '../lib/utils/scales/scales';
-import { computeSeriesDomains } from './utils';
+import {
+  computeSeriesDomains,
+  findSelectedDataSeries,
+  getAllDataSeriesColorValues,
+  getLegendItemByIndex,
+  updateSelectedDataSeries,
+} from './utils';
 
 describe('Chart State utils', () => {
   it('should compute and format specifications for non stacked chart', () => {
@@ -113,5 +123,95 @@ describe('Chart State utils', () => {
     ]);
     expect(domains.formattedDataSeries.stacked).toMatchSnapshot();
     expect(domains.formattedDataSeries.nonStacked).toMatchSnapshot();
+  });
+  it('should get a legend item by index', () => {
+    const dataSeriesColorValues = {
+      specId: getSpecId('foo'),
+      colorValues: [],
+    };
+
+    const firstItem = {
+      color: 'foo',
+      label: 'foo',
+      value: dataSeriesColorValues,
+    };
+
+    const secondItem = {
+      color: 'bar',
+      label: 'bar',
+      value: dataSeriesColorValues,
+    };
+
+    const legendItems: LegendItem[] = [firstItem, secondItem];
+    const legendItemIndex = 1;
+
+    expect(getLegendItemByIndex([], legendItemIndex)).toBe(null);
+    expect(getLegendItemByIndex(legendItems, 2)).toEqual(null);
+    expect(getLegendItemByIndex(legendItems, legendItemIndex)).toEqual(secondItem);
+  });
+  it('should check if a DataSeriesColorValues item exists in a list of DataSeriesColorValues', () => {
+    const dataSeriesValuesA: DataSeriesColorsValues = {
+      specId: getSpecId('a'),
+      colorValues: ['a', 'b', 'c'],
+    };
+
+    const dataSeriesValuesB: DataSeriesColorsValues = {
+      specId: getSpecId('b'),
+      colorValues: ['a', 'b', 'c'],
+    };
+
+    const dataSeriesValuesC: DataSeriesColorsValues = {
+      specId: getSpecId('a'),
+      colorValues: ['a', 'b', 'd'],
+    };
+
+    const selectedSeries = [dataSeriesValuesA, dataSeriesValuesB];
+
+    expect(findSelectedDataSeries(selectedSeries, dataSeriesValuesA)).toBe(0);
+    expect(findSelectedDataSeries(selectedSeries, dataSeriesValuesC)).toBe(-1);
+    expect(findSelectedDataSeries(null, dataSeriesValuesA)).toBe(-1);
+  });
+  it('should update a list of DataSeriesColorsValues given a selected DataSeriesColorValues item', () => {
+    const dataSeriesValuesA: DataSeriesColorsValues = {
+      specId: getSpecId('a'),
+      colorValues: ['a', 'b', 'c'],
+    };
+
+    const dataSeriesValuesB: DataSeriesColorsValues = {
+      specId: getSpecId('b'),
+      colorValues: ['a', 'b', 'c'],
+    };
+
+    const dataSeriesValuesC: DataSeriesColorsValues = {
+      specId: getSpecId('a'),
+      colorValues: ['a', 'b', 'd'],
+    };
+
+    const selectedSeries = [dataSeriesValuesA, dataSeriesValuesB];
+    const addedSelectedSeries = [dataSeriesValuesA, dataSeriesValuesB, dataSeriesValuesC];
+    const removedSelectedSeries = [dataSeriesValuesB];
+
+    expect(updateSelectedDataSeries(selectedSeries, dataSeriesValuesC)).toEqual(addedSelectedSeries);
+    expect(updateSelectedDataSeries(selectedSeries, dataSeriesValuesA)).toEqual(removedSelectedSeries);
+    expect(updateSelectedDataSeries(null, dataSeriesValuesA)).toEqual([dataSeriesValuesA]);
+  });
+  it('should return all of the DataSeriesColorValues on initialization', () => {
+    const dataSeriesValuesA: DataSeriesColorsValues = {
+      specId: getSpecId('a'),
+      colorValues: ['a', 'b', 'c'],
+    };
+
+    const dataSeriesValuesB: DataSeriesColorsValues = {
+      specId: getSpecId('b'),
+      colorValues: ['a', 'b', 'c'],
+    };
+
+    const colorMap = new Map();
+    colorMap.set('a', dataSeriesValuesA);
+    colorMap.set('b', dataSeriesValuesB);
+
+    const expected = [dataSeriesValuesA, dataSeriesValuesB];
+
+    expect(getAllDataSeriesColorValues(colorMap)).toEqual(expected);
   });
 });

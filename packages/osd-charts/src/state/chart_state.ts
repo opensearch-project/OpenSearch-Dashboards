@@ -46,8 +46,12 @@ import {
   computeChartTransform,
   computeSeriesDomains,
   computeSeriesGeometries,
+  findSelectedDataSeries,
+  getAllDataSeriesColorValues,
   getAxesSpecForSpecId,
+  getLegendItemByIndex,
   Transform,
+  updateSelectedDataSeries,
 } from './utils';
 export interface TooltipPosition {
   top?: number;
@@ -126,6 +130,9 @@ export class ChartStore {
 
   legendItems: LegendItem[] = [];
   highlightedLegendItemIndex: IObservableValue<number | null> = observable.box(null);
+  selectedLegendItemIndex: IObservableValue<number | null> = observable.box(null);
+  selectedDataSeries: DataSeriesColorsValues[] | null = null;
+  customSeriesColors: Map<string, string> = new Map();
 
   tooltipData = observable.box<Array<[any, any]> | null>(null);
   tooltipPosition = observable.box<{ x: number; y: number } | null>();
@@ -135,9 +142,12 @@ export class ChartStore {
   onElementOverListener?: ElementOverListener;
   onElementOutListener?: () => undefined;
   onBrushEndListener?: BrushEndListener;
-
   onLegendItemOverListener?: LegendItemListener;
   onLegendItemOutListener?: () => undefined;
+  onLegendItemClickListener?: LegendItemListener;
+  onLegendItemPlusClickListener?: LegendItemListener;
+  onLegendItemMinusClickListener?: LegendItemListener;
+  onLegendItemVisibilityToggleClickListener?: LegendItemListener;
 
   geometries: {
     points: PointGeometry[];
@@ -197,6 +207,11 @@ export class ChartStore {
     return index == null ? null : this.legendItems[index];
   });
 
+  selectedLegendItem = computed(() => {
+    const index = this.selectedLegendItemIndex.get();
+    return index == null ? null : this.legendItems[index];
+  });
+
   onLegendItemOver = action((legendItemIndex: number) => {
     if (legendItemIndex >= this.legendItems.length || legendItemIndex < 0) {
       this.highlightedLegendItemIndex.set(null);
@@ -218,6 +233,76 @@ export class ChartStore {
     }
   });
 
+  onLegendItemClick = action((legendItemIndex: number) => {
+    if (legendItemIndex !== this.selectedLegendItemIndex.get()) {
+      this.selectedLegendItemIndex.set(legendItemIndex);
+    } else {
+      this.selectedLegendItemIndex.set(null);
+    }
+
+    if (this.onLegendItemClickListener) {
+      const currentLegendItem = this.selectedLegendItem.get();
+      const listenerData = currentLegendItem ? currentLegendItem.value : null;
+      this.onLegendItemClickListener(listenerData);
+    }
+  });
+
+  onLegendItemPlusClick = action(() => {
+    if (this.onLegendItemPlusClickListener) {
+      const currentLegendItem = this.selectedLegendItem.get();
+      const listenerData = currentLegendItem ? currentLegendItem.value : null;
+      this.onLegendItemPlusClickListener(listenerData);
+    }
+  });
+
+  onLegendItemMinusClick = action(() => {
+    if (this.onLegendItemMinusClickListener) {
+      const currentLegendItem = this.selectedLegendItem.get();
+      const listenerData = currentLegendItem ? currentLegendItem.value : null;
+      this.onLegendItemMinusClickListener(listenerData);
+    }
+  });
+
+  toggleSingleSeries = action((legendItemIndex: number) => {
+    const legendItem = getLegendItemByIndex(this.legendItems, legendItemIndex);
+
+    if (legendItem) {
+      if (findSelectedDataSeries(this.selectedDataSeries, legendItem.value) > -1) {
+        this.selectedDataSeries =
+          this.legendItems
+            .filter((item: LegendItem, idx: number) => idx !== legendItemIndex)
+            .map((item: LegendItem) => item.value);
+      } else {
+        this.selectedDataSeries = [legendItem.value];
+      }
+
+      this.computeChart();
+    }
+  });
+
+  toggleSeriesVisibility = action((legendItemIndex: number) => {
+    const legendItem = getLegendItemByIndex(this.legendItems, legendItemIndex);
+
+    if (legendItem) {
+      this.selectedDataSeries = updateSelectedDataSeries(this.selectedDataSeries, legendItem.value);
+      this.computeChart();
+    }
+  });
+
+  setSeriesColor = action((legendItemIndex: number, color: string) => {
+    const legendItem = getLegendItemByIndex(this.legendItems, legendItemIndex);
+
+    if (legendItem) {
+      const key = legendItem.label;
+      this.customSeriesColors.set(key, color);
+      this.computeChart();
+    }
+  });
+
+  resetSelectedDataSeries() {
+    this.selectedDataSeries = null;
+  }
+
   setOnElementClickListener(listener: ElementClickListener) {
     this.onElementClickListener = listener;
   }
@@ -236,6 +321,15 @@ export class ChartStore {
   setOnLegendItemOutListener(listener: () => undefined) {
     this.onLegendItemOutListener = listener;
   }
+  setOnLegendItemClickListener(listener: LegendItemListener) {
+    this.onLegendItemClickListener = listener;
+  }
+  setOnLegendItemPlusClickListener(listener: LegendItemListener) {
+    this.onLegendItemPlusClickListener = listener;
+  }
+  setOnLegendItemMinusClickListener(listener: LegendItemListener) {
+    this.onLegendItemMinusClickListener = listener;
+  }
   removeElementClickListener() {
     this.onElementClickListener = undefined;
   }
@@ -250,6 +344,12 @@ export class ChartStore {
   }
   removeOnLegendItemOutListener() {
     this.onLegendItemOutListener = undefined;
+  }
+  removeOnLegendItemPlusClickListener() {
+    this.onLegendItemPlusClickListener = undefined;
+  }
+  removeOnLegendItemMinusClickListener() {
+    this.onLegendItemMinusClickListener = undefined;
   }
   onBrushEnd(start: Point, end: Point) {
     if (!this.onBrushEndListener) {
@@ -323,19 +423,39 @@ export class ChartStore {
       return;
     }
 
-    const seriesDomains = computeSeriesDomains(this.seriesSpecs);
+    // When specs are not initialized, reset selectedDataSeries to null
+    if (!this.specsInitialized.get()) {
+      this.selectedDataSeries = null;
+    }
+
+    // The second argument is optional; if not supplied, then all series will be factored into computations
+    // Otherwise, selectedDataSeries is used to restrict the computation for just the selected series
+    const seriesDomains = computeSeriesDomains(this.seriesSpecs, this.selectedDataSeries);
     this.seriesDomainsAndData = seriesDomains;
+
+    // If this.selectedDataSeries is null, initialize with all series
+    if (!this.selectedDataSeries) {
+      this.selectedDataSeries = getAllDataSeriesColorValues(seriesDomains.seriesColors);
+    }
+
     // tslint:disable-next-line:no-console
     // console.log({colors: seriesDomains.seriesColors});
 
     // tslint:disable-next-line:no-console
     // console.log({ seriesDomains });
-    const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, this.chartTheme.colors);
+    const seriesColorMap = getSeriesColorMap(
+      seriesDomains.seriesColors,
+      this.chartTheme.colors,
+      this.customSeriesColors,
+      this.seriesSpecs,
+    );
+
     this.legendItems = computeLegend(
       seriesDomains.seriesColors,
       seriesColorMap,
       this.seriesSpecs,
       this.chartTheme.colors.defaultVizColor,
+      this.selectedDataSeries,
     );
     // tslint:disable-next-line:no-console
     // console.log({ legendItems: this.legendItems });

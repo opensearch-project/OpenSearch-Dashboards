@@ -29,6 +29,9 @@ const onElementListeners = {
 const onLegendItemListeners = {
   onLegendItemOver: action('onLegendItemOver'),
   onLegendItemOut: action('onLegendItemOut'),
+  onLegendItemClick: action('onLegendItemClick'),
+  onLegendItemPlusClick: action('onLegendItemPlusClick'),
+  onLegendItemMinusClick: action('onLegendItemMinusClick'),
 };
 
 storiesOf('Interactions', module)
@@ -119,7 +122,7 @@ storiesOf('Interactions', module)
       </Chart>
     );
   })
-  .add('click/hovers on legend items [bar chart] (TO DO click)', () => {
+  .add('click/hovers on legend items [bar chart]', () => {
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} {...onLegendItemListeners} />
@@ -149,7 +152,7 @@ storiesOf('Interactions', module)
       </Chart>
     );
   })
-  .add('click/hovers on legend items [area chart] (TO DO click)', () => {
+  .add('click/hovers on legend items [area chart]', () => {
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
@@ -189,7 +192,7 @@ storiesOf('Interactions', module)
       </Chart>
     );
   })
-  .add('click/hovers on legend items [line chart] (TO DO click)', () => {
+  .add('click/hovers on legend items [line chart]', () => {
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
@@ -269,7 +272,7 @@ storiesOf('Interactions', module)
       </Chart>
     );
   })
-  .add('click/hovers on legend items [mixed chart] (TO DO click)', () => {
+  .add('click/hovers on legend items [mixed chart]', () => {
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />

@@ -66,6 +66,19 @@ describe('Chart Store', () => {
     expect(seriesDomainsAndData).not.toBeUndefined();
   });
 
+  test('can initialize selectedDataSeries depending on previous state', () => {
+    const selectedDataSeries = [{ specId: SPEC_ID, colorValues: [] }];
+
+    store.selectedDataSeries = null;
+    store.computeChart();
+    expect(store.selectedDataSeries).toEqual(selectedDataSeries);
+
+    store.selectedDataSeries = selectedDataSeries;
+    store.specsInitialized.set(true);
+    store.computeChart();
+    expect(store.selectedDataSeries).toEqual(selectedDataSeries);
+  });
+
   test('can add an axis', () => {
     const axisSpec: AxisSpec = {
       id: AXIS_ID,
@@ -216,6 +229,105 @@ describe('Chart Store', () => {
     expect(outListener.mock.calls.length).toBe(1);
   });
 
+  test('can respond to legend item click event', () => {
+    const legendListener = jest.fn((ds: DataSeriesColorsValues | null): void => { return; });
+
+    store.legendItems = [firstLegendItem, secondLegendItem];
+    store.selectedLegendItemIndex.set(null);
+    store.onLegendItemClickListener = undefined;
+
+    store.onLegendItemClick(0);
+    expect(store.selectedLegendItemIndex.get()).toBe(0);
+    expect(legendListener).not.toBeCalled();
+
+    store.setOnLegendItemClickListener(legendListener);
+    store.onLegendItemClick(0);
+    expect(store.selectedLegendItemIndex.get()).toBe(null);
+    expect(legendListener).toBeCalledWith(null);
+
+    store.setOnLegendItemClickListener(legendListener);
+    store.onLegendItemClick(1);
+    expect(store.selectedLegendItemIndex.get()).toBe(1);
+    expect(legendListener).toBeCalledWith(secondLegendItem.value);
+  });
+
+  test('can respond to a legend item plus click event', () => {
+    const legendListener = jest.fn((ds: DataSeriesColorsValues | null): void => { return; });
+
+    store.legendItems = [firstLegendItem, secondLegendItem];
+    store.selectedLegendItemIndex.set(null);
+    store.onLegendItemPlusClickListener = undefined;
+
+    store.onLegendItemPlusClick();
+    expect(legendListener).not.toBeCalled();
+
+    store.setOnLegendItemPlusClickListener(legendListener);
+    store.onLegendItemPlusClick();
+    expect(legendListener).toBeCalledWith(null);
+
+    store.selectedLegendItemIndex.set(0);
+    store.onLegendItemPlusClick();
+    expect(legendListener).toBeCalledWith(firstLegendItem.value);
+  });
+
+  test('can respond to a legend item minus click event', () => {
+    const legendListener = jest.fn((ds: DataSeriesColorsValues | null): void => { return; });
+
+    store.legendItems = [firstLegendItem, secondLegendItem];
+    store.selectedLegendItemIndex.set(null);
+    store.onLegendItemMinusClickListener = undefined;
+
+    store.onLegendItemMinusClick();
+    expect(legendListener).not.toBeCalled();
+
+    store.setOnLegendItemMinusClickListener(legendListener);
+    store.onLegendItemMinusClick();
+    expect(legendListener).toBeCalledWith(null);
+
+    store.selectedLegendItemIndex.set(0);
+    store.onLegendItemMinusClick();
+    expect(legendListener).toBeCalledWith(firstLegendItem.value);
+  });
+
+  test('can toggle series visibility', () => {
+    const computeChart = jest.fn((): void => { return; });
+
+    store.legendItems = [firstLegendItem, secondLegendItem];
+    store.selectedDataSeries = null;
+    store.computeChart = computeChart;
+
+    store.toggleSeriesVisibility(3);
+    expect(store.selectedDataSeries).toEqual(null);
+    expect(computeChart).not.toBeCalled();
+
+    store.selectedDataSeries = [firstLegendItem.value, secondLegendItem.value];
+    store.toggleSeriesVisibility(0);
+    expect(store.selectedDataSeries).toEqual([secondLegendItem.value]);
+    expect(computeChart).toBeCalled();
+
+    store.selectedDataSeries = [firstLegendItem.value];
+    store.toggleSeriesVisibility(0);
+    expect(store.selectedDataSeries).toEqual([]);
+  });
+
+  test('can toggle single series visibility', () => {
+    const computeChart = jest.fn((): void => { return; });
+
+    store.legendItems = [firstLegendItem, secondLegendItem];
+    store.selectedDataSeries = null;
+    store.computeChart = computeChart;
+
+    store.toggleSingleSeries(3);
+    expect(store.selectedDataSeries).toEqual(null);
+    expect(computeChart).not.toBeCalled();
+
+    store.toggleSingleSeries(0);
+    expect(store.selectedDataSeries).toEqual([firstLegendItem.value]);
+
+    store.toggleSingleSeries(0);
+    expect(store.selectedDataSeries).toEqual([secondLegendItem.value]);
+  });
+
   test('can set an element click listener', () => {
     const clickListener = (value: GeometryValue): void => { return; };
     store.setOnElementClickListener(clickListener);
@@ -242,6 +354,12 @@ describe('Chart Store', () => {
 
     store.removeOnLegendItemOverListener();
     expect(store.onLegendItemOverListener).toEqual(undefined);
+
+    store.removeOnLegendItemPlusClickListener();
+    expect(store.onLegendItemPlusClickListener).toEqual(undefined);
+
+    store.removeOnLegendItemMinusClickListener();
+    expect(store.onLegendItemMinusClickListener).toEqual(undefined);
   });
 
   test('can respond to a brush end event', () => {
@@ -343,5 +461,43 @@ describe('Chart Store', () => {
 
     localStore.computeChart();
     expect(localStore.initialized.get()).toBe(false);
+  });
+
+  test('only computes chart if series specs exist', () => {
+    const localStore = new ChartStore();
+
+    localStore.parentDimensions = {
+      width: 100,
+      height: 100,
+      top: 0,
+      left: 0,
+    };
+
+    localStore.seriesSpecs = new Map();
+    localStore.computeChart();
+    expect(localStore.initialized.get()).toBe(false);
+  });
+
+  test('can set the color for a series', () => {
+    const computeChart = jest.fn((): void => { return; });
+    store.computeChart = computeChart;
+    store.legendItems = [firstLegendItem, secondLegendItem];
+
+    const expectedCustomColors = new Map();
+    expectedCustomColors.set(firstLegendItem.label, 'foo');
+
+    store.setSeriesColor(-1, 'foo');
+    expect(computeChart).not.toBeCalled();
+    expect(store.customSeriesColors).toEqual(new Map());
+
+    store.setSeriesColor(0, 'foo');
+    expect(computeChart).toBeCalled();
+    expect(store.customSeriesColors).toEqual(expectedCustomColors);
+  });
+
+  test('can reset selectedDataSeries', () => {
+    store.selectedDataSeries = [firstLegendItem.value];
+    store.resetSelectedDataSeries();
+    expect(store.selectedDataSeries).toBe(null);
   });
 });

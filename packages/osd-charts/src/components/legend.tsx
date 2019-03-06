@@ -1,10 +1,14 @@
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import { inject, observer } from 'mobx-react';
 import React from 'react';
 import { isVertical } from '../lib/axes/axis_utils';
 import { LegendItem } from '../lib/series/legend';
 import { ChartStore } from '../state/chart_state';
+import { LegendElement } from './legend_element';
 
 interface ReactiveChartProps {
   chartStore?: ChartStore; // FIX until we find a better way on ts mobx
@@ -74,9 +78,11 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
                 onMouseLeave: this.onLegendItemMouseout,
               };
 
+              const { color, label, isVisible } = item;
+
               return (
                 <EuiFlexItem {...legendItemProps}>
-                  <LegendElement color={item.color} label={item.label} />
+                  {this.renderLegendElement({ color, label, isVisible }, index)}
                 </EuiFlexItem>
               );
             })}
@@ -93,22 +99,12 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
   private onLegendItemMouseout = () => {
     this.props.chartStore!.onLegendItemOut();
   }
-}
-function LegendElement({ color, label }: Partial<LegendItem>) {
-  return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="dot" color={color} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexItem grow={true} className="elasticChartsLegendListItem__title" title={label}>
-          <EuiText size="xs" className="eui-textTruncate">
-            {label}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+
+  private renderLegendElement = ({ color, label, isVisible }: Partial<LegendItem>, legendItemIndex: number) => {
+    const props = { color, label, isVisible, index: legendItemIndex };
+
+    return <LegendElement {...props} />;
+  }
 }
 
 export const Legend = inject('chartStore')(observer(LegendComponent));

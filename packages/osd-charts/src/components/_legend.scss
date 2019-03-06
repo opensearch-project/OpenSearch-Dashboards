@@ -90,14 +90,24 @@ $elasticChartsLegendMaxHeight: $euiSize * 4;
 }
 
 .elasticChartsLegendList__item {
+  cursor: pointer;
+
   &:hover {
-    text-decoration: underline;
+    .elasticChartsLegendListItem__title {
+      text-decoration: underline;
+    }
   }
 }
 
 .elasticChartsLegendListItem__title {
   width: $elasticChartsLegendMaxWidth - 4 * $euiSize;
   max-width: $elasticChartsLegendMaxWidth - 4 * $euiSize;
+
+  &.elasticChartsLegendListItem__title--selected {
+    .elasticChartsLegendListItem__title {
+      text-decoration: underline;
+    }
+  }
 }
 
 .elasticChartsLegend__toggle {

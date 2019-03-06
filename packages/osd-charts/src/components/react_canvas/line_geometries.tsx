@@ -29,7 +29,7 @@ interface LineGeometriesDataState {
 export class LineGeometries extends React.PureComponent<
   LineGeometriesDataProps,
   LineGeometriesDataState
-> {
+  > {
   static defaultProps: Partial<LineGeometriesDataProps> = {
     animated: false,
   };
@@ -41,6 +41,7 @@ export class LineGeometries extends React.PureComponent<
       overPoint: undefined,
     };
   }
+
   render() {
     return (
       <Group ref={this.barSeriesRef} key={'bar_series'}>
@@ -153,11 +154,12 @@ export class LineGeometries extends React.PureComponent<
       if (this.props.animated) {
         return (
           <Group key={i} x={transform.x}>
-            <Spring native from={{ line }} to={{ line }}>
-              {(props: { line: string }) => (
+            <Spring native reset from={{ opacity: 0 }} to={{ opacity: 1 }}>
+              {(props: { opacity: number }) => (
                 <animated.Path
+                  opacity={props.opacity}
                   key="line"
-                  data={props.line}
+                  data={line}
                   strokeWidth={strokeWidth}
                   stroke={color}
                   listening={false}
@@ -172,7 +174,7 @@ export class LineGeometries extends React.PureComponent<
       } else {
         return (
           <Path
-            key="line"
+            key={i}
             data={line}
             strokeWidth={strokeWidth}
             stroke={color}
