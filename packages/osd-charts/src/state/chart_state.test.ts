@@ -380,12 +380,12 @@ describe('Chart Store', () => {
     expect(brushEndListener).not.toBeCalled();
 
     store.onBrushEnd(start, end1);
-    expect(brushEndListener.mock.calls[0][0]).toEqual(0.9426386233269598);
-    expect(brushEndListener.mock.calls[0][1]).toEqual(1.5162523900573615);
+    expect(brushEndListener.mock.calls[0][0]).toBeCloseTo(0.9, 1);
+    expect(brushEndListener.mock.calls[0][1]).toBeCloseTo(1.5, 1);
 
     store.onBrushEnd(start, end2);
-    expect(brushEndListener.mock.calls[1][0]).toEqual(0.36902485659655826);
-    expect(brushEndListener.mock.calls[1][1]).toEqual(0.9426386233269598);
+    expect(brushEndListener.mock.calls[1][0]).toBeCloseTo(0.3, 1);
+    expect(brushEndListener.mock.calls[1][1]).toBeCloseTo(0.9, 1);
   });
 
   test('can determine if brush is enabled', () => {
