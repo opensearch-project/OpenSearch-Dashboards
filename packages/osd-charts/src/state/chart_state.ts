@@ -50,6 +50,7 @@ import {
   getAllDataSeriesColorValues,
   getAxesSpecForSpecId,
   getLegendItemByIndex,
+  getUpdatedCustomSeriesColors,
   Transform,
   updateSelectedDataSeries,
 } from './utils';
@@ -293,8 +294,19 @@ export class ChartStore {
     const legendItem = getLegendItemByIndex(this.legendItems, legendItemIndex);
 
     if (legendItem) {
-      const key = legendItem.label;
-      this.customSeriesColors.set(key, color);
+      const { specId } = legendItem.value;
+
+      const spec = this.seriesSpecs.get(specId);
+      if (spec) {
+        if (spec.customSeriesColors) {
+          spec.customSeriesColors.set(legendItem.value, color);
+        } else {
+          const specCustomSeriesColors = new Map();
+          spec.customSeriesColors = specCustomSeriesColors;
+          spec.customSeriesColors.set(legendItem.value, color);
+        }
+      }
+
       this.computeChart();
     }
   });
@@ -438,6 +450,10 @@ export class ChartStore {
       this.selectedDataSeries = getAllDataSeriesColorValues(seriesDomains.seriesColors);
     }
 
+    // Merge all series spec custom colors with state custom colors map
+    const updatedCustomSeriesColors = getUpdatedCustomSeriesColors(this.seriesSpecs);
+    this.customSeriesColors = new Map([...this.customSeriesColors, ...updatedCustomSeriesColors]);
+
     // tslint:disable-next-line:no-console
     // console.log({colors: seriesDomains.seriesColors});
 
@@ -447,7 +463,6 @@ export class ChartStore {
       seriesDomains.seriesColors,
       this.chartTheme.colors,
       this.customSeriesColors,
-      this.seriesSpecs,
     );
 
     this.legendItems = computeLegend(

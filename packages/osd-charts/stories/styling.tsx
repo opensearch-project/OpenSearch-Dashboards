@@ -21,6 +21,9 @@ import {
   ScaleType,
   Settings,
 } from '../src/';
+import { DataSeriesColorsValues } from '../src/lib/series/series';
+import { CustomSeriesColorsMap } from '../src/lib/series/specs';
+import * as TestDatasets from '../src/lib/series/utils/test_dataset';
 import { DEFAULT_MISSING_COLOR } from '../src/lib/themes/theme_commons';
 
 function range(
@@ -344,6 +347,64 @@ storiesOf('Stylings', module)
           yAccessors={['y']}
           curve={CurveType.CURVE_MONOTONE_X}
           data={data3}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('custom series colors through spec props', () => {
+    const barCustomSeriesColors: CustomSeriesColorsMap = new Map();
+    const barDataSeriesColorValues: DataSeriesColorsValues = {
+      colorValues: ['cloudflare.com', 'direct-cdn', 'y2'],
+      specId: getSpecId('bars'),
+    };
+
+    const lineCustomSeriesColors: CustomSeriesColorsMap = new Map();
+    const lineDataSeriesColorValues: DataSeriesColorsValues = {
+      colorValues: [],
+      specId: getSpecId('lines'),
+    };
+
+    const customBarColorKnob = color('barDataSeriesColor', '#000');
+    const customLineColorKnob = color('lineDataSeriesColor', '#ff0');
+    barCustomSeriesColors.set(barDataSeriesColorValues, customBarColorKnob);
+    lineCustomSeriesColors.set(lineDataSeriesColorValues, customLineColorKnob);
+
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Settings showLegend={true} legendPosition={Position.Right} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y1', 'y2']}
+          splitSeriesAccessors={['g1', 'g2']}
+          customSeriesColors={barCustomSeriesColors}
+          data={TestDatasets.BARCHART_2Y2G}
+          yScaleToDataExtent={false}
+        />
+        <LineSeries
+          id={getSpecId('lines')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          customSeriesColors={lineCustomSeriesColors}
+          data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
           yScaleToDataExtent={false}
         />
       </Chart>

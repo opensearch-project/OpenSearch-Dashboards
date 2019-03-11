@@ -265,7 +265,7 @@ describe('Series', () => {
 
     const emptyCustomColors = new Map();
 
-    const defaultColorMap = getSeriesColorMap(seriesColors, chartColors, emptyCustomColors, specs);
+    const defaultColorMap = getSeriesColorMap(seriesColors, chartColors, emptyCustomColors);
     const expectedDefaultColorMap = new Map();
     expectedDefaultColorMap.set('spec1', 'elastic_charts_c1');
     expect(defaultColorMap).toEqual(expectedDefaultColorMap);
@@ -273,7 +273,7 @@ describe('Series', () => {
     const customColors: Map<string, string> = new Map();
     customColors.set('spec1', 'custom_color');
 
-    const customizedColorMap = getSeriesColorMap(seriesColors, chartColors, customColors, specs);
+    const customizedColorMap = getSeriesColorMap(seriesColors, chartColors, customColors);
     const expectedCustomizedColorMap = new Map();
     expectedCustomizedColorMap.set('spec1', 'custom_color');
     expect(customizedColorMap).toEqual(expectedCustomizedColorMap);

@@ -4,6 +4,7 @@ import { Domain } from '../utils/domain';
 import { AxisId, GroupId, SpecId } from '../utils/ids';
 import { ScaleContinuousType, ScaleType } from '../utils/scales/scales';
 import { CurveType } from './curves';
+import { DataSeriesColorsValues } from './series';
 import { TooltipPosition } from './tooltip';
 
 export type Datum = any;
@@ -37,7 +38,11 @@ export interface SeriesSpec {
   yDomain?: Domain;
   /** The type of series you are looking to render */
   seriesType: 'bar' | 'line' | 'area' | 'basic';
+  /** Custom colors for series */
+  customSeriesColors?: CustomSeriesColorsMap;
 }
+
+export type CustomSeriesColorsMap = Map<DataSeriesColorsValues, string>;
 
 export interface SeriesAccessors {
   /** The field name of the x value on Datum object */

@@ -11,6 +11,7 @@ import {
   findSelectedDataSeries,
   getAllDataSeriesColorValues,
   getLegendItemByIndex,
+  getUpdatedCustomSeriesColors,
   updateSelectedDataSeries,
 } from './utils';
 
@@ -213,5 +214,37 @@ describe('Chart State utils', () => {
     const expected = [dataSeriesValuesA, dataSeriesValuesB];
 
     expect(getAllDataSeriesColorValues(colorMap)).toEqual(expected);
+  });
+  it('should get an updated customSeriesColor based on specs', () => {
+    const spec1: BasicSeriesSpec = {
+      id: getSpecId('spec1'),
+      groupId: getGroupId('group1'),
+      seriesType: 'line',
+      yScaleType: ScaleType.Log,
+      xScaleType: ScaleType.Linear,
+      xAccessor: 'x',
+      yAccessors: ['y'],
+      yScaleToDataExtent: false,
+      data: BARCHART_1Y0G,
+    };
+
+    const specs = new Map<SpecId, BasicSeriesSpec>();
+    specs.set(spec1.id, spec1);
+
+    const emptyCustomSeriesColors = getUpdatedCustomSeriesColors(specs);
+    expect(emptyCustomSeriesColors).toEqual(new Map());
+
+    const dataSeriesColorValues = {
+      specId: spec1.id,
+      colorValues: ['bar'],
+    };
+    spec1.customSeriesColors = new Map();
+    spec1.customSeriesColors.set(dataSeriesColorValues, 'custom_color');
+
+    const updatedCustomSeriesColors = getUpdatedCustomSeriesColors(specs);
+    const expectedCustomSeriesColors = new Map();
+    expectedCustomSeriesColors.set('specId:{spec1},colors:{bar}', 'custom_color');
+
+    expect(updatedCustomSeriesColors).toEqual(expectedCustomSeriesColors);
   });
 });

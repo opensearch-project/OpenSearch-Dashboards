@@ -18,6 +18,7 @@ import {
   DataSeries,
   DataSeriesColorsValues,
   FormattedDataSeries,
+  getColorValuesAsString,
   getFormattedDataseries,
   getSplittedSeries,
   RawDataSeries,
@@ -87,6 +88,20 @@ export function updateSelectedDataSeries(
     updatedSeries.push(value);
   }
   return updatedSeries;
+}
+
+export function getUpdatedCustomSeriesColors(seriesSpecs: Map<SpecId, BasicSeriesSpec>): Map<string, string> {
+  const updatedCustomSeriesColors = new Map();
+  seriesSpecs.forEach((spec: BasicSeriesSpec, id: SpecId) => {
+    if (spec.customSeriesColors) {
+      spec.customSeriesColors.forEach((color: string, seriesColorValues: DataSeriesColorsValues) => {
+        const { colorValues, specId } = seriesColorValues;
+        const seriesLabel = getColorValuesAsString(colorValues, specId);
+        updatedCustomSeriesColors.set(seriesLabel, color);
+      });
+    }
+  });
+  return updatedCustomSeriesColors;
 }
 
 export function computeSeriesDomains(

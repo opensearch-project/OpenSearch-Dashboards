@@ -483,16 +483,23 @@ describe('Chart Store', () => {
     store.computeChart = computeChart;
     store.legendItems = [firstLegendItem, secondLegendItem];
 
-    const expectedCustomColors = new Map();
-    expectedCustomColors.set(firstLegendItem.label, 'foo');
-
     store.setSeriesColor(-1, 'foo');
     expect(computeChart).not.toBeCalled();
     expect(store.customSeriesColors).toEqual(new Map());
 
     store.setSeriesColor(0, 'foo');
     expect(computeChart).toBeCalled();
-    expect(store.customSeriesColors).toEqual(expectedCustomColors);
+    expect(store.seriesSpecs.get(firstLegendItem.value.specId)).toBeUndefined();
+
+    store.addSeriesSpec(spec);
+    store.setSeriesColor(0, 'foo');
+    const expectedSpecCustomColorSeries = new Map();
+    expectedSpecCustomColorSeries.set(firstLegendItem.value, 'foo');
+    expect(spec.customSeriesColors).toEqual(expectedSpecCustomColorSeries);
+
+    store.setSeriesColor(1, 'bar');
+    expectedSpecCustomColorSeries.set(secondLegendItem.value, 'bar');
+    expect(spec.customSeriesColors).toEqual(expectedSpecCustomColorSeries);
   });
 
   test('can reset selectedDataSeries', () => {
