@@ -19,7 +19,7 @@ module.exports = (baseConfig, env, config) => {
   });
   config.module.rules.push({
     test: /\.tsx?$/,
-    include: [path.resolve(__dirname, '../src/stories')],
+    include: [path.resolve(__dirname, '../stories')],
     loaders: [
       {
         loader: require.resolve('@storybook/addon-storysource/loader'),
