@@ -1,8 +1,9 @@
 import { inject } from 'mobx-react';
 import { PureComponent } from 'react';
-import { Position, Rendering, Rotation } from '../lib/series/specs';
+import { DomainRange, Position, Rendering, Rotation } from '../lib/series/specs';
 import { LIGHT_THEME } from '../lib/themes/light_theme';
 import { Theme } from '../lib/themes/theme';
+import { Domain } from '../lib/utils/domain';
 import {
   BrushEndListener,
   ChartStore,
@@ -29,6 +30,7 @@ interface SettingSpecProps {
   onLegendItemClick?: LegendItemListener;
   onLegendItemPlusClick?: LegendItemListener;
   onLegendItemMinusClick?: LegendItemListener;
+  xDomain?: Domain | DomainRange;
 }
 
 function updateChartStore(props: SettingSpecProps) {
@@ -50,6 +52,7 @@ function updateChartStore(props: SettingSpecProps) {
     onLegendItemMinusClick,
     onLegendItemPlusClick,
     debug,
+    xDomain,
   } = props;
   if (!chartStore) {
     return;
@@ -62,6 +65,7 @@ function updateChartStore(props: SettingSpecProps) {
 
   chartStore.setShowLegend(showLegend);
   chartStore.legendPosition = legendPosition;
+  chartStore.xDomain = xDomain;
 
   if (onElementOver) {
     chartStore.setOnElementOverListener(onElementOver);

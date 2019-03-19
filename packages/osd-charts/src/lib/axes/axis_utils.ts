@@ -1,11 +1,11 @@
 import { XDomain } from '../series/domains/x_domain';
 import { YDomain } from '../series/domains/y_domain';
 import { computeXScale, computeYScales } from '../series/scales';
-import { AxisSpec, Position, Rotation, TickFormatter } from '../series/specs';
+import { AxisSpec, DomainRange, Position, Rotation, TickFormatter } from '../series/specs';
 import { AxisConfig, Theme } from '../themes/theme';
 import { Dimensions, Margins } from '../utils/dimensions';
 import { Domain } from '../utils/domain';
-import { AxisId } from '../utils/ids';
+import { AxisId, GroupId } from '../utils/ids';
 import { Scale, ScaleType } from '../utils/scales/scales';
 import { BBox, BBoxCalculator } from './bbox_calculator';
 
@@ -54,6 +54,10 @@ export function computeAxisTicksDimensions(
   chartRotation: Rotation,
   axisConfig: AxisConfig,
 ): AxisTicksDimensions | null {
+  if (axisSpec.hide) {
+    return null;
+  }
+
   const scale = getScaleForAxisSpec(
     axisSpec,
     xDomain,
@@ -80,6 +84,16 @@ export function computeAxisTicksDimensions(
     ...dimensions,
   };
 }
+
+export function isYDomain(position: Position, chartRotation: Rotation): boolean {
+  const isStraightRotation = chartRotation === 0 || chartRotation === 180;
+  if (isVertical(position)) {
+    return isStraightRotation;
+  }
+
+  return !isStraightRotation;
+}
+
 export function getScaleForAxisSpec(
   axisSpec: AxisSpec,
   xDomain: XDomain,
@@ -89,9 +103,9 @@ export function getScaleForAxisSpec(
   minRange: number,
   maxRange: number,
 ): Scale | null {
-  const axisDomain = getAxisDomain(axisSpec.position, xDomain, yDomain, chartRotation);
-  // If axisDomain is an array of values, this is an array of YDomains
-  if (Array.isArray(axisDomain)) {
+  const axisIsYDomain = isYDomain(axisSpec.position, chartRotation);
+
+  if (axisIsYDomain) {
     const yScales = computeYScales(yDomain, minRange, maxRange);
     if (yScales.has(axisSpec.groupId)) {
       return yScales.get(axisSpec.groupId)!;
@@ -598,47 +612,52 @@ export function computeAxisGridLinePositions(
   return positions;
 }
 
-export function getVerticalDomain(
-  xDomain: XDomain,
-  yDomain: YDomain[],
-  chartRotation: number,
-): XDomain | YDomain[] {
-  if (chartRotation === 0 || chartRotation === 180) {
-    return yDomain;
-  } else {
-    return xDomain;
-  }
-}
-
-export function getHorizontalDomain(
-  xDomain: XDomain,
-  yDomain: YDomain[],
-  chartRotation: number,
-): XDomain | YDomain[] {
-  if (chartRotation === 0 || chartRotation === 180) {
-    return xDomain;
-  } else {
-    return yDomain;
-  }
-}
-
-export function getAxisDomain(
-  position: Position,
-  xDomain: XDomain,
-  yDomain: YDomain[],
-  chartRotation: number,
-): XDomain | YDomain[] {
-  if (!isHorizontal(position)) {
-    return getVerticalDomain(xDomain, yDomain, chartRotation);
-  } else {
-    return getHorizontalDomain(xDomain, yDomain, chartRotation);
-  }
-}
-
 export function isVertical(position: Position) {
   return position === Position.Left || position === Position.Right;
 }
 
 export function isHorizontal(position: Position) {
   return !isVertical(position);
+}
+
+export function mergeDomainsByGroupId(
+  axesSpecs: Map<AxisId, AxisSpec>,
+  chartRotation: Rotation,
+): Map<GroupId, DomainRange> {
+  const domainsByGroupId = new Map<GroupId, DomainRange>();
+
+  axesSpecs.forEach((spec: AxisSpec, id: AxisId) => {
+    const { groupId, domain } = spec;
+
+    if (!domain) {
+      return;
+    }
+
+    const isAxisYDomain = isYDomain(spec.position, chartRotation);
+
+    if (!isAxisYDomain) {
+      const errorMessage = `[Axis ${id}]: custom domain for xDomain should be defined in Settings`;
+      throw new Error(errorMessage);
+    }
+
+    if (domain.min > domain.max) {
+      const errorMessage = `[Axis ${id}]: custom domain is invalid, min is greater than max`;
+      throw new Error(errorMessage);
+    }
+
+    const prevGroupDomain = domainsByGroupId.get(groupId);
+
+    if (prevGroupDomain) {
+      const mergedDomain = {
+        min: Math.min(domain.min, prevGroupDomain.min),
+        max: Math.max(domain.max, prevGroupDomain.max),
+      };
+
+      domainsByGroupId.set(groupId, mergedDomain);
+    } else {
+      domainsByGroupId.set(groupId, domain);
+    }
+  });
+
+  return domainsByGroupId;
 }

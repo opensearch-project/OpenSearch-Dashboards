@@ -28,11 +28,13 @@ import {
   AreaSeriesSpec,
   AxisSpec,
   BasicSeriesSpec,
+  DomainRange,
   LineSeriesSpec,
   Rotation,
 } from '../lib/series/specs';
 import { ColorConfig } from '../lib/themes/theme';
 import { Dimensions } from '../lib/utils/dimensions';
+import { Domain } from '../lib/utils/domain';
 import { AxisId, GroupId, SpecId } from '../lib/utils/ids';
 import { Scale } from '../lib/utils/scales/scales';
 
@@ -106,6 +108,8 @@ export function getUpdatedCustomSeriesColors(seriesSpecs: Map<SpecId, BasicSerie
 
 export function computeSeriesDomains(
   seriesSpecs: Map<SpecId, BasicSeriesSpec>,
+  domainsByGroupId: Map<GroupId, DomainRange>,
+  customXDomain?: DomainRange | Domain,
   selectedDataSeries?: DataSeriesColorsValues[] | null,
 ): {
   xDomain: XDomain;
@@ -122,8 +126,10 @@ export function computeSeriesDomains(
   // console.log({ splittedSeries, xValues, seriesColors });
   const splittedDataSeries = [...splittedSeries.values()];
   const specsArray = [...seriesSpecs.values()];
-  const xDomain = mergeXDomain(specsArray, xValues);
-  const yDomain = mergeYDomain(splittedSeries, specsArray);
+
+  const xDomain = mergeXDomain(specsArray, xValues, customXDomain);
+  const yDomain = mergeYDomain(splittedSeries, specsArray, domainsByGroupId);
+
   const formattedDataSeries = getFormattedDataseries(specsArray, splittedSeries);
   // tslint:disable-next-line:no-console
   // console.log({ formattedDataSeries, xDomain, yDomain });

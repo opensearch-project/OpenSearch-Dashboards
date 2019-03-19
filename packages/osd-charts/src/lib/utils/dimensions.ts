@@ -44,7 +44,7 @@ export function computeChartDimensions(
 
   axisDimensions.forEach(({ maxLabelBboxWidth = 0, maxLabelBboxHeight = 0 }, id) => {
     const axisSpec = axisSpecs.get(id);
-    if (!axisSpec) {
+    if (!axisSpec || axisSpec.hide) {
       return;
     }
     const { position, tickSize, tickPadding } = axisSpec;

@@ -5,6 +5,7 @@ import {
   AxisTicksDimensions,
   computeAxisTicksDimensions,
   getAxisTicksPositions,
+  mergeDomainsByGroupId,
 } from '../lib/axes/axis_utils';
 import { CanvasTextBBoxCalculator } from '../lib/axes/canvas_text_bbox_calculator';
 import { XDomain } from '../lib/series/domains/x_domain';
@@ -29,6 +30,7 @@ import {
   AxisSpec,
   BarSeriesSpec,
   BasicSeriesSpec,
+  DomainRange,
   LineSeriesSpec,
   Position,
   Rendering,
@@ -38,6 +40,7 @@ import { formatTooltip } from '../lib/series/tooltip';
 import { LIGHT_THEME } from '../lib/themes/light_theme';
 import { Theme } from '../lib/themes/theme';
 import { computeChartDimensions, Dimensions } from '../lib/utils/dimensions';
+import { Domain } from '../lib/utils/domain';
 import { AxisId, GroupId, SpecId } from '../lib/utils/ids';
 import { Scale, ScaleType } from '../lib/utils/scales/scales';
 import {
@@ -54,6 +57,7 @@ import {
   Transform,
   updateSelectedDataSeries,
 } from './utils';
+
 export interface TooltipPosition {
   top?: number;
   left?: number;
@@ -128,6 +132,7 @@ export class ChartStore {
   seriesDomainsAndData?: SeriesDomainsAndData; // computed
   xScale?: Scale;
   yScales?: Map<GroupId, Scale>;
+  xDomain?: Domain | DomainRange;
 
   legendItems: LegendItem[] = [];
   highlightedLegendItemIndex: IObservableValue<number | null> = observable.box(null);
@@ -440,9 +445,16 @@ export class ChartStore {
       this.selectedDataSeries = null;
     }
 
-    // The second argument is optional; if not supplied, then all series will be factored into computations
+    const domainsByGroupId = mergeDomainsByGroupId(this.axesSpecs, this.chartRotation);
+
+    // The last argument is optional; if not supplied, then all series will be factored into computations
     // Otherwise, selectedDataSeries is used to restrict the computation for just the selected series
-    const seriesDomains = computeSeriesDomains(this.seriesSpecs, this.selectedDataSeries);
+    const seriesDomains = computeSeriesDomains(
+      this.seriesSpecs,
+      domainsByGroupId,
+      this.xDomain,
+      this.selectedDataSeries,
+    );
     this.seriesDomainsAndData = seriesDomains;
 
     // If this.selectedDataSeries is null, initialize with all series

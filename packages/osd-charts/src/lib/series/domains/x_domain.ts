@@ -1,7 +1,7 @@
 import { compareByValueAsc, identity } from '../../utils/commons';
-import { computeContinuousDataDomain, computeOrdinalDataDomain } from '../../utils/domain';
+import { computeContinuousDataDomain, computeOrdinalDataDomain, Domain } from '../../utils/domain';
 import { ScaleType } from '../../utils/scales/scales';
-import { BasicSeriesSpec } from '../specs';
+import { BasicSeriesSpec, DomainRange } from '../specs';
 import { BaseDomain } from './domain';
 
 export type XDomain = BaseDomain & {
@@ -16,8 +16,9 @@ export type XDomain = BaseDomain & {
  * Merge X domain value between a set of chart specification.
  */
 export function mergeXDomain(
-  specs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType' | 'xDomain'>>,
+  specs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>>,
   xValues: Set<any>,
+  xDomain?: DomainRange | Domain,
 ): XDomain {
   const mainXScaleType = convertXScaleTypes(specs);
   if (!mainXScaleType) {
@@ -31,10 +32,28 @@ export function mergeXDomain(
   let minInterval = null;
   if (mainXScaleType.scaleType === ScaleType.Ordinal) {
     seriesXComputedDomains = computeOrdinalDataDomain(values, identity, false, true);
+    if (xDomain) {
+      if (Array.isArray(xDomain)) {
+        seriesXComputedDomains = xDomain;
+      } else {
+        throw new Error('xDomain for ordinal scale should be an array of values, not a DomainRange object');
+      }
+    }
   } else {
     seriesXComputedDomains = computeContinuousDataDomain(values, identity, true);
+    if (xDomain) {
+      if (!Array.isArray(xDomain)) {
+        if (xDomain.min > xDomain.max) {
+          throw new Error('custom xDomain is invalid, min is greater than max');
+        }
+        seriesXComputedDomains = [xDomain.min, xDomain.max];
+      } else {
+        throw new Error('xDomain for continuous scale should be a DomainRange object, not an array');
+      }
+    }
     minInterval = findMinInterval(values);
   }
+
   return {
     type: 'xDomain',
     scaleType: mainXScaleType.scaleType,

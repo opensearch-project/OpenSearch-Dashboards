@@ -98,8 +98,17 @@ export function renderBars(
   specId: SpecId,
   seriesKey: any[],
 ): BarGeometry[] {
-  return dataset.map((datum, i) => {
+  const barGeometries: BarGeometry[] = [];
+  const xDomain = xScale.domain;
+  const xScaleType = xScale.type;
+
+  dataset.forEach((datum, i) => {
     const { x, y0, y1 } = datum;
+
+    if (xScaleType === ScaleType.Ordinal && !xDomain.includes(x)) {
+      return;
+    }
+
     let height = 0;
     let y = 0;
     if (yScale.type === ScaleType.Log) {
@@ -116,7 +125,7 @@ export function renderBars(
       height = yScale.scale(y0) - y;
     }
 
-    return {
+    const barGeometry = {
       x: xScale.scale(x) + xScale.bandwidth * orderIndex,
       y, // top most value
       width: xScale.bandwidth,
@@ -132,7 +141,11 @@ export function renderBars(
         seriesKey,
       },
     };
+
+    barGeometries.push(barGeometry);
   });
+
+  return barGeometries;
 }
 
 export function renderLine(

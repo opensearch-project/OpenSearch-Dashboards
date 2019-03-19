@@ -1,8 +1,8 @@
 import { XDomain } from '../series/domains/x_domain';
 import { YDomain } from '../series/domains/y_domain';
-import { Position } from '../series/specs';
+import { AxisSpec, DomainRange, Position } from '../series/specs';
 import { LIGHT_THEME } from '../themes/light_theme';
-import { getAxisId, getGroupId } from '../utils/ids';
+import { getAxisId, getGroupId, GroupId } from '../utils/ids';
 import { ScaleType } from '../utils/scales/scales';
 import {
   centerRotationOrigin,
@@ -14,15 +14,17 @@ import {
   getAxisTicksPositions,
   getHorizontalAxisGridLineProps,
   getHorizontalAxisTickLineProps,
-  getHorizontalDomain,
   getMaxBboxDimensions,
   getMinMaxRange,
   getScaleForAxisSpec,
   getTickLabelProps,
   getVerticalAxisGridLineProps,
   getVerticalAxisTickLineProps,
-  getVerticalDomain,
   getVisibleTicks,
+  isHorizontal,
+  isVertical,
+  isYDomain,
+  mergeDomainsByGroupId,
 } from './axis_utils';
 import { CanvasTextBBoxCalculator } from './canvas_text_bbox_calculator';
 import { SvgTextBBoxCalculator } from './svg_text_bbox_calculator';
@@ -71,7 +73,7 @@ describe('Axis computational utils', () => {
     maxLabelTextWidth: 10,
     maxLabelTextHeight: 10,
   };
-  const verticalAxisSpec = {
+  const verticalAxisSpec: AxisSpec = {
     id: getAxisId('axis_1'),
     groupId: getGroupId('group_1'),
     hide: false,
@@ -86,7 +88,7 @@ describe('Axis computational utils', () => {
     showGridLines: true,
   };
 
-  const horizontalAxisSpec = {
+  const horizontalAxisSpec: AxisSpec = {
     id: getAxisId('axis_2'),
     groupId: getGroupId('group_1'),
     hide: false,
@@ -147,6 +149,21 @@ describe('Axis computational utils', () => {
     expect(computeScalelessSpec).toThrowError('Cannot compute scale for axis spec axis_1');
 
     bboxCalculator.destroy();
+  });
+
+  test('should not compute axis dimensions when spec is configured to hide', () => {
+    const bboxCalculator = new CanvasTextBBoxCalculator();
+    verticalAxisSpec.hide = true;
+    const axisDimensions = computeAxisTicksDimensions(
+      verticalAxisSpec,
+      xDomain,
+      [yDomain],
+      1,
+      bboxCalculator,
+      0,
+      axes,
+    );
+    expect(axisDimensions).toBe(null);
   });
 
   test('should compute dimensions for the bounding box containing a rotated label', () => {
@@ -914,13 +931,94 @@ describe('Axis computational utils', () => {
     expect(horizontalAxisGridLines).toEqual([25, 0, 25, 100]);
   });
 
-  test('should return correct domain based on rotation', () => {
-    const chartRotation = 180;
-    expect(getHorizontalDomain(xDomain, [yDomain], chartRotation)).toEqual(xDomain);
-    expect(getVerticalDomain(xDomain, [yDomain], chartRotation)).toEqual([yDomain]);
+  test('should determine orientation of axis position', () => {
+    expect(isVertical(Position.Left)).toBe(true);
+    expect(isVertical(Position.Right)).toBe(true);
+    expect(isVertical(Position.Top)).toBe(false);
+    expect(isVertical(Position.Bottom)).toBe(false);
 
-    const skewChartRotation = 45;
-    expect(getHorizontalDomain(xDomain, [yDomain], skewChartRotation)).toEqual([yDomain]);
-    expect(getVerticalDomain(xDomain, [yDomain], skewChartRotation)).toEqual(xDomain);
+    expect(isHorizontal(Position.Left)).toBe(false);
+    expect(isHorizontal(Position.Right)).toBe(false);
+    expect(isHorizontal(Position.Top)).toBe(true);
+    expect(isHorizontal(Position.Bottom)).toBe(true);
+  });
+
+  test('should determine if axis belongs to yDomain', () => {
+    const verticalY = isYDomain(Position.Left, 0);
+    expect(verticalY).toBe(true);
+
+    const verticalX = isYDomain(Position.Left, 90);
+    expect(verticalX).toBe(false);
+
+    const horizontalX = isYDomain(Position.Top, 0);
+    expect(horizontalX).toBe(false);
+
+    const horizontalY = isYDomain(Position.Top, 90);
+    expect(horizontalY).toBe(true);
+  });
+
+  test('should merge axis domains by group id', () => {
+    const groupId = getGroupId('group_1');
+    const domainRange1 = {
+      min: 2,
+      max: 9,
+    };
+
+    verticalAxisSpec.domain = domainRange1;
+
+    const axesSpecs = new Map();
+    axesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+
+    // Base case
+    const expectedSimpleMap = new Map<GroupId, DomainRange>();
+    expectedSimpleMap.set(groupId, { min: 2, max: 9 });
+
+    const simpleDomainsByGroupId = mergeDomainsByGroupId(axesSpecs, 0);
+    expect(simpleDomainsByGroupId).toEqual(expectedSimpleMap);
+
+    // Multiple definitions for the same group
+    const domainRange2 = {
+      min: 0,
+      max: 7,
+    };
+
+    const altVerticalAxisSpec = { ...verticalAxisSpec, id: getAxisId('axis2') };
+
+    altVerticalAxisSpec.domain = domainRange2;
+    axesSpecs.set(altVerticalAxisSpec.id, altVerticalAxisSpec);
+
+    const expectedMergedMap = new Map<GroupId, DomainRange>();
+    expectedMergedMap.set(groupId, { min: 0, max: 9 });
+
+    const mergedDomainsByGroupId = mergeDomainsByGroupId(axesSpecs, 0);
+    expect(mergedDomainsByGroupId).toEqual(expectedMergedMap);
+
+    // xDomain limit (bad config)
+    horizontalAxisSpec.domain = {
+      min: 5,
+      max: 15,
+    };
+    axesSpecs.set(horizontalAxisSpec.id, horizontalAxisSpec);
+
+    const attemptToMerge = () => { mergeDomainsByGroupId(axesSpecs, 0); };
+
+    expect(attemptToMerge).toThrowError('[Axis axis_2]: custom domain for xDomain should be defined in Settings');
+  });
+
+  test('should throw on invalid domain', () => {
+    const domainRange1 = {
+      min: 9,
+      max: 2,
+    };
+
+    verticalAxisSpec.domain = domainRange1;
+
+    const axesSpecs = new Map();
+    axesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+
+    const attemptToMerge = () => { mergeDomainsByGroupId(axesSpecs, 0); };
+    const expectedError = '[Axis axis_1]: custom domain is invalid, min is greater than max';
+
+    expect(attemptToMerge).toThrowError(expectedError);
   });
 });

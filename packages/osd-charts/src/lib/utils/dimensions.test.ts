@@ -148,4 +148,47 @@ describe('Computed chart dimensions', () => {
     );
     expect(chartDimensions).toMatchSnapshot();
   });
+  test('should not add space for axis when no spec for axis dimensions or axis is hidden', () => {
+    const axisDims = new Map<AxisId, AxisTicksDimensions>();
+    const axisSpecs = new Map<AxisId, AxisSpec>();
+    axisDims.set(getAxisId('foo'), axis1Dims);
+    axisSpecs.set(getAxisId('axis_1'), {
+      ...axisLeftSpec,
+      position: Position.Bottom,
+    });
+    const chartDimensions = computeChartDimensions(
+      parentDim,
+      chartTheme,
+      axisDims,
+      axisSpecs,
+      showLegend,
+    );
+
+    const expectedDims = {
+      height: 60,
+      width: 60,
+      left: 20,
+      top: 20,
+    };
+
+    expect(chartDimensions).toEqual(expectedDims);
+
+    const hiddenAxisDims = new Map<AxisId, AxisTicksDimensions>();
+    const hiddenAxisSpecs = new Map<AxisId, AxisSpec>();
+    hiddenAxisDims.set(getAxisId('axis_1'), axis1Dims);
+    hiddenAxisSpecs.set(getAxisId('axis_1'), {
+      ...axisLeftSpec,
+      hide: true,
+      position: Position.Bottom,
+    });
+    const hiddenAxisChartDimensions = computeChartDimensions(
+      parentDim,
+      chartTheme,
+      axisDims,
+      axisSpecs,
+      showLegend,
+    );
+
+    expect(hiddenAxisChartDimensions).toEqual(expectedDims);
+  });
 });
