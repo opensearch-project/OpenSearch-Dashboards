@@ -10,13 +10,14 @@ import {
   getAxisId,
   getSpecId,
   LIGHT_THEME,
+  niceTimeFormatByDay,
   Position,
   ScaleType,
   Settings,
+  timeFormatter,
 } from '../src/';
 import * as TestDatasets from '../src/lib/series/utils/test_dataset';
 import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
-import { niceTimeFormatByDay, timeFormatter } from '../src/utils/data/formatters';
 
 storiesOf('Bar Chart', module)
   .add('basic', () => {

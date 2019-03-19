@@ -1,10 +1,8 @@
 language: node_js
 cache: yarn
-# nodejs version from nvmrc
-# yarn install is default install lifecycle
 script:
   - yarn global add codecov -g
-  - yarn build:ts --noEmit && yarn lint && yarn test --coverage
+  - yarn build && yarn lint && yarn test --coverage
 after_success:
   - codecov
   - yarn semantic-release

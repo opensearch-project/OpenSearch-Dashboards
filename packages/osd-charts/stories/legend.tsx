@@ -1,3 +1,4 @@
+import { boolean } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import {
@@ -11,7 +12,6 @@ import {
   Settings,
 } from '../src/';
 import * as TestDatasets from '../src/lib/series/utils/test_dataset';
-import { boolean } from '@storybook/addon-knobs';
 
 storiesOf('Legend', module)
   .add('right', () => {
@@ -135,8 +135,7 @@ storiesOf('Legend', module)
     );
   })
   .add('changing specs', () => {
-    const splitSeries = boolean('split series', true) ?
-      ['g1', 'g2'] : undefined;
+    const splitSeries = boolean('split series', true) ? ['g1', 'g2'] : undefined;
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Top} />
@@ -166,4 +165,3 @@ storiesOf('Legend', module)
       </Chart>
     );
   });
-

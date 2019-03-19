@@ -6,6 +6,7 @@ import {
   Axis,
   BarSeries,
   Chart,
+  CurveType,
   getAxisId,
   getSpecId,
   LineSeries,
@@ -17,7 +18,6 @@ import {
 
 import { boolean } from '@storybook/addon-knobs';
 import { DateTime } from 'luxon';
-import { CurveType } from '../src/lib/series/curves';
 import * as TestDatasets from '../src/lib/series/utils/test_dataset';
 
 const onElementListeners = {

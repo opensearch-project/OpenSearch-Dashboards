@@ -9,8 +9,11 @@ import {
   BarSeries,
   Chart,
   CurveType,
+  CustomSeriesColorsMap,
   DARK_THEME,
   DataGenerator,
+  DataSeriesColorsValues,
+  DEFAULT_MISSING_COLOR,
   getAxisId,
   getSpecId,
   LIGHT_THEME,
@@ -21,10 +24,7 @@ import {
   ScaleType,
   Settings,
 } from '../src/';
-import { DataSeriesColorsValues } from '../src/lib/series/series';
-import { CustomSeriesColorsMap } from '../src/lib/series/specs';
 import * as TestDatasets from '../src/lib/series/utils/test_dataset';
-import { DEFAULT_MISSING_COLOR } from '../src/lib/themes/theme_commons';
 
 function range(
   title: string,

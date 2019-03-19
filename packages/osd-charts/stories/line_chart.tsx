@@ -7,13 +7,15 @@ import {
   getAxisId,
   getSpecId,
   LineSeries,
+  niceTimeFormatByDay,
   Position,
   ScaleType,
   Settings,
+  timeFormatter,
 } from '../src/';
 import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
-import { niceTimeFormatByDay, timeFormatter } from '../src/utils/data/formatters';
 const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
+
 storiesOf('Line Chart', module)
   .add('basic', () => {
     return (

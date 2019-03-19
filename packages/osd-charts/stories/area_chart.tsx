@@ -9,9 +9,9 @@ import {
   Position,
   ScaleType,
   Settings,
+  timeFormatter,
 } from '../src';
 import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
-import { timeFormatter } from '../src/utils/data/formatters';
 const dateFormatter = timeFormatter('HH:mm');
 
 storiesOf('Area Chart', module)
