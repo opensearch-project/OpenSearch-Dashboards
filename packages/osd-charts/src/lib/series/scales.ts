@@ -10,45 +10,46 @@ import { YDomain } from './domains/y_domain';
 import { FormattedDataSeries } from './series';
 
 /**
- * Count how many series are clustered
+ * Count the max number of bars in cluster value.
+ * Doesn't take in consideration areas, lines or points.
  * @param stacked all the stacked formatted dataseries
  * @param nonStacked all the non-stacked formatted dataseries
  */
-export function countClusteredSeries(
+export function countBarsInCluster(
   stacked: FormattedDataSeries[],
   nonStacked: FormattedDataSeries[],
 ): {
-  nonStackedGroupCount: number;
-  stackedGroupCount: number;
-  totalGroupCount: number;
+  nonStackedBarsInCluster: number;
+  stackedBarsInCluster: number;
+  totalBarsInCluster: number;
 } {
   // along x axis, we count one "space" per bar series.
   // we ignore the points, areas, lines as they are
   // aligned with the x value and doesn't occupy space
-  const nonStackedGroupCount = nonStacked.reduce((acc, ns) => {
+  const nonStackedBarsInCluster = nonStacked.reduce((acc, ns) => {
     return acc + ns.counts.barSeries;
   }, 0);
   // count stacked bars groups as 1 per group
-  const stackedGroupCount = stacked.reduce((acc, ns) => {
+  const stackedBarsInCluster = stacked.reduce((acc, ns) => {
     return acc + (ns.counts.barSeries > 0 ? 1 : 0);
   }, 0);
-  const totalGroupCount = nonStackedGroupCount + stackedGroupCount;
+  const totalBarsInCluster = nonStackedBarsInCluster + stackedBarsInCluster;
   return {
-    nonStackedGroupCount,
-    stackedGroupCount,
-    totalGroupCount,
+    nonStackedBarsInCluster,
+    stackedBarsInCluster,
+    totalBarsInCluster,
   };
 }
 
 /**
  * Compute the x scale used to align geometries to the x axis.
  * @param xDomain the x domain
- * @param totalGroupCount the total number of grouped series
+ * @param totalBarsInCluster the total number of grouped series
  * @param axisLength the length of the x axis
  */
 export function computeXScale(
   xDomain: XDomain,
-  totalGroupCount: number,
+  totalBarsInCluster: number,
   minRange: number,
   maxRange: number,
 ): Scale {
@@ -56,11 +57,11 @@ export function computeXScale(
   const rangeDiff = Math.abs(maxRange - minRange);
   const isInverse = maxRange < minRange;
   if (scaleType === ScaleType.Ordinal) {
-    const dividend = totalGroupCount > 0 ? totalGroupCount : 1;
-    const bandwitdh = rangeDiff / (domain.length * dividend);
-    return createOrdinalScale(domain, minRange, maxRange, 0, bandwitdh);
+    const dividend = totalBarsInCluster > 0 ? totalBarsInCluster : 1;
+    const bandwidth = rangeDiff / (domain.length * dividend);
+    return createOrdinalScale(domain, minRange, maxRange, 0, bandwidth);
   } else {
-    if (isBandScale && minInterval !== null) {
+    if (isBandScale) {
       const intervalCount = (domain[1] - domain[0]) / minInterval;
       const bandwidth = rangeDiff / (intervalCount + 1);
       const start = isInverse ? minRange - bandwidth : minRange;
@@ -70,12 +71,20 @@ export function computeXScale(
         domain,
         start,
         end,
-        bandwidth / totalGroupCount,
+        bandwidth / totalBarsInCluster,
         false,
         minInterval,
       );
     } else {
-      return createContinuousScale(scaleType, domain, minRange, maxRange, 0);
+      return createContinuousScale(
+        scaleType,
+        domain,
+        minRange,
+        maxRange,
+        0,
+        undefined,
+        minInterval,
+      );
     }
   }
 }

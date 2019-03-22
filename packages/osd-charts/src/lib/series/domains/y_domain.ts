@@ -38,9 +38,6 @@ export function mergeYDomain(
   const yDomains = specsByGroupIdsEntries.map(
     ([groupId, groupSpecs]): YDomain => {
       const groupYScaleType = coerceYScaleTypes([...groupSpecs.stacked, ...groupSpecs.nonStacked]);
-      if (groupYScaleType === null) {
-        throw new Error(`Cannot merge ${groupId} domain. Missing Y scale types`);
-      }
 
       // compute stacked domain
       const isStackedScaleToExtent = groupSpecs.stacked.some((spec) => {
@@ -161,15 +158,11 @@ export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
  */
 export function coerceYScaleTypes(
   specs: Array<Pick<BasicSeriesSpec, 'yScaleType'>>,
-): ScaleContinuousType | null {
+): ScaleContinuousType {
   const scaleTypes = new Set<ScaleContinuousType>();
   specs.forEach((spec) => {
     scaleTypes.add(spec.yScaleType);
   });
-
-  if (specs.length === 0) {
-    return null;
-  }
   return coerceYScale(scaleTypes);
 }
 

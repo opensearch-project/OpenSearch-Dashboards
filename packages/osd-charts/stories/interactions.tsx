@@ -7,18 +7,24 @@ import {
   BarSeries,
   Chart,
   CurveType,
+  DARK_THEME,
   getAxisId,
   getSpecId,
+  LIGHT_THEME,
   LineSeries,
   niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
+  TooltipType,
 } from '../src/';
 
-import { boolean } from '@storybook/addon-knobs';
+import { boolean, select } from '@storybook/addon-knobs';
 import { DateTime } from 'luxon';
+import { switchTheme } from '../.storybook/theme_service';
 import * as TestDatasets from '../src/lib/series/utils/test_dataset';
+import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
+import { niceTimeFormatByDay, timeFormatter } from '../src/utils/data/formatters';
 
 const onElementListeners = {
   onElementClick: action('onElementClick'),
@@ -117,6 +123,54 @@ storiesOf('Interactions', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('line area bar point clicks and hovers', () => {
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Settings showLegend={true} legendPosition={Position.Right} {...onElementListeners} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          splitSeriesAccessors={['g']}
+          data={[{ x: 0, y: 2.3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 8 }]}
+          yScaleToDataExtent={false}
+        />
+        <LineSeries
+          id={getSpecId('line')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          yScaleToDataExtent={false}
+        />
+        <AreaSeries
+          id={getSpecId('area')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={[{ x: 0, y: 2.3 }, { x: 1, y: 7.3 }, { x: 2, y: 6 }, { x: 3, y: 2 }]}
           yScaleToDataExtent={false}
         />
       </Chart>
@@ -354,7 +408,7 @@ storiesOf('Interactions', module)
     );
   })
   .add('brush selection tool on time charts', () => {
-    const now = DateTime.fromISO('2019-01-11T00:00:00.000').toMillis();
+    const now = DateTime.fromISO('2019-01-11T00:00:00.000Z').toMillis();
     const oneDay = 1000 * 60 * 60 * 24;
     return (
       <Chart renderer="canvas" className={'story-chart'}>
@@ -409,6 +463,82 @@ storiesOf('Interactions', module)
           yAccessors={['y']}
           data={[{ x: 'a', y: 2 }, { x: 'b', y: 7 }, { x: 'c', y: 3 }, { x: 'd', y: 6 }]}
           yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('crosshair with time axis', () => {
+    const hideBars = boolean('hideBars', false);
+    const formatter = timeFormatter(niceTimeFormatByDay(1));
+    const darkmode = boolean('darkmode', false);
+    const className = darkmode ? 'story-chart-dark' : 'story-chart';
+    const defaultTheme = darkmode ? DARK_THEME : LIGHT_THEME;
+    switchTheme(darkmode ? 'dark' : 'light');
+    const chartRotation = select('rotation', { '90': 90, '0': 0, '-90': -90, '180': 180 }, 0);
+    const numberFormatter = (d: any) => Number(d).toFixed(2);
+
+    return (
+      <Chart renderer="canvas" className={className}>
+        <Settings
+          debug={boolean('debug', false)}
+          tooltipType={select(
+            'tooltipType',
+            {
+              cross: TooltipType.Crosshairs,
+              vertical: TooltipType.VerticalCursor,
+              follow: TooltipType.Follow,
+              none: TooltipType.None,
+            },
+            TooltipType.Crosshairs,
+          )}
+          theme={defaultTheme}
+          tooltipSnap={boolean('tooltip snap to grid', true)}
+          rotation={chartRotation}
+        />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          tickFormat={[0, 180].includes(chartRotation) ? formatter : numberFormatter}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={[0, 180].includes(chartRotation) ? numberFormatter : formatter}
+        />
+        {!hideBars && (
+          <BarSeries
+            id={getSpecId('data 1')}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor={0}
+            yAccessors={[1]}
+            stackAccessors={[0]}
+            data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 20)}
+            yScaleToDataExtent={false}
+          />
+        )}
+        {!hideBars && (
+          <BarSeries
+            id={getSpecId('data 2')}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor={0}
+            yAccessors={[1]}
+            stackAccessors={[0]}
+            data={KIBANA_METRICS.metrics.kibana_os_load[1].data.slice(0, 20)}
+            yScaleToDataExtent={false}
+          />
+        )}
+        <LineSeries
+          id={getSpecId('data 3')}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[2].data.slice(0, 20)}
+          yScaleToDataExtent={hideBars}
         />
       </Chart>
     );

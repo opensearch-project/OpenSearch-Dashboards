@@ -45,7 +45,7 @@ storiesOf('Line Chart', module)
           id={getAxisId('left')}
           title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
           position={Position.Left}
-          tickFormat={(d) => `${Number(d).toFixed(0)}%`}
+          tickFormat={(d) => `${Number(d).toFixed(2)}%`}
         />
         <LineSeries
           id={getSpecId('lines')}
@@ -53,8 +53,62 @@ storiesOf('Line Chart', module)
           yScaleType={ScaleType.Linear}
           xAccessor={0}
           yAccessors={[1]}
-          data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
-          yScaleToDataExtent={false}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 5)}
+          yScaleToDataExtent={true}
+        />
+      </Chart>
+    );
+  })
+  .add('ordinal w axis', () => {
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          showOverlappingTicks={true}
+          tickFormat={dateFormatter}
+        />
+        <Axis
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+          position={Position.Left}
+          tickFormat={(d) => `${Number(d).toFixed(2)}%`}
+        />
+        <LineSeries
+          id={getSpecId('lines')}
+          xScaleType={ScaleType.Ordinal}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 5)}
+          yScaleToDataExtent={true}
+        />
+      </Chart>
+    );
+  })
+  .add('linear w axis', () => {
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          showOverlappingTicks={true}
+          tickFormat={dateFormatter}
+        />
+        <Axis
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+          position={Position.Left}
+          tickFormat={(d) => `${Number(d).toFixed(2)}%`}
+        />
+        <LineSeries
+          id={getSpecId('lines')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 5)}
+          yScaleToDataExtent={true}
         />
       </Chart>
     );

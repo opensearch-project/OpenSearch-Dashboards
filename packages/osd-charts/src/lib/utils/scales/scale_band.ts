@@ -1,4 +1,5 @@
-import { scaleBand } from 'd3-scale';
+import { scaleBand, scaleQuantize, ScaleQuantize } from 'd3-scale';
+import { StepType } from './scale_continuous';
 import { ScaleType } from './scales';
 import { Scale } from './scales';
 
@@ -9,6 +10,8 @@ export class ScaleBand implements Scale {
   readonly domain: any[];
   readonly range: number[];
   readonly isInverted: boolean;
+  readonly invertedScale: ScaleQuantize<number>;
+  readonly minInterval: number;
   private readonly d3Scale: any;
 
   constructor(
@@ -36,7 +39,12 @@ export class ScaleBand implements Scale {
     if (overrideBandwidth) {
       this.bandwidth = overrideBandwidth;
     }
+    // TO FIX: we are assiming that it's ordered
     this.isInverted = this.domain[0] > this.domain[1];
+    this.invertedScale = scaleQuantize()
+      .domain(range)
+      .range(this.domain);
+    this.minInterval = 0;
   }
 
   scale(value: any) {
@@ -47,86 +55,13 @@ export class ScaleBand implements Scale {
     return this.domain;
   }
   invert(value: any) {
-    // TODO fix
-    return null;
+    return this.invertedScale(value);
+  }
+  invertWithStep(value: any, stepType?: StepType) {
+    return this.invertedScale(value);
   }
 }
 
-// import { ScaleType } from './scales';
-// import { Scale } from './scales';
-
-// export class ScaleBand implements Scale {
-//   readonly bandwidth: number;
-//   readonly step: number;
-//   readonly type: ScaleType;
-//   readonly domain: any[];
-//   readonly range: number[];
-//   private readonly modelDomain: Map<any, any>;
-//   private readonly modelRange: number[];
-//   private readonly paddingInner: number;
-//   private readonly paddingOuter: number;
-//   private readonly round: boolean;
-//   private readonly align = 0.5;
-
-//   constructor(
-//     domain: any[],
-//     range: [number, number],
-//     padding?: [number, number],
-//     round?: boolean,
-//     overrideBandwidth?: number,
-//   ) {
-//     this.type = ScaleType.Ordinal;
-//     this.modelDomain = new Map();
-//     let domainIndex = 0;
-//     domain.forEach((value) => {
-//       if (!this.modelDomain.has(value)) {
-//         this.modelDomain.set(value, domainIndex);
-//         domainIndex++;
-//       }
-//     });
-//     if (padding) {
-//       this.paddingInner = padding[0];
-//       this.paddingOuter = padding[1];
-//     } else {
-//       this.paddingInner = 0;
-//       this.paddingOuter = 0;
-//     }
-//     this.round = round || false;
-//     const n = this.modelDomain.size;
-//     let start = range[0];
-//     const stop = range[1];
-//     this.step = (stop - start) / Math.max(1, n - this.paddingInner + this.paddingOuter * 2);
-//     if (this.round) {
-//       this.step = Math.floor(this.step);
-//     }
-//     start += (stop - start - this.step * (n - this.paddingInner)) * this.align;
-//     this.bandwidth = Math.abs(this.step * (1 - this.paddingInner));
-//     if (round) {
-//       start = Math.round(start);
-//       this.bandwidth = Math.abs(Math.round(this.bandwidth));
-//       // console.log({round});
-//     }
-//     if (overrideBandwidth) {
-//       this.bandwidth = overrideBandwidth;
-//       // console.log({overrideBandwidth});
-//     }
-//     this.range = range;
-//     this.modelRange = new Array(n).fill(0).map((val, i) => {
-//       return start + this.step * i;
-//     });
-//     this.domain = [...this.modelDomain.keys()];
-//   }
-
-//   scale(value: any) {
-//     const index = this.modelDomain.get(value);
-//     return this.modelRange[index % this.modelRange.length];
-//   }
-
-//   ticks() {
-//     return this.domain;
-//   }
-//   invert(value: any) {
-//     // TODO fix
-//     return null;
-//   }
-// }
+export function isOrdinalScale(scale: Scale): scale is ScaleBand {
+  return scale.type === ScaleType.Ordinal;
+}

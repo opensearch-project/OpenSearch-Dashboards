@@ -18,7 +18,7 @@ import { ChartStore } from '../state/chart_state';
 
 interface LegendElementProps {
   chartStore?: ChartStore; // FIX until we find a better way on ts mobx
-  index: number;
+  legendItemKey: string;
   color: string | undefined;
   label: string | undefined;
   isVisible?: boolean;
@@ -51,15 +51,18 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
   }
 
   render() {
-    const legendItemIndex = this.props.index;
+    const { legendItemKey } = this.props;
     const { color, label, isVisible } = this.props;
 
-    const onTitleClick = this.onLegendTitleClick(legendItemIndex);
+    const onTitleClick = this.onLegendTitleClick(legendItemKey);
 
-    const isSelected = legendItemIndex === this.props.chartStore!.selectedLegendItemIndex.get();
-    const titleClassNames = classNames({
-      ['elasticChartsLegendListItem__title--selected']: isSelected,
-    }, 'elasticChartsLegendListItem__title');
+    const isSelected = legendItemKey === this.props.chartStore!.selectedLegendItemKey.get();
+    const titleClassNames = classNames(
+      {
+        ['elasticChartsLegendListItem__title--selected']: isSelected,
+      },
+      'elasticChartsLegendListItem__title',
+    );
 
     const colorDotProps = {
       color,
@@ -80,19 +83,20 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
             anchorPosition="downCenter"
           >
             <EuiContextMenuPanel>
-              <EuiColorPicker onChange={this.onColorPickerChange(legendItemIndex)} color={color} />
+              <EuiColorPicker onChange={this.onColorPickerChange(legendItemKey)} color={color} />
             </EuiContextMenuPanel>
           </EuiPopover>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {this.renderVisibilityButton(legendItemIndex, isVisible)}
+          {this.renderVisibilityButton(legendItemKey, isVisible)}
         </EuiFlexItem>
         <EuiFlexItem grow={false} className={titleClassNames} onClick={onTitleClick}>
           <EuiPopover
             id="contentPanel"
-            button={(<EuiText size="xs" className="eui-textTruncate elasticChartsLegendListItem__title">
-              {label}
-            </EuiText>)
+            button={
+              <EuiText size="xs" className="eui-textTruncate elasticChartsLegendListItem__title">
+                {label}
+              </EuiText>
             }
             isOpen={isSelected}
             closePopover={this.onLegendItemPanelClose}
@@ -101,12 +105,8 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
           >
             <EuiContextMenuPanel>
               <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                <EuiFlexItem>
-                  {this.renderPlusButton()}
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  {this.renderMinusButton()}
-                </EuiFlexItem>
+                <EuiFlexItem>{this.renderPlusButton()}</EuiFlexItem>
+                <EuiFlexItem>{this.renderMinusButton()}</EuiFlexItem>
               </EuiFlexGroup>
             </EuiContextMenuPanel>
           </EuiPopover>
@@ -115,8 +115,8 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
     );
   }
 
-  private onLegendTitleClick = (legendItemIndex: number) => () => {
-    this.props.chartStore!.onLegendItemClick(legendItemIndex);
+  private onLegendTitleClick = (legendItemKey: string) => () => {
+    this.props.chartStore!.onLegendItemClick(legendItemKey);
   }
 
   private onLegendItemPanelClose = () => {
@@ -124,8 +124,8 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
     console.log('close');
   }
 
-  private onColorPickerChange = (legendItemIndex: number) => (color: string) => {
-    this.props.chartStore!.setSeriesColor(legendItemIndex, color);
+  private onColorPickerChange = (legendItemKey: string) => (color: string) => {
+    this.props.chartStore!.setSeriesColor(legendItemKey, color);
   }
 
   private renderPlusButton = () => {
@@ -134,7 +134,8 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
         onClick={this.props.chartStore!.onLegendItemPlusClick}
         iconType="plusInCircle"
         aria-label="minus"
-      />);
+      />
+    );
   }
 
   private renderMinusButton = () => {
@@ -143,25 +144,27 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
         onClick={this.props.chartStore!.onLegendItemMinusClick}
         iconType="minusInCircle"
         aria-label="minus"
-      />);
+      />
+    );
   }
 
-  private onVisibilityClick = (legendItemIndex: number) => (event: React.MouseEvent<HTMLElement>) => {
+  private onVisibilityClick = (legendItemKey: string) => (event: React.MouseEvent<HTMLElement>) => {
     if (event.shiftKey) {
-      this.props.chartStore!.toggleSingleSeries(legendItemIndex);
+      this.props.chartStore!.toggleSingleSeries(legendItemKey);
     } else {
-      this.props.chartStore!.toggleSeriesVisibility(legendItemIndex);
+      this.props.chartStore!.toggleSeriesVisibility(legendItemKey);
     }
   }
 
-  private renderVisibilityButton = (legendItemIndex: number, isVisible: boolean = true) => {
+  private renderVisibilityButton = (legendItemKey: string, isVisible: boolean = true) => {
     const iconType = isVisible ? 'eye' : 'eyeClosed';
-
-    return <EuiButtonIcon
-      onClick={this.onVisibilityClick(legendItemIndex)}
-      iconType={iconType}
-      aria-label="toggle visibility"
-    />;
+    return (
+      <EuiButtonIcon
+        onClick={this.onVisibilityClick(legendItemKey)}
+        iconType={iconType}
+        aria-label="toggle visibility"
+      />
+    );
   }
 }
 

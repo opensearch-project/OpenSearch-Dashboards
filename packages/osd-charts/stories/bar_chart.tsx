@@ -1,5 +1,6 @@
 import { boolean } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
+import { DateTime } from 'luxon';
 import React from 'react';
 import {
   Axis,
@@ -18,6 +19,7 @@ import {
 } from '../src/';
 import * as TestDatasets from '../src/lib/series/utils/test_dataset';
 import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
+const dateFormatter = timeFormatter('HH:mm:ss');
 
 storiesOf('Bar Chart', module)
   .add('basic', () => {
@@ -126,7 +128,7 @@ storiesOf('Bar Chart', module)
     );
   })
   .add('with time x axis', () => {
-    const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
+    const formatter = timeFormatter(niceTimeFormatByDay(1));
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <Settings debug={boolean('debug', false)} />
@@ -136,7 +138,7 @@ storiesOf('Bar Chart', module)
           title={'Bottom axis'}
           showOverlappingTicks={boolean('showOverlappingTicks bottom axis', false)}
           showOverlappingLabels={boolean('showOverlappingLabels bottom axis', false)}
-          tickFormat={dateFormatter}
+          tickFormat={formatter}
         />
         <Axis
           id={getAxisId('left2')}
@@ -407,7 +409,7 @@ storiesOf('Bar Chart', module)
     );
   })
   .add('time clustered using various specs', () => {
-    const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
+    const formatter = timeFormatter(niceTimeFormatByDay(1));
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <Settings debug={boolean('debug', false)} />
@@ -417,7 +419,7 @@ storiesOf('Bar Chart', module)
           title={'Bottom axis'}
           showOverlappingTicks={boolean('showOverlappingTicks bottom axis', false)}
           showOverlappingLabels={boolean('showOverlappingLabels bottom axis', false)}
-          tickFormat={dateFormatter}
+          tickFormat={formatter}
         />
         <Axis
           id={getAxisId('left2')}
@@ -457,7 +459,7 @@ storiesOf('Bar Chart', module)
     );
   })
   .add('time stacked using various specs', () => {
-    const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
+    const formatter = timeFormatter(niceTimeFormatByDay(1));
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <Settings debug={boolean('debug', false)} />
@@ -467,7 +469,7 @@ storiesOf('Bar Chart', module)
           title={'Bottom axis'}
           showOverlappingTicks={boolean('showOverlappingTicks bottom axis', false)}
           showOverlappingLabels={boolean('showOverlappingLabels bottom axis', false)}
-          tickFormat={dateFormatter}
+          tickFormat={formatter}
         />
         <Axis
           id={getAxisId('left2')}
@@ -822,6 +824,140 @@ storiesOf('Bar Chart', module)
             { x: -1, y: 3 },
             { x: 3, y: 1 },
           ]}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('[test] - linear', () => {
+    const data = [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 4], [7, 3], [8, 2], [9, 1]];
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} />
+        <Axis
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <BarSeries
+          id={getSpecId('lines')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={data}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('[test] - time', () => {
+    const start = DateTime.fromISO('2019-01-01T00:00:00.000', { zone: 'utc' });
+    const data = [
+      [start.toMillis(), 1],
+      [start.plus({ minute: 1 }).toMillis(), 2],
+      [start.plus({ minute: 2 }).toMillis(), 3],
+      [start.plus({ minute: 3 }).toMillis(), 4],
+      [start.plus({ minute: 4 }).toMillis(), 5],
+      [start.plus({ minute: 5 }).toMillis(), 4],
+      [start.plus({ minute: 6 }).toMillis(), 3],
+      [start.plus({ minute: 7 }).toMillis(), 2],
+      [start.plus({ minute: 8 }).toMillis(), 1],
+    ];
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Axis
+          id={getAxisId('bottom')}
+          title={'index'}
+          position={Position.Bottom}
+          tickFormat={dateFormatter}
+        />
+        <Axis
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <BarSeries
+          id={getSpecId('data')}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={data}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('[test] - linear clustered', () => {
+    const data = [
+      [1, 1, 3],
+      [2, 2, 4],
+      [3, 3, 5],
+      [4, 4, 6],
+      [5, 5, 7],
+      [6, 4, 6],
+      [7, 3, 5],
+      [8, 2, 4],
+      [9, 1, 3],
+    ];
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} />
+        <Axis
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <BarSeries
+          id={getSpecId('lines')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1, 2]}
+          data={data}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('[test] - time clustered', () => {
+    const start = DateTime.fromISO('2019-01-01T00:00:00.000', { zone: 'utc' });
+    const data = [
+      [start.toMillis(), 1, 4],
+      [start.plus({ minute: 1 }).toMillis(), 2, 5],
+      [start.plus({ minute: 2 }).toMillis(), 3, 6],
+      [start.plus({ minute: 3 }).toMillis(), 4, 7],
+      [start.plus({ minute: 4 }).toMillis(), 5, 8],
+      [start.plus({ minute: 5 }).toMillis(), 4, 7],
+      [start.plus({ minute: 6 }).toMillis(), 3, 6],
+      [start.plus({ minute: 7 }).toMillis(), 2, 5],
+      [start.plus({ minute: 8 }).toMillis(), 1, 4],
+    ];
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Axis
+          id={getAxisId('bottom')}
+          title={'index'}
+          position={Position.Bottom}
+          tickFormat={dateFormatter}
+        />
+        <Axis
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <BarSeries
+          id={getSpecId('data')}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1, 2]}
+          data={data}
           yScaleToDataExtent={false}
         />
       </Chart>

@@ -1,4 +1,3 @@
-import { Layer as KonvaLayer } from 'konva';
 import { inject, observer } from 'mobx-react';
 import React from 'react';
 import { Layer, Rect, Stage } from 'react-konva';
@@ -18,6 +17,10 @@ interface ReactiveChartState {
   brushing: boolean;
   brushStart: Point;
   brushEnd: Point;
+  bbox: {
+    left: number;
+    top: number;
+  };
 }
 function limitPoint(value: number, min: number, max: number) {
   if (value > max) {
@@ -48,27 +51,14 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
       x: 0,
       y: 0,
     },
+    bbox: {
+      left: 0,
+      top: 0,
+    },
   };
-  private renderingLayerRef: React.RefObject<KonvaLayer> = React.createRef();
-  componentDidMount() {
-    // tslint:disable-next-line:no-console
-    console.log('Chart mounted');
-  }
-
-  componentWillUnmount() {
-    // tslint:disable-next-line:no-console
-    console.log('Chart unmounted');
-  }
 
   renderBarSeries = () => {
-    const {
-      geometries,
-      canDataBeAnimated,
-      chartTheme,
-      onOverElement,
-      onOutElement,
-      onElementClickListener,
-    } = this.props.chartStore!;
+    const { geometries, canDataBeAnimated, chartTheme } = this.props.chartStore!;
     if (!geometries) {
       return;
     }
@@ -80,22 +70,12 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
         bars={geometries.bars}
         style={chartTheme.barSeriesStyle}
         sharedStyle={chartTheme.sharedStyle}
-        onElementOver={onOverElement}
-        onElementOut={onOutElement}
-        onElementClick={onElementClickListener}
         highlightedLegendItem={highlightedLegendItem}
       />
     );
   }
   renderLineSeries = () => {
-    const {
-      geometries,
-      canDataBeAnimated,
-      chartTheme,
-      onOverElement,
-      onOutElement,
-      onElementClickListener,
-    } = this.props.chartStore!;
+    const { geometries, canDataBeAnimated, chartTheme } = this.props.chartStore!;
     if (!geometries) {
       return;
     }
@@ -108,22 +88,12 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
         lines={geometries.lines}
         style={chartTheme.lineSeriesStyle}
         sharedStyle={chartTheme.sharedStyle}
-        onElementOver={onOverElement}
-        onElementOut={onOutElement}
-        onElementClick={onElementClickListener}
         highlightedLegendItem={highlightedLegendItem}
       />
     );
   }
   renderAreaSeries = () => {
-    const {
-      geometries,
-      canDataBeAnimated,
-      chartTheme,
-      onOverElement,
-      onOutElement,
-      onElementClickListener,
-    } = this.props.chartStore!;
+    const { geometries, canDataBeAnimated, chartTheme } = this.props.chartStore!;
     if (!geometries) {
       return;
     }
@@ -136,9 +106,6 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
         areas={geometries.areas}
         style={chartTheme.areaSeriesStyle}
         sharedStyle={chartTheme.sharedStyle}
-        onElementOver={onOverElement}
-        onElementOut={onOutElement}
-        onElementClick={onElementClickListener}
         highlightedLegendItem={highlightedLegendItem}
       />
     );
@@ -265,8 +232,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
       chartDimensions,
       chartRotation,
       chartTransform,
-      tooltipData,
-      setTooltipPosition,
+      setCursorPosition,
     } = this.props.chartStore!;
 
     // disable clippings when debugging
@@ -310,6 +276,19 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
           left: 0,
           boxSizing: 'border-box',
         }}
+        onMouseMove={({ clientX, clientY }) => {
+          // this cause a layout reflow on the browser https://gist.github.com/paulirish/5d52fb081b3570c81e3a
+          const { left, top } = this.props.chartStore!.parentDimensions;
+          const x = clientX - left;
+          const y = clientY - top;
+          setCursorPosition(x, y);
+        }}
+        onMouseLeave={() => {
+          setCursorPosition(-1, -1);
+        }}
+        onClick={() => {
+          this.props.chartStore!.handleChartClick();
+        }}
       >
         <Stage
           width={parentDimensions.width}
@@ -325,25 +304,23 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
           </Layer>
 
           <Layer
-            ref={this.renderingLayerRef}
             x={chartDimensions.left + chartTransform.x}
             y={chartDimensions.top + chartTransform.y}
             rotation={chartRotation}
             {...clippings}
-            listening={!this.state.brushing}
-            onMouseMove={({ evt }) => {
-              if (tooltipData != null) {
-                setTooltipPosition(evt.layerX, evt.layerY);
-              }
-            }}
+            hitGraphEnabled={false}
+            listening={false}
           >
             {this.renderBarSeries()}
             {this.renderAreaSeries()}
             {this.renderLineSeries()}
-
-            {debug && this.renderDebugChartBorders()}
           </Layer>
-          {isBrushEnabled && <Layer listening={false}>{this.renderBrushTool()}</Layer>}
+          <Layer hitGraphEnabled={false}>{debug && this.renderDebugChartBorders()}</Layer>
+          {isBrushEnabled && (
+            <Layer hitGraphEnabled={false} listening={false}>
+              {this.renderBrushTool()}
+            </Layer>
+          )}
 
           <Layer hitGraphEnabled={false}>{this.renderAxes()}</Layer>
         </Stage>
@@ -352,17 +329,17 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
   }
 
   private renderDebugChartBorders = () => {
-    const { chartDimensions, chartRotation } = this.props.chartStore!;
+    const { chartDimensions, chartRotation, chartTransform } = this.props.chartStore!;
     return (
       <Rect
-        x={0}
-        y={0}
+        x={chartDimensions.left + chartTransform.x}
+        y={chartDimensions.top + chartTransform.y}
         width={[90, -90].includes(chartRotation) ? chartDimensions.height : chartDimensions.width}
         height={[90, -90].includes(chartRotation) ? chartDimensions.width : chartDimensions.height}
         stroke="red"
-        strokeWidth={0.5}
+        strokeWidth={4}
         listening={false}
-        dash={[2, 2]}
+        dash={[4, 4]}
       />
     );
   }

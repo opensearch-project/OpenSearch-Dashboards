@@ -23,20 +23,22 @@ export const LIGHT_THEME: Theme = {
       visible: false,
     },
     point: {
-      visible: false,
-      radius: 5,
+      visible: true,
+      radius: 1,
       stroke: 'white',
-      strokeWidth: 1,
+      strokeWidth: 0.5,
+      opacity: 1,
     },
   },
   areaSeriesStyle: {
     area: {
       fill: DEFAULT_MISSING_COLOR,
       visible: true,
+      opacity: 0.8,
     },
     line: {
       stroke: DEFAULT_MISSING_COLOR,
-      strokeWidth: 1,
+      strokeWidth: 1.5,
       visible: true,
     },
     border: {
@@ -45,10 +47,11 @@ export const LIGHT_THEME: Theme = {
       visible: false,
     },
     point: {
-      visible: false,
-      radius: 5,
+      visible: true,
+      radius: 1,
       stroke: 'white',
-      strokeWidth: 1,
+      strokeWidth: 0.5,
+      opacity: 1,
     },
   },
   barSeriesStyle: {
@@ -95,5 +98,17 @@ export const LIGHT_THEME: Theme = {
   legend: {
     verticalWidth: 150,
     horizontalHeight: 50,
+  },
+  crosshair: {
+    band: {
+      fill: 'lightgray',
+      visible: true,
+    },
+    line: {
+      stroke: 'gray',
+      strokeWidth: 1,
+      dash: [5, 5],
+      visible: true,
+    },
   },
 };

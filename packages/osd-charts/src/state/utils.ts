@@ -2,10 +2,10 @@ import { isVertical } from '../lib/axes/axis_utils';
 import { CurveType } from '../lib/series/curves';
 import { mergeXDomain, XDomain } from '../lib/series/domains/x_domain';
 import { mergeYDomain, YDomain } from '../lib/series/domains/y_domain';
-import { LegendItem } from '../lib/series/legend';
 import {
   AreaGeometry,
   BarGeometry,
+  IndexedGeometry,
   LineGeometry,
   PointGeometry,
   renderArea,
@@ -13,7 +13,7 @@ import {
   renderLine,
   renderPoints,
 } from '../lib/series/rendering';
-import { computeXScale, computeYScales, countClusteredSeries } from '../lib/series/scales';
+import { computeXScale, computeYScales, countBarsInCluster } from '../lib/series/scales';
 import {
   DataSeries,
   DataSeriesColorsValues,
@@ -21,7 +21,6 @@ import {
   getColorValuesAsString,
   getFormattedDataseries,
   getSplittedSeries,
-  RawDataSeries,
 } from '../lib/series/series';
 import { isEqualSeriesKey } from '../lib/series/series_utils';
 import {
@@ -37,6 +36,7 @@ import { Dimensions } from '../lib/utils/dimensions';
 import { Domain } from '../lib/utils/domain';
 import { AxisId, GroupId, SpecId } from '../lib/utils/ids';
 import { Scale } from '../lib/utils/scales/scales';
+import { SeriesDomainsAndData } from './chart_state';
 
 export interface Transform {
   x: number;
@@ -48,13 +48,6 @@ export interface BrushExtent {
   minY: number;
   maxX: number;
   maxY: number;
-}
-
-export function getLegendItemByIndex(items: LegendItem[], index: number): LegendItem | null {
-  if (index < 0 || index >= items.length) {
-    return null;
-  }
-  return items[index];
 }
 
 export function findSelectedDataSeries(
@@ -80,7 +73,6 @@ export function updateSelectedDataSeries(
   series: DataSeriesColorsValues[] | null,
   value: DataSeriesColorsValues,
 ): DataSeriesColorsValues[] {
-
   const seriesIndex = findSelectedDataSeries(series, value);
   const updatedSeries = series ? [...series] : [];
 
@@ -92,36 +84,42 @@ export function updateSelectedDataSeries(
   return updatedSeries;
 }
 
-export function getUpdatedCustomSeriesColors(seriesSpecs: Map<SpecId, BasicSeriesSpec>): Map<string, string> {
+export function getUpdatedCustomSeriesColors(
+  seriesSpecs: Map<SpecId, BasicSeriesSpec>,
+): Map<string, string> {
   const updatedCustomSeriesColors = new Map();
   seriesSpecs.forEach((spec: BasicSeriesSpec, id: SpecId) => {
     if (spec.customSeriesColors) {
-      spec.customSeriesColors.forEach((color: string, seriesColorValues: DataSeriesColorsValues) => {
-        const { colorValues, specId } = seriesColorValues;
-        const seriesLabel = getColorValuesAsString(colorValues, specId);
-        updatedCustomSeriesColors.set(seriesLabel, color);
-      });
+      spec.customSeriesColors.forEach(
+        (color: string, seriesColorValues: DataSeriesColorsValues) => {
+          const { colorValues, specId } = seriesColorValues;
+          const seriesLabel = getColorValuesAsString(colorValues, specId);
+          updatedCustomSeriesColors.set(seriesLabel, color);
+        },
+      );
     }
   });
   return updatedCustomSeriesColors;
 }
 
+/**
+ *
+ * @param seriesSpecs
+ * @param selectedDataSeries is optional; if not supplied,
+ * then all series will be factored into computations. Otherwise, selectedDataSeries
+ * is used to restrict the computation for just the selected series
+ * @returns `SeriesDomainsAndData`
+ */
 export function computeSeriesDomains(
   seriesSpecs: Map<SpecId, BasicSeriesSpec>,
   domainsByGroupId: Map<GroupId, DomainRange>,
   customXDomain?: DomainRange | Domain,
   selectedDataSeries?: DataSeriesColorsValues[] | null,
-): {
-  xDomain: XDomain;
-  yDomain: YDomain[];
-  splittedDataSeries: RawDataSeries[][];
-  formattedDataSeries: {
-    stacked: FormattedDataSeries[];
-    nonStacked: FormattedDataSeries[];
-  };
-  seriesColors: Map<string, DataSeriesColorsValues>;
-} {
-  const { splittedSeries, xValues, seriesColors } = getSplittedSeries(seriesSpecs, selectedDataSeries);
+): SeriesDomainsAndData {
+  const { splittedSeries, xValues, seriesColors } = getSplittedSeries(
+    seriesSpecs,
+    selectedDataSeries,
+  );
   // tslint:disable-next-line:no-console
   // console.log({ splittedSeries, xValues, seriesColors });
   const splittedDataSeries = [...splittedSeries.values()];
@@ -166,6 +164,7 @@ export function computeSeriesGeometries(
     areas: AreaGeometry[];
     lines: LineGeometry[];
   };
+  geometriesIndex: Map<any, IndexedGeometry[]>;
 } {
   const width = [0, 180].includes(chartRotation) ? chartDims.width : chartDims.height;
   const height = [0, 180].includes(chartRotation) ? chartDims.height : chartDims.width;
@@ -173,10 +172,10 @@ export function computeSeriesGeometries(
   const { stacked, nonStacked } = formattedDataSeries;
 
   // compute how many series are clustered
-  const { stackedGroupCount, totalGroupCount } = countClusteredSeries(stacked, nonStacked);
+  const { stackedBarsInCluster, totalBarsInCluster } = countBarsInCluster(stacked, nonStacked);
 
   // compute scales
-  const xScale = computeXScale(xDomain, totalGroupCount, 0, width);
+  const xScale = computeXScale(xDomain, totalBarsInCluster, 0, width);
   const yScales = computeYScales(yDomain, height, 0);
 
   // compute colors
@@ -186,6 +185,8 @@ export function computeSeriesGeometries(
   const areas: AreaGeometry[] = [];
   const bars: BarGeometry[] = [];
   const lines: LineGeometry[] = [];
+  let stackedGeometriesIndex: Map<any, IndexedGeometry[]> = new Map();
+  let nonStackedGeometriesIndex: Map<any, IndexedGeometry[]> = new Map();
   let orderIndex = 0;
   formattedDataSeries.stacked.forEach((dataSeriesGroup, index) => {
     const { groupId, dataSeries, counts } = dataSeriesGroup;
@@ -196,7 +197,7 @@ export function computeSeriesGeometries(
 
     const geometries = renderGeometries(
       orderIndex,
-      totalGroupCount,
+      totalBarsInCluster,
       true,
       dataSeries,
       xScale,
@@ -210,8 +211,7 @@ export function computeSeriesGeometries(
     lines.push(...geometries.lines);
     bars.push(...geometries.bars);
     points.push(...geometries.points);
-
-    // console.log(geometries);
+    stackedGeometriesIndex = geometries.geometriesIndex;
   });
   formattedDataSeries.nonStacked.map((dataSeriesGroup, index) => {
     const { groupId, dataSeries } = dataSeriesGroup;
@@ -220,8 +220,8 @@ export function computeSeriesGeometries(
       return;
     }
     const geometries = renderGeometries(
-      stackedGroupCount,
-      totalGroupCount,
+      stackedBarsInCluster,
+      totalBarsInCluster,
       false,
       dataSeries,
       xScale,
@@ -235,7 +235,9 @@ export function computeSeriesGeometries(
     lines.push(...geometries.lines);
     bars.push(...geometries.bars);
     points.push(...geometries.points);
+    nonStackedGeometriesIndex = geometries.geometriesIndex;
   });
+  const geometriesIndex = mergeGeometriesIndexes(stackedGeometriesIndex, nonStackedGeometriesIndex);
   return {
     scales: {
       xScale,
@@ -247,6 +249,7 @@ export function computeSeriesGeometries(
       bars,
       lines,
     },
+    geometriesIndex,
   };
 }
 
@@ -265,13 +268,18 @@ export function renderGeometries(
   bars: BarGeometry[];
   areas: AreaGeometry[];
   lines: LineGeometry[];
+  geometriesIndex: Map<any, IndexedGeometry[]>;
 } {
   const len = dataSeries.length;
   let i;
-  const points = [];
-  const bars = [];
-  const areas = [];
-  const lines = [];
+  const points: PointGeometry[] = [];
+  const bars: BarGeometry[] = [];
+  const areas: AreaGeometry[] = [];
+  const lines: LineGeometry[] = [];
+  let pointGeometriesIndex: Map<any, IndexedGeometry[]> = new Map();
+  let barGeometriesIndex: Map<any, IndexedGeometry[]> = new Map();
+  let lineGeometriesIndex: Map<any, IndexedGeometry[]> = new Map();
+  let areaGeometriesIndex: Map<any, IndexedGeometry[]> = new Map();
   for (i = 0; i < len; i++) {
     const ds = dataSeries[i];
     const spec = getSpecById(seriesSpecs, ds.specId);
@@ -283,7 +291,7 @@ export function renderGeometries(
       case 'basic':
         const pointShift = clusteredCount > 0 ? clusteredCount : 1;
 
-        const point = renderPoints(
+        const renderedPoints = renderPoints(
           (xScale.bandwidth * pointShift) / 2,
           ds.data,
           xScale,
@@ -292,16 +300,25 @@ export function renderGeometries(
           ds.specId,
           ds.key,
         );
-        points.push(...point);
+        points.push(...renderedPoints.pointGeometries);
+        pointGeometriesIndex = mergeGeometriesIndexes(
+          pointGeometriesIndex,
+          renderedPoints.indexedGeometries,
+        );
         break;
       case 'bar':
         const shift = isStacked ? indexOffset : indexOffset + i;
-        const bar = renderBars(shift, ds.data, xScale, yScale, color, ds.specId, ds.key);
-        bars.push(...bar);
+        const renderedBars = renderBars(shift, ds.data, xScale, yScale, color, ds.specId, ds.key);
+        barGeometriesIndex = mergeGeometriesIndexes(
+          barGeometriesIndex,
+          renderedBars.indexedGeometries,
+        );
+        bars.push(...renderedBars.barGeometries);
         break;
       case 'line':
         const lineShift = clusteredCount > 0 ? clusteredCount : 1;
-        const line = renderLine(
+        const renderedLines = renderLine(
+          // move the point on half of the bandwidth if we have mixed bars/lines
           (xScale.bandwidth * lineShift) / 2,
           ds.data,
           xScale,
@@ -311,11 +328,16 @@ export function renderGeometries(
           ds.specId,
           ds.key,
         );
-        lines.push(line);
+        lineGeometriesIndex = mergeGeometriesIndexes(
+          lineGeometriesIndex,
+          renderedLines.indexedGeometries,
+        );
+        lines.push(renderedLines.lineGeometry);
         break;
       case 'area':
         const areaShift = clusteredCount > 0 ? clusteredCount : 1;
-        const area = renderArea(
+        const renderedAreas = renderArea(
+          // move the point on half of the bandwidth if we have mixed bars/lines
           (xScale.bandwidth * areaShift) / 2,
           ds.data,
           xScale,
@@ -325,15 +347,26 @@ export function renderGeometries(
           ds.specId,
           ds.key,
         );
-        areas.push(area);
+        areaGeometriesIndex = mergeGeometriesIndexes(
+          areaGeometriesIndex,
+          renderedAreas.indexedGeometries,
+        );
+        areas.push(renderedAreas.areaGeometry);
         break;
     }
   }
+  const geometriesIndex = mergeGeometriesIndexes(
+    pointGeometriesIndex,
+    lineGeometriesIndex,
+    areaGeometriesIndex,
+    barGeometriesIndex,
+  );
   return {
     points,
     bars,
     areas,
     lines,
+    geometriesIndex,
   };
 }
 
@@ -410,4 +443,47 @@ export function computeBrushExtent(
     maxX,
     maxY,
   };
+}
+
+export function mergeGeometriesIndexes(...iterables: Array<Map<any, IndexedGeometry[]>>) {
+  const geometriesIndex: Map<any, IndexedGeometry[]> = new Map();
+
+  for (const iterable of iterables) {
+    for (const item of iterable) {
+      mutableIndexedGeometryMapUpsert(geometriesIndex, item[0], item[1]);
+    }
+  }
+  return geometriesIndex;
+}
+
+export function mutableIndexedGeometryMapUpsert(
+  mutableGeometriesIndex: Map<any, IndexedGeometry[]>,
+  key: any,
+  geometry: IndexedGeometry | IndexedGeometry[],
+) {
+  const existing = mutableGeometriesIndex.get(key);
+  const upsertGeometry: IndexedGeometry[] = Array.isArray(geometry) ? geometry : [geometry];
+  if (existing === undefined) {
+    mutableGeometriesIndex.set(key, upsertGeometry);
+  } else {
+    mutableGeometriesIndex.set(key, [...upsertGeometry, ...existing]);
+  }
+}
+
+export function isHorizontalRotation(chartRotation: Rotation) {
+  return chartRotation === 0 || chartRotation === 180;
+}
+
+export function isVerticalRotation(chartRotation: Rotation) {
+  return chartRotation === -90 || chartRotation === 90;
+}
+
+/**
+ * Check if a specs map contains only line or area specs
+ * @param specs Map<SpecId, BasicSeriesSpec>
+ */
+export function isLineAreaOnlyChart(specs: Map<SpecId, BasicSeriesSpec>) {
+  return ![...specs.values()].some((spec) => {
+    return spec.seriesType === 'bar';
+  });
 }

@@ -1,21 +1,16 @@
 import { Group as KonvaGroup } from 'konva';
-import { IAction } from 'mobx';
 import React from 'react';
 import { Group, Rect } from 'react-konva';
 import { animated, Spring } from 'react-spring/renderprops-konva';
 import { LegendItem } from '../../lib/series/legend';
-import { BarGeometry, GeometryValue, getGeometryStyle } from '../../lib/series/rendering';
+import { BarGeometry, getGeometryStyle } from '../../lib/series/rendering';
 import { BarSeriesStyle, SharedGeometryStyle } from '../../lib/themes/theme';
-import { ElementClickListener, TooltipData } from '../../state/chart_state';
 
 interface BarGeometriesDataProps {
   animated?: boolean;
   bars: BarGeometry[];
   style: BarSeriesStyle;
   sharedStyle: SharedGeometryStyle;
-  onElementClick?: ElementClickListener;
-  onElementOver: ((tooltip: TooltipData) => void) & IAction;
-  onElementOut: (() => void) & IAction;
   highlightedLegendItem: LegendItem | null;
 }
 interface BarGeometriesDataState {
@@ -44,37 +39,6 @@ export class BarGeometries extends React.PureComponent<
       </Group>
     );
   }
-  private onElementClick = (value: GeometryValue) => () => {
-    if (this.props.onElementClick) {
-      this.props.onElementClick(value);
-    }
-  }
-  private onOverBar = (point: BarGeometry) => () => {
-    const { onElementOver } = this.props;
-    const { x, y, value } = point;
-    this.setState(() => {
-      return {
-        overBar: point,
-      };
-    });
-    onElementOver({
-      value,
-      position: {
-        left: x,
-        top: y,
-      },
-    });
-  }
-  private onOutBar = () => {
-    const { onElementOut } = this.props;
-
-    this.setState(() => {
-      return {
-        overBar: undefined,
-      };
-    });
-    onElementOut();
-  }
 
   private renderBarGeoms = (bars: BarGeometry[]): JSX.Element[] => {
     const { overBar } = this.state;
@@ -83,7 +47,7 @@ export class BarGeometries extends React.PureComponent<
       sharedStyle,
     } = this.props;
     return bars.map((bar, i) => {
-      const { x, y, width, height, color, value } = bar;
+      const { x, y, width, height, color } = bar;
 
       // Properties to determine if we need to highlight individual bars depending on hover state
       const hasGeometryHover = overBar != null;
@@ -100,7 +64,7 @@ export class BarGeometries extends React.PureComponent<
         individualHighlight,
       );
 
-      // min 5px bars with white border
+      // min border depending on bar width bars with white border
       const borderEnabled = border.visible && width > border.strokeWidth * 7;
       if (this.props.animated) {
         return (
@@ -118,9 +82,6 @@ export class BarGeometries extends React.PureComponent<
                   stroke={border.stroke}
                   strokeEnabled={borderEnabled}
                   perfectDrawEnabled={true}
-                  onMouseOver={this.onOverBar(bar)}
-                  onMouseLeave={this.onOutBar}
-                  onClick={this.onElementClick(value)}
                   {...geometryStyle}
                 />
               )}
@@ -140,9 +101,6 @@ export class BarGeometries extends React.PureComponent<
             stroke={border.stroke}
             strokeEnabled={borderEnabled}
             perfectDrawEnabled={false}
-            onMouseOver={this.onOverBar(bar)}
-            onMouseLeave={this.onOutBar}
-            onClick={this.onElementClick(bar.value)}
             {...geometryStyle}
           />
         );

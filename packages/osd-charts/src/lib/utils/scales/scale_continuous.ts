@@ -59,6 +59,11 @@ export function limitLogScaleDomain(domain: any[]) {
   }
   return domain;
 }
+export enum StepType {
+  StepBefore = 'before',
+  StepAfter = 'after',
+  Step = 'half',
+}
 
 export class ScaleContinuous implements Scale {
   readonly bandwidth: number;
@@ -75,9 +80,10 @@ export class ScaleContinuous implements Scale {
     domain: any[],
     range: [number, number],
     type: ScaleContinuousType,
-    clamp?: boolean,
-    bandwidth?: number,
-    minInterval?: number,
+    clamp: boolean = false,
+    bandwidth: number = 0,
+    /** the min interval computed on the XDomain, not available for yDomains */
+    minInterval: number = 0,
   ) {
     this.d3Scale = SCALES[type]();
     if (type === ScaleType.Log) {
@@ -90,18 +96,25 @@ export class ScaleContinuous implements Scale {
     this.d3Scale.range(range);
     this.d3Scale.clamp(clamp);
     // this.d3Scale.nice();
-    this.bandwidth = bandwidth || 0;
+    this.bandwidth = bandwidth;
     this.step = 0;
     this.type = type;
     this.range = range;
-    this.minInterval = minInterval || 0;
+    this.minInterval = minInterval;
     this.isInverted = this.domain[0] > this.domain[1];
     if (type === ScaleType.Time) {
       this.tickValues = this.d3Scale.ticks().map((d: Date) => {
-        return d.getTime();
+        return DateTime.fromJSDate(d).toMillis();
       });
     } else {
-      this.tickValues = this.d3Scale.ticks();
+      if (this.minInterval > 0) {
+        const intervalCount = (this.domain[1] - this.domain[0]) / this.minInterval;
+        this.tickValues = new Array(intervalCount + 1).fill(0).map((d, i) => {
+          return this.domain[0] + i * this.minInterval;
+        });
+      } else {
+        this.tickValues = this.d3Scale.ticks();
+      }
     }
   }
 
@@ -110,20 +123,71 @@ export class ScaleContinuous implements Scale {
   }
 
   ticks() {
-    if (this.minInterval > 0) {
-      const intervalCount = (this.domain[1] - this.domain[0]) / this.minInterval;
-      return new Array(intervalCount + 1).fill(0).map((d, i) => {
-        return this.domain[0] + i * this.minInterval;
-      });
-    }
     return this.tickValues;
   }
   invert(value: number) {
+    let invertedValue = this.d3Scale.invert(value);
     if (this.type === ScaleType.Time) {
-      const invertedDate = this.d3Scale.invert(value);
-      return DateTime.fromJSDate(invertedDate).toISO();
-    } else {
-      return this.d3Scale.invert(value);
+      invertedValue = DateTime.fromJSDate(invertedValue).toMillis();
+    }
+    return invertedValue;
+  }
+  invertWithStep(value: number, stepType?: StepType) {
+    const invertedValue = this.invert(value);
+    const forcedStep = this.bandwidth > 0 ? StepType.StepAfter : stepType;
+    return invertValue(invertedValue, this.minInterval, forcedStep);
+  }
+}
+
+export function isContinuousScale(scale: Scale): scale is ScaleContinuous {
+  return scale.type !== ScaleType.Ordinal;
+}
+
+function invertValue(invertedValue: number, minInterval: number, stepType?: StepType) {
+  if (minInterval > 0) {
+    switch (stepType) {
+      case StepType.StepAfter:
+        return linearStepAfter(invertedValue, minInterval);
+      case StepType.StepBefore:
+        return linearStepBefore(invertedValue, minInterval);
+      case StepType.Step:
+      default:
+        return linearStep(invertedValue, minInterval);
     }
   }
+  return invertedValue;
+}
+
+/**
+ * Return an inverted value that is valid from the exact point of the scale
+ * till the end of the interval. |--------|********|
+ * @param invertedValue the inverted value
+ * @param minInterval the data minimum interval grether than 0
+ */
+export function linearStepAfter(invertedValue: number, minInterval: number): number {
+  return Math.floor(invertedValue / minInterval) * minInterval;
+}
+
+/**
+ * Return an inverted value that is valid from the half point before and half point
+ * after the value. |----****|*****----|
+ * till the end of the interval.
+ * @param invertedValue the inverted value
+ * @param minInterval the data minimum interval grether than 0
+ */
+export function linearStep(invertedValue: number, minInterval: number): number {
+  const diff = invertedValue / minInterval;
+  const base = diff - Math.floor(diff) > 0.5 ? 1 : 0;
+  return Math.floor(diff) * minInterval + minInterval * base;
+}
+
+/**
+ * Return an inverted value that is valid from the half point before and half point
+ * after the value. |********|--------|
+ * till the end of the interval.
+ * @param invertedValue the inverted value
+ * @param minInterval the data minimum interval grether than 0
+ */
+export function linearStepBefore(invertedValue: number, minInterval: number): number {
+  return Math.ceil(invertedValue / minInterval) * minInterval;
 }

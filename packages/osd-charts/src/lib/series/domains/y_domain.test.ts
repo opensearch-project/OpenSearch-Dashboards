@@ -29,16 +29,20 @@ describe('Y Domain', () => {
     ];
     const specDataSeries = new Map();
     specDataSeries.set(getSpecId('a'), dataSeries);
-    const mergedDomain = mergeYDomain(specDataSeries, [
-      {
-        seriesType: 'area',
-        yScaleType: ScaleType.Linear,
-        groupId: getGroupId('a'),
-        id: getSpecId('a'),
-        stackAccessors: ['a'],
-        yScaleToDataExtent: true,
-      },
-    ], new Map());
+    const mergedDomain = mergeYDomain(
+      specDataSeries,
+      [
+        {
+          seriesType: 'area',
+          yScaleType: ScaleType.Linear,
+          groupId: getGroupId('a'),
+          id: getSpecId('a'),
+          stackAccessors: ['a'],
+          yScaleToDataExtent: true,
+        },
+      ],
+      new Map(),
+    );
     expect(mergedDomain).toEqual([
       {
         type: 'yDomain',
@@ -75,24 +79,28 @@ describe('Y Domain', () => {
     const specDataSeries = new Map();
     specDataSeries.set(getSpecId('a'), dataSeries1);
     specDataSeries.set(getSpecId('b'), dataSeries2);
-    const mergedDomain = mergeYDomain(specDataSeries, [
-      {
-        seriesType: 'area',
-        yScaleType: ScaleType.Linear,
-        groupId: getGroupId('a'),
-        id: getSpecId('a'),
-        stackAccessors: ['a'],
-        yScaleToDataExtent: true,
-      },
-      {
-        seriesType: 'area',
-        yScaleType: ScaleType.Log,
-        groupId: getGroupId('b'),
-        id: getSpecId('b'),
-        stackAccessors: ['a'],
-        yScaleToDataExtent: true,
-      },
-    ], new Map());
+    const mergedDomain = mergeYDomain(
+      specDataSeries,
+      [
+        {
+          seriesType: 'area',
+          yScaleType: ScaleType.Linear,
+          groupId: getGroupId('a'),
+          id: getSpecId('a'),
+          stackAccessors: ['a'],
+          yScaleToDataExtent: true,
+        },
+        {
+          seriesType: 'area',
+          yScaleType: ScaleType.Log,
+          groupId: getGroupId('b'),
+          id: getSpecId('b'),
+          stackAccessors: ['a'],
+          yScaleToDataExtent: true,
+        },
+      ],
+      new Map(),
+    );
     expect(mergedDomain).toEqual([
       {
         groupId: 'a',
@@ -136,24 +144,28 @@ describe('Y Domain', () => {
     const specDataSeries = new Map();
     specDataSeries.set(getSpecId('a'), dataSeries1);
     specDataSeries.set(getSpecId('b'), dataSeries2);
-    const mergedDomain = mergeYDomain(specDataSeries, [
-      {
-        seriesType: 'area',
-        yScaleType: ScaleType.Linear,
-        groupId: getGroupId('a'),
-        id: getSpecId('a'),
-        stackAccessors: ['a'],
-        yScaleToDataExtent: true,
-      },
-      {
-        seriesType: 'area',
-        yScaleType: ScaleType.Log,
-        groupId: getGroupId('a'),
-        id: getSpecId('b'),
-        stackAccessors: ['a'],
-        yScaleToDataExtent: true,
-      },
-    ], new Map());
+    const mergedDomain = mergeYDomain(
+      specDataSeries,
+      [
+        {
+          seriesType: 'area',
+          yScaleType: ScaleType.Linear,
+          groupId: getGroupId('a'),
+          id: getSpecId('a'),
+          stackAccessors: ['a'],
+          yScaleToDataExtent: true,
+        },
+        {
+          seriesType: 'area',
+          yScaleType: ScaleType.Log,
+          groupId: getGroupId('a'),
+          id: getSpecId('b'),
+          stackAccessors: ['a'],
+          yScaleToDataExtent: true,
+        },
+      ],
+      new Map(),
+    );
     expect(mergedDomain).toEqual([
       {
         groupId: 'a',
@@ -190,23 +202,27 @@ describe('Y Domain', () => {
     const specDataSeries = new Map();
     specDataSeries.set(getSpecId('a'), dataSeries1);
     specDataSeries.set(getSpecId('b'), dataSeries2);
-    const mergedDomain = mergeYDomain(specDataSeries, [
-      {
-        seriesType: 'area',
-        yScaleType: ScaleType.Linear,
-        groupId: getGroupId('a'),
-        id: getSpecId('a'),
-        stackAccessors: ['a'],
-        yScaleToDataExtent: true,
-      },
-      {
-        seriesType: 'area',
-        yScaleType: ScaleType.Log,
-        groupId: getGroupId('a'),
-        id: getSpecId('b'),
-        yScaleToDataExtent: true,
-      },
-    ], new Map());
+    const mergedDomain = mergeYDomain(
+      specDataSeries,
+      [
+        {
+          seriesType: 'area',
+          yScaleType: ScaleType.Linear,
+          groupId: getGroupId('a'),
+          id: getSpecId('a'),
+          stackAccessors: ['a'],
+          yScaleToDataExtent: true,
+        },
+        {
+          seriesType: 'area',
+          yScaleType: ScaleType.Log,
+          groupId: getGroupId('a'),
+          id: getSpecId('b'),
+          yScaleToDataExtent: true,
+        },
+      ],
+      new Map(),
+    );
     expect(mergedDomain).toEqual([
       {
         groupId: 'a',
@@ -244,23 +260,27 @@ describe('Y Domain', () => {
     const specDataSeries = new Map();
     specDataSeries.set(getSpecId('a'), dataSeries1);
     specDataSeries.set(getSpecId('b'), dataSeries2);
-    const mergedDomain = mergeYDomain(specDataSeries, [
-      {
-        seriesType: 'area',
-        yScaleType: ScaleType.Linear,
-        groupId: getGroupId('a'),
-        id: getSpecId('a'),
-        stackAccessors: ['a'],
-        yScaleToDataExtent: true,
-      },
-      {
-        seriesType: 'area',
-        yScaleType: ScaleType.Log,
-        groupId: getGroupId('a'),
-        id: getSpecId('b'),
-        yScaleToDataExtent: true,
-      },
-    ], new Map());
+    const mergedDomain = mergeYDomain(
+      specDataSeries,
+      [
+        {
+          seriesType: 'area',
+          yScaleType: ScaleType.Linear,
+          groupId: getGroupId('a'),
+          id: getSpecId('a'),
+          stackAccessors: ['a'],
+          yScaleToDataExtent: true,
+        },
+        {
+          seriesType: 'area',
+          yScaleType: ScaleType.Log,
+          groupId: getGroupId('a'),
+          id: getSpecId('b'),
+          yScaleToDataExtent: true,
+        },
+      ],
+      new Map(),
+    );
     expect(mergedDomain.length).toEqual(1);
   });
   test('Should split specs by groupId, two groups, non stacked', () => {
@@ -412,9 +432,9 @@ describe('Y Domain', () => {
     expect(groupValues[0].nonStacked).toEqual([]);
   });
 
-  test('Should return null for YScaleType when there are no specs', () => {
+  test('Should return a default Scale Linear for YScaleType when there are no specs', () => {
     const specs: Array<Pick<BasicSeriesSpec, 'yScaleType'>> = [];
-    expect(coerceYScaleTypes(specs)).toBe(null);
+    expect(coerceYScaleTypes(specs)).toBe(ScaleType.Linear);
   });
 
   test('Should getDataSeriesOnGroup for matching specs', () => {
@@ -435,14 +455,16 @@ describe('Y Domain', () => {
     const specDataSeries = new Map();
     specDataSeries.set(getSpecId('b'), dataSeries);
 
-    const specs: YBasicSeriesSpec[] = [{
-      seriesType: 'area',
-      yScaleType: ScaleType.Linear,
-      groupId: getGroupId('a'),
-      id: getSpecId('a'),
-      stackAccessors: ['a'],
-      yScaleToDataExtent: true,
-    }];
+    const specs: YBasicSeriesSpec[] = [
+      {
+        seriesType: 'area',
+        yScaleType: ScaleType.Linear,
+        groupId: getGroupId('a'),
+        id: getSpecId('a'),
+        stackAccessors: ['a'],
+        yScaleToDataExtent: true,
+      },
+    ];
 
     const rawDataSeries = getDataSeriesOnGroup(specDataSeries, specs);
     expect(rawDataSeries).toEqual([]);
@@ -469,16 +491,20 @@ describe('Y Domain', () => {
     const domainsByGroupId = new Map<GroupId, DomainRange>();
     domainsByGroupId.set(groupId, { min: 0, max: 20 });
 
-    const mergedDomain = mergeYDomain(specDataSeries, [
-      {
-        seriesType: 'area',
-        yScaleType: ScaleType.Linear,
-        groupId,
-        id: getSpecId('a'),
-        stackAccessors: ['a'],
-        yScaleToDataExtent: true,
-      },
-    ], domainsByGroupId);
+    const mergedDomain = mergeYDomain(
+      specDataSeries,
+      [
+        {
+          seriesType: 'area',
+          yScaleType: ScaleType.Linear,
+          groupId,
+          id: getSpecId('a'),
+          stackAccessors: ['a'],
+          yScaleToDataExtent: true,
+        },
+      ],
+      domainsByGroupId,
+    );
     expect(mergedDomain).toEqual([
       {
         type: 'yDomain',

@@ -89,4 +89,17 @@ describe.only('Scale Band', () => {
     expect(scale.scale(2)).toBe(50);
     // an empty 1 step place at the end
   });
+  test('shall invert all values in range', () => {
+    const domain = ['a', 'b', 'c', 'd'];
+    const minRange = 0;
+    const maxRange = 100;
+    const scale = new ScaleBand(domain, [minRange, maxRange]);
+    expect(scale.invert(0)).toBe('a');
+    expect(scale.invert(15)).toBe('a');
+    expect(scale.invert(24)).toBe('a');
+    expect(scale.invert(24.99999)).toBe('a');
+    expect(scale.invert(25)).toBe('b');
+    expect(scale.invert(99.99999)).toBe('d');
+    expect(scale.invert(100)).toBe('d');
+  });
 });

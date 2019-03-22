@@ -47,6 +47,11 @@ function range(
   );
 }
 
+const dg = new DataGenerator();
+const data1 = dg.generateGroupedSeries(40, 4);
+const data2 = dg.generateSimpleSeries(40);
+const data3 = dg.generateSimpleSeries(40);
+
 storiesOf('Stylings', module)
   .add('margins and paddings', () => {
     const theme: PartialTheme = {
@@ -189,10 +194,8 @@ storiesOf('Stylings', module)
       lineSeriesStyle: {
         line: {
           stroke: DEFAULT_MISSING_COLOR,
-          strokeWidth: range('lStrokeWidth', 0, 10, 1, 'line'),
-          visible: true,
-          // not already customizeable
-          // visible: boolean('lVisible', true, 'line'),
+          strokeWidth: range('lineStrokeWidth', 0, 10, 1, 'line'),
+          visible: boolean('lineVisible', true, 'line'),
         },
         border: {
           stroke: 'gray',
@@ -204,26 +207,26 @@ storiesOf('Stylings', module)
           // visible: boolean('lBorderVisible', false, 'line'),
         },
         point: {
-          visible: true,
-          // not already customizeable
-          // visible: boolean('lPointVisible', true, 'line'),
-          radius: range('lPointRadius', 0, 20, 5, 'line'),
-          stroke: color('lPointStroke', 'white', 'line'),
-          strokeWidth: range('lPointStrokeWidth', 0, 20, 1, 'line'),
+          visible: boolean('linePointVisible', true, 'line'),
+          radius: range('linePointRadius', 0, 20, 1, 'line', 0.5),
+          // not customizable
+          stroke: 'red',
+          strokeWidth: range('linePointStrokeWidth', 0, 20, 0.5, 'line'),
+          opacity: range('linePointOpacity', 0, 1, 1, 'line', 0.01),
         },
       },
       areaSeriesStyle: {
         area: {
           // not already customizeable
           fill: DEFAULT_MISSING_COLOR,
-          visible: true,
+          visible: boolean('aAreaVisible', true, 'area'),
+          opacity: range('aAreaOpacity', 0, 1, 1, 'area'),
         },
         line: {
+          // not already customizeable
           stroke: DEFAULT_MISSING_COLOR,
           strokeWidth: range('aStrokeWidth', 0, 10, 1, 'area'),
-          visible: true,
-          // not already customizeable
-          // visible: boolean('aVisible', true, 'area'),
+          visible: boolean('aLineVisible', true, 'area'),
         },
         border: {
           stroke: 'gray',
@@ -235,12 +238,11 @@ storiesOf('Stylings', module)
           // visible: boolean('aBorderVisible', false, 'area'),
         },
         point: {
-          visible: true,
-          // not already customizeable
-          // visible: boolean('aPointVisible', true, 'area'),
-          radius: range('aPointRadius', 0, 20, 5, 'area'),
+          visible: boolean('aPointVisible', true, 'area'),
+          radius: range('aPointRadius', 0, 20, 1, 'area'),
           stroke: color('aPointStroke', 'white', 'area'),
-          strokeWidth: range('aPointStrokeWidth', 0, 20, 1, 'area'),
+          strokeWidth: range('aPointStrokeWidth', 0, 20, 0.5, 'area'),
+          opacity: range('aPointOpacity', 0, 1, 0.01, 'area'),
         },
       },
       barSeriesStyle: {
@@ -282,10 +284,7 @@ storiesOf('Stylings', module)
     const defaultTheme = darkmode ? DARK_THEME : LIGHT_THEME;
     const customTheme = mergeWithDefaultTheme(theme, defaultTheme);
     switchTheme(darkmode ? 'dark' : 'light');
-    const dg = new DataGenerator();
-    const data1 = dg.generateGroupedSeries(40, 4);
-    const data2 = dg.generateSimpleSeries(40);
-    const data3 = dg.generateSimpleSeries(40);
+
     return (
       <Chart renderer="canvas" className={className}>
         <Settings
@@ -376,7 +375,7 @@ storiesOf('Stylings', module)
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
-          title={'Bottom axis'}
+          // title={'Bottom axis'}
           showOverlappingTicks={true}
         />
         <Axis

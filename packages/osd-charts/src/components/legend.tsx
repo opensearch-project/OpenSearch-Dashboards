@@ -1,7 +1,4 @@
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import classNames from 'classnames';
 import { inject, observer } from 'mobx-react';
 import React from 'react';
@@ -35,7 +32,7 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
     if (
       !showLegend.get() ||
       !initialized.get() ||
-      legendItems.length === 0 ||
+      legendItems.size === 0 ||
       legendPosition === undefined
     ) {
       return null;
@@ -70,11 +67,11 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
             className="elasticChartsLegendListContainer"
             responsive={false}
           >
-            {legendItems.map((item, index) => {
+            {[...legendItems.values()].map((item) => {
               const legendItemProps = {
-                key: index,
+                key: item.key,
                 className: 'elasticChartsLegendList__item',
-                onMouseEnter: this.onLegendItemMouseover(index),
+                onMouseEnter: this.onLegendItemMouseover(item.key),
                 onMouseLeave: this.onLegendItemMouseout,
               };
 
@@ -82,7 +79,7 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
 
               return (
                 <EuiFlexItem {...legendItemProps}>
-                  {this.renderLegendElement({ color, label, isVisible }, index)}
+                  {this.renderLegendElement({ color, label, isVisible }, item.key)}
                 </EuiFlexItem>
               );
             })}
@@ -92,16 +89,19 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
     );
   }
 
-  private onLegendItemMouseover = (legendItemIndex: number) => () => {
-    this.props.chartStore!.onLegendItemOver(legendItemIndex);
+  private onLegendItemMouseover = (legendItemKey: string) => () => {
+    this.props.chartStore!.onLegendItemOver(legendItemKey);
   }
 
   private onLegendItemMouseout = () => {
     this.props.chartStore!.onLegendItemOut();
   }
 
-  private renderLegendElement = ({ color, label, isVisible }: Partial<LegendItem>, legendItemIndex: number) => {
-    const props = { color, label, isVisible, index: legendItemIndex };
+  private renderLegendElement = (
+    { color, label, isVisible }: Partial<LegendItem>,
+    legendItemKey: string,
+  ) => {
+    const props = { color, label, isVisible, legendItemKey };
 
     return <LegendElement {...props} />;
   }

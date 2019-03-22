@@ -9,7 +9,7 @@ export type XDomain = BaseDomain & {
   /* if the scale needs to be a band scale: used when displaying bars */
   isBandScale: boolean;
   /* the minimum interval of the scale if not-ordinal band-scale*/
-  minInterval: number | null;
+  minInterval: number;
 };
 
 /**
@@ -24,12 +24,11 @@ export function mergeXDomain(
   if (!mainXScaleType) {
     throw new Error('Cannot merge the domain. Missing X scale types');
   }
-  // TODO
-  // compute the domain merging the configured static domains
+  // TODO: compute this domain merging also/overwritted by any configured static domains
 
   const values = [...xValues.values()];
   let seriesXComputedDomains;
-  let minInterval = null;
+  let minInterval = 0;
   if (mainXScaleType.scaleType === ScaleType.Ordinal) {
     seriesXComputedDomains = computeOrdinalDataDomain(values, identity, false, true);
     if (xDomain) {
@@ -64,18 +63,21 @@ export function mergeXDomain(
 }
 
 /**
- * Find the minimum interval between numerical xValues that can be used
- * to display a bar chart in a linear scale.
+ * Find the minimum interval between xValues.
+ * Default to 0 if an empty array, 1 if one item array
  */
-export function findMinInterval(xValues: number[]): number | null {
-  if (xValues.length === 1) {
+export function findMinInterval(xValues: number[]): number {
+  const valuesLength = xValues.length - 1;
+  if (valuesLength < 0) {
+    return 0;
+  }
+  if (valuesLength === 0) {
     return 1;
   }
   const sortedValues = xValues.slice().sort(compareByValueAsc);
-  const sortedValuesLength = sortedValues.length - 1;
   let i;
   let minInterval = null;
-  for (i = 0; i < sortedValuesLength; i++) {
+  for (i = 0; i < valuesLength; i++) {
     const current = sortedValues[i];
     const next = sortedValues[i + 1];
     const interval = Math.abs(next - current);
@@ -85,7 +87,7 @@ export function findMinInterval(xValues: number[]): number | null {
       minInterval = Math.min(minInterval, interval);
     }
   }
-  return minInterval;
+  return minInterval === null ? 0 : minInterval;
 }
 
 /**

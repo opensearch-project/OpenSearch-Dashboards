@@ -6,6 +6,7 @@ import {
   AxisConfig,
   BarSeriesStyle,
   ColorConfig,
+  CrosshairStyle,
   DEFAULT_GRID_LINE_CONFIG,
   LegendStyle,
   LineSeriesStyle,
@@ -88,6 +89,7 @@ describe('Themes', () => {
         stroke: 'elastic_charts',
         strokeWidth: 314571,
         visible: true,
+        opacity: 314571,
       },
     };
     const customTheme = mergeWithDefaultTheme({
@@ -108,6 +110,7 @@ describe('Themes', () => {
       area: {
         fill: 'elastic_charts',
         visible: true,
+        opacity: 314571,
       },
       line: {
         stroke: 'elastic_charts',
@@ -124,6 +127,7 @@ describe('Themes', () => {
         radius: 314571,
         stroke: 'elastic_charts',
         strokeWidth: 314571,
+        opacity: 314571,
       },
     };
     const customTheme = mergeWithDefaultTheme({
@@ -294,6 +298,30 @@ describe('Themes', () => {
       DARK_THEME,
     );
     expect(customDarkTheme.legend).toEqual(legend);
+  });
+  it('should merge partial theme: crosshair', () => {
+    const crosshair: CrosshairStyle = {
+      band: {
+        visible: false,
+        fill: 'elastic_charts_c1',
+      },
+      line: {
+        visible: false,
+        stroke: 'elastic_charts_c1',
+        strokeWidth: 314571,
+      },
+    };
+    const customTheme = mergeWithDefaultTheme({
+      crosshair,
+    });
+    expect(customTheme.crosshair).toEqual(crosshair);
+    const customDarkTheme = mergeWithDefaultTheme(
+      {
+        crosshair,
+      },
+      DARK_THEME,
+    );
+    expect(customDarkTheme.crosshair).toEqual(crosshair);
   });
 
   it('should merge partial grid line configs', () => {

@@ -60,43 +60,79 @@ describe('Legends', () => {
     seriesColor.set('colorSeries1a', colorValues1a);
     const legend = computeLegend(seriesColor, seriesColorMap, specs, 'violet');
     const expected = [
-      { color: 'red', label: 'spec1', value: { colorValues: [], specId: 'spec1' }, isVisible: true },
+      {
+        color: 'red',
+        label: 'spec1',
+        value: { colorValues: [], specId: 'spec1' },
+        isVisible: true,
+        key: 'colorSeries1a',
+      },
     ];
-    expect(legend).toEqual(expected);
+    expect(Array.from(legend.values())).toEqual(expected);
   });
   it('compute legend for a single spec but with multiple series', () => {
     seriesColor.set('colorSeries1a', colorValues1a);
     seriesColor.set('colorSeries1b', colorValues1b);
     const legend = computeLegend(seriesColor, seriesColorMap, specs, 'violet');
     const expected = [
-      { color: 'red', label: 'spec1', value: { colorValues: [], specId: 'spec1' }, isVisible: true },
-      { color: 'blue', label: 'a - b', value: { colorValues: ['a', 'b'], specId: 'spec1' }, isVisible: true },
+      {
+        color: 'red',
+        label: 'spec1',
+        value: { colorValues: [], specId: 'spec1' },
+        isVisible: true,
+        key: 'colorSeries1a',
+      },
+      {
+        color: 'blue',
+        label: 'a - b',
+        value: { colorValues: ['a', 'b'], specId: 'spec1' },
+        isVisible: true,
+        key: 'colorSeries1b',
+      },
     ];
-    expect(legend).toEqual(expected);
+    expect(Array.from(legend.values())).toEqual(expected);
   });
   it('compute legend for multiple specs', () => {
     seriesColor.set('colorSeries1a', colorValues1a);
     seriesColor.set('colorSeries2a', colorValues2a);
     const legend = computeLegend(seriesColor, seriesColorMap, specs, 'violet');
     const expected = [
-      { color: 'red', label: 'spec1', value: { colorValues: [], specId: 'spec1' }, isVisible: true },
-      { color: 'green', label: 'spec2', value: { colorValues: [], specId: 'spec2' }, isVisible: true },
+      {
+        color: 'red',
+        label: 'spec1',
+        value: { colorValues: [], specId: 'spec1' },
+        isVisible: true,
+        key: 'colorSeries1a',
+      },
+      {
+        color: 'green',
+        label: 'spec2',
+        value: { colorValues: [], specId: 'spec2' },
+        isVisible: true,
+        key: 'colorSeries2a',
+      },
     ];
-    expect(legend).toEqual(expected);
+    expect(Array.from(legend.values())).toEqual(expected);
   });
   it('empty legend for missing spec', () => {
     seriesColor.set('colorSeries2b', colorValues2b);
     const legend = computeLegend(seriesColor, seriesColorMap, specs, 'violet');
-    expect(legend).toEqual([]);
+    expect(legend.size).toEqual(0);
   });
   it('compute legend with default color for missing series color', () => {
     seriesColor.set('colorSeries1a', colorValues1a);
     const emptyColorMap = new Map<string, string>();
     const legend = computeLegend(seriesColor, emptyColorMap, specs, 'violet');
     const expected = [
-      { color: 'violet', label: 'spec1', value: { colorValues: [], specId: 'spec1' }, isVisible: true },
+      {
+        color: 'violet',
+        label: 'spec1',
+        value: { colorValues: [], specId: 'spec1' },
+        isVisible: true,
+        key: 'colorSeries1a',
+      },
     ];
-    expect(legend).toEqual(expected);
+    expect(Array.from(legend.values())).toEqual(expected);
   });
   it('sets all series legend items to visible when selectedDataSeries is null', () => {
     seriesColor.set('colorSeries1a', colorValues1a);
@@ -109,7 +145,7 @@ describe('Legends', () => {
 
     const legend = computeLegend(seriesColor, emptyColorMap, specs, 'violet', selectedDataSeries);
 
-    const visibility = legend.map((item) => item.isVisible);
+    const visibility = [...legend.values()].map((item) => item.isVisible);
 
     expect(visibility).toEqual([true, true, true, true]);
   });
@@ -124,7 +160,7 @@ describe('Legends', () => {
 
     const legend = computeLegend(seriesColor, emptyColorMap, specs, 'violet', selectedDataSeries);
 
-    const visibility = legend.map((item) => item.isVisible);
+    const visibility = [...legend.values()].map((item) => item.isVisible);
     expect(visibility).toEqual([true, true, false, false]);
   });
 });

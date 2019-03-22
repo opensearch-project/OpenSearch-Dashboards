@@ -41,7 +41,7 @@ export interface TickLabelProps {
  * @param axisSpec tbe spec of the axis
  * @param xDomain the x domain associated
  * @param yDomain the y domain array
- * @param totalGroupCount the total number of grouped series
+ * @param totalBarsInCluster the total number of grouped series
  * @param bboxCalculator an instance of the boundingbox calculator
  * @param chartRotation the rotation of the chart
  */
@@ -49,7 +49,7 @@ export function computeAxisTicksDimensions(
   axisSpec: AxisSpec,
   xDomain: XDomain,
   yDomain: YDomain[],
-  totalGroupCount: number,
+  totalBarsInCluster: number,
   bboxCalculator: BBoxCalculator,
   chartRotation: Rotation,
   axisConfig: AxisConfig,
@@ -62,7 +62,7 @@ export function computeAxisTicksDimensions(
     axisSpec,
     xDomain,
     yDomain,
-    totalGroupCount,
+    totalBarsInCluster,
     chartRotation,
     0,
     1,
@@ -98,7 +98,7 @@ export function getScaleForAxisSpec(
   axisSpec: AxisSpec,
   xDomain: XDomain,
   yDomain: YDomain[],
-  totalGroupCount: number,
+  totalBarsInCluster: number,
   chartRotation: Rotation,
   minRange: number,
   maxRange: number,
@@ -112,7 +112,7 @@ export function getScaleForAxisSpec(
     }
     return null;
   } else {
-    return computeXScale(xDomain, totalGroupCount, minRange, maxRange);
+    return computeXScale(xDomain, totalBarsInCluster, minRange, maxRange);
   }
 }
 
@@ -378,9 +378,9 @@ export function getLeftAxisMinMaxRange(chartRotation: Rotation, height: number) 
   }
 }
 
-export function getAvailableTicks(axisSpec: AxisSpec, scale: Scale, totalGroupCount: number) {
+export function getAvailableTicks(axisSpec: AxisSpec, scale: Scale, totalBarsInCluster: number) {
   const ticks = scale.ticks();
-  const shift = totalGroupCount > 0 ? totalGroupCount : 1;
+  const shift = totalBarsInCluster > 0 ? totalBarsInCluster : 1;
   const offset = (scale.bandwidth * shift) / 2;
   return ticks.map((tick) => {
     return {

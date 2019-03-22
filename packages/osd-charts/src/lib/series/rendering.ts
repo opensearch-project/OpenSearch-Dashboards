@@ -1,4 +1,5 @@
 import { area, line } from 'd3-shape';
+import { mutableIndexedGeometryMapUpsert } from '../../state/utils';
 import { SharedGeometryStyle } from '../themes/theme';
 import { SpecId } from '../utils/ids';
 import { Scale, ScaleType } from '../utils/scales/scales';
@@ -19,6 +20,17 @@ export interface GeometryValue extends GeometryId {
 /** Shared style properties for varies geometries */
 export interface GeometryStyle {
   opacity: number;
+}
+
+export interface IndexedGeometry extends GeometryValue {
+  color: string;
+  geom: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    isPoint?: true;
+  };
 }
 
 export interface PointGeometry {
@@ -70,11 +82,32 @@ export function renderPoints(
   color: string,
   specId: SpecId,
   seriesKey: any[],
-): PointGeometry[] {
-  return dataset.map((datum) => {
+): {
+  pointGeometries: PointGeometry[];
+  indexedGeometries: Map<any, IndexedGeometry[]>;
+} {
+  const indexedGeometries: Map<any, IndexedGeometry[]> = new Map();
+
+  const pointGeometries = dataset.map((datum) => {
+    const x = xScale.scale(datum.x);
+    const y = yScale.scale(datum.y1);
+    const indexedGeometry: IndexedGeometry = {
+      specId,
+      datum: datum.datum,
+      color,
+      seriesKey,
+      geom: {
+        x: x + shift,
+        y,
+        width: 10,
+        height: 10,
+        isPoint: true,
+      },
+    };
+    mutableIndexedGeometryMapUpsert(indexedGeometries, datum.x, indexedGeometry);
     return {
-      x: xScale.scale(datum.x),
-      y: yScale.scale(datum.y1),
+      x,
+      y,
       color,
       value: {
         specId,
@@ -87,6 +120,10 @@ export function renderPoints(
       },
     };
   });
+  return {
+    pointGeometries,
+    indexedGeometries,
+  };
 }
 
 export function renderBars(
@@ -97,15 +134,18 @@ export function renderBars(
   color: string,
   specId: SpecId,
   seriesKey: any[],
-): BarGeometry[] {
-  const barGeometries: BarGeometry[] = [];
+): {
+  barGeometries: BarGeometry[];
+  indexedGeometries: Map<any, IndexedGeometry[]>;
+} {
+  const indexedGeometries: Map<any, IndexedGeometry[]> = new Map();
   const xDomain = xScale.domain;
   const xScaleType = xScale.type;
+  const barGeometries: BarGeometry[] = [];
+  dataset.forEach((datum) => {
+    const { y0, y1 } = datum;
 
-  dataset.forEach((datum, i) => {
-    const { x, y0, y1 } = datum;
-
-    if (xScaleType === ScaleType.Ordinal && !xDomain.includes(x)) {
+    if (xScaleType === ScaleType.Ordinal && !xDomain.includes(datum.x)) {
       return;
     }
 
@@ -124,11 +164,25 @@ export function renderBars(
       y = yScale.scale(y1);
       height = yScale.scale(y0) - y;
     }
-
+    const x = xScale.scale(datum.x) + xScale.bandwidth * orderIndex;
+    const width = xScale.bandwidth;
+    const indexedGeometry: IndexedGeometry = {
+      specId,
+      datum: datum.datum,
+      geom: {
+        x,
+        y,
+        width,
+        height,
+      },
+      color,
+      seriesKey,
+    };
+    mutableIndexedGeometryMapUpsert(indexedGeometries, datum.x, indexedGeometry);
     const barGeometry = {
-      x: xScale.scale(x) + xScale.bandwidth * orderIndex,
+      x,
       y, // top most value
-      width: xScale.bandwidth,
+      width,
       height,
       color,
       value: {
@@ -141,11 +195,12 @@ export function renderBars(
         seriesKey,
       },
     };
-
     barGeometries.push(barGeometry);
   });
-
-  return barGeometries;
+  return {
+    barGeometries,
+    indexedGeometries,
+  };
 }
 
 export function renderLine(
@@ -157,16 +212,28 @@ export function renderLine(
   curve: CurveType,
   specId: SpecId,
   seriesKey: any[],
-): LineGeometry {
+): {
+  lineGeometry: LineGeometry;
+  indexedGeometries: Map<any, IndexedGeometry[]>;
+} {
   const pathGenerator = line<DataSeriesDatum>()
     .x((datum: DataSeriesDatum) => xScale.scale(datum.x))
     .y((datum: DataSeriesDatum) => yScale.scale(datum.y1))
     .curve(getCurveFactory(curve));
   const y = 0;
   const x = shift;
-  return {
+  const { pointGeometries, indexedGeometries } = renderPoints(
+    shift,
+    dataset,
+    xScale,
+    yScale,
+    color,
+    specId,
+    seriesKey,
+  );
+  const lineGeometry = {
     line: pathGenerator(dataset) || '',
-    points: renderPoints(shift, dataset, xScale, yScale, color, specId, seriesKey),
+    points: pointGeometries,
     color,
     transform: {
       x,
@@ -176,6 +243,10 @@ export function renderLine(
       specId,
       seriesKey,
     },
+  };
+  return {
+    lineGeometry,
+    indexedGeometries,
   };
 }
 
@@ -188,14 +259,26 @@ export function renderArea(
   curve: CurveType,
   specId: SpecId,
   seriesKey: any[],
-): AreaGeometry {
+): {
+  areaGeometry: AreaGeometry;
+  indexedGeometries: Map<any, IndexedGeometry[]>;
+} {
   const pathGenerator = area<DataSeriesDatum>()
     .x((datum: DataSeriesDatum) => xScale.scale(datum.x))
     .y1((datum: DataSeriesDatum) => yScale.scale(datum.y1))
     .y0((datum: DataSeriesDatum) => yScale.scale(datum.y0))
     .curve(getCurveFactory(curve));
-  const lineGeometry = renderLine(shift, dataset, xScale, yScale, color, curve, specId, seriesKey);
-  return {
+  const { lineGeometry, indexedGeometries } = renderLine(
+    shift,
+    dataset,
+    xScale,
+    yScale,
+    color,
+    curve,
+    specId,
+    seriesKey,
+  );
+  const areaGeometry = {
     area: pathGenerator(dataset) || '',
     line: lineGeometry.line,
     points: lineGeometry.points,
@@ -205,6 +288,10 @@ export function renderArea(
       specId,
       seriesKey,
     },
+  };
+  return {
+    areaGeometry,
+    indexedGeometries,
   };
 }
 
@@ -229,4 +316,16 @@ export function getGeometryStyle(
   }
 
   return sharedStyle.default;
+}
+
+export function isPointOnGeometry(x: number, y: number, { geom }: Pick<IndexedGeometry, 'geom'>) {
+  if (geom.isPoint) {
+    return (
+      y >= geom.y - geom.height &&
+      y <= geom.y + geom.height &&
+      x >= geom.x - geom.width &&
+      x <= geom.x + geom.width
+    );
+  }
+  return y >= geom.y && y <= geom.y + geom.height && x >= geom.x && x <= geom.x + geom.width;
 }

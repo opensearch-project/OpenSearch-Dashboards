@@ -4,23 +4,10 @@ import { AxisId, GroupId, SpecId } from '../utils/ids';
 import { ScaleContinuousType, ScaleType } from '../utils/scales/scales';
 import { CurveType } from './curves';
 import { DataSeriesColorsValues } from './series';
-import { TooltipPosition } from './tooltip';
 
 export type Datum = any;
 export type Rotation = 0 | 90 | -90 | 180;
 export type Rendering = 'canvas' | 'svg';
-export enum DataSeriesType {
-  Bar = 'bar',
-  Line = 'line',
-  Area = 'area',
-  Point = 'point',
-}
-export interface GeomDatum {
-  specId: SpecId;
-  yAccessor: Accessor;
-  datum: Datum;
-  tooltipPosition: TooltipPosition;
-}
 
 export interface DomainRange {
   min: number;

@@ -1,5 +1,5 @@
 import { ScaleBand } from './scale_band';
-import { ScaleContinuous } from './scale_continuous';
+import { ScaleContinuous, StepType } from './scale_continuous';
 
 export interface Scale {
   domain: any[];
@@ -7,7 +7,9 @@ export interface Scale {
   ticks: () => any[];
   scale: (value: any) => number;
   invert: (value: number) => any;
+  invertWithStep: (value: number, stepType?: StepType) => any;
   bandwidth: number;
+  minInterval: number;
   type: ScaleType;
   isInverted: boolean;
 }

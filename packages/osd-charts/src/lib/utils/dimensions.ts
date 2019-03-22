@@ -18,10 +18,14 @@ export interface Margins {
 }
 
 /**
- * Compute the chart dimension padding the parent dimension by the specified set of axis
+ * Compute the chart dimensions. It's computed removing from the parent dimensions
+ * the axis spaces, the legend and any other specified style margin and padding.
  * @param parentDimensions the parent dimension
+ * @param chartTheme the theme style of the chart
  * @param axisDimensions the axis dimensions
  * @param axisSpecs the axis specs
+ * @param showLegend is the legend shown
+ * @param legendPosition the optional legend position
  */
 export function computeChartDimensions(
   parentDimensions: Dimensions,

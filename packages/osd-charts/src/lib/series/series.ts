@@ -351,20 +351,20 @@ export function getSplittedSeries(
   const splittedSeries = new Map<SpecId, RawDataSeries[]>();
   const seriesColors = new Map<string, DataSeriesColorsValues>();
   const xValues: Set<any> = new Set();
-
   for (const [specId, spec] of seriesSpecs) {
     const dataSeries = splitSeries(spec.data, spec, specId);
-
     let currentRawDataSeries = dataSeries.rawDataSeries;
     if (selectedDataSeries) {
-      currentRawDataSeries = dataSeries.rawDataSeries.filter((series): boolean => {
-        const seriesValues = {
-          specId,
-          colorValues: series.key,
-        };
+      currentRawDataSeries = dataSeries.rawDataSeries.filter(
+        (series): boolean => {
+          const seriesValues = {
+            specId,
+            colorValues: series.key,
+          };
 
-        return findSelectedDataSeries(selectedDataSeries, seriesValues) > -1;
-      });
+          return findSelectedDataSeries(selectedDataSeries, seriesValues) > -1;
+        },
+      );
     }
 
     splittedSeries.set(specId, currentRawDataSeries);
@@ -397,13 +397,10 @@ export function getSeriesColorMap(
 
   seriesColors.forEach((value: DataSeriesColorsValues, seriesColorKey: string) => {
     const customSeriesColor: string | undefined = customColors.get(seriesColorKey);
-    const color = customSeriesColor ||
-      chartColors.vizColors[counter % chartColors.vizColors.length];
+    const color =
+      customSeriesColor || chartColors.vizColors[counter % chartColors.vizColors.length];
 
-    seriesColorMap.set(
-      seriesColorKey,
-      color,
-    );
+    seriesColorMap.set(seriesColorKey, color);
     counter++;
   });
   return seriesColorMap;

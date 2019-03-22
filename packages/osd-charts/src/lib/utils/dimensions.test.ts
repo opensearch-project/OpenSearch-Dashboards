@@ -76,6 +76,8 @@ describe('Computed chart dimensions', () => {
       axisSpecs,
       showLegend,
     );
+    expect(chartDimensions.left + chartDimensions.width).toBeLessThanOrEqual(parentDim.width);
+    expect(chartDimensions.top + chartDimensions.height).toBeLessThanOrEqual(parentDim.height);
     expect(chartDimensions).toMatchSnapshot();
   });
   test('should be padded by a left axis', () => {
@@ -92,6 +94,8 @@ describe('Computed chart dimensions', () => {
       axisSpecs,
       showLegend,
     );
+    expect(chartDimensions.left + chartDimensions.width).toBeLessThanOrEqual(parentDim.width);
+    expect(chartDimensions.top + chartDimensions.height).toBeLessThanOrEqual(parentDim.height);
     expect(chartDimensions).toMatchSnapshot();
   });
   test('should be padded by a right axis', () => {
@@ -108,6 +112,8 @@ describe('Computed chart dimensions', () => {
       axisSpecs,
       showLegend,
     );
+    expect(chartDimensions.left + chartDimensions.width).toBeLessThanOrEqual(parentDim.width);
+    expect(chartDimensions.top + chartDimensions.height).toBeLessThanOrEqual(parentDim.height);
     expect(chartDimensions).toMatchSnapshot();
   });
   test('should be padded by a top axis', () => {
@@ -127,6 +133,8 @@ describe('Computed chart dimensions', () => {
       axisSpecs,
       showLegend,
     );
+    expect(chartDimensions.left + chartDimensions.width).toBeLessThanOrEqual(parentDim.width);
+    expect(chartDimensions.top + chartDimensions.height).toBeLessThanOrEqual(parentDim.height);
     expect(chartDimensions).toMatchSnapshot();
   });
   test('should be padded by a bottom axis', () => {
@@ -146,6 +154,8 @@ describe('Computed chart dimensions', () => {
       axisSpecs,
       showLegend,
     );
+    expect(chartDimensions.left + chartDimensions.width).toBeLessThanOrEqual(parentDim.width);
+    expect(chartDimensions.top + chartDimensions.height).toBeLessThanOrEqual(parentDim.height);
     expect(chartDimensions).toMatchSnapshot();
   });
   test('should not add space for axis when no spec for axis dimensions or axis is hidden', () => {

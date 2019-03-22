@@ -17,7 +17,7 @@ class LegendButtonComponent extends React.Component<ReactiveChartProps> {
   render() {
     const { initialized, legendItems, legendCollapsed, showLegend } = this.props.chartStore!;
 
-    if (!showLegend.get() || !initialized.get() || legendItems.length === 0) {
+    if (!showLegend.get() || !initialized.get() || legendItems.size === 0) {
       return null;
     }
     const isOpen = !legendCollapsed.get();

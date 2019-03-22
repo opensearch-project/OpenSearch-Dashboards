@@ -4,6 +4,7 @@ import { DomainRange, Position, Rendering, Rotation } from '../lib/series/specs'
 import { LIGHT_THEME } from '../lib/themes/light_theme';
 import { Theme } from '../lib/themes/theme';
 import { Domain } from '../lib/utils/domain';
+import { TooltipType } from '../lib/utils/interactions';
 import {
   BrushEndListener,
   ChartStore,
@@ -12,6 +13,9 @@ import {
   LegendItemListener,
 } from '../state/chart_state';
 
+export const DEFAULT_TOOLTIP_TYPE = TooltipType.VerticalCursor;
+export const DEFAULT_TOOLTIP_SNAP = true;
+
 interface SettingSpecProps {
   chartStore?: ChartStore;
   theme?: Theme;
@@ -19,6 +23,10 @@ interface SettingSpecProps {
   rotation: Rotation;
   animateData: boolean;
   showLegend: boolean;
+  /** Specify the tooltip type */
+  tooltipType?: TooltipType;
+  /** Snap tooltip to grid */
+  tooltipSnap?: boolean;
   debug: boolean;
   legendPosition?: Position;
   onElementClick?: ElementClickListener;
@@ -41,6 +49,8 @@ function updateChartStore(props: SettingSpecProps) {
     rendering,
     animateData,
     showLegend,
+    tooltipType,
+    tooltipSnap,
     legendPosition,
     onElementClick,
     onElementOver,
@@ -62,6 +72,9 @@ function updateChartStore(props: SettingSpecProps) {
   chartStore.chartRendering = rendering;
   chartStore.animateData = animateData;
   chartStore.debug = debug;
+
+  chartStore.tooltipType.set(tooltipType!);
+  chartStore.tooltipSnap.set(tooltipSnap!);
 
   chartStore.setShowLegend(showLegend);
   chartStore.legendPosition = legendPosition;
@@ -103,6 +116,8 @@ export class SettingsComponent extends PureComponent<SettingSpecProps> {
     animateData: true,
     showLegend: false,
     debug: false,
+    tooltipType: DEFAULT_TOOLTIP_TYPE,
+    tooltipSnap: DEFAULT_TOOLTIP_SNAP,
   };
   componentDidMount() {
     updateChartStore(this.props);

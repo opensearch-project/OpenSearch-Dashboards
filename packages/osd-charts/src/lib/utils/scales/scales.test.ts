@@ -139,4 +139,80 @@ describe('Scale Test', () => {
     limitedDomain = limitLogScaleDomain([50, -100]);
     expect(limitedDomain).toEqual([-1, -100]);
   });
+
+  test('compare ordinal scale and linear/band invertWithStep 3 bars', () => {
+    const dataLinear = [0, 2];
+    const dataOrdinal = [0, 1, 2];
+    const minRange = 0;
+    const maxRange = 120;
+    const bandwidth = maxRange / 3;
+    const linearScale = createContinuousScale(
+      ScaleType.Linear,
+      dataLinear,
+      minRange,
+      maxRange - bandwidth, // we currently limit the range like that a band linear scale
+      bandwidth,
+      false,
+      1,
+    );
+    const ordinalScale = createOrdinalScale(dataOrdinal, minRange, maxRange);
+    expect(ordinalScale.invertWithStep(0)).toBe(0);
+    expect(ordinalScale.invertWithStep(40)).toBe(1);
+    expect(ordinalScale.invertWithStep(80)).toBe(2);
+    expect(linearScale.invertWithStep(0)).toBe(0);
+    expect(linearScale.invertWithStep(40)).toBe(1);
+    expect(linearScale.invertWithStep(80)).toBe(2);
+  });
+  test('compare ordinal scale and linear/band 2 bars', () => {
+    const dataLinear = [0, 1];
+    const dataOrdinal = [0, 1];
+    const minRange = 0;
+    const maxRange = 100;
+    const bandwidth = maxRange / 2;
+    const linearScale = createContinuousScale(
+      ScaleType.Linear,
+      dataLinear,
+      minRange,
+      maxRange - bandwidth, // we currently limit the range like that a band linear scale
+      bandwidth,
+      false,
+      1,
+    );
+    const ordinalScale = createOrdinalScale(dataOrdinal, minRange, maxRange);
+
+    expect(ordinalScale.scale(0)).toBe(0);
+    expect(ordinalScale.scale(1)).toBe(50);
+    expect(linearScale.scale(0)).toBe(0);
+    expect(linearScale.scale(1)).toBe(50);
+
+    expect(ordinalScale.invertWithStep(0)).toBe(0);
+    expect(ordinalScale.invertWithStep(50)).toBe(1);
+    expect(ordinalScale.invertWithStep(100)).toBe(1);
+    expect(linearScale.invertWithStep(0)).toBe(0);
+    expect(linearScale.invertWithStep(50)).toBe(1);
+    // expect(linearScale.invertWithStep(100)).toBe(1);
+    expect(linearScale.bandwidth).toBe(50);
+    expect(linearScale.range).toEqual([0, 50]);
+  });
+  test.skip('compare ordinal scale and linear/band 2 bars', () => {
+    // I'm skipping this because the current implementation of linearScale
+    // is a bit different than the ordinalScale when forcing bandwidth on linear scale
+    const dataLinear = [0, 1];
+    const dataOrdinal = [0, 1];
+    const minRange = 0;
+    const maxRange = 100;
+    const bandwidth = maxRange / 2;
+    const linearScale = createContinuousScale(
+      ScaleType.Linear,
+      dataLinear,
+      minRange,
+      maxRange - bandwidth, // we currently limit the range like that a band linear scale
+      bandwidth,
+      false,
+      1,
+    );
+    const ordinalScale = createOrdinalScale(dataOrdinal, minRange, maxRange);
+    expect(ordinalScale.invertWithStep(100)).toBe(1);
+    expect(linearScale.invertWithStep(100)).toBe(1);
+  });
 });

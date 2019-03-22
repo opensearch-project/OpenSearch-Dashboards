@@ -1,27 +1,16 @@
 import { Group as KonvaGroup } from 'konva';
-import { IAction } from 'mobx';
 import React from 'react';
 import { Circle, Group, Path } from 'react-konva';
 import { animated, Spring } from 'react-spring/renderprops-konva';
 import { LegendItem } from '../../lib/series/legend';
-import {
-  AreaGeometry,
-  GeometryValue,
-  getGeometryStyle,
-  PointGeometry,
-} from '../../lib/series/rendering';
+import { AreaGeometry, getGeometryStyle, PointGeometry } from '../../lib/series/rendering';
 import { AreaSeriesStyle, SharedGeometryStyle } from '../../lib/themes/theme';
-import { ElementClickListener, TooltipData } from '../../state/chart_state';
 
 interface AreaGeometriesDataProps {
   animated?: boolean;
   areas: AreaGeometry[];
-  num?: number;
   style: AreaSeriesStyle;
   sharedStyle: SharedGeometryStyle;
-  onElementClick?: ElementClickListener;
-  onElementOver: ((tooltip: TooltipData) => void) & IAction;
-  onElementOut: (() => void) & IAction;
   highlightedLegendItem: LegendItem | null;
 }
 interface AreaGeometriesDataState {
@@ -33,7 +22,6 @@ export class AreaGeometries extends React.PureComponent<
 > {
   static defaultProps: Partial<AreaGeometriesDataProps> = {
     animated: false,
-    num: 1,
   };
   private readonly barSeriesRef: React.RefObject<KonvaGroup> = React.createRef();
   constructor(props: AreaGeometriesDataProps) {
@@ -44,43 +32,15 @@ export class AreaGeometries extends React.PureComponent<
     };
   }
   render() {
+    const { point, area, line } = this.props.style;
+
     return (
       <Group ref={this.barSeriesRef} key={'bar_series'}>
-        {this.renderAreaGeoms()}
-        {this.renderAreaPoints()}
+        {area.visible && this.renderAreaGeoms()}
+        {line.visible && this.renderAreaLine()}
+        {point.visible && this.renderAreaPoints()}
       </Group>
     );
-  }
-  private onElementClick = (value: GeometryValue) => () => {
-    if (this.props.onElementClick) {
-      this.props.onElementClick(value);
-    }
-  }
-  private onOverPoint = (point: PointGeometry) => () => {
-    const { onElementOver } = this.props;
-    const { x, y, value, transform } = point;
-    this.setState(() => {
-      return {
-        overPoint: point,
-      };
-    });
-    onElementOver({
-      value,
-      position: {
-        left: transform.x + x,
-        top: y,
-      },
-    });
-  }
-  private onOutPoint = () => {
-    const { onElementOut } = this.props;
-
-    this.setState(() => {
-      return {
-        overPoint: undefined,
-      };
-    });
-    onElementOut();
   }
   private renderAreaPoints = (): JSX.Element[] => {
     const { areas } = this.props;
@@ -93,57 +53,97 @@ export class AreaGeometries extends React.PureComponent<
     );
   }
   private renderPoints = (areaPoints: PointGeometry[], i: number): JSX.Element[] => {
-    const { radius, stroke, strokeWidth } = this.props.style.point;
-    const { overPoint } = this.state;
+    const { radius, stroke, strokeWidth, opacity } = this.props.style.point;
 
     return areaPoints.map((areaPoint, index) => {
-      const { x, y, color, value, transform } = areaPoint;
-      return (
-        <Group key={`point-${i}-${index}`}>
+      const { x, y, color, transform } = areaPoint;
+      if (this.props.animated) {
+        return (
+          <Group key={`area-point-group-${i}-${index}`} x={transform.x}>
+            <Spring native from={{ y }} to={{ y }}>
+              {(props: { y: number }) => (
+                <animated.Circle
+                  key={`area-point-${index}`}
+                  x={x}
+                  y={y}
+                  radius={radius}
+                  strokeWidth={strokeWidth}
+                  strokeEnabled={strokeWidth !== 0}
+                  stroke={color}
+                  fill={'white'}
+                  opacity={opacity}
+                  strokeHitEnabled={false}
+                  listening={false}
+                  perfectDrawEnabled={false}
+                />
+              )}
+            </Spring>
+          </Group>
+        );
+      } else {
+        return (
           <Circle
-            x={transform.x + x}
-            y={y}
-            radius={radius * 2.5}
-            onClick={this.onElementClick(value)}
-            onMouseOver={this.onOverPoint(areaPoint)}
-            onMouseLeave={this.onOutPoint}
-            fill={'gray'}
-            opacity={overPoint === areaPoint ? 0.3 : 0}
-          />
-          <Circle
+            key={`area-point-${index}`}
             x={transform.x + x}
             y={y}
             radius={radius}
-            strokeWidth={0}
-            fill={color}
-            opacity={overPoint === areaPoint ? 0.5 : 0}
-            strokeHitEnabled={false}
-            listening={false}
-            perfectDrawEnabled={true}
-          />
-          <Circle
-            x={transform.x + x}
-            y={y}
-            radius={radius}
-            onMouseOver={this.onOverPoint(areaPoint)}
-            onMouseLeave={this.onOutPoint}
-            fill={'transparent'}
-            stroke={stroke}
             strokeWidth={strokeWidth}
-            opacity={overPoint === areaPoint ? 1 : 0}
+            stroke={stroke}
+            fill={color}
+            opacity={opacity}
             strokeHitEnabled={false}
             listening={false}
-            perfectDrawEnabled={true}
+            perfectDrawEnabled={false}
           />
-        </Group>
-      );
+        );
+      }
     });
   }
 
   private renderAreaGeoms = (): JSX.Element[] => {
-    const { areas, sharedStyle } = this.props;
+    const { areas } = this.props;
+    const { opacity } = this.props.style.area;
+
     return areas.map((glyph, i) => {
-      const { area, color, transform, geometryId } = glyph;
+      const { area, color, transform } = glyph;
+
+      if (this.props.animated) {
+        return (
+          <Group key={`area-group-${i}`} x={transform.x}>
+            <Spring native from={{ area }} to={{ area }}>
+              {(props: { area: string }) => (
+                <animated.Path
+                  key={`area-${i}`}
+                  data={props.area}
+                  fill={color}
+                  lineCap="round"
+                  lineJoin="round"
+                  opacity={opacity}
+                />
+              )}
+            </Spring>
+          </Group>
+        );
+      } else {
+        return (
+          <Path
+            key={`area-${i}`}
+            data={area}
+            fill={color}
+            opacity={opacity}
+            lineCap="round"
+            lineJoin="round"
+          />
+        );
+      }
+    });
+  }
+  private renderAreaLine = (): JSX.Element[] => {
+    const { areas, sharedStyle } = this.props;
+    const { strokeWidth } = this.props.style.line;
+
+    return areas.map((glyph, i) => {
+      const { line, color, transform, geometryId } = glyph;
 
       const geometryStyle = getGeometryStyle(
         geometryId,
@@ -153,14 +153,17 @@ export class AreaGeometries extends React.PureComponent<
 
       if (this.props.animated) {
         return (
-          <Group key={`area-group-${i}`} x={transform.x}>
-            <Spring native from={{ area }} to={{ area }}>
-              {(props: { area: string }) => (
+          <Group key={`area-line-group-${i}`} x={transform.x}>
+            <Spring native from={{ line }} to={{ line }}>
+              {(props: { line: string }) => (
                 <animated.Path
-                  key="area"
-                  data={props.area}
-                  fill={color}
+                  key={`line-${i}`}
+                  data={props.line}
+                  stroke={color}
+                  strokeWidth={strokeWidth}
                   listening={false}
+                  lineCap="round"
+                  lineJoin="round"
                   {...geometryStyle}
                 />
               )}
@@ -169,7 +172,7 @@ export class AreaGeometries extends React.PureComponent<
         );
       } else {
         return (
-          <Path key={`area-${i}`} data={area} fill={color} listening={false} {...geometryStyle} />
+          <Path key={`line-${i}`} data={line} fill={color} listening={false} {...geometryStyle} />
         );
       }
     });

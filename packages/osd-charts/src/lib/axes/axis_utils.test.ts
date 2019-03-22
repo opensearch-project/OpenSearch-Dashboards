@@ -134,15 +134,7 @@ describe('Axis computational utils', () => {
     expect(axisDimensions).toEqual(axis1Dims);
 
     const computeScalelessSpec = () => {
-      computeAxisTicksDimensions(
-        ungroupedAxisSpec,
-        xDomain,
-        [yDomain],
-        1,
-        bboxCalculator,
-        0,
-        axes,
-      );
+      computeAxisTicksDimensions(ungroupedAxisSpec, xDomain, [yDomain], 1, bboxCalculator, 0, axes);
     };
 
     const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: getGroupId('foo') };
@@ -839,6 +831,35 @@ describe('Axis computational utils', () => {
     expect(bottomAxisPosition).toEqual(expectedBottomAxisPosition);
   });
 
+  test('should not compute axis ticks positions if missaligned specs', () => {
+    const chartRotation = 0;
+    const showLegend = true;
+    const leftLegendPosition = Position.Left;
+
+    const axisSpecs = new Map();
+    axisSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+
+    const axisDims = new Map();
+    axisDims.set(getAxisId('not_a_mapped_one'), axis1Dims);
+
+    const axisTicksPosition = getAxisTicksPositions(
+      chartDim,
+      LIGHT_THEME,
+      chartRotation,
+      showLegend,
+      axisSpecs,
+      axisDims,
+      xDomain,
+      [yDomain],
+      1,
+      leftLegendPosition,
+    );
+    expect(axisTicksPosition.axisPositions.size).toBe(0);
+    expect(axisTicksPosition.axisTicks.size).toBe(0);
+    expect(axisTicksPosition.axisGridLinesPositions.size).toBe(0);
+    expect(axisTicksPosition.axisVisibleTicks.size).toBe(0);
+  });
+
   test('should compute axis ticks positions', () => {
     const chartRotation = 0;
     const showLegend = true;
@@ -878,7 +899,9 @@ describe('Axis computational utils', () => {
       [0, 100, 100, 100],
     ];
 
-    expect(axisTicksPosition.axisGridLinesPositions.get(verticalAxisSpec.id)).toEqual(expectedVerticalAxisGridLines);
+    expect(axisTicksPosition.axisGridLinesPositions.get(verticalAxisSpec.id)).toEqual(
+      expectedVerticalAxisGridLines,
+    );
 
     const axisTicksPositionWithTopLegend = getAxisTicksPositions(
       chartDim,
@@ -899,7 +922,9 @@ describe('Axis computational utils', () => {
       left: 100,
       top: 0,
     };
-    const verticalAxisWithTopLegendPosition = axisTicksPositionWithTopLegend.axisPositions.get(verticalAxisSpec.id);
+    const verticalAxisWithTopLegendPosition = axisTicksPositionWithTopLegend.axisPositions.get(
+      verticalAxisSpec.id,
+    );
     expect(verticalAxisWithTopLegendPosition).toEqual(expectedPositionWithTopLegend);
 
     const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: getGroupId('foo') };
@@ -1000,9 +1025,13 @@ describe('Axis computational utils', () => {
     };
     axesSpecs.set(horizontalAxisSpec.id, horizontalAxisSpec);
 
-    const attemptToMerge = () => { mergeDomainsByGroupId(axesSpecs, 0); };
+    const attemptToMerge = () => {
+      mergeDomainsByGroupId(axesSpecs, 0);
+    };
 
-    expect(attemptToMerge).toThrowError('[Axis axis_2]: custom domain for xDomain should be defined in Settings');
+    expect(attemptToMerge).toThrowError(
+      '[Axis axis_2]: custom domain for xDomain should be defined in Settings',
+    );
   });
 
   test('should throw on invalid domain', () => {
@@ -1016,7 +1045,9 @@ describe('Axis computational utils', () => {
     const axesSpecs = new Map();
     axesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
 
-    const attemptToMerge = () => { mergeDomainsByGroupId(axesSpecs, 0); };
+    const attemptToMerge = () => {
+      mergeDomainsByGroupId(axesSpecs, 0);
+    };
     const expectedError = '[Axis axis_1]: custom domain is invalid, min is greater than max';
 
     expect(attemptToMerge).toThrowError(expectedError);

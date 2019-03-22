@@ -1,6 +1,10 @@
-import { LegendItem } from '../lib/series/legend';
 import { DataSeriesColorsValues } from '../lib/series/series';
-import { BasicSeriesSpec } from '../lib/series/specs';
+import {
+  AreaSeriesSpec,
+  BarSeriesSpec,
+  BasicSeriesSpec,
+  LineSeriesSpec,
+} from '../lib/series/specs';
 
 import { BARCHART_1Y0G, BARCHART_1Y1G } from '../lib/series/utils/test_dataset';
 
@@ -10,8 +14,10 @@ import {
   computeSeriesDomains,
   findSelectedDataSeries,
   getAllDataSeriesColorValues,
-  getLegendItemByIndex,
   getUpdatedCustomSeriesColors,
+  isHorizontalRotation,
+  isLineAreaOnlyChart,
+  isVerticalRotation,
   updateSelectedDataSeries,
 } from './utils';
 
@@ -125,31 +131,6 @@ describe('Chart State utils', () => {
     expect(domains.formattedDataSeries.stacked).toMatchSnapshot();
     expect(domains.formattedDataSeries.nonStacked).toMatchSnapshot();
   });
-  it('should get a legend item by index', () => {
-    const dataSeriesColorValues = {
-      specId: getSpecId('foo'),
-      colorValues: [],
-    };
-
-    const firstItem = {
-      color: 'foo',
-      label: 'foo',
-      value: dataSeriesColorValues,
-    };
-
-    const secondItem = {
-      color: 'bar',
-      label: 'bar',
-      value: dataSeriesColorValues,
-    };
-
-    const legendItems: LegendItem[] = [firstItem, secondItem];
-    const legendItemIndex = 1;
-
-    expect(getLegendItemByIndex([], legendItemIndex)).toBe(null);
-    expect(getLegendItemByIndex(legendItems, 2)).toEqual(null);
-    expect(getLegendItemByIndex(legendItems, legendItemIndex)).toEqual(secondItem);
-  });
   it('should check if a DataSeriesColorValues item exists in a list of DataSeriesColorValues', () => {
     const dataSeriesValuesA: DataSeriesColorsValues = {
       specId: getSpecId('a'),
@@ -192,8 +173,12 @@ describe('Chart State utils', () => {
     const addedSelectedSeries = [dataSeriesValuesA, dataSeriesValuesB, dataSeriesValuesC];
     const removedSelectedSeries = [dataSeriesValuesB];
 
-    expect(updateSelectedDataSeries(selectedSeries, dataSeriesValuesC)).toEqual(addedSelectedSeries);
-    expect(updateSelectedDataSeries(selectedSeries, dataSeriesValuesA)).toEqual(removedSelectedSeries);
+    expect(updateSelectedDataSeries(selectedSeries, dataSeriesValuesC)).toEqual(
+      addedSelectedSeries,
+    );
+    expect(updateSelectedDataSeries(selectedSeries, dataSeriesValuesA)).toEqual(
+      removedSelectedSeries,
+    );
     expect(updateSelectedDataSeries(null, dataSeriesValuesA)).toEqual([dataSeriesValuesA]);
   });
   it('should return all of the DataSeriesColorValues on initialization', () => {
@@ -246,5 +231,77 @@ describe('Chart State utils', () => {
     expectedCustomSeriesColors.set('specId:{spec1},colors:{bar}', 'custom_color');
 
     expect(updatedCustomSeriesColors).toEqual(expectedCustomSeriesColors);
+  });
+
+  test('is horizontal chart rotation', () => {
+    expect(isHorizontalRotation(0)).toBe(true);
+    expect(isHorizontalRotation(180)).toBe(true);
+    expect(isHorizontalRotation(-90)).toBe(false);
+    expect(isHorizontalRotation(90)).toBe(false);
+    expect(isVerticalRotation(-90)).toBe(true);
+    expect(isVerticalRotation(90)).toBe(true);
+    expect(isVerticalRotation(0)).toBe(false);
+    expect(isVerticalRotation(180)).toBe(false);
+  });
+
+  test('is vertical chart rotation', () => {
+    expect(isVerticalRotation(-90)).toBe(true);
+    expect(isVerticalRotation(90)).toBe(true);
+    expect(isVerticalRotation(0)).toBe(false);
+    expect(isVerticalRotation(180)).toBe(false);
+  });
+  test('is an area or line only map', () => {
+    const area: AreaSeriesSpec = {
+      id: getSpecId('area'),
+      groupId: getGroupId('group1'),
+      seriesType: 'area',
+      yScaleType: ScaleType.Log,
+      xScaleType: ScaleType.Linear,
+      xAccessor: 'x',
+      yAccessors: ['y'],
+      splitSeriesAccessors: ['g'],
+      yScaleToDataExtent: false,
+      data: BARCHART_1Y1G,
+    };
+    const line: LineSeriesSpec = {
+      id: getSpecId('line'),
+      groupId: getGroupId('group2'),
+      seriesType: 'line',
+      yScaleType: ScaleType.Log,
+      xScaleType: ScaleType.Linear,
+      xAccessor: 'x',
+      yAccessors: ['y'],
+      splitSeriesAccessors: ['g'],
+      stackAccessors: ['x'],
+      yScaleToDataExtent: false,
+      data: BARCHART_1Y1G,
+    };
+    const bar: BarSeriesSpec = {
+      id: getSpecId('bar'),
+      groupId: getGroupId('group2'),
+      seriesType: 'bar',
+      yScaleType: ScaleType.Log,
+      xScaleType: ScaleType.Linear,
+      xAccessor: 'x',
+      yAccessors: ['y'],
+      splitSeriesAccessors: ['g'],
+      stackAccessors: ['x'],
+      yScaleToDataExtent: false,
+      data: BARCHART_1Y1G,
+    };
+    let seriesMap = new Map<SpecId, BasicSeriesSpec>([
+      [area.id, area],
+      [line.id, line],
+      [bar.id, bar],
+    ]);
+    expect(isLineAreaOnlyChart(seriesMap)).toBe(false);
+    seriesMap = new Map<SpecId, BasicSeriesSpec>([[area.id, area], [line.id, line]]);
+    expect(isLineAreaOnlyChart(seriesMap)).toBe(true);
+    seriesMap = new Map<SpecId, BasicSeriesSpec>([[area.id, area]]);
+    expect(isLineAreaOnlyChart(seriesMap)).toBe(true);
+    seriesMap = new Map<SpecId, BasicSeriesSpec>([[line.id, line]]);
+    expect(isLineAreaOnlyChart(seriesMap)).toBe(true);
+    seriesMap = new Map<SpecId, BasicSeriesSpec>([[bar.id, bar], [getSpecId('bar2'), bar]]);
+    expect(isLineAreaOnlyChart(seriesMap)).toBe(false);
   });
 });

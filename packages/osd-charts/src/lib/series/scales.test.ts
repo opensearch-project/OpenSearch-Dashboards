@@ -1,7 +1,8 @@
 import { getGroupId } from '../utils/ids';
 import { ScaleType } from '../utils/scales/scales';
 import { XDomain } from './domains/x_domain';
-import { computeXScale, countClusteredSeries } from './scales';
+import { computeXScale, countBarsInCluster } from './scales';
+import { FormattedDataSeries } from './series';
 
 describe('Series scales', () => {
   const xDomainLinear: XDomain = {
@@ -51,44 +52,69 @@ describe('Series scales', () => {
     expect(zeroGroupScale.bandwidth).toBe(expectedBandwidth);
   });
 
-  test('should count clustered series', () => {
-    const group1 = getGroupId('group_1');
-    const nonStackedSeries = [{
-      groupId: group1,
-      dataSeries: [],
-      counts: {
-        barSeries: 1,
-        lineSeries: 1,
-        areaSeries: 1,
-        basicSeries: 1,
+  test('count bars required on a cluster', () => {
+    const stacked: FormattedDataSeries[] = [
+      {
+        groupId: getGroupId('g1'),
+        dataSeries: [],
+        counts: {
+          basicSeries: 14,
+          areaSeries: 10,
+          barSeries: 2,
+          lineSeries: 2,
+        },
       },
-    }];
-    const stackedSeries = [{
-      groupId: group1,
-      dataSeries: [],
-      counts: {
-        barSeries: 3,
-        lineSeries: 1,
-        areaSeries: 1,
-        basicSeries: 1,
+      {
+        groupId: getGroupId('g2'),
+        dataSeries: [],
+        counts: {
+          basicSeries: 14,
+          areaSeries: 10,
+          barSeries: 20,
+          lineSeries: 2,
+        },
       },
-    }, {
-      groupId: group1,
-      dataSeries: [],
-      counts: {
-        barSeries: 0,
-        lineSeries: 1,
-        areaSeries: 1,
-        basicSeries: 1,
+      {
+        groupId: getGroupId('g3'),
+        dataSeries: [],
+        counts: {
+          basicSeries: 14,
+          areaSeries: 10,
+          barSeries: 0,
+          lineSeries: 2,
+        },
       },
-    }];
-
-    const expectedCount = {
-      nonStackedGroupCount: 1,
-      stackedGroupCount: 1,
-      totalGroupCount: 2,
-    };
-    const numClusteredSeries = countClusteredSeries(stackedSeries, nonStackedSeries);
-    expect(numClusteredSeries).toEqual(expectedCount);
+    ];
+    const nonStacked: FormattedDataSeries[] = [
+      {
+        groupId: getGroupId('g1'),
+        dataSeries: [],
+        counts: {
+          basicSeries: 14,
+          areaSeries: 10,
+          barSeries: 5,
+          lineSeries: 2,
+        },
+      },
+      {
+        groupId: getGroupId('g2'),
+        dataSeries: [],
+        counts: {
+          basicSeries: 14,
+          areaSeries: 10,
+          barSeries: 7,
+          lineSeries: 2,
+        },
+      },
+    ];
+    const {
+      nonStackedBarsInCluster,
+      stackedBarsInCluster,
+      totalBarsInCluster,
+    } = countBarsInCluster(stacked, nonStacked);
+    expect(nonStackedBarsInCluster).toBe(12);
+    // count one per group
+    expect(stackedBarsInCluster).toBe(2);
+    expect(totalBarsInCluster).toBe(14);
   });
 });

@@ -27,11 +27,20 @@ export interface SharedGeometryStyle {
 }
 
 export interface StrokeStyle {
+  /** The stroke color in hex, rgba, hsl */
   stroke: string;
+  /** The stroke width in pixel */
   strokeWidth: number;
+  /** The dash array for dashed strokes */
+  dash?: number[];
 }
 export interface FillStyle {
+  /** The fill color in hex, rgba, hsl */
   fill: string;
+}
+export interface Opacity {
+  /** The opacity value from 0 to 1 */
+  opacity: number;
 }
 
 export interface AxisConfig {
@@ -76,6 +85,7 @@ export interface Theme {
   scales: ScalesConfig;
   colors: ColorConfig;
   legend: LegendStyle;
+  crosshair: CrosshairStyle;
 }
 export interface BarSeriesStyle {
   border: StrokeStyle & Visible;
@@ -83,13 +93,17 @@ export interface BarSeriesStyle {
 export interface LineSeriesStyle {
   line: StrokeStyle & Visible;
   border: StrokeStyle & Visible;
-  point: StrokeStyle & Visible & Radius;
+  point: StrokeStyle & Opacity & Visible & Radius;
 }
 export interface AreaSeriesStyle {
-  area: FillStyle & Visible;
+  area: FillStyle & Opacity & Visible;
   line: StrokeStyle & Visible;
   border: StrokeStyle & Visible;
-  point: StrokeStyle & Visible & Radius;
+  point: StrokeStyle & Opacity & Visible & Radius;
+}
+export interface CrosshairStyle {
+  band: FillStyle & Visible;
+  line: StrokeStyle & Visible;
 }
 export interface PartialTheme {
   chartMargins?: Margins;
@@ -102,6 +116,7 @@ export interface PartialTheme {
   scales?: Partial<ScalesConfig>;
   colors?: Partial<ColorConfig>;
   legend?: Partial<LegendStyle>;
+  crosshair?: Partial<CrosshairStyle>;
 }
 
 export const DEFAULT_GRID_LINE_CONFIG: GridLineConfig = {
@@ -111,7 +126,8 @@ export const DEFAULT_GRID_LINE_CONFIG: GridLineConfig = {
 };
 
 export function mergeWithDefaultGridLineConfig(config: GridLineConfig): GridLineConfig {
-  const strokeWidth = config.strokeWidth != null ? config.strokeWidth : DEFAULT_GRID_LINE_CONFIG.strokeWidth;
+  const strokeWidth =
+    config.strokeWidth != null ? config.strokeWidth : DEFAULT_GRID_LINE_CONFIG.strokeWidth;
   const opacity = config.opacity != null ? config.opacity : DEFAULT_GRID_LINE_CONFIG.opacity;
 
   return {
@@ -187,6 +203,12 @@ export function mergeWithDefaultTheme(
     customTheme.legend = {
       ...defaultTheme.legend,
       ...theme.legend,
+    };
+  }
+  if (theme.crosshair) {
+    customTheme.crosshair = {
+      ...defaultTheme.crosshair,
+      ...theme.crosshair,
     };
   }
   return customTheme;
