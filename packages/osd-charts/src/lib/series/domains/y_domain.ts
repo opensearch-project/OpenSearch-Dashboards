@@ -1,4 +1,5 @@
 import { sum } from 'd3-array';
+import { isCompleteBound, isLowerBound, isUpperBound } from '../../axes/axis_utils';
 import { identity } from '../../utils/commons';
 import { computeContinuousDataDomain } from '../../utils/domain';
 import { GroupId, SpecId } from '../../utils/ids';
@@ -63,8 +64,27 @@ export function mergeYDomain(
         isStackedScaleToExtent || isNonStackedScaleToExtent,
       );
 
+      const [computedDomainMin, computedDomainMax] = groupDomain;
+      let domain = groupDomain;
+
       const customDomain = domainsByGroupId.get(groupId);
-      const domain = customDomain ? [customDomain.min, customDomain.max] : groupDomain;
+
+      if (customDomain && isCompleteBound(customDomain)) {
+        // Don't need to check min > max because this has been validated on axis domain merge
+        domain = [customDomain.min, customDomain.max];
+      } else if (customDomain && isLowerBound(customDomain)) {
+        if (customDomain.min > computedDomainMax) {
+          throw new Error(`custom yDomain for ${groupId} is invalid, custom min is greater than computed max`);
+        }
+
+        domain = [customDomain.min, computedDomainMax];
+      } else if (customDomain && isUpperBound(customDomain)) {
+        if (computedDomainMin > customDomain.max) {
+          throw new Error(`custom yDomain for ${groupId} is invalid, computed min is greater than custom max`);
+        }
+
+        domain = [computedDomainMin, customDomain.max];
+      }
 
       return {
         type: 'yDomain',

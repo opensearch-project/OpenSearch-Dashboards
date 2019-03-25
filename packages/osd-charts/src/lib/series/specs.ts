@@ -9,10 +9,20 @@ export type Datum = any;
 export type Rotation = 0 | 90 | -90 | 180;
 export type Rendering = 'canvas' | 'svg';
 
-export interface DomainRange {
+export interface LowerBoundedDomain {
+  min: number;
+}
+
+export interface UpperBoundedDomain {
+  max: number;
+}
+
+export interface CompleteBoundedDomain {
   min: number;
   max: number;
 }
+
+export type DomainRange = LowerBoundedDomain | UpperBoundedDomain | CompleteBoundedDomain;
 
 export interface SeriesSpec {
   /** The ID of the spec, generated via getSpecId method */

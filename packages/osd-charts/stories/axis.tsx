@@ -433,15 +433,6 @@ storiesOf('Axis', module)
           data={[{ x: 'a', y: 2 }, { x: 'b', y: 7 }, { x: 'c', y: 3 }, { x: 'd', y: 6 }]}
           yScaleToDataExtent={false}
         />
-        {/* <BarSeries
-          id={getSpecId('bars')}
-          xScaleType={ScaleType.Linear}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
-        /> */}
         <LineSeries
           id={getSpecId('lines')}
           xScaleType={ScaleType.Linear}
@@ -452,6 +443,43 @@ storiesOf('Axis', module)
           stackAccessors={['x']}
           splitSeriesAccessors={['g']}
           data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('customizing domain limits [only one bound defined]', () => {
+    const leftDomain = {
+      min: number('left min', 0),
+    };
+
+    const xDomain = {
+      max: number('xDomain max', 3),
+    };
+
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Settings showLegend={false} xDomain={xDomain} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+        />
+        <Axis
+          id={getAxisId('left')}
+          title={'Bar axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+          domain={leftDomain}
+        />
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
           yScaleToDataExtent={false}
         />
       </Chart>

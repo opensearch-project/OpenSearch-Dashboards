@@ -634,7 +634,7 @@ describe('X Domain', () => {
     const minInterval = findMinInterval([]);
     expect(minInterval).toBe(0);
   });
-  test('should account for custom domain when merging a linear domain', () => {
+  test('should account for custom domain when merging a linear domain: complete bounded domain', () => {
     const xValues = new Set([1, 2, 3, 4, 5]);
     const xDomain = { min: 0, max: 3 };
     const specs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
@@ -657,6 +657,40 @@ describe('X Domain', () => {
       mergeXDomain(specs, xValues, invalidXDomain);
     };
     expect(attemptToMerge).toThrowError('custom xDomain is invalid, min is greater than max');
+  });
+
+  test('should account for custom domain when merging a linear domain: lower bounded domain', () => {
+    const xValues = new Set([1, 2, 3, 4, 5]);
+    const xDomain = { min: 0 };
+    const specs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
+      { seriesType: 'line', xScaleType: ScaleType.Linear },
+    ];
+
+    const mergedDomain = mergeXDomain(specs, xValues, xDomain);
+    expect(mergedDomain.domain).toEqual([0, 5]);
+
+    const invalidXDomain = { min: 10 };
+    const attemptToMerge = () => {
+      mergeXDomain(specs, xValues, invalidXDomain);
+    };
+    expect(attemptToMerge).toThrowError('custom xDomain is invalid, custom min is greater than computed max');
+  });
+
+  test('should account for custom domain when merging a linear domain: upper bounded domain', () => {
+    const xValues = new Set([1, 2, 3, 4, 5]);
+    const xDomain = { max: 3 };
+    const specs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
+      { seriesType: 'line', xScaleType: ScaleType.Linear },
+    ];
+
+    const mergedDomain = mergeXDomain(specs, xValues, xDomain);
+    expect(mergedDomain.domain).toEqual([1, 3]);
+
+    const invalidXDomain = { max: -1 };
+    const attemptToMerge = () => {
+      mergeXDomain(specs, xValues, invalidXDomain);
+    };
+    expect(attemptToMerge).toThrowError('custom xDomain is invalid, computed min is greater than custom max');
   });
 
   test('should account for custom domain when merging an ordinal domain', () => {

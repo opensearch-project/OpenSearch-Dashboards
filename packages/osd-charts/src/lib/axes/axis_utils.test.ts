@@ -21,6 +21,7 @@ import {
   getVerticalAxisGridLineProps,
   getVerticalAxisTickLineProps,
   getVisibleTicks,
+  isBounded,
   isHorizontal,
   isVertical,
   isYDomain,
@@ -1034,6 +1035,134 @@ describe('Axis computational utils', () => {
     );
   });
 
+  test('should merge axis domains by group id: partial upper bounded prevDomain with complete domain', () => {
+    const groupId = getGroupId('group_1');
+    const domainRange1 = {
+      max: 9,
+    };
+
+    const domainRange2 = {
+      min: 0,
+      max: 7,
+    };
+
+    verticalAxisSpec.domain = domainRange1;
+
+    const axesSpecs = new Map();
+    axesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+
+    const axis2 = { ...verticalAxisSpec, id: getAxisId('axis2') };
+
+    axis2.domain = domainRange2;
+    axesSpecs.set(axis2.id, axis2);
+
+    const expectedMergedMap = new Map<GroupId, DomainRange>();
+    expectedMergedMap.set(groupId, { min: 0, max: 9 });
+
+    const mergedDomainsByGroupId = mergeDomainsByGroupId(axesSpecs, 0);
+    expect(mergedDomainsByGroupId).toEqual(expectedMergedMap);
+  });
+
+  test('should merge axis domains by group id: partial lower bounded prevDomain with complete domain', () => {
+    const groupId = getGroupId('group_1');
+    const domainRange1 = {
+      min: -1,
+    };
+
+    const domainRange2 = {
+      min: 0,
+      max: 7,
+    };
+
+    verticalAxisSpec.domain = domainRange1;
+
+    const axesSpecs = new Map();
+    axesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+
+    const axis2 = { ...verticalAxisSpec, id: getAxisId('axis2') };
+
+    axis2.domain = domainRange2;
+    axesSpecs.set(axis2.id, axis2);
+
+    const expectedMergedMap = new Map<GroupId, DomainRange>();
+    expectedMergedMap.set(groupId, { min: -1, max: 7 });
+
+    const mergedDomainsByGroupId = mergeDomainsByGroupId(axesSpecs, 0);
+    expect(mergedDomainsByGroupId).toEqual(expectedMergedMap);
+  });
+
+  test('should merge axis domains by group id: partial upper bounded prevDomain with lower bounded domain', () => {
+    const groupId = getGroupId('group_1');
+    const domainRange1 = {
+      max: 9,
+    };
+
+    const domainRange2 = {
+      min: 0,
+    };
+
+    const domainRange3 = {
+      min: -1,
+    };
+
+    verticalAxisSpec.domain = domainRange1;
+
+    const axesSpecs = new Map();
+    axesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+
+    const axis2 = { ...verticalAxisSpec, id: getAxisId('axis2') };
+
+    axis2.domain = domainRange2;
+    axesSpecs.set(axis2.id, axis2);
+
+    const axis3 = { ...verticalAxisSpec, id: getAxisId('axis3') };
+
+    axis3.domain = domainRange3;
+    axesSpecs.set(axis3.id, axis3);
+
+    const expectedMergedMap = new Map<GroupId, DomainRange>();
+    expectedMergedMap.set(groupId, { min: -1, max: 9 });
+
+    const mergedDomainsByGroupId = mergeDomainsByGroupId(axesSpecs, 0);
+    expect(mergedDomainsByGroupId).toEqual(expectedMergedMap);
+  });
+
+  test('should merge axis domains by group id: partial lower bounded prevDomain with upper bounded domain', () => {
+    const groupId = getGroupId('group_1');
+    const domainRange1 = {
+      min: 2,
+    };
+
+    const domainRange2 = {
+      max: 7,
+    };
+
+    const domainRange3 = {
+      max: 9,
+    };
+
+    verticalAxisSpec.domain = domainRange1;
+
+    const axesSpecs = new Map();
+    axesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+
+    const axis2 = { ...verticalAxisSpec, id: getAxisId('axis2') };
+
+    axis2.domain = domainRange2;
+    axesSpecs.set(axis2.id, axis2);
+
+    const axis3 = { ...verticalAxisSpec, id: getAxisId('axis3') };
+
+    axis3.domain = domainRange3;
+    axesSpecs.set(axis3.id, axis3);
+
+    const expectedMergedMap = new Map<GroupId, DomainRange>();
+    expectedMergedMap.set(groupId, { min: 2, max: 9 });
+
+    const mergedDomainsByGroupId = mergeDomainsByGroupId(axesSpecs, 0);
+    expect(mergedDomainsByGroupId).toEqual(expectedMergedMap);
+  });
+
   test('should throw on invalid domain', () => {
     const domainRange1 = {
       min: 9,
@@ -1051,5 +1180,18 @@ describe('Axis computational utils', () => {
     const expectedError = '[Axis axis_1]: custom domain is invalid, min is greater than max';
 
     expect(attemptToMerge).toThrowError(expectedError);
+  });
+
+  test('should determine that a domain has at least one bound', () => {
+    const lowerBounded = {
+      min: 0,
+    };
+
+    const upperBounded = {
+      max: 0,
+    };
+
+    expect(isBounded(lowerBounded)).toBe(true);
+    expect(isBounded(upperBounded)).toBe(true);
   });
 });

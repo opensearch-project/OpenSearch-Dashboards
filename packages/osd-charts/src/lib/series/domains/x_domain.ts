@@ -1,3 +1,4 @@
+import { isCompleteBound, isLowerBound, isUpperBound } from '../../axes/axis_utils';
 import { compareByValueAsc, identity } from '../../utils/commons';
 import { computeContinuousDataDomain, computeOrdinalDataDomain, Domain } from '../../utils/domain';
 import { ScaleType } from '../../utils/scales/scales';
@@ -42,10 +43,27 @@ export function mergeXDomain(
     seriesXComputedDomains = computeContinuousDataDomain(values, identity, true);
     if (xDomain) {
       if (!Array.isArray(xDomain)) {
-        if (xDomain.min > xDomain.max) {
-          throw new Error('custom xDomain is invalid, min is greater than max');
+        const [computedDomainMin, computedDomainMax] = seriesXComputedDomains;
+
+        if (isCompleteBound(xDomain)) {
+          if (xDomain.min > xDomain.max) {
+            throw new Error('custom xDomain is invalid, min is greater than max');
+          }
+
+          seriesXComputedDomains = [xDomain.min, xDomain.max];
+        } else if (isLowerBound(xDomain)) {
+          if (xDomain.min > computedDomainMax) {
+            throw new Error('custom xDomain is invalid, custom min is greater than computed max');
+          }
+
+          seriesXComputedDomains = [xDomain.min, computedDomainMax];
+        } else if (isUpperBound(xDomain)) {
+          if (computedDomainMin > xDomain.max) {
+            throw new Error('custom xDomain is invalid, computed min is greater than custom max');
+          }
+
+          seriesXComputedDomains = [computedDomainMin, xDomain.max];
         }
-        seriesXComputedDomains = [xDomain.min, xDomain.max];
       } else {
         throw new Error('xDomain for continuous scale should be a DomainRange object, not an array');
       }

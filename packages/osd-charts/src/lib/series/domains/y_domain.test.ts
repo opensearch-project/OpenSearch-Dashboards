@@ -469,7 +469,7 @@ describe('Y Domain', () => {
     const rawDataSeries = getDataSeriesOnGroup(specDataSeries, specs);
     expect(rawDataSeries).toEqual([]);
   });
-  test('Should merge Y domain accounting for custom domain limits', () => {
+  test('Should merge Y domain accounting for custom domain limits: complete bounded domain', () => {
     const groupId = getGroupId('a');
 
     const dataSeries: RawDataSeries[] = [
@@ -514,5 +514,181 @@ describe('Y Domain', () => {
         isBandScale: false,
       },
     ]);
+  });
+  test('Should merge Y domain accounting for custom domain limits: partial lower bounded domain', () => {
+    const groupId = getGroupId('a');
+
+    const dataSeries: RawDataSeries[] = [
+      {
+        specId: getSpecId('a'),
+        key: [''],
+        seriesColorKey: '',
+        data: [{ x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 5 }],
+      },
+      {
+        specId: getSpecId('a'),
+        key: [''],
+        seriesColorKey: '',
+        data: [{ x: 1, y: 2 }, { x: 4, y: 7 }],
+      },
+    ];
+    const specDataSeries = new Map();
+    specDataSeries.set(getSpecId('a'), dataSeries);
+    const domainsByGroupId = new Map<GroupId, DomainRange>();
+    domainsByGroupId.set(groupId, { min: 0 });
+
+    const mergedDomain = mergeYDomain(
+      specDataSeries,
+      [
+        {
+          seriesType: 'area',
+          yScaleType: ScaleType.Linear,
+          groupId,
+          id: getSpecId('a'),
+          stackAccessors: ['a'],
+          yScaleToDataExtent: true,
+        },
+      ],
+      domainsByGroupId,
+    );
+    expect(mergedDomain).toEqual([
+      {
+        type: 'yDomain',
+        groupId,
+        domain: [0, 12],
+        scaleType: ScaleType.Linear,
+        isBandScale: false,
+      },
+    ]);
+  });
+  test('Should not merge Y domain with invalid custom domain limits: partial lower bounded domain', () => {
+    const groupId = getGroupId('a');
+
+    const dataSeries: RawDataSeries[] = [
+      {
+        specId: getSpecId('a'),
+        key: [''],
+        seriesColorKey: '',
+        data: [{ x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 5 }],
+      },
+      {
+        specId: getSpecId('a'),
+        key: [''],
+        seriesColorKey: '',
+        data: [{ x: 1, y: 2 }, { x: 4, y: 7 }],
+      },
+    ];
+    const specDataSeries = new Map();
+    specDataSeries.set(getSpecId('a'), dataSeries);
+    const domainsByGroupId = new Map<GroupId, DomainRange>();
+    domainsByGroupId.set(groupId, { min: 20 });
+
+    const attemptToMerge = () => {
+      mergeYDomain(
+        specDataSeries,
+        [
+          {
+            seriesType: 'area',
+            yScaleType: ScaleType.Linear,
+            groupId,
+            id: getSpecId('a'),
+            stackAccessors: ['a'],
+            yScaleToDataExtent: true,
+          },
+        ],
+        domainsByGroupId,
+      );
+    };
+
+    const errorMessage = 'custom yDomain for a is invalid, custom min is greater than computed max';
+    expect(attemptToMerge).toThrowError(errorMessage);
+  });
+  test('Should merge Y domain accounting for custom domain limits: partial upper bounded domain', () => {
+    const groupId = getGroupId('a');
+
+    const dataSeries: RawDataSeries[] = [
+      {
+        specId: getSpecId('a'),
+        key: [''],
+        seriesColorKey: '',
+        data: [{ x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 5 }],
+      },
+      {
+        specId: getSpecId('a'),
+        key: [''],
+        seriesColorKey: '',
+        data: [{ x: 1, y: 2 }, { x: 4, y: 7 }],
+      },
+    ];
+    const specDataSeries = new Map();
+    specDataSeries.set(getSpecId('a'), dataSeries);
+    const domainsByGroupId = new Map<GroupId, DomainRange>();
+    domainsByGroupId.set(groupId, { max: 20 });
+
+    const mergedDomain = mergeYDomain(
+      specDataSeries,
+      [
+        {
+          seriesType: 'area',
+          yScaleType: ScaleType.Linear,
+          groupId,
+          id: getSpecId('a'),
+          stackAccessors: ['a'],
+          yScaleToDataExtent: true,
+        },
+      ],
+      domainsByGroupId,
+    );
+    expect(mergedDomain).toEqual([
+      {
+        type: 'yDomain',
+        groupId,
+        domain: [2, 20],
+        scaleType: ScaleType.Linear,
+        isBandScale: false,
+      },
+    ]);
+  });
+  test('Should not merge Y domain with invalid custom domain limits: partial upper bounded domain', () => {
+    const groupId = getGroupId('a');
+
+    const dataSeries: RawDataSeries[] = [
+      {
+        specId: getSpecId('a'),
+        key: [''],
+        seriesColorKey: '',
+        data: [{ x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 5 }],
+      },
+      {
+        specId: getSpecId('a'),
+        key: [''],
+        seriesColorKey: '',
+        data: [{ x: 1, y: 2 }, { x: 4, y: 7 }],
+      },
+    ];
+    const specDataSeries = new Map();
+    specDataSeries.set(getSpecId('a'), dataSeries);
+    const domainsByGroupId = new Map<GroupId, DomainRange>();
+    domainsByGroupId.set(groupId, { max: -1 });
+
+    const attemptToMerge = () => {
+      mergeYDomain(
+        specDataSeries,
+        [
+          {
+            seriesType: 'area',
+            yScaleType: ScaleType.Linear,
+            groupId,
+            id: getSpecId('a'),
+            stackAccessors: ['a'],
+            yScaleToDataExtent: true,
+          },
+        ],
+        domainsByGroupId,
+      );
+    };
+
+    const errorMessage = 'custom yDomain for a is invalid, computed min is greater than custom max';
+    expect(attemptToMerge).toThrowError(errorMessage);
   });
 });
