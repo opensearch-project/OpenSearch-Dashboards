@@ -5,6 +5,7 @@ import { animated, Spring } from 'react-spring/renderprops-konva';
 import { LegendItem } from '../../lib/series/legend';
 import { BarGeometry, getGeometryStyle } from '../../lib/series/rendering';
 import { BarSeriesStyle, SharedGeometryStyle } from '../../lib/themes/theme';
+import { GlobalKonvaElementProps } from './globals';
 
 interface BarGeometriesDataProps {
   animated?: boolean;
@@ -81,7 +82,7 @@ export class BarGeometries extends React.PureComponent<
                   strokeWidth={border.strokeWidth}
                   stroke={border.stroke}
                   strokeEnabled={borderEnabled}
-                  perfectDrawEnabled={true}
+                  {...GlobalKonvaElementProps}
                   {...geometryStyle}
                 />
               )}
@@ -100,7 +101,7 @@ export class BarGeometries extends React.PureComponent<
             strokeWidth={border.strokeWidth}
             stroke={border.stroke}
             strokeEnabled={borderEnabled}
-            perfectDrawEnabled={false}
+            {...GlobalKonvaElementProps}
             {...geometryStyle}
           />
         );

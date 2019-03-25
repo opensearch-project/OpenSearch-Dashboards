@@ -299,7 +299,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
           }}
           {...brushProps}
         >
-          <Layer hitGraphEnabled={false} {...gridClippings}>
+          <Layer hitGraphEnabled={false} listening={false} {...gridClippings}>
             {this.renderGrids()}
           </Layer>
 
@@ -315,14 +315,18 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
             {this.renderAreaSeries()}
             {this.renderLineSeries()}
           </Layer>
-          <Layer hitGraphEnabled={false}>{debug && this.renderDebugChartBorders()}</Layer>
+          <Layer hitGraphEnabled={false} listening={false}>
+            {debug && this.renderDebugChartBorders()}
+          </Layer>
           {isBrushEnabled && (
             <Layer hitGraphEnabled={false} listening={false}>
               {this.renderBrushTool()}
             </Layer>
           )}
 
-          <Layer hitGraphEnabled={false}>{this.renderAxes()}</Layer>
+          <Layer hitGraphEnabled={false} listening={false}>
+            {this.renderAxes()}
+          </Layer>
         </Stage>
       </div>
     );

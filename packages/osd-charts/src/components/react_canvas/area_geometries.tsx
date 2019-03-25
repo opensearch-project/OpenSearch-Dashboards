@@ -5,6 +5,7 @@ import { animated, Spring } from 'react-spring/renderprops-konva';
 import { LegendItem } from '../../lib/series/legend';
 import { AreaGeometry, getGeometryStyle, PointGeometry } from '../../lib/series/rendering';
 import { AreaSeriesStyle, SharedGeometryStyle } from '../../lib/themes/theme';
+import { GlobalKonvaElementProps } from './globals';
 
 interface AreaGeometriesDataProps {
   animated?: boolean;
@@ -52,18 +53,18 @@ export class AreaGeometries extends React.PureComponent<
       [] as JSX.Element[],
     );
   }
-  private renderPoints = (areaPoints: PointGeometry[], i: number): JSX.Element[] => {
+  private renderPoints = (areaPoints: PointGeometry[], areaIndex: number): JSX.Element[] => {
     const { radius, stroke, strokeWidth, opacity } = this.props.style.point;
 
     return areaPoints.map((areaPoint, index) => {
       const { x, y, color, transform } = areaPoint;
       if (this.props.animated) {
         return (
-          <Group key={`area-point-group-${i}-${index}`} x={transform.x}>
+          <Group key={`area-point-group-${areaIndex}-${index}`} x={transform.x}>
             <Spring native from={{ y }} to={{ y }}>
               {(props: { y: number }) => (
                 <animated.Circle
-                  key={`area-point-${index}`}
+                  key={`area-point-${areaIndex}-${index}`}
                   x={x}
                   y={y}
                   radius={radius}
@@ -72,9 +73,7 @@ export class AreaGeometries extends React.PureComponent<
                   stroke={color}
                   fill={'white'}
                   opacity={opacity}
-                  strokeHitEnabled={false}
-                  listening={false}
-                  perfectDrawEnabled={false}
+                  {...GlobalKonvaElementProps}
                 />
               )}
             </Spring>
@@ -83,7 +82,7 @@ export class AreaGeometries extends React.PureComponent<
       } else {
         return (
           <Circle
-            key={`area-point-${index}`}
+            key={`area-point-${areaIndex}-${index}`}
             x={transform.x + x}
             y={y}
             radius={radius}
@@ -91,9 +90,7 @@ export class AreaGeometries extends React.PureComponent<
             stroke={stroke}
             fill={color}
             opacity={opacity}
-            strokeHitEnabled={false}
-            listening={false}
-            perfectDrawEnabled={false}
+            {...GlobalKonvaElementProps}
           />
         );
       }
@@ -119,6 +116,7 @@ export class AreaGeometries extends React.PureComponent<
                   lineCap="round"
                   lineJoin="round"
                   opacity={opacity}
+                  {...GlobalKonvaElementProps}
                 />
               )}
             </Spring>
@@ -133,6 +131,7 @@ export class AreaGeometries extends React.PureComponent<
             opacity={opacity}
             lineCap="round"
             lineJoin="round"
+            {...GlobalKonvaElementProps}
           />
         );
       }
@@ -157,14 +156,14 @@ export class AreaGeometries extends React.PureComponent<
             <Spring native from={{ line }} to={{ line }}>
               {(props: { line: string }) => (
                 <animated.Path
-                  key={`line-${i}`}
+                  key={`area-line-${i}`}
                   data={props.line}
                   stroke={color}
                   strokeWidth={strokeWidth}
-                  listening={false}
                   lineCap="round"
                   lineJoin="round"
                   {...geometryStyle}
+                  {...GlobalKonvaElementProps}
                 />
               )}
             </Spring>
@@ -172,7 +171,13 @@ export class AreaGeometries extends React.PureComponent<
         );
       } else {
         return (
-          <Path key={`line-${i}`} data={line} fill={color} listening={false} {...geometryStyle} />
+          <Path
+            key={`area-line-${i}`}
+            data={line}
+            fill={color}
+            {...geometryStyle}
+            {...GlobalKonvaElementProps}
+          />
         );
       }
     });

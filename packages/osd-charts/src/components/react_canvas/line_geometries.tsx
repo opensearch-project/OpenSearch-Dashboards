@@ -5,6 +5,7 @@ import { animated, Spring } from 'react-spring/renderprops-konva';
 import { LegendItem } from '../../lib/series/legend';
 import { getGeometryStyle, LineGeometry, PointGeometry } from '../../lib/series/rendering';
 import { LineSeriesStyle, SharedGeometryStyle } from '../../lib/themes/theme';
+import { GlobalKonvaElementProps } from './globals';
 
 interface LineGeometriesDataProps {
   animated?: boolean;
@@ -55,7 +56,7 @@ export class LineGeometries extends React.PureComponent<
   }
 
   private renderPoints = (linePoints: PointGeometry[], i: number): JSX.Element[] => {
-    const { radius, stroke, strokeWidth, opacity } = this.props.style.point;
+    const { radius, strokeWidth, opacity } = this.props.style.point;
 
     return linePoints.map((areaPoint, index) => {
       const { x, y, color, transform } = areaPoint;
@@ -69,14 +70,12 @@ export class LineGeometries extends React.PureComponent<
                   x={x}
                   y={y}
                   radius={radius}
+                  stroke={color}
                   strokeWidth={strokeWidth}
                   strokeEnabled={strokeWidth !== 0}
-                  stroke={color}
                   fill={'white'}
                   opacity={opacity}
-                  strokeHitEnabled={false}
-                  listening={false}
-                  perfectDrawEnabled={false}
+                  {...GlobalKonvaElementProps}
                 />
               )}
             </Spring>
@@ -89,13 +88,12 @@ export class LineGeometries extends React.PureComponent<
             x={transform.x + x}
             y={y}
             radius={radius}
+            stroke={color}
             strokeWidth={strokeWidth}
-            stroke={stroke}
-            fill={color}
+            strokeEnabled={strokeWidth !== 0}
+            fill={'white'}
             opacity={opacity}
-            strokeHitEnabled={false}
-            listening={false}
-            perfectDrawEnabled={false}
+            {...GlobalKonvaElementProps}
           />
         );
       }
@@ -120,15 +118,15 @@ export class LineGeometries extends React.PureComponent<
             <Spring native reset from={{ opacity: 0 }} to={{ opacity: 1 }}>
               {(props: { opacity: number }) => (
                 <animated.Path
-                  opacity={props.opacity}
-                  key="line"
+                  key={`line-${i}`}
                   data={line}
-                  strokeWidth={strokeWidth}
                   stroke={color}
-                  listening={false}
+                  strokeWidth={strokeWidth}
+                  opacity={props.opacity}
                   lineCap="round"
                   lineJoin="round"
                   {...geometryStyle}
+                  {...GlobalKonvaElementProps}
                 />
               )}
             </Spring>
@@ -137,14 +135,14 @@ export class LineGeometries extends React.PureComponent<
       } else {
         return (
           <Path
-            key={i}
+            key={`line-${i}`}
             data={line}
-            strokeWidth={strokeWidth}
             stroke={color}
-            listening={false}
+            strokeWidth={strokeWidth}
             lineCap="round"
             lineJoin="round"
             {...geometryStyle}
+            {...GlobalKonvaElementProps}
           />
         );
       }
