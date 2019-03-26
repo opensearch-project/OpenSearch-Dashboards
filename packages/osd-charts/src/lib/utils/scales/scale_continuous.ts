@@ -143,6 +143,10 @@ export function isContinuousScale(scale: Scale): scale is ScaleContinuous {
   return scale.type !== ScaleType.Ordinal;
 }
 
+export function isLogarithmicScale(scale: Scale) {
+  return scale.type === ScaleType.Log;
+}
+
 function invertValue(invertedValue: number, minInterval: number, stepType?: StepType) {
   if (minInterval > 0) {
     switch (stepType) {

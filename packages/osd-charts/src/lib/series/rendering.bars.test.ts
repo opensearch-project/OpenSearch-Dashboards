@@ -8,7 +8,7 @@ const SPEC_ID = getSpecId('spec_1');
 const GROUP_ID = getGroupId('group_1');
 
 describe('Rendering bars', () => {
-  describe('Single series barchart - ordinal', () => {
+  describe('Single series bar chart - ordinal', () => {
     const barSeriesSpec: BarSeriesSpec = {
       id: SPEC_ID,
       groupId: GROUP_ID,
@@ -70,7 +70,7 @@ describe('Rendering bars', () => {
       });
     });
   });
-  describe('Multi series barchart - ordinal', () => {
+  describe('Multi series bar chart - ordinal', () => {
     const spec1Id = getSpecId('bar1');
     const spec2Id = getSpecId('bar2');
     const barSeriesSpec1: BarSeriesSpec = {
@@ -191,7 +191,7 @@ describe('Rendering bars', () => {
       });
     });
   });
-  describe('Single series barchart - lineaar', () => {
+  describe('Single series bar chart - lineaar', () => {
     const barSeriesSpec: BarSeriesSpec = {
       id: SPEC_ID,
       groupId: GROUP_ID,
@@ -253,7 +253,7 @@ describe('Rendering bars', () => {
       });
     });
   });
-  describe('Multi series barchart - linear', () => {
+  describe('Multi series bar chart - linear', () => {
     const spec1Id = getSpecId('bar1');
     const spec2Id = getSpecId('bar2');
     const barSeriesSpec1: BarSeriesSpec = {
@@ -374,7 +374,7 @@ describe('Rendering bars', () => {
       });
     });
   });
-  describe('Multi series barchart - time', () => {
+  describe('Multi series bar chart - time', () => {
     const spec1Id = getSpecId('bar1');
     const spec2Id = getSpecId('bar2');
     const barSeriesSpec1: BarSeriesSpec = {

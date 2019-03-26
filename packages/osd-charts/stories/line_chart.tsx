@@ -14,6 +14,7 @@ import {
   timeFormatter,
 } from '../src/';
 import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
+import { TSVB_DATASET } from '../src/lib/series/utils/test_dataset_tsvb';
 const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
 
 storiesOf('Line Chart', module)
@@ -314,6 +315,40 @@ storiesOf('Line Chart', module)
           curve={CurveType.LINEAR}
           stackAccessors={[0]}
         />
+      </Chart>
+    );
+  })
+  .add('multi series with log values (limit 0 or negative values)', () => {
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Settings showLegend={true} legendPosition={Position.Right} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          showOverlappingTicks={true}
+          tickFormat={dateFormatter}
+        />
+        <Axis
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+          position={Position.Left}
+          tickFormat={(d) => `${Number(d).toFixed(0)}%`}
+        />
+        {TSVB_DATASET.series.map((series) => {
+          return (
+            <LineSeries
+              key={series.id}
+              id={getSpecId(series.label)}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Log}
+              xAccessor={0}
+              yAccessors={[1]}
+              data={series.data}
+              curve={CurveType.CURVE_MONOTONE_X}
+              yScaleToDataExtent={false}
+            />
+          );
+        })}
       </Chart>
     );
   });
