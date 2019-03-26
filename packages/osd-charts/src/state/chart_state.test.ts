@@ -3,6 +3,8 @@ import { DataSeriesColorsValues } from '../lib/series/series';
 import { AxisSpec, BarSeriesSpec, Position } from '../lib/series/specs';
 import { getAxisId, getGroupId, getSpecId } from '../lib/utils/ids';
 import { TooltipType, TooltipValue } from '../lib/utils/interactions';
+import { ScaleBand } from '../lib/utils/scales/scale_band';
+import { ScaleContinuous } from '../lib/utils/scales/scale_continuous';
 import { ScaleType } from '../lib/utils/scales/scales';
 import { ChartStore } from './chart_state';
 
@@ -345,11 +347,14 @@ describe('Chart Store', () => {
     store.chartDimensions.left = 10;
 
     store.onBrushEndListener = undefined;
+    store.onBrushStart();
+    expect(store.isBrushing.get()).toBe(false);
     store.onBrushEnd(start, end1);
     expect(brushEndListener).not.toBeCalled();
 
     store.setOnBrushEndListener(brushEndListener);
-
+    store.onBrushStart();
+    expect(store.isBrushing.get()).toBe(true);
     store.onBrushEnd(start, start);
     expect(brushEndListener).not.toBeCalled();
 
@@ -360,13 +365,6 @@ describe('Chart Store', () => {
     store.onBrushEnd(start, end2);
     expect(brushEndListener.mock.calls[1][0]).toBeCloseTo(0.3, 1);
     expect(brushEndListener.mock.calls[1][1]).toBeCloseTo(0.9, 1);
-  });
-
-  test('can determine if brush is enabled', () => {
-    expect(store.isBrushEnabled()).toBe(true);
-
-    store.xScale = undefined;
-    expect(store.isBrushEnabled()).toBe(false);
   });
 
   test('can update parent dimensions', () => {
@@ -550,6 +548,44 @@ describe('Chart Store', () => {
     store.cursorPosition.x = 1;
     store.tooltipType.set(TooltipType.Crosshairs);
     store.tooltipData.replace([tooltipValue]);
+    expect(store.isTooltipVisible.get()).toBe(true);
+  });
+
+  test('can disable brush based on scale and listener', () => {
+    store.xScale = undefined;
+    expect(store.isBrushEnabled()).toBe(false);
+    store.xScale = new ScaleContinuous([0, 100], [0, 100], ScaleType.Linear);
+    store.onBrushEndListener = undefined;
+    expect(store.isBrushEnabled()).toBe(false);
+    store.setOnBrushEndListener(() => ({}));
+    expect(store.isBrushEnabled()).toBe(true);
+    store.xScale = new ScaleBand([0, 100], [0, 100]);
+    expect(store.isBrushEnabled()).toBe(false);
+  });
+
+  test('can disable tooltip on brushing', () => {
+    const tooltipValue: TooltipValue = {
+      name: 'a',
+      value: 'a',
+      color: 'a',
+      isHighlighted: false,
+      isXValue: false,
+    };
+    store.xScale = new ScaleContinuous([0, 100], [0, 100], ScaleType.Linear);
+    store.cursorPosition.x = 1;
+    store.cursorPosition.x = 1;
+    store.tooltipType.set(TooltipType.Crosshairs);
+    store.tooltipData.replace([tooltipValue]);
+    store.onBrushStart();
+    expect(store.isBrushing.get()).toBe(true);
+    expect(store.isTooltipVisible.get()).toBe(false);
+
+    store.cursorPosition.x = 1;
+    store.cursorPosition.x = 1;
+    store.tooltipType.set(TooltipType.Crosshairs);
+    store.tooltipData.replace([tooltipValue]);
+    store.onBrushEnd({ x: 0, y: 0 }, { x: 1, y: 1 });
+    expect(store.isBrushing.get()).toBe(false);
     expect(store.isTooltipVisible.get()).toBe(true);
   });
   test('handle click on chart', () => {

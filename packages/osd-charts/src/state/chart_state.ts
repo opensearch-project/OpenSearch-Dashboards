@@ -117,6 +117,7 @@ export class ChartStore {
     y: 0,
     rotate: 0,
   };
+  isBrushing = observable.box(false);
   brushExtent: BrushExtent = {
     minX: 0,
     minY: 0,
@@ -385,6 +386,7 @@ export class ChartStore {
 
   isTooltipVisible = computed(() => {
     return (
+      !this.isBrushing.get() &&
       this.tooltipType.get() !== TooltipType.None &&
       this.cursorPosition.x > -1 &&
       this.cursorPosition.y > -1 &&
@@ -393,6 +395,7 @@ export class ChartStore {
   });
   isCrosshairVisible = computed(() => {
     return (
+      !this.isBrushing.get() &&
       isCrosshairTooltipType(this.tooltipType.get()) &&
       this.cursorPosition.x > -1 &&
       this.cursorPosition.y > -1
@@ -521,6 +524,29 @@ export class ChartStore {
     }
   });
 
+  onBrushStart = action(() => {
+    if (!this.onBrushEndListener) {
+      return;
+    }
+    this.isBrushing.set(true);
+  });
+
+  onBrushEnd = action((start: Point, end: Point) => {
+    if (!this.onBrushEndListener) {
+      return;
+    }
+    this.isBrushing.set(false);
+    const minValue = start.x < end.x ? start.x : end.x;
+    const maxValue = start.x > end.x ? start.x : end.x;
+    if (maxValue === minValue) {
+      // if 0 size brush, avoid computing the value
+      return;
+    }
+    const min = this.xScale!.invert(minValue - this.chartDimensions.left);
+    const max = this.xScale!.invert(maxValue - this.chartDimensions.left);
+    this.onBrushEndListener(min, max);
+  });
+
   handleChartClick() {
     if (this.highlightedGeometries.length > 0 && this.onElementClickListener) {
       this.onElementClickListener(this.highlightedGeometries.toJS());
@@ -578,20 +604,6 @@ export class ChartStore {
   }
   removeOnLegendItemMinusClickListener() {
     this.onLegendItemMinusClickListener = undefined;
-  }
-  onBrushEnd(start: Point, end: Point) {
-    if (!this.onBrushEndListener) {
-      return;
-    }
-    const minValue = start.x < end.x ? start.x : end.x;
-    const maxValue = start.x > end.x ? start.x : end.x;
-    if (maxValue === minValue) {
-      // if 0 size brush, avoid computing the value
-      return;
-    }
-    const min = this.xScale!.invert(minValue - this.chartDimensions.left);
-    const max = this.xScale!.invert(maxValue - this.chartDimensions.left);
-    this.onBrushEndListener(min, max);
   }
 
   isBrushEnabled(): boolean {
