@@ -12,13 +12,12 @@ import { getGroupId, getSpecId, SpecId } from '../lib/utils/ids';
 import { ScaleType } from '../lib/utils/scales/scales';
 import {
   computeSeriesDomains,
-  findSelectedDataSeries,
-  getAllDataSeriesColorValues,
+  findDataSeriesByColorValues,
   getUpdatedCustomSeriesColors,
   isHorizontalRotation,
   isLineAreaOnlyChart,
   isVerticalRotation,
-  updateSelectedDataSeries,
+  updateDeselectedDataSeries,
 } from './utils';
 
 describe('Chart State utils', () => {
@@ -147,11 +146,11 @@ describe('Chart State utils', () => {
       colorValues: ['a', 'b', 'd'],
     };
 
-    const selectedSeries = [dataSeriesValuesA, dataSeriesValuesB];
+    const deselectedSeries = [dataSeriesValuesA, dataSeriesValuesB];
 
-    expect(findSelectedDataSeries(selectedSeries, dataSeriesValuesA)).toBe(0);
-    expect(findSelectedDataSeries(selectedSeries, dataSeriesValuesC)).toBe(-1);
-    expect(findSelectedDataSeries(null, dataSeriesValuesA)).toBe(-1);
+    expect(findDataSeriesByColorValues(deselectedSeries, dataSeriesValuesA)).toBe(0);
+    expect(findDataSeriesByColorValues(deselectedSeries, dataSeriesValuesC)).toBe(-1);
+    expect(findDataSeriesByColorValues(null, dataSeriesValuesA)).toBe(-1);
   });
   it('should update a list of DataSeriesColorsValues given a selected DataSeriesColorValues item', () => {
     const dataSeriesValuesA: DataSeriesColorsValues = {
@@ -173,32 +172,13 @@ describe('Chart State utils', () => {
     const addedSelectedSeries = [dataSeriesValuesA, dataSeriesValuesB, dataSeriesValuesC];
     const removedSelectedSeries = [dataSeriesValuesB];
 
-    expect(updateSelectedDataSeries(selectedSeries, dataSeriesValuesC)).toEqual(
+    expect(updateDeselectedDataSeries(selectedSeries, dataSeriesValuesC)).toEqual(
       addedSelectedSeries,
     );
-    expect(updateSelectedDataSeries(selectedSeries, dataSeriesValuesA)).toEqual(
+    expect(updateDeselectedDataSeries(selectedSeries, dataSeriesValuesA)).toEqual(
       removedSelectedSeries,
     );
-    expect(updateSelectedDataSeries(null, dataSeriesValuesA)).toEqual([dataSeriesValuesA]);
-  });
-  it('should return all of the DataSeriesColorValues on initialization', () => {
-    const dataSeriesValuesA: DataSeriesColorsValues = {
-      specId: getSpecId('a'),
-      colorValues: ['a', 'b', 'c'],
-    };
-
-    const dataSeriesValuesB: DataSeriesColorsValues = {
-      specId: getSpecId('b'),
-      colorValues: ['a', 'b', 'c'],
-    };
-
-    const colorMap = new Map();
-    colorMap.set('a', dataSeriesValuesA);
-    colorMap.set('b', dataSeriesValuesB);
-
-    const expected = [dataSeriesValuesA, dataSeriesValuesB];
-
-    expect(getAllDataSeriesColorValues(colorMap)).toEqual(expected);
+    expect(updateDeselectedDataSeries(null, dataSeriesValuesA)).toEqual([dataSeriesValuesA]);
   });
   it('should get an updated customSeriesColor based on specs', () => {
     const spec1: BasicSeriesSpec = {

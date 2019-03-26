@@ -134,33 +134,33 @@ describe('Legends', () => {
     ];
     expect(Array.from(legend.values())).toEqual(expected);
   });
-  it('sets all series legend items to visible when selectedDataSeries is null', () => {
+  it('default all series legend items to visible when deselectedDataSeries is null', () => {
     seriesColor.set('colorSeries1a', colorValues1a);
     seriesColor.set('colorSeries1b', colorValues1b);
     seriesColor.set('colorSeries2a', colorValues2a);
     seriesColor.set('colorSeries2b', colorValues2b);
 
     const emptyColorMap = new Map<string, string>();
-    const selectedDataSeries = null;
+    const deselectedDataSeries = null;
 
-    const legend = computeLegend(seriesColor, emptyColorMap, specs, 'violet', selectedDataSeries);
+    const legend = computeLegend(seriesColor, emptyColorMap, specs, 'violet', deselectedDataSeries);
 
     const visibility = [...legend.values()].map((item) => item.isVisible);
 
     expect(visibility).toEqual([true, true, true, true]);
   });
-  it('selectively sets series to visible when there are selectedDataSeries items', () => {
+  it('selectively sets series to visible when there are deselectedDataSeries items', () => {
     seriesColor.set('colorSeries1a', colorValues1a);
     seriesColor.set('colorSeries1b', colorValues1b);
     seriesColor.set('colorSeries2a', colorValues2a);
     seriesColor.set('colorSeries2b', colorValues2b);
 
     const emptyColorMap = new Map<string, string>();
-    const selectedDataSeries = [colorValues1a, colorValues1b];
+    const deselectedDataSeries = [colorValues1a, colorValues1b];
 
-    const legend = computeLegend(seriesColor, emptyColorMap, specs, 'violet', selectedDataSeries);
+    const legend = computeLegend(seriesColor, emptyColorMap, specs, 'violet', deselectedDataSeries);
 
     const visibility = [...legend.values()].map((item) => item.isVisible);
-    expect(visibility).toEqual([true, true, false, false]);
+    expect(visibility).toEqual([false, false, true, true]);
   });
 });

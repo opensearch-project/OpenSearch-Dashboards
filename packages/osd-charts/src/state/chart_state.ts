@@ -66,13 +66,12 @@ import {
   computeChartTransform,
   computeSeriesDomains,
   computeSeriesGeometries,
-  findSelectedDataSeries,
-  getAllDataSeriesColorValues,
+  findDataSeriesByColorValues,
   getAxesSpecForSpecId,
   getUpdatedCustomSeriesColors,
   isLineAreaOnlyChart,
   Transform,
-  updateSelectedDataSeries,
+  updateDeselectedDataSeries,
 } from './utils';
 
 export interface Point {
@@ -145,7 +144,7 @@ export class ChartStore {
   legendItems: Map<string, LegendItem> = new Map();
   highlightedLegendItemKey: IObservableValue<string | null> = observable.box(null);
   selectedLegendItemKey: IObservableValue<string | null> = observable.box(null);
-  selectedDataSeries: DataSeriesColorsValues[] | null = null;
+  deselectedDataSeries: DataSeriesColorsValues[] | null = null;
   customSeriesColors: Map<string, string> = new Map();
   seriesColorMap: Map<string, string> = new Map();
   totalBarsInCluster?: number;
@@ -482,12 +481,12 @@ export class ChartStore {
     const legendItem = this.legendItems.get(legendItemKey);
 
     if (legendItem) {
-      if (findSelectedDataSeries(this.selectedDataSeries, legendItem.value) > -1) {
-        this.selectedDataSeries = [...this.legendItems.values()]
+      if (findDataSeriesByColorValues(this.deselectedDataSeries, legendItem.value) > -1) {
+        this.deselectedDataSeries = [...this.legendItems.values()]
           .filter((item: LegendItem) => item.key !== legendItemKey)
           .map((item: LegendItem) => item.value);
       } else {
-        this.selectedDataSeries = [legendItem.value];
+        this.deselectedDataSeries = [legendItem.value];
       }
 
       this.computeChart();
@@ -498,7 +497,7 @@ export class ChartStore {
     const legendItem = this.legendItems.get(legendItemKey);
 
     if (legendItem) {
-      this.selectedDataSeries = updateSelectedDataSeries(this.selectedDataSeries, legendItem.value);
+      this.deselectedDataSeries = updateDeselectedDataSeries(this.deselectedDataSeries, legendItem.value);
       this.computeChart();
     }
   });
@@ -553,8 +552,8 @@ export class ChartStore {
     }
   }
 
-  resetSelectedDataSeries() {
-    this.selectedDataSeries = null;
+  resetDeselectedDataSeries() {
+    this.deselectedDataSeries = null;
   }
 
   setOnElementClickListener(listener: ElementClickListener) {
@@ -665,25 +664,21 @@ export class ChartStore {
 
     // When specs are not initialized, reset selectedDataSeries to null
     if (!this.specsInitialized.get()) {
-      this.selectedDataSeries = null;
+      this.deselectedDataSeries = null;
     }
 
     const domainsByGroupId = mergeDomainsByGroupId(this.axesSpecs, this.chartRotation);
 
     // The last argument is optional; if not supplied, then all series will be factored into computations
-    // Otherwise, selectedDataSeries is used to restrict the computation for just the selected series
+    // Otherwise, deselectedDataSeries is used to restrict the computation excluding the deselected series
     const seriesDomains = computeSeriesDomains(
       this.seriesSpecs,
       domainsByGroupId,
       this.xDomain,
-      this.selectedDataSeries,
+      this.deselectedDataSeries,
     );
-    this.seriesDomainsAndData = seriesDomains;
 
-    // If this.selectedDataSeries is null, initialize with all series
-    if (!this.selectedDataSeries) {
-      this.selectedDataSeries = getAllDataSeriesColorValues(seriesDomains.seriesColors);
-    }
+    this.seriesDomainsAndData = seriesDomains;
 
     // Merge all series spec custom colors with state custom colors map
     const updatedCustomSeriesColors = getUpdatedCustomSeriesColors(this.seriesSpecs);
@@ -705,7 +700,7 @@ export class ChartStore {
       this.seriesColorMap,
       this.seriesSpecs,
       this.chartTheme.colors.defaultVizColor,
-      this.selectedDataSeries,
+      this.deselectedDataSeries,
     );
     // tslint:disable-next-line:no-console
     // console.log({ legendItems: this.legendItems });

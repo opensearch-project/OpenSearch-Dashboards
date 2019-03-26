@@ -278,7 +278,7 @@ describe('Series', () => {
     expectedCustomizedColorMap.set('spec1', 'custom_color');
     expect(customizedColorMap).toEqual(expectedCustomizedColorMap);
   });
-  test('should only include selectedDataSeries when splitting series if selectedDataSeries is defined', () => {
+  test('should only include deselectedDataSeries when splitting series if deselectedDataSeries is defined', () => {
     const seriesSpecs = new Map<SpecId, BasicSeriesSpec>();
     const specId = getSpecId('splitSpec');
 
@@ -300,14 +300,14 @@ describe('Series', () => {
     const allSeries = getSplittedSeries(seriesSpecs, null);
     expect(allSeries.splittedSeries.get(specId)!.length).toBe(2);
 
-    const emptySplit = getSplittedSeries(seriesSpecs, []);
-    expect(emptySplit.splittedSeries.get(specId)!.length).toBe(0);
+    const emptyDeselected = getSplittedSeries(seriesSpecs, []);
+    expect(emptyDeselected.splittedSeries.get(specId)!.length).toBe(2);
 
-    const selectedDataSeries: DataSeriesColorsValues[] = [{
+    const deselectedDataSeries: DataSeriesColorsValues[] = [{
       specId,
       colorValues: ['y1'],
     }];
-    const subsetSplit = getSplittedSeries(seriesSpecs, selectedDataSeries);
+    const subsetSplit = getSplittedSeries(seriesSpecs, deselectedDataSeries);
     expect(subsetSplit.splittedSeries.get(specId)!.length).toBe(1);
   });
 });

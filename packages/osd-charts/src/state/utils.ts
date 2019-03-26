@@ -50,7 +50,7 @@ export interface BrushExtent {
   maxY: number;
 }
 
-export function findSelectedDataSeries(
+export function findDataSeriesByColorValues(
   series: DataSeriesColorsValues[] | null,
   value: DataSeriesColorsValues,
 ): number {
@@ -63,17 +63,11 @@ export function findSelectedDataSeries(
   });
 }
 
-export function getAllDataSeriesColorValues(
-  seriesColors: Map<string, DataSeriesColorsValues>,
-): DataSeriesColorsValues[] {
-  return Array.from(seriesColors.values());
-}
-
-export function updateSelectedDataSeries(
+export function updateDeselectedDataSeries(
   series: DataSeriesColorsValues[] | null,
   value: DataSeriesColorsValues,
 ): DataSeriesColorsValues[] {
-  const seriesIndex = findSelectedDataSeries(series, value);
+  const seriesIndex = findDataSeriesByColorValues(series, value);
   const updatedSeries = series ? [...series] : [];
 
   if (seriesIndex > -1) {
@@ -114,11 +108,11 @@ export function computeSeriesDomains(
   seriesSpecs: Map<SpecId, BasicSeriesSpec>,
   domainsByGroupId: Map<GroupId, DomainRange>,
   customXDomain?: DomainRange | Domain,
-  selectedDataSeries?: DataSeriesColorsValues[] | null,
+  deselectedDataSeries?: DataSeriesColorsValues[] | null,
 ): SeriesDomainsAndData {
   const { splittedSeries, xValues, seriesColors } = getSplittedSeries(
     seriesSpecs,
-    selectedDataSeries,
+    deselectedDataSeries,
   );
   // tslint:disable-next-line:no-console
   // console.log({ splittedSeries, xValues, seriesColors });

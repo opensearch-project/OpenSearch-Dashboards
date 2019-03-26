@@ -1,4 +1,4 @@
-import { findSelectedDataSeries } from '../../state/utils';
+import { findDataSeriesByColorValues } from '../../state/utils';
 import { ColorConfig } from '../themes/theme';
 import { Accessor } from '../utils/accessor';
 import { GroupId, SpecId } from '../utils/ids';
@@ -342,7 +342,7 @@ export function formatStackedDataSeriesValues(
 
 export function getSplittedSeries(
   seriesSpecs: Map<SpecId, BasicSeriesSpec>,
-  selectedDataSeries?: DataSeriesColorsValues[] | null,
+  deselectedDataSeries?: DataSeriesColorsValues[] | null,
 ): {
   splittedSeries: Map<SpecId, RawDataSeries[]>;
   seriesColors: Map<string, DataSeriesColorsValues>;
@@ -354,7 +354,7 @@ export function getSplittedSeries(
   for (const [specId, spec] of seriesSpecs) {
     const dataSeries = splitSeries(spec.data, spec, specId);
     let currentRawDataSeries = dataSeries.rawDataSeries;
-    if (selectedDataSeries) {
+    if (deselectedDataSeries) {
       currentRawDataSeries = dataSeries.rawDataSeries.filter(
         (series): boolean => {
           const seriesValues = {
@@ -362,7 +362,7 @@ export function getSplittedSeries(
             colorValues: series.key,
           };
 
-          return findSelectedDataSeries(selectedDataSeries, seriesValues) > -1;
+          return findDataSeriesByColorValues(deselectedDataSeries, seriesValues) < 0;
         },
       );
     }

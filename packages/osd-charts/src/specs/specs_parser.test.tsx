@@ -11,15 +11,16 @@ describe('Specs parser', () => {
     mount(component);
     expect(chartStore.specsInitialized.get()).toBe(true);
   });
-  test('resets selectedDataSeries on component update', () => {
+  test('chart store initialized and computeChart on component update', () => {
     const chartStore = new ChartStore();
-    const reset = jest.fn((): void => { return; });
-    chartStore.resetSelectedDataSeries = reset;
+    const computeChart = jest.fn((): void => { return; });
+    chartStore.computeChart = computeChart;
 
     const component = mount(<SpecsSpecRootComponent chartStore={chartStore} />);
     component.update();
     component.setState({ foo: 'bar' });
-    expect(reset).toBeCalled();
+    expect(chartStore.specsInitialized.get()).toBe(true);
+    expect(computeChart).toBeCalled();
   });
   test('updates initialization state on unmount', () => {
     const chartStore = new ChartStore();

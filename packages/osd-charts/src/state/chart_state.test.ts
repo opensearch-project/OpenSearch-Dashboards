@@ -20,7 +20,7 @@ describe('Chart Store', () => {
     groupId: GROUP_ID,
     seriesType: 'bar',
     yScaleToDataExtent: false,
-    data: [{ x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }],
+    data: [{ x: 1, y: 1, g: 0 }, { x: 2, y: 2, g: 1 }, { x: 3, y: 3, g: 3 }],
     xAccessor: 'x',
     yAccessors: ['y'],
     xScaleType: ScaleType.Linear,
@@ -55,17 +55,10 @@ describe('Chart Store', () => {
     expect(seriesDomainsAndData).not.toBeUndefined();
   });
 
-  test('can initialize selectedDataSeries depending on previous state', () => {
-    const selectedDataSeries = [{ specId: SPEC_ID, colorValues: [] }];
-
-    store.selectedDataSeries = null;
+  test('can initialize deselectedDataSeries depending on previous state', () => {
+    store.specsInitialized.set(false);
     store.computeChart();
-    expect(store.selectedDataSeries).toEqual(selectedDataSeries);
-
-    store.selectedDataSeries = selectedDataSeries;
-    store.specsInitialized.set(true);
-    store.computeChart();
-    expect(store.selectedDataSeries).toEqual(selectedDataSeries);
+    expect(store.deselectedDataSeries).toEqual(null);
   });
 
   test('can add an axis', () => {
@@ -254,21 +247,21 @@ describe('Chart Store', () => {
       [firstLegendItem.key, firstLegendItem],
       [secondLegendItem.key, secondLegendItem],
     ]);
-    store.selectedDataSeries = null;
+    store.deselectedDataSeries = null;
     store.computeChart = computeChart;
 
     store.toggleSeriesVisibility('other');
-    expect(store.selectedDataSeries).toEqual(null);
+    expect(store.deselectedDataSeries).toEqual(null);
     expect(computeChart).not.toBeCalled();
 
-    store.selectedDataSeries = [firstLegendItem.value, secondLegendItem.value];
+    store.deselectedDataSeries = [firstLegendItem.value, secondLegendItem.value];
     store.toggleSeriesVisibility(firstLegendItem.key);
-    expect(store.selectedDataSeries).toEqual([secondLegendItem.value]);
+    expect(store.deselectedDataSeries).toEqual([secondLegendItem.value]);
     expect(computeChart).toBeCalled();
 
-    store.selectedDataSeries = [firstLegendItem.value];
+    store.deselectedDataSeries = [firstLegendItem.value];
     store.toggleSeriesVisibility(firstLegendItem.key);
-    expect(store.selectedDataSeries).toEqual([]);
+    expect(store.deselectedDataSeries).toEqual([]);
   });
 
   test('can toggle single series visibility', () => {
@@ -282,18 +275,18 @@ describe('Chart Store', () => {
       [firstLegendItem.key, firstLegendItem],
       [secondLegendItem.key, secondLegendItem],
     ]);
-    store.selectedDataSeries = null;
+    store.deselectedDataSeries = null;
     store.computeChart = computeChart;
 
     store.toggleSingleSeries('other');
-    expect(store.selectedDataSeries).toEqual(null);
+    expect(store.deselectedDataSeries).toEqual(null);
     expect(computeChart).not.toBeCalled();
 
     store.toggleSingleSeries(firstLegendItem.key);
-    expect(store.selectedDataSeries).toEqual([firstLegendItem.value]);
+    expect(store.deselectedDataSeries).toEqual([firstLegendItem.value]);
 
     store.toggleSingleSeries(firstLegendItem.key);
-    expect(store.selectedDataSeries).toEqual([secondLegendItem.value]);
+    expect(store.deselectedDataSeries).toEqual([secondLegendItem.value]);
   });
 
   test('can set an element click listener', () => {
@@ -486,9 +479,9 @@ describe('Chart Store', () => {
   });
 
   test('can reset selectedDataSeries', () => {
-    store.selectedDataSeries = [firstLegendItem.value];
-    store.resetSelectedDataSeries();
-    expect(store.selectedDataSeries).toBe(null);
+    store.deselectedDataSeries = [firstLegendItem.value];
+    store.resetDeselectedDataSeries();
+    expect(store.deselectedDataSeries).toBe(null);
   });
   test('can update the crosshair visibility', () => {
     store.cursorPosition.x = -1;

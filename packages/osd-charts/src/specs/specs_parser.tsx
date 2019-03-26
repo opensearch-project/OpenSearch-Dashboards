@@ -18,7 +18,6 @@ export class SpecsSpecRootComponent extends PureComponent<SpecProps> {
   }
   componentDidUpdate() {
     this.props.chartStore!.specsInitialized.set(true);
-    this.props.chartStore!.resetSelectedDataSeries();
     this.props.chartStore!.computeChart();
   }
   componentWillUnmount() {
