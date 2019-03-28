@@ -26,10 +26,8 @@ class Resizer extends React.Component<ResizerProps> {
   }
 
   onResize = (entries: ResizeObserverEntry[]) => {
-    entries.forEach((entry) => {
-      const { width, height } = entry.contentRect;
-      const { top, left } = entry.target.getBoundingClientRect();
-      this.props.chartStore!.updateParentDimensions(width, height, top, left);
+    entries.forEach(({ contentRect: { width, height } }) => {
+      this.props.chartStore!.updateParentDimensions(width, height, 0, 0);
     });
   }
 

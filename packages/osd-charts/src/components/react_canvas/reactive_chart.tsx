@@ -278,12 +278,8 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
           left: 0,
           boxSizing: 'border-box',
         }}
-        onMouseMove={({ clientX, clientY }) => {
-          // this cause a layout reflow on the browser https://gist.github.com/paulirish/5d52fb081b3570c81e3a
-          const { left, top } = this.props.chartStore!.parentDimensions;
-          const x = clientX - left;
-          const y = clientY - top;
-          setCursorPosition(x, y);
+        onMouseMove={({ nativeEvent: { offsetX, offsetY } }) => {
+          setCursorPosition(offsetX, offsetY);
         }}
         onMouseLeave={() => {
           setCursorPosition(-1, -1);
