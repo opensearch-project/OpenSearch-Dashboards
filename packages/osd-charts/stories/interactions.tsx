@@ -194,8 +194,6 @@ storiesOf('Interactions', module)
       linear: ScaleType.Linear,
       log: ScaleType.Log,
     };
-
-    const xScaleType = ScaleType.Linear;
     const yScaleType = select('yScaleType', yScaleTypeOptions, ScaleType.Linear, specChange);
 
     const xAccessorOptions = { x: 'x', y1: 'y1', y2: 'y2' };
@@ -215,19 +213,14 @@ storiesOf('Interactions', module)
 
     const data = hasAdditionalG1Value ? [...seriesData, additionalG1Value] : seriesData;
 
-    const barSeriesProps = {
-      xScaleType,
-      yScaleType,
-      xAccessor,
-      yAccessors,
-      splitSeriesAccessors,
-      data,
-      yScaleToDataExtent,
-    };
-
     return (
       <Chart renderer="canvas" className={'story-chart'}>
-        <Settings showLegend={true} legendPosition={Position.Right} {...onLegendItemListeners} xDomain={xDomain} />
+        <Settings
+          showLegend={true}
+          legendPosition={Position.Right}
+          {...onLegendItemListeners}
+          xDomain={xDomain}
+        />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -242,7 +235,16 @@ storiesOf('Interactions', module)
           domain={yDomain}
         />
 
-        <BarSeries id={getSpecId('bars')} {...barSeriesProps} />
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={yScaleType}
+          xAccessor={xAccessor}
+          yAccessors={yAccessors}
+          splitSeriesAccessors={splitSeriesAccessors}
+          data={data}
+          yScaleToDataExtent={yScaleToDataExtent}
+        />
       </Chart>
     );
   })

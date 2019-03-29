@@ -20,7 +20,7 @@
     "start": "yarn storybook",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "storybook:build": "rm -rf .out && build-storybook -c .storybook -o .out",
-    "lint": "yarn build:ts --noEmit && tslint -c ./tslint.yaml -p ./tsconfig.json",
+    "lint": "yarn typecheck:all && tslint -c ./tslint.yaml -p ./tsconfig.json",
     "lint:fix": "yarn lint --fix",
     "prettier": "prettier --check --debug-check \"**/*.{ts,tsx}\"",
     "prettier:fix": "prettier --write \"{,!(node_modules)/}**/*.{ts,tsx}\"",
@@ -28,8 +28,10 @@
     "watch": "yarn test --watch",
     "format:fix": "yarn prettier:fix && yarn lint:fix",
     "format:check": "yarn prettier && yarn lint",
-    "style:fix": "tsc -p ./tsconfig.json --noEmit && yarn prettier-tslint fix \"{,!(node_modules)/}**/*.{ts,tsx}\"",
-    "semantic-release": "semantic-release"
+    "style:fix": "yarn typecheck:src && yarn prettier-tslint fix \"{,!(node_modules)/}**/*.{ts,tsx}\"",
+    "semantic-release": "semantic-release",
+    "typecheck:src": "yarn build:ts --noEmit",
+    "typecheck:all": "tsc -p ./tsconfig.all.json --noEmit"
   },
   "files": [
     "dist/**/*",
