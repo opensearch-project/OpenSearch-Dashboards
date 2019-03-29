@@ -1,19 +1,21 @@
-import { DataSeriesColorsValues } from '../lib/series/series';
+import { mergeDomainsByGroupId } from '../lib/axes/axis_utils';
+import { DataSeriesColorsValues, getSeriesColorMap } from '../lib/series/series';
 import {
   AreaSeriesSpec,
+  AxisSpec,
   BarSeriesSpec,
   BasicSeriesSpec,
   LineSeriesSpec,
 } from '../lib/series/specs';
-
 import { BARCHART_1Y0G, BARCHART_1Y1G } from '../lib/series/utils/test_dataset';
-
-import { getGroupId, getSpecId, SpecId } from '../lib/utils/ids';
+import { AxisId, getGroupId, getSpecId, SpecId } from '../lib/utils/ids';
 import { ScaleType } from '../lib/utils/scales/scales';
 import {
   computeSeriesDomains,
+  computeSeriesGeometries,
   findDataSeriesByColorValues,
   getUpdatedCustomSeriesColors,
+  isChartAnimatable,
   isHorizontalRotation,
   isLineAreaOnlyChart,
   isVerticalRotation,
@@ -283,5 +285,370 @@ describe('Chart State utils', () => {
     expect(isLineAreaOnlyChart(seriesMap)).toBe(true);
     seriesMap = new Map<SpecId, BasicSeriesSpec>([[bar.id, bar], [getSpecId('bar2'), bar]]);
     expect(isLineAreaOnlyChart(seriesMap)).toBe(false);
+  });
+  test('can enable the chart animation if we have a valid number of elements', () => {
+    const geometriesCounts = {
+      points: 0,
+      bars: 0,
+      areas: 0,
+      areasPoints: 0,
+      lines: 0,
+      linePoints: 0,
+    };
+    expect(isChartAnimatable(geometriesCounts, false)).toBe(false);
+    expect(isChartAnimatable(geometriesCounts, true)).toBe(true);
+    geometriesCounts.bars = 300;
+    expect(isChartAnimatable(geometriesCounts, true)).toBe(true);
+    geometriesCounts.areasPoints = 300;
+    expect(isChartAnimatable(geometriesCounts, true)).toBe(true);
+    geometriesCounts.linePoints = 300;
+    expect(isChartAnimatable(geometriesCounts, true)).toBe(true);
+    expect(isChartAnimatable(geometriesCounts, false)).toBe(false);
+    geometriesCounts.linePoints = 301;
+    expect(isChartAnimatable(geometriesCounts, true)).toBe(false);
+  });
+  describe('Geometries counts', () => {
+    test('can compute stacked geometries counts', () => {
+      const area: AreaSeriesSpec = {
+        id: getSpecId('area'),
+        groupId: getGroupId('group1'),
+        seriesType: 'area',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Linear,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        splitSeriesAccessors: ['g'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y1G,
+      };
+      const line: LineSeriesSpec = {
+        id: getSpecId('line'),
+        groupId: getGroupId('group2'),
+        seriesType: 'line',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Linear,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        splitSeriesAccessors: ['g'],
+        stackAccessors: ['x'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y1G,
+      };
+      const bar: BarSeriesSpec = {
+        id: getSpecId('bar'),
+        groupId: getGroupId('group2'),
+        seriesType: 'bar',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Linear,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        splitSeriesAccessors: ['g'],
+        stackAccessors: ['x'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y1G,
+      };
+      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([
+        [area.id, area],
+        [line.id, line],
+        [bar.id, bar],
+      ]);
+      const axesSpecs = new Map<AxisId, AxisSpec>();
+      const chartRotation = 0;
+      const chartDimensions = { width: 100, height: 100, top: 0, left: 0 };
+      const chartColors = {
+        vizColors: ['violet', 'green', 'blue'],
+        defaultVizColor: 'red',
+      };
+      const domainsByGroupId = mergeDomainsByGroupId(axesSpecs, chartRotation);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
+      const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, chartColors, new Map());
+      const geometries = computeSeriesGeometries(
+        seriesSpecs,
+        seriesDomains.xDomain,
+        seriesDomains.yDomain,
+        seriesDomains.formattedDataSeries,
+        seriesColorMap,
+        chartColors,
+        chartDimensions,
+        chartRotation,
+      );
+      expect(geometries.geometriesCounts.bars).toBe(8);
+      expect(geometries.geometriesCounts.linePoints).toBe(8);
+      expect(geometries.geometriesCounts.areasPoints).toBe(8);
+      expect(geometries.geometriesCounts.lines).toBe(2);
+      expect(geometries.geometriesCounts.areas).toBe(2);
+    });
+    test('can compute non stacked geometries counts', () => {
+      const area: AreaSeriesSpec = {
+        id: getSpecId('area'),
+        groupId: getGroupId('group1'),
+        seriesType: 'area',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Linear,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        splitSeriesAccessors: ['g'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y1G,
+      };
+      const line: LineSeriesSpec = {
+        id: getSpecId('line'),
+        groupId: getGroupId('group2'),
+        seriesType: 'line',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Linear,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        splitSeriesAccessors: ['g'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y1G,
+      };
+      const bar: BarSeriesSpec = {
+        id: getSpecId('bar'),
+        groupId: getGroupId('group2'),
+        seriesType: 'bar',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Linear,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        splitSeriesAccessors: ['g'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y1G,
+      };
+      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([
+        [area.id, area],
+        [line.id, line],
+        [bar.id, bar],
+      ]);
+      const axesSpecs = new Map<AxisId, AxisSpec>();
+      const chartRotation = 0;
+      const chartDimensions = { width: 100, height: 100, top: 0, left: 0 };
+      const chartColors = {
+        vizColors: ['violet', 'green', 'blue'],
+        defaultVizColor: 'red',
+      };
+      const domainsByGroupId = mergeDomainsByGroupId(axesSpecs, chartRotation);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
+      const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, chartColors, new Map());
+      const geometries = computeSeriesGeometries(
+        seriesSpecs,
+        seriesDomains.xDomain,
+        seriesDomains.yDomain,
+        seriesDomains.formattedDataSeries,
+        seriesColorMap,
+        chartColors,
+        chartDimensions,
+        chartRotation,
+      );
+      expect(geometries.geometriesCounts.bars).toBe(8);
+      expect(geometries.geometriesCounts.linePoints).toBe(8);
+      expect(geometries.geometriesCounts.areasPoints).toBe(8);
+      expect(geometries.geometriesCounts.lines).toBe(2);
+      expect(geometries.geometriesCounts.areas).toBe(2);
+    });
+    test('can compute line geometries counts', () => {
+      const line1: LineSeriesSpec = {
+        id: getSpecId('line1'),
+        groupId: getGroupId('group2'),
+        seriesType: 'line',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Linear,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        splitSeriesAccessors: ['g'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y1G,
+      };
+      const line2: LineSeriesSpec = {
+        id: getSpecId('line2'),
+        groupId: getGroupId('group2'),
+        seriesType: 'line',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Linear,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        splitSeriesAccessors: ['g'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y1G,
+      };
+      const line3: LineSeriesSpec = {
+        id: getSpecId('line3'),
+        groupId: getGroupId('group2'),
+        seriesType: 'line',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Linear,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        splitSeriesAccessors: ['g'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y1G,
+      };
+      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([
+        [line1.id, line1],
+        [line2.id, line2],
+        [line3.id, line3],
+      ]);
+      const axesSpecs = new Map<AxisId, AxisSpec>();
+      const chartRotation = 0;
+      const chartDimensions = { width: 100, height: 100, top: 0, left: 0 };
+      const chartColors = {
+        vizColors: ['violet', 'green', 'blue'],
+        defaultVizColor: 'red',
+      };
+      const domainsByGroupId = mergeDomainsByGroupId(axesSpecs, chartRotation);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
+      const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, chartColors, new Map());
+      const geometries = computeSeriesGeometries(
+        seriesSpecs,
+        seriesDomains.xDomain,
+        seriesDomains.yDomain,
+        seriesDomains.formattedDataSeries,
+        seriesColorMap,
+        chartColors,
+        chartDimensions,
+        chartRotation,
+      );
+      expect(geometries.geometriesCounts.bars).toBe(0);
+      expect(geometries.geometriesCounts.linePoints).toBe(24);
+      expect(geometries.geometriesCounts.areasPoints).toBe(0);
+      expect(geometries.geometriesCounts.lines).toBe(6);
+      expect(geometries.geometriesCounts.areas).toBe(0);
+    });
+    test('can compute area geometries counts', () => {
+      const area1: AreaSeriesSpec = {
+        id: getSpecId('area1'),
+        groupId: getGroupId('group2'),
+        seriesType: 'area',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Linear,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        splitSeriesAccessors: ['g'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y1G,
+      };
+      const area2: AreaSeriesSpec = {
+        id: getSpecId('area2'),
+        groupId: getGroupId('group2'),
+        seriesType: 'area',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Linear,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        splitSeriesAccessors: ['g'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y1G,
+      };
+      const area3: AreaSeriesSpec = {
+        id: getSpecId('area3'),
+        groupId: getGroupId('group2'),
+        seriesType: 'area',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Linear,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        splitSeriesAccessors: ['g'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y1G,
+      };
+      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([
+        [area1.id, area1],
+        [area2.id, area2],
+        [area3.id, area3],
+      ]);
+      const axesSpecs = new Map<AxisId, AxisSpec>();
+      const chartRotation = 0;
+      const chartDimensions = { width: 100, height: 100, top: 0, left: 0 };
+      const chartColors = {
+        vizColors: ['violet', 'green', 'blue'],
+        defaultVizColor: 'red',
+      };
+      const domainsByGroupId = mergeDomainsByGroupId(axesSpecs, chartRotation);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
+      const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, chartColors, new Map());
+      const geometries = computeSeriesGeometries(
+        seriesSpecs,
+        seriesDomains.xDomain,
+        seriesDomains.yDomain,
+        seriesDomains.formattedDataSeries,
+        seriesColorMap,
+        chartColors,
+        chartDimensions,
+        chartRotation,
+      );
+      expect(geometries.geometriesCounts.bars).toBe(0);
+      expect(geometries.geometriesCounts.linePoints).toBe(0);
+      expect(geometries.geometriesCounts.areasPoints).toBe(24);
+      expect(geometries.geometriesCounts.lines).toBe(0);
+      expect(geometries.geometriesCounts.areas).toBe(6);
+    });
+    test('can compute bars geometries counts', () => {
+      const bars1: BarSeriesSpec = {
+        id: getSpecId('bars1'),
+        groupId: getGroupId('group2'),
+        seriesType: 'bar',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Linear,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        splitSeriesAccessors: ['g'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y1G,
+      };
+      const bars2: BarSeriesSpec = {
+        id: getSpecId('bars2'),
+        groupId: getGroupId('group2'),
+        seriesType: 'bar',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Linear,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        splitSeriesAccessors: ['g'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y1G,
+      };
+      const bars3: BarSeriesSpec = {
+        id: getSpecId('bars3'),
+        groupId: getGroupId('group2'),
+        seriesType: 'bar',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Linear,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        splitSeriesAccessors: ['g'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y1G,
+      };
+      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([
+        [bars1.id, bars1],
+        [bars2.id, bars2],
+        [bars3.id, bars3],
+      ]);
+      const axesSpecs = new Map<AxisId, AxisSpec>();
+      const chartRotation = 0;
+      const chartDimensions = { width: 100, height: 100, top: 0, left: 0 };
+      const chartColors = {
+        vizColors: ['violet', 'green', 'blue'],
+        defaultVizColor: 'red',
+      };
+      const domainsByGroupId = mergeDomainsByGroupId(axesSpecs, chartRotation);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
+      const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, chartColors, new Map());
+      const geometries = computeSeriesGeometries(
+        seriesSpecs,
+        seriesDomains.xDomain,
+        seriesDomains.yDomain,
+        seriesDomains.formattedDataSeries,
+        seriesColorMap,
+        chartColors,
+        chartDimensions,
+        chartRotation,
+      );
+      expect(geometries.geometriesCounts.bars).toBe(24);
+      expect(geometries.geometriesCounts.linePoints).toBe(0);
+      expect(geometries.geometriesCounts.areasPoints).toBe(0);
+      expect(geometries.geometriesCounts.lines).toBe(0);
+      expect(geometries.geometriesCounts.areas).toBe(0);
+    });
   });
 });

@@ -69,6 +69,7 @@ import {
   findDataSeriesByColorValues,
   getAxesSpecForSpecId,
   getUpdatedCustomSeriesColors,
+  isChartAnimatable,
   isLineAreaOnlyChart,
   Transform,
   updateDeselectedDataSeries,
@@ -93,7 +94,6 @@ export type ElementClickListener = (values: GeometryValue[]) => void;
 export type ElementOverListener = (values: GeometryValue[]) => void;
 export type BrushEndListener = (min: number, max: number) => void;
 export type LegendItemListener = (dataSeriesIdentifiers: DataSeriesColorsValues | null) => void;
-// const MAX_ANIMATABLE_GLYPHS = 500;
 
 export class ChartStore {
   debug = false;
@@ -497,7 +497,10 @@ export class ChartStore {
     const legendItem = this.legendItems.get(legendItemKey);
 
     if (legendItem) {
-      this.deselectedDataSeries = updateDeselectedDataSeries(this.deselectedDataSeries, legendItem.value);
+      this.deselectedDataSeries = updateDeselectedDataSeries(
+        this.deselectedDataSeries,
+        legendItem.value,
+      );
       this.computeChart();
     }
   });
@@ -789,13 +792,8 @@ export class ChartStore {
     this.axesTicks = axisTicksPositions.axisTicks;
     this.axesVisibleTicks = axisTicksPositions.axisVisibleTicks;
     this.axesGridLinesPositions = axisTicksPositions.axisGridLinesPositions;
-    // if (glyphsCount > MAX_ANIMATABLE_GLYPHS) {
-    //   this.canDataBeAnimated = false;
-    // } else {
-    //   this.canDataBeAnimated = this.animateData;
-    // }
-    this.canDataBeAnimated = true;
 
+    this.canDataBeAnimated = isChartAnimatable(seriesGeometries.geometriesCounts, this.animateData);
     this.initialized.set(true);
   }
 }
