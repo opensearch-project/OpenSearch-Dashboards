@@ -59,7 +59,7 @@ export interface SeriesScales {
    * The x axis scale type
    * @default ScaleType.Ordinal
    */
-  xScaleType: ScaleType;
+  xScaleType: ScaleType.Ordinal | ScaleType.Linear | ScaleType.Time;
   /**
    * The y axis scale type
    * @default ScaleType.Linear

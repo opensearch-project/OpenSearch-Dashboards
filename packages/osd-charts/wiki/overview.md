@@ -129,29 +129,35 @@ export interface SeriesSpec {
 }
 
 export interface SeriesAccessors {
-  /* The field name of the x value on Datum object */
+  /** The field name of the x value on Datum object */
   xAccessor: Accessor;
-  /* An array of field names one per y metric value */
+  /** An array of field names one per y metric value */
   yAccessors: Accessor[];
-  /* An array of fields thats indicates the datum series membership */
+  /** An array of fields thats indicates the datum series membership */
   splitSeriesAccessors?: Accessor[];
-  /* An array of fields thats indicates the stack membership */
+  /** An array of fields thats indicates the stack membership */
   stackAccessors?: Accessor[];
-  /* An optional array of field name thats indicates the stack membership */
+  /** An optional array of field name thats indicates the stack membership */
   colorAccessors?: Accessor[];
 }
 
 export interface SeriesScales {
-  /* The x axis scale type */
-  xScaleType: ScaleType;
-  /* The y axis scale type */
+  /**
+   * The x axis scale type
+   * @default ScaleType.Ordinal
+   */
+  xScaleType: ScaleType.Ordinal | ScaleType.Linear | ScaleType.Time;
+  /**
+   * The y axis scale type
+   * @default ScaleType.Linear
+   */
   yScaleType: ScaleContinuousType;
   /** if true, the min y value is set to the minimum domain value, 0 otherwise */
   yScaleToDataExtent: boolean;
 }
 ```
 
-A `BarSeriesSpec` for example is the following union type:
+A `BarSeriesSpec` for example is the following intersection type:
 
 ```ts
 export type BarSeriesSpec = SeriesSpec &

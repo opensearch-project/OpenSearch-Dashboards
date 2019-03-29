@@ -71,57 +71,6 @@ describe('X Domain', () => {
       isBandScale: false,
     });
   });
-  test('Should return correct scale type with multi line, area (log)', () => {
-    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
-      {
-        seriesType: 'line',
-        xScaleType: ScaleType.Log,
-      },
-      {
-        seriesType: 'area',
-        xScaleType: ScaleType.Log,
-      },
-    ];
-    const mainXScale = convertXScaleTypes(seriesSpecs);
-    expect(mainXScale).toEqual({
-      scaleType: ScaleType.Log,
-      isBandScale: false,
-    });
-  });
-  test('Should return correct scale type with multi line, area with different scale types (time, log)', () => {
-    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
-      {
-        seriesType: 'line',
-        xScaleType: ScaleType.Time,
-      },
-      {
-        seriesType: 'area',
-        xScaleType: ScaleType.Log,
-      },
-    ];
-    const mainXScale = convertXScaleTypes(seriesSpecs);
-    expect(mainXScale).toEqual({
-      scaleType: ScaleType.Linear,
-      isBandScale: false,
-    });
-  });
-  test('Should return correct scale type with multi line, area with different scale types (ordinal, log)', () => {
-    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
-      {
-        seriesType: 'line',
-        xScaleType: ScaleType.Ordinal,
-      },
-      {
-        seriesType: 'area',
-        xScaleType: ScaleType.Log,
-      },
-    ];
-    const mainXScale = convertXScaleTypes(seriesSpecs);
-    expect(mainXScale).toEqual({
-      scaleType: ScaleType.Ordinal,
-      isBandScale: false,
-    });
-  });
   test('Should return correct scale type with multi line with different scale types (linear, ordinal)', () => {
     const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
       {
@@ -139,40 +88,6 @@ describe('X Domain', () => {
       isBandScale: false,
     });
   });
-  test('Should return correct scale type with multi bar, area with different scale types (ordinal, log)', () => {
-    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
-      {
-        seriesType: 'bar',
-        xScaleType: ScaleType.Ordinal,
-      },
-      {
-        seriesType: 'area',
-        xScaleType: ScaleType.Log,
-      },
-    ];
-    const mainXScale = convertXScaleTypes(seriesSpecs);
-    expect(mainXScale).toEqual({
-      scaleType: ScaleType.Ordinal,
-      isBandScale: true,
-    });
-  });
-  test('Should return correct scale type with multi bar, area with different scale types (time, log)', () => {
-    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
-      {
-        seriesType: 'bar',
-        xScaleType: ScaleType.Time,
-      },
-      {
-        seriesType: 'area',
-        xScaleType: ScaleType.Log,
-      },
-    ];
-    const mainXScale = convertXScaleTypes(seriesSpecs);
-    expect(mainXScale).toEqual({
-      scaleType: ScaleType.Linear,
-      isBandScale: true,
-    });
-  });
   test('Should return correct scale type with multi bar, area with different scale types (linear, ordinal)', () => {
     const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
       {
@@ -187,6 +102,23 @@ describe('X Domain', () => {
     const mainXScale = convertXScaleTypes(seriesSpecs);
     expect(mainXScale).toEqual({
       scaleType: ScaleType.Ordinal,
+      isBandScale: true,
+    });
+  });
+  test('Should return correct scale type with multi bar, area with same scale types (linear, linear)', () => {
+    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
+      {
+        seriesType: 'bar',
+        xScaleType: ScaleType.Linear,
+      },
+      {
+        seriesType: 'area',
+        xScaleType: ScaleType.Time,
+      },
+    ];
+    const mainXScale = convertXScaleTypes(seriesSpecs);
+    expect(mainXScale).toEqual({
+      scaleType: ScaleType.Linear,
       isBandScale: true,
     });
   });
@@ -519,48 +451,6 @@ describe('X Domain', () => {
     );
     expect(mergedDomain.domain).toEqual([0, 1, 2, 5, 7]);
   });
-  test('Should merge multi lines log/linear series correctly', () => {
-    const ds1: BasicSeriesSpec = {
-      id: getSpecId('ds1'),
-      groupId: getGroupId('g1'),
-      seriesType: 'line',
-      xAccessor: 'x',
-      yAccessors: ['y'],
-      xScaleType: ScaleType.Log,
-      yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 5, y: 0 }],
-    };
-    const ds2: BasicSeriesSpec = {
-      id: getSpecId('ds2'),
-      groupId: getGroupId('g2'),
-      seriesType: 'line',
-      xAccessor: 'x',
-      yAccessors: ['y'],
-      xScaleType: ScaleType.Linear,
-      yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 7, y: 0 }],
-    };
-    const specDataSeries = new Map<SpecId, BasicSeriesSpec>();
-    specDataSeries.set(ds1.id, ds1);
-    specDataSeries.set(ds2.id, ds2);
-    const { xValues } = getSplittedSeries(specDataSeries);
-    const mergedDomain = mergeXDomain(
-      [
-        {
-          seriesType: 'line',
-          xScaleType: ScaleType.Log,
-        },
-        {
-          seriesType: 'line',
-          xScaleType: ScaleType.Linear,
-        },
-      ],
-      xValues,
-    );
-    expect(mergedDomain.domain).toEqual([0, 7]);
-  });
 
   test('Should merge X multi high volume of data', () => {
     const maxValues = 10000;
@@ -570,7 +460,7 @@ describe('X Domain', () => {
       seriesType: 'line',
       xAccessor: 'x',
       yAccessors: ['y'],
-      xScaleType: ScaleType.Log,
+      xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
       data: new Array(maxValues).fill(0).map((d, i) => ({ x: i, y: i })),
@@ -673,7 +563,9 @@ describe('X Domain', () => {
     const attemptToMerge = () => {
       mergeXDomain(specs, xValues, invalidXDomain);
     };
-    expect(attemptToMerge).toThrowError('custom xDomain is invalid, custom min is greater than computed max');
+    expect(attemptToMerge).toThrowError(
+      'custom xDomain is invalid, custom min is greater than computed max',
+    );
   });
 
   test('should account for custom domain when merging a linear domain: upper bounded domain', () => {
@@ -690,7 +582,9 @@ describe('X Domain', () => {
     const attemptToMerge = () => {
       mergeXDomain(specs, xValues, invalidXDomain);
     };
-    expect(attemptToMerge).toThrowError('custom xDomain is invalid, computed min is greater than custom max');
+    expect(attemptToMerge).toThrowError(
+      'custom xDomain is invalid, computed min is greater than custom max',
+    );
   });
 
   test('should account for custom domain when merging an ordinal domain', () => {

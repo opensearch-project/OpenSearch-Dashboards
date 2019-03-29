@@ -36,7 +36,9 @@ export function mergeXDomain(
       if (Array.isArray(xDomain)) {
         seriesXComputedDomains = xDomain;
       } else {
-        throw new Error('xDomain for ordinal scale should be an array of values, not a DomainRange object');
+        throw new Error(
+          'xDomain for ordinal scale should be an array of values, not a DomainRange object',
+        );
       }
     }
   } else {
@@ -65,7 +67,9 @@ export function mergeXDomain(
           seriesXComputedDomains = [computedDomainMin, xDomain.max];
         }
       } else {
-        throw new Error('xDomain for continuous scale should be a DomainRange object, not an array');
+        throw new Error(
+          'xDomain for continuous scale should be a DomainRange object, not an array',
+        );
       }
     }
     minInterval = findMinInterval(values);
@@ -85,27 +89,23 @@ export function mergeXDomain(
  * Default to 0 if an empty array, 1 if one item array
  */
 export function findMinInterval(xValues: number[]): number {
-  const valuesLength = xValues.length - 1;
-  if (valuesLength < 0) {
+  const valuesLength = xValues.length;
+  if (valuesLength <= 0) {
     return 0;
   }
-  if (valuesLength === 0) {
+  if (valuesLength === 1) {
     return 1;
   }
   const sortedValues = xValues.slice().sort(compareByValueAsc);
   let i;
-  let minInterval = null;
-  for (i = 0; i < valuesLength; i++) {
+  let minInterval = Math.abs(sortedValues[1] - sortedValues[0]);
+  for (i = 1; i < valuesLength - 1; i++) {
     const current = sortedValues[i];
     const next = sortedValues[i + 1];
     const interval = Math.abs(next - current);
-    if (minInterval === null) {
-      minInterval = interval;
-    } else {
-      minInterval = Math.min(minInterval, interval);
-    }
+    minInterval = Math.min(minInterval, interval);
   }
-  return minInterval === null ? 0 : minInterval;
+  return minInterval;
 }
 
 /**
