@@ -217,7 +217,8 @@ storiesOf('Area Chart', module)
           tickFormat={(d) => Number(d).toFixed(2)}
         />
         <AreaSeries
-          id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[2].metric.label)}
+          id={getSpecId('1')}
+          name={KIBANA_METRICS.metrics.kibana_os_load[2].metric.label}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={0}
@@ -227,7 +228,8 @@ storiesOf('Area Chart', module)
           yScaleToDataExtent={false}
         />
         <AreaSeries
-          id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[1].metric.label)}
+          id={getSpecId('2')}
+          name={KIBANA_METRICS.metrics.kibana_os_load[1].metric.label}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={0}
@@ -237,7 +239,60 @@ storiesOf('Area Chart', module)
           yScaleToDataExtent={false}
         />
         <AreaSeries
-          id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[0].metric.label)}
+          id={getSpecId('3')}
+          name={KIBANA_METRICS.metrics.kibana_os_load[0].metric.label}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          stackAccessors={[0]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('stacked with separated specs - same naming', () => {
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Settings showLegend={true} legendPosition={Position.Right} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'timestamp per 1 minute'}
+          showOverlappingTicks={true}
+          tickFormat={dateFormatter}
+        />
+        <Axis
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <AreaSeries
+          id={getSpecId('1')}
+          name={'Count'}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          stackAccessors={[0]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[2].data}
+          yScaleToDataExtent={false}
+        />
+        <AreaSeries
+          id={getSpecId('2')}
+          name={'Count'}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          stackAccessors={[0]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[1].data}
+          yScaleToDataExtent={false}
+        />
+        <AreaSeries
+          id={getSpecId('3')}
+          name={'Count'}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={0}

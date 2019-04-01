@@ -20,7 +20,7 @@ export function formatTooltip(
   if (seriesKey.length > 0) {
     name = searchIndexValue.seriesKey.join(' - ');
   } else {
-    name = `${spec.id}`;
+    name = spec.name || `${spec.id}`;
   }
   // format y value
   return formatAccessor(
@@ -50,7 +50,7 @@ export function formatXTooltipValue(
   if (searchIndexValue.seriesKey.length > 0) {
     name = searchIndexValue.seriesKey.join(' - ');
   } else {
-    name = `${spec.id}`;
+    name = spec.name || `${spec.id}`;
   }
   const xValues = formatAccessor(
     searchIndexValue.datum,

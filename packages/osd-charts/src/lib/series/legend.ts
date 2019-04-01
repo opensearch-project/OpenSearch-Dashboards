@@ -23,7 +23,7 @@ export function computeLegend(
 
     const color = seriesColorMap.get(key) || defaultColor;
     const hasSingleSeries = seriesColor.size === 1;
-    const label = getSeriesColorLabel(series, hasSingleSeries, spec);
+    const label = getSeriesColorLabel(series.colorValues, hasSingleSeries, spec);
     const isVisible = deselectedDataSeries
       ? findDataSeriesByColorValues(deselectedDataSeries, series) < 0
       : true;
@@ -44,19 +44,19 @@ export function computeLegend(
 }
 
 export function getSeriesColorLabel(
-  series: DataSeriesColorsValues,
+  colorValues: any[],
   hasSingleSeries: boolean,
-  spec: BasicSeriesSpec | undefined,
+  spec?: BasicSeriesSpec,
 ): string | undefined {
   let label = '';
 
-  if (hasSingleSeries || series.colorValues.length === 0 || !series.colorValues[0]) {
+  if (hasSingleSeries || colorValues.length === 0 || !colorValues[0]) {
     if (!spec) {
       return;
     }
-    label = `${spec.id}`;
+    label = spec.name || `${spec.id}`;
   } else {
-    label = series.colorValues.join(' - ');
+    label = colorValues.join(' - ');
   }
 
   return label;

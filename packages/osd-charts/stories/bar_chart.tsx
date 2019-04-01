@@ -29,6 +29,7 @@ storiesOf('Bar Chart', module)
       <Chart renderer="canvas" className={className}>
         <BarSeries
           id={getSpecId('bars')}
+          name={'Simple bar series'}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
@@ -262,6 +263,7 @@ storiesOf('Bar Chart', module)
 
         <BarSeries
           id={getSpecId('bars')}
+          name={'Simple bar series'}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           xAccessor="x"

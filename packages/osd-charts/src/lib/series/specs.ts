@@ -27,6 +27,8 @@ export type DomainRange = LowerBoundedDomain | UpperBoundedDomain | CompleteBoun
 export interface SeriesSpec {
   /** The ID of the spec, generated via getSpecId method */
   id: SpecId;
+  /** The name or label of the spec */
+  name?: string;
   /** The ID of the spec group, generated via getGroupId method
    * @default __global__
    */
