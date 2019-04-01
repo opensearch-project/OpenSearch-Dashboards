@@ -1,11 +1,11 @@
 import { Group as KonvaGroup } from 'konva';
 import React from 'react';
 import { Group, Rect } from 'react-konva';
-import { animated, Spring } from 'react-spring/renderprops-konva';
+import { animated, Spring } from 'react-spring/renderprops-konva.cjs';
 import { LegendItem } from '../../lib/series/legend';
 import { BarGeometry, getGeometryStyle } from '../../lib/series/rendering';
 import { BarSeriesStyle, SharedGeometryStyle } from '../../lib/themes/theme';
-import { GlobalKonvaElementProps } from './globals';
+import { buildBarProps } from './utils/rendering_props_utils';
 
 interface BarGeometriesDataProps {
   animated?: boolean;
@@ -47,7 +47,7 @@ export class BarGeometries extends React.PureComponent<
       style: { border },
       sharedStyle,
     } = this.props;
-    return bars.map((bar, i) => {
+    return bars.map((bar, index) => {
       const { x, y, width, height, color } = bar;
 
       // Properties to determine if we need to highlight individual bars depending on hover state
@@ -69,42 +69,41 @@ export class BarGeometries extends React.PureComponent<
       const borderEnabled = border.visible && width > border.strokeWidth * 7;
       if (this.props.animated) {
         return (
-          <Group key={i}>
+          <Group key={index}>
             <Spring native from={{ y: y + height, height: 0 }} to={{ y, height }}>
-              {(props: { y: number; height: number }) => (
-                <animated.Rect
-                  key="animatedRect"
-                  x={x}
-                  y={props.y}
-                  width={width}
-                  height={props.height}
-                  fill={color}
-                  strokeWidth={border.strokeWidth}
-                  stroke={border.stroke}
-                  strokeEnabled={borderEnabled}
-                  {...GlobalKonvaElementProps}
-                  {...geometryStyle}
-                />
-              )}
+              {(props: { y: number; height: number }) => {
+                const barProps = buildBarProps({
+                  index,
+                  x,
+                  y: props.y,
+                  width,
+                  height: props.height,
+                  fill: color,
+                  stroke: border.stroke,
+                  strokeWidth: border.strokeWidth,
+                  borderEnabled,
+                  geometryStyle,
+                });
+
+                return <animated.Rect {...barProps} />;
+              }}
             </Spring>
           </Group>
         );
       } else {
-        return (
-          <Rect
-            key={i}
-            x={x}
-            y={y}
-            width={width}
-            height={height}
-            fill={color}
-            strokeWidth={border.strokeWidth}
-            stroke={border.stroke}
-            strokeEnabled={borderEnabled}
-            {...GlobalKonvaElementProps}
-            {...geometryStyle}
-          />
-        );
+        const barProps = buildBarProps({
+          index,
+          x,
+          y,
+          width,
+          height,
+          fill: color,
+          stroke: border.stroke,
+          strokeWidth: border.strokeWidth,
+          borderEnabled,
+          geometryStyle,
+        });
+        return <Rect {...barProps} />;
       }
     });
   }

@@ -21,7 +21,7 @@ storiesOf('Area Chart', module)
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <AreaSeries
-          id={getSpecId('lines')}
+          id={getSpecId('areas')}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={0}
@@ -50,7 +50,7 @@ storiesOf('Area Chart', module)
         />
 
         <AreaSeries
-          id={getSpecId('lines')}
+          id={getSpecId('area')}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={0}
@@ -77,7 +77,7 @@ storiesOf('Area Chart', module)
         />
 
         <AreaSeries
-          id={getSpecId('lines')}
+          id={getSpecId('areas')}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           xAccessor={0}
@@ -261,7 +261,7 @@ storiesOf('Area Chart', module)
           tickFormat={(d) => Number(d).toFixed(2)}
         />
         <AreaSeries
-          id={getSpecId('lines')}
+          id={getSpecId('areas')}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           xAccessor={0}

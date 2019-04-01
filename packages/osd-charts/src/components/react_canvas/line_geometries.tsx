@@ -1,11 +1,11 @@
 import { Group as KonvaGroup } from 'konva';
 import React from 'react';
 import { Circle, Group, Path } from 'react-konva';
-import { animated, Spring } from 'react-spring/renderprops-konva';
+import { animated, Spring } from 'react-spring/renderprops-konva.cjs';
 import { LegendItem } from '../../lib/series/legend';
 import { getGeometryStyle, LineGeometry, PointGeometry } from '../../lib/series/rendering';
 import { LineSeriesStyle, SharedGeometryStyle } from '../../lib/themes/theme';
-import { GlobalKonvaElementProps } from './globals';
+import { buildLinePointProps, buildLineProps } from './utils/rendering_props_utils';
 
 interface LineGeometriesDataProps {
   animated?: boolean;
@@ -55,47 +55,43 @@ export class LineGeometries extends React.PureComponent<
     );
   }
 
-  private renderPoints = (linePoints: PointGeometry[], i: number): JSX.Element[] => {
+  private renderPoints = (linePoints: PointGeometry[], lineIndex: number): JSX.Element[] => {
     const { radius, strokeWidth, opacity } = this.props.style.point;
 
-    return linePoints.map((areaPoint, index) => {
-      const { x, y, color, transform } = areaPoint;
+    return linePoints.map((linePoint, pointIndex) => {
+      const { x, y, color, transform } = linePoint;
       if (this.props.animated) {
         return (
-          <Group key={`line-point-group-${i}-${index}`} x={transform.x}>
+          <Group key={`line-point-group-${lineIndex}-${pointIndex}`} x={transform.x}>
             <Spring native from={{ y }} to={{ y }}>
-              {(props: { y: number }) => (
-                <animated.Circle
-                  key={`line-point-${index}`}
-                  x={x}
-                  y={y}
-                  radius={radius}
-                  stroke={color}
-                  strokeWidth={strokeWidth}
-                  strokeEnabled={strokeWidth !== 0}
-                  fill={'white'}
-                  opacity={opacity}
-                  {...GlobalKonvaElementProps}
-                />
-              )}
+              {(props: { y: number }) => {
+                const pointProps = buildLinePointProps({
+                  lineIndex,
+                  pointIndex,
+                  x,
+                  y,
+                  radius,
+                  color,
+                  strokeWidth,
+                  opacity,
+                });
+                return <animated.Circle {...pointProps} />;
+              }}
             </Spring>
           </Group>
         );
       } else {
-        return (
-          <Circle
-            key={`line-point-${i}-${index}`}
-            x={transform.x + x}
-            y={y}
-            radius={radius}
-            stroke={color}
-            strokeWidth={strokeWidth}
-            strokeEnabled={strokeWidth !== 0}
-            fill={'white'}
-            opacity={opacity}
-            {...GlobalKonvaElementProps}
-          />
-        );
+        const pointProps = buildLinePointProps({
+          lineIndex,
+          pointIndex,
+          x: transform.x + x,
+          y,
+          radius,
+          color,
+          strokeWidth,
+          opacity,
+        });
+        return <Circle {...pointProps} />;
       }
     });
   }
@@ -103,7 +99,7 @@ export class LineGeometries extends React.PureComponent<
   private renderLineGeoms = (): JSX.Element[] => {
     const { style, lines, sharedStyle } = this.props;
     const { strokeWidth } = style.line;
-    return lines.map((glyph, i) => {
+    return lines.map((glyph, index) => {
       const { line, color, transform, geometryId } = glyph;
 
       const geometryStyle = getGeometryStyle(
@@ -114,37 +110,32 @@ export class LineGeometries extends React.PureComponent<
 
       if (this.props.animated) {
         return (
-          <Group key={i} x={transform.x}>
+          <Group key={index} x={transform.x}>
             <Spring native reset from={{ opacity: 0 }} to={{ opacity: 1 }}>
-              {(props: { opacity: number }) => (
-                <animated.Path
-                  key={`line-${i}`}
-                  data={line}
-                  stroke={color}
-                  strokeWidth={strokeWidth}
-                  opacity={props.opacity}
-                  lineCap="round"
-                  lineJoin="round"
-                  {...geometryStyle}
-                  {...GlobalKonvaElementProps}
-                />
-              )}
+              {(props: { opacity: number }) => {
+                const lineProps = buildLineProps({
+                  index,
+                  linePath: line,
+                  color,
+                  strokeWidth,
+                  opacity: props.opacity,
+                  geometryStyle,
+                });
+                return <animated.Path {...lineProps} />;
+              }}
             </Spring>
           </Group>
         );
       } else {
-        return (
-          <Path
-            key={`line-${i}`}
-            data={line}
-            stroke={color}
-            strokeWidth={strokeWidth}
-            lineCap="round"
-            lineJoin="round"
-            {...geometryStyle}
-            {...GlobalKonvaElementProps}
-          />
-        );
+        const lineProps = buildLineProps({
+          index,
+          linePath: line,
+          color,
+          strokeWidth,
+          opacity: 1,
+          geometryStyle,
+        });
+        return <Path {...lineProps} />;
       }
     });
   }

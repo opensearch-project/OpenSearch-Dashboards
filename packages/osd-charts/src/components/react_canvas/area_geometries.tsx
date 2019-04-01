@@ -1,11 +1,15 @@
 import { Group as KonvaGroup } from 'konva';
 import React from 'react';
 import { Circle, Group, Path } from 'react-konva';
-import { animated, Spring } from 'react-spring/renderprops-konva';
+import { animated, Spring } from 'react-spring/renderprops-konva.cjs';
 import { LegendItem } from '../../lib/series/legend';
 import { AreaGeometry, getGeometryStyle, PointGeometry } from '../../lib/series/rendering';
 import { AreaSeriesStyle, SharedGeometryStyle } from '../../lib/themes/theme';
-import { GlobalKonvaElementProps } from './globals';
+import {
+  buildAreaLineProps,
+  buildAreaPointProps,
+  buildAreaProps,
+} from './utils/rendering_props_utils';
 
 interface AreaGeometriesDataProps {
   animated?: boolean;
@@ -54,45 +58,42 @@ export class AreaGeometries extends React.PureComponent<
     );
   }
   private renderPoints = (areaPoints: PointGeometry[], areaIndex: number): JSX.Element[] => {
-    const { radius, stroke, strokeWidth, opacity } = this.props.style.point;
+    const { radius, strokeWidth, opacity } = this.props.style.point;
 
-    return areaPoints.map((areaPoint, index) => {
+    return areaPoints.map((areaPoint, pointIndex) => {
       const { x, y, color, transform } = areaPoint;
       if (this.props.animated) {
         return (
-          <Group key={`area-point-group-${areaIndex}-${index}`} x={transform.x}>
+          <Group key={`area-point-group-${areaIndex}-${pointIndex}`} x={transform.x}>
             <Spring native from={{ y }} to={{ y }}>
-              {(props: { y: number }) => (
-                <animated.Circle
-                  key={`area-point-${areaIndex}-${index}`}
-                  x={x}
-                  y={y}
-                  radius={radius}
-                  strokeWidth={strokeWidth}
-                  strokeEnabled={strokeWidth !== 0}
-                  stroke={color}
-                  fill={'white'}
-                  opacity={opacity}
-                  {...GlobalKonvaElementProps}
-                />
-              )}
+              {(props: { y: number }) => {
+                const pointProps = buildAreaPointProps({
+                  areaIndex,
+                  pointIndex,
+                  x,
+                  y,
+                  radius,
+                  strokeWidth,
+                  color,
+                  opacity,
+                });
+                return <animated.Circle {...pointProps} />;
+              }}
             </Spring>
           </Group>
         );
       } else {
-        return (
-          <Circle
-            key={`area-point-${areaIndex}-${index}`}
-            x={transform.x + x}
-            y={y}
-            radius={radius}
-            strokeWidth={strokeWidth}
-            stroke={stroke}
-            fill={color}
-            opacity={opacity}
-            {...GlobalKonvaElementProps}
-          />
-        );
+        const pointProps = buildAreaPointProps({
+          areaIndex,
+          pointIndex,
+          x: transform.x + x,
+          y,
+          radius,
+          strokeWidth,
+          color,
+          opacity,
+        });
+        return <Circle {...pointProps} />;
       }
     });
   }
@@ -108,32 +109,26 @@ export class AreaGeometries extends React.PureComponent<
         return (
           <Group key={`area-group-${i}`} x={transform.x}>
             <Spring native from={{ area }} to={{ area }}>
-              {(props: { area: string }) => (
-                <animated.Path
-                  key={`area-${i}`}
-                  data={props.area}
-                  fill={color}
-                  lineCap="round"
-                  lineJoin="round"
-                  opacity={opacity}
-                  {...GlobalKonvaElementProps}
-                />
-              )}
+              {(props: { area: string }) => {
+                const areaProps = buildAreaProps({
+                  index: i,
+                  areaPath: props.area,
+                  color,
+                  opacity,
+                });
+                return <animated.Path {...areaProps} />;
+              }}
             </Spring>
           </Group>
         );
       } else {
-        return (
-          <Path
-            key={`area-${i}`}
-            data={area}
-            fill={color}
-            opacity={opacity}
-            lineCap="round"
-            lineJoin="round"
-            {...GlobalKonvaElementProps}
-          />
-        );
+        const areaProps = buildAreaProps({
+          index: i,
+          areaPath: area,
+          color,
+          opacity,
+        });
+        return <Path {...areaProps} />;
       }
     });
   }
@@ -154,31 +149,28 @@ export class AreaGeometries extends React.PureComponent<
         return (
           <Group key={`area-line-group-${i}`} x={transform.x}>
             <Spring native from={{ line }} to={{ line }}>
-              {(props: { line: string }) => (
-                <animated.Path
-                  key={`area-line-${i}`}
-                  data={props.line}
-                  stroke={color}
-                  strokeWidth={strokeWidth}
-                  lineCap="round"
-                  lineJoin="round"
-                  {...geometryStyle}
-                  {...GlobalKonvaElementProps}
-                />
-              )}
+              {(props: { line: string }) => {
+                const lineProps = buildAreaLineProps({
+                  index: i,
+                  linePath: props.line,
+                  color,
+                  strokeWidth,
+                  geometryStyle,
+                });
+                return <animated.Path {...lineProps} />;
+              }}
             </Spring>
           </Group>
         );
       } else {
-        return (
-          <Path
-            key={`area-line-${i}`}
-            data={line}
-            fill={color}
-            {...geometryStyle}
-            {...GlobalKonvaElementProps}
-          />
-        );
+        const lineProps = buildAreaLineProps({
+          index: i,
+          linePath: line,
+          color,
+          strokeWidth,
+          geometryStyle,
+        });
+        return <Path {...lineProps} />;
       }
     });
   }
