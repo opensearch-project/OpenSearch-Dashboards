@@ -1048,10 +1048,10 @@
   dependencies:
     tslib "^1.9.3"
 
-"@elastic/eui@^8.0.0":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-8.0.0.tgz#36247a32f27b10ad3b3f886378d57aaaaa583064"
-  integrity sha512-XVhoHcDqnI60gct9PiqVwL4rpui7cdjYZf2/n+SAXBhqqYXQIZ5YX6HiVSkN84gcmWGODXbXCA27Oj35lOWW9A==
+"@elastic/eui@9.7.1":
+  version "9.7.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.7.1.tgz#817b5018303a2c6160011e201a8d21fca2f3e47b"
+  integrity sha512-yYTnW1jqv586M8dD4TxTa/9wkj84gJuHeDh9F13z7XGeZ/clUN0XP43Y5Jzv80Q3M80VlEuTpABYMGpPqBAw8w==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -10347,7 +10347,7 @@ react-is@~16.3.0:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.3.2.tgz#f4d3d0e2f5fbb6ac46450641eb2e25bf05d36b22"
   integrity sha512-ybEM7YOr4yBgFd6w8dJqwxegqZGJNBZl6U27HnGKuTZmDvVrD5quWOK/wAnMywiZzW+Qsk+l4X2c70+thp/A8Q==
 
-react-konva@^16.8.3:
+react-konva@16.8.3:
   version "16.8.3"
   resolved "https://registry.yarnpkg.com/react-konva/-/react-konva-16.8.3.tgz#e55390040ea54675a0ef0d40b4fa93731e6d7b03"
   integrity sha512-gU36TBxcPZANQOV5prAFnpRSNp2ikAT7zCICHTBJvOzAfa8Yhcyaey6EIrD+NTT/4y0PyGFBIkmWq6zdrlNrQg==
