@@ -8,7 +8,8 @@ export interface LegendItem {
   color: string;
   label: string;
   value: DataSeriesColorsValues;
-  isVisible?: boolean;
+  isSeriesVisible?: boolean;
+  isLegendItemVisible?: boolean;
 }
 export function computeLegend(
   seriesColor: Map<string, DataSeriesColorsValues>,
@@ -24,20 +25,23 @@ export function computeLegend(
     const color = seriesColorMap.get(key) || defaultColor;
     const hasSingleSeries = seriesColor.size === 1;
     const label = getSeriesColorLabel(series.colorValues, hasSingleSeries, spec);
-    const isVisible = deselectedDataSeries
+    const isSeriesVisible = deselectedDataSeries
       ? findDataSeriesByColorValues(deselectedDataSeries, series) < 0
       : true;
 
-    if (!label) {
+    if (!label || !spec) {
       return;
     }
+
+    const { hideInLegend } = spec;
 
     legendItems.set(key, {
       key,
       color,
       label,
       value: series,
-      isVisible,
+      isSeriesVisible,
+      isLegendItemVisible: !hideInLegend,
     });
   });
   return legendItems;

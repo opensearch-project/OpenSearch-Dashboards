@@ -16,6 +16,7 @@ export class AreaSeriesSpecComponent extends PureComponent<AreaSpecProps> {
     xAccessor: 'x',
     yAccessors: ['y'],
     yScaleToDataExtent: false,
+    hideInLegend: false,
   };
   componentDidMount() {
     const { chartStore, children, ...config } = this.props;

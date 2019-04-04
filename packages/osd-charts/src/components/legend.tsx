@@ -68,18 +68,20 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
             responsive={false}
           >
             {[...legendItems.values()].map((item) => {
+              const { color, label, isSeriesVisible, isLegendItemVisible } = item;
+
               const legendItemProps = {
                 key: item.key,
-                className: 'elasticChartsLegendList__item',
+                className: classNames('elasticChartsLegendList__item', {
+                  'elasticChartsLegendList__item--hidden': !isLegendItemVisible,
+                }),
                 onMouseEnter: this.onLegendItemMouseover(item.key),
                 onMouseLeave: this.onLegendItemMouseout,
               };
 
-              const { color, label, isVisible } = item;
-
               return (
                 <EuiFlexItem {...legendItemProps}>
-                  {this.renderLegendElement({ color, label, isVisible }, item.key)}
+                  {this.renderLegendElement({ color, label, isSeriesVisible }, item.key)}
                 </EuiFlexItem>
               );
             })}
@@ -98,10 +100,10 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
   }
 
   private renderLegendElement = (
-    { color, label, isVisible }: Partial<LegendItem>,
+    { color, label, isSeriesVisible }: Partial<LegendItem>,
     legendItemKey: string,
   ) => {
-    const props = { color, label, isVisible, legendItemKey };
+    const props = { color, label, isSeriesVisible, legendItemKey };
 
     return <LegendElement {...props} />;
   }

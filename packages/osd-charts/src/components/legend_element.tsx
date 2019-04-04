@@ -21,7 +21,7 @@ interface LegendElementProps {
   legendItemKey: string;
   color: string | undefined;
   label: string | undefined;
-  isVisible?: boolean;
+  isSeriesVisible?: boolean;
 }
 
 interface LegendElementState {
@@ -52,7 +52,7 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
 
   render() {
     const { legendItemKey } = this.props;
-    const { color, label, isVisible } = this.props;
+    const { color, label, isSeriesVisible } = this.props;
 
     const onTitleClick = this.onLegendTitleClick(legendItemKey);
 
@@ -88,7 +88,7 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
           </EuiPopover>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {this.renderVisibilityButton(legendItemKey, isVisible)}
+          {this.renderVisibilityButton(legendItemKey, isSeriesVisible)}
         </EuiFlexItem>
         <EuiFlexItem grow={false} className={titleClassNames} onClick={onTitleClick}>
           <EuiPopover
@@ -156,8 +156,8 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
     }
   }
 
-  private renderVisibilityButton = (legendItemKey: string, isVisible: boolean = true) => {
-    const iconType = isVisible ? 'eye' : 'eyeClosed';
+  private renderVisibilityButton = (legendItemKey: string, isSeriesVisible: boolean = true) => {
+    const iconType = isSeriesVisible ? 'eye' : 'eyeClosed';
     return (
       <EuiButtonIcon
         onClick={this.onVisibilityClick(legendItemKey)}

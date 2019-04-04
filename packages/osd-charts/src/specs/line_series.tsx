@@ -16,6 +16,7 @@ export class LineSeriesSpecComponent extends PureComponent<LineSpecProps> {
     xAccessor: 'x',
     yAccessors: ['y'],
     yScaleToDataExtent: false,
+    hideInLegend: false,
   };
   componentDidMount() {
     const { chartStore, children, ...config } = this.props;

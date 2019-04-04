@@ -16,6 +16,7 @@ export class BasicSeriesSpecComponent extends PureComponent<BasicSpecProps> {
     xAccessor: 'x',
     yAccessors: ['y'],
     yScaleToDataExtent: false,
+    hideInLegend: false,
   };
   componentDidMount() {
     const { chartStore, children, ...config } = this.props;

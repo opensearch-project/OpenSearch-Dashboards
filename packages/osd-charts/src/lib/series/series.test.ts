@@ -181,6 +181,7 @@ describe('Series', () => {
       yAccessors: ['y'],
       yScaleToDataExtent: false,
       data: TestDataset.BARCHART_1Y0G,
+      hideInLegend: false,
     };
     const spec2: BasicSeriesSpec = {
       id: getSpecId('spec2'),
@@ -193,6 +194,7 @@ describe('Series', () => {
       stackAccessors: ['x'],
       yScaleToDataExtent: false,
       data: TestDataset.BARCHART_2Y0G,
+      hideInLegend: false,
     };
     seriesSpecs.set(spec1.id, spec1);
     seriesSpecs.set(spec2.id, spec2);
@@ -212,6 +214,7 @@ describe('Series', () => {
       yAccessors: ['y'],
       yScaleToDataExtent: false,
       data: TestDataset.BARCHART_1Y0G,
+      hideInLegend: false,
     };
     const spec2: BasicSeriesSpec = {
       id: getSpecId('spec2'),
@@ -224,6 +227,7 @@ describe('Series', () => {
       stackAccessors: ['x'],
       yScaleToDataExtent: false,
       data: TestDataset.BARCHART_2Y0G,
+      hideInLegend: false,
     };
     seriesSpecs.set(spec1.id, spec1);
     seriesSpecs.set(spec2.id, spec2);
@@ -245,6 +249,7 @@ describe('Series', () => {
       yAccessors: ['y'],
       yScaleToDataExtent: false,
       data: TestDataset.BARCHART_1Y0G,
+      hideInLegend: false,
     };
 
     const specs = new Map();
@@ -293,6 +298,7 @@ describe('Series', () => {
       stackAccessors: ['x'],
       yScaleToDataExtent: false,
       data: TestDataset.BARCHART_2Y0G,
+      hideInLegend: false,
     };
 
     seriesSpecs.set(splitSpec.id, splitSpec);

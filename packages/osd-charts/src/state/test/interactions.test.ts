@@ -22,6 +22,7 @@ const ordinalBarSeries: BarSeriesSpec = {
   yAccessors: [1],
   xScaleType: ScaleType.Ordinal,
   yScaleType: ScaleType.Linear,
+  hideInLegend: false,
 };
 const linearBarSeries: BarSeriesSpec = {
   id: SPEC_ID,
@@ -33,6 +34,7 @@ const linearBarSeries: BarSeriesSpec = {
   yAccessors: [1],
   xScaleType: ScaleType.Linear,
   yScaleType: ScaleType.Linear,
+  hideInLegend: false,
 };
 const chartTop = 10;
 const chartLeft = 10;

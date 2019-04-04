@@ -97,6 +97,10 @@ $elasticChartsLegendMaxHeight: $euiSize * 4;
       text-decoration: underline;
     }
   }
+
+  &.elasticChartsLegendList__item--hidden {
+    display: none;
+  }
 }
 
 .elasticChartsLegendListItem__title {

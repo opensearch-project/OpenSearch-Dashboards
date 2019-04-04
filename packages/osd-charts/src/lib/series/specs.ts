@@ -39,6 +39,10 @@ export interface SeriesSpec {
   seriesType: 'bar' | 'line' | 'area' | 'basic';
   /** Custom colors for series */
   customSeriesColors?: CustomSeriesColorsMap;
+  /** If the series should appear in the legend
+   * @default false
+   */
+  hideInLegend?: boolean;
 }
 
 export type CustomSeriesColorsMap = Map<DataSeriesColorsValues, string>;

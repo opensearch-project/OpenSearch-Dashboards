@@ -31,6 +31,7 @@ const spec1: BasicSeriesSpec = {
   yAccessors: ['y'],
   yScaleToDataExtent: false,
   data: [],
+  hideInLegend: false,
 };
 const spec2: BasicSeriesSpec = {
   id: getSpecId('spec2'),
@@ -42,6 +43,7 @@ const spec2: BasicSeriesSpec = {
   yAccessors: ['y'],
   yScaleToDataExtent: false,
   data: [],
+  hideInLegend: false,
 };
 
 describe('Legends', () => {
@@ -65,7 +67,8 @@ describe('Legends', () => {
         color: 'red',
         label: 'Spec 1 title',
         value: { colorValues: [], specId: 'spec1' },
-        isVisible: true,
+        isSeriesVisible: true,
+        isLegendItemVisible: true,
         key: 'colorSeries1a',
       },
     ];
@@ -80,14 +83,16 @@ describe('Legends', () => {
         color: 'red',
         label: 'Spec 1 title',
         value: { colorValues: [], specId: 'spec1' },
-        isVisible: true,
+        isSeriesVisible: true,
+        isLegendItemVisible: true,
         key: 'colorSeries1a',
       },
       {
         color: 'blue',
         label: 'a - b',
         value: { colorValues: ['a', 'b'], specId: 'spec1' },
-        isVisible: true,
+        isSeriesVisible: true,
+        isLegendItemVisible: true,
         key: 'colorSeries1b',
       },
     ];
@@ -102,14 +107,16 @@ describe('Legends', () => {
         color: 'red',
         label: 'Spec 1 title',
         value: { colorValues: [], specId: 'spec1' },
-        isVisible: true,
+        isSeriesVisible: true,
+        isLegendItemVisible: true,
         key: 'colorSeries1a',
       },
       {
         color: 'green',
         label: 'spec2',
         value: { colorValues: [], specId: 'spec2' },
-        isVisible: true,
+        isSeriesVisible: true,
+        isLegendItemVisible: true,
         key: 'colorSeries2a',
       },
     ];
@@ -129,7 +136,8 @@ describe('Legends', () => {
         color: 'violet',
         label: 'Spec 1 title',
         value: { colorValues: [], specId: 'spec1' },
-        isVisible: true,
+        isSeriesVisible: true,
+        isLegendItemVisible: true,
         key: 'colorSeries1a',
       },
     ];
@@ -146,9 +154,9 @@ describe('Legends', () => {
 
     const legend = computeLegend(seriesColor, emptyColorMap, specs, 'violet', deselectedDataSeries);
 
-    const visibility = [...legend.values()].map((item) => item.isVisible);
+    const visibility = [...legend.values()].map((item) => item.isSeriesVisible);
 
-    expect(visibility).toEqual([true, true, true, true]);
+    expect(visibility).toEqual([true, true, true]);
   });
   it('selectively sets series to visible when there are deselectedDataSeries items', () => {
     seriesColor.set('colorSeries1a', colorValues1a);
@@ -161,8 +169,8 @@ describe('Legends', () => {
 
     const legend = computeLegend(seriesColor, emptyColorMap, specs, 'violet', deselectedDataSeries);
 
-    const visibility = [...legend.values()].map((item) => item.isVisible);
-    expect(visibility).toEqual([false, false, true, true]);
+    const visibility = [...legend.values()].map((item) => item.isSeriesVisible);
+    expect(visibility).toEqual([false, false, true]);
   });
   it('returns the right series label for a color series', () => {
     let label = getSeriesColorLabel([], true);
