@@ -105,6 +105,12 @@ export interface CrosshairStyle {
   band: FillStyle & Visible;
   line: StrokeStyle & Visible;
 }
+
+export interface AnnotationLineStyle {
+  line: StrokeStyle & Opacity;
+  details: TextStyle;
+}
+
 export interface PartialTheme {
   chartMargins?: Margins;
   chartPaddings?: Margins;
@@ -125,6 +131,21 @@ export const DEFAULT_GRID_LINE_CONFIG: GridLineConfig = {
   opacity: 1,
 };
 
+export const DEFAULT_ANNOTATION_LINE_STYLE: AnnotationLineStyle = {
+  line: {
+    stroke: '#000',
+    strokeWidth: 3,
+    opacity: 1,
+  },
+  details: {
+    fontSize: 10,
+    fontFamily: `'Open Sans', Helvetica, Arial, sans-serif`,
+    fontStyle: 'normal',
+    fill: 'gray',
+    padding: 0,
+  },
+};
+
 export function mergeWithDefaultGridLineConfig(config: GridLineConfig): GridLineConfig {
   const strokeWidth =
     config.strokeWidth != null ? config.strokeWidth : DEFAULT_GRID_LINE_CONFIG.strokeWidth;
@@ -136,6 +157,32 @@ export function mergeWithDefaultGridLineConfig(config: GridLineConfig): GridLine
     strokeWidth,
     opacity,
   };
+}
+
+export function mergeWithDefaultAnnotationLine(config?: Partial<AnnotationLineStyle>): AnnotationLineStyle {
+  const defaultLine = DEFAULT_ANNOTATION_LINE_STYLE.line;
+  const defaultDetails = DEFAULT_ANNOTATION_LINE_STYLE.details;
+  const mergedConfig: AnnotationLineStyle = { ...DEFAULT_ANNOTATION_LINE_STYLE };
+
+  if (!config) {
+    return mergedConfig;
+  }
+
+  if (config.line) {
+    mergedConfig.line = {
+      ...defaultLine,
+      ...config.line,
+    };
+  }
+
+  if (config.details) {
+    mergedConfig.details = {
+      ...defaultDetails,
+      ...config.details,
+    };
+  }
+
+  return mergedConfig;
 }
 
 export function mergeWithDefaultTheme(

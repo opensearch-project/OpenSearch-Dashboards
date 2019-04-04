@@ -7,9 +7,11 @@ import {
   BarSeriesStyle,
   ColorConfig,
   CrosshairStyle,
+  DEFAULT_ANNOTATION_LINE_STYLE,
   DEFAULT_GRID_LINE_CONFIG,
   LegendStyle,
   LineSeriesStyle,
+  mergeWithDefaultAnnotationLine,
   mergeWithDefaultGridLineConfig,
   mergeWithDefaultTheme,
   ScalesConfig,
@@ -333,5 +335,45 @@ describe('Themes', () => {
     };
     expect(mergeWithDefaultGridLineConfig(fullConfig)).toEqual(fullConfig);
     expect(mergeWithDefaultGridLineConfig({})).toEqual(DEFAULT_GRID_LINE_CONFIG);
+  });
+
+  it('should merge custom and default annotation line configs', () => {
+    expect(mergeWithDefaultAnnotationLine()).toEqual(DEFAULT_ANNOTATION_LINE_STYLE);
+
+    const customLineConfig = {
+      stroke: 'foo',
+      strokeWidth: 50,
+      opacity: 1,
+    };
+
+    const defaultLineConfig = {
+      stroke: '#000',
+      strokeWidth: 3,
+      opacity: 1,
+    };
+
+    const customDetailsConfig = {
+      fontSize: 50,
+      fontFamily: 'custom-font-family',
+      fontStyle: 'custom-font-style',
+      fill: 'custom-fill',
+      padding: 20,
+    };
+
+    const defaultDetailsConfig = {
+      fontSize: 10,
+      fontFamily: `'Open Sans', Helvetica, Arial, sans-serif`,
+      fontStyle: 'normal',
+      fill: 'gray',
+      padding: 0,
+    };
+
+    const expectedMergedCustomLineConfig = { line: customLineConfig, details: defaultDetailsConfig };
+    const mergedCustomLineConfig = mergeWithDefaultAnnotationLine({ line: customLineConfig });
+    expect(mergedCustomLineConfig).toEqual(expectedMergedCustomLineConfig);
+
+    const expectedMergedCustomDetailsConfig = { line: defaultLineConfig, details: customDetailsConfig };
+    const mergedCustomDetailsConfig = mergeWithDefaultAnnotationLine({ details: customDetailsConfig });
+    expect(mergedCustomDetailsConfig).toEqual(expectedMergedCustomDetailsConfig);
   });
 });

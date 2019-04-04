@@ -28,6 +28,7 @@ import {
   RawDataSeries,
 } from '../lib/series/series';
 import {
+  AnnotationSpec,
   AreaSeriesSpec,
   AxisSpec,
   BarSeriesSpec,
@@ -40,10 +41,10 @@ import {
 } from '../lib/series/specs';
 import { formatTooltip, formatXTooltipValue } from '../lib/series/tooltip';
 import { LIGHT_THEME } from '../lib/themes/light_theme';
-import { Theme } from '../lib/themes/theme';
+import { mergeWithDefaultAnnotationLine, Theme } from '../lib/themes/theme';
 import { computeChartDimensions, Dimensions } from '../lib/utils/dimensions';
 import { Domain } from '../lib/utils/domain';
-import { AxisId, GroupId, SpecId } from '../lib/utils/ids';
+import { AnnotationId, AxisId, GroupId, SpecId } from '../lib/utils/ids';
 import {
   areIndexedGeometryArraysEquals,
   getValidXPosition,
@@ -55,6 +56,11 @@ import {
 } from '../lib/utils/interactions';
 import { Scale, ScaleType } from '../lib/utils/scales/scales';
 import { DEFAULT_TOOLTIP_SNAP, DEFAULT_TOOLTIP_TYPE } from '../specs/settings';
+import {
+  AnnotationDimensions,
+  computeAnnotationDimensions,
+  computeAnnotationTooltipState,
+} from './annotation_utils';
 import {
   getCursorBandPosition,
   getCursorLinePosition,
@@ -134,6 +140,10 @@ export class ChartStore {
   axesTicks: Map<AxisId, AxisTick[]> = new Map(); // computed
   axesGridLinesPositions: Map<AxisId, AxisLinePosition[]> = new Map(); // computed
 
+  annotationSpecs = new Map<AnnotationId, AnnotationSpec>(); // read from jsx
+
+  annotationDimensions = observable.map<AnnotationId, AnnotationDimensions>(new Map());
+
   seriesSpecs: Map<SpecId, BasicSeriesSpec> = new Map(); // readed from jsx
 
   seriesDomainsAndData?: SeriesDomainsAndData; // computed
@@ -153,6 +163,11 @@ export class ChartStore {
   tooltipType = observable.box(DEFAULT_TOOLTIP_TYPE);
   tooltipSnap = observable.box(DEFAULT_TOOLTIP_SNAP);
   tooltipPosition = observable.object<{ transform: string }>({ transform: '' });
+
+  /** cursorPosition is used by tooltip, so this is a way to expose the position for other uses */
+  rawCursorPosition = observable.object<{ x: number; y: number }>({ x: -1, y: -1 }, undefined, {
+    deep: false,
+  });
 
   /** position of the cursor relative to the chart */
   cursorPosition = observable.object<{ x: number; y: number }>({ x: -1, y: -1 }, undefined, {
@@ -213,6 +228,9 @@ export class ChartStore {
    * x and y values are relative to the container.
    */
   setCursorPosition = action((x: number, y: number) => {
+    this.rawCursorPosition.x = x;
+    this.rawCursorPosition.y = y;
+
     if (!this.seriesDomainsAndData || this.tooltipType.get() === TooltipType.None) {
       return;
     }
@@ -381,6 +399,30 @@ export class ChartStore {
     } else {
       document.body.style.cursor = 'default';
     }
+  });
+
+  annotationTooltipState = computed(() => {
+    // get positions relative to chart
+    const xPos = this.rawCursorPosition.x - this.chartDimensions.left;
+    const yPos = this.rawCursorPosition.y - this.chartDimensions.top;
+
+    // only if we have a valid cursor position and the necessary scale
+    if (!this.xScale || !this.yScales) {
+      return null;
+    }
+
+    const cursorPosition = {
+      x: xPos,
+      y: yPos,
+    };
+
+    return computeAnnotationTooltipState(
+      cursorPosition,
+      this.annotationDimensions,
+      this.annotationSpecs,
+      this.chartRotation,
+      this.axesSpecs,
+    );
   });
 
   isTooltipVisible = computed(() => {
@@ -654,6 +696,19 @@ export class ChartStore {
     this.axesSpecs.delete(axisId);
   }
 
+  addAnnotationSpec(annotationSpec: AnnotationSpec) {
+    const { style } = annotationSpec;
+
+    // TODO: will need to check for annotationType when we introduce other types
+    const mergedLineStyle = mergeWithDefaultAnnotationLine(style);
+    annotationSpec.style = mergedLineStyle;
+    this.annotationSpecs.set(annotationSpec.annotationId, annotationSpec);
+  }
+
+  removeAnnotationSpec(annotationId: AnnotationId) {
+    this.annotationSpecs.delete(annotationId);
+  }
+
   computeChart() {
     this.initialized.set(false);
     // compute only if parent dimensions are computed
@@ -792,6 +847,18 @@ export class ChartStore {
     this.axesTicks = axisTicksPositions.axisTicks;
     this.axesVisibleTicks = axisTicksPositions.axisVisibleTicks;
     this.axesGridLinesPositions = axisTicksPositions.axisGridLinesPositions;
+
+    // annotation computations
+    const updatedAnnotationDimensions = computeAnnotationDimensions(
+      this.annotationSpecs,
+      this.chartDimensions,
+      this.chartRotation,
+      this.yScales,
+      this.xScale,
+      this.axesSpecs,
+    );
+
+    this.annotationDimensions.replace(updatedAnnotationDimensions);
 
     this.canDataBeAnimated = isChartAnimatable(seriesGeometries.geometriesCounts, this.animateData);
     this.initialized.set(true);

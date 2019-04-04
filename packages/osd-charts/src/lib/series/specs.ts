@@ -1,6 +1,6 @@
-import { GridLineConfig } from '../themes/theme';
+import { AnnotationLineStyle, GridLineConfig } from '../themes/theme';
 import { Accessor } from '../utils/accessor';
-import { AxisId, GroupId, SpecId } from '../utils/ids';
+import { AnnotationId, AxisId, GroupId, SpecId } from '../utils/ids';
 import { ScaleContinuousType, ScaleType } from '../utils/scales/scales';
 import { CurveType } from './curves';
 import { DataSeriesColorsValues } from './series';
@@ -149,3 +149,53 @@ export enum Position {
   Left = 'left',
   Right = 'right',
 }
+
+export const AnnotationTypes = Object.freeze({
+  Line: 'line' as AnnotationType,
+  Rectangle: 'rectangle' as AnnotationType,
+  Text: 'text' as AnnotationType,
+});
+
+export type AnnotationType = 'line' | 'rectangle' | 'text';
+
+export const AnnotationDomainTypes = Object.freeze({
+  XDomain: 'xDomain' as AnnotationDomainType,
+  YDomain: 'yDomain' as AnnotationDomainType,
+});
+
+export type AnnotationDomainType = 'xDomain' | 'yDomain';
+export interface AnnotationDatum {
+  dataValue: any;
+  details?: string;
+  header?: string;
+}
+
+export interface LineAnnotationSpec {
+  /** The id of the annotation */
+  annotationId: AnnotationId;
+  /** Annotation type: line, rectangle, text */
+  annotationType: AnnotationType;
+  /** The ID of the axis group, generated via getGroupId method
+   * @default __global__
+   */
+  groupId: GroupId; // defaults to __global__; needed for yDomain position
+  /** Annotation domain type: AnnotationDomainTypes.XDomain or AnnotationDomainTypes.YDomain */
+  domainType: AnnotationDomainType;
+  /** Data values defined with value, details, and header */
+  dataValues: AnnotationDatum[];
+  /** Custom line styles */
+  style?: Partial<AnnotationLineStyle>;
+  /** Custom marker */
+  marker?: JSX.Element;
+  /**
+   * Custom marker dimensions; will be computed internally
+   * Any user-supplied values will be overwritten
+   */
+  markerDimensions?: {
+    width: number;
+    height: number;
+  };
+}
+
+// TODO: RectangleAnnotationSpec & TextAnnotationSpec
+export type AnnotationSpec = LineAnnotationSpec;

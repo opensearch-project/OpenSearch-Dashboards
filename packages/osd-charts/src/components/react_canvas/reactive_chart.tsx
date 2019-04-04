@@ -1,8 +1,12 @@
 import { inject, observer } from 'mobx-react';
 import React from 'react';
 import { Layer, Rect, Stage } from 'react-konva';
+import { AnnotationLineStyle } from '../../lib/themes/theme';
+import { AnnotationId } from '../../lib/utils/ids';
+import { AnnotationDimensions } from '../../state/annotation_utils';
 import { ChartStore, Point } from '../../state/chart_state';
 import { BrushExtent } from '../../state/utils';
+import { Annotation } from './annotation';
 import { AreaGeometries } from './area_geometries';
 import { Axis } from './axis';
 import { BarGeometries } from './bar_geometries';
@@ -167,6 +171,33 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
     return gridComponents;
   }
 
+  renderAnnotations = () => {
+    const { annotationDimensions, annotationSpecs, chartDimensions, debug } = this.props.chartStore!;
+
+    const annotationComponents: JSX.Element[] = [];
+    annotationDimensions.forEach((annotation: AnnotationDimensions, id: AnnotationId) => {
+      const spec = annotationSpecs.get(id);
+      if (!spec) {
+        return;
+      }
+
+      // We merge custom style w/ the default on addAnnotationSpec, so this is guaranteed
+      // to be complete by the time we get to rendering
+      const lineStyle = spec.style as AnnotationLineStyle;
+
+      annotationComponents.push(
+        <Annotation
+          key={`annotation-${id}`}
+          chartDimensions={chartDimensions}
+          debug={debug}
+          lines={annotation}
+          lineStyle={lineStyle}
+        />,
+      );
+    });
+    return annotationComponents;
+  }
+
   renderBrushTool = () => {
     const { brushing, brushStart, brushEnd } = this.state;
     const { chartDimensions, chartRotation, chartTransform } = this.props.chartStore!;
@@ -242,15 +273,15 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
     const clippings = debug
       ? {}
       : {
-          clipX: 0,
-          clipY: 0,
-          clipWidth: [90, -90].includes(chartRotation)
-            ? chartDimensions.height
-            : chartDimensions.width,
-          clipHeight: [90, -90].includes(chartRotation)
-            ? chartDimensions.width
-            : chartDimensions.height,
-        };
+        clipX: 0,
+        clipY: 0,
+        clipWidth: [90, -90].includes(chartRotation)
+          ? chartDimensions.height
+          : chartDimensions.width,
+        clipHeight: [90, -90].includes(chartRotation)
+          ? chartDimensions.width
+          : chartDimensions.height,
+      };
 
     let brushProps = {};
     const isBrushEnabled = this.props.chartStore!.isBrushEnabled();
@@ -261,7 +292,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
       };
     }
 
-    const gridClippings = {
+    const layerClippings = {
       clipX: chartDimensions.left,
       clipY: chartDimensions.top,
       clipWidth: chartDimensions.width,
@@ -297,7 +328,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
           }}
           {...brushProps}
         >
-          <Layer hitGraphEnabled={false} listening={false} {...gridClippings}>
+          <Layer hitGraphEnabled={false} listening={false} {...layerClippings}>
             {this.renderGrids()}
           </Layer>
 
@@ -324,6 +355,10 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
 
           <Layer hitGraphEnabled={false} listening={false}>
             {this.renderAxes()}
+          </Layer>
+
+          <Layer hitGraphEnabled={false} listening={false}>
+            {this.renderAnnotations()}
           </Layer>
         </Stage>
       </div>

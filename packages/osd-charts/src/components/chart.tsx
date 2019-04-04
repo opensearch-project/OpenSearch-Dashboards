@@ -3,6 +3,7 @@ import { Provider } from 'mobx-react';
 import React, { CSSProperties, Fragment } from 'react';
 import { SpecsParser } from '../specs/specs_parser';
 import { ChartStore } from '../state/chart_state';
+import { AnnotationTooltip } from './annotation_tooltips';
 import { ChartResizer } from './chart_resizer';
 import { Crosshair } from './crosshair';
 import { Highlighter } from './highlighter';
@@ -50,6 +51,7 @@ export class Chart extends React.Component<ChartProps> {
             {renderer === 'svg' && <SVGChart />}
             {renderer === 'canvas' && <ReactChart />}
             <Tooltips />
+            <AnnotationTooltip />
             <Legend />
             <LegendButton />
             <Highlighter />

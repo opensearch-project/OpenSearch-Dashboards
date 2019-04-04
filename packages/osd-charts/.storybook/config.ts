@@ -41,6 +41,7 @@ function loadStories() {
   require('../stories/rotations.tsx');
   require('../stories/styling.tsx');
   require('../stories/grid.tsx');
+  require('../stories/annotations.tsx');
 }
 
 configure(loadStories, module);

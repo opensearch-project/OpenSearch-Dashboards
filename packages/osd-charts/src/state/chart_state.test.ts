@@ -1,7 +1,14 @@
 import { GeometryValue, IndexedGeometry } from '../lib/series/rendering';
 import { DataSeriesColorsValues } from '../lib/series/series';
-import { AxisSpec, BarSeriesSpec, Position } from '../lib/series/specs';
-import { getAxisId, getGroupId, getSpecId } from '../lib/utils/ids';
+import {
+  AnnotationDomainTypes,
+  AnnotationSpec,
+  AnnotationTypes,
+  AxisSpec,
+  BarSeriesSpec,
+  Position,
+} from '../lib/series/specs';
+import { getAnnotationId, getAxisId, getGroupId, getSpecId } from '../lib/utils/ids';
 import { TooltipType, TooltipValue } from '../lib/utils/interactions';
 import { ScaleBand } from '../lib/utils/scales/scale_band';
 import { ScaleContinuous } from '../lib/utils/scales/scale_continuous';
@@ -418,6 +425,45 @@ describe('Chart Store', () => {
     expect(store.axesSpecs.get(AXIS_ID)).toBe(undefined);
   });
 
+  test('can add and remove an annotation spec', () => {
+    const annotationId = getAnnotationId('annotation');
+    const groupId = getGroupId('group');
+
+    const customStyle = {
+      line: {
+        strokeWidth: 30,
+        stroke: '#f00000',
+        opacity: 0.32,
+      },
+      details: {
+        fontSize: 90,
+        fontFamily: 'custom-font',
+        fontStyle: 'custom-style',
+        fill: 'custom-color',
+        padding: 20,
+      },
+    };
+
+    const lineAnnotation: AnnotationSpec = {
+      annotationType: AnnotationTypes.Line,
+      annotationId,
+      domainType: AnnotationDomainTypes.YDomain,
+      dataValues: [{ dataValue: 2, details: 'foo' }],
+      groupId,
+      style: customStyle,
+    };
+
+    store.addAnnotationSpec(lineAnnotation);
+
+    const expectedAnnotationSpecs = new Map();
+    expectedAnnotationSpecs.set(annotationId, lineAnnotation);
+
+    expect(store.annotationSpecs).toEqual(expectedAnnotationSpecs);
+
+    store.removeAnnotationSpec(annotationId);
+    expect(store.annotationSpecs).toEqual(new Map());
+  });
+
   test('only computes chart if parent dimensions are computed', () => {
     const localStore = new ChartStore();
 
@@ -626,5 +672,27 @@ describe('Chart Store', () => {
     store.handleChartClick();
     expect(clickListener).toBeCalledTimes(2);
     expect(clickListener.mock.calls[1][0]).toEqual([geom1, geom2]);
+  });
+  test('can compute annotation tooltip state', () => {
+    const scale = new ScaleContinuous([0, 100], [0, 100], ScaleType.Linear);
+
+    store.cursorPosition.x = -1;
+    store.cursorPosition.y = 0;
+
+    expect(store.annotationTooltipState.get()).toBe(null);
+
+    store.xScale = undefined;
+    expect(store.annotationTooltipState.get()).toBe(null);
+
+    store.xScale = scale;
+
+    store.yScales = undefined;
+    expect(store.annotationTooltipState.get()).toBe(null);
+
+    store.yScales = new Map();
+    store.yScales.set(GROUP_ID, scale);
+
+    store.cursorPosition.x = 0;
+    expect(store.annotationTooltipState.get()).toBe(null);
   });
 });
