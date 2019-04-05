@@ -1,5 +1,10 @@
 import { AccessorFn } from './accessor';
-import { computeContinuousDataDomain, computeOrdinalDataDomain, computeStackedContinuousDomain } from './domain';
+import {
+  computeContinuousDataDomain,
+  computeDomainExtent,
+  computeOrdinalDataDomain,
+  computeStackedContinuousDomain,
+} from './domain';
 
 describe('utils/domain', () => {
   test('should compute ordinal data domain: sort & remove nulls', () => {
@@ -150,5 +155,19 @@ describe('utils/domain', () => {
     const expectedStackedDomain = [0, 20];
 
     expect(stackedDataDomain).toEqual(expectedStackedDomain);
+  });
+
+  test('should compute domain based on scaleToExtent', () => {
+    // start & end are positive
+    expect(computeDomainExtent([5, 10], true)).toEqual([5, 10]);
+    expect(computeDomainExtent([5, 10], false)).toEqual([0, 10]);
+
+    // start & end are negative
+    expect(computeDomainExtent([-15, -10], true)).toEqual([-15, -10]);
+    expect(computeDomainExtent([-15, -10], false)).toEqual([-15, 0]);
+
+    // start is negative, end is positive
+    expect(computeDomainExtent([-15, 10], true)).toEqual([-15, 10]);
+    expect(computeDomainExtent([-15, 10], false)).toEqual([-15, 10]);
   });
 });

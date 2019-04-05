@@ -1,4 +1,4 @@
-import { boolean } from '@storybook/addon-knobs';
+import { boolean, select } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import { DateTime } from 'luxon';
 import React from 'react';
@@ -827,6 +827,61 @@ storiesOf('Bar Chart', module)
             { x: 3, y: 1 },
           ]}
           yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('scale to extent', () => {
+    const yScaleToDataExtent = boolean('yScaleDataToExtent', false);
+    const mixed = [
+      { x: 3, y: 1 },
+      { x: 0, y: -4 },
+      { x: 2, y: 2 },
+      { x: 1, y: -3 },
+      { x: 2, y: 2 },
+      { x: 1, y: -3 },
+      { x: 3, y: 1 },
+    ];
+
+    const allPositive = mixed.map((datum) => ({ x: datum.x, y: Math.abs(datum.y) }));
+    const allNegative = mixed.map((datum) => ({ x: datum.x, y: Math.abs(datum.y) * -1 }));
+
+    const dataChoice = select('data', {
+      mixed: 'mixed',
+      allPositive: 'all positive',
+      allNegative: 'all negative',
+    }, 'mixed');
+
+    let data = mixed;
+    switch (dataChoice) {
+      case 'all positive':
+        data = allPositive;
+        break;
+      case 'all negative':
+        data = allNegative;
+        break;
+    }
+
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Axis id={getAxisId('top')} position={Position.Top} title={'Top axis'} />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          splitSeriesAccessors={['g']}
+          stackAccessors={['x']}
+          data={data}
+          yScaleToDataExtent={yScaleToDataExtent}
         />
       </Chart>
     );

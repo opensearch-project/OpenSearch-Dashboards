@@ -40,9 +40,28 @@ export function computeOrdinalDataDomain(
   const uniqueValues = [...new Set(domain)];
   return sorted
     ? uniqueValues.sort((a, b) => {
-        return `${a}`.localeCompare(`${b}`);
-      })
+      return `${a}`.localeCompare(`${b}`);
+    })
     : uniqueValues;
+}
+
+export function computeDomainExtent(
+  computedDomain: [number, number] | [undefined, undefined],
+  scaleToExtent: boolean,
+): [number, number] {
+  const [start, end] = computedDomain;
+
+  if (start != null && end != null) {
+    if (start >= 0 && end >= 0) {
+      return scaleToExtent ? [start, end] : [0, end];
+    } else if (start < 0 && end < 0) {
+      return scaleToExtent ? [start, end] : [start, 0];
+    }
+    return [start, end];
+  }
+
+  // if any of the values are null
+  return [0, 0];
 }
 
 export function computeContinuousDataDomain(
@@ -51,7 +70,7 @@ export function computeContinuousDataDomain(
   scaleToExtent = false,
 ): number[] {
   const range = extent(data, accessor);
-  return scaleToExtent ? range : [0, range[1] || 0];
+  return computeDomainExtent(range, scaleToExtent);
 }
 
 export function computeStackedContinuousDomain(
