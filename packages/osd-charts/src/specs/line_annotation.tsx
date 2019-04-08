@@ -12,6 +12,8 @@ export class LineAnnotationSpecComponent extends PureComponent<LineAnnotationPro
     groupId: getGroupId('__global__'),
     annotationType: AnnotationTypes.Line,
     style: DEFAULT_ANNOTATION_LINE_STYLE,
+    hideLines: false,
+    hideTooltips: false,
   };
 
   private markerRef = createRef<HTMLDivElement>();

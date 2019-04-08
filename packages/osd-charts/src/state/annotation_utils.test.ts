@@ -525,7 +525,7 @@ describe('annotation utils', () => {
       expect(dimensions).toEqual(expectedDimensions);
     });
 
-  test('should not compute annotation line values for values outside of domain', () => {
+  test('should not compute annotation line values for values outside of domain or AnnotationSpec.hideLines', () => {
     const chartRotation: Rotation = 0;
     const yScales: Map<GroupId, Scale> = new Map();
     yScales.set(groupId, continuousScale);
@@ -652,6 +652,27 @@ describe('annotation utils', () => {
     );
 
     expect(invalidStringYDimensions).toEqual([]);
+
+    const validHiddenAnnotation: AnnotationSpec = {
+      annotationType: AnnotationTypes.Line,
+      annotationId,
+      domainType: AnnotationDomainTypes.XDomain,
+      dataValues: [{ dataValue: 2, details: 'foo' }],
+      groupId,
+      style: DEFAULT_ANNOTATION_LINE_STYLE,
+      hideLines: true,
+    };
+
+    const hiddenAnnotationDimensions = computeLineAnnotationDimensions(
+      validHiddenAnnotation,
+      chartDimensions,
+      chartRotation,
+      yScales,
+      continuousScale,
+      Position.Right,
+    );
+
+    expect(hiddenAnnotationDimensions).toEqual(null);
   });
 
   test('should compute if a point is within an annotation line bounds (xDomain annotation)', () => {
@@ -967,7 +988,7 @@ describe('annotation utils', () => {
     annotationDimensions.set(annotationId, annotationLines);
 
     // missing annotations
-    const missingTooltipState = computeAnnotationTooltipState(
+    const missingSpecTooltipState = computeAnnotationTooltipState(
       cursorPosition,
       annotationDimensions,
       annotations,
@@ -975,11 +996,42 @@ describe('annotation utils', () => {
       localAxesSpecs,
     );
 
-    expect(missingTooltipState).toBe(null);
+    expect(missingSpecTooltipState).toBe(null);
 
     // add valid annotation axis
     annotations.set(annotationId, lineAnnotation);
     localAxesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+
+    // hide tooltipState
+    lineAnnotation.hideTooltips = true;
+
+    const hideTooltipState = computeAnnotationTooltipState(
+      cursorPosition,
+      annotationDimensions,
+      annotations,
+      chartRotation,
+      localAxesSpecs,
+    );
+
+    expect(hideTooltipState).toBe(null);
+
+    // show tooltipState, hide lines
+    lineAnnotation.hideTooltips = false;
+    lineAnnotation.hideLines = true;
+
+    const hideLinesTooltipState = computeAnnotationTooltipState(
+      cursorPosition,
+      annotationDimensions,
+      annotations,
+      chartRotation,
+      localAxesSpecs,
+    );
+
+    expect(hideLinesTooltipState).toBe(null);
+
+    // show tooltipState & lines
+    lineAnnotation.hideTooltips = false;
+    lineAnnotation.hideLines = false;
 
     const tooltipState = computeAnnotationTooltipState(
       cursorPosition,

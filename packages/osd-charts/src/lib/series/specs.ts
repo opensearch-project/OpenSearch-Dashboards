@@ -206,6 +206,10 @@ export interface LineAnnotationSpec {
     width: number;
     height: number;
   };
+  /** Annotation lines are hidden */
+  hideLines?: boolean;
+  /** Annotation tooltips are hidden */
+  hideTooltips?: boolean;
 }
 
 // TODO: RectangleAnnotationSpec & TextAnnotationSpec

@@ -258,6 +258,9 @@ storiesOf('Annotations', module)
       questionInCircle: 'questionInCircle',
     }, 'alert');
 
+    const hideLines = boolean('annotation lines hidden', false);
+    const hideTooltips = boolean('annotation tooltips hidden', false);
+
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <Settings debug={boolean('debug', false)} rotation={chartRotation} />
@@ -267,6 +270,8 @@ storiesOf('Annotations', module)
           dataValues={dataValues}
           style={style}
           marker={(<EuiIcon type={marker} />)}
+          hideLines={hideLines}
+          hideTooltips={hideTooltips}
         />
         <Axis
           id={getAxisId('horizontal')}
