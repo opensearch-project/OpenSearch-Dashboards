@@ -449,6 +449,47 @@ storiesOf('Interactions', module)
       </Chart>
     );
   })
+  .add('brush selection tool on bar chart linear', () => {
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Settings onBrushEnd={action('onBrushEnd')} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'bottom'}
+          showOverlappingTicks={true}
+        />
+        <Axis
+          id={getAxisId('left')}
+          title={'left'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <Axis
+          id={getAxisId('top')}
+          position={Position.Top}
+          title={'top'}
+          showOverlappingTicks={true}
+        />
+        <Axis
+          id={getAxisId('right')}
+          title={'right'}
+          position={Position.Right}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId('lines')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={[{ x: 1, y: 2 }, { x: 2, y: 7 }, { x: 3, y: 3 }]}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
   .add('brush selection tool on time charts', () => {
     const now = DateTime.fromISO('2019-01-11T00:00:00.000Z').toMillis();
     const oneDay = 1000 * 60 * 60 * 24;

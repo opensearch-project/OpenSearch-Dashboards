@@ -1,11 +1,6 @@
 {
-  "roots": [
-    "<rootDir>/src"
-  ],
+  "roots": ["<rootDir>/src"],
   "preset": "ts-jest",
-  "testEnvironment": "jsdom",
-  "setupFilesAfterEnv": [
-    "<rootDir>/scripts/setup_enzyme.ts",
-    "jest-canvas-mock"
-  ]
+  "testEnvironment": "jest-environment-jsdom-fourteen",
+  "setupFilesAfterEnv": ["<rootDir>/scripts/setup_enzyme.ts"]
 }

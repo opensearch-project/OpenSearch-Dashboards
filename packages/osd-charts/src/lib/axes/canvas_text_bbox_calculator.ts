@@ -7,7 +7,7 @@ export class CanvasTextBBoxCalculator implements BBoxCalculator {
   private offscreenCanvas: HTMLCanvasElement;
   private scaledFontSize: number;
 
-  constructor(rootElement?: HTMLElement) {
+  constructor(rootElement?: HTMLElement, scaledFontSize: number = 100) {
     this.offscreenCanvas = document.createElement('canvas');
     this.offscreenCanvas.style.position = 'absolute';
     this.offscreenCanvas.style.top = '-9999px';
@@ -15,7 +15,7 @@ export class CanvasTextBBoxCalculator implements BBoxCalculator {
     this.context = this.offscreenCanvas.getContext('2d');
     this.attachedRoot = rootElement || document.documentElement;
     this.attachedRoot.appendChild(this.offscreenCanvas);
-    this.scaledFontSize = 5;
+    this.scaledFontSize = scaledFontSize;
   }
   compute(text: string, fontSize = 16, fontFamily = 'Arial', padding: number = 1): Option<BBox> {
     if (!this.context) {

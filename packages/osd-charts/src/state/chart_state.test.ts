@@ -8,6 +8,8 @@ import {
   BarSeriesSpec,
   Position,
 } from '../lib/series/specs';
+import { LIGHT_THEME } from '../lib/themes/light_theme';
+import { mergeWithDefaultTheme } from '../lib/themes/theme';
 import { getAnnotationId, getAxisId, getGroupId, getSpecId } from '../lib/utils/ids';
 import { TooltipType, TooltipValue } from '../lib/utils/interactions';
 import { ScaleBand } from '../lib/utils/scales/scale_band';
@@ -16,7 +18,7 @@ import { ScaleType } from '../lib/utils/scales/scales';
 import { ChartStore } from './chart_state';
 
 describe('Chart Store', () => {
-  const store = new ChartStore();
+  let store = new ChartStore();
 
   const SPEC_ID = getSpecId('spec_1');
   const AXIS_ID = getAxisId('axis_1');
@@ -54,6 +56,11 @@ describe('Chart Store', () => {
       colorValues: [],
     },
   };
+  beforeEach(() => {
+    store = new ChartStore();
+    store.updateParentDimensions(600, 600, 0, 0);
+    store.computeChart();
+  });
 
   test('can add a single spec', () => {
     store.addSeriesSpec(spec);
@@ -70,6 +77,7 @@ describe('Chart Store', () => {
   });
 
   test('can add an axis', () => {
+    store.addSeriesSpec(spec);
     const axisSpec: AxisSpec = {
       id: AXIS_ID,
       groupId: GROUP_ID,
@@ -342,30 +350,42 @@ describe('Chart Store', () => {
       },
     );
 
-    const start = { x: 0, y: 0 };
-    const end1 = { x: 100, y: 0 };
-    const end2 = { x: -100, y: 0 };
-    store.chartDimensions.left = 10;
-
+    const start1 = { x: 0, y: 0 };
+    const start2 = { x: 100, y: 0 };
+    const end1 = { x: 600, y: 0 };
+    const end2 = { x: 300, y: 0 };
+    store.chartTheme = mergeWithDefaultTheme(
+      {
+        chartMargins: {
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+        },
+      },
+      LIGHT_THEME,
+    );
+    store.addSeriesSpec(spec);
+    store.computeChart();
     store.onBrushEndListener = undefined;
     store.onBrushStart();
     expect(store.isBrushing.get()).toBe(false);
-    store.onBrushEnd(start, end1);
+    store.onBrushEnd(start1, end1);
     expect(brushEndListener).not.toBeCalled();
 
     store.setOnBrushEndListener(brushEndListener);
     store.onBrushStart();
     expect(store.isBrushing.get()).toBe(true);
-    store.onBrushEnd(start, start);
+    store.onBrushEnd(start1, start1);
     expect(brushEndListener).not.toBeCalled();
 
-    store.onBrushEnd(start, end1);
-    expect(brushEndListener.mock.calls[0][0]).toBeCloseTo(0.9, 1);
-    expect(brushEndListener.mock.calls[0][1]).toBeCloseTo(1.5, 1);
+    store.onBrushEnd(start1, end1);
+    expect(brushEndListener.mock.calls[0][0]).toBe(1);
+    expect(brushEndListener.mock.calls[0][1]).toBe(4);
 
-    store.onBrushEnd(start, end2);
-    expect(brushEndListener.mock.calls[1][0]).toBeCloseTo(0.3, 1);
-    expect(brushEndListener.mock.calls[1][1]).toBeCloseTo(0.9, 1);
+    store.onBrushEnd(start2, end2);
+    expect(brushEndListener.mock.calls[1][0]).toBe(1.5);
+    expect(brushEndListener.mock.calls[1][1]).toBe(2.5);
   });
 
   test('can update parent dimensions', () => {
@@ -604,6 +624,8 @@ describe('Chart Store', () => {
   });
 
   test('can disable tooltip on brushing', () => {
+    store.addSeriesSpec(spec);
+    store.setOnBrushEndListener(() => ({}));
     const tooltipValue: TooltipValue = {
       name: 'a',
       value: 'a',
@@ -613,7 +635,7 @@ describe('Chart Store', () => {
     };
     store.xScale = new ScaleContinuous([0, 100], [0, 100], ScaleType.Linear);
     store.cursorPosition.x = 1;
-    store.cursorPosition.x = 1;
+    store.cursorPosition.y = 1;
     store.tooltipType.set(TooltipType.Crosshairs);
     store.tooltipData.replace([tooltipValue]);
     store.onBrushStart();
@@ -621,7 +643,7 @@ describe('Chart Store', () => {
     expect(store.isTooltipVisible.get()).toBe(false);
 
     store.cursorPosition.x = 1;
-    store.cursorPosition.x = 1;
+    store.cursorPosition.y = 1;
     store.tooltipType.set(TooltipType.Crosshairs);
     store.tooltipData.replace([tooltipValue]);
     store.onBrushEnd({ x: 0, y: 0 }, { x: 1, y: 1 });
