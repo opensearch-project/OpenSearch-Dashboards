@@ -57,8 +57,17 @@ export function createContinuousScale(
   bandwidth?: number,
   clamp?: boolean,
   minInterval?: number,
+  timeZone?: string,
 ): Scale {
-  return new ScaleContinuous(domain, [minRange, maxRange], type, clamp, bandwidth, minInterval);
+  return new ScaleContinuous(
+    domain,
+    [minRange, maxRange],
+    type,
+    clamp,
+    bandwidth,
+    minInterval,
+    timeZone,
+  );
 }
 
 /**

@@ -59,18 +59,61 @@ describe('X Domain', () => {
     });
   });
   test('Should return correct scale type with single line (time)', () => {
-    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
+    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType' | 'timeZone'>> = [
       {
         seriesType: 'line',
         xScaleType: ScaleType.Time,
+        timeZone: 'utc-3',
       },
     ];
     const mainXScale = convertXScaleTypes(seriesSpecs);
     expect(mainXScale).toEqual({
       scaleType: ScaleType.Time,
       isBandScale: false,
+      timeZone: 'utc-3',
     });
   });
+  test('Should return correct scale type with multi line with same scale types (time) same tz', () => {
+    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType' | 'timeZone'>> = [
+      {
+        seriesType: 'line',
+        xScaleType: ScaleType.Time,
+        timeZone: 'UTC-3',
+      },
+      {
+        seriesType: 'line',
+        xScaleType: ScaleType.Time,
+        timeZone: 'utc-3',
+      },
+    ];
+    const mainXScale = convertXScaleTypes(seriesSpecs);
+    expect(mainXScale).toEqual({
+      scaleType: ScaleType.Time,
+      isBandScale: false,
+      timeZone: 'utc-3',
+    });
+  });
+  test('Should return correct scale type with multi line with same scale types (time) coerce to UTC', () => {
+    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType' | 'timeZone'>> = [
+      {
+        seriesType: 'line',
+        xScaleType: ScaleType.Time,
+        timeZone: 'utc-3',
+      },
+      {
+        seriesType: 'line',
+        xScaleType: ScaleType.Time,
+        timeZone: 'utc+3',
+      },
+    ];
+    const mainXScale = convertXScaleTypes(seriesSpecs);
+    expect(mainXScale).toEqual({
+      scaleType: ScaleType.Time,
+      isBandScale: false,
+      timeZone: 'utc',
+    });
+  });
+
   test('Should return correct scale type with multi line with different scale types (linear, ordinal)', () => {
     const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
       {
@@ -106,7 +149,7 @@ describe('X Domain', () => {
     });
   });
   test('Should return correct scale type with multi bar, area with same scale types (linear, linear)', () => {
-    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
+    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType' | 'timeZone'>> = [
       {
         seriesType: 'bar',
         xScaleType: ScaleType.Linear,
@@ -114,6 +157,7 @@ describe('X Domain', () => {
       {
         seriesType: 'area',
         xScaleType: ScaleType.Time,
+        timeZone: 'utc+3',
       },
     ];
     const mainXScale = convertXScaleTypes(seriesSpecs);
@@ -272,11 +316,11 @@ describe('X Domain', () => {
       [
         {
           seriesType: 'bar',
-          xScaleType: ScaleType.Time,
+          xScaleType: ScaleType.Linear,
         },
         {
           seriesType: 'bar',
-          xScaleType: ScaleType.Time,
+          xScaleType: ScaleType.Linear,
         },
       ],
       xValues,
@@ -374,7 +418,7 @@ describe('X Domain', () => {
       seriesType: 'bar',
       xAccessor: 'x',
       yAccessors: ['y'],
-      xScaleType: ScaleType.Linear,
+      xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
       data: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 5, y: 0 }],
@@ -457,7 +501,7 @@ describe('X Domain', () => {
     const ds1: BasicSeriesSpec = {
       id: getSpecId('ds1'),
       groupId: getGroupId('g1'),
-      seriesType: 'line',
+      seriesType: 'area',
       xAccessor: 'x',
       yAccessors: ['y'],
       xScaleType: ScaleType.Linear,
@@ -471,7 +515,7 @@ describe('X Domain', () => {
       seriesType: 'line',
       xAccessor: 'x',
       yAccessors: ['y'],
-      xScaleType: ScaleType.Linear,
+      xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
       data: new Array(maxValues).fill(0).map((d, i) => ({ x: i, y: i })),

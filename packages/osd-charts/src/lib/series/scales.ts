@@ -53,7 +53,7 @@ export function computeXScale(
   minRange: number,
   maxRange: number,
 ): Scale {
-  const { scaleType, minInterval, domain, isBandScale } = xDomain;
+  const { scaleType, minInterval, domain, isBandScale, timeZone } = xDomain;
   const rangeDiff = Math.abs(maxRange - minRange);
   const isInverse = maxRange < minRange;
   if (scaleType === ScaleType.Ordinal) {
@@ -74,6 +74,7 @@ export function computeXScale(
         bandwidth / totalBarsInCluster,
         false,
         minInterval,
+        timeZone,
       );
     } else {
       return createContinuousScale(
@@ -84,6 +85,7 @@ export function computeXScale(
         0,
         undefined,
         minInterval,
+        timeZone,
       );
     }
   }

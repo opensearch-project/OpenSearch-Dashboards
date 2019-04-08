@@ -7,10 +7,10 @@ import { BaseDomain } from './domain';
 
 export type XDomain = BaseDomain & {
   type: 'xDomain';
-  /* if the scale needs to be a band scale: used when displaying bars */
-  isBandScale: boolean;
   /* the minimum interval of the scale if not-ordinal band-scale*/
   minInterval: number;
+  /** if x domain is time, we should also specify the timezone */
+  timeZone?: string;
 };
 
 /**
@@ -25,7 +25,6 @@ export function mergeXDomain(
   if (!mainXScaleType) {
     throw new Error('Cannot merge the domain. Missing X scale types');
   }
-  // TODO: compute this domain merging also/overwritted by any configured static domains
 
   const values = [...xValues.values()];
   let seriesXComputedDomains;
@@ -81,6 +80,7 @@ export function mergeXDomain(
     isBandScale: mainXScaleType.isBandScale,
     domain: seriesXComputedDomains,
     minInterval,
+    timeZone: mainXScaleType.timeZone,
   };
 }
 
@@ -119,20 +119,37 @@ export function findMinInterval(xValues: number[]): number {
  * @returns {ChartScaleType}
  */
 export function convertXScaleTypes(
-  specs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>>,
-): Pick<XDomain, 'scaleType' | 'isBandScale'> | null {
+  specs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType' | 'timeZone'>>,
+): {
+  scaleType: ScaleType;
+  isBandScale: boolean;
+  timeZone?: string;
+} | null {
   const seriesTypes = new Set<string>();
   const scaleTypes = new Set<ScaleType>();
+  const timeZones = new Set<string>();
   specs.forEach((spec) => {
     seriesTypes.add(spec.seriesType);
     scaleTypes.add(spec.xScaleType);
+    if (spec.timeZone) {
+      timeZones.add(spec.timeZone.toLowerCase());
+    }
   });
   if (specs.length === 0 || seriesTypes.size === 0 || scaleTypes.size === 0) {
     return null;
   }
   const isBandScale = seriesTypes.has('bar');
   if (scaleTypes.size === 1) {
-    return { scaleType: [...scaleTypes.values()][0], isBandScale };
+    const scaleType = scaleTypes.values().next().value;
+    let timeZone: string | undefined;
+    if (scaleType === ScaleType.Time) {
+      if (timeZones.size > 1) {
+        timeZone = 'utc';
+      } else {
+        timeZone = timeZones.values().next().value;
+      }
+    }
+    return { scaleType, isBandScale, timeZone };
   }
 
   if (scaleTypes.size > 1 && scaleTypes.has(ScaleType.Ordinal)) {

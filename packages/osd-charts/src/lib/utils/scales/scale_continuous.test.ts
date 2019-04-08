@@ -3,18 +3,7 @@ import { ScaleBand } from './scale_band';
 import { isLogarithmicScale, ScaleContinuous } from './scale_continuous';
 import { ScaleType } from './scales';
 
-describe.only('Scale Continuous', () => {
-  /**
-   * These tests cover the following cases:
-   * line/area with simple linear scale
-   * line/area chart with time scale (ac: w axis)
-   * barscale with linear scale (bc: with linear x axis)
-   * barscale with time scale (bc: with time x axis)
-   * bar + line with linear scale (mc: bar and lines)
-   * bar + line with time scale (missing story)
-   * bar clustered with time scale (bc: time clustered using various specs)
-   * bar clustered with linear scale (bc: clustered multiple series specs)
-   */
+describe('Scale Continuous', () => {
   test('shall invert on continuous scale linear', () => {
     const domain = [0, 2];
     const minRange = 0;

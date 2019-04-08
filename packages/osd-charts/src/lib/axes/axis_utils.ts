@@ -144,36 +144,39 @@ export const getMaxBboxDimensions = (
   fontSize: number,
   fontFamily: string,
   tickLabelRotation: number,
-) => (acc: { [key: string]: number }, tickLabel: string): {
-  maxLabelBboxWidth: number,
-  maxLabelBboxHeight: number,
-  maxLabelTextWidth: number,
-  maxLabelTextHeight: number,
+) => (
+  acc: { [key: string]: number },
+  tickLabel: string,
+): {
+  maxLabelBboxWidth: number;
+  maxLabelBboxHeight: number;
+  maxLabelTextWidth: number;
+  maxLabelTextHeight: number;
 } => {
-    const bbox = bboxCalculator.compute(tickLabel, fontSize, fontFamily).getOrElse({
-      width: 0,
-      height: 0,
-    });
+  const bbox = bboxCalculator.compute(tickLabel, fontSize, fontFamily).getOrElse({
+    width: 0,
+    height: 0,
+  });
 
-    const rotatedBbox = computeRotatedLabelDimensions(bbox, tickLabelRotation);
+  const rotatedBbox = computeRotatedLabelDimensions(bbox, tickLabelRotation);
 
-    const width = Math.ceil(rotatedBbox.width);
-    const height = Math.ceil(rotatedBbox.height);
-    const labelWidth = Math.ceil(bbox.width);
-    const labelHeight = Math.ceil(bbox.height);
+  const width = Math.ceil(rotatedBbox.width);
+  const height = Math.ceil(rotatedBbox.height);
+  const labelWidth = Math.ceil(bbox.width);
+  const labelHeight = Math.ceil(bbox.height);
 
-    const prevWidth = acc.maxLabelBboxWidth;
-    const prevHeight = acc.maxLabelBboxHeight;
-    const prevLabelWidth = acc.maxLabelTextWidth;
-    const prevLabelHeight = acc.maxLabelTextHeight;
+  const prevWidth = acc.maxLabelBboxWidth;
+  const prevHeight = acc.maxLabelBboxHeight;
+  const prevLabelWidth = acc.maxLabelTextWidth;
+  const prevLabelHeight = acc.maxLabelTextHeight;
 
-    return {
-      maxLabelBboxWidth: prevWidth > width ? prevWidth : width,
-      maxLabelBboxHeight: prevHeight > height ? prevHeight : height,
-      maxLabelTextWidth: prevLabelWidth > labelWidth ? prevLabelWidth : labelWidth,
-      maxLabelTextHeight: prevLabelHeight > labelHeight ? prevLabelHeight : labelHeight,
-    };
+  return {
+    maxLabelBboxWidth: prevWidth > width ? prevWidth : width,
+    maxLabelBboxHeight: prevHeight > height ? prevHeight : height,
+    maxLabelTextWidth: prevLabelWidth > labelWidth ? prevLabelWidth : labelWidth,
+    maxLabelTextHeight: prevLabelHeight > labelHeight ? prevLabelHeight : labelHeight,
   };
+};
 
 function computeTickDimensions(
   scale: Scale,
@@ -562,11 +565,7 @@ export function getAxisTicksPositions(
     }
 
     const allTicks = getAvailableTicks(axisSpec, scale, totalGroupsCount);
-    const visibleTicks = getVisibleTicks(
-      allTicks,
-      axisSpec,
-      axisDim,
-    );
+    const visibleTicks = getVisibleTicks(allTicks, axisSpec, axisDim);
 
     if (axisSpec.showGridLines) {
       const isVerticalAxis = isVertical(axisSpec.position);
@@ -637,7 +636,9 @@ export function isUpperBound(domain: Partial<CompleteBoundedDomain>): domain is 
   return domain.max != null;
 }
 
-export function isCompleteBound(domain: Partial<CompleteBoundedDomain>): domain is CompleteBoundedDomain {
+export function isCompleteBound(
+  domain: Partial<CompleteBoundedDomain>,
+): domain is CompleteBoundedDomain {
   return domain.max != null && domain.min != null;
 }
 
@@ -675,8 +676,8 @@ export function mergeDomainsByGroupId(
     if (prevGroupDomain) {
       const prevDomain = prevGroupDomain as DomainRange;
 
-      const prevMin = (isLowerBound(prevDomain)) ? prevDomain.min : undefined;
-      const prevMax = (isUpperBound(prevDomain)) ? prevDomain.max : undefined;
+      const prevMin = isLowerBound(prevDomain) ? prevDomain.min : undefined;
+      const prevMax = isUpperBound(prevDomain) ? prevDomain.max : undefined;
 
       let max = prevMax;
       let min = prevMin;

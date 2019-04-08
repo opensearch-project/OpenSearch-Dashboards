@@ -67,6 +67,13 @@ export interface SeriesScales {
    */
   xScaleType: ScaleType.Ordinal | ScaleType.Linear | ScaleType.Time;
   /**
+   * If using a ScaleType.Time this timezone identifier is required to
+   * compute a nice set of xScale ticks. Can be any IANA zone supported by
+   * the host environment, or a fixed-offset name of the form 'utc+3',
+   * or the strings 'local' or 'utc'.
+   */
+  timeZone?: string;
+  /**
    * The y axis scale type
    * @default ScaleType.Linear
    */

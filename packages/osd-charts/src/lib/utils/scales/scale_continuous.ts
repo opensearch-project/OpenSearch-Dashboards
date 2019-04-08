@@ -1,4 +1,4 @@
-import { scaleLinear, scaleLog, scaleSqrt, scaleTime } from 'd3-scale';
+import { scaleLinear, scaleLog, scaleSqrt, scaleUtc } from 'd3-scale';
 import { DateTime } from 'luxon';
 import { ScaleContinuousType, ScaleType } from './scales';
 import { Scale } from './scales';
@@ -7,7 +7,7 @@ const SCALES = {
   [ScaleType.Linear]: scaleLinear,
   [ScaleType.Log]: scaleLog,
   [ScaleType.Sqrt]: scaleSqrt,
-  [ScaleType.Time]: scaleTime,
+  [ScaleType.Time]: scaleUtc,
 };
 
 export function limitToMin(value: number, positive: boolean) {
@@ -74,6 +74,7 @@ export class ScaleContinuous implements Scale {
   readonly range: number[];
   readonly isInverted: boolean;
   readonly tickValues: number[];
+  readonly timeZone: string;
   private readonly d3Scale: any;
 
   constructor(
@@ -84,6 +85,11 @@ export class ScaleContinuous implements Scale {
     bandwidth: number = 0,
     /** the min interval computed on the XDomain, not available for yDomains */
     minInterval: number = 0,
+    /**
+     * A time zone identifier. Can be any IANA zone supported by he host environment,
+     * or a fixed-offset name of the form 'utc+3', or the strings 'local' or 'utc'.
+     */
+    timeZone: string = 'utc',
   ) {
     this.d3Scale = SCALES[type]();
     if (type === ScaleType.Log) {
@@ -102,9 +108,19 @@ export class ScaleContinuous implements Scale {
     this.range = range;
     this.minInterval = minInterval;
     this.isInverted = this.domain[0] > this.domain[1];
+    this.timeZone = timeZone;
     if (type === ScaleType.Time) {
-      this.tickValues = this.d3Scale.ticks().map((d: Date) => {
-        return DateTime.fromJSDate(d).toMillis();
+      const startDomain = DateTime.fromMillis(this.domain[0], { zone: this.timeZone });
+      const endDomain = DateTime.fromMillis(this.domain[1], { zone: this.timeZone });
+      const offset = startDomain.offset;
+      const shiftedDomainMin = startDomain.plus({ minutes: offset }).toMillis();
+      const shiftedDomainMax = endDomain.plus({ minutes: offset }).toMillis();
+      const tzShiftedScale = scaleUtc().domain([shiftedDomainMin, shiftedDomainMax]);
+
+      this.tickValues = tzShiftedScale.ticks().map((d: Date) => {
+        return DateTime.fromMillis(d.getTime(), { zone: this.timeZone })
+          .minus({ minutes: offset })
+          .toMillis();
       });
     } else {
       if (this.minInterval > 0) {
@@ -135,7 +151,7 @@ export class ScaleContinuous implements Scale {
   invertWithStep(value: number, stepType?: StepType) {
     const invertedValue = this.invert(value);
     const forcedStep = this.bandwidth > 0 ? StepType.StepAfter : stepType;
-    return invertValue(invertedValue, this.minInterval, forcedStep);
+    return invertValue(this.domain[0], invertedValue, this.minInterval, forcedStep);
   }
 }
 
@@ -147,7 +163,12 @@ export function isLogarithmicScale(scale: Scale) {
   return scale.type === ScaleType.Log;
 }
 
-function invertValue(invertedValue: number, minInterval: number, stepType?: StepType) {
+function invertValue(
+  domainMin: number,
+  invertedValue: number,
+  minInterval: number,
+  stepType?: StepType,
+) {
   if (minInterval > 0) {
     switch (stepType) {
       case StepType.StepAfter:
@@ -156,7 +177,7 @@ function invertValue(invertedValue: number, minInterval: number, stepType?: Step
         return linearStepBefore(invertedValue, minInterval);
       case StepType.Step:
       default:
-        return linearStep(invertedValue, minInterval);
+        return linearStep(domainMin, invertedValue, minInterval);
     }
   }
   return invertedValue;
@@ -176,13 +197,14 @@ export function linearStepAfter(invertedValue: number, minInterval: number): num
  * Return an inverted value that is valid from the half point before and half point
  * after the value. |----****|*****----|
  * till the end of the interval.
+ * @param domainMin the domain's minimum value
  * @param invertedValue the inverted value
  * @param minInterval the data minimum interval grether than 0
  */
-export function linearStep(invertedValue: number, minInterval: number): number {
-  const diff = invertedValue / minInterval;
+export function linearStep(domainMin: number, invertedValue: number, minInterval: number): number {
+  const diff = (invertedValue - domainMin) / minInterval;
   const base = diff - Math.floor(diff) > 0.5 ? 1 : 0;
-  return Math.floor(diff) * minInterval + minInterval * base;
+  return domainMin + Math.floor(diff) * minInterval + minInterval * base;
 }
 
 /**
