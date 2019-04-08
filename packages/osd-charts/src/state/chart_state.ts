@@ -743,10 +743,10 @@ export class ChartStore {
     this.customSeriesColors = new Map([...this.customSeriesColors, ...updatedCustomSeriesColors]);
 
     // tslint:disable-next-line:no-console
-    console.log({ colors: seriesDomains.seriesColors });
+    // console.log({ colors: seriesDomains.seriesColors });
 
     // tslint:disable-next-line:no-console
-    console.log({ seriesDomains });
+    // console.log({ seriesDomains });
     this.seriesColorMap = getSeriesColorMap(
       seriesDomains.seriesColors,
       this.chartTheme.colors,
@@ -761,7 +761,7 @@ export class ChartStore {
       this.deselectedDataSeries,
     );
     // tslint:disable-next-line:no-console
-    console.log({ legendItems: this.legendItems });
+    // console.log({ legendItems: this.legendItems });
 
     const {
       xDomain,
@@ -822,7 +822,7 @@ export class ChartStore {
     );
 
     // tslint:disable-next-line:no-console
-    console.log({ seriesGeometries });
+    // console.log({ seriesGeometries });
     this.geometries = seriesGeometries.geometries;
     this.xScale = seriesGeometries.scales.xScale;
     this.yScales = seriesGeometries.scales.yScales;
