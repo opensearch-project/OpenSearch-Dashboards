@@ -39,7 +39,7 @@ import {
   Rendering,
   Rotation,
 } from '../lib/series/specs';
-import { formatTooltip, formatXTooltipValue } from '../lib/series/tooltip';
+import { formatTooltip, formatXTooltipValue, getSeriesTooltipValues } from '../lib/series/tooltip';
 import { LIGHT_THEME } from '../lib/themes/light_theme';
 import { mergeWithDefaultAnnotationLine, Theme } from '../lib/themes/theme';
 import { computeChartDimensions, Dimensions } from '../lib/utils/dimensions';
@@ -219,6 +219,8 @@ export class ChartStore {
   showLegend = observable.box(false);
   legendCollapsed = observable.box(false);
   legendPosition: Position | undefined;
+  showLegendDisplayValue = observable.box(true);
+
   toggleLegendCollapsed = action(() => {
     this.legendCollapsed.set(!this.legendCollapsed.get());
     this.computeChart();
@@ -401,6 +403,11 @@ export class ChartStore {
     }
   });
 
+  legendItemTooltipValues = computed(() => {
+    // update legend items with value to display
+    return getSeriesTooltipValues(this.tooltipData);
+  });
+
   annotationTooltipState = computed(() => {
     // get positions relative to chart
     const xPos = this.rawCursorPosition.x - this.chartDimensions.left;
@@ -455,6 +462,7 @@ export class ChartStore {
     // clear highlight geoms
     this.highlightedGeometries.clear();
     this.tooltipData.clear();
+
     document.body.style.cursor = 'default';
   });
 
@@ -758,8 +766,10 @@ export class ChartStore {
       this.seriesColorMap,
       this.seriesSpecs,
       this.chartTheme.colors.defaultVizColor,
+      this.axesSpecs,
       this.deselectedDataSeries,
     );
+
     // tslint:disable-next-line:no-console
     // console.log({ legendItems: this.legendItems });
 

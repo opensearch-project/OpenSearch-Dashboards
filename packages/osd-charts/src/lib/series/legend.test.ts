@@ -1,8 +1,8 @@
-import { getGroupId, getSpecId, SpecId } from '../utils/ids';
+import { AxisId, getAxisId, getGroupId, getSpecId, SpecId } from '../utils/ids';
 import { ScaleType } from '../utils/scales/scales';
 import { computeLegend, getSeriesColorLabel } from './legend';
 import { DataSeriesColorsValues } from './series';
-import { BasicSeriesSpec } from './specs';
+import { AxisSpec, BasicSeriesSpec, Position } from './specs';
 
 const colorValues1a = {
   specId: getSpecId('spec1'),
@@ -46,6 +46,22 @@ const spec2: BasicSeriesSpec = {
   hideInLegend: false,
 };
 
+const axesSpecs = new Map<AxisId, AxisSpec>();
+const axisSpec: AxisSpec = {
+  id: getAxisId('axis1'),
+  groupId: getGroupId('group1'),
+  hide: false,
+  showOverlappingTicks: false,
+  showOverlappingLabels: false,
+  position: Position.Left,
+  tickSize: 10,
+  tickPadding: 10,
+  tickFormat: (value: any) => {
+    return `${value}`;
+  },
+};
+axesSpecs.set(axisSpec.id, axisSpec);
+
 describe('Legends', () => {
   const seriesColor = new Map<string, DataSeriesColorsValues>();
   const seriesColorMap = new Map<string, string>();
@@ -61,7 +77,7 @@ describe('Legends', () => {
   });
   it('compute legend for a single series', () => {
     seriesColor.set('colorSeries1a', colorValues1a);
-    const legend = computeLegend(seriesColor, seriesColorMap, specs, 'violet');
+    const legend = computeLegend(seriesColor, seriesColorMap, specs, 'violet', axesSpecs);
     const expected = [
       {
         color: 'red',
@@ -70,6 +86,7 @@ describe('Legends', () => {
         isSeriesVisible: true,
         isLegendItemVisible: true,
         key: 'colorSeries1a',
+        displayValue: {},
       },
     ];
     expect(Array.from(legend.values())).toEqual(expected);
@@ -77,7 +94,7 @@ describe('Legends', () => {
   it('compute legend for a single spec but with multiple series', () => {
     seriesColor.set('colorSeries1a', colorValues1a);
     seriesColor.set('colorSeries1b', colorValues1b);
-    const legend = computeLegend(seriesColor, seriesColorMap, specs, 'violet');
+    const legend = computeLegend(seriesColor, seriesColorMap, specs, 'violet', axesSpecs);
     const expected = [
       {
         color: 'red',
@@ -86,6 +103,7 @@ describe('Legends', () => {
         isSeriesVisible: true,
         isLegendItemVisible: true,
         key: 'colorSeries1a',
+        displayValue: {},
       },
       {
         color: 'blue',
@@ -94,6 +112,7 @@ describe('Legends', () => {
         isSeriesVisible: true,
         isLegendItemVisible: true,
         key: 'colorSeries1b',
+        displayValue: {},
       },
     ];
     expect(Array.from(legend.values())).toEqual(expected);
@@ -101,7 +120,7 @@ describe('Legends', () => {
   it('compute legend for multiple specs', () => {
     seriesColor.set('colorSeries1a', colorValues1a);
     seriesColor.set('colorSeries2a', colorValues2a);
-    const legend = computeLegend(seriesColor, seriesColorMap, specs, 'violet');
+    const legend = computeLegend(seriesColor, seriesColorMap, specs, 'violet', axesSpecs);
     const expected = [
       {
         color: 'red',
@@ -110,6 +129,7 @@ describe('Legends', () => {
         isSeriesVisible: true,
         isLegendItemVisible: true,
         key: 'colorSeries1a',
+        displayValue: {},
       },
       {
         color: 'green',
@@ -118,19 +138,20 @@ describe('Legends', () => {
         isSeriesVisible: true,
         isLegendItemVisible: true,
         key: 'colorSeries2a',
+        displayValue: {},
       },
     ];
     expect(Array.from(legend.values())).toEqual(expected);
   });
   it('empty legend for missing spec', () => {
     seriesColor.set('colorSeries2b', colorValues2b);
-    const legend = computeLegend(seriesColor, seriesColorMap, specs, 'violet');
+    const legend = computeLegend(seriesColor, seriesColorMap, specs, 'violet', axesSpecs);
     expect(legend.size).toEqual(0);
   });
   it('compute legend with default color for missing series color', () => {
     seriesColor.set('colorSeries1a', colorValues1a);
     const emptyColorMap = new Map<string, string>();
-    const legend = computeLegend(seriesColor, emptyColorMap, specs, 'violet');
+    const legend = computeLegend(seriesColor, emptyColorMap, specs, 'violet', axesSpecs);
     const expected = [
       {
         color: 'violet',
@@ -139,6 +160,7 @@ describe('Legends', () => {
         isSeriesVisible: true,
         isLegendItemVisible: true,
         key: 'colorSeries1a',
+        displayValue: {},
       },
     ];
     expect(Array.from(legend.values())).toEqual(expected);
@@ -152,7 +174,7 @@ describe('Legends', () => {
     const emptyColorMap = new Map<string, string>();
     const deselectedDataSeries = null;
 
-    const legend = computeLegend(seriesColor, emptyColorMap, specs, 'violet', deselectedDataSeries);
+    const legend = computeLegend(seriesColor, emptyColorMap, specs, 'violet', axesSpecs, deselectedDataSeries);
 
     const visibility = [...legend.values()].map((item) => item.isSeriesVisible);
 
@@ -167,7 +189,7 @@ describe('Legends', () => {
     const emptyColorMap = new Map<string, string>();
     const deselectedDataSeries = [colorValues1a, colorValues1b];
 
-    const legend = computeLegend(seriesColor, emptyColorMap, specs, 'violet', deselectedDataSeries);
+    const legend = computeLegend(seriesColor, emptyColorMap, specs, 'violet', axesSpecs, deselectedDataSeries);
 
     const visibility = [...legend.values()].map((item) => item.isSeriesVisible);
     expect(visibility).toEqual([false, false, true]);

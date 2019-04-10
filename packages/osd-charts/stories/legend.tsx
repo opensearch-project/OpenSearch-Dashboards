@@ -1,10 +1,12 @@
-import { boolean } from '@storybook/addon-knobs';
+import { array, boolean, select } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import {
+  AreaSeries,
   Axis,
   BarSeries,
   Chart,
+  CurveType,
   getAxisId,
   getSpecId,
   LineSeries,
@@ -13,6 +15,7 @@ import {
   Settings,
 } from '../src/';
 import * as TestDatasets from '../src/lib/series/utils/test_dataset';
+import { TSVB_DATASET } from '../src/lib/series/utils/test_dataset_tsvb';
 
 storiesOf('Legend', module)
   .add('right', () => {
@@ -209,6 +212,65 @@ storiesOf('Legend', module)
           yScaleToDataExtent={false}
           hideInLegend={hideLineSeriesInLegend}
         />
+      </Chart>
+    );
+  })
+  .add('display values in legend elements', () => {
+    const showLegendDisplayValue = boolean('show display value in legend', true);
+    const legendPosition = select('legendPosition', {
+      right: Position.Right,
+      bottom: Position.Bottom,
+      left: Position.Left,
+      top: Position.Top,
+    }, Position.Right);
+
+    const tsvbSeries = TSVB_DATASET.series;
+
+    const namesArray = array('series names (in sort order)', [
+      'jpg',
+      'php',
+      'png',
+      'css',
+      'gif',
+    ]);
+
+    const seriesComponents = tsvbSeries.map((series: any) => {
+      const nameIndex = namesArray.findIndex((name: string) => name === series.label);
+      const sortIndex = nameIndex > -1 ? nameIndex : undefined;
+
+      return (<AreaSeries
+        key={`${series.id}-${series.label}`}
+        id={getSpecId(`${series.id}-${series.label}`)}
+        name={series.label}
+        xScaleType={ScaleType.Time}
+        yScaleType={ScaleType.Linear}
+        xAccessor={0}
+        yAccessors={[1]}
+        data={series.data}
+        curve={series.lines.steps ? CurveType.CURVE_STEP : CurveType.LINEAR}
+        sortIndex={sortIndex}
+      />);
+    });
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Settings
+          showLegend={true}
+          legendPosition={legendPosition}
+          showLegendDisplayValue={showLegendDisplayValue}
+        />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        {seriesComponents}
       </Chart>
     );
   });

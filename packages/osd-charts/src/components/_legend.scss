@@ -81,11 +81,13 @@ $elasticChartsLegendMaxHeight: $euiSize * 4;
   overflow: hidden;
   flex-shrink: 1;
   flex-grow: 0;
+  max-width: 100%;
 }
 .elasticChartsLegendList {
   overflow-y: auto;
   overflow-x: hidden;
   height: 100%;
+  max-width: 100%;
   @include euiScrollBar;
 }
 
@@ -108,9 +110,20 @@ $elasticChartsLegendMaxHeight: $euiSize * 4;
   max-width: $elasticChartsLegendMaxWidth - 4 * $euiSize;
 
   &.elasticChartsLegendListItem__title--selected {
-    .elasticChartsLegendListItem__title {
-      text-decoration: underline;
-    }
+    text-decoration: underline;
+  }
+
+  &.elasticChartsLegendListItem__title--hasDisplayValue {
+    width: $elasticChartsLegendMaxWidth - 6 * $euiSize;
+    max-width: $elasticChartsLegendMaxWidth - 6 * $euiSize;
+  }
+}
+
+.elasticChartsLegendListItem__displayValue {
+  text-align: right;
+
+  &.elasticChartsLegendListItem__displayValue--hidden {
+    display: none;
   }
 }
 

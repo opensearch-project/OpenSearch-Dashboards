@@ -29,6 +29,8 @@ interface SettingSpecProps {
   tooltipSnap?: boolean;
   debug: boolean;
   legendPosition?: Position;
+  isLegendItemsSortDesc: boolean;
+  showLegendDisplayValue: boolean;
   onElementClick?: ElementClickListener;
   onElementOver?: ElementOverListener;
   onElementOut?: () => undefined;
@@ -52,6 +54,7 @@ function updateChartStore(props: SettingSpecProps) {
     tooltipType,
     tooltipSnap,
     legendPosition,
+    showLegendDisplayValue,
     onElementClick,
     onElementOver,
     onElementOut,
@@ -78,6 +81,7 @@ function updateChartStore(props: SettingSpecProps) {
 
   chartStore.setShowLegend(showLegend);
   chartStore.legendPosition = legendPosition;
+  chartStore.showLegendDisplayValue.set(showLegendDisplayValue);
   chartStore.xDomain = xDomain;
 
   if (onElementOver) {
@@ -118,6 +122,7 @@ export class SettingsComponent extends PureComponent<SettingSpecProps> {
     debug: false,
     tooltipType: DEFAULT_TOOLTIP_TYPE,
     tooltipSnap: DEFAULT_TOOLTIP_SNAP,
+    showLegendDisplayValue: true,
   };
   componentDidMount() {
     updateChartStore(this.props);

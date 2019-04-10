@@ -1,7 +1,28 @@
 import { Accessor } from '../utils/accessor';
+import { SpecId } from '../utils/ids';
 import { TooltipValue } from '../utils/interactions';
 import { IndexedGeometry } from './rendering';
+import { getColorValuesAsString } from './series';
 import { AxisSpec, BasicSeriesSpec, Datum, TickFormatter } from './specs';
+
+export function getSeriesTooltipValues(
+  tooltipValues: TooltipValue[],
+): Map<string, any> {
+  // map from seriesKey to tooltipValue
+  const seriesTooltipValues = new Map();
+
+  // First tooltipValue is the header
+  if (tooltipValues.length <= 1) {
+    return seriesTooltipValues;
+  }
+
+  tooltipValues.slice(1).forEach((tooltipValue: TooltipValue) => {
+    const { seriesKey, value } = tooltipValue;
+    seriesTooltipValues.set(seriesKey, value);
+  });
+
+  return seriesTooltipValues;
+}
 
 export function formatTooltip(
   searchIndexValue: IndexedGeometry,
@@ -24,6 +45,8 @@ export function formatTooltip(
   }
   // format y value
   return formatAccessor(
+    spec.id,
+    seriesKey,
     datum,
     yAccessors,
     color,
@@ -53,6 +76,8 @@ export function formatXTooltipValue(
     name = spec.name || `${spec.id}`;
   }
   const xValues = formatAccessor(
+    spec.id,
+    searchIndexValue.seriesKey,
     searchIndexValue.datum,
     [spec.xAccessor],
     color,
@@ -63,7 +88,10 @@ export function formatXTooltipValue(
   );
   return xValues[0];
 }
-function formatAccessor(
+
+export function formatAccessor(
+  specId: SpecId,
+  seriesKeys: any[],
   datum: Datum,
   accessors: Accessor[] = [],
   color: string,
@@ -72,9 +100,12 @@ function formatAccessor(
   isXValue: boolean,
   name?: string,
 ): TooltipValue[] {
+  const seriesKey = getColorValuesAsString(seriesKeys, specId);
+
   return accessors.map(
     (accessor): TooltipValue => {
       return {
+        seriesKey,
         name: name || `${accessor}`,
         value: formatter(datum[accessor]),
         color,

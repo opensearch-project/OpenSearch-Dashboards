@@ -22,6 +22,7 @@ interface LegendElementProps {
   color: string | undefined;
   label: string | undefined;
   isSeriesVisible?: boolean;
+  displayValue: string;
 }
 
 interface LegendElementState {
@@ -50,18 +51,37 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
     });
   }
 
+  renderDisplayValue(displayValue: string, show: boolean) {
+    if (!show) {
+      return;
+    }
+
+    return (
+      <EuiText
+        size="xs"
+        className="eui-textTruncate elasticChartsLegendListItem__displayValue"
+        title={displayValue}
+      >
+        {displayValue}
+      </EuiText>
+    );
+  }
+
   render() {
     const { legendItemKey } = this.props;
-    const { color, label, isSeriesVisible } = this.props;
+    const { color, label, isSeriesVisible, displayValue } = this.props;
 
     const onTitleClick = this.onLegendTitleClick(legendItemKey);
 
+    const showLegendDisplayValue = this.props.chartStore!.showLegendDisplayValue.get();
     const isSelected = legendItemKey === this.props.chartStore!.selectedLegendItemKey.get();
     const titleClassNames = classNames(
+      'eui-textTruncate',
+      'elasticChartsLegendListItem__title',
       {
         ['elasticChartsLegendListItem__title--selected']: isSelected,
+        ['elasticChartsLegendListItem__title--hasDisplayValue']: this.props.chartStore!.showLegendDisplayValue.get(),
       },
-      'elasticChartsLegendListItem__title',
     );
 
     const colorDotProps = {
@@ -70,6 +90,13 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
     };
 
     const colorDot = <EuiIcon type="dot" {...colorDotProps} />;
+
+    const displayValueClassNames = classNames(
+      'elasticChartsLegendListItem__displayValue',
+      {
+        ['elasticChartsLegendListItem__displayValue--hidden']: !isSeriesVisible,
+      },
+    );
 
     return (
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -90,11 +117,11 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
         <EuiFlexItem grow={false}>
           {this.renderVisibilityButton(legendItemKey, isSeriesVisible)}
         </EuiFlexItem>
-        <EuiFlexItem grow={false} className={titleClassNames} onClick={onTitleClick}>
+        <EuiFlexItem grow={false} onClick={onTitleClick}>
           <EuiPopover
             id="contentPanel"
             button={
-              <EuiText size="xs" className="eui-textTruncate elasticChartsLegendListItem__title">
+              <EuiText size="xs" className={titleClassNames}>
                 {label}
               </EuiText>
             }
@@ -110,6 +137,9 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
               </EuiFlexGroup>
             </EuiContextMenuPanel>
           </EuiPopover>
+        </EuiFlexItem>
+        <EuiFlexItem grow={true} className={displayValueClassNames}>
+          {this.renderDisplayValue(displayValue, showLegendDisplayValue)}
         </EuiFlexItem>
       </EuiFlexGroup>
     );

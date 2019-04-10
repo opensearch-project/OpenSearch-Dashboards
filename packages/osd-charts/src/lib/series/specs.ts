@@ -43,6 +43,8 @@ export interface SeriesSpec {
    * @default false
    */
   hideInLegend?: boolean;
+  /** Index per series to sort by */
+  sortIndex?: number;
 }
 
 export type CustomSeriesColorsMap = Map<DataSeriesColorsValues, string>;
