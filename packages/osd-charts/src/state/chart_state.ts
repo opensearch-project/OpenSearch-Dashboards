@@ -873,6 +873,9 @@ export class ChartStore {
     this.annotationDimensions.replace(updatedAnnotationDimensions);
 
     this.canDataBeAnimated = isChartAnimatable(seriesGeometries.geometriesCounts, this.animateData);
+    // temporary disabled until
+    // https://github.com/elastic/elastic-charts/issues/89 and https://github.com/elastic/elastic-charts/issues/41
+    this.canDataBeAnimated = false;
     this.initialized.set(true);
   }
 }
