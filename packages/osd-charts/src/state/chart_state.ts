@@ -39,7 +39,7 @@ import {
   Rendering,
   Rotation,
 } from '../lib/series/specs';
-import { formatTooltip, formatXTooltipValue, getSeriesTooltipValues } from '../lib/series/tooltip';
+import { formatTooltip, getSeriesTooltipValues } from '../lib/series/tooltip';
 import { LIGHT_THEME } from '../lib/themes/light_theme';
 import { mergeWithDefaultAnnotationLine, Theme } from '../lib/themes/theme';
 import { computeChartDimensions, Dimensions } from '../lib/utils/dimensions';
@@ -328,7 +328,9 @@ export class ChartStore {
     const newHighlightedGeometries: IndexedGeometry[] = [];
     const tooltipValues = elements.reduce(
       (acc, indexedGeometry) => {
-        const { specId, color } = indexedGeometry;
+        const {
+          geometryId: { specId },
+        } = indexedGeometry;
         const spec = this.seriesSpecs.get(specId);
 
         // safe guard check
@@ -358,15 +360,15 @@ export class ChartStore {
         }
 
         // format the tooltip values
-        const formattedTooltip = formatTooltip(indexedGeometry, spec, color, isHighlighted, yAxis);
+        const formattedTooltip = formatTooltip(indexedGeometry, spec, false, isHighlighted, yAxis);
 
         // format only one time the x value
         if (!xValueInfo) {
-          xValueInfo = formatXTooltipValue(indexedGeometry, spec, color, xAxis);
-          return [xValueInfo, ...acc, ...formattedTooltip];
+          xValueInfo = formatTooltip(indexedGeometry, spec, true, false, xAxis);
+          return [xValueInfo, ...acc, formattedTooltip];
         }
 
-        return [...acc, ...formattedTooltip];
+        return [...acc, formattedTooltip];
       },
       [] as TooltipValue[],
     );
@@ -377,7 +379,7 @@ export class ChartStore {
       !areIndexedGeometryArraysEquals(newHighlightedGeometries, this.highlightedGeometries.toJS())
     ) {
       if (newHighlightedGeometries.length > 0) {
-        this.onElementOverListener(newHighlightedGeometries);
+        this.onElementOverListener(newHighlightedGeometries.map(({ value }) => value));
       } else {
         if (this.onElementOutListener) {
           this.onElementOutListener();
@@ -601,7 +603,7 @@ export class ChartStore {
 
   handleChartClick() {
     if (this.highlightedGeometries.length > 0 && this.onElementClickListener) {
-      this.onElementClickListener(this.highlightedGeometries.toJS());
+      this.onElementClickListener(this.highlightedGeometries.toJS().map(({ value }) => value));
     }
   }
 

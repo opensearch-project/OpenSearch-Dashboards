@@ -33,7 +33,6 @@ export function mergeYDomain(
   // group specs by group ids
   const specsByGroupIds = splitSpecsByGroupId(specs);
 
-  // const groupDomains = new Map<GroupId, {}>();
   const specsByGroupIdsEntries = [...specsByGroupIds.entries()];
 
   const yDomains = specsByGroupIdsEntries.map(
@@ -74,13 +73,17 @@ export function mergeYDomain(
         domain = [customDomain.min, customDomain.max];
       } else if (customDomain && isLowerBound(customDomain)) {
         if (customDomain.min > computedDomainMax) {
-          throw new Error(`custom yDomain for ${groupId} is invalid, custom min is greater than computed max`);
+          throw new Error(
+            `custom yDomain for ${groupId} is invalid, custom min is greater than computed max`,
+          );
         }
 
         domain = [customDomain.min, computedDomainMax];
       } else if (customDomain && isUpperBound(customDomain)) {
         if (computedDomainMin > customDomain.max) {
-          throw new Error(`custom yDomain for ${groupId} is invalid, computed min is greater than custom max`);
+          throw new Error(
+            `custom yDomain for ${groupId} is invalid, computed min is greater than custom max`,
+          );
         }
 
         domain = [computedDomainMin, customDomain.max];
@@ -89,7 +92,7 @@ export function mergeYDomain(
       return {
         type: 'yDomain',
         isBandScale: false,
-        scaleType: groupYScaleType as ScaleContinuousType,
+        scaleType: groupYScaleType,
         groupId,
         domain,
       };
@@ -117,7 +120,7 @@ function computeYStackedDomain(dataseries: RawDataSeries[], scaleToExtent: boole
   dataseries.forEach((ds, index) => {
     ds.data.forEach((datum) => {
       const stack = stackMap.get(datum.x) || [];
-      stack[index] = datum.y;
+      stack[index] = datum.y1;
       stackMap.set(datum.x, stack);
     });
   });
@@ -137,7 +140,10 @@ function computeYNonStackedDomain(dataseries: RawDataSeries[], scaleToExtent: bo
   const yValues = new Set<any>();
   dataseries.forEach((ds) => {
     ds.data.forEach((datum) => {
-      yValues.add(datum.y);
+      yValues.add(datum.y1);
+      if (datum.y0 != null) {
+        yValues.add(datum.y0);
+      }
     });
   });
   if (yValues.size === 0) {

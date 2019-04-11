@@ -11,6 +11,7 @@ import {
   getAxisId,
   getSpecId,
   LIGHT_THEME,
+  LineSeries,
   niceTimeFormatByDay,
   Position,
   ScaleType,
@@ -798,6 +799,55 @@ storiesOf('Bar Chart', module)
       </Chart>
     );
   })
+  .add('single data stacked chart scale to extent', () => {
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          splitSeriesAccessors={['g']}
+          stackAccessors={['x']}
+          data={[{ x: 0, y: 10, g: 'a' }, { x: 0, y: 20, g: 'b' }, { x: 0, y: 30, g: 'c' }]}
+          yScaleToDataExtent={true}
+        />
+      </Chart>
+    );
+  })
+  .add('single data clustered chart scale to extent', () => {
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          splitSeriesAccessors={['g']}
+          data={[{ x: 0, y: 10, g: 'a' }, { x: 0, y: 20, g: 'b' }, { x: 0, y: 30, g: 'c' }]}
+          yScaleToDataExtent={true}
+        />
+      </Chart>
+    );
+  })
   .add('negative and positive x values', () => {
     return (
       <Chart renderer="canvas" className={'story-chart'}>
@@ -846,11 +896,15 @@ storiesOf('Bar Chart', module)
     const allPositive = mixed.map((datum) => ({ x: datum.x, y: Math.abs(datum.y) }));
     const allNegative = mixed.map((datum) => ({ x: datum.x, y: Math.abs(datum.y) * -1 }));
 
-    const dataChoice = select('data', {
-      mixed: 'mixed',
-      allPositive: 'all positive',
-      allNegative: 'all negative',
-    }, 'mixed');
+    const dataChoice = select(
+      'data',
+      {
+        mixed: 'mixed',
+        allPositive: 'all positive',
+        allNegative: 'all negative',
+      },
+      'mixed',
+    );
 
     let data = mixed;
     switch (dataChoice) {
@@ -882,6 +936,59 @@ storiesOf('Bar Chart', module)
           stackAccessors={['x']}
           data={data}
           yScaleToDataExtent={yScaleToDataExtent}
+        />
+      </Chart>
+    );
+  })
+  .add('band bar chart', () => {
+    const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => {
+      return {
+        x: d[0],
+        max: d[1] + 4 + 4 * Math.random(),
+        min: d[1] - 4 - 4 * Math.random(),
+      };
+    });
+    const lineData = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => {
+      return [d[0], d[1]];
+    });
+    const scaleToDataExtent = boolean('scale to extent', true);
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Axis
+          id={getAxisId('bottom')}
+          title={'timestamp per 1 minute'}
+          position={Position.Bottom}
+          showOverlappingTicks={true}
+          tickFormat={dateFormatter}
+        />
+        <Axis
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={'x'}
+          yAccessors={['max']}
+          y0Accessors={['min']}
+          data={data}
+          // this is a temporary hack to display names for min and max values
+          splitSeriesAccessors={['fake']}
+          yScaleToDataExtent={scaleToDataExtent}
+        />
+
+        <LineSeries
+          id={getSpecId('average')}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={lineData}
+          yScaleToDataExtent={scaleToDataExtent}
         />
       </Chart>
     );
@@ -1014,6 +1121,73 @@ storiesOf('Bar Chart', module)
           yScaleType={ScaleType.Linear}
           xAccessor={0}
           yAccessors={[1, 2]}
+          data={data}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('[test] - clustered bar chart with null bars', () => {
+    const data = [
+      [1, 1, 3, 'a'],
+      [2, null, 4, 'a'],
+      [3, 3, 5, 'a'],
+      [4, 4, 6, 'a'],
+      [1, 1, 3, 'b'],
+      [2, 2, 4, 'b'],
+      [3, 3, 5, 'b'],
+      [4, 4, 6, 'b'],
+    ];
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} />
+        <Axis
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <BarSeries
+          id={getSpecId('lines')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          splitSeriesAccessors={[3]}
+          data={data}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('[test] - stacked bar chart with null bars', () => {
+    const data = [
+      [1, 1, 3, 'a'],
+      [2, null, 4, 'a'],
+      [3, 3, 5, 'a'],
+      [4, 4, 6, 'a'],
+      [1, 1, 3, 'b'],
+      [2, 2, 4, 'b'],
+      [3, null, 5, 'b'],
+      [4, 4, 6, 'b'],
+    ];
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} />
+        <Axis
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <BarSeries
+          id={getSpecId('lines')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          splitSeriesAccessors={[3]}
+          stackAccessors={[0]}
           data={data}
           yScaleToDataExtent={false}
         />

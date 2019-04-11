@@ -54,6 +54,8 @@ export interface SeriesAccessors {
   xAccessor: Accessor;
   /** An array of field names one per y metric value */
   yAccessors: Accessor[];
+  /** An optional accessor of the y0 value: base point for area/bar charts  */
+  y0Accessors?: Accessor[];
   /** An array of fields thats indicates the datum series membership */
   splitSeriesAccessors?: Accessor[];
   /** An array of fields thats indicates the stack membership */

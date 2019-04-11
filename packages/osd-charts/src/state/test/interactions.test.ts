@@ -1,4 +1,4 @@
-import { GeometryValue, IndexedGeometry } from '../../lib/series/rendering';
+import { BarGeometry, GeometryValue } from '../../lib/series/rendering';
 import { computeXScale, computeYScales } from '../../lib/series/scales';
 import { DataSeriesColorsValues } from '../../lib/series/series';
 import { BarSeriesSpec, BasicSeriesSpec } from '../../lib/series/specs';
@@ -74,29 +74,37 @@ function initStore(spec: BasicSeriesSpec) {
   store.seriesSpecs.set(spec.id, spec);
   return store;
 }
-const indexedGeom1Red: IndexedGeometry = {
+const indexedGeom1Red: BarGeometry = {
   color: 'red',
-  geom: {
+  x: 0,
+  y: 0,
+  width: 50,
+  height: 100,
+  value: {
     x: 0,
-    y: 0,
-    width: 50,
-    height: 100,
+    y: 10,
+    accessor: 'y1',
   },
-  datum: [0, 10],
-  specId: SPEC_ID,
-  seriesKey: [],
+  geometryId: {
+    specId: SPEC_ID,
+    seriesKey: [],
+  },
 };
-const indexedGeom2Blue: IndexedGeometry = {
+const indexedGeom2Blue: BarGeometry = {
   color: 'blue',
-  geom: {
-    x: 50,
-    y: 50,
-    width: 50,
-    height: 50,
+  x: 50,
+  y: 50,
+  width: 50,
+  height: 50,
+  value: {
+    x: 1,
+    y: 5,
+    accessor: 'y1',
   },
-  datum: [1, 5],
-  specId: SPEC_ID,
-  seriesKey: [],
+  geometryId: {
+    specId: SPEC_ID,
+    seriesKey: [],
+  },
 };
 
 describe('Chart state pointer interactions', () => {
@@ -215,7 +223,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(store.highlightedGeometries.length).toBe(1);
     expect(onOverListener).toBeCalledTimes(1);
     expect(onOutListener).toBeCalledTimes(0);
-    expect(onOverListener.mock.calls[0][0]).toEqual([indexedGeom1Red]);
+    expect(onOverListener.mock.calls[0][0]).toEqual([indexedGeom1Red.value]);
 
     store.setCursorPosition(chartLeft - 1, chartTop - 1);
     expect(store.cursorPosition).toEqual({ x: -1, y: -1 });
@@ -236,7 +244,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(store.tooltipData.length).toBe(2); // x value + 1 y value
     expect(onOverListener).toBeCalledTimes(1);
     expect(onOutListener).toBeCalledTimes(0);
-    expect(onOverListener.mock.calls[0][0]).toEqual([indexedGeom1Red]);
+    expect(onOverListener.mock.calls[0][0]).toEqual([indexedGeom1Red.value]);
 
     store.setCursorPosition(chartLeft - 1, chartTop + 99);
     expect(store.cursorPosition).toEqual({ x: -1, y: 99 });
@@ -257,7 +265,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(store.tooltipData.length).toBe(2);
     expect(onOverListener).toBeCalledTimes(1);
     expect(onOutListener).toBeCalledTimes(0);
-    expect(onOverListener.mock.calls[0][0]).toEqual([indexedGeom1Red]);
+    expect(onOverListener.mock.calls[0][0]).toEqual([indexedGeom1Red.value]);
 
     store.setCursorPosition(chartLeft + 50, chartTop + 0);
     expect(store.cursorPosition).toEqual({ x: 50, y: 0 });
@@ -280,7 +288,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(store.tooltipData.length).toBe(2);
     expect(onOverListener).toBeCalledTimes(1);
     expect(onOutListener).toBeCalledTimes(0);
-    expect(onOverListener.mock.calls[0][0]).toEqual([indexedGeom1Red]);
+    expect(onOverListener.mock.calls[0][0]).toEqual([indexedGeom1Red.value]);
 
     store.setCursorPosition(chartLeft + 50, chartTop + 99);
     expect(store.cursorPosition).toEqual({ x: 50, y: 99 });
@@ -291,7 +299,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     // we are over the second bar here
     expect(store.highlightedGeometries.length).toBe(1);
     expect(onOverListener).toBeCalledTimes(2);
-    expect(onOverListener.mock.calls[1][0]).toEqual([indexedGeom2Blue]);
+    expect(onOverListener.mock.calls[1][0]).toEqual([indexedGeom2Blue.value]);
 
     expect(onOutListener).toBeCalledTimes(0);
   });
@@ -318,7 +326,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(store.highlightedGeometries.length).toBe(1);
     expect(store.tooltipData.length).toBe(2);
     expect(onOverListener).toBeCalledTimes(1);
-    expect(onOverListener.mock.calls[0][0]).toEqual([indexedGeom2Blue]);
+    expect(onOverListener.mock.calls[0][0]).toEqual([indexedGeom2Blue.value]);
     expect(onOutListener).toBeCalledTimes(0);
   });
 }

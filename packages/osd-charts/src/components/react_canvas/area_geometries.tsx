@@ -42,7 +42,7 @@ export class AreaGeometries extends React.PureComponent<
     return (
       <Group ref={this.barSeriesRef} key={'bar_series'}>
         {area.visible && this.renderAreaGeoms()}
-        {line.visible && this.renderAreaLine()}
+        {line.visible && this.renderAreaLines()}
         {point.visible && this.renderAreaPoints()}
       </Group>
     );
@@ -132,12 +132,12 @@ export class AreaGeometries extends React.PureComponent<
       }
     });
   }
-  private renderAreaLine = (): JSX.Element[] => {
+  private renderAreaLines = (): JSX.Element[] => {
     const { areas, sharedStyle } = this.props;
     const { strokeWidth } = this.props.style.line;
-
-    return areas.map((glyph, i) => {
-      const { line, color, transform, geometryId } = glyph;
+    const linesToRender: JSX.Element[] = [];
+    areas.forEach((glyph, areaIndex) => {
+      const { lines, color, geometryId } = glyph;
 
       const geometryStyle = getGeometryStyle(
         geometryId,
@@ -145,33 +145,38 @@ export class AreaGeometries extends React.PureComponent<
         sharedStyle,
       );
 
-      if (this.props.animated) {
-        return (
-          <Group key={`area-line-group-${i}`} x={transform.x}>
-            <Spring native from={{ line }} to={{ line }}>
-              {(props: { line: string }) => {
-                const lineProps = buildAreaLineProps({
-                  index: i,
-                  linePath: props.line,
-                  color,
-                  strokeWidth,
-                  geometryStyle,
-                });
-                return <animated.Path {...lineProps} />;
-              }}
-            </Spring>
-          </Group>
-        );
-      } else {
+      lines.forEach((linePath, lineIndex) => {
         const lineProps = buildAreaLineProps({
-          index: i,
-          linePath: line,
+          areaIndex,
+          lineIndex,
+          linePath,
           color,
           strokeWidth,
           geometryStyle,
         });
-        return <Path {...lineProps} />;
-      }
+        linesToRender.push(<Path {...lineProps} />);
+      });
     });
+    return linesToRender;
+    // if (this.props.animated) {
+    //   return (
+    //     <Group key={`area-line-group-${i}`} x={transform.x}>
+    //       <Spring native from={{ line }} to={{ line }}>
+    //         {(props: { line: string }) => {
+    //           const lineProps = buildAreaLineProps({
+    //             index: i,
+    //             linePath: props.line,
+    //             color,
+    //             strokeWidth,
+    //             geometryStyle,
+    //           });
+    //           return <animated.Path {...lineProps} />;
+    //         }}
+    //       </Spring>
+    //     </Group>
+    //   );
+    // } else {
+
+    // }
   }
 }

@@ -1,3 +1,4 @@
+import { boolean } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import { DateTime } from 'luxon';
 import React from 'react';
@@ -8,6 +9,7 @@ import {
   CurveType,
   getAxisId,
   getSpecId,
+  LineSeries,
   Position,
   ScaleType,
   Settings,
@@ -80,6 +82,38 @@ storiesOf('Area Chart', module)
           id={getSpecId('areas')}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={data}
+          curve={CurveType.CURVE_MONOTONE_X}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('with log y axis', () => {
+    const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => {
+      return d[1] < 7 ? [d[0], null] : [d[0], d[1] - 10];
+    });
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Axis
+          id={getAxisId('bottom')}
+          title={'index'}
+          position={Position.Bottom}
+          tickFormat={dateFormatter}
+        />
+        <Axis
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <AreaSeries
+          id={getSpecId('areas')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Log}
           xAccessor={0}
           yAccessors={[1]}
           data={data}
@@ -362,6 +396,107 @@ storiesOf('Area Chart', module)
           yAccessors={[1]}
           data={data}
           yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('band area chart', () => {
+    const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => {
+      return {
+        x: d[0],
+        max: d[1] + 4 + 4 * Math.random(),
+        min: d[1] - 4 - 4 * Math.random(),
+      };
+    });
+    const lineData = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => {
+      return [d[0], d[1]];
+    });
+    const scaleToDataExtent = boolean('scale to extent', true);
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Axis
+          id={getAxisId('bottom')}
+          title={'timestamp per 1 minute'}
+          position={Position.Bottom}
+          showOverlappingTicks={true}
+          tickFormat={dateFormatter}
+        />
+        <Axis
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <AreaSeries
+          id={getSpecId('area')}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={'x'}
+          yAccessors={['max']}
+          y0Accessors={['min']}
+          data={data}
+          yScaleToDataExtent={scaleToDataExtent}
+          curve={CurveType.CURVE_MONOTONE_X}
+        />
+
+        <LineSeries
+          id={getSpecId('average')}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={lineData}
+          yScaleToDataExtent={scaleToDataExtent}
+          curve={CurveType.CURVE_MONOTONE_X}
+        />
+      </Chart>
+    );
+  })
+  .add('stacked band area chart', () => {
+    const data = KIBANA_METRICS.metrics.kibana_os_load[0].data;
+    const data2 = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => {
+      return [d[0], 20, 10];
+    });
+    const scaleToDataExtent = boolean('scale to extent', false);
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Axis
+          id={getAxisId('bottom')}
+          title={'timestamp per 1 minute'}
+          position={Position.Bottom}
+          showOverlappingTicks={true}
+          tickFormat={dateFormatter}
+        />
+        <Axis
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <AreaSeries
+          id={getSpecId('area')}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          y0Accessors={[2]}
+          data={data}
+          stackAccessors={[0]}
+          yScaleToDataExtent={scaleToDataExtent}
+        />
+
+        <AreaSeries
+          id={getSpecId('fixed band')}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          y0Accessors={[2]}
+          data={data2}
+          stackAccessors={[0]}
+          yScaleToDataExtent={scaleToDataExtent}
         />
       </Chart>
     );

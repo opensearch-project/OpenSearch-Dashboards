@@ -1,5 +1,6 @@
 import { inject, observer } from 'mobx-react';
 import React from 'react';
+import { isPointGeometry } from '../lib/series/rendering';
 import { ChartStore } from '../state/chart_state';
 
 interface HighlighterProps {
@@ -21,18 +22,15 @@ class HighlighterComponent extends React.Component<HighlighterProps> {
     return (
       <svg className="elasticChartsHighlighter">
         <g transform={`translate(${left}, ${top}) rotate(${chartRotation})`}>
-          {highlightedGeometries.map((highlightedGeometry, i) => {
-            const {
-              color,
-              geom: { x, y, width, height, isPoint },
-            } = highlightedGeometry;
-            if (isPoint) {
+          {highlightedGeometries.map((geom, i) => {
+            const { color, x, y } = geom;
+            if (isPointGeometry(geom)) {
               return (
                 <circle
                   key={i}
-                  cx={x}
+                  cx={x + geom.transform.x}
                   cy={y}
-                  r={width}
+                  r={geom.radius}
                   stroke={color}
                   strokeWidth={4}
                   fill="transparent"
@@ -40,7 +38,15 @@ class HighlighterComponent extends React.Component<HighlighterProps> {
               );
             }
             return (
-              <rect key={i} x={x} y={y} width={width} height={height} fill="white" opacity={0.4} />
+              <rect
+                key={i}
+                x={x}
+                y={y}
+                width={geom.width}
+                height={geom.height}
+                fill="white"
+                opacity={0.4}
+              />
             );
           })}
         </g>

@@ -58,7 +58,6 @@ describe('Series scales', () => {
         groupId: getGroupId('g1'),
         dataSeries: [],
         counts: {
-          basicSeries: 14,
           areaSeries: 10,
           barSeries: 2,
           lineSeries: 2,
@@ -68,7 +67,6 @@ describe('Series scales', () => {
         groupId: getGroupId('g2'),
         dataSeries: [],
         counts: {
-          basicSeries: 14,
           areaSeries: 10,
           barSeries: 20,
           lineSeries: 2,
@@ -78,7 +76,6 @@ describe('Series scales', () => {
         groupId: getGroupId('g3'),
         dataSeries: [],
         counts: {
-          basicSeries: 14,
           areaSeries: 10,
           barSeries: 0,
           lineSeries: 2,
@@ -90,7 +87,6 @@ describe('Series scales', () => {
         groupId: getGroupId('g1'),
         dataSeries: [],
         counts: {
-          basicSeries: 14,
           areaSeries: 10,
           barSeries: 5,
           lineSeries: 2,
@@ -100,7 +96,6 @@ describe('Series scales', () => {
         groupId: getGroupId('g2'),
         dataSeries: [],
         counts: {
-          basicSeries: 14,
           areaSeries: 10,
           barSeries: 7,
           lineSeries: 2,

@@ -3,18 +3,32 @@ import { ColorConfig } from '../themes/theme';
 import { Accessor } from '../utils/accessor';
 import { GroupId, SpecId } from '../utils/ids';
 import { splitSpecsByGroupId, YBasicSeriesSpec } from './domains/y_domain';
+import { formatNonStackedDataSeriesValues } from './nonstacked_series_utils';
 import { BasicSeriesSpec, Datum, SeriesAccessors } from './specs';
+import { formatStackedDataSeriesValues } from './stacked_series_utils';
 
 export interface RawDataSeriesDatum {
+  /** the x value */
   x: number | string;
-  y: number;
+  /** the main y metric */
+  y1: number | null;
+  /** the optional y0 metric, used for bars or area with a lower bound */
+  y0?: number | null;
+  /** the datum */
   datum?: any;
 }
 
 export interface DataSeriesDatum {
   x: number | string;
-  y0: number;
-  y1: number;
+  /** the max y value */
+  y1: number | null;
+  /** the minimum y value */
+  y0: number | null;
+  /** initial y1 value, non stacked */
+  initialY1: number | null;
+  /** initial y0 value, non stacked */
+  initialY0: number | null;
+  /** the datum */
   datum?: any;
 }
 
@@ -41,7 +55,6 @@ export interface DataSeriesCounts {
   barSeries: number;
   lineSeries: number;
   areaSeries: number;
-  basicSeries: number;
 }
 
 export interface DataSeriesColorsValues {
@@ -65,7 +78,7 @@ export function splitSeries(
   xValues: Set<any>;
   splitSeriesLastValues: Map<string, any>;
 } {
-  const { xAccessor, yAccessors, splitSeriesAccessors = [] } = accessors;
+  const { xAccessor, yAccessors, y0Accessors, splitSeriesAccessors = [] } = accessors;
   const colorAccessors = accessors.colorAccessors ? accessors.colorAccessors : splitSeriesAccessors;
   const isMultipleY = yAccessors && yAccessors.length > 1;
   const series = new Map<string, RawDataSeries>();
@@ -76,12 +89,17 @@ export function splitSeries(
   data.forEach((datum) => {
     const seriesKey = getAccessorsValues(datum, splitSeriesAccessors);
     if (isMultipleY) {
-      yAccessors.forEach((accessor) => {
+      yAccessors.forEach((accessor, index) => {
         const colorValues = getColorValues(datum, colorAccessors, accessor);
         const colorValuesKey = getColorValuesAsString(colorValues, specId);
         colorsValues.set(colorValuesKey, colorValues);
-        const cleanedDatum = cleanDatum(datum, xAccessor, accessor);
-        splitSeriesLastValues.set(colorValuesKey, cleanedDatum.y);
+        const cleanedDatum = cleanDatum(
+          datum,
+          xAccessor,
+          accessor,
+          y0Accessors && y0Accessors[index],
+        );
+        splitSeriesLastValues.set(colorValuesKey, cleanedDatum.y1);
         xValues.add(cleanedDatum.x);
         updateSeriesMap(series, [...seriesKey, accessor], cleanedDatum, specId, colorValuesKey);
       }, {});
@@ -89,8 +107,13 @@ export function splitSeries(
       const colorValues = getColorValues(datum, colorAccessors);
       const colorValuesKey = getColorValuesAsString(colorValues, specId);
       colorsValues.set(colorValuesKey, colorValues);
-      const cleanedDatum = cleanDatum(datum, xAccessor, yAccessors[0]);
-      splitSeriesLastValues.set(colorValuesKey, cleanedDatum.y);
+      const cleanedDatum = cleanDatum(
+        datum,
+        xAccessor,
+        yAccessors[0],
+        y0Accessors && y0Accessors[0],
+      );
+      splitSeriesLastValues.set(colorValuesKey, cleanedDatum.y1);
       xValues.add(cleanedDatum.x);
       updateSeriesMap(series, [...seriesKey], cleanedDatum, specId, colorValuesKey);
     }
@@ -134,9 +157,11 @@ function updateSeriesMap(
  * Get the array of values that forms a series key
  */
 function getAccessorsValues(datum: Datum, accessors: Accessor[] = []): any[] {
-  return accessors.map((accessor) => {
-    return datum[accessor];
-  });
+  return accessors
+    .map((accessor) => {
+      return datum[accessor];
+    })
+    .filter((value) => value !== undefined);
 }
 
 /**
@@ -163,13 +188,21 @@ export function getColorValuesAsString(colorValues: any[], specId: SpecId): stri
 /**
  * Reformat the datum having only the required x and y property.
  */
-function cleanDatum(datum: Datum, xAccessor: Accessor, yAccessor: Accessor): RawDataSeriesDatum {
+function cleanDatum(
+  datum: Datum,
+  xAccessor: Accessor,
+  yAccessor: Accessor,
+  y0Accessor?: Accessor,
+): RawDataSeriesDatum {
   const x = datum[xAccessor];
-  const y = datum[yAccessor];
-  return { x, y, datum };
+  const y1 = datum[yAccessor];
+  const cleanedDatum: RawDataSeriesDatum = { x, y1, datum, y0: null };
+  if (y0Accessor) {
+    cleanedDatum.y0 = datum[y0Accessor];
+  }
+  return cleanedDatum;
 }
 
-// TODO MISSING SCALE TO EXTENT
 export function getFormattedDataseries(
   specs: YBasicSeriesSpec[],
   dataSeries: Map<SpecId, RawDataSeries[]>,
@@ -226,7 +259,6 @@ export function getRawDataSeries(
     barSeries: 0,
     lineSeries: 0,
     areaSeries: 0,
-    basicSeries: 0,
   };
   const seriesSpecsCount = seriesSpecs.length;
   let i;
@@ -244,9 +276,6 @@ export function getRawDataSeries(
       case 'area':
         counts.areaSeries += ds ? ds.length : 0;
         break;
-      case 'basic':
-        counts.basicSeries += ds ? ds.length : 0;
-        break;
     }
 
     if (ds) {
@@ -257,96 +286,6 @@ export function getRawDataSeries(
     rawDataSeries,
     counts,
   };
-}
-
-export function formatNonStackedDataSeriesValues(
-  dataseries: RawDataSeries[],
-  scaleToExtent: boolean,
-): DataSeries[] {
-  const len = dataseries.length;
-  let i;
-  const formattedValues: DataSeries[] = [];
-  for (i = 0; i < len; i++) {
-    const formattedValue = formatNonStackedDataValues(dataseries[i], scaleToExtent);
-    formattedValues.push(formattedValue);
-  }
-  return formattedValues;
-}
-
-export function formatNonStackedDataValues(
-  dataSeries: RawDataSeries,
-  scaleToExtent: boolean,
-): DataSeries {
-  const len = dataSeries.data.length;
-  let i;
-  const formattedValues: DataSeries = {
-    key: dataSeries.key,
-    specId: dataSeries.specId,
-    seriesColorKey: dataSeries.seriesColorKey,
-    data: [],
-  };
-  for (i = 0; i < len; i++) {
-    const value = dataSeries.data[i];
-    const formattedValue = {
-      x: value.x,
-      y0: scaleToExtent ? value.y : 0,
-      y1: value.y,
-      datum: value.datum,
-    };
-    formattedValues.data.push(formattedValue);
-  }
-  return formattedValues;
-}
-
-export function formatStackedDataSeriesValues(
-  dataseries: RawDataSeries[],
-  scaleToExtent: boolean,
-): DataSeries[] {
-  const stackMap = new Map<any, number[]>();
-  dataseries.forEach((ds, index) => {
-    ds.data.forEach((datum) => {
-      const stack = stackMap.get(datum.x) || new Array(dataseries.length).fill(0);
-      stack[index] = datum.y;
-      stackMap.set(datum.x, stack);
-    });
-  });
-  const stackedValues = new Map<any, number[]>();
-  stackMap.forEach((value, key) => {
-    const stackArray = value.reduce(
-      (stackedValue, currentValue, index) => {
-        if (stackedValue.length === 0) {
-          if (scaleToExtent) {
-            return [currentValue, currentValue];
-          }
-          return [0, currentValue];
-        }
-        return [...stackedValue, stackedValue[index] + currentValue];
-      },
-      [] as number[],
-    );
-    stackedValues.set(key, stackArray);
-  });
-
-  const stackedDataSeries: DataSeries[] = dataseries.map((ds, index) => {
-    const newData = ds.data
-      .filter((datum) => stackedValues.get(datum.x) !== undefined)
-      .map((datum) => {
-        const stack = stackedValues.get(datum.x)!;
-        if (index === 0) {
-          return { x: datum.x, y0: scaleToExtent ? datum.y : 0, y1: datum.y, datum: datum.datum };
-        } else {
-          return { x: datum.x, y0: stack[index], y1: stack[index] + datum.y, datum: datum.datum };
-        }
-      });
-    return {
-      specId: ds.specId,
-      key: ds.key,
-      seriesColorKey: ds.seriesColorKey,
-      data: newData,
-    };
-  });
-
-  return stackedDataSeries;
 }
 
 export function getSplittedSeries(
@@ -408,8 +347,10 @@ export function getSortedDataSeriesColorsValuesMap(
     const [, colorValuesA] = seriesA;
     const [, colorValuesB] = seriesB;
 
-    const specAIndex = colorValuesA.specSortIndex != null ? colorValuesA.specSortIndex : colorValuesMap.size;
-    const specBIndex = colorValuesB.specSortIndex != null ? colorValuesB.specSortIndex : colorValuesMap.size;
+    const specAIndex =
+      colorValuesA.specSortIndex != null ? colorValuesA.specSortIndex : colorValuesMap.size;
+    const specBIndex =
+      colorValuesB.specSortIndex != null ? colorValuesB.specSortIndex : colorValuesMap.size;
 
     return specAIndex - specBIndex;
   });

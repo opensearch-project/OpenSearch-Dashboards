@@ -1,4 +1,10 @@
-import { IndexedGeometry } from '../series/rendering';
+import {
+  BarGeometry,
+  IndexedGeometry,
+  isBarGeometry,
+  isPointGeometry,
+  PointGeometry,
+} from '../series/rendering';
 import { Datum, Rotation } from '../series/specs';
 import { Dimensions } from './dimensions';
 
@@ -84,20 +90,40 @@ export function areIndexedGeometryArraysEquals(arr1: IndexedGeometry[], arr2: In
   if (arr1.length !== arr2.length) {
     return false;
   }
-  for (let i = arr1.length; i--;) {
+  for (let i = arr1.length; i--; ) {
     return areIndexedGeomsEquals(arr1[i], arr2[i]);
   }
   return true;
 }
 
 export function areIndexedGeomsEquals(ig1: IndexedGeometry, ig2: IndexedGeometry) {
+  if (isPointGeometry(ig1) && isPointGeometry(ig2)) {
+    return arePointsEqual(ig1, ig2);
+  }
+  if (isBarGeometry(ig1) && isBarGeometry(ig2)) {
+    return areBarEqual(ig1, ig2);
+  }
+  return false;
+}
+
+export function arePointsEqual(ig1: PointGeometry, ig2: PointGeometry) {
   return (
-    ig1.specId === ig2.specId &&
+    ig1.geometryId.specId === ig2.geometryId.specId &&
     ig1.color === ig2.color &&
-    ig1.geom.x === ig2.geom.x &&
-    ig1.geom.y === ig2.geom.y &&
-    ig1.geom.width === ig2.geom.width &&
-    ig1.geom.height === ig2.geom.height &&
-    ig1.geom.isPoint === ig2.geom.isPoint
+    ig1.x === ig2.x &&
+    ig1.transform.x === ig2.transform.x &&
+    ig1.transform.y === ig2.transform.y &&
+    ig1.y === ig2.y &&
+    ig1.radius === ig2.radius
+  );
+}
+export function areBarEqual(ig1: BarGeometry, ig2: BarGeometry) {
+  return (
+    ig1.geometryId.specId === ig2.geometryId.specId &&
+    ig1.color === ig2.color &&
+    ig1.x === ig2.x &&
+    ig1.y === ig2.y &&
+    ig1.width === ig2.width &&
+    ig1.height === ig2.height
   );
 }

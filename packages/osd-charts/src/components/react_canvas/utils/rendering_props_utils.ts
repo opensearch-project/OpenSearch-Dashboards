@@ -57,20 +57,22 @@ export function buildAreaProps({
 }
 
 export function buildAreaLineProps({
-  index,
+  areaIndex,
+  lineIndex,
   linePath,
   color,
   strokeWidth,
   geometryStyle,
 }: {
-  index: number;
+  areaIndex: number;
+  lineIndex: number;
   linePath: string;
   color: string;
   strokeWidth: number;
   geometryStyle: GeometryStyle;
 }) {
   return {
-    key: `area-line-${index}`,
+    key: `area-${areaIndex}-line-${lineIndex}`,
     data: linePath,
     stroke: color,
     strokeWidth,

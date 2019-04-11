@@ -80,7 +80,8 @@ describe('[canvas] Area Geometries props', () => {
   });
   test('can build area line path props', () => {
     const props = buildAreaLineProps({
-      index: 1,
+      areaIndex: 1,
+      lineIndex: 2,
       linePath: 'M0,0L10,10Z',
       color: 'red',
       strokeWidth: 1,
@@ -89,7 +90,7 @@ describe('[canvas] Area Geometries props', () => {
       },
     });
     expect(props).toEqual({
-      key: `area-line-1`,
+      key: `area-1-line-2`,
       data: 'M0,0L10,10Z',
       stroke: 'red',
       strokeWidth: 1,

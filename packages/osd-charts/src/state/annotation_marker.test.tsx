@@ -27,7 +27,12 @@ describe('annotation marker', () => {
   const maxRange = 100;
 
   const continuousData = [0, 10];
-  const continuousScale = createContinuousScale(ScaleType.Linear, continuousData, minRange, maxRange);
+  const continuousScale = createContinuousScale(
+    ScaleType.Linear,
+    continuousData,
+    minRange,
+    maxRange,
+  );
 
   const chartDimensions: Dimensions = {
     width: 10,
@@ -63,17 +68,19 @@ describe('annotation marker', () => {
       xScale,
       Position.Left,
     );
-    const expectedDimensions = [{
-      position: [DEFAULT_LINE_OVERFLOW, 20, 10, 20],
-      details: { detailsText: 'foo', headerText: '2' },
-      tooltipLinePosition: [0, 20, 10, 20],
-      marker: {
-        icon: <div />,
-        transform: 'translate(calc(0px - 0%),calc(20px - 50%))',
-        color: '#000',
-        dimensions: { width: 0, height: 0 }
+    const expectedDimensions = [
+      {
+        position: [DEFAULT_LINE_OVERFLOW, 20, 10, 20],
+        details: { detailsText: 'foo', headerText: '2' },
+        tooltipLinePosition: [0, 20, 10, 20],
+        marker: {
+          icon: <div />,
+          transform: 'translate(calc(0px - 0%),calc(20px - 50%))',
+          color: '#000',
+          dimensions: { width: 0, height: 0 },
+        },
       },
-    }];
+    ];
     expect(dimensions).toEqual(expectedDimensions);
   });
 
@@ -99,17 +106,19 @@ describe('annotation marker', () => {
       xScale,
       Position.Left,
     );
-    const expectedDimensions = [{
-      position: [20, -DEFAULT_LINE_OVERFLOW, 20, 20],
-      details: { detailsText: 'foo', headerText: '2' },
-      tooltipLinePosition: [20, 0, 20, 20],
-      marker: {
-        icon: <div />,
-        transform: 'translate(calc(20px - 0%),calc(20px - 50%))',
-        color: '#000',
-        dimensions: { width: 0, height: 0 },
+    const expectedDimensions = [
+      {
+        position: [20, -DEFAULT_LINE_OVERFLOW, 20, 20],
+        details: { detailsText: 'foo', headerText: '2' },
+        tooltipLinePosition: [20, 0, 20, 20],
+        marker: {
+          icon: <div />,
+          transform: 'translate(calc(20px - 0%),calc(20px - 50%))',
+          color: '#000',
+          dimensions: { width: 0, height: 0 },
+        },
       },
-    }];
+    ];
     expect(dimensions).toEqual(expectedDimensions);
   });
 

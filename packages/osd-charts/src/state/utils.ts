@@ -339,6 +339,7 @@ export function renderGeometries(
           yScale,
           color,
           ds.specId,
+          Boolean(spec.y0Accessors),
           ds.key,
         );
         points.push(...renderedPoints.pointGeometries);
@@ -369,6 +370,7 @@ export function renderGeometries(
           color,
           (spec as LineSeriesSpec).curve || CurveType.LINEAR,
           ds.specId,
+          Boolean(spec.y0Accessors),
           ds.key,
         );
         lineGeometriesIndex = mergeGeometriesIndexes(
@@ -390,6 +392,7 @@ export function renderGeometries(
           color,
           (spec as AreaSeriesSpec).curve || CurveType.LINEAR,
           ds.specId,
+          Boolean(spec.y0Accessors),
           ds.key,
         );
         areaGeometriesIndex = mergeGeometriesIndexes(

@@ -18,13 +18,13 @@ describe('Y Domain', () => {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 5 }],
+        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 4, y: 7 }],
+        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
     const specDataSeries = new Map();
@@ -59,13 +59,13 @@ describe('Y Domain', () => {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 5 }],
+        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 4, y: 7 }],
+        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
     const dataSeries2: RawDataSeries[] = [
@@ -73,7 +73,7 @@ describe('Y Domain', () => {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 10 }, { x: 2, y: 10 }, { x: 3, y: 2 }, { x: 4, y: 5 }],
+        data: [{ x: 1, y1: 10 }, { x: 2, y1: 10 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
     ];
     const specDataSeries = new Map();
@@ -124,13 +124,13 @@ describe('Y Domain', () => {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 5 }],
+        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 4, y: 7 }],
+        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
     const dataSeries2: RawDataSeries[] = [
@@ -138,7 +138,7 @@ describe('Y Domain', () => {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 10 }, { x: 2, y: 10 }, { x: 3, y: 2 }, { x: 4, y: 5 }],
+        data: [{ x: 1, y1: 10 }, { x: 2, y1: 10 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
     ];
     const specDataSeries = new Map();
@@ -182,13 +182,13 @@ describe('Y Domain', () => {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 5 }],
+        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 4, y: 7 }],
+        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
     const dataSeries2: RawDataSeries[] = [
@@ -196,7 +196,7 @@ describe('Y Domain', () => {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 10 }, { x: 2, y: 10 }, { x: 3, y: 2 }, { x: 4, y: 5 }],
+        data: [{ x: 1, y1: 10 }, { x: 2, y1: 10 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
     ];
     const specDataSeries = new Map();
@@ -240,13 +240,13 @@ describe('Y Domain', () => {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: new Array(maxValues).fill(0).map((d, i) => ({ x: i, y: i })),
+        data: new Array(maxValues).fill(0).map((d, i) => ({ x: i, y1: i })),
       },
       {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: new Array(maxValues).fill(0).map((d, i) => ({ x: i, y: i })),
+        data: new Array(maxValues).fill(0).map((d, i) => ({ x: i, y1: i })),
       },
     ];
     const dataSeries2: RawDataSeries[] = [
@@ -254,7 +254,7 @@ describe('Y Domain', () => {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: new Array(maxValues).fill(0).map((d, i) => ({ x: i, y: i })),
+        data: new Array(maxValues).fill(0).map((d, i) => ({ x: i, y1: i })),
       },
     ];
     const specDataSeries = new Map();
@@ -443,13 +443,13 @@ describe('Y Domain', () => {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 5 }],
+        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 4, y: 7 }],
+        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
     const specDataSeries = new Map();
@@ -477,13 +477,13 @@ describe('Y Domain', () => {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 5 }],
+        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 4, y: 7 }],
+        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
     const specDataSeries = new Map();
@@ -523,13 +523,13 @@ describe('Y Domain', () => {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 5 }],
+        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 4, y: 7 }],
+        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
     const specDataSeries = new Map();
@@ -569,13 +569,13 @@ describe('Y Domain', () => {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 5 }],
+        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 4, y: 7 }],
+        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
     const specDataSeries = new Map();
@@ -611,13 +611,13 @@ describe('Y Domain', () => {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 5 }],
+        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 4, y: 7 }],
+        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
     const specDataSeries = new Map();
@@ -657,13 +657,13 @@ describe('Y Domain', () => {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 5 }],
+        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: getSpecId('a'),
         key: [''],
         seriesColorKey: '',
-        data: [{ x: 1, y: 2 }, { x: 4, y: 7 }],
+        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
     const specDataSeries = new Map();

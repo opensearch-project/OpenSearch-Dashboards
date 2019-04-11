@@ -664,27 +664,35 @@ describe('Chart Store', () => {
   test('handle click on chart', () => {
     const geom1: IndexedGeometry = {
       color: 'red',
-      specId: getSpecId('specId1'),
-      datum: [0, 1, 2],
-      geom: {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
+      geometryId: {
+        specId: getSpecId('specId1'),
+        seriesKey: [2],
       },
-      seriesKey: [2],
+      value: {
+        x: 0,
+        y: 1,
+        accessor: 'y1',
+      },
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
     };
     const geom2: IndexedGeometry = {
       color: 'blue',
-      specId: getSpecId('specId2'),
-      datum: [0, 3, 2],
-      geom: {
-        x: 50,
-        y: 0,
-        width: 0,
-        height: 0,
+      geometryId: {
+        specId: getSpecId('specId2'),
+        seriesKey: [2],
       },
-      seriesKey: [2],
+      value: {
+        x: 0,
+        y: 3,
+        accessor: 'y1',
+      },
+      x: 50,
+      y: 0,
+      width: 0,
+      height: 0,
     };
     const clickListener = jest.fn(
       (ds: GeometryValue[]): void => {
@@ -700,12 +708,12 @@ describe('Chart Store', () => {
     store.highlightedGeometries.replace([geom1]);
     store.handleChartClick();
     expect(clickListener).toBeCalledTimes(1);
-    expect(clickListener.mock.calls[0][0]).toEqual([geom1]);
+    expect(clickListener.mock.calls[0][0]).toEqual([geom1.value]);
 
     store.highlightedGeometries.replace([geom1, geom2]);
     store.handleChartClick();
     expect(clickListener).toBeCalledTimes(2);
-    expect(clickListener.mock.calls[1][0]).toEqual([geom1, geom2]);
+    expect(clickListener.mock.calls[1][0]).toEqual([geom1.value, geom2.value]);
   });
   test('can compute annotation tooltip state', () => {
     const scale = new ScaleContinuous([0, 100], [0, 100], ScaleType.Linear);

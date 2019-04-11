@@ -1,4 +1,4 @@
-import { IndexedGeometry } from '../series/rendering';
+import { IndexedGeometry, PointGeometry } from '../series/rendering';
 import { Dimensions } from './dimensions';
 import { getSpecId } from './ids';
 import {
@@ -10,66 +10,105 @@ import {
   isFollowTooltipType,
   TooltipType,
 } from './interactions';
-
 const ig1: IndexedGeometry = {
-  specId: getSpecId('ig1'),
   color: 'red',
-  geom: {
-    x: 0,
-    y: 0,
-    width: 50,
-    height: 50,
+  geometryId: {
+    specId: getSpecId('ig1'),
+    seriesKey: [0, 1, 2],
   },
-  datum: [0, 1, 2],
-  seriesKey: [0, 1, 2],
+  value: {
+    accessor: 'y1',
+    x: 0,
+    y: 1,
+  },
+  x: 0,
+  y: 0,
+  width: 50,
+  height: 50,
 };
 const ig2: IndexedGeometry = {
-  specId: getSpecId('ig1'),
-  color: 'red',
-  geom: {
-    x: 0,
-    y: 0,
-    width: 10,
-    height: 10,
+  geometryId: {
+    specId: getSpecId('ig1'),
+    seriesKey: [0, 1, 2],
   },
-  datum: [0, 1, 2],
-  seriesKey: [0, 1, 2],
+  value: {
+    accessor: 'y1',
+    x: 0,
+    y: 1,
+  },
+  color: 'red',
+  x: 0,
+  y: 0,
+  width: 10,
+  height: 10,
 };
 const ig3: IndexedGeometry = {
-  specId: getSpecId('ig1'),
-  color: 'red',
-  geom: {
-    x: 0,
-    y: 0,
-    width: 50,
-    height: 50,
+  geometryId: {
+    specId: getSpecId('ig1'),
+    seriesKey: [123, 123, 123],
   },
-  datum: [123, 123, 123],
-  seriesKey: [123, 123, 123],
+  value: {
+    accessor: 'y1',
+    x: 123,
+    y: 123,
+  },
+  color: 'red',
+
+  x: 0,
+  y: 0,
+  width: 50,
+  height: 50,
 };
 const ig4: IndexedGeometry = {
-  specId: getSpecId('ig1'),
-  color: 'blue',
-  geom: {
-    x: 0,
-    y: 0,
-    width: 50,
-    height: 50,
+  geometryId: {
+    specId: getSpecId('ig4'),
+    seriesKey: [123, 123, 123],
   },
-  datum: [123, 123, 123],
-  seriesKey: [123, 123, 123],
+  value: {
+    accessor: 'y1',
+    x: 123,
+    y: 123,
+  },
+  color: 'blue',
+  x: 0,
+  y: 0,
+  width: 50,
+  height: 50,
 };
 const ig5: IndexedGeometry = {
-  specId: getSpecId('ig5'),
+  geometryId: {
+    specId: getSpecId('ig5'),
+    seriesKey: [123, 123, 123],
+  },
+  value: {
+    accessor: 'y1',
+    x: 123,
+    y: 123,
+  },
   color: 'red',
-  geom: {
+  x: 0,
+  y: 0,
+  width: 50,
+  height: 50,
+};
+const ig6: PointGeometry = {
+  geometryId: {
+    specId: getSpecId('ig5'),
+    seriesKey: [123, 123, 123],
+  },
+  value: {
+    accessor: 'y1',
+    x: 123,
+    y: 123,
+  },
+  color: 'red',
+  x: 0,
+  y: 0,
+  radius: 50,
+  transform: {
     x: 0,
     y: 0,
-    width: 50,
-    height: 50,
   },
-  datum: [123, 123, 123],
-  seriesKey: [123, 123, 123],
 };
 describe('Interaction utils', () => {
   const chartDimensions: Dimensions = {
@@ -119,6 +158,8 @@ describe('Interaction utils', () => {
     expect(areIndexedGeomsEquals(ig1, ig1)).toBe(true);
     expect(areIndexedGeomsEquals(ig1, ig2)).toBe(false);
     expect(areIndexedGeomsEquals(ig1, ig3)).toBe(true);
+    expect(areIndexedGeomsEquals(ig5, ig6)).toBe(false);
+    expect(areIndexedGeomsEquals(ig6, ig6)).toBe(true);
   });
   test('geometry array equality', () => {
     expect(

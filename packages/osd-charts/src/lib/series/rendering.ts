@@ -14,8 +14,10 @@ export interface GeometryId {
   seriesKey: any[];
 }
 
-export interface GeometryValue extends GeometryId {
-  datum: any;
+export interface GeometryValue {
+  y: any;
+  x: any;
+  accessor: 'y1' | 'y0';
 }
 
 /** Shared style properties for varies geometries */
@@ -23,26 +25,19 @@ export interface GeometryStyle {
   opacity: number;
 }
 
-export interface IndexedGeometry extends GeometryValue {
-  color: string;
-  geom: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    isPoint?: true;
-  };
-}
+export type IndexedGeometry = PointGeometry | BarGeometry;
 
 export interface PointGeometry {
   x: number;
   y: number;
+  radius: number;
   color: string;
-  value: GeometryValue;
   transform: {
     x: number;
     y: number;
   };
+  geometryId: GeometryId;
+  value: GeometryValue;
 }
 export interface BarGeometry {
   x: number;
@@ -50,8 +45,8 @@ export interface BarGeometry {
   width: number;
   height: number;
   color: string;
-  value: GeometryValue;
   geometryId: GeometryId;
+  value: GeometryValue;
 }
 export interface LineGeometry {
   line: string;
@@ -65,7 +60,7 @@ export interface LineGeometry {
 }
 export interface AreaGeometry {
   area: string;
-  line: string;
+  lines: string[];
   points: PointGeometry[];
   color: string;
   transform: {
@@ -75,6 +70,13 @@ export interface AreaGeometry {
   geometryId: GeometryId;
 }
 
+export function isPointGeometry(ig: IndexedGeometry): ig is PointGeometry {
+  return ig.hasOwnProperty('radius');
+}
+export function isBarGeometry(ig: IndexedGeometry): ig is BarGeometry {
+  return ig.hasOwnProperty('width') && ig.hasOwnProperty('height');
+}
+
 export function renderPoints(
   shift: number,
   dataset: DataSeriesDatum[],
@@ -82,6 +84,7 @@ export function renderPoints(
   yScale: Scale,
   color: string,
   specId: SpecId,
+  hasY0Accessors: boolean,
   seriesKey: any[],
 ): {
   pointGeometries: PointGeometry[];
@@ -93,48 +96,52 @@ export function renderPoints(
   const pointGeometries = dataset.reduce(
     (acc, datum) => {
       const x = xScale.scale(datum.x);
-      let y;
-      let radius = 10;
-      const isHidden = datum.y1 === null || (isLogScale && datum.y1 <= 0);
-      // we fix 0 and negative values at y = 0
-      if (isHidden) {
-        y = yScale.range[0];
-        radius = 0;
-      } else {
-        y = yScale.scale(datum.y1);
+      const points: PointGeometry[] = [];
+      const yDatums = [datum.y1];
+      if (hasY0Accessors) {
+        yDatums.unshift(datum.y0);
       }
-      const indexedGeometry: IndexedGeometry = {
-        specId,
-        datum: datum.datum,
-        color,
-        seriesKey,
-        geom: {
-          x: x + shift,
+      yDatums.forEach((yDatum, index) => {
+        // skip rendering point if y1 is null
+        if (datum.y1 === null) {
+          return;
+        }
+        let y;
+        let radius = 10;
+        const isHidden = yDatum === null || (isLogScale && yDatum <= 0);
+        // we fix 0 and negative values at y = 0
+        if (isHidden) {
+          y = yScale.range[0];
+          radius = 0;
+        } else {
+          y = yScale.scale(yDatum);
+        }
+        const originalY = hasY0Accessors && index === 0 ? datum.initialY0 : datum.initialY1;
+        const pointGeometry: PointGeometry = {
+          radius,
+          x,
           y,
-          width: radius,
-          height: radius,
-          isPoint: true,
-        },
-      };
-      mutableIndexedGeometryMapUpsert(indexedGeometries, datum.x, indexedGeometry);
-      const pointGeometry: PointGeometry = {
-        x,
-        y,
-        color,
-        value: {
-          specId,
-          datum: datum.datum,
-          seriesKey,
-        },
-        transform: {
-          x: shift,
-          y: 0,
-        },
-      };
-      if (isHidden) {
-        return acc;
-      }
-      return [...acc, pointGeometry];
+          color,
+          value: {
+            x: datum.x,
+            y: originalY,
+            accessor: hasY0Accessors && index === 0 ? 'y0' : 'y1',
+          },
+          transform: {
+            x: shift,
+            y: 0,
+          },
+          geometryId: {
+            specId,
+            seriesKey,
+          },
+        };
+        mutableIndexedGeometryMapUpsert(indexedGeometries, datum.x, pointGeometry);
+        if (!isHidden) {
+          points.push(pointGeometry);
+        }
+      });
+      return [...acc, ...points];
     },
     [] as PointGeometry[],
   );
@@ -161,8 +168,12 @@ export function renderBars(
   const xScaleType = xScale.type;
   const barGeometries: BarGeometry[] = [];
   dataset.forEach((datum) => {
-    const { y0, y1 } = datum;
-
+    const { y0, y1, initialY1 } = datum;
+    // don't create a bar if the initialY1 value is null.
+    if (initialY1 === null) {
+      return;
+    }
+    // don't create a bar if the x value is not part of the ordinal scale
     if (xScaleType === ScaleType.Ordinal && !xDomain.includes(datum.x)) {
       return;
     }
@@ -184,35 +195,23 @@ export function renderBars(
     }
     const x = xScale.scale(datum.x) + xScale.bandwidth * orderIndex;
     const width = xScale.bandwidth;
-    const indexedGeometry: IndexedGeometry = {
-      specId,
-      datum: datum.datum,
-      geom: {
-        x,
-        y,
-        width,
-        height,
-      },
-      color,
-      seriesKey,
-    };
-    mutableIndexedGeometryMapUpsert(indexedGeometries, datum.x, indexedGeometry);
-    const barGeometry = {
+    const barGeometry: BarGeometry = {
       x,
       y, // top most value
       width,
       height,
       color,
       value: {
-        specId,
-        datum: datum.datum,
-        seriesKey,
+        x: datum.x,
+        y: initialY1,
+        accessor: 'y1',
       },
       geometryId: {
         specId,
         seriesKey,
       },
     };
+    mutableIndexedGeometryMapUpsert(indexedGeometries, datum.x, barGeometry);
     barGeometries.push(barGeometry);
   });
   return {
@@ -229,6 +228,7 @@ export function renderLine(
   color: string,
   curve: CurveType,
   specId: SpecId,
+  hasY0Accessors: boolean,
   seriesKey: any[],
 ): {
   lineGeometry: LineGeometry;
@@ -250,6 +250,7 @@ export function renderLine(
     yScale,
     color,
     specId,
+    hasY0Accessors,
     seriesKey,
   );
   const lineGeometry = {
@@ -279,6 +280,7 @@ export function renderArea(
   color: string,
   curve: CurveType,
   specId: SpecId,
+  hasY0Accessors: boolean,
   seriesKey: any[],
 ): {
   areaGeometry: AreaGeometry;
@@ -290,29 +292,47 @@ export function renderArea(
     .x((datum: DataSeriesDatum) => xScale.scale(datum.x))
     .y1((datum: DataSeriesDatum) => yScale.scale(datum.y1))
     .y0((datum: DataSeriesDatum) => {
-      if (isLogScale && datum.y0 <= 0) {
+      if (datum.y0 === null || (isLogScale && datum.y0 <= 0)) {
         return yScale.range[0];
       }
       return yScale.scale(datum.y0);
     })
     .defined((datum: DataSeriesDatum) => datum.y1 !== null && !(isLogScale && datum.y1 <= 0))
     .curve(getCurveFactory(curve));
-  const { lineGeometry, indexedGeometries } = renderLine(
+
+  const y1Line = pathGenerator.lineY1()(dataset);
+
+  const lines: string[] = [];
+  if (y1Line) {
+    lines.push(y1Line);
+  }
+  if (hasY0Accessors) {
+    const y0Line = pathGenerator.lineY0()(dataset);
+    if (y0Line) {
+      lines.push(y0Line);
+    }
+  }
+
+  const { pointGeometries, indexedGeometries } = renderPoints(
     shift,
     dataset,
     xScale,
     yScale,
     color,
-    curve,
     specId,
+    hasY0Accessors,
     seriesKey,
   );
+
   const areaGeometry = {
     area: pathGenerator(dataset) || '',
-    line: lineGeometry.line,
-    points: lineGeometry.points,
+    lines,
+    points: pointGeometries,
     color,
-    transform: lineGeometry.transform,
+    transform: {
+      y: 0,
+      x: shift,
+    },
     geometryId: {
       specId,
       seriesKey,
@@ -347,14 +367,23 @@ export function getGeometryStyle(
   return sharedStyle.default;
 }
 
-export function isPointOnGeometry(x: number, y: number, { geom }: Pick<IndexedGeometry, 'geom'>) {
-  if (geom.isPoint) {
+export function isPointOnGeometry(
+  xCoordinate: number,
+  yCoordinate: number,
+  indexedGeometry: BarGeometry | PointGeometry,
+) {
+  const { x, y } = indexedGeometry;
+  if (isPointGeometry(indexedGeometry)) {
+    const { radius, transform } = indexedGeometry;
     return (
-      y >= geom.y - geom.height &&
-      y <= geom.y + geom.height &&
-      x >= geom.x - geom.width &&
-      x <= geom.x + geom.width
+      yCoordinate >= y - radius &&
+      yCoordinate <= y + radius &&
+      xCoordinate >= x + transform.x - radius &&
+      xCoordinate <= x + transform.x + radius
     );
   }
-  return y >= geom.y && y <= geom.y + geom.height && x >= geom.x && x <= geom.x + geom.width;
+  const { width, height } = indexedGeometry;
+  return (
+    yCoordinate >= y && yCoordinate <= y + height && xCoordinate >= x && xCoordinate <= x + width
+  );
 }

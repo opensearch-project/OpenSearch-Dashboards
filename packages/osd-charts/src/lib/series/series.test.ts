@@ -3,7 +3,6 @@ import { getGroupId, getSpecId, SpecId } from '../utils/ids';
 import { ScaleType } from '../utils/scales/scales';
 import {
   DataSeriesColorsValues,
-  formatStackedDataSeriesValues,
   getFormattedDataseries,
   getSeriesColorMap,
   getSortedDataSeriesColorsValuesMap,
@@ -12,6 +11,7 @@ import {
   splitSeries,
 } from './series';
 import { BasicSeriesSpec } from './specs';
+import { formatStackedDataSeriesValues } from './stacked_series_utils';
 import * as TestDataset from './utils/test_dataset';
 
 describe('Series', () => {
@@ -91,13 +91,13 @@ describe('Series', () => {
         specId: getSpecId('spec1'),
         key: ['a'],
         seriesColorKey: 'a',
-        data: [{ x: 1, y: 1 }, { x: 2, y: 2 }, { x: 4, y: 4 }],
+        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 4, y1: 4 }],
       },
       {
         specId: getSpecId('spec1'),
         key: ['b'],
         seriesColorKey: 'b',
-        data: [{ x: 1, y: 21 }, { x: 3, y: 23 }],
+        data: [{ x: 1, y1: 21 }, { x: 3, y1: 23 }],
       },
     ];
     const stackedValues = formatStackedDataSeriesValues(dataSeries, false);
@@ -109,25 +109,25 @@ describe('Series', () => {
         specId: getSpecId('spec1'),
         key: ['a'],
         seriesColorKey: 'a',
-        data: [{ x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }, { x: 4, y: 4 }],
+        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
       },
       {
         specId: getSpecId('spec1'),
         key: ['b'],
         seriesColorKey: 'b',
-        data: [{ x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }, { x: 4, y: 4 }],
+        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
       },
       {
         specId: getSpecId('spec1'),
         key: ['b'],
         seriesColorKey: 'b',
-        data: [{ x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }, { x: 4, y: 4 }],
+        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
       },
       {
         specId: getSpecId('spec1'),
         key: ['b'],
         seriesColorKey: 'b',
-        data: [{ x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }, { x: 4, y: 4 }],
+        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
       },
     ];
     const stackedValues = formatStackedDataSeriesValues(dataSeries, false);
@@ -139,13 +139,13 @@ describe('Series', () => {
         specId: getSpecId('spec1'),
         key: ['a'],
         seriesColorKey: 'a',
-        data: [{ x: 1, y: 1 }, { x: 4, y: 4 }, { x: 2, y: 2 }],
+        data: [{ x: 1, y1: 1 }, { x: 4, y1: 4 }, { x: 2, y1: 2 }],
       },
       {
         specId: getSpecId('spec1'),
         key: ['b'],
         seriesColorKey: 'b',
-        data: [{ x: 3, y: 23 }, { x: 1, y: 21 }],
+        data: [{ x: 3, y1: 23 }, { x: 1, y1: 21 }],
       },
     ];
     const stackedValues = formatStackedDataSeriesValues(dataSeries, false);
@@ -158,18 +158,141 @@ describe('Series', () => {
         specId: getSpecId('spec1'),
         key: ['a'],
         seriesColorKey: 'a',
-        data: new Array(maxArrayItems).fill(0).map((d, i) => ({ x: i, y: i })),
+        data: new Array(maxArrayItems).fill(0).map((d, i) => ({ x: i, y1: i })),
       },
       {
         specId: getSpecId('spec1'),
         key: ['b'],
         seriesColorKey: 'b',
-        data: new Array(maxArrayItems).fill(0).map((d, i) => ({ x: i, y: i })),
+        data: new Array(maxArrayItems).fill(0).map((d, i) => ({ x: i, y1: i })),
       },
     ];
     const stackedValues = formatStackedDataSeriesValues(dataSeries, false);
     expect(stackedValues).toMatchSnapshot();
   });
+  test('Can stack simple dataseries with scale to extent', () => {
+    const dataSeries: RawDataSeries[] = [
+      {
+        specId: getSpecId('spec1'),
+        key: ['a'],
+        seriesColorKey: 'a',
+        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 4, y1: 4 }],
+      },
+      {
+        specId: getSpecId('spec1'),
+        key: ['b'],
+        seriesColorKey: 'b',
+        data: [{ x: 1, y1: 21 }, { x: 3, y1: 23 }],
+      },
+    ];
+    const stackedValues = formatStackedDataSeriesValues(dataSeries, true);
+    // the datum on the snapshots is undefined because we are not adding it to
+    // the test raw dataseries
+    expect(stackedValues).toMatchSnapshot();
+  });
+  test('Can stack multiple dataseries with scale to extent', () => {
+    const dataSeries: RawDataSeries[] = [
+      {
+        specId: getSpecId('spec1'),
+        key: ['a'],
+        seriesColorKey: 'a',
+        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
+      },
+      {
+        specId: getSpecId('spec1'),
+        key: ['b'],
+        seriesColorKey: 'b',
+        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
+      },
+      {
+        specId: getSpecId('spec1'),
+        key: ['b'],
+        seriesColorKey: 'b',
+        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
+      },
+      {
+        specId: getSpecId('spec1'),
+        key: ['b'],
+        seriesColorKey: 'b',
+        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
+      },
+    ];
+    const stackedValues = formatStackedDataSeriesValues(dataSeries, true);
+    // the datum on the snapshots is undefined because we are not adding it to
+    // the test raw dataseries
+    expect(stackedValues).toMatchSnapshot();
+  });
+  test('Can stack simple dataseries with y0', () => {
+    const dataSeries: RawDataSeries[] = [
+      {
+        specId: getSpecId('spec1'),
+        key: ['a'],
+        seriesColorKey: 'a',
+        data: [{ x: 1, y1: 3, y0: 1 }, { x: 2, y1: 3, y0: 2 }, { x: 4, y1: 4, y0: 3 }],
+      },
+      {
+        specId: getSpecId('spec1'),
+        key: ['b'],
+        seriesColorKey: 'b',
+        data: [
+          { x: 1, y1: 2, y0: 1 },
+          { x: 2, y1: 3, y0: 1 },
+          { x: 3, y1: 23, y0: 4 },
+          { x: 4, y1: 4, y0: 1 },
+        ],
+      },
+    ];
+    const stackedValues = formatStackedDataSeriesValues(dataSeries, true);
+    // the datum on the snapshots is undefined because we are not adding it to
+    // the test raw dataseries
+
+    expect(stackedValues[0].data[0].y0).toBe(1);
+    expect(stackedValues[0].data[0].y1).toBe(3);
+    expect(stackedValues[0].data[0].initialY0).toBe(1);
+    expect(stackedValues[0].data[0].initialY1).toBe(3);
+
+    expect(stackedValues[1].data[0].y0).toBe(4);
+    expect(stackedValues[1].data[0].y1).toBe(5);
+    expect(stackedValues[1].data[0].initialY0).toBe(1);
+    expect(stackedValues[1].data[0].initialY1).toBe(2);
+
+    expect(stackedValues).toMatchSnapshot();
+  });
+  test('Can stack simple dataseries with scale to extent with y0', () => {
+    const dataSeries: RawDataSeries[] = [
+      {
+        specId: getSpecId('spec1'),
+        key: ['a'],
+        seriesColorKey: 'a',
+        data: [{ x: 1, y1: 3, y0: 1 }, { x: 2, y1: 3, y0: 2 }, { x: 4, y1: 4, y0: 3 }],
+      },
+      {
+        specId: getSpecId('spec1'),
+        key: ['b'],
+        seriesColorKey: 'b',
+        data: [
+          { x: 1, y1: 2, y0: 1 },
+          { x: 2, y1: 3, y0: 1 },
+          { x: 3, y1: 23, y0: 4 },
+          { x: 4, y1: 4, y0: 1 },
+        ],
+      },
+    ];
+    const stackedValues = formatStackedDataSeriesValues(dataSeries, true);
+    // the datum on the snapshots is undefined because we are not adding it to
+    // the test raw dataseries
+    expect(stackedValues[0].data[0].y0).toBe(1);
+    expect(stackedValues[0].data[0].y1).toBe(3);
+    expect(stackedValues[0].data[0].initialY0).toBe(1);
+    expect(stackedValues[0].data[0].initialY1).toBe(3);
+
+    expect(stackedValues[1].data[0].y0).toBe(4);
+    expect(stackedValues[1].data[0].y1).toBe(5);
+    expect(stackedValues[1].data[0].initialY0).toBe(1);
+    expect(stackedValues[1].data[0].initialY1).toBe(2);
+    expect(stackedValues).toMatchSnapshot();
+  });
+
   test('should split an array of specs into data series', () => {
     const seriesSpecs = new Map<SpecId, BasicSeriesSpec>();
     const spec1: BasicSeriesSpec = {
@@ -310,10 +433,12 @@ describe('Series', () => {
     const emptyDeselected = getSplittedSeries(seriesSpecs, []);
     expect(emptyDeselected.splittedSeries.get(specId)!.length).toBe(2);
 
-    const deselectedDataSeries: DataSeriesColorsValues[] = [{
-      specId,
-      colorValues: ['y1'],
-    }];
+    const deselectedDataSeries: DataSeriesColorsValues[] = [
+      {
+        specId,
+        colorValues: ['y1'],
+      },
+    ];
     const subsetSplit = getSplittedSeries(seriesSpecs, deselectedDataSeries);
     expect(subsetSplit.splittedSeries.get(specId)!.length).toBe(1);
   });
