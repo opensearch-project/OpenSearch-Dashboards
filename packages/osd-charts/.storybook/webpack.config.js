@@ -35,6 +35,11 @@ module.exports = (baseConfig, env, config) => {
     use: [
       {
         loader: 'style-loader',
+        options: {
+          attrs: {
+            nonce: 'Pk1rZ1XDlMuYe8ubWV3Lh0BzwrTigJQ=',
+          },
+        },
       },
       {
         loader: 'css-loader',
