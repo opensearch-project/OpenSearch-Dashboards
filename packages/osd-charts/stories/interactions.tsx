@@ -12,10 +12,13 @@ import {
   getSpecId,
   LIGHT_THEME,
   LineSeries,
+  niceTimeFormatByDay,
   niceTimeFormatter,
   Position,
+  Rotation,
   ScaleType,
   Settings,
+  timeFormatter,
   TooltipType,
 } from '../src/';
 
@@ -24,7 +27,6 @@ import { DateTime } from 'luxon';
 import { switchTheme } from '../.storybook/theme_service';
 import { BARCHART_2Y2G } from '../src/lib/series/utils/test_dataset';
 import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
-import { niceTimeFormatByDay, timeFormatter } from '../src/utils/data/formatters';
 
 const onElementListeners = {
   onElementClick: action('onElementClick'),
@@ -557,7 +559,11 @@ storiesOf('Interactions', module)
     const className = darkmode ? 'story-chart-dark' : 'story-chart';
     const defaultTheme = darkmode ? DARK_THEME : LIGHT_THEME;
     switchTheme(darkmode ? 'dark' : 'light');
-    const chartRotation = select('rotation', { '90': 90, '0': 0, '-90': -90, '180': 180 }, 0);
+    const chartRotation = select<Rotation>(
+      'rotation',
+      { '90': 90, '0': 0, '-90': -90, '180': 180 },
+      0,
+    );
     const numberFormatter = (d: any) => Number(d).toFixed(2);
 
     return (

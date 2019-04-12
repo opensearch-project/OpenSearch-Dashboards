@@ -3,22 +3,22 @@ import { array, boolean, color, number, select } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import {
+  AnnotationDatum,
+  AnnotationDomainTypes,
   Axis,
   BarSeries,
   Chart,
+  getAnnotationId,
+  getAxisId,
   getSpecId,
   LineAnnotation,
+  Position,
+  Rotation,
   ScaleType,
   Settings,
   timeFormatter,
 } from '../src';
-import {
-  AnnotationDatum,
-  AnnotationDomainTypes,
-  Position,
-} from '../src/lib/series/specs';
 import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
-import { getAnnotationId, getAxisId } from '../src/lib/utils/ids';
 
 const dateFormatter = timeFormatter('HH:mm:ss');
 
@@ -27,7 +27,11 @@ function generateAnnotationData(values: any[]): AnnotationDatum[] {
 }
 
 function generateTimeAnnotationData(values: any[]): AnnotationDatum[] {
-  return values.map((value, index) => ({ dataValue: value, details: `detail-${index}`, header: dateFormatter(value) }));
+  return values.map((value, index) => ({
+    dataValue: value,
+    details: `detail-${index}`,
+    header: dateFormatter(value),
+  }));
 }
 
 storiesOf('Annotations', module)
@@ -50,12 +54,16 @@ storiesOf('Annotations', module)
       },
     };
 
-    const chartRotation = select('chartRotation', {
-      '0 deg': 0,
-      '90 deg': 90,
-      '-90 deg': -90,
-      '180 deg': 180,
-    }, 0);
+    const chartRotation = select<Rotation>(
+      'chartRotation',
+      {
+        '0 deg': 0,
+        '90 deg': 90,
+        '-90 deg': -90,
+        '180 deg': 180,
+      },
+      0,
+    );
 
     const isBottom = boolean('x domain axis is bottom', true);
     const axisPosition = isBottom ? Position.Bottom : Position.Top;
@@ -68,18 +76,10 @@ storiesOf('Annotations', module)
           domainType={AnnotationDomainTypes.XDomain}
           dataValues={dataValues}
           style={style}
-          marker={(<EuiIcon type="alert" />)}
+          marker={<EuiIcon type="alert" />}
         />
-        <Axis
-          id={getAxisId('horizontal')}
-          position={axisPosition}
-          title={'x-domain axis'}
-        />
-        <Axis
-          id={getAxisId('vertical')}
-          title={'y-domain axis'}
-          position={Position.Left}
-        />
+        <Axis id={getAxisId('horizontal')} position={axisPosition} title={'x-domain axis'} />
+        <Axis id={getAxisId('vertical')} title={'y-domain axis'} position={Position.Left} />
         <BarSeries
           id={getSpecId('bars')}
           xScaleType={ScaleType.Linear}
@@ -95,12 +95,16 @@ storiesOf('Annotations', module)
   .add('basic xDomain ordinal', () => {
     const dataValues = generateAnnotationData(array('annotation values', ['a', 'c']));
 
-    const chartRotation = select('chartRotation', {
-      '0 deg': 0,
-      '90 deg': 90,
-      '-90 deg': -90,
-      '180 deg': 180,
-    }, 0);
+    const chartRotation = select<Rotation>(
+      'chartRotation',
+      {
+        '0 deg': 0,
+        '90 deg': 90,
+        '-90 deg': -90,
+        '180 deg': 180,
+      },
+      0,
+    );
 
     return (
       <Chart renderer="canvas" className={'story-chart'}>
@@ -109,23 +113,15 @@ storiesOf('Annotations', module)
           annotationId={getAnnotationId('anno_1')}
           domainType={AnnotationDomainTypes.XDomain}
           dataValues={dataValues}
-          marker={(<EuiIcon type="alert" />)}
+          marker={<EuiIcon type="alert" />}
         />
-        <Axis
-          id={getAxisId('top')}
-          position={Position.Top}
-          title={'x-domain axis (top)'}
-        />
+        <Axis id={getAxisId('top')} position={Position.Top} title={'x-domain axis (top)'} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
           title={'x-domain axis (bottom)'}
         />
-        <Axis
-          id={getAxisId('left')}
-          title={'y-domain axis'}
-          position={Position.Left}
-        />
+        <Axis id={getAxisId('left')} title={'y-domain axis'} position={Position.Left} />
         <BarSeries
           id={getSpecId('bars')}
           xScaleType={ScaleType.Ordinal}
@@ -142,12 +138,16 @@ storiesOf('Annotations', module)
     const data = array('data values', [3.5, 7.2]);
     const dataValues = generateAnnotationData(data);
 
-    const chartRotation = select('chartRotation', {
-      '0 deg': 0,
-      '90 deg': 90,
-      '-90 deg': -90,
-      '180 deg': 180,
-    }, 0);
+    const chartRotation = select<Rotation>(
+      'chartRotation',
+      {
+        '0 deg': 0,
+        '90 deg': 90,
+        '-90 deg': -90,
+        '180 deg': 180,
+      },
+      0,
+    );
 
     const isLeft = boolean('y-domain axis is Position.Left', true);
     const axisTitle = isLeft ? 'y-domain axis (left)' : 'y-domain axis (right)';
@@ -160,18 +160,10 @@ storiesOf('Annotations', module)
           annotationId={getAnnotationId('anno_')}
           domainType={AnnotationDomainTypes.YDomain}
           dataValues={dataValues}
-          marker={(<EuiIcon type="alert" />)}
+          marker={<EuiIcon type="alert" />}
         />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'x-domain axis'}
-        />
-        <Axis
-          id={getAxisId('left')}
-          title={axisTitle}
-          position={axisPosition}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'x-domain axis'} />
+        <Axis id={getAxisId('left')} title={axisTitle} position={axisPosition} />
         <BarSeries
           id={getSpecId('bars')}
           xScaleType={ScaleType.Linear}
@@ -185,15 +177,24 @@ storiesOf('Annotations', module)
     );
   })
   .add('time series', () => {
-    const dataValues =
-      generateTimeAnnotationData([1551438150000, 1551438180000, 1551438390000, 1551438450000, 1551438480000]);
+    const dataValues = generateTimeAnnotationData([
+      1551438150000,
+      1551438180000,
+      1551438390000,
+      1551438450000,
+      1551438480000,
+    ]);
 
-    const chartRotation = select('chartRotation', {
-      '0 deg': 0,
-      '90 deg': 90,
-      '-90 deg': -90,
-      '180 deg': 180,
-    }, 0);
+    const chartRotation = select<Rotation>(
+      'chartRotation',
+      {
+        '0 deg': 0,
+        '90 deg': 90,
+        '-90 deg': -90,
+        '180 deg': 180,
+      },
+      0,
+    );
 
     return (
       <Chart renderer="canvas" className={'story-chart'}>
@@ -202,7 +203,7 @@ storiesOf('Annotations', module)
           annotationId={getAnnotationId('anno_1')}
           domainType={AnnotationDomainTypes.XDomain}
           dataValues={dataValues}
-          marker={(<EuiIcon type="alert" />)}
+          marker={<EuiIcon type="alert" />}
         />
         <Axis
           id={getAxisId('bottom')}
@@ -210,11 +211,7 @@ storiesOf('Annotations', module)
           title={'x-domain axis'}
           tickFormat={dateFormatter}
         />
-        <Axis
-          id={getAxisId('left')}
-          title={'y-domain axis'}
-          position={Position.Left}
-        />
+        <Axis id={getAxisId('left')} title={'y-domain axis'} position={Position.Left} />
         <BarSeries
           id={getSpecId('bars')}
           xScaleType={ScaleType.Linear}
@@ -248,15 +245,19 @@ storiesOf('Annotations', module)
       },
     };
 
-    const chartRotation = 0;
+    const chartRotation: Rotation = 0;
 
     const axisPosition = Position.Bottom;
 
-    const marker = select('marker icon (examples from EUI)', {
-      alert: 'alert',
-      asterisk: 'asterisk',
-      questionInCircle: 'questionInCircle',
-    }, 'alert');
+    const marker = select<'alert' | 'asterisk' | 'questionInCircle'>(
+      'marker icon (examples from EUI)',
+      {
+        alert: 'alert',
+        asterisk: 'asterisk',
+        questionInCircle: 'questionInCircle',
+      },
+      'alert',
+    );
 
     const hideLines = boolean('annotation lines hidden', false);
     const hideTooltips = boolean('annotation tooltips hidden', false);
@@ -269,20 +270,12 @@ storiesOf('Annotations', module)
           domainType={AnnotationDomainTypes.XDomain}
           dataValues={dataValues}
           style={style}
-          marker={(<EuiIcon type={marker} />)}
+          marker={<EuiIcon type={marker} />}
           hideLines={hideLines}
           hideTooltips={hideTooltips}
         />
-        <Axis
-          id={getAxisId('horizontal')}
-          position={axisPosition}
-          title={'x-domain axis'}
-        />
-        <Axis
-          id={getAxisId('vertical')}
-          title={'y-domain axis'}
-          position={Position.Left}
-        />
+        <Axis id={getAxisId('horizontal')} position={axisPosition} title={'x-domain axis'} />
+        <Axis id={getAxisId('vertical')} title={'y-domain axis'} position={Position.Left} />
         <BarSeries
           id={getSpecId('bars')}
           xScaleType={ScaleType.Linear}

@@ -1,7 +1,7 @@
 export * from './specs';
 export { Chart } from './components/chart';
 export { TooltipType } from './lib/utils/interactions';
-export { getAxisId, getGroupId, getSpecId } from './lib/utils/ids';
+export { getAxisId, getGroupId, getSpecId, getAnnotationId } from './lib/utils/ids';
 export { ScaleType } from './lib/utils/scales/scales';
 export { Position, Rendering, Rotation } from './lib/series/specs';
 export * from './lib/themes/theme';
@@ -12,4 +12,4 @@ export { CurveType } from './lib/series/curves';
 export { timeFormatter, niceTimeFormatter, niceTimeFormatByDay } from './utils/data/formatters';
 export { DataGenerator } from './utils/data_generators/data_generator';
 export { DataSeriesColorsValues } from './lib/series/series';
-export { CustomSeriesColorsMap } from './lib/series/specs';
+export { CustomSeriesColorsMap, AnnotationDatum, AnnotationDomainTypes } from './lib/series/specs';
