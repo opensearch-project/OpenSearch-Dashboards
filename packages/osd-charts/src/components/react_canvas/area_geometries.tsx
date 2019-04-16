@@ -9,6 +9,7 @@ import {
   buildAreaLineProps,
   buildAreaPointProps,
   buildAreaProps,
+  buildPointStyleProps,
 } from './utils/rendering_props_utils';
 
 interface AreaGeometriesDataProps {
@@ -24,7 +25,7 @@ interface AreaGeometriesDataState {
 export class AreaGeometries extends React.PureComponent<
   AreaGeometriesDataProps,
   AreaGeometriesDataState
-> {
+  > {
   static defaultProps: Partial<AreaGeometriesDataProps> = {
     animated: false,
   };
@@ -41,29 +42,47 @@ export class AreaGeometries extends React.PureComponent<
 
     return (
       <Group ref={this.barSeriesRef} key={'bar_series'}>
-        {area.visible && this.renderAreaGeoms()}
-        {line.visible && this.renderAreaLines()}
-        {point.visible && this.renderAreaPoints()}
+        {this.renderAreaGeoms(area.visible)}
+        {this.renderAreaLines(line.visible)}
+        {this.renderAreaPoints(point.visible)}
       </Group>
     );
   }
-  private renderAreaPoints = (): JSX.Element[] => {
+  private renderAreaPoints = (themeIsVisible: boolean): JSX.Element[] => {
     const { areas } = this.props;
     return areas.reduce(
       (acc, glyph, i) => {
-        const { points } = glyph;
-        return [...acc, ...this.renderPoints(points, i)];
+        const { points, seriesPointStyle } = glyph;
+
+        const isVisible = seriesPointStyle ? seriesPointStyle.visible : themeIsVisible;
+        if (!isVisible) {
+          return acc;
+        }
+
+        const { radius, strokeWidth, opacity } = this.props.style.point;
+        const pointStyleProps = buildPointStyleProps({
+          radius,
+          strokeWidth,
+          opacity,
+          seriesPointStyle,
+        });
+
+        return [...acc, ...this.renderPoints(points, i, pointStyleProps)];
       },
       [] as JSX.Element[],
     );
   }
-  private renderPoints = (areaPoints: PointGeometry[], areaIndex: number): JSX.Element[] => {
-    const { radius, strokeWidth, opacity } = this.props.style.point;
-
-    return areaPoints.map((areaPoint, pointIndex) => {
+  private renderPoints = (
+    areaPoints: PointGeometry[],
+    areaIndex: number,
+    pointStyleProps: any,
+  ): JSX.Element[] => {
+    const areaPointElements: JSX.Element[] = [];
+    areaPoints.forEach((areaPoint, pointIndex) => {
       const { x, y, color, transform } = areaPoint;
+
       if (this.props.animated) {
-        return (
+        areaPointElements.push(
           <Group key={`area-point-group-${areaIndex}-${pointIndex}`} x={transform.x}>
             <Spring native from={{ y }} to={{ y }}>
               {(props: { y: number }) => {
@@ -72,41 +91,42 @@ export class AreaGeometries extends React.PureComponent<
                   pointIndex,
                   x,
                   y,
-                  radius,
-                  strokeWidth,
                   color,
-                  opacity,
+                  pointStyleProps,
                 });
                 return <animated.Circle {...pointProps} />;
               }}
             </Spring>
-          </Group>
-        );
+          </Group>);
       } else {
         const pointProps = buildAreaPointProps({
           areaIndex,
           pointIndex,
           x: transform.x + x,
           y,
-          radius,
-          strokeWidth,
           color,
-          opacity,
+          pointStyleProps,
         });
-        return <Circle {...pointProps} />;
+        areaPointElements.push(<Circle {...pointProps} />);
       }
     });
+    return areaPointElements;
   }
 
-  private renderAreaGeoms = (): JSX.Element[] => {
+  private renderAreaGeoms = (themeIsVisible: boolean): JSX.Element[] => {
     const { areas } = this.props;
     const { opacity } = this.props.style.area;
+    const areasToRender: JSX.Element[] = [];
 
-    return areas.map((glyph, i) => {
-      const { area, color, transform } = glyph;
+    areas.forEach((glyph, i) => {
+      const { area, color, transform, seriesAreaStyle } = glyph;
+      const isVisible = seriesAreaStyle ? seriesAreaStyle.visible : themeIsVisible;
+      if (!isVisible) {
+        return;
+      }
 
       if (this.props.animated) {
-        return (
+        areasToRender.push(
           <Group key={`area-group-${i}`} x={transform.x}>
             <Spring native from={{ area }} to={{ area }}>
               {(props: { area: string }) => {
@@ -115,34 +135,43 @@ export class AreaGeometries extends React.PureComponent<
                   areaPath: props.area,
                   color,
                   opacity,
+                  seriesAreaStyle,
                 });
                 return <animated.Path {...areaProps} />;
               }}
             </Spring>
-          </Group>
-        );
+          </Group>);
       } else {
         const areaProps = buildAreaProps({
           index: i,
           areaPath: area,
           color,
           opacity,
+          seriesAreaStyle,
         });
-        return <Path {...areaProps} />;
+        areasToRender.push(<Path {...areaProps} />);
       }
     });
+    return areasToRender;
   }
-  private renderAreaLines = (): JSX.Element[] => {
+  private renderAreaLines = (themeIsVisible: boolean): JSX.Element[] => {
     const { areas, sharedStyle } = this.props;
     const { strokeWidth } = this.props.style.line;
     const linesToRender: JSX.Element[] = [];
     areas.forEach((glyph, areaIndex) => {
-      const { lines, color, geometryId } = glyph;
+      const { lines, color, geometryId, seriesAreaLineStyle } = glyph;
+      const isVisible = seriesAreaLineStyle ? seriesAreaLineStyle.visible : themeIsVisible;
+      if (!isVisible) {
+        return;
+      }
+
+      const customOpacity = seriesAreaLineStyle ? seriesAreaLineStyle.opacity : undefined;
 
       const geometryStyle = getGeometryStyle(
         geometryId,
         this.props.highlightedLegendItem,
         sharedStyle,
+        customOpacity,
       );
 
       lines.forEach((linePath, lineIndex) => {
@@ -153,6 +182,7 @@ export class AreaGeometries extends React.PureComponent<
           color,
           strokeWidth,
           geometryStyle,
+          seriesAreaLineStyle,
         });
         linesToRender.push(<Path {...lineProps} />);
       });

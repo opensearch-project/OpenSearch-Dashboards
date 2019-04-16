@@ -1,4 +1,10 @@
-import { AnnotationLineStyle, GridLineConfig } from '../themes/theme';
+import {
+  AnnotationLineStyle,
+  AreaSeriesStyle,
+  CustomBarSeriesStyle,
+  GridLineConfig,
+  LineSeriesStyle,
+} from '../themes/theme';
 import { Accessor } from '../utils/accessor';
 import { AnnotationId, AxisId, GroupId, SpecId } from '../utils/ids';
 import { ScaleContinuousType, ScaleType } from '../utils/scales/scales';
@@ -86,7 +92,11 @@ export interface SeriesScales {
   yScaleToDataExtent: boolean;
 }
 
-export type BasicSeriesSpec = SeriesSpec & SeriesAccessors & SeriesScales;
+export type BasicSeriesSpec = SeriesSpec & SeriesAccessors & SeriesScales & {
+  barSeriesStyle?: CustomBarSeriesStyle;
+  lineSeriesStyle?: LineSeriesStyle;
+  areaSeriesStyle?: AreaSeriesStyle;
+};
 
 /**
  * This spec describe the dataset configuration used to display a bar series.

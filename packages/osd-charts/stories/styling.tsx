@@ -47,6 +47,40 @@ function range(
   );
 }
 
+function generateLineSeriesStyleKnobs(groupName: string) {
+  return {
+    line: {
+      stroke: DEFAULT_MISSING_COLOR,
+      strokeWidth: range(`line.strokeWidth (${groupName})`, 0, 10, 1, groupName),
+      visible: boolean(`line.visible (${groupName})`, true, groupName),
+      opacity: range(`line.opacity (${groupName})`, 0, 1, 1, groupName, 0.01),
+    },
+    border: {
+      stroke: 'gray',
+      strokeWidth: 2,
+      visible: false,
+    },
+    point: {
+      visible: boolean(`point.visible (${groupName})`, true, groupName),
+      radius: range(`point.radius (${groupName})`, 0, 20, 1, groupName, 0.5),
+      opacity: range(`point.opacity (${groupName})`, 0, 1, 1, groupName, 0.01),
+      stroke: '',
+      strokeWidth: 0.5,
+    },
+  };
+}
+
+function generateAreaSeriesStyleKnobs(groupName: string) {
+  return {
+    ...generateLineSeriesStyleKnobs(groupName),
+    area: {
+      fill: DEFAULT_MISSING_COLOR,
+      visible: boolean(`area.visible (${groupName})`, true, groupName),
+      opacity: range(`area.opacity ${groupName}`, 0, 1, 1, groupName, 0.01),
+    },
+  };
+}
+
 const dg = new DataGenerator();
 const data1 = dg.generateGroupedSeries(40, 4);
 const data2 = dg.generateSimpleSeries(40);
@@ -404,6 +438,217 @@ storiesOf('Stylings', module)
           yAccessors={['y']}
           customSeriesColors={lineCustomSeriesColors}
           data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('custom series styles: bars', () => {
+    const useOnlyChartTheme = boolean('ignore series style (use only chart theme)', false, 'chartTheme');
+
+    const barSeriesStyle1 = useOnlyChartTheme ? undefined : {
+      border: {
+        stroke: color('borderStroke 1', 'white', 'group1'),
+        strokeWidth: range('strokeWidth 1', 0, 10, 1, 'group1'),
+        visible: boolean('borderVisible 1', true, 'group1'),
+      },
+      opacity: range('opacity 1', 0, 1, 1, 'group1', 0.1),
+    };
+
+    const barSeriesStyle2 = useOnlyChartTheme ? undefined : {
+      border: {
+        stroke: color('borderStroke 2', 'white', 'group2'),
+        strokeWidth: range('strokeWidth 2', 0, 10, 1, 'group2'),
+        visible: boolean('borderVisible 2', true, 'group2'),
+      },
+      opacity: range('opacity 2', 0, 1, 1, 'group2', 0.1),
+    };
+
+    const chartTheme = {
+      ...LIGHT_THEME,
+      barSeriesStyle: {
+        border: {
+          stroke: color('theme borderStroke', 'white', 'chartTheme'),
+          strokeWidth: range('theme strokeWidth', 0, 10, 1, 'chartTheme'),
+          visible: boolean('theme borderVisible', true, 'chartTheme'),
+        },
+      },
+    };
+
+    const dataset1 = TestDatasets.BARCHART_2Y2G.filter((data) => data.g1 === 'cdn.google.com');
+    const dataset2 = TestDatasets.BARCHART_2Y2G.filter((data) => data.g1 === 'cloudflare.com');
+    const dataset3 = TestDatasets.BARCHART_2Y2G.filter((data) => data.g2 === 'indirect-cdn');
+
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Settings showLegend={true} legendPosition={Position.Right} theme={chartTheme} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          showOverlappingTicks={true}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y1', 'y2']}
+          splitSeriesAccessors={['g1', 'g2']}
+          data={dataset1}
+          yScaleToDataExtent={false}
+          barSeriesStyle={barSeriesStyle1}
+          name={'bars 1'}
+        />
+        <BarSeries
+          id={getSpecId('bars2')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y1', 'y2']}
+          splitSeriesAccessors={['g1', 'g2']}
+          data={dataset2}
+          yScaleToDataExtent={false}
+          barSeriesStyle={barSeriesStyle2}
+          name={'bars 2'}
+        />
+        <BarSeries
+          id={getSpecId('bars3')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y1', 'y2']}
+          splitSeriesAccessors={['g1', 'g2']}
+          data={dataset3}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('custom series styles: lines', () => {
+    const useOnlyChartTheme = boolean('ignore series style (use only chart theme)', false, 'chartTheme');
+    const lineSeriesStyle1 = useOnlyChartTheme ? undefined : generateLineSeriesStyleKnobs('lines1');
+    const lineSeriesStyle2 = useOnlyChartTheme ? undefined : generateLineSeriesStyleKnobs('lines2');
+
+    const chartTheme = {
+      ...LIGHT_THEME,
+      lineSeriesStyle: generateLineSeriesStyleKnobs('chartTheme'),
+    };
+
+    const dataset1 = [{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }];
+    const dataset2 = dataset1.map((datum) => ({ ...datum, y: datum.y - 1 }));
+    const dataset3 = dataset1.map((datum) => ({ ...datum, y: datum.y - 2 }));
+
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Settings showLegend={true} legendPosition={Position.Right} theme={chartTheme} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          // title={'Bottom axis'}
+          showOverlappingTicks={true}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <LineSeries
+          id={getSpecId('lines1')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={dataset1}
+          yScaleToDataExtent={false}
+          lineSeriesStyle={lineSeriesStyle1}
+        />
+        <LineSeries
+          id={getSpecId('lines2')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={dataset2}
+          yScaleToDataExtent={false}
+          lineSeriesStyle={lineSeriesStyle2}
+        />
+        <LineSeries
+          id={getSpecId('lines3')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={dataset3}
+          yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('custom series styles: area', () => {
+    const chartTheme = {
+      ...LIGHT_THEME,
+      areaSeriesStyle: generateAreaSeriesStyleKnobs('chartTheme'),
+    };
+
+    const useOnlyChartTheme = boolean('ignore series style (use only chart theme)', false, 'chartTheme');
+
+    const dataset1 = [{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }];
+    const dataset2 = dataset1.map((datum) => ({ ...datum, y: datum.y - 1 }));
+    const dataset3 = dataset1.map((datum) => ({ ...datum, y: datum.y - 2 }));
+
+    const areaStyle1 = useOnlyChartTheme ? undefined : generateAreaSeriesStyleKnobs('area1');
+    const areaStyle2 = useOnlyChartTheme ? undefined : generateAreaSeriesStyleKnobs('area2');
+
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Settings showLegend={true} legendPosition={Position.Right} theme={chartTheme} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <AreaSeries
+          id={getSpecId('area1')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={dataset1}
+          yScaleToDataExtent={false}
+          areaSeriesStyle={areaStyle1}
+        />
+        <AreaSeries
+          id={getSpecId('area2')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={dataset2}
+          yScaleToDataExtent={false}
+          areaSeriesStyle={areaStyle2}
+        />
+        <AreaSeries
+          id={getSpecId('area3')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={dataset3}
           yScaleToDataExtent={false}
         />
       </Chart>

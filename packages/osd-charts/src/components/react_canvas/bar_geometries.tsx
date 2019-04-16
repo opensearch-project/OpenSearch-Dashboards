@@ -20,7 +20,7 @@ interface BarGeometriesDataState {
 export class BarGeometries extends React.PureComponent<
   BarGeometriesDataProps,
   BarGeometriesDataState
-> {
+  > {
   static defaultProps: Partial<BarGeometriesDataProps> = {
     animated: false,
   };
@@ -44,11 +44,13 @@ export class BarGeometries extends React.PureComponent<
   private renderBarGeoms = (bars: BarGeometry[]): JSX.Element[] => {
     const { overBar } = this.state;
     const {
-      style: { border },
+      style,
       sharedStyle,
     } = this.props;
     return bars.map((bar, index) => {
-      const { x, y, width, height, color } = bar;
+      const { x, y, width, height, color, seriesStyle } = bar;
+      const border = seriesStyle ? seriesStyle.border : style.border;
+      const customOpacity = seriesStyle ? seriesStyle.opacity : undefined;
 
       // Properties to determine if we need to highlight individual bars depending on hover state
       const hasGeometryHover = overBar != null;
@@ -62,6 +64,7 @@ export class BarGeometries extends React.PureComponent<
         bar.geometryId,
         this.props.highlightedLegendItem,
         sharedStyle,
+        customOpacity,
         individualHighlight,
       );
 
