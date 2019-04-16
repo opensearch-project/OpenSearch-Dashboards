@@ -1,10 +1,11 @@
 language: node_js
 cache: yarn
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.15.2
+  - export PATH="$HOME/.yarn/bin:$PATH"
 script:
-  - yarn global add codecov -g
-  - yarn build && yarn lint && yarn test --coverage
+  - yarn build && yarn lint && yarn test
 after_success:
-  - codecov
   - yarn semantic-release
 before_deploy: yarn storybook:build
 deploy:

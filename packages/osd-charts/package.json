@@ -20,7 +20,7 @@
     "start": "yarn storybook",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "storybook:build": "rm -rf .out && build-storybook -c .storybook -o .out",
-    "lint": "yarn typecheck:all && tslint -c ./tslint.yaml -p ./tsconfig.json",
+    "lint": "yarn typecheck:all && tslint -c ./tslint.yaml -p ./tsconfig.all.json",
     "lint:fix": "yarn lint --fix",
     "prettier": "prettier --check --debug-check \"**/*.{ts,tsx}\"",
     "prettier:fix": "prettier --write \"{,!(node_modules)/}**/*.{ts,tsx}\"",
@@ -136,5 +136,9 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "engines": {
+    "node": "10.15.2",
+    "yarn": "^1.10.1"
   }
 }
