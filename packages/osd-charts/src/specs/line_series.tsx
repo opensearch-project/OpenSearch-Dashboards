@@ -22,9 +22,12 @@ export class LineSeriesSpecComponent extends PureComponent<LineSpecProps> {
     const { chartStore, children, ...config } = this.props;
     chartStore!.addSeriesSpec({ ...config });
   }
-  componentDidUpdate() {
+  componentDidUpdate(prevProps: LineSpecProps) {
     const { chartStore, children, ...config } = this.props;
     chartStore!.addSeriesSpec({ ...config });
+    if (prevProps.id !== this.props.id) {
+      chartStore!.removeSeriesSpec(prevProps.id);
+    }
   }
   componentWillUnmount() {
     const { chartStore, id } = this.props;

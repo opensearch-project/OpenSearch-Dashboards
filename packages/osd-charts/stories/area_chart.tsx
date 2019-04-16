@@ -20,15 +20,21 @@ const dateFormatter = timeFormatter('HH:mm');
 
 storiesOf('Area Chart', module)
   .add('basic', () => {
+    const toggleSpec = boolean('toggle area spec', true);
+    const data1 = KIBANA_METRICS.metrics.kibana_os_load[0].data;
+    const data2 = data1.map((datum) => [datum[0], datum[1] - 1]);
+    const data = toggleSpec ? data1 : data2;
+    const specId = toggleSpec ? 'areas1' : 'areas2';
+
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <AreaSeries
-          id={getSpecId('areas')}
+          id={getSpecId(specId)}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={0}
           yAccessors={[1]}
-          data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
+          data={data}
           yScaleToDataExtent={false}
         />
       </Chart>

@@ -1,3 +1,4 @@
+import { boolean } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import {
@@ -15,19 +16,26 @@ import {
 } from '../src/';
 import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
 import { TSVB_DATASET } from '../src/lib/series/utils/test_dataset_tsvb';
+
 const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
 
 storiesOf('Line Chart', module)
   .add('basic', () => {
+    const toggleSpec = boolean('toggle line spec', true);
+    const data1 = KIBANA_METRICS.metrics.kibana_os_load[0].data;
+    const data2 = data1.map((datum) => [datum[0], datum[1] - 1]);
+    const data = toggleSpec ? data1 : data2;
+    const specId = toggleSpec ? 'lines1' : 'lines2';
+
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <LineSeries
-          id={getSpecId('lines')}
+          id={getSpecId(specId)}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={0}
           yAccessors={[1]}
-          data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
+          data={data}
           yScaleToDataExtent={false}
         />
       </Chart>
