@@ -11,7 +11,6 @@ import {
   renderArea,
   renderBars,
   renderLine,
-  renderPoints,
 } from '../lib/series/rendering';
 import { computeXScale, computeYScales, countBarsInCluster } from '../lib/series/scales';
 import {
@@ -309,7 +308,7 @@ export function renderGeometries(
   const bars: BarGeometry[] = [];
   const areas: AreaGeometry[] = [];
   const lines: LineGeometry[] = [];
-  let pointGeometriesIndex: Map<any, IndexedGeometry[]> = new Map();
+  const pointGeometriesIndex: Map<any, IndexedGeometry[]> = new Map();
   let barGeometriesIndex: Map<any, IndexedGeometry[]> = new Map();
   let lineGeometriesIndex: Map<any, IndexedGeometry[]> = new Map();
   let areaGeometriesIndex: Map<any, IndexedGeometry[]> = new Map();
@@ -329,26 +328,6 @@ export function renderGeometries(
     }
     const color = seriesColorsMap.get(ds.seriesColorKey) || defaultColor;
     switch (spec.seriesType) {
-      case 'basic':
-        const pointShift = clusteredCount > 0 ? clusteredCount : 1;
-
-        const renderedPoints = renderPoints(
-          (xScale.bandwidth * pointShift) / 2,
-          ds.data,
-          xScale,
-          yScale,
-          color,
-          ds.specId,
-          Boolean(spec.y0Accessors),
-          ds.key,
-        );
-        points.push(...renderedPoints.pointGeometries);
-        pointGeometriesIndex = mergeGeometriesIndexes(
-          pointGeometriesIndex,
-          renderedPoints.indexedGeometries,
-        );
-        geometriesCounts.points += renderedPoints.pointGeometries.length;
-        break;
       case 'bar':
         const shift = isStacked ? indexOffset : indexOffset + i;
         const barSeriesStyle = spec.barSeriesStyle;

@@ -14,14 +14,17 @@ import { ReactiveChart as SVGChart } from './svg/reactive_chart';
 import { Tooltips } from './tooltips';
 
 interface ChartProps {
-  renderer: 'svg' | 'canvas' | 'canvas_old';
+  /** The type of rendered
+   * @default 'canvas'
+   */
+  renderer: 'svg' | 'canvas';
   size?: [number, number];
   className?: string;
 }
 
 export class Chart extends React.Component<ChartProps> {
-  static defaultProps: Pick<ChartProps, 'renderer'> = {
-    renderer: 'svg',
+  static defaultProps: ChartProps = {
+    renderer: 'canvas',
   };
   private chartSpecStore: ChartStore;
   constructor(props: any) {

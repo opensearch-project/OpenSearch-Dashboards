@@ -19,7 +19,7 @@ import { timeFormatter } from '../src/utils/data/formatters';
 storiesOf('Mixed Charts', module)
   .add('bar and lines', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
         <Axis
@@ -50,7 +50,7 @@ storiesOf('Mixed Charts', module)
   })
   .add('lines and areas', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -72,7 +72,6 @@ storiesOf('Mixed Charts', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2.5 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
         <LineSeries
           id={getSpecId('lines')}
@@ -82,7 +81,6 @@ storiesOf('Mixed Charts', module)
           yAccessors={['y']}
           stackAccessors={['x']}
           data={[{ x: 0, y: 2.8 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -147,7 +145,7 @@ storiesOf('Mixed Charts', module)
     const data2 = [[1, 5], [2, 4], [3, 3], [4, 2], [5, 1], [6, 2], [7, 3], [8, 4], [9, 5]];
 
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -169,7 +167,6 @@ storiesOf('Mixed Charts', module)
           xAccessor={0}
           yAccessors={[1]}
           data={data1}
-          yScaleToDataExtent={false}
         />
         <LineSeries
           id={getSpecId('data2')}
@@ -178,7 +175,6 @@ storiesOf('Mixed Charts', module)
           xAccessor={0}
           yAccessors={[1]}
           data={data2}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -210,7 +206,7 @@ storiesOf('Mixed Charts', module)
     const dateFormatter = timeFormatter('HH:mm:ss');
 
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -233,7 +229,6 @@ storiesOf('Mixed Charts', module)
           xAccessor={0}
           yAccessors={[1]}
           data={data1}
-          yScaleToDataExtent={false}
         />
         <LineSeries
           id={getSpecId('data2')}
@@ -242,7 +237,6 @@ storiesOf('Mixed Charts', module)
           xAccessor={0}
           yAccessors={[2]}
           data={data2}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );

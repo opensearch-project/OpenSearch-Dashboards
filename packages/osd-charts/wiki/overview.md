@@ -114,18 +114,26 @@ These datasets can be used as input for any type of chart specification. These a
 
 ```ts
 export interface SeriesSpec {
-  /* The ID of the spec, generated via getSpecId method */
+  /** The ID of the spec, generated via getSpecId method */
   id: SpecId;
-  /* The ID of the spec, generated via getGroupId method, default to __global__ */
+  /** The name or label of the spec */
+  name?: string;
+  /** The ID of the spec group, generated via getGroupId method
+   * @default __global__
+   */
   groupId: GroupId;
-  /* An array of data */
+  /** An array of data */
   data: Datum[];
-  /* If specified, it constrant the x domain to these values */
-  xDomain?: Domain;
-  /* If specified, it constrant the y Domain to these values */
-  yDomain?: Domain;
-  /* The type of series you are looking to render */
-  seriesType: 'bar' | 'line' | 'area' | 'basic';
+  /** The type of series you are looking to render */
+  seriesType: 'bar' | 'line' | 'area';
+  /** Custom colors for series */
+  customSeriesColors?: CustomSeriesColorsMap;
+  /** If the series should appear in the legend
+   * @default false
+   */
+  hideInLegend?: boolean;
+  /** Index per series to sort by */
+  sortIndex?: number;
 }
 
 export interface SeriesAccessors {
@@ -133,6 +141,8 @@ export interface SeriesAccessors {
   xAccessor: Accessor;
   /** An array of field names one per y metric value */
   yAccessors: Accessor[];
+  /** An optional accessor of the y0 value: base point for area/bar charts  */
+  y0Accessors?: Accessor[];
   /** An array of fields thats indicates the datum series membership */
   splitSeriesAccessors?: Accessor[];
   /** An array of fields thats indicates the stack membership */
@@ -148,11 +158,21 @@ export interface SeriesScales {
    */
   xScaleType: ScaleType.Ordinal | ScaleType.Linear | ScaleType.Time;
   /**
+   * If using a ScaleType.Time this timezone identifier is required to
+   * compute a nice set of xScale ticks. Can be any IANA zone supported by
+   * the host environment, or a fixed-offset name of the form 'utc+3',
+   * or the strings 'local' or 'utc'.
+   */
+  timeZone?: string;
+  /**
    * The y axis scale type
    * @default ScaleType.Linear
    */
   yScaleType: ScaleContinuousType;
-  /** if true, the min y value is set to the minimum domain value, 0 otherwise */
+  /**
+   * if true, the min y value is set to the minimum domain value, 0 otherwise
+   * @default false
+   */
   yScaleToDataExtent: boolean;
 }
 ```

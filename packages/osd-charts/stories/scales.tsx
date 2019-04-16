@@ -79,7 +79,7 @@ storiesOf('Scales', module)
         break;
     }
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis id={getAxisId('time')} position={Position.Bottom} tickFormat={tooltipFn} />
         <Axis id={getAxisId('y')} position={Position.Left} />
         <LineSeries
@@ -90,7 +90,6 @@ storiesOf('Scales', module)
           xAccessor={0}
           yAccessors={[1]}
           data={data}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -99,7 +98,7 @@ storiesOf('Scales', module)
     'x scale: UTC Time zone - local tooltip',
     () => {
       return (
-        <Chart renderer="canvas" className={'story-chart'}>
+        <Chart className={'story-chart'}>
           <Axis
             id={getAxisId('time')}
             position={Position.Bottom}
@@ -116,7 +115,6 @@ storiesOf('Scales', module)
             xAccessor={0}
             yAccessors={[1]}
             data={UTC_DATASET}
-            yScaleToDataExtent={false}
           />
         </Chart>
       );
@@ -133,7 +131,7 @@ storiesOf('Scales', module)
     'x scale: UTC Time zone - UTC tooltip',
     () => {
       return (
-        <Chart renderer="canvas" className={'story-chart'}>
+        <Chart className={'story-chart'}>
           <Axis
             id={getAxisId('time')}
             position={Position.Bottom}
@@ -152,7 +150,6 @@ storiesOf('Scales', module)
             xAccessor={0}
             yAccessors={[1]}
             data={UTC_DATASET}
-            yScaleToDataExtent={false}
           />
         </Chart>
       );
@@ -169,7 +166,7 @@ storiesOf('Scales', module)
     'x scale year scale: custom timezone - same zone tooltip',
     () => {
       return (
-        <Chart renderer="canvas" className={'story-chart'}>
+        <Chart className={'story-chart'}>
           <Axis
             id={getAxisId('time')}
             position={Position.Bottom}
@@ -193,7 +190,6 @@ storiesOf('Scales', module)
               ['2017-01-01T00:00:00.000-06:00', 1483250400000, 6206],
               ['2018-01-01T00:00:00.000-06:00', 1514786400000, 3698],
             ]}
-            yScaleToDataExtent={false}
           />
         </Chart>
       );

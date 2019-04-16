@@ -69,7 +69,7 @@ storiesOf('Annotations', module)
     const axisPosition = isBottom ? Position.Bottom : Position.Top;
 
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings debug={boolean('debug', false)} rotation={chartRotation} />
         <LineAnnotation
           annotationId={getAnnotationId('anno_1')}
@@ -87,7 +87,6 @@ storiesOf('Annotations', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -107,7 +106,7 @@ storiesOf('Annotations', module)
     );
 
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings debug={boolean('debug', false)} rotation={chartRotation} />
         <LineAnnotation
           annotationId={getAnnotationId('anno_1')}
@@ -129,7 +128,6 @@ storiesOf('Annotations', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 'a', y: 2 }, { x: 'b', y: 7 }, { x: 'c', y: 3 }, { x: 'd', y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -154,7 +152,7 @@ storiesOf('Annotations', module)
     const axisPosition = isLeft ? Position.Left : Position.Right;
 
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings debug={boolean('debug', false)} rotation={chartRotation} />
         <LineAnnotation
           annotationId={getAnnotationId('anno_')}
@@ -171,7 +169,6 @@ storiesOf('Annotations', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -197,7 +194,7 @@ storiesOf('Annotations', module)
     );
 
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings debug={boolean('debug', false)} rotation={chartRotation} />
         <LineAnnotation
           annotationId={getAnnotationId('anno_1')}
@@ -219,7 +216,6 @@ storiesOf('Annotations', module)
           xAccessor={0}
           yAccessors={[1]}
           data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 20)}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -263,7 +259,7 @@ storiesOf('Annotations', module)
     const hideTooltips = boolean('annotation tooltips hidden', false);
 
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings debug={boolean('debug', false)} rotation={chartRotation} />
         <LineAnnotation
           annotationId={getAnnotationId('anno_1')}
@@ -283,7 +279,6 @@ storiesOf('Annotations', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );

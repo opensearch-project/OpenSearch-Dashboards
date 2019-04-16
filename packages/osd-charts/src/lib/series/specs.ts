@@ -42,7 +42,7 @@ export interface SeriesSpec {
   /** An array of data */
   data: Datum[];
   /** The type of series you are looking to render */
-  seriesType: 'bar' | 'line' | 'area' | 'basic';
+  seriesType: 'bar' | 'line' | 'area';
   /** Custom colors for series */
   customSeriesColors?: CustomSeriesColorsMap;
   /** If the series should appear in the legend
@@ -88,7 +88,10 @@ export interface SeriesScales {
    * @default ScaleType.Linear
    */
   yScaleType: ScaleContinuousType;
-  /** if true, the min y value is set to the minimum domain value, 0 otherwise */
+  /**
+   * if true, the min y value is set to the minimum domain value, 0 otherwise
+   * @default false
+   */
   yScaleToDataExtent: boolean;
 }
 

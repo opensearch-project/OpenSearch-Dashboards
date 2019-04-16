@@ -45,7 +45,7 @@ const onLegendItemListeners = {
 storiesOf('Interactions', module)
   .add('bar clicks and hovers', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} {...onElementListeners} />
         <Axis
           id={getAxisId('bottom')}
@@ -67,14 +67,13 @@ storiesOf('Interactions', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('area point clicks and hovers', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} {...onElementListeners} />
         <Axis
           id={getAxisId('bottom')}
@@ -96,14 +95,13 @@ storiesOf('Interactions', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('line point clicks and hovers', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} {...onElementListeners} />
         <Axis
           id={getAxisId('bottom')}
@@ -125,14 +123,13 @@ storiesOf('Interactions', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('line area bar point clicks and hovers', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} {...onElementListeners} />
         <Axis
           id={getAxisId('bottom')}
@@ -155,7 +152,6 @@ storiesOf('Interactions', module)
           yAccessors={['y']}
           splitSeriesAccessors={['g']}
           data={[{ x: 0, y: 2.3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 8 }]}
-          yScaleToDataExtent={false}
         />
         <LineSeries
           id={getSpecId('line')}
@@ -164,7 +160,6 @@ storiesOf('Interactions', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
         <AreaSeries
           id={getSpecId('area')}
@@ -173,7 +168,6 @@ storiesOf('Interactions', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2.3 }, { x: 1, y: 7.3 }, { x: 2, y: 6 }, { x: 3, y: 2 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -216,7 +210,7 @@ storiesOf('Interactions', module)
     const data = hasAdditionalG1Value ? [...seriesData, additionalG1Value] : seriesData;
 
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings
           showLegend={true}
           legendPosition={Position.Right}
@@ -252,7 +246,7 @@ storiesOf('Interactions', module)
   })
   .add('click/hovers on legend items [area chart]', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -285,14 +279,13 @@ storiesOf('Interactions', module)
             { x: 2, y: 8, g: 'b' },
             { x: 3, y: 2, g: 'b' },
           ]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('click/hovers on legend items [line chart]', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -315,7 +308,6 @@ storiesOf('Interactions', module)
           yAccessors={['y']}
           curve={CurveType.CURVE_MONOTONE_X}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
         <LineSeries
           id={getSpecId('lines2')}
@@ -325,7 +317,6 @@ storiesOf('Interactions', module)
           yAccessors={['y']}
           curve={CurveType.CURVE_BASIS}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
         <LineSeries
           id={getSpecId('lines3')}
@@ -335,7 +326,6 @@ storiesOf('Interactions', module)
           yAccessors={['y']}
           curve={CurveType.CURVE_CARDINAL}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
         <LineSeries
           id={getSpecId('lines4')}
@@ -345,7 +335,6 @@ storiesOf('Interactions', module)
           yAccessors={['y']}
           curve={CurveType.CURVE_CATMULL_ROM}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
         <LineSeries
           id={getSpecId('lines5')}
@@ -355,7 +344,6 @@ storiesOf('Interactions', module)
           yAccessors={['y']}
           curve={CurveType.CURVE_NATURAL}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
         <LineSeries
           id={getSpecId('lines6')}
@@ -365,14 +353,13 @@ storiesOf('Interactions', module)
           yAccessors={['y']}
           curve={CurveType.LINEAR}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('click/hovers on legend items [mixed chart]', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -394,7 +381,6 @@ storiesOf('Interactions', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
         <LineSeries
           id={getSpecId('lines')}
@@ -405,14 +391,13 @@ storiesOf('Interactions', module)
           stackAccessors={['x']}
           splitSeriesAccessors={['g']}
           data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('brush selection tool on linear', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings onBrushEnd={action('onBrushEnd')} />
         <Axis
           id={getAxisId('bottom')}
@@ -446,14 +431,13 @@ storiesOf('Interactions', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('brush selection tool on bar chart linear', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings onBrushEnd={action('onBrushEnd')} />
         <Axis
           id={getAxisId('bottom')}
@@ -487,7 +471,6 @@ storiesOf('Interactions', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 1, y: 2 }, { x: 2, y: 7 }, { x: 3, y: 3 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -496,7 +479,7 @@ storiesOf('Interactions', module)
     const now = DateTime.fromISO('2019-01-11T00:00:00.000Z').toMillis();
     const oneDay = 1000 * 60 * 60 * 24;
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings debug={boolean('debug', false)} onBrushEnd={action('onBrushEnd')} />
         <Axis
           id={getAxisId('bottom')}
@@ -524,14 +507,13 @@ storiesOf('Interactions', module)
             { x: now + oneDay * 2, y: 3 },
             { x: now + oneDay * 5, y: 6 },
           ]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('brush disabled on ordinal x axis', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings onBrushEnd={action('onBrushEnd')} />
         <Axis
           id={getAxisId('bottom')}
@@ -547,7 +529,6 @@ storiesOf('Interactions', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 'a', y: 2 }, { x: 'b', y: 7 }, { x: 'c', y: 3 }, { x: 'd', y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -567,7 +548,7 @@ storiesOf('Interactions', module)
     const numberFormatter = (d: any) => Number(d).toFixed(2);
 
     return (
-      <Chart renderer="canvas" className={className}>
+      <Chart className={className}>
         <Settings
           debug={boolean('debug', false)}
           tooltipType={select(
@@ -605,7 +586,6 @@ storiesOf('Interactions', module)
             yAccessors={[1]}
             stackAccessors={[0]}
             data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 20)}
-            yScaleToDataExtent={false}
           />
         )}
         {!hideBars && (
@@ -617,7 +597,6 @@ storiesOf('Interactions', module)
             yAccessors={[1]}
             stackAccessors={[0]}
             data={KIBANA_METRICS.metrics.kibana_os_load[1].data.slice(0, 20)}
-            yScaleToDataExtent={false}
           />
         )}
         <LineSeries

@@ -55,7 +55,7 @@ function renderAxisWithOptions(position: Position, seriesGroup: string, show: bo
 storiesOf('Axis', module)
   .add('basic', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings debug={boolean('debug', false)} />
         <Axis
           id={getAxisId('bottom')}
@@ -77,14 +77,13 @@ storiesOf('Axis', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('tick label rotation', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -140,7 +139,6 @@ storiesOf('Axis', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
         <Settings debug={boolean('debug', false)} />
       </Chart>
@@ -148,7 +146,7 @@ storiesOf('Axis', module)
   })
   .add('4 axes', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -185,7 +183,6 @@ storiesOf('Axis', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -210,7 +207,7 @@ storiesOf('Axis', module)
     const seriesGroup1 = 'group1';
     const seriesGroup2 = 'group2';
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart size={[500, 300]} className={'story-chart'}>
         <Settings showLegend={false} theme={customTheme} debug={boolean('debug', true)} />
         {renderAxisWithOptions(Position.Top, seriesGroup1, false)}
         {renderAxisWithOptions(Position.Top, seriesGroup2, true)}
@@ -233,7 +230,7 @@ storiesOf('Axis', module)
   })
   .add('with multi axis bar/lines', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={false} />
         <Axis
           id={getAxisId('bottom')}
@@ -261,7 +258,6 @@ storiesOf('Axis', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
         <LineSeries
           id={getSpecId('lines')}
@@ -273,7 +269,6 @@ storiesOf('Axis', module)
           stackAccessors={['x']}
           splitSeriesAccessors={['g']}
           data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -282,7 +277,7 @@ storiesOf('Axis', module)
     const dg = new DataGenerator();
     const data = dg.generateSimpleSeries(31);
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings debug={true} />
         <Axis
           id={getAxisId('bottom')}
@@ -297,7 +292,6 @@ storiesOf('Axis', module)
           xAccessor="x"
           yAccessors={['y']}
           data={data}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -324,7 +318,7 @@ storiesOf('Axis', module)
     };
 
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={false} xDomain={xDomain} />
         <Axis
           id={getAxisId('bottom')}
@@ -363,7 +357,6 @@ storiesOf('Axis', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
         <LineSeries
           id={getSpecId('lines')}
@@ -375,7 +368,6 @@ storiesOf('Axis', module)
           stackAccessors={['x']}
           splitSeriesAccessors={['g']}
           data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -394,7 +386,7 @@ storiesOf('Axis', module)
     const xDomain = array('xDomain', ['a', 'b', 'c', 'd', 0, 1, 2, 3]);
 
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={false} xDomain={xDomain} />
         <Axis
           id={getAxisId('bottom')}
@@ -431,7 +423,6 @@ storiesOf('Axis', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 'a', y: 2 }, { x: 'b', y: 7 }, { x: 'c', y: 3 }, { x: 'd', y: 6 }]}
-          yScaleToDataExtent={false}
         />
         <LineSeries
           id={getSpecId('lines')}
@@ -443,7 +434,6 @@ storiesOf('Axis', module)
           stackAccessors={['x']}
           splitSeriesAccessors={['g']}
           data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -458,7 +448,7 @@ storiesOf('Axis', module)
     };
 
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={false} xDomain={xDomain} />
         <Axis
           id={getAxisId('bottom')}
@@ -480,7 +470,6 @@ storiesOf('Axis', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );

@@ -33,7 +33,7 @@ storiesOf('Bar Chart', module)
     const specId = toggleSpec ? 'bars1' : 'bars2';
 
     return (
-      <Chart renderer="canvas" className={className}>
+      <Chart className={className}>
         <BarSeries
           id={getSpecId(specId)}
           name={'Simple bar series'}
@@ -42,7 +42,6 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y']}
           data={data}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -52,7 +51,7 @@ storiesOf('Bar Chart', module)
     const className = darkmode ? 'story-chart-dark' : 'story-chart';
     const defaultTheme = darkmode ? DARK_THEME : LIGHT_THEME;
     return (
-      <Chart renderer="canvas" className={className}>
+      <Chart className={className}>
         <Settings theme={defaultTheme} />
         <Axis
           id={getAxisId('bottom')}
@@ -74,14 +73,13 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('with ordinal x axis', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -102,14 +100,13 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 'a', y: 2 }, { x: 'b', y: 7 }, { x: 'c', y: 3 }, { x: 'd', y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('with linear x axis', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -130,7 +127,6 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 1, y: 2 }, { x: 2, y: 7 }, { x: 4, y: 3 }, { x: 9, y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -138,7 +134,7 @@ storiesOf('Bar Chart', module)
   .add('with time x axis', () => {
     const formatter = timeFormatter(niceTimeFormatByDay(1));
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings debug={boolean('debug', false)} />
         <Axis
           id={getAxisId('bottom')}
@@ -162,14 +158,13 @@ storiesOf('Bar Chart', module)
           xAccessor={0}
           yAccessors={[1]}
           data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('with log y axis', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -206,7 +201,7 @@ storiesOf('Bar Chart', module)
   })
   .add('with stacked log y axis', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -253,7 +248,7 @@ storiesOf('Bar Chart', module)
   })
   .add('with axis and legend', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -276,14 +271,13 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('stacked with axis and legend', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -316,14 +310,13 @@ storiesOf('Bar Chart', module)
             { x: 2, y: 8, g: 'b' },
             { x: 3, y: 2, g: 'b' },
           ]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('clustered with axis and legend', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -355,14 +348,13 @@ storiesOf('Bar Chart', module)
             { x: 2, y: 8, g: 'b' },
             { x: 3, y: 2, g: 'b' },
           ]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('clustered multiple series specs', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -384,7 +376,6 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
         <BarSeries
           id={getSpecId('bar series 2')}
@@ -393,7 +384,6 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }, { x: 3, y: 4 }]}
-          yScaleToDataExtent={false}
         />
         <BarSeries
           id={getSpecId('bar series 3')}
@@ -412,7 +402,6 @@ storiesOf('Bar Chart', module)
             { x: 2, y: 9, g: 'b' },
             { x: 3, y: 2, g: 'b' },
           ]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -420,7 +409,7 @@ storiesOf('Bar Chart', module)
   .add('time clustered using various specs', () => {
     const formatter = timeFormatter(niceTimeFormatByDay(1));
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings debug={boolean('debug', false)} />
         <Axis
           id={getAxisId('bottom')}
@@ -444,7 +433,6 @@ storiesOf('Bar Chart', module)
           xAccessor={0}
           yAccessors={[1]}
           data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
-          yScaleToDataExtent={false}
         />
         <BarSeries
           id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[1].metric.label)}
@@ -453,7 +441,6 @@ storiesOf('Bar Chart', module)
           xAccessor={0}
           yAccessors={[1]}
           data={KIBANA_METRICS.metrics.kibana_os_load[1].data}
-          yScaleToDataExtent={false}
         />
         <BarSeries
           id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[2].metric.label)}
@@ -462,7 +449,6 @@ storiesOf('Bar Chart', module)
           xAccessor={0}
           yAccessors={[1]}
           data={KIBANA_METRICS.metrics.kibana_os_load[2].data}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -470,7 +456,7 @@ storiesOf('Bar Chart', module)
   .add('time stacked using various specs', () => {
     const formatter = timeFormatter(niceTimeFormatByDay(1));
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings debug={boolean('debug', false)} />
         <Axis
           id={getAxisId('bottom')}
@@ -495,7 +481,6 @@ storiesOf('Bar Chart', module)
           yAccessors={[1]}
           stackAccessors={[0]}
           data={KIBANA_METRICS.metrics.kibana_os_load[2].data.slice(0, 20)}
-          yScaleToDataExtent={false}
         />
         <BarSeries
           id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[1].metric.label)}
@@ -505,7 +490,6 @@ storiesOf('Bar Chart', module)
           yAccessors={[1]}
           stackAccessors={[0]}
           data={KIBANA_METRICS.metrics.kibana_os_load[1].data.slice(0, 20)}
-          yScaleToDataExtent={false}
         />
         <BarSeries
           id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[0].metric.label)}
@@ -515,14 +499,13 @@ storiesOf('Bar Chart', module)
           yAccessors={[1]}
           stackAccessors={[0]}
           data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 20)}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('1y0g', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -544,14 +527,13 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y']}
           data={TestDatasets.BARCHART_1Y0G}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('1y1g', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -574,14 +556,13 @@ storiesOf('Bar Chart', module)
           yAccessors={['y']}
           splitSeriesAccessors={['g']}
           data={TestDatasets.BARCHART_1Y1G}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('1y2g', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -604,14 +585,13 @@ storiesOf('Bar Chart', module)
           yAccessors={['y']}
           splitSeriesAccessors={['g1', 'g2']}
           data={TestDatasets.BARCHART_1Y2G}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('2y0g', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -633,14 +613,13 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y1', 'y2']}
           data={TestDatasets.BARCHART_2Y0G}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('2y1g', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -663,14 +642,13 @@ storiesOf('Bar Chart', module)
           yAccessors={['y1', 'y2']}
           splitSeriesAccessors={['g']}
           data={TestDatasets.BARCHART_2Y1G}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('2y2g', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -693,7 +671,6 @@ storiesOf('Bar Chart', module)
           yAccessors={['y1', 'y2']}
           splitSeriesAccessors={['g1', 'g2']}
           data={TestDatasets.BARCHART_2Y2G}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -702,7 +679,7 @@ storiesOf('Bar Chart', module)
     const dg = new DataGenerator();
     const data = dg.generateSimpleSeries(200);
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
         <Axis
           id={getAxisId('left2')}
@@ -718,14 +695,13 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y']}
           data={data}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('single data chart', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
         <Axis
           id={getAxisId('left2')}
@@ -741,14 +717,13 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 1, y: 10 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('single data clusterd chart', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
         <Axis
           id={getAxisId('left2')}
@@ -770,14 +745,13 @@ storiesOf('Bar Chart', module)
             { x: 1, y: 3, g: 'c' },
             { x: 1, y: 10, g: 'd' },
           ]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('single data stacked chart', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
         <Axis
           id={getAxisId('left2')}
@@ -800,14 +774,13 @@ storiesOf('Bar Chart', module)
             { x: 1, y: 3, g: 'c' },
             { x: 1, y: 10, g: 'd' },
           ]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('single data stacked chart scale to extent', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
         <Axis
           id={getAxisId('left2')}
@@ -832,7 +805,7 @@ storiesOf('Bar Chart', module)
   })
   .add('single data clustered chart scale to extent', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
         <Axis
           id={getAxisId('left2')}
@@ -856,7 +829,7 @@ storiesOf('Bar Chart', module)
   })
   .add('negative and positive x values', () => {
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
         <Axis
           id={getAxisId('left2')}
@@ -882,7 +855,6 @@ storiesOf('Bar Chart', module)
             { x: -1, y: 3 },
             { x: 3, y: 1 },
           ]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -923,7 +895,7 @@ storiesOf('Bar Chart', module)
     }
 
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis id={getAxisId('top')} position={Position.Top} title={'Top axis'} />
         <Axis
           id={getAxisId('left2')}
@@ -959,7 +931,7 @@ storiesOf('Bar Chart', module)
     });
     const scaleToDataExtent = boolean('scale to extent', true);
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           title={'timestamp per 1 minute'}
@@ -1002,7 +974,7 @@ storiesOf('Bar Chart', module)
   .add('[test] - linear', () => {
     const data = [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 4], [7, 3], [8, 2], [9, 1]];
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} />
         <Axis
           id={getAxisId('left')}
@@ -1017,7 +989,6 @@ storiesOf('Bar Chart', module)
           xAccessor={0}
           yAccessors={[1]}
           data={data}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -1036,7 +1007,7 @@ storiesOf('Bar Chart', module)
       [start.plus({ minute: 8 }).toMillis(), 1],
     ];
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           title={'index'}
@@ -1056,7 +1027,6 @@ storiesOf('Bar Chart', module)
           xAccessor={0}
           yAccessors={[1]}
           data={data}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -1074,7 +1044,7 @@ storiesOf('Bar Chart', module)
       [9, 1, 3],
     ];
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} />
         <Axis
           id={getAxisId('left')}
@@ -1089,7 +1059,6 @@ storiesOf('Bar Chart', module)
           xAccessor={0}
           yAccessors={[1, 2]}
           data={data}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -1108,7 +1077,7 @@ storiesOf('Bar Chart', module)
       [start.plus({ minute: 8 }).toMillis(), 1, 4],
     ];
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis
           id={getAxisId('bottom')}
           title={'index'}
@@ -1128,7 +1097,6 @@ storiesOf('Bar Chart', module)
           xAccessor={0}
           yAccessors={[1, 2]}
           data={data}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -1145,7 +1113,7 @@ storiesOf('Bar Chart', module)
       [4, 4, 6, 'b'],
     ];
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} />
         <Axis
           id={getAxisId('left')}
@@ -1161,7 +1129,6 @@ storiesOf('Bar Chart', module)
           yAccessors={[1]}
           splitSeriesAccessors={[3]}
           data={data}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -1178,7 +1145,7 @@ storiesOf('Bar Chart', module)
       [4, 4, 6, 'b'],
     ];
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} />
         <Axis
           id={getAxisId('left')}
@@ -1195,7 +1162,6 @@ storiesOf('Bar Chart', module)
           splitSeriesAccessors={[3]}
           stackAccessors={[0]}
           data={data}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );

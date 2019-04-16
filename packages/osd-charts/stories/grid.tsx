@@ -77,7 +77,7 @@ storiesOf('Grids', module)
     const bottomAxisGridLineConfig = generateGridLineConfig(Position.Bottom);
 
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart size={[500, 300]} className={'story-chart'}>
         <Settings debug={boolean('debug', false)} />
         <Axis
           id={getAxisId('bottom')}
@@ -118,7 +118,6 @@ storiesOf('Grids', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
         <LineSeries
           id={getSpecId('lines')}
@@ -130,7 +129,6 @@ storiesOf('Grids', module)
           stackAccessors={['x']}
           splitSeriesAccessors={['g']}
           data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -140,7 +138,7 @@ storiesOf('Grids', module)
     const leftAxisGridLineConfig2 = generateGridLineConfig(`${Position.Left}2`);
 
     return (
-      <Chart renderer="canvas" size={[500, 300]} className={'story-chart'}>
+      <Chart size={[500, 300]} className={'story-chart'}>
         <Settings debug={boolean('debug', false)} />
         <Axis
           id={getAxisId('left1')}
@@ -166,7 +164,6 @@ storiesOf('Grids', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
         <LineSeries
           id={getSpecId('lines')}
@@ -178,7 +175,6 @@ storiesOf('Grids', module)
           stackAccessors={['x']}
           splitSeriesAccessors={['g']}
           data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );

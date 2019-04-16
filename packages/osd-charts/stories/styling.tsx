@@ -104,7 +104,7 @@ storiesOf('Stylings', module)
     };
     const customTheme = mergeWithDefaultTheme(theme, LIGHT_THEME);
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings
           theme={customTheme}
           debug={boolean('debug', true)}
@@ -146,7 +146,6 @@ storiesOf('Stylings', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -180,7 +179,7 @@ storiesOf('Stylings', module)
     };
     const customTheme = mergeWithDefaultTheme(theme, LIGHT_THEME);
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings
           theme={customTheme}
           debug={boolean('debug', true)}
@@ -206,7 +205,6 @@ storiesOf('Stylings', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -320,7 +318,7 @@ storiesOf('Stylings', module)
     switchTheme(darkmode ? 'dark' : 'light');
 
     return (
-      <Chart renderer="canvas" className={className}>
+      <Chart className={className}>
         <Settings
           theme={customTheme}
           debug={boolean('debug', false)}
@@ -360,7 +358,6 @@ storiesOf('Stylings', module)
           splitSeriesAccessors={['g']}
           stackAccessors={['x']}
           data={data1}
-          yScaleToDataExtent={false}
         />
         <LineSeries
           id={getSpecId('lines')}
@@ -370,7 +367,6 @@ storiesOf('Stylings', module)
           yAccessors={['y']}
           curve={CurveType.CURVE_MONOTONE_X}
           data={data2}
-          yScaleToDataExtent={false}
         />
         <AreaSeries
           id={getSpecId('areas')}
@@ -380,7 +376,6 @@ storiesOf('Stylings', module)
           yAccessors={['y']}
           curve={CurveType.CURVE_MONOTONE_X}
           data={data3}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
@@ -404,7 +399,7 @@ storiesOf('Stylings', module)
     lineCustomSeriesColors.set(lineDataSeriesColorValues, customLineColorKnob);
 
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
+      <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
@@ -428,7 +423,6 @@ storiesOf('Stylings', module)
           splitSeriesAccessors={['g1', 'g2']}
           customSeriesColors={barCustomSeriesColors}
           data={TestDatasets.BARCHART_2Y2G}
-          yScaleToDataExtent={false}
         />
         <LineSeries
           id={getSpecId('lines')}
@@ -438,7 +432,6 @@ storiesOf('Stylings', module)
           yAccessors={['y']}
           customSeriesColors={lineCustomSeriesColors}
           data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
-          yScaleToDataExtent={false}
         />
       </Chart>
     );
