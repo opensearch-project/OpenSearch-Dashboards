@@ -107,12 +107,14 @@ describe('[canvas] Area Geometries props', () => {
     const props = buildAreaProps({
       index: 1,
       areaPath: 'M0,0L10,10Z',
+      xTransform: 40,
       color: 'red',
       opacity: 0.5,
     });
     expect(props).toEqual({
       key: 'area-1',
       data: 'M0,0L10,10Z',
+      x: 40,
       fill: 'red',
       lineCap: 'round',
       lineJoin: 'round',
@@ -125,6 +127,7 @@ describe('[canvas] Area Geometries props', () => {
     const seriesAreaStyle = buildAreaProps({
       index: 1,
       areaPath: 'M0,0L10,10Z',
+      xTransform: 0,
       color: 'red',
       opacity: 0.5,
       seriesAreaStyle: {
@@ -136,6 +139,7 @@ describe('[canvas] Area Geometries props', () => {
     expect(seriesAreaStyle).toEqual({
       key: 'area-1',
       data: 'M0,0L10,10Z',
+      x: 0,
       fill: 'red',
       lineCap: 'round',
       lineJoin: 'round',
@@ -149,6 +153,7 @@ describe('[canvas] Area Geometries props', () => {
     const props = buildAreaLineProps({
       areaIndex: 1,
       lineIndex: 2,
+      xTransform: 40,
       linePath: 'M0,0L10,10Z',
       color: 'red',
       strokeWidth: 1,
@@ -159,6 +164,7 @@ describe('[canvas] Area Geometries props', () => {
     expect(props).toEqual({
       key: `area-1-line-2`,
       data: 'M0,0L10,10Z',
+      x: 40,
       stroke: 'red',
       strokeWidth: 1,
       lineCap: 'round',
@@ -172,6 +178,7 @@ describe('[canvas] Area Geometries props', () => {
 
     const seriesLineStyle = buildAreaLineProps({
       areaIndex: 1,
+      xTransform: 0,
       lineIndex: 2,
       linePath: 'M0,0L10,10Z',
       color: 'red',
@@ -189,6 +196,7 @@ describe('[canvas] Area Geometries props', () => {
     expect(seriesLineStyle).toEqual({
       key: `area-1-line-2`,
       data: 'M0,0L10,10Z',
+      x: 0,
       stroke: 'red',
       strokeWidth: 66,
       lineCap: 'round',
@@ -299,6 +307,7 @@ describe('[canvas] Line Geometries', () => {
     const props = buildLineProps({
       index: 1,
       linePath: 'M0,0L10,10Z',
+      xTransform: 40,
       color: 'red',
       strokeWidth: 1,
       geometryStyle: {
@@ -308,6 +317,7 @@ describe('[canvas] Line Geometries', () => {
     expect(props).toEqual({
       key: `line-1`,
       data: 'M0,0L10,10Z',
+      x: 40,
       stroke: 'red',
       strokeWidth: 1,
       lineCap: 'round',
@@ -322,6 +332,7 @@ describe('[canvas] Line Geometries', () => {
     const seriesLineStyleProps = buildLineProps({
       index: 1,
       linePath: 'M0,0L10,10Z',
+      xTransform: 0,
       color: 'red',
       strokeWidth: 1,
       geometryStyle: {
@@ -336,6 +347,7 @@ describe('[canvas] Line Geometries', () => {
     expect(seriesLineStyleProps).toEqual({
       key: `line-1`,
       data: 'M0,0L10,10Z',
+      x: 0,
       stroke: 'red',
       strokeWidth: 66,
       lineCap: 'round',

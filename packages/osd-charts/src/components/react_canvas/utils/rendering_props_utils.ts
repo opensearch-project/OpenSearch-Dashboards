@@ -59,12 +59,14 @@ export function buildPointStyleProps({
 export function buildAreaProps({
   index,
   areaPath,
+  xTransform,
   color,
   opacity,
   seriesAreaStyle,
 }: {
   index: number;
   areaPath: string;
+  xTransform: number;
   color: string;
   opacity: number;
   seriesAreaStyle?: AreaStyle,
@@ -72,6 +74,7 @@ export function buildAreaProps({
   return {
     key: `area-${index}`,
     data: areaPath,
+    x: xTransform,
     fill: color,
     lineCap: 'round',
     lineJoin: 'round',
@@ -83,6 +86,7 @@ export function buildAreaProps({
 export function buildAreaLineProps({
   areaIndex,
   lineIndex,
+  xTransform,
   linePath,
   color,
   strokeWidth,
@@ -91,6 +95,7 @@ export function buildAreaLineProps({
 }: {
   areaIndex: number;
   lineIndex: number;
+  xTransform: number;
   linePath: string;
   color: string;
   strokeWidth: number;
@@ -100,6 +105,7 @@ export function buildAreaLineProps({
   return {
     key: `area-${areaIndex}-line-${lineIndex}`,
     data: linePath,
+    x: xTransform,
     stroke: color,
     strokeWidth: seriesAreaLineStyle ? seriesAreaLineStyle.strokeWidth : strokeWidth,
     lineCap: 'round',
@@ -174,6 +180,7 @@ export function buildLinePointProps({
 
 export function buildLineProps({
   index,
+  xTransform,
   linePath,
   color,
   strokeWidth,
@@ -181,6 +188,7 @@ export function buildLineProps({
   seriesLineStyle,
 }: {
   index: number;
+  xTransform: number;
   linePath: string;
   color: string;
   strokeWidth: number;
@@ -189,6 +197,7 @@ export function buildLineProps({
 }) {
   return {
     key: `line-${index}`,
+    x: xTransform,
     data: linePath,
     stroke: color,
     strokeWidth: seriesLineStyle ? seriesLineStyle.strokeWidth : strokeWidth,

@@ -133,6 +133,7 @@ export class AreaGeometries extends React.PureComponent<
                 const areaProps = buildAreaProps({
                   index: i,
                   areaPath: props.area,
+                  xTransform: 0,
                   color,
                   opacity,
                   seriesAreaStyle,
@@ -145,6 +146,7 @@ export class AreaGeometries extends React.PureComponent<
         const areaProps = buildAreaProps({
           index: i,
           areaPath: area,
+          xTransform: transform.x,
           color,
           opacity,
           seriesAreaStyle,
@@ -159,7 +161,7 @@ export class AreaGeometries extends React.PureComponent<
     const { strokeWidth } = this.props.style.line;
     const linesToRender: JSX.Element[] = [];
     areas.forEach((glyph, areaIndex) => {
-      const { lines, color, geometryId, seriesAreaLineStyle } = glyph;
+      const { lines, color, geometryId, transform, seriesAreaLineStyle } = glyph;
       const isVisible = seriesAreaLineStyle ? seriesAreaLineStyle.visible : themeIsVisible;
       if (!isVisible) {
         return;
@@ -178,6 +180,7 @@ export class AreaGeometries extends React.PureComponent<
         const lineProps = buildAreaLineProps({
           areaIndex,
           lineIndex,
+          xTransform: transform.x,
           linePath,
           color,
           strokeWidth,
