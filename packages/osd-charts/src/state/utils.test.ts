@@ -1,4 +1,5 @@
 import { mergeDomainsByGroupId } from '../lib/axes/axis_utils';
+import { IndexedGeometry } from '../lib/series/rendering';
 import { DataSeriesColorsValues, getSeriesColorMap } from '../lib/series/series';
 import {
   AreaSeriesSpec,
@@ -19,6 +20,7 @@ import {
   isHorizontalRotation,
   isLineAreaOnlyChart,
   isVerticalRotation,
+  mergeGeometriesIndexes,
   updateDeselectedDataSeries,
 } from './utils';
 
@@ -378,6 +380,108 @@ describe('Chart State utils', () => {
       expect(geometries.geometriesCounts.lines).toBe(2);
       expect(geometries.geometriesCounts.areas).toBe(2);
     });
+    test('can compute non stacked geometries indexes', () => {
+      const line1: LineSeriesSpec = {
+        id: getSpecId('line1'),
+        groupId: getGroupId('group1'),
+        seriesType: 'line',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Ordinal,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y0G,
+      };
+      const line2: LineSeriesSpec = {
+        id: getSpecId('line2'),
+        groupId: getGroupId('group2'),
+        seriesType: 'line',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Ordinal,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y0G,
+      };
+      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([[line1.id, line1], [line2.id, line2]]);
+      const axesSpecs = new Map<AxisId, AxisSpec>();
+      const chartRotation = 0;
+      const chartDimensions = { width: 100, height: 100, top: 0, left: 0 };
+      const chartColors = {
+        vizColors: ['violet', 'green', 'blue'],
+        defaultVizColor: 'red',
+      };
+      const domainsByGroupId = mergeDomainsByGroupId(axesSpecs, chartRotation);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
+      const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, chartColors, new Map());
+      const geometries = computeSeriesGeometries(
+        seriesSpecs,
+        seriesDomains.xDomain,
+        seriesDomains.yDomain,
+        seriesDomains.formattedDataSeries,
+        seriesColorMap,
+        chartColors,
+        chartDimensions,
+        chartRotation,
+      );
+      expect(geometries.geometriesIndex.size).toBe(4);
+      expect(geometries.geometriesIndex.get(0)!.length).toBe(2);
+      expect(geometries.geometriesIndex.get(1)!.length).toBe(2);
+      expect(geometries.geometriesIndex.get(2)!.length).toBe(2);
+      expect(geometries.geometriesIndex.get(3)!.length).toBe(2);
+    });
+    test('can compute stacked geometries indexes', () => {
+      const line1: LineSeriesSpec = {
+        id: getSpecId('line1'),
+        groupId: getGroupId('group1'),
+        seriesType: 'line',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Ordinal,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        stackAccessors: ['x'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y0G,
+      };
+      const line2: LineSeriesSpec = {
+        id: getSpecId('line2'),
+        groupId: getGroupId('group2'),
+        seriesType: 'line',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Ordinal,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        stackAccessors: ['x'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y0G,
+      };
+      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([[line1.id, line1], [line2.id, line2]]);
+      const axesSpecs = new Map<AxisId, AxisSpec>();
+      const chartRotation = 0;
+      const chartDimensions = { width: 100, height: 100, top: 0, left: 0 };
+      const chartColors = {
+        vizColors: ['violet', 'green', 'blue'],
+        defaultVizColor: 'red',
+      };
+      const domainsByGroupId = mergeDomainsByGroupId(axesSpecs, chartRotation);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
+      const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, chartColors, new Map());
+      const geometries = computeSeriesGeometries(
+        seriesSpecs,
+        seriesDomains.xDomain,
+        seriesDomains.yDomain,
+        seriesDomains.formattedDataSeries,
+        seriesColorMap,
+        chartColors,
+        chartDimensions,
+        chartRotation,
+      );
+      expect(geometries.geometriesIndex.size).toBe(4);
+      expect(geometries.geometriesIndex.get(0)!.length).toBe(2);
+      expect(geometries.geometriesIndex.get(1)!.length).toBe(2);
+      expect(geometries.geometriesIndex.get(2)!.length).toBe(2);
+      expect(geometries.geometriesIndex.get(3)!.length).toBe(2);
+    });
     test('can compute non stacked geometries counts', () => {
       const area: AreaSeriesSpec = {
         id: getSpecId('area'),
@@ -650,5 +754,34 @@ describe('Chart State utils', () => {
       expect(geometries.geometriesCounts.lines).toBe(0);
       expect(geometries.geometriesCounts.areas).toBe(0);
     });
+  });
+  test('can merge geometry indexes', () => {
+    const map1 = new Map<string, IndexedGeometry[]>();
+    map1.set('a', [
+      {
+        radius: 10,
+        x: 0,
+        y: 0,
+        color: '#1EA593',
+        value: { x: 0, y: 5, accessor: 'y1' },
+        transform: { x: 0, y: 0 },
+        geometryId: { specId: getSpecId('line1'), seriesKey: [] },
+      },
+    ]);
+    const map2 = new Map<string, IndexedGeometry[]>();
+    map2.set('a', [
+      {
+        radius: 10,
+        x: 0,
+        y: 175.8,
+        color: '#2B70F7',
+        value: { x: 0, y: 2, accessor: 'y1' },
+        transform: { x: 0, y: 0 },
+        geometryId: { specId: getSpecId('line2'), seriesKey: [] },
+      },
+    ]);
+    const merged = mergeGeometriesIndexes(map1, map2);
+    expect(merged.get('a')).toBeDefined();
+    expect(merged.get('a')!.length).toBe(2);
   });
 });
