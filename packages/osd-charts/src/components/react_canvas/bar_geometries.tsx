@@ -20,7 +20,7 @@ interface BarGeometriesDataState {
 export class BarGeometries extends React.PureComponent<
   BarGeometriesDataProps,
   BarGeometriesDataState
-  > {
+> {
   static defaultProps: Partial<BarGeometriesDataProps> = {
     animated: false,
   };
@@ -43,10 +43,7 @@ export class BarGeometries extends React.PureComponent<
 
   private renderBarGeoms = (bars: BarGeometry[]): JSX.Element[] => {
     const { overBar } = this.state;
-    const {
-      style,
-      sharedStyle,
-    } = this.props;
+    const { style, sharedStyle } = this.props;
     return bars.map((bar, index) => {
       const { x, y, width, height, color, seriesStyle } = bar;
       const border = seriesStyle ? seriesStyle.border : style.border;
@@ -68,8 +65,6 @@ export class BarGeometries extends React.PureComponent<
         individualHighlight,
       );
 
-      // min border depending on bar width bars with white border
-      const borderEnabled = border.visible && width > border.strokeWidth * 7;
       if (this.props.animated) {
         return (
           <Group key={index}>
@@ -84,7 +79,7 @@ export class BarGeometries extends React.PureComponent<
                   fill: color,
                   stroke: border.stroke,
                   strokeWidth: border.strokeWidth,
-                  borderEnabled,
+                  borderEnabled: border.visible,
                   geometryStyle,
                 });
 
@@ -103,7 +98,7 @@ export class BarGeometries extends React.PureComponent<
           fill: color,
           stroke: border.stroke,
           strokeWidth: border.strokeWidth,
-          borderEnabled,
+          borderEnabled: border.visible,
           geometryStyle,
         });
         return <Rect {...barProps} />;
