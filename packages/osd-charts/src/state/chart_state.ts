@@ -798,6 +798,7 @@ export class ChartStore {
         bboxCalculator,
         this.chartRotation,
         this.chartTheme.axes,
+        this.chartTheme.scales.barsPadding,
       );
       if (dimensions) {
         this.axesTicksDimensions.set(id, dimensions);
@@ -831,6 +832,7 @@ export class ChartStore {
       this.chartTheme.colors,
       this.chartDimensions,
       this.chartRotation,
+      this.chartTheme.scales.barsPadding,
     );
 
     // tslint:disable-next-line:no-console
@@ -852,6 +854,7 @@ export class ChartStore {
       seriesDomains.yDomain,
       totalBarsInCluster,
       this.legendPosition,
+      this.chartTheme.scales.barsPadding,
     );
     // tslint:disable-next-line:no-console
     // console.log({axisTicksPositions});

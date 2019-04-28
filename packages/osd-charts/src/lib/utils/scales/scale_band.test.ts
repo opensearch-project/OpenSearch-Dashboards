@@ -60,34 +60,24 @@ describe.only('Scale Band', () => {
     expect(scale.scale(null)).toBeUndefined();
   });
   it('shall scale a numeric domain with padding', () => {
-    const scale = new ScaleBand([0, 1, 2], [0, 100], [0, 1]);
+    const scale = new ScaleBand([0, 1, 2], [0, 120], undefined, 0.5);
     expect(scale.bandwidth).toBe(20);
-    expect(scale.step).toBe(20);
+    expect(scale.step).toBe(40);
     // an empty 1 step place at the beginning
-    expect(scale.scale(0)).toBe(20);
-    expect(scale.scale(1)).toBe(40);
-    expect(scale.scale(2)).toBe(60);
+    expect(scale.scale(0)).toBe(10); // padding
+    expect(scale.scale(1)).toBe(50); // padding + step
+    expect(scale.scale(2)).toBe(90);
     // an empty 1 step place at the end
 
-    const scale2 = new ScaleBand([0, 1, 2, 3], [0, 100], [0, 0.5]);
-    expect(scale2.bandwidth).toBe(20);
-    expect(scale2.step).toBe(20);
+    const scale2 = new ScaleBand([0, 1, 2, 3], [0, 100], undefined, 0.5);
+    expect(scale2.bandwidth).toBe(12.5);
+    expect(scale2.step).toBe(25);
     // an empty 1/2 step place at the beginning
-    expect(scale2.scale(0)).toBe(10);
-    expect(scale2.scale(1)).toBe(30);
-    expect(scale2.scale(2)).toBe(50);
-    expect(scale2.scale(3)).toBe(70);
+    expect(scale2.scale(0)).toBe(6.25);
+    expect(scale2.scale(1)).toBe(31.25);
+    expect(scale2.scale(2)).toBe(56.25);
+    expect(scale2.scale(3)).toBe(81.25);
     // an empty 1/2 step place at the end
-  });
-  it('shall scale a numeric domain with rounding', () => {
-    const scale = new ScaleBand([0, 1, 2, 3], [0, 100], [0, 1], true);
-    expect(scale.bandwidth).toBe(16);
-    expect(scale.step).toBe(16);
-    // an empty 1 step place at the beginning
-    expect(scale.scale(0)).toBe(18);
-    expect(scale.scale(1)).toBe(34);
-    expect(scale.scale(2)).toBe(50);
-    // an empty 1 step place at the end
   });
   test('shall invert all values in range', () => {
     const domain = ['a', 'b', 'c', 'd'];

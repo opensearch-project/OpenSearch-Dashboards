@@ -104,78 +104,75 @@ describe('Crosshair utils ordinal scales', () => {
 
   test('can snap position on scale ordinal bar', () => {
     let snappedPosition = getSnapPosition('a', barSeriesScale);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toEqual(0);
+    expect(snappedPosition!.band).toEqual(40);
+    expect(snappedPosition!.position).toEqual(0);
 
     snappedPosition = getSnapPosition('b', barSeriesScale);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toEqual(40);
+    expect(snappedPosition!.band).toEqual(40);
+    expect(snappedPosition!.position).toEqual(40);
 
     snappedPosition = getSnapPosition('c', barSeriesScale);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toEqual(80);
+    expect(snappedPosition!.band).toEqual(40);
+    expect(snappedPosition!.position).toEqual(80);
 
     snappedPosition = getSnapPosition('x', barSeriesScale);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toBeUndefined();
+    expect(snappedPosition).toBeUndefined();
 
     snappedPosition = getSnapPosition('a', multiBarSeriesScale, 2);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toEqual(0);
+    expect(snappedPosition!.band).toEqual(40);
+    expect(snappedPosition!.position).toEqual(0);
 
     snappedPosition = getSnapPosition('b', multiBarSeriesScale, 2);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toEqual(40);
+    expect(snappedPosition!.band).toEqual(40);
+    expect(snappedPosition!.position).toEqual(40);
 
     snappedPosition = getSnapPosition('c', multiBarSeriesScale, 2);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toEqual(80);
+    expect(snappedPosition!.band).toEqual(40);
+    expect(snappedPosition!.position).toEqual(80);
   });
   test('can snap position on scale ordinal lines', () => {
     let snappedPosition = getSnapPosition('a', lineSeriesScale);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toEqual(0);
+    expect(snappedPosition!.band).toEqual(40);
+    expect(snappedPosition!.position).toEqual(0);
 
     snappedPosition = getSnapPosition('b', lineSeriesScale);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toEqual(40);
+    expect(snappedPosition!.band).toEqual(40);
+    expect(snappedPosition!.position).toEqual(40);
 
     snappedPosition = getSnapPosition('c', lineSeriesScale);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toEqual(80);
+    expect(snappedPosition!.band).toEqual(40);
+    expect(snappedPosition!.position).toEqual(80);
 
     snappedPosition = getSnapPosition('x', lineSeriesScale);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toBeUndefined();
+    expect(snappedPosition).toBeUndefined();
 
     snappedPosition = getSnapPosition('a', multiLineSeriesScale, 2);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toEqual(0);
+    expect(snappedPosition!.band).toEqual(40);
+    expect(snappedPosition!.position).toEqual(0);
 
     snappedPosition = getSnapPosition('b', multiLineSeriesScale, 2);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toEqual(40);
+    expect(snappedPosition!.band).toEqual(40);
+    expect(snappedPosition!.position).toEqual(40);
 
     snappedPosition = getSnapPosition('c', multiLineSeriesScale, 2);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toEqual(80);
+    expect(snappedPosition!.band).toEqual(40);
+    expect(snappedPosition!.position).toEqual(80);
   });
 
   test('can snap position on scale ordinal mixed lines/bars', () => {
     let snappedPosition = getSnapPosition('a', mixedLinesBarsSeriesScale, 4);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toEqual(0);
+    expect(snappedPosition!.band).toEqual(40);
+    expect(snappedPosition!.position).toEqual(0);
 
     snappedPosition = getSnapPosition('b', mixedLinesBarsSeriesScale, 4);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toEqual(40);
+    expect(snappedPosition!.band).toEqual(40);
+    expect(snappedPosition!.position).toEqual(40);
 
     snappedPosition = getSnapPosition('c', mixedLinesBarsSeriesScale, 4);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toEqual(80);
+    expect(snappedPosition!.band).toEqual(40);
+    expect(snappedPosition!.position).toEqual(80);
 
     snappedPosition = getSnapPosition('x', mixedLinesBarsSeriesScale, 4);
-    expect(snappedPosition.band).toEqual(40);
-    expect(snappedPosition.position).toBeUndefined();
+    expect(snappedPosition).toBeUndefined();
   });
 });

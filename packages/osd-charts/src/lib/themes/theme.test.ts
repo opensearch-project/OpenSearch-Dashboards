@@ -193,9 +193,7 @@ describe('Themes', () => {
 
   it('should merge partial theme: scales', () => {
     const scales: ScalesConfig = {
-      ordinal: {
-        padding: 314571,
-      },
+      barsPadding: 314571,
     };
     const customTheme = mergeWithDefaultTheme({
       scales,

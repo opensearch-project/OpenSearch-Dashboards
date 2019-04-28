@@ -62,6 +62,7 @@ export function computeAxisTicksDimensions(
   bboxCalculator: BBoxCalculator,
   chartRotation: Rotation,
   axisConfig: AxisConfig,
+  barsPadding?: number,
 ): AxisTicksDimensions | null {
   if (axisSpec.hide) {
     return null;
@@ -75,6 +76,7 @@ export function computeAxisTicksDimensions(
     chartRotation,
     0,
     1,
+    barsPadding,
   );
   if (!scale) {
     throw new Error(`Cannot compute scale for axis spec ${axisSpec.id}`);
@@ -111,6 +113,7 @@ export function getScaleForAxisSpec(
   chartRotation: Rotation,
   minRange: number,
   maxRange: number,
+  barsPadding?: number,
 ): Scale | null {
   const axisIsYDomain = isYDomain(axisSpec.position, chartRotation);
 
@@ -121,7 +124,7 @@ export function getScaleForAxisSpec(
     }
     return null;
   } else {
-    return computeXScale(xDomain, totalBarsInCluster, minRange, maxRange);
+    return computeXScale(xDomain, totalBarsInCluster, minRange, maxRange, barsPadding);
   }
 }
 
@@ -505,6 +508,7 @@ export function getAxisTicksPositions(
   yDomain: YDomain[],
   totalGroupsCount: number,
   legendPosition?: Position,
+  barsPadding?: number,
 ) {
   const { chartPaddings, chartMargins } = chartTheme;
   const legendStyle = chartTheme.legend;
@@ -556,8 +560,7 @@ export function getAxisTicksPositions(
       chartRotation,
       minMaxRanges.minRange,
       minMaxRanges.maxRange,
-      // minRange,
-      // maxRange,
+      barsPadding,
     );
 
     if (!scale) {

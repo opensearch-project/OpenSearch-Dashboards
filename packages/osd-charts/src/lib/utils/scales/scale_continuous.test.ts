@@ -8,7 +8,7 @@ describe('Scale Continuous', () => {
     const domain = [0, 2];
     const minRange = 0;
     const maxRange = 100;
-    const scale = new ScaleContinuous(domain, [minRange, maxRange], ScaleType.Linear);
+    const scale = new ScaleContinuous(ScaleType.Linear, domain, [minRange, maxRange]);
     expect(scale.invert(0)).toBe(0);
     expect(scale.invert(50)).toBe(1);
     expect(scale.invert(100)).toBe(2);
@@ -20,7 +20,7 @@ describe('Scale Continuous', () => {
     const domain = [startTime.toMillis(), endTime.toMillis()];
     const minRange = 0;
     const maxRange = 100;
-    const scale = new ScaleContinuous(domain, [minRange, maxRange], ScaleType.Time);
+    const scale = new ScaleContinuous(ScaleType.Time, domain, [minRange, maxRange]);
     expect(scale.invert(0)).toBe(startTime.toMillis());
     expect(scale.invert(50)).toBe(midTime.toMillis());
     expect(scale.invert(100)).toBe(endTime.toMillis());
@@ -28,10 +28,10 @@ describe('Scale Continuous', () => {
   test('check if a scale is log scale', () => {
     const domain = [0, 2];
     const range: [number, number] = [0, 100];
-    const scaleLinear = new ScaleContinuous(domain, range, ScaleType.Linear);
-    const scaleLog = new ScaleContinuous(domain, range, ScaleType.Log);
-    const scaleTime = new ScaleContinuous(domain, range, ScaleType.Time);
-    const scaleSqrt = new ScaleContinuous(domain, range, ScaleType.Sqrt);
+    const scaleLinear = new ScaleContinuous(ScaleType.Linear, domain, range);
+    const scaleLog = new ScaleContinuous(ScaleType.Log, domain, range);
+    const scaleTime = new ScaleContinuous(ScaleType.Time, domain, range);
+    const scaleSqrt = new ScaleContinuous(ScaleType.Sqrt, domain, range);
     const scaleBand = new ScaleBand(domain, range);
     expect(isLogarithmicScale(scaleLinear)).toBe(false);
     expect(isLogarithmicScale(scaleLog)).toBe(true);

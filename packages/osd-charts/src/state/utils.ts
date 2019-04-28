@@ -158,6 +158,7 @@ export function computeSeriesGeometries(
   chartColors: ColorConfig,
   chartDims: Dimensions,
   chartRotation: Rotation,
+  barsPadding?: number,
 ): {
   scales: {
     xScale: Scale;
@@ -181,7 +182,7 @@ export function computeSeriesGeometries(
   const { stackedBarsInCluster, totalBarsInCluster } = countBarsInCluster(stacked, nonStacked);
 
   // compute scales
-  const xScale = computeXScale(xDomain, totalBarsInCluster, 0, width);
+  const xScale = computeXScale(xDomain, totalBarsInCluster, 0, width, barsPadding);
   const yScales = computeYScales(yDomain, height, 0);
 
   // compute colors

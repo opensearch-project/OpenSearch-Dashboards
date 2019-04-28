@@ -76,10 +76,9 @@ describe('[Scale Time] - timezones', () => {
       const maxRange = 100;
       const minInterval = (endTime - startTime) / 2;
       const scale = new ScaleContinuous(
+        ScaleType.Time,
         domain,
         [minRange, maxRange],
-        ScaleType.Time,
-        undefined,
         undefined,
         minInterval,
         'local',
@@ -108,10 +107,9 @@ describe('[Scale Time] - timezones', () => {
       const maxRange = 100;
       const minInterval = (endTime - startTime) / 2;
       const scale = new ScaleContinuous(
+        ScaleType.Time,
         domain,
         [minRange, maxRange],
-        ScaleType.Time,
-        undefined,
         undefined,
         minInterval,
         'utc',
@@ -140,10 +138,9 @@ describe('[Scale Time] - timezones', () => {
       const maxRange = 100;
       const minInterval = (endTime - startTime) / 2;
       const scale = new ScaleContinuous(
+        ScaleType.Time,
         domain,
         [minRange, maxRange],
-        ScaleType.Time,
-        undefined,
         undefined,
         minInterval,
         'utc+8',
@@ -172,10 +169,9 @@ describe('[Scale Time] - timezones', () => {
       const maxRange = 100;
       const minInterval = (endTime - startTime) / 2;
       const scale = new ScaleContinuous(
+        ScaleType.Time,
         domain,
         [minRange, maxRange],
-        ScaleType.Time,
-        undefined,
         undefined,
         minInterval,
         'utc-8',
@@ -208,10 +204,9 @@ describe('[Scale Time] - timezones', () => {
         const maxRange = 100;
         const minInterval = (endTime - startTime) / 2;
         const scale = new ScaleContinuous(
+          ScaleType.Time,
           domain,
           [minRange, maxRange],
-          ScaleType.Time,
-          undefined,
           undefined,
           minInterval,
           timezone,

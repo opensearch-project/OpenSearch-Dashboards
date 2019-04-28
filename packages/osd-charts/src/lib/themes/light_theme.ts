@@ -63,9 +63,7 @@ export const LIGHT_THEME: Theme = {
   },
   sharedStyle: DEFAULT_GEOMETRY_STYLES,
   scales: {
-    ordinal: {
-      padding: 0.25,
-    },
+    barsPadding: 0.25,
   },
   axes: {
     axisTitleStyle: {

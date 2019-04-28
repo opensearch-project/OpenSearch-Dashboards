@@ -101,6 +101,9 @@ storiesOf('Stylings', module)
         top: range('padding top', 0, 50, 10),
         bottom: range('padding bottom', 0, 50, 10),
       },
+      scales: {
+        barsPadding: range('bar padding', 0, 1, 0.1, undefined, 0.01),
+      },
     };
     const customTheme = mergeWithDefaultTheme(theme, LIGHT_THEME);
     return (
@@ -437,25 +440,33 @@ storiesOf('Stylings', module)
     );
   })
   .add('custom series styles: bars', () => {
-    const useOnlyChartTheme = boolean('ignore series style (use only chart theme)', false, 'chartTheme');
+    const useOnlyChartTheme = boolean(
+      'ignore series style (use only chart theme)',
+      false,
+      'chartTheme',
+    );
 
-    const barSeriesStyle1 = useOnlyChartTheme ? undefined : {
-      border: {
-        stroke: color('borderStroke 1', 'white', 'group1'),
-        strokeWidth: range('strokeWidth 1', 0, 10, 1, 'group1'),
-        visible: boolean('borderVisible 1', true, 'group1'),
-      },
-      opacity: range('opacity 1', 0, 1, 1, 'group1', 0.1),
-    };
+    const barSeriesStyle1 = useOnlyChartTheme
+      ? undefined
+      : {
+          border: {
+            stroke: color('borderStroke 1', 'white', 'group1'),
+            strokeWidth: range('strokeWidth 1', 0, 10, 1, 'group1'),
+            visible: boolean('borderVisible 1', true, 'group1'),
+          },
+          opacity: range('opacity 1', 0, 1, 1, 'group1', 0.1),
+        };
 
-    const barSeriesStyle2 = useOnlyChartTheme ? undefined : {
-      border: {
-        stroke: color('borderStroke 2', 'white', 'group2'),
-        strokeWidth: range('strokeWidth 2', 0, 10, 1, 'group2'),
-        visible: boolean('borderVisible 2', true, 'group2'),
-      },
-      opacity: range('opacity 2', 0, 1, 1, 'group2', 0.1),
-    };
+    const barSeriesStyle2 = useOnlyChartTheme
+      ? undefined
+      : {
+          border: {
+            stroke: color('borderStroke 2', 'white', 'group2'),
+            strokeWidth: range('strokeWidth 2', 0, 10, 1, 'group2'),
+            visible: boolean('borderVisible 2', true, 'group2'),
+          },
+          opacity: range('opacity 2', 0, 1, 1, 'group2', 0.1),
+        };
 
     const chartTheme = {
       ...LIGHT_THEME,
@@ -475,11 +486,7 @@ storiesOf('Stylings', module)
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} theme={chartTheme} />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          showOverlappingTicks={true}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} showOverlappingTicks={true} />
         <Axis
           id={getAxisId('left2')}
           title={'Left axis'}
@@ -525,7 +532,11 @@ storiesOf('Stylings', module)
     );
   })
   .add('custom series styles: lines', () => {
-    const useOnlyChartTheme = boolean('ignore series style (use only chart theme)', false, 'chartTheme');
+    const useOnlyChartTheme = boolean(
+      'ignore series style (use only chart theme)',
+      false,
+      'chartTheme',
+    );
     const lineSeriesStyle1 = useOnlyChartTheme ? undefined : generateLineSeriesStyleKnobs('lines1');
     const lineSeriesStyle2 = useOnlyChartTheme ? undefined : generateLineSeriesStyleKnobs('lines2');
 
@@ -591,7 +602,11 @@ storiesOf('Stylings', module)
       areaSeriesStyle: generateAreaSeriesStyleKnobs('chartTheme'),
     };
 
-    const useOnlyChartTheme = boolean('ignore series style (use only chart theme)', false, 'chartTheme');
+    const useOnlyChartTheme = boolean(
+      'ignore series style (use only chart theme)',
+      false,
+      'chartTheme',
+    );
 
     const dataset1 = [{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }];
     const dataset2 = dataset1.map((datum) => ({ ...datum, y: datum.y - 1 }));

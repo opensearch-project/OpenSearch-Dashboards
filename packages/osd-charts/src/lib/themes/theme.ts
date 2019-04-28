@@ -56,9 +56,12 @@ export interface GridLineConfig {
   dash?: number[];
 }
 export interface ScalesConfig {
-  ordinal: {
-    padding: number;
-  };
+  /**
+   * The proportion of the range that is reserved for blank space between bands.
+   * A value of 0 means no blank space between bands, and a value of 1 means a bandwidth of zero.
+   * A number between 0 and 1.
+   */
+  barsPadding: number;
 }
 export interface ColorConfig {
   vizColors: string[];
@@ -167,7 +170,9 @@ export function mergeWithDefaultGridLineConfig(config: GridLineConfig): GridLine
   };
 }
 
-export function mergeWithDefaultAnnotationLine(config?: Partial<AnnotationLineStyle>): AnnotationLineStyle {
+export function mergeWithDefaultAnnotationLine(
+  config?: Partial<AnnotationLineStyle>,
+): AnnotationLineStyle {
   const defaultLine = DEFAULT_ANNOTATION_LINE_STYLE.line;
   const defaultDetails = DEFAULT_ANNOTATION_LINE_STYLE.details;
   const mergedConfig: AnnotationLineStyle = { ...DEFAULT_ANNOTATION_LINE_STYLE };

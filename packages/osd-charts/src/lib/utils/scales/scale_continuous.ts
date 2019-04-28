@@ -1,5 +1,6 @@
 import { scaleLinear, scaleLog, scaleSqrt, scaleUtc } from 'd3-scale';
 import { DateTime } from 'luxon';
+import { clamp } from '../commons';
 import { ScaleContinuousType, ScaleType } from './scales';
 import { Scale } from './scales';
 
@@ -67,6 +68,8 @@ export enum StepType {
 
 export class ScaleContinuous implements Scale {
   readonly bandwidth: number;
+  readonly totalBarsInCluster: number;
+  readonly bandwidthPadding: number;
   readonly minInterval: number;
   readonly step: number;
   readonly type: ScaleType;
@@ -75,21 +78,41 @@ export class ScaleContinuous implements Scale {
   readonly isInverted: boolean;
   readonly tickValues: number[];
   readonly timeZone: string;
+  readonly barsPadding: number;
   private readonly d3Scale: any;
 
   constructor(
+    type: ScaleContinuousType,
     domain: any[],
     range: [number, number],
-    type: ScaleContinuousType,
-    clamp: boolean = false,
+    /**
+     * The desidered bandwidth for a linear band scale.
+     * @default 0
+     */
     bandwidth: number = 0,
-    /** the min interval computed on the XDomain, not available for yDomains */
+    /**
+     * The min interval computed on the XDomain. Not available for yDomains.
+     * @default 0
+     */
     minInterval: number = 0,
     /**
      * A time zone identifier. Can be any IANA zone supported by he host environment,
      * or a fixed-offset name of the form 'utc+3', or the strings 'local' or 'utc'.
+     * @default 'utc'
      */
     timeZone: string = 'utc',
+    /**
+     * The number of bars in the cluster. Used to correctly compute scales when
+     * using padding between bars.
+     * @default 1
+     */
+    totalBarsInCluster: number = 1,
+    /**
+     * The proportion of the range that is reserved for blank space between bands
+     * A number between 0 and 1.
+     * @default 0
+     */
+    barsPadding: number = 0,
   ) {
     this.d3Scale = SCALES[type]();
     if (type === ScaleType.Log) {
@@ -99,16 +122,18 @@ export class ScaleContinuous implements Scale {
       this.domain = domain;
       this.d3Scale.domain(domain);
     }
+    const safeBarPadding = clamp(barsPadding, 0, 1);
+    this.barsPadding = safeBarPadding;
+    this.bandwidth = bandwidth * (1 - safeBarPadding);
+    this.bandwidthPadding = bandwidth * safeBarPadding;
     this.d3Scale.range(range);
-    this.d3Scale.clamp(clamp);
-    // this.d3Scale.nice();
-    this.bandwidth = bandwidth;
     this.step = 0;
     this.type = type;
     this.range = range;
     this.minInterval = minInterval;
     this.isInverted = this.domain[0] > this.domain[1];
     this.timeZone = timeZone;
+    this.totalBarsInCluster = totalBarsInCluster;
     if (type === ScaleType.Time) {
       const startDomain = DateTime.fromMillis(this.domain[0], { zone: this.timeZone });
       const endDomain = DateTime.fromMillis(this.domain[1], { zone: this.timeZone });
@@ -135,7 +160,7 @@ export class ScaleContinuous implements Scale {
   }
 
   scale(value: any) {
-    return this.d3Scale(value);
+    return this.d3Scale(value) + (this.bandwidthPadding / 2) * this.totalBarsInCluster;
   }
 
   ticks() {

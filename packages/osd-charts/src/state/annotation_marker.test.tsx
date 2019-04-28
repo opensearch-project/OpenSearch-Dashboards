@@ -11,7 +11,8 @@ import {
 import { DEFAULT_ANNOTATION_LINE_STYLE } from '../lib/themes/theme';
 import { Dimensions } from '../lib/utils/dimensions';
 import { getAnnotationId, getGroupId, GroupId } from '../lib/utils/ids';
-import { createContinuousScale, Scale, ScaleType } from '../lib/utils/scales/scales';
+import { ScaleContinuous } from '../lib/utils/scales/scale_continuous';
+import { Scale, ScaleType } from '../lib/utils/scales/scales';
 import {
   AnnotationLinePosition,
   computeLineAnnotationDimensions,
@@ -27,12 +28,10 @@ describe('annotation marker', () => {
   const maxRange = 100;
 
   const continuousData = [0, 10];
-  const continuousScale = createContinuousScale(
-    ScaleType.Linear,
-    continuousData,
+  const continuousScale = new ScaleContinuous(ScaleType.Linear, continuousData, [
     minRange,
     maxRange,
-  );
+  ]);
 
   const chartDimensions: Dimensions = {
     width: 10,
