@@ -17,3 +17,4 @@ coverage/
 .yo-rc.json
 npm-debug.log
 yarn-error.log
+./playground/playground.tsx

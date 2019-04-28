@@ -23,13 +23,13 @@ export function niceTimeFormat(interval: Interval) {
 
 export function niceTimeFormatByDay(days: number) {
   if (days > 30) {
-    return 'yyyy-MM-DD';
+    return 'yyyy-MM-dd';
   }
   if (days > 7 && days <= 30) {
-    return 'MMM-DD';
+    return 'MMMM dd';
   }
   if (days > 1 && days <= 7) {
-    return 'MMM-DD HH:mm';
+    return 'MM-dd HH:mm';
   }
   return 'HH:mm:ss';
 }
