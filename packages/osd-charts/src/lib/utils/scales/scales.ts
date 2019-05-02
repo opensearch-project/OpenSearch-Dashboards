@@ -1,12 +1,10 @@
-import { StepType } from './scale_continuous';
-
 export interface Scale {
   domain: any[];
   range: number[];
   ticks: () => any[];
   scale: (value: any) => number;
   invert: (value: number) => any;
-  invertWithStep: (value: number, stepType?: StepType) => any;
+  invertWithStep: (value: number, data: any[]) => any;
   bandwidth: number;
   minInterval: number;
   type: ScaleType;

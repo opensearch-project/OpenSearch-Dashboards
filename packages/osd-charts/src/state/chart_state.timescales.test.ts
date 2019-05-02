@@ -146,19 +146,20 @@ describe('Render chart', () => {
       expect(store.geometries!.lines[0].points.length).toBe(3);
     });
     test('check scale values', () => {
+      const xValues = [date1, date2, date3];
       expect(store.xScale!.minInterval).toBe(1000 * 60 * 5);
       expect(store.xScale!.domain).toEqual([date1, date3]);
       expect(store.xScale!.range).toEqual([0, 100]);
       expect(store.xScale!.invert(0)).toBe(date1);
       expect(store.xScale!.invert(50)).toBe(date2);
       expect(store.xScale!.invert(100)).toBe(date3);
-      expect(store.xScale!.invertWithStep(5)).toBe(date1);
-      expect(store.xScale!.invertWithStep(20)).toBe(date1);
-      expect(store.xScale!.invertWithStep(30)).toBe(date2);
-      expect(store.xScale!.invertWithStep(50)).toBe(date2);
-      expect(store.xScale!.invertWithStep(70)).toBe(date2);
-      expect(store.xScale!.invertWithStep(80)).toBe(date3);
-      expect(store.xScale!.invertWithStep(100)).toBe(date3);
+      expect(store.xScale!.invertWithStep(5, xValues)).toBe(date1);
+      expect(store.xScale!.invertWithStep(20, xValues)).toBe(date1);
+      expect(store.xScale!.invertWithStep(30, xValues)).toBe(date2);
+      expect(store.xScale!.invertWithStep(50, xValues)).toBe(date2);
+      expect(store.xScale!.invertWithStep(70, xValues)).toBe(date2);
+      expect(store.xScale!.invertWithStep(80, xValues)).toBe(date3);
+      expect(store.xScale!.invertWithStep(100, xValues)).toBe(date3);
     });
     test('check mouse position correctly return inverted value', () => {
       store.setCursorPosition(15, 10); // check first valid tooltip

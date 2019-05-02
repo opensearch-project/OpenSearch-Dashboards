@@ -1,6 +1,5 @@
 import { scaleBand, scaleQuantize, ScaleQuantize } from 'd3-scale';
 import { clamp } from '../commons';
-import { StepType } from './scale_continuous';
 import { ScaleType } from './scales';
 import { Scale } from './scales';
 
@@ -61,7 +60,7 @@ export class ScaleBand implements Scale {
   invert(value: any) {
     return this.invertedScale(value);
   }
-  invertWithStep(value: any, stepType?: StepType) {
+  invertWithStep(value: any) {
     return this.invertedScale(value);
   }
 }

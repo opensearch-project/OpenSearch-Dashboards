@@ -157,7 +157,7 @@ describe('Chart state pointer interactions', () => {
     store.yScales = new Map();
     store.yScales.set(GROUP_ID, new ScaleContinuous(ScaleType.Linear, [0, 1], [0, 100]));
     store.geometriesIndex.set(0, [indexedGeom1Red]);
-
+    store.geometriesIndexKeys.push(0);
     store.tooltipType.set(TooltipType.None);
     store.setCursorPosition(10, 10 + 70);
     expect(store.tooltipData).toEqual([]);
@@ -165,6 +165,7 @@ describe('Chart state pointer interactions', () => {
 
     store.tooltipType.set(TooltipType.Follow);
     store.setCursorPosition(10, 10 + 70);
+    expect(store.geometriesIndexKeys.length).toBe(1);
     expect(store.isTooltipVisible.get()).toBe(true);
     expect(store.highlightedGeometries.length).toBe(1);
   });
@@ -198,6 +199,8 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     store.yScales = yScales;
     store.geometriesIndex.set(0, [indexedGeom1Red]);
     store.geometriesIndex.set(1, [indexedGeom2Blue]);
+    store.geometriesIndexKeys.push(0);
+    store.geometriesIndexKeys.push(1);
     onOverListener = jest.fn((elements: GeometryValue[]): undefined => undefined);
     onOutListener = jest.fn((): undefined => undefined);
     store.setOnElementOverListener(onOverListener);

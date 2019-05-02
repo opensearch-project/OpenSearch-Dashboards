@@ -132,6 +132,42 @@ storiesOf('Bar Chart', module)
       </Chart>
     );
   })
+  .add('with linear x axis no linear interval', () => {
+    return (
+      <Chart className={'story-chart'}>
+        <Settings xDomain={{ max: 100 }} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={[
+            { x: 0, y: 2 },
+            { x: 10, y: 7 },
+            { x: 11.5, y: 9 },
+            { x: 13.5, y: 3 },
+            { x: 50, y: 6 },
+            { x: 66, y: 13 },
+            { x: 90, y: 4 },
+          ]}
+        />
+      </Chart>
+    );
+  })
   .add('with time x axis', () => {
     const formatter = timeFormatter(niceTimeFormatByDay(1));
     return (
@@ -678,7 +714,7 @@ storiesOf('Bar Chart', module)
   })
   .add('with high data volume', () => {
     const dg = new DataGenerator();
-    const data = dg.generateSimpleSeries(200);
+    const data = dg.generateSimpleSeries(15000);
     return (
       <Chart className={'story-chart'}>
         <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />

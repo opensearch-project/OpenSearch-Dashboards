@@ -201,6 +201,7 @@ describe('Crosshair utils linear scale', () => {
       { x: 200, y: 0 },
       snapPosition,
       lineSeriesScale,
+      [0, 1, 2],
       1,
     );
     expect(bandPosition).toBeUndefined();
@@ -210,6 +211,7 @@ describe('Crosshair utils linear scale', () => {
       { x: 0, y: 200 },
       snapPosition,
       lineSeriesScale,
+      [0, 1, 2],
       1,
     );
     expect(bandPosition).toBeUndefined();
@@ -220,6 +222,7 @@ describe('Crosshair utils linear scale', () => {
       { x: -1, y: 0 },
       snapPosition,
       lineSeriesScale,
+      [0, 1, 2],
       1,
     );
     expect(bandPosition).toBeUndefined();
@@ -230,6 +233,7 @@ describe('Crosshair utils linear scale', () => {
       { x: 0, y: -1 },
       snapPosition,
       lineSeriesScale,
+      [0, 1, 2],
       1,
     );
     expect(bandPosition).toBeUndefined();
@@ -249,6 +253,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -266,6 +271,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 45 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -283,6 +289,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 40, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -300,6 +307,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 90, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -317,6 +325,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 200, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toBeUndefined();
@@ -333,6 +342,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -350,6 +360,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 45 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -367,6 +378,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 20, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -384,6 +396,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 40, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -401,6 +414,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 95, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -418,6 +432,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 200, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toBeUndefined();
@@ -435,6 +450,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -452,6 +468,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 45 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -469,6 +486,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 40, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -486,6 +504,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 90, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -503,6 +522,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 200, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toBeUndefined();
@@ -520,6 +540,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -537,6 +558,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 45 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -554,6 +576,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 20, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -571,6 +594,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 40, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -588,6 +612,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 95, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -605,6 +630,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 200, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toBeUndefined();
@@ -622,6 +648,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -639,6 +666,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 45, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -656,6 +684,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 40 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -673,6 +702,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 90 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -690,6 +720,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 200 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toBeUndefined();
@@ -707,6 +738,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -724,6 +756,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 45, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -741,6 +774,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 20 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -758,6 +792,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 40 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -775,6 +810,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 95 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -792,6 +828,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 200 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toBeUndefined();
@@ -809,6 +846,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -826,6 +864,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 45, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -843,6 +882,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 40 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -860,6 +900,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 90 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -877,6 +918,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 200 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toBeUndefined();
@@ -894,6 +936,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -911,6 +954,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 45, y: 0 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -928,6 +972,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 20 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -945,6 +990,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 40 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -962,6 +1008,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 95 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -979,6 +1026,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 200 },
           snapPosition,
           lineSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toBeUndefined();
@@ -999,6 +1047,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 0 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1016,6 +1065,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 45 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1027,12 +1077,28 @@ describe('Crosshair utils linear scale', () => {
       });
 
       test('increase of x axis increase the left param 1', () => {
-        const bandPosition = getCursorBandPosition(
+        let bandPosition = getCursorBandPosition(
+          chartRotation,
+          chartDimensions,
+          { x: 39, y: 0 },
+          snapPosition,
+          barSeriesScale,
+          [0, 1, 2],
+          1,
+        );
+        expect(bandPosition).toEqual({
+          left: 0,
+          top: 0,
+          height: 100,
+          width: 40,
+        });
+        bandPosition = getCursorBandPosition(
           chartRotation,
           chartDimensions,
           { x: 40, y: 0 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1050,6 +1116,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 90, y: 0 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1067,6 +1134,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 200, y: 0 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toBeUndefined();
@@ -1084,6 +1152,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 0 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1101,6 +1170,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 45 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1118,6 +1188,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 40, y: 0 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1135,6 +1206,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 90, y: 0 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1152,6 +1224,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 200, y: 0 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toBeUndefined();
@@ -1169,6 +1242,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 0 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1186,6 +1260,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 45, y: 0 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1203,6 +1278,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 40 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1220,6 +1296,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 90 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1237,6 +1314,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 200 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toBeUndefined();
@@ -1254,6 +1332,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 0 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1271,6 +1350,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 45, y: 0 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1288,6 +1368,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 40 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1305,6 +1386,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 90 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1322,6 +1404,7 @@ describe('Crosshair utils linear scale', () => {
           { x: 0, y: 200 },
           snapPosition,
           barSeriesScale,
+          [0, 1, 2],
           1,
         );
         expect(bandPosition).toBeUndefined();
