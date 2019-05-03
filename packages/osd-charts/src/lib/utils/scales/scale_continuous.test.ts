@@ -1,7 +1,7 @@
-import { DateTime } from 'luxon';
 import { XDomain } from '../../series/domains/x_domain';
 import { computeXScale } from '../../series/scales';
 import { Domain } from '../domain';
+import { DateTime, Settings } from 'luxon';
 import { ScaleBand } from './scale_band';
 import { isLogarithmicScale, ScaleContinuous } from './scale_continuous';
 import { ScaleType } from './scales';
@@ -138,5 +138,242 @@ describe('Scale Continuous', () => {
     expect(scaleLinear.invertWithStep(40, data)).toBe(50);
     expect(scaleLinear.invertWithStep(50, data)).toBe(50);
     expect(scaleLinear.invertWithStep(90, data)).toBe(90);
+  });
+
+  describe('time ticks', () => {
+    const timezonesToTest = [
+      'Asia/Tokyo',
+      'Europe/Berlin',
+      'UTC',
+      'America/New_York',
+      'America/Los_Angeles',
+    ];
+
+    function getTicksForDomain(domainStart: number, domainEnd: number) {
+      const scale = new ScaleContinuous(
+        ScaleType.Time,
+        [domainStart, domainEnd],
+        [0, 100],
+        0,
+        0,
+        Settings.defaultZoneName,
+      );
+      return scale.tickValues;
+    }
+
+    const currentTz = Settings.defaultZoneName;
+
+    afterEach(() => {
+      Settings.defaultZoneName = currentTz;
+    });
+
+    timezonesToTest.map((tz) => {
+      describe(`standard tests in ${tz}`, () => {
+        beforeEach(() => {
+          Settings.defaultZoneName = tz;
+        });
+
+        test('should return nice daily ticks', () => {
+          const ticks = getTicksForDomain(
+            DateTime.fromISO('2019-04-04T00:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-08T00:00:00.000').toMillis(),
+          );
+
+          expect(ticks).toEqual([
+            DateTime.fromISO('2019-04-04T00:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-04T12:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-05T00:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-05T12:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-06T00:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-06T12:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-07T00:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-07T12:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-08T00:00:00.000').toMillis(),
+          ]);
+        });
+
+        test('should return nice hourly ticks', () => {
+          const ticks = getTicksForDomain(
+            DateTime.fromISO('2019-04-04T00:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-04T08:00:00.000').toMillis(),
+          );
+
+          expect(ticks).toEqual([
+            DateTime.fromISO('2019-04-04T00:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-04T01:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-04T02:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-04T03:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-04T04:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-04T05:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-04T06:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-04T07:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-04T08:00:00.000').toMillis(),
+          ]);
+        });
+
+        test('should return nice yearly ticks', () => {
+          const ticks = getTicksForDomain(
+            DateTime.fromISO('2010-04-04T00:00:00.000').toMillis(),
+            DateTime.fromISO('2019-04-04T04:00:00.000').toMillis(),
+          );
+
+          expect(ticks).toEqual([
+            DateTime.fromISO('2011-01-01T00:00:00.000').toMillis(),
+            DateTime.fromISO('2012-01-01T00:00:00.000').toMillis(),
+            DateTime.fromISO('2013-01-01T00:00:00.000').toMillis(),
+            DateTime.fromISO('2014-01-01T00:00:00.000').toMillis(),
+            DateTime.fromISO('2015-01-01T00:00:00.000').toMillis(),
+            DateTime.fromISO('2016-01-01T00:00:00.000').toMillis(),
+            DateTime.fromISO('2017-01-01T00:00:00.000').toMillis(),
+            DateTime.fromISO('2018-01-01T00:00:00.000').toMillis(),
+            DateTime.fromISO('2019-01-01T00:00:00.000').toMillis(),
+          ]);
+        });
+
+        test('should return nice yearly ticks from leap year to leap year', () => {
+          const ticks = getTicksForDomain(
+            DateTime.fromISO('2016-02-29T00:00:00.000').toMillis(),
+            DateTime.fromISO('2024-04-29T00:00:00.000').toMillis(),
+          );
+
+          expect(ticks).toEqual([
+            DateTime.fromISO('2017-01-01T00:00:00.000').toMillis(),
+            DateTime.fromISO('2018-01-01T00:00:00.000').toMillis(),
+            DateTime.fromISO('2019-01-01T00:00:00.000').toMillis(),
+            DateTime.fromISO('2020-01-01T00:00:00.000').toMillis(),
+            DateTime.fromISO('2021-01-01T00:00:00.000').toMillis(),
+            DateTime.fromISO('2022-01-01T00:00:00.000').toMillis(),
+            DateTime.fromISO('2023-01-01T00:00:00.000').toMillis(),
+            DateTime.fromISO('2024-01-01T00:00:00.000').toMillis(),
+          ]);
+        });
+      });
+    });
+
+    describe('dst switch', () => {
+      test('should not leave gaps in hourly ticks on dst switch winter to summer time', () => {
+        Settings.defaultZoneName = 'Europe/Berlin';
+
+        const ticks = getTicksForDomain(
+          DateTime.fromISO('2019-03-31T01:00:00.000').toMillis(),
+          DateTime.fromISO('2019-03-31T10:00:00.000').toMillis(),
+        );
+
+        expect(ticks).toEqual([
+          DateTime.fromISO('2019-03-31T01:00:00.000').toMillis(),
+          DateTime.fromISO('2019-03-31T02:00:00.000').toMillis(),
+          // 3 AM is missing because it is the same as 2 AM
+          DateTime.fromISO('2019-03-31T04:00:00.000').toMillis(),
+          DateTime.fromISO('2019-03-31T05:00:00.000').toMillis(),
+          DateTime.fromISO('2019-03-31T06:00:00.000').toMillis(),
+          DateTime.fromISO('2019-03-31T07:00:00.000').toMillis(),
+          DateTime.fromISO('2019-03-31T08:00:00.000').toMillis(),
+          DateTime.fromISO('2019-03-31T09:00:00.000').toMillis(),
+          DateTime.fromISO('2019-03-31T10:00:00.000').toMillis(),
+        ]);
+      });
+
+      test('should not leave gaps in hourly ticks on dst switch summer to winter time', () => {
+        Settings.defaultZoneName = 'Europe/Berlin';
+
+        const ticks = getTicksForDomain(
+          DateTime.fromISO('2019-10-27T01:00:00.000').toMillis(),
+          DateTime.fromISO('2019-10-27T09:00:00.000').toMillis(),
+        );
+
+        expect(ticks).toEqual([
+          DateTime.fromISO('2019-10-27T01:00:00.000').toMillis(),
+          DateTime.fromISO('2019-10-27T02:00:00.000').toMillis(),
+          // this is the "first" 3 o'clock still in summer time
+          DateTime.fromISO('2019-10-27T03:00:00.000+02:00').toMillis(),
+          DateTime.fromISO('2019-10-27T03:00:00.000').toMillis(),
+          DateTime.fromISO('2019-10-27T04:00:00.000').toMillis(),
+          DateTime.fromISO('2019-10-27T05:00:00.000').toMillis(),
+          DateTime.fromISO('2019-10-27T06:00:00.000').toMillis(),
+          DateTime.fromISO('2019-10-27T07:00:00.000').toMillis(),
+          DateTime.fromISO('2019-10-27T08:00:00.000').toMillis(),
+          DateTime.fromISO('2019-10-27T09:00:00.000').toMillis(),
+        ]);
+      });
+
+      test('should set nice daily ticks on dst switch summer to winter time', () => {
+        Settings.defaultZoneName = 'Europe/Berlin';
+
+        const ticks = getTicksForDomain(
+          DateTime.fromISO('2019-10-25T16:00:00.000').toMillis(),
+          DateTime.fromISO('2019-11-03T08:00:00.000').toMillis(),
+        );
+
+        expect(ticks).toEqual([
+          DateTime.fromISO('2019-10-26T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-10-27T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-10-28T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-10-29T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-10-30T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-10-31T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-11-01T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-11-02T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-11-03T00:00:00.000').toMillis(),
+        ]);
+      });
+
+      test('should set nice daily ticks on dst switch winter to summer time', () => {
+        Settings.defaultZoneName = 'Europe/Berlin';
+
+        const ticks = getTicksForDomain(
+          DateTime.fromISO('2019-03-29T16:00:00.000').toMillis(),
+          DateTime.fromISO('2019-04-07T08:00:00.000').toMillis(),
+        );
+
+        expect(ticks).toEqual([
+          DateTime.fromISO('2019-03-30T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-03-31T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-04-01T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-04-02T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-04-03T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-04-04T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-04-05T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-04-06T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-04-07T00:00:00.000').toMillis(),
+        ]);
+      });
+
+      test('should set nice monthly ticks on two dst switches from winter to winter time', () => {
+        Settings.defaultZoneName = 'Europe/Berlin';
+
+        const ticks = getTicksForDomain(
+          DateTime.fromISO('2019-03-29T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-11-02T00:00:00.000').toMillis(),
+        );
+
+        expect(ticks).toEqual([
+          DateTime.fromISO('2019-04-01T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-05-01T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-06-01T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-07-01T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-08-01T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-09-01T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-10-01T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-11-01T00:00:00.000').toMillis(),
+        ]);
+      });
+
+      test('should set nice monthly ticks on two dst switches from summer to summer time', () => {
+        Settings.defaultZoneName = 'Europe/Berlin';
+
+        const ticks = getTicksForDomain(
+          DateTime.fromISO('2018-10-26T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-03-31T20:00:00.000').toMillis(),
+        );
+
+        expect(ticks).toEqual([
+          DateTime.fromISO('2018-11-01T00:00:00.000').toMillis(),
+          DateTime.fromISO('2018-12-01T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-01-01T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-02-01T00:00:00.000').toMillis(),
+          DateTime.fromISO('2019-03-01T00:00:00.000').toMillis(),
+        ]);
+      });
+    });
   });
 });

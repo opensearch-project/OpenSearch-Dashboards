@@ -138,11 +138,18 @@ export class ScaleContinuous implements Scale {
       const shiftedDomainMax = endDomain.plus({ minutes: offset }).toMillis();
       const tzShiftedScale = scaleUtc().domain([shiftedDomainMin, shiftedDomainMax]);
 
-      this.tickValues = tzShiftedScale.ticks().map((d: Date) => {
-        return DateTime.fromMillis(d.getTime(), { zone: this.timeZone })
-          .minus({ minutes: offset })
+      const rawTicks = tzShiftedScale.ticks();
+      const timePerTick = (shiftedDomainMax - shiftedDomainMin) / rawTicks.length;
+      const hasHourTicks = timePerTick < 1000 * 60 * 60 * 12;
+
+      this.tickValues = rawTicks.map((d: Date) => {
+        const currentDateTime = DateTime.fromJSDate(d, { zone: this.timeZone });
+        const currentOffset = hasHourTicks ? offset : currentDateTime.offset;
+        return currentDateTime
+          .minus({ minutes: currentOffset })
           .toMillis();
       });
+
     } else {
       if (this.minInterval > 0) {
         const intervalCount = Math.floor((this.domain[1] - this.domain[0]) / this.minInterval);
