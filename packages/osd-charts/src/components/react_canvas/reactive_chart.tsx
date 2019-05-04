@@ -10,6 +10,7 @@ import { Annotation } from './annotation';
 import { AreaGeometries } from './area_geometries';
 import { Axis } from './axis';
 import { BarGeometries } from './bar_geometries';
+import { BarValues } from './bar_values';
 import { Grid } from './grid';
 import { LineGeometries } from './line_geometries';
 
@@ -198,6 +199,22 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
     return annotationComponents;
   }
 
+  renderBarValues = () => {
+    const { debug, chartDimensions, geometries, chartTheme, chartRotation } = this.props.chartStore!;
+    if (!geometries) {
+      return;
+    }
+    const props = {
+      debug,
+      chartDimensions,
+      chartRotation,
+      bars: geometries.bars,
+      // displayValue is guaranteed on style as part of the merged theme
+      displayValueStyle: chartTheme.barSeriesStyle.displayValue!,
+    };
+    return <BarValues {...props} />;
+  }
+
   renderBrushTool = () => {
     const { brushing, brushStart, brushEnd } = this.state;
     const { chartDimensions, chartRotation, chartTransform } = this.props.chartStore!;
@@ -360,19 +377,23 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
           <Layer hitGraphEnabled={false} listening={false}>
             {this.renderAnnotations()}
           </Layer>
+
+          <Layer hitGraphEnabled={false} listening={false} {...layerClippings}>
+            {this.renderBarValues()}
+          </Layer>
         </Stage>
       </div>
     );
   }
 
   private renderDebugChartBorders = () => {
-    const { chartDimensions, chartRotation, chartTransform } = this.props.chartStore!;
+    const { chartDimensions } = this.props.chartStore!;
     return (
       <Rect
-        x={chartDimensions.left + chartTransform.x}
-        y={chartDimensions.top + chartTransform.y}
-        width={[90, -90].includes(chartRotation) ? chartDimensions.height : chartDimensions.width}
-        height={[90, -90].includes(chartRotation) ? chartDimensions.width : chartDimensions.height}
+        x={chartDimensions.left}
+        y={chartDimensions.top}
+        width={chartDimensions.width}
+        height={chartDimensions.height}
         stroke="red"
         strokeWidth={4}
         listening={false}

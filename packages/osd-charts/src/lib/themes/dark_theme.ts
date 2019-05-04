@@ -60,6 +60,15 @@ export const DARK_THEME: Theme = {
       strokeWidth: 2,
       visible: false,
     },
+    displayValue: {
+      fontSize: 10,
+      fontStyle: 'normal',
+      fontFamily: `'Open Sans', Helvetica, Arial, sans-serif`,
+      padding: 0,
+      fill: 'white',
+      offsetX: 0,
+      offsetY: 0,
+    },
   },
   sharedStyle: DEFAULT_GEOMETRY_STYLES,
   scales: {

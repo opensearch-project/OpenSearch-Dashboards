@@ -1,4 +1,4 @@
-import { boolean, select } from '@storybook/addon-knobs';
+import { boolean, color, number, select } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import { DateTime } from 'luxon';
 import React from 'react';
@@ -13,8 +13,10 @@ import {
   getSpecId,
   LIGHT_THEME,
   LineSeries,
+  mergeWithDefaultTheme,
   niceTimeFormatByDay,
   Position,
+  Rotation,
   ScaleType,
   Settings,
   timeFormatter,
@@ -22,6 +24,24 @@ import {
 import * as TestDatasets from '../src/lib/series/utils/test_dataset';
 import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
 const dateFormatter = timeFormatter('HH:mm:ss');
+
+const dataGen = new DataGenerator();
+function generateDataWithAdditional(num: number) {
+  return [
+    ...dataGen.generateSimpleSeries(num),
+    { x: num, y: 0.25, g: 0 },
+    { x: num + 1, y: 8, g: 0 },
+  ];
+}
+const frozenDataSmallVolume = generateDataWithAdditional(10);
+const frozenDataMediumVolume = generateDataWithAdditional(50);
+const frozenDataHighVolume = generateDataWithAdditional(1500);
+
+const frozenData: { [key: string]: any[] } = {
+  s: frozenDataSmallVolume,
+  m: frozenDataMediumVolume,
+  h: frozenDataHighVolume,
+};
 
 storiesOf('Bar Chart', module)
   .add('basic', () => {
@@ -43,6 +63,118 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y']}
           data={data}
+        />
+      </Chart>
+    );
+  })
+  .add('with value label', () => {
+    const showValueLabel = boolean('show value label', false);
+    const isAlternatingValueLabel = boolean('alternating value label', false);
+    const isValueContainedInElement = boolean('contain value label within bar element', false);
+    const hideClippedValue = boolean('hide clipped value', false);
+
+    const displayValueSettings = {
+      showValueLabel,
+      isAlternatingValueLabel,
+      isValueContainedInElement,
+      hideClippedValue,
+    };
+
+    const displayValueStyle = {
+      displayValue: {
+        fontSize: number('value font size', 10),
+        fontFamily: `'Open Sans', Helvetica, Arial, sans-serif`,
+        fontStyle: 'normal',
+        padding: 0,
+        fill: color('value color', '#000'),
+        offsetX: number('offsetX', 0),
+        offsetY: number('offsetY', 0),
+      },
+    };
+
+    const barStyle = {
+      barSeriesStyle: {
+        ...LIGHT_THEME.barSeriesStyle,
+        ...displayValueStyle,
+      },
+    };
+
+    const debug = boolean('debug', true);
+    const chartRotation = select<Rotation>(
+      'chartRotation',
+      {
+        '0 deg': 0,
+        '90 deg': 90,
+        '-90 deg': -90,
+        '180 deg': 180,
+      },
+      0,
+    );
+
+    const theme = mergeWithDefaultTheme(barStyle, LIGHT_THEME);
+    const dataSize = select(
+      'data volume size',
+      {
+        'small volume': 's',
+        'medium volume': 'm',
+        'high volume': 'h',
+      },
+      's',
+    );
+    const data = frozenData[dataSize];
+
+    const isSplitSeries = boolean('split series', false);
+    const isStackedSeries = boolean('stacked series', false);
+
+    const splitSeriesAccessors = isSplitSeries ? ['g'] : undefined;
+    const stackAccessors = isStackedSeries ? ['x'] : undefined;
+
+    return (
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Settings theme={theme} debug={debug} rotation={chartRotation} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <BarSeries
+          id={getSpecId('bars')}
+          displayValueSettings={displayValueSettings}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          splitSeriesAccessors={splitSeriesAccessors}
+          stackAccessors={stackAccessors}
+          data={data}
+          yScaleToDataExtent={false}
+        />
+        <BarSeries
+          id={getSpecId('bars2')}
+          displayValueSettings={displayValueSettings}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          stackAccessors={['x']}
+          splitSeriesAccessors={['g']}
+          data={[
+            { x: 0, y: 2, g: 'a' },
+            { x: 1, y: 7, g: 'a' },
+            { x: 2, y: 3, g: 'a' },
+            { x: 3, y: 6, g: 'a' },
+            { x: 0, y: 4, g: 'b' },
+            { x: 1, y: 5, g: 'b' },
+            { x: 2, y: 8, g: 'b' },
+            { x: 3, y: 2, g: 'b' },
+          ]}
         />
       </Chart>
     );

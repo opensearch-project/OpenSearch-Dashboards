@@ -20,7 +20,7 @@ interface BarGeometriesDataState {
 export class BarGeometries extends React.PureComponent<
   BarGeometriesDataProps,
   BarGeometriesDataState
-> {
+  > {
   static defaultProps: Partial<BarGeometriesDataProps> = {
     animated: false,
   };
@@ -101,7 +101,11 @@ export class BarGeometries extends React.PureComponent<
           borderEnabled: border.visible,
           geometryStyle,
         });
-        return <Rect {...barProps} />;
+        return (
+          <React.Fragment key={index}>
+            <Rect {...barProps} />
+          </React.Fragment>
+        );
       }
     });
   }

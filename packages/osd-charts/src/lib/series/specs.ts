@@ -30,6 +30,19 @@ export interface CompleteBoundedDomain {
 
 export type DomainRange = LowerBoundedDomain | UpperBoundedDomain | CompleteBoundedDomain;
 
+export interface DisplayValueSpec {
+  /** Show value label in chart element */
+  showValueLabel?: boolean;
+  /** If value labels are shown, skips every other label */
+  isAlternatingValueLabel?: boolean;
+  /** Function for formatting values; will use axis tickFormatter if none specified */
+  valueFormatter?: TickFormatter;
+  /** If true will contain value label within element, else dimensions are computed based on value */
+  isValueContainedInElement?: boolean;
+  /** If true will hide values that are clipped at chart edges */
+  hideClippedValue?: boolean;
+}
+
 export interface SeriesSpec {
   /** The ID of the spec, generated via getSpecId method */
   id: SpecId;
@@ -51,6 +64,7 @@ export interface SeriesSpec {
   hideInLegend?: boolean;
   /** Index per series to sort by */
   sortIndex?: number;
+  displayValueSettings?: DisplayValueSpec;
 }
 
 export type CustomSeriesColorsMap = Map<DataSeriesColorsValues, string>;

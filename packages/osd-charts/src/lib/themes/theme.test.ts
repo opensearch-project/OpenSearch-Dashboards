@@ -152,6 +152,13 @@ describe('Themes', () => {
         strokeWidth: 314571,
         visible: true,
       },
+      displayValue: {
+        fontSize: 10,
+        fontStyle: 'custom-font-style',
+        fontFamily: 'custom-font',
+        padding: 5,
+        fill: 'custom-fill',
+      },
     };
     const customTheme = mergeWithDefaultTheme({
       barSeriesStyle,

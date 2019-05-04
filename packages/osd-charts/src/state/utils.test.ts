@@ -9,6 +9,7 @@ import {
   LineSeriesSpec,
 } from '../lib/series/specs';
 import { BARCHART_1Y0G, BARCHART_1Y1G } from '../lib/series/utils/test_dataset';
+import { LIGHT_THEME } from '../lib/themes/light_theme';
 import { AxisId, getGroupId, getSpecId, SpecId } from '../lib/utils/ids';
 import { ScaleType } from '../lib/utils/scales/scales';
 import {
@@ -361,6 +362,7 @@ describe('Chart State utils', () => {
         vizColors: ['violet', 'green', 'blue'],
         defaultVizColor: 'red',
       };
+      const chartTheme = { ...LIGHT_THEME, colors: chartColors };
       const domainsByGroupId = mergeDomainsByGroupId(axesSpecs, chartRotation);
       const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
       const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, chartColors, new Map());
@@ -370,9 +372,10 @@ describe('Chart State utils', () => {
         seriesDomains.yDomain,
         seriesDomains.formattedDataSeries,
         seriesColorMap,
-        chartColors,
+        chartTheme,
         chartDimensions,
         chartRotation,
+        axesSpecs,
       );
       expect(geometries.geometriesCounts.bars).toBe(8);
       expect(geometries.geometriesCounts.linePoints).toBe(8);
@@ -411,6 +414,7 @@ describe('Chart State utils', () => {
         vizColors: ['violet', 'green', 'blue'],
         defaultVizColor: 'red',
       };
+      const chartTheme = { ...LIGHT_THEME, colors: chartColors };
       const domainsByGroupId = mergeDomainsByGroupId(axesSpecs, chartRotation);
       const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
       const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, chartColors, new Map());
@@ -420,9 +424,10 @@ describe('Chart State utils', () => {
         seriesDomains.yDomain,
         seriesDomains.formattedDataSeries,
         seriesColorMap,
-        chartColors,
+        chartTheme,
         chartDimensions,
         chartRotation,
+        axesSpecs,
       );
       expect(geometries.geometriesIndex.size).toBe(4);
       expect(geometries.geometriesIndex.get(0)!.length).toBe(2);
@@ -463,6 +468,7 @@ describe('Chart State utils', () => {
         vizColors: ['violet', 'green', 'blue'],
         defaultVizColor: 'red',
       };
+      const chartTheme = { ...LIGHT_THEME, colors: chartColors };
       const domainsByGroupId = mergeDomainsByGroupId(axesSpecs, chartRotation);
       const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
       const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, chartColors, new Map());
@@ -472,9 +478,10 @@ describe('Chart State utils', () => {
         seriesDomains.yDomain,
         seriesDomains.formattedDataSeries,
         seriesColorMap,
-        chartColors,
+        chartTheme,
         chartDimensions,
         chartRotation,
+        axesSpecs,
       );
       expect(geometries.geometriesIndex.size).toBe(4);
       expect(geometries.geometriesIndex.get(0)!.length).toBe(2);
@@ -518,6 +525,17 @@ describe('Chart State utils', () => {
         splitSeriesAccessors: ['g'],
         yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
+        barSeriesStyle: {
+          border: {
+            stroke: 'stroke',
+            strokeWidth: 123,
+            visible: true,
+          },
+          opacity: 0.2,
+        },
+        displayValueSettings: {
+          showValueLabel: true,
+        },
       };
       const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([
         [area.id, area],
@@ -531,6 +549,7 @@ describe('Chart State utils', () => {
         vizColors: ['violet', 'green', 'blue'],
         defaultVizColor: 'red',
       };
+      const chartTheme = { ...LIGHT_THEME, colors: chartColors };
       const domainsByGroupId = mergeDomainsByGroupId(axesSpecs, chartRotation);
       const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
       const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, chartColors, new Map());
@@ -540,9 +559,10 @@ describe('Chart State utils', () => {
         seriesDomains.yDomain,
         seriesDomains.formattedDataSeries,
         seriesColorMap,
-        chartColors,
+        chartTheme,
         chartDimensions,
         chartRotation,
+        axesSpecs,
       );
       expect(geometries.geometriesCounts.bars).toBe(8);
       expect(geometries.geometriesCounts.linePoints).toBe(8);
@@ -599,6 +619,7 @@ describe('Chart State utils', () => {
         vizColors: ['violet', 'green', 'blue'],
         defaultVizColor: 'red',
       };
+      const chartTheme = { ...LIGHT_THEME, colors: chartColors };
       const domainsByGroupId = mergeDomainsByGroupId(axesSpecs, chartRotation);
       const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
       const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, chartColors, new Map());
@@ -608,9 +629,10 @@ describe('Chart State utils', () => {
         seriesDomains.yDomain,
         seriesDomains.formattedDataSeries,
         seriesColorMap,
-        chartColors,
+        chartTheme,
         chartDimensions,
         chartRotation,
+        axesSpecs,
       );
       expect(geometries.geometriesCounts.bars).toBe(0);
       expect(geometries.geometriesCounts.linePoints).toBe(24);
@@ -667,6 +689,7 @@ describe('Chart State utils', () => {
         vizColors: ['violet', 'green', 'blue'],
         defaultVizColor: 'red',
       };
+      const chartTheme = { ...LIGHT_THEME, colors: chartColors };
       const domainsByGroupId = mergeDomainsByGroupId(axesSpecs, chartRotation);
       const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
       const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, chartColors, new Map());
@@ -676,9 +699,10 @@ describe('Chart State utils', () => {
         seriesDomains.yDomain,
         seriesDomains.formattedDataSeries,
         seriesColorMap,
-        chartColors,
+        chartTheme,
         chartDimensions,
         chartRotation,
+        axesSpecs,
       );
       expect(geometries.geometriesCounts.bars).toBe(0);
       expect(geometries.geometriesCounts.linePoints).toBe(0);
@@ -735,6 +759,7 @@ describe('Chart State utils', () => {
         vizColors: ['violet', 'green', 'blue'],
         defaultVizColor: 'red',
       };
+      const chartTheme = { ...LIGHT_THEME, colors: chartColors };
       const domainsByGroupId = mergeDomainsByGroupId(axesSpecs, chartRotation);
       const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
       const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, chartColors, new Map());
@@ -744,9 +769,10 @@ describe('Chart State utils', () => {
         seriesDomains.yDomain,
         seriesDomains.formattedDataSeries,
         seriesColorMap,
-        chartColors,
+        chartTheme,
         chartDimensions,
         chartRotation,
+        axesSpecs,
       );
       expect(geometries.geometriesCounts.bars).toBe(24);
       expect(geometries.geometriesCounts.linePoints).toBe(0);

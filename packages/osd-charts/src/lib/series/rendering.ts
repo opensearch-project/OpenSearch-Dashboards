@@ -1,5 +1,6 @@
 import { area, line } from 'd3-shape';
 import { mutableIndexedGeometryMapUpsert } from '../../state/utils';
+import { CanvasTextBBoxCalculator } from '../axes/canvas_text_bbox_calculator';
 import {
   AreaSeriesStyle,
   AreaStyle,
@@ -16,6 +17,7 @@ import { CurveType, getCurveFactory } from './curves';
 import { LegendItem } from './legend';
 import { DataSeriesDatum } from './series';
 import { belongsToDataSeries } from './series_utils';
+import { DisplayValueSpec } from './specs';
 
 export interface GeometryId {
   specId: SpecId;
@@ -53,6 +55,13 @@ export interface BarGeometry {
   width: number;
   height: number;
   color: string;
+  displayValue?: {
+    text: any;
+    width: number;
+    height: number;
+    hideClippedValue?: boolean;
+    isValueContainedInElement?: boolean;
+  };
   geometryId: GeometryId;
   value: GeometryValue;
   seriesStyle?: CustomBarSeriesStyle;
@@ -173,6 +182,7 @@ export function renderBars(
   color: string,
   specId: SpecId,
   seriesKey: any[],
+  displayValueSettings?: DisplayValueSpec,
   seriesStyle?: CustomBarSeriesStyle,
 ): {
   barGeometries: BarGeometry[];
@@ -182,6 +192,11 @@ export function renderBars(
   const xDomain = xScale.domain;
   const xScaleType = xScale.type;
   const barGeometries: BarGeometry[] = [];
+
+  const bboxCalculator = new CanvasTextBBoxCalculator();
+  const fontSize = seriesStyle && seriesStyle.displayValue ? seriesStyle.displayValue.fontSize : undefined;
+  const fontFamily = seriesStyle && seriesStyle.displayValue ? seriesStyle.displayValue.fontFamily : undefined;
+
   dataset.forEach((datum) => {
     const { y0, y1, initialY1 } = datum;
     // don't create a bar if the initialY1 value is null.
@@ -210,7 +225,36 @@ export function renderBars(
     }
     const x = xScale.scale(datum.x) + xScale.bandwidth * orderIndex;
     const width = xScale.bandwidth;
+
+    const formattedDisplayValue = displayValueSettings && displayValueSettings.valueFormatter ?
+      displayValueSettings.valueFormatter(initialY1) : undefined;
+
+    // only show displayValue for even bars if showOverlappingValue
+    const displayValueText = displayValueSettings && displayValueSettings.isAlternatingValueLabel ?
+      (barGeometries.length % 2 === 0 ? formattedDisplayValue : undefined)
+      : formattedDisplayValue;
+
+    const computedDisplayValueWidth = bboxCalculator.compute(displayValueText || '', fontSize, fontFamily).getOrElse({
+      width: 0,
+      height: 0,
+    }).width;
+    const displayValueWidth = displayValueSettings && displayValueSettings.isValueContainedInElement ?
+      width : computedDisplayValueWidth;
+
+    const hideClippedValue = displayValueSettings ? displayValueSettings.hideClippedValue : undefined;
+
+    const displayValue = (displayValueSettings && displayValueSettings.showValueLabel) ?
+      {
+        text: displayValueText,
+        width: displayValueWidth,
+        height: fontSize || 0,
+        hideClippedValue,
+        isValueContainedInElement: displayValueSettings.isValueContainedInElement,
+      }
+      : undefined;
+
     const barGeometry: BarGeometry = {
+      displayValue,
       x,
       y, // top most value
       width,
@@ -230,6 +274,9 @@ export function renderBars(
     mutableIndexedGeometryMapUpsert(indexedGeometries, datum.x, barGeometry);
     barGeometries.push(barGeometry);
   });
+
+  bboxCalculator.destroy();
+
   return {
     barGeometries,
     indexedGeometries,
