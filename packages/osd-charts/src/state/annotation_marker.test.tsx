@@ -4,7 +4,6 @@ import {
   AnnotationDomainType,
   AnnotationDomainTypes,
   AnnotationSpec,
-  AnnotationTypes,
   Position,
   Rotation,
 } from '../lib/series/specs';
@@ -50,7 +49,7 @@ describe('annotation marker', () => {
 
     const annotationId = getAnnotationId('foo-line');
     const lineAnnotation: AnnotationSpec = {
-      annotationType: AnnotationTypes.Line,
+      annotationType: 'line',
       annotationId,
       domainType: AnnotationDomainTypes.YDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
@@ -83,12 +82,50 @@ describe('annotation marker', () => {
     expect(dimensions).toEqual(expectedDimensions);
   });
 
+  test('should compute line annotation dimensions with marker if defined (y domain: 180 deg rotation)', () => {
+    const chartRotation: Rotation = 180;
+
+    const annotationId = getAnnotationId('foo-line');
+    const lineAnnotation: AnnotationSpec = {
+      annotationType: 'line',
+      annotationId,
+      domainType: AnnotationDomainTypes.YDomain,
+      dataValues: [{ dataValue: 2, details: 'foo' }],
+      groupId,
+      style: DEFAULT_ANNOTATION_LINE_STYLE,
+      marker: <div />,
+    };
+
+    const dimensions = computeLineAnnotationDimensions(
+      lineAnnotation,
+      chartDimensions,
+      chartRotation,
+      yScales,
+      xScale,
+      Position.Left,
+    );
+    const expectedDimensions = [
+      {
+        position: [DEFAULT_LINE_OVERFLOW, 20, 10, 20],
+        details: { detailsText: 'foo', headerText: '2' },
+        tooltipLinePosition: [0, 20, 10, 20],
+        marker: {
+          icon: <div />,
+          transform: 'translate(calc(0px - 0%),calc(0px - 50%))',
+          color: '#000',
+          dimensions: { width: 0, height: 0 },
+        },
+      },
+    ];
+    expect(dimensions).toEqual(expectedDimensions);
+  });
+
   test('should compute line annotation dimensions with marker if defined (x domain)', () => {
     const chartRotation: Rotation = 0;
 
     const annotationId = getAnnotationId('foo-line');
     const lineAnnotation: AnnotationSpec = {
-      annotationType: AnnotationTypes.Line,
+      annotationType: 'line',
       annotationId,
       domainType: AnnotationDomainTypes.XDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
@@ -144,6 +181,7 @@ describe('annotation marker', () => {
       cursorPosition1,
       offset,
       horizontalChartRotation,
+      chartDimensions,
       domainType,
       marker,
     );
@@ -156,6 +194,7 @@ describe('annotation marker', () => {
       cursorPosition2,
       offset,
       horizontalChartRotation,
+      chartDimensions,
       domainType,
       marker,
     );
@@ -168,6 +207,7 @@ describe('annotation marker', () => {
       cursorPosition1,
       offset,
       horizontalChartRotation,
+      chartDimensions,
       domainType,
       marker,
     );
@@ -180,11 +220,25 @@ describe('annotation marker', () => {
       cursorPosition1,
       offset,
       verticalChartRotation,
+      chartDimensions,
       domainType,
       marker,
     );
 
-    expect(verticalRotationOutsideBounds).toBe(true);
+    expect(verticalRotationOutsideBounds).toBe(false);
+
+    const verticalRotationMarkerOutsideBounds = isWithinLineBounds(
+      Position.Bottom,
+      [0, 0, 0, 0],
+      { x: 0, y: 10 },
+      offset,
+      verticalChartRotation,
+      chartDimensions,
+      domainType,
+      marker,
+    );
+
+    expect(verticalRotationMarkerOutsideBounds).toBe(false);
   });
 
   test('should compute if a point is within an annotation line bounds (yDomain annotation)', () => {
@@ -210,6 +264,7 @@ describe('annotation marker', () => {
       cursorPosition1,
       offset,
       horizontalChartRotation,
+      chartDimensions,
       domainType,
       marker,
     );
@@ -222,6 +277,7 @@ describe('annotation marker', () => {
       cursorPosition2,
       offset,
       horizontalChartRotation,
+      chartDimensions,
       domainType,
       marker,
     );
@@ -234,6 +290,7 @@ describe('annotation marker', () => {
       cursorPosition1,
       offset,
       horizontalChartRotation,
+      chartDimensions,
       domainType,
       marker,
     );
@@ -246,10 +303,37 @@ describe('annotation marker', () => {
       cursorPosition1,
       offset,
       verticalChartRotation,
+      chartDimensions,
       domainType,
       marker,
     );
 
     expect(verticalRotationOutsideBounds).toBe(false);
+
+    const verticalRotationMarkerOutsideBounds = isWithinLineBounds(
+      Position.Left,
+      [0, 0, 0, 0],
+      { x: 0, y: 10 },
+      offset,
+      verticalChartRotation,
+      chartDimensions,
+      domainType,
+      marker,
+    );
+
+    expect(verticalRotationMarkerOutsideBounds).toBe(false);
+
+    const verticalRotationMarkerWithinBounds = isWithinLineBounds(
+      Position.Left,
+      [10, 20, 10, 0],
+      { x: -5, y: 20 },
+      offset,
+      verticalChartRotation,
+      chartDimensions,
+      domainType,
+      marker,
+    );
+
+    expect(verticalRotationMarkerWithinBounds).toBe(true);
   });
 });

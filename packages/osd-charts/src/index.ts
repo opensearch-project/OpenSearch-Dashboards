@@ -12,4 +12,11 @@ export { CurveType } from './lib/series/curves';
 export { timeFormatter, niceTimeFormatter, niceTimeFormatByDay } from './utils/data/formatters';
 export { DataGenerator } from './utils/data_generators/data_generator';
 export { DataSeriesColorsValues } from './lib/series/series';
-export { CustomSeriesColorsMap, AnnotationDatum, AnnotationDomainTypes } from './lib/series/specs';
+export {
+  AnnotationDomainTypes,
+  CustomSeriesColorsMap,
+  LineAnnotationDatum,
+  LineAnnotationSpec,
+  RectAnnotationDatum,
+  RectAnnotationSpec,
+} from './lib/series/specs';

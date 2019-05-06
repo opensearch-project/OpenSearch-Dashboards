@@ -124,10 +124,12 @@ export interface CrosshairStyle {
   line: StrokeStyle & Visible;
 }
 
-export interface AnnotationLineStyle {
+export interface LineAnnotationStyle {
   line: StrokeStyle & Opacity;
   details: TextStyle;
 }
+
+export type RectAnnotationStyle = StrokeStyle & FillStyle & Opacity;
 
 export interface PartialTheme {
   chartMargins?: Margins;
@@ -149,7 +151,7 @@ export const DEFAULT_GRID_LINE_CONFIG: GridLineConfig = {
   opacity: 1,
 };
 
-export const DEFAULT_ANNOTATION_LINE_STYLE: AnnotationLineStyle = {
+export const DEFAULT_ANNOTATION_LINE_STYLE: LineAnnotationStyle = {
   line: {
     stroke: '#000',
     strokeWidth: 3,
@@ -162,6 +164,13 @@ export const DEFAULT_ANNOTATION_LINE_STYLE: AnnotationLineStyle = {
     fill: 'gray',
     padding: 0,
   },
+};
+
+export const DEFAULT_ANNOTATION_RECT_STYLE: RectAnnotationStyle = {
+  stroke: '#e5e5e5',
+  strokeWidth: 1,
+  opacity: 0.5,
+  fill: '#e5e5e5',
 };
 
 export function mergeWithDefaultGridLineConfig(config: GridLineConfig): GridLineConfig {
@@ -178,11 +187,11 @@ export function mergeWithDefaultGridLineConfig(config: GridLineConfig): GridLine
 }
 
 export function mergeWithDefaultAnnotationLine(
-  config?: Partial<AnnotationLineStyle>,
-): AnnotationLineStyle {
+  config?: Partial<LineAnnotationStyle>,
+): LineAnnotationStyle {
   const defaultLine = DEFAULT_ANNOTATION_LINE_STYLE.line;
   const defaultDetails = DEFAULT_ANNOTATION_LINE_STYLE.details;
-  const mergedConfig: AnnotationLineStyle = { ...DEFAULT_ANNOTATION_LINE_STYLE };
+  const mergedConfig: LineAnnotationStyle = { ...DEFAULT_ANNOTATION_LINE_STYLE };
 
   if (!config) {
     return mergedConfig;
@@ -203,6 +212,17 @@ export function mergeWithDefaultAnnotationLine(
   }
 
   return mergedConfig;
+}
+
+export function mergeWithDefaultAnnotationRect(config?: Partial<RectAnnotationStyle>): RectAnnotationStyle {
+  if (!config) {
+    return DEFAULT_ANNOTATION_RECT_STYLE;
+  }
+
+  return {
+    ...DEFAULT_ANNOTATION_RECT_STYLE,
+    ...config,
+  };
 }
 
 export function mergeWithDefaultTheme(

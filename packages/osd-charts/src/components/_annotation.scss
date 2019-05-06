@@ -40,4 +40,9 @@
 .elasticChartsAnnotation__details {
   margin: 0;
   padding: 0 8px;
+  display: flex;
+}
+
+.elasticChartsAnnotation__detailsMarker {
+  margin-right: 4px;
 }

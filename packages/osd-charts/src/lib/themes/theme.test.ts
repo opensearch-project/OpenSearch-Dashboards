@@ -8,10 +8,12 @@ import {
   ColorConfig,
   CrosshairStyle,
   DEFAULT_ANNOTATION_LINE_STYLE,
+  DEFAULT_ANNOTATION_RECT_STYLE,
   DEFAULT_GRID_LINE_CONFIG,
   LegendStyle,
   LineSeriesStyle,
   mergeWithDefaultAnnotationLine,
+  mergeWithDefaultAnnotationRect,
   mergeWithDefaultGridLineConfig,
   mergeWithDefaultTheme,
   ScalesConfig,
@@ -380,5 +382,22 @@ describe('Themes', () => {
     const expectedMergedCustomDetailsConfig = { line: defaultLineConfig, details: customDetailsConfig };
     const mergedCustomDetailsConfig = mergeWithDefaultAnnotationLine({ details: customDetailsConfig });
     expect(mergedCustomDetailsConfig).toEqual(expectedMergedCustomDetailsConfig);
+  });
+  it('should merge custom and default rect annotation style', () => {
+    expect(mergeWithDefaultAnnotationRect()).toEqual(DEFAULT_ANNOTATION_RECT_STYLE);
+
+    const customConfig = {
+      stroke: 'customStroke',
+      fill: 'customFill',
+    };
+
+    const expectedMergedConfig = {
+      stroke: 'customStroke',
+      fill: 'customFill',
+      opacity: 0.5,
+      strokeWidth: 1,
+    };
+
+    expect(mergeWithDefaultAnnotationRect(customConfig)).toEqual(expectedMergedConfig);
   });
 });

@@ -8,6 +8,7 @@ import {
   AxisSpec,
   BarSeriesSpec,
   Position,
+  RectAnnotationSpec,
 } from '../lib/series/specs';
 import { LIGHT_THEME } from '../lib/themes/light_theme';
 import { mergeWithDefaultTheme } from '../lib/themes/theme';
@@ -475,7 +476,7 @@ describe('Chart Store', () => {
     };
 
     const lineAnnotation: AnnotationSpec = {
-      annotationType: AnnotationTypes.Line,
+      annotationType: 'line',
       annotationId,
       domainType: AnnotationDomainTypes.YDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
@@ -492,6 +493,19 @@ describe('Chart Store', () => {
 
     store.removeAnnotationSpec(annotationId);
     expect(store.annotationSpecs).toEqual(new Map());
+
+    const rectAnnotation: RectAnnotationSpec = {
+      annotationId: getAnnotationId('rect'),
+      groupId: GROUP_ID,
+      annotationType: 'rectangle',
+      dataValues: [
+        { coordinates: { x0: 1, x1: 2, y0: 3, y1: 5 } },
+      ],
+    };
+    store.addAnnotationSpec(rectAnnotation);
+    expectedAnnotationSpecs.clear();
+    expectedAnnotationSpecs.set(rectAnnotation.annotationId, rectAnnotation);
+    expect(store.annotationSpecs).toEqual(expectedAnnotationSpecs);
   });
 
   test('only computes chart if parent dimensions are computed', () => {
@@ -718,8 +732,8 @@ describe('Chart Store', () => {
   test('can compute annotation tooltip state', () => {
     const scale = new ScaleContinuous(ScaleType.Linear, [0, 100], [0, 100]);
 
-    store.cursorPosition.x = -1;
-    store.cursorPosition.y = 0;
+    store.rawCursorPosition.x = -1;
+    store.rawCursorPosition.y = 0;
 
     expect(store.annotationTooltipState.get()).toBe(null);
 
@@ -734,7 +748,47 @@ describe('Chart Store', () => {
     store.yScales = new Map();
     store.yScales.set(GROUP_ID, scale);
 
-    store.cursorPosition.x = 0;
+    store.rawCursorPosition.x = 0;
+    expect(store.annotationTooltipState.get()).toBe(null);
+
+    // If there's a rect annotation & there's also a highlight chart element tooltip, ignore annotation tooltip
+    store.rawCursorPosition.x = 18;
+    store.rawCursorPosition.y = 9;
+    store.chartDimensions = { width: 10, height: 20, top: 5, left: 15 };
+
+    const annotationDimensions = [{ rect: { x: 2, y: 3, width: 3, height: 5 } }];
+    const rectAnnotationSpec: RectAnnotationSpec = {
+      annotationId: getAnnotationId('rect'),
+      groupId: GROUP_ID,
+      annotationType: 'rectangle',
+      dataValues: [
+        { coordinates: { x0: 1, x1: 2, y0: 3, y1: 5 } },
+      ],
+    };
+
+    store.annotationSpecs.set(rectAnnotationSpec.annotationId, rectAnnotationSpec);
+    store.annotationDimensions.set(rectAnnotationSpec.annotationId, annotationDimensions);
+
+    const highlightedTooltipValue = {
+      name: 'foo', value: 1, color: 'color',
+      isHighlighted: true, isXValue: false, seriesKey: 'foo',
+    };
+    const unhighlightedTooltipValue = {
+      name: 'foo', value: 1, color: 'color',
+      isHighlighted: false, isXValue: false, seriesKey: 'foo',
+    };
+
+    const expectedRectTooltipState = {
+      isVisible: true,
+      transform: 'translate(0, 0)',
+      annotationType: AnnotationTypes.Rectangle,
+      top: 4,
+      left: 5,
+    };
+    store.tooltipData.push(unhighlightedTooltipValue);
+    expect(store.annotationTooltipState.get()).toEqual(expectedRectTooltipState);
+
+    store.tooltipData.push(highlightedTooltipValue);
     expect(store.annotationTooltipState.get()).toBe(null);
   });
   test('can get tooltipValues by seriesKeys', () => {

@@ -1,9 +1,10 @@
 import {
-  AnnotationLineStyle,
   AreaSeriesStyle,
   CustomBarSeriesStyle,
   GridLineConfig,
+  LineAnnotationStyle,
   LineSeriesStyle,
+  RectAnnotationStyle,
 } from '../themes/theme';
 import { Accessor } from '../utils/accessor';
 import { AnnotationId, AxisId, GroupId, SpecId } from '../utils/ids';
@@ -206,27 +207,19 @@ export const AnnotationDomainTypes = Object.freeze({
 });
 
 export type AnnotationDomainType = 'xDomain' | 'yDomain';
-export interface AnnotationDatum {
+export interface LineAnnotationDatum {
   dataValue: any;
   details?: string;
   header?: string;
 }
 
-export interface LineAnnotationSpec {
-  /** The id of the annotation */
-  annotationId: AnnotationId;
-  /** Annotation type: line, rectangle, text */
-  annotationType: AnnotationType;
-  /** The ID of the axis group, generated via getGroupId method
-   * @default __global__
-   */
-  groupId: GroupId; // defaults to __global__; needed for yDomain position
-  /** Annotation domain type: AnnotationDomainTypes.XDomain or AnnotationDomainTypes.YDomain */
+export type LineAnnotationSpec = BaseAnnotationSpec & {
+  annotationType: 'line';
   domainType: AnnotationDomainType;
   /** Data values defined with value, details, and header */
-  dataValues: AnnotationDatum[];
+  dataValues: LineAnnotationDatum[];
   /** Custom line styles */
-  style?: Partial<AnnotationLineStyle>;
+  style?: Partial<LineAnnotationStyle>;
   /** Custom marker */
   marker?: JSX.Element;
   /**
@@ -239,9 +232,67 @@ export interface LineAnnotationSpec {
   };
   /** Annotation lines are hidden */
   hideLines?: boolean;
-  /** Annotation tooltips are hidden */
-  hideTooltips?: boolean;
+  /** z-index of the annotation relative to other elements in the chart
+   * @default 1
+   */
+  zIndex?: number;
+};
+
+export interface RectAnnotationDatum {
+  coordinates: {
+    x0?: any;
+    x1?: any;
+    y0?: any;
+    y1?: any;
+  };
+  details?: string;
 }
 
-// TODO: RectangleAnnotationSpec & TextAnnotationSpec
-export type AnnotationSpec = LineAnnotationSpec;
+export type RectAnnotationSpec = BaseAnnotationSpec & {
+  annotationType: 'rectangle';
+  /** Custom rendering function for tooltip */
+  renderTooltip?: (position: { transform: string; top: number; left: number; }, details?: string) => JSX.Element;
+  /** Data values defined with coordinates and details */
+  dataValues: RectAnnotationDatum[];
+  /** Custom annotation style */
+  style?: Partial<RectAnnotationStyle>;
+  /** z-index of the annotation relative to other elements in the chart
+   * @default -1
+   */
+  zIndex?: number;
+};
+
+export interface BaseAnnotationSpec {
+  /** The id of the annotation */
+  annotationId: AnnotationId;
+  /** Annotation type: line, rectangle, text */
+  annotationType: AnnotationType;
+  /** The ID of the axis group, generated via getGroupId method
+   * @default __global__
+   */
+  groupId: GroupId; // defaults to __global__; needed for yDomain position
+  /** Data values defined with coordinates and details */
+  dataValues: AnnotationDatum[];
+  /** Custom annotation style */
+  style?: Partial<AnnotationStyle>;
+  /** Toggles tooltip annotation visibility */
+  hideTooltips?: boolean;
+  /** z-index of the annotation relative to other elements in the chart
+   * Default specified per specific annotation spec.
+   */
+  zIndex?: number;
+}
+
+export type AnnotationDatum = LineAnnotationDatum | RectAnnotationDatum;
+export type AnnotationStyle = LineAnnotationStyle | RectAnnotationStyle;
+
+// TODO:  TextAnnotationSpec
+export type AnnotationSpec = LineAnnotationSpec | RectAnnotationSpec;
+
+export function isLineAnnotation(spec: AnnotationSpec): spec is LineAnnotationSpec {
+  return spec.annotationType === AnnotationTypes.Line;
+}
+
+export function isRectAnnotation(spec: AnnotationSpec): spec is RectAnnotationSpec {
+  return spec.annotationType === AnnotationTypes.Rectangle;
+}

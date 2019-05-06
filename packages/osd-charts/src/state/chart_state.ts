@@ -29,11 +29,14 @@ import {
 } from '../lib/series/series';
 import {
   AnnotationSpec,
+  AnnotationTypes,
   AreaSeriesSpec,
   AxisSpec,
   BarSeriesSpec,
   BasicSeriesSpec,
   DomainRange,
+  isLineAnnotation,
+  isRectAnnotation,
   LineSeriesSpec,
   Position,
   Rendering,
@@ -41,7 +44,7 @@ import {
 } from '../lib/series/specs';
 import { formatTooltip, getSeriesTooltipValues } from '../lib/series/tooltip';
 import { LIGHT_THEME } from '../lib/themes/light_theme';
-import { mergeWithDefaultAnnotationLine, Theme } from '../lib/themes/theme';
+import { mergeWithDefaultAnnotationLine, mergeWithDefaultAnnotationRect, Theme } from '../lib/themes/theme';
 import { compareByValueAsc } from '../lib/utils/commons';
 import { computeChartDimensions, Dimensions } from '../lib/utils/dimensions';
 import { Domain } from '../lib/utils/domain';
@@ -377,6 +380,14 @@ export class ChartStore {
       [] as TooltipValue[],
     );
 
+    // if there's an annotation rect tooltip & there isn't a single highlighted element, hide
+    const annotationTooltip = this.annotationTooltipState.get();
+    const hasRectAnnotationToolip = annotationTooltip && annotationTooltip.annotationType === AnnotationTypes.Rectangle;
+    if (hasRectAnnotationToolip && !oneHighlighted) {
+      this.clearTooltipAndHighlighted();
+      return;
+    }
+
     // check if we already have send out an over/out event on highlighted elements
     if (
       this.onElementOverListener &&
@@ -429,13 +440,25 @@ export class ChartStore {
       y: yPos,
     };
 
-    return computeAnnotationTooltipState(
+    const tooltipState = computeAnnotationTooltipState(
       cursorPosition,
       this.annotationDimensions,
       this.annotationSpecs,
       this.chartRotation,
       this.axesSpecs,
+      this.chartDimensions,
     );
+
+    // If there's a highlighted chart element tooltip value, don't show annotation tooltip
+    if (tooltipState && tooltipState.annotationType === AnnotationTypes.Rectangle) {
+      for (const tooltipValue of this.tooltipData) {
+        if (tooltipValue.isHighlighted) {
+          return null;
+        }
+      }
+    }
+
+    return tooltipState;
   });
 
   isTooltipVisible = computed(() => {
@@ -711,11 +734,18 @@ export class ChartStore {
   }
 
   addAnnotationSpec(annotationSpec: AnnotationSpec) {
-    const { style } = annotationSpec;
+    if (isLineAnnotation(annotationSpec)) {
+      const { style } = annotationSpec;
 
-    // TODO: will need to check for annotationType when we introduce other types
-    const mergedLineStyle = mergeWithDefaultAnnotationLine(style);
-    annotationSpec.style = mergedLineStyle;
+      const mergedLineStyle = mergeWithDefaultAnnotationLine(style);
+      annotationSpec.style = mergedLineStyle;
+    }
+    if (isRectAnnotation(annotationSpec)) {
+      const { style } = annotationSpec;
+
+      const mergedRectStyle = mergeWithDefaultAnnotationRect(style);
+      annotationSpec.style = mergedRectStyle;
+    }
     this.annotationSpecs.set(annotationSpec.annotationId, annotationSpec);
   }
 

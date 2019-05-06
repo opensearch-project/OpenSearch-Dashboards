@@ -1,8 +1,8 @@
 import { inject, observer } from 'mobx-react';
 import React from 'react';
-import { AnnotationTypes } from '../lib/series/specs';
+import { isLineAnnotation } from '../lib/series/specs';
 import { AnnotationId } from '../lib/utils/ids';
-import { AnnotationLineProps } from '../state/annotation_utils';
+import { AnnotationDimensions, AnnotationLineProps } from '../state/annotation_utils';
 import { ChartStore } from '../state/chart_state';
 
 interface AnnotationTooltipProps {
@@ -13,28 +13,44 @@ class AnnotationTooltipComponent extends React.Component<AnnotationTooltipProps>
   static displayName = 'AnnotationTooltip';
 
   renderTooltip() {
-    const annotationTooltipState = this.props.chartStore!.annotationTooltipState.get();
-    if (!annotationTooltipState || !annotationTooltipState.isVisible) {
+    const { annotationTooltipState } = this.props.chartStore!;
+    const tooltipState = annotationTooltipState.get();
+
+    if (!tooltipState || !tooltipState.isVisible) {
       return <div className="elasticChartsAnnotation__tooltip elasticChartsAnnotation__tooltip--hidden" />;
     }
 
-    const transform = annotationTooltipState.transform;
+    const { transform, details, header } = tooltipState;
     const chartDimensions = this.props.chartStore!.chartDimensions;
 
-    const style = {
+    const tooltipTop = tooltipState.top;
+    const tooltipLeft = tooltipState.left;
+    const top = tooltipTop == null ? chartDimensions.top : chartDimensions.top + tooltipTop;
+    const left = tooltipLeft == null ? chartDimensions.left : chartDimensions.left + tooltipLeft;
+
+    const position = {
       transform,
-      top: chartDimensions.top,
-      left: chartDimensions.left,
+      top,
+      left,
     };
 
-    return (
-      <div className="elasticChartsAnnotation__tooltip" style={{ ...style }}>
-        <p className="elasticChartsAnnotation__header">{annotationTooltipState.header}</p>
-        <div className="elasticChartsAnnotation__details">
-          {annotationTooltipState.details}
-        </div>
-      </div>
-    );
+    switch (tooltipState.annotationType) {
+      case 'line': {
+        const props = { position, details, header };
+        return <LineAnnotationTooltip {...props} />;
+      }
+      case 'rectangle': {
+        const props = { details, position };
+
+        if (tooltipState.renderTooltip) {
+          return tooltipState.renderTooltip(position, details);
+        }
+
+        return <RectAnnotationTooltip {...props} />;
+      }
+      default:
+        return null;
+    }
   }
 
   renderAnnotationLineMarkers(annotationLines: AnnotationLineProps[], id: AnnotationId): JSX.Element[] {
@@ -72,17 +88,16 @@ class AnnotationTooltipComponent extends React.Component<AnnotationTooltipProps>
     const { annotationDimensions, annotationSpecs } = this.props.chartStore!;
     const markers: JSX.Element[] = [];
 
-    annotationDimensions.forEach((annotationLines: AnnotationLineProps[], id: AnnotationId) => {
+    annotationDimensions.forEach((dimensions: AnnotationDimensions, id: AnnotationId) => {
       const annotationSpec = annotationSpecs.get(id);
       if (!annotationSpec) {
         return;
       }
 
-      switch (annotationSpec.annotationType) {
-        case AnnotationTypes.Line:
-          const lineMarkers = this.renderAnnotationLineMarkers(annotationLines, id);
-          markers.push(...lineMarkers);
-          break;
+      if (isLineAnnotation(annotationSpec)) {
+        const annotationLines = dimensions as AnnotationLineProps[];
+        const lineMarkers = this.renderAnnotationLineMarkers(annotationLines, id);
+        markers.push(...lineMarkers);
       }
     });
 
@@ -100,3 +115,35 @@ class AnnotationTooltipComponent extends React.Component<AnnotationTooltipProps>
 }
 
 export const AnnotationTooltip = inject('chartStore')(observer(AnnotationTooltipComponent));
+
+function RectAnnotationTooltip(props: {
+  details?: string;
+  position: { transform: string; top: number; left: number; };
+}) {
+  const { details, position } = props;
+  return (
+    <div className="elasticChartsAnnotation__tooltip" style={{ ...position }}>
+      <div className="elasticChartsAnnotation__details">
+        <div className="elasticChartsAnnotation__detailsText">
+          {details}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LineAnnotationTooltip(props: {
+  details?: string;
+  header?: string;
+  position: { transform: string; top: number; left: number; };
+}) {
+  const { details, position, header } = props;
+  return (
+    <div className="elasticChartsAnnotation__tooltip" style={{ ...position }}>
+      <p className="elasticChartsAnnotation__header">{header}</p>
+      <div className="elasticChartsAnnotation__details">
+        {details}
+      </div>
+    </div>
+  );
+}
