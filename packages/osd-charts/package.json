@@ -50,7 +50,7 @@
     "@commitlint/cli": "^7.5.2",
     "@commitlint/config-conventional": "^7.5.0",
     "@elastic/datemath": "^5.0.2",
-    "@elastic/eui": "9.7.1",
+    "@elastic/eui": "11.0.0",
     "@semantic-release/changelog": "^3.0.2",
     "@semantic-release/commit-analyzer": "^6.1.0",
     "@semantic-release/git": "^7.0.8",
@@ -132,7 +132,7 @@
   },
   "peerDependencies": {
     "@elastic/datemath": "^5.0.2",
-    "@elastic/eui": "9.7.1",
+    "@elastic/eui": "11.0.0",
     "moment": "^2.20.1"
   },
   "config": {
