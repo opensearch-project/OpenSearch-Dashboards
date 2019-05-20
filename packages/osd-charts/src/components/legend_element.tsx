@@ -23,6 +23,10 @@ interface LegendElementProps {
   label: string | undefined;
   isSeriesVisible?: boolean;
   displayValue: string;
+  key: string;
+  className: string;
+  onMouseEnter: (key: React.MouseEvent) => void;
+  onMouseLeave: () => void;
 }
 
 interface LegendElementState {
@@ -70,19 +74,16 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
   render() {
     const { legendItemKey } = this.props;
     const { color, label, isSeriesVisible, displayValue } = this.props;
+    const { className, onMouseEnter, onMouseLeave } = this.props;
 
     const onTitleClick = this.onLegendTitleClick(legendItemKey);
 
     const showLegendDisplayValue = this.props.chartStore!.showLegendDisplayValue.get();
     const isSelected = legendItemKey === this.props.chartStore!.selectedLegendItemKey.get();
-    const titleClassNames = classNames(
-      'eui-textTruncate',
-      'elasticChartsLegendListItem__title',
-      {
-        ['elasticChartsLegendListItem__title--selected']: isSelected,
-        ['elasticChartsLegendListItem__title--hasDisplayValue']: this.props.chartStore!.showLegendDisplayValue.get(),
-      },
-    );
+    const titleClassNames = classNames('eui-textTruncate', 'elasticChartsLegendListItem__title', {
+      ['elasticChartsLegendListItem__title--selected']: isSelected,
+      ['elasticChartsLegendListItem__title--hasDisplayValue']: this.props.chartStore!.showLegendDisplayValue.get(),
+    });
 
     const colorDotProps = {
       color,
@@ -91,15 +92,20 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
 
     const colorDot = <EuiIcon type="dot" {...colorDotProps} />;
 
-    const displayValueClassNames = classNames(
-      'elasticChartsLegendListItem__displayValue',
-      {
-        ['elasticChartsLegendListItem__displayValue--hidden']: !isSeriesVisible,
-      },
-    );
+    const displayValueClassNames = classNames('elasticChartsLegendListItem__displayValue', {
+      ['elasticChartsLegendListItem__displayValue--hidden']: !isSeriesVisible,
+    });
 
     return (
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexGroup
+        className={classNames(className, 'euiIEFlexWrapFix')}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        gutterSize="xs"
+        alignItems="center"
+        justifyContent="spaceBetween"
+        responsive={false}
+      >
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="legendItemColorPicker"
@@ -117,7 +123,7 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
         <EuiFlexItem grow={false}>
           {this.renderVisibilityButton(legendItemKey, isSeriesVisible)}
         </EuiFlexItem>
-        <EuiFlexItem grow={false} onClick={onTitleClick}>
+        <EuiFlexItem onClick={onTitleClick} grow={false}>
           <EuiPopover
             id="contentPanel"
             button={

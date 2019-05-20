@@ -21,12 +21,13 @@ $elasticChartsLegendMaxHeight: $euiSize * 4;
   top: 0;
   left: 0;
   right: 0;
-  width: auto;
+  width: 100%;
   height: $elasticChartsLegendMaxHeight;
   flex-direction: column;
   order: 1;
-  .elasticChartsLegend__listItem {
-    min-height: 50%;
+  .elasticChartsLegendList__item {
+    min-height: $elasticChartsLegendMaxHeight / 2 - 6px;
+    height: $elasticChartsLegendMaxHeight / 2 - 6px;
     width: $elasticChartsLegendMaxWidth;
     min-width: $elasticChartsLegendMaxWidth;
   }
@@ -35,11 +36,12 @@ $elasticChartsLegendMaxHeight: $euiSize * 4;
   bottom: 0;
   left: 0;
   right: 0;
-  width: auto;
+  width: 100%;
   height: $elasticChartsLegendMaxHeight;
   flex-direction: column;
-  .elasticChartsLegend__listItem {
-    min-height: 50%;
+  .elasticChartsLegendList__item {
+    min-height: $elasticChartsLegendMaxHeight / 2 - 6px;
+    height: $elasticChartsLegendMaxHeight / 2 - 6px;
     width: $elasticChartsLegendMaxWidth;
     min-width: $elasticChartsLegendMaxWidth;
   }
@@ -50,8 +52,11 @@ $elasticChartsLegendMaxHeight: $euiSize * 4;
   left: 0;
   width: $elasticChartsLegendMaxWidth;
   order: 1;
-  .elasticChartsLegend__listItem {
+  .elasticChartsLegendList__item {
+    min-height: $euiSize * 2;
+    height: $euiSize * 2;
     min-width: 100%;
+    width: 100%;
   }
 }
 .elasticChartsLegend--right {
@@ -59,8 +64,11 @@ $elasticChartsLegendMaxHeight: $euiSize * 4;
   bottom: 0;
   right: 0;
   width: $elasticChartsLegendMaxWidth;
-  .elasticChartsLegend__listItem {
+  .elasticChartsLegendList__item {
+    min-height: $euiSize * 2;
+    height: $euiSize * 2;
     min-width: 100%;
+    width: 100%;
   }
 }
 
@@ -88,12 +96,15 @@ $elasticChartsLegendMaxHeight: $euiSize * 4;
   overflow-x: hidden;
   height: 100%;
   max-width: 100%;
+  width: 100%;
   @include euiScrollBar;
 }
 
 .elasticChartsLegendList__item {
   cursor: pointer;
-
+  height: 24px;
+  width: $elasticChartsLegendMaxWidth;
+  min-width: $elasticChartsLegendMaxWidth;
   &:hover {
     .elasticChartsLegendListItem__title {
       text-decoration: underline;

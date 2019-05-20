@@ -1,0 +1,7 @@
+{
+  "extends": "../tsconfig",
+  "compilerOptions": {
+    "downlevelIteration": true,
+    "target": "es5"
+  }
+}

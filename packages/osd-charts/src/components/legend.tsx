@@ -47,16 +47,19 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
       },
     );
     let paddingStyle;
+    let legendItemGrow = false;
     if (isVertical(legendPosition)) {
       paddingStyle = {
         paddingTop: chartTheme.chartMargins.top,
         paddingBottom: chartTheme.chartMargins.bottom,
       };
+      legendItemGrow = true;
     } else {
       paddingStyle = {
         paddingLeft: chartTheme.chartMargins.left,
         paddingRight: chartTheme.chartMargins.right,
       };
+      legendItemGrow = true;
     }
     return (
       <div className={legendClasses} style={paddingStyle}>
@@ -72,7 +75,7 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
 
               const legendItemProps = {
                 key: item.key,
-                className: classNames('elasticChartsLegendList__item', {
+                className: classNames('elasticChartsLegendList__item', 'euiIEFlexWrapFix', {
                   'elasticChartsLegendList__item--hidden': !isLegendItemVisible,
                 }),
                 onMouseEnter: this.onLegendItemMouseover(item.key),
@@ -80,8 +83,8 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
               };
 
               return (
-                <EuiFlexItem {...legendItemProps}>
-                  {this.renderLegendElement(item, item.key)}
+                <EuiFlexItem className={legendItemProps.className}>
+                  {this.renderLegendElement(item, item.key, legendItemGrow, legendItemProps)}
                 </EuiFlexItem>
               );
             })}
@@ -102,6 +105,13 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
   private renderLegendElement = (
     { color, label, isSeriesVisible, displayValue }: LegendItem,
     legendItemKey: string,
+    legendItemGrow: boolean,
+    containerProps: {
+      key: string;
+      className: string;
+      onMouseEnter: (key: React.MouseEvent) => void;
+      onMouseLeave: () => void;
+    },
   ) => {
     const tooltipValues = this.props.chartStore!.legendItemTooltipValues.get();
     let tooltipValue;
@@ -113,7 +123,7 @@ class LegendComponent extends React.Component<ReactiveChartProps> {
     const display = tooltipValue != null ? tooltipValue : displayValue.formatted;
     const props = { color, label, isSeriesVisible, legendItemKey, displayValue: display };
 
-    return <LegendElement {...props} />;
+    return <LegendElement {...props} {...containerProps} />;
   }
 }
 

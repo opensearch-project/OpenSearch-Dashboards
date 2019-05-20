@@ -103,8 +103,8 @@ export const LIGHT_THEME: Theme = {
     defaultVizColor: DEFAULT_MISSING_COLOR,
   },
   legend: {
-    verticalWidth: 150,
-    horizontalHeight: 50,
+    verticalWidth: 160,
+    horizontalHeight: 64,
   },
   crosshair: {
     band: {

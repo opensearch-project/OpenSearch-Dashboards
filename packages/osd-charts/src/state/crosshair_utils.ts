@@ -123,10 +123,10 @@ export function getTooltipPosition(
     chartDimensions,
     isHorizontalRotated,
   );
-  const xTranslation = `calc(${hPosition.position}px - ${hPosition.offset}%)`;
-  const yTranslation = `calc(${vPosition.position}px - ${vPosition.offset}%)`;
+  const xTranslation = `translateX(${hPosition.position}px) translateX(-${hPosition.offset}%)`;
+  const yTranslation = `translateY(${vPosition.position}px) translateY(-${vPosition.offset}%)`;
   return {
-    transform: `translate(${xTranslation},${yTranslation})`,
+    transform: `${xTranslation} ${yTranslation}`,
   };
 }
 
