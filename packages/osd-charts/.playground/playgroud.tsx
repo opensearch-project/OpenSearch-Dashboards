@@ -17,7 +17,7 @@ export class Playground extends React.Component {
   render() {
     return (
       <Chart>
-        <Settings showLegend={true} legendPosition={Position.Bottom} rotation={0} />
+        <Settings showLegend={true} legendPosition={Position.Right} rotation={0} />
         <Axis
           id={getAxisId('timestamp')}
           title="timestamp"
@@ -39,7 +39,7 @@ export class Playground extends React.Component {
           yAccessors={[1]}
         />
         <LineSeries
-          id={getSpecId('dataset B')}
+          id={getSpecId('bar series 1')}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           data={KIBANA_METRICS.metrics.kibana_os_load[1].data.slice(0, 15)}
@@ -47,7 +47,7 @@ export class Playground extends React.Component {
           yAccessors={[1]}
         />
         <LineSeries
-          id={getSpecId('dataset C')}
+          id={getSpecId('bar series 2')}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           data={KIBANA_METRICS.metrics.kibana_os_load[2].data.slice(0, 15)}

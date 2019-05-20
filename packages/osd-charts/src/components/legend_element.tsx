@@ -123,7 +123,7 @@ class LegendElementComponent extends React.Component<LegendElementProps, LegendE
         <EuiFlexItem grow={false}>
           {this.renderVisibilityButton(legendItemKey, isSeriesVisible)}
         </EuiFlexItem>
-        <EuiFlexItem onClick={onTitleClick} grow={false}>
+        <EuiFlexItem onClick={onTitleClick} grow={true}>
           <EuiPopover
             id="contentPanel"
             button={
