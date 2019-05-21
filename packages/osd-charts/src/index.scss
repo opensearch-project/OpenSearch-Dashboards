@@ -1,4 +1,8 @@
-@import '../node_modules/@elastic/eui/src/global_styling/index';
+@import '../node_modules/@elastic/eui/src/global_styling/variables/index';
+@import '../node_modules/@elastic/eui/src/global_styling/mixins/helpers';
+@import '../node_modules/@elastic/eui/src/global_styling/mixins/shadow';
+@import '../node_modules/@elastic/eui/src/global_styling/mixins/typography';
+@import '../node_modules/@elastic/eui/src/global_styling/functions/colors';
 
 @import 'components/chart';
 @import 'components/legend';
