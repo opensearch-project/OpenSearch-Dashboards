@@ -987,7 +987,7 @@ describe('annotation utils', () => {
         position: [0, 10, 20, 10],
         details: {},
         tooltipLinePosition: [0, 10, 20, 10],
-      }
+      },
     ];
     const lineStyle = DEFAULT_ANNOTATION_LINE_STYLE;
     const chartRotation: Rotation = 0;

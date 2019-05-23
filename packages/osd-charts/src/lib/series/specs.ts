@@ -110,11 +110,7 @@ export interface SeriesScales {
   yScaleToDataExtent: boolean;
 }
 
-export type BasicSeriesSpec = SeriesSpec & SeriesAccessors & SeriesScales & {
-  barSeriesStyle?: CustomBarSeriesStyle;
-  lineSeriesStyle?: LineSeriesStyle;
-  areaSeriesStyle?: AreaSeriesStyle;
-};
+export type BasicSeriesSpec = SeriesSpec & SeriesAccessors & SeriesScales;
 
 /**
  * This spec describe the dataset configuration used to display a bar series.
@@ -122,6 +118,7 @@ export type BasicSeriesSpec = SeriesSpec & SeriesAccessors & SeriesScales & {
 export type BarSeriesSpec = BasicSeriesSpec & {
   /** @default bar */
   seriesType: 'bar';
+  barSeriesStyle?: CustomBarSeriesStyle;
 };
 
 /**
@@ -131,6 +128,7 @@ export type LineSeriesSpec = BasicSeriesSpec & {
   /** @default line */
   seriesType: 'line';
   curve?: CurveType;
+  lineSeriesStyle?: LineSeriesStyle;
 };
 
 /**
@@ -141,6 +139,7 @@ export type AreaSeriesSpec = BasicSeriesSpec & {
   seriesType: 'area';
   /** The type of interpolator to be used to interpolate values between points */
   curve?: CurveType;
+  areaSeriesStyle?: AreaSeriesStyle;
 };
 
 /**
@@ -295,4 +294,16 @@ export function isLineAnnotation(spec: AnnotationSpec): spec is LineAnnotationSp
 
 export function isRectAnnotation(spec: AnnotationSpec): spec is RectAnnotationSpec {
   return spec.annotationType === AnnotationTypes.Rectangle;
+}
+
+export function isBarSeriesSpec(spec: BasicSeriesSpec): spec is BarSeriesSpec {
+  return spec.seriesType === 'bar';
+}
+
+export function isLineSeriesSpec(spec: BasicSeriesSpec): spec is LineSeriesSpec {
+  return spec.seriesType === 'line';
+}
+
+export function isAreaSeriesSpec(spec: BasicSeriesSpec): spec is AreaSeriesSpec {
+  return spec.seriesType === 'area';
 }
