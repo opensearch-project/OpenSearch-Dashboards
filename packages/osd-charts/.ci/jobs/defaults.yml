@@ -1,0 +1,76 @@
+---
+
+##### GLOBAL METADATA
+
+- meta:
+    cluster: kibana-ci
+
+##### JOB DEFAULTS
+
+- job:
+    logrotate:
+      daysToKeep: 30
+      numToKeep: 100
+    properties:
+    - github:
+        url: https://github.com/elastic/elastic-charts/
+    - inject:
+        properties-content: 'HOME=$JENKINS_HOME
+
+          '
+    concurrent: true
+    node: linux
+    scm:
+    - git:
+        name: origin
+        credentials-id: f6c7695a-671e-4f4f-a331-acdce44ff9ba
+        reference-repo: /var/lib/jenkins/.git-references/elastic-charts.git
+        branches:
+        - ${ghprbActualCommit}
+        url: git@github.com:elastic/elastic-charts.git
+        refspec: +refs/pull/${ghprbPullId}/*:refs/remotes/origin/pr/${ghprbPullId}/*
+        basedir: ''
+        wipe-workspace: 'True'
+    triggers:
+    - github-pull-request:
+        org-list:
+        - elastic
+        allow-whitelist-orgs-as-admins: true
+        github-hooks: true
+        status-context: kibana-ci
+        cancel-builds-on-update: true
+    vault:
+      role_id: 443f9500-f443-19ba-d698-1a48e104f8ba
+    wrappers:
+    - ansicolor
+    - timeout:
+        type: absolute
+        timeout: 180
+        fail: true
+    - timestamps
+    builders:
+    - shell: |-
+        #!/usr/local/bin/runbld
+
+        set -euo pipefail
+
+        set +x
+        export VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+        unset VAULT_ROLE_ID VAULT_SECRET_ID
+        export CODECOV_TOKEN=$(vault read -field=token secret/kibana-issues/prod/codecov)
+        unset VAULT_TOKEN
+        set -x
+
+        ./.ci/run.sh
+    publishers:
+    - email:
+        recipients: infra-root+build@elastic.co
+    - google-cloud-storage:
+        credentials-id: kibana-ci-gcs-plugin
+        uploads:
+        - classic:
+            file-pattern: stories/__image_diff_snapshots__/**/*
+            storage-location: gs://kibana-ci-artifacts/jobs/$JOB_NAME/$BUILD_NUMBER
+            share-publicly: true
+            upload-for-failed-jobs: true
+            show-inline: true

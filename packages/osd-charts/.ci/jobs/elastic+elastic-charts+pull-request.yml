@@ -1,0 +1,5 @@
+---
+- job:
+    name: elastic+elastic-charts+pull-request
+    display-name: 'elastic / elastic-charts # pull-request'
+    description: Testing of elastic-charts pull requests.
