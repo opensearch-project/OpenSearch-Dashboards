@@ -103,6 +103,37 @@ describe('Axis computational utils', () => {
     },
   };
 
+  const verticalAxisSpecWTitle: AxisSpec = {
+    id: getAxisId('axis_1'),
+    groupId: getGroupId('group_1'),
+    title: 'v axis',
+    hide: false,
+    showOverlappingTicks: false,
+    showOverlappingLabels: false,
+    position: Position.Left,
+    tickSize: 10,
+    tickPadding: 10,
+    tickFormat: (value: any) => {
+      return `${value}`;
+    },
+    showGridLines: true,
+  };
+
+  // const horizontalAxisSpecWTitle: AxisSpec = {
+  //   id: getAxisId('axis_2'),
+  //   groupId: getGroupId('group_1'),
+  //   title: 'h axis',
+  //   hide: false,
+  //   showOverlappingTicks: false,
+  //   showOverlappingLabels: false,
+  //   position: Position.Top,
+  //   tickSize: 10,
+  //   tickPadding: 10,
+  //   tickFormat: (value: any) => {
+  //     return `${value}`;
+  //   },
+  // };
+
   const xDomain: XDomain = {
     type: 'xDomain',
     scaleType: ScaleType.Linear,
@@ -687,6 +718,56 @@ describe('Axis computational utils', () => {
     );
 
     expect(horizontalAxisGridLinePositions).toEqual([10, 0, 10, 200]);
+  });
+
+  test('should compute axis ticks positions with title', () => {
+    const chartRotation = 0;
+    const showLegend = false;
+    
+    // validate assumptions for test
+    expect(verticalAxisSpec.id).toEqual(verticalAxisSpecWTitle.id);
+
+    const axisSpecs = new Map();
+    axisSpecs.set(verticalAxisSpecWTitle.id, verticalAxisSpecWTitle);
+
+    const axisDims = new Map();
+    axisDims.set(verticalAxisSpecWTitle.id, axis1Dims);
+
+    let axisTicksPosition = getAxisTicksPositions(
+      chartDim,
+      LIGHT_THEME,
+      chartRotation,
+      showLegend,
+      axisSpecs,
+      axisDims,
+      xDomain,
+      [yDomain],
+      1,
+    );
+
+    let left = 12 + 5 + 10 + 10; // font size + title padding + chart margin left + label width
+    expect(axisTicksPosition.axisPositions.get(verticalAxisSpecWTitle.id))
+      .toEqual({ top: 0, left, width: 10, height: 100 });
+
+    axisSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+
+    axisDims.set(verticalAxisSpec.id, axis1Dims);
+
+    axisTicksPosition = getAxisTicksPositions(
+      chartDim,
+      LIGHT_THEME,
+      chartRotation,
+      showLegend,
+      axisSpecs,
+      axisDims,
+      xDomain,
+      [yDomain],
+      1,
+    );
+
+    left = 0 + 10 + 10; // no title + chart margin left + label width
+    expect(axisTicksPosition.axisPositions.get(verticalAxisSpecWTitle.id))
+      .toEqual({ top: 0, left: 20, width: 10, height: 100 });
   });
 
   test('should compute left axis position', () => {

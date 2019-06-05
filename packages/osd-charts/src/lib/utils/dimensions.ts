@@ -51,23 +51,24 @@ export function computeChartDimensions(
     if (!axisSpec || axisSpec.hide) {
       return;
     }
-    const { position, tickSize, tickPadding } = axisSpec;
+    const { position, tickSize, tickPadding, title } = axisSpec;
+    const titleHeight = title !== undefined ? axisTitleHeight : 0;
     switch (position) {
       case Position.Top:
         hTopAxisSpecHeight +=
-          maxLabelBboxHeight + tickSize + tickPadding + chartMargins.top + axisTitleHeight;
+          maxLabelBboxHeight + tickSize + tickPadding + chartMargins.top + titleHeight;
         break;
       case Position.Bottom:
         hBottomAxisSpecHeight +=
-          maxLabelBboxHeight + tickSize + tickPadding + chartMargins.bottom + axisTitleHeight;
+          maxLabelBboxHeight + tickSize + tickPadding + chartMargins.bottom + titleHeight;
         break;
       case Position.Left:
         vLeftAxisSpecWidth +=
-          maxLabelBboxWidth + tickSize + tickPadding + chartMargins.left + axisTitleHeight;
+          maxLabelBboxWidth + tickSize + tickPadding + chartMargins.left + titleHeight;
         break;
       case Position.Right:
         vRightAxisSpecWidth +=
-          maxLabelBboxWidth + tickSize + tickPadding + chartMargins.right + axisTitleHeight;
+          maxLabelBboxWidth + tickSize + tickPadding + chartMargins.right + titleHeight;
         break;
     }
   });
