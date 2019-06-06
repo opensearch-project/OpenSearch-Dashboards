@@ -19,6 +19,7 @@ export function getSnapPosition(
   if (position === undefined) {
     return;
   }
+
   if (scale.bandwidth > 0) {
     const band = scale.bandwidth / (1 - scale.barsPadding);
     const halfPadding = (band - scale.bandwidth) / 2;
@@ -72,11 +73,16 @@ export function getCursorBandPosition(
 ): Dimensions | undefined {
   const { top, left, width, height } = chartDimensions;
   const { x, y } = cursorPosition;
-  if (x > width || y > height || x < 0 || y < 0) {
+  const isHorizontalRotated = isHorizontalRotation(chartRotation);
+
+  const chartWidth = isHorizontalRotated ? width : height;
+  const chartHeight = isHorizontalRotated ? height : width;
+  if (x > chartWidth || y > chartHeight || x < 0 || y < 0) {
     return;
   }
-  const isHorizontalRotated = isHorizontalRotation(chartRotation);
-  const invertedValue = xScale.invertWithStep(isHorizontalRotated ? x : y, data);
+
+  const invertedValue = xScale.invertWithStep(x, data);
+
   if (invertedValue == null) {
     return;
   }
@@ -84,17 +90,26 @@ export function getCursorBandPosition(
   if (!snappedPosition) {
     return;
   }
+
   const { position, band } = snappedPosition;
+  const bandOffset = xScale.bandwidth > 0 ? band : 0;
+
   if (isHorizontalRotated) {
+    const adjustedLeft = snapEnabled ? position : x;
+    const leftPosition = chartRotation === 0 ? left + adjustedLeft : left + width - adjustedLeft - bandOffset;
+
     return {
       top,
-      left: left + (snapEnabled ? position : x),
+      left: leftPosition,
       width: band,
       height,
     };
   } else {
+    const adjustedTop = snapEnabled ? position : x;
+    const topPosition = chartRotation === 90 ? top + adjustedTop : height + top - adjustedTop - bandOffset;
+
     return {
-      top: top + (snapEnabled ? position : y),
+      top: topPosition,
       left,
       width,
       height: band,

@@ -1,4 +1,4 @@
-import { boolean } from '@storybook/addon-knobs';
+import { boolean, select } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import {
@@ -10,6 +10,7 @@ import {
   LineSeries,
   niceTimeFormatByDay,
   Position,
+  Rotation,
   ScaleType,
   Settings,
   timeFormatter,
@@ -67,8 +68,20 @@ storiesOf('Line Chart', module)
     );
   })
   .add('ordinal w axis', () => {
+    const chartRotation = select<Rotation>(
+      'chartRotation',
+      {
+        '0 deg': 0,
+        '90 deg': 90,
+        '-90 deg': -90,
+        '180 deg': 180,
+      },
+      0,
+    );
+
     return (
       <Chart className={'story-chart'}>
+        <Settings rotation={chartRotation} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}

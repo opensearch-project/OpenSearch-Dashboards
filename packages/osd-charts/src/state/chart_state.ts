@@ -292,7 +292,7 @@ export class ChartStore {
     const updatedCursorBand = getCursorBandPosition(
       this.chartRotation,
       this.chartDimensions,
-      this.cursorPosition,
+      { x: xAxisCursorPosition, y: yAxisCursorPosition},
       this.isTooltipSnapEnabled.get(),
       this.xScale,
       this.geometriesIndexKeys,

@@ -238,8 +238,31 @@ storiesOf('Bar Chart', module)
     );
   })
   .add('with linear x axis', () => {
+    const chartRotation = select<Rotation>(
+      'chartRotation',
+      {
+        '0 deg': 0,
+        '90 deg': 90,
+        '-90 deg': -90,
+        '180 deg': 180,
+      },
+      0,
+    );
+
+    const theme = {
+      ...LIGHT_THEME,
+      scales: {
+        barsPadding: number('bar padding', 0, {
+          range: true,
+          min: 0,
+          max: 1,
+          step: 0.01,
+        }),
+      },
+    };
     return (
       <Chart className={'story-chart'}>
+        <Settings rotation={chartRotation} theme={theme} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -484,9 +507,32 @@ storiesOf('Bar Chart', module)
     );
   })
   .add('clustered with axis and legend', () => {
+    const chartRotation = select<Rotation>(
+      'chartRotation',
+      {
+        '0 deg': 0,
+        '90 deg': 90,
+        '-90 deg': -90,
+        '180 deg': 180,
+      },
+      0,
+    );
+
+    const theme = {
+      ...LIGHT_THEME,
+      scales: {
+        barsPadding: number('bar padding', 0, {
+          range: true,
+          min: 0,
+          max: 1,
+          step: 0.01,
+        }),
+      },
+    };
+
     return (
       <Chart className={'story-chart'}>
-        <Settings showLegend={true} legendPosition={Position.Right} />
+        <Settings showLegend={true} legendPosition={Position.Right} theme={theme} rotation={chartRotation}/>
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
