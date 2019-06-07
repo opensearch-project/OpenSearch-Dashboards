@@ -1,20 +1,23 @@
-import debounce from 'lodash/debounce';
 import { inject, observer } from 'mobx-react';
 import React, { RefObject } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
+import { debounce } from 'ts-debounce';
 import { ChartStore } from '../state/chart_state';
 
 interface ResizerProps {
   chartStore?: ChartStore;
 }
 class Resizer extends React.Component<ResizerProps> {
+  private initialResizeComplete = false;
   private containerRef: RefObject<HTMLDivElement>;
   private ro: ResizeObserver;
+  private onResizeDebounced: (entries: ResizeObserverEntry[]) => void;
 
   constructor(props: ResizerProps) {
     super(props);
     this.containerRef = React.createRef();
-    this.ro = new ResizeObserver(debounce(this.onResize, 200));
+    this.onResizeDebounced = debounce(this.onResize, 200);
+    this.ro = new ResizeObserver(this.handleResize);
   }
 
   componentDidMount() {
@@ -46,6 +49,15 @@ class Resizer extends React.Component<ResizerProps> {
         }}
       />
     );
+  }
+
+  private handleResize = (entries: ResizeObserverEntry[]) => {
+    if (this.initialResizeComplete) {
+      this.onResizeDebounced(entries);
+    } else {
+      this.initialResizeComplete = true;
+      this.onResize(entries);
+    }
   }
 }
 

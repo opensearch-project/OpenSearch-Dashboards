@@ -129,7 +129,8 @@
     "react-dom": "^16.8.3",
     "react-konva": "16.8.3",
     "react-spring": "^8.0.8",
-    "resize-observer-polyfill": "^1.5.1"
+    "resize-observer-polyfill": "^1.5.1",
+    "ts-debounce": "^1.0.0"
   },
   "peerDependencies": {
     "@elastic/datemath": "^5.0.2",
