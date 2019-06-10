@@ -1,5 +1,4 @@
 import { area, line } from 'd3-shape';
-import { mutableIndexedGeometryMapUpsert } from '../../state/utils';
 import { CanvasTextBBoxCalculator } from '../axes/canvas_text_bbox_calculator';
 import {
   AreaSeriesStyle,
@@ -100,6 +99,20 @@ export function isBarGeometry(ig: IndexedGeometry): ig is BarGeometry {
   return ig.hasOwnProperty('width') && ig.hasOwnProperty('height');
 }
 
+export function mutableIndexedGeometryMapUpsert(
+  mutableGeometriesIndex: Map<any, IndexedGeometry[]>,
+  key: any,
+  geometry: IndexedGeometry | IndexedGeometry[],
+) {
+  const existing = mutableGeometriesIndex.get(key);
+  const upsertGeometry: IndexedGeometry[] = Array.isArray(geometry) ? geometry : [geometry];
+  if (existing === undefined) {
+    mutableGeometriesIndex.set(key, upsertGeometry);
+  } else {
+    mutableGeometriesIndex.set(key, [...upsertGeometry, ...existing]);
+  }
+}
+
 export function renderPoints(
   shift: number,
   dataset: DataSeriesDatum[],
@@ -194,8 +207,10 @@ export function renderBars(
   const barGeometries: BarGeometry[] = [];
 
   const bboxCalculator = new CanvasTextBBoxCalculator();
-  const fontSize = seriesStyle && seriesStyle.displayValue ? seriesStyle.displayValue.fontSize : undefined;
-  const fontFamily = seriesStyle && seriesStyle.displayValue ? seriesStyle.displayValue.fontFamily : undefined;
+  const fontSize =
+    seriesStyle && seriesStyle.displayValue ? seriesStyle.displayValue.fontSize : undefined;
+  const fontFamily =
+    seriesStyle && seriesStyle.displayValue ? seriesStyle.displayValue.fontFamily : undefined;
 
   dataset.forEach((datum) => {
     const { y0, y1, initialY1 } = datum;
@@ -226,32 +241,44 @@ export function renderBars(
     const x = xScale.scale(datum.x) + xScale.bandwidth * orderIndex;
     const width = xScale.bandwidth;
 
-    const formattedDisplayValue = displayValueSettings && displayValueSettings.valueFormatter ?
-      displayValueSettings.valueFormatter(initialY1) : undefined;
+    const formattedDisplayValue =
+      displayValueSettings && displayValueSettings.valueFormatter
+        ? displayValueSettings.valueFormatter(initialY1)
+        : undefined;
 
     // only show displayValue for even bars if showOverlappingValue
-    const displayValueText = displayValueSettings && displayValueSettings.isAlternatingValueLabel ?
-      (barGeometries.length % 2 === 0 ? formattedDisplayValue : undefined)
-      : formattedDisplayValue;
+    const displayValueText =
+      displayValueSettings && displayValueSettings.isAlternatingValueLabel
+        ? barGeometries.length % 2 === 0
+          ? formattedDisplayValue
+          : undefined
+        : formattedDisplayValue;
 
-    const computedDisplayValueWidth = bboxCalculator.compute(displayValueText || '', fontSize, fontFamily).getOrElse({
-      width: 0,
-      height: 0,
-    }).width;
-    const displayValueWidth = displayValueSettings && displayValueSettings.isValueContainedInElement ?
-      width : computedDisplayValueWidth;
+    const computedDisplayValueWidth = bboxCalculator
+      .compute(displayValueText || '', fontSize, fontFamily)
+      .getOrElse({
+        width: 0,
+        height: 0,
+      }).width;
+    const displayValueWidth =
+      displayValueSettings && displayValueSettings.isValueContainedInElement
+        ? width
+        : computedDisplayValueWidth;
 
-    const hideClippedValue = displayValueSettings ? displayValueSettings.hideClippedValue : undefined;
-
-    const displayValue = (displayValueSettings && displayValueSettings.showValueLabel) ?
-      {
-        text: displayValueText,
-        width: displayValueWidth,
-        height: fontSize || 0,
-        hideClippedValue,
-        isValueContainedInElement: displayValueSettings.isValueContainedInElement,
-      }
+    const hideClippedValue = displayValueSettings
+      ? displayValueSettings.hideClippedValue
       : undefined;
+
+    const displayValue =
+      displayValueSettings && displayValueSettings.showValueLabel
+        ? {
+            text: displayValueText,
+            width: displayValueWidth,
+            height: fontSize || 0,
+            hideClippedValue,
+            isValueContainedInElement: displayValueSettings.isValueContainedInElement,
+          }
+        : undefined;
 
     const barGeometry: BarGeometry = {
       displayValue,
@@ -429,14 +456,14 @@ export function getGeometryStyle(
   specOpacity?: number,
   individualHighlight?: { [key: string]: boolean },
 ): GeometryStyle {
-
-  const sharedStyle = specOpacity == null ?
-    sharedThemeStyle :
-    {
-      ...sharedThemeStyle,
-      highlighted: { opacity: specOpacity },
-      default: { opacity: specOpacity },
-    };
+  const sharedStyle =
+    specOpacity == null
+      ? sharedThemeStyle
+      : {
+          ...sharedThemeStyle,
+          highlighted: { opacity: specOpacity },
+          default: { opacity: specOpacity },
+        };
 
   if (highlightedLegendItem != null) {
     const isPartOfHighlightedSeries = belongsToDataSeries(geometryId, highlightedLegendItem.value);

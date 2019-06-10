@@ -247,7 +247,13 @@ storiesOf('Interactions', module)
   .add('click/hovers on legend items [area chart]', () => {
     return (
       <Chart className={'story-chart'}>
-        <Settings showLegend={true} legendPosition={Position.Right} />
+        <Settings
+          showLegend={true}
+          legendPosition={Position.Right}
+          onLegendItemClick={action('onLegendItemClick')}
+          onLegendItemOver={action('onLegendItemOver')}
+          onLegendItemOut={action('onLegendItemOut')}
+        />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -286,7 +292,13 @@ storiesOf('Interactions', module)
   .add('click/hovers on legend items [line chart]', () => {
     return (
       <Chart className={'story-chart'}>
-        <Settings showLegend={true} legendPosition={Position.Right} />
+        <Settings
+          showLegend={true}
+          legendPosition={Position.Right}
+          onLegendItemClick={action('onLegendItemClick')}
+          onLegendItemOver={action('onLegendItemOver')}
+          onLegendItemOut={action('onLegendItemOut')}
+        />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -360,7 +372,13 @@ storiesOf('Interactions', module)
   .add('click/hovers on legend items [mixed chart]', () => {
     return (
       <Chart className={'story-chart'}>
-        <Settings showLegend={true} legendPosition={Position.Right} />
+        <Settings
+          showLegend={true}
+          legendPosition={Position.Right}
+          onLegendItemClick={action('onLegendItemClick')}
+          onLegendItemOver={action('onLegendItemOver')}
+          onLegendItemOut={action('onLegendItemOut')}
+        />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}

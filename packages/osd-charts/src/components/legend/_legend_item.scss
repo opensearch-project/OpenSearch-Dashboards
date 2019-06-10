@@ -1,0 +1,55 @@
+.echLegendItem {
+  color: $euiTextColor;
+  height: $echLegendItemHeight;
+  width: 100%;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  user-select: none;
+  align-items: center;
+
+  &:hover {
+    .echLegendItem__title {
+      text-decoration: underline;
+    }
+  }
+}
+
+.echLegendItem__color {
+  margin-right: $euiSizeXS;
+}
+
+.echLegendItem__visibility {
+  margin-right: $euiSizeXS;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.echLegendItem__title {
+  @include euiFontSizeXS;
+  @include euiTextTruncate;
+  margin-right: $euiSizeXS;
+  flex: 1;
+}
+
+.echLegendItem__title--selected {
+  text-decoration: underline;
+}
+
+.echLegendItem__title--hasClickListener {
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.echLegendItem__displayValue {
+  @include euiFontSizeXS;
+  text-align: right;
+  font-feature-settings: 'tnum';
+
+  &.echLegendItem__displayValue--hidden {
+    display: none;
+  }
+}

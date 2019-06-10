@@ -15,7 +15,7 @@
     "cz": "git-cz",
     "build:clean": "rm -rf ./dist",
     "build:ts": "tsc -p ./tsconfig.json",
-    "build:sass": "node-sass src/index.scss dist/style.css  --output-style compressed",
+    "build:sass": "node-sass src/theme_light.scss dist/theme_light.css --output-style compressed && node-sass src/theme_dark.scss dist/theme_dark.css --output-style compressed && node-sass src/theme_only_light.scss dist/theme_only_light.css --output-style compressed && node-sass src/theme_only_dark.scss dist/theme_only_dark.css --output-style compressed",
     "build": "yarn build:clean && yarn build:ts && yarn build:sass",
     "start": "yarn storybook",
     "storybook": "start-storybook -p 9001 -c .storybook",
@@ -50,8 +50,7 @@
     "@babel/polyfill": "^7.4.4",
     "@commitlint/cli": "^7.5.2",
     "@commitlint/config-conventional": "^7.5.0",
-    "@elastic/datemath": "^5.0.2",
-    "@elastic/eui": "10.4.1",
+    "@elastic/eui": "^11.2.1",
     "@semantic-release/changelog": "^3.0.2",
     "@semantic-release/commit-analyzer": "^6.1.0",
     "@semantic-release/git": "^7.0.8",
@@ -80,6 +79,7 @@
     "@types/storybook__addon-knobs": "^4.0.1",
     "@types/storybook__addon-options": "^4.0.1",
     "@types/storybook__react": "^4.0.0",
+    "@types/uuid": "^3.4.4",
     "babel-loader": "^8.0.5",
     "canvas": "^2.4.1",
     "commitizen": "^3.0.7",
@@ -91,7 +91,6 @@
     "husky": "^1.3.1",
     "jest": "^24.1.0",
     "jest-environment-jsdom-fourteen": "^0.1.0",
-    "moment": "^2.24.0",
     "node-sass": "^4.11.0",
     "prettier": "1.16.4",
     "prettier-tslint": "^0.4.2",
@@ -119,7 +118,6 @@
     "d3-shape": "^1.3.4",
     "fp-ts": "^1.14.2",
     "konva": "^2.6.0",
-    "lodash": "^4.17.11",
     "luxon": "^1.11.3",
     "mobx": "^4.9.2",
     "mobx-react": "^5.4.3",
@@ -130,12 +128,8 @@
     "react-konva": "16.8.3",
     "react-spring": "^8.0.8",
     "resize-observer-polyfill": "^1.5.1",
-    "ts-debounce": "^1.0.0"
-  },
-  "peerDependencies": {
-    "@elastic/datemath": "^5.0.2",
-    "@elastic/eui": "10.4.1",
-    "moment": "^2.20.1"
+    "ts-debounce": "^1.0.0",
+    "uuid": "^3.3.2"
   },
   "config": {
     "commitizen": {

@@ -25,7 +25,7 @@ interface LineGeometriesDataState {
 export class LineGeometries extends React.PureComponent<
   LineGeometriesDataProps,
   LineGeometriesDataState
-  > {
+> {
   static defaultProps: Partial<LineGeometriesDataProps> = {
     animated: false,
   };
@@ -99,7 +99,8 @@ export class LineGeometries extends React.PureComponent<
                 return <animated.Circle {...pointProps} />;
               }}
             </Spring>
-          </Group>);
+          </Group>,
+        );
       } else {
         const pointProps = buildLinePointProps({
           lineIndex,
@@ -155,7 +156,8 @@ export class LineGeometries extends React.PureComponent<
                 return <animated.Path {...lineProps} />;
               }}
             </Spring>
-          </Group>);
+          </Group>,
+        );
       } else {
         const lineProps = buildLineProps({
           index,

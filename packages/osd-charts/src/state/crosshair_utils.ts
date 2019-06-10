@@ -122,9 +122,7 @@ export function getTooltipPosition(
   chartRotation: Rotation,
   cursorBandPosition: Dimensions,
   cursorPosition: { x: number; y: number },
-): {
-  transform: string;
-} {
+): string {
   const isHorizontalRotated = isHorizontalRotation(chartRotation);
   const hPosition = getHorizontalTooltipPosition(
     cursorPosition.x,
@@ -140,9 +138,7 @@ export function getTooltipPosition(
   );
   const xTranslation = `translateX(${hPosition.position}px) translateX(-${hPosition.offset}%)`;
   const yTranslation = `translateY(${vPosition.position}px) translateY(-${vPosition.offset}%)`;
-  return {
-    transform: `${xTranslation} ${yTranslation}`,
-  };
+  return `${xTranslation} ${yTranslation}`;
 }
 
 export function getHorizontalTooltipPosition(

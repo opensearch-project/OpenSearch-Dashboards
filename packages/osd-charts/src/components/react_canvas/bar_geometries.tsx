@@ -20,7 +20,7 @@ interface BarGeometriesDataState {
 export class BarGeometries extends React.PureComponent<
   BarGeometriesDataProps,
   BarGeometriesDataState
-  > {
+> {
   static defaultProps: Partial<BarGeometriesDataProps> = {
     animated: false,
   };

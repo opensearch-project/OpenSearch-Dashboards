@@ -20,7 +20,7 @@ class HighlighterComponent extends React.Component<HighlighterProps> {
     const left = chartDimensions.left + chartTransform.x;
     const top = chartDimensions.top + chartTransform.y;
     return (
-      <svg className="elasticChartsHighlighter">
+      <svg className="echHighlighter">
         <g transform={`translate(${left}, ${top}) rotate(${chartRotation})`}>
           {highlightedGeometries.map((geom, i) => {
             const { color, x, y } = geom;

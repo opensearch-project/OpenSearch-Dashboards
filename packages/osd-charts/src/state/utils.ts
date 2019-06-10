@@ -7,6 +7,7 @@ import {
   BarGeometry,
   IndexedGeometry,
   LineGeometry,
+  mutableIndexedGeometryMapUpsert,
   PointGeometry,
   renderArea,
   renderBars,
@@ -16,12 +17,12 @@ import { computeXScale, computeYScales, countBarsInCluster } from '../lib/series
 import {
   DataSeries,
   DataSeriesColorsValues,
+  findDataSeriesByColorValues,
   FormattedDataSeries,
   getColorValuesAsString,
   getFormattedDataseries,
   getSplittedSeries,
 } from '../lib/series/series';
-import { isEqualSeriesKey } from '../lib/series/series_utils';
 import {
   AreaSeriesSpec,
   AxisSpec,
@@ -63,19 +64,6 @@ export interface GeometriesCounts {
   areasPoints: number;
   lines: number;
   linePoints: number;
-}
-
-export function findDataSeriesByColorValues(
-  series: DataSeriesColorsValues[] | null,
-  value: DataSeriesColorsValues,
-): number {
-  if (!series) {
-    return -1;
-  }
-
-  return series.findIndex((item: DataSeriesColorsValues) => {
-    return isEqualSeriesKey(item.colorValues, value.colorValues) && item.specId === value.specId;
-  });
 }
 
 export function updateDeselectedDataSeries(
@@ -530,20 +518,6 @@ export function mergeGeometriesIndexes(...iterables: Array<Map<any, IndexedGeome
     }
   }
   return geometriesIndex;
-}
-
-export function mutableIndexedGeometryMapUpsert(
-  mutableGeometriesIndex: Map<any, IndexedGeometry[]>,
-  key: any,
-  geometry: IndexedGeometry | IndexedGeometry[],
-) {
-  const existing = mutableGeometriesIndex.get(key);
-  const upsertGeometry: IndexedGeometry[] = Array.isArray(geometry) ? geometry : [geometry];
-  if (existing === undefined) {
-    mutableGeometriesIndex.set(key, upsertGeometry);
-  } else {
-    mutableGeometriesIndex.set(key, [...upsertGeometry, ...existing]);
-  }
 }
 
 export function isHorizontalRotation(chartRotation: Rotation) {

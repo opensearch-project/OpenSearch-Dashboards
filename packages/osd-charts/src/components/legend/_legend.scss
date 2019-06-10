@@ -1,0 +1,70 @@
+// Legend
+
+.echLegend {
+  @include euiOverflowShadow;
+  // Padding supplied in JS to match chart margins
+  position: absolute !important; // Override shadow
+  overflow: hidden;
+}
+
+.echLegend--collapsed {
+  display: none;
+}
+
+.echLegend--debug {
+  background: red;
+}
+
+.echLegend--top,
+.echLegend--bottom {
+  left: $euiSizeL;
+  right: 0;
+  height: $echLegendMaxHeight;
+
+  .echLegendList {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .echLegendItem {
+    margin-right: $euiSizeL;
+    width: $echLegendMaxWidth;
+  }
+}
+
+.echLegend--top {
+  top: 0;
+}
+.echLegend--bottom {
+  bottom: 0;
+}
+
+.echLegend--left,
+.echLegend--right {
+  top: 0;
+  bottom: 0;
+  width: $echLegendMaxWidth;
+
+  .echLegendList {
+    flex-direction: column;
+  }
+
+  .echLegendItem {
+    width: 100%;
+  }
+}
+
+.echLegend--left {
+  left: 0;
+}
+.echLegend--right {
+  right: 0;
+}
+
+.echLegendListContainer {
+  @include euiScrollBar;
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}

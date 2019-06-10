@@ -1,10 +1,10 @@
-@import '../node_modules/@elastic/eui/src/themes/eui/eui_colors_dark.scss';
-
 .story-chart {
+  box-sizing: border-box;
   background: white;
 }
 .story-chart-dark {
-  background: $euiColorEmptyShade;
+  box-sizing: border-box;
+  background: #1a1b20;
 }
 #root {
   background-color: blanchedalmond;
@@ -14,6 +14,7 @@
   width: 100%;
   height: 400px;
   position: relative;
+  box-sizing: border-box;
 }
 #story-root + div table {
   border: 1px solid gray;

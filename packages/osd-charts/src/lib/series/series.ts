@@ -1,9 +1,9 @@
-import { findDataSeriesByColorValues } from '../../state/utils';
 import { ColorConfig } from '../themes/theme';
 import { Accessor } from '../utils/accessor';
 import { GroupId, SpecId } from '../utils/ids';
 import { splitSpecsByGroupId, YBasicSeriesSpec } from './domains/y_domain';
 import { formatNonStackedDataSeriesValues } from './nonstacked_series_utils';
+import { isEqualSeriesKey } from './series_utils';
 import { BasicSeriesSpec, Datum, SeriesAccessors } from './specs';
 import { formatStackedDataSeriesValues } from './stacked_series_utils';
 
@@ -62,6 +62,19 @@ export interface DataSeriesColorsValues {
   colorValues: any[];
   lastValue?: any;
   specSortIndex?: number;
+}
+
+export function findDataSeriesByColorValues(
+  series: DataSeriesColorsValues[] | null,
+  value: DataSeriesColorsValues,
+): number {
+  if (!series) {
+    return -1;
+  }
+
+  return series.findIndex((item: DataSeriesColorsValues) => {
+    return isEqualSeriesKey(item.colorValues, value.colorValues) && item.specId === value.specId;
+  });
 }
 
 /**

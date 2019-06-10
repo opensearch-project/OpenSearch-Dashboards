@@ -1,6 +1,6 @@
 import { mergeDomainsByGroupId } from '../lib/axes/axis_utils';
 import { IndexedGeometry } from '../lib/series/rendering';
-import { DataSeriesColorsValues, getSeriesColorMap } from '../lib/series/series';
+import { DataSeriesColorsValues, findDataSeriesByColorValues, getSeriesColorMap } from '../lib/series/series';
 import {
   AreaSeriesSpec,
   AxisSpec,
@@ -15,7 +15,6 @@ import { ScaleType } from '../lib/utils/scales/scales';
 import {
   computeSeriesDomains,
   computeSeriesGeometries,
-  findDataSeriesByColorValues,
   getUpdatedCustomSeriesColors,
   isChartAnimatable,
   isHorizontalRotation,

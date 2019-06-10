@@ -25,12 +25,6 @@ To install the Elastic Charts into an existing project, use the `yarn` CLI (`npm
 yarn add @elastic/charts
 ```
 
-Note that Elastic Charts itself has some dependencies itself mostly around styles and management of dates and times. If you are installing it into a blank project you will need to install the following with it. You can read more about other ways to [consume Elastic Charts][consuming].
-
-```
-yarn add @elastic/eui @elastic/datemath moment
-```
-
 ## Running Locally
 
 ### Node

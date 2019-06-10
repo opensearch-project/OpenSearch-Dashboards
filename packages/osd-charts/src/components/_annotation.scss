@@ -1,48 +1,31 @@
-.elasticChartsAnnotation {
-  @include euiFontSizeXS;
+.echAnnotation {
   pointer-events: none;
   position: absolute;
-  z-index: $euiZLevel9;
-  max-width: $euiSizeXL * 10;
-  overflow: hidden;
-  overflow-wrap: break-word;
-  transition: opacity $euiAnimSpeedNormal;
   user-select: none;
 }
 
-.elasticChartsAnnotation--hidden, .elasticChartsAnnotation__tooltip--hidden {
+.echAnnotation--hidden,
+.echAnnotation__tooltip--hidden {
   opacity: 0;
 }
 
-.elasticChartsAnnotation__tooltip {
-  @include euiBottomShadow($color: $euiColorFullShade);
+.echAnnotation__tooltip {
+  @include euiToolTipStyle;
   @include euiFontSizeXS;
-  pointer-events: none;
   position: absolute;
-  z-index: $euiZLevel9;
-  background-color: rgba(tintOrShade($euiColorFullShade, 25%, 80%), 0.9);
-  color: $euiColorGhost;
-  border-radius: $euiBorderRadius;
-  max-width: $euiSizeXL * 10;
-  overflow: hidden;
-  overflow-wrap: break-word;
+  padding: 0;
+
+  // overflow: hidden;
   transition: opacity $euiAnimSpeedNormal;
+  pointer-events: none;
   user-select: none;
 }
 
-.elasticChartsAnnotation__header {
-  margin: 0;
-  background: rgba(shade($euiColorGhost, 20%), 0.9);
-  color: $euiColorFullShade;
-  padding: 0 8px;
+.echAnnotation__header {
+  @include euiToolTipTitle;
+  padding: $euiSizeXS ($euiSizeXS * 2);
 }
 
-.elasticChartsAnnotation__details {
-  margin: 0;
-  padding: 0 8px;
-  display: flex;
-}
-
-.elasticChartsAnnotation__detailsMarker {
-  margin-right: 4px;
+.echAnnotation__details {
+  padding: $euiSizeXS ($euiSizeXS * 2);
 }

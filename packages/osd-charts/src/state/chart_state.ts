@@ -23,6 +23,7 @@ import {
 import { countBarsInCluster } from '../lib/series/scales';
 import {
   DataSeriesColorsValues,
+  findDataSeriesByColorValues,
   FormattedDataSeries,
   getSeriesColorMap,
   RawDataSeries,
@@ -44,7 +45,11 @@ import {
 } from '../lib/series/specs';
 import { formatTooltip, getSeriesTooltipValues } from '../lib/series/tooltip';
 import { LIGHT_THEME } from '../lib/themes/light_theme';
-import { mergeWithDefaultAnnotationLine, mergeWithDefaultAnnotationRect, Theme } from '../lib/themes/theme';
+import {
+  mergeWithDefaultAnnotationLine,
+  mergeWithDefaultAnnotationRect,
+  Theme,
+} from '../lib/themes/theme';
 import { compareByValueAsc } from '../lib/utils/commons';
 import { computeChartDimensions, Dimensions } from '../lib/utils/dimensions';
 import { Domain } from '../lib/utils/domain';
@@ -76,7 +81,6 @@ import {
   computeChartTransform,
   computeSeriesDomains,
   computeSeriesGeometries,
-  findDataSeriesByColorValues,
   getAxesSpecForSpecId,
   getUpdatedCustomSeriesColors,
   isChartAnimatable,
@@ -311,14 +315,12 @@ export class ChartStore {
     );
     Object.assign(this.cursorLinePosition, updatedCursorLine);
 
-    const updatedTooltipPosition = getTooltipPosition(
+    this.tooltipPosition.transform = getTooltipPosition(
       this.chartDimensions,
       this.chartRotation,
       this.cursorBandPosition,
       this.cursorPosition,
     );
-
-    this.tooltipPosition.transform = updatedTooltipPosition.transform;
 
     // get the elements on at this cursor position
     const elements = this.geometriesIndex.get(xValue);
@@ -382,7 +384,8 @@ export class ChartStore {
 
     // if there's an annotation rect tooltip & there isn't a single highlighted element, hide
     const annotationTooltip = this.annotationTooltipState.get();
-    const hasRectAnnotationToolip = annotationTooltip && annotationTooltip.annotationType === AnnotationTypes.Rectangle;
+    const hasRectAnnotationToolip =
+      annotationTooltip && annotationTooltip.annotationType === AnnotationTypes.Rectangle;
     if (hasRectAnnotationToolip && !oneHighlighted) {
       this.clearTooltipAndHighlighted();
       return;
@@ -527,14 +530,15 @@ export class ChartStore {
   });
 
   onLegendItemClick = action((legendItemKey: string) => {
-    if (legendItemKey !== this.selectedLegendItemKey.get()) {
-      this.selectedLegendItemKey.set(legendItemKey);
-    } else {
-      this.selectedLegendItemKey.set(null);
-    }
-
+    // Disabling the select until we implement the right contextual menu
+    // with extend possibility
+    // if (legendItemKey !== this.selectedLegendItemKey.get()) {
+    // this.selectedLegendItemKey.set(legendItemKey);
+    // } else {
+    //   this.selectedLegendItemKey.set(null);
+    // }
     if (this.onLegendItemClickListener) {
-      const currentLegendItem = this.selectedLegendItem.get();
+      const currentLegendItem = legendItemKey == null ? null : this.legendItems.get(legendItemKey);
       const listenerData = currentLegendItem ? currentLegendItem.value : null;
       this.onLegendItemClickListener(listenerData);
     }

@@ -1,14 +1,15 @@
-import { EuiButtonIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import { inject, observer } from 'mobx-react';
 import React from 'react';
-import { ChartStore } from '../state/chart_state';
+import { ChartStore } from '../../state/chart_state';
+import { Icon } from '../icons/icon';
 
-interface ReactiveChartProps {
+interface LegendButtonProps {
   chartStore?: ChartStore;
+  legendId: string;
 }
 
-class LegendButtonComponent extends React.Component<ReactiveChartProps> {
+class LegendButtonComponent extends React.Component<LegendButtonProps> {
   static displayName = 'Legend';
   onCollapseLegend = () => {
     this.props.chartStore!.toggleLegendCollapsed();
@@ -21,16 +22,21 @@ class LegendButtonComponent extends React.Component<ReactiveChartProps> {
       return null;
     }
     const isOpen = !legendCollapsed.get();
-    const className = classNames('elasticChartsLegend__toggle', {
-      'elasticChartsLegend__toggle--isOpen': isOpen,
+    const className = classNames('echLegendButton', {
+      'echLegendButton--isOpen': isOpen,
     });
     return (
-      <EuiButtonIcon
-        className={className}
+      <button
+        type="button"
         onClick={this.onCollapseLegend}
-        iconType="list"
+        className={className}
+        aria-expanded={!legendCollapsed.get()}
         aria-label={legendCollapsed.get() ? 'Expand legend' : 'Collapse legend'}
-      />
+        title={legendCollapsed.get() ? 'Expand legend' : 'Collapse legend'}
+        aria-controls={this.props.legendId}
+      >
+        <Icon type="list" />
+      </button>
     );
   }
 }

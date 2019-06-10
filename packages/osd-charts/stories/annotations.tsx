@@ -1,4 +1,3 @@
-import { EuiIcon } from '@elastic/eui';
 import { array, boolean, color, number, select } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React, { CSSProperties } from 'react';
@@ -20,6 +19,7 @@ import {
   Settings,
   timeFormatter,
 } from '../src';
+import { Icon } from '../src/components/icons/icon';
 import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
 
 const dateFormatter = timeFormatter('HH:mm:ss');
@@ -78,7 +78,7 @@ storiesOf('Annotations', module)
           domainType={AnnotationDomainTypes.XDomain}
           dataValues={dataValues}
           style={style}
-          marker={<EuiIcon type="alert" />}
+          marker={<Icon type="alert" />}
         />
         <Axis id={getAxisId('horizontal')} position={axisPosition} title={'x-domain axis'} />
         <Axis id={getAxisId('vertical')} title={'y-domain axis'} position={Position.Left} />
@@ -114,7 +114,7 @@ storiesOf('Annotations', module)
           annotationId={getAnnotationId('anno_1')}
           domainType={AnnotationDomainTypes.XDomain}
           dataValues={dataValues}
-          marker={<EuiIcon type="alert" />}
+          marker={<Icon type="alert" />}
         />
         <Axis id={getAxisId('top')} position={Position.Top} title={'x-domain axis (top)'} />
         <Axis
@@ -160,7 +160,7 @@ storiesOf('Annotations', module)
           annotationId={getAnnotationId('anno_')}
           domainType={AnnotationDomainTypes.YDomain}
           dataValues={dataValues}
-          marker={<EuiIcon type="alert" />}
+          marker={<Icon type="alert" />}
         />
         <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'x-domain axis'} />
         <Axis id={getAxisId('left')} title={axisTitle} position={axisPosition} />
@@ -202,7 +202,7 @@ storiesOf('Annotations', module)
           annotationId={getAnnotationId('anno_1')}
           domainType={AnnotationDomainTypes.XDomain}
           dataValues={dataValues}
-          marker={<EuiIcon type="alert" />}
+          marker={<Icon type="alert" />}
         />
         <Axis
           id={getAxisId('bottom')}
@@ -256,11 +256,11 @@ storiesOf('Annotations', module)
 
     const axisPosition = Position.Bottom;
 
-    const marker = select<'alert' | 'asterisk' | 'questionInCircle'>(
-      'marker icon (examples from EUI)',
+    const marker = select<'alert' | 'eye' | 'questionInCircle'>(
+      'marker icon (examples from internal Icon library)',
       {
         alert: 'alert',
-        asterisk: 'asterisk',
+        eye: 'eye',
         questionInCircle: 'questionInCircle',
       },
       'alert',
@@ -277,7 +277,7 @@ storiesOf('Annotations', module)
           domainType={AnnotationDomainTypes.XDomain}
           dataValues={dataValues}
           style={style}
-          marker={<EuiIcon type={marker} />}
+          marker={<Icon type={marker} />}
           hideLines={hideLines}
           hideTooltips={hideTooltips}
         />
@@ -295,15 +295,17 @@ storiesOf('Annotations', module)
     );
   })
   .add('[rect] basic annotation (bar)', () => {
-    const dataValues = [{
-      coordinates: {
-        x0: 0,
-        x1: 1,
-        y0: 0,
-        y1: 7,
+    const dataValues = [
+      {
+        coordinates: {
+          x0: 0,
+          x1: 1,
+          y0: 0,
+          y1: 7,
+        },
+        details: 'details about this annotation',
       },
-      details: 'details about this annotation',
-    }];
+    ];
 
     const chartRotation = select<Rotation>(
       'chartRotation',
@@ -320,11 +322,7 @@ storiesOf('Annotations', module)
       <Chart className={'story-chart'}>
         <Settings debug={boolean('debug', false)} rotation={chartRotation} />
         <RectAnnotation dataValues={dataValues} annotationId={getAnnotationId('rect')} />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'x-domain axis'}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'x-domain axis'} />
         <Axis id={getAxisId('left')} title={'y-domain axis'} position={Position.Left} />
         <BarSeries
           id={getSpecId('bars')}
@@ -338,38 +336,46 @@ storiesOf('Annotations', module)
     );
   })
   .add('[rect] basic annotation (line)', () => {
-    const definedCoordinate = select('defined coordinate', {
-      x0: 'x0',
-      x1: 'x1',
-      y0: 'y0',
-      y1: 'y1',
-    }, 'x0');
+    const definedCoordinate = select(
+      'defined coordinate',
+      {
+        x0: 'x0',
+        x1: 'x1',
+        y0: 'y0',
+        y1: 'y1',
+      },
+      'x0',
+    );
 
-    const dataValues = [{
-      coordinates: {
-        x0: 1,
-        x1: 1.25,
-        y0: 0,
-        y1: 7,
+    const dataValues = [
+      {
+        coordinates: {
+          x0: 1,
+          x1: 1.25,
+          y0: 0,
+          y1: 7,
+        },
+        details: 'details about this annotation',
       },
-      details: 'details about this annotation',
-    }, {
-      coordinates: {
-        x0: 2.0,
-        x1: 2.1,
-        y0: 0,
-        y1: 7,
+      {
+        coordinates: {
+          x0: 2.0,
+          x1: 2.1,
+          y0: 0,
+          y1: 7,
+        },
+        details: 'details about this annotation',
       },
-      details: 'details about this annotation',
-    }, {
-      coordinates: {
-        x0: definedCoordinate === 'x0' ? 0.25 : null,
-        x1: definedCoordinate === 'x1' ? 2.75 : null,
-        y0: definedCoordinate === 'y0' ? 0.25 : null,
-        y1: definedCoordinate === 'y1' ? 6.75 : null,
+      {
+        coordinates: {
+          x0: definedCoordinate === 'x0' ? 0.25 : null,
+          x1: definedCoordinate === 'x1' ? 2.75 : null,
+          y0: definedCoordinate === 'y0' ? 0.25 : null,
+          y1: definedCoordinate === 'y1' ? 6.75 : null,
+        },
+        details: 'can have null values',
       },
-      details: 'can have null values',
-    }];
+    ];
 
     const chartRotation = select<Rotation>(
       'chartRotation',
@@ -393,15 +399,8 @@ storiesOf('Annotations', module)
     return (
       <Chart className={'story-chart'}>
         <Settings debug={boolean('debug', false)} rotation={chartRotation} />
-        <RectAnnotation
-          dataValues={dataValues}
-          annotationId={getAnnotationId('rect')}
-        />
-        <Axis
-          id={getAxisId('bottom')}
-          position={xAxisPosition}
-          title={xAxisTitle}
-        />
+        <RectAnnotation dataValues={dataValues} annotationId={getAnnotationId('rect')} />
+        <Axis id={getAxisId('bottom')} position={xAxisPosition} title={xAxisTitle} />
         <Axis id={getAxisId('left')} title={yAxisTitle} position={yAxisPosition} />
         <LineSeries
           id={getSpecId('lines')}
@@ -415,39 +414,44 @@ storiesOf('Annotations', module)
     );
   })
   .add('[rect] styling', () => {
-    const dataValues = [{
-      coordinates: {
-        x0: 0,
-        x1: 0.25,
-        y0: 0,
-        y1: 7,
+    const dataValues = [
+      {
+        coordinates: {
+          x0: 0,
+          x1: 0.25,
+          y0: 0,
+          y1: 7,
+        },
+        details: 'annotation 1',
       },
-      details: 'annotation 1',
-    }, {
-      coordinates: {
-        x0: -0.1,
-        x1: 0,
-        y0: 0,
-        y1: 7,
+      {
+        coordinates: {
+          x0: -0.1,
+          x1: 0,
+          y0: 0,
+          y1: 7,
+        },
+        details: 'annotation 2',
       },
-      details: 'annotation 2',
-    }, {
-      coordinates: {
-        x0: 1.1,
-        x1: 1.3,
-        y0: 0,
-        y1: 7,
+      {
+        coordinates: {
+          x0: 1.1,
+          x1: 1.3,
+          y0: 0,
+          y1: 7,
+        },
+        details: 'annotation 2',
       },
-      details: 'annotation 2',
-    }, {
-      coordinates: {
-        x0: 2.5,
-        x1: 3,
-        y0: 0,
-        y1: 7,
+      {
+        coordinates: {
+          x0: 2.5,
+          x1: 3,
+          y0: 0,
+          y1: 7,
+        },
+        details: 'annotation 3',
       },
-      details: 'annotation 3',
-    }];
+    ];
 
     const zIndex = number('annotation zIndex', 0);
 
@@ -483,9 +487,13 @@ storiesOf('Annotations', module)
       overflowWrap: 'break-word',
       width: '120px',
     };
-    const renderTooltip = hasCustomTooltip ?
-      (position: { transform: string; top: number; left: number; }, details?: string) =>
-        (<div style={{ ...tooltipStyle, ...position }}><EuiIcon type="alert" />{details}</div>)
+    const renderTooltip = hasCustomTooltip
+      ? (position: { transform: string; top: number; left: number }, details?: string) => (
+          <div style={{ ...tooltipStyle, ...position }}>
+            <Icon type="alert" />
+            {details}
+          </div>
+        )
       : undefined;
 
     const isLeft = boolean('y-domain axis is Position.Left', true);
@@ -506,11 +514,7 @@ storiesOf('Annotations', module)
           renderTooltip={renderTooltip}
           zIndex={zIndex}
         />
-        <Axis
-          id={getAxisId('bottom')}
-          position={xAxisPosition}
-          title={xAxisTitle}
-        />
+        <Axis id={getAxisId('bottom')} position={xAxisPosition} title={xAxisTitle} />
         <Axis id={getAxisId('left')} title={yAxisTitle} position={yAxisPosition} />
         <LineSeries
           id={getSpecId('lines')}

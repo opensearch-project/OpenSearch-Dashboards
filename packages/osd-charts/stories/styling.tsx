@@ -1,4 +1,3 @@
-import { palettes } from '@elastic/eui';
 import { boolean, color, number, select } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
@@ -25,6 +24,7 @@ import {
   Settings,
 } from '../src/';
 import * as TestDatasets from '../src/lib/series/utils/test_dataset';
+import { palettes } from '../src/lib/themes/colors';
 
 function range(
   title: string,
@@ -306,12 +306,12 @@ storiesOf('Stylings', module)
         vizColors: select(
           'vizColors',
           {
-            colorBlind: palettes.euiPaletteColorBlind.colors,
-            darkBackground: palettes.euiPaletteForDarkBackground.colors,
-            lightBackground: palettes.euiPaletteForLightBackground.colors,
-            forStatus: palettes.euiPaletteForStatus.colors,
+            colorBlind: palettes.echPaletteColorBlind.colors,
+            darkBackground: palettes.echPaletteForDarkBackground.colors,
+            lightBackground: palettes.echPaletteForLightBackground.colors,
+            forStatus: palettes.echPaletteForStatus.colors,
           },
-          palettes.euiPaletteColorBlind.colors,
+          palettes.echPaletteColorBlind.colors,
           'Colors',
         ),
         defaultVizColor: DEFAULT_MISSING_COLOR,

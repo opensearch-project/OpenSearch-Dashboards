@@ -25,7 +25,7 @@ interface AreaGeometriesDataState {
 export class AreaGeometries extends React.PureComponent<
   AreaGeometriesDataProps,
   AreaGeometriesDataState
-  > {
+> {
   static defaultProps: Partial<AreaGeometriesDataProps> = {
     animated: false,
   };
@@ -97,7 +97,8 @@ export class AreaGeometries extends React.PureComponent<
                 return <animated.Circle {...pointProps} />;
               }}
             </Spring>
-          </Group>);
+          </Group>,
+        );
       } else {
         const pointProps = buildAreaPointProps({
           areaIndex,
@@ -141,7 +142,8 @@ export class AreaGeometries extends React.PureComponent<
                 return <animated.Path {...areaProps} />;
               }}
             </Spring>
-          </Group>);
+          </Group>,
+        );
       } else {
         const areaProps = buildAreaProps({
           index: i,
