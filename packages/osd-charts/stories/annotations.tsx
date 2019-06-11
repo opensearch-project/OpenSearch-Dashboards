@@ -294,18 +294,15 @@ storiesOf('Annotations', module)
       </Chart>
     );
   })
-  .add('[rect] basic annotation (bar)', () => {
-    const dataValues = [
-      {
-        coordinates: {
-          x0: 0,
-          x1: 1,
-          y0: 0,
-          y1: 7,
-        },
-        details: 'details about this annotation',
+  .add('[rect] basic annotation (linear bar)', () => {
+    const dataValues = [{
+      coordinates: {
+        x0: 0,
+        x1: 1,
+        y0: 0,
+        y1: 7,
       },
-    ];
+    }];
 
     const chartRotation = select<Rotation>(
       'chartRotation',
@@ -331,6 +328,47 @@ storiesOf('Annotations', module)
           xAccessor={'x'}
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 3, y: 6 }]}
+        />
+      </Chart>
+    );
+  })
+  .add('[rect] basic annotation (ordinal bar)', () => {
+    const dataValues = [{
+      coordinates: {
+        x0: 'a',
+        x1: 'b.5',
+      },
+      details: 'details about this annotation',
+    }];
+
+    const chartRotation = select<Rotation>(
+      'chartRotation',
+      {
+        '0 deg': 0,
+        '90 deg': 90,
+        '-90 deg': -90,
+        '180 deg': 180,
+      },
+      0,
+    );
+
+    return (
+      <Chart className={'story-chart'}>
+        <Settings debug={boolean('debug', false)} rotation={chartRotation} />
+        <RectAnnotation dataValues={dataValues} annotationId={getAnnotationId('rect')} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'x-domain axis'}
+        />
+        <Axis id={getAxisId('left')} title={'y-domain axis'} position={Position.Left} />
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Ordinal}
+          yScaleType={ScaleType.Linear}
+          xAccessor={'x'}
+          yAccessors={['y']}
+          data={[{ x: 'a', y: 2 }, { x: 'b', y: 7 }, { x: 'c', y: 0 }, { x: 'd', y: 6 }]}
         />
       </Chart>
     );

@@ -13,8 +13,11 @@ export { timeFormatter, niceTimeFormatter, niceTimeFormatByDay } from './utils/d
 export { DataGenerator } from './utils/data_generators/data_generator';
 export { DataSeriesColorsValues } from './lib/series/series';
 export {
+  AnnotationDomainType,
   AnnotationDomainTypes,
   CustomSeriesColorsMap,
+  HistogramModeAlignment,
+  HistogramModeAlignments,
   LineAnnotationDatum,
   LineAnnotationSpec,
   RectAnnotationDatum,

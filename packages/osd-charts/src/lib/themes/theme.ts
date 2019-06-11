@@ -62,6 +62,12 @@ export interface ScalesConfig {
    * A number between 0 and 1.
    */
   barsPadding: number;
+  /**
+   * The proportion of the range that is reserved for blank space between bands in histogramMode.
+   * A value of 0 means no blank space between bands, and a value of 1 means a bandwidth of zero.
+   * A number between 0 and 1.
+   */
+  histogramPadding: number;
 }
 export interface ColorConfig {
   vizColors: string[];

@@ -6,6 +6,7 @@ import {
   AnnotationType,
   AnnotationTypes,
   AxisSpec,
+  HistogramModeAlignments,
   isLineAnnotation,
   isRectAnnotation,
   LineAnnotationDatum,
@@ -20,7 +21,7 @@ import { Dimensions } from '../lib/utils/dimensions';
 import { AnnotationId, AxisId, GroupId } from '../lib/utils/ids';
 import { Scale, ScaleType } from '../lib/utils/scales/scales';
 import { Point } from './chart_state';
-import { getAxesSpecForSpecId, isHorizontalRotation } from './utils';
+import { computeXScaleOffset, getAxesSpecForSpecId, isHorizontalRotation } from './utils';
 
 export interface AnnotationTooltipState {
   annotationType: AnnotationType;
@@ -177,6 +178,7 @@ export function computeXDomainLineAnnotationDimensions(
   axisPosition: Position,
   chartDimensions: Dimensions,
   lineColor: string,
+  xScaleOffset: number,
   marker?: JSX.Element,
   markerDimensions?: { width: number; height: number; },
 ): AnnotationLineProps[] {
@@ -192,8 +194,7 @@ export function computeXDomainLineAnnotationDimensions(
       headerText: datum.header || dataValue.toString(),
     };
 
-    // TODO: make offset dependent on annotationSpec.alignment (left, center, right)
-    const offset = xScale.bandwidth / 2;
+    const offset = xScale.bandwidth / 2 - xScaleOffset;
     const isContinuous = xScale.type !== ScaleType.Ordinal;
 
     const scaledXValue = xScale.scale(dataValue);
@@ -250,10 +251,7 @@ export function computeXDomainLineAnnotationDimensions(
         const startY = (axisPosition === Position.Bottom) ? 0 : -lineOverflow;
         const endY = (axisPosition === Position.Bottom) ? chartHeight + lineOverflow : chartHeight;
         linePosition = [xDomainPosition, startY, xDomainPosition, endY];
-        // tooltipLinePosition = [chartWidth - xDomainPosition, 0, chartWidth - xDomainPosition, chartHeight];
         tooltipLinePosition = [xDomainPosition, 0, xDomainPosition, chartHeight];
-
-        // tooltipLinePosition = [0, chartWidth - xDomainPosition, chartHeight, chartWidth - xDomainPosition];
 
         const startMarkerY = (axisPosition === Position.Bottom) ? 0 : -lineOverflow - markerOffsets.height;
         const endMarkerY = (axisPosition === Position.Bottom) ?
@@ -281,6 +279,7 @@ export function computeLineAnnotationDimensions(
   yScales: Map<GroupId, Scale>,
   xScale: Scale,
   axisPosition: Position,
+  xScaleOffset: number,
 ): AnnotationLineProps[] | null {
   const { domainType, dataValues, marker, markerDimensions, hideLines } = annotationSpec;
 
@@ -304,6 +303,7 @@ export function computeLineAnnotationDimensions(
       axisPosition,
       chartDimensions,
       lineColor,
+      xScaleOffset,
       marker,
       markerDimensions,
     );
@@ -328,10 +328,44 @@ export function computeLineAnnotationDimensions(
   );
 }
 
-export function scaleAndValidateDatum(dataValue: any, scale: Scale): any | null {
-  const isContinuous = scale.type !== ScaleType.Ordinal;
+/**
+ * Used when we need to snap values to the nearest tick edge, this performs a binary search for the nearest tick
+ * @param dataValue - dataValue defined as an annotation cooordinate
+ * @param ticks - ticks from the scale
+ * @param minInterval - minInterva from the scale
+ */
+export function getNearestTick(dataValue: number, ticks: number[], minInterval: number): number | undefined {
+  if (ticks.length === 0) {
+    return;
+  }
 
-  const scaledValue = scale.scale(dataValue);
+  if (ticks.length === 1) {
+    if (Math.abs(dataValue - ticks[0]) <= minInterval / 2) {
+      return ticks[0];
+    }
+    return;
+  }
+
+  const numTicks = ticks.length - 1;
+  const midIdx = Math.ceil(numTicks / 2);
+  const midPoint = ticks[midIdx];
+
+  if (Math.abs(dataValue - midPoint) <= minInterval / 2) {
+    return midPoint;
+  }
+
+  if (dataValue > midPoint) {
+    return getNearestTick(dataValue, ticks.slice(midIdx, ticks.length), minInterval);
+  }
+
+  return getNearestTick(dataValue, ticks.slice(0, midIdx), minInterval);
+}
+
+export function scaleAndValidateDatum(dataValue: any, scale: Scale, alignWithTick: boolean): any | null {
+  const isContinuous = scale.type !== ScaleType.Ordinal;
+  const value = (isContinuous && alignWithTick) ?
+    getNearestTick(dataValue, scale.ticks(), scale.minInterval) : dataValue;
+  const scaledValue = scale.scale(value);
 
   // d3.scale will return 0 for '', rendering the line incorrectly at 0
   if (isNaN(scaledValue) || (isContinuous && dataValue === '')) {
@@ -341,7 +375,10 @@ export function scaleAndValidateDatum(dataValue: any, scale: Scale): any | null 
   if (isContinuous) {
     const [domainStart, domainEnd] = scale.domain;
 
-    if (domainStart > dataValue || domainEnd < dataValue) {
+    // if we're not aligning the ticks, we need to extend the domain by one more tick for histograms
+    const domainEndOffset = alignWithTick ? 0 : scale.minInterval;
+
+    if (domainStart > dataValue || domainEnd + domainEndOffset < dataValue) {
       return null;
     }
   }
@@ -353,6 +390,8 @@ export function computeRectAnnotationDimensions(
   annotationSpec: RectAnnotationSpec,
   yScales: Map<GroupId, Scale>,
   xScale: Scale,
+  enableHistogramMode: boolean,
+  barsPadding: number,
 ): AnnotationRectProps[] | null {
   const { dataValues } = annotationSpec;
 
@@ -364,6 +403,8 @@ export function computeRectAnnotationDimensions(
 
   const xDomain = xScale.domain;
   const yDomain = yScale.domain;
+  const lastX = xDomain[xDomain.length - 1];
+  const xMinInterval = xScale.minInterval;
 
   const rectsProps: AnnotationRectProps[] = [];
 
@@ -377,7 +418,8 @@ export function computeRectAnnotationDimensions(
 
     if (x0 == null) {
       // if x1 is defined, we want the rect to draw to the end of the scale
-      x0 = xDomain[xDomain.length - 1];
+      // if we're in histogram mode, extend domain end by min interval
+      x0 = enableHistogramMode ? lastX + xMinInterval : lastX;
     }
 
     if (x1 == null) {
@@ -395,10 +437,12 @@ export function computeRectAnnotationDimensions(
       y1 = yDomain[0];
     }
 
-    let x0Scaled = scaleAndValidateDatum(x0, xScale);
-    let x1Scaled = scaleAndValidateDatum(x1, xScale);
-    const y0Scaled = scaleAndValidateDatum(y0, yScale);
-    const y1Scaled = scaleAndValidateDatum(y1, yScale);
+    const alignWithTick = xScale.bandwidth > 0 && !enableHistogramMode;
+
+    let x0Scaled = scaleAndValidateDatum(x0, xScale, alignWithTick);
+    let x1Scaled = scaleAndValidateDatum(x1, xScale, alignWithTick);
+    const y0Scaled = scaleAndValidateDatum(y0, yScale, false);
+    const y1Scaled = scaleAndValidateDatum(y1, yScale, false);
 
     // TODO: surface this as a warning
     if ([x0Scaled, x1Scaled, y0Scaled, y1Scaled].includes(null)) {
@@ -408,8 +452,9 @@ export function computeRectAnnotationDimensions(
     let xOffset = 0;
     if (xScale.bandwidth > 0) {
       const xBand = xScale.bandwidth / (1 - xScale.barsPadding);
-      xOffset = (xBand - xScale.bandwidth) / 2;
+      xOffset = enableHistogramMode ? (xBand - xScale.bandwidth) / 2 : barsPadding;
     }
+
     x0Scaled = x0Scaled - xOffset;
     x1Scaled = x1Scaled - xOffset;
 
@@ -454,6 +499,14 @@ export function getAnnotationAxis(
   return annotationAxis ? annotationAxis.position : null;
 }
 
+export function computeClusterOffset(totalBarsInCluster: number, barsShift: number, bandwidth: number): number {
+  if (totalBarsInCluster > 1) {
+    return barsShift - bandwidth / 2;
+  }
+
+  return 0;
+}
+
 export function computeAnnotationDimensions(
   annotations: Map<AnnotationId, AnnotationSpec>,
   chartDimensions: Dimensions,
@@ -461,8 +514,20 @@ export function computeAnnotationDimensions(
   yScales: Map<GroupId, Scale>,
   xScale: Scale,
   axesSpecs: Map<AxisId, AxisSpec>,
+  totalBarsInCluster: number,
+  enableHistogramMode: boolean,
 ): Map<AnnotationId, AnnotationDimensions> {
   const annotationDimensions = new Map<AnnotationId, AnnotationDimensions>();
+
+  const barsShift = totalBarsInCluster * xScale.bandwidth / 2;
+
+  const band = xScale.bandwidth / (1 - xScale.barsPadding);
+  const halfPadding = (band - xScale.bandwidth) / 2;
+  const barsPadding = halfPadding * totalBarsInCluster;
+  const clusterOffset = computeClusterOffset(totalBarsInCluster, barsShift, xScale.bandwidth);
+
+  // Annotations should always align with the axis line in histogram mode
+  const xScaleOffset = computeXScaleOffset(xScale, enableHistogramMode, HistogramModeAlignments.Start);
 
   annotations.forEach((annotationSpec: AnnotationSpec, annotationId: AnnotationId) => {
     if (isLineAnnotation(annotationSpec)) {
@@ -480,6 +545,7 @@ export function computeAnnotationDimensions(
         yScales,
         xScale,
         annotationAxisPosition,
+        xScaleOffset - clusterOffset,
       );
 
       if (dimensions) {
@@ -490,6 +556,8 @@ export function computeAnnotationDimensions(
         annotationSpec,
         yScales,
         xScale,
+        enableHistogramMode,
+        barsPadding,
       );
 
       if (dimensions) {

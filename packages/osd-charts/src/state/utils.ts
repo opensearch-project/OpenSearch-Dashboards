@@ -28,6 +28,8 @@ import {
   AxisSpec,
   BasicSeriesSpec,
   DomainRange,
+  HistogramModeAlignment,
+  HistogramModeAlignments,
   isAreaSeriesSpec,
   isBarSeriesSpec,
   isLineSeriesSpec,
@@ -151,6 +153,7 @@ export function computeSeriesGeometries(
   chartDims: Dimensions,
   chartRotation: Rotation,
   axesSpecs: Map<AxisId, AxisSpec>,
+  enableHistogramMode: boolean,
 ): {
   scales: {
     xScale: Scale;
@@ -166,7 +169,7 @@ export function computeSeriesGeometries(
   geometriesCounts: GeometriesCounts;
 } {
   const chartColors: ColorConfig = chartTheme.colors;
-  const barsPadding = chartTheme.scales.barsPadding;
+  const barsPadding = enableHistogramMode ? chartTheme.scales.histogramPadding : chartTheme.scales.barsPadding;
 
   const width = [0, 180].includes(chartRotation) ? chartDims.width : chartDims.height;
   const height = [0, 180].includes(chartRotation) ? chartDims.height : chartDims.width;
@@ -217,6 +220,7 @@ export function computeSeriesGeometries(
       chartColors.defaultVizColor,
       axesSpecs,
       chartTheme,
+      enableHistogramMode,
     );
     orderIndex = counts.barSeries > 0 ? orderIndex + 1 : orderIndex;
     areas.push(...geometries.areas);
@@ -253,6 +257,7 @@ export function computeSeriesGeometries(
       chartColors.defaultVizColor,
       axesSpecs,
       chartTheme,
+      enableHistogramMode,
     );
 
     areas.push(...geometries.areas);
@@ -289,6 +294,63 @@ export function computeSeriesGeometries(
   };
 }
 
+export function setBarSeriesAccessors(
+  isHistogramMode: boolean,
+  seriesSpecs: Map<SpecId, BasicSeriesSpec>,
+): void {
+  if (!isHistogramMode) {
+    return;
+  }
+
+  for (const [, spec] of seriesSpecs) {
+    if (isBarSeriesSpec(spec)) {
+      let stackAccessors = spec.stackAccessors ? [...spec.stackAccessors] : spec.yAccessors;
+
+      if (spec.splitSeriesAccessors) {
+        stackAccessors = [...stackAccessors, ...spec.splitSeriesAccessors];
+      }
+
+      spec.stackAccessors = stackAccessors;
+    }
+  }
+
+  return;
+}
+
+export function isHistogramModeEnabled(seriesSpecs: Map<SpecId, BasicSeriesSpec>): boolean {
+  for (const [, spec] of seriesSpecs) {
+    if (isBarSeriesSpec(spec) && spec.enableHistogramMode) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function computeXScaleOffset(
+  xScale: Scale,
+  enableHistogramMode: boolean,
+  histogramModeAlignment: HistogramModeAlignment = HistogramModeAlignments.Start,
+): number {
+  if (!enableHistogramMode) {
+    return 0;
+  }
+
+  const { bandwidth, barsPadding } = xScale;
+  const band = bandwidth / (1 - barsPadding);
+  const halfPadding = (band - bandwidth) / 2;
+
+  const startAlignmentOffset = (bandwidth / 2) + halfPadding;
+
+  switch (histogramModeAlignment) {
+    case HistogramModeAlignments.Center:
+      return 0;
+    case HistogramModeAlignments.End:
+      return -startAlignmentOffset;
+    default:
+      return startAlignmentOffset;
+  }
+}
+
 export function renderGeometries(
   indexOffset: number,
   clusteredCount: number,
@@ -301,6 +363,7 @@ export function renderGeometries(
   defaultColor: string,
   axesSpecs: Map<AxisId, AxisSpec>,
   chartTheme: Theme,
+  enableHistogramMode: boolean,
 ): {
   points: PointGeometry[];
   bars: BarGeometry[];
@@ -367,6 +430,13 @@ export function renderGeometries(
     } else if (isLineSeriesSpec(spec)) {
         const lineShift = clusteredCount > 0 ? clusteredCount : 1;
         const lineSeriesStyle = spec.lineSeriesStyle;
+
+        const xScaleOffset = computeXScaleOffset(
+          xScale,
+          enableHistogramMode,
+          spec.histogramModeAlignment,
+        );
+
         const renderedLines = renderLine(
           // move the point on half of the bandwidth if we have mixed bars/lines
           (xScale.bandwidth * lineShift) / 2,
@@ -378,6 +448,7 @@ export function renderGeometries(
           ds.specId,
           Boolean(spec.y0Accessors),
           ds.key,
+          xScaleOffset,
           lineSeriesStyle,
         );
         lineGeometriesIndex = mergeGeometriesIndexes(
@@ -390,6 +461,13 @@ export function renderGeometries(
     } else if (isAreaSeriesSpec(spec)) {
         const areaShift = clusteredCount > 0 ? clusteredCount : 1;
         const areaSeriesStyle = spec.areaSeriesStyle;
+
+        const xScaleOffset = computeXScaleOffset(
+          xScale,
+          enableHistogramMode,
+          spec.histogramModeAlignment,
+        );
+
         const renderedAreas = renderArea(
           // move the point on half of the bandwidth if we have mixed bars/lines
           (xScale.bandwidth * areaShift) / 2,
@@ -401,6 +479,7 @@ export function renderGeometries(
           ds.specId,
           Boolean(spec.y0Accessors),
           ds.key,
+          xScaleOffset,
           areaSeriesStyle,
         );
         areaGeometriesIndex = mergeGeometriesIndexes(

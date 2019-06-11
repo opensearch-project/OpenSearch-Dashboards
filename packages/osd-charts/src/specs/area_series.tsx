@@ -1,6 +1,6 @@
 import { inject } from 'mobx-react';
 import { PureComponent } from 'react';
-import { AreaSeriesSpec } from '../lib/series/specs';
+import { AreaSeriesSpec, HistogramModeAlignments } from '../lib/series/specs';
 import { getGroupId } from '../lib/utils/ids';
 import { ScaleType } from '../lib/utils/scales/scales';
 import { SpecProps } from './specs_parser';
@@ -17,6 +17,7 @@ export class AreaSeriesSpecComponent extends PureComponent<AreaSpecProps> {
     yAccessors: ['y'],
     yScaleToDataExtent: false,
     hideInLegend: false,
+    histogramModeAlignment: HistogramModeAlignments.Center,
   };
   componentDidMount() {
     const { chartStore, children, ...config } = this.props;

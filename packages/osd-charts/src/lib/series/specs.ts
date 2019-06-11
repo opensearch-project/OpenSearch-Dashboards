@@ -7,6 +7,7 @@ import {
   RectAnnotationStyle,
 } from '../themes/theme';
 import { Accessor } from '../utils/accessor';
+import { Omit } from '../utils/commons';
 import { AnnotationId, AxisId, GroupId, SpecId } from '../utils/ids';
 import { ScaleContinuousType, ScaleType } from '../utils/scales/scales';
 import { CurveType } from './curves';
@@ -118,13 +119,23 @@ export type BasicSeriesSpec = SeriesSpec & SeriesAccessors & SeriesScales;
 export type BarSeriesSpec = BasicSeriesSpec & {
   /** @default bar */
   seriesType: 'bar';
+  /** If true, will stack all BarSeries and align bars to ticks (instead of centered on ticks) */
+  enableHistogramMode?: boolean;
   barSeriesStyle?: CustomBarSeriesStyle;
+};
+
+/**
+ * This spec describe the dataset configuration used to display a histogram bar series.
+ * A histogram bar series is identical to a bar series except that stackAccessors are not allowed.
+ */
+export type HistogramBarSeriesSpec = Omit<BarSeriesSpec, 'stackAccessors'> & {
+  enableHistogramMode: true;
 };
 
 /**
  * This spec describe the dataset configuration used to display a line series.
  */
-export type LineSeriesSpec = BasicSeriesSpec & {
+export type LineSeriesSpec = BasicSeriesSpec & HistogramConfig & {
   /** @default line */
   seriesType: 'line';
   curve?: CurveType;
@@ -134,13 +145,28 @@ export type LineSeriesSpec = BasicSeriesSpec & {
 /**
  * This spec describe the dataset configuration used to display an area series.
  */
-export type AreaSeriesSpec = BasicSeriesSpec & {
+export type AreaSeriesSpec = BasicSeriesSpec & HistogramConfig & {
   /** @default area */
   seriesType: 'area';
   /** The type of interpolator to be used to interpolate values between points */
   curve?: CurveType;
   areaSeriesStyle?: AreaSeriesStyle;
 };
+
+interface HistogramConfig {
+  /**  Determines how points in the series will align to bands in histogram mode
+   * @default 'start'
+   */
+  histogramModeAlignment?: HistogramModeAlignment;
+}
+
+export const HistogramModeAlignments = Object.freeze({
+  Start: 'start' as HistogramModeAlignment,
+  Center: 'center' as HistogramModeAlignment,
+  End: 'end' as HistogramModeAlignment,
+});
+
+export type HistogramModeAlignment = 'start' | 'center' | 'end';
 
 /**
  * This spec describe the configuration for a chart axis.

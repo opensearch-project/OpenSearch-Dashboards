@@ -3,19 +3,26 @@ import { storiesOf } from '@storybook/react';
 import { DateTime } from 'luxon';
 import React from 'react';
 import {
+  AnnotationDomainTypes,
+  AreaSeries,
   Axis,
   BarSeries,
   Chart,
   DARK_THEME,
   DataGenerator,
+  getAnnotationId,
   getAxisId,
   getGroupId,
   getSpecId,
+  HistogramBarSeries,
+  HistogramModeAlignments,
   LIGHT_THEME,
+  LineAnnotation,
   LineSeries,
   mergeWithDefaultTheme,
   niceTimeFormatByDay,
   Position,
+  RectAnnotation,
   Rotation,
   ScaleType,
   Settings,
@@ -23,7 +30,9 @@ import {
   TooltipType,
 } from '../src/';
 import * as TestDatasets from '../src/lib/series/utils/test_dataset';
+
 import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
+
 const dateFormatter = timeFormatter('HH:mm:ss');
 
 const dataGen = new DataGenerator();
@@ -253,6 +262,12 @@ storiesOf('Bar Chart', module)
     const theme = {
       ...LIGHT_THEME,
       scales: {
+        histogramPadding: number('histogram padding', 0, {
+          range: true,
+          min: 0,
+          max: 1,
+          step: 0.01,
+        }),
         barsPadding: number('bar padding', 0, {
           range: true,
           min: 0,
@@ -522,7 +537,13 @@ storiesOf('Bar Chart', module)
     const theme = {
       ...LIGHT_THEME,
       scales: {
-        barsPadding: number('bar padding', 0, {
+        histogramPadding: number('histogram padding', 0.05, {
+          range: true,
+          min: 0,
+          max: 1,
+          step: 0.01,
+        }),
+        barsPadding: number('bar padding', 0.25, {
           range: true,
           min: 0,
           max: 1,
@@ -1414,6 +1435,220 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y']}
           data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+        />
+      </Chart>
+    );
+  })
+  .add('[test] histogram mode (linear)', () => {
+    const data = TestDatasets.BARCHART_2Y1G;
+
+    const lineAnnotationStyle = {
+      line: {
+        strokeWidth: 2,
+        stroke: '#c80000',
+        opacity: 0.3,
+      },
+    };
+
+    const chartRotation = select<Rotation>(
+      'chartRotation',
+      {
+        '0 deg': 0,
+        '90 deg': 90,
+        '-90 deg': -90,
+        '180 deg': 180,
+      },
+      0,
+    );
+
+    const theme = mergeWithDefaultTheme({
+      scales: {
+        barsPadding: number('bars padding', 0.25, {
+          range: true,
+          min: 0,
+          max: 1,
+          step: 0.1,
+        }),
+        histogramPadding: number('histogram padding', 0.05, {
+          range: true,
+          min: 0,
+          max: 1,
+          step: 0.1,
+        }),
+      },
+    }, LIGHT_THEME);
+
+    const otherSeriesSelection = select(
+      'other series',
+      {
+        line: 'line',
+        area: 'area',
+      },
+      'line',
+    );
+
+    const pointAlignment = select('point series alignment', HistogramModeAlignments, HistogramModeAlignments.Center);
+    const pointData = TestDatasets.BARCHART_1Y0G;
+
+    const otherSeries = otherSeriesSelection === 'line' ?
+      <LineSeries
+        id={getSpecId('other-series')}
+        xScaleType={ScaleType.Linear}
+        yScaleType={ScaleType.Linear}
+        xAccessor="x"
+        yAccessors={['y']}
+        data={pointData}
+        histogramModeAlignment={pointAlignment}
+      /> :
+      <AreaSeries
+      id={getSpecId('other-series')}
+      xScaleType={ScaleType.Linear}
+      yScaleType={ScaleType.Linear}
+      xAccessor="x"
+      yAccessors={['y']}
+      data={pointData}
+      histogramModeAlignment={pointAlignment}
+    />;
+
+    const hasHistogramBarSeries = boolean('hasHistogramBarSeries', false);
+
+    return (
+      <Chart className={'story-chart'}>
+        <Settings rotation={chartRotation} theme={theme} debug={boolean('debug', true)} />
+        <LineAnnotation
+          annotationId={getAnnotationId('line-annotation')}
+          domainType={AnnotationDomainTypes.XDomain}
+          dataValues={[{dataValue: 2}, {dataValue: 2.5}]}
+          style={lineAnnotationStyle}
+          marker={<div style={{background: 'red', width: 10, height: 10}} />}
+        />
+        <RectAnnotation
+          dataValues={[
+            {
+              coordinates: {
+                x0: 0.5,
+              },
+              details: 'rect annotation',
+            },
+            {
+              coordinates: {
+                x1: 3,
+              },
+              details: 'rect annotation',
+            },
+          ]}
+          annotationId={getAnnotationId('rect')}
+        />
+        <Axis
+          id={getAxisId('discover-histogram-left-axis')}
+          position={Position.Left}
+          title={'left axis'}
+        />
+        <Axis
+          id={getAxisId('discover-histogram-bottom-axis')}
+          position={Position.Bottom}
+          title={'bottom axis'}
+        />
+        {hasHistogramBarSeries && <HistogramBarSeries
+          id={getSpecId('histo')}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={pointData}
+          name={'histogram'}
+        />}
+        <BarSeries
+          id={getSpecId('bars-1')}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={pointData}
+          name={'bars 1'}
+          enableHistogramMode={boolean('bars-1 enableHistogramMode', false)}
+        />
+        <BarSeries
+          id={getSpecId('bars-2')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y1', 'y2']}
+          splitSeriesAccessors={['g']}
+          data={data}
+          enableHistogramMode={boolean('bars-2 enableHistogramMode', false)}
+        />
+        {otherSeries}
+      </Chart>
+    );
+  })
+  .add('[test] histogram mode (ordinal)', () => {
+    const data = [{ x: 'a', y: 2 }, { x: 'b', y: 7 }, { x: 'c', y: 0 }, { x: 'd', y: 6 }];
+
+    const chartRotation = select<Rotation>(
+      'chartRotation',
+      {
+        '0 deg': 0,
+        '90 deg': 90,
+        '-90 deg': -90,
+        '180 deg': 180,
+      },
+      0,
+    );
+
+    const theme = mergeWithDefaultTheme({
+      scales: {
+        barsPadding: number('bars padding', 0.25, {
+          range: true,
+          min: 0,
+          max: 1,
+          step: 0.1,
+        }),
+      },
+    }, LIGHT_THEME);
+
+    const hasHistogramBarSeries = boolean('hasHistogramBarSeries', false);
+
+    return (
+      <Chart className={'story-chart'}>
+        <Settings rotation={chartRotation} theme={theme} debug={boolean('debug', true)} />
+        <Axis
+          id={getAxisId('discover-histogram-left-axis')}
+          position={Position.Left}
+          title={'left axis'}
+        />
+        <Axis
+          id={getAxisId('discover-histogram-bottom-axis')}
+          position={Position.Bottom}
+          title={'bottom axis'}
+        />
+        {hasHistogramBarSeries && <HistogramBarSeries
+          id={getSpecId('histo')}
+          xScaleType={ScaleType.Ordinal}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={data}
+          name={'histogram'}
+        />}
+        <BarSeries
+          id={getSpecId('bars-1')}
+          xScaleType={ScaleType.Ordinal}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={data}
+          name={'bars 1'}
+          enableHistogramMode={boolean('bars-1 enableHistogramMode', false)}
+        />
+        <BarSeries
+          id={getSpecId('bars-2')}
+          xScaleType={ScaleType.Ordinal}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={data}
+          enableHistogramMode={boolean('bars-2 enableHistogramMode', false)}
         />
       </Chart>
     );

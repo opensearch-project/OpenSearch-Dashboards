@@ -203,6 +203,7 @@ describe('Themes', () => {
   it('should merge partial theme: scales', () => {
     const scales: ScalesConfig = {
       barsPadding: 314571,
+      histogramPadding: 0.05,
     };
     const customTheme = mergeWithDefaultTheme({
       scales,

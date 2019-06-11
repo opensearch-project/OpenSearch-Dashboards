@@ -84,7 +84,9 @@ import {
   getAxesSpecForSpecId,
   getUpdatedCustomSeriesColors,
   isChartAnimatable,
+  isHistogramModeEnabled,
   isLineAreaOnlyChart,
+  setBarSeriesAccessors,
   Transform,
   updateDeselectedDataSeries,
 } from './utils';
@@ -113,6 +115,8 @@ export class ChartStore {
   debug = false;
   specsInitialized = observable.box(false);
   initialized = observable.box(false);
+  enableHistogramMode = observable.box(false);
+
   parentDimensions: Dimensions = {
     width: 0,
     height: 0,
@@ -722,10 +726,21 @@ export class ChartStore {
   }
   addSeriesSpec(seriesSpec: BasicSeriesSpec | LineSeriesSpec | AreaSeriesSpec | BarSeriesSpec) {
     this.seriesSpecs.set(seriesSpec.id, seriesSpec);
+
+    const isEnabled = isHistogramModeEnabled(this.seriesSpecs);
+    this.enableHistogramMode.set(isEnabled);
+
+    setBarSeriesAccessors(isEnabled, this.seriesSpecs);
   }
   removeSeriesSpec(specId: SpecId) {
     this.seriesSpecs.delete(specId);
+
+    const isEnabled = isHistogramModeEnabled(this.seriesSpecs);
+    this.enableHistogramMode.set(isEnabled);
+
+    setBarSeriesAccessors(isEnabled, this.seriesSpecs);
   }
+
   /**
    * Add an axis spec to the store
    * @param axisSpec an axis spec
@@ -825,6 +840,9 @@ export class ChartStore {
 
     // compute axis dimensions
     const bboxCalculator = new CanvasTextBBoxCalculator();
+    const barsPadding = this.enableHistogramMode.get() ?
+      this.chartTheme.scales.histogramPadding : this.chartTheme.scales.barsPadding;
+
     this.axesTicksDimensions.clear();
     this.axesSpecs.forEach((axisSpec) => {
       const { id } = axisSpec;
@@ -836,7 +854,7 @@ export class ChartStore {
         bboxCalculator,
         this.chartRotation,
         this.chartTheme.axes,
-        this.chartTheme.scales.barsPadding,
+        barsPadding,
       );
       if (dimensions) {
         this.axesTicksDimensions.set(id, dimensions);
@@ -871,6 +889,7 @@ export class ChartStore {
       this.chartDimensions,
       this.chartRotation,
       this.axesSpecs,
+      this.enableHistogramMode.get(),
     );
 
     // tslint:disable-next-line:no-console
@@ -892,8 +911,9 @@ export class ChartStore {
       seriesDomains.xDomain,
       seriesDomains.yDomain,
       totalBarsInCluster,
+      this.enableHistogramMode.get(),
       this.legendPosition,
-      this.chartTheme.scales.barsPadding,
+      barsPadding,
     );
     // tslint:disable-next-line:no-console
     // console.log({axisTicksPositions});
@@ -910,6 +930,8 @@ export class ChartStore {
       this.yScales,
       this.xScale,
       this.axesSpecs,
+      this.totalBarsInCluster,
+      this.enableHistogramMode.get(),
     );
 
     this.annotationDimensions.replace(updatedAnnotationDimensions);

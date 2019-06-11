@@ -1,6 +1,6 @@
 import { computeSeriesDomains } from '../../state/utils';
 import { identity } from '../utils/commons';
-import { getGroupId, getSpecId } from '../utils/ids';
+import { getGroupId, getSpecId, SpecId } from '../utils/ids';
 import { ScaleType } from '../utils/scales/scales';
 import { renderBars } from './rendering';
 import { computeXScale, computeYScales } from './scales';
@@ -22,7 +22,7 @@ describe('Rendering bars', () => {
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
     };
-    const barSeriesMap = new Map();
+    const barSeriesMap = new Map<SpecId, BarSeriesSpec>();
     barSeriesMap.set(SPEC_ID, barSeriesSpec);
     const customDomain = [0, 1];
     const barSeriesDomains = computeSeriesDomains(barSeriesMap, new Map(), customDomain);
@@ -159,7 +159,7 @@ describe('Rendering bars', () => {
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
     };
-    const barSeriesMap = new Map();
+    const barSeriesMap = new Map<SpecId, BarSeriesSpec>();
     barSeriesMap.set(spec1Id, barSeriesSpec1);
     barSeriesMap.set(spec2Id, barSeriesSpec2);
     const barSeriesDomains = computeSeriesDomains(barSeriesMap, new Map());
@@ -267,7 +267,7 @@ describe('Rendering bars', () => {
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
     };
-    const barSeriesMap = new Map();
+    const barSeriesMap = new Map<SpecId, BarSeriesSpec>();
     barSeriesMap.set(SPEC_ID, barSeriesSpec);
     const barSeriesDomains = computeSeriesDomains(barSeriesMap, new Map());
     const xScale = computeXScale(barSeriesDomains.xDomain, barSeriesMap.size, 0, 100);
@@ -342,7 +342,7 @@ describe('Rendering bars', () => {
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
     };
-    const barSeriesMap = new Map();
+    const barSeriesMap = new Map<SpecId, BarSeriesSpec>();
     barSeriesMap.set(spec1Id, barSeriesSpec1);
     barSeriesMap.set(spec2Id, barSeriesSpec2);
     const barSeriesDomains = computeSeriesDomains(barSeriesMap, new Map());
@@ -463,7 +463,7 @@ describe('Rendering bars', () => {
       xScaleType: ScaleType.Time,
       yScaleType: ScaleType.Linear,
     };
-    const barSeriesMap = new Map();
+    const barSeriesMap = new Map<SpecId, BarSeriesSpec>();
     barSeriesMap.set(spec1Id, barSeriesSpec1);
     barSeriesMap.set(spec2Id, barSeriesSpec2);
     const barSeriesDomains = computeSeriesDomains(barSeriesMap, new Map());

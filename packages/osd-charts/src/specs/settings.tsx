@@ -29,7 +29,6 @@ interface SettingSpecProps {
   tooltipSnap?: boolean;
   debug: boolean;
   legendPosition?: Position;
-  isLegendItemsSortDesc: boolean;
   showLegendDisplayValue: boolean;
   onElementClick?: ElementClickListener;
   onElementOver?: ElementOverListener;

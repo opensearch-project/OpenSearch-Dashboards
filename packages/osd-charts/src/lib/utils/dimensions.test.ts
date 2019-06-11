@@ -4,7 +4,6 @@ import { LIGHT_THEME } from '../themes/light_theme';
 import { LegendStyle } from '../themes/theme';
 import { computeChartDimensions, Margins } from './dimensions';
 import { AxisId, getAxisId, getGroupId } from './ids';
-import { ScaleType } from './scales/scales';
 
 describe('Computed chart dimensions', () => {
   const parentDim = {
@@ -27,8 +26,6 @@ describe('Computed chart dimensions', () => {
   };
 
   const axis1Dims: AxisTicksDimensions = {
-    axisScaleType: ScaleType.Linear,
-    axisScaleDomain: [0, 1],
     tickValues: [0, 1],
     tickLabels: ['first', 'second'],
     maxLabelBboxWidth: 10,
