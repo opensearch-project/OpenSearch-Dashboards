@@ -42,5 +42,5 @@ If using Elastic Charts in the same project that is already compiling EUI's Sass
 @import '~@elastic/eui/src/global_styling/variables/index';
 @import '~@elastic/eui/src/global_styling/mixins/index';
 @import '~@elastic/eui/src/global_styling/reset/index';
-@import '~@elastic/charts/src/theme_only_light';
+@import '~@elastic/charts/dist/theme';
 ```
