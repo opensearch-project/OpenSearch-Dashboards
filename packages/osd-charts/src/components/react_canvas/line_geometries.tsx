@@ -22,10 +22,7 @@ interface LineGeometriesDataProps {
 interface LineGeometriesDataState {
   overPoint?: PointGeometry;
 }
-export class LineGeometries extends React.PureComponent<
-  LineGeometriesDataProps,
-  LineGeometriesDataState
-> {
+export class LineGeometries extends React.PureComponent<LineGeometriesDataProps, LineGeometriesDataState> {
   static defaultProps: Partial<LineGeometriesDataProps> = {
     animated: false,
   };
@@ -72,7 +69,7 @@ export class LineGeometries extends React.PureComponent<
       },
       [] as JSX.Element[],
     );
-  }
+  };
 
   private renderPoints = (
     linePoints: PointGeometry[],
@@ -87,7 +84,7 @@ export class LineGeometries extends React.PureComponent<
         linePointsElements.push(
           <Group key={`line-point-group-${lineIndex}-${pointIndex}`} x={transform.x}>
             <Spring native from={{ y }} to={{ y }}>
-              {(props: { y: number }) => {
+              {() => {
                 const pointProps = buildLinePointProps({
                   lineIndex,
                   pointIndex,
@@ -114,7 +111,7 @@ export class LineGeometries extends React.PureComponent<
       }
     });
     return linePointsElements;
-  }
+  };
 
   private renderLineGeoms = (themeIsVisible: boolean): JSX.Element[] => {
     const { style, lines, sharedStyle } = this.props;
@@ -132,18 +129,13 @@ export class LineGeometries extends React.PureComponent<
 
       const customOpacity = seriesLineStyle ? seriesLineStyle.opacity : undefined;
 
-      const geometryStyle = getGeometryStyle(
-        geometryId,
-        this.props.highlightedLegendItem,
-        sharedStyle,
-        customOpacity,
-      );
+      const geometryStyle = getGeometryStyle(geometryId, this.props.highlightedLegendItem, sharedStyle, customOpacity);
 
       if (this.props.animated) {
         lineElements.push(
           <Group key={index} x={transform.x}>
             <Spring native reset from={{ opacity: 0 }} to={{ opacity: 1 }}>
-              {(props: { opacity: number }) => {
+              {() => {
                 const lineProps = buildLineProps({
                   index,
                   xTransform: 0,
@@ -173,5 +165,5 @@ export class LineGeometries extends React.PureComponent<
     });
 
     return lineElements;
-  }
+  };
 }

@@ -17,7 +17,7 @@ export type XDomain = BaseDomain & {
  * Merge X domain value between a set of chart specification.
  */
 export function mergeXDomain(
-  specs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>>,
+  specs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>[],
   xValues: Set<any>,
   xDomain?: DomainRange | Domain,
 ): XDomain {
@@ -35,9 +35,7 @@ export function mergeXDomain(
       if (Array.isArray(xDomain)) {
         seriesXComputedDomains = xDomain;
       } else {
-        throw new Error(
-          'xDomain for ordinal scale should be an array of values, not a DomainRange object',
-        );
+        throw new Error('xDomain for ordinal scale should be an array of values, not a DomainRange object');
       }
     }
   } else {
@@ -66,9 +64,7 @@ export function mergeXDomain(
           seriesXComputedDomains = [computedDomainMin, xDomain.max];
         }
       } else {
-        throw new Error(
-          'xDomain for continuous scale should be a DomainRange object, not an array',
-        );
+        throw new Error('xDomain for continuous scale should be a DomainRange object, not an array');
       }
     }
     minInterval = findMinInterval(values);
@@ -119,7 +115,7 @@ export function findMinInterval(xValues: number[]): number {
  * @returns {ChartScaleType}
  */
 export function convertXScaleTypes(
-  specs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType' | 'timeZone'>>,
+  specs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType' | 'timeZone'>[],
 ): {
   scaleType: ScaleType;
   isBandScale: boolean;

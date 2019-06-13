@@ -1,6 +1,5 @@
 import { LegendItem } from '../lib/series/legend';
 import { GeometryValue, IndexedGeometry } from '../lib/series/rendering';
-import { DataSeriesColorsValues } from '../lib/series/series';
 import {
   AnnotationDomainTypes,
   AnnotationSpec,
@@ -125,10 +124,7 @@ describe('Chart Store', () => {
   });
 
   test('can get highlighted legend item', () => {
-    store.legendItems = new Map([
-      [firstLegendItem.key, firstLegendItem],
-      [secondLegendItem.key, secondLegendItem],
-    ]);
+    store.legendItems = new Map([[firstLegendItem.key, firstLegendItem], [secondLegendItem.key, secondLegendItem]]);
 
     store.highlightedLegendItemKey.set(null);
     expect(store.highlightedLegendItem.get()).toBe(null);
@@ -139,15 +135,12 @@ describe('Chart Store', () => {
 
   test('can respond to legend item mouseover event', () => {
     const legendListener = jest.fn(
-      (ds: DataSeriesColorsValues | null): void => {
+      (): void => {
         return;
       },
     );
 
-    store.legendItems = new Map([
-      [firstLegendItem.key, firstLegendItem],
-      [secondLegendItem.key, secondLegendItem],
-    ]);
+    store.legendItems = new Map([[firstLegendItem.key, firstLegendItem], [secondLegendItem.key, secondLegendItem]]);
     store.highlightedLegendItemKey.set(null);
 
     store.onLegendItemOver(firstLegendItem.key);
@@ -183,15 +176,12 @@ describe('Chart Store', () => {
 
   test('can respond to legend item click event', () => {
     const legendListener = jest.fn(
-      (ds: DataSeriesColorsValues | null): void => {
+      (): void => {
         return;
       },
     );
 
-    store.legendItems = new Map([
-      [firstLegendItem.key, firstLegendItem],
-      [secondLegendItem.key, secondLegendItem],
-    ]);
+    store.legendItems = new Map([[firstLegendItem.key, firstLegendItem], [secondLegendItem.key, secondLegendItem]]);
     store.selectedLegendItemKey.set(null);
     store.onLegendItemClickListener = undefined;
 
@@ -214,15 +204,12 @@ describe('Chart Store', () => {
 
   test('can respond to a legend item plus click event', () => {
     const legendListener = jest.fn(
-      (ds: DataSeriesColorsValues | null): void => {
+      (): void => {
         return;
       },
     );
 
-    store.legendItems = new Map([
-      [firstLegendItem.key, firstLegendItem],
-      [secondLegendItem.key, secondLegendItem],
-    ]);
+    store.legendItems = new Map([[firstLegendItem.key, firstLegendItem], [secondLegendItem.key, secondLegendItem]]);
     store.selectedLegendItemKey.set(null);
     store.onLegendItemPlusClickListener = undefined;
 
@@ -240,15 +227,12 @@ describe('Chart Store', () => {
 
   test('can respond to a legend item minus click event', () => {
     const legendListener = jest.fn(
-      (ds: DataSeriesColorsValues | null): void => {
+      (): void => {
         return;
       },
     );
 
-    store.legendItems = new Map([
-      [firstLegendItem.key, firstLegendItem],
-      [secondLegendItem.key, secondLegendItem],
-    ]);
+    store.legendItems = new Map([[firstLegendItem.key, firstLegendItem], [secondLegendItem.key, secondLegendItem]]);
     store.selectedLegendItemKey.set(null);
     store.onLegendItemMinusClickListener = undefined;
 
@@ -271,10 +255,7 @@ describe('Chart Store', () => {
       },
     );
 
-    store.legendItems = new Map([
-      [firstLegendItem.key, firstLegendItem],
-      [secondLegendItem.key, secondLegendItem],
-    ]);
+    store.legendItems = new Map([[firstLegendItem.key, firstLegendItem], [secondLegendItem.key, secondLegendItem]]);
     store.deselectedDataSeries = null;
     store.computeChart = computeChart;
 
@@ -299,10 +280,7 @@ describe('Chart Store', () => {
       },
     );
 
-    store.legendItems = new Map([
-      [firstLegendItem.key, firstLegendItem],
-      [secondLegendItem.key, secondLegendItem],
-    ]);
+    store.legendItems = new Map([[firstLegendItem.key, firstLegendItem], [secondLegendItem.key, secondLegendItem]]);
     store.deselectedDataSeries = null;
     store.computeChart = computeChart;
 
@@ -318,7 +296,7 @@ describe('Chart Store', () => {
   });
 
   test('can set an element click listener', () => {
-    const clickListener = (value: GeometryValue[]): void => {
+    const clickListener = (): void => {
       return;
     };
     store.setOnElementClickListener(clickListener);
@@ -327,7 +305,7 @@ describe('Chart Store', () => {
   });
 
   test('can set a brush end listener', () => {
-    const brushEndListener = (min: number, max: number): void => {
+    const brushEndListener = (): void => {
       return;
     };
     store.setOnBrushEndListener(brushEndListener);
@@ -356,8 +334,8 @@ describe('Chart Store', () => {
   });
 
   test('can respond to a brush end event', () => {
-    const brushEndListener = jest.fn(
-      (min: number, max: number): void => {
+    const brushEndListener = jest.fn<void, [number, number]>(
+      (): void => {
         return;
       },
     );
@@ -544,10 +522,7 @@ describe('Chart Store', () => {
       },
     );
     store.computeChart = computeChart;
-    store.legendItems = new Map([
-      [firstLegendItem.key, firstLegendItem],
-      [secondLegendItem.key, secondLegendItem],
-    ]);
+    store.legendItems = new Map([[firstLegendItem.key, firstLegendItem], [secondLegendItem.key, secondLegendItem]]);
 
     store.setSeriesColor('other', 'foo');
     expect(computeChart).not.toBeCalled();
@@ -741,8 +716,8 @@ describe('Chart Store', () => {
       width: 0,
       height: 0,
     };
-    const clickListener = jest.fn(
-      (ds: GeometryValue[]): void => {
+    const clickListener = jest.fn<void, [GeometryValue[]]>(
+      (): void => {
         return;
       },
     );

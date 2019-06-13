@@ -16,14 +16,12 @@ export class Grid extends React.PureComponent<GridProps> {
     return this.renderGrid();
   }
   private renderGridLine = (linePosition: AxisLinePosition, i: number) => {
-    const {
-      gridLineStyle,
-    } = this.props;
+    const { gridLineStyle } = this.props;
 
     const config = gridLineStyle ? mergeWithDefaultGridLineConfig(gridLineStyle) : DEFAULT_GRID_LINE_CONFIG;
 
     return <Line key={`tick-${i}`} points={linePosition} {...config} />;
-  }
+  };
 
   private renderGrid = () => {
     const { chartDimensions, linesPositions } = this.props;
@@ -33,5 +31,5 @@ export class Grid extends React.PureComponent<GridProps> {
         <Group key="grid-lines">{linesPositions.map(this.renderGridLine)}</Group>
       </Group>
     );
-  }
+  };
 }

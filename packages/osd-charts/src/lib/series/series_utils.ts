@@ -15,10 +15,7 @@ export function isEqualSeriesKey(a: any[], b: any[]): boolean {
   return true;
 }
 
-export function belongsToDataSeries(
-  geometryValue: GeometryId,
-  dataSeriesValues: DataSeriesColorsValues,
-): boolean {
+export function belongsToDataSeries(geometryValue: GeometryId, dataSeriesValues: DataSeriesColorsValues): boolean {
   const legendItemSeriesKey = dataSeriesValues.colorValues;
   const legendItemSpecId = dataSeriesValues.specId;
 

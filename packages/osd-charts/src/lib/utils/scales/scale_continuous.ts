@@ -2,8 +2,7 @@ import { bisectLeft } from 'd3-array';
 import { scaleLinear, scaleLog, scaleSqrt, scaleUtc } from 'd3-scale';
 import { DateTime } from 'luxon';
 import { clamp } from '../commons';
-import { ScaleContinuousType, ScaleType } from './scales';
-import { Scale } from './scales';
+import { ScaleContinuousType, ScaleType, Scale } from './scales';
 
 const SCALES = {
   [ScaleType.Linear]: scaleLinear,
@@ -145,11 +144,8 @@ export class ScaleContinuous implements Scale {
       this.tickValues = rawTicks.map((d: Date) => {
         const currentDateTime = DateTime.fromJSDate(d, { zone: this.timeZone });
         const currentOffset = hasHourTicks ? offset : currentDateTime.offset;
-        return currentDateTime
-          .minus({ minutes: currentOffset })
-          .toMillis();
+        return currentDateTime.minus({ minutes: currentOffset }).toMillis();
       });
-
     } else {
       if (this.minInterval > 0) {
         const intervalCount = Math.floor((this.domain[1] - this.domain[0]) / this.minInterval);

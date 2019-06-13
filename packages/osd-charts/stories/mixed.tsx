@@ -52,12 +52,7 @@ storiesOf('Mixed Charts', module)
     return (
       <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'Bottom axis'}
-          showOverlappingTicks={true}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
         <Axis
           id={getAxisId('left2')}
           title={'Left axis'}
@@ -88,28 +83,15 @@ storiesOf('Mixed Charts', module)
   .add('areas and bars', () => {
     return (
       <Chart renderer="canvas" className={'story-chart'}>
-        <Settings
-          showLegend={true}
-          legendPosition={Position.Right}
-        />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'Bottom axis'}
-          showOverlappingTicks={true}
-        />
+        <Settings showLegend={true} legendPosition={Position.Right} />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
         <Axis
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
           tickFormat={(d) => Number(d).toFixed(2)}
         />
-        <Axis
-          id={getAxisId('top')}
-          position={Position.Top}
-          title={'Top axis'}
-          showOverlappingTicks={true}
-        />
+        <Axis id={getAxisId('top')} position={Position.Top} title={'Top axis'} showOverlappingTicks={true} />
         <Axis
           id={getAxisId('right')}
           title={'Right axis'}
@@ -147,12 +129,7 @@ storiesOf('Mixed Charts', module)
     return (
       <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'Bottom axis'}
-          showOverlappingTicks={true}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
         <Axis
           id={getAxisId('left2')}
           title={'Left axis'}

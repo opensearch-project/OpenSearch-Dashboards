@@ -162,15 +162,9 @@ describe('Interaction utils', () => {
     expect(areIndexedGeomsEquals(ig6, ig6)).toBe(true);
   });
   test('geometry array equality', () => {
-    expect(
-      areIndexedGeometryArraysEquals([ig1, ig2, ig3, ig4, ig5], [ig1, ig2, ig3, ig4, ig5]),
-    ).toBe(true);
-    expect(
-      areIndexedGeometryArraysEquals([ig1, ig2, ig3, ig4, ig5], [ig3, ig2, ig3, ig4, ig5]),
-    ).toBe(true);
-    expect(areIndexedGeometryArraysEquals([ig1, ig2, ig3, ig4], [ig1, ig2, ig3, ig4, ig5])).toBe(
-      false,
-    );
+    expect(areIndexedGeometryArraysEquals([ig1, ig2, ig3, ig4, ig5], [ig1, ig2, ig3, ig4, ig5])).toBe(true);
+    expect(areIndexedGeometryArraysEquals([ig1, ig2, ig3, ig4, ig5], [ig3, ig2, ig3, ig4, ig5])).toBe(true);
+    expect(areIndexedGeometryArraysEquals([ig1, ig2, ig3, ig4], [ig1, ig2, ig3, ig4, ig5])).toBe(false);
     expect(areIndexedGeometryArraysEquals([ig1, ig2, ig3, ig4], [ig1, ig2, ig3])).toBe(false);
     expect(areIndexedGeometryArraysEquals([], [])).toBe(true);
   });

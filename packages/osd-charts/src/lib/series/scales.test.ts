@@ -102,11 +102,10 @@ describe('Series scales', () => {
         },
       },
     ];
-    const {
-      nonStackedBarsInCluster,
-      stackedBarsInCluster,
-      totalBarsInCluster,
-    } = countBarsInCluster(stacked, nonStacked);
+    const { nonStackedBarsInCluster, stackedBarsInCluster, totalBarsInCluster } = countBarsInCluster(
+      stacked,
+      nonStacked,
+    );
     expect(nonStackedBarsInCluster).toBe(12);
     // count one per group
     expect(stackedBarsInCluster).toBe(2);

@@ -26,14 +26,7 @@ import {
 import * as TestDatasets from '../src/lib/series/utils/test_dataset';
 import { palettes } from '../src/lib/themes/colors';
 
-function range(
-  title: string,
-  min: number,
-  max: number,
-  value: number,
-  groupId?: string,
-  step: number = 1,
-) {
+function range(title: string, min: number, max: number, value: number, groupId?: string, step: number = 1) {
   return number(
     title,
     value,
@@ -192,12 +185,7 @@ storiesOf('Stylings', module)
           debug={boolean('debug', true)}
           rotation={select('rotation', { '0': 0, '90': 90, '-90': -90, '180': 180 }, 0)}
         />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'Bottom axis'}
-          showOverlappingTicks={true}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
         <Axis
           id={getAxisId('left2')}
           title={'Left axis'}
@@ -332,24 +320,14 @@ storiesOf('Stylings', module)
           showLegend={true}
           legendPosition={Position.Right}
         />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'Bottom axis'}
-          showOverlappingTicks={true}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
         <Axis
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
           tickFormat={(d) => Number(d).toFixed(2)}
         />
-        <Axis
-          id={getAxisId('top')}
-          position={Position.Top}
-          title={'Top axis'}
-          showOverlappingTicks={true}
-        />
+        <Axis id={getAxisId('top')} position={Position.Top} title={'Top axis'} showOverlappingTicks={true} />
         <Axis
           id={getAxisId('right')}
           title={'Right axis'}
@@ -444,11 +422,7 @@ storiesOf('Stylings', module)
     );
   })
   .add('custom series styles: bars', () => {
-    const useOnlyChartTheme = boolean(
-      'ignore series style (use only chart theme)',
-      false,
-      'chartTheme',
-    );
+    const useOnlyChartTheme = boolean('ignore series style (use only chart theme)', false, 'chartTheme');
 
     const barSeriesStyle1 = useOnlyChartTheme
       ? undefined
@@ -536,11 +510,7 @@ storiesOf('Stylings', module)
     );
   })
   .add('custom series styles: lines', () => {
-    const useOnlyChartTheme = boolean(
-      'ignore series style (use only chart theme)',
-      false,
-      'chartTheme',
-    );
+    const useOnlyChartTheme = boolean('ignore series style (use only chart theme)', false, 'chartTheme');
     const lineSeriesStyle1 = useOnlyChartTheme ? undefined : generateLineSeriesStyleKnobs('lines1');
     const lineSeriesStyle2 = useOnlyChartTheme ? undefined : generateLineSeriesStyleKnobs('lines2');
 
@@ -606,11 +576,7 @@ storiesOf('Stylings', module)
       areaSeriesStyle: generateAreaSeriesStyleKnobs('chartTheme'),
     };
 
-    const useOnlyChartTheme = boolean(
-      'ignore series style (use only chart theme)',
-      false,
-      'chartTheme',
-    );
+    const useOnlyChartTheme = boolean('ignore series style (use only chart theme)', false, 'chartTheme');
 
     const dataset1 = [{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }];
     const dataset2 = dataset1.map((datum) => ({ ...datum, y: datum.y - 1 }));
@@ -622,12 +588,7 @@ storiesOf('Stylings', module)
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} theme={chartTheme} />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'Bottom axis'}
-          showOverlappingTicks={true}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
         <Axis
           id={getAxisId('left2')}
           title={'Left axis'}

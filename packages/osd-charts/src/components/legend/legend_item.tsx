@@ -34,13 +34,13 @@ class LegendItemComponent extends React.Component<LegendItemProps, LegendItemSta
     this.setState({
       isColorPickerOpen: false,
     });
-  }
+  };
 
   toggleColorPicker = () => {
     this.setState({
       isColorPickerOpen: !this.state.isColorPickerOpen,
     });
-  }
+  };
 
   render() {
     const { legendItemKey } = this.props;
@@ -77,14 +77,10 @@ class LegendItemComponent extends React.Component<LegendItemProps, LegendItemSta
     const iconType = isSeriesVisible ? 'eye' : 'eyeClosed';
     return (
       <div className="echLegendItem__visibility">
-        <Icon
-          type={iconType}
-          aria-label="toggle visibility"
-          onClick={this.onVisibilityClick(legendItemKey)}
-        />
+        <Icon type={iconType} aria-label="toggle visibility" onClick={this.onVisibilityClick(legendItemKey)} />
       </div>
     );
-  }
+  };
 
   renderTitle(
     title: string | undefined,
@@ -125,8 +121,9 @@ class LegendItemComponent extends React.Component<LegendItemProps, LegendItemSta
 
   onLegendTitleClick = (legendItemKey: string) => () => {
     this.props.chartStore!.onLegendItemClick(legendItemKey);
-  }
+  };
 
+  // Keeping these as reference when we have a contextual panel
   // private onLegendItemPanelClose = () => {
   //   // tslint:disable-next-line:no-console
   //   console.log('close');
@@ -162,7 +159,7 @@ class LegendItemComponent extends React.Component<LegendItemProps, LegendItemSta
     } else {
       this.props.chartStore!.toggleSeriesVisibility(legendItemKey);
     }
-  }
+  };
 }
 
 export const LegendItem = inject('chartStore')(observer(LegendItemComponent));

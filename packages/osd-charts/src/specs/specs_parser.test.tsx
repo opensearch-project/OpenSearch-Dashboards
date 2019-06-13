@@ -13,7 +13,11 @@ describe('Specs parser', () => {
   });
   test('chart store initialized and computeChart on component update', () => {
     const chartStore = new ChartStore();
-    const computeChart = jest.fn((): void => { return; });
+    const computeChart = jest.fn(
+      (): void => {
+        return;
+      },
+    );
     chartStore.computeChart = computeChart;
 
     const component = mount(<SpecsSpecRootComponent chartStore={chartStore} />);

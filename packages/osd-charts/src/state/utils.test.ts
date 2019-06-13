@@ -181,12 +181,8 @@ describe('Chart State utils', () => {
     const addedSelectedSeries = [dataSeriesValuesA, dataSeriesValuesB, dataSeriesValuesC];
     const removedSelectedSeries = [dataSeriesValuesB];
 
-    expect(updateDeselectedDataSeries(selectedSeries, dataSeriesValuesC)).toEqual(
-      addedSelectedSeries,
-    );
-    expect(updateDeselectedDataSeries(selectedSeries, dataSeriesValuesA)).toEqual(
-      removedSelectedSeries,
-    );
+    expect(updateDeselectedDataSeries(selectedSeries, dataSeriesValuesC)).toEqual(addedSelectedSeries);
+    expect(updateDeselectedDataSeries(selectedSeries, dataSeriesValuesA)).toEqual(removedSelectedSeries);
     expect(updateDeselectedDataSeries(null, dataSeriesValuesA)).toEqual([dataSeriesValuesA]);
   });
   it('should get an updated customSeriesColor based on specs', () => {
@@ -278,11 +274,7 @@ describe('Chart State utils', () => {
       yScaleToDataExtent: false,
       data: BARCHART_1Y1G,
     };
-    let seriesMap = new Map<SpecId, BasicSeriesSpec>([
-      [area.id, area],
-      [line.id, line],
-      [bar.id, bar],
-    ]);
+    let seriesMap = new Map<SpecId, BasicSeriesSpec>([[area.id, area], [line.id, line], [bar.id, bar]]);
     expect(isLineAreaOnlyChart(seriesMap)).toBe(false);
     seriesMap = new Map<SpecId, BasicSeriesSpec>([[area.id, area], [line.id, line]]);
     expect(isLineAreaOnlyChart(seriesMap)).toBe(true);
@@ -354,11 +346,7 @@ describe('Chart State utils', () => {
         yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
-      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([
-        [area.id, area],
-        [line.id, line],
-        [bar.id, bar],
-      ]);
+      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([[area.id, area], [line.id, line], [bar.id, bar]]);
       const axesSpecs = new Map<AxisId, AxisSpec>();
       const chartRotation = 0;
       const chartDimensions = { width: 100, height: 100, top: 0, left: 0 };
@@ -544,11 +532,7 @@ describe('Chart State utils', () => {
           showValueLabel: true,
         },
       };
-      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([
-        [area.id, area],
-        [line.id, line],
-        [bar.id, bar],
-      ]);
+      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([[area.id, area], [line.id, line], [bar.id, bar]]);
       const axesSpecs = new Map<AxisId, AxisSpec>();
       const chartRotation = 0;
       const chartDimensions = { width: 100, height: 100, top: 0, left: 0 };
@@ -615,11 +599,7 @@ describe('Chart State utils', () => {
         yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
-      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([
-        [line1.id, line1],
-        [line2.id, line2],
-        [line3.id, line3],
-      ]);
+      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([[line1.id, line1], [line2.id, line2], [line3.id, line3]]);
       const axesSpecs = new Map<AxisId, AxisSpec>();
       const chartRotation = 0;
       const chartDimensions = { width: 100, height: 100, top: 0, left: 0 };
@@ -686,11 +666,7 @@ describe('Chart State utils', () => {
         yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
-      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([
-        [area1.id, area1],
-        [area2.id, area2],
-        [area3.id, area3],
-      ]);
+      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([[area1.id, area1], [area2.id, area2], [area3.id, area3]]);
       const axesSpecs = new Map<AxisId, AxisSpec>();
       const chartRotation = 0;
       const chartDimensions = { width: 100, height: 100, top: 0, left: 0 };
@@ -757,11 +733,7 @@ describe('Chart State utils', () => {
         yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
-      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([
-        [bars1.id, bars1],
-        [bars2.id, bars2],
-        [bars3.id, bars3],
-      ]);
+      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([[bars1.id, bars1], [bars2.id, bars2], [bars3.id, bars3]]);
       const axesSpecs = new Map<AxisId, AxisSpec>();
       const chartRotation = 0;
       const chartDimensions = { width: 100, height: 100, top: 0, left: 0 };
@@ -826,16 +798,7 @@ describe('Chart State utils', () => {
     const range: [number, number] = [0, 100];
     const bandwidth = 10;
     const barsPadding = 0.5;
-    const scale = new ScaleContinuous(
-      ScaleType.Linear,
-      domain,
-      range,
-      bandwidth,
-      0,
-      'utc',
-      1,
-      barsPadding,
-    );
+    const scale = new ScaleContinuous(ScaleType.Linear, domain, range, bandwidth, 0, 'utc', 1, barsPadding);
     const histogramModeEnabled = true;
     const histogramModeDisabled = false;
 
@@ -958,10 +921,7 @@ describe('Chart State utils', () => {
       data: BARCHART_1Y1G,
     };
 
-    const seriesMap = new Map<SpecId, BasicSeriesSpec>([
-      [area.id, area],
-      [line.id, line],
-    ]);
+    const seriesMap = new Map<SpecId, BasicSeriesSpec>([[area.id, area], [line.id, line]]);
 
     // should not affect area or line series
     setBarSeriesAccessors(isHistogramEnabled, seriesMap);

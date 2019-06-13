@@ -287,9 +287,7 @@ describe('Themes', () => {
     const partialUpdated2CustomTheme = mergeWithDefaultTheme({
       colors: defaultVizColor,
     });
-    expect(partialUpdated2CustomTheme.colors.defaultVizColor).toEqual(
-      defaultVizColor.defaultVizColor,
-    );
+    expect(partialUpdated2CustomTheme.colors.defaultVizColor).toEqual(defaultVizColor.defaultVizColor);
   });
 
   it('should merge partial theme: legends', () => {

@@ -31,10 +31,6 @@ export interface ScaleConfig {
   clamp?: boolean;
 }
 
-export type ScaleContinuousType =
-  | ScaleType.Linear
-  | ScaleType.Sqrt
-  | ScaleType.Log
-  | ScaleType.Time;
+export type ScaleContinuousType = ScaleType.Linear | ScaleType.Sqrt | ScaleType.Log | ScaleType.Time;
 export type ScaleOrdinalType = ScaleType.Ordinal;
 export type ScaleTypes = ScaleContinuousType | ScaleOrdinalType;

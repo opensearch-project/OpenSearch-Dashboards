@@ -100,12 +100,7 @@ storiesOf('Area Chart', module)
     });
     return (
       <Chart className={'story-chart'}>
-        <Axis
-          id={getAxisId('bottom')}
-          title={'index'}
-          position={Position.Bottom}
-          tickFormat={dateFormatter}
-        />
+        <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} tickFormat={dateFormatter} />
         <Axis
           id={getAxisId('left')}
           title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
@@ -368,12 +363,7 @@ storiesOf('Area Chart', module)
     ];
     return (
       <Chart className={'story-chart'}>
-        <Axis
-          id={getAxisId('bottom')}
-          title={'index'}
-          position={Position.Bottom}
-          tickFormat={dateFormatter}
-        />
+        <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} tickFormat={dateFormatter} />
         <Axis
           id={getAxisId('left')}
           title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}

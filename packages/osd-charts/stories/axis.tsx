@@ -57,12 +57,7 @@ storiesOf('Axis', module)
     return (
       <Chart className={'story-chart'}>
         <Settings debug={boolean('debug', false)} />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'Bottom axis'}
-          showOverlappingTicks={true}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
         <Axis
           id={getAxisId('left2')}
           title={'Left axis'}
@@ -232,12 +227,7 @@ storiesOf('Axis', module)
     return (
       <Chart className={'story-chart'}>
         <Settings showLegend={false} />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'Bottom axis'}
-          showOverlappingTicks={true}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
         <Axis
           id={getAxisId('left')}
           title={'Bar axis'}
@@ -277,12 +267,7 @@ storiesOf('Axis', module)
     return (
       <Chart className={'story-chart'}>
         <Settings showLegend={false} />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'Bottom axis'}
-          showOverlappingTicks={true}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
         <Axis
           id={getAxisId('left')}
           groupId={getGroupId('group1')}
@@ -328,12 +313,7 @@ storiesOf('Axis', module)
     return (
       <Chart className={'story-chart'}>
         <Settings debug={true} />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'Bottom axis'}
-          showOverlappingTicks={true}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
         <AreaSeries
           id={getSpecId('lines')}
           xScaleType={ScaleType.Linear}
@@ -369,12 +349,7 @@ storiesOf('Axis', module)
     return (
       <Chart className={'story-chart'}>
         <Settings showLegend={false} xDomain={xDomain} />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'Bottom axis'}
-          showOverlappingTicks={true}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
         <Axis
           id={getAxisId('left')}
           title={'Bar axis'}
@@ -437,12 +412,7 @@ storiesOf('Axis', module)
     return (
       <Chart className={'story-chart'}>
         <Settings showLegend={false} xDomain={xDomain} />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'Bottom axis'}
-          showOverlappingTicks={true}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
         <Axis
           id={getAxisId('left')}
           title={'Bar axis'}
@@ -499,12 +469,7 @@ storiesOf('Axis', module)
     return (
       <Chart className={'story-chart'}>
         <Settings showLegend={false} xDomain={xDomain} />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'Bottom axis'}
-          showOverlappingTicks={true}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
         <Axis
           id={getAxisId('left')}
           title={'Bar axis'}

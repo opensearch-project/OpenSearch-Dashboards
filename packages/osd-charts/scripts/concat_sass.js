@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const fs = require('fs');
 const sassGraph = require('sass-graph');
 
@@ -14,22 +15,23 @@ function recursiveReadSCSS(branchId, branch) {
     return fs.readFileSync(branchId, 'utf8');
   }
   const file = fs.readFileSync(branchId, 'utf8');
-  const sassFileContent = []
+  const sassFileContent = [];
   branch.imports.forEach((branchId) => {
     const content = recursiveReadSCSS(branchId, graph.index[branchId]);
     sassFileContent.push(content);
   });
   // remove imports
-  const contentWithoutImports = removeImportsFromFile(file)
+  const contentWithoutImports = removeImportsFromFile(file);
   sassFileContent.push(contentWithoutImports);
   return sassFileContent.join('\n');
 }
 
-
 function removeImportsFromFile(fileContent) {
   const lines = fileContent.split(/\r\n|\r|\n/g);
 
-  return lines.filter((line) => {
-    return !line.match(/@import\s/i)
-  }).join('\n');
+  return lines
+    .filter((line) => {
+      return !line.match(/@import\s/i);
+    })
+    .join('\n');
 }

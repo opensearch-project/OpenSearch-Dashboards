@@ -1,11 +1,6 @@
 export const BARCHART_1Y0G = [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 10 }, { x: 3, y: 6 }];
 
-export const BARCHART_1Y0G_LINEAR = [
-  { x: 0, y: 1 },
-  { x: 1, y: 2 },
-  { x: 2.5, y: 10 },
-  { x: 3.5, y: 6 },
-];
+export const BARCHART_1Y0G_LINEAR = [{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2.5, y: 10 }, { x: 3.5, y: 6 }];
 export const BARCHART_1Y1G = [
   { x: 0, g: 'a', y: 1 },
   { x: 0, g: 'b', y: 2 },

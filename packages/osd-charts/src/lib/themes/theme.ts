@@ -180,8 +180,7 @@ export const DEFAULT_ANNOTATION_RECT_STYLE: RectAnnotationStyle = {
 };
 
 export function mergeWithDefaultGridLineConfig(config: GridLineConfig): GridLineConfig {
-  const strokeWidth =
-    config.strokeWidth != null ? config.strokeWidth : DEFAULT_GRID_LINE_CONFIG.strokeWidth;
+  const strokeWidth = config.strokeWidth != null ? config.strokeWidth : DEFAULT_GRID_LINE_CONFIG.strokeWidth;
   const opacity = config.opacity != null ? config.opacity : DEFAULT_GRID_LINE_CONFIG.opacity;
 
   return {
@@ -192,9 +191,7 @@ export function mergeWithDefaultGridLineConfig(config: GridLineConfig): GridLine
   };
 }
 
-export function mergeWithDefaultAnnotationLine(
-  config?: Partial<LineAnnotationStyle>,
-): LineAnnotationStyle {
+export function mergeWithDefaultAnnotationLine(config?: Partial<LineAnnotationStyle>): LineAnnotationStyle {
   const defaultLine = DEFAULT_ANNOTATION_LINE_STYLE.line;
   const defaultDetails = DEFAULT_ANNOTATION_LINE_STYLE.details;
   const mergedConfig: LineAnnotationStyle = { ...DEFAULT_ANNOTATION_LINE_STYLE };
@@ -231,10 +228,7 @@ export function mergeWithDefaultAnnotationRect(config?: Partial<RectAnnotationSt
   };
 }
 
-export function mergeWithDefaultTheme(
-  theme: PartialTheme,
-  defaultTheme: Theme = LIGHT_THEME,
-): Theme {
+export function mergeWithDefaultTheme(theme: PartialTheme, defaultTheme: Theme = LIGHT_THEME): Theme {
   const customTheme: Theme = {
     ...defaultTheme,
   };

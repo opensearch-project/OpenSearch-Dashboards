@@ -11,12 +11,7 @@ class HighlighterComponent extends React.Component<HighlighterProps> {
   static displayName = 'Highlighter';
 
   render() {
-    const {
-      highlightedGeometries,
-      chartTransform,
-      chartDimensions,
-      chartRotation,
-    } = this.props.chartStore!;
+    const { highlightedGeometries, chartTransform, chartDimensions, chartRotation } = this.props.chartStore!;
     const left = chartDimensions.left + chartTransform.x;
     const top = chartDimensions.top + chartTransform.y;
     return (
@@ -37,17 +32,7 @@ class HighlighterComponent extends React.Component<HighlighterProps> {
                 />
               );
             }
-            return (
-              <rect
-                key={i}
-                x={x}
-                y={y}
-                width={geom.width}
-                height={geom.height}
-                fill="white"
-                opacity={0.4}
-              />
-            );
+            return <rect key={i} x={x} y={y} width={geom.width} height={geom.height} fill="white" opacity={0.4} />;
           })}
         </g>
       </svg>

@@ -59,8 +59,8 @@ export class Chart extends React.Component<ChartProps> {
             {renderer === 'canvas' && <ReactChart />}
             <Tooltips />
             <AnnotationTooltip />
-            <Legend legendId={this.legendId}/>
-            <LegendButton legendId={this.legendId}/>
+            <Legend legendId={this.legendId} />
+            <LegendButton legendId={this.legendId} />
             <Highlighter />
           </div>
         </Fragment>

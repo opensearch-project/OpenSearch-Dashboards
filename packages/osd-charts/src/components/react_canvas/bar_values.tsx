@@ -59,5 +59,5 @@ export class BarValues extends React.PureComponent<BarValuesProps> {
         </Group>
       );
     });
-  }
+  };
 }

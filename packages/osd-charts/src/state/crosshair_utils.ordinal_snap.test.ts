@@ -82,25 +82,10 @@ describe('Crosshair utils ordinal scales', () => {
   const mixedLinesBarsSeriesDomains = computeSeriesDomains(mixedLinesBarsMap, new Map());
 
   const barSeriesScale = computeXScale(barSeriesDomains.xDomain, barSeriesMap.size, 0, 120);
-  const multiBarSeriesScale = computeXScale(
-    multiBarSeriesDomains.xDomain,
-    multiBarSeriesMap.size,
-    0,
-    120,
-  );
+  const multiBarSeriesScale = computeXScale(multiBarSeriesDomains.xDomain, multiBarSeriesMap.size, 0, 120);
   const lineSeriesScale = computeXScale(lineSeriesDomains.xDomain, lineSeriesMap.size, 0, 120);
-  const multiLineSeriesScale = computeXScale(
-    multiLineSeriesDomains.xDomain,
-    multiLineSeriesMap.size,
-    0,
-    120,
-  );
-  const mixedLinesBarsSeriesScale = computeXScale(
-    mixedLinesBarsSeriesDomains.xDomain,
-    mixedLinesBarsMap.size,
-    0,
-    120,
-  );
+  const multiLineSeriesScale = computeXScale(multiLineSeriesDomains.xDomain, multiLineSeriesMap.size, 0, 120);
+  const mixedLinesBarsSeriesScale = computeXScale(mixedLinesBarsSeriesDomains.xDomain, mixedLinesBarsMap.size, 0, 120);
 
   test('can snap position on scale ordinal bar', () => {
     let snappedPosition = getSnapPosition('a', barSeriesScale);

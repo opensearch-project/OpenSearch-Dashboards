@@ -13,7 +13,7 @@ class LegendButtonComponent extends React.Component<LegendButtonProps> {
   static displayName = 'Legend';
   onCollapseLegend = () => {
     this.props.chartStore!.toggleLegendCollapsed();
-  }
+  };
 
   render() {
     const { initialized, legendItems, legendCollapsed, showLegend } = this.props.chartStore!;

@@ -35,9 +35,7 @@ export function computeLegend(
     const color = seriesColorMap.get(key) || defaultColor;
     const hasSingleSeries = seriesColor.size === 1;
     const label = getSeriesColorLabel(series.colorValues, hasSingleSeries, spec);
-    const isSeriesVisible = deselectedDataSeries
-      ? findDataSeriesByColorValues(deselectedDataSeries, series) < 0
-      : true;
+    const isSeriesVisible = deselectedDataSeries ? findDataSeriesByColorValues(deselectedDataSeries, series) < 0 : true;
 
     if (!label || !spec) {
       return;

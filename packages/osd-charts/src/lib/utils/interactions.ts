@@ -1,10 +1,4 @@
-import {
-  BarGeometry,
-  IndexedGeometry,
-  isBarGeometry,
-  isPointGeometry,
-  PointGeometry,
-} from '../series/rendering';
+import { BarGeometry, IndexedGeometry, isBarGeometry, isPointGeometry, PointGeometry } from '../series/rendering';
 import { Datum, Rotation } from '../series/specs';
 import { Dimensions } from './dimensions';
 
@@ -47,12 +41,7 @@ export interface HighlightedElement {
  * @param chartRotation the chart rotation
  * @param chartDimension the chart dimension
  */
-export function getValidXPosition(
-  xPos: number,
-  yPos: number,
-  chartRotation: Rotation,
-  chartDimension: Dimensions,
-) {
+export function getValidXPosition(xPos: number, yPos: number, chartRotation: Rotation, chartDimension: Dimensions) {
   switch (chartRotation) {
     case 0:
       return xPos;
@@ -64,12 +53,7 @@ export function getValidXPosition(
       return chartDimension.height - yPos;
   }
 }
-export function getValidYPosition(
-  xPos: number,
-  yPos: number,
-  chartRotation: Rotation,
-  chartDimension: Dimensions,
-) {
+export function getValidYPosition(xPos: number, yPos: number, chartRotation: Rotation, chartDimension: Dimensions) {
   switch (chartRotation) {
     case 0:
       return yPos;

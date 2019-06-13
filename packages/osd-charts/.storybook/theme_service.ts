@@ -1,4 +1,4 @@
-/* tslint:disable */
+/* eslint-disable import/no-unresolved */
 // @ts-ignore
 import themeDark from '!!style-loader/useable?{attrs:{"nonce":"Pk1rZ1XDlMuYe8ubWV3Lh0BzwrTigJQ="}}!css-loader!sass-loader!../src/theme_dark.scss';
 // @ts-ignore

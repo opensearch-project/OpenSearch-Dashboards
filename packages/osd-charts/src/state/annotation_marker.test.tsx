@@ -1,12 +1,6 @@
 import * as React from 'react';
 
-import {
-  AnnotationDomainType,
-  AnnotationDomainTypes,
-  AnnotationSpec,
-  Position,
-  Rotation,
-} from '../lib/series/specs';
+import { AnnotationDomainType, AnnotationDomainTypes, AnnotationSpec, Position, Rotation } from '../lib/series/specs';
 import { DEFAULT_ANNOTATION_LINE_STYLE } from '../lib/themes/theme';
 import { Dimensions } from '../lib/utils/dimensions';
 import { getAnnotationId, getGroupId, GroupId } from '../lib/utils/ids';
@@ -27,10 +21,7 @@ describe('annotation marker', () => {
   const maxRange = 100;
 
   const continuousData = [0, 10];
-  const continuousScale = new ScaleContinuous(ScaleType.Linear, continuousData, [
-    minRange,
-    maxRange,
-  ]);
+  const continuousScale = new ScaleContinuous(ScaleType.Linear, continuousData, [minRange, maxRange]);
 
   const chartDimensions: Dimensions = {
     width: 10,
@@ -166,7 +157,7 @@ describe('annotation marker', () => {
     const cursorPosition1: Point = { x: 0, y: 0 };
     const cursorPosition2: Point = { x: 10, y: 0 };
 
-    const offset: number = 0;
+    const offset = 0;
     const horizontalChartRotation: Rotation = 0;
     const verticalChartRotation: Rotation = 90;
     const domainType: AnnotationDomainType = AnnotationDomainTypes.XDomain;
@@ -249,7 +240,7 @@ describe('annotation marker', () => {
     const cursorPosition1: Point = { x: 0, y: 0 };
     const cursorPosition2: Point = { x: 10, y: 0 };
 
-    const offset: number = 0;
+    const offset = 0;
     const horizontalChartRotation: Rotation = 0;
     const verticalChartRotation: Rotation = 90;
     const domainType: AnnotationDomainType = AnnotationDomainTypes.YDomain;

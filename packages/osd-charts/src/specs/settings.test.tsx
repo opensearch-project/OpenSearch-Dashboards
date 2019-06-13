@@ -1,8 +1,5 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
-
-import { GeometryValue } from '../lib/series/rendering';
-import { DataSeriesColorsValues } from '../lib/series/series';
 import { Position, Rendering, Rotation } from '../lib/series/specs';
 import { DARK_THEME } from '../lib/themes/dark_theme';
 import { LIGHT_THEME } from '../lib/themes/light_theme';
@@ -114,11 +111,19 @@ describe('Settings spec component', () => {
     expect(chartStore.onLegendItemPlusClickListener).toBeUndefined();
     expect(chartStore.onLegendItemMinusClickListener).toBeUndefined();
 
-    const onElementClick = (value: GeometryValue[]): void => { return; };
-    const onElementOver = (value: GeometryValue[]): void => { return; };
+    const onElementClick = (): void => {
+      return;
+    };
+    const onElementOver = (): void => {
+      return;
+    };
     const onOut = () => undefined;
-    const onBrushEnd = (min: number, max: number): void => { return; };
-    const onLegendEvent = (ds: DataSeriesColorsValues | null): void => { return; };
+    const onBrushEnd = (): void => {
+      return;
+    };
+    const onLegendEvent = (): void => {
+      return;
+    };
 
     const chartStoreListeners = {
       onElementClick,

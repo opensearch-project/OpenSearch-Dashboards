@@ -118,15 +118,13 @@ export const AnnotationTooltip = inject('chartStore')(observer(AnnotationTooltip
 
 function RectAnnotationTooltip(props: {
   details?: string;
-  position: { transform: string; top: number; left: number; };
+  position: { transform: string; top: number; left: number };
 }) {
   const { details, position } = props;
   return (
     <div className="echAnnotation__tooltip" style={{ ...position }}>
       <div className="echAnnotation__details">
-        <div className="echAnnotation__detailsText">
-          {details}
-        </div>
+        <div className="echAnnotation__detailsText">{details}</div>
       </div>
     </div>
   );
@@ -135,15 +133,13 @@ function RectAnnotationTooltip(props: {
 function LineAnnotationTooltip(props: {
   details?: string;
   header?: string;
-  position: { transform: string; top: number; left: number; };
+  position: { transform: string; top: number; left: number };
 }) {
   const { details, position, header } = props;
   return (
     <div className="echAnnotation__tooltip" style={{ ...position }}>
       <p className="echAnnotation__header">{header}</p>
-      <div className="echAnnotation__details">
-        {details}
-      </div>
+      <div className="echAnnotation__details">{details}</div>
     </div>
   );
 }

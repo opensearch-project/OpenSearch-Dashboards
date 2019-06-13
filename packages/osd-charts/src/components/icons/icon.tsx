@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { FunctionComponent, SVGAttributes } from 'react';
+import React, { SVGAttributes } from 'react';
 import { AlertIcon } from './assets/alert';
 import { DotIcon } from './assets/dot';
 import { EmptyIcon } from './assets/empty';
@@ -31,9 +31,10 @@ export interface IconProps {
   color?: IconColor;
 }
 
-export type Props = Omit<SVGAttributes<SVGElement>, 'color'> & IconProps;
+export type Props = Omit<SVGAttributes<SVGElement>, 'color' | 'type'> & IconProps;
 
-export const Icon: FunctionComponent<Props> = ({ type, color, className, tabIndex, ...rest }) => {
+export const Icon = (props: Props) => {
+  const { type, color, className, tabIndex, ...rest } = props;
   let optionalCustomStyles = null;
 
   if (color) {
@@ -52,13 +53,5 @@ export const Icon: FunctionComponent<Props> = ({ type, color, className, tabInde
   //   - For all other values, the consumer wants the icon to be focusable.
   const focusable = tabIndex == null || tabIndex === -1 ? 'false' : 'true';
 
-  return (
-    <Svg
-      className={classes}
-      {...optionalCustomStyles}
-      tabIndex={tabIndex}
-      focusable={focusable}
-      {...rest}
-    />
-  );
+  return <Svg className={classes} {...optionalCustomStyles} tabIndex={tabIndex} focusable={focusable} {...rest} />;
 };

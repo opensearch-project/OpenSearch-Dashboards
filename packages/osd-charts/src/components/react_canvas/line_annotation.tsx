@@ -25,15 +25,11 @@ export class LineAnnotation extends React.PureComponent<LineAnnotationProps> {
     };
 
     return <Line key={`tick-${i}`} {...lineProps} />;
-  }
+  };
 
   private renderAnnotation = () => {
     const { lines } = this.props;
 
-    return (
-      <Group>
-        {lines.map(this.renderAnnotationLine)}
-      </Group>
-    );
-  }
+    return <Group>{lines.map(this.renderAnnotationLine)}</Group>;
+  };
 }

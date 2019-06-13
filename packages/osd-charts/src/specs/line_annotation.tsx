@@ -59,7 +59,11 @@ export class LineAnnotationSpecComponent extends PureComponent<LineAnnotationPro
       opacity: 0,
     };
 
-    return (<div ref={this.markerRef} style={{ ...offscreenStyle }}>{this.props.marker}</div>);
+    return (
+      <div ref={this.markerRef} style={{ ...offscreenStyle }}>
+        {this.props.marker}
+      </div>
+    );
   }
 }
 

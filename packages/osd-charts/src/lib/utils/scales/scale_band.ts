@@ -1,7 +1,6 @@
 import { scaleBand, scaleQuantize, ScaleQuantize } from 'd3-scale';
 import { clamp } from '../commons';
-import { ScaleType } from './scales';
-import { Scale } from './scales';
+import { ScaleType, Scale } from './scales';
 
 export class ScaleBand implements Scale {
   readonly bandwidth: number;

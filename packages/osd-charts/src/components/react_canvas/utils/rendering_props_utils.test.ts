@@ -536,31 +536,17 @@ describe('[canvas] Bar Geometries', () => {
       offsetY: 4,
     };
 
-    const overflowVisible = isBarValueOverflow(
-      chartDimensions,
-      clip,
-      displayValue,
-    );
+    const overflowVisible = isBarValueOverflow(chartDimensions, clip, displayValue);
     expect(overflowVisible).toBe(false);
 
     clip.offsetX = -15;
     clip.offsetY = 0;
-    const overflowXHidden = isBarValueOverflow(
-      chartDimensions,
-      clip,
-      displayValue,
-      true,
-    );
+    const overflowXHidden = isBarValueOverflow(chartDimensions, clip, displayValue, true);
     expect(overflowXHidden).toBe(true);
 
     clip.offsetX = 10;
     clip.offsetY = -25;
-    const overflowYHidden = isBarValueOverflow(
-      chartDimensions,
-      clip,
-      displayValue,
-      true,
-    );
+    const overflowYHidden = isBarValueOverflow(chartDimensions, clip, displayValue, true);
     expect(overflowYHidden).toBe(true);
   });
   test('can get bar value clip dimensions', () => {
@@ -575,34 +561,28 @@ describe('[canvas] Bar Geometries', () => {
       isValueContainedInElement: false,
     };
 
-    const unrotatedClipDimensions = getBarValueClipDimensions(
-      displayValue,
-      computedDimensions,
-      barHeight,
-      0,
-    );
+    const unrotatedClipDimensions = getBarValueClipDimensions(displayValue, computedDimensions, barHeight, 0);
     expect(unrotatedClipDimensions).toEqual({
-      width: 20, height: 10, offsetX: 0, offsetY: 0,
+      width: 20,
+      height: 10,
+      offsetX: 0,
+      offsetY: 0,
     });
 
-    const horizontalRotatedClipDimensions = getBarValueClipDimensions(
-      displayValue,
-      computedDimensions,
-      barHeight,
-      180,
-    );
+    const horizontalRotatedClipDimensions = getBarValueClipDimensions(displayValue, computedDimensions, barHeight, 180);
     expect(horizontalRotatedClipDimensions).toEqual({
-      width: 20, height: 10, offsetX: 0, offsetY: 25,
+      width: 20,
+      height: 10,
+      offsetX: 0,
+      offsetY: 25,
     });
 
-    const verticalRotatedClipDimensions = getBarValueClipDimensions(
-      displayValue,
-      computedDimensions,
-      barHeight,
-      90,
-    );
+    const verticalRotatedClipDimensions = getBarValueClipDimensions(displayValue, computedDimensions, barHeight, 90);
     expect(verticalRotatedClipDimensions).toEqual({
-      width: 20, height: 10, offsetX: 15, offsetY: 0,
+      width: 20,
+      height: 10,
+      offsetX: 15,
+      offsetY: 0,
     });
   });
   test('can compute props for rotated bar values', () => {

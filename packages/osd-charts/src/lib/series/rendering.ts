@@ -207,10 +207,8 @@ export function renderBars(
   const barGeometries: BarGeometry[] = [];
 
   const bboxCalculator = new CanvasTextBBoxCalculator();
-  const fontSize =
-    seriesStyle && seriesStyle.displayValue ? seriesStyle.displayValue.fontSize : undefined;
-  const fontFamily =
-    seriesStyle && seriesStyle.displayValue ? seriesStyle.displayValue.fontFamily : undefined;
+  const fontSize = seriesStyle && seriesStyle.displayValue ? seriesStyle.displayValue.fontSize : undefined;
+  const fontFamily = seriesStyle && seriesStyle.displayValue ? seriesStyle.displayValue.fontFamily : undefined;
 
   dataset.forEach((datum) => {
     const { y0, y1, initialY1 } = datum;
@@ -255,20 +253,14 @@ export function renderBars(
           : undefined
         : formattedDisplayValue;
 
-    const computedDisplayValueWidth = bboxCalculator
-      .compute(displayValueText || '', fontSize, fontFamily)
-      .getOrElse({
-        width: 0,
-        height: 0,
-      }).width;
+    const computedDisplayValueWidth = bboxCalculator.compute(displayValueText || '', fontSize, fontFamily).getOrElse({
+      width: 0,
+      height: 0,
+    }).width;
     const displayValueWidth =
-      displayValueSettings && displayValueSettings.isValueContainedInElement
-        ? width
-        : computedDisplayValueWidth;
+      displayValueSettings && displayValueSettings.isValueContainedInElement ? width : computedDisplayValueWidth;
 
-    const hideClippedValue = displayValueSettings
-      ? displayValueSettings.hideClippedValue
-      : undefined;
+    const hideClippedValue = displayValueSettings ? displayValueSettings.hideClippedValue : undefined;
 
     const displayValue =
       displayValueSettings && displayValueSettings.showValueLabel
@@ -501,7 +493,5 @@ export function isPointOnGeometry(
     );
   }
   const { width, height } = indexedGeometry;
-  return (
-    yCoordinate >= y && yCoordinate <= y + height && xCoordinate >= x && xCoordinate <= x + width
-  );
+  return yCoordinate >= y && yCoordinate <= y + height && xCoordinate >= x && xCoordinate <= x + width;
 }

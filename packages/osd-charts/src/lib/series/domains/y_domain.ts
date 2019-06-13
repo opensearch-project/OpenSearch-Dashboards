@@ -1,12 +1,12 @@
-import { sum } from 'd3-array';
-import { isCompleteBound, isLowerBound, isUpperBound } from '../../axes/axis_utils';
-import { identity } from '../../utils/commons';
-import { computeContinuousDataDomain } from '../../utils/domain';
+import { BasicSeriesSpec, DomainRange } from '../specs';
 import { GroupId, SpecId } from '../../utils/ids';
 import { ScaleContinuousType, ScaleType } from '../../utils/scales/scales';
-import { RawDataSeries } from '../series';
-import { BasicSeriesSpec, DomainRange } from '../specs';
+import { isCompleteBound, isLowerBound, isUpperBound } from '../../axes/axis_utils';
 import { BaseDomain } from './domain';
+import { RawDataSeries } from '../series';
+import { computeContinuousDataDomain } from '../../utils/domain';
+import { identity } from '../../utils/commons';
+import { sum } from 'd3-array';
 
 export type YDomain = BaseDomain & {
   type: 'yDomain';
@@ -16,13 +16,7 @@ export type YDomain = BaseDomain & {
 };
 export type YBasicSeriesSpec = Pick<
   BasicSeriesSpec,
-  | 'id'
-  | 'seriesType'
-  | 'yScaleType'
-  | 'groupId'
-  | 'stackAccessors'
-  | 'yScaleToDataExtent'
-  | 'colorAccessors'
+  'id' | 'seriesType' | 'yScaleType' | 'groupId' | 'stackAccessors' | 'yScaleToDataExtent' | 'colorAccessors'
 >;
 
 export function mergeYDomain(
@@ -51,10 +45,7 @@ export function mergeYDomain(
         return spec.yScaleToDataExtent;
       });
       const nonStackedDataSeries = getDataSeriesOnGroup(dataSeries, groupSpecs.nonStacked);
-      const nonStackedDomain = computeYNonStackedDomain(
-        nonStackedDataSeries,
-        isNonStackedScaleToExtent,
-      );
+      const nonStackedDomain = computeYNonStackedDomain(nonStackedDataSeries, isNonStackedScaleToExtent);
 
       // merge stacked and non stacked domain together
       const groupDomain = computeContinuousDataDomain(
@@ -73,17 +64,13 @@ export function mergeYDomain(
         domain = [customDomain.min, customDomain.max];
       } else if (customDomain && isLowerBound(customDomain)) {
         if (customDomain.min > computedDomainMax) {
-          throw new Error(
-            `custom yDomain for ${groupId} is invalid, custom min is greater than computed max`,
-          );
+          throw new Error(`custom yDomain for ${groupId} is invalid, custom min is greater than computed max`);
         }
 
         domain = [customDomain.min, computedDomainMax];
       } else if (customDomain && isUpperBound(customDomain)) {
         if (computedDomainMin > customDomain.max) {
-          throw new Error(
-            `custom yDomain for ${groupId} is invalid, computed min is greater than custom max`,
-          );
+          throw new Error(`custom yDomain for ${groupId} is invalid, computed min is greater than custom max`);
         }
 
         domain = [computedDomainMin, customDomain.max];
@@ -152,10 +139,7 @@ function computeYNonStackedDomain(dataseries: RawDataSeries[], scaleToExtent: bo
   return computeContinuousDataDomain([...yValues.values()], identity, scaleToExtent);
 }
 export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
-  const specsByGroupIds = new Map<
-    GroupId,
-    { stacked: YBasicSeriesSpec[]; nonStacked: YBasicSeriesSpec[] }
-  >();
+  const specsByGroupIds = new Map<GroupId, { stacked: YBasicSeriesSpec[]; nonStacked: YBasicSeriesSpec[] }>();
   // split each specs by groupId and by stacked or not
   specs.forEach((spec) => {
     const group = specsByGroupIds.get(spec.groupId) || {
@@ -182,9 +166,7 @@ export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
  * If none of the above, than coerce to the specified scale.
  * @returns {ChartScaleType}
  */
-export function coerceYScaleTypes(
-  specs: Array<Pick<BasicSeriesSpec, 'yScaleType'>>,
-): ScaleContinuousType {
+export function coerceYScaleTypes(specs: Pick<BasicSeriesSpec, 'yScaleType'>[]): ScaleContinuousType {
   const scaleTypes = new Set<ScaleContinuousType>();
   specs.forEach((spec) => {
     scaleTypes.add(spec.yScaleType);

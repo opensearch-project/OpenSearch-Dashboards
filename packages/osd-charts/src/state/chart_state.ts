@@ -45,11 +45,7 @@ import {
 } from '../lib/series/specs';
 import { formatTooltip, getSeriesTooltipValues } from '../lib/series/tooltip';
 import { LIGHT_THEME } from '../lib/themes/light_theme';
-import {
-  mergeWithDefaultAnnotationLine,
-  mergeWithDefaultAnnotationRect,
-  Theme,
-} from '../lib/themes/theme';
+import { mergeWithDefaultAnnotationLine, mergeWithDefaultAnnotationRect, Theme } from '../lib/themes/theme';
 import { compareByValueAsc } from '../lib/utils/commons';
 import { computeChartDimensions, Dimensions } from '../lib/utils/dimensions';
 import { Domain } from '../lib/utils/domain';
@@ -66,16 +62,8 @@ import {
 } from '../lib/utils/interactions';
 import { Scale, ScaleType } from '../lib/utils/scales/scales';
 import { DEFAULT_TOOLTIP_SNAP, DEFAULT_TOOLTIP_TYPE } from '../specs/settings';
-import {
-  AnnotationDimensions,
-  computeAnnotationDimensions,
-  computeAnnotationTooltipState,
-} from './annotation_utils';
-import {
-  getCursorBandPosition,
-  getCursorLinePosition,
-  getTooltipPosition,
-} from './crosshair_utils';
+import { AnnotationDimensions, computeAnnotationDimensions, computeAnnotationTooltipState } from './annotation_utils';
+import { getCursorBandPosition, getCursorLinePosition, getTooltipPosition } from './crosshair_utils';
 import {
   BrushExtent,
   computeBrushExtent,
@@ -187,20 +175,12 @@ export class ChartStore {
   cursorPosition = observable.object<{ x: number; y: number }>({ x: -1, y: -1 }, undefined, {
     deep: false,
   });
-  cursorBandPosition = observable.object<Dimensions>(
-    { top: -1, left: -1, height: -1, width: -1 },
-    undefined,
-    {
-      deep: false,
-    },
-  );
-  cursorLinePosition = observable.object<Dimensions>(
-    { top: -1, left: -1, height: -1, width: -1 },
-    undefined,
-    {
-      deep: false,
-    },
-  );
+  cursorBandPosition = observable.object<Dimensions>({ top: -1, left: -1, height: -1, width: -1 }, undefined, {
+    deep: false,
+  });
+  cursorLinePosition = observable.object<Dimensions>({ top: -1, left: -1, height: -1, width: -1 }, undefined, {
+    deep: false,
+  });
 
   onElementClickListener?: ElementClickListener;
   onElementOverListener?: ElementOverListener;
@@ -274,18 +254,8 @@ export class ChartStore {
     }
 
     // get the cursor position depending on the chart rotation
-    const xAxisCursorPosition = getValidXPosition(
-      xPos,
-      yPos,
-      this.chartRotation,
-      this.chartDimensions,
-    );
-    const yAxisCursorPosition = getValidYPosition(
-      xPos,
-      yPos,
-      this.chartRotation,
-      this.chartDimensions,
-    );
+    const xAxisCursorPosition = getValidXPosition(xPos, yPos, this.chartRotation, this.chartDimensions);
+    const yAxisCursorPosition = getValidYPosition(xPos, yPos, this.chartRotation, this.chartDimensions);
 
     // only if we have a valid cursor position and the necessary scale
     if (xAxisCursorPosition < 0 || !this.xScale || !this.yScales) {
@@ -302,7 +272,7 @@ export class ChartStore {
     const updatedCursorBand = getCursorBandPosition(
       this.chartRotation,
       this.chartDimensions,
-      { x: xAxisCursorPosition, y: yAxisCursorPosition},
+      { x: xAxisCursorPosition, y: yAxisCursorPosition },
       this.isTooltipSnapEnabled.get(),
       this.xScale,
       this.geometriesIndexKeys,
@@ -314,11 +284,7 @@ export class ChartStore {
     }
     Object.assign(this.cursorBandPosition, updatedCursorBand);
 
-    const updatedCursorLine = getCursorLinePosition(
-      this.chartRotation,
-      this.chartDimensions,
-      this.cursorPosition,
-    );
+    const updatedCursorLine = getCursorLinePosition(this.chartRotation, this.chartDimensions, this.cursorPosition);
     Object.assign(this.cursorLinePosition, updatedCursorLine);
 
     this.tooltipPosition.transform = getTooltipPosition(
@@ -392,8 +358,7 @@ export class ChartStore {
 
     // if there's an annotation rect tooltip & there isn't a single highlighted element, hide
     const annotationTooltip = this.annotationTooltipState.get();
-    const hasRectAnnotationToolip =
-      annotationTooltip && annotationTooltip.annotationType === AnnotationTypes.Rectangle;
+    const hasRectAnnotationToolip = annotationTooltip && annotationTooltip.annotationType === AnnotationTypes.Rectangle;
     if (hasRectAnnotationToolip && !oneHighlighted) {
       this.clearTooltipAndHighlighted();
       return;
@@ -588,10 +553,7 @@ export class ChartStore {
     const legendItem = this.legendItems.get(legendItemKey);
 
     if (legendItem) {
-      this.deselectedDataSeries = updateDeselectedDataSeries(
-        this.deselectedDataSeries,
-        legendItem.value,
-      );
+      this.deselectedDataSeries = updateDeselectedDataSeries(this.deselectedDataSeries, legendItem.value);
       this.computeChart();
     }
   });
@@ -844,8 +806,9 @@ export class ChartStore {
 
     // compute axis dimensions
     const bboxCalculator = new CanvasTextBBoxCalculator();
-    const barsPadding = this.enableHistogramMode.get() ?
-      this.chartTheme.scales.histogramPadding : this.chartTheme.scales.barsPadding;
+    const barsPadding = this.enableHistogramMode.get()
+      ? this.chartTheme.scales.histogramPadding
+      : this.chartTheme.scales.barsPadding;
 
     this.axesTicksDimensions.clear();
     this.axesSpecs.forEach((axisSpec) => {
@@ -877,11 +840,7 @@ export class ChartStore {
     );
 
     this.chartTransform = computeChartTransform(this.chartDimensions, this.chartRotation);
-    this.brushExtent = computeBrushExtent(
-      this.chartDimensions,
-      this.chartRotation,
-      this.chartTransform,
-    );
+    this.brushExtent = computeBrushExtent(this.chartDimensions, this.chartRotation, this.chartTransform);
 
     const seriesGeometries = computeSeriesGeometries(
       this.seriesSpecs,

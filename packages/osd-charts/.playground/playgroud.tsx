@@ -33,12 +33,7 @@ export class Playground extends React.Component {
             position={Position.Bottom}
             tickFormat={niceTimeFormatter([1555819200000, 1555905600000])}
           />
-          <Axis
-            id={getAxisId('count')}
-            title="count"
-            position={Position.Left}
-            tickFormat={(d) => d.toFixed(2)}
-          />
+          <Axis id={getAxisId('count')} title="count" position={Position.Left} tickFormat={(d) => d.toFixed(2)} />
           <LineSeries
             id={getSpecId('dataset A with long title')}
             xScaleType={ScaleType.Time}

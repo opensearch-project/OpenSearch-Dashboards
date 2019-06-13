@@ -1,9 +1,6 @@
 import { DataSeries, DataSeriesDatum, RawDataSeries } from './series';
 
-export function formatNonStackedDataSeriesValues(
-  dataseries: RawDataSeries[],
-  scaleToExtent: boolean,
-): DataSeries[] {
+export function formatNonStackedDataSeriesValues(dataseries: RawDataSeries[], scaleToExtent: boolean): DataSeries[] {
   const len = dataseries.length;
   let i;
   const formattedValues: DataSeries[] = [];
@@ -14,10 +11,7 @@ export function formatNonStackedDataSeriesValues(
   return formattedValues;
 }
 
-export function formatNonStackedDataValues(
-  dataSeries: RawDataSeries,
-  scaleToExtent: boolean,
-): DataSeries {
+export function formatNonStackedDataValues(dataSeries: RawDataSeries, scaleToExtent: boolean): DataSeries {
   const len = dataSeries.data.length;
   let i;
   const formattedValues: DataSeries = {

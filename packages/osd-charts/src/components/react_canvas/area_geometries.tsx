@@ -22,10 +22,7 @@ interface AreaGeometriesDataProps {
 interface AreaGeometriesDataState {
   overPoint?: PointGeometry;
 }
-export class AreaGeometries extends React.PureComponent<
-  AreaGeometriesDataProps,
-  AreaGeometriesDataState
-> {
+export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps, AreaGeometriesDataState> {
   static defaultProps: Partial<AreaGeometriesDataProps> = {
     animated: false,
   };
@@ -71,12 +68,8 @@ export class AreaGeometries extends React.PureComponent<
       },
       [] as JSX.Element[],
     );
-  }
-  private renderPoints = (
-    areaPoints: PointGeometry[],
-    areaIndex: number,
-    pointStyleProps: any,
-  ): JSX.Element[] => {
+  };
+  private renderPoints = (areaPoints: PointGeometry[], areaIndex: number, pointStyleProps: any): JSX.Element[] => {
     const areaPointElements: JSX.Element[] = [];
     areaPoints.forEach((areaPoint, pointIndex) => {
       const { x, y, color, transform } = areaPoint;
@@ -85,7 +78,7 @@ export class AreaGeometries extends React.PureComponent<
         areaPointElements.push(
           <Group key={`area-point-group-${areaIndex}-${pointIndex}`} x={transform.x}>
             <Spring native from={{ y }} to={{ y }}>
-              {(props: { y: number }) => {
+              {() => {
                 const pointProps = buildAreaPointProps({
                   areaIndex,
                   pointIndex,
@@ -112,7 +105,7 @@ export class AreaGeometries extends React.PureComponent<
       }
     });
     return areaPointElements;
-  }
+  };
 
   private renderAreaGeoms = (themeIsVisible: boolean): JSX.Element[] => {
     const { areas } = this.props;
@@ -157,7 +150,7 @@ export class AreaGeometries extends React.PureComponent<
       }
     });
     return areasToRender;
-  }
+  };
   private renderAreaLines = (themeIsVisible: boolean): JSX.Element[] => {
     const { areas, sharedStyle } = this.props;
     const { strokeWidth } = this.props.style.line;
@@ -171,12 +164,7 @@ export class AreaGeometries extends React.PureComponent<
 
       const customOpacity = seriesAreaLineStyle ? seriesAreaLineStyle.opacity : undefined;
 
-      const geometryStyle = getGeometryStyle(
-        geometryId,
-        this.props.highlightedLegendItem,
-        sharedStyle,
-        customOpacity,
-      );
+      const geometryStyle = getGeometryStyle(geometryId, this.props.highlightedLegendItem, sharedStyle, customOpacity);
 
       lines.forEach((linePath, lineIndex) => {
         const lineProps = buildAreaLineProps({
@@ -213,5 +201,5 @@ export class AreaGeometries extends React.PureComponent<
     // } else {
 
     // }
-  }
+  };
 }

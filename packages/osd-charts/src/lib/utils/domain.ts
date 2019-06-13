@@ -40,8 +40,8 @@ export function computeOrdinalDataDomain(
   const uniqueValues = [...new Set(domain)];
   return sorted
     ? uniqueValues.sort((a, b) => {
-      return `${a}`.localeCompare(`${b}`);
-    })
+        return `${a}`.localeCompare(`${b}`);
+      })
     : uniqueValues;
 }
 
@@ -64,11 +64,7 @@ export function computeDomainExtent(
   return [0, 0];
 }
 
-export function computeContinuousDataDomain(
-  data: any[],
-  accessor: AccessorFn,
-  scaleToExtent = false,
-): number[] {
+export function computeContinuousDataDomain(data: any[], accessor: AccessorFn, scaleToExtent = false): number[] {
   const range = extent(data, accessor);
   return computeDomainExtent(range, scaleToExtent);
 }

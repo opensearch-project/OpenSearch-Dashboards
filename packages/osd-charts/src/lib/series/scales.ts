@@ -94,11 +94,7 @@ export function computeXScale(
  * @param yDomains the y domains
  * @param axisLength the axisLength of the y axis
  */
-export function computeYScales(
-  yDomains: YDomain[],
-  minRange: number,
-  maxRange: number,
-): Map<GroupId, Scale> {
+export function computeYScales(yDomains: YDomain[], minRange: number, maxRange: number): Map<GroupId, Scale> {
   const yScales: Map<GroupId, Scale> = new Map();
 
   yDomains.forEach((yDomain) => {

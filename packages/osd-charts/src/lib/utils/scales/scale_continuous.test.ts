@@ -141,13 +141,7 @@ describe('Scale Continuous', () => {
   });
 
   describe('time ticks', () => {
-    const timezonesToTest = [
-      'Asia/Tokyo',
-      'Europe/Berlin',
-      'UTC',
-      'America/New_York',
-      'America/Los_Angeles',
-    ];
+    const timezonesToTest = ['Asia/Tokyo', 'Europe/Berlin', 'UTC', 'America/New_York', 'America/Los_Angeles'];
 
     function getTicksForDomain(domainStart: number, domainEnd: number) {
       const scale = new ScaleContinuous(

@@ -1,9 +1,10 @@
+/* eslint @typescript-eslint/no-empty-interface: off */
 import { iso, Newtype } from 'newtype-ts';
 
-export interface GroupId extends Newtype<{ readonly GroupId: unique symbol }, string> { }
-export interface AxisId extends Newtype<{ readonly AxisId: unique symbol }, string> { }
-export interface SpecId extends Newtype<{ readonly SpecId: unique symbol }, string> { }
-export interface AnnotationId extends Newtype<{ readonly AnnotationId: unique symbol }, string> { }
+export interface GroupId extends Newtype<{ readonly GroupId: unique symbol }, string> {}
+export interface AxisId extends Newtype<{ readonly AxisId: unique symbol }, string> {}
+export interface SpecId extends Newtype<{ readonly SpecId: unique symbol }, string> {}
+export interface AnnotationId extends Newtype<{ readonly AnnotationId: unique symbol }, string> {}
 
 const groupIdIso = iso<GroupId>();
 const axisIdIso = iso<AxisId>();

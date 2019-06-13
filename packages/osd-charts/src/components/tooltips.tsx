@@ -32,6 +32,7 @@ class TooltipsComponent extends React.Component<TooltipProps> {
             <tbody>
               {tooltipData.slice(1).map(({ name, value, color, isHighlighted }, index) => {
                 const classes = classNames({
+                  /* eslint @typescript-eslint/camelcase:0 */
                   echTooltip__rowHighlighted: isHighlighted,
                 });
                 return (

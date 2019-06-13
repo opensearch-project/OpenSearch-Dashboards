@@ -117,11 +117,7 @@ storiesOf('Annotations', module)
           marker={<Icon type="alert" />}
         />
         <Axis id={getAxisId('top')} position={Position.Top} title={'x-domain axis (top)'} />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'x-domain axis (bottom)'}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'x-domain axis (bottom)'} />
         <Axis id={getAxisId('left')} title={'y-domain axis'} position={Position.Left} />
         <BarSeries
           id={getSpecId('bars')}
@@ -204,12 +200,7 @@ storiesOf('Annotations', module)
           dataValues={dataValues}
           marker={<Icon type="alert" />}
         />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'x-domain axis'}
-          tickFormat={dateFormatter}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'x-domain axis'} tickFormat={dateFormatter} />
         <Axis id={getAxisId('left')} title={'y-domain axis'} position={Position.Left} />
         <BarSeries
           id={getSpecId('bars')}
@@ -295,14 +286,16 @@ storiesOf('Annotations', module)
     );
   })
   .add('[rect] basic annotation (linear bar)', () => {
-    const dataValues = [{
-      coordinates: {
-        x0: 0,
-        x1: 1,
-        y0: 0,
-        y1: 7,
+    const dataValues = [
+      {
+        coordinates: {
+          x0: 0,
+          x1: 1,
+          y0: 0,
+          y1: 7,
+        },
       },
-    }];
+    ];
 
     const chartRotation = select<Rotation>(
       'chartRotation',
@@ -333,13 +326,15 @@ storiesOf('Annotations', module)
     );
   })
   .add('[rect] basic annotation (ordinal bar)', () => {
-    const dataValues = [{
-      coordinates: {
-        x0: 'a',
-        x1: 'b.5',
+    const dataValues = [
+      {
+        coordinates: {
+          x0: 'a',
+          x1: 'b.5',
+        },
+        details: 'details about this annotation',
       },
-      details: 'details about this annotation',
-    }];
+    ];
 
     const chartRotation = select<Rotation>(
       'chartRotation',
@@ -356,11 +351,7 @@ storiesOf('Annotations', module)
       <Chart className={'story-chart'}>
         <Settings debug={boolean('debug', false)} rotation={chartRotation} />
         <RectAnnotation dataValues={dataValues} annotationId={getAnnotationId('rect')} />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'x-domain axis'}
-        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'x-domain axis'} />
         <Axis id={getAxisId('left')} title={'y-domain axis'} position={Position.Left} />
         <BarSeries
           id={getSpecId('bars')}
@@ -525,14 +516,13 @@ storiesOf('Annotations', module)
       overflowWrap: 'break-word',
       width: '120px',
     };
-    const renderTooltip = hasCustomTooltip
-      ? (position: { transform: string; top: number; left: number }, details?: string) => (
-          <div style={{ ...tooltipStyle, ...position }}>
-            <Icon type="alert" />
-            {details}
-          </div>
-        )
-      : undefined;
+    const customTooltip = (position: { transform: string; top: number; left: number }, details?: string) => (
+      <div style={{ ...tooltipStyle, ...position }}>
+        <Icon type="alert" />
+        {details}
+      </div>
+    );
+    const renderTooltip = hasCustomTooltip ? customTooltip : undefined;
 
     const isLeft = boolean('y-domain axis is Position.Left', true);
     const yAxisTitle = isLeft ? 'y-domain axis (left)' : 'y-domain axis (right)';

@@ -16,7 +16,7 @@ class LegendComponent extends React.Component<LegendProps> {
 
   onCollapseLegend = () => {
     this.props.chartStore!.toggleLegendCollapsed();
-  }
+  };
 
   render() {
     const { legendId } = this.props;
@@ -30,12 +30,7 @@ class LegendComponent extends React.Component<LegendProps> {
       chartTheme,
     } = this.props.chartStore!;
 
-    if (
-      !showLegend.get() ||
-      !initialized.get() ||
-      legendItems.size === 0 ||
-      legendPosition === undefined
-    ) {
+    if (!showLegend.get() || !initialized.get() || legendItems.size === 0 || legendPosition === undefined) {
       return null;
     }
 
@@ -51,12 +46,7 @@ class LegendComponent extends React.Component<LegendProps> {
       };
     }
     return (
-      <div
-        className={legendClasses}
-        style={paddingStyle}
-        id={legendId}
-        aria-hidden={legendCollapsed.get()}
-      >
+      <div className={legendClasses} style={paddingStyle} id={legendId} aria-hidden={legendCollapsed.get()}>
         <div className="echLegendListContainer">
           <div className="echLegendList">
             {[...legendItems.values()].map((item) => {
@@ -86,11 +76,11 @@ class LegendComponent extends React.Component<LegendProps> {
 
   onLegendItemMouseover = (legendItemKey: string) => () => {
     this.props.chartStore!.onLegendItemOver(legendItemKey);
-  }
+  };
 
   onLegendItemMouseout = () => {
     this.props.chartStore!.onLegendItemOut();
-  }
+  };
 
   private renderLegendElement = (
     { color, label, isSeriesVisible, displayValue }: SeriesLegendItem,
@@ -108,15 +98,8 @@ class LegendComponent extends React.Component<LegendProps> {
     const display = tooltipValue != null ? tooltipValue : displayValue.formatted;
     const props = { color, label, isSeriesVisible, legendItemKey, displayValue: display };
 
-    return (
-      <LegendItem
-        {...props}
-        key={legendItemKey}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
-      />
-    );
-  }
+    return <LegendItem {...props} key={legendItemKey} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} />;
+  };
 }
 
 export const Legend = inject('chartStore')(observer(LegendComponent));

@@ -18,7 +18,7 @@ describe('X Domain', () => {
   });
 
   test('Should return correct scale type with single bar', () => {
-    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
+    const seriesSpecs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>[] = [
       {
         seriesType: 'bar',
         xScaleType: ScaleType.Linear,
@@ -32,7 +32,7 @@ describe('X Domain', () => {
   });
 
   test('Should return correct scale type with single bar with Ordinal', () => {
-    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
+    const seriesSpecs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>[] = [
       {
         seriesType: 'bar',
         xScaleType: ScaleType.Ordinal,
@@ -46,7 +46,7 @@ describe('X Domain', () => {
   });
 
   test('Should return correct scale type with single area', () => {
-    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
+    const seriesSpecs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>[] = [
       {
         seriesType: 'area',
         xScaleType: ScaleType.Linear,
@@ -59,7 +59,7 @@ describe('X Domain', () => {
     });
   });
   test('Should return correct scale type with single line (time)', () => {
-    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType' | 'timeZone'>> = [
+    const seriesSpecs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType' | 'timeZone'>[] = [
       {
         seriesType: 'line',
         xScaleType: ScaleType.Time,
@@ -74,7 +74,7 @@ describe('X Domain', () => {
     });
   });
   test('Should return correct scale type with multi line with same scale types (time) same tz', () => {
-    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType' | 'timeZone'>> = [
+    const seriesSpecs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType' | 'timeZone'>[] = [
       {
         seriesType: 'line',
         xScaleType: ScaleType.Time,
@@ -94,7 +94,7 @@ describe('X Domain', () => {
     });
   });
   test('Should return correct scale type with multi line with same scale types (time) coerce to UTC', () => {
-    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType' | 'timeZone'>> = [
+    const seriesSpecs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType' | 'timeZone'>[] = [
       {
         seriesType: 'line',
         xScaleType: ScaleType.Time,
@@ -115,7 +115,7 @@ describe('X Domain', () => {
   });
 
   test('Should return correct scale type with multi line with different scale types (linear, ordinal)', () => {
-    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
+    const seriesSpecs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>[] = [
       {
         seriesType: 'line',
         xScaleType: ScaleType.Linear,
@@ -132,7 +132,7 @@ describe('X Domain', () => {
     });
   });
   test('Should return correct scale type with multi bar, area with different scale types (linear, ordinal)', () => {
-    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
+    const seriesSpecs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>[] = [
       {
         seriesType: 'bar',
         xScaleType: ScaleType.Linear,
@@ -149,7 +149,7 @@ describe('X Domain', () => {
     });
   });
   test('Should return correct scale type with multi bar, area with same scale types (linear, linear)', () => {
-    const seriesSpecs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType' | 'timeZone'>> = [
+    const seriesSpecs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType' | 'timeZone'>[] = [
       {
         seriesType: 'bar',
         xScaleType: ScaleType.Linear,
@@ -571,7 +571,7 @@ describe('X Domain', () => {
   test('should account for custom domain when merging a linear domain: complete bounded domain', () => {
     const xValues = new Set([1, 2, 3, 4, 5]);
     const xDomain = { min: 0, max: 3 };
-    const specs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
+    const specs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>[] = [
       { seriesType: 'line', xScaleType: ScaleType.Linear },
     ];
 
@@ -582,8 +582,7 @@ describe('X Domain', () => {
     const attemptToMergeArrayDomain = () => {
       mergeXDomain(specs, xValues, arrayXDomain);
     };
-    const errorMessage =
-      'xDomain for continuous scale should be a DomainRange object, not an array';
+    const errorMessage = 'xDomain for continuous scale should be a DomainRange object, not an array';
     expect(attemptToMergeArrayDomain).toThrowError(errorMessage);
 
     const invalidXDomain = { min: 10, max: 0 };
@@ -596,7 +595,7 @@ describe('X Domain', () => {
   test('should account for custom domain when merging a linear domain: lower bounded domain', () => {
     const xValues = new Set([1, 2, 3, 4, 5]);
     const xDomain = { min: 0 };
-    const specs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
+    const specs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>[] = [
       { seriesType: 'line', xScaleType: ScaleType.Linear },
     ];
 
@@ -607,15 +606,13 @@ describe('X Domain', () => {
     const attemptToMerge = () => {
       mergeXDomain(specs, xValues, invalidXDomain);
     };
-    expect(attemptToMerge).toThrowError(
-      'custom xDomain is invalid, custom min is greater than computed max',
-    );
+    expect(attemptToMerge).toThrowError('custom xDomain is invalid, custom min is greater than computed max');
   });
 
   test('should account for custom domain when merging a linear domain: upper bounded domain', () => {
     const xValues = new Set([1, 2, 3, 4, 5]);
     const xDomain = { max: 3 };
-    const specs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
+    const specs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>[] = [
       { seriesType: 'line', xScaleType: ScaleType.Linear },
     ];
 
@@ -626,15 +623,13 @@ describe('X Domain', () => {
     const attemptToMerge = () => {
       mergeXDomain(specs, xValues, invalidXDomain);
     };
-    expect(attemptToMerge).toThrowError(
-      'custom xDomain is invalid, computed min is greater than custom max',
-    );
+    expect(attemptToMerge).toThrowError('custom xDomain is invalid, computed min is greater than custom max');
   });
 
   test('should account for custom domain when merging an ordinal domain', () => {
     const xValues = new Set(['a', 'b', 'c', 'd']);
     const xDomain = ['a', 'b', 'c'];
-    const specs: Array<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>> = [
+    const specs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>[] = [
       { seriesType: 'bar', xScaleType: ScaleType.Ordinal },
     ];
     const basicMergedDomain = mergeXDomain(specs, xValues, xDomain);
@@ -644,8 +639,7 @@ describe('X Domain', () => {
     const attemptToMerge = () => {
       mergeXDomain(specs, xValues, objectXDomain);
     };
-    const errorMessage =
-      'xDomain for ordinal scale should be an array of values, not a DomainRange object';
+    const errorMessage = 'xDomain for ordinal scale should be an array of values, not a DomainRange object';
     expect(attemptToMerge).toThrowError(errorMessage);
   });
 });

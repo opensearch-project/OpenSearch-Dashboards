@@ -234,12 +234,7 @@ describe('Series', () => {
         specId: getSpecId('spec1'),
         key: ['b'],
         seriesColorKey: 'b',
-        data: [
-          { x: 1, y1: 2, y0: 1 },
-          { x: 2, y1: 3, y0: 1 },
-          { x: 3, y1: 23, y0: 4 },
-          { x: 4, y1: 4, y0: 1 },
-        ],
+        data: [{ x: 1, y1: 2, y0: 1 }, { x: 2, y1: 3, y0: 1 }, { x: 3, y1: 23, y0: 4 }, { x: 4, y1: 4, y0: 1 }],
       },
     ];
     const stackedValues = formatStackedDataSeriesValues(dataSeries, true);
@@ -270,12 +265,7 @@ describe('Series', () => {
         specId: getSpecId('spec1'),
         key: ['b'],
         seriesColorKey: 'b',
-        data: [
-          { x: 1, y1: 2, y0: 1 },
-          { x: 2, y1: 3, y0: 1 },
-          { x: 3, y1: 23, y0: 4 },
-          { x: 4, y1: 4, y0: 1 },
-        ],
+        data: [{ x: 1, y1: 2, y0: 1 }, { x: 2, y1: 3, y0: 1 }, { x: 3, y1: 23, y0: 4 }, { x: 4, y1: 4, y0: 1 }],
       },
     ];
     const stackedValues = formatStackedDataSeriesValues(dataSeries, true);
@@ -356,10 +346,7 @@ describe('Series', () => {
     seriesSpecs.set(spec1.id, spec1);
     seriesSpecs.set(spec2.id, spec2);
     const splittedDataSeries = getSplittedSeries(seriesSpecs);
-    const stackedDataSeries = getFormattedDataseries(
-      [spec1, spec2],
-      splittedDataSeries.splittedSeries,
-    );
+    const stackedDataSeries = getFormattedDataseries([spec1, spec2], splittedDataSeries.splittedSeries);
     expect(stackedDataSeries.stacked).toMatchSnapshot();
   });
   test('should get series color map', () => {

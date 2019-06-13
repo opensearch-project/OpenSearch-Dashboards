@@ -433,7 +433,7 @@ describe('Y Domain', () => {
   });
 
   test('Should return a default Scale Linear for YScaleType when there are no specs', () => {
-    const specs: Array<Pick<BasicSeriesSpec, 'yScaleType'>> = [];
+    const specs: Pick<BasicSeriesSpec, 'yScaleType'>[] = [];
     expect(coerceYScaleTypes(specs)).toBe(ScaleType.Linear);
   });
 

@@ -154,15 +154,7 @@ describe('Axis computational utils', () => {
 
   test('should compute axis dimensions', () => {
     const bboxCalculator = new SvgTextBBoxCalculator();
-    const axisDimensions = computeAxisTicksDimensions(
-      verticalAxisSpec,
-      xDomain,
-      [yDomain],
-      1,
-      bboxCalculator,
-      0,
-      axes,
-    );
+    const axisDimensions = computeAxisTicksDimensions(verticalAxisSpec, xDomain, [yDomain], 1, bboxCalculator, 0, axes);
     expect(axisDimensions).toEqual(axis1Dims);
 
     const computeScalelessSpec = () => {
@@ -178,15 +170,7 @@ describe('Axis computational utils', () => {
   test('should not compute axis dimensions when spec is configured to hide', () => {
     const bboxCalculator = new CanvasTextBBoxCalculator();
     verticalAxisSpec.hide = true;
-    const axisDimensions = computeAxisTicksDimensions(
-      verticalAxisSpec,
-      xDomain,
-      [yDomain],
-      1,
-      bboxCalculator,
-      0,
-      axes,
-    );
+    const axisDimensions = computeAxisTicksDimensions(verticalAxisSpec, xDomain, [yDomain], 1, bboxCalculator, 0, axes);
     expect(axisDimensions).toBe(null);
   });
 
@@ -677,12 +661,7 @@ describe('Axis computational utils', () => {
     const tickPosition = 10;
     const maxLabelBboxHeight = 20;
 
-    const leftAxisTickLinePositions = getVerticalAxisTickLineProps(
-      Position.Left,
-      tickPadding,
-      tickSize,
-      tickPosition,
-    );
+    const leftAxisTickLinePositions = getVerticalAxisTickLineProps(Position.Left, tickPadding, tickSize, tickPosition);
 
     expect(leftAxisTickLinePositions).toEqual([5, 10, 15, 10]);
 
@@ -725,10 +704,7 @@ describe('Axis computational utils', () => {
 
     expect(verticalAxisGridLinePositions).toEqual([0, 10, 100, 10]);
 
-    const horizontalAxisGridLinePositions = getHorizontalAxisGridLineProps(
-      tickPosition,
-      chartHeight,
-    );
+    const horizontalAxisGridLinePositions = getHorizontalAxisGridLineProps(tickPosition, chartHeight);
 
     expect(horizontalAxisGridLinePositions).toEqual([10, 0, 10, 200]);
   });
@@ -760,8 +736,12 @@ describe('Axis computational utils', () => {
     );
 
     let left = 12 + 5 + 10 + 10; // font size + title padding + chart margin left + label width
-    expect(axisTicksPosition.axisPositions.get(verticalAxisSpecWTitle.id))
-      .toEqual({ top: 0, left, width: 10, height: 100 });
+    expect(axisTicksPosition.axisPositions.get(verticalAxisSpecWTitle.id)).toEqual({
+      top: 0,
+      left,
+      width: 10,
+      height: 100,
+    });
 
     axisSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
 
@@ -781,8 +761,12 @@ describe('Axis computational utils', () => {
     );
 
     left = 0 + 10 + 10; // no title + chart margin left + label width
-    expect(axisTicksPosition.axisPositions.get(verticalAxisSpecWTitle.id))
-      .toEqual({ top: 0, left: 20, width: 10, height: 100 });
+    expect(axisTicksPosition.axisPositions.get(verticalAxisSpecWTitle.id)).toEqual({
+      top: 0,
+      left: 20,
+      width: 10,
+      height: 100,
+    });
   });
 
   test('should compute left axis position', () => {
@@ -998,9 +982,7 @@ describe('Axis computational utils', () => {
       [0, 100, 100, 100],
     ];
 
-    expect(axisTicksPosition.axisGridLinesPositions.get(verticalAxisSpec.id)).toEqual(
-      expectedVerticalAxisGridLines,
-    );
+    expect(axisTicksPosition.axisGridLinesPositions.get(verticalAxisSpec.id)).toEqual(expectedVerticalAxisGridLines);
 
     const axisTicksPositionWithTopLegend = getAxisTicksPositions(
       chartDim,
@@ -1022,9 +1004,7 @@ describe('Axis computational utils', () => {
       left: 100,
       top: 0,
     };
-    const verticalAxisWithTopLegendPosition = axisTicksPositionWithTopLegend.axisPositions.get(
-      verticalAxisSpec.id,
-    );
+    const verticalAxisWithTopLegendPosition = axisTicksPositionWithTopLegend.axisPositions.get(verticalAxisSpec.id);
     expect(verticalAxisWithTopLegendPosition).toEqual(expectedPositionWithTopLegend);
 
     const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: getGroupId('foo') };
@@ -1130,9 +1110,7 @@ describe('Axis computational utils', () => {
       mergeDomainsByGroupId(axesSpecs, 0);
     };
 
-    expect(attemptToMerge).toThrowError(
-      '[Axis axis_2]: custom domain for xDomain should be defined in Settings',
-    );
+    expect(attemptToMerge).toThrowError('[Axis axis_2]: custom domain for xDomain should be defined in Settings');
   });
 
   test('should merge axis domains by group id: partial upper bounded prevDomain with complete domain', () => {

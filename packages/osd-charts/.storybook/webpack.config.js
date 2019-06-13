@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 const path = require('path');
 
 module.exports = (baseConfig, env, config) => {

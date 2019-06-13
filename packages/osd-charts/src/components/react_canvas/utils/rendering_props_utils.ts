@@ -71,7 +71,7 @@ export function buildAreaProps({
   xTransform: number;
   color: string;
   opacity: number;
-  seriesAreaStyle?: AreaStyle,
+  seriesAreaStyle?: AreaStyle;
 }) {
   return {
     key: `area-${index}`,
@@ -189,9 +189,10 @@ export function rotateBarValueProps(
   const displayValueX = displayValueDimensions.left;
   const displayValueY = displayValueDimensions.top;
 
-  const rotatedDisplayValueX = displayValueHeight > barWidth ?
-    x - Math.abs(barWidth - displayValueHeight) / 2
-    : x + Math.abs(barWidth - displayValueHeight) / 2;
+  const rotatedDisplayValueX =
+    displayValueHeight > barWidth
+      ? x - Math.abs(barWidth - displayValueHeight) / 2
+      : x + Math.abs(barWidth - displayValueHeight) / 2;
 
   switch (chartRotation) {
     case 0:
@@ -204,9 +205,8 @@ export function rotateBarValueProps(
       props.verticalAlign = 'bottom';
       break;
     case 90:
-      props.x = (barHeight >= displayValueWidth) ?
-        chartWidth - displayValueY - displayValueWidth
-        : chartWidth - displayValueY;
+      props.x =
+        barHeight >= displayValueWidth ? chartWidth - displayValueY - displayValueWidth : chartWidth - displayValueY;
       props.y = rotatedDisplayValueX;
       props.verticalAlign = 'middle';
 
@@ -219,7 +219,7 @@ export function rotateBarValueProps(
       }
       break;
     case -90:
-      props.x = (barHeight >= displayValueWidth) ? displayValueY : displayValueY - displayValueWidth;
+      props.x = barHeight >= displayValueWidth ? displayValueY : displayValueY - displayValueWidth;
       props.y = chartHeight - rotatedDisplayValueX - displayValueHeight;
       props.verticalAlign = 'middle';
 
@@ -238,10 +238,10 @@ export function rotateBarValueProps(
 
 export function getBarValueClipDimensions(
   displayValue: { width: number; height: number; isValueContainedInElement?: boolean },
-  computedDimensions: { width: number; height: number; },
+  computedDimensions: { width: number; height: number },
   barHeight: number,
   chartRotation: Rotation,
-): { width: number; height: number; offsetX: number; offsetY: number; } {
+): { width: number; height: number; offsetX: number; offsetY: number } {
   const height = displayValue.isValueContainedInElement ? displayValue.height : computedDimensions.height;
   const width = displayValue.isValueContainedInElement ? displayValue.width : computedDimensions.width;
 
@@ -260,10 +260,12 @@ export function isBarValueOverflow(
   const chartHeight = chartDimensions.height;
   const chartWidth = chartDimensions.width;
 
-  const isOverflowX = valuePosition.x + clip.width - valuePosition.offsetX > chartWidth
-    || valuePosition.x + clip.offsetX - valuePosition.offsetX < 0;
-  const isOverflowY = valuePosition.y + clip.height - valuePosition.offsetY > chartHeight
-    || valuePosition.y + clip.offsetY - valuePosition.offsetY < 0;
+  const isOverflowX =
+    valuePosition.x + clip.width - valuePosition.offsetX > chartWidth ||
+    valuePosition.x + clip.offsetX - valuePosition.offsetX < 0;
+  const isOverflowY =
+    valuePosition.y + clip.height - valuePosition.offsetY > chartHeight ||
+    valuePosition.y + clip.offsetY - valuePosition.offsetY < 0;
 
   return !!hideClippedValue && (isOverflowX || isOverflowY);
 }
@@ -307,9 +309,10 @@ export function buildBarValueProps({
   const displayValueWidth = displayValue.width + padding;
 
   const displayValueY = barHeight >= displayValueHeight ? y : y - displayValueHeight;
-  const displayValueX = displayValueWidth > barWidth ?
-    x - Math.abs(barWidth - displayValueWidth) / 2
-    : x + Math.abs(barWidth - displayValueWidth) / 2;
+  const displayValueX =
+    displayValueWidth > barWidth
+      ? x - Math.abs(barWidth - displayValueWidth) / 2
+      : x + Math.abs(barWidth - displayValueWidth) / 2;
 
   const displayValueOffsetY = displayValueStyle.offsetY || 0;
   const displayValueOffsetX = displayValueStyle.offsetX || 0;

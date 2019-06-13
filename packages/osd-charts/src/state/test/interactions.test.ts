@@ -1,4 +1,4 @@
-import { BarGeometry, GeometryValue } from '../../lib/series/rendering';
+import { BarGeometry } from '../../lib/series/rendering';
 import { computeXScale, computeYScales } from '../../lib/series/scales';
 import { DataSeriesColorsValues } from '../../lib/series/series';
 import { BarSeriesSpec, BasicSeriesSpec, RectAnnotationSpec } from '../../lib/series/specs';
@@ -201,7 +201,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     store.geometriesIndex.set(1, [indexedGeom2Blue]);
     store.geometriesIndexKeys.push(0);
     store.geometriesIndexKeys.push(1);
-    onOverListener = jest.fn((elements: GeometryValue[]): undefined => undefined);
+    onOverListener = jest.fn((): undefined => undefined);
     onOutListener = jest.fn((): undefined => undefined);
     store.setOnElementOverListener(onOverListener);
     store.setOnElementOutListener(onOutListener);
@@ -221,9 +221,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
       annotationId: getAnnotationId('rect'),
       groupId: GROUP_ID,
       annotationType: 'rectangle',
-      dataValues: [
-        { coordinates: { x0: 1, x1: 1.5, y0: 0.5, y1: 10 } },
-      ],
+      dataValues: [{ coordinates: { x0: 1, x1: 1.5, y0: 0.5, y1: 10 } }],
     };
 
     store.annotationSpecs.set(rectAnnotationSpec.annotationId, rectAnnotationSpec);

@@ -13,12 +13,7 @@ describe('utils/domain', () => {
     const isSorted = true;
     const removeNull = true;
 
-    const ordinalDataDomain = computeOrdinalDataDomain(
-      data,
-      accessor,
-      isSorted,
-      removeNull,
-    );
+    const ordinalDataDomain = computeOrdinalDataDomain(data, accessor, isSorted, removeNull);
 
     const expectedOrdinalDomain = ['a', 'b', 'd'];
 
@@ -31,12 +26,7 @@ describe('utils/domain', () => {
     const isSorted = false;
     const removeNull = true;
 
-    const ordinalDataDomain = computeOrdinalDataDomain(
-      data,
-      accessor,
-      isSorted,
-      removeNull,
-    );
+    const ordinalDataDomain = computeOrdinalDataDomain(data, accessor, isSorted, removeNull);
 
     const expectedOrdinalDomain = ['d', 'a', 'b'];
 
@@ -49,12 +39,7 @@ describe('utils/domain', () => {
     const isSorted = true;
     const removeNull = false;
 
-    const ordinalDataDomain = computeOrdinalDataDomain(
-      data,
-      accessor,
-      isSorted,
-      removeNull,
-    );
+    const ordinalDataDomain = computeOrdinalDataDomain(data, accessor, isSorted, removeNull);
 
     const expectedOrdinalDomain = ['a', 'b', 'd', null];
 
@@ -67,12 +52,7 @@ describe('utils/domain', () => {
     const isSorted = false;
     const removeNull = false;
 
-    const ordinalDataDomain = computeOrdinalDataDomain(
-      data,
-      accessor,
-      isSorted,
-      removeNull,
-    );
+    const ordinalDataDomain = computeOrdinalDataDomain(data, accessor, isSorted, removeNull);
 
     const expectedOrdinalDomain = ['d', 'a', null, 'b'];
 
@@ -84,11 +64,7 @@ describe('utils/domain', () => {
     const accessor: AccessorFn = (datum: any) => datum.x;
     const scaleToExtent = true;
 
-    const continuousDataDomain = computeContinuousDataDomain(
-      data,
-      accessor,
-      scaleToExtent,
-    );
+    const continuousDataDomain = computeContinuousDataDomain(data, accessor, scaleToExtent);
 
     const expectedContinuousDomain = [6, 12];
 
@@ -99,10 +75,7 @@ describe('utils/domain', () => {
     const data = [{ x: 12 }, { x: 6 }, { x: 8 }];
     const accessor: AccessorFn = (datum: any) => datum.x;
 
-    const continuousDataDomain = computeContinuousDataDomain(
-      data,
-      accessor,
-    );
+    const continuousDataDomain = computeContinuousDataDomain(data, accessor);
 
     const expectedContinuousDomain = [0, 12];
 
@@ -113,10 +86,7 @@ describe('utils/domain', () => {
     const data: any[] = [];
     const accessor: AccessorFn = (datum: any) => datum.x;
 
-    const continuousDataDomain = computeContinuousDataDomain(
-      data,
-      accessor,
-    );
+    const continuousDataDomain = computeContinuousDataDomain(data, accessor);
 
     const expectedContinuousDomain = [0, 0];
 
@@ -129,12 +99,7 @@ describe('utils/domain', () => {
     const xAccessor: AccessorFn = (datum: any) => datum.x;
     const scaleToExtent = true;
 
-    const stackedDataDomain = computeStackedContinuousDomain(
-      data,
-      xAccessor,
-      yAccessor,
-      scaleToExtent,
-    );
+    const stackedDataDomain = computeStackedContinuousDomain(data, xAccessor, yAccessor, scaleToExtent);
 
     const expectedStackedDomain = [6, 20];
 
@@ -146,11 +111,7 @@ describe('utils/domain', () => {
     const yAccessor: AccessorFn = (datum: any) => datum.y;
     const xAccessor: AccessorFn = (datum: any) => datum.x;
 
-    const stackedDataDomain = computeStackedContinuousDomain(
-      data,
-      xAccessor,
-      yAccessor,
-    );
+    const stackedDataDomain = computeStackedContinuousDomain(data, xAccessor, yAccessor);
 
     const expectedStackedDomain = [0, 20];
 
