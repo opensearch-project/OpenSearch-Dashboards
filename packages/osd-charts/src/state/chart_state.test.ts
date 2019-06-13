@@ -635,6 +635,39 @@ describe('Chart Store', () => {
     expect(store.isTooltipVisible.get()).toBe(true);
   });
 
+  describe('can use a custom tooltip header formatter', () => {
+    beforeEach(() => {
+      const axisSpec: AxisSpec = {
+        id: AXIS_ID,
+        groupId: spec.groupId,
+        hide: true,
+        showOverlappingTicks: false,
+        showOverlappingLabels: false,
+        position: Position.Bottom,
+        tickSize: 30,
+        tickPadding: 10,
+        tickFormat: (value: any) => `foo ${value}`,
+      };
+
+      store.addAxisSpec(axisSpec);
+      store.addSeriesSpec(spec);
+      store.tooltipType.set(TooltipType.Crosshairs);
+      store.computeChart();
+    });
+
+    test('with no tooltipHeaderFormatter defined, should return value formatted using xAxis tickFormatter', () => {
+      store.tooltipHeaderFormatter = undefined;
+      store.setCursorPosition(10, 10);
+      expect(store.tooltipData[0].value).toBe('foo 1');
+    });
+
+    test('with tooltipHeaderFormatter defined, should return value formatted', () => {
+      store.tooltipHeaderFormatter = (value: TooltipValue) => `${value}`;
+      store.setCursorPosition(10, 10);
+      expect(store.tooltipData[0].value).toBe(1);
+    });
+  });
+
   test('can disable brush based on scale and listener', () => {
     store.xScale = undefined;
     expect(store.isBrushEnabled()).toBe(false);

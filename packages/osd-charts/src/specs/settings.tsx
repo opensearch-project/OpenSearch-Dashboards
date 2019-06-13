@@ -4,7 +4,7 @@ import { DomainRange, Position, Rendering, Rotation } from '../lib/series/specs'
 import { LIGHT_THEME } from '../lib/themes/light_theme';
 import { Theme } from '../lib/themes/theme';
 import { Domain } from '../lib/utils/domain';
-import { TooltipType } from '../lib/utils/interactions';
+import { TooltipType, TooltipValueFormatter } from '../lib/utils/interactions';
 import {
   BrushEndListener,
   ChartStore,
@@ -16,6 +16,20 @@ import {
 export const DEFAULT_TOOLTIP_TYPE = TooltipType.VerticalCursor;
 export const DEFAULT_TOOLTIP_SNAP = true;
 
+interface TooltipProps {
+  type?: TooltipType;
+  snap?: boolean;
+  headerFormatter?: TooltipValueFormatter;
+}
+
+function isTooltipProps(config: TooltipType | TooltipProps): config is TooltipProps {
+  return typeof config === 'object';
+}
+
+function isTooltipType(config: TooltipType | TooltipProps): config is TooltipType {
+  return typeof config === 'string';
+}
+
 interface SettingSpecProps {
   chartStore?: ChartStore;
   theme?: Theme;
@@ -23,10 +37,8 @@ interface SettingSpecProps {
   rotation: Rotation;
   animateData: boolean;
   showLegend: boolean;
-  /** Specify the tooltip type */
-  tooltipType?: TooltipType;
-  /** Snap tooltip to grid */
-  tooltipSnap?: boolean;
+  /** Either a TooltipType or an object with configuration of type, snap, and/or headerFormatter */
+  tooltip?: TooltipType | TooltipProps;
   debug: boolean;
   legendPosition?: Position;
   showLegendDisplayValue: boolean;
@@ -50,8 +62,7 @@ function updateChartStore(props: SettingSpecProps) {
     rendering,
     animateData,
     showLegend,
-    tooltipType,
-    tooltipSnap,
+    tooltip,
     legendPosition,
     showLegendDisplayValue,
     onElementClick,
@@ -75,8 +86,14 @@ function updateChartStore(props: SettingSpecProps) {
   chartStore.animateData = animateData;
   chartStore.debug = debug;
 
-  chartStore.tooltipType.set(tooltipType!);
-  chartStore.tooltipSnap.set(tooltipSnap!);
+  if (tooltip && isTooltipProps(tooltip)) {
+    const { type, snap, headerFormatter } = tooltip;
+    chartStore.tooltipType.set(type!);
+    chartStore.tooltipSnap.set(snap!);
+    chartStore.tooltipHeaderFormatter = headerFormatter;
+  } else if (tooltip && isTooltipType(tooltip)) {
+    chartStore.tooltipType.set(tooltip);
+  }
 
   chartStore.setShowLegend(showLegend);
   chartStore.legendPosition = legendPosition;
@@ -119,8 +136,10 @@ export class SettingsComponent extends PureComponent<SettingSpecProps> {
     animateData: true,
     showLegend: false,
     debug: false,
-    tooltipType: DEFAULT_TOOLTIP_TYPE,
-    tooltipSnap: DEFAULT_TOOLTIP_SNAP,
+    tooltip: {
+      type: DEFAULT_TOOLTIP_TYPE,
+      snap: DEFAULT_TOOLTIP_SNAP,
+    },
     showLegendDisplayValue: true,
   };
   componentDidMount() {

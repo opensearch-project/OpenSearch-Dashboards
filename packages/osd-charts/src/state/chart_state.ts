@@ -62,6 +62,7 @@ import {
   isFollowTooltipType,
   TooltipType,
   TooltipValue,
+  TooltipValueFormatter,
 } from '../lib/utils/interactions';
 import { Scale, ScaleType } from '../lib/utils/scales/scales';
 import { DEFAULT_TOOLTIP_SNAP, DEFAULT_TOOLTIP_TYPE } from '../specs/settings';
@@ -175,6 +176,7 @@ export class ChartStore {
   tooltipType = observable.box(DEFAULT_TOOLTIP_TYPE);
   tooltipSnap = observable.box(DEFAULT_TOOLTIP_SNAP);
   tooltipPosition = observable.object<{ transform: string }>({ transform: '' });
+  tooltipHeaderFormatter?: TooltipValueFormatter;
 
   /** cursorPosition is used by tooltip, so this is a way to expose the position for other uses */
   rawCursorPosition = observable.object<{ x: number; y: number }>({ x: -1, y: -1 }, undefined, {
@@ -377,7 +379,9 @@ export class ChartStore {
 
         // format only one time the x value
         if (!xValueInfo) {
-          xValueInfo = formatTooltip(indexedGeometry, spec, true, false, xAxis);
+          // if we have a tooltipHeaderFormatter, then don't pass in the xAxis as the user will define a formatter
+          const formatterAxis = this.tooltipHeaderFormatter ? undefined : xAxis;
+          xValueInfo = formatTooltip(indexedGeometry, spec, true, false, formatterAxis);
           return [xValueInfo, ...acc, formattedTooltip];
         }
 

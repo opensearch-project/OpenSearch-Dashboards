@@ -27,6 +27,9 @@ export interface TooltipValue {
   isXValue: boolean;
   seriesKey: string;
 }
+
+export type TooltipValueFormatter = (data: TooltipValue) => JSX.Element | string;
+
 export interface HighlightedElement {
   position: {
     x: number;

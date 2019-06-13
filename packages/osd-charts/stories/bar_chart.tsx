@@ -915,9 +915,13 @@ storiesOf('Bar Chart', module)
   .add('with high data volume', () => {
     const dg = new DataGenerator();
     const data = dg.generateSimpleSeries(15000);
+    const tooltipProps = {
+      type: TooltipType.Follow,
+    };
+
     return (
       <Chart className={'story-chart'}>
-        <Settings tooltipType={TooltipType.Follow} />
+        <Settings tooltip={tooltipProps} />
         <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
         <Axis
           id={getAxisId('left2')}

@@ -52,6 +52,6 @@ export function formatTooltip(
   };
 }
 
-function emptyFormatter(value: any): string {
-  return `${value}`;
+function emptyFormatter<T>(value: T): T {
+  return value;
 }

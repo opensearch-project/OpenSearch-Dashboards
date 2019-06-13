@@ -20,6 +20,8 @@ import {
   Settings,
   timeFormatter,
   TooltipType,
+  TooltipValue,
+  TooltipValueFormatter,
 } from '../src/';
 
 import { array, boolean, number, select } from '@storybook/addon-knobs';
@@ -44,9 +46,31 @@ const onLegendItemListeners = {
 
 storiesOf('Interactions', module)
   .add('bar clicks and hovers', () => {
+    const headerFormatter: TooltipValueFormatter = (tooltipData: TooltipValue) => {
+      if (tooltipData.value % 2 === 0) {
+        return (
+          <div>
+            <p>special header for even x values</p>
+            <p>{tooltipData.value}</p>
+          </div>
+        );
+      }
+
+      return tooltipData.value;
+    };
+
+    const tooltipProps = {
+      headerFormatter,
+    };
+
     return (
       <Chart className={'story-chart'}>
-        <Settings showLegend={true} legendPosition={Position.Right} {...onElementListeners} />
+        <Settings
+          showLegend={true}
+          legendPosition={Position.Right}
+          {...onElementListeners}
+          tooltip={tooltipProps}
+        />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -565,22 +589,27 @@ storiesOf('Interactions', module)
     );
     const numberFormatter = (d: any) => Number(d).toFixed(2);
 
+    const tooltipType = select('tooltipType',
+      {
+        cross: TooltipType.Crosshairs,
+        vertical: TooltipType.VerticalCursor,
+        follow: TooltipType.Follow,
+        none: TooltipType.None,
+      },
+      TooltipType.Crosshairs,
+    );
+
+    const tooltipProps = {
+      type: tooltipType,
+      snap: boolean('tooltip snap to grid', true),
+    };
+
     return (
       <Chart className={className}>
         <Settings
           debug={boolean('debug', false)}
-          tooltipType={select(
-            'tooltipType',
-            {
-              cross: TooltipType.Crosshairs,
-              vertical: TooltipType.VerticalCursor,
-              follow: TooltipType.Follow,
-              none: TooltipType.None,
-            },
-            TooltipType.Crosshairs,
-          )}
+          tooltip={tooltipProps}
           theme={defaultTheme}
-          tooltipSnap={boolean('tooltip snap to grid', true)}
           rotation={chartRotation}
         />
         <Axis
