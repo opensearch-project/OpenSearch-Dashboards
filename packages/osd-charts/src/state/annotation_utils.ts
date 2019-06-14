@@ -179,6 +179,7 @@ export function computeXDomainLineAnnotationDimensions(
   chartDimensions: Dimensions,
   lineColor: string,
   xScaleOffset: number,
+  enableHistogramMode: boolean,
   marker?: JSX.Element,
   markerDimensions?: { width: number; height: number },
 ): AnnotationLineProps[] {
@@ -187,6 +188,7 @@ export function computeXDomainLineAnnotationDimensions(
   const markerOffsets = markerDimensions || { width: 0, height: 0 };
   const lineProps: AnnotationLineProps[] = [];
 
+  const alignWithTick = xScale.bandwidth > 0 && !enableHistogramMode;
   dataValues.forEach((datum: LineAnnotationDatum) => {
     const { dataValue } = datum;
     const details = {
@@ -195,21 +197,11 @@ export function computeXDomainLineAnnotationDimensions(
     };
 
     const offset = xScale.bandwidth / 2 - xScaleOffset;
-    const isContinuous = xScale.type !== ScaleType.Ordinal;
 
-    const scaledXValue = xScale.scale(dataValue);
+    const scaledXValue = scaleAndValidateDatum(dataValue, xScale, alignWithTick);
 
-    // d3.scale will return 0 for '', rendering the line incorrectly at 0
-    if (isNaN(scaledXValue) || (isContinuous && dataValue === '')) {
+    if (scaledXValue == null) {
       return;
-    }
-
-    if (isContinuous) {
-      const [domainStart, domainEnd] = xScale.domain;
-
-      if (domainStart > dataValue || domainEnd < dataValue) {
-        return;
-      }
     }
 
     const xDomainPosition = scaledXValue + offset;
@@ -280,6 +272,7 @@ export function computeLineAnnotationDimensions(
   xScale: Scale,
   axisPosition: Position,
   xScaleOffset: number,
+  enableHistogramMode: boolean,
 ): AnnotationLineProps[] | null {
   const { domainType, dataValues, marker, markerDimensions, hideLines } = annotationSpec;
 
@@ -304,6 +297,7 @@ export function computeLineAnnotationDimensions(
       chartDimensions,
       lineColor,
       xScaleOffset,
+      enableHistogramMode,
       marker,
       markerDimensions,
     );
@@ -545,6 +539,7 @@ export function computeAnnotationDimensions(
         xScale,
         annotationAxisPosition,
         xScaleOffset - clusterOffset,
+        enableHistogramMode,
       );
 
       if (dimensions) {

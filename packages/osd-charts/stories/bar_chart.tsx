@@ -1404,7 +1404,7 @@ storiesOf('Bar Chart', module)
         <LineAnnotation
           annotationId={getAnnotationId('line-annotation')}
           domainType={AnnotationDomainTypes.XDomain}
-          dataValues={[{ dataValue: 2 }, { dataValue: 2.5 }]}
+          dataValues={[{ dataValue: 2 }, { dataValue: 2.5 }, { dataValue: 3.5 }]}
           style={lineAnnotationStyle}
           marker={<div style={{ background: 'red', width: 10, height: 10 }} />}
         />

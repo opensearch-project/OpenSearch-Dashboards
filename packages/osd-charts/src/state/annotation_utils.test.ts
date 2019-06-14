@@ -203,6 +203,7 @@ describe('annotation utils', () => {
       xScale,
       Position.Left,
       0,
+      false,
     );
     const expectedDimensions = [
       {
@@ -239,6 +240,7 @@ describe('annotation utils', () => {
       xScale,
       Position.Right,
       0,
+      false,
     );
     const expectedDimensions = [
       {
@@ -275,6 +277,7 @@ describe('annotation utils', () => {
       xScale,
       Position.Left,
       0,
+      false,
     );
     const expectedDimensions = [
       {
@@ -309,6 +312,7 @@ describe('annotation utils', () => {
       xScale,
       Position.Left,
       0,
+      false,
     );
     expect(dimensions).toEqual(null);
   });
@@ -336,6 +340,7 @@ describe('annotation utils', () => {
       xScale,
       Position.Left,
       0,
+      false,
     );
     const expectedDimensions = [
       {
@@ -370,6 +375,7 @@ describe('annotation utils', () => {
       xScale,
       Position.Top,
       0,
+      false,
     );
     const expectedDimensions = [
       {
@@ -404,12 +410,48 @@ describe('annotation utils', () => {
       xScale,
       Position.Bottom,
       0,
+      false,
     );
     const expectedDimensions = [
       {
         position: [20, 0, 20, 20],
         details: { detailsText: 'foo', headerText: '2' },
         tooltipLinePosition: [20, 0, 20, 20],
+      },
+    ];
+    expect(dimensions).toEqual(expectedDimensions);
+  });
+
+  test('should compute line annotation dimensions for xDomain in histogramMode with extended upper bound', () => {
+    const chartRotation: Rotation = 0;
+    const yScales: Map<GroupId, Scale> = new Map();
+    const xScale: Scale = continuousScale;
+
+    const annotationId = getAnnotationId('foo-line');
+    const lineAnnotation: LineAnnotationSpec = {
+      annotationType: 'line',
+      annotationId,
+      domainType: AnnotationDomainTypes.XDomain,
+      dataValues: [{ dataValue: 10.5, details: 'foo' }],
+      groupId,
+      style: DEFAULT_ANNOTATION_LINE_STYLE,
+    };
+
+    const dimensions = computeLineAnnotationDimensions(
+      lineAnnotation,
+      chartDimensions,
+      chartRotation,
+      yScales,
+      xScale,
+      Position.Bottom,
+      0,
+      true,
+    );
+    const expectedDimensions = [
+      {
+        position: [105, 0, 105, 20],
+        details: { detailsText: 'foo', headerText: '10.5' },
+        tooltipLinePosition: [105, 0, 105, 20],
       },
     ];
     expect(dimensions).toEqual(expectedDimensions);
@@ -439,6 +481,7 @@ describe('annotation utils', () => {
       xScale,
       Position.Left,
       0,
+      false,
     );
     const expectedDimensions = [
       {
@@ -474,6 +517,7 @@ describe('annotation utils', () => {
       xScale,
       Position.Left,
       0,
+      false,
     );
     const expectedDimensions = [
       {
@@ -509,6 +553,7 @@ describe('annotation utils', () => {
       xScale,
       Position.Left,
       0,
+      false,
     );
     const expectedDimensions = [
       {
@@ -544,6 +589,7 @@ describe('annotation utils', () => {
       xScale,
       Position.Top,
       0,
+      false,
     );
     const expectedDimensions = [
       {
@@ -578,6 +624,7 @@ describe('annotation utils', () => {
       xScale,
       Position.Bottom,
       0,
+      false,
     );
     const expectedDimensions = [
       {
@@ -614,6 +661,7 @@ describe('annotation utils', () => {
       xScale,
       Position.Right,
       0,
+      false,
     );
 
     expect(emptyXDimensions).toEqual([]);
@@ -635,6 +683,7 @@ describe('annotation utils', () => {
       continuousScale,
       Position.Right,
       0,
+      false,
     );
 
     expect(invalidStringXDimensions).toEqual([]);
@@ -656,6 +705,7 @@ describe('annotation utils', () => {
       continuousScale,
       Position.Right,
       0,
+      false,
     );
 
     expect(emptyOutOfBoundsXDimensions).toEqual([]);
@@ -677,6 +727,7 @@ describe('annotation utils', () => {
       xScale,
       Position.Right,
       0,
+      false,
     );
 
     expect(emptyYDimensions).toEqual([]);
@@ -698,6 +749,7 @@ describe('annotation utils', () => {
       xScale,
       Position.Right,
       0,
+      false,
     );
 
     expect(emptyOutOfBoundsYDimensions).toEqual([]);
@@ -719,6 +771,7 @@ describe('annotation utils', () => {
       continuousScale,
       Position.Right,
       0,
+      false,
     );
 
     expect(invalidStringYDimensions).toEqual([]);
@@ -741,6 +794,7 @@ describe('annotation utils', () => {
       continuousScale,
       Position.Right,
       0,
+      false,
     );
 
     expect(hiddenAnnotationDimensions).toEqual(null);
