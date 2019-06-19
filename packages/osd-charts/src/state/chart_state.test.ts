@@ -836,4 +836,34 @@ describe('Chart Store', () => {
     expectedTooltipValues.set('seriesKey', 123);
     expect(store.legendItemTooltipValues.get()).toEqual(expectedTooltipValues);
   });
+  describe('can determine if crosshair cursor is visible', () => {
+    const brushEndListener = (): void => {
+      return;
+    };
+
+    beforeEach(() => {
+      store.xScale = new ScaleContinuous(ScaleType.Linear, [0, 100], [0, 100]);
+    });
+
+    test('when cursor is outside of chart bounds', () => {
+      store.cursorPosition.x = -1;
+      store.cursorPosition.y = -1;
+      store.onBrushEndListener = brushEndListener;
+      expect(store.isCrosshairCursorVisible.get()).toBe(false);
+    });
+
+    test('when cursor is within chart bounds and brush enabled', () => {
+      store.cursorPosition.x = 10;
+      store.cursorPosition.y = 10;
+      store.onBrushEndListener = brushEndListener;
+      expect(store.isCrosshairCursorVisible.get()).toBe(true);
+    });
+
+    test('when cursor is within chart bounds and brush disabled', () => {
+      store.cursorPosition.x = 10;
+      store.cursorPosition.y = 10;
+      store.onBrushEndListener = undefined;
+      expect(store.isCrosshairCursorVisible.get()).toBe(false);
+    });
+  });
 });

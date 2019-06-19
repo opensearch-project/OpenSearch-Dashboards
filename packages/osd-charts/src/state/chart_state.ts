@@ -222,6 +222,20 @@ export class ChartStore {
   });
 
   /**
+   * determine if crosshair cursor should be visible based on cursor position and brush enablement
+   */
+  isCrosshairCursorVisible = computed(() => {
+    const xPos = this.cursorPosition.x;
+    const yPos = this.cursorPosition.y;
+
+    if (yPos < 0 || xPos < 0) {
+      return false;
+    }
+
+    return this.isBrushEnabled();
+  });
+
+  /**
    * x and y values are relative to the container.
    */
   setCursorPosition = action((x: number, y: number) => {

@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import { inject, observer } from 'mobx-react';
 import React from 'react';
 import { Layer, Rect, Stage } from 'react-konva';
@@ -376,6 +377,10 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
       clipHeight: chartDimensions.height,
     };
 
+    const className = classNames({
+      'echChart--isBrushEnabled': this.props.chartStore!.isCrosshairCursorVisible.get(),
+    });
+
     return (
       <div
         style={{
@@ -395,6 +400,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
         onClick={() => {
           this.props.chartStore!.handleChartClick();
         }}
+        className={className}
       >
         <Stage
           width={parentDimensions.width}
