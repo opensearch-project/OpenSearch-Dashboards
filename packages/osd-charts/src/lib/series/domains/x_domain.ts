@@ -29,6 +29,7 @@ export function mergeXDomain(
   const values = [...xValues.values()];
   let seriesXComputedDomains;
   let minInterval = 0;
+
   if (mainXScaleType.scaleType === ScaleType.Ordinal) {
     seriesXComputedDomains = computeOrdinalDataDomain(values, identity, false, true);
     if (xDomain) {
@@ -40,8 +41,16 @@ export function mergeXDomain(
     }
   } else {
     seriesXComputedDomains = computeContinuousDataDomain(values, identity, true);
+    let customMinInterval: undefined | number;
+
     if (xDomain) {
-      if (!Array.isArray(xDomain)) {
+      if (Array.isArray(xDomain)) {
+        throw new Error('xDomain for continuous scale should be a DomainRange object, not an array');
+      }
+
+      customMinInterval = xDomain.minInterval;
+
+      if (xDomain) {
         const [computedDomainMin, computedDomainMax] = seriesXComputedDomains;
 
         if (isCompleteBound(xDomain)) {
@@ -63,11 +72,21 @@ export function mergeXDomain(
 
           seriesXComputedDomains = [computedDomainMin, xDomain.max];
         }
-      } else {
-        throw new Error('xDomain for continuous scale should be a DomainRange object, not an array');
       }
     }
-    minInterval = findMinInterval(values);
+
+    const computedMinInterval = findMinInterval(values);
+    if (customMinInterval != null) {
+      // Allow greater custom min iff xValues has 1 member.
+      if (xValues.size > 1 && customMinInterval > computedMinInterval) {
+        throw new Error('custom xDomain is invalid, custom minInterval is greater than computed minInterval');
+      }
+      if (customMinInterval < 0) {
+        throw new Error('custom xDomain is invalid, custom minInterval is less than 0');
+      }
+    }
+
+    minInterval = customMinInterval || computedMinInterval;
   }
 
   return {

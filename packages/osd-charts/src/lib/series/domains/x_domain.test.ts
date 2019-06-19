@@ -642,4 +642,41 @@ describe('X Domain', () => {
     const errorMessage = 'xDomain for ordinal scale should be an array of values, not a DomainRange object';
     expect(attemptToMerge).toThrowError(errorMessage);
   });
+
+  describe('should account for custom minInterval', () => {
+    const xValues = new Set([1, 2, 3, 4, 5]);
+    const specs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>[] = [
+      { seriesType: 'bar', xScaleType: ScaleType.Linear },
+    ];
+
+    test('with valid minInterval', () => {
+      const xDomain = { minInterval: 0.5 };
+      const mergedDomain = mergeXDomain(specs, xValues, xDomain);
+      expect(mergedDomain.minInterval).toEqual(0.5);
+    });
+
+    test('with valid minInterval greater than computed minInterval for single datum set', () => {
+      const xDomain = { minInterval: 10 };
+      const mergedDomain = mergeXDomain(specs, new Set([5]), xDomain);
+      expect(mergedDomain.minInterval).toEqual(10);
+    });
+
+    test('with invalid minInterval greater than computed minInterval for multi data set', () => {
+      const invalidXDomain = { minInterval: 10 };
+      const attemptToMerge = () => {
+        mergeXDomain(specs, xValues, invalidXDomain);
+      };
+      const expectedError = 'custom xDomain is invalid, custom minInterval is greater than computed minInterval';
+      expect(attemptToMerge).toThrowError(expectedError);
+    });
+
+    test('with invalid minInterval less than 0', () => {
+      const invalidXDomain = { minInterval: -1 };
+      const attemptToMerge = () => {
+        mergeXDomain(specs, xValues, invalidXDomain);
+      };
+      const expectedError = 'custom xDomain is invalid, custom minInterval is less than 0';
+      expect(attemptToMerge).toThrowError(expectedError);
+    });
+  });
 });

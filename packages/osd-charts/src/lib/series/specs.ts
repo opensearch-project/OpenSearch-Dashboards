@@ -17,20 +17,34 @@ export type Datum = any;
 export type Rotation = 0 | 90 | -90 | 180;
 export type Rendering = 'canvas' | 'svg';
 
-export interface LowerBoundedDomain {
+interface DomainMinInterval {
+  /** Custom minInterval for the domain which will affect data bucket size.
+   * The minInterval cannot be greater than the computed minimum interval between any two adjacent data points.
+   * Further, if you specify a custom numeric minInterval for a timeseries, please note that due to the restriction
+   * above, the specified numeric minInterval will be interpreted as a fixed interval.
+   * This means that, for example, if you have yearly timeseries data that ranges from 2016 to 2019 and you manually
+   * compute the interval between 2016 and 2017, you'll have 366 days due to 2016 being a leap year.  This will not
+   * be a valid interval because it is greater than the computed minInterval of 365 days betwen the other years.
+   */
+  minInterval?: number;
+}
+
+interface LowerBound {
+  /** Lower bound of domain range */
   min: number;
 }
 
-export interface UpperBoundedDomain {
+interface UpperBound {
+  /** Upper bound of domain range */
   max: number;
 }
 
-export interface CompleteBoundedDomain {
-  min: number;
-  max: number;
-}
+export type LowerBoundedDomain = DomainMinInterval & LowerBound;
+export type UpperBoundedDomain = DomainMinInterval & UpperBound;
+export type CompleteBoundedDomain = DomainMinInterval & LowerBound & UpperBound;
+export type UnboundedDomainWithInterval = DomainMinInterval;
 
-export type DomainRange = LowerBoundedDomain | UpperBoundedDomain | CompleteBoundedDomain;
+export type DomainRange = LowerBoundedDomain | UpperBoundedDomain | CompleteBoundedDomain | UnboundedDomainWithInterval;
 
 export interface DisplayValueSpec {
   /** Show value label in chart element */
