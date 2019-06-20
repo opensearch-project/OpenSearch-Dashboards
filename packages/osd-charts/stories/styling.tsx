@@ -22,6 +22,7 @@ import {
   Position,
   ScaleType,
   Settings,
+  BaseThemeTypes,
 } from '../src/';
 import * as TestDatasets from '../src/lib/series/utils/test_dataset';
 import { palettes } from '../src/lib/themes/colors';
@@ -361,6 +362,51 @@ storiesOf('Stylings', module)
           yAccessors={['y']}
           curve={CurveType.CURVE_MONOTONE_X}
           data={data3}
+        />
+      </Chart>
+    );
+  })
+  .add('partial custom theme', () => {
+    const customPartialTheme: PartialTheme = {
+      barSeriesStyle: {
+        border: {
+          stroke: color('BarBorderStroke', 'white'),
+          visible: true,
+        },
+      },
+    };
+
+    return (
+      <Chart className="story-chart">
+        <Settings
+          showLegend
+          theme={customPartialTheme}
+          baseThemeType={BaseThemeTypes.Light}
+          legendPosition={Position.Right}
+        />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
+        <Axis
+          id={getAxisId('left2')}
+          title="Left axis"
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <Axis id={getAxisId('top')} position={Position.Top} title="Top axis" showOverlappingTicks={true} />
+        <Axis
+          id={getAxisId('right')}
+          title="Right axis"
+          position={Position.Right}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          splitSeriesAccessors={['g']}
+          stackAccessors={['x']}
+          data={data1}
         />
       </Chart>
     );

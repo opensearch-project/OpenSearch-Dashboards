@@ -12,7 +12,7 @@ module.exports = {
         loader: 'ts-loader',
         exclude: /node_modules/,
         options: {
-          configFile: './tsconfig.json',
+          configFile: 'tsconfig.json',
         },
       },
       {

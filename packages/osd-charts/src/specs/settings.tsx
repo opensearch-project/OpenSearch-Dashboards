@@ -1,8 +1,10 @@
 import { inject } from 'mobx-react';
 import { PureComponent } from 'react';
+
 import { DomainRange, Position, Rendering, Rotation } from '../lib/series/specs';
+import { DARK_THEME } from '../lib/themes/dark_theme';
 import { LIGHT_THEME } from '../lib/themes/light_theme';
-import { Theme } from '../lib/themes/theme';
+import { BaseThemeType, mergeWithDefaultTheme, PartialTheme, Theme, BaseThemeTypes } from '../lib/themes/theme';
 import { Domain } from '../lib/utils/domain';
 import { TooltipType, TooltipValueFormatter } from '../lib/utils/interactions';
 import {
@@ -30,9 +32,10 @@ function isTooltipType(config: TooltipType | TooltipProps): config is TooltipTyp
   return typeof config === 'string';
 }
 
-interface SettingSpecProps {
+export interface SettingSpecProps {
   chartStore?: ChartStore;
-  theme?: Theme;
+  theme?: Theme | PartialTheme;
+  baseThemeType?: BaseThemeType;
   rendering: Rendering;
   rotation: Rotation;
   animateData: boolean;
@@ -54,10 +57,20 @@ interface SettingSpecProps {
   xDomain?: Domain | DomainRange;
 }
 
+function getTheme(theme?: Theme | PartialTheme, baseThemeType: BaseThemeType = BaseThemeTypes.Light): Theme {
+  if (theme) {
+    const baseTheme = baseThemeType === BaseThemeTypes.Light ? LIGHT_THEME : DARK_THEME;
+    return mergeWithDefaultTheme(theme, baseTheme);
+  }
+
+  return LIGHT_THEME;
+}
+
 function updateChartStore(props: SettingSpecProps) {
   const {
     chartStore,
     theme,
+    baseThemeType,
     rotation,
     rendering,
     animateData,
@@ -80,7 +93,8 @@ function updateChartStore(props: SettingSpecProps) {
   if (!chartStore) {
     return;
   }
-  chartStore.chartTheme = theme || LIGHT_THEME;
+
+  chartStore.chartTheme = getTheme(theme, baseThemeType);
   chartStore.chartRotation = rotation;
   chartStore.chartRendering = rendering;
   chartStore.animateData = animateData;
@@ -136,6 +150,7 @@ export class SettingsComponent extends PureComponent<SettingSpecProps> {
     animateData: true,
     showLegend: false,
     debug: false,
+    baseThemeType: BaseThemeTypes.Light,
     tooltip: {
       type: DEFAULT_TOOLTIP_TYPE,
       snap: DEFAULT_TOOLTIP_SNAP,

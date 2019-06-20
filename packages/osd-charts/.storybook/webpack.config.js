@@ -8,15 +8,17 @@ module.exports = (baseConfig, env, config) => {
     config.devtool = 'source-map';
   }
   config.module.rules.push({
-    test: /\.(ts|tsx)$/,
-    use: [
-      {
-        loader: require.resolve('ts-loader'),
-      },
-      {
-        loader: require.resolve('react-docgen-typescript-loader'),
-      },
-    ],
+    test: /\.tsx?$/,
+    loader: require.resolve('ts-loader'),
+    exclude: /node_modules/,
+    options: {
+      configFile: 'tsconfig.json',
+    },
+  });
+  config.module.rules.push({
+    test: /\.tsx?$/,
+    loader: require.resolve('react-docgen-typescript-loader'),
+    exclude: /node_modules/,
   });
   config.module.rules.push({
     test: /\.tsx?$/,

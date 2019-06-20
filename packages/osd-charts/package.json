@@ -14,7 +14,7 @@
   "scripts": {
     "cz": "git-cz",
     "build:clean": "rm -rf ./dist",
-    "build:ts": "tsc -p ./tsconfig.json",
+    "build:ts": "tsc -p ./tsconfig.lib.json",
     "build:sass": "node-sass src/theme_light.scss dist/theme_light.css --output-style compressed && node-sass src/theme_dark.scss dist/theme_dark.css --output-style compressed && node-sass src/theme_only_light.scss dist/theme_only_light.css --output-style compressed && node-sass src/theme_only_dark.scss dist/theme_only_dark.css --output-style compressed",
     "concat:sass": "node scripts/concat_sass.js",
     "build": "yarn build:clean && yarn build:ts && yarn build:sass && yarn concat:sass",
@@ -27,7 +27,7 @@
     "watch": "yarn test --watch",
     "semantic-release": "semantic-release",
     "typecheck:src": "yarn build:ts --noEmit",
-    "typecheck:all": "tsc -p ./tsconfig.all.json --noEmit",
+    "typecheck:all": "tsc -p ./tsconfig.json --noEmit",
     "playground": "cd .playground && webpack-dev-server"
   },
   "files": [

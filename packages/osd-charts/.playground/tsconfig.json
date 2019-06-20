@@ -3,5 +3,8 @@
   "compilerOptions": {
     "downlevelIteration": true,
     "target": "es5"
-  }
+  },
+  "exclude": [
+    "../**/*.test.*"
+  ]
 }

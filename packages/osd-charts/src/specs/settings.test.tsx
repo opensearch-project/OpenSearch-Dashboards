@@ -5,7 +5,8 @@ import { DARK_THEME } from '../lib/themes/dark_theme';
 import { LIGHT_THEME } from '../lib/themes/light_theme';
 import { TooltipType } from '../lib/utils/interactions';
 import { ChartStore } from '../state/chart_state';
-import { DEFAULT_TOOLTIP_SNAP, DEFAULT_TOOLTIP_TYPE, SettingsComponent } from './settings';
+import { DEFAULT_TOOLTIP_SNAP, DEFAULT_TOOLTIP_TYPE, SettingsComponent, SettingSpecProps } from './settings';
+import { PartialTheme, BaseThemeTypes } from '../lib/themes/theme';
 
 describe('Settings spec component', () => {
   test('should update store on mount if spec has a chart store', () => {
@@ -67,7 +68,7 @@ describe('Settings spec component', () => {
     expect(chartStore.debug).toBe(false);
     expect(chartStore.xDomain).toBeUndefined();
 
-    const updatedProps = {
+    const updatedProps: SettingSpecProps = {
       theme: DARK_THEME,
       rotation: 90 as Rotation,
       rendering: 'svg' as Rendering,
@@ -147,5 +148,43 @@ describe('Settings spec component', () => {
     expect(chartStore.onLegendItemClickListener).toEqual(onLegendEvent);
     expect(chartStore.onLegendItemPlusClickListener).toEqual(onLegendEvent);
     expect(chartStore.onLegendItemMinusClickListener).toEqual(onLegendEvent);
+  });
+
+  test('should allow partial theme', () => {
+    const chartStore = new ChartStore();
+    const partialTheme: PartialTheme = {
+      colors: {
+        defaultVizColor: 'aquamarine',
+      },
+    };
+
+    expect(chartStore.chartTheme).toEqual(LIGHT_THEME);
+
+    const updatedProps: SettingSpecProps = {
+      theme: partialTheme,
+      baseThemeType: BaseThemeTypes.Dark,
+      rotation: 90 as Rotation,
+      rendering: 'svg' as Rendering,
+      animateData: true,
+      showLegend: true,
+      tooltip: {
+        type: TooltipType.None,
+        snap: false,
+      },
+      legendPosition: Position.Bottom,
+      showLegendDisplayValue: false,
+      debug: true,
+      xDomain: { min: 0, max: 10 },
+    };
+
+    mount(<SettingsComponent chartStore={chartStore} {...updatedProps} />);
+
+    expect(chartStore.chartTheme).toEqual({
+      ...DARK_THEME,
+      colors: {
+        ...DARK_THEME.colors,
+        ...partialTheme.colors,
+      },
+    });
   });
 });
