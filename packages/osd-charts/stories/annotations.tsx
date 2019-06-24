@@ -1,6 +1,6 @@
 import { array, boolean, color, number, select } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
-import React, { CSSProperties } from 'react';
+import React from 'react';
 import {
   AnnotationDomainTypes,
   Axis,
@@ -508,16 +508,9 @@ storiesOf('Annotations', module)
     };
 
     const hasCustomTooltip = boolean('has custom tooltip render', false);
-    const tooltipStyle: CSSProperties = {
-      position: 'absolute',
-      backgroundColor: '#e76f6f',
-      color: '#e6e6e6',
-      overflow: 'hidden',
-      overflowWrap: 'break-word',
-      width: '120px',
-    };
-    const customTooltip = (position: { transform: string; top: number; left: number }, details?: string) => (
-      <div style={{ ...tooltipStyle, ...position }}>
+
+    const customTooltip = (details?: string) => (
+      <div>
         <Icon type="alert" />
         {details}
       </div>

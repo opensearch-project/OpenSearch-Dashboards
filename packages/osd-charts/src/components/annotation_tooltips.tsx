@@ -40,12 +40,7 @@ class AnnotationTooltipComponent extends React.Component<AnnotationTooltipProps>
         return <LineAnnotationTooltip {...props} />;
       }
       case 'rectangle': {
-        const props = { details, position };
-
-        if (tooltipState.renderTooltip) {
-          return tooltipState.renderTooltip(position, details);
-        }
-
+        const props = { details, position, customTooltip: tooltipState.renderTooltip };
         return <RectAnnotationTooltip {...props} />;
       }
       default:
@@ -119,12 +114,14 @@ export const AnnotationTooltip = inject('chartStore')(observer(AnnotationTooltip
 function RectAnnotationTooltip(props: {
   details?: string;
   position: { transform: string; top: number; left: number };
+  customTooltip?: (details?: string) => JSX.Element;
 }) {
-  const { details, position } = props;
+  const { details, position, customTooltip } = props;
+  const tooltipContent = customTooltip ? customTooltip(details) : details;
   return (
     <div className="echAnnotation__tooltip" style={{ ...position }}>
       <div className="echAnnotation__details">
-        <div className="echAnnotation__detailsText">{details}</div>
+        <div className="echAnnotation__detailsText">{tooltipContent}</div>
       </div>
     </div>
   );

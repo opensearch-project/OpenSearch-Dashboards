@@ -292,7 +292,7 @@ export interface RectAnnotationDatum {
 export type RectAnnotationSpec = BaseAnnotationSpec & {
   annotationType: 'rectangle';
   /** Custom rendering function for tooltip */
-  renderTooltip?: (position: { transform: string; top: number; left: number }, details?: string) => JSX.Element;
+  renderTooltip?: (details?: string) => JSX.Element;
   /** Data values defined with coordinates and details */
   dataValues: RectAnnotationDatum[];
   /** Custom annotation style */
