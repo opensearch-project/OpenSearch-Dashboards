@@ -13,7 +13,6 @@ export function clamp(value: number, min: number, max: number): number {
 // Can remove once we upgrade to TypesScript >= 3.5
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
-
 /**
  * Replaces all properties on any type as optional, includes nested types
  *
@@ -38,8 +37,8 @@ export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type RecursivePartial<T> = {
   [P in keyof T]?: T[P] extends (infer U)[]
     ? RecursivePartial<U>[]
-    : T[P] extends readonly (infer U)[] // eslint-disable-line prettier/prettier
-    ? readonly RecursivePartial<U>[]
+    : T[P] extends ReadonlyArray<infer U> // eslint-disable-line @typescript-eslint/array-type
+    ? ReadonlyArray<RecursivePartial<U>> // eslint-disable-line @typescript-eslint/array-type
     : RecursivePartial<T[P]>
 };
 
