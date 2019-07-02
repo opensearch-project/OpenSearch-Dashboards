@@ -42,6 +42,10 @@ export type RecursivePartial<T> = {
     : RecursivePartial<T[P]>
 };
 
+export interface MergeOptions {
+  mergeOptionalPartialValues?: boolean;
+}
+
 /**
  * Merges values of a partial structure with a base structure.
  *
@@ -50,18 +54,26 @@ export type RecursivePartial<T> = {
  *
  * @returns new base structure with updated partial values
  */
-export function mergePartial<T>(base: T, partial?: RecursivePartial<T>): T {
+export function mergePartial<T>(base: T, partial?: RecursivePartial<T>, options: MergeOptions = {}): T {
   if (Array.isArray(base)) {
     return partial ? (partial as T) : base; // No nested array merging
   } else if (typeof base === 'object') {
-    return Object.keys(base).reduce(
-      (newBase, key) => {
-        // @ts-ignore
-        newBase[key] = mergePartial(base[key], partial && partial[key]);
-        return newBase;
-      },
-      { ...base },
-    );
+    const baseClone = { ...base };
+
+    if (partial && options.mergeOptionalPartialValues) {
+      Object.keys(partial).forEach((key) => {
+        if (!(key in baseClone)) {
+          // @ts-ignore
+          baseClone[key] = partial[key];
+        }
+      });
+    }
+
+    return Object.keys(base).reduce((newBase, key) => {
+      // @ts-ignore
+      newBase[key] = mergePartial(base[key], partial && partial[key], options);
+      return newBase;
+    }, baseClone);
   }
 
   return partial !== undefined ? (partial as T) : base;

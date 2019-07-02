@@ -224,5 +224,5 @@ export function mergeWithDefaultAnnotationRect(config?: Partial<RectAnnotationSt
 }
 
 export function mergeWithDefaultTheme(theme: PartialTheme, defaultTheme: Theme = LIGHT_THEME): Theme {
-  return mergePartial(defaultTheme, theme);
+  return mergePartial(defaultTheme, theme, { mergeOptionalPartialValues: true });
 }

@@ -134,5 +134,80 @@ describe('commons utilities', () => {
       mergePartial(base, partial);
       expect(base).toEqual(baseClone);
     });
+
+    describe('MergeOptions', () => {
+      describe('mergeOptionalPartialValues', () => {
+        interface OptionalTestType {
+          value1: string;
+          value2?: number;
+          value3: string;
+          value4?: OptionalTestType;
+        }
+        const defaultBase: OptionalTestType = {
+          value1: 'foo',
+          value3: 'bar',
+          value4: {
+            value1: 'foo',
+            value3: 'bar',
+          },
+        };
+        const partial1: RecursivePartial<OptionalTestType> = { value1: 'baz', value2: 10 };
+        const partial2: RecursivePartial<OptionalTestType> = { value1: 'baz', value4: { value2: 10 } };
+
+        describe('mergeOptionalPartialValues is true', () => {
+          test('should merge optional parameters', () => {
+            const merged = mergePartial(defaultBase, partial1, { mergeOptionalPartialValues: true });
+            expect(merged).toEqual({
+              value1: 'baz',
+              value2: 10,
+              value3: 'bar',
+              value4: {
+                value1: 'foo',
+                value3: 'bar',
+              },
+            });
+          });
+
+          test('should merge nested optional parameters', () => {
+            const merged = mergePartial(defaultBase, partial2, { mergeOptionalPartialValues: true });
+            expect(merged).toEqual({
+              value1: 'baz',
+              value3: 'bar',
+              value4: {
+                value1: 'foo',
+                value2: 10,
+                value3: 'bar',
+              },
+            });
+          });
+        });
+
+        describe('mergeOptionalPartialValues is false', () => {
+          test('should NOT merge optional parameters', () => {
+            const merged = mergePartial(defaultBase, partial1, { mergeOptionalPartialValues: false });
+            expect(merged).toEqual({
+              value1: 'baz',
+              value3: 'bar',
+              value4: {
+                value1: 'foo',
+                value3: 'bar',
+              },
+            });
+          });
+
+          test('should NOT merge nested optional parameters', () => {
+            const merged = mergePartial(defaultBase, partial2, { mergeOptionalPartialValues: false });
+            expect(merged).toEqual({
+              value1: 'baz',
+              value3: 'bar',
+              value4: {
+                value1: 'foo',
+                value3: 'bar',
+              },
+            });
+          });
+        });
+      });
+    });
   });
 });
