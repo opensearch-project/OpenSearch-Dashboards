@@ -6,6 +6,6 @@ export interface BBox {
 }
 
 export interface BBoxCalculator {
-  compute(text: string, fontSize?: number, fontFamily?: string): Option<BBox>;
+  compute(text: string, padding: number, fontSize?: number, fontFamily?: string): Option<BBox>;
   destroy(): void;
 }

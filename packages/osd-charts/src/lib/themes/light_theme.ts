@@ -92,7 +92,7 @@ export const LIGHT_THEME: Theme = {
       fontFamily: 'sans-serif',
       fontStyle: 'normal',
       fill: 'gray',
-      padding: 0,
+      padding: 1,
     },
     tickLineStyle: {
       stroke: 'gray',

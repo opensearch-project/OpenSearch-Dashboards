@@ -54,15 +54,26 @@ function renderAxisWithOptions(position: Position, seriesGroup: string, show: bo
 
 storiesOf('Axis', module)
   .add('basic', () => {
+    const customStyle = {
+      tickLabelPadding: number('Tick Label Padding', 0),
+    };
+
     return (
       <Chart className={'story-chart'}>
         <Settings debug={boolean('debug', false)} />
-        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+          style={customStyle}
+        />
         <Axis
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
           tickFormat={(d) => Number(d).toFixed(2)}
+          style={customStyle}
         />
 
         <AreaSeries
@@ -77,6 +88,10 @@ storiesOf('Axis', module)
     );
   })
   .add('tick label rotation', () => {
+    const customStyle = {
+      tickLabelPadding: number('Tick Label Padding', 0),
+    };
+
     return (
       <Chart className={'story-chart'}>
         <Axis
@@ -90,6 +105,7 @@ storiesOf('Axis', module)
             max: 90,
             step: 1,
           })}
+          style={customStyle}
         />
         <Axis
           id={getAxisId('left')}
@@ -102,6 +118,7 @@ storiesOf('Axis', module)
             step: 1,
           })}
           tickFormat={(d) => Number(d).toFixed(2)}
+          style={customStyle}
         />
         <Axis
           id={getAxisId('top')}
@@ -114,6 +131,7 @@ storiesOf('Axis', module)
             step: 1,
           })}
           tickFormat={(d) => Number(d).toFixed(2)}
+          style={customStyle}
         />
         <Axis
           id={getAxisId('right')}
@@ -126,6 +144,7 @@ storiesOf('Axis', module)
             step: 1,
           })}
           tickFormat={(d) => Number(d).toFixed(2)}
+          style={customStyle}
         />
         <AreaSeries
           id={getSpecId('lines')}
@@ -310,10 +329,20 @@ storiesOf('Axis', module)
   .add('w many tick labels', () => {
     const dg = new DataGenerator();
     const data = dg.generateSimpleSeries(31);
+    const customStyle = {
+      tickLabelPadding: number('Tick Label Padding', 0),
+    };
+
     return (
       <Chart className={'story-chart'}>
         <Settings debug={true} />
-        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          showOverlappingTicks={true}
+          style={customStyle}
+        />
         <AreaSeries
           id={getSpecId('lines')}
           xScaleType={ScaleType.Linear}
@@ -345,7 +374,6 @@ storiesOf('Axis', module)
       min: number('xDomain min', 0),
       max: number('xDomain max', 3),
     };
-
     return (
       <Chart className={'story-chart'}>
         <Settings showLegend={false} xDomain={xDomain} />

@@ -29,7 +29,16 @@ export class Axis extends React.PureComponent<AxisProps> {
     return this.renderAxis();
   }
   renderTickLabel = (tick: AxisTick, i: number) => {
-    const { padding, ...labelStyle } = this.props.chartTheme.axes.tickLabelStyle;
+    /**
+     * padding is already computed through width
+     * and bbox_calculator using tickLabelPadding
+     * set padding to 0 to avoid conflict
+     */
+    const labelStyle = {
+      ...this.props.chartTheme.axes.tickLabelStyle,
+      padding: 0,
+    };
+
     const {
       axisSpec: { tickSize, tickPadding, position },
       axisTicksDimensions,
@@ -48,6 +57,7 @@ export class Axis extends React.PureComponent<AxisProps> {
     );
 
     const { maxLabelTextWidth, maxLabelTextHeight } = axisTicksDimensions;
+
     const centeredRectProps = centerRotationOrigin(axisTicksDimensions, {
       x: tickLabelProps.x,
       y: tickLabelProps.y,

@@ -17,9 +17,14 @@ export class CanvasTextBBoxCalculator implements BBoxCalculator {
     this.attachedRoot.appendChild(this.offscreenCanvas);
     this.scaledFontSize = scaledFontSize;
   }
-  compute(text: string, fontSize = 16, fontFamily = 'Arial', padding: number = 1): Option<BBox> {
+  compute(text: string, padding: number, fontSize = 16, fontFamily = 'Arial'): Option<BBox> {
     if (!this.context) {
       return none;
+    }
+
+    // Padding should be at least one to avoid browser measureText inconsistencies
+    if (padding < 1) {
+      padding = 1;
     }
 
     // We scale the text up to get a more accurate computation of the width of the text
