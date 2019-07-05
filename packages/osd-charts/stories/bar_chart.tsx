@@ -1608,6 +1608,39 @@ storiesOf('Bar Chart', module)
       </Chart>
     );
   })
+  .add('[test] single histogram bar chart', () => {
+    const formatter = timeFormatter(niceTimeFormatByDay(1));
+
+    const xDomain = {
+      minInterval: 60000,
+    };
+
+    return (
+      <Chart className={'story-chart'}>
+        <Settings xDomain={xDomain} />
+        <Axis
+          id={getAxisId('bottom')}
+          title={'timestamp per 1 minute'}
+          position={Position.Bottom}
+          showOverlappingTicks={true}
+          tickFormat={formatter}
+        />
+        <Axis
+          id={getAxisId('left')}
+          title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+          position={Position.Left}
+        />
+        <HistogramBarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 1)}
+        />
+      </Chart>
+    );
+  })
   .add('stacked only grouped areas', () => {
     const data1 = [[1, 2], [2, 2], [3, 3], [4, 5], [5, 5], [6, 3], [7, 8], [8, 2], [9, 1]];
     const data2 = [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 4], [7, 3], [8, 2], [9, 4]];

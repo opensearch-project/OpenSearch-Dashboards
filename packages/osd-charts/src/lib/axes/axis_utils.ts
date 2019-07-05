@@ -383,10 +383,21 @@ export function getAvailableTicks(
   enableHistogramMode: boolean,
 ): AxisTick[] {
   const ticks = scale.ticks();
+  const isSingleValueScale = scale.domain[0] - scale.domain[1] === 0;
+  const hasAdditionalTicks = enableHistogramMode && scale.bandwidth > 0;
 
-  if (enableHistogramMode && scale.bandwidth > 0) {
-    const finalTick = ticks[ticks.length - 1] + scale.minInterval;
-    ticks.push(finalTick);
+  if (hasAdditionalTicks) {
+    const lastComputedTick = ticks[ticks.length - 1];
+
+    if (!isSingleValueScale) {
+      const penultimateComputedTick = ticks[ticks.length - 2];
+      const computedTickDistance = lastComputedTick - penultimateComputedTick;
+      const numTicks = scale.minInterval / computedTickDistance;
+
+      for (let i = 1; i <= numTicks; i++) {
+        ticks.push(i * computedTickDistance + lastComputedTick);
+      }
+    }
   }
 
   const shift = totalBarsInCluster > 0 ? totalBarsInCluster : 1;
@@ -394,6 +405,25 @@ export function getAvailableTicks(
   const band = scale.bandwidth / (1 - scale.barsPadding);
   const halfPadding = (band - scale.bandwidth) / 2;
   const offset = enableHistogramMode ? -halfPadding : (scale.bandwidth * shift) / 2;
+
+  if (isSingleValueScale && hasAdditionalTicks) {
+    const firstTickValue = ticks[0];
+    const firstTick = {
+      value: firstTickValue,
+      label: axisSpec.tickFormat(firstTickValue),
+      position: scale.scale(firstTickValue) + offset,
+    };
+
+    const lastTickValue = firstTickValue + scale.minInterval;
+    const lastTick = {
+      value: lastTickValue,
+      label: axisSpec.tickFormat(lastTickValue),
+      position: scale.bandwidth + halfPadding * 2,
+    };
+
+    return [firstTick, lastTick];
+  }
+
   return ticks.map((tick) => {
     return {
       value: tick,
@@ -433,6 +463,7 @@ export function getVisibleTicks(allTicks: AxisTick[], axisSpec: AxisSpec, axisDi
       }
     }
   }
+
   return visibleTicks;
 }
 
