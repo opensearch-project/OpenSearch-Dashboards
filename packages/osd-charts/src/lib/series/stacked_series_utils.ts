@@ -1,5 +1,11 @@
 import { DataSeries, DataSeriesDatum, RawDataSeries } from './series';
 
+interface StackedValues {
+  values: number[];
+  percent: number[];
+  total: number;
+}
+
 /**
  * Map each y value from a RawDataSeries on it's specific x value into,
  * ordering the stack based on the dataseries index.
@@ -26,28 +32,51 @@ export function getYValueStackMap(dataseries: RawDataSeries[]): Map<any, number[
 export function computeYStackedMapValues(
   yValueStackMap: Map<any, number[]>,
   scaleToExtent: boolean,
-): Map<any, number[]> {
-  const stackedValues = new Map<any, number[]>();
+): Map<any, StackedValues> {
+  const stackedValues = new Map<any, StackedValues>();
 
   yValueStackMap.forEach((yStackArray, xValue) => {
     const stackArray = yStackArray.reduce(
-      (stackedValue, currentValue, index) => {
-        if (stackedValue.length === 0) {
+      (acc, currentValue, index) => {
+        if (acc.values.length === 0) {
           if (scaleToExtent) {
-            return [currentValue, currentValue];
+            return {
+              values: [currentValue, currentValue],
+              total: currentValue,
+            };
           }
-          return [0, currentValue];
+          return {
+            values: [0, currentValue],
+            total: currentValue,
+          };
         }
-        return [...stackedValue, stackedValue[index] + currentValue];
+        return {
+          values: [...acc.values, acc.values[index] + currentValue],
+          total: acc.total + currentValue,
+        };
       },
-      [] as number[],
+      {
+        values: [] as number[],
+        total: 0,
+      },
     );
-    stackedValues.set(xValue, stackArray);
+    const percent = stackArray.values.map((value) => {
+      return value / stackArray.total;
+    });
+    stackedValues.set(xValue, {
+      values: stackArray.values,
+      percent,
+      total: stackArray.total,
+    });
   });
   return stackedValues;
 }
 
-export function formatStackedDataSeriesValues(dataseries: RawDataSeries[], scaleToExtent: boolean): DataSeries[] {
+export function formatStackedDataSeriesValues(
+  dataseries: RawDataSeries[],
+  scaleToExtent: boolean,
+  isPercentageMode: boolean = false,
+): DataSeries[] {
   const yValueStackMap = getYValueStackMap(dataseries);
 
   const stackedValues = computeYStackedMapValues(yValueStackMap, scaleToExtent);
@@ -55,17 +84,25 @@ export function formatStackedDataSeriesValues(dataseries: RawDataSeries[], scale
   const stackedDataSeries: DataSeries[] = dataseries.map((ds, seriesIndex) => {
     const newData: DataSeriesDatum[] = [];
     ds.data.forEach((data) => {
-      const { x, y1, datum } = data;
-      if (stackedValues.get(x) === undefined) {
+      const { x, datum } = data;
+      const stack = stackedValues.get(x);
+      if (!stack) {
         return;
       }
+      let y1: number | null = null;
+      if (isPercentageMode) {
+        y1 = data.y1 != null ? data.y1 / stack.total : null;
+      } else {
+        y1 = data.y1;
+      }
+      let y0 = isPercentageMode && data.y0 != null ? data.y0 / stack.total : data.y0;
       let computedY0: number | null;
       if (scaleToExtent) {
-        computedY0 = data.y0 ? data.y0 : y1;
+        computedY0 = y0 ? y0 : y1;
       } else {
-        computedY0 = data.y0 ? data.y0 : 0;
+        computedY0 = y0 ? y0 : 0;
       }
-      const initialY0 = data.y0 == null ? null : data.y0;
+      const initialY0 = y0 == null ? null : y0;
       if (seriesIndex === 0) {
         newData.push({
           x,
@@ -76,17 +113,20 @@ export function formatStackedDataSeriesValues(dataseries: RawDataSeries[], scale
           datum,
         });
       } else {
-        const stack = stackedValues.get(x);
-        if (!stack) {
-          return;
-        }
-        const stackY = stack[seriesIndex];
-        const stackedY1 = y1 !== null ? stackY + y1 : null;
-        let stackedY0: number | null = data.y0 == null ? stackY : stackY + data.y0;
-        // configure null y0 if y1 is null
-        // it's semantically right to say y0 is null if y1 is null
-        if (stackedY1 === null) {
-          stackedY0 = null;
+        const stackY = isPercentageMode ? stack.percent[seriesIndex] : stack.values[seriesIndex];
+        let stackedY1: number | null = null;
+        let stackedY0: number | null = null;
+        if (isPercentageMode) {
+          stackedY1 = y1 !== null ? stackY + y1 : null;
+          stackedY0 = y0 != null ? stackY + y0 : stackY;
+        } else {
+          stackedY1 = y1 !== null ? stackY + y1 : null;
+          stackedY0 = y0 != null ? stackY + y0 : stackY;
+          // configure null y0 if y1 is null
+          // it's semantically right to say y0 is null if y1 is null
+          if (stackedY1 === null) {
+            stackedY0 = null;
+          }
         }
         newData.push({
           x,
@@ -98,6 +138,7 @@ export function formatStackedDataSeriesValues(dataseries: RawDataSeries[], scale
         });
       }
     });
+
     return {
       specId: ds.specId,
       key: ds.key,

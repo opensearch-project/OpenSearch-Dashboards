@@ -691,4 +691,109 @@ describe('Y Domain', () => {
     const errorMessage = 'custom yDomain for a is invalid, computed min is greater than custom max';
     expect(attemptToMerge).toThrowError(errorMessage);
   });
+  test('Should merge Y domain with stacked as percentage', () => {
+    const dataSeries1: RawDataSeries[] = [
+      {
+        specId: getSpecId('a'),
+        key: [''],
+        seriesColorKey: '',
+        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+      },
+      {
+        specId: getSpecId('a'),
+        key: [''],
+        seriesColorKey: '',
+        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
+      },
+    ];
+    const dataSeries2: RawDataSeries[] = [
+      {
+        specId: getSpecId('a'),
+        key: [''],
+        seriesColorKey: '',
+        data: [{ x: 1, y1: 10 }, { x: 2, y1: 10 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+      },
+    ];
+    const specDataSeries = new Map();
+    specDataSeries.set(getSpecId('a'), dataSeries1);
+    specDataSeries.set(getSpecId('b'), dataSeries2);
+    const mergedDomain = mergeYDomain(
+      specDataSeries,
+      [
+        {
+          seriesType: 'area',
+          yScaleType: ScaleType.Linear,
+          groupId: getGroupId('a'),
+          id: getSpecId('a'),
+          stackAccessors: ['a'],
+          yScaleToDataExtent: true,
+          stackAsPercentage: true,
+        },
+        {
+          seriesType: 'area',
+          yScaleType: ScaleType.Log,
+          groupId: getGroupId('a'),
+          id: getSpecId('b'),
+          yScaleToDataExtent: true,
+        },
+      ],
+      new Map(),
+    );
+    expect(mergedDomain).toEqual([
+      {
+        groupId: 'a',
+        domain: [0, 1],
+        scaleType: ScaleType.Linear,
+        isBandScale: false,
+        type: 'yDomain',
+      },
+    ]);
+  });
+  test('Should merge Y domain with as percentage regadless of custom domains', () => {
+    const groupId = getGroupId('a');
+
+    const dataSeries: RawDataSeries[] = [
+      {
+        specId: getSpecId('a'),
+        key: [''],
+        seriesColorKey: '',
+        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+      },
+      {
+        specId: getSpecId('a'),
+        key: [''],
+        seriesColorKey: '',
+        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
+      },
+    ];
+    const specDataSeries = new Map();
+    specDataSeries.set(getSpecId('a'), dataSeries);
+    const domainsByGroupId = new Map<GroupId, DomainRange>();
+    domainsByGroupId.set(groupId, { min: 2, max: 20 });
+
+    const mergedDomain = mergeYDomain(
+      specDataSeries,
+      [
+        {
+          seriesType: 'area',
+          yScaleType: ScaleType.Linear,
+          groupId,
+          id: getSpecId('a'),
+          stackAccessors: ['a'],
+          yScaleToDataExtent: true,
+          stackAsPercentage: true,
+        },
+      ],
+      domainsByGroupId,
+    );
+    expect(mergedDomain).toEqual([
+      {
+        type: 'yDomain',
+        groupId,
+        domain: [0, 1],
+        scaleType: ScaleType.Linear,
+        isBandScale: false,
+      },
+    ]);
+  });
 });

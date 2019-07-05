@@ -56,7 +56,7 @@ export function computeLegend(
       isLegendItemVisible: !hideInLegend,
       displayValue: {
         raw: series.lastValue,
-        formatted: formatter(series.lastValue),
+        formatted: isSeriesVisible ? formatter(series.lastValue) : undefined,
       },
     });
   });

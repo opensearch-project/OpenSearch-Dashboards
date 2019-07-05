@@ -122,14 +122,34 @@ export function computeSeriesDomains(
 
   const formattedDataSeries = getFormattedDataseries(specsArray, splittedSeries);
   // tslint:disable-next-line:no-console
-  // console.log({ formattedDataSeries, xDomain, yDomain });
+  // console.log({ formattedDataSeries, xDomain, yDomain });\
+  const lastValues = new Map<string, number>();
 
+  formattedDataSeries.stacked.forEach((ds) => {
+    ds.dataSeries.forEach((series) => {
+      if (series.data.length > 0) {
+        const last = series.data[series.data.length - 1];
+        if (last !== null && last.initialY1 !== null) {
+          lastValues.set(series.seriesColorKey, last.initialY1);
+        }
+      }
+    });
+  });
+  const updatedSeriesColors = new Map<string, DataSeriesColorsValues>();
+  seriesColors.forEach((value, key) => {
+    const lastValue = lastValues.get(key);
+    const updatedColorSet = {
+      ...value,
+      lastValue,
+    };
+    updatedSeriesColors.set(key, updatedColorSet);
+  });
   return {
     xDomain,
     yDomain,
     splittedDataSeries,
     formattedDataSeries,
-    seriesColors,
+    seriesColors: updatedSeriesColors,
   };
 }
 

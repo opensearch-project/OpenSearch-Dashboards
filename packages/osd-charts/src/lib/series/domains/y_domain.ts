@@ -17,7 +17,7 @@ export type YDomain = BaseDomain & {
 export type YBasicSeriesSpec = Pick<
   BasicSeriesSpec,
   'id' | 'seriesType' | 'yScaleType' | 'groupId' | 'stackAccessors' | 'yScaleToDataExtent' | 'colorAccessors'
->;
+> & { stackAsPercentage?: boolean };
 
 export function mergeYDomain(
   dataSeries: Map<SpecId, RawDataSeries[]>,
@@ -32,50 +32,54 @@ export function mergeYDomain(
   const yDomains = specsByGroupIdsEntries.map(
     ([groupId, groupSpecs]): YDomain => {
       const groupYScaleType = coerceYScaleTypes([...groupSpecs.stacked, ...groupSpecs.nonStacked]);
+      const { isPercentageStack } = groupSpecs;
 
-      // compute stacked domain
-      const isStackedScaleToExtent = groupSpecs.stacked.some((spec) => {
-        return spec.yScaleToDataExtent;
-      });
-      const stackedDataSeries = getDataSeriesOnGroup(dataSeries, groupSpecs.stacked);
-      const stackedDomain = computeYStackedDomain(stackedDataSeries, isStackedScaleToExtent);
+      let domain: number[];
+      if (isPercentageStack) {
+        domain = computeContinuousDataDomain([0, 1], identity);
+      } else {
+        // compute stacked domain
+        const isStackedScaleToExtent = groupSpecs.stacked.some((spec) => {
+          return spec.yScaleToDataExtent;
+        });
+        const stackedDataSeries = getDataSeriesOnGroup(dataSeries, groupSpecs.stacked);
+        const stackedDomain = computeYStackedDomain(stackedDataSeries, isStackedScaleToExtent);
 
-      // compute non stacked domain
-      const isNonStackedScaleToExtent = groupSpecs.nonStacked.some((spec) => {
-        return spec.yScaleToDataExtent;
-      });
-      const nonStackedDataSeries = getDataSeriesOnGroup(dataSeries, groupSpecs.nonStacked);
-      const nonStackedDomain = computeYNonStackedDomain(nonStackedDataSeries, isNonStackedScaleToExtent);
+        // compute non stacked domain
+        const isNonStackedScaleToExtent = groupSpecs.nonStacked.some((spec) => {
+          return spec.yScaleToDataExtent;
+        });
+        const nonStackedDataSeries = getDataSeriesOnGroup(dataSeries, groupSpecs.nonStacked);
+        const nonStackedDomain = computeYNonStackedDomain(nonStackedDataSeries, isNonStackedScaleToExtent);
 
-      // merge stacked and non stacked domain together
-      const groupDomain = computeContinuousDataDomain(
-        [...stackedDomain, ...nonStackedDomain],
-        identity,
-        isStackedScaleToExtent || isNonStackedScaleToExtent,
-      );
+        // merge stacked and non stacked domain together
+        domain = computeContinuousDataDomain(
+          [...stackedDomain, ...nonStackedDomain],
+          identity,
+          isStackedScaleToExtent || isNonStackedScaleToExtent,
+        );
 
-      const [computedDomainMin, computedDomainMax] = groupDomain;
-      let domain = groupDomain;
+        const [computedDomainMin, computedDomainMax] = domain;
 
-      const customDomain = domainsByGroupId.get(groupId);
+        const customDomain = domainsByGroupId.get(groupId);
 
-      if (customDomain && isCompleteBound(customDomain)) {
-        // Don't need to check min > max because this has been validated on axis domain merge
-        domain = [customDomain.min, customDomain.max];
-      } else if (customDomain && isLowerBound(customDomain)) {
-        if (customDomain.min > computedDomainMax) {
-          throw new Error(`custom yDomain for ${groupId} is invalid, custom min is greater than computed max`);
+        if (customDomain && isCompleteBound(customDomain)) {
+          // Don't need to check min > max because this has been validated on axis domain merge
+          domain = [customDomain.min, customDomain.max];
+        } else if (customDomain && isLowerBound(customDomain)) {
+          if (customDomain.min > computedDomainMax) {
+            throw new Error(`custom yDomain for ${groupId} is invalid, custom min is greater than computed max`);
+          }
+
+          domain = [customDomain.min, computedDomainMax];
+        } else if (customDomain && isUpperBound(customDomain)) {
+          if (computedDomainMin > customDomain.max) {
+            throw new Error(`custom yDomain for ${groupId} is invalid, computed min is greater than custom max`);
+          }
+
+          domain = [computedDomainMin, customDomain.max];
         }
-
-        domain = [customDomain.min, computedDomainMax];
-      } else if (customDomain && isUpperBound(customDomain)) {
-        if (computedDomainMin > customDomain.max) {
-          throw new Error(`custom yDomain for ${groupId} is invalid, computed min is greater than custom max`);
-        }
-
-        domain = [computedDomainMin, customDomain.max];
       }
-
       return {
         type: 'yDomain',
         isBandScale: false,
@@ -139,10 +143,14 @@ function computeYNonStackedDomain(dataseries: RawDataSeries[], scaleToExtent: bo
   return computeContinuousDataDomain([...yValues.values()], identity, scaleToExtent);
 }
 export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
-  const specsByGroupIds = new Map<GroupId, { stacked: YBasicSeriesSpec[]; nonStacked: YBasicSeriesSpec[] }>();
+  const specsByGroupIds = new Map<
+    GroupId,
+    { isPercentageStack: boolean; stacked: YBasicSeriesSpec[]; nonStacked: YBasicSeriesSpec[] }
+  >();
   // split each specs by groupId and by stacked or not
   specs.forEach((spec) => {
     const group = specsByGroupIds.get(spec.groupId) || {
+      isPercentageStack: false,
       stacked: [],
       nonStacked: [],
     };
@@ -150,6 +158,9 @@ export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
       group.stacked.push(spec);
     } else {
       group.nonStacked.push(spec);
+    }
+    if (spec.stackAsPercentage === true) {
+      group.isPercentageStack = true;
     }
     specsByGroupIds.set(spec.groupId, group);
   });

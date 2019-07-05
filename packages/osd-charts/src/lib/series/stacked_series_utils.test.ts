@@ -182,6 +182,7 @@ describe('Stacked Series Utils', () => {
       expect(x0StackArray).toBeDefined();
       expect(x0StackArray.length).toBe(3);
       expect(x0StackArray).toEqual([10, 20, 30]);
+      // expect(x0StackArray).toEqual([10, 20, 30]);
     });
     test('with values with nulls', () => {
       const stackedMap = getYValueStackMap(WITH_NULL_DATASET);
@@ -206,7 +207,9 @@ describe('Stacked Series Utils', () => {
       expect(computedStackedMap.size).toBe(1);
       const x0Array = computedStackedMap.get(0)!;
       expect(x0Array).toBeDefined();
-      expect(x0Array).toEqual([0, 10, 30, 60]);
+      expect(x0Array.values).toEqual([0, 10, 30, 60]);
+      expect(x0Array.percent).toEqual([0, 0.16666666666666666, 0.5, 1]);
+      expect(x0Array.total).toBe(60);
     });
     test('with null values', () => {
       const stackedMap = getYValueStackMap(WITH_NULL_DATASET);
@@ -214,7 +217,9 @@ describe('Stacked Series Utils', () => {
       expect(computedStackedMap.size).toBe(1);
       const x0Array = computedStackedMap.get(0)!;
       expect(x0Array).toBeDefined();
-      expect(x0Array).toEqual([0, 10, 10, 40]);
+      expect(x0Array.values).toEqual([0, 10, 10, 40]);
+      expect(x0Array.percent).toEqual([0, 0.25, 0.25, 1]);
+      expect(x0Array.total).toBe(40);
     });
   });
   describe('Format stacked dataset', () => {

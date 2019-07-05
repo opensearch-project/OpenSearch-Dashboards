@@ -18,6 +18,7 @@ export class BarSeriesSpecComponent extends PureComponent<BarSpecProps> {
     yScaleToDataExtent: false,
     hideInLegend: false,
     enableHistogramMode: false,
+    stackAsPercentage: false,
   };
   componentDidMount() {
     const { chartStore, children, ...config } = this.props;

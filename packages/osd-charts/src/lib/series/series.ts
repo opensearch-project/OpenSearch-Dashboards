@@ -219,12 +219,18 @@ export function getFormattedDataseries(
   }[] = [];
 
   specsByGroupIdsEntries.forEach(([groupId, groupSpecs]) => {
+    const { isPercentageStack } = groupSpecs;
     // format stacked data series
     const stackedDataSeries = getRawDataSeries(groupSpecs.stacked, dataSeries);
+    const stackedDataSeriesValues = formatStackedDataSeriesValues(
+      stackedDataSeries.rawDataSeries,
+      false,
+      isPercentageStack,
+    );
     stackedFormattedDataSeries.push({
       groupId,
       counts: stackedDataSeries.counts,
-      dataSeries: formatStackedDataSeriesValues(stackedDataSeries.rawDataSeries, false),
+      dataSeries: stackedDataSeriesValues,
     });
 
     // format non stacked data series
