@@ -97,6 +97,36 @@ export function getUpdatedCustomSeriesColors(seriesSpecs: Map<SpecId, BasicSerie
   return updatedCustomSeriesColors;
 }
 
+export function getLastValues(formattedDataSeries: {
+  stacked: FormattedDataSeries[];
+  nonStacked: FormattedDataSeries[];
+}): Map<string, number> {
+  const lastValues = new Map<string, number>();
+
+  // we need to get the latest
+  formattedDataSeries.stacked.forEach((ds) => {
+    ds.dataSeries.forEach((series) => {
+      if (series.data.length > 0) {
+        const last = series.data[series.data.length - 1];
+        if (last !== null && last.initialY1 !== null) {
+          lastValues.set(series.seriesColorKey, last.initialY1);
+        }
+      }
+    });
+  });
+  formattedDataSeries.nonStacked.forEach((ds) => {
+    ds.dataSeries.forEach((series) => {
+      if (series.data.length > 0) {
+        const last = series.data[series.data.length - 1];
+        if (last !== null && last.initialY1 !== null) {
+          lastValues.set(series.seriesColorKey, last.initialY1);
+        }
+      }
+    });
+  });
+  return lastValues;
+}
+
 /**
  *
  * @param seriesSpecs
@@ -112,8 +142,7 @@ export function computeSeriesDomains(
   deselectedDataSeries?: DataSeriesColorsValues[] | null,
 ): SeriesDomainsAndData {
   const { splittedSeries, xValues, seriesColors } = getSplittedSeries(seriesSpecs, deselectedDataSeries);
-  // tslint:disable-next-line:no-console
-  // console.log({ splittedSeries, xValues, seriesColors });
+
   const splittedDataSeries = [...splittedSeries.values()];
   const specsArray = [...seriesSpecs.values()];
 
@@ -121,20 +150,10 @@ export function computeSeriesDomains(
   const yDomain = mergeYDomain(splittedSeries, specsArray, domainsByGroupId);
 
   const formattedDataSeries = getFormattedDataseries(specsArray, splittedSeries);
-  // tslint:disable-next-line:no-console
-  // console.log({ formattedDataSeries, xDomain, yDomain });\
-  const lastValues = new Map<string, number>();
 
-  formattedDataSeries.stacked.forEach((ds) => {
-    ds.dataSeries.forEach((series) => {
-      if (series.data.length > 0) {
-        const last = series.data[series.data.length - 1];
-        if (last !== null && last.initialY1 !== null) {
-          lastValues.set(series.seriesColorKey, last.initialY1);
-        }
-      }
-    });
-  });
+  // we need to get the last values from the formatted dataseries
+  // because we change the format if we are on percentage mode
+  const lastValues = getLastValues(formattedDataSeries);
   const updatedSeriesColors = new Map<string, DataSeriesColorsValues>();
   seriesColors.forEach((value, key) => {
     const lastValue = lastValues.get(key);

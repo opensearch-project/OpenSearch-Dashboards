@@ -478,6 +478,7 @@ storiesOf('Bar Chart', module)
   .add('stacked as percentage', () => {
     const stackedAsPercentage = boolean('stacked as percentage', true);
     const clusterBars = boolean('cluster', true);
+
     return (
       <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
@@ -486,7 +487,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => (stackedAsPercentage && clusterBars ? `${Number(d * 100).toFixed(0)} %` : d)}
+          tickFormat={(d) => (stackedAsPercentage && !clusterBars ? `${Number(d * 100).toFixed(0)} %` : d)}
         />
 
         <BarSeries
@@ -496,7 +497,7 @@ storiesOf('Bar Chart', module)
           xAccessor="x"
           yAccessors={['y']}
           stackAccessors={clusterBars ? [] : ['x']}
-          stackAsPercentage={stackedAsPercentage}
+          stackAsPercentage={clusterBars ? false : stackedAsPercentage}
           splitSeriesAccessors={['g']}
           data={[
             { x: 0, y: 2, g: 'a' },
