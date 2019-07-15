@@ -885,4 +885,22 @@ describe('Chart Store', () => {
       expect(store.isCrosshairCursorVisible.get()).toBe(false);
     });
   });
+  test('should set tooltip type to follow when single value x scale', () => {
+    const singleValueSpec: BarSeriesSpec = {
+      id: SPEC_ID,
+      groupId: GROUP_ID,
+      seriesType: 'bar',
+      yScaleToDataExtent: false,
+      data: [{ x: 1, y: 1, g: 0 }],
+      xAccessor: 'x',
+      yAccessors: ['y'],
+      xScaleType: ScaleType.Linear,
+      yScaleType: ScaleType.Linear,
+      hideInLegend: false,
+    };
+
+    store.addSeriesSpec(singleValueSpec);
+    store.computeChart();
+    expect(store.tooltipType.get()).toBe(TooltipType.Follow);
+  });
 });

@@ -72,6 +72,9 @@ export function isCrosshairTooltipType(type: TooltipType) {
 export function isFollowTooltipType(type: TooltipType) {
   return type === TooltipType.Follow;
 }
+export function isNoneTooltipType(type: TooltipType) {
+  return type === TooltipType.None;
+}
 
 export function areIndexedGeometryArraysEquals(arr1: IndexedGeometry[], arr2: IndexedGeometry[]) {
   if (arr1.length !== arr2.length) {

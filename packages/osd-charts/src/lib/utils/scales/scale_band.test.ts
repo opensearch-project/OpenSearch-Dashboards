@@ -97,4 +97,14 @@ describe('Scale Band', () => {
     expect(scale.invert(99.99999)).toBe('d');
     expect(scale.invert(100)).toBe('d');
   });
+  describe('isSingleValue', () => {
+    it('should return true for single value scale', () => {
+      const scale = new ScaleBand(['a'], [0, 100]);
+      expect(scale.isSingleValue()).toBe(true);
+    });
+    it('should return false for multi value scale', () => {
+      const scale = new ScaleBand(['a', 'b'], [0, 100]);
+      expect(scale.isSingleValue()).toBe(false);
+    });
+  });
 });

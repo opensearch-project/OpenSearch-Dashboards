@@ -140,6 +140,21 @@ describe('Scale Continuous', () => {
     expect(scaleLinear.invertWithStep(90, data)).toBe(90);
   });
 
+  describe('isSingleValue', () => {
+    test('should return true for domain with fewer than 2 values', () => {
+      const scale = new ScaleContinuous(ScaleType.Linear, [], [0, 100]);
+      expect(scale.isSingleValue()).toBe(true);
+    });
+    test('should return true for domain with equal min and max values', () => {
+      const scale = new ScaleContinuous(ScaleType.Linear, [1, 1], [0, 100]);
+      expect(scale.isSingleValue()).toBe(true);
+    });
+    test('should return false for domain with differing min and max values', () => {
+      const scale = new ScaleContinuous(ScaleType.Linear, [1, 2], [0, 100]);
+      expect(scale.isSingleValue()).toBe(false);
+    });
+  });
+
   describe('time ticks', () => {
     const timezonesToTest = ['Asia/Tokyo', 'Europe/Berlin', 'UTC', 'America/New_York', 'America/Los_Angeles'];
 

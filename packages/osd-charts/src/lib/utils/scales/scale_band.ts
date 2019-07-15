@@ -62,6 +62,9 @@ export class ScaleBand implements Scale {
   invertWithStep(value: any) {
     return this.invertedScale(value);
   }
+  isSingleValue() {
+    return this.domain.length < 2;
+  }
 }
 
 export function isOrdinalScale(scale: Scale): scale is ScaleBand {

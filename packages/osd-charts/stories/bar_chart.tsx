@@ -886,9 +886,39 @@ storiesOf('Bar Chart', module)
       </Chart>
     );
   })
-  .add('single data chart', () => {
+  .add('single data chart [linear]', () => {
+    const hasCustomDomain = boolean('has custom domain', false);
+    const xDomain = hasCustomDomain
+      ? {
+          min: 0,
+        }
+      : undefined;
+
+    const chartRotation = select<Rotation>(
+      'chartRotation',
+      {
+        '0 deg': 0,
+        '90 deg': 90,
+        '-90 deg': -90,
+        '180 deg': 180,
+      },
+      0,
+    );
+
+    const theme = {
+      scales: {
+        barsPadding: number('bars padding', 0.25, {
+          range: true,
+          min: 0,
+          max: 1,
+          step: 0.1,
+        }),
+      },
+    };
+
     return (
       <Chart className={'story-chart'}>
+        <Settings xDomain={xDomain} rotation={chartRotation} theme={theme} />
         <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
         <Axis
           id={getAxisId('left2')}
@@ -903,7 +933,56 @@ storiesOf('Bar Chart', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
+          splitSeriesAccessors={['g']}
           data={[{ x: 1, y: 10 }]}
+        />
+      </Chart>
+    );
+  })
+  .add('single data chart [ordinal]', () => {
+    const hasCustomDomain = boolean('has custom domain', false);
+    const xDomain = hasCustomDomain ? ['a', 'b'] : undefined;
+
+    const chartRotation = select<Rotation>(
+      'chartRotation',
+      {
+        '0 deg': 0,
+        '90 deg': 90,
+        '-90 deg': -90,
+        '180 deg': 180,
+      },
+      0,
+    );
+
+    const theme = {
+      scales: {
+        barsPadding: number('bars padding', 0.25, {
+          range: true,
+          min: 0,
+          max: 1,
+          step: 0.1,
+        }),
+      },
+    };
+
+    return (
+      <Chart className={'story-chart'}>
+        <Settings xDomain={xDomain} rotation={chartRotation} theme={theme} />
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Ordinal}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={[{ x: 'a', y: 10, g: 1 }]}
         />
       </Chart>
     );

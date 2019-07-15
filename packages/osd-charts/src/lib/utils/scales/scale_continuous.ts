@@ -201,6 +201,15 @@ export class ScaleContinuous implements Scale {
     }
     return prevValue;
   }
+  isSingleValue() {
+    if (this.domain.length < 2) {
+      return true;
+    }
+
+    const min = this.domain[0];
+    const max = this.domain[this.domain.length - 1];
+    return max === min;
+  }
 }
 
 export function isContinuousScale(scale: Scale): scale is ScaleContinuous {

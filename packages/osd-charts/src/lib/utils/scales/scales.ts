@@ -5,6 +5,7 @@ export interface Scale {
   scale: (value: any) => number;
   invert: (value: number) => any;
   invertWithStep: (value: number, data: any[]) => any;
+  isSingleValue: () => boolean;
   bandwidth: number;
   minInterval: number;
   type: ScaleType;
