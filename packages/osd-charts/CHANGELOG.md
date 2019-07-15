@@ -1,3 +1,36 @@
+# [8.0.0](https://github.com/elastic/elastic-charts/compare/v7.2.1...v8.0.0) (2019-07-15)
+
+
+### Code Refactoring
+
+* **legend:** remove visibility button ([#252](https://github.com/elastic/elastic-charts/issues/252)) ([90a1ba7](https://github.com/elastic/elastic-charts/commit/90a1ba7))
+
+
+### Features
+
+* **style:** allow fill and stroke overrides ([#258](https://github.com/elastic/elastic-charts/issues/258)) ([99c5e9f](https://github.com/elastic/elastic-charts/commit/99c5e9f))
+
+
+### BREAKING CHANGES
+
+* **style:** `LineStyle`, `AreaStyle` and `BarSeriesStyle` types differs on the optional values.
+`stroke` and `fill` on the theme or specific series style now override the computed series color.
+
+* fix: no unused locals error on theme
+
+* fix: avoid key prop override by spread operator
+
+* test: increase test coverage on PR changes
+
+* fix: fontSize is now always a number
+
+* test: increase coverage for rendendering
+
+* refactor(story): simplify theme merging on `with value label` story
+
+* refactor: removed mergeWithDefaultTheme
+* **legend:** the `onLegendItemClick` click handler is no longer applied when clicking on the title. Instead a simple visibility change is applied.
+
 ## [7.2.1](https://github.com/elastic/elastic-charts/compare/v7.2.0...v7.2.1) (2019-07-10)
 
 
