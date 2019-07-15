@@ -20,7 +20,7 @@ export class Grid extends React.PureComponent<GridProps> {
 
     const config = gridLineStyle ? mergeWithDefaultGridLineConfig(gridLineStyle) : DEFAULT_GRID_LINE_CONFIG;
 
-    return <Line key={`tick-${i}`} points={linePosition} {...config} />;
+    return <Line {...config} key={`tick-${i}`} points={linePosition} />;
   };
 
   private renderGrid = () => {

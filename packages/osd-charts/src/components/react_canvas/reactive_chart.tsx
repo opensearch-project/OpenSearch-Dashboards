@@ -82,7 +82,6 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
         key={'bar-geometries'}
         animated={canDataBeAnimated}
         bars={geometries.bars}
-        style={chartTheme.barSeriesStyle}
         sharedStyle={chartTheme.sharedStyle}
         highlightedLegendItem={highlightedLegendItem}
       />
@@ -108,7 +107,6 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
         key={'line-geometries'}
         animated={canDataBeAnimated}
         lines={geometries.lines}
-        style={chartTheme.lineSeriesStyle}
         sharedStyle={chartTheme.sharedStyle}
         highlightedLegendItem={highlightedLegendItem}
       />
@@ -134,7 +132,6 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
         key={'area-geometries'}
         animated={canDataBeAnimated}
         areas={geometries.areas}
-        style={chartTheme.areaSeriesStyle}
         sharedStyle={chartTheme.sharedStyle}
         highlightedLegendItem={highlightedLegendItem}
       />

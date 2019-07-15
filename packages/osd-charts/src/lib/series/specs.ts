@@ -1,13 +1,13 @@
 import {
   AreaSeriesStyle,
-  CustomBarSeriesStyle,
   GridLineConfig,
   LineAnnotationStyle,
   LineSeriesStyle,
   RectAnnotationStyle,
+  BarSeriesStyle,
 } from '../themes/theme';
 import { Accessor } from '../utils/accessor';
-import { Omit } from '../utils/commons';
+import { Omit, RecursivePartial } from '../utils/commons';
 import { AnnotationId, AxisId, GroupId, SpecId } from '../utils/ids';
 import { ScaleContinuousType, ScaleType } from '../utils/scales/scales';
 import { CurveType } from './curves';
@@ -135,7 +135,7 @@ export type BarSeriesSpec = BasicSeriesSpec & {
   seriesType: 'bar';
   /** If true, will stack all BarSeries and align bars to ticks (instead of centered on ticks) */
   enableHistogramMode?: boolean;
-  barSeriesStyle?: CustomBarSeriesStyle;
+  barSeriesStyle?: RecursivePartial<BarSeriesStyle>;
   /**
    * Stack each series in percentage for each point.
    */
@@ -158,7 +158,7 @@ export type LineSeriesSpec = BasicSeriesSpec &
     /** @default line */
     seriesType: 'line';
     curve?: CurveType;
-    lineSeriesStyle?: LineSeriesStyle;
+    lineSeriesStyle?: RecursivePartial<LineSeriesStyle>;
   };
 
 /**
@@ -170,7 +170,7 @@ export type AreaSeriesSpec = BasicSeriesSpec &
     seriesType: 'area';
     /** The type of interpolator to be used to interpolate values between points */
     curve?: CurveType;
-    areaSeriesStyle?: AreaSeriesStyle;
+    areaSeriesStyle?: RecursivePartial<AreaSeriesStyle>;
     /**
      * Stack each series in percentage for each point.
      */

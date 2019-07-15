@@ -24,7 +24,7 @@ export class LineAnnotation extends React.PureComponent<LineAnnotationProps> {
       ...line,
     };
 
-    return <Line key={`tick-${i}`} {...lineProps} />;
+    return <Line {...lineProps} key={`tick-${i}`} />;
   };
 
   private renderAnnotation = () => {

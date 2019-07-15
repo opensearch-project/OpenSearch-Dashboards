@@ -37,7 +37,7 @@ import {
   Rotation,
 } from '../lib/series/specs';
 import { ColorConfig, Theme } from '../lib/themes/theme';
-import { identity } from '../lib/utils/commons';
+import { identity, mergePartial } from '../lib/utils/commons';
 import { Dimensions } from '../lib/utils/dimensions';
 import { Domain } from '../lib/utils/domain';
 import { AxisId, GroupId, SpecId } from '../lib/utils/ids';
@@ -424,15 +424,9 @@ export function renderGeometries(
     if (isBarSeriesSpec(spec)) {
       const shift = isStacked ? indexOffset : indexOffset + i;
 
-      // TODO: we can handle style merging here and not pass that off to the component
-      // then barSeriesStyle should not be an optional parameter and we can simplify
-      // the props building in the geometries component
-      const barSeriesStyle = spec.barSeriesStyle
-        ? {
-            ...chartTheme.barSeriesStyle,
-            ...spec.barSeriesStyle,
-          }
-        : chartTheme.barSeriesStyle;
+      const barSeriesStyle = mergePartial(chartTheme.barSeriesStyle, spec.barSeriesStyle, {
+        mergeOptionalPartialValues: true,
+      });
 
       const { yAxis } = getAxesSpecForSpecId(axesSpecs, spec.groupId);
       const valueFormatter = yAxis && yAxis.tickFormat ? yAxis.tickFormat : identity;
@@ -452,15 +446,17 @@ export function renderGeometries(
         color,
         ds.specId,
         ds.key,
-        displayValueSettings,
         barSeriesStyle,
+        displayValueSettings,
       );
       barGeometriesIndex = mergeGeometriesIndexes(barGeometriesIndex, renderedBars.indexedGeometries);
       bars.push(...renderedBars.barGeometries);
       geometriesCounts.bars += renderedBars.barGeometries.length;
     } else if (isLineSeriesSpec(spec)) {
       const lineShift = clusteredCount > 0 ? clusteredCount : 1;
-      const lineSeriesStyle = spec.lineSeriesStyle;
+      const lineSeriesStyle = spec.lineSeriesStyle
+        ? mergePartial(chartTheme.lineSeriesStyle, spec.lineSeriesStyle, { mergeOptionalPartialValues: true })
+        : chartTheme.lineSeriesStyle;
 
       const xScaleOffset = computeXScaleOffset(xScale, enableHistogramMode, spec.histogramModeAlignment);
 
@@ -484,8 +480,9 @@ export function renderGeometries(
       geometriesCounts.lines += 1;
     } else if (isAreaSeriesSpec(spec)) {
       const areaShift = clusteredCount > 0 ? clusteredCount : 1;
-      const areaSeriesStyle = spec.areaSeriesStyle;
-
+      const areaSeriesStyle = spec.areaSeriesStyle
+        ? mergePartial(chartTheme.areaSeriesStyle, spec.areaSeriesStyle, { mergeOptionalPartialValues: true })
+        : chartTheme.areaSeriesStyle;
       const xScaleOffset = computeXScaleOffset(xScale, enableHistogramMode, spec.histogramModeAlignment);
 
       const renderedAreas = renderArea(

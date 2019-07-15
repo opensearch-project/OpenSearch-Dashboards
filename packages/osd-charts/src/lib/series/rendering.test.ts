@@ -4,6 +4,24 @@ import { BarGeometry, getGeometryStyle, isPointOnGeometry, PointGeometry } from 
 
 describe('Rendering utils', () => {
   test('check if point is in geometry', () => {
+    const seriesStyle = {
+      rect: {
+        opacity: 1,
+      },
+      rectBorder: {
+        strokeWidth: 1,
+        visible: false,
+      },
+      displayValue: {
+        fill: 'black',
+        fontFamily: '',
+        fontSize: 2,
+        offsetX: 0,
+        offsetY: 0,
+        padding: 2,
+      },
+    };
+
     const geometry: BarGeometry = {
       color: 'red',
       geometryId: {
@@ -19,6 +37,7 @@ describe('Rendering utils', () => {
       y: 0,
       width: 10,
       height: 10,
+      seriesStyle,
     };
     expect(isPointOnGeometry(0, 0, geometry)).toBe(true);
     expect(isPointOnGeometry(10, 10, geometry)).toBe(true);

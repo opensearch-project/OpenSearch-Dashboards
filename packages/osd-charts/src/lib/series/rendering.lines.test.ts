@@ -7,10 +7,57 @@ import { CurveType } from './curves';
 import { IndexedGeometry, LineGeometry, PointGeometry, renderLine } from './rendering';
 import { computeXScale, computeYScales } from './scales';
 import { LineSeriesSpec } from './specs';
+import { LIGHT_THEME } from '../themes/light_theme';
 const SPEC_ID = getSpecId('spec_1');
 const GROUP_ID = getGroupId('group_1');
 
 describe('Rendering points - line', () => {
+  describe('Empty line for missing data', () => {
+    const pointSeriesSpec: LineSeriesSpec = {
+      id: SPEC_ID,
+      groupId: GROUP_ID,
+      seriesType: 'line',
+      yScaleToDataExtent: false,
+      data: [[0, 10], [1, 5]],
+      xAccessor: 0,
+      yAccessors: [1],
+      xScaleType: ScaleType.Ordinal,
+      yScaleType: ScaleType.Linear,
+    };
+    const pointSeriesMap = new Map<SpecId, LineSeriesSpec>();
+    pointSeriesMap.set(SPEC_ID, pointSeriesSpec);
+    const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
+    const xScale = computeXScale(pointSeriesDomains.xDomain, pointSeriesMap.size, 0, 100);
+    const yScales = computeYScales(pointSeriesDomains.yDomain, 100, 0);
+    let renderedLine: {
+      lineGeometry: LineGeometry;
+      indexedGeometries: Map<any, IndexedGeometry[]>;
+    };
+
+    beforeEach(() => {
+      renderedLine = renderLine(
+        25, // adding a ideal 25px shift, generally applied by renderGeometries
+        [],
+        xScale,
+        yScales.get(GROUP_ID)!,
+        'red',
+        CurveType.LINEAR,
+        SPEC_ID,
+        false,
+        [],
+        0,
+        LIGHT_THEME.lineSeriesStyle,
+      );
+    });
+    test('Can render the geometry without a line', () => {
+      const { lineGeometry } = renderedLine;
+      expect(lineGeometry.line).toBe('');
+      expect(lineGeometry.color).toBe('red');
+      expect(lineGeometry.geometryId.seriesKey).toEqual([]);
+      expect(lineGeometry.geometryId.specId).toEqual(SPEC_ID);
+      expect(lineGeometry.transform).toEqual({ x: 25, y: 0 });
+    });
+  });
   describe('Single series line chart - ordinal', () => {
     const pointSeriesSpec: LineSeriesSpec = {
       id: SPEC_ID,
@@ -45,6 +92,7 @@ describe('Rendering points - line', () => {
         false,
         [],
         0,
+        LIGHT_THEME.lineSeriesStyle,
       );
     });
     test('Can render a line', () => {
@@ -155,6 +203,7 @@ describe('Rendering points - line', () => {
         false,
         [],
         0,
+        LIGHT_THEME.lineSeriesStyle,
       );
       secondLine = renderLine(
         25, // adding a ideal 25px shift, generally applied by renderGeometries
@@ -167,6 +216,7 @@ describe('Rendering points - line', () => {
         false,
         [],
         0,
+        LIGHT_THEME.lineSeriesStyle,
       );
     });
 
@@ -311,6 +361,7 @@ describe('Rendering points - line', () => {
         false,
         [],
         0,
+        LIGHT_THEME.lineSeriesStyle,
       );
     });
     test('Can render a linear line', () => {
@@ -419,6 +470,7 @@ describe('Rendering points - line', () => {
         false,
         [],
         0,
+        LIGHT_THEME.lineSeriesStyle,
       );
       secondLine = renderLine(
         0, // not applied any shift, renderGeometries applies it only with mixed charts
@@ -431,6 +483,7 @@ describe('Rendering points - line', () => {
         false,
         [],
         0,
+        LIGHT_THEME.lineSeriesStyle,
       );
     });
     test('can render two linear lines', () => {
@@ -574,6 +627,7 @@ describe('Rendering points - line', () => {
         false,
         [],
         0,
+        LIGHT_THEME.lineSeriesStyle,
       );
     });
     test('Can render a time line', () => {
@@ -682,6 +736,7 @@ describe('Rendering points - line', () => {
         false,
         [],
         0,
+        LIGHT_THEME.lineSeriesStyle,
       );
       secondLine = renderLine(
         0, // not applied any shift, renderGeometries applies it only with mixed charts
@@ -694,6 +749,7 @@ describe('Rendering points - line', () => {
         false,
         [],
         0,
+        LIGHT_THEME.lineSeriesStyle,
       );
     });
     test('can render first spec points', () => {
@@ -824,6 +880,7 @@ describe('Rendering points - line', () => {
         false,
         [],
         0,
+        LIGHT_THEME.lineSeriesStyle,
       );
     });
     test('Can render a splitted line', () => {

@@ -92,7 +92,7 @@ export class Axis extends React.PureComponent<AxisProps> {
       ? getVerticalAxisTickLineProps(position, tickPadding, tickSize, tick.position)
       : getHorizontalAxisTickLineProps(position, tickPadding, tickSize, tick.position, maxLabelBboxHeight);
 
-    return <Line key={`tick-${i}`} points={lineProps} {...tickLineStyle} />;
+    return <Line {...tickLineStyle} key={`tick-${i}`} points={lineProps} />;
   };
   private renderAxis = () => {
     const { ticks, axisPosition, debug } = this.props;

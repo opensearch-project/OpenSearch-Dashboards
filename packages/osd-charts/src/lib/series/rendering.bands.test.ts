@@ -6,10 +6,61 @@ import { CurveType } from './curves';
 import { AreaGeometry, IndexedGeometry, PointGeometry, renderArea, renderBars } from './rendering';
 import { computeXScale, computeYScales } from './scales';
 import { AreaSeriesSpec, BarSeriesSpec } from './specs';
+import { LIGHT_THEME } from '../themes/light_theme';
 const SPEC_ID = getSpecId('spec_1');
 const GROUP_ID = getGroupId('group_1');
 
 describe('Rendering bands - areas', () => {
+  describe('Empty line for missing data', () => {
+    const pointSeriesSpec: AreaSeriesSpec = {
+      id: SPEC_ID,
+      groupId: GROUP_ID,
+      seriesType: 'area',
+      yScaleToDataExtent: false,
+      data: [[0, 2, 10], [1, 3, 5]],
+      xAccessor: 0,
+      y0Accessors: [1],
+      yAccessors: [2],
+      xScaleType: ScaleType.Ordinal,
+      yScaleType: ScaleType.Linear,
+    };
+    const pointSeriesMap = new Map<SpecId, AreaSeriesSpec>();
+    pointSeriesMap.set(SPEC_ID, pointSeriesSpec);
+    const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
+    const xScale = computeXScale(pointSeriesDomains.xDomain, pointSeriesMap.size, 0, 100);
+    const yScales = computeYScales(pointSeriesDomains.yDomain, 100, 0);
+    let renderedArea: {
+      areaGeometry: AreaGeometry;
+      indexedGeometries: Map<any, IndexedGeometry[]>;
+    };
+
+    beforeEach(() => {
+      renderedArea = renderArea(
+        25, // adding a ideal 25px shift, generally applied by renderGeometries
+        [],
+        xScale,
+        yScales.get(GROUP_ID)!,
+        'red',
+        CurveType.LINEAR,
+        SPEC_ID,
+        true,
+        [],
+        0,
+        LIGHT_THEME.areaSeriesStyle,
+      );
+    });
+    test('Render geometry but empty upper and lower lines and area paths', () => {
+      const {
+        areaGeometry: { lines, area, color, geometryId, transform },
+      } = renderedArea;
+      expect(lines.length).toBe(0);
+      expect(area).toBe('');
+      expect(color).toBe('red');
+      expect(geometryId.seriesKey).toEqual([]);
+      expect(geometryId.specId).toEqual(SPEC_ID);
+      expect(transform).toEqual({ x: 25, y: 0 });
+    });
+  });
   describe('Single band area chart', () => {
     const pointSeriesSpec: AreaSeriesSpec = {
       id: SPEC_ID,
@@ -45,6 +96,7 @@ describe('Rendering bands - areas', () => {
         true,
         [],
         0,
+        LIGHT_THEME.areaSeriesStyle,
       );
     });
     test('Can render upper and lower lines and area paths', () => {
@@ -182,6 +234,7 @@ describe('Rendering bands - areas', () => {
         true,
         [],
         0,
+        LIGHT_THEME.areaSeriesStyle,
       );
     });
     test('Can render upper and lower lines and area paths', () => {
@@ -351,6 +404,7 @@ describe('Rendering bands - areas', () => {
         'red',
         SPEC_ID,
         [],
+        LIGHT_THEME.barSeriesStyle,
       );
       expect(barGeometries.length).toBe(3);
       expect(barGeometries[0]).toEqual({
@@ -368,6 +422,25 @@ describe('Rendering bands - areas', () => {
           specId: SPEC_ID,
           seriesKey: [],
         },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
+        },
       });
       expect(barGeometries[1]).toEqual({
         x: 50,
@@ -384,6 +457,25 @@ describe('Rendering bands - areas', () => {
           specId: SPEC_ID,
           seriesKey: [],
         },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
+        },
       });
       expect(barGeometries[2]).toEqual({
         x: 75,
@@ -399,6 +491,25 @@ describe('Rendering bands - areas', () => {
         geometryId: {
           specId: SPEC_ID,
           seriesKey: [],
+        },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
         },
       });
     });

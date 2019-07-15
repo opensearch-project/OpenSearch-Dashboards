@@ -13,52 +13,41 @@ export const DARK_THEME: Theme = {
   chartMargins: DEFAULT_CHART_MARGINS,
   lineSeriesStyle: {
     line: {
-      stroke: DEFAULT_MISSING_COLOR,
-      strokeWidth: 1,
       visible: true,
-    },
-    border: {
-      stroke: 'white',
-      strokeWidth: 2,
-      visible: false,
+      strokeWidth: 1,
+      opacity: 1,
     },
     point: {
       visible: true,
+      strokeWidth: 0,
       radius: 1,
-      stroke: 'white',
-      strokeWidth: 0.5,
       opacity: 1,
     },
   },
   areaSeriesStyle: {
     area: {
-      fill: DEFAULT_MISSING_COLOR,
       visible: true,
       opacity: 1,
     },
     line: {
-      stroke: DEFAULT_MISSING_COLOR,
-      strokeWidth: 1,
       visible: true,
-    },
-    border: {
-      stroke: 'white',
-      strokeWidth: 2,
-      visible: false,
+      strokeWidth: 1,
+      opacity: 1,
     },
     point: {
       visible: true,
+      strokeWidth: 0,
       radius: 1,
-      stroke: 'white',
-      strokeWidth: 0.5,
       opacity: 1,
     },
   },
   barSeriesStyle: {
-    border: {
-      stroke: 'white',
-      strokeWidth: 2,
+    rect: {
+      opacity: 1,
+    },
+    rectBorder: {
       visible: false,
+      strokeWidth: 0,
     },
     displayValue: {
       fontSize: 10,

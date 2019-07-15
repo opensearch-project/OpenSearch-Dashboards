@@ -10,6 +10,25 @@ import {
   isFollowTooltipType,
   TooltipType,
 } from './interactions';
+
+const seriesStyle = {
+  rect: {
+    opacity: 1,
+  },
+  rectBorder: {
+    strokeWidth: 1,
+    visible: false,
+  },
+  displayValue: {
+    fill: 'black',
+    fontFamily: '',
+    fontSize: 2,
+    offsetX: 0,
+    offsetY: 0,
+    padding: 2,
+  },
+};
+
 const ig1: IndexedGeometry = {
   color: 'red',
   geometryId: {
@@ -25,6 +44,7 @@ const ig1: IndexedGeometry = {
   y: 0,
   width: 50,
   height: 50,
+  seriesStyle,
 };
 const ig2: IndexedGeometry = {
   geometryId: {
@@ -41,6 +61,7 @@ const ig2: IndexedGeometry = {
   y: 0,
   width: 10,
   height: 10,
+  seriesStyle,
 };
 const ig3: IndexedGeometry = {
   geometryId: {
@@ -58,6 +79,7 @@ const ig3: IndexedGeometry = {
   y: 0,
   width: 50,
   height: 50,
+  seriesStyle,
 };
 const ig4: IndexedGeometry = {
   geometryId: {
@@ -74,6 +96,7 @@ const ig4: IndexedGeometry = {
   y: 0,
   width: 50,
   height: 50,
+  seriesStyle,
 };
 const ig5: IndexedGeometry = {
   geometryId: {
@@ -90,6 +113,7 @@ const ig5: IndexedGeometry = {
   y: 0,
   width: 50,
   height: 50,
+  seriesStyle,
 };
 const ig6: PointGeometry = {
   geometryId: {

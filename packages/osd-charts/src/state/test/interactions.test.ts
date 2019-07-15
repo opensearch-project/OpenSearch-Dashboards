@@ -74,6 +74,24 @@ function initStore(spec: BasicSeriesSpec) {
   store.seriesSpecs.set(spec.id, spec);
   return store;
 }
+
+const barStyle = {
+  rect: {
+    opacity: 1,
+  },
+  rectBorder: {
+    strokeWidth: 1,
+    visible: false,
+  },
+  displayValue: {
+    fill: 'black',
+    fontFamily: '',
+    fontSize: 2,
+    offsetX: 0,
+    offsetY: 0,
+    padding: 2,
+  },
+};
 const indexedGeom1Red: BarGeometry = {
   color: 'red',
   x: 0,
@@ -89,6 +107,7 @@ const indexedGeom1Red: BarGeometry = {
     specId: SPEC_ID,
     seriesKey: [],
   },
+  seriesStyle: barStyle,
 };
 const indexedGeom2Blue: BarGeometry = {
   color: 'blue',
@@ -105,6 +124,7 @@ const indexedGeom2Blue: BarGeometry = {
     specId: SPEC_ID,
     seriesKey: [],
   },
+  seriesStyle: barStyle,
 };
 
 describe('Chart state pointer interactions', () => {

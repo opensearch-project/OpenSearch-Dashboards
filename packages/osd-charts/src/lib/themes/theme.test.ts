@@ -152,11 +152,7 @@ describe('Theme', () => {
           stroke: 'elastic_charts',
           strokeWidth: 314571,
           visible: true,
-        },
-        border: {
-          stroke: 'elastic_charts',
-          strokeWidth: 314571,
-          visible: true,
+          opacity: 1,
         },
         point: {
           radius: 314571,
@@ -190,11 +186,7 @@ describe('Theme', () => {
           stroke: 'elastic_charts',
           strokeWidth: 314571,
           visible: true,
-        },
-        border: {
-          stroke: 'elastic_charts',
-          strokeWidth: 314571,
-          visible: true,
+          opacity: 1,
         },
         point: {
           visible: true,
@@ -220,7 +212,7 @@ describe('Theme', () => {
     it('should merge partial theme: barSeriesStyle', () => {
       const partialTheme: PartialTheme = {
         barSeriesStyle: {
-          border: {
+          rectBorder: {
             stroke: 'elastic_charts',
           },
           displayValue: {
@@ -233,9 +225,12 @@ describe('Theme', () => {
       expect(mergedTheme).toEqual({
         ...DARK_THEME,
         barSeriesStyle: {
-          border: {
-            ...DARK_THEME.barSeriesStyle.border,
-            ...partialTheme!.barSeriesStyle!.border,
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            ...DARK_THEME.barSeriesStyle.rectBorder,
+            ...partialTheme!.barSeriesStyle!.rectBorder,
           },
           displayValue: {
             ...DARK_THEME.barSeriesStyle.displayValue,

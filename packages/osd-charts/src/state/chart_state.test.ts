@@ -684,6 +684,23 @@ describe('Chart Store', () => {
     expect(store.isTooltipVisible.get()).toBe(true);
   });
   test('handle click on chart', () => {
+    const barStyle = {
+      rect: {
+        opacity: 1,
+      },
+      rectBorder: {
+        strokeWidth: 1,
+        visible: false,
+      },
+      displayValue: {
+        fill: 'black',
+        fontFamily: '',
+        fontSize: 2,
+        offsetX: 0,
+        offsetY: 0,
+        padding: 2,
+      },
+    };
     const geom1: IndexedGeometry = {
       color: 'red',
       geometryId: {
@@ -699,6 +716,7 @@ describe('Chart Store', () => {
       y: 0,
       width: 0,
       height: 0,
+      seriesStyle: barStyle,
     };
     const geom2: IndexedGeometry = {
       color: 'blue',
@@ -715,6 +733,7 @@ describe('Chart Store', () => {
       y: 0,
       width: 0,
       height: 0,
+      seriesStyle: barStyle,
     };
     const clickListener = jest.fn<void, [GeometryValue[]]>(
       (): void => {

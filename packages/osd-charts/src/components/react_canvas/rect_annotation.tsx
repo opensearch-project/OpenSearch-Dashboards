@@ -26,7 +26,7 @@ export class RectAnnotation extends React.PureComponent<RectAnnotationProps> {
       height,
     };
 
-    return <Rect key={`rect-${i}`} {...rectProps} />;
+    return <Rect {...rectProps} key={`rect-${i}`} />;
   };
 
   private renderAnnotation = () => {

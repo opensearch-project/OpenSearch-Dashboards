@@ -4,13 +4,12 @@ import { Group, Rect } from 'react-konva';
 import { animated, Spring } from 'react-spring/renderprops-konva.cjs';
 import { LegendItem } from '../../lib/series/legend';
 import { BarGeometry, getGeometryStyle } from '../../lib/series/rendering';
-import { BarSeriesStyle, SharedGeometryStyle } from '../../lib/themes/theme';
-import { buildBarProps } from './utils/rendering_props_utils';
+import { SharedGeometryStyle } from '../../lib/themes/theme';
+import { buildBarRenderProps } from './utils/rendering_props_utils';
 
 interface BarGeometriesDataProps {
   animated?: boolean;
   bars: BarGeometry[];
-  style: BarSeriesStyle;
   sharedStyle: SharedGeometryStyle;
   highlightedLegendItem: LegendItem | null;
 }
@@ -40,11 +39,9 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps, B
 
   private renderBarGeoms = (bars: BarGeometry[]): JSX.Element[] => {
     const { overBar } = this.state;
-    const { style, sharedStyle } = this.props;
+    const { sharedStyle } = this.props;
     return bars.map((bar, index) => {
       const { x, y, width, height, color, seriesStyle } = bar;
-      const border = seriesStyle ? seriesStyle.border : style.border;
-      const customOpacity = seriesStyle ? seriesStyle.opacity : undefined;
 
       // Properties to determine if we need to highlight individual bars depending on hover state
       const hasGeometryHover = overBar != null;
@@ -58,49 +55,46 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps, B
         bar.geometryId,
         this.props.highlightedLegendItem,
         sharedStyle,
-        customOpacity,
+        seriesStyle.rect.opacity,
         individualHighlight,
       );
+      const key = `bar-${index}`;
 
       if (this.props.animated) {
         return (
           <Group key={index}>
             <Spring native from={{ y: y + height, height: 0 }} to={{ y, height }}>
               {(props: { y: number; height: number }) => {
-                const barProps = buildBarProps({
-                  index,
+                const barProps = buildBarRenderProps(
                   x,
-                  y: props.y,
+                  props.y,
                   width,
-                  height: props.height,
-                  fill: color,
-                  stroke: border.stroke,
-                  strokeWidth: border.strokeWidth,
-                  borderEnabled: border.visible,
+                  props.height,
+                  color,
+                  seriesStyle.rect,
+                  seriesStyle.rectBorder,
                   geometryStyle,
-                });
+                );
 
-                return <animated.Rect {...barProps} />;
+                return <animated.Rect {...barProps} key={key} />;
               }}
             </Spring>
           </Group>
         );
       } else {
-        const barProps = buildBarProps({
-          index,
+        const barProps = buildBarRenderProps(
           x,
           y,
           width,
           height,
-          fill: color,
-          stroke: border.stroke,
-          strokeWidth: border.strokeWidth,
-          borderEnabled: border.visible,
+          color,
+          seriesStyle.rect,
+          seriesStyle.rectBorder,
           geometryStyle,
-        });
+        );
         return (
           <React.Fragment key={index}>
-            <Rect {...barProps} />
+            <Rect {...barProps} key={key} />
           </React.Fragment>
         );
       }

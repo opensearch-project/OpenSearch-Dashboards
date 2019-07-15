@@ -5,6 +5,7 @@ import { ScaleType } from '../utils/scales/scales';
 import { renderBars } from './rendering';
 import { computeXScale, computeYScales } from './scales';
 import { BarSeriesSpec } from './specs';
+import { LIGHT_THEME } from '../themes/light_theme';
 
 const SPEC_ID = getSpecId('spec_1');
 const GROUP_ID = getGroupId('group_1');
@@ -38,6 +39,7 @@ describe('Rendering bars', () => {
         'red',
         SPEC_ID,
         [],
+        LIGHT_THEME.barSeriesStyle,
       );
 
       expect(barGeometries[0]).toEqual({
@@ -55,6 +57,25 @@ describe('Rendering bars', () => {
           specId: SPEC_ID,
           seriesKey: [],
         },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
+        },
       });
       expect(barGeometries[1]).toEqual({
         x: 50,
@@ -71,6 +92,25 @@ describe('Rendering bars', () => {
           specId: SPEC_ID,
           seriesKey: [],
         },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
+        },
       });
       expect(barGeometries.length).toBe(2);
     });
@@ -84,6 +124,7 @@ describe('Rendering bars', () => {
         'red',
         SPEC_ID,
         [],
+        LIGHT_THEME.barSeriesStyle,
         { valueFormatter, showValueLabel: true, isAlternatingValueLabel: true },
       );
       expect(barGeometries[0].displayValue).toBeDefined();
@@ -98,6 +139,7 @@ describe('Rendering bars', () => {
         'red',
         SPEC_ID,
         [],
+        LIGHT_THEME.barSeriesStyle,
         {},
       );
       expect(barGeometries[0].displayValue).toBeUndefined();
@@ -113,6 +155,7 @@ describe('Rendering bars', () => {
         'red',
         SPEC_ID,
         [],
+        LIGHT_THEME.barSeriesStyle,
         { valueFormatter, showValueLabel: true, isAlternatingValueLabel: true },
       );
       expect(barGeometries[0].displayValue!.text).toBeDefined();
@@ -129,6 +172,7 @@ describe('Rendering bars', () => {
         'red',
         SPEC_ID,
         [],
+        LIGHT_THEME.barSeriesStyle,
         { valueFormatter, showValueLabel: true, isValueContainedInElement: true },
       );
       expect(barGeometries[0].displayValue!.width).toBe(50);
@@ -175,6 +219,7 @@ describe('Rendering bars', () => {
         'red',
         spec1Id,
         [],
+        LIGHT_THEME.barSeriesStyle,
       );
       expect(barGeometries.length).toEqual(2);
       expect(barGeometries[0]).toEqual({
@@ -192,6 +237,25 @@ describe('Rendering bars', () => {
           specId: spec1Id,
           seriesKey: [],
         },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
+        },
       });
       expect(barGeometries[1]).toEqual({
         x: 50,
@@ -208,6 +272,25 @@ describe('Rendering bars', () => {
           specId: spec1Id,
           seriesKey: [],
         },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
+        },
       });
     });
     test('can render second spec bars', () => {
@@ -219,6 +302,7 @@ describe('Rendering bars', () => {
         'blue',
         spec2Id,
         [],
+        LIGHT_THEME.barSeriesStyle,
       );
       expect(barGeometries.length).toEqual(2);
       expect(barGeometries[0]).toEqual({
@@ -236,6 +320,25 @@ describe('Rendering bars', () => {
           specId: spec2Id,
           seriesKey: [],
         },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
+        },
       });
       expect(barGeometries[1]).toEqual({
         x: 75,
@@ -251,6 +354,25 @@ describe('Rendering bars', () => {
         geometryId: {
           specId: spec2Id,
           seriesKey: [],
+        },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
         },
       });
     });
@@ -282,6 +404,7 @@ describe('Rendering bars', () => {
         'red',
         SPEC_ID,
         [],
+        LIGHT_THEME.barSeriesStyle,
       );
       expect(barGeometries[0]).toEqual({
         x: 0,
@@ -298,6 +421,25 @@ describe('Rendering bars', () => {
           specId: SPEC_ID,
           seriesKey: [],
         },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
+        },
       });
       expect(barGeometries[1]).toEqual({
         x: 50,
@@ -313,6 +455,25 @@ describe('Rendering bars', () => {
         geometryId: {
           specId: SPEC_ID,
           seriesKey: [],
+        },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
         },
       });
     });
@@ -358,6 +519,7 @@ describe('Rendering bars', () => {
         'red',
         spec1Id,
         [],
+        LIGHT_THEME.barSeriesStyle,
       );
       expect(barGeometries.length).toEqual(2);
       expect(barGeometries[0]).toEqual({
@@ -375,6 +537,25 @@ describe('Rendering bars', () => {
           specId: spec1Id,
           seriesKey: [],
         },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
+        },
       });
       expect(barGeometries[1]).toEqual({
         x: 50,
@@ -391,6 +572,25 @@ describe('Rendering bars', () => {
           specId: spec1Id,
           seriesKey: [],
         },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
+        },
       });
     });
     test('can render second spec bars', () => {
@@ -402,6 +602,7 @@ describe('Rendering bars', () => {
         'blue',
         spec2Id,
         [],
+        LIGHT_THEME.barSeriesStyle,
       );
       expect(barGeometries.length).toEqual(2);
       expect(barGeometries[0]).toEqual({
@@ -419,6 +620,25 @@ describe('Rendering bars', () => {
           specId: spec2Id,
           seriesKey: [],
         },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
+        },
       });
       expect(barGeometries[1]).toEqual({
         x: 75,
@@ -434,6 +654,25 @@ describe('Rendering bars', () => {
         geometryId: {
           specId: spec2Id,
           seriesKey: [],
+        },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
         },
       });
     });
@@ -479,6 +718,7 @@ describe('Rendering bars', () => {
         'red',
         spec1Id,
         [],
+        LIGHT_THEME.barSeriesStyle,
       );
       expect(barGeometries.length).toEqual(2);
       expect(barGeometries[0]).toEqual({
@@ -496,6 +736,25 @@ describe('Rendering bars', () => {
           specId: spec1Id,
           seriesKey: [],
         },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
+        },
       });
       expect(barGeometries[1]).toEqual({
         x: 50,
@@ -512,6 +771,25 @@ describe('Rendering bars', () => {
           specId: spec1Id,
           seriesKey: [],
         },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
+        },
       });
     });
     test('can render second spec bars', () => {
@@ -523,6 +801,7 @@ describe('Rendering bars', () => {
         'blue',
         spec2Id,
         [],
+        LIGHT_THEME.barSeriesStyle,
       );
       expect(barGeometries.length).toEqual(2);
       expect(barGeometries[0]).toEqual({
@@ -540,6 +819,25 @@ describe('Rendering bars', () => {
           specId: spec2Id,
           seriesKey: [],
         },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
+        },
       });
       expect(barGeometries[1]).toEqual({
         x: 75,
@@ -555,6 +853,25 @@ describe('Rendering bars', () => {
         geometryId: {
           specId: spec2Id,
           seriesKey: [],
+        },
+        displayValue: undefined,
+        seriesStyle: {
+          displayValue: {
+            fill: 'gray',
+            fontFamily: 'sans-serif',
+            fontSize: 10,
+            fontStyle: 'normal',
+            offsetX: 0,
+            offsetY: 0,
+            padding: 0,
+          },
+          rect: {
+            opacity: 1,
+          },
+          rectBorder: {
+            strokeWidth: 0,
+            visible: false,
+          },
         },
       });
     });

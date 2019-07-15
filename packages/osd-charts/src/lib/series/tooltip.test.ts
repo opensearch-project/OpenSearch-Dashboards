@@ -29,6 +29,23 @@ describe('Tooltip formatting', () => {
     tickSize: 0,
     tickFormat: (d) => `${d}`,
   };
+  const seriesStyle = {
+    rect: {
+      opacity: 1,
+    },
+    rectBorder: {
+      strokeWidth: 1,
+      visible: false,
+    },
+    displayValue: {
+      fill: 'black',
+      fontFamily: '',
+      fontSize: 2,
+      offsetX: 0,
+      offsetY: 0,
+      padding: 2,
+    },
+  };
   const indexedGeometry: BarGeometry = {
     x: 0,
     y: 0,
@@ -44,6 +61,7 @@ describe('Tooltip formatting', () => {
       y: 10,
       accessor: 'y1',
     },
+    seriesStyle,
   };
 
   test('format simple tooltip', () => {
