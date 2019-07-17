@@ -41,6 +41,44 @@ describe('Series scales', () => {
     expect(scale.scale(3)).toBe(expectedBandwidth * 0);
   });
 
+  describe('computeXScale with single value domain', () => {
+    const maxRange = 120;
+    const singleDomainValue = 3;
+    const minInterval = 1;
+
+    test('should return extended domain & range when in histogram mode', () => {
+      const xDomainSingleValue: XDomain = {
+        type: 'xDomain',
+        isBandScale: true,
+        domain: [singleDomainValue, singleDomainValue],
+        minInterval: minInterval,
+        scaleType: ScaleType.Linear,
+      };
+      const enableHistogramMode = true;
+
+      const scale = computeXScale(xDomainSingleValue, 1, 0, maxRange, 0, enableHistogramMode);
+      expect(scale.bandwidth).toBe(maxRange);
+      expect(scale.domain).toEqual([singleDomainValue, singleDomainValue + minInterval]);
+      expect(scale.range).toEqual([0, maxRange]);
+    });
+
+    test('should return unextended domain & range when not in histogram mode', () => {
+      const xDomainSingleValue: XDomain = {
+        type: 'xDomain',
+        isBandScale: true,
+        domain: [singleDomainValue, singleDomainValue],
+        minInterval: minInterval,
+        scaleType: ScaleType.Linear,
+      };
+      const enableHistogramMode = false;
+
+      const scale = computeXScale(xDomainSingleValue, 1, 0, maxRange, 0, enableHistogramMode);
+      expect(scale.bandwidth).toBe(maxRange);
+      expect(scale.domain).toEqual([singleDomainValue, singleDomainValue]);
+      expect(scale.range).toEqual([0, 0]);
+    });
+  });
+
   test('should compute X Scale ordinal', () => {
     const nonZeroGroupScale = computeXScale(xDomainOrdinal, 1, 120, 0);
     const expectedBandwidth = 60;

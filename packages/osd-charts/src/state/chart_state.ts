@@ -840,6 +840,7 @@ export class ChartStore {
         this.chartRotation,
         this.chartTheme.axes,
         barsPadding,
+        this.enableHistogramMode.get(),
       );
       if (dimensions) {
         this.axesTicksDimensions.set(id, dimensions);

@@ -38,6 +38,23 @@ export function countBarsInCluster(
   };
 }
 
+function getBandScaleRange(
+  isInverse: boolean,
+  isSingleValueHistogram: boolean,
+  minRange: number,
+  maxRange: number,
+  bandwidth: number,
+): {
+  start: number;
+  end: number;
+} {
+  const rangeEndOffset = isSingleValueHistogram ? 0 : bandwidth;
+  const start = isInverse ? minRange - rangeEndOffset : minRange;
+  const end = isInverse ? maxRange : maxRange - rangeEndOffset;
+
+  return { start, end };
+}
+
 /**
  * Compute the x scale used to align geometries to the x axis.
  * @param xDomain the x domain
@@ -50,6 +67,7 @@ export function computeXScale(
   minRange: number,
   maxRange: number,
   barsPadding?: number,
+  enableHistogramMode?: boolean,
 ): Scale {
   const { scaleType, minInterval, domain, isBandScale, timeZone } = xDomain;
   const rangeDiff = Math.abs(maxRange - minRange);
@@ -60,13 +78,21 @@ export function computeXScale(
     return new ScaleBand(domain, [minRange, maxRange], bandwidth, barsPadding);
   } else {
     if (isBandScale) {
-      const intervalCount = (domain[1] - domain[0]) / minInterval;
-      const bandwidth = rangeDiff / (intervalCount + 1);
-      const start = isInverse ? minRange - bandwidth : minRange;
-      const end = isInverse ? maxRange : maxRange - bandwidth;
-      return new ScaleContinuous(
+      const [domainMin, domainMax] = domain;
+      const isSingleValueHistogram = !!enableHistogramMode && domainMax - domainMin === 0;
+
+      const adjustedDomainMax = isSingleValueHistogram ? domainMin + minInterval : domainMax;
+      const adjustedDomain = [domainMin, adjustedDomainMax];
+
+      const intervalCount = (adjustedDomain[1] - adjustedDomain[0]) / minInterval;
+      const intervalCountOffest = isSingleValueHistogram ? 0 : 1;
+      const bandwidth = rangeDiff / (intervalCount + intervalCountOffest);
+
+      const { start, end } = getBandScaleRange(isInverse, isSingleValueHistogram, minRange, maxRange, bandwidth);
+
+      const scale = new ScaleContinuous(
         scaleType,
-        domain,
+        adjustedDomain,
         [start, end],
         bandwidth / totalBarsInCluster,
         minInterval,
@@ -74,6 +100,8 @@ export function computeXScale(
         totalBarsInCluster,
         barsPadding,
       );
+
+      return scale;
     } else {
       return new ScaleContinuous(
         scaleType,

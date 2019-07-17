@@ -61,12 +61,23 @@ export function computeAxisTicksDimensions(
   chartRotation: Rotation,
   axisConfig: AxisConfig,
   barsPadding?: number,
+  enableHistogramMode?: boolean,
 ): AxisTicksDimensions | null {
   if (axisSpec.hide) {
     return null;
   }
 
-  const scale = getScaleForAxisSpec(axisSpec, xDomain, yDomain, totalBarsInCluster, chartRotation, 0, 1, barsPadding);
+  const scale = getScaleForAxisSpec(
+    axisSpec,
+    xDomain,
+    yDomain,
+    totalBarsInCluster,
+    chartRotation,
+    0,
+    1,
+    barsPadding,
+    enableHistogramMode,
+  );
   if (!scale) {
     throw new Error(`Cannot compute scale for axis spec ${axisSpec.id}`);
   }
@@ -112,6 +123,7 @@ export function getScaleForAxisSpec(
   minRange: number,
   maxRange: number,
   barsPadding?: number,
+  enableHistogramMode?: boolean,
 ): Scale | null {
   const axisIsYDomain = isYDomain(axisSpec.position, chartRotation);
 
@@ -122,7 +134,7 @@ export function getScaleForAxisSpec(
     }
     return null;
   } else {
-    return computeXScale(xDomain, totalBarsInCluster, minRange, maxRange, barsPadding);
+    return computeXScale(xDomain, totalBarsInCluster, minRange, maxRange, barsPadding, enableHistogramMode);
   }
 }
 
@@ -580,6 +592,7 @@ export function getAxisTicksPositions(
       minMaxRanges.minRange,
       minMaxRanges.maxRange,
       barsPadding,
+      enableHistogramMode,
     );
 
     if (!scale) {
