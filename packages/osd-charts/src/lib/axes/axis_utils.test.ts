@@ -565,14 +565,13 @@ describe('Axis computational utils', () => {
     const tickSize = 10;
     const tickPadding = 5;
     const tickPosition = 0;
-    let axisPosition = Position.Left;
 
     const unrotatedLabelProps = getTickLabelProps(
       tickLabelRotation,
       tickSize,
       tickPadding,
       tickPosition,
-      axisPosition,
+      Position.Left,
       axis1Dims,
     );
 
@@ -589,7 +588,7 @@ describe('Axis computational utils', () => {
       tickSize,
       tickPadding,
       tickPosition,
-      axisPosition,
+      Position.Left,
       axis1Dims,
     );
 
@@ -600,13 +599,12 @@ describe('Axis computational utils', () => {
       verticalAlign: 'middle',
     });
 
-    axisPosition = Position.Right;
     const rightRotatedLabelProps = getTickLabelProps(
       tickLabelRotation,
       tickSize,
       tickPadding,
       tickPosition,
-      axisPosition,
+      Position.Right,
       axis1Dims,
     );
 
@@ -623,7 +621,7 @@ describe('Axis computational utils', () => {
       tickSize,
       tickPadding,
       tickPosition,
-      axisPosition,
+      Position.Right,
       axis1Dims,
     );
 
@@ -640,14 +638,13 @@ describe('Axis computational utils', () => {
     const tickSize = 10;
     const tickPadding = 5;
     const tickPosition = 0;
-    let axisPosition = Position.Top;
 
     const unrotatedLabelProps = getTickLabelProps(
       tickLabelRotation,
       tickSize,
       tickPadding,
       tickPosition,
-      axisPosition,
+      Position.Top,
       axis1Dims,
     );
 
@@ -664,7 +661,7 @@ describe('Axis computational utils', () => {
       tickSize,
       tickPadding,
       tickPosition,
-      axisPosition,
+      Position.Top,
       axis1Dims,
     );
 
@@ -675,13 +672,12 @@ describe('Axis computational utils', () => {
       verticalAlign: 'middle',
     });
 
-    axisPosition = Position.Bottom;
     const bottomRotatedLabelProps = getTickLabelProps(
       tickLabelRotation,
       tickSize,
       tickPadding,
       tickPosition,
-      axisPosition,
+      Position.Bottom,
       axis1Dims,
     );
 
@@ -698,7 +694,7 @@ describe('Axis computational utils', () => {
       tickSize,
       tickPadding,
       tickPosition,
-      axisPosition,
+      Position.Bottom,
       axis1Dims,
     );
 

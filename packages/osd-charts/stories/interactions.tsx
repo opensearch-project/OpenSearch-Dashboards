@@ -185,7 +185,7 @@ storiesOf('Interactions', module)
       max: number('yDomain max', 10, {}, notSpecChange),
     };
 
-    const yScaleTypeOptions: { [key: string]: ScaleType.Linear | ScaleType.Log } = {
+    const yScaleTypeOptions: { [key: string]: typeof ScaleType.Linear | typeof ScaleType.Log } = {
       linear: ScaleType.Linear,
       log: ScaleType.Log,
     };

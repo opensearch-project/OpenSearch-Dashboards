@@ -100,11 +100,12 @@ export interface Theme {
 
 export type PartialTheme = RecursivePartial<Theme>;
 
-export type BaseThemeType = 'light' | 'dark';
-export const BaseThemeTypes: Readonly<{ [key: string]: BaseThemeType }> = Object.freeze({
-  Light: 'light',
-  Dark: 'dark',
+export const BaseThemeTypes = Object.freeze({
+  Light: 'light' as 'light',
+  Dark: 'dark' as 'dark',
 });
+
+export type BaseThemeType = typeof BaseThemeTypes.Dark | typeof BaseThemeTypes.Light;
 
 export type DisplayValueStyle = TextStyle & {
   offsetX: number;

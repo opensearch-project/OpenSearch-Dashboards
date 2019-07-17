@@ -3,16 +3,23 @@ import { Datum, Rotation } from '../series/specs';
 import { Dimensions } from './dimensions';
 
 /** The type of tooltip to use */
-export enum TooltipType {
+export const TooltipType = Object.freeze({
   /** Vertical cursor parallel to x axis */
-  VerticalCursor = 'vertical',
+  VerticalCursor: 'vertical' as 'vertical',
   /** Vertical and horizontal cursors */
-  Crosshairs = 'cross',
+  Crosshairs: 'cross' as 'cross',
   /** Follor the mouse coordinates */
-  Follow = 'follow',
+  Follow: 'follow' as 'follow',
   /** Hide every tooltip */
-  None = 'none',
-}
+  None: 'none' as 'none',
+});
+
+export type TooltipType =
+  | typeof TooltipType.VerticalCursor
+  | typeof TooltipType.Crosshairs
+  | typeof TooltipType.Follow
+  | typeof TooltipType.None;
+
 export interface TooltipValue {
   name: string;
   value: any;

@@ -105,7 +105,7 @@ export interface SeriesScales {
    * The x axis scale type
    * @default ScaleType.Ordinal
    */
-  xScaleType: ScaleType.Ordinal | ScaleType.Linear | ScaleType.Time;
+  xScaleType: typeof ScaleType.Ordinal | typeof ScaleType.Linear | typeof ScaleType.Time;
   /**
    * If using a ScaleType.Time this timezone identifier is required to
    * compute a nice set of xScale ticks. Can be any IANA zone supported by
@@ -242,27 +242,33 @@ export interface AxisStyle {
  * A left or right positioned axis is a vertical axis.
  * A top or bottom positioned axis is an horizontal axis.
  */
-export enum Position {
-  Top = 'top',
-  Bottom = 'bottom',
-  Left = 'left',
-  Right = 'right',
-}
+export const Position = Object.freeze({
+  Top: 'top' as 'top',
+  Bottom: 'bottom' as 'bottom',
+  Left: 'left' as 'left',
+  Right: 'right' as 'right',
+});
+
+export type Position = typeof Position.Top | typeof Position.Bottom | typeof Position.Left | typeof Position.Right;
 
 export const AnnotationTypes = Object.freeze({
-  Line: 'line' as AnnotationType,
-  Rectangle: 'rectangle' as AnnotationType,
-  Text: 'text' as AnnotationType,
+  Line: 'line' as 'line',
+  Rectangle: 'rectangle' as 'rectangle',
+  Text: 'text' as 'text',
 });
 
-export type AnnotationType = 'line' | 'rectangle' | 'text';
+export type AnnotationType =
+  | typeof AnnotationTypes.Line
+  | typeof AnnotationTypes.Rectangle
+  | typeof AnnotationTypes.Text;
 
 export const AnnotationDomainTypes = Object.freeze({
-  XDomain: 'xDomain' as AnnotationDomainType,
-  YDomain: 'yDomain' as AnnotationDomainType,
+  XDomain: 'xDomain' as 'xDomain',
+  YDomain: 'yDomain' as 'yDomain',
 });
 
-export type AnnotationDomainType = 'xDomain' | 'yDomain';
+export type AnnotationDomainType = typeof AnnotationDomainTypes.XDomain | typeof AnnotationDomainTypes.YDomain;
+
 export interface LineAnnotationDatum {
   dataValue: any;
   details?: string;

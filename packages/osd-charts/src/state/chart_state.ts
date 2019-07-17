@@ -162,8 +162,8 @@ export class ChartStore {
   totalBarsInCluster?: number;
 
   tooltipData = observable.array<TooltipValue>([], { deep: false });
-  tooltipType = observable.box(DEFAULT_TOOLTIP_TYPE);
-  tooltipSnap = observable.box(DEFAULT_TOOLTIP_SNAP);
+  tooltipType = observable.box<TooltipType>(DEFAULT_TOOLTIP_TYPE);
+  tooltipSnap = observable.box<boolean>(DEFAULT_TOOLTIP_SNAP);
   tooltipPosition = observable.object<{ transform: string }>({ transform: '' });
   tooltipHeaderFormatter?: TooltipValueFormatter;
 
