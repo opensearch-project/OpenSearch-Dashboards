@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import { inject, observer } from 'mobx-react';
 import React from 'react';
 import { Layer, Rect, Stage } from 'react-konva';
-import { isLineAnnotation, isRectAnnotation } from '../../lib/series/specs';
+import { isLineAnnotation, isRectAnnotation, Position } from '../../lib/series/specs';
 import { LineAnnotationStyle, RectAnnotationStyle } from '../../lib/themes/theme';
 import { AnnotationId } from '../../lib/utils/ids';
 import { AnnotationDimensions, AnnotationLineProps, AnnotationRectProps } from '../../state/annotation_utils';
@@ -16,7 +16,7 @@ import { Grid } from './grid';
 import { LineAnnotation } from './line_annotation';
 import { LineGeometries } from './line_geometries';
 import { RectAnnotation } from './rect_annotation';
-
+import { isVertical } from '../../lib/axes/axis_utils';
 interface ReactiveChartProps {
   chartStore?: ChartStore; // FIX until we find a better way on ts mobx
 }
@@ -335,7 +335,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
   }
 
   render() {
-    const { initialized, debug } = this.props.chartStore!;
+    const { initialized } = this.props.chartStore!;
     if (!initialized.get()) {
       return null;
     }
@@ -345,9 +345,35 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
       chartDimensions,
       chartRotation,
       chartTransform,
+      debug,
       setCursorPosition,
+      isChartEmpty,
+      legendCollapsed,
+      legendPosition,
+      chartTheme,
     } = this.props.chartStore!;
 
+    if (isChartEmpty) {
+      const isLegendCollapsed = legendCollapsed.get();
+      const { verticalWidth, horizontalHeight } = chartTheme.legend;
+
+      const paddingStyle =
+        legendPosition && isVertical(legendPosition)
+          ? legendPosition === Position.Right
+            ? { paddingLeft: -verticalWidth }
+            : { paddingLeft: verticalWidth }
+          : legendPosition === Position.Top
+          ? { paddingTop: horizontalHeight }
+          : { paddingTop: -horizontalHeight };
+
+      const style = isLegendCollapsed ? undefined : paddingStyle;
+
+      return (
+        <div className="echReactiveChart_unavailable">
+          <p style={style}>No data to display</p>
+        </div>
+      );
+    }
     // disable clippings when debugging
     const clippings = debug
       ? {}

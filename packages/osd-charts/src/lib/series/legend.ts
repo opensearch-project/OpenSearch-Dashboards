@@ -26,12 +26,10 @@ export function computeLegend(
   deselectedDataSeries?: DataSeriesColorsValues[] | null,
 ): Map<string, LegendItem> {
   const legendItems: Map<string, LegendItem> = new Map();
-
   const sortedSeriesColors = getSortedDataSeriesColorsValuesMap(seriesColor);
 
   sortedSeriesColors.forEach((series, key) => {
     const spec = specs.get(series.specId);
-
     const color = seriesColorMap.get(key) || defaultColor;
     const hasSingleSeries = seriesColor.size === 1;
     const label = getSeriesColorLabel(series.colorValues, hasSingleSeries, spec);

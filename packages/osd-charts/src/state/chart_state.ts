@@ -73,6 +73,7 @@ import {
   computeSeriesGeometries,
   getAxesSpecForSpecId,
   getUpdatedCustomSeriesColors,
+  isAllSeriesDeselected,
   isChartAnimatable,
   isHistogramModeEnabled,
   isLineAreaOnlyChart,
@@ -147,7 +148,7 @@ export class ChartStore {
   annotationDimensions = observable.map<AnnotationId, AnnotationDimensions>(new Map());
 
   seriesSpecs: Map<SpecId, BasicSeriesSpec> = new Map(); // readed from jsx
-
+  isChartEmpty: boolean = true;
   seriesDomainsAndData?: SeriesDomainsAndData; // computed
   xScale?: Scale;
   yScales?: Map<GroupId, Scale>;
@@ -809,8 +810,7 @@ export class ChartStore {
       this.deselectedDataSeries,
     );
 
-    // tslint:disable-next-line:no-console
-    // console.log({ legendItems: this.legendItems });
+    this.isChartEmpty = isAllSeriesDeselected(this.legendItems);
 
     const {
       xDomain,

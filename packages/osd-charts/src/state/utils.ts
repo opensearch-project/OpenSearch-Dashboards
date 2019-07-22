@@ -2,6 +2,7 @@ import { isVertical } from '../lib/axes/axis_utils';
 import { CurveType } from '../lib/series/curves';
 import { mergeXDomain, XDomain } from '../lib/series/domains/x_domain';
 import { mergeYDomain, YDomain } from '../lib/series/domains/y_domain';
+import { LegendItem } from '../lib/series/legend';
 import {
   AreaGeometry,
   BarGeometry,
@@ -636,4 +637,13 @@ export function isChartAnimatable(geometriesCounts: GeometriesCounts, animationE
   const isBarsAnimatable = bars <= MAX_ANIMATABLE_BARS;
   const isLinesAndAreasAnimatable = linePoints + areasPoints <= MAX_ANIMATABLE_LINES_AREA_POINTS;
   return isBarsAnimatable && isLinesAndAreasAnimatable;
+}
+
+export function isAllSeriesDeselected(legendItems: Map<string, LegendItem>): boolean {
+  for (const [, legendItem] of legendItems) {
+    if (legendItem.isSeriesVisible) {
+      return false;
+    }
+  }
+  return true;
 }
