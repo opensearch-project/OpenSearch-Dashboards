@@ -442,7 +442,11 @@ storiesOf('Interactions', module)
     const oneDay = 1000 * 60 * 60 * 24;
     return (
       <Chart className={'story-chart'}>
-        <Settings debug={boolean('debug', false)} onBrushEnd={action('onBrushEnd')} />
+        <Settings
+          debug={boolean('debug', false)}
+          onBrushEnd={action('onBrushEnd')}
+          onElementClick={action('onElementClick')}
+        />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
