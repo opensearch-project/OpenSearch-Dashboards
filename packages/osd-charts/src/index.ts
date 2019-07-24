@@ -24,3 +24,4 @@ export {
   RectAnnotationDatum,
   RectAnnotationSpec,
 } from './lib/series/specs';
+export { GeometryValue } from './lib/series/rendering';
