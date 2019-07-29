@@ -1,8 +1,8 @@
 import React from 'react';
 import { Group, Rect } from 'react-konva';
-import { RectAnnotationStyle } from '../../lib/themes/theme';
-import { Dimensions } from '../../lib/utils/dimensions';
-import { AnnotationRectProps } from '../../state/annotation_utils';
+import { RectAnnotationStyle } from '../../utils/themes/theme';
+import { Dimensions } from '../../utils/dimensions';
+import { AnnotationRectProps } from '../../chart_types/xy_chart/annotations/annotation_utils';
 
 interface RectAnnotationProps {
   chartDimensions: Dimensions;

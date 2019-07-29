@@ -14,8 +14,8 @@ import {
   ScaleType,
   Settings,
 } from '../src/';
-import * as TestDatasets from '../src/lib/series/utils/test_dataset';
-import { TSVB_DATASET } from '../src/lib/series/utils/test_dataset_tsvb';
+import * as TestDatasets from '../src/utils/data_samples/test_dataset';
+import { TSVB_DATASET } from '../src/utils/data_samples/test_dataset_tsvb';
 
 storiesOf('Legend', module)
   .add('right', () => {

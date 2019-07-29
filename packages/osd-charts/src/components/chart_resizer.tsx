@@ -2,7 +2,7 @@ import { inject, observer } from 'mobx-react';
 import React, { RefObject } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { debounce } from 'ts-debounce';
-import { ChartStore } from '../state/chart_state';
+import { ChartStore } from '../chart_types/xy_chart/store/chart_state';
 
 interface ResizerProps {
   chartStore?: ChartStore;

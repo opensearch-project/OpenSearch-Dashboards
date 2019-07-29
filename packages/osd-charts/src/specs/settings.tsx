@@ -1,19 +1,18 @@
 import { inject } from 'mobx-react';
 import { PureComponent } from 'react';
-
-import { DomainRange, Position, Rendering, Rotation } from '../lib/series/specs';
-import { DARK_THEME } from '../lib/themes/dark_theme';
-import { LIGHT_THEME } from '../lib/themes/light_theme';
-import { BaseThemeType, mergeWithDefaultTheme, PartialTheme, Theme, BaseThemeTypes } from '../lib/themes/theme';
-import { Domain } from '../lib/utils/domain';
-import { TooltipType, TooltipValueFormatter } from '../lib/utils/interactions';
+import { DomainRange, Position, Rendering, Rotation } from '../chart_types/xy_chart/utils/specs';
+import { LIGHT_THEME } from '../utils/themes/light_theme';
+import { DARK_THEME } from '../utils/themes/dark_theme';
+import { BaseThemeType, mergeWithDefaultTheme, PartialTheme, Theme, BaseThemeTypes } from '../utils/themes/theme';
+import { Domain } from '../utils/domain';
+import { TooltipType, TooltipValueFormatter } from '../chart_types/xy_chart/utils/interactions';
 import {
   BrushEndListener,
   ChartStore,
   ElementClickListener,
   ElementOverListener,
   LegendItemListener,
-} from '../state/chart_state';
+} from '../chart_types/xy_chart/store/chart_state';
 
 export const DEFAULT_TOOLTIP_TYPE = TooltipType.VerticalCursor;
 export const DEFAULT_TOOLTIP_SNAP = true;
@@ -112,7 +111,7 @@ function updateChartStore(props: SettingSpecProps) {
   chartStore.setShowLegend(showLegend);
   chartStore.legendPosition = legendPosition;
   chartStore.showLegendDisplayValue.set(showLegendDisplayValue);
-  chartStore.xDomain = xDomain;
+  chartStore.customXDomain = xDomain;
 
   if (onElementOver) {
     chartStore.setOnElementOverListener(onElementOver);

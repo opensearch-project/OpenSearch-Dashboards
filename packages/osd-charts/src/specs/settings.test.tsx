@@ -1,12 +1,12 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
-import { Position, Rendering, Rotation } from '../lib/series/specs';
-import { DARK_THEME } from '../lib/themes/dark_theme';
-import { LIGHT_THEME } from '../lib/themes/light_theme';
-import { TooltipType } from '../lib/utils/interactions';
-import { ChartStore } from '../state/chart_state';
+import { Position, Rendering, Rotation } from '../chart_types/xy_chart/utils/specs';
+import { DARK_THEME } from '../utils/themes/dark_theme';
+import { LIGHT_THEME } from '../utils/themes/light_theme';
+import { TooltipType } from '../chart_types/xy_chart/utils/interactions';
+import { ChartStore } from '../chart_types/xy_chart/store/chart_state';
 import { DEFAULT_TOOLTIP_SNAP, DEFAULT_TOOLTIP_TYPE, SettingsComponent, SettingSpecProps } from './settings';
-import { PartialTheme, BaseThemeTypes } from '../lib/themes/theme';
+import { PartialTheme, BaseThemeTypes } from '../utils/themes/theme';
 
 describe('Settings spec component', () => {
   test('should update store on mount if spec has a chart store', () => {
@@ -50,7 +50,7 @@ describe('Settings spec component', () => {
     expect(chartStore.legendPosition).toBe(Position.Bottom);
     expect(chartStore.showLegendDisplayValue.get()).toEqual(false);
     expect(chartStore.debug).toBe(true);
-    expect(chartStore.xDomain).toEqual({ min: 0, max: 10 });
+    expect(chartStore.customXDomain).toEqual({ min: 0, max: 10 });
   });
 
   test('should set chart properties on chart store', () => {
@@ -66,7 +66,7 @@ describe('Settings spec component', () => {
     expect(chartStore.showLegendDisplayValue.get()).toEqual(true);
     expect(chartStore.legendPosition).toBeUndefined();
     expect(chartStore.debug).toBe(false);
-    expect(chartStore.xDomain).toBeUndefined();
+    expect(chartStore.customXDomain).toBeUndefined();
 
     const updatedProps: SettingSpecProps = {
       theme: DARK_THEME,
@@ -96,7 +96,7 @@ describe('Settings spec component', () => {
     expect(chartStore.legendPosition).toBe(Position.Bottom);
     expect(chartStore.showLegendDisplayValue.get()).toEqual(false);
     expect(chartStore.debug).toBe(true);
-    expect(chartStore.xDomain).toEqual({ min: 0, max: 10 });
+    expect(chartStore.customXDomain).toEqual({ min: 0, max: 10 });
   });
 
   test('should set event listeners on chart store', () => {

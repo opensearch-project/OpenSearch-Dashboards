@@ -1,8 +1,8 @@
 import { inject, observer } from 'mobx-react';
 import React, { CSSProperties } from 'react';
-import { TooltipType } from '../lib/utils/interactions';
-import { ChartStore } from '../state/chart_state';
-import { isHorizontalRotation } from '../state/utils';
+import { TooltipType } from '../chart_types/xy_chart/utils/interactions';
+import { ChartStore } from '../chart_types/xy_chart/store/chart_state';
+import { isHorizontalRotation } from '../chart_types/xy_chart/store/utils';
 
 interface CrosshairProps {
   chartStore?: ChartStore;

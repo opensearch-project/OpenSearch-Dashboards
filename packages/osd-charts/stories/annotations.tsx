@@ -20,7 +20,7 @@ import {
   timeFormatter,
 } from '../src';
 import { Icon } from '../src/components/icons/icon';
-import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
+import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 
 const dateFormatter = timeFormatter('HH:mm:ss');
 

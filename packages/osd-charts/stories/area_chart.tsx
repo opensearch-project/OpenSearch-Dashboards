@@ -15,7 +15,7 @@ import {
   Settings,
   timeFormatter,
 } from '../src';
-import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
+import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 const dateFormatter = timeFormatter('HH:mm');
 
 storiesOf('Area Chart', module)

@@ -1,14 +1,14 @@
-import { GeometryStyle } from '../../../lib/series/rendering';
-import { Rotation } from '../../../lib/series/specs';
+import { GeometryStyle } from '../../../chart_types/xy_chart/rendering/rendering';
+import { Rotation } from '../../../chart_types/xy_chart/utils/specs';
 import {
   AreaStyle,
   DisplayValueStyle,
   LineStyle,
   PointStyle,
-  RectStyle,
   RectBorderStyle,
-} from '../../../lib/themes/theme';
-import { Dimensions } from '../../../lib/utils/dimensions';
+  RectStyle,
+} from '../../../utils/themes/theme';
+import { Dimensions } from '../../../utils/dimensions';
 import { GlobalKonvaElementProps } from '../globals';
 
 export interface PointStyleProps {

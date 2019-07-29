@@ -1,6 +1,6 @@
 import { inject } from 'mobx-react';
 import { PureComponent } from 'react';
-import { ChartStore } from '../state/chart_state';
+import { ChartStore } from '../chart_types/xy_chart/store/chart_state';
 
 export interface SpecProps {
   chartStore?: ChartStore; // FIX

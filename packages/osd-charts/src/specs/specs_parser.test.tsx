@@ -1,6 +1,6 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
-import { ChartStore } from '../state/chart_state';
+import { ChartStore } from '../chart_types/xy_chart/store/chart_state';
 import { SpecsSpecRootComponent } from './specs_parser';
 
 describe('Specs parser', () => {

@@ -27,8 +27,8 @@ import {
 import { array, boolean, number, select } from '@storybook/addon-knobs';
 import { DateTime } from 'luxon';
 import { switchTheme } from '../.storybook/theme_service';
-import { BARCHART_2Y2G } from '../src/lib/series/utils/test_dataset';
-import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
+import { BARCHART_2Y2G } from '../src/utils/data_samples/test_dataset';
+import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 
 const onElementListeners = {
   onElementClick: action('onElementClick'),

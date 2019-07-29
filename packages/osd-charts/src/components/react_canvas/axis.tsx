@@ -9,10 +9,10 @@ import {
   getVerticalAxisTickLineProps,
   isHorizontal,
   isVertical,
-} from '../../lib/axes/axis_utils';
-import { AxisSpec, Position } from '../../lib/series/specs';
-import { Theme } from '../../lib/themes/theme';
-import { Dimensions } from '../../lib/utils/dimensions';
+} from '../../chart_types/xy_chart/utils/axis_utils';
+import { AxisSpec, Position } from '../../chart_types/xy_chart/utils/specs';
+import { Theme } from '../../utils/themes/theme';
+import { Dimensions } from '../../utils/dimensions';
 
 interface AxisProps {
   chartTheme: Theme;

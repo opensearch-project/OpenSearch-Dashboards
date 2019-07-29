@@ -15,8 +15,8 @@ import {
   Settings,
   timeFormatter,
 } from '../src/';
-import { KIBANA_METRICS } from '../src/lib/series/utils/test_dataset_kibana';
-import { TSVB_DATASET } from '../src/lib/series/utils/test_dataset_tsvb';
+import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
+import { TSVB_DATASET } from '../src/utils/data_samples/test_dataset_tsvb';
 
 const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
 

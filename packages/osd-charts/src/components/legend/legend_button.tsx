@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import { inject, observer } from 'mobx-react';
 import React from 'react';
-import { ChartStore } from '../../state/chart_state';
+import { ChartStore } from '../../chart_types/xy_chart/store/chart_state';
 import { Icon } from '../icons/icon';
 
 interface LegendButtonProps {

@@ -3,7 +3,7 @@ import { inject, observer } from 'mobx-react';
 import React from 'react';
 import { Icon } from '../icons/icon';
 
-import { ChartStore } from '../../state/chart_state';
+import { ChartStore } from '../../chart_types/xy_chart/store/chart_state';
 
 interface LegendItemProps {
   chartStore?: ChartStore; // FIX until we find a better way on ts mobx
