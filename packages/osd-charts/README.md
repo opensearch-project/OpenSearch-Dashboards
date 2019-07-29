@@ -3,12 +3,14 @@
 </h1>
 <p align="center">
   <a href="(https://travis-ci.org/elastic/elastic-charts"><img alt="Build Status" src="https://travis-ci.org/elastic/elastic-charts.svg?branch=master"></a>
-  <a href="https://codecov.io/gh/elastic/elastic-charts"><img alt="Codecov" src="https://img.shields.io/codecov/c/github/elastic/elastic-charts.svg?style=flat">
+  <a href="https://codecov.io/gh/elastic/elastic-charts">
+    <img src="https://codecov.io/gh/elastic/elastic-charts/branch/master/graph/badge.svg" />
   </a>
   <a href="https://www.npmjs.com/@elastic/charts"><img alt="NPM version" src="https://img.shields.io/npm/v/@elastic/charts.svg?style=flat"></a>
   <a href="http://commitizen.github.io/cz-cli/"><img alt="Commitizen friendly" src="https://img.shields.io/badge/commitizen-friendly-brightgreen.svg"></a>
-  <a href="https://elastic.github.io/elastic-charts"><img alt="Storybook" src="https://github.com/storybooks/press/raw/master/badges/storybook.svg?sanitize=true"></a>
-  
+  <a href="https://elastic.github.io/elastic-charts">
+    <img src="https://img.shields.io/static/v1?label=examples&message=storybook&color=blueviolet">
+  </a>
 </p>
 
 🚨 **WARNING** While open source, the intended consumers of this repository are Elastic products. Read the [FAQ][faq] for details.
