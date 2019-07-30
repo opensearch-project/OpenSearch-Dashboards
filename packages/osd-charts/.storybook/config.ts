@@ -1,24 +1,30 @@
 import { withInfo } from '@storybook/addon-info';
 import { withKnobs } from '@storybook/addon-knobs';
-import { withOptions } from '@storybook/addon-options';
-import { addDecorator, configure } from '@storybook/react';
+import { addDecorator, configure, addParameters } from '@storybook/react';
 import { switchTheme } from './theme_service';
 switchTheme('light');
 import './style.scss';
 
-addDecorator(
-  withOptions({
-    name: 'Elastic Charts',
-    url: 'https://github.com/elastic/elastic-charts',
-    addonPanelInRight: true,
+import { create } from '@storybook/theming';
+addParameters({
+  options: {
+    theme: create({
+      base: 'light',
+      brandTitle: 'Elastic Charts',
+      brandUrl: 'https://github.com/elastic/elastic-charts',
+      brandImage:
+        'https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt6ae3d6980b5fd629/5bbca1d1af3a954c36f95ed3/logo-elastic.svg',
+    }),
+    panelPosition: 'right',
     sidebarAnimations: true,
-  }),
-);
+  },
+});
+
 addDecorator(withKnobs);
 addDecorator(
   withInfo({
     inline: true,
-    source: false,
+    source: true,
     styles: {
       infoBody: {
         marginTop: 0,

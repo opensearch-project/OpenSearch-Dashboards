@@ -46,10 +46,10 @@ export interface SettingSpecProps {
   showLegendDisplayValue: boolean;
   onElementClick?: ElementClickListener;
   onElementOver?: ElementOverListener;
-  onElementOut?: () => undefined;
+  onElementOut?: () => undefined | void;
   onBrushEnd?: BrushEndListener;
   onLegendItemOver?: LegendItemListener;
-  onLegendItemOut?: () => undefined;
+  onLegendItemOut?: () => undefined | void;
   onLegendItemClick?: LegendItemListener;
   onLegendItemPlusClick?: LegendItemListener;
   onLegendItemMinusClick?: LegendItemListener;

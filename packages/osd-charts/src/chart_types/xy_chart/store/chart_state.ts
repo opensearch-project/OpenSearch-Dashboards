@@ -193,10 +193,10 @@ export class ChartStore {
 
   onElementClickListener?: ElementClickListener;
   onElementOverListener?: ElementOverListener;
-  onElementOutListener?: () => undefined;
+  onElementOutListener?: () => undefined | void;
   onBrushEndListener?: BrushEndListener;
   onLegendItemOverListener?: LegendItemListener;
-  onLegendItemOutListener?: () => undefined;
+  onLegendItemOutListener?: () => undefined | void;
   onLegendItemClickListener?: LegendItemListener;
   onLegendItemPlusClickListener?: LegendItemListener;
   onLegendItemMinusClickListener?: LegendItemListener;
@@ -644,7 +644,7 @@ export class ChartStore {
   setOnElementOverListener(listener: ElementOverListener) {
     this.onElementOverListener = listener;
   }
-  setOnElementOutListener(listener: () => undefined) {
+  setOnElementOutListener(listener: () => undefined | void) {
     this.onElementOutListener = listener;
   }
   setOnBrushEndListener(listener: BrushEndListener) {
@@ -653,7 +653,7 @@ export class ChartStore {
   setOnLegendItemOverListener(listener: LegendItemListener) {
     this.onLegendItemOverListener = listener;
   }
-  setOnLegendItemOutListener(listener: () => undefined) {
+  setOnLegendItemOutListener(listener: () => undefined | void) {
     this.onLegendItemOutListener = listener;
   }
   setOnLegendItemClickListener(listener: LegendItemListener) {
