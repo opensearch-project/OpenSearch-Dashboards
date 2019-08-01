@@ -19,7 +19,8 @@ export const DARK_THEME: Theme = {
     },
     point: {
       visible: true,
-      strokeWidth: 0,
+      strokeWidth: 0.5,
+      fill: 'white',
       radius: 1,
       opacity: 1,
     },
@@ -27,16 +28,17 @@ export const DARK_THEME: Theme = {
   areaSeriesStyle: {
     area: {
       visible: true,
-      opacity: 1,
+      opacity: 0.8,
     },
     line: {
       visible: true,
-      strokeWidth: 1,
+      strokeWidth: 1.5,
       opacity: 1,
     },
     point: {
-      visible: true,
-      strokeWidth: 0,
+      visible: false,
+      fill: 'white',
+      strokeWidth: 0.5,
       radius: 1,
       opacity: 1,
     },

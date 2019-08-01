@@ -779,8 +779,8 @@ describe('Chart State utils', () => {
         visible: true,
         fill: 'green', // the override strokeWidth
         opacity: 1,
-        radius: 4,
-        strokeWidth: 0,
+        radius: 1,
+        strokeWidth: 0.5,
       });
     });
     test('can compute area geometries with custom style', () => {
@@ -868,11 +868,11 @@ describe('Chart State utils', () => {
         opacity: 1,
       });
       expect(geometries.geometries.areas[0].seriesPointStyle).toEqual({
-        visible: true,
+        visible: false,
         fill: 'point-fill-custom-color', // the override strokeWidth
         opacity: 1,
-        radius: 4,
-        strokeWidth: 0,
+        radius: 1,
+        strokeWidth: 0.5,
       });
     });
     test('can compute bars geometries counts', () => {
