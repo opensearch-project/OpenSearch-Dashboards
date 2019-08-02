@@ -2,7 +2,11 @@ import { inject, observer } from 'mobx-react';
 import React from 'react';
 import { isLineAnnotation } from '../chart_types/xy_chart/utils/specs';
 import { AnnotationId } from '../utils/ids';
-import { AnnotationDimensions, AnnotationLineProps } from '../chart_types/xy_chart/annotations/annotation_utils';
+import {
+  AnnotationDimensions,
+  AnnotationLineProps,
+  AnnotationTooltipFormatter,
+} from '../chart_types/xy_chart/annotations/annotation_utils';
 import { ChartStore } from '../chart_types/xy_chart/store/chart_state';
 
 interface AnnotationTooltipProps {
@@ -114,10 +118,15 @@ export const AnnotationTooltip = inject('chartStore')(observer(AnnotationTooltip
 function RectAnnotationTooltip(props: {
   details?: string;
   position: { transform: string; top: number; left: number };
-  customTooltip?: (details?: string) => JSX.Element;
+  customTooltip?: AnnotationTooltipFormatter;
 }) {
   const { details, position, customTooltip } = props;
   const tooltipContent = customTooltip ? customTooltip(details) : details;
+
+  if (!tooltipContent) {
+    return null;
+  }
+
   return (
     <div className="echAnnotation__tooltip" style={{ ...position }}>
       <div className="echAnnotation__details">

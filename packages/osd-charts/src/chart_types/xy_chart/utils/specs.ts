@@ -11,6 +11,7 @@ import { Omit, RecursivePartial } from '../../../utils/commons';
 import { AnnotationId, AxisId, GroupId, SpecId } from '../../../utils/ids';
 import { ScaleContinuousType, ScaleType } from '../../../utils/scales/scales';
 import { CurveType } from '../../../utils/curves';
+import { AnnotationTooltipFormatter } from '../annotations/annotation_utils';
 import { DataSeriesColorsValues } from './series';
 
 export type Datum = any;
@@ -313,7 +314,7 @@ export interface RectAnnotationDatum {
 export type RectAnnotationSpec = BaseAnnotationSpec & {
   annotationType: 'rectangle';
   /** Custom rendering function for tooltip */
-  renderTooltip?: (details?: string) => JSX.Element;
+  renderTooltip?: AnnotationTooltipFormatter;
   /** Data values defined with coordinates and details */
   dataValues: RectAnnotationDatum[];
   /** Custom annotation style */

@@ -23,6 +23,7 @@ import { Scale, ScaleType } from '../../../utils/scales/scales';
 import { Point } from '../store/chart_state';
 import { computeXScaleOffset, getAxesSpecForSpecId, isHorizontalRotation } from '../store/utils';
 
+export type AnnotationTooltipFormatter = (details?: string) => JSX.Element | null;
 export interface AnnotationTooltipState {
   annotationType: AnnotationType;
   isVisible: boolean;
@@ -31,7 +32,7 @@ export interface AnnotationTooltipState {
   transform: string;
   top?: number;
   left?: number;
-  renderTooltip?: (details?: string) => JSX.Element;
+  renderTooltip?: AnnotationTooltipFormatter;
 }
 export interface AnnotationDetails {
   headerText?: string;
@@ -925,7 +926,7 @@ export function computeRectAnnotationTooltipState(
   annotationRects: AnnotationRectProps[],
   chartRotation: Rotation,
   chartDimensions: Dimensions,
-  renderTooltip?: (details?: string) => JSX.Element,
+  renderTooltip?: AnnotationTooltipFormatter,
 ): AnnotationTooltipState {
   const cursorPosition = getRotatedCursor(rawCursorPosition, chartDimensions, chartRotation);
 

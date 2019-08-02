@@ -25,3 +25,4 @@ export {
   RectAnnotationSpec,
 } from './chart_types/xy_chart/utils/specs';
 export { GeometryValue } from './chart_types/xy_chart/rendering/rendering';
+export { AnnotationTooltipFormatter } from './chart_types/xy_chart/annotations/annotation_utils';
