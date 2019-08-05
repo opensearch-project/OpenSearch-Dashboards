@@ -367,12 +367,13 @@ export class ChartStore {
         }
 
         // format the tooltip values
-        const formattedTooltip = formatTooltip(indexedGeometry, spec, false, isHighlighted, yAxis);
-
+        const yAxisFormatSpec = [0, 180].includes(this.chartRotation) ? yAxis : xAxis;
+        const formattedTooltip = formatTooltip(indexedGeometry, spec, false, isHighlighted, yAxisFormatSpec);
         // format only one time the x value
         if (!xValueInfo) {
           // if we have a tooltipHeaderFormatter, then don't pass in the xAxis as the user will define a formatter
-          const formatterAxis = this.tooltipHeaderFormatter ? undefined : xAxis;
+          const xAxisFormatSpec = [0, 180].includes(this.chartRotation) ? xAxis : yAxis;
+          const formatterAxis = this.tooltipHeaderFormatter ? undefined : xAxisFormatSpec;
           xValueInfo = formatTooltip(indexedGeometry, spec, true, false, formatterAxis);
           return [xValueInfo, ...acc, formattedTooltip];
         }

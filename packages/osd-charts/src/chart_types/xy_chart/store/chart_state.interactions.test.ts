@@ -1,8 +1,8 @@
 import { BarGeometry } from '../rendering/rendering';
 import { computeXScale, computeYScales } from '../utils/scales';
 import { DataSeriesColorsValues } from '../utils/series';
-import { BarSeriesSpec, BasicSeriesSpec, RectAnnotationSpec } from '../utils/specs';
-import { getAnnotationId, getGroupId, getSpecId } from '../../../utils/ids';
+import { BarSeriesSpec, BasicSeriesSpec, RectAnnotationSpec, Position } from '../utils/specs';
+import { getAnnotationId, getGroupId, getSpecId, getAxisId } from '../../../utils/ids';
 import { TooltipType } from '../utils/interactions';
 import { ScaleContinuous } from '../../../utils/scales/scale_continuous';
 import { ScaleType } from '../../../utils/scales/scales';
@@ -390,6 +390,44 @@ function mouseOverTestSuite(scaleType: ScaleType) {
       store.setCursorPosition(chartLeft + 99, chartTop + 99);
       const expectedTransform = `translateX(109px) translateX(-100%) translateY(${chartTop}px) translateY(-0%)`;
       expect(store.tooltipPosition.transform).toBe(expectedTransform);
+    });
+  });
+  describe('can format tooltip values on rotated chart', () => {
+    beforeEach(() => {
+      store.addAxisSpec({
+        hide: true,
+        id: getAxisId('yaxis'),
+        groupId: GROUP_ID,
+        position: Position.Left,
+        tickFormat: (value) => `left ${Number(value)}`,
+        showOverlappingLabels: false,
+        showOverlappingTicks: false,
+        tickPadding: 0,
+        tickSize: 0,
+      });
+      store.addAxisSpec({
+        hide: true,
+        id: getAxisId('xaxis'),
+        groupId: GROUP_ID,
+        position: Position.Bottom,
+        tickFormat: (value) => `bottom ${Number(value)}`,
+        showOverlappingLabels: false,
+        showOverlappingTicks: false,
+        tickPadding: 0,
+        tickSize: 0,
+      });
+    });
+    test('chart 0 rotation', () => {
+      store.setCursorPosition(chartLeft + 0, chartTop + 99);
+      expect(store.tooltipData[0].value).toBe('bottom 0');
+      expect(store.tooltipData[1].value).toBe('left 10');
+    });
+
+    test('chart 90 deg rotated', () => {
+      store.chartRotation = 90;
+      store.setCursorPosition(chartLeft + 0, chartTop + 99);
+      expect(store.tooltipData[0].value).toBe('left 1');
+      expect(store.tooltipData[1].value).toBe('bottom 5');
     });
   });
 }
