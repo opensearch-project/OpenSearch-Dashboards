@@ -1,9 +1,9 @@
 export * from './specs';
 export { Chart } from './components/chart';
 export { TooltipType, TooltipValue, TooltipValueFormatter } from './chart_types/xy_chart/utils/interactions';
-export { getAxisId, getGroupId, getSpecId, getAnnotationId } from './utils/ids';
+export { SpecId, GroupId, AxisId, AnnotationId, getAxisId, getGroupId, getSpecId, getAnnotationId } from './utils/ids';
 export { ScaleType } from './utils/scales/scales';
-export { Position, Rendering, Rotation } from './chart_types/xy_chart/utils/specs';
+export { Position, Rendering, Rotation, TickFormatter } from './chart_types/xy_chart/utils/specs';
 export * from './utils/themes/theme';
 export { LIGHT_THEME } from './utils/themes/light_theme';
 export { DARK_THEME } from './utils/themes/dark_theme';
@@ -26,3 +26,10 @@ export {
 } from './chart_types/xy_chart/utils/specs';
 export { GeometryValue } from './chart_types/xy_chart/rendering/rendering';
 export { AnnotationTooltipFormatter } from './chart_types/xy_chart/annotations/annotation_utils';
+export { SettingSpecProps } from './specs/settings';
+export {
+  BrushEndListener,
+  ElementClickListener,
+  ElementOverListener,
+  LegendItemListener,
+} from './chart_types/xy_chart/store/chart_state';
