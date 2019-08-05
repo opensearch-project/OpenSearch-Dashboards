@@ -7,45 +7,40 @@
   pointer-events: none;
   user-select: none;
 
-  table {
-    border-collapse: collapse;
-    border-spacing: 0;
-    td,
-    th {
-      padding: 3px;
-    }
+  &__list {
+    margin: $euiSizeXS;
   }
-  table {
-    width: 100%;
+
+  &__header {
+    @include euiToolTipTitle;
+    padding: $euiSizeXS ($euiSizeXS * 2);
   }
-}
 
-.echTooltip__header {
-  @include euiToolTipTitle;
-  padding: $euiSizeXS ($euiSizeXS * 2);
-}
+  &__item {
+    display: flex;
+    padding: 3px;
+    box-sizing: border-box;
+    border-left: $euiSizeXS solid transparent;
+  }
 
-.echTooltip__label {
-  @include euiTextTruncate;
-  // Border indicates series color
-  border-left: $euiSizeXS solid transparent;
-}
+  &__label {
+    @include euiTextOverflowWrap;
+    min-width: 1px;
+    flex: 1;
+  }
 
-.echTooltip__value {
-  font-weight: $euiFontWeightBold;
-  text-align: right;
-  font-feature-settings: 'tnum';
-}
+  &__value {
+    font-weight: $euiFontWeightBold;
+    text-align: right;
+    font-feature-settings: 'tnum';
+    margin-left: 8px;
+  }
 
-.echTooltip__rowHighlighted {
-  background-color: transparentize($euiColorGhost, .9);
-  border-radius: $euiBorderRadius;
-}
+  &__rowHighlighted {
+    background-color: transparentize($euiColorGhost, 0.9);
+  }
 
-.echTooltip--hidden {
-  opacity: 0;
-}
-
-.echTooltip__table {
-  margin: $euiSizeXS;
+  &--hidden {
+    opacity: 0;
+  }
 }
