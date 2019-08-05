@@ -451,6 +451,7 @@ export function renderGeometries(
         ds.key,
         barSeriesStyle,
         displayValueSettings,
+        spec.styleAccessor,
       );
       barGeometriesIndex = mergeGeometriesIndexes(barGeometriesIndex, renderedBars.indexedGeometries);
       bars.push(...renderedBars.barGeometries);

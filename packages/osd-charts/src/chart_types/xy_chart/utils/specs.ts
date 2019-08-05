@@ -11,12 +11,16 @@ import { Omit, RecursivePartial } from '../../../utils/commons';
 import { AnnotationId, AxisId, GroupId, SpecId } from '../../../utils/ids';
 import { ScaleContinuousType, ScaleType } from '../../../utils/scales/scales';
 import { CurveType } from '../../../utils/curves';
+import { DataSeriesColorsValues, RawDataSeriesDatum } from './series';
+import { GeometryId } from '../rendering/rendering';
 import { AnnotationTooltipFormatter } from '../annotations/annotation_utils';
-import { DataSeriesColorsValues } from './series';
 
 export type Datum = any;
 export type Rotation = 0 | 90 | -90 | 180;
 export type Rendering = 'canvas' | 'svg';
+export type Color = string;
+export type StyleOverride = RecursivePartial<BarSeriesStyle> | Color | null;
+export type StyleAccessor = (datum: RawDataSeriesDatum, geometryId: GeometryId) => StyleOverride;
 
 interface DomainMinInterval {
   /** Custom minInterval for the domain which will affect data bucket size.
@@ -97,8 +101,8 @@ export interface SeriesAccessors {
   splitSeriesAccessors?: Accessor[];
   /** An array of fields thats indicates the stack membership */
   stackAccessors?: Accessor[];
-  /** An optional array of field name thats indicates the stack membership */
-  colorAccessors?: Accessor[];
+  /** An optional functional accessor to return custom datum color or style */
+  styleAccessor?: StyleAccessor;
 }
 
 export interface SeriesScales {

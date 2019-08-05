@@ -1,4 +1,5 @@
 import { area, line } from 'd3-shape';
+
 import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
 import {
   AreaSeriesStyle,
@@ -16,7 +17,8 @@ import { CurveType, getCurveFactory } from '../../../utils/curves';
 import { LegendItem } from '../legend/legend';
 import { DataSeriesDatum } from '../utils/series';
 import { belongsToDataSeries } from '../utils/series_utils';
-import { DisplayValueSpec } from '../utils/specs';
+import { DisplayValueSpec, StyleAccessor } from '../utils/specs';
+import { mergePartial } from '../../../utils/commons';
 
 export interface GeometryId {
   specId: SpecId;
@@ -113,6 +115,33 @@ export function mutableIndexedGeometryMapUpsert(
   }
 }
 
+export function getStyleOverrides(
+  datum: DataSeriesDatum,
+  geometryId: GeometryId,
+  seriesStyle: BarSeriesStyle,
+  styleAccessor?: StyleAccessor,
+): BarSeriesStyle {
+  const styleOverride = styleAccessor && styleAccessor(datum, geometryId);
+
+  if (!styleOverride) {
+    return seriesStyle;
+  }
+
+  if (typeof styleOverride === 'string') {
+    return {
+      ...seriesStyle,
+      rect: {
+        ...seriesStyle.rect,
+        fill: styleOverride,
+      },
+    };
+  }
+
+  return mergePartial(seriesStyle, styleOverride, {
+    mergeOptionalPartialValues: true,
+  });
+}
+
 export function renderPoints(
   shift: number,
   dataset: DataSeriesDatum[],
@@ -195,8 +224,9 @@ export function renderBars(
   color: string,
   specId: SpecId,
   seriesKey: any[],
-  seriesStyle: BarSeriesStyle,
+  sharedSeriesStyle: BarSeriesStyle,
   displayValueSettings?: DisplayValueSpec,
+  styleAccessor?: StyleAccessor,
 ): {
   barGeometries: BarGeometry[];
   indexedGeometries: Map<any, IndexedGeometry[]>;
@@ -210,8 +240,8 @@ export function renderBars(
 
   // default padding to 1 for now
   const padding = 1;
-  const fontSize = seriesStyle.displayValue.fontSize;
-  const fontFamily = seriesStyle.displayValue.fontFamily;
+  const fontSize = sharedSeriesStyle.displayValue.fontSize;
+  const fontFamily = sharedSeriesStyle.displayValue.fontFamily;
 
   dataset.forEach((datum) => {
     const { y0, y1, initialY1 } = datum;
@@ -278,6 +308,13 @@ export function renderBars(
           }
         : undefined;
 
+    const geometryId = {
+      specId,
+      seriesKey,
+    };
+
+    const seriesStyle = getStyleOverrides(datum, geometryId, sharedSeriesStyle, styleAccessor);
+
     const barGeometry: BarGeometry = {
       displayValue,
       x,
@@ -290,10 +327,7 @@ export function renderBars(
         y: initialY1,
         accessor: 'y1',
       },
-      geometryId: {
-        specId,
-        seriesKey,
-      },
+      geometryId,
       seriesStyle,
     };
     mutableIndexedGeometryMapUpsert(indexedGeometries, datum.x, barGeometry);

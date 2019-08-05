@@ -1,6 +1,16 @@
 import { DEFAULT_GEOMETRY_STYLES } from '../../../utils/themes/theme_commons';
 import { getSpecId } from '../../../utils/ids';
-import { BarGeometry, getGeometryStyle, isPointOnGeometry, PointGeometry } from './rendering';
+import {
+  BarGeometry,
+  getGeometryStyle,
+  isPointOnGeometry,
+  PointGeometry,
+  getStyleOverrides,
+  GeometryId,
+} from './rendering';
+import { BarSeriesStyle } from '../../../utils/themes/theme';
+import { DataSeriesDatum } from '../utils/series';
+import { RecursivePartial, mergePartial } from '../../../utils/commons';
 
 describe('Rendering utils', () => {
   test('check if point is in geometry', () => {
@@ -167,5 +177,111 @@ describe('Rendering utils', () => {
     });
 
     expect(noHover).toEqual({ opacity: 1 });
+  });
+
+  describe('getStyleOverrides', () => {
+    let mockAccessor: jest.Mock;
+
+    const sampleSeriesStyle: BarSeriesStyle = {
+      rect: {
+        opacity: 1,
+      },
+      rectBorder: {
+        visible: true,
+        strokeWidth: 1,
+      },
+      displayValue: {
+        fontSize: 10,
+        fontFamily: 'helvetica',
+        fill: 'blue',
+        padding: 1,
+        offsetX: 1,
+        offsetY: 1,
+      },
+    };
+    const datum: DataSeriesDatum = {
+      x: 1,
+      y1: 2,
+      y0: 3,
+      initialY1: 4,
+      initialY0: 5,
+    };
+    const geometryId: GeometryId = {
+      specId: getSpecId('test'),
+      seriesKey: ['test'],
+    };
+
+    beforeEach(() => {
+      mockAccessor = jest.fn();
+    });
+
+    it('should return input seriesStyle if no styleAccessor is passed', () => {
+      const styleOverrides = getStyleOverrides(datum, geometryId, sampleSeriesStyle);
+
+      expect(styleOverrides).toBe(sampleSeriesStyle);
+    });
+
+    it('should return input seriesStyle if styleAccessor returns null', () => {
+      mockAccessor.mockReturnValue(null);
+      const styleOverrides = getStyleOverrides(datum, geometryId, sampleSeriesStyle, mockAccessor);
+
+      expect(styleOverrides).toBe(sampleSeriesStyle);
+    });
+
+    it('should call styleAccessor with datum and geometryId', () => {
+      getStyleOverrides(datum, geometryId, sampleSeriesStyle, mockAccessor);
+
+      expect(mockAccessor).toBeCalledWith(datum, geometryId);
+    });
+
+    it('should return seriesStyle with updated fill color', () => {
+      const color = 'blue';
+      mockAccessor.mockReturnValue(color);
+      const styleOverrides = getStyleOverrides(datum, geometryId, sampleSeriesStyle, mockAccessor);
+      const expectedStyles: BarSeriesStyle = {
+        ...sampleSeriesStyle,
+        rect: {
+          ...sampleSeriesStyle.rect,
+          fill: color,
+        },
+      };
+      expect(styleOverrides).toEqual(expectedStyles);
+    });
+
+    it('should return a new seriesStyle object with color', () => {
+      mockAccessor.mockReturnValue('blue');
+      const styleOverrides = getStyleOverrides(datum, geometryId, sampleSeriesStyle, mockAccessor);
+
+      expect(styleOverrides).not.toBe(sampleSeriesStyle);
+    });
+
+    it('should return seriesStyle with updated partial style', () => {
+      const partialStyle: RecursivePartial<BarSeriesStyle> = {
+        rect: {
+          fill: 'blue',
+        },
+        rectBorder: {
+          strokeWidth: 10,
+        },
+      };
+      mockAccessor.mockReturnValue(partialStyle);
+      const styleOverrides = getStyleOverrides(datum, geometryId, sampleSeriesStyle, mockAccessor);
+      const expectedStyles = mergePartial(sampleSeriesStyle, partialStyle, {
+        mergeOptionalPartialValues: true,
+      });
+
+      expect(styleOverrides).toEqual(expectedStyles);
+    });
+
+    it('should return a new seriesStyle object with partial styles', () => {
+      mockAccessor.mockReturnValue({
+        rect: {
+          fill: 'blue',
+        },
+      });
+      const styleOverrides = getStyleOverrides(datum, geometryId, sampleSeriesStyle, mockAccessor);
+
+      expect(styleOverrides).not.toBe(sampleSeriesStyle);
+    });
   });
 });

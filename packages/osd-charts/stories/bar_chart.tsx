@@ -2,6 +2,7 @@ import { boolean, color, number, select } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import { DateTime } from 'luxon';
 import React from 'react';
+
 import {
   AnnotationDomainTypes,
   AreaSeries,
@@ -27,12 +28,15 @@ import {
   Settings,
   timeFormatter,
   TooltipType,
-} from '../src/';
+  RecursivePartial,
+} from '../src';
 import * as TestDatasets from '../src/utils/data_samples/test_dataset';
 
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 
 import { TEST_DATASET_DISCOVER } from '../src/utils/data_samples/test_dataset_discover_per_30s';
+import { StyleAccessor } from '../src/chart_types/xy_chart/utils/specs';
+import { BarSeriesStyle } from '../src/utils/themes/theme';
 
 const dateFormatter = timeFormatter('HH:mm:ss');
 
@@ -138,7 +142,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
         <BarSeries
           id={getSpecId('bars')}
@@ -187,7 +191,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -209,7 +213,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -260,7 +264,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -283,7 +287,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -322,7 +326,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -344,7 +348,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -376,7 +380,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -419,7 +423,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -443,7 +447,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -480,7 +484,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => (stackedAsPercentage && !clusterBars ? `${Number(d * 100).toFixed(0)} %` : d)}
+          tickFormat={(d: any) => (stackedAsPercentage && !clusterBars ? `${Number(d * 100).toFixed(0)} %` : d)}
         />
 
         <BarSeries
@@ -544,7 +548,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -577,7 +581,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'count'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -634,7 +638,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -681,7 +685,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -723,7 +727,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -746,7 +750,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -770,7 +774,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -794,7 +798,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -817,7 +821,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -841,7 +845,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -871,7 +875,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -924,7 +928,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -973,7 +977,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -995,7 +999,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -1018,7 +1022,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -1042,7 +1046,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -1067,7 +1071,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -1091,7 +1095,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -1157,7 +1161,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -1175,14 +1179,14 @@ storiesOf('Bar Chart', module)
     );
   })
   .add('band bar chart', () => {
-    const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => {
+    const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d: any) => {
       return {
         x: d[0],
         max: d[1] + 4 + 4 * Math.random(),
         min: d[1] - 4 - 4 * Math.random(),
       };
     });
-    const lineData = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => {
+    const lineData = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d: any) => {
       return [d[0], d[1]];
     });
     const scaleToDataExtent = boolean('scale to extent', true);
@@ -1199,7 +1203,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left')}
           title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -1236,7 +1240,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left')}
           title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
         <BarSeries
           id={getSpecId('lines')}
@@ -1269,7 +1273,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left')}
           title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
         <BarSeries
           id={getSpecId('data')}
@@ -1291,7 +1295,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left')}
           title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
         <BarSeries
           id={getSpecId('lines')}
@@ -1324,7 +1328,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left')}
           title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
         <BarSeries
           id={getSpecId('data')}
@@ -1355,7 +1359,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left')}
           title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
         <BarSeries
           id={getSpecId('lines')}
@@ -1387,7 +1391,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left')}
           title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
         <BarSeries
           id={getSpecId('lines')}
@@ -1410,7 +1414,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left2')}
           title={'Left axis'}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
 
         <BarSeries
@@ -1721,7 +1725,7 @@ storiesOf('Bar Chart', module)
           id={getAxisId('left')}
           title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
           domain={{ min: 0, max: 15 }}
         />
         <Axis
@@ -1729,7 +1733,7 @@ storiesOf('Bar Chart', module)
           groupId={getGroupId('gb')}
           title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
           position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
           hide={true}
           domain={{ min: 0, max: 15 }}
         />
@@ -1784,6 +1788,39 @@ storiesOf('Bar Chart', module)
           yAccessors={[1]}
           data={data3}
           yScaleToDataExtent={false}
+        />
+      </Chart>
+    );
+  })
+  .add('styleAccessor overrides', () => {
+    const hasThreshold = boolean('threshold', true);
+    const threshold = number('min threshold', 4);
+    const style: RecursivePartial<BarSeriesStyle> = {
+      rect: {
+        opacity: 0.5,
+        fill: 'red',
+      },
+    };
+    const styleAccessor: StyleAccessor = (d, g) => (g.specId === getSpecId('bars') && d.y1! > threshold ? style : null);
+
+    return (
+      <Chart className="story-chart">
+        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
+        />
+
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          styleAccessor={hasThreshold ? styleAccessor : undefined}
+          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
         />
       </Chart>
     );

@@ -214,14 +214,15 @@ Small multiples are created using the `<SmallMultiples>` component, that takes m
 
 In the case of small multiples, each `SplittedSeries` computes its own x and y domains. Then the x domains are merged and expanded. The same happens with the main Y domains; they are merged together.
 
-### Colors
+### Color/Style overrides
 
-Each data series can have its own color.
-The color is assigned through the `colorAccessors` prop that specifies which data attributes are used to define the color,
-for example:
+Each `datum` of a **Bar Chart** data series can be assigned a custom color or style with the `styleAccessor` prop.
 
-- a dataset without any split accessor or fields that can be used to identify a color will have a single color.
-- a dataset that has 1 variable to split the dataset into 3 different series, will have 3 different colors if that variable is specified through the `colorAccessors`.
-- a dataset with 2 split variables, each with 3 different values (a dataset with 3 \* 2 series) will have 6 different colors if the two variables are defined in `colorAccessors`
-- a dataset with 2 split variables, each with 3 different values, but only one specified in the `colorAccessors` will have only 3 colors.
-- if no `colorAccessors` is specified, `splitAccessors` will be used to identify how to coloring the series
+The `styleAccessor` prop expects a callback function which will be called on _every_ `datum` in _every_ bar series with the signiture below. This callback should return a color `string` or a partial `BarSeriesStyle`, which will override any series-level styles for the respective `datum`. You are passed `geometryId` to identify the series the `datum` belongs to and the raw `datum` to derive conditions against.
+
+```ts
+type StyleAccessor = (
+  datum: RawDataSeriesDatum,
+  geometryId: GeometryId,
+) => RecursivePartial<BarSeriesStyle> | Color | null;
+```

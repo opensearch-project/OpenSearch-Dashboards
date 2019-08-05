@@ -92,7 +92,6 @@ export function splitSeries(
   xValues: Set<any>;
 } {
   const { xAccessor, yAccessors, y0Accessors, splitSeriesAccessors = [] } = accessors;
-  const colorAccessors = accessors.colorAccessors ? accessors.colorAccessors : splitSeriesAccessors;
   const isMultipleY = yAccessors && yAccessors.length > 1;
   const series = new Map<string, RawDataSeries>();
   const colorsValues = new Map<string, any[]>();
@@ -102,7 +101,7 @@ export function splitSeries(
     const seriesKey = getAccessorsValues(datum, splitSeriesAccessors);
     if (isMultipleY) {
       yAccessors.forEach((accessor, index) => {
-        const colorValues = getColorValues(datum, colorAccessors, accessor);
+        const colorValues = getColorValues(datum, splitSeriesAccessors, accessor);
         const colorValuesKey = getColorValuesAsString(colorValues, specId);
         colorsValues.set(colorValuesKey, colorValues);
         const cleanedDatum = cleanDatum(datum, xAccessor, accessor, y0Accessors && y0Accessors[index]);
@@ -110,7 +109,7 @@ export function splitSeries(
         updateSeriesMap(series, [...seriesKey, accessor], cleanedDatum, specId, colorValuesKey);
       }, {});
     } else {
-      const colorValues = getColorValues(datum, colorAccessors);
+      const colorValues = getColorValues(datum, splitSeriesAccessors);
       const colorValuesKey = getColorValuesAsString(colorValues, specId);
       colorsValues.set(colorValuesKey, colorValues);
       const cleanedDatum = cleanDatum(datum, xAccessor, yAccessors[0], y0Accessors && y0Accessors[0]);
@@ -165,8 +164,8 @@ function getAccessorsValues(datum: Datum, accessors: Accessor[] = []): any[] {
 /**
  * Get the array of values that forms a series key
  */
-function getColorValues(datum: Datum, colorAccessors: Accessor[] = [], yAccessorValue?: any): any[] {
-  const colorValues = getAccessorsValues(datum, colorAccessors);
+function getColorValues(datum: Datum, accessors: Accessor[] = [], yAccessorValue?: any): any[] {
+  const colorValues = getAccessorsValues(datum, accessors);
   if (yAccessorValue) {
     return [...colorValues, yAccessorValue];
   }
