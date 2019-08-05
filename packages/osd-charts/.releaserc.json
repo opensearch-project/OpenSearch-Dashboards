@@ -6,6 +6,13 @@
     "@semantic-release/changelog",
     "@semantic-release/github",
     "@semantic-release/npm",
-    "@semantic-release/git"
+    "@semantic-release/git",
+    [
+      "semantic-release-slack-bot",
+      {
+        "notifyOnSuccess": true,
+        "notifyOnFail": true
+      }
+    ]
   ]
 }

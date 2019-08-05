@@ -102,6 +102,7 @@
     "sass-graph": "^3.0.4",
     "sass-loader": "^7.1.0",
     "semantic-release": "^15.13.19",
+    "semantic-release-slack-bot": "^1.2.0",
     "style-loader": "^0.23.1",
     "ts-jest": "^24.0.0",
     "ts-loader": "^5.3.3",
