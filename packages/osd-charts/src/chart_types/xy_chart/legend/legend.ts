@@ -71,8 +71,7 @@ export function getSeriesColorLabel(
   spec?: BasicSeriesSpec,
 ): string | undefined {
   let label = '';
-
-  if (hasSingleSeries || colorValues.length === 0 || !colorValues[0]) {
+  if (hasSingleSeries || colorValues.length === 0 || colorValues[0] == null) {
     if (!spec) {
       return;
     }

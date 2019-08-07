@@ -216,5 +216,41 @@ describe('Legends', () => {
     expect(label).toBe('a - b');
     label = getSeriesColorLabel(['a', 'b'], false, spec2);
     expect(label).toBe('a - b');
+
+    label = getSeriesColorLabel([null], true);
+    expect(label).toBeUndefined();
+    label = getSeriesColorLabel([null], true, spec1);
+    expect(label).toBe('Spec 1 title');
+    label = getSeriesColorLabel([null], true, spec2);
+    expect(label).toBe('spec2');
+    label = getSeriesColorLabel([undefined], true);
+    expect(label).toBeUndefined();
+    label = getSeriesColorLabel([undefined], true, spec1);
+    expect(label).toBe('Spec 1 title');
+    label = getSeriesColorLabel([undefined], true, spec2);
+    expect(label).toBe('spec2');
+
+    label = getSeriesColorLabel([0], true);
+    expect(label).toBeUndefined();
+    label = getSeriesColorLabel([0], true, spec1);
+    expect(label).toBe('Spec 1 title');
+
+    label = getSeriesColorLabel([null], false);
+    expect(label).toBeUndefined();
+    label = getSeriesColorLabel([null], false, spec1);
+    expect(label).toBe('Spec 1 title');
+    label = getSeriesColorLabel([null], false, spec2);
+    expect(label).toBe('spec2');
+    label = getSeriesColorLabel([undefined], false);
+    expect(label).toBeUndefined();
+    label = getSeriesColorLabel([undefined], false, spec1);
+    expect(label).toBe('Spec 1 title');
+    label = getSeriesColorLabel([undefined], false, spec2);
+    expect(label).toBe('spec2');
+
+    label = getSeriesColorLabel([0], false);
+    expect(label).toBe('0');
+    label = getSeriesColorLabel([0], false, spec1);
+    expect(label).toBe('0');
   });
 });
