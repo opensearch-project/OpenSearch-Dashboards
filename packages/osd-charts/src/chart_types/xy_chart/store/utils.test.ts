@@ -942,6 +942,64 @@ describe('Chart State utils', () => {
       expect(geometries.geometriesCounts.lines).toBe(0);
       expect(geometries.geometriesCounts.areas).toBe(0);
     });
+    test('can compute the bar offset in mixed charts', () => {
+      const line1: LineSeriesSpec = {
+        id: getSpecId('line1'),
+        groupId: getGroupId('group2'),
+        seriesType: 'line',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Linear,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        splitSeriesAccessors: ['g'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y1G,
+      };
+
+      const bar1: BarSeriesSpec = {
+        id: getSpecId('line3'),
+        groupId: getGroupId('group2'),
+        seriesType: 'bar',
+        yScaleType: ScaleType.Log,
+        xScaleType: ScaleType.Linear,
+        xAccessor: 'x',
+        yAccessors: ['y'],
+        splitSeriesAccessors: ['g'],
+        yScaleToDataExtent: false,
+        data: BARCHART_1Y1G,
+      };
+      const seriesSpecs = new Map<SpecId, BasicSeriesSpec>([[line1.id, line1], [bar1.id, bar1]]);
+      const axesSpecs = new Map<AxisId, AxisSpec>();
+      const chartRotation = 0;
+      const chartDimensions = { width: 100, height: 100, top: 0, left: 0 };
+      const chartColors = {
+        vizColors: ['violet', 'green', 'blue'],
+        defaultVizColor: 'red',
+      };
+      const chartTheme = {
+        ...LIGHT_THEME,
+        scales: {
+          barsPadding: 0,
+          histogramPadding: 0,
+        },
+      };
+      const domainsByGroupId = mergeYCustomDomainsByGroupId(axesSpecs, chartRotation);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
+      const seriesColorMap = getSeriesColorMap(seriesDomains.seriesColors, chartColors, new Map());
+      const geometries = computeSeriesGeometries(
+        seriesSpecs,
+        seriesDomains.xDomain,
+        seriesDomains.yDomain,
+        seriesDomains.formattedDataSeries,
+        seriesColorMap,
+        chartTheme,
+        chartDimensions,
+        chartRotation,
+        axesSpecs,
+        false,
+      );
+      expect(geometries.geometries.bars[0].x).toBe(0);
+    });
   });
   test('can merge geometry indexes', () => {
     const map1 = new Map<string, IndexedGeometry[]>();
