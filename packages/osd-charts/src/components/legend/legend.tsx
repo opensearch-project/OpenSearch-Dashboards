@@ -48,27 +48,7 @@ class LegendComponent extends React.Component<LegendProps> {
     return (
       <div className={legendClasses} style={paddingStyle} id={legendId} aria-hidden={legendCollapsed.get()}>
         <div className="echLegendListContainer">
-          <div className="echLegendList">
-            {[...legendItems.values()].map((item) => {
-              // const { isLegendItemVisible } = item;
-
-              // const legendItemProps = {
-              //   key: item.key,
-              //   className: classNames('echLegendList__item', {
-              //     'echLegendList__item--hidden': !isLegendItemVisible,
-              //   }),
-              //   onMouseEnter: this.onLegendItemMouseover(item.key),
-              //   onMouseLeave: this.onLegendItemMouseout,
-              // };
-
-              return this.renderLegendElement(
-                item,
-                item.key,
-                this.onLegendItemMouseover(item.key),
-                this.onLegendItemMouseout,
-              );
-            })}
-          </div>
+          <div className="echLegendList">{[...legendItems.values()].map(this.renderLegendElement)}</div>
         </div>
       </div>
     );
@@ -82,23 +62,28 @@ class LegendComponent extends React.Component<LegendProps> {
     this.props.chartStore!.onLegendItemOut();
   };
 
-  private renderLegendElement = (
-    { color, label, isSeriesVisible, displayValue }: SeriesLegendItem,
-    legendItemKey: string,
-    onMouseEnter: (event: React.MouseEvent) => void,
-    onMouseLeave: () => void,
-  ) => {
+  private renderLegendElement = (item: SeriesLegendItem) => {
+    const { key, displayValue } = item;
     const tooltipValues = this.props.chartStore!.legendItemTooltipValues.get();
     let tooltipValue;
 
-    if (tooltipValues && tooltipValues.get(legendItemKey)) {
-      tooltipValue = tooltipValues.get(legendItemKey);
+    if (tooltipValues && tooltipValues.get(key)) {
+      tooltipValue = tooltipValues.get(key);
     }
 
-    const display = tooltipValue != null ? tooltipValue : displayValue.formatted;
-    const props = { color, label, isSeriesVisible, legendItemKey, displayValue: display };
+    const newDisplayValue = tooltipValue != null ? tooltipValue : displayValue.formatted;
+    console.log('renderLegendElement', item.key, item.isLegendItemVisible);
 
-    return <LegendItem {...props} key={legendItemKey} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} />;
+    return (
+      <LegendItem
+        {...item}
+        key={key}
+        legendItemKey={key}
+        displayValue={newDisplayValue}
+        onMouseEnter={this.onLegendItemMouseover(key)}
+        onMouseLeave={this.onLegendItemMouseout}
+      />
+    );
   };
 }
 

@@ -11,6 +11,7 @@ interface LegendItemProps {
   color: string | undefined;
   label: string | undefined;
   isSeriesVisible?: boolean;
+  isLegendItemVisible?: boolean;
   displayValue: string;
   onMouseEnter: (event: React.MouseEvent) => void;
   onMouseLeave: () => void;
@@ -44,7 +45,7 @@ class LegendItemComponent extends React.Component<LegendItemProps, LegendItemSta
 
   render() {
     const { legendItemKey } = this.props;
-    const { color, label, isSeriesVisible, displayValue, onMouseEnter, onMouseLeave } = this.props;
+    const { color, label, isSeriesVisible, isLegendItemVisible, displayValue, onMouseEnter, onMouseLeave } = this.props;
 
     const onTitleClick = this.onVisibilityClick(legendItemKey);
 
@@ -54,7 +55,9 @@ class LegendItemComponent extends React.Component<LegendItemProps, LegendItemSta
     const hasTitleClickListener = Boolean(this.props.chartStore!.onLegendItemClickListener);
     const itemClasses = classNames('echLegendItem', {
       'echLegendItem-isHidden': !isSeriesVisible,
+      'echLegendItem__displayValue--hidden': !isLegendItemVisible,
     });
+
     return (
       <div className={itemClasses} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
         {this.renderColor(this.toggleColorPicker, color, isSeriesVisible)}

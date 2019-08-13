@@ -52,7 +52,7 @@
   text-align: right;
   font-feature-settings: 'tnum';
 
-  &.echLegendItem__displayValue--hidden {
+  &--hidden {
     display: none;
   }
 }
