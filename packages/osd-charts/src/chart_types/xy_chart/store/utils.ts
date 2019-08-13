@@ -503,6 +503,7 @@ export function renderGeometries(
         ds.key,
         xScaleOffset,
         areaSeriesStyle,
+        isStacked,
       );
       areaGeometriesIndex = mergeGeometriesIndexes(areaGeometriesIndex, renderedAreas.indexedGeometries);
       areas.push(renderedAreas.areaGeometry);

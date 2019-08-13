@@ -92,6 +92,7 @@ export interface AreaGeometry {
   seriesAreaStyle: AreaStyle;
   seriesAreaLineStyle: LineStyle;
   seriesPointStyle: PointStyle;
+  isStacked: boolean;
 }
 
 export function isPointGeometry(ig: IndexedGeometry): ig is PointGeometry {
@@ -411,6 +412,7 @@ export function renderArea(
   seriesKey: any[],
   xScaleOffset: number,
   seriesStyle: AreaSeriesStyle,
+  isStacked: boolean = false,
 ): {
   areaGeometry: AreaGeometry;
   indexedGeometries: Map<any, IndexedGeometry[]>;
@@ -469,6 +471,7 @@ export function renderArea(
     seriesAreaStyle: seriesStyle.area,
     seriesAreaLineStyle: seriesStyle.line,
     seriesPointStyle: seriesStyle.point,
+    isStacked,
   };
   return {
     areaGeometry,
@@ -526,4 +529,8 @@ export function isPointOnGeometry(
   }
   const { width, height } = indexedGeometry;
   return yCoordinate >= y && yCoordinate <= y + height && xCoordinate >= x && xCoordinate <= x + width;
+}
+
+export function getGeometryIdKey(geometryId: GeometryId, prefix?: string, postfix?: string) {
+  return `${prefix || ''}spec:${geometryId.specId}_${geometryId.seriesKey.join('::-::')}${postfix || ''}`;
 }

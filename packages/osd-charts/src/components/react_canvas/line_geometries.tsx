@@ -1,9 +1,13 @@
 import { Group as KonvaGroup } from 'konva';
 import React from 'react';
 import { Circle, Group, Path } from 'react-konva';
-import { animated, Spring } from 'react-spring/renderprops-konva.cjs';
 import { LegendItem } from '../../chart_types/xy_chart/legend/legend';
-import { getGeometryStyle, LineGeometry, PointGeometry } from '../../chart_types/xy_chart/rendering/rendering';
+import {
+  getGeometryStyle,
+  LineGeometry,
+  PointGeometry,
+  getGeometryIdKey,
+} from '../../chart_types/xy_chart/rendering/rendering';
 import { SharedGeometryStyle } from '../../utils/themes/theme';
 import {
   buildLineRenderProps,
@@ -38,51 +42,21 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps,
     return (
       <Group ref={this.barSeriesRef} key={'bar_series'}>
         {this.renderLineGeoms()}
-        {this.renderLinePoints()}
       </Group>
     );
   }
 
-  private renderLinePoints = (): JSX.Element[] => {
-    const { lines } = this.props;
-    return lines.reduce(
-      (acc, glyph, i) => {
-        const { points, seriesPointStyle, color } = glyph;
-
-        if (!seriesPointStyle.visible) {
-          return acc;
-        }
-        const pointStyleProps = buildPointStyleProps(color, seriesPointStyle);
-        return [...acc, ...this.renderPoints(points, i, pointStyleProps)];
-      },
-      [] as JSX.Element[],
-    );
-  };
-
   private renderPoints = (
     linePoints: PointGeometry[],
-    lineIndex: number,
+    lineKey: string,
     pointStyleProps: PointStyleProps,
   ): JSX.Element[] => {
     const linePointsElements: JSX.Element[] = [];
     linePoints.forEach((linePoint, pointIndex) => {
       const { x, y, transform } = linePoint;
-      const key = `line-point-${lineIndex}-${pointIndex}`;
-      if (this.props.animated) {
-        linePointsElements.push(
-          <Group key={`line-point-group-${lineIndex}-${pointIndex}`} x={transform.x}>
-            <Spring native from={{ y }} to={{ y }}>
-              {() => {
-                const pointProps = buildPointRenderProps(x, y, pointStyleProps);
-                return <animated.Circle {...pointProps} key={key} />;
-              }}
-            </Spring>
-          </Group>,
-        );
-      } else {
-        const pointProps = buildPointRenderProps(transform.x + x, y, pointStyleProps);
-        linePointsElements.push(<Circle {...pointProps} key={key} />);
-      }
+      const key = `line-point-${lineKey}-${pointIndex}`;
+      const pointProps = buildPointRenderProps(transform.x + x, y, pointStyleProps);
+      linePointsElements.push(<Circle {...pointProps} key={key} />);
     });
     return linePointsElements;
   };
@@ -90,35 +64,32 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps,
   private renderLineGeoms = (): JSX.Element[] => {
     const { lines, sharedStyle } = this.props;
 
-    const lineElements: JSX.Element[] = [];
-
-    lines.forEach((glyph, index) => {
-      const { line, color, transform, geometryId, seriesLineStyle } = glyph;
-
-      if (!seriesLineStyle.visible) {
-        return;
+    return lines.reduce<JSX.Element[]>((acc, glyph) => {
+      const { seriesLineStyle, seriesPointStyle, geometryId } = glyph;
+      const key = getGeometryIdKey(geometryId, 'line-');
+      if (seriesLineStyle.visible) {
+        acc.push(this.getLineToRender(glyph, sharedStyle, key));
       }
-      const key = `line-${index}`;
-      const customOpacity = seriesLineStyle ? seriesLineStyle.opacity : undefined;
-      const geometryStyle = getGeometryStyle(geometryId, this.props.highlightedLegendItem, sharedStyle, customOpacity);
 
-      if (this.props.animated) {
-        lineElements.push(
-          <Group key={index} x={transform.x}>
-            <Spring native reset from={{ opacity: 0 }} to={{ opacity: 1 }}>
-              {() => {
-                const lineProps = buildLineRenderProps(0, line, color, seriesLineStyle, geometryStyle);
-                return <animated.Path {...lineProps} key={key} />;
-              }}
-            </Spring>
-          </Group>,
-        );
-      } else {
-        const lineProps = buildLineRenderProps(transform.x, line, color, seriesLineStyle, geometryStyle);
-        lineElements.push(<Path {...lineProps} key={key} />);
+      if (seriesPointStyle.visible) {
+        acc.push(...this.getPointToRender(glyph, key));
       }
-    });
-
-    return lineElements;
+      return acc;
+    }, []);
   };
+
+  getLineToRender(glyph: LineGeometry, sharedStyle: SharedGeometryStyle, key: string) {
+    const { line, color, transform, geometryId, seriesLineStyle } = glyph;
+    const customOpacity = seriesLineStyle ? seriesLineStyle.opacity : undefined;
+    const geometryStyle = getGeometryStyle(geometryId, this.props.highlightedLegendItem, sharedStyle, customOpacity);
+    const lineProps = buildLineRenderProps(transform.x, line, color, seriesLineStyle, geometryStyle);
+    return <Path {...lineProps} key={key} />;
+  }
+
+  getPointToRender(glyph: LineGeometry, key: string) {
+    const { points, color, seriesPointStyle } = glyph;
+
+    const pointStyleProps = buildPointStyleProps(color, seriesPointStyle);
+    return this.renderPoints(points, key, pointStyleProps);
+  }
 }
