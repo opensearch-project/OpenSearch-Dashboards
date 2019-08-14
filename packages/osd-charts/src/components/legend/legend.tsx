@@ -72,7 +72,6 @@ class LegendComponent extends React.Component<LegendProps> {
     }
 
     const newDisplayValue = tooltipValue != null ? tooltipValue : displayValue.formatted;
-    console.log('renderLegendElement', item.key, item.isLegendItemVisible);
 
     return (
       <LegendItem
