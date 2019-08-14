@@ -10,6 +10,10 @@ export interface SnappedPosition {
 
 export const DEFAULT_SNAP_POSITION_BAND = 1;
 
+export function getPosition(value: string | number, scale: Scale): number | undefined {
+  return scale.scale(value);
+}
+
 export function getSnapPosition(
   value: string | number,
   scale: Scale,

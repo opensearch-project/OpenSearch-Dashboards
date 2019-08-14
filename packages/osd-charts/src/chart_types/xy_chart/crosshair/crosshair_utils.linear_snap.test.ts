@@ -2,8 +2,8 @@ import { computeXScale } from '../utils/scales';
 import { BasicSeriesSpec } from '../utils/specs';
 import { Dimensions } from '../../../utils/dimensions';
 import { getGroupId, getSpecId } from '../../../utils/ids';
-import { ScaleType } from '../../../utils/scales/scales';
-import { getCursorBandPosition, getSnapPosition } from './crosshair_utils';
+import { ScaleType, Scale } from '../../../utils/scales/scales';
+import { getCursorBandPosition, getSnapPosition, getPosition } from './crosshair_utils';
 import { computeSeriesDomains } from '../store/utils';
 
 describe('Crosshair utils linear scale', () => {
@@ -1395,6 +1395,28 @@ describe('Crosshair utils linear scale', () => {
         );
         expect(bandPosition).toBeUndefined();
       });
+    });
+  });
+
+  describe('getPosition', () => {
+    // @ts-ignore
+    const scale: Scale = {
+      scale: jest.fn(),
+    };
+
+    beforeEach(() => {
+      (scale.scale as jest.Mock).mockClear();
+    });
+
+    it('should return value from scale', () => {
+      (scale.scale as jest.Mock).mockReturnValue(20);
+      const result = getPosition(10, scale);
+      expect(result).toBe(20);
+    });
+
+    it('should call scale with correct args', () => {
+      getPosition(10, scale);
+      expect(scale.scale).toBeCalledWith(10);
     });
   });
 });

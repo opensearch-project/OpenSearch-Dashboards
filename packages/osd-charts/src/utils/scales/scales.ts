@@ -9,6 +9,11 @@ export interface Scale {
   bandwidth: number;
   minInterval: number;
   type: ScaleType;
+  /**
+   * @todo
+   * designates unit of scale to compare to other Chart axis
+   */
+  unit?: string;
   isInverted: boolean;
   barsPadding: number;
 }

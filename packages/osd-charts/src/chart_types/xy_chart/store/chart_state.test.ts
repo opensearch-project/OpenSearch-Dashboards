@@ -313,24 +313,36 @@ describe('Chart Store', () => {
     expect(store.onBrushEndListener).toEqual(brushEndListener);
   });
 
+  test('can set a cursor hover listener', () => {
+    const listener = (): void => {
+      return;
+    };
+    store.setOnCursorUpdateListener(listener);
+
+    expect(store.onCursorUpdateListener).toEqual(listener);
+  });
+
   test('can remove listeners', () => {
     store.removeElementClickListener();
-    expect(store.onElementClickListener).toEqual(undefined);
+    expect(store.onElementClickListener).toBeUndefined();
 
     store.removeElementOverListener();
-    expect(store.onElementOverListener).toEqual(undefined);
+    expect(store.onElementOverListener).toBeUndefined();
 
     store.removeElementOutListener();
-    expect(store.onElementOutListener).toEqual(undefined);
+    expect(store.onElementOutListener).toBeUndefined();
 
     store.removeOnLegendItemOverListener();
-    expect(store.onLegendItemOverListener).toEqual(undefined);
+    expect(store.onLegendItemOverListener).toBeUndefined();
 
     store.removeOnLegendItemPlusClickListener();
-    expect(store.onLegendItemPlusClickListener).toEqual(undefined);
+    expect(store.onLegendItemPlusClickListener).toBeUndefined();
 
     store.removeOnLegendItemMinusClickListener();
-    expect(store.onLegendItemMinusClickListener).toEqual(undefined);
+    expect(store.onLegendItemMinusClickListener).toBeUndefined();
+
+    store.removeOnCursorUpdateListener();
+    expect(store.onCursorUpdateListener).toBeUndefined();
   });
 
   test('can respond to a brush end event', () => {
@@ -611,6 +623,9 @@ describe('Chart Store', () => {
   });
 
   describe('can use a custom tooltip header formatter', () => {
+    jest.unmock('../crosshair/crosshair_utils');
+    jest.resetModules();
+
     beforeEach(() => {
       const axisSpec: AxisSpec = {
         id: AXIS_ID,
@@ -640,6 +655,25 @@ describe('Chart Store', () => {
       store.tooltipHeaderFormatter = (value: TooltipValue) => `${value}`;
       store.setCursorPosition(10, 10);
       expect(store.tooltipData[0].value).toBe(1);
+    });
+
+    test('should update cursor postion with hover event', () => {
+      const legendListener = jest.fn(
+        (): void => {
+          return;
+        },
+      );
+
+      store.legendItems = new Map([[firstLegendItem.key, firstLegendItem], [secondLegendItem.key, secondLegendItem]]);
+      store.selectedLegendItemKey.set(null);
+      store.onCursorUpdateListener = undefined;
+
+      store.setCursorPosition(1, 1);
+      expect(legendListener).not.toBeCalled();
+
+      store.setOnCursorUpdateListener(legendListener);
+      store.setCursorPosition(1, 1);
+      expect(legendListener).toBeCalled();
     });
   });
 
@@ -902,5 +936,79 @@ describe('Chart Store', () => {
     store.addSeriesSpec(singleValueSpec);
     store.computeChart();
     expect(store.tooltipType.get()).toBe(TooltipType.Follow);
+  });
+
+  describe('isActiveChart', () => {
+    it('should return true if no activeChartId is defined', () => {
+      store.activeChartId = undefined;
+      expect(store.isActiveChart.get()).toBe(true);
+    });
+
+    it('should return true if activeChartId is defined and matches chart id', () => {
+      store.activeChartId = store.id;
+      expect(store.isActiveChart.get()).toBe(true);
+    });
+
+    it('should return false if activeChartId is defined and does NOT match chart id', () => {
+      store.activeChartId = '123';
+      expect(store.isActiveChart.get()).toBe(false);
+    });
+  });
+
+  describe('setActiveChartId', () => {
+    it('should set activeChartId with value', () => {
+      store.activeChartId = undefined;
+      store.setActiveChartId('test-id');
+      expect(store.activeChartId).toBe('test-id');
+    });
+
+    it('should set activeChartId to undefined if no value', () => {
+      store.activeChartId = 'test';
+      store.setActiveChartId();
+      expect(store.activeChartId).toBeUndefined();
+    });
+  });
+
+  describe('setCursorValue', () => {
+    const getPosition = jest.fn();
+    // TODO: fix mocking implementation
+    jest.doMock('../crosshair/crosshair_utils', () => ({
+      getPosition,
+    }));
+
+    const scale = new ScaleContinuous(ScaleType.Linear, [0, 100], [0, 100]);
+    beforeEach(() => {
+      // @ts-ignore
+      store.setCursorPosition = jest.fn();
+    });
+
+    it('should not call setCursorPosition if xScale is not defined', () => {
+      store.xScale = undefined;
+      store.setCursorValue(1);
+      expect(store.setCursorPosition).not.toBeCalled();
+    });
+
+    it.skip('should call getPosition with args', () => {
+      (getPosition as jest.Mock).mockReturnValue(undefined);
+      store.xScale = scale;
+      store.setCursorValue(1);
+      expect(getPosition).toBeCalledWith(1, store.xScale);
+    });
+
+    it.skip('should not call setCursorPosition if xPosition is not defined', () => {
+      store.xScale = scale;
+      (getPosition as jest.Mock).mockReturnValue(undefined);
+      store.setCursorValue(1);
+      expect(store.setCursorPosition).not.toBeCalled();
+    });
+
+    it('should call setCursorPosition with correct args', () => {
+      store.xScale = scale;
+      store.chartDimensions.left = 10;
+      store.chartDimensions.top = 10;
+      (getPosition as jest.Mock).mockReturnValue(20);
+      store.setCursorValue(20);
+      expect(store.setCursorPosition).toBeCalledWith(30, 10, false);
+    });
   });
 });

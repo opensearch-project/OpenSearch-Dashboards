@@ -9,103 +9,88 @@ import {
   Position,
   ScaleType,
   Settings,
-  mergeWithDefaultTheme,
-  AreaSeries,
+  LineSeries,
 } from '../src';
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
+import { CursorEvent } from '../src/specs/settings';
+import { CursorUpdateListener } from '../src/chart_types/xy_chart/store/chart_state';
 
 export class Playground extends React.Component {
-  render() {
-    return <>{this.renderChart(Position.Right)}</>;
-  }
-  renderChart(legendPosition: Position) {
-    const theme = mergeWithDefaultTheme({
-      lineSeriesStyle: {
-        line: {
-          stroke: 'violet',
-          strokeWidth: 4,
-        },
-        point: {
-          fill: 'yellow',
-          stroke: 'black',
-          strokeWidth: 2,
-          radius: 6,
-        },
-      },
-    });
-    console.log(theme.areaSeriesStyle);
-    return (
-      <div className="chart">
-        <Chart>
-          <Settings debug={false} showLegend={true} legendPosition={legendPosition} rotation={0} theme={theme} />
-          <Axis
-            id={getAxisId('timestamp')}
-            title="timestamp"
-            position={Position.Bottom}
-            tickFormat={niceTimeFormatter([1555819200000, 1555905600000])}
-          />
-          <Axis id={getAxisId('count')} title="count" position={Position.Left} tickFormat={(d) => d.toFixed(2)} />
+  ref1 = React.createRef<Chart>();
+  ref2 = React.createRef<Chart>();
+  ref3 = React.createRef<Chart>();
 
-          <AreaSeries
-            id={getSpecId('dataset B')}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            data={KIBANA_METRICS.metrics.kibana_os_load[1].data.slice(0, 15)}
-            xAccessor={0}
-            yAccessors={[1]}
-            stackAccessors={[0]}
-            areaSeriesStyle={{
-              line: {
-                // opacity:1,
-                strokeWidth: 10,
-              },
-              point: {
-                visible: true,
-                strokeWidth: 3,
-                radius: 10,
-              },
-            }}
-          />
-          <AreaSeries
-            id={getSpecId('dataset C')}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            data={KIBANA_METRICS.metrics.kibana_os_load[1].data.slice(0, 15)}
-            xAccessor={0}
-            yAccessors={[1]}
-            stackAccessors={[0]}
-            areaSeriesStyle={{
-              line: {
-                // opacity:1,
-                strokeWidth: 10,
-              },
-              point: {
-                visible: true,
-                strokeWidth: 3,
-                radius: 10,
-              },
-            }}
-          />
-          <AreaSeries
-            id={getSpecId('dataset A with long title')}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 15)}
-            xAccessor={0}
-            areaSeriesStyle={{
-              point: {
-                visible: true,
-                strokeWidth: 3,
-                radius: 10,
-              },
-              line: {
-                strokeWidth: 10,
-              },
-            }}
-            yAccessors={[1]}
-          />
-        </Chart>
-      </div>
+  onCursorUpdate: CursorUpdateListener = (event?: CursorEvent) => {
+    this.ref1.current!.dispatchExternalCursorEvent(event);
+    this.ref2.current!.dispatchExternalCursorEvent(event);
+    this.ref3.current!.dispatchExternalCursorEvent(event);
+  };
+
+  render() {
+    return (
+      <>
+        {renderChart(
+          '1',
+          this.ref1,
+          KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 15),
+          this.onCursorUpdate,
+          true,
+        )}
+        {renderChart(
+          '2',
+          this.ref2,
+          KIBANA_METRICS.metrics.kibana_os_load[1].data.slice(0, 15),
+          this.onCursorUpdate,
+          true,
+        )}
+        {renderChart('2', this.ref3, KIBANA_METRICS.metrics.kibana_os_load[1].data.slice(15, 30), this.onCursorUpdate)}
+      </>
     );
   }
+}
+
+function renderChart(
+  key: string,
+  ref: React.RefObject<Chart>,
+  data: any,
+  onCursorUpdate?: CursorUpdateListener,
+  timeSeries: boolean = false,
+) {
+  return (
+    <div key={key} className="chart">
+      <Chart ref={ref}>
+        <Settings tooltip={{ type: 'vertical' }} debug={false} showLegend={true} onCursorUpdate={onCursorUpdate} />
+        <Axis
+          id={getAxisId('timestamp')}
+          title="timestamp"
+          position={Position.Bottom}
+          tickFormat={niceTimeFormatter([1555819200000, 1555905600000])}
+        />
+        <Axis id={getAxisId('count')} title="count" position={Position.Left} tickFormat={(d) => d.toFixed(2)} />
+        <LineSeries
+          id={getSpecId('dataset A with long title')}
+          xScaleType={timeSeries ? ScaleType.Time : ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          data={data}
+          xAccessor={0}
+          lineSeriesStyle={{
+            line: {
+              stroke: 'red',
+              opacity: 1,
+            },
+          }}
+          yAccessors={[1]}
+        />
+        <LineSeries
+          id={getSpecId('dataset B')}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          data={KIBANA_METRICS.metrics.kibana_os_load[1].data.slice(0, 15)}
+          xAccessor={0}
+          yAccessors={[1]}
+          stackAccessors={[0]}
+        />
+      </Chart>
+    </div>
+  );
 }

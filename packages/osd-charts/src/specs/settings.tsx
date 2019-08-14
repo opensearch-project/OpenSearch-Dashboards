@@ -1,5 +1,6 @@
-import { inject } from 'mobx-react';
 import { PureComponent } from 'react';
+import { inject } from 'mobx-react';
+
 import { DomainRange, Position, Rendering, Rotation } from '../chart_types/xy_chart/utils/specs';
 import { LIGHT_THEME } from '../utils/themes/light_theme';
 import { DARK_THEME } from '../utils/themes/dark_theme';
@@ -12,7 +13,9 @@ import {
   ElementClickListener,
   ElementOverListener,
   LegendItemListener,
+  CursorUpdateListener,
 } from '../chart_types/xy_chart/store/chart_state';
+import { ScaleTypes } from '../utils/scales/scales';
 
 export const DEFAULT_TOOLTIP_TYPE = TooltipType.VerticalCursor;
 export const DEFAULT_TOOLTIP_SNAP = true;
@@ -21,6 +24,22 @@ interface TooltipProps {
   type?: TooltipType;
   snap?: boolean;
   headerFormatter?: TooltipValueFormatter;
+}
+
+/**
+ * Event used to syncronize cursors between Charts.
+ *
+ * fired as callback argument for `CursorUpdateListener`
+ */
+export interface CursorEvent {
+  chartId: string;
+  scale: ScaleTypes;
+  /**
+   * @todo
+   * unit for event (i.e. `time`, `feet`, `count`, etc.)
+   */
+  unit?: string;
+  value: number | string;
 }
 
 function isTooltipProps(config: TooltipType | TooltipProps): config is TooltipProps {
@@ -53,6 +72,7 @@ export interface SettingSpecProps {
   onLegendItemClick?: LegendItemListener;
   onLegendItemPlusClick?: LegendItemListener;
   onLegendItemMinusClick?: LegendItemListener;
+  onCursorUpdate?: CursorUpdateListener;
   xDomain?: Domain | DomainRange;
 }
 
@@ -86,6 +106,7 @@ function updateChartStore(props: SettingSpecProps) {
     onLegendItemClick,
     onLegendItemMinusClick,
     onLegendItemPlusClick,
+    onCursorUpdate,
     debug,
     xDomain,
   } = props;
@@ -140,6 +161,9 @@ function updateChartStore(props: SettingSpecProps) {
   if (onLegendItemMinusClick) {
     chartStore.setOnLegendItemMinusClickListener(onLegendItemMinusClick);
   }
+  if (onCursorUpdate) {
+    chartStore.setOnCursorUpdateListener(onCursorUpdate);
+  }
 }
 
 export class SettingsComponent extends PureComponent<SettingSpecProps> {
@@ -156,6 +180,7 @@ export class SettingsComponent extends PureComponent<SettingSpecProps> {
     },
     showLegendDisplayValue: true,
   };
+
   componentDidMount() {
     updateChartStore(this.props);
   }

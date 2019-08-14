@@ -11,8 +11,8 @@ import { Highlighter } from './highlighter';
 import { Legend } from './legend/legend';
 import { LegendButton } from './legend/legend_button';
 import { ReactiveChart as ReactChart } from './react_canvas/reactive_chart';
-// import { ReactiveChart as SVGChart } from './svg/reactive_chart';
 import { Tooltips } from './tooltips';
+import { CursorEvent } from '../specs/settings';
 
 interface ChartProps {
   /** The type of rendered
@@ -34,6 +34,26 @@ export class Chart extends React.Component<ChartProps> {
     this.chartSpecStore = new ChartStore();
     this.legendId = htmlIdGenerator()('legend');
   }
+
+  dispatchExternalCursorEvent(event?: CursorEvent) {
+    this.chartSpecStore.setActiveChartId(event && event.chartId);
+    const isActiveChart = this.chartSpecStore.isActiveChart.get();
+
+    if (!event) {
+      if (!isActiveChart) {
+        this.chartSpecStore.setCursorPosition(-1, -1);
+      }
+    } else {
+      if (
+        !isActiveChart &&
+        this.chartSpecStore.xScale!.type === event.scale &&
+        (event.unit === undefined || event.unit === this.chartSpecStore.xScale!.unit)
+      ) {
+        this.chartSpecStore.setCursorValue(event.value);
+      }
+    }
+  }
+
   render() {
     const { renderer, size, className } = this.props;
     let containerStyle: CSSProperties;

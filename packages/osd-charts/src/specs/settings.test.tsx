@@ -125,6 +125,9 @@ describe('Settings spec component', () => {
     const onLegendEvent = (): void => {
       return;
     };
+    const onCursorUpdateEvent = (): void => {
+      return;
+    };
 
     const chartStoreListeners = {
       onElementClick,
@@ -136,6 +139,7 @@ describe('Settings spec component', () => {
       onLegendItemClick: onLegendEvent,
       onLegendItemPlusClick: onLegendEvent,
       onLegendItemMinusClick: onLegendEvent,
+      onCursorUpdate: onCursorUpdateEvent,
     };
 
     mount(<SettingsComponent chartStore={chartStore} {...chartStoreListeners} />);
@@ -148,6 +152,7 @@ describe('Settings spec component', () => {
     expect(chartStore.onLegendItemClickListener).toEqual(onLegendEvent);
     expect(chartStore.onLegendItemPlusClickListener).toEqual(onLegendEvent);
     expect(chartStore.onLegendItemMinusClickListener).toEqual(onLegendEvent);
+    expect(chartStore.onCursorUpdateListener).toEqual(onCursorUpdateEvent);
   });
 
   test('should allow partial theme', () => {
