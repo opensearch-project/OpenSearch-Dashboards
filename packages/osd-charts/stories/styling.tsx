@@ -221,6 +221,11 @@ storiesOf('Stylings', module)
     );
   })
   .add('theme/style', () => {
+    const customizeLineStroke = boolean('customizeLineStroke', false, 'line');
+    const customizePointStroke = boolean('customizeLinePointStroke', false, 'line');
+    const customizeAreaFill = boolean('customizeAreaFill', false, 'area');
+    const customizeAreaLineStroke = boolean('customizeAreaLineStroke', false, 'area');
+    const customizeRectFill = boolean('customizeRectFill', false, 'bar');
     const theme: PartialTheme = {
       chartMargins: {
         left: range('margin left', 0, 50, 10, 'Margins'),
@@ -236,34 +241,33 @@ storiesOf('Stylings', module)
       },
       lineSeriesStyle: {
         line: {
-          stroke: DEFAULT_MISSING_COLOR,
+          stroke: customizeLineStroke ? color('customLineStroke', 'red', 'line') : undefined,
           strokeWidth: range('lineStrokeWidth', 0, 10, 1, 'line'),
           visible: boolean('lineVisible', true, 'line'),
         },
         point: {
           visible: boolean('linePointVisible', true, 'line'),
           radius: range('linePointRadius', 0, 20, 1, 'line', 0.5),
-          // not customizable
-          stroke: 'red',
+          fill: color('linePointFill', 'white', 'line'),
+          stroke: customizePointStroke ? color('customLinePointStroke', 'red', 'line') : undefined,
           strokeWidth: range('linePointStrokeWidth', 0, 20, 0.5, 'line'),
           opacity: range('linePointOpacity', 0, 1, 1, 'line', 0.01),
         },
       },
       areaSeriesStyle: {
         area: {
-          // not already customizeable
-          fill: DEFAULT_MISSING_COLOR,
+          fill: customizeAreaFill ? color('customAreaFill', 'red', 'area') : undefined,
           visible: boolean('aAreaVisible', true, 'area'),
           opacity: range('aAreaOpacity', 0, 1, 1, 'area'),
         },
         line: {
-          // not already customizeable
-          stroke: DEFAULT_MISSING_COLOR,
+          stroke: customizeAreaLineStroke ? color('customAreaLineStroke', 'red', 'area') : undefined,
           strokeWidth: range('aStrokeWidth', 0, 10, 1, 'area'),
           visible: boolean('aLineVisible', true, 'area'),
         },
         point: {
           visible: boolean('aPointVisible', true, 'area'),
+          fill: color('aPointFill', 'white', 'area'),
           radius: range('aPointRadius', 0, 20, 1, 'area'),
           stroke: color('aPointStroke', 'white', 'area'),
           strokeWidth: range('aPointStrokeWidth', 0, 20, 0.5, 'area'),
@@ -272,7 +276,8 @@ storiesOf('Stylings', module)
       },
       barSeriesStyle: {
         rect: {
-          opacity: range('rectOpacity', 0, 1, 0.1, 'bar'),
+          fill: customizeRectFill ? color('recCustomFull', 'red', 'bar') : undefined,
+          opacity: range('rectOpacity', 0, 1, 0.5, 'bar', 0.1),
         },
         rectBorder: {
           stroke: color('bBorderStroke', 'white', 'bar'),
