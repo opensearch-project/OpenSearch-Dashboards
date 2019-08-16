@@ -105,6 +105,7 @@ storiesOf('Axis', module)
             max: 90,
             step: 1,
           })}
+          hide={boolean('hide bottom axis', false)}
           style={customStyle}
         />
         <Axis
@@ -119,6 +120,7 @@ storiesOf('Axis', module)
           })}
           tickFormat={(d) => Number(d).toFixed(2)}
           style={customStyle}
+          hide={boolean('hide left axis', false)}
         />
         <Axis
           id={getAxisId('top')}
@@ -132,6 +134,7 @@ storiesOf('Axis', module)
           })}
           tickFormat={(d) => Number(d).toFixed(2)}
           style={customStyle}
+          hide={boolean('hide top axis', false)}
         />
         <Axis
           id={getAxisId('right')}
@@ -145,6 +148,7 @@ storiesOf('Axis', module)
           })}
           tickFormat={(d) => Number(d).toFixed(2)}
           style={customStyle}
+          hide={boolean('hide right axis', false)}
         />
         <AreaSeries
           id={getSpecId('lines')}

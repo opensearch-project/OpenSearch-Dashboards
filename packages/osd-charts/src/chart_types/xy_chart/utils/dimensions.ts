@@ -21,7 +21,10 @@ export function computeChartDimensions(
   axisSpecs: Map<AxisId, AxisSpec>,
   showLegend: boolean,
   legendPosition?: Position,
-): Dimensions {
+): {
+  chartDimensions: Dimensions;
+  leftMargin: number;
+} {
   const { chartMargins, chartPaddings } = chartTheme;
   const legendStyle = chartTheme.legend;
   const { axisTitleStyle } = chartTheme.axes;
@@ -32,7 +35,8 @@ export function computeChartDimensions(
   let vRightAxisSpecWidth = 0;
   let hTopAxisSpecHeight = 0;
   let hBottomAxisSpecHeight = 0;
-
+  let horizontalEdgeLabelOverflow = 0;
+  let verticalEdgeLabelOverflow = 0;
   axisDimensions.forEach(({ maxLabelBboxWidth = 0, maxLabelBboxHeight = 0 }, id) => {
     const axisSpec = axisSpecs.get(id);
     if (!axisSpec || axisSpec.hide) {
@@ -40,38 +44,41 @@ export function computeChartDimensions(
     }
     const { position, tickSize, tickPadding, title } = axisSpec;
     const titleHeight = title !== undefined ? axisTitleHeight : 0;
+    const maxAxisHeight = maxLabelBboxHeight + tickSize + tickPadding + titleHeight;
+    const maxAxisWidth = maxLabelBboxWidth + tickSize + tickPadding + titleHeight;
     switch (position) {
       case Position.Top:
-        hTopAxisSpecHeight += maxLabelBboxHeight + tickSize + tickPadding + chartMargins.top + titleHeight;
+        hTopAxisSpecHeight += maxAxisHeight + chartMargins.top;
+        // find the max half label size to accomodate the left/right labels
+        horizontalEdgeLabelOverflow = Math.max(horizontalEdgeLabelOverflow, maxLabelBboxWidth / 2);
         break;
       case Position.Bottom:
-        hBottomAxisSpecHeight += maxLabelBboxHeight + tickSize + tickPadding + chartMargins.bottom + titleHeight;
+        hBottomAxisSpecHeight += maxAxisHeight + chartMargins.bottom;
+        // find the max half label size to accomodate the left/right labels
+        horizontalEdgeLabelOverflow = Math.max(horizontalEdgeLabelOverflow, maxLabelBboxWidth / 2);
         break;
       case Position.Left:
-        vLeftAxisSpecWidth += maxLabelBboxWidth + tickSize + tickPadding + chartMargins.left + titleHeight;
+        vLeftAxisSpecWidth += maxAxisWidth + chartMargins.left;
+        verticalEdgeLabelOverflow = Math.max(verticalEdgeLabelOverflow, maxLabelBboxHeight / 2);
         break;
       case Position.Right:
-        vRightAxisSpecWidth += maxLabelBboxWidth + tickSize + tickPadding + chartMargins.right + titleHeight;
+        vRightAxisSpecWidth += maxAxisWidth + chartMargins.right;
+        verticalEdgeLabelOverflow = Math.max(verticalEdgeLabelOverflow, maxLabelBboxHeight / 2);
         break;
     }
   });
-  // const hMargins = chartMargins.left + chartMargins.right;
-  const chartWidth = parentDimensions.width - vLeftAxisSpecWidth - vRightAxisSpecWidth;
-  const chartHeight = parentDimensions.height - hTopAxisSpecHeight - hBottomAxisSpecHeight;
+  const chartLeftAxisMaxWidth = Math.max(vLeftAxisSpecWidth, horizontalEdgeLabelOverflow + chartMargins.left);
+  const chartRightAxisMaxWidth = Math.max(vRightAxisSpecWidth, horizontalEdgeLabelOverflow + chartMargins.right);
+  const chartTopAxisMaxHeight = Math.max(hTopAxisSpecHeight, verticalEdgeLabelOverflow + chartMargins.top);
+  const chartBottomAxisMaxHeight = Math.max(hBottomAxisSpecHeight, verticalEdgeLabelOverflow + chartMargins.bottom);
+
+  const chartWidth = parentDimensions.width - chartLeftAxisMaxWidth - chartRightAxisMaxWidth;
+  const chartHeight = parentDimensions.height - chartTopAxisMaxHeight - chartBottomAxisMaxHeight;
+
   let vMargin = 0;
-  if (hTopAxisSpecHeight === 0) {
-    vMargin += chartMargins.top;
-  }
-  if (hBottomAxisSpecHeight === 0) {
-    vMargin += chartMargins.bottom;
-  }
   let hMargin = 0;
-  if (vLeftAxisSpecWidth === 0) {
-    hMargin += chartMargins.left;
-  }
-  if (vRightAxisSpecWidth === 0) {
-    hMargin += chartMargins.right;
-  }
+
+  // add space for legend
   let legendTopMargin = 0;
   let legendLeftMargin = 0;
   if (showLegend) {
@@ -92,22 +99,17 @@ export function computeChartDimensions(
         break;
     }
   }
-  let top = 0;
-  let left = 0;
-  if (hTopAxisSpecHeight === 0) {
-    top = chartMargins.top + chartPaddings.top + legendTopMargin;
-  } else {
-    top = hTopAxisSpecHeight + chartPaddings.top + legendTopMargin;
-  }
-  if (vLeftAxisSpecWidth === 0) {
-    left = chartMargins.left + chartPaddings.left + legendLeftMargin;
-  } else {
-    left = vLeftAxisSpecWidth + chartPaddings.left + legendLeftMargin;
-  }
+
+  let top = chartTopAxisMaxHeight + chartPaddings.top + legendTopMargin;
+  let left = chartLeftAxisMaxWidth + chartPaddings.left + legendLeftMargin;
+
   return {
-    top,
-    left,
-    width: chartWidth - hMargin - chartPaddings.left - chartPaddings.right,
-    height: chartHeight - vMargin - chartPaddings.top - chartPaddings.bottom,
+    leftMargin: chartLeftAxisMaxWidth - vLeftAxisSpecWidth,
+    chartDimensions: {
+      top,
+      left,
+      width: chartWidth - hMargin - chartPaddings.left - chartPaddings.right,
+      height: chartHeight - vMargin - chartPaddings.top - chartPaddings.bottom,
+    },
   };
 }

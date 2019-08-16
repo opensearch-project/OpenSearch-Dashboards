@@ -913,8 +913,8 @@ export class ChartStore {
     });
     bboxCalculator.destroy();
 
-    // compute chart dimensions
-    this.chartDimensions = computeChartDimensions(
+    // // compute chart dimensions
+    const computedChartDims = computeChartDimensions(
       this.parentDimensions,
       this.chartTheme,
       this.axesTicksDimensions,
@@ -922,6 +922,7 @@ export class ChartStore {
       this.showLegend.get() && !this.legendCollapsed.get(),
       this.legendPosition,
     );
+    this.chartDimensions = computedChartDims.chartDimensions;
 
     this.chartTransform = computeChartTransform(this.chartDimensions, this.chartRotation);
     this.brushExtent = computeBrushExtent(this.chartDimensions, this.chartRotation, this.chartTransform);
@@ -954,7 +955,7 @@ export class ChartStore {
 
     // compute visible ticks and their positions
     const axisTicksPositions = getAxisTicksPositions(
-      this.chartDimensions,
+      computedChartDims,
       this.chartTheme,
       this.chartRotation,
       this.showLegend.get() && !this.legendCollapsed.get(),

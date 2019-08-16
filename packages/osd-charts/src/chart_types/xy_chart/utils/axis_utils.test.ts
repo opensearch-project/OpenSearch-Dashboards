@@ -565,18 +565,24 @@ describe('Axis computational utils', () => {
     const tickSize = 10;
     const tickPadding = 5;
     const tickPosition = 0;
-
+    const axisPosition = {
+      top: 0,
+      left: 0,
+      width: 100,
+      height: 100,
+    };
     const unrotatedLabelProps = getTickLabelProps(
       tickLabelRotation,
       tickSize,
       tickPadding,
       tickPosition,
       Position.Left,
+      axisPosition,
       axis1Dims,
     );
 
     expect(unrotatedLabelProps).toEqual({
-      x: -10,
+      x: 75,
       y: -5,
       align: 'right',
       verticalAlign: 'middle',
@@ -589,11 +595,12 @@ describe('Axis computational utils', () => {
       tickPadding,
       tickPosition,
       Position.Left,
+      axisPosition,
       axis1Dims,
     );
 
     expect(rotatedLabelProps).toEqual({
-      x: -10,
+      x: 75,
       y: -5,
       align: 'center',
       verticalAlign: 'middle',
@@ -605,6 +612,7 @@ describe('Axis computational utils', () => {
       tickPadding,
       tickPosition,
       Position.Right,
+      axisPosition,
       axis1Dims,
     );
 
@@ -622,6 +630,7 @@ describe('Axis computational utils', () => {
       tickPadding,
       tickPosition,
       Position.Right,
+      axisPosition,
       axis1Dims,
     );
 
@@ -638,6 +647,12 @@ describe('Axis computational utils', () => {
     const tickSize = 10;
     const tickPadding = 5;
     const tickPosition = 0;
+    const axisPosition = {
+      top: 0,
+      left: 0,
+      width: 100,
+      height: 100,
+    };
 
     const unrotatedLabelProps = getTickLabelProps(
       tickLabelRotation,
@@ -645,12 +660,13 @@ describe('Axis computational utils', () => {
       tickPadding,
       tickPosition,
       Position.Top,
+      axisPosition,
       axis1Dims,
     );
 
     expect(unrotatedLabelProps).toEqual({
       x: -5,
-      y: 0,
+      y: 75,
       align: 'center',
       verticalAlign: 'bottom',
     });
@@ -662,12 +678,13 @@ describe('Axis computational utils', () => {
       tickPadding,
       tickPosition,
       Position.Top,
+      axisPosition,
       axis1Dims,
     );
 
     expect(rotatedLabelProps).toEqual({
       x: -5,
-      y: 0,
+      y: 75,
       align: 'center',
       verticalAlign: 'middle',
     });
@@ -678,6 +695,7 @@ describe('Axis computational utils', () => {
       tickPadding,
       tickPosition,
       Position.Bottom,
+      axisPosition,
       axis1Dims,
     );
 
@@ -695,6 +713,7 @@ describe('Axis computational utils', () => {
       tickPadding,
       tickPosition,
       Position.Bottom,
+      axisPosition,
       axis1Dims,
     );
 
@@ -710,11 +729,11 @@ describe('Axis computational utils', () => {
     const tickPadding = 5;
     const tickSize = 10;
     const tickPosition = 10;
-    const maxLabelBboxHeight = 20;
+    const axisHeight = 20;
 
     const leftAxisTickLinePositions = getVerticalAxisTickLineProps(Position.Left, tickPadding, tickSize, tickPosition);
 
-    expect(leftAxisTickLinePositions).toEqual([5, 10, 15, 10]);
+    expect(leftAxisTickLinePositions).toEqual([5, 10, -5, 10]);
 
     const rightAxisTickLinePositions = getVerticalAxisTickLineProps(
       Position.Right,
@@ -725,22 +744,15 @@ describe('Axis computational utils', () => {
 
     expect(rightAxisTickLinePositions).toEqual([0, 10, 10, 10]);
 
-    const topAxisTickLinePositions = getHorizontalAxisTickLineProps(
-      Position.Top,
-      tickPadding,
-      tickSize,
-      tickPosition,
-      maxLabelBboxHeight,
-    );
+    const topAxisTickLinePositions = getHorizontalAxisTickLineProps(Position.Top, axisHeight, tickSize, tickPosition);
 
-    expect(topAxisTickLinePositions).toEqual([10, 25, 10, 35]);
+    expect(topAxisTickLinePositions).toEqual([10, 10, 10, 20]);
 
     const bottomAxisTickLinePositions = getHorizontalAxisTickLineProps(
       Position.Bottom,
-      tickPadding,
+      axisHeight,
       tickSize,
       tickPosition,
-      maxLabelBboxHeight,
     );
 
     expect(bottomAxisTickLinePositions).toEqual([10, 0, 10, 10]);
@@ -774,7 +786,10 @@ describe('Axis computational utils', () => {
     axisDims.set(verticalAxisSpecWTitle.id, axis1Dims);
 
     let axisTicksPosition = getAxisTicksPositions(
-      chartDim,
+      {
+        chartDimensions: chartDim,
+        leftMargin: 0,
+      },
       LIGHT_THEME,
       chartRotation,
       showLegend,
@@ -786,11 +801,10 @@ describe('Axis computational utils', () => {
       false,
     );
 
-    let left = 12 + 5 + 10 + 10; // font size + title padding + chart margin left + label width
     expect(axisTicksPosition.axisPositions.get(verticalAxisSpecWTitle.id)).toEqual({
       top: 0,
-      left,
-      width: 10,
+      left: 10,
+      width: 12 + 5 + 10 + 10 + 10,
       height: 100,
     });
 
@@ -799,7 +813,10 @@ describe('Axis computational utils', () => {
     axisDims.set(verticalAxisSpec.id, axis1Dims);
 
     axisTicksPosition = getAxisTicksPositions(
-      chartDim,
+      {
+        chartDimensions: chartDim,
+        leftMargin: 0,
+      },
       LIGHT_THEME,
       chartRotation,
       showLegend,
@@ -811,11 +828,10 @@ describe('Axis computational utils', () => {
       false,
     );
 
-    left = 0 + 10 + 10; // no title + chart margin left + label width
     expect(axisTicksPosition.axisPositions.get(verticalAxisSpecWTitle.id)).toEqual({
       top: 0,
-      left: 20,
-      width: 10,
+      left: 10,
+      width: 30,
       height: 100,
     });
   });
@@ -842,8 +858,8 @@ describe('Axis computational utils', () => {
     const expectedLeftAxisPosition = {
       dimensions: {
         height: 100,
-        width: 10,
-        left: 40,
+        width: 40,
+        left: 20,
         top: 0,
       },
       topIncrement: 0,
@@ -878,7 +894,7 @@ describe('Axis computational utils', () => {
     const expectedRightAxisPosition = {
       dimensions: {
         height: 100,
-        width: 10,
+        width: 40,
         left: 110,
         top: 0,
       },
@@ -913,10 +929,11 @@ describe('Axis computational utils', () => {
 
     const expectedTopAxisPosition = {
       dimensions: {
-        height: 10,
+        height:
+          axis1Dims.maxLabelBboxHeight + axisTitleHeight + horizontalAxisSpec.tickSize + horizontalAxisSpec.tickPadding,
         width: 100,
         left: 0,
-        top: 30,
+        top: cumTopSum + LIGHT_THEME.chartMargins.top,
       },
       topIncrement: 50,
       bottomIncrement: 0,
@@ -949,7 +966,7 @@ describe('Axis computational utils', () => {
 
     const expectedBottomAxisPosition = {
       dimensions: {
-        height: 10,
+        height: 40,
         width: 100,
         left: 0,
         top: 110,
@@ -975,7 +992,10 @@ describe('Axis computational utils', () => {
     axisDims.set(getAxisId('not_a_mapped_one'), axis1Dims);
 
     const axisTicksPosition = getAxisTicksPositions(
-      chartDim,
+      {
+        chartDimensions: chartDim,
+        leftMargin: 0,
+      },
       LIGHT_THEME,
       chartRotation,
       showLegend,
@@ -1006,7 +1026,10 @@ describe('Axis computational utils', () => {
     axisDims.set(verticalAxisSpec.id, axis1Dims);
 
     const axisTicksPosition = getAxisTicksPositions(
-      chartDim,
+      {
+        chartDimensions: chartDim,
+        leftMargin: 0,
+      },
       LIGHT_THEME,
       chartRotation,
       showLegend,
@@ -1036,7 +1059,10 @@ describe('Axis computational utils', () => {
     expect(axisTicksPosition.axisGridLinesPositions.get(verticalAxisSpec.id)).toEqual(expectedVerticalAxisGridLines);
 
     const axisTicksPositionWithTopLegend = getAxisTicksPositions(
-      chartDim,
+      {
+        chartDimensions: chartDim,
+        leftMargin: 0,
+      },
       LIGHT_THEME,
       chartRotation,
       showLegend,
@@ -1051,7 +1077,7 @@ describe('Axis computational utils', () => {
 
     const expectedPositionWithTopLegend = {
       height: 100,
-      width: 10,
+      width: 30,
       left: 100,
       top: 0,
     };
@@ -1063,7 +1089,10 @@ describe('Axis computational utils', () => {
     invalidSpecs.set(verticalAxisSpec.id, ungroupedAxisSpec);
     const computeScalelessSpec = () => {
       getAxisTicksPositions(
-        chartDim,
+        {
+          chartDimensions: chartDim,
+          leftMargin: 0,
+        },
         LIGHT_THEME,
         chartRotation,
         showLegend,

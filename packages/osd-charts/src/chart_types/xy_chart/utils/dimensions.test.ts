@@ -67,7 +67,7 @@ describe('Computed chart dimensions', () => {
   test('should be equal to parent dimension with no axis minus margins', () => {
     const axisDims = new Map<AxisId, AxisTicksDimensions>();
     const axisSpecs = new Map<AxisId, AxisSpec>();
-    const chartDimensions = computeChartDimensions(parentDim, chartTheme, axisDims, axisSpecs, showLegend);
+    const { chartDimensions } = computeChartDimensions(parentDim, chartTheme, axisDims, axisSpecs, showLegend);
     expect(chartDimensions.left + chartDimensions.width).toBeLessThanOrEqual(parentDim.width);
     expect(chartDimensions.top + chartDimensions.height).toBeLessThanOrEqual(parentDim.height);
     expect(chartDimensions).toMatchSnapshot();
@@ -79,7 +79,7 @@ describe('Computed chart dimensions', () => {
     const axisSpecs = new Map<AxisId, AxisSpec>();
     axisDims.set(getAxisId('axis_1'), axis1Dims);
     axisSpecs.set(getAxisId('axis_1'), axisLeftSpec);
-    const chartDimensions = computeChartDimensions(parentDim, chartTheme, axisDims, axisSpecs, showLegend);
+    const { chartDimensions } = computeChartDimensions(parentDim, chartTheme, axisDims, axisSpecs, showLegend);
     expect(chartDimensions.left + chartDimensions.width).toBeLessThanOrEqual(parentDim.width);
     expect(chartDimensions.top + chartDimensions.height).toBeLessThanOrEqual(parentDim.height);
     expect(chartDimensions).toMatchSnapshot();
@@ -91,7 +91,7 @@ describe('Computed chart dimensions', () => {
     const axisSpecs = new Map<AxisId, AxisSpec>();
     axisDims.set(getAxisId('axis_1'), axis1Dims);
     axisSpecs.set(getAxisId('axis_1'), { ...axisLeftSpec, position: Position.Right });
-    const chartDimensions = computeChartDimensions(parentDim, chartTheme, axisDims, axisSpecs, showLegend);
+    const { chartDimensions } = computeChartDimensions(parentDim, chartTheme, axisDims, axisSpecs, showLegend);
     expect(chartDimensions.left + chartDimensions.width).toBeLessThanOrEqual(parentDim.width);
     expect(chartDimensions.top + chartDimensions.height).toBeLessThanOrEqual(parentDim.height);
     expect(chartDimensions).toMatchSnapshot();
@@ -106,7 +106,7 @@ describe('Computed chart dimensions', () => {
       ...axisLeftSpec,
       position: Position.Top,
     });
-    const chartDimensions = computeChartDimensions(parentDim, chartTheme, axisDims, axisSpecs, showLegend);
+    const { chartDimensions } = computeChartDimensions(parentDim, chartTheme, axisDims, axisSpecs, showLegend);
     expect(chartDimensions.left + chartDimensions.width).toBeLessThanOrEqual(parentDim.width);
     expect(chartDimensions.top + chartDimensions.height).toBeLessThanOrEqual(parentDim.height);
     expect(chartDimensions).toMatchSnapshot();
@@ -121,7 +121,7 @@ describe('Computed chart dimensions', () => {
       ...axisLeftSpec,
       position: Position.Bottom,
     });
-    const chartDimensions = computeChartDimensions(parentDim, chartTheme, axisDims, axisSpecs, showLegend);
+    const { chartDimensions } = computeChartDimensions(parentDim, chartTheme, axisDims, axisSpecs, showLegend);
     expect(chartDimensions.left + chartDimensions.width).toBeLessThanOrEqual(parentDim.width);
     expect(chartDimensions.top + chartDimensions.height).toBeLessThanOrEqual(parentDim.height);
     expect(chartDimensions).toMatchSnapshot();
@@ -137,10 +137,13 @@ describe('Computed chart dimensions', () => {
     const chartDimensions = computeChartDimensions(parentDim, chartTheme, axisDims, axisSpecs, showLegend);
 
     const expectedDims = {
-      height: 60,
-      width: 60,
-      left: 20,
-      top: 20,
+      chartDimensions: {
+        height: 60,
+        width: 60,
+        left: 20,
+        top: 20,
+      },
+      leftMargin: 10,
     };
 
     expect(chartDimensions).toEqual(expectedDims);
