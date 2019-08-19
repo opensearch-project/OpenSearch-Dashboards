@@ -13,12 +13,18 @@ import {
 
 describe('[canvas] Area Geometries props', () => {
   test('can build area point props', () => {
-    const pointStyleProps = buildPointStyleProps('red', {
-      visible: true,
-      radius: 30,
-      strokeWidth: 2,
-      opacity: 0.5,
-    });
+    const pointStyleProps = buildPointStyleProps(
+      'red',
+      {
+        visible: true,
+        radius: 30,
+        strokeWidth: 2,
+        opacity: 0.5,
+      },
+      {
+        opacity: 0.2,
+      },
+    );
 
     const props = buildPointRenderProps(10, 20, pointStyleProps);
     expect(props).toEqual({
@@ -29,19 +35,25 @@ describe('[canvas] Area Geometries props', () => {
       strokeEnabled: true,
       stroke: 'red',
       fill: 'red',
-      opacity: 0.5,
+      opacity: 0.2,
       strokeHitEnabled: false,
       perfectDrawEnabled: false,
       listening: false,
     });
 
-    const noStrokePointStyleProps = buildPointStyleProps('blue', {
-      visible: true,
-      radius: 30,
-      stroke: 'red',
-      strokeWidth: 0,
-      opacity: 0.5,
-    });
+    const noStrokePointStyleProps = buildPointStyleProps(
+      'blue',
+      {
+        visible: true,
+        radius: 30,
+        stroke: 'red',
+        strokeWidth: 0,
+        opacity: 0.5,
+      },
+      {
+        opacity: 0.2,
+      },
+    );
 
     const propsNoStroke = buildPointRenderProps(10, 20, noStrokePointStyleProps);
     expect(propsNoStroke).toEqual({
@@ -52,19 +64,25 @@ describe('[canvas] Area Geometries props', () => {
       strokeEnabled: false,
       stroke: 'red',
       fill: 'blue',
-      opacity: 0.5,
+      opacity: 0.2,
       strokeHitEnabled: false,
       perfectDrawEnabled: false,
       listening: false,
     });
 
-    const seriesPointStyleProps = buildPointStyleProps('violet', {
-      visible: true,
-      fill: 'pink',
-      radius: 123,
-      strokeWidth: 456,
-      opacity: 789,
-    });
+    const seriesPointStyleProps = buildPointStyleProps(
+      'violet',
+      {
+        visible: true,
+        fill: 'pink',
+        radius: 123,
+        strokeWidth: 456,
+        opacity: 789,
+      },
+      {
+        opacity: 0.2,
+      },
+    );
     const seriesPointStyle = buildPointRenderProps(10, 20, seriesPointStyleProps);
     expect(seriesPointStyle).toEqual({
       x: 10,
@@ -74,7 +92,7 @@ describe('[canvas] Area Geometries props', () => {
       strokeEnabled: true,
       stroke: 'violet',
       fill: 'pink',
-      opacity: 789,
+      opacity: 0.2,
       strokeHitEnabled: false,
       perfectDrawEnabled: false,
       listening: false,
@@ -194,12 +212,18 @@ describe('[canvas] Area Geometries props', () => {
 
 describe('[canvas] Line Geometries', () => {
   test('can build line point props', () => {
-    const pointStyleProps = buildPointStyleProps('pink', {
-      visible: true,
-      radius: 30,
-      strokeWidth: 2,
-      opacity: 0.5,
-    });
+    const pointStyleProps = buildPointStyleProps(
+      'pink',
+      {
+        visible: true,
+        radius: 30,
+        strokeWidth: 2,
+        opacity: 0.5,
+      },
+      {
+        opacity: 0.2,
+      },
+    );
 
     const props = buildPointRenderProps(10, 20, pointStyleProps);
     expect(props).toEqual({
@@ -210,18 +234,24 @@ describe('[canvas] Line Geometries', () => {
       strokeEnabled: true,
       stroke: 'pink',
       fill: 'pink',
-      opacity: 0.5,
+      opacity: 0.2,
       strokeHitEnabled: false,
       perfectDrawEnabled: false,
       listening: false,
     });
 
-    const noStrokeStyleProps = buildPointStyleProps('pink', {
-      visible: true,
-      radius: 30,
-      strokeWidth: 0,
-      opacity: 0.5,
-    });
+    const noStrokeStyleProps = buildPointStyleProps(
+      'pink',
+      {
+        visible: true,
+        radius: 30,
+        strokeWidth: 0,
+        opacity: 0.5,
+      },
+      {
+        opacity: 0.2,
+      },
+    );
     const propsNoStroke = buildPointRenderProps(10, 20, noStrokeStyleProps);
     expect(propsNoStroke).toEqual({
       x: 10,
@@ -231,19 +261,25 @@ describe('[canvas] Line Geometries', () => {
       strokeEnabled: false,
       stroke: 'pink',
       fill: 'pink',
-      opacity: 0.5,
+      opacity: 0.2,
       strokeHitEnabled: false,
       perfectDrawEnabled: false,
       listening: false,
     });
 
-    const seriesPointStyleProps = buildPointStyleProps('pink', {
-      stroke: 'series-stroke',
-      strokeWidth: 6,
-      visible: true,
-      radius: 12,
-      opacity: 18,
-    });
+    const seriesPointStyleProps = buildPointStyleProps(
+      'pink',
+      {
+        stroke: 'series-stroke',
+        strokeWidth: 6,
+        visible: true,
+        radius: 12,
+        opacity: 18,
+      },
+      {
+        opacity: 0.2,
+      },
+    );
     const seriesPointStyle = buildPointRenderProps(10, 20, seriesPointStyleProps);
     expect(seriesPointStyle).toEqual({
       x: 10,
@@ -253,7 +289,7 @@ describe('[canvas] Line Geometries', () => {
       strokeEnabled: true,
       stroke: 'series-stroke',
       fill: 'pink',
-      opacity: 18,
+      opacity: 0.2,
       strokeHitEnabled: false,
       perfectDrawEnabled: false,
       listening: false,

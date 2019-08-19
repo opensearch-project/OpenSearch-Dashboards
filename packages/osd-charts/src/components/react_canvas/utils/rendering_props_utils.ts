@@ -240,7 +240,11 @@ export function buildBarValueProps({
  * @param color the series color
  * @param pointStyle the merged point style
  */
-export function buildPointStyleProps(color: string, pointStyle: PointStyle): PointStyleProps {
+export function buildPointStyleProps(
+  color: string,
+  pointStyle: PointStyle,
+  geometryStyle: GeometryStyle,
+): PointStyleProps {
   const { strokeWidth, opacity } = pointStyle;
   const stroke = pointStyle.stroke || color;
   const fill = pointStyle.fill || color;
@@ -251,6 +255,7 @@ export function buildPointStyleProps(color: string, pointStyle: PointStyle): Poi
     strokeEnabled: strokeWidth !== 0,
     fill: fill,
     opacity,
+    ...geometryStyle,
   };
 }
 

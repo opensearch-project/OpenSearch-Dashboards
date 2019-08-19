@@ -88,9 +88,16 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
       }
     });
     areas.forEach((glyph, i) => {
-      const { seriesPointStyle } = glyph;
+      const { seriesPointStyle, geometryId } = glyph;
       if (seriesPointStyle.visible) {
-        const pointStyleProps = buildPointStyleProps(glyph.color, seriesPointStyle);
+        const customOpacity = seriesPointStyle ? seriesPointStyle.opacity : undefined;
+        const geometryStyle = getGeometryStyle(
+          geometryId,
+          this.props.highlightedLegendItem,
+          sharedStyle,
+          customOpacity,
+        );
+        const pointStyleProps = buildPointStyleProps(glyph.color, seriesPointStyle, geometryStyle);
         elements.push(...this.renderPoints(glyph.points, i, pointStyleProps, glyph.geometryId));
       }
     });
@@ -102,7 +109,7 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
     highlightedLegendItem: LegendItem | null,
   ): JSX.Element[] => {
     return areas.reduce<JSX.Element[]>((acc, glyph, i) => {
-      const { seriesAreaLineStyle, seriesAreaStyle, seriesPointStyle } = glyph;
+      const { seriesAreaLineStyle, seriesAreaStyle, seriesPointStyle, geometryId } = glyph;
       if (seriesAreaStyle.visible) {
         acc.push(this.renderArea(glyph, sharedStyle, highlightedLegendItem));
       }
@@ -110,7 +117,14 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
         acc.push(...this.renderAreaLines(glyph, i, sharedStyle, highlightedLegendItem));
       }
       if (seriesPointStyle.visible) {
-        const pointStyleProps = buildPointStyleProps(glyph.color, seriesPointStyle);
+        const customOpacity = seriesPointStyle ? seriesPointStyle.opacity : undefined;
+        const geometryStyle = getGeometryStyle(
+          geometryId,
+          this.props.highlightedLegendItem,
+          sharedStyle,
+          customOpacity,
+        );
+        const pointStyleProps = buildPointStyleProps(glyph.color, seriesPointStyle, geometryStyle);
         acc.push(...this.renderPoints(glyph.points, i, pointStyleProps, glyph.geometryId));
       }
       return acc;

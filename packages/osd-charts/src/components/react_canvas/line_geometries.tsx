@@ -72,7 +72,7 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps,
       }
 
       if (seriesPointStyle.visible) {
-        acc.push(...this.getPointToRender(glyph, key));
+        acc.push(...this.getPointToRender(glyph, sharedStyle, key));
       }
       return acc;
     }, []);
@@ -86,10 +86,11 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps,
     return <Path {...lineProps} key={key} />;
   }
 
-  getPointToRender(glyph: LineGeometry, key: string) {
-    const { points, color, seriesPointStyle } = glyph;
-
-    const pointStyleProps = buildPointStyleProps(color, seriesPointStyle);
+  getPointToRender(glyph: LineGeometry, sharedStyle: SharedGeometryStyle, key: string) {
+    const { points, color, geometryId, seriesPointStyle } = glyph;
+    const customOpacity = seriesPointStyle ? seriesPointStyle.opacity : undefined;
+    const geometryStyle = getGeometryStyle(geometryId, this.props.highlightedLegendItem, sharedStyle, customOpacity);
+    const pointStyleProps = buildPointStyleProps(color, seriesPointStyle, geometryStyle);
     return this.renderPoints(points, key, pointStyleProps);
   }
 }
