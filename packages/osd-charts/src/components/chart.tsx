@@ -13,13 +13,14 @@ import { LegendButton } from './legend/legend_button';
 import { ReactiveChart as ReactChart } from './react_canvas/reactive_chart';
 import { Tooltips } from './tooltips';
 import { CursorEvent } from '../specs/settings';
+import { ChartSize, getChartSize } from '../utils/chart_size';
 
 interface ChartProps {
   /** The type of rendered
    * @default 'canvas'
    */
   renderer: 'svg' | 'canvas';
-  size?: [number, number];
+  size?: ChartSize;
   className?: string;
 }
 
@@ -60,8 +61,7 @@ export class Chart extends React.Component<ChartProps> {
     if (size) {
       containerStyle = {
         position: 'relative',
-        width: size[0],
-        height: size[1],
+        ...getChartSize(size),
       };
     } else {
       containerStyle = {};

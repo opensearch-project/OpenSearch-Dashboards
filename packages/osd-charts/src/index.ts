@@ -1,5 +1,6 @@
 export * from './specs';
 export { Chart } from './components/chart';
+export { ChartSize, ChartSizeArray, ChartSizeObject } from './utils/chart_size';
 export { TooltipType, TooltipValue, TooltipValueFormatter } from './chart_types/xy_chart/utils/interactions';
 export { SpecId, GroupId, AxisId, AnnotationId, getAxisId, getGroupId, getSpecId, getAnnotationId } from './utils/ids';
 export { ScaleType } from './utils/scales/scales';
