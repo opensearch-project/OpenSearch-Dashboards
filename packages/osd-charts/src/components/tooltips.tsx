@@ -30,14 +30,14 @@ class TooltipsComponent extends React.Component<TooltipProps> {
       <div className="echTooltip" style={{ transform: tooltipPosition.transform }}>
         <div className="echTooltip__header">{this.renderHeader(tooltipData[0], tooltipHeaderFormatter)}</div>
         <div className="echTooltip__list">
-          {tooltipData.slice(1).map(({ name, value, color, isHighlighted, seriesKey }) => {
+          {tooltipData.slice(1).map(({ name, value, color, isHighlighted, seriesKey, yAccessor }) => {
             const classes = classNames('echTooltip__item', {
               /* eslint @typescript-eslint/camelcase:0 */
               echTooltip__rowHighlighted: isHighlighted,
             });
             return (
               <div
-                key={seriesKey}
+                key={`${seriesKey}--${yAccessor}`}
                 className={classes}
                 style={{
                   borderLeftColor: color,

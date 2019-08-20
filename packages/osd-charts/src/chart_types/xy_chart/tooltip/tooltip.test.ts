@@ -67,6 +67,7 @@ describe('Tooltip formatting', () => {
   test('format simple tooltip', () => {
     const tooltipValue = formatTooltip(indexedGeometry, SPEC_1, false, false, YAXIS_SPEC);
     expect(tooltipValue).toBeDefined();
+    expect(tooltipValue.yAccessor).toBe('y1');
     expect(tooltipValue.name).toBe('bar_1');
     expect(tooltipValue.isXValue).toBe(false);
     expect(tooltipValue.isHighlighted).toBe(false);
@@ -83,6 +84,7 @@ describe('Tooltip formatting', () => {
     };
     const tooltipValue = formatTooltip(geometry, SPEC_1, false, false, YAXIS_SPEC);
     expect(tooltipValue).toBeDefined();
+    expect(tooltipValue.yAccessor).toBe('y1');
     expect(tooltipValue.name).toBe('y1');
     expect(tooltipValue.isXValue).toBe(false);
     expect(tooltipValue.isHighlighted).toBe(false);
@@ -99,6 +101,7 @@ describe('Tooltip formatting', () => {
     };
     const tooltipValue = formatTooltip(geometry, SPEC_1, false, false, YAXIS_SPEC);
     expect(tooltipValue).toBeDefined();
+    expect(tooltipValue.yAccessor).toBe('y0');
     expect(tooltipValue.name).toBe('bar_1');
     expect(tooltipValue.isXValue).toBe(false);
     expect(tooltipValue.isHighlighted).toBe(false);
@@ -115,6 +118,7 @@ describe('Tooltip formatting', () => {
     };
     let tooltipValue = formatTooltip(geometry, SPEC_1, true, false, YAXIS_SPEC);
     expect(tooltipValue).toBeDefined();
+    expect(tooltipValue.yAccessor).toBe('y0');
     expect(tooltipValue.name).toBe('bar_1');
     expect(tooltipValue.isXValue).toBe(true);
     expect(tooltipValue.isHighlighted).toBe(false);

@@ -107,7 +107,7 @@ export function splitSeries(
         const cleanedDatum = cleanDatum(datum, xAccessor, accessor, y0Accessors && y0Accessors[index]);
         xValues.add(cleanedDatum.x);
         updateSeriesMap(series, [...seriesKey, accessor], cleanedDatum, specId, colorValuesKey);
-      }, {});
+      });
     } else {
       const colorValues = getColorValues(datum, splitSeriesAccessors);
       const colorValuesKey = getColorValuesAsString(colorValues, specId);
@@ -116,7 +116,7 @@ export function splitSeries(
       xValues.add(cleanedDatum.x);
       updateSeriesMap(series, [...seriesKey], cleanedDatum, specId, colorValuesKey);
     }
-  }, {});
+  });
   return {
     rawDataSeries: [...series.values()],
     colorsValues,

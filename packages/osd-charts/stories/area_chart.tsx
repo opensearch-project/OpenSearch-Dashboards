@@ -431,6 +431,7 @@ storiesOf('Area Chart', module)
     const scaleToDataExtent = boolean('scale to extent', true);
     return (
       <Chart className={'story-chart'}>
+        <Settings showLegend legendPosition={Position.Right} />
         <Axis
           id={getAxisId('bottom')}
           title={'timestamp per 1 minute'}

@@ -30,7 +30,7 @@ export function formatTooltip(
   const { id } = spec;
   const {
     color,
-    value: { x, y },
+    value: { x, y, accessor },
     geometryId: { seriesKey },
   } = searchIndexValue;
   const seriesKeyAsString = getColorValuesAsString(seriesKey, id);
@@ -49,6 +49,7 @@ export function formatTooltip(
     color,
     isHighlighted: isXValue ? false : isHighlighted,
     isXValue,
+    yAccessor: accessor,
   };
 }
 

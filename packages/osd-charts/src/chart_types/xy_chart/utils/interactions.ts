@@ -1,6 +1,7 @@
 import { BarGeometry, IndexedGeometry, isBarGeometry, isPointGeometry, PointGeometry } from '../rendering/rendering';
 import { Datum, Rotation } from './specs';
 import { Dimensions } from '../../../utils/dimensions';
+import { Accessor } from '../../../utils/accessor';
 
 /** The type of tooltip to use */
 export const TooltipType = Object.freeze({
@@ -27,6 +28,7 @@ export interface TooltipValue {
   isHighlighted: boolean;
   isXValue: boolean;
   seriesKey: string;
+  yAccessor: Accessor;
 }
 
 export type TooltipValueFormatter = (data: TooltipValue) => JSX.Element | string;
