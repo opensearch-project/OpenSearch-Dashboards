@@ -9,7 +9,7 @@ import { ChartResizer } from './chart_resizer';
 import { Crosshair } from './crosshair';
 import { Highlighter } from './highlighter';
 import { Legend } from './legend/legend';
-import { ReactiveChart as ReactChart } from './react_canvas/reactive_chart';
+import { ChartContainer } from './react_canvas/chart_container';
 import { Tooltips } from './tooltips';
 import { isHorizontal } from '../chart_types/xy_chart/utils/axis_utils';
 import { Position } from '../chart_types/xy_chart/utils/specs';
@@ -94,8 +94,8 @@ export class Chart extends React.Component<ChartProps, ChartState> {
             <ChartResizer />
             <Crosshair />
             {// TODO reenable when SVG rendered is aligned with canvas one
-            renderer === 'svg' && <ReactChart />}
-            {renderer === 'canvas' && <ReactChart />}
+            renderer === 'svg' && <ChartContainer />}
+            {renderer === 'canvas' && <ChartContainer />}
             <Tooltips />
             <AnnotationTooltip />
             <Highlighter />

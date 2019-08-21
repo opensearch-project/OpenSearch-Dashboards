@@ -238,17 +238,16 @@ export class ChartStore {
   legendPosition = observable.box<Position>(Position.Right);
   showLegendDisplayValue = observable.box(true);
 
-  /**
-   * determine if crosshair cursor should be visible based on cursor position and brush enablement
-   */
-  isCrosshairCursorVisible = computed(() => {
+  chartCursor = computed(() => {
     const { x: xPos, y: yPos } = this.cursorPosition;
 
     if (yPos < 0 || xPos < 0) {
-      return false;
+      return 'default';
     }
-
-    return this.isBrushEnabled();
+    if (this.highlightedGeometries.length > 0 && (this.onElementClickListener || this.onElementOverListener)) {
+      return 'pointer';
+    }
+    return this.isBrushEnabled() ? 'crosshair' : 'default';
   });
 
   /**
@@ -466,13 +465,6 @@ export class ChartStore {
     } else {
       this.tooltipData.replace(tooltipValues);
     }
-
-    // TODO move this into the renderer
-    if (oneHighlighted) {
-      document.body.style.cursor = 'pointer';
-    } else {
-      document.body.style.cursor = 'default';
-    }
   });
 
   legendItemTooltipValues = computed(() => {
@@ -548,8 +540,6 @@ export class ChartStore {
     // clear highlight geoms
     this.highlightedGeometries.clear();
     this.tooltipData.clear();
-
-    document.body.style.cursor = 'default';
 
     if (this.onCursorUpdateListener && this.isActiveChart.get()) {
       this.onCursorUpdateListener();
