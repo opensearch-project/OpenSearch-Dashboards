@@ -6,6 +6,7 @@ import { TooltipType } from '../chart_types/xy_chart/utils/interactions';
 import { ChartStore } from '../chart_types/xy_chart/store/chart_state';
 import { DEFAULT_TOOLTIP_SNAP, DEFAULT_TOOLTIP_TYPE, SettingsComponent, SettingSpecProps } from './settings';
 import { PartialTheme } from '../utils/themes/theme';
+import { LIGHT_THEME } from '../utils/themes/light_theme';
 
 describe('Settings spec component', () => {
   test('should update store on mount if spec has a chart store', () => {
@@ -55,7 +56,7 @@ describe('Settings spec component', () => {
   test('should set chart properties on chart store', () => {
     const chartStore = new ChartStore();
 
-    expect(chartStore.chartTheme).toBeUndefined();
+    expect(chartStore.chartTheme).toEqual(LIGHT_THEME);
     expect(chartStore.chartRotation).toBe(0);
     expect(chartStore.chartRendering).toBe('canvas');
     expect(chartStore.animateData).toBe(false);
@@ -162,7 +163,7 @@ describe('Settings spec component', () => {
       },
     };
 
-    expect(chartStore.chartTheme).toBeUndefined();
+    expect(chartStore.chartTheme).toEqual(LIGHT_THEME);
 
     const updatedProps: SettingSpecProps = {
       theme: partialTheme,

@@ -92,6 +92,7 @@ import {
   Transform,
   updateDeselectedDataSeries,
 } from './utils';
+import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 
 export interface Point {
   x: number;
@@ -149,10 +150,7 @@ export class ChartStore {
 
   chartRotation: Rotation = 0; // updated from jsx
   chartRendering: Rendering = 'canvas'; // updated from jsx
-  /**
-   * Chart theme to be set from Settings.tsx
-   */
-  chartTheme!: Theme;
+  chartTheme: Theme = LIGHT_THEME;
   axesSpecs: Map<AxisId, AxisSpec> = new Map(); // readed from jsx
   axesTicksDimensions: Map<AxisId, AxisTicksDimensions> = new Map(); // computed
   axesPositions: Map<AxisId, Dimensions> = new Map(); // computed
