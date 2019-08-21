@@ -163,7 +163,7 @@ describe('Stacked Series Utils', () => {
     },
   ];
 
-  describe.only('Format stacked dataset', () => {
+  describe('Format stacked dataset', () => {
     test('format data without nulls', () => {
       const formattedData = formatStackedDataSeriesValues(STANDARD_DATA_SET, false, true);
       const data0 = formattedData[0].data[0];

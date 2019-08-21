@@ -11,7 +11,7 @@ describe('Scale Continuous', () => {
     const domain: Domain = [0, 2];
     const minRange = 0;
     const maxRange = 100;
-    const scale = new ScaleContinuous(ScaleType.Linear, domain, [minRange, maxRange]);
+    const scale = new ScaleContinuous({ type: ScaleType.Linear, domain, range: [minRange, maxRange] });
     expect(scale.invert(0)).toBe(0);
     expect(scale.invert(50)).toBe(1);
     expect(scale.invert(100)).toBe(2);
@@ -23,7 +23,7 @@ describe('Scale Continuous', () => {
     const domain = [startTime.toMillis(), endTime.toMillis()];
     const minRange = 0;
     const maxRange = 100;
-    const scale = new ScaleContinuous(ScaleType.Time, domain, [minRange, maxRange]);
+    const scale = new ScaleContinuous({ type: ScaleType.Time, domain, range: [minRange, maxRange] });
     expect(scale.invert(0)).toBe(startTime.toMillis());
     expect(scale.invert(50)).toBe(midTime.toMillis());
     expect(scale.invert(100)).toBe(endTime.toMillis());
@@ -31,10 +31,10 @@ describe('Scale Continuous', () => {
   test('check if a scale is log scale', () => {
     const domain: Domain = [0, 2];
     const range: [number, number] = [0, 100];
-    const scaleLinear = new ScaleContinuous(ScaleType.Linear, domain, range);
-    const scaleLog = new ScaleContinuous(ScaleType.Log, domain, range);
-    const scaleTime = new ScaleContinuous(ScaleType.Time, domain, range);
-    const scaleSqrt = new ScaleContinuous(ScaleType.Sqrt, domain, range);
+    const scaleLinear = new ScaleContinuous({ type: ScaleType.Linear, domain, range });
+    const scaleLog = new ScaleContinuous({ type: ScaleType.Log, domain, range });
+    const scaleTime = new ScaleContinuous({ type: ScaleType.Time, domain, range });
+    const scaleSqrt = new ScaleContinuous({ type: ScaleType.Sqrt, domain, range });
     const scaleBand = new ScaleBand(domain, range);
     expect(isLogarithmicScale(scaleLinear)).toBe(false);
     expect(isLogarithmicScale(scaleLog)).toBe(true);
@@ -46,7 +46,7 @@ describe('Scale Continuous', () => {
     const domain: Domain = [0, 2];
     const data = [0, 0.5, 0.8, 2];
     const range: [number, number] = [0, 2];
-    const scaleLinear = new ScaleContinuous(ScaleType.Linear, domain, range);
+    const scaleLinear = new ScaleContinuous({ type: ScaleType.Linear, domain, range });
     expect(scaleLinear.bandwidth).toBe(0);
     expect(scaleLinear.invertWithStep(0, data)).toBe(0);
     expect(scaleLinear.invertWithStep(0.1, data)).toBe(0);
@@ -78,7 +78,7 @@ describe('Scale Continuous', () => {
       type: 'xDomain',
     };
 
-    const scaleLinear = computeXScale(xDomain, 1, 0, 120, 0);
+    const scaleLinear = computeXScale({ xDomain, totalBarsInCluster: 1, range: [0, 120], barsPadding: 0 });
     expect(scaleLinear.bandwidth).toBe(40);
     expect(scaleLinear.invertWithStep(0, data)).toBe(0);
     expect(scaleLinear.invertWithStep(40, data)).toBe(1);
@@ -97,7 +97,10 @@ describe('Scale Continuous', () => {
     // we tweak the maxRange removing the bandwidth to correctly compute
     // a band linear scale in computeXScale
     const range: [number, number] = [0, 100 - 10];
-    const scaleLinear = new ScaleContinuous(ScaleType.Linear, domain, range, 10, 10);
+    const scaleLinear = new ScaleContinuous(
+      { type: ScaleType.Linear, domain, range },
+      { bandwidth: 10, minInterval: 10 },
+    );
     expect(scaleLinear.bandwidth).toBe(10);
     expect(scaleLinear.invertWithStep(0, data)).toBe(0);
     expect(scaleLinear.invertWithStep(10, data)).toBe(10);
@@ -117,8 +120,8 @@ describe('Scale Continuous', () => {
       type: 'xDomain',
     };
 
-    const scaleLinear = computeXScale(xDomain, 1, 0, 110, 0);
-    // const scaleLinear = new ScaleContinuous(ScaleType.Linear, domain, range, 10, 10);
+    const scaleLinear = computeXScale({ xDomain, totalBarsInCluster: 1, range: [0, 110], barsPadding: 0 });
+    // const scaleLinear = new ScaleContinuous({type: ScaleType.Linear, domain, range}, 10, 10);
     expect(scaleLinear.bandwidth).toBe(10);
 
     expect(scaleLinear.invertWithStep(0, data)).toBe(0);
@@ -142,15 +145,15 @@ describe('Scale Continuous', () => {
 
   describe('isSingleValue', () => {
     test('should return true for domain with fewer than 2 values', () => {
-      const scale = new ScaleContinuous(ScaleType.Linear, [], [0, 100]);
+      const scale = new ScaleContinuous({ type: ScaleType.Linear, domain: [], range: [0, 100] });
       expect(scale.isSingleValue()).toBe(true);
     });
     test('should return true for domain with equal min and max values', () => {
-      const scale = new ScaleContinuous(ScaleType.Linear, [1, 1], [0, 100]);
+      const scale = new ScaleContinuous({ type: ScaleType.Linear, domain: [1, 1], range: [0, 100] });
       expect(scale.isSingleValue()).toBe(true);
     });
     test('should return false for domain with differing min and max values', () => {
-      const scale = new ScaleContinuous(ScaleType.Linear, [1, 2], [0, 100]);
+      const scale = new ScaleContinuous({ type: ScaleType.Linear, domain: [1, 2], range: [0, 100] });
       expect(scale.isSingleValue()).toBe(false);
     });
   });
@@ -160,12 +163,8 @@ describe('Scale Continuous', () => {
 
     function getTicksForDomain(domainStart: number, domainEnd: number) {
       const scale = new ScaleContinuous(
-        ScaleType.Time,
-        [domainStart, domainEnd],
-        [0, 100],
-        0,
-        0,
-        Settings.defaultZoneName,
+        { type: ScaleType.Time, domain: [domainStart, domainEnd], range: [0, 100] },
+        { bandwidth: 0, minInterval: 0, timeZone: Settings.defaultZoneName },
       );
       return scale.tickValues;
     }

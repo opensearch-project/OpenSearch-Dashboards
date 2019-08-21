@@ -227,6 +227,8 @@ export interface AxisSpec {
   tickFormat: TickFormatter;
   /** The degrees of rotation of the tick labels */
   tickLabelRotation?: number;
+  /** An approximate count of how many ticks will be generated */
+  ticks?: number;
   /** The axis title */
   title?: string;
   /** If specified, it constrains the domain for these values */

@@ -21,7 +21,11 @@ describe('annotation marker', () => {
   const maxRange = 100;
 
   const continuousData = [0, 10];
-  const continuousScale = new ScaleContinuous(ScaleType.Linear, continuousData, [minRange, maxRange]);
+  const continuousScale = new ScaleContinuous({
+    type: ScaleType.Linear,
+    domain: continuousData,
+    range: [minRange, maxRange],
+  });
 
   const chartDimensions: Dimensions = {
     width: 10,

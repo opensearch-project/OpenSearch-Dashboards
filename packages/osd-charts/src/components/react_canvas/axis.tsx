@@ -220,6 +220,7 @@ export class Axis extends React.PureComponent<AxisProps> {
             stroke="black"
             strokeWidth={1}
             fill="violet"
+            opacity={0.2}
           />
         )}
         <Text align="center" x={left} y={top} width={width} height={height} text={title} {...titleStyle} />

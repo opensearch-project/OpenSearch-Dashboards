@@ -17,7 +17,9 @@ import {
   Position,
   ScaleType,
   Settings,
+  niceTimeFormatter,
 } from '../src/';
+import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 
 function createThemeAction(title: string, min: number, max: number, value: number) {
   return number(
@@ -55,9 +57,14 @@ function renderAxisWithOptions(position: Position, seriesGroup: string, show: bo
 storiesOf('Axis', module)
   .add('basic', () => {
     const customStyle = {
-      tickLabelPadding: number('Tick Label Padding', 0),
+      tickLabelPadding: number('Tick Label Padding', 0, {
+        range: true,
+        min: 2,
+        max: 30,
+        step: 1,
+      }),
     };
-
+    const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 60);
     return (
       <Chart className={'story-chart'}>
         <Settings debug={boolean('debug', false)} />
@@ -65,8 +72,21 @@ storiesOf('Axis', module)
           id={getAxisId('bottom')}
           position={Position.Bottom}
           title={'Bottom axis'}
-          showOverlappingTicks={true}
           style={customStyle}
+          showOverlappingLabels={boolean('Bottom overlap labels', false, 'Bottom Axis')}
+          showOverlappingTicks={boolean('Bottom overlap ticks', true, 'Bottom Axis')}
+          ticks={number(
+            'Number of ticks on bottom',
+            10,
+            {
+              range: true,
+              min: 2,
+              max: 20,
+              step: 1,
+            },
+            'Bottom Axis',
+          )}
+          tickFormat={niceTimeFormatter([data[0][0], data[data.length - 1][0]])}
         />
         <Axis
           id={getAxisId('left2')}
@@ -74,15 +94,28 @@ storiesOf('Axis', module)
           position={Position.Left}
           tickFormat={(d) => Number(d).toFixed(2)}
           style={customStyle}
+          showOverlappingLabels={boolean('Left overlap labels', false, 'Left Axis')}
+          showOverlappingTicks={boolean('Left overlap ticks', true, 'Left Axis')}
+          ticks={number(
+            'Number of ticks on left',
+            10,
+            {
+              range: true,
+              min: 2,
+              max: 20,
+              step: 1,
+            },
+            'Left Axis',
+          )}
         />
 
         <AreaSeries
           id={getSpecId('lines')}
-          xScaleType={ScaleType.Linear}
+          xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={data}
         />
       </Chart>
     );

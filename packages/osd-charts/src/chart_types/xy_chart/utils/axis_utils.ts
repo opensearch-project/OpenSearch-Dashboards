@@ -126,15 +126,22 @@ export function getScaleForAxisSpec(
   enableHistogramMode?: boolean,
 ): Scale | null {
   const axisIsYDomain = isYDomain(axisSpec.position, chartRotation);
-
+  const range: [number, number] = [minRange, maxRange];
   if (axisIsYDomain) {
-    const yScales = computeYScales(yDomain, minRange, maxRange);
+    const yScales = computeYScales({ yDomains: yDomain, range, ticks: axisSpec.ticks });
     if (yScales.has(axisSpec.groupId)) {
       return yScales.get(axisSpec.groupId)!;
     }
     return null;
   } else {
-    return computeXScale(xDomain, totalBarsInCluster, minRange, maxRange, barsPadding, enableHistogramMode);
+    return computeXScale({
+      xDomain,
+      totalBarsInCluster,
+      range,
+      barsPadding,
+      enableHistogramMode,
+      ticks: axisSpec.ticks,
+    });
   }
 }
 

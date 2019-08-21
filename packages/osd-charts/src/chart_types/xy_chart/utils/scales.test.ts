@@ -22,7 +22,7 @@ describe('Series scales', () => {
   };
 
   test('should compute X Scale linear min, max with bands', () => {
-    const scale = computeXScale(xDomainLinear, 1, 0, 120);
+    const scale = computeXScale({ xDomain: xDomainLinear, totalBarsInCluster: 1, range: [0, 120] });
     const expectedBandwidth = 120 / 4;
     expect(scale.bandwidth).toBe(expectedBandwidth);
     expect(scale.scale(0)).toBe(expectedBandwidth * 0);
@@ -32,7 +32,7 @@ describe('Series scales', () => {
   });
 
   test('should compute X Scale linear inverse min, max with bands', () => {
-    const scale = computeXScale(xDomainLinear, 1, 120, 0);
+    const scale = computeXScale({ xDomain: xDomainLinear, totalBarsInCluster: 1, range: [120, 0] });
     const expectedBandwidth = 120 / 4;
     expect(scale.bandwidth).toBe(expectedBandwidth);
     expect(scale.scale(0)).toBe(expectedBandwidth * 3);
@@ -56,7 +56,13 @@ describe('Series scales', () => {
       };
       const enableHistogramMode = true;
 
-      const scale = computeXScale(xDomainSingleValue, 1, 0, maxRange, 0, enableHistogramMode);
+      const scale = computeXScale({
+        xDomain: xDomainSingleValue,
+        totalBarsInCluster: 1,
+        range: [0, maxRange],
+        barsPadding: 0,
+        enableHistogramMode,
+      });
       expect(scale.bandwidth).toBe(maxRange);
       expect(scale.domain).toEqual([singleDomainValue, singleDomainValue + minInterval]);
       expect(scale.range).toEqual([0, maxRange]);
@@ -72,7 +78,13 @@ describe('Series scales', () => {
       };
       const enableHistogramMode = false;
 
-      const scale = computeXScale(xDomainSingleValue, 1, 0, maxRange, 0, enableHistogramMode);
+      const scale = computeXScale({
+        xDomain: xDomainSingleValue,
+        totalBarsInCluster: 1,
+        range: [0, maxRange],
+        barsPadding: 0,
+        enableHistogramMode,
+      });
       expect(scale.bandwidth).toBe(maxRange);
       expect(scale.domain).toEqual([singleDomainValue, singleDomainValue]);
       expect(scale.range).toEqual([0, 0]);
@@ -80,13 +92,13 @@ describe('Series scales', () => {
   });
 
   test('should compute X Scale ordinal', () => {
-    const nonZeroGroupScale = computeXScale(xDomainOrdinal, 1, 120, 0);
+    const nonZeroGroupScale = computeXScale({ xDomain: xDomainOrdinal, totalBarsInCluster: 1, range: [120, 0] });
     const expectedBandwidth = 60;
     expect(nonZeroGroupScale.bandwidth).toBe(expectedBandwidth);
     expect(nonZeroGroupScale.scale('a')).toBe(expectedBandwidth);
     expect(nonZeroGroupScale.scale('b')).toBe(0);
 
-    const zeroGroupScale = computeXScale(xDomainOrdinal, 0, 120, 0);
+    const zeroGroupScale = computeXScale({ xDomain: xDomainOrdinal, totalBarsInCluster: 0, range: [120, 0] });
     expect(zeroGroupScale.bandwidth).toBe(expectedBandwidth);
   });
 

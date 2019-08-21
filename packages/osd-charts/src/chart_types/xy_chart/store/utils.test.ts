@@ -1035,7 +1035,14 @@ describe('Chart State utils', () => {
     const range: [number, number] = [0, 100];
     const bandwidth = 10;
     const barsPadding = 0.5;
-    const scale = new ScaleContinuous(ScaleType.Linear, domain, range, bandwidth, 0, 'utc', 1, barsPadding);
+    const scale = new ScaleContinuous(
+      {
+        type: ScaleType.Linear,
+        domain,
+        range,
+      },
+      { bandwidth, minInterval: 0, timeZone: 'utc', totalBarsInCluster: 1, barsPadding },
+    );
     const histogramModeEnabled = true;
     const histogramModeDisabled = false;
 

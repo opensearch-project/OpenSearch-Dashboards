@@ -81,11 +81,31 @@ describe('Crosshair utils ordinal scales', () => {
   mixedLinesBarsMap.set(barSeries2SpecId, barSeries2);
   const mixedLinesBarsSeriesDomains = computeSeriesDomains(mixedLinesBarsMap, new Map());
 
-  const barSeriesScale = computeXScale(barSeriesDomains.xDomain, barSeriesMap.size, 0, 120);
-  const multiBarSeriesScale = computeXScale(multiBarSeriesDomains.xDomain, multiBarSeriesMap.size, 0, 120);
-  const lineSeriesScale = computeXScale(lineSeriesDomains.xDomain, lineSeriesMap.size, 0, 120);
-  const multiLineSeriesScale = computeXScale(multiLineSeriesDomains.xDomain, multiLineSeriesMap.size, 0, 120);
-  const mixedLinesBarsSeriesScale = computeXScale(mixedLinesBarsSeriesDomains.xDomain, mixedLinesBarsMap.size, 0, 120);
+  const barSeriesScale = computeXScale({
+    xDomain: barSeriesDomains.xDomain,
+    totalBarsInCluster: barSeriesMap.size,
+    range: [0, 120],
+  });
+  const multiBarSeriesScale = computeXScale({
+    xDomain: multiBarSeriesDomains.xDomain,
+    totalBarsInCluster: multiBarSeriesMap.size,
+    range: [0, 120],
+  });
+  const lineSeriesScale = computeXScale({
+    xDomain: lineSeriesDomains.xDomain,
+    totalBarsInCluster: lineSeriesMap.size,
+    range: [0, 120],
+  });
+  const multiLineSeriesScale = computeXScale({
+    xDomain: multiLineSeriesDomains.xDomain,
+    totalBarsInCluster: multiLineSeriesMap.size,
+    range: [0, 120],
+  });
+  const mixedLinesBarsSeriesScale = computeXScale({
+    xDomain: mixedLinesBarsSeriesDomains.xDomain,
+    totalBarsInCluster: mixedLinesBarsMap.size,
+    range: [0, 120],
+  });
 
   test('can snap position on scale ordinal bar', () => {
     let snappedPosition = getSnapPosition('a', barSeriesScale);

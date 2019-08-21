@@ -215,8 +215,8 @@ export function computeSeriesGeometries(
   const { stackedBarsInCluster, totalBarsInCluster } = countBarsInCluster(stacked, nonStacked);
 
   // compute scales
-  const xScale = computeXScale(xDomain, totalBarsInCluster, 0, width, barsPadding, enableHistogramMode);
-  const yScales = computeYScales(yDomain, height, 0);
+  const xScale = computeXScale({ xDomain, totalBarsInCluster, range: [0, width], barsPadding, enableHistogramMode });
+  const yScales = computeYScales({ yDomains: yDomain, range: [height, 0] });
 
   // compute colors
 

@@ -74,7 +74,14 @@ describe('[Scale Time] - timezones', () => {
       const minRange = 0;
       const maxRange = 100;
       const minInterval = (endTime - startTime) / 2;
-      const scale = new ScaleContinuous(ScaleType.Time, domain, [minRange, maxRange], undefined, minInterval, 'local');
+      const scale = new ScaleContinuous(
+        {
+          type: ScaleType.Time,
+          domain,
+          range: [minRange, maxRange],
+        },
+        { bandwidth: undefined, minInterval, timeZone: 'local' },
+      );
       expect(scale.invert(0)).toBe(startTime);
       expect(scale.invert(50)).toBe(midTime);
       expect(scale.invert(100)).toBe(endTime);
@@ -99,7 +106,10 @@ describe('[Scale Time] - timezones', () => {
       const minRange = 0;
       const maxRange = 100;
       const minInterval = (endTime - startTime) / 2;
-      const scale = new ScaleContinuous(ScaleType.Time, domain, [minRange, maxRange], undefined, minInterval, 'utc');
+      const scale = new ScaleContinuous(
+        { type: ScaleType.Time, domain, range: [minRange, maxRange] },
+        { bandwidth: undefined, minInterval, timeZone: 'utc' },
+      );
       expect(scale.invert(0)).toBe(startTime);
       expect(scale.invert(50)).toBe(midTime);
       expect(scale.invert(100)).toBe(endTime);
@@ -124,7 +134,14 @@ describe('[Scale Time] - timezones', () => {
       const minRange = 0;
       const maxRange = 100;
       const minInterval = (endTime - startTime) / 2;
-      const scale = new ScaleContinuous(ScaleType.Time, domain, [minRange, maxRange], undefined, minInterval, 'utc+8');
+      const scale = new ScaleContinuous(
+        {
+          type: ScaleType.Time,
+          domain,
+          range: [minRange, maxRange],
+        },
+        { bandwidth: undefined, minInterval, timeZone: 'utc+8' },
+      );
       expect(scale.invert(0)).toBe(startTime);
       expect(scale.invert(50)).toBe(midTime);
       expect(scale.invert(100)).toBe(endTime);
@@ -149,7 +166,14 @@ describe('[Scale Time] - timezones', () => {
       const minRange = 0;
       const maxRange = 100;
       const minInterval = (endTime - startTime) / 2;
-      const scale = new ScaleContinuous(ScaleType.Time, domain, [minRange, maxRange], undefined, minInterval, 'utc-8');
+      const scale = new ScaleContinuous(
+        {
+          type: ScaleType.Time,
+          domain,
+          range: [minRange, maxRange],
+        },
+        { bandwidth: undefined, minInterval, timeZone: 'utc-8' },
+      );
       expect(scale.invert(0)).toBe(startTime);
       expect(scale.invert(50)).toBe(midTime);
       expect(scale.invert(100)).toBe(endTime);
@@ -179,12 +203,8 @@ describe('[Scale Time] - timezones', () => {
         const maxRange = 100;
         const minInterval = (endTime - startTime) / 2;
         const scale = new ScaleContinuous(
-          ScaleType.Time,
-          domain,
-          [minRange, maxRange],
-          undefined,
-          minInterval,
-          timezone,
+          { type: ScaleType.Time, domain, range: [minRange, maxRange] },
+          { bandwidth: undefined, minInterval, timeZone: timezone },
         );
         const formatFunction = (d: number) => {
           return DateTime.fromMillis(d, { zone: timezone }).toISO();

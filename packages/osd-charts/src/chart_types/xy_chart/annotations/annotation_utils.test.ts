@@ -50,7 +50,14 @@ describe('annotation utils', () => {
   const maxRange = 100;
 
   const continuousData = [0, 10];
-  const continuousScale = new ScaleContinuous(ScaleType.Linear, continuousData, [minRange, maxRange], 0, 1);
+  const continuousScale = new ScaleContinuous(
+    {
+      type: ScaleType.Linear,
+      domain: continuousData,
+      range: [minRange, maxRange],
+    },
+    { bandwidth: 0, minInterval: 1 },
+  );
 
   const ordinalData = ['a', 'b', 'c', 'd', 'a', 'b', 'c'];
   const ordinalScale = new ScaleBand(ordinalData, [minRange, maxRange]);
@@ -1345,7 +1352,10 @@ describe('annotation utils', () => {
     const yScales: Map<GroupId, Scale> = new Map();
     yScales.set(groupId, continuousScale);
 
-    const xScale: Scale = new ScaleContinuous(ScaleType.Linear, continuousData, [minRange, maxRange], 1, 1);
+    const xScale: Scale = new ScaleContinuous(
+      { type: ScaleType.Linear, domain: continuousData, range: [minRange, maxRange] },
+      { bandwidth: 1, minInterval: 1 },
+    );
 
     const annotationRectangle: RectAnnotationSpec = {
       annotationId: getAnnotationId('rect'),
