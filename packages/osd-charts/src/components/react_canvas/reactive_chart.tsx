@@ -380,15 +380,6 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
         </div>
       );
     }
-    // disable clippings when debugging
-    const clippings = debug
-      ? {}
-      : {
-          clipX: 0,
-          clipY: 0,
-          clipWidth: [90, -90].includes(chartRotation) ? chartDimensions.height : chartDimensions.width,
-          clipHeight: [90, -90].includes(chartRotation) ? chartDimensions.width : chartDimensions.height,
-        };
 
     let brushProps = {};
     const isBrushEnabled = this.props.chartStore!.isBrushEnabled();
@@ -398,13 +389,6 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
         onMouseMove: this.onBrushing,
       };
     }
-
-    const layerClippings = {
-      clipX: chartDimensions.left,
-      clipY: chartDimensions.top,
-      clipWidth: chartDimensions.width,
-      clipHeight: chartDimensions.height,
-    };
 
     const className = classNames({
       'echChart--isBrushEnabled': this.props.chartStore!.isCrosshairCursorVisible.get(),
@@ -443,15 +427,17 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
           }}
           {...brushProps}
         >
-          <Layer hitGraphEnabled={false} listening={false} {...layerClippings}>
+          <Layer hitGraphEnabled={false} listening={false}>
             {this.renderGrids()}
+          </Layer>
+          <Layer hitGraphEnabled={false} listening={false}>
+            {this.renderAxes()}
           </Layer>
 
           <Layer
             x={chartDimensions.left + chartTransform.x}
             y={chartDimensions.top + chartTransform.y}
             rotation={chartRotation}
-            {...clippings}
             hitGraphEnabled={false}
             listening={false}
           >
@@ -468,10 +454,6 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
           )}
 
           <Layer hitGraphEnabled={false} listening={false}>
-            {this.renderAxes()}
-          </Layer>
-
-          <Layer hitGraphEnabled={false} listening={false} {...layerClippings}>
             {this.renderBarValues()}
           </Layer>
         </Stage>
