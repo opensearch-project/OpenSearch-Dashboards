@@ -26,7 +26,7 @@
   &__label {
     @include euiTextOverflowWrap;
     min-width: 1px;
-    flex: 1;
+    flex: 1 1 auto;
   }
 
   &__value {

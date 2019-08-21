@@ -1,62 +1,81 @@
+$legendItemVerticalPadding: $echLegendRowGap / 2;
+
 .echLegendItem {
   color: $euiTextColor;
-  height: $echLegendItemHeight;
-  width: 100%;
   display: flex;
   flex-wrap: nowrap;
   justify-content: space-between;
   user-select: none;
   align-items: center;
+  width: 100%;
 
   &:hover {
     .echLegendItem__title {
       text-decoration: underline;
     }
   }
-}
 
-.echLegendItem__color {
-  margin-right: $euiSizeXS;
-}
-
-.echLegendItem__visibility {
-  margin-right: $euiSizeXS;
-
-  &:hover {
-    cursor: pointer;
+  &__color {
+    margin-right: $euiSizeXS;
   }
-}
 
-.echLegendItem__title {
-  @include euiFontSizeXS;
-  @include euiTextTruncate;
-  margin-right: $euiSizeXS;
-  flex: 1;
-  &:hover {
-    cursor: pointer;
+  &__visibility {
+    margin-right: $euiSizeXS;
+
+    &:hover {
+      cursor: pointer;
+    }
   }
-}
 
-.echLegendItem__title--selected {
-  text-decoration: underline;
-}
+  &__title {
+    @include euiFontSizeXS;
+    @include euiTextTruncate;
+    flex: 1 1 auto;
 
-.echLegendItem__title--hasClickListener {
-  &:hover {
-    cursor: pointer;
+    &:hover {
+      cursor: pointer;
+    }
   }
-}
 
-.echLegendItem__displayValue {
-  @include euiFontSizeXS;
-  text-align: right;
-  font-feature-settings: 'tnum';
+  &__title--selected {
+    text-decoration: underline;
+  }
+
+  &__title--hasClickListener {
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
+  &__displayValue {
+    @include euiFontSizeXS;
+    text-align: right;
+    margin-left: $euiSizeXS;
+    font-feature-settings: 'tnum';
+
+    &--hidden {
+      display: none;
+    }
+  }
+
+  &--right,
+  &--left {
+    padding-top: $legendItemVerticalPadding;
+    padding-bottom: $legendItemVerticalPadding;
+  }
+
+  @include internetExplorerOnly {
+    &--bottom,
+    &--top {
+      width: $echLegendMaxWidth;
+      margin-right: $euiSizeL;
+    }
+
+    padding-top: $legendItemVerticalPadding;
+    padding-bottom: $legendItemVerticalPadding;
+  }
 
   &--hidden {
-    display: none;
+    color: $euiColorDarkShade;
   }
-}
-
-.echLegendItem-isHidden {
-  color: $euiColorDarkShade;
 }

@@ -28,9 +28,9 @@ describe('Specs parser', () => {
   });
   test('updates initialization state on unmount', () => {
     const chartStore = new ChartStore();
-    chartStore.initialized.set(true);
+    chartStore.chartInitialized.set(true);
     const component = mount(<SpecsSpecRootComponent chartStore={chartStore} />);
     component.unmount();
-    expect(chartStore.initialized.get()).toBe(false);
+    expect(chartStore.chartInitialized.get()).toBe(false);
   });
 });

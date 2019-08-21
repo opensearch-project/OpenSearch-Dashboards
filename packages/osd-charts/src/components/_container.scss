@@ -3,17 +3,19 @@
  */
 
 .echContainer {
+  flex: 1;
   position: relative;
-  width: 100%;
-  height: 100%;
-
-  &:hover {
-    .echLegend__toggle {
-      opacity: 1;
-    }
-  }
 }
 
-.echChart--isBrushEnabled {
-  cursor: crosshair;
+.echChart {
+  display: flex;
+  height: 100%;
+
+  &--isBrushEnabled {
+    cursor: crosshair;
+  }
+
+  &--column {
+    flex-direction: column;
+  }
 }

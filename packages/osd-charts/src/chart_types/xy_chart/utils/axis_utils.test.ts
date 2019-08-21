@@ -33,11 +33,6 @@ import {
 import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
 import { SvgTextBBoxCalculator } from '../../../utils/bbox/svg_text_bbox_calculator';
 
-// const chartScalesConfig: ScalesConfig = {
-//   ordinal: {
-//     padding:  0,
-//   },
-// };
 describe('Axis computational utils', () => {
   const mockedRect = {
     x: 0,
@@ -774,7 +769,6 @@ describe('Axis computational utils', () => {
 
   test('should compute axis ticks positions with title', () => {
     const chartRotation = 0;
-    const showLegend = false;
 
     // validate assumptions for test
     expect(verticalAxisSpec.id).toEqual(verticalAxisSpecWTitle.id);
@@ -792,7 +786,6 @@ describe('Axis computational utils', () => {
       },
       LIGHT_THEME,
       chartRotation,
-      showLegend,
       axisSpecs,
       axisDims,
       xDomain,
@@ -819,7 +812,6 @@ describe('Axis computational utils', () => {
       },
       LIGHT_THEME,
       chartRotation,
-      showLegend,
       axisSpecs,
       axisDims,
       xDomain,
@@ -982,9 +974,6 @@ describe('Axis computational utils', () => {
 
   test('should not compute axis ticks positions if missaligned specs', () => {
     const chartRotation = 0;
-    const showLegend = true;
-    const leftLegendPosition = Position.Left;
-
     const axisSpecs = new Map<AxisId, AxisSpec>();
     axisSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
 
@@ -998,14 +987,12 @@ describe('Axis computational utils', () => {
       },
       LIGHT_THEME,
       chartRotation,
-      showLegend,
       axisSpecs,
       axisDims,
       xDomain,
       [yDomain],
       1,
       false,
-      leftLegendPosition,
     );
     expect(axisTicksPosition.axisPositions.size).toBe(0);
     expect(axisTicksPosition.axisTicks.size).toBe(0);
@@ -1015,10 +1002,6 @@ describe('Axis computational utils', () => {
 
   test('should compute axis ticks positions', () => {
     const chartRotation = 0;
-    const showLegend = true;
-    const leftLegendPosition = Position.Left;
-    const topLegendPosition = Position.Top;
-
     const axisSpecs = new Map<AxisId, AxisSpec>();
     axisSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
 
@@ -1032,14 +1015,12 @@ describe('Axis computational utils', () => {
       },
       LIGHT_THEME,
       chartRotation,
-      showLegend,
       axisSpecs,
       axisDims,
       xDomain,
       [yDomain],
       1,
       false,
-      leftLegendPosition,
     );
 
     const expectedVerticalAxisGridLines = [
@@ -1065,14 +1046,12 @@ describe('Axis computational utils', () => {
       },
       LIGHT_THEME,
       chartRotation,
-      showLegend,
       axisSpecs,
       axisDims,
       xDomain,
       [yDomain],
       1,
       false,
-      topLegendPosition,
     );
 
     const expectedPositionWithTopLegend = {
@@ -1095,14 +1074,12 @@ describe('Axis computational utils', () => {
         },
         LIGHT_THEME,
         chartRotation,
-        showLegend,
         invalidSpecs,
         axisDims,
         xDomain,
         [yDomain],
         1,
         false,
-        leftLegendPosition,
       );
     };
 

@@ -75,8 +75,24 @@ export interface ColorConfig {
   defaultVizColor: string;
 }
 export interface LegendStyle {
+  /**
+   * Max width used for left/right legend
+   *
+   * or
+   *
+   * Width of `LegendItem` for top/bottom legend
+   */
   verticalWidth: number;
+  /**
+   * Max height used for top/bottom legend
+   */
   horizontalHeight: number;
+  /**
+   * Added buffer between label and value.
+   *
+   * Smaller values render a more compact legend
+   */
+  spacingBuffer: number;
 }
 export interface Theme {
   /**

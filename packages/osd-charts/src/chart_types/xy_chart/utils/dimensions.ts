@@ -19,14 +19,11 @@ export function computeChartDimensions(
   chartTheme: Theme,
   axisDimensions: Map<AxisId, AxisTicksDimensions>,
   axisSpecs: Map<AxisId, AxisSpec>,
-  showLegend: boolean,
-  legendPosition?: Position,
 ): {
   chartDimensions: Dimensions;
   leftMargin: number;
 } {
   const { chartMargins, chartPaddings } = chartTheme;
-  const legendStyle = chartTheme.legend;
   const { axisTitleStyle } = chartTheme.axes;
 
   const axisTitleHeight = axisTitleStyle.fontSize + axisTitleStyle.padding;
@@ -75,41 +72,16 @@ export function computeChartDimensions(
   const chartWidth = parentDimensions.width - chartLeftAxisMaxWidth - chartRightAxisMaxWidth;
   const chartHeight = parentDimensions.height - chartTopAxisMaxHeight - chartBottomAxisMaxHeight;
 
-  let vMargin = 0;
-  let hMargin = 0;
-
-  // add space for legend
-  let legendTopMargin = 0;
-  let legendLeftMargin = 0;
-  if (showLegend) {
-    switch (legendPosition) {
-      case Position.Right:
-        hMargin += legendStyle.verticalWidth;
-        break;
-      case Position.Left:
-        hMargin += legendStyle.verticalWidth;
-        legendLeftMargin = legendStyle.verticalWidth;
-        break;
-      case Position.Top:
-        vMargin += legendStyle.horizontalHeight;
-        legendTopMargin = legendStyle.horizontalHeight;
-        break;
-      case Position.Bottom:
-        vMargin += legendStyle.horizontalHeight;
-        break;
-    }
-  }
-
-  let top = chartTopAxisMaxHeight + chartPaddings.top + legendTopMargin;
-  let left = chartLeftAxisMaxWidth + chartPaddings.left + legendLeftMargin;
+  let top = chartTopAxisMaxHeight + chartPaddings.top;
+  let left = chartLeftAxisMaxWidth + chartPaddings.left;
 
   return {
     leftMargin: chartLeftAxisMaxWidth - vLeftAxisSpecWidth,
     chartDimensions: {
       top,
       left,
-      width: chartWidth - hMargin - chartPaddings.left - chartPaddings.right,
-      height: chartHeight - vMargin - chartPaddings.top - chartPaddings.bottom,
+      width: chartWidth - chartPaddings.left - chartPaddings.right,
+      height: chartHeight - chartPaddings.top - chartPaddings.bottom,
     },
   };
 }

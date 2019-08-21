@@ -1,0 +1,3 @@
+.invisible {
+  visibility: hidden;
+}

@@ -97,6 +97,7 @@ export const LIGHT_THEME: Theme = {
   legend: {
     verticalWidth: 200,
     horizontalHeight: 64,
+    spacingBuffer: 40,
   },
   crosshair: {
     band: {

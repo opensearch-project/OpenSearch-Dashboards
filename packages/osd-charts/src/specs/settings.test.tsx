@@ -47,7 +47,7 @@ describe('Settings spec component', () => {
     expect(chartStore.showLegend.get()).toEqual(true);
     expect(chartStore.tooltipType.get()).toEqual(TooltipType.None);
     expect(chartStore.tooltipSnap.get()).toEqual(false);
-    expect(chartStore.legendPosition).toBe(Position.Bottom);
+    expect(chartStore.legendPosition.get()).toBe(Position.Bottom);
     expect(chartStore.showLegendDisplayValue.get()).toEqual(false);
     expect(chartStore.debug).toBe(true);
     expect(chartStore.customXDomain).toEqual({ min: 0, max: 10 });
@@ -64,7 +64,7 @@ describe('Settings spec component', () => {
     expect(chartStore.tooltipType.get()).toEqual(DEFAULT_TOOLTIP_TYPE);
     expect(chartStore.tooltipSnap.get()).toEqual(DEFAULT_TOOLTIP_SNAP);
     expect(chartStore.showLegendDisplayValue.get()).toEqual(true);
-    expect(chartStore.legendPosition).toBeUndefined();
+    expect(chartStore.legendPosition.get()).toBe(Position.Right);
     expect(chartStore.debug).toBe(false);
     expect(chartStore.customXDomain).toBeUndefined();
 
@@ -93,7 +93,7 @@ describe('Settings spec component', () => {
     expect(chartStore.showLegend.get()).toEqual(true);
     expect(chartStore.tooltipType.get()).toEqual(TooltipType.None);
     expect(chartStore.tooltipSnap.get()).toEqual(false);
-    expect(chartStore.legendPosition).toBe(Position.Bottom);
+    expect(chartStore.legendPosition.get()).toBe(Position.Bottom);
     expect(chartStore.showLegendDisplayValue.get()).toEqual(false);
     expect(chartStore.debug).toBe(true);
     expect(chartStore.customXDomain).toEqual({ min: 0, max: 10 });

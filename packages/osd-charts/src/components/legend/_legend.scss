@@ -1,67 +1,46 @@
-// Legend
-
 .echLegend {
-  // Margin supplied in JS to match chart margins
-  position: absolute !important; // Override shadow
-  overflow-y: hidden;
-}
+  &--top,
+  &--bottom {
+    .echLegendList {
+      display: grid;
+      grid-column-gap: $echLegendColumnGap;
+      grid-row-gap: $echLegendRowGap;
+      margin-top: $echLegendRowGap;
+      margin-bottom: $echLegendRowGap;
 
-.echLegend--collapsed {
-  display: none;
-}
-
-.echLegend--debug {
-  background: red;
-}
-
-.echLegend--top,
-.echLegend--bottom {
-  left: $euiSizeL;
-  right: 0;
-  height: $echLegendMaxHeight;
-
-  .echLegendList {
-    flex-direction: row;
-    flex-wrap: wrap;
+      @include internetExplorerOnly {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+    }
   }
 
-  .echLegendItem {
-    margin-right: $euiSizeL;
-    width: $echLegendMaxWidth;
-  }
-}
-
-.echLegend--top {
-  top: 0;
-}
-.echLegend--bottom {
-  bottom: 0;
-}
-
-.echLegend--left,
-.echLegend--right {
-  top: 0;
-  bottom: 0;
-  width: $echLegendMaxWidth;
-
-  .echLegendList {
-    flex-direction: column;
+  &--left,
+  &--right {
+    .echLegendList {
+      flex-direction: column;
+    }
   }
 
-  .echLegendItem {
+  &--top,
+  &--left {
+    order: 0;
+  }
+
+  &--bottom,
+  &--right {
+    order: 1;
+  }
+
+  &--debug {
+    background: red;
+  }
+
+  .echLegendListContainer {
+    @include euiYScrollWithShadows;
     width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
-}
-
-.echLegend--left {
-  left: 0;
-}
-.echLegend--right {
-  right: 0;
-}
-
-.echLegendListContainer {
-  @include euiYScrollWithShadows;
-  width: 100%;
-  overflow-y: auto;
 }
