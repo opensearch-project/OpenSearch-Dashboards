@@ -2,11 +2,10 @@ import { mount } from 'enzyme';
 import * as React from 'react';
 import { Position, Rendering, Rotation } from '../chart_types/xy_chart/utils/specs';
 import { DARK_THEME } from '../utils/themes/dark_theme';
-import { LIGHT_THEME } from '../utils/themes/light_theme';
 import { TooltipType } from '../chart_types/xy_chart/utils/interactions';
 import { ChartStore } from '../chart_types/xy_chart/store/chart_state';
 import { DEFAULT_TOOLTIP_SNAP, DEFAULT_TOOLTIP_TYPE, SettingsComponent, SettingSpecProps } from './settings';
-import { PartialTheme, BaseThemeTypes } from '../utils/themes/theme';
+import { PartialTheme } from '../utils/themes/theme';
 
 describe('Settings spec component', () => {
   test('should update store on mount if spec has a chart store', () => {
@@ -56,7 +55,7 @@ describe('Settings spec component', () => {
   test('should set chart properties on chart store', () => {
     const chartStore = new ChartStore();
 
-    expect(chartStore.chartTheme).toEqual(LIGHT_THEME);
+    expect(chartStore.chartTheme).toBeUndefined();
     expect(chartStore.chartRotation).toBe(0);
     expect(chartStore.chartRendering).toBe('canvas');
     expect(chartStore.animateData).toBe(false);
@@ -163,11 +162,11 @@ describe('Settings spec component', () => {
       },
     };
 
-    expect(chartStore.chartTheme).toEqual(LIGHT_THEME);
+    expect(chartStore.chartTheme).toBeUndefined();
 
     const updatedProps: SettingSpecProps = {
       theme: partialTheme,
-      baseThemeType: BaseThemeTypes.Dark,
+      baseTheme: DARK_THEME,
       rotation: 90 as Rotation,
       rendering: 'svg' as Rendering,
       animateData: true,

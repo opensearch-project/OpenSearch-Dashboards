@@ -20,6 +20,7 @@ import { ChartStore } from './chart_state';
 
 describe('Chart Store', () => {
   let store = new ChartStore();
+  store.chartTheme = LIGHT_THEME;
 
   const SPEC_ID = getSpecId('spec_1');
   const AXIS_ID = getAxisId('axis_1');
@@ -67,6 +68,7 @@ describe('Chart Store', () => {
   };
   beforeEach(() => {
     store = new ChartStore();
+    store.chartTheme = LIGHT_THEME;
     store.updateParentDimensions(600, 600, 0, 0);
     store.computeChart();
   });

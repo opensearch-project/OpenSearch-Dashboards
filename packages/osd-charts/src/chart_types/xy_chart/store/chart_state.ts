@@ -46,7 +46,6 @@ import {
   Rotation,
 } from '../utils/specs';
 import { formatTooltip, getSeriesTooltipValues } from '../tooltip/tooltip';
-import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { mergeWithDefaultAnnotationLine, mergeWithDefaultAnnotationRect, Theme } from '../../../utils/themes/theme';
 import { compareByValueAsc } from '../../../utils/commons';
 import { computeChartDimensions } from '../utils/dimensions';
@@ -150,7 +149,10 @@ export class ChartStore {
 
   chartRotation: Rotation = 0; // updated from jsx
   chartRendering: Rendering = 'canvas'; // updated from jsx
-  chartTheme: Theme = LIGHT_THEME; // updated from jsx
+  /**
+   * Chart theme to be set from Settings.tsx
+   */
+  chartTheme!: Theme;
   axesSpecs: Map<AxisId, AxisSpec> = new Map(); // readed from jsx
   axesTicksDimensions: Map<AxisId, AxisTicksDimensions> = new Map(); // computed
   axesPositions: Map<AxisId, Dimensions> = new Map(); // computed
