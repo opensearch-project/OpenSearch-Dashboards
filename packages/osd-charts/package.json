@@ -29,7 +29,8 @@
     "semantic-release": "semantic-release",
     "typecheck:src": "yarn build:ts --noEmit",
     "typecheck:all": "tsc -p ./tsconfig.json --noEmit",
-    "playground": "cd .playground && webpack-dev-server"
+    "playground": "cd .playground && webpack-dev-server",
+    "playground:ie": "cd .playground && webpack-dev-server --host=0.0.0.0 --disable-host-check --useLocalIp"
   },
   "files": [
     "dist/**/*",
@@ -145,6 +146,7 @@
     "yarn": "^1.10.1"
   },
   "browserslist": [
-    "last 2 versions"
+    "last 2 versions",
+    "ie 11"
   ]
 }

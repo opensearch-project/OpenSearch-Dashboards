@@ -24,7 +24,8 @@
   }
 
   &__label {
-    @include euiTextOverflowWrap;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
     min-width: 1px;
     flex: 1 1 auto;
   }
