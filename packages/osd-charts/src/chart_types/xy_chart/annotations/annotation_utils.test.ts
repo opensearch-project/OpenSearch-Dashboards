@@ -1294,6 +1294,18 @@ describe('annotation utils', () => {
     };
 
     expect(rectTooltipState).toEqual(expectedRectTooltipState);
+    annotationRectangle.hideTooltips = true;
+
+    const rectHideTooltipState = computeAnnotationTooltipState(
+      { x: 3, y: 4 },
+      annotationDimensions,
+      rectAnnotations,
+      chartRotation,
+      localAxesSpecs,
+      chartDimensions,
+    );
+
+    expect(rectHideTooltipState).toBe(null);
   });
 
   test('should get associated axis for an annotation', () => {

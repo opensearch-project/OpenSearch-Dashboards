@@ -331,7 +331,7 @@ storiesOf('Annotations', module)
       {
         coordinates: {
           x0: 'a',
-          x1: 'b.5',
+          x1: 'b',
         },
         details: 'details about this annotation',
       },
@@ -535,6 +535,7 @@ storiesOf('Annotations', module)
           style={style}
           renderTooltip={renderTooltip}
           zIndex={zIndex}
+          hideTooltips={boolean('hide tooltips', false)}
         />
         <Axis id={getAxisId('bottom')} position={xAxisPosition} title={xAxisTitle} />
         <Axis id={getAxisId('left')} title={yAxisTitle} position={yAxisPosition} />

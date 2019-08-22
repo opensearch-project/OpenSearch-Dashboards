@@ -9,11 +9,15 @@ import {
   Position,
   ScaleType,
   Settings,
-  LineSeries,
+  BarSeries,
+  LineAnnotation,
+  getAnnotationId,
+  AnnotationDomainTypes,
 } from '../src';
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 import { CursorEvent } from '../src/specs/settings';
 import { CursorUpdateListener } from '../src/chart_types/xy_chart/store/chart_state';
+import { Icon } from '../src/components/icons/icon';
 
 export class Playground extends React.Component {
   ref1 = React.createRef<Chart>();
@@ -65,6 +69,7 @@ function renderChart(
           legendPosition={Position.Right}
           showLegend={true}
           onCursorUpdate={onCursorUpdate}
+          rotation={0}
         />
         <Axis
           id={getAxisId('timestamp')}
@@ -73,31 +78,32 @@ function renderChart(
           tickFormat={niceTimeFormatter([1555819200000, 1555905600000])}
         />
         <Axis id={getAxisId('count')} title="count" position={Position.Left} tickFormat={(d) => d.toFixed(2)} />
-        <LineSeries
-          id={getSpecId('dataset A with a really really really really long title')}
+        <LineAnnotation
+          annotationId={getAnnotationId('annotation1')}
+          domainType={AnnotationDomainTypes.XDomain}
+          dataValues={[
+            {
+              dataValue: KIBANA_METRICS.metrics.kibana_os_load[1].data[5][0],
+              details: 'tooltip 1',
+            },
+            {
+              dataValue: KIBANA_METRICS.metrics.kibana_os_load[1].data[9][0],
+              details: 'tooltip 2',
+            },
+          ]}
+          hideLinesTooltips={true}
+          marker={<Icon type="alert" />}
+        />
+        <BarSeries
+          id={getSpecId('dataset A with long title')}
           xScaleType={timeSeries ? ScaleType.Time : ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           data={data}
           xAccessor={0}
-          lineSeriesStyle={{
-            line: {
-              stroke: 'red',
-              opacity: 1,
-            },
-          }}
           yAccessors={[1]}
         />
-        <LineSeries
+        <BarSeries
           id={getSpecId('dataset B')}
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          data={KIBANA_METRICS.metrics.kibana_os_load[1].data.slice(0, 15)}
-          xAccessor={0}
-          yAccessors={[1]}
-          stackAccessors={[0]}
-        />
-        <LineSeries
-          id={getSpecId('dataset C')}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           data={KIBANA_METRICS.metrics.kibana_os_load[1].data.slice(0, 15)}
