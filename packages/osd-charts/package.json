@@ -1,7 +1,7 @@
 {
   "name": "@elastic/charts",
   "description": "Elastic-Charts data visualization library",
-  "version": "10.1.1",
+  "version": "10.2.0",
   "author": "Marco Vettorello <marco.vettorello@elastic.co>",
   "license": "Apache-2.0",
   "main": "dist/index.js",
