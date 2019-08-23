@@ -52,9 +52,16 @@ function isTooltipType(config: TooltipType | TooltipProps): config is TooltipTyp
 export interface SettingSpecProps {
   chartStore?: ChartStore;
   /**
-   * Full or partial theme to be merged with base
+   * Partial theme to be merged with base
+   *
+   * or
+   *
+   * Array of partial themes to be merged with base
+   * index `0` being the hightest priority
+   *
+   * i.e. `[primary, secondary, tertiary]`
    */
-  theme?: Theme | PartialTheme;
+  theme?: PartialTheme | PartialTheme[];
   /**
    * Full default theme to use as base
    *
@@ -83,8 +90,14 @@ export interface SettingSpecProps {
   xDomain?: Domain | DomainRange;
 }
 
-function getTheme(baseTheme?: Theme, theme?: Theme | PartialTheme): Theme {
+function getTheme(baseTheme?: Theme, theme?: PartialTheme | PartialTheme[]): Theme {
   const base = baseTheme ? baseTheme : LIGHT_THEME;
+
+  if (Array.isArray(theme)) {
+    const [firstTheme, ...axillaryThemes] = theme;
+    return mergeWithDefaultTheme(firstTheme, base, axillaryThemes);
+  }
+
   return theme ? mergeWithDefaultTheme(theme, base) : base;
 }
 

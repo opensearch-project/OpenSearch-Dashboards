@@ -443,7 +443,7 @@ storiesOf('Stylings', module)
       </Chart>
     );
   })
-  .add('partial custom theme with baseThemeType', () => {
+  .add('partial custom theme', () => {
     const customPartialTheme: PartialTheme = {
       barSeriesStyle: {
         rectBorder: {
@@ -455,7 +455,7 @@ storiesOf('Stylings', module)
 
     return (
       <Chart className="story-chart">
-        <Settings showLegend theme={customPartialTheme} baseTheme={LIGHT_THEME} legendPosition={Position.Right} />
+        <Settings showLegend theme={customPartialTheme} legendPosition={Position.Right} />
         <Axis id={getAxisId('bottom')} position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
         <Axis
           id={getAxisId('left2')}
@@ -523,6 +523,59 @@ storiesOf('Stylings', module)
       </Chart>
     );
   })
+  .add(
+    'multiple custom partial themes',
+    () => {
+      const primaryTheme: PartialTheme = {
+        barSeriesStyle: {
+          rect: {
+            fill: color('bar fill - primary theme', 'red'),
+          },
+        },
+      };
+      const secondaryTheme: PartialTheme = {
+        barSeriesStyle: {
+          rect: {
+            fill: color('bar fill - secondary theme', 'blue'),
+            opacity: range('bar opacity - secondary theme', 0.1, 1, 0.7, undefined, 0.1),
+          },
+        },
+      };
+
+      return (
+        <Chart className="story-chart">
+          <Settings showLegend theme={[primaryTheme, secondaryTheme]} legendPosition={Position.Right} />
+          <Axis id={getAxisId('bottom')} position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
+          <Axis
+            id={getAxisId('left2')}
+            title="Left axis"
+            position={Position.Left}
+            tickFormat={(d) => Number(d).toFixed(2)}
+          />
+          <Axis id={getAxisId('top')} position={Position.Top} title="Top axis" showOverlappingTicks={true} />
+          <Axis
+            id={getAxisId('right')}
+            title="Right axis"
+            position={Position.Right}
+            tickFormat={(d) => Number(d).toFixed(2)}
+          />
+          <BarSeries
+            id={getSpecId('bars')}
+            xScaleType={ScaleType.Linear}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x"
+            yAccessors={['y']}
+            splitSeriesAccessors={['g']}
+            stackAccessors={['x']}
+            data={data1}
+          />
+        </Chart>
+      );
+    },
+    {
+      info: 'Notice that the secondary theme bar fill has no effect as the primary value takes priority',
+    },
+  )
   .add('custom series colors through spec props', () => {
     const barCustomSeriesColors: CustomSeriesColorsMap = new Map();
     const barDataSeriesColorValues: DataSeriesColorsValues = {
