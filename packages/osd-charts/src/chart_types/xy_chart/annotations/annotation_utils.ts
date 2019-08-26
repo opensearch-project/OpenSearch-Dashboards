@@ -364,7 +364,6 @@ export function computeRectAnnotationDimensions(
   const yDomain = yScale.domain;
   const lastX = xDomain[xDomain.length - 1];
   const xMinInterval = xScale.minInterval;
-
   const rectsProps: AnnotationRectProps[] = [];
 
   dataValues.forEach((dataValue: RectAnnotationDatum) => {
@@ -375,15 +374,15 @@ export function computeRectAnnotationDimensions(
       return;
     }
 
-    if (x0 == null) {
+    if (x1 == null) {
       // if x1 is defined, we want the rect to draw to the end of the scale
       // if we're in histogram mode, extend domain end by min interval
-      x0 = enableHistogramMode ? lastX + xMinInterval : lastX;
+      x1 = enableHistogramMode && !xScale.isSingleValue() ? lastX + xMinInterval : lastX;
     }
 
-    if (x1 == null) {
+    if (x0 == null) {
       // if x0 is defined, we want the rect to draw to the start of the scale
-      x1 = xDomain[0];
+      x0 = xDomain[0];
     }
 
     if (y0 == null) {

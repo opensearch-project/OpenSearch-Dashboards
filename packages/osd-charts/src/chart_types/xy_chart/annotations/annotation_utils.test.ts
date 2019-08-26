@@ -1392,14 +1392,14 @@ describe('annotation utils', () => {
     const dimensions = computeRectAnnotationDimensions(annotationRectangle, yScales, xScale, true, 0);
 
     const [dims1, dims2, dims3, dims4] = dimensions;
-    expect(dims1.rect.x).toBe(0);
+    expect(dims1.rect.x).toBe(10);
     expect(dims1.rect.y).toBe(0);
-    expect(dims1.rect.width).toBe(10);
+    expect(dims1.rect.width).toBeCloseTo(100);
     expect(dims1.rect.height).toBe(100);
 
-    expect(dims2.rect.x).toBe(10);
+    expect(dims2.rect.x).toBe(0);
     expect(dims2.rect.y).toBe(0);
-    expect(dims2.rect.width).toBeCloseTo(100);
+    expect(dims2.rect.width).toBe(10);
     expect(dims2.rect.height).toBe(100);
 
     expect(dims3.rect.x).toBe(0);
@@ -1433,8 +1433,8 @@ describe('annotation utils', () => {
     const dimensions = computeRectAnnotationDimensions(annotationRectangle, yScales, xScale, false, 0);
 
     const expectedDimensions = [
-      { rect: { x: 0, y: 0, width: 10, height: 100 } },
       { rect: { x: 10, y: 0, width: 90, height: 100 } },
+      { rect: { x: 0, y: 0, width: 10, height: 100 } },
       { rect: { x: 0, y: 0, width: 100, height: 10 } },
       { rect: { x: 0, y: 10, width: 100, height: 90 } },
     ];

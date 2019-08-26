@@ -98,7 +98,15 @@ export function computeXScale(options: XScaleOptions): Scale {
           domain: adjustedDomain,
           range: [start, end],
         },
-        { bandwidth: bandwidth / totalBarsInCluster, minInterval, timeZone, totalBarsInCluster, barsPadding, ticks },
+        {
+          bandwidth: bandwidth / totalBarsInCluster,
+          minInterval,
+          timeZone,
+          totalBarsInCluster,
+          barsPadding,
+          ticks,
+          isSingleValueHistogram,
+        },
       );
 
       return scale;

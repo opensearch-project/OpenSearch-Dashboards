@@ -103,8 +103,18 @@ interface ScaleOptions {
    * @default 10
    */
   ticks: number;
+  /** true if the scale was adjusted to fit one single value histogram */
+  isSingleValueHistogram: boolean;
 }
-
+const defaultScaleOptions: ScaleOptions = {
+  bandwidth: 0,
+  minInterval: 0,
+  timeZone: 'utc',
+  totalBarsInCluster: 1,
+  barsPadding: 0,
+  ticks: 10,
+  isSingleValueHistogram: false,
+};
 export class ScaleContinuous implements Scale {
   readonly bandwidth: number;
   readonly totalBarsInCluster: number;
@@ -118,22 +128,21 @@ export class ScaleContinuous implements Scale {
   readonly tickValues: number[];
   readonly timeZone: string;
   readonly barsPadding: number;
+  readonly isSingleValueHistogram: boolean;
   private readonly d3Scale: any;
 
   constructor(scaleData: ScaleData, options?: Partial<ScaleOptions>) {
     const { type, domain, range } = scaleData;
-    const scaleOptions: ScaleOptions = mergePartial(
-      {
-        bandwidth: 0,
-        minInterval: 0,
-        timeZone: 'utc',
-        totalBarsInCluster: 1,
-        barsPadding: 0,
-        ticks: 10,
-      },
-      options,
-    );
-    const { bandwidth, minInterval, timeZone, totalBarsInCluster, barsPadding, ticks } = scaleOptions;
+    const {
+      bandwidth,
+      minInterval,
+      timeZone,
+      totalBarsInCluster,
+      barsPadding,
+      ticks,
+      isSingleValueHistogram,
+    } = mergePartial(defaultScaleOptions, options);
+
     this.d3Scale = SCALES[type]();
     if (type === ScaleType.Log) {
       this.domain = limitLogScaleDomain(domain);
@@ -154,6 +163,7 @@ export class ScaleContinuous implements Scale {
     this.isInverted = this.domain[0] > this.domain[1];
     this.timeZone = timeZone;
     this.totalBarsInCluster = totalBarsInCluster;
+    this.isSingleValueHistogram = isSingleValueHistogram;
     if (type === ScaleType.Time) {
       const startDomain = DateTime.fromMillis(this.domain[0], { zone: this.timeZone });
       const endDomain = DateTime.fromMillis(this.domain[1], { zone: this.timeZone });
@@ -242,6 +252,9 @@ export class ScaleContinuous implements Scale {
     };
   }
   isSingleValue() {
+    if (this.isSingleValueHistogram) {
+      return true;
+    }
     if (this.domain.length < 2) {
       return true;
     }
