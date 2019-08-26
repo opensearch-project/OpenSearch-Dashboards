@@ -2,6 +2,8 @@
   pointer-events: none;
   position: absolute;
   user-select: none;
+  font-size: $euiFontSizeXS;
+  font-weight: $euiFontWeightBold;
 }
 
 .echAnnotation--hidden,
@@ -15,7 +17,6 @@
   position: absolute;
   padding: 0;
 
-  // overflow: hidden;
   transition: opacity $euiAnimSpeedNormal;
   pointer-events: none;
   user-select: none;

@@ -32,7 +32,9 @@ class HighlighterComponent extends React.Component<HighlighterProps> {
                 />
               );
             }
-            return <rect key={i} x={x} y={y} width={geom.width} height={geom.height} fill="white" opacity={0.4} />;
+            return (
+              <rect key={i} x={x} y={y} width={geom.width} height={geom.height} className="echHighlighter__rect" />
+            );
           })}
         </g>
       </svg>

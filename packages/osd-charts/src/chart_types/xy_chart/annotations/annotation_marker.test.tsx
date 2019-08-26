@@ -71,7 +71,7 @@ describe('annotation marker', () => {
         marker: {
           icon: <div />,
           transform: 'translate(calc(0px - 0%),calc(20px - 50%))',
-          color: '#000',
+          color: '#777',
           dimensions: { width: 0, height: 0 },
         },
       },
@@ -111,7 +111,7 @@ describe('annotation marker', () => {
         marker: {
           icon: <div />,
           transform: 'translate(calc(0px - 0%),calc(0px - 50%))',
-          color: '#000',
+          color: '#777',
           dimensions: { width: 0, height: 0 },
         },
       },
@@ -151,7 +151,7 @@ describe('annotation marker', () => {
         marker: {
           icon: <div />,
           transform: 'translate(calc(20px - 0%),calc(20px - 50%))',
-          color: '#000',
+          color: '#777',
           dimensions: { width: 0, height: 0 },
         },
       },

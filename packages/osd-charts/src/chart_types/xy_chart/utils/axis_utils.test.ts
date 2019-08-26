@@ -797,7 +797,7 @@ describe('Axis computational utils', () => {
     expect(axisTicksPosition.axisPositions.get(verticalAxisSpecWTitle.id)).toEqual({
       top: 0,
       left: 10,
-      width: 12 + 5 + 10 + 10 + 10,
+      width: 50,
       height: 100,
     });
 

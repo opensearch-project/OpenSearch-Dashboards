@@ -9,3 +9,7 @@
   width: 100%;
   height: 100%;
 }
+
+.echHighlighter__rect {
+  fill: transparentize($euiColorGhost, .8);
+}

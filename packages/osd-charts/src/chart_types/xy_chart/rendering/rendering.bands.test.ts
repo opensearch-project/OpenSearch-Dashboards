@@ -442,9 +442,9 @@ describe('Rendering bands - areas', () => {
         displayValue: undefined,
         seriesStyle: {
           displayValue: {
-            fill: 'gray',
+            fill: '#777',
             fontFamily: 'sans-serif',
-            fontSize: 10,
+            fontSize: 8,
             fontStyle: 'normal',
             offsetX: 0,
             offsetY: 0,
@@ -477,9 +477,9 @@ describe('Rendering bands - areas', () => {
         displayValue: undefined,
         seriesStyle: {
           displayValue: {
-            fill: 'gray',
+            fill: '#777',
             fontFamily: 'sans-serif',
-            fontSize: 10,
+            fontSize: 8,
             fontStyle: 'normal',
             offsetX: 0,
             offsetY: 0,
@@ -512,9 +512,9 @@ describe('Rendering bands - areas', () => {
         displayValue: undefined,
         seriesStyle: {
           displayValue: {
-            fill: 'gray',
+            fill: '#777',
             fontFamily: 'sans-serif',
-            fontSize: 10,
+            fontSize: 8,
             fontStyle: 'normal',
             offsetX: 0,
             offsetY: 0,

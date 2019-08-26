@@ -65,15 +65,15 @@ class LegendComponent extends React.Component<LegendProps, LegendState> {
       debug,
       chartTheme,
     } = this.props.chartStore!;
-    const postion = legendPosition.get();
+    const position = legendPosition.get();
 
     if (!showLegend.get() || !legendInitialized.get() || legendItems.size === 0) {
       return null;
     }
 
-    const legendContainerStyle = this.getLegendStyle(postion, chartTheme);
-    const legendListStyle = this.getLegendListStyle(postion, chartTheme);
-    const legendClasses = classNames('echLegend', `echLegend--${postion}`, {
+    const legendContainerStyle = this.getLegendStyle(position, chartTheme);
+    const legendListStyle = this.getLegendListStyle(position, chartTheme);
+    const legendClasses = classNames('echLegend', `echLegend--${position}`, {
       'echLegend--debug': debug,
       invisible: !chartInitialized.get(),
     });
