@@ -80,16 +80,14 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps,
 
   getLineToRender(glyph: LineGeometry, sharedStyle: SharedGeometryStyle, key: string) {
     const { line, color, transform, geometryId, seriesLineStyle } = glyph;
-    const customOpacity = seriesLineStyle ? seriesLineStyle.opacity : undefined;
-    const geometryStyle = getGeometryStyle(geometryId, this.props.highlightedLegendItem, sharedStyle, customOpacity);
+    const geometryStyle = getGeometryStyle(geometryId, this.props.highlightedLegendItem, sharedStyle);
     const lineProps = buildLineRenderProps(transform.x, line, color, seriesLineStyle, geometryStyle);
     return <Path {...lineProps} key={key} />;
   }
 
   getPointToRender(glyph: LineGeometry, sharedStyle: SharedGeometryStyle, key: string) {
     const { points, color, geometryId, seriesPointStyle } = glyph;
-    const customOpacity = seriesPointStyle ? seriesPointStyle.opacity : undefined;
-    const geometryStyle = getGeometryStyle(geometryId, this.props.highlightedLegendItem, sharedStyle, customOpacity);
+    const geometryStyle = getGeometryStyle(geometryId, this.props.highlightedLegendItem, sharedStyle);
     const pointStyleProps = buildPointStyleProps(color, seriesPointStyle, geometryStyle);
     return this.renderPoints(points, key, pointStyleProps);
   }

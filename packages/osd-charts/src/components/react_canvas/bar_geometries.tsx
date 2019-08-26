@@ -5,7 +5,7 @@ import { animated, Spring } from 'react-spring/renderprops-konva.cjs';
 import { LegendItem } from '../../chart_types/xy_chart/legend/legend';
 import { BarGeometry, getGeometryStyle } from '../../chart_types/xy_chart/rendering/rendering';
 import { SharedGeometryStyle } from '../../utils/themes/theme';
-import { buildBarRenderProps } from './utils/rendering_props_utils';
+import { buildBarRenderProps, buildBarBorderRenderProps } from './utils/rendering_props_utils';
 
 interface BarGeometriesDataProps {
   animated?: boolean;
@@ -55,7 +55,6 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps, B
         bar.geometryId,
         this.props.highlightedLegendItem,
         sharedStyle,
-        seriesStyle.rect.opacity,
         individualHighlight,
       );
       const key = `bar-${index}`;
@@ -65,6 +64,15 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps, B
           <Group key={index}>
             <Spring native from={{ y: y + height, height: 0 }} to={{ y, height }}>
               {(props: { y: number; height: number }) => {
+                const barPropsBorder = buildBarBorderRenderProps(
+                  x,
+                  props.y,
+                  width,
+                  props.height,
+                  seriesStyle.rect,
+                  seriesStyle.rectBorder,
+                  geometryStyle,
+                );
                 const barProps = buildBarRenderProps(
                   x,
                   props.y,
@@ -76,12 +84,26 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps, B
                   geometryStyle,
                 );
 
-                return <animated.Rect {...barProps} key={key} />;
+                return (
+                  <React.Fragment key={key}>
+                    <animated.Rect {...barProps} />
+                    {barPropsBorder && <animated.Rect {...barPropsBorder} />}
+                  </React.Fragment>
+                );
               }}
             </Spring>
           </Group>
         );
       } else {
+        const barPropsBorder = buildBarBorderRenderProps(
+          x,
+          y,
+          width,
+          height,
+          seriesStyle.rect,
+          seriesStyle.rectBorder,
+          geometryStyle,
+        );
         const barProps = buildBarRenderProps(
           x,
           y,
@@ -92,9 +114,11 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps, B
           seriesStyle.rectBorder,
           geometryStyle,
         );
+
         return (
-          <React.Fragment key={index}>
-            <Rect {...barProps} key={key} />
+          <React.Fragment key={key}>
+            <Rect {...barProps} />
+            {barPropsBorder && <Rect {...barPropsBorder} />}
           </React.Fragment>
         );
       }

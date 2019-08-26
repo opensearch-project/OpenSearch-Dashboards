@@ -33,6 +33,11 @@ export interface GeometryValue {
 
 /** Shared style properties for varies geometries */
 export interface GeometryStyle {
+  /**
+   * Opacity multiplier
+   *
+   * if set to `0.5` all given opacities will be halfed
+   */
   opacity: number;
 }
 
@@ -482,34 +487,26 @@ export function renderArea(
 export function getGeometryStyle(
   geometryId: GeometryId,
   highlightedLegendItem: LegendItem | null,
-  sharedThemeStyle: SharedGeometryStyle,
-  specOpacity?: number,
+  sharedGeometryStyle: SharedGeometryStyle,
   individualHighlight?: { [key: string]: boolean },
 ): GeometryStyle {
-  const sharedStyle =
-    specOpacity == null
-      ? sharedThemeStyle
-      : {
-          ...sharedThemeStyle,
-          highlighted: { opacity: specOpacity },
-          default: { opacity: specOpacity },
-        };
+  const { default: defaultStyles, highlighted, unhighlighted } = sharedGeometryStyle;
 
   if (highlightedLegendItem != null) {
     const isPartOfHighlightedSeries = belongsToDataSeries(geometryId, highlightedLegendItem.value);
 
-    return isPartOfHighlightedSeries ? sharedStyle.highlighted : sharedStyle.unhighlighted;
+    return isPartOfHighlightedSeries ? highlighted : unhighlighted;
   }
 
   if (individualHighlight) {
     const { hasHighlight, hasGeometryHover } = individualHighlight;
     if (!hasGeometryHover) {
-      return sharedStyle.highlighted;
+      return highlighted;
     }
-    return hasHighlight ? sharedStyle.highlighted : sharedStyle.unhighlighted;
+    return hasHighlight ? highlighted : unhighlighted;
   }
 
-  return sharedStyle.default;
+  return defaultStyles;
 }
 
 export function isPointOnGeometry(

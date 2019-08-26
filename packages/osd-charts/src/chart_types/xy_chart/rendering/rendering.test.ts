@@ -1,4 +1,3 @@
-import { DEFAULT_GEOMETRY_STYLES } from '../../../utils/themes/theme_commons';
 import { getSpecId } from '../../../utils/ids';
 import {
   BarGeometry,
@@ -8,7 +7,7 @@ import {
   getStyleOverrides,
   GeometryId,
 } from './rendering';
-import { BarSeriesStyle } from '../../../utils/themes/theme';
+import { BarSeriesStyle, SharedGeometryStyle } from '../../../utils/themes/theme';
 import { DataSeriesDatum } from '../utils/series';
 import { RecursivePartial, mergePartial } from '../../../utils/commons';
 
@@ -116,67 +115,58 @@ describe('Rendering utils', () => {
       },
     };
 
-    const sharedThemeStyle = DEFAULT_GEOMETRY_STYLES;
-    const specOpacity = 0.66;
-
-    const defaultStyle = getGeometryStyle(geometryId, null, sharedThemeStyle);
+    const sharedThemeStyle: SharedGeometryStyle = {
+      default: {
+        opacity: 1,
+      },
+      highlighted: {
+        opacity: 0.5,
+      },
+      unhighlighted: {
+        opacity: 0.25,
+      },
+    };
 
     // no highlighted elements
-    expect(defaultStyle).toEqual({ opacity: 1 });
-
-    const customDefaultStyle = getGeometryStyle(geometryId, null, sharedThemeStyle, specOpacity);
-
-    // no highlighted elements with custom spec opacity
-    expect(customDefaultStyle).toEqual({ opacity: 0.66 });
-
-    const highlightedStyle = getGeometryStyle(geometryId, highlightedLegendItem, sharedThemeStyle);
+    const defaultStyle = getGeometryStyle(geometryId, null, sharedThemeStyle);
+    expect(defaultStyle).toBe(sharedThemeStyle.default);
 
     // should equal highlighted opacity
-    expect(highlightedStyle).toEqual({ opacity: 1 });
-
-    const unhighlightedStyle = getGeometryStyle(geometryId, unhighlightedLegendItem, sharedThemeStyle);
+    const highlightedStyle = getGeometryStyle(geometryId, highlightedLegendItem, sharedThemeStyle);
+    expect(highlightedStyle).toBe(sharedThemeStyle.highlighted);
 
     // should equal unhighlighted opacity
-    expect(unhighlightedStyle).toEqual({ opacity: 0.25 });
-
-    const customHighlightedStyle = getGeometryStyle(geometryId, highlightedLegendItem, sharedThemeStyle, specOpacity);
+    const unhighlightedStyle = getGeometryStyle(geometryId, unhighlightedLegendItem, sharedThemeStyle);
+    expect(unhighlightedStyle).toBe(sharedThemeStyle.unhighlighted);
 
     // should equal custom spec highlighted opacity
-    expect(customHighlightedStyle).toEqual({ opacity: 0.66 });
-
-    const customUnhighlightedStyle = getGeometryStyle(
-      geometryId,
-      unhighlightedLegendItem,
-      sharedThemeStyle,
-      specOpacity,
-    );
+    const customHighlightedStyle = getGeometryStyle(geometryId, highlightedLegendItem, sharedThemeStyle);
+    expect(customHighlightedStyle).toBe(sharedThemeStyle.highlighted);
 
     // unhighlighted elements remain unchanged with custom opacity
-    expect(customUnhighlightedStyle).toEqual({ opacity: 0.25 });
+    const customUnhighlightedStyle = getGeometryStyle(geometryId, unhighlightedLegendItem, sharedThemeStyle);
+    expect(customUnhighlightedStyle).toBe(sharedThemeStyle.unhighlighted);
 
     // has individual highlight
-    const hasIndividualHighlight = getGeometryStyle(geometryId, null, sharedThemeStyle, undefined, {
+    const hasIndividualHighlight = getGeometryStyle(geometryId, null, sharedThemeStyle, {
       hasHighlight: true,
       hasGeometryHover: true,
     });
-
-    expect(hasIndividualHighlight).toEqual({ opacity: 1 });
+    expect(hasIndividualHighlight).toBe(sharedThemeStyle.highlighted);
 
     // no highlight
-    const noHighlight = getGeometryStyle(geometryId, null, sharedThemeStyle, undefined, {
+    const noHighlight = getGeometryStyle(geometryId, null, sharedThemeStyle, {
       hasHighlight: false,
       hasGeometryHover: true,
     });
-
-    expect(noHighlight).toEqual({ opacity: 0.25 });
+    expect(noHighlight).toBe(sharedThemeStyle.unhighlighted);
 
     // no geometry hover
-    const noHover = getGeometryStyle(geometryId, null, sharedThemeStyle, undefined, {
+    const noHover = getGeometryStyle(geometryId, null, sharedThemeStyle, {
       hasHighlight: true,
       hasGeometryHover: false,
     });
-
-    expect(noHover).toEqual({ opacity: 1 });
+    expect(noHover).toBe(sharedThemeStyle.highlighted);
   });
 
   describe('getStyleOverrides', () => {

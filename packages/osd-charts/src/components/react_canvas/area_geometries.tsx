@@ -57,13 +57,7 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
         acc.push(...this.renderAreaLines(glyph, i, sharedStyle, highlightedLegendItem));
       }
       if (seriesPointStyle.visible) {
-        const customOpacity = seriesPointStyle ? seriesPointStyle.opacity : undefined;
-        const geometryStyle = getGeometryStyle(
-          geometryId,
-          this.props.highlightedLegendItem,
-          sharedStyle,
-          customOpacity,
-        );
+        const geometryStyle = getGeometryStyle(geometryId, this.props.highlightedLegendItem, sharedStyle);
         const pointStyleProps = buildPointStyleProps(glyph.color, seriesPointStyle, geometryStyle);
         acc.push(...this.renderPoints(glyph.points, i, pointStyleProps, glyph.geometryId));
       }
@@ -76,8 +70,7 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
     highlightedLegendItem: LegendItem | null,
   ): JSX.Element => {
     const { area, color, transform, geometryId, seriesAreaStyle } = glyph;
-    const customOpacity = seriesAreaStyle ? seriesAreaStyle.opacity : undefined;
-    const geometryStyle = getGeometryStyle(geometryId, highlightedLegendItem, sharedStyle, customOpacity);
+    const geometryStyle = getGeometryStyle(geometryId, highlightedLegendItem, sharedStyle);
     const key = getGeometryIdKey(geometryId, 'area-');
     const areaProps = buildAreaRenderProps(transform.x, area, color, seriesAreaStyle, geometryStyle);
     return <Path {...areaProps} key={key} />;
@@ -89,7 +82,7 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
     highlightedLegendItem: LegendItem | null,
   ): JSX.Element[] => {
     const { lines, color, geometryId, transform, seriesAreaLineStyle } = glyph;
-    const geometryStyle = getGeometryStyle(geometryId, highlightedLegendItem, sharedStyle, seriesAreaLineStyle.opacity);
+    const geometryStyle = getGeometryStyle(geometryId, highlightedLegendItem, sharedStyle);
 
     return lines.map((linePath, lineIndex) => {
       const key = getGeometryIdKey(geometryId, `area-line-${areaIndex}-${lineIndex}`);
