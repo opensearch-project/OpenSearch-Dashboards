@@ -23,7 +23,6 @@ class CrosshairComponent extends React.Component<CrosshairProps> {
     if (!isCrosshairVisible.get()) {
       return <div className="echCrosshair" />;
     }
-
     return (
       <div className="echCrosshair">
         {this.renderBand()}
@@ -37,15 +36,18 @@ class CrosshairComponent extends React.Component<CrosshairProps> {
       chartTheme: {
         crosshair: { band },
       },
-      cursorBandPosition,
+      cursorBandPosition: { top, left, width, height, visible },
       tooltipType,
     } = this.props.chartStore!;
-
-    if (!canRenderBand(tooltipType.get(), band.visible)) {
+    if (!visible || !canRenderBand(tooltipType.get(), band.visible)) {
       return null;
     }
+
     const style: CSSProperties = {
-      ...cursorBandPosition,
+      top,
+      left,
+      width,
+      height,
       background: band.fill,
     };
 

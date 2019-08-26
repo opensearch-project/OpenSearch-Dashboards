@@ -153,12 +153,13 @@ describe('Scale Test', () => {
       { bandwidth, minInterval: 1 },
     );
     const ordinalScale = new ScaleBand(domainOrdinal, [minRange, maxRange]);
-    expect(ordinalScale.invertWithStep(0)).toBe(0);
-    expect(ordinalScale.invertWithStep(40)).toBe(1);
-    expect(ordinalScale.invertWithStep(80)).toBe(2);
-    expect(linearScale.invertWithStep(0, data)).toBe(0);
-    expect(linearScale.invertWithStep(40, data)).toBe(1);
-    expect(linearScale.invertWithStep(80, data)).toBe(2);
+    expect(ordinalScale.invertWithStep(0)).toEqual({ value: 0, withinBandwidth: true });
+    expect(ordinalScale.invertWithStep(40)).toEqual({ value: 1, withinBandwidth: true });
+    expect(ordinalScale.invertWithStep(80)).toEqual({ value: 2, withinBandwidth: true });
+    // linear scale have 1 pixel difference...
+    expect(linearScale.invertWithStep(0, data)).toEqual({ value: 0, withinBandwidth: true });
+    expect(linearScale.invertWithStep(41, data)).toEqual({ value: 1, withinBandwidth: true });
+    expect(linearScale.invertWithStep(81, data)).toEqual({ value: 2, withinBandwidth: true });
   });
   test('compare ordinal scale and linear/band 2 bars', () => {
     const dataLinear = [0, 1];
@@ -181,12 +182,13 @@ describe('Scale Test', () => {
     expect(linearScale.scale(0)).toBe(0);
     expect(linearScale.scale(1)).toBe(50);
 
-    expect(ordinalScale.invertWithStep(0)).toBe(0);
-    expect(ordinalScale.invertWithStep(50)).toBe(1);
-    expect(ordinalScale.invertWithStep(100)).toBe(1);
-    expect(linearScale.invertWithStep(0, dataLinear)).toBe(0);
-    expect(linearScale.invertWithStep(50, dataLinear)).toBe(1);
-    expect(linearScale.invertWithStep(100, dataLinear)).toBe(1);
+    expect(ordinalScale.invertWithStep(0)).toEqual({ value: 0, withinBandwidth: true });
+    expect(ordinalScale.invertWithStep(50)).toEqual({ value: 1, withinBandwidth: true });
+    expect(ordinalScale.invertWithStep(100)).toEqual({ value: 1, withinBandwidth: true });
+    // linear scale have 1 pixel difference...
+    expect(linearScale.invertWithStep(0, dataLinear)).toEqual({ value: 0, withinBandwidth: true });
+    expect(linearScale.invertWithStep(51, dataLinear)).toEqual({ value: 1, withinBandwidth: true });
+    expect(linearScale.invertWithStep(100, dataLinear)).toEqual({ value: 1, withinBandwidth: true });
     expect(linearScale.bandwidth).toBe(50);
     expect(linearScale.range).toEqual([0, 50]);
   });

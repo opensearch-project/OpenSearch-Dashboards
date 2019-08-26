@@ -101,7 +101,7 @@ export const LIGHT_THEME: Theme = {
   },
   crosshair: {
     band: {
-      fill: 'lightgray',
+      fill: 'gray',
       visible: true,
     },
     line: {

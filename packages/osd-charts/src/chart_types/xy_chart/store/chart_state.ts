@@ -70,12 +70,7 @@ import {
   computeAnnotationDimensions,
   computeAnnotationTooltipState,
 } from '../annotations/annotation_utils';
-import {
-  getCursorBandPosition,
-  getCursorLinePosition,
-  getTooltipPosition,
-  getPosition,
-} from '../crosshair/crosshair_utils';
+import { getCursorBandPosition, getCursorLinePosition, getTooltipPosition } from '../crosshair/crosshair_utils';
 import {
   BrushExtent,
   computeBrushExtent,
@@ -116,6 +111,9 @@ export type LegendItemListener = (dataSeriesIdentifiers: DataSeriesColorsValues 
 export type CursorUpdateListener = (event?: CursorEvent) => void;
 
 export class ChartStore {
+  constructor(id?: string) {
+    this.id = id || uuid.v4();
+  }
   debug = false;
   id = uuid.v4();
   specsInitialized = observable.box(false);
@@ -195,12 +193,17 @@ export class ChartStore {
   cursorPosition = observable.object<{ x: number; y: number }>({ x: -1, y: -1 }, undefined, {
     deep: false,
   });
-  cursorBandPosition = observable.object<Dimensions>({ top: -1, left: -1, height: -1, width: -1 }, undefined, {
-    deep: false,
-  });
+  cursorBandPosition = observable.object<Dimensions & { visible: boolean }>(
+    { top: -1, left: -1, height: -1, width: -1, visible: false },
+    undefined,
+    {
+      deep: false,
+    },
+  );
   cursorLinePosition = observable.object<Dimensions>({ top: -1, left: -1, height: -1, width: -1 }, undefined, {
     deep: false,
   });
+  externalCursorShown = observable.box(false);
 
   onElementClickListener?: ElementClickListener;
   onElementOverListener?: ElementOverListener;
@@ -265,19 +268,42 @@ export class ChartStore {
   /**
    * set the x value of the cursor
    */
-  setCursorValue = (value: string | number) => {
+  setCursorValue = action((value: string | number) => {
     if (!this.xScale) {
       return;
     }
+    this.externalCursorShown.set(true);
 
-    const xPosition = getPosition(value, this.xScale);
+    const xPosition = this.xScale.pureScale(value);
 
-    if (xPosition === undefined) {
+    if (xPosition == null || xPosition > this.chartDimensions.width + this.chartDimensions.left) {
+      this.clearTooltipAndHighlighted();
       return;
     }
 
-    this.setCursorPosition(xPosition + this.chartDimensions.left, this.chartDimensions.top, false);
-  };
+    const isLineAreaOnly = isLineAreaOnlyChart(this.seriesSpecs);
+
+    const updatedCursorBand = getCursorBandPosition(
+      this.chartRotation,
+      this.chartDimensions,
+      { x: xPosition, y: 0 },
+      {
+        value,
+        withinBandwidth: true,
+      },
+      this.isTooltipSnapEnabled.get(),
+      this.xScale,
+      isLineAreaOnly ? 1 : this.totalBarsInCluster,
+    );
+    if (xPosition === undefined) {
+      return;
+    }
+    if (updatedCursorBand.visible === false) {
+      this.clearTooltipAndHighlighted();
+      return;
+    }
+    Object.assign(this.cursorBandPosition, updatedCursorBand);
+  });
 
   /**
    * x and y values are relative to the container.
@@ -289,11 +315,11 @@ export class ChartStore {
     if (!this.seriesDomainsAndData || this.tooltipType.get() === TooltipType.None) {
       return;
     }
+    this.externalCursorShown.set(false);
 
     // get positions relative to chart
     let xPos = x - this.chartDimensions.left;
     let yPos = y - this.chartDimensions.top;
-
     // limit cursorPosition to chartDimensions
     // note: to debug and inspect tooltip html, just comment the following ifs
     if (xPos < 0 || xPos >= this.chartDimensions.width) {
@@ -307,6 +333,9 @@ export class ChartStore {
 
     // hide tooltip if outside chart dimensions
     if (yPos === -1 || xPos === -1) {
+      if (this.onCursorUpdateListener && this.isActiveChart.get()) {
+        this.onCursorUpdateListener();
+      }
       this.clearTooltipAndHighlighted();
       return;
     }
@@ -323,16 +352,12 @@ export class ChartStore {
 
     // invert the cursor position to get the scale value
     const xValue = this.xScale.invertWithStep(xAxisCursorPosition, this.geometriesIndexKeys);
-
     if (updateCursor && this.onCursorUpdateListener) {
-      // Get non-stepped xValue
-      const value = this.xScale.invert(xAxisCursorPosition);
-
       this.onCursorUpdateListener({
         chartId: this.id,
         scale: this.xScale.type,
         unit: this.xScale.unit,
-        value,
+        value: xValue.value,
       });
     }
 
@@ -342,12 +367,12 @@ export class ChartStore {
       this.chartRotation,
       this.chartDimensions,
       { x: xAxisCursorPosition, y: yAxisCursorPosition },
+      xValue,
       this.isTooltipSnapEnabled.get(),
       this.xScale,
-      this.geometriesIndexKeys,
       isLineAreaOnly ? 1 : this.totalBarsInCluster,
     );
-    if (updatedCursorBand === undefined) {
+    if (updatedCursorBand.visible === false) {
       this.clearTooltipAndHighlighted();
       return;
     }
@@ -367,7 +392,7 @@ export class ChartStore {
     );
 
     // get the elements on at this cursor position
-    const elements = this.geometriesIndex.get(xValue);
+    const elements = this.geometriesIndex.get(xValue.value);
 
     // if no element, hide everything
     if (!elements || elements.length === 0) {
@@ -521,8 +546,7 @@ export class ChartStore {
     return (
       !this.isBrushing.get() &&
       isCrosshairTooltipType(this.tooltipType.get()) &&
-      this.cursorPosition.x > -1 &&
-      this.cursorPosition.y > -1
+      (this.externalCursorShown.get() || (this.cursorPosition.x > -1 && this.cursorPosition.y > -1))
     );
   });
 
@@ -539,9 +563,7 @@ export class ChartStore {
     this.highlightedGeometries.clear();
     this.tooltipData.clear();
 
-    if (this.onCursorUpdateListener && this.isActiveChart.get()) {
-      this.onCursorUpdateListener();
-    }
+    Object.assign(this.cursorBandPosition, { visible: false });
   });
 
   setShowLegend = action((showLegend: boolean) => {
@@ -664,8 +686,8 @@ export class ChartStore {
       return;
     }
     this.isBrushing.set(false);
-    const minValue = start.x < end.x ? start.x : end.x;
-    const maxValue = start.x > end.x ? start.x : end.x;
+    const minValue = Math.min(start.x, end.x);
+    const maxValue = Math.max(start.x, end.x);
     if (maxValue === minValue) {
       // if 0 size brush, avoid computing the value
       return;

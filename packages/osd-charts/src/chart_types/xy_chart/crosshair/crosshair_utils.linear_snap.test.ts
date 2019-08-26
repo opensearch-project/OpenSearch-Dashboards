@@ -2,8 +2,8 @@ import { computeXScale } from '../utils/scales';
 import { BasicSeriesSpec } from '../utils/specs';
 import { Dimensions } from '../../../utils/dimensions';
 import { getGroupId, getSpecId } from '../../../utils/ids';
-import { ScaleType, Scale } from '../../../utils/scales/scales';
-import { getCursorBandPosition, getSnapPosition, getPosition } from './crosshair_utils';
+import { ScaleType } from '../../../utils/scales/scales';
+import { getCursorBandPosition, getSnapPosition } from './crosshair_utils';
 import { computeSeriesDomains } from '../store/utils';
 
 describe('Crosshair utils linear scale', () => {
@@ -200,48 +200,50 @@ describe('Crosshair utils linear scale', () => {
     const chartDimensions: Dimensions = { top: 0, left: 0, width: 120, height: 100 };
     const chartRotation = 0;
     const snapPosition = false;
+
     let bandPosition = getCursorBandPosition(
       chartRotation,
       chartDimensions,
       { x: 200, y: 0 },
+      lineSeriesScale.invertWithStep(200, [0, 1, 2]),
       snapPosition,
       lineSeriesScale,
-      [0, 1, 2],
       1,
     );
-    expect(bandPosition).toBeUndefined();
+    expect(bandPosition).toEqual({ height: 0, left: -1, top: -1, visible: false, width: 0 });
+
     bandPosition = getCursorBandPosition(
       chartRotation,
       chartDimensions,
       { x: 0, y: 200 },
+      lineSeriesScale.invertWithStep(0, [0, 1, 2]),
       snapPosition,
       lineSeriesScale,
-      [0, 1, 2],
       1,
     );
-    expect(bandPosition).toBeUndefined();
+    expect(bandPosition).toEqual({ height: 0, left: -1, top: -1, visible: false, width: 0 });
 
     bandPosition = getCursorBandPosition(
       chartRotation,
       chartDimensions,
       { x: -1, y: 0 },
+      lineSeriesScale.invertWithStep(-1, [0, 1, 2]),
       snapPosition,
       lineSeriesScale,
-      [0, 1, 2],
       1,
     );
-    expect(bandPosition).toBeUndefined();
+    expect(bandPosition).toEqual({ height: 0, left: -1, top: -1, visible: false, width: 0 });
 
     bandPosition = getCursorBandPosition(
       chartRotation,
       chartDimensions,
       { x: 0, y: -1 },
+      lineSeriesScale.invertWithStep(0, [0, 1, 2]),
       snapPosition,
       lineSeriesScale,
-      [0, 1, 2],
       1,
     );
-    expect(bandPosition).toBeUndefined();
+    expect(bandPosition).toEqual({ height: 0, left: -1, top: -1, visible: false, width: 0 });
   });
 
   describe('BandPosition line chart', () => {
@@ -256,9 +258,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 0 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -266,6 +268,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -274,9 +277,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 45 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -284,6 +287,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -292,9 +296,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 40, y: 0 },
+          lineSeriesScale.invertWithStep(40, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -302,6 +306,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -310,9 +315,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 90, y: 0 },
+          lineSeriesScale.invertWithStep(90, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -320,6 +325,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -328,12 +334,12 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 200, y: 0 },
+          lineSeriesScale.invertWithStep(200, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
-        expect(bandPosition).toBeUndefined();
+        expect(bandPosition).toEqual({ height: 0, left: -1, top: -1, visible: false, width: 0 });
       });
     });
     describe('0 degree rotation, snap enabled', () => {
@@ -345,9 +351,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 0 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -355,6 +361,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -363,9 +370,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 45 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -373,6 +380,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -381,9 +389,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 20, y: 0 },
+          lineSeriesScale.invertWithStep(20, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -391,6 +399,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -399,9 +408,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 40, y: 0 },
+          lineSeriesScale.invertWithStep(40, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -409,6 +418,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -417,9 +427,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 95, y: 0 },
+          lineSeriesScale.invertWithStep(95, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -427,6 +437,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -435,12 +446,12 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 200, y: 0 },
+          lineSeriesScale.invertWithStep(200, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
-        expect(bandPosition).toBeUndefined();
+        expect(bandPosition).toEqual({ height: 0, left: -1, top: -1, visible: false, width: 0 });
       });
     });
 
@@ -453,9 +464,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 0 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
 
@@ -464,6 +475,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -472,9 +484,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 45 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -482,6 +494,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -490,9 +503,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 40, y: 0 },
+          lineSeriesScale.invertWithStep(40, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -500,6 +513,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -508,9 +522,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 90, y: 0 },
+          lineSeriesScale.invertWithStep(90, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -518,6 +532,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -526,12 +541,12 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 200, y: 0 },
+          lineSeriesScale.invertWithStep(200, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
-        expect(bandPosition).toBeUndefined();
+        expect(bandPosition).toEqual({ height: 0, left: -1, top: -1, visible: false, width: 0 });
       });
     });
 
@@ -544,9 +559,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 0 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -554,6 +569,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -562,9 +578,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 45 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -572,6 +588,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -580,9 +597,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 20, y: 0 },
+          lineSeriesScale.invertWithStep(20, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -590,6 +607,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -598,9 +616,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 40, y: 0 },
+          lineSeriesScale.invertWithStep(40, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -608,6 +626,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -616,9 +635,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 95, y: 0 },
+          lineSeriesScale.invertWithStep(95, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -626,6 +645,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 1,
+          visible: true,
         });
       });
 
@@ -634,12 +654,12 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 200, y: 0 },
+          lineSeriesScale.invertWithStep(200, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
-        expect(bandPosition).toBeUndefined();
+        expect(bandPosition).toEqual({ height: 0, left: -1, top: -1, visible: false, width: 0 });
       });
     });
 
@@ -652,9 +672,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 0 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -662,6 +682,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -670,9 +691,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 45, y: 0 },
+          lineSeriesScale.invertWithStep(45, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -680,6 +701,7 @@ describe('Crosshair utils linear scale', () => {
           top: 45,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -688,9 +710,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 40 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -698,6 +720,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -706,9 +729,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 90 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -716,6 +739,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -724,12 +748,12 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 200 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
-        expect(bandPosition).toBeUndefined();
+        expect(bandPosition).toEqual({ height: 0, left: -1, top: -1, visible: false, width: 0 });
       });
     });
 
@@ -742,9 +766,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 0 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -752,6 +776,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -760,9 +785,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 45, y: 0 },
+          lineSeriesScale.invertWithStep(45, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -770,6 +795,7 @@ describe('Crosshair utils linear scale', () => {
           top: 60,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -778,9 +804,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 20 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -788,6 +814,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -796,9 +823,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 40 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -806,6 +833,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -814,9 +842,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 95 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -824,6 +852,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -832,12 +861,12 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 200 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
-        expect(bandPosition).toBeUndefined();
+        expect(bandPosition).toEqual({ height: 0, left: -1, top: -1, visible: false, width: 0 });
       });
     });
 
@@ -850,9 +879,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 0 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -860,6 +889,7 @@ describe('Crosshair utils linear scale', () => {
           top: 100,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -868,9 +898,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 45, y: 0 },
+          lineSeriesScale.invertWithStep(45, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -878,6 +908,7 @@ describe('Crosshair utils linear scale', () => {
           top: 55,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -886,9 +917,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 40 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -896,6 +927,7 @@ describe('Crosshair utils linear scale', () => {
           top: 100,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -904,9 +936,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 90 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -914,6 +946,7 @@ describe('Crosshair utils linear scale', () => {
           top: 100,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -922,12 +955,12 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 200 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
-        expect(bandPosition).toBeUndefined();
+        expect(bandPosition).toEqual({ height: 0, left: -1, top: -1, visible: false, width: 0 });
       });
     });
 
@@ -940,9 +973,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 0 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -950,6 +983,7 @@ describe('Crosshair utils linear scale', () => {
           top: 100,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -958,9 +992,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 45, y: 0 },
+          lineSeriesScale.invertWithStep(45, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -968,6 +1002,7 @@ describe('Crosshair utils linear scale', () => {
           top: 40,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -976,9 +1011,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 20 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -986,6 +1021,7 @@ describe('Crosshair utils linear scale', () => {
           top: 100,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -994,9 +1030,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 40 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1004,6 +1040,7 @@ describe('Crosshair utils linear scale', () => {
           top: 100,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -1012,9 +1049,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 95 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1022,6 +1059,7 @@ describe('Crosshair utils linear scale', () => {
           top: 100,
           height: 1,
           width: 120,
+          visible: true,
         });
       });
 
@@ -1030,12 +1068,12 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 200 },
+          lineSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           lineSeriesScale,
-          [0, 1, 2],
           1,
         );
-        expect(bandPosition).toBeUndefined();
+        expect(bandPosition).toEqual({ height: 0, left: -1, top: -1, visible: false, width: 0 });
       });
     });
   });
@@ -1051,9 +1089,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 0 },
+          barSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1061,6 +1099,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 40,
+          visible: true,
         });
       });
 
@@ -1069,9 +1108,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 45 },
+          barSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1079,6 +1118,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 40,
+          visible: true,
         });
       });
 
@@ -1086,10 +1126,10 @@ describe('Crosshair utils linear scale', () => {
         let bandPosition = getCursorBandPosition(
           chartRotation,
           chartDimensions,
-          { x: 39, y: 0 },
+          { x: 40, y: 0 },
+          barSeriesScale.invertWithStep(40, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1097,14 +1137,15 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 40,
+          visible: true,
         });
         bandPosition = getCursorBandPosition(
           chartRotation,
           chartDimensions,
-          { x: 40, y: 0 },
+          { x: 41, y: 0 },
+          barSeriesScale.invertWithStep(41, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1112,6 +1153,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 40,
+          visible: true,
         });
       });
 
@@ -1120,9 +1162,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 90, y: 0 },
+          barSeriesScale.invertWithStep(90, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1130,6 +1172,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 40,
+          visible: true,
         });
       });
 
@@ -1138,12 +1181,12 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 200, y: 0 },
+          barSeriesScale.invertWithStep(200, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
-        expect(bandPosition).toBeUndefined();
+        expect(bandPosition).toEqual({ height: 0, left: -1, top: -1, visible: false, width: 0 });
       });
     });
 
@@ -1156,9 +1199,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 0 },
+          barSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1166,6 +1209,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 40,
+          visible: true,
         });
       });
 
@@ -1174,9 +1218,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 45 },
+          barSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1184,6 +1228,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 40,
+          visible: true,
         });
       });
 
@@ -1191,10 +1236,10 @@ describe('Crosshair utils linear scale', () => {
         const bandPosition = getCursorBandPosition(
           chartRotation,
           chartDimensions,
-          { x: 40, y: 0 },
+          { x: 41, y: 0 },
+          barSeriesScale.invertWithStep(41, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1202,6 +1247,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 40,
+          visible: true,
         });
       });
 
@@ -1210,9 +1256,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 90, y: 0 },
+          barSeriesScale.invertWithStep(90, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1220,6 +1266,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 100,
           width: 40,
+          visible: true,
         });
       });
 
@@ -1228,12 +1275,12 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 200, y: 0 },
+          barSeriesScale.invertWithStep(200, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
-        expect(bandPosition).toBeUndefined();
+        expect(bandPosition).toEqual({ height: 0, left: -1, top: -1, visible: false, width: 0 });
       });
     });
 
@@ -1246,9 +1293,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 0 },
+          barSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1256,6 +1303,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 40,
           width: 120,
+          visible: true,
         });
       });
 
@@ -1264,9 +1312,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 45, y: 0 },
+          barSeriesScale.invertWithStep(45, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1274,6 +1322,7 @@ describe('Crosshair utils linear scale', () => {
           top: 40,
           height: 40,
           width: 120,
+          visible: true,
         });
       });
 
@@ -1282,9 +1331,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 40 },
+          barSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1292,6 +1341,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 40,
           width: 120,
+          visible: true,
         });
       });
 
@@ -1300,9 +1350,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 90 },
+          barSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1310,6 +1360,7 @@ describe('Crosshair utils linear scale', () => {
           top: 0,
           height: 40,
           width: 120,
+          visible: true,
         });
       });
 
@@ -1318,12 +1369,12 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 200 },
+          barSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
-        expect(bandPosition).toBeUndefined();
+        expect(bandPosition).toEqual({ height: 0, left: -1, top: -1, visible: false, width: 0 });
       });
     });
 
@@ -1336,9 +1387,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 0 },
+          barSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1346,6 +1397,7 @@ describe('Crosshair utils linear scale', () => {
           top: 60,
           height: 40,
           width: 120,
+          visible: true,
         });
       });
 
@@ -1354,9 +1406,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 45, y: 0 },
+          barSeriesScale.invertWithStep(45, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1364,6 +1416,7 @@ describe('Crosshair utils linear scale', () => {
           top: 20,
           height: 40,
           width: 120,
+          visible: true,
         });
       });
 
@@ -1372,9 +1425,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 40 },
+          barSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1382,6 +1435,7 @@ describe('Crosshair utils linear scale', () => {
           top: 60,
           height: 40,
           width: 120,
+          visible: true,
         });
       });
 
@@ -1390,9 +1444,9 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 90 },
+          barSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
         expect(bandPosition).toEqual({
@@ -1400,6 +1454,7 @@ describe('Crosshair utils linear scale', () => {
           top: 60,
           height: 40,
           width: 120,
+          visible: true,
         });
       });
 
@@ -1408,35 +1463,13 @@ describe('Crosshair utils linear scale', () => {
           chartRotation,
           chartDimensions,
           { x: 0, y: 200 },
+          barSeriesScale.invertWithStep(0, [0, 1, 2]),
           snapPosition,
           barSeriesScale,
-          [0, 1, 2],
           1,
         );
-        expect(bandPosition).toBeUndefined();
+        expect(bandPosition).toEqual({ height: 0, left: -1, top: -1, visible: false, width: 0 });
       });
-    });
-  });
-
-  describe('getPosition', () => {
-    // @ts-ignore
-    const scale: Scale = {
-      scale: jest.fn(),
-    };
-
-    beforeEach(() => {
-      (scale.scale as jest.Mock).mockClear();
-    });
-
-    it('should return value from scale', () => {
-      (scale.scale as jest.Mock).mockReturnValue(20);
-      const result = getPosition(10, scale);
-      expect(result).toBe(20);
-    });
-
-    it('should call scale with correct args', () => {
-      getPosition(10, scale);
-      expect(scale.scale).toBeCalledWith(10);
     });
   });
 });

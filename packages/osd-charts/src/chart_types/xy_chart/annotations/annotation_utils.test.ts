@@ -33,7 +33,6 @@ import {
   getAnnotationLineTooltipTransform,
   getAnnotationLineTooltipXOffset,
   getAnnotationLineTooltipYOffset,
-  getNearestTick,
   getRotatedCursor,
   isBottomRectTooltip,
   isRightRectTooltip,
@@ -56,7 +55,7 @@ describe('annotation utils', () => {
       domain: continuousData,
       range: [minRange, maxRange],
     },
-    { bandwidth: 0, minInterval: 1 },
+    { bandwidth: 10, minInterval: 1 },
   );
 
   const ordinalData = ['a', 'b', 'c', 'd', 'a', 'b', 'c'];
@@ -291,6 +290,7 @@ describe('annotation utils', () => {
         position: [0, 20, 20 + DEFAULT_LINE_OVERFLOW, 20],
         details: { detailsText: 'foo', headerText: '2' },
         tooltipLinePosition: [20, 0, 20, 20],
+        marker: undefined,
       },
     ];
     expect(dimensions).toEqual(expectedDimensions);
@@ -386,9 +386,10 @@ describe('annotation utils', () => {
     );
     const expectedDimensions = [
       {
-        position: [20, -DEFAULT_LINE_OVERFLOW, 20, 20],
+        position: [25, -DEFAULT_LINE_OVERFLOW, 25, 20],
         details: { detailsText: 'foo', headerText: '2' },
-        tooltipLinePosition: [20, 0, 20, 20],
+        tooltipLinePosition: [25, 0, 25, 20],
+        marker: undefined,
       },
     ];
     expect(dimensions).toEqual(expectedDimensions);
@@ -421,9 +422,10 @@ describe('annotation utils', () => {
     );
     const expectedDimensions = [
       {
-        position: [20, 0, 20, 20],
+        position: [25, 0, 25, 20],
         details: { detailsText: 'foo', headerText: '2' },
-        tooltipLinePosition: [20, 0, 20, 20],
+        tooltipLinePosition: [25, 0, 25, 20],
+        marker: undefined,
       },
     ];
     expect(dimensions).toEqual(expectedDimensions);
@@ -456,9 +458,10 @@ describe('annotation utils', () => {
     );
     const expectedDimensions = [
       {
-        position: [105, 0, 105, 20],
+        position: [110, 0, 110, 20],
         details: { detailsText: 'foo', headerText: '10.5' },
-        tooltipLinePosition: [105, 0, 105, 20],
+        tooltipLinePosition: [110, 0, 110, 20],
+        marker: undefined,
       },
     ];
     expect(dimensions).toEqual(expectedDimensions);
@@ -495,6 +498,7 @@ describe('annotation utils', () => {
         position: [12.5, -DEFAULT_LINE_OVERFLOW, 12.5, 10],
         details: { detailsText: 'foo', headerText: 'a' },
         tooltipLinePosition: [0, 12.5, 10, 12.5],
+        marker: undefined,
       },
     ];
     expect(dimensions).toEqual(expectedDimensions);
@@ -528,9 +532,10 @@ describe('annotation utils', () => {
     );
     const expectedDimensions = [
       {
-        position: [20, -DEFAULT_LINE_OVERFLOW, 20, 10],
+        position: [25, -DEFAULT_LINE_OVERFLOW, 25, 10],
         details: { detailsText: 'foo', headerText: '2' },
-        tooltipLinePosition: [0, 20, 10, 20],
+        tooltipLinePosition: [0, 25, 10, 25],
+        marker: undefined,
       },
     ];
     expect(dimensions).toEqual(expectedDimensions);
@@ -564,9 +569,10 @@ describe('annotation utils', () => {
     );
     const expectedDimensions = [
       {
-        position: [20, -DEFAULT_LINE_OVERFLOW, 20, 10],
+        position: [25, -DEFAULT_LINE_OVERFLOW, 25, 10],
         details: { detailsText: 'foo', headerText: '2' },
-        tooltipLinePosition: [0, 0, 10, 0],
+        tooltipLinePosition: [0, -5, 10, -5],
+        marker: undefined,
       },
     ];
     expect(dimensions).toEqual(expectedDimensions);
@@ -600,9 +606,10 @@ describe('annotation utils', () => {
     );
     const expectedDimensions = [
       {
-        position: [20, -DEFAULT_LINE_OVERFLOW, 20, 20],
+        position: [25, -DEFAULT_LINE_OVERFLOW, 25, 20],
         details: { detailsText: 'foo', headerText: '2' },
-        tooltipLinePosition: [20, 0, 20, 20],
+        tooltipLinePosition: [25, 0, 25, 20],
+        marker: undefined,
       },
     ];
     expect(dimensions).toEqual(expectedDimensions);
@@ -635,9 +642,10 @@ describe('annotation utils', () => {
     );
     const expectedDimensions = [
       {
-        position: [20, DEFAULT_LINE_OVERFLOW, 20, 20],
+        position: [25, DEFAULT_LINE_OVERFLOW, 25, 20],
         details: { detailsText: 'foo', headerText: '2' },
-        tooltipLinePosition: [20, DEFAULT_LINE_OVERFLOW, 20, 20],
+        tooltipLinePosition: [25, DEFAULT_LINE_OVERFLOW, 25, 20],
+        marker: undefined,
       },
     ];
     expect(dimensions).toEqual(expectedDimensions);
@@ -1482,7 +1490,7 @@ describe('annotation utils', () => {
     expect(scaleAndValidateDatum(0, continuousScale, false)).toBe(0);
 
     // aligned with tick
-    expect(scaleAndValidateDatum(1.25, continuousScale, true)).toBe(10);
+    expect(scaleAndValidateDatum(1.25, continuousScale, true)).toBe(12.5);
   });
   test('should determine if a point is within a rectangle annotation', () => {
     const cursorPosition = { x: 3, y: 4 };
@@ -1681,15 +1689,7 @@ describe('annotation utils', () => {
     expect(getRotatedCursor(rawCursorPosition, chartDimensions, -90)).toEqual({ x: 18, y: 9 });
     expect(getRotatedCursor(rawCursorPosition, chartDimensions, 180)).toEqual({ x: 9, y: 18 });
   });
-  test('should get nearest tick', () => {
-    const ticks = [0, 1, 2];
-    expect(getNearestTick(0.25, [], 1)).toBeUndefined();
-    expect(getNearestTick(0.25, [100], 1)).toBeUndefined();
-    expect(getNearestTick(0.25, ticks, 1)).toBe(0);
-    expect(getNearestTick(0.75, ticks, 1)).toBe(1);
-    expect(getNearestTick(0.5, ticks, 1)).toBe(1);
-    expect(getNearestTick(1.75, ticks, 1)).toBe(2);
-  });
+
   test('should compute cluster offset', () => {
     const singleBarCluster = 1;
     const multiBarCluster = 2;

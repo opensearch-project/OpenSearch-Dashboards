@@ -23,6 +23,7 @@ interface ChartProps {
   renderer: 'svg' | 'canvas';
   size?: ChartSize;
   className?: string;
+  id?: string;
 }
 
 interface ChartState {
@@ -36,7 +37,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
   private chartSpecStore: ChartStore;
   constructor(props: any) {
     super(props);
-    this.chartSpecStore = new ChartStore();
+    this.chartSpecStore = new ChartStore(props.id);
     this.state = {
       legendPosition: this.chartSpecStore.legendPosition.get(),
     };
@@ -63,9 +64,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
     const isActiveChart = this.chartSpecStore.isActiveChart.get();
 
     if (!event) {
-      if (!isActiveChart) {
-        this.chartSpecStore.setCursorPosition(-1, -1);
-      }
+      this.chartSpecStore.externalCursorShown.set(false);
     } else {
       if (
         !isActiveChart &&

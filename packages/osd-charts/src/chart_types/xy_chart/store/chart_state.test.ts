@@ -1008,47 +1008,4 @@ describe('Chart Store', () => {
       expect(store.activeChartId).toBeUndefined();
     });
   });
-
-  describe('setCursorValue', () => {
-    const getPosition = jest.fn();
-    // TODO: fix mocking implementation
-    jest.doMock('../crosshair/crosshair_utils', () => ({
-      getPosition,
-    }));
-
-    const scale = new ScaleContinuous({ type: ScaleType.Linear, domain: [0, 100], range: [0, 100] });
-    beforeEach(() => {
-      // @ts-ignore
-      store.setCursorPosition = jest.fn();
-    });
-
-    it('should not call setCursorPosition if xScale is not defined', () => {
-      store.xScale = undefined;
-      store.setCursorValue(1);
-      expect(store.setCursorPosition).not.toBeCalled();
-    });
-
-    it.skip('should call getPosition with args', () => {
-      (getPosition as jest.Mock).mockReturnValue(undefined);
-      store.xScale = scale;
-      store.setCursorValue(1);
-      expect(getPosition).toBeCalledWith(1, store.xScale);
-    });
-
-    it.skip('should not call setCursorPosition if xPosition is not defined', () => {
-      store.xScale = scale;
-      (getPosition as jest.Mock).mockReturnValue(undefined);
-      store.setCursorValue(1);
-      expect(store.setCursorPosition).not.toBeCalled();
-    });
-
-    it('should call setCursorPosition with correct args', () => {
-      store.xScale = scale;
-      store.chartDimensions.left = 10;
-      store.chartDimensions.top = 10;
-      (getPosition as jest.Mock).mockReturnValue(20);
-      store.setCursorValue(20);
-      expect(store.setCursorPosition).toBeCalledWith(30, 10, false);
-    });
-  });
 });

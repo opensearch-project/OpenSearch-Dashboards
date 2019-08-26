@@ -186,7 +186,12 @@ export class ScaleContinuous implements Scale {
   scale(value: any) {
     return this.d3Scale(value) + (this.bandwidthPadding / 2) * this.totalBarsInCluster;
   }
-
+  pureScale(value: any) {
+    if (this.bandwidth === 0) {
+      return this.d3Scale(value);
+    }
+    return this.d3Scale(value + this.minInterval / 2);
+  }
   ticks() {
     return this.tickValues;
   }
@@ -197,34 +202,44 @@ export class ScaleContinuous implements Scale {
     }
     return invertedValue;
   }
-  invertWithStep(value: number, data: number[]): any {
-    const invertedValue = this.invert(value - this.bandwidth / 2);
-    const leftIndex = bisectLeft(data, invertedValue);
+  invertWithStep(
+    value: number,
+    data: number[],
+  ): {
+    value: any;
+    withinBandwidth: boolean;
+  } {
+    const invertedValue = this.invert(value);
+    const bisectValue = this.bandwidth === 0 ? invertedValue + this.minInterval / 2 : invertedValue;
+    const leftIndex = bisectLeft(data, bisectValue);
+
     if (leftIndex === 0) {
-      // is equal or less than the first value
-      const prevValue1 = data[leftIndex];
-      if (data.length === 0) {
-        return prevValue1;
-      }
-      const nextValue1 = data[leftIndex + 1];
-      const nextDiff1 = Math.abs(nextValue1 - invertedValue);
-      const prevDiff1 = Math.abs(invertedValue - prevValue1);
-      if (nextDiff1 < prevDiff1) {
-        return nextValue1;
-      }
-      return prevValue1;
+      return {
+        value: data[0],
+        withinBandwidth: true,
+      };
     }
-    if (leftIndex === data.length) {
-      return data[leftIndex - 1];
+    const currentValue = data[leftIndex - 1];
+    // pure linear scale
+    if (this.minInterval === 0) {
+      const nextValue = data[leftIndex];
+      const nextDiff = Math.abs(nextValue - invertedValue);
+      const prevDiff = Math.abs(invertedValue - currentValue);
+      return {
+        value: nextDiff <= prevDiff ? nextValue : currentValue,
+        withinBandwidth: true,
+      };
     }
-    const nextValue = data[leftIndex];
-    const prevValue = data[leftIndex - 1];
-    const nextDiff = Math.abs(nextValue - invertedValue);
-    const prevDiff = Math.abs(invertedValue - prevValue);
-    if (nextDiff <= prevDiff) {
-      return nextValue;
+    if (invertedValue - currentValue <= this.minInterval) {
+      return {
+        value: currentValue,
+        withinBandwidth: true,
+      };
     }
-    return prevValue;
+    return {
+      value: currentValue + this.minInterval * Math.floor((invertedValue - currentValue) / this.minInterval),
+      withinBandwidth: false,
+    };
   }
   isSingleValue() {
     if (this.domain.length < 2) {

@@ -247,8 +247,40 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(store.yScales).not.toBeUndefined();
   });
 
+  test('set cursor from external source', () => {
+    store.setCursorValue(0);
+    expect(store.externalCursorShown.get()).toBe(true);
+    expect(store.cursorBandPosition).toEqual({
+      height: 100,
+      left: 10,
+      top: 10,
+      visible: true,
+      width: 50,
+    });
+
+    store.setCursorValue(1);
+    expect(store.externalCursorShown.get()).toBe(true);
+    expect(store.cursorBandPosition).toEqual({
+      height: 100,
+      left: 60,
+      top: 10,
+      visible: true,
+      width: 50,
+    });
+
+    store.setCursorValue(2);
+    expect(store.externalCursorShown.get()).toBe(true);
+    // equal to the latest except the visiblility
+    expect(store.cursorBandPosition).toEqual({
+      height: 100,
+      left: 60,
+      top: 10,
+      visible: false,
+      width: 50,
+    });
+  });
   test('can determine which tooltip to display if chart & annotation tooltips possible', () => {
-    const annotationDimensions = [{ rect: { x: 49, y: -1, width: 2, height: 99 } }];
+    const annotationDimensions = [{ rect: { x: 49, y: -1, width: 3, height: 99 } }];
     const rectAnnotationSpec: RectAnnotationSpec = {
       annotationId: getAnnotationId('rect'),
       groupId: GROUP_ID,
@@ -258,9 +290,9 @@ function mouseOverTestSuite(scaleType: ScaleType) {
 
     store.annotationSpecs.set(rectAnnotationSpec.annotationId, rectAnnotationSpec);
     store.annotationDimensions.set(rectAnnotationSpec.annotationId, annotationDimensions);
-
+    debugger;
     // isHighlighted false, chart tooltip true; should show annotationTooltip only
-    store.setCursorPosition(chartLeft + 50, chartTop + 0);
+    store.setCursorPosition(chartLeft + 51, chartTop + 1);
     expect(store.isTooltipVisible.get()).toBe(false);
   });
 
@@ -308,8 +340,12 @@ function mouseOverTestSuite(scaleType: ScaleType) {
   });
 
   test('can hover top-right corner of the first bar', () => {
-    store.setCursorPosition(chartLeft + 49, chartTop + 0);
-    expect(store.cursorPosition).toEqual({ x: 49, y: 0 });
+    let scaleOffset = 0;
+    if (scaleType !== ScaleType.Ordinal) {
+      scaleOffset = 1;
+    }
+    store.setCursorPosition(chartLeft + 49 + scaleOffset, chartTop + 0);
+    expect(store.cursorPosition).toEqual({ x: 49 + scaleOffset, y: 0 });
     expect(store.cursorBandPosition.left).toBe(chartLeft + 0);
     expect(store.cursorBandPosition.width).toBe(50);
     expect(store.isTooltipVisible.get()).toBe(true);
@@ -319,8 +355,8 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(onOutListener).toBeCalledTimes(0);
     expect(onOverListener.mock.calls[0][0]).toEqual([indexedGeom1Red.value]);
 
-    store.setCursorPosition(chartLeft + 50, chartTop + 0);
-    expect(store.cursorPosition).toEqual({ x: 50, y: 0 });
+    store.setCursorPosition(chartLeft + 50 + scaleOffset, chartTop + 0);
+    expect(store.cursorPosition).toEqual({ x: 50 + scaleOffset, y: 0 });
     expect(store.cursorBandPosition.left).toBe(chartLeft + 50);
     expect(store.cursorBandPosition.width).toBe(50);
     expect(store.isTooltipVisible.get()).toBe(true);
@@ -331,8 +367,12 @@ function mouseOverTestSuite(scaleType: ScaleType) {
   });
 
   test('can hover bottom-right corner of the first bar', () => {
-    store.setCursorPosition(chartLeft + 49, chartTop + 99);
-    expect(store.cursorPosition).toEqual({ x: 49, y: 99 });
+    let scaleOffset = 0;
+    if (scaleType !== ScaleType.Ordinal) {
+      scaleOffset = 1;
+    }
+    store.setCursorPosition(chartLeft + 49 + scaleOffset, chartTop + 99);
+    expect(store.cursorPosition).toEqual({ x: 49 + scaleOffset, y: 99 });
     expect(store.cursorBandPosition.left).toBe(chartLeft + 0);
     expect(store.cursorBandPosition.width).toBe(50);
     expect(store.isTooltipVisible.get()).toBe(true);
@@ -342,8 +382,8 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(onOutListener).toBeCalledTimes(0);
     expect(onOverListener.mock.calls[0][0]).toEqual([indexedGeom1Red.value]);
 
-    store.setCursorPosition(chartLeft + 50, chartTop + 99);
-    expect(store.cursorPosition).toEqual({ x: 50, y: 99 });
+    store.setCursorPosition(chartLeft + 50 + scaleOffset, chartTop + 99);
+    expect(store.cursorPosition).toEqual({ x: 50 + scaleOffset, y: 99 });
     expect(store.cursorBandPosition.left).toBe(chartLeft + 50);
     expect(store.cursorBandPosition.width).toBe(50);
     expect(store.isTooltipVisible.get()).toBe(true);

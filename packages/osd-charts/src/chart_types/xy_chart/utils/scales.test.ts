@@ -24,8 +24,8 @@ describe('Series scales', () => {
   test('should compute X Scale linear min, max with bands', () => {
     const scale = computeXScale({ xDomain: xDomainLinear, totalBarsInCluster: 1, range: [0, 120] });
     const expectedBandwidth = 120 / 4;
-    expect(scale.bandwidth).toBe(expectedBandwidth);
-    expect(scale.scale(0)).toBe(expectedBandwidth * 0);
+    expect(scale.bandwidth).toBe(120 / 4);
+    expect(scale.scale(0)).toBe(0);
     expect(scale.scale(1)).toBe(expectedBandwidth * 1);
     expect(scale.scale(2)).toBe(expectedBandwidth * 2);
     expect(scale.scale(3)).toBe(expectedBandwidth * 3);
@@ -65,6 +65,7 @@ describe('Series scales', () => {
       });
       expect(scale.bandwidth).toBe(maxRange);
       expect(scale.domain).toEqual([singleDomainValue, singleDomainValue + minInterval]);
+      // reducing of 1 pixel the range for band scale
       expect(scale.range).toEqual([0, maxRange]);
     });
 

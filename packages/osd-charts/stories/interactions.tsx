@@ -438,13 +438,18 @@ storiesOf('Interactions', module)
     );
   })
   .add('brush selection tool on time charts', () => {
-    const now = DateTime.fromISO('2019-01-11T00:00:00.000Z').toMillis();
+    const now = DateTime.fromISO('2019-01-11T00:00:00.000')
+      .setZone('utc+1')
+      .toMillis();
     const oneDay = 1000 * 60 * 60 * 24;
+    const formatter = niceTimeFormatter([now, now + oneDay * 5]);
     return (
       <Chart className={'story-chart'}>
         <Settings
           debug={boolean('debug', false)}
-          onBrushEnd={action('onBrushEnd')}
+          onBrushEnd={(start, end) => {
+            action('onBrushEnd')(formatter(start), formatter(end));
+          }}
           onElementClick={action('onElementClick')}
         />
         <Axis
@@ -452,7 +457,7 @@ storiesOf('Interactions', module)
           position={Position.Bottom}
           title={'bottom'}
           showOverlappingTicks={true}
-          tickFormat={niceTimeFormatter([now, now + oneDay * 5])}
+          tickFormat={formatter}
         />
         <Axis id={getAxisId('left')} title={'left'} position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
 

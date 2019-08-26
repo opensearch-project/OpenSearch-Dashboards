@@ -52,6 +52,9 @@ export class ScaleBand implements Scale {
   scale(value: any) {
     return this.d3Scale(value);
   }
+  pureScale(value: any) {
+    return this.d3Scale(value);
+  }
 
   ticks() {
     return this.domain;
@@ -60,7 +63,10 @@ export class ScaleBand implements Scale {
     return this.invertedScale(value);
   }
   invertWithStep(value: any) {
-    return this.invertedScale(value);
+    return {
+      value: this.invertedScale(value),
+      withinBandwidth: true,
+    };
   }
   isSingleValue() {
     return this.domain.length < 2;

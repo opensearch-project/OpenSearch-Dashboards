@@ -48,25 +48,25 @@ describe('Scale Continuous', () => {
     const range: [number, number] = [0, 2];
     const scaleLinear = new ScaleContinuous({ type: ScaleType.Linear, domain, range });
     expect(scaleLinear.bandwidth).toBe(0);
-    expect(scaleLinear.invertWithStep(0, data)).toBe(0);
-    expect(scaleLinear.invertWithStep(0.1, data)).toBe(0);
+    expect(scaleLinear.invertWithStep(0, data)).toEqual({ value: 0, withinBandwidth: true });
+    expect(scaleLinear.invertWithStep(0.1, data)).toEqual({ value: 0, withinBandwidth: true });
 
-    expect(scaleLinear.invertWithStep(0.4, data)).toBe(0.5);
-    expect(scaleLinear.invertWithStep(0.5, data)).toBe(0.5);
-    expect(scaleLinear.invertWithStep(0.6, data)).toBe(0.5);
+    expect(scaleLinear.invertWithStep(0.4, data)).toEqual({ value: 0.5, withinBandwidth: true });
+    expect(scaleLinear.invertWithStep(0.5, data)).toEqual({ value: 0.5, withinBandwidth: true });
+    expect(scaleLinear.invertWithStep(0.6, data)).toEqual({ value: 0.5, withinBandwidth: true });
 
-    expect(scaleLinear.invertWithStep(0.7, data)).toBe(0.8);
-    expect(scaleLinear.invertWithStep(0.8, data)).toBe(0.8);
-    expect(scaleLinear.invertWithStep(0.9, data)).toBe(0.8);
+    expect(scaleLinear.invertWithStep(0.7, data)).toEqual({ value: 0.8, withinBandwidth: true });
+    expect(scaleLinear.invertWithStep(0.8, data)).toEqual({ value: 0.8, withinBandwidth: true });
+    expect(scaleLinear.invertWithStep(0.9, data)).toEqual({ value: 0.8, withinBandwidth: true });
 
-    expect(scaleLinear.invertWithStep(2, data)).toBe(2);
+    expect(scaleLinear.invertWithStep(2, data)).toEqual({ value: 2, withinBandwidth: true });
 
-    expect(scaleLinear.invertWithStep(1.7, data)).toBe(2);
+    expect(scaleLinear.invertWithStep(1.7, data)).toEqual({ value: 2, withinBandwidth: true });
 
-    expect(scaleLinear.invertWithStep(0.8 + (2 - 0.8) / 2, data)).toBe(0.8);
-    expect(scaleLinear.invertWithStep(0.8 + (2 - 0.8) / 2 - 0.01, data)).toBe(0.8);
+    expect(scaleLinear.invertWithStep(0.8 + (2 - 0.8) / 2, data)).toEqual({ value: 0.8, withinBandwidth: true });
+    expect(scaleLinear.invertWithStep(0.8 + (2 - 0.8) / 2 - 0.01, data)).toEqual({ value: 0.8, withinBandwidth: true });
 
-    expect(scaleLinear.invertWithStep(0.8 + (2 - 0.8) / 2 + 0.01, data)).toBe(2);
+    expect(scaleLinear.invertWithStep(0.8 + (2 - 0.8) / 2 + 0.01, data)).toEqual({ value: 2, withinBandwidth: true });
   });
   test('invert with step x value on linear band scale', () => {
     const data = [0, 1, 2];
@@ -78,17 +78,18 @@ describe('Scale Continuous', () => {
       type: 'xDomain',
     };
 
-    const scaleLinear = computeXScale({ xDomain, totalBarsInCluster: 1, range: [0, 120], barsPadding: 0 });
-    expect(scaleLinear.bandwidth).toBe(40);
-    expect(scaleLinear.invertWithStep(0, data)).toBe(0);
-    expect(scaleLinear.invertWithStep(40, data)).toBe(1);
+    const scaleLinear = computeXScale({ xDomain, totalBarsInCluster: 1, range: [0, 119], barsPadding: 0 });
+    expect(scaleLinear.bandwidth).toBe(119 / 3);
+    expect(scaleLinear.invertWithStep(0, data)).toEqual({ value: 0, withinBandwidth: true });
 
-    expect(scaleLinear.invertWithStep(41, data)).toBe(1);
-    expect(scaleLinear.invertWithStep(79, data)).toBe(1);
+    expect(scaleLinear.invertWithStep(40, data)).toEqual({ value: 1, withinBandwidth: true });
+    expect(scaleLinear.invertWithStep(41, data)).toEqual({ value: 1, withinBandwidth: true });
+    expect(scaleLinear.invertWithStep(79, data)).toEqual({ value: 1, withinBandwidth: true });
 
-    expect(scaleLinear.invertWithStep(80, data)).toBe(2);
-    expect(scaleLinear.invertWithStep(81, data)).toBe(2);
-    expect(scaleLinear.invertWithStep(120, data)).toBe(2);
+    expect(scaleLinear.invertWithStep(80, data)).toEqual({ value: 2, withinBandwidth: true });
+    expect(scaleLinear.invertWithStep(81, data)).toEqual({ value: 2, withinBandwidth: true });
+
+    expect(scaleLinear.invertWithStep(120, data)).toEqual({ value: 3, withinBandwidth: false });
   });
   test('can get the right x value on linear scale with regular band 1', () => {
     const domain = [0, 100];
@@ -102,15 +103,13 @@ describe('Scale Continuous', () => {
       { bandwidth: 10, minInterval: 10 },
     );
     expect(scaleLinear.bandwidth).toBe(10);
-    expect(scaleLinear.invertWithStep(0, data)).toBe(0);
-    expect(scaleLinear.invertWithStep(10, data)).toBe(10);
-    expect(scaleLinear.invertWithStep(20, data)).toBe(20);
-    expect(scaleLinear.invertWithStep(90, data)).toBe(90);
+    expect(scaleLinear.invertWithStep(0, data)).toEqual({ value: 0, withinBandwidth: true });
+    expect(scaleLinear.invertWithStep(10, data)).toEqual({ value: 10, withinBandwidth: true });
+    expect(scaleLinear.invertWithStep(20, data)).toEqual({ value: 20, withinBandwidth: true });
+    expect(scaleLinear.invertWithStep(90, data)).toEqual({ value: 90, withinBandwidth: true });
   });
   test('can get the right x value on linear scale with band', () => {
     const data = [0, 10, 20, 50, 90];
-    // we tweak the maxRange removing the bandwidth to correctly compute
-    // a band linear scale in computeXScale
 
     const xDomain: XDomain = {
       domain: [0, 100],
@@ -119,28 +118,33 @@ describe('Scale Continuous', () => {
       scaleType: ScaleType.Linear,
       type: 'xDomain',
     };
+    // we tweak the maxRange removing the bandwidth to correctly compute
+    // a band linear scale in computeXScale
+    const scaleLinear = computeXScale({ xDomain, totalBarsInCluster: 1, range: [0, 109], barsPadding: 0 });
+    expect(scaleLinear.bandwidth).toBe(109 / 11);
 
-    const scaleLinear = computeXScale({ xDomain, totalBarsInCluster: 1, range: [0, 110], barsPadding: 0 });
-    // const scaleLinear = new ScaleContinuous({type: ScaleType.Linear, domain, range}, 10, 10);
-    expect(scaleLinear.bandwidth).toBe(10);
+    expect(scaleLinear.invertWithStep(0, data)).toEqual({ value: 0, withinBandwidth: true });
+    expect(scaleLinear.invertWithStep(9, data)).toEqual({ value: 0, withinBandwidth: true });
 
-    expect(scaleLinear.invertWithStep(0, data)).toBe(0);
-    expect(scaleLinear.invertWithStep(5, data)).toBe(0);
-    expect(scaleLinear.invertWithStep(9, data)).toBe(0);
+    expect(scaleLinear.invertWithStep(10, data)).toEqual({ value: 10, withinBandwidth: true });
+    expect(scaleLinear.invertWithStep(19, data)).toEqual({ value: 10, withinBandwidth: true });
 
-    expect(scaleLinear.invertWithStep(10, data)).toBe(10);
-    expect(scaleLinear.invertWithStep(11, data)).toBe(10);
-    expect(scaleLinear.invertWithStep(19, data)).toBe(10);
+    expect(scaleLinear.invertWithStep(20, data)).toEqual({ value: 20, withinBandwidth: true });
+    expect(scaleLinear.invertWithStep(29, data)).toEqual({ value: 20, withinBandwidth: true });
 
-    expect(scaleLinear.invertWithStep(20, data)).toBe(20);
-    expect(scaleLinear.invertWithStep(21, data)).toBe(20);
-    expect(scaleLinear.invertWithStep(25, data)).toBe(20);
-    expect(scaleLinear.invertWithStep(29, data)).toBe(20);
-    expect(scaleLinear.invertWithStep(30, data)).toBe(20);
-    expect(scaleLinear.invertWithStep(39, data)).toBe(20);
-    expect(scaleLinear.invertWithStep(40, data)).toBe(50);
-    expect(scaleLinear.invertWithStep(50, data)).toBe(50);
-    expect(scaleLinear.invertWithStep(90, data)).toBe(90);
+    expect(scaleLinear.invertWithStep(30, data)).toEqual({ value: 30, withinBandwidth: false });
+    expect(scaleLinear.invertWithStep(39, data)).toEqual({ value: 30, withinBandwidth: false });
+
+    expect(scaleLinear.invertWithStep(40, data)).toEqual({ value: 40, withinBandwidth: false });
+
+    expect(scaleLinear.invertWithStep(50, data)).toEqual({ value: 50, withinBandwidth: true });
+    expect(scaleLinear.invertWithStep(59, data)).toEqual({ value: 50, withinBandwidth: true });
+
+    expect(scaleLinear.invertWithStep(60, data)).toEqual({ value: 60, withinBandwidth: false });
+
+    expect(scaleLinear.invertWithStep(90, data)).toEqual({ value: 90, withinBandwidth: true });
+
+    expect(scaleLinear.invertWithStep(100, data)).toEqual({ value: 100, withinBandwidth: false });
   });
 
   describe('isSingleValue', () => {

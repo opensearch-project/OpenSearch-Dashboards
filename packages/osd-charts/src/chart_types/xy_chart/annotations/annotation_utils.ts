@@ -323,44 +323,9 @@ export function computeLineAnnotationDimensions(
   );
 }
 
-/**
- * Used when we need to snap values to the nearest tick edge, this performs a binary search for the nearest tick
- * @param dataValue - dataValue defined as an annotation cooordinate
- * @param ticks - ticks from the scale
- * @param minInterval - minInterva from the scale
- */
-export function getNearestTick(dataValue: number, ticks: number[], minInterval: number): number | undefined {
-  if (ticks.length === 0) {
-    return;
-  }
-
-  if (ticks.length === 1) {
-    if (Math.abs(dataValue - ticks[0]) <= minInterval / 2) {
-      return ticks[0];
-    }
-    return;
-  }
-
-  const numTicks = ticks.length - 1;
-  const midIdx = Math.ceil(numTicks / 2);
-  const midPoint = ticks[midIdx];
-
-  if (Math.abs(dataValue - midPoint) <= minInterval / 2) {
-    return midPoint;
-  }
-
-  if (dataValue > midPoint) {
-    return getNearestTick(dataValue, ticks.slice(midIdx, ticks.length), minInterval);
-  }
-
-  return getNearestTick(dataValue, ticks.slice(0, midIdx), minInterval);
-}
-
 export function scaleAndValidateDatum(dataValue: any, scale: Scale, alignWithTick: boolean): any | null {
   const isContinuous = scale.type !== ScaleType.Ordinal;
-  const value = isContinuous && alignWithTick ? getNearestTick(dataValue, scale.ticks(), scale.minInterval) : dataValue;
-  const scaledValue = scale.scale(value);
-
+  const scaledValue = scale.scale(dataValue);
   // d3.scale will return 0 for '', rendering the line incorrectly at 0
   if (isNaN(scaledValue) || (isContinuous && dataValue === '')) {
     return null;
@@ -951,7 +916,6 @@ export function computeRectAnnotationTooltipState(
     const endY = startY + rect.height;
 
     const isWithinBounds = isWithinRectBounds(cursorPosition, { startX, endX, startY, endY });
-
     if (isWithinBounds) {
       annotationTooltipState.isVisible = true;
       annotationTooltipState.details = details;

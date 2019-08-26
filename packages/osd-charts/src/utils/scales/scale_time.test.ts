@@ -72,7 +72,7 @@ describe('[Scale Time] - timezones', () => {
       const data = [startTime, midTime, endTime];
       const domain = [startTime, endTime];
       const minRange = 0;
-      const maxRange = 100;
+      const maxRange = 99;
       const minInterval = (endTime - startTime) / 2;
       const scale = new ScaleContinuous(
         {
@@ -83,15 +83,15 @@ describe('[Scale Time] - timezones', () => {
         { bandwidth: undefined, minInterval, timeZone: 'local' },
       );
       expect(scale.invert(0)).toBe(startTime);
-      expect(scale.invert(50)).toBe(midTime);
-      expect(scale.invert(100)).toBe(endTime);
-      expect(scale.invertWithStep(0, data)).toBe(startTime);
-      expect(scale.invertWithStep(24, data)).toBe(startTime);
-      expect(scale.invertWithStep(25, data)).toBe(midTime);
-      expect(scale.invertWithStep(50, data)).toBe(midTime);
-      expect(scale.invertWithStep(74, data)).toBe(midTime);
-      expect(scale.invertWithStep(76, data)).toBe(endTime);
-      expect(scale.invertWithStep(100, data)).toBe(endTime);
+      expect(scale.invert(49.5)).toBe(midTime);
+      expect(scale.invert(99)).toBe(endTime);
+      expect(scale.invertWithStep(0, data)).toEqual({ value: startTime, withinBandwidth: true });
+      expect(scale.invertWithStep(24, data)).toEqual({ value: startTime, withinBandwidth: true });
+      expect(scale.invertWithStep(25, data)).toEqual({ value: midTime, withinBandwidth: true });
+      expect(scale.invertWithStep(50, data)).toEqual({ value: midTime, withinBandwidth: true });
+      expect(scale.invertWithStep(74, data)).toEqual({ value: midTime, withinBandwidth: true });
+      expect(scale.invertWithStep(76, data)).toEqual({ value: endTime, withinBandwidth: true });
+      expect(scale.invertWithStep(100, data)).toEqual({ value: endTime, withinBandwidth: true });
       expect(scale.tickValues.length).toBe(9);
       expect(scale.tickValues[0]).toEqual(startTime);
       expect(scale.tickValues[4]).toEqual(midTime);
@@ -104,22 +104,22 @@ describe('[Scale Time] - timezones', () => {
       const data = [startTime, midTime, endTime];
       const domain = [startTime, endTime];
       const minRange = 0;
-      const maxRange = 100;
+      const maxRange = 99;
       const minInterval = (endTime - startTime) / 2;
       const scale = new ScaleContinuous(
         { type: ScaleType.Time, domain, range: [minRange, maxRange] },
         { bandwidth: undefined, minInterval, timeZone: 'utc' },
       );
       expect(scale.invert(0)).toBe(startTime);
-      expect(scale.invert(50)).toBe(midTime);
-      expect(scale.invert(100)).toBe(endTime);
-      expect(scale.invertWithStep(0, data)).toBe(startTime);
-      expect(scale.invertWithStep(24, data)).toBe(startTime);
-      expect(scale.invertWithStep(25, data)).toBe(midTime);
-      expect(scale.invertWithStep(50, data)).toBe(midTime);
-      expect(scale.invertWithStep(74, data)).toBe(midTime);
-      expect(scale.invertWithStep(75, data)).toBe(endTime);
-      expect(scale.invertWithStep(100, data)).toBe(endTime);
+      expect(scale.invert(49.5)).toBe(midTime);
+      expect(scale.invert(99)).toBe(endTime);
+      expect(scale.invertWithStep(0, data)).toEqual({ value: startTime, withinBandwidth: true });
+      expect(scale.invertWithStep(24, data)).toEqual({ value: startTime, withinBandwidth: true });
+      expect(scale.invertWithStep(25, data)).toEqual({ value: midTime, withinBandwidth: true });
+      expect(scale.invertWithStep(50, data)).toEqual({ value: midTime, withinBandwidth: true });
+      expect(scale.invertWithStep(74, data)).toEqual({ value: midTime, withinBandwidth: true });
+      expect(scale.invertWithStep(75, data)).toEqual({ value: endTime, withinBandwidth: true });
+      expect(scale.invertWithStep(100, data)).toEqual({ value: endTime, withinBandwidth: true });
       expect(scale.tickValues.length).toBe(9);
       expect(scale.tickValues[0]).toEqual(startTime);
       expect(scale.tickValues[4]).toEqual(midTime);
@@ -132,7 +132,7 @@ describe('[Scale Time] - timezones', () => {
       const data = [startTime, midTime, endTime];
       const domain = [startTime, endTime];
       const minRange = 0;
-      const maxRange = 100;
+      const maxRange = 99;
       const minInterval = (endTime - startTime) / 2;
       const scale = new ScaleContinuous(
         {
@@ -143,15 +143,17 @@ describe('[Scale Time] - timezones', () => {
         { bandwidth: undefined, minInterval, timeZone: 'utc+8' },
       );
       expect(scale.invert(0)).toBe(startTime);
-      expect(scale.invert(50)).toBe(midTime);
-      expect(scale.invert(100)).toBe(endTime);
-      expect(scale.invertWithStep(0, data)).toBe(startTime);
-      expect(scale.invertWithStep(24, data)).toBe(startTime);
-      expect(scale.invertWithStep(25, data)).toBe(midTime);
-      expect(scale.invertWithStep(50, data)).toBe(midTime);
-      expect(scale.invertWithStep(74, data)).toBe(midTime);
-      expect(scale.invertWithStep(75, data)).toBe(endTime);
-      expect(scale.invertWithStep(100, data)).toBe(endTime);
+      expect(scale.invert(49.5)).toBe(midTime);
+      expect(scale.invert(99)).toBe(endTime);
+      expect(scale.invertWithStep(0, data)).toEqual({ value: startTime, withinBandwidth: true });
+      expect(scale.invertWithStep(24, data)).toEqual({ value: startTime, withinBandwidth: true });
+
+      expect(scale.invertWithStep(25, data)).toEqual({ value: midTime, withinBandwidth: true });
+      expect(scale.invertWithStep(50, data)).toEqual({ value: midTime, withinBandwidth: true });
+      expect(scale.invertWithStep(74, data)).toEqual({ value: midTime, withinBandwidth: true });
+
+      expect(scale.invertWithStep(75, data)).toEqual({ value: endTime, withinBandwidth: true });
+      expect(scale.invertWithStep(100, data)).toEqual({ value: endTime, withinBandwidth: true });
       expect(scale.tickValues.length).toBe(9);
       expect(scale.tickValues[0]).toEqual(startTime);
       expect(scale.tickValues[4]).toEqual(midTime);
@@ -164,7 +166,7 @@ describe('[Scale Time] - timezones', () => {
       const data = [startTime, midTime, endTime];
       const domain = [startTime, endTime];
       const minRange = 0;
-      const maxRange = 100;
+      const maxRange = 99;
       const minInterval = (endTime - startTime) / 2;
       const scale = new ScaleContinuous(
         {
@@ -175,15 +177,18 @@ describe('[Scale Time] - timezones', () => {
         { bandwidth: undefined, minInterval, timeZone: 'utc-8' },
       );
       expect(scale.invert(0)).toBe(startTime);
-      expect(scale.invert(50)).toBe(midTime);
-      expect(scale.invert(100)).toBe(endTime);
-      expect(scale.invertWithStep(0, data)).toBe(startTime);
-      expect(scale.invertWithStep(24, data)).toBe(startTime);
-      expect(scale.invertWithStep(25, data)).toBe(midTime);
-      expect(scale.invertWithStep(50, data)).toBe(midTime);
-      expect(scale.invertWithStep(74, data)).toBe(midTime);
-      expect(scale.invertWithStep(75, data)).toBe(endTime);
-      expect(scale.invertWithStep(100, data)).toBe(endTime);
+      expect(scale.invert(49.5)).toBe(midTime);
+      expect(scale.invert(99)).toBe(endTime);
+
+      expect(scale.invertWithStep(0, data)).toEqual({ value: startTime, withinBandwidth: true });
+      expect(scale.invertWithStep(24, data)).toEqual({ value: startTime, withinBandwidth: true });
+
+      expect(scale.invertWithStep(25, data)).toEqual({ value: midTime, withinBandwidth: true });
+      expect(scale.invertWithStep(50, data)).toEqual({ value: midTime, withinBandwidth: true });
+      expect(scale.invertWithStep(74, data)).toEqual({ value: midTime, withinBandwidth: true });
+
+      expect(scale.invertWithStep(75, data)).toEqual({ value: endTime, withinBandwidth: true });
+      expect(scale.invertWithStep(100, data)).toEqual({ value: endTime, withinBandwidth: true });
       expect(scale.tickValues.length).toBe(9);
       expect(scale.tickValues[0]).toEqual(startTime);
       expect(scale.tickValues[4]).toEqual(midTime);
@@ -200,7 +205,7 @@ describe('[Scale Time] - timezones', () => {
         const data = [startTime, midTime, endTime];
         const domain = [startTime, endTime];
         const minRange = 0;
-        const maxRange = 100;
+        const maxRange = 99;
         const minInterval = (endTime - startTime) / 2;
         const scale = new ScaleContinuous(
           { type: ScaleType.Time, domain, range: [minRange, maxRange] },
@@ -210,15 +215,15 @@ describe('[Scale Time] - timezones', () => {
           return DateTime.fromMillis(d, { zone: timezone }).toISO();
         };
         expect(scale.invert(0)).toBe(startTime);
-        expect(scale.invert(50)).toBe(midTime);
-        expect(scale.invert(100)).toBe(endTime);
-        expect(scale.invertWithStep(0, data)).toBe(startTime);
-        expect(scale.invertWithStep(24, data)).toBe(startTime);
-        expect(scale.invertWithStep(25, data)).toBe(midTime);
-        expect(scale.invertWithStep(50, data)).toBe(midTime);
-        expect(scale.invertWithStep(74, data)).toBe(midTime);
-        expect(scale.invertWithStep(75, data)).toBe(endTime);
-        expect(scale.invertWithStep(100, data)).toBe(endTime);
+        expect(scale.invert(49.5)).toBe(midTime);
+        expect(scale.invert(99)).toBe(endTime);
+        expect(scale.invertWithStep(0, data)).toEqual({ value: startTime, withinBandwidth: true });
+        expect(scale.invertWithStep(24, data)).toEqual({ value: startTime, withinBandwidth: true });
+        expect(scale.invertWithStep(25, data)).toEqual({ value: midTime, withinBandwidth: true });
+        expect(scale.invertWithStep(50, data)).toEqual({ value: midTime, withinBandwidth: true });
+        expect(scale.invertWithStep(74, data)).toEqual({ value: midTime, withinBandwidth: true });
+        expect(scale.invertWithStep(75, data)).toEqual({ value: endTime, withinBandwidth: true });
+        expect(scale.invertWithStep(100, data)).toEqual({ value: endTime, withinBandwidth: true });
         expect(scale.tickValues.length).toBe(9);
         expect(scale.tickValues[0]).toEqual(startTime);
         expect(scale.tickValues[4]).toEqual(midTime);

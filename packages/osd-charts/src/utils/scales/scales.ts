@@ -3,8 +3,15 @@ export interface Scale {
   range: number[];
   ticks: () => any[];
   scale: (value: any) => number;
+  pureScale: (value: any) => number;
   invert: (value: number) => any;
-  invertWithStep: (value: number, data: any[]) => any;
+  invertWithStep: (
+    value: number,
+    data: any[],
+  ) => {
+    value: any;
+    withinBandwidth: boolean;
+  };
   isSingleValue: () => boolean;
   bandwidth: number;
   minInterval: number;
