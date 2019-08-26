@@ -65,6 +65,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
 
     if (!event) {
       this.chartSpecStore.externalCursorShown.set(false);
+      this.chartSpecStore.isCursorOnChart.set(false);
     } else {
       if (
         !isActiveChart &&

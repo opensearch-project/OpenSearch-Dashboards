@@ -18,7 +18,6 @@ import {
   BarGeometry,
   GeometryValue,
   IndexedGeometry,
-  isPointOnGeometry as isPointerOnGeometry,
   LineGeometry,
   PointGeometry,
 } from '../rendering/rendering';
@@ -45,7 +44,7 @@ import {
   Rendering,
   Rotation,
 } from '../utils/specs';
-import { formatTooltip, getSeriesTooltipValues } from '../tooltip/tooltip';
+import { getSeriesTooltipValues, getTooltipAndHighlightFromXValue } from '../tooltip/tooltip';
 import { mergeWithDefaultAnnotationLine, mergeWithDefaultAnnotationRect, Theme } from '../../../utils/themes/theme';
 import { compareByValueAsc } from '../../../utils/commons';
 import { computeChartDimensions } from '../utils/dimensions';
@@ -57,7 +56,6 @@ import {
   getValidXPosition,
   getValidYPosition,
   isCrosshairTooltipType,
-  isFollowTooltipType,
   isNoneTooltipType,
   TooltipType,
   TooltipValue,
@@ -77,7 +75,6 @@ import {
   computeChartTransform,
   computeSeriesDomains,
   computeSeriesGeometries,
-  getAxesSpecForSpecId,
   getUpdatedCustomSeriesColors,
   isAllSeriesDeselected,
   isChartAnimatable,
@@ -161,7 +158,7 @@ export class ChartStore {
   annotationDimensions = observable.map<AnnotationId, AnnotationDimensions>(new Map());
 
   seriesSpecs: Map<SpecId, BasicSeriesSpec> = new Map(); // readed from jsx
-  isChartEmpty: boolean = true;
+  isChartEmpty = observable.box(false);
   activeChartId?: string;
   seriesDomainsAndData?: SeriesDomainsAndData; // computed
   xScale?: Scale;
@@ -238,6 +235,7 @@ export class ChartStore {
   showLegend = observable.box(false);
   legendPosition = observable.box<Position>(Position.Right);
   showLegendDisplayValue = observable.box(true);
+  isCursorOnChart = observable.box(false);
 
   chartCursor = computed(() => {
     const { x: xPos, y: yPos } = this.cursorPosition;
@@ -269,10 +267,12 @@ export class ChartStore {
    * set the x value of the cursor
    */
   setCursorValue = action((value: string | number) => {
+    this.externalCursorShown.set(true);
+    this.isCursorOnChart.set(true);
+
     if (!this.xScale) {
       return;
     }
-    this.externalCursorShown.set(true);
 
     const xPosition = this.xScale.pureScale(value);
 
@@ -295,20 +295,41 @@ export class ChartStore {
       this.xScale,
       isLineAreaOnly ? 1 : this.totalBarsInCluster,
     );
-    if (xPosition === undefined) {
-      return;
-    }
-    if (updatedCursorBand.visible === false) {
-      this.clearTooltipAndHighlighted();
-      return;
-    }
+
     Object.assign(this.cursorBandPosition, updatedCursorBand);
+
+    const tooltipAndHighlight = getTooltipAndHighlightFromXValue(
+      { x: xPosition, y: 0 },
+      this.seriesSpecs,
+      this.axesSpecs,
+      this.geometriesIndex,
+      {
+        value,
+        withinBandwidth: true,
+      },
+      this.isActiveChart.get(),
+      this.tooltipType.get(),
+      this.chartRotation,
+      this.yScales,
+      this.tooltipHeaderFormatter,
+    );
+    if (!tooltipAndHighlight || tooltipAndHighlight.tooltipData.length === 0) {
+      this.clearTooltipAndHighlighted(false);
+      return;
+    }
+    // update tooltip visibility
+    if (tooltipAndHighlight.tooltipData.length === 0) {
+      this.tooltipData.clear();
+    } else {
+      this.tooltipData.replace(tooltipAndHighlight.tooltipData);
+    }
   });
 
   /**
    * x and y values are relative to the container.
    */
   setCursorPosition = action((x: number, y: number, updateCursor: boolean = true) => {
+    this.isCursorOnChart.set(true);
     this.rawCursorPosition.x = x;
     this.rawCursorPosition.y = y;
 
@@ -333,6 +354,7 @@ export class ChartStore {
 
     // hide tooltip if outside chart dimensions
     if (yPos === -1 || xPos === -1) {
+      this.isCursorOnChart.set(false);
       if (this.onCursorUpdateListener && this.isActiveChart.get()) {
         this.onCursorUpdateListener();
       }
@@ -343,6 +365,7 @@ export class ChartStore {
     // get the cursor position depending on the chart rotation
     const xAxisCursorPosition = getValidXPosition(xPos, yPos, this.chartRotation, this.chartDimensions);
     const yAxisCursorPosition = getValidYPosition(xPos, yPos, this.chartRotation, this.chartDimensions);
+    const axisCursorPosition = { x: xAxisCursorPosition, y: yAxisCursorPosition };
 
     // only if we have a valid cursor position and the necessary scale
     if (xAxisCursorPosition < 0 || !this.xScale || !this.yScales) {
@@ -366,16 +389,15 @@ export class ChartStore {
     const updatedCursorBand = getCursorBandPosition(
       this.chartRotation,
       this.chartDimensions,
-      { x: xAxisCursorPosition, y: yAxisCursorPosition },
-      xValue,
+      axisCursorPosition,
+      {
+        value: xValue.value,
+        withinBandwidth: true,
+      },
       this.isTooltipSnapEnabled.get(),
       this.xScale,
       isLineAreaOnly ? 1 : this.totalBarsInCluster,
     );
-    if (updatedCursorBand.visible === false) {
-      this.clearTooltipAndHighlighted();
-      return;
-    }
     Object.assign(this.cursorBandPosition, updatedCursorBand);
 
     const updatedCursorLine = getCursorLinePosition(this.chartRotation, this.chartDimensions, this.cursorPosition);
@@ -391,76 +413,30 @@ export class ChartStore {
       isSingleValueXScale,
     );
 
-    // get the elements on at this cursor position
-    const elements = this.geometriesIndex.get(xValue.value);
+    const tooltipAndHighlight = getTooltipAndHighlightFromXValue(
+      axisCursorPosition,
+      this.seriesSpecs,
+      this.axesSpecs,
+      this.geometriesIndex,
+      xValue,
+      this.isActiveChart.get(),
+      this.tooltipType.get(),
+      this.chartRotation,
+      this.yScales,
+      this.tooltipHeaderFormatter,
+    );
 
-    // if no element, hide everything
-    if (!elements || elements.length === 0) {
-      this.clearTooltipAndHighlighted();
+    // if no element, hide everything keep crosshair
+    if (!tooltipAndHighlight || tooltipAndHighlight.tooltipData.length === 0) {
+      this.clearTooltipAndHighlighted(false);
       return;
     }
-
-    // build the tooltip value list
-    let xValueInfo: TooltipValue | null = null;
-    let oneHighlighted = false;
-    const newHighlightedGeometries: IndexedGeometry[] = [];
-    const tooltipValues = elements.reduce(
-      (acc, indexedGeometry) => {
-        const {
-          geometryId: { specId },
-        } = indexedGeometry;
-        const spec = this.seriesSpecs.get(specId);
-
-        // safe guard check
-        if (!spec) {
-          return acc;
-        }
-        const { xAxis, yAxis } = getAxesSpecForSpecId(this.axesSpecs, spec.groupId);
-
-        // yScales is ensured by the enclosing if
-        const yScale = this.yScales!.get(spec.groupId);
-        if (!yScale) {
-          return acc;
-        }
-
-        // check if the pointer is on the geometry
-        let isHighlighted = false;
-        if (
-          this.isActiveChart.get() &&
-          isPointerOnGeometry(xAxisCursorPosition, yAxisCursorPosition, indexedGeometry)
-        ) {
-          isHighlighted = true;
-          oneHighlighted = true;
-          newHighlightedGeometries.push(indexedGeometry);
-        }
-
-        // if it's a follow tooltip, and no element is highlighted
-        // not add that element into the tooltip list
-        if (!isHighlighted && isFollowTooltipType(this.tooltipType.get())) {
-          return acc;
-        }
-
-        // format the tooltip values
-        const yAxisFormatSpec = [0, 180].includes(this.chartRotation) ? yAxis : xAxis;
-        const formattedTooltip = formatTooltip(indexedGeometry, spec, false, isHighlighted, yAxisFormatSpec);
-        // format only one time the x value
-        if (!xValueInfo) {
-          // if we have a tooltipHeaderFormatter, then don't pass in the xAxis as the user will define a formatter
-          const xAxisFormatSpec = [0, 180].includes(this.chartRotation) ? xAxis : yAxis;
-          const formatterAxis = this.tooltipHeaderFormatter ? undefined : xAxisFormatSpec;
-          xValueInfo = formatTooltip(indexedGeometry, spec, true, false, formatterAxis);
-          return [xValueInfo, ...acc, formattedTooltip];
-        }
-
-        return [...acc, formattedTooltip];
-      },
-      [] as TooltipValue[],
-    );
+    const { highlightedGeometries, tooltipData } = tooltipAndHighlight;
 
     // if there's an annotation rect tooltip & there isn't a single highlighted element, hide
     const annotationTooltip = this.annotationTooltipState.get();
     const hasRectAnnotationToolip = annotationTooltip && annotationTooltip.annotationType === AnnotationTypes.Rectangle;
-    if (hasRectAnnotationToolip && !oneHighlighted) {
+    if (hasRectAnnotationToolip && highlightedGeometries.length === 0) {
       this.clearTooltipAndHighlighted();
       return;
     }
@@ -468,10 +444,10 @@ export class ChartStore {
     // check if we already have send out an over/out event on highlighted elements
     if (
       this.onElementOverListener &&
-      !areIndexedGeometryArraysEquals(newHighlightedGeometries, this.highlightedGeometries.toJS())
+      !areIndexedGeometryArraysEquals(highlightedGeometries, this.highlightedGeometries.toJS())
     ) {
-      if (newHighlightedGeometries.length > 0) {
-        this.onElementOverListener(newHighlightedGeometries.map(({ value }) => value));
+      if (highlightedGeometries.length > 0) {
+        this.onElementOverListener(highlightedGeometries.map(({ value }) => value));
       } else {
         if (this.onElementOutListener) {
           this.onElementOutListener();
@@ -480,17 +456,22 @@ export class ChartStore {
     }
 
     // update highlighted geometries observer
-    this.highlightedGeometries.replace(newHighlightedGeometries);
+    this.highlightedGeometries.replace(highlightedGeometries);
 
     // update tooltip visibility
-    if (tooltipValues.length === 0) {
+    if (tooltipData.length === 0) {
       this.tooltipData.clear();
     } else {
-      this.tooltipData.replace(tooltipValues);
+      this.tooltipData.replace(tooltipData);
     }
   });
 
   legendItemTooltipValues = computed(() => {
+    const xPos = this.rawCursorPosition.x - this.chartDimensions.left;
+    const yPos = this.rawCursorPosition.y - this.chartDimensions.top;
+    if (xPos > 0 && xPos <= this.chartDimensions.width && yPos > 0 && yPos <= this.chartDimensions.height) {
+      return getSeriesTooltipValues(this.tooltipData, '');
+    }
     // update legend items with value to display
     return getSeriesTooltipValues(this.tooltipData);
   });
@@ -546,6 +527,7 @@ export class ChartStore {
     return (
       !this.isBrushing.get() &&
       isCrosshairTooltipType(this.tooltipType.get()) &&
+      !this.isChartEmpty.get() &&
       (this.externalCursorShown.get() || (this.cursorPosition.x > -1 && this.cursorPosition.y > -1))
     );
   });
@@ -554,7 +536,7 @@ export class ChartStore {
     return (this.xScale && this.xScale.bandwidth > 0) || this.tooltipSnap.get();
   });
 
-  clearTooltipAndHighlighted = action(() => {
+  clearTooltipAndHighlighted = action((clearCursorBand: boolean = true) => {
     // if exist any highlighted geometry, send an out element event
     if (this.onElementOutListener && this.highlightedGeometries.length > 0) {
       this.onElementOutListener();
@@ -562,8 +544,9 @@ export class ChartStore {
     // clear highlight geoms
     this.highlightedGeometries.clear();
     this.tooltipData.clear();
-
-    Object.assign(this.cursorBandPosition, { visible: false });
+    if (clearCursorBand) {
+      Object.assign(this.cursorBandPosition, { visible: false });
+    }
   });
 
   setShowLegend = action((showLegend: boolean) => {
@@ -893,8 +876,7 @@ export class ChartStore {
         return;
       }
     }
-
-    this.isChartEmpty = isAllSeriesDeselected(this.legendItems);
+    this.isChartEmpty.set(isAllSeriesDeselected(this.legendItems));
 
     const { xDomain, yDomain, formattedDataSeries } = this.seriesDomainsAndData;
 

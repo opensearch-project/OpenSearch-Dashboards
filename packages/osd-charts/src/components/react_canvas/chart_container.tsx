@@ -22,7 +22,7 @@ class ChartContainerComponent extends React.Component<ReactiveChartProps> {
           cursor: this.props.chartStore!.chartCursor.get(),
         }}
         onMouseMove={({ nativeEvent: { offsetX, offsetY } }) => {
-          if (!isChartEmpty) {
+          if (!isChartEmpty.get()) {
             setCursorPosition(offsetX, offsetY);
           }
         }}

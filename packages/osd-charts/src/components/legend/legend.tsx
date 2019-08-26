@@ -138,7 +138,7 @@ class LegendComponent extends React.Component<LegendProps, LegendState> {
 
   private renderLegendElement = (item: SeriesLegendItem) => {
     const { key, displayValue } = item;
-    const { legendPosition, legendItemTooltipValues } = this.props.chartStore!;
+    const { legendPosition, legendItemTooltipValues, isCursorOnChart } = this.props.chartStore!;
     const tooltipValues = legendItemTooltipValues.get();
     let tooltipValue;
 
@@ -146,7 +146,7 @@ class LegendComponent extends React.Component<LegendProps, LegendState> {
       tooltipValue = tooltipValues.get(key);
     }
 
-    const newDisplayValue = tooltipValue != null ? tooltipValue : displayValue.formatted;
+    const newDisplayValue = tooltipValue != null ? tooltipValue : '';
 
     return (
       <LegendItem
@@ -154,7 +154,7 @@ class LegendComponent extends React.Component<LegendProps, LegendState> {
         key={key}
         legendItemKey={key}
         legendPosition={legendPosition.get()}
-        displayValue={newDisplayValue}
+        displayValue={isCursorOnChart.get() ? newDisplayValue : displayValue.formatted}
         onMouseEnter={this.onLegendItemMouseover(key)}
         onMouseLeave={this.onLegendItemMouseout}
       />
