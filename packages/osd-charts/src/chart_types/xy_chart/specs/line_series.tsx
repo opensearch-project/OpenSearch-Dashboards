@@ -1,6 +1,6 @@
 import { inject } from 'mobx-react';
 import { PureComponent } from 'react';
-import { HistogramModeAlignments, LineSeriesSpec } from '../utils/specs';
+import { HistogramModeAlignments, LineSeriesSpec, DEFAULT_GLOBAL_ID } from '../utils/specs';
 import { getGroupId } from '../../../utils/ids';
 import { ScaleType } from '../../../utils/scales/scales';
 import { SpecProps } from '../../../specs/specs_parser';
@@ -10,7 +10,7 @@ type LineSpecProps = SpecProps & LineSeriesSpec;
 export class LineSeriesSpecComponent extends PureComponent<LineSpecProps> {
   static defaultProps: Partial<LineSpecProps> = {
     seriesType: 'line',
-    groupId: getGroupId('__global__'),
+    groupId: getGroupId(DEFAULT_GLOBAL_ID),
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
     xAccessor: 'x',

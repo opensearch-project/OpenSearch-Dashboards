@@ -1,6 +1,6 @@
 import { inject } from 'mobx-react';
 import { PureComponent } from 'react';
-import { AxisSpec as AxisSpecType, Position } from '../utils/specs';
+import { AxisSpec as AxisSpecType, Position, DEFAULT_GLOBAL_ID } from '../utils/specs';
 import { getGroupId } from '../../../utils/ids';
 import { SpecProps } from '../../../specs/specs_parser';
 
@@ -8,7 +8,7 @@ type AxisSpecProps = SpecProps & AxisSpecType;
 
 class AxisSpec extends PureComponent<AxisSpecProps> {
   static defaultProps: Partial<AxisSpecProps> = {
-    groupId: getGroupId('__global__'),
+    groupId: getGroupId(DEFAULT_GLOBAL_ID),
     hide: false,
     showOverlappingTicks: false,
     showOverlappingLabels: false,

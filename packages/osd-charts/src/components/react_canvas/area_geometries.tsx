@@ -47,67 +47,7 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
     );
   }
   private renderAreaGeoms = (): JSX.Element[] => {
-    const { sharedStyle, highlightedLegendItem } = this.props;
-    const areas = this.props.areas.reduce<{
-      stacked: AreaGeometry[];
-      nonStacked: AreaGeometry[];
-    }>(
-      (acc, area) => {
-        if (area.isStacked) {
-          acc.stacked.push(area);
-        } else {
-          acc.nonStacked.push(area);
-        }
-        return acc;
-      },
-
-      { stacked: [], nonStacked: [] },
-    );
-
-    return [
-      ...this.renderStackedAreas(areas.stacked, sharedStyle, highlightedLegendItem),
-      ...this.renderNonStackedAreas(areas.nonStacked, sharedStyle, highlightedLegendItem),
-    ];
-  };
-  renderStackedAreas = (
-    areas: AreaGeometry[],
-    sharedStyle: SharedGeometryStyle,
-    highlightedLegendItem: LegendItem | null,
-  ): JSX.Element[] => {
-    const elements: JSX.Element[] = [];
-    areas.forEach((glyph) => {
-      const { seriesAreaStyle } = glyph;
-      if (seriesAreaStyle.visible) {
-        elements.push(this.renderArea(glyph, sharedStyle, highlightedLegendItem));
-      }
-    });
-    areas.forEach((glyph, i) => {
-      const { seriesAreaLineStyle } = glyph;
-      if (seriesAreaLineStyle.visible) {
-        elements.push(...this.renderAreaLines(glyph, i, sharedStyle, highlightedLegendItem));
-      }
-    });
-    areas.forEach((glyph, i) => {
-      const { seriesPointStyle, geometryId } = glyph;
-      if (seriesPointStyle.visible) {
-        const customOpacity = seriesPointStyle ? seriesPointStyle.opacity : undefined;
-        const geometryStyle = getGeometryStyle(
-          geometryId,
-          this.props.highlightedLegendItem,
-          sharedStyle,
-          customOpacity,
-        );
-        const pointStyleProps = buildPointStyleProps(glyph.color, seriesPointStyle, geometryStyle);
-        elements.push(...this.renderPoints(glyph.points, i, pointStyleProps, glyph.geometryId));
-      }
-    });
-    return elements;
-  };
-  renderNonStackedAreas = (
-    areas: AreaGeometry[],
-    sharedStyle: SharedGeometryStyle,
-    highlightedLegendItem: LegendItem | null,
-  ): JSX.Element[] => {
+    const { sharedStyle, highlightedLegendItem, areas } = this.props;
     return areas.reduce<JSX.Element[]>((acc, glyph, i) => {
       const { seriesAreaLineStyle, seriesAreaStyle, seriesPointStyle, geometryId } = glyph;
       if (seriesAreaStyle.visible) {

@@ -1,6 +1,6 @@
 import { inject } from 'mobx-react';
 import { PureComponent } from 'react';
-import { BarSeriesSpec } from '../utils/specs';
+import { BarSeriesSpec, DEFAULT_GLOBAL_ID } from '../utils/specs';
 import { getGroupId } from '../../../utils/ids';
 import { ScaleType } from '../../../utils/scales/scales';
 import { SpecProps } from '../../../specs/specs_parser';
@@ -10,7 +10,7 @@ type BarSpecProps = SpecProps & BarSeriesSpec;
 export class BarSeriesSpecComponent extends PureComponent<BarSpecProps> {
   static defaultProps: Partial<BarSpecProps> = {
     seriesType: 'bar',
-    groupId: getGroupId('__global__'),
+    groupId: getGroupId(DEFAULT_GLOBAL_ID),
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
     xAccessor: 'x',

@@ -21,6 +21,7 @@ export type Rendering = 'canvas' | 'svg';
 export type Color = string;
 export type StyleOverride = RecursivePartial<BarSeriesStyle> | Color | null;
 export type StyleAccessor = (datum: RawDataSeriesDatum, geometryId: GeometryId) => StyleOverride;
+export const DEFAULT_GLOBAL_ID = '__global__';
 
 interface DomainMinInterval {
   /** Custom minInterval for the domain which will affect data bucket size.
@@ -73,6 +74,8 @@ export interface SeriesSpec {
    * @default __global__
    */
   groupId: GroupId;
+  /** when using a different groupId this option will allow compute in the same domain of the global domain */
+  useDefaultGroupDomain?: boolean;
   /** An array of data */
   data: Datum[];
   /** The type of series you are looking to render */

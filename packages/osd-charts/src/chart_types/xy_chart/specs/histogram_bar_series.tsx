@@ -1,6 +1,6 @@
 import { inject } from 'mobx-react';
 import { PureComponent } from 'react';
-import { HistogramBarSeriesSpec } from '../utils/specs';
+import { HistogramBarSeriesSpec, DEFAULT_GLOBAL_ID } from '../utils/specs';
 import { getGroupId } from '../../../utils/ids';
 import { ScaleType } from '../../../utils/scales/scales';
 import { SpecProps } from '../../../specs/specs_parser';
@@ -10,7 +10,7 @@ type HistogramBarSpecProps = SpecProps & HistogramBarSeriesSpec;
 export class HistogramBarSeriesSpecComponent extends PureComponent<HistogramBarSpecProps> {
   static defaultProps: Partial<HistogramBarSpecProps> = {
     seriesType: 'bar',
-    groupId: getGroupId('__global__'),
+    groupId: getGroupId(DEFAULT_GLOBAL_ID),
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
     xAccessor: 'x',

@@ -1,6 +1,6 @@
 import { inject } from 'mobx-react';
 import { PureComponent } from 'react';
-import { AreaSeriesSpec, HistogramModeAlignments } from '../utils/specs';
+import { AreaSeriesSpec, HistogramModeAlignments, DEFAULT_GLOBAL_ID } from '../utils/specs';
 import { getGroupId } from '../../../utils/ids';
 import { ScaleType } from '../../../utils/scales/scales';
 import { SpecProps } from '../../../specs/specs_parser';
@@ -10,7 +10,7 @@ type AreaSpecProps = SpecProps & AreaSeriesSpec;
 export class AreaSeriesSpecComponent extends PureComponent<AreaSpecProps> {
   static defaultProps: Partial<AreaSpecProps> = {
     seriesType: 'area',
-    groupId: getGroupId('__global__'),
+    groupId: getGroupId(DEFAULT_GLOBAL_ID),
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
     xAccessor: 'x',
