@@ -1472,4 +1472,136 @@ describe('Crosshair utils linear scale', () => {
       });
     });
   });
+
+  describe('BandPosition bar chart wwith limited edges', () => {
+    const chartDimensions: Dimensions = { top: 0, left: 0, width: 120, height: 120 };
+    test('cursor at begin of domain', () => {
+      const barSeriesScaleLimited = computeXScale({
+        xDomain: {
+          domain: [0.5, 3.5],
+          isBandScale: true,
+          minInterval: 1,
+          scaleType: ScaleType.Linear,
+          type: 'xDomain',
+        },
+        totalBarsInCluster: 1,
+        range: [0, 120],
+      });
+      const bandPosition = getCursorBandPosition(
+        0,
+        chartDimensions,
+        { x: 0, y: 0 },
+        {
+          value: 0,
+          withinBandwidth: true,
+        },
+        true,
+        barSeriesScaleLimited,
+        1,
+      );
+      expect(bandPosition).toEqual({
+        left: 0,
+        top: 0,
+        height: 120,
+        width: 15,
+        visible: true,
+      });
+    });
+    test('cursor at end of domain', () => {
+      const barSeriesScaleLimited = computeXScale({
+        xDomain: {
+          domain: [-0.5, 2.5],
+          isBandScale: true,
+          minInterval: 1,
+          scaleType: ScaleType.Linear,
+          type: 'xDomain',
+        },
+        totalBarsInCluster: barSeriesMap.size,
+        range: [0, 120],
+      });
+      const bandPosition = getCursorBandPosition(
+        0,
+        chartDimensions,
+        { x: 119, y: 0 },
+        {
+          value: 3,
+          withinBandwidth: true,
+        },
+        true,
+        barSeriesScaleLimited,
+        1,
+      );
+      expect(bandPosition).toEqual({
+        left: 105,
+        top: 0,
+        height: 120,
+        width: 15,
+        visible: true,
+      });
+    });
+    test('cursor at top begin of domain', () => {
+      const barSeriesScaleLimited = computeXScale({
+        xDomain: {
+          domain: [0.5, 3.5],
+          isBandScale: true,
+          minInterval: 1,
+          scaleType: ScaleType.Linear,
+          type: 'xDomain',
+        },
+        totalBarsInCluster: 1,
+        range: [0, 120],
+      });
+      const bandPosition = getCursorBandPosition(
+        90,
+        chartDimensions,
+        { x: 0, y: 0 },
+        {
+          value: 0,
+          withinBandwidth: true,
+        },
+        true,
+        barSeriesScaleLimited,
+        1,
+      );
+      expect(bandPosition).toEqual({
+        left: 0,
+        top: 0,
+        height: 15,
+        width: 120,
+        visible: true,
+      });
+    });
+    test('cursor at top end of domain', () => {
+      const barSeriesScaleLimited = computeXScale({
+        xDomain: {
+          domain: [-0.5, 2.5],
+          isBandScale: true,
+          minInterval: 1,
+          scaleType: ScaleType.Linear,
+          type: 'xDomain',
+        },
+        totalBarsInCluster: barSeriesMap.size,
+        range: [0, 120],
+      });
+      const bandPosition = getCursorBandPosition(
+        90,
+        chartDimensions,
+        { x: 0, y: 119 },
+        {
+          value: 3,
+          withinBandwidth: true,
+        },
+        true,
+        barSeriesScaleLimited,
+        1,
+      );
+      expect(bandPosition).toEqual({
+        left: 0,
+        top: 105,
+        height: 15,
+        width: 120,
+        visible: true,
+      });
+    });
+  });
 });

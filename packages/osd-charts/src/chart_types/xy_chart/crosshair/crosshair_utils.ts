@@ -107,24 +107,36 @@ export function getCursorBandPosition(
 
   if (isHorizontalRotated) {
     const adjustedLeft = snapEnabled ? position : cursorPosition.x;
-    const leftPosition = chartRotation === 0 ? left + adjustedLeft : left + width - adjustedLeft - bandOffset;
-
+    let leftPosition = chartRotation === 0 ? left + adjustedLeft : left + width - adjustedLeft - bandOffset;
+    let adjustedWidth = band;
+    if (band > 1 && leftPosition + band > left + width) {
+      adjustedWidth = left + width - leftPosition;
+    } else if (band > 1 && leftPosition < left) {
+      adjustedWidth = band - (left - leftPosition);
+      leftPosition = left;
+    }
     return {
       top,
       left: leftPosition,
-      width: band,
+      width: adjustedWidth,
       height,
       visible: true,
     };
   } else {
     const adjustedTop = snapEnabled ? position : cursorPosition.x;
-    const topPosition = chartRotation === 90 ? top + adjustedTop : height + top - adjustedTop - bandOffset;
-
+    let topPosition = chartRotation === 90 ? top + adjustedTop : height + top - adjustedTop - bandOffset;
+    let adjustedHeight = band;
+    if (band > 1 && topPosition + band > top + height) {
+      adjustedHeight = band - (topPosition + band - (top + height));
+    } else if (band > 1 && topPosition < top) {
+      adjustedHeight = band - (top - topPosition);
+      topPosition = top;
+    }
     return {
       top: topPosition,
       left,
       width,
-      height: band,
+      height: adjustedHeight,
       visible: true,
     };
   }
