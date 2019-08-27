@@ -143,6 +143,8 @@ export class ChartStore {
     maxY: 0,
   };
 
+  resizeDebounce: number = 10;
+
   chartRotation: Rotation = 0; // updated from jsx
   chartRendering: Rendering = 'canvas'; // updated from jsx
   chartTheme: Theme = LIGHT_THEME;

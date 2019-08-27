@@ -11,16 +11,16 @@ class Resizer extends React.Component<ResizerProps> {
   private initialResizeComplete = false;
   private containerRef: RefObject<HTMLDivElement>;
   private ro: ResizeObserver;
-  private onResizeDebounced: (entries: ResizeObserverEntry[]) => void;
+  private onResizeDebounced: (entries: ResizeObserverEntry[]) => void = () => {};
 
   constructor(props: ResizerProps) {
     super(props);
     this.containerRef = React.createRef();
-    this.onResizeDebounced = debounce(this.onResize, 200);
     this.ro = new ResizeObserver(this.handleResize);
   }
 
   componentDidMount() {
+    this.onResizeDebounced = debounce(this.onResize, this.props.chartStore!.resizeDebounce);
     this.ro.observe(this.containerRef.current as Element);
   }
 

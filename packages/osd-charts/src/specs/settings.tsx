@@ -88,6 +88,7 @@ export interface SettingSpecProps {
   onLegendItemMinusClick?: LegendItemListener;
   onCursorUpdate?: CursorUpdateListener;
   xDomain?: Domain | DomainRange;
+  resizeDebounce?: number;
 }
 
 function getTheme(baseTheme?: Theme, theme?: PartialTheme | PartialTheme[]): Theme {
@@ -125,6 +126,7 @@ function updateChartStore(props: SettingSpecProps) {
     onCursorUpdate,
     debug,
     xDomain,
+    resizeDebounce,
   } = props;
 
   if (!chartStore) {
@@ -136,6 +138,7 @@ function updateChartStore(props: SettingSpecProps) {
   chartStore.chartRendering = rendering;
   chartStore.animateData = animateData;
   chartStore.debug = debug;
+  chartStore.resizeDebounce = resizeDebounce!;
 
   if (tooltip && isTooltipProps(tooltip)) {
     const { type, snap, headerFormatter } = tooltip;
@@ -192,6 +195,7 @@ export class SettingsComponent extends PureComponent<SettingSpecProps> {
     rotation: 0,
     animateData: true,
     showLegend: false,
+    resizeDebounce: 10,
     debug: false,
     tooltip: {
       type: DEFAULT_TOOLTIP_TYPE,
