@@ -1,32 +1,116 @@
-import React from 'react';
-import { Axis, Chart, getAxisId, getSpecId, Position, ScaleType, Settings, HistogramBarSeries } from '../src';
-import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
+import React, { Fragment } from 'react';
+import {
+  Axis,
+  Chart,
+  getAxisId,
+  getSpecId,
+  Position,
+  ScaleType,
+  Settings,
+  BarSeries,
+  LineSeries,
+  AreaSeries,
+} from '../src';
 
 export class Playground extends React.Component {
   render() {
     return (
-      <div className="chart">
-        <Chart>
-          <Settings
-            showLegend={true}
-            xDomain={{
-              min: KIBANA_METRICS.metrics.kibana_os_load[0].data[0][0] - 10000,
-              max: KIBANA_METRICS.metrics.kibana_os_load[0].data[18][0] + 10000,
-            }}
-            rotation={0}
-          />
-          <Axis id={getAxisId('y')} position={Position.Left} />
-          <Axis id={getAxisId('x')} position={Position.Bottom} />
-          <HistogramBarSeries
-            id={getSpecId('bar')}
-            yScaleType={ScaleType.Linear}
-            xScaleType={ScaleType.Time}
-            xAccessor={0}
-            yAccessors={[1]}
-            data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 15)}
-          />
-        </Chart>
-      </div>
+      <Fragment>
+        <div className="chart">
+          <Chart>
+            <Settings
+              showLegend={true}
+              xDomain={{
+                min: 0.5,
+                max: 4.5,
+              }}
+            />
+            <Axis
+              id={getAxisId('y')}
+              position={Position.Left}
+              domain={{
+                min: 50,
+                max: 250,
+              }}
+            />
+            <Axis id={getAxisId('x')} position={Position.Bottom} />
+            <BarSeries
+              id={getSpecId('bar')}
+              yScaleType={ScaleType.Linear}
+              xScaleType={ScaleType.Linear}
+              xAccessor={0}
+              yAccessors={[1]}
+              data={[[0, 100], [1, 50], [3, 400], [4, 250], [5, 235]]}
+            />
+          </Chart>
+        </div>
+        <div className="chart">
+          <Chart>
+            <Settings
+              showLegend={true}
+              xDomain={{
+                min: 0.5,
+                max: 4.5,
+              }}
+            />
+            <Axis
+              id={getAxisId('y')}
+              position={Position.Left}
+              domain={{
+                min: 50,
+                max: 450,
+              }}
+            />
+            <Axis id={getAxisId('x')} position={Position.Bottom} />
+            <LineSeries
+              id={getSpecId('line')}
+              yScaleType={ScaleType.Linear}
+              xScaleType={ScaleType.Linear}
+              xAccessor={0}
+              yAccessors={[1]}
+              stackAccessors={[0]}
+              data={[[0.25, 100], [1, 50], [3, 400], [4, 250], [5, 235]]}
+            />
+            <LineSeries
+              id={getSpecId('line2')}
+              yScaleType={ScaleType.Linear}
+              xScaleType={ScaleType.Linear}
+              xAccessor={0}
+              yAccessors={[1]}
+              stackAccessors={[0]}
+              data={[[0.25, 100], [0.5, 100], [1, 50], [3, 400], [4, 250], [4.5, 220], [5, 235]]}
+            />
+          </Chart>
+        </div>
+        <div className="chart">
+          <Chart>
+            <Settings
+              showLegend={true}
+              xDomain={{
+                min: 0.5,
+                max: 4.5,
+              }}
+            />
+            <Axis
+              id={getAxisId('y')}
+              position={Position.Left}
+              domain={{
+                min: 50,
+                max: 250,
+              }}
+            />
+            <Axis id={getAxisId('x')} position={Position.Bottom} />
+            <AreaSeries
+              id={getSpecId('line')}
+              yScaleType={ScaleType.Linear}
+              xScaleType={ScaleType.Linear}
+              xAccessor={0}
+              yAccessors={[1]}
+              data={[[0, 100], [1, 50], [3, 400], [4, 250], [5, 235]]}
+            />
+          </Chart>
+        </div>
+      </Fragment>
     );
   }
 }

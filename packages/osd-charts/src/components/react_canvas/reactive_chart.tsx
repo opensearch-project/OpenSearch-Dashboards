@@ -19,6 +19,7 @@ import { Grid } from './grid';
 import { LineAnnotation } from './line_annotation';
 import { LineGeometries } from './line_geometries';
 import { RectAnnotation } from './rect_annotation';
+import { ContainerConfig } from 'konva';
 
 interface ReactiveChartProps {
   chartStore?: ChartStore; // FIX until we find a better way on ts mobx
@@ -73,7 +74,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
     },
   };
 
-  renderBarSeries = (): ReactiveChartElementIndex[] => {
+  renderBarSeries = (clippings: ContainerConfig): ReactiveChartElementIndex[] => {
     const { geometries, canDataBeAnimated, chartTheme } = this.props.chartStore!;
     if (!geometries) {
       return [];
@@ -87,6 +88,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
         bars={geometries.bars}
         sharedStyle={chartTheme.sharedStyle}
         highlightedLegendItem={highlightedLegendItem}
+        clippings={clippings}
       />
     );
 
@@ -97,7 +99,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
       },
     ];
   };
-  renderLineSeries = (): ReactiveChartElementIndex[] => {
+  renderLineSeries = (clippings: ContainerConfig): ReactiveChartElementIndex[] => {
     const { geometries, canDataBeAnimated, chartTheme } = this.props.chartStore!;
     if (!geometries) {
       return [];
@@ -112,6 +114,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
         lines={geometries.lines}
         sharedStyle={chartTheme.sharedStyle}
         highlightedLegendItem={highlightedLegendItem}
+        clippings={clippings}
       />
     );
 
@@ -122,7 +125,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
       },
     ];
   };
-  renderAreaSeries = (): ReactiveChartElementIndex[] => {
+  renderAreaSeries = (clippings: ContainerConfig): ReactiveChartElementIndex[] => {
     const { geometries, canDataBeAnimated, chartTheme } = this.props.chartStore!;
     if (!geometries) {
       return [];
@@ -137,6 +140,7 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
         areas={geometries.areas}
         sharedStyle={chartTheme.sharedStyle}
         highlightedLegendItem={highlightedLegendItem}
+        clippings={clippings}
       />
     );
 
@@ -329,9 +333,17 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
   };
 
   sortAndRenderElements() {
-    const bars = this.renderBarSeries();
-    const areas = this.renderAreaSeries();
-    const lines = this.renderLineSeries();
+    const { chartRotation, chartDimensions } = this.props.chartStore!;
+    const clippings = {
+      clipX: 0,
+      clipY: 0,
+      clipWidth: [90, -90].includes(chartRotation) ? chartDimensions.height : chartDimensions.width,
+      clipHeight: [90, -90].includes(chartRotation) ? chartDimensions.width : chartDimensions.height,
+    };
+
+    const bars = this.renderBarSeries(clippings);
+    const areas = this.renderAreaSeries(clippings);
+    const lines = this.renderLineSeries(clippings);
     const annotations = this.renderAnnotations();
 
     return [...bars, ...areas, ...lines, ...annotations]

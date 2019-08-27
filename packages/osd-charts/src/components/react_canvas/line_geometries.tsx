@@ -1,4 +1,4 @@
-import { Group as KonvaGroup } from 'konva';
+import { Group as KonvaGroup, ContainerConfig } from 'konva';
 import React from 'react';
 import { Circle, Group, Path } from 'react-konva';
 import { LegendItem } from '../../chart_types/xy_chart/legend/legend';
@@ -21,6 +21,7 @@ interface LineGeometriesDataProps {
   lines: LineGeometry[];
   sharedStyle: SharedGeometryStyle;
   highlightedLegendItem: LegendItem | null;
+  clippings: ContainerConfig;
 }
 interface LineGeometriesDataState {
   overPoint?: PointGeometry;
@@ -79,10 +80,15 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps,
   };
 
   getLineToRender(glyph: LineGeometry, sharedStyle: SharedGeometryStyle, key: string) {
+    const { clippings } = this.props;
     const { line, color, transform, geometryId, seriesLineStyle } = glyph;
     const geometryStyle = getGeometryStyle(geometryId, this.props.highlightedLegendItem, sharedStyle);
     const lineProps = buildLineRenderProps(transform.x, line, color, seriesLineStyle, geometryStyle);
-    return <Path {...lineProps} key={key} />;
+    return (
+      <Group {...clippings} key={key}>
+        <Path {...lineProps} />
+      </Group>
+    );
   }
 
   getPointToRender(glyph: LineGeometry, sharedStyle: SharedGeometryStyle, key: string) {

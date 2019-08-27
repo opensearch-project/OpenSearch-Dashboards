@@ -1,4 +1,4 @@
-import { Group as KonvaGroup } from 'konva';
+import { Group as KonvaGroup, ContainerConfig } from 'konva';
 import React from 'react';
 import { Group, Rect } from 'react-konva';
 import { animated, Spring } from 'react-spring/renderprops-konva.cjs';
@@ -12,6 +12,7 @@ interface BarGeometriesDataProps {
   bars: BarGeometry[];
   sharedStyle: SharedGeometryStyle;
   highlightedLegendItem: LegendItem | null;
+  clippings: ContainerConfig;
 }
 interface BarGeometriesDataState {
   overBar?: BarGeometry;
@@ -29,9 +30,9 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps, B
     };
   }
   render() {
-    const { bars } = this.props;
+    const { bars, clippings } = this.props;
     return (
-      <Group ref={this.barSeriesRef} key={'bar_series'}>
+      <Group ref={this.barSeriesRef} key={'bar_series'} {...clippings}>
         {this.renderBarGeoms(bars)}
       </Group>
     );

@@ -1,4 +1,4 @@
-import { Group as KonvaGroup } from 'konva';
+import { Group as KonvaGroup, ContainerConfig } from 'konva';
 import React from 'react';
 import { Circle, Group, Path } from 'react-konva';
 import { LegendItem } from '../../chart_types/xy_chart/legend/legend';
@@ -23,6 +23,7 @@ interface AreaGeometriesDataProps {
   areas: AreaGeometry[];
   sharedStyle: SharedGeometryStyle;
   highlightedLegendItem: LegendItem | null;
+  clippings: ContainerConfig;
 }
 interface AreaGeometriesDataState {
   overPoint?: PointGeometry;
@@ -47,14 +48,14 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
     );
   }
   private renderAreaGeoms = (): JSX.Element[] => {
-    const { sharedStyle, highlightedLegendItem, areas } = this.props;
+    const { sharedStyle, highlightedLegendItem, areas, clippings } = this.props;
     return areas.reduce<JSX.Element[]>((acc, glyph, i) => {
       const { seriesAreaLineStyle, seriesAreaStyle, seriesPointStyle, geometryId } = glyph;
       if (seriesAreaStyle.visible) {
-        acc.push(this.renderArea(glyph, sharedStyle, highlightedLegendItem));
+        acc.push(this.renderArea(glyph, sharedStyle, highlightedLegendItem, clippings));
       }
       if (seriesAreaLineStyle.visible) {
-        acc.push(...this.renderAreaLines(glyph, i, sharedStyle, highlightedLegendItem));
+        acc.push(this.renderAreaLines(glyph, i, sharedStyle, highlightedLegendItem, clippings));
       }
       if (seriesPointStyle.visible) {
         const geometryStyle = getGeometryStyle(geometryId, this.props.highlightedLegendItem, sharedStyle);
@@ -68,27 +69,38 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
     glyph: AreaGeometry,
     sharedStyle: SharedGeometryStyle,
     highlightedLegendItem: LegendItem | null,
+    clippings: ContainerConfig,
   ): JSX.Element => {
     const { area, color, transform, geometryId, seriesAreaStyle } = glyph;
     const geometryStyle = getGeometryStyle(geometryId, highlightedLegendItem, sharedStyle);
     const key = getGeometryIdKey(geometryId, 'area-');
     const areaProps = buildAreaRenderProps(transform.x, area, color, seriesAreaStyle, geometryStyle);
-    return <Path {...areaProps} key={key} />;
+    return (
+      <Group {...clippings} key={key}>
+        <Path {...areaProps} />
+      </Group>
+    );
   };
   private renderAreaLines = (
     glyph: AreaGeometry,
     areaIndex: number,
     sharedStyle: SharedGeometryStyle,
     highlightedLegendItem: LegendItem | null,
-  ): JSX.Element[] => {
+    clippings: ContainerConfig,
+  ): JSX.Element => {
     const { lines, color, geometryId, transform, seriesAreaLineStyle } = glyph;
     const geometryStyle = getGeometryStyle(geometryId, highlightedLegendItem, sharedStyle);
-
-    return lines.map((linePath, lineIndex) => {
+    const groupKey = getGeometryIdKey(geometryId, `area-line-${areaIndex}`);
+    const linesElements = lines.map<JSX.Element>((linePath, lineIndex) => {
       const key = getGeometryIdKey(geometryId, `area-line-${areaIndex}-${lineIndex}`);
       const lineProps = buildLineRenderProps(transform.x, linePath, color, seriesAreaLineStyle, geometryStyle);
       return <Path {...lineProps} key={key} />;
     });
+    return (
+      <Group {...clippings} key={groupKey}>
+        {...linesElements}
+      </Group>
+    );
   };
 
   private renderPoints = (

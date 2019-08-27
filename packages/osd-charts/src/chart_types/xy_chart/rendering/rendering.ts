@@ -167,6 +167,9 @@ export function renderPoints(
   const pointGeometries = dataset.reduce(
     (acc, datum) => {
       const x = xScale.scale(datum.x);
+      if (x < xScale.range[0] || x > xScale.range[1]) {
+        return acc;
+      }
       const points: PointGeometry[] = [];
       const yDatums = [datum.y1];
       if (hasY0Accessors) {
@@ -186,6 +189,9 @@ export function renderPoints(
           radius = 0;
         } else {
           y = yScale.scale(yDatum);
+        }
+        if (y < yScale.range[1] || y > yScale.range[0]) {
+          return;
         }
         const originalY = hasY0Accessors && index === 0 ? datum.initialY0 : datum.initialY1;
         const pointGeometry: PointGeometry = {
