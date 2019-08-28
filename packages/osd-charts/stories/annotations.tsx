@@ -73,7 +73,7 @@ storiesOf('Annotations', module)
 
     return (
       <Chart className={'story-chart'}>
-        <Settings debug={boolean('debug', false)} rotation={chartRotation} />
+        <Settings showLegend debug={boolean('debug', false)} rotation={chartRotation} />
         <LineAnnotation
           annotationId={getAnnotationId('anno_1')}
           domainType={AnnotationDomainTypes.XDomain}

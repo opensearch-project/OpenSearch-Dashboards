@@ -104,6 +104,12 @@ class AnnotationTooltipComponent extends React.Component<AnnotationTooltipProps>
   }
 
   render() {
+    const { chartStore } = this.props;
+
+    if (chartStore!.isChartEmpty.get()) {
+      return null;
+    }
+
     return (
       <React.Fragment>
         {this.renderAnnotationMarkers()}
