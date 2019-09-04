@@ -12,6 +12,7 @@ import {
   ElementOverListener,
   LegendItemListener,
   CursorUpdateListener,
+  RenderChangeListener,
 } from '../chart_types/xy_chart/store/chart_state';
 import { ScaleTypes } from '../utils/scales/scales';
 import { LIGHT_THEME } from '../utils/themes/light_theme';
@@ -87,6 +88,7 @@ export interface SettingSpecProps {
   onLegendItemPlusClick?: LegendItemListener;
   onLegendItemMinusClick?: LegendItemListener;
   onCursorUpdate?: CursorUpdateListener;
+  onRenderChange?: RenderChangeListener;
   xDomain?: Domain | DomainRange;
   resizeDebounce?: number;
 }
@@ -123,6 +125,7 @@ function updateChartStore(props: SettingSpecProps) {
     onLegendItemClick,
     onLegendItemMinusClick,
     onLegendItemPlusClick,
+    onRenderChange,
     onCursorUpdate,
     debug,
     xDomain,
@@ -186,6 +189,9 @@ function updateChartStore(props: SettingSpecProps) {
   }
   if (onCursorUpdate) {
     chartStore.setOnCursorUpdateListener(onCursorUpdate);
+  }
+  if (onRenderChange) {
+    chartStore.setOnRenderChangeListener(onRenderChange);
   }
 }
 
