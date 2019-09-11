@@ -5,11 +5,10 @@ import {
   AreaSeriesStyle,
   DEFAULT_ANNOTATION_LINE_STYLE,
   DEFAULT_ANNOTATION_RECT_STYLE,
-  DEFAULT_GRID_LINE_CONFIG,
   LineSeriesStyle,
   mergeWithDefaultAnnotationLine,
   mergeWithDefaultAnnotationRect,
-  mergeWithDefaultGridLineConfig,
+  mergeGridLineConfigs,
   mergeWithDefaultTheme,
   PartialTheme,
   Theme,
@@ -30,16 +29,21 @@ describe('Theme', () => {
     expect(DARK_THEME).toEqual(CLONED_DARK_THEME);
   });
 
-  describe('mergeWithDefaultGridLineConfig', () => {
+  describe('mergeGridLineConfigs', () => {
     it('should merge partial grid line configs', () => {
       const fullConfig = {
+        visible: true,
         stroke: 'foo',
         strokeWidth: 1,
         opacity: 0,
         dash: [0, 0],
       };
-      expect(mergeWithDefaultGridLineConfig(fullConfig)).toEqual(fullConfig);
-      expect(mergeWithDefaultGridLineConfig({})).toEqual(DEFAULT_GRID_LINE_CONFIG);
+      const partialConfig = { strokeWidth: 5 };
+      const themeConfig = LIGHT_THEME.axes.gridLineStyle.vertical;
+
+      expect(mergeGridLineConfigs(fullConfig, themeConfig)).toEqual(fullConfig);
+      expect(mergeGridLineConfigs({}, themeConfig)).toEqual(themeConfig);
+      expect(mergeGridLineConfigs(partialConfig, themeConfig)).toEqual({ ...themeConfig, ...partialConfig });
     });
   });
 
