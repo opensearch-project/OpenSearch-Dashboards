@@ -1,3 +1,23 @@
+# [12.0.0](https://github.com/elastic/elastic-charts/compare/v11.2.0...v12.0.0) (2019-09-11)
+
+
+### Features
+
+* **theme:** add gridLineStyle to AxisConfig ([#257](https://github.com/elastic/elastic-charts/issues/257)) ([97dd812](https://github.com/elastic/elastic-charts/commit/97dd812)), closes [#237](https://github.com/elastic/elastic-charts/issues/237)
+
+
+### BREAKING CHANGES
+
+* **theme:** Added `GridLineStyle` to `Theme` (`theme.gridLineStyle.horizontal` and `theme.gridLineStyle.vertical`)
+
+* add gridLineStyle to AxisConfig
+* add chartTheme vs axisSpec
+* add gridLineStyle for theme or spec
+* merge gridLineConfig from theme with axisSpec
+* add visible key to GridLineConfig
+* specify theme styling per axis in story
+* add gridLineStyle theme with horiz and vert
+
 # [11.2.0](https://github.com/elastic/elastic-charts/compare/v11.1.2...v11.2.0) (2019-09-04)
 
 
