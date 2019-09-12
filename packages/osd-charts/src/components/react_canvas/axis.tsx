@@ -7,8 +7,8 @@ import {
   getHorizontalAxisTickLineProps,
   getTickLabelProps,
   getVerticalAxisTickLineProps,
-  isHorizontal,
-  isVertical,
+  isHorizontalAxis,
+  isVerticalAxis,
 } from '../../chart_types/xy_chart/utils/axis_utils';
 import { AxisSpec, Position } from '../../chart_types/xy_chart/utils/specs';
 import { Theme } from '../../utils/themes/theme';
@@ -61,7 +61,7 @@ export class Axis extends React.PureComponent<AxisProps> {
       },
     } = this.props;
     const lineProps: number[] = [];
-    if (isVertical(position)) {
+    if (isVerticalAxis(position)) {
       lineProps[0] = position === Position.Left ? axisPosition.width : 0;
       lineProps[2] = position === Position.Left ? axisPosition.width : 0;
       lineProps[1] = 0;
@@ -83,7 +83,7 @@ export class Axis extends React.PureComponent<AxisProps> {
       },
     } = this.props;
 
-    const lineProps = isVertical(position)
+    const lineProps = isVerticalAxis(position)
       ? getVerticalAxisTickLineProps(position, axisPosition.width, tickSize, tick.position)
       : getHorizontalAxisTickLineProps(position, axisPosition.height, tickSize, tick.position);
 
@@ -148,7 +148,7 @@ export class Axis extends React.PureComponent<AxisProps> {
     if (!title) {
       return null;
     }
-    if (isHorizontal(position)) {
+    if (isHorizontalAxis(position)) {
       return this.renderHorizontalAxisTitle();
     }
     return this.renderVerticalAxisTitle();

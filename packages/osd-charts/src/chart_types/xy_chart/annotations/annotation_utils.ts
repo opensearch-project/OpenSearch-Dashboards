@@ -1,4 +1,3 @@
-import { isHorizontal } from '../utils/axis_utils';
 import {
   AnnotationDomainType,
   AnnotationDomainTypes,
@@ -16,6 +15,7 @@ import {
   RectAnnotationSpec,
   Rotation,
 } from '../utils/specs';
+import { isHorizontalAxis } from '../utils/axis_utils';
 import { LineAnnotationStyle } from '../../../utils/themes/theme';
 import { Dimensions } from '../../../utils/dimensions';
 import { AnnotationId, AxisId, GroupId } from '../../../utils/ids';
@@ -637,11 +637,9 @@ export function isVerticalAnnotationLine(isXDomainAnnotation: boolean, isHorizon
 
 export function getAnnotationLineTooltipXOffset(chartRotation: Rotation, axisPosition: Position): number {
   let xOffset = 0;
-
-  const isHorizontalAxis = isHorizontal(axisPosition);
   const isChartHorizontalRotation = isHorizontalRotation(chartRotation);
 
-  if (isHorizontalAxis) {
+  if (isHorizontalAxis(axisPosition)) {
     xOffset = isChartHorizontalRotation ? 50 : 0;
   } else {
     xOffset = isChartHorizontalRotation ? (axisPosition === Position.Right ? 100 : 0) : 50;
@@ -652,11 +650,9 @@ export function getAnnotationLineTooltipXOffset(chartRotation: Rotation, axisPos
 
 export function getAnnotationLineTooltipYOffset(chartRotation: Rotation, axisPosition: Position): number {
   let yOffset = 0;
-
-  const isHorizontalAxis = isHorizontal(axisPosition);
   const isChartHorizontalRotation = isHorizontalRotation(chartRotation);
 
-  if (isHorizontalAxis) {
+  if (isHorizontalAxis(axisPosition)) {
     yOffset = isChartHorizontalRotation ? (axisPosition === Position.Top ? 0 : 100) : 50;
   } else {
     yOffset = isChartHorizontalRotation ? 50 : 100;

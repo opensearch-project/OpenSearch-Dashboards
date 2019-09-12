@@ -24,11 +24,13 @@ import {
   getVerticalAxisTickLineProps,
   getVisibleTicks,
   isBounded,
-  isHorizontal,
-  isVertical,
+  isHorizontalAxis,
+  isVerticalAxis,
   isYDomain,
   getAxisTickLabelPadding,
   mergeYCustomDomainsByGroupId,
+  isVerticalGrid,
+  isHorizontalGrid,
 } from './axis_utils';
 import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
 import { SvgTextBBoxCalculator } from '../../../utils/bbox/svg_text_bbox_calculator';
@@ -1095,15 +1097,27 @@ describe('Axis computational utils', () => {
   });
 
   test('should determine orientation of axis position', () => {
-    expect(isVertical(Position.Left)).toBe(true);
-    expect(isVertical(Position.Right)).toBe(true);
-    expect(isVertical(Position.Top)).toBe(false);
-    expect(isVertical(Position.Bottom)).toBe(false);
+    expect(isVerticalAxis(Position.Left)).toBe(true);
+    expect(isVerticalAxis(Position.Right)).toBe(true);
+    expect(isVerticalAxis(Position.Top)).toBe(false);
+    expect(isVerticalAxis(Position.Bottom)).toBe(false);
 
-    expect(isHorizontal(Position.Left)).toBe(false);
-    expect(isHorizontal(Position.Right)).toBe(false);
-    expect(isHorizontal(Position.Top)).toBe(true);
-    expect(isHorizontal(Position.Bottom)).toBe(true);
+    expect(isHorizontalAxis(Position.Left)).toBe(false);
+    expect(isHorizontalAxis(Position.Right)).toBe(false);
+    expect(isHorizontalAxis(Position.Top)).toBe(true);
+    expect(isHorizontalAxis(Position.Bottom)).toBe(true);
+  });
+
+  test('should determine orientation of gridlines from axis position', () => {
+    expect(isVerticalGrid(Position.Left)).toBe(false);
+    expect(isVerticalGrid(Position.Right)).toBe(false);
+    expect(isVerticalGrid(Position.Top)).toBe(true);
+    expect(isVerticalGrid(Position.Bottom)).toBe(true);
+
+    expect(isHorizontalGrid(Position.Left)).toBe(true);
+    expect(isHorizontalGrid(Position.Right)).toBe(true);
+    expect(isHorizontalGrid(Position.Top)).toBe(false);
+    expect(isHorizontalGrid(Position.Bottom)).toBe(false);
   });
 
   test('should determine if axis belongs to yDomain', () => {

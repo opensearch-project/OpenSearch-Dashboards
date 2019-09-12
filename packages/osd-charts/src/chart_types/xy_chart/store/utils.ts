@@ -1,4 +1,4 @@
-import { isVertical } from '../utils/axis_utils';
+import { isVerticalAxis } from '../utils/axis_utils';
 import { CurveType } from '../../../utils/curves';
 import { mergeXDomain, XDomain } from '../domains/x_domain';
 import { mergeYDomain, YDomain } from '../domains/y_domain';
@@ -538,7 +538,7 @@ export function getAxesSpecForSpecId(axesSpecs: Map<AxisId, AxisSpec>, groupId: 
     if (axisSpec.groupId !== groupId) {
       continue;
     }
-    if (isVertical(axisSpec.position)) {
+    if (isVerticalAxis(axisSpec.position)) {
       yAxis = axisSpec;
     } else {
       xAxis = axisSpec;

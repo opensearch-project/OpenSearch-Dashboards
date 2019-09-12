@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import { inject, observer } from 'mobx-react';
 import React, { createRef } from 'react';
-import { isVertical, isHorizontal } from '../../chart_types/xy_chart/utils/axis_utils';
+import { isVerticalAxis, isHorizontalAxis } from '../../chart_types/xy_chart/utils/axis_utils';
 import { LegendItem as SeriesLegendItem } from '../../chart_types/xy_chart/legend/legend';
 import { ChartStore } from '../../chart_types/xy_chart/store/chart_state';
 import { Position } from '../../chart_types/xy_chart/utils/specs';
@@ -43,7 +43,7 @@ class LegendComponent extends React.Component<LegendProps, LegendState> {
     const { chartInitialized, chartTheme, legendPosition } = this.props.chartStore!;
     if (
       this.echLegend.current &&
-      isVertical(legendPosition.get()) &&
+      isVerticalAxis(legendPosition.get()) &&
       this.state.width === undefined &&
       !chartInitialized.get()
     ) {
@@ -92,7 +92,7 @@ class LegendComponent extends React.Component<LegendProps, LegendState> {
   getLegendListStyle = (position: Position, { chartMargins, legend }: Theme): LegendListStyle => {
     const { top: paddingTop, bottom: paddingBottom, left: paddingLeft, right: paddingRight } = chartMargins;
 
-    if (isHorizontal(position)) {
+    if (isHorizontalAxis(position)) {
       return {
         paddingLeft,
         paddingRight,
@@ -107,7 +107,7 @@ class LegendComponent extends React.Component<LegendProps, LegendState> {
   };
 
   getLegendStyle = (position: Position, { legend }: Theme): LegendStyle => {
-    if (isVertical(position)) {
+    if (isVerticalAxis(position)) {
       if (this.state.width !== undefined) {
         const threshold = Math.min(this.state.width!, legend.verticalWidth);
         const width = `${threshold}px`;

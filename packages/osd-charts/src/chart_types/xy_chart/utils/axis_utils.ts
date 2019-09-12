@@ -107,7 +107,7 @@ export function getAxisTickLabelPadding(axisConfigTickLabelPadding: number, axis
 
 export function isYDomain(position: Position, chartRotation: Rotation): boolean {
   const isStraightRotation = chartRotation === 0 || chartRotation === 180;
-  if (isVertical(position)) {
+  if (isVerticalAxis(position)) {
     return isStraightRotation;
   }
 
@@ -277,7 +277,7 @@ export function getTickLabelProps(
   let align = 'center';
   let verticalAlign = 'middle';
 
-  if (isVertical(position)) {
+  if (isVerticalAxis(position)) {
     const isLeftAxis = position === Position.Left;
 
     if (!isRotated) {
@@ -457,7 +457,7 @@ export function getVisibleTicks(allTicks: AxisTick[], axisSpec: AxisSpec, axisDi
   const { showOverlappingTicks, showOverlappingLabels } = axisSpec;
   const { maxLabelBboxHeight, maxLabelBboxWidth } = axisDim;
 
-  const requiredSpace = isVertical(axisSpec.position) ? maxLabelBboxHeight / 2 : maxLabelBboxWidth / 2;
+  const requiredSpace = isVerticalAxis(axisSpec.position) ? maxLabelBboxHeight / 2 : maxLabelBboxWidth / 2;
 
   let previousOccupiedSpace = 0;
   const visibleTicks = [];
@@ -510,7 +510,7 @@ export function getAxisPosition(
   let leftIncrement = 0;
   let rightIncrement = 0;
 
-  if (isVertical(position)) {
+  if (isVerticalAxis(position)) {
     const dimWidth = maxLabelBboxWidth + tickSize + tickPadding + axisTitleHeight;
     if (position === Position.Left) {
       leftIncrement = dimWidth + chartMargins.left;
@@ -533,6 +533,22 @@ export function getAxisPosition(
   }
 
   return { dimensions, topIncrement, bottomIncrement, leftIncrement, rightIncrement };
+}
+
+export function isVerticalAxis(axisPosition: Position) {
+  return axisPosition === Position.Left || axisPosition === Position.Right;
+}
+
+export function isHorizontalAxis(axisPosition: Position) {
+  return axisPosition === Position.Top || axisPosition === Position.Bottom;
+}
+
+export function isVerticalGrid(axisPosition: Position) {
+  return isHorizontalAxis(axisPosition);
+}
+
+export function isHorizontalGrid(axisPosition: Position) {
+  return isVerticalAxis(axisPosition);
 }
 
 export function getAxisTicksPositions(
@@ -591,10 +607,10 @@ export function getAxisTicksPositions(
     const visibleTicks = getVisibleTicks(allTicks, axisSpec, axisDim);
 
     if (axisSpec.showGridLines) {
-      const isVerticalAxis = isVertical(axisSpec.position);
+      const isVertical = isVerticalAxis(axisSpec.position);
       const gridLines = visibleTicks.map(
         (tick: AxisTick): AxisLinePosition => {
-          return computeAxisGridLinePositions(isVerticalAxis, tick.position, chartDimensions);
+          return computeAxisGridLinePositions(isVertical, tick.position, chartDimensions);
         },
       );
       axisGridLinesPositions.set(id, gridLines);
@@ -641,14 +657,6 @@ export function computeAxisGridLinePositions(
     : getHorizontalAxisGridLineProps(tickPosition, chartDimensions.height);
 
   return positions;
-}
-
-export function isVertical(position: Position) {
-  return position === Position.Left || position === Position.Right;
-}
-
-export function isHorizontal(position: Position) {
-  return position === Position.Top || position === Position.Bottom;
 }
 
 export function isLowerBound(domain: Partial<CompleteBoundedDomain>): domain is LowerBoundedDomain {

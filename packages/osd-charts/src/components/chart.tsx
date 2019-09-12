@@ -11,7 +11,7 @@ import { Highlighter } from './highlighter';
 import { Legend } from './legend/legend';
 import { ChartContainer } from './react_canvas/chart_container';
 import { Tooltips } from './tooltips';
-import { isHorizontal } from '../chart_types/xy_chart/utils/axis_utils';
+import { isHorizontalAxis } from '../chart_types/xy_chart/utils/axis_utils';
 import { Position } from '../chart_types/xy_chart/utils/specs';
 import { CursorEvent } from '../specs/settings';
 import { ChartSize, getChartSize } from '../utils/chart_size';
@@ -80,9 +80,9 @@ export class Chart extends React.Component<ChartProps, ChartState> {
   render() {
     const { renderer, size, className } = this.props;
     const containerStyle = Chart.getContainerStyle(size);
-    const Horizontal = isHorizontal(this.state.legendPosition);
+    const horizontal = isHorizontalAxis(this.state.legendPosition);
     const chartClassNames = classNames('echChart', className, {
-      'echChart--column': Horizontal,
+      'echChart--column': horizontal,
     });
 
     return (

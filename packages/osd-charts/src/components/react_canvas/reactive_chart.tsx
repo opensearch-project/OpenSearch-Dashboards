@@ -1,6 +1,8 @@
-import { inject, observer } from 'mobx-react';
 import React from 'react';
+import { inject, observer } from 'mobx-react';
+import { ContainerConfig } from 'konva';
 import { Layer, Rect, Stage } from 'react-konva';
+
 import { isLineAnnotation, isRectAnnotation } from '../../chart_types/xy_chart/utils/specs';
 import { LineAnnotationStyle, RectAnnotationStyle, mergeGridLineConfigs } from '../../utils/themes/theme';
 import { AnnotationId } from '../../utils/ids';
@@ -19,8 +21,7 @@ import { Grid } from './grid';
 import { LineAnnotation } from './line_annotation';
 import { LineGeometries } from './line_geometries';
 import { RectAnnotation } from './rect_annotation';
-import { ContainerConfig } from 'konva';
-import { isVertical } from '../../chart_types/xy_chart/utils/axis_utils';
+import { isVerticalGrid } from '../../chart_types/xy_chart/utils/axis_utils';
 
 interface ReactiveChartProps {
   chartStore?: ChartStore; // FIX until we find a better way on ts mobx
@@ -196,9 +197,10 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
       const axisSpec = axesSpecs.get(axisId);
 
       if (axisSpec && axisGridLinesPositions.length > 0) {
-        const themeConfig = isVertical(axisSpec.position)
+        const themeConfig = isVerticalGrid(axisSpec.position)
           ? chartTheme.axes.gridLineStyle.vertical
           : chartTheme.axes.gridLineStyle.horizontal;
+
         const axisSpecConfig = axisSpec.gridLineStyle;
         const gridLineStyle = axisSpecConfig ? mergeGridLineConfigs(axisSpecConfig, themeConfig) : themeConfig;
         gridComponents.push(
