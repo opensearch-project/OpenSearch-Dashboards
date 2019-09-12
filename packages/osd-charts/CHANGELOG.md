@@ -1,3 +1,10 @@
+## [12.0.1](https://github.com/elastic/elastic-charts/compare/v12.0.0...v12.0.1) (2019-09-12)
+
+
+### Bug Fixes
+
+* **theme:** fix grid position check ([#373](https://github.com/elastic/elastic-charts/issues/373)) ([af4805f](https://github.com/elastic/elastic-charts/commit/af4805f)), closes [#372](https://github.com/elastic/elastic-charts/issues/372)
+
 # [12.0.0](https://github.com/elastic/elastic-charts/compare/v11.2.0...v12.0.0) (2019-09-11)
 
 
