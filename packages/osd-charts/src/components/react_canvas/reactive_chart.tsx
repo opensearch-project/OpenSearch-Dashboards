@@ -76,6 +76,10 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
     },
   };
 
+  componentWillUnmount() {
+    window.removeEventListener('mouseup', this.onEndBrushing);
+  }
+
   renderBarSeries = (clippings: ContainerConfig): ReactiveChartElementIndex[] => {
     const { geometries, canDataBeAnimated, chartTheme } = this.props.chartStore!;
     if (!geometries) {
@@ -292,8 +296,6 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
     let y = 0;
     let width = 0;
     let height = 0;
-    // x = {chartDimensions.left + chartTransform.x};
-    // y = {chartDimensions.top + chartTransform.y};
     if (chartRotation === 0 || chartRotation === 180) {
       x = brushStart.x;
       y = chartDimensions.top + chartTransform.y;
@@ -320,12 +322,17 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
   onEndBrushing = () => {
     window.removeEventListener('mouseup', this.onEndBrushing);
     const { brushStart, brushEnd } = this.state;
-    this.props.chartStore!.onBrushEnd(brushStart, brushEnd);
-    this.setState(() => ({
-      brushing: false,
-      brushStart: { x: 0, y: 0 },
-      brushEnd: { x: 0, y: 0 },
-    }));
+
+    this.setState(
+      () => ({
+        brushing: false,
+        brushStart: { x: 0, y: 0 },
+        brushEnd: { x: 0, y: 0 },
+      }),
+      () => {
+        this.props.chartStore!.onBrushEnd(brushStart, brushEnd);
+      },
+    );
   };
   onBrushing = (event: { evt: MouseEvent }) => {
     if (!this.state.brushing) {
