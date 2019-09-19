@@ -78,6 +78,12 @@ export interface SettingSpecProps {
   debug: boolean;
   legendPosition?: Position;
   showLegendDisplayValue: boolean;
+  /**
+   * Removes duplicate axes
+   *
+   * Compares title, position and first & last tick labels
+   */
+  hideDuplicateAxes: boolean;
   onElementClick?: ElementClickListener;
   onElementOver?: ElementOverListener;
   onElementOut?: () => undefined | void;
@@ -130,6 +136,7 @@ function updateChartStore(props: SettingSpecProps) {
     debug,
     xDomain,
     resizeDebounce,
+    hideDuplicateAxes,
   } = props;
 
   if (!chartStore) {
@@ -142,6 +149,7 @@ function updateChartStore(props: SettingSpecProps) {
   chartStore.animateData = animateData;
   chartStore.debug = debug;
   chartStore.resizeDebounce = resizeDebounce!;
+  chartStore.hideDuplicateAxes = hideDuplicateAxes;
 
   if (tooltip && isTooltipProps(tooltip)) {
     const { type, snap, headerFormatter } = tooltip;
@@ -203,6 +211,7 @@ export class SettingsComponent extends PureComponent<SettingSpecProps> {
     showLegend: false,
     resizeDebounce: 10,
     debug: false,
+    hideDuplicateAxes: false,
     tooltip: {
       type: DEFAULT_TOOLTIP_TYPE,
       snap: DEFAULT_TOOLTIP_SNAP,

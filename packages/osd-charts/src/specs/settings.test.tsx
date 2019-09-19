@@ -79,6 +79,7 @@ describe('Settings spec component', () => {
         snap: false,
       },
       legendPosition: Position.Bottom,
+      hideDuplicateAxes: false,
       showLegendDisplayValue: false,
       debug: true,
       xDomain: { min: 0, max: 10 },
@@ -183,6 +184,7 @@ describe('Settings spec component', () => {
       },
       legendPosition: Position.Bottom,
       showLegendDisplayValue: false,
+      hideDuplicateAxes: false,
       debug: true,
       xDomain: { min: 0, max: 10 },
     };

@@ -11,12 +11,13 @@ import {
 } from '../utils/specs';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { mergeWithDefaultTheme } from '../../../utils/themes/theme';
-import { getAnnotationId, getAxisId, getGroupId, getSpecId } from '../../../utils/ids';
+import { getAnnotationId, getAxisId, getGroupId, getSpecId, AxisId } from '../../../utils/ids';
 import { TooltipType, TooltipValue } from '../utils/interactions';
 import { ScaleBand } from '../../../utils/scales/scale_band';
 import { ScaleContinuous } from '../../../utils/scales/scale_continuous';
 import { ScaleType } from '../../../utils/scales/scales';
-import { ChartStore } from './chart_state';
+import { ChartStore, isDuplicateAxis } from './chart_state';
+import { AxisTicksDimensions } from '../utils/axis_utils';
 
 describe('Chart Store', () => {
   let store = new ChartStore();
@@ -69,6 +70,148 @@ describe('Chart Store', () => {
     store = new ChartStore();
     store.updateParentDimensions(600, 600, 0, 0);
     store.computeChart();
+  });
+
+  describe('isDuplicateAxis', () => {
+    const AXIS_1_ID = getAxisId('spec_1');
+    const AXIS_2_ID = getAxisId('spec_1');
+    const axis1: AxisSpec = {
+      id: AXIS_1_ID,
+      groupId: getGroupId('group_1'),
+      hide: false,
+      showOverlappingTicks: false,
+      showOverlappingLabels: false,
+      position: Position.Left,
+      tickSize: 30,
+      tickPadding: 10,
+      tickFormat: (value: any) => `${value}%`,
+    };
+    const axis2: AxisSpec = {
+      ...axis1,
+      id: AXIS_2_ID,
+      groupId: getGroupId('group_2'),
+    };
+    const axisTicksDimensions: AxisTicksDimensions = {
+      tickValues: [],
+      tickLabels: ['10', '20', '30'],
+      maxLabelBboxWidth: 1,
+      maxLabelBboxHeight: 1,
+      maxLabelTextWidth: 1,
+      maxLabelTextHeight: 1,
+    };
+    let tickMap: Map<AxisId, AxisTicksDimensions>;
+    let specMap: Map<AxisId, AxisSpec>;
+
+    beforeEach(() => {
+      tickMap = new Map<AxisId, AxisTicksDimensions>();
+      specMap = new Map<AxisId, AxisSpec>();
+    });
+
+    it('should return true if axisSpecs and ticks match', () => {
+      tickMap.set(AXIS_2_ID, axisTicksDimensions);
+      specMap.set(AXIS_2_ID, axis2);
+      const result = isDuplicateAxis(axis1, axisTicksDimensions, tickMap, specMap);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false if axisSpecs, ticks AND title match', () => {
+      tickMap.set(AXIS_2_ID, axisTicksDimensions);
+      specMap.set(AXIS_2_ID, {
+        ...axis2,
+        title: 'TESTING',
+      });
+      const result = isDuplicateAxis(
+        {
+          ...axis1,
+          title: 'TESTING',
+        },
+        axisTicksDimensions,
+        tickMap,
+        specMap,
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it('should return true with single tick', () => {
+      const newAxisTicksDimensions = {
+        ...axisTicksDimensions,
+        tickLabels: ['10'],
+      };
+      tickMap.set(AXIS_2_ID, newAxisTicksDimensions);
+      specMap.set(AXIS_2_ID, axis2);
+
+      const result = isDuplicateAxis(axis1, newAxisTicksDimensions, tickMap, specMap);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false if axisSpecs and ticks match but title is different', () => {
+      tickMap.set(AXIS_2_ID, axisTicksDimensions);
+      specMap.set(AXIS_2_ID, {
+        ...axis2,
+        title: 'TESTING',
+      });
+      const result = isDuplicateAxis(
+        {
+          ...axis1,
+          title: 'NOT TESTING',
+        },
+        axisTicksDimensions,
+        tickMap,
+        specMap,
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false if axisSpecs and ticks match but position is different', () => {
+      tickMap.set(AXIS_2_ID, axisTicksDimensions);
+      specMap.set(AXIS_2_ID, axis2);
+      const result = isDuplicateAxis(
+        {
+          ...axis1,
+          position: Position.Top,
+        },
+        axisTicksDimensions,
+        tickMap,
+        specMap,
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false if tickFormat is different', () => {
+      tickMap.set(AXIS_2_ID, {
+        ...axisTicksDimensions,
+        tickLabels: ['10%', '20%', '30%'],
+      });
+      specMap.set(AXIS_2_ID, axis2);
+
+      const result = isDuplicateAxis(axis1, axisTicksDimensions, tickMap, specMap);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false if tick label count is different', () => {
+      tickMap.set(AXIS_2_ID, {
+        ...axisTicksDimensions,
+        tickLabels: ['10', '20', '25', '30'],
+      });
+      specMap.set(AXIS_2_ID, axis2);
+
+      const result = isDuplicateAxis(axis1, axisTicksDimensions, tickMap, specMap);
+
+      expect(result).toBe(false);
+    });
+
+    it("should return false if can't find spec", () => {
+      tickMap.set(AXIS_2_ID, axisTicksDimensions);
+      const result = isDuplicateAxis(axis1, axisTicksDimensions, tickMap, specMap);
+
+      expect(result).toBe(false);
+    });
   });
 
   test('can add a single spec', () => {
