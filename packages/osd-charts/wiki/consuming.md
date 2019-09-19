@@ -44,3 +44,22 @@ If using Elastic Charts in the same project that is already compiling EUI's Sass
 @import '~@elastic/eui/src/global_styling/reset/index';
 @import '~@elastic/charts/dist/theme';
 ```
+
+## Polyfills
+
+Elastic Charts is transpiled to es5 but requires the `core-js/stable` polyfill for IE11.
+
+If using babel there are two [options](https://github.com/zloirock/core-js/blob/master/docs/2019-03-19-core-js-3-babel-and-a-look-into-the-future.md#babel)
+
+### Option 1 `preferred` - [`@babel/preset-env`](https://github.com/zloirock/core-js/blob/master/docs/2019-03-19-core-js-3-babel-and-a-look-into-the-future.md#babelpreset-env)
+
+Use a `.babelrc` config with the [`usebuiltins`](https://babeljs.io/docs/en/babel-preset-env#usebuiltins) option set to [`'entry'`](https://babeljs.io/docs/en/babel-preset-env#usebuiltins-entry) and the [`corejs`](https://babeljs.io/docs/en/babel-preset-env#corejs) option set to `3`.
+
+### Option 2 - [`@babel/polyfill`](https://github.com/zloirock/core-js/blob/master/docs/2019-03-19-core-js-3-babel-and-a-look-into-the-future.md#babelpolyfill)
+
+Directly import polyfill and runtime.
+
+```js
+import "core-js/stable";
+import "regenerator-runtime/runtime";
+```
