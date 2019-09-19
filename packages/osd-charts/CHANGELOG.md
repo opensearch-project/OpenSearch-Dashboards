@@ -1,3 +1,10 @@
+# [12.1.0](https://github.com/elastic/elastic-charts/compare/v12.0.2...v12.1.0) (2019-09-19)
+
+
+### Features
+
+* **axis:** option to hide duplicate axes ([#370](https://github.com/elastic/elastic-charts/issues/370)) ([ada2ddc](https://github.com/elastic/elastic-charts/commit/ada2ddc)), closes [#368](https://github.com/elastic/elastic-charts/issues/368)
+
 ## [12.0.2](https://github.com/elastic/elastic-charts/compare/v12.0.1...v12.0.2) (2019-09-16)
 
 
