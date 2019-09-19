@@ -1,3 +1,15 @@
+# [13.0.0](https://github.com/elastic/elastic-charts/compare/v12.1.0...v13.0.0) (2019-09-19)
+
+
+### Features
+
+* **axis:** add visibility to tick style ([#374](https://github.com/elastic/elastic-charts/issues/374)) ([265a6bb](https://github.com/elastic/elastic-charts/commit/265a6bb)), closes [#330](https://github.com/elastic/elastic-charts/issues/330)
+
+
+### BREAKING CHANGES
+
+* **axis:** `theme.axes.tickLineStyle.visible` is now required (default base is false)
+
 # [12.1.0](https://github.com/elastic/elastic-charts/compare/v12.0.2...v12.1.0) (2019-09-19)
 
 
