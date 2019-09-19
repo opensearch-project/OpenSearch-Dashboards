@@ -33,6 +33,9 @@ export interface StrokeStyle {
   /** The stroke width in pixel */
   strokeWidth: number;
 }
+
+export type TickStyle = StrokeStyle & Visible;
+
 export interface StrokeDashArray {
   /** The dash array for dashed strokes */
   dash: number[];
@@ -50,7 +53,7 @@ export interface AxisConfig {
   axisTitleStyle: TextStyle;
   axisLineStyle: StrokeStyle;
   tickLabelStyle: TextStyle;
-  tickLineStyle: StrokeStyle;
+  tickLineStyle: TickStyle;
   gridLineStyle: {
     horizontal: GridLineConfig;
     vertical: GridLineConfig;

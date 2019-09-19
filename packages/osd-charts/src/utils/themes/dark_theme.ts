@@ -86,6 +86,7 @@ export const DARK_THEME: Theme = {
       padding: 1,
     },
     tickLineStyle: {
+      visible: true,
       stroke: '#444',
       strokeWidth: 1,
     },
