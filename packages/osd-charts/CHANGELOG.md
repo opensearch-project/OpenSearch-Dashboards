@@ -22,7 +22,7 @@
 
 ### Bug Fixes
 
-* **reactive_chart:** fix order of instantiation of onBruchEnd callback ([#376](https://github.com/elastic/elastic-charts/issues/376)) ([527d68d](https://github.com/elastic/elastic-charts/commit/527d68d)), closes [#360](https://github.com/elastic/elastic-charts/issues/360)
+* **reactive_chart:** fix order of instantiation of onBrushEnd callback ([#376](https://github.com/elastic/elastic-charts/issues/376)) ([527d68d](https://github.com/elastic/elastic-charts/commit/527d68d)), closes [#360](https://github.com/elastic/elastic-charts/issues/360)
 
 ## [12.0.1](https://github.com/elastic/elastic-charts/compare/v12.0.0...v12.0.1) (2019-09-12)
 
