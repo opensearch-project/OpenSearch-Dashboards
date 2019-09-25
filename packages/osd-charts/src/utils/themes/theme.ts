@@ -113,8 +113,29 @@ export interface Theme {
    * Space btw the chart geometries and axis; if no axis, pads space btw chart & container
    */
   chartPaddings: Margins;
+  /**
+   * Global line styles.
+   *
+   * __Note:__ This is not used to set the color of a specific series. As such, any changes to the styles will not be reflected in the tooltip, legend, etc..
+   *
+   * You may use `CustomSeriesColorsMap` to assign colors to a given series or replace the `theme.colors.vizColors` colors to your desired colors.
+   */
   lineSeriesStyle: LineSeriesStyle;
+  /**
+   * Global area styles.
+   *
+   * __Note:__ This is not used to set the color of a specific series. As such, any changes to the styles will not be reflected in the tooltip, legend, etc..
+   *
+   * You may use `CustomSeriesColorsMap` to assign colors to a given series or replace the `theme.colors.vizColors` colors to your desired colors.
+   */
   areaSeriesStyle: AreaSeriesStyle;
+  /**
+   * Global bar styles.
+   *
+   * __Note:__ This is not used to set the color of a specific series. As such, any changes to the styles will not be reflected in the tooltip, legend, etc..
+   *
+   * You may use `CustomSeriesColorsMap` to assign colors to a given series or replace the `theme.colors.vizColors` colors to your desired colors.
+   */
   barSeriesStyle: BarSeriesStyle;
   sharedStyle: SharedGeometryStyle;
   axes: AxisConfig;
