@@ -46,7 +46,6 @@ module.exports = {
         ignoreRestSiblings: true,
       },
     ],
-    'comma-dangle': ['error', 'always-multiline'],
     'sort-keys': 'off',
     'import/no-default-export': 'error',
     'import/no-unresolved': 'error',
