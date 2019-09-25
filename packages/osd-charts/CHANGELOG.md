@@ -8,7 +8,7 @@
 
 ### BREAKING CHANGES
 
-* **axis:** `theme.axes.tickLineStyle.visible` is now required (default base is false)
+* **axis:** `theme.axes.tickLineStyle.visible` is now required (default base is `true`)
 
 # [12.1.0](https://github.com/elastic/elastic-charts/compare/v12.0.2...v12.1.0) (2019-09-19)
 
@@ -41,7 +41,7 @@
 
 ### BREAKING CHANGES
 
-* **theme:** Added `GridLineStyle` to `Theme` (`theme.gridLineStyle.horizontal` and `theme.gridLineStyle.vertical`)
+* **theme:** Added `GridLineStyle` to `Theme` (`theme.axes.gridLineStyle.horizontal` and `theme.axes.gridLineStyle.vertical`)
 
 * add gridLineStyle to AxisConfig
 * add chartTheme vs axisSpec
