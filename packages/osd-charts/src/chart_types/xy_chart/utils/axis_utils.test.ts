@@ -85,6 +85,7 @@ describe('Axis computational utils', () => {
       return `${value}`;
     },
     showGridLines: true,
+    integersOnly: false,
   };
 
   const horizontalAxisSpec: AxisSpec = {
@@ -99,6 +100,7 @@ describe('Axis computational utils', () => {
     tickFormat: (value: any) => {
       return `${value}`;
     },
+    integersOnly: false,
   };
 
   const verticalAxisSpecWTitle: AxisSpec = {
@@ -115,6 +117,7 @@ describe('Axis computational utils', () => {
       return `${value}`;
     },
     showGridLines: true,
+    integersOnly: false,
   };
 
   // const horizontalAxisSpecWTitle: AxisSpec = {

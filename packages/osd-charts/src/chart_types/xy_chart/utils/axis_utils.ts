@@ -128,7 +128,12 @@ export function getScaleForAxisSpec(
   const axisIsYDomain = isYDomain(axisSpec.position, chartRotation);
   const range: [number, number] = [minRange, maxRange];
   if (axisIsYDomain) {
-    const yScales = computeYScales({ yDomains: yDomain, range, ticks: axisSpec.ticks });
+    const yScales = computeYScales({
+      yDomains: yDomain,
+      range,
+      ticks: axisSpec.ticks,
+      integersOnly: axisSpec.integersOnly,
+    });
     if (yScales.has(axisSpec.groupId)) {
       return yScales.get(axisSpec.groupId)!;
     }
@@ -141,6 +146,7 @@ export function getScaleForAxisSpec(
       barsPadding,
       enableHistogramMode,
       ticks: axisSpec.ticks,
+      integersOnly: axisSpec.integersOnly,
     });
   }
 }
@@ -393,7 +399,6 @@ export function getLeftAxisMinMaxRange(chartRotation: Rotation, height: number) 
       return { minRange: 0, maxRange: height };
   }
 }
-
 export function getAvailableTicks(
   axisSpec: AxisSpec,
   scale: Scale,
@@ -441,7 +446,6 @@ export function getAvailableTicks(
 
     return [firstTick, lastTick];
   }
-
   return ticks.map((tick) => {
     return {
       value: tick,
@@ -481,7 +485,6 @@ export function getVisibleTicks(allTicks: AxisTick[], axisSpec: AxisSpec, axisDi
       }
     }
   }
-
   return visibleTicks;
 }
 

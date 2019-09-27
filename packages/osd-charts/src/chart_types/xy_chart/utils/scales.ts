@@ -62,6 +62,7 @@ interface XScaleOptions {
   barsPadding?: number;
   enableHistogramMode?: boolean;
   ticks?: number;
+  integersOnly?: boolean;
 }
 
 /**
@@ -71,7 +72,7 @@ interface XScaleOptions {
  * @param axisLength the length of the x axis
  */
 export function computeXScale(options: XScaleOptions): Scale {
-  const { xDomain, totalBarsInCluster, range, barsPadding, enableHistogramMode, ticks } = options;
+  const { xDomain, totalBarsInCluster, range, barsPadding, enableHistogramMode, ticks, integersOnly } = options;
   const { scaleType, minInterval, domain, isBandScale, timeZone } = xDomain;
   const rangeDiff = Math.abs(range[1] - range[0]);
   const isInverse = range[1] < range[0];
@@ -113,7 +114,7 @@ export function computeXScale(options: XScaleOptions): Scale {
     } else {
       return new ScaleContinuous(
         { type: scaleType, domain, range },
-        { bandwidth: 0, minInterval, timeZone, totalBarsInCluster, barsPadding, ticks },
+        { bandwidth: 0, minInterval, timeZone, totalBarsInCluster, barsPadding, ticks, integersOnly },
       );
     }
   }
@@ -123,6 +124,7 @@ interface YScaleOptions {
   yDomains: YDomain[];
   range: [number, number];
   ticks?: number;
+  integersOnly?: boolean;
 }
 /**
  * Compute the y scales, one per groupId for the y axis.
@@ -131,7 +133,7 @@ interface YScaleOptions {
  */
 export function computeYScales(options: YScaleOptions): Map<GroupId, Scale> {
   const yScales: Map<GroupId, Scale> = new Map();
-  const { yDomains, range, ticks } = options;
+  const { yDomains, range, ticks, integersOnly } = options;
   yDomains.forEach(({ scaleType: type, domain, groupId }) => {
     const yScale = new ScaleContinuous(
       {
@@ -141,6 +143,7 @@ export function computeYScales(options: YScaleOptions): Map<GroupId, Scale> {
       },
       {
         ticks,
+        integersOnly,
       },
     );
     yScales.set(groupId, yScale);
