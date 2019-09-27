@@ -162,6 +162,22 @@ describe('Scale Continuous', () => {
     });
   });
 
+  describe('xScale values with minInterval and bandwidth', () => {
+    const domain = [7.053400039672852, 1070.1354763603908];
+
+    it('should return nice ticks when minInterval & bandwidth are 0', () => {
+      const scale = new ScaleContinuous(
+        {
+          type: ScaleType.Linear,
+          domain,
+          range: [0, 100],
+        },
+        { minInterval: 0, bandwidth: 0 },
+      );
+      expect(scale.ticks()).toEqual([100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]);
+    });
+  });
+
   describe('time ticks', () => {
     const timezonesToTest = ['Asia/Tokyo', 'Europe/Berlin', 'UTC', 'America/New_York', 'America/Los_Angeles'];
 
