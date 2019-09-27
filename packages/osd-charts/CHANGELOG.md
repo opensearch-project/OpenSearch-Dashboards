@@ -1,3 +1,10 @@
+## [13.0.1](https://github.com/elastic/elastic-charts/compare/v13.0.0...v13.0.1) (2019-09-27)
+
+
+### Bug Fixes
+
+* x-scale for linear band charts ([#384](https://github.com/elastic/elastic-charts/issues/384)) ([daa3b55](https://github.com/elastic/elastic-charts/commit/daa3b55))
+
 # [13.0.0](https://github.com/elastic/elastic-charts/compare/v12.1.0...v13.0.0) (2019-09-19)
 
 
