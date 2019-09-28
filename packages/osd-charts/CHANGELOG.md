@@ -1,3 +1,10 @@
+## [13.1.1](https://github.com/elastic/elastic-charts/compare/v13.1.0...v13.1.1) (2019-09-28)
+
+
+### Bug Fixes
+
+* **rendering:** out-of-domain rendering of points/bars/lines/areas ([#395](https://github.com/elastic/elastic-charts/issues/395)) ([b6fee52](https://github.com/elastic/elastic-charts/commit/b6fee52)), closes [#386](https://github.com/elastic/elastic-charts/issues/386)
+
 # [13.1.0](https://github.com/elastic/elastic-charts/compare/v13.0.1...v13.1.0) (2019-09-27)
 
 
