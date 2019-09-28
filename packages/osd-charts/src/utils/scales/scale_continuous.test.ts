@@ -16,6 +16,16 @@ describe('Scale Continuous', () => {
     expect(scale.invert(50)).toBe(1);
     expect(scale.invert(100)).toBe(2);
   });
+  test('is value within domain', () => {
+    const domain: Domain = [0, 2];
+    const minRange = 0;
+    const maxRange = 100;
+    const scale = new ScaleContinuous({ type: ScaleType.Linear, domain, range: [minRange, maxRange] });
+    expect(scale.isValueInDomain(0)).toBe(true);
+    expect(scale.isValueInDomain(2)).toBe(true);
+    expect(scale.isValueInDomain(-1)).toBe(false);
+    expect(scale.isValueInDomain(3)).toBe(false);
+  });
   test('shall invert on continuous scale time', () => {
     const startTime = DateTime.fromISO('2019-01-01T00:00:00.000', { zone: 'utc' });
     const midTime = DateTime.fromISO('2019-01-02T00:00:00.000', { zone: 'utc' });

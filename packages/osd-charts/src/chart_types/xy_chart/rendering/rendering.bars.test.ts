@@ -1,10 +1,10 @@
 import { computeSeriesDomains } from '../store/utils';
 import { identity } from '../../../utils/commons';
-import { getGroupId, getSpecId, SpecId } from '../../../utils/ids';
+import { getGroupId, getSpecId, SpecId, GroupId } from '../../../utils/ids';
 import { ScaleType } from '../../../utils/scales/scales';
 import { renderBars } from './rendering';
 import { computeXScale, computeYScales } from '../utils/scales';
-import { BarSeriesSpec } from '../utils/specs';
+import { BarSeriesSpec, DomainRange } from '../utils/specs';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 
 const SPEC_ID = getSpecId('spec_1');
@@ -894,6 +894,51 @@ describe('Rendering bars', () => {
           },
         },
       });
+    });
+  });
+  describe('Remove points datum is not in domain', () => {
+    const barSeriesSpec: BarSeriesSpec = {
+      id: SPEC_ID,
+      groupId: GROUP_ID,
+      seriesType: 'bar',
+      yScaleToDataExtent: false,
+      data: [[0, 0], [1, 1], [2, 10], [3, 3]],
+      xAccessor: 0,
+      yAccessors: [1],
+      xScaleType: ScaleType.Linear,
+      yScaleType: ScaleType.Linear,
+    };
+    const barSeriesMap = new Map<SpecId, BarSeriesSpec>();
+    barSeriesMap.set(SPEC_ID, barSeriesSpec);
+    const customYDomain = new Map<GroupId, DomainRange>();
+    customYDomain.set(GROUP_ID, {
+      max: 1,
+    });
+    const barSeriesDomains = computeSeriesDomains(barSeriesMap, customYDomain, {
+      max: 2,
+    });
+    const xScale = computeXScale({
+      xDomain: barSeriesDomains.xDomain,
+      totalBarsInCluster: barSeriesMap.size,
+      range: [0, 100],
+    });
+    const yScales = computeYScales({ yDomains: barSeriesDomains.yDomain, range: [100, 0] });
+
+    test('Can render 3 bars', () => {
+      const { barGeometries, indexedGeometries } = renderBars(
+        0,
+        barSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0].data,
+        xScale,
+        yScales.get(GROUP_ID)!,
+        'red',
+        SPEC_ID,
+        [],
+        LIGHT_THEME.barSeriesStyle,
+      );
+      expect(barGeometries.length).toBe(3);
+      // will be cut by the clipping areas in the rendering component
+      expect(barGeometries[2].height).toBe(1000);
+      expect(indexedGeometries.size).toBe(3);
     });
   });
 });

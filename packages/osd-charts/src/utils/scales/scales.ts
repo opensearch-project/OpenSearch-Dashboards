@@ -13,6 +13,8 @@ export interface Scale {
     withinBandwidth: boolean;
   };
   isSingleValue: () => boolean;
+  /** Check if the passed value is within the scale domain */
+  isValueInDomain: (value: any) => boolean;
   bandwidth: number;
   minInterval: number;
   type: ScaleType;

@@ -71,6 +71,9 @@ export class ScaleBand implements Scale {
   isSingleValue() {
     return this.domain.length < 2;
   }
+  isValueInDomain(value: any) {
+    return this.domain.includes(value);
+  }
 }
 
 export function isOrdinalScale(scale: Scale): scale is ScaleBand {

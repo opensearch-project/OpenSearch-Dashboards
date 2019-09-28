@@ -303,6 +303,9 @@ export class ScaleContinuous implements Scale {
     const max = this.domain[this.domain.length - 1];
     return max === min;
   }
+  isValueInDomain(value: number) {
+    return value >= this.domain[0] && value <= this.domain[1];
+  }
 }
 
 export function isContinuousScale(scale: Scale): scale is ScaleContinuous {

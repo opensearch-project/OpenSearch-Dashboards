@@ -1,12 +1,12 @@
 /* eslint @typescript-eslint/no-object-literal-type-assertion: off */
 
 import { computeSeriesDomains } from '../store/utils';
-import { getGroupId, getSpecId, SpecId } from '../../../utils/ids';
+import { getGroupId, getSpecId, SpecId, GroupId } from '../../../utils/ids';
 import { ScaleType } from '../../../utils/scales/scales';
 import { CurveType } from '../../../utils/curves';
 import { IndexedGeometry, LineGeometry, PointGeometry, renderLine } from './rendering';
 import { computeXScale, computeYScales } from '../utils/scales';
-import { LineSeriesSpec } from '../utils/specs';
+import { LineSeriesSpec, DomainRange } from '../utils/specs';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 
 const SPEC_ID = getSpecId('spec_1');
@@ -943,6 +943,102 @@ describe('Rendering points - line', () => {
       expect((zeroValueIndexdGeometry[0] as PointGeometry).y).toBe(100);
       // 0 radius point
       expect((zeroValueIndexdGeometry[0] as PointGeometry).radius).toBe(0);
+    });
+  });
+  describe('Remove points datum is not in domain', () => {
+    const pointSeriesSpec: LineSeriesSpec = {
+      id: SPEC_ID,
+      groupId: GROUP_ID,
+      seriesType: 'line',
+      yScaleToDataExtent: false,
+      data: [[0, 0], [1, 1], [2, 10], [3, 3]],
+      xAccessor: 0,
+      yAccessors: [1],
+      xScaleType: ScaleType.Linear,
+      yScaleType: ScaleType.Linear,
+    };
+    const pointSeriesMap = new Map<SpecId, LineSeriesSpec>();
+    pointSeriesMap.set(SPEC_ID, pointSeriesSpec);
+    const customYDomain = new Map<GroupId, DomainRange>();
+    customYDomain.set(GROUP_ID, {
+      max: 1,
+    });
+    const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, customYDomain, {
+      max: 2,
+    });
+    const xScale = computeXScale({
+      xDomain: pointSeriesDomains.xDomain,
+      totalBarsInCluster: pointSeriesMap.size,
+      range: [0, 100],
+    });
+    const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
+    let renderedLine: {
+      lineGeometry: LineGeometry;
+      indexedGeometries: Map<any, IndexedGeometry[]>;
+    };
+
+    beforeEach(() => {
+      renderedLine = renderLine(
+        25, // adding a ideal 25px shift, generally applied by renderGeometries
+        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0].data,
+        xScale,
+        yScales.get(GROUP_ID)!,
+        'red',
+        CurveType.LINEAR,
+        SPEC_ID,
+        false,
+        [],
+        0,
+        LIGHT_THEME.lineSeriesStyle,
+      );
+    });
+    test('Can render two points', () => {
+      const {
+        lineGeometry: { points },
+        indexedGeometries,
+      } = renderedLine;
+      // will not render the 3rd point that is out of y domain
+      expect(points.length).toBe(2);
+      // will keep the 3rd point as an indexedGeometry
+      expect(indexedGeometries.size).toEqual(3);
+      expect(points[0]).toEqual({
+        x: 0,
+        y: 100,
+        radius: 10,
+        color: 'red',
+        geometryId: {
+          specId: SPEC_ID,
+          seriesKey: [],
+        },
+        value: {
+          accessor: 'y1',
+          x: 0,
+          y: 0,
+        },
+        transform: {
+          x: 25,
+          y: 0,
+        },
+      } as PointGeometry);
+      expect(points[1]).toEqual({
+        x: 50,
+        y: 0,
+        radius: 10,
+        color: 'red',
+        geometryId: {
+          specId: SPEC_ID,
+          seriesKey: [],
+        },
+        value: {
+          accessor: 'y1',
+          x: 1,
+          y: 1,
+        },
+        transform: {
+          x: 25,
+          y: 0,
+        },
+      } as PointGeometry);
     });
   });
 });

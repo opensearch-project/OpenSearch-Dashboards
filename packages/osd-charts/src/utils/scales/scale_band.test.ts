@@ -28,6 +28,14 @@ describe('Scale Band', () => {
     expect(scale.scale('c')).toBe(50);
     expect(scale.scale('d')).toBe(75);
   });
+  it('is value within domain', () => {
+    const scale = new ScaleBand(['a', 'b', 'c', 'd'], [0, 100]);
+    expect(scale.bandwidth).toBe(25);
+    expect(scale.isValueInDomain('a')).toBe(true);
+    expect(scale.isValueInDomain('b')).toBe(true);
+    expect(scale.isValueInDomain('z')).toBe(false);
+    expect(scale.isValueInDomain(null)).toBe(false);
+  });
   it('shall scale a any domain', () => {
     const scale = new ScaleBand(['a', 1, null, 'd', undefined], [0, 100]);
     expect(scale.bandwidth).toBe(20);

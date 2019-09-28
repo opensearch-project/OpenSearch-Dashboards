@@ -163,13 +163,13 @@ export function renderPoints(
 } {
   const indexedGeometries: Map<any, IndexedGeometry[]> = new Map();
   const isLogScale = isLogarithmicScale(yScale);
-
   const pointGeometries = dataset.reduce(
     (acc, datum) => {
-      const x = xScale.scale(datum.x);
-      if (x < xScale.range[0] || x > xScale.range[1]) {
+      // don't create the point if not within the xScale domain
+      if (!xScale.isValueInDomain(datum.x)) {
         return acc;
       }
+      const x = xScale.scale(datum.x);
       const points: PointGeometry[] = [];
       const yDatums = [datum.y1];
       if (hasY0Accessors) {
@@ -189,9 +189,6 @@ export function renderPoints(
           radius = 0;
         } else {
           y = yScale.scale(yDatum);
-        }
-        if (y < yScale.range[1] || y > yScale.range[0]) {
-          return;
         }
         const originalY = hasY0Accessors && index === 0 ? datum.initialY0 : datum.initialY1;
         const pointGeometry: PointGeometry = {
@@ -214,7 +211,8 @@ export function renderPoints(
           },
         };
         mutableIndexedGeometryMapUpsert(indexedGeometries, datum.x, pointGeometry);
-        if (!isHidden) {
+        // use the geometry only if the yDatum in contained in the current yScale domain
+        if (!isHidden && yScale.isValueInDomain(yDatum)) {
           points.push(pointGeometry);
         }
       });
@@ -244,8 +242,6 @@ export function renderBars(
   indexedGeometries: Map<any, IndexedGeometry[]>;
 } {
   const indexedGeometries: Map<any, IndexedGeometry[]> = new Map();
-  const xDomain = xScale.domain;
-  const xScaleType = xScale.type;
   const barGeometries: BarGeometry[] = [];
 
   const bboxCalculator = new CanvasTextBBoxCalculator();
@@ -261,8 +257,8 @@ export function renderBars(
     if (initialY1 === null) {
       return;
     }
-    // don't create a bar if the x value is not part of the ordinal scale
-    if (xScaleType === ScaleType.Ordinal && !xDomain.includes(datum.x)) {
+    // don't create a bar if not within the xScale domain
+    if (!xScale.isValueInDomain(datum.x)) {
       return;
     }
 
@@ -375,7 +371,9 @@ export function renderLine(
   const pathGenerator = line<DataSeriesDatum>()
     .x((datum: DataSeriesDatum) => xScale.scale(datum.x) - xScaleOffset)
     .y((datum: DataSeriesDatum) => yScale.scale(datum.y1))
-    .defined((datum: DataSeriesDatum) => datum.y1 !== null && !(isLogScale && datum.y1 <= 0))
+    .defined((datum: DataSeriesDatum) => {
+      return datum.y1 !== null && !(isLogScale && datum.y1 <= 0) && xScale.isValueInDomain(datum.x);
+    })
     .curve(getCurveFactory(curve));
   const y = 0;
   const x = shift;
@@ -439,7 +437,9 @@ export function renderArea(
       }
       return yScale.scale(datum.y0);
     })
-    .defined((datum: DataSeriesDatum) => datum.y1 !== null && !(isLogScale && datum.y1 <= 0))
+    .defined((datum: DataSeriesDatum) => {
+      return datum.y1 !== null && !(isLogScale && datum.y1 <= 0) && xScale.isValueInDomain(datum.x);
+    })
     .curve(getCurveFactory(curve));
 
   const y1Line = pathGenerator.lineY1()(dataset);
