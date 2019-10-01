@@ -9,7 +9,7 @@ import {
   getGeometryIdKey,
   GeometryId,
 } from '../../chart_types/xy_chart/rendering/rendering';
-import { SharedGeometryStyle } from '../../utils/themes/theme';
+import { SharedGeometryStyle, PointStyle } from '../../utils/themes/theme';
 import {
   buildAreaRenderProps,
   buildPointStyleProps,
@@ -17,6 +17,7 @@ import {
   PointStyleProps,
   buildLineRenderProps,
 } from './utils/rendering_props_utils';
+import { mergePartial } from '../../utils/commons';
 
 interface AreaGeometriesDataProps {
   animated?: boolean;
@@ -103,6 +104,14 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
     );
   };
 
+  private mergePointPropsWithOverrides(props: PointStyleProps, overrides?: Partial<PointStyle>): PointStyleProps {
+    if (!overrides) {
+      return props;
+    }
+
+    return mergePartial(props, overrides);
+  }
+
   private renderPoints = (
     areaPoints: PointGeometry[],
     areaIndex: number,
@@ -110,9 +119,10 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
     geometryId: GeometryId,
   ): JSX.Element[] => {
     return areaPoints.map((areaPoint, pointIndex) => {
-      const { x, y, transform } = areaPoint;
+      const { x, y, transform, styleOverrides } = areaPoint;
       const key = getGeometryIdKey(geometryId, `area-point-${areaIndex}-${pointIndex}-`);
-      const pointProps = buildPointRenderProps(transform.x + x, y, pointStyleProps);
+      const pointStyle = this.mergePointPropsWithOverrides(pointStyleProps, styleOverrides);
+      const pointProps = buildPointRenderProps(transform.x + x, y, pointStyle);
       return <Circle {...pointProps} key={key} />;
     });
   };

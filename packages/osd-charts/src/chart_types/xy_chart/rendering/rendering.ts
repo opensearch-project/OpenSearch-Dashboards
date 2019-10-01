@@ -17,7 +17,7 @@ import { CurveType, getCurveFactory } from '../../../utils/curves';
 import { LegendItem } from '../legend/legend';
 import { DataSeriesDatum } from '../utils/series';
 import { belongsToDataSeries } from '../utils/series_utils';
-import { DisplayValueSpec, StyleAccessor } from '../utils/specs';
+import { DisplayValueSpec, BarStyleAccessor, PointStyleAccessor } from '../utils/specs';
 import { mergePartial } from '../../../utils/commons';
 
 export interface GeometryId {
@@ -54,6 +54,7 @@ export interface PointGeometry {
   };
   geometryId: GeometryId;
   value: GeometryValue;
+  styleOverrides?: Partial<PointStyle>;
 }
 export interface BarGeometry {
   x: number;
@@ -121,11 +122,31 @@ export function mutableIndexedGeometryMapUpsert(
   }
 }
 
-export function getStyleOverrides(
+export function getPointStyleOverrides(
+  datum: DataSeriesDatum,
+  geometryId: GeometryId,
+  pointStyleAccessor?: PointStyleAccessor,
+): Partial<PointStyle> | undefined {
+  const styleOverride = pointStyleAccessor && pointStyleAccessor(datum, geometryId);
+
+  if (!styleOverride) {
+    return;
+  }
+
+  if (typeof styleOverride === 'string') {
+    return {
+      stroke: styleOverride,
+    };
+  }
+
+  return styleOverride;
+}
+
+export function getBarStyleOverrides(
   datum: DataSeriesDatum,
   geometryId: GeometryId,
   seriesStyle: BarSeriesStyle,
-  styleAccessor?: StyleAccessor,
+  styleAccessor?: BarStyleAccessor,
 ): BarSeriesStyle {
   const styleOverride = styleAccessor && styleAccessor(datum, geometryId);
 
@@ -157,6 +178,7 @@ export function renderPoints(
   specId: SpecId,
   hasY0Accessors: boolean,
   seriesKey: any[],
+  styleAccessor?: PointStyleAccessor,
 ): {
   pointGeometries: PointGeometry[];
   indexedGeometries: Map<any, IndexedGeometry[]>;
@@ -191,6 +213,11 @@ export function renderPoints(
           y = yScale.scale(yDatum);
         }
         const originalY = hasY0Accessors && index === 0 ? datum.initialY0 : datum.initialY1;
+        const geometryId = {
+          specId,
+          seriesKey,
+        };
+        const styleOverrides = getPointStyleOverrides(datum, geometryId, styleAccessor);
         const pointGeometry: PointGeometry = {
           radius,
           x,
@@ -205,10 +232,8 @@ export function renderPoints(
             x: shift,
             y: 0,
           },
-          geometryId: {
-            specId,
-            seriesKey,
-          },
+          geometryId,
+          styleOverrides,
         };
         mutableIndexedGeometryMapUpsert(indexedGeometries, datum.x, pointGeometry);
         // use the geometry only if the yDatum in contained in the current yScale domain
@@ -236,7 +261,7 @@ export function renderBars(
   seriesKey: any[],
   sharedSeriesStyle: BarSeriesStyle,
   displayValueSettings?: DisplayValueSpec,
-  styleAccessor?: StyleAccessor,
+  styleAccessor?: BarStyleAccessor,
 ): {
   barGeometries: BarGeometry[];
   indexedGeometries: Map<any, IndexedGeometry[]>;
@@ -321,7 +346,7 @@ export function renderBars(
       seriesKey,
     };
 
-    const seriesStyle = getStyleOverrides(datum, geometryId, sharedSeriesStyle, styleAccessor);
+    const seriesStyle = getBarStyleOverrides(datum, geometryId, sharedSeriesStyle, styleAccessor);
 
     const barGeometry: BarGeometry = {
       displayValue,
@@ -362,6 +387,7 @@ export function renderLine(
   seriesKey: any[],
   xScaleOffset: number,
   seriesStyle: LineSeriesStyle,
+  pointStyleAccessor?: PointStyleAccessor,
 ): {
   lineGeometry: LineGeometry;
   indexedGeometries: Map<any, IndexedGeometry[]>;
@@ -387,7 +413,9 @@ export function renderLine(
     specId,
     hasY0Accessors,
     seriesKey,
+    pointStyleAccessor,
   );
+
   const lineGeometry = {
     line: pathGenerator(dataset) || '',
     points: pointGeometries,
@@ -422,6 +450,7 @@ export function renderArea(
   xScaleOffset: number,
   seriesStyle: AreaSeriesStyle,
   isStacked: boolean = false,
+  pointStyleAccessor?: PointStyleAccessor,
 ): {
   areaGeometry: AreaGeometry;
   indexedGeometries: Map<any, IndexedGeometry[]>;
@@ -464,6 +493,7 @@ export function renderArea(
     specId,
     hasY0Accessors,
     seriesKey,
+    pointStyleAccessor,
   );
 
   const areaGeometry = {

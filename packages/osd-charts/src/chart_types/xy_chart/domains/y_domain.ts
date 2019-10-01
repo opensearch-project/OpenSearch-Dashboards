@@ -16,14 +16,7 @@ export type YDomain = BaseDomain & {
 };
 export type YBasicSeriesSpec = Pick<
   BasicSeriesSpec,
-  | 'id'
-  | 'seriesType'
-  | 'yScaleType'
-  | 'groupId'
-  | 'stackAccessors'
-  | 'yScaleToDataExtent'
-  | 'styleAccessor'
-  | 'useDefaultGroupDomain'
+  'id' | 'seriesType' | 'yScaleType' | 'groupId' | 'stackAccessors' | 'yScaleToDataExtent' | 'useDefaultGroupDomain'
 > & { stackAsPercentage?: boolean };
 
 interface GroupSpecs {

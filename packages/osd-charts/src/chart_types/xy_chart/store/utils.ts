@@ -478,6 +478,7 @@ export function renderGeometries(
         ds.key,
         xScaleOffset,
         lineSeriesStyle,
+        spec.pointStyleAccessor,
       );
       lineGeometriesIndex = mergeGeometriesIndexes(lineGeometriesIndex, renderedLines.indexedGeometries);
       lines.push(renderedLines.lineGeometry);
@@ -504,6 +505,7 @@ export function renderGeometries(
         xScaleOffset,
         areaSeriesStyle,
         isStacked,
+        spec.pointStyleAccessor,
       );
       areaGeometriesIndex = mergeGeometriesIndexes(areaGeometriesIndex, renderedAreas.indexedGeometries);
       areas.push(renderedAreas.areaGeometry);

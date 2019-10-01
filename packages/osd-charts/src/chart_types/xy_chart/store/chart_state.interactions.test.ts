@@ -290,7 +290,6 @@ function mouseOverTestSuite(scaleType: ScaleType) {
 
     store.annotationSpecs.set(rectAnnotationSpec.annotationId, rectAnnotationSpec);
     store.annotationDimensions.set(rectAnnotationSpec.annotationId, annotationDimensions);
-    debugger;
     // isHighlighted false, chart tooltip true; should show annotationTooltip only
     store.setCursorPosition(chartLeft + 51, chartTop + 1);
     expect(store.isTooltipVisible.get()).toBe(false);

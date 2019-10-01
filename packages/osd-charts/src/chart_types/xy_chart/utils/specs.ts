@@ -5,6 +5,7 @@ import {
   LineSeriesStyle,
   RectAnnotationStyle,
   BarSeriesStyle,
+  PointStyle,
 } from '../../../utils/themes/theme';
 import { Accessor } from '../../../utils/accessor';
 import { Omit, RecursivePartial } from '../../../utils/commons';
@@ -19,8 +20,26 @@ export type Datum = any;
 export type Rotation = 0 | 90 | -90 | 180;
 export type Rendering = 'canvas' | 'svg';
 export type Color = string;
-export type StyleOverride = RecursivePartial<BarSeriesStyle> | Color | null;
-export type StyleAccessor = (datum: RawDataSeriesDatum, geometryId: GeometryId) => StyleOverride;
+export type BarStyleOverride = RecursivePartial<BarSeriesStyle> | Color | null;
+export type PointStyleOverride = RecursivePartial<PointStyle> | Color | null;
+/**
+ * Override for bar styles per datum
+ *
+ * Return types:
+ * - `Color`: Color value as a `string` will set the bar `fill` to that color
+ * - `RecursivePartial<BarSeriesStyle>`: Style values to be merged with base bar styles
+ * - `null`: Keep existing bar style
+ */
+export type BarStyleAccessor = (datum: RawDataSeriesDatum, geometryId: GeometryId) => BarStyleOverride;
+/**
+ * Override for bar styles per datum
+ *
+ * Return types:
+ * - `Color`: Color value as a `string` will set the point `stroke` to that color
+ * - `RecursivePartial<PointStyle>`: Style values to be merged with base point styles
+ * - `null`: Keep existing point style
+ */
+export type PointStyleAccessor = (datum: RawDataSeriesDatum, geometryId: GeometryId) => PointStyleOverride;
 export const DEFAULT_GLOBAL_ID = '__global__';
 
 interface DomainMinInterval {
@@ -104,8 +123,6 @@ export interface SeriesAccessors {
   splitSeriesAccessors?: Accessor[];
   /** An array of fields thats indicates the stack membership */
   stackAccessors?: Accessor[];
-  /** An optional functional accessor to return custom datum color or style */
-  styleAccessor?: StyleAccessor;
 }
 
 export interface SeriesScales {
@@ -148,6 +165,10 @@ export type BarSeriesSpec = BasicSeriesSpec & {
    * Stack each series in percentage for each point.
    */
   stackAsPercentage?: boolean;
+  /**
+   * An optional functional accessor to return custom color or style for bar datum
+   */
+  styleAccessor?: BarStyleAccessor;
 };
 
 /**
@@ -167,6 +188,10 @@ export type LineSeriesSpec = BasicSeriesSpec &
     seriesType: 'line';
     curve?: CurveType;
     lineSeriesStyle?: RecursivePartial<LineSeriesStyle>;
+    /**
+     * An optional functional accessor to return custom color or style for point datum
+     */
+    pointStyleAccessor?: PointStyleAccessor;
   };
 
 /**
@@ -183,6 +208,10 @@ export type AreaSeriesSpec = BasicSeriesSpec &
      * Stack each series in percentage for each point.
      */
     stackAsPercentage?: boolean;
+    /**
+     * An optional functional accessor to return custom color or style for point datum
+     */
+    pointStyleAccessor?: PointStyleAccessor;
   };
 
 interface HistogramConfig {

@@ -28,15 +28,12 @@ import {
   Settings,
   timeFormatter,
   TooltipType,
-  RecursivePartial,
 } from '../src';
 import * as TestDatasets from '../src/utils/data_samples/test_dataset';
 
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 
 import { TEST_DATASET_DISCOVER } from '../src/utils/data_samples/test_dataset_discover_per_30s';
-import { StyleAccessor } from '../src/chart_types/xy_chart/utils/specs';
-import { BarSeriesStyle } from '../src/utils/themes/theme';
 
 const dateFormatter = timeFormatter('HH:mm:ss');
 
@@ -1788,39 +1785,6 @@ storiesOf('Bar Chart', module)
           yAccessors={[1]}
           data={data3}
           yScaleToDataExtent={false}
-        />
-      </Chart>
-    );
-  })
-  .add('styleAccessor overrides', () => {
-    const hasThreshold = boolean('threshold', true);
-    const threshold = number('min threshold', 4);
-    const style: RecursivePartial<BarSeriesStyle> = {
-      rect: {
-        opacity: 0.5,
-        fill: 'red',
-      },
-    };
-    const styleAccessor: StyleAccessor = (d, g) => (g.specId === getSpecId('bars') && d.y1! > threshold ? style : null);
-
-    return (
-      <Chart className="story-chart">
-        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-        <Axis
-          id={getAxisId('left2')}
-          title={'Left axis'}
-          position={Position.Left}
-          tickFormat={(d: any) => Number(d).toFixed(2)}
-        />
-
-        <BarSeries
-          id={getSpecId('bars')}
-          xScaleType={ScaleType.Linear}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          styleAccessor={hasThreshold ? styleAccessor : undefined}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
         />
       </Chart>
     );
