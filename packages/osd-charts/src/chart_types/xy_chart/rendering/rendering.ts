@@ -25,10 +25,20 @@ export interface GeometryId {
   seriesKey: any[];
 }
 
+/**
+ * The accessor type
+ */
+export const AccessorType = Object.freeze({
+  Y0: 'y0' as 'y0',
+  Y1: 'y1' as 'y1',
+});
+
+export type AccessorType = typeof AccessorType.Y0 | typeof AccessorType.Y1;
+
 export interface GeometryValue {
   y: any;
   x: any;
-  accessor: 'y1' | 'y0';
+  accessor: AccessorType;
 }
 
 /** Shared style properties for varies geometries */
@@ -187,19 +197,18 @@ export function renderPoints(
   const isLogScale = isLogarithmicScale(yScale);
   const pointGeometries = dataset.reduce(
     (acc, datum) => {
+      const { x: xValue, y0, y1, initialY0, initialY1 } = datum;
       // don't create the point if not within the xScale domain
-      if (!xScale.isValueInDomain(datum.x)) {
+      if (!xScale.isValueInDomain(xValue)) {
         return acc;
       }
-      const x = xScale.scale(datum.x);
+      const x = xScale.scale(xValue);
       const points: PointGeometry[] = [];
-      const yDatums = [datum.y1];
-      if (hasY0Accessors) {
-        yDatums.unshift(datum.y0);
-      }
+      const yDatums = hasY0Accessors ? [y0, y1] : [y1];
+
       yDatums.forEach((yDatum, index) => {
         // skip rendering point if y1 is null
-        if (datum.y1 === null) {
+        if (y1 === null) {
           return;
         }
         let y;
@@ -212,7 +221,7 @@ export function renderPoints(
         } else {
           y = yScale.scale(yDatum);
         }
-        const originalY = hasY0Accessors && index === 0 ? datum.initialY0 : datum.initialY1;
+        const originalY = hasY0Accessors && index === 0 ? initialY0 : initialY1;
         const geometryId = {
           specId,
           seriesKey,
@@ -224,9 +233,9 @@ export function renderPoints(
           y,
           color,
           value: {
-            x: datum.x,
+            x: xValue,
             y: originalY,
-            accessor: hasY0Accessors && index === 0 ? 'y0' : 'y1',
+            accessor: hasY0Accessors && index === 0 ? AccessorType.Y0 : AccessorType.Y1,
           },
           transform: {
             x: shift,
@@ -235,7 +244,7 @@ export function renderPoints(
           geometryId,
           styleOverrides,
         };
-        mutableIndexedGeometryMapUpsert(indexedGeometries, datum.x, pointGeometry);
+        mutableIndexedGeometryMapUpsert(indexedGeometries, xValue, pointGeometry);
         // use the geometry only if the yDatum in contained in the current yScale domain
         if (!isHidden && yScale.isValueInDomain(yDatum)) {
           points.push(pointGeometry);
@@ -358,7 +367,7 @@ export function renderBars(
       value: {
         x: datum.x,
         y: initialY1,
-        accessor: 'y1',
+        accessor: AccessorType.Y1,
       },
       geometryId,
       seriesStyle,
@@ -395,10 +404,10 @@ export function renderLine(
   const isLogScale = isLogarithmicScale(yScale);
 
   const pathGenerator = line<DataSeriesDatum>()
-    .x((datum: DataSeriesDatum) => xScale.scale(datum.x) - xScaleOffset)
-    .y((datum: DataSeriesDatum) => yScale.scale(datum.y1))
-    .defined((datum: DataSeriesDatum) => {
-      return datum.y1 !== null && !(isLogScale && datum.y1 <= 0) && xScale.isValueInDomain(datum.x);
+    .x(({ x }) => xScale.scale(x) - xScaleOffset)
+    .y(({ y1 }) => yScale.scale(y1))
+    .defined(({ x, y1 }) => {
+      return y1 !== null && !(isLogScale && y1 <= 0) && xScale.isValueInDomain(x);
     })
     .curve(getCurveFactory(curve));
   const y = 0;
@@ -458,16 +467,16 @@ export function renderArea(
   const isLogScale = isLogarithmicScale(yScale);
 
   const pathGenerator = area<DataSeriesDatum>()
-    .x((datum: DataSeriesDatum) => xScale.scale(datum.x) - xScaleOffset)
-    .y1((datum: DataSeriesDatum) => yScale.scale(datum.y1))
-    .y0((datum: DataSeriesDatum) => {
-      if (datum.y0 === null || (isLogScale && datum.y0 <= 0)) {
+    .x(({ x }) => xScale.scale(x) - xScaleOffset)
+    .y1(({ y1 }) => yScale.scale(y1))
+    .y0(({ y0 }) => {
+      if (y0 === null || (isLogScale && y0 <= 0)) {
         return yScale.range[0];
       }
-      return yScale.scale(datum.y0);
+      return yScale.scale(y0);
     })
-    .defined((datum: DataSeriesDatum) => {
-      return datum.y1 !== null && !(isLogScale && datum.y1 <= 0) && xScale.isValueInDomain(datum.x);
+    .defined(({ y1, x }) => {
+      return y1 !== null && !(isLogScale && y1 <= 0) && xScale.isValueInDomain(x);
     })
     .curve(getCurveFactory(curve));
 

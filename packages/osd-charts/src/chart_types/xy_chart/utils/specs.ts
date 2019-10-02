@@ -7,7 +7,7 @@ import {
   BarSeriesStyle,
   PointStyle,
 } from '../../../utils/themes/theme';
-import { Accessor } from '../../../utils/accessor';
+import { Accessor, AccessorFormat } from '../../../utils/accessor';
 import { Omit, RecursivePartial } from '../../../utils/commons';
 import { AnnotationId, AxisId, GroupId, SpecId } from '../../../utils/ids';
 import { ScaleContinuousType, ScaleType } from '../../../utils/scales/scales';
@@ -108,6 +108,18 @@ export interface SeriesSpec {
   /** Index per series to sort by */
   sortIndex?: number;
   displayValueSettings?: DisplayValueSpec;
+  /**
+   * Postfix string or accessor function for y1 accesor when using `y0Accessors`
+   *
+   * @default ' - upper'
+   */
+  y0AccessorFormat?: AccessorFormat;
+  /**
+   * Postfix string or accessor function for y1 accesor when using `y0Accessors`
+   *
+   * @default ' - lower'
+   */
+  y1AccessorFormat?: AccessorFormat;
 }
 
 export type CustomSeriesColorsMap = Map<DataSeriesColorsValues, string>;
@@ -412,4 +424,8 @@ export function isLineSeriesSpec(spec: BasicSeriesSpec): spec is LineSeriesSpec 
 
 export function isAreaSeriesSpec(spec: BasicSeriesSpec): spec is AreaSeriesSpec {
   return spec.seriesType === 'area';
+}
+
+export function isBandedSpec(y0Accessors: SeriesAccessors['y0Accessors']): boolean {
+  return Boolean(y0Accessors && y0Accessors.length > 0);
 }

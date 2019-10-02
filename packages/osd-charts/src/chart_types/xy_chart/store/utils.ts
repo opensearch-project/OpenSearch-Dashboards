@@ -35,6 +35,7 @@ import {
   isLineSeriesSpec,
   LineSeriesSpec,
   Rotation,
+  isBandedSpec,
 } from '../utils/specs';
 import { ColorConfig, Theme } from '../../../utils/themes/theme';
 import { identity, mergePartial } from '../../../utils/commons';
@@ -474,7 +475,7 @@ export function renderGeometries(
         color,
         (spec as LineSeriesSpec).curve || CurveType.LINEAR,
         ds.specId,
-        Boolean(spec.y0Accessors),
+        isBandedSpec(spec.y0Accessors),
         ds.key,
         xScaleOffset,
         lineSeriesStyle,
@@ -500,7 +501,7 @@ export function renderGeometries(
         color,
         (spec as AreaSeriesSpec).curve || CurveType.LINEAR,
         ds.specId,
-        Boolean(spec.y0Accessors),
+        isBandedSpec(spec.y0Accessors),
         ds.key,
         xScaleOffset,
         areaSeriesStyle,

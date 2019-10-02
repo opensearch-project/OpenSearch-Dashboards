@@ -1,11 +1,12 @@
 import { TooltipValue, isFollowTooltipType, TooltipType, TooltipValueFormatter } from '../utils/interactions';
-import { IndexedGeometry, isPointOnGeometry } from '../rendering/rendering';
+import { IndexedGeometry, isPointOnGeometry, AccessorType } from '../rendering/rendering';
 import { getColorValuesAsString } from '../utils/series';
-import { AxisSpec, BasicSeriesSpec, Rotation } from '../utils/specs';
+import { AxisSpec, BasicSeriesSpec, Rotation, isBandedSpec } from '../utils/specs';
 import { SpecId, AxisId, GroupId } from '../../../utils/ids';
 import { getAxesSpecForSpecId } from '../store/utils';
 import { Scale } from '../../../utils/scales/scales';
 import { Point } from '../store/chart_state';
+import { getAccessorFormatLabel } from '../../../utils/accessor';
 
 export function getSeriesTooltipValues(tooltipValues: TooltipValue[], defaultValue?: string): Map<string, any> {
   // map from seriesKey to tooltipValue
@@ -25,30 +26,29 @@ export function getSeriesTooltipValues(tooltipValues: TooltipValue[], defaultVal
 }
 
 export function formatTooltip(
-  searchIndexValue: IndexedGeometry,
-  spec: BasicSeriesSpec,
+  { color, value: { x, y, accessor }, geometryId: { seriesKey } }: IndexedGeometry,
+  { id, name, y0AccessorFormat = ' - lower', y1AccessorFormat = ' - upper', y0Accessors }: BasicSeriesSpec,
   isXValue: boolean,
   isHighlighted: boolean,
   axisSpec?: AxisSpec,
 ): TooltipValue {
-  const { id } = spec;
-  const {
-    color,
-    value: { x, y, accessor },
-    geometryId: { seriesKey },
-  } = searchIndexValue;
   const seriesKeyAsString = getColorValuesAsString(seriesKey, id);
-  let name: string | undefined;
+  let displayName: string | undefined;
   if (seriesKey.length > 0) {
-    name = seriesKey.join(' - ');
+    displayName = seriesKey.join(' - ');
   } else {
-    name = spec.name || `${spec.id}`;
+    displayName = name || `${id}`;
+  }
+
+  if (isBandedSpec(y0Accessors)) {
+    const formatter = accessor === AccessorType.Y0 ? y0AccessorFormat : y1AccessorFormat;
+    displayName = getAccessorFormatLabel(formatter, displayName);
   }
 
   const value = isXValue ? x : y;
   return {
     seriesKey: seriesKeyAsString,
-    name,
+    name: displayName,
     value: axisSpec ? axisSpec.tickFormat(value) : emptyFormatter(value),
     color,
     isHighlighted: isXValue ? false : isHighlighted,
@@ -136,6 +136,7 @@ export function getTooltipAndHighlightFromXValue(
 
     return [...acc, formattedTooltip];
   }, []);
+
   return {
     tooltipData,
     highlightedGeometries,

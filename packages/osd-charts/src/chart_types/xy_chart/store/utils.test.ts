@@ -1,5 +1,5 @@
 import { mergeYCustomDomainsByGroupId } from '../utils/axis_utils';
-import { IndexedGeometry } from '../rendering/rendering';
+import { IndexedGeometry, AccessorType } from '../rendering/rendering';
 import { DataSeriesColorsValues, findDataSeriesByColorValues, getSeriesColorMap } from '../utils/series';
 import {
   AreaSeriesSpec,
@@ -1009,7 +1009,7 @@ describe('Chart State utils', () => {
         x: 0,
         y: 0,
         color: '#1EA593',
-        value: { x: 0, y: 5, accessor: 'y1' },
+        value: { x: 0, y: 5, accessor: AccessorType.Y1 },
         transform: { x: 0, y: 0 },
         geometryId: { specId: getSpecId('line1'), seriesKey: [] },
       },
@@ -1021,7 +1021,7 @@ describe('Chart State utils', () => {
         x: 0,
         y: 175.8,
         color: '#2B70F7',
-        value: { x: 0, y: 2, accessor: 'y1' },
+        value: { x: 0, y: 2, accessor: AccessorType.Y1 },
         transform: { x: 0, y: 0 },
         geometryId: { specId: getSpecId('line2'), seriesKey: [] },
       },
