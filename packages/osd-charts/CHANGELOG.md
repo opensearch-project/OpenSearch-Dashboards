@@ -1,3 +1,10 @@
+# [13.3.0](https://github.com/elastic/elastic-charts/compare/v13.2.0...v13.3.0) (2019-10-02)
+
+
+### Features
+
+* **tooltip:** tooltip label format for upper/lower banded area series ([#391](https://github.com/elastic/elastic-charts/issues/391)) ([dfd5d7b](https://github.com/elastic/elastic-charts/commit/dfd5d7b)), closes [#162](https://github.com/elastic/elastic-charts/issues/162)
+
 # [13.2.0](https://github.com/elastic/elastic-charts/compare/v13.1.1...v13.2.0) (2019-10-01)
 
 
