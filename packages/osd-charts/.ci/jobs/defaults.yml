@@ -69,7 +69,7 @@
         credentials-id: kibana-ci-gcs-plugin
         uploads:
         - classic:
-            file-pattern: stories/__image_diff_snapshots__/**/*
+            file-pattern: integration/**/__diff_output__/**/*
             storage-location: gs://kibana-ci-artifacts/jobs/$JOB_NAME/$BUILD_NUMBER
             share-publicly: true
             upload-for-failed-jobs: true
