@@ -230,7 +230,7 @@ describe('Stacked Series Utils', () => {
         initialY0: null,
         initialY1: 10,
         x: 0,
-        y0: 0,
+        y0: null,
         y1: 10,
       });
       expect(formattedData[1].data[0]).toEqual({
@@ -326,7 +326,7 @@ describe('Stacked Series Utils', () => {
         initialY0: null,
         initialY1: 1,
         x: 1,
-        y0: 0,
+        y0: null,
         y1: 1,
       });
       expect(formattedData[0].data[1]).toEqual({
@@ -334,7 +334,7 @@ describe('Stacked Series Utils', () => {
         initialY0: null,
         initialY1: 2,
         x: 2,
-        y0: 0,
+        y0: null,
         y1: 2,
       });
       expect(formattedData[0].data[2]).toEqual({
@@ -342,7 +342,7 @@ describe('Stacked Series Utils', () => {
         initialY0: null,
         initialY1: 4,
         x: 4,
-        y0: 0,
+        y0: null,
         y1: 4,
       });
       expect(formattedData[1].data[0]).toEqual({

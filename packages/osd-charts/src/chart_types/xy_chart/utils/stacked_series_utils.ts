@@ -100,9 +100,10 @@ export function formatStackedDataSeriesValues(
       if (scaleToExtent) {
         computedY0 = y0 ? y0 : y1;
       } else {
-        computedY0 = y0 ? y0 : 0;
+        computedY0 = y0 ? y0 : null;
       }
       const initialY0 = y0 == null ? null : y0;
+
       if (seriesIndex === 0) {
         newData.push({
           x,
@@ -128,6 +129,7 @@ export function formatStackedDataSeriesValues(
             stackedY0 = null;
           }
         }
+
         newData.push({
           x,
           y1: stackedY1,

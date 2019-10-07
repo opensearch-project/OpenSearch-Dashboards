@@ -147,7 +147,7 @@ Array [
             "initialY0": null,
             "initialY1": 1,
             "x": 0,
-            "y0": 0,
+            "y0": null,
             "y1": 1,
           },
           Object {
@@ -159,7 +159,7 @@ Array [
             "initialY0": null,
             "initialY1": 2,
             "x": 1,
-            "y0": 0,
+            "y0": null,
             "y1": 2,
           },
           Object {
@@ -171,7 +171,7 @@ Array [
             "initialY0": null,
             "initialY1": 3,
             "x": 2,
-            "y0": 0,
+            "y0": null,
             "y1": 3,
           },
           Object {
@@ -183,7 +183,7 @@ Array [
             "initialY0": null,
             "initialY1": 4,
             "x": 3,
-            "y0": 0,
+            "y0": null,
             "y1": 4,
           },
         ],

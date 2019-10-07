@@ -99,19 +99,28 @@ export function getUpdatedCustomSeriesColors(seriesSpecs: Map<SpecId, BasicSerie
   return updatedCustomSeriesColors;
 }
 
+export interface LastValues {
+  y0: number | null;
+  y1: number | null;
+}
+
 export function getLastValues(formattedDataSeries: {
   stacked: FormattedDataSeries[];
   nonStacked: FormattedDataSeries[];
-}): Map<string, number> {
-  const lastValues = new Map<string, number>();
+}): Map<string, LastValues> {
+  const lastValues = new Map<string, LastValues>();
 
   // we need to get the latest
   formattedDataSeries.stacked.forEach((ds) => {
     ds.dataSeries.forEach((series) => {
       if (series.data.length > 0) {
         const last = series.data[series.data.length - 1];
-        if (last !== null && last.initialY1 !== null) {
-          lastValues.set(series.seriesColorKey, last.initialY1);
+        if (last !== null) {
+          const { initialY1: y1, initialY0: y0 } = last;
+
+          if (y1 !== null || y0 !== null) {
+            lastValues.set(series.seriesColorKey, { y0, y1 });
+          }
         }
       }
     });
@@ -120,8 +129,11 @@ export function getLastValues(formattedDataSeries: {
     ds.dataSeries.forEach((series) => {
       if (series.data.length > 0) {
         const last = series.data[series.data.length - 1];
-        if (last !== null && last.initialY1 !== null) {
-          lastValues.set(series.seriesColorKey, last.initialY1);
+        if (last !== null) {
+          const { initialY1: y1, initialY0: y0 } = last;
+          if (y1 !== null || y0 !== null) {
+            lastValues.set(series.seriesColorKey, { y0, y1 });
+          }
         }
       }
     });
@@ -157,11 +169,11 @@ export function computeSeriesDomains(
 
   // we need to get the last values from the formatted dataseries
   // because we change the format if we are on percentage mode
-  const lastValues = getLastValues(formattedDataSeries);
+  const lastValuesMap = getLastValues(formattedDataSeries);
   const updatedSeriesColors = new Map<string, DataSeriesColorsValues>();
   seriesColors.forEach((value, key) => {
-    const lastValue = lastValues.get(key);
-    const updatedColorSet = {
+    const lastValue = lastValuesMap.get(key);
+    const updatedColorSet: DataSeriesColorsValues = {
       ...value,
       lastValue,
     };

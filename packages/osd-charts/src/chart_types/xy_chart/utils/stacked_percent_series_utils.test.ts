@@ -168,7 +168,7 @@ describe('Stacked Series Utils', () => {
       const formattedData = formatStackedDataSeriesValues(STANDARD_DATA_SET, false, true);
       const data0 = formattedData[0].data[0];
       expect(data0.initialY1).toBe(0.1);
-      expect(data0.y0).toBe(0);
+      expect(data0.y0).toBeNull();
       expect(data0.y1).toBe(0.1);
 
       const data1 = formattedData[1].data[0];
@@ -185,7 +185,7 @@ describe('Stacked Series Utils', () => {
       const formattedData = formatStackedDataSeriesValues(WITH_NULL_DATASET, false, true);
       const data0 = formattedData[0].data[0];
       expect(data0.initialY1).toBe(0.25);
-      expect(data0.y0).toBe(0);
+      expect(data0.y0).toBeNull();
       expect(data0.y1).toBe(0.25);
 
       expect(formattedData[1].data[0]).toEqual({
@@ -253,7 +253,7 @@ describe('Stacked Series Utils', () => {
         initialY0: null,
         initialY1: 0.1,
         x: 1,
-        y0: 0,
+        y0: null,
         y1: 0.1,
       });
       expect(formattedData[0].data[1]).toEqual({
@@ -261,7 +261,7 @@ describe('Stacked Series Utils', () => {
         initialY0: null,
         initialY1: 1,
         x: 2,
-        y0: 0,
+        y0: null,
         y1: 1,
       });
       expect(formattedData[0].data[2]).toEqual({
@@ -269,7 +269,7 @@ describe('Stacked Series Utils', () => {
         initialY0: null,
         initialY1: 1,
         x: 4,
-        y0: 0,
+        y0: null,
         y1: 1,
       });
       expect(formattedData[1].data[0]).toEqual({
