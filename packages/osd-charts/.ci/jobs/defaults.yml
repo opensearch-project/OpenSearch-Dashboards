@@ -19,7 +19,7 @@
 
           '
     concurrent: true
-    node: linux
+    node: linux && docker
     scm:
     - git:
         name: origin
