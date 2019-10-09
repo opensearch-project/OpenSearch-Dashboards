@@ -197,9 +197,9 @@ export function renderPoints(
   const isLogScale = isLogarithmicScale(yScale);
   const pointGeometries = dataset.reduce(
     (acc, datum) => {
-      const { x: xValue, y0, y1, initialY0, initialY1 } = datum;
-      // don't create the point if not within the xScale domain
-      if (!xScale.isValueInDomain(xValue)) {
+      const { x: xValue, y0, y1, initialY0, initialY1, filled } = datum;
+      // don't create the point if not within the xScale domain or it that point was filled
+      if (!xScale.isValueInDomain(xValue) || (filled && filled.y1 !== undefined)) {
         return acc;
       }
       const x = xScale.scale(xValue);
@@ -286,9 +286,9 @@ export function renderBars(
   const fontFamily = sharedSeriesStyle.displayValue.fontFamily;
 
   dataset.forEach((datum) => {
-    const { y0, y1, initialY1 } = datum;
+    const { y0, y1, initialY1, filled } = datum;
     // don't create a bar if the initialY1 value is null.
-    if (initialY1 === null) {
+    if (initialY1 === null || (filled && filled.y1 !== undefined)) {
       return;
     }
     // don't create a bar if not within the xScale domain

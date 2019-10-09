@@ -17652,6 +17652,18 @@ Array [
       },
       Object {
         "datum": undefined,
+        "filled": Object {
+          "x": 3,
+          "y1": 0,
+        },
+        "initialY0": null,
+        "initialY1": 0,
+        "x": 3,
+        "y0": null,
+        "y1": 0,
+      },
+      Object {
+        "datum": undefined,
         "initialY0": null,
         "initialY1": 4,
         "x": 4,
@@ -17677,11 +17689,35 @@ Array [
       },
       Object {
         "datum": undefined,
+        "filled": Object {
+          "x": 2,
+          "y1": 0,
+        },
+        "initialY0": null,
+        "initialY1": 0,
+        "x": 2,
+        "y0": 2,
+        "y1": 2,
+      },
+      Object {
+        "datum": undefined,
         "initialY0": null,
         "initialY1": 23,
         "x": 3,
         "y0": 0,
         "y1": 23,
+      },
+      Object {
+        "datum": undefined,
+        "filled": Object {
+          "x": 4,
+          "y1": 0,
+        },
+        "initialY0": null,
+        "initialY1": 0,
+        "x": 4,
+        "y0": 4,
+        "y1": 4,
       },
     ],
     "key": Array [
@@ -17715,6 +17751,18 @@ Array [
       },
       Object {
         "datum": undefined,
+        "filled": Object {
+          "x": 3,
+          "y1": 0,
+        },
+        "initialY0": null,
+        "initialY1": 0,
+        "x": 3,
+        "y0": 0,
+        "y1": 0,
+      },
+      Object {
+        "datum": undefined,
         "initialY0": null,
         "initialY1": 4,
         "x": 4,
@@ -17740,11 +17788,35 @@ Array [
       },
       Object {
         "datum": undefined,
+        "filled": Object {
+          "x": 2,
+          "y1": 0,
+        },
+        "initialY0": null,
+        "initialY1": 0,
+        "x": 2,
+        "y0": 2,
+        "y1": 2,
+      },
+      Object {
+        "datum": undefined,
         "initialY0": null,
         "initialY1": 23,
         "x": 3,
         "y0": 0,
         "y1": 23,
+      },
+      Object {
+        "datum": undefined,
+        "filled": Object {
+          "x": 4,
+          "y1": 0,
+        },
+        "initialY0": null,
+        "initialY1": 0,
+        "x": 4,
+        "y0": 4,
+        "y1": 4,
       },
     ],
     "key": Array [
@@ -17775,6 +17847,18 @@ Array [
         "x": 2,
         "y0": 2,
         "y1": 3,
+      },
+      Object {
+        "datum": undefined,
+        "filled": Object {
+          "x": 3,
+          "y1": 0,
+        },
+        "initialY0": null,
+        "initialY1": 0,
+        "x": 3,
+        "y0": 0,
+        "y1": 0,
       },
       Object {
         "datum": undefined,
@@ -17857,6 +17941,18 @@ Array [
       },
       Object {
         "datum": undefined,
+        "filled": Object {
+          "x": 3,
+          "y1": 0,
+        },
+        "initialY0": null,
+        "initialY1": 0,
+        "x": 3,
+        "y0": 0,
+        "y1": 0,
+      },
+      Object {
+        "datum": undefined,
         "initialY0": 3,
         "initialY1": 4,
         "x": 4,
@@ -17929,18 +18025,30 @@ Array [
       Object {
         "datum": undefined,
         "initialY0": null,
-        "initialY1": 4,
-        "x": 4,
-        "y0": null,
-        "y1": 4,
-      },
-      Object {
-        "datum": undefined,
-        "initialY0": null,
         "initialY1": 2,
         "x": 2,
         "y0": null,
         "y1": 2,
+      },
+      Object {
+        "datum": undefined,
+        "filled": Object {
+          "x": 3,
+          "y1": 0,
+        },
+        "initialY0": null,
+        "initialY1": 0,
+        "x": 3,
+        "y0": null,
+        "y1": 0,
+      },
+      Object {
+        "datum": undefined,
+        "initialY0": null,
+        "initialY1": 4,
+        "x": 4,
+        "y0": null,
+        "y1": 4,
       },
     ],
     "key": Array [
@@ -17954,6 +18062,26 @@ Array [
       Object {
         "datum": undefined,
         "initialY0": null,
+        "initialY1": 21,
+        "x": 1,
+        "y0": 1,
+        "y1": 22,
+      },
+      Object {
+        "datum": undefined,
+        "filled": Object {
+          "x": 2,
+          "y1": 0,
+        },
+        "initialY0": null,
+        "initialY1": 0,
+        "x": 2,
+        "y0": 2,
+        "y1": 2,
+      },
+      Object {
+        "datum": undefined,
+        "initialY0": null,
         "initialY1": 23,
         "x": 3,
         "y0": 0,
@@ -17961,11 +18089,15 @@ Array [
       },
       Object {
         "datum": undefined,
+        "filled": Object {
+          "x": 4,
+          "y1": 0,
+        },
         "initialY0": null,
-        "initialY1": 21,
-        "x": 1,
-        "y0": 1,
-        "y1": 22,
+        "initialY1": 0,
+        "x": 4,
+        "y0": 4,
+        "y1": 4,
       },
     ],
     "key": Array [

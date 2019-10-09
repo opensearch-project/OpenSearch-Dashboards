@@ -355,10 +355,10 @@ class Chart extends React.Component<ReactiveChartProps, ReactiveChartState> {
   sortAndRenderElements() {
     const { chartRotation, chartDimensions } = this.props.chartStore!;
     const clippings = {
-      clipX: 0,
-      clipY: 0,
-      clipWidth: [90, -90].includes(chartRotation) ? chartDimensions.height : chartDimensions.width,
-      clipHeight: [90, -90].includes(chartRotation) ? chartDimensions.width : chartDimensions.height,
+      clipX: -1,
+      clipY: -1,
+      clipWidth: ([90, -90].includes(chartRotation) ? chartDimensions.height : chartDimensions.width) + 1,
+      clipHeight: ([90, -90].includes(chartRotation) ? chartDimensions.width : chartDimensions.height) + 1,
     };
 
     const bars = this.renderBarSeries(clippings);

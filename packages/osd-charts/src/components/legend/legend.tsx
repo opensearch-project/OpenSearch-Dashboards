@@ -169,25 +169,21 @@ class LegendComponent extends React.Component<LegendProps, LegendState> {
     const tooltipValues = legendItemTooltipValues.get();
     const legendValues = this.getLegendValues(tooltipValues, key, banded);
 
-    return (
-      <>
-        {legendValues.map((value, index) => {
-          const yAccessor: AccessorType = index === 0 ? AccessorType.Y1 : AccessorType.Y0;
-          return (
-            <LegendItem
-              {...item}
-              label={this.getItemLabel(item, yAccessor)}
-              key={`${key}-${yAccessor}`}
-              legendItemKey={key}
-              legendPosition={legendPosition.get()}
-              displayValue={isCursorOnChart.get() ? value : displayValue.formatted[yAccessor]}
-              onMouseEnter={this.onLegendItemMouseover(key)}
-              onMouseLeave={this.onLegendItemMouseout}
-            />
-          );
-        })}
-      </>
-    );
+    return legendValues.map((value, index) => {
+      const yAccessor: AccessorType = index === 0 ? AccessorType.Y1 : AccessorType.Y0;
+      return (
+        <LegendItem
+          {...item}
+          label={this.getItemLabel(item, yAccessor)}
+          key={`${key}-${yAccessor}`}
+          legendItemKey={key}
+          legendPosition={legendPosition.get()}
+          displayValue={isCursorOnChart.get() ? value : displayValue.formatted[yAccessor]}
+          onMouseEnter={this.onLegendItemMouseover(key)}
+          onMouseLeave={this.onLegendItemMouseout}
+        />
+      );
+    });
   };
 }
 

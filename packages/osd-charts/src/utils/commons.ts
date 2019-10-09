@@ -123,3 +123,7 @@ export function mergePartial<T>(
 
   return getPartialValue<T>(base, partial, additionalPartials);
 }
+
+export function isNumberArray(value: unknown): value is number[] {
+  return Array.isArray(value) && value.every((element) => typeof element === 'number');
+}

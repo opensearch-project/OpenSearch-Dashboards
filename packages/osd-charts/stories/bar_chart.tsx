@@ -88,7 +88,7 @@ storiesOf('Bar Chart', module)
       hideClippedValue,
     };
 
-    const debug = boolean('debug', true);
+    const debug = boolean('debug', false);
     const chartRotation = select<Rotation>(
       'chartRotation',
       {
@@ -133,7 +133,7 @@ storiesOf('Bar Chart', module)
 
     return (
       <Chart renderer="canvas" className={'story-chart'}>
-        <Settings theme={theme} debug={debug} rotation={chartRotation} />
+        <Settings theme={theme} debug={debug} rotation={chartRotation} showLegend />
         <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
         <Axis
           id={getAxisId('left2')}
@@ -141,7 +141,7 @@ storiesOf('Bar Chart', module)
           position={Position.Left}
           tickFormat={(d: any) => Number(d).toFixed(2)}
         />
-        <BarSeries
+        <LineSeries
           id={getSpecId('bars')}
           displayValueSettings={displayValueSettings}
           xScaleType={ScaleType.Linear}
@@ -153,7 +153,7 @@ storiesOf('Bar Chart', module)
           data={data}
           yScaleToDataExtent={false}
         />
-        <BarSeries
+        <LineSeries
           id={getSpecId('bars2')}
           displayValueSettings={displayValueSettings}
           xScaleType={ScaleType.Linear}

@@ -1,35 +1,13 @@
 import React, { Fragment } from 'react';
-import {
-  Axis,
-  Chart,
-  getAxisId,
-  getSpecId,
-  Position,
-  ScaleType,
-  Settings,
-  BarSeries,
-  LineSeries,
-  AreaSeries,
-} from '../src';
+import { Axis, Chart, getAxisId, getSpecId, Position, ScaleType, Settings, AreaSeries } from '../src';
 
 export class Playground extends React.Component {
   render() {
     return (
       <Fragment>
         <div className="chart">
-          <Chart className="story-chart">
-            <Settings
-              theme={{
-                areaSeriesStyle: {
-                  point: {
-                    visible: true,
-                  },
-                },
-              }}
-              xDomain={{
-                max: 3.8,
-              }}
-            />
+          <Chart>
+            <Settings showLegend theme={{ areaSeriesStyle: { point: { visible: true } } }} />
             <Axis
               id={getAxisId('bottom')}
               position={Position.Bottom}
@@ -37,39 +15,55 @@ export class Playground extends React.Component {
               showOverlappingTicks={true}
             />
             <Axis
-              id={getAxisId('left')}
+              id={getAxisId('left2')}
               title={'Left axis'}
               position={Position.Left}
-              domain={{
-                max: 5,
-              }}
+              tickFormat={(d: any) => Number(d).toFixed(2)}
             />
-
-            <BarSeries
-              id={getSpecId('bar')}
-              xScaleType={ScaleType.Linear}
-              yScaleType={ScaleType.Linear}
-              xAccessor={0}
-              yAccessors={[1]}
-              data={[[0, 1], [1, 2], [2, 10], [3, 4], [4, 5]]}
-            />
-
-            <LineSeries
-              id={getSpecId('line')}
-              xScaleType={ScaleType.Linear}
-              yScaleType={ScaleType.Linear}
-              xAccessor={0}
-              yAccessors={[1]}
-              data={[[0, 1], [1, 2], [2, 10], [3, 4], [4, 5]]}
-            />
-
             <AreaSeries
-              id={getSpecId('area')}
+              id={getSpecId('bars1')}
               xScaleType={ScaleType.Linear}
               yScaleType={ScaleType.Linear}
-              xAccessor={0}
-              yAccessors={[1]}
-              data={[[0, 1], [1, 2], [2, 10], [3, 4], [4, 5]]}
+              xAccessor="x"
+              yAccessors={['y']}
+              stackAccessors={['x']}
+              splitSeriesAccessors={['g']}
+              // curve={CurveType.CURVE_MONOTONE_X}
+              data={[
+                { x: 0, y: 2, g: 'a' },
+                { x: 1, y: 7, g: 'a' },
+                { x: 2, y: 3, g: 'a' },
+                { x: 3, y: 6, g: 'a' },
+                { x: 0, y: 4, g: 'b' },
+                { x: 1, y: 5, g: 'b' },
+                { x: 2, y: 8, g: 'b' },
+                { x: 3, y: 2, g: 'b' },
+                { x: 4, y: 6, g: 'b' },
+                { x: 5, y: 7, g: 'a' },
+                { x: 5, y: 7, g: 'b' },
+                { x: 6, y: 7, g: 'a' },
+                { x: 6, y: 7, g: 'b' },
+              ]}
+            />
+            <AreaSeries
+              id={getSpecId('area2')}
+              xScaleType={ScaleType.Linear}
+              yScaleType={ScaleType.Linear}
+              xAccessor="x"
+              yAccessors={['y']}
+              stackAccessors={['x']}
+              splitSeriesAccessors={['g']}
+              // curve={CurveType.CURVE_MONOTONE_X}
+              data={[
+                { x: 1, y: 7, g: 'a' },
+                { x: 2, y: 3, g: 'a' },
+                { x: 3, y: 6, g: 'a' },
+                { x: 0, y: 4, g: 'b' },
+                { x: 1, y: 5, g: 'b' },
+                { x: 2, y: 8, g: 'b' },
+                { x: 3, y: 2, g: 'b' },
+                { x: 4, y: 6, g: 'b' },
+              ]}
             />
           </Chart>
         </div>

@@ -100,7 +100,8 @@ describe('Series', () => {
         data: [{ x: 1, y1: 21 }, { x: 3, y1: 23 }],
       },
     ];
-    const stackedValues = formatStackedDataSeriesValues(dataSeries, false);
+    const xValues = new Set([1, 2, 3, 4]);
+    const stackedValues = formatStackedDataSeriesValues(dataSeries, false, false, xValues, ScaleType.Linear);
     expect(stackedValues).toMatchSnapshot();
   });
   test('Can stack multiple dataseries', () => {
@@ -130,7 +131,8 @@ describe('Series', () => {
         data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
       },
     ];
-    const stackedValues = formatStackedDataSeriesValues(dataSeries, false);
+    const xValues = new Set([1, 2, 3, 4]);
+    const stackedValues = formatStackedDataSeriesValues(dataSeries, false, false, xValues, ScaleType.Linear);
     expect(stackedValues).toMatchSnapshot();
   });
   test('Can stack unsorted dataseries', () => {
@@ -148,7 +150,8 @@ describe('Series', () => {
         data: [{ x: 3, y1: 23 }, { x: 1, y1: 21 }],
       },
     ];
-    const stackedValues = formatStackedDataSeriesValues(dataSeries, false);
+    const xValues = new Set([1, 2, 3, 4]);
+    const stackedValues = formatStackedDataSeriesValues(dataSeries, false, false, xValues, ScaleType.Linear);
     expect(stackedValues).toMatchSnapshot();
   });
   test('Can stack high volume of dataseries', () => {
@@ -167,7 +170,8 @@ describe('Series', () => {
         data: new Array(maxArrayItems).fill(0).map((d, i) => ({ x: i, y1: i })),
       },
     ];
-    const stackedValues = formatStackedDataSeriesValues(dataSeries, false);
+    const xValues = new Set(new Array(maxArrayItems).fill(0).map((d, i) => i));
+    const stackedValues = formatStackedDataSeriesValues(dataSeries, false, false, xValues, ScaleType.Linear);
     expect(stackedValues).toMatchSnapshot();
   });
   test('Can stack simple dataseries with scale to extent', () => {
@@ -185,7 +189,8 @@ describe('Series', () => {
         data: [{ x: 1, y1: 21 }, { x: 3, y1: 23 }],
       },
     ];
-    const stackedValues = formatStackedDataSeriesValues(dataSeries, true);
+    const xValues = new Set([1, 2, 3, 4]);
+    const stackedValues = formatStackedDataSeriesValues(dataSeries, true, false, xValues, ScaleType.Linear);
     // the datum on the snapshots is undefined because we are not adding it to
     // the test raw dataseries
     expect(stackedValues).toMatchSnapshot();
@@ -217,7 +222,8 @@ describe('Series', () => {
         data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
       },
     ];
-    const stackedValues = formatStackedDataSeriesValues(dataSeries, true);
+    const xValues = new Set([1, 2, 3, 4]);
+    const stackedValues = formatStackedDataSeriesValues(dataSeries, true, false, xValues, ScaleType.Linear);
     // the datum on the snapshots is undefined because we are not adding it to
     // the test raw dataseries
     expect(stackedValues).toMatchSnapshot();
@@ -237,7 +243,8 @@ describe('Series', () => {
         data: [{ x: 1, y1: 2, y0: 1 }, { x: 2, y1: 3, y0: 1 }, { x: 3, y1: 23, y0: 4 }, { x: 4, y1: 4, y0: 1 }],
       },
     ];
-    const stackedValues = formatStackedDataSeriesValues(dataSeries, true);
+    const xValues = new Set([1, 2, 3, 4]);
+    const stackedValues = formatStackedDataSeriesValues(dataSeries, true, false, xValues, ScaleType.Linear);
     // the datum on the snapshots is undefined because we are not adding it to
     // the test raw dataseries
 
@@ -268,7 +275,8 @@ describe('Series', () => {
         data: [{ x: 1, y1: 2, y0: 1 }, { x: 2, y1: 3, y0: 1 }, { x: 3, y1: 23, y0: 4 }, { x: 4, y1: 4, y0: 1 }],
       },
     ];
-    const stackedValues = formatStackedDataSeriesValues(dataSeries, true);
+    const xValues = new Set([1, 2, 3, 4]);
+    const stackedValues = formatStackedDataSeriesValues(dataSeries, true, false, xValues, ScaleType.Linear);
     // the datum on the snapshots is undefined because we are not adding it to
     // the test raw dataseries
     expect(stackedValues[0].data[0].y0).toBe(1);
@@ -343,10 +351,16 @@ describe('Series', () => {
       data: TestDataset.BARCHART_2Y0G,
       hideInLegend: false,
     };
+    const xValues = new Set([0, 1, 2, 3]);
     seriesSpecs.set(spec1.id, spec1);
     seriesSpecs.set(spec2.id, spec2);
     const splittedDataSeries = getSplittedSeries(seriesSpecs);
-    const stackedDataSeries = getFormattedDataseries([spec1, spec2], splittedDataSeries.splittedSeries);
+    const stackedDataSeries = getFormattedDataseries(
+      [spec1, spec2],
+      splittedDataSeries.splittedSeries,
+      xValues,
+      ScaleType.Linear,
+    );
     expect(stackedDataSeries.stacked).toMatchSnapshot();
   });
   test('should get series color map', () => {

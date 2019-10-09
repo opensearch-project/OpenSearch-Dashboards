@@ -1,5 +1,5 @@
 import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_utils';
-import { compareByValueAsc, identity } from '../../../utils/commons';
+import { compareByValueAsc, identity, isNumberArray } from '../../../utils/commons';
 import { computeContinuousDataDomain, computeOrdinalDataDomain, Domain } from '../../../utils/domain';
 import { ScaleType } from '../../../utils/scales/scales';
 import { BasicSeriesSpec, DomainRange } from '../utils/specs';
@@ -22,7 +22,7 @@ export type XDomain = BaseDomain & {
  */
 export function mergeXDomain(
   specs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>[],
-  xValues: Set<any>,
+  xValues: Set<string | number>,
   customXDomain?: DomainRange | Domain,
 ): XDomain {
   const mainXScaleType = convertXScaleTypes(specs);
@@ -46,7 +46,11 @@ export function mergeXDomain(
   } else {
     seriesXComputedDomains = computeContinuousDataDomain(values, identity, true);
     let customMinInterval: undefined | number;
-
+    if (!isNumberArray(values)) {
+      throw new Error(
+        `Each X value in a ${mainXScaleType.scaleType} x scale needs be be a number. String or objects are not allowed`,
+      );
+    }
     if (customXDomain) {
       if (Array.isArray(customXDomain)) {
         throw new Error('xDomain for continuous scale should be a DomainRange object, not an array');
@@ -78,7 +82,6 @@ export function mergeXDomain(
         }
       }
     }
-
     const computedMinInterval = findMinInterval(values);
     if (customMinInterval != null) {
       // Allow greater custom min iff xValues has 1 member.

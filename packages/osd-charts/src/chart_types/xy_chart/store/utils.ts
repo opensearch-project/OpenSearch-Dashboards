@@ -118,7 +118,7 @@ export function getLastValues(formattedDataSeries: {
         if (last !== null) {
           const { initialY1: y1, initialY0: y0 } = last;
 
-          if (y1 !== null || y0 !== null) {
+          if (!last.filled && (y1 !== null || y0 !== null)) {
             lastValues.set(series.seriesColorKey, { y0, y1 });
           }
         }
@@ -165,7 +165,7 @@ export function computeSeriesDomains(
   const xDomain = mergeXDomain(specsArray, xValues, customXDomain);
   const yDomain = mergeYDomain(splittedSeries, specsArray, customYDomainsByGroupId);
 
-  const formattedDataSeries = getFormattedDataseries(specsArray, splittedSeries);
+  const formattedDataSeries = getFormattedDataseries(specsArray, splittedSeries, xValues, xDomain.scaleType);
 
   // we need to get the last values from the formatted dataseries
   // because we change the format if we are on percentage mode
