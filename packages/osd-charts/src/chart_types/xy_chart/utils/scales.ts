@@ -51,7 +51,6 @@ function getBandScaleRange(
   const rangeEndOffset = isSingleValueHistogram ? 0 : bandwidth;
   const start = isInverse ? minRange - rangeEndOffset : minRange;
   const end = isInverse ? maxRange : maxRange - rangeEndOffset;
-
   return { start, end };
 }
 
@@ -100,7 +99,7 @@ export function computeXScale(options: XScaleOptions): Scale {
           range: [start, end],
         },
         {
-          bandwidth: bandwidth / totalBarsInCluster,
+          bandwidth: totalBarsInCluster > 0 ? bandwidth / totalBarsInCluster : bandwidth,
           minInterval,
           timeZone,
           totalBarsInCluster,

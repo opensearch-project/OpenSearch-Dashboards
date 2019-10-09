@@ -162,4 +162,36 @@ describe('Series scales', () => {
     expect(stackedBarsInCluster).toBe(2);
     expect(totalBarsInCluster).toBe(14);
   });
+  describe('bandwidth when totalBarsInCluster is greater than 0 or less than 0', () => {
+    const xDomainLinear: XDomain = {
+      type: 'xDomain',
+      isBandScale: true,
+      domain: [0, 3],
+      minInterval: 1,
+      scaleType: ScaleType.Linear,
+    };
+    const maxRange = 120;
+    const scaleOver0 = computeXScale({
+      xDomain: xDomainLinear,
+      totalBarsInCluster: 2,
+      range: [0, maxRange],
+      barsPadding: 0,
+      enableHistogramMode: false,
+    });
+
+    test('totalBarsInCluster greater than 0', () => {
+      expect(scaleOver0.bandwidth).toBe(maxRange / 4 / 2);
+    });
+
+    const scaleUnder0 = computeXScale({
+      xDomain: xDomainLinear,
+      totalBarsInCluster: 0,
+      range: [0, maxRange],
+      barsPadding: 0,
+      enableHistogramMode: false,
+    });
+    test('totalBarsInCluster less than 0', () => {
+      expect(scaleUnder0.bandwidth).toBe(maxRange / 4);
+    });
+  });
 });
