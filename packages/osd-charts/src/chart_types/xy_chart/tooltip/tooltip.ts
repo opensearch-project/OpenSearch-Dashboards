@@ -55,7 +55,7 @@ export function formatTooltip(
   if (seriesKey.length > 0) {
     displayName = seriesKey.join(' - ');
   } else {
-    displayName = name || `${spec.id}`;
+    displayName = spec.name || `${spec.id}`;
   }
 
   if (isBandedSpec(spec.y0Accessors) && (isAreaSeriesSpec(spec) || isBarSeriesSpec(spec))) {

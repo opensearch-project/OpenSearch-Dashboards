@@ -95,6 +95,15 @@ describe('Tooltip formatting', () => {
     expect(tooltipValue.color).toBe('blue');
     expect(tooltipValue.value).toBe('10');
   });
+  it('should set name as spec name when provided', () => {
+    const name = 'test - spec';
+    const tooltipValue = formatTooltip(indexedBandedGeometry, { ...SPEC_1, name }, false, false, YAXIS_SPEC);
+    expect(tooltipValue.name).toBe(name);
+  });
+  it('should set name as spec id when name is not provided', () => {
+    const tooltipValue = formatTooltip(indexedBandedGeometry, SPEC_1, false, false, YAXIS_SPEC);
+    expect(tooltipValue.name).toBe(SPEC_1.id);
+  });
   test('format banded tooltip - upper', () => {
     const tooltipValue = formatTooltip(indexedBandedGeometry, bandedSpec, false, false, YAXIS_SPEC);
     expect(tooltipValue.name).toBe('bar_1 - upper');
