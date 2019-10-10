@@ -28,6 +28,8 @@ interface ChartProps {
 
 interface ChartState {
   legendPosition: Position;
+  renderComplete: boolean;
+  renderCount: number;
 }
 
 export class Chart extends React.Component<ChartProps, ChartState> {
@@ -40,7 +42,18 @@ export class Chart extends React.Component<ChartProps, ChartState> {
     this.chartSpecStore = new ChartStore(props.id);
     this.state = {
       legendPosition: this.chartSpecStore.legendPosition.get(),
+      renderComplete: false,
+      renderCount: 0,
     };
+
+    this.chartSpecStore.chartInitialized.observe(({ newValue, oldValue }) => {
+      if (newValue !== oldValue) {
+        this.setState({
+          renderComplete: newValue,
+          renderCount: newValue ? this.state.renderCount + 1 : this.state.renderCount,
+        });
+      }
+    });
     // value is set to chart_store in settings so need to watch the value
     this.chartSpecStore.legendPosition.observe(({ newValue: legendPosition }) => {
       this.setState({
@@ -79,6 +92,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
 
   render() {
     const { renderer, size, className } = this.props;
+    const { renderComplete, renderCount } = this.state;
     const containerStyle = Chart.getContainerStyle(size);
     const horizontal = isHorizontalAxis(this.state.legendPosition);
     const chartClassNames = classNames('echChart', className, {
@@ -87,7 +101,12 @@ export class Chart extends React.Component<ChartProps, ChartState> {
 
     return (
       <Provider chartStore={this.chartSpecStore}>
-        <div style={containerStyle} className={chartClassNames}>
+        <div
+          style={containerStyle}
+          className={chartClassNames}
+          data-ech-render-complete={renderComplete}
+          data-ech-render-count={renderCount}
+        >
           <Legend />
           <SpecsParser>{this.props.children}</SpecsParser>
           <div className="echContainer">

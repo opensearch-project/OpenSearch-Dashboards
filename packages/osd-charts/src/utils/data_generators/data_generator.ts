@@ -8,7 +8,7 @@ export class DataGenerator {
     this.frequency = frequency;
   }
   generateSimpleSeries(totalPoints = 50, group = 1) {
-    const dataPoints = new Array(totalPoints).fill(0).map((value, i) => {
+    const dataPoints = new Array(totalPoints).fill(0).map((_, i) => {
       return {
         x: i,
         y: 3 + Math.sin(i / this.frequency) + this.generator.getValue(i),

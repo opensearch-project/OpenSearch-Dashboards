@@ -1,3 +1,7 @@
+import seedrandom from 'seedrandom';
+
+export const getRandomNumber = seedrandom(process.env.RNG_SEED || undefined);
+
 export class Simple1DNoise {
   private maxVertices: number;
   private maxVerticesMask: number;
@@ -9,8 +13,9 @@ export class Simple1DNoise {
     this.scale = scale;
     this.maxVertices = maxVertices;
   }
+
   getValue(x: number) {
-    const r = new Array(this.maxVertices).fill(0).map(Math.random);
+    const r = new Array(this.maxVertices).fill(0).map(getRandomNumber);
     const scaledX = x * this.scale;
     const xFloor = Math.floor(scaledX);
     const t = scaledX - xFloor;
@@ -25,6 +30,7 @@ export class Simple1DNoise {
 
     return y * this.amplitude;
   }
+
   private lerp(a: number, b: number, t: number) {
     return a * (1 - t) + b * t;
   }

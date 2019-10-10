@@ -1,5 +1,6 @@
 // eslint-disable-next-line
 const path = require('path');
+const webpack = require('webpack');
 
 const nonce = 'Pk1rZ1XDlMuYe8ubWV3Lh0BzwrTigJQ=';
 const scssLoaders = [
@@ -22,6 +23,8 @@ module.exports = async ({ config, mode }) => {
   } else {
     config.devtool = 'source-map';
   }
+
+  config.plugins.push(new webpack.EnvironmentPlugin({ RNG_SEED: null }));
 
   config.module.rules.push({
     test: /\.tsx?$/,

@@ -23,7 +23,7 @@ export class ScaleBand implements Scale {
      * A number between 0 and 1.
      * @default 0
      */
-    barsPadding: number = 0,
+    barsPadding = 0,
   ) {
     this.type = ScaleType.Ordinal;
     this.d3Scale = scaleBand();

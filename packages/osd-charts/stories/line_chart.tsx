@@ -1,4 +1,4 @@
-import { boolean, select } from '@storybook/addon-knobs';
+import { boolean } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import {
@@ -10,13 +10,13 @@ import {
   LineSeries,
   niceTimeFormatByDay,
   Position,
-  Rotation,
   ScaleType,
   Settings,
   timeFormatter,
 } from '../src/';
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 import { TSVB_DATASET } from '../src/utils/data_samples/test_dataset_tsvb';
+import { getChartRotationKnob } from './common';
 
 const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
 
@@ -68,20 +68,9 @@ storiesOf('Line Chart', module)
     );
   })
   .add('ordinal w axis', () => {
-    const chartRotation = select<Rotation>(
-      'chartRotation',
-      {
-        '0 deg': 0,
-        '90 deg': 90,
-        '-90 deg': -90,
-        '180 deg': 180,
-      },
-      0,
-    );
-
     return (
       <Chart className={'story-chart'}>
-        <Settings rotation={chartRotation} />
+        <Settings rotation={getChartRotationKnob()} />
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}

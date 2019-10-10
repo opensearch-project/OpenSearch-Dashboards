@@ -15,7 +15,7 @@ import {
   Settings,
 } from '../src/';
 
-function generateGridLineConfig(group: string, gridColor: string = 'purple'): GridLineConfig {
+function generateGridLineConfig(group: string, gridColor = 'purple'): GridLineConfig {
   const groupId = `${group} axis`;
 
   return {

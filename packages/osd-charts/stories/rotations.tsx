@@ -57,7 +57,7 @@ storiesOf('Rotations', module)
       </Chart>
     );
   })
-  .add('-90 deg ordinal', () => {
+  .add('negative 90 deg ordinal', () => {
     return (
       <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} rotation={-90} />
@@ -133,7 +133,7 @@ storiesOf('Rotations', module)
       </Chart>
     );
   })
-  .add('-90 deg linear', () => {
+  .add('negative 90 deg linear', () => {
     return (
       <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} rotation={-90} />

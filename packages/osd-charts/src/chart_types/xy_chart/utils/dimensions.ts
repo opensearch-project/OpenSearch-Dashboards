@@ -72,8 +72,8 @@ export function computeChartDimensions(
   const chartWidth = parentDimensions.width - chartLeftAxisMaxWidth - chartRightAxisMaxWidth;
   const chartHeight = parentDimensions.height - chartTopAxisMaxHeight - chartBottomAxisMaxHeight;
 
-  let top = chartTopAxisMaxHeight + chartPaddings.top;
-  let left = chartLeftAxisMaxWidth + chartPaddings.left;
+  const top = chartTopAxisMaxHeight + chartPaddings.top;
+  const left = chartLeftAxisMaxWidth + chartPaddings.left;
 
   return {
     leftMargin: chartLeftAxisMaxWidth - vLeftAxisSpecWidth,

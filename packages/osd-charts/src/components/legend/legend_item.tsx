@@ -77,7 +77,7 @@ class LegendItemComponent extends React.Component<LegendItemProps, LegendItemSta
       </div>
     );
   }
-  renderColor(colorClickAction: () => void, color?: string, isSeriesVisible: boolean = true) {
+  renderColor(colorClickAction: () => void, color?: string, isSeriesVisible = true) {
     if (!color) {
       return null;
     }
@@ -93,7 +93,7 @@ class LegendItemComponent extends React.Component<LegendItemProps, LegendItemSta
     );
   }
 
-  renderVisibilityButton = (legendItemKey: string, isSeriesVisible: boolean = true) => {
+  renderVisibilityButton = (legendItemKey: string, isSeriesVisible = true) => {
     const iconType = isSeriesVisible ? 'eye' : 'eyeClosed';
     return (
       <div className="echLegendItem__visibility">

@@ -27,7 +27,7 @@ export function getYValueStackMap(
         missingXValues.delete(datum.x);
       }
     });
-    for (let x of missingXValues.values()) {
+    for (const x of missingXValues.values()) {
       const stack = stackMap.get(x) || new Array(dataseries.length).fill(0);
       // currently filling as 0 value
       stack[index] = 0;
@@ -113,7 +113,7 @@ export function formatStackedDataSeriesValues(
       missingXValues.delete(data.x);
       newData.push(formattedSeriesDatum);
     });
-    for (let x of missingXValues.values()) {
+    for (const x of missingXValues.values()) {
       const filledSeriesDatum = getStackedFormattedSeriesDatum(
         {
           x,
@@ -170,7 +170,7 @@ function getStackedFormattedSeriesDatum(
   } else {
     y1 = data.y1;
   }
-  let y0 = isPercentageMode && data.y0 != null ? data.y0 / stack.total : data.y0;
+  const y0 = isPercentageMode && data.y0 != null ? data.y0 / stack.total : data.y0;
   let computedY0: number | null;
   if (scaleToExtent) {
     computedY0 = y0 ? y0 : y1;

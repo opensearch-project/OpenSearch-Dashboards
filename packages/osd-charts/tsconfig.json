@@ -16,6 +16,5 @@
     "allowJs": false,
     "skipLibCheck": true,
     "downlevelIteration": true
-  },
-  "include": ["src/**/*", "stories/**/*"]
+  }
 }

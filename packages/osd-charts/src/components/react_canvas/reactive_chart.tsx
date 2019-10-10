@@ -2,7 +2,6 @@ import React from 'react';
 import { inject, observer } from 'mobx-react';
 import { ContainerConfig } from 'konva';
 import { Layer, Rect, Stage } from 'react-konva';
-
 import { AnnotationId } from '../../utils/ids';
 import { isLineAnnotation, isRectAnnotation, AxisSpec } from '../../chart_types/xy_chart/utils/specs';
 import { LineAnnotationStyle, RectAnnotationStyle, mergeGridLineConfigs } from '../../utils/themes/theme';
@@ -61,7 +60,9 @@ function limitPoint(value: number, min: number, max: number) {
 }
 function getPoint(event: MouseEvent, extent: BrushExtent): Point {
   const point = {
+    // @ts-ignore
     x: limitPoint(event.layerX, extent.minX, extent.maxX),
+    // @ts-ignore
     y: limitPoint(event.layerY, extent.minY, extent.maxY),
   };
   return point;

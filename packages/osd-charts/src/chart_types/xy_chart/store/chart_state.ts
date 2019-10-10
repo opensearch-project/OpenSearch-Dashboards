@@ -179,12 +179,12 @@ export class ChartStore {
     maxY: 0,
   };
 
-  resizeDebounce: number = 10;
+  resizeDebounce = 10;
 
   chartRotation: Rotation = 0; // updated from jsx
   chartRendering: Rendering = 'canvas'; // updated from jsx
   chartTheme: Theme = LIGHT_THEME;
-  hideDuplicateAxes: boolean = false; // updated from jsx
+  hideDuplicateAxes = false; // updated from jsx
   axesSpecs: Map<AxisId, AxisSpec> = new Map(); // readed from jsx
   axesTicksDimensions: Map<AxisId, AxisTicksDimensions> = new Map(); // computed
   axesPositions: Map<AxisId, Dimensions> = new Map(); // computed
@@ -576,7 +576,7 @@ export class ChartStore {
     return (this.xScale && this.xScale.bandwidth > 0) || this.tooltipSnap.get();
   });
 
-  clearTooltipAndHighlighted = action((clearCursorBand: boolean = true) => {
+  clearTooltipAndHighlighted = action((clearCursorBand = true) => {
     // if exist any highlighted geometry, send an out element event
     if (this.onElementOutListener && this.highlightedGeometries.length > 0) {
       this.onElementOutListener();

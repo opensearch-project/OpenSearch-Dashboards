@@ -14,7 +14,7 @@ export const DEFAULT_SNAP_POSITION_BAND = 1;
 export function getSnapPosition(
   value: string | number,
   scale: Scale,
-  totalBarsInCluster: number = 1,
+  totalBarsInCluster = 1,
 ): { band: number; position: number } | undefined {
   const position = scale.scale(value);
   if (position === undefined) {
@@ -175,7 +175,7 @@ export function getHorizontalTooltipPosition(
   chartDimensions: Dimensions,
   isHorizontalRotated: boolean,
   isSingleValueXScale: boolean,
-  padding: number = 20,
+  padding = 20,
 ): { offset: number; position: number } {
   if (isHorizontalRotated) {
     if (isSingleValueXScale) {
@@ -217,7 +217,7 @@ export function getVerticalTooltipPosition(
   chartDimensions: Dimensions,
   isHorizontalRotated: boolean,
   isSingleValueXScale: boolean,
-  padding: number = 20,
+  padding = 20,
 ): {
   offset: number;
   position: number;

@@ -1,8 +1,11 @@
 import { withInfo } from '@storybook/addon-info';
 import { withKnobs } from '@storybook/addon-knobs';
 import { addDecorator, configure, addParameters } from '@storybook/react';
+
 import { switchTheme } from './theme_service';
+
 switchTheme('light');
+
 import './style.scss';
 
 import { create } from '@storybook/theming';

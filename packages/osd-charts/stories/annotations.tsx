@@ -15,7 +15,6 @@ import {
   LineSeries,
   Position,
   RectAnnotation,
-  Rotation,
   ScaleType,
   Settings,
   timeFormatter,
@@ -23,6 +22,7 @@ import {
 import { Icon } from '../src/components/icons/icon';
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 import { AccessorType } from '../src/chart_types/xy_chart/rendering/rendering';
+import { getChartRotationKnob } from './common';
 
 const dateFormatter = timeFormatter('HH:mm:ss');
 
@@ -58,23 +58,12 @@ storiesOf('Annotations', module)
       },
     };
 
-    const chartRotation = select<Rotation>(
-      'chartRotation',
-      {
-        '0 deg': 0,
-        '90 deg': 90,
-        '-90 deg': -90,
-        '180 deg': 180,
-      },
-      0,
-    );
-
     const isBottom = boolean('x domain axis is bottom', true);
     const axisPosition = isBottom ? Position.Bottom : Position.Top;
 
     return (
       <Chart className={'story-chart'}>
-        <Settings showLegend debug={boolean('debug', false)} rotation={chartRotation} />
+        <Settings showLegend debug={boolean('debug', false)} rotation={getChartRotationKnob()} />
         <LineAnnotation
           annotationId={getAnnotationId('anno_1')}
           domainType={AnnotationDomainTypes.XDomain}
@@ -98,20 +87,9 @@ storiesOf('Annotations', module)
   .add('[line] basic xDomain ordinal', () => {
     const dataValues = generateAnnotationData(array('annotation values', ['a', 'c']));
 
-    const chartRotation = select<Rotation>(
-      'chartRotation',
-      {
-        '0 deg': 0,
-        '90 deg': 90,
-        '-90 deg': -90,
-        '180 deg': 180,
-      },
-      0,
-    );
-
     return (
       <Chart className={'story-chart'}>
-        <Settings debug={boolean('debug', false)} rotation={chartRotation} />
+        <Settings debug={boolean('debug', false)} rotation={getChartRotationKnob()} />
         <LineAnnotation
           annotationId={getAnnotationId('anno_1')}
           domainType={AnnotationDomainTypes.XDomain}
@@ -136,24 +114,13 @@ storiesOf('Annotations', module)
     const data = array('data values', [1.5, 7.2]);
     const dataValues = generateAnnotationData(data);
 
-    const chartRotation = select<Rotation>(
-      'chartRotation',
-      {
-        '0 deg': 0,
-        '90 deg': 90,
-        '-90 deg': -90,
-        '180 deg': 180,
-      },
-      0,
-    );
-
     const isLeft = boolean('y-domain axis is Position.Left', true);
     const axisTitle = isLeft ? 'y-domain axis (left)' : 'y-domain axis (right)';
     const axisPosition = isLeft ? Position.Left : Position.Right;
 
     return (
       <Chart className={'story-chart'}>
-        <Settings debug={boolean('debug', false)} rotation={chartRotation} />
+        <Settings debug={boolean('debug', false)} rotation={getChartRotationKnob()} />
         <LineAnnotation
           annotationId={getAnnotationId('anno_')}
           domainType={AnnotationDomainTypes.YDomain}
@@ -182,20 +149,9 @@ storiesOf('Annotations', module)
       1551438480000,
     ]);
 
-    const chartRotation = select<Rotation>(
-      'chartRotation',
-      {
-        '0 deg': 0,
-        '90 deg': 90,
-        '-90 deg': -90,
-        '180 deg': 180,
-      },
-      0,
-    );
-
     return (
       <Chart className={'story-chart'}>
-        <Settings debug={boolean('debug', false)} rotation={chartRotation} />
+        <Settings debug={boolean('debug', false)} rotation={getChartRotationKnob()} />
         <LineAnnotation
           annotationId={getAnnotationId('anno_1')}
           domainType={AnnotationDomainTypes.XDomain}
@@ -236,17 +192,6 @@ storiesOf('Annotations', module)
       },
     };
 
-    const chartRotation = select<Rotation>(
-      'chartRotation',
-      {
-        '0 deg': 0,
-        '90 deg': 90,
-        '-90 deg': -90,
-        '180 deg': 180,
-      },
-      0,
-    );
-
     const axisPosition = Position.Bottom;
 
     const marker = select<'alert' | 'eye' | 'questionInCircle'>(
@@ -264,7 +209,7 @@ storiesOf('Annotations', module)
 
     return (
       <Chart className={'story-chart'}>
-        <Settings debug={boolean('debug', false)} rotation={chartRotation} />
+        <Settings debug={boolean('debug', false)} rotation={getChartRotationKnob()} />
         <LineAnnotation
           annotationId={getAnnotationId('anno_1')}
           domainType={AnnotationDomainTypes.XDomain}
@@ -299,20 +244,9 @@ storiesOf('Annotations', module)
       },
     ];
 
-    const chartRotation = select<Rotation>(
-      'chartRotation',
-      {
-        '0 deg': 0,
-        '90 deg': 90,
-        '-90 deg': -90,
-        '180 deg': 180,
-      },
-      0,
-    );
-
     return (
       <Chart className={'story-chart'}>
-        <Settings debug={boolean('debug', false)} rotation={chartRotation} />
+        <Settings debug={boolean('debug', false)} rotation={getChartRotationKnob()} />
         <RectAnnotation dataValues={dataValues} annotationId={getAnnotationId('rect')} />
         <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'x-domain axis'} />
         <Axis id={getAxisId('left')} title={'y-domain axis'} position={Position.Left} />
@@ -338,20 +272,9 @@ storiesOf('Annotations', module)
       },
     ];
 
-    const chartRotation = select<Rotation>(
-      'chartRotation',
-      {
-        '0 deg': 0,
-        '90 deg': 90,
-        '-90 deg': -90,
-        '180 deg': 180,
-      },
-      0,
-    );
-
     return (
       <Chart className={'story-chart'}>
-        <Settings debug={boolean('debug', false)} rotation={chartRotation} />
+        <Settings debug={boolean('debug', false)} rotation={getChartRotationKnob()} />
         <RectAnnotation dataValues={dataValues} annotationId={getAnnotationId('rect')} />
         <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'x-domain axis'} />
         <Axis id={getAxisId('left')} title={'y-domain axis'} position={Position.Left} />
@@ -408,17 +331,6 @@ storiesOf('Annotations', module)
       },
     ];
 
-    const chartRotation = select<Rotation>(
-      'chartRotation',
-      {
-        '0 deg': 0,
-        '90 deg': 90,
-        '-90 deg': -90,
-        '180 deg': 180,
-      },
-      0,
-    );
-
     const isLeft = boolean('y-domain axis is Position.Left', true);
     const yAxisTitle = isLeft ? 'y-domain axis (left)' : 'y-domain axis (right)';
     const yAxisPosition = isLeft ? Position.Left : Position.Right;
@@ -429,7 +341,7 @@ storiesOf('Annotations', module)
 
     return (
       <Chart className={'story-chart'}>
-        <Settings debug={boolean('debug', false)} rotation={chartRotation} />
+        <Settings debug={boolean('debug', false)} rotation={getChartRotationKnob()} />
         <RectAnnotation dataValues={dataValues} annotationId={getAnnotationId('rect')} />
         <Axis id={getAxisId('bottom')} position={xAxisPosition} title={xAxisTitle} />
         <Axis id={getAxisId('left')} title={yAxisTitle} position={yAxisPosition} />
@@ -486,17 +398,6 @@ storiesOf('Annotations', module)
 
     const zIndex = number('annotation zIndex', 0);
 
-    const chartRotation = select<Rotation>(
-      'chartRotation',
-      {
-        '0 deg': 0,
-        '90 deg': 90,
-        '-90 deg': -90,
-        '180 deg': 180,
-      },
-      0,
-    );
-
     const style = {
       strokeWidth: number('rect border stroke width', 1),
       stroke: color('rect border stroke color', '#e5e5e5'),
@@ -529,7 +430,7 @@ storiesOf('Annotations', module)
 
     return (
       <Chart className={'story-chart'}>
-        <Settings debug={boolean('debug', false)} rotation={chartRotation} />
+        <Settings debug={boolean('debug', false)} rotation={getChartRotationKnob()} />
         <RectAnnotation
           dataValues={dataValues}
           annotationId={getAnnotationId('rect')}
@@ -573,24 +474,13 @@ storiesOf('Annotations', module)
       },
     };
 
-    const chartRotation = select<Rotation>(
-      'chartRotation',
-      {
-        '0 deg': 0,
-        '90 deg': 90,
-        '-90 deg': -90,
-        '180 deg': 180,
-      },
-      0,
-    );
-
     const xDomain = {
       minInterval: 1,
     };
 
     return (
       <Chart className={'story-chart'}>
-        <Settings debug={boolean('debug', false)} rotation={chartRotation} xDomain={xDomain} />
+        <Settings debug={boolean('debug', false)} rotation={getChartRotationKnob()} xDomain={xDomain} />
         <LineAnnotation
           annotationId={getAnnotationId('anno_1')}
           domainType={AnnotationDomainTypes.XDomain}

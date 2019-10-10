@@ -210,7 +210,7 @@ function computeTickDimensions(
   bboxCalculator: BBoxCalculator,
   axisConfig: AxisConfig,
   tickLabelPadding: number,
-  tickLabelRotation: number = 0,
+  tickLabelRotation = 0,
 ) {
   const tickValues = scale.ticks();
   const tickLabels = tickValues.map(tickFormat);

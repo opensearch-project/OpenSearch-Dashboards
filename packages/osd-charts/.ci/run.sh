@@ -97,13 +97,13 @@ yarn add codecov --prefer-offline
 ### install dependencies
 ###
 echo " -- installing dependencies"
-yarn install
+yarn install --frozen-lockfile
 
 ###
 ### building
 ###
 echo " -- building"
-yarn build 
+yarn build
 
 ###
 ### run linter
@@ -115,10 +115,16 @@ yarn lint
 ### testing
 ###
 echo " -- testing"
-yarn test --coverage
+yarn test --coverage --ci
 
 ###
 ### upload code coverage
 ###
 echo " -- upload code coverage"
 ./node_modules/.bin/codecov
+
+###
+### visual testing
+###
+echo " -- visual testing"
+yarn jest:integration --ci

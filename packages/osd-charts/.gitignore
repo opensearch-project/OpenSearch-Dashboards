@@ -18,3 +18,5 @@ coverage/
 npm-debug.log
 yarn-error.log
 ./playground/playground.tsx
+
+**/__diff_output__/
