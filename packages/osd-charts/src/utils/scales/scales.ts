@@ -2,7 +2,7 @@ export interface Scale {
   domain: any[];
   range: number[];
   ticks: () => any[];
-  scale: (value: any) => number;
+  scale: (value: string | number) => number;
   pureScale: (value: any) => number;
   invert: (value: number) => any;
   invertWithStep: (

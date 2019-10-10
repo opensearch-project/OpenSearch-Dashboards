@@ -213,9 +213,8 @@ export function renderPoints(
         }
         let y;
         let radius = 10;
-        const isHidden = yDatum === null || (isLogScale && yDatum <= 0);
         // we fix 0 and negative values at y = 0
-        if (isHidden) {
+        if (yDatum === null || (isLogScale && yDatum <= 0)) {
           y = yScale.range[0];
           radius = 0;
         } else {
@@ -246,6 +245,7 @@ export function renderPoints(
         };
         mutableIndexedGeometryMapUpsert(indexedGeometries, xValue, pointGeometry);
         // use the geometry only if the yDatum in contained in the current yScale domain
+        const isHidden = yDatum === null || (isLogScale && yDatum <= 0);
         if (!isHidden && yScale.isValueInDomain(yDatum)) {
           points.push(pointGeometry);
         }
@@ -288,7 +288,7 @@ export function renderBars(
   dataset.forEach((datum) => {
     const { y0, y1, initialY1, filled } = datum;
     // don't create a bar if the initialY1 value is null.
-    if (initialY1 === null || (filled && filled.y1 !== undefined)) {
+    if (y1 === null || initialY1 === null || (filled && filled.y1 !== undefined)) {
       return;
     }
     // don't create a bar if not within the xScale domain
@@ -296,21 +296,25 @@ export function renderBars(
       return;
     }
 
-    let height = 0;
     let y = 0;
+    let y0Scaled;
     if (yScale.type === ScaleType.Log) {
-      y = y1 === 0 ? yScale.range[0] : yScale.scale(y1);
-      let y0Scaled;
+      y = y1 === 0 || y1 === null ? yScale.range[0] : yScale.scale(y1);
       if (yScale.isInverted) {
-        y0Scaled = y0 === 0 ? yScale.range[1] : yScale.scale(y0);
+        y0Scaled = y0 === 0 || y0 === null ? yScale.range[1] : yScale.scale(y0);
       } else {
-        y0Scaled = y0 === 0 ? yScale.range[0] : yScale.scale(y0);
+        y0Scaled = y0 === 0 || y0 === null ? yScale.range[0] : yScale.scale(y0);
       }
-      height = y0Scaled - y;
     } else {
       y = yScale.scale(y1);
-      height = yScale.scale(y0) - y;
+      if (yScale.isInverted) {
+        // use always zero as baseline if y0 is null
+        y0Scaled = y0 === null ? yScale.scale(0) : yScale.scale(y0);
+      } else {
+        y0Scaled = y0 === null ? yScale.scale(0) : yScale.scale(y0);
+      }
     }
+    const height = y0Scaled - y;
 
     const x = xScale.scale(datum.x) + xScale.bandwidth * orderIndex;
     const width = xScale.bandwidth;
@@ -405,7 +409,13 @@ export function renderLine(
 
   const pathGenerator = line<DataSeriesDatum>()
     .x(({ x }) => xScale.scale(x) - xScaleOffset)
-    .y(({ y1 }) => yScale.scale(y1))
+    .y(({ y1 }) => {
+      if (y1 !== null) {
+        return yScale.scale(y1);
+      }
+      // this should never happen thanks to the defined function
+      return yScale.isInverted ? yScale.range[1] : yScale.range[0];
+    })
     .defined(({ x, y1 }) => {
       return y1 !== null && !(isLogScale && y1 <= 0) && xScale.isValueInDomain(x);
     })
@@ -458,7 +468,7 @@ export function renderArea(
   seriesKey: any[],
   xScaleOffset: number,
   seriesStyle: AreaSeriesStyle,
-  isStacked: boolean = false,
+  isStacked = false,
   pointStyleAccessor?: PointStyleAccessor,
 ): {
   areaGeometry: AreaGeometry;
@@ -468,7 +478,13 @@ export function renderArea(
 
   const pathGenerator = area<DataSeriesDatum>()
     .x(({ x }) => xScale.scale(x) - xScaleOffset)
-    .y1(({ y1 }) => yScale.scale(y1))
+    .y1(({ y1 }) => {
+      if (y1 !== null) {
+        return yScale.scale(y1);
+      }
+      // this should never happen thanks to the defined function
+      return yScale.isInverted ? yScale.range[1] : yScale.range[0];
+    })
     .y0(({ y0 }) => {
       if (y0 === null || (isLogScale && y0 <= 0)) {
         return yScale.range[0];
