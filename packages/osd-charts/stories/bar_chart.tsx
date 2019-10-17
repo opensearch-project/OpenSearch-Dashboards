@@ -10,7 +10,6 @@ import {
   BarSeries,
   Chart,
   DARK_THEME,
-  DataGenerator,
   getAnnotationId,
   getAxisId,
   getGroupId,
@@ -28,17 +27,15 @@ import {
   timeFormatter,
   TooltipType,
 } from '../src';
+import { SeededDataGenerator, getRandomNumber } from '../.storybook/utils';
 import * as TestDatasets from '../src/utils/data_samples/test_dataset';
-
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
-
 import { TEST_DATASET_DISCOVER } from '../src/utils/data_samples/test_dataset_discover_per_30s';
-import { getRandomNumber } from '../src/utils/data_generators/simple_noise';
 import { getChartRotationKnob } from './common';
 
 const dateFormatter = timeFormatter('HH:mm:ss');
 
-const dataGen = new DataGenerator();
+const dataGen = new SeededDataGenerator();
 function generateDataWithAdditional(num: number) {
   return [...dataGen.generateSimpleSeries(num), { x: num, y: 0.25, g: 0 }, { x: num + 1, y: 8, g: 0 }];
 }
@@ -827,7 +824,7 @@ storiesOf('Bar Chart', module)
     );
   })
   .add('with high data volume', () => {
-    const dg = new DataGenerator();
+    const dg = new SeededDataGenerator();
     const data = dg.generateSimpleSeries(15000);
     const tooltipProps = {
       type: TooltipType.Follow,

@@ -1,12 +1,12 @@
 import { array, boolean, number } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
+
 import {
   AreaSeries,
   Axis,
   BarSeries,
   Chart,
-  DataGenerator,
   getAxisId,
   getGroupId,
   getSpecId,
@@ -19,6 +19,7 @@ import {
   Settings,
   niceTimeFormatter,
 } from '../src/';
+import { SeededDataGenerator } from '../.storybook/utils';
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 
 function createThemeAction(title: string, min: number, max: number, value: number) {
@@ -364,7 +365,7 @@ storiesOf('Axis', module)
     );
   })
   .add('w many tick labels', () => {
-    const dg = new DataGenerator();
+    const dg = new SeededDataGenerator();
     const data = dg.generateSimpleSeries(31);
     const customStyle = {
       tickLabelPadding: number('Tick Label Padding', 0),

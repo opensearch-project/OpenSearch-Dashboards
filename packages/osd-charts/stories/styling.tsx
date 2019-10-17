@@ -1,6 +1,7 @@
 import { boolean, color, number, select } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
+
 import { switchTheme } from '../.storybook/theme_service';
 import {
   AreaSeries,
@@ -9,7 +10,6 @@ import {
   Chart,
   CurveType,
   CustomSeriesColorsMap,
-  DataGenerator,
   DataSeriesColorsValues,
   DEFAULT_MISSING_COLOR,
   getAxisId,
@@ -28,6 +28,7 @@ import {
   BarSeriesStyle,
   PointStyle,
 } from '../src/';
+import { SeededDataGenerator } from '../.storybook/utils';
 import * as TestDatasets from '../src/utils/data_samples/test_dataset';
 import { palettes } from '../src/utils/themes/colors';
 import { BarStyleAccessor, PointStyleAccessor } from '../src/chart_types/xy_chart/utils/specs';
@@ -104,7 +105,7 @@ function generateAreaSeriesStyleKnobs(
   };
 }
 
-const dg = new DataGenerator();
+const dg = new SeededDataGenerator();
 const data1 = dg.generateGroupedSeries(40, 4);
 const data2 = dg.generateSimpleSeries(40);
 const data3 = dg.generateSimpleSeries(40);

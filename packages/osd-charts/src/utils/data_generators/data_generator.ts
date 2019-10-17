@@ -1,10 +1,10 @@
-import { Simple1DNoise } from './simple_noise';
+import { Simple1DNoise, RandomNumberGenerator } from './simple_noise';
 
 export class DataGenerator {
   private generator: Simple1DNoise;
   private frequency: number;
-  constructor(frequency = 500) {
-    this.generator = new Simple1DNoise();
+  constructor(frequency = 500, randomNumberGenerator?: RandomNumberGenerator) {
+    this.generator = new Simple1DNoise(randomNumberGenerator);
     this.frequency = frequency;
   }
   generateSimpleSeries(totalPoints = 50, group = 1) {
