@@ -263,4 +263,27 @@ describe('Legends', () => {
     label = getSeriesColorLabel([0], false, spec1);
     expect(label).toBe('0');
   });
+  it('use the splitted value as label if has a single series and splitSeries is used', () => {
+    const specWithSplit: BasicSeriesSpec = {
+      ...spec1,
+      splitSeriesAccessors: ['g'],
+    };
+    let label = getSeriesColorLabel([], true, specWithSplit);
+    expect(label).toBe('Spec 1 title');
+
+    label = getSeriesColorLabel(['a'], true, specWithSplit);
+    expect(label).toBe('a');
+
+    // happens when we have multiple values in splitSeriesAccessor
+    // or we have also multiple yAccessors
+    label = getSeriesColorLabel(['a', 'b'], true, specWithSplit);
+    expect(label).toBe('a - b');
+
+    // happens when the value of a splitSeriesAccessor is null
+    label = getSeriesColorLabel([null], true, specWithSplit);
+    expect(label).toBe('Spec 1 title');
+
+    label = getSeriesColorLabel([], false, specWithSplit);
+    expect(label).toBe('Spec 1 title');
+  });
 });

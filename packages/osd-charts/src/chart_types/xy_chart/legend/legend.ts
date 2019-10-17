@@ -95,7 +95,7 @@ export function computeLegend(
 }
 
 export function getSeriesColorLabel(
-  colorValues: any[],
+  colorValues: Array<string | number | null | undefined>,
   hasSingleSeries: boolean,
   spec?: BasicSeriesSpec,
 ): string | undefined {
@@ -104,7 +104,11 @@ export function getSeriesColorLabel(
     if (!spec) {
       return;
     }
-    label = spec.name || `${spec.id}`;
+    if (spec.splitSeriesAccessors && colorValues.length > 0 && colorValues[0] !== null) {
+      label = colorValues.join(' - ');
+    } else {
+      label = spec.name || `${spec.id}`;
+    }
   } else {
     label = colorValues.join(' - ');
   }
