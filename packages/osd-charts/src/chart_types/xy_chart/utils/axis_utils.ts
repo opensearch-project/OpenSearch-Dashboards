@@ -11,6 +11,7 @@ import {
   TickFormatter,
   UpperBoundedDomain,
   AxisStyle,
+  TickFormatterOptions,
 } from './specs';
 import { AxisConfig, Theme } from '../../../utils/themes/theme';
 import { Dimensions, Margins } from '../../../utils/dimensions';
@@ -91,6 +92,9 @@ export function computeAxisTicksDimensions(
     axisConfig,
     tickLabelPadding,
     axisSpec.tickLabelRotation,
+    {
+      timeZone: xDomain.timeZone,
+    },
   );
 
   return {
@@ -211,9 +215,12 @@ function computeTickDimensions(
   axisConfig: AxisConfig,
   tickLabelPadding: number,
   tickLabelRotation = 0,
+  tickFormatOptions?: TickFormatterOptions,
 ) {
   const tickValues = scale.ticks();
-  const tickLabels = tickValues.map(tickFormat);
+  const tickLabels = tickValues.map((d) => {
+    return tickFormat(d, tickFormatOptions);
+  });
 
   const {
     tickLabelStyle: { fontFamily, fontSize },
@@ -404,6 +411,7 @@ export function getAvailableTicks(
   scale: Scale,
   totalBarsInCluster: number,
   enableHistogramMode: boolean,
+  tickFormatOptions?: TickFormatterOptions,
 ): AxisTick[] {
   const ticks = scale.ticks();
   const isSingleValueScale = scale.domain[0] - scale.domain[1] === 0;
@@ -433,14 +441,14 @@ export function getAvailableTicks(
     const firstTickValue = ticks[0];
     const firstTick = {
       value: firstTickValue,
-      label: axisSpec.tickFormat(firstTickValue),
+      label: axisSpec.tickFormat(firstTickValue, tickFormatOptions),
       position: scale.scale(firstTickValue) + offset,
     };
 
     const lastTickValue = firstTickValue + scale.minInterval;
     const lastTick = {
       value: lastTickValue,
-      label: axisSpec.tickFormat(lastTickValue),
+      label: axisSpec.tickFormat(lastTickValue, tickFormatOptions),
       position: scale.bandwidth + halfPadding * 2,
     };
 
@@ -449,7 +457,7 @@ export function getAvailableTicks(
   return ticks.map((tick) => {
     return {
       value: tick,
-      label: axisSpec.tickFormat(tick),
+      label: axisSpec.tickFormat(tick, tickFormatOptions),
       position: scale.scale(tick) + offset,
     };
   });
@@ -605,8 +613,11 @@ export function getAxisTicksPositions(
     if (!scale) {
       throw new Error(`Cannot compute scale for axis spec ${axisSpec.id}`);
     }
+    const tickFormatOptions = {
+      timeZone: xDomain.timeZone,
+    };
 
-    const allTicks = getAvailableTicks(axisSpec, scale, totalGroupsCount, enableHistogramMode);
+    const allTicks = getAvailableTicks(axisSpec, scale, totalGroupsCount, enableHistogramMode, tickFormatOptions);
     const visibleTicks = getVisibleTicks(allTicks, axisSpec, axisDim);
 
     if (axisSpec.showGridLines) {

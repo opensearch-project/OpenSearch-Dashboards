@@ -34,6 +34,7 @@ import {
 } from './axis_utils';
 import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
 import { SvgTextBBoxCalculator } from '../../../utils/bbox/svg_text_bbox_calculator';
+import { niceTimeFormatter } from '../../../utils/data/formatters';
 
 describe('Axis computational utils', () => {
   const mockedRect = {
@@ -119,6 +120,20 @@ describe('Axis computational utils', () => {
     showGridLines: true,
     integersOnly: false,
   };
+  const xAxisWithTime: AxisSpec = {
+    id: getAxisId('axis_1'),
+    groupId: getGroupId('group_1'),
+    title: 'v axis',
+    hide: false,
+    showOverlappingTicks: false,
+    showOverlappingLabels: false,
+    position: Position.Bottom,
+    tickSize: 10,
+    tickPadding: 10,
+    tickFormat: niceTimeFormatter([1551438000000, 1551441300000]),
+    showGridLines: true,
+    integersOnly: false,
+  };
 
   // const horizontalAxisSpecWTitle: AxisSpec = {
   //   id: getAxisId('axis_2'),
@@ -173,6 +188,56 @@ describe('Axis computational utils', () => {
     verticalAxisSpec.hide = true;
     const axisDimensions = computeAxisTicksDimensions(verticalAxisSpec, xDomain, [yDomain], 1, bboxCalculator, 0, axes);
     expect(axisDimensions).toBe(null);
+  });
+
+  test('should compute axis dimensions with timeZone', () => {
+    const bboxCalculator = new SvgTextBBoxCalculator();
+    const xDomain: XDomain = {
+      type: 'xDomain',
+      scaleType: ScaleType.Time,
+      domain: [1551438000000, 1551441300000],
+      isBandScale: false,
+      minInterval: 0,
+      timeZone: 'utc',
+    };
+    let axisDimensions = computeAxisTicksDimensions(xAxisWithTime, xDomain, [yDomain], 1, bboxCalculator, 0, axes);
+    expect(axisDimensions).not.toBeNull();
+    expect(axisDimensions!.tickLabels[0]).toBe('11:00:00');
+    expect(axisDimensions!.tickLabels[11]).toBe('11:55:00');
+
+    axisDimensions = computeAxisTicksDimensions(
+      xAxisWithTime,
+      {
+        ...xDomain,
+        timeZone: 'utc+3',
+      },
+      [yDomain],
+      1,
+      bboxCalculator,
+      0,
+      axes,
+    );
+    expect(axisDimensions).not.toBeNull();
+    expect(axisDimensions!.tickLabels[0]).toBe('14:00:00');
+    expect(axisDimensions!.tickLabels[11]).toBe('14:55:00');
+
+    axisDimensions = computeAxisTicksDimensions(
+      xAxisWithTime,
+      {
+        ...xDomain,
+        timeZone: 'utc-3',
+      },
+      [yDomain],
+      1,
+      bboxCalculator,
+      0,
+      axes,
+    );
+    expect(axisDimensions).not.toBeNull();
+    expect(axisDimensions!.tickLabels[0]).toBe('08:00:00');
+    expect(axisDimensions!.tickLabels[11]).toBe('08:55:00');
+
+    bboxCalculator.destroy();
   });
 
   test('should compute dimensions for the bounding box containing a rotated label', () => {

@@ -300,7 +300,10 @@ export interface AxisSpec {
   integersOnly?: boolean;
 }
 
-export type TickFormatter = (value: any) => string;
+export type TickFormatterOptions = {
+  timeZone?: string;
+};
+export type TickFormatter = (value: any, options?: TickFormatterOptions) => string;
 
 export interface AxisStyle {
   /** Specifies the amount of padding on the tick label bounding box */

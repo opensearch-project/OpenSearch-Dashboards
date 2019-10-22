@@ -1,14 +1,14 @@
 import { DateTime, Interval } from 'luxon';
+import { TickFormatter, TickFormatterOptions } from '../../chart_types/xy_chart/utils/specs';
 
-type TimeFormatter = (value: number) => string;
-
-export function timeFormatter(format: string): TimeFormatter {
-  return (value: number): string => {
-    return DateTime.fromMillis(value).toFormat(format);
+export function timeFormatter(format: string): TickFormatter {
+  return (value: number, options?: TickFormatterOptions): string => {
+    const dateTimeOptions = options && options.timeZone ? { zone: options.timeZone } : undefined;
+    return DateTime.fromMillis(value, dateTimeOptions).toFormat(format);
   };
 }
 
-export function niceTimeFormatter(domain: [number, number]): TimeFormatter {
+export function niceTimeFormatter(domain: [number, number]): TickFormatter {
   const minDate = DateTime.fromMillis(domain[0]);
   const maxDate = DateTime.fromMillis(domain[1]);
   const diff = Interval.fromDateTimes(minDate, maxDate);

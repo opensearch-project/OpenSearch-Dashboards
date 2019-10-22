@@ -1,7 +1,15 @@
 import { TooltipValue, isFollowTooltipType, TooltipType, TooltipValueFormatter } from '../utils/interactions';
 import { IndexedGeometry, isPointOnGeometry, AccessorType } from '../rendering/rendering';
 import { getColorValuesAsString } from '../utils/series';
-import { AxisSpec, BasicSeriesSpec, Rotation, isAreaSeriesSpec, isBandedSpec, isBarSeriesSpec } from '../utils/specs';
+import {
+  AxisSpec,
+  BasicSeriesSpec,
+  Rotation,
+  isAreaSeriesSpec,
+  isBandedSpec,
+  isBarSeriesSpec,
+  TickFormatterOptions,
+} from '../utils/specs';
 import { SpecId, AxisId, GroupId } from '../../../utils/ids';
 import { getAxesSpecForSpecId } from '../store/utils';
 import { Scale } from '../../../utils/scales/scales';
@@ -65,10 +73,11 @@ export function formatTooltip(
   }
 
   const value = isXValue ? x : y;
+  const tickFormatOptions: TickFormatterOptions | undefined = spec.timeZone ? { timeZone: spec.timeZone } : undefined;
   return {
     seriesKey: seriesKeyAsString,
     name: displayName,
-    value: axisSpec ? axisSpec.tickFormat(value) : emptyFormatter(value),
+    value: axisSpec ? axisSpec.tickFormat(value, tickFormatOptions) : emptyFormatter(value),
     color,
     isHighlighted: isXValue ? false : isHighlighted,
     isXValue,

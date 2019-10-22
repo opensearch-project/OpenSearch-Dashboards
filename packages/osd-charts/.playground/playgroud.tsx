@@ -1,5 +1,6 @@
 import React, { Fragment } from 'react';
-import { Axis, Chart, getAxisId, getSpecId, Position, ScaleType, BarSeries, Settings } from '../src';
+import { Axis, Chart, getAxisId, getSpecId, Position, ScaleType, BarSeries, Settings, niceTimeFormatter } from '../src';
+import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 
 export class Playground extends React.Component<{}, { dataLimit: boolean }> {
   state = {
@@ -13,21 +14,7 @@ export class Playground extends React.Component<{}, { dataLimit: boolean }> {
     });
   };
   render() {
-    const data = [
-      {
-        g: null,
-        i: 'aa',
-        x: 1571212800000,
-        y: 16,
-        y1: 2,
-      },
-      // {
-      //   x: 1571290200000,
-      //   y: 1,
-      //   y1: 5,
-      //   // g: 'authentication_success',
-      // },
-    ];
+    const { data } = KIBANA_METRICS.metrics.kibana_os_load[0];
     return (
       <Fragment>
         <div>
@@ -36,23 +23,22 @@ export class Playground extends React.Component<{}, { dataLimit: boolean }> {
         <div className="chart">
           <Chart>
             <Settings showLegend />
-            <Axis id={getAxisId('top')} position={Position.Bottom} title={'Top axis'} />
             <Axis
-              id={getAxisId('left2')}
-              title={'Left axis'}
-              position={Position.Left}
-              tickFormat={(d: any) => Number(d).toFixed(2)}
+              id={getAxisId('top')}
+              position={Position.Bottom}
+              title={'Top axis'}
+              tickFormat={niceTimeFormatter([data[0][0], data[data.length - 1][0]])}
             />
+            <Axis id={getAxisId('left2')} title={'Left axis'} position={Position.Left} />
 
             <BarSeries
               id={getSpecId('bars1')}
-              xScaleType={ScaleType.Linear}
+              xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
-              xAccessor="x"
-              yAccessors={['y']}
-              splitSeriesAccessors={['g']}
-              stackAccessors={['x']}
-              data={data.slice(0, this.state.dataLimit ? 1 : 2)}
+              xAccessor={0}
+              yAccessors={[1]}
+              data={data}
+              timeZone={'utc+8'}
             />
           </Chart>
         </div>
