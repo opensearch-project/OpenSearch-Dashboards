@@ -11,25 +11,39 @@ class Resizer extends React.Component<ResizerProps> {
   private initialResizeComplete = false;
   private containerRef: RefObject<HTMLDivElement>;
   private ro: ResizeObserver;
+  private animationFrameID: number | null;
   private onResizeDebounced: (entries: ResizeObserverEntry[]) => void = () => {};
 
   constructor(props: ResizerProps) {
     super(props);
     this.containerRef = React.createRef();
     this.ro = new ResizeObserver(this.handleResize);
+    this.animationFrameID = null;
   }
 
   componentDidMount() {
     this.onResizeDebounced = debounce(this.onResize, this.props.chartStore!.resizeDebounce);
-    this.ro.observe(this.containerRef.current as Element);
+    if (this.containerRef.current) {
+      this.ro.observe(this.containerRef.current as Element);
+    }
   }
 
   componentWillUnmount() {
-    this.ro.unobserve(this.containerRef.current as Element);
+    if (this.animationFrameID) {
+      window.cancelAnimationFrame(this.animationFrameID);
+    }
+    this.ro.disconnect();
   }
 
   onResize = (entries: ResizeObserverEntry[]) => {
-    entries.forEach(({ contentRect: { width, height } }) => {
+    if (!Array.isArray(entries)) {
+      return;
+    }
+    if (!entries.length || !entries[0]) {
+      return;
+    }
+    const { width, height } = entries[0].contentRect;
+    this.animationFrameID = window.requestAnimationFrame(() => {
       this.props.chartStore!.updateParentDimensions(width, height, 0, 0);
     });
   };
