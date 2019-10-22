@@ -85,19 +85,17 @@ yarn config set yarn-offline-mirror "$cacheDir/yarn-offline-cache"
 yarnGlobalDir="$(yarn global bin)"
 export PATH="$PATH:$yarnGlobalDir"
 
-
-
-###
-### install codecov dependencies
-###
-echo " -- installing codecov dependencies"
-yarn add codecov --prefer-offline
-
 ###
 ### install dependencies
 ###
 echo " -- installing dependencies"
 yarn install --frozen-lockfile
+
+###
+### install codecov dependencies
+###
+echo " -- installing codecov dependencies"
+yarn add codecov --prefer-offline --frozen-lockfile
 
 ###
 ### building
