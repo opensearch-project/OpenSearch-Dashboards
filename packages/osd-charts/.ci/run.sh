@@ -110,6 +110,12 @@ echo " -- run linter"
 yarn lint
 
 ###
+### timezone specific testing
+###
+echo " -- tz testing"
+yarn test:tz --ci
+
+###
 ### testing
 ###
 echo " -- testing"

@@ -17,7 +17,7 @@ export function niceTimeFormatter(domain: [number, number]): TickFormatter {
 }
 
 export function niceTimeFormat(interval: Interval) {
-  const days = interval.count('days');
+  const days = interval.length('days');
   return niceTimeFormatByDay(days);
 }
 
