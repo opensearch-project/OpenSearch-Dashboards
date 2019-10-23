@@ -1,35 +1,30 @@
-import { DateTime, Interval } from 'luxon';
 import { TickFormatter, TickFormatterOptions } from '../../chart_types/xy_chart/utils/specs';
+import { getMomentWithTz } from './date_time';
+import moment from 'moment-timezone';
 
 export function timeFormatter(format: string): TickFormatter {
   return (value: number, options?: TickFormatterOptions): string => {
-    const dateTimeOptions = options && options.timeZone ? { zone: options.timeZone } : undefined;
-    return DateTime.fromMillis(value, dateTimeOptions).toFormat(format);
+    return getMomentWithTz(value, options && options.timeZone).format(format);
   };
 }
 
 export function niceTimeFormatter(domain: [number, number]): TickFormatter {
-  const minDate = DateTime.fromMillis(domain[0]);
-  const maxDate = DateTime.fromMillis(domain[1]);
-  const diff = Interval.fromDateTimes(minDate, maxDate);
-  const format = niceTimeFormat(diff);
+  const minDate = moment(domain[0]);
+  const maxDate = moment(domain[1]);
+  const diff = maxDate.diff(minDate, 'days');
+  const format = niceTimeFormatByDay(diff);
   return timeFormatter(format);
-}
-
-export function niceTimeFormat(interval: Interval) {
-  const days = interval.length('days');
-  return niceTimeFormatByDay(days);
 }
 
 export function niceTimeFormatByDay(days: number) {
   if (days > 30) {
-    return 'yyyy-MM-dd';
+    return 'YYYY-MM-DD';
   }
   if (days > 7 && days <= 30) {
-    return 'MMMM dd';
+    return 'MMMM DD';
   }
   if (days > 1 && days <= 7) {
-    return 'MM-dd HH:mm';
+    return 'MM-DD HH:mm';
   }
   return 'HH:mm:ss';
 }

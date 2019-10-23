@@ -9,10 +9,10 @@ import {
   ScalePower,
   ScaleTime,
 } from 'd3-scale';
-import { DateTime } from 'luxon';
 
 import { clamp, mergePartial } from '../commons';
 import { ScaleContinuousType, ScaleType, Scale } from './scales';
+import { getMomentWithTz } from '../data/date_time';
 
 /**
  * d3 scales excluding time scale
@@ -186,11 +186,11 @@ export class ScaleContinuous implements Scale {
     this.totalBarsInCluster = totalBarsInCluster;
     this.isSingleValueHistogram = isSingleValueHistogram;
     if (type === ScaleType.Time) {
-      const startDomain = DateTime.fromMillis(this.domain[0], { zone: this.timeZone });
-      const endDomain = DateTime.fromMillis(this.domain[1], { zone: this.timeZone });
-      const offset = startDomain.offset;
-      const shiftedDomainMin = startDomain.plus({ minutes: offset }).toMillis();
-      const shiftedDomainMax = endDomain.plus({ minutes: offset }).toMillis();
+      const startDomain = getMomentWithTz(this.domain[0], this.timeZone);
+      const endDomain = getMomentWithTz(this.domain[1], this.timeZone);
+      const offset = startDomain.utcOffset();
+      const shiftedDomainMin = startDomain.add(offset, 'minutes').valueOf();
+      const shiftedDomainMax = endDomain.add(offset, 'minutes').valueOf();
       const tzShiftedScale = scaleUtc().domain([shiftedDomainMin, shiftedDomainMax]);
 
       const rawTicks = tzShiftedScale.ticks(ticks);
@@ -198,9 +198,9 @@ export class ScaleContinuous implements Scale {
       const hasHourTicks = timePerTick < 1000 * 60 * 60 * 12;
 
       this.tickValues = rawTicks.map((d: Date) => {
-        const currentDateTime = DateTime.fromJSDate(d, { zone: this.timeZone });
-        const currentOffset = hasHourTicks ? offset : currentDateTime.offset;
-        return currentDateTime.minus({ minutes: currentOffset }).toMillis();
+        const currentDateTime = getMomentWithTz(d, this.timeZone);
+        const currentOffset = hasHourTicks ? offset : currentDateTime.utcOffset();
+        return currentDateTime.subtract(currentOffset, 'minutes').valueOf();
       });
     } else {
       /**
@@ -241,7 +241,7 @@ export class ScaleContinuous implements Scale {
   invert(value: number): number {
     let invertedValue = this.d3Scale.invert(value);
     if (this.type === ScaleType.Time) {
-      invertedValue = DateTime.fromJSDate(invertedValue as Date).toMillis();
+      invertedValue = getMomentWithTz(invertedValue, this.timeZone).valueOf();
     }
 
     return invertedValue as number;

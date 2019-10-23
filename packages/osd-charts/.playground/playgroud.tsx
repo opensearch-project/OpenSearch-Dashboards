@@ -37,8 +37,8 @@ export class Playground extends React.Component<{}, { dataLimit: boolean }> {
               yScaleType={ScaleType.Linear}
               xAccessor={0}
               yAccessors={[1]}
+              timeZone={'US/Pacific'}
               data={data}
-              timeZone={'utc+8'}
             />
           </Chart>
         </div>
