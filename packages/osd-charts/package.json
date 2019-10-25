@@ -19,6 +19,7 @@
     "concat:sass": "node scripts/concat_sass.js",
     "autoprefix:css": "yarn postcss dist/*.css --no-map --use autoprefixer -d dist",
     "build": "yarn build:clean && yarn build:ts && yarn build:sass && yarn autoprefix:css && yarn concat:sass",
+    "build:watch": "yarn build:clean && yarn build:sass && yarn autoprefix:css && yarn concat:sass && yarn build:ts -w ",
     "start": "yarn storybook",
     "storybook": "start-storybook -p 9001 -c .storybook --ci",
     "storybook:build": "rm -rf .out && build-storybook -c .storybook -o .out",
