@@ -33,11 +33,16 @@ module.exports = {
     project: undefined,
   },
   rules: {
-    'no-unused-vars': ['error', {
-      vars: 'all',
-      args: 'after-used',
-      ignoreRestSiblings: true,
-    },],
+    'no-console': process.env.NODE_ENV === 'production' ? 2 : 1,
+    'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 1,
+    'no-unused-vars': [
+      'error',
+      {
+        vars: 'all',
+        args: 'after-used',
+        ignoreRestSiblings: true,
+      },
+    ],
     '@typescript-eslint/no-unused-vars': [
       'error',
       {
@@ -73,20 +78,23 @@ module.exports = {
   },
   overrides: [
     {
-      files: [ '*.js' ],
+      files: ['*.js'],
       rules: {
-        '@typescript-eslint/no-var-requires': 0
-      }
+        '@typescript-eslint/no-var-requires': 0,
+      },
     },
     {
-      files: [ 'stories/**/*.tsx', 'stories/**/*.ts', '*.test.ts', '*.test.tsx' ],
+      files: ['stories/**/*.tsx', 'stories/**/*.ts', '*.test.ts', '*.test.tsx'],
       rules: {
-        'no-restricted-properties': [2, {
-          'object': 'Math',
-          'property': 'random',
-          'message': 'Please use the `getRandomNumber` to create seeded random function in `stories/` and `tests/`',
-        }],
-      }
-    }
-  ]
+        'no-restricted-properties': [
+          2,
+          {
+            object: 'Math',
+            property: 'random',
+            message: 'Please use the `getRandomNumber` to create seeded random function in `stories/` and `tests/`',
+          },
+        ],
+      },
+    },
+  ],
 };

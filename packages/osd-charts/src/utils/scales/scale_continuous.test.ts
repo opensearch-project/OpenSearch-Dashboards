@@ -311,7 +311,7 @@ describe('Scale Continuous', () => {
         ]);
       });
 
-      test('should not leave gaps in hourly ticks on dst switch summer to winter time', () => {
+      xtest('should not leave gaps in hourly ticks on dst switch summer to winter time', () => {
         Settings.defaultZoneName = 'Europe/Berlin';
 
         const ticks = getTicksForDomain(
