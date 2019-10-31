@@ -14,6 +14,7 @@ export class LineAnnotationSpecComponent extends PureComponent<LineAnnotationPro
     style: DEFAULT_ANNOTATION_LINE_STYLE,
     hideLines: false,
     hideTooltips: false,
+    hideLinesTooltips: true,
     zIndex: 1,
   };
 

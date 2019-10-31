@@ -431,15 +431,15 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     });
     test('horizontal chart rotation', () => {
       store.setCursorPosition(chartLeft + 99, chartTop + 99);
-      const expectedTransform = `translateX(${chartLeft}px) translateX(-0%) translateY(109px) translateY(-100%)`;
-      expect(store.tooltipPosition.transform).toBe(expectedTransform);
+      expect(store.tooltipPosition.hPosition.bandLeft).toBe(chartLeft);
+      expect(store.tooltipPosition.vPosition.bandTop).toBe(109);
     });
 
     test('vertical chart rotation', () => {
       store.chartRotation = 90;
       store.setCursorPosition(chartLeft + 99, chartTop + 99);
-      const expectedTransform = `translateX(109px) translateX(-100%) translateY(${chartTop}px) translateY(-0%)`;
-      expect(store.tooltipPosition.transform).toBe(expectedTransform);
+      expect(store.tooltipPosition.hPosition.bandLeft).toBe(109);
+      expect(store.tooltipPosition.vPosition.bandTop).toBe(chartTop);
     });
   });
   describe('can format tooltip values on rotated chart', () => {

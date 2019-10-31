@@ -8,49 +8,100 @@ import {
   AnnotationTooltipFormatter,
 } from '../chart_types/xy_chart/annotations/annotation_utils';
 import { ChartStore } from '../chart_types/xy_chart/store/chart_state';
+import { createPortal } from 'react-dom';
+import { getFinalAnnotationTooltipPosition } from '../chart_types/xy_chart/annotations/annotation_tooltip';
 
 interface AnnotationTooltipProps {
   chartStore?: ChartStore;
+  getChartContainerRef: () => React.RefObject<HTMLDivElement>;
 }
+const ANNOTATION_CONTAINER_ID = 'echAnnotationContainerPortal';
 
 class AnnotationTooltipComponent extends React.Component<AnnotationTooltipProps> {
   static displayName = 'AnnotationTooltip';
+  portalNode: HTMLDivElement | null = null;
+  tooltipRef: React.RefObject<HTMLDivElement>;
 
-  renderTooltip() {
+  constructor(props: AnnotationTooltipProps) {
+    super(props);
+    this.tooltipRef = React.createRef();
+  }
+
+  createPortalNode() {
+    const container = document.getElementById(ANNOTATION_CONTAINER_ID);
+    if (container) {
+      this.portalNode = container as HTMLDivElement;
+    } else {
+      this.portalNode = document.createElement('div');
+      this.portalNode.id = ANNOTATION_CONTAINER_ID;
+      document.body.appendChild(this.portalNode);
+    }
+  }
+  componentDidMount() {
+    this.createPortalNode();
+  }
+  componentDidUpdate() {
+    // calling on componentDidUpdate because the annotation container can be
+    // removed by another chart on the same page
+    this.createPortalNode();
+    if (!this.tooltipRef.current) {
+      return;
+    }
+    const { getChartContainerRef } = this.props;
+    const chartContainerRef = getChartContainerRef();
+    if (!chartContainerRef.current) {
+      return;
+    }
+    const { annotationTooltipState, chartDimensions } = this.props.chartStore!;
+    const tooltipState = annotationTooltipState.get();
+    if (!tooltipState || !tooltipState.isVisible || !this.portalNode) {
+      return null;
+    }
+
+    const chartContainerBBox = chartContainerRef.current.getBoundingClientRect();
+    const tooltipBBox = this.tooltipRef.current.getBoundingClientRect();
+    const tooltipStyle = getFinalAnnotationTooltipPosition(
+      chartContainerBBox,
+      chartDimensions,
+      tooltipBBox,
+      tooltipState.anchor,
+    );
+
+    this.portalNode.style.left = tooltipStyle.left;
+    this.portalNode.style.top = tooltipStyle.top;
+  }
+
+  componentWillUnmount() {
+    if (this.portalNode && this.portalNode.parentNode) {
+      this.portalNode.parentNode.removeChild(this.portalNode);
+    }
+  }
+
+  renderTooltip = () => {
     const { annotationTooltipState } = this.props.chartStore!;
     const tooltipState = annotationTooltipState.get();
-
+    if (!this.portalNode) {
+      return null;
+    }
     if (!tooltipState || !tooltipState.isVisible) {
       return <div className="echAnnotation__tooltip echAnnotation__tooltip--hidden" />;
     }
 
-    const { transform, details, header } = tooltipState;
-    const chartDimensions = this.props.chartStore!.chartDimensions;
-
-    const tooltipTop = tooltipState.top;
-    const tooltipLeft = tooltipState.left;
-    const top = tooltipTop == null ? chartDimensions.top : chartDimensions.top + tooltipTop;
-    const left = tooltipLeft == null ? chartDimensions.left : chartDimensions.left + tooltipLeft;
-
-    const position = {
-      transform,
-      top,
-      left,
-    };
+    const { details, header } = tooltipState;
 
     switch (tooltipState.annotationType) {
       case 'line': {
-        const props = { position, details, header };
-        return <LineAnnotationTooltip {...props} />;
+        const props = { details, header };
+        return createPortal(<LineAnnotationTooltip {...props} ref={this.tooltipRef} />, this.portalNode);
       }
       case 'rectangle': {
-        const props = { details, position, customTooltip: tooltipState.renderTooltip };
-        return <RectAnnotationTooltip {...props} />;
+        const props = { details, customTooltip: tooltipState.renderTooltip };
+        return createPortal(<RectAnnotationTooltip {...props} ref={this.tooltipRef} />, this.portalNode);
       }
       default:
         return null;
     }
-  }
+  };
 
   renderAnnotationLineMarkers(annotationLines: AnnotationLineProps[], id: AnnotationId): JSX.Element[] {
     const { chartDimensions } = this.props.chartStore!;
@@ -62,13 +113,12 @@ class AnnotationTooltipComponent extends React.Component<AnnotationTooltipProps>
         return;
       }
 
-      const { transform, icon, color } = line.marker;
+      const { icon, color, position } = line.marker;
 
       const style = {
         color,
-        transform,
-        top: chartDimensions.top,
-        left: chartDimensions.left,
+        top: chartDimensions.top + position.top,
+        left: chartDimensions.left + position.left,
       };
 
       const markerElement = (
@@ -121,12 +171,12 @@ class AnnotationTooltipComponent extends React.Component<AnnotationTooltipProps>
 
 export const AnnotationTooltip = inject('chartStore')(observer(AnnotationTooltipComponent));
 
-function RectAnnotationTooltip(props: {
+interface RectAnnotationTooltipProps {
   details?: string;
-  position: { transform: string; top: number; left: number };
   customTooltip?: AnnotationTooltipFormatter;
-}) {
-  const { details, position, customTooltip } = props;
+}
+function RectAnnotationTooltipRender(props: RectAnnotationTooltipProps, ref: React.Ref<HTMLDivElement>) {
+  const { details, customTooltip } = props;
   const tooltipContent = customTooltip ? customTooltip(details) : details;
 
   if (!tooltipContent) {
@@ -134,7 +184,7 @@ function RectAnnotationTooltip(props: {
   }
 
   return (
-    <div className="echAnnotation__tooltip" style={{ ...position }}>
+    <div className="echAnnotation__tooltip" ref={ref}>
       <div className="echAnnotation__details">
         <div className="echAnnotation__detailsText">{tooltipContent}</div>
       </div>
@@ -142,16 +192,19 @@ function RectAnnotationTooltip(props: {
   );
 }
 
-function LineAnnotationTooltip(props: {
+const RectAnnotationTooltip = React.forwardRef(RectAnnotationTooltipRender);
+
+interface LineAnnotationTooltipProps {
   details?: string;
   header?: string;
-  position: { transform: string; top: number; left: number };
-}) {
-  const { details, position, header } = props;
+}
+function LineAnnotationTooltipRender(props: LineAnnotationTooltipProps, ref: React.Ref<HTMLDivElement>) {
+  const { details, header } = props;
   return (
-    <div className="echAnnotation__tooltip" style={{ ...position }}>
+    <div className="echAnnotation__tooltip" ref={ref}>
       <p className="echAnnotation__header">{header}</p>
       <div className="echAnnotation__details">{details}</div>
     </div>
   );
 }
+const LineAnnotationTooltip = React.forwardRef(LineAnnotationTooltipRender);

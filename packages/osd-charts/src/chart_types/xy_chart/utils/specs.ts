@@ -367,7 +367,9 @@ export type LineAnnotationSpec = BaseAnnotationSpec & {
   };
   /** Annotation lines are hidden */
   hideLines?: boolean;
-  /** Hide tooltip when hovering over the line */
+  /** Hide tooltip when hovering over the line
+   * @default true
+   */
   hideLinesTooltips?: boolean;
   /** z-index of the annotation relative to other elements in the chart
    * @default 1

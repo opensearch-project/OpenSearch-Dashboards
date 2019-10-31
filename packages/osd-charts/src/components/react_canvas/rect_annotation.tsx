@@ -17,7 +17,6 @@ export class RectAnnotation extends React.PureComponent<RectAnnotationProps> {
   }
   private renderAnnotationRect = (props: AnnotationRectProps, i: number) => {
     const { x, y, width, height } = props.rect;
-
     const rectProps = {
       ...this.props.rectStyle,
       x,

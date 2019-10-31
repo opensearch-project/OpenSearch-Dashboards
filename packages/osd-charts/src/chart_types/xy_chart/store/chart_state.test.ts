@@ -1056,10 +1056,11 @@ describe('Chart Store', () => {
 
     const expectedRectTooltipState = {
       isVisible: true,
-      transform: 'translate(0, 0)',
       annotationType: AnnotationTypes.Rectangle,
-      top: 4,
-      left: 5,
+      anchor: {
+        top: store.rawCursorPosition.y - store.chartDimensions.top,
+        left: store.rawCursorPosition.x - store.chartDimensions.left,
+      },
     };
     store.tooltipData.push(unhighlightedTooltipValue);
     expect(store.annotationTooltipState.get()).toEqual(expectedRectTooltipState);

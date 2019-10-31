@@ -8,6 +8,22 @@ export interface SnappedPosition {
   position: number;
   band: number;
 }
+export interface TooltipPosition {
+  /** true if the x axis is horizontal */
+  isRotatedHorizontal: boolean;
+  vPosition: {
+    /** the top position of the tooltip relative to the parent */
+    bandTop: number;
+    /** the height of the crosshair band if any */
+    bandHeight: number;
+  };
+  hPosition: {
+    /** the left position of the tooltip relative to the parent */
+    bandLeft: number;
+    /** the width of the crosshair band if any */
+    bandWidth: number;
+  };
+}
 
 export const DEFAULT_SNAP_POSITION_BAND = 1;
 
@@ -148,7 +164,7 @@ export function getTooltipPosition(
   cursorBandPosition: Dimensions,
   cursorPosition: { x: number; y: number },
   isSingleValueXScale: boolean,
-): string {
+): TooltipPosition {
   const isHorizontalRotated = isHorizontalRotation(chartRotation);
   const hPosition = getHorizontalTooltipPosition(
     cursorPosition.x,
@@ -164,9 +180,11 @@ export function getTooltipPosition(
     isHorizontalRotated,
     isSingleValueXScale,
   );
-  const xTranslation = `translateX(${hPosition.position}px) translateX(-${hPosition.offset}%)`;
-  const yTranslation = `translateY(${vPosition.position}px) translateY(-${vPosition.offset}%)`;
-  return `${xTranslation} ${yTranslation}`;
+  return {
+    isRotatedHorizontal: isHorizontalRotated,
+    vPosition,
+    hPosition,
+  };
 }
 
 export function getHorizontalTooltipPosition(
@@ -175,39 +193,17 @@ export function getHorizontalTooltipPosition(
   chartDimensions: Dimensions,
   isHorizontalRotated: boolean,
   isSingleValueXScale: boolean,
-  padding = 20,
-): { offset: number; position: number } {
+): { bandLeft: number; bandWidth: number } {
   if (isHorizontalRotated) {
-    if (isSingleValueXScale) {
-      return {
-        offset: 0,
-        position: cursorBandPosition.left,
-      };
-    }
-
-    if (cursorXPosition <= chartDimensions.width / 2) {
-      return {
-        offset: 0,
-        position: cursorBandPosition.left + cursorBandPosition.width + padding,
-      };
-    } else {
-      return {
-        offset: 100,
-        position: cursorBandPosition.left - padding,
-      };
-    }
+    return {
+      bandLeft: cursorBandPosition.left,
+      bandWidth: isSingleValueXScale ? 0 : cursorBandPosition.width,
+    };
   } else {
-    if (cursorXPosition <= chartDimensions.width / 2) {
-      return {
-        offset: 0,
-        position: chartDimensions.left + cursorXPosition,
-      };
-    } else {
-      return {
-        offset: 100,
-        position: chartDimensions.left + cursorXPosition,
-      };
-    }
+    return {
+      bandWidth: 0,
+      bandLeft: chartDimensions.left + cursorXPosition,
+    };
   }
 }
 
@@ -217,40 +213,69 @@ export function getVerticalTooltipPosition(
   chartDimensions: Dimensions,
   isHorizontalRotated: boolean,
   isSingleValueXScale: boolean,
-  padding = 20,
 ): {
-  offset: number;
-  position: number;
+  bandHeight: number;
+  bandTop: number;
 } {
   if (isHorizontalRotated) {
-    if (cursorYPosition <= chartDimensions.height / 2) {
-      return {
-        offset: 0,
-        position: cursorYPosition + chartDimensions.top,
-      };
+    return {
+      bandHeight: 0,
+      bandTop: cursorYPosition + chartDimensions.top,
+    };
+  } else {
+    return {
+      bandHeight: isSingleValueXScale ? 0 : cursorBandPosition.height,
+      bandTop: cursorBandPosition.top,
+    };
+  }
+}
+
+export function getFinalTooltipPosition(
+  /** the dimensions of the chart parent container */
+  container: Dimensions,
+  /** the dimensions of the tooltip container */
+  tooltip: Dimensions,
+  /** the tooltip computed position not adjusted within chart bounds */
+  tooltipPosition: TooltipPosition,
+  /** the padding to add between the tooltip position and the final position */
+  padding = 10,
+): {
+  left: string | null;
+  top: string | null;
+} {
+  const { hPosition, vPosition, isRotatedHorizontal: isHorizontalRotated } = tooltipPosition;
+  let left = 0;
+  let top = 0;
+  if (isHorizontalRotated) {
+    const leftOfBand = window.pageXOffset + container.left + hPosition.bandLeft;
+    if (hPosition.bandLeft + hPosition.bandWidth + tooltip.width + padding > container.width) {
+      left = leftOfBand - tooltip.width - padding;
     } else {
-      return {
-        offset: 100,
-        position: cursorYPosition + chartDimensions.top,
-      };
+      left = leftOfBand + hPosition.bandWidth + padding;
+    }
+    const topOfBand = window.pageYOffset + container.top;
+    if (vPosition.bandTop + tooltip.height > container.height) {
+      top = topOfBand + container.height - tooltip.height;
+    } else {
+      top = topOfBand + vPosition.bandTop;
     }
   } else {
-    if (isSingleValueXScale) {
-      return {
-        offset: 0,
-        position: cursorBandPosition.top,
-      };
-    }
-    if (cursorYPosition <= chartDimensions.height / 2) {
-      return {
-        offset: 0,
-        position: cursorBandPosition.top + cursorBandPosition.height + padding,
-      };
+    const leftOfBand = window.pageXOffset + container.left;
+    if (hPosition.bandLeft + hPosition.bandWidth + tooltip.width > container.width) {
+      left = leftOfBand + container.width - tooltip.width;
     } else {
-      return {
-        offset: 100,
-        position: cursorBandPosition.top - padding,
-      };
+      left = leftOfBand + hPosition.bandLeft + hPosition.bandWidth;
+    }
+    const topOfBand = window.pageYOffset + container.top + vPosition.bandTop;
+    if (vPosition.bandTop + vPosition.bandHeight + tooltip.height + padding > container.height) {
+      top = topOfBand - tooltip.height - padding;
+    } else {
+      top = topOfBand + vPosition.bandHeight + padding;
     }
   }
+
+  return {
+    left: `${Math.round(left)}px`,
+    top: `${Math.round(top)}px`,
+  };
 }

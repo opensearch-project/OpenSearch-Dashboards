@@ -1,4 +1,4 @@
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, createRef } from 'react';
 import classNames from 'classnames';
 import { Provider } from 'mobx-react';
 
@@ -37,8 +37,10 @@ export class Chart extends React.Component<ChartProps, ChartState> {
     renderer: 'canvas',
   };
   private chartSpecStore: ChartStore;
+  private chartContainerRef: React.RefObject<HTMLDivElement>;
   constructor(props: any) {
     super(props);
+    this.chartContainerRef = createRef();
     this.chartSpecStore = new ChartStore(props.id);
     this.state = {
       legendPosition: this.chartSpecStore.legendPosition.get(),
@@ -89,6 +91,9 @@ export class Chart extends React.Component<ChartProps, ChartState> {
       }
     }
   }
+  getChartContainerRef = () => {
+    return this.chartContainerRef;
+  };
 
   render() {
     const { renderer, size, className } = this.props;
@@ -106,6 +111,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
           className={chartClassNames}
           data-ech-render-complete={renderComplete}
           data-ech-render-count={renderCount}
+          ref={this.chartContainerRef}
         >
           <Legend />
           <SpecsParser>{this.props.children}</SpecsParser>
@@ -115,8 +121,8 @@ export class Chart extends React.Component<ChartProps, ChartState> {
             {// TODO reenable when SVG rendered is aligned with canvas one
             renderer === 'svg' && <ChartContainer />}
             {renderer === 'canvas' && <ChartContainer />}
-            <Tooltips />
-            <AnnotationTooltip />
+            <Tooltips getChartContainerRef={this.getChartContainerRef} />
+            <AnnotationTooltip getChartContainerRef={this.getChartContainerRef} />
             <Highlighter />
           </div>
         </div>

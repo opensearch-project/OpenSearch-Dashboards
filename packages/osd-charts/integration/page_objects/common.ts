@@ -21,25 +21,29 @@ class CommonPage {
 
     return `${baseUrl}?${query}${query ? '&' : ''}knob-debug=false`;
   }
-
-  async screenshotDOMElement(selector: string, opts?: ScreenshotDOMElementOptions) {
-    const padding: number = opts && opts.padding ? opts.padding : 0;
-    const path: string | undefined = opts && opts.path ? opts.path : undefined;
-
-    await page.waitForSelector(selector, { timeout: 10000 });
-    const rect = await page.evaluate((selector) => {
+  async getBoundingClientRect(selector = '.echChart[data-ech-render-complete=true]') {
+    return await page.evaluate((selector) => {
       const element = document.querySelector(selector);
 
       if (!element) {
-        return null;
+        throw Error(`Could not find element that matches selector: ${selector}.`);
       }
 
       const { x, y, width, height } = element.getBoundingClientRect();
 
       return { left: x, top: y, width, height, id: element.id };
     }, selector);
-
-    if (!rect) throw Error(`Could not find element that matches selector: ${selector}.`);
+  }
+  /**
+   * Capture screenshot or chart element only
+   */
+  async screenshotDOMElement(
+    selector = '.echChart[data-ech-render-complete=true]',
+    opts?: ScreenshotDOMElementOptions,
+  ) {
+    const padding: number = opts && opts.padding ? opts.padding : 0;
+    const path: string | undefined = opts && opts.path ? opts.path : undefined;
+    const rect = await this.getBoundingClientRect(selector);
 
     return page.screenshot({
       path,
@@ -52,11 +56,12 @@ class CommonPage {
     });
   }
 
-  /**
-   * Capture screenshot or chart element only
-   */
-  async getChartScreenshot() {
-    return this.screenshotDOMElement('.echChart[data-ech-render-complete=true]');
+  async moveMouseRelativeToDOMElement(
+    mousePosition: { x: number; y: number },
+    selector = '.echChart[data-ech-render-complete=true]',
+  ) {
+    const chartContainer = await this.getBoundingClientRect(selector);
+    await page.mouse.move(chartContainer.left + mousePosition.x, chartContainer.top + mousePosition.y);
   }
 
   /**
@@ -68,9 +73,10 @@ class CommonPage {
    */
   async expectChartAtUrlToMatchScreenshot(url: string) {
     try {
-      const cleanUrl = CommonPage.parseUrl(url);
-      await page.goto(cleanUrl);
-      const chart = await this.getChartScreenshot();
+      await this.loadChartFromURL(url);
+      await this.waitForElement();
+
+      const chart = await this.screenshotDOMElement();
 
       if (!chart) {
         throw new Error(`Error: Unable to find chart element\n\n\t${url}`);
@@ -80,6 +86,37 @@ class CommonPage {
     } catch (error) {
       throw new Error(error);
     }
+  }
+
+  /**
+   * Expect a chart given a url from storybook.
+   *
+   * - Note: No need to fix host or port. They will be set automatically.
+   *
+   * @param url Storybook url from knobs section
+   */
+  async expectChartWithMouseAtUrlToMatchScreenshot(url: string, mousePosition: { x: number; y: number }) {
+    try {
+      await this.loadChartFromURL(url);
+      await this.waitForElement();
+      await this.moveMouseRelativeToDOMElement(mousePosition);
+      const chart = await this.screenshotDOMElement();
+      if (!chart) {
+        throw new Error(`Error: Unable to find chart element\n\n\t${url}`);
+      }
+
+      expect(chart).toMatchImageSnapshot();
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+  async loadChartFromURL(url: string) {
+    const cleanUrl = CommonPage.parseUrl(url);
+    await page.goto(cleanUrl);
+  }
+
+  async waitForElement(selector = '.echChart[data-ech-render-complete=true]', timeout = 10000) {
+    await page.waitForSelector(selector, { timeout });
   }
 }
 
