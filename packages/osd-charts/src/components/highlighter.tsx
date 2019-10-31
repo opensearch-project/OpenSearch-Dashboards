@@ -14,8 +14,15 @@ class HighlighterComponent extends React.Component<HighlighterProps> {
     const { highlightedGeometries, chartTransform, chartDimensions, chartRotation } = this.props.chartStore!;
     const left = chartDimensions.left + chartTransform.x;
     const top = chartDimensions.top + chartTransform.y;
+    const clipWidth = [90, -90].includes(chartRotation) ? chartDimensions.height : chartDimensions.width;
+    const clipHeight = [90, -90].includes(chartRotation) ? chartDimensions.width : chartDimensions.height;
     return (
       <svg className="echHighlighter">
+        <defs>
+          <clipPath id="echHighlighterClipPath">
+            <rect x="0" y="0" width={clipWidth} height={clipHeight} />
+          </clipPath>
+        </defs>
         <g transform={`translate(${left}, ${top}) rotate(${chartRotation})`}>
           {highlightedGeometries.map((geom, i) => {
             const { color, x, y } = geom;
@@ -33,7 +40,15 @@ class HighlighterComponent extends React.Component<HighlighterProps> {
               );
             }
             return (
-              <rect key={i} x={x} y={y} width={geom.width} height={geom.height} className="echHighlighter__rect" />
+              <rect
+                key={i}
+                x={x}
+                y={y}
+                width={geom.width}
+                height={geom.height}
+                className="echHighlighter__rect"
+                clipPath="url(#echHighlighterClipPath)"
+              />
             );
           })}
         </g>
