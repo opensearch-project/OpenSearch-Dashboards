@@ -1,3 +1,10 @@
+## [13.5.10](https://github.com/elastic/elastic-charts/compare/v13.5.9...v13.5.10) (2019-10-31)
+
+
+### Bug Fixes
+
+* **legend:** disable fade of other charts when hiding an item ([#446](https://github.com/elastic/elastic-charts/issues/446)) ([ff4e097](https://github.com/elastic/elastic-charts/commit/ff4e097))
+
 ## [13.5.9](https://github.com/elastic/elastic-charts/compare/v13.5.8...v13.5.9) (2019-10-25)
 
 
