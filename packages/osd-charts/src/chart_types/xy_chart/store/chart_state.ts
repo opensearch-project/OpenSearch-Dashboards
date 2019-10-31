@@ -604,8 +604,13 @@ export class ChartStore {
   });
 
   onLegendItemOver = action((legendItemKey: string | null) => {
+    if (legendItemKey) {
+      const legendItem = this.legendItems.get(legendItemKey);
+      if (legendItem && findDataSeriesByColorValues(this.deselectedDataSeries, legendItem.value) > -1) {
+        return;
+      }
+    }
     this.highlightedLegendItemKey.set(legendItemKey);
-
     if (this.onLegendItemOverListener) {
       const currentLegendItem = this.highlightedLegendItem.get();
       const listenerData = currentLegendItem ? currentLegendItem.value : null;
@@ -667,11 +672,21 @@ export class ChartStore {
     }
   });
 
+  updateHighlightedLegendItemKey = action((legendItemKey: string, deselected: boolean) => {
+    if (deselected) {
+      this.highlightedLegendItemKey.set(null);
+    } else {
+      this.highlightedLegendItemKey.set(legendItemKey);
+    }
+  });
+
   toggleSeriesVisibility = action((legendItemKey: string) => {
     const legendItem = this.legendItems.get(legendItemKey);
 
     if (legendItem) {
       this.deselectedDataSeries = updateDeselectedDataSeries(this.deselectedDataSeries, legendItem.value);
+      const deselected = findDataSeriesByColorValues(this.deselectedDataSeries, legendItem.value) > -1;
+      this.updateHighlightedLegendItemKey(legendItemKey, deselected);
       this.computeChart();
     }
   });
