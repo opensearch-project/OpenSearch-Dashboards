@@ -194,9 +194,17 @@ export type BarSeriesSpec = BasicSeriesSpec &
      */
     stackAsPercentage?: boolean;
     /**
-     * An optional functional accessor to return custom color or style for bar datum
+     * Functional accessor to return custom color or style for bar datum
      */
     styleAccessor?: BarStyleAccessor;
+    /**
+     * Min height to render bars for highly variable data
+     *
+     * i.e. ranges from 100,000 to 1
+     *
+     * @units pixel
+     */
+    minBarHeight?: number;
   };
 
 /**

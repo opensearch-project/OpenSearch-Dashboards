@@ -981,4 +981,85 @@ describe('Rendering bars', () => {
       expect(indexedGeometries.size).toBe(3);
     });
   });
+  describe('Renders minBarHeight', () => {
+    const minBarHeight = 8;
+    const data = [
+      [1, -100000],
+      [2, -10000],
+      [3, -1000],
+      [4, -100],
+      [5, -10],
+      [6, -1],
+      [7, 0],
+      [8, -1],
+      [9, 0],
+      [10, 0],
+      [11, 1],
+      [12, 0],
+      [13, 1],
+      [14, 10],
+      [15, 100],
+      [16, 1000],
+      [17, 10000],
+      [18, 100000],
+    ];
+    const barSeriesSpec: BarSeriesSpec = {
+      id: SPEC_ID,
+      groupId: GROUP_ID,
+      seriesType: 'bar',
+      yScaleToDataExtent: false,
+      data,
+      xAccessor: 0,
+      yAccessors: [1],
+      xScaleType: ScaleType.Linear,
+      yScaleType: ScaleType.Linear,
+      minBarHeight,
+    };
+    const barSeriesMap = new Map<SpecId, BarSeriesSpec>();
+    barSeriesMap.set(SPEC_ID, barSeriesSpec);
+    const customYDomain = new Map<GroupId, DomainRange>();
+    const barSeriesDomains = computeSeriesDomains(barSeriesMap, customYDomain);
+    const xScale = computeXScale({
+      xDomain: barSeriesDomains.xDomain,
+      totalBarsInCluster: barSeriesMap.size,
+      range: [0, 100],
+    });
+    const yScales = computeYScales({ yDomains: barSeriesDomains.yDomain, range: [100, 0] });
+    const expected = [-50, -8, -8, -8, -8, -8, 0, -8, 0, 0, 8, 0, 8, 8, 8, 8, 8, 50];
+
+    it('should render correct heights with positive minBarHeight', () => {
+      const { barGeometries } = renderBars(
+        0,
+        barSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0].data,
+        xScale,
+        yScales.get(GROUP_ID)!,
+        'red',
+        SPEC_ID,
+        [],
+        LIGHT_THEME.barSeriesStyle,
+        undefined,
+        undefined,
+        minBarHeight,
+      );
+      const barHeights = barGeometries.map(({ height }) => height);
+      expect(barHeights).toEqual(expected);
+    });
+    it('should render correct heights with negative minBarHeight', () => {
+      const { barGeometries } = renderBars(
+        0,
+        barSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0].data,
+        xScale,
+        yScales.get(GROUP_ID)!,
+        'red',
+        SPEC_ID,
+        [],
+        LIGHT_THEME.barSeriesStyle,
+        undefined,
+        undefined,
+        -minBarHeight,
+      );
+      const barHeights = barGeometries.map(({ height }) => height);
+      expect(barHeights).toEqual(expected);
+    });
+  });
 });

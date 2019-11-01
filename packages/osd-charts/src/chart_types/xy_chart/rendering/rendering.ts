@@ -271,6 +271,7 @@ export function renderBars(
   sharedSeriesStyle: BarSeriesStyle,
   displayValueSettings?: DisplayValueSpec,
   styleAccessor?: BarStyleAccessor,
+  minBarHeight?: number,
 ): {
   barGeometries: BarGeometry[];
   indexedGeometries: Map<any, IndexedGeometry[]>;
@@ -284,6 +285,7 @@ export function renderBars(
   const padding = 1;
   const fontSize = sharedSeriesStyle.displayValue.fontSize;
   const fontFamily = sharedSeriesStyle.displayValue.fontFamily;
+  const absMinHeight = minBarHeight && Math.abs(minBarHeight);
 
   dataset.forEach((datum) => {
     const { y0, y1, initialY1, filled } = datum;
@@ -314,7 +316,20 @@ export function renderBars(
         y0Scaled = y0 === null ? yScale.scale(0) : yScale.scale(y0);
       }
     }
-    const height = y0Scaled - y;
+
+    let height = y0Scaled - y;
+
+    // handle minBarHeight adjustment
+    if (absMinHeight !== undefined && height !== 0 && Math.abs(height) < absMinHeight) {
+      const heightDelta = absMinHeight - Math.abs(height);
+      if (height < 0) {
+        height = -absMinHeight;
+        y = y + heightDelta;
+      } else {
+        height = absMinHeight;
+        y = y - heightDelta;
+      }
+    }
 
     const x = xScale.scale(datum.x) + xScale.bandwidth * orderIndex;
     const width = xScale.bandwidth;

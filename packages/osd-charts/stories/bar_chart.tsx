@@ -1622,6 +1622,63 @@ storiesOf('Bar Chart', module)
       </Chart>
     );
   })
+  .add('Min Height', () => {
+    const minBarHeight = number('minBarHeight', 5);
+    const data = [[1, 100000], [2, 10000], [3, 1000], [4, 100], [5, 10], [6, 1], [7, 0], [8, 1], [9, 0]];
+    return (
+      <Chart className={'story-chart'}>
+        <Axis id={getAxisId('bottom')} title="Bottom" position={Position.Bottom} />
+        <Axis id={getAxisId('left')} title="Left" position={Position.Left} />
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={data}
+          minBarHeight={minBarHeight}
+        />
+      </Chart>
+    );
+  })
+  .add('[Test] Min Height - positive and negative values', () => {
+    const minBarHeight = number('minBarHeight', 10);
+    const data = [
+      [1, -100000],
+      [2, -10000],
+      [3, -1000],
+      [4, -100],
+      [5, -10],
+      [6, -1],
+      [7, 0],
+      [8, -1],
+      [9, 0],
+      [10, 0],
+      [11, 1],
+      [12, 0],
+      [13, 1],
+      [14, 10],
+      [15, 100],
+      [16, 1000],
+      [17, 10000],
+      [18, 100000],
+    ];
+    return (
+      <Chart className={'story-chart'}>
+        <Axis id={getAxisId('bottom')} title="Bottom" position={Position.Bottom} />
+        <Axis id={getAxisId('left')} title="Left" position={Position.Left} />
+        <BarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={data}
+          minBarHeight={minBarHeight}
+        />
+      </Chart>
+    );
+  })
   .add('stacked only grouped areas', () => {
     const data1 = [[1, 2], [2, 2], [3, 3], [4, 5], [5, 5], [6, 3], [7, 8], [8, 2], [9, 1]];
     const data2 = [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 4], [7, 3], [8, 2], [9, 4]];
