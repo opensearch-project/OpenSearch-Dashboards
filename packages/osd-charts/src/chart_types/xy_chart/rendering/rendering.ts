@@ -7,8 +7,9 @@ import {
   LineSeriesStyle,
   LineStyle,
   PointStyle,
-  SharedGeometryStyle,
+  SharedGeometryStateStyle,
   BarSeriesStyle,
+  GeometryStateStyle,
 } from '../../../utils/themes/theme';
 import { SpecId } from '../../../utils/ids';
 import { isLogarithmicScale } from '../../../utils/scales/scale_continuous';
@@ -39,16 +40,6 @@ export interface GeometryValue {
   y: any;
   x: any;
   accessor: AccessorType;
-}
-
-/** Shared style properties for varies geometries */
-export interface GeometryStyle {
-  /**
-   * Opacity multiplier
-   *
-   * if set to `0.5` all given opacities will be halfed
-   */
-  opacity: number;
 }
 
 export type IndexedGeometry = PointGeometry | BarGeometry;
@@ -560,12 +551,12 @@ export function renderArea(
   };
 }
 
-export function getGeometryStyle(
+export function getGeometryStateStyle(
   geometryId: GeometryId,
   highlightedLegendItem: LegendItem | null,
-  sharedGeometryStyle: SharedGeometryStyle,
+  sharedGeometryStyle: SharedGeometryStateStyle,
   individualHighlight?: { [key: string]: boolean },
-): GeometryStyle {
+): GeometryStateStyle {
   const { default: defaultStyles, highlighted, unhighlighted } = sharedGeometryStyle;
 
   if (highlightedLegendItem != null) {

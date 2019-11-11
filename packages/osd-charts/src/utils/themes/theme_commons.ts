@@ -1,5 +1,5 @@
 import { Margins } from '../dimensions';
-import { SharedGeometryStyle } from './theme';
+import { SharedGeometryStateStyle } from './theme';
 
 export const DEFAULT_MISSING_COLOR = 'red';
 
@@ -16,7 +16,7 @@ export const DEFAULT_CHART_MARGINS: Margins = {
   bottom: 10,
 };
 
-export const DEFAULT_GEOMETRY_STYLES: SharedGeometryStyle = {
+export const DEFAULT_GEOMETRY_STYLES: SharedGeometryStateStyle = {
   default: {
     opacity: 1,
   },

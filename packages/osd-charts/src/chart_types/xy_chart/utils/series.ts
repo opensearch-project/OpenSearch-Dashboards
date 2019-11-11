@@ -281,8 +281,8 @@ export function getRawDataSeries(
     areaSeries: 0,
   };
   const seriesSpecsCount = seriesSpecs.length;
-  let i;
-  for (i = 0; i < seriesSpecsCount; i++) {
+  let i = 0;
+  for (; i < seriesSpecsCount; i++) {
     const spec = seriesSpecs[i];
     const { id, seriesType } = spec;
     const ds = dataSeries.get(id);
