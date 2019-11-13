@@ -10,8 +10,12 @@ import {
   rotateBarValueProps,
   buildPointStyleProps,
   buildBarBorderRenderProps,
+  Clippings,
+  clipRanges,
 } from './rendering_props_utils';
 import { RectBorderStyle, RectStyle } from '../../../utils/themes/theme';
+import { forcedType } from '../../../mocks/utils';
+import { ClippedRanges } from '../../../chart_types/xy_chart/rendering/rendering';
 
 describe('[canvas] Area Geometries props', () => {
   test('can build area point props', () => {
@@ -975,6 +979,102 @@ describe('[canvas] Bar Geometries', () => {
       // @ts-ignore
       const props = buildBarBorderRenderProps(...getProps({ strokeOpacity: undefined }, { opacity: 0 }));
       expect(props).toBeNull();
+    });
+  });
+
+  describe('clipRanges', () => {
+    const clippedRanges: ClippedRanges = [[0, 1], [2, 4], [4, 6], [7, 11], [11, 12]];
+    const singleRange: ClippedRanges = [[0, 1]];
+    const clippings: Clippings = {
+      clipHeight: 111,
+      clipWidth: 222,
+    };
+    const mockCtx = forcedType<CanvasRenderingContext2D>({
+      rect: jest.fn(),
+    });
+
+    describe('clipping is NOT negated', () => {
+      it('should call ctx with correct args - empty range', () => {
+        clipRanges([], clippings, false)(mockCtx);
+
+        expect(mockCtx.rect).not.toBeCalled();
+      });
+
+      describe('length equal to 1', () => {
+        it('should call ctx with correct args for start range - single range', () => {
+          clipRanges(singleRange, clippings, false)(mockCtx);
+
+          expect(mockCtx.rect).toHaveBeenNthCalledWith(1, 0, 0, singleRange[0][0], clippings.clipHeight);
+        });
+
+        it('should call ctx with correct args for end range - single range', () => {
+          clipRanges(singleRange, clippings, false)(mockCtx);
+          const lastX = singleRange[singleRange.length - 1][1];
+
+          expect(mockCtx.rect).toHaveBeenNthCalledWith(2, lastX, 0, clippings.clipWidth - lastX, clippings.clipHeight);
+        });
+
+        it('should only call ctx twice', () => {
+          clipRanges(singleRange, clippings, false)(mockCtx);
+
+          expect(mockCtx.rect).toBeCalledTimes(2);
+        });
+      });
+
+      describe('length greater than 1', () => {
+        it('should call ctx with correct args for start range - single range', () => {
+          clipRanges(clippedRanges, clippings, false)(mockCtx);
+
+          expect(mockCtx.rect).toHaveBeenNthCalledWith(1, 0, 0, clippedRanges[0][0], clippings.clipHeight);
+        });
+
+        it('should call ctx with correct args for end range - single range', () => {
+          clipRanges(clippedRanges, clippings, false)(mockCtx);
+          const lastX = clippedRanges[clippedRanges.length - 1][1];
+
+          expect(mockCtx.rect).toHaveBeenNthCalledWith(2, lastX, 0, clippings.clipWidth - lastX, clippings.clipHeight);
+        });
+
+        it('should call ctx with correct args', () => {
+          clipRanges(clippedRanges, clippings, false)(mockCtx);
+
+          for (let i = 1; i < length; i++) {
+            const [, x0] = clippedRanges[i - 1];
+            const [x1] = clippedRanges[i];
+
+            expect(mockCtx.rect).toHaveBeenNthCalledWith(i + 3, x0, 0, x1 - x0, clippings.clipHeight);
+          }
+        });
+
+        it('should only call ctx for (n - 1) range plus 2 for ends', () => {
+          clipRanges(clippedRanges, clippings, false)(mockCtx);
+
+          expect(mockCtx.rect).toBeCalledTimes(clippedRanges.length - 1 + 2);
+        });
+      });
+    });
+
+    describe('clipping is negated', () => {
+      it('should call ctx with correct args - empty range', () => {
+        clipRanges([], clippings, true)(mockCtx);
+
+        expect(mockCtx.rect).not.toBeCalled();
+      });
+
+      it('should call ctx with correct args - single range', () => {
+        clipRanges(singleRange, clippings, true)(mockCtx);
+        const [x0, x1] = clippedRanges[0];
+
+        expect(mockCtx.rect).toHaveBeenNthCalledWith(1, x0, 0, x1 - x0, clippings.clipHeight);
+      });
+
+      it('should call ctx with correct args', () => {
+        clipRanges(clippedRanges, clippings, true)(mockCtx);
+
+        clippedRanges.forEach(([x0, x1], i) => {
+          expect(mockCtx.rect).toHaveBeenNthCalledWith(i + 1, x0, 0, x1 - x0, clippings.clipHeight);
+        });
+      });
     });
   });
 });

@@ -1,4 +1,4 @@
-import { Group as KonvaGroup, ContainerConfig } from 'konva';
+import { Group as KonvaGroup } from 'konva';
 import React from 'react';
 import { Circle, Group, Path } from 'react-konva';
 import { LegendItem } from '../../chart_types/xy_chart/legend/legend';
@@ -14,6 +14,8 @@ import {
   buildPointStyleProps,
   PointStyleProps,
   buildPointRenderProps,
+  Clippings,
+  clipRanges,
 } from './utils/rendering_props_utils';
 import { mergePartial } from '../../utils/commons';
 
@@ -22,7 +24,7 @@ interface LineGeometriesDataProps {
   lines: LineGeometry[];
   sharedStyle: SharedGeometryStateStyle;
   highlightedLegendItem: LegendItem | null;
-  clippings: ContainerConfig;
+  clippings: Clippings;
 }
 interface LineGeometriesDataState {
   overPoint?: PointGeometry;
@@ -92,9 +94,23 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps,
 
   getLineToRender(line: LineGeometry, sharedStyle: SharedGeometryStateStyle, key: string) {
     const { clippings } = this.props;
-    const { line: linePath, color, transform, geometryId, seriesLineStyle } = line;
+    const { line: linePath, color, transform, geometryId, seriesLineStyle, clippedRanges } = line;
     const geometryStyle = getGeometryStateStyle(geometryId, this.props.highlightedLegendItem, sharedStyle);
     const lineProps = buildLineRenderProps(transform.x, linePath, color, seriesLineStyle, geometryStyle);
+
+    if (clippedRanges.length > 0) {
+      return (
+        <Group {...clippings} key={key}>
+          <Group clipFunc={clipRanges(clippedRanges, clippings)}>
+            <Path {...lineProps} />
+          </Group>
+          <Group clipFunc={clipRanges(clippedRanges, clippings, true)}>
+            <Path {...lineProps} dash={[5, 5]} dashEnabled />
+          </Group>
+        </Group>
+      );
+    }
+
     return (
       <Group {...clippings} key={key}>
         <Path {...lineProps} />

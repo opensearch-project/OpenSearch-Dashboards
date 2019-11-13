@@ -36,6 +36,8 @@ import {
   LineSeriesSpec,
   Rotation,
   isBandedSpec,
+  Fit,
+  FitConfig,
 } from '../utils/specs';
 import { ColorConfig, Theme } from '../../../utils/themes/theme';
 import { identity, mergePartial } from '../../../utils/commons';
@@ -165,7 +167,13 @@ export function computeSeriesDomains(
   const xDomain = mergeXDomain(specsArray, xValues, customXDomain);
   const yDomain = mergeYDomain(splittedSeries, specsArray, customYDomainsByGroupId);
 
-  const formattedDataSeries = getFormattedDataseries(specsArray, splittedSeries, xValues, xDomain.scaleType);
+  const formattedDataSeries = getFormattedDataseries(
+    specsArray,
+    splittedSeries,
+    xValues,
+    xDomain.scaleType,
+    seriesSpecs,
+  );
 
   // we need to get the last values from the formatted dataseries
   // because we change the format if we are on percentage mode
@@ -493,6 +501,7 @@ export function renderGeometries(
         xScaleOffset,
         lineSeriesStyle,
         spec.pointStyleAccessor,
+        Boolean(spec.fit && ((spec.fit as FitConfig).type || spec.fit) !== Fit.None),
       );
       lineGeometriesIndex = mergeGeometriesIndexes(lineGeometriesIndex, renderedLines.indexedGeometries);
       lines.push(renderedLines.lineGeometry);
@@ -520,6 +529,7 @@ export function renderGeometries(
         areaSeriesStyle,
         isStacked,
         spec.pointStyleAccessor,
+        Boolean(spec.fit && ((spec.fit as FitConfig).type || spec.fit) !== Fit.None),
       );
       areaGeometriesIndex = mergeGeometriesIndexes(areaGeometriesIndex, renderedAreas.indexedGeometries);
       areas.push(renderedAreas.areaGeometry);

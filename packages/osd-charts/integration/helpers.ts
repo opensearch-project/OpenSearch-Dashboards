@@ -24,6 +24,7 @@ function requireAllStories() {
 function encodeString(string: string) {
   return string
     .replace(/\//gi, ' ')
+    .replace(/-/g, ' ')
     .replace(/[^a-z|A-Z|0-9|\s|\/]+/gi, '')
     .trim()
     .replace(/\s+/g, '-')

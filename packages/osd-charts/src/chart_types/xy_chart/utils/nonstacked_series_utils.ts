@@ -1,26 +1,44 @@
 import { DataSeries, DataSeriesDatum, RawDataSeries } from './series';
+import { fitFunction } from './fit_function';
+import { isAreaSeriesSpec, isLineSeriesSpec, SeriesSpecs } from './specs';
+import { ScaleType } from '../../../utils/scales/scales';
 
-export function formatNonStackedDataSeriesValues(dataseries: RawDataSeries[], scaleToExtent: boolean): DataSeries[] {
+export const formatNonStackedDataSeriesValues = (
+  dataseries: RawDataSeries[],
+  scaleToExtent: boolean,
+  seriesSpecs: SeriesSpecs,
+  xScaleType: ScaleType,
+): DataSeries[] => {
   const len = dataseries.length;
-  let i;
   const formattedValues: DataSeries[] = [];
-  for (i = 0; i < len; i++) {
-    const formattedValue = formatNonStackedDataValues(dataseries[i], scaleToExtent);
-    formattedValues.push(formattedValue);
+  for (let i = 0; i < len; i++) {
+    const formattedDataValue = formatNonStackedDataValues(dataseries[i], scaleToExtent);
+    const spec = seriesSpecs.get(formattedDataValue.specId);
+
+    if (
+      spec !== null &&
+      spec !== undefined &&
+      (isAreaSeriesSpec(spec) || isLineSeriesSpec(spec)) &&
+      spec.fit !== undefined
+    ) {
+      const fittedData = fitFunction(formattedDataValue, spec.fit, xScaleType);
+      formattedValues.push(fittedData);
+    } else {
+      formattedValues.push(formattedDataValue);
+    }
   }
   return formattedValues;
-}
+};
 
-export function formatNonStackedDataValues(dataSeries: RawDataSeries, scaleToExtent: boolean): DataSeries {
+export const formatNonStackedDataValues = (dataSeries: RawDataSeries, scaleToExtent: boolean): DataSeries => {
   const len = dataSeries.data.length;
-  let i;
   const formattedValues: DataSeries = {
     key: dataSeries.key,
     specId: dataSeries.specId,
     seriesColorKey: dataSeries.seriesColorKey,
     data: [],
   };
-  for (i = 0; i < len; i++) {
+  for (let i = 0; i < len; i++) {
     const data = dataSeries.data[i];
     const { x, y1, datum } = data;
     let y0: number | null;
@@ -45,4 +63,4 @@ export function formatNonStackedDataValues(dataSeries: RawDataSeries, scaleToExt
     formattedValues.data.push(formattedValue);
   }
   return formattedValues;
-}
+};

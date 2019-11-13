@@ -52,7 +52,6 @@ module.exports = {
       },
     ],
     'sort-keys': 'off',
-    'import/no-default-export': 'error',
     'import/no-unresolved': 'error',
     'no-irregular-whitespace': 'error',
     'no-unused-expressions': 'error',
@@ -78,7 +77,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['*.js'],
+      files: ['*.js', '*test.ts'],
       rules: {
         '@typescript-eslint/no-var-requires': 0,
       },

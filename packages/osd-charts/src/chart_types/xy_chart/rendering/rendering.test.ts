@@ -7,10 +7,13 @@ import {
   getBarStyleOverrides,
   GeometryId,
   getPointStyleOverrides,
+  getClippedRanges,
 } from './rendering';
 import { BarSeriesStyle, SharedGeometryStateStyle, PointStyle } from '../../../utils/themes/theme';
 import { DataSeriesDatum } from '../utils/series';
 import { RecursivePartial, mergePartial } from '../../../utils/commons';
+import { MockDataSeries } from '../../../mocks';
+import { MockScale } from '../../../mocks/scale';
 
 describe('Rendering utils', () => {
   test('check if point is in geometry', () => {
@@ -328,6 +331,58 @@ describe('Rendering utils', () => {
         stroke,
       };
       expect(styleOverrides).toEqual(expectedStyles);
+    });
+  });
+
+  describe('getClippedRanges', () => {
+    const dataSeries = MockDataSeries.fitFunction({ shuffle: false });
+    const xScale = MockScale.default({
+      scale: jest.fn().mockImplementation((x) => x),
+      bandwidth: 0,
+      range: [dataSeries.data[0].x as number, dataSeries.data[12].x as number],
+    });
+
+    it('should return array pairs of non-null x regions with null end values', () => {
+      const actual = getClippedRanges(dataSeries.data, xScale, 0);
+
+      expect(actual).toEqual([[0, 1], [2, 4], [4, 6], [7, 11], [11, 12]]);
+    });
+
+    it('should return array pairs of non-null x regions with valid end values', () => {
+      const data = dataSeries.data.slice(1, -1);
+      const xScale = MockScale.default({
+        scale: jest.fn().mockImplementation((x) => x),
+        range: [data[0].x as number, data[10].x as number],
+      });
+      const actual = getClippedRanges(data, xScale, 0);
+
+      expect(actual).toEqual([[2, 4], [4, 6], [7, 11]]);
+    });
+
+    it('should account for bandwidth', () => {
+      const bandwidth = 2;
+      const xScale = MockScale.default({
+        scale: jest.fn().mockImplementation((x) => x),
+        bandwidth,
+        range: [dataSeries.data[0].x as number, (dataSeries.data[12].x as number) + bandwidth * (2 / 3)],
+      });
+      const actual = getClippedRanges(dataSeries.data, xScale, 0);
+
+      expect(actual).toEqual([[0, 2], [3, 5], [5, 7], [8, 12]]);
+    });
+
+    it('should account for xScaleOffset', () => {
+      const actual = getClippedRanges(dataSeries.data, xScale, 2);
+
+      expect(actual).toEqual([[0, -1], [0, 2], [2, 4], [5, 9]]);
+    });
+
+    it('should call scale to get x value for each datum', () => {
+      getClippedRanges(dataSeries.data, xScale, 0);
+
+      expect(xScale.scale).toHaveBeenNthCalledWith(1, dataSeries.data[0].x);
+      expect(xScale.scale).toHaveBeenCalledTimes(dataSeries.data.length);
+      expect(xScale.scale).toHaveBeenCalledWith(dataSeries.data[12].x);
     });
   });
 });

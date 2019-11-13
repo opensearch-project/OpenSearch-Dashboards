@@ -7,6 +7,13 @@ interface StackedValues {
   total: number;
 }
 
+export const datumXSortPredicate = (xScaleType: ScaleType) => (a: DataSeriesDatum, b: DataSeriesDatum) => {
+  if (xScaleType === ScaleType.Ordinal || typeof a.x === 'string' || typeof b.x === 'string') {
+    return 0;
+  }
+  return a.x - b.x;
+};
+
 /**
  * Map each y value from a RawDataSeries on it's specific x value into,
  * ordering the stack based on the dataseries index.
@@ -134,12 +141,7 @@ export function formatStackedDataSeriesValues(
         newData.push(filledSeriesDatum);
       }
     }
-    newData.sort((a, b) => {
-      if (xScaleType === ScaleType.Ordinal || typeof a.x === 'string' || typeof b.x === 'string') {
-        return 0;
-      }
-      return a.x - b.x;
-    });
+    newData.sort(datumXSortPredicate(xScaleType));
     return {
       specId: ds.specId,
       key: ds.key,
@@ -157,7 +159,7 @@ function getStackedFormattedSeriesDatum(
   seriesIndex: number,
   scaleToExtent: boolean,
   isPercentageMode = false,
-  filled?: Partial<FilledValues>,
+  filled?: FilledValues,
 ): DataSeriesDatum | undefined {
   const { x, datum } = data;
   const stack = stackedValues.get(x);
@@ -200,7 +202,7 @@ function getStackedFormattedSeriesDatum(
       stackedY1 = y1 !== null ? stackY + y1 : null;
       stackedY0 = y0 != null ? stackY + y0 : stackY;
       // configure null y0 if y1 is null
-      // it's semantically right to say y0 is null if y1 is null
+      // it's semantically correct to say y0 is null if y1 is null
       if (stackedY1 === null) {
         stackedY0 = null;
       }

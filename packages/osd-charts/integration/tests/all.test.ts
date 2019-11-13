@@ -14,7 +14,8 @@ describe('Baseline Visual tests for all stories', () => {
       stories.forEach(({ title, encodedTitle }) => {
         describe(title, () => {
           it('visually looks correct', async () => {
-            await common.expectChartAtUrlToMatchScreenshot(`http://localhost:9001?id=${encodedGroup}--${encodedTitle}`);
+            const url = `http://localhost:9001?id=${encodedGroup}--${encodedTitle}`;
+            await common.expectChartAtUrlToMatchScreenshot(url);
           });
         });
       });

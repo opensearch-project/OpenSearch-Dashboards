@@ -107,7 +107,7 @@ class CommonPage {
 
       expect(chart).toMatchImageSnapshot();
     } catch (error) {
-      throw new Error(error);
+      throw new Error(`${error}\n\n${url}`);
     }
   }
   async loadChartFromURL(url: string) {

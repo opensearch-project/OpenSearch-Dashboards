@@ -1,38 +1,66 @@
 import React from 'react';
-import {
-  Axis,
-  Chart,
-  getAxisId,
-  getSpecId,
-  Position,
-  ScaleType,
-  HistogramBarSeries,
-  DARK_THEME,
-  Settings,
-} from '../src';
-import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
+import { Axis, Chart, getAxisId, getSpecId, Position, ScaleType, Settings, LineSeries } from '../src';
+import { Fit } from '../src/chart_types/xy_chart/utils/specs';
+
+const data = [
+  { x: 0, y: null },
+  { x: 1, y: 3 },
+  { x: 2, y: 5 },
+  { x: 3, y: null },
+  { x: 4, y: 4 },
+  { x: 5, y: null },
+  { x: 6, y: 5 },
+  { x: 7, y: 6 },
+  { x: 8, y: null },
+  { x: 9, y: null },
+  { x: 10, y: null },
+  { x: 11, y: 12 },
+  { x: 12, y: null },
+];
 
 export class Playground extends React.Component {
   render() {
-    const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 5);
     return (
-      <div className="chart">
-        <Chart>
-          <Settings theme={DARK_THEME} rotation={180} />
-          <Axis id={getAxisId('x')} position={Position.Bottom} />
-          <Axis id={getAxisId('y')} position={Position.Left} />
-
-          <HistogramBarSeries
-            id={getSpecId('series bars chart')}
-            xScaleType={ScaleType.Linear}
-            yScaleType={ScaleType.Linear}
-            xAccessor={0}
-            yAccessors={[1]}
-            data={data}
-            yScaleToDataExtent={true}
-          />
-        </Chart>
-      </div>
+      <>
+        <div className="chart">
+          <Chart className="story-chart">
+            <Settings
+              showLegend
+              theme={{
+                areaSeriesStyle: {
+                  point: {
+                    visible: true,
+                  },
+                },
+              }}
+            />
+            <Axis
+              id={getAxisId('bottom')}
+              position={Position.Bottom}
+              title={'Bottom axis'}
+              showOverlappingTicks={true}
+            />
+            <Axis id={getAxisId('left')} title={'Left axis'} position={Position.Left} />
+            <LineSeries
+              id={getSpecId('test')}
+              xScaleType={ScaleType.Linear}
+              yScaleType={ScaleType.Linear}
+              xAccessor={'x'}
+              yAccessors={['y']}
+              // curve={2}
+              // splitSeriesAccessors={['g']}
+              // stackAccessors={['x']}
+              fit={Fit.Linear}
+              data={data}
+              // fit={{
+              //   type: Fit.Average,
+              //   endValue: 0,
+              // }}
+              // data={data}
+            />
+          </Chart>
+        </div>
+      </>
     );
   }
 }

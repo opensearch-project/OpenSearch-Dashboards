@@ -10,6 +10,7 @@ import {
   curveStepAfter,
   curveStepBefore,
 } from 'd3-shape';
+import { $Values } from 'utility-types';
 
 export const CurveType = Object.freeze({
   CURVE_CARDINAL: 0 as 0,
@@ -24,17 +25,7 @@ export const CurveType = Object.freeze({
   LINEAR: 9 as 9,
 });
 
-export type CurveType =
-  | typeof CurveType.CURVE_CARDINAL
-  | typeof CurveType.CURVE_NATURAL
-  | typeof CurveType.CURVE_MONOTONE_X
-  | typeof CurveType.CURVE_MONOTONE_Y
-  | typeof CurveType.CURVE_BASIS
-  | typeof CurveType.CURVE_CATMULL_ROM
-  | typeof CurveType.CURVE_STEP
-  | typeof CurveType.CURVE_STEP_AFTER
-  | typeof CurveType.CURVE_STEP_BEFORE
-  | typeof CurveType.LINEAR;
+export type CurveType = $Values<typeof CurveType>;
 
 export function getCurveFactory(curveType: CurveType = CurveType.LINEAR) {
   switch (curveType) {

@@ -1,3 +1,5 @@
+import { $Values } from 'utility-types';
+
 export interface Scale {
   domain: any[];
   range: number[];
@@ -39,12 +41,7 @@ export const ScaleType = Object.freeze({
   Time: 'time' as 'time',
 });
 
-export type ScaleType =
-  | typeof ScaleType.Linear
-  | typeof ScaleType.Sqrt
-  | typeof ScaleType.Log
-  | typeof ScaleType.Time
-  | typeof ScaleType.Ordinal;
+export type ScaleType = $Values<typeof ScaleType>;
 
 export interface ScaleConfig {
   accessor: (value: any) => any;

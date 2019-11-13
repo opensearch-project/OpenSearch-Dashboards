@@ -11,14 +11,14 @@ import { ScaleType } from '../../../utils/scales/scales';
 
 export interface FilledValues {
   /** the x value */
-  x: number | string;
+  x?: number | string;
   /** the max y value */
-  y1: number | null;
+  y1?: number;
   /** the minimum y value */
-  y0: number | null;
+  y0?: number;
 }
 
-export interface RawDataSeriesDatum {
+export interface RawDataSeriesDatum<T = any> {
   /** the x value */
   x: number | string;
   /** the main y metric */
@@ -26,10 +26,10 @@ export interface RawDataSeriesDatum {
   /** the optional y0 metric, used for bars or area with a lower bound */
   y0?: number | null;
   /** the datum */
-  datum?: any;
+  datum?: T;
 }
 
-export interface DataSeriesDatum {
+export interface DataSeriesDatum<T = any> {
   /** the x value */
   x: number | string;
   /** the max y value */
@@ -40,10 +40,10 @@ export interface DataSeriesDatum {
   initialY1: number | null;
   /** initial y0 value, non stacked */
   initialY0: number | null;
-  /** the datum */
-  datum?: any;
+  /** initial datum */
+  datum?: T;
   /** the list of filled values because missing or nulls */
-  filled?: Partial<FilledValues>;
+  filled?: FilledValues;
 }
 
 export interface DataSeries {
@@ -218,6 +218,7 @@ export function getFormattedDataseries(
   dataSeries: Map<SpecId, RawDataSeries[]>,
   xValues: Set<string | number>,
   xScaleType: ScaleType,
+  seriesSpecs: Map<SpecId, BasicSeriesSpec>,
 ): {
   stacked: FormattedDataSeries[];
   nonStacked: FormattedDataSeries[];
@@ -258,7 +259,7 @@ export function getFormattedDataseries(
     nonStackedFormattedDataSeries.push({
       groupId,
       counts: nonStackedDataSeries.counts,
-      dataSeries: formatNonStackedDataSeriesValues(nonStackedDataSeries.rawDataSeries, false),
+      dataSeries: formatNonStackedDataSeriesValues(nonStackedDataSeries.rawDataSeries, false, seriesSpecs, xScaleType),
     });
   });
   return {

@@ -1,3 +1,5 @@
+import { $Values } from 'utility-types';
+
 import { BarGeometry, IndexedGeometry, isBarGeometry, isPointGeometry, PointGeometry } from '../rendering/rendering';
 import { Datum, Rotation } from './specs';
 import { Dimensions } from '../../../utils/dimensions';
@@ -15,11 +17,7 @@ export const TooltipType = Object.freeze({
   None: 'none' as 'none',
 });
 
-export type TooltipType =
-  | typeof TooltipType.VerticalCursor
-  | typeof TooltipType.Crosshairs
-  | typeof TooltipType.Follow
-  | typeof TooltipType.None;
+export type TooltipType = $Values<typeof TooltipType>;
 
 export interface TooltipValue {
   name: string;
