@@ -2,8 +2,10 @@ import React from 'react';
 import { inject, observer } from 'mobx-react';
 import { ChartStore } from '../../chart_types/xy_chart/store/chart_state';
 import { ReactiveChart } from './reactive_chart';
+import { Stage } from 'react-konva';
 interface ReactiveChartProps {
   chartStore?: ChartStore; // FIX until we find a better way on ts mobx
+  forwardRef: React.RefObject<Stage>;
 }
 
 class ChartContainerComponent extends React.Component<ReactiveChartProps> {
@@ -36,7 +38,7 @@ class ChartContainerComponent extends React.Component<ReactiveChartProps> {
           this.props.chartStore!.handleChartClick();
         }}
       >
-        <ReactiveChart />
+        <ReactiveChart forwardRef={this.props.forwardRef} />
       </div>
     );
   }
