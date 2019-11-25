@@ -1,3 +1,10 @@
+# [14.2.0](https://github.com/elastic/elastic-charts/compare/v14.1.0...v14.2.0) (2019-11-25)
+
+
+### Features
+
+* add PNG export ([#451](https://github.com/elastic/elastic-charts/issues/451)) ([e844687](https://github.com/elastic/elastic-charts/commit/e844687)), closes [#82](https://github.com/elastic/elastic-charts/issues/82)
+
 # [14.1.0](https://github.com/elastic/elastic-charts/compare/v14.0.0...v14.1.0) (2019-11-13)
 
 
