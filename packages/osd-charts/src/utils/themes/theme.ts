@@ -13,11 +13,15 @@ export interface TextStyle {
   fill: string;
   padding: number;
 }
+
+/** Shared style properties for varies geometries */
 export interface GeometryStyle {
-  stroke: string;
-  strokeWidth: number;
-  fill?: string;
-  opacity?: number;
+  /**
+   * Opacity multiplier
+   *
+   * if set to `0.5` all given opacities will be halfed
+   */
+  opacity: number;
 }
 
 /** Shared style properties for varies geometries */
@@ -146,6 +150,7 @@ export interface Theme {
    * You may use `CustomSeriesColorsMap` to assign colors to a given series or replace the `theme.colors.vizColors` colors to your desired colors.
    */
   barSeriesStyle: BarSeriesStyle;
+  arcSeriesStyle: ArcSeriesStyle;
   sharedStyle: SharedGeometryStateStyle;
   axes: AxisConfig;
   scales: ScalesConfig;
@@ -196,6 +201,19 @@ export interface AreaStyle {
   opacity: number;
 }
 
+export interface ArcStyle {
+  /** is the arc is visible or hidden ? */
+  visible: boolean;
+  /** a static fill color if defined, if not it will use the color of the series */
+  fill?: string;
+  /** a static stroke color if defined, if not it will use the color of the series */
+  stroke?: string;
+  /** the stroke width of the line */
+  strokeWidth: number;
+  /** the opacity of each arc on the theme/series */
+  opacity: number;
+}
+
 export interface RectStyle {
   /** a static fill color if defined, if not it will use the color of the series */
   fill?: string;
@@ -236,6 +254,10 @@ export interface AreaSeriesStyle {
   area: AreaStyle;
   line: LineStyle;
   point: PointStyle;
+}
+
+export interface ArcSeriesStyle {
+  arc: ArcStyle;
 }
 
 export interface CrosshairStyle {

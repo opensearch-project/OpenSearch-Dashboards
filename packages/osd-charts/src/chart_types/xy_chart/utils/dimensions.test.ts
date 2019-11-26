@@ -1,10 +1,11 @@
 import { AxisTicksDimensions } from './axis_utils';
-import { AxisSpec, Position } from './specs';
+import { AxisSpec, Position, SpecTypes } from './specs';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { LegendStyle } from '../../../utils/themes/theme';
 import { computeChartDimensions } from './dimensions';
-import { AxisId, getAxisId, getGroupId } from '../../../utils/ids';
+import { AxisId } from '../../../utils/ids';
 import { Margins } from '../../../utils/dimensions';
+import { ChartTypes } from '../..';
 
 describe('Computed chart dimensions', () => {
   const parentDim = {
@@ -35,8 +36,10 @@ describe('Computed chart dimensions', () => {
     maxLabelTextHeight: 10,
   };
   const axisLeftSpec: AxisSpec = {
-    id: getAxisId('axis_1'),
-    groupId: getGroupId('group_1'),
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Axis,
+    id: 'axis_1',
+    groupId: 'group_1',
     hide: false,
     showOverlappingTicks: false,
     showOverlappingLabels: false,
@@ -66,7 +69,7 @@ describe('Computed chart dimensions', () => {
   chartTheme.axes.axisTitleStyle.padding = 10;
   test('should be equal to parent dimension with no axis minus margins', () => {
     const axisDims = new Map<AxisId, AxisTicksDimensions>();
-    const axisSpecs = new Map<AxisId, AxisSpec>();
+    const axisSpecs: AxisSpec[] = [];
     const { chartDimensions } = computeChartDimensions(parentDim, chartTheme, axisDims, axisSpecs);
     expect(chartDimensions.left + chartDimensions.width).toBeLessThanOrEqual(parentDim.width);
     expect(chartDimensions.top + chartDimensions.height).toBeLessThanOrEqual(parentDim.height);
@@ -76,9 +79,8 @@ describe('Computed chart dimensions', () => {
     // |margin|titleFontSize|titlePadding|maxLabelBboxWidth|tickPadding|tickSize|padding|
     // \10|10|10|10|10|10|10| = 70px from left
     const axisDims = new Map<AxisId, AxisTicksDimensions>();
-    const axisSpecs = new Map<AxisId, AxisSpec>();
-    axisDims.set(getAxisId('axis_1'), axis1Dims);
-    axisSpecs.set(getAxisId('axis_1'), axisLeftSpec);
+    const axisSpecs = [axisLeftSpec];
+    axisDims.set('axis_1', axis1Dims);
     const { chartDimensions } = computeChartDimensions(parentDim, chartTheme, axisDims, axisSpecs);
     expect(chartDimensions.left + chartDimensions.width).toBeLessThanOrEqual(parentDim.width);
     expect(chartDimensions.top + chartDimensions.height).toBeLessThanOrEqual(parentDim.height);
@@ -88,9 +90,8 @@ describe('Computed chart dimensions', () => {
     // |padding|tickSize|tickPadding|maxLabelBBoxWidth|titlePadding|titleFontSize\margin|
     // \10|10|10|10|10|10|10| = 70px from right
     const axisDims = new Map<AxisId, AxisTicksDimensions>();
-    const axisSpecs = new Map<AxisId, AxisSpec>();
-    axisDims.set(getAxisId('axis_1'), axis1Dims);
-    axisSpecs.set(getAxisId('axis_1'), { ...axisLeftSpec, position: Position.Right });
+    const axisSpecs = [{ ...axisLeftSpec, position: Position.Right }];
+    axisDims.set('axis_1', axis1Dims);
     const { chartDimensions } = computeChartDimensions(parentDim, chartTheme, axisDims, axisSpecs);
     expect(chartDimensions.left + chartDimensions.width).toBeLessThanOrEqual(parentDim.width);
     expect(chartDimensions.top + chartDimensions.height).toBeLessThanOrEqual(parentDim.height);
@@ -100,12 +101,13 @@ describe('Computed chart dimensions', () => {
     // |margin|titleFontSize|titlePadding|maxLabelBboxHeight|tickPadding|tickSize|padding|
     // \10|10|10|10|10|10|10| = 70px from top
     const axisDims = new Map<AxisId, AxisTicksDimensions>();
-    const axisSpecs = new Map<AxisId, AxisSpec>();
-    axisDims.set(getAxisId('axis_1'), axis1Dims);
-    axisSpecs.set(getAxisId('axis_1'), {
-      ...axisLeftSpec,
-      position: Position.Top,
-    });
+    const axisSpecs = [
+      {
+        ...axisLeftSpec,
+        position: Position.Top,
+      },
+    ];
+    axisDims.set('axis_1', axis1Dims);
     const { chartDimensions } = computeChartDimensions(parentDim, chartTheme, axisDims, axisSpecs);
     expect(chartDimensions.left + chartDimensions.width).toBeLessThanOrEqual(parentDim.width);
     expect(chartDimensions.top + chartDimensions.height).toBeLessThanOrEqual(parentDim.height);
@@ -115,12 +117,13 @@ describe('Computed chart dimensions', () => {
     // |margin|titleFontSize|titlePadding|maxLabelBboxHeight|tickPadding|tickSize|padding|
     // \10|10|10|10|10|10|10| = 70px from bottom
     const axisDims = new Map<AxisId, AxisTicksDimensions>();
-    const axisSpecs = new Map<AxisId, AxisSpec>();
-    axisDims.set(getAxisId('axis_1'), axis1Dims);
-    axisSpecs.set(getAxisId('axis_1'), {
-      ...axisLeftSpec,
-      position: Position.Bottom,
-    });
+    const axisSpecs = [
+      {
+        ...axisLeftSpec,
+        position: Position.Bottom,
+      },
+    ];
+    axisDims.set('axis_1', axis1Dims);
     const { chartDimensions } = computeChartDimensions(parentDim, chartTheme, axisDims, axisSpecs);
     expect(chartDimensions.left + chartDimensions.width).toBeLessThanOrEqual(parentDim.width);
     expect(chartDimensions.top + chartDimensions.height).toBeLessThanOrEqual(parentDim.height);
@@ -128,12 +131,13 @@ describe('Computed chart dimensions', () => {
   });
   test('should not add space for axis when no spec for axis dimensions or axis is hidden', () => {
     const axisDims = new Map<AxisId, AxisTicksDimensions>();
-    const axisSpecs = new Map<AxisId, AxisSpec>();
-    axisDims.set(getAxisId('foo'), axis1Dims);
-    axisSpecs.set(getAxisId('axis_1'), {
-      ...axisLeftSpec,
-      position: Position.Bottom,
-    });
+    const axisSpecs = [
+      {
+        ...axisLeftSpec,
+        position: Position.Bottom,
+      },
+    ];
+    axisDims.set('foo', axis1Dims);
     const chartDimensions = computeChartDimensions(parentDim, chartTheme, axisDims, axisSpecs);
 
     const expectedDims = {
@@ -150,8 +154,8 @@ describe('Computed chart dimensions', () => {
 
     const hiddenAxisDims = new Map<AxisId, AxisTicksDimensions>();
     const hiddenAxisSpecs = new Map<AxisId, AxisSpec>();
-    hiddenAxisDims.set(getAxisId('axis_1'), axis1Dims);
-    hiddenAxisSpecs.set(getAxisId('axis_1'), {
+    hiddenAxisDims.set('axis_1', axis1Dims);
+    hiddenAxisSpecs.set('axis_1', {
       ...axisLeftSpec,
       hide: true,
       position: Position.Bottom,

@@ -13,6 +13,7 @@ module.exports = {
         exclude: /node_modules/,
         options: {
           configFile: 'tsconfig.json',
+          transpileOnly: true,
         },
       },
       {

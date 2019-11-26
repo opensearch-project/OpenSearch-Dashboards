@@ -1,12 +1,23 @@
-import { inject, observer } from 'mobx-react';
 import React, { RefObject } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { debounce } from 'ts-debounce';
-import { ChartStore } from '../chart_types/xy_chart/store/chart_state';
+import { Dimensions } from '../utils/dimensions';
+import { updateParentDimensions } from '../state/actions/chart_settings';
+import { Dispatch, bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
+import { GlobalChartState } from '../state/chart_state';
 
-interface ResizerProps {
-  chartStore?: ChartStore;
+interface ResizerStateProps {
+  resizeDebounce: number;
 }
+
+interface ResizerDispatchProps {
+  updateParentDimensions(dimension: Dimensions): void;
+}
+
+type ResizerProps = ResizerStateProps & ResizerDispatchProps;
+
 class Resizer extends React.Component<ResizerProps> {
   private initialResizeComplete = false;
   private containerRef: RefObject<HTMLDivElement>;
@@ -22,10 +33,12 @@ class Resizer extends React.Component<ResizerProps> {
   }
 
   componentDidMount() {
-    this.onResizeDebounced = debounce(this.onResize, this.props.chartStore!.resizeDebounce);
+    this.onResizeDebounced = debounce(this.onResize, this.props.resizeDebounce);
     if (this.containerRef.current) {
-      this.ro.observe(this.containerRef.current as Element);
+      const { clientWidth, clientHeight } = this.containerRef.current;
+      this.props.updateParentDimensions({ width: clientWidth, height: clientHeight, top: 0, left: 0 });
     }
+    this.ro.observe(this.containerRef.current as Element);
   }
 
   componentWillUnmount() {
@@ -44,7 +57,7 @@ class Resizer extends React.Component<ResizerProps> {
     }
     const { width, height } = entries[0].contentRect;
     this.animationFrameID = window.requestAnimationFrame(() => {
-      this.props.chartStore!.updateParentDimensions(width, height, 0, 0);
+      this.props.updateParentDimensions({ width, height, top: 0, left: 0 });
     });
   };
 
@@ -62,4 +75,24 @@ class Resizer extends React.Component<ResizerProps> {
   };
 }
 
-export const ChartResizer = inject('chartStore')(observer(Resizer));
+const mapDispatchToProps = (dispatch: Dispatch): ResizerDispatchProps =>
+  bindActionCreators(
+    {
+      updateParentDimensions,
+    },
+    dispatch,
+  );
+
+const mapStateToProps = (state: GlobalChartState): ResizerStateProps => {
+  const settings = getSettingsSpecSelector(state);
+  const resizeDebounce =
+    settings.resizeDebounce === undefined || settings.resizeDebounce === null ? 200 : settings.resizeDebounce;
+  return {
+    resizeDebounce,
+  };
+};
+
+export const ChartResizer = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(Resizer);

@@ -1,7 +1,8 @@
 import { DataSeries, DataSeriesDatum, RawDataSeries } from './series';
 import { fitFunction } from './fit_function';
-import { isAreaSeriesSpec, isLineSeriesSpec, SeriesSpecs } from './specs';
+import { isAreaSeriesSpec, isLineSeriesSpec, SeriesSpecs, BasicSeriesSpec } from './specs';
 import { ScaleType } from '../../../utils/scales/scales';
+import { getSpecsById } from '../state/utils';
 
 export const formatNonStackedDataSeriesValues = (
   dataseries: RawDataSeries[],
@@ -13,7 +14,7 @@ export const formatNonStackedDataSeriesValues = (
   const formattedValues: DataSeries[] = [];
   for (let i = 0; i < len; i++) {
     const formattedDataValue = formatNonStackedDataValues(dataseries[i], scaleToExtent);
-    const spec = seriesSpecs.get(formattedDataValue.specId);
+    const spec = getSpecsById<BasicSeriesSpec>(seriesSpecs, formattedDataValue.specId);
 
     if (
       spec !== null &&

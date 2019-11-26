@@ -1,4 +1,3 @@
-import { getSpecId } from '../../../utils/ids';
 import { RawDataSeries } from './series';
 import { ScaleType } from '../../../utils/scales/scales';
 import { MockRawDataSeries, MockDataSeries } from '../../../mocks';
@@ -13,7 +12,7 @@ const EMPTY_DATA_SET: RawDataSeries[] = [
     data: [],
     key: [],
     seriesColorKey: 'color-key',
-    specId: getSpecId('spec1'),
+    specId: 'spec1',
   },
 ];
 const STANDARD_DATA_SET: RawDataSeries[] = [
@@ -26,7 +25,7 @@ const STANDARD_DATA_SET: RawDataSeries[] = [
     ],
     key: [],
     seriesColorKey: 'color-key',
-    specId: getSpecId('spec1'),
+    specId: 'spec1',
   },
   {
     data: [
@@ -37,7 +36,7 @@ const STANDARD_DATA_SET: RawDataSeries[] = [
     ],
     key: [],
     seriesColorKey: 'color-key',
-    specId: getSpecId('spec2'),
+    specId: 'spec2',
   },
   {
     data: [
@@ -48,7 +47,7 @@ const STANDARD_DATA_SET: RawDataSeries[] = [
     ],
     key: [],
     seriesColorKey: 'color-key',
-    specId: getSpecId('spec3'),
+    specId: 'spec3',
   },
 ];
 const WITH_NULL_DATASET: RawDataSeries[] = [
@@ -61,7 +60,7 @@ const WITH_NULL_DATASET: RawDataSeries[] = [
     ],
     key: [],
     seriesColorKey: 'color-key',
-    specId: getSpecId('spec1'),
+    specId: 'spec1',
   },
   {
     data: [
@@ -72,7 +71,7 @@ const WITH_NULL_DATASET: RawDataSeries[] = [
     ],
     key: [],
     seriesColorKey: 'color-key',
-    specId: getSpecId('spec2'),
+    specId: 'spec2',
   },
   {
     data: [
@@ -83,7 +82,7 @@ const WITH_NULL_DATASET: RawDataSeries[] = [
     ],
     key: [],
     seriesColorKey: 'color-key',
-    specId: getSpecId('spec3'),
+    specId: 'spec3',
   },
 ];
 const STANDARD_DATA_SET_WY0: RawDataSeries[] = [
@@ -97,7 +96,7 @@ const STANDARD_DATA_SET_WY0: RawDataSeries[] = [
     ],
     key: [],
     seriesColorKey: 'color-key',
-    specId: getSpecId('spec1'),
+    specId: 'spec1',
   },
   {
     data: [
@@ -109,7 +108,7 @@ const STANDARD_DATA_SET_WY0: RawDataSeries[] = [
     ],
     key: [],
     seriesColorKey: 'color-key',
-    specId: getSpecId('spec2'),
+    specId: 'spec2',
   },
   {
     data: [
@@ -121,7 +120,7 @@ const STANDARD_DATA_SET_WY0: RawDataSeries[] = [
     ],
     key: [],
     seriesColorKey: 'color-key',
-    specId: getSpecId('spec3'),
+    specId: 'spec3',
   },
 ];
 const WITH_NULL_DATASET_WY0: RawDataSeries[] = [
@@ -135,7 +134,7 @@ const WITH_NULL_DATASET_WY0: RawDataSeries[] = [
     ],
     key: [],
     seriesColorKey: 'color-key',
-    specId: getSpecId('spec1'),
+    specId: 'spec1',
   },
   {
     data: [
@@ -146,7 +145,7 @@ const WITH_NULL_DATASET_WY0: RawDataSeries[] = [
     ],
     key: [],
     seriesColorKey: 'color-key',
-    specId: getSpecId('spec2'),
+    specId: 'spec2',
   },
   {
     data: [
@@ -158,18 +157,18 @@ const WITH_NULL_DATASET_WY0: RawDataSeries[] = [
     ],
     key: [],
     seriesColorKey: 'color-key',
-    specId: getSpecId('spec3'),
+    specId: 'spec3',
   },
 ];
 const DATA_SET_WITH_NULL_2: RawDataSeries[] = [
   {
-    specId: getSpecId('spec1'),
+    specId: 'spec1',
     key: ['a'],
     seriesColorKey: 'a',
     data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 4, y1: 4 }],
   },
   {
-    specId: getSpecId('spec1'),
+    specId: 'spec1',
     key: ['b'],
     seriesColorKey: 'b',
     data: [{ x: 1, y1: 21 }, { x: 3, y1: 23 }],

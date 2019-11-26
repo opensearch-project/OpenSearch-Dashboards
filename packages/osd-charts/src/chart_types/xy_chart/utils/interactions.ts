@@ -1,9 +1,8 @@
 import { $Values } from 'utility-types';
-
-import { BarGeometry, IndexedGeometry, isBarGeometry, isPointGeometry, PointGeometry } from '../rendering/rendering';
 import { Datum, Rotation } from './specs';
 import { Dimensions } from '../../../utils/dimensions';
 import { Accessor } from '../../../utils/accessor';
+import { BarGeometry, PointGeometry, IndexedGeometry, isPointGeometry, isBarGeometry } from '../../../utils/geometry';
 
 /** The type of tooltip to use */
 export const TooltipType = Object.freeze({
@@ -29,6 +28,12 @@ export interface TooltipValue {
   yAccessor: Accessor;
 }
 
+export interface TooltipProps {
+  type?: TooltipType;
+  snap?: boolean;
+  headerFormatter?: TooltipValueFormatter;
+}
+
 export type TooltipValueFormatter = (data: TooltipValue) => JSX.Element | string;
 
 export interface HighlightedElement {
@@ -48,7 +53,7 @@ export interface HighlightedElement {
  * @param chartRotation the chart rotation
  * @param chartDimension the chart dimension
  */
-export function getValidXPosition(xPos: number, yPos: number, chartRotation: Rotation, chartDimension: Dimensions) {
+export function getOrientedXPosition(xPos: number, yPos: number, chartRotation: Rotation, chartDimension: Dimensions) {
   switch (chartRotation) {
     case 0:
       return xPos;
@@ -60,7 +65,7 @@ export function getValidXPosition(xPos: number, yPos: number, chartRotation: Rot
       return chartDimension.height - yPos;
   }
 }
-export function getValidYPosition(xPos: number, yPos: number, chartRotation: Rotation, chartDimension: Dimensions) {
+export function getOrientedYPosition(xPos: number, yPos: number, chartRotation: Rotation, chartDimension: Dimensions) {
   switch (chartRotation) {
     case 0:
       return yPos;
@@ -78,9 +83,6 @@ export function isCrosshairTooltipType(type: TooltipType) {
 }
 export function isFollowTooltipType(type: TooltipType) {
   return type === TooltipType.Follow;
-}
-export function isNoneTooltipType(type: TooltipType) {
-  return type === TooltipType.None;
 }
 
 export function areIndexedGeometryArraysEquals(arr1: IndexedGeometry[], arr2: IndexedGeometry[]) {
@@ -103,7 +105,7 @@ export function areIndexedGeomsEquals(ig1: IndexedGeometry, ig2: IndexedGeometry
   return false;
 }
 
-export function arePointsEqual(ig1: PointGeometry, ig2: PointGeometry) {
+function arePointsEqual(ig1: PointGeometry, ig2: PointGeometry) {
   return (
     ig1.geometryId.specId === ig2.geometryId.specId &&
     ig1.color === ig2.color &&
@@ -114,7 +116,7 @@ export function arePointsEqual(ig1: PointGeometry, ig2: PointGeometry) {
     ig1.radius === ig2.radius
   );
 }
-export function areBarEqual(ig1: BarGeometry, ig2: BarGeometry) {
+function areBarEqual(ig1: BarGeometry, ig2: BarGeometry) {
   return (
     ig1.geometryId.specId === ig2.geometryId.specId &&
     ig1.color === ig2.color &&
@@ -123,4 +125,12 @@ export function areBarEqual(ig1: BarGeometry, ig2: BarGeometry) {
     ig1.width === ig2.width &&
     ig1.height === ig2.height
   );
+}
+
+export function isTooltipProps(config: TooltipType | TooltipProps): config is TooltipProps {
+  return typeof config === 'object';
+}
+
+export function isTooltipType(config: TooltipType | TooltipProps): config is TooltipType {
+  return typeof config === 'string';
 }

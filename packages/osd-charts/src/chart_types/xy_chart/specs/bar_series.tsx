@@ -1,43 +1,38 @@
-import { inject } from 'mobx-react';
-import { PureComponent } from 'react';
-import { BarSeriesSpec, DEFAULT_GLOBAL_ID } from '../utils/specs';
-import { getGroupId } from '../../../utils/ids';
+import { BarSeriesSpec, DEFAULT_GLOBAL_ID, SpecTypes, SeriesTypes } from '../utils/specs';
 import { ScaleType } from '../../../utils/scales/scales';
-import { SpecProps } from '../../../specs/specs_parser';
+import { ChartTypes } from '../../../chart_types';
+import { specComponentFactory, getConnect } from '../../../state/spec_factory';
 
-type BarSpecProps = SpecProps & BarSeriesSpec;
+const defaultProps = {
+  chartType: ChartTypes.XYAxis,
+  specType: SpecTypes.Series,
+  seriesType: SeriesTypes.Bar,
+  groupId: DEFAULT_GLOBAL_ID,
+  xScaleType: ScaleType.Ordinal,
+  yScaleType: ScaleType.Linear,
+  xAccessor: 'x',
+  yAccessors: ['y'],
+  yScaleToDataExtent: false,
+  hideInLegend: false,
+  enableHistogramMode: false,
+  stackAsPercentage: false,
+};
 
-export class BarSeriesSpecComponent extends PureComponent<BarSpecProps> {
-  static defaultProps: Partial<BarSpecProps> = {
-    seriesType: 'bar',
-    groupId: getGroupId(DEFAULT_GLOBAL_ID),
-    xScaleType: ScaleType.Ordinal,
-    yScaleType: ScaleType.Linear,
-    xAccessor: 'x',
-    yAccessors: ['y'],
-    yScaleToDataExtent: false,
-    hideInLegend: false,
-    enableHistogramMode: false,
-    stackAsPercentage: false,
-  };
-  componentDidMount() {
-    const { chartStore, children, ...config } = this.props;
-    chartStore!.addSeriesSpec({ ...config });
-  }
-  componentDidUpdate(prevProps: BarSpecProps) {
-    const { chartStore, children, ...config } = this.props;
-    chartStore!.addSeriesSpec({ ...config });
-    if (prevProps.id !== this.props.id) {
-      chartStore!.removeSeriesSpec(prevProps.id);
-    }
-  }
-  componentWillUnmount() {
-    const { chartStore, id } = this.props;
-    chartStore!.removeSeriesSpec(id);
-  }
-  render() {
-    return null;
-  }
-}
+type SpecRequiredProps = Pick<BarSeriesSpec, 'id' | 'data'>;
+type SpecOptionalProps = Partial<Omit<BarSeriesSpec, 'chartType' | 'specType' | 'seriesType' | 'id' | 'data'>>;
 
-export const BarSeries = inject('chartStore')(BarSeriesSpecComponent);
+export const BarSeries: React.FunctionComponent<SpecRequiredProps & SpecOptionalProps> = getConnect()(
+  specComponentFactory<
+    BarSeriesSpec,
+    | 'seriesType'
+    | 'groupId'
+    | 'xScaleType'
+    | 'yScaleType'
+    | 'xAccessor'
+    | 'yAccessors'
+    | 'yScaleToDataExtent'
+    | 'hideInLegend'
+    | 'enableHistogramMode'
+    | 'stackAsPercentage'
+  >(defaultProps),
+);

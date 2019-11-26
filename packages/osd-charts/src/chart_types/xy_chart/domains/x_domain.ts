@@ -2,7 +2,7 @@ import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_utils
 import { compareByValueAsc, identity, isNumberArray } from '../../../utils/commons';
 import { computeContinuousDataDomain, computeOrdinalDataDomain, Domain } from '../../../utils/domain';
 import { ScaleType } from '../../../utils/scales/scales';
-import { BasicSeriesSpec, DomainRange } from '../utils/specs';
+import { BasicSeriesSpec, DomainRange, SeriesTypes } from '../utils/specs';
 import { BaseDomain } from './domain';
 
 export type XDomain = BaseDomain & {
@@ -155,7 +155,7 @@ export function convertXScaleTypes(
   if (specs.length === 0 || seriesTypes.size === 0 || scaleTypes.size === 0) {
     return null;
   }
-  const isBandScale = seriesTypes.has('bar');
+  const isBandScale = seriesTypes.has(SeriesTypes.Bar);
   if (scaleTypes.size === 1) {
     const scaleType = scaleTypes.values().next().value;
     let timeZone: string | undefined;

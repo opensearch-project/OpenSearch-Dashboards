@@ -21,7 +21,7 @@ class CommonPage {
 
     return `${baseUrl}?${query}${query ? '&' : ''}knob-debug=false`;
   }
-  async getBoundingClientRect(selector = '.echChart[data-ech-render-complete=true]') {
+  async getBoundingClientRect(selector = '.echChart') {
     return await page.evaluate((selector) => {
       const element = document.querySelector(selector);
 
@@ -37,10 +37,7 @@ class CommonPage {
   /**
    * Capture screenshot or chart element only
    */
-  async screenshotDOMElement(
-    selector = '.echChart[data-ech-render-complete=true]',
-    opts?: ScreenshotDOMElementOptions,
-  ) {
+  async screenshotDOMElement(selector = '.echChart', opts?: ScreenshotDOMElementOptions) {
     const padding: number = opts && opts.padding ? opts.padding : 0;
     const path: string | undefined = opts && opts.path ? opts.path : undefined;
     const rect = await this.getBoundingClientRect(selector);
@@ -56,10 +53,7 @@ class CommonPage {
     });
   }
 
-  async moveMouseRelativeToDOMElement(
-    mousePosition: { x: number; y: number },
-    selector = '.echChart[data-ech-render-complete=true]',
-  ) {
+  async moveMouseRelativeToDOMElement(mousePosition: { x: number; y: number }, selector = '.echChart') {
     const chartContainer = await this.getBoundingClientRect(selector);
     await page.mouse.move(chartContainer.left + mousePosition.x, chartContainer.top + mousePosition.y);
   }
@@ -113,9 +107,14 @@ class CommonPage {
   async loadChartFromURL(url: string) {
     const cleanUrl = CommonPage.parseUrl(url);
     await page.goto(cleanUrl);
+    this.waitForElement();
   }
-
-  async waitForElement(selector = '.echChart[data-ech-render-complete=true]', timeout = 10000) {
+  /**
+   * Wait for an element to be on the DOM
+   * @param {string} [selector] the DOM selector to wait for, default to '.echChartStatus[data-ech-render-complete=true]'
+   * @param {number} [timeout] - the timeout for the operation, default to 10000ms
+   */
+  async waitForElement(selector = '.echChartStatus[data-ech-render-complete=true]', timeout = 10000) {
     await page.waitForSelector(selector, { timeout });
   }
 }

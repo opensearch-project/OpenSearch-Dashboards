@@ -1,8 +1,8 @@
 import { XDomain } from '../domains/x_domain';
 import { YDomain } from '../domains/y_domain';
-import { AxisSpec, DomainRange, Position, AxisStyle } from './specs';
+import { AxisSpec, DomainRange, Position, AxisStyle, SpecTypes } from './specs';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
-import { AxisId, getAxisId, getGroupId, GroupId } from '../../../utils/ids';
+import { AxisId, GroupId } from '../../../utils/ids';
 import { ScaleType } from '../../../utils/scales/scales';
 import {
   AxisTick,
@@ -28,13 +28,14 @@ import {
   isVerticalAxis,
   isYDomain,
   getAxisTickLabelPadding,
-  mergeYCustomDomainsByGroupId,
   isVerticalGrid,
   isHorizontalGrid,
 } from './axis_utils';
 import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
 import { SvgTextBBoxCalculator } from '../../../utils/bbox/svg_text_bbox_calculator';
 import { niceTimeFormatter } from '../../../utils/data/formatters';
+import { mergeYCustomDomainsByGroupId } from '../state/selectors/merge_y_custom_domains';
+import { ChartTypes } from '../..';
 
 describe('Axis computational utils', () => {
   const mockedRect = {
@@ -74,8 +75,10 @@ describe('Axis computational utils', () => {
     maxLabelTextHeight: 10,
   };
   const verticalAxisSpec: AxisSpec = {
-    id: getAxisId('axis_1'),
-    groupId: getGroupId('group_1'),
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Axis,
+    id: 'axis_1',
+    groupId: 'group_1',
     hide: false,
     showOverlappingTicks: false,
     showOverlappingLabels: false,
@@ -90,8 +93,10 @@ describe('Axis computational utils', () => {
   };
 
   const horizontalAxisSpec: AxisSpec = {
-    id: getAxisId('axis_2'),
-    groupId: getGroupId('group_1'),
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Axis,
+    id: 'axis_2',
+    groupId: 'group_1',
     hide: false,
     showOverlappingTicks: false,
     showOverlappingLabels: false,
@@ -105,8 +110,10 @@ describe('Axis computational utils', () => {
   };
 
   const verticalAxisSpecWTitle: AxisSpec = {
-    id: getAxisId('axis_1'),
-    groupId: getGroupId('group_1'),
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Axis,
+    id: 'axis_1',
+    groupId: 'group_1',
     title: 'v axis',
     hide: false,
     showOverlappingTicks: false,
@@ -121,8 +128,10 @@ describe('Axis computational utils', () => {
     integersOnly: false,
   };
   const xAxisWithTime: AxisSpec = {
-    id: getAxisId('axis_1'),
-    groupId: getGroupId('group_1'),
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Axis,
+    id: 'axis_1',
+    groupId: 'group_1',
     title: 'v axis',
     hide: false,
     showOverlappingTicks: false,
@@ -136,8 +145,8 @@ describe('Axis computational utils', () => {
   };
 
   // const horizontalAxisSpecWTitle: AxisSpec = {
-  //   id: getAxisId('axis_2'),
-  //   groupId: getGroupId('group_1'),
+  //   id: ('axis_2'),
+  //   groupId: ('group_1'),
   //   title: 'h axis',
   //   hide: false,
   //   showOverlappingTicks: false,
@@ -160,7 +169,7 @@ describe('Axis computational utils', () => {
 
   const yDomain: YDomain = {
     scaleType: ScaleType.Linear,
-    groupId: getGroupId('group_1'),
+    groupId: 'group_1',
     type: 'yDomain',
     domain: [0, 1],
     isBandScale: false,
@@ -177,7 +186,7 @@ describe('Axis computational utils', () => {
       computeAxisTicksDimensions(ungroupedAxisSpec, xDomain, [yDomain], 1, bboxCalculator, 0, axes);
     };
 
-    const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: getGroupId('foo') };
+    const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: 'foo' };
     expect(computeScalelessSpec).toThrowError('Cannot compute scale for axis spec axis_1');
 
     bboxCalculator.destroy();
@@ -263,7 +272,7 @@ describe('Axis computational utils', () => {
     expect(yScale!.range).toEqual([100, 0]);
     expect(yScale!.ticks()).toEqual([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]);
 
-    const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: getGroupId('foo') };
+    const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: 'foo' };
     const nullYScale = getScaleForAxisSpec(ungroupedAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
     expect(nullYScale).toBe(null);
 
@@ -843,8 +852,7 @@ describe('Axis computational utils', () => {
     // validate assumptions for test
     expect(verticalAxisSpec.id).toEqual(verticalAxisSpecWTitle.id);
 
-    const axisSpecs = new Map();
-    axisSpecs.set(verticalAxisSpecWTitle.id, verticalAxisSpecWTitle);
+    const axisSpecs = [verticalAxisSpecWTitle];
 
     const axisDims = new Map();
     axisDims.set(verticalAxisSpecWTitle.id, axis1Dims);
@@ -871,7 +879,7 @@ describe('Axis computational utils', () => {
       height: 100,
     });
 
-    axisSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+    axisSpecs[0] = verticalAxisSpec;
 
     axisDims.set(verticalAxisSpec.id, axis1Dims);
 
@@ -1044,11 +1052,11 @@ describe('Axis computational utils', () => {
 
   test('should not compute axis ticks positions if missaligned specs', () => {
     const chartRotation = 0;
-    const axisSpecs = new Map<AxisId, AxisSpec>();
-    axisSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+
+    const axisSpecs = [verticalAxisSpec];
 
     const axisDims = new Map<AxisId, AxisTicksDimensions>();
-    axisDims.set(getAxisId('not_a_mapped_one'), axis1Dims);
+    axisDims.set('not_a_mapped_one', axis1Dims);
 
     const axisTicksPosition = getAxisTicksPositions(
       {
@@ -1072,8 +1080,8 @@ describe('Axis computational utils', () => {
 
   test('should compute axis ticks positions', () => {
     const chartRotation = 0;
-    const axisSpecs = new Map<AxisId, AxisSpec>();
-    axisSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+
+    const axisSpecs = [verticalAxisSpec];
 
     const axisDims = new Map<AxisId, AxisTicksDimensions>();
     axisDims.set(verticalAxisSpec.id, axis1Dims);
@@ -1133,9 +1141,8 @@ describe('Axis computational utils', () => {
     const verticalAxisWithTopLegendPosition = axisTicksPositionWithTopLegend.axisPositions.get(verticalAxisSpec.id);
     expect(verticalAxisWithTopLegendPosition).toEqual(expectedPositionWithTopLegend);
 
-    const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: getGroupId('foo') };
-    const invalidSpecs = new Map<AxisId, AxisSpec>();
-    invalidSpecs.set(verticalAxisSpec.id, ungroupedAxisSpec);
+    const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: 'foo' };
+    const invalidSpecs = [ungroupedAxisSpec];
     const computeScalelessSpec = () => {
       getAxisTicksPositions(
         {
@@ -1203,7 +1210,7 @@ describe('Axis computational utils', () => {
   });
 
   test('should merge axis domains by group id', () => {
-    const groupId = getGroupId('group_1');
+    const groupId = 'group_1';
     const domainRange1 = {
       min: 2,
       max: 9,
@@ -1211,8 +1218,7 @@ describe('Axis computational utils', () => {
 
     verticalAxisSpec.domain = domainRange1;
 
-    const axesSpecs = new Map<AxisId, AxisSpec>();
-    axesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+    const axesSpecs = [verticalAxisSpec];
 
     // Base case
     const expectedSimpleMap = new Map<GroupId, DomainRange>();
@@ -1227,10 +1233,10 @@ describe('Axis computational utils', () => {
       max: 7,
     };
 
-    const altVerticalAxisSpec = { ...verticalAxisSpec, id: getAxisId('axis2') };
+    const altVerticalAxisSpec = { ...verticalAxisSpec, id: 'axis2' };
 
     altVerticalAxisSpec.domain = domainRange2;
-    axesSpecs.set(altVerticalAxisSpec.id, altVerticalAxisSpec);
+    axesSpecs.push(altVerticalAxisSpec);
 
     const expectedMergedMap = new Map<GroupId, DomainRange>();
     expectedMergedMap.set(groupId, { min: 0, max: 9 });
@@ -1243,7 +1249,7 @@ describe('Axis computational utils', () => {
       min: 5,
       max: 15,
     };
-    axesSpecs.set(horizontalAxisSpec.id, horizontalAxisSpec);
+    axesSpecs.push(horizontalAxisSpec);
 
     const attemptToMerge = () => {
       mergeYCustomDomainsByGroupId(axesSpecs, 0);
@@ -1253,7 +1259,7 @@ describe('Axis computational utils', () => {
   });
 
   test('should merge axis domains by group id: partial upper bounded prevDomain with complete domain', () => {
-    const groupId = getGroupId('group_1');
+    const groupId = 'group_1';
     const domainRange1 = {
       max: 9,
     };
@@ -1265,13 +1271,10 @@ describe('Axis computational utils', () => {
 
     verticalAxisSpec.domain = domainRange1;
 
-    const axesSpecs = new Map<AxisId, AxisSpec>();
-    axesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
-
-    const axis2 = { ...verticalAxisSpec, id: getAxisId('axis2') };
+    const axis2 = { ...verticalAxisSpec, id: 'axis2' };
 
     axis2.domain = domainRange2;
-    axesSpecs.set(axis2.id, axis2);
+    const axesSpecs = [verticalAxisSpec, axis2];
 
     const expectedMergedMap = new Map<GroupId, DomainRange>();
     expectedMergedMap.set(groupId, { min: 0, max: 9 });
@@ -1281,7 +1284,7 @@ describe('Axis computational utils', () => {
   });
 
   test('should merge axis domains by group id: partial lower bounded prevDomain with complete domain', () => {
-    const groupId = getGroupId('group_1');
+    const groupId = 'group_1';
     const domainRange1 = {
       min: -1,
     };
@@ -1292,14 +1295,11 @@ describe('Axis computational utils', () => {
     };
 
     verticalAxisSpec.domain = domainRange1;
+    const axis2 = { ...verticalAxisSpec, id: 'axis2' };
 
-    const axesSpecs = new Map<AxisId, AxisSpec>();
-    axesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
-
-    const axis2 = { ...verticalAxisSpec, id: getAxisId('axis2') };
+    const axesSpecs = [verticalAxisSpec, axis2];
 
     axis2.domain = domainRange2;
-    axesSpecs.set(axis2.id, axis2);
 
     const expectedMergedMap = new Map<GroupId, DomainRange>();
     expectedMergedMap.set(groupId, { min: -1, max: 7 });
@@ -1309,7 +1309,7 @@ describe('Axis computational utils', () => {
   });
 
   test('should merge axis domains by group id: partial upper bounded prevDomain with lower bounded domain', () => {
-    const groupId = getGroupId('group_1');
+    const groupId = 'group_1';
     const domainRange1 = {
       max: 9,
     };
@@ -1324,18 +1324,18 @@ describe('Axis computational utils', () => {
 
     verticalAxisSpec.domain = domainRange1;
 
-    const axesSpecs = new Map<AxisId, AxisSpec>();
-    axesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+    const axesSpecs = [];
+    axesSpecs.push(verticalAxisSpec);
 
-    const axis2 = { ...verticalAxisSpec, id: getAxisId('axis2') };
+    const axis2 = { ...verticalAxisSpec, id: 'axis2' };
 
     axis2.domain = domainRange2;
-    axesSpecs.set(axis2.id, axis2);
+    axesSpecs.push(axis2);
 
-    const axis3 = { ...verticalAxisSpec, id: getAxisId('axis3') };
+    const axis3 = { ...verticalAxisSpec, id: 'axis3' };
 
     axis3.domain = domainRange3;
-    axesSpecs.set(axis3.id, axis3);
+    axesSpecs.push(axis3);
 
     const expectedMergedMap = new Map<GroupId, DomainRange>();
     expectedMergedMap.set(groupId, { min: -1, max: 9 });
@@ -1345,7 +1345,7 @@ describe('Axis computational utils', () => {
   });
 
   test('should merge axis domains by group id: partial lower bounded prevDomain with upper bounded domain', () => {
-    const groupId = getGroupId('group_1');
+    const groupId = 'group_1';
     const domainRange1 = {
       min: 2,
     };
@@ -1360,18 +1360,18 @@ describe('Axis computational utils', () => {
 
     verticalAxisSpec.domain = domainRange1;
 
-    const axesSpecs = new Map<AxisId, AxisSpec>();
-    axesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+    const axesSpecs = [];
+    axesSpecs.push(verticalAxisSpec);
 
-    const axis2 = { ...verticalAxisSpec, id: getAxisId('axis2') };
+    const axis2 = { ...verticalAxisSpec, id: 'axis2' };
 
     axis2.domain = domainRange2;
-    axesSpecs.set(axis2.id, axis2);
+    axesSpecs.push(axis2);
 
-    const axis3 = { ...verticalAxisSpec, id: getAxisId('axis3') };
+    const axis3 = { ...verticalAxisSpec, id: 'axis3' };
 
     axis3.domain = domainRange3;
-    axesSpecs.set(axis3.id, axis3);
+    axesSpecs.push(axis3);
 
     const expectedMergedMap = new Map<GroupId, DomainRange>();
     expectedMergedMap.set(groupId, { min: 2, max: 9 });
@@ -1388,8 +1388,7 @@ describe('Axis computational utils', () => {
 
     verticalAxisSpec.domain = domainRange1;
 
-    const axesSpecs = new Map<AxisId, AxisSpec>();
-    axesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+    const axesSpecs = [verticalAxisSpec];
 
     const attemptToMerge = () => {
       mergeYCustomDomainsByGroupId(axesSpecs, 0);

@@ -1,22 +1,19 @@
-/**
- * The Base Elastic-Charts container
- */
-
-.echContainer {
-  flex: 1;
-  position: relative;
-}
-
 .echChart {
   display: flex;
   height: 100%;
+  position: relative;
 
   &--column {
     flex-direction: column;
   }
 }
 
-.echChartCursorContainer {
+.echContainer {
+  flex: 1;
+  position: relative;
+}
+
+.echChartPointerContainer {
   position: absolute;
   top: 0;
   bottom: 0;

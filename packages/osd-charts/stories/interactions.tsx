@@ -21,6 +21,7 @@ import {
   TooltipType,
   TooltipValue,
   TooltipValueFormatter,
+  HistogramBarSeries,
 } from '../src/';
 
 import { array, boolean, number, select, button } from '@storybook/addon-knobs';
@@ -470,6 +471,62 @@ storiesOf('Interactions', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
+          timeZone={'Europe/Rome'}
+          data={[
+            { x: now, y: 2 },
+            { x: now + oneDay, y: 7 },
+            { x: now + oneDay * 2, y: 3 },
+            { x: now + oneDay * 5, y: 6 },
+          ]}
+        />
+        <LineSeries
+          id={getSpecId('baras')}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          timeZone={'Europe/Rome'}
+          data={[
+            { x: now, y: 2 },
+            { x: now + oneDay, y: 7 },
+            { x: now + oneDay * 2, y: 3 },
+            { x: now + oneDay * 5, y: 6 },
+          ]}
+        />
+      </Chart>
+    );
+  })
+  .add('brush selection tool on histogram time charts', () => {
+    const now = DateTime.fromISO('2019-01-11T00:00:00.000')
+      .setZone('utc+1')
+      .toMillis();
+    const oneDay = 1000 * 60 * 60 * 24;
+    const formatter = niceTimeFormatter([now, now + oneDay * 5]);
+    return (
+      <Chart className={'story-chart'}>
+        <Settings
+          debug={boolean('debug', false)}
+          onBrushEnd={(start, end) => {
+            action('onBrushEnd')(formatter(start), formatter(end));
+          }}
+          onElementClick={action('onElementClick')}
+        />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'bottom'}
+          showOverlappingTicks={true}
+          tickFormat={formatter}
+        />
+        <Axis id={getAxisId('left')} title={'left'} position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
+
+        <HistogramBarSeries
+          id={getSpecId('bars')}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          timeZone={'Europe/Rome'}
           data={[
             { x: now, y: 2 },
             { x: now + oneDay, y: 7 },

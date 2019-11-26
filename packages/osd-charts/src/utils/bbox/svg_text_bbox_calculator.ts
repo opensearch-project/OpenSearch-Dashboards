@@ -1,4 +1,3 @@
-import { Option, some } from 'fp-ts/lib/Option';
 import { BBox, BBoxCalculator } from './bbox_calculator';
 
 // not sure where to specify this, required for tests
@@ -26,13 +25,13 @@ export class SvgTextBBoxCalculator implements BBoxCalculator {
     this.attachedRoot = rootElement || document.documentElement;
     this.attachedRoot.appendChild(this.svgElem);
   }
-  compute(text: string): Option<BBox> {
+  compute(text: string): BBox {
     this.textNode.textContent = text;
     const rect = this.textElem.getBoundingClientRect();
-    return some({
+    return {
       width: rect.width,
       height: rect.height,
-    });
+    };
   }
   destroy(): void {
     this.attachedRoot.removeChild(this.svgElem);

@@ -3,6 +3,7 @@ import { AxisSpec, Position } from './specs';
 import { Theme } from '../../../utils/themes/theme';
 import { AxisId } from '../../../utils/ids';
 import { Dimensions } from '../../../utils/dimensions';
+import { getSpecsById } from '../state/utils';
 
 /**
  * Compute the chart dimensions. It's computed removing from the parent dimensions
@@ -18,11 +19,22 @@ export function computeChartDimensions(
   parentDimensions: Dimensions,
   chartTheme: Theme,
   axisDimensions: Map<AxisId, AxisTicksDimensions>,
-  axisSpecs: Map<AxisId, AxisSpec>,
+  axisSpecs: AxisSpec[],
 ): {
   chartDimensions: Dimensions;
   leftMargin: number;
 } {
+  if (parentDimensions.width <= 0 || parentDimensions.height <= 0) {
+    return {
+      chartDimensions: {
+        width: 0,
+        height: 0,
+        left: 0,
+        top: 0,
+      },
+      leftMargin: 0,
+    };
+  }
   const { chartMargins, chartPaddings } = chartTheme;
   const { axisTitleStyle } = chartTheme.axes;
 
@@ -35,7 +47,7 @@ export function computeChartDimensions(
   let horizontalEdgeLabelOverflow = 0;
   let verticalEdgeLabelOverflow = 0;
   axisDimensions.forEach(({ maxLabelBboxWidth = 0, maxLabelBboxHeight = 0 }, id) => {
-    const axisSpec = axisSpecs.get(id);
+    const axisSpec = getSpecsById<AxisSpec>(axisSpecs, id);
     if (!axisSpec || axisSpec.hide) {
       return;
     }

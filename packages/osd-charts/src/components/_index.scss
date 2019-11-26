@@ -1,9 +1,9 @@
 @import 'global';
 @import 'container';
 @import 'annotation';
-@import 'crosshair';
-@import 'highlighter';
 @import 'tooltip';
 @import 'icons/index';
 @import 'legend/index';
 @import 'unavailable_chart';
+
+@import '../chart_types/xy_chart/renderer/index'

@@ -1,17 +1,14 @@
-import { getSpecId } from '../../../utils/ids';
 import {
-  BarGeometry,
   getGeometryStateStyle,
   isPointOnGeometry,
-  PointGeometry,
   getBarStyleOverrides,
-  GeometryId,
   getPointStyleOverrides,
   getClippedRanges,
 } from './rendering';
 import { BarSeriesStyle, SharedGeometryStateStyle, PointStyle } from '../../../utils/themes/theme';
 import { DataSeriesDatum } from '../utils/series';
-import { RecursivePartial, mergePartial } from '../../../utils/commons';
+import { mergePartial, RecursivePartial } from '../../../utils/commons';
+import { BarGeometry, PointGeometry, GeometryId } from '../../../utils/geometry';
 import { MockDataSeries } from '../../../mocks';
 import { MockScale } from '../../../mocks/scale';
 
@@ -39,7 +36,7 @@ describe('Rendering utils', () => {
       color: 'red',
       geometryId: {
         seriesKey: [],
-        specId: getSpecId('id'),
+        specId: 'id',
       },
       value: {
         accessor: 'y1',
@@ -65,7 +62,7 @@ describe('Rendering utils', () => {
       color: 'red',
       geometryId: {
         seriesKey: [],
-        specId: getSpecId('id'),
+        specId: 'id',
       },
       value: {
         accessor: 'y1',
@@ -93,7 +90,7 @@ describe('Rendering utils', () => {
   test('should get common geometry style dependent on legend item highlight state', () => {
     const geometryId = {
       seriesKey: [],
-      specId: getSpecId('id'),
+      specId: 'id',
     };
     const highlightedLegendItem = {
       key: '',
@@ -101,7 +98,7 @@ describe('Rendering utils', () => {
       label: '',
       value: {
         colorValues: [],
-        specId: getSpecId('id'),
+        specId: 'id',
       },
       isSeriesVisible: true,
       isLegendItemVisible: true,
@@ -121,7 +118,7 @@ describe('Rendering utils', () => {
       ...highlightedLegendItem,
       value: {
         colorValues: [],
-        specId: getSpecId('foo'),
+        specId: 'foo',
       },
     };
 
@@ -207,7 +204,7 @@ describe('Rendering utils', () => {
       initialY0: 5,
     };
     const geometryId: GeometryId = {
-      specId: getSpecId('test'),
+      specId: 'test',
       seriesKey: ['test'],
     };
 
@@ -296,7 +293,7 @@ describe('Rendering utils', () => {
       initialY0: 5,
     };
     const geometryId: GeometryId = {
-      specId: getSpecId('test'),
+      specId: 'test',
       seriesKey: ['test'],
     };
 

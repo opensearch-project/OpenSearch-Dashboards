@@ -15,7 +15,8 @@ type MatcherParameters<T extends (this: any, received: any, ...args: any[]) => a
   : never;
 
 declare global {
-  namespace jest { // eslint-disable-line
+  // eslint-disable-next-line
+  namespace jest {
     interface Matchers<R> {
       /**
        * Expect array to be filled with value, and optionally length

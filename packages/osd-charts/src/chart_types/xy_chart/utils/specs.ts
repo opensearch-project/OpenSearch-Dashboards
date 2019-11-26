@@ -1,3 +1,4 @@
+import { $Values } from 'utility-types';
 import {
   AreaSeriesStyle,
   GridLineConfig,
@@ -9,13 +10,14 @@ import {
 } from '../../../utils/themes/theme';
 import { Accessor, AccessorFormat } from '../../../utils/accessor';
 import { RecursivePartial } from '../../../utils/commons';
-import { AnnotationId, AxisId, GroupId, SpecId } from '../../../utils/ids';
+import { AxisId, GroupId } from '../../../utils/ids';
 import { ScaleContinuousType, ScaleType } from '../../../utils/scales/scales';
 import { CurveType } from '../../../utils/curves';
-import { DataSeriesColorsValues, RawDataSeriesDatum } from './series';
-import { GeometryId } from '../rendering/rendering';
+import { RawDataSeriesDatum, DataSeriesColorsValues } from './series';
 import { AnnotationTooltipFormatter } from '../annotations/annotation_utils';
-import { $Values } from 'utility-types';
+import { GeometryId } from '../../../utils/geometry';
+import { Spec } from '../../..';
+import { ChartTypes } from '../..';
 
 export type Datum = any;
 export type Rotation = 0 | 90 | -90 | 180;
@@ -23,6 +25,24 @@ export type Rendering = 'canvas' | 'svg';
 export type Color = string;
 export type BarStyleOverride = RecursivePartial<BarSeriesStyle> | Color | null;
 export type PointStyleOverride = RecursivePartial<PointStyle> | Color | null;
+
+export const SeriesTypes = Object.freeze({
+  Area: 'area' as 'area',
+  Bar: 'bar' as 'bar',
+  Line: 'line' as 'line',
+});
+
+export type SeriesTypes = $Values<typeof SeriesTypes>;
+
+export const SpecTypes = Object.freeze({
+  Series: 'series' as 'series',
+  Axis: 'axis' as 'axis',
+  Annotation: 'annotation' as 'annotation',
+  Settings: 'settings' as 'settings',
+});
+
+export type SpecTypes = $Values<typeof SpecTypes>;
+
 /**
  * Override for bar styles per datum
  *
@@ -169,21 +189,21 @@ export interface DisplayValueSpec {
   hideClippedValue?: boolean;
 }
 
-export interface SeriesSpec {
-  /** The ID of the spec, generated via getSpecId method */
-  id: SpecId;
+export interface SeriesSpec extends Spec {
+  specType: typeof SpecTypes.Series;
+  chartType: typeof ChartTypes.XYAxis;
   /** The name or label of the spec */
   name?: string;
   /** The ID of the spec group, generated via getGroupId method
    * @default __global__
    */
-  groupId: GroupId;
+  groupId: string;
   /** when using a different groupId this option will allow compute in the same domain of the global domain */
   useDefaultGroupDomain?: boolean;
   /** An array of data */
   data: Datum[];
   /** The type of series you are looking to render */
-  seriesType: 'bar' | 'line' | 'area';
+  seriesType: SeriesTypes;
   /** Custom colors for series */
   customSeriesColors?: CustomSeriesColorsMap;
   /** If the series should appear in the legend
@@ -264,7 +284,7 @@ export interface SeriesScales {
 
 export type BasicSeriesSpec = SeriesSpec & SeriesAccessors & SeriesScales;
 
-export type SeriesSpecs<S extends BasicSeriesSpec = BasicSeriesSpec> = Map<SpecId, S>;
+export type SeriesSpecs<S extends BasicSeriesSpec = BasicSeriesSpec> = Array<S>;
 
 /**
  * This spec describe the dataset configuration used to display a bar series.
@@ -272,7 +292,7 @@ export type SeriesSpecs<S extends BasicSeriesSpec = BasicSeriesSpec> = Map<SpecI
 export type BarSeriesSpec = BasicSeriesSpec &
   Postfixes & {
     /** @default bar */
-    seriesType: 'bar';
+    seriesType: typeof SeriesTypes.Bar;
     /** If true, will stack all BarSeries and align bars to ticks (instead of centered on ticks) */
     enableHistogramMode?: boolean;
     barSeriesStyle?: RecursivePartial<BarSeriesStyle>;
@@ -327,7 +347,7 @@ export type FitConfig = {
 export type LineSeriesSpec = BasicSeriesSpec &
   HistogramConfig & {
     /** @default line */
-    seriesType: 'line';
+    seriesType: typeof SeriesTypes.Line;
     curve?: CurveType;
     lineSeriesStyle?: RecursivePartial<LineSeriesStyle>;
     /**
@@ -347,7 +367,7 @@ export type AreaSeriesSpec = BasicSeriesSpec &
   HistogramConfig &
   Postfixes & {
     /** @default area */
-    seriesType: 'area';
+    seriesType: typeof SeriesTypes.Area;
     /** The type of interpolator to be used to interpolate values between points */
     curve?: CurveType;
     areaSeriesStyle?: RecursivePartial<AreaSeriesStyle>;
@@ -365,7 +385,7 @@ export type AreaSeriesSpec = BasicSeriesSpec &
     fit?: Exclude<Fit, 'explicit'> | FitConfig;
   };
 
-interface HistogramConfig {
+export interface HistogramConfig {
   /**  Determines how points in the series will align to bands in histogram mode
    * @default 'start'
    */
@@ -383,8 +403,10 @@ export type HistogramModeAlignment = 'start' | 'center' | 'end';
 /**
  * This spec describe the configuration for a chart axis.
  */
-export interface AxisSpec {
-  /** The ID of the spec, generated via getSpecId method */
+export interface AxisSpec extends Spec {
+  specType: typeof SpecTypes.Axis;
+  chartType: typeof ChartTypes.XYAxis;
+  /** The ID of the spec */
   id: AxisId;
   /** Style options for grid line */
   gridLineStyle?: GridLineConfig;
@@ -468,7 +490,7 @@ export interface LineAnnotationDatum {
 }
 
 export type LineAnnotationSpec = BaseAnnotationSpec & {
-  annotationType: 'line';
+  annotationType: typeof AnnotationTypes.Line;
   domainType: AnnotationDomainType;
   /** Data values defined with value, details, and header */
   dataValues: LineAnnotationDatum[];
@@ -507,7 +529,7 @@ export interface RectAnnotationDatum {
 }
 
 export type RectAnnotationSpec = BaseAnnotationSpec & {
-  annotationType: 'rectangle';
+  annotationType: typeof AnnotationTypes.Rectangle;
   /** Custom rendering function for tooltip */
   renderTooltip?: AnnotationTooltipFormatter;
   /** Data values defined with coordinates and details */
@@ -520,9 +542,9 @@ export type RectAnnotationSpec = BaseAnnotationSpec & {
   zIndex?: number;
 };
 
-export interface BaseAnnotationSpec {
-  /** The id of the annotation */
-  annotationId: AnnotationId;
+export interface BaseAnnotationSpec extends Spec {
+  chartType: ChartTypes;
+  specType: typeof SpecTypes.Annotation;
   /** Annotation type: line, rectangle, text */
   annotationType: AnnotationType;
   /** The ID of the axis group, generated via getGroupId method
@@ -556,15 +578,15 @@ export function isRectAnnotation(spec: AnnotationSpec): spec is RectAnnotationSp
 }
 
 export function isBarSeriesSpec(spec: BasicSeriesSpec): spec is BarSeriesSpec {
-  return spec.seriesType === 'bar';
+  return spec.seriesType === SeriesTypes.Bar;
 }
 
 export function isLineSeriesSpec(spec: BasicSeriesSpec): spec is LineSeriesSpec {
-  return spec.seriesType === 'line';
+  return spec.seriesType === SeriesTypes.Line;
 }
 
 export function isAreaSeriesSpec(spec: BasicSeriesSpec): spec is AreaSeriesSpec {
-  return spec.seriesType === 'area';
+  return spec.seriesType === SeriesTypes.Area;
 }
 
 export function isBandedSpec(y0Accessors: SeriesAccessors['y0Accessors']): boolean {

@@ -31,25 +31,27 @@ export interface IconProps {
 
 export type Props = Omit<SVGAttributes<SVGElement>, 'color' | 'type'> & IconProps;
 
-export const Icon = (props: Props) => {
-  const { type, color, className, tabIndex, ...rest } = props;
-  let optionalCustomStyles = null;
+export class Icon extends React.PureComponent<Props> {
+  render() {
+    const { type, color, className, tabIndex, ...rest } = this.props;
+    let optionalCustomStyles = null;
 
-  if (color) {
-    optionalCustomStyles = { color };
+    if (color) {
+      optionalCustomStyles = { color };
+    }
+
+    const classes = classNames('echIcon', className);
+
+    const Svg = (type && typeToIconMap[type]) || EmptyIcon;
+
+    // This is a fix for IE and Edge, which ignores tabindex="-1" on an SVG, but respects
+    // focusable="false".
+    //   - If there's no tab index specified, we'll default the icon to not be focusable,
+    //     which is how SVGs behave in Chrome, Safari, and FF.
+    //   - If tab index is -1, then the consumer wants the icon to not be focusable.
+    //   - For all other values, the consumer wants the icon to be focusable.
+    const focusable = tabIndex == null || tabIndex === -1 ? 'false' : 'true';
+
+    return <Svg className={classes} {...optionalCustomStyles} tabIndex={tabIndex} focusable={focusable} {...rest} />;
   }
-
-  const classes = classNames('echIcon', className);
-
-  const Svg = (type && typeToIconMap[type]) || EmptyIcon;
-
-  // This is a fix for IE and Edge, which ignores tabindex="-1" on an SVG, but respects
-  // focusable="false".
-  //   - If there's no tab index specified, we'll default the icon to not be focusable,
-  //     which is how SVGs behave in Chrome, Safari, and FF.
-  //   - If tab index is -1, then the consumer wants the icon to not be focusable.
-  //   - For all other values, the consumer wants the icon to be focusable.
-  const focusable = tabIndex == null || tabIndex === -1 ? 'false' : 'true';
-
-  return <Svg className={classes} {...optionalCustomStyles} tabIndex={tabIndex} focusable={focusable} {...rest} />;
-};
+}

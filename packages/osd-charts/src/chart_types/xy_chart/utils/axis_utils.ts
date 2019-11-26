@@ -15,9 +15,10 @@ import {
 } from './specs';
 import { AxisConfig, Theme } from '../../../utils/themes/theme';
 import { Dimensions, Margins } from '../../../utils/dimensions';
-import { AxisId, GroupId } from '../../../utils/ids';
+import { AxisId } from '../../../utils/ids';
 import { Scale } from '../../../utils/scales/scales';
 import { BBox, BBoxCalculator } from '../../../utils/bbox/bbox_calculator';
+import { getSpecsById } from '../state/utils';
 
 export type AxisLinePosition = [number, number, number, number];
 
@@ -184,10 +185,7 @@ export const getMaxBboxDimensions = (
   maxLabelTextWidth: number;
   maxLabelTextHeight: number;
 } => {
-  const bbox = bboxCalculator.compute(tickLabel, tickLabelPadding, fontSize, fontFamily).getOrElse({
-    width: 0,
-    height: 0,
-  });
+  const bbox = bboxCalculator.compute(tickLabel, tickLabelPadding, fontSize, fontFamily);
 
   const rotatedBbox = computeRotatedLabelDimensions(bbox, tickLabelRotation);
 
@@ -374,7 +372,7 @@ export function getMinMaxRange(
   }
 }
 
-export function getBottomTopAxisMinMaxRange(chartRotation: Rotation, width: number) {
+function getBottomTopAxisMinMaxRange(chartRotation: Rotation, width: number) {
   switch (chartRotation) {
     case 0:
       // dealing with x domain
@@ -390,7 +388,7 @@ export function getBottomTopAxisMinMaxRange(chartRotation: Rotation, width: numb
       return { minRange: width, maxRange: 0 };
   }
 }
-export function getLeftAxisMinMaxRange(chartRotation: Rotation, height: number) {
+function getLeftAxisMinMaxRange(chartRotation: Rotation, height: number) {
   switch (chartRotation) {
     case 0:
       // dealing with y domain
@@ -430,7 +428,6 @@ export function getAvailableTicks(
       }
     }
   }
-
   const shift = totalBarsInCluster > 0 ? totalBarsInCluster : 1;
 
   const band = scale.bandwidth / (1 - scale.barsPadding);
@@ -569,14 +566,19 @@ export function getAxisTicksPositions(
   },
   chartTheme: Theme,
   chartRotation: Rotation,
-  axisSpecs: Map<AxisId, AxisSpec>,
+  axisSpecs: AxisSpec[],
   axisDimensions: Map<AxisId, AxisTicksDimensions>,
   xDomain: XDomain,
   yDomain: YDomain[],
   totalGroupsCount: number,
   enableHistogramMode: boolean,
   barsPadding?: number,
-) {
+): {
+  axisPositions: Map<AxisId, Dimensions>;
+  axisTicks: Map<AxisId, AxisTick[]>;
+  axisVisibleTicks: Map<AxisId, AxisTick[]>;
+  axisGridLinesPositions: Map<AxisId, AxisLinePosition[]>;
+} {
   const { chartPaddings, chartMargins } = chartTheme;
   const axisPositions: Map<AxisId, Dimensions> = new Map();
   const axisVisibleTicks: Map<AxisId, AxisTick[]> = new Map();
@@ -589,7 +591,7 @@ export function getAxisTicksPositions(
   let cumRightSum = chartPaddings.right;
 
   axisDimensions.forEach((axisDim, id) => {
-    const axisSpec = axisSpecs.get(id);
+    const axisSpec = getSpecsById<AxisSpec>(axisSpecs, id);
 
     // Consider refactoring this so this condition can be tested
     // Given some of the values that get passed around, maybe re-write as a reduce instead of forEach?
@@ -689,63 +691,31 @@ export function isBounded(domain: Partial<CompleteBoundedDomain>): domain is Dom
   return domain.max != null || domain.min != null;
 }
 
-export function mergeYCustomDomainsByGroupId(
-  axesSpecs: Map<AxisId, AxisSpec>,
-  chartRotation: Rotation,
-): Map<GroupId, DomainRange> {
-  const domainsByGroupId = new Map<GroupId, DomainRange>();
+export const isDuplicateAxis = (
+  { position, title }: AxisSpec,
+  { tickLabels }: AxisTicksDimensions,
+  tickMap: Map<AxisId, AxisTicksDimensions>,
+  specs: AxisSpec[],
+): boolean => {
+  const firstTickLabel = tickLabels[0];
+  const lastTickLabel = tickLabels.slice(-1)[0];
 
-  axesSpecs.forEach((spec: AxisSpec, id: AxisId) => {
-    const { groupId, domain } = spec;
+  let hasDuplicate = false;
+  tickMap.forEach(({ tickLabels: axisTickLabels }, axisId) => {
+    if (
+      !hasDuplicate &&
+      axisTickLabels &&
+      tickLabels.length === axisTickLabels.length &&
+      firstTickLabel === axisTickLabels[0] &&
+      lastTickLabel === axisTickLabels.slice(-1)[0]
+    ) {
+      const spec = getSpecsById<AxisSpec>(specs, axisId);
 
-    if (!domain) {
-      return;
-    }
-
-    const isAxisYDomain = isYDomain(spec.position, chartRotation);
-
-    if (!isAxisYDomain) {
-      const errorMessage = `[Axis ${id}]: custom domain for xDomain should be defined in Settings`;
-      throw new Error(errorMessage);
-    }
-
-    if (isCompleteBound(domain) && domain.min > domain.max) {
-      const errorMessage = `[Axis ${id}]: custom domain is invalid, min is greater than max`;
-      throw new Error(errorMessage);
-    }
-
-    const prevGroupDomain = domainsByGroupId.get(groupId);
-
-    if (prevGroupDomain) {
-      const prevDomain = prevGroupDomain as DomainRange;
-
-      const prevMin = isLowerBound(prevDomain) ? prevDomain.min : undefined;
-      const prevMax = isUpperBound(prevDomain) ? prevDomain.max : undefined;
-
-      let max = prevMax;
-      let min = prevMin;
-
-      if (isCompleteBound(domain)) {
-        min = prevMin != null ? Math.min(domain.min, prevMin) : domain.min;
-        max = prevMax != null ? Math.max(domain.max, prevMax) : domain.max;
-      } else if (isLowerBound(domain)) {
-        min = prevMin != null ? Math.min(domain.min, prevMin) : domain.min;
-      } else if (isUpperBound(domain)) {
-        max = prevMax != null ? Math.max(domain.max, prevMax) : domain.max;
+      if (spec && spec.position === position && title === spec.title) {
+        hasDuplicate = true;
       }
-
-      const mergedDomain = {
-        min,
-        max,
-      };
-
-      if (isBounded(mergedDomain)) {
-        domainsByGroupId.set(groupId, mergedDomain);
-      }
-    } else {
-      domainsByGroupId.set(groupId, domain);
     }
   });
 
-  return domainsByGroupId;
-}
+  return hasDuplicate;
+};

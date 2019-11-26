@@ -4,10 +4,10 @@ import { GroupId, SpecId } from '../../../utils/ids';
 import { splitSpecsByGroupId, YBasicSeriesSpec } from '../domains/y_domain';
 import { formatNonStackedDataSeriesValues } from './nonstacked_series_utils';
 import { isEqualSeriesKey } from './series_utils';
-import { BasicSeriesSpec, Datum, SeriesAccessors } from './specs';
+import { BasicSeriesSpec, Datum, SeriesAccessors, SeriesSpecs, SeriesTypes } from './specs';
 import { formatStackedDataSeriesValues } from './stacked_series_utils';
-import { LastValues } from '../store/utils';
 import { ScaleType } from '../../../utils/scales/scales';
+import { LastValues } from '../state/utils';
 
 export interface FilledValues {
   /** the x value */
@@ -218,7 +218,7 @@ export function getFormattedDataseries(
   dataSeries: Map<SpecId, RawDataSeries[]>,
   xValues: Set<string | number>,
   xScaleType: ScaleType,
-  seriesSpecs: Map<SpecId, BasicSeriesSpec>,
+  seriesSpecs: SeriesSpecs,
 ): {
   stacked: FormattedDataSeries[];
   nonStacked: FormattedDataSeries[];
@@ -268,7 +268,7 @@ export function getFormattedDataseries(
   };
 }
 
-export function getRawDataSeries(
+function getRawDataSeries(
   seriesSpecs: YBasicSeriesSpec[],
   dataSeries: Map<SpecId, RawDataSeries[]>,
 ): {
@@ -288,13 +288,13 @@ export function getRawDataSeries(
     const { id, seriesType } = spec;
     const ds = dataSeries.get(id);
     switch (seriesType) {
-      case 'bar':
+      case SeriesTypes.Bar:
         counts.barSeries += ds ? ds.length : 0;
         break;
-      case 'line':
+      case SeriesTypes.Line:
         counts.lineSeries += ds ? ds.length : 0;
         break;
-      case 'area':
+      case SeriesTypes.Area:
         counts.areaSeries += ds ? ds.length : 0;
         break;
     }
@@ -314,8 +314,8 @@ export function getRawDataSeries(
  * @param deselectedDataSeries the array of deselected/hidden data series
  */
 export function getSplittedSeries(
-  seriesSpecs: Map<SpecId, BasicSeriesSpec>,
-  deselectedDataSeries?: DataSeriesColorsValues[] | null,
+  seriesSpecs: BasicSeriesSpec[],
+  deselectedDataSeries: DataSeriesColorsValues[] = [],
 ): {
   splittedSeries: Map<SpecId, RawDataSeries[]>;
   seriesColors: Map<string, DataSeriesColorsValues>;
@@ -325,17 +325,17 @@ export function getSplittedSeries(
   const seriesColors = new Map<string, DataSeriesColorsValues>();
   let xValues: Set<string | number> = new Set();
   let isOrdinalScale = false;
-  for (const [specId, spec] of seriesSpecs) {
+  for (const spec of seriesSpecs) {
     if (spec.xScaleType === ScaleType.Ordinal) {
       isOrdinalScale = true;
     }
-    const dataSeries = splitSeries(spec.data, spec, specId);
+    const dataSeries = splitSeries(spec.data, spec, spec.id);
     let currentRawDataSeries = dataSeries.rawDataSeries;
-    if (deselectedDataSeries) {
+    if (deselectedDataSeries.length > 0) {
       currentRawDataSeries = dataSeries.rawDataSeries.filter(
         (series): boolean => {
           const seriesValues = {
-            specId,
+            specId: spec.id,
             colorValues: series.key,
           };
 
@@ -344,13 +344,13 @@ export function getSplittedSeries(
       );
     }
 
-    splittedSeries.set(specId, currentRawDataSeries);
+    splittedSeries.set(spec.id, currentRawDataSeries);
 
     const banded = spec.y0Accessors && spec.y0Accessors.length > 0;
 
     dataSeries.colorsValues.forEach((colorValues, key) => {
       seriesColors.set(key, {
-        specId,
+        specId: spec.id,
         specSortIndex: spec.sortIndex,
         banded,
         colorValues,
@@ -372,7 +372,7 @@ export function getSplittedSeries(
   };
 }
 
-export function getSortIndex({ specSortIndex }: DataSeriesColorsValues, total: number): number {
+function getSortIndex({ specSortIndex }: DataSeriesColorsValues, total: number): number {
   return specSortIndex != null ? specSortIndex : total;
 }
 

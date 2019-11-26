@@ -39,9 +39,6 @@ storiesOf('Scales', module)
 
     let data;
     switch (datasetSelected) {
-      case 'utc':
-        data = UTC_DATASET;
-        break;
       case 'local':
         data = CURRENT_TIMEZONE_DATASET;
         break;
@@ -50,6 +47,10 @@ storiesOf('Scales', module)
         break;
       case 'utc-8':
         data = OTHER_MINUS8_TIMEZONE_DATASET;
+        break;
+      case 'utc':
+      default:
+        data = UTC_DATASET;
         break;
     }
     let tooltipFn: (d: number) => string;

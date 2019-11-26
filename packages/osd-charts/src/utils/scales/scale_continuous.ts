@@ -31,12 +31,6 @@ const SCALES = {
   [ScaleType.Time]: scaleUtc,
 };
 
-export function limitToMin(value: number, positive: boolean) {
-  if (value === 0) {
-    return positive ? 1 : -1;
-  }
-  return value;
-}
 /**
  * As log(0) = -Infinite, a log scale domain must be strictly-positive
  * or strictly-negative; the domain must not include or cross zero value.
@@ -250,9 +244,12 @@ export class ScaleContinuous implements Scale {
     value: number,
     data: number[],
   ): {
-    value: any;
+    value: number;
     withinBandwidth: boolean;
-  } {
+  } | null {
+    if (data.length === 0) {
+      return null;
+    }
     const invertedValue = this.invert(value);
     const bisectValue = this.bandwidth === 0 ? invertedValue + this.minInterval / 2 : invertedValue;
     const leftIndex = bisectLeft(data, bisectValue);
@@ -306,10 +303,6 @@ export class ScaleContinuous implements Scale {
   isValueInDomain(value: number) {
     return value >= this.domain[0] && value <= this.domain[1];
   }
-}
-
-export function isContinuousScale(scale: Scale): scale is ScaleContinuous {
-  return scale.type !== ScaleType.Ordinal;
 }
 
 export function isLogarithmicScale(scale: Scale) {

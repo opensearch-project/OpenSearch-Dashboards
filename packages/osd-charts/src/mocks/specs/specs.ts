@@ -8,14 +8,19 @@ import {
   HistogramBarSeriesSpec,
   LineSeriesSpec,
   BasicSeriesSpec,
+  SpecTypes,
+  SeriesTypes,
 } from '../../chart_types/xy_chart/utils/specs';
-import { getSpecId, getGroupId, SpecId } from '../../utils/ids';
+import { getSpecId, getGroupId } from '../../utils/ids';
 import { ScaleType } from '../../utils/scales/scales';
+import { ChartTypes } from '../../chart_types';
 
 export class MockSeriesSpec {
   private static readonly barBase: BarSeriesSpec = {
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Series,
     id: getSpecId('spec1'),
-    seriesType: 'bar',
+    seriesType: SeriesTypes.Bar,
     groupId: getGroupId(DEFAULT_GLOBAL_ID),
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
@@ -25,12 +30,14 @@ export class MockSeriesSpec {
     hideInLegend: false,
     enableHistogramMode: false,
     stackAsPercentage: false,
-    data: [],
+    data: [] as any[],
   };
 
   private static readonly histogramBarBase: HistogramBarSeriesSpec = {
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Series,
     id: getSpecId('spec1'),
-    seriesType: 'bar',
+    seriesType: SeriesTypes.Bar,
     groupId: getGroupId(DEFAULT_GLOBAL_ID),
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
@@ -43,8 +50,10 @@ export class MockSeriesSpec {
   };
 
   private static readonly areaBase: AreaSeriesSpec = {
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Series,
     id: getSpecId('spec1'),
-    seriesType: 'area',
+    seriesType: SeriesTypes.Area,
     groupId: getGroupId(DEFAULT_GLOBAL_ID),
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
@@ -57,8 +66,10 @@ export class MockSeriesSpec {
   };
 
   private static readonly lineBase: LineSeriesSpec = {
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Series,
     id: getSpecId('spec1'),
-    seriesType: 'line',
+    seriesType: SeriesTypes.Line,
     groupId: getGroupId(DEFAULT_GLOBAL_ID),
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
@@ -91,11 +102,10 @@ export class MockSeriesSpec {
 
 export class MockSeriesSpecs {
   static fromSpecs(specs: BasicSeriesSpec[]): SeriesSpecs {
-    const specsMap: [SpecId, BasicSeriesSpec][] = specs.map((spec) => [spec.id, spec]);
-    return new Map(specsMap);
+    return specs;
   }
 
   static empty(): SeriesSpecs {
-    return new Map();
+    return [];
   }
 }

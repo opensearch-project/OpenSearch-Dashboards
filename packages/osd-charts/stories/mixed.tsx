@@ -17,7 +17,7 @@ import {
   Settings,
 } from '../src/';
 import { timeFormatter } from '../src/utils/data/formatters';
-import { Fit } from '../src/chart_types/xy_chart/utils/specs';
+import { Fit, SeriesTypes } from '../src/chart_types/xy_chart/utils/specs';
 
 storiesOf('Mixed Charts', module)
   .add('bar and lines', () => {
@@ -290,10 +290,10 @@ storiesOf('Mixed Charts', module)
     const seriesType = select<string>(
       'seriesType',
       {
-        Area: 'area',
-        Line: 'line',
+        Area: SeriesTypes.Area,
+        Line: SeriesTypes.Line,
       },
-      'area',
+      SeriesTypes.Area,
     );
     const dataKey = select<string>(
       'dataset',
@@ -365,7 +365,7 @@ storiesOf('Mixed Charts', module)
         />
         <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
         <Axis id={getAxisId('left')} title={'Left axis'} position={Position.Left} />
-        {seriesType === 'area' ? (
+        {seriesType === SeriesTypes.Area ? (
           <AreaSeries
             id={getSpecId('test')}
             xScaleType={xScaleType}

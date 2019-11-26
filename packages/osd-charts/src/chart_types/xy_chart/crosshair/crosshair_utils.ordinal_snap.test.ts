@@ -1,9 +1,10 @@
 import { computeXScale } from '../utils/scales';
-import { BasicSeriesSpec } from '../utils/specs';
+import { BasicSeriesSpec, SpecTypes, SeriesTypes } from '../utils/specs';
 import { getGroupId, getSpecId } from '../../../utils/ids';
 import { ScaleType } from '../../../utils/scales/scales';
 import { getSnapPosition } from './crosshair_utils';
-import { computeSeriesDomains } from '../store/utils';
+import { computeSeriesDomains } from '../state/utils';
+import { ChartTypes } from '../..';
 
 describe('Crosshair utils ordinal scales', () => {
   const barSeries1SpecId = getSpecId('barSeries1');
@@ -12,9 +13,11 @@ describe('Crosshair utils ordinal scales', () => {
   const lineSeries2SpecId = getSpecId('lineSeries2');
 
   const barSeries1: BasicSeriesSpec = {
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Series,
     id: barSeries1SpecId,
     groupId: getGroupId('group1'),
-    seriesType: 'bar',
+    seriesType: SeriesTypes.Bar,
     data: [['a', 0], ['b', 0], ['c', 0]],
     xAccessor: 0,
     yAccessors: [1],
@@ -23,9 +26,11 @@ describe('Crosshair utils ordinal scales', () => {
     yScaleToDataExtent: true,
   };
   const barSeries2: BasicSeriesSpec = {
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Series,
     id: barSeries2SpecId,
     groupId: getGroupId('group1'),
-    seriesType: 'bar',
+    seriesType: SeriesTypes.Bar,
     data: [['a', 2], ['b', 2], ['c', 2]],
     xAccessor: 0,
     yAccessors: [1],
@@ -34,9 +39,11 @@ describe('Crosshair utils ordinal scales', () => {
     yScaleToDataExtent: true,
   };
   const lineSeries1: BasicSeriesSpec = {
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Series,
     id: lineSeries1SpecId,
     groupId: getGroupId('group1'),
-    seriesType: 'line',
+    seriesType: SeriesTypes.Line,
     data: [['a', 0], ['b', 0], ['c', 0]],
     xAccessor: 0,
     yAccessors: [1],
@@ -45,9 +52,11 @@ describe('Crosshair utils ordinal scales', () => {
     yScaleToDataExtent: true,
   };
   const lineSeries2: BasicSeriesSpec = {
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Series,
     id: lineSeries2SpecId,
     groupId: getGroupId('group1'),
-    seriesType: 'line',
+    seriesType: SeriesTypes.Line,
     data: [['a', 2], ['b', 2], ['c', 2]],
     xAccessor: 0,
     yAccessors: [1],
@@ -56,54 +65,44 @@ describe('Crosshair utils ordinal scales', () => {
     yScaleToDataExtent: true,
   };
 
-  const barSeriesMap = new Map();
-  barSeriesMap.set(barSeries1SpecId, barSeries1);
-  const barSeriesDomains = computeSeriesDomains(barSeriesMap, new Map());
+  const barSeries = [barSeries1];
+  const barSeriesDomains = computeSeriesDomains(barSeries);
 
-  const multiBarSeriesMap = new Map();
-  multiBarSeriesMap.set(barSeries1SpecId, barSeries1);
-  multiBarSeriesMap.set(barSeries2SpecId, barSeries2);
-  const multiBarSeriesDomains = computeSeriesDomains(multiBarSeriesMap, new Map());
+  const multiBarSeries = [barSeries1, barSeries2];
+  const multiBarSeriesDomains = computeSeriesDomains(multiBarSeries);
 
-  const lineSeriesMap = new Map();
-  lineSeriesMap.set(lineSeries1SpecId, lineSeries1);
-  const lineSeriesDomains = computeSeriesDomains(lineSeriesMap, new Map());
+  const lineSeries = [lineSeries1];
+  const lineSeriesDomains = computeSeriesDomains(lineSeries);
 
-  const multiLineSeriesMap = new Map();
-  multiLineSeriesMap.set(lineSeries1SpecId, lineSeries1);
-  multiLineSeriesMap.set(lineSeries2SpecId, lineSeries2);
-  const multiLineSeriesDomains = computeSeriesDomains(multiLineSeriesMap, new Map());
+  const multiLineSeries = [lineSeries1, lineSeries2];
+  const multiLineSeriesDomains = computeSeriesDomains(multiLineSeries);
 
-  const mixedLinesBarsMap = new Map();
-  mixedLinesBarsMap.set(lineSeries1SpecId, lineSeries1);
-  mixedLinesBarsMap.set(lineSeries2SpecId, lineSeries2);
-  mixedLinesBarsMap.set(barSeries1SpecId, barSeries1);
-  mixedLinesBarsMap.set(barSeries2SpecId, barSeries2);
-  const mixedLinesBarsSeriesDomains = computeSeriesDomains(mixedLinesBarsMap, new Map());
+  const mixedLinesBars = [lineSeries1, lineSeries2, barSeries1, barSeries2];
+  const mixedLinesBarsSeriesDomains = computeSeriesDomains(mixedLinesBars);
 
   const barSeriesScale = computeXScale({
     xDomain: barSeriesDomains.xDomain,
-    totalBarsInCluster: barSeriesMap.size,
+    totalBarsInCluster: barSeries.length,
     range: [0, 120],
   });
   const multiBarSeriesScale = computeXScale({
     xDomain: multiBarSeriesDomains.xDomain,
-    totalBarsInCluster: multiBarSeriesMap.size,
+    totalBarsInCluster: multiBarSeries.length,
     range: [0, 120],
   });
   const lineSeriesScale = computeXScale({
     xDomain: lineSeriesDomains.xDomain,
-    totalBarsInCluster: lineSeriesMap.size,
+    totalBarsInCluster: lineSeries.length,
     range: [0, 120],
   });
   const multiLineSeriesScale = computeXScale({
     xDomain: multiLineSeriesDomains.xDomain,
-    totalBarsInCluster: multiLineSeriesMap.size,
+    totalBarsInCluster: multiLineSeries.length,
     range: [0, 120],
   });
   const mixedLinesBarsSeriesScale = computeXScale({
     xDomain: mixedLinesBarsSeriesDomains.xDomain,
-    totalBarsInCluster: mixedLinesBarsMap.size,
+    totalBarsInCluster: mixedLinesBars.length,
     range: [0, 120],
   });
 

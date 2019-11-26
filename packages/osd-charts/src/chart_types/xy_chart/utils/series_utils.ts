@@ -1,5 +1,5 @@
-import { GeometryId } from '../rendering/rendering';
 import { DataSeriesColorsValues } from './series';
+import { GeometryId } from '../../../utils/geometry';
 
 export function isEqualSeriesKey(a: any[], b: any[]): boolean {
   if (a.length !== b.length) {

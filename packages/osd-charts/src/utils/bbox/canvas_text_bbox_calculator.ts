@@ -1,42 +1,34 @@
-import { none, Option, some } from 'fp-ts/lib/Option';
-import { BBox, BBoxCalculator } from './bbox_calculator';
+import { BBox, BBoxCalculator, DEFAULT_EMPTY_BBOX } from './bbox_calculator';
 
 export class CanvasTextBBoxCalculator implements BBoxCalculator {
-  context: CanvasRenderingContext2D | null;
   private attachedRoot: HTMLElement;
   private offscreenCanvas: HTMLCanvasElement;
-  private scaledFontSize: number;
+  private context: CanvasRenderingContext2D | null;
 
-  constructor(rootElement?: HTMLElement, scaledFontSize = 100) {
+  constructor(rootElement?: HTMLElement) {
     this.offscreenCanvas = document.createElement('canvas');
     this.offscreenCanvas.style.position = 'absolute';
-    this.offscreenCanvas.style.top = '-9999px';
-
+    this.offscreenCanvas.style.top = '-99999px';
+    this.offscreenCanvas.style.left = '-99999px';
     this.context = this.offscreenCanvas.getContext('2d');
     this.attachedRoot = rootElement || document.documentElement;
     this.attachedRoot.appendChild(this.offscreenCanvas);
-    this.scaledFontSize = scaledFontSize;
   }
-  compute(text: string, padding: number, fontSize = 16, fontFamily = 'Arial'): Option<BBox> {
+  compute(text: string, padding: number, fontSize = 16, fontFamily = 'Arial', lineHeight = 1, fontWeight = 400): BBox {
     if (!this.context) {
-      return none;
+      return DEFAULT_EMPTY_BBOX;
     }
-
     // Padding should be at least one to avoid browser measureText inconsistencies
     if (padding < 1) {
       padding = 1;
     }
-
-    // We scale the text up to get a more accurate computation of the width of the text
-    // because `measureText` can vary a lot between browsers.
-    const scalingFactor = this.scaledFontSize / fontSize;
-    this.context.font = `${this.scaledFontSize}px ${fontFamily}`;
+    this.context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
     const measure = this.context.measureText(text);
 
-    return some({
-      width: measure.width / scalingFactor + padding,
-      height: fontSize,
-    });
+    return {
+      width: measure.width + padding,
+      height: fontSize * lineHeight,
+    };
   }
   destroy(): void {
     this.attachedRoot.removeChild(this.offscreenCanvas);

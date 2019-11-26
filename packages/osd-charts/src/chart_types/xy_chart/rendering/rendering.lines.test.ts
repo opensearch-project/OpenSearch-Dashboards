@@ -1,23 +1,25 @@
-/* eslint @typescript-eslint/no-object-literal-type-assertion: off */
-
-import { computeSeriesDomains } from '../store/utils';
-import { getGroupId, getSpecId, SpecId, GroupId } from '../../../utils/ids';
+import { computeSeriesDomains } from '../state/utils';
 import { ScaleType } from '../../../utils/scales/scales';
 import { CurveType } from '../../../utils/curves';
-import { IndexedGeometry, LineGeometry, PointGeometry, renderLine } from './rendering';
+import { renderLine } from './rendering';
 import { computeXScale, computeYScales } from '../utils/scales';
-import { LineSeriesSpec, DomainRange } from '../utils/specs';
+import { LineSeriesSpec, DomainRange, SpecTypes, SeriesTypes } from '../utils/specs';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
+import { LineGeometry, IndexedGeometry, PointGeometry } from '../../../utils/geometry';
+import { GroupId } from '../../../utils/ids';
+import { ChartTypes } from '../..';
 
-const SPEC_ID = getSpecId('spec_1');
-const GROUP_ID = getGroupId('group_1');
+const SPEC_ID = 'spec_1';
+const GROUP_ID = 'group_1';
 
 describe('Rendering points - line', () => {
   describe('Empty line for missing data', () => {
     const pointSeriesSpec: LineSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
       id: SPEC_ID,
       groupId: GROUP_ID,
-      seriesType: 'line',
+      seriesType: SeriesTypes.Line,
       yScaleToDataExtent: false,
       data: [[0, 10], [1, 5]],
       xAccessor: 0,
@@ -25,12 +27,11 @@ describe('Rendering points - line', () => {
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
     };
-    const pointSeriesMap = new Map<SpecId, LineSeriesSpec>();
-    pointSeriesMap.set(SPEC_ID, pointSeriesSpec);
+    const pointSeriesMap = [pointSeriesSpec];
     const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
     const xScale = computeXScale({
       xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.size,
+      totalBarsInCluster: pointSeriesMap.length,
       range: [0, 100],
     });
     const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
@@ -65,9 +66,11 @@ describe('Rendering points - line', () => {
   });
   describe('Single series line chart - ordinal', () => {
     const pointSeriesSpec: LineSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
       id: SPEC_ID,
       groupId: GROUP_ID,
-      seriesType: 'line',
+      seriesType: SeriesTypes.Line,
       yScaleToDataExtent: false,
       data: [[0, 10], [1, 5]],
       xAccessor: 0,
@@ -75,12 +78,11 @@ describe('Rendering points - line', () => {
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
     };
-    const pointSeriesMap = new Map<SpecId, LineSeriesSpec>();
-    pointSeriesMap.set(SPEC_ID, pointSeriesSpec);
+    const pointSeriesMap = [pointSeriesSpec];
     const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
     const xScale = computeXScale({
       xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.size,
+      totalBarsInCluster: pointSeriesMap.length,
       range: [0, 100],
     });
     const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
@@ -160,12 +162,14 @@ describe('Rendering points - line', () => {
     });
   });
   describe('Multi series line chart - ordinal', () => {
-    const spec1Id = getSpecId('point1');
-    const spec2Id = getSpecId('point2');
+    const spec1Id = 'point1';
+    const spec2Id = 'point2';
     const pointSeriesSpec1: LineSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
       id: spec1Id,
       groupId: GROUP_ID,
-      seriesType: 'line',
+      seriesType: SeriesTypes.Line,
       yScaleToDataExtent: false,
       data: [[0, 10], [1, 5]],
       xAccessor: 0,
@@ -174,9 +178,11 @@ describe('Rendering points - line', () => {
       yScaleType: ScaleType.Linear,
     };
     const pointSeriesSpec2: LineSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
       id: spec2Id,
       groupId: GROUP_ID,
-      seriesType: 'line',
+      seriesType: SeriesTypes.Line,
       yScaleToDataExtent: false,
       data: [[0, 20], [1, 10]],
       xAccessor: 0,
@@ -184,13 +190,11 @@ describe('Rendering points - line', () => {
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
     };
-    const pointSeriesMap = new Map<SpecId, LineSeriesSpec>();
-    pointSeriesMap.set(spec1Id, pointSeriesSpec1);
-    pointSeriesMap.set(spec2Id, pointSeriesSpec2);
+    const pointSeriesMap = [pointSeriesSpec1, pointSeriesSpec2];
     const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
     const xScale = computeXScale({
       xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.size,
+      totalBarsInCluster: pointSeriesMap.length,
       range: [0, 100],
     });
     const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
@@ -341,9 +345,11 @@ describe('Rendering points - line', () => {
   });
   describe('Single series line chart - linear', () => {
     const pointSeriesSpec: LineSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
       id: SPEC_ID,
       groupId: GROUP_ID,
-      seriesType: 'line',
+      seriesType: SeriesTypes.Line,
       yScaleToDataExtent: false,
       data: [[0, 10], [1, 5]],
       xAccessor: 0,
@@ -351,12 +357,11 @@ describe('Rendering points - line', () => {
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
     };
-    const pointSeriesMap = new Map<SpecId, LineSeriesSpec>();
-    pointSeriesMap.set(SPEC_ID, pointSeriesSpec);
+    const pointSeriesMap = [pointSeriesSpec];
     const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
     const xScale = computeXScale({
       xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.size,
+      totalBarsInCluster: pointSeriesMap.length,
       range: [0, 100],
     });
     const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
@@ -435,12 +440,14 @@ describe('Rendering points - line', () => {
     });
   });
   describe('Multi series line chart - linear', () => {
-    const spec1Id = getSpecId('point1');
-    const spec2Id = getSpecId('point2');
+    const spec1Id = 'point1';
+    const spec2Id = 'point2';
     const pointSeriesSpec1: LineSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
       id: spec1Id,
       groupId: GROUP_ID,
-      seriesType: 'line',
+      seriesType: SeriesTypes.Line,
       yScaleToDataExtent: false,
       data: [[0, 10], [1, 5]],
       xAccessor: 0,
@@ -449,9 +456,11 @@ describe('Rendering points - line', () => {
       yScaleType: ScaleType.Linear,
     };
     const pointSeriesSpec2: LineSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
       id: spec2Id,
       groupId: GROUP_ID,
-      seriesType: 'line',
+      seriesType: SeriesTypes.Line,
       yScaleToDataExtent: false,
       data: [[0, 20], [1, 10]],
       xAccessor: 0,
@@ -459,13 +468,11 @@ describe('Rendering points - line', () => {
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
     };
-    const pointSeriesMap = new Map<SpecId, LineSeriesSpec>();
-    pointSeriesMap.set(spec1Id, pointSeriesSpec1);
-    pointSeriesMap.set(spec2Id, pointSeriesSpec2);
+    const pointSeriesMap = [pointSeriesSpec1, pointSeriesSpec2];
     const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
     const xScale = computeXScale({
       xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.size,
+      totalBarsInCluster: pointSeriesMap.length,
       range: [0, 100],
     });
     const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
@@ -615,9 +622,11 @@ describe('Rendering points - line', () => {
   });
   describe('Single series line chart - time', () => {
     const pointSeriesSpec: LineSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
       id: SPEC_ID,
       groupId: GROUP_ID,
-      seriesType: 'line',
+      seriesType: SeriesTypes.Line,
       yScaleToDataExtent: false,
       data: [[1546300800000, 10], [1546387200000, 5]],
       xAccessor: 0,
@@ -625,12 +634,11 @@ describe('Rendering points - line', () => {
       xScaleType: ScaleType.Time,
       yScaleType: ScaleType.Linear,
     };
-    const pointSeriesMap = new Map<SpecId, LineSeriesSpec>();
-    pointSeriesMap.set(SPEC_ID, pointSeriesSpec);
+    const pointSeriesMap = [pointSeriesSpec];
     const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
     const xScale = computeXScale({
       xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.size,
+      totalBarsInCluster: pointSeriesMap.length,
       range: [0, 100],
     });
     const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
@@ -709,12 +717,14 @@ describe('Rendering points - line', () => {
     });
   });
   describe('Multi series line chart - time', () => {
-    const spec1Id = getSpecId('point1');
-    const spec2Id = getSpecId('point2');
+    const spec1Id = 'point1';
+    const spec2Id = 'point2';
     const pointSeriesSpec1: LineSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
       id: spec1Id,
       groupId: GROUP_ID,
-      seriesType: 'line',
+      seriesType: SeriesTypes.Line,
       yScaleToDataExtent: false,
       data: [[1546300800000, 10], [1546387200000, 5]],
       xAccessor: 0,
@@ -723,9 +733,11 @@ describe('Rendering points - line', () => {
       yScaleType: ScaleType.Linear,
     };
     const pointSeriesSpec2: LineSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
       id: spec2Id,
       groupId: GROUP_ID,
-      seriesType: 'line',
+      seriesType: SeriesTypes.Line,
       yScaleToDataExtent: false,
       data: [[1546300800000, 20], [1546387200000, 10]],
       xAccessor: 0,
@@ -733,13 +745,11 @@ describe('Rendering points - line', () => {
       xScaleType: ScaleType.Time,
       yScaleType: ScaleType.Linear,
     };
-    const pointSeriesMap = new Map<SpecId, LineSeriesSpec>();
-    pointSeriesMap.set(spec1Id, pointSeriesSpec1);
-    pointSeriesMap.set(spec2Id, pointSeriesSpec2);
+    const pointSeriesMap = [pointSeriesSpec1, pointSeriesSpec2];
     const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
     const xScale = computeXScale({
       xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.size,
+      totalBarsInCluster: pointSeriesMap.length,
       range: [0, 100],
     });
     const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
@@ -876,9 +886,11 @@ describe('Rendering points - line', () => {
   });
   describe('Single series line chart - y log', () => {
     const pointSeriesSpec: LineSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
       id: SPEC_ID,
       groupId: GROUP_ID,
-      seriesType: 'line',
+      seriesType: SeriesTypes.Line,
       yScaleToDataExtent: false,
       data: [[0, 10], [1, 5], [2, null], [3, 5], [4, 5], [5, 0], [6, 10], [7, 10], [8, 10]],
       xAccessor: 0,
@@ -886,12 +898,11 @@ describe('Rendering points - line', () => {
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Log,
     };
-    const pointSeriesMap = new Map<SpecId, LineSeriesSpec>();
-    pointSeriesMap.set(SPEC_ID, pointSeriesSpec);
+    const pointSeriesMap = [pointSeriesSpec];
     const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
     const xScale = computeXScale({
       xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.size,
+      totalBarsInCluster: pointSeriesMap.length,
       range: [0, 90],
     });
     const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
@@ -947,9 +958,11 @@ describe('Rendering points - line', () => {
   });
   describe('Remove points datum is not in domain', () => {
     const pointSeriesSpec: LineSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
       id: SPEC_ID,
       groupId: GROUP_ID,
-      seriesType: 'line',
+      seriesType: SeriesTypes.Line,
       yScaleToDataExtent: false,
       data: [[0, 0], [1, 1], [2, 10], [3, 3]],
       xAccessor: 0,
@@ -957,18 +970,16 @@ describe('Rendering points - line', () => {
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
     };
-    const pointSeriesMap = new Map<SpecId, LineSeriesSpec>();
-    pointSeriesMap.set(SPEC_ID, pointSeriesSpec);
     const customYDomain = new Map<GroupId, DomainRange>();
     customYDomain.set(GROUP_ID, {
       max: 1,
     });
-    const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, customYDomain, {
+    const pointSeriesDomains = computeSeriesDomains([pointSeriesSpec], customYDomain, [], {
       max: 2,
     });
     const xScale = computeXScale({
       xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.size,
+      totalBarsInCluster: 1,
       range: [0, 100],
     });
     const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });

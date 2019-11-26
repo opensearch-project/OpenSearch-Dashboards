@@ -1,22 +1,24 @@
-/* eslint @typescript-eslint/no-object-literal-type-assertion: off */
-import { computeSeriesDomains } from '../store/utils';
-import { getGroupId, getSpecId, SpecId } from '../../../utils/ids';
+import { computeSeriesDomains } from '../state/utils';
 import { ScaleType } from '../../../utils/scales/scales';
 import { CurveType } from '../../../utils/curves';
-import { AreaGeometry, IndexedGeometry, PointGeometry, renderArea, renderBars } from './rendering';
+import { renderArea, renderBars } from './rendering';
 import { computeXScale, computeYScales } from '../utils/scales';
-import { AreaSeriesSpec, BarSeriesSpec } from '../utils/specs';
+import { AreaSeriesSpec, BarSeriesSpec, SpecTypes, SeriesTypes } from '../utils/specs';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
+import { AreaGeometry, IndexedGeometry, PointGeometry } from '../../../utils/geometry';
+import { ChartTypes } from '../..';
 
-const SPEC_ID = getSpecId('spec_1');
-const GROUP_ID = getGroupId('group_1');
+const SPEC_ID = 'spec_1';
+const GROUP_ID = 'group_1';
 
 describe('Rendering bands - areas', () => {
   describe('Empty line for missing data', () => {
     const pointSeriesSpec: AreaSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
       id: SPEC_ID,
       groupId: GROUP_ID,
-      seriesType: 'area',
+      seriesType: SeriesTypes.Area,
       yScaleToDataExtent: false,
       data: [[0, 2, 10], [1, 3, 5]],
       xAccessor: 0,
@@ -25,12 +27,11 @@ describe('Rendering bands - areas', () => {
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
     };
-    const pointSeriesMap = new Map<SpecId, AreaSeriesSpec>();
-    pointSeriesMap.set(SPEC_ID, pointSeriesSpec);
+    const pointSeriesMap = [pointSeriesSpec];
     const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
     const xScale = computeXScale({
       xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.size,
+      totalBarsInCluster: pointSeriesMap.length,
       range: [0, 100],
     });
     const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
@@ -68,9 +69,11 @@ describe('Rendering bands - areas', () => {
   });
   describe('Single band area chart', () => {
     const pointSeriesSpec: AreaSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
       id: SPEC_ID,
       groupId: GROUP_ID,
-      seriesType: 'area',
+      seriesType: SeriesTypes.Area,
       yScaleToDataExtent: false,
       data: [[0, 2, 10], [1, 3, 5]],
       xAccessor: 0,
@@ -79,12 +82,11 @@ describe('Rendering bands - areas', () => {
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
     };
-    const pointSeriesMap = new Map<SpecId, AreaSeriesSpec>();
-    pointSeriesMap.set(SPEC_ID, pointSeriesSpec);
+    const pointSeriesMap = [pointSeriesSpec];
     const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
     const xScale = computeXScale({
       xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.size,
+      totalBarsInCluster: pointSeriesMap.length,
       range: [0, 100],
     });
     const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
@@ -210,9 +212,11 @@ describe('Rendering bands - areas', () => {
   });
   describe('Single band area chart with null values', () => {
     const pointSeriesSpec: AreaSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
       id: SPEC_ID,
       groupId: GROUP_ID,
-      seriesType: 'area',
+      seriesType: SeriesTypes.Area,
       yScaleToDataExtent: false,
       data: [[0, 2, 10], [1, 2, null], [2, 3, 5], [3, 3, 5]],
       xAccessor: 0,
@@ -221,12 +225,11 @@ describe('Rendering bands - areas', () => {
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
     };
-    const pointSeriesMap = new Map<SpecId, AreaSeriesSpec>();
-    pointSeriesMap.set(SPEC_ID, pointSeriesSpec);
+    const pointSeriesMap = [pointSeriesSpec];
     const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
     const xScale = computeXScale({
       xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.size,
+      totalBarsInCluster: pointSeriesMap.length,
       range: [0, 100],
     });
     const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
@@ -391,9 +394,11 @@ describe('Rendering bands - areas', () => {
   });
   describe('Single series band bar chart - ordinal', () => {
     const barSeriesSpec: BarSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
       id: SPEC_ID,
       groupId: GROUP_ID,
-      seriesType: 'bar',
+      seriesType: SeriesTypes.Bar,
       yScaleToDataExtent: false,
       data: [[0, 2, 10], [1, 3, null], [2, 3, 5], [3, 4, 8]],
       xAccessor: 0,
@@ -402,12 +407,11 @@ describe('Rendering bands - areas', () => {
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
     };
-    const barSeriesMap = new Map<SpecId, BarSeriesSpec>();
-    barSeriesMap.set(SPEC_ID, barSeriesSpec);
+    const barSeriesMap = [barSeriesSpec];
     const barSeriesDomains = computeSeriesDomains(barSeriesMap, new Map());
     const xScale = computeXScale({
       xDomain: barSeriesDomains.xDomain,
-      totalBarsInCluster: barSeriesMap.size,
+      totalBarsInCluster: barSeriesMap.length,
       range: [0, 100],
     });
     const yScales = computeYScales({ yDomains: barSeriesDomains.yDomain, range: [100, 0] });

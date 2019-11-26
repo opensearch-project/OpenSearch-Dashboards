@@ -60,6 +60,14 @@ export const LIGHT_THEME: Theme = {
       offsetY: 0,
     },
   },
+  arcSeriesStyle: {
+    arc: {
+      visible: true,
+      stroke: 'black',
+      strokeWidth: 1,
+      opacity: 1,
+    },
+  },
   sharedStyle: DEFAULT_GEOMETRY_STYLES,
   scales: {
     barsPadding: 0.25,

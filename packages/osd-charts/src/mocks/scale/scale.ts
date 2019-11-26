@@ -6,6 +6,7 @@ export class MockScale {
     scale: jest.fn().mockImplementation((x) => x),
     type: ScaleType.Linear,
     bandwidth: 0,
+    bandwidthPadding: 0,
     minInterval: 0,
     barsPadding: 0,
     range: [0, 100],

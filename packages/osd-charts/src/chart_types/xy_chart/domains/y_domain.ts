@@ -1,4 +1,4 @@
-import { BasicSeriesSpec, DomainRange, DEFAULT_GLOBAL_ID } from '../utils/specs';
+import { BasicSeriesSpec, DomainRange, DEFAULT_GLOBAL_ID, SeriesTypes } from '../utils/specs';
 import { GroupId, SpecId, getGroupId } from '../../../utils/ids';
 import { ScaleContinuousType, ScaleType } from '../../../utils/scales/scales';
 import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_utils';
@@ -17,7 +17,7 @@ export type YDomain = BaseDomain & {
 export type YBasicSeriesSpec = Pick<
   BasicSeriesSpec,
   'id' | 'seriesType' | 'yScaleType' | 'groupId' | 'stackAccessors' | 'yScaleToDataExtent' | 'useDefaultGroupDomain'
-> & { stackAsPercentage?: boolean };
+> & { stackAsPercentage?: boolean; enableHistogramMode?: boolean };
 
 interface GroupSpecs {
   isPercentageStack: boolean;
@@ -160,6 +160,7 @@ function computeYStackedDomain(dataseries: RawDataSeries[], scaleToExtent: boole
   }
   return computeContinuousDataDomain(dataValues, identity, scaleToExtent);
 }
+
 function computeYNonStackedDomain(dataseries: RawDataSeries[], scaleToExtent: boolean) {
   const yValues = new Set<any>();
   dataseries.forEach((ds) => {
@@ -175,11 +176,18 @@ function computeYNonStackedDomain(dataseries: RawDataSeries[], scaleToExtent: bo
   }
   return computeContinuousDataDomain([...yValues.values()], identity, scaleToExtent);
 }
+
 export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
   const specsByGroupIds = new Map<
     GroupId,
     { isPercentageStack: boolean; stacked: YBasicSeriesSpec[]; nonStacked: YBasicSeriesSpec[] }
   >();
+  // After mobx->redux https://github.com/elastic/elastic-charts/pull/281 we keep the specs untouched on mount
+  // in MobX version, the stackAccessors was programmatically added to every histogram specs
+  // in ReduX version, we left untouched the specs, so we have to manually check that
+  const isHistogramEnabled = specs.some(({ seriesType, enableHistogramMode }) => {
+    return seriesType === SeriesTypes.Bar && enableHistogramMode;
+  });
   // split each specs by groupId and by stacked or not
   specs.forEach((spec) => {
     const group = specsByGroupIds.get(spec.groupId) || {
@@ -187,7 +195,12 @@ export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
       stacked: [],
       nonStacked: [],
     };
-    if (spec.stackAccessors && spec.stackAccessors.length > 0) {
+    // stack every bars if using histogram mode
+    // independenyly from lines and areas
+    if (
+      (spec.seriesType === SeriesTypes.Bar && isHistogramEnabled) ||
+      (spec.stackAccessors && spec.stackAccessors.length > 0)
+    ) {
       group.stacked.push(spec);
     } else {
       group.nonStacked.push(spec);

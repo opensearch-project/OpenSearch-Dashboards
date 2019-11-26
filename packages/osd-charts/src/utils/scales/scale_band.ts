@@ -4,6 +4,7 @@ import { ScaleType, Scale } from './scales';
 
 export class ScaleBand implements Scale {
   readonly bandwidth: number;
+  readonly bandwidthPadding: number;
   readonly step: number;
   readonly type: ScaleType;
   readonly domain: any[];
@@ -34,13 +35,13 @@ export class ScaleBand implements Scale {
     this.d3Scale.paddingInner(safeBarPadding);
     this.d3Scale.paddingOuter(safeBarPadding / 2);
     this.bandwidth = this.d3Scale.bandwidth() || 0;
-
     this.step = this.d3Scale.step();
     this.domain = this.d3Scale.domain();
     this.range = range.slice();
     if (overrideBandwidth) {
       this.bandwidth = overrideBandwidth * (1 - safeBarPadding);
     }
+    this.bandwidthPadding = this.bandwidth;
     // TO FIX: we are assiming that it's ordered
     this.isInverted = this.domain[0] > this.domain[1];
     this.invertedScale = scaleQuantize()
@@ -74,8 +75,4 @@ export class ScaleBand implements Scale {
   isValueInDomain(value: any) {
     return this.domain.includes(value);
   }
-}
-
-export function isOrdinalScale(scale: Scale): scale is ScaleBand {
-  return scale.type === ScaleType.Ordinal;
 }

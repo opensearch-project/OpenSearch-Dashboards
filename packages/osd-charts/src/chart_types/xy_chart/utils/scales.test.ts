@@ -1,4 +1,3 @@
-import { getGroupId } from '../../../utils/ids';
 import { ScaleType } from '../../../utils/scales/scales';
 import { XDomain } from '../domains/x_domain';
 import { computeXScale, countBarsInCluster } from './scales';
@@ -106,7 +105,7 @@ describe('Series scales', () => {
   test('count bars required on a cluster', () => {
     const stacked: FormattedDataSeries[] = [
       {
-        groupId: getGroupId('g1'),
+        groupId: 'g1',
         dataSeries: [],
         counts: {
           areaSeries: 10,
@@ -115,7 +114,7 @@ describe('Series scales', () => {
         },
       },
       {
-        groupId: getGroupId('g2'),
+        groupId: 'g2',
         dataSeries: [],
         counts: {
           areaSeries: 10,
@@ -124,7 +123,7 @@ describe('Series scales', () => {
         },
       },
       {
-        groupId: getGroupId('g3'),
+        groupId: 'g3',
         dataSeries: [],
         counts: {
           areaSeries: 10,
@@ -135,7 +134,7 @@ describe('Series scales', () => {
     ];
     const nonStacked: FormattedDataSeries[] = [
       {
-        groupId: getGroupId('g1'),
+        groupId: 'g1',
         dataSeries: [],
         counts: {
           areaSeries: 10,
@@ -144,7 +143,7 @@ describe('Series scales', () => {
         },
       },
       {
-        groupId: getGroupId('g2'),
+        groupId: 'g2',
         dataSeries: [],
         counts: {
           areaSeries: 10,

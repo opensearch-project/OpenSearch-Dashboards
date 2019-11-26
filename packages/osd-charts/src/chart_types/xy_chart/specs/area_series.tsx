@@ -1,42 +1,36 @@
-import { inject } from 'mobx-react';
-import { PureComponent } from 'react';
-import { AreaSeriesSpec, HistogramModeAlignments, DEFAULT_GLOBAL_ID } from '../utils/specs';
-import { getGroupId } from '../../../utils/ids';
+import { AreaSeriesSpec, HistogramModeAlignments, DEFAULT_GLOBAL_ID, SpecTypes, SeriesTypes } from '../utils/specs';
 import { ScaleType } from '../../../utils/scales/scales';
-import { SpecProps } from '../../../specs/specs_parser';
+import { specComponentFactory, getConnect } from '../../../state/spec_factory';
+import { ChartTypes } from '../../../chart_types';
 
-type AreaSpecProps = SpecProps & AreaSeriesSpec;
+const defaultProps = {
+  chartType: ChartTypes.XYAxis,
+  specType: SpecTypes.Series,
+  seriesType: SeriesTypes.Area,
+  groupId: DEFAULT_GLOBAL_ID,
+  xScaleType: ScaleType.Ordinal,
+  yScaleType: ScaleType.Linear,
+  xAccessor: 'x',
+  yAccessors: ['y'],
+  yScaleToDataExtent: false,
+  hideInLegend: false,
+  histogramModeAlignment: HistogramModeAlignments.Center,
+};
 
-export class AreaSeriesSpecComponent extends PureComponent<AreaSpecProps> {
-  static defaultProps: Partial<AreaSpecProps> = {
-    seriesType: 'area',
-    groupId: getGroupId(DEFAULT_GLOBAL_ID),
-    xScaleType: ScaleType.Ordinal,
-    yScaleType: ScaleType.Linear,
-    xAccessor: 'x',
-    yAccessors: ['y'],
-    yScaleToDataExtent: false,
-    hideInLegend: false,
-    histogramModeAlignment: HistogramModeAlignments.Center,
-  };
-  componentDidMount() {
-    const { chartStore, children, ...config } = this.props;
-    chartStore!.addSeriesSpec({ ...config });
-  }
-  componentDidUpdate(prevProps: AreaSpecProps) {
-    const { chartStore, children, ...config } = this.props;
-    chartStore!.addSeriesSpec({ ...config });
-    if (prevProps.id !== this.props.id) {
-      chartStore!.removeSeriesSpec(prevProps.id);
-    }
-  }
-  componentWillUnmount() {
-    const { chartStore, id } = this.props;
-    chartStore!.removeSeriesSpec(id);
-  }
-  render() {
-    return null;
-  }
-}
+type SpecRequiredProps = Pick<AreaSeriesSpec, 'id' | 'data'>;
+type SpecOptionalProps = Partial<Omit<AreaSeriesSpec, 'chartType' | 'specType' | 'seriesType' | 'id' | 'data'>>;
 
-export const AreaSeries = inject('chartStore')(AreaSeriesSpecComponent);
+export const AreaSeries: React.FunctionComponent<SpecRequiredProps & SpecOptionalProps> = getConnect()(
+  specComponentFactory<
+    AreaSeriesSpec,
+    | 'seriesType'
+    | 'groupId'
+    | 'xScaleType'
+    | 'yScaleType'
+    | 'xAccessor'
+    | 'yAccessors'
+    | 'yScaleToDataExtent'
+    | 'hideInLegend'
+    | 'histogramModeAlignment'
+  >(defaultProps),
+);

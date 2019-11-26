@@ -1,42 +1,35 @@
-import { inject } from 'mobx-react';
-import { PureComponent } from 'react';
-import { HistogramModeAlignments, LineSeriesSpec, DEFAULT_GLOBAL_ID } from '../utils/specs';
-import { getGroupId } from '../../../utils/ids';
+import { LineSeriesSpec, DEFAULT_GLOBAL_ID, HistogramModeAlignments, SpecTypes, SeriesTypes } from '../utils/specs';
 import { ScaleType } from '../../../utils/scales/scales';
-import { SpecProps } from '../../../specs/specs_parser';
+import { ChartTypes } from '../../../chart_types';
+import { specComponentFactory, getConnect } from '../../../state/spec_factory';
 
-type LineSpecProps = SpecProps & LineSeriesSpec;
+const defaultProps = {
+  chartType: ChartTypes.XYAxis,
+  specType: SpecTypes.Series,
+  seriesType: SeriesTypes.Line,
+  groupId: DEFAULT_GLOBAL_ID,
+  xScaleType: ScaleType.Ordinal,
+  yScaleType: ScaleType.Linear,
+  xAccessor: 'x',
+  yAccessors: ['y'],
+  yScaleToDataExtent: false,
+  hideInLegend: false,
+  histogramModeAlignment: HistogramModeAlignments.Center,
+};
+type SpecRequiredProps = Pick<LineSeriesSpec, 'id' | 'data'>;
+type SpecOptionalProps = Partial<Omit<LineSeriesSpec, 'chartType' | 'specType' | 'seriesType' | 'id' | 'data'>>;
 
-export class LineSeriesSpecComponent extends PureComponent<LineSpecProps> {
-  static defaultProps: Partial<LineSpecProps> = {
-    seriesType: 'line',
-    groupId: getGroupId(DEFAULT_GLOBAL_ID),
-    xScaleType: ScaleType.Ordinal,
-    yScaleType: ScaleType.Linear,
-    xAccessor: 'x',
-    yAccessors: ['y'],
-    yScaleToDataExtent: false,
-    hideInLegend: false,
-    histogramModeAlignment: HistogramModeAlignments.Center,
-  };
-  componentDidMount() {
-    const { chartStore, children, ...config } = this.props;
-    chartStore!.addSeriesSpec({ ...config });
-  }
-  componentDidUpdate(prevProps: LineSpecProps) {
-    const { chartStore, children, ...config } = this.props;
-    chartStore!.addSeriesSpec({ ...config });
-    if (prevProps.id !== this.props.id) {
-      chartStore!.removeSeriesSpec(prevProps.id);
-    }
-  }
-  componentWillUnmount() {
-    const { chartStore, id } = this.props;
-    chartStore!.removeSeriesSpec(id);
-  }
-  render() {
-    return null;
-  }
-}
-
-export const LineSeries = inject('chartStore')(LineSeriesSpecComponent);
+export const LineSeries: React.FunctionComponent<SpecRequiredProps & SpecOptionalProps> = getConnect()(
+  specComponentFactory<
+    LineSeriesSpec,
+    | 'seriesType'
+    | 'groupId'
+    | 'xScaleType'
+    | 'yScaleType'
+    | 'xAccessor'
+    | 'yAccessors'
+    | 'yScaleToDataExtent'
+    | 'hideInLegend'
+    | 'histogramModeAlignment'
+  >(defaultProps),
+);

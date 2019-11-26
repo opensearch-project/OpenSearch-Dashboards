@@ -1,8 +1,8 @@
 import { Rotation } from '../utils/specs';
 import { Dimensions } from '../../../utils/dimensions';
 import { Scale } from '../../../utils/scales/scales';
-import { isHorizontalRotation } from '../store/utils';
-import { Point } from '../store/chart_state';
+import { isHorizontalRotation } from '../state/utils';
+import { Point } from '../../../utils/point';
 
 export interface SnappedPosition {
   position: number;
@@ -56,12 +56,12 @@ export function getSnapPosition(
 export function getCursorLinePosition(
   chartRotation: Rotation,
   chartDimensions: Dimensions,
-  cursorPosition: { x: number; y: number },
+  projectedPointerPosition: { x: number; y: number },
 ): Dimensions {
   const { left, top, width, height } = chartDimensions;
   const isHorizontalRotated = isHorizontalRotation(chartRotation);
   if (isHorizontalRotated) {
-    const crosshairTop = cursorPosition.y + top;
+    const crosshairTop = projectedPointerPosition.y + top;
     return {
       left,
       width,
@@ -69,7 +69,7 @@ export function getCursorLinePosition(
       height: 0,
     };
   } else {
-    const crosshairLeft = cursorPosition.x + left;
+    const crosshairLeft = projectedPointerPosition.x + left;
 
     return {
       top,
@@ -187,7 +187,7 @@ export function getTooltipPosition(
   };
 }
 
-export function getHorizontalTooltipPosition(
+function getHorizontalTooltipPosition(
   cursorXPosition: number,
   cursorBandPosition: Dimensions,
   chartDimensions: Dimensions,
@@ -207,7 +207,7 @@ export function getHorizontalTooltipPosition(
   }
 }
 
-export function getVerticalTooltipPosition(
+function getVerticalTooltipPosition(
   cursorYPosition: number,
   cursorBandPosition: Dimensions,
   chartDimensions: Dimensions,

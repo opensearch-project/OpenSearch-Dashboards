@@ -7,37 +7,41 @@ import {
   Position,
   RectAnnotationSpec,
   Rotation,
+  SpecTypes,
+  AnnotationTypes,
 } from '../utils/specs';
 import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../utils/themes/theme';
 import { Dimensions } from '../../../utils/dimensions';
-import { AnnotationId, AxisId, getAnnotationId, getAxisId, getGroupId, GroupId } from '../../../utils/ids';
+import { getAxisId, getGroupId, GroupId, AnnotationId } from '../../../utils/ids';
 import { ScaleBand } from '../../../utils/scales/scale_band';
 import { ScaleContinuous } from '../../../utils/scales/scale_continuous';
 import { Scale, ScaleType } from '../../../utils/scales/scales';
 import {
-  AnnotationLineProps,
   computeAnnotationDimensions,
   computeAnnotationTooltipState,
   computeClusterOffset,
+  getAnnotationAxis,
+  getRotatedCursor,
+  scaleAndValidateDatum,
+  AnnotationDimensions,
+  AnnotationTooltipState,
+  Bounds,
+} from './annotation_utils';
+import {
+  AnnotationLineProps,
   computeLineAnnotationDimensions,
   computeLineAnnotationTooltipState,
-  computeRectAnnotationDimensions,
-  computeRectAnnotationTooltipState,
-  computeRectTooltipLeft,
-  computeRectTooltipTop,
-  getAnnotationAxis,
+  isVerticalAnnotationLine,
   getAnnotationLineTooltipXOffset,
   getAnnotationLineTooltipYOffset,
-  getRotatedCursor,
-  isBottomRectTooltip,
-  isRightRectTooltip,
-  isVerticalAnnotationLine,
+} from './line_annotation_tooltip';
+import {
+  computeRectAnnotationDimensions,
   isWithinRectBounds,
-  scaleAndValidateDatum,
-  AnnotationTooltipState,
-  AnnotationDimensions,
-} from './annotation_utils';
-import { Point } from '../store/chart_state';
+  computeRectAnnotationTooltipState,
+} from './rect_annotation_tooltip';
+import { Point } from '../../../utils/point';
+import { ChartTypes } from '../..';
 
 describe('annotation utils', () => {
   const minRange = 0;
@@ -65,8 +69,10 @@ describe('annotation utils', () => {
 
   const groupId = getGroupId('foo-group');
 
-  const axesSpecs: Map<AxisId, AxisSpec> = new Map();
+  const axesSpecs: AxisSpec[] = [];
   const verticalAxisSpec: AxisSpec = {
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Axis,
     id: getAxisId('vertical_axis'),
     groupId,
     hide: false,
@@ -79,6 +85,8 @@ describe('annotation utils', () => {
     showGridLines: true,
   };
   const horizontalAxisSpec: AxisSpec = {
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Axis,
     id: getAxisId('horizontal_axis'),
     groupId,
     hide: false,
@@ -91,7 +99,7 @@ describe('annotation utils', () => {
     showGridLines: true,
   };
 
-  axesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+  axesSpecs.push(verticalAxisSpec);
 
   test('should compute annotation dimensions', () => {
     const chartRotation: Rotation = 0;
@@ -100,27 +108,31 @@ describe('annotation utils', () => {
 
     const xScale: Scale = ordinalScale;
 
-    const annotations: Map<AnnotationId, AnnotationSpec> = new Map();
-    const annotationId = getAnnotationId('foo');
+    const annotations: AnnotationSpec[] = [];
+    const annotationId = 'foo';
     const lineAnnotation: LineAnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.YDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
       style: DEFAULT_ANNOTATION_LINE_STYLE,
     };
 
-    const rectAnnotationId = getAnnotationId('rect');
+    const rectAnnotationId = 'rect';
     const rectAnnotation: AnnotationSpec = {
-      annotationId: rectAnnotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      id: rectAnnotationId,
       groupId,
-      annotationType: 'rectangle',
+      annotationType: AnnotationTypes.Rectangle,
       dataValues: [{ coordinates: { x0: 'a', x1: 'b', y0: 3, y1: 5 } }],
     };
 
-    annotations.set(annotationId, lineAnnotation);
-    annotations.set(rectAnnotationId, rectAnnotation);
+    annotations.push(lineAnnotation);
+    annotations.push(rectAnnotation);
 
     const dimensions = computeAnnotationDimensions(
       annotations,
@@ -159,18 +171,20 @@ describe('annotation utils', () => {
 
     const xScale: Scale = ordinalScale;
 
-    const annotations: Map<AnnotationId, AnnotationSpec> = new Map();
-    const annotationId = getAnnotationId('foo');
+    const annotations: AnnotationSpec[] = [];
+    const id = 'foo';
     const lineAnnotation: LineAnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id,
       domainType: AnnotationDomainTypes.YDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
       style: DEFAULT_ANNOTATION_LINE_STYLE,
     };
 
-    annotations.set(annotationId, lineAnnotation);
+    annotations.push(lineAnnotation);
 
     const dimensions = computeAnnotationDimensions(
       annotations,
@@ -178,7 +192,7 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       xScale,
-      new Map(), // empty axesSpecs
+      [], // empty axesSpecs
       1,
       false,
     );
@@ -193,10 +207,12 @@ describe('annotation utils', () => {
 
     const xScale: Scale = ordinalScale;
 
-    const annotationId = getAnnotationId('foo-line');
+    const id = 'foo-line';
     const lineAnnotation: LineAnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id,
       domainType: AnnotationDomainTypes.YDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
@@ -237,10 +253,12 @@ describe('annotation utils', () => {
 
     const xScale: Scale = ordinalScale;
 
-    const annotationId = getAnnotationId('foo-line');
+    const annotationId = 'foo-line';
     const lineAnnotation: LineAnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.YDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
@@ -281,10 +299,12 @@ describe('annotation utils', () => {
 
     const xScale: Scale = ordinalScale;
 
-    const annotationId = getAnnotationId('foo-line');
+    const annotationId = 'foo-line';
     const lineAnnotation: LineAnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.YDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
@@ -324,10 +344,12 @@ describe('annotation utils', () => {
     const yScales: Map<GroupId, Scale> = new Map();
     const xScale: Scale = ordinalScale;
 
-    const annotationId = getAnnotationId('foo-line');
+    const annotationId = 'foo-line';
     const lineAnnotation: LineAnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.YDomain,
       dataValues: [],
       groupId,
@@ -352,10 +374,12 @@ describe('annotation utils', () => {
     const yScales: Map<GroupId, Scale> = new Map();
     const xScale: Scale = ordinalScale;
 
-    const annotationId = getAnnotationId('foo-line');
+    const annotationId = 'foo-line';
     const lineAnnotation: LineAnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.XDomain,
       dataValues: [{ dataValue: 'a', details: 'foo' }],
       groupId,
@@ -394,10 +418,12 @@ describe('annotation utils', () => {
     const yScales: Map<GroupId, Scale> = new Map();
     const xScale: Scale = continuousScale;
 
-    const annotationId = getAnnotationId('foo-line');
+    const annotationId = 'foo-line';
     const lineAnnotation: LineAnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.XDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
@@ -437,10 +463,12 @@ describe('annotation utils', () => {
     const yScales: Map<GroupId, Scale> = new Map();
     const xScale: Scale = continuousScale;
 
-    const annotationId = getAnnotationId('foo-line');
+    const annotationId = 'foo-line';
     const lineAnnotation: LineAnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.XDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
@@ -480,10 +508,12 @@ describe('annotation utils', () => {
     const yScales: Map<GroupId, Scale> = new Map();
     const xScale: Scale = continuousScale;
 
-    const annotationId = getAnnotationId('foo-line');
+    const annotationId = 'foo-line';
     const lineAnnotation: LineAnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.XDomain,
       dataValues: [{ dataValue: 10.5, details: 'foo' }],
       groupId,
@@ -524,10 +554,12 @@ describe('annotation utils', () => {
 
     const xScale: Scale = ordinalScale;
 
-    const annotationId = getAnnotationId('foo-line');
+    const annotationId = 'foo-line';
     const lineAnnotation: LineAnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.XDomain,
       dataValues: [{ dataValue: 'a', details: 'foo' }],
       groupId,
@@ -568,10 +600,12 @@ describe('annotation utils', () => {
 
     const xScale: Scale = continuousScale;
 
-    const annotationId = getAnnotationId('foo-line');
+    const annotationId = 'foo-line';
     const lineAnnotation: LineAnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.XDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
@@ -612,10 +646,12 @@ describe('annotation utils', () => {
 
     const xScale: Scale = continuousScale;
 
-    const annotationId = getAnnotationId('foo-line');
+    const annotationId = 'foo-line';
     const lineAnnotation: LineAnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.XDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
@@ -656,10 +692,12 @@ describe('annotation utils', () => {
 
     const xScale: Scale = continuousScale;
 
-    const annotationId = getAnnotationId('foo-line');
+    const annotationId = 'foo-line';
     const lineAnnotation: LineAnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.XDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
@@ -699,10 +737,12 @@ describe('annotation utils', () => {
     const yScales: Map<GroupId, Scale> = new Map();
     const xScale: Scale = continuousScale;
 
-    const annotationId = getAnnotationId('foo-line');
+    const annotationId = 'foo-line';
     const lineAnnotation: LineAnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.XDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
@@ -744,10 +784,12 @@ describe('annotation utils', () => {
 
     const xScale: Scale = ordinalScale;
 
-    const annotationId = getAnnotationId('foo-line');
+    const annotationId = 'foo-line';
     const invalidXLineAnnotation: AnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.XDomain,
       dataValues: [{ dataValue: 'e', details: 'foo' }],
       groupId,
@@ -768,8 +810,10 @@ describe('annotation utils', () => {
     expect(emptyXDimensions).toEqual([]);
 
     const invalidStringXLineAnnotation: AnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.XDomain,
       dataValues: [{ dataValue: '', details: 'foo' }],
       groupId,
@@ -790,8 +834,10 @@ describe('annotation utils', () => {
     expect(invalidStringXDimensions).toEqual([]);
 
     const outOfBoundsXLineAnnotation: AnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.XDomain,
       dataValues: [{ dataValue: -999, details: 'foo' }],
       groupId,
@@ -812,8 +858,10 @@ describe('annotation utils', () => {
     expect(emptyOutOfBoundsXDimensions).toEqual([]);
 
     const invalidYLineAnnotation: AnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.YDomain,
       dataValues: [{ dataValue: 'e', details: 'foo' }],
       groupId,
@@ -834,8 +882,10 @@ describe('annotation utils', () => {
     expect(emptyYDimensions).toEqual([]);
 
     const outOfBoundsYLineAnnotation: AnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.YDomain,
       dataValues: [{ dataValue: -999, details: 'foo' }],
       groupId,
@@ -856,8 +906,10 @@ describe('annotation utils', () => {
     expect(emptyOutOfBoundsYDimensions).toEqual([]);
 
     const invalidStringYLineAnnotation: AnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.YDomain,
       dataValues: [{ dataValue: '', details: 'foo' }],
       groupId,
@@ -878,8 +930,10 @@ describe('annotation utils', () => {
     expect(invalidStringYDimensions).toEqual([]);
 
     const validHiddenAnnotation: AnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.XDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
@@ -1007,7 +1061,8 @@ describe('annotation utils', () => {
         },
       },
     ];
-    const localAxesSpecs = new Map();
+
+    const localAxesSpecs: AxisSpec[] = [];
 
     // missing annotation axis (xDomain)
     const missingTooltipState = computeLineAnnotationTooltipState(
@@ -1021,7 +1076,7 @@ describe('annotation utils', () => {
     expect(missingTooltipState).toEqual({ isVisible: false });
 
     // add axis for xDomain annotation
-    localAxesSpecs.set(horizontalAxisSpec.id, horizontalAxisSpec);
+    localAxesSpecs.push(horizontalAxisSpec);
 
     const xDomainTooltipState = computeLineAnnotationTooltipState(
       cursorPosition,
@@ -1032,7 +1087,7 @@ describe('annotation utils', () => {
     );
     const expectedXDomainTooltipState = {
       isVisible: true,
-      annotationType: 'line',
+      annotationType: AnnotationTypes.Line,
       anchor: {
         position: Position.Left,
         top: 0,
@@ -1057,13 +1112,13 @@ describe('annotation utils', () => {
         top: 0,
         left: 0,
       },
-      annotationType: 'line',
+      annotationType: AnnotationTypes.Line,
     };
 
     expect(xDomainRotatedTooltipState).toEqual(expectedXDomainRotatedTooltipState);
 
     // add axis for yDomain annotation
-    localAxesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+    localAxesSpecs.push(verticalAxisSpec);
 
     const yDomainTooltipState = computeLineAnnotationTooltipState(
       cursorPosition,
@@ -1079,7 +1134,7 @@ describe('annotation utils', () => {
         top: 0,
         left: 0,
       },
-      annotationType: 'line',
+      annotationType: AnnotationTypes.Line,
     };
 
     expect(yDomainTooltipState).toEqual(expectedYDomainTooltipState);
@@ -1098,7 +1153,7 @@ describe('annotation utils', () => {
         top: 0,
         left: 0,
       },
-      annotationType: 'line',
+      annotationType: AnnotationTypes.Line,
     };
 
     expect(flippedYDomainTooltipState).toEqual(expectedFlippedYDomainTooltipState);
@@ -1117,18 +1172,20 @@ describe('annotation utils', () => {
         top: 0,
         left: 0,
       },
-      annotationType: 'line',
+      annotationType: AnnotationTypes.Line,
     };
 
     expect(rotatedYDomainTooltipState).toEqual(expectedRotatedYDomainTooltipState);
   });
 
   test('should compute the tooltip state for an annotation', () => {
-    const annotations: Map<AnnotationId, AnnotationSpec> = new Map();
-    const annotationId = getAnnotationId('foo');
+    const annotations: AnnotationSpec[] = [];
+    const annotationId = 'foo';
     const lineAnnotation: LineAnnotationSpec = {
-      annotationType: 'line',
-      annotationId,
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      annotationType: AnnotationTypes.Line,
+      id: annotationId,
       domainType: AnnotationDomainTypes.YDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
       groupId,
@@ -1155,7 +1212,7 @@ describe('annotation utils', () => {
       },
     ];
     const chartRotation: Rotation = 0;
-    const localAxesSpecs: Map<AxisId, AxisSpec> = new Map();
+    const localAxesSpecs: AxisSpec[] = [];
 
     const annotationDimensions = new Map();
     annotationDimensions.set(annotationId, annotationLines);
@@ -1173,8 +1230,8 @@ describe('annotation utils', () => {
     expect(missingSpecTooltipState).toBe(null);
 
     // add valid annotation axis
-    annotations.set(annotationId, lineAnnotation);
-    localAxesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+    annotations.push(lineAnnotation);
+    localAxesSpecs.push(verticalAxisSpec);
 
     // hide tooltipState
     lineAnnotation.hideTooltips = true;
@@ -1220,7 +1277,7 @@ describe('annotation utils', () => {
 
     const expectedTooltipState = {
       isVisible: true,
-      annotationType: 'line',
+      annotationType: AnnotationTypes.Line,
       anchor: {
         top: 0,
         left: 0,
@@ -1232,17 +1289,19 @@ describe('annotation utils', () => {
 
     // rect annotation tooltip
     const annotationRectangle: RectAnnotationSpec = {
-      annotationId: getAnnotationId('rect'),
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      id: 'rect',
       groupId,
-      annotationType: 'rectangle',
+      annotationType: AnnotationTypes.Rectangle,
       dataValues: [{ coordinates: { x0: 1, x1: 2, y0: 3, y1: 5 } }],
     };
 
-    const rectAnnotations = new Map();
-    rectAnnotations.set(annotationRectangle.annotationId, annotationRectangle);
+    const rectAnnotations: RectAnnotationSpec[] = [];
+    rectAnnotations.push(annotationRectangle);
 
     const rectAnnotationDimensions = [{ rect: { x: 2, y: 3, width: 3, height: 5 } }];
-    annotationDimensions.set(annotationRectangle.annotationId, rectAnnotationDimensions);
+    annotationDimensions.set(annotationRectangle.id, rectAnnotationDimensions);
 
     const rectTooltipState = computeAnnotationTooltipState(
       { x: 3, y: 4 },
@@ -1255,7 +1314,7 @@ describe('annotation utils', () => {
 
     expect(rectTooltipState).toEqual({
       isVisible: true,
-      annotationType: 'rectangle',
+      annotationType: AnnotationTypes.Rectangle,
       anchor: {
         top: 4,
         left: 3,
@@ -1276,13 +1335,13 @@ describe('annotation utils', () => {
   });
 
   test('should get associated axis for an annotation', () => {
-    const localAxesSpecs = new Map();
+    const localAxesSpecs: AxisSpec[] = [];
 
     const noAxis = getAnnotationAxis(localAxesSpecs, groupId, AnnotationDomainTypes.XDomain, 0);
     expect(noAxis).toBe(null);
 
-    localAxesSpecs.set(horizontalAxisSpec.id, horizontalAxisSpec);
-    localAxesSpecs.set(verticalAxisSpec.id, verticalAxisSpec);
+    localAxesSpecs.push(horizontalAxisSpec);
+    localAxesSpecs.push(verticalAxisSpec);
 
     const xAnnotationAxisPosition = getAnnotationAxis(localAxesSpecs, groupId, AnnotationDomainTypes.XDomain, 0);
     expect(xAnnotationAxisPosition).toEqual(Position.Bottom);
@@ -1297,9 +1356,11 @@ describe('annotation utils', () => {
     const xScale: Scale = continuousScale;
 
     const annotationRectangle: RectAnnotationSpec = {
-      annotationId: getAnnotationId('rect'),
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      id: 'rect',
       groupId: getGroupId('foo'),
-      annotationType: 'rectangle',
+      annotationType: AnnotationTypes.Rectangle,
       dataValues: [{ coordinates: { x0: 1, x1: 2, y0: 3, y1: 5 } }],
     };
 
@@ -1314,9 +1375,11 @@ describe('annotation utils', () => {
     const xScale: Scale = continuousScale;
 
     const annotationRectangle: RectAnnotationSpec = {
-      annotationId: getAnnotationId('rect'),
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      id: 'rect',
       groupId,
-      annotationType: 'rectangle',
+      annotationType: AnnotationTypes.Rectangle,
       dataValues: [
         { coordinates: { x0: 1, x1: 2, y0: -10, y1: 5 } },
         { coordinates: { x0: null, x1: null, y0: null, y1: null } },
@@ -1337,9 +1400,11 @@ describe('annotation utils', () => {
     );
 
     const annotationRectangle: RectAnnotationSpec = {
-      annotationId: getAnnotationId('rect'),
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      id: 'rect',
       groupId,
-      annotationType: 'rectangle',
+      annotationType: AnnotationTypes.Rectangle,
       dataValues: [
         { coordinates: { x0: 1, x1: null, y0: null, y1: null } },
         { coordinates: { x0: null, x1: 1, y0: null, y1: null } },
@@ -1378,9 +1443,11 @@ describe('annotation utils', () => {
     const xScale: Scale = continuousScale;
 
     const annotationRectangle: RectAnnotationSpec = {
-      annotationId: getAnnotationId('rect'),
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      id: 'rect',
       groupId,
-      annotationType: 'rectangle',
+      annotationType: AnnotationTypes.Rectangle,
       dataValues: [
         { coordinates: { x0: 1, x1: null, y0: null, y1: null } },
         { coordinates: { x0: null, x1: 1, y0: null, y1: null } },
@@ -1407,9 +1474,11 @@ describe('annotation utils', () => {
     const xScale: Scale = continuousScale;
 
     const annotationRectangle: RectAnnotationSpec = {
-      annotationId: getAnnotationId('rect'),
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      id: 'rect',
       groupId,
-      annotationType: 'rectangle',
+      annotationType: AnnotationTypes.Rectangle,
       dataValues: [{ coordinates: { x0: 1, x1: 2, y0: 3, y1: 5 } }],
     };
 
@@ -1424,9 +1493,11 @@ describe('annotation utils', () => {
     const xScale: Scale = ordinalScale;
 
     const annotationRectangle: RectAnnotationSpec = {
-      annotationId: getAnnotationId('rect'),
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Annotation,
+      id: 'rect',
       groupId,
-      annotationType: 'rectangle',
+      annotationType: AnnotationTypes.Rectangle,
       dataValues: [{ coordinates: { x0: 'a', x1: 'b', y0: 0, y1: 2 } }],
     };
 
@@ -1454,11 +1525,11 @@ describe('annotation utils', () => {
   test('should determine if a point is within a rectangle annotation', () => {
     const cursorPosition = { x: 3, y: 4 };
 
-    const outOfXBounds = { startX: 4, endX: 5, startY: 3, endY: 5 };
-    const outOfYBounds = { startX: 2, endX: 4, startY: 5, endY: 6 };
-    const withinBounds = { startX: 2, endX: 4, startY: 3, endY: 5 };
-    const withinBoundsReverseXScale = { startX: 4, endX: 2, startY: 3, endY: 5 };
-    const withinBoundsReverseYScale = { startX: 2, endX: 4, startY: 5, endY: 3 };
+    const outOfXBounds: Bounds = { startX: 4, endX: 5, startY: 3, endY: 5 };
+    const outOfYBounds: Bounds = { startX: 2, endX: 4, startY: 5, endY: 6 };
+    const withinBounds: Bounds = { startX: 2, endX: 4, startY: 3, endY: 5 };
+    const withinBoundsReverseXScale: Bounds = { startX: 4, endX: 2, startY: 3, endY: 5 };
+    const withinBoundsReverseYScale: Bounds = { startX: 2, endX: 4, startY: 5, endY: 3 };
 
     // chart rotation 0
     expect(isWithinRectBounds(cursorPosition, outOfXBounds)).toBe(false);
@@ -1487,66 +1558,6 @@ describe('annotation utils', () => {
     expect(isWithinRectBounds(cursorPosition, withinBounds)).toBe(true);
     expect(isWithinRectBounds(cursorPosition, withinBoundsReverseXScale)).toBe(false);
     expect(isWithinRectBounds(cursorPosition, withinBoundsReverseYScale)).toBe(false);
-  });
-  test('should determine if an annotation has a rightward tooltip based on cursor position', () => {
-    const cursor1 = { x: 8, y: 0 };
-    const cursor2 = { x: 0, y: 8 };
-
-    // chart rotation 0
-    expect(isRightRectTooltip(0, cursor1, 10)).toBe(false);
-    expect(isRightRectTooltip(0, cursor2, 10)).toBe(true);
-
-    // chart rotation 180
-    expect(isRightRectTooltip(180, cursor1, 10)).toBe(false);
-    expect(isRightRectTooltip(180, cursor2, 10)).toBe(true);
-
-    // chart rotation 90
-    expect(isRightRectTooltip(90, cursor1, 10)).toBe(true);
-    expect(isRightRectTooltip(90, cursor2, 10)).toBe(false);
-
-    // chart rotation -90
-    expect(isRightRectTooltip(-90, cursor1, 10)).toBe(false);
-    expect(isRightRectTooltip(-90, cursor2, 10)).toBe(true);
-  });
-  test('should determine if an annotation has a bottomward tooltip based on cursor position', () => {
-    const cursor1 = { x: 8, y: 0 };
-    const cursor2 = { x: 0, y: 8 };
-
-    // chart rotation 0
-    expect(isBottomRectTooltip(0, cursor1, 10)).toBe(true);
-    expect(isBottomRectTooltip(0, cursor2, 10)).toBe(false);
-
-    // chart rotation 180
-    expect(isBottomRectTooltip(180, cursor1, 10)).toBe(false);
-    expect(isBottomRectTooltip(180, cursor2, 10)).toBe(true);
-
-    // chart rotation 90
-    expect(isBottomRectTooltip(90, cursor1, 10)).toBe(false);
-    expect(isBottomRectTooltip(90, cursor2, 10)).toBe(true);
-
-    // chart rotation -90
-    expect(isBottomRectTooltip(-90, cursor1, 10)).toBe(false);
-    expect(isBottomRectTooltip(-90, cursor2, 10)).toBe(true);
-  });
-  test('should compute rect annotation tooltip left', () => {
-    const isRightTooltip = true;
-    const xPosition = { startX: 2, endX: 4 };
-    const cursorX = 3;
-    const chartWidth = 10;
-
-    expect(computeRectTooltipLeft(0, isRightTooltip, xPosition, cursorX, chartWidth)).toBe(4);
-    expect(computeRectTooltipLeft(180, !isRightTooltip, xPosition, cursorX, chartWidth)).toBe(8);
-    expect(computeRectTooltipLeft(90, isRightTooltip, xPosition, cursorX, chartWidth)).toBe(3);
-  });
-  test('should compute rect annotation tooltip top', () => {
-    const isBottomTooltip = true;
-    const xPosition = { startX: 2, endX: 4 };
-    const cursorY = 3;
-    const chartHeight = 10;
-
-    expect(computeRectTooltipTop(0, isBottomTooltip, xPosition, cursorY, chartHeight)).toBe(3);
-    expect(computeRectTooltipTop(90, isBottomTooltip, xPosition, cursorY, chartHeight)).toBe(4);
-    expect(computeRectTooltipTop(-90, !isBottomTooltip, xPosition, cursorY, chartHeight)).toBe(8);
   });
   test('should compute tooltip state for rect annotation', () => {
     const cursorPosition = { x: 3, y: 4 };
@@ -1555,7 +1566,7 @@ describe('annotation utils', () => {
     const visibleTooltip = computeRectAnnotationTooltipState(cursorPosition, annotationRects, 0, chartDimensions);
     const expectedVisibleTooltipState: AnnotationTooltipState = {
       isVisible: true,
-      annotationType: 'rectangle',
+      annotationType: AnnotationTypes.Rectangle,
       anchor: {
         top: 4,
         left: 3,

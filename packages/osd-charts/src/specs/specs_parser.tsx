@@ -1,26 +1,37 @@
-import { inject } from 'mobx-react';
-import { PureComponent } from 'react';
-import { ChartStore } from '../chart_types/xy_chart/store/chart_state';
+import React, { useEffect } from 'react';
+import { bindActionCreators, Dispatch } from 'redux';
+import { connect } from 'react-redux';
+import { specParsed, specUnmounted } from '../state/actions/specs';
 
-export interface SpecProps {
-  chartStore?: ChartStore; // FIX
+export const SpecsParserComponent: React.FunctionComponent<{}> = (props) => {
+  const injected = props as DispatchProps;
+  useEffect(() => {
+    injected.specParsed();
+  });
+  useEffect(
+    () => () => {
+      injected.specUnmounted();
+    },
+    [],
+  );
+  return props.children ? (props.children as React.ReactElement) : null;
+};
+
+interface DispatchProps {
+  specParsed: () => void;
+  specUnmounted: () => void;
 }
 
-export class SpecsSpecRootComponent extends PureComponent<SpecProps> {
-  componentDidMount() {
-    this.props.chartStore!.specsInitialized.set(true);
-    this.props.chartStore!.computeChart();
-  }
-  componentDidUpdate() {
-    this.props.chartStore!.specsInitialized.set(true);
-    this.props.chartStore!.computeChart();
-  }
-  componentWillUnmount() {
-    this.props.chartStore!.chartInitialized.set(false);
-  }
-  render() {
-    return this.props.children || null;
-  }
-}
+const mapDispatchToProps = (dispatch: Dispatch): DispatchProps =>
+  bindActionCreators(
+    {
+      specParsed,
+      specUnmounted,
+    },
+    dispatch,
+  );
 
-export const SpecsParser = inject('chartStore')(SpecsSpecRootComponent);
+export const SpecsParser = connect(
+  null,
+  mapDispatchToProps,
+)(SpecsParserComponent);
