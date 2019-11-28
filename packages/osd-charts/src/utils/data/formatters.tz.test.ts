@@ -19,7 +19,7 @@ describe('Date Formatter', () => {
       expect(formatter(END_DAY + aDay, TIMEZONE_UTC)).toBe('2019-01-02');
       expect(formatter(END_DAY + aDay * 2, TIMEZONE_UTC)).toBe('2019-01-03');
     });
-    test(`America/New_York`, () => {
+    test('America/New_York', () => {
       expect(formatter(START_DAY, TIMEZONE_NY)).toBe('2018-12-31');
       expect(formatter(START_DAY + aDay, TIMEZONE_NY)).toBe('2019-01-01');
       expect(formatter(START_DAY + aDay * 2, TIMEZONE_NY)).toBe('2019-01-02');
@@ -27,7 +27,7 @@ describe('Date Formatter', () => {
       expect(formatter(END_DAY + aDay, TIMEZONE_NY)).toBe('2019-01-02');
       expect(formatter(END_DAY + aDay * 2, TIMEZONE_NY)).toBe('2019-01-03');
     });
-    test(`Asia/Tokyo`, () => {
+    test('Asia/Tokyo', () => {
       expect(formatter(START_DAY, TIMEZONE_TOKYO)).toBe('2019-01-01');
       expect(formatter(START_DAY + aDay, TIMEZONE_TOKYO)).toBe('2019-01-02');
       expect(formatter(START_DAY + aDay * 2, TIMEZONE_TOKYO)).toBe('2019-01-03');
@@ -46,7 +46,7 @@ describe('Date Formatter', () => {
       expect(formatter(END_DAY + aDay, TIMEZONE_UTC)).toBe('January 02');
       expect(formatter(END_DAY + aDay * 2, TIMEZONE_UTC)).toBe('January 03');
     });
-    test(`America/New_York`, () => {
+    test('America/New_York', () => {
       expect(formatter(START_DAY, TIMEZONE_NY)).toBe('December 31');
       expect(formatter(START_DAY + aDay, TIMEZONE_NY)).toBe('January 01');
       expect(formatter(START_DAY + aDay * 2, TIMEZONE_NY)).toBe('January 02');
@@ -54,7 +54,7 @@ describe('Date Formatter', () => {
       expect(formatter(END_DAY + aDay, TIMEZONE_NY)).toBe('January 02');
       expect(formatter(END_DAY + aDay * 2, TIMEZONE_NY)).toBe('January 03');
     });
-    test(`Asia/Tokyo`, () => {
+    test('Asia/Tokyo', () => {
       expect(formatter(START_DAY, TIMEZONE_TOKYO)).toBe('January 01');
       expect(formatter(START_DAY + aDay, TIMEZONE_TOKYO)).toBe('January 02');
       expect(formatter(START_DAY + aDay * 2, TIMEZONE_TOKYO)).toBe('January 03');
@@ -73,7 +73,7 @@ describe('Date Formatter', () => {
       expect(formatter(END_DAY + aDay, TIMEZONE_UTC)).toBe('01-02 23:59');
       expect(formatter(END_DAY + aDay * 2, TIMEZONE_UTC)).toBe('01-03 23:59');
     });
-    test(`America/New_York`, () => {
+    test('America/New_York', () => {
       expect(formatter(START_DAY, TIMEZONE_NY)).toBe('12-31 19:00');
       expect(formatter(START_DAY + aDay, TIMEZONE_NY)).toBe('01-01 19:00');
       expect(formatter(START_DAY + aDay * 2, TIMEZONE_NY)).toBe('01-02 19:00');
@@ -81,7 +81,7 @@ describe('Date Formatter', () => {
       expect(formatter(END_DAY + aDay, TIMEZONE_NY)).toBe('01-02 18:59');
       expect(formatter(END_DAY + aDay * 2, TIMEZONE_NY)).toBe('01-03 18:59');
     });
-    test(`Asia/Tokyo`, () => {
+    test('Asia/Tokyo', () => {
       expect(formatter(START_DAY, TIMEZONE_TOKYO)).toBe('01-01 09:00');
       expect(formatter(START_DAY + aDay, TIMEZONE_TOKYO)).toBe('01-02 09:00');
       expect(formatter(START_DAY + aDay * 2, TIMEZONE_TOKYO)).toBe('01-03 09:00');
@@ -100,7 +100,7 @@ describe('Date Formatter', () => {
       expect(formatter(END_DAY + anHour * 2.5, TIMEZONE_UTC)).toBe('02:29:59');
       expect(formatter(END_DAY + anHour * 10.5 + 1000, TIMEZONE_UTC)).toBe('10:30:00');
     });
-    test(`America/New_York`, () => {
+    test('America/New_York', () => {
       expect(formatter(START_DAY, TIMEZONE_NY)).toBe('19:00:00');
       expect(formatter(START_DAY + anHour * 2.5, TIMEZONE_NY)).toBe('21:30:00');
       expect(formatter(START_DAY + anHour * 10.5 + 1000, TIMEZONE_NY)).toBe('05:30:01');
@@ -108,7 +108,7 @@ describe('Date Formatter', () => {
       expect(formatter(END_DAY + anHour * 2.5, TIMEZONE_NY)).toBe('21:29:59');
       expect(formatter(END_DAY + anHour * 10.5 + 1000, TIMEZONE_NY)).toBe('05:30:00');
     });
-    test(`Asia/Tokyo`, () => {
+    test('Asia/Tokyo', () => {
       expect(formatter(START_DAY, TIMEZONE_TOKYO)).toBe('09:00:00');
       expect(formatter(START_DAY + anHour * 2.5, TIMEZONE_TOKYO)).toBe('11:30:00');
       expect(formatter(START_DAY + anHour * 10.5 + 1000, TIMEZONE_TOKYO)).toBe('19:30:01');

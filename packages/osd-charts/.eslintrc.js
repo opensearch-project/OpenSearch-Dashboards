@@ -55,7 +55,6 @@ module.exports = {
     'import/no-unresolved': 'error',
     'no-irregular-whitespace': 'error',
     'no-unused-expressions': 'error',
-    quotemark: [true, 'single', 'jsx-double'],
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-member-accessibility': ['error', { accessibility: 'no-public' }],
     '@typescript-eslint/no-explicit-any': 'off',
