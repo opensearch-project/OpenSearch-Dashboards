@@ -1,3 +1,10 @@
+## [15.0.1](https://github.com/elastic/elastic-charts/compare/v15.0.0...v15.0.1) (2019-12-02)
+
+
+### Bug Fixes
+
+* redux dev tools config ([#465](https://github.com/elastic/elastic-charts/issues/465)) ([89d5364](https://github.com/elastic/elastic-charts/commit/89d53648f254983efc11f5f9a1636554aba31dd4))
+
 # [15.0.0](https://github.com/elastic/elastic-charts/compare/v14.2.0...v15.0.0) (2019-12-02)
 
 
