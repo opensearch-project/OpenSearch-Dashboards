@@ -1,3 +1,17 @@
+# [15.0.0](https://github.com/elastic/elastic-charts/compare/v14.2.0...v15.0.0) (2019-12-02)
+
+
+### Code Refactoring
+
+* series identifications throughout library ([#419](https://github.com/elastic/elastic-charts/issues/419)) ([66a48ff](https://github.com/elastic/elastic-charts/commit/66a48ff170cec4e6d48b9219dee53a9f36b8d23d))
+* use redux in favour of mobx ([#281](https://github.com/elastic/elastic-charts/issues/281)) ([cd34716](https://github.com/elastic/elastic-charts/commit/cd34716c744598b8fd56a1d4d6b2eda43437d365))
+
+
+### BREAKING CHANGES
+
+* `GeometryId` is now `SeriesIdentifier`. `customSeriesColors` prop on `SeriesSpec` which used to take a `CustomSeriesColorsMap`, now expects a `CustomSeriesColors` type. `LegendItemListener` now passes the `SeriesIdentifier` type as the first callback argument.
+* `SpecId`,`AxisId`, `AnnotationId` types are down-casted to a `string` type. The `getSpecId`, `getAxisId` and `getAnnotationId` methods still exist and but return just the same passed string until deprecated in a future version. The spec ids, previously `id`, `axisId`,`annotationId` etc are now aligned to use the same prop name: `id`. The chart rendering status `data-ech-render-complete` and `data-ech-render-count` is no more at the root level of the `echChart` div, but on its child element: `echChartStatus`. The `Spec` has two new private properties called `chartType` and `specType`.
+
 # [14.2.0](https://github.com/elastic/elastic-charts/compare/v14.1.0...v14.2.0) (2019-11-25)
 
 
