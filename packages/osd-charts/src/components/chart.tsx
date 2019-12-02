@@ -1,6 +1,11 @@
 import React, { CSSProperties, createRef } from 'react';
 import classNames from 'classnames';
 import { Provider } from 'react-redux';
+import { createStore, Store } from 'redux';
+import Konva from 'konva';
+import { Stage } from 'react-konva';
+import uuid from 'uuid';
+
 import { SpecsParser } from '../specs/specs_parser';
 import { ChartResizer } from './chart_resizer';
 import { Legend } from './legend/legend';
@@ -10,9 +15,6 @@ import { Position } from '../chart_types/xy_chart/utils/specs';
 import { ChartSize, getChartSize } from '../utils/chart_size';
 import { ChartStatus } from './chart_status';
 import { chartStoreReducer, GlobalChartState } from '../state/chart_state';
-import { createStore, Store } from 'redux';
-import uuid from 'uuid';
-import { devToolsEnhancer } from 'redux-devtools-extension';
 import { isInitialized } from '../state/selectors/is_initialized';
 import { createOnElementOutCaller } from '../chart_types/xy_chart/state/selectors/on_element_out_caller';
 import { createOnElementOverCaller } from '../chart_types/xy_chart/state/selectors/on_element_over_caller';
@@ -23,8 +25,6 @@ import { createOnBrushEndCaller } from '../chart_types/xy_chart/state/selectors/
 import { onExternalPointerEvent } from '../state/actions/events';
 import { CursorEvent } from '../specs';
 import { createOnPointerMoveCaller } from '../chart_types/xy_chart/state/selectors/on_pointer_move_caller';
-import Konva from 'konva';
-import { Stage } from 'react-konva';
 
 interface ChartProps {
   /** The type of rendered
@@ -57,17 +57,19 @@ export class Chart extends React.Component<ChartProps, ChartState> {
   private chartStore: Store<GlobalChartState>;
   private chartContainerRef: React.RefObject<HTMLDivElement>;
   private chartStageRef: React.RefObject<Stage>;
+
   constructor(props: any) {
     super(props);
     this.chartContainerRef = createRef();
     this.chartStageRef = createRef();
 
-    const storeReducer = chartStoreReducer(uuid.v4());
-    if (process.env.NODE_ENV !== 'production') {
-      this.chartStore = createStore(storeReducer, devToolsEnhancer({ trace: true }));
-    } else {
-      this.chartStore = createStore(storeReducer);
-    }
+    const id = uuid.v4();
+    const storeReducer = chartStoreReducer(id);
+    const enhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
+      ? (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ trace: true, name: `@elastic/charts (id: ${id})` })()
+      : undefined;
+
+    this.chartStore = createStore(storeReducer, enhancers);
     this.state = {
       legendPosition: Position.Right,
     };
@@ -135,7 +137,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
     const canvasStage = stage.toCanvas({
       width,
       height,
-      callback: () => {},
+      callback: () => undefined,
     });
     // @ts-ignore
     if (canvasStage.msToBlob) {

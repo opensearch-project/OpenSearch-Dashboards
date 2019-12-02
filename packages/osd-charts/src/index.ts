@@ -20,6 +20,8 @@ export {
   AnnotationDomainType,
   AnnotationDomainTypes,
   CustomSeriesColors,
+  SeriesColorsArray,
+  SeriesColorAccessorFn,
   HistogramModeAlignment,
   HistogramModeAlignments,
   LineAnnotationDatum,

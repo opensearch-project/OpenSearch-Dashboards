@@ -23,7 +23,7 @@ class Resizer extends React.Component<ResizerProps> {
   private containerRef: RefObject<HTMLDivElement>;
   private ro: ResizeObserver;
   private animationFrameID: number | null;
-  private onResizeDebounced: (entries: ResizeObserverEntry[]) => void = () => {};
+  private onResizeDebounced: (entries: ResizeObserverEntry[]) => void = () => undefined;
 
   constructor(props: ResizerProps) {
     super(props);
