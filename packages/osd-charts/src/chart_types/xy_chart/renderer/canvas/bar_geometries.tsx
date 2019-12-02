@@ -55,7 +55,7 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps, B
       };
 
       const geometryStyle = getGeometryStateStyle(
-        bar.geometryId,
+        bar.seriesIdentifier,
         this.props.highlightedLegendItem,
         sharedStyle,
         individualHighlight,

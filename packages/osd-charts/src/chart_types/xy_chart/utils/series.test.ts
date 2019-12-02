@@ -1,13 +1,14 @@
 import { ColorConfig } from '../../../utils/themes/theme';
 import { ScaleType } from '../../../utils/scales/scales';
 import {
-  DataSeriesColorsValues,
+  SeriesCollectionValue,
   getFormattedDataseries,
-  getSeriesColorMap,
+  getSeriesColors,
   getSortedDataSeriesColorsValuesMap,
   getSplittedSeries,
   RawDataSeries,
   splitSeries,
+  SeriesIdentifier,
 } from './series';
 import { BasicSeriesSpec, LineSeriesSpec, SpecTypes, SeriesTypes } from './specs';
 import { formatStackedDataSeriesValues } from './stacked_series_utils';
@@ -16,87 +17,80 @@ import { ChartTypes } from '../..';
 
 describe('Series', () => {
   test('Can split dataset into 1Y0G series', () => {
-    const splittedSeries = splitSeries(
-      TestDataset.BARCHART_1Y0G,
-      {
-        xAccessor: 'x',
-        yAccessors: ['y'],
-      },
-      'spec1',
-    );
+    const splittedSeries = splitSeries({
+      id: 'spec1',
+      data: TestDataset.BARCHART_1Y0G,
+      xAccessor: 'x',
+      yAccessors: ['y1'],
+      splitSeriesAccessors: ['y'],
+    });
+
     expect(splittedSeries.rawDataSeries).toMatchSnapshot();
   });
   test('Can split dataset into 1Y1G series', () => {
-    const splittedSeries = splitSeries(
-      TestDataset.BARCHART_1Y1G,
-      {
-        xAccessor: 'x',
-        yAccessors: ['y'],
-        splitSeriesAccessors: ['g'],
-      },
-      'spec1',
-    );
+    const splittedSeries = splitSeries({
+      id: 'spec1',
+      data: TestDataset.BARCHART_1Y1G,
+      xAccessor: 'x',
+      yAccessors: ['y'],
+    });
     expect(splittedSeries.rawDataSeries).toMatchSnapshot();
   });
   test('Can split dataset into 1Y2G series', () => {
-    const splittedSeries = splitSeries(
-      TestDataset.BARCHART_1Y2G,
-      {
-        xAccessor: 'x',
-        yAccessors: ['y'],
-        splitSeriesAccessors: ['g1', 'g2'],
-      },
-      'spec1',
-    );
+    const splittedSeries = splitSeries({
+      id: 'spec1',
+      data: TestDataset.BARCHART_1Y2G,
+      xAccessor: 'x',
+      yAccessors: ['y'],
+      splitSeriesAccessors: ['g1', 'g2'],
+    });
     expect(splittedSeries.rawDataSeries).toMatchSnapshot();
   });
   test('Can split dataset into 2Y0G series', () => {
-    const splittedSeries = splitSeries(
-      TestDataset.BARCHART_2Y0G,
-      {
-        xAccessor: 'x',
-        yAccessors: ['y1', 'y2'],
-      },
-      'spec1',
-    );
+    const splittedSeries = splitSeries({
+      id: 'spec1',
+      data: TestDataset.BARCHART_2Y0G,
+      xAccessor: 'x',
+      yAccessors: ['y1', 'y2'],
+    });
     expect(splittedSeries.rawDataSeries).toMatchSnapshot();
   });
   test('Can split dataset into 2Y1G series', () => {
-    const splittedSeries = splitSeries(
-      TestDataset.BARCHART_2Y1G,
-      {
-        xAccessor: 'x',
-        yAccessors: ['y1', 'y2'],
-        splitSeriesAccessors: ['g'],
-      },
-      'spec1',
-    );
+    const splittedSeries = splitSeries({
+      id: 'spec1',
+      data: TestDataset.BARCHART_2Y1G,
+      xAccessor: 'x',
+      yAccessors: ['y1', 'y2'],
+      splitSeriesAccessors: ['g'],
+    });
     expect(splittedSeries.rawDataSeries).toMatchSnapshot();
   });
   test('Can split dataset into 2Y2G series', () => {
-    const splittedSeries = splitSeries(
-      TestDataset.BARCHART_2Y2G,
-      {
-        xAccessor: 'x',
-        yAccessors: ['y1', 'y2'],
-        splitSeriesAccessors: ['g1', 'g2'],
-      },
-      'spec1',
-    );
+    const splittedSeries = splitSeries({
+      id: 'spec1',
+      data: TestDataset.BARCHART_2Y2G,
+      xAccessor: 'x',
+      yAccessors: ['y1', 'y2'],
+      splitSeriesAccessors: ['g1', 'g2'],
+    });
     expect(splittedSeries.rawDataSeries).toMatchSnapshot();
   });
   test('Can stack simple dataseries', () => {
     const dataSeries: RawDataSeries[] = [
       {
         specId: 'spec1',
-        key: ['a'],
-        seriesColorKey: 'a',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['a'],
+        key: 'a',
         data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 4, y1: 4 }],
       },
       {
         specId: 'spec1',
-        key: ['b'],
-        seriesColorKey: 'b',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['b'],
+        key: 'b',
         data: [{ x: 1, y1: 21 }, { x: 3, y1: 23 }],
       },
     ];
@@ -108,26 +102,34 @@ describe('Series', () => {
     const dataSeries: RawDataSeries[] = [
       {
         specId: 'spec1',
-        key: ['a'],
-        seriesColorKey: 'a',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['a'],
+        key: 'a',
         data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
       },
       {
         specId: 'spec1',
-        key: ['b'],
-        seriesColorKey: 'b',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['b'],
+        key: 'b',
         data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
       },
       {
         specId: 'spec1',
-        key: ['b'],
-        seriesColorKey: 'b',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['b'],
+        key: 'b',
         data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
       },
       {
         specId: 'spec1',
-        key: ['b'],
-        seriesColorKey: 'b',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['b'],
+        key: 'b',
         data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
       },
     ];
@@ -139,14 +141,18 @@ describe('Series', () => {
     const dataSeries: RawDataSeries[] = [
       {
         specId: 'spec1',
-        key: ['a'],
-        seriesColorKey: 'a',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['a'],
+        key: 'a',
         data: [{ x: 1, y1: 1 }, { x: 4, y1: 4 }, { x: 2, y1: 2 }],
       },
       {
         specId: 'spec1',
-        key: ['b'],
-        seriesColorKey: 'b',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['b'],
+        key: 'b',
         data: [{ x: 3, y1: 23 }, { x: 1, y1: 21 }],
       },
     ];
@@ -159,14 +165,18 @@ describe('Series', () => {
     const dataSeries: RawDataSeries[] = [
       {
         specId: 'spec1',
-        key: ['a'],
-        seriesColorKey: 'a',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['a'],
+        key: 'a',
         data: new Array(maxArrayItems).fill(0).map((d, i) => ({ x: i, y1: i })),
       },
       {
         specId: 'spec1',
-        key: ['b'],
-        seriesColorKey: 'b',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['b'],
+        key: 'b',
         data: new Array(maxArrayItems).fill(0).map((d, i) => ({ x: i, y1: i })),
       },
     ];
@@ -178,14 +188,18 @@ describe('Series', () => {
     const dataSeries: RawDataSeries[] = [
       {
         specId: 'spec1',
-        key: ['a'],
-        seriesColorKey: 'a',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['a'],
+        key: 'a',
         data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 4, y1: 4 }],
       },
       {
         specId: 'spec1',
-        key: ['b'],
-        seriesColorKey: 'b',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['b'],
+        key: 'b',
         data: [{ x: 1, y1: 21 }, { x: 3, y1: 23 }],
       },
     ];
@@ -199,26 +213,34 @@ describe('Series', () => {
     const dataSeries: RawDataSeries[] = [
       {
         specId: 'spec1',
-        key: ['a'],
-        seriesColorKey: 'a',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['a'],
+        key: 'a',
         data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
       },
       {
         specId: 'spec1',
-        key: ['b'],
-        seriesColorKey: 'b',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['b'],
+        key: 'b',
         data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
       },
       {
         specId: 'spec1',
-        key: ['b'],
-        seriesColorKey: 'b',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['b'],
+        key: 'b',
         data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
       },
       {
         specId: 'spec1',
-        key: ['b'],
-        seriesColorKey: 'b',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['b'],
+        key: 'b',
         data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
       },
     ];
@@ -232,14 +254,18 @@ describe('Series', () => {
     const dataSeries: RawDataSeries[] = [
       {
         specId: 'spec1',
-        key: ['a'],
-        seriesColorKey: 'a',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['a'],
+        key: 'a',
         data: [{ x: 1, y1: 3, y0: 1 }, { x: 2, y1: 3, y0: 2 }, { x: 4, y1: 4, y0: 3 }],
       },
       {
         specId: 'spec1',
-        key: ['b'],
-        seriesColorKey: 'b',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['b'],
+        key: 'b',
         data: [{ x: 1, y1: 2, y0: 1 }, { x: 2, y1: 3, y0: 1 }, { x: 3, y1: 23, y0: 4 }, { x: 4, y1: 4, y0: 1 }],
       },
     ];
@@ -264,14 +290,18 @@ describe('Series', () => {
     const dataSeries: RawDataSeries[] = [
       {
         specId: 'spec1',
-        key: ['a'],
-        seriesColorKey: 'a',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['a'],
+        key: 'a',
         data: [{ x: 1, y1: 3, y0: 1 }, { x: 2, y1: 3, y0: 2 }, { x: 4, y1: 4, y0: 3 }],
       },
       {
         specId: 'spec1',
-        key: ['b'],
-        seriesColorKey: 'b',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['b'],
+        key: 'b',
         data: [{ x: 1, y1: 2, y0: 1 }, { x: 2, y1: 3, y0: 1 }, { x: 3, y1: 23, y0: 4 }, { x: 4, y1: 4, y0: 1 }],
       },
     ];
@@ -386,9 +416,14 @@ describe('Series', () => {
     const specs = new Map();
     specs.set(spec1.id, spec1);
 
-    const dataSeriesValuesA: DataSeriesColorsValues = {
-      specId: 'spec1',
-      colorValues: ['a', 'b', 'c'],
+    const dataSeriesValuesA: SeriesCollectionValue = {
+      seriesIdentifier: {
+        specId: 'spec1',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['a', 'b', 'c'],
+        key: '',
+      },
     };
 
     const chartColors: ColorConfig = {
@@ -401,7 +436,7 @@ describe('Series', () => {
 
     const emptyCustomColors = new Map();
 
-    const defaultColorMap = getSeriesColorMap(seriesColors, chartColors, emptyCustomColors);
+    const defaultColorMap = getSeriesColors(seriesColors, chartColors, emptyCustomColors);
     const expectedDefaultColorMap = new Map();
     expectedDefaultColorMap.set('spec1', 'elastic_charts_c1');
     expect(defaultColorMap).toEqual(expectedDefaultColorMap);
@@ -409,7 +444,7 @@ describe('Series', () => {
     const customColors: Map<string, string> = new Map();
     customColors.set('spec1', 'custom_color');
 
-    const customizedColorMap = getSeriesColorMap(seriesColors, chartColors, customColors);
+    const customizedColorMap = getSeriesColors(seriesColors, chartColors, customColors);
     const expectedCustomizedColorMap = new Map();
     expectedCustomizedColorMap.set('spec1', 'custom_color');
     expect(customizedColorMap).toEqual(expectedCustomizedColorMap);
@@ -439,10 +474,13 @@ describe('Series', () => {
     const emptyDeselected = getSplittedSeries([splitSpec]);
     expect(emptyDeselected.splittedSeries.get(specId)!.length).toBe(2);
 
-    const deselectedDataSeries: DataSeriesColorsValues[] = [
+    const deselectedDataSeries: SeriesIdentifier[] = [
       {
         specId,
-        colorValues: ['y1'],
+        yAccessor: splitSpec.yAccessors[0],
+        splitAccessors: new Map(),
+        seriesKeys: [],
+        key: 'spec{splitSpec}yAccessor{y1}splitAccessors{}',
       },
     ];
     const subsetSplit = getSplittedSeries([splitSpec], deselectedDataSeries);
@@ -454,35 +492,50 @@ describe('Series', () => {
     const spec2Id = 'spec2';
     const spec3Id = 'spec3';
 
-    const colorValuesMap = new Map();
-    const dataSeriesValues1: DataSeriesColorsValues = {
-      specId: spec1Id,
-      colorValues: [],
+    const seriesCollection = new Map();
+    const dataSeriesValues1: SeriesCollectionValue = {
+      seriesIdentifier: {
+        specId: spec1Id,
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [],
+        key: '',
+      },
       specSortIndex: 0,
     };
 
-    const dataSeriesValues2: DataSeriesColorsValues = {
-      specId: spec2Id,
-      colorValues: [],
+    const dataSeriesValues2: SeriesCollectionValue = {
+      seriesIdentifier: {
+        specId: spec2Id,
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [],
+        key: '',
+      },
       specSortIndex: 1,
     };
 
-    const dataSeriesValues3: DataSeriesColorsValues = {
-      specId: spec3Id,
-      colorValues: [],
+    const dataSeriesValues3: SeriesCollectionValue = {
+      seriesIdentifier: {
+        specId: spec3Id,
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [],
+        key: '',
+      },
       specSortIndex: 3,
     };
 
-    colorValuesMap.set(spec3Id, dataSeriesValues3);
-    colorValuesMap.set(spec1Id, dataSeriesValues1);
-    colorValuesMap.set(spec2Id, dataSeriesValues2);
+    seriesCollection.set(spec3Id, dataSeriesValues3);
+    seriesCollection.set(spec1Id, dataSeriesValues1);
+    seriesCollection.set(spec2Id, dataSeriesValues2);
 
     const descSortedColorValues = new Map();
     descSortedColorValues.set(spec1Id, dataSeriesValues1);
     descSortedColorValues.set(spec2Id, dataSeriesValues2);
     descSortedColorValues.set(spec3Id, dataSeriesValues3);
 
-    expect(getSortedDataSeriesColorsValuesMap(colorValuesMap)).toEqual(descSortedColorValues);
+    expect(getSortedDataSeriesColorsValuesMap(seriesCollection)).toEqual(descSortedColorValues);
 
     const ascSortedColorValues = new Map();
     dataSeriesValues1.specSortIndex = 2;
@@ -493,7 +546,7 @@ describe('Series', () => {
     ascSortedColorValues.set(spec2Id, dataSeriesValues2);
     ascSortedColorValues.set(spec1Id, dataSeriesValues1);
 
-    expect(getSortedDataSeriesColorsValuesMap(colorValuesMap)).toEqual(ascSortedColorValues);
+    expect(getSortedDataSeriesColorsValuesMap(seriesCollection)).toEqual(ascSortedColorValues);
 
     // Any series with undefined sort order should come last
     const undefinedSortedColorValues = new Map();
@@ -505,6 +558,6 @@ describe('Series', () => {
     undefinedSortedColorValues.set(spec1Id, dataSeriesValues1);
     undefinedSortedColorValues.set(spec2Id, dataSeriesValues2);
 
-    expect(getSortedDataSeriesColorsValuesMap(colorValuesMap)).toEqual(undefinedSortedColorValues);
+    expect(getSortedDataSeriesColorsValuesMap(seriesCollection)).toEqual(undefinedSortedColorValues);
   });
 });

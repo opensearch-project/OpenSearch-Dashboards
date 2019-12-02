@@ -19,7 +19,7 @@ import {
   Settings,
   niceTimeFormatter,
 } from '../src/';
-import { SeededDataGenerator } from '../.storybook/utils';
+import { SeededDataGenerator } from '../src/mocks/utils';
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 
 function createThemeAction(title: string, min: number, max: number, value: number) {

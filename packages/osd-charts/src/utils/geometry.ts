@@ -1,26 +1,21 @@
 import { $Values } from 'utility-types';
-import { SpecId } from './ids';
 import { BarSeriesStyle, PointStyle, AreaStyle, LineStyle, ArcStyle } from './themes/theme';
-
-export interface GeometryId {
-  specId: SpecId;
-  seriesKey: any[];
-}
+import { SeriesIdentifier } from '../chart_types/xy_chart/utils/series';
 
 /**
  * The accessor type
  */
-export const AccessorType = Object.freeze({
+export const BandedAccessorType = Object.freeze({
   Y0: 'y0' as 'y0',
   Y1: 'y1' as 'y1',
 });
 
-export type AccessorType = $Values<typeof AccessorType>;
+export type BandedAccessorType = $Values<typeof BandedAccessorType>;
 
 export interface GeometryValue {
   y: any;
   x: any;
-  accessor: AccessorType;
+  accessor: BandedAccessorType;
 }
 
 export type IndexedGeometry = PointGeometry | BarGeometry;
@@ -41,7 +36,7 @@ export interface PointGeometry {
     x: number;
     y: number;
   };
-  geometryId: GeometryId;
+  seriesIdentifier: SeriesIdentifier;
   value: GeometryValue;
   styleOverrides?: Partial<PointStyle>;
 }
@@ -58,7 +53,7 @@ export interface BarGeometry {
     hideClippedValue?: boolean;
     isValueContainedInElement?: boolean;
   };
-  geometryId: GeometryId;
+  seriesIdentifier: SeriesIdentifier;
   value: GeometryValue;
   seriesStyle: BarSeriesStyle;
 }
@@ -71,7 +66,7 @@ export interface LineGeometry {
     x: number;
     y: number;
   };
-  geometryId: GeometryId;
+  seriesIdentifier: SeriesIdentifier;
   seriesLineStyle: LineStyle;
   seriesPointStyle: PointStyle;
   /**
@@ -89,7 +84,7 @@ export interface AreaGeometry {
     x: number;
     y: number;
   };
-  geometryId: GeometryId;
+  seriesIdentifier: SeriesIdentifier;
   seriesAreaStyle: AreaStyle;
   seriesAreaLineStyle: LineStyle;
   seriesPointStyle: PointStyle;
@@ -103,7 +98,7 @@ export interface AreaGeometry {
 export interface ArcGeometry {
   arc: string;
   color: string;
-  geometryId: GeometryId;
+  seriesIdentifier: SeriesIdentifier;
   seriesArcStyle: ArcStyle;
   transform: {
     x: number;

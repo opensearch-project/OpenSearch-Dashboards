@@ -6,11 +6,12 @@ import {
   getClippedRanges,
 } from './rendering';
 import { BarSeriesStyle, SharedGeometryStateStyle, PointStyle } from '../../../utils/themes/theme';
-import { DataSeriesDatum } from '../utils/series';
+import { DataSeriesDatum, SeriesIdentifier } from '../utils/series';
 import { mergePartial, RecursivePartial } from '../../../utils/commons';
-import { BarGeometry, PointGeometry, GeometryId } from '../../../utils/geometry';
+import { BarGeometry, PointGeometry } from '../../../utils/geometry';
 import { MockDataSeries } from '../../../mocks';
 import { MockScale } from '../../../mocks/scale';
+import { LegendItem } from '../legend/legend';
 
 describe('Rendering utils', () => {
   test('check if point is in geometry', () => {
@@ -34,9 +35,12 @@ describe('Rendering utils', () => {
 
     const geometry: BarGeometry = {
       color: 'red',
-      geometryId: {
-        seriesKey: [],
+      seriesIdentifier: {
         specId: 'id',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [],
+        key: '',
       },
       value: {
         accessor: 'y1',
@@ -60,9 +64,12 @@ describe('Rendering utils', () => {
   test('check if point is in point geometry', () => {
     const geometry: PointGeometry = {
       color: 'red',
-      geometryId: {
-        seriesKey: [],
+      seriesIdentifier: {
         specId: 'id',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [],
+        key: '',
       },
       value: {
         accessor: 'y1',
@@ -87,19 +94,19 @@ describe('Rendering utils', () => {
     expect(isPointOnGeometry(11, 11, geometry)).toBe(false);
   });
 
-  test('should get common geometry style dependent on legend item highlight state', () => {
-    const geometryId = {
-      seriesKey: [],
+  describe('should get common geometry style dependent on legend item highlight state', () => {
+    const seriesIdentifier: SeriesIdentifier = {
       specId: 'id',
+      yAccessor: 'y1',
+      splitAccessors: new Map(),
+      seriesKeys: [],
+      key: 'somekey',
     };
-    const highlightedLegendItem = {
-      key: '',
+    const highlightedLegendItem: LegendItem = {
+      key: 'somekey',
       color: '',
       label: '',
-      value: {
-        colorValues: [],
-        specId: 'id',
-      },
+      seriesIdentifier,
       isSeriesVisible: true,
       isLegendItemVisible: true,
       displayValue: {
@@ -114,11 +121,11 @@ describe('Rendering utils', () => {
       },
     };
 
-    const unhighlightedLegendItem = {
+    const unhighlightedLegendItem: LegendItem = {
       ...highlightedLegendItem,
-      value: {
-        colorValues: [],
-        specId: 'foo',
+      seriesIdentifier: {
+        ...seriesIdentifier,
+        key: 'not me',
       },
     };
 
@@ -134,46 +141,58 @@ describe('Rendering utils', () => {
       },
     };
 
-    // no highlighted elements
-    const defaultStyle = getGeometryStateStyle(geometryId, null, sharedThemeStyle);
-    expect(defaultStyle).toBe(sharedThemeStyle.default);
-
-    // should equal highlighted opacity
-    const highlightedStyle = getGeometryStateStyle(geometryId, highlightedLegendItem, sharedThemeStyle);
-    expect(highlightedStyle).toBe(sharedThemeStyle.highlighted);
-
-    // should equal unhighlighted opacity
-    const unhighlightedStyle = getGeometryStateStyle(geometryId, unhighlightedLegendItem, sharedThemeStyle);
-    expect(unhighlightedStyle).toBe(sharedThemeStyle.unhighlighted);
-
-    // should equal custom spec highlighted opacity
-    const customHighlightedStyle = getGeometryStateStyle(geometryId, highlightedLegendItem, sharedThemeStyle);
-    expect(customHighlightedStyle).toBe(sharedThemeStyle.highlighted);
-
-    // unhighlighted elements remain unchanged with custom opacity
-    const customUnhighlightedStyle = getGeometryStateStyle(geometryId, unhighlightedLegendItem, sharedThemeStyle);
-    expect(customUnhighlightedStyle).toBe(sharedThemeStyle.unhighlighted);
-
-    // has individual highlight
-    const hasIndividualHighlight = getGeometryStateStyle(geometryId, null, sharedThemeStyle, {
-      hasHighlight: true,
-      hasGeometryHover: true,
+    it('no highlighted elements', () => {
+      const defaultStyle = getGeometryStateStyle(seriesIdentifier, null, sharedThemeStyle);
+      expect(defaultStyle).toBe(sharedThemeStyle.default);
     });
-    expect(hasIndividualHighlight).toBe(sharedThemeStyle.highlighted);
 
-    // no highlight
-    const noHighlight = getGeometryStateStyle(geometryId, null, sharedThemeStyle, {
-      hasHighlight: false,
-      hasGeometryHover: true,
+    it('should equal highlighted opacity', () => {
+      const highlightedStyle = getGeometryStateStyle(seriesIdentifier, highlightedLegendItem, sharedThemeStyle);
+      expect(highlightedStyle).toBe(sharedThemeStyle.highlighted);
     });
-    expect(noHighlight).toBe(sharedThemeStyle.unhighlighted);
 
-    // no geometry hover
-    const noHover = getGeometryStateStyle(geometryId, null, sharedThemeStyle, {
-      hasHighlight: true,
-      hasGeometryHover: false,
+    it('should equal unhighlighted when not highlighted item', () => {
+      const unhighlightedStyle = getGeometryStateStyle(seriesIdentifier, unhighlightedLegendItem, sharedThemeStyle);
+      expect(unhighlightedStyle).toBe(sharedThemeStyle.unhighlighted);
     });
-    expect(noHover).toBe(sharedThemeStyle.highlighted);
+
+    it('should equal custom spec highlighted opacity', () => {
+      const customHighlightedStyle = getGeometryStateStyle(seriesIdentifier, highlightedLegendItem, sharedThemeStyle);
+      expect(customHighlightedStyle).toBe(sharedThemeStyle.highlighted);
+    });
+
+    it('unhighlighted elements remain unchanged with custom opacity', () => {
+      const customUnhighlightedStyle = getGeometryStateStyle(
+        seriesIdentifier,
+        unhighlightedLegendItem,
+        sharedThemeStyle,
+      );
+      expect(customUnhighlightedStyle).toBe(sharedThemeStyle.unhighlighted);
+    });
+
+    it('has individual highlight', () => {
+      const hasIndividualHighlight = getGeometryStateStyle(seriesIdentifier, null, sharedThemeStyle, {
+        hasHighlight: true,
+        hasGeometryHover: true,
+      });
+      expect(hasIndividualHighlight).toBe(sharedThemeStyle.highlighted);
+    });
+
+    it('no highlight', () => {
+      const noHighlight = getGeometryStateStyle(seriesIdentifier, null, sharedThemeStyle, {
+        hasHighlight: false,
+        hasGeometryHover: true,
+      });
+      expect(noHighlight).toBe(sharedThemeStyle.unhighlighted);
+    });
+
+    it('no geometry hover', () => {
+      const noHover = getGeometryStateStyle(seriesIdentifier, null, sharedThemeStyle, {
+        hasHighlight: true,
+        hasGeometryHover: false,
+      });
+      expect(noHover).toBe(sharedThemeStyle.highlighted);
+    });
   });
 
   describe('getBarStyleOverrides', () => {
@@ -203,9 +222,12 @@ describe('Rendering utils', () => {
       initialY1: 4,
       initialY0: 5,
     };
-    const geometryId: GeometryId = {
+    const seriesIdentifier: SeriesIdentifier = {
       specId: 'test',
-      seriesKey: ['test'],
+      yAccessor: 'test',
+      splitAccessors: new Map(),
+      seriesKeys: ['test'],
+      key: '',
     };
 
     beforeEach(() => {
@@ -213,28 +235,28 @@ describe('Rendering utils', () => {
     });
 
     it('should return input seriesStyle if no barStyleAccessor is passed', () => {
-      const styleOverrides = getBarStyleOverrides(datum, geometryId, sampleSeriesStyle);
+      const styleOverrides = getBarStyleOverrides(datum, seriesIdentifier, sampleSeriesStyle);
 
       expect(styleOverrides).toBe(sampleSeriesStyle);
     });
 
     it('should return input seriesStyle if barStyleAccessor returns null', () => {
       mockAccessor.mockReturnValue(null);
-      const styleOverrides = getBarStyleOverrides(datum, geometryId, sampleSeriesStyle, mockAccessor);
+      const styleOverrides = getBarStyleOverrides(datum, seriesIdentifier, sampleSeriesStyle, mockAccessor);
 
       expect(styleOverrides).toBe(sampleSeriesStyle);
     });
 
-    it('should call barStyleAccessor with datum and geometryId', () => {
-      getBarStyleOverrides(datum, geometryId, sampleSeriesStyle, mockAccessor);
+    it('should call barStyleAccessor with datum and seriesIdentifier', () => {
+      getBarStyleOverrides(datum, seriesIdentifier, sampleSeriesStyle, mockAccessor);
 
-      expect(mockAccessor).toBeCalledWith(datum, geometryId);
+      expect(mockAccessor).toBeCalledWith(datum, seriesIdentifier);
     });
 
     it('should return seriesStyle with updated fill color', () => {
       const color = 'blue';
       mockAccessor.mockReturnValue(color);
-      const styleOverrides = getBarStyleOverrides(datum, geometryId, sampleSeriesStyle, mockAccessor);
+      const styleOverrides = getBarStyleOverrides(datum, seriesIdentifier, sampleSeriesStyle, mockAccessor);
       const expectedStyles: BarSeriesStyle = {
         ...sampleSeriesStyle,
         rect: {
@@ -247,7 +269,7 @@ describe('Rendering utils', () => {
 
     it('should return a new seriesStyle object with color', () => {
       mockAccessor.mockReturnValue('blue');
-      const styleOverrides = getBarStyleOverrides(datum, geometryId, sampleSeriesStyle, mockAccessor);
+      const styleOverrides = getBarStyleOverrides(datum, seriesIdentifier, sampleSeriesStyle, mockAccessor);
 
       expect(styleOverrides).not.toBe(sampleSeriesStyle);
     });
@@ -262,7 +284,7 @@ describe('Rendering utils', () => {
         },
       };
       mockAccessor.mockReturnValue(partialStyle);
-      const styleOverrides = getBarStyleOverrides(datum, geometryId, sampleSeriesStyle, mockAccessor);
+      const styleOverrides = getBarStyleOverrides(datum, seriesIdentifier, sampleSeriesStyle, mockAccessor);
       const expectedStyles = mergePartial(sampleSeriesStyle, partialStyle, {
         mergeOptionalPartialValues: true,
       });
@@ -276,7 +298,7 @@ describe('Rendering utils', () => {
           fill: 'blue',
         },
       });
-      const styleOverrides = getBarStyleOverrides(datum, geometryId, sampleSeriesStyle, mockAccessor);
+      const styleOverrides = getBarStyleOverrides(datum, seriesIdentifier, sampleSeriesStyle, mockAccessor);
 
       expect(styleOverrides).not.toBe(sampleSeriesStyle);
     });
@@ -292,9 +314,12 @@ describe('Rendering utils', () => {
       initialY1: 4,
       initialY0: 5,
     };
-    const geometryId: GeometryId = {
+    const seriesIdentifier: SeriesIdentifier = {
       specId: 'test',
-      seriesKey: ['test'],
+      yAccessor: 'test',
+      splitAccessors: new Map(),
+      seriesKeys: ['test'],
+      key: '',
     };
 
     beforeEach(() => {
@@ -302,28 +327,28 @@ describe('Rendering utils', () => {
     });
 
     it('should return undefined if no pointStyleAccessor is passed', () => {
-      const styleOverrides = getPointStyleOverrides(datum, geometryId);
+      const styleOverrides = getPointStyleOverrides(datum, seriesIdentifier);
 
       expect(styleOverrides).toBeUndefined();
     });
 
     it('should return undefined if pointStyleAccessor returns null', () => {
       mockAccessor.mockReturnValue(null);
-      const styleOverrides = getPointStyleOverrides(datum, geometryId, mockAccessor);
+      const styleOverrides = getPointStyleOverrides(datum, seriesIdentifier, mockAccessor);
 
       expect(styleOverrides).toBeUndefined();
     });
 
-    it('should call pointStyleAccessor with datum and geometryId', () => {
-      getPointStyleOverrides(datum, geometryId, mockAccessor);
+    it('should call pointStyleAccessor with datum and seriesIdentifier', () => {
+      getPointStyleOverrides(datum, seriesIdentifier, mockAccessor);
 
-      expect(mockAccessor).toBeCalledWith(datum, geometryId);
+      expect(mockAccessor).toBeCalledWith(datum, seriesIdentifier);
     });
 
     it('should return seriesStyle with updated stroke color', () => {
       const stroke = 'blue';
       mockAccessor.mockReturnValue(stroke);
-      const styleOverrides = getPointStyleOverrides(datum, geometryId, mockAccessor);
+      const styleOverrides = getPointStyleOverrides(datum, seriesIdentifier, mockAccessor);
       const expectedStyles: Partial<PointStyle> = {
         stroke,
       };

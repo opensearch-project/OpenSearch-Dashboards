@@ -18,6 +18,7 @@ import { CursorEvent } from '../../../../specs';
 import { isValidExternalPointerEvent } from '../../../../utils/events';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { hasSingleSeriesSelector } from './has_single_series';
 
 const EMPTY_VALUES = Object.freeze({
   tooltipValues: [],
@@ -38,6 +39,7 @@ export const getTooltipValuesAndGeometriesSelector = createCachedSelector(
     getProjectedPointerPositionSelector,
     getOrientedProjectedPointerPositionSelector,
     getChartRotationSelector,
+    hasSingleSeriesSelector,
     getComputedScalesSelector,
     getElementAtCursorPositionSelector,
     getTooltipTypeSelector,
@@ -55,6 +57,7 @@ function getTooltipAndHighlightFromXValue(
   projectedPointerPosition: Point,
   orientedProjectedPointerPosition: Point,
   chartRotation: Rotation,
+  hasSingleSeries: boolean,
   scales: ComputedScales,
   xMatchingGeoms: IndexedGeometry[],
   tooltipType: TooltipType,
@@ -84,7 +87,7 @@ function getTooltipAndHighlightFromXValue(
     .filter(({ value: { y } }) => y !== null)
     .reduce<TooltipValue[]>((acc, indexedGeometry) => {
       const {
-        geometryId: { specId },
+        seriesIdentifier: { specId },
       } = indexedGeometry;
       const spec = getSpecsById<BasicSeriesSpec>(seriesSpecs, specId);
 
@@ -115,14 +118,21 @@ function getTooltipAndHighlightFromXValue(
 
       // format the tooltip values
       const yAxisFormatSpec = [0, 180].includes(chartRotation) ? yAxis : xAxis;
-      const formattedTooltip = formatTooltip(indexedGeometry, spec, false, isHighlighted, yAxisFormatSpec);
+      const formattedTooltip = formatTooltip(
+        indexedGeometry,
+        spec,
+        false,
+        isHighlighted,
+        hasSingleSeries,
+        yAxisFormatSpec,
+      );
 
       // format only one time the x value
       if (!xValueInfo) {
         // if we have a tooltipHeaderFormatter, then don't pass in the xAxis as the user will define a formatter
         const xAxisFormatSpec = [0, 180].includes(chartRotation) ? xAxis : yAxis;
         const formatterAxis = tooltipHeaderFormatter ? undefined : xAxisFormatSpec;
-        xValueInfo = formatTooltip(indexedGeometry, spec, true, false, formatterAxis);
+        xValueInfo = formatTooltip(indexedGeometry, spec, true, false, hasSingleSeries, formatterAxis);
         return [xValueInfo, ...acc, formattedTooltip];
       }
 

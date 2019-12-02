@@ -26,6 +26,7 @@ export interface TooltipValue {
   isXValue: boolean;
   seriesKey: string;
   yAccessor: Accessor;
+  isVisible: boolean;
 }
 
 export interface TooltipProps {
@@ -107,7 +108,7 @@ export function areIndexedGeomsEquals(ig1: IndexedGeometry, ig2: IndexedGeometry
 
 function arePointsEqual(ig1: PointGeometry, ig2: PointGeometry) {
   return (
-    ig1.geometryId.specId === ig2.geometryId.specId &&
+    ig1.seriesIdentifier.specId === ig2.seriesIdentifier.specId &&
     ig1.color === ig2.color &&
     ig1.x === ig2.x &&
     ig1.transform.x === ig2.transform.x &&
@@ -118,7 +119,7 @@ function arePointsEqual(ig1: PointGeometry, ig2: PointGeometry) {
 }
 function areBarEqual(ig1: BarGeometry, ig2: BarGeometry) {
   return (
-    ig1.geometryId.specId === ig2.geometryId.specId &&
+    ig1.seriesIdentifier.specId === ig2.seriesIdentifier.specId &&
     ig1.color === ig2.color &&
     ig1.x === ig2.x &&
     ig1.y === ig2.y &&

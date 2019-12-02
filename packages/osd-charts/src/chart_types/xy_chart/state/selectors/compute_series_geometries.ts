@@ -5,7 +5,7 @@ import { getChartThemeSelector } from '../../../../state/selectors/get_chart_the
 import { getSeriesSpecsSelector, getAxisSpecsSelector } from './get_specs';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { computeSeriesGeometries, ComputedGeometries } from '../utils';
-import { getSeriesColorMapSelector } from './get_series_color_map';
+import { getSeriesColorsSelector } from './get_series_color_map';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
@@ -14,7 +14,7 @@ export const computeSeriesGeometriesSelector = createCachedSelector(
     getSettingsSpecSelector,
     getSeriesSpecsSelector,
     computeSeriesDomainsSelector,
-    getSeriesColorMapSelector,
+    getSeriesColorsSelector,
     getChartThemeSelector,
     computeChartDimensionsSelector,
     getAxisSpecsSelector,
@@ -24,7 +24,7 @@ export const computeSeriesGeometriesSelector = createCachedSelector(
     settingsSpec,
     seriesSpecs,
     seriesDomainsAndData,
-    seriesColorMap,
+    seriesColors,
     chartTheme,
     chartDimensions,
     axesSpecs,
@@ -36,7 +36,7 @@ export const computeSeriesGeometriesSelector = createCachedSelector(
       xDomain,
       yDomain,
       formattedDataSeries,
-      seriesColorMap,
+      seriesColors,
       chartTheme,
       chartDimensions.chartDimensions,
       settingsSpec.rotation,

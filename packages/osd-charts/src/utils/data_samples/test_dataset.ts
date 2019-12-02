@@ -101,6 +101,29 @@ export const BARCHART_2Y2G = [
   { x: 6, g1: 'cloudflare.com', g2: 'indirect-cdn', y1: 6, y2: 4 },
 ];
 
+export const BARCHART_2Y3G = [
+  { x: 0, g1: 'cdn.google.com', g2: 'direct-cdn', y1: 1, y2: 4, g3: 'somevalue' },
+  { x: 0, g1: 'cdn.google.com', g2: 'indirect-cdn', y1: 1, y2: 4, g3: 'newvalue' },
+  { x: 0, g1: 'cloudflare.com', g2: 'direct-cdn', y1: 3, y2: 6, g3: 'somevalue' },
+  { x: 0, g1: 'cloudflare.com', g2: 'indirect-cdn', y1: 3, y2: 6, g3: 'newvalue' },
+  { x: 1, g1: 'cdn.google.com', g2: 'direct-cdn', y1: 2, y2: 1, g3: 'somevalue' },
+  { x: 1, g1: 'cdn.google.com', g2: 'indirect-cdn', y1: 2, y2: 1, g3: 'newvalue' },
+  { x: 1, g1: 'cloudflare.com', g2: 'direct-cdn', y1: 2, y2: 5, g3: 'somevalue' },
+  { x: 1, g1: 'cloudflare.com', g2: 'indirect-cdn', y1: 2, y2: 5, g3: 'newvalue' },
+  { x: 2, g1: 'cdn.google.com', g2: 'direct-cdn', y1: 10, y2: 5, g3: 'somevalue' },
+  { x: 2, g1: 'cdn.google.com', g2: 'indirect-cdn', y1: 10, y2: 5, g3: 'newvalue' },
+  { x: 2, g1: 'cloudflare.com', g2: 'direct-cdn', y1: 3, y2: 1, g3: 'somevalue' },
+  { x: 2, g1: 'cloudflare.com', g2: 'indirect-cdn', y1: 3, y2: 1, g3: 'newvalue' },
+  { x: 3, g1: 'cdn.google.com', g2: 'direct-cdn', y1: 7, y2: 3, g3: 'somevalue' },
+  { x: 3, g1: 'cdn.google.com', g2: 'indirect-cdn', y1: 7, y2: 3, g3: 'newvalue' },
+  { x: 3, g1: 'cloudflare.com', g2: 'direct-cdn', y1: 6, y2: 4, g3: 'somevalue' },
+  { x: 3, g1: 'cloudflare.com', g2: 'indirect-cdn', y1: 6, y2: 4, g3: 'newvalue' },
+  { x: 6, g1: 'cdn.google.com', g2: 'direct-cdn', y1: 7, y2: 3, g3: 'somevalue' },
+  { x: 6, g1: 'cdn.google.com', g2: 'indirect-cdn', y1: 7, y2: 3, g3: 'newvalue' },
+  { x: 6, g1: 'cloudflare.com', g2: 'direct-cdn', y1: 6, y2: 4, g3: 'somevalue' },
+  { x: 6, g1: 'cloudflare.com', g2: 'indirect-cdn', y1: 6, y2: 4, g3: 'newvalue' },
+];
+
 const NOW = Date.now();
 const DAY = 24 * 60 * 60 * 1000;
 export const TIME_CHART_2Y0G = [

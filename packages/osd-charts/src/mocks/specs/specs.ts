@@ -26,6 +26,7 @@ export class MockSeriesSpec {
     yScaleType: ScaleType.Linear,
     xAccessor: 'x',
     yAccessors: ['y'],
+    splitSeriesAccessors: ['g'],
     yScaleToDataExtent: false,
     hideInLegend: false,
     enableHistogramMode: false,
@@ -98,11 +99,34 @@ export class MockSeriesSpec {
   static line(partial?: Partial<LineSeriesSpec>): LineSeriesSpec {
     return mergePartial<LineSeriesSpec>(MockSeriesSpec.lineBase, partial, { mergeOptionalPartialValues: true });
   }
+
+  static byType(type?: 'line' | 'bar' | 'area'): BasicSeriesSpec {
+    switch (type) {
+      case 'line':
+        return MockSeriesSpec.lineBase;
+        break;
+      case 'bar':
+        return MockSeriesSpec.barBase;
+        break;
+      case 'area':
+        return MockSeriesSpec.areaBase;
+        break;
+      default:
+        return MockSeriesSpec.barBase;
+    }
+  }
 }
 
 export class MockSeriesSpecs {
   static fromSpecs(specs: BasicSeriesSpec[]): SeriesSpecs {
     return specs;
+  }
+
+  static fromPartialSpecs(specs: Partial<BasicSeriesSpec>[]): SeriesSpecs {
+    return specs.map(({ seriesType, ...spec }) => {
+      const base = MockSeriesSpec.byType(seriesType);
+      return mergePartial<BasicSeriesSpec>(base, spec, { mergeOptionalPartialValues: true });
+    });
   }
 
   static empty(): SeriesSpecs {

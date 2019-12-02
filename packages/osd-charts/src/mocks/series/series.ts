@@ -14,8 +14,10 @@ import { FullDataSeriesDatum, WithIndex } from '../../chart_types/xy_chart/utils
 export class MockDataSeries {
   private static readonly base: DataSeries = {
     specId: getSpecId('spec1'),
-    key: ['spec1'],
-    seriesColorKey: 'spec1',
+    seriesKeys: ['spec1'],
+    yAccessor: 'y',
+    splitAccessors: new Map(),
+    key: 'spec1',
     data: [],
   };
 
@@ -48,8 +50,10 @@ export class MockDataSeries {
 export class MockRawDataSeries {
   private static readonly base: RawDataSeries = {
     specId: getSpecId('spec1'),
-    key: ['spec1'],
-    seriesColorKey: 'spec1',
+    seriesKeys: ['spec1'],
+    yAccessor: 'y',
+    splitAccessors: new Map(),
+    key: 'spec1',
     data: [],
   };
 

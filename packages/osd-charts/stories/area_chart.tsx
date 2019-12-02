@@ -16,7 +16,7 @@ import {
   timeFormatter,
 } from '../src';
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
-import { getRandomNumber } from '../.storybook/utils';
+import { getRandomNumber } from '../src/mocks/utils';
 
 const dateFormatter = timeFormatter('HH:mm');
 

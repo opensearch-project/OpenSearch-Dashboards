@@ -11,8 +11,22 @@ Array [
         },
         "x": 0,
         "y0": null,
-        "y1": 1,
+        "y1": undefined,
       },
+    ],
+    "key": "spec{spec1}yAccessor{y1}splitAccessors{y-1}",
+    "seriesKeys": Array [
+      1,
+      "y1",
+    ],
+    "specId": "spec1",
+    "splitAccessors": Map {
+      "y" => 1,
+    },
+    "yAccessor": "y1",
+  },
+  Object {
+    "data": Array [
       Object {
         "datum": Object {
           "x": 1,
@@ -20,8 +34,22 @@ Array [
         },
         "x": 1,
         "y0": null,
-        "y1": 2,
+        "y1": undefined,
       },
+    ],
+    "key": "spec{spec1}yAccessor{y1}splitAccessors{y-2}",
+    "seriesKeys": Array [
+      2,
+      "y1",
+    ],
+    "specId": "spec1",
+    "splitAccessors": Map {
+      "y" => 2,
+    },
+    "yAccessor": "y1",
+  },
+  Object {
+    "data": Array [
       Object {
         "datum": Object {
           "x": 2,
@@ -29,8 +57,22 @@ Array [
         },
         "x": 2,
         "y0": null,
-        "y1": 10,
+        "y1": undefined,
       },
+    ],
+    "key": "spec{spec1}yAccessor{y1}splitAccessors{y-10}",
+    "seriesKeys": Array [
+      10,
+      "y1",
+    ],
+    "specId": "spec1",
+    "splitAccessors": Map {
+      "y" => 10,
+    },
+    "yAccessor": "y1",
+  },
+  Object {
+    "data": Array [
       Object {
         "datum": Object {
           "x": 3,
@@ -38,12 +80,19 @@ Array [
         },
         "x": 3,
         "y0": null,
-        "y1": 6,
+        "y1": undefined,
       },
     ],
-    "key": Array [],
-    "seriesColorKey": "specId:{spec1},colors:{}",
+    "key": "spec{spec1}yAccessor{y1}splitAccessors{y-6}",
+    "seriesKeys": Array [
+      6,
+      "y1",
+    ],
     "specId": "spec1",
+    "splitAccessors": Map {
+      "y" => 6,
+    },
+    "yAccessor": "y1",
   },
 ]
 `;
@@ -64,45 +113,6 @@ Array [
       },
       Object {
         "datum": Object {
-          "g": "a",
-          "x": 1,
-          "y": 2,
-        },
-        "x": 1,
-        "y0": null,
-        "y1": 2,
-      },
-      Object {
-        "datum": Object {
-          "g": "a",
-          "x": 2,
-          "y": 3,
-        },
-        "x": 2,
-        "y0": null,
-        "y1": 3,
-      },
-      Object {
-        "datum": Object {
-          "g": "a",
-          "x": 3,
-          "y": 4,
-        },
-        "x": 3,
-        "y0": null,
-        "y1": 4,
-      },
-    ],
-    "key": Array [
-      "a",
-    ],
-    "seriesColorKey": "specId:{spec1},colors:{a}",
-    "specId": "spec1",
-  },
-  Object {
-    "data": Array [
-      Object {
-        "datum": Object {
           "g": "b",
           "x": 0,
           "y": 2,
@@ -113,6 +123,16 @@ Array [
       },
       Object {
         "datum": Object {
+          "g": "a",
+          "x": 1,
+          "y": 2,
+        },
+        "x": 1,
+        "y0": null,
+        "y1": 2,
+      },
+      Object {
+        "datum": Object {
           "g": "b",
           "x": 1,
           "y": 3,
@@ -123,11 +143,31 @@ Array [
       },
       Object {
         "datum": Object {
+          "g": "a",
+          "x": 2,
+          "y": 3,
+        },
+        "x": 2,
+        "y0": null,
+        "y1": 3,
+      },
+      Object {
+        "datum": Object {
           "g": "b",
           "x": 2,
           "y": 4,
         },
         "x": 2,
+        "y0": null,
+        "y1": 4,
+      },
+      Object {
+        "datum": Object {
+          "g": "a",
+          "x": 3,
+          "y": 4,
+        },
+        "x": 3,
         "y0": null,
         "y1": 4,
       },
@@ -142,11 +182,13 @@ Array [
         "y1": 5,
       },
     ],
-    "key": Array [
-      "b",
+    "key": "spec{spec1}yAccessor{y}splitAccessors{}",
+    "seriesKeys": Array [
+      "y",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{b}",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y",
   },
 ]
 `;
@@ -200,12 +242,18 @@ Array [
         "y1": 6,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y}splitAccessors{g1-a|g2-s}",
+    "seriesKeys": Array [
       "a",
       "s",
+      "y",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{a,s}",
     "specId": "spec1",
+    "splitAccessors": Map {
+      "g1" => "a",
+      "g2" => "s",
+    },
+    "yAccessor": "y",
   },
   Object {
     "data": Array [
@@ -254,12 +302,18 @@ Array [
         "y1": 6,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y}splitAccessors{g1-a|g2-p}",
+    "seriesKeys": Array [
       "a",
       "p",
+      "y",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{a,p}",
     "specId": "spec1",
+    "splitAccessors": Map {
+      "g1" => "a",
+      "g2" => "p",
+    },
+    "yAccessor": "y",
   },
   Object {
     "data": Array [
@@ -308,12 +362,18 @@ Array [
         "y1": 6,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y}splitAccessors{g1-b|g2-s}",
+    "seriesKeys": Array [
       "b",
       "s",
+      "y",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{b,s}",
     "specId": "spec1",
+    "splitAccessors": Map {
+      "g1" => "b",
+      "g2" => "s",
+    },
+    "yAccessor": "y",
   },
   Object {
     "data": Array [
@@ -362,12 +422,18 @@ Array [
         "y1": 6,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y}splitAccessors{g1-b|g2-p}",
+    "seriesKeys": Array [
       "b",
       "p",
+      "y",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{b,p}",
     "specId": "spec1",
+    "splitAccessors": Map {
+      "g1" => "b",
+      "g2" => "p",
+    },
+    "yAccessor": "y",
   },
 ]
 `;
@@ -417,11 +483,13 @@ Array [
         "y1": 6,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y1}splitAccessors{}",
+    "seriesKeys": Array [
       "y1",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{y1}",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -466,11 +534,13 @@ Array [
         "y1": 10,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y2}splitAccessors{}",
+    "seriesKeys": Array [
       "y2",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{y2}",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y2",
   },
 ]
 `;
@@ -524,12 +594,16 @@ Array [
         "y1": 7,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y1}splitAccessors{g-a}",
+    "seriesKeys": Array [
       "a",
       "y1",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{a,y1}",
     "specId": "spec1",
+    "splitAccessors": Map {
+      "g" => "a",
+    },
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -578,12 +652,16 @@ Array [
         "y1": 3,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y2}splitAccessors{g-a}",
+    "seriesKeys": Array [
       "a",
       "y2",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{a,y2}",
     "specId": "spec1",
+    "splitAccessors": Map {
+      "g" => "a",
+    },
+    "yAccessor": "y2",
   },
   Object {
     "data": Array [
@@ -632,12 +710,16 @@ Array [
         "y1": 6,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y1}splitAccessors{g-b}",
+    "seriesKeys": Array [
       "b",
       "y1",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{b,y1}",
     "specId": "spec1",
+    "splitAccessors": Map {
+      "g" => "b",
+    },
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -686,12 +768,16 @@ Array [
         "y1": 4,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y2}splitAccessors{g-b}",
+    "seriesKeys": Array [
       "b",
       "y2",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{b,y2}",
     "specId": "spec1",
+    "splitAccessors": Map {
+      "g" => "b",
+    },
+    "yAccessor": "y2",
   },
 ]
 `;
@@ -761,13 +847,18 @@ Array [
         "y1": 7,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y1}splitAccessors{g1-cdn.google.com|g2-direct-cdn}",
+    "seriesKeys": Array [
       "cdn.google.com",
       "direct-cdn",
       "y1",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{cdn.google.com,direct-cdn,y1}",
     "specId": "spec1",
+    "splitAccessors": Map {
+      "g1" => "cdn.google.com",
+      "g2" => "direct-cdn",
+    },
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -832,13 +923,18 @@ Array [
         "y1": 3,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y2}splitAccessors{g1-cdn.google.com|g2-direct-cdn}",
+    "seriesKeys": Array [
       "cdn.google.com",
       "direct-cdn",
       "y2",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{cdn.google.com,direct-cdn,y2}",
     "specId": "spec1",
+    "splitAccessors": Map {
+      "g1" => "cdn.google.com",
+      "g2" => "direct-cdn",
+    },
+    "yAccessor": "y2",
   },
   Object {
     "data": Array [
@@ -903,13 +999,18 @@ Array [
         "y1": 7,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y1}splitAccessors{g1-cdn.google.com|g2-indirect-cdn}",
+    "seriesKeys": Array [
       "cdn.google.com",
       "indirect-cdn",
       "y1",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{cdn.google.com,indirect-cdn,y1}",
     "specId": "spec1",
+    "splitAccessors": Map {
+      "g1" => "cdn.google.com",
+      "g2" => "indirect-cdn",
+    },
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -974,13 +1075,18 @@ Array [
         "y1": 3,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y2}splitAccessors{g1-cdn.google.com|g2-indirect-cdn}",
+    "seriesKeys": Array [
       "cdn.google.com",
       "indirect-cdn",
       "y2",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{cdn.google.com,indirect-cdn,y2}",
     "specId": "spec1",
+    "splitAccessors": Map {
+      "g1" => "cdn.google.com",
+      "g2" => "indirect-cdn",
+    },
+    "yAccessor": "y2",
   },
   Object {
     "data": Array [
@@ -1045,13 +1151,18 @@ Array [
         "y1": 6,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y1}splitAccessors{g1-cloudflare.com|g2-direct-cdn}",
+    "seriesKeys": Array [
       "cloudflare.com",
       "direct-cdn",
       "y1",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{cloudflare.com,direct-cdn,y1}",
     "specId": "spec1",
+    "splitAccessors": Map {
+      "g1" => "cloudflare.com",
+      "g2" => "direct-cdn",
+    },
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -1116,13 +1227,18 @@ Array [
         "y1": 4,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y2}splitAccessors{g1-cloudflare.com|g2-direct-cdn}",
+    "seriesKeys": Array [
       "cloudflare.com",
       "direct-cdn",
       "y2",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{cloudflare.com,direct-cdn,y2}",
     "specId": "spec1",
+    "splitAccessors": Map {
+      "g1" => "cloudflare.com",
+      "g2" => "direct-cdn",
+    },
+    "yAccessor": "y2",
   },
   Object {
     "data": Array [
@@ -1187,13 +1303,18 @@ Array [
         "y1": 6,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y1}splitAccessors{g1-cloudflare.com|g2-indirect-cdn}",
+    "seriesKeys": Array [
       "cloudflare.com",
       "indirect-cdn",
       "y1",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{cloudflare.com,indirect-cdn,y1}",
     "specId": "spec1",
+    "splitAccessors": Map {
+      "g1" => "cloudflare.com",
+      "g2" => "indirect-cdn",
+    },
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -1258,13 +1379,18 @@ Array [
         "y1": 4,
       },
     ],
-    "key": Array [
+    "key": "spec{spec1}yAccessor{y2}splitAccessors{g1-cloudflare.com|g2-indirect-cdn}",
+    "seriesKeys": Array [
       "cloudflare.com",
       "indirect-cdn",
       "y2",
     ],
-    "seriesColorKey": "specId:{spec1},colors:{cloudflare.com,indirect-cdn,y2}",
     "specId": "spec1",
+    "splitAccessors": Map {
+      "g1" => "cloudflare.com",
+      "g2" => "indirect-cdn",
+    },
+    "yAccessor": "y2",
   },
 ]
 `;
@@ -9274,11 +9400,13 @@ Array [
         "y1": 999,
       },
     ],
-    "key": Array [
+    "key": "a",
+    "seriesKeys": Array [
       "a",
     ],
-    "seriesColorKey": "a",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -17283,11 +17411,13 @@ Array [
         "y1": 1998,
       },
     ],
-    "key": Array [
+    "key": "b",
+    "seriesKeys": Array [
       "b",
     ],
-    "seriesColorKey": "b",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
 ]
 `;
@@ -17329,11 +17459,13 @@ Array [
         "y1": 4,
       },
     ],
-    "key": Array [
+    "key": "a",
+    "seriesKeys": Array [
       "a",
     ],
-    "seriesColorKey": "a",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -17370,11 +17502,13 @@ Array [
         "y1": 8,
       },
     ],
-    "key": Array [
+    "key": "b",
+    "seriesKeys": Array [
       "b",
     ],
-    "seriesColorKey": "b",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -17411,11 +17545,13 @@ Array [
         "y1": 12,
       },
     ],
-    "key": Array [
+    "key": "b",
+    "seriesKeys": Array [
       "b",
     ],
-    "seriesColorKey": "b",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -17452,11 +17588,13 @@ Array [
         "y1": 16,
       },
     ],
-    "key": Array [
+    "key": "b",
+    "seriesKeys": Array [
       "b",
     ],
-    "seriesColorKey": "b",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
 ]
 `;
@@ -17498,11 +17636,13 @@ Array [
         "y1": 4,
       },
     ],
-    "key": Array [
+    "key": "a",
+    "seriesKeys": Array [
       "a",
     ],
-    "seriesColorKey": "a",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -17539,11 +17679,13 @@ Array [
         "y1": 8,
       },
     ],
-    "key": Array [
+    "key": "b",
+    "seriesKeys": Array [
       "b",
     ],
-    "seriesColorKey": "b",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -17580,11 +17722,13 @@ Array [
         "y1": 12,
       },
     ],
-    "key": Array [
+    "key": "b",
+    "seriesKeys": Array [
       "b",
     ],
-    "seriesColorKey": "b",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -17621,11 +17765,13 @@ Array [
         "y1": 16,
       },
     ],
-    "key": Array [
+    "key": "b",
+    "seriesKeys": Array [
       "b",
     ],
-    "seriesColorKey": "b",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
 ]
 `;
@@ -17671,11 +17817,13 @@ Array [
         "y1": 4,
       },
     ],
-    "key": Array [
+    "key": "a",
+    "seriesKeys": Array [
       "a",
     ],
-    "seriesColorKey": "a",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -17720,11 +17868,13 @@ Array [
         "y1": 4,
       },
     ],
-    "key": Array [
+    "key": "b",
+    "seriesKeys": Array [
       "b",
     ],
-    "seriesColorKey": "b",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
 ]
 `;
@@ -17770,11 +17920,13 @@ Array [
         "y1": 4,
       },
     ],
-    "key": Array [
+    "key": "a",
+    "seriesKeys": Array [
       "a",
     ],
-    "seriesColorKey": "a",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -17819,11 +17971,13 @@ Array [
         "y1": 4,
       },
     ],
-    "key": Array [
+    "key": "b",
+    "seriesKeys": Array [
       "b",
     ],
-    "seriesColorKey": "b",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
 ]
 `;
@@ -17869,11 +18023,13 @@ Array [
         "y1": 4,
       },
     ],
-    "key": Array [
+    "key": "a",
+    "seriesKeys": Array [
       "a",
     ],
-    "seriesColorKey": "a",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -17910,11 +18066,13 @@ Array [
         "y1": 8,
       },
     ],
-    "key": Array [
+    "key": "b",
+    "seriesKeys": Array [
       "b",
     ],
-    "seriesColorKey": "b",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
 ]
 `;
@@ -17960,11 +18118,13 @@ Array [
         "y1": 4,
       },
     ],
-    "key": Array [
+    "key": "a",
+    "seriesKeys": Array [
       "a",
     ],
-    "seriesColorKey": "a",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -18001,11 +18161,13 @@ Array [
         "y1": 8,
       },
     ],
-    "key": Array [
+    "key": "b",
+    "seriesKeys": Array [
       "b",
     ],
-    "seriesColorKey": "b",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
 ]
 `;
@@ -18051,11 +18213,13 @@ Array [
         "y1": 4,
       },
     ],
-    "key": Array [
+    "key": "a",
+    "seriesKeys": Array [
       "a",
     ],
-    "seriesColorKey": "a",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -18100,11 +18264,13 @@ Array [
         "y1": 4,
       },
     ],
-    "key": Array [
+    "key": "b",
+    "seriesKeys": Array [
       "b",
     ],
-    "seriesColorKey": "b",
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
 ]
 `;
@@ -18169,11 +18335,13 @@ Array [
             "y1": 6,
           },
         ],
-        "key": Array [
+        "key": "spec{spec2}yAccessor{y1}splitAccessors{}",
+        "seriesKeys": Array [
           "y1",
         ],
-        "seriesColorKey": "specId:{spec2},colors:{y1}",
         "specId": "spec2",
+        "splitAccessors": Map {},
+        "yAccessor": "y1",
       },
       Object {
         "data": Array [
@@ -18226,11 +18394,13 @@ Array [
             "y1": 16,
           },
         ],
-        "key": Array [
+        "key": "spec{spec2}yAccessor{y2}splitAccessors{}",
+        "seriesKeys": Array [
           "y2",
         ],
-        "seriesColorKey": "specId:{spec2},colors:{y2}",
         "specId": "spec2",
+        "splitAccessors": Map {},
+        "yAccessor": "y2",
       },
     ],
     "groupId": "group2",
@@ -18279,9 +18449,13 @@ Array [
         "y1": 6,
       },
     ],
-    "key": Array [],
-    "seriesColorKey": "specId:{spec1},colors:{}",
+    "key": "spec{spec1}yAccessor{y}splitAccessors{}",
+    "seriesKeys": Array [
+      "y",
+    ],
     "specId": "spec1",
+    "splitAccessors": Map {},
+    "yAccessor": "y",
   },
 ]
 `;
@@ -18331,11 +18505,13 @@ Array [
         "y1": 6,
       },
     ],
-    "key": Array [
+    "key": "spec{spec2}yAccessor{y1}splitAccessors{}",
+    "seriesKeys": Array [
       "y1",
     ],
-    "seriesColorKey": "specId:{spec2},colors:{y1}",
     "specId": "spec2",
+    "splitAccessors": Map {},
+    "yAccessor": "y1",
   },
   Object {
     "data": Array [
@@ -18380,11 +18556,13 @@ Array [
         "y1": 10,
       },
     ],
-    "key": Array [
+    "key": "spec{spec2}yAccessor{y2}splitAccessors{}",
+    "seriesKeys": Array [
       "y2",
     ],
-    "seriesColorKey": "specId:{spec2},colors:{y2}",
     "specId": "spec2",
+    "splitAccessors": Map {},
+    "yAccessor": "y2",
   },
 ]
 `;

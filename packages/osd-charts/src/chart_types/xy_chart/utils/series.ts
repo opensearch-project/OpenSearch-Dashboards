@@ -3,8 +3,7 @@ import { Accessor } from '../../../utils/accessor';
 import { GroupId, SpecId } from '../../../utils/ids';
 import { splitSpecsByGroupId, YBasicSeriesSpec } from '../domains/y_domain';
 import { formatNonStackedDataSeriesValues } from './nonstacked_series_utils';
-import { isEqualSeriesKey } from './series_utils';
-import { BasicSeriesSpec, Datum, SeriesAccessors, SeriesSpecs, SeriesTypes } from './specs';
+import { BasicSeriesSpec, Datum, SubSeriesStringPredicate, SeriesTypes, SeriesSpecs } from './specs';
 import { formatStackedDataSeriesValues } from './stacked_series_utils';
 import { ScaleType } from '../../../utils/scales/scales';
 import { LastValues } from '../state/utils';
@@ -46,18 +45,23 @@ export interface DataSeriesDatum<T = any> {
   filled?: FilledValues;
 }
 
-export interface DataSeries {
+export interface SeriesIdentifier {
   specId: SpecId;
-  key: any[];
-  seriesColorKey: string;
+  yAccessor: string | number;
+  splitAccessors: Map<string | number, string | number>; // does the map have a size vs making it optional
+  seriesKeys: (string | number)[];
+  key: string;
+}
+
+export type DataSeries = SeriesIdentifier & {
+  // seriesColorKey: string;
   data: DataSeriesDatum[];
-}
-export interface RawDataSeries {
-  specId: SpecId;
-  key: any[];
-  seriesColorKey: string;
+};
+
+export type RawDataSeries = SeriesIdentifier & {
+  // seriesColorKey: string;
   data: RawDataSeriesDatum[];
-}
+};
 
 export interface FormattedDataSeries {
   groupId: GroupId;
@@ -71,25 +75,19 @@ export interface DataSeriesCounts {
   areaSeries: number;
 }
 
-export interface DataSeriesColorsValues {
-  specId: SpecId;
+export type SeriesCollectionValue = {
   banded?: boolean;
-  colorValues: any[];
   lastValue?: LastValues;
   specSortIndex?: number;
-}
+  seriesIdentifier: SeriesIdentifier;
+};
 
-export function findDataSeriesByColorValues(
-  series: DataSeriesColorsValues[] | null,
-  value: DataSeriesColorsValues,
-): number {
+export function getSeriesIndex(series: SeriesIdentifier[], target: SeriesIdentifier): number {
   if (!series) {
     return -1;
   }
 
-  return series.findIndex((item: DataSeriesColorsValues) => {
-    return isEqualSeriesKey(item.colorValues, value.colorValues) && item.specId === value.specId;
-  });
+  return series.findIndex(({ key }) => target.key === key);
 }
 
 /**
@@ -97,44 +95,41 @@ export function findDataSeriesByColorValues(
  * Each series is then associated with a key thats belong to its configuration.
  *
  */
-export function splitSeries(
-  data: Datum[],
-  accessors: SeriesAccessors,
-  specId: SpecId,
-): {
+export function splitSeries({
+  id: specId,
+  data,
+  xAccessor,
+  yAccessors,
+  y0Accessors,
+  splitSeriesAccessors = [],
+}: Pick<BasicSeriesSpec, 'id' | 'data' | 'xAccessor' | 'yAccessors' | 'y0Accessors' | 'splitSeriesAccessors'>): {
   rawDataSeries: RawDataSeries[];
-  colorsValues: Map<string, any[]>;
+  colorsValues: Set<string>;
   xValues: Set<string | number>;
 } {
-  const { xAccessor, yAccessors, y0Accessors, splitSeriesAccessors = [] } = accessors;
   const isMultipleY = yAccessors && yAccessors.length > 1;
   const series = new Map<string, RawDataSeries>();
-  const colorsValues = new Map<string, any[]>();
+  const colorsValues = new Set<string>();
   const xValues = new Set<string | number>();
 
   data.forEach((datum) => {
-    const seriesKey = getAccessorsValues(datum, splitSeriesAccessors);
+    const splitAccessors = getSplitAccessors(datum, splitSeriesAccessors);
     if (isMultipleY) {
       yAccessors.forEach((accessor, index) => {
-        const colorValues = getColorValues(datum, splitSeriesAccessors, accessor);
-        const colorValuesKey = getColorValuesAsString(colorValues, specId);
-        colorsValues.set(colorValuesKey, colorValues);
         const cleanedDatum = cleanDatum(datum, xAccessor, accessor, y0Accessors && y0Accessors[index]);
 
         if (cleanedDatum.x !== null && cleanedDatum.x !== undefined) {
           xValues.add(cleanedDatum.x);
-          updateSeriesMap(series, [...seriesKey, accessor], cleanedDatum, specId, colorValuesKey);
+          const seriesKey = updateSeriesMap(series, splitAccessors, accessor, cleanedDatum, specId);
+          colorsValues.add(seriesKey);
         }
       });
     } else {
-      const colorValues = getColorValues(datum, splitSeriesAccessors);
-      const colorValuesKey = getColorValuesAsString(colorValues, specId);
-      colorsValues.set(colorValuesKey, colorValues);
       const cleanedDatum = cleanDatum(datum, xAccessor, yAccessors[0], y0Accessors && y0Accessors[0]);
-
       if (cleanedDatum.x !== null && cleanedDatum.x !== undefined) {
         xValues.add(cleanedDatum.x);
-        updateSeriesMap(series, [...seriesKey], cleanedDatum, specId, colorValuesKey);
+        const seriesKey = updateSeriesMap(series, splitAccessors, yAccessors[0], cleanedDatum, specId);
+        colorsValues.add(seriesKey);
       }
     }
   });
@@ -147,57 +142,65 @@ export function splitSeries(
 }
 
 /**
+ * Gets global series key to id any series as a string
+ */
+export function getSeriesKey({
+  specId,
+  yAccessor,
+  splitAccessors,
+}: Pick<SeriesIdentifier, 'specId' | 'yAccessor' | 'splitAccessors'>): string {
+  const joinedAccessors = [...splitAccessors.entries()]
+    .sort(([a], [b]) => (a > b ? 1 : -1))
+    .map(([key, value]) => `${key}-${value}`)
+    .join('|');
+  return `spec{${specId}}yAccessor{${yAccessor}}splitAccessors{${joinedAccessors}}`;
+}
+
+/**
  * Mutate the passed map adding or updating the DataSeries stored
  * along with the series key
  */
 function updateSeriesMap(
   seriesMap: Map<string, RawDataSeries>,
-  seriesKey: any[],
+  splitAccessors: Map<string | number, string | number>,
+  accessor: any,
   datum: RawDataSeriesDatum,
   specId: SpecId,
-  seriesColorKey: string,
-): Map<string, RawDataSeries> {
-  const seriesKeyString = seriesKey.join('___');
-  const series = seriesMap.get(seriesKeyString);
+): string {
+  const seriesKeys = [...splitAccessors.values(), accessor];
+  const seriesKey = getSeriesKey({
+    specId,
+    yAccessor: accessor,
+    splitAccessors,
+  });
+  const series = seriesMap.get(seriesKey);
   if (series) {
     series.data.push(datum);
   } else {
-    seriesMap.set(seriesKeyString, {
+    seriesMap.set(seriesKey, {
       specId,
-      seriesColorKey,
-      key: seriesKey,
+      yAccessor: accessor,
+      splitAccessors,
       data: [datum],
+      key: seriesKey,
+      seriesKeys,
     });
   }
-  return seriesMap;
+  return seriesKey;
 }
 
 /**
  * Get the array of values that forms a series key
  */
-function getAccessorsValues(datum: Datum, accessors: Accessor[] = []): any[] {
-  return accessors
-    .map((accessor) => {
-      return datum[accessor];
-    })
-    .filter((value) => value !== undefined);
-}
-
-/**
- * Get the array of values that forms a series key
- */
-function getColorValues(datum: Datum, accessors: Accessor[] = [], yAccessorValue?: any): any[] {
-  const colorValues = getAccessorsValues(datum, accessors);
-  if (yAccessorValue) {
-    return [...colorValues, yAccessorValue];
-  }
-  return colorValues;
-}
-/**
- * Get the array of values that forms a series key
- */
-export function getColorValuesAsString(colorValues: any[], specId: SpecId): string {
-  return `specId:{${specId}},colors:{${colorValues}}`;
+function getSplitAccessors(datum: Datum, accessors: Accessor[] = []): Map<string | number, string | number> {
+  const splitAccessors = new Map<string | number, string | number>();
+  accessors.forEach((accessor) => {
+    const value = datum[accessor];
+    if (value !== undefined || value !== null) {
+      splitAccessors.set(accessor, value);
+    }
+  });
+  return splitAccessors;
 }
 
 /**
@@ -315,45 +318,37 @@ function getRawDataSeries(
  */
 export function getSplittedSeries(
   seriesSpecs: BasicSeriesSpec[],
-  deselectedDataSeries: DataSeriesColorsValues[] = [],
+  deselectedDataSeries: SeriesIdentifier[] = [],
 ): {
   splittedSeries: Map<SpecId, RawDataSeries[]>;
-  seriesColors: Map<string, DataSeriesColorsValues>;
+  seriesCollection: Map<string, SeriesCollectionValue>;
   xValues: Set<string | number>;
 } {
   const splittedSeries = new Map<SpecId, RawDataSeries[]>();
-  const seriesColors = new Map<string, DataSeriesColorsValues>();
-  let xValues: Set<string | number> = new Set();
+  const seriesCollection = new Map<string, SeriesCollectionValue>();
+  const xValues: Set<any> = new Set();
   let isOrdinalScale = false;
   for (const spec of seriesSpecs) {
+    const dataSeries = splitSeries(spec);
+    let currentRawDataSeries = dataSeries.rawDataSeries;
     if (spec.xScaleType === ScaleType.Ordinal) {
       isOrdinalScale = true;
     }
-    const dataSeries = splitSeries(spec.data, spec, spec.id);
-    let currentRawDataSeries = dataSeries.rawDataSeries;
     if (deselectedDataSeries.length > 0) {
-      currentRawDataSeries = dataSeries.rawDataSeries.filter(
-        (series): boolean => {
-          const seriesValues = {
-            specId: spec.id,
-            colorValues: series.key,
-          };
-
-          return findDataSeriesByColorValues(deselectedDataSeries, seriesValues) < 0;
-        },
-      );
+      currentRawDataSeries = dataSeries.rawDataSeries.filter(({ key }) => {
+        return !deselectedDataSeries.some(({ key: deselectedKey }) => key === deselectedKey);
+      });
     }
 
     splittedSeries.set(spec.id, currentRawDataSeries);
 
     const banded = spec.y0Accessors && spec.y0Accessors.length > 0;
 
-    dataSeries.colorsValues.forEach((colorValues, key) => {
-      seriesColors.set(key, {
-        specId: spec.id,
-        specSortIndex: spec.sortIndex,
+    dataSeries.rawDataSeries.forEach((series) => {
+      seriesCollection.set(series.key, {
         banded,
-        colorValues,
+        specSortIndex: spec.sortIndex,
+        seriesIdentifier: series as SeriesIdentifier,
       });
     });
 
@@ -361,45 +356,124 @@ export function getSplittedSeries(
       xValues.add(xValue);
     }
   }
-  // keep the user order for ordinal scales
-  if (!isOrdinalScale) {
-    xValues = new Set([...xValues].sort());
-  }
+
   return {
     splittedSeries,
-    seriesColors,
-    xValues,
+    seriesCollection,
+    // keep the user order for ordinal scales
+    xValues: isOrdinalScale ? xValues : new Set([...xValues].sort()),
   };
 }
 
-function getSortIndex({ specSortIndex }: DataSeriesColorsValues, total: number): number {
+/**
+ * Get custom  series sub-name
+ */
+const getCustomSubSeriesName = (() => {
+  const cache = new Map();
+
+  return (customSubSeriesLabel: SubSeriesStringPredicate, isTooltip: boolean) => (
+    args: [string | number | null, string | number],
+  ): string | number => {
+    const [accessorKey, accessorLabel] = args;
+    const key = [args, isTooltip].join('~~~');
+
+    if (cache.has(key)) {
+      return cache.get(key);
+    } else {
+      const label = customSubSeriesLabel(accessorLabel, accessorKey, isTooltip) || accessorLabel;
+      cache.set(key, label);
+
+      return label;
+    }
+  };
+})();
+
+const getSeriesLabelKeys = (
+  spec: BasicSeriesSpec,
+  seriesIdentifier: SeriesIdentifier,
+  isTooltip: boolean,
+): (string | number)[] => {
+  const isMultipleY = spec.yAccessors.length > 1;
+
+  if (spec.customSubSeriesLabel) {
+    const { yAccessor, splitAccessors } = seriesIdentifier;
+    const fullKeyPairs: [string | number | null, string | number][] = [...splitAccessors.entries(), [null, yAccessor]];
+    const labelKeys = fullKeyPairs.map(getCustomSubSeriesName(spec.customSubSeriesLabel, isTooltip));
+
+    return isMultipleY ? labelKeys : labelKeys.slice(0, -1);
+  }
+
+  const { seriesKeys } = seriesIdentifier;
+
+  return isMultipleY ? seriesKeys : seriesKeys.slice(0, -1);
+};
+
+/**
+ * Get series label based on `SeriesIdentifier`
+ */
+export function getSeriesLabel(
+  seriesIdentifier: SeriesIdentifier,
+  hasSingleSeries: boolean,
+  isTooltip: boolean,
+  spec?: BasicSeriesSpec,
+): string {
+  if (spec && spec.customSeriesLabel) {
+    const customLabel = spec.customSeriesLabel(seriesIdentifier, isTooltip);
+
+    if (customLabel !== null) {
+      return customLabel;
+    }
+  }
+
+  let label = '';
+  const labelKeys = spec ? getSeriesLabelKeys(spec, seriesIdentifier, isTooltip) : seriesIdentifier.seriesKeys;
+
+  // there is one series, the is only one yAccessor, the first part is not null
+  if (hasSingleSeries || labelKeys.length === 0 || labelKeys[0] == null) {
+    if (!spec) {
+      return '';
+    }
+
+    if (spec.splitSeriesAccessors && labelKeys.length > 0 && labelKeys[0] != null) {
+      label = labelKeys.join(' - ');
+    } else {
+      label = spec.name || `${spec.id}`;
+    }
+  } else {
+    label = labelKeys.join(' - ');
+  }
+
+  return label;
+}
+
+function getSortIndex({ specSortIndex }: SeriesCollectionValue, total: number): number {
   return specSortIndex != null ? specSortIndex : total;
 }
 
 export function getSortedDataSeriesColorsValuesMap(
-  colorValuesMap: Map<string, DataSeriesColorsValues>,
-): Map<string, DataSeriesColorsValues> {
-  const seriesColorsArray = [...colorValuesMap];
+  seriesCollection: Map<string, SeriesCollectionValue>,
+): Map<string, SeriesCollectionValue> {
+  const seriesColorsArray = [...seriesCollection];
   seriesColorsArray.sort(([, specA], [, specB]) => {
-    return getSortIndex(specA, colorValuesMap.size) - getSortIndex(specB, colorValuesMap.size);
+    return getSortIndex(specA, seriesCollection.size) - getSortIndex(specB, seriesCollection.size);
   });
 
   return new Map([...seriesColorsArray]);
 }
 
-export function getSeriesColorMap(
-  seriesColors: Map<string, DataSeriesColorsValues>,
+export function getSeriesColors(
+  seriesCollection: Map<string, SeriesCollectionValue>,
   chartColors: ColorConfig,
   customColors: Map<string, string>,
 ): Map<string, string> {
   const seriesColorMap = new Map<string, string>();
   let counter = 0;
 
-  seriesColors.forEach((_, key) => {
-    const customSeriesColor: string | undefined = customColors.get(key);
+  seriesCollection.forEach((_, seriesKey) => {
+    const customSeriesColor: string | undefined = customColors.get(seriesKey);
     const color = customSeriesColor || chartColors.vizColors[counter % chartColors.vizColors.length];
 
-    seriesColorMap.set(key, color);
+    seriesColorMap.set(seriesKey, color);
     counter++;
   });
   return seriesColorMap;

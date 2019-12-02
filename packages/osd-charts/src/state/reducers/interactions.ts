@@ -7,7 +7,7 @@ import {
   LegendActions,
 } from '../actions/legend';
 import { ON_MOUSE_DOWN, ON_MOUSE_UP, ON_POINTER_MOVE, MouseActions } from '../actions/mouse';
-import { DataSeriesColorsValues, findDataSeriesByColorValues } from '../../chart_types/xy_chart/utils/series';
+import { getSeriesIndex, SeriesIdentifier } from '../../chart_types/xy_chart/utils/series';
 
 export function interactionsReducer(state: InteractionsState, action: LegendActions | MouseActions): InteractionsState {
   switch (action.type) {
@@ -107,11 +107,8 @@ export function interactionsReducer(state: InteractionsState, action: LegendActi
   }
 }
 
-function toggleDeselectedDataSeries(
-  legendItem: DataSeriesColorsValues,
-  deselectedDataSeries: DataSeriesColorsValues[],
-) {
-  const index = findDataSeriesByColorValues(deselectedDataSeries, legendItem);
+function toggleDeselectedDataSeries(legendItem: SeriesIdentifier, deselectedDataSeries: SeriesIdentifier[]) {
+  const index = getSeriesIndex(deselectedDataSeries, legendItem);
   if (index > -1) {
     return [...deselectedDataSeries.slice(0, index), ...deselectedDataSeries.slice(index + 1)];
   } else {

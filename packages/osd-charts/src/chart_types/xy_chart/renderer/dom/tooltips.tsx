@@ -97,7 +97,10 @@ class TooltipsComponent extends React.Component<TooltipProps> {
         <div className="echTooltip" ref={this.tooltipRef}>
           <div className="echTooltip__header">{this.renderHeader(tooltipValues[0], tooltipHeaderFormatter)}</div>
           <div className="echTooltip__list">
-            {tooltipValues.slice(1).map(({ name, value, color, isHighlighted, seriesKey, yAccessor }) => {
+            {tooltipValues.slice(1).map(({ name, value, color, isHighlighted, seriesKey, yAccessor, isVisible }) => {
+              if (!isVisible) {
+                return null;
+              }
               const classes = classNames('echTooltip__item', {
                 /* eslint @typescript-eslint/camelcase:0 */
                 echTooltip__rowHighlighted: isHighlighted,

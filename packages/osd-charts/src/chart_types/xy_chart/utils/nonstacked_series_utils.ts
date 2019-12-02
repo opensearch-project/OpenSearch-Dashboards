@@ -34,9 +34,7 @@ export const formatNonStackedDataSeriesValues = (
 export const formatNonStackedDataValues = (dataSeries: RawDataSeries, scaleToExtent: boolean): DataSeries => {
   const len = dataSeries.data.length;
   const formattedValues: DataSeries = {
-    key: dataSeries.key,
-    specId: dataSeries.specId,
-    seriesColorKey: dataSeries.seriesColorKey,
+    ...dataSeries,
     data: [],
   };
   for (let i = 0; i < len; i++) {

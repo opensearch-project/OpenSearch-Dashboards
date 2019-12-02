@@ -1,5 +1,4 @@
 import { TooltipValue } from '../utils/interactions';
-import { getColorValuesAsString } from '../utils/series';
 import {
   AxisSpec,
   BasicSeriesSpec,
@@ -8,8 +7,9 @@ import {
   isBarSeriesSpec,
   TickFormatterOptions,
 } from '../utils/specs';
-import { IndexedGeometry, AccessorType } from '../../../utils/geometry';
+import { IndexedGeometry, BandedAccessorType } from '../../../utils/geometry';
 import { getAccessorFormatLabel } from '../../../utils/accessor';
+import { getSeriesKey, getSeriesLabel } from '../utils/series';
 
 export interface TooltipLegendValue {
   y0: any;
@@ -42,41 +42,39 @@ export function getSeriesTooltipValues(
       [yAccessor]: seriesValue,
     });
   });
-
   return seriesTooltipValues;
 }
 
 export function formatTooltip(
-  { color, value: { x, y, accessor }, geometryId: { seriesKey } }: IndexedGeometry,
+  { color, value: { x, y, accessor }, seriesIdentifier }: IndexedGeometry,
   spec: BasicSeriesSpec,
   isXValue: boolean,
   isHighlighted: boolean,
+  hasSingleSeries: boolean,
   axisSpec?: AxisSpec,
 ): TooltipValue {
-  const seriesKeyAsString = getColorValuesAsString(seriesKey, spec.id);
-  let displayName: string | undefined;
-  if (seriesKey.length > 0) {
-    displayName = seriesKey.join(' - ');
-  } else {
-    displayName = spec.name || `${spec.id}`;
-  }
+  const seriesKey = getSeriesKey(seriesIdentifier);
+  let displayName = getSeriesLabel(seriesIdentifier, hasSingleSeries, true, spec);
 
   if (isBandedSpec(spec.y0Accessors) && (isAreaSeriesSpec(spec) || isBarSeriesSpec(spec))) {
     const { y0AccessorFormat = Y0_ACCESSOR_POSTFIX, y1AccessorFormat = Y1_ACCESSOR_POSTFIX } = spec;
-    const formatter = accessor === AccessorType.Y0 ? y0AccessorFormat : y1AccessorFormat;
+    const formatter = accessor === BandedAccessorType.Y0 ? y0AccessorFormat : y1AccessorFormat;
     displayName = getAccessorFormatLabel(formatter, displayName);
   }
+  const isFiltered = spec.filterSeriesInTooltip !== undefined ? spec.filterSeriesInTooltip(seriesIdentifier) : true;
+  const isVisible = displayName === '' ? false : isFiltered;
 
   const value = isXValue ? x : y;
   const tickFormatOptions: TickFormatterOptions | undefined = spec.timeZone ? { timeZone: spec.timeZone } : undefined;
   return {
-    seriesKey: seriesKeyAsString,
+    seriesKey,
     name: displayName,
     value: axisSpec ? axisSpec.tickFormat(value, tickFormatOptions) : emptyFormatter(value),
     color,
     isHighlighted: isXValue ? false : isHighlighted,
     isXValue,
     yAccessor: accessor,
+    isVisible,
   };
 }
 

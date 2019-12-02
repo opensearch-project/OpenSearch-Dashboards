@@ -133,7 +133,7 @@
     "ts-loader": "^6.1.2",
     "ts-prune": "^0.3.0",
     "typescript": "^3.6.3",
-    "utility-types": "^3.8.0",
+    "utility-types": "^3.9.0",
     "webpack": "^4.29.5",
     "webpack-cli": "^3.3.1",
     "webpack-dev-server": "^3.3.1"

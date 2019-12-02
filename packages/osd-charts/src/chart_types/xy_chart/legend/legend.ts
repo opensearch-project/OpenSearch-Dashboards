@@ -1,13 +1,15 @@
 import { getAxesSpecForSpecId, LastValues, getSpecsById } from '../state/utils';
 import { identity } from '../../../utils/commons';
 import {
-  DataSeriesColorsValues,
+  SeriesCollectionValue,
+  getSeriesIndex,
   getSortedDataSeriesColorsValuesMap,
-  findDataSeriesByColorValues,
+  SeriesIdentifier,
+  getSeriesLabel,
 } from '../utils/series';
 import { AxisSpec, BasicSeriesSpec, Postfixes, isAreaSeriesSpec, isBarSeriesSpec } from '../utils/specs';
 import { Y0_ACCESSOR_POSTFIX, Y1_ACCESSOR_POSTFIX } from '../tooltip/tooltip';
-import { AccessorType } from '../../../utils/geometry';
+import { BandedAccessorType } from '../../../utils/geometry';
 
 interface FormattedLastValues {
   y0: number | string | null;
@@ -18,7 +20,7 @@ export type LegendItem = Postfixes & {
   key: string;
   color: string;
   label: string;
-  value: DataSeriesColorsValues;
+  seriesIdentifier: SeriesIdentifier;
   isSeriesVisible?: boolean;
   banded?: boolean;
   isLegendItemVisible?: boolean;
@@ -42,35 +44,35 @@ function getPostfix(spec: BasicSeriesSpec): Postfixes {
 
 export function getItemLabel(
   { banded, label, y1AccessorFormat, y0AccessorFormat }: LegendItem,
-  yAccessor: AccessorType,
+  yAccessor: BandedAccessorType,
 ) {
   if (!banded) {
     return label;
   }
 
-  return yAccessor === AccessorType.Y1 ? `${label}${y1AccessorFormat}` : `${label}${y0AccessorFormat}`;
+  return yAccessor === BandedAccessorType.Y1 ? `${label}${y1AccessorFormat}` : `${label}${y0AccessorFormat}`;
 }
 
 export function computeLegend(
-  seriesColor: Map<string, DataSeriesColorsValues>,
-  seriesColorMap: Map<string, string>,
+  seriesCollection: Map<string, SeriesCollectionValue>,
+  seriesColors: Map<string, string>,
   specs: BasicSeriesSpec[],
   defaultColor: string,
   axesSpecs: AxisSpec[],
-  deselectedDataSeries: DataSeriesColorsValues[] = [],
+  deselectedDataSeries: SeriesIdentifier[] = [],
 ): Map<string, LegendItem> {
   const legendItems: Map<string, LegendItem> = new Map();
-  const sortedSeriesColors = getSortedDataSeriesColorsValuesMap(seriesColor);
+  const sortedCollection = getSortedDataSeriesColorsValuesMap(seriesCollection);
 
-  sortedSeriesColors.forEach((series, key) => {
-    const { banded, specId, lastValue, colorValues } = series;
-    const spec = getSpecsById<BasicSeriesSpec>(specs, specId);
-    const color = seriesColorMap.get(key) || defaultColor;
-    const hasSingleSeries = seriesColor.size === 1;
-    const label = getSeriesColorLabel(colorValues, hasSingleSeries, spec);
-    const isSeriesVisible = deselectedDataSeries ? findDataSeriesByColorValues(deselectedDataSeries, series) < 0 : true;
+  sortedCollection.forEach((series, key) => {
+    const { banded, lastValue, seriesIdentifier } = series;
+    const spec = getSpecsById<BasicSeriesSpec>(specs, seriesIdentifier.specId);
+    const color = seriesColors.get(key) || defaultColor;
+    const hasSingleSeries = seriesCollection.size === 1;
+    const label = getSeriesLabel(seriesIdentifier, hasSingleSeries, false, spec);
+    const isSeriesVisible = deselectedDataSeries ? getSeriesIndex(deselectedDataSeries, seriesIdentifier) < 0 : true;
 
-    if (!label || !spec) {
+    if (label === '' || !spec) {
       return;
     }
 
@@ -84,7 +86,7 @@ export function computeLegend(
       color,
       label,
       banded,
-      value: series,
+      seriesIdentifier,
       isSeriesVisible,
       isLegendItemVisible: !hideInLegend,
       displayValue: {
@@ -103,26 +105,4 @@ export function computeLegend(
     legendItems.set(key, legendItem);
   });
   return legendItems;
-}
-
-export function getSeriesColorLabel(
-  colorValues: Array<string | number | null | undefined>,
-  hasSingleSeries: boolean,
-  spec?: BasicSeriesSpec,
-): string | undefined {
-  let label = '';
-  if (hasSingleSeries || colorValues.length === 0 || colorValues[0] == null) {
-    if (!spec) {
-      return;
-    }
-    if (spec.splitSeriesAccessors && colorValues.length > 0 && colorValues[0] !== null) {
-      label = colorValues.join(' - ');
-    } else {
-      label = spec.name || `${spec.id}`;
-    }
-  } else {
-    label = colorValues.join(' - ');
-  }
-
-  return label;
 }

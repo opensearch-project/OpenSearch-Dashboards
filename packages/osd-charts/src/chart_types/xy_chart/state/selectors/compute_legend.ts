@@ -2,7 +2,7 @@ import createCachedSelector from 're-reselect';
 import { computeSeriesDomainsSelector } from './compute_series_domains';
 import { getSeriesSpecsSelector, getAxisSpecsSelector } from './get_specs';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
-import { getSeriesColorMapSelector } from './get_series_color_map';
+import { getSeriesColorsSelector } from './get_series_color_map';
 import { computeLegend, LegendItem } from '../../legend/legend';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
@@ -14,7 +14,7 @@ export const computeLegendSelector = createCachedSelector(
     getSeriesSpecsSelector,
     computeSeriesDomainsSelector,
     getChartThemeSelector,
-    getSeriesColorMapSelector,
+    getSeriesColorsSelector,
     getAxisSpecsSelector,
     getDeselectedSeriesSelector,
   ],
@@ -22,13 +22,13 @@ export const computeLegendSelector = createCachedSelector(
     seriesSpecs,
     seriesDomainsAndData,
     chartTheme,
-    seriesColorMap,
+    seriesColors,
     axesSpecs,
     deselectedDataSeries,
   ): Map<string, LegendItem> => {
     return computeLegend(
-      seriesDomainsAndData.seriesColors,
-      seriesColorMap,
+      seriesDomainsAndData.seriesCollection,
+      seriesColors,
       seriesSpecs,
       chartTheme.colors.defaultVizColor,
       axesSpecs,

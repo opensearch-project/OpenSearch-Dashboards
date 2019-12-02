@@ -143,9 +143,7 @@ export function formatStackedDataSeriesValues(
     }
     newData.sort(datumXSortPredicate(xScaleType));
     return {
-      specId: ds.specId,
-      key: ds.key,
-      seriesColorKey: ds.seriesColorKey,
+      ...ds,
       data: newData,
     };
   });

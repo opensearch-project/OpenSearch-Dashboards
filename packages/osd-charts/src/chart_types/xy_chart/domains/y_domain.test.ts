@@ -17,14 +17,18 @@ describe('Y Domain', () => {
     const dataSeries: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
@@ -58,22 +62,28 @@ describe('Y Domain', () => {
     const dataSeries1: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
     const dataSeries2: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 10 }, { x: 2, y1: 10 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
     ];
@@ -123,22 +133,28 @@ describe('Y Domain', () => {
     const dataSeries1: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
     const dataSeries2: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 10 }, { x: 2, y1: 10 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
     ];
@@ -181,22 +197,28 @@ describe('Y Domain', () => {
     const dataSeries1: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
     const dataSeries2: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 10 }, { x: 2, y1: 10 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
     ];
@@ -239,22 +261,28 @@ describe('Y Domain', () => {
     const dataSeries1: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: new Array(maxValues).fill(0).map((d, i) => ({ x: i, y1: i })),
       },
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: new Array(maxValues).fill(0).map((d, i) => ({ x: i, y1: i })),
       },
     ];
     const dataSeries2: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: new Array(maxValues).fill(0).map((d, i) => ({ x: i, y1: i })),
       },
     ];
@@ -460,14 +488,18 @@ describe('Y Domain', () => {
     const dataSeries: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
@@ -494,14 +526,18 @@ describe('Y Domain', () => {
     const dataSeries: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
@@ -540,14 +576,18 @@ describe('Y Domain', () => {
     const dataSeries: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
@@ -586,14 +626,18 @@ describe('Y Domain', () => {
     const dataSeries: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
@@ -628,14 +672,18 @@ describe('Y Domain', () => {
     const dataSeries: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
@@ -674,14 +722,18 @@ describe('Y Domain', () => {
     const dataSeries: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
@@ -714,22 +766,28 @@ describe('Y Domain', () => {
     const dataSeries1: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];
     const dataSeries2: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 10 }, { x: 2, y1: 10 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
     ];
@@ -774,14 +832,18 @@ describe('Y Domain', () => {
     const dataSeries: RawDataSeries[] = [
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
       },
       {
         specId: 'a',
-        key: [''],
-        seriesColorKey: '',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: [''],
+        key: '',
         data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
       },
     ];

@@ -45,27 +45,25 @@ describe('Rendering points - areas', () => {
     beforeEach(() => {
       renderedArea = renderArea(
         25, // adding a ideal 25px shift, generally applied by renderGeometries
-        [],
+        { ...pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0], data: [] },
         xScale,
         yScales.get(GROUP_ID)!,
         'red',
         CurveType.LINEAR,
-        SPEC_ID,
         false,
-        [],
         0,
         LIGHT_THEME.areaSeriesStyle,
       );
     });
     test('Render geometry but empty upper and lower lines and area paths', () => {
       const {
-        areaGeometry: { lines, area, color, geometryId, transform },
+        areaGeometry: { lines, area, color, seriesIdentifier, transform },
       } = renderedArea;
       expect(lines.length).toBe(0);
       expect(area).toBe('');
       expect(color).toBe('red');
-      expect(geometryId.seriesKey).toEqual([]);
-      expect(geometryId.specId).toEqual(SPEC_ID);
+      expect(seriesIdentifier.seriesKeys).toEqual([1]);
+      expect(seriesIdentifier.specId).toEqual(SPEC_ID);
       expect(transform).toEqual({ x: 25, y: 0 });
     });
   });
@@ -99,27 +97,25 @@ describe('Rendering points - areas', () => {
     beforeEach(() => {
       renderedArea = renderArea(
         25, // adding a ideal 25px shift, generally applied by renderGeometries
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0].data,
+        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
         xScale,
         yScales.get(GROUP_ID)!,
         'red',
         CurveType.LINEAR,
-        SPEC_ID,
         false,
-        [],
         0,
         LIGHT_THEME.areaSeriesStyle,
       );
     });
     test('Can render an line and area paths', () => {
       const {
-        areaGeometry: { lines, area, color, geometryId, transform },
+        areaGeometry: { lines, area, color, seriesIdentifier, transform },
       } = renderedArea;
       expect(lines[0]).toBe('M0,0L50,50');
       expect(area).toBe('M0,0L50,50L50,100L0,100Z');
       expect(color).toBe('red');
-      expect(geometryId.seriesKey).toEqual([]);
-      expect(geometryId.specId).toEqual(SPEC_ID);
+      expect(seriesIdentifier.seriesKeys).toEqual([1]);
+      expect(seriesIdentifier.specId).toEqual(SPEC_ID);
       expect(transform).toEqual({ x: 25, y: 0 });
     });
 
@@ -129,35 +125,42 @@ describe('Rendering points - areas', () => {
         indexedGeometries,
       } = renderedArea;
 
-      expect(points[0]).toEqual({
+      expect(points[0]).toEqual(({
         x: 0,
         y: 0,
         radius: 10,
         color: 'red',
-        geometryId: {
+        seriesIdentifier: {
           specId: SPEC_ID,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 0,
           y: 10,
         },
-
         transform: {
           x: 25,
           y: 0,
         },
-      } as PointGeometry);
-      expect(points[1]).toEqual({
+      } as unknown) as PointGeometry);
+      expect(points[1]).toEqual(({
         x: 50,
         y: 50,
         radius: 10,
         color: 'red',
-        geometryId: {
+        seriesIdentifier: {
           specId: SPEC_ID,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 1,
@@ -167,13 +170,13 @@ describe('Rendering points - areas', () => {
           x: 25,
           y: 0,
         },
-      } as PointGeometry);
+      } as unknown) as PointGeometry);
       expect(indexedGeometries.size).toEqual(points.length);
     });
   });
   describe('Multi series area chart - ordinal', () => {
-    const spec1Id = 'point1';
-    const spec2Id = 'point2';
+    const spec1Id = 'spec_1';
+    const spec2Id = 'spec_2';
     const pointSeriesSpec1: AreaSeriesSpec = {
       chartType: ChartTypes.XYAxis,
       specType: SpecTypes.Series,
@@ -221,27 +224,23 @@ describe('Rendering points - areas', () => {
     beforeEach(() => {
       firstLine = renderArea(
         25, // adding a ideal 25px shift, generally applied by renderGeometries
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0].data,
+        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
         xScale,
         yScales.get(GROUP_ID)!,
         'red',
         CurveType.LINEAR,
-        spec1Id,
         false,
-        [],
         0,
         LIGHT_THEME.areaSeriesStyle,
       );
       secondLine = renderArea(
         25, // adding a ideal 25px shift, generally applied by renderGeometries
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[1].data,
+        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[1],
         xScale,
         yScales.get(GROUP_ID)!,
         'blue',
         CurveType.LINEAR,
-        spec2Id,
         false,
-        [],
         0,
         LIGHT_THEME.areaSeriesStyle,
       );
@@ -251,15 +250,15 @@ describe('Rendering points - areas', () => {
       expect(firstLine.areaGeometry.lines[0]).toBe('M0,50L50,75');
       expect(firstLine.areaGeometry.area).toBe('M0,50L50,75L50,100L0,100Z');
       expect(firstLine.areaGeometry.color).toBe('red');
-      expect(firstLine.areaGeometry.geometryId.seriesKey).toEqual([]);
-      expect(firstLine.areaGeometry.geometryId.specId).toEqual(spec1Id);
+      expect(firstLine.areaGeometry.seriesIdentifier.seriesKeys).toEqual([1]);
+      expect(firstLine.areaGeometry.seriesIdentifier.specId).toEqual(spec1Id);
       expect(firstLine.areaGeometry.transform).toEqual({ x: 25, y: 0 });
 
       expect(secondLine.areaGeometry.lines[0]).toBe('M0,0L50,50');
       expect(secondLine.areaGeometry.area).toBe('M0,0L50,50L50,100L0,100Z');
       expect(secondLine.areaGeometry.color).toBe('blue');
-      expect(secondLine.areaGeometry.geometryId.seriesKey).toEqual([]);
-      expect(secondLine.areaGeometry.geometryId.specId).toEqual(spec2Id);
+      expect(secondLine.areaGeometry.seriesIdentifier.seriesKeys).toEqual([1]);
+      expect(secondLine.areaGeometry.seriesIdentifier.specId).toEqual(spec2Id);
       expect(secondLine.areaGeometry.transform).toEqual({ x: 25, y: 0 });
     });
     test('can render first spec points', () => {
@@ -268,15 +267,19 @@ describe('Rendering points - areas', () => {
         indexedGeometries,
       } = firstLine;
       expect(points.length).toEqual(2);
-      expect(points[0]).toEqual({
+      expect(points[0]).toEqual(({
         x: 0,
         y: 50,
         radius: 10,
         color: 'red',
-        geometryId: {
+        seriesIdentifier: {
           specId: spec1Id,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 0,
@@ -286,16 +289,20 @@ describe('Rendering points - areas', () => {
           x: 25,
           y: 0,
         },
-      } as PointGeometry);
-      expect(points[1]).toEqual({
+      } as unknown) as PointGeometry);
+      expect(points[1]).toEqual(({
         x: 50,
         y: 75,
         radius: 10,
         color: 'red',
-        geometryId: {
+        seriesIdentifier: {
           specId: spec1Id,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 1,
@@ -305,7 +312,7 @@ describe('Rendering points - areas', () => {
           x: 25,
           y: 0,
         },
-      } as PointGeometry);
+      } as unknown) as PointGeometry);
       expect(indexedGeometries.size).toEqual(points.length);
     });
     test('can render second spec points', () => {
@@ -314,15 +321,19 @@ describe('Rendering points - areas', () => {
         indexedGeometries,
       } = secondLine;
       expect(points.length).toEqual(2);
-      expect(points[0]).toEqual({
+      expect(points[0]).toEqual(({
         x: 0,
         y: 0,
         radius: 10,
         color: 'blue',
-        geometryId: {
+        seriesIdentifier: {
           specId: spec2Id,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_2}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 0,
@@ -332,16 +343,20 @@ describe('Rendering points - areas', () => {
           x: 25,
           y: 0,
         },
-      } as PointGeometry);
-      expect(points[1]).toEqual({
+      } as unknown) as PointGeometry);
+      expect(points[1]).toEqual(({
         x: 50,
         y: 50,
         radius: 10,
         color: 'blue',
-        geometryId: {
+        seriesIdentifier: {
           specId: spec2Id,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_2}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 1,
@@ -351,7 +366,7 @@ describe('Rendering points - areas', () => {
           x: 25,
           y: 0,
         },
-      } as PointGeometry);
+      } as unknown) as PointGeometry);
       expect(indexedGeometries.size).toEqual(points.length);
     });
   });
@@ -386,14 +401,12 @@ describe('Rendering points - areas', () => {
     beforeEach(() => {
       renderedArea = renderArea(
         0, // not applied any shift, renderGeometries applies it only with mixed charts
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0].data,
+        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
         xScale,
         yScales.get(GROUP_ID)!,
         'red',
         CurveType.LINEAR,
-        SPEC_ID,
         false,
-        [],
         0,
         LIGHT_THEME.areaSeriesStyle,
       );
@@ -402,8 +415,8 @@ describe('Rendering points - areas', () => {
       expect(renderedArea.areaGeometry.lines[0]).toBe('M0,0L100,50');
       expect(renderedArea.areaGeometry.area).toBe('M0,0L100,50L100,100L0,100Z');
       expect(renderedArea.areaGeometry.color).toBe('red');
-      expect(renderedArea.areaGeometry.geometryId.seriesKey).toEqual([]);
-      expect(renderedArea.areaGeometry.geometryId.specId).toEqual(SPEC_ID);
+      expect(renderedArea.areaGeometry.seriesIdentifier.seriesKeys).toEqual([1]);
+      expect(renderedArea.areaGeometry.seriesIdentifier.specId).toEqual(SPEC_ID);
       expect(renderedArea.areaGeometry.transform).toEqual({ x: 0, y: 0 });
     });
     test('Can render two points', () => {
@@ -411,15 +424,19 @@ describe('Rendering points - areas', () => {
         areaGeometry: { points },
         indexedGeometries,
       } = renderedArea;
-      expect(points[0]).toEqual({
+      expect(points[0]).toEqual(({
         x: 0,
         y: 0,
         radius: 10,
         color: 'red',
-        geometryId: {
+        seriesIdentifier: {
           specId: SPEC_ID,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 0,
@@ -429,16 +446,20 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 0,
         },
-      } as PointGeometry);
-      expect(points[1]).toEqual({
+      } as unknown) as PointGeometry);
+      expect(points[1]).toEqual(({
         x: 100,
         y: 50,
         radius: 10,
         color: 'red',
-        geometryId: {
+        seriesIdentifier: {
           specId: SPEC_ID,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 1,
@@ -448,13 +469,13 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 0,
         },
-      } as PointGeometry);
+      } as unknown) as PointGeometry);
       expect(indexedGeometries.size).toEqual(points.length);
     });
   });
   describe('Multi series area chart - linear', () => {
-    const spec1Id = 'point1';
-    const spec2Id = 'point2';
+    const spec1Id = 'spec_1';
+    const spec2Id = 'spec_2';
     const pointSeriesSpec1: AreaSeriesSpec = {
       chartType: ChartTypes.XYAxis,
       specType: SpecTypes.Series,
@@ -502,27 +523,23 @@ describe('Rendering points - areas', () => {
     beforeEach(() => {
       firstLine = renderArea(
         0, // not applied any shift, renderGeometries applies it only with mixed charts
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0].data,
+        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
         xScale,
         yScales.get(GROUP_ID)!,
         'red',
         CurveType.LINEAR,
-        spec1Id,
         false,
-        [],
         0,
         LIGHT_THEME.areaSeriesStyle,
       );
       secondLine = renderArea(
         0, // not applied any shift, renderGeometries applies it only with mixed charts
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[1].data,
+        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[1],
         xScale,
         yScales.get(GROUP_ID)!,
         'blue',
         CurveType.LINEAR,
-        spec2Id,
         false,
-        [],
         0,
         LIGHT_THEME.areaSeriesStyle,
       );
@@ -531,15 +548,15 @@ describe('Rendering points - areas', () => {
       expect(firstLine.areaGeometry.lines[0]).toBe('M0,50L100,75');
       expect(firstLine.areaGeometry.area).toBe('M0,50L100,75L100,100L0,100Z');
       expect(firstLine.areaGeometry.color).toBe('red');
-      expect(firstLine.areaGeometry.geometryId.seriesKey).toEqual([]);
-      expect(firstLine.areaGeometry.geometryId.specId).toEqual(spec1Id);
+      expect(firstLine.areaGeometry.seriesIdentifier.seriesKeys).toEqual([1]);
+      expect(firstLine.areaGeometry.seriesIdentifier.specId).toEqual(spec1Id);
       expect(firstLine.areaGeometry.transform).toEqual({ x: 0, y: 0 });
 
       expect(secondLine.areaGeometry.lines[0]).toBe('M0,0L100,50');
       expect(secondLine.areaGeometry.area).toBe('M0,0L100,50L100,100L0,100Z');
       expect(secondLine.areaGeometry.color).toBe('blue');
-      expect(secondLine.areaGeometry.geometryId.seriesKey).toEqual([]);
-      expect(secondLine.areaGeometry.geometryId.specId).toEqual(spec2Id);
+      expect(secondLine.areaGeometry.seriesIdentifier.seriesKeys).toEqual([1]);
+      expect(secondLine.areaGeometry.seriesIdentifier.specId).toEqual(spec2Id);
       expect(secondLine.areaGeometry.transform).toEqual({ x: 0, y: 0 });
     });
     test('can render first spec points', () => {
@@ -548,15 +565,19 @@ describe('Rendering points - areas', () => {
         indexedGeometries,
       } = firstLine;
       expect(points.length).toEqual(2);
-      expect(points[0]).toEqual({
+      expect(points[0]).toEqual(({
         x: 0,
         y: 50,
         radius: 10,
         color: 'red',
-        geometryId: {
+        seriesIdentifier: {
           specId: spec1Id,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 0,
@@ -566,16 +587,20 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 0,
         },
-      } as PointGeometry);
-      expect(points[1]).toEqual({
+      } as unknown) as PointGeometry);
+      expect(points[1]).toEqual(({
         x: 100,
         y: 75,
         radius: 10,
         color: 'red',
-        geometryId: {
+        seriesIdentifier: {
           specId: spec1Id,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 1,
@@ -585,7 +610,7 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 0,
         },
-      } as PointGeometry);
+      } as unknown) as PointGeometry);
       expect(indexedGeometries.size).toEqual(points.length);
     });
     test('can render second spec points', () => {
@@ -594,15 +619,19 @@ describe('Rendering points - areas', () => {
         indexedGeometries,
       } = secondLine;
       expect(points.length).toEqual(2);
-      expect(points[0]).toEqual({
+      expect(points[0]).toEqual(({
         x: 0,
         y: 0,
         radius: 10,
         color: 'blue',
-        geometryId: {
+        seriesIdentifier: {
           specId: spec2Id,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_2}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 0,
@@ -612,16 +641,20 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 0,
         },
-      } as PointGeometry);
-      expect(points[1]).toEqual({
+      } as unknown) as PointGeometry);
+      expect(points[1]).toEqual(({
         x: 100,
         y: 50,
         radius: 10,
         color: 'blue',
-        geometryId: {
+        seriesIdentifier: {
           specId: spec2Id,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_2}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 1,
@@ -631,7 +664,7 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 0,
         },
-      } as PointGeometry);
+      } as unknown) as PointGeometry);
       expect(indexedGeometries.size).toEqual(points.length);
     });
   });
@@ -666,14 +699,12 @@ describe('Rendering points - areas', () => {
     beforeEach(() => {
       renderedArea = renderArea(
         0, // not applied any shift, renderGeometries applies it only with mixed charts
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0].data,
+        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
         xScale,
         yScales.get(GROUP_ID)!,
         'red',
         CurveType.LINEAR,
-        SPEC_ID,
         false,
-        [],
         0,
         LIGHT_THEME.areaSeriesStyle,
       );
@@ -682,8 +713,8 @@ describe('Rendering points - areas', () => {
       expect(renderedArea.areaGeometry.lines[0]).toBe('M0,0L100,50');
       expect(renderedArea.areaGeometry.area).toBe('M0,0L100,50L100,100L0,100Z');
       expect(renderedArea.areaGeometry.color).toBe('red');
-      expect(renderedArea.areaGeometry.geometryId.seriesKey).toEqual([]);
-      expect(renderedArea.areaGeometry.geometryId.specId).toEqual(SPEC_ID);
+      expect(renderedArea.areaGeometry.seriesIdentifier.seriesKeys).toEqual([1]);
+      expect(renderedArea.areaGeometry.seriesIdentifier.specId).toEqual(SPEC_ID);
       expect(renderedArea.areaGeometry.transform).toEqual({ x: 0, y: 0 });
     });
     test('Can render two points', () => {
@@ -691,15 +722,19 @@ describe('Rendering points - areas', () => {
         areaGeometry: { points },
         indexedGeometries,
       } = renderedArea;
-      expect(points[0]).toEqual({
+      expect(points[0]).toEqual(({
         x: 0,
         y: 0,
         radius: 10,
         color: 'red',
-        geometryId: {
+        seriesIdentifier: {
           specId: SPEC_ID,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 1546300800000,
@@ -709,16 +744,20 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 0,
         },
-      } as PointGeometry);
-      expect(points[1]).toEqual({
+      } as unknown) as PointGeometry);
+      expect(points[1]).toEqual(({
         x: 100,
         y: 50,
         radius: 10,
         color: 'red',
-        geometryId: {
+        seriesIdentifier: {
           specId: SPEC_ID,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 1546387200000,
@@ -728,13 +767,13 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 0,
         },
-      } as PointGeometry);
+      } as unknown) as PointGeometry);
       expect(indexedGeometries.size).toEqual(points.length);
     });
   });
   describe('Multi series area chart - time', () => {
-    const spec1Id = 'point1';
-    const spec2Id = 'point2';
+    const spec1Id = 'spec_1';
+    const spec2Id = 'spec_2';
     const pointSeriesSpec1: AreaSeriesSpec = {
       chartType: ChartTypes.XYAxis,
       specType: SpecTypes.Series,
@@ -782,27 +821,23 @@ describe('Rendering points - areas', () => {
     beforeEach(() => {
       firstLine = renderArea(
         0, // not applied any shift, renderGeometries applies it only with mixed charts
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0].data,
+        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
         xScale,
         yScales.get(GROUP_ID)!,
         'red',
         CurveType.LINEAR,
-        spec1Id,
         false,
-        [],
         0,
         LIGHT_THEME.areaSeriesStyle,
       );
       secondLine = renderArea(
         0, // not applied any shift, renderGeometries applies it only with mixed charts
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[1].data,
+        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[1],
         xScale,
         yScales.get(GROUP_ID)!,
         'blue',
         CurveType.LINEAR,
-        spec2Id,
         false,
-        [],
         0,
         LIGHT_THEME.areaSeriesStyle,
       );
@@ -813,15 +848,19 @@ describe('Rendering points - areas', () => {
         indexedGeometries,
       } = firstLine;
       expect(points.length).toEqual(2);
-      expect(points[0]).toEqual({
+      expect(points[0]).toEqual(({
         x: 0,
         y: 50,
         radius: 10,
         color: 'red',
-        geometryId: {
+        seriesIdentifier: {
           specId: spec1Id,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 1546300800000,
@@ -831,16 +870,20 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 0,
         },
-      } as PointGeometry);
-      expect(points[1]).toEqual({
+      } as unknown) as PointGeometry);
+      expect(points[1]).toEqual(({
         x: 100,
         y: 75,
         radius: 10,
         color: 'red',
-        geometryId: {
+        seriesIdentifier: {
           specId: spec1Id,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 1546387200000,
@@ -850,7 +893,7 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 0,
         },
-      } as PointGeometry);
+      } as unknown) as PointGeometry);
       expect(indexedGeometries.size).toEqual(points.length);
     });
     test('can render second spec points', () => {
@@ -859,15 +902,19 @@ describe('Rendering points - areas', () => {
         indexedGeometries,
       } = secondLine;
       expect(points.length).toEqual(2);
-      expect(points[0]).toEqual({
+      expect(points[0]).toEqual(({
         x: 0,
         y: 0,
         radius: 10,
         color: 'blue',
-        geometryId: {
+        seriesIdentifier: {
           specId: spec2Id,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_2}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 1546300800000,
@@ -877,16 +924,20 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 0,
         },
-      } as PointGeometry);
-      expect(points[1]).toEqual({
+      } as unknown) as PointGeometry);
+      expect(points[1]).toEqual(({
         x: 100,
         y: 50,
         radius: 10,
         color: 'blue',
-        geometryId: {
+        seriesIdentifier: {
           specId: spec2Id,
-          seriesKey: [],
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+          key: 'spec{spec_2}yAccessor{1}splitAccessors{}',
         },
+        styleOverrides: undefined,
         value: {
           accessor: 'y1',
           x: 1546387200000,
@@ -896,7 +947,7 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 0,
         },
-      } as PointGeometry);
+      } as unknown) as PointGeometry);
       expect(indexedGeometries.size).toEqual(points.length);
     });
   });
@@ -931,14 +982,12 @@ describe('Rendering points - areas', () => {
     beforeEach(() => {
       renderedArea = renderArea(
         0, // not applied any shift, renderGeometries applies it only with mixed charts
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0].data,
+        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
         xScale,
         yScales.get(GROUP_ID)!,
         'red',
         CurveType.LINEAR,
-        SPEC_ID,
         false,
-        [],
         0,
         LIGHT_THEME.areaSeriesStyle,
       );
@@ -948,8 +997,8 @@ describe('Rendering points - areas', () => {
       expect(renderedArea.areaGeometry.lines[0].split('M').length - 1).toBe(3);
       expect(renderedArea.areaGeometry.area.split('M').length - 1).toBe(3);
       expect(renderedArea.areaGeometry.color).toBe('red');
-      expect(renderedArea.areaGeometry.geometryId.seriesKey).toEqual([]);
-      expect(renderedArea.areaGeometry.geometryId.specId).toEqual(SPEC_ID);
+      expect(renderedArea.areaGeometry.seriesIdentifier.seriesKeys).toEqual([1]);
+      expect(renderedArea.areaGeometry.seriesIdentifier.specId).toEqual(SPEC_ID);
       expect(renderedArea.areaGeometry.transform).toEqual({ x: 0, y: 0 });
     });
     test('Can render points points', () => {

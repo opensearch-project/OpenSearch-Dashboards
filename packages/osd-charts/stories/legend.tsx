@@ -20,6 +20,9 @@ import { TSVB_DATASET } from '../src/utils/data_samples/test_dataset_tsvb';
 
 storiesOf('Legend', module)
   .add('right', () => {
+    const yAccessors = ['y1', 'y2'];
+    const splitSeriesAccessors = ['g1', 'g2'];
+
     return (
       <Chart className={'story-chart'}>
         <Settings showLegend={true} legendPosition={Position.Right} />
@@ -36,8 +39,8 @@ storiesOf('Legend', module)
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
-          yAccessors={['y1', 'y2']}
-          splitSeriesAccessors={['g1', 'g2']}
+          yAccessors={yAccessors}
+          splitSeriesAccessors={splitSeriesAccessors}
           data={TestDatasets.BARCHART_2Y2G}
           hideInLegend={false}
         />

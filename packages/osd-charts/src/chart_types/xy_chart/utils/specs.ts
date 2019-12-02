@@ -13,9 +13,8 @@ import { RecursivePartial } from '../../../utils/commons';
 import { AxisId, GroupId } from '../../../utils/ids';
 import { ScaleContinuousType, ScaleType } from '../../../utils/scales/scales';
 import { CurveType } from '../../../utils/curves';
-import { RawDataSeriesDatum, DataSeriesColorsValues } from './series';
+import { RawDataSeriesDatum, SeriesIdentifier } from './series';
 import { AnnotationTooltipFormatter } from '../annotations/annotation_utils';
-import { GeometryId } from '../../../utils/geometry';
 import { Spec } from '../../..';
 import { ChartTypes } from '../..';
 
@@ -51,7 +50,7 @@ export type SpecTypes = $Values<typeof SpecTypes>;
  * - `RecursivePartial<BarSeriesStyle>`: Style values to be merged with base bar styles
  * - `null`: Keep existing bar style
  */
-export type BarStyleAccessor = (datum: RawDataSeriesDatum, geometryId: GeometryId) => BarStyleOverride;
+export type BarStyleAccessor = (datum: RawDataSeriesDatum, seriesIdentifier: SeriesIdentifier) => BarStyleOverride;
 /**
  * Override for bar styles per datum
  *
@@ -60,8 +59,16 @@ export type BarStyleAccessor = (datum: RawDataSeriesDatum, geometryId: GeometryI
  * - `RecursivePartial<PointStyle>`: Style values to be merged with base point styles
  * - `null`: Keep existing point style
  */
-export type PointStyleAccessor = (datum: RawDataSeriesDatum, geometryId: GeometryId) => PointStyleOverride;
+export type PointStyleAccessor = (datum: RawDataSeriesDatum, seriesIdentifier: SeriesIdentifier) => PointStyleOverride;
 export const DEFAULT_GLOBAL_ID = '__global__';
+
+export type FilterPredicate = (series: SeriesIdentifier) => boolean;
+export type SeriesStringPredicate = (series: SeriesIdentifier, isTooltip: boolean) => string | null;
+export type SubSeriesStringPredicate = (
+  accessorLabel: string | number,
+  accessorKey: string | number | null,
+  isTooltip: boolean,
+) => string | number | null;
 
 interface DomainMinInterval {
   /** Custom minInterval for the domain which will affect data bucket size.
@@ -204,8 +211,8 @@ export interface SeriesSpec extends Spec {
   data: Datum[];
   /** The type of series you are looking to render */
   seriesType: SeriesTypes;
-  /** Custom colors for series */
-  customSeriesColors?: CustomSeriesColorsMap;
+  /** Set colors for specific series */
+  customSeriesColors?: CustomSeriesColors;
   /** If the series should appear in the legend
    * @default false
    */
@@ -225,6 +232,25 @@ export interface SeriesSpec extends Spec {
    * @default ' - lower'
    */
   y1AccessorFormat?: AccessorFormat;
+  /**
+   * Hide series in tooltip
+   */
+  filterSeriesInTooltip?: FilterPredicate;
+  /**
+   * Custom series naming predicate function. Values are unaffected by `customSubSeriesLabel` changes.
+   *
+   * This takes precedence over `customSubSeriesLabel`
+   *
+   * @param series - `SeriesIdentifier`
+   * @param isTooltip - true if tooltip label, otherwise legend label
+   */
+  customSeriesLabel?: SeriesStringPredicate;
+  /**
+   * Custom sub series naming predicate function.
+   *
+   * `customSeriesLabel` takes precedence
+   */
+  customSubSeriesLabel?: SubSeriesStringPredicate;
 }
 
 export interface Postfixes {
@@ -242,7 +268,9 @@ export interface Postfixes {
   y1AccessorFormat?: string;
 }
 
-export type CustomSeriesColorsMap = Map<DataSeriesColorsValues, string>;
+export type SeriesColorsArray = string[];
+export type SeriesColorAccessorFn = (seriesIdentifier: SeriesIdentifier) => string | null;
+export type CustomSeriesColors = SeriesColorsArray | SeriesColorAccessorFn;
 
 export interface SeriesAccessors {
   /** The field name of the x value on Datum object */

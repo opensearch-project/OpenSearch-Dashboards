@@ -15,7 +15,6 @@ import { LIGHT_THEME } from '../../utils/themes/light_theme';
 import { LegendListItem } from './legend_item';
 import { Theme } from '../../utils/themes/theme';
 import { TooltipLegendValue } from '../../chart_types/xy_chart/tooltip/tooltip';
-import { AccessorType } from '../../utils/geometry';
 import { LegendItem, getItemLabel } from '../../chart_types/xy_chart/legend/legend';
 import { BBox } from '../../utils/bbox/bbox_calculator';
 import {
@@ -24,6 +23,7 @@ import {
   onLegendItemOverAction,
 } from '../../state/actions/legend';
 import { SettingsSpec } from '../../specs';
+import { BandedAccessorType } from '../../utils/geometry';
 
 interface LegendStateProps {
   legendItems: Map<string, LegendItem>;
@@ -142,7 +142,7 @@ class LegendComponent extends React.Component<LegendProps> {
     const { showLegendDisplayValue, legendPosition } = settings;
     const legendValues = this.getLegendValues(legendItemTooltipValues, key, banded);
     return legendValues.map((value, index) => {
-      const yAccessor: AccessorType = index === 0 ? AccessorType.Y1 : AccessorType.Y0;
+      const yAccessor: BandedAccessorType = index === 0 ? BandedAccessorType.Y1 : BandedAccessorType.Y0;
       return (
         <LegendListItem
           {...item}

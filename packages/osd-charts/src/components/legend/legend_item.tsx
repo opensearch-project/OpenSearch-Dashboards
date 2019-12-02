@@ -2,11 +2,10 @@ import classNames from 'classnames';
 import React from 'react';
 import { Icon } from '../icons/icon';
 import { LegendItemListener, BasicListener } from '../../specs/settings';
-import { isEqualSeriesKey } from '../../chart_types/xy_chart/utils/series_utils';
-import { DataSeriesColorsValues } from '../../chart_types/xy_chart/utils/series';
 import { LegendItem } from '../../chart_types/xy_chart/legend/legend';
 import { onLegendItemOutAction, onLegendItemOverAction } from '../../state/actions/legend';
 import { Position } from '../../chart_types/xy_chart/utils/specs';
+import { SeriesIdentifier } from '../../chart_types/xy_chart/utils/series';
 
 interface LegendItemProps {
   selectedLegendItem?: LegendItem | null;
@@ -20,7 +19,7 @@ interface LegendItemProps {
   onLegendItemOverListener?: LegendItemListener;
   legendItemOutAction: typeof onLegendItemOutAction;
   legendItemOverAction: typeof onLegendItemOverAction;
-  toggleDeselectSeriesAction: (legendItemId: DataSeriesColorsValues) => void;
+  toggleDeselectSeriesAction: (legendItemId: SeriesIdentifier) => void;
 }
 
 interface LegendItemState {
@@ -98,15 +97,12 @@ export class LegendListItem extends React.PureComponent<LegendItemProps, LegendI
 
   render() {
     const { displayValue, legendItem, legendPosition, label } = this.props;
-    const { color, isSeriesVisible, value, isLegendItemVisible } = legendItem;
-    const onTitleClick = this.onVisibilityClick(legendItem.value);
+    const { color, isSeriesVisible, seriesIdentifier, isLegendItemVisible } = legendItem;
+    const onTitleClick = this.onVisibilityClick(seriesIdentifier);
 
     const { showLegendDisplayValue, selectedLegendItem, onLegendItemClickListener } = this.props;
     const isSelected =
-      selectedLegendItem == null
-        ? false
-        : isEqualSeriesKey(value.colorValues, selectedLegendItem.value.colorValues) &&
-          value.specId === selectedLegendItem.value.specId;
+      selectedLegendItem == null ? false : selectedLegendItem.seriesIdentifier.key === seriesIdentifier.key;
     const hasTitleClickListener = Boolean(onLegendItemClickListener);
     const itemClasses = classNames('echLegendItem', `echLegendItem--${legendPosition}`, {
       'echLegendItem-isHidden': !isSeriesVisible,
@@ -126,7 +122,7 @@ export class LegendListItem extends React.PureComponent<LegendItemProps, LegendI
     const { onLegendItemOverListener, legendItemOverAction, legendItem } = this.props;
     // call the settings listener directly if available
     if (onLegendItemOverListener) {
-      onLegendItemOverListener(legendItem.value);
+      onLegendItemOverListener(legendItem.seriesIdentifier);
     }
     legendItemOverAction(legendItem.key);
   };
@@ -141,7 +137,7 @@ export class LegendListItem extends React.PureComponent<LegendItemProps, LegendI
   };
 
   // TODO handle shift key
-  onVisibilityClick = (legendItemId: DataSeriesColorsValues) => () => {
+  onVisibilityClick = (legendItemId: SeriesIdentifier) => () => {
     const { onLegendItemClickListener, toggleDeselectSeriesAction } = this.props;
     if (onLegendItemClickListener) {
       onLegendItemClickListener(legendItemId);
