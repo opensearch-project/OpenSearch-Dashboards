@@ -1,3 +1,10 @@
+## [15.0.2](https://github.com/elastic/elastic-charts/compare/v15.0.1...v15.0.2) (2019-12-05)
+
+
+### Bug Fixes
+
+* **crosshair:** hide horizontal line when the pointer is outside chart ([#484](https://github.com/elastic/elastic-charts/issues/484)) ([654d929](https://github.com/elastic/elastic-charts/commit/654d9296215d183e7433edab65a99122143b56e7)), closes [#483](https://github.com/elastic/elastic-charts/issues/483)
+
 ## [15.0.1](https://github.com/elastic/elastic-charts/compare/v15.0.0...v15.0.1) (2019-12-02)
 
 
