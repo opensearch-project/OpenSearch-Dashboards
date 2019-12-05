@@ -1,3 +1,10 @@
+## [15.0.3](https://github.com/elastic/elastic-charts/compare/v15.0.2...v15.0.3) (2019-12-05)
+
+
+### Bug Fixes
+
+* **highlighter:** hide it when tooltip type is None ([#482](https://github.com/elastic/elastic-charts/issues/482)) ([6032c29](https://github.com/elastic/elastic-charts/commit/6032c29194d0e507fe4a9d36bf63b4b78692d271)), closes [#478](https://github.com/elastic/elastic-charts/issues/478) [#479](https://github.com/elastic/elastic-charts/issues/479)
+
 ## [15.0.2](https://github.com/elastic/elastic-charts/compare/v15.0.1...v15.0.2) (2019-12-05)
 
 
