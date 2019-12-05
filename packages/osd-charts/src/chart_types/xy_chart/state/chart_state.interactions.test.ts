@@ -212,10 +212,8 @@ describe('Chart state pointer interactions', () => {
     store.dispatch(specParsed());
     store.dispatch(onPointerMove({ x: 10, y: 10 + 70 }, 0));
     const tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
-    expect(tooltipData.tooltipValues.length).toBe(2);
-    expect(tooltipData.tooltipValues[0].isXValue).toBe(true);
-    expect(tooltipData.tooltipValues[1].isXValue).toBe(false);
-    expect(tooltipData.tooltipValues[1].isHighlighted).toBe(true);
+    // no tooltip values exist if we have a TooltipType === None
+    expect(tooltipData.tooltipValues.length).toBe(0);
     let isTooltipVisible = isTooltipVisibleSelector(store.getState());
     expect(isTooltipVisible).toBe(false);
 

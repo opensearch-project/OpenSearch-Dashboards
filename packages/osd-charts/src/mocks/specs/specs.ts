@@ -10,10 +10,14 @@ import {
   BasicSeriesSpec,
   SpecTypes,
   SeriesTypes,
+  Position,
 } from '../../chart_types/xy_chart/utils/specs';
 import { getSpecId, getGroupId } from '../../utils/ids';
 import { ScaleType } from '../../utils/scales/scales';
 import { ChartTypes } from '../../chart_types';
+import { SettingsSpec } from '../../specs';
+import { TooltipType } from '../../chart_types/xy_chart/utils/interactions';
+import { LIGHT_THEME } from '../../utils/themes/light_theme';
 
 export class MockSeriesSpec {
   private static readonly barBase: BarSeriesSpec = {
@@ -104,13 +108,10 @@ export class MockSeriesSpec {
     switch (type) {
       case 'line':
         return MockSeriesSpec.lineBase;
-        break;
       case 'bar':
         return MockSeriesSpec.barBase;
-        break;
       case 'area':
         return MockSeriesSpec.areaBase;
-        break;
       default:
         return MockSeriesSpec.barBase;
     }
@@ -131,5 +132,31 @@ export class MockSeriesSpecs {
 
   static empty(): SeriesSpecs {
     return [];
+  }
+}
+
+export class MockGlobalSpec {
+  private static readonly settingsBase: SettingsSpec = {
+    id: '__global__settings___',
+    chartType: ChartTypes.Global,
+    specType: SpecTypes.Settings,
+    rendering: 'canvas' as 'canvas',
+    rotation: 0 as 0,
+    animateData: true,
+    showLegend: false,
+    resizeDebounce: 10,
+    debug: false,
+    tooltip: {
+      type: TooltipType.VerticalCursor,
+      snap: true,
+    },
+    legendPosition: Position.Right,
+    showLegendDisplayValue: true,
+    hideDuplicateAxes: false,
+    theme: LIGHT_THEME,
+  };
+
+  static settings(partial?: Partial<SettingsSpec>): SettingsSpec {
+    return mergePartial<SettingsSpec>(MockGlobalSpec.settingsBase, partial, { mergeOptionalPartialValues: true });
   }
 }

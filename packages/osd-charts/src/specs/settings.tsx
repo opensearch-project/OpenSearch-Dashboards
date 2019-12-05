@@ -112,7 +112,7 @@ export type DefaultSettingsProps =
 export const DEFAULT_TOOLTIP_TYPE = TooltipType.VerticalCursor;
 export const DEFAULT_TOOLTIP_SNAP = true;
 
-export const DEFAULT_SETTINGS_SPEC = {
+export const DEFAULT_SETTINGS_SPEC: SettingsSpec = {
   id: '__global__settings___',
   chartType: ChartTypes.Global,
   specType: SpecTypes.Settings,
@@ -125,7 +125,6 @@ export const DEFAULT_SETTINGS_SPEC = {
   tooltip: {
     type: DEFAULT_TOOLTIP_TYPE,
     snap: DEFAULT_TOOLTIP_SNAP,
-    value: '',
   },
   legendPosition: Position.Right,
   showLegendDisplayValue: true,

@@ -2,10 +2,12 @@ import {
   clamp,
   compareByValueAsc,
   identity,
+  hasPartialObjectToMerge,
   mergePartial,
   RecursivePartial,
   getPartialValue,
   getAllKeys,
+  shallowClone,
 } from './commons';
 
 describe('commons utilities', () => {
@@ -127,6 +129,69 @@ describe('commons utilities', () => {
     });
   });
 
+  describe('shallowClone', () => {
+    const obj = { value: 'test' };
+    const arr = ['test'];
+
+    it('should clone object', () => {
+      const result = shallowClone(obj);
+
+      expect(result).toEqual(obj);
+      expect(result).not.toBe(obj);
+    });
+
+    it('should clone array', () => {
+      const result = shallowClone(arr);
+
+      expect(result).toEqual(arr);
+      expect(result).not.toBe(arr);
+    });
+
+    it('should return simple values', () => {
+      expect(shallowClone(false)).toBe(false);
+      expect(shallowClone(true)).toBe(true);
+      expect(shallowClone('string')).toBe('string');
+      expect(shallowClone(10)).toBe(10);
+      expect(shallowClone(undefined)).toBeUndefined();
+    });
+
+    it('should return null', () => {
+      expect(shallowClone(null)).toBeNull();
+    });
+  });
+
+  describe('hasPartialObjectToMerge', () => {
+    it('should return false if base is an array', () => {
+      const result = hasPartialObjectToMerge([]);
+      expect(result).toBe(false);
+    });
+
+    it('should return true if base and partial are objects', () => {
+      const result = hasPartialObjectToMerge({}, {});
+      expect(result).toBe(true);
+    });
+
+    it('should return true if base and any additionalPartials are objects', () => {
+      const result = hasPartialObjectToMerge({}, undefined, ['string', [], {}]);
+      expect(result).toBe(true);
+    });
+
+    it('should return true if base and any additionalPartials are objects even if partial is an array', () => {
+      const result = hasPartialObjectToMerge({}, [], ['string', [], {}]);
+      expect(result).toBe(true);
+    });
+
+    it('should return false if base is an object but not the partial nor any additionalPartials are not objects', () => {
+      const result = hasPartialObjectToMerge({}, undefined, ['string', []]);
+      expect(result).toBe(false);
+    });
+
+    it('should return false if base is an object but not the partial nor any additionalPartials are not objects even if partial is an array', () => {
+      const result = hasPartialObjectToMerge({}, [], ['string', []]);
+      expect(result).toBe(false);
+    });
+  });
+
   describe('mergePartial', () => {
     let baseClone: TestType;
     interface TestType {
@@ -156,6 +221,127 @@ describe('commons utilities', () => {
 
     beforeAll(() => {
       baseClone = JSON.parse(JSON.stringify(base)) as TestType;
+    });
+
+    describe('Union types', () => {
+      type TestObject = { string1?: string; string2?: string };
+      interface TestUnionType {
+        union: 'val1' | 'val2' | TestObject | string[];
+      }
+
+      test('should override simple union type with object', () => {
+        const result = mergePartial<TestUnionType>(
+          { union: 'val2' },
+          { union: { string1: 'other' } },
+          { mergeOptionalPartialValues: true },
+        );
+        expect(result).toEqual({
+          union: { string1: 'other' },
+        });
+      });
+
+      test('should override simple union type with array', () => {
+        const result = mergePartial<TestUnionType>(
+          { union: 'val2' },
+          { union: ['string'] },
+          { mergeOptionalPartialValues: true },
+        );
+        expect(result).toEqual({
+          union: ['string'],
+        });
+      });
+
+      test('should override simple union type with object from additionalPartials', () => {
+        const result = mergePartial<TestUnionType>({ union: 'val2' }, {}, { mergeOptionalPartialValues: true }, [
+          {},
+          { union: { string1: 'other' } },
+        ]);
+        expect(result).toEqual({
+          union: { string1: 'other' },
+        });
+      });
+
+      test('should override simple union type with array from additionalPartials', () => {
+        const result = mergePartial<TestUnionType>({ union: 'val2' }, {}, { mergeOptionalPartialValues: true }, [
+          {},
+          { union: ['string'] },
+        ]);
+        expect(result).toEqual({
+          union: ['string'],
+        });
+      });
+
+      test('should override object union type with simple', () => {
+        const result = mergePartial<TestUnionType>(
+          { union: { string1: 'other' } },
+          { union: 'val2' },
+          { mergeOptionalPartialValues: true },
+        );
+        expect(result).toEqual({ union: 'val2' });
+      });
+
+      test('should override object union type with array', () => {
+        const result = mergePartial<TestUnionType>(
+          { union: { string1: 'other' } },
+          { union: ['string'] },
+          { mergeOptionalPartialValues: true },
+        );
+        expect(result).toEqual({ union: ['string'] });
+      });
+
+      test('should override object union type with simple from additionalPartials', () => {
+        const result = mergePartial<TestUnionType>(
+          { union: { string1: 'other' } },
+          {},
+          { mergeOptionalPartialValues: true },
+          [{}, { union: 'val2' }],
+        );
+        expect(result).toEqual({ union: 'val2' });
+      });
+
+      test('should override object union type with array from additionalPartials', () => {
+        const result = mergePartial<TestUnionType>(
+          { union: { string1: 'other' } },
+          {},
+          { mergeOptionalPartialValues: true },
+          [{}, { union: ['string'] }],
+        );
+        expect(result).toEqual({ union: ['string'] });
+      });
+
+      test('should override array union type with simple', () => {
+        const result = mergePartial<TestUnionType>(
+          { union: ['string'] },
+          { union: 'val2' },
+          { mergeOptionalPartialValues: true },
+        );
+        expect(result).toEqual({ union: 'val2' });
+      });
+
+      test('should override array union type with object', () => {
+        const result = mergePartial<TestUnionType>(
+          { union: ['string'] },
+          { union: { string1: 'other' } },
+          { mergeOptionalPartialValues: true },
+        );
+        expect(result).toEqual({ union: { string1: 'other' } });
+      });
+
+      test('should override array union type with simple from additionalPartials', () => {
+        const result = mergePartial<TestUnionType>({ union: ['string'] }, {}, { mergeOptionalPartialValues: true }, [
+          {},
+          { union: 'val2' },
+        ]);
+        expect(result).toEqual({ union: 'val2' });
+      });
+
+      test('should override array union type with object from additionalPartials', () => {
+        const result = mergePartial<TestUnionType>({ union: ['string'] }, {}, { mergeOptionalPartialValues: true }, [
+          {},
+          { union: { string1: 'other' } },
+        ]);
+        expect(result).toEqual({ union: { string1: 'other' } });
+      });
     });
 
     test('should allow partial to be undefined', () => {

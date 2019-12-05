@@ -77,6 +77,38 @@ export function getAllKeys(object: any, objects: any[] = []): string[] {
   }, Object.keys(object));
 }
 
+export function hasPartialObjectToMerge<T>(
+  base: T,
+  partial?: RecursivePartial<T>,
+  additionalPartials: RecursivePartial<T>[] = [],
+): boolean {
+  if (Array.isArray(base)) {
+    return false;
+  }
+
+  if (typeof base === 'object') {
+    if (typeof partial === 'object' && !Array.isArray(partial)) {
+      return true;
+    }
+
+    return additionalPartials.some((p) => typeof p === 'object' && !Array.isArray(p));
+  }
+
+  return false;
+}
+
+export function shallowClone(value: any) {
+  if (Array.isArray(value)) {
+    return [...value];
+  }
+
+  if (typeof value === 'object' && value !== null) {
+    return { ...value };
+  }
+
+  return value;
+}
+
 /**
  * Merges values of a partial structure with a base structure.
  *
@@ -93,9 +125,9 @@ export function mergePartial<T>(
   options: MergeOptions = {},
   additionalPartials: RecursivePartial<T>[] = [],
 ): T {
-  if (!Array.isArray(base) && typeof base === 'object') {
-    const baseClone = { ...base };
+  const baseClone = shallowClone(base);
 
+  if (hasPartialObjectToMerge(base, partial, additionalPartials)) {
     if (partial !== undefined && options.mergeOptionalPartialValues) {
       getAllKeys(partial, additionalPartials).forEach((key) => {
         if (!(key in baseClone)) {
@@ -118,7 +150,7 @@ export function mergePartial<T>(
     }, baseClone);
   }
 
-  return getPartialValue<T>(base, partial, additionalPartials);
+  return getPartialValue<T>(baseClone, partial, additionalPartials);
 }
 
 export function isNumberArray(value: unknown): value is number[] {

@@ -1,20 +1,5 @@
 import React from 'react';
-import {
-  Axis,
-  Chart,
-  getAxisId,
-  getSpecId,
-  Position,
-  ScaleType,
-  Settings,
-  LIGHT_THEME,
-  niceTimeFormatter,
-  LineAnnotation,
-  AnnotationDomainTypes,
-  BarSeries,
-  RectAnnotation,
-  TooltipType,
-} from '../src';
+import { Chart, Settings, TooltipType, LineSeries } from '../src';
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 export class Playground extends React.Component {
   chartRef: React.RefObject<Chart> = React.createRef();
@@ -43,50 +28,17 @@ export class Playground extends React.Component {
     }
   };
   render() {
-    const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 7);
-
     return (
       <>
         <button onClick={this.onSnapshot}>Snapshot</button>
         <div className="chart">
-          <Chart ref={this.chartRef}>
-            <Settings theme={LIGHT_THEME} showLegend={true} tooltip={TooltipType.Crosshairs} />
-            <Axis
-              id={getAxisId('time')}
-              position={Position.Bottom}
-              tickFormat={niceTimeFormatter([data[0][0], data[data.length - 1][0]])}
-            />
-            <Axis id={getAxisId('count')} position={Position.Left} />
-            <LineAnnotation
-              id="line annotation"
-              dataValues={[
-                {
-                  dataValue: data[5][0],
-                  details: 'hello tooltip',
-                },
-              ]}
-              domainType={AnnotationDomainTypes.XDomain}
-              marker={<div style={{ width: 10, height: 10, background: 'red' }} />}
-            />
-            <RectAnnotation
-              id="rect annotation"
-              dataValues={[
-                {
-                  coordinates: {
-                    x1: data[3][0],
-                  },
-                  details: 'hello',
-                },
-              ]}
-            />
-            <BarSeries
-              id={getSpecId('series bars chart')}
-              xScaleType={ScaleType.Linear}
-              yScaleType={ScaleType.Linear}
+          <Chart>
+            <Settings tooltip={{ type: TooltipType.Crosshairs }} showLegend />
+            <LineSeries
+              id="lines"
               xAccessor={0}
               yAccessors={[1]}
-              data={data}
-              yScaleToDataExtent={true}
+              data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
             />
           </Chart>
         </div>

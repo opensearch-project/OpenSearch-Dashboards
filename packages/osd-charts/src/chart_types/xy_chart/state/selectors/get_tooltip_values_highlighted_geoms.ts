@@ -67,6 +67,9 @@ function getTooltipAndHighlightFromXValue(
   if (!scales.xScale || !scales.yScales) {
     return EMPTY_VALUES;
   }
+  if (tooltipType === TooltipType.None) {
+    return EMPTY_VALUES;
+  }
   let x = orientedProjectedPointerPosition.x;
   let y = orientedProjectedPointerPosition.y;
   if (externalPointerEvent && isValidExternalPointerEvent(externalPointerEvent, scales.xScale)) {
