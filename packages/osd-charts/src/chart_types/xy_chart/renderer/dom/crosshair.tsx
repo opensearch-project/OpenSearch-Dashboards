@@ -18,7 +18,7 @@ interface CrosshairProps {
   theme: Theme;
   chartRotation: Rotation;
   cursorBandPosition?: Dimensions;
-  cursorLinePosition: Dimensions;
+  cursorLinePosition?: Dimensions;
   tooltipType: TooltipType;
 }
 
@@ -100,8 +100,6 @@ const mapStateToProps = (state: GlobalChartState): CrosshairProps => {
     return {
       theme: LIGHT_THEME,
       chartRotation: 0,
-      cursorBandPosition: { top: 0, left: 0, width: 0, height: 0 },
-      cursorLinePosition: { top: 0, left: 0, width: 0, height: 0 },
       tooltipType: TooltipType.None,
     };
   }

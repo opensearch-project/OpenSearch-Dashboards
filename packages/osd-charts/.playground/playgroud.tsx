@@ -13,6 +13,7 @@ import {
   AnnotationDomainTypes,
   BarSeries,
   RectAnnotation,
+  TooltipType,
 } from '../src';
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 export class Playground extends React.Component {
@@ -49,7 +50,7 @@ export class Playground extends React.Component {
         <button onClick={this.onSnapshot}>Snapshot</button>
         <div className="chart">
           <Chart ref={this.chartRef}>
-            <Settings theme={LIGHT_THEME} showLegend={true} />
+            <Settings theme={LIGHT_THEME} showLegend={true} tooltip={TooltipType.Crosshairs} />
             <Axis
               id={getAxisId('time')}
               position={Position.Bottom}
