@@ -1,3 +1,10 @@
+## [15.0.5](https://github.com/elastic/elastic-charts/compare/v15.0.4...v15.0.5) (2019-12-12)
+
+
+### Bug Fixes
+
+* render stacked bar with stringified values ([#488](https://github.com/elastic/elastic-charts/issues/488)) ([811ee90](https://github.com/elastic/elastic-charts/commit/811ee900280706933fa33ce72b52be89684b5188)), closes [#487](https://github.com/elastic/elastic-charts/issues/487)
+
 ## [15.0.4](https://github.com/elastic/elastic-charts/compare/v15.0.3...v15.0.4) (2019-12-12)
 
 
