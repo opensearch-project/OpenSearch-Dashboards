@@ -206,14 +206,27 @@ function getSplitAccessors(datum: Datum, accessors: Accessor[] = []): Map<string
 /**
  * Reformat the datum having only the required x and y property.
  */
-function cleanDatum(datum: Datum, xAccessor: Accessor, yAccessor: Accessor, y0Accessor?: Accessor): RawDataSeriesDatum {
+export function cleanDatum(
+  datum: Datum,
+  xAccessor: Accessor,
+  yAccessor: Accessor,
+  y0Accessor?: Accessor,
+): RawDataSeriesDatum {
   const x = datum[xAccessor];
-  const y1 = datum[yAccessor];
+  const y1 = castToNumber(datum[yAccessor]);
   const cleanedDatum: RawDataSeriesDatum = { x, y1, datum, y0: null };
   if (y0Accessor) {
-    cleanedDatum.y0 = datum[y0Accessor];
+    cleanedDatum.y0 = castToNumber(datum[y0Accessor]);
   }
   return cleanedDatum;
+}
+
+function castToNumber(value: any): number | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  const num = Number(value);
+  return isNaN(num) ? null : num;
 }
 
 export function getFormattedDataseries(

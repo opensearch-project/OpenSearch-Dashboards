@@ -9,6 +9,7 @@ import {
   RawDataSeries,
   splitSeries,
   SeriesIdentifier,
+  cleanDatum,
 } from './series';
 import { BasicSeriesSpec, LineSeriesSpec, SpecTypes, SeriesTypes } from './specs';
 import { formatStackedDataSeriesValues } from './stacked_series_utils';
@@ -559,5 +560,25 @@ describe('Series', () => {
     undefinedSortedColorValues.set(spec2Id, dataSeriesValues2);
 
     expect(getSortedDataSeriesColorsValuesMap(seriesCollection)).toEqual(undefinedSortedColorValues);
+  });
+  test('clean datum shall parse string as number for y values', () => {
+    let datum = cleanDatum([0, 1, 2], 0, 1, 2);
+    expect(datum.y1).toBe(1);
+    expect(datum.y0).toBe(2);
+    datum = cleanDatum([0, '1', 2], 0, 1, 2);
+    expect(datum.y1).toBe(1);
+    expect(datum.y0).toBe(2);
+
+    datum = cleanDatum([0, '1', '2'], 0, 1, 2);
+    expect(datum.y1).toBe(1);
+    expect(datum.y0).toBe(2);
+
+    datum = cleanDatum([0, 1, '2'], 0, 1, 2);
+    expect(datum.y1).toBe(1);
+    expect(datum.y0).toBe(2);
+
+    datum = cleanDatum([0, 'invalid', 'invalid'], 0, 1, 2);
+    expect(datum.y1).toBe(null);
+    expect(datum.y0).toBe(null);
   });
 });

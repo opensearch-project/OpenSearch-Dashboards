@@ -1001,7 +1001,7 @@ describe('Rendering points - areas', () => {
       expect(renderedArea.areaGeometry.seriesIdentifier.specId).toEqual(SPEC_ID);
       expect(renderedArea.areaGeometry.transform).toEqual({ x: 0, y: 0 });
     });
-    test('Can render points points', () => {
+    test('Can render points', () => {
       const {
         areaGeometry: { points },
         indexedGeometries,
