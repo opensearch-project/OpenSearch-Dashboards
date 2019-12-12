@@ -2,7 +2,7 @@ import { Required } from 'utility-types';
 import { Rotation } from '../../utils/specs';
 import { Dimensions } from '../../../../utils/dimensions';
 import { DisplayValueStyle } from '../../../../utils/themes/theme';
-import { ContainerConfig } from 'konva';
+import { ContainerConfig } from 'konva/types/Container';
 import { ClippedRanges } from '../../../../utils/geometry';
 
 export interface PointStyleProps {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Group as KonvaGroup } from 'konva';
+import { Group as KonvaGroup } from 'konva/types/Group';
 import { Circle, Group, Path } from 'react-konva';
 import {
   buildLineRenderProps,

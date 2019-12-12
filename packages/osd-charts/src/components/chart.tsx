@@ -118,7 +118,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
     if (!this.chartStageRef.current) {
       return null;
     }
-    const stage = this.chartStageRef.current.getStage().clone();
+    const stage = this.chartStageRef.current.getStage().clone(null);
     const width = stage.getWidth();
     const height = stage.getHeight();
     const backgroundLayer = new Konva.Layer();

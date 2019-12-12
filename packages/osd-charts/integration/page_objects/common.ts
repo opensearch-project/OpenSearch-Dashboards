@@ -1,6 +1,6 @@
 import Url from 'url';
 
-import { toMatchImageSnapshot } from '../jest-env-setup';
+import { JEST_TIMEOUT, toMatchImageSnapshot } from '../jest-env-setup';
 // @ts-ignore
 import defaults from '../defaults';
 
@@ -114,7 +114,7 @@ class CommonPage {
    * @param {string} [selector] the DOM selector to wait for, default to '.echChartStatus[data-ech-render-complete=true]'
    * @param {number} [timeout] - the timeout for the operation, default to 10000ms
    */
-  async waitForElement(selector = '.echChartStatus[data-ech-render-complete=true]', timeout = 10000) {
+  async waitForElement(selector = '.echChartStatus[data-ech-render-complete=true]', timeout = JEST_TIMEOUT) {
     await page.waitForSelector(selector, { timeout });
   }
 }

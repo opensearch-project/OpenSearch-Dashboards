@@ -1,4 +1,4 @@
-import { ShapeConfig } from 'konva';
+import { ShapeConfig } from 'konva/types/Shape';
 
 export const GlobalKonvaElementProps: ShapeConfig = {
   strokeHitEnabled: false,

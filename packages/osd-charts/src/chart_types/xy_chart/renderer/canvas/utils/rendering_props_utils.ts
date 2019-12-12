@@ -1,4 +1,6 @@
-import { RectConfig, PathConfig, CircleConfig } from 'konva';
+import { RectConfig } from 'konva/types/shapes/Rect';
+import { PathConfig } from 'konva/types/shapes/Path';
+import { CircleConfig } from 'konva/types/shapes/Circle';
 import {
   AreaStyle,
   LineStyle,

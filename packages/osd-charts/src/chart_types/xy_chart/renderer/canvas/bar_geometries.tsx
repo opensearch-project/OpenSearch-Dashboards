@@ -1,4 +1,4 @@
-import { Group as KonvaGroup } from 'konva';
+import { Group as KonvaGroup } from 'konva/types/Group';
 import React from 'react';
 import { Group, Rect } from 'react-konva';
 import { animated, Spring } from 'react-spring/renderprops-konva.cjs';

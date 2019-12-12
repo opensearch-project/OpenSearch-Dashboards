@@ -8,3 +8,6 @@ export const toMatchImageSnapshot = configureToMatchImageSnapshot({
 });
 
 expect.extend({ toMatchImageSnapshot });
+
+export const JEST_TIMEOUT = 10000;
+jest.setTimeout(JEST_TIMEOUT);
