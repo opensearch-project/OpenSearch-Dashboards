@@ -12,8 +12,9 @@ import { getChartRotationSelector } from '../../../../state/selectors/get_chart_
 import { computeChartDimensionsSelector } from '../../state/selectors/compute_chart_dimensions';
 
 interface HighlighterProps {
-  highlightedGeometries: IndexedGeometry[];
   initialized: boolean;
+  chartId: string;
+  highlightedGeometries: IndexedGeometry[];
   chartTransform: Transform;
   chartDimensions: Dimensions;
   chartRotation: Rotation;
@@ -23,15 +24,16 @@ class HighlighterComponent extends React.Component<HighlighterProps> {
   static displayName = 'Highlighter';
 
   render() {
-    const { highlightedGeometries, chartTransform, chartDimensions, chartRotation } = this.props;
+    const { highlightedGeometries, chartTransform, chartDimensions, chartRotation, chartId } = this.props;
     const left = chartDimensions.left + chartTransform.x;
     const top = chartDimensions.top + chartTransform.y;
     const clipWidth = [90, -90].includes(chartRotation) ? chartDimensions.height : chartDimensions.width;
     const clipHeight = [90, -90].includes(chartRotation) ? chartDimensions.width : chartDimensions.height;
+    const clipPathId = `echHighlighterClipPath__${chartId}`;
     return (
       <svg className="echHighlighter">
         <defs>
-          <clipPath id="echHighlighterClipPath">
+          <clipPath id={clipPathId}>
             <rect x="0" y="0" width={clipWidth} height={clipHeight} />
           </clipPath>
         </defs>
@@ -59,7 +61,7 @@ class HighlighterComponent extends React.Component<HighlighterProps> {
                 width={geom.width}
                 height={geom.height}
                 className="echHighlighter__rect"
-                clipPath="url(#echHighlighterClipPath)"
+                clipPath={`url(#${clipPathId})`}
               />
             );
           })}
@@ -73,6 +75,7 @@ const mapStateToProps = (state: GlobalChartState): HighlighterProps => {
   if (!isInitialized(state)) {
     return {
       initialized: false,
+      chartId: state.chartId,
       highlightedGeometries: [],
       chartTransform: {
         x: 0,
@@ -85,6 +88,7 @@ const mapStateToProps = (state: GlobalChartState): HighlighterProps => {
   }
   return {
     initialized: true,
+    chartId: state.chartId,
     highlightedGeometries: getHighlightedGeomsSelector(state),
     chartTransform: computeChartTransformSelector(state),
     chartDimensions: computeChartDimensionsSelector(state).chartDimensions,

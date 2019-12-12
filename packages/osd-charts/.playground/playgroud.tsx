@@ -1,5 +1,5 @@
 import React from 'react';
-import { Chart, Settings, TooltipType, LineSeries } from '../src';
+import { Chart, Settings, TooltipType, BarSeries } from '../src';
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 export class Playground extends React.Component {
   chartRef: React.RefObject<Chart> = React.createRef();
@@ -32,13 +32,38 @@ export class Playground extends React.Component {
       <>
         <button onClick={this.onSnapshot}>Snapshot</button>
         <div className="chart">
-          <Chart>
+          <Chart size={[200, 100]}>
             <Settings tooltip={{ type: TooltipType.Crosshairs }} showLegend />
-            <LineSeries
+            <BarSeries
               id="lines"
               xAccessor={0}
               yAccessors={[1]}
-              data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
+              data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 5)}
+            />
+            <BarSeries
+              id="lines2"
+              xAccessor={0}
+              yAccessors={[1]}
+              data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 5)}
+            />
+          </Chart>
+        </div>
+        <div className="chart">
+          <Chart>
+            <Settings tooltip={{ type: TooltipType.Crosshairs }} showLegend />
+            <BarSeries
+              id="lines"
+              xAccessor={0}
+              yAccessors={[1]}
+              stackAccessors={[0]}
+              data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 5)}
+            />
+            <BarSeries
+              id="lines2"
+              xAccessor={0}
+              yAccessors={[1]}
+              stackAccessors={[0]}
+              data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 5)}
             />
           </Chart>
         </div>
