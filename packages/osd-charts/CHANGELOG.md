@@ -1,3 +1,10 @@
+## [15.0.4](https://github.com/elastic/elastic-charts/compare/v15.0.3...v15.0.4) (2019-12-12)
+
+
+### Bug Fixes
+
+* **highlighter:** clip path unique id ([#490](https://github.com/elastic/elastic-charts/issues/490)) ([dc93624](https://github.com/elastic/elastic-charts/commit/dc936242546bb39ce973fd6dddbb60538f8be5d6)), closes [#489](https://github.com/elastic/elastic-charts/issues/489)
+
 ## [15.0.3](https://github.com/elastic/elastic-charts/compare/v15.0.2...v15.0.3) (2019-12-05)
 
 
