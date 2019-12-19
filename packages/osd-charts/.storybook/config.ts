@@ -9,6 +9,7 @@ switchTheme('light');
 import './style.scss';
 
 import { create } from '@storybook/theming';
+
 addParameters({
   options: {
     theme: create({
@@ -21,21 +22,23 @@ addParameters({
     panelPosition: 'right',
     sidebarAnimations: true,
   },
-});
-
-addDecorator(withKnobs);
-addDecorator(
-  withInfo({
+  info: {
     inline: true,
     source: true,
+    propTables: false,
     styles: {
       infoBody: {
+        fontSize: '14px',
         marginTop: 0,
         marginBottom: 0,
       },
     },
-  }),
-);
+  },
+  docs: {},
+});
+
+addDecorator(withKnobs);
+addDecorator(withInfo);
 
 function loadStories() {
   require('../stories/bar_chart.tsx');

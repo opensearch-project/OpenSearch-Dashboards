@@ -660,8 +660,10 @@ storiesOf('Interactions', module)
       );
     },
     {
-      info:
-        'Sends an event every time the chart render state changes. This is provided to bind attributes to the chart for visulaization loading checks.',
+      info: {
+        text:
+          'Sends an event every time the chart render state changes. This is provided to bind attributes to the chart for visulaization loading checks.',
+      },
     },
   )
   .add(
@@ -690,7 +692,9 @@ storiesOf('Interactions', module)
       );
     },
     {
-      info: 'Sends an event every time the cursor changes. This is provided to sync cursors between multiple charts.',
+      info: {
+        text: 'Sends an event every time the cursor changes. This is provided to sync cursors between multiple charts.',
+      },
     },
   )
   .add(
@@ -728,7 +732,7 @@ storiesOf('Interactions', module)
             document.body.removeChild(link);
         }
       };
-      const groupId = 'PNG-1';
+      const groupId = '';
       button(label, handler, groupId);
       return (
         <Chart className={'story-chart'} ref={chartRef}>
@@ -753,7 +757,9 @@ storiesOf('Interactions', module)
       );
     },
     {
-      info:
-        'Generate a PNG of the chart by clicking on the Export PNG button in the knobs section. In this example, the button handler is setting the PNG background to white with a pixel ratio of 2. If the browser is detected to be IE11, msSaveBlob will be used instead of a PNG capture.',
+      info: {
+        text:
+          'Generate a PNG of the chart by clicking on the Export PNG button in the knobs section. In this example, the button handler is setting the PNG background to white with a pixel ratio of 2. If the browser is detected to be IE11, msSaveBlob will be used instead of a PNG capture.',
+      },
     },
   );

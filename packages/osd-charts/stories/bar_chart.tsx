@@ -861,36 +861,44 @@ storiesOf('Bar Chart', module)
       </Chart>
     );
   })
-  .add('with high data volume', () => {
-    const dg = new SeededDataGenerator();
-    const data = dg.generateSimpleSeries(15000);
-    const tooltipProps = {
-      type: TooltipType.Follow,
-    };
+  .add(
+    'with high data volume',
+    () => {
+      const dg = new SeededDataGenerator();
+      const data = dg.generateSimpleSeries(15000);
+      const tooltipProps = {
+        type: TooltipType.Follow,
+      };
 
-    return (
-      <Chart className={'story-chart'}>
-        <Settings tooltip={tooltipProps} />
-        <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
-        <Axis
-          id={getAxisId('left2')}
-          title={'Left axis'}
-          position={Position.Left}
-          tickFormat={(d: any) => Number(d).toFixed(2)}
-        />
+      return (
+        <Chart className={'story-chart'}>
+          <Settings tooltip={tooltipProps} />
+          <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
+          <Axis
+            id={getAxisId('left2')}
+            title={'Left axis'}
+            position={Position.Left}
+            tickFormat={(d: any) => Number(d).toFixed(2)}
+          />
 
-        <BarSeries
-          id={getSpecId('bars')}
-          xScaleType={ScaleType.Linear}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          splitSeriesAccessors={['g']}
-          data={data}
-        />
-      </Chart>
-    );
-  })
+          <BarSeries
+            id={getSpecId('bars')}
+            xScaleType={ScaleType.Linear}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x"
+            yAccessors={['y']}
+            splitSeriesAccessors={['g']}
+            data={data}
+          />
+        </Chart>
+      );
+    },
+    {
+      info: {
+        source: false,
+      },
+    },
+  )
   .add('single data chart [linear]', () => {
     const hasCustomDomain = boolean('has custom domain', false);
     const xDomain = hasCustomDomain

@@ -8,7 +8,7 @@ describe('Axis stories', () => {
   });
   it('should render proper tick count with showOverlappingLabels', async () => {
     await common.expectChartAtUrlToMatchScreenshot(
-      'http://localhost:9001/?path=/story/axis--basic&knob-Tick Label Padding=0&knob-debug=&knob-Bottom overlap labels=true&knob-Bottom overlap ticks=true&knob-Number of ticks on bottom=20&knob-Left overlap labels=&knob-Left overlap ticks=true&knob-Number of ticks on left=10',
+      'http://localhost:9001/?path=/story/axis--basic&knob-Tick Label Padding=0&knob-debug=&knob-Bottom overlap labels_Bottom Axis=true&knob-Bottom overlap ticks_Bottom Axis=true&knob-Number of ticks on bottom_Bottom Axis=20&knob-Left overlap labels_Left Axis=&knob-Left overlap ticks_Left Axis=true&knob-Number of ticks on left_Left Axis=10',
     );
   });
   it('should render ticks with varied rotations', async () => {

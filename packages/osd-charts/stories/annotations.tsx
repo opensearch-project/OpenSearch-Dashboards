@@ -1,4 +1,4 @@
-import { array, boolean, color, number, select } from '@storybook/addon-knobs';
+import { boolean, color, number, select } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import {
@@ -20,7 +20,7 @@ import {
 } from '../src';
 import { Icon } from '../src/components/icons/icon';
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
-import { getChartRotationKnob } from './common';
+import { getChartRotationKnob, arrayKnobs } from './common';
 import { BandedAccessorType } from '../src/utils/geometry';
 import { Position } from '../src/chart_types/xy_chart/utils/specs';
 
@@ -40,7 +40,7 @@ function generateTimeAnnotationData(values: any[]): LineAnnotationDatum[] {
 
 storiesOf('Annotations', module)
   .add('[line] basic xDomain continuous', () => {
-    const data = array('data values', [2.5, 7.2]);
+    const data = arrayKnobs('data values', [2.5, 7.2]);
     const dataValues = generateAnnotationData(data);
 
     const style = {
@@ -85,7 +85,7 @@ storiesOf('Annotations', module)
     );
   })
   .add('[line] basic xDomain ordinal', () => {
-    const dataValues = generateAnnotationData(array('annotation values', ['a', 'c']));
+    const dataValues = generateAnnotationData(arrayKnobs('annotation values', ['a', 'c']));
 
     return (
       <Chart className={'story-chart'}>
@@ -111,7 +111,7 @@ storiesOf('Annotations', module)
     );
   })
   .add('[line] basic yDomain', () => {
-    const data = array('data values', [1.5, 7.2]);
+    const data = arrayKnobs('data values', [1.5, 7.2]);
     const dataValues = generateAnnotationData(data);
 
     const isLeft = boolean('y-domain axis is Position.Left', true);

@@ -584,7 +584,9 @@ storiesOf('Stylings', module)
       );
     },
     {
-      info: 'Notice that the secondary theme bar fill has no effect as the primary value takes priority',
+      info: {
+        text: 'Notice that the secondary theme bar fill has no effect as the primary value takes priority',
+      },
     },
   )
   .add('custom series colors via colors array', () => {

@@ -1,4 +1,4 @@
-import { select } from '@storybook/addon-knobs';
+import { select, array } from '@storybook/addon-knobs';
 
 import { Rotation } from '../src';
 
@@ -20,3 +20,10 @@ export const getChartRotationKnob = () =>
     },
     0,
   );
+
+export function arrayKnobs(name: string, values: (string | number)[]): (string | number)[] {
+  const stringifiedValues = values.map<string>((d) => `${d}`);
+  return array(name, stringifiedValues).map<string | number>((value: string) => {
+    return !isNaN(parseFloat(value)) ? parseFloat(value) : value;
+  });
+}
