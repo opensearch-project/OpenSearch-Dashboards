@@ -1,3 +1,16 @@
+# [16.0.0](https://github.com/elastic/elastic-charts/compare/v15.0.5...v16.0.0) (2020-01-02)
+
+
+### Bug Fixes
+
+* **external pointer:** avoid recursive-loops on pointer events ([#503](https://github.com/elastic/elastic-charts/issues/503)) ([c170f0d](https://github.com/elastic/elastic-charts/commit/c170f0ddfade407d4c2b2e7d1b1d72a8142b59b8)), closes [#504](https://github.com/elastic/elastic-charts/issues/504)
+
+
+### BREAKING CHANGES
+
+* **external pointer:** The `onCursorUpdate` Settings property is changed to a more generic
+`onPointerUpdate`. The same apply for the event type `CursorEvent` that is now `PointerEvent` and can assume a `PointerOverEvent` or `PointOutEvent` shape (see TS types)
+
 ## [15.0.5](https://github.com/elastic/elastic-charts/compare/v15.0.4...v15.0.5) (2019-12-12)
 
 
