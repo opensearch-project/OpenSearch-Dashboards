@@ -19,6 +19,8 @@ import { upsertSpec, specParsed } from '../../../state/actions/specs';
 import { updateParentDimensions } from '../../../state/actions/chart_settings';
 import { onPointerMove } from '../../../state/actions/mouse';
 import { ChartTypes } from '../..';
+import { createOnPointerMoveCaller } from './selectors/on_pointer_move_caller';
+import { onExternalPointerEvent } from '../../../state/actions/events';
 
 const SPEC_ID = 'spec_1';
 const GROUP_ID = 'group_1';
@@ -250,23 +252,29 @@ function mouseOverTestSuite(scaleType: ScaleType) {
   let store: Store<GlobalChartState>;
   let onOverListener: jest.Mock<undefined>;
   let onOutListener: jest.Mock<undefined>;
+  let onPointerUpdateListener: jest.Mock<undefined>;
   const spec = scaleType === ScaleType.Ordinal ? ordinalBarSeries : linearBarSeries;
   beforeEach(() => {
     store = initStore(spec);
     onOverListener = jest.fn((): undefined => undefined);
     onOutListener = jest.fn((): undefined => undefined);
+    onPointerUpdateListener = jest.fn((): undefined => undefined);
     const settingsWithListeners: SettingsSpec = {
       ...settingSpec,
       onElementOver: onOverListener,
       onElementOut: onOutListener,
+      onPointerUpdate: onPointerUpdateListener,
     };
     store.dispatch(upsertSpec(settingsWithListeners));
     store.dispatch(specParsed());
     const onElementOutCaller = createOnElementOutCaller();
     const onElementOverCaller = createOnElementOverCaller();
+    const onPointerMoveCaller = createOnPointerMoveCaller();
     store.subscribe(() => {
-      onElementOutCaller(store.getState());
-      onElementOverCaller(store.getState());
+      const state = store.getState();
+      onElementOutCaller(state);
+      onElementOverCaller(state);
+      onPointerMoveCaller(state);
     });
     const tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
     expect(tooltipData.tooltipValues).toEqual([]);
@@ -279,36 +287,79 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(seriesGeoms.scales.yScales).not.toBeUndefined();
   });
 
-  test.skip('set cursor from external source', () => {
-    // store.setCursorValue(0);
-    // expect(store.externalCursorShown.get()).toBe(true);
-    // expect(store.cursorBandPosition).toEqual({
-    //   height: 100,
-    //   left: 10,
-    //   top: 10,
-    //   visible: true,
-    //   width: 50,
-    // });
-    // store.setCursorValue(1);
-    // expect(store.externalCursorShown.get()).toBe(true);
-    // expect(store.cursorBandPosition).toEqual({
-    //   height: 100,
-    //   left: 60,
-    //   top: 10,
-    //   visible: true,
-    //   width: 50,
-    // });
-    // store.setCursorValue(2);
-    // expect(store.externalCursorShown.get()).toBe(true);
-    // // equal to the latest except the visiblility
-    // expect(store.cursorBandPosition).toEqual({
-    //   height: 100,
-    //   left: 60,
-    //   top: 10,
-    //   visible: false,
-    //   width: 50,
-    // });
+  test('avoid call pointer update listener if moving over the same element', () => {
+    store.dispatch(onPointerMove({ x: chartLeft + 10, y: chartTop + 10 }, 0));
+    expect(onPointerUpdateListener).toBeCalledTimes(1);
+
+    const tooltipData1 = getTooltipValuesAndGeometriesSelector(store.getState());
+    expect(tooltipData1.tooltipValues.length).toBe(2);
+    // avoid calls
+    store.dispatch(onPointerMove({ x: chartLeft + 12, y: chartTop + 12 }, 1));
+    expect(onPointerUpdateListener).toBeCalledTimes(1);
+
+    const tooltipData2 = getTooltipValuesAndGeometriesSelector(store.getState());
+    expect(tooltipData2.tooltipValues.length).toBe(2);
+    expect(tooltipData1).toEqual(tooltipData2);
   });
+
+  test('call pointer update listener on move', () => {
+    store.dispatch(onPointerMove({ x: chartLeft + 10, y: chartTop + 10 }, 0));
+    expect(onPointerUpdateListener).toBeCalledTimes(1);
+    expect(onPointerUpdateListener.mock.calls[0][0]).toEqual({
+      chartId: 'chartId',
+      scale: scaleType,
+      type: 'Over',
+      unit: undefined,
+      value: 0,
+    });
+
+    // avoid multiple calls for the same value
+    store.dispatch(onPointerMove({ x: chartLeft + 50, y: chartTop + 10 }, 1));
+    expect(onPointerUpdateListener).toBeCalledTimes(2);
+    expect(onPointerUpdateListener.mock.calls[1][0]).toEqual({
+      chartId: 'chartId',
+      scale: scaleType,
+      type: 'Over',
+      unit: undefined,
+      value: 1,
+    });
+
+    store.dispatch(onPointerMove({ x: chartLeft + 200, y: chartTop + 10 }, 1));
+    expect(onPointerUpdateListener).toBeCalledTimes(3);
+    expect(onPointerUpdateListener.mock.calls[2][0]).toEqual({
+      chartId: 'chartId',
+      type: 'Out',
+    });
+  });
+
+  test('handle only external pointer update', () => {
+    store.dispatch(
+      onExternalPointerEvent({
+        chartId: 'chartId',
+        scale: scaleType,
+        type: 'Over',
+        unit: undefined,
+        value: 0,
+      }),
+    );
+    let cursorBandPosition = getCursorBandPositionSelector(store.getState());
+    expect(cursorBandPosition).toBeDefined();
+    expect(cursorBandPosition && cursorBandPosition.visible).toBe(false);
+
+    store.dispatch(
+      onExternalPointerEvent({
+        chartId: 'differentChart',
+        scale: scaleType,
+        type: 'Over',
+        unit: undefined,
+        value: 0,
+      }),
+    );
+    cursorBandPosition = getCursorBandPositionSelector(store.getState());
+    expect(cursorBandPosition).toBeDefined();
+    expect(cursorBandPosition && cursorBandPosition.visible).toBe(true);
+  });
+
   test.skip('can determine which tooltip to display if chart & annotation tooltips possible', () => {
     // const annotationDimensions = [{ rect: { x: 49, y: -1, width: 3, height: 99 } }];
     // const rectAnnotationSpec: RectAnnotationSpec = {

@@ -2,7 +2,7 @@ import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { SettingsSpec, CursorEvent } from '../../../../specs';
+import { SettingsSpec, PointerEvent, PointerEventType } from '../../../../specs';
 import { ChartTypes } from '../../../index';
 import { Scale } from '../../../../utils/scales/scales';
 import { Point } from '../../../../utils/point';
@@ -18,8 +18,8 @@ const getPointerEventSelector = createCachedSelector(
     computeSeriesGeometriesSelector,
     getGeometriesIndexKeysSelector,
   ],
-  (chartId, orientedProjectedPointerPosition, seriesGeometries, geometriesIndexKeys) => {
-    return getCursorBand(
+  (chartId, orientedProjectedPointerPosition, seriesGeometries, geometriesIndexKeys): PointerEvent => {
+    return getPointerEvent(
       chartId,
       orientedProjectedPointerPosition,
       seriesGeometries.scales.xScale,
@@ -28,54 +28,58 @@ const getPointerEventSelector = createCachedSelector(
   },
 )(getChartIdSelector);
 
-function getCursorBand(
+function getPointerEvent(
   chartId: string,
   orientedProjectedPoinerPosition: Point,
   xScale: Scale | undefined,
   geometriesIndexKeys: any[],
-): CursorEvent | null {
+): PointerEvent {
   // update che cursorBandPosition based on chart configuration
   if (!xScale) {
-    return null;
+    return {
+      chartId,
+      type: PointerEventType.Out,
+    };
   }
   const { x, y } = orientedProjectedPoinerPosition;
   if (x === -1 || y === -1) {
-    return null;
+    return {
+      chartId,
+      type: PointerEventType.Out,
+    };
   }
   const xValue = xScale.invertWithStep(x, geometriesIndexKeys);
   if (!xValue) {
-    return null;
+    return {
+      chartId,
+      type: PointerEventType.Out,
+    };
   }
   return {
     chartId,
-    scale: xScale.type,
+    type: PointerEventType.Over,
     unit: xScale.unit,
+    scale: xScale.type,
     value: xValue.value,
   };
 }
-interface Props {
-  settings: SettingsSpec;
-  pointerEvent: CursorEvent | null;
-}
 
-function hasPointerEventChanged(prevProps: Props, nextProps: Props | null) {
-  // new pointer event, pointer over
-  if (prevProps.pointerEvent === null && nextProps && nextProps.pointerEvent) {
+function hasPointerEventChanged(prevPointerEvent: PointerEvent, nextPointerEvent: PointerEvent | null) {
+  if (nextPointerEvent && prevPointerEvent.type !== nextPointerEvent.type) {
     return true;
   }
-
-  // new pointer event, pointer out
-  if (prevProps.pointerEvent !== null && nextProps && nextProps.pointerEvent === null) {
-    return true;
+  if (
+    nextPointerEvent &&
+    prevPointerEvent.type === nextPointerEvent.type &&
+    prevPointerEvent.type === PointerEventType.Out
+  ) {
+    return false;
   }
-
-  const prevPointerEvent = prevProps.pointerEvent;
-  const nextPointerEvent = nextProps && nextProps.pointerEvent;
-
   // if something changed in the pointerEvent than recompute
   if (
-    prevPointerEvent !== null &&
-    nextPointerEvent !== null &&
+    nextPointerEvent &&
+    prevPointerEvent.type === PointerEventType.Over &&
+    nextPointerEvent.type === PointerEventType.Over &&
     (prevPointerEvent.value !== nextPointerEvent.value ||
       prevPointerEvent.scale !== nextPointerEvent.scale ||
       prevPointerEvent.unit !== nextPointerEvent.unit)
@@ -86,26 +90,28 @@ function hasPointerEventChanged(prevProps: Props, nextProps: Props | null) {
 }
 
 export function createOnPointerMoveCaller(): (state: GlobalChartState) => void {
-  let prevProps: Props | null = null;
+  let prevPointerEvent: PointerEvent | null = null;
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartTypes.XYAxis) {
       selector = createCachedSelector(
-        [getSettingsSpecSelector, getPointerEventSelector],
-        (settings: SettingsSpec, pointerEvent: CursorEvent | null): void => {
-          const nextProps = {
-            settings,
-            pointerEvent,
+        [getSettingsSpecSelector, getPointerEventSelector, getChartIdSelector],
+        (settings: SettingsSpec, nextPointerEvent: PointerEvent, chartId: string): void => {
+          if (prevPointerEvent === null) {
+            prevPointerEvent = {
+              chartId,
+              type: PointerEventType.Out,
+            };
+          }
+          const tempPrev = {
+            ...prevPointerEvent,
           };
-
-          if (prevProps === null && nextProps.pointerEvent === null) {
-            prevProps = nextProps;
-            return;
+          // we have to update the prevPointerEvents before possiibly calling the onPointerUpdate
+          // to avoid a recursive loop of calls caused by the impossibility to update the prevPointerEvent
+          prevPointerEvent = nextPointerEvent;
+          if (settings && settings.onPointerUpdate && hasPointerEventChanged(tempPrev, nextPointerEvent)) {
+            settings.onPointerUpdate(nextPointerEvent);
           }
-          if (settings && settings.onCursorUpdate && hasPointerEventChanged(prevProps!, nextProps)) {
-            settings.onCursorUpdate(pointerEvent ? pointerEvent : undefined);
-          }
-          prevProps = nextProps;
         },
       )({
         keySelector: getChartIdSelector,

@@ -1,3 +1,4 @@
+import { $Values } from 'utility-types';
 import { DomainRange, Position, Rendering, Rotation, SpecTypes } from '../chart_types/xy_chart/utils/specs';
 import { PartialTheme, Theme } from '../utils/themes/theme';
 import { Domain } from '../utils/domain';
@@ -14,7 +15,7 @@ export type ElementClickListener = (values: GeometryValue[]) => void;
 export type ElementOverListener = (values: GeometryValue[]) => void;
 export type BrushEndListener = (min: number, max: number) => void;
 export type LegendItemListener = (series: SeriesIdentifier | null) => void;
-export type CursorUpdateListener = (event?: CursorEvent) => void;
+export type PointerUpdateListener = (event: PointerEvent) => void;
 /**
  * Listener to be called when chart render state changes
  *
@@ -22,21 +23,38 @@ export type CursorUpdateListener = (event?: CursorEvent) => void;
  */
 export type RenderChangeListener = (isRendered: boolean) => void;
 export type BasicListener = () => undefined | void;
-/**
- * Event used to syncronize cursors between Charts.
- *
- * fired as callback argument for `CursorUpdateListener`
- */
-export interface CursorEvent {
+
+export const PointerEventType = Object.freeze({
+  Over: 'Over' as 'Over',
+  Out: 'Out' as 'Out',
+});
+
+export type PointerEventType = $Values<typeof PointerEventType>;
+
+export interface BasePointerEvent {
   chartId: string;
+  type: PointerEventType;
+}
+/**
+ * Event used to syncronize pointers/mouse positions between Charts.
+ *
+ * fired as callback argument for `PointerUpdateListener`
+ */
+export interface PointerOverEvent extends BasePointerEvent {
+  type: typeof PointerEventType.Over;
   scale: ScaleTypes;
   /**
    * @todo
    * unit for event (i.e. `time`, `feet`, `count`, etc.)
    */
   unit?: string;
-  value: number | string;
+  value: number | string | null;
 }
+export interface PointerOutEvent extends BasePointerEvent {
+  type: typeof PointerEventType.Out;
+}
+
+export type PointerEvent = PointerOverEvent | PointerOutEvent;
 
 interface TooltipProps {
   type?: TooltipType;
@@ -87,7 +105,7 @@ export interface SettingsSpec extends Spec {
   onLegendItemClick?: LegendItemListener;
   onLegendItemPlusClick?: LegendItemListener;
   onLegendItemMinusClick?: LegendItemListener;
-  onCursorUpdate?: CursorUpdateListener;
+  onPointerUpdate?: PointerUpdateListener;
   onRenderChange?: RenderChangeListener;
   xDomain?: Domain | DomainRange;
   resizeDebounce?: number;
@@ -137,3 +155,11 @@ export type SettingsSpecProps = Partial<Omit<SettingsSpec, 'chartType' | 'specTy
 export const Settings: React.FunctionComponent<SettingsSpecProps> = getConnect()(
   specComponentFactory<SettingsSpec, DefaultSettingsProps>(DEFAULT_SETTINGS_SPEC),
 );
+
+export function isPointerOutEvent(event: PointerEvent | null | undefined): event is PointerOutEvent {
+  return event !== null && event !== undefined && event.type === PointerEventType.Out;
+}
+
+export function isPointerOverEvent(event: PointerEvent | null | undefined): event is PointerOverEvent {
+  return event !== null && event !== undefined && event.type === PointerEventType.Over;
+}

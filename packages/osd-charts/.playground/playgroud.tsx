@@ -1,8 +1,9 @@
 import React from 'react';
-import { Chart, Settings, TooltipType, BarSeries } from '../src';
+import { Chart, Settings, TooltipType, AreaSeries, PointerEvent } from '../src';
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 export class Playground extends React.Component {
   chartRef: React.RefObject<Chart> = React.createRef();
+  chartRef2: React.RefObject<Chart> = React.createRef();
   onSnapshot = () => {
     if (!this.chartRef.current) {
       return;
@@ -27,39 +28,43 @@ export class Playground extends React.Component {
         document.body.removeChild(link);
     }
   };
+  onPointerUpdate = (event: PointerEvent) => {
+    if (this.chartRef && this.chartRef.current) {
+      this.chartRef.current.dispatchExternalPointerEvent(event);
+    }
+    if (this.chartRef2 && this.chartRef2.current) {
+      this.chartRef2.current.dispatchExternalPointerEvent(event);
+    }
+  };
   render() {
     return (
       <>
         <button onClick={this.onSnapshot}>Snapshot</button>
         <div className="chart">
-          <Chart size={[200, 100]}>
-            <Settings tooltip={{ type: TooltipType.Crosshairs }} showLegend />
-            <BarSeries
-              id="lines"
-              xAccessor={0}
-              yAccessors={[1]}
-              data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 5)}
+          <Chart ref={this.chartRef}>
+            <Settings
+              tooltip={{ type: TooltipType.VerticalCursor }}
+              showLegend
+              onPointerUpdate={this.onPointerUpdate}
             />
-            <BarSeries
-              id="lines2"
-              xAccessor={0}
-              yAccessors={[1]}
-              data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 5)}
-            />
-          </Chart>
-        </div>
-        <div className="chart">
-          <Chart>
-            <Settings tooltip={{ type: TooltipType.Crosshairs }} showLegend />
-            <BarSeries
+            <AreaSeries
               id="lines"
               xAccessor={0}
               yAccessors={[1]}
               stackAccessors={[0]}
               data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 5)}
             />
-            <BarSeries
-              id="lines2"
+          </Chart>
+        </div>
+        <div className="chart">
+          <Chart ref={this.chartRef2}>
+            <Settings
+              tooltip={{ type: TooltipType.VerticalCursor }}
+              showLegend
+              onPointerUpdate={this.onPointerUpdate}
+            />
+            <AreaSeries
+              id="lines"
               xAccessor={0}
               yAccessors={[1]}
               stackAccessors={[0]}

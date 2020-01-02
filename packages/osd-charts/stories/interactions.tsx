@@ -46,7 +46,7 @@ const onLegendItemListeners = {
 };
 
 const onRenderChange = action('onRenderChange');
-const onCursorUpdate = action('onCursorUpdate');
+const onPointerUpdate = action('onPointerUpdate');
 
 storiesOf('Interactions', module)
   .add('bar clicks and hovers', () => {
@@ -671,7 +671,7 @@ storiesOf('Interactions', module)
     () => {
       return (
         <Chart className={'story-chart'}>
-          <Settings showLegend={true} legendPosition={Position.Right} onCursorUpdate={onCursorUpdate} />
+          <Settings showLegend={true} legendPosition={Position.Right} onPointerUpdate={onPointerUpdate} />
           <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
           <Axis
             id={getAxisId('left2')}

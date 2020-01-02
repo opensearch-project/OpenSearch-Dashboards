@@ -23,7 +23,7 @@ import { ChartTypes } from '../chart_types/index';
 import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
 import { createOnBrushEndCaller } from '../chart_types/xy_chart/state/selectors/on_brush_end_caller';
 import { onExternalPointerEvent } from '../state/actions/events';
-import { CursorEvent } from '../specs';
+import { PointerEvent } from '../specs';
 import { createOnPointerMoveCaller } from '../chart_types/xy_chart/state/selectors/on_pointer_move_caller';
 
 interface ChartProps {
@@ -102,7 +102,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
     });
   }
 
-  dispatchExternalCursorEvent(event?: CursorEvent) {
+  dispatchExternalPointerEvent(event: PointerEvent) {
     this.chartStore.dispatch(onExternalPointerEvent(event));
   }
 

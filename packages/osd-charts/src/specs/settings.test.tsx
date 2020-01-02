@@ -116,7 +116,7 @@ describe('Settings spec component', () => {
     const onLegendEvent = (): void => {
       return;
     };
-    const onCursorUpdateEvent = (): void => {
+    const onPointerUpdateEvent = (): void => {
       return;
     };
     const onRenderChangeEvent = (): void => {
@@ -133,7 +133,7 @@ describe('Settings spec component', () => {
       onLegendItemClick: onLegendEvent,
       onLegendItemPlusClick: onLegendEvent,
       onLegendItemMinusClick: onLegendEvent,
-      onCursorUpdate: onCursorUpdateEvent,
+      onPointerUpdate: onPointerUpdateEvent,
       onRenderChange: onRenderChangeEvent,
     };
 
@@ -149,7 +149,7 @@ describe('Settings spec component', () => {
     expect(settingSpec.onLegendItemClick).toEqual(onLegendEvent);
     expect(settingSpec.onLegendItemPlusClick).toEqual(onLegendEvent);
     expect(settingSpec.onLegendItemMinusClick).toEqual(onLegendEvent);
-    expect(settingSpec.onCursorUpdate).toEqual(onCursorUpdateEvent);
+    expect(settingSpec.onPointerUpdate).toEqual(onPointerUpdateEvent);
     expect(settingSpec.onRenderChange).toEqual(onRenderChangeEvent);
   });
 

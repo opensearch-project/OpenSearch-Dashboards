@@ -14,8 +14,8 @@ import { formatTooltip } from '../../tooltip/tooltip';
 import { getTooltipHeaderFormatterSelector } from './get_tooltip_header_formatter';
 import { isPointOnGeometry } from '../../rendering/rendering';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { CursorEvent } from '../../../../specs';
-import { isValidExternalPointerEvent } from '../../../../utils/events';
+import { PointerEvent, isPointerOutEvent } from '../../../../specs';
+import { isValidPointerOverEvent } from '../../../../utils/events';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { hasSingleSeriesSelector } from './has_single_series';
@@ -61,7 +61,7 @@ function getTooltipAndHighlightFromXValue(
   scales: ComputedScales,
   xMatchingGeoms: IndexedGeometry[],
   tooltipType: TooltipType,
-  externalPointerEvent: CursorEvent | null,
+  externalPointerEvent: PointerEvent | null,
   tooltipHeaderFormatter?: TooltipValueFormatter,
 ): TooltipAndHighlightedGeoms {
   if (!scales.xScale || !scales.yScales) {
@@ -72,7 +72,7 @@ function getTooltipAndHighlightFromXValue(
   }
   let x = orientedProjectedPointerPosition.x;
   let y = orientedProjectedPointerPosition.y;
-  if (externalPointerEvent && isValidExternalPointerEvent(externalPointerEvent, scales.xScale)) {
+  if (isValidPointerOverEvent(scales.xScale, externalPointerEvent)) {
     x = scales.xScale.pureScale(externalPointerEvent.value);
     y = 0;
   } else if (projectedPointerPosition.x === -1 || projectedPointerPosition.y === -1) {
@@ -108,7 +108,10 @@ function getTooltipAndHighlightFromXValue(
 
       // check if the pointer is on the geometry (avoid checking if using external pointer event)
       let isHighlighted = false;
-      if (!externalPointerEvent && isPointOnGeometry(x, y, indexedGeometry)) {
+      if (
+        (!externalPointerEvent || isPointerOutEvent(externalPointerEvent)) &&
+        isPointOnGeometry(x, y, indexedGeometry)
+      ) {
         isHighlighted = true;
         highlightedGeometries.push(indexedGeometry);
       }

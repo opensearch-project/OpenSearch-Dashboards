@@ -6,11 +6,11 @@ import { getComputedScalesSelector } from './get_computed_scales';
 import { getGeometriesIndexKeysSelector } from './get_geometries_index_keys';
 import { getGeometriesIndexSelector } from './get_geometries_index';
 import { IndexedGeometry } from '../../../../utils/geometry';
-import { CursorEvent } from '../../../../specs';
+import { PointerEvent } from '../../../../specs';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { Dimensions } from '../../../../utils/dimensions';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { isValidExternalPointerEvent } from '../../../../utils/events';
+import { isValidPointerOverEvent } from '../../../../utils/events';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
 const getExternalPointerEventStateSelector = (state: GlobalChartState) => state.externalEvents.pointer;
@@ -32,14 +32,14 @@ function getElementAtCursorPosition(
   scales: ComputedScales,
   geometriesIndexKeys: any,
   geometriesIndex: Map<any, IndexedGeometry[]>,
-  externalPointerEvent: CursorEvent | null,
+  externalPointerEvent: PointerEvent | null,
   {
     chartDimensions,
   }: {
     chartDimensions: Dimensions;
   },
 ): IndexedGeometry[] {
-  if (externalPointerEvent && isValidExternalPointerEvent(externalPointerEvent, scales.xScale)) {
+  if (isValidPointerOverEvent(scales.xScale, externalPointerEvent)) {
     const x = scales.xScale.pureScale(externalPointerEvent.value);
 
     if (x == null || x > chartDimensions.width + chartDimensions.left) {

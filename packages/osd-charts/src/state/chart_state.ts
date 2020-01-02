@@ -3,8 +3,8 @@ import { interactionsReducer } from './reducers/interactions';
 import { ChartTypes } from '../chart_types';
 import { XYAxisChartState } from '../chart_types/xy_chart/state/chart_state';
 import { SeriesIdentifier } from '../chart_types/xy_chart/utils/series';
-import { Spec } from '../specs';
-import { DEFAULT_SETTINGS_SPEC, CursorEvent } from '../specs/settings';
+import { Spec, PointerEvent } from '../specs';
+import { DEFAULT_SETTINGS_SPEC } from '../specs/settings';
 import { Dimensions } from '../utils/dimensions';
 import { Point } from '../utils/point';
 import { LegendItem } from '../chart_types/xy_chart/legend/legend';
@@ -69,7 +69,7 @@ export interface InteractionsState {
 }
 
 export interface ExternalEventsState {
-  pointer: CursorEvent | null;
+  pointer: PointerEvent | null;
 }
 
 export interface GlobalChartState {
@@ -202,7 +202,7 @@ export const chartStoreReducer = (chartId: string) => {
         };
       case EXTERNAL_POINTER_EVENT:
         // discard events from self if any
-        if (!action.event || action.event.chartId === state.chartId) {
+        if (action.event.chartId === chartId) {
           return {
             ...state,
             externalEvents: {

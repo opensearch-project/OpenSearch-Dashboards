@@ -1,13 +1,13 @@
-import { CursorEvent } from '../../specs/settings';
+import { PointerEvent } from '../../specs/settings';
 
 export const EXTERNAL_POINTER_EVENT = 'EXTERNAL_POINTER_EVENT';
 
 interface ExternalPointerEvent {
   type: typeof EXTERNAL_POINTER_EVENT;
-  event?: CursorEvent;
+  event: PointerEvent;
 }
 
-export function onExternalPointerEvent(event?: CursorEvent): ExternalPointerEvent {
+export function onExternalPointerEvent(event: PointerEvent): ExternalPointerEvent {
   return { type: EXTERNAL_POINTER_EVENT, event };
 }
 
