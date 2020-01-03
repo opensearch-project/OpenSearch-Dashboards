@@ -47,13 +47,6 @@ export class Playground extends React.Component {
               showLegend
               onPointerUpdate={this.onPointerUpdate}
             />
-            <AreaSeries
-              id="lines"
-              xAccessor={0}
-              yAccessors={[1]}
-              stackAccessors={[0]}
-              data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 5)}
-            />
           </Chart>
         </div>
         <div className="chart">

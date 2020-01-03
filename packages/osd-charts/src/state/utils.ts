@@ -6,11 +6,9 @@ export function getSpecsFromStore<U extends Spec>(specs: SpecList, chartType: Ch
   return Object.keys(specs)
     .filter((specId) => {
       const currentSpec = specs[specId];
-      if (specType) {
-        return currentSpec.specType === specType && currentSpec.chartType === chartType;
-      } else {
-        return currentSpec.chartType === chartType;
-      }
+      const sameChartType = currentSpec.chartType === chartType;
+      const sameSpecType = specType ? currentSpec.specType === specType : true;
+      return sameChartType && sameSpecType;
     })
     .map((specId) => {
       return specs[specId] as U;

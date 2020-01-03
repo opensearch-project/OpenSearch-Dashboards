@@ -115,7 +115,11 @@ class ChartContainerComponent extends React.Component<ReactiveChartProps> {
   render() {
     const { initialized } = this.props;
     if (!initialized) {
-      return null;
+      return (
+        <div className="echReactiveChart_unavailable">
+          <p>No data to display</p>
+        </div>
+      );
     }
     const { pointerCursor, internalChartRenderer, getChartContainerRef, forwardStageRef } = this.props;
     return (
