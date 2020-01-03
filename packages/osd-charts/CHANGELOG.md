@@ -1,3 +1,10 @@
+## [16.0.1](https://github.com/elastic/elastic-charts/compare/v16.0.0...v16.0.1) (2020-01-03)
+
+
+### Bug Fixes
+
+* **specs:** shows a chart message without series specified ([#506](https://github.com/elastic/elastic-charts/issues/506)) ([ba1a67b](https://github.com/elastic/elastic-charts/commit/ba1a67b5c59396fa38dc87516487403e53d30405))
+
 # [16.0.0](https://github.com/elastic/elastic-charts/compare/v15.0.5...v16.0.0) (2020-01-02)
 
 
