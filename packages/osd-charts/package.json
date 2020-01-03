@@ -135,7 +135,6 @@
     "ts-loader": "^6.2.1",
     "ts-prune": "^0.3.0",
     "typescript": "^3.7.0",
-    "utility-types": "^3.9.0",
     "webpack": "^4.29.5",
     "webpack-cli": "^3.3.1",
     "webpack-dev-server": "^3.3.1"
@@ -158,6 +157,7 @@
     "reselect": "^4.0.0",
     "resize-observer-polyfill": "^1.5.1",
     "ts-debounce": "^1.0.0",
+    "utility-types": "^3.9.0",
     "uuid": "^3.3.2"
   },
   "peerDependencies": {
