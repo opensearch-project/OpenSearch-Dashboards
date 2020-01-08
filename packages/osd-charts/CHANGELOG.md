@@ -1,3 +1,10 @@
+# [16.1.0](https://github.com/elastic/elastic-charts/compare/v16.0.2...v16.1.0) (2020-01-08)
+
+
+### Features
+
+* add domain fitting ([#510](https://github.com/elastic/elastic-charts/issues/510)) ([fefe728](https://github.com/elastic/elastic-charts/commit/fefe728da21be72a38855f719bce19588319fb71))
+
 ## [16.0.2](https://github.com/elastic/elastic-charts/compare/v16.0.1...v16.0.2) (2020-01-03)
 
 
