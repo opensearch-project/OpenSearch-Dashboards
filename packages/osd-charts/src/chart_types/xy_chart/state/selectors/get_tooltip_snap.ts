@@ -5,9 +5,10 @@ import { SettingsSpec } from '../../../../specs/settings';
 import { DEFAULT_TOOLTIP_SNAP } from '../../../../specs/settings';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
-export const getTooltipSnapSelector = createCachedSelector([getSettingsSpecSelector], getTooltipSnap)(
-  getChartIdSelector,
-);
+export const getTooltipSnapSelector = createCachedSelector(
+  [getSettingsSpecSelector],
+  getTooltipSnap,
+)(getChartIdSelector);
 
 function getTooltipSnap(settings: SettingsSpec): boolean {
   const { tooltip } = settings;

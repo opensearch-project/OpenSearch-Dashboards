@@ -171,7 +171,4 @@ const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
   };
 };
 
-export const ChartContainer = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(ChartContainerComponent);
+export const ChartContainer = connect(mapStateToProps, mapDispatchToProps)(ChartContainerComponent);

@@ -34,7 +34,11 @@ describe('Render chart', () => {
         yScaleType: ScaleType.Linear,
         xAccessor: 0,
         yAccessors: [1],
-        data: [[day1, 10], [day2, 22], [day3, 6]],
+        data: [
+          [day1, 10],
+          [day2, 22],
+          [day3, 6],
+        ],
         yScaleToDataExtent: false,
       };
       store.dispatch(upsertSpec(lineSeries));
@@ -100,7 +104,11 @@ describe('Render chart', () => {
         yScaleType: ScaleType.Linear,
         xAccessor: 0,
         yAccessors: [1],
-        data: [[date1, 10], [date2, 22], [date3, 6]],
+        data: [
+          [date1, 10],
+          [date2, 22],
+          [date3, 6],
+        ],
         yScaleToDataExtent: false,
       };
       store.dispatch(upsertSpec(lineSeries));
@@ -164,7 +172,11 @@ describe('Render chart', () => {
         yScaleType: ScaleType.Linear,
         xAccessor: 0,
         yAccessors: [1],
-        data: [[date1, 10], [date2, 22], [date3, 6]],
+        data: [
+          [date1, 10],
+          [date2, 22],
+          [date3, 6],
+        ],
         yScaleToDataExtent: false,
       };
       store.dispatch(upsertSpec(lineSeries));

@@ -84,7 +84,12 @@ storiesOf('Interactions', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
       </Chart>
     );
@@ -107,7 +112,12 @@ storiesOf('Interactions', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
       </Chart>
     );
@@ -130,7 +140,12 @@ storiesOf('Interactions', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
       </Chart>
     );
@@ -154,7 +169,12 @@ storiesOf('Interactions', module)
           xAccessor="x"
           yAccessors={['y']}
           splitSeriesAccessors={['g']}
-          data={[{ x: 0, y: 2.3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 8 }]}
+          data={[
+            { x: 0, y: 2.3 },
+            { x: 1, y: 2 },
+            { x: 2, y: 4 },
+            { x: 3, y: 8 },
+          ]}
         />
         <LineSeries
           id={getSpecId('line')}
@@ -162,7 +182,12 @@ storiesOf('Interactions', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
         <AreaSeries
           id={getSpecId('area')}
@@ -170,7 +195,12 @@ storiesOf('Interactions', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2.3 }, { x: 1, y: 7.3 }, { x: 2, y: 6 }, { x: 3, y: 2 }]}
+          data={[
+            { x: 0, y: 2.3 },
+            { x: 1, y: 7.3 },
+            { x: 2, y: 6 },
+            { x: 3, y: 2 },
+          ]}
         />
       </Chart>
     );
@@ -302,7 +332,12 @@ storiesOf('Interactions', module)
           xAccessor="x"
           yAccessors={['y']}
           curve={CurveType.CURVE_MONOTONE_X}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
         <LineSeries
           id={getSpecId('lines2')}
@@ -311,7 +346,12 @@ storiesOf('Interactions', module)
           xAccessor="x"
           yAccessors={['y']}
           curve={CurveType.CURVE_BASIS}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
         <LineSeries
           id={getSpecId('lines3')}
@@ -320,7 +360,12 @@ storiesOf('Interactions', module)
           xAccessor="x"
           yAccessors={['y']}
           curve={CurveType.CURVE_CARDINAL}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
         <LineSeries
           id={getSpecId('lines4')}
@@ -329,7 +374,12 @@ storiesOf('Interactions', module)
           xAccessor="x"
           yAccessors={['y']}
           curve={CurveType.CURVE_CATMULL_ROM}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
         <LineSeries
           id={getSpecId('lines5')}
@@ -338,7 +388,12 @@ storiesOf('Interactions', module)
           xAccessor="x"
           yAccessors={['y']}
           curve={CurveType.CURVE_NATURAL}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
         <LineSeries
           id={getSpecId('lines6')}
@@ -347,7 +402,12 @@ storiesOf('Interactions', module)
           xAccessor="x"
           yAccessors={['y']}
           curve={CurveType.LINEAR}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
       </Chart>
     );
@@ -376,7 +436,12 @@ storiesOf('Interactions', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
         <LineSeries
           id={getSpecId('lines')}
@@ -386,7 +451,12 @@ storiesOf('Interactions', module)
           yAccessors={['y']}
           stackAccessors={['x']}
           splitSeriesAccessors={['g']}
-          data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
+          data={[
+            { x: 0, y: 3 },
+            { x: 1, y: 2 },
+            { x: 2, y: 4 },
+            { x: 3, y: 10 },
+          ]}
         />
       </Chart>
     );
@@ -411,7 +481,12 @@ storiesOf('Interactions', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
       </Chart>
     );
@@ -436,7 +511,11 @@ storiesOf('Interactions', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 1, y: 2 }, { x: 2, y: 7 }, { x: 3, y: 3 }]}
+          data={[
+            { x: 1, y: 2 },
+            { x: 2, y: 7 },
+            { x: 3, y: 3 },
+          ]}
         />
       </Chart>
     );
@@ -549,7 +628,12 @@ storiesOf('Interactions', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 'a', y: 2 }, { x: 'b', y: 7 }, { x: 'c', y: 3 }, { x: 'd', y: 6 }]}
+          data={[
+            { x: 'a', y: 2 },
+            { x: 'b', y: 7 },
+            { x: 'c', y: 3 },
+            { x: 'd', y: 6 },
+          ]}
         />
       </Chart>
     );
@@ -654,7 +738,12 @@ storiesOf('Interactions', module)
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={['y']}
-            data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+            data={[
+              { x: 0, y: 2 },
+              { x: 1, y: 7 },
+              { x: 2, y: 3 },
+              { x: 3, y: 6 },
+            ]}
           />
         </Chart>
       );
@@ -686,7 +775,12 @@ storiesOf('Interactions', module)
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={['y']}
-            data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+            data={[
+              { x: 0, y: 2 },
+              { x: 1, y: 7 },
+              { x: 2, y: 3 },
+              { x: 3, y: 6 },
+            ]}
           />
         </Chart>
       );

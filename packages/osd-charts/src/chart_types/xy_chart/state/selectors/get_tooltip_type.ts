@@ -4,9 +4,10 @@ import { getSettingsSpecSelector } from '../../../../state/selectors/get_setting
 import { SettingsSpec } from '../../../../specs/settings';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
-export const getTooltipTypeSelector = createCachedSelector([getSettingsSpecSelector], getTooltipType)(
-  getChartIdSelector,
-);
+export const getTooltipTypeSelector = createCachedSelector(
+  [getSettingsSpecSelector],
+  getTooltipType,
+)(getChartIdSelector);
 
 function getTooltipType(settings: SettingsSpec): TooltipType {
   const { tooltip } = settings;

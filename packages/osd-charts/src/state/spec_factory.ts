@@ -51,8 +51,5 @@ const mapDispatchToProps = (dispatch: Dispatch): DispatchProps =>
   );
 
 export function getConnect() {
-  return connect(
-    null,
-    mapDispatchToProps,
-  );
+  return connect(null, mapDispatchToProps);
 }

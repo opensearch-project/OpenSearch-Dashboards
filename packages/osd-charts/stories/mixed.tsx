@@ -38,7 +38,12 @@ storiesOf('Mixed Charts', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
         <LineSeries
           id={getSpecId('line')}
@@ -46,7 +51,12 @@ storiesOf('Mixed Charts', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
+          data={[
+            { x: 0, y: 3 },
+            { x: 1, y: 2 },
+            { x: 2, y: 4 },
+            { x: 3, y: 10 },
+          ]}
         />
       </Chart>
     );
@@ -69,7 +79,12 @@ storiesOf('Mixed Charts', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2.5 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2.5 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
         <LineSeries
           id={getSpecId('lines')}
@@ -78,7 +93,12 @@ storiesOf('Mixed Charts', module)
           xAccessor="x"
           yAccessors={['y']}
           stackAccessors={['x']}
-          data={[{ x: 0, y: 2.8 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
+          data={[
+            { x: 0, y: 2.8 },
+            { x: 1, y: 2 },
+            { x: 2, y: 4 },
+            { x: 3, y: 10 },
+          ]}
         />
       </Chart>
     );
@@ -109,7 +129,12 @@ storiesOf('Mixed Charts', module)
           yAccessors={['y']}
           splitSeriesAccessors={['g']}
           stackAccessors={['x']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
           yScaleToDataExtent={false}
         />
         <AreaSeries
@@ -119,15 +144,40 @@ storiesOf('Mixed Charts', module)
           xAccessor="x"
           yAccessors={['y']}
           curve={CurveType.CURVE_MONOTONE_X}
-          data={[{ x: 0, y: 2.5 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2.5 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
           yScaleToDataExtent={false}
         />
       </Chart>
     );
   })
   .add('[test] - bar/lines linear', () => {
-    const data1 = [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 4], [7, 3], [8, 2], [9, 1]];
-    const data2 = [[1, 5], [2, 4], [3, 3], [4, 2], [5, 1], [6, 2], [7, 3], [8, 4], [9, 5]];
+    const data1 = [
+      [1, 1],
+      [2, 2],
+      [3, 3],
+      [4, 4],
+      [5, 5],
+      [6, 4],
+      [7, 3],
+      [8, 2],
+      [9, 1],
+    ];
+    const data2 = [
+      [1, 5],
+      [2, 4],
+      [3, 3],
+      [4, 2],
+      [5, 1],
+      [6, 2],
+      [7, 3],
+      [8, 4],
+      [9, 5],
+    ];
 
     return (
       <Chart className={'story-chart'}>

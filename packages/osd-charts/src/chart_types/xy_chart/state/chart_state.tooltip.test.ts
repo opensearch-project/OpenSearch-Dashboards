@@ -12,7 +12,16 @@ describe('XYChart - State tooltips', () => {
   beforeEach(() => {
     const storeReducer = chartStoreReducer('chartId');
     store = createStore(storeReducer);
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ data: [{ x: 1, y: 10 }, { x: 2, y: 5 }] })));
+    store.dispatch(
+      upsertSpec(
+        MockSeriesSpec.bar({
+          data: [
+            { x: 1, y: 10 },
+            { x: 2, y: 5 },
+          ],
+        }),
+      ),
+    );
     store.dispatch(upsertSpec(MockGlobalSpec.settings()));
     store.dispatch(specParsed());
     store.dispatch(updateParentDimensions({ width: 100, height: 100, top: 0, left: 0 }));

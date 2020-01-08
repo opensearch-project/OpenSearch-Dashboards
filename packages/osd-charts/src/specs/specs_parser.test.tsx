@@ -30,9 +30,33 @@ describe('Specs parser', () => {
     const component = (
       <Provider store={chartStore}>
         <SpecsParser>
-          <BarSeries id={'bars'} xAccessor={0} yAccessors={[1]} data={[[0, 1], [1, 2]]} />
-          <BarSeries id={'bars'} xAccessor={0} yAccessors={[1]} data={[[0, 1], [1, 2]]} />
-          <BarSeries id={'bars2'} xAccessor={0} yAccessors={[1]} data={[[0, 1], [1, 2]]} />
+          <BarSeries
+            id={'bars'}
+            xAccessor={0}
+            yAccessors={[1]}
+            data={[
+              [0, 1],
+              [1, 2],
+            ]}
+          />
+          <BarSeries
+            id={'bars'}
+            xAccessor={0}
+            yAccessors={[1]}
+            data={[
+              [0, 1],
+              [1, 2],
+            ]}
+          />
+          <BarSeries
+            id={'bars2'}
+            xAccessor={0}
+            yAccessors={[1]}
+            data={[
+              [0, 1],
+              [1, 2],
+            ]}
+          />
         </SpecsParser>
       </Provider>
     );
@@ -51,7 +75,15 @@ describe('Specs parser', () => {
     const component = (
       <Provider store={chartStore}>
         <SpecsParser>
-          <BarSeries id={'bars'} xAccessor={0} yAccessors={[1]} data={[[0, 1], [1, 2]]} />
+          <BarSeries
+            id={'bars'}
+            xAccessor={0}
+            yAccessors={[1]}
+            data={[
+              [0, 1],
+              [1, 2],
+            ]}
+          />
         </SpecsParser>
       </Provider>
     );
@@ -60,7 +92,15 @@ describe('Specs parser', () => {
     wrapper.setProps({
       children: (
         <SpecsParser>
-          <BarSeries id={'bars'} xAccessor={1} yAccessors={[1]} data={[[0, 1], [1, 2]]} />
+          <BarSeries
+            id={'bars'}
+            xAccessor={1}
+            yAccessors={[1]}
+            data={[
+              [0, 1],
+              [1, 2],
+            ]}
+          />
         </SpecsParser>
       ),
     });

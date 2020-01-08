@@ -92,7 +92,4 @@ const mapStateToProps = (state: GlobalChartState): ResizerStateProps => {
   };
 };
 
-export const ChartResizer = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(Resizer);
+export const ChartResizer = connect(mapStateToProps, mapDispatchToProps)(Resizer);

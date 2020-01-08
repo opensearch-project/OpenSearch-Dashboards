@@ -50,7 +50,7 @@ export type RecursivePartial<T> = {
     ? RecursivePartial<U>[]
     : T[P] extends ReadonlyArray<infer U> // eslint-disable-line @typescript-eslint/array-type
     ? ReadonlyArray<RecursivePartial<U>> // eslint-disable-line @typescript-eslint/array-type
-    : RecursivePartial<T[P]>
+    : RecursivePartial<T[P]>;
 };
 
 export interface MergeOptions {

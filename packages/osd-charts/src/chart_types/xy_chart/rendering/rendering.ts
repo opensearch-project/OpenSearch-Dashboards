@@ -101,68 +101,65 @@ function renderPoints(
 } {
   const indexedGeometries: Map<any, IndexedGeometry[]> = new Map();
   const isLogScale = isLogarithmicScale(yScale);
-  const pointGeometries = dataSeries.data.reduce(
-    (acc, datum) => {
-      const { x: xValue, y0, y1, initialY0, initialY1, filled } = datum;
-      // don't create the point if not within the xScale domain or it that point was filled
-      if (!xScale.isValueInDomain(xValue) || (filled && filled.y1 !== undefined)) {
-        return acc;
-      }
-      const x = xScale.scale(xValue);
-      const points: PointGeometry[] = [];
-      const yDatums = hasY0Accessors ? [y0, y1] : [y1];
+  const pointGeometries = dataSeries.data.reduce((acc, datum) => {
+    const { x: xValue, y0, y1, initialY0, initialY1, filled } = datum;
+    // don't create the point if not within the xScale domain or it that point was filled
+    if (!xScale.isValueInDomain(xValue) || (filled && filled.y1 !== undefined)) {
+      return acc;
+    }
+    const x = xScale.scale(xValue);
+    const points: PointGeometry[] = [];
+    const yDatums = hasY0Accessors ? [y0, y1] : [y1];
 
-      yDatums.forEach((yDatum, index) => {
-        // skip rendering point if y1 is null
-        if (y1 === null) {
-          return;
-        }
-        let y;
-        let radius = 10;
-        // we fix 0 and negative values at y = 0
-        if (yDatum === null || (isLogScale && yDatum <= 0)) {
-          y = yScale.range[0];
-          radius = 0;
-        } else {
-          y = yScale.scale(yDatum);
-        }
-        const originalY = hasY0Accessors && index === 0 ? initialY0 : initialY1;
-        const seriesIdentifier: SeriesIdentifier = {
-          key: dataSeries.key,
-          specId: dataSeries.specId,
-          yAccessor: dataSeries.yAccessor,
-          splitAccessors: dataSeries.splitAccessors,
-          seriesKeys: dataSeries.seriesKeys,
-        };
-        const styleOverrides = getPointStyleOverrides(datum, seriesIdentifier, styleAccessor);
-        const pointGeometry: PointGeometry = {
-          radius,
-          x,
-          y,
-          color,
-          value: {
-            x: xValue,
-            y: originalY,
-            accessor: hasY0Accessors && index === 0 ? BandedAccessorType.Y0 : BandedAccessorType.Y1,
-          },
-          transform: {
-            x: shift,
-            y: 0,
-          },
-          seriesIdentifier,
-          styleOverrides,
-        };
-        mutableIndexedGeometryMapUpsert(indexedGeometries, xValue, pointGeometry);
-        // use the geometry only if the yDatum in contained in the current yScale domain
-        const isHidden = yDatum === null || (isLogScale && yDatum <= 0);
-        if (!isHidden && yScale.isValueInDomain(yDatum)) {
-          points.push(pointGeometry);
-        }
-      });
-      return [...acc, ...points];
-    },
-    [] as PointGeometry[],
-  );
+    yDatums.forEach((yDatum, index) => {
+      // skip rendering point if y1 is null
+      if (y1 === null) {
+        return;
+      }
+      let y;
+      let radius = 10;
+      // we fix 0 and negative values at y = 0
+      if (yDatum === null || (isLogScale && yDatum <= 0)) {
+        y = yScale.range[0];
+        radius = 0;
+      } else {
+        y = yScale.scale(yDatum);
+      }
+      const originalY = hasY0Accessors && index === 0 ? initialY0 : initialY1;
+      const seriesIdentifier: SeriesIdentifier = {
+        key: dataSeries.key,
+        specId: dataSeries.specId,
+        yAccessor: dataSeries.yAccessor,
+        splitAccessors: dataSeries.splitAccessors,
+        seriesKeys: dataSeries.seriesKeys,
+      };
+      const styleOverrides = getPointStyleOverrides(datum, seriesIdentifier, styleAccessor);
+      const pointGeometry: PointGeometry = {
+        radius,
+        x,
+        y,
+        color,
+        value: {
+          x: xValue,
+          y: originalY,
+          accessor: hasY0Accessors && index === 0 ? BandedAccessorType.Y0 : BandedAccessorType.Y1,
+        },
+        transform: {
+          x: shift,
+          y: 0,
+        },
+        seriesIdentifier,
+        styleOverrides,
+      };
+      mutableIndexedGeometryMapUpsert(indexedGeometries, xValue, pointGeometry);
+      // use the geometry only if the yDatum in contained in the current yScale domain
+      const isHidden = yDatum === null || (isLogScale && yDatum <= 0);
+      if (!isHidden && yScale.isValueInDomain(yDatum)) {
+        points.push(pointGeometry);
+      }
+    });
+    return [...acc, ...points];
+  }, [] as PointGeometry[]);
   return {
     pointGeometries,
     indexedGeometries,

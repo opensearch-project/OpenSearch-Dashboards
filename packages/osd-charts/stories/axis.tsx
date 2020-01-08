@@ -1,4 +1,4 @@
-import { boolean, number } from '@storybook/addon-knobs';
+import { boolean, number, select } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 
@@ -191,7 +191,12 @@ storiesOf('Axis', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
         <Settings debug={boolean('debug', false)} />
       </Chart>
@@ -235,7 +240,12 @@ storiesOf('Axis', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
       </Chart>
     );
@@ -276,7 +286,12 @@ storiesOf('Axis', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 3 }, { x: 3, y: 4 }]}
+          data={[
+            { x: 0, y: 1 },
+            { x: 1, y: 2 },
+            { x: 2, y: 3 },
+            { x: 3, y: 4 },
+          ]}
         />
       </Chart>
     );
@@ -305,7 +320,12 @@ storiesOf('Axis', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
         <LineSeries
           id={getSpecId('lines')}
@@ -316,7 +336,12 @@ storiesOf('Axis', module)
           yAccessors={['y']}
           stackAccessors={['x']}
           splitSeriesAccessors={['g']}
-          data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
+          data={[
+            { x: 0, y: 3 },
+            { x: 1, y: 2 },
+            { x: 2, y: 4 },
+            { x: 3, y: 10 },
+          ]}
         />
       </Chart>
     );
@@ -349,7 +374,12 @@ storiesOf('Axis', module)
           yAccessors={['y']}
           stackAccessors={['x']}
           splitSeriesAccessors={['g']}
-          data={[{ x: 0, y: 5 }, { x: 1, y: 4 }, { x: 2, y: 3 }, { x: 3, y: 2 }]}
+          data={[
+            { x: 0, y: 5 },
+            { x: 1, y: 4 },
+            { x: 2, y: 3 },
+            { x: 3, y: 2 },
+          ]}
         />
         <LineSeries
           id={getSpecId('line2')}
@@ -360,7 +390,12 @@ storiesOf('Axis', module)
           yAccessors={['y']}
           stackAccessors={['x']}
           splitSeriesAccessors={['g']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 3 }, { x: 2, y: 4 }, { x: 3, y: 5 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 3 },
+            { x: 2, y: 4 },
+            { x: 3, y: 5 },
+          ]}
         />
       </Chart>
     );
@@ -447,7 +482,12 @@ storiesOf('Axis', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
         <LineSeries
           id={getSpecId('lines')}
@@ -458,7 +498,12 @@ storiesOf('Axis', module)
           yAccessors={['y']}
           stackAccessors={['x']}
           splitSeriesAccessors={['g']}
-          data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
+          data={[
+            { x: 0, y: 3 },
+            { x: 1, y: 2 },
+            { x: 2, y: 4 },
+            { x: 3, y: 10 },
+          ]}
         />
       </Chart>
     );
@@ -508,7 +553,12 @@ storiesOf('Axis', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 'a', y: 2 }, { x: 'b', y: 7 }, { x: 'c', y: 3 }, { x: 'd', y: 6 }]}
+          data={[
+            { x: 'a', y: 2 },
+            { x: 'b', y: 7 },
+            { x: 'c', y: 3 },
+            { x: 'd', y: 6 },
+          ]}
         />
         <LineSeries
           id={getSpecId('lines')}
@@ -519,7 +569,12 @@ storiesOf('Axis', module)
           yAccessors={['y']}
           stackAccessors={['x']}
           splitSeriesAccessors={['g']}
-          data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
+          data={[
+            { x: 0, y: 3 },
+            { x: 1, y: 2 },
+            { x: 2, y: 4 },
+            { x: 3, y: 10 },
+          ]}
         />
       </Chart>
     );
@@ -550,7 +605,59 @@ storiesOf('Axis', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
+        />
+      </Chart>
+    );
+  })
+  .add('fit domain to extent in y axis', () => {
+    const dg = new SeededDataGenerator();
+    const base = dg.generateBasicSeries(100, 0, 50);
+    const positive = base.map(({ x, y }) => ({ x, y: y + 1000 }));
+    const both = base.map(({ x, y }) => ({ x, y: y - 100 }));
+    const negative = base.map(({ x, y }) => ({ x, y: y - 1000 }));
+
+    const dataTypes = {
+      positive,
+      both,
+      negative,
+    };
+    const dataKey = select<string>(
+      'dataset',
+      {
+        'Positive values only': 'positive',
+        'Positive and negative': 'both',
+        'Negtive values only': 'negative',
+      },
+      'both',
+    );
+    // @ts-ignore
+    const dataset = dataTypes[dataKey];
+    const fit = boolean('fit domain to data', true);
+
+    return (
+      <Chart className={'story-chart'}>
+        <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} />
+        <Axis
+          domain={{ fit }}
+          id={getAxisId('left')}
+          title="Value"
+          position={Position.Left}
+          tickFormat={(d) => Number(d).toFixed(2)}
+        />
+
+        <LineSeries
+          id={getSpecId('lines')}
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={dataset}
         />
       </Chart>
     );

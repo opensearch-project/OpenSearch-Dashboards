@@ -369,7 +369,17 @@ storiesOf('Area Chart', module)
     );
   })
   .add('[test] - linear', () => {
-    const data = [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 4], [7, 3], [8, 2], [9, 1]];
+    const data = [
+      [1, 1],
+      [2, 2],
+      [3, 3],
+      [4, 4],
+      [5, 5],
+      [6, 4],
+      [7, 3],
+      [8, 2],
+      [9, 1],
+    ];
     return (
       <Chart className={'story-chart'}>
         <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} />
@@ -530,9 +540,39 @@ storiesOf('Area Chart', module)
     );
   })
   .add('stacked only grouped areas', () => {
-    const data1 = [[1, 2], [2, 2], [3, 3], [4, 5], [5, 5], [6, 3], [7, 8], [8, 2], [9, 1]];
-    const data2 = [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 4], [7, 3], [8, 2], [9, 4]];
-    const data3 = [[1, 6], [2, 6], [3, 3], [4, 2], [5, 1], [6, 1], [7, 5], [8, 6], [9, 7]];
+    const data1 = [
+      [1, 2],
+      [2, 2],
+      [3, 3],
+      [4, 5],
+      [5, 5],
+      [6, 3],
+      [7, 8],
+      [8, 2],
+      [9, 1],
+    ];
+    const data2 = [
+      [1, 1],
+      [2, 2],
+      [3, 3],
+      [4, 4],
+      [5, 5],
+      [6, 4],
+      [7, 3],
+      [8, 2],
+      [9, 4],
+    ];
+    const data3 = [
+      [1, 6],
+      [2, 6],
+      [3, 3],
+      [4, 2],
+      [5, 1],
+      [6, 1],
+      [7, 5],
+      [8, 6],
+      [9, 7],
+    ];
     return (
       <Chart renderer="canvas" className={'story-chart'}>
         <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} />

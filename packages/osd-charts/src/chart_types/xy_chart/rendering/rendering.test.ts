@@ -367,7 +367,13 @@ describe('Rendering utils', () => {
     it('should return array pairs of non-null x regions with null end values', () => {
       const actual = getClippedRanges(dataSeries.data, xScale, 0);
 
-      expect(actual).toEqual([[0, 1], [2, 4], [4, 6], [7, 11], [11, 12]]);
+      expect(actual).toEqual([
+        [0, 1],
+        [2, 4],
+        [4, 6],
+        [7, 11],
+        [11, 12],
+      ]);
     });
 
     it('should return array pairs of non-null x regions with valid end values', () => {
@@ -378,7 +384,11 @@ describe('Rendering utils', () => {
       });
       const actual = getClippedRanges(data, xScale, 0);
 
-      expect(actual).toEqual([[2, 4], [4, 6], [7, 11]]);
+      expect(actual).toEqual([
+        [2, 4],
+        [4, 6],
+        [7, 11],
+      ]);
     });
 
     it('should account for bandwidth', () => {
@@ -390,13 +400,23 @@ describe('Rendering utils', () => {
       });
       const actual = getClippedRanges(dataSeries.data, xScale, 0);
 
-      expect(actual).toEqual([[0, 2], [3, 5], [5, 7], [8, 12]]);
+      expect(actual).toEqual([
+        [0, 2],
+        [3, 5],
+        [5, 7],
+        [8, 12],
+      ]);
     });
 
     it('should account for xScaleOffset', () => {
       const actual = getClippedRanges(dataSeries.data, xScale, 2);
 
-      expect(actual).toEqual([[0, -1], [0, 2], [2, 4], [5, 9]]);
+      expect(actual).toEqual([
+        [0, -1],
+        [0, 2],
+        [2, 4],
+        [5, 9],
+      ]);
     });
 
     it('should call scale to get x value for each datum', () => {

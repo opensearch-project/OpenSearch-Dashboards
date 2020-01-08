@@ -193,7 +193,11 @@ const DATA_SET_WITH_NULL_2: RawDataSeries[] = [
     splitAccessors: new Map(),
     seriesKeys: ['a'],
     key: 'a',
-    data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 4, y1: 4 }],
+    data: [
+      { x: 1, y1: 1 },
+      { x: 2, y1: 2 },
+      { x: 4, y1: 4 },
+    ],
   },
   {
     specId: 'spec1',
@@ -201,7 +205,10 @@ const DATA_SET_WITH_NULL_2: RawDataSeries[] = [
     splitAccessors: new Map(),
     seriesKeys: ['b'],
     key: 'b',
-    data: [{ x: 1, y1: 21 }, { x: 3, y1: 23 }],
+    data: [
+      { x: 1, y1: 21 },
+      { x: 3, y1: 23 },
+    ],
   },
 ];
 describe('Non-Stacked Series Utils', () => {

@@ -245,7 +245,12 @@ storiesOf('Stylings', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
       </Chart>
     );
@@ -299,7 +304,12 @@ storiesOf('Stylings', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
       </Chart>
     );
@@ -664,7 +674,12 @@ storiesOf('Stylings', module)
           xAccessor="x"
           yAccessors={['y']}
           customSeriesColors={lineSeriesColorAccessor}
-          data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
+          data={[
+            { x: 0, y: 3 },
+            { x: 1, y: 2 },
+            { x: 2, y: 4 },
+            { x: 3, y: 10 },
+          ]}
         />
       </Chart>
     );
@@ -741,7 +756,12 @@ storiesOf('Stylings', module)
       lineSeriesStyle: generateLineSeriesStyleKnobs('Chart Global Theme', 'chartTheme'),
     };
 
-    const dataset1 = [{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }];
+    const dataset1 = [
+      { x: 0, y: 3 },
+      { x: 1, y: 2 },
+      { x: 2, y: 4 },
+      { x: 3, y: 10 },
+    ];
     const dataset2 = dataset1.map((datum) => ({ ...datum, y: datum.y - 1 }));
     const dataset3 = dataset1.map((datum) => ({ ...datum, y: datum.y - 2 }));
 
@@ -794,7 +814,12 @@ storiesOf('Stylings', module)
       areaSeriesStyle: generateAreaSeriesStyleKnobs('Chart Global Theme', 'chartTheme'),
     };
 
-    const dataset1 = [{ x: 0, y: 3 }, { x: 1, y: 6 }, { x: 2, y: 4 }, { x: 3, y: 10 }];
+    const dataset1 = [
+      { x: 0, y: 3 },
+      { x: 1, y: 6 },
+      { x: 2, y: 4 },
+      { x: 3, y: 10 },
+    ];
     const dataset2 = dataset1.map((datum) => ({ ...datum, y: datum.y - 1 }));
     const dataset3 = dataset1.map((datum) => ({ ...datum, y: datum.y - 2 }));
 
@@ -996,7 +1021,12 @@ storiesOf('Stylings', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
       </Chart>
     );
@@ -1045,7 +1075,12 @@ storiesOf('Stylings', module)
           xAccessor="x"
           yAccessors={['y']}
           styleAccessor={hasThreshold ? barStyleAccessor : undefined}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
         />
 
         <LineSeries
@@ -1055,7 +1090,12 @@ storiesOf('Stylings', module)
           xAccessor="x"
           yAccessors={['y']}
           pointStyleAccessor={hasThreshold ? pointStyleAccessor : undefined}
-          data={[{ x: 0, y: 1 }, { x: 1, y: 6 }, { x: 2, y: 2 }, { x: 3, y: 5 }]}
+          data={[
+            { x: 0, y: 1 },
+            { x: 1, y: 6 },
+            { x: 2, y: 2 },
+            { x: 3, y: 5 },
+          ]}
         />
 
         <AreaSeries
@@ -1065,7 +1105,12 @@ storiesOf('Stylings', module)
           xAccessor="x"
           yAccessors={['y']}
           pointStyleAccessor={hasThreshold ? pointStyleAccessor : undefined}
-          data={[{ x: 0, y: 0.5 }, { x: 1, y: 4 }, { x: 2, y: 1 }, { x: 3, y: 4 }]}
+          data={[
+            { x: 0, y: 0.5 },
+            { x: 1, y: 4 },
+            { x: 2, y: 1 },
+            { x: 3, y: 4 },
+          ]}
         />
       </Chart>
     );

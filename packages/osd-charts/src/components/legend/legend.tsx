@@ -215,7 +215,4 @@ const mapStateToProps = (state: GlobalChartState): LegendStateProps => {
   };
 };
 
-export const Legend = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(LegendComponent);
+export const Legend = connect(mapStateToProps, mapDispatchToProps)(LegendComponent);

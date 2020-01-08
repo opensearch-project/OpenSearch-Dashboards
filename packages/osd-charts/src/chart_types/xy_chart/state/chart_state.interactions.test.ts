@@ -32,7 +32,10 @@ const ordinalBarSeries: BarSeriesSpec = {
   groupId: GROUP_ID,
   seriesType: SeriesTypes.Bar,
   yScaleToDataExtent: false,
-  data: [[0, 10], [1, 5]],
+  data: [
+    [0, 10],
+    [1, 5],
+  ],
   xAccessor: 0,
   yAccessors: [1],
   xScaleType: ScaleType.Ordinal,
@@ -46,7 +49,10 @@ const linearBarSeries: BarSeriesSpec = {
   groupId: GROUP_ID,
   seriesType: SeriesTypes.Bar,
   yScaleToDataExtent: false,
-  data: [[0, 10], [1, 5]],
+  data: [
+    [0, 10],
+    [1, 5],
+  ],
   xAccessor: 0,
   yAccessors: [1],
   xScaleType: ScaleType.Linear,

@@ -7,12 +7,9 @@ import { ChartTypes } from '../../..';
 
 const getSpecs = (state: GlobalChartState) => state.specs;
 
-export const getAxisSpecsSelector = createCachedSelector(
-  [getSpecs],
-  (specs): AxisSpec[] => {
-    return getSpecsFromStore<AxisSpec>(specs, ChartTypes.XYAxis, SpecTypes.Axis);
-  },
-)(getChartIdSelector);
+export const getAxisSpecsSelector = createCachedSelector([getSpecs], (specs): AxisSpec[] => {
+  return getSpecsFromStore<AxisSpec>(specs, ChartTypes.XYAxis, SpecTypes.Axis);
+})(getChartIdSelector);
 
 export const getSeriesSpecsSelector = createCachedSelector([getSpecs], (specs) => {
   const seriesSpec = getSpecsFromStore<BasicSeriesSpec>(specs, ChartTypes.XYAxis, SpecTypes.Series);

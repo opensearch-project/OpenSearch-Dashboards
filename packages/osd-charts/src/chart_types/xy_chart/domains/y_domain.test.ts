@@ -21,7 +21,12 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 2 },
+          { x: 4, y1: 5 },
+        ],
       },
       {
         specId: 'a',
@@ -29,7 +34,10 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 4, y1: 7 },
+        ],
       },
     ];
     const specDataSeries = new Map();
@@ -66,7 +74,12 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 2 },
+          { x: 4, y1: 5 },
+        ],
       },
       {
         specId: 'a',
@@ -74,7 +87,10 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 4, y1: 7 },
+        ],
       },
     ];
     const dataSeries2: RawDataSeries[] = [
@@ -84,7 +100,12 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 10 }, { x: 2, y1: 10 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+        data: [
+          { x: 1, y1: 10 },
+          { x: 2, y1: 10 },
+          { x: 3, y1: 2 },
+          { x: 4, y1: 5 },
+        ],
       },
     ];
     const specDataSeries = new Map();
@@ -137,7 +158,12 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 2 },
+          { x: 4, y1: 5 },
+        ],
       },
       {
         specId: 'a',
@@ -145,7 +171,10 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 4, y1: 7 },
+        ],
       },
     ];
     const dataSeries2: RawDataSeries[] = [
@@ -155,7 +184,12 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 10 }, { x: 2, y1: 10 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+        data: [
+          { x: 1, y1: 10 },
+          { x: 2, y1: 10 },
+          { x: 3, y1: 2 },
+          { x: 4, y1: 5 },
+        ],
       },
     ];
     const specDataSeries = new Map();
@@ -201,7 +235,12 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 2 },
+          { x: 4, y1: 5 },
+        ],
       },
       {
         specId: 'a',
@@ -209,7 +248,10 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 4, y1: 7 },
+        ],
       },
     ];
     const dataSeries2: RawDataSeries[] = [
@@ -219,7 +261,12 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 10 }, { x: 2, y1: 10 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+        data: [
+          { x: 1, y1: 10 },
+          { x: 2, y1: 10 },
+          { x: 3, y1: 2 },
+          { x: 4, y1: 5 },
+        ],
       },
     ];
     const specDataSeries = new Map();
@@ -492,7 +539,12 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 2 },
+          { x: 4, y1: 5 },
+        ],
       },
       {
         specId: 'a',
@@ -500,7 +552,10 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 4, y1: 7 },
+        ],
       },
     ];
     const specDataSeries = new Map();
@@ -530,7 +585,12 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 2 },
+          { x: 4, y1: 5 },
+        ],
       },
       {
         specId: 'a',
@@ -538,7 +598,10 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 4, y1: 7 },
+        ],
       },
     ];
     const specDataSeries = new Map();
@@ -580,7 +643,12 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 2 },
+          { x: 4, y1: 5 },
+        ],
       },
       {
         specId: 'a',
@@ -588,7 +656,10 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 4, y1: 7 },
+        ],
       },
     ];
     const specDataSeries = new Map();
@@ -630,7 +701,12 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 2 },
+          { x: 4, y1: 5 },
+        ],
       },
       {
         specId: 'a',
@@ -638,7 +714,10 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 4, y1: 7 },
+        ],
       },
     ];
     const specDataSeries = new Map();
@@ -676,7 +755,12 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 2 },
+          { x: 4, y1: 5 },
+        ],
       },
       {
         specId: 'a',
@@ -684,7 +768,10 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 4, y1: 7 },
+        ],
       },
     ];
     const specDataSeries = new Map();
@@ -726,7 +813,12 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 2 },
+          { x: 4, y1: 5 },
+        ],
       },
       {
         specId: 'a',
@@ -734,7 +826,10 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 4, y1: 7 },
+        ],
       },
     ];
     const specDataSeries = new Map();
@@ -770,7 +865,12 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 2 },
+          { x: 4, y1: 5 },
+        ],
       },
       {
         specId: 'a',
@@ -778,7 +878,10 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 4, y1: 7 },
+        ],
       },
     ];
     const dataSeries2: RawDataSeries[] = [
@@ -788,7 +891,12 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 10 }, { x: 2, y1: 10 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+        data: [
+          { x: 1, y1: 10 },
+          { x: 2, y1: 10 },
+          { x: 3, y1: 2 },
+          { x: 4, y1: 5 },
+        ],
       },
     ];
     const specDataSeries = new Map();
@@ -836,7 +944,12 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 2, y1: 2 }, { x: 3, y1: 2 }, { x: 4, y1: 5 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 2 },
+          { x: 4, y1: 5 },
+        ],
       },
       {
         specId: 'a',
@@ -844,7 +957,10 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [{ x: 1, y1: 2 }, { x: 4, y1: 7 }],
+        data: [
+          { x: 1, y1: 2 },
+          { x: 4, y1: 7 },
+        ],
       },
     ];
     const specDataSeries = new Map();

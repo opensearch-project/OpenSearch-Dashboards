@@ -20,7 +20,12 @@ describe('Legend', () => {
           xAccessor={0}
           yAccessors={[1]}
           splitSeriesAccessors={[2]}
-          data={[[0, 123, 'group0'], [0, 123, 'group1'], [0, 123, 'group2'], [0, 123, 'group3']]}
+          data={[
+            [0, 123, 'group0'],
+            [0, 123, 'group1'],
+            [0, 123, 'group2'],
+            [0, 123, 'group3'],
+          ]}
         />
       </Chart>,
     );
@@ -46,7 +51,12 @@ describe('Legend', () => {
           xAccessor={0}
           yAccessors={[1]}
           splitSeriesAccessors={[2]}
-          data={[[0, 123, 'group0'], [0, 123, 'group1'], [0, 123, 'group2'], [0, 123, 'group3']]}
+          data={[
+            [0, 123, 'group0'],
+            [0, 123, 'group1'],
+            [0, 123, 'group2'],
+            [0, 123, 'group3'],
+          ]}
         />
       </Chart>,
     );

@@ -166,7 +166,12 @@ storiesOf('Legend', module)
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+          data={[
+            { x: 0, y: 2 },
+            { x: 1, y: 7 },
+            { x: 2, y: 3 },
+            { x: 3, y: 6 },
+          ]}
           hideInLegend={hideBarSeriesInLegend}
         />
         <LineSeries
@@ -177,7 +182,12 @@ storiesOf('Legend', module)
           yAccessors={['y']}
           stackAccessors={['x']}
           splitSeriesAccessors={['g']}
-          data={[{ x: 0, y: 3 }, { x: 1, y: 2 }, { x: 2, y: 4 }, { x: 3, y: 10 }]}
+          data={[
+            { x: 0, y: 3 },
+            { x: 1, y: 2 },
+            { x: 2, y: 4 },
+            { x: 3, y: 10 },
+          ]}
           hideInLegend={hideLineSeriesInLegend}
         />
       </Chart>
@@ -261,7 +271,12 @@ storiesOf('Legend', module)
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={['y']}
-            data={[{ x: 0, y: 2 }, { x: 1, y: 100000000 }, { x: 2, y: 3 }, { x: 3, y: 6 }]}
+            data={[
+              { x: 0, y: 2 },
+              { x: 1, y: 100000000 },
+              { x: 2, y: 3 },
+              { x: 3, y: 6 },
+            ]}
           />
           <BarSeries
             id={getSpecId('bars 2')}
@@ -269,7 +284,12 @@ storiesOf('Legend', module)
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={['y']}
-            data={[{ x: 0, y: 2 }, { x: 1, y: 7 }, { x: 2, y: 100000000 }, { x: 3, y: 6 }]}
+            data={[
+              { x: 0, y: 2 },
+              { x: 1, y: 7 },
+              { x: 2, y: 100000000 },
+              { x: 3, y: 6 },
+            ]}
           />
         </Chart>
       );

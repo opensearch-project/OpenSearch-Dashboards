@@ -179,7 +179,11 @@ describe('Stacked Series Utils', () => {
       splitAccessors: new Map(),
       seriesKeys: ['a'],
       key: 'a',
-      data: [{ x: 1, y1: 10 }, { x: 2, y1: 20 }, { x: 4, y1: 40 }],
+      data: [
+        { x: 1, y1: 10 },
+        { x: 2, y1: 20 },
+        { x: 4, y1: 40 },
+      ],
     },
     {
       specId: 'spec1',
@@ -187,7 +191,10 @@ describe('Stacked Series Utils', () => {
       splitAccessors: new Map(),
       seriesKeys: ['b'],
       key: 'b',
-      data: [{ x: 1, y1: 90 }, { x: 3, y1: 30 }],
+      data: [
+        { x: 1, y1: 90 },
+        { x: 3, y1: 30 },
+      ],
     },
   ];
   const xValues = new Set([0]);

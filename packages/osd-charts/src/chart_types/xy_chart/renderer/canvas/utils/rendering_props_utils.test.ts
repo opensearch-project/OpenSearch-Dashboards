@@ -985,7 +985,13 @@ describe('[canvas] Bar Geometries', () => {
   });
 
   describe('clipRanges', () => {
-    const clippedRanges: ClippedRanges = [[0, 1], [2, 4], [4, 6], [7, 11], [11, 12]];
+    const clippedRanges: ClippedRanges = [
+      [0, 1],
+      [2, 4],
+      [4, 6],
+      [7, 11],
+      [11, 12],
+    ];
     const singleRange: ClippedRanges = [[0, 1]];
     const clippings: Clippings = {
       clipHeight: 111,

@@ -84,7 +84,11 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['a'],
         key: 'a',
-        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 4, y1: 4 }],
+        data: [
+          { x: 1, y1: 1 },
+          { x: 2, y1: 2 },
+          { x: 4, y1: 4 },
+        ],
       },
       {
         specId: 'spec1',
@@ -92,7 +96,10 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['b'],
         key: 'b',
-        data: [{ x: 1, y1: 21 }, { x: 3, y1: 23 }],
+        data: [
+          { x: 1, y1: 21 },
+          { x: 3, y1: 23 },
+        ],
       },
     ];
     const xValues = new Set([1, 2, 3, 4]);
@@ -107,7 +114,12 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['a'],
         key: 'a',
-        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
+        data: [
+          { x: 1, y1: 1 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 3 },
+          { x: 4, y1: 4 },
+        ],
       },
       {
         specId: 'spec1',
@@ -115,7 +127,12 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['b'],
         key: 'b',
-        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
+        data: [
+          { x: 1, y1: 1 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 3 },
+          { x: 4, y1: 4 },
+        ],
       },
       {
         specId: 'spec1',
@@ -123,7 +140,12 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['b'],
         key: 'b',
-        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
+        data: [
+          { x: 1, y1: 1 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 3 },
+          { x: 4, y1: 4 },
+        ],
       },
       {
         specId: 'spec1',
@@ -131,7 +153,12 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['b'],
         key: 'b',
-        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
+        data: [
+          { x: 1, y1: 1 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 3 },
+          { x: 4, y1: 4 },
+        ],
       },
     ];
     const xValues = new Set([1, 2, 3, 4]);
@@ -146,7 +173,11 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['a'],
         key: 'a',
-        data: [{ x: 1, y1: 1 }, { x: 4, y1: 4 }, { x: 2, y1: 2 }],
+        data: [
+          { x: 1, y1: 1 },
+          { x: 4, y1: 4 },
+          { x: 2, y1: 2 },
+        ],
       },
       {
         specId: 'spec1',
@@ -154,7 +185,10 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['b'],
         key: 'b',
-        data: [{ x: 3, y1: 23 }, { x: 1, y1: 21 }],
+        data: [
+          { x: 3, y1: 23 },
+          { x: 1, y1: 21 },
+        ],
       },
     ];
     const xValues = new Set([1, 2, 3, 4]);
@@ -193,7 +227,11 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['a'],
         key: 'a',
-        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 4, y1: 4 }],
+        data: [
+          { x: 1, y1: 1 },
+          { x: 2, y1: 2 },
+          { x: 4, y1: 4 },
+        ],
       },
       {
         specId: 'spec1',
@@ -201,7 +239,10 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['b'],
         key: 'b',
-        data: [{ x: 1, y1: 21 }, { x: 3, y1: 23 }],
+        data: [
+          { x: 1, y1: 21 },
+          { x: 3, y1: 23 },
+        ],
       },
     ];
     const xValues = new Set([1, 2, 3, 4]);
@@ -218,7 +259,12 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['a'],
         key: 'a',
-        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
+        data: [
+          { x: 1, y1: 1 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 3 },
+          { x: 4, y1: 4 },
+        ],
       },
       {
         specId: 'spec1',
@@ -226,7 +272,12 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['b'],
         key: 'b',
-        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
+        data: [
+          { x: 1, y1: 1 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 3 },
+          { x: 4, y1: 4 },
+        ],
       },
       {
         specId: 'spec1',
@@ -234,7 +285,12 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['b'],
         key: 'b',
-        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
+        data: [
+          { x: 1, y1: 1 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 3 },
+          { x: 4, y1: 4 },
+        ],
       },
       {
         specId: 'spec1',
@@ -242,7 +298,12 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['b'],
         key: 'b',
-        data: [{ x: 1, y1: 1 }, { x: 2, y1: 2 }, { x: 3, y1: 3 }, { x: 4, y1: 4 }],
+        data: [
+          { x: 1, y1: 1 },
+          { x: 2, y1: 2 },
+          { x: 3, y1: 3 },
+          { x: 4, y1: 4 },
+        ],
       },
     ];
     const xValues = new Set([1, 2, 3, 4]);
@@ -259,7 +320,11 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['a'],
         key: 'a',
-        data: [{ x: 1, y1: 3, y0: 1 }, { x: 2, y1: 3, y0: 2 }, { x: 4, y1: 4, y0: 3 }],
+        data: [
+          { x: 1, y1: 3, y0: 1 },
+          { x: 2, y1: 3, y0: 2 },
+          { x: 4, y1: 4, y0: 3 },
+        ],
       },
       {
         specId: 'spec1',
@@ -267,7 +332,12 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['b'],
         key: 'b',
-        data: [{ x: 1, y1: 2, y0: 1 }, { x: 2, y1: 3, y0: 1 }, { x: 3, y1: 23, y0: 4 }, { x: 4, y1: 4, y0: 1 }],
+        data: [
+          { x: 1, y1: 2, y0: 1 },
+          { x: 2, y1: 3, y0: 1 },
+          { x: 3, y1: 23, y0: 4 },
+          { x: 4, y1: 4, y0: 1 },
+        ],
       },
     ];
     const xValues = new Set([1, 2, 3, 4]);
@@ -295,7 +365,11 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['a'],
         key: 'a',
-        data: [{ x: 1, y1: 3, y0: 1 }, { x: 2, y1: 3, y0: 2 }, { x: 4, y1: 4, y0: 3 }],
+        data: [
+          { x: 1, y1: 3, y0: 1 },
+          { x: 2, y1: 3, y0: 2 },
+          { x: 4, y1: 4, y0: 3 },
+        ],
       },
       {
         specId: 'spec1',
@@ -303,7 +377,12 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['b'],
         key: 'b',
-        data: [{ x: 1, y1: 2, y0: 1 }, { x: 2, y1: 3, y0: 1 }, { x: 3, y1: 23, y0: 4 }, { x: 4, y1: 4, y0: 1 }],
+        data: [
+          { x: 1, y1: 2, y0: 1 },
+          { x: 2, y1: 3, y0: 1 },
+          { x: 3, y1: 23, y0: 4 },
+          { x: 4, y1: 4, y0: 1 },
+        ],
       },
     ];
     const xValues = new Set([1, 2, 3, 4]);

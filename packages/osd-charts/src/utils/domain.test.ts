@@ -94,7 +94,11 @@ describe('utils/domain', () => {
   });
 
   test('should compute stacked data domain: data scaled to extent', () => {
-    const data = [{ y: 12, x: 'a' }, { y: 6, x: 'b' }, { y: 8, x: 'a' }];
+    const data = [
+      { y: 12, x: 'a' },
+      { y: 6, x: 'b' },
+      { y: 8, x: 'a' },
+    ];
     const yAccessor: AccessorFn = (datum: any) => datum.y;
     const xAccessor: AccessorFn = (datum: any) => datum.x;
     const scaleToExtent = true;
@@ -107,7 +111,11 @@ describe('utils/domain', () => {
   });
 
   test('should compute stacked data domain: data not scaled to extent', () => {
-    const data = [{ y: 12, x: 'a' }, { y: 6, x: 'b' }, { y: 8, x: 'a' }];
+    const data = [
+      { y: 12, x: 'a' },
+      { y: 6, x: 'b' },
+      { y: 8, x: 'a' },
+    ];
     const yAccessor: AccessorFn = (datum: any) => datum.y;
     const xAccessor: AccessorFn = (datum: any) => datum.x;
 
@@ -118,17 +126,55 @@ describe('utils/domain', () => {
     expect(stackedDataDomain).toEqual(expectedStackedDomain);
   });
 
-  test('should compute domain based on scaleToExtent', () => {
-    // start & end are positive
-    expect(computeDomainExtent([5, 10], true)).toEqual([5, 10]);
-    expect(computeDomainExtent([5, 10], false)).toEqual([0, 10]);
+  describe('scaleToExtent', () => {
+    describe('true', () => {
+      it('should find domain when start & end are positive', () => {
+        expect(computeDomainExtent([5, 10], true)).toEqual([5, 10]);
+      });
+      it('should find domain when start & end are negative', () => {
+        expect(computeDomainExtent([-15, -10], true)).toEqual([-15, -10]);
+      });
+      it('should find domain when start is negative, end is positive', () => {
+        expect(computeDomainExtent([-15, 10], true)).toEqual([-15, 10]);
+      });
+    });
+    describe('false', () => {
+      it('should find domain when start & end are positive', () => {
+        expect(computeDomainExtent([5, 10], false)).toEqual([0, 10]);
+      });
+      it('should find domain when start & end are negative', () => {
+        expect(computeDomainExtent([-15, -10], false)).toEqual([-15, 0]);
+      });
+      it('should find domain when start is negative, end is positive', () => {
+        expect(computeDomainExtent([-15, 10], false)).toEqual([-15, 10]);
+      });
+    });
+  });
 
-    // start & end are negative
-    expect(computeDomainExtent([-15, -10], true)).toEqual([-15, -10]);
-    expect(computeDomainExtent([-15, -10], false)).toEqual([-15, 0]);
+  describe('fitToExtent', () => {
+    it('should not effect domain when scaleToExtent is true', () => {
+      expect(computeDomainExtent([5, 10], true)).toEqual([5, 10]);
+    });
 
-    // start is negative, end is positive
-    expect(computeDomainExtent([-15, 10], true)).toEqual([-15, 10]);
-    expect(computeDomainExtent([-15, 10], false)).toEqual([-15, 10]);
+    describe('baseline far from zero', () => {
+      it('should get domain from positive domain', () => {
+        expect(computeDomainExtent([10, 70], false, true)).toEqual([5, 75]);
+      });
+      it('should get domain from positive & negative domain', () => {
+        expect(computeDomainExtent([-30, 30], false, true)).toEqual([-35, 35]);
+      });
+      it('should get domain from negative domain', () => {
+        expect(computeDomainExtent([-70, -10], false, true)).toEqual([-75, -5]);
+      });
+    });
+
+    describe('baseline near zero', () => {
+      it('should set min baseline as 0 if original domain is less than zero', () => {
+        expect(computeDomainExtent([5, 65], false, true)).toEqual([0, 70]);
+      });
+      it('should set max baseline as 0 if original domain is less than zero', () => {
+        expect(computeDomainExtent([-65, -5], false, true)).toEqual([-70, 0]);
+      });
+    });
   });
 });

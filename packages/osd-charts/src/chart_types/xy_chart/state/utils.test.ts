@@ -1343,7 +1343,10 @@ describe('Chart State utils', () => {
       yScaleToDataExtent: false,
       data: BARCHART_1Y1G,
     };
-    const seriesMap = new Map<SpecId, BasicSeriesSpec>([[area.id, area], [line.id, line]]);
+    const seriesMap = new Map<SpecId, BasicSeriesSpec>([
+      [area.id, area],
+      [line.id, line],
+    ]);
     // should not affect area or line series
     setBarSeriesAccessors(isHistogramEnabled, seriesMap);
     expect(seriesMap).toEqual(seriesMap);

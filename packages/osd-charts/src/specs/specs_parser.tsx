@@ -31,7 +31,4 @@ const mapDispatchToProps = (dispatch: Dispatch): DispatchProps =>
     dispatch,
   );
 
-export const SpecsParser = connect(
-  null,
-  mapDispatchToProps,
-)(SpecsParserComponent);
+export const SpecsParser = connect(null, mapDispatchToProps)(SpecsParserComponent);

@@ -582,7 +582,7 @@ describe('commons utilities', () => {
           test('should merge optional params from partials', () => {
             type PartialTestTypeOverride = PartialTestType & any;
             const partial: PartialTestTypeOverride = { nick: 'test', number: 6 };
-            const partials: (PartialTestTypeOverride)[] = [{ string: 'test', foo: 'bar' }, { array3: [3, 3, 3] }];
+            const partials: PartialTestTypeOverride[] = [{ string: 'test', foo: 'bar' }, { array3: [3, 3, 3] }];
             const newBase = mergePartial(base, partial, { mergeOptionalPartialValues: true }, partials);
             expect(newBase).toEqual({
               ...newBase,

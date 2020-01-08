@@ -75,27 +75,32 @@ function mergeYDomainForGroup(
 
   let domain: number[];
   if (isPercentageStack) {
-    domain = computeContinuousDataDomain([0, 1], identity);
+    domain = computeContinuousDataDomain([0, 1], identity, customDomain?.fit);
   } else {
     // compute stacked domain
     const isStackedScaleToExtent = groupSpecs.stacked.some((spec) => {
       return spec.yScaleToDataExtent;
     });
     const stackedDataSeries = getDataSeriesOnGroup(dataSeries, groupSpecs.stacked);
-    const stackedDomain = computeYStackedDomain(stackedDataSeries, isStackedScaleToExtent);
+    const stackedDomain = computeYStackedDomain(stackedDataSeries, isStackedScaleToExtent, customDomain?.fit);
 
     // compute non stacked domain
     const isNonStackedScaleToExtent = groupSpecs.nonStacked.some((spec) => {
       return spec.yScaleToDataExtent;
     });
     const nonStackedDataSeries = getDataSeriesOnGroup(dataSeries, groupSpecs.nonStacked);
-    const nonStackedDomain = computeYNonStackedDomain(nonStackedDataSeries, isNonStackedScaleToExtent);
+    const nonStackedDomain = computeYNonStackedDomain(
+      nonStackedDataSeries,
+      isNonStackedScaleToExtent,
+      customDomain?.fit,
+    );
 
     // merge stacked and non stacked domain together
     domain = computeContinuousDataDomain(
       [...stackedDomain, ...nonStackedDomain],
       identity,
       isStackedScaleToExtent || isNonStackedScaleToExtent,
+      customDomain?.fit,
     );
 
     const [computedDomainMin, computedDomainMax] = domain;
@@ -130,16 +135,17 @@ export function getDataSeriesOnGroup(
   dataSeries: Map<SpecId, RawDataSeries[]>,
   specs: YBasicSeriesSpec[],
 ): RawDataSeries[] {
-  return specs.reduce(
-    (acc, spec) => {
-      const ds = dataSeries.get(spec.id) || [];
-      return [...acc, ...ds];
-    },
-    [] as RawDataSeries[],
-  );
+  return specs.reduce((acc, spec) => {
+    const ds = dataSeries.get(spec.id) || [];
+    return [...acc, ...ds];
+  }, [] as RawDataSeries[]);
 }
 
-function computeYStackedDomain(dataseries: RawDataSeries[], scaleToExtent: boolean): number[] {
+function computeYStackedDomain(
+  dataseries: RawDataSeries[],
+  scaleToExtent: boolean,
+  fitToExtent: boolean = false,
+): number[] {
   const stackMap = new Map<any, any[]>();
   dataseries.forEach((ds, index) => {
     ds.data.forEach((datum) => {
@@ -158,10 +164,10 @@ function computeYStackedDomain(dataseries: RawDataSeries[], scaleToExtent: boole
   if (dataValues.length === 0) {
     return [];
   }
-  return computeContinuousDataDomain(dataValues, identity, scaleToExtent);
+  return computeContinuousDataDomain(dataValues, identity, scaleToExtent, fitToExtent);
 }
 
-function computeYNonStackedDomain(dataseries: RawDataSeries[], scaleToExtent: boolean) {
+function computeYNonStackedDomain(dataseries: RawDataSeries[], scaleToExtent: boolean, fitToExtent: boolean = false) {
   const yValues = new Set<any>();
   dataseries.forEach((ds) => {
     ds.data.forEach((datum) => {
@@ -174,7 +180,7 @@ function computeYNonStackedDomain(dataseries: RawDataSeries[], scaleToExtent: bo
   if (yValues.size === 0) {
     return [];
   }
-  return computeContinuousDataDomain([...yValues.values()], identity, scaleToExtent);
+  return computeContinuousDataDomain([...yValues.values()], identity, scaleToExtent, fitToExtent);
 }
 
 export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {

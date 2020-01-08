@@ -13,7 +13,10 @@ describe('IDs', () => {
     const groupSeries: Map<GroupId, string> = new Map();
     groupSeries.set(groupId1, 'data1');
     groupSeries.set(groupId2, 'data2');
-    const expectedAxisSeries = [['axisId1', 'data1'], ['axisId2', 'data2']];
+    const expectedAxisSeries = [
+      ['axisId1', 'data1'],
+      ['axisId2', 'data2'],
+    ];
     const expectedGroupSeries = [['groupId', 'data2']];
     expect(expectedAxisSeries).toEqual([...axisSeries]);
     expect(expectedGroupSeries).toEqual([...groupSeries]);
@@ -26,7 +29,10 @@ describe('IDs', () => {
     annotations.set(annotationId1, 'annotations 1');
     annotations.set(annotationId2, 'annotations 2');
 
-    const expectedAnnotations = [['anno1', 'annotations 1'], ['anno2', 'annotations 2']];
+    const expectedAnnotations = [
+      ['anno1', 'annotations 1'],
+      ['anno2', 'annotations 2'],
+    ];
     expect(expectedAnnotations).toEqual([...annotations]);
   });
 });

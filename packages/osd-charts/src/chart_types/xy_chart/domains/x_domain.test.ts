@@ -179,7 +179,12 @@ describe('X Domain', () => {
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 5, y: 0 }],
+      data: [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 2, y: 0 },
+        { x: 5, y: 0 },
+      ],
     };
     const ds2: BasicSeriesSpec = {
       chartType: ChartTypes.XYAxis,
@@ -192,7 +197,10 @@ describe('X Domain', () => {
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 7, y: 0 }],
+      data: [
+        { x: 0, y: 0 },
+        { x: 7, y: 0 },
+      ],
     };
     const specDataSeries: BasicSeriesSpec[] = [ds1, ds2];
     const { xValues } = getSplittedSeries(specDataSeries);
@@ -219,7 +227,12 @@ describe('X Domain', () => {
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 5, y: 0 }],
+      data: [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 2, y: 0 },
+        { x: 5, y: 0 },
+      ],
     };
     const ds2: BasicSeriesSpec = {
       chartType: ChartTypes.XYAxis,
@@ -232,7 +245,10 @@ describe('X Domain', () => {
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 7, y: 0 }],
+      data: [
+        { x: 0, y: 0 },
+        { x: 7, y: 0 },
+      ],
     };
     const specDataSeries = [ds1, ds2];
 
@@ -260,7 +276,12 @@ describe('X Domain', () => {
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 5, y: 0 }],
+      data: [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 2, y: 0 },
+        { x: 5, y: 0 },
+      ],
     };
     const ds2: BasicSeriesSpec = {
       chartType: ChartTypes.XYAxis,
@@ -273,7 +294,10 @@ describe('X Domain', () => {
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 7, y: 0 }],
+      data: [
+        { x: 0, y: 0 },
+        { x: 7, y: 0 },
+      ],
     };
     const specDataSeries = [ds1, ds2];
 
@@ -305,7 +329,12 @@ describe('X Domain', () => {
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 5, y: 0 }],
+      data: [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 2, y: 0 },
+        { x: 5, y: 0 },
+      ],
     };
     const ds2: BasicSeriesSpec = {
       chartType: ChartTypes.XYAxis,
@@ -318,7 +347,10 @@ describe('X Domain', () => {
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 7, y: 0 }],
+      data: [
+        { x: 0, y: 0 },
+        { x: 7, y: 0 },
+      ],
     };
     const specDataSeries = [ds1, ds2];
 
@@ -350,7 +382,12 @@ describe('X Domain', () => {
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 5, y: 0 }],
+      data: [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 2, y: 0 },
+        { x: 5, y: 0 },
+      ],
     };
     const ds2: BasicSeriesSpec = {
       chartType: ChartTypes.XYAxis,
@@ -363,7 +400,10 @@ describe('X Domain', () => {
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 7, y: 0 }],
+      data: [
+        { x: 0, y: 0 },
+        { x: 7, y: 0 },
+      ],
     };
     const specDataSeries = [ds1, ds2];
 
@@ -395,7 +435,12 @@ describe('X Domain', () => {
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 5, y: 0 }],
+      data: [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 2, y: 0 },
+        { x: 5, y: 0 },
+      ],
     };
     const ds2: BasicSeriesSpec = {
       chartType: ChartTypes.XYAxis,
@@ -408,7 +453,10 @@ describe('X Domain', () => {
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 7, y: 0 }],
+      data: [
+        { x: 0, y: 0 },
+        { x: 7, y: 0 },
+      ],
     };
     const specDataSeries = [ds1, ds2];
 
@@ -440,7 +488,12 @@ describe('X Domain', () => {
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 5, y: 0 }],
+      data: [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 2, y: 0 },
+        { x: 5, y: 0 },
+      ],
     };
     const ds2: BasicSeriesSpec = {
       chartType: ChartTypes.XYAxis,
@@ -453,7 +506,10 @@ describe('X Domain', () => {
       xScaleType: ScaleType.Time,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 7, y: 0 }],
+      data: [
+        { x: 0, y: 0 },
+        { x: 7, y: 0 },
+      ],
     };
     const specDataSeries = [ds1, ds2];
 
@@ -485,7 +541,12 @@ describe('X Domain', () => {
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 5, y: 0 }],
+      data: [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 2, y: 0 },
+        { x: 5, y: 0 },
+      ],
     };
     const ds2: BasicSeriesSpec = {
       chartType: ChartTypes.XYAxis,
@@ -498,7 +559,10 @@ describe('X Domain', () => {
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
       yScaleToDataExtent: false,
-      data: [{ x: 0, y: 0 }, { x: 7, y: 0 }],
+      data: [
+        { x: 0, y: 0 },
+        { x: 7, y: 0 },
+      ],
     };
     const specDataSeries = [ds1, ds2];
 

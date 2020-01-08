@@ -226,7 +226,13 @@ storiesOf('Scales', module)
             xAccessor={0}
             yAccessors={[1]}
             timeZone={'utc-6'}
-            data={[[1, 62], [2, 56], [3, 41], [4, 62], [5, 90]]}
+            data={[
+              [1, 62],
+              [2, 56],
+              [3, 41],
+              [4, 62],
+              [5, 90],
+            ]}
           />
         </Chart>
       );

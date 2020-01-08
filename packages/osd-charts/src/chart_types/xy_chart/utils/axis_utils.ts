@@ -224,7 +224,12 @@ function computeTickDimensions(
     tickLabelStyle: { fontFamily, fontSize },
   } = axisConfig;
 
-  const { maxLabelBboxWidth, maxLabelBboxHeight, maxLabelTextWidth, maxLabelTextHeight } = tickLabels.reduce(
+  const {
+    maxLabelBboxWidth,
+    maxLabelBboxHeight,
+    maxLabelTextWidth,
+    maxLabelTextHeight,
+  } = tickLabels.reduce(
     getMaxBboxDimensions(bboxCalculator, fontSize, fontFamily, tickLabelRotation, tickLabelPadding),
     { maxLabelBboxWidth: 0, maxLabelBboxHeight: 0, maxLabelTextWidth: 0, maxLabelTextHeight: 0 },
   );

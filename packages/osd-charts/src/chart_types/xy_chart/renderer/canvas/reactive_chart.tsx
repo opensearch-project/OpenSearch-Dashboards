@@ -353,7 +353,4 @@ const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
   };
 };
 
-export const ReactiveChart = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(Chart);
+export const ReactiveChart = connect(mapStateToProps, mapDispatchToProps)(Chart);
