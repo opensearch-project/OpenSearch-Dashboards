@@ -11,6 +11,8 @@ after_success:
   - yarn semantic-release
 before_deploy: yarn storybook:build
 deploy:
+  on:
+    branch: master
   provider: pages
   skip_cleanup: true
   github_token: $GH_TOKEN
