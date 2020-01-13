@@ -1,0 +1,6 @@
+{
+  "upstream": "elastic/elastic-charts",
+  "branches": ["13.5.x"],
+  "all": true,
+  "labels": ["backport"]
+}

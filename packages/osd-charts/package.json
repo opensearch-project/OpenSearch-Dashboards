@@ -90,6 +90,7 @@
     "@typescript-eslint/parser": "^2.10.0",
     "autoprefixer": "^9.6.1",
     "babel-loader": "^8.0.5",
+    "backport": "^4.8.0",
     "canvas": "^2.4.1",
     "commitizen": "^4.0.3",
     "css-loader": "^2.1.0",
