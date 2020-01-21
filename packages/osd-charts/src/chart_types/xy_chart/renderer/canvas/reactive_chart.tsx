@@ -37,6 +37,7 @@ import { getSettingsSpecSelector } from '../../../../state/selectors/get_setting
 import { computeChartDimensionsSelector } from '../../state/selectors/compute_chart_dimensions';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { Clippings } from './bar_values_utils';
+import { ChartTypes } from '../../..';
 
 interface ReactiveChartStateProps {
   initialized: boolean;
@@ -332,7 +333,7 @@ const DEFAULT_PROPS: ReactiveChartStateProps = {
 };
 
 const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
-  if (!isInitialized(state)) {
+  if (!isInitialized(state) || state.chartType !== ChartTypes.XYAxis) {
     return DEFAULT_PROPS;
   }
   return {

@@ -3,10 +3,11 @@ import { CurveType } from '../../../utils/curves';
 import { IndexedGeometry, PointGeometry, AreaGeometry } from '../../../utils/geometry';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { computeXScale, computeYScales } from '../utils/scales';
-import { AreaSeriesSpec, SpecTypes, SeriesTypes } from '../utils/specs';
+import { AreaSeriesSpec, SeriesTypes } from '../utils/specs';
 import { computeSeriesDomains } from '../state/utils';
 import { renderArea } from './rendering';
 import { ChartTypes } from '../..';
+import { SpecTypes } from '../../../specs/settings';
 
 const SPEC_ID = 'spec_1';
 const GROUP_ID = 'group_1';

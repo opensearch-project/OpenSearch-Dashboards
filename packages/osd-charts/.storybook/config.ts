@@ -53,6 +53,7 @@ function loadStories() {
   require('../stories/grid.tsx');
   require('../stories/annotations.tsx');
   require('../stories/scales.tsx');
+  return [require('../stories/sunburst.tsx'), require('../stories/treemap.tsx')];
 }
 
 configure(loadStories, module);

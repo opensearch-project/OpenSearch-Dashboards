@@ -1,6 +1,10 @@
-import { Datum } from '../chart_types/xy_chart/utils/specs';
+import { Datum } from './domain';
 
-export type AccessorFn = (datum: Datum) => any;
+type UnaryAccessorFn = (datum: Datum) => any;
+type BinaryAccessorFn = (datum: Datum, index: number) => any;
+
+export type AccessorFn = UnaryAccessorFn;
+export type IndexedAccessorFn = UnaryAccessorFn | BinaryAccessorFn;
 export type AccessorString = string | number;
 export type Accessor = AccessorString;
 

@@ -1,8 +1,9 @@
 import { ScaleType } from '../../../utils/scales/scales';
-import { AxisSpec, BarSeriesSpec, Position, SpecTypes, SeriesTypes } from '../utils/specs';
+import { AxisSpec, BarSeriesSpec, Position, SeriesTypes } from '../utils/specs';
 import { formatTooltip } from './tooltip';
 import { BarGeometry } from '../../../utils/geometry';
 import { ChartTypes } from '../..';
+import { SpecTypes } from '../../../specs/settings';
 
 describe('Tooltip formatting', () => {
   const SPEC_ID_1 = 'bar_1';

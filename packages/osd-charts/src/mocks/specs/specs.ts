@@ -8,14 +8,13 @@ import {
   HistogramBarSeriesSpec,
   LineSeriesSpec,
   BasicSeriesSpec,
-  SpecTypes,
   SeriesTypes,
   Position,
 } from '../../chart_types/xy_chart/utils/specs';
 import { getSpecId, getGroupId } from '../../utils/ids';
 import { ScaleType } from '../../utils/scales/scales';
 import { ChartTypes } from '../../chart_types';
-import { SettingsSpec } from '../../specs';
+import { SettingsSpec, SpecTypes } from '../../specs';
 import { TooltipType } from '../../chart_types/xy_chart/utils/interactions';
 import { LIGHT_THEME } from '../../utils/themes/light_theme';
 

@@ -29,7 +29,15 @@ export {
   RectAnnotationDatum,
   RectAnnotationSpec,
   SeriesTypes,
-  SpecTypes,
 } from './chart_types/xy_chart/utils/specs';
 export { AnnotationTooltipFormatter } from './chart_types/xy_chart/annotations/annotation_utils';
 export { GeometryValue } from './utils/geometry';
+export {
+  Config as PartitionConfig,
+  FillLabel as PartitionFillLabel,
+  PartitionLayout,
+} from './chart_types/partition_chart/layout/types/config_types';
+export { Layer as PartitionLayer } from './chart_types/partition_chart/specs/index';
+export { AccessorFn, IndexedAccessorFn } from './utils/accessor';
+export { Datum } from './utils/domain';
+export { SpecTypes } from './specs/settings';

@@ -3,11 +3,12 @@ import { ScaleType } from '../../../utils/scales/scales';
 import { CurveType } from '../../../utils/curves';
 import { renderLine } from './rendering';
 import { computeXScale, computeYScales } from '../utils/scales';
-import { LineSeriesSpec, DomainRange, SpecTypes, SeriesTypes } from '../utils/specs';
+import { LineSeriesSpec, DomainRange, SeriesTypes } from '../utils/specs';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { LineGeometry, IndexedGeometry, PointGeometry } from '../../../utils/geometry';
 import { GroupId } from '../../../utils/ids';
 import { ChartTypes } from '../..';
+import { SpecTypes } from '../../../specs/settings';
 
 const SPEC_ID = 'spec_1';
 const GROUP_ID = 'group_1';

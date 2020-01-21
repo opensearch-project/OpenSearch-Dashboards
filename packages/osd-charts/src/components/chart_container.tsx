@@ -10,8 +10,8 @@ import { isInternalChartEmptySelector } from '../state/selectors/is_chart_empty'
 import { isInitialized } from '../state/selectors/is_initialized';
 import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
 import { SettingsSpec } from '../specs';
-import { isBrushingSelector } from '../chart_types/xy_chart/state/selectors/is_brushing';
 import { Stage } from 'react-konva';
+import { getInternalIsBrushingSelector } from '../state/selectors/get_internal_is_brushing';
 
 interface ReactiveChartStateProps {
   initialized: boolean;
@@ -165,7 +165,7 @@ const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
     isChartEmpty: isInternalChartEmptySelector(state),
     pointerCursor: getInternalPointerCursor(state),
     isBrushingAvailable: getInternalIsBrushingAvailableSelector(state),
-    isBrushing: isBrushingSelector(state),
+    isBrushing: getInternalIsBrushingSelector(state),
     internalChartRenderer: getInternalChartRendererSelector(state),
     settings: getSettingsSpecSelector(state),
   };

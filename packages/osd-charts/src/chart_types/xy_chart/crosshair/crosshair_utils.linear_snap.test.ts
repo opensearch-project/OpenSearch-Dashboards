@@ -1,11 +1,12 @@
 import { computeXScale } from '../utils/scales';
-import { BasicSeriesSpec, SpecTypes, SeriesTypes } from '../utils/specs';
+import { BasicSeriesSpec, SeriesTypes } from '../utils/specs';
 import { Dimensions } from '../../../utils/dimensions';
 import { getGroupId, getSpecId } from '../../../utils/ids';
 import { ScaleType } from '../../../utils/scales/scales';
 import { getCursorBandPosition, getSnapPosition } from './crosshair_utils';
 import { computeSeriesDomains } from '../state/utils';
 import { ChartTypes } from '../..';
+import { SpecTypes } from '../../../specs/settings';
 
 describe('Crosshair utils linear scale', () => {
   const barSeries1SpecId = getSpecId('barSeries1');

@@ -13,6 +13,7 @@ import { getChartRotationSelector } from '../../../../state/selectors/get_chart_
 import { computeSeriesGeometriesSelector } from '../../state/selectors/compute_series_geometries';
 import { LIGHT_THEME } from '../../../../utils/themes/light_theme';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
+import { ChartTypes } from '../../..';
 
 interface BarValuesProps {
   theme: Theme;
@@ -76,7 +77,9 @@ export class BarValuesComponent extends React.PureComponent<BarValuesProps> {
 }
 
 const mapStateToProps = (state: GlobalChartState): BarValuesProps => {
-  if (!state.specsInitialized) {
+  // check for correct chartType required because <BarValues /> live in a different
+  // redux context (see ReactiveChart render method)
+  if (!state.specsInitialized || state.chartType !== ChartTypes.XYAxis) {
     return {
       theme: LIGHT_THEME,
       chartDimensions: {

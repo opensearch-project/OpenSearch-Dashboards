@@ -11,10 +11,11 @@ import {
   SeriesIdentifier,
   cleanDatum,
 } from './series';
-import { BasicSeriesSpec, LineSeriesSpec, SpecTypes, SeriesTypes } from './specs';
+import { BasicSeriesSpec, LineSeriesSpec, SeriesTypes } from './specs';
 import { formatStackedDataSeriesValues } from './stacked_series_utils';
 import * as TestDataset from '../../../utils/data_samples/test_dataset';
 import { ChartTypes } from '../..';
+import { SpecTypes } from '../../../specs/settings';
 
 describe('Series', () => {
   test('Can split dataset into 1Y0G series', () => {

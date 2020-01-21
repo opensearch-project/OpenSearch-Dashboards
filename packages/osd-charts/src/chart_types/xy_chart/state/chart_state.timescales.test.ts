@@ -1,9 +1,9 @@
-import { LineSeriesSpec, SpecTypes, SeriesTypes } from '../utils/specs';
+import { LineSeriesSpec, SeriesTypes } from '../utils/specs';
 import { ScaleType } from '../../../utils/scales/scales';
 import { createStore, Store } from 'redux';
 import { chartStoreReducer, GlobalChartState } from '../../../state/chart_state';
 import { upsertSpec, specParsed } from '../../../state/actions/specs';
-import { SettingsSpec, DEFAULT_SETTINGS_SPEC } from '../../../specs';
+import { SettingsSpec, DEFAULT_SETTINGS_SPEC, SpecTypes } from '../../../specs';
 import { mergeWithDefaultTheme } from '../../../utils/themes/theme';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { updateParentDimensions } from '../../../state/actions/chart_settings';

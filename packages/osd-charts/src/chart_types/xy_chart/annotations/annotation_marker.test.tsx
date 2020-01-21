@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { AnnotationDomainTypes, AnnotationSpec, Position, Rotation, SpecTypes, AnnotationTypes } from '../utils/specs';
+import { AnnotationDomainTypes, AnnotationSpec, Position, Rotation, AnnotationTypes } from '../utils/specs';
 import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../utils/themes/theme';
 import { Dimensions } from '../../../utils/dimensions';
 import { GroupId } from '../../../utils/ids';
@@ -8,6 +8,7 @@ import { ScaleContinuous } from '../../../utils/scales/scale_continuous';
 import { Scale, ScaleType } from '../../../utils/scales/scales';
 import { computeLineAnnotationDimensions, AnnotationLineProps } from './line_annotation_tooltip';
 import { ChartTypes } from '../..';
+import { SpecTypes } from '../../../specs/settings';
 
 describe('annotation marker', () => {
   const groupId = 'foo-group';

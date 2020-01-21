@@ -1,8 +1,9 @@
 import { ScaleType } from '../../../utils/scales/scales';
 import { getSplittedSeries } from '../utils/series';
-import { BasicSeriesSpec, SpecTypes, SeriesTypes } from '../utils/specs';
+import { BasicSeriesSpec, SeriesTypes } from '../utils/specs';
 import { convertXScaleTypes, findMinInterval, mergeXDomain } from './x_domain';
 import { ChartTypes } from '../..';
+import { SpecTypes } from '../../../specs/settings';
 
 describe('X Domain', () => {
   test('Should return null when missing specs or specs types', () => {

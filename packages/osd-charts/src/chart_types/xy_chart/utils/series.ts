@@ -3,10 +3,11 @@ import { Accessor } from '../../../utils/accessor';
 import { GroupId, SpecId } from '../../../utils/ids';
 import { splitSpecsByGroupId, YBasicSeriesSpec } from '../domains/y_domain';
 import { formatNonStackedDataSeriesValues } from './nonstacked_series_utils';
-import { BasicSeriesSpec, Datum, SubSeriesStringPredicate, SeriesTypes, SeriesSpecs } from './specs';
+import { BasicSeriesSpec, SubSeriesStringPredicate, SeriesTypes, SeriesSpecs } from './specs';
 import { formatStackedDataSeriesValues } from './stacked_series_utils';
 import { ScaleType } from '../../../utils/scales/scales';
 import { LastValues } from '../state/utils';
+import { Datum } from '../../../utils/domain';
 
 export interface FilledValues {
   /** the x value */

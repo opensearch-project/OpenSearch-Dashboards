@@ -1,12 +1,12 @@
 import { $Values } from 'utility-types';
 import {
   AreaSeriesStyle,
+  BarSeriesStyle,
   GridLineConfig,
   LineAnnotationStyle,
   LineSeriesStyle,
-  RectAnnotationStyle,
-  BarSeriesStyle,
   PointStyle,
+  RectAnnotationStyle,
 } from '../../../utils/themes/theme';
 import { Accessor, AccessorFormat } from '../../../utils/accessor';
 import { RecursivePartial } from '../../../utils/commons';
@@ -15,10 +15,10 @@ import { ScaleContinuousType, ScaleType } from '../../../utils/scales/scales';
 import { CurveType } from '../../../utils/curves';
 import { RawDataSeriesDatum, SeriesIdentifier } from './series';
 import { AnnotationTooltipFormatter } from '../annotations/annotation_utils';
-import { Spec } from '../../..';
+import { Spec, SpecTypes } from '../../..';
 import { ChartTypes } from '../..';
+import { Datum } from '../../../utils/domain';
 
-export type Datum = any;
 export type Rotation = 0 | 90 | -90 | 180;
 export type Rendering = 'canvas' | 'svg';
 export type Color = string;
@@ -32,15 +32,6 @@ export const SeriesTypes = Object.freeze({
 });
 
 export type SeriesTypes = $Values<typeof SeriesTypes>;
-
-export const SpecTypes = Object.freeze({
-  Series: 'series' as 'series',
-  Axis: 'axis' as 'axis',
-  Annotation: 'annotation' as 'annotation',
-  Settings: 'settings' as 'settings',
-});
-
-export type SpecTypes = $Values<typeof SpecTypes>;
 
 /**
  * Override for bar styles per datum

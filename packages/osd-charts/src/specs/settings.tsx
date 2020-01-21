@@ -1,5 +1,5 @@
 import { $Values } from 'utility-types';
-import { DomainRange, Position, Rendering, Rotation, SpecTypes } from '../chart_types/xy_chart/utils/specs';
+import { DomainRange, Position, Rendering, Rotation } from '../chart_types/xy_chart/utils/specs';
 import { PartialTheme, Theme } from '../utils/themes/theme';
 import { Domain } from '../utils/domain';
 import { TooltipType, TooltipValueFormatter } from '../chart_types/xy_chart/utils/interactions';
@@ -129,6 +129,15 @@ export type DefaultSettingsProps =
 
 export const DEFAULT_TOOLTIP_TYPE = TooltipType.VerticalCursor;
 export const DEFAULT_TOOLTIP_SNAP = true;
+
+export const SpecTypes = Object.freeze({
+  Series: 'series' as 'series',
+  Axis: 'axis' as 'axis',
+  Annotation: 'annotation' as 'annotation',
+  Settings: 'settings' as 'settings',
+});
+
+export type SpecTypes = $Values<typeof SpecTypes>;
 
 export const DEFAULT_SETTINGS_SPEC: SettingsSpec = {
   id: '__global__settings___',

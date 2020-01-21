@@ -1,10 +1,10 @@
 import React, { createRef, CSSProperties, PureComponent } from 'react';
-import { LineAnnotationSpec, DEFAULT_GLOBAL_ID, SpecTypes, AnnotationTypes } from '../utils/specs';
+import { LineAnnotationSpec, DEFAULT_GLOBAL_ID, AnnotationTypes } from '../utils/specs';
 import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../utils/themes/theme';
 import { bindActionCreators, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { upsertSpec, removeSpec } from '../../../state/actions/specs';
-import { Spec } from '../../../specs';
+import { Spec, SpecTypes } from '../../../specs';
 import { ChartTypes } from '../..';
 
 type InjectedProps = LineAnnotationSpec &

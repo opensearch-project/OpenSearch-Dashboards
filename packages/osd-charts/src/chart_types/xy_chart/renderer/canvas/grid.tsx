@@ -13,6 +13,7 @@ import { computeAxisVisibleTicksSelector } from '../../state/selectors/compute_a
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { LIGHT_THEME } from '../../../../utils/themes/light_theme';
 import { getSpecsById } from '../../state/utils';
+import { ChartTypes } from '../../..';
 
 interface GridProps {
   chartTheme: Theme;
@@ -54,7 +55,9 @@ class GridComponent extends React.PureComponent<GridProps> {
 }
 
 const mapStateToProps = (state: GlobalChartState): GridProps => {
-  if (!state.specsInitialized) {
+  // check for correct chartType required because <Grid /> leave in a different
+  // redux context (see ReactiveChart render method)
+  if (!state.specsInitialized || state.chartType !== ChartTypes.XYAxis) {
     return {
       chartTheme: LIGHT_THEME,
       chartDimensions: {

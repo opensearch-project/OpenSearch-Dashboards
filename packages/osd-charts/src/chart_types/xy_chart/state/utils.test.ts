@@ -5,7 +5,6 @@ import {
   BasicSeriesSpec,
   HistogramModeAlignments,
   LineSeriesSpec,
-  SpecTypes,
   SeriesTypes,
   SeriesColorAccessorFn,
 } from '../utils/specs';
@@ -37,6 +36,7 @@ import { MockSeriesSpecs, MockSeriesSpec } from '../../../mocks/specs';
 import { MockSeriesCollection } from '../../../mocks/series/seriesIdentifiers';
 import { SeededDataGenerator } from '../../../mocks/utils';
 import { SeriesCollectionValue, getSeriesIndex, getSeriesColors } from '../utils/series';
+import { SpecTypes } from '../../../specs/settings';
 
 describe('Chart State utils', () => {
   it('should compute and format specifications for non stacked chart', () => {

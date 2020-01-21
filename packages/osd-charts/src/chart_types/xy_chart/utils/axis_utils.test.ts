@@ -1,6 +1,6 @@
 import { XDomain } from '../domains/x_domain';
 import { YDomain } from '../domains/y_domain';
-import { AxisSpec, DomainRange, Position, AxisStyle, SpecTypes } from './specs';
+import { AxisSpec, DomainRange, Position, AxisStyle } from './specs';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { AxisId, GroupId } from '../../../utils/ids';
 import { ScaleType } from '../../../utils/scales/scales';
@@ -36,6 +36,7 @@ import { SvgTextBBoxCalculator } from '../../../utils/bbox/svg_text_bbox_calcula
 import { niceTimeFormatter } from '../../../utils/data/formatters';
 import { mergeYCustomDomainsByGroupId } from '../state/selectors/merge_y_custom_domains';
 import { ChartTypes } from '../..';
+import { SpecTypes } from '../../../specs/settings';
 
 describe('Axis computational utils', () => {
   const mockedRect = {

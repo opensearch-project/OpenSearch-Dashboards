@@ -15,12 +15,16 @@ import { getLegendTooltipValuesSelector } from './selectors/get_legend_tooltip_v
 import { TooltipLegendValue } from '../tooltip/tooltip';
 import { getPointerCursorSelector } from './selectors/get_cursor_pointer';
 import { Stage } from 'react-konva';
+import { isBrushingSelector } from './selectors/is_brushing';
 
 export class XYAxisChartState implements InternalChartState {
   chartType = ChartTypes.XYAxis;
   legendId: string = htmlIdGenerator()('legend');
   isBrushAvailable(globalState: GlobalChartState) {
     return isBrushAvailableSelector(globalState);
+  }
+  isBrushing(globalState: GlobalChartState) {
+    return isBrushingSelector(globalState);
   }
   isChartEmpty(globalState: GlobalChartState) {
     return isChartEmptySelector(globalState);

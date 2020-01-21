@@ -6,7 +6,6 @@ import {
   BarSeriesSpec,
   Position,
   RectAnnotationSpec,
-  SpecTypes,
   SeriesTypes,
 } from '../utils/specs';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
@@ -21,6 +20,7 @@ import { AxisTicksDimensions, isDuplicateAxis } from '../utils/axis_utils';
 import { AxisId } from '../../../utils/ids';
 import { LegendItem } from '../legend/legend';
 import { ChartTypes } from '../..';
+import { SpecTypes } from '../../../specs/settings';
 
 describe.skip('Chart Store', () => {
   let store: any = null; //

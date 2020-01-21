@@ -7,7 +7,6 @@ import {
   Position,
   RectAnnotationSpec,
   Rotation,
-  SpecTypes,
   AnnotationTypes,
 } from '../utils/specs';
 import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../utils/themes/theme';
@@ -42,6 +41,7 @@ import {
 } from './rect_annotation_tooltip';
 import { Point } from '../../../utils/point';
 import { ChartTypes } from '../..';
+import { SpecTypes } from '../../../specs/settings';
 
 describe('annotation utils', () => {
   const minRange = 0;

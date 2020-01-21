@@ -1,7 +1,8 @@
-import { LineSeriesSpec, DEFAULT_GLOBAL_ID, HistogramModeAlignments, SpecTypes, SeriesTypes } from '../utils/specs';
+import { LineSeriesSpec, DEFAULT_GLOBAL_ID, HistogramModeAlignments, SeriesTypes } from '../utils/specs';
 import { ScaleType } from '../../../utils/scales/scales';
 import { ChartTypes } from '../../../chart_types';
 import { specComponentFactory, getConnect } from '../../../state/spec_factory';
+import { SpecTypes } from '../../../specs/settings';
 
 const defaultProps = {
   chartType: ChartTypes.XYAxis,

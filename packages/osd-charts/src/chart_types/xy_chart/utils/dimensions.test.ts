@@ -1,11 +1,12 @@
 import { AxisTicksDimensions } from './axis_utils';
-import { AxisSpec, Position, SpecTypes } from './specs';
+import { AxisSpec, Position } from './specs';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { LegendStyle } from '../../../utils/themes/theme';
 import { computeChartDimensions } from './dimensions';
 import { AxisId } from '../../../utils/ids';
 import { Margins } from '../../../utils/dimensions';
 import { ChartTypes } from '../..';
+import { SpecTypes } from '../../../specs/settings';
 
 describe('Computed chart dimensions', () => {
   const parentDim = {

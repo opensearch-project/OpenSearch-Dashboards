@@ -24,6 +24,7 @@ import { computeChartDimensionsSelector } from '../../state/selectors/compute_ch
 import { LIGHT_THEME } from '../../../../utils/themes/light_theme';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getSpecsById } from '../../state/utils';
+import { ChartTypes } from '../../..';
 
 interface AxisProps {
   theme: Theme;
@@ -286,7 +287,9 @@ class AxesComponent extends React.PureComponent<AxesProps> {
 }
 
 const mapStateToProps = (state: GlobalChartState): AxesProps => {
-  if (!state.specsInitialized) {
+  // check for correct chartType required because <Axis /> live in a different
+  // redux context (see ReactiveChart render method)
+  if (!state.specsInitialized || state.chartType !== ChartTypes.XYAxis) {
     return {
       theme: LIGHT_THEME,
       chartDimensions: {
