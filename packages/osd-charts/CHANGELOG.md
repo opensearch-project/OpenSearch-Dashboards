@@ -1,3 +1,10 @@
+# [16.2.0](https://github.com/elastic/elastic-charts/compare/v16.1.0...v16.2.0) (2020-01-21)
+
+
+### Features
+
+* implement treemap, sunburst, pie and donut charts ([#493](https://github.com/elastic/elastic-charts/issues/493)) ([e4de627](https://github.com/elastic/elastic-charts/commit/e4de6275d63250a92ca8a07c6f7e6420ba3da73a))
+
 # [16.1.0](https://github.com/elastic/elastic-charts/compare/v16.0.2...v16.1.0) (2020-01-08)
 
 
