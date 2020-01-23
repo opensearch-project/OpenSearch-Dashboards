@@ -44,7 +44,15 @@ class PartitionComponent extends React.Component<PartitionProps> {
     }
   }
 
+  private tryCanvasContext() {
+    const canvas = this.canvasRef.current;
+    this.ctx = canvas && canvas.getContext('2d');
+  }
+
   componentDidUpdate() {
+    if (!this.ctx) {
+      this.tryCanvasContext();
+    }
     if (this.props.initialized) {
       this.drawCanvas();
       this.props.onChartRendered();
@@ -54,8 +62,7 @@ class PartitionComponent extends React.Component<PartitionProps> {
   componentDidMount() {
     // the DOM element has just been appended, and getContext('2d') is always non-null,
     // so we could use a couple of ! non-null assertions but no big plus
-    const canvas = this.canvasRef.current;
-    this.ctx = canvas && canvas.getContext('2d');
+    this.tryCanvasContext();
     this.drawCanvas();
   }
 
