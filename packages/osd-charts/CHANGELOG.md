@@ -1,3 +1,10 @@
+## [16.2.1](https://github.com/elastic/elastic-charts/compare/v16.2.0...v16.2.1) (2020-01-23)
+
+
+### Bug Fixes
+
+* try to get canvas post mounting ([#521](https://github.com/elastic/elastic-charts/issues/521)) ([141f465](https://github.com/elastic/elastic-charts/commit/141f4658acd3047eb6652ef3324fcfe2b9e42903))
+
 # [16.2.0](https://github.com/elastic/elastic-charts/compare/v16.1.0...v16.2.0) (2020-01-21)
 
 
