@@ -4,7 +4,7 @@ describe('Bar series stories', () => {
   describe('[test] switch ordinal/linear x axis', () => {
     it('using ordinal x axis', async () => {
       await common.expectChartAtUrlToMatchScreenshot(
-        'http://localhost:9001/?path=/story/bar-chart--test-switch-ordinal-linear-x-axis&knob-scaleType=ordinal',
+        'http://localhost:9001/?path=/story/bar-chart--test-switch-ordinal-linear-axis&knob-scaleType=ordinal',
       );
     });
   });

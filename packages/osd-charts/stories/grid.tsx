@@ -1,5 +1,4 @@
 import { boolean, color, number } from '@storybook/addon-knobs';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import {
   Axis,
@@ -69,147 +68,162 @@ function generateGridLineConfig(group: string, gridColor = 'purple'): GridLineCo
   };
 }
 
-storiesOf('Grids', module)
-  .add('basic', () => {
-    const leftAxisGridLineConfig = generateGridLineConfig(Position.Left, 'lightblue');
-    const rightAxisGridLineConfig = generateGridLineConfig(Position.Right, 'red');
-    const topAxisGridLineConfig = generateGridLineConfig(Position.Top, 'teal');
-    const bottomAxisGridLineConfig = generateGridLineConfig(Position.Bottom, 'blue');
-    const toggleBottomAxisGridLineStyle = boolean('use axis gridLineStyle vertically', false, 'bottom axis');
-    const toggleHorizontalAxisGridLineStyle = boolean('use axis gridLineStyle horizontally', false, 'left axis');
-    const bottomAxisThemeGridLineConfig = generateGridLineConfig('Vertical Axis Theme', 'violet');
-    const leftAxisThemeGridLineConfig = generateGridLineConfig('Horizontal Axis Theme', 'hotpink');
-    const theme = {
-      axes: {
-        gridLineStyle: { vertical: leftAxisThemeGridLineConfig, horizontal: bottomAxisThemeGridLineConfig },
-      },
-    };
-    const integersOnlyLeft = boolean('left axis show only integer values', false, 'left axis');
-    const integersOnlyRight = boolean('right axis show only intger values', false, 'right axis');
-    return (
-      <Chart className={'story-chart'}>
-        <Settings debug={boolean('debug', false)} theme={theme} />
-        <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={'Bottom axis'}
-          showOverlappingTicks={true}
-          showGridLines={boolean('show bottom axis grid lines', false, 'bottom axis')}
-          gridLineStyle={toggleBottomAxisGridLineStyle ? bottomAxisGridLineConfig : undefined}
-          integersOnly={boolean('bottom axis show only integer values', false, 'bottom axis')}
-        />
-        <Axis
-          id={getAxisId('left1')}
-          position={Position.Left}
-          title={'Left axis 1'}
-          tickFormat={integersOnlyLeft ? (d) => Number(d).toFixed(0) : (d) => Number(d).toFixed(2)}
-          showGridLines={boolean('show left axis grid lines', false, 'left axis')}
-          gridLineStyle={toggleHorizontalAxisGridLineStyle ? leftAxisGridLineConfig : undefined}
-          integersOnly={integersOnlyLeft}
-        />
-        <Axis
-          id={getAxisId('top')}
-          position={Position.Top}
-          title={'Top axis'}
-          showOverlappingTicks={true}
-          showGridLines={boolean('show top axis grid lines', false, 'top axis')}
-          gridLineStyle={topAxisGridLineConfig}
-          integersOnly={boolean('top axis show only integer values', false, 'top axis')}
-        />
-        <Axis
-          id={getAxisId('right')}
-          title={'Right axis'}
-          position={Position.Right}
-          tickFormat={integersOnlyRight ? (d) => Number(d).toFixed(0) : (d) => Number(d).toFixed(2)}
-          showGridLines={boolean('show right axis grid lines', false, 'right axis')}
-          gridLineStyle={rightAxisGridLineConfig}
-          integersOnly={integersOnlyRight}
-        />
-        <BarSeries
-          id={getSpecId('bars')}
-          xScaleType={ScaleType.Linear}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          data={[
-            { x: 0, y: 2 },
-            { x: 1, y: 7 },
-            { x: 2, y: 3 },
-            { x: 3, y: 6 },
-          ]}
-        />
-        <LineSeries
-          id={getSpecId('lines')}
-          xScaleType={ScaleType.Linear}
-          yScaleType={ScaleType.Linear}
-          groupId={getGroupId('group2')}
-          xAccessor="x"
-          yAccessors={['y']}
-          stackAccessors={['x']}
-          splitSeriesAccessors={['g']}
-          data={[
-            { x: 0, y: 3 },
-            { x: 1, y: 2 },
-            { x: 2, y: 4 },
-            { x: 3, y: 10 },
-          ]}
-        />
-      </Chart>
-    );
-  })
-  .add('multiple axes with the same position', () => {
-    const leftAxisGridLineConfig = generateGridLineConfig(Position.Left);
-    const leftAxisGridLineConfig2 = generateGridLineConfig(`${Position.Left}2`);
+export default {
+  title: 'Grids',
+  parameters: {
+    info: {
+      source: false,
+    },
+  },
+};
 
-    return (
-      <Chart size={[500, 300]} className={'story-chart'}>
-        <Settings debug={boolean('debug', false)} />
-        <Axis
-          id={getAxisId('left1')}
-          title={'Left axis 1'}
-          position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
-          showGridLines={boolean('show left axis grid lines', false, 'left axis')}
-          gridLineStyle={leftAxisGridLineConfig}
-        />
-        <Axis
-          id={getAxisId('left2')}
-          title={'Left axis 2'}
-          groupId={getGroupId('group2')}
-          position={Position.Left}
-          tickFormat={(d) => Number(d).toFixed(2)}
-          showGridLines={boolean('show left axis 2 grid lines', false, 'left2 axis')}
-          gridLineStyle={leftAxisGridLineConfig2}
-        />
-        <BarSeries
-          id={getSpecId('bars')}
-          xScaleType={ScaleType.Linear}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          data={[
-            { x: 0, y: 2 },
-            { x: 1, y: 7 },
-            { x: 2, y: 3 },
-            { x: 3, y: 6 },
-          ]}
-        />
-        <LineSeries
-          id={getSpecId('lines')}
-          xScaleType={ScaleType.Linear}
-          yScaleType={ScaleType.Linear}
-          groupId={getGroupId('group2')}
-          xAccessor="x"
-          yAccessors={['y']}
-          stackAccessors={['x']}
-          splitSeriesAccessors={['g']}
-          data={[
-            { x: 0, y: 3 },
-            { x: 1, y: 2 },
-            { x: 2, y: 4 },
-            { x: 3, y: 10 },
-          ]}
-        />
-      </Chart>
-    );
-  });
+export const basic = () => {
+  const leftAxisGridLineConfig = generateGridLineConfig(Position.Left, 'lightblue');
+  const rightAxisGridLineConfig = generateGridLineConfig(Position.Right, 'red');
+  const topAxisGridLineConfig = generateGridLineConfig(Position.Top, 'teal');
+  const bottomAxisGridLineConfig = generateGridLineConfig(Position.Bottom, 'blue');
+  const toggleBottomAxisGridLineStyle = boolean('use axis gridLineStyle vertically', false, 'bottom axis');
+  const toggleHorizontalAxisGridLineStyle = boolean('use axis gridLineStyle horizontally', false, 'left axis');
+  const bottomAxisThemeGridLineConfig = generateGridLineConfig('Vertical Axis Theme', 'violet');
+  const leftAxisThemeGridLineConfig = generateGridLineConfig('Horizontal Axis Theme', 'hotpink');
+  const theme = {
+    axes: {
+      gridLineStyle: { vertical: leftAxisThemeGridLineConfig, horizontal: bottomAxisThemeGridLineConfig },
+    },
+  };
+  const integersOnlyLeft = boolean('left axis show only integer values', false, 'left axis');
+  const integersOnlyRight = boolean('right axis show only intger values', false, 'right axis');
+  return (
+    <Chart className={'story-chart'}>
+      <Settings debug={boolean('debug', false)} theme={theme} />
+      <Axis
+        id={getAxisId('bottom')}
+        position={Position.Bottom}
+        title={'Bottom axis'}
+        showOverlappingTicks={true}
+        showGridLines={boolean('show bottom axis grid lines', false, 'bottom axis')}
+        gridLineStyle={toggleBottomAxisGridLineStyle ? bottomAxisGridLineConfig : undefined}
+        integersOnly={boolean('bottom axis show only integer values', false, 'bottom axis')}
+      />
+      <Axis
+        id={getAxisId('left1')}
+        position={Position.Left}
+        title={'Left axis 1'}
+        tickFormat={integersOnlyLeft ? (d) => Number(d).toFixed(0) : (d) => Number(d).toFixed(2)}
+        showGridLines={boolean('show left axis grid lines', false, 'left axis')}
+        gridLineStyle={toggleHorizontalAxisGridLineStyle ? leftAxisGridLineConfig : undefined}
+        integersOnly={integersOnlyLeft}
+      />
+      <Axis
+        id={getAxisId('top')}
+        position={Position.Top}
+        title={'Top axis'}
+        showOverlappingTicks={true}
+        showGridLines={boolean('show top axis grid lines', false, 'top axis')}
+        gridLineStyle={topAxisGridLineConfig}
+        integersOnly={boolean('top axis show only integer values', false, 'top axis')}
+      />
+      <Axis
+        id={getAxisId('right')}
+        title={'Right axis'}
+        position={Position.Right}
+        tickFormat={integersOnlyRight ? (d) => Number(d).toFixed(0) : (d) => Number(d).toFixed(2)}
+        showGridLines={boolean('show right axis grid lines', false, 'right axis')}
+        gridLineStyle={rightAxisGridLineConfig}
+        integersOnly={integersOnlyRight}
+      />
+      <BarSeries
+        id={getSpecId('bars')}
+        xScaleType={ScaleType.Linear}
+        yScaleType={ScaleType.Linear}
+        xAccessor="x"
+        yAccessors={['y']}
+        data={[
+          { x: 0, y: 2 },
+          { x: 1, y: 7 },
+          { x: 2, y: 3 },
+          { x: 3, y: 6 },
+        ]}
+      />
+      <LineSeries
+        id={getSpecId('lines')}
+        xScaleType={ScaleType.Linear}
+        yScaleType={ScaleType.Linear}
+        groupId={getGroupId('group2')}
+        xAccessor="x"
+        yAccessors={['y']}
+        stackAccessors={['x']}
+        splitSeriesAccessors={['g']}
+        data={[
+          { x: 0, y: 3 },
+          { x: 1, y: 2 },
+          { x: 2, y: 4 },
+          { x: 3, y: 10 },
+        ]}
+      />
+    </Chart>
+  );
+};
+basic.story = {
+  name: 'basic',
+};
+
+export const multipleAxesWithTheSamePosition = () => {
+  const leftAxisGridLineConfig = generateGridLineConfig(Position.Left);
+  const leftAxisGridLineConfig2 = generateGridLineConfig(`${Position.Left}2`);
+
+  return (
+    <Chart size={[500, 300]} className={'story-chart'}>
+      <Settings debug={boolean('debug', false)} />
+      <Axis
+        id={getAxisId('left1')}
+        title={'Left axis 1'}
+        position={Position.Left}
+        tickFormat={(d) => Number(d).toFixed(2)}
+        showGridLines={boolean('show left axis grid lines', false, 'left axis')}
+        gridLineStyle={leftAxisGridLineConfig}
+      />
+      <Axis
+        id={getAxisId('left2')}
+        title={'Left axis 2'}
+        groupId={getGroupId('group2')}
+        position={Position.Left}
+        tickFormat={(d) => Number(d).toFixed(2)}
+        showGridLines={boolean('show left axis 2 grid lines', false, 'left2 axis')}
+        gridLineStyle={leftAxisGridLineConfig2}
+      />
+      <BarSeries
+        id={getSpecId('bars')}
+        xScaleType={ScaleType.Linear}
+        yScaleType={ScaleType.Linear}
+        xAccessor="x"
+        yAccessors={['y']}
+        data={[
+          { x: 0, y: 2 },
+          { x: 1, y: 7 },
+          { x: 2, y: 3 },
+          { x: 3, y: 6 },
+        ]}
+      />
+      <LineSeries
+        id={getSpecId('lines')}
+        xScaleType={ScaleType.Linear}
+        yScaleType={ScaleType.Linear}
+        groupId={getGroupId('group2')}
+        xAccessor="x"
+        yAccessors={['y']}
+        stackAccessors={['x']}
+        splitSeriesAccessors={['g']}
+        data={[
+          { x: 0, y: 3 },
+          { x: 1, y: 2 },
+          { x: 2, y: 4 },
+          { x: 3, y: 10 },
+        ]}
+      />
+    </Chart>
+  );
+};
+multipleAxesWithTheSamePosition.story = {
+  name: 'multiple axes with the same position',
+};

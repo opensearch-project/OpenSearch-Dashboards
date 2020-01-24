@@ -40,20 +40,4 @@ addParameters({
 addDecorator(withKnobs);
 addDecorator(withInfo);
 
-function loadStories() {
-  require('../stories/bar_chart.tsx');
-  require('../stories/line_chart.tsx');
-  require('../stories/area_chart.tsx');
-  require('../stories/axis.tsx');
-  require('../stories/mixed.tsx');
-  require('../stories/legend.tsx');
-  require('../stories/interactions.tsx');
-  require('../stories/rotations.tsx');
-  require('../stories/styling.tsx');
-  require('../stories/grid.tsx');
-  require('../stories/annotations.tsx');
-  require('../stories/scales.tsx');
-  return [require('../stories/sunburst.tsx'), require('../stories/treemap.tsx')];
-}
-
-configure(loadStories, module);
+configure(require.context('../stories', true, /\.tsx$/), module);

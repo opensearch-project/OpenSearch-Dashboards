@@ -18,7 +18,7 @@ describe('Legend stories', () => {
   });
   it('should 0 legend buffer', async () => {
     await common.expectChartAtUrlToMatchScreenshot(
-      'http://localhost:9001/?path=/story/legend--legend-spacingbuffer&knob-legend buffer value=0',
+      'http://localhost:9001/?path=/story/legend--legend-spacing-buffer&knob-legend buffer value=0',
     );
   });
 });
