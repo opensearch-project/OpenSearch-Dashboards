@@ -16,15 +16,14 @@ export function sunburst(
       const index = clockwiseSectors ? i : nodeCount - i - 1;
       const node = nodes[depth === 1 && specialFirstInnermostSector ? (index + 1) % nodeCount : index];
       const area = areaAccessor(node);
-      const X0 = currentOffsetX;
-      currentOffsetX += area;
-      result.push({ node, x0: X0, y0, x1: X0 + area, y1: y0 + 1 });
+      result.push({ node, x0: currentOffsetX, y0, x1: currentOffsetX + area, y1: y0 + 1 });
       const children = childrenAccessor(node);
       if (children && children.length) {
-        laySubtree(children, { x0: X0, y0: y0 + 1 }, depth + 1);
+        laySubtree(children, { x0: currentOffsetX, y0: y0 + 1 }, depth + 1);
       }
+      currentOffsetX += area;
     }
   };
-  laySubtree(nodes, { x0, y0 }, 1);
+  laySubtree(nodes, { x0, y0 }, 0);
   return result;
 }

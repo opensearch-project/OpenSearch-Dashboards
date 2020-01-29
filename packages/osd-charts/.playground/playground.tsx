@@ -25,7 +25,7 @@ export class Playground extends React.Component<{}, { isSunburstShown: boolean }
                 {
                   groupByRollup: (d: Datum) => d.id,
                   nodeLabel: (d: Datum) => d,
-                  fillLabel: { formatter: (d: Datum) => `${d} pct` },
+                  fillLabel: { valueFormatter: (d: Datum) => `${d} pct` },
                 },
               ]}
             />

@@ -6,6 +6,8 @@ import { countryDimension, productDimension, regionDimension } from '../src/mock
 import { getRandomNumber } from '../src/mocks/utils';
 import { palettes } from '../src/mocks/hierarchical/palettes';
 import React from 'react';
+import { ShapeTreeNode } from '../src/chart_types/partition_chart/layout/types/viewmodel_types';
+import { categoricalFillColor, colorBrewerCategoricalPastel12 } from './utils/utils';
 
 const productLookup = arrayToLookup((d: Datum) => d.sitc1, productDimension);
 const regionLookup = arrayToLookup((d: Datum) => d.region, regionDimension);
@@ -32,14 +34,14 @@ export const OneLayer = () => (
       id={'spec_' + getRandomNumber()}
       data={mocks.pie}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => productLookup[d].name,
           fillLabel: {
             textInvertible: true,
-            formatter: (d: number) => `${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`,
+            valueFormatter: (d: number) => `${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
           },
           shape: {
             fillColor: defaultFillColor(interpolatorCET2s),
@@ -56,6 +58,39 @@ OneLayer.story = {
   name: 'One-layer, resizing treemap',
 };
 
+export const OneLayer2 = () => (
+  <Chart className={'story-chart'}>
+    <Partition
+      id={'spec_' + getRandomNumber()}
+      data={mocks.pie}
+      valueAccessor={(d: Datum) => d.exportVal as number}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
+      layers={[
+        {
+          groupByRollup: (d: Datum) => d.sitc1,
+          nodeLabel: (d: Datum) => productLookup[d].name,
+          fillLabel: {
+            textInvertible: true,
+            valueFormatter: (d: number) => `${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
+            valueFont: {
+              fontWeight: 100,
+            },
+          },
+          shape: {
+            fillColor: (d: ShapeTreeNode) => categoricalFillColor(colorBrewerCategoricalPastel12)(d.sortIndex),
+          },
+        },
+      ]}
+      config={{
+        partitionLayout: PartitionLayout.treemap,
+      }}
+    />
+  </Chart>
+);
+OneLayer2.story = {
+  name: 'One-layer, ColorBrewer treemap',
+};
+
 export const MidTwoLayers = () => (
   <Chart
     className={'story-chart'}
@@ -69,33 +104,39 @@ export const MidTwoLayers = () => (
       id={'spec_' + getRandomNumber()}
       data={mocks.sunburst}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => countryLookup[d.dest].continentCountry.substr(0, 2),
           nodeLabel: (d: any) => regionLookup[d].regionName,
           fillLabel: {
-            formatter: (d: number) => `${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`,
+            valueFormatter: (d: number) => `${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
             fontFamily: 'Phosphate-Inline',
             textColor: 'yellow',
             textInvertible: false,
           },
-          shape: { fillColor: 'rgba(255, 229, 180,0.25)' },
+          shape: { fillColor: 'rgba(0,0,0,0)' },
         },
         {
           groupByRollup: (d: Datum) => d.dest,
           nodeLabel: (d: any) => countryLookup[d].name,
           fillLabel: {
-            formatter: (d: number) => `${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`,
+            valueFormatter: (d: number) => `${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
             textColor: 'black',
             textInvertible: false,
-            textWeight: 200,
+            fontWeight: 200,
             fontStyle: 'normal',
             fontFamily: 'Helvetica',
-            fontVariant: 'normal',
+            fontVariant: 'small-caps',
+            valueFont: { fontWeight: 400, fontStyle: 'italic' },
           },
           shape: {
-            fillColor: defaultFillColor(interpolatorTurbo),
+            fillColor: (d: ShapeTreeNode) => {
+              // primarily, pick color based on parent's index, but then perturb by the index within the parent
+              return interpolatorTurbo(
+                (d.parent.sortIndex + d.sortIndex / d.parent.children.length) / (d.parent.parent.children.length + 1),
+              );
+            },
           },
         },
       ]}
@@ -113,12 +154,15 @@ export const MidTwoLayers = () => (
 MidTwoLayers.story = {
   name: 'Midsize two-layer treemap',
 };
+
 export const TwoLayersStressTest = () => (
   <Chart
     className={'story-chart'}
     size={
       {
-        /*height: 800*/
+        /*
+      height: 800,
+        */
       }
     }
   >
@@ -126,33 +170,46 @@ export const TwoLayersStressTest = () => (
       id={'spec_' + getRandomNumber()}
       data={mocks.sunburst}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: any) => productLookup[d].name.toUpperCase(),
           fillLabel: {
-            formatter: (d: number) => `${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`,
+            valueFormatter: () => '',
             fontFamily: 'Phosphate-Inline',
-            textColor: 'white',
-            textInvertible: false,
+            textColor: 'rgba(255,255,0, 0.6)',
+            textInvertible: true,
           },
-          shape: { fillColor: 'rgba(255, 229, 180,0.25)' },
+          shape: {
+            fillColor: (d: ShapeTreeNode) => {
+              // primarily, pick color based on parent's index, but then perturb by the index within the parent
+              return interpolatorTurbo(d.sortIndex / (d.parent.children.length + 1));
+            },
+          },
         },
         {
           groupByRollup: (d: Datum) => d.dest,
           nodeLabel: (d: any) => countryLookup[d].name,
           fillLabel: {
-            formatter: (d: number) => `${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`,
+            valueFormatter: (d: number) => `${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
             textColor: 'black',
-            textInvertible: false,
-            textWeight: 200,
+            textInvertible: true,
+            fontWeight: 900,
             fontStyle: 'normal',
             fontFamily: 'Helvetica',
             fontVariant: 'normal',
+            valueFont: {
+              fontWeight: 100,
+            },
           },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: (d: ShapeTreeNode) => {
+              // primarily, pick color based on parent's index, but then perturb by the index within the parent
+              return interpolatorTurbo(
+                (d.parent.sortIndex + d.sortIndex / d.parent.children.length) / (d.parent.parent.children.length + 1),
+              );
+            },
           },
         },
       ]}
@@ -184,13 +241,13 @@ export const MultiColor = () => (
       id={'spec_' + getRandomNumber()}
       data={mocks.sunburst}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => countryLookup[d.dest].continentCountry.substr(0, 2),
           nodeLabel: () => '',
           fillLabel: {
-            formatter: () => '',
+            valueFormatter: () => '',
           },
           shape: {
             fillColor: defaultFillColor(interpolatorCET2s),
@@ -200,10 +257,10 @@ export const MultiColor = () => (
           groupByRollup: (d: Datum) => d.dest,
           nodeLabel: (d: any) => countryLookup[d].name,
           fillLabel: {
-            formatter: (d: number) => `${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`,
+            valueFormatter: (d: number) => `${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
             textColor: 'rgb(60,60,60,1)',
             textInvertible: false,
-            textWeight: 100,
+            fontWeight: 100,
             fontStyle: 'normal',
             fontFamily: 'Din Condensed',
             fontVariant: 'normal',
@@ -241,13 +298,13 @@ export const CustomStyle = () => (
       id={'spec_' + getRandomNumber()}
       data={mocks.sunburst}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => countryLookup[d.dest].continentCountry.substr(0, 2),
           nodeLabel: () => '',
           fillLabel: {
-            formatter: () => '',
+            valueFormatter: () => '',
           },
           shape: {
             fillColor: (d: any, i: any, a: any) => {
@@ -260,10 +317,10 @@ export const CustomStyle = () => (
           groupByRollup: (d: Datum) => d.dest,
           nodeLabel: (d: any) => countryLookup[d].name,
           fillLabel: {
-            formatter: (d: number) => `${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`,
+            valueFormatter: (d: number) => `${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
             textColor: 'rgb(60,60,60,1)',
             textInvertible: false,
-            textWeight: 600,
+            fontWeight: 600,
             fontStyle: 'normal',
             fontFamily: 'Courier New',
             fontVariant: 'normal',

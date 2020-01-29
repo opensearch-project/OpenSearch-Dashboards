@@ -2,8 +2,16 @@ import { wrapToTau } from '../geometry';
 import { Coordinate, Distance, Pixels, Radian, Radius, RingSector } from '../types/geometry_types';
 import { Config } from '../types/config_types';
 import { logarithm, TAU, trueBearingToStandardPositionAngle } from '../utils/math';
-import { RawTextGetter, RowBox, RowSet, RowSpace, ShapeTreeNode } from '../types/viewmodel_types';
-import { FontWeight, TextMeasure } from '../types/types';
+import {
+  QuadViewModel,
+  RawTextGetter,
+  RowBox,
+  RowSet,
+  RowSpace,
+  ShapeTreeNode,
+  ValueFormatter,
+} from '../types/viewmodel_types';
+import { Box, Font, PartialFont, TextMeasure } from '../types/types';
 import { AGGREGATE_KEY } from '../utils/group_by_rollup';
 import { conjunctiveConstraint } from '../circline_geometry';
 import { Layer } from '../../specs/index';
@@ -189,24 +197,27 @@ function identityRowSet(): RowSet {
   return {
     id: '',
     rows: [],
-    fontFamily: '',
-    fontStyle: '',
-    fontVariant: '',
     fontSize: NaN,
     fillTextColor: '',
-    fillTextWeight: 400,
     rotation: NaN,
   };
 }
 
 function getAllBoxes(
   rawTextGetter: RawTextGetter,
-  valueFormatter: (value: number) => string,
+  valueFormatter: ValueFormatter,
+  sizeInvariantFontShorthand: Font,
+  valueFont: PartialFont,
   node: ShapeTreeNode,
-): string[] {
+): Box[] {
   return rawTextGetter(node)
     .split(' ')
-    .concat(valueFormatter(node[AGGREGATE_KEY]).split(' '));
+    .map((text) => ({ text, ...sizeInvariantFontShorthand }))
+    .concat(
+      valueFormatter(node[AGGREGATE_KEY])
+        .split(' ')
+        .map((text) => ({ text, ...sizeInvariantFontShorthand, ...valueFont })),
+    );
 }
 
 function getWordSpacing(fontSize: number) {
@@ -217,39 +228,46 @@ function fill(
   config: Config,
   layers: Layer[],
   fontSizes: string | any[],
-  measure: { (font: string, texts: string[]): TextMetrics[]; (arg0: string, arg1: any): any },
+  measure: TextMeasure,
   rawTextGetter: RawTextGetter,
-  valueFormatter: (value: number) => string,
+  formatter: (value: number) => string,
   textFillOrigins: any[],
   shapeConstructor: (n: ShapeTreeNode) => any,
   getShapeRowGeometry: (...args: any[]) => RowSpace,
   getRotation: Function,
 ) {
-  return (node: ShapeTreeNode, index: number, a: ShapeTreeNode[]) => {
+  return (node: QuadViewModel, index: number) => {
     const { maxRowCount, fillLabel } = config;
 
-    const {
-      textColor,
-      textInvertible,
-      textWeight,
-      fontStyle,
-      fontVariant,
-      fontFamily,
-      formatter,
-      fillColor,
-    } = Object.assign(
-      { fontFamily: config.fontFamily, fillColor: node.fill },
+    const layer = layers[node.depth - 1] || {};
+    const { textColor, textInvertible, fontStyle, fontVariant, fontFamily, fontWeight, valueFormatter } = Object.assign(
+      { fontFamily: config.fontFamily, fontWeight: 'normal' },
       fillLabel,
-      { formatter: valueFormatter },
-      layers[node.depth - 1] && layers[node.depth - 1].fillLabel,
-      layers[node.depth - 1] && layers[node.depth - 1].shape,
+      { valueFormatter: formatter },
+      layer.fillLabel,
+      layer.shape,
+    );
+
+    const valueFont = Object.assign(
+      { fontFamily: config.fontFamily, fontWeight: 'normal' },
+      config.fillLabel && config.fillLabel.valueFont,
+      fillLabel,
+      fillLabel.valueFont,
+      layer.fillLabel,
+      layer.fillLabel && layer.fillLabel.valueFont,
     );
 
     const specifiedTextColorIsDark = colorIsDark(textColor);
-    const shapeFillColor = typeof fillColor === 'function' ? fillColor(node, index, a) : fillColor;
-    const { r: tr, g: tg, b: tb } = stringToRGB(textColor);
+    const shapeFillColor = node.fillColor;
+    const { r: tr, g: tg, b: tb, opacity: to } = stringToRGB(textColor);
     let fontSizeIndex = fontSizes.length - 1;
-    const allBoxes = getAllBoxes(rawTextGetter, formatter, node);
+    const sizeInvariantFont: Font = {
+      fontStyle,
+      fontVariant,
+      fontWeight,
+      fontFamily,
+    };
+    const allBoxes = getAllBoxes(rawTextGetter, valueFormatter, sizeInvariantFont, valueFont, node);
     let rowSet = identityRowSet();
     let completed = false;
     const rotation = getRotation(node);
@@ -261,13 +279,14 @@ function fill(
       const wordSpacing = getWordSpacing(fontSize);
 
       // model text pieces, obtaining their width at the current font size
-      const measurements = measure(fontSize + 'px ' + fontFamily, allBoxes);
+      const measurements = measure(fontSize, allBoxes);
       const allMeasuredBoxes: RowBox[] = measurements.map(
         ({ width, emHeightDescent, emHeightAscent }: TextMetrics, i: number) => ({
           width,
           verticalOffset: -(emHeightDescent + emHeightAscent) / 2, // meaning, `middle`,
-          text: allBoxes[i],
           wordBeginning: NaN,
+          ...allBoxes[i],
+          fontSize, // iterated fontSize overrides a possible more global fontSize
         }),
       );
       const linePitch = fontSize;
@@ -284,14 +303,14 @@ function fill(
         rowSet = {
           id: nodeId(node),
           fontSize,
-          fontFamily,
-          fontStyle,
-          fontVariant,
           // fontWeight must be a multiple of 100 for non-variable width fonts, otherwise weird things happen due to
           // https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight#Fallback_weights - Fallback weights
           // todo factor out the discretization into a => FontWeight function
-          fillTextWeight: (Math.round(textWeight / 100) * 100) as FontWeight,
-          fillTextColor: inverseForContrast ? `rgb(${255 - tr}, ${255 - tg}, ${255 - tb})` : textColor,
+          fillTextColor: inverseForContrast
+            ? to === undefined
+              ? `rgb(${255 - tr}, ${255 - tg}, ${255 - tb})`
+              : `rgba(${255 - tr}, ${255 - tg}, ${255 - tb}, ${to})`
+            : textColor,
           rotation,
           rows: [...Array(targetRowCount)].map(() => ({
             rowWords: [],
@@ -357,7 +376,7 @@ function fill(
         }
       }
     }
-    rowSet.rows = rowSet.rows.filter((r) => !isNaN(r.length));
+    rowSet.rows = rowSet.rows.filter((r) => completed && !isNaN(r.length));
     return rowSet;
   };
 }
@@ -376,7 +395,7 @@ export function fillTextLayout(
   measure: TextMeasure,
   rawTextGetter: RawTextGetter,
   valueFormatter: (value: number) => string,
-  childNodes: ShapeTreeNode[],
+  childNodes: QuadViewModel[],
   config: Config,
   layers: Layer[],
   textFillOrigins: [number, number][],

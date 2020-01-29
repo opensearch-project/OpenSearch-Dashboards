@@ -34,7 +34,7 @@ export { AnnotationTooltipFormatter } from './chart_types/xy_chart/annotations/a
 export { GeometryValue } from './utils/geometry';
 export {
   Config as PartitionConfig,
-  FillLabel as PartitionFillLabel,
+  FillLabelConfig as PartitionFillLabel,
   PartitionLayout,
 } from './chart_types/partition_chart/layout/types/config_types';
 export { Layer as PartitionLayer } from './chart_types/partition_chart/specs/index';

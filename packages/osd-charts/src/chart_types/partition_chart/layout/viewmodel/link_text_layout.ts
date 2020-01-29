@@ -1,9 +1,10 @@
 import { Distance } from '../types/geometry_types';
 import { Config } from '../types/config_types';
 import { TAU, trueBearingToStandardPositionAngle } from '../utils/math';
-import { LinkLabelVM, ShapeTreeNode } from '../types/viewmodel_types';
+import { LinkLabelVM, ShapeTreeNode, ValueFormatter } from '../types/viewmodel_types';
 import { meanAngle } from '../geometry';
 import { TextMeasure } from '../types/types';
+import { AGGREGATE_KEY } from '../utils/group_by_rollup';
 
 // todo modularize this large function
 export function linkTextLayout(
@@ -13,6 +14,7 @@ export function linkTextLayout(
   currentY: Distance[],
   anchorRadius: Distance,
   rawTextGetter: Function,
+  valueFormatter: ValueFormatter,
 ): LinkLabelVM[] {
   const { linkLabel } = config;
   const maxDepth = nodesWithoutRoom.reduce((p: number, n: ShapeTreeNode) => Math.max(p, n.depth), 0);
@@ -49,8 +51,8 @@ export function linkTextLayout(
       const stemToX = x + north * west * cy - west * relativeY;
       const stemToY = cy;
       const text = rawTextGetter(node);
-      const { width, emHeightAscent, emHeightDescent } = measure(linkLabel.fontSize + 'px ' + config.fontFamily, [
-        text,
+      const { width, emHeightAscent, emHeightDescent } = measure(linkLabel.fontSize, [
+        { fontFamily: config.fontFamily, ...linkLabel, text },
       ])[0];
       return {
         link: [
@@ -62,6 +64,7 @@ export function linkTextLayout(
         translate: [stemToX + west * (linkLabel.horizontalStemLength + linkLabel.gap), stemToY],
         textAlign: side ? 'left' : 'right',
         text,
+        valueText: valueFormatter(node[AGGREGATE_KEY]),
         width,
         verticalOffset: -(emHeightDescent + emHeightAscent) / 2, // meaning, `middle`
       };

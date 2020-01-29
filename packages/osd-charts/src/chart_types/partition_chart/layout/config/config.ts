@@ -1,6 +1,7 @@
 import { palettes } from '../../../../mocks/hierarchical/palettes';
 import { Config, PartitionLayout, Numeric } from '../types/config_types';
 import { GOLDEN_RATIO, TAU } from '../utils/math';
+import { FONT_STYLES, FONT_VARIANTS } from '../types/types';
 
 const log10 = Math.log(10);
 function significantDigitCount(d: number): number {
@@ -23,6 +24,30 @@ function defaultFormatter(d: any): string {
         })
     : String(d);
 }
+
+const valueFont = {
+  type: 'group',
+  values: {
+    /*
+    // Object.assign interprets the extant `undefined` as legit, so commenting it out till moving away from Object.assign in `const valueFont = ...`
+    fontFamily: {
+      dflt: undefined,
+      type: 'string',
+    },
+   */
+    fontWeight: { dflt: 400, min: 100, max: 900, type: 'number' },
+    fontStyle: {
+      dflt: 'normal',
+      type: 'string',
+      values: FONT_STYLES,
+    },
+    fontVariant: {
+      dflt: 'normal',
+      type: 'string',
+      values: FONT_VARIANTS,
+    },
+  },
+};
 
 export const configMetadata = {
   // shape geometry
@@ -100,21 +125,22 @@ export const configMetadata = {
     values: {
       textColor: { dflt: '#000000', type: 'color' },
       textInvertible: { dflt: false, type: 'boolean' },
-      textWeight: { dflt: 400, min: 100, max: 900, type: 'number' },
+      fontWeight: { dflt: 400, min: 100, max: 900, type: 'number' },
       fontStyle: {
         dflt: 'normal',
         type: 'string',
-        values: ['normal', 'italic', 'oblique', 'inherit', 'initial', 'unset'],
+        values: FONT_STYLES,
       },
       fontVariant: {
         dflt: 'normal',
         type: 'string',
-        values: ['normal', 'small-caps'],
+        values: FONT_VARIANTS,
       },
-      formatter: {
+      valueFormatter: {
         dflt: defaultFormatter,
         type: 'function',
       },
+      valueFont,
     },
   },
 
@@ -160,6 +186,7 @@ export const configMetadata = {
         type: 'number',
         reconfigurable: false, // currently only tau / 8 is reliable
       },
+      valueFont,
     },
   },
 

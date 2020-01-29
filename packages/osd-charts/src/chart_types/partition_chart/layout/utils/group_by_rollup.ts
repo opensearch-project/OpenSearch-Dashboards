@@ -3,6 +3,8 @@ import { Relation } from '../types/types';
 export const AGGREGATE_KEY = 'value'; // todo later switch back to 'aggregate'
 export const DEPTH_KEY = 'depth';
 export const CHILDREN_KEY = 'children';
+export const PARENT_KEY = 'parent';
+export const SORT_INDEX_KEY = 'sortIndex';
 
 interface NodeDescriptor {
   [AGGREGATE_KEY]: number;
@@ -11,13 +13,16 @@ interface NodeDescriptor {
 
 export type ArrayEntry = [Key, ArrayNode];
 export type HierarchyOfArrays = Array<ArrayEntry>;
-interface ArrayNode extends NodeDescriptor {
-  [CHILDREN_KEY]?: HierarchyOfArrays;
+export interface ArrayNode extends NodeDescriptor {
+  [CHILDREN_KEY]: HierarchyOfArrays;
+  [PARENT_KEY]: ArrayNode;
+  [SORT_INDEX_KEY]: number;
 }
 
 type HierarchyOfMaps = Map<Key, MapNode>;
 interface MapNode extends NodeDescriptor {
   [CHILDREN_KEY]?: HierarchyOfMaps;
+  [PARENT_KEY]?: ArrayNode;
 }
 
 export type PrimitiveValue = string | number | null; // there could be more but sufficient for now
@@ -31,11 +36,17 @@ export const entryValue = ([, value]: ArrayEntry) => value;
 export function depthAccessor(n: ArrayEntry) {
   return entryValue(n)[DEPTH_KEY];
 }
-export function aggregateAccessor(n: ArrayEntry) {
+export function aggregateAccessor(n: ArrayEntry): number {
   return entryValue(n)[AGGREGATE_KEY];
+}
+export function parentAccessor(n: ArrayEntry): ArrayNode {
+  return entryValue(n)[PARENT_KEY];
 }
 export function childrenAccessor(n: ArrayEntry) {
   return entryValue(n)[CHILDREN_KEY];
+}
+export function sortIndexAccessor(n: ArrayEntry) {
+  return entryValue(n)[SORT_INDEX_KEY];
 }
 const ascending: Sorter = (a, b) => a - b;
 const descending: Sorter = (a, b) => b - a;
@@ -78,21 +89,41 @@ export function groupByRollup(
   return reductionMap;
 }
 
+function getRootArrayNode(): ArrayNode {
+  const children: HierarchyOfArrays = [];
+  const bootstrap = { [AGGREGATE_KEY]: NaN, [DEPTH_KEY]: NaN, [CHILDREN_KEY]: children };
+  Object.assign(bootstrap, { [PARENT_KEY]: bootstrap });
+  const result: ArrayNode = bootstrap as ArrayNode;
+  return result;
+}
+
 export function mapsToArrays(root: HierarchyOfMaps, sorter: NodeSorter): HierarchyOfArrays {
-  const groupByMap = (node: HierarchyOfMaps) =>
+  const groupByMap = (node: HierarchyOfMaps, parent: ArrayNode) =>
     Array.from(
       node,
       ([key, value]: [Key, MapNode]): ArrayEntry => {
         const valueElement = value[CHILDREN_KEY];
+        const resultNode: ArrayNode = {
+          [AGGREGATE_KEY]: NaN,
+          [CHILDREN_KEY]: [],
+          [DEPTH_KEY]: NaN,
+          [SORT_INDEX_KEY]: NaN,
+          [PARENT_KEY]: parent,
+        };
         const newValue: ArrayNode = Object.assign(
-          {},
+          resultNode,
           value,
-          valueElement && { [CHILDREN_KEY]: groupByMap(valueElement) },
+          valueElement && { [CHILDREN_KEY]: groupByMap(valueElement, resultNode) },
         );
         return [key, newValue];
       },
-    ).sort(sorter); // with the current algo, decreasing order is important
-  return groupByMap(root);
+    )
+      .sort(sorter)
+      .map((n: ArrayEntry, i) => {
+        entryValue(n).sortIndex = i;
+        return n;
+      }); // with the current algo, decreasing order is important
+  return groupByMap(root, getRootArrayNode());
 }
 
 export function mapEntryValue(entry: ArrayEntry) {

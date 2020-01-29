@@ -1,15 +1,20 @@
 import { Chart, Datum, Partition, PartitionLayout } from '../src';
 import { mocks } from '../src/mocks/hierarchical/index';
 import { config } from '../src/chart_types/partition_chart/layout/config/config';
-import { arrayToLookup, hueInterpolator } from '../src/chart_types/partition_chart/layout/utils/calcs';
-import { productDimension, regionDimension, countryDimension } from '../src/mocks/hierarchical/dimension_codes';
 import { getRandomNumber } from '../src/mocks/utils';
-import { palettes } from '../src/mocks/hierarchical/palettes';
 import React from 'react';
-
-const productLookup = arrayToLookup((d: Datum) => d.sitc1, productDimension);
-const regionLookup = arrayToLookup((d: Datum) => d.region, regionDimension);
-const countryLookup = arrayToLookup((d: Datum) => d.country, countryDimension);
+import { ShapeTreeNode } from '../src/chart_types/partition_chart/layout/types/viewmodel_types';
+import {
+  categoricalFillColor,
+  colorBrewerCategoricalPastel12,
+  colorBrewerCategoricalStark9,
+  countryLookup,
+  indexInterpolatedFillColor,
+  interpolatorCET2s,
+  interpolatorTurbo,
+  productLookup,
+  regionLookup,
+} from './utils/utils';
 
 export default {
   title: 'Sunburst',
@@ -20,26 +25,20 @@ export default {
   },
 };
 
-// style calcs
-const interpolatorCET2s = hueInterpolator(palettes.CET2s.map(([r, g, b]) => [r, g, b, 0.8]));
-const interpolatorTurbo = hueInterpolator(palettes.turbo.map(([r, g, b]) => [r, g, b, 0.8]));
-
-const defaultFillColor = (colorMaker: any) => (d: any, i: number, a: any[]) => colorMaker(i / (a.length + 1));
-
 export const SimplePieChart = () => (
   <Chart className={'story-chart'}>
     <Partition
       id={'spec_' + getRandomNumber()}
       data={mocks.pie}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => productLookup[d].name,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorTurbo),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -47,7 +46,81 @@ export const SimplePieChart = () => (
   </Chart>
 );
 SimplePieChart.story = {
-  name: 'Most basic PieChart',
+  name: 'Most basic pie chart',
+  info: {
+    source: false,
+  },
+};
+
+export const ValueFormattedPieChart = () => (
+  <Chart className={'story-chart'}>
+    <Partition
+      id={'spec_' + getRandomNumber()}
+      data={mocks.pie}
+      valueAccessor={(d: Datum) => d.exportVal as number}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
+      layers={[
+        {
+          groupByRollup: (d: Datum) => d.sitc1,
+          nodeLabel: (d: Datum) => productLookup[d].name,
+          fillLabel: {
+            textInvertible: true,
+            fontWeight: 100,
+            fontStyle: 'italic',
+            valueFont: {
+              fontFamily: 'Menlo',
+              fontStyle: 'normal',
+              fontWeight: 900,
+            },
+          },
+          shape: {
+            fillColor: indexInterpolatedFillColor(interpolatorTurbo),
+          },
+        },
+      ]}
+      config={{ outerSizeRatio: 0.9 }}
+    />
+  </Chart>
+);
+ValueFormattedPieChart.story = {
+  name: 'Value formatted pie chart',
+  info: {
+    source: false,
+  },
+};
+
+export const ValueFormattedPieChart2 = () => (
+  <Chart className={'story-chart'}>
+    <Partition
+      id={'spec_' + getRandomNumber()}
+      data={mocks.pie}
+      valueAccessor={(d: Datum) => d.exportVal as number}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
+      layers={[
+        {
+          groupByRollup: (d: Datum) => d.sitc1,
+          nodeLabel: (d: Datum) => productLookup[d].name,
+          fillLabel: {
+            textInvertible: true,
+            fontWeight: 100,
+            fontStyle: 'italic',
+            valueFont: {
+              fontFamily: 'Menlo',
+              fontStyle: 'normal',
+              fontWeight: 900,
+            },
+          },
+          shape: {
+            fillColor: (d: ShapeTreeNode) => categoricalFillColor(colorBrewerCategoricalPastel12)(d.sortIndex),
+          },
+        },
+      ]}
+      config={{ outerSizeRatio: 0.9 }}
+    />
+  </Chart>
+);
+ValueFormattedPieChart2.story = {
+  name: 'Value formatted pie chart with categorical color palette',
   info: {
     source: false,
   },
@@ -59,14 +132,14 @@ export const PieChartWithFillLabels = () => (
       id={'spec_' + getRandomNumber()}
       data={mocks.pie}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => productLookup[d].name,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -78,7 +151,7 @@ export const PieChartWithFillLabels = () => (
         },
         fontFamily: 'Arial',
         fillLabel: {
-          formatter: (d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`,
+          valueFormatter: (d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
           fontStyle: 'italic',
         },
         margin: { top: 0, bottom: 0, left: 0, right: 0 },
@@ -103,14 +176,14 @@ export const DonutChartWithFillLabels = () => (
       id={'spec_' + getRandomNumber()}
       data={mocks.pie}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => productLookup[d].name,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -122,7 +195,7 @@ export const DonutChartWithFillLabels = () => (
         },
         fontFamily: 'Arial',
         fillLabel: {
-          formatter: (d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`,
+          valueFormatter: (d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
           fontStyle: 'italic',
         },
         margin: { top: 0, bottom: 0, left: 0.2, right: 0 },
@@ -149,14 +222,14 @@ export const PieChartLabels = () => (
         { sitc1: 'Mineral fuels, lubricants and related materials', exportVal: 4 },
       ]}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d))}`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d))}`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           // nodeLabel: (d: Datum) => d,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -177,14 +250,14 @@ export const SomeZeroValueSlice = () => (
         .concat(mocks.pie.slice(2, 4).map((s) => ({ ...s, exportVal: 0 })))
         .concat(mocks.pie.slice(4))}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => productLookup[d].name,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -193,7 +266,7 @@ export const SomeZeroValueSlice = () => (
   </Chart>
 );
 SomeZeroValueSlice.story = {
-  name: 'Some slices has a zero value',
+  name: 'Some slices have a zero value',
 };
 
 export const SunburstTwoLayers = () => (
@@ -202,25 +275,30 @@ export const SunburstTwoLayers = () => (
       id={'spec_' + getRandomNumber()}
       data={mocks.sunburst}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => countryLookup[d.dest].continentCountry.substr(0, 2),
           nodeLabel: (d: any) => regionLookup[d].regionName,
           fillLabel: {
             fontFamily: 'Impact',
-            textInvertible: true,
-            formatter: (d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000000))}\xa0Tn`,
+            valueFormatter: (d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000000))}\xa0Tn`,
           },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: (d) => {
+              // pick color from color palette based on mean angle - rather distinct colors in the inner ring
+              return indexInterpolatedFillColor(interpolatorCET2s)(d, (d.x0 + d.x1) / 2 / (2 * Math.PI), []);
+            },
           },
         },
         {
           groupByRollup: (d: Datum) => d.dest,
           nodeLabel: (d: any) => countryLookup[d].name,
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: (d) => {
+              // pick color from color palette based on mean angle - related yet distinct colors in the outer ring
+              return indexInterpolatedFillColor(interpolatorCET2s)(d, (d.x0 + d.x1) / 2 / (2 * Math.PI), []);
+            },
           },
         },
       ]}
@@ -232,13 +310,14 @@ export const SunburstTwoLayers = () => (
         },
         fontFamily: 'Arial',
         fillLabel: {
-          formatter: (d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`,
+          textInvertible: true,
+          valueFormatter: (d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
           fontStyle: 'italic',
         },
         margin: { top: 0, bottom: 0, left: 0, right: 0 },
         minFontSize: 1,
         idealFontSizeJump: 1.1,
-        outerSizeRatio: 1,
+        outerSizeRatio: 0.95,
         emptySizeRatio: 0,
         circlePadding: 4,
         backgroundColor: 'rgba(229,229,229,1)',
@@ -246,41 +325,43 @@ export const SunburstTwoLayers = () => (
     />
   </Chart>
 );
-
 SunburstTwoLayers.story = {
-  name: 'Sunburst with two layers',
+  name: 'Sunburst with two layers, angle color',
 };
 
 export const SunburstThreeLayers = () => (
-  <Chart className={'story-chart'}>
+  <Chart className={'story-chart'} /*size={{ width: 1200, height: 800 }}*/>
     <Partition
       id={'spec_' + getRandomNumber()}
       data={mocks.miniSunburst}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: any) => productLookup[d].name,
-          fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: (d: ShapeTreeNode) => {
+              return categoricalFillColor(colorBrewerCategoricalStark9, 0.7)(d.sortIndex);
+            },
           },
         },
         {
           groupByRollup: (d: Datum) => countryLookup[d.dest].continentCountry.substr(0, 2),
           nodeLabel: (d: any) => regionLookup[d].regionName,
-          fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: (d: ShapeTreeNode) => {
+              return categoricalFillColor(colorBrewerCategoricalStark9, 0.5)(d.parent.sortIndex);
+            },
           },
         },
         {
           groupByRollup: (d: Datum) => d.dest,
           nodeLabel: (d: any) => countryLookup[d].name,
-          fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: (d: ShapeTreeNode) => {
+              return categoricalFillColor(colorBrewerCategoricalStark9, 0.3)(d.parent.parent.sortIndex);
+            },
           },
         },
       ]}
@@ -292,8 +373,15 @@ export const SunburstThreeLayers = () => (
         },
         fontFamily: 'Arial',
         fillLabel: {
-          formatter: (d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`,
+          valueFormatter: (d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
           fontStyle: 'italic',
+          textInvertible: true,
+          fontWeight: 900,
+          valueFont: {
+            fontFamily: 'Menlo',
+            fontStyle: 'normal',
+            fontWeight: 100,
+          },
         },
         margin: { top: 0, bottom: 0, left: 0, right: 0 },
         minFontSize: 1,
@@ -307,7 +395,7 @@ export const SunburstThreeLayers = () => (
   </Chart>
 );
 SunburstThreeLayers.story = {
-  name: 'Sunburst with three layers',
+  name: 'Sunburst with three layers, ColorBrewer, fade',
 };
 
 export const TwoSlicesPieChart = () => (
@@ -316,14 +404,14 @@ export const TwoSlicesPieChart = () => (
       id={'spec_' + getRandomNumber()}
       data={mocks.pie.slice(0, 2)}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => productLookup[d].name,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -332,7 +420,7 @@ export const TwoSlicesPieChart = () => (
   </Chart>
 );
 TwoSlicesPieChart.story = {
-  name: 'Pie Chart with two slices',
+  name: 'Pie chart with two slices',
 };
 
 export const LargeSmallPieChart = () => (
@@ -344,14 +432,14 @@ export const LargeSmallPieChart = () => (
         { sitc1: 'Mineral fuels, lubricants and related materials', exportVal: 80 },
       ]}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d))}`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d))}`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => d,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -367,6 +455,7 @@ export const LargeSmallPieChart = () => (
 LargeSmallPieChart.story = {
   name: 'Pie chart with one large and one small slice',
 };
+
 export const VeryLargeSmallPieChart = () => (
   <Chart className={'story-chart'}>
     <Partition
@@ -376,14 +465,14 @@ export const VeryLargeSmallPieChart = () => (
         { sitc1: 'Mineral fuels, lubricants and related materials', exportVal: 1 },
       ]}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d))}`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d))}`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => d,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -404,14 +493,14 @@ export const BigEmptyPieChart = () => (
         { sitc1: '3', exportVal: 1 },
       ]}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d))}`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d))}`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => productLookup[d].name,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -432,14 +521,14 @@ export const FullZeroSlicePieChart = () => (
         { sitc1: '3', exportVal: 0 },
       ]}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d))}`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d))}`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => productLookup[d].name,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -450,20 +539,21 @@ export const FullZeroSlicePieChart = () => (
 FullZeroSlicePieChart.story = {
   name: 'Pie chart with one full and one zero slice',
 };
+
 export const SingleSlicePieChart = () => (
   <Chart className={'story-chart'}>
     <Partition
       id={'spec_' + getRandomNumber()}
       data={mocks.pie.slice(0, 1)}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => productLookup[d].name,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -474,20 +564,71 @@ export const SingleSlicePieChart = () => (
 SingleSlicePieChart.story = {
   name: 'Pie chart with a single slice',
 };
-export const NoSliceNoPie = () => (
+
+export const SingleSmallSlicePieChart = () => (
   <Chart className={'story-chart'}>
     <Partition
       id={'spec_' + getRandomNumber()}
-      data={[]}
+      data={mocks.pie.slice(0, 1)}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => productLookup[d].name,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
+          },
+        },
+      ]}
+      config={{ partitionLayout: PartitionLayout.sunburst, outerSizeRatio: 0.15 }}
+    />
+  </Chart>
+);
+SingleSmallSlicePieChart.story = {
+  name: 'Small pie chart with a single slice',
+};
+
+export const SingleVerySmallSlicePieChart = () => (
+  <Chart className={'story-chart'}>
+    <Partition
+      id={'spec_' + getRandomNumber()}
+      data={mocks.pie.slice(0, 1)}
+      valueAccessor={(d: Datum) => d.exportVal as number}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
+      layers={[
+        {
+          groupByRollup: (d: Datum) => d.sitc1,
+          nodeLabel: (d: Datum) => productLookup[d].name,
+          fillLabel: { textInvertible: true },
+          shape: {
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
+          },
+        },
+      ]}
+      config={{ partitionLayout: PartitionLayout.sunburst, outerSizeRatio: 0.03 }}
+    />
+  </Chart>
+);
+SingleVerySmallSlicePieChart.story = {
+  name: 'Very small pie chart with a single slice',
+};
+
+export const NoSliceNoPie = () => (
+  <Chart className={'story-chart'}>
+    <Partition
+      id={'spec_' + getRandomNumber()}
+      data={[]}
+      valueAccessor={(d: Datum) => d.exportVal as number}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
+      layers={[
+        {
+          groupByRollup: (d: Datum) => d.sitc1,
+          nodeLabel: (d: Datum) => productLookup[d].name,
+          fillLabel: { textInvertible: true },
+          shape: {
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -498,6 +639,7 @@ export const NoSliceNoPie = () => (
 NoSliceNoPie.story = {
   name: 'No pie chart if no slices',
 };
+
 export const NegativeNoPie = () => (
   <Chart className={'story-chart'}>
     <Partition
@@ -507,14 +649,14 @@ export const NegativeNoPie = () => (
         .concat(mocks.pie.slice(2, 3).map((s) => ({ ...s, exportVal: -0.1 })))
         .concat(mocks.pie.slice(3))}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => productLookup[d].name,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -525,20 +667,21 @@ export const NegativeNoPie = () => (
 NegativeNoPie.story = {
   name: 'No pie chart if some slices are negative',
 };
+
 export const TotalZeroNoPie = () => (
   <Chart className={'story-chart'}>
     <Partition
       id={'spec_' + getRandomNumber()}
       data={mocks.pie.map((s) => ({ ...s, exportVal: 0 }))}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => productLookup[d].name,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -556,14 +699,14 @@ export const HighNumberOfSlice = () => (
       id={'spec_' + getRandomNumber()}
       data={mocks.manyPie}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.origin,
           nodeLabel: (d: Datum) => countryLookup[d].name,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -584,14 +727,14 @@ export const CounterClockwiseSpecial = () => (
       id={'spec_' + getRandomNumber()}
       data={mocks.pie}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => productLookup[d].name,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -612,14 +755,14 @@ export const ClockwiseNoSpecial = () => (
       id={'spec_' + getRandomNumber()}
       data={mocks.pie}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => productLookup[d].name,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -640,14 +783,14 @@ export const LinkedLabelsOnly = () => (
       id={'spec_' + getRandomNumber()}
       data={mocks.pie}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => productLookup[d].name,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
@@ -661,20 +804,21 @@ export const LinkedLabelsOnly = () => (
 LinkedLabelsOnly.story = {
   name: 'Linked labels only',
 };
+
 export const NoLabels = () => (
   <Chart className={'story-chart'}>
     <Partition
       id={'spec_' + getRandomNumber()}
       data={mocks.pie}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.formatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => productLookup[d].name,
           fillLabel: { textInvertible: true },
           shape: {
-            fillColor: defaultFillColor(interpolatorCET2s),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}

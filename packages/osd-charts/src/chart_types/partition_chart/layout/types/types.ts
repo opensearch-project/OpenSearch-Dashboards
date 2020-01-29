@@ -2,9 +2,38 @@ import { ArrayEntry } from '../utils/group_by_rollup';
 
 export type Color = string; // todo refine later (union type)
 
-export type FontWeight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900; // the aliases are now excluded: 'normal' | 'bold' | 'lighter' | 'bolder';
+export const FONT_VARIANTS = Object.freeze(['normal', 'small-caps'] as const);
+export type FontVariant = typeof FONT_VARIANTS[number];
 
-export type TextMeasure = (font: string, texts: string[]) => TextMetrics[];
+// prettier-ignore
+export const FONT_WEIGHTS = Object.freeze([
+  100, 200, 300, 400, 500, 600, 700, 800, 900,
+  'normal', 'bold', 'lighter', 'bolder', 'inherit', 'initial', 'unset',
+] as const);
+export type FontWeight = typeof FONT_WEIGHTS[number];
+export type NumericFontWeight = number & typeof FONT_WEIGHTS[number];
+
+export const FONT_STYLES = Object.freeze(['normal', 'italic', 'oblique', 'inherit', 'initial', 'unset'] as const);
+export type FontStyle = typeof FONT_STYLES[number];
+
+/** todo consider doing tighter control for permissible font families, eg. as in Kibana Canvas - expression language
+ *  - though the same applies for permissible (eg. known available or loaded) font weights, styles, variants...
+ */
+export type FontFamily = string;
+
+export interface Font {
+  fontStyle: FontStyle;
+  fontVariant: FontVariant;
+  fontWeight: FontWeight;
+  fontFamily: FontFamily;
+}
+
+export type PartialFont = Partial<Font>;
+
+export interface Box extends Font {
+  text: string;
+}
+export type TextMeasure = (fontSize: number, boxes: Box[]) => TextMetrics[];
 
 /**
  * Part-to-whole visualizations such as treemap, sunburst, pie hinge on an aggregation

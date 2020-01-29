@@ -1,18 +1,20 @@
 import { Config } from './config_types';
 import { Coordinate, Distance, PointObject, PointTuple, Radian } from './geometry_types';
-import { Color, FontWeight } from './types';
+import { Color, Font } from './types';
 import { config } from '../config/config';
+import { ArrayNode } from '../utils/group_by_rollup';
 
 export type LinkLabelVM = {
   link: [PointTuple, ...PointTuple[]]; // at least one point
   translate: [number, number];
   textAlign: CanvasTextAlign;
   text: string;
+  valueText: string;
   width: Distance;
   verticalOffset: Distance;
 };
 
-export interface RowBox {
+export interface RowBox extends Font {
   text: string;
   width: Distance;
   verticalOffset: Distance;
@@ -38,15 +40,11 @@ export interface RowSet {
   id: string;
   rows: Array<TextRow>;
   fillTextColor: string;
-  fillTextWeight: FontWeight;
-  fontFamily: string;
-  fontStyle: string;
-  fontVariant: string;
   fontSize: number;
   rotation: Radian;
 }
 
-export interface QuadViewModel extends RingSectorGeometry {
+export interface QuadViewModel extends ShapeTreeNode {
   strokeWidth: number;
   fillColor: string;
 }
@@ -92,14 +90,14 @@ interface SectorGeomSpecY {
   y1px: Distance;
 }
 
-export interface RingSectorGeometry extends AngleFromTo, SectorGeomSpecY {}
-
 export interface ShapeTreeNode extends TreeNode, SectorGeomSpecY {
   yMidPx: Distance;
   depth: number;
-  inRingIndex: number;
+  sortIndex: number;
   dataName: any;
   value: number;
+  parent: ArrayNode;
 }
 
 export type RawTextGetter = (node: ShapeTreeNode) => string;
+export type ValueFormatter = (value: number) => string;

@@ -10,11 +10,11 @@ import { AccessorFn, IndexedAccessorFn } from '../../../../utils/accessor';
 import { argsToRGBString, stringToRGB } from '../utils/d3_utils';
 import {
   OutsideLinksViewModel,
-  ShapeTreeNode,
   QuadViewModel,
-  RowSet,
-  ShapeViewModel,
   RawTextGetter,
+  RowSet,
+  ShapeTreeNode,
+  ShapeViewModel,
 } from '../types/viewmodel_types';
 import { Layer } from '../../specs/index';
 import {
@@ -38,6 +38,8 @@ import {
   groupByRollup,
   mapEntryValue,
   mapsToArrays,
+  parentAccessor,
+  sortIndexAccessor,
 } from '../utils/group_by_rollup';
 
 function paddingAccessor(n: ArrayEntry) {
@@ -75,17 +77,16 @@ export function makeQuadViewModel(
   layers: Layer[],
   sectorLineWidth: Pixels,
 ): Array<QuadViewModel> {
-  return childNodes.map((node, index, a) => {
+  return childNodes.map((node) => {
     const opacityMultiplier = 1; // could alter in the future, eg. in response to interactions
     const layer = layers[node.depth - 1];
     const fillColorSpec = layer && layer.shape && layer.shape.fillColor;
     const fill = fillColorSpec || 'rgba(128,0,0,0.5)';
-    const shapeFillColor = typeof fill === 'function' ? fill(node, index, a) : fill;
+    const shapeFillColor = typeof fill === 'function' ? fill(node, node.sortIndex, node.parent.children) : fill;
     const { r, g, b, opacity } = stringToRGB(shapeFillColor);
     const fillColor = argsToRGBString(r, g, b, opacity * opacityMultiplier);
     const strokeWidth = sectorLineWidth;
-    const { x0, x1, y0px, y1px } = node;
-    return { strokeWidth, fillColor, x0, x1, y0px, y1px };
+    return { strokeWidth, fillColor, ...node };
   });
 }
 
@@ -170,22 +171,23 @@ export function shapeViewModel(
   // By introducing `scale`, we no longer need to deal with the dichotomy of
   // size as data value vs size as number of pixels in the rectangle
 
-  const hierarchyMap = groupByRollup(groupByRollupAccessors, valueAccessor, aggregator, facts);
-  const tree = mapsToArrays(hierarchyMap, aggregateComparator(mapEntryValue, childOrders.descending));
+  const tree = mapsToArrays(
+    groupByRollup(groupByRollupAccessors, valueAccessor, aggregator, facts),
+    aggregateComparator(mapEntryValue, childOrders.descending),
+  );
 
   const totalValue = tree.reduce((p: number, n: ArrayEntry): number => p + mapEntryValue(n), 0);
 
   const sunburstValueToAreaScale = TAU / totalValue;
   const sunburstAreaAccessor = (e: ArrayEntry) => sunburstValueToAreaScale * mapEntryValue(e);
-  const children = entryValue(tree[0]).children || [];
   const treemapLayout = partitionLayout === PartitionLayout.treemap;
   const treemapInnerArea = treemapLayout ? width * height : 1; // assuming 1 x 1 unit square
   const treemapValueToAreaScale = treemapInnerArea / totalValue;
   const treemapAreaAccessor = (e: ArrayEntry) => treemapValueToAreaScale * mapEntryValue(e);
 
   const rawChildNodes: Array<Part> = treemapLayout
-    ? treemap(tree, treemapAreaAccessor, paddingAccessor, { x0: -width / 2, y0: -height / 2, width, height }).slice(1)
-    : sunburst(children, sunburstAreaAccessor, { x0: 0, y0: 0 }, clockwiseSectors, specialFirstInnermostSector);
+    ? treemap(tree, treemapAreaAccessor, paddingAccessor, { x0: -width / 2, y0: -height / 2, width, height })
+    : sunburst(tree, sunburstAreaAccessor, { x0: 0, y0: -1 }, clockwiseSectors, specialFirstInnermostSector);
 
   // use the smaller of the two sizes, as a circle fits into a square
   const circleMaximumSize = Math.min(innerWidth, innerHeight);
@@ -194,24 +196,29 @@ export function shapeViewModel(
   const treeHeight = rawChildNodes.reduce((p: number, n: any) => Math.max(p, entryValue(n.node).depth), 0); // 1: pie, 2: two-ring donut etc.
   const ringThickness = (outerRadius - innerRadius) / treeHeight;
 
-  const childNodes = rawChildNodes.map((n: any, index: number) => {
-    return {
-      dataName: entryKey(n.node),
-      depth: depthAccessor(n.node),
-      value: aggregateAccessor(n.node),
-      x0: n.x0,
-      x1: n.x1,
-      y0: n.y0,
-      y1: n.y1,
-      y0px: treemapLayout ? n.y0 : innerRadius + n.y0 * ringThickness,
-      y1px: treemapLayout ? n.y1 : innerRadius + n.y1 * ringThickness,
-      yMidPx: treemapLayout ? (n.y0 + n.y1) / 2 : innerRadius + ((n.y0 + n.y1) / 2) * ringThickness,
-      inRingIndex: index,
-    };
-  });
-
-  // ring sector paths
-  const quadViewModel = makeQuadViewModel(childNodes, layers, config.sectorLineWidth);
+  const quadViewModel = makeQuadViewModel(
+    rawChildNodes.slice(1).map(
+      (n: Part): ShapeTreeNode => {
+        const node: ArrayEntry = n.node;
+        return {
+          dataName: entryKey(node),
+          depth: depthAccessor(node),
+          value: aggregateAccessor(node),
+          parent: parentAccessor(node),
+          sortIndex: sortIndexAccessor(node),
+          x0: n.x0,
+          x1: n.x1,
+          y0: n.y0,
+          y1: n.y1,
+          y0px: treemapLayout ? n.y0 : innerRadius + n.y0 * ringThickness,
+          y1px: treemapLayout ? n.y1 : innerRadius + n.y1 * ringThickness,
+          yMidPx: treemapLayout ? (n.y0 + n.y1) / 2 : innerRadius + ((n.y0 + n.y1) / 2) * ringThickness,
+        };
+      },
+    ),
+    layers,
+    config.sectorLineWidth,
+  );
 
   // fill text
   const roomCondition = (n: ShapeTreeNode) => {
@@ -221,7 +228,7 @@ export function shapeViewModel(
       : (diff < 0 ? TAU + diff : diff) * ringSectorMiddleRadius(n) > Math.max(minFontSize, linkLabel.maximumSection);
   };
 
-  const nodesWithRoom = childNodes.filter(roomCondition);
+  const nodesWithRoom = quadViewModel.filter(roomCondition);
   const outsideFillNodes = fillOutside && !treemapLayout ? nodesWithRoom : [];
 
   const textFillOrigins = nodesWithRoom.map(treemapLayout ? rectangleFillOrigins : sectorFillOrigins(fillOutside));
@@ -230,12 +237,7 @@ export function shapeViewModel(
     textMeasure,
     rawTextGetter,
     valueFormatter,
-    nodesWithRoom.map((n: ShapeTreeNode) =>
-      Object.assign({}, n, {
-        y0: n.y0,
-        fill: quadViewModel[n.inRingIndex].fillColor, // todo roll a proper join, as this current thing assumes 1:1 between sectors and sector VMs (in the future we may elide small, invisible sector VMs(
-      }),
-    ),
+    nodesWithRoom,
     config,
     layers,
     textFillOrigins,
@@ -244,6 +246,7 @@ export function shapeViewModel(
     treemapLayout ? () => 0 : inSectorRotation(config.horizontalTextEnforcer, config.horizontalTextAngleThreshold),
   );
 
+  // whiskers (ie. just lines, no text) for fill text outside the outer radius
   const outsideLinksViewModel = makeOutsideLinksViewModel(outsideFillNodes, rowSets, linkLabel.radiusPadding);
 
   // linked text
@@ -252,7 +255,7 @@ export function shapeViewModel(
   const nodesWithoutRoom =
     fillOutside || treemapLayout
       ? [] // outsideFillNodes and linkLabels are in inherent conflict due to very likely overlaps
-      : childNodes.filter((n: ShapeTreeNode) => {
+      : quadViewModel.filter((n: ShapeTreeNode) => {
           const id = nodeId(n);
           const foundInFillText = rowSets.find((r: RowSet) => r.id === id);
           // successful text render if found, and has some row(s)
@@ -266,13 +269,14 @@ export function shapeViewModel(
     currentY,
     outerRadius,
     rawTextGetter,
+    valueFormatter,
   );
 
   // combined viewModel
   return {
     config,
     diskCenter,
-    quadViewModel: quadViewModel,
+    quadViewModel,
     rowSets,
     linkLabelViewModels,
     outsideLinksViewModel,

@@ -1,5 +1,5 @@
 import { Distance, Pixels, Radian, Radius, Ratio, SizeRatio, TimeMs } from './geometry_types';
-import { Color, FontWeight } from './types';
+import { Color, Font, FontFamily, PartialFont } from './types';
 import { $Values as Values } from 'utility-types';
 
 export const PartitionLayout = Object.freeze({
@@ -9,14 +9,27 @@ export const PartitionLayout = Object.freeze({
 
 export type PartitionLayout = Values<typeof PartitionLayout>; // could use ValuesType<typeof HierarchicalChartTypes>
 
-export interface FillLabel {
+interface LabelConfig extends Font {
   textColor: Color;
   textInvertible: boolean;
-  textWeight: FontWeight;
-  fontStyle: string;
-  fontVariant: string;
-  fontFamily: string;
-  formatter: (x: number) => string;
+  textOpacity: Ratio;
+  valueFormatter: (x: number) => string;
+  valueFont: PartialFont;
+}
+
+export type FillLabelConfig = LabelConfig;
+
+export interface LinkLabelConfig extends LabelConfig {
+  fontSize: Pixels; // todo consider putting it in Font
+  maximumSection: Distance; // use linked labels below this limit
+  gap: Pixels;
+  spacing: Pixels;
+  minimumStemLength: Distance;
+  stemAngle: Radian;
+  horizontalStemLength: Distance;
+  radiusPadding: Distance;
+  lineWidth: Pixels;
+  maxCount: number;
 }
 
 // todo switch to `io-ts` style, generic way of combining static and runtime type info
@@ -32,12 +45,12 @@ export interface StaticConfig {
   partitionLayout: PartitionLayout;
 
   // general text config
-  fontFamily: string;
+  fontFamily: FontFamily;
 
   // fill text config
   minFontSize: Pixels;
   maxFontSize: Pixels;
-  idealFontSizeJump: number;
+  idealFontSizeJump: Ratio;
 
   // fill text layout config
   circlePadding: Distance;
@@ -47,26 +60,12 @@ export interface StaticConfig {
   maxRowCount: number;
   fillOutside: boolean;
   radiusOutside: Radius;
-  fillRectangleWidth: number;
-  fillRectangleHeight: number;
-  fillLabel: FillLabel;
+  fillRectangleWidth: Distance;
+  fillRectangleHeight: Distance;
+  fillLabel: FillLabelConfig;
 
   // linked labels (primarily: single-line)
-  linkLabel: {
-    maximumSection: number; // use linked labels below this limit
-    fontSize: Pixels;
-    gap: Pixels;
-    spacing: Pixels;
-    minimumStemLength: Distance;
-    stemAngle: Radian;
-    horizontalStemLength: Distance;
-    radiusPadding: Distance;
-    lineWidth: Pixels;
-    maxCount: number;
-    textColor: Color;
-    textInvertible: boolean;
-    textOpacity: number;
-  };
+  linkLabel: LinkLabelConfig;
 
   // other
   backgroundColor: Color;

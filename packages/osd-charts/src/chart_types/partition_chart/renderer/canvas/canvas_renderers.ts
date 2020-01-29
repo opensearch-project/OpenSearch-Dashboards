@@ -10,6 +10,7 @@ import {
 } from '../../layout/types/viewmodel_types';
 import { TAU } from '../../layout/utils/math';
 import { PartitionLayout } from '../../layout/types/config_types';
+import { cssFontShorthand } from '../../layout/utils/measure';
 
 // the burnout avoidance in the center of the pie
 const LINE_WIDTH_MULT = 10; // border can be a maximum 1/LINE_WIDTH_MULT - th of the sector angle, otherwise the border would dominate
@@ -39,10 +40,7 @@ function clearCanvas(
   });
 }
 
-function renderTextRow(
-  ctx: CanvasRenderingContext2D,
-  { fontFamily, fontSize, fillTextColor, fillTextWeight, fontStyle, fontVariant, rotation }: RowSet,
-) {
+function renderTextRow(ctx: CanvasRenderingContext2D, { fontSize, fillTextColor, rotation }: RowSet) {
   return (currentRow: TextRow) => {
     const crx = currentRow.rowCentroidX - (Math.cos(rotation) * currentRow.length) / 2;
     const cry = -currentRow.rowCentroidY + (Math.sin(rotation) * currentRow.length) / 2;
@@ -50,9 +48,11 @@ function renderTextRow(
       ctx.scale(1, -1);
       ctx.translate(crx, cry);
       ctx.rotate(-rotation);
-      ctx.font = fontStyle + ' ' + fontVariant + ' ' + fillTextWeight + ' ' + fontSize + 'px ' + fontFamily;
       ctx.fillStyle = fillTextColor;
-      currentRow.rowWords.forEach((box) => ctx.fillText(box.text, box.width / 2 + box.wordBeginning, 0));
+      currentRow.rowWords.forEach((box) => {
+        ctx.font = cssFontShorthand(box, fontSize);
+        ctx.fillText(box.text, box.width / 2 + box.wordBeginning, 0);
+      });
     });
   };
 }
@@ -183,7 +183,7 @@ function renderLinkLabels(
     ctx.strokeStyle = linkLabelTextColor;
     ctx.fillStyle = linkLabelTextColor;
     ctx.font = `${400} ${linkLabelFontSize}px ${fontFamily}`;
-    viewModels.forEach(({ link, translate, textAlign, text }: LinkLabelVM) => {
+    viewModels.forEach(({ link, translate, textAlign, text, valueText }: LinkLabelVM) => {
       ctx.beginPath();
       ctx.moveTo(...link[0]);
       link.slice(1).forEach((point) => ctx.lineTo(...point));
@@ -192,7 +192,8 @@ function renderLinkLabels(
         ctx.translate(...translate);
         ctx.scale(1, -1); // flip for text rendering not to be upside down
         ctx.textAlign = textAlign;
-        ctx.fillText(text, 0, 0);
+        // only use a colon if both text and valueText are non-zero length strings
+        ctx.fillText(text + (text && valueText ? ': ' : '') + valueText, 0, 0);
       });
     });
   });
