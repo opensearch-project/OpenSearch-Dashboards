@@ -1,3 +1,4 @@
+import 'core-js';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import '../src/theme_light.scss';
