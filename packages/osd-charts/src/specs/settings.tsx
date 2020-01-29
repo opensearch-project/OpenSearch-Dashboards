@@ -11,8 +11,8 @@ import { ChartTypes } from '../chart_types';
 import { GeometryValue } from '../utils/geometry';
 import { SeriesIdentifier } from '../chart_types/xy_chart/utils/series';
 
-export type ElementClickListener = (values: GeometryValue[]) => void;
-export type ElementOverListener = (values: GeometryValue[]) => void;
+export type ElementClickListener = (elements: Array<[GeometryValue, SeriesIdentifier]>) => void;
+export type ElementOverListener = (elements: Array<[GeometryValue, SeriesIdentifier]>) => void;
 export type BrushEndListener = (min: number, max: number) => void;
 export type LegendItemListener = (series: SeriesIdentifier | null) => void;
 export type PointerUpdateListener = (event: PointerEvent) => void;
