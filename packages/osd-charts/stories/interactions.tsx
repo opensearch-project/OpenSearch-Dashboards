@@ -503,7 +503,7 @@ clickHoversOnLegendItemsMixedChart.story = {
 export const brushSelectionToolOnLinear = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings onBrushEnd={action('onBrushEnd')} />
+      <Settings onBrushEnd={action('onBrushEnd')} rotation={getChartRotationKnob()} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'bottom'} showOverlappingTicks={true} />
       <Axis id={getAxisId('left')} title={'left'} position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
       <Axis id={getAxisId('top')} position={Position.Top} title={'top'} showOverlappingTicks={true} />
@@ -537,7 +537,7 @@ brushSelectionToolOnLinear.story = {
 export const brushSelectionToolOnBarChartLinear = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings onBrushEnd={action('onBrushEnd')} />
+      <Settings onBrushEnd={action('onBrushEnd')} rotation={getChartRotationKnob()} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'bottom'} showOverlappingTicks={true} />
       <Axis id={getAxisId('left')} title={'left'} position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
       <Axis id={getAxisId('top')} position={Position.Top} title={'top'} showOverlappingTicks={true} />
@@ -581,6 +581,7 @@ export const brushSelectionToolOnTimeCharts = () => {
           action('onBrushEnd')(formatter(start), formatter(end));
         }}
         onElementClick={action('onElementClick')}
+        rotation={getChartRotationKnob()}
       />
       <Axis
         id={getAxisId('bottom')}
@@ -640,6 +641,7 @@ export const brushSelectionToolOnHistogramTimeCharts = () => {
           action('onBrushEnd')(formatter(start), formatter(end));
         }}
         onElementClick={action('onElementClick')}
+        rotation={getChartRotationKnob()}
       />
       <Axis
         id={getAxisId('bottom')}
@@ -674,7 +676,7 @@ brushSelectionToolOnHistogramTimeCharts.story = {
 export const brushDisabledOnOrdinalXAxis = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings onBrushEnd={action('onBrushEnd')} />
+      <Settings onBrushEnd={action('onBrushEnd')} rotation={getChartRotationKnob()} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'bottom'} showOverlappingTicks={true} />
       <Axis id={getAxisId('left')} title={'left'} position={Position.Left} />
       <LineSeries

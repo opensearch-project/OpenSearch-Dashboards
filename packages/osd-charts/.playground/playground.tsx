@@ -1,9 +1,13 @@
 import React from 'react';
-import { Chart, Datum, Partition } from '../src';
+import { Chart, LineSeries, ScaleType, Settings, Position, Axis, BarSeries, HistogramBarSeries } from '../src';
 export class Playground extends React.Component<{}, { isSunburstShown: boolean }> {
   chartRef: React.RefObject<Chart> = React.createRef();
   state = {
     isSunburstShown: true,
+  };
+  onBrushEnd = (min: number, max: number) => {
+    // eslint-disable-next-line no-console
+    console.log({ min, max });
   };
 
   render() {
@@ -11,38 +15,98 @@ export class Playground extends React.Component<{}, { isSunburstShown: boolean }
       <>
         <div className="chart">
           <Chart ref={this.chartRef}>
-            <Partition
-              id={'piechart'}
+            <Settings rotation={90} onBrushEnd={this.onBrushEnd} />
+            <Axis id="y" position={Position.Left} title={'y'} />
+            <Axis id="x" position={Position.Bottom} title={'x'} />
+            <LineSeries
+              id={'aaa'}
+              xScaleType={ScaleType.Linear}
+              xAccessor={0}
+              yAccessors={[1]}
               data={[
-                { id: 'Item\u00A00', g: 'A', v: 30 },
-                { id: 'Item\u00A01', g: 'A', v: 20 },
-                { id: 'Item\u00A02', g: 'B', v: 50 },
-              ]}
-              valueAccessor={(d: Datum) => d.v}
-              valueFormatter={(d: Datum) => `${d}%`}
-              layers={[
-                { groupByRollup: (d: Datum) => d.g, nodeLabel: (d: Datum) => `Group ${d}` },
-                {
-                  groupByRollup: (d: Datum) => d.id,
-                  nodeLabel: (d: Datum) => d,
-                  fillLabel: { valueFormatter: (d: Datum) => `${d} pct` },
-                },
+                [0, 1],
+                [1, 2],
+                [2, 5],
+                [3, 5],
+                [4, 2],
+                [5, 6],
               ]}
             />
           </Chart>
         </div>
         <div className="chart">
           <Chart ref={this.chartRef}>
-            <Partition
-              id={'piechart'}
-              data={[30, 20, 50]}
-              valueFormatter={(d: Datum) => `${d}%`}
-              layers={[
-                {
-                  groupByRollup: (d: Datum, i: number) => (i < 2 ? 'A' : 'B'),
-                  nodeLabel: (d: Datum) => `Group ${d}`,
-                },
-                { groupByRollup: (d: Datum, i: number) => i, nodeLabel: (d: Datum) => `Item\u00A0${d}` },
+            <Settings rotation={0} onBrushEnd={this.onBrushEnd} theme={{ chartMargins: { left: 30 } }} />
+            <Axis id="x" position={Position.Bottom} title={'x'} />
+            <Axis id="y" position={Position.Left} title={'y'} />
+            <LineSeries
+              id={'aaa'}
+              xScaleType={ScaleType.Linear}
+              xAccessor={0}
+              yAccessors={[1]}
+              data={[
+                [0, 1],
+                [1, 2],
+                [2, 5],
+                [3, 5],
+                [4, 2],
+                [5, 6],
+              ]}
+            />
+          </Chart>
+        </div>
+        <div className="chart">
+          <Chart ref={this.chartRef}>
+            <Settings rotation={90} onBrushEnd={this.onBrushEnd} theme={{ chartMargins: { left: 30 } }} />
+            <Axis id="x" position={Position.Bottom} title={'x'} />
+            <Axis id="y" position={Position.Left} title={'y'} />
+            <BarSeries
+              id={'aaa'}
+              xScaleType={ScaleType.Linear}
+              xAccessor={0}
+              yAccessors={[1]}
+              data={[
+                [0, 1],
+                [1, 2],
+                [2, 5],
+                [3, 5],
+                // [4, 2],
+                [5, 6],
+              ]}
+            />
+            <LineSeries
+              id={'aaa1'}
+              xScaleType={ScaleType.Linear}
+              xAccessor={0}
+              yAccessors={[1]}
+              data={[
+                [0, 1],
+                [1, 2],
+                [2, 5],
+                [3, 5],
+                // [4, 2],
+                [5, 6],
+              ]}
+            />
+          </Chart>
+        </div>
+        <div className="chart">
+          <Chart ref={this.chartRef}>
+            <Settings rotation={90} onBrushEnd={this.onBrushEnd} theme={{ chartMargins: { left: 30 } }} />
+            <Axis id="x" position={Position.Bottom} title={'x'} />
+            <Axis id="y" position={Position.Left} title={'y'} />
+            <HistogramBarSeries
+              id={'aaa'}
+              xScaleType={ScaleType.Linear}
+              xAccessor={0}
+              yAccessors={[1]}
+              data={[
+                [0, 1],
+                [1, 2],
+                [2, 5],
+                [3, 5],
+                [4, 2],
+                [5, 6],
               ]}
             />
           </Chart>

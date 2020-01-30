@@ -8,8 +8,6 @@ import {
   RectAnnotationSpec,
   SeriesTypes,
 } from '../utils/specs';
-import { LIGHT_THEME } from '../../../utils/themes/light_theme';
-import { mergeWithDefaultTheme } from '../../../utils/themes/theme';
 import { TooltipType, TooltipValue } from '../utils/interactions';
 import { ScaleBand } from '../../../utils/scales/scale_band';
 import { ScaleContinuous } from '../../../utils/scales/scale_continuous';
@@ -577,49 +575,6 @@ describe.skip('Chart Store', () => {
 
     store.removeOnRenderChangeListener();
     expect(store.onRenderChangeListener).toBeUndefined();
-  });
-
-  test.skip('can respond to a brush end event', () => {
-    const brushEndListener = jest.fn<void, [number, number]>((): void => {
-      return;
-    });
-
-    const start1 = { x: 0, y: 0 };
-    const start2 = { x: 100, y: 0 };
-    const end1 = { x: 600, y: 0 };
-    const end2 = { x: 300, y: 0 };
-    store.chartTheme = mergeWithDefaultTheme(
-      {
-        chartMargins: {
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-        },
-      },
-      LIGHT_THEME,
-    );
-    store.addSeriesSpec(spec);
-    store.computeChart();
-    store.onBrushEndListener = undefined;
-    store.onBrushStart();
-    expect(store.isBrushing.get()).toBe(false);
-    store.onBrushEnd(start1, end1);
-    expect(brushEndListener).not.toBeCalled();
-
-    store.setOnBrushEndListener(brushEndListener);
-    store.onBrushStart();
-    expect(store.isBrushing.get()).toBe(true);
-    store.onBrushEnd(start1, start1);
-    expect(brushEndListener).not.toBeCalled();
-
-    store.onBrushEnd(start1, end1);
-    expect(brushEndListener.mock.calls[0][0]).toBe(1);
-    expect(brushEndListener.mock.calls[0][1]).toBe(4);
-
-    store.onBrushEnd(start2, end2);
-    expect(brushEndListener.mock.calls[1][0]).toBe(1.5);
-    expect(brushEndListener.mock.calls[1][1]).toBe(2.5);
   });
 
   test.skip('can update parent dimensions', () => {

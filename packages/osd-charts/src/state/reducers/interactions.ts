@@ -56,7 +56,7 @@ export function interactionsReducer(state: InteractionsState, action: LegendActi
                   },
                   end: {
                     position: {
-                      ...action.position,
+                      ...state.pointer.current.position,
                     },
                     time: action.time,
                   },

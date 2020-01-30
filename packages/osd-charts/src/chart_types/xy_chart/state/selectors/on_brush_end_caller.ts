@@ -66,18 +66,32 @@ export function createOnBrushEndCaller(): (state: GlobalChartState) => void {
 
           if (lastDrag !== null && hasDragged(prevProps, nextProps)) {
             if (settings && settings.onBrushEnd) {
-              const minValue = Math.min(lastDrag.start.position.x, lastDrag.end.position.x);
-              const maxValue = Math.max(lastDrag.start.position.x, lastDrag.end.position.x);
-              if (maxValue === minValue) {
+              let startPos = lastDrag.start.position.x - chartDimensions.left;
+              let endPos = lastDrag.end.position.x - chartDimensions.left;
+              let chartMax = chartDimensions.width;
+              if (settings.rotation === -90 || settings.rotation === 90) {
+                startPos = lastDrag.start.position.y - chartDimensions.top;
+                endPos = lastDrag.end.position.y - chartDimensions.top;
+                chartMax = chartDimensions.height;
+              }
+              let minPos = Math.max(Math.min(startPos, endPos), 0);
+              let maxPos = Math.min(Math.max(startPos, endPos), chartMax);
+              if (settings.rotation === -90 || settings.rotation === 180) {
+                minPos = chartMax - minPos;
+                maxPos = chartMax - maxPos;
+              }
+              if (maxPos === minPos) {
                 // if 0 size brush, avoid computing the value
                 return;
               }
-
               const { xScale } = computedScales;
               const offset = histogramMode ? 0 : -(xScale.bandwidth + xScale.bandwidthPadding) / 2;
-              const min = xScale.invert(minValue - chartDimensions.left + offset);
-              const max = xScale.invert(maxValue - chartDimensions.left + offset);
-              settings.onBrushEnd(min, max);
+              const minPosScaled = xScale.invert(minPos + offset);
+              const maxPosScaled = xScale.invert(maxPos + offset);
+              const minValue = Math.max(Math.min(minPosScaled, maxPosScaled), xScale.domain[0]);
+              const maxValue = Math.min(Math.max(minPosScaled, maxPosScaled), xScale.domain[1]);
+
+              settings.onBrushEnd(minValue, maxValue);
             }
           }
           prevProps = nextProps;
