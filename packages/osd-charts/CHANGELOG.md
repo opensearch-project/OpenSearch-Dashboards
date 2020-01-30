@@ -1,3 +1,35 @@
+# [17.0.0](https://github.com/elastic/elastic-charts/compare/v16.2.1...v17.0.0) (2020-01-30)
+
+
+### Bug Fixes
+
+* **brush:** rotate brush on rotated charts ([#528](https://github.com/elastic/elastic-charts/issues/528)) ([985ac21](https://github.com/elastic/elastic-charts/commit/985ac21e1e6669d812dd9cf6c688668eee06aa65)), closes [#527](https://github.com/elastic/elastic-charts/issues/527)
+
+
+### Features
+
+* text improvements ([#524](https://github.com/elastic/elastic-charts/issues/524)) ([6e61700](https://github.com/elastic/elastic-charts/commit/6e617007f953e23cb96bef610f7ea2ce5a81161a))
+* **listeners:** add seriesIdentifiers to element listeners ([#525](https://github.com/elastic/elastic-charts/issues/525)) ([027d008](https://github.com/elastic/elastic-charts/commit/027d008b79996ac465b062fd9b7ecace10a3080f)), closes [#419](https://github.com/elastic/elastic-charts/issues/419) [#505](https://github.com/elastic/elastic-charts/issues/505)
+
+
+### BREAKING CHANGES
+
+* **listeners:** the `onElementOver` and the `onElementClick` are now called with
+`Array<[GeometryValue, SeriesIdentifier]>` instead of `Array<GeometryValue>`
+* renames in `Partition` charts— `Layers`: `fillLabel.formatter`->`fillLabel.valueFormatter`; type `FillLabel`-> `FillLabelConfig`
+
+Non-breaking changes:
+
+* feat: the values in linked labels are rendered, just like they have been in the sectors (formerly, the value could optionally be put in the link label accessor itself)
+
+* feat: font styling is possible separately for values: `valueFormatter` configs
+
+* test: opacity decrease example; coloring examples
+
+* feat: hierarchical data (`parent`, `sortIndex`) is made available to accessors (see stories, helpful with eg. coloring)
+
+* refactor: tighter types; other code improvements
+
 ## [16.2.1](https://github.com/elastic/elastic-charts/compare/v16.2.0...v16.2.1) (2020-01-23)
 
 
