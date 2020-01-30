@@ -1,6 +1,5 @@
 import createCachedSelector from 're-reselect';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { getSpecsFromStore } from '../../../../state/utils';
 import { ChartTypes } from '../../..';
 import { render } from './scenegraph';
@@ -13,9 +12,9 @@ const getSpecs = (state: GlobalChartState) => state.specs;
 const getParentDimensions = (state: GlobalChartState) => state.parentDimensions;
 
 export const partitionGeometries = createCachedSelector(
-  [getSpecs, getParentDimensions, getChartThemeSelector],
-  (specs, parentDimensions, theme): ShapeViewModel => {
+  [getSpecs, getParentDimensions],
+  (specs, parentDimensions): ShapeViewModel => {
     const pieSpecs = getSpecsFromStore<PartitionSpec>(specs, ChartTypes.Partition, SpecTypes.Series);
-    return pieSpecs.length === 1 ? render(pieSpecs[0], parentDimensions, theme) : nullSectorViewModel();
+    return pieSpecs.length === 1 ? render(pieSpecs[0], parentDimensions) : nullSectorViewModel();
   },
 )((state) => state.chartId);

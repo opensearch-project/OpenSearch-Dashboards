@@ -2,7 +2,6 @@ import { Dimensions } from '../../../../utils/dimensions';
 import { shapeViewModel } from '../../layout/viewmodel/viewmodel';
 import { measureText } from '../../layout/utils/measure';
 import { ShapeTreeNode, ShapeViewModel, RawTextGetter } from '../../layout/types/viewmodel_types';
-import { Theme } from '../../../../utils/themes/theme';
 import { DEPTH_KEY } from '../../layout/utils/group_by_rollup';
 import { PartitionSpec, Layer } from '../../specs/index';
 import { identity, mergePartial, RecursivePartial } from '../../../../utils/commons';
@@ -16,10 +15,8 @@ function rawTextGetter(layers: Layer[]): RawTextGetter {
   };
 }
 
-export function render(partitionSpec: PartitionSpec, parentDimensions: Dimensions, theme: Theme): ShapeViewModel {
+export function render(partitionSpec: PartitionSpec, parentDimensions: Dimensions): ShapeViewModel {
   const { width, height } = parentDimensions;
-  // eslint-disable-next-line no-console
-  console.log(theme);
   const { layers, data: facts, config: specConfig } = partitionSpec;
   const textMeasurer = document.createElement('canvas');
   const textMeasurerCtx = textMeasurer.getContext('2d');
