@@ -36,6 +36,11 @@ export function computeOrdinalDataDomain(
   sorted?: boolean,
   removeNull?: boolean,
 ): string[] | number[] {
+  // TODO: Check for empty data before computing domain
+  if (data.length === 0) {
+    return [0];
+  }
+
   const domain = data.map(accessor).filter((d) => (removeNull ? d !== null : true));
   const uniqueValues = [...new Set(domain)];
   return sorted

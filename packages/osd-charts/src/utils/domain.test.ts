@@ -7,6 +7,17 @@ import {
 } from './domain';
 
 describe('utils/domain', () => {
+  test('should return [0] domain if no data', () => {
+    const data: any[] = [];
+    const accessor: AccessorFn = (datum: any) => datum.x;
+    const isSorted = true;
+    const removeNull = true;
+
+    const ordinalDataDomain = computeOrdinalDataDomain(data, accessor, isSorted, removeNull);
+
+    expect(ordinalDataDomain).toEqual([0]);
+  });
+
   test('should compute ordinal data domain: sort & remove nulls', () => {
     const data = [{ x: 'd' }, { x: 'a' }, { x: null }, { x: 'b' }];
     const accessor: AccessorFn = (datum: any) => datum.x;
