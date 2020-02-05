@@ -1,3 +1,10 @@
+## [17.0.1](https://github.com/elastic/elastic-charts/compare/v17.0.0...v17.0.1) (2020-02-05)
+
+
+### Bug Fixes
+
+* replace PureComponent with shouldComponentUpdate ([#534](https://github.com/elastic/elastic-charts/issues/534)) ([5043725](https://github.com/elastic/elastic-charts/commit/5043725b7581bfea2340ca5323743d9fe03a4e19))
+
 # [17.0.0](https://github.com/elastic/elastic-charts/compare/v16.2.1...v17.0.0) (2020-01-30)
 
 
