@@ -1,6 +1,7 @@
 import React from 'react';
 import { Group as KonvaGroup } from 'konva/types/Group';
 import { Circle, Group, Path } from 'react-konva';
+import deepEqual from 'fast-deep-equal/es6/react';
 import {
   buildLineRenderProps,
   buildPointStyleProps,
@@ -21,10 +22,8 @@ interface LineGeometriesDataProps {
   highlightedLegendItem: LegendItem | null;
   clippings: Clippings;
 }
-interface LineGeometriesDataState {
-  overPoint?: PointGeometry;
-}
-export class LineGeometries extends React.PureComponent<LineGeometriesDataProps, LineGeometriesDataState> {
+
+export class LineGeometries extends React.Component<LineGeometriesDataProps> {
   static defaultProps: Partial<LineGeometriesDataProps> = {
     animated: false,
   };
@@ -35,6 +34,10 @@ export class LineGeometries extends React.PureComponent<LineGeometriesDataProps,
     this.state = {
       overPoint: undefined,
     };
+  }
+
+  shouldComponentUpdate(nextProps: LineGeometriesDataProps) {
+    return !deepEqual(this.props, nextProps);
   }
 
   render() {

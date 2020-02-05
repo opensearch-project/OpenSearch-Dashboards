@@ -2,6 +2,7 @@ import React from 'react';
 import { Group as KonvaGroup } from 'konva/types/Group';
 import { PathConfig } from 'konva/types/shapes/Path';
 import { Circle, Group, Path } from 'react-konva';
+import deepEqual from 'fast-deep-equal/es6/react';
 import {
   buildAreaRenderProps,
   buildPointStyleProps,
@@ -24,10 +25,8 @@ interface AreaGeometriesDataProps {
   highlightedLegendItem: LegendItem | null;
   clippings: Clippings;
 }
-interface AreaGeometriesDataState {
-  overPoint?: PointGeometry;
-}
-export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps, AreaGeometriesDataState> {
+
+export class AreaGeometries extends React.Component<AreaGeometriesDataProps> {
   static defaultProps: Partial<AreaGeometriesDataProps> = {
     animated: false,
   };
@@ -35,10 +34,12 @@ export class AreaGeometries extends React.PureComponent<AreaGeometriesDataProps,
   constructor(props: AreaGeometriesDataProps) {
     super(props);
     this.barSeriesRef = React.createRef();
-    this.state = {
-      overPoint: undefined,
-    };
   }
+
+  shouldComponentUpdate(nextProps: AreaGeometriesDataProps) {
+    return !deepEqual(this.props, nextProps);
+  }
+
   render() {
     return (
       <Group ref={this.barSeriesRef} key={'bar_series'}>

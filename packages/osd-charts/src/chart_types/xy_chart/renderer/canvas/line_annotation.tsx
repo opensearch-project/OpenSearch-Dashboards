@@ -1,5 +1,6 @@
 import React from 'react';
 import { Group, Line } from 'react-konva';
+import deepEqual from 'fast-deep-equal/es6/react';
 import { LineAnnotationStyle } from '../../../../utils/themes/theme';
 import { AnnotationLineProps } from '../../annotations/line_annotation_tooltip';
 
@@ -8,7 +9,11 @@ interface LineAnnotationProps {
   lineStyle: LineAnnotationStyle;
 }
 
-export class LineAnnotation extends React.PureComponent<LineAnnotationProps> {
+export class LineAnnotation extends React.Component<LineAnnotationProps> {
+  shouldComponentUpdate(nextProps: LineAnnotationProps) {
+    return !deepEqual(this.props, nextProps);
+  }
+
   render() {
     const { lines } = this.props;
 

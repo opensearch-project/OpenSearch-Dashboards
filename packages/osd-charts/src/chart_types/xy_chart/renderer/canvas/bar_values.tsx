@@ -1,5 +1,6 @@
 import React from 'react';
 import { Group, Rect, Text } from 'react-konva';
+import deepEqual from 'fast-deep-equal/es6/react';
 import { Rotation } from '../../utils/specs';
 import { Theme } from '../../../../utils/themes/theme';
 import { Dimensions } from '../../../../utils/dimensions';
@@ -23,7 +24,11 @@ interface BarValuesProps {
   bars: BarGeometry[];
 }
 
-export class BarValuesComponent extends React.PureComponent<BarValuesProps> {
+export class BarValuesComponent extends React.Component<BarValuesProps> {
+  shouldComponentUpdate(nextProps: BarValuesProps) {
+    return !deepEqual(this.props, nextProps);
+  }
+
   render() {
     const { chartDimensions, bars } = this.props;
     if (!bars) {

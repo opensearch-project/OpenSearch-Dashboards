@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import React from 'react';
+import deepEqual from 'fast-deep-equal/es6/react';
 import { Icon } from '../icons/icon';
 import { LegendItemListener, BasicListener } from '../../specs/settings';
 import { LegendItem } from '../../chart_types/xy_chart/legend/legend';
@@ -20,10 +21,6 @@ interface LegendItemProps {
   legendItemOutAction: typeof onLegendItemOutAction;
   legendItemOverAction: typeof onLegendItemOverAction;
   toggleDeselectSeriesAction: (legendItemId: SeriesIdentifier) => void;
-}
-
-interface LegendItemState {
-  isColorPickerOpen: boolean;
 }
 
 /**
@@ -92,8 +89,12 @@ function renderColor(color: string, isSeriesVisible = true) {
   );
 }
 
-export class LegendListItem extends React.PureComponent<LegendItemProps, LegendItemState> {
+export class LegendListItem extends React.Component<LegendItemProps> {
   static displayName = 'LegendItem';
+
+  shouldComponentUpdate(nextProps: LegendItemProps) {
+    return !deepEqual(this.props, nextProps);
+  }
 
   render() {
     const { displayValue, legendItem, legendPosition, label } = this.props;

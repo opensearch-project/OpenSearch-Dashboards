@@ -1,7 +1,12 @@
 import React from 'react';
+import deepEqual from 'fast-deep-equal/es6/react';
 import { Props } from '../icon';
 
-export class DotIcon extends React.PureComponent<Props> {
+export class DotIcon extends React.Component<Props> {
+  shouldComponentUpdate(nextProps: Props) {
+    return !deepEqual(this.props, nextProps);
+  }
+
   render() {
     return (
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" {...this.props}>

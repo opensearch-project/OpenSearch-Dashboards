@@ -2,6 +2,7 @@ import { Group as KonvaGroup } from 'konva/types/Group';
 import React from 'react';
 import { Group, Rect } from 'react-konva';
 import { animated, Spring } from 'react-spring/renderprops-konva.cjs';
+import deepEqual from 'fast-deep-equal/es6/react';
 import { buildBarRenderProps, buildBarBorderRenderProps } from './utils/rendering_props_utils';
 import { BarGeometry } from '../../../../utils/geometry';
 import { LegendItem } from '../../../../chart_types/xy_chart/legend/legend';
@@ -19,7 +20,7 @@ interface BarGeometriesDataProps {
 interface BarGeometriesDataState {
   overBar?: BarGeometry;
 }
-export class BarGeometries extends React.PureComponent<BarGeometriesDataProps, BarGeometriesDataState> {
+export class BarGeometries extends React.Component<BarGeometriesDataProps, BarGeometriesDataState> {
   static defaultProps: Partial<BarGeometriesDataProps> = {
     animated: false,
   };
@@ -31,6 +32,11 @@ export class BarGeometries extends React.PureComponent<BarGeometriesDataProps, B
       overBar: undefined,
     };
   }
+
+  shouldComponentUpdate(nextProps: BarGeometriesDataProps, nextState: BarGeometriesDataState) {
+    return !deepEqual(this.props, nextProps) || !deepEqual(this.state, nextState);
+  }
+
   render() {
     const { bars, clippings } = this.props;
     return (

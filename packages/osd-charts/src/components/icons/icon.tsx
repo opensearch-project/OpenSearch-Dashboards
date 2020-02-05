@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import React, { SVGAttributes } from 'react';
+import deepEqual from 'fast-deep-equal/es6/react';
 import { AlertIcon } from './assets/alert';
 import { DotIcon } from './assets/dot';
 import { EmptyIcon } from './assets/empty';
@@ -31,7 +32,11 @@ export interface IconProps {
 
 export type Props = Omit<SVGAttributes<SVGElement>, 'color' | 'type'> & IconProps;
 
-export class Icon extends React.PureComponent<Props> {
+export class Icon extends React.Component<Props> {
+  shouldComponentUpdate(nextProps: Props) {
+    return !deepEqual(this.props, nextProps);
+  }
+
   render() {
     const { type, color, className, tabIndex, ...rest } = this.props;
     let optionalCustomStyles = null;

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Group, Line, Rect, Text } from 'react-konva';
+import deepEqual from 'fast-deep-equal/es6/react';
 import {
   AxisTick,
   AxisTicksDimensions,
@@ -36,7 +37,11 @@ interface AxisProps {
   chartDimensions: Dimensions;
 }
 
-export class Axis extends React.PureComponent<AxisProps> {
+export class Axis extends React.Component<AxisProps> {
+  shouldComponentUpdate(nextProps: AxisProps) {
+    return !deepEqual(this.props, nextProps);
+  }
+
   private renderTickLabel = (tick: AxisTick, i: number) => {
     /**
      * padding is already computed through width
@@ -249,7 +254,11 @@ interface AxesProps {
   debug: boolean;
   chartDimensions: Dimensions;
 }
-class AxesComponent extends React.PureComponent<AxesProps> {
+class AxesComponent extends React.Component<AxesProps> {
+  shouldComponentUpdate(nextProps: AxesProps) {
+    return !deepEqual(this.props, nextProps);
+  }
+
   render() {
     const {
       axesVisibleTicks,
