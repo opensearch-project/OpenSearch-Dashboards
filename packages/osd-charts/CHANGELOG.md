@@ -1,3 +1,10 @@
+## [17.0.2](https://github.com/elastic/elastic-charts/compare/v17.0.1...v17.0.2) (2020-02-05)
+
+
+### Bug Fixes
+
+* empty domain error for ordinal x scale ([#536](https://github.com/elastic/elastic-charts/issues/536)) ([ce4e84f](https://github.com/elastic/elastic-charts/commit/ce4e84fac8b51861cde377303ecaf9038611158b))
+
 ## [17.0.1](https://github.com/elastic/elastic-charts/compare/v17.0.0...v17.0.1) (2020-02-05)
 
 
