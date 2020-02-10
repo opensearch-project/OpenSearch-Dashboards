@@ -1,5 +1,5 @@
 import React, { createRef, CSSProperties, Component } from 'react';
-import deepEqual from 'fast-deep-equal/es6/react';
+import { deepEqual } from '../../../utils/fast_deep_equal';
 import { LineAnnotationSpec, DEFAULT_GLOBAL_ID, AnnotationTypes } from '../utils/specs';
 import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../utils/themes/theme';
 import { bindActionCreators, Dispatch } from 'redux';

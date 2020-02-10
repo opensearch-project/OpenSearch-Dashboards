@@ -1,6 +1,6 @@
 import React from 'react';
 import { Group, Rect } from 'react-konva';
-import deepEqual from 'fast-deep-equal/es6';
+import { deepEqual } from '../../../../utils/fast_deep_equal';
 import { RectAnnotationStyle } from '../../../../utils/themes/theme';
 import { AnnotationRectProps } from '../../annotations/rect_annotation_tooltip';
 

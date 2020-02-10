@@ -1,7 +1,7 @@
 import React from 'react';
 import { Group as KonvaGroup } from 'konva/types/Group';
 import { Circle, Group, Path } from 'react-konva';
-import deepEqual from 'fast-deep-equal/es6/react';
+import { deepEqual } from '../../../../utils/fast_deep_equal';
 import {
   buildLineRenderProps,
   buildPointStyleProps,

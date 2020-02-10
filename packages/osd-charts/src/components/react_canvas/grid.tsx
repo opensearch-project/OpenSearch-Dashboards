@@ -1,6 +1,6 @@
 import React from 'react';
 import { Group, Line } from 'react-konva';
-import deepEqual from 'fast-deep-equal/es6/react';
+import { deepEqual } from '../../utils/fast_deep_equal';
 import { AxisLinePosition } from '../../chart_types/xy_chart/utils/axis_utils';
 import { GridLineConfig } from '../../utils/themes/theme';
 import { Dimensions } from '../../utils/dimensions';

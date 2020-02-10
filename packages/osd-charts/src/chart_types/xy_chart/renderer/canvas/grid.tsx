@@ -1,7 +1,7 @@
 import React from 'react';
 import { Group, Line } from 'react-konva';
 import { connect } from 'react-redux';
-import deepEqual from 'fast-deep-equal/es6/react';
+import { deepEqual } from '../../../../utils/fast_deep_equal';
 import { AxisLinePosition, isVerticalGrid } from '../../utils/axis_utils';
 import { GridLineConfig, mergeGridLineConfigs, Theme } from '../../../../utils/themes/theme';
 import { Dimensions } from '../../../../utils/dimensions';

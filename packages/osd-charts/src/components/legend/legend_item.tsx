@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import React from 'react';
-import deepEqual from 'fast-deep-equal/es6/react';
+import { deepEqual } from '../../utils/fast_deep_equal';
 import { Icon } from '../icons/icon';
 import { LegendItemListener, BasicListener } from '../../specs/settings';
 import { LegendItem } from '../../chart_types/xy_chart/legend/legend';

@@ -2,7 +2,7 @@ import { Group as KonvaGroup } from 'konva/types/Group';
 import React from 'react';
 import { Group, Rect } from 'react-konva';
 import { animated, Spring } from 'react-spring/renderprops-konva.cjs';
-import deepEqual from 'fast-deep-equal/es6/react';
+import { deepEqual } from '../../../../utils/fast_deep_equal';
 import { buildBarRenderProps, buildBarBorderRenderProps } from './utils/rendering_props_utils';
 import { BarGeometry } from '../../../../utils/geometry';
 import { LegendItem } from '../../../../chart_types/xy_chart/legend/legend';

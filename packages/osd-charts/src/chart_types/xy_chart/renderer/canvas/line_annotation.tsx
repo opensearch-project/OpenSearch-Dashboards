@@ -1,6 +1,6 @@
 import React from 'react';
 import { Group, Line } from 'react-konva';
-import deepEqual from 'fast-deep-equal/es6/react';
+import { deepEqual } from '../../../../utils/fast_deep_equal';
 import { LineAnnotationStyle } from '../../../../utils/themes/theme';
 import { AnnotationLineProps } from '../../annotations/line_annotation_tooltip';
 

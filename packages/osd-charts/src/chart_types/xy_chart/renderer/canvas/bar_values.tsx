@@ -1,6 +1,6 @@
 import React from 'react';
 import { Group, Rect, Text } from 'react-konva';
-import deepEqual from 'fast-deep-equal/es6/react';
+import { deepEqual } from '../../../../utils/fast_deep_equal';
 import { Rotation } from '../../utils/specs';
 import { Theme } from '../../../../utils/themes/theme';
 import { Dimensions } from '../../../../utils/dimensions';

@@ -1,5 +1,5 @@
 import React from 'react';
-import deepEqual from 'fast-deep-equal/es6/react';
+import { deepEqual } from '../../../utils/fast_deep_equal';
 import { Props } from '../icon';
 
 export class DotIcon extends React.Component<Props> {

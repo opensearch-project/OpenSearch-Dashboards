@@ -1,7 +1,7 @@
 import React from 'react';
 import { bindActionCreators, Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import deepEqual from 'fast-deep-equal/es6/react';
+import { deepEqual } from '../utils/fast_deep_equal';
 import { GlobalChartState, BackwardRef } from '../state/chart_state';
 import { onMouseUp, onMouseDown, onPointerMove } from '../state/actions/mouse';
 import { getInternalChartRendererSelector } from '../state/selectors/get_chart_type_components';
