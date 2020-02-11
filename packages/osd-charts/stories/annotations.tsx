@@ -101,7 +101,6 @@ lineBasicXDomainContinous.story = {
 
 export const lineBasicXDomainOrdinal = () => {
   const dataValues = generateAnnotationData(arrayKnobs('annotation values', ['a', 'c']));
-
   return (
     <Chart className={'story-chart'}>
       <Settings debug={boolean('debug', false)} rotation={getChartRotationKnob()} />

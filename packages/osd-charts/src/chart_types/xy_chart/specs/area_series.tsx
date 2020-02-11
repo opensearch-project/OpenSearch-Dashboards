@@ -9,7 +9,7 @@ const defaultProps = {
   specType: SpecTypes.Series,
   seriesType: SeriesTypes.Area,
   groupId: DEFAULT_GLOBAL_ID,
-  xScaleType: ScaleType.Ordinal,
+  xScaleType: ScaleType.Linear,
   yScaleType: ScaleType.Linear,
   xAccessor: 'x',
   yAccessors: ['y'],

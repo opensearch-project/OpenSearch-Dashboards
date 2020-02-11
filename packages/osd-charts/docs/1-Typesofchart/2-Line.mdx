@@ -1,0 +1,125 @@
+import { boolean } from '@storybook/addon-knobs';
+import {
+  Axis,
+  Chart,
+  CurveType,
+  LineSeries,
+  niceTimeFormatByDay,
+  Position,
+  ScaleType,
+  Settings,
+  timeFormatter,
+} from '../../src/';
+import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+import { TSVB_DATASET } from '../../src/utils/data_samples/test_dataset_tsvb';
+
+<Meta title="Types of charts/Line Charts/Basic and with axes" />
+
+# Line Chart
+
+Here is a basic line chart from Elastic Charts. A line chart (or line graph) is a type of chart which displays information as a series of data points called ‘markers’ connected by straight line segments.
+It is similar to a scatter plot except that the measurement points are ordered (typically by their x-axis value) and joined with straight line segments. Line Charts show how a particular data changes at equal intervals of time.
+A line chart is similar to the spline graph, but the spline graph draws a curved line between the points instead of the straight lines.
+
+[source](https://datavizproject.com/data-type/line-chart/)
+
+<Chart className={'story-chart'}>
+    <LineSeries
+    id={'lines1'}
+    xScaleType={ScaleType.Time}
+    yScaleType={ScaleType.Linear}
+    xAccessor={0}
+    yAccessors={[1]}
+    data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
+    />
+</Chart>
+
+## The code sample for the above chart
+
+The data is generated from kibana metrics data
+<details>
+
+```js
+<Chart className={'story-chart'}>
+    <LineSeries
+    id={'lines1'}
+    xScaleType={ScaleType.Time}
+    yScaleType={ScaleType.Linear}
+    xAccessor={0}
+    yAccessors={[1]}
+    data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
+    />
+</Chart>
+```
+</details>
+
+Here is a `linear x axis` line chart 
+
+<Chart className={'story-chart'}>
+    <Axis
+    id={'bottom'}
+    position={Position.Bottom}
+    showOverlappingTicks={true}
+    tickFormat={timeFormatter(niceTimeFormatByDay(1))}
+    title={'timestamp per 1 minute'}
+    />
+    <Axis
+    id={'left'}
+    title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+    position={Position.Left}
+    tickFormat={(d) => `${Number(d).toFixed(2)}%`}
+    />
+    <LineSeries
+    id={'lines'}
+    xScaleType={ScaleType.Linear}
+    yScaleType={ScaleType.Linear}
+    xAccessor={0}
+    yAccessors={[1]}
+    data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 5)}
+    />
+</Chart>
+
+
+***
+
+## The code sample of this chart can be found below 
+
+Notice how the `<Axis position={Position.Left}/>` includes a tickFormat prop to achieve the percentages. 
+
+<details>
+
+```js
+<Chart className={'story-chart'}>
+
+    <Axis
+    id={'bottom'}
+    position={Position.Bottom}
+    showOverlappingTicks={true}
+    tickFormat={timeFormatter(niceTimeFormatByDay(1))}
+    title={'timestamp per 1 minute'}
+    />
+
+    <Axis
+    id={'left'}
+    title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+    position={Position.Left}
+    tickFormat={(d) => `${Number(d).toFixed(2)}%`}
+    />
+
+    <LineSeries
+    id={'lines'}
+    xScaleType={ScaleType.Linear}
+    yScaleType={ScaleType.Linear}
+    xAccessor={0}
+    yAccessors={[1]}
+    data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 5)}
+    />
+
+</Chart>
+```
+</details>
+
+***
+
+The props table for line charts can be found in the `Chart References > Prop Tables` section 
+Also, check out the `Stacked Charts` section for an example of stacked line charts.

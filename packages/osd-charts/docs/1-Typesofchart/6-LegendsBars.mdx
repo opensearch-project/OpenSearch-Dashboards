@@ -1,0 +1,78 @@
+import { boolean, select, number } from '@storybook/addon-knobs';
+import {
+  AreaSeries,
+  Axis,
+  BarSeries,
+  Chart,
+  CurveType,
+  LineSeries,
+  Position,
+  ScaleType,
+  Settings,
+  PartialTheme,
+} from '../../src/';
+import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
+import { TSVB_DATASET } from '../../src/utils/data_samples/test_dataset_tsvb';
+
+<Meta title="Types of charts/Bar Charts/Legends with Bar Charts" />
+
+# Including legends with charts
+
+Here is a chart with a legend on the `right`
+
+<Chart className={'story-chart'}>
+    <Settings showLegend={true} legendPosition={Position.Right} />
+    <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+    <Axis
+    id={'left2'}
+    title={'Left axis'}
+    position={Position.Left}
+    tickFormat={(d) => Number(d).toFixed(2)}
+    />
+    <BarSeries
+    id={'bars'}
+    xScaleType={ScaleType.Linear}
+    yScaleType={ScaleType.Linear}
+    xAccessor="x"
+    yAccessors={['y1', 'y2']}
+    splitSeriesAccessors={['g1', 'g2']}
+    data={TestDatasets.BARCHART_2Y2G}
+    hideInLegend={false}
+    />
+</Chart>
+
+***
+
+## The above chart's sample code is given below
+
+What you should pay attention to:
+* Legend specific props are included in the `<Settings/>` component
+    * `showLegend={true}`
+    * `legendPosition={Position.Right}`
+* The tick tickFormat prop within the `<Axis/>` component 
+
+<details>
+
+```js
+<Chart className={'story-chart'}>
+    <Settings showLegend={true} legendPosition={Position.Right} />
+    <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+    <Axis
+    id={'left2'}
+    title={'Left axis'}
+    position={Position.Left}
+    tickFormat={(d) => Number(d).toFixed(2)}
+    />
+    <BarSeries
+    id={'bars'}
+    xScaleType={ScaleType.Linear}
+    yScaleType={ScaleType.Linear}
+    xAccessor="x"
+    yAccessors={['y1', 'y2']}
+    splitSeriesAccessors={['g1', 'g2']}
+    data={TestDatasets.BARCHART_2Y2G}
+    hideInLegend={false}
+    />
+</Chart>
+```
+</details>

@@ -1,0 +1,41 @@
+import { Meta, Description, Story } from "@storybook/addon-docs/blocks";
+import { boolean, select, number } from '@storybook/addon-knobs';
+import {
+  AreaSeries,
+  Axis,
+  BarSeries,
+  Chart,
+  CurveType,
+  LineSeries,
+  Position,
+  ScaleType,
+  Settings,
+  PartialTheme,
+} from '../../src/';
+import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
+import { TSVB_DATASET } from '../../src/utils/data_samples/test_dataset_tsvb';
+import BarSeriesPropsTable from './9-BarProps.md';
+import BarWAxisPropsTable from './10-BarWAxisProps.md';
+import SettingsPropsTable from './11-SettingsProps.md';
+import AxisPropsTable from './12-AxisProps.md';
+import AreaPropsTable from './13-AreaProps.md';
+import LinePropsTable from './14-LineProps.md';
+
+<Meta title="Chart Reference/Prop Tables" />
+
+***
+
+Please also see the `Elastic Charts Overview` section in the Introduction for a heartier explanation for some of these props. 
+
+<Description markdown={BarSeriesPropsTable} />
+
+<Description markdown={BarWAxisPropsTable} />
+
+<Description markdown={SettingsPropsTable} />
+
+<Description markdown={AxisPropsTable} />
+
+<Description markdown={AreaPropsTable} />
+
+<Description markdown={LinePropsTable} />
+

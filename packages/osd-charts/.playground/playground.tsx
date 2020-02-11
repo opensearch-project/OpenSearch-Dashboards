@@ -1,5 +1,7 @@
 import React from 'react';
-import { Chart, LineSeries, ScaleType, Settings, Position, Axis, BarSeries, HistogramBarSeries } from '../src';
+
+import { Chart, ScaleType, Position, Axis, getAxisId, timeFormatter, getSpecId, AreaSeries } from '../src';
+import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 export class Playground extends React.Component<{}, { isSunburstShown: boolean }> {
   chartRef: React.RefObject<Chart> = React.createRef();
   state = {
@@ -14,100 +16,28 @@ export class Playground extends React.Component<{}, { isSunburstShown: boolean }
     return (
       <>
         <div className="chart">
-          <Chart ref={this.chartRef}>
-            <Settings rotation={90} onBrushEnd={this.onBrushEnd} />
-            <Axis id="y" position={Position.Left} title={'y'} />
-            <Axis id="x" position={Position.Bottom} title={'x'} />
-            <LineSeries
-              id={'aaa'}
-              xScaleType={ScaleType.Linear}
-              xAccessor={0}
-              yAccessors={[1]}
-              data={[
-                [0, 1],
-                [1, 2],
-                [2, 5],
-                [3, 5],
-                [4, 2],
-                [5, 6],
-              ]}
+          <Chart className={'story-chart'}>
+            <Axis
+              id={getAxisId('bottom')}
+              title={'timestamp per 1 minute'}
+              position={Position.Bottom}
+              showOverlappingTicks={true}
+              tickFormat={timeFormatter('HH:mm')}
             />
-          </Chart>
-        </div>
-        <div className="chart">
-          <Chart ref={this.chartRef}>
-            <Settings rotation={0} onBrushEnd={this.onBrushEnd} theme={{ chartMargins: { left: 30 } }} />
-            <Axis id="x" position={Position.Bottom} title={'x'} />
-            <Axis id="y" position={Position.Left} title={'y'} />
-            <LineSeries
-              id={'aaa'}
-              xScaleType={ScaleType.Linear}
-              xAccessor={0}
-              yAccessors={[1]}
-              data={[
-                [0, 1],
-                [1, 2],
-                [2, 5],
-                [3, 5],
-                [4, 2],
-                [5, 6],
-              ]}
+            <Axis
+              id={getAxisId('left')}
+              title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+              position={Position.Left}
+              tickFormat={(d) => Number(d).toFixed(2)}
             />
-          </Chart>
-        </div>
-        <div className="chart">
-          <Chart ref={this.chartRef}>
-            <Settings rotation={90} onBrushEnd={this.onBrushEnd} theme={{ chartMargins: { left: 30 } }} />
-            <Axis id="x" position={Position.Bottom} title={'x'} />
-            <Axis id="y" position={Position.Left} title={'y'} />
-            <BarSeries
-              id={'aaa'}
-              xScaleType={ScaleType.Linear}
+
+            <AreaSeries
+              id={getSpecId('area')}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
               xAccessor={0}
               yAccessors={[1]}
-              data={[
-                [0, 1],
-                [1, 2],
-                [2, 5],
-                [3, 5],
-                // [4, 2],
-                [5, 6],
-              ]}
-            />
-            <LineSeries
-              id={'aaa1'}
-              xScaleType={ScaleType.Linear}
-              xAccessor={0}
-              yAccessors={[1]}
-              data={[
-                [0, 1],
-                [1, 2],
-                [2, 5],
-                [3, 5],
-                // [4, 2],
-                [5, 6],
-              ]}
-            />
-          </Chart>
-        </div>
-        <div className="chart">
-          <Chart ref={this.chartRef}>
-            <Settings rotation={90} onBrushEnd={this.onBrushEnd} theme={{ chartMargins: { left: 30 } }} />
-            <Axis id="x" position={Position.Bottom} title={'x'} />
-            <Axis id="y" position={Position.Left} title={'y'} />
-            <HistogramBarSeries
-              id={'aaa'}
-              xScaleType={ScaleType.Linear}
-              xAccessor={0}
-              yAccessors={[1]}
-              data={[
-                [0, 1],
-                [1, 2],
-                [2, 5],
-                [3, 5],
-                [4, 2],
-                [5, 6],
-              ]}
+              data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
             />
           </Chart>
         </div>

@@ -1,0 +1,248 @@
+import { Meta, Description, Story, Preview } from "@storybook/addon-docs/blocks";
+import { boolean, color, number, select } from '@storybook/addon-knobs';
+import {
+  Chart,
+  BarSeries,
+  ScaleType,
+  DARK_THEME,
+  LIGHT_THEME,
+  Settings,
+  Axis,
+  Position,
+  timeFormatter,
+  niceTimeFormatByDay,
+} from '../../src';
+import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+import BarSeriesPropsTable from '../2-ChartPropTables/9-BarProps.md';
+import BarWAxisPropsTable from '../2-ChartPropTables/10-BarWAxisProps.md';
+
+<Meta title="Types of charts/Bar Charts/Basic and with axes" />
+
+# Basic Bar Chart
+
+[source](https://datavizproject.com/data-type/bar-chart/)
+
+<Chart className={'story-chart'}>
+    <BarSeries
+    id={'bars1'}
+    name={'Simple bar series'}
+    xScaleType={ScaleType.Linear}
+    yScaleType={ScaleType.Linear}
+    xAccessor="x"
+    yAccessors={['y']}
+    data={[
+    { x: 0, y: 2 },
+    { x: 1, y: 7 },
+    { x: 2, y: 3 },
+    { x: 3, y: 6 },
+    ]}
+    />
+</Chart>
+
+
+<details>
+
+Below is a very basic bar chart from Elastic Charts. A bar chart is a chart with rectangular bars with lengths proportional to the values that they represent.  One axis of the chart shows the specific categories being compared, and the other axis represents a discrete value.
+Bar charts provide a visual presentation of categorical data. Categorical data is a grouping of data into discrete groups, such as months of the year, age group, shoe sizes, and animals. These categories are usually qualitative. Bars on the chart may be arranged in any order.
+
+``` js
+<Chart className={'story-chart'}>
+    <BarSeries
+    id={'bars1'}
+    name={'Simple bar series'}
+    xScaleType={ScaleType.Linear}
+    yScaleType={ScaleType.Linear}
+    xAccessor="x"
+    yAccessors={['y']}
+    data={[
+    { x: 0, y: 2 },
+    { x: 1, y: 7 },
+    { x: 2, y: 3 },
+    { x: 3, y: 6 },
+    ]}
+    />
+</Chart>
+```
+</details>
+
+***
+<Description markdown={BarSeriesPropsTable} />
+
+Additonal prop tables for the following bar charts can be found in `Chart References > Prop Tables`
+***
+
+# Bar Chart with Axes 
+
+This chart now includes x and y axes. These axes can be `linear`, `ordinal` or `time`. 
+
+<Chart className={'story-chart'}>
+    <Settings theme={LIGHT_THEME} />
+    <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+    <Axis
+    id={'left2'}
+    title={'Left axis'}
+    position={Position.Left}
+    tickFormat={(d) => Number(d).toFixed(2)}
+    />
+    <BarSeries
+    id={'bars'}
+    xScaleType={ScaleType.Linear}
+    yScaleType={ScaleType.Linear}
+    xAccessor="x"
+    yAccessors={['y']}
+    data={[
+        { x: 0, y: 2 },
+        { x: 1, y: 7 },
+        { x: 2, y: 3 },
+        { x: 3, y: 6 },
+    ]}
+    />
+</Chart>
+
+***
+## Code for the bar chart with axes
+
+<details>
+
+```js
+<Chart className={'story-chart'}>
+    <Settings theme={LIGHT_THEME} />
+    <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+    <Axis
+    id={'left2'}
+    title={'Left axis'}
+    position={Position.Left}
+    tickFormat={(d:any) => Number(d).toFixed(2)}
+    />
+    <BarSeries
+    id={'bars'}
+    xScaleType={ScaleType.Linear}
+    yScaleType={ScaleType.Linear}
+    xAccessor="x"
+    yAccessors={['y']}
+    data={[
+        { x: 0, y: 2 },
+        { x: 1, y: 7 },
+        { x: 2, y: 3 },
+        { x: 3, y: 6 },
+    ]}
+    />
+</Chart>
+```
+</details>
+
+<Description markdown={BarWAxisPropsTable} />
+
+And below is an example of an `ordinal` x axis bar chart
+
+<Chart className={'story-chart'}>
+    <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+    <Axis
+    id={'left2'}
+    title={'Left axis'}
+    position={Position.Left}
+    tickFormat={(d) => Number(d).toFixed(2)}
+    />
+    <BarSeries
+    id={'bars'}
+    xScaleType={ScaleType.Ordinal}
+    yScaleType={ScaleType.Linear}
+    xAccessor="x"
+    yAccessors={['y']}
+    data={[
+        { x: 'a', y: 2 },
+        { x: 'b', y: 7 },
+        { x: 'c', y: 3 },
+        { x: 'd', y: 6 },
+    ]}
+    />
+</Chart>
+
+<details> 
+
+```js
+
+<Chart className={'story-chart'}>
+    <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+    <Axis
+    id={'left2'}
+    title={'Left axis'}
+    position={Position.Left}
+    tickFormat={(d) => Number(d).toFixed(2)}
+    />
+
+    <BarSeries
+    id={'bars'}
+    xScaleType={ScaleType.Ordinal}
+    yScaleType={ScaleType.Linear}
+    xAccessor="x"
+    yAccessors={['y']}
+    data={[
+        { x: 'a', y: 2 },
+        { x: 'b', y: 7 },
+        { x: 'c', y: 3 },
+        { x: 'd', y: 6 },
+    ]}
+    />
+</Chart>
+```
+
+</details>
+
+Here is an example of a `time` x axis
+<Chart className={'story-chart'}>
+    <Settings debug={boolean('debug', false)} />
+    <Axis
+        id={'bottom'}
+        position={Position.Bottom}
+        title={'Bottom axis'}
+        showOverlappingTicks={boolean('showOverlappingTicks bottom axis', false)}
+        showOverlappingLabels={boolean('showOverlappingLabels bottom axis', false)}
+        tickFormat={timeFormatter(niceTimeFormatByDay(1))}
+    />
+    <Axis
+        id={'left2'}
+        title={'Left axis'}
+        position={Position.Left}
+        tickFormat={(d) => Number(d).toFixed(2)}
+    />
+    <BarSeries
+        id={'bars'}
+        xScaleType={ScaleType.Time}
+        yScaleType={ScaleType.Linear}
+        xAccessor={0}
+        yAccessors={[1]}
+        data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
+    />
+</Chart>
+
+<details>
+
+```js
+<Chart className={'story-chart'}>
+    <Settings debug={boolean('debug', false)} />
+    <Axis
+        id={'bottom'}
+        position={Position.Bottom}
+        title={'Bottom axis'}
+        showOverlappingTicks={boolean('showOverlappingTicks bottom axis', false)}
+        showOverlappingLabels={boolean('showOverlappingLabels bottom axis', false)}
+        tickFormat={timeFormatter(niceTimeFormatByDay(1))}
+    />
+    <Axis
+        id={'left2'}
+        title={'Left axis'}
+        position={Position.Left}
+        tickFormat={(d) => Number(d).toFixed(2)}
+    />
+    <BarSeries
+        id={'bars'}
+        xScaleType={ScaleType.Time}
+        yScaleType={ScaleType.Linear}
+        xAccessor={0}
+        yAccessors={[1]}
+        data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
+    />
+</Chart>
+```
+</details>

@@ -1,0 +1,278 @@
+import { boolean, select, number } from '@storybook/addon-knobs';
+import {
+  AreaSeries,
+  Axis,
+  BarSeries,
+  Chart,
+  CurveType,
+  LineSeries,
+  Position,
+  ScaleType,
+  Settings,
+  PartialTheme,
+} from '../../src/';
+import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
+import { TSVB_DATASET } from '../../src/utils/data_samples/test_dataset_tsvb';
+
+<Meta title="Chart Reference/Code Samples" />
+
+Basic Bar
+``` js
+<Chart className={'story-chart'}>
+    <BarSeries
+    id={'bars1'}
+    name={'Simple bar series'}
+    xScaleType={ScaleType.Linear}
+    yScaleType={ScaleType.Linear}
+    xAccessor="x"
+    yAccessors={['y']}
+    data={[
+    { x: 0, y: 2 },
+    { x: 1, y: 7 },
+    { x: 2, y: 3 },
+    { x: 3, y: 6 },
+    ]}
+    />
+</Chart>
+```
+
+Bar with axes
+```js
+<Chart className={'story-chart'}>
+    <Settings theme={LIGHT_THEME} />
+    <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+    <Axis
+    id={'left2'}
+    title={'Left axis'}
+    position={Position.Left}
+    tickFormat={(d:any) => Number(d).toFixed(2)}
+    />
+    <BarSeries
+    id={'bars'}
+    xScaleType={ScaleType.Linear}
+    yScaleType={ScaleType.Linear}
+    xAccessor="x"
+    yAccessors={['y']}
+    data={[
+        { x: 0, y: 2 },
+        { x: 1, y: 7 },
+        { x: 2, y: 3 },
+        { x: 3, y: 6 },
+    ]}
+    />
+</Chart>
+```
+
+Stacked bar chart 
+```js
+<Chart className={'story-chart'}>
+  <Settings showLegend={true} legendPosition={Position.Right} />
+  <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+  <Axis
+    id={'left2'}
+    title={'Left axis'}
+    position={Position.Left}
+    tickFormat={(d) => Number(d).toFixed(2)}
+  />
+  <BarSeries
+    id={'bars'}
+    xScaleType={ScaleType.Linear}
+    yScaleType={ScaleType.Linear}
+    xAccessor="x"
+    yAccessors={['y']}
+    stackAccessors={['x']}
+    splitSeriesAccessors={['g']}
+    data={[
+      { x: 0, y: 2, g: 'a' },
+      { x: 1, y: 7, g: 'a' },
+      { x: 2, y: 3, g: 'a' },
+      { x: 3, y: 6, g: 'a' },
+      { x: 0, y: 4, g: 'b' },
+      { x: 1, y: 5, g: 'b' },
+      { x: 2, y: 8, g: 'b' },
+      { x: 3, y: 2, g: 'b' },
+    ]}
+  />
+</Chart>
+```
+
+Basic area chart 
+```js
+<Chart className={'story-chart'}>
+  <AreaSeries
+    id={'areas1'}
+    xScaleType={ScaleType.Time}
+    yScaleType={ScaleType.Linear}
+    xAccessor={0}
+    yAccessors={[1]}
+    data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
+  />
+</Chart>
+```
+
+Area chart with axes components 
+```js
+<Chart className={'story-chart'}>
+  <Axis
+    id={'bottom'}
+    title={'timestamp per 1 minute'}
+    position={Position.Bottom}
+    showOverlappingTicks={true}
+    tickFormat={timeFormatter('HH:mm')}
+  />
+  <Axis
+    id={'left'}
+    title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+    position={Position.Left}
+    tickFormat={(d) => Number(d).toFixed(2)}
+  />
+  <AreaSeries
+    id={'area'}
+    xScaleType={ScaleType.Time}
+    yScaleType={ScaleType.Linear}
+    xAccessor={0}
+    yAccessors={[1]}
+    data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
+  />
+</Chart>
+```
+
+Stacked area chart 
+```js
+<Chart className={'story-chart'}>
+  <Settings showLegend={true} legendPosition={Position.Right}/>
+  <Axis
+    id={'bottom'}
+    position={Position.Bottom}
+    showOverlappingTicks={true}
+    tickFormat={timeFormatter(niceTimeFormatByDay(1))}
+    title={'timestamp per 1 minute'}
+  />
+  <Axis
+    id={'left'}
+    title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+    position={Position.Left}
+    tickFormat={(d) => Number(d).toFixed(2)}
+  /> 
+  <AreaSeries
+    id={'1'}
+    name={KIBANA_METRICS.metrics.kibana_os_load[2].metric.label}
+    xScaleType={ScaleType.Time}
+    yScaleType={ScaleType.Linear}
+    xAccessor={0}
+    yAccessors={[1]}
+    stackAccessors={[0]}
+    data={KIBANA_METRICS.metrics.kibana_os_load[2].data}
+  />
+  <AreaSeries
+    id={'2'}
+    name={KIBANA_METRICS.metrics.kibana_os_load[1].metric.label}
+    xScaleType={ScaleType.Time}
+    yScaleType={ScaleType.Linear}
+    xAccessor={0}
+    yAccessors={[1]}
+    stackAccessors={[0]}
+    data={KIBANA_METRICS.metrics.kibana_os_load[1].data}
+  />
+  <AreaSeries
+    id={'3'}
+    name={KIBANA_METRICS.metrics.kibana_os_load[0].metric.label}
+    xScaleType={ScaleType.Time}
+    yScaleType={ScaleType.Linear}
+    xAccessor={0}
+    yAccessors={[1]}
+    stackAccessors={[0]}
+    data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
+  />
+</Chart>
+```
+
+Basic line chart
+```js
+<Chart className={'story-chart'}>
+    <LineSeries
+    id={'lines1'}
+    xScaleType={ScaleType.Time}
+    yScaleType={ScaleType.Linear}
+    xAccessor={0}
+    yAccessors={[1]}
+    data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
+    />
+</Chart>
+```
+
+Linear x axis line chart 
+```js
+<Chart className={'story-chart'}>
+    <Axis
+    id={'bottom'}
+    position={Position.Bottom}
+    showOverlappingTicks={true}
+    tickFormat={timeFormatter(niceTimeFormatByDay(1))}
+    title={'timestamp per 1 minute'}
+    />
+    <Axis
+    id={'left'}
+    title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+    position={Position.Left}
+    tickFormat={(d) => `${Number(d).toFixed(2)}%`}
+    />
+    <LineSeries
+    id={'lines'}
+    xScaleType={ScaleType.Linear}
+    yScaleType={ScaleType.Linear}
+    xAccessor={0}
+    yAccessors={[1]}
+    data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 5)}
+    />
+</Chart>
+```
+
+Stacked line chart 
+```js
+<Chart className={'story-chart'}>
+    <Settings showLegend={true} legendPosition={Position.Right} />
+  <Axis
+    id={'bottom'}
+    position={Position.Bottom}
+    showOverlappingTicks={true}
+    tickFormat={timeFormatter(niceTimeFormatByDay(1))}
+  />
+  <Axis
+    id={'left'}
+    title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
+    position={Position.Left}
+    tickFormat={(d) => `${Number(d).toFixed(0)}%`}
+  />
+  <LineSeries
+    id={KIBANA_METRICS.metrics.kibana_os_load[0].metric.label}
+    xScaleType={ScaleType.Time}
+    yScaleType={ScaleType.Linear}
+    xAccessor={0}
+    yAccessors={[1]}
+    data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
+    curve={CurveType.LINEAR}
+    stackAccessors={[0]}
+  />
+  <LineSeries
+    id={KIBANA_METRICS.metrics.kibana_os_load[1].metric.label}
+    xScaleType={ScaleType.Time}
+    yScaleType={ScaleType.Linear}
+    xAccessor={0}
+    yAccessors={[1]}
+    data={KIBANA_METRICS.metrics.kibana_os_load[1].data}
+    curve={CurveType.LINEAR}
+    stackAccessors={[0]}
+  />
+  <LineSeries
+    id={KIBANA_METRICS.metrics.kibana_os_load[2].metric.label}
+    xScaleType={ScaleType.Time}
+    yScaleType={ScaleType.Linear}
+    xAccessor={0}
+    yAccessors={[1]}
+    data={KIBANA_METRICS.metrics.kibana_os_load[2].data}
+    curve={CurveType.LINEAR}
+    stackAccessors={[0]}
+  />
+</Chart>
+```
