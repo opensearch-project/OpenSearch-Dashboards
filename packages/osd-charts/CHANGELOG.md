@@ -1,3 +1,10 @@
+# [17.1.0](https://github.com/elastic/elastic-charts/compare/v17.0.3...v17.1.0) (2020-02-12)
+
+
+### Features
+
+* remove konva and add native canvas rendering ([#540](https://github.com/elastic/elastic-charts/issues/540)) ([08a4d5d](https://github.com/elastic/elastic-charts/commit/08a4d5dca21c98236c645e09548f918f088a6e96))
+
 ## [17.0.3](https://github.com/elastic/elastic-charts/compare/v17.0.2...v17.0.3) (2020-02-10)
 
 
