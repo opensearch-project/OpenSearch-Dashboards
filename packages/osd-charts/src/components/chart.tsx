@@ -2,8 +2,6 @@ import React, { CSSProperties, createRef } from 'react';
 import classNames from 'classnames';
 import { Provider } from 'react-redux';
 import { createStore, Store } from 'redux';
-import Konva from 'konva';
-import { Stage } from 'react-konva';
 import uuid from 'uuid';
 
 import { SpecsParser } from '../specs/specs_parser';
@@ -56,7 +54,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
   };
   private chartStore: Store<GlobalChartState>;
   private chartContainerRef: React.RefObject<HTMLDivElement>;
-  private chartStageRef: React.RefObject<Stage>;
+  private chartStageRef: React.RefObject<HTMLCanvasElement>;
 
   constructor(props: any) {
     super(props);
@@ -119,38 +117,29 @@ export class Chart extends React.Component<ChartProps, ChartState> {
     if (!this.chartStageRef.current) {
       return null;
     }
-    const stage = this.chartStageRef.current.getStage().clone(null);
-    const width = stage.getWidth();
-    const height = stage.getHeight();
-    const backgroundLayer = new Konva.Layer();
-    const backgroundRect = new Konva.Rect({
-      fill: options.backgroundColor,
-      x: 0,
-      y: 0,
-      width,
-      height,
-    });
+    const canvas = this.chartStageRef.current;
+    const backgroundCanvas = document.createElement('canvas');
+    backgroundCanvas.width = canvas.width;
+    backgroundCanvas.height = canvas.height;
+    const bgCtx = backgroundCanvas.getContext('2d');
+    if (!bgCtx) {
+      return null;
+    }
+    bgCtx.fillStyle = options.backgroundColor;
+    bgCtx.fillRect(0, 0, canvas.width, canvas.height);
+    bgCtx.drawImage(canvas, 0, 0);
 
-    backgroundLayer.add(backgroundRect);
-    stage.add(backgroundLayer);
-    backgroundLayer.moveToBottom();
-    stage.draw();
-    const canvasStage = stage.toCanvas({
-      width,
-      height,
-      callback: () => undefined,
-    });
     // @ts-ignore
-    if (canvasStage.msToBlob) {
+    if (bgCtx.msToBlob) {
       // @ts-ignore
-      const blobOrDataUrl = canvasStage.msToBlob();
+      const blobOrDataUrl = bgCtx.msToBlob();
       return {
         blobOrDataUrl,
         browser: 'IE11',
       };
     } else {
       return {
-        blobOrDataUrl: stage.toDataURL({ pixelRatio: options.pixelRatio }),
+        blobOrDataUrl: backgroundCanvas.toDataURL(),
         browser: 'other',
       };
     }

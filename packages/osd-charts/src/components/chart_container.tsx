@@ -11,7 +11,6 @@ import { isInternalChartEmptySelector } from '../state/selectors/is_chart_empty'
 import { isInitialized } from '../state/selectors/is_initialized';
 import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
 import { SettingsSpec } from '../specs';
-import { Stage } from 'react-konva';
 import { getInternalIsBrushingSelector } from '../state/selectors/get_internal_is_brushing';
 
 interface ReactiveChartStateProps {
@@ -21,7 +20,10 @@ interface ReactiveChartStateProps {
   isBrushing: boolean;
   isBrushingAvailable: boolean;
   settings?: SettingsSpec;
-  internalChartRenderer: (containerRef: BackwardRef, forwardStageRef: React.RefObject<Stage>) => JSX.Element | null;
+  internalChartRenderer: (
+    containerRef: BackwardRef,
+    forwardStageRef: React.RefObject<HTMLCanvasElement>,
+  ) => JSX.Element | null;
 }
 interface ReactiveChartDispatchProps {
   onPointerMove: typeof onPointerMove;
@@ -31,7 +33,7 @@ interface ReactiveChartDispatchProps {
 
 interface ReactiveChartOwnProps {
   getChartContainerRef: BackwardRef;
-  forwardStageRef: React.RefObject<Stage>;
+  forwardStageRef: React.RefObject<HTMLCanvasElement>;
 }
 
 type ReactiveChartProps = ReactiveChartStateProps & ReactiveChartDispatchProps & ReactiveChartOwnProps;

@@ -30,6 +30,19 @@ export interface Font {
 
 export type PartialFont = Partial<Font>;
 
+export const TEXT_ALIGNS = Object.freeze(['start', 'end', 'left', 'right', 'center'] as const);
+export type TextAlign = typeof TEXT_ALIGNS[number];
+
+export const TEXT_BASELINE = Object.freeze([
+  'top',
+  'hanging',
+  'middle',
+  'alphabetic',
+  'ideographic',
+  'bottom',
+] as const);
+export type TextBaseline = typeof TEXT_BASELINE[number];
+
 export interface Box extends Font {
   text: string;
 }

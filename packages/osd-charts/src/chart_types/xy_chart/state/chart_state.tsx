@@ -9,13 +9,12 @@ import { AnnotationTooltip } from '../renderer/dom/annotation_tooltips';
 import { isBrushAvailableSelector } from './selectors/is_brush_available';
 import { BrushTool } from '../renderer/dom/brush';
 import { isChartEmptySelector } from './selectors/is_chart_empty';
-import { ReactiveChart } from '../renderer/canvas/reactive_chart';
 import { computeLegendSelector } from './selectors/compute_legend';
 import { getLegendTooltipValuesSelector } from './selectors/get_legend_tooltip_values';
 import { TooltipLegendValue } from '../tooltip/tooltip';
 import { getPointerCursorSelector } from './selectors/get_cursor_pointer';
-import { Stage } from 'react-konva';
 import { isBrushingSelector } from './selectors/is_brushing';
+import { XYChart } from '../renderer/canvas/xy_chart';
 
 export class XYAxisChartState implements InternalChartState {
   chartType = ChartTypes.XYAxis;
@@ -35,11 +34,11 @@ export class XYAxisChartState implements InternalChartState {
   getLegendItemsValues(globalState: GlobalChartState): Map<string, TooltipLegendValue> {
     return getLegendTooltipValuesSelector(globalState);
   }
-  chartRenderer(containerRef: BackwardRef, forwardStageRef: RefObject<Stage>) {
+  chartRenderer(containerRef: BackwardRef, forwardStageRef: RefObject<HTMLCanvasElement>) {
     return (
       <React.Fragment>
         <Crosshair />
-        <ReactiveChart forwardStageRef={forwardStageRef} />
+        <XYChart forwardStageRef={forwardStageRef} />
         <Tooltips getChartContainerRef={containerRef} />
         <AnnotationTooltip getChartContainerRef={containerRef} />
         <Highlighter />

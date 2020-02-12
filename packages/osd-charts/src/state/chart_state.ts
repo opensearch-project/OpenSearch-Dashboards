@@ -14,7 +14,6 @@ import { CHART_RENDERED } from './actions/chart';
 import { UPDATE_PARENT_DIMENSION } from './actions/chart_settings';
 import { EXTERNAL_POINTER_EVENT } from './actions/events';
 import { RefObject } from 'react';
-import { Stage } from 'react-konva';
 import { PartitionState } from '../chart_types/partition_chart/state/chart_state';
 
 export type BackwardRef = () => React.RefObject<HTMLDivElement>;
@@ -27,7 +26,7 @@ export interface InternalChartState {
   // the chart type
   chartType: ChartTypes;
   // returns a JSX element with the chart rendered (lenged excluded)
-  chartRenderer(containerRef: BackwardRef, forwardStageRef: RefObject<Stage>): JSX.Element | null;
+  chartRenderer(containerRef: BackwardRef, forwardStageRef: RefObject<HTMLCanvasElement>): JSX.Element | null;
   // true if the brush is available for this chart type
   isBrushAvailable(globalState: GlobalChartState): boolean;
   // true if the brush is available for this chart type

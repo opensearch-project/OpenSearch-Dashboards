@@ -550,10 +550,10 @@ function renderGeometries(
         ? mergePartial(chartTheme.areaSeriesStyle, spec.areaSeriesStyle, { mergeOptionalPartialValues: true })
         : chartTheme.areaSeriesStyle;
       const xScaleOffset = computeXScaleOffset(xScale, enableHistogramMode, spec.histogramModeAlignment);
-
       const renderedAreas = renderArea(
         // move the point on half of the bandwidth if we have mixed bars/lines
         (xScale.bandwidth * areaShift) / 2,
+
         ds,
         xScale,
         yScale,

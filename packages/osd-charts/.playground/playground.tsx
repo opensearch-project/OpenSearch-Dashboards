@@ -1,12 +1,8 @@
 import React from 'react';
-
 import { Chart, ScaleType, Position, Axis, getAxisId, timeFormatter, getSpecId, AreaSeries } from '../src';
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
-export class Playground extends React.Component<{}, { isSunburstShown: boolean }> {
+export class Playground extends React.Component {
   chartRef: React.RefObject<Chart> = React.createRef();
-  state = {
-    isSunburstShown: true,
-  };
   onBrushEnd = (min: number, max: number) => {
     // eslint-disable-next-line no-console
     console.log({ min, max });

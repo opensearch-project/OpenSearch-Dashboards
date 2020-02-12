@@ -20,3 +20,8 @@ export function argsToRGBString(r: number, g: number, b: number, opacity: number
   // d3.rgb returns an Rgb instance, which has a specialized `toString` method
   return argsToRGB(r, g, b, opacity).toString();
 }
+
+export function RGBtoString(rgb: RgbObject): string {
+  const { r, g, b, opacity } = rgb;
+  return argsToRGBString(r, g, b, opacity);
+}

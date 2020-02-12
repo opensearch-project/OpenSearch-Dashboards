@@ -13,7 +13,7 @@ import { AxisId } from '../../../../utils/ids';
 import { Dimensions } from '../../../../utils/dimensions';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
-interface AxisVisibleTicks {
+export interface AxisVisibleTicks {
   axisPositions: Map<AxisId, Dimensions>;
   axisTicks: Map<AxisId, AxisTick[]>;
   axisVisibleTicks: Map<AxisId, AxisTick[]>;

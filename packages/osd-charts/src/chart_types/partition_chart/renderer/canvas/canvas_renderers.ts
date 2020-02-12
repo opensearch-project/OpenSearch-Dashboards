@@ -1,4 +1,4 @@
-import { Coordinate, Pixels } from '../../layout/types/geometry_types';
+import { Pixels } from '../../layout/types/geometry_types';
 import { addOpacity } from '../../layout/utils/calcs';
 import {
   LinkLabelVM,
@@ -11,34 +11,11 @@ import {
 import { TAU } from '../../layout/utils/math';
 import { PartitionLayout } from '../../layout/types/config_types';
 import { cssFontShorthand } from '../../layout/utils/measure';
+import { withContext, renderLayers, clearCanvas } from '../../../../renderers/canvas';
 
 // the burnout avoidance in the center of the pie
 const LINE_WIDTH_MULT = 10; // border can be a maximum 1/LINE_WIDTH_MULT - th of the sector angle, otherwise the border would dominate
 const TAPER_OFF_LIMIT = 50; // taper off within a radius of TAPER_OFF_LIMIT to avoid burnout in the middle of the pie when there are hundreds of pies
-
-// withContext abstracts out the otherwise error-prone save/restore pairing; it can be nested and/or put into sequence
-// The idea is that you just set what's needed for the enclosed snippet, which may temporarily override values in the
-// outer withContext. Example: we use a +y = top convention, so when doing text rendering, y has to be flipped (ctx.scale)
-// otherwise the text will render upside down.
-function withContext(ctx: CanvasRenderingContext2D, fun: (ctx: CanvasRenderingContext2D) => void) {
-  ctx.save();
-  fun(ctx);
-  ctx.restore();
-}
-
-function clearCanvas(
-  ctx: CanvasRenderingContext2D,
-  width: Coordinate,
-  height: Coordinate /*, backgroundColor: string*/,
-) {
-  withContext(ctx, (ctx) => {
-    // two steps, as the backgroundColor may have a non-one opacity
-    // todo we should avoid `fillRect` by setting the <canvas> element background via CSS
-    ctx.clearRect(-width, -height, 2 * width, 2 * height); // remove past contents
-    // ctx.fillStyle = backgroundColor;
-    // ctx.fillRect(-width, -height, 2 * width, 2 * height); // new background
-  });
-}
 
 function renderTextRow(ctx: CanvasRenderingContext2D, { fontSize, fillTextColor, rotation }: RowSet) {
   return (currentRow: TextRow) => {
@@ -143,11 +120,6 @@ function renderRectangles(ctx: CanvasRenderingContext2D, quadViewModel: QuadView
       }
     });
   });
-}
-
-// order of rendering is important; determined by the order of layers in the array
-function renderLayers(ctx: CanvasRenderingContext2D, layers: Array<(ctx: CanvasRenderingContext2D) => void>) {
-  layers.forEach((renderLayer) => renderLayer(ctx));
 }
 
 function renderFillOutsideLinks(

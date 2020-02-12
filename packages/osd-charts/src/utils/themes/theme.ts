@@ -190,6 +190,8 @@ export interface LineStyle {
   strokeWidth: number;
   /** the opacity of each line on the theme/series */
   opacity: number;
+  /** the dash array */
+  dash?: number[];
 }
 
 export interface AreaStyle {

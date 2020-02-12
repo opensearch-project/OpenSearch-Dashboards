@@ -10,6 +10,7 @@ export * from './utils/themes/theme_commons';
 export { RecursivePartial } from './utils/commons';
 export { CurveType } from './utils/curves';
 export { timeFormatter, niceTimeFormatter, niceTimeFormatByDay } from './utils/data/formatters';
+import 'path2d-polyfill';
 export { DataGenerator } from './utils/data_generators/data_generator';
 export { SeriesCollectionValue } from './chart_types/xy_chart/utils/series';
 export { ChartTypes } from './chart_types';
