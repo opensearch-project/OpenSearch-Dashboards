@@ -3,7 +3,12 @@ import { Spec } from '../../specs';
 export const UPSERT_SPEC = 'UPSERT_SPEC';
 export const REMOVE_SPEC = 'REMOVE_SPEC';
 export const SPEC_PARSED = 'SPEC_PARSED';
+export const SPEC_PARSING = 'SPEC_PARSING';
 export const SPEC_UNMOUNTED = 'SPEC_UNMOUNTED';
+
+interface SpecParsingAction {
+  type: typeof SPEC_PARSING;
+}
 
 interface SpecParsedAction {
   type: typeof SPEC_PARSED;
@@ -35,8 +40,17 @@ export function specParsed(): SpecParsedAction {
   return { type: SPEC_PARSED };
 }
 
+export function specParsing(): SpecParsingAction {
+  return { type: SPEC_PARSING };
+}
+
 export function specUnmounted(): SpecUnmountedAction {
   return { type: SPEC_UNMOUNTED };
 }
 
-export type SpecActions = SpecParsedAction | SpecUnmountedAction | UpsertSpecAction | RemoveSpecAction;
+export type SpecActions =
+  | SpecParsingAction
+  | SpecParsedAction
+  | SpecUnmountedAction
+  | UpsertSpecAction
+  | RemoveSpecAction;

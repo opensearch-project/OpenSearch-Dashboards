@@ -21,12 +21,19 @@ import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { hasSingleSeriesSelector } from './has_single_series';
 
 const EMPTY_VALUES = Object.freeze({
-  tooltipValues: [],
+  tooltip: {
+    header: null,
+    values: [],
+  },
   highlightedGeometries: [],
 });
 
+export interface TooltipData {
+  header: TooltipValue | null;
+  values: TooltipValue[];
+}
 export interface TooltipAndHighlightedGeoms {
-  tooltipValues: TooltipValue[];
+  tooltip: TooltipData;
   highlightedGeometries: IndexedGeometry[];
 }
 
@@ -84,7 +91,7 @@ function getTooltipAndHighlightFromXValue(
   }
 
   // build the tooltip value list
-  let xValueInfo: TooltipValue | null = null;
+  let tooltipHeader: TooltipValue | null = null;
   const highlightedGeometries: IndexedGeometry[] = [];
   const tooltipValues = xMatchingGeoms
     .filter(({ value: { y } }) => y !== null)
@@ -134,27 +141,29 @@ function getTooltipAndHighlightFromXValue(
       );
 
       // format only one time the x value
-      if (!xValueInfo) {
+      if (!tooltipHeader) {
         // if we have a tooltipHeaderFormatter, then don't pass in the xAxis as the user will define a formatter
         const xAxisFormatSpec = [0, 180].includes(chartRotation) ? xAxis : yAxis;
         const formatterAxis = tooltipHeaderFormatter ? undefined : xAxisFormatSpec;
-        xValueInfo = formatTooltip(indexedGeometry, spec, true, false, hasSingleSeries, formatterAxis);
-        return [xValueInfo, ...acc, formattedTooltip];
+        tooltipHeader = formatTooltip(indexedGeometry, spec, true, false, hasSingleSeries, formatterAxis);
       }
 
       return [...acc, formattedTooltip];
     }, []);
 
   return {
-    tooltipValues,
+    tooltip: {
+      header: tooltipHeader,
+      values: tooltipValues,
+    },
     highlightedGeometries,
   };
 }
 
 export const getTooltipValuesSelector = createCachedSelector(
   [getTooltipValuesAndGeometriesSelector],
-  (values): TooltipValue[] => {
-    return values.tooltipValues;
+  ({ tooltip }): TooltipData => {
+    return tooltip;
   },
 )(getChartIdSelector);
 

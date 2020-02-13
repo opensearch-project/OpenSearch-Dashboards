@@ -1,4 +1,4 @@
-import { SPEC_PARSED, SPEC_UNMOUNTED, UPSERT_SPEC, REMOVE_SPEC } from './actions/specs';
+import { SPEC_PARSED, SPEC_UNMOUNTED, UPSERT_SPEC, REMOVE_SPEC, SPEC_PARSING } from './actions/specs';
 import { interactionsReducer } from './reducers/interactions';
 import { ChartTypes } from '../chart_types';
 import { XYAxisChartState } from '../chart_types/xy_chart/state/chart_state';
@@ -142,6 +142,15 @@ export const chartStoreReducer = (chartId: string) => {
   const initialState = getInitialState(chartId);
   return (state = initialState, action: StateActions): GlobalChartState => {
     switch (action.type) {
+      case SPEC_PARSING:
+        return {
+          ...state,
+          specsInitialized: false,
+          chartRendered: false,
+          specs: {
+            [DEFAULT_SETTINGS_SPEC.id]: DEFAULT_SETTINGS_SPEC,
+          },
+        };
       case SPEC_PARSED:
         const chartType = findMainChartType(state.specs);
 
@@ -150,7 +159,6 @@ export const chartStoreReducer = (chartId: string) => {
           return {
             ...state,
             specsInitialized: true,
-            chartRendered: false,
             chartType,
             internalChartState,
           };
@@ -158,7 +166,6 @@ export const chartStoreReducer = (chartId: string) => {
           return {
             ...state,
             specsInitialized: true,
-            chartRendered: false,
             chartType,
           };
         }
@@ -171,8 +178,6 @@ export const chartStoreReducer = (chartId: string) => {
       case UPSERT_SPEC:
         return {
           ...state,
-          specsInitialized: false,
-          chartRendered: false,
           specs: {
             ...state.specs,
             [action.spec.id]: action.spec,
@@ -182,8 +187,6 @@ export const chartStoreReducer = (chartId: string) => {
         const { [action.id]: specToRemove, ...rest } = state.specs;
         return {
           ...state,
-          specsInitialized: false,
-          chartRendered: false,
           specs: {
             ...rest,
           },

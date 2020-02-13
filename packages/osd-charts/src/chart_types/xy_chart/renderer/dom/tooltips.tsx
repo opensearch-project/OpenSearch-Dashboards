@@ -6,7 +6,7 @@ import { GlobalChartState, BackwardRef } from '../../../../state/chart_state';
 import { isTooltipVisibleSelector } from '../../state/selectors/is_tooltip_visible';
 import { getTooltipHeaderFormatterSelector } from '../../state/selectors/get_tooltip_header_formatter';
 import { getTooltipPositionSelector } from '../../state/selectors/get_tooltip_position';
-import { getTooltipValuesSelector } from '../../state/selectors/get_tooltip_values_highlighted_geoms';
+import { getTooltipValuesSelector, TooltipData } from '../../state/selectors/get_tooltip_values_highlighted_geoms';
 import { isInitialized } from '../../../../state/selectors/is_initialized';
 import { createPortal } from 'react-dom';
 import { getFinalTooltipPosition, TooltipPosition } from '../../crosshair/crosshair_utils';
@@ -15,7 +15,7 @@ import { isAnnotationTooltipVisibleSelector } from '../../state/selectors/is_ann
 interface TooltipStateProps {
   isTooltipVisible: boolean;
   isAnnotationTooltipVisible: boolean;
-  tooltipValues: TooltipValue[];
+  tooltip: TooltipData;
   tooltipPosition: TooltipPosition | null;
   tooltipHeaderFormatter?: TooltipValueFormatter;
 }
@@ -74,7 +74,7 @@ class TooltipsComponent extends React.Component<TooltipProps> {
     }
   }
 
-  renderHeader(headerData?: TooltipValue, formatter?: TooltipValueFormatter) {
+  renderHeader(headerData: TooltipValue | null, formatter?: TooltipValueFormatter) {
     if (!headerData) {
       return null;
     }
@@ -83,21 +83,21 @@ class TooltipsComponent extends React.Component<TooltipProps> {
   }
 
   render() {
-    const { isTooltipVisible, tooltipValues, tooltipHeaderFormatter, isAnnotationTooltipVisible } = this.props;
+    const { isTooltipVisible, tooltip, tooltipHeaderFormatter, isAnnotationTooltipVisible } = this.props;
     if (!this.portalNode) {
       return null;
     }
     const { getChartContainerRef } = this.props;
     const chartContainerRef = getChartContainerRef();
-    let tooltip;
+    let tooltipComponent;
     if (chartContainerRef.current === null || !isTooltipVisible || isAnnotationTooltipVisible) {
       return null;
     } else {
-      tooltip = (
+      tooltipComponent = (
         <div className="echTooltip" ref={this.tooltipRef}>
-          <div className="echTooltip__header">{this.renderHeader(tooltipValues[0], tooltipHeaderFormatter)}</div>
+          <div className="echTooltip__header">{this.renderHeader(tooltip.header, tooltipHeaderFormatter)}</div>
           <div className="echTooltip__list">
-            {tooltipValues.slice(1).map(({ name, value, color, isHighlighted, seriesKey, yAccessor, isVisible }) => {
+            {tooltip.values.map(({ name, value, color, isHighlighted, seriesKey, yAccessor, isVisible }) => {
               if (!isVisible) {
                 return null;
               }
@@ -122,7 +122,7 @@ class TooltipsComponent extends React.Component<TooltipProps> {
         </div>
       );
     }
-    return createPortal(tooltip, this.portalNode);
+    return createPortal(tooltipComponent, this.portalNode);
   }
 }
 
@@ -131,7 +131,10 @@ const mapStateToProps = (state: GlobalChartState): TooltipStateProps => {
     return {
       isTooltipVisible: false,
       isAnnotationTooltipVisible: false,
-      tooltipValues: [],
+      tooltip: {
+        header: null,
+        values: [],
+      },
       tooltipPosition: null,
       tooltipHeaderFormatter: undefined,
     };
@@ -139,7 +142,7 @@ const mapStateToProps = (state: GlobalChartState): TooltipStateProps => {
   return {
     isTooltipVisible: isTooltipVisibleSelector(state),
     isAnnotationTooltipVisible: isAnnotationTooltipVisibleSelector(state),
-    tooltipValues: getTooltipValuesSelector(state),
+    tooltip: getTooltipValuesSelector(state),
     tooltipPosition: getTooltipPositionSelector(state),
     tooltipHeaderFormatter: getTooltipHeaderFormatterSelector(state),
   };

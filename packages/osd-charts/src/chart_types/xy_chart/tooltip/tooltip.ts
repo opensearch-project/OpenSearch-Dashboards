@@ -26,12 +26,7 @@ export function getSeriesTooltipValues(
   // map from seriesKey to TooltipLegendValue
   const seriesTooltipValues = new Map<string, TooltipLegendValue>();
 
-  // First TooltipLegendValue is the header
-  if (tooltipValues.length <= 1) {
-    return seriesTooltipValues;
-  }
-
-  tooltipValues.slice(1).forEach(({ seriesKey, value, yAccessor }) => {
+  tooltipValues.forEach(({ seriesKey, value, yAccessor }) => {
     const seriesValue = defaultValue ? defaultValue : value;
     const current = seriesTooltipValues.get(seriesKey) || {};
 

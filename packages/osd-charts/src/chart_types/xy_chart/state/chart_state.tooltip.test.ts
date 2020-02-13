@@ -28,12 +28,12 @@ describe('XYChart - State tooltips', () => {
   });
 
   describe('should compute tooltip values depending on tooltip type', () => {
-    it.each<[TooltipType, number, number]>([
-      [TooltipType.None, 0, 0],
-      [TooltipType.Follow, 1, 2],
-      [TooltipType.VerticalCursor, 1, 2],
-      [TooltipType.Crosshairs, 1, 2],
-    ])('tooltip type %s', (tooltipType, expectedHgeomsLength, expectedTooltipValuesLength) => {
+    it.each<[TooltipType, number, boolean, number]>([
+      [TooltipType.None, 0, true, 0],
+      [TooltipType.Follow, 1, false, 1],
+      [TooltipType.VerticalCursor, 1, false, 1],
+      [TooltipType.Crosshairs, 1, false, 1],
+    ])('tooltip type %s', (tooltipType, expectedHgeomsLength, expectHeader, expectedTooltipValuesLength) => {
       store.dispatch(onPointerMove({ x: 25, y: 50 }, 0));
       store.dispatch(
         upsertSpec(
@@ -47,7 +47,8 @@ describe('XYChart - State tooltips', () => {
       store.dispatch(specParsed());
       const state = store.getState();
       const tooltipValues = getTooltipValuesAndGeometriesSelector(state);
-      expect(tooltipValues.tooltipValues).toHaveLength(expectedTooltipValuesLength);
+      expect(tooltipValues.tooltip.values).toHaveLength(expectedTooltipValuesLength);
+      expect(tooltipValues.tooltip.header === null).toBe(expectHeader);
       expect(tooltipValues.highlightedGeometries).toHaveLength(expectedHgeomsLength);
     });
   });

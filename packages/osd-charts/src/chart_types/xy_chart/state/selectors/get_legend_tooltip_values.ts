@@ -5,7 +5,7 @@ import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
 export const getLegendTooltipValuesSelector = createCachedSelector(
   [getTooltipValuesSelector],
-  (tooltipData): Map<string, TooltipLegendValue> => {
-    return getSeriesTooltipValues(tooltipData);
+  ({ values }): Map<string, TooltipLegendValue> => {
+    return getSeriesTooltipValues(values);
   },
 )(getChartIdSelector);

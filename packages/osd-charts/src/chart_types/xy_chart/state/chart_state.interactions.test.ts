@@ -222,7 +222,7 @@ describe('Chart state pointer interactions', () => {
     store.dispatch(onPointerMove({ x: 10, y: 10 + 70 }, 0));
     const tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
     // no tooltip values exist if we have a TooltipType === None
-    expect(tooltipData.tooltipValues.length).toBe(0);
+    expect(tooltipData.tooltip.values.length).toBe(0);
     let isTooltipVisible = isTooltipVisibleSelector(store.getState());
     expect(isTooltipVisible).toBe(false);
 
@@ -284,7 +284,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
       onPointerMoveCaller(state);
     });
     const tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
-    expect(tooltipData.tooltipValues).toEqual([]);
+    expect(tooltipData.tooltip.values).toEqual([]);
   });
 
   test('store is correctly configured', () => {
@@ -299,13 +299,13 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(onPointerUpdateListener).toBeCalledTimes(1);
 
     const tooltipData1 = getTooltipValuesAndGeometriesSelector(store.getState());
-    expect(tooltipData1.tooltipValues.length).toBe(2);
+    expect(tooltipData1.tooltip.values.length).toBe(1);
     // avoid calls
     store.dispatch(onPointerMove({ x: chartLeft + 12, y: chartTop + 12 }, 1));
     expect(onPointerUpdateListener).toBeCalledTimes(1);
 
     const tooltipData2 = getTooltipValuesAndGeometriesSelector(store.getState());
-    expect(tooltipData2.tooltipValues.length).toBe(2);
+    expect(tooltipData2.tooltip.values.length).toBe(1);
     expect(tooltipData1).toEqual(tooltipData2);
   });
 
@@ -385,7 +385,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
 
   test('can hover top-left corner of the first bar', () => {
     let tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
-    expect(tooltipData.tooltipValues).toEqual([]);
+    expect(tooltipData.tooltip.values).toEqual([]);
     store.dispatch(onPointerMove({ x: chartLeft + 0, y: chartTop + 0 }, 0));
     let projectedPointerPosition = getProjectedPointerPositionSelector(store.getState());
     expect(projectedPointerPosition).toEqual({ x: 0, y: 0 });
@@ -396,7 +396,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     let isTooltipVisible = isTooltipVisibleSelector(store.getState());
     expect(isTooltipVisible).toBe(true);
     tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
-    expect(tooltipData.tooltipValues.length).toBe(2); // x value + 1 y value
+    expect(tooltipData.tooltip.values.length).toBe(1);
     expect(tooltipData.highlightedGeometries.length).toBe(1);
     expect(onOverListener).toBeCalledTimes(1);
     expect(onOutListener).toBeCalledTimes(0);
@@ -423,7 +423,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     isTooltipVisible = isTooltipVisibleSelector(store.getState());
     expect(isTooltipVisible).toBe(false);
     tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
-    expect(tooltipData.tooltipValues.length).toBe(0);
+    expect(tooltipData.tooltip.values.length).toBe(0);
     expect(tooltipData.highlightedGeometries.length).toBe(0);
     expect(onOverListener).toBeCalledTimes(1);
     expect(onOutListener).toBeCalledTimes(1);
@@ -441,7 +441,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(isTooltipVisible).toBe(true);
     let tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
     expect(tooltipData.highlightedGeometries.length).toBe(1);
-    expect(tooltipData.tooltipValues.length).toBe(2); // x value + 1 y value
+    expect(tooltipData.tooltip.values.length).toBe(1);
     expect(onOverListener).toBeCalledTimes(1);
     expect(onOutListener).toBeCalledTimes(0);
     expect(onOverListener.mock.calls[0][0]).toEqual([
@@ -466,7 +466,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     isTooltipVisible = isTooltipVisibleSelector(store.getState());
     expect(isTooltipVisible).toBe(false);
     tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
-    expect(tooltipData.tooltipValues.length).toBe(0);
+    expect(tooltipData.tooltip.values.length).toBe(0);
     expect(tooltipData.highlightedGeometries.length).toBe(0);
     expect(onOverListener).toBeCalledTimes(1);
     expect(onOutListener).toBeCalledTimes(1);
@@ -488,7 +488,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(isTooltipVisible).toBe(true);
     let tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
     expect(tooltipData.highlightedGeometries.length).toBe(1);
-    expect(tooltipData.tooltipValues.length).toBe(2);
+    expect(tooltipData.tooltip.values.length).toBe(1);
     expect(onOverListener).toBeCalledTimes(1);
     expect(onOutListener).toBeCalledTimes(0);
     expect(onOverListener.mock.calls[0][0]).toEqual([
@@ -518,7 +518,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     isTooltipVisible = isTooltipVisibleSelector(store.getState());
     expect(isTooltipVisible).toBe(true);
     tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
-    expect(tooltipData.tooltipValues.length).toBe(2);
+    expect(tooltipData.tooltip.values.length).toBe(1);
     expect(tooltipData.highlightedGeometries.length).toBe(0);
     expect(onOverListener).toBeCalledTimes(1);
     expect(onOutListener).toBeCalledTimes(1);
@@ -540,7 +540,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(isTooltipVisible).toBe(true);
     let tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
     expect(tooltipData.highlightedGeometries.length).toBe(1);
-    expect(tooltipData.tooltipValues.length).toBe(2);
+    expect(tooltipData.tooltip.values.length).toBe(1);
     expect(onOverListener).toBeCalledTimes(1);
     expect(onOutListener).toBeCalledTimes(0);
     expect(onOverListener.mock.calls[0][0]).toEqual([
@@ -570,7 +570,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     isTooltipVisible = isTooltipVisibleSelector(store.getState());
     expect(isTooltipVisible).toBe(true);
     tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
-    expect(tooltipData.tooltipValues.length).toBe(2);
+    expect(tooltipData.tooltip.values.length).toBe(1);
     // we are over the second bar here
     expect(tooltipData.highlightedGeometries.length).toBe(1);
     expect(onOverListener).toBeCalledTimes(2);
@@ -601,7 +601,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(onOutListener).toBeCalledTimes(0);
     let tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
     expect(tooltipData.highlightedGeometries.length).toBe(0);
-    expect(tooltipData.tooltipValues.length).toBe(0);
+    expect(tooltipData.tooltip.values.length).toBe(0);
 
     store.dispatch(onPointerMove({ x: chartLeft + 89, y: chartTop + 0 }, 0));
     const projectedPointerPosition = getProjectedPointerPositionSelector(store.getState());
@@ -615,7 +615,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(isTooltipVisible).toBe(true);
     tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
     expect(tooltipData.highlightedGeometries.length).toBe(0);
-    expect(tooltipData.tooltipValues.length).toBe(2);
+    expect(tooltipData.tooltip.values.length).toBe(1);
     expect(onOverListener).toBeCalledTimes(0);
     expect(onOutListener).toBeCalledTimes(0);
   });
@@ -667,7 +667,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(isTooltipVisible).toBe(true);
     const tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
     expect(tooltipData.highlightedGeometries.length).toBe(1);
-    expect(tooltipData.tooltipValues.length).toBe(2);
+    expect(tooltipData.tooltip.values.length).toBe(1);
     expect(onOverListener).toBeCalledTimes(1);
     expect(onOverListener.mock.calls[0][0]).toEqual([
       [
@@ -744,8 +744,8 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     test('chart 0 rotation', () => {
       store.dispatch(onPointerMove({ x: chartLeft + 0, y: chartTop + 89 }, 0));
       const tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
-      expect(tooltipData.tooltipValues[0].value).toBe('bottom 0');
-      expect(tooltipData.tooltipValues[1].value).toBe('left 10');
+      expect(tooltipData.tooltip.header?.value).toBe('bottom 0');
+      expect(tooltipData.tooltip.values[0].value).toBe('left 10');
     });
 
     test('chart 90 deg rotated', () => {
@@ -758,8 +758,8 @@ function mouseOverTestSuite(scaleType: ScaleType) {
       store.dispatch(specParsed());
       store.dispatch(onPointerMove({ x: chartLeft + 0, y: chartTop + 89 }, 0));
       const tooltipData = getTooltipValuesAndGeometriesSelector(store.getState());
-      expect(tooltipData.tooltipValues[0].value).toBe('left 1');
-      expect(tooltipData.tooltipValues[1].value).toBe('bottom 5');
+      expect(tooltipData.tooltip.header?.value).toBe('left 1');
+      expect(tooltipData.tooltip.values[0].value).toBe('bottom 5');
     });
   });
   describe('brush', () => {
