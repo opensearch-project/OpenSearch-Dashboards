@@ -1,6 +1,6 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
-import { Position, Rendering, Rotation } from '../chart_types/xy_chart/utils/specs';
+import { Position, Rendering, Rotation } from '../utils/commons';
 import { DARK_THEME } from '../utils/themes/dark_theme';
 import { TooltipType } from '../chart_types/xy_chart/utils/interactions';
 import { Settings, SettingsSpec } from './settings';

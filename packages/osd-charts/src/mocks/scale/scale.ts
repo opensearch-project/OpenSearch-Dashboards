@@ -1,5 +1,5 @@
 import { mergePartial } from '../../utils/commons';
-import { Scale, ScaleType } from '../../utils/scales/scales';
+import { Scale, ScaleType } from '../../scales';
 
 export class MockScale {
   private static readonly base: Scale = {

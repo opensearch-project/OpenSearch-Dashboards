@@ -1,7 +1,5 @@
 import { ArrayEntry } from '../utils/group_by_rollup';
 
-export type Color = string; // todo refine later (union type)
-
 export const FONT_VARIANTS = Object.freeze(['normal', 'small-caps'] as const);
 export type FontVariant = typeof FONT_VARIANTS[number];
 

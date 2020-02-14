@@ -1,6 +1,7 @@
 import { Distance, Pixels, Radian, Radius, Ratio, SizeRatio, TimeMs } from './geometry_types';
-import { Color, Font, FontFamily, PartialFont } from './types';
+import { Font, FontFamily, PartialFont } from './types';
 import { $Values as Values } from 'utility-types';
+import { Color } from '../../../../utils/commons';
 
 export const PartitionLayout = Object.freeze({
   sunburst: 'sunburst',

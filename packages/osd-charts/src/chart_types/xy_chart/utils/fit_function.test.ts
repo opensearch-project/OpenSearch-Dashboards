@@ -6,7 +6,7 @@ import {
   MockDataSeriesDatum,
 } from '../../../mocks';
 import { Fit } from './specs';
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 import { DataSeries } from './series';
 
 import * as seriesUtils from './stacked_series_utils';

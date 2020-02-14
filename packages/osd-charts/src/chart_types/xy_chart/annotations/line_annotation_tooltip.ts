@@ -2,12 +2,11 @@ import {
   AnnotationDomainType,
   AnnotationDomainTypes,
   AnnotationTypes,
-  Position,
-  Rotation,
   LineAnnotationSpec,
   LineAnnotationDatum,
   AxisSpec,
 } from '../utils/specs';
+import { Position, Rotation } from '../../../utils/commons';
 import {
   AnnotationTooltipState,
   AnnotationDetails,
@@ -19,7 +18,7 @@ import {
 import { isHorizontalRotation, getAxesSpecForSpecId } from '../state/utils';
 import { isHorizontalAxis } from '../utils/axis_utils';
 import { Dimensions } from '../../../utils/dimensions';
-import { Scale } from '../../../utils/scales/scales';
+import { Scale } from '../../../scales';
 import { GroupId } from '../../../utils/ids';
 import { LineAnnotationStyle } from '../../../utils/themes/theme';
 import { Point } from '../../../utils/point';

@@ -1,6 +1,6 @@
 import { arrayToLookup, hueInterpolator } from '../../src/chart_types/partition_chart/layout/utils/calcs';
 import { palettes } from '../../src/mocks/hierarchical/palettes';
-import { Datum } from '../../src/utils/domain';
+import { Datum } from '../../src/utils/commons';
 import { countryDimension, productDimension, regionDimension } from '../../src/mocks/hierarchical/dimension_codes';
 
 export const productLookup = arrayToLookup((d: Datum) => d.sitc1, productDimension);

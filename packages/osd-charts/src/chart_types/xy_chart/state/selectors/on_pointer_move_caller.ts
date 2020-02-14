@@ -4,7 +4,7 @@ import { GlobalChartState } from '../../../../state/chart_state';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { SettingsSpec, PointerEvent, PointerEventType } from '../../../../specs';
 import { ChartTypes } from '../../../index';
-import { Scale } from '../../../../utils/scales/scales';
+import { Scale } from '../../../../scales';
 import { Point } from '../../../../utils/point';
 import { getOrientedProjectedPointerPositionSelector } from './get_oriented_projected_pointer_position';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';

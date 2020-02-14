@@ -1,4 +1,4 @@
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 import { XDomain } from '../domains/x_domain';
 import { computeXScale, countBarsInCluster } from './scales';
 import { FormattedDataSeries } from './series';

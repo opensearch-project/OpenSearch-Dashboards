@@ -1,6 +1,6 @@
 import { BasicSeriesSpec, DomainRange, DEFAULT_GLOBAL_ID, SeriesTypes } from '../utils/specs';
 import { GroupId, SpecId, getGroupId } from '../../../utils/ids';
-import { ScaleContinuousType, ScaleType } from '../../../utils/scales/scales';
+import { ScaleContinuousType, ScaleType } from '../../../scales';
 import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_utils';
 import { BaseDomain } from './domain';
 import { RawDataSeries } from '../utils/series';

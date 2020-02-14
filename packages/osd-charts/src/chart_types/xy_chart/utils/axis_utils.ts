@@ -6,17 +6,16 @@ import {
   CompleteBoundedDomain,
   DomainRange,
   LowerBoundedDomain,
-  Position,
-  Rotation,
   TickFormatter,
   UpperBoundedDomain,
   AxisStyle,
   TickFormatterOptions,
 } from './specs';
+import { Position, Rotation } from '../../../utils/commons';
 import { AxisConfig, Theme } from '../../../utils/themes/theme';
 import { Dimensions, Margins } from '../../../utils/dimensions';
 import { AxisId } from '../../../utils/ids';
-import { Scale } from '../../../utils/scales/scales';
+import { Scale } from '../../../scales';
 import { BBox, BBoxCalculator } from '../../../utils/bbox/bbox_calculator';
 import { getSpecsById } from '../state/utils';
 

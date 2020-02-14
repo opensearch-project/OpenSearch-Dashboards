@@ -3,7 +3,7 @@ import { DeepNonNullable } from 'utility-types';
 import { Fit, FitConfig } from './specs';
 import { DataSeries, DataSeriesDatum } from './series';
 import { datumXSortPredicate } from './stacked_series_utils';
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 
 /**
  * Fit type that requires previous and/or next `non-nullable` values

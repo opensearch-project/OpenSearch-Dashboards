@@ -1,6 +1,6 @@
 import createCachedSelector from 're-reselect';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';
-import { Scale } from '../../../../utils/scales/scales';
+import { Scale } from '../../../../scales';
 import { getTooltipSnapSelector } from './get_tooltip_snap';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 

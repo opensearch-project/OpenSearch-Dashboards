@@ -5,9 +5,9 @@ import { splitSpecsByGroupId, YBasicSeriesSpec } from '../domains/y_domain';
 import { formatNonStackedDataSeriesValues } from './nonstacked_series_utils';
 import { BasicSeriesSpec, SubSeriesStringPredicate, SeriesTypes, SeriesSpecs } from './specs';
 import { formatStackedDataSeriesValues } from './stacked_series_utils';
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 import { LastValues } from '../state/utils';
-import { Datum } from '../../../utils/domain';
+import { Datum } from '../../../utils/commons';
 
 export interface FilledValues {
   /** the x value */

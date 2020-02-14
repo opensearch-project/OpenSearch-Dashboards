@@ -1,4 +1,5 @@
-import { AxisSpec, Position, DEFAULT_GLOBAL_ID } from '../utils/specs';
+import { AxisSpec, DEFAULT_GLOBAL_ID } from '../utils/specs';
+import { Position } from '../../../utils/commons';
 import { ChartTypes } from '../../../chart_types';
 import { specComponentFactory, getConnect } from '../../../state/spec_factory';
 import { SpecTypes } from '../../../specs/settings';

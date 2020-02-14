@@ -1,4 +1,4 @@
-import { ScaleBand } from './scale_band';
+import { ScaleBand } from '.';
 
 describe('Scale Band', () => {
   it('shall clone domain and range arrays', () => {

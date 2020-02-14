@@ -8,8 +8,7 @@ import {
   BarSeriesStyle,
   GeometryStateStyle,
 } from '../../../utils/themes/theme';
-import { isLogarithmicScale } from '../../../utils/scales/scale_continuous';
-import { Scale, ScaleType } from '../../../utils/scales/scales';
+import { Scale, ScaleType, isLogarithmicScale } from '../../../scales';
 import { CurveType, getCurveFactory } from '../../../utils/curves';
 import { DataSeriesDatum, SeriesIdentifier, DataSeries } from '../utils/series';
 import { DisplayValueSpec, PointStyleAccessor, BarStyleAccessor } from '../utils/specs';

@@ -1,10 +1,8 @@
-import { XDomain } from '../../chart_types/xy_chart/domains/x_domain';
-import { computeXScale } from '../../chart_types/xy_chart/utils/scales';
-import { Domain } from '../domain';
+import { XDomain } from '../chart_types/xy_chart/domains/x_domain';
+import { computeXScale } from '../chart_types/xy_chart/utils/scales';
+import { Domain } from '../utils/domain';
 import { DateTime, Settings } from 'luxon';
-import { ScaleBand } from './scale_band';
-import { isLogarithmicScale, ScaleContinuous } from './scale_continuous';
-import { ScaleType } from './scales';
+import { ScaleContinuous, ScaleType, ScaleBand, isLogarithmicScale } from '.';
 
 describe('Scale Continuous', () => {
   test('shall invert on continuous scale linear', () => {

@@ -1,5 +1,5 @@
 import { RawDataSeries } from './series';
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 import { MockRawDataSeries, MockDataSeries } from '../../../mocks';
 import { MockSeriesSpecs, MockSeriesSpec } from '../../../mocks/specs';
 

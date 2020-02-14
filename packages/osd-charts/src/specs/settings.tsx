@@ -1,15 +1,16 @@
 import { $Values } from 'utility-types';
-import { DomainRange, Position, Rendering, Rotation } from '../chart_types/xy_chart/utils/specs';
+import { DomainRange } from '../chart_types/xy_chart/utils/specs';
 import { PartialTheme, Theme } from '../utils/themes/theme';
 import { Domain } from '../utils/domain';
 import { TooltipType, TooltipValueFormatter } from '../chart_types/xy_chart/utils/interactions';
-import { ScaleTypes } from '../utils/scales/scales';
 import { getConnect, specComponentFactory } from '../state/spec_factory';
 import { Spec } from '.';
 import { LIGHT_THEME } from '../utils/themes/light_theme';
 import { ChartTypes } from '../chart_types';
 import { GeometryValue } from '../utils/geometry';
 import { SeriesIdentifier } from '../chart_types/xy_chart/utils/series';
+import { Position, Rendering, Rotation } from '../utils/commons';
+import { ScaleContinuousType, ScaleOrdinalType } from '../scales';
 
 export type ElementClickListener = (elements: Array<[GeometryValue, SeriesIdentifier]>) => void;
 export type ElementOverListener = (elements: Array<[GeometryValue, SeriesIdentifier]>) => void;
@@ -42,7 +43,7 @@ export interface BasePointerEvent {
  */
 export interface PointerOverEvent extends BasePointerEvent {
   type: typeof PointerEventType.Over;
-  scale: ScaleTypes;
+  scale: ScaleContinuousType | ScaleOrdinalType;
   /**
    * @todo
    * unit for event (i.e. `time`, `feet`, `count`, etc.)

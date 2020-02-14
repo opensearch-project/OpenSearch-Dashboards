@@ -4,17 +4,14 @@ import {
   AnnotationSpec,
   AxisSpec,
   LineAnnotationSpec,
-  Position,
   RectAnnotationSpec,
-  Rotation,
   AnnotationTypes,
 } from '../utils/specs';
+import { Position, Rotation } from '../../../utils/commons';
 import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../utils/themes/theme';
 import { Dimensions } from '../../../utils/dimensions';
 import { getAxisId, getGroupId, GroupId, AnnotationId } from '../../../utils/ids';
-import { ScaleBand } from '../../../utils/scales/scale_band';
-import { ScaleContinuous } from '../../../utils/scales/scale_continuous';
-import { Scale, ScaleType } from '../../../utils/scales/scales';
+import { Scale, ScaleType, ScaleBand, ScaleContinuous } from '../../../scales';
 import {
   computeAnnotationDimensions,
   computeAnnotationTooltipState,

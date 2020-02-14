@@ -1,4 +1,4 @@
-import { Datum } from './domain';
+import { Datum } from './commons';
 
 type UnaryAccessorFn = (datum: Datum) => any;
 type BinaryAccessorFn = (datum: Datum, index: number) => any;

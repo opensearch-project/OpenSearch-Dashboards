@@ -24,10 +24,11 @@ import { getHighlightedSeriesSelector } from '../../state/selectors/get_highligh
 import { getAnnotationSpecsSelector, getAxisSpecsSelector } from '../../state/selectors/get_specs';
 import { Geometries, Transform } from '../../state/utils';
 import { AxisLinePosition, AxisTicksDimensions } from '../../utils/axis_utils';
-import { AxisSpec, Rotation, AnnotationSpec } from '../../utils/specs';
+import { AxisSpec, AnnotationSpec } from '../../utils/specs';
 import { renderXYChartCanvas2d } from './renderers';
 import { isChartEmptySelector } from '../../state/selectors/is_chart_empty';
 import { deepEqual } from '../../../../utils/fast_deep_equal';
+import { Rotation } from '../../../../utils/commons';
 
 export interface ReactiveChartStateProps {
   initialized: boolean;

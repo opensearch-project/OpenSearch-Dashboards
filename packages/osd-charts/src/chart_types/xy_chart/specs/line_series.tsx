@@ -1,5 +1,5 @@
 import { LineSeriesSpec, DEFAULT_GLOBAL_ID, HistogramModeAlignments, SeriesTypes } from '../utils/specs';
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 import { ChartTypes } from '../../../chart_types';
 import { specComponentFactory, getConnect } from '../../../state/spec_factory';
 import { SpecTypes } from '../../../specs/settings';

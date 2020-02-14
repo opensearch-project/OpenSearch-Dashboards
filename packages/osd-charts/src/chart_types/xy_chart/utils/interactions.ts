@@ -1,9 +1,8 @@
 import { $Values } from 'utility-types';
-import { Rotation } from './specs';
+import { Datum, Rotation } from '../../../utils/commons';
 import { Dimensions } from '../../../utils/dimensions';
 import { Accessor } from '../../../utils/accessor';
 import { BarGeometry, PointGeometry, IndexedGeometry, isPointGeometry, isBarGeometry } from '../../../utils/geometry';
-import { Datum } from '../../../utils/domain';
 
 /** The type of tooltip to use */
 export const TooltipType = Object.freeze({

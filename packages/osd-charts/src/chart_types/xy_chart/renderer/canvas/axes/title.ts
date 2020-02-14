@@ -2,7 +2,7 @@ import { AxisProps } from '.';
 import { isHorizontalAxis } from '../../../utils/axis_utils';
 import { renderDebugRect } from '../utils/debug';
 import { renderText } from '../primitives/text';
-import { Position } from '../../../utils/specs';
+import { Position } from '../../../../../utils/commons';
 import { Font, FontStyle } from '../../../../partition_chart/layout/types/types';
 
 export function renderTitle(ctx: CanvasRenderingContext2D, props: AxisProps) {

@@ -1,5 +1,5 @@
 import { ColorConfig } from '../../../utils/themes/theme';
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 import {
   SeriesCollectionValue,
   getFormattedDataseries,

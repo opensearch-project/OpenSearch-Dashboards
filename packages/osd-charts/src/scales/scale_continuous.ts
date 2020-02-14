@@ -10,9 +10,9 @@ import {
   ScaleTime,
 } from 'd3-scale';
 
-import { clamp, mergePartial } from '../commons';
-import { ScaleContinuousType, ScaleType, Scale } from './scales';
-import { getMomentWithTz } from '../data/date_time';
+import { clamp, mergePartial } from '../utils/commons';
+import { ScaleContinuousType, ScaleType, Scale } from '.';
+import { getMomentWithTz } from '../utils/data/date_time';
 
 /**
  * d3 scales excluding time scale
@@ -303,8 +303,4 @@ export class ScaleContinuous implements Scale {
   isValueInDomain(value: number) {
     return value >= this.domain[0] && value <= this.domain[1];
   }
-}
-
-export function isLogarithmicScale(scale: Scale) {
-  return scale.type === ScaleType.Log;
 }

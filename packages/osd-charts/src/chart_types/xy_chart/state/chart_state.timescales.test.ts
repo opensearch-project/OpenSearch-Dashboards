@@ -1,5 +1,5 @@
 import { LineSeriesSpec, SeriesTypes } from '../utils/specs';
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 import { createStore, Store } from 'redux';
 import { chartStoreReducer, GlobalChartState } from '../../../state/chart_state';
 import { upsertSpec, specParsed } from '../../../state/actions/specs';

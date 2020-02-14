@@ -1,7 +1,7 @@
 import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_utils';
 import { compareByValueAsc, identity, isNumberArray } from '../../../utils/commons';
 import { computeContinuousDataDomain, computeOrdinalDataDomain, Domain } from '../../../utils/domain';
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 import { BasicSeriesSpec, DomainRange, SeriesTypes } from '../utils/specs';
 import { BaseDomain } from './domain';
 

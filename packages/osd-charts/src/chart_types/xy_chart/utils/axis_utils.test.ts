@@ -1,9 +1,10 @@
 import { XDomain } from '../domains/x_domain';
 import { YDomain } from '../domains/y_domain';
-import { AxisSpec, DomainRange, Position, AxisStyle } from './specs';
+import { AxisSpec, DomainRange, AxisStyle } from './specs';
+import { Position } from '../../../utils/commons';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { AxisId, GroupId } from '../../../utils/ids';
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 import {
   AxisTick,
   AxisTicksDimensions,

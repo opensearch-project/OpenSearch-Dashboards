@@ -1,4 +1,19 @@
-import * as uuid from 'uuid';
+import { v1 as uuidV1 } from 'uuid';
+import { $Values } from 'utility-types';
+
+export type Datum = any;
+export type Rotation = 0 | 90 | -90 | 180;
+export type Rendering = 'canvas' | 'svg';
+export type Color = string;
+
+export const Position = Object.freeze({
+  Top: 'top' as 'top',
+  Bottom: 'bottom' as 'bottom',
+  Left: 'left' as 'left',
+  Right: 'right' as 'right',
+});
+
+export type Position = $Values<typeof Position>;
 
 export function identity<T>(value: T): T {
   return value;
@@ -20,8 +35,8 @@ export function clamp(value: number, min: number, max: number): number {
  * it should begin with an letter to be HTML4 compliant.
  */
 export function htmlIdGenerator(idPrefix?: string) {
-  const prefix = idPrefix || `i${uuid.v1()}`;
-  return (suffix?: string) => `${prefix}_${suffix || uuid.v1()}`;
+  const prefix = idPrefix || `i${uuidV1()}`;
+  return (suffix?: string) => `${prefix}_${suffix || uuidV1()}`;
 }
 
 /**

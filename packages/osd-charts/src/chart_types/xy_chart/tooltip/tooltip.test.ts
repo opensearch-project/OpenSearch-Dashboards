@@ -1,5 +1,6 @@
-import { ScaleType } from '../../../utils/scales/scales';
-import { AxisSpec, BarSeriesSpec, Position, SeriesTypes } from '../utils/specs';
+import { ScaleType } from '../../../scales';
+import { AxisSpec, BarSeriesSpec, SeriesTypes } from '../utils/specs';
+import { Position } from '../../../utils/commons';
 import { formatTooltip } from './tooltip';
 import { BarGeometry } from '../../../utils/geometry';
 import { ChartTypes } from '../..';

@@ -5,7 +5,7 @@ import { Icon } from '../icons/icon';
 import { LegendItemListener, BasicListener } from '../../specs/settings';
 import { LegendItem } from '../../chart_types/xy_chart/legend/legend';
 import { onLegendItemOutAction, onLegendItemOverAction } from '../../state/actions/legend';
-import { Position } from '../../chart_types/xy_chart/utils/specs';
+import { Position } from '../../utils/commons';
 import { SeriesIdentifier } from '../../chart_types/xy_chart/utils/series';
 
 interface LegendItemProps {

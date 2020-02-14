@@ -1,6 +1,6 @@
 import { RawDataSeries } from './series';
 import { computeYStackedMapValues, formatStackedDataSeriesValues, getYValueStackMap } from './stacked_series_utils';
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 
 describe('Stacked Series Utils', () => {
   const EMPTY_DATA_SET: RawDataSeries[] = [

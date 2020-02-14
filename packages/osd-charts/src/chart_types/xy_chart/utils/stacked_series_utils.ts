@@ -1,5 +1,5 @@
 import { DataSeries, DataSeriesDatum, RawDataSeries, RawDataSeriesDatum, FilledValues } from './series';
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 
 interface StackedValues {
   values: number[];

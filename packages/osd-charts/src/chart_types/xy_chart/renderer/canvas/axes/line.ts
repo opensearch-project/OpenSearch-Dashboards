@@ -1,6 +1,6 @@
 import { isVerticalAxis } from '../../../utils/axis_utils';
 import { AxisProps } from '.';
-import { Position } from '../../../utils/specs';
+import { Position } from '../../../../../utils/commons';
 
 export function renderLine(ctx: CanvasRenderingContext2D, props: AxisProps) {
   const {

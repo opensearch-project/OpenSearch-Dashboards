@@ -5,8 +5,7 @@ import { getConnect, specComponentFactory } from '../../../state/spec_factory';
 import { AccessorFn, IndexedAccessorFn } from '../../../utils/accessor';
 import { Spec, SpecTypes } from '../../../specs/index';
 import { Config, FillLabelConfig } from '../layout/types/config_types';
-import { RecursivePartial } from '../../../utils/commons';
-import { Datum } from '../../../utils/domain';
+import { RecursivePartial, Datum } from '../../../utils/commons';
 
 type ColorAccessor = (d: Datum, index: number, array: Datum[]) => string;
 

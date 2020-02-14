@@ -1,5 +1,5 @@
 import { Domain } from '../../../utils/domain';
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 
 export interface BaseDomain {
   scaleType: ScaleType;

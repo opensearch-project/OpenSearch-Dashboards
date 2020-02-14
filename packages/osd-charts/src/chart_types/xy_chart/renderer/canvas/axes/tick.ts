@@ -1,6 +1,6 @@
 import { AxisTick, isVerticalAxis } from '../../../utils/axis_utils';
 import { AxisProps } from '.';
-import { Position } from '../../../utils/specs';
+import { Position } from '../../../../../utils/commons';
 import { TickStyle } from '../../../../../utils/themes/theme';
 import { renderLine, MIN_STROKE_WIDTH } from '../primitives/line';
 import { stringToRGB } from '../../../../partition_chart/layout/utils/d3_utils';

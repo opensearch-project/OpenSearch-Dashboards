@@ -6,7 +6,7 @@ import { isInitialized } from '../../../../state/selectors/is_initialized';
 import { computeChartTransformSelector } from '../../state/selectors/compute_chart_transform';
 import { getHighlightedGeomsSelector } from '../../state/selectors/get_tooltip_values_highlighted_geoms';
 import { Dimensions } from '../../../../utils/dimensions';
-import { Rotation } from '../../../../chart_types/xy_chart/utils/specs';
+import { Rotation } from '../../../../utils/commons';
 import { Transform } from '../../state/utils';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { computeChartDimensionsSelector } from '../../state/selectors/compute_chart_dimensions';

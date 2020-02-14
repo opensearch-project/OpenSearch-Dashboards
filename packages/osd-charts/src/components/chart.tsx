@@ -3,13 +3,12 @@ import classNames from 'classnames';
 import { Provider } from 'react-redux';
 import { createStore, Store } from 'redux';
 import uuid from 'uuid';
-
 import { SpecsParser } from '../specs/specs_parser';
 import { ChartResizer } from './chart_resizer';
 import { Legend } from './legend/legend';
 import { ChartContainer } from './chart_container';
 import { isHorizontalAxis } from '../chart_types/xy_chart/utils/axis_utils';
-import { Position } from '../chart_types/xy_chart/utils/specs';
+import { Position } from '../utils/commons';
 import { ChartSize, getChartSize } from '../utils/chart_size';
 import { ChartStatus } from './chart_status';
 import { chartStoreReducer, GlobalChartState } from '../state/chart_state';

@@ -1,7 +1,8 @@
 import createCachedSelector from 're-reselect';
 import { getAxisSpecsSelector } from './get_specs';
 import { isYDomain, isCompleteBound, isLowerBound, isUpperBound, isBounded } from '../../utils/axis_utils';
-import { AxisSpec, DomainRange, Rotation } from '../../utils/specs';
+import { AxisSpec, DomainRange } from '../../utils/specs';
+import { Rotation } from '../../../../utils/commons';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 

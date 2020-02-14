@@ -4,7 +4,7 @@ import { TooltipType } from '../../utils/interactions';
 import { isHorizontalRotation } from '../../state/utils';
 import { Dimensions } from '../../../../utils/dimensions';
 import { Theme } from '../../../../utils/themes/theme';
-import { Rotation } from '../../../../chart_types/xy_chart/utils/specs';
+import { Rotation } from '../../../../utils/commons';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { isInitialized } from '../../../../state/selectors/is_initialized';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';

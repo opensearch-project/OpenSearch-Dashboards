@@ -1,5 +1,5 @@
 import { computeSeriesDomains } from '../state/utils';
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 import { CurveType } from '../../../utils/curves';
 import { renderArea, renderBars } from './rendering';
 import { computeXScale, computeYScales } from '../utils/scales';

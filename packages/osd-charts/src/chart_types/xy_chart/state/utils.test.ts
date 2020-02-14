@@ -11,8 +11,7 @@ import {
 import { BARCHART_1Y0G, BARCHART_1Y1G } from '../../../utils/data_samples/test_dataset';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { SpecId } from '../../../utils/ids';
-import { ScaleContinuous } from '../../../utils/scales/scale_continuous';
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType, ScaleContinuous } from '../../../scales';
 import {
   computeSeriesDomains,
   computeSeriesGeometries,

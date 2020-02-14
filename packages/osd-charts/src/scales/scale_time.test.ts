@@ -1,6 +1,5 @@
 import { DateTime } from 'luxon';
-import { ScaleContinuous } from './scale_continuous';
-import { ScaleType } from './scales';
+import { ScaleContinuous, ScaleType } from '.';
 
 describe('[Scale Time] - timezones', () => {
   describe('timezone checks', () => {

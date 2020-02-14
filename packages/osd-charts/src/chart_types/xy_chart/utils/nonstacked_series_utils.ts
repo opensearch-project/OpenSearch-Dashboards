@@ -1,7 +1,7 @@
 import { DataSeries, DataSeriesDatum, RawDataSeries } from './series';
 import { fitFunction } from './fit_function';
 import { isAreaSeriesSpec, isLineSeriesSpec, SeriesSpecs, BasicSeriesSpec } from './specs';
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 import { getSpecsById } from '../state/utils';
 
 export const formatNonStackedDataSeriesValues = (

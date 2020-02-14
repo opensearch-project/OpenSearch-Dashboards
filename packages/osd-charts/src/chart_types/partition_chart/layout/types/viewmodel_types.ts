@@ -1,8 +1,9 @@
 import { Config } from './config_types';
 import { Coordinate, Distance, PointObject, PointTuple, Radian } from './geometry_types';
-import { Color, Font } from './types';
+import { Font } from './types';
 import { config } from '../config/config';
 import { ArrayNode } from '../utils/group_by_rollup';
+import { Color } from '../../../../utils/commons';
 
 export type LinkLabelVM = {
   link: [PointTuple, ...PointTuple[]]; // at least one point

@@ -7,12 +7,10 @@ import {
   HistogramModeAlignments,
   isLineAnnotation,
   isRectAnnotation,
-  Position,
-  Rotation,
 } from '../utils/specs';
 import { Dimensions } from '../../../utils/dimensions';
 import { AnnotationId, GroupId } from '../../../utils/ids';
-import { Scale, ScaleType } from '../../../utils/scales/scales';
+import { Scale, ScaleType } from '../../../scales';
 import { computeXScaleOffset, getAxesSpecForSpecId, isHorizontalRotation, getSpecsById } from '../state/utils';
 import { Point } from '../../../utils/point';
 import {
@@ -25,6 +23,7 @@ import {
   AnnotationRectProps,
   computeRectAnnotationDimensions,
 } from './rect_annotation_tooltip';
+import { Rotation, Position } from '../../../utils/commons';
 
 export type AnnotationTooltipFormatter = (details?: string) => JSX.Element | null;
 

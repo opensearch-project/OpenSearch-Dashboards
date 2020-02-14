@@ -1,4 +1,4 @@
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 import { getSplittedSeries } from '../utils/series';
 import { BasicSeriesSpec, SeriesTypes } from '../utils/specs';
 import { convertXScaleTypes, findMinInterval, mergeXDomain } from './x_domain';

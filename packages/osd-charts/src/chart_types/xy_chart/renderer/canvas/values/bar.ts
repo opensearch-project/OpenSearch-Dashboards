@@ -1,4 +1,4 @@
-import { Rotation } from '../../../utils/specs';
+import { Rotation } from '../../../../../utils/commons';
 import { Dimensions } from '../../../../../utils/dimensions';
 import { Theme } from '../../../../../utils/themes/theme';
 import { BarGeometry } from '../../../../../utils/geometry';

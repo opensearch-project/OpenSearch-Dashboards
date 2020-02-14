@@ -1,6 +1,6 @@
 import { computeSeriesDomains } from '../state/utils';
 import { identity } from '../../../utils/commons';
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 import { renderBars } from './rendering';
 import { computeXScale, computeYScales } from '../utils/scales';
 import { BarSeriesSpec, DomainRange, SeriesTypes } from '../utils/specs';

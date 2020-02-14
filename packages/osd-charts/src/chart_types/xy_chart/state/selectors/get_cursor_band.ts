@@ -1,7 +1,7 @@
 import { Dimensions } from '../../../../utils/dimensions';
 import createCachedSelector from 're-reselect';
 import { Point } from '../../../../utils/point';
-import { Scale } from '../../../../utils/scales/scales';
+import { Scale } from '../../../../scales';
 import { isLineAreaOnlyChart } from '../utils';
 import { getCursorBandPosition } from '../../crosshair/crosshair_utils';
 import { SettingsSpec, PointerEvent } from '../../../../specs/settings';

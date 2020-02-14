@@ -1,4 +1,4 @@
-import { ScaleType } from '../../../utils/scales/scales';
+import { ScaleType } from '../../../scales';
 import { CurveType } from '../../../utils/curves';
 import { IndexedGeometry, PointGeometry, AreaGeometry } from '../../../utils/geometry';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
