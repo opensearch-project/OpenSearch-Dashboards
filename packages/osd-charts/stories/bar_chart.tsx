@@ -9,9 +9,6 @@ import {
   BarSeries,
   Chart,
   DARK_THEME,
-  getAxisId,
-  getGroupId,
-  getSpecId,
   HistogramBarSeries,
   HistogramModeAlignments,
   LIGHT_THEME,
@@ -73,7 +70,7 @@ export const basic = () => {
   return (
     <Chart className={className}>
       <BarSeries
-        id={getSpecId(specId)}
+        id={specId}
         name={'Simple bar series'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
@@ -136,15 +133,10 @@ export const withValueLabel = () => {
   return (
     <Chart renderer="canvas" className={'story-chart'}>
       <Settings theme={theme} debug={debug} rotation={getChartRotationKnob()} showLegend />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         displayValueSettings={displayValueSettings}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
@@ -156,7 +148,7 @@ export const withValueLabel = () => {
         yScaleToDataExtent={false}
       />
       <BarSeries
-        id={getSpecId('bars2')}
+        id={'bars2'}
         displayValueSettings={displayValueSettings}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
@@ -189,16 +181,11 @@ export const withAxis = () => {
   return (
     <Chart className={className}>
       <Settings theme={defaultTheme} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -220,16 +207,11 @@ withAxis.story = {
 export const withOrdinalXAxis = () => {
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -269,16 +251,11 @@ export const withLinearXAxis = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings rotation={getChartRotationKnob()} theme={theme} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -300,16 +277,11 @@ withLinearXAxis.story = {
 export const withLinearXAxisNoLinearInterval = () => (
   <Chart className={'story-chart'}>
     <Settings xDomain={{ max: 100 }} />
-    <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-    <Axis
-      id={getAxisId('left2')}
-      title={'Left axis'}
-      position={Position.Left}
-      tickFormat={(d: any) => Number(d).toFixed(2)}
-    />
+    <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+    <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
     <BarSeries
-      id={getSpecId('bars')}
+      id={'bars'}
       xScaleType={ScaleType.Linear}
       yScaleType={ScaleType.Linear}
       xAccessor="x"
@@ -336,22 +308,17 @@ export const withTimeXAxis = () => {
     <Chart className={'story-chart'}>
       <Settings debug={boolean('debug', false)} />
       <Axis
-        id={getAxisId('bottom')}
+        id={'bottom'}
         position={Position.Bottom}
         title={'Bottom axis'}
         showOverlappingTicks={boolean('showOverlappingTicks bottom axis', false)}
         showOverlappingLabels={boolean('showOverlappingLabels bottom axis', false)}
         tickFormat={formatter}
       />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -368,16 +335,11 @@ withTimeXAxis.story = {
 export const withLogYAxis = () => {
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Log}
         xAccessor="x"
@@ -404,16 +366,11 @@ withLogYAxis.story = {
 export const withStackedLogYAxis = () => {
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Log}
         xAccessor="x"
@@ -451,16 +408,11 @@ export const withAxisAndLegend = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings showLegend={true} legendPosition={Position.Right} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         name={'Simple bar series'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
@@ -484,16 +436,11 @@ export const stackedWithAxisAndLegend = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings showLegend={true} legendPosition={Position.Right} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -524,16 +471,16 @@ export const stackedAsPercentage = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings showLegend={true} legendPosition={Position.Right} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
-        id={getAxisId('left2')}
+        id={'left2'}
         title={'Left axis'}
         position={Position.Left}
         tickFormat={(d: any) => (stackedAsPercentage && !clusterBars ? `${Number(d * 100).toFixed(0)} %` : d)}
       />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -580,16 +527,11 @@ export const clusteredWithAxisAndLegend = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings showLegend={true} legendPosition={Position.Right} theme={theme} rotation={getChartRotationKnob()} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -617,16 +559,11 @@ export const clusteredMultipleSeriesSpecs = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings showLegend={true} legendPosition={Position.Right} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'elements'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'count'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'elements'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'count'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bar series 1')}
+        id={'bar series 1'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -639,7 +576,7 @@ export const clusteredMultipleSeriesSpecs = () => {
         ]}
       />
       <BarSeries
-        id={getSpecId('bar series 2')}
+        id={'bar series 2'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -652,7 +589,7 @@ export const clusteredMultipleSeriesSpecs = () => {
         ]}
       />
       <BarSeries
-        id={getSpecId('bar series 3')}
+        id={'bar series 3'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -682,22 +619,17 @@ export const timeClusteredUsingVariousSpecs = () => {
     <Chart className={'story-chart'}>
       <Settings debug={boolean('debug', false)} />
       <Axis
-        id={getAxisId('bottom')}
+        id={'bottom'}
         position={Position.Bottom}
         title={'Bottom axis'}
         showOverlappingTicks={boolean('showOverlappingTicks bottom axis', false)}
         showOverlappingLabels={boolean('showOverlappingLabels bottom axis', false)}
         tickFormat={formatter}
       />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[0].metric.label)}
+        id={KIBANA_METRICS.metrics.kibana_os_load[0].metric.label}
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -705,7 +637,7 @@ export const timeClusteredUsingVariousSpecs = () => {
         data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
       />
       <BarSeries
-        id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[1].metric.label)}
+        id={KIBANA_METRICS.metrics.kibana_os_load[1].metric.label}
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -713,7 +645,7 @@ export const timeClusteredUsingVariousSpecs = () => {
         data={KIBANA_METRICS.metrics.kibana_os_load[1].data}
       />
       <BarSeries
-        id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[2].metric.label)}
+        id={KIBANA_METRICS.metrics.kibana_os_load[2].metric.label}
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -733,22 +665,17 @@ export const timeStackedUsingVariousSpecs = () => {
     <Chart className={'story-chart'}>
       <Settings debug={boolean('debug', false)} />
       <Axis
-        id={getAxisId('bottom')}
+        id={'bottom'}
         position={Position.Bottom}
         title={'Bottom axis'}
         showOverlappingTicks={boolean('showOverlappingTicks bottom axis', false)}
         showOverlappingLabels={boolean('showOverlappingLabels bottom axis', false)}
         tickFormat={formatter}
       />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[2].metric.label)}
+        id={KIBANA_METRICS.metrics.kibana_os_load[2].metric.label}
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -757,7 +684,7 @@ export const timeStackedUsingVariousSpecs = () => {
         data={KIBANA_METRICS.metrics.kibana_os_load[2].data.slice(0, 20)}
       />
       <BarSeries
-        id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[1].metric.label)}
+        id={KIBANA_METRICS.metrics.kibana_os_load[1].metric.label}
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -766,7 +693,7 @@ export const timeStackedUsingVariousSpecs = () => {
         data={KIBANA_METRICS.metrics.kibana_os_load[1].data.slice(0, 20)}
       />
       <BarSeries
-        id={getSpecId(KIBANA_METRICS.metrics.kibana_os_load[0].metric.label)}
+        id={KIBANA_METRICS.metrics.kibana_os_load[0].metric.label}
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -785,16 +712,11 @@ export const barChart1y0g = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings showLegend={true} legendPosition={Position.Right} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars1')}
+        id={'bars1'}
         xScaleType={ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -812,16 +734,11 @@ export const barChart1y1g = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings showLegend={true} legendPosition={Position.Right} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars1')}
+        id={'bars1'}
         xScaleType={ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -840,16 +757,11 @@ export const barChart1y2g = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings showLegend={true} legendPosition={Position.Right} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars1')}
+        id={'bars1'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -868,16 +780,11 @@ export const barChart2y0g = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings showLegend={true} legendPosition={Position.Right} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars1')}
+        id={'bars1'}
         xScaleType={ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -895,16 +802,11 @@ export const barChart2y1g = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings showLegend={true} legendPosition={Position.Right} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars1')}
+        id={'bars1'}
         xScaleType={ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -922,25 +824,18 @@ barChart2y1g.story = {
 export const barChart2y2g = () => {
   const isVisibleFunction: FilterPredicate = (series) => {
     return series.splitAccessors.size > 0
-      ? series.specId === getSpecId('bars') &&
-          series.yAccessor === 'y1' &&
-          series.splitAccessors.get('g1') === 'cloudflare.com'
-      : series.specId === getSpecId('bars') && series.yAccessor === 'y1';
+      ? series.specId === 'bars1' && series.yAccessor === 'y1' && series.splitAccessors.get('g1') === 'cloudflare.com'
+      : series.specId === 'bars1' && series.yAccessor === 'y1';
   };
 
   return (
     <Chart className={'story-chart'}>
       <Settings showLegend={true} legendPosition={Position.Right} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars1')}
+        id={'bars1'}
         xScaleType={ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -963,16 +858,11 @@ export const tooltipSeriesVisibility = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings showLegend={true} legendPosition={Position.Right} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars1')}
+        id={'bars1'}
         xScaleType={ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -997,16 +887,11 @@ export const withHighDataVolume = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings tooltip={tooltipProps} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -1045,16 +930,11 @@ export const singleDataChartLinear = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings xDomain={xDomain} rotation={getChartRotationKnob()} theme={theme} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -1086,16 +966,11 @@ export const singleDataChartOrdinal = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings xDomain={xDomain} rotation={getChartRotationKnob()} theme={theme} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -1112,16 +987,11 @@ singleDataChartOrdinal.story = {
 export const singleDataClusteredChart = () => {
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -1144,16 +1014,11 @@ singleDataClusteredChart.story = {
 export const singleDataStackedChart = () => {
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -1177,16 +1042,11 @@ singleDataStackedChart.story = {
 export const singldedatachartstackedtoextent = () => {
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -1210,16 +1070,11 @@ singldedatachartstackedtoextent.story = {
 export const singleDataClusteredChartScaleToExtent = () => {
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -1242,16 +1097,11 @@ singleDataClusteredChartScaleToExtent.story = {
 export const negativeAndPositiveXValues = () => {
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -1308,16 +1158,11 @@ export const scaleToExtent = () => {
   }
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('top')} position={Position.Top} title={'Top axis'} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'top'} position={Position.Top} title={'Top axis'} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -1349,21 +1194,21 @@ export const bandBarChart = () => {
   return (
     <Chart className={'story-chart'}>
       <Axis
-        id={getAxisId('bottom')}
+        id={'bottom'}
         title={'timestamp per 1 minute'}
         position={Position.Bottom}
         showOverlappingTicks={true}
         tickFormat={dateFormatter}
       />
       <Axis
-        id={getAxisId('left')}
+        id={'left'}
         title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
         position={Position.Left}
         tickFormat={(d: any) => Number(d).toFixed(2)}
       />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor={'x'}
@@ -1376,7 +1221,7 @@ export const bandBarChart = () => {
       />
 
       <LineSeries
-        id={getSpecId('average')}
+        id={'average'}
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -1405,15 +1250,15 @@ export const testLinear = () => {
   ];
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} />
+      <Axis id={'bottom'} title={'index'} position={Position.Bottom} />
       <Axis
-        id={getAxisId('left')}
+        id={'left'}
         title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
         position={Position.Left}
         tickFormat={(d: any) => Number(d).toFixed(2)}
       />
       <BarSeries
-        id={getSpecId('lines')}
+        id={'lines'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -1442,15 +1287,15 @@ export const testTime = () => {
   ];
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} tickFormat={dateFormatter} />
+      <Axis id={'bottom'} title={'index'} position={Position.Bottom} tickFormat={dateFormatter} />
       <Axis
-        id={getAxisId('left')}
+        id={'left'}
         title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
         position={Position.Left}
         tickFormat={(d: any) => Number(d).toFixed(2)}
       />
       <BarSeries
-        id={getSpecId('data')}
+        id={'data'}
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -1478,15 +1323,15 @@ export const testLinearClustered = () => {
   ];
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} />
+      <Axis id={'bottom'} title={'index'} position={Position.Bottom} />
       <Axis
-        id={getAxisId('left')}
+        id={'left'}
         title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
         position={Position.Left}
         tickFormat={(d: any) => Number(d).toFixed(2)}
       />
       <BarSeries
-        id={getSpecId('lines')}
+        id={'lines'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -1515,15 +1360,15 @@ export const testTimeClustered = () => {
   ];
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} tickFormat={dateFormatter} />
+      <Axis id={'bottom'} title={'index'} position={Position.Bottom} tickFormat={dateFormatter} />
       <Axis
-        id={getAxisId('left')}
+        id={'left'}
         title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
         position={Position.Left}
         tickFormat={(d: any) => Number(d).toFixed(2)}
       />
       <BarSeries
-        id={getSpecId('data')}
+        id={'data'}
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -1550,15 +1395,15 @@ export const testClusteredBarChartWithNullBars = () => {
   ];
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} />
+      <Axis id={'bottom'} title={'index'} position={Position.Bottom} />
       <Axis
-        id={getAxisId('left')}
+        id={'left'}
         title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
         position={Position.Left}
         tickFormat={(d: any) => Number(d).toFixed(2)}
       />
       <BarSeries
-        id={getSpecId('lines')}
+        id={'lines'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -1586,15 +1431,15 @@ export const testStackedBarChartWithNullBars = () => {
   ];
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} />
+      <Axis id={'bottom'} title={'index'} position={Position.Bottom} />
       <Axis
-        id={getAxisId('left')}
+        id={'left'}
         title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
         position={Position.Left}
         tickFormat={(d: any) => Number(d).toFixed(2)}
       />
       <BarSeries
-        id={getSpecId('lines')}
+        id={'lines'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -1613,16 +1458,11 @@ testStackedBarChartWithNullBars.story = {
 export const testSwitchOrdinalLinearAxis = () => {
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={select(
           'scaleType',
           {
@@ -1691,7 +1531,7 @@ export const testHistogramModeLinear = () => {
   const otherSeries =
     otherSeriesSelection === 'line' ? (
       <LineSeries
-        id={getSpecId('other-series')}
+        id={'other-series'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -1701,7 +1541,7 @@ export const testHistogramModeLinear = () => {
       />
     ) : (
       <AreaSeries
-        id={getSpecId('other-series')}
+        id={'other-series'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -1739,11 +1579,11 @@ export const testHistogramModeLinear = () => {
         ]}
         id={'rect'}
       />
-      <Axis id={getAxisId('discover-histogram-left-axis')} position={Position.Left} title={'left axis'} />
-      <Axis id={getAxisId('discover-histogram-bottom-axis')} position={Position.Bottom} title={'bottom axis'} />
+      <Axis id={'discover-histogram-left-axis'} position={Position.Left} title={'left axis'} />
+      <Axis id={'discover-histogram-bottom-axis'} position={Position.Bottom} title={'bottom axis'} />
       {hasHistogramBarSeries && (
         <HistogramBarSeries
-          id={getSpecId('histo')}
+          id={'histo'}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
@@ -1753,7 +1593,7 @@ export const testHistogramModeLinear = () => {
         />
       )}
       <BarSeries
-        id={getSpecId('bars-1')}
+        id={'bars-1'}
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -1763,7 +1603,7 @@ export const testHistogramModeLinear = () => {
         enableHistogramMode={boolean('bars-1 enableHistogramMode', false)}
       />
       <BarSeries
-        id={getSpecId('bars-2')}
+        id={'bars-2'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -1802,11 +1642,11 @@ export const testHistogramModeOrdinal = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings rotation={getChartRotationKnob()} theme={theme} debug={boolean('debug', true)} />
-      <Axis id={getAxisId('discover-histogram-left-axis')} position={Position.Left} title={'left axis'} />
-      <Axis id={getAxisId('discover-histogram-bottom-axis')} position={Position.Bottom} title={'bottom axis'} />
+      <Axis id={'discover-histogram-left-axis'} position={Position.Left} title={'left axis'} />
+      <Axis id={'discover-histogram-bottom-axis'} position={Position.Bottom} title={'bottom axis'} />
       {hasHistogramBarSeries && (
         <HistogramBarSeries
-          id={getSpecId('histo')}
+          id={'histo'}
           xScaleType={ScaleType.Ordinal}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
@@ -1816,7 +1656,7 @@ export const testHistogramModeOrdinal = () => {
         />
       )}
       <BarSeries
-        id={getSpecId('bars-1')}
+        id={'bars-1'}
         xScaleType={ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -1826,7 +1666,7 @@ export const testHistogramModeOrdinal = () => {
         enableHistogramMode={boolean('bars-1 enableHistogramMode', false)}
       />
       <BarSeries
-        id={getSpecId('bars-2')}
+        id={'bars-2'}
         xScaleType={ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -1854,20 +1694,16 @@ export const testDiscover = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings xDomain={useCustomMinInterval ? xDomain : undefined} />
+      <Axis id={'discover-histogram-left-axis'} position={Position.Left} title={TEST_DATASET_DISCOVER.yAxisLabel} />
       <Axis
-        id={getAxisId('discover-histogram-left-axis')}
-        position={Position.Left}
-        title={TEST_DATASET_DISCOVER.yAxisLabel}
-      />
-      <Axis
-        id={getAxisId('discover-histogram-bottom-axis')}
+        id={'discover-histogram-bottom-axis'}
         position={Position.Bottom}
         title={TEST_DATASET_DISCOVER.xAxisLabel}
         tickFormat={formatter}
       />
 
       <HistogramBarSeries
-        id={getSpecId('discover-histogram')}
+        id={'discover-histogram'}
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -1894,19 +1730,15 @@ export const testSingleHistogramBarChart = () => {
     <Chart className={'story-chart'}>
       <Settings xDomain={xDomain} />
       <Axis
-        id={getAxisId('bottom')}
+        id={'bottom'}
         title={'timestamp per 1 minute'}
         position={Position.Bottom}
         showOverlappingTicks={true}
         tickFormat={formatter}
       />
-      <Axis
-        id={getAxisId('left')}
-        title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
-        position={Position.Left}
-      />
+      <Axis id={'left'} title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title} position={Position.Left} />
       <HistogramBarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -1935,10 +1767,10 @@ export const MinHeight = () => {
   ];
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} title="Bottom" position={Position.Bottom} />
-      <Axis id={getAxisId('left')} title="Left" position={Position.Left} />
+      <Axis id={'bottom'} title="Bottom" position={Position.Bottom} />
+      <Axis id={'left'} title="Left" position={Position.Left} />
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -1977,10 +1809,10 @@ export const testMinHeightPositiveAndNegativeValues = () => {
   ];
   return (
     <Chart className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} title="Bottom" position={Position.Bottom} />
-      <Axis id={getAxisId('left')} title="Left" position={Position.Left} />
+      <Axis id={'bottom'} title="Bottom" position={Position.Bottom} />
+      <Axis id={'left'} title="Left" position={Position.Left} />
       <BarSeries
-        id={getSpecId('bars')}
+        id={'bars'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -2053,17 +1885,17 @@ export const stackedOnlyGroupedAreas = () => {
   ];
   return (
     <Chart renderer="canvas" className={'story-chart'}>
-      <Axis id={getAxisId('bottom')} title={'index'} position={Position.Bottom} />
+      <Axis id={'bottom'} title={'index'} position={Position.Bottom} />
       <Axis
-        id={getAxisId('left')}
+        id={'left'}
         title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
         position={Position.Left}
         tickFormat={(d: any) => Number(d).toFixed(2)}
         domain={{ min: 0, max: 15 }}
       />
       <Axis
-        id={getAxisId('left group b')}
-        groupId={getGroupId('gb')}
+        id={'left group b'}
+        groupId={'gb'}
         title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
         position={Position.Left}
         tickFormat={(d: any) => Number(d).toFixed(2)}
@@ -2071,7 +1903,7 @@ export const stackedOnlyGroupedAreas = () => {
         domain={{ min: 0, max: 15 }}
       />
       <BarSeries
-        id={getSpecId('stacked bar 1')}
+        id={'stacked bar 1'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -2081,7 +1913,7 @@ export const stackedOnlyGroupedAreas = () => {
         yScaleToDataExtent={false}
       />
       <BarSeries
-        id={getSpecId('stacked bar 2')}
+        id={'stacked bar 2'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -2092,8 +1924,8 @@ export const stackedOnlyGroupedAreas = () => {
       />
 
       <BarSeries
-        id={getSpecId('stacked bar A')}
-        groupId={getGroupId('gb')}
+        id={'stacked bar A'}
+        groupId={'gb'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -2103,8 +1935,8 @@ export const stackedOnlyGroupedAreas = () => {
         yScaleToDataExtent={false}
       />
       <BarSeries
-        id={getSpecId('stacked bar B')}
-        groupId={getGroupId('gb')}
+        id={'stacked bar B'}
+        groupId={'gb'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -2114,7 +1946,7 @@ export const stackedOnlyGroupedAreas = () => {
         yScaleToDataExtent={false}
       />
       <BarSeries
-        id={getSpecId('non stacked bar')}
+        id={'non stacked bar'}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
@@ -2133,16 +1965,11 @@ export const testTooltipAndRotation = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings rotation={getChartRotationKnob()} />
-      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
-      <Axis
-        id={getAxisId('left2')}
-        title={'Left axis'}
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id={'bottom'} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis id={'left2'} title={'Left axis'} position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries
-        id={getSpecId('bars1')}
+        id={'bars1'}
         xScaleType={ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
