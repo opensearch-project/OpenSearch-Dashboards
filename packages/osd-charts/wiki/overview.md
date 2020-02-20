@@ -229,7 +229,7 @@ Return types:
 ```ts
 type BarStyleAccessor = (
   datum: RawDataSeriesDatum,
-  seriesIdentifier: SeriesIdentifier,
+  seriesIdentifier: XYChartSeriesIdentifier,
 ) => RecursivePartial<BarSeriesStyle> | Color | null;
 ```
 
@@ -246,7 +246,7 @@ Return types:
 ```ts
 type PointStyleAccessor = (
   datum: RawDataSeriesDatum,
-  seriesIdentifier: SeriesIdentifier,
+  seriesIdentifier: XYChartSeriesIdentifier,
 ) => RecursivePartial<PointStyle> | Color | null;
 ```
 

@@ -1,7 +1,7 @@
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import createCachedSelector from 're-reselect';
 import {
-  getTooltipValuesAndGeometriesSelector,
+  getTooltipInfoAndGeometriesSelector,
   TooltipAndHighlightedGeoms,
 } from './get_tooltip_values_highlighted_geoms';
 import { SettingsSpec } from '../../../../specs';
@@ -40,7 +40,7 @@ export function createOnElementOutCaller(): (state: GlobalChartState) => void {
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartTypes.XYAxis) {
       selector = createCachedSelector(
-        [getTooltipValuesAndGeometriesSelector, getSettingsSpecSelector],
+        [getTooltipInfoAndGeometriesSelector, getSettingsSpecSelector],
         ({ highlightedGeometries }: TooltipAndHighlightedGeoms, settings: SettingsSpec): void => {
           const nextProps = {
             settings,

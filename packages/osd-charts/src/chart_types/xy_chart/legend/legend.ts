@@ -4,8 +4,8 @@ import {
   SeriesCollectionValue,
   getSeriesIndex,
   getSortedDataSeriesColorsValuesMap,
-  SeriesIdentifier,
   getSeriesLabel,
+  XYChartSeriesIdentifier,
 } from '../utils/series';
 import { AxisSpec, BasicSeriesSpec, Postfixes, isAreaSeriesSpec, isBarSeriesSpec } from '../utils/specs';
 import { Y0_ACCESSOR_POSTFIX, Y1_ACCESSOR_POSTFIX } from '../tooltip/tooltip';
@@ -20,7 +20,7 @@ export type LegendItem = Postfixes & {
   key: string;
   color: string;
   label: string;
-  seriesIdentifier: SeriesIdentifier;
+  seriesIdentifier: XYChartSeriesIdentifier;
   isSeriesVisible?: boolean;
   banded?: boolean;
   isLegendItemVisible?: boolean;
@@ -59,7 +59,7 @@ export function computeLegend(
   specs: BasicSeriesSpec[],
   defaultColor: string,
   axesSpecs: AxisSpec[],
-  deselectedDataSeries: SeriesIdentifier[] = [],
+  deselectedDataSeries: XYChartSeriesIdentifier[] = [],
 ): Map<string, LegendItem> {
   const legendItems: Map<string, LegendItem> = new Map();
   const sortedCollection = getSortedDataSeriesColorsValuesMap(seriesCollection);

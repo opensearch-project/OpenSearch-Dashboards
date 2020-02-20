@@ -9,7 +9,7 @@ import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { updateParentDimensions } from '../../../state/actions/chart_settings';
 import { computeSeriesGeometriesSelector } from './selectors/compute_series_geometries';
 import { onPointerMove } from '../../../state/actions/mouse';
-import { getTooltipValuesSelector } from './selectors/get_tooltip_values_highlighted_geoms';
+import { getTooltipInfoSelector } from './selectors/get_tooltip_values_highlighted_geoms';
 import { DateTime } from 'luxon';
 import { getComputedScalesSelector } from './selectors/get_computed_scales';
 import { ChartTypes } from '../..';
@@ -69,17 +69,17 @@ describe('Render chart', () => {
     });
     test('check mouse position correctly return inverted value', () => {
       store.dispatch(onPointerMove({ x: 15, y: 10 }, 0)); // check first valid tooltip
-      let tooltip = getTooltipValuesSelector(store.getState());
+      let tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
       expect(tooltip.header?.value).toBe(day1);
       expect(tooltip.values[0].value).toBe(10);
       store.dispatch(onPointerMove({ x: 35, y: 10 }, 1)); // check second valid tooltip
-      tooltip = getTooltipValuesSelector(store.getState());
+      tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
       expect(tooltip.header?.value).toBe(day2);
       expect(tooltip.values[0].value).toBe(22);
       store.dispatch(onPointerMove({ x: 76, y: 10 }, 2)); // check third valid tooltip
-      tooltip = getTooltipValuesSelector(store.getState());
+      tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
       expect(tooltip.header?.value).toBe(day3);
       expect(tooltip.values[0].value).toBe(6);
@@ -138,17 +138,17 @@ describe('Render chart', () => {
     });
     test('check mouse position correctly return inverted value', () => {
       store.dispatch(onPointerMove({ x: 15, y: 10 }, 0)); // check first valid tooltip
-      let tooltip = getTooltipValuesSelector(store.getState());
+      let tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
       expect(tooltip.header?.value).toBe(date1);
       expect(tooltip.values[0].value).toBe(10);
       store.dispatch(onPointerMove({ x: 35, y: 10 }, 1)); // check second valid tooltip
-      tooltip = getTooltipValuesSelector(store.getState());
+      tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
       expect(tooltip.header?.value).toBe(date2);
       expect(tooltip.values[0].value).toBe(22);
       store.dispatch(onPointerMove({ x: 76, y: 10 }, 2)); // check third valid tooltip
-      tooltip = getTooltipValuesSelector(store.getState());
+      tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
       expect(tooltip.header?.value).toBe(date3);
       expect(tooltip.values[0].value).toBe(6);
@@ -225,17 +225,17 @@ describe('Render chart', () => {
     });
     test('check mouse position correctly return inverted value', () => {
       store.dispatch(onPointerMove({ x: 15, y: 10 }, 0)); // check first valid tooltip
-      let tooltip = getTooltipValuesSelector(store.getState());
+      let tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
       expect(tooltip.header?.value).toBe(date1);
       expect(tooltip.values[0].value).toBe(10);
       store.dispatch(onPointerMove({ x: 35, y: 10 }, 1)); // check second valid tooltip
-      tooltip = getTooltipValuesSelector(store.getState());
+      tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
       expect(tooltip.header?.value).toBe(date2);
       expect(tooltip.values[0].value).toBe(22);
       store.dispatch(onPointerMove({ x: 76, y: 10 }, 2)); // check third valid tooltip
-      tooltip = getTooltipValuesSelector(store.getState());
+      tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
       expect(tooltip.header?.value).toBe(date3);
       expect(tooltip.values[0].value).toBe(6);

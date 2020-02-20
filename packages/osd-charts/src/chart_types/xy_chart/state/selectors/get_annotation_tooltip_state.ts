@@ -15,9 +15,10 @@ import { getChartRotationSelector } from '../../../../state/selectors/get_chart_
 import { AnnotationId } from '../../../../utils/ids';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';
 import { ComputedGeometries } from '../utils';
-import { getTooltipValuesSelector, TooltipData } from './get_tooltip_values_highlighted_geoms';
+import { getTooltipInfoSelector } from './get_tooltip_values_highlighted_geoms';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { GlobalChartState } from '../../../../state/chart_state';
+import { TooltipInfo } from '../../../../components/tooltip/types';
 
 const getCurrentPointerPosition = (state: GlobalChartState) => state.interactions.pointer.current.position;
 
@@ -30,7 +31,7 @@ export const getAnnotationTooltipStateSelector = createCachedSelector(
     getAnnotationSpecsSelector,
     getAxisSpecsSelector,
     computeAnnotationDimensionsSelector,
-    getTooltipValuesSelector,
+    getTooltipInfoSelector,
   ],
   getAnnotationTooltipState,
 )(getChartIdSelector);
@@ -47,7 +48,7 @@ function getAnnotationTooltipState(
   annotationSpecs: AnnotationSpec[],
   axesSpecs: AxisSpec[],
   annotationDimensions: Map<AnnotationId, AnnotationDimensions>,
-  tooltip: TooltipData,
+  tooltip: TooltipInfo,
 ): AnnotationTooltipState | null {
   // get positions relative to chart
   if (x < 0 || y < 0) {

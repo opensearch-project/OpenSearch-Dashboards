@@ -146,7 +146,7 @@ linearWAxis.story = {
 export const wAxisAndLegend = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis
         id={getAxisId('bottom')}
         position={Position.Bottom}
@@ -177,7 +177,7 @@ wAxisAndLegend.story = {
 export const curvedwaxisandlegend = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis
         id={getAxisId('bottom')}
         position={Position.Bottom}
@@ -255,7 +255,7 @@ curvedwaxisandlegend.story = {
 export const multiplewaxisandlegend = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis
         id={getAxisId('bottom')}
         position={Position.Bottom}
@@ -306,7 +306,7 @@ multiplewaxisandlegend.story = {
 export const stackedwaxisandlegend = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis
         id={getAxisId('bottom')}
         position={Position.Bottom}
@@ -359,7 +359,7 @@ stackedwaxisandlegend.story = {
 export const multiserieswithlogvalues = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis
         id={getAxisId('bottom')}
         position={Position.Bottom}

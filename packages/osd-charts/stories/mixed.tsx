@@ -30,7 +30,7 @@ export default {
 export const barsAndLines = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} />
       <Axis
         id={getAxisId('left2')}
@@ -75,7 +75,7 @@ barsAndLines.story = {
 export const linesAndAreas = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -121,7 +121,7 @@ linesAndAreas.story = {
 export const areasAndBars = () => {
   return (
     <Chart renderer="canvas" className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -200,7 +200,7 @@ export const testBarLinesLinear = () => {
 
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -260,7 +260,7 @@ export const testBarLinesTime = () => {
 
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis
         id={getAxisId('bottom')}
         position={Position.Bottom}

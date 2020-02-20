@@ -10,7 +10,7 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
   width: 100%;
 
   &:hover {
-    .echLegendItem__title {
+    .echLegendItem__label {
       text-decoration: underline;
     }
   }
@@ -27,7 +27,7 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
     }
   }
 
-  &__title {
+  &__label {
     @include euiFontSizeXS;
     @include euiTextTruncate;
     flex: 1 1 auto;
@@ -37,17 +37,13 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
     }
   }
 
-  &__title--selected {
-    text-decoration: underline;
-  }
-
-  &__title--hasClickListener {
+  &__label--hasClickListener {
     &:hover {
       cursor: pointer;
     }
   }
 
-  &__displayValue {
+  &__extra {
     @include euiFontSizeXS;
     text-align: right;
     margin-left: $euiSizeXS;

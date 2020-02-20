@@ -33,7 +33,7 @@ export const right = () => {
 
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -62,7 +62,7 @@ right.story = {
 export const bottom = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Bottom} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Bottom} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -90,7 +90,7 @@ bottom.story = {
 export const left = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Left} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Left} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -118,7 +118,7 @@ left.story = {
 export const top = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Top} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Top} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -147,7 +147,7 @@ export const changingSpecs = () => {
   const splitSeries = boolean('split series', true) ? ['g1', 'g2'] : undefined;
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Top} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Top} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -178,7 +178,7 @@ export const hideLegendItemsBySeries = () => {
 
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -264,7 +264,7 @@ export const displayValuesInLegendElements = () => {
   });
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={legendPosition} showLegendDisplayValue={showLegendDisplayValue} />
+      <Settings showLegend={true} legendPosition={legendPosition} showLegendExtra={showLegendDisplayValue} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -289,7 +289,7 @@ export const legendSpacingBuffer = () => {
 
   return (
     <Chart className={'story-chart'}>
-      <Settings theme={theme} showLegend={true} legendPosition={Position.Right} />
+      <Settings theme={theme} showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}

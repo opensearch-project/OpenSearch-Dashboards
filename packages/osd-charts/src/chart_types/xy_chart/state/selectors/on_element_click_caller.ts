@@ -6,7 +6,7 @@ import { getHighlightedGeomsSelector } from './get_tooltip_values_highlighted_ge
 import { SettingsSpec } from '../../../../specs';
 import { IndexedGeometry, GeometryValue } from '../../../../utils/geometry';
 import { ChartTypes } from '../../../index';
-import { SeriesIdentifier } from '../../utils/series';
+import { XYChartSeriesIdentifier } from '../../utils/series';
 
 const getLastClickSelector = (state: GlobalChartState) => state.interactions.pointer.lastClick;
 
@@ -57,7 +57,7 @@ export function createOnElementClickCaller(): (state: GlobalChartState) => void 
 
           if (isClicking(prevProps, nextProps)) {
             if (settings && settings.onElementClick) {
-              const elements = indexedGeometries.map<[GeometryValue, SeriesIdentifier]>(
+              const elements = indexedGeometries.map<[GeometryValue, XYChartSeriesIdentifier]>(
                 ({ value, seriesIdentifier }) => [value, seriesIdentifier],
               );
               settings.onElementClick(elements);

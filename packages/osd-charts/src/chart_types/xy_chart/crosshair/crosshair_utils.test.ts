@@ -1,4 +1,4 @@
-import { getFinalTooltipPosition } from './crosshair_utils';
+import { getFinalTooltipPosition } from '../../../components/tooltip/utils';
 
 describe('Tooltip position', () => {
   const container = {
@@ -19,15 +19,11 @@ describe('Tooltip position', () => {
         container,
         tooltip,
         {
-          isRotatedHorizontal: true,
-          vPosition: {
-            bandHeight: 0,
-            bandTop: 0,
-          },
-          hPosition: {
-            bandWidth: 0,
-            bandLeft: 10,
-          },
+          isRotated: false,
+          y1: 0,
+          y0: 0,
+          x0: 10,
+          x1: 10,
         },
         5,
       );
@@ -39,15 +35,11 @@ describe('Tooltip position', () => {
         container,
         tooltip,
         {
-          isRotatedHorizontal: true,
-          vPosition: {
-            bandHeight: 0,
-            bandTop: 90,
-          },
-          hPosition: {
-            bandWidth: 0,
-            bandLeft: 10,
-          },
+          isRotated: false,
+          y0: 90,
+          y1: 90,
+          x0: 10,
+          x1: 10,
         },
         5,
       );
@@ -59,15 +51,11 @@ describe('Tooltip position', () => {
         container,
         tooltip,
         {
-          isRotatedHorizontal: true,
-          vPosition: {
-            bandHeight: 0,
-            bandTop: 0,
-          },
-          hPosition: {
-            bandWidth: 0,
-            bandLeft: 100,
-          },
+          isRotated: false,
+          y0: 0,
+          y1: 0,
+          x0: 100,
+          x1: 100,
         },
         5,
       );
@@ -79,15 +67,11 @@ describe('Tooltip position', () => {
         container,
         tooltip,
         {
-          isRotatedHorizontal: true,
-          vPosition: {
-            bandHeight: 0,
-            bandTop: 90,
-          },
-          hPosition: {
-            bandWidth: 0,
-            bandLeft: 100,
-          },
+          isRotated: false,
+          y0: 90,
+          y1: 90,
+          x0: 100,
+          x1: 100,
         },
         5,
       );
@@ -101,15 +85,11 @@ describe('Tooltip position', () => {
         container,
         tooltip,
         {
-          isRotatedHorizontal: false,
-          vPosition: {
-            bandHeight: 0,
-            bandTop: 0,
-          },
-          hPosition: {
-            bandWidth: 0,
-            bandLeft: 10,
-          },
+          isRotated: true,
+          y0: 0,
+          y1: 0,
+          x1: 10,
+          x0: 10,
         },
         5,
       );
@@ -121,15 +101,11 @@ describe('Tooltip position', () => {
         container,
         tooltip,
         {
-          isRotatedHorizontal: false,
-          vPosition: {
-            bandHeight: 0,
-            bandTop: 90,
-          },
-          hPosition: {
-            bandWidth: 0,
-            bandLeft: 10,
-          },
+          isRotated: true,
+          y0: 90,
+          y1: 90,
+          x1: 10,
+          x0: 10,
         },
         5,
       );
@@ -141,15 +117,11 @@ describe('Tooltip position', () => {
         container,
         tooltip,
         {
-          isRotatedHorizontal: false,
-          vPosition: {
-            bandHeight: 0,
-            bandTop: 0,
-          },
-          hPosition: {
-            bandWidth: 0,
-            bandLeft: 100,
-          },
+          isRotated: true,
+          y0: 0,
+          y1: 0,
+          x1: 100,
+          x0: 100,
         },
         5,
       );
@@ -161,15 +133,11 @@ describe('Tooltip position', () => {
         container,
         tooltip,
         {
-          isRotatedHorizontal: false,
-          vPosition: {
-            bandHeight: 0,
-            bandTop: 90,
-          },
-          hPosition: {
-            bandWidth: 0,
-            bandLeft: 100,
-          },
+          isRotated: true,
+          y0: 90,
+          y1: 90,
+          x1: 100,
+          x0: 100,
         },
         5,
       );

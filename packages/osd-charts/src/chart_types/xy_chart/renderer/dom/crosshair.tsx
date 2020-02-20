@@ -1,6 +1,5 @@
 import React, { CSSProperties } from 'react';
 import { connect } from 'react-redux';
-import { TooltipType } from '../../utils/interactions';
 import { isHorizontalRotation } from '../../state/utils';
 import { Dimensions } from '../../../../utils/dimensions';
 import { Theme } from '../../../../utils/themes/theme';
@@ -13,6 +12,7 @@ import { getCursorLinePositionSelector } from '../../state/selectors/get_cursor_
 import { getTooltipTypeSelector } from '../../state/selectors/get_tooltip_type';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { LIGHT_THEME } from '../../../../utils/themes/light_theme';
+import { TooltipType } from '../../../../specs';
 
 interface CrosshairProps {
   theme: Theme;
@@ -108,7 +108,7 @@ const mapStateToProps = (state: GlobalChartState): CrosshairProps => {
     chartRotation: getChartRotationSelector(state),
     cursorBandPosition: getCursorBandPositionSelector(state),
     cursorLinePosition: getCursorLinePositionSelector(state),
-    tooltipType: getTooltipTypeSelector(state),
+    tooltipType: getTooltipTypeSelector(state) || TooltipType.VerticalCursor,
   };
 };
 

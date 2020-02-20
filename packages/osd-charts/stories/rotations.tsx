@@ -17,6 +17,7 @@ export const withOrdinalAxis = () => {
       <Settings
         debug={boolean('Debug', true)}
         showLegend={boolean('Legend', true)}
+        showLegendExtra
         legendPosition={select(
           'Legend position',
           {
@@ -76,7 +77,7 @@ withOrdinalAxis.story = {
 export const negative90DegreeOrdinal = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} rotation={-90} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} rotation={-90} />
       <Axis id={getAxisId('y top')} position={Position.Top} title={'y top axis'} />
       <Axis id={getAxisId('x right')} title={'x right axis'} position={Position.Right} />
       <Axis id={getAxisId('y bottom')} position={Position.Bottom} title={'y bottom axis'} />
@@ -104,7 +105,7 @@ negative90DegreeOrdinal.story = {
 export const rotations0DegOrdinal = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} rotation={0} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} rotation={0} />
       <Axis id={getAxisId('x top')} position={Position.Top} title={'x top axis'} />
       <Axis id={getAxisId('y right')} title={'y right axis'} position={Position.Right} />
       <Axis id={getAxisId('x bottom')} position={Position.Bottom} title={'x bottom axis'} />
@@ -132,7 +133,7 @@ rotations0DegOrdinal.story = {
 export const rotations90DegOrdinal = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} rotation={90} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} rotation={90} />
       <Axis id={getAxisId('y top')} position={Position.Top} title={'y top axis'} />
       <Axis id={getAxisId('x right')} title={'x right axis'} position={Position.Right} />
       <Axis id={getAxisId('y bottom')} position={Position.Bottom} title={'y bottom axis'} />
@@ -160,7 +161,7 @@ rotations90DegOrdinal.story = {
 export const rotations180DegOrdinal = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} rotation={180} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} rotation={180} />
       <Axis id={getAxisId('x top')} position={Position.Top} title={'x top axis'} />
       <Axis id={getAxisId('y right')} title={'y right axis'} position={Position.Right} />
       <Axis id={getAxisId('x bottom')} position={Position.Bottom} title={'x bottom axis'} />
@@ -188,7 +189,7 @@ rotations180DegOrdinal.story = {
 export const negative90DegLinear = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} rotation={-90} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} rotation={-90} />
       <Axis id={getAxisId('y top')} position={Position.Top} title={'y top axis'} />
       <Axis id={getAxisId('x right')} title={'x right axis'} position={Position.Right} />
       <Axis id={getAxisId('y bottom')} position={Position.Bottom} title={'y bottom axis'} />
@@ -216,7 +217,7 @@ negative90DegLinear.story = {
 export const rotations0DegLinear = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} rotation={0} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} rotation={0} />
       <Axis id={getAxisId('x top')} position={Position.Top} title={'x top axis'} />
       <Axis id={getAxisId('y right')} title={'y right axis'} position={Position.Right} />
       <Axis id={getAxisId('x bottom')} position={Position.Bottom} title={'x bottom axis'} />
@@ -244,7 +245,7 @@ rotations0DegLinear.story = {
 export const rotations90DegLinear = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} rotation={90} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} rotation={90} />
       <Axis id={getAxisId('y top')} position={Position.Top} title={'y top axis'} />
       <Axis id={getAxisId('x right')} title={'x right axis'} position={Position.Right} />
       <Axis id={getAxisId('y bottom')} position={Position.Bottom} title={'y bottom axis'} />
@@ -272,7 +273,7 @@ rotations90DegLinear.story = {
 export const rotations180DegLinear = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} rotation={180} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} rotation={180} />
       <Axis id={getAxisId('x top')} position={Position.Top} title={'x top axis'} />
       <Axis id={getAxisId('y right')} title={'y right axis'} position={Position.Right} />
       <Axis id={getAxisId('x bottom')} position={Position.Bottom} title={'x bottom axis'} />

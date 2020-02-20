@@ -193,7 +193,7 @@ with4Axes.story = {
 export const wAxisAndLegend = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis
         id={getAxisId('bottom')}
         title={'timestamp per 1 minute'}
@@ -236,7 +236,7 @@ export const stackedWAxisAndLegend = () => {
   const allMetrics = [...data3, ...data2, ...data1];
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis
         id={getAxisId('bottom')}
         position={Position.Bottom}
@@ -271,7 +271,7 @@ export const stackedAsPercentage = () => {
   const stackedAsPercentage = boolean('stacked as percentage', true);
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -310,7 +310,7 @@ stackedAsPercentage.story = {
 export const stackedWithSeparatedSpecs = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis
         id={getAxisId('bottom')}
         position={Position.Bottom}
@@ -364,7 +364,7 @@ stackedWithSeparatedSpecs.story = {
 export const stackedWithSeparatedSpecsSameNaming = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis
         id={getAxisId('bottom')}
         position={Position.Bottom}
@@ -504,7 +504,7 @@ export const bandAreaChart = () => {
   const y1AccessorFormat = text('y1AccessorFormat', '');
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis
         id={getAxisId('bottom')}
         title={'timestamp per 1 minute'}
@@ -557,7 +557,7 @@ export const stackedBandAreaChart = () => {
 
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend />
+      <Settings showLegend showLegendExtra />
       <Axis
         id={getAxisId('bottom')}
         title={'timestamp per 1 minute'}

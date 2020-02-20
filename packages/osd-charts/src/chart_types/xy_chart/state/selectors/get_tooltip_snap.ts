@@ -1,7 +1,6 @@
 import createCachedSelector from 're-reselect';
-import { isTooltipProps } from '../../utils/interactions';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { SettingsSpec } from '../../../../specs/settings';
+import { SettingsSpec, isTooltipProps } from '../../../../specs/settings';
 import { DEFAULT_TOOLTIP_SNAP } from '../../../../specs/settings';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 

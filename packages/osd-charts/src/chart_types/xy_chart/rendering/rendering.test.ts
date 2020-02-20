@@ -6,7 +6,7 @@ import {
   getClippedRanges,
 } from './rendering';
 import { BarSeriesStyle, SharedGeometryStateStyle, PointStyle } from '../../../utils/themes/theme';
-import { DataSeriesDatum, SeriesIdentifier } from '../utils/series';
+import { DataSeriesDatum, XYChartSeriesIdentifier } from '../utils/series';
 import { mergePartial, RecursivePartial } from '../../../utils/commons';
 import { BarGeometry, PointGeometry } from '../../../utils/geometry';
 import { MockDataSeries } from '../../../mocks';
@@ -95,7 +95,7 @@ describe('Rendering utils', () => {
   });
 
   describe('should get common geometry style dependent on legend item highlight state', () => {
-    const seriesIdentifier: SeriesIdentifier = {
+    const seriesIdentifier: XYChartSeriesIdentifier = {
       specId: 'id',
       yAccessor: 'y1',
       splitAccessors: new Map(),
@@ -222,7 +222,7 @@ describe('Rendering utils', () => {
       initialY1: 4,
       initialY0: 5,
     };
-    const seriesIdentifier: SeriesIdentifier = {
+    const seriesIdentifier: XYChartSeriesIdentifier = {
       specId: 'test',
       yAccessor: 'test',
       splitAccessors: new Map(),
@@ -314,7 +314,7 @@ describe('Rendering utils', () => {
       initialY1: 4,
       initialY0: 5,
     };
-    const seriesIdentifier: SeriesIdentifier = {
+    const seriesIdentifier: XYChartSeriesIdentifier = {
       specId: 'test',
       yAccessor: 'test',
       splitAccessors: new Map(),

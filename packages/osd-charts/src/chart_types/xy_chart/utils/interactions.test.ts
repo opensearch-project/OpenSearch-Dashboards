@@ -4,11 +4,9 @@ import {
   areIndexedGeomsEquals,
   getOrientedXPosition,
   getOrientedYPosition,
-  isCrosshairTooltipType,
-  isFollowTooltipType,
-  TooltipType,
 } from './interactions';
 import { IndexedGeometry, PointGeometry } from '../../../utils/geometry';
+import { TooltipType, isCrosshairTooltipType, isFollowTooltipType } from '../../../specs';
 
 const seriesStyle = {
   rect: {

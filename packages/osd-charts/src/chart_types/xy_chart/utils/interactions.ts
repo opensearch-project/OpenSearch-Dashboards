@@ -1,52 +1,7 @@
-import { $Values } from 'utility-types';
-import { Datum, Rotation } from '../../../utils/commons';
+import { Rotation } from '../../../utils/commons';
 import { Dimensions } from '../../../utils/dimensions';
-import { Accessor } from '../../../utils/accessor';
 import { BarGeometry, PointGeometry, IndexedGeometry, isPointGeometry, isBarGeometry } from '../../../utils/geometry';
 
-/** The type of tooltip to use */
-export const TooltipType = Object.freeze({
-  /** Vertical cursor parallel to x axis */
-  VerticalCursor: 'vertical' as 'vertical',
-  /** Vertical and horizontal cursors */
-  Crosshairs: 'cross' as 'cross',
-  /** Follor the mouse coordinates */
-  Follow: 'follow' as 'follow',
-  /** Hide every tooltip */
-  None: 'none' as 'none',
-});
-
-export type TooltipType = $Values<typeof TooltipType>;
-
-export interface TooltipValue {
-  name: string;
-  value: any;
-  color: string;
-  isHighlighted: boolean;
-  isXValue: boolean;
-  seriesKey: string;
-  yAccessor: Accessor;
-  isVisible: boolean;
-}
-
-export interface TooltipProps {
-  type?: TooltipType;
-  snap?: boolean;
-  headerFormatter?: TooltipValueFormatter;
-}
-
-export type TooltipValueFormatter = (data: TooltipValue) => JSX.Element | string;
-
-export interface HighlightedElement {
-  position: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    type: 'rect' | 'circle';
-  };
-  value: Datum;
-}
 /**
  * Get the cursor position depending on the chart rotation
  * @param xPos x position relative to chart
@@ -77,13 +32,6 @@ export function getOrientedYPosition(xPos: number, yPos: number, chartRotation: 
     case 90:
       return chartDimension.width - xPos;
   }
-}
-
-export function isCrosshairTooltipType(type: TooltipType) {
-  return type === TooltipType.VerticalCursor || type === TooltipType.Crosshairs;
-}
-export function isFollowTooltipType(type: TooltipType) {
-  return type === TooltipType.Follow;
 }
 
 export function areIndexedGeometryArraysEquals(arr1: IndexedGeometry[], arr2: IndexedGeometry[]) {
@@ -126,12 +74,4 @@ function areBarEqual(ig1: BarGeometry, ig2: BarGeometry) {
     ig1.width === ig2.width &&
     ig1.height === ig2.height
   );
-}
-
-export function isTooltipProps(config: TooltipType | TooltipProps): config is TooltipProps {
-  return typeof config === 'object';
-}
-
-export function isTooltipType(config: TooltipType | TooltipProps): config is TooltipType {
-  return typeof config === 'string';
 }

@@ -1,34 +1,8 @@
 import { extent, sum } from 'd3-array';
 import { nest } from 'd3-collection';
-import { Accessor, AccessorFn } from './accessor';
-import { ScaleType } from '../scales';
+import { AccessorFn } from './accessor';
 
 export type Domain = any[];
-
-export interface SpecDomain {
-  accessor: Accessor;
-  level: number;
-  domain: Domain;
-  scaleType: ScaleType;
-  isStacked?: boolean;
-}
-
-export interface ColorDomain {
-  accessors: Accessor[];
-  yAccessors?: Accessor[];
-  domain: string[];
-  scaleType: ScaleType;
-}
-
-export interface SeriesScales {
-  groupLevel: number;
-  xDomain: Domain;
-  yDomain?: Domain;
-  xScaleType: ScaleType;
-  yScaleType?: ScaleType;
-  xAccessor: Accessor;
-  yAccessor?: Accessor;
-}
 
 export function computeOrdinalDataDomain(
   data: any[],

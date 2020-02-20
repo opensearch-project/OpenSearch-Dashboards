@@ -70,7 +70,7 @@ export const lineBasicXDomainContinous = () => {
 
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend debug={boolean('debug', false)} rotation={getChartRotationKnob()} />
+      <Settings showLegend showLegendExtra debug={boolean('debug', false)} rotation={getChartRotationKnob()} />
       <LineAnnotation
         id={getAnnotationId('anno_1')}
         domainType={AnnotationDomainTypes.XDomain}

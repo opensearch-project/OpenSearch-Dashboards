@@ -1,5 +1,5 @@
 import React from 'react';
-import { Chart, ScaleType, Position, Axis, getAxisId, timeFormatter, getSpecId, AreaSeries } from '../src';
+import { Chart, ScaleType, Position, Axis, getAxisId, timeFormatter, getSpecId, AreaSeries, Settings } from '../src';
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 export class Playground extends React.Component {
   chartRef: React.RefObject<Chart> = React.createRef();
@@ -13,6 +13,7 @@ export class Playground extends React.Component {
       <>
         <div className="chart">
           <Chart className={'story-chart'}>
+            <Settings showLegend={true} />
             <Axis
               id={getAxisId('bottom')}
               title={'timestamp per 1 minute'}
@@ -33,7 +34,10 @@ export class Playground extends React.Component {
               yScaleType={ScaleType.Linear}
               xAccessor={0}
               yAccessors={[1]}
-              data={KIBANA_METRICS.metrics.kibana_os_load[0].data}
+              y0Accessors={[2]}
+              data={KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => {
+                return [...d, d[1] - 10];
+              })}
             />
           </Chart>
         </div>

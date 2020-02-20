@@ -2,8 +2,7 @@ import { mount } from 'enzyme';
 import * as React from 'react';
 import { Position, Rendering, Rotation } from '../utils/commons';
 import { DARK_THEME } from '../utils/themes/dark_theme';
-import { TooltipType } from '../chart_types/xy_chart/utils/interactions';
-import { Settings, SettingsSpec } from './settings';
+import { Settings, SettingsSpec, TooltipType } from './settings';
 import { PartialTheme } from '../utils/themes/theme';
 import { LIGHT_THEME } from '../utils/themes/light_theme';
 import { chartStoreReducer, GlobalChartState } from '../state/chart_state';
@@ -68,7 +67,7 @@ describe('Settings spec component', () => {
           snap: false,
         },
         legendPosition: Position.Bottom,
-        showLegendDisplayValue: false,
+        showLegendExtra: false,
         debug: true,
         xDomain: { min: 0, max: 10 },
       },
@@ -84,7 +83,7 @@ describe('Settings spec component', () => {
       snap: false,
     });
     expect(settingSpec.legendPosition).toBe(Position.Bottom);
-    expect(settingSpec.showLegendDisplayValue).toEqual(false);
+    expect(settingSpec.showLegendExtra).toEqual(false);
     expect(settingSpec.debug).toBe(true);
     expect(settingSpec.xDomain).toEqual({ min: 0, max: 10 });
   });
@@ -176,7 +175,7 @@ describe('Settings spec component', () => {
         snap: false,
       },
       legendPosition: Position.Bottom,
-      showLegendDisplayValue: false,
+      showLegendExtra: false,
       hideDuplicateAxes: false,
       debug: true,
       xDomain: { min: 0, max: 10 },

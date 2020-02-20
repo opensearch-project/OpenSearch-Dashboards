@@ -221,7 +221,13 @@ export const marginsAndPaddings = () => {
   const withTopTitle = boolean('top axis with title', true);
   return (
     <Chart className={'story-chart'}>
-      <Settings theme={theme} debug={boolean('debug', true)} showLegend={true} legendPosition={Position.Right} />
+      <Settings
+        theme={theme}
+        debug={boolean('debug', true)}
+        showLegend
+        showLegendExtra
+        legendPosition={Position.Right}
+      />
       <Axis
         id={getAxisId('bottom')}
         position={Position.Bottom}
@@ -435,7 +441,8 @@ export const themeStyle = () => {
         theme={theme}
         baseTheme={darkmode ? DARK_THEME : LIGHT_THEME}
         debug={boolean('debug', false)}
-        showLegend={true}
+        showLegend
+        showLegendExtra
         legendPosition={Position.Right}
       />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
@@ -499,7 +506,7 @@ export const partialCustomTheme = () => {
 
   return (
     <Chart className="story-chart">
-      <Settings showLegend theme={customPartialTheme} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra theme={customPartialTheme} legendPosition={Position.Right} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -543,7 +550,13 @@ export const partialCustomThemeWithBaseTheme = () => {
 
   return (
     <Chart className="story-chart">
-      <Settings showLegend theme={customPartialTheme} baseTheme={LIGHT_THEME} legendPosition={Position.Right} />
+      <Settings
+        showLegend
+        showLegendExtra
+        theme={customPartialTheme}
+        baseTheme={LIGHT_THEME}
+        legendPosition={Position.Right}
+      />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -594,7 +607,7 @@ export const multipleCustomPartialThemes = () => {
 
   return (
     <Chart className="story-chart">
-      <Settings showLegend theme={[primaryTheme, secondaryTheme]} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra theme={[primaryTheme, secondaryTheme]} legendPosition={Position.Right} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -635,7 +648,7 @@ multipleCustomPartialThemes.story = {
 export const customSeriesColorsViaColorsArray = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -688,7 +701,7 @@ export const customSeriesColorsViaAccessorFunction = () => {
 
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -758,7 +771,7 @@ export const customSeriesStylesBars = () => {
 
   return (
     <Chart renderer="canvas" className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} theme={theme} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} theme={theme} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -815,7 +828,7 @@ export const customSeriesStylesLines = () => {
 
   return (
     <Chart renderer="canvas" className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} theme={chartTheme} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} theme={chartTheme} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -880,7 +893,7 @@ export const customSeriesStylesArea = () => {
 
   return (
     <Chart renderer="canvas" className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} theme={chartTheme} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} theme={chartTheme} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -950,7 +963,7 @@ export const addCustomFullAndSubSeriesLabel = () => {
   };
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -1013,7 +1026,7 @@ export const addCustomSubSeriesLabelFormatting = () => {
 
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}

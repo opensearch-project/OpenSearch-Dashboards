@@ -2,20 +2,20 @@ import { $Values } from 'utility-types';
 import { DomainRange } from '../chart_types/xy_chart/utils/specs';
 import { PartialTheme, Theme } from '../utils/themes/theme';
 import { Domain } from '../utils/domain';
-import { TooltipType, TooltipValueFormatter } from '../chart_types/xy_chart/utils/interactions';
 import { getConnect, specComponentFactory } from '../state/spec_factory';
 import { Spec } from '.';
 import { LIGHT_THEME } from '../utils/themes/light_theme';
 import { ChartTypes } from '../chart_types';
 import { GeometryValue } from '../utils/geometry';
-import { SeriesIdentifier } from '../chart_types/xy_chart/utils/series';
+import { XYChartSeriesIdentifier, SeriesIdentifier } from '../chart_types/xy_chart/utils/series';
 import { Position, Rendering, Rotation } from '../utils/commons';
 import { ScaleContinuousType, ScaleOrdinalType } from '../scales';
+import { Accessor } from '../utils/accessor';
 
-export type ElementClickListener = (elements: Array<[GeometryValue, SeriesIdentifier]>) => void;
-export type ElementOverListener = (elements: Array<[GeometryValue, SeriesIdentifier]>) => void;
+export type ElementClickListener = (elements: Array<[GeometryValue, XYChartSeriesIdentifier]>) => void;
+export type ElementOverListener = (elements: Array<[GeometryValue, XYChartSeriesIdentifier]>) => void;
 export type BrushEndListener = (min: number, max: number) => void;
-export type LegendItemListener = (series: SeriesIdentifier | null) => void;
+export type LegendItemListener = (series: XYChartSeriesIdentifier | null) => void;
 export type PointerUpdateListener = (event: PointerEvent) => void;
 /**
  * Listener to be called when chart render state changes
@@ -57,7 +57,54 @@ export interface PointerOutEvent extends BasePointerEvent {
 
 export type PointerEvent = PointerOverEvent | PointerOutEvent;
 
-interface TooltipProps {
+/** The type of tooltip to use */
+export const TooltipType = Object.freeze({
+  /** Vertical cursor parallel to x axis */
+  VerticalCursor: 'vertical' as 'vertical',
+  /** Vertical and horizontal cursors */
+  Crosshairs: 'cross' as 'cross',
+  /** Follor the mouse coordinates */
+  Follow: 'follow' as 'follow',
+  /** Hide every tooltip */
+  None: 'none' as 'none',
+});
+
+export type TooltipType = $Values<typeof TooltipType>;
+
+export interface TooltipValue {
+  /**
+   * The label of the tooltip value
+   */
+  label: string;
+  /**
+   * The value to display
+   */
+  value: any;
+  /**
+   * The color of the graphic mark (by default the color of the series)
+   */
+  color: string;
+  /**
+   * True if the mouse is over the graphic mark connected to the tooltip
+   */
+  isHighlighted: boolean;
+  /**
+   * True if the tooltip is visible, false otherwise
+   */
+  isVisible: boolean;
+  /**
+   * The idenfitier of the related series
+   */
+  seriesIdentifier: SeriesIdentifier;
+  /**
+   * The accessor linked to the current tooltip value
+   */
+  valueAccessor: Accessor;
+}
+
+export type TooltipValueFormatter = (data: TooltipValue) => JSX.Element | string;
+
+export interface TooltipProps {
   type?: TooltipType;
   snap?: boolean;
   headerFormatter?: TooltipValueFormatter;
@@ -90,7 +137,11 @@ export interface SettingsSpec extends Spec {
   tooltip: TooltipType | TooltipProps;
   debug: boolean;
   legendPosition: Position;
-  showLegendDisplayValue: boolean;
+  /**
+   * Show an extra parameter on each legend item defined by the chart type
+   * @default false
+   */
+  showLegendExtra: boolean;
   /**
    * Removes duplicate axes
    *
@@ -123,7 +174,7 @@ export type DefaultSettingsProps =
   | 'showLegend'
   | 'debug'
   | 'tooltip'
-  | 'showLegendDisplayValue'
+  | 'showLegendExtra'
   | 'theme'
   | 'legendPosition'
   | 'hideDuplicateAxes';
@@ -155,7 +206,7 @@ export const DEFAULT_SETTINGS_SPEC: SettingsSpec = {
     snap: DEFAULT_TOOLTIP_SNAP,
   },
   legendPosition: Position.Right,
-  showLegendDisplayValue: true,
+  showLegendExtra: false,
   hideDuplicateAxes: false,
   theme: LIGHT_THEME,
 };
@@ -172,4 +223,20 @@ export function isPointerOutEvent(event: PointerEvent | null | undefined): event
 
 export function isPointerOverEvent(event: PointerEvent | null | undefined): event is PointerOverEvent {
   return event !== null && event !== undefined && event.type === PointerEventType.Over;
+}
+
+export function isTooltipProps(config: TooltipType | TooltipProps): config is TooltipProps {
+  return typeof config === 'object';
+}
+
+export function isTooltipType(config: TooltipType | TooltipProps): config is TooltipType {
+  return typeof config === 'string';
+}
+
+export function isCrosshairTooltipType(type: TooltipType) {
+  return type === TooltipType.VerticalCursor || type === TooltipType.Crosshairs;
+}
+
+export function isFollowTooltipType(type: TooltipType) {
+  return type === TooltipType.Follow;
 }

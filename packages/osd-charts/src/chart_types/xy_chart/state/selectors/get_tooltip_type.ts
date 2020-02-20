@@ -1,7 +1,6 @@
 import createCachedSelector from 're-reselect';
-import { TooltipType, isTooltipProps, isTooltipType } from '../../utils/interactions';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { SettingsSpec } from '../../../../specs/settings';
+import { SettingsSpec, TooltipType, isTooltipType, isTooltipProps } from '../../../../specs/settings';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
 export const getTooltipTypeSelector = createCachedSelector(
@@ -9,16 +8,16 @@ export const getTooltipTypeSelector = createCachedSelector(
   getTooltipType,
 )(getChartIdSelector);
 
-function getTooltipType(settings: SettingsSpec): TooltipType {
+export function getTooltipType(settings: SettingsSpec): TooltipType | undefined {
   const { tooltip } = settings;
   if (tooltip === undefined || tooltip === null) {
-    return TooltipType.VerticalCursor;
+    return undefined;
   }
   if (isTooltipType(tooltip)) {
     return tooltip;
   }
   if (isTooltipProps(tooltip)) {
-    return tooltip.type || TooltipType.VerticalCursor;
+    return tooltip.type || undefined;
   }
-  return TooltipType.VerticalCursor;
+  return undefined;
 }

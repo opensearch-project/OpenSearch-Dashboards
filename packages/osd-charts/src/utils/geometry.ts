@@ -1,6 +1,6 @@
 import { $Values } from 'utility-types';
 import { BarSeriesStyle, PointStyle, AreaStyle, LineStyle, ArcStyle } from './themes/theme';
-import { SeriesIdentifier } from '../chart_types/xy_chart/utils/series';
+import { XYChartSeriesIdentifier } from '../chart_types/xy_chart/utils/series';
 
 /**
  * The accessor type
@@ -36,7 +36,7 @@ export interface PointGeometry {
     x: number;
     y: number;
   };
-  seriesIdentifier: SeriesIdentifier;
+  seriesIdentifier: XYChartSeriesIdentifier;
   value: GeometryValue;
   styleOverrides?: Partial<PointStyle>;
 }
@@ -53,7 +53,7 @@ export interface BarGeometry {
     hideClippedValue?: boolean;
     isValueContainedInElement?: boolean;
   };
-  seriesIdentifier: SeriesIdentifier;
+  seriesIdentifier: XYChartSeriesIdentifier;
   value: GeometryValue;
   seriesStyle: BarSeriesStyle;
 }
@@ -66,7 +66,7 @@ export interface LineGeometry {
     x: number;
     y: number;
   };
-  seriesIdentifier: SeriesIdentifier;
+  seriesIdentifier: XYChartSeriesIdentifier;
   seriesLineStyle: LineStyle;
   seriesPointStyle: PointStyle;
   /**
@@ -84,7 +84,7 @@ export interface AreaGeometry {
     x: number;
     y: number;
   };
-  seriesIdentifier: SeriesIdentifier;
+  seriesIdentifier: XYChartSeriesIdentifier;
   seriesAreaStyle: AreaStyle;
   seriesAreaLineStyle: LineStyle;
   seriesPointStyle: PointStyle;
@@ -98,7 +98,7 @@ export interface AreaGeometry {
 export interface ArcGeometry {
   arc: string;
   color: string;
-  seriesIdentifier: SeriesIdentifier;
+  seriesIdentifier: XYChartSeriesIdentifier;
   seriesArcStyle: ArcStyle;
   transform: {
     x: number;

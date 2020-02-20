@@ -138,19 +138,18 @@ class LegendComponent extends React.Component<LegendProps> {
     }
     const { key, displayValue, banded } = item;
     const { legendItemTooltipValues, settings } = this.props;
-    const { showLegendDisplayValue, legendPosition } = settings;
+    const { showLegendExtra, legendPosition } = settings;
     const legendValues = this.getLegendValues(legendItemTooltipValues, key, banded);
     return legendValues.map((value, index) => {
       const yAccessor: BandedAccessorType = index === 0 ? BandedAccessorType.Y1 : BandedAccessorType.Y0;
       return (
         <LegendListItem
-          {...item}
-          label={getItemLabel(item, yAccessor)}
           key={`${key}-${yAccessor}`}
-          legendItem={item}
-          displayValue={value !== '' ? value : displayValue.formatted[yAccessor]}
-          showLegendDisplayValue={showLegendDisplayValue}
           legendPosition={legendPosition}
+          legendItem={item}
+          label={getItemLabel(item, yAccessor)}
+          extra={value !== '' ? value : displayValue.formatted[yAccessor]}
+          showExtra={showLegendExtra}
           toggleDeselectSeriesAction={this.props.onToggleDeselectSeriesAction}
           legendItemOutAction={this.props.onLegendItemOutAction}
           legendItemOverAction={this.props.onLegendItemOverAction}

@@ -57,17 +57,17 @@ export default {
 };
 
 export const barClicksAndHovers = () => {
-  const headerFormatter: TooltipValueFormatter = (tooltipData: TooltipValue) => {
-    if (tooltipData.value % 2 === 0) {
+  const headerFormatter: TooltipValueFormatter = (tooltip: TooltipValue) => {
+    if (tooltip.value % 2 === 0) {
       return (
         <div>
           <p>special header for even x values</p>
-          <p>{tooltipData.value}</p>
+          <p>{tooltip.value}</p>
         </div>
       );
     }
 
-    return tooltipData.value;
+    return tooltip.value;
   };
 
   const tooltipProps = {
@@ -76,7 +76,13 @@ export const barClicksAndHovers = () => {
 
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} {...onElementListeners} tooltip={tooltipProps} />
+      <Settings
+        showLegend
+        showLegendExtra
+        legendPosition={Position.Right}
+        {...onElementListeners}
+        tooltip={tooltipProps}
+      />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -108,7 +114,7 @@ barClicksAndHovers.story = {
 export const areaPointClicksAndHovers = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} {...onElementListeners} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} {...onElementListeners} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -140,7 +146,7 @@ areaPointClicksAndHovers.story = {
 export const linePointClicksAndHovers = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} {...onElementListeners} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} {...onElementListeners} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -172,7 +178,7 @@ linePointClicksAndHovers.story = {
 export const lineAreaBarPointClicksAndHovers = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} {...onElementListeners} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} {...onElementListeners} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -267,7 +273,13 @@ export const clicksHoversOnLegendItemsBarChart = () => {
 
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} {...onLegendItemListeners} xDomain={xDomain} />
+      <Settings
+        showLegend
+        showLegendExtra
+        legendPosition={Position.Right}
+        {...onLegendItemListeners}
+        xDomain={xDomain}
+      />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -298,7 +310,8 @@ export const clickHoversOnLegendItemsAreaChart = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings
-        showLegend={true}
+        showLegend
+        showLegendExtra
         legendPosition={Position.Right}
         onLegendItemClick={action('onLegendItemClick')}
         onLegendItemOver={action('onLegendItemOver')}
@@ -342,7 +355,8 @@ export const clickHoversOnLegendItemsLineChart = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings
-        showLegend={true}
+        showLegend
+        showLegendExtra
         legendPosition={Position.Right}
         onLegendItemClick={action('onLegendItemClick')}
         onLegendItemOver={action('onLegendItemOver')}
@@ -451,7 +465,8 @@ export const clickHoversOnLegendItemsMixedChart = () => {
   return (
     <Chart className={'story-chart'}>
       <Settings
-        showLegend={true}
+        showLegend
+        showLegendExtra
         legendPosition={Position.Right}
         onLegendItemClick={action('onLegendItemClick')}
         onLegendItemOver={action('onLegendItemOver')}
@@ -781,7 +796,7 @@ crosshairWithTimeAxis.story = {
 export const renderChangeAction = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} onRenderChange={onRenderChange} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} onRenderChange={onRenderChange} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -817,7 +832,7 @@ renderChangeAction.story = {
 export const cursorUpdateAction = () => {
   return (
     <Chart className={'story-chart'}>
-      <Settings showLegend={true} legendPosition={Position.Right} onPointerUpdate={onPointerUpdate} />
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} onPointerUpdate={onPointerUpdate} />
       <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
       <Axis
         id={getAxisId('left2')}
@@ -886,7 +901,7 @@ export const pngExportAction = () => {
   button(label, handler, groupId);
   return (
     <Chart className={'story-chart'} ref={chartRef}>
-      <Settings showLegend={true} />
+      <Settings showLegend showLegendExtra />
       <Axis
         id={getAxisId('time')}
         position={Position.Bottom}

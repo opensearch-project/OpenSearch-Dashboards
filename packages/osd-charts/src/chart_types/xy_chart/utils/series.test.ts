@@ -8,7 +8,7 @@ import {
   getSplittedSeries,
   RawDataSeries,
   splitSeries,
-  SeriesIdentifier,
+  XYChartSeriesIdentifier,
   cleanDatum,
 } from './series';
 import { BasicSeriesSpec, LineSeriesSpec, SeriesTypes } from './specs';
@@ -555,7 +555,7 @@ describe('Series', () => {
     const emptyDeselected = getSplittedSeries([splitSpec]);
     expect(emptyDeselected.splittedSeries.get(specId)!.length).toBe(2);
 
-    const deselectedDataSeries: SeriesIdentifier[] = [
+    const deselectedDataSeries: XYChartSeriesIdentifier[] = [
       {
         specId,
         yAccessor: splitSpec.yAccessors[0],

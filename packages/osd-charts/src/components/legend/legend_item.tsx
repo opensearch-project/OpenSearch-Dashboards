@@ -6,63 +6,58 @@ import { LegendItemListener, BasicListener } from '../../specs/settings';
 import { LegendItem } from '../../chart_types/xy_chart/legend/legend';
 import { onLegendItemOutAction, onLegendItemOverAction } from '../../state/actions/legend';
 import { Position } from '../../utils/commons';
-import { SeriesIdentifier } from '../../chart_types/xy_chart/utils/series';
+import { XYChartSeriesIdentifier } from '../../chart_types/xy_chart/utils/series';
 
 interface LegendItemProps {
-  selectedLegendItem?: LegendItem | null;
   legendItem: LegendItem;
-  displayValue: string;
+  extra: string;
   label?: string;
   legendPosition: Position;
-  showLegendDisplayValue: boolean;
+  showExtra: boolean;
   onLegendItemClickListener?: LegendItemListener;
   onLegendItemOutListener?: BasicListener;
   onLegendItemOverListener?: LegendItemListener;
   legendItemOutAction: typeof onLegendItemOutAction;
   legendItemOverAction: typeof onLegendItemOverAction;
-  toggleDeselectSeriesAction: (legendItemId: SeriesIdentifier) => void;
+  toggleDeselectSeriesAction: (legendItemId: XYChartSeriesIdentifier) => void;
 }
 
 /**
- * Create a div for the the displayed value
- * @param displayValue
+ * Create a div for the extra text
+ * @param extra
  * @param isSeriesVisible
  */
-function renderDisplayValue(displayValue: string, isSeriesVisible: boolean | undefined) {
-  const displayValueClassNames = classNames('echLegendItem__displayValue', {
-    ['echLegendItem__displayValue--hidden']: !isSeriesVisible,
+function renderExtra(extra: string, isSeriesVisible: boolean | undefined) {
+  const extraClassNames = classNames('echLegendItem__extra', {
+    ['echLegendItem__extra--hidden']: !isSeriesVisible,
   });
   return (
-    <div className={displayValueClassNames} title={displayValue}>
-      {displayValue}
+    <div className={extraClassNames} title={extra}>
+      {extra}
     </div>
   );
 }
 
 /**
- * Create a div for the title
- * @param title
- * @param onTitleClick
- * @param hasTitleClickListener
- * @param isSelected
- * @param showLegendDisplayValue
+ * Create a div for the label
+ * @param label
+ * @param onLabelClick
+ * @param hasLabelClickListener
  */
-function renderTitle(
-  title: string,
-  onTitleClick: (event: React.MouseEvent<Element, MouseEvent>) => void,
-  hasTitleClickListener: boolean,
-  isSelected: boolean,
-  showLegendDisplayValue: boolean,
+function renderLabel(
+  onLabelClick: (event: React.MouseEvent<Element, MouseEvent>) => void,
+  hasLabelClickListener: boolean,
+  label?: string,
 ) {
-  // TODO add contextual menu panel on click
-  const titleClassNames = classNames('echLegendItem__title', {
-    ['echLegendItem__title--hasClickListener']: hasTitleClickListener,
-    ['echLegendItem__title--selected']: isSelected,
-    ['echLegendItem__title--hasDisplayValue']: showLegendDisplayValue,
+  if (!label) {
+    return null;
+  }
+  const labelClassNames = classNames('echLegendItem__label', {
+    ['echLegendItem__label--hasClickListener']: hasLabelClickListener,
   });
   return (
-    <div className={titleClassNames} title={title} onClick={onTitleClick}>
-      {title}
+    <div className={labelClassNames} title={label} onClick={onLabelClick}>
+      {label}
     </div>
   );
 }
@@ -72,7 +67,10 @@ function renderTitle(
  * @param color
  * @param isSeriesVisible
  */
-function renderColor(color: string, isSeriesVisible = true) {
+function renderColor(color?: string, isSeriesVisible = true) {
+  if (!color) {
+    return null;
+  }
   // TODO add color picker
   if (isSeriesVisible) {
     return (
@@ -97,24 +95,26 @@ export class LegendListItem extends React.Component<LegendItemProps> {
   }
 
   render() {
-    const { displayValue, legendItem, legendPosition, label } = this.props;
+    const { extra, legendItem, legendPosition, label, showExtra, onLegendItemClickListener } = this.props;
     const { color, isSeriesVisible, seriesIdentifier, isLegendItemVisible } = legendItem;
-    const onTitleClick = this.onVisibilityClick(seriesIdentifier);
 
-    const { showLegendDisplayValue, selectedLegendItem, onLegendItemClickListener } = this.props;
-    const isSelected =
-      selectedLegendItem == null ? false : selectedLegendItem.seriesIdentifier.key === seriesIdentifier.key;
-    const hasTitleClickListener = Boolean(onLegendItemClickListener);
-    const itemClasses = classNames('echLegendItem', `echLegendItem--${legendPosition}`, {
+    const onLabelClick = this.onVisibilityClick(seriesIdentifier);
+    const hasLabelClickListener = Boolean(onLegendItemClickListener);
+
+    const itemClassNames = classNames('echLegendItem', `echLegendItem--${legendPosition}`, {
       'echLegendItem-isHidden': !isSeriesVisible,
-      'echLegendItem__displayValue--hidden': !isLegendItemVisible,
+      'echLegendItem__extra--hidden': !isLegendItemVisible,
     });
 
     return (
-      <div className={itemClasses} onMouseEnter={this.onLegendItemMouseOver} onMouseLeave={this.onLegendItemMouseOut}>
-        {color && renderColor(color, isSeriesVisible)}
-        {label && renderTitle(label, onTitleClick, hasTitleClickListener, isSelected, showLegendDisplayValue)}
-        {showLegendDisplayValue && renderDisplayValue(displayValue, isSeriesVisible)}
+      <div
+        className={itemClassNames}
+        onMouseEnter={this.onLegendItemMouseOver}
+        onMouseLeave={this.onLegendItemMouseOut}
+      >
+        {renderColor(color, isSeriesVisible)}
+        {renderLabel(onLabelClick, hasLabelClickListener, label)}
+        {showExtra && renderExtra(extra, isSeriesVisible)}
       </div>
     );
   }
@@ -138,7 +138,7 @@ export class LegendListItem extends React.Component<LegendItemProps> {
   };
 
   // TODO handle shift key
-  onVisibilityClick = (legendItemId: SeriesIdentifier) => () => {
+  onVisibilityClick = (legendItemId: XYChartSeriesIdentifier) => () => {
     const { onLegendItemClickListener, toggleDeselectSeriesAction } = this.props;
     if (onLegendItemClickListener) {
       onLegendItemClickListener(legendItemId);
