@@ -51,5 +51,12 @@ const mapDispatchToProps = (dispatch: Dispatch): DispatchProps =>
   );
 
 export function getConnect() {
-  return connect(null, mapDispatchToProps);
+  /**
+   * Redux assumes shallowEqual for all connected components
+   *
+   * This causes an issue where the specs are cleared and memoized spec components will never be
+   * rerendered and thus never re-upserted to the state. Setting pure to false solves this issue
+   * and doesn't cause traditional performance degradations.
+   */
+  return connect(null, mapDispatchToProps, null, { pure: false });
 }
