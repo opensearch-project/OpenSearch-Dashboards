@@ -56,12 +56,58 @@ export type PointStyleAccessor = (
 export const DEFAULT_GLOBAL_ID = '__global__';
 
 export type FilterPredicate = (series: XYChartSeriesIdentifier) => boolean;
-export type SeriesStringPredicate = (series: XYChartSeriesIdentifier, isTooltip: boolean) => string | null;
-export type SubSeriesStringPredicate = (
-  accessorLabel: string | number,
-  accessorKey: string | number | null,
-  isTooltip: boolean,
-) => string | number | null;
+export type SeriesName = string | number | null;
+/**
+ * Function to create custom series name for a given series
+ */
+export type SeriesNameFn = (series: XYChartSeriesIdentifier, isTooltip: boolean) => SeriesName;
+/**
+ * Accessor mapping to replace names
+ */
+export interface SeriesNameConfig {
+  /**
+   * accessor key (i.e. `yAccessors` and `seriesSplitAccessors`)
+   */
+  accessor: string | number;
+  /**
+   * Accessor value (i.e. values from `seriesSplitAccessors`)
+   */
+  value?: string | number;
+  /**
+   * New name for Accessor value
+   *
+   * If not provided, the original value will be used
+   */
+  name?: string | number;
+  /**
+   * Sort order of name, overrides order listed in array.
+   *
+   * lower values - left-most
+   * higher values - right-most
+   */
+  sortIndex?: number;
+}
+export interface SeriesNameConfigOptions {
+  /**
+   * Array of accessor naming configs to replace series names
+   *
+   * Only provided configs will be included
+   * (i.e. if you only provide a single mapping for `yAccessor`, all other series accessor names will be ignored)
+   *
+   * The order of configs is the order in which the resulting names will
+   * be joined, if no `sortIndex` is specified.
+   *
+   * If no values are found for a giving mapping in a series, the mapping will be ignored.
+   */
+  names?: SeriesNameConfig[];
+  /**
+   * Delimiter to join values/names
+   *
+   * @default ' - '
+   */
+  delimiter?: string;
+}
+export type SeriesNameAccessor = string | SeriesNameFn | SeriesNameConfigOptions;
 
 /**
  * The fit function type
@@ -203,8 +249,10 @@ export interface DisplayValueSpec {
 export interface SeriesSpec extends Spec {
   specType: typeof SpecTypes.Series;
   chartType: typeof ChartTypes.XYAxis;
-  /** The name or label of the spec */
-  name?: string;
+  /**
+   * The name of the spec. Also a mechanism to provide custom series names.
+   */
+  name?: SeriesNameAccessor;
   /** The ID of the spec group, generated via getGroupId method
    * @default __global__
    */
@@ -240,21 +288,6 @@ export interface SeriesSpec extends Spec {
    * Hide series in tooltip
    */
   filterSeriesInTooltip?: FilterPredicate;
-  /**
-   * Custom series naming predicate function. Values are unaffected by `customSubSeriesLabel` changes.
-   *
-   * This takes precedence over `customSubSeriesLabel`
-   *
-   * @param series - `XYChartSeriesIdentifier`
-   * @param isTooltip - true if tooltip label, otherwise legend label
-   */
-  customSeriesLabel?: SeriesStringPredicate;
-  /**
-   * Custom sub series naming predicate function.
-   *
-   * `customSeriesLabel` takes precedence
-   */
-  customSubSeriesLabel?: SubSeriesStringPredicate;
 }
 
 export interface Postfixes {

@@ -3,11 +3,13 @@ import { Accessor } from '../../../utils/accessor';
 import { GroupId, SpecId } from '../../../utils/ids';
 import { splitSpecsByGroupId, YBasicSeriesSpec } from '../domains/y_domain';
 import { formatNonStackedDataSeriesValues } from './nonstacked_series_utils';
-import { BasicSeriesSpec, SubSeriesStringPredicate, SeriesTypes, SeriesSpecs } from './specs';
+import { BasicSeriesSpec, SeriesTypes, SeriesSpecs, SeriesNameConfigOptions } from './specs';
 import { formatStackedDataSeriesValues } from './stacked_series_utils';
 import { ScaleType } from '../../../scales';
 import { LastValues } from '../state/utils';
 import { Datum } from '../../../utils/commons';
+
+export const SERIES_DELIMITER = ' - ';
 
 export interface FilledValues {
   /** the x value */
@@ -361,10 +363,11 @@ export function getSplittedSeries(
     const banded = spec.y0Accessors && spec.y0Accessors.length > 0;
 
     dataSeries.rawDataSeries.forEach((series) => {
+      const { data, ...seriesIdentifier } = series;
       seriesCollection.set(series.key, {
         banded,
         specSortIndex: spec.sortIndex,
-        seriesIdentifier: series as XYChartSeriesIdentifier,
+        seriesIdentifier,
       });
     });
 
@@ -381,85 +384,79 @@ export function getSplittedSeries(
   };
 }
 
-/**
- * Get custom  series sub-name
- */
-const getCustomSubSeriesName = (() => {
-  const cache = new Map();
-
-  return (customSubSeriesLabel: SubSeriesStringPredicate, isTooltip: boolean) => (
-    args: [string | number | null, string | number],
-  ): string | number => {
-    const [accessorKey, accessorLabel] = args;
-    const key = [args, isTooltip].join('~~~');
-
-    if (cache.has(key)) {
-      return cache.get(key);
-    } else {
-      const label = customSubSeriesLabel(accessorLabel, accessorKey, isTooltip) || accessorLabel;
-      cache.set(key, label);
-
-      return label;
-    }
-  };
-})();
-
-const getSeriesLabelKeys = (
-  spec: BasicSeriesSpec,
-  seriesIdentifier: XYChartSeriesIdentifier,
-  isTooltip: boolean,
-): (string | number)[] => {
-  const isMultipleY = spec.yAccessors.length > 1;
-
-  if (spec.customSubSeriesLabel) {
-    const { yAccessor, splitAccessors } = seriesIdentifier;
-    const fullKeyPairs: [string | number | null, string | number][] = [...splitAccessors.entries(), [null, yAccessor]];
-    const labelKeys = fullKeyPairs.map(getCustomSubSeriesName(spec.customSubSeriesLabel, isTooltip));
-
-    return isMultipleY ? labelKeys : labelKeys.slice(0, -1);
+export function getSeriesNameFromOptions(
+  options: SeriesNameConfigOptions,
+  { yAccessor, splitAccessors }: XYChartSeriesIdentifier,
+  delimiter: string,
+): string | null {
+  if (!options.names) {
+    return null;
   }
 
-  const { seriesKeys } = seriesIdentifier;
+  return (
+    options.names
+      .slice()
+      .sort(({ sortIndex: a = Infinity }, { sortIndex: b = Infinity }) => a - b)
+      .map(({ accessor, value, name }) => {
+        const accessorValue = splitAccessors.get(accessor) ?? null;
+        if (accessorValue === value) {
+          return name ?? value;
+        }
 
-  return isMultipleY ? seriesKeys : seriesKeys.slice(0, -1);
-};
+        if (yAccessor === accessor) {
+          return name ?? accessor;
+        }
+        return null;
+      })
+      .filter((d) => Boolean(d) || d === 0)
+      .join(delimiter) || null
+  );
+}
 
 /**
- * Get series label based on `SeriesIdentifier`
+ * Get series name based on `SeriesIdentifier`
  */
-export function getSeriesLabel(
+export function getSeriesName(
   seriesIdentifier: XYChartSeriesIdentifier,
   hasSingleSeries: boolean,
   isTooltip: boolean,
   spec?: BasicSeriesSpec,
 ): string {
-  if (spec && spec.customSeriesLabel) {
-    const customLabel = spec.customSeriesLabel(seriesIdentifier, isTooltip);
+  let delimiter = SERIES_DELIMITER;
+  if (spec && spec.name && typeof spec.name !== 'string') {
+    let customLabel: string | number | null = null;
+    if (typeof spec.name === 'function') {
+      customLabel = spec.name(seriesIdentifier, isTooltip);
+    } else {
+      delimiter = spec.name.delimiter ?? delimiter;
+      customLabel = getSeriesNameFromOptions(spec.name, seriesIdentifier, delimiter);
+    }
 
     if (customLabel !== null) {
-      return customLabel;
+      return customLabel.toString();
     }
   }
 
-  let label = '';
-  const labelKeys = spec ? getSeriesLabelKeys(spec, seriesIdentifier, isTooltip) : seriesIdentifier.seriesKeys;
+  let name = '';
+  const nameKeys =
+    spec && spec.yAccessors.length > 1 ? seriesIdentifier.seriesKeys : seriesIdentifier.seriesKeys.slice(0, -1);
 
   // there is one series, the is only one yAccessor, the first part is not null
-  if (hasSingleSeries || labelKeys.length === 0 || labelKeys[0] == null) {
+  if (hasSingleSeries || nameKeys.length === 0 || nameKeys[0] == null) {
     if (!spec) {
       return '';
     }
 
-    if (spec.splitSeriesAccessors && labelKeys.length > 0 && labelKeys[0] != null) {
-      label = labelKeys.join(' - ');
+    if (spec.splitSeriesAccessors && nameKeys.length > 0 && nameKeys[0] != null) {
+      name = nameKeys.join(delimiter);
     } else {
-      label = spec.name || `${spec.id}`;
+      name = typeof spec.name === 'string' ? spec.name : `${spec.id}`;
     }
   } else {
-    label = labelKeys.join(' - ');
+    name = nameKeys.join(delimiter);
   }
 
-  return label;
+  return name;
 }
 
 function getSortIndex({ specSortIndex }: SeriesCollectionValue, total: number): number {

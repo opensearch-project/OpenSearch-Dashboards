@@ -105,7 +105,7 @@ describe('Rendering utils', () => {
     const highlightedLegendItem: LegendItem = {
       key: 'somekey',
       color: '',
-      label: '',
+      name: '',
       seriesIdentifier,
       isSeriesVisible: true,
       isLegendItemVisible: true,

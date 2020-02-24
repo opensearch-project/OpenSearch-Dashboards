@@ -32,8 +32,8 @@ import { palettes } from '../src/utils/themes/colors';
 import {
   BarStyleAccessor,
   PointStyleAccessor,
-  SeriesStringPredicate,
-  SubSeriesStringPredicate,
+  SeriesNameConfigOptions,
+  SeriesNameFn,
 } from '../src/chart_types/xy_chart/utils/specs';
 import moment from 'moment';
 import { DateTime } from 'luxon';
@@ -937,29 +937,60 @@ customSeriesStylesArea.story = {
   name: 'custom series styles: area',
 };
 
-export const addCustomFullAndSubSeriesLabel = () => {
-  const customSeriesLabel: SeriesStringPredicate = ({ yAccessor, splitAccessors }) => {
+export const addCustomSeriesName = () => {
+  const customSeriesNamingFn: SeriesNameFn = ({ yAccessor, splitAccessors }) => {
     // eslint-disable-next-line react/prop-types
     if (yAccessor === 'y1' && splitAccessors.get('g') === 'a') {
-      return 'replace full series name';
+      return 'Custom full series name';
     }
 
     return null;
   };
-  const customSubSeriesLabel: SubSeriesStringPredicate = (accessor, key) => {
-    if (key) {
-      // split accessor;
-      if (accessor === 'a') {
-        return 'replace a(from g)';
-      }
-    } else {
-      // y accessor;
-      if (accessor === 'y2') {
-        return 'replace y2';
-      }
-    }
 
-    return null;
+  return (
+    <Chart className={'story-chart'}>
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
+      <Axis id={getAxisId('bottom')} position={Position.Bottom} title={'Bottom axis'} showOverlappingTicks={true} />
+      <Axis
+        id={getAxisId('left2')}
+        title={'Left axis'}
+        position={Position.Left}
+        tickFormat={(d: any) => Number(d).toFixed(2)}
+      />
+
+      <BarSeries
+        id={getSpecId('bars1')}
+        xScaleType={ScaleType.Ordinal}
+        yScaleType={ScaleType.Linear}
+        xAccessor="x"
+        yAccessors={['y1', 'y2']}
+        splitSeriesAccessors={['g']}
+        data={TestDatasets.BARCHART_2Y1G}
+        name={customSeriesNamingFn}
+      />
+    </Chart>
+  );
+};
+addCustomSeriesName.story = {
+  name: 'Add custom series name',
+};
+
+export const customSeriesNamingConfig = () => {
+  const customSeriesNameOptions: SeriesNameConfigOptions = {
+    names: [
+      {
+        // replace split accessor;
+        accessor: 'g',
+        value: 'a',
+        name: 'replace a(from g)',
+      },
+      {
+        // replace y accessor;
+        accessor: 'y2',
+        name: 'replace y2',
+      },
+    ],
+    delimiter: ' | ',
   };
   return (
     <Chart className={'story-chart'}>
@@ -980,17 +1011,16 @@ export const addCustomFullAndSubSeriesLabel = () => {
         yAccessors={['y1', 'y2']}
         splitSeriesAccessors={['g']}
         data={TestDatasets.BARCHART_2Y1G}
-        customSeriesLabel={customSeriesLabel}
-        customSubSeriesLabel={customSubSeriesLabel}
+        name={customSeriesNameOptions}
       />
     </Chart>
   );
 };
-addCustomFullAndSubSeriesLabel.story = {
-  name: 'Add custom full and sub series label',
+customSeriesNamingConfig.story = {
+  name: 'Add custom series naming and delimeter',
 };
 
-export const addCustomSubSeriesLabelFormatting = () => {
+export const addCustomSeriesNameFormatting = () => {
   const start = DateTime.fromISO('2019-01-01T00:00:00.000', { zone: 'utc' });
   const data = [
     { x: 1, y: 3, percent: 0.5, time: start.plus({ month: 1 }).toMillis() },
@@ -1003,26 +1033,30 @@ export const addCustomSubSeriesLabelFormatting = () => {
     { x: 2, y: 18, percent: 1, time: start.plus({ month: 2 }).toMillis() },
     { x: 3, y: 7, percent: 1, time: start.plus({ month: 3 }).toMillis() },
   ];
-  const customSubSeriesLabel: SubSeriesStringPredicate = (accessor, key, isTooltip) => {
-    if (key === 'time') {
-      // Format time group
-      if (isTooltip) {
-        // Format tooltip time to be longer
-        return moment(accessor).format('ll');
-      }
+  const customSeriesNamingFn: SeriesNameFn = ({ yAccessor, splitAccessors }, isTooltip) =>
+    [
+      ...[...splitAccessors.entries()].map(([key, value]) => {
+        if (key === 'time') {
+          // Format time group
+          if (isTooltip) {
+            // Format tooltip time to be longer
+            return moment(value).format('ll');
+          }
 
-      // Format legend to be shorter
-      return moment(accessor).format('M/YYYY');
-    }
+          // Format legend to be shorter
+          return moment(value).format('M/YYYY');
+        }
 
-    if (key === 'percent') {
-      // Format percent group
-      return `${(accessor as number) * 100}%`;
-    }
+        if (key === 'percent') {
+          // Format percent group
+          return `${(value as number) * 100}%`;
+        }
 
-    // don't format yAccessor
-    return null;
-  };
+        return value;
+      }),
+      // don't format yAccessor
+      yAccessor,
+    ].join(' - ');
 
   return (
     <Chart className={'story-chart'}>
@@ -1043,13 +1077,13 @@ export const addCustomSubSeriesLabelFormatting = () => {
         yAccessors={['y']}
         splitSeriesAccessors={['time', 'percent']}
         data={data}
-        customSubSeriesLabel={customSubSeriesLabel}
+        name={customSeriesNamingFn}
       />
     </Chart>
   );
 };
-addCustomFullAndSubSeriesLabel.story = {
-  name: 'Add custom sub-series label formatting [time/date and percent]',
+addCustomSeriesNameFormatting.story = {
+  name: 'Add custom series name formatting (legend/tooltip) [time/date and percent]',
 };
 
 export const tickLabelPaddingBothPropAndTheme = () => {

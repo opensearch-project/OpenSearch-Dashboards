@@ -1,7 +1,7 @@
 import { getAxisId, getGroupId, getSpecId } from '../../../utils/ids';
 import { ScaleType } from '../../../scales';
 import { computeLegend } from './legend';
-import { SeriesCollectionValue, getSeriesLabel } from '../utils/series';
+import { SeriesCollectionValue, getSeriesName } from '../utils/series';
 import { AxisSpec, BasicSeriesSpec, SeriesTypes } from '../utils/specs';
 import { Position } from '../../../utils/commons';
 import { ChartTypes } from '../..';
@@ -118,7 +118,7 @@ describe('Legends', () => {
     const expected = [
       {
         color: 'red',
-        label: 'Spec 1 title',
+        name: 'Spec 1 title',
         seriesIdentifier: {
           seriesKeys: ['y1'],
           specId: 'spec1',
@@ -142,7 +142,7 @@ describe('Legends', () => {
     const expected = [
       {
         color: 'red',
-        label: 'Spec 1 title',
+        name: 'Spec 1 title',
         seriesIdentifier: {
           seriesKeys: ['y1'],
           specId: 'spec1',
@@ -158,7 +158,7 @@ describe('Legends', () => {
       },
       {
         color: 'blue',
-        label: 'a - b',
+        name: 'a - b',
         seriesIdentifier: {
           seriesKeys: ['a', 'b', 'y1'],
           specId: 'spec1',
@@ -182,7 +182,7 @@ describe('Legends', () => {
     const expected = [
       {
         color: 'red',
-        label: 'Spec 1 title',
+        name: 'Spec 1 title',
         seriesIdentifier: {
           seriesKeys: ['y1'],
           specId: 'spec1',
@@ -198,7 +198,7 @@ describe('Legends', () => {
       },
       {
         color: 'green',
-        label: 'spec2',
+        name: 'spec2',
         seriesIdentifier: {
           seriesKeys: ['y1'],
           specId: 'spec2',
@@ -227,7 +227,7 @@ describe('Legends', () => {
     const expected = [
       {
         color: 'violet',
-        label: 'Spec 1 title',
+        name: 'Spec 1 title',
         banded: undefined,
         seriesIdentifier: {
           seriesKeys: ['y1'],
@@ -272,7 +272,7 @@ describe('Legends', () => {
     const visibility = [...legend.values()].map((item) => item.isSeriesVisible);
     expect(visibility).toEqual([false, false, true]);
   });
-  it('returns the right series label for a color series', () => {
+  it('returns the right series name for a color series', () => {
     const seriesIdentifier1 = {
       specId: getSpecId(''),
       yAccessor: 'y1',
@@ -289,38 +289,38 @@ describe('Legends', () => {
     };
 
     // null removed, seriesIdentifier has to be at least an empty array
-    let label = getSeriesLabel(seriesIdentifier1, true, false);
-    expect(label).toBe('');
-    label = getSeriesLabel(seriesIdentifier1, true, false, spec1);
-    expect(label).toBe('Spec 1 title');
-    label = getSeriesLabel(seriesIdentifier1, true, false, spec2);
-    expect(label).toBe('spec2');
-    label = getSeriesLabel(seriesIdentifier2, true, false, spec1);
-    expect(label).toBe('Spec 1 title');
-    label = getSeriesLabel(seriesIdentifier2, true, false, spec2);
-    expect(label).toBe('spec2');
+    let name = getSeriesName(seriesIdentifier1, true, false);
+    expect(name).toBe('');
+    name = getSeriesName(seriesIdentifier1, true, false, spec1);
+    expect(name).toBe('Spec 1 title');
+    name = getSeriesName(seriesIdentifier1, true, false, spec2);
+    expect(name).toBe('spec2');
+    name = getSeriesName(seriesIdentifier2, true, false, spec1);
+    expect(name).toBe('Spec 1 title');
+    name = getSeriesName(seriesIdentifier2, true, false, spec2);
+    expect(name).toBe('spec2');
 
-    label = getSeriesLabel(seriesIdentifier1, false, false, spec1);
-    expect(label).toBe('Spec 1 title');
-    label = getSeriesLabel(seriesIdentifier1, false, false, spec2);
-    expect(label).toBe('spec2');
-    label = getSeriesLabel(seriesIdentifier2, false, false, spec1);
-    expect(label).toBe('a - b');
-    label = getSeriesLabel(seriesIdentifier2, false, false, spec2);
-    expect(label).toBe('a - b');
+    name = getSeriesName(seriesIdentifier1, false, false, spec1);
+    expect(name).toBe('Spec 1 title');
+    name = getSeriesName(seriesIdentifier1, false, false, spec2);
+    expect(name).toBe('spec2');
+    name = getSeriesName(seriesIdentifier2, false, false, spec1);
+    expect(name).toBe('a - b');
+    name = getSeriesName(seriesIdentifier2, false, false, spec2);
+    expect(name).toBe('a - b');
 
-    label = getSeriesLabel(seriesIdentifier1, true, false, spec1);
-    expect(label).toBe('Spec 1 title');
-    label = getSeriesLabel(seriesIdentifier1, true, false, spec2);
-    expect(label).toBe('spec2');
-    label = getSeriesLabel(seriesIdentifier1, true, false);
-    expect(label).toBe('');
-    label = getSeriesLabel(seriesIdentifier1, true, false, spec1);
-    expect(label).toBe('Spec 1 title');
-    label = getSeriesLabel(seriesIdentifier1, true, false, spec2);
-    expect(label).toBe('spec2');
+    name = getSeriesName(seriesIdentifier1, true, false, spec1);
+    expect(name).toBe('Spec 1 title');
+    name = getSeriesName(seriesIdentifier1, true, false, spec2);
+    expect(name).toBe('spec2');
+    name = getSeriesName(seriesIdentifier1, true, false);
+    expect(name).toBe('');
+    name = getSeriesName(seriesIdentifier1, true, false, spec1);
+    expect(name).toBe('Spec 1 title');
+    name = getSeriesName(seriesIdentifier1, true, false, spec2);
+    expect(name).toBe('spec2');
   });
-  it('use the splitted value as label if has a single series and splitSeries is used', () => {
+  it('use the splitted value as name if has a single series and splitSeries is used', () => {
     const seriesIdentifier1 = {
       specId: getSpecId(''),
       yAccessor: 'y1',
@@ -347,22 +347,22 @@ describe('Legends', () => {
       ...spec1,
       splitSeriesAccessors: ['g'],
     };
-    let label = getSeriesLabel(seriesIdentifier1, true, false, specWithSplit);
-    expect(label).toBe('Spec 1 title');
+    let name = getSeriesName(seriesIdentifier1, true, false, specWithSplit);
+    expect(name).toBe('Spec 1 title');
 
-    label = getSeriesLabel(seriesIdentifier3, true, false, specWithSplit);
-    expect(label).toBe('a');
+    name = getSeriesName(seriesIdentifier3, true, false, specWithSplit);
+    expect(name).toBe('a');
 
     // happens when we have multiple values in splitSeriesAccessor
     // or we have also multiple yAccessors
-    label = getSeriesLabel(seriesIdentifier2, true, false, specWithSplit);
-    expect(label).toBe('a - b');
+    name = getSeriesName(seriesIdentifier2, true, false, specWithSplit);
+    expect(name).toBe('a - b');
 
     // happens when the value of a splitSeriesAccessor is null
-    label = getSeriesLabel(seriesIdentifier1, true, false, specWithSplit);
-    expect(label).toBe('Spec 1 title');
+    name = getSeriesName(seriesIdentifier1, true, false, specWithSplit);
+    expect(name).toBe('Spec 1 title');
 
-    label = getSeriesLabel(seriesIdentifier1, false, false, specWithSplit);
-    expect(label).toBe('Spec 1 title');
+    name = getSeriesName(seriesIdentifier1, false, false, specWithSplit);
+    expect(name).toBe('Spec 1 title');
   });
 });

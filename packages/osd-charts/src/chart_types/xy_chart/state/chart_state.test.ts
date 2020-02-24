@@ -45,7 +45,7 @@ describe.skip('Chart Store', () => {
   const firstLegendItem: LegendItem = {
     key: 'color1',
     color: 'foo',
-    label: 'bar',
+    name: 'bar',
     seriesIdentifier: {
       specId: SPEC_ID,
       yAccessor: 'y1',
@@ -68,7 +68,7 @@ describe.skip('Chart Store', () => {
   const secondLegendItem: LegendItem = {
     key: 'color2',
     color: 'baz',
-    label: 'qux',
+    name: 'qux',
     seriesIdentifier: {
       specId: SPEC_ID,
       yAccessor: '',

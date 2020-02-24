@@ -8,7 +8,7 @@ import {
 } from '../utils/specs';
 import { IndexedGeometry, BandedAccessorType } from '../../../utils/geometry';
 import { getAccessorFormatLabel } from '../../../utils/accessor';
-import { getSeriesLabel } from '../utils/series';
+import { getSeriesName } from '../utils/series';
 import { TooltipValue } from '../../../specs';
 
 export interface TooltipLegendValue {
@@ -48,7 +48,7 @@ export function formatTooltip(
   hasSingleSeries: boolean,
   axisSpec?: AxisSpec,
 ): TooltipValue {
-  let label = getSeriesLabel(seriesIdentifier, hasSingleSeries, true, spec);
+  let label = getSeriesName(seriesIdentifier, hasSingleSeries, true, spec);
 
   if (isBandedSpec(spec.y0Accessors) && (isAreaSeriesSpec(spec) || isBarSeriesSpec(spec))) {
     const { y0AccessorFormat = Y0_ACCESSOR_POSTFIX, y1AccessorFormat = Y1_ACCESSOR_POSTFIX } = spec;

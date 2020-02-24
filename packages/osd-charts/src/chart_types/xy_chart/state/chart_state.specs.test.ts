@@ -25,8 +25,8 @@ describe('XYChart - specs ordering', () => {
     store.dispatch(specParsed());
 
     const legendItems = getLegendItemsSelector(store.getState());
-    const labels = [...legendItems.values()].map((item) => item.label);
-    expect(labels).toEqual(['A', 'B', 'C']);
+    const names = [...legendItems.values()].map((item) => item.name);
+    expect(names).toEqual(['A', 'B', 'C']);
   });
   it('the legend respect the insert order [B, A, C]', () => {
     store.dispatch(specParsing());
@@ -35,8 +35,8 @@ describe('XYChart - specs ordering', () => {
     store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'C', data })));
     store.dispatch(specParsed());
     const legendItems = getLegendItemsSelector(store.getState());
-    const labels = [...legendItems.values()].map((item) => item.label);
-    expect(labels).toEqual(['B', 'A', 'C']);
+    const names = [...legendItems.values()].map((item) => item.name);
+    expect(names).toEqual(['B', 'A', 'C']);
   });
   it('the legend respect the order when changing properties of existing specs', () => {
     store.dispatch(specParsing());
@@ -46,8 +46,8 @@ describe('XYChart - specs ordering', () => {
     store.dispatch(specParsed());
 
     let legendItems = getLegendItemsSelector(store.getState());
-    let labels = [...legendItems.values()].map((item) => item.label);
-    expect(labels).toEqual(['A', 'B', 'C']);
+    let names = [...legendItems.values()].map((item) => item.name);
+    expect(names).toEqual(['A', 'B', 'C']);
 
     store.dispatch(specParsing());
     store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'A', data })));
@@ -56,8 +56,8 @@ describe('XYChart - specs ordering', () => {
     store.dispatch(specParsed());
 
     legendItems = getLegendItemsSelector(store.getState());
-    labels = [...legendItems.values()].map((item) => item.label);
-    expect(labels).toEqual(['A', 'B updated', 'C']);
+    names = [...legendItems.values()].map((item) => item.name);
+    expect(names).toEqual(['A', 'B updated', 'C']);
   });
   it('the legend respect the order when changing the order of the specs', () => {
     store.dispatch(specParsing());
@@ -67,8 +67,8 @@ describe('XYChart - specs ordering', () => {
     store.dispatch(specParsed());
 
     let legendItems = getLegendItemsSelector(store.getState());
-    let labels = [...legendItems.values()].map((item) => item.label);
-    expect(labels).toEqual(['A', 'B', 'C']);
+    let names = [...legendItems.values()].map((item) => item.name);
+    expect(names).toEqual(['A', 'B', 'C']);
 
     store.dispatch(specParsing());
     store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'B', data })));
@@ -77,7 +77,7 @@ describe('XYChart - specs ordering', () => {
     store.dispatch(specParsed());
 
     legendItems = getLegendItemsSelector(store.getState());
-    labels = [...legendItems.values()].map((item) => item.label);
-    expect(labels).toEqual(['B', 'A', 'C']);
+    names = [...legendItems.values()].map((item) => item.name);
+    expect(names).toEqual(['B', 'A', 'C']);
   });
 });
