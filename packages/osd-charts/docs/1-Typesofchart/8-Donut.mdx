@@ -1,7 +1,6 @@
 import { Chart, Datum, Partition, PartitionLayout } from '../../src';
 import { mocks } from '../../src/mocks/hierarchical/index';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
-import { getRandomNumber } from '../../src/mocks/utils';
 import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/types/viewmodel_types';
 import {
   categoricalFillColor,
@@ -21,7 +20,7 @@ import {
 
 <Chart className={'story-chart'}>
 <Partition
-    id={'spec_' + getRandomNumber()}
+    id={'spec_1'}
     data={mocks.pie}
     valueAccessor={(d) => d.exportVal}
     valueFormatter={(d) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
@@ -62,7 +61,7 @@ import {
 ```js
 <Chart className={'story-chart'}>
 <Partition
-    id={'spec_' + getRandomNumber()}
+    id={'spec_1'}
     data={mocks.pie}
     valueAccessor={(d: Datum) => d.exportVal}
     valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}

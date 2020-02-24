@@ -22,7 +22,7 @@ import {
   timeFormatter,
   TooltipType,
 } from '../src';
-import { SeededDataGenerator, getRandomNumber } from '../src/mocks/utils';
+import { SeededDataGenerator, getRandomNumberGenerator } from '../src/mocks/utils';
 import * as TestDatasets from '../src/utils/data_samples/test_dataset';
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 import { TEST_DATASET_DISCOVER } from '../src/utils/data_samples/test_dataset_discover_per_30s';
@@ -1186,6 +1186,7 @@ scaleToExtent.story = {
 };
 
 export const bandBarChart = () => {
+  const getRandomNumber = getRandomNumberGenerator();
   const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d: any) => {
     return {
       x: d[0],

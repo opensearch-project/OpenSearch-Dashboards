@@ -3,7 +3,6 @@ import { mocks } from '../src/mocks/hierarchical/index';
 import { config } from '../src/chart_types/partition_chart/layout/config/config';
 import { arrayToLookup, hueInterpolator } from '../src/chart_types/partition_chart/layout/utils/calcs';
 import { countryDimension, productDimension, regionDimension } from '../src/mocks/hierarchical/dimension_codes';
-import { getRandomNumber } from '../src/mocks/utils';
 import { palettes } from '../src/mocks/hierarchical/palettes';
 import React from 'react';
 import { ShapeTreeNode } from '../src/chart_types/partition_chart/layout/types/viewmodel_types';
@@ -31,7 +30,7 @@ export default {
 export const OneLayer = () => (
   <Chart className={'story-chart'}>
     <Partition
-      id={'spec_' + getRandomNumber()}
+      id={'spec_1'}
       data={mocks.pie}
       valueAccessor={(d: Datum) => d.exportVal as number}
       valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
@@ -61,7 +60,7 @@ OneLayer.story = {
 export const OneLayer2 = () => (
   <Chart className={'story-chart'}>
     <Partition
-      id={'spec_' + getRandomNumber()}
+      id={'spec_1'}
       data={mocks.pie}
       valueAccessor={(d: Datum) => d.exportVal as number}
       valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
@@ -101,7 +100,7 @@ export const MidTwoLayers = () => (
     }
   >
     <Partition
-      id={'spec_' + getRandomNumber()}
+      id={'spec_1'}
       data={mocks.sunburst}
       valueAccessor={(d: Datum) => d.exportVal as number}
       valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
@@ -167,7 +166,7 @@ export const TwoLayersStressTest = () => (
     }
   >
     <Partition
-      id={'spec_' + getRandomNumber()}
+      id={'spec_1'}
       data={mocks.sunburst}
       valueAccessor={(d: Datum) => d.exportVal as number}
       valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
@@ -238,7 +237,7 @@ export const MultiColor = () => (
     }
   >
     <Partition
-      id={'spec_' + getRandomNumber()}
+      id={'spec_1'}
       data={mocks.sunburst}
       valueAccessor={(d: Datum) => d.exportVal as number}
       valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
@@ -295,7 +294,7 @@ export const CustomStyle = () => (
     }
   >
     <Partition
-      id={'spec_' + getRandomNumber()}
+      id={'spec_1'}
       data={mocks.sunburst}
       valueAccessor={(d: Datum) => d.exportVal as number}
       valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}

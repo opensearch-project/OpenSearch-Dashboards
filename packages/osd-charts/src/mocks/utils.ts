@@ -13,10 +13,10 @@ export const forcedType = <T extends object>(obj: Partial<T>): T => {
   return obj as T;
 };
 
-export const getRandomNumber = seedrandom(process.env.RNG_SEED || undefined);
+export const getRandomNumberGenerator = (seed = process.env.RNG_SEED) => seedrandom(seed);
 
 export class SeededDataGenerator extends DataGenerator {
   constructor(frequency = 500) {
-    super(frequency, getRandomNumber);
+    super(frequency, getRandomNumberGenerator());
   }
 }
