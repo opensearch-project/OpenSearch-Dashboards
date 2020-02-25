@@ -1,13 +1,12 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint'],
   extends: [
     'plugin:@typescript-eslint/recommended',
     'prettier/@typescript-eslint',
     'plugin:prettier/recommended',
     'plugin:react/recommended',
   ],
-  plugins: ['import', 'jest'],
+  plugins: ['@typescript-eslint', 'import', 'jest', 'unicorn'],
 
   env: {
     es6: true,
@@ -49,6 +48,12 @@ module.exports = {
         vars: 'all',
         args: 'after-used',
         ignoreRestSiblings: true,
+      },
+    ],
+    'unicorn/filename-case': [
+      'error',
+      {
+        case: 'snakeCase',
       },
     ],
     'sort-keys': 'off',

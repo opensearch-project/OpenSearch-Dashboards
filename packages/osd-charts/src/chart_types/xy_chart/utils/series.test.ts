@@ -19,7 +19,7 @@ import { ChartTypes } from '../..';
 import { SpecTypes } from '../../../specs/settings';
 import { MockSeriesSpec } from '../../../mocks/specs';
 import { SeededDataGenerator } from '../../../mocks/utils';
-import { MockSeriesIdentifier } from '../../../mocks/series/seriesIdentifiers';
+import { MockSeriesIdentifier } from '../../../mocks/series/series_identifiers';
 
 const dg = new SeededDataGenerator();
 

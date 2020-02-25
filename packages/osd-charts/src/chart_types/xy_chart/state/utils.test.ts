@@ -32,7 +32,7 @@ import { updateDeselectedDataSeries } from './utils';
 import { LegendItem } from '../legend/legend';
 import { ChartTypes } from '../..';
 import { MockSeriesSpecs, MockSeriesSpec } from '../../../mocks/specs';
-import { MockSeriesCollection } from '../../../mocks/series/seriesIdentifiers';
+import { MockSeriesCollection } from '../../../mocks/series/series_identifiers';
 import { SeededDataGenerator } from '../../../mocks/utils';
 import { SeriesCollectionValue, getSeriesIndex, getSeriesColors } from '../utils/series';
 import { SpecTypes } from '../../../specs/settings';

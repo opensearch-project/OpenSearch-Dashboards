@@ -1,6 +1,6 @@
 import Url from 'url';
 
-import { JEST_TIMEOUT, toMatchImageSnapshot } from '../jest-env-setup';
+import { JEST_TIMEOUT, toMatchImageSnapshot } from '../jest_env_setup';
 // @ts-ignore
 import defaults from '../defaults';
 
