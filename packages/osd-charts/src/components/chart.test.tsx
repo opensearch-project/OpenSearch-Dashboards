@@ -19,7 +19,7 @@ describe('Chart', () => {
   it("should render 'No data to display' with settings but without series", () => {
     const wrapper = render(
       <Chart>
-        <Settings debug={true} rendering={'svg'} />
+        <Settings debug={true} rendering="svg" />
       </Chart>,
     );
     expect(wrapper.text()).toContain('No data to display');

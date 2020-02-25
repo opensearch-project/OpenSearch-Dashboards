@@ -21,7 +21,7 @@ function requireAllStories(basedir: string, directory: string) {
       const stats = lstatSync(join(basedir, relativePath));
       if (stats.isDirectory()) {
         result = result.concat(enumerateFiles(basedir, relativePath));
-      } else if (/\.tsx$/.test(relativePath)) {
+      } else if (/\.stories\.tsx$/.test(relativePath)) {
         result.push(relativePath);
       }
     });

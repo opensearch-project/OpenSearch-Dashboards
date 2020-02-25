@@ -19,7 +19,9 @@ class ChartStatusComponent extends React.Component<ChartStatusStateProps> {
   dispatchRenderChange = () => {
     const { onRenderChange, rendered } = this.props;
     if (onRenderChange) {
-      onRenderChange(rendered);
+      window.requestAnimationFrame(() => {
+        onRenderChange(rendered);
+      });
     }
   };
   render() {

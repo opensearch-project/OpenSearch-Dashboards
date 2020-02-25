@@ -24,7 +24,7 @@ addParameters({
   },
   info: {
     inline: true,
-    source: true,
+    source: false,
     propTables: false,
     styles: {
       infoBody: {
@@ -40,4 +40,4 @@ addParameters({
 addDecorator(withKnobs);
 addDecorator(withInfo);
 
-configure(require.context('../stories', true, /\.tsx$/), module);
+configure(require.context('../stories', true, /\.stories\.tsx?$/), module);

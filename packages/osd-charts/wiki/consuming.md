@@ -5,7 +5,7 @@
 You can import Chart components from the top-level Elastic Chart module.
 
 ```js
-import { Axis, BarSeries, Chart, getAxisId, getSpecId, Position, ScaleType } from '@elastic/charts';
+import { Axis, BarSeries, Chart, Position, ScaleType } from '@elastic/charts';
 ```
 
 ## Using Elastic Charts in Kibana

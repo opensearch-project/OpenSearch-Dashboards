@@ -15,13 +15,13 @@ export class Playground extends React.Component<{}, { isSunburstShown: boolean }
       <>
         <div className="chart">
           <Chart>
-            <Axis id="y1" position={Position.Left} title={'y1'} />
-            <Axis id="y2" domain={{ fit: true }} groupId="g2" position={Position.Right} title={'y2'} />
-            <Axis id="x" position={Position.Bottom} title={'x'} />
+            <Axis id="y1" position={Position.Left} title="y1" />
+            <Axis id="y2" domain={{ fit: true }} groupId="g2" position={Position.Right} title="y2" />
+            <Axis id="x" position={Position.Bottom} title="x" />
             <LineSeries
               id="line1"
               xScaleType={ScaleType.Linear}
-              xAccessor={'x'}
+              xAccessor="x"
               yAccessors={['y']}
               splitSeriesAccessors={['g']}
               data={data}
@@ -30,7 +30,7 @@ export class Playground extends React.Component<{}, { isSunburstShown: boolean }
               id="line2"
               groupId="g2"
               xScaleType={ScaleType.Linear}
-              xAccessor={'x'}
+              xAccessor="x"
               yAccessors={['y1']}
               splitSeriesAccessors={['g']}
               data={data}

@@ -68,6 +68,7 @@ module.exports = {
     '@typescript-eslint/no-use-before-define': 'off',
     '@typescript-eslint/ban-ts-ignore': 'off',
     '@typescript-eslint/no-inferrable-types': 'off',
+    'react/jsx-curly-brace-presence': ['error', { props: 'never', children: 'never' }],
   },
   settings: {
     'import/resolver': {

@@ -31,7 +31,7 @@ describe('Specs parser', () => {
       <Provider store={chartStore}>
         <SpecsParser>
           <BarSeries
-            id={'bars'}
+            id="bars"
             xAccessor={0}
             yAccessors={[1]}
             data={[
@@ -40,7 +40,7 @@ describe('Specs parser', () => {
             ]}
           />
           <BarSeries
-            id={'bars'}
+            id="bars"
             xAccessor={0}
             yAccessors={[1]}
             data={[
@@ -49,7 +49,7 @@ describe('Specs parser', () => {
             ]}
           />
           <BarSeries
-            id={'bars2'}
+            id="bars2"
             xAccessor={0}
             yAccessors={[1]}
             data={[
@@ -76,7 +76,7 @@ describe('Specs parser', () => {
       <Provider store={chartStore}>
         <SpecsParser>
           <BarSeries
-            id={'bars'}
+            id="bars"
             xAccessor={0}
             yAccessors={[1]}
             data={[
@@ -93,7 +93,7 @@ describe('Specs parser', () => {
       children: (
         <SpecsParser>
           <BarSeries
-            id={'bars'}
+            id="bars"
             xAccessor={1}
             yAccessors={[1]}
             data={[

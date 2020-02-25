@@ -14,7 +14,7 @@ import {
 } from '../src';
 import React from 'react';
 import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
-import { arrayKnobs, getChartRotationKnob } from '../stories/common';
+import { arrayKnobs, getChartRotationKnob } from '../stories/utils/knobs';
 import { Icon } from '../src/components/icons/icon';
 
 export default {
@@ -39,7 +39,7 @@ export const Basic = () => {
     <Chart className={className}>
       <BarSeries
         id={specId}
-        name={'Simple bar series'}
+        name="Simple bar series"
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -61,7 +61,7 @@ export const AreaBasic = () => {
   const specId = toggleSpec ? 'areas1' : 'areas2';
 
   return (
-    <Chart className={'story-chart'}>
+    <Chart className="story-chart">
       <AreaSeries
         id={specId}
         xScaleType={ScaleType.Time}
@@ -104,7 +104,7 @@ export const lineBasicXDomainContinous = () => {
   const axisPosition = isBottom ? Position.Bottom : Position.Top;
 
   return (
-    <Chart className={'story-chart'}>
+    <Chart className="story-chart">
       <Settings showLegend debug={boolean('debug', false)} rotation={getChartRotationKnob()} />
       <LineAnnotation
         id={getAnnotationId('anno_1')}
@@ -113,10 +113,10 @@ export const lineBasicXDomainContinous = () => {
         style={style}
         marker={<Icon type="alert" />}
       />
-      <Axis id={'horizontal'} position={axisPosition} title={'x-domain axis'} />
-      <Axis id={'vertical'} title={'y-domain axis'} position={Position.Left} />
+      <Axis id="horizontal" position={axisPosition} title="x-domain axis" />
+      <Axis id="vertical" title="y-domain axis" position={Position.Left} />
       <BarSeries
-        id={'bars'}
+        id="bars"
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
@@ -138,19 +138,19 @@ export const lineBasicXDomainOrdinal = () => {
   const dataValues = generateAnnotationData(arrayKnobs('annotation values', ['a', 'c']));
 
   return (
-    <Chart className={'story-chart'}>
+    <Chart className="story-chart">
       <Settings debug={boolean('debug', false)} rotation={getChartRotationKnob()} />
       <LineAnnotation
-        id={'anno_1'}
+        id="anno_1"
         domainType={AnnotationDomainTypes.XDomain}
         dataValues={dataValues}
         marker={<Icon type="alert" />}
       />
-      <Axis id={'top'} position={Position.Top} title={'x-domain axis (top)'} />
-      <Axis id={'bottom'} position={Position.Bottom} title={'x-domain axis (bottom)'} />
-      <Axis id={'left'} title={'y-domain axis'} position={Position.Left} />
+      <Axis id="top" position={Position.Top} title="x-domain axis (top)" />
+      <Axis id="bottom" position={Position.Bottom} title="x-domain axis (bottom)" />
+      <Axis id="left" title="y-domain axis" position={Position.Left} />
       <BarSeries
-        id={'bars'}
+        id="bars"
         xScaleType={ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
