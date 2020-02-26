@@ -20,6 +20,7 @@ import { SpecTypes } from '../../../specs/settings';
 import { MockSeriesSpec } from '../../../mocks/specs';
 import { SeededDataGenerator } from '../../../mocks/utils';
 import { MockSeriesIdentifier } from '../../../mocks/series/series_identifiers';
+import { AccessorFn } from '../../../utils/accessor';
 
 const dg = new SeededDataGenerator();
 
@@ -880,6 +881,33 @@ describe('Series', () => {
         });
         expect(actual).toBe('a - y');
       });
+    });
+  });
+
+  describe('functional accessors', () => {
+    test('Can split dataset into 2Y2G series', () => {
+      const xAccessor: AccessorFn = (d) => d.x;
+      const splittedSeries = splitSeries({
+        id: 'spec1',
+        data: TestDataset.BARCHART_2Y2G,
+        xAccessor,
+        yAccessors: ['y1', 'y2'],
+        splitSeriesAccessors: ['g1', 'g2'],
+      });
+      expect(splittedSeries.rawDataSeries.length).toBe(8);
+      expect(splittedSeries.rawDataSeries).toMatchSnapshot();
+    });
+
+    test('Can split dataset with custom _all xAccessor', () => {
+      const xAccessor: AccessorFn = () => '_all';
+      const splittedSeries = splitSeries({
+        id: 'spec1',
+        data: TestDataset.BARCHART_2Y2G,
+        xAccessor,
+        yAccessors: ['y1'],
+      });
+      expect(splittedSeries.rawDataSeries.length).toBe(1);
+      expect(splittedSeries.rawDataSeries).toMatchSnapshot();
     });
   });
 });

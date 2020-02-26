@@ -1,5 +1,5 @@
 import { ColorConfig } from '../../../utils/themes/theme';
-import { Accessor } from '../../../utils/accessor';
+import { Accessor, getAccessorValue, AccessorFn } from '../../../utils/accessor';
 import { GroupId, SpecId } from '../../../utils/ids';
 import { splitSpecsByGroupId, YBasicSeriesSpec } from '../domains/y_domain';
 import { formatNonStackedDataSeriesValues } from './nonstacked_series_utils';
@@ -213,11 +213,11 @@ function getSplitAccessors(datum: Datum, accessors: Accessor[] = []): Map<string
  */
 export function cleanDatum(
   datum: Datum,
-  xAccessor: Accessor,
+  xAccessor: Accessor | AccessorFn,
   yAccessor: Accessor,
   y0Accessor?: Accessor,
 ): RawDataSeriesDatum {
-  const x = datum[xAccessor];
+  const x = getAccessorValue(datum, xAccessor);
   const y1 = castToNumber(datum[yAccessor]);
   const cleanedDatum: RawDataSeriesDatum = { x, y1, datum, y0: null };
   if (y0Accessor) {

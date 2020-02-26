@@ -8,7 +8,7 @@ import {
   PointStyle,
   RectAnnotationStyle,
 } from '../../../utils/themes/theme';
-import { Accessor, AccessorFormat } from '../../../utils/accessor';
+import { Accessor, AccessorFormat, AccessorFn } from '../../../utils/accessor';
 import { RecursivePartial, Color, Position, Datum } from '../../../utils/commons';
 import { AxisId, GroupId } from '../../../utils/ids';
 import { ScaleContinuousType, ScaleType } from '../../../scales';
@@ -311,7 +311,7 @@ export type CustomSeriesColors = SeriesColorsArray | SeriesColorAccessorFn;
 
 export interface SeriesAccessors {
   /** The field name of the x value on Datum object */
-  xAccessor: Accessor;
+  xAccessor: Accessor | AccessorFn;
   /** An array of field names one per y metric value */
   yAccessors: Accessor[];
   /** An optional accessor of the y0 value: base point for area/bar charts  */
