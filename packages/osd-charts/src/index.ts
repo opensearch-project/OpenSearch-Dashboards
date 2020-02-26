@@ -20,7 +20,7 @@ export { SeriesIdentifier, XYChartSeriesIdentifier } from './chart_types/xy_char
 export {
   AnnotationDomainType,
   AnnotationDomainTypes,
-  CustomSeriesColors,
+  SeriesColorAccessor,
   SeriesColorsArray,
   SeriesColorAccessorFn,
   HistogramModeAlignment,

@@ -18,7 +18,7 @@ export const example = () => {
         xAccessor="x"
         yAccessors={['y1']}
         splitSeriesAccessors={['g1', 'g2']}
-        customSeriesColors={['red', 'orange', 'blue', 'green', 'black', 'lightgrey']}
+        color={['red', 'orange', 'blue', 'green', 'black', 'lightgrey']}
         data={TestDatasets.BARCHART_2Y2G}
       />
     </Chart>

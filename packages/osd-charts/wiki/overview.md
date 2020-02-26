@@ -127,7 +127,7 @@ export interface SeriesSpec {
   /** The type of series you are looking to render */
   seriesType: SeriesTypes;
   /** Set colors for specific series */
-  customSeriesColors?: CustomSeriesColors;
+  color?: SeriesColorAccessor;
   /** If the series should appear in the legend
    * @default false
    */

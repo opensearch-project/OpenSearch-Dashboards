@@ -338,7 +338,7 @@ describe('Chart State utils', () => {
     });
 
     describe('series collection is not empty', () => {
-      it('it should return an empty map if no customSeriesColors', () => {
+      it('it should return an empty map if no color', () => {
         const barSpec1 = MockSeriesSpec.bar({ id: specId1, data });
         const barSpec2 = MockSeriesSpec.bar({ id: specId2, data });
         const barSeriesSpecs = MockSeriesSpecs.fromSpecs([barSpec1, barSpec2]);
@@ -348,14 +348,25 @@ describe('Chart State utils', () => {
         expect(actual.size).toBe(0);
       });
 
+      it('it should return string color value', () => {
+        const color = 'green';
+        const barSpec1 = MockSeriesSpec.bar({ id: specId1, data, color });
+        const barSpec2 = MockSeriesSpec.bar({ id: specId2, data });
+        const barSeriesSpecs = MockSeriesSpecs.fromSpecs([barSpec1, barSpec2]);
+        const barSeriesCollection = MockSeriesCollection.fromSpecs(barSeriesSpecs);
+        const actual = getCustomSeriesColors(barSeriesSpecs, barSeriesCollection, new Map());
+
+        expect([...actual.values()]).toEqualArrayOf(color);
+      });
+
       describe('with customSeriesColors array', () => {
         const customSeriesColors = ['red', 'blue', 'green'];
-        const barSpec1 = MockSeriesSpec.bar({ id: specId1, data, customSeriesColors });
+        const barSpec1 = MockSeriesSpec.bar({ id: specId1, data, color: customSeriesColors });
         const barSpec2 = MockSeriesSpec.bar({ id: specId2, data });
         const barSeriesSpecs = MockSeriesSpecs.fromSpecs([barSpec1, barSpec2]);
         const barSeriesCollection = MockSeriesCollection.fromSpecs(barSeriesSpecs);
 
-        it('it should return color from customSeriesColors array', () => {
+        it('it should return color from color array', () => {
           const actual = getCustomSeriesColors(barSeriesSpecs, barSeriesCollection, new Map());
 
           expect(actual.size).toBe(4);
@@ -386,20 +397,20 @@ describe('Chart State utils', () => {
         });
       });
 
-      describe('with customSeriesColors function', () => {
-        const customSeriesColors: SeriesColorAccessorFn = ({ yAccessor, splitAccessors }) => {
+      describe('with color function', () => {
+        const color: SeriesColorAccessorFn = ({ yAccessor, splitAccessors }) => {
           if (yAccessor === 'y' && splitAccessors.get('g') === 'b') {
             return 'aquamarine';
           }
 
           return null;
         };
-        const barSpec1 = MockSeriesSpec.bar({ id: specId1, yAccessors: ['y'], data, customSeriesColors });
+        const barSpec1 = MockSeriesSpec.bar({ id: specId1, yAccessors: ['y'], data, color });
         const barSpec2 = MockSeriesSpec.bar({ id: specId2, data });
         const barSeriesSpecs = MockSeriesSpecs.fromSpecs([barSpec1, barSpec2]);
         const barSeriesCollection = MockSeriesCollection.fromSpecs(barSeriesSpecs);
 
-        it('it should return color from customSeriesColors function', () => {
+        it('it should return color from color function', () => {
           const actual = getCustomSeriesColors(barSeriesSpecs, barSeriesCollection, new Map());
 
           expect(actual.size).toBe(1);
