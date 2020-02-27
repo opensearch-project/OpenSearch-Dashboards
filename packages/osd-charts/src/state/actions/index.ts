@@ -4,6 +4,7 @@ import { ChartSettingsActions } from './chart_settings';
 import { LegendActions } from './legend';
 import { EventsActions } from './events';
 import { MouseActions } from './mouse';
+import { ColorsActions } from './colors';
 
 export type StateActions =
   | SpecActions
@@ -11,4 +12,5 @@ export type StateActions =
   | ChartSettingsActions
   | LegendActions
   | EventsActions
-  | MouseActions;
+  | MouseActions
+  | ColorsActions;

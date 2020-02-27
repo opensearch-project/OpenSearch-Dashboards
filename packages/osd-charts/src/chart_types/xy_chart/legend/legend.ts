@@ -1,11 +1,12 @@
 import { getAxesSpecForSpecId, LastValues, getSpecsById } from '../state/utils';
-import { identity } from '../../../utils/commons';
+import { identity, Color } from '../../../utils/commons';
 import {
   SeriesCollectionValue,
   getSeriesIndex,
   getSortedDataSeriesColorsValuesMap,
   getSeriesName,
   XYChartSeriesIdentifier,
+  SeriesKey,
 } from '../utils/series';
 import { AxisSpec, BasicSeriesSpec, Postfixes, isAreaSeriesSpec, isBarSeriesSpec } from '../utils/specs';
 import { Y0_ACCESSOR_POSTFIX, Y1_ACCESSOR_POSTFIX } from '../tooltip/tooltip';
@@ -17,8 +18,8 @@ interface FormattedLastValues {
 }
 
 export type LegendItem = Postfixes & {
-  key: string;
-  color: string;
+  key: SeriesKey;
+  color: Color;
   name: string;
   seriesIdentifier: XYChartSeriesIdentifier;
   isSeriesVisible?: boolean;
@@ -54,14 +55,14 @@ export function getItemLabel(
 }
 
 export function computeLegend(
-  seriesCollection: Map<string, SeriesCollectionValue>,
-  seriesColors: Map<string, string>,
+  seriesCollection: Map<SeriesKey, SeriesCollectionValue>,
+  seriesColors: Map<SeriesKey, Color>,
   specs: BasicSeriesSpec[],
   defaultColor: string,
   axesSpecs: AxisSpec[],
   deselectedDataSeries: XYChartSeriesIdentifier[] = [],
-): Map<string, LegendItem> {
-  const legendItems: Map<string, LegendItem> = new Map();
+): Map<SeriesKey, LegendItem> {
+  const legendItems: Map<SeriesKey, LegendItem> = new Map();
   const sortedCollection = getSortedDataSeriesColorsValuesMap(seriesCollection);
 
   sortedCollection.forEach((series, key) => {

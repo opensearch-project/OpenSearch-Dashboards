@@ -15,3 +15,4 @@ export { example as changingSpecs } from './5_changing_specs';
 export { example as hideLegendItemsBySeries } from './6_hide_legend';
 export { example as displayValuesInLegendElements } from './7_display_values';
 export { example as legendSpacingBuffer } from './8_spacing_buffer';
+export { example as colorPicker } from './9_color_picker';

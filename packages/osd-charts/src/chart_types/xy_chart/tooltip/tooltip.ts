@@ -8,7 +8,7 @@ import {
 } from '../utils/specs';
 import { IndexedGeometry, BandedAccessorType } from '../../../utils/geometry';
 import { getAccessorFormatLabel } from '../../../utils/accessor';
-import { getSeriesName } from '../utils/series';
+import { getSeriesName, SeriesKey } from '../utils/series';
 import { TooltipValue } from '../../../specs';
 
 export interface TooltipLegendValue {
@@ -22,9 +22,9 @@ export const Y1_ACCESSOR_POSTFIX = ' - upper';
 export function getSeriesTooltipValues(
   tooltipValues: TooltipValue[],
   defaultValue?: string,
-): Map<string, TooltipLegendValue> {
+): Map<SeriesKey, TooltipLegendValue> {
   // map from seriesKey to TooltipLegendValue
-  const seriesTooltipValues = new Map<string, TooltipLegendValue>();
+  const seriesTooltipValues = new Map<SeriesKey, TooltipLegendValue>();
 
   tooltipValues.forEach(({ value, seriesIdentifier, valueAccessor }) => {
     const seriesValue = defaultValue ? defaultValue : value;

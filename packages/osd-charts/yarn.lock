@@ -2670,6 +2670,13 @@
   resolved "https://registry.yarnpkg.com/@egoist/vue-to-react/-/vue-to-react-1.1.0.tgz#83c884b8608e8ee62e76c03e91ce9c26063a91ad"
   integrity sha512-MwfwXHDh6ptZGLEtNLPXp2Wghteav7mzpT2Mcwl3NZWKF814i5hhHnNkVrcQQEuxUroSWQqzxLkMKSb+nhPang==
 
+"@elastic/datemath@^5.0.2":
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/@elastic/datemath/-/datemath-5.0.2.tgz#1e62fe7137acd6ebcde9a794ef22b91820c9e6cf"
+  integrity sha512-MYU7KedGPMYu3ljgrO3tY8I8rD73lvBCltd78k5avDIv/6gMbuhKXsMhkEPbb9angs9hR/2ADk0QcGbVxUBXUw==
+  dependencies:
+    tslib "^1.9.3"
+
 "@elastic/eui@^16.0.1":
   version "16.0.1"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-16.0.1.tgz#8b3d358d1574f4168fd276c5cb190361c477f0b0"

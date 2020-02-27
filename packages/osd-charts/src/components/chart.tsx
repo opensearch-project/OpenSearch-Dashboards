@@ -1,7 +1,7 @@
 import React, { CSSProperties, createRef } from 'react';
 import classNames from 'classnames';
 import { Provider } from 'react-redux';
-import { createStore, Store } from 'redux';
+import { createStore, Store, Unsubscribe } from 'redux';
 import uuid from 'uuid';
 import { SpecsParser } from '../specs/specs_parser';
 import { ChartResizer } from './chart_resizer';
@@ -51,6 +51,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
   static defaultProps: ChartProps = {
     renderer: 'canvas',
   };
+  private unsubscribeToStore: Unsubscribe;
   private chartStore: Store<GlobalChartState>;
   private chartContainerRef: React.RefObject<HTMLDivElement>;
   private chartStageRef: React.RefObject<HTMLCanvasElement>;
@@ -77,11 +78,12 @@ export class Chart extends React.Component<ChartProps, ChartState> {
     const onElementOutCaller = createOnElementOutCaller();
     const onBrushEndCaller = createOnBrushEndCaller();
     const onPointerMoveCaller = createOnPointerMoveCaller();
-    this.chartStore.subscribe(() => {
+    this.unsubscribeToStore = this.chartStore.subscribe(() => {
       const state = this.chartStore.getState();
       if (!isInitialized(state)) {
         return;
       }
+
       const settings = getSettingsSpecSelector(state);
       if (this.state.legendPosition !== settings.legendPosition) {
         this.setState({
@@ -98,6 +100,10 @@ export class Chart extends React.Component<ChartProps, ChartState> {
       onBrushEndCaller(state);
       onPointerMoveCaller(state);
     });
+  }
+
+  componentWillUnmount() {
+    this.unsubscribeToStore();
   }
 
   dispatchExternalPointerEvent(event: PointerEvent) {

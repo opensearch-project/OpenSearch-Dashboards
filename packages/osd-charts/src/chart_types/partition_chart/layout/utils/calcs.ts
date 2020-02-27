@@ -1,5 +1,6 @@
 import { Ratio } from '../types/geometry_types';
 import { RgbTuple, stringToRGB } from './d3_utils';
+import { Color } from '../../../../utils/commons';
 
 export function hueInterpolator(colors: RgbTuple[]) {
   return (d: number) => {
@@ -26,7 +27,7 @@ export function arrayToLookup(keyFun: Function, array: Array<any>) {
   return Object.assign({}, ...array.map((d) => ({ [keyFun(d)]: d })));
 }
 
-export function colorIsDark(color: string) {
+export function colorIsDark(color: Color) {
   // fixme this assumes a white or very light background
   const rgba = stringToRGB(color);
   const { r, g, b, opacity } = rgba;

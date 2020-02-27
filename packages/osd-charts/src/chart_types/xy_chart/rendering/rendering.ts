@@ -22,7 +22,7 @@ import {
   ClippedRanges,
   BandedAccessorType,
 } from '../../../utils/geometry';
-import { mergePartial } from '../../../utils/commons';
+import { mergePartial, Color } from '../../../utils/commons';
 import { LegendItem } from '../legend/legend';
 
 export function mutableIndexedGeometryMapUpsert(
@@ -91,7 +91,7 @@ function renderPoints(
   dataSeries: DataSeries,
   xScale: Scale,
   yScale: Scale,
-  color: string,
+  color: Color,
   hasY0Accessors: boolean,
   styleAccessor?: PointStyleAccessor,
 ): {
@@ -170,7 +170,7 @@ export function renderBars(
   dataSeries: DataSeries,
   xScale: Scale,
   yScale: Scale,
-  color: string,
+  color: Color,
   sharedSeriesStyle: BarSeriesStyle,
   displayValueSettings?: DisplayValueSpec,
   styleAccessor?: BarStyleAccessor,
@@ -310,7 +310,7 @@ export function renderLine(
   dataSeries: DataSeries,
   xScale: Scale,
   yScale: Scale,
-  color: string,
+  color: Color,
   curve: CurveType,
   hasY0Accessors: boolean,
   xScaleOffset: number,
@@ -399,7 +399,7 @@ export function renderArea(
   dataSeries: DataSeries,
   xScale: Scale,
   yScale: Scale,
-  color: string,
+  color: Color,
   curve: CurveType,
   hasY0Accessors: boolean,
   xScaleOffset: number,

@@ -9,9 +9,9 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
   align-items: center;
   width: 100%;
 
-  &:hover {
-    .echLegendItem__label {
-      text-decoration: underline;
+  &:not(&--hidden) {
+    .echLegendItem__color--changable {
+      cursor: pointer;
     }
   }
 
@@ -34,6 +34,7 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
 
     &:hover {
       cursor: pointer;
+      text-decoration: underline;
     }
   }
 

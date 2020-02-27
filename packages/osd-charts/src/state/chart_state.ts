@@ -1,8 +1,9 @@
 import { SPEC_PARSED, SPEC_UNMOUNTED, UPSERT_SPEC, REMOVE_SPEC, SPEC_PARSING } from './actions/specs';
+import { SET_PERSISTED_COLOR, SET_TEMPORARY_COLOR, CLEAR_TEMPORARY_COLORS } from './actions/colors';
 import { interactionsReducer } from './reducers/interactions';
 import { ChartTypes } from '../chart_types';
 import { XYAxisChartState } from '../chart_types/xy_chart/state/chart_state';
-import { XYChartSeriesIdentifier } from '../chart_types/xy_chart/utils/series';
+import { XYChartSeriesIdentifier, SeriesKey } from '../chart_types/xy_chart/utils/series';
 import { Spec, PointerEvent } from '../specs';
 import { DEFAULT_SETTINGS_SPEC } from '../specs/settings';
 import { Dimensions } from '../utils/dimensions';
@@ -17,6 +18,7 @@ import { RefObject } from 'react';
 import { PartitionState } from '../chart_types/partition_chart/state/chart_state';
 import { TooltipInfo } from '../components/tooltip/types';
 import { TooltipAnchorPosition } from '../components/tooltip/utils';
+import { Color } from '../utils/commons';
 
 export type BackwardRef = () => React.RefObject<HTMLDivElement>;
 
@@ -54,12 +56,12 @@ export interface InternalChartState {
    * return the list of legend items
    * @param globalState
    */
-  getLegendItems(globalState: GlobalChartState): Map<string, LegendItem>;
+  getLegendItems(globalState: GlobalChartState): Map<SeriesKey, LegendItem>;
   /**
    * return the list of values for each legend item
    * @param globalState
    */
-  getLegendItemsValues(globalState: GlobalChartState): Map<string, TooltipLegendValue>;
+  getLegendItemsValues(globalState: GlobalChartState): Map<SeriesKey, TooltipLegendValue>;
   /**
    * return the CSS pointer cursor depending on the internal chart state
    * @param globalState
@@ -116,27 +118,56 @@ export interface ExternalEventsState {
   pointer: PointerEvent | null;
 }
 
+export interface ColorOverrides {
+  temporary: Record<SeriesKey, Color>;
+  persisted: Record<SeriesKey, Color>;
+}
+
 export interface GlobalChartState {
-  // an unique ID for each chart used by re-reselect to memoize selector per chart
+  /**
+   * a unique ID for each chart used by re-reselect to memoize selector per chart
+   */
   chartId: string;
-  // true when all all the specs are parsed ad stored into the specs object
+  /**
+   * true when all all the specs are parsed ad stored into the specs object
+   */
   specsInitialized: boolean;
-  // true if the chart is rendered on dom
+  /**
+   * true if the chart is rendered on dom
+   */
   chartRendered: boolean;
-  // incremental count of the chart rendering
+  /**
+   * incremental count of the chart rendering
+   */
   chartRenderedCount: number;
-  // the map of parsed specs
+  /**
+   * the map of parsed specs
+   */
   specs: SpecList;
-  // the chart type depending on the used specs
+  /**
+   * the chart type depending on the used specs
+   */
   chartType: ChartTypes | null;
-  // a chart-type-dependant class that is used to render and share chart-type dependant functions
+  /**
+   * a chart-type-dependant class that is used to render and share chart-type dependant functions
+   */
   internalChartState: InternalChartState | null;
-  // the dimensions of the parent container, including the legend
+  /**
+   * the dimensions of the parent container, including the legend
+   */
   parentDimensions: Dimensions;
-  // the state of the interactions
+  /**
+   * the state of the interactions
+   */
   interactions: InteractionsState;
-  // external event state
+  /**
+   * external event state
+   */
   externalEvents: ExternalEventsState;
+  /**
+   * Color map used to persist color picker changes
+   */
+  colors: ColorOverrides;
 }
 
 export const getInitialState = (chartId: string): GlobalChartState => ({
@@ -146,6 +177,10 @@ export const getInitialState = (chartId: string): GlobalChartState => ({
   chartRenderedCount: 0,
   specs: {
     [DEFAULT_SETTINGS_SPEC.id]: DEFAULT_SETTINGS_SPEC,
+  },
+  colors: {
+    temporary: {},
+    persisted: {},
   },
   chartType: null,
   internalChartState: null,
@@ -264,6 +299,36 @@ export const chartStoreReducer = (chartId: string) => {
             ...state.externalEvents,
             pointer: {
               ...action.event,
+            },
+          },
+        };
+      case CLEAR_TEMPORARY_COLORS:
+        return {
+          ...state,
+          colors: {
+            ...state.colors,
+            temporary: {},
+          },
+        };
+      case SET_TEMPORARY_COLOR:
+        return {
+          ...state,
+          colors: {
+            ...state.colors,
+            temporary: {
+              ...state.colors.temporary,
+              [action.key]: action.color,
+            },
+          },
+        };
+      case SET_PERSISTED_COLOR:
+        return {
+          ...state,
+          colors: {
+            ...state.colors,
+            persisted: {
+              ...state.colors.persisted,
+              [action.key]: action.color,
             },
           },
         };

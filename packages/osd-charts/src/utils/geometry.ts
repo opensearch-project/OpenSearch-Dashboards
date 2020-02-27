@@ -1,6 +1,7 @@
 import { $Values } from 'utility-types';
 import { BarSeriesStyle, PointStyle, AreaStyle, LineStyle, ArcStyle } from './themes/theme';
 import { XYChartSeriesIdentifier } from '../chart_types/xy_chart/utils/series';
+import { Color } from './commons';
 
 /**
  * The accessor type
@@ -31,7 +32,7 @@ export interface PointGeometry {
   x: number;
   y: number;
   radius: number;
-  color: string;
+  color: Color;
   transform: {
     x: number;
     y: number;
@@ -45,7 +46,7 @@ export interface BarGeometry {
   y: number;
   width: number;
   height: number;
-  color: string;
+  color: Color;
   displayValue?: {
     text: any;
     width: number;
@@ -61,7 +62,7 @@ export interface BarGeometry {
 export interface LineGeometry {
   line: string;
   points: PointGeometry[];
-  color: string;
+  color: Color;
   transform: {
     x: number;
     y: number;
@@ -79,7 +80,7 @@ export interface AreaGeometry {
   area: string;
   lines: string[];
   points: PointGeometry[];
-  color: string;
+  color: Color;
   transform: {
     x: number;
     y: number;
@@ -97,7 +98,7 @@ export interface AreaGeometry {
 
 export interface ArcGeometry {
   arc: string;
-  color: string;
+  color: Color;
   seriesIdentifier: XYChartSeriesIdentifier;
   seriesArcStyle: ArcStyle;
   transform: {

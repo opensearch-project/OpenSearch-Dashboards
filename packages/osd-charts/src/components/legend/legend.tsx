@@ -21,11 +21,13 @@ import {
   onLegendItemOutAction,
   onLegendItemOverAction,
 } from '../../state/actions/legend';
+import { clearTemporaryColors, setTemporaryColor, setPersistedColor } from '../../state/actions/colors';
 import { SettingsSpec } from '../../specs';
 import { BandedAccessorType } from '../../utils/geometry';
+import { SeriesKey } from '../../chart_types/xy_chart/utils/series';
 
 interface LegendStateProps {
-  legendItems: Map<string, LegendItem>;
+  legendItems: Map<SeriesKey, LegendItem>;
   legendPosition: Position;
   legendItemTooltipValues: Map<string, TooltipLegendValue>;
   showLegend: boolean;
@@ -40,6 +42,9 @@ interface LegendDispatchProps {
   onLegendItemOutAction: typeof onLegendItemOutAction;
   onLegendItemOverAction: typeof onLegendItemOverAction;
   onToggleDeselectSeriesAction: typeof onToggleDeselectSeriesAction;
+  clearTemporaryColors: typeof clearTemporaryColors;
+  setTemporaryColor: typeof setTemporaryColor;
+  setPersistedColor: typeof setPersistedColor;
 }
 type LegendProps = LegendStateProps & LegendDispatchProps;
 
@@ -119,8 +124,8 @@ class LegendComponent extends React.Component<LegendProps> {
   };
 
   private getLegendValues(
-    tooltipValues: Map<string, TooltipLegendValue> | undefined,
-    key: string,
+    tooltipValues: Map<SeriesKey, TooltipLegendValue> | undefined,
+    key: SeriesKey,
     banded: boolean = false,
   ): any[] {
     const values = tooltipValues && tooltipValues.get(key);
@@ -138,21 +143,25 @@ class LegendComponent extends React.Component<LegendProps> {
     }
     const { key, displayValue, banded } = item;
     const { legendItemTooltipValues, settings } = this.props;
-    const { showLegendExtra, legendPosition } = settings;
+    const { showLegendExtra, legendPosition, legendColorPicker } = settings;
     const legendValues = this.getLegendValues(legendItemTooltipValues, key, banded);
     return legendValues.map((value, index) => {
       const yAccessor: BandedAccessorType = index === 0 ? BandedAccessorType.Y1 : BandedAccessorType.Y0;
       return (
         <LegendListItem
           key={`${key}-${yAccessor}`}
-          legendPosition={legendPosition}
           legendItem={item}
+          legendColorPicker={legendColorPicker}
+          legendPosition={legendPosition}
           label={getItemLabel(item, yAccessor)}
           extra={value !== '' ? value : displayValue.formatted[yAccessor]}
           showExtra={showLegendExtra}
           toggleDeselectSeriesAction={this.props.onToggleDeselectSeriesAction}
           legendItemOutAction={this.props.onLegendItemOutAction}
           legendItemOverAction={this.props.onLegendItemOverAction}
+          clearTemporaryColors={this.props.clearTemporaryColors}
+          setTemporaryColor={this.props.setTemporaryColor}
+          setPersistedColor={this.props.setPersistedColor}
           onLegendItemOverListener={settings.onLegendItemOver}
           onLegendItemOutListener={settings.onLegendItemOut}
           onLegendItemClickListener={settings.onLegendItemClick}
@@ -169,6 +178,9 @@ const mapDispatchToProps = (dispatch: Dispatch): LegendDispatchProps =>
       onToggleDeselectSeriesAction,
       onLegendItemOutAction,
       onLegendItemOverAction,
+      clearTemporaryColors,
+      setTemporaryColor,
+      setPersistedColor,
     },
     dispatch,
   );

@@ -1,4 +1,6 @@
+import { ComponentType } from 'react';
 import { $Values } from 'utility-types';
+
 import { DomainRange } from '../chart_types/xy_chart/utils/specs';
 import { PartialTheme, Theme } from '../utils/themes/theme';
 import { Domain } from '../utils/domain';
@@ -8,9 +10,9 @@ import { LIGHT_THEME } from '../utils/themes/light_theme';
 import { ChartTypes } from '../chart_types';
 import { GeometryValue } from '../utils/geometry';
 import { XYChartSeriesIdentifier, SeriesIdentifier } from '../chart_types/xy_chart/utils/series';
-import { Position, Rendering, Rotation } from '../utils/commons';
-import { ScaleContinuousType, ScaleOrdinalType } from '../scales';
 import { Accessor } from '../utils/accessor';
+import { Position, Rendering, Rotation, Color } from '../utils/commons';
+import { ScaleContinuousType, ScaleOrdinalType } from '../scales';
 
 export type ElementClickListener = (elements: Array<[GeometryValue, XYChartSeriesIdentifier]>) => void;
 export type ElementOverListener = (elements: Array<[GeometryValue, XYChartSeriesIdentifier]>) => void;
@@ -83,7 +85,7 @@ export interface TooltipValue {
   /**
    * The color of the graphic mark (by default the color of the series)
    */
-  color: string;
+  color: Color;
   /**
    * True if the mouse is over the graphic mark connected to the tooltip
    */
@@ -110,6 +112,30 @@ export interface TooltipProps {
   headerFormatter?: TooltipValueFormatter;
   unit?: string;
 }
+
+export interface LegendColorPickerProps {
+  /**
+   * Anchor used to position picker
+   */
+  anchor: HTMLDivElement;
+  /**
+   * Current color of the given series
+   */
+  color: Color;
+  /**
+   * Callback to close color picker and set persistent color
+   */
+  onClose: () => void;
+  /**
+   * Callback to update temporary color state
+   */
+  onChange: (color: Color) => void;
+  /**
+   * Series id for the active series
+   */
+  seriesIdentifier: XYChartSeriesIdentifier;
+}
+export type LegendColorPicker = ComponentType<LegendColorPickerProps>;
 
 export interface SettingsSpec extends Spec {
   /**
@@ -161,6 +187,7 @@ export interface SettingsSpec extends Spec {
   onRenderChange?: RenderChangeListener;
   xDomain?: Domain | DomainRange;
   resizeDebounce?: number;
+  legendColorPicker?: LegendColorPicker;
 }
 
 export type DefaultSettingsProps =

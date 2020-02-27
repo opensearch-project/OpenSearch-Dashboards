@@ -18,6 +18,7 @@ import { getTooltipInfoSelector } from './selectors/get_tooltip_values_highlight
 import { htmlIdGenerator } from '../../../utils/commons';
 import { Tooltip } from '../../../components/tooltip';
 import { getTooltipAnchorPositionSelector } from './selectors/get_tooltip_position';
+import { SeriesKey } from '../utils/series';
 
 export class XYAxisChartState implements InternalChartState {
   chartType = ChartTypes.XYAxis;
@@ -34,7 +35,7 @@ export class XYAxisChartState implements InternalChartState {
   getLegendItems(globalState: GlobalChartState) {
     return computeLegendSelector(globalState);
   }
-  getLegendItemsValues(globalState: GlobalChartState): Map<string, TooltipLegendValue> {
+  getLegendItemsValues(globalState: GlobalChartState): Map<SeriesKey, TooltipLegendValue> {
     return getLegendTooltipValuesSelector(globalState);
   }
   chartRenderer(containerRef: BackwardRef, forwardStageRef: RefObject<HTMLCanvasElement>) {

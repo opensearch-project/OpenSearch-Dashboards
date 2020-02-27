@@ -15,13 +15,48 @@ interface ScreenshotDOMElementOptions {
   path?: string;
 }
 
+type ScreenshotElementAtUrlOptions = ScreenshotDOMElementOptions & {
+  /**
+   * timeout for waiting on element to appear in DOM
+   *
+   * @default JEST_TIMEOUT
+   */
+  timeout?: number;
+  /**
+   * any desired action to be performed after loading url, prior to screenshot
+   */
+  action?: () => void | Promise<void>;
+  /**
+   * Selector used to wait on DOM element
+   */
+  waitSelector?: string;
+  /**
+   * Delay to take screenshot after element is visiable
+   */
+  delay?: number;
+};
+
 class CommonPage {
+  readonly chartWaitSelector = '.echChartStatus[data-ech-render-complete=true]';
+  readonly chartSelector = '.echChart';
+
+  /**
+   * Parse url from knob storybook url to iframe storybook url
+   *
+   * @param url
+   */
   static parseUrl(url: string): string {
     const { query } = Url.parse(url);
 
     return `${baseUrl}?${query}${query ? '&' : ''}knob-debug=false`;
   }
-  async getBoundingClientRect(selector = '.echChart') {
+
+  /**
+   * Get getBoundingClientRect of selected element
+   *
+   * @param selector
+   */
+  async getBoundingClientRect(selector: string) {
     return await page.evaluate((selector) => {
       const element = document.querySelector(selector);
 
@@ -34,12 +69,16 @@ class CommonPage {
       return { left: x, top: y, width, height, id: element.id };
     }, selector);
   }
+
   /**
-   * Capture screenshot or chart element only
+   * Capture screenshot of selected element only
+   *
+   * @param selector
+   * @param options
    */
-  async screenshotDOMElement(selector = '.echChart', opts?: ScreenshotDOMElementOptions) {
-    const padding: number = opts && opts.padding ? opts.padding : 0;
-    const path: string | undefined = opts && opts.path ? opts.path : undefined;
+  async screenshotDOMElement(selector: string, options?: ScreenshotDOMElementOptions) {
+    const padding: number = options && options.padding ? options.padding : 0;
+    const path: string | undefined = options && options.path ? options.path : undefined;
     const rect = await this.getBoundingClientRect(selector);
 
     return page.screenshot({
@@ -53,69 +92,121 @@ class CommonPage {
     });
   }
 
-  async moveMouseRelativeToDOMElement(mousePosition: { x: number; y: number }, selector = '.echChart') {
-    const chartContainer = await this.getBoundingClientRect(selector);
-    await page.mouse.move(chartContainer.left + mousePosition.x, chartContainer.top + mousePosition.y);
+  /**
+   * Move mouse relative to element
+   *
+   * @param mousePosition
+   * @param selector
+   */
+  async moveMouseRelativeToDOMElement(mousePosition: { x: number; y: number }, selector: string) {
+    const element = await this.getBoundingClientRect(selector);
+    await page.mouse.move(element.left + mousePosition.x, element.top + mousePosition.y);
   }
 
   /**
-   * Expect a chart given a url from storybook.
+   * Click mouse relative to element
+   *
+   * @param mousePosition
+   * @param selector
+   */
+  async clickMouseRelativeToDOMElement(mousePosition: { x: number; y: number }, selector: string) {
+    const element = await this.getBoundingClientRect(selector);
+    await page.mouse.click(element.left + mousePosition.x, element.top + mousePosition.y);
+  }
+
+  /**
+   * Expect an element given a url and selector from storybook
    *
    * - Note: No need to fix host or port. They will be set automatically.
    *
    * @param url Storybook url from knobs section
+   * @param selector selector of element to screenshot
+   * @param options
    */
-  async expectChartAtUrlToMatchScreenshot(url: string) {
+  async expectElementAtUrlToMatchScreenshot(
+    url: string,
+    selector: string = 'body',
+    options?: ScreenshotElementAtUrlOptions,
+  ) {
     try {
-      await this.loadChartFromURL(url);
-      await this.waitForElement();
+      await this.loadElementFromURL(url, options?.waitSelector ?? selector, options?.timeout);
 
-      const chart = await this.screenshotDOMElement();
-
-      if (!chart) {
-        throw new Error(`Error: Unable to find chart element\n\n\t${url}`);
+      if (options?.action) {
+        await options.action();
       }
 
-      expect(chart).toMatchImageSnapshot();
+      if (options?.delay) {
+        await page.waitFor(options.delay);
+      }
+
+      const element = await this.screenshotDOMElement(selector, options);
+
+      if (!element) {
+        throw new Error(`Error: Unable to find element\n\n\t${url}`);
+      }
+
+      expect(element).toMatchImageSnapshot();
     } catch (error) {
       throw new Error(error);
     }
   }
 
   /**
-   * Expect a chart given a url from storybook.
-   *
-   * - Note: No need to fix host or port. They will be set automatically.
+   * Expect a chart given a url from storybook
    *
    * @param url Storybook url from knobs section
+   * @param options
    */
-  async expectChartWithMouseAtUrlToMatchScreenshot(url: string, mousePosition: { x: number; y: number }) {
-    try {
-      await this.loadChartFromURL(url);
-      await this.waitForElement();
-      await this.moveMouseRelativeToDOMElement(mousePosition);
-      const chart = await this.screenshotDOMElement();
-      if (!chart) {
-        throw new Error(`Error: Unable to find chart element\n\n\t${url}`);
-      }
-
-      expect(chart).toMatchImageSnapshot();
-    } catch (error) {
-      throw new Error(`${error}\n\n${url}`);
-    }
+  async expectChartAtUrlToMatchScreenshot(url: string, options?: ScreenshotElementAtUrlOptions) {
+    await this.expectElementAtUrlToMatchScreenshot(url, this.chartSelector, {
+      waitSelector: this.chartWaitSelector,
+      ...options,
+    });
   }
-  async loadChartFromURL(url: string) {
+
+  /**
+   * Expect a chart given a url from storybook with mouse move
+   *
+   * @param url Storybook url from knobs section
+   * @param mousePosition - postion of mouse relative to chart
+   * @param options
+   */
+  async expectChartWithMouseAtUrlToMatchScreenshot(
+    url: string,
+    mousePosition: { x: number; y: number },
+    options?: Omit<ScreenshotElementAtUrlOptions, 'action'>,
+  ) {
+    const action = async () => await this.moveMouseRelativeToDOMElement(mousePosition, this.chartSelector);
+    await this.expectChartAtUrlToMatchScreenshot(url, {
+      ...options,
+      action,
+    });
+  }
+
+  /**
+   * Loads storybook page from raw url, and waits for element
+   *
+   * @param url Storybook url from knobs section
+   * @param waitSelector selector of element to wait to appear in DOM
+   * @param timeout timeout for waiting on element to appear in DOM
+   */
+  async loadElementFromURL(url: string, waitSelector?: string, timeout?: number) {
     const cleanUrl = CommonPage.parseUrl(url);
     await page.goto(cleanUrl);
-    this.waitForElement();
+
+    if (waitSelector) {
+      await this.waitForElement(waitSelector, timeout);
+    }
   }
+
   /**
    * Wait for an element to be on the DOM
-   * @param {string} [selector] the DOM selector to wait for, default to '.echChartStatus[data-ech-render-complete=true]'
+   *
+   * @param {string} [waitSelector] the DOM selector to wait for, default to '.echChartStatus[data-ech-render-complete=true]'
    * @param {number} [timeout] - the timeout for the operation, default to 10000ms
    */
-  async waitForElement(selector = '.echChartStatus[data-ech-render-complete=true]', timeout = JEST_TIMEOUT) {
-    await page.waitForSelector(selector, { timeout });
+  async waitForElement(waitSelector: string, timeout = JEST_TIMEOUT) {
+    await page.waitForSelector(waitSelector, { timeout });
   }
 }
 

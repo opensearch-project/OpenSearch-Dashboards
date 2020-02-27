@@ -23,7 +23,7 @@ import {
   AnnotationRectProps,
   computeRectAnnotationDimensions,
 } from './rect_annotation_tooltip';
-import { Rotation, Position } from '../../../utils/commons';
+import { Rotation, Position, Color } from '../../../utils/commons';
 
 export type AnnotationTooltipFormatter = (details?: string) => JSX.Element | null;
 
@@ -54,7 +54,7 @@ export interface AnnotationMarker {
   icon: JSX.Element;
   position: { top: number; left: number };
   dimension: { width: number; height: number };
-  color: string;
+  color: Color;
 }
 
 export type AnnotationDimensions = AnnotationLineProps[] | AnnotationRectProps[];

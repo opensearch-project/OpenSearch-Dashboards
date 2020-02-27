@@ -24,7 +24,7 @@ export interface AxesProps {
   axesVisibleTicks: Map<AxisId, AxisTick[]>;
   axesSpecs: AxisSpec[];
   axesTicksDimensions: Map<AxisId, AxisTicksDimensions>;
-  axesPositions: Map<string, Dimensions>;
+  axesPositions: Map<AxisId, Dimensions>;
   axisStyle: AxisConfig;
   debug: boolean;
   chartDimensions: Dimensions;

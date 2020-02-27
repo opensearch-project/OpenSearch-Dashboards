@@ -485,32 +485,16 @@ describe('Series', () => {
     );
     expect(stackedDataSeries.stacked).toMatchSnapshot();
   });
-  test('should get series color map', () => {
-    const spec1: BasicSeriesSpec = {
-      specType: SpecTypes.Series,
-      chartType: ChartTypes.XYAxis,
-      id: 'spec1',
-      groupId: 'group',
-      seriesType: SeriesTypes.Line,
-      yScaleType: ScaleType.Log,
-      xScaleType: ScaleType.Linear,
-      xAccessor: 'x',
-      yAccessors: ['y'],
-      yScaleToDataExtent: false,
-      data: TestDataset.BARCHART_1Y0G,
-      hideInLegend: false,
-    };
 
-    const specs = new Map();
-    specs.set(spec1.id, spec1);
-
-    const dataSeriesValuesA: SeriesCollectionValue = {
+  describe('#getSeriesColors', () => {
+    const seriesKey = 'mock_series_key';
+    const mockSeries: SeriesCollectionValue = {
       seriesIdentifier: {
         specId: 'spec1',
         yAccessor: 'y1',
         splitAccessors: new Map(),
         seriesKeys: ['a', 'b', 'c'],
-        key: '',
+        key: seriesKey,
       },
     };
 
@@ -520,22 +504,53 @@ describe('Series', () => {
     };
 
     const seriesColors = new Map();
-    seriesColors.set('spec1', dataSeriesValuesA);
+    seriesColors.set(seriesKey, mockSeries);
 
     const emptyCustomColors = new Map();
-
-    const defaultColorMap = getSeriesColors(seriesColors, chartColors, emptyCustomColors);
-    const expectedDefaultColorMap = new Map();
-    expectedDefaultColorMap.set('spec1', 'elastic_charts_c1');
-    expect(defaultColorMap).toEqual(expectedDefaultColorMap);
-
+    const persistedColor = 'persisted_color';
+    const customColor = 'custom_color';
     const customColors: Map<string, string> = new Map();
-    customColors.set('spec1', 'custom_color');
+    customColors.set(seriesKey, customColor);
+    const emptyColorOverrides = {
+      persisted: {},
+      temporary: {},
+    };
+    const persistedOverrides = {
+      persisted: { [seriesKey]: persistedColor },
+      temporary: {},
+    };
 
-    const customizedColorMap = getSeriesColors(seriesColors, chartColors, customColors);
-    const expectedCustomizedColorMap = new Map();
-    expectedCustomizedColorMap.set('spec1', 'custom_color');
-    expect(customizedColorMap).toEqual(expectedCustomizedColorMap);
+    it('should return deafult color', () => {
+      const result = getSeriesColors(seriesColors, chartColors, emptyCustomColors, emptyColorOverrides);
+      const expected = new Map();
+      expected.set(seriesKey, 'elastic_charts_c1');
+      expect(result).toEqual(expected);
+    });
+
+    it('should return persisted color', () => {
+      const result = getSeriesColors(seriesColors, chartColors, emptyCustomColors, persistedOverrides);
+      const expected = new Map();
+      expected.set(seriesKey, persistedColor);
+      expect(result).toEqual(expected);
+    });
+
+    it('should return custom color', () => {
+      const result = getSeriesColors(seriesColors, chartColors, customColors, persistedOverrides);
+      const expected = new Map();
+      expected.set(seriesKey, customColor);
+      expect(result).toEqual(expected);
+    });
+
+    it('should return temporary color', () => {
+      const temporaryColor = 'persisted-color';
+      const result = getSeriesColors(seriesColors, chartColors, customColors, {
+        ...persistedOverrides,
+        temporary: { [seriesKey]: temporaryColor },
+      });
+      const expected = new Map();
+      expected.set(seriesKey, temporaryColor);
+      expect(result).toEqual(expected);
+    });
   });
   test('should only include deselectedDataSeries when splitting series if deselectedDataSeries is defined', () => {
     const specId = 'splitSpec';

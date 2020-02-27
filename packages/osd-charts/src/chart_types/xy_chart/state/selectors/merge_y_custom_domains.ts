@@ -5,16 +5,20 @@ import { AxisSpec, DomainRange } from '../../utils/specs';
 import { Rotation } from '../../../../utils/commons';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { GroupId } from '../../../../utils/ids';
 
 export const mergeYCustomDomainsByGroupIdSelector = createCachedSelector(
   [getAxisSpecsSelector, getSettingsSpecSelector],
-  (axisSpecs, settingsSpec): Map<string, DomainRange> => {
+  (axisSpecs, settingsSpec): Map<GroupId, DomainRange> => {
     return mergeYCustomDomainsByGroupId(axisSpecs, settingsSpec ? settingsSpec.rotation : 0);
   },
 )(getChartIdSelector);
 
-export function mergeYCustomDomainsByGroupId(axesSpecs: AxisSpec[], chartRotation: Rotation): Map<string, DomainRange> {
-  const domainsByGroupId = new Map<string, DomainRange>();
+export function mergeYCustomDomainsByGroupId(
+  axesSpecs: AxisSpec[],
+  chartRotation: Rotation,
+): Map<GroupId, DomainRange> {
+  const domainsByGroupId = new Map<GroupId, DomainRange>();
 
   axesSpecs.forEach((spec: AxisSpec) => {
     const { id, groupId, domain } = spec;

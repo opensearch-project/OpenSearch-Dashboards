@@ -7,7 +7,8 @@ import { BasicSeriesSpec, SeriesTypes, SeriesSpecs, SeriesNameConfigOptions } fr
 import { formatStackedDataSeriesValues } from './stacked_series_utils';
 import { ScaleType } from '../../../scales';
 import { LastValues } from '../state/utils';
-import { Datum } from '../../../utils/commons';
+import { Datum, Color } from '../../../utils/commons';
+import { ColorOverrides } from '../../../state/chart_state';
 
 export const SERIES_DELIMITER = ' - ';
 
@@ -47,9 +48,12 @@ export interface DataSeriesDatum<T = any> {
   /** the list of filled values because missing or nulls */
   filled?: FilledValues;
 }
+
+export type SeriesKey = string;
+
 export type SeriesIdentifier = {
   specId: SpecId;
-  key: string;
+  key: SeriesKey;
 };
 
 export interface XYChartSeriesIdentifier extends SeriesIdentifier {
@@ -113,7 +117,7 @@ export function splitSeries({
   xValues: Set<string | number>;
 } {
   const isMultipleY = yAccessors && yAccessors.length > 1;
-  const series = new Map<string, RawDataSeries>();
+  const series = new Map<SeriesKey, RawDataSeries>();
   const colorsValues = new Set<string>();
   const xValues = new Set<string | number>();
 
@@ -166,7 +170,7 @@ export function getSeriesKey({
  * along with the series key
  */
 function updateSeriesMap(
-  seriesMap: Map<string, RawDataSeries>,
+  seriesMap: Map<SeriesKey, RawDataSeries>,
   splitAccessors: Map<string | number, string | number>,
   accessor: any,
   datum: RawDataSeriesDatum,
@@ -339,11 +343,11 @@ export function getSplittedSeries(
   deselectedDataSeries: XYChartSeriesIdentifier[] = [],
 ): {
   splittedSeries: Map<SpecId, RawDataSeries[]>;
-  seriesCollection: Map<string, SeriesCollectionValue>;
+  seriesCollection: Map<SeriesKey, SeriesCollectionValue>;
   xValues: Set<string | number>;
 } {
   const splittedSeries = new Map<SpecId, RawDataSeries[]>();
-  const seriesCollection = new Map<string, SeriesCollectionValue>();
+  const seriesCollection = new Map<SeriesKey, SeriesCollectionValue>();
   const xValues: Set<any> = new Set();
   let isOrdinalScale = false;
   for (const spec of seriesSpecs) {
@@ -464,8 +468,8 @@ function getSortIndex({ specSortIndex }: SeriesCollectionValue, total: number): 
 }
 
 export function getSortedDataSeriesColorsValuesMap(
-  seriesCollection: Map<string, SeriesCollectionValue>,
-): Map<string, SeriesCollectionValue> {
+  seriesCollection: Map<SeriesKey, SeriesCollectionValue>,
+): Map<SeriesKey, SeriesCollectionValue> {
   const seriesColorsArray = [...seriesCollection];
   seriesColorsArray.sort(([, specA], [, specB]) => {
     return getSortIndex(specA, seriesCollection.size) - getSortIndex(specB, seriesCollection.size);
@@ -474,17 +478,55 @@ export function getSortedDataSeriesColorsValuesMap(
   return new Map([...seriesColorsArray]);
 }
 
+/**
+ * Helper function to get highest override color.
+ *
+ * from highest to lowest: `temporary`, `seriesSpec.color` then `persisted`
+ *
+ * @param key
+ * @param customColors
+ * @param overrides
+ */
+function getHighestOverride(
+  key: string,
+  customColors: Map<SeriesKey, Color>,
+  overrides: ColorOverrides,
+): Color | undefined {
+  let color: Color | undefined = overrides.temporary[key];
+
+  if (color) {
+    return color;
+  }
+
+  color = customColors.get(key);
+
+  if (color) {
+    return color;
+  }
+
+  return overrides.persisted[key];
+}
+
+/**
+ * Returns color for a series given all color hierarchies
+ *
+ * @param seriesCollection
+ * @param chartColors
+ * @param customColors
+ * @param overrides
+ */
 export function getSeriesColors(
-  seriesCollection: Map<string, SeriesCollectionValue>,
+  seriesCollection: Map<SeriesKey, SeriesCollectionValue>,
   chartColors: ColorConfig,
-  customColors: Map<string, string>,
-): Map<string, string> {
-  const seriesColorMap = new Map<string, string>();
+  customColors: Map<SeriesKey, Color>,
+  overrides: ColorOverrides,
+): Map<SeriesKey, Color> {
+  const seriesColorMap = new Map<SeriesKey, Color>();
   let counter = 0;
 
   seriesCollection.forEach((_, seriesKey) => {
-    const customSeriesColor: string | undefined = customColors.get(seriesKey);
-    const color = customSeriesColor || chartColors.vizColors[counter % chartColors.vizColors.length];
+    const colorOverride = getHighestOverride(seriesKey, customColors, overrides);
+    const color = colorOverride || chartColors.vizColors[counter % chartColors.vizColors.length];
 
     seriesColorMap.set(seriesKey, color);
     counter++;
