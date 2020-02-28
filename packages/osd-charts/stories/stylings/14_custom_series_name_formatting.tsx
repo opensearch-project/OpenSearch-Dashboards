@@ -1,7 +1,6 @@
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
-import { SeriesNameFn } from '../../src/chart_types/xy_chart/utils/specs';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, SeriesNameFn } from '../../src';
 import moment from 'moment';
 import { DateTime } from 'luxon';
 import { SB_SOURCE_PANEL } from '../utils/storybook';

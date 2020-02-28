@@ -7,7 +7,6 @@ import {
   Position,
   Settings,
   LineAnnotation,
-  getAnnotationId,
   AnnotationDomainTypes,
   Axis,
   LineAnnotationDatum,
@@ -107,7 +106,7 @@ export const lineBasicXDomainContinous = () => {
     <Chart className="story-chart">
       <Settings showLegend debug={boolean('debug', false)} rotation={getChartRotationKnob()} />
       <LineAnnotation
-        id={getAnnotationId('anno_1')}
+        id="anno_1"
         domainType={AnnotationDomainTypes.XDomain}
         dataValues={dataValues}
         style={style}

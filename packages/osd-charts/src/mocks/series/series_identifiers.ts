@@ -1,4 +1,4 @@
-import { BasicSeriesSpec } from '../../chart_types/xy_chart/utils/specs';
+import { BasicSeriesSpec } from '../../';
 import {
   SeriesCollectionValue,
   getSplittedSeries,

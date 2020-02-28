@@ -1,6 +1,5 @@
 import { computeXScale } from '../utils/scales';
 import { BasicSeriesSpec, SeriesTypes } from '../utils/specs';
-import { getGroupId, getSpecId } from '../../../utils/ids';
 import { ScaleType } from '../../../scales';
 import { getSnapPosition } from './crosshair_utils';
 import { computeSeriesDomains } from '../state/utils';
@@ -8,16 +7,16 @@ import { ChartTypes } from '../..';
 import { SpecTypes } from '../../../specs/settings';
 
 describe('Crosshair utils ordinal scales', () => {
-  const barSeries1SpecId = getSpecId('barSeries1');
-  const barSeries2SpecId = getSpecId('barSeries2');
-  const lineSeries1SpecId = getSpecId('lineSeries1');
-  const lineSeries2SpecId = getSpecId('lineSeries2');
+  const barSeries1SpecId = 'barSeries1';
+  const barSeries2SpecId = 'barSeries2';
+  const lineSeries1SpecId = 'lineSeries1';
+  const lineSeries2SpecId = 'lineSeries2';
 
   const barSeries1: BasicSeriesSpec = {
     chartType: ChartTypes.XYAxis,
     specType: SpecTypes.Series,
     id: barSeries1SpecId,
-    groupId: getGroupId('group1'),
+    groupId: 'group1',
     seriesType: SeriesTypes.Bar,
     data: [
       ['a', 0],
@@ -34,7 +33,7 @@ describe('Crosshair utils ordinal scales', () => {
     chartType: ChartTypes.XYAxis,
     specType: SpecTypes.Series,
     id: barSeries2SpecId,
-    groupId: getGroupId('group1'),
+    groupId: 'group1',
     seriesType: SeriesTypes.Bar,
     data: [
       ['a', 2],
@@ -51,7 +50,7 @@ describe('Crosshair utils ordinal scales', () => {
     chartType: ChartTypes.XYAxis,
     specType: SpecTypes.Series,
     id: lineSeries1SpecId,
-    groupId: getGroupId('group1'),
+    groupId: 'group1',
     seriesType: SeriesTypes.Line,
     data: [
       ['a', 0],
@@ -68,7 +67,7 @@ describe('Crosshair utils ordinal scales', () => {
     chartType: ChartTypes.XYAxis,
     specType: SpecTypes.Series,
     id: lineSeries2SpecId,
-    groupId: getGroupId('group1'),
+    groupId: 'group1',
     seriesType: SeriesTypes.Line,
     data: [
       ['a', 2],

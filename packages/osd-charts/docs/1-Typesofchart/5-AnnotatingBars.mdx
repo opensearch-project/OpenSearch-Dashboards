@@ -5,7 +5,6 @@ import {
   Axis,
   BarSeries,
   Chart,
-  getAnnotationId,
   LineAnnotation,
   LineAnnotationDatum,
   LineSeries,
@@ -13,11 +12,11 @@ import {
   ScaleType,
   Settings,
   timeFormatter,
+  Position,
 } from '../../src';
 import { Icon } from '../../src/components/icons/icon';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 import { BandedAccessorType } from '../../src/utils/geometry';
-import { Position } from '../../src/chart_types/xy_chart/utils/specs';
 import { getChartRotationKnob, generateAnnotationData, arrayKnobs } from '../../docs/charts'
 
 <Meta title="Types of charts/Bar Charts/Annotating Bar Charts" />
@@ -31,22 +30,22 @@ Here is a basic `line` annotation with `x domain continuous`
 <Chart className={'story-chart'}>
     <Settings showLegend debug={boolean('debug', false)} rotation={getChartRotationKnob} />
     <LineAnnotation
-    id={getAnnotationId('anno_1')}
-    domainType={AnnotationDomainTypes.XDomain}
-    dataValues={[{dataValue:2.5, details:'detail-0'}, {dataValue: 7.2, details: 'detail-1'}]}
-    marker={<Icon type="alert" />}
-    style = {{line: {
-      strokeWidth: 3,
-      stroke: '#f00',
-      opacity: 1,
-    },
-    details: {
-      fontSize: 12,
-      fontFamily: 'Arial',
-      fontStyle: 'bold',
-      fill: 'gray',
-      padding: 0,
-    },}}
+      id="anno_1"
+      domainType={AnnotationDomainTypes.XDomain}
+      dataValues={[{dataValue:2.5, details:'detail-0'}, {dataValue: 7.2, details: 'detail-1'}]}
+      marker={<Icon type="alert" />}
+      style = {{line: {
+        strokeWidth: 3,
+        stroke: '#f00',
+        opacity: 1,
+      },
+      details: {
+        fontSize: 12,
+        fontFamily: 'Arial',
+        fontStyle: 'bold',
+        fill: 'gray',
+        padding: 0,
+      },}}
     />
     <Axis id={'horizontal'} position={Position.Bottom} title={'x-domain axis'} />
     <Axis id={'vertical'} title={'y-domain axis'} position={Position.Left} />
@@ -74,22 +73,22 @@ The code sample for the above chart is shown below in the details. What you shou
 <Chart className={'story-chart'}>
     <Settings showLegend debug={boolean('debug', false)} rotation={getChartRotationKnob} />
     <LineAnnotation
-    id={getAnnotationId('anno_1')}
-    domainType={AnnotationDomainTypes.XDomain}
-    dataValues={[{dataValue:2.5, details:'detail-0'}, {dataValue: 7.2, details: 'detail-1'}]}
-    marker={<Icon type="alert" />}
-    style = {{line: {
-      strokeWidth: 3,
-      stroke: '#f00',
-      opacity: 1,
-    },
-    details: {
-      fontSize: 12,
-      fontFamily: 'Arial',
-      fontStyle: 'bold',
-      fill: 'gray',
-      padding: 0,
-    },}}
+      id="anno_1"
+      domainType={AnnotationDomainTypes.XDomain}
+      dataValues={[{dataValue:2.5, details:'detail-0'}, {dataValue: 7.2, details: 'detail-1'}]}
+      marker={<Icon type="alert" />}
+      style = {{line: {
+        strokeWidth: 3,
+        stroke: '#f00',
+        opacity: 1,
+      },
+      details: {
+        fontSize: 12,
+        fontFamily: 'Arial',
+        fontStyle: 'bold',
+        fill: 'gray',
+        padding: 0,
+      },}}
     />
     <Axis id={'horizontal'} position={Position.Bottom} title={'x-domain axis'} />
     <Axis id={'vertical'} title={'y-domain axis'} position={Position.Left} />
@@ -114,7 +113,7 @@ Instead of `continuous` you can use `ordinal` annotations
 <Chart className={'story-chart'}>
     <Settings debug={boolean('debug', false)} rotation={getChartRotationKnob} />
     <LineAnnotation
-    id={'anno_1'}
+    id="anno_1"
     domainType={AnnotationDomainTypes.XDomain}
     dataValues={[{dataValue: 'a', details: 'detail-0'}, {dataValue: 'c', details:'details-1'}]}
     marker={<Icon type="alert" />}
@@ -144,7 +143,7 @@ The code sample for the above chart can be seen below.
 <Chart className={'story-chart'}>
     <Settings debug={boolean('debug', false)} rotation={getChartRotationKnob} />
     <LineAnnotation
-    id={'anno_1'}
+    id="anno_1"
     domainType={AnnotationDomainTypes.XDomain}
     dataValues={[{dataValue: 'a', details: 'detail-0'}, {dataValue: 'c', details:'details-1'}]}
     marker={<Icon type="alert" />}

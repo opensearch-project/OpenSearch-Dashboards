@@ -1,5 +1,5 @@
 import { BasicSeriesSpec, DomainRange, DEFAULT_GLOBAL_ID, SeriesTypes } from '../utils/specs';
-import { GroupId, SpecId, getGroupId } from '../../../utils/ids';
+import { GroupId, SpecId } from '../../../utils/ids';
 import { ScaleContinuousType, ScaleType } from '../../../scales';
 import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_utils';
 import { BaseDomain } from './domain';
@@ -33,7 +33,7 @@ export function mergeYDomain(
   // group specs by group ids
   const specsByGroupIds = splitSpecsByGroupId(specs);
   const specsByGroupIdsEntries = [...specsByGroupIds.entries()];
-  const globalId = getGroupId(DEFAULT_GLOBAL_ID);
+  const globalId = DEFAULT_GLOBAL_ID;
 
   const yDomains = specsByGroupIdsEntries.map<YDomain>(([groupId, groupSpecs]) => {
     const customDomain = domainsByGroupId.get(groupId);

@@ -1,8 +1,19 @@
 import { select, number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } from '../../src/';
-import { Fit, SeriesTypes } from '../../src/chart_types/xy_chart/utils/specs';
+import {
+  AreaSeries,
+  Axis,
+  Chart,
+  CurveType,
+  LineSeries,
+  Position,
+  ScaleType,
+  Settings,
+  Fit,
+  SeriesTypes,
+} from '../../src/';
+
 import { SB_KNOBS_PANEL } from '../utils/storybook';
 
 export const example = () => {

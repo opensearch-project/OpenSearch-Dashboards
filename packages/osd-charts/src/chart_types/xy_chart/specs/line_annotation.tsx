@@ -1,7 +1,7 @@
 import React, { createRef, CSSProperties, Component } from 'react';
 import { deepEqual } from '../../../utils/fast_deep_equal';
 import { LineAnnotationSpec, DEFAULT_GLOBAL_ID, AnnotationTypes } from '../utils/specs';
-import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../utils/themes/theme';
+import { DEFAULT_ANNOTATION_LINE_STYLE, mergeWithDefaultAnnotationLine } from '../../../utils/themes/theme';
 import { bindActionCreators, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { upsertSpec, removeSpec } from '../../../state/actions/specs';
@@ -37,7 +37,9 @@ export class LineAnnotationSpecComponent extends Component<LineAnnotationSpec> {
         height: offsetHeight,
       };
     }
-    upsertSpec({ ...config });
+    const style = mergeWithDefaultAnnotationLine(config.style);
+    const spec = { ...config, style };
+    upsertSpec(spec);
   }
 
   shouldComponentUpdate(nextProps: LineAnnotationSpec) {
@@ -53,7 +55,9 @@ export class LineAnnotationSpecComponent extends Component<LineAnnotationSpec> {
         height: offsetHeight,
       };
     }
-    upsertSpec({ ...config });
+    const style = mergeWithDefaultAnnotationLine(config.style);
+    const spec = { ...config, style };
+    upsertSpec(spec);
   }
   componentWillUnmount() {
     const { removeSpec, id } = this.props as InjectedProps;

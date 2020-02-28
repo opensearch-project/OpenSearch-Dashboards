@@ -1,6 +1,6 @@
 import { boolean, select } from '@storybook/addon-knobs';
 import React from 'react';
-import { Axis, Chart, LineSeries, RectAnnotation, ScaleType, Settings } from '../../../src';
+import { Axis, Chart, LineSeries, RectAnnotation, ScaleType, Settings, RectAnnotationDatum } from '../../../src';
 import { getChartRotationKnob } from '../../utils/knobs';
 import { BandedAccessorType } from '../../../src/utils/geometry';
 import { Position } from '../../../src/utils/commons';
@@ -20,7 +20,7 @@ export const example = () => {
     'x0',
   );
 
-  const dataValues = [
+  const dataValues: RectAnnotationDatum[] = [
     {
       coordinates: {
         x0: 1,

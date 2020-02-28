@@ -1,8 +1,7 @@
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, SeriesNameFn } from '../../src';
 import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
-import { SeriesNameFn } from '../../src/chart_types/xy_chart/utils/specs';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const example = () => {

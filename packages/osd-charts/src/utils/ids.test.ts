@@ -1,11 +1,11 @@
-import { AnnotationId, AxisId, getAnnotationId, getAxisId, getGroupId, GroupId } from './ids';
+import { AnnotationId, AxisId, GroupId } from './ids';
 
 describe('IDs', () => {
   test('ids should differ depending on entity', () => {
-    const axisId1 = getAxisId('axisId1');
-    const axisId2 = getAxisId('axisId2');
-    const groupId1 = getGroupId('groupId');
-    const groupId2 = getGroupId('groupId');
+    const axisId1 = 'axisId1';
+    const axisId2 = 'axisId2';
+    const groupId1 = 'groupId';
+    const groupId2 = 'groupId';
     const axisSeries: Map<AxisId, string> = new Map();
     axisSeries.set(axisId1, 'data1');
     axisSeries.set(axisId2, 'data2');
@@ -22,8 +22,8 @@ describe('IDs', () => {
     expect(expectedGroupSeries).toEqual([...groupSeries]);
   });
   test('should be able to identify annotations', () => {
-    const annotationId1 = getAnnotationId('anno1');
-    const annotationId2 = getAnnotationId('anno2');
+    const annotationId1 = 'anno1';
+    const annotationId2 = 'anno2';
 
     const annotations = new Map<AnnotationId, string>();
     annotations.set(annotationId1, 'annotations 1');

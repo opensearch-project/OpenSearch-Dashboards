@@ -10,7 +10,6 @@ import {
   BasicSeriesSpec,
   SeriesTypes,
 } from '../../chart_types/xy_chart/utils/specs';
-import { getSpecId, getGroupId } from '../../utils/ids';
 import { ScaleType } from '../../scales';
 import { ChartTypes } from '../../chart_types';
 import { SettingsSpec, SpecTypes, TooltipType } from '../../specs';
@@ -20,9 +19,9 @@ export class MockSeriesSpec {
   private static readonly barBase: BarSeriesSpec = {
     chartType: ChartTypes.XYAxis,
     specType: SpecTypes.Series,
-    id: getSpecId('spec1'),
+    id: 'spec1',
     seriesType: SeriesTypes.Bar,
-    groupId: getGroupId(DEFAULT_GLOBAL_ID),
+    groupId: DEFAULT_GLOBAL_ID,
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
     xAccessor: 'x',
@@ -38,9 +37,9 @@ export class MockSeriesSpec {
   private static readonly histogramBarBase: HistogramBarSeriesSpec = {
     chartType: ChartTypes.XYAxis,
     specType: SpecTypes.Series,
-    id: getSpecId('spec1'),
+    id: 'spec1',
     seriesType: SeriesTypes.Bar,
-    groupId: getGroupId(DEFAULT_GLOBAL_ID),
+    groupId: DEFAULT_GLOBAL_ID,
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
     xAccessor: 'x',
@@ -54,9 +53,9 @@ export class MockSeriesSpec {
   private static readonly areaBase: AreaSeriesSpec = {
     chartType: ChartTypes.XYAxis,
     specType: SpecTypes.Series,
-    id: getSpecId('spec1'),
+    id: 'spec1',
     seriesType: SeriesTypes.Area,
-    groupId: getGroupId(DEFAULT_GLOBAL_ID),
+    groupId: DEFAULT_GLOBAL_ID,
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
     xAccessor: 'x',
@@ -70,9 +69,9 @@ export class MockSeriesSpec {
   private static readonly lineBase: LineSeriesSpec = {
     chartType: ChartTypes.XYAxis,
     specType: SpecTypes.Series,
-    id: getSpecId('spec1'),
+    id: 'spec1',
     seriesType: SeriesTypes.Line,
-    groupId: getGroupId(DEFAULT_GLOBAL_ID),
+    groupId: DEFAULT_GLOBAL_ID,
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
     xAccessor: 'x',

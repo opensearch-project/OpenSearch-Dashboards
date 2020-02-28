@@ -114,11 +114,11 @@ These datasets can be used as input for any type of chart specification. These a
 
 ```ts
 export interface SeriesSpec {
-  /** The ID of the spec, generated via getSpecId method */
+  /** The ID of the spec */
   id: SpecId;
   /** The name or label of the spec */
   name?: string;
-  /** The ID of the spec group, generated via getGroupId method
+  /** The ID of the spec group
    * @default __global__
    */
   groupId: GroupId;

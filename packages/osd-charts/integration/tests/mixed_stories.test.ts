@@ -1,5 +1,5 @@
 import { common } from '../page_objects';
-import { Fit } from '../../src/chart_types/xy_chart/utils/specs';
+import { Fit } from '../../src';
 
 describe('Mixed series stories', () => {
   describe('Fitting functions', () => {

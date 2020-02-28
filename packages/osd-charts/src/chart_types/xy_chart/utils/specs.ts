@@ -253,7 +253,7 @@ export interface SeriesSpec extends Spec {
    * The name of the spec. Also a mechanism to provide custom series names.
    */
   name?: SeriesNameAccessor;
-  /** The ID of the spec group, generated via getGroupId method
+  /** The ID of the spec group
    * @default __global__
    */
   groupId: string;
@@ -475,7 +475,7 @@ export interface AxisSpec extends Spec {
   id: AxisId;
   /** Style options for grid line */
   gridLineStyle?: GridLineConfig;
-  /** The ID of the axis group, generated via getGroupId method
+  /** The ID of the axis group
    * @default __global__
    */
   groupId: GroupId;
@@ -534,19 +534,30 @@ export const AnnotationDomainTypes = Object.freeze({
 
 export type AnnotationDomainType = $Values<typeof AnnotationDomainTypes>;
 
+/**
+ * The descriptive object of a line annotation
+ */
 export interface LineAnnotationDatum {
+  /**
+   * The value on the x or y axis accordingly to the domainType configured
+   */
   dataValue: any;
+  /**
+   * A textual description of the annotation
+   */
   details?: string;
+  /**
+   * An header of the annotation. If undefined, than the formatted dataValue will be used
+   */
   header?: string;
 }
 
-export type LineAnnotationSpec = BaseAnnotationSpec & {
-  annotationType: typeof AnnotationTypes.Line;
+export type LineAnnotationSpec = BaseAnnotationSpec<
+  typeof AnnotationTypes.Line,
+  LineAnnotationDatum,
+  LineAnnotationStyle
+> & {
   domainType: AnnotationDomainType;
-  /** Data values defined with value, details, and header */
-  dataValues: LineAnnotationDatum[];
-  /** Custom line styles */
-  style?: Partial<LineAnnotationStyle>;
   /** Custom marker */
   marker?: JSX.Element;
   /**
@@ -569,55 +580,85 @@ export type LineAnnotationSpec = BaseAnnotationSpec & {
   zIndex?: number;
 };
 
+/**
+ * The descriptive object of a rectangular annotation
+ */
 export interface RectAnnotationDatum {
+  /**
+   * The coordinates for the 4 rectangle points.
+   */
   coordinates: {
+    /**
+     * The minuimum value on the x axis. If undefined, the minuimum value of the x domain will be used.
+     */
     x0?: any;
+    /**
+     * The maximum value on the x axis. If undefined, the maximum value of the x domain will be used.
+     */
     x1?: any;
+    /**
+     * The minimum value on the y axis. If undefined, the minimum value of the y domain will be used.
+     */
     y0?: any;
+    /**
+     * The maximum value on the y axis. If undefined, the maximum value of the y domain will be used.
+     */
     y1?: any;
   };
+  /**
+   * A textual description of the annotation
+   */
   details?: string;
 }
 
-export type RectAnnotationSpec = BaseAnnotationSpec & {
-  annotationType: typeof AnnotationTypes.Rectangle;
+export type RectAnnotationSpec = BaseAnnotationSpec<
+  typeof AnnotationTypes.Rectangle,
+  RectAnnotationDatum,
+  RectAnnotationStyle
+> & {
   /** Custom rendering function for tooltip */
   renderTooltip?: AnnotationTooltipFormatter;
-  /** Data values defined with coordinates and details */
-  dataValues: RectAnnotationDatum[];
-  /** Custom annotation style */
-  style?: Partial<RectAnnotationStyle>;
   /** z-index of the annotation relative to other elements in the chart
    * @default -1
    */
   zIndex?: number;
 };
 
-export interface BaseAnnotationSpec extends Spec {
+export interface BaseAnnotationSpec<
+  T extends typeof AnnotationTypes.Rectangle | typeof AnnotationTypes.Line,
+  D extends RectAnnotationDatum | LineAnnotationDatum,
+  S extends RectAnnotationStyle | LineAnnotationStyle
+> extends Spec {
   chartType: ChartTypes;
   specType: typeof SpecTypes.Annotation;
-  /** Annotation type: line, rectangle, text */
-  annotationType: AnnotationType;
-  /** The ID of the axis group, generated via getGroupId method
+  /**
+   * Annotation type: line, rectangle, text
+   */
+  annotationType: T;
+  /**
+   * The ID of the axis group
    * @default __global__
    */
   groupId: GroupId; // defaults to __global__; needed for yDomain position
-  /** Data values defined with coordinates and details */
-  dataValues: AnnotationDatum[];
-  /** Custom annotation style */
-  style?: Partial<AnnotationStyle>;
-  /** Toggles tooltip annotation visibility */
+  /**
+   * Data values defined with coordinates and details
+   */
+  dataValues: D[];
+  /**
+   * Custom annotation style
+   */
+  style?: Partial<S>;
+  /**
+   * Toggles tooltip annotation visibility
+   */
   hideTooltips?: boolean;
-  /** z-index of the annotation relative to other elements in the chart
+  /**
+   * z-index of the annotation relative to other elements in the chart
    * Default specified per specific annotation spec.
    */
   zIndex?: number;
 }
 
-export type AnnotationDatum = LineAnnotationDatum | RectAnnotationDatum;
-export type AnnotationStyle = LineAnnotationStyle | RectAnnotationStyle;
-
-// TODO:  TextAnnotationSpec
 export type AnnotationSpec = LineAnnotationSpec | RectAnnotationSpec;
 
 export function isLineAnnotation(spec: AnnotationSpec): spec is LineAnnotationSpec {

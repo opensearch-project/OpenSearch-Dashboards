@@ -6,7 +6,7 @@ The bar chart with axis example in the `Types of charts` section includes only s
 |:------|:------:|:---------:|:------|
 | chartType | `typeof ChartTypes.XYAxis` | ChartTypes.XYAxis  |  |
 | specType  | `typeof SpecTypes.Axis` | SpecTypes.Axis  |  |
-| groupId | GroupId | `__global__`  | The ID of the axis group, generated via getGroupId method  |
+| groupId | GroupId | `__global__`  | The ID of the axis group |
 | hide  | boolean  | false  | Hide this axis |
 | showOverlappingTicks | boolean | false  | Shows all ticks, also the one from the overlapping labels   |
 | showOverlappingLabels | boolean  | false  | Shows all labels, also the overlapping ones |

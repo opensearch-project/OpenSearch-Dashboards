@@ -13,8 +13,9 @@ import {
   RecursivePartial,
   BarSeriesStyle,
   PointStyle,
+  BarStyleAccessor,
+  PointStyleAccessor,
 } from '../../src';
-import { BarStyleAccessor, PointStyleAccessor } from '../../src/chart_types/xy_chart/utils/specs';
 
 export const example = () => {
   const hasThreshold = boolean('threshold', true);

@@ -1,4 +1,3 @@
-import { getAxisId, getGroupId, getSpecId } from '../../../utils/ids';
 import { ScaleType } from '../../../scales';
 import { computeLegend } from './legend';
 import { SeriesCollectionValue, getSeriesName } from '../utils/series';
@@ -19,7 +18,7 @@ const nullDisplayValue = {
 };
 const seriesCollectionValue1a = {
   seriesIdentifier: {
-    specId: getSpecId('spec1'),
+    specId: 'spec1',
     yAccessor: 'y1',
     splitAccessors: new Map(),
     seriesKeys: ['y1'],
@@ -28,7 +27,7 @@ const seriesCollectionValue1a = {
 };
 const seriesCollectionValue1b = {
   seriesIdentifier: {
-    specId: getSpecId('spec1'),
+    specId: 'spec1',
     yAccessor: 'y1',
     splitAccessors: new Map(),
     seriesKeys: ['a', 'b', 'y1'],
@@ -37,7 +36,7 @@ const seriesCollectionValue1b = {
 };
 const seriesCollectionValue2a = {
   seriesIdentifier: {
-    specId: getSpecId('spec2'),
+    specId: 'spec2',
     yAccessor: 'y1',
     splitAccessors: new Map(),
     seriesKeys: ['y1'],
@@ -46,7 +45,7 @@ const seriesCollectionValue2a = {
 };
 const seriesCollectionValue2b = {
   seriesIdentifier: {
-    specId: getSpecId('spec3'),
+    specId: 'spec3',
     yAccessor: 'y1',
     splitAccessors: new Map(),
     seriesKeys: ['c', 'd', 'y1'],
@@ -56,9 +55,9 @@ const seriesCollectionValue2b = {
 const spec1: BasicSeriesSpec = {
   chartType: ChartTypes.XYAxis,
   specType: SpecTypes.Series,
-  id: getSpecId('spec1'),
+  id: 'spec1',
   name: 'Spec 1 title',
-  groupId: getGroupId('group'),
+  groupId: 'group',
   seriesType: SeriesTypes.Line,
   yScaleType: ScaleType.Log,
   xScaleType: ScaleType.Linear,
@@ -71,8 +70,8 @@ const spec1: BasicSeriesSpec = {
 const spec2: BasicSeriesSpec = {
   chartType: ChartTypes.XYAxis,
   specType: SpecTypes.Series,
-  id: getSpecId('spec2'),
-  groupId: getGroupId('group'),
+  id: 'spec2',
+  groupId: 'group',
   seriesType: SeriesTypes.Line,
   yScaleType: ScaleType.Log,
   xScaleType: ScaleType.Linear,
@@ -87,8 +86,8 @@ const axesSpecs: AxisSpec[] = [];
 const axisSpec: AxisSpec = {
   chartType: ChartTypes.XYAxis,
   specType: SpecTypes.Axis,
-  id: getAxisId('axis1'),
-  groupId: getGroupId('group1'),
+  id: 'axis1',
+  groupId: 'group1',
   hide: false,
   showOverlappingTicks: false,
   showOverlappingLabels: false,
@@ -274,14 +273,14 @@ describe('Legends', () => {
   });
   it('returns the right series name for a color series', () => {
     const seriesIdentifier1 = {
-      specId: getSpecId(''),
+      specId: '',
       yAccessor: 'y1',
       splitAccessors: new Map(),
       seriesKeys: ['y1'],
       key: '',
     };
     const seriesIdentifier2 = {
-      specId: getSpecId(''),
+      specId: '',
       yAccessor: 'y1',
       splitAccessors: new Map(),
       seriesKeys: ['a', 'b', 'y1'],
@@ -322,21 +321,21 @@ describe('Legends', () => {
   });
   it('use the splitted value as name if has a single series and splitSeries is used', () => {
     const seriesIdentifier1 = {
-      specId: getSpecId(''),
+      specId: '',
       yAccessor: 'y1',
       splitAccessors: new Map(),
       seriesKeys: ['y1'],
       key: '',
     };
     const seriesIdentifier2 = {
-      specId: getSpecId(''),
+      specId: '',
       yAccessor: 'y1',
       splitAccessors: new Map(),
       seriesKeys: ['a', 'b', 'y1'],
       key: '',
     };
     const seriesIdentifier3 = {
-      specId: getSpecId(''),
+      specId: '',
       yAccessor: 'y1',
       splitAccessors: new Map(),
       seriesKeys: ['a', 'y1'],

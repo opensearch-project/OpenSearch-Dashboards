@@ -10,7 +10,7 @@ import {
 import { Position, Rotation } from '../../../utils/commons';
 import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../utils/themes/theme';
 import { Dimensions } from '../../../utils/dimensions';
-import { getAxisId, getGroupId, GroupId, AnnotationId } from '../../../utils/ids';
+import { GroupId, AnnotationId } from '../../../utils/ids';
 import { Scale, ScaleType, ScaleBand, ScaleContinuous } from '../../../scales';
 import {
   computeAnnotationDimensions,
@@ -64,13 +64,13 @@ describe('annotation utils', () => {
     left: 15,
   };
 
-  const groupId = getGroupId('foo-group');
+  const groupId = 'foo-group';
 
   const axesSpecs: AxisSpec[] = [];
   const verticalAxisSpec: AxisSpec = {
     chartType: ChartTypes.XYAxis,
     specType: SpecTypes.Axis,
-    id: getAxisId('vertical_axis'),
+    id: 'vertical_axis',
     groupId,
     hide: false,
     showOverlappingTicks: false,
@@ -84,7 +84,7 @@ describe('annotation utils', () => {
   const horizontalAxisSpec: AxisSpec = {
     chartType: ChartTypes.XYAxis,
     specType: SpecTypes.Axis,
-    id: getAxisId('horizontal_axis'),
+    id: 'horizontal_axis',
     groupId,
     hide: false,
     showOverlappingTicks: false,
@@ -1356,7 +1356,7 @@ describe('annotation utils', () => {
       chartType: ChartTypes.XYAxis,
       specType: SpecTypes.Annotation,
       id: 'rect',
-      groupId: getGroupId('foo'),
+      groupId: 'foo',
       annotationType: AnnotationTypes.Rectangle,
       dataValues: [{ coordinates: { x0: 1, x1: 2, y0: 3, y1: 5 } }],
     };

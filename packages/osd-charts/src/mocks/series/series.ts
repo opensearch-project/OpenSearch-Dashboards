@@ -1,7 +1,6 @@
 import { shuffle } from 'lodash';
 
 import { mergePartial } from '../../utils/commons';
-import { getSpecId } from '../..';
 import {
   DataSeries,
   DataSeriesDatum,
@@ -13,7 +12,7 @@ import { FullDataSeriesDatum, WithIndex } from '../../chart_types/xy_chart/utils
 
 export class MockDataSeries {
   private static readonly base: DataSeries = {
-    specId: getSpecId('spec1'),
+    specId: 'spec1',
     seriesKeys: ['spec1'],
     yAccessor: 'y',
     splitAccessors: new Map(),
@@ -49,7 +48,7 @@ export class MockDataSeries {
 
 export class MockRawDataSeries {
   private static readonly base: RawDataSeries = {
-    specId: getSpecId('spec1'),
+    specId: 'spec1',
     seriesKeys: ['spec1'],
     yAccessor: 'y',
     splitAccessors: new Map(),
