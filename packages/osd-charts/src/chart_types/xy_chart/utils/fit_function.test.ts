@@ -27,7 +27,7 @@ describe('Fit Function', () => {
         const current = MockDataSeriesDatum.default();
         const actual = testModule.getValue(current, 0, null, null, Fit.Average, 100);
 
-        expect(actual.filled!.y1).toBe(100);
+        expect(actual.filled?.y1).toBe(100);
       });
 
       describe('previous is not null and fit type is Carry', () => {
@@ -211,7 +211,7 @@ describe('Fit Function', () => {
         const current = MockDataSeriesDatum.ordinal();
         const actual = testModule.getValue(current, 0, null, null, Fit.Average, 100);
 
-        expect(actual.filled!.y1).toBe(100);
+        expect(actual.filled?.y1).toBe(100);
       });
 
       describe('previous is not null and fit type is Carry', () => {

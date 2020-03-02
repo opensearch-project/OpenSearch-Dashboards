@@ -167,8 +167,8 @@ describe('Rendering bars', () => {
         LIGHT_THEME.barSeriesStyle,
         { valueFormatter, showValueLabel: true, isAlternatingValueLabel: true },
       );
-      expect(barGeometries[0].displayValue!.text).toBeDefined();
-      expect(barGeometries[1].displayValue!.text).toBeUndefined();
+      expect(barGeometries[0].displayValue?.text).toBeDefined();
+      expect(barGeometries[1].displayValue?.text).toBeUndefined();
     });
 
     test('Can render bars with contained value labels', () => {
@@ -182,7 +182,7 @@ describe('Rendering bars', () => {
         LIGHT_THEME.barSeriesStyle,
         { valueFormatter, showValueLabel: true, isValueContainedInElement: true },
       );
-      expect(barGeometries[0].displayValue!.width).toBe(50);
+      expect(barGeometries[0].displayValue?.width).toBe(50);
     });
   });
   describe('Multi series bar chart - ordinal', () => {

@@ -1,4 +1,5 @@
 import { Relation } from '../types/types';
+import { Datum } from '../../../../utils/commons';
 
 export const AGGREGATE_KEY = 'value'; // todo later switch back to 'aggregate'
 export const DEPTH_KEY = 'depth';
@@ -30,7 +31,6 @@ type Key = PrimitiveValue;
 type Sorter = (a: number, b: number) => number;
 type NodeSorter = (a: ArrayEntry, b: ArrayEntry) => number;
 
-export type Tuple = Record<string, any>; // this is a row like {country: 'US', gdp: 20392090, ...} from ES; we don't know its properties, todo
 export const entryKey = ([key]: ArrayEntry) => key;
 export const entryValue = ([, value]: ArrayEntry) => value;
 export function depthAccessor(n: ArrayEntry) {
@@ -52,7 +52,7 @@ const ascending: Sorter = (a, b) => a - b;
 const descending: Sorter = (a, b) => b - a;
 
 export function groupByRollup(
-  keyAccessors: Array<((a: Tuple) => Key) | ((a: Tuple, i: number) => Key)>,
+  keyAccessors: Array<((a: Datum) => Key) | ((a: Datum, i: number) => Key)>,
   valueAccessor: Function,
   {
     reducer,

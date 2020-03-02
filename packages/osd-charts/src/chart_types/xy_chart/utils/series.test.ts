@@ -572,10 +572,10 @@ describe('Series', () => {
     };
 
     const allSeries = getSplittedSeries([splitSpec]);
-    expect(allSeries.splittedSeries.get(specId)!.length).toBe(2);
+    expect(allSeries.splittedSeries.get(specId)?.length).toBe(2);
 
     const emptyDeselected = getSplittedSeries([splitSpec]);
-    expect(emptyDeselected.splittedSeries.get(specId)!.length).toBe(2);
+    expect(emptyDeselected.splittedSeries.get(specId)?.length).toBe(2);
 
     const deselectedDataSeries: XYChartSeriesIdentifier[] = [
       {
@@ -587,7 +587,7 @@ describe('Series', () => {
       },
     ];
     const subsetSplit = getSplittedSeries([splitSpec], deselectedDataSeries);
-    expect(subsetSplit.splittedSeries.get(specId)!.length).toBe(1);
+    expect(subsetSplit.splittedSeries.get(specId)?.length).toBe(1);
   });
 
   test('should sort series color by series spec sort index', () => {
@@ -665,23 +665,28 @@ describe('Series', () => {
   });
   test('clean datum shall parse string as number for y values', () => {
     let datum = cleanDatum([0, 1, 2], 0, 1, 2);
-    expect(datum.y1).toBe(1);
-    expect(datum.y0).toBe(2);
+    expect(datum).toBeDefined();
+    expect(datum?.y1).toBe(1);
+    expect(datum?.y0).toBe(2);
     datum = cleanDatum([0, '1', 2], 0, 1, 2);
-    expect(datum.y1).toBe(1);
-    expect(datum.y0).toBe(2);
+    expect(datum).toBeDefined();
+    expect(datum?.y1).toBe(1);
+    expect(datum?.y0).toBe(2);
 
     datum = cleanDatum([0, '1', '2'], 0, 1, 2);
-    expect(datum.y1).toBe(1);
-    expect(datum.y0).toBe(2);
+    expect(datum).toBeDefined();
+    expect(datum?.y1).toBe(1);
+    expect(datum?.y0).toBe(2);
 
     datum = cleanDatum([0, 1, '2'], 0, 1, 2);
-    expect(datum.y1).toBe(1);
-    expect(datum.y0).toBe(2);
+    expect(datum).toBeDefined();
+    expect(datum?.y1).toBe(1);
+    expect(datum?.y0).toBe(2);
 
     datum = cleanDatum([0, 'invalid', 'invalid'], 0, 1, 2);
-    expect(datum.y1).toBe(null);
-    expect(datum.y0).toBe(null);
+    expect(datum).toBeDefined();
+    expect(datum?.y1).toBe(null);
+    expect(datum?.y0).toBe(null);
   });
   describe('#getSeriesNameKeys', () => {
     const data = dg.generateGroupedSeries(50, 2).map((d) => ({ ...d, y2: d.y }));

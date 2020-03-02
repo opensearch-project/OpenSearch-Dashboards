@@ -19,15 +19,9 @@ export type AccessorFormat = string | ((value: string) => string);
  * @param accessor the spec accessor
  */
 export function getAccessorFn(accessor: Accessor): AccessorFn {
-  if (typeof accessor === 'string' || typeof accessor === 'number') {
-    return (datum: Datum) => {
-      return datum[accessor];
-    };
-  }
-  if (typeof accessor === 'function') {
-    return accessor;
-  }
-  throw new Error('Accessor must be a string or a function');
+  return (datum: Datum) => {
+    return typeof datum === 'object' && datum !== null ? datum[accessor as keyof typeof datum] : undefined;
+  };
 }
 
 /**

@@ -213,8 +213,8 @@ describe('Axis computational utils', () => {
     };
     let axisDimensions = computeAxisTicksDimensions(xAxisWithTime, xDomain, [yDomain], 1, bboxCalculator, 0, axes);
     expect(axisDimensions).not.toBeNull();
-    expect(axisDimensions!.tickLabels[0]).toBe('11:00:00');
-    expect(axisDimensions!.tickLabels[11]).toBe('11:55:00');
+    expect(axisDimensions?.tickLabels[0]).toBe('11:00:00');
+    expect(axisDimensions?.tickLabels[11]).toBe('11:55:00');
 
     axisDimensions = computeAxisTicksDimensions(
       xAxisWithTime,
@@ -229,8 +229,8 @@ describe('Axis computational utils', () => {
       axes,
     );
     expect(axisDimensions).not.toBeNull();
-    expect(axisDimensions!.tickLabels[0]).toBe('14:00:00');
-    expect(axisDimensions!.tickLabels[11]).toBe('14:55:00');
+    expect(axisDimensions?.tickLabels[0]).toBe('14:00:00');
+    expect(axisDimensions?.tickLabels[11]).toBe('14:55:00');
 
     axisDimensions = computeAxisTicksDimensions(
       xAxisWithTime,
@@ -245,8 +245,8 @@ describe('Axis computational utils', () => {
       axes,
     );
     expect(axisDimensions).not.toBeNull();
-    expect(axisDimensions!.tickLabels[0]).toBe('08:00:00');
-    expect(axisDimensions!.tickLabels[11]).toBe('08:55:00');
+    expect(axisDimensions?.tickLabels[0]).toBe('08:00:00');
+    expect(axisDimensions?.tickLabels[11]).toBe('08:55:00');
 
     bboxCalculator.destroy();
   });
@@ -269,10 +269,10 @@ describe('Axis computational utils', () => {
   test('should generate a valid scale', () => {
     const yScale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
     expect(yScale).toBeDefined();
-    expect(yScale!.bandwidth).toBe(0);
-    expect(yScale!.domain).toEqual([0, 1]);
-    expect(yScale!.range).toEqual([100, 0]);
-    expect(yScale!.ticks()).toEqual([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]);
+    expect(yScale?.bandwidth).toBe(0);
+    expect(yScale?.domain).toEqual([0, 1]);
+    expect(yScale?.range).toEqual([100, 0]);
+    expect(yScale?.ticks()).toEqual([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]);
 
     const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: 'foo' };
     const nullYScale = getScaleForAxisSpec(ungroupedAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);

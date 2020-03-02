@@ -1,4 +1,5 @@
 import { ArrayEntry } from '../utils/group_by_rollup';
+import { Datum } from '../../../../utils/commons';
 
 export const FONT_VARIANTS = Object.freeze(['normal', 'small-caps'] as const);
 export type FontVariant = typeof FONT_VARIANTS[number];
@@ -57,7 +58,7 @@ export type TextMeasure = (fontSize: number, boxes: Box[]) => TextMetrics[];
  */
 export type AdditiveAggregation = 'count' | 'sum';
 
-export type Relation = Array<object>;
+export type Relation = Array<Datum>;
 
 export interface Origin {
   x0: number;

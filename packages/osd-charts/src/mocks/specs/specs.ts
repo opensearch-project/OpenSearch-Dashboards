@@ -1,4 +1,4 @@
-import { mergePartial, Position } from '../../utils/commons';
+import { mergePartial, Position, RecursivePartial } from '../../utils/commons';
 import {
   SeriesSpecs,
   DEFAULT_GLOBAL_ID,
@@ -83,21 +83,31 @@ export class MockSeriesSpec {
   };
 
   static bar(partial?: Partial<BarSeriesSpec>): BarSeriesSpec {
-    return mergePartial<BarSeriesSpec>(MockSeriesSpec.barBase, partial, { mergeOptionalPartialValues: true });
-  }
-
-  static histogramBar(partial?: Partial<HistogramBarSeriesSpec>): HistogramBarSeriesSpec {
-    return mergePartial<HistogramBarSeriesSpec>(MockSeriesSpec.histogramBarBase, partial, {
+    return mergePartial<BarSeriesSpec>(MockSeriesSpec.barBase, partial as RecursivePartial<BarSeriesSpec>, {
       mergeOptionalPartialValues: true,
     });
   }
 
+  static histogramBar(partial?: Partial<HistogramBarSeriesSpec>): HistogramBarSeriesSpec {
+    return mergePartial<HistogramBarSeriesSpec>(
+      MockSeriesSpec.histogramBarBase,
+      partial as RecursivePartial<HistogramBarSeriesSpec>,
+      {
+        mergeOptionalPartialValues: true,
+      },
+    );
+  }
+
   static area(partial?: Partial<AreaSeriesSpec>): AreaSeriesSpec {
-    return mergePartial<AreaSeriesSpec>(MockSeriesSpec.areaBase, partial, { mergeOptionalPartialValues: true });
+    return mergePartial<AreaSeriesSpec>(MockSeriesSpec.areaBase, partial as RecursivePartial<AreaSeriesSpec>, {
+      mergeOptionalPartialValues: true,
+    });
   }
 
   static line(partial?: Partial<LineSeriesSpec>): LineSeriesSpec {
-    return mergePartial<LineSeriesSpec>(MockSeriesSpec.lineBase, partial, { mergeOptionalPartialValues: true });
+    return mergePartial<LineSeriesSpec>(MockSeriesSpec.lineBase, partial as RecursivePartial<LineSeriesSpec>, {
+      mergeOptionalPartialValues: true,
+    });
   }
 
   static byType(type?: 'line' | 'bar' | 'area'): BasicSeriesSpec {
@@ -122,7 +132,9 @@ export class MockSeriesSpecs {
   static fromPartialSpecs(specs: Partial<BasicSeriesSpec>[]): SeriesSpecs {
     return specs.map(({ seriesType, ...spec }) => {
       const base = MockSeriesSpec.byType(seriesType);
-      return mergePartial<BasicSeriesSpec>(base, spec, { mergeOptionalPartialValues: true });
+      return mergePartial<BasicSeriesSpec>(base, spec as RecursivePartial<BasicSeriesSpec>, {
+        mergeOptionalPartialValues: true,
+      });
     });
   }
 

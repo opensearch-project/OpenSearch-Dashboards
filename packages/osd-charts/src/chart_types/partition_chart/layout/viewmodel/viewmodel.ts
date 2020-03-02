@@ -6,7 +6,7 @@ import { Distance, Pixels, Radius } from '../types/geometry_types';
 import { meanAngle } from '../geometry';
 import { treemap } from '../utils/treemap';
 import { sunburst } from '../utils/sunburst';
-import { AccessorFn, IndexedAccessorFn } from '../../../../utils/accessor';
+import { IndexedAccessorFn } from '../../../../utils/accessor';
 import { argsToRGBString, stringToRGB } from '../utils/d3_utils';
 import {
   OutsideLinksViewModel,
@@ -41,6 +41,7 @@ import {
   parentAccessor,
   sortIndexAccessor,
 } from '../utils/group_by_rollup';
+import { ValueAccessor } from '../../../../utils/commons';
 
 function paddingAccessor(n: ArrayEntry) {
   return entryValue(n).depth > 1 ? 1 : [0, 2][entryValue(n).depth];
@@ -123,7 +124,7 @@ export function shapeViewModel(
   layers: Layer[],
   facts: Relation,
   rawTextGetter: RawTextGetter,
-  valueAccessor: AccessorFn,
+  valueAccessor: ValueAccessor,
   valueFormatter: (value: number) => string,
   groupByRollupAccessors: IndexedAccessorFn[],
 ): ShapeViewModel {

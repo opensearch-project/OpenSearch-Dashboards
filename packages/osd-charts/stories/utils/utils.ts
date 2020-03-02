@@ -1,16 +1,17 @@
 import { arrayToLookup, hueInterpolator } from '../../src/chart_types/partition_chart/layout/utils/calcs';
 import { palettes } from '../../src/mocks/hierarchical/palettes';
-import { Datum } from '../../src/utils/commons';
 import { countryDimension, productDimension, regionDimension } from '../../src/mocks/hierarchical/dimension_codes';
 
-export const productLookup = arrayToLookup((d: Datum) => d.sitc1, productDimension);
-export const regionLookup = arrayToLookup((d: Datum) => d.region, regionDimension);
-export const countryLookup = arrayToLookup((d: Datum) => d.country, countryDimension);
+export const productLookup = arrayToLookup((d: any) => d.sitc1, productDimension);
+export const regionLookup = arrayToLookup((d: any) => d.region, regionDimension);
+export const countryLookup = arrayToLookup((d: any) => d.country, countryDimension);
+
+type ColorMaker = (x: number) => string;
 
 // interpolation based, cyclical color example
 export const interpolatorCET2s = hueInterpolator(palettes.CET2s.map(([r, g, b]) => [r, g, b, 0.8]));
 export const interpolatorTurbo = hueInterpolator(palettes.turbo.map(([r, g, b]) => [r, g, b, 0.8]));
-export const indexInterpolatedFillColor = (colorMaker: any) => (d: any, i: number, a: any[]) =>
+export const indexInterpolatedFillColor = (colorMaker: ColorMaker) => (d: any, i: number, a: any[]) =>
   colorMaker(i / (a.length + 1));
 
 // colorbrewer2.org based, categorical color example

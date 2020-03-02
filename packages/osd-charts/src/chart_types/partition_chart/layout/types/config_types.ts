@@ -1,7 +1,7 @@
 import { Distance, Pixels, Radian, Radius, Ratio, SizeRatio, TimeMs } from './geometry_types';
 import { Font, FontFamily, PartialFont } from './types';
 import { $Values as Values } from 'utility-types';
-import { Color } from '../../../../utils/commons';
+import { Color, ValueFormatter } from '../../../../utils/commons';
 
 export const PartitionLayout = Object.freeze({
   sunburst: 'sunburst',
@@ -14,7 +14,7 @@ interface LabelConfig extends Font {
   textColor: Color;
   textInvertible: boolean;
   textOpacity: Ratio;
-  valueFormatter: (x: number) => string;
+  valueFormatter: ValueFormatter;
   valueFont: PartialFont;
 }
 

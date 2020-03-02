@@ -2,21 +2,14 @@ import { wrapToTau } from '../geometry';
 import { Coordinate, Distance, Pixels, Radian, Radius, RingSector } from '../types/geometry_types';
 import { Config } from '../types/config_types';
 import { logarithm, TAU, trueBearingToStandardPositionAngle } from '../utils/math';
-import {
-  QuadViewModel,
-  RawTextGetter,
-  RowBox,
-  RowSet,
-  RowSpace,
-  ShapeTreeNode,
-  ValueFormatter,
-} from '../types/viewmodel_types';
+import { QuadViewModel, RawTextGetter, RowBox, RowSet, RowSpace, ShapeTreeNode } from '../types/viewmodel_types';
 import { Box, Font, PartialFont, TextMeasure } from '../types/types';
 import { AGGREGATE_KEY } from '../utils/group_by_rollup';
 import { conjunctiveConstraint } from '../circline_geometry';
 import { Layer } from '../../specs/index';
 import { stringToRGB } from '../utils/d3_utils';
 import { colorIsDark } from '../utils/calcs';
+import { ValueFormatter } from '../../../../utils/commons';
 
 const INFINITY_RADIUS = 1e4; // far enough for a sub-2px precision on a 4k screen, good enough for text bounds; 64 bit floats still work well with it
 

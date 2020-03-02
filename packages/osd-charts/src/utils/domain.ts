@@ -59,11 +59,11 @@ export function computeDomainExtent(
 
 export function computeContinuousDataDomain(
   data: any[],
-  accessor: AccessorFn,
+  accessor: (n: any) => number,
   scaleToExtent = false,
   fitToExtent = false,
 ): number[] {
-  const range = extent(data, accessor);
+  const range = extent<any, number>(data, accessor);
 
   return computeDomainExtent(range, scaleToExtent, fitToExtent);
 }

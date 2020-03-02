@@ -72,7 +72,7 @@ describe('utils/domain', () => {
 
   test('should compute continuous data domain: data scaled to extent', () => {
     const data = [{ x: 12 }, { x: 6 }, { x: 8 }];
-    const accessor: AccessorFn = (datum: any) => datum.x;
+    const accessor = (datum: any) => datum.x;
     const scaleToExtent = true;
 
     const continuousDataDomain = computeContinuousDataDomain(data, accessor, scaleToExtent);
@@ -84,7 +84,7 @@ describe('utils/domain', () => {
 
   test('should compute continuous data domain: data not scaled to extent', () => {
     const data = [{ x: 12 }, { x: 6 }, { x: 8 }];
-    const accessor: AccessorFn = (datum: any) => datum.x;
+    const accessor = (datum: any) => datum.x;
 
     const continuousDataDomain = computeContinuousDataDomain(data, accessor);
 
@@ -95,7 +95,7 @@ describe('utils/domain', () => {
 
   test('should compute continuous data domain: empty data not scaled to extent', () => {
     const data: any[] = [];
-    const accessor: AccessorFn = (datum: any) => datum.x;
+    const accessor = (datum: any) => datum.x;
 
     const continuousDataDomain = computeContinuousDataDomain(data, accessor);
 

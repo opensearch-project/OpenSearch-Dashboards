@@ -547,10 +547,10 @@ describe('Chart State utils', () => {
         false,
       );
       expect(geometries.geometriesIndex.size).toBe(4);
-      expect(geometries.geometriesIndex.get(0)!.length).toBe(2);
-      expect(geometries.geometriesIndex.get(1)!.length).toBe(2);
-      expect(geometries.geometriesIndex.get(2)!.length).toBe(2);
-      expect(geometries.geometriesIndex.get(3)!.length).toBe(2);
+      expect(geometries.geometriesIndex.get(0)?.length).toBe(2);
+      expect(geometries.geometriesIndex.get(1)?.length).toBe(2);
+      expect(geometries.geometriesIndex.get(2)?.length).toBe(2);
+      expect(geometries.geometriesIndex.get(3)?.length).toBe(2);
     });
     test('can compute stacked geometries indexes', () => {
       const line1: LineSeriesSpec = {
@@ -611,10 +611,10 @@ describe('Chart State utils', () => {
         false,
       );
       expect(geometries.geometriesIndex.size).toBe(4);
-      expect(geometries.geometriesIndex.get(0)!.length).toBe(2);
-      expect(geometries.geometriesIndex.get(1)!.length).toBe(2);
-      expect(geometries.geometriesIndex.get(2)!.length).toBe(2);
-      expect(geometries.geometriesIndex.get(3)!.length).toBe(2);
+      expect(geometries.geometriesIndex.get(0)?.length).toBe(2);
+      expect(geometries.geometriesIndex.get(1)?.length).toBe(2);
+      expect(geometries.geometriesIndex.get(2)?.length).toBe(2);
+      expect(geometries.geometriesIndex.get(3)?.length).toBe(2);
     });
     test('can compute non stacked geometries counts', () => {
       const area: AreaSeriesSpec = {
@@ -1244,7 +1244,7 @@ describe('Chart State utils', () => {
     ]);
     const merged = mergeGeometriesIndexes(map1, map2);
     expect(merged.get('a')).toBeDefined();
-    expect(merged.get('a')!.length).toBe(2);
+    expect(merged.get('a')?.length).toBe(2);
   });
   test('can compute xScaleOffset dependent on histogram mode', () => {
     const domain = [0, 10];
