@@ -1,7 +1,7 @@
 import { Dimensions } from '../../../../utils/dimensions';
 import { shapeViewModel } from '../../layout/viewmodel/viewmodel';
 import { measureText } from '../../layout/utils/measure';
-import { ShapeTreeNode, ShapeViewModel, RawTextGetter } from '../../layout/types/viewmodel_types';
+import { ShapeTreeNode, ShapeViewModel, RawTextGetter, nullShapeViewModel } from '../../layout/types/viewmodel_types';
 import { DEPTH_KEY } from '../../layout/utils/group_by_rollup';
 import { PartitionSpec, Layer } from '../../specs/index';
 import { identity, mergePartial, RecursivePartial } from '../../../../utils/commons';
@@ -23,14 +23,7 @@ export function render(partitionSpec: PartitionSpec, parentDimensions: Dimension
   const partialConfig: RecursivePartial<Config> = { ...specConfig, width, height };
   const config: Config = mergePartial(defaultConfig, partialConfig);
   if (!textMeasurerCtx) {
-    return {
-      config,
-      quadViewModel: [],
-      rowSets: [],
-      linkLabelViewModels: [],
-      outsideLinksViewModel: [],
-      diskCenter: { x: width / 2, y: height / 2 },
-    };
+    return nullShapeViewModel(config, { x: width / 2, y: height / 2 });
   }
   return shapeViewModel(
     measureText(textMeasurerCtx),

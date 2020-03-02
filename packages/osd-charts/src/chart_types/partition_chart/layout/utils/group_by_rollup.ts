@@ -4,12 +4,14 @@ import { Datum } from '../../../../utils/commons';
 export const AGGREGATE_KEY = 'value'; // todo later switch back to 'aggregate'
 export const DEPTH_KEY = 'depth';
 export const CHILDREN_KEY = 'children';
+export const INPUT_KEY = 'inputIndex';
 export const PARENT_KEY = 'parent';
 export const SORT_INDEX_KEY = 'sortIndex';
 
 interface NodeDescriptor {
   [AGGREGATE_KEY]: number;
   [DEPTH_KEY]: number;
+  [INPUT_KEY]?: Array<number>;
 }
 
 export type ArrayEntry = [Key, ArrayNode];
@@ -71,11 +73,13 @@ export function groupByRollup(
       const keyExists = pointer.has(key);
       const last = i === keyCount - 1;
       const node = keyExists && pointer.get(key);
+      const inputIndices = node ? node[INPUT_KEY] : [];
       const childrenMap = node ? node[CHILDREN_KEY] : new Map();
       const aggregate = node ? node[AGGREGATE_KEY] : identity();
       const reductionValue = reducer(aggregate, valueAccessor(n));
       pointer.set(key, {
         [AGGREGATE_KEY]: reductionValue,
+        [INPUT_KEY]: [...inputIndices, index],
         [DEPTH_KEY]: i,
         ...(!last && { [CHILDREN_KEY]: childrenMap }),
       });
@@ -91,7 +95,7 @@ export function groupByRollup(
 
 function getRootArrayNode(): ArrayNode {
   const children: HierarchyOfArrays = [];
-  const bootstrap = { [AGGREGATE_KEY]: NaN, [DEPTH_KEY]: NaN, [CHILDREN_KEY]: children };
+  const bootstrap = { [AGGREGATE_KEY]: NaN, [DEPTH_KEY]: NaN, [CHILDREN_KEY]: children, [INPUT_KEY]: [] as number[] };
   Object.assign(bootstrap, { [PARENT_KEY]: bootstrap });
   const result: ArrayNode = bootstrap as ArrayNode;
   return result;
@@ -109,6 +113,7 @@ export function mapsToArrays(root: HierarchyOfMaps, sorter: NodeSorter): Hierarc
           [DEPTH_KEY]: NaN,
           [SORT_INDEX_KEY]: NaN,
           [PARENT_KEY]: parent,
+          [INPUT_KEY]: [],
         };
         const newValue: ArrayNode = Object.assign(
           resultNode,

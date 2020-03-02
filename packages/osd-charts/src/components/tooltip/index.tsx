@@ -75,11 +75,10 @@ class TooltipComponent extends React.Component<TooltipProps> {
   }
 
   renderHeader(headerData: TooltipValue | null, formatter?: TooltipValueFormatter) {
-    if (!headerData) {
+    if (!headerData || !headerData.isVisible) {
       return null;
     }
-
-    return formatter ? formatter(headerData) : headerData.value;
+    return <div className="echTooltip__header">{formatter ? formatter(headerData) : headerData.value}</div>;
   }
 
   render() {
@@ -90,7 +89,7 @@ class TooltipComponent extends React.Component<TooltipProps> {
     }
     const tooltipComponent = (
       <div className="echTooltip" ref={this.tooltipRef}>
-        <div className="echTooltip__header">{this.renderHeader(info.header, headerFormatter)}</div>
+        {this.renderHeader(info.header, headerFormatter)}
         <div className="echTooltip__list">
           {info.values.map(({ seriesIdentifier, valueAccessor, label, value, color, isHighlighted, isVisible }) => {
             if (!isVisible) {

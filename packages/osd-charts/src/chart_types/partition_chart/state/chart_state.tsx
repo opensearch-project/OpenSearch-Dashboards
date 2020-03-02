@@ -1,7 +1,10 @@
 import React from 'react';
-import { InternalChartState } from '../../../state/chart_state';
+import { InternalChartState, GlobalChartState, BackwardRef } from '../../../state/chart_state';
 import { ChartTypes } from '../..';
 import { Partition } from '../renderer/canvas/partition';
+import { isTooltipVisibleSelector } from '../state/selectors/is_tooltip_visible';
+import { getTooltipInfoSelector } from '../state/selectors/tooltip';
+import { Tooltip } from '../../../components/tooltip';
 
 const EMPTY_MAP = new Map();
 export class PartitionState implements InternalChartState {
@@ -21,19 +24,29 @@ export class PartitionState implements InternalChartState {
   getLegendItemsValues() {
     return EMPTY_MAP;
   }
-  chartRenderer() {
-    return <Partition />;
+  chartRenderer(containerRef: BackwardRef) {
+    return (
+      <>
+        <Tooltip getChartContainerRef={containerRef} />
+        <Partition />
+      </>
+    );
   }
   getPointerCursor() {
     return 'default';
   }
-  isTooltipVisible() {
-    return false;
+  isTooltipVisible(globalState: GlobalChartState) {
+    return isTooltipVisibleSelector(globalState);
   }
-  getTooltipInfo() {
-    return undefined;
+  getTooltipInfo(globalState: GlobalChartState) {
+    return getTooltipInfoSelector(globalState);
   }
-  getTooltipAnchor() {
-    return null;
+  getTooltipAnchor(state: GlobalChartState) {
+    const position = state.interactions.pointer.current.position;
+    return {
+      isRotated: false,
+      x1: position.x,
+      y1: position.y,
+    };
   }
 }

@@ -1,5 +1,5 @@
 import { Config } from './config_types';
-import { Coordinate, Distance, PointObject, PointTuple, Radian } from './geometry_types';
+import { Coordinate, Distance, Pixels, PointObject, PointTuple, Radian } from './geometry_types';
 import { Font } from './types';
 import { config } from '../config/config';
 import { ArrayNode, HierarchyOfArrays } from '../utils/group_by_rollup';
@@ -54,6 +54,8 @@ export interface OutsideLinksViewModel {
   points: Array<PointTuple>;
 }
 
+export type PickFunction = (x: Pixels, y: Pixels) => Array<QuadViewModel>;
+
 export type ShapeViewModel = {
   config: Config;
   quadViewModel: QuadViewModel[];
@@ -61,16 +63,19 @@ export type ShapeViewModel = {
   linkLabelViewModels: LinkLabelVM[];
   outsideLinksViewModel: OutsideLinksViewModel[];
   diskCenter: PointObject;
+  pickQuads: PickFunction;
 };
 
-export const nullSectorViewModel = (): ShapeViewModel => ({
-  config,
+export const nullShapeViewModel = (specifiedConfig?: Config, diskCenter?: PointObject): ShapeViewModel => ({
+  config: specifiedConfig || config,
   quadViewModel: [],
   rowSets: [],
   linkLabelViewModels: [],
   outsideLinksViewModel: [],
-  diskCenter: { x: 0, y: 0 },
+  diskCenter: diskCenter || { x: 0, y: 0 },
+  pickQuads: () => [],
 });
+
 type TreeLevel = number;
 
 interface AngleFromTo {

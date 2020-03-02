@@ -21,6 +21,10 @@ export interface TooltipAnchorPosition {
    * the left position of the anchor
    */
   x1: number;
+  /**
+   * the padding to add between the tooltip position and the final position
+   */
+  padding?: number;
 }
 
 export function getFinalTooltipPosition(
@@ -30,18 +34,16 @@ export function getFinalTooltipPosition(
   tooltip: Dimensions,
   /** the tooltip anchor computed position not adjusted within chart bounds */
   anchorPosition: TooltipAnchorPosition,
-  /** the padding to add between the tooltip position and the final position */
-  padding = 10,
 ): {
   left: string | null;
   top: string | null;
 } {
-  const { x1, y1, isRotated } = anchorPosition;
+  const { x1, y1, isRotated, padding = 10 } = anchorPosition;
   let left = 0;
   let top = 0;
 
-  const x0 = anchorPosition.x0 || 0;
-  const y0 = anchorPosition.y0 || 0;
+  const x0 = anchorPosition.x0 || anchorPosition.x1;
+  const y0 = anchorPosition.y0 || anchorPosition.y1;
 
   if (!isRotated) {
     const leftOfBand = window.pageXOffset + container.left + x0;

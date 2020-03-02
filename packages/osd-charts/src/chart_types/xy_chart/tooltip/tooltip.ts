@@ -29,13 +29,15 @@ export function getSeriesTooltipValues(
   tooltipValues.forEach(({ value, seriesIdentifier, valueAccessor }) => {
     const seriesValue = defaultValue ? defaultValue : value;
     const current = seriesTooltipValues.get(seriesIdentifier.key) || {};
-
-    seriesTooltipValues.set(seriesIdentifier.key, {
+    const tooltipValue: TooltipLegendValue = {
       y0: defaultValue,
       y1: defaultValue,
       ...current,
-      [valueAccessor]: seriesValue,
-    });
+    };
+    if (valueAccessor != null && (valueAccessor === 'y0' || valueAccessor === 'y1')) {
+      tooltipValue[valueAccessor] = seriesValue;
+    }
+    seriesTooltipValues.set(seriesIdentifier.key, tooltipValue);
   });
   return seriesTooltipValues;
 }
