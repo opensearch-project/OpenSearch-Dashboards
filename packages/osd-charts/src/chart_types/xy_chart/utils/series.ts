@@ -397,7 +397,7 @@ export function getSplittedSeries(
   };
 }
 
-export function getSeriesNameFromOptions(
+function getSeriesNameFromOptions(
   options: SeriesNameConfigOptions,
   { yAccessor, splitAccessors }: XYChartSeriesIdentifier,
   delimiter: string,

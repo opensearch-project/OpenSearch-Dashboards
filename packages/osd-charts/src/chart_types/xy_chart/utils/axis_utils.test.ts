@@ -8,7 +8,6 @@ import { ScaleType } from '../../../scales';
 import {
   AxisTick,
   AxisTicksDimensions,
-  centerRotationOrigin,
   computeAxisGridLinePositions,
   computeAxisTicksDimensions,
   computeRotatedLabelDimensions,
@@ -598,42 +597,6 @@ describe('Axis computational utils', () => {
       maxLabelTextHeight: 100,
     };
     expect(reducer(accWithGreaterValues, 'foo')).toEqual(accWithGreaterValues);
-  });
-
-  test('should compute coordinates and offsets to anchor rotation origin from the center', () => {
-    const simpleCenteredProps = centerRotationOrigin(
-      {
-        maxLabelBboxWidth: 10,
-        maxLabelBboxHeight: 20,
-        maxLabelTextWidth: 10,
-        maxLabelTextHeight: 20,
-      },
-      { x: 0, y: 0 },
-    );
-
-    expect(simpleCenteredProps).toEqual({
-      offsetX: 5,
-      offsetY: 10,
-      x: 5,
-      y: 10,
-    });
-
-    const rotatedCenteredProps = centerRotationOrigin(
-      {
-        maxLabelBboxWidth: 10,
-        maxLabelBboxHeight: 20,
-        maxLabelTextWidth: 20,
-        maxLabelTextHeight: 10,
-      },
-      { x: 30, y: 40 },
-    );
-
-    expect(rotatedCenteredProps).toEqual({
-      offsetX: 10,
-      offsetY: 5,
-      x: 35,
-      y: 50,
-    });
   });
 
   test('should compute positions and alignment of tick labels along a vertical axis', () => {

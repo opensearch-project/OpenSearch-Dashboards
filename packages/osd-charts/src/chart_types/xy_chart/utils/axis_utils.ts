@@ -246,31 +246,6 @@ function computeTickDimensions(
 }
 
 /**
- * The Konva api sets the top right corner of a shape as the default origin of rotation.
- * In order to apply rotation to tick labels while preserving their relative position to the axis,
- * we compute offsets to apply to the Text element as well as adjust the x/y coordinates to adjust
- * for these offsets.
- */
-export function centerRotationOrigin(
-  axisTicksDimensions: {
-    maxLabelBboxWidth: number;
-    maxLabelBboxHeight: number;
-    maxLabelTextWidth: number;
-    maxLabelTextHeight: number;
-  },
-  coordinates: { x: number; y: number },
-): { x: number; y: number; offsetX: number; offsetY: number } {
-  const { maxLabelBboxWidth, maxLabelBboxHeight, maxLabelTextWidth, maxLabelTextHeight } = axisTicksDimensions;
-
-  const offsetX = maxLabelTextWidth / 2;
-  const offsetY = maxLabelTextHeight / 2;
-  const x = coordinates.x + maxLabelBboxWidth / 2;
-  const y = coordinates.y + maxLabelBboxHeight / 2;
-
-  return { offsetX, offsetY, x, y };
-}
-
-/**
  * Gets the computed x/y coordinates & alignment properties for an axis tick label.
  * @param isVerticalAxis if the axis is vertical (in contrast to horizontal)
  * @param tickLabelRotation degree of rotation of the tick label

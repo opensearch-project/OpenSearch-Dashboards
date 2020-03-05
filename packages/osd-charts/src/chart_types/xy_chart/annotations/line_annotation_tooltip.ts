@@ -57,7 +57,7 @@ export interface AnnotationLineProps {
 
 export const DEFAULT_LINE_OVERFLOW = 0;
 
-export function computeYDomainLineAnnotationDimensions(
+function computeYDomainLineAnnotationDimensions(
   dataValues: LineAnnotationDatum[],
   yScale: Scale,
   chartRotation: Rotation,
@@ -180,7 +180,7 @@ export function computeYDomainLineAnnotationDimensions(
   return lineProps;
 }
 
-export function computeXDomainLineAnnotationDimensions(
+function computeXDomainLineAnnotationDimensions(
   dataValues: LineAnnotationDatum[],
   xScale: Scale,
   chartRotation: Rotation,
@@ -399,7 +399,7 @@ export function isVerticalAnnotationLine(isXDomainAnnotation: boolean, isHorizon
  * @param cursorPosition the cursor position relative to the projected area
  * @param marker the line annotation marker
  */
-export function isWithinLineMarkerBounds(cursorPosition: Point, marker: AnnotationMarker): boolean {
+function isWithinLineMarkerBounds(cursorPosition: Point, marker: AnnotationMarker): boolean {
   const { top, left } = marker.position;
   const { width, height } = marker.dimension;
   const markerRect: Bounds = { startX: left, startY: top, endX: left + width, endY: top + height };
