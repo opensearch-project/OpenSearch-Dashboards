@@ -1,5 +1,6 @@
 # Force include
 !/.storybook
+!/.storybook-docs
 !/.playground
 
 # Ignore

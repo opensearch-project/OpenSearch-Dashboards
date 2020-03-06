@@ -77,7 +77,7 @@ You can find documentation around creating and submitting new features in [CONTR
 
 [Apache Licensed][license]. Read the [FAQ][faq] for details.
 
-[license]: LICENSE.md
+[license]: LICENSE.txt
 [faq]: FAQ.md
 [docs]: https://elastic.github.io/elastic-charts/
 [consuming]: wiki/consuming.md
