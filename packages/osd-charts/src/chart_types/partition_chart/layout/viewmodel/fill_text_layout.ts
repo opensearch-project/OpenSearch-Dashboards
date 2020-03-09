@@ -62,7 +62,7 @@ function angleToCircline(
 
 // todo pick a better unique key for the slices (D3 doesn't keep track of an index)
 export function nodeId(node: ShapeTreeNode): string {
-  return node.x0 + '|' + node.y0;
+  return `${node.x0}|${node.y0}`;
 }
 
 export function rectangleConstruction(node: ShapeTreeNode) {

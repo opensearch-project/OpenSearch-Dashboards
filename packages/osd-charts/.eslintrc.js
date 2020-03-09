@@ -70,6 +70,7 @@ module.exports = {
     '@typescript-eslint/no-inferrable-types': 'off',
     'react/jsx-curly-brace-presence': ['error', { props: 'never', children: 'never' }],
     'react/prop-types': 0,
+    'prefer-template': 'error',
     'file-header/file-header': [
       'error',
       [

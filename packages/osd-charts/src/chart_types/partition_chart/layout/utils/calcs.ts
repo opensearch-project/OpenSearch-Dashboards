@@ -35,8 +35,8 @@ export function addOpacity(hexColorString: string, opacity: Ratio) {
     ? hexColorString
     : hexColorString.slice(0, 7) +
         (hexColorString.slice(7).length === 0 || parseInt(hexColorString.slice(7, 2), 16) === 255
-          ? ('00' + Math.round(opacity * 255).toString(16)).substr(-2) // color was of full opacity
-          : ('00' + Math.round((parseInt(hexColorString.slice(7, 2), 16) / 255) * opacity * 255).toString(16)).substr(
+          ? `00${Math.round(opacity * 255).toString(16)}`.substr(-2) // color was of full opacity
+          : `00${Math.round((parseInt(hexColorString.slice(7, 2), 16) / 255) * opacity * 255).toString(16)}`.substr(
               -2,
             ));
 }
