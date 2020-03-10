@@ -18,23 +18,10 @@
 
 import createCachedSelector from 're-reselect';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { partitionGeometries } from './geometries';
 import { INPUT_KEY } from '../../layout/utils/group_by_rollup';
-import { QuadViewModel } from '../../layout/types/viewmodel_types';
 import { TooltipInfo } from '../../../../components/tooltip/types';
-import { ChartTypes } from '../../..';
-import { SpecTypes } from '../../../../specs';
-import { getSpecsFromStore } from '../../../../state/utils';
-import { PartitionSpec } from '../../specs';
-
-function getCurrentPointerPosition(state: GlobalChartState) {
-  return state.interactions.pointer.current.position;
-}
-
-function getPieSpecOrNull(state: GlobalChartState): PartitionSpec | null {
-  const pieSpecs = getSpecsFromStore<PartitionSpec>(state.specs, ChartTypes.Partition, SpecTypes.Series);
-  return pieSpecs.length > 0 ? pieSpecs[0] : null;
-}
+import { getPieSpecOrNull } from './pie_spec';
+import { getPickedShapes } from './picked_shapes';
 
 function getValueFormatter(state: GlobalChartState) {
   return getPieSpecOrNull(state)?.valueFormatter;
@@ -50,16 +37,12 @@ const EMPTY_TOOLTIP = Object.freeze({
 });
 
 export const getTooltipInfoSelector = createCachedSelector(
-  [getPieSpecOrNull, partitionGeometries, getCurrentPointerPosition, getValueFormatter, getLabelFormatters],
-  (pieSpec, geoms, pointerPosition, valueFormatter, labelFormatters): TooltipInfo => {
+  [getPieSpecOrNull, getPickedShapes, getValueFormatter, getLabelFormatters],
+  (pieSpec, pickedShapes, valueFormatter, labelFormatters): TooltipInfo => {
     if (!pieSpec || !valueFormatter || !labelFormatters) {
       return EMPTY_TOOLTIP;
     }
-    const picker = geoms.pickQuads;
-    const diskCenter = geoms.diskCenter;
-    const x = pointerPosition.x - diskCenter.x;
-    const y = pointerPosition.y - diskCenter.y;
-    const pickedShapes: Array<QuadViewModel> = picker(x, y);
+
     const datumIndices = new Set();
     const tooltipInfo: TooltipInfo = {
       header: null,

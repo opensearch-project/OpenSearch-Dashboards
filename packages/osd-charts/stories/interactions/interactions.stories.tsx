@@ -29,6 +29,7 @@ export { example as barClicksAndHovers } from './1_bar_clicks';
 export { example as areaPointClicksAndHovers } from './2_area_point_clicks';
 export { example as linePointClicksAndHovers } from './3_line_point_clicks';
 export { example as lineAreaBarPointClicksAndHovers } from './4_line_area_bar_clicks';
+export { example as sunburstSliceClicks } from './4_sunburst_slice_clicks';
 export { example as clicksHoversOnLegendItemsBarChart } from './5_clicks_legend_items_bar';
 export { example as clickHoversOnLegendItemsAreaChart } from './6_clicks_legend_items_area';
 export { example as clickHoversOnLegendItemsLineChart } from './7_clicks_legend_items_line';

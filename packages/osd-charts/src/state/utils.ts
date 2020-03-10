@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { SpecList } from './chart_state';
+import { SpecList, PointerState } from './chart_state';
 import { Spec } from '../specs';
 import { ChartTypes } from '../chart_types';
 
@@ -31,4 +31,14 @@ export function getSpecsFromStore<U extends Spec>(specs: SpecList, chartType: Ch
     .map((specId) => {
       return specs[specId] as U;
     });
+}
+
+export function isClicking(prevClick: PointerState | null, lastClick: PointerState | null) {
+  if (prevClick === null && lastClick !== null) {
+    return true;
+  }
+  if (prevClick !== null && lastClick !== null && prevClick.time !== lastClick.time) {
+    return true;
+  }
+  return false;
 }

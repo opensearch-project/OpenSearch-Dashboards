@@ -93,7 +93,7 @@ module.exports = {
         'under the License.',
       ],
       'block',
-      ['-\\*-(.*)-\\*-', 'eslint(.*)'],
+      ['-\\*-(.*)-\\*-', 'eslint(.*)', '@jest-environment'],
     ],
   },
   settings: {

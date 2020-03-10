@@ -20,11 +20,11 @@ import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 import { GlobalChartState, PointerState } from '../../../../state/chart_state';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { getHighlightedGeomsSelector } from './get_tooltip_values_highlighted_geoms';
-import { SettingsSpec } from '../../../../specs';
-import { IndexedGeometry, GeometryValue } from '../../../../utils/geometry';
-import { ChartTypes } from '../../../index';
-import { XYChartSeriesIdentifier } from '../../utils/series';
+import { SettingsSpec, LayerValue } from '../../../../specs';
+import { getPickedShapesLayerValues } from './picked_shapes';
+import { getPieSpecOrNull } from './pie_spec';
+import { ChartTypes } from '../../..';
+import { SeriesIdentifier } from '../../../xy_chart/utils/series';
 import { isClicking } from '../../../../state/utils';
 import { getLastClickSelector } from '../../../../state/selectors/get_last_click';
 
@@ -38,18 +38,28 @@ export function createOnElementClickCaller(): (state: GlobalChartState) => void 
   let prevClick: PointerState | null = null;
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
-    if (selector === null && state.chartType === ChartTypes.XYAxis) {
+    if (selector === null && state.chartType === ChartTypes.Partition) {
       selector = createCachedSelector(
-        [getLastClickSelector, getSettingsSpecSelector, getHighlightedGeomsSelector],
-        (lastClick: PointerState | null, settings: SettingsSpec, indexedGeometries: IndexedGeometry[]): void => {
+        [getPieSpecOrNull, getLastClickSelector, getSettingsSpecSelector, getPickedShapesLayerValues],
+        (pieSpec, lastClick: PointerState | null, settings: SettingsSpec, pickedShapes): void => {
+          if (!pieSpec) {
+            return;
+          }
           if (!settings.onElementClick) {
             return;
           }
-          if (indexedGeometries.length > 0 && isClicking(prevClick, lastClick)) {
+          const nextPickedShapesLength = pickedShapes.length;
+          if (nextPickedShapesLength > 0 && isClicking(prevClick, lastClick)) {
             if (settings && settings.onElementClick) {
-              const elements = indexedGeometries.map<[GeometryValue, XYChartSeriesIdentifier]>(
-                ({ value, seriesIdentifier }) => [value, seriesIdentifier],
-              );
+              const elements = pickedShapes.map<[Array<LayerValue>, SeriesIdentifier]>((values) => {
+                return [
+                  values,
+                  {
+                    specId: pieSpec.id,
+                    key: `spec{${pieSpec.id}}`,
+                  },
+                ];
+              });
               settings.onElementClick(elements);
             }
           }

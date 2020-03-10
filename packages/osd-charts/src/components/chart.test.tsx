@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -15,9 +18,6 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License. */
-/**
- * @jest-environment node
- */
 // Using node env because JSDOM environment throws warnings:
 // Jest doesn't work well with the environment detection hack that react-redux uses internally.
 // https://github.com/reduxjs/react-redux/issues/1373

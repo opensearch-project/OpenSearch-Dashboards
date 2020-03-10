@@ -22,8 +22,8 @@ import { $Values as Values } from 'utility-types';
 import { Color, ValueFormatter } from '../../../../utils/commons';
 
 export const PartitionLayout = Object.freeze({
-  sunburst: 'sunburst',
-  treemap: 'treemap',
+  sunburst: 'sunburst' as 'sunburst',
+  treemap: 'treemap' as 'treemap',
 });
 
 export type PartitionLayout = Values<typeof PartitionLayout>; // could use ValuesType<typeof HierarchicalChartTypes>

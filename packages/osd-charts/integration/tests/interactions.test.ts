@@ -94,5 +94,14 @@ describe.only('Tooltips', () => {
         },
       );
     });
+    it('shows tooltip on sunburst', async () => {
+      await common.expectChartWithMouseAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/interactions--sunburst-slice-clicks',
+        {
+          x: 350,
+          y: 100,
+        },
+      );
+    });
   });
 });

@@ -31,9 +31,18 @@ import { XYChartSeriesIdentifier, SeriesIdentifier } from '../chart_types/xy_cha
 import { Accessor } from '../utils/accessor';
 import { Position, Rendering, Rotation, Color } from '../utils/commons';
 import { ScaleContinuousType, ScaleOrdinalType } from '../scales';
+import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 
-export type ElementClickListener = (elements: Array<[GeometryValue, XYChartSeriesIdentifier]>) => void;
-export type ElementOverListener = (elements: Array<[GeometryValue, XYChartSeriesIdentifier]>) => void;
+export interface LayerValue {
+  groupByRollup: PrimitiveValue;
+  value: number;
+}
+
+export type XYChartElementEvent = [GeometryValue, XYChartSeriesIdentifier];
+export type PartitionElementEvent = [Array<LayerValue>, SeriesIdentifier];
+
+export type ElementClickListener = (elements: Array<XYChartElementEvent | PartitionElementEvent>) => void;
+export type ElementOverListener = (elements: Array<XYChartElementEvent | PartitionElementEvent>) => void;
 export type BrushEndListener = (min: number, max: number) => void;
 export type LegendItemListener = (series: XYChartSeriesIdentifier | null) => void;
 export type PointerUpdateListener = (event: PointerEvent) => void;
