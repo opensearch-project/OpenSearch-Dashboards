@@ -1,4 +1,4 @@
-This product includes code that is adapted from fase-deep-equal@3.1.1,
+This product includes code that is adapted from fast-deep-equal@3.1.1,
 which is available under a "MIT" license.
 
 MIT License
