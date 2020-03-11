@@ -19,16 +19,22 @@
 import { Relation } from '../types/types';
 import { Datum } from '../../../../utils/commons';
 
-export const AGGREGATE_KEY = 'value'; // todo later switch back to 'aggregate'
+export const AGGREGATE_KEY = 'value';
+export const STATISTICS_KEY = 'statistics';
 export const DEPTH_KEY = 'depth';
 export const CHILDREN_KEY = 'children';
 export const INPUT_KEY = 'inputIndex';
 export const PARENT_KEY = 'parent';
 export const SORT_INDEX_KEY = 'sortIndex';
 
+interface Statistics {
+  globalAggregate: number;
+}
+
 interface NodeDescriptor {
   [AGGREGATE_KEY]: number;
   [DEPTH_KEY]: number;
+  [STATISTICS_KEY]: Statistics;
   [INPUT_KEY]?: Array<number>;
 }
 
@@ -82,7 +88,10 @@ export function groupByRollup(
     identity: Function;
   },
   factTable: Relation,
-) {
+): HierarchyOfMaps {
+  const statistics: Statistics = {
+    globalAggregate: NaN,
+  };
   const reductionMap = factTable.reduce((p: HierarchyOfMaps, n, index) => {
     const keyCount = keyAccessors.length;
     let pointer: HierarchyOfMaps = p;
@@ -97,6 +106,7 @@ export function groupByRollup(
       const reductionValue = reducer(aggregate, valueAccessor(n));
       pointer.set(key, {
         [AGGREGATE_KEY]: reductionValue,
+        [STATISTICS_KEY]: statistics,
         [INPUT_KEY]: [...inputIndices, index],
         [DEPTH_KEY]: i,
         ...(!last && { [CHILDREN_KEY]: childrenMap }),
@@ -108,6 +118,9 @@ export function groupByRollup(
     });
     return p;
   }, new Map());
+  if (reductionMap.get(null) !== void 0) {
+    statistics.globalAggregate = (reductionMap.get(null) as MapNode)[AGGREGATE_KEY];
+  }
   return reductionMap;
 }
 
@@ -127,6 +140,7 @@ export function mapsToArrays(root: HierarchyOfMaps, sorter: NodeSorter): Hierarc
         const valueElement = value[CHILDREN_KEY];
         const resultNode: ArrayNode = {
           [AGGREGATE_KEY]: NaN,
+          [STATISTICS_KEY]: { globalAggregate: NaN },
           [CHILDREN_KEY]: [],
           [DEPTH_KEY]: NaN,
           [SORT_INDEX_KEY]: NaN,

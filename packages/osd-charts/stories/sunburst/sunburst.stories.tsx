@@ -52,3 +52,4 @@ export { example as counterClockwiseSpecial } from './22_counter_clockwise';
 export { example as clockwiseNoSpecial } from './23_clockwise';
 export { example as linkedLabelsOnly } from './24_linked_label';
 export { example as noLabels } from './25_no_labels';
+export { example as percentage } from './26_percentage';

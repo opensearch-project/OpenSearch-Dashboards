@@ -22,6 +22,7 @@ import { config } from '../../src/chart_types/partition_chart/layout/config/conf
 import { arrayToLookup } from '../../src/chart_types/partition_chart/layout/utils/calcs';
 import { countryDimension } from '../../src/mocks/hierarchical/dimension_codes';
 import React from 'react';
+import { regionLookup } from '../utils/utils';
 
 const countryLookup = arrayToLookup((d: Datum) => d.country, countryDimension);
 
@@ -42,9 +43,10 @@ export const example = () => (
       layers={[
         {
           groupByRollup: (d: Datum) => countryLookup[d.dest].continentCountry.substr(0, 2),
-          nodeLabel: () => '',
+          nodeLabel: (d: any) => regionLookup[d].regionName,
           fillLabel: {
             valueFormatter: () => '',
+            textColor: 'rgba(0,0,0,0)',
           },
           shape: {
             fillColor: (d: any, i: any, a: any) => {

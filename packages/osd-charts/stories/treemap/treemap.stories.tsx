@@ -31,3 +31,4 @@ export { example as midTwoLayers } from './3_mid_two';
 export { example as twoLayersStressTest } from './4_two_layer_stress';
 export { example as multiColor } from './5_multicolor';
 export { example as customStyle } from './6_custom_style';
+export { example as percentage } from './7_percentage';

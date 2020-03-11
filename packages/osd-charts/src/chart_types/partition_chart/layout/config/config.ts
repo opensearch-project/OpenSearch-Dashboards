@@ -20,6 +20,8 @@ import { palettes } from '../../../../mocks/hierarchical/palettes';
 import { Config, PartitionLayout, Numeric } from '../types/config_types';
 import { GOLDEN_RATIO, TAU } from '../utils/math';
 import { FONT_STYLES, FONT_VARIANTS } from '../types/types';
+import { ShapeTreeNode } from '../types/viewmodel_types';
+import { AGGREGATE_KEY, STATISTICS_KEY } from '../utils/group_by_rollup';
 
 const log10 = Math.log(10);
 function significantDigitCount(d: number): number {
@@ -29,18 +31,33 @@ function significantDigitCount(d: number): number {
   return Math.floor(Math.log(n) / log10) + 1;
 }
 
-function defaultFormatter(d: any): string {
-  return typeof d === 'string'
-    ? d
-    : typeof d === 'number'
-    ? Math.abs(d) >= 10000000 || Math.abs(d) < 0.001
-      ? d.toExponential(Math.min(2, Math.max(0, significantDigitCount(d) - 1)))
-      : d.toLocaleString(void 0, {
-          maximumSignificantDigits: 4,
-          maximumFractionDigits: 3,
-          useGrouping: true,
-        })
-    : String(d);
+export function sumValueGetter(node: ShapeTreeNode): number {
+  return node[AGGREGATE_KEY];
+}
+
+export function percentValueGetter(node: ShapeTreeNode): number {
+  return (100 * node[AGGREGATE_KEY]) / node.parent[STATISTICS_KEY].globalAggregate;
+}
+
+export function ratioValueGetter(node: ShapeTreeNode): number {
+  return node[AGGREGATE_KEY] / node.parent[STATISTICS_KEY].globalAggregate;
+}
+
+export const VALUE_GETTERS = Object.freeze({ percent: percentValueGetter, ratio: ratioValueGetter } as const);
+export type ValueGetterName = keyof typeof VALUE_GETTERS;
+
+function defaultFormatter(d: number): string {
+  return Math.abs(d) >= 10000000 || Math.abs(d) < 0.001
+    ? d.toExponential(Math.min(2, Math.max(0, significantDigitCount(d) - 1)))
+    : d.toLocaleString(void 0, {
+        maximumSignificantDigits: 4,
+        maximumFractionDigits: 3,
+        useGrouping: true,
+      });
+}
+
+export function percentFormatter(d: number): string {
+  return `${Math.round(d)}%`;
 }
 
 const valueFont = {
@@ -153,6 +170,10 @@ export const configMetadata = {
         dflt: 'normal',
         type: 'string',
         values: FONT_VARIANTS,
+      },
+      valueGetter: {
+        dflt: sumValueGetter,
+        type: 'function',
       },
       valueFormatter: {
         dflt: defaultFormatter,

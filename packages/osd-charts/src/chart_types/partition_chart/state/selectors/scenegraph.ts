@@ -19,11 +19,17 @@
 import { Dimensions } from '../../../../utils/dimensions';
 import { shapeViewModel } from '../../layout/viewmodel/viewmodel';
 import { measureText } from '../../layout/utils/measure';
-import { ShapeTreeNode, ShapeViewModel, RawTextGetter, nullShapeViewModel } from '../../layout/types/viewmodel_types';
+import {
+  ShapeTreeNode,
+  ShapeViewModel,
+  RawTextGetter,
+  nullShapeViewModel,
+  ValueGetter,
+} from '../../layout/types/viewmodel_types';
 import { DEPTH_KEY } from '../../layout/utils/group_by_rollup';
 import { PartitionSpec, Layer } from '../../specs/index';
 import { identity, mergePartial, RecursivePartial } from '../../../../utils/commons';
-import { config as defaultConfig } from '../../layout/config/config';
+import { config as defaultConfig, VALUE_GETTERS } from '../../layout/config/config';
 import { Config } from '../../layout/types/config_types';
 
 function rawTextGetter(layers: Layer[]): RawTextGetter {
@@ -31,6 +37,10 @@ function rawTextGetter(layers: Layer[]): RawTextGetter {
     const accessorFn = layers[node[DEPTH_KEY] - 1].nodeLabel || identity;
     return `${accessorFn(node.dataName)}`;
   };
+}
+
+export function valueGetterFunction(valueGetter: ValueGetter) {
+  return typeof valueGetter === 'function' ? valueGetter : VALUE_GETTERS[valueGetter];
 }
 
 export function render(partitionSpec: PartitionSpec, parentDimensions: Dimensions): ShapeViewModel {
@@ -43,6 +53,7 @@ export function render(partitionSpec: PartitionSpec, parentDimensions: Dimension
   if (!textMeasurerCtx) {
     return nullShapeViewModel(config, { x: width / 2, y: height / 2 });
   }
+  const valueGetter = valueGetterFunction(partitionSpec.valueGetter);
   return shapeViewModel(
     measureText(textMeasurerCtx),
     config,
@@ -51,6 +62,8 @@ export function render(partitionSpec: PartitionSpec, parentDimensions: Dimension
     rawTextGetter(layers),
     partitionSpec.valueAccessor,
     partitionSpec.valueFormatter,
+    partitionSpec.percentFormatter,
+    valueGetter,
     [() => null, ...layers.map(({ groupByRollup }) => groupByRollup)],
   );
 }

@@ -17,19 +17,11 @@
  * under the License. */
 
 import createCachedSelector from 're-reselect';
-import { GlobalChartState } from '../../../../state/chart_state';
-import { INPUT_KEY } from '../../layout/utils/group_by_rollup';
 import { TooltipInfo } from '../../../../components/tooltip/types';
+import { valueGetterFunction } from './scenegraph';
+import { percentValueGetter, sumValueGetter } from '../../layout/config/config';
 import { getPieSpecOrNull } from './pie_spec';
 import { getPickedShapes } from './picked_shapes';
-
-function getValueFormatter(state: GlobalChartState) {
-  return getPieSpecOrNull(state)?.valueFormatter;
-}
-
-function getLabelFormatters(state: GlobalChartState) {
-  return getPieSpecOrNull(state)?.layers;
-}
 
 const EMPTY_TOOLTIP = Object.freeze({
   header: null,
@@ -37,20 +29,26 @@ const EMPTY_TOOLTIP = Object.freeze({
 });
 
 export const getTooltipInfoSelector = createCachedSelector(
-  [getPieSpecOrNull, getPickedShapes, getValueFormatter, getLabelFormatters],
-  (pieSpec, pickedShapes, valueFormatter, labelFormatters): TooltipInfo => {
-    if (!pieSpec || !valueFormatter || !labelFormatters) {
+  [getPieSpecOrNull, getPickedShapes],
+  (pieSpec, pickedShapes): TooltipInfo => {
+    if (!pieSpec) {
+      return EMPTY_TOOLTIP;
+    }
+    const { valueGetter, valueFormatter, layers: labelFormatters } = pieSpec;
+    if (!valueFormatter || !labelFormatters) {
       return EMPTY_TOOLTIP;
     }
 
-    const datumIndices = new Set();
     const tooltipInfo: TooltipInfo = {
       header: null,
       values: [],
     };
+
+    const valueGetterFun = valueGetterFunction(valueGetter);
+    const primaryValueGetterFun = valueGetterFun === percentValueGetter ? sumValueGetter : valueGetterFun;
     pickedShapes.forEach((shape) => {
-      const node = shape.parent;
-      const formatter = labelFormatters[shape.depth - 1] && labelFormatters[shape.depth - 1].nodeLabel;
+      const labelFormatter = labelFormatters[shape.depth - 1];
+      const formatter = labelFormatter?.nodeLabel;
 
       tooltipInfo.values.push({
         label: formatter ? formatter(shape.dataName) : shape.dataName,
@@ -61,13 +59,11 @@ export const getTooltipInfoSelector = createCachedSelector(
           specId: pieSpec.id,
           key: pieSpec.id,
         },
-        value: valueFormatter(shape.value),
+        value: `${valueFormatter(primaryValueGetterFun(shape))} (${pieSpec.percentFormatter(
+          percentValueGetter(shape),
+        )})`,
+        valueAccessor: shape.depth,
       });
-      const shapeNode = node.children.find(([key]) => key === shape.dataName);
-      if (shapeNode) {
-        const indices = shapeNode[1][INPUT_KEY] || [];
-        indices.forEach((i) => datumIndices.add(i));
-      }
     });
 
     return tooltipInfo;
