@@ -23,13 +23,17 @@ import { Axis, BarSeries, Chart, LineSeries, niceTimeFormatter, Position, ScaleT
 import { boolean } from '@storybook/addon-knobs';
 import { DateTime } from 'luxon';
 import { getChartRotationKnob } from '../utils/knobs';
+import moment from 'moment-timezone';
 
 export const example = () => {
   const now = DateTime.fromISO('2019-01-11T00:00:00.000')
     .setZone('utc+1')
     .toMillis();
   const oneDay = 1000 * 60 * 60 * 24;
-  const formatter = niceTimeFormatter([now, now + oneDay * 5]);
+  const oneDays = moment.duration(1, 'd');
+  const twoDays = moment.duration(2, 'd');
+  const fiveDays = moment.duration(5, 'd');
+  const formatter = niceTimeFormatter([now, fiveDays.add(now).asMilliseconds()]);
   return (
     <Chart className="story-chart">
       <Settings
@@ -52,8 +56,8 @@ export const example = () => {
         timeZone="Europe/Rome"
         data={[
           { x: now, y: 2 },
-          { x: now + oneDay, y: 7 },
-          { x: now + oneDay * 2, y: 3 },
+          { x: oneDays.add(now).asMilliseconds(), y: 7 },
+          { x: twoDays.add(now).asMilliseconds(), y: 3 },
           { x: now + oneDay * 5, y: 6 },
         ]}
       />

@@ -29,7 +29,7 @@ import {
   AxisStyle,
   TickFormatterOptions,
 } from './specs';
-import { Position, Rotation } from '../../../utils/commons';
+import { Position, Rotation, getUniqueValues } from '../../../utils/commons';
 import { AxisConfig, Theme } from '../../../utils/themes/theme';
 import { Dimensions, Margins } from '../../../utils/dimensions';
 import { AxisId } from '../../../utils/ids';
@@ -87,7 +87,6 @@ export function computeAxisTicksDimensions(
   if (axisSpec.hide) {
     return null;
   }
-
   const scale = getScaleForAxisSpec(
     axisSpec,
     xDomain,
@@ -238,11 +237,9 @@ function computeTickDimensions(
   const tickLabels = tickValues.map((d) => {
     return tickFormat(d, tickFormatOptions);
   });
-
   const {
     tickLabelStyle: { fontFamily, fontSize },
   } = axisConfig;
-
   const {
     maxLabelBboxWidth,
     maxLabelBboxHeight,
@@ -252,7 +249,6 @@ function computeTickDimensions(
     getMaxBboxDimensions(bboxCalculator, fontSize, fontFamily, tickLabelRotation, tickLabelPadding),
     { maxLabelBboxWidth: 0, maxLabelBboxHeight: 0, maxLabelTextWidth: 0, maxLabelTextHeight: 0 },
   );
-
   return {
     tickValues,
     tickLabels,
@@ -444,14 +440,31 @@ export function getAvailableTicks(
 
     return [firstTick, lastTick];
   }
-  return ticks.map((tick) => {
+  return enableDuplicatedTicks(axisSpec, scale, offset, tickFormatOptions);
+}
+
+/** @internal */
+export function enableDuplicatedTicks(
+  axisSpec: AxisSpec,
+  scale: Scale,
+  offset: number,
+  tickFormatOptions?: TickFormatterOptions,
+) {
+  const ticks = scale.ticks();
+  const allTicks: AxisTick[] = ticks.map((tick) => {
     return {
       value: tick,
       label: axisSpec.tickFormat(tick, tickFormatOptions),
       position: scale.scale(tick) + offset,
     };
   });
+
+  if (axisSpec.showDuplicatedTicks === true) {
+    return allTicks;
+  }
+  return getUniqueValues(allTicks, 'label');
 }
+
 export function getVisibleTicks(allTicks: AxisTick[], axisSpec: AxisSpec, axisDim: AxisTicksDimensions): AxisTick[] {
   // We sort the ticks by position so that we can incrementally compute previousOccupiedSpace
   allTicks.sort((a: AxisTick, b: AxisTick) => a.position - b.position);

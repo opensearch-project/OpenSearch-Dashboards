@@ -295,9 +295,14 @@ export function computeSeriesGeometries(
 
   // compute how many series are clustered
   const { stackedBarsInCluster, totalBarsInCluster } = countBarsInCluster(stacked, nonStacked);
-
   // compute scales
-  const xScale = computeXScale({ xDomain, totalBarsInCluster, range: [0, width], barsPadding, enableHistogramMode });
+  const xScale = computeXScale({
+    xDomain,
+    totalBarsInCluster,
+    range: [0, width],
+    barsPadding,
+    enableHistogramMode,
+  });
   const yScales = computeYScales({ yDomains: yDomain, range: [height, 0] });
 
   // compute colors

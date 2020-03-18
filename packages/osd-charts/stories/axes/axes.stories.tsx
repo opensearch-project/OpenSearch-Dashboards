@@ -36,3 +36,4 @@ export { example as customDomain } from './8_custom_domain';
 export { example as customMixed } from './9_custom_mixed_domain';
 export { example as oneDomainBound } from './10_one_domain_bound';
 export { example as fitDomain } from './11_fit_domain_extent';
+export { example as duplicateTicks } from './12_duplicate_ticks';

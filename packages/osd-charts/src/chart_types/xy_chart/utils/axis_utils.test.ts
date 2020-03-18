@@ -22,7 +22,7 @@ import { AxisSpec, DomainRange, AxisStyle } from './specs';
 import { Position } from '../../../utils/commons';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { AxisId, GroupId } from '../../../utils/ids';
-import { ScaleType } from '../../../scales';
+import { ScaleType, Scale } from '../../../scales';
 import {
   AxisTick,
   AxisTicksDimensions,
@@ -48,6 +48,7 @@ import {
   getAxisTickLabelPadding,
   isVerticalGrid,
   isHorizontalGrid,
+  enableDuplicatedTicks,
 } from './axis_utils';
 import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
 import { SvgTextBBoxCalculator } from '../../../utils/bbox/svg_text_bbox_calculator';
@@ -55,6 +56,9 @@ import { niceTimeFormatter } from '../../../utils/data/formatters';
 import { mergeYCustomDomainsByGroupId } from '../state/selectors/merge_y_custom_domains';
 import { ChartTypes } from '../..';
 import { SpecTypes } from '../../../specs/settings';
+import { DateTime } from 'luxon';
+import { computeXScale } from './scales';
+import moment from 'moment-timezone';
 
 describe('Axis computational utils', () => {
   const mockedRect = {
@@ -202,7 +206,7 @@ describe('Axis computational utils', () => {
     expect(axisDimensions).toEqual(axis1Dims);
 
     const computeScalelessSpec = () => {
-      computeAxisTicksDimensions(ungroupedAxisSpec, xDomain, [yDomain], 1, bboxCalculator, 0, axes);
+      computeAxisTicksDimensions(ungroupedAxisSpec, xDomain, [yDomain], 1, bboxCalculator, 0, axes, undefined, false);
     };
 
     const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: 'foo' };
@@ -1435,5 +1439,89 @@ describe('Axis computational utils', () => {
     const axisConfigTickLabelPadding = 1;
 
     expect(getAxisTickLabelPadding(axisConfigTickLabelPadding, axisSpecStyle)).toEqual(2);
+  });
+  test('should show unique tick labels if duplicateTicks is set to false', () => {
+    const now = DateTime.fromISO('2019-01-11T00:00:00.000')
+      .setZone('utc+1')
+      .toMillis();
+    const oneDay = moment.duration(1, 'day');
+    const formatter = niceTimeFormatter([now, oneDay.add(now).asMilliseconds() * 31]);
+    const axisSpec: AxisSpec = {
+      id: 'bottom',
+      position: 'bottom',
+      showDuplicatedTicks: false,
+      chartType: 'xy_axis',
+      specType: 'axis',
+      groupId: '__global__',
+      hide: false,
+      showOverlappingLabels: false,
+      showOverlappingTicks: false,
+      tickSize: 10,
+      tickPadding: 10,
+      tickLabelRotation: 0,
+      tickFormat: formatter,
+    };
+    const xDomainTime: XDomain = {
+      type: 'xDomain',
+      isBandScale: false,
+      domain: [1547190000000, 1547622000000],
+      minInterval: 86400000,
+      scaleType: ScaleType.Time,
+    };
+    const scale: Scale = computeXScale({ xDomain: xDomainTime, totalBarsInCluster: 0, range: [0, 603.5] });
+    const offset = 0;
+    const tickFormatOption = { timeZone: 'utc+1' };
+    expect(enableDuplicatedTicks(axisSpec, scale, offset, tickFormatOption)).toEqual([
+      { value: 1547208000000, label: '2019-01-11', position: 25.145833333333332 },
+      { value: 1547251200000, label: '2019-01-12', position: 85.49583333333334 },
+      { value: 1547337600000, label: '2019-01-13', position: 206.19583333333333 },
+      { value: 1547424000000, label: '2019-01-14', position: 326.8958333333333 },
+      { value: 1547510400000, label: '2019-01-15', position: 447.59583333333336 },
+      { value: 1547596800000, label: '2019-01-16', position: 568.2958333333333 },
+    ]);
+  });
+  test('should show duplicate tick labels if duplicateTicks is set to true', () => {
+    const now = DateTime.fromISO('2019-01-11T00:00:00.000')
+      .setZone('utc+1')
+      .toMillis();
+    const oneDay = moment.duration(1, 'day');
+    const formatter = niceTimeFormatter([now, oneDay.add(now).asMilliseconds() * 31]);
+    const axisSpec: AxisSpec = {
+      id: 'bottom',
+      position: 'bottom',
+      showDuplicatedTicks: true,
+      chartType: 'xy_axis',
+      specType: 'axis',
+      groupId: '__global__',
+      hide: false,
+      showOverlappingLabels: false,
+      showOverlappingTicks: false,
+      tickSize: 10,
+      tickPadding: 10,
+      tickLabelRotation: 0,
+      tickFormat: formatter,
+    };
+    const xDomainTime: XDomain = {
+      type: 'xDomain',
+      isBandScale: false,
+      domain: [1547190000000, 1547622000000],
+      minInterval: 86400000,
+      scaleType: ScaleType.Time,
+    };
+    const scale: Scale = computeXScale({ xDomain: xDomainTime, totalBarsInCluster: 0, range: [0, 603.5] });
+    const offset = 0;
+    const tickFormatOption = { timeZone: 'utc+1' };
+    expect(enableDuplicatedTicks(axisSpec, scale, offset, tickFormatOption)).toEqual([
+      { value: 1547208000000, label: '2019-01-11', position: 25.145833333333332 },
+      { value: 1547251200000, label: '2019-01-12', position: 85.49583333333334 },
+      { value: 1547294400000, label: '2019-01-12', position: 145.84583333333333 },
+      { value: 1547337600000, label: '2019-01-13', position: 206.19583333333333 },
+      { value: 1547380800000, label: '2019-01-13', position: 266.54583333333335 },
+      { value: 1547424000000, label: '2019-01-14', position: 326.8958333333333 },
+      { value: 1547467200000, label: '2019-01-14', position: 387.24583333333334 },
+      { value: 1547510400000, label: '2019-01-15', position: 447.59583333333336 },
+      { value: 1547553600000, label: '2019-01-15', position: 507.9458333333333 },
+      { value: 1547596800000, label: '2019-01-16', position: 568.2958333333333 },
+    ]);
   });
 });
