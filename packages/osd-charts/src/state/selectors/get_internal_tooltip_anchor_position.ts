@@ -19,6 +19,7 @@
 import { GlobalChartState } from '../chart_state';
 import { TooltipAnchorPosition } from '../../components/tooltip/utils';
 
+/** @internal */
 export const getInternalTooltipAnchorPositionSelector = (state: GlobalChartState): TooltipAnchorPosition | null => {
   if (state.internalChartState) {
     return state.internalChartState.getTooltipAnchor(state);

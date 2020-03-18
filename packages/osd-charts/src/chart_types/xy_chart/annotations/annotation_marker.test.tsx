@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import * as React from 'react';
+import React from 'react';
 import { AnnotationDomainTypes, AnnotationSpec, AnnotationTypes } from '../utils/specs';
 import { Position, Rotation } from '../../../utils/commons';
 import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../utils/themes/theme';

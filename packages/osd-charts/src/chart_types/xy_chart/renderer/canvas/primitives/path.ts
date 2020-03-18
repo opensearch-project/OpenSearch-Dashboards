@@ -22,6 +22,7 @@ import { RGBtoString } from '../../../../partition_chart/layout/utils/d3_utils';
 import { Rect, Stroke, Fill } from '../../../../../geoms/types';
 import { MIN_STROKE_WIDTH } from './line';
 
+/** @internal */
 export function renderLinePaths(
   ctx: CanvasRenderingContext2D,
   transformX: number,
@@ -52,6 +53,7 @@ export function renderLinePaths(
   });
 }
 
+/** @internal */
 export function renderAreaPath(
   ctx: CanvasRenderingContext2D,
   transformX: number,

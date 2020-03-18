@@ -1,5 +1,3 @@
-import { GlobalChartState } from '../chart_state';
-
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -18,6 +16,9 @@ import { GlobalChartState } from '../chart_state';
  * specific language governing permissions and limitations
  * under the License. */
 
+import { GlobalChartState } from '../chart_state';
+
+/** @internal */
 export function getLastClickSelector(state: GlobalChartState) {
   return state.interactions.pointer.lastClick;
 }

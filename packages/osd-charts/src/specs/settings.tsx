@@ -271,30 +271,37 @@ export const Settings: React.FunctionComponent<SettingsSpecProps> = getConnect()
   specComponentFactory<SettingsSpec, DefaultSettingsProps>(DEFAULT_SETTINGS_SPEC),
 );
 
+/** @internal */
 export function isPointerOutEvent(event: PointerEvent | null | undefined): event is PointerOutEvent {
   return event !== null && event !== undefined && event.type === PointerEventType.Out;
 }
 
+/** @internal */
 export function isPointerOverEvent(event: PointerEvent | null | undefined): event is PointerOverEvent {
   return event !== null && event !== undefined && event.type === PointerEventType.Over;
 }
 
+/** @internal */
 export function isTooltipProps(config: TooltipType | TooltipProps): config is TooltipProps {
   return typeof config === 'object';
 }
 
+/** @internal */
 export function isTooltipType(config: TooltipType | TooltipProps): config is TooltipType {
   return typeof config === 'string';
 }
 
+/** @internal */
 export function isCrosshairTooltipType(type: TooltipType) {
   return type === TooltipType.VerticalCursor || type === TooltipType.Crosshairs;
 }
 
+/** @internal */
 export function isFollowTooltipType(type: TooltipType) {
   return type === TooltipType.Follow;
 }
 
+/** @internal */
 export function getTooltipType(settings: SettingsSpec): TooltipType | undefined {
   const { tooltip } = settings;
   if (tooltip === undefined || tooltip === null) {

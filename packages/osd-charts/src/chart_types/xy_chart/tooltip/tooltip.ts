@@ -37,6 +37,7 @@ export interface TooltipLegendValue {
 export const Y0_ACCESSOR_POSTFIX = ' - lower';
 export const Y1_ACCESSOR_POSTFIX = ' - upper';
 
+/** @internal */
 export function getSeriesTooltipValues(
   tooltipValues: TooltipValue[],
   defaultValue?: string,
@@ -60,6 +61,7 @@ export function getSeriesTooltipValues(
   return seriesTooltipValues;
 }
 
+/** @internal */
 export function formatTooltip(
   { color, value: { x, y, accessor }, seriesIdentifier }: IndexedGeometry,
   spec: BasicSeriesSpec,

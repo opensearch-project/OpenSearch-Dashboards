@@ -25,6 +25,7 @@ import { getChartIdSelector } from './get_chart_id';
 
 const getSpecs = (state: GlobalChartState) => state.specs;
 
+/** @internal */
 export const getSettingsSpecSelector = createCachedSelector(
   [getSpecs],
   (specs): SettingsSpec => {

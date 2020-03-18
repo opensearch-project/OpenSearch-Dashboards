@@ -26,6 +26,7 @@ import { BarGeometry, PointGeometry, IndexedGeometry, isPointGeometry, isBarGeom
  * @param yPos y position relative to chart
  * @param chartRotation the chart rotation
  * @param chartDimension the chart dimension
+ * @internal
  */
 export function getOrientedXPosition(xPos: number, yPos: number, chartRotation: Rotation, chartDimension: Dimensions) {
   switch (chartRotation) {
@@ -39,6 +40,8 @@ export function getOrientedXPosition(xPos: number, yPos: number, chartRotation: 
       return chartDimension.height - yPos;
   }
 }
+
+/** @internal */
 export function getOrientedYPosition(xPos: number, yPos: number, chartRotation: Rotation, chartDimension: Dimensions) {
   switch (chartRotation) {
     case 0:
@@ -52,6 +55,7 @@ export function getOrientedYPosition(xPos: number, yPos: number, chartRotation: 
   }
 }
 
+/** @internal */
 export function areIndexedGeometryArraysEquals(arr1: IndexedGeometry[], arr2: IndexedGeometry[]) {
   if (arr1.length !== arr2.length) {
     return false;
@@ -62,6 +66,7 @@ export function areIndexedGeometryArraysEquals(arr1: IndexedGeometry[], arr2: In
   return true;
 }
 
+/** @internal */
 export function areIndexedGeomsEquals(ig1: IndexedGeometry, ig2: IndexedGeometry) {
   if (isPointGeometry(ig1) && isPointGeometry(ig2)) {
     return arePointsEqual(ig1, ig2);

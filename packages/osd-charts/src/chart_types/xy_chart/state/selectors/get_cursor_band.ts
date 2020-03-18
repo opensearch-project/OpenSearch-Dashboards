@@ -38,6 +38,7 @@ import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
 const getExternalPointerEventStateSelector = (state: GlobalChartState) => state.externalEvents.pointer;
 
+/** @internal */
 export const getCursorBandPositionSelector = createCachedSelector(
   [
     getOrientedProjectedPointerPositionSelector,

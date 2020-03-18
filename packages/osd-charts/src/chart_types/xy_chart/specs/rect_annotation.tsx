@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
+import React from 'react';
 import { RectAnnotationSpec, DEFAULT_GLOBAL_ID, AnnotationTypes } from '../utils/specs';
 import { specComponentFactory, getConnect } from '../../../state/spec_factory';
 import { DEFAULT_ANNOTATION_RECT_STYLE } from '../../../utils/themes/theme';

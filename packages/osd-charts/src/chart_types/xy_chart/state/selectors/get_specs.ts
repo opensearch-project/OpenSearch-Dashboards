@@ -26,15 +26,18 @@ import { SpecTypes } from '../../../../specs/settings';
 
 const getSpecs = (state: GlobalChartState) => state.specs;
 
+/** @internal */
 export const getAxisSpecsSelector = createCachedSelector([getSpecs], (specs): AxisSpec[] => {
   return getSpecsFromStore<AxisSpec>(specs, ChartTypes.XYAxis, SpecTypes.Axis);
 })(getChartIdSelector);
 
+/** @internal */
 export const getSeriesSpecsSelector = createCachedSelector([getSpecs], (specs) => {
   const seriesSpec = getSpecsFromStore<BasicSeriesSpec>(specs, ChartTypes.XYAxis, SpecTypes.Series);
   return seriesSpec;
 })(getChartIdSelector);
 
+/** @internal */
 export const getAnnotationSpecsSelector = createCachedSelector([getSpecs], (specs) => {
   return getSpecsFromStore<AnnotationSpec>(specs, ChartTypes.XYAxis, SpecTypes.Annotation);
 })(getChartIdSelector);

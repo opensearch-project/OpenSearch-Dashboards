@@ -189,6 +189,7 @@ function renderLinkLabels(
   });
 }
 
+/** @internal */
 export function renderPartitionCanvas2d(
   ctx: CanvasRenderingContext2D,
   dpr: number,

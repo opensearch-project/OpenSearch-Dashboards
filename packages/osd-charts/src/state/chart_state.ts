@@ -15,7 +15,7 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License. */
-
+import React from 'react';
 import { SPEC_PARSED, SPEC_UNMOUNTED, UPSERT_SPEC, REMOVE_SPEC, SPEC_PARSING } from './actions/specs';
 import { SET_PERSISTED_COLOR, SET_TEMPORARY_COLOR, CLEAR_TEMPORARY_COLORS } from './actions/colors';
 import { interactionsReducer } from './reducers/interactions';
@@ -41,8 +41,8 @@ import { Color } from '../utils/commons';
 export type BackwardRef = () => React.RefObject<HTMLDivElement>;
 
 /**
- * A set of chart-type-dependant functions that are required and called
- * globally by the <ChartContainer> and
+ * A set of chart-type-dependant functions that required by all char types
+ * @internal
  */
 export interface InternalChartState {
   /**
@@ -105,18 +105,23 @@ export interface InternalChartState {
   eventCallbacks(globalState: GlobalChartState): void;
 }
 
+/** @internal */
 export interface SpecList {
   [specId: string]: Spec;
 }
 
+/** @internal */
 export interface PointerState {
   position: Point;
   time: number;
 }
+/** @internal */
 export interface DragState {
   start: PointerState;
   end: PointerState;
 }
+
+/** @internal */
 export interface PointerStates {
   dragging: boolean;
   current: PointerState;
@@ -126,6 +131,7 @@ export interface PointerStates {
   lastClick: PointerState | null;
 }
 
+/** @internal */
 export interface InteractionsState {
   pointer: PointerStates;
   highlightedLegendItemKey: string | null;
@@ -134,15 +140,18 @@ export interface InteractionsState {
   deselectedDataSeries: XYChartSeriesIdentifier[];
 }
 
+/** @internal */
 export interface ExternalEventsState {
   pointer: PointerEvent | null;
 }
 
+/** @internal */
 export interface ColorOverrides {
   temporary: Record<SeriesKey, Color>;
   persisted: Record<SeriesKey, Color>;
 }
 
+/** @internal */
 export interface GlobalChartState {
   /**
    * a unique ID for each chart used by re-reselect to memoize selector per chart
@@ -190,6 +199,7 @@ export interface GlobalChartState {
   colors: ColorOverrides;
 }
 
+/** @internal */
 export const getInitialState = (chartId: string): GlobalChartState => ({
   chartId,
   specsInitialized: false,
@@ -235,6 +245,7 @@ export const getInitialState = (chartId: string): GlobalChartState => ({
   },
 });
 
+/** @internal */
 export const chartStoreReducer = (chartId: string) => {
   const initialState = getInitialState(chartId);
   return (state = initialState, action: StateActions): GlobalChartState => {

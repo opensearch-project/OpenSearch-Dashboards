@@ -28,6 +28,7 @@ const EMPTY_TOOLTIP = Object.freeze({
   values: [],
 });
 
+/** @internal */
 export const getTooltipInfoSelector = createCachedSelector(
   [getPieSpecOrNull, getPickedShapes],
   (pieSpec, pickedShapes): TooltipInfo => {

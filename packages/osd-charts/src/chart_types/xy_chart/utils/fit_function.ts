@@ -46,6 +46,7 @@ export const getXYValues = ({ x, y1, fittingIndex }: WithIndex<FullDataSeriesDat
   return [typeof x === 'string' ? fittingIndex : x, y1];
 };
 
+/** @internal */
 export const getValue = (
   current: DataSeriesDatum,
   currentIndex: number,
@@ -122,6 +123,7 @@ export const getValue = (
   };
 };
 
+/** @internal */
 export const parseConfig = (config?: Exclude<Fit, 'explicit'> | FitConfig): FitConfig => {
   if (!config) {
     return {
@@ -149,6 +151,7 @@ export const parseConfig = (config?: Exclude<Fit, 'explicit'> | FitConfig): FitC
   };
 };
 
+/** @internal */
 export const fitFunction = (
   dataSeries: DataSeries,
   fitConfig: Exclude<Fit, 'explicit'> | FitConfig,

@@ -30,6 +30,7 @@ import {
   Bounds,
 } from './annotation_utils';
 
+/** @internal */
 export interface AnnotationRectProps {
   rect: {
     x: number;
@@ -40,6 +41,7 @@ export interface AnnotationRectProps {
   details?: string;
 }
 
+/** @internal */
 export function computeRectAnnotationTooltipState(
   /** the cursor position relative to the projection area */
   cursorPosition: Point,
@@ -81,6 +83,7 @@ export function computeRectAnnotationTooltipState(
   };
 }
 
+/** @internal */
 export function isWithinRectBounds({ x, y }: Point, { startX, endX, startY, endY }: Bounds): boolean {
   const withinXBounds = x >= startX && x <= endX;
   const withinYBounds = y >= startY && y <= endY;
@@ -88,6 +91,7 @@ export function isWithinRectBounds({ x, y }: Point, { startX, endX, startY, endY
   return withinXBounds && withinYBounds;
 }
 
+/** @internal */
 export function computeRectAnnotationDimensions(
   annotationSpec: RectAnnotationSpec,
   yScales: Map<GroupId, Scale>,

@@ -18,6 +18,7 @@
 
 import { DataSeriesDatum } from '../../chart_types/xy_chart/utils/series';
 
+/** @internal */
 export const fitFunctionData: DataSeriesDatum[] = [
   {
     x: 0,

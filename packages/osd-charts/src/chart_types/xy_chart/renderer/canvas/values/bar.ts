@@ -33,6 +33,8 @@ interface BarValuesProps {
   debug: boolean;
   bars: BarGeometry[];
 }
+
+/** @internal */
 export function renderBarValues(ctx: CanvasRenderingContext2D, props: BarValuesProps) {
   const { bars, debug, chartRotation, chartDimensions, theme } = props;
   const { fontFamily, fontStyle, fill, fontSize } = theme.barSeriesStyle.displayValue;

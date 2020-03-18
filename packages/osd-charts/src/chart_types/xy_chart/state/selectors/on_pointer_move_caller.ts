@@ -107,6 +107,7 @@ function hasPointerEventChanged(prevPointerEvent: PointerEvent, nextPointerEvent
   return false;
 }
 
+/** @internal */
 export function createOnPointerMoveCaller(): (state: GlobalChartState) => void {
   let prevPointerEvent: PointerEvent | null = null;
   let selector: Selector<GlobalChartState, void> | null = null;

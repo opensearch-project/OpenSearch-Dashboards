@@ -39,6 +39,7 @@ const DEFAULT_DEBUG_STROKE: Stroke = {
   width: 1,
 };
 
+/** @internal */
 export function renderDebugRect(
   ctx: CanvasRenderingContext2D,
   rect: Rect,
@@ -62,6 +63,8 @@ export function renderDebugRect(
     );
   });
 }
+
+/** @internal */
 export function renderDebugRectCenterRotated(
   ctx: CanvasRenderingContext2D,
   center: Point,

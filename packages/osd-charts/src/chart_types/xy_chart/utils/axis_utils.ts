@@ -72,6 +72,7 @@ export interface TickLabelProps {
  * @param totalBarsInCluster the total number of grouped series
  * @param bboxCalculator an instance of the boundingbox calculator
  * @param chartRotation the rotation of the chart
+ * @internal
  */
 export function computeAxisTicksDimensions(
   axisSpec: AxisSpec,
@@ -121,6 +122,7 @@ export function computeAxisTicksDimensions(
   };
 }
 
+/** @internal */
 export function getAxisTickLabelPadding(axisConfigTickLabelPadding: number, axisSpecStyle?: AxisStyle): number {
   if (axisSpecStyle && axisSpecStyle.tickLabelPadding !== undefined) {
     return axisSpecStyle.tickLabelPadding;
@@ -128,6 +130,7 @@ export function getAxisTickLabelPadding(axisConfigTickLabelPadding: number, axis
   return axisConfigTickLabelPadding;
 }
 
+/** @internal */
 export function isYDomain(position: Position, chartRotation: Rotation): boolean {
   const isStraightRotation = chartRotation === 0 || chartRotation === 180;
   if (isVerticalAxis(position)) {
@@ -137,6 +140,7 @@ export function isYDomain(position: Position, chartRotation: Rotation): boolean 
   return !isStraightRotation;
 }
 
+/** @internal */
 export function getScaleForAxisSpec(
   axisSpec: AxisSpec,
   xDomain: XDomain,
@@ -174,6 +178,7 @@ export function getScaleForAxisSpec(
   }
 }
 
+/** @internal */
 export function computeRotatedLabelDimensions(unrotatedDims: BBox, degreesRotation: number): BBox {
   const { width, height } = unrotatedDims;
 
@@ -188,6 +193,7 @@ export function computeRotatedLabelDimensions(unrotatedDims: BBox, degreesRotati
   };
 }
 
+/** @internal */
 export const getMaxBboxDimensions = (
   bboxCalculator: BBoxCalculator,
   fontSize: number,
@@ -268,6 +274,7 @@ function computeTickDimensions(
  * @param tickPosition position of tick relative to axis line origin and other ticks along it
  * @param position position of where the axis sits relative to the visualization
  * @param axisTicksDimensions computed axis dimensions and values (from computeTickDimensions)
+ * @internal
  */
 export function getTickLabelProps(
   tickLabelRotation: number,
@@ -306,6 +313,7 @@ export function getTickLabelProps(
   };
 }
 
+/** @internal */
 export function getVerticalAxisTickLineProps(
   position: Position,
   axisWidth: number,
@@ -320,6 +328,7 @@ export function getVerticalAxisTickLineProps(
   return [x1, y, x2, y];
 }
 
+/** @internal */
 export function getHorizontalAxisTickLineProps(
   position: Position,
   axisHeight: number,
@@ -334,14 +343,17 @@ export function getHorizontalAxisTickLineProps(
   return [x, y1, x, y2];
 }
 
+/** @internal */
 export function getVerticalAxisGridLineProps(tickPosition: number, chartWidth: number): AxisLinePosition {
   return [0, tickPosition, chartWidth, tickPosition];
 }
 
+/** @internal */
 export function getHorizontalAxisGridLineProps(tickPosition: number, chartHeight: number): AxisLinePosition {
   return [tickPosition, 0, tickPosition, chartHeight];
 }
 
+/** @internal */
 export function getMinMaxRange(
   axisPosition: Position,
   chartRotation: Rotation,
@@ -393,6 +405,8 @@ function getLeftAxisMinMaxRange(chartRotation: Rotation, height: number) {
       return { minRange: 0, maxRange: height };
   }
 }
+
+/** @internal */
 export function getAvailableTicks(
   axisSpec: AxisSpec,
   scale: Scale,
@@ -465,6 +479,7 @@ export function enableDuplicatedTicks(
   return getUniqueValues(allTicks, 'label');
 }
 
+/** @internal */
 export function getVisibleTicks(allTicks: AxisTick[], axisSpec: AxisSpec, axisDim: AxisTicksDimensions): AxisTick[] {
   // We sort the ticks by position so that we can incrementally compute previousOccupiedSpace
   allTicks.sort((a: AxisTick, b: AxisTick) => a.position - b.position);
@@ -499,6 +514,7 @@ export function getVisibleTicks(allTicks: AxisTick[], axisSpec: AxisSpec, axisDi
   return visibleTicks;
 }
 
+/** @internal */
 export function getAxisPosition(
   chartDimensions: Dimensions,
   chartMargins: Margins,
@@ -549,22 +565,27 @@ export function getAxisPosition(
   return { dimensions, topIncrement, bottomIncrement, leftIncrement, rightIncrement };
 }
 
+/** @internal */
 export function isVerticalAxis(axisPosition: Position) {
   return axisPosition === Position.Left || axisPosition === Position.Right;
 }
 
+/** @internal */
 export function isHorizontalAxis(axisPosition: Position) {
   return axisPosition === Position.Top || axisPosition === Position.Bottom;
 }
 
+/** @internal */
 export function isVerticalGrid(axisPosition: Position) {
   return isHorizontalAxis(axisPosition);
 }
 
+/** @internal */
 export function isHorizontalGrid(axisPosition: Position) {
   return isVerticalAxis(axisPosition);
 }
 
+/** @internal */
 export function getAxisTicksPositions(
   computedChartDims: {
     chartDimensions: Dimensions;
@@ -669,6 +690,7 @@ export function getAxisTicksPositions(
   };
 }
 
+/** @internal */
 export function computeAxisGridLinePositions(
   isVerticalAxis: boolean,
   tickPosition: number,
@@ -681,22 +703,27 @@ export function computeAxisGridLinePositions(
   return positions;
 }
 
+/** @internal */
 export function isLowerBound(domain: Partial<CompleteBoundedDomain>): domain is LowerBoundedDomain {
   return domain.min != null;
 }
 
+/** @internal */
 export function isUpperBound(domain: Partial<CompleteBoundedDomain>): domain is UpperBoundedDomain {
   return domain.max != null;
 }
 
+/** @internal */
 export function isCompleteBound(domain: Partial<CompleteBoundedDomain>): domain is CompleteBoundedDomain {
   return domain.max != null && domain.min != null;
 }
 
+/** @internal */
 export function isBounded(domain: Partial<CompleteBoundedDomain>): domain is DomainRange {
   return domain.max != null || domain.min != null;
 }
 
+/** @internal */
 export const isDuplicateAxis = (
   { position, title }: AxisSpec,
   { tickLabels }: AxisTicksDimensions,

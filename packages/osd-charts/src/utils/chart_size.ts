@@ -24,6 +24,7 @@ export interface ChartSizeObject {
 
 export type ChartSize = number | string | ChartSizeArray | ChartSizeObject;
 
+/** @internal */
 export function getChartSize(size: ChartSize) {
   if (Array.isArray(size)) {
     return {

@@ -43,6 +43,7 @@ import { createOnElementOutCaller } from './selectors/on_element_out_caller';
 import { createOnBrushEndCaller } from './selectors/on_brush_end_caller';
 import { createOnPointerMoveCaller } from './selectors/on_pointer_move_caller';
 
+/** @internal */
 export class XYAxisChartState implements InternalChartState {
   onElementClickCaller: (state: GlobalChartState) => void;
   onElementOverCaller: (state: GlobalChartState) => void;

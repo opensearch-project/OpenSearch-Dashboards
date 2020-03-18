@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License. */
 
+/** tslint:disable:max-line-length  */
 import React from 'react';
-import { Props } from '../icon';
+import { IconComponentProps } from '../icon';
 
-// tslint:disable:max-line-length
-export function AlertIcon(extraProps: Props) {
+/** @internal */
+export function AlertIcon(extraProps: IconComponentProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" {...extraProps}>
       <path

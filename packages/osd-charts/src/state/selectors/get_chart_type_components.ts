@@ -23,6 +23,7 @@ type ChartRendererFn = (
   forwardStageRef: React.RefObject<HTMLCanvasElement>,
 ) => JSX.Element | null;
 
+/** @internal */
 export const getInternalChartRendererSelector = (state: GlobalChartState): ChartRendererFn => {
   if (state.internalChartState) {
     return state.internalChartState.chartRenderer;

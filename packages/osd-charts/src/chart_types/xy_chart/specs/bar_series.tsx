@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
+import React from 'react';
 import { BarSeriesSpec, DEFAULT_GLOBAL_ID, SeriesTypes } from '../utils/specs';
 import { ScaleType } from '../../../scales';
 import { ChartTypes } from '../../../chart_types';

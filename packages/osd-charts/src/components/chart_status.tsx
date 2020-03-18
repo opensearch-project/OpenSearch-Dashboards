@@ -56,4 +56,5 @@ const mapStateToProps = (state: GlobalChartState): ChartStatusStateProps => {
   };
 };
 
+/** @internal */
 export const ChartStatus = connect(mapStateToProps)(ChartStatusComponent);

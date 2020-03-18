@@ -22,6 +22,7 @@ import { AccessorFn } from './accessor';
 
 export type Domain = any[];
 
+/** @internal */
 export function computeOrdinalDataDomain(
   data: any[],
   accessor: AccessorFn,
@@ -55,6 +56,7 @@ function computeFittedDomain(start?: number, end?: number) {
   return [start >= 0 && newStart < 0 ? 0 : newStart, end <= 0 && newEnd > 0 ? 0 : newEnd];
 }
 
+/** @internal */
 export function computeDomainExtent(
   computedDomain: [number, number] | [undefined, undefined],
   scaleToExtent: boolean,
@@ -75,6 +77,7 @@ export function computeDomainExtent(
   return [0, 0];
 }
 
+/** @internal */
 export function computeContinuousDataDomain(
   data: any[],
   accessor: (n: any) => number,
@@ -87,6 +90,7 @@ export function computeContinuousDataDomain(
 }
 
 // TODO: remove or incorporate this function
+/** @internal */
 export function computeStackedContinuousDomain(
   data: any[],
   xAccessor: AccessorFn,

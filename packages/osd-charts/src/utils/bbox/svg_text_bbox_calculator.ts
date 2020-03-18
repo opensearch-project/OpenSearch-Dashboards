@@ -18,13 +18,6 @@
 
 import { BBox, BBoxCalculator } from './bbox_calculator';
 
-// not sure where to specify this, required for tests
-declare global {
-  interface SVGElement {
-    getBBox(): SVGRect;
-  }
-}
-
 export class SvgTextBBoxCalculator implements BBoxCalculator {
   svgElem: SVGSVGElement;
   textElem: SVGTextElement;

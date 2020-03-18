@@ -30,6 +30,7 @@ import { Stroke, Fill } from '../../../../../geoms/types';
  * @param themeRectStyle the theme style of the rectangle for the bar series
  * @param themeRectBorderStyle the theme style of the rectangle borders for the bar series
  * @param geometryStateStyle the highlight geometry style
+ * @internal
  */
 export function buildBarStyles(
   baseColor: string,

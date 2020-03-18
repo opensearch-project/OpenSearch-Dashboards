@@ -33,6 +33,7 @@ import { ChartTypes } from '../../chart_types';
 import { SettingsSpec, SpecTypes, TooltipType } from '../../specs';
 import { LIGHT_THEME } from '../../utils/themes/light_theme';
 
+/** @internal */
 export class MockSeriesSpec {
   private static readonly barBase: BarSeriesSpec = {
     chartType: ChartTypes.XYAxis,
@@ -161,6 +162,7 @@ export class MockSeriesSpecs {
   }
 }
 
+/** @internal */
 export class MockGlobalSpec {
   private static readonly settingsBase: SettingsSpec = {
     id: '__global__settings___',

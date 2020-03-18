@@ -266,4 +266,5 @@ const mapStateToProps = (state: GlobalChartState): AnnotationTooltipStateProps =
   };
 };
 
+/** @internal */
 export const AnnotationTooltip = connect(mapStateToProps)(AnnotationTooltipComponent);

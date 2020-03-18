@@ -21,7 +21,7 @@ import { bindActionCreators, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { specParsing, specParsed, specUnmounted } from '../state/actions/specs';
 
-export const SpecsParserComponent: React.FunctionComponent<{}> = (props) => {
+const SpecsParserComponent: React.FunctionComponent<{}> = (props) => {
   const injected = props as DispatchProps;
   injected.specParsing();
   useEffect(() => {
@@ -52,4 +52,8 @@ const mapDispatchToProps = (dispatch: Dispatch): DispatchProps =>
     dispatch,
   );
 
+/**
+ * The Spec Parser component
+ * @internal
+ */
 export const SpecsParser = connect(null, mapDispatchToProps)(SpecsParserComponent);

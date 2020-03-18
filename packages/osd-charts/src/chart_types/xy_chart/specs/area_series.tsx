@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
+import React from 'react';
 import { AreaSeriesSpec, HistogramModeAlignments, DEFAULT_GLOBAL_ID, SeriesTypes } from '../utils/specs';
 import { ScaleType } from '../../../scales';
 import { specComponentFactory, getConnect } from '../../../state/spec_factory';

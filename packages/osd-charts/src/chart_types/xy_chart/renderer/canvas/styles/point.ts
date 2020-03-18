@@ -29,6 +29,7 @@ import { mergePartial } from '../../../../../utils/commons';
  * @param themePointStyle the theme style or the merged point style if a custom PointStyle is applied
  * @param geometryStateStyle the state style of the geometry
  * @param overrides (optional) an override PointStyle
+ * @internal
  */
 export function buildPointStyles(
   baseColor: string,

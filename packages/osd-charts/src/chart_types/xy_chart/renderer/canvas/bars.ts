@@ -25,6 +25,7 @@ import { LegendItem } from '../../legend/legend';
 import { renderRect } from './primitives/rect';
 import { Rect } from '../../../../geoms/types';
 
+/** @internal */
 export function renderBars(
   ctx: CanvasRenderingContext2D,
   barGeometries: BarGeometry[],

@@ -22,6 +22,7 @@ import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
+/** @internal */
 export const computeChartTransformSelector = createCachedSelector(
   [computeChartDimensionsSelector, getSettingsSpecSelector],
   (chartDimensions, settingsSpecs): Transform => {

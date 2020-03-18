@@ -21,6 +21,7 @@ import { getYValue } from '../../chart_types/xy_chart/rendering/rendering';
 
 /**
  * Helper function to return array of rendered y1 values
+ * @internal
  */
 export const getFilledNullData = (data: DataSeriesDatum[]): (number | undefined)[] => {
   return data.filter(({ y1 }) => y1 === null).map(({ filled }) => filled && filled.y1);
@@ -28,6 +29,7 @@ export const getFilledNullData = (data: DataSeriesDatum[]): (number | undefined)
 
 /**
  * Helper function to return array of rendered y1 values
+ * @internal
  */
 export const getFilledNonNullData = (data: DataSeriesDatum[]): (number | undefined)[] => {
   return data.filter(({ y1 }) => y1 !== null).map(({ filled }) => filled && filled.y1);
@@ -35,6 +37,7 @@ export const getFilledNonNullData = (data: DataSeriesDatum[]): (number | undefin
 
 /**
  * Helper function to return array of rendered x values
+ * @internal
  */
 export const getXValueData = (data: DataSeriesDatum[]): (number | string)[] => {
   return data.map(({ x }) => x);
@@ -42,6 +45,7 @@ export const getXValueData = (data: DataSeriesDatum[]): (number | string)[] => {
 
 /**
  * Returns value of `y1` or `filled.y1` or null
+ * @internal
  */
 export const getYResolvedData = (data: DataSeriesDatum[]): (number | null)[] => {
   return data.map(getYValue);

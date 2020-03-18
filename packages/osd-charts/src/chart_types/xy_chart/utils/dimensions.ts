@@ -33,6 +33,7 @@ import { getSpecsById } from '../state/utils';
  * @param axisSpecs the axis specs
  * @param showLegend is the legend shown
  * @param legendPosition the optional legend position
+ * @internal
  */
 export function computeChartDimensions(
   parentDimensions: Dimensions,

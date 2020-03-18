@@ -60,6 +60,7 @@ const MARKER_LEFT_MARGIN = 4;
 const VALUE_LEFT_MARGIN = 4;
 const VERTICAL_PADDING = 4;
 
+/** @internal */
 export const getLegendSizeSelector = createCachedSelector(
   [getSettingsSpecSelector, getChartThemeSelector, getParentDimensionSelector, legendItemLabelsSelector],
   (settings, theme, parentDimensions, labels): BBox => {

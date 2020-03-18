@@ -28,6 +28,7 @@ import { SeriesKey } from '../../utils/series';
 
 const getDeselectedSeriesSelector = (state: GlobalChartState) => state.interactions.deselectedDataSeries;
 
+/** @internal */
 export const computeLegendSelector = createCachedSelector(
   [
     getSeriesSpecsSelector,

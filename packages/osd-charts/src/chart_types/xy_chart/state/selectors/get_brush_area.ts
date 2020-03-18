@@ -28,6 +28,7 @@ const getCurrentPointerPosition = (state: GlobalChartState) => {
   return state.interactions.pointer.current.position;
 };
 
+/** @internal */
 export const getBrushAreaSelector = createCachedSelector(
   [getMouseDownPosition, getCurrentPointerPosition, getChartRotationSelector, computeChartDimensionsSelector],
   (mouseDownPosition, cursorPosition, chartRotation, { chartDimensions }): Dimensions | null => {

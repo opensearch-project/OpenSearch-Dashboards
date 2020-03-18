@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
+import React from 'react';
 import { AxisSpec, DEFAULT_GLOBAL_ID } from '../utils/specs';
 import { Position } from '../../../utils/commons';
 import { ChartTypes } from '../../../chart_types';

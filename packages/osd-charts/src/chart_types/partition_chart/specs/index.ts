@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License. */
 
+import React from 'react';
 import { ChartTypes } from '../../index';
 import { config, percentFormatter } from '../layout/config/config';
-import { FunctionComponent } from 'react';
 import { getConnect, specComponentFactory } from '../../../state/spec_factory';
 import { IndexedAccessorFn } from '../../../utils/accessor';
 import { Spec, SpecTypes } from '../../../specs/index';
@@ -77,7 +77,7 @@ export interface PartitionSpec extends Spec {
 type SpecRequiredProps = Pick<PartitionSpec, 'id' | 'data'>;
 type SpecOptionalProps = Partial<Omit<PartitionSpec, 'chartType' | 'specType' | 'id' | 'data'>>;
 
-export const Partition: FunctionComponent<SpecRequiredProps & SpecOptionalProps> = getConnect()(
+export const Partition: React.FunctionComponent<SpecRequiredProps & SpecOptionalProps> = getConnect()(
   specComponentFactory<
     PartitionSpec,
     'valueAccessor' | 'valueGetter' | 'valueFormatter' | 'layers' | 'config' | 'percentFormatter'

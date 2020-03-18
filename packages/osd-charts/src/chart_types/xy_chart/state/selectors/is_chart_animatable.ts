@@ -22,6 +22,7 @@ import { computeSeriesGeometriesSelector } from './compute_series_geometries';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 // import { isChartAnimatable } from '../utils';
 
+/** @internal */
 export const isChartAnimatableSelector = createCachedSelector(
   [computeSeriesGeometriesSelector, getSettingsSpecSelector],
   () => {

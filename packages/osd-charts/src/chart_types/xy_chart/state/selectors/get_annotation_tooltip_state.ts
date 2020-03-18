@@ -40,6 +40,7 @@ import { TooltipInfo } from '../../../../components/tooltip/types';
 
 const getCurrentPointerPosition = (state: GlobalChartState) => state.interactions.pointer.current.position;
 
+/** @internal */
 export const getAnnotationTooltipStateSelector = createCachedSelector(
   [
     getCurrentPointerPosition,

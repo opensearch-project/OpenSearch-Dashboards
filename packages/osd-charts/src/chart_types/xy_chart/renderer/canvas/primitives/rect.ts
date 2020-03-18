@@ -19,6 +19,7 @@
 import { Rect, Fill, Stroke } from '../../../../../geoms/types';
 import { RGBtoString } from '../../../../partition_chart/layout/utils/d3_utils';
 
+/** @internal */
 export function renderRect(
   ctx: CanvasRenderingContext2D,
   rect: Rect,
@@ -73,6 +74,7 @@ function drawRect(ctx: CanvasRenderingContext2D, rect: Rect) {
   ctx.lineTo(x, y);
 }
 
+/** @internal */
 export function renderMultiRect(ctx: CanvasRenderingContext2D, rects: Rect[], fill?: Fill, stroke?: Stroke) {
   if (!fill && !stroke && rects.length > 0) {
     return;

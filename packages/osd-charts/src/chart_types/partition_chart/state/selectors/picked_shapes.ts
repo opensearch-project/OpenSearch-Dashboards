@@ -27,6 +27,7 @@ function getCurrentPointerPosition(state: GlobalChartState) {
   return state.interactions.pointer.current.position;
 }
 
+/** @internal */
 export const getPickedShapes = createCachedSelector(
   [partitionGeometries, getCurrentPointerPosition],
   (geoms, pointerPosition): QuadViewModel[] => {
@@ -38,6 +39,7 @@ export const getPickedShapes = createCachedSelector(
   },
 )((state) => state.chartId);
 
+/** @internal */
 export const getPickedShapesLayerValues = createCachedSelector(
   [getPickedShapes],
   (pickedShapes): Array<Array<LayerValue>> => {

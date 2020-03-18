@@ -22,6 +22,7 @@ import { isAreaSeriesSpec, isLineSeriesSpec, SeriesSpecs, BasicSeriesSpec } from
 import { ScaleType } from '../../../scales';
 import { getSpecsById } from '../state/utils';
 
+/** @internal */
 export const formatNonStackedDataSeriesValues = (
   dataseries: RawDataSeries[],
   scaleToExtent: boolean,
@@ -49,6 +50,7 @@ export const formatNonStackedDataSeriesValues = (
   return formattedValues;
 };
 
+/** @internal */
 export const formatNonStackedDataValues = (dataSeries: RawDataSeries, scaleToExtent: boolean): DataSeries => {
   const len = dataSeries.data.length;
   const formattedValues: DataSeries = {

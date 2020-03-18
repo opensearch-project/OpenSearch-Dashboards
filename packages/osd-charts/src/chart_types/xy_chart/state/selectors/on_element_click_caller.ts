@@ -33,6 +33,7 @@ import { getLastClickSelector } from '../../../../state/selectors/get_last_click
  * - the onElementClick listener is available
  * - we have at least one highlighted geometry
  * - the pointer state goes from down state to up state
+ * @internal
  */
 export function createOnElementClickCaller(): (state: GlobalChartState) => void {
   let prevClick: PointerState | null = null;

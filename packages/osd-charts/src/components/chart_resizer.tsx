@@ -110,4 +110,5 @@ const mapStateToProps = (state: GlobalChartState): ResizerStateProps => {
   };
 };
 
+/** @internal */
 export const ChartResizer = connect(mapStateToProps, mapDispatchToProps)(Resizer);

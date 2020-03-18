@@ -23,6 +23,7 @@ import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
 const getPointerSelector = (state: GlobalChartState) => state.interactions.pointer;
 
+/** @internal */
 export const isBrushingSelector = createCachedSelector(
   [isBrushAvailableSelector, getPointerSelector],
   (isBrushAvailable, pointer): boolean => {

@@ -26,6 +26,7 @@ import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { TooltipAnchorPosition } from '../../../../components/tooltip/utils';
 
+/** @internal */
 export const getTooltipAnchorPositionSelector = createCachedSelector(
   [
     computeChartDimensionsSelector,

@@ -27,6 +27,7 @@ import { getSeriesColorsSelector } from './get_series_color_map';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
+/** @internal */
 export const computeSeriesGeometriesSelector = createCachedSelector(
   [
     getSettingsSpecSelector,

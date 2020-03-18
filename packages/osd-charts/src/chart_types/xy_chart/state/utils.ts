@@ -63,11 +63,14 @@ import { Spec } from '../../../specs';
 const MAX_ANIMATABLE_BARS = 300;
 const MAX_ANIMATABLE_LINES_AREA_POINTS = 600;
 
+/** @internal */
 export interface Transform {
   x: number;
   y: number;
   rotate: number;
 }
+
+/** @internal */
 export interface BrushExtent {
   minX: number;
   minY: number;
@@ -75,6 +78,7 @@ export interface BrushExtent {
   maxY: number;
 }
 
+/** @internal */
 export interface GeometriesCounts {
   points: number;
   bars: number;
@@ -84,10 +88,12 @@ export interface GeometriesCounts {
   linePoints: number;
 }
 
+/** @internal */
 export interface ComputedScales {
   xScale: Scale;
   yScales: Map<GroupId, Scale>;
 }
+/** @internal */
 export interface Geometries {
   points: PointGeometry[];
   bars: BarGeometry[];
@@ -95,6 +101,7 @@ export interface Geometries {
   lines: LineGeometry[];
 }
 
+/** @internal */
 export interface ComputedGeometries {
   scales: ComputedScales;
   geometries: Geometries;
@@ -102,6 +109,7 @@ export interface ComputedGeometries {
   geometriesCounts: GeometriesCounts;
 }
 
+/** @internal */
 export interface SeriesDomainsAndData {
   xDomain: XDomain;
   yDomain: YDomain[];
@@ -117,6 +125,7 @@ export interface SeriesDomainsAndData {
  * Adds or removes series from array or series
  * @param series
  * @param target
+ * @internal
  */
 export function updateDeselectedDataSeries(
   series: XYChartSeriesIdentifier[],
@@ -138,6 +147,7 @@ export function updateDeselectedDataSeries(
  * @param seriesSpecs
  * @param seriesCollection
  * @param seriesColorOverrides color override from legend
+ * @internal
  */
 export function getCustomSeriesColors(
   seriesSpecs: BasicSeriesSpec[],
@@ -225,6 +235,7 @@ function getLastValues(formattedDataSeries: {
  * then all series will be factored into computations. Otherwise, selectedDataSeries
  * is used to restrict the computation for just the selected series
  * @returns `SeriesDomainsAndData`
+ * @internal
  */
 export function computeSeriesDomains(
   seriesSpecs: BasicSeriesSpec[],
@@ -270,6 +281,7 @@ export function computeSeriesDomains(
   };
 }
 
+/** @internal */
 export function computeSeriesGeometries(
   seriesSpecs: BasicSeriesSpec[],
   xDomain: XDomain,
@@ -410,6 +422,7 @@ export function computeSeriesGeometries(
   };
 }
 
+/** @internal */
 export function setBarSeriesAccessors(isHistogramMode: boolean, seriesSpecs: Map<SpecId, BasicSeriesSpec>): void {
   if (!isHistogramMode) {
     return;
@@ -430,12 +443,14 @@ export function setBarSeriesAccessors(isHistogramMode: boolean, seriesSpecs: Map
   return;
 }
 
+/** @internal */
 export function isHistogramModeEnabled(seriesSpecs: BasicSeriesSpec[]): boolean {
   return seriesSpecs.some((spec) => {
     return isBarSeriesSpec(spec) && spec.enableHistogramMode;
   });
 }
 
+/** @internal */
 export function computeXScaleOffset(
   xScale: Scale,
   enableHistogramMode: boolean,
@@ -611,10 +626,12 @@ function renderGeometries(
   };
 }
 
+/** @internal */
 export function getSpecsById<T extends Spec>(specs: T[], id: string): T | undefined {
   return specs.find((spec) => spec.id === id);
 }
 
+/** @internal */
 export function getAxesSpecForSpecId(axesSpecs: AxisSpec[], groupId: GroupId) {
   let xAxis;
   let yAxis;
@@ -634,6 +651,7 @@ export function getAxesSpecForSpecId(axesSpecs: AxisSpec[], groupId: GroupId) {
   };
 }
 
+/** @internal */
 export function computeChartTransform(chartDimensions: Dimensions, chartRotation: Rotation): Transform {
   if (chartRotation === 90) {
     return {
@@ -667,6 +685,7 @@ export function computeChartTransform(chartDimensions: Dimensions, chartRotation
  * @param iterables a set of maps to be merged
  * @returns a new Map where each element with the same key are concatenated on a single
  * IndexedGemoetry array for that key
+ * @internal
  */
 export function mergeGeometriesIndexes(...iterables: Map<any, IndexedGeometry[]>[]) {
   const geometriesIndex: Map<any, IndexedGeometry[]> = new Map();
@@ -679,10 +698,12 @@ export function mergeGeometriesIndexes(...iterables: Map<any, IndexedGeometry[]>
   return geometriesIndex;
 }
 
+/** @internal */
 export function isHorizontalRotation(chartRotation: Rotation) {
   return chartRotation === 0 || chartRotation === 180;
 }
 
+/** @internal */
 export function isVerticalRotation(chartRotation: Rotation) {
   return chartRotation === -90 || chartRotation === 90;
 }
@@ -690,6 +711,7 @@ export function isVerticalRotation(chartRotation: Rotation) {
 /**
  * Check if a specs map contains only line or area specs
  * @param specs Map<SpecId, BasicSeriesSpec>
+ * @internal
  */
 export function isLineAreaOnlyChart(specs: BasicSeriesSpec[]) {
   return !specs.some((spec) => {
@@ -697,6 +719,7 @@ export function isLineAreaOnlyChart(specs: BasicSeriesSpec[]) {
   });
 }
 
+/** @internal */
 export function isChartAnimatable(geometriesCounts: GeometriesCounts, animationEnabled: boolean): boolean {
   if (!animationEnabled) {
     return false;
@@ -707,6 +730,7 @@ export function isChartAnimatable(geometriesCounts: GeometriesCounts, animationE
   return isBarsAnimatable && isLinesAndAreasAnimatable;
 }
 
+/** @internal */
 export function isAllSeriesDeselected(legendItems: Map<string, LegendItem>): boolean {
   for (const [, legendItem] of legendItems) {
     if (legendItem.isSeriesVisible) {

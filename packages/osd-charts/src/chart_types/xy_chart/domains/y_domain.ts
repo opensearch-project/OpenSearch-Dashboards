@@ -32,6 +32,7 @@ export type YDomain = BaseDomain & {
   scaleType: ScaleContinuousType;
   groupId: GroupId;
 };
+
 export type YBasicSeriesSpec = Pick<
   BasicSeriesSpec,
   'id' | 'seriesType' | 'yScaleType' | 'groupId' | 'stackAccessors' | 'yScaleToDataExtent' | 'useDefaultGroupDomain'
@@ -43,6 +44,7 @@ interface GroupSpecs {
   nonStacked: YBasicSeriesSpec[];
 }
 
+/** @internal */
 export function mergeYDomain(
   dataSeries: Map<SpecId, RawDataSeries[]>,
   specs: YBasicSeriesSpec[],
@@ -149,6 +151,7 @@ function mergeYDomainForGroup(
   };
 }
 
+/** @internal */
 export function getDataSeriesOnGroup(
   dataSeries: Map<SpecId, RawDataSeries[]>,
   specs: YBasicSeriesSpec[],
@@ -201,6 +204,7 @@ function computeYNonStackedDomain(dataseries: RawDataSeries[], scaleToExtent: bo
   return computeContinuousDataDomain([...yValues.values()], identity, scaleToExtent, fitToExtent);
 }
 
+/** @internal */
 export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
   const specsByGroupIds = new Map<
     GroupId,
@@ -246,6 +250,7 @@ export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
  * If there are at least one Ordinal scale type, is coerced to ordinal.
  * If none of the above, than coerce to the specified scale.
  * @returns {ChartScaleType}
+ * @internal
  */
 export function coerceYScaleTypes(specs: Pick<BasicSeriesSpec, 'yScaleType'>[]): ScaleContinuousType {
   const scaleTypes = new Set<ScaleContinuousType>();

@@ -18,6 +18,7 @@
 
 import { GlobalChartState } from '../chart_state';
 
+/** @internal */
 export const getInternalPointerCursor = (state: GlobalChartState): string => {
   if (state.internalChartState) {
     return state.internalChartState.getPointerCursor(state);

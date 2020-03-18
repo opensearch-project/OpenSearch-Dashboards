@@ -17,7 +17,7 @@
  * under the License. */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 import { Position, Rendering, Rotation } from '../utils/commons';
 import { DARK_THEME } from '../utils/themes/dark_theme';
 import { Settings, SettingsSpec, TooltipType } from './settings';

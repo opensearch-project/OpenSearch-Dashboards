@@ -28,6 +28,7 @@ import { Point } from '../../utils/point';
  * otherwise the text will render upside down.
  * @param ctx
  * @param fun
+ * @internal
  */
 export function withContext(ctx: CanvasRenderingContext2D, fun: (ctx: CanvasRenderingContext2D) => void) {
   ctx.save();
@@ -35,6 +36,7 @@ export function withContext(ctx: CanvasRenderingContext2D, fun: (ctx: CanvasRend
   ctx.restore();
 }
 
+/** @internal */
 export function clearCanvas(
   ctx: CanvasRenderingContext2D,
   width: Coordinate,
@@ -50,10 +52,12 @@ export function clearCanvas(
 }
 
 // order of rendering is important; determined by the order of layers in the array
+/** @internal */
 export function renderLayers(ctx: CanvasRenderingContext2D, layers: Array<(ctx: CanvasRenderingContext2D) => void>) {
   layers.forEach((renderLayer) => renderLayer(ctx));
 }
 
+/** @internal */
 export function withClip(
   ctx: CanvasRenderingContext2D,
   clip: { x: number; y: number; width: number; height: number },
@@ -76,6 +80,7 @@ export function withClip(
  * @param clippedRanges ranges to be clipped from rendering
  * @param clippings the general clipping
  * @param negate show, rather than exclude, only selected ranges
+ * @internal
  */
 export function withClipRanges(
   ctx: CanvasRenderingContext2D,
@@ -112,6 +117,7 @@ export function withClipRanges(
   });
 }
 
+/** @internal */
 export function withRotatedOrigin(
   ctx: CanvasRenderingContext2D,
   origin: Point,

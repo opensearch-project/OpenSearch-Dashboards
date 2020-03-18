@@ -67,11 +67,13 @@ function angleToCircline(
   return sectorRadiusCircline;
 }
 
+/** @internal */
 // todo pick a better unique key for the slices (D3 doesn't keep track of an index)
 export function nodeId(node: ShapeTreeNode): string {
   return `${node.x0}|${node.y0}`;
 }
 
+/** @internal */
 export function rectangleConstruction(node: ShapeTreeNode) {
   return {
     x0: node.x0,
@@ -81,6 +83,7 @@ export function rectangleConstruction(node: ShapeTreeNode) {
   };
 }
 
+/** @internal */
 export function ringSectorConstruction(config: Config, innerRadius: Radius, ringThickness: Distance) {
   return (ringSector: ShapeTreeNode): RingSector => {
     const {
@@ -143,6 +146,7 @@ function makeRowCircline(
   return circline;
 }
 
+/** @internal */
 export function getSectorRowGeometry(
   ringSector: RingSector,
   cx: Coordinate,
@@ -177,6 +181,7 @@ export function getSectorRowGeometry(
   return { rowCentroidX, rowCentroidY, maximumRowLength };
 }
 
+/** @internal */
 export function getRectangleRowGeometry(
   container: any,
   cx: number,
@@ -401,6 +406,7 @@ function fill(
   };
 }
 
+/** @internal */
 export function inSectorRotation(horizontalTextEnforcer: number, horizontalTextAngleThreshold: number) {
   return (node: ShapeTreeNode) => {
     let rotation = trueBearingToStandardPositionAngle((node.x0 + node.x1) / 2);
@@ -411,6 +417,7 @@ export function inSectorRotation(horizontalTextEnforcer: number, horizontalTextA
   };
 }
 
+/** @internal */
 export function fillTextLayout(
   measure: TextMeasure,
   rawTextGetter: RawTextGetter,

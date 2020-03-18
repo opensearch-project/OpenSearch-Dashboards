@@ -30,6 +30,7 @@ export interface SnappedPosition {
 
 export const DEFAULT_SNAP_POSITION_BAND = 1;
 
+/** @internal */
 export function getSnapPosition(
   value: string | number,
   scale: Scale,
@@ -56,6 +57,7 @@ export function getSnapPosition(
   }
 }
 
+/** @internal */
 export function getCursorLinePosition(
   chartRotation: Rotation,
   chartDimensions: Dimensions,
@@ -87,6 +89,7 @@ export function getCursorLinePosition(
   }
 }
 
+/** @internal */
 export function getCursorBandPosition(
   chartRotation: Rotation,
   chartDimensions: Dimensions,
@@ -165,6 +168,7 @@ export function getCursorBandPosition(
   }
 }
 
+/** @internal */
 export function getTooltipAnchorPosition(
   chartDimensions: Dimensions,
   chartRotation: Rotation,

@@ -21,6 +21,7 @@ import { getSettingsSpecSelector } from '../../../../state/selectors/get_setting
 import { getTooltipType } from '../../../../specs/settings';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
+/** @internal */
 export const getTooltipTypeSelector = createCachedSelector(
   [getSettingsSpecSelector],
   getTooltipType,

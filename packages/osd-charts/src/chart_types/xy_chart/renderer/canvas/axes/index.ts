@@ -29,6 +29,7 @@ import { renderLine } from './line';
 import { renderTickLabel } from './tick_label';
 import { renderTick } from './tick';
 
+/** @internal */
 export interface AxisProps {
   axisConfig: AxisConfig;
   axisSpec: AxisSpec;
@@ -38,6 +39,8 @@ export interface AxisProps {
   debug: boolean;
   chartDimensions: Dimensions;
 }
+
+/** @internal */
 export interface AxesProps {
   axesVisibleTicks: Map<AxisId, AxisTick[]>;
   axesSpecs: AxisSpec[];
@@ -48,6 +51,7 @@ export interface AxesProps {
   chartDimensions: Dimensions;
 }
 
+/** @internal */
 export function renderAxes(ctx: CanvasRenderingContext2D, props: AxesProps) {
   const { axesVisibleTicks, axesSpecs, axesTicksDimensions, axesPositions, axisStyle, debug, chartDimensions } = props;
   axesVisibleTicks.forEach((ticks, axisId) => {

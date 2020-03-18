@@ -27,6 +27,7 @@ import { FormattedDataSeries } from './series';
  * Doesn't take in consideration areas, lines or points.
  * @param stacked all the stacked formatted dataseries
  * @param nonStacked all the non-stacked formatted dataseries
+ * @internal
  */
 export function countBarsInCluster(
   stacked: FormattedDataSeries[],
@@ -85,6 +86,7 @@ interface XScaleOptions {
  * @param xDomain the x domain
  * @param totalBarsInCluster the total number of grouped series
  * @param axisLength the length of the x axis
+ * @internal
  */
 export function computeXScale(options: XScaleOptions): Scale {
   const { xDomain, totalBarsInCluster, range, barsPadding, enableHistogramMode, ticks, integersOnly } = options;
@@ -145,6 +147,7 @@ interface YScaleOptions {
  * Compute the y scales, one per groupId for the y axis.
  * @param yDomains the y domains
  * @param axisLength the axisLength of the y axis
+ * @internal
  */
 export function computeYScales(options: YScaleOptions): Map<GroupId, Scale> {
   const yScales: Map<GroupId, Scale> = new Map();

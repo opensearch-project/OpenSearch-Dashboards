@@ -25,6 +25,7 @@ import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
 const getCurrentPointerPosition = (state: GlobalChartState) => state.interactions.pointer.current.position;
 
+/** @internal */
 export const getProjectedPointerPositionSelector = createCachedSelector(
   [getCurrentPointerPosition, computeChartDimensionsSelector],
   (currentPointerPosition, chartDimensions): Point => {

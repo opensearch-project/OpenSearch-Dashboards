@@ -21,6 +21,7 @@ import { ComputedScales } from '../utils';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
+/** @internal */
 export const getComputedScalesSelector = createCachedSelector(
   [computeSeriesGeometriesSelector],
   (geometries): ComputedScales => {

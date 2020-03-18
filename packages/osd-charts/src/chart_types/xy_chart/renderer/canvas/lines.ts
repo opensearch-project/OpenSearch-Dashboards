@@ -33,6 +33,8 @@ interface LineGeometriesDataProps {
   highlightedLegendItem: LegendItem | null;
   clippings: Rect;
 }
+
+/** @internal */
 export function renderLines(ctx: CanvasRenderingContext2D, props: LineGeometriesDataProps) {
   withContext(ctx, (ctx) => {
     const { lines, sharedStyle, highlightedLegendItem, clippings } = props;

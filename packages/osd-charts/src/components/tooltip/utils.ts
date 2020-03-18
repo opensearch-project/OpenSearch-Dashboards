@@ -18,6 +18,7 @@
 
 import { Dimensions } from '../../utils/dimensions';
 
+/** @internal */
 export interface TooltipAnchorPosition {
   /**
    * true if the x axis is vertical
@@ -45,6 +46,7 @@ export interface TooltipAnchorPosition {
   padding?: number;
 }
 
+/** @internal */
 export function getFinalTooltipPosition(
   /** the dimensions of the chart parent container */
   container: Dimensions,

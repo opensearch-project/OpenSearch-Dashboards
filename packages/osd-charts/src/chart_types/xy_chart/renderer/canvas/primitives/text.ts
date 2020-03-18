@@ -21,6 +21,7 @@ import { Font, TextAlign, TextBaseline } from '../../../../partition_chart/layou
 import { cssFontShorthand, measureText } from '../../../../partition_chart/layout/utils/measure';
 import { Point } from '../../../../../utils/point';
 
+/** @internal */
 export function renderText(
   ctx: CanvasRenderingContext2D,
   origin: Point,
@@ -46,6 +47,7 @@ const SPACE = ' ';
 const ELLIPSIS = '…';
 const DASH = '-';
 
+/** @internal */
 export function wrapLines(
   ctx: CanvasRenderingContext2D,
   text: string,

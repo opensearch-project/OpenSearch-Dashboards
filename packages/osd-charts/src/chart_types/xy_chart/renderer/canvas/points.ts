@@ -22,6 +22,7 @@ import { renderCircle } from './primitives/arc';
 import { Circle } from '../../../../geoms/types';
 import { buildPointStyles } from './styles/point';
 
+/** @internal */
 export function renderPoints(
   ctx: CanvasRenderingContext2D,
   points: PointGeometry[],

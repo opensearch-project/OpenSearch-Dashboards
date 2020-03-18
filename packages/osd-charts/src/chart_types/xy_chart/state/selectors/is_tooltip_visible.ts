@@ -33,6 +33,7 @@ const hasTooltipTypeDefinedSelector = (state: GlobalChartState): TooltipType | u
 
 const getPointerSelector = (state: GlobalChartState) => state.interactions.pointer;
 
+/** @internal */
 export const isTooltipVisibleSelector = createCachedSelector(
   [
     hasTooltipTypeDefinedSelector,

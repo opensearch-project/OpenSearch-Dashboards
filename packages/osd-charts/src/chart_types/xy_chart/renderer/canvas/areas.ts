@@ -34,6 +34,7 @@ interface AreaGeometriesProps {
   clippings: Rect;
 }
 
+/** @internal */
 export function renderAreas(ctx: CanvasRenderingContext2D, props: AreaGeometriesProps) {
   withContext(ctx, (ctx) => {
     const { sharedStyle, highlightedLegendItem, areas, clippings } = props;

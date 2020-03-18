@@ -18,9 +18,16 @@
 
 import { XYChartSeriesIdentifier } from '../../chart_types/xy_chart/utils/series';
 
+/** @internal */
 export const ON_TOGGLE_LEGEND = 'ON_TOGGLE_LEGEND';
+
+/** @internal */
 export const ON_LEGEND_ITEM_OVER = 'ON_LEGEND_ITEM_OVER';
+
+/** @internal */
 export const ON_LEGEND_ITEM_OUT = 'ON_LEGEND_ITEM_OUT';
+
+/** @internal */
 export const ON_TOGGLE_DESELECT_SERIES = 'ON_TOGGLE_DESELECT_SERIES';
 
 interface ToggleLegendAction {
@@ -39,22 +46,27 @@ interface ToggleDeselectSeriesAction {
   legendItemId: XYChartSeriesIdentifier;
 }
 
+/** @internal */
 export function onToggleLegend(): ToggleLegendAction {
   return { type: ON_TOGGLE_LEGEND };
 }
 
+/** @internal */
 export function onLegendItemOverAction(legendItemKey: string | null): LegendItemOverAction {
   return { type: ON_LEGEND_ITEM_OVER, legendItemKey };
 }
 
+/** @internal */
 export function onLegendItemOutAction(): LegendItemOutAction {
   return { type: ON_LEGEND_ITEM_OUT };
 }
 
+/** @internal */
 export function onToggleDeselectSeriesAction(legendItemId: XYChartSeriesIdentifier): ToggleDeselectSeriesAction {
   return { type: ON_TOGGLE_DESELECT_SERIES, legendItemId };
 }
 
+/** @internal */
 export type LegendActions =
   | ToggleLegendAction
   | LegendItemOverAction

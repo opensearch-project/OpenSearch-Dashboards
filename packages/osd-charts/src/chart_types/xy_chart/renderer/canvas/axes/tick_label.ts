@@ -23,6 +23,7 @@ import { renderDebugRectCenterRotated } from '../utils/debug';
 import { Font, FontStyle } from '../../../../partition_chart/layout/types/types';
 import { withContext } from '../../../../../renderers/canvas';
 
+/** @internal */
 export function renderTickLabel(ctx: CanvasRenderingContext2D, tick: AxisTick, props: AxisProps) {
   /**
    * padding is already computed through width

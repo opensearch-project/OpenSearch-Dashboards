@@ -113,6 +113,7 @@ export function makeQuadViewModel(
   });
 }
 
+/** @internal */
 export function makeOutsideLinksViewModel(
   outsideFillNodes: ShapeTreeNode[],
   rowSets: RowSet[],
@@ -140,6 +141,7 @@ export function makeOutsideLinksViewModel(
     .filter(({ points }: OutsideLinksViewModel) => points.length > 1);
 }
 
+/** @internal */
 export function shapeViewModel(
   textMeasure: TextMeasure,
   config: Config,

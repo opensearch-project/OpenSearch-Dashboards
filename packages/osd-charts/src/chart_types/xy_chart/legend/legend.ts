@@ -35,6 +35,7 @@ interface FormattedLastValues {
   y1: number | string | null;
 }
 
+/** @internal */
 export type LegendItem = Postfixes & {
   key: SeriesKey;
   color: Color;
@@ -61,6 +62,7 @@ function getPostfix(spec: BasicSeriesSpec): Postfixes {
   return {};
 }
 
+/** @internal */
 export function getItemLabel(
   { banded, name, y1AccessorFormat, y0AccessorFormat }: LegendItem,
   yAccessor: BandedAccessorType,
@@ -72,6 +74,7 @@ export function getItemLabel(
   return yAccessor === BandedAccessorType.Y1 ? `${name}${y1AccessorFormat}` : `${name}${y0AccessorFormat}`;
 }
 
+/** @internal */
 export function computeLegend(
   seriesCollection: Map<SeriesKey, SeriesCollectionValue>,
   seriesColors: Map<SeriesKey, Color>,

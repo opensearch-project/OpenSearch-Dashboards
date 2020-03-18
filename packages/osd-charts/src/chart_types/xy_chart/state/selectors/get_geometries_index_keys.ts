@@ -21,6 +21,7 @@ import { compareByValueAsc } from '../../../../utils/commons';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
+/** @internal */
 export const getGeometriesIndexKeysSelector = createCachedSelector(
   [computeSeriesGeometriesSelector],
   (seriesGeometries): any[] => {

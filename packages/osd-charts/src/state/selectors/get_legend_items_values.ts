@@ -21,6 +21,8 @@ import { GlobalChartState } from '../chart_state';
 import { SeriesKey } from '../../chart_types/xy_chart/utils/series';
 
 const EMPTY_ITEM_LIST = new Map<SeriesKey, TooltipLegendValue>();
+
+/** @internal */
 export const getLegendItemsValuesSelector = (state: GlobalChartState): Map<SeriesKey, TooltipLegendValue> => {
   if (state.internalChartState) {
     return state.internalChartState.getLegendItemsValues(state);

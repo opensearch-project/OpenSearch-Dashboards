@@ -20,9 +20,13 @@ import { Stroke, Line } from '../../../../../geoms/types';
 import { RGBtoString } from '../../../../partition_chart/layout/utils/d3_utils';
 import { withContext } from '../../../../../renderers/canvas';
 
-// Canvas2d stroke ignores an exact zero line width
+/**
+ * Canvas2d stroke ignores an exact zero line width
+ * @internal
+ */
 export const MIN_STROKE_WIDTH = 0.001;
 
+/** @internal */
 export function renderLine(ctx: CanvasRenderingContext2D, line: Line, stroke: Stroke) {
   if (stroke.width < MIN_STROKE_WIDTH) {
     return;
@@ -41,6 +45,7 @@ export function renderLine(ctx: CanvasRenderingContext2D, line: Line, stroke: St
   });
 }
 
+/** @internal */
 export function renderMultiLine(ctx: CanvasRenderingContext2D, lines: Line[], stroke: Stroke) {
   if (stroke.width < MIN_STROKE_WIDTH) {
     return;

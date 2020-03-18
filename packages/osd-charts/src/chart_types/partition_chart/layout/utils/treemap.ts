@@ -47,6 +47,7 @@ function layVector(
   return { nodes, dependentSize, sectionSizes, sectionOffsets }; // descriptor for a vector (column or row) of elements (nodes)
 }
 
+/** @internal */
 export function leastSquarishAspectRatio({ sectionSizes, dependentSize }: LayoutElement) {
   return sectionSizes.reduce((p, n) => Math.min(p, n / dependentSize, dependentSize / n), 1);
 }
@@ -87,6 +88,7 @@ function vectorNodeCoordinates(vectorLayout: LayoutElement, x0Base: number, y0Ba
   });
 }
 
+/** @internal */
 export function treemap(
   nodes: HierarchyOfArrays,
   areaAccessor: (e: ArrayEntry) => number,

@@ -18,10 +18,11 @@
 
 import React from 'react';
 import { deepEqual } from '../../../utils/fast_deep_equal';
-import { Props } from '../icon';
+import { IconComponentProps } from '../icon';
 
-export class DotIcon extends React.Component<Props> {
-  shouldComponentUpdate(nextProps: Props) {
+/** @internal */
+export class DotIcon extends React.Component<IconComponentProps> {
+  shouldComponentUpdate(nextProps: IconComponentProps) {
     return !deepEqual(this.props, nextProps);
   }
 

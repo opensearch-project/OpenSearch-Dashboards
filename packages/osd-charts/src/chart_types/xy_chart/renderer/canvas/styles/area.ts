@@ -26,6 +26,7 @@ import { Fill } from '../../../../../geoms/types';
  * @param baseColor the assigned color of the area for this series
  * @param themeAreaStyle the theme style for the area series
  * @param geometryStateStyle the highlight geometry style
+ * @internal
  */
 export function buildAreaStyles(
   baseColor: string,

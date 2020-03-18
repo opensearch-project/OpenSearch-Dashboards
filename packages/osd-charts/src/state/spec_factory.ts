@@ -22,6 +22,7 @@ import { connect } from 'react-redux';
 import { upsertSpec, removeSpec } from './actions/specs';
 import { Spec } from '../specs';
 
+/** @internal */
 export interface DispatchProps {
   upsertSpec: (spec: Spec) => void;
   removeSpec: (id: string) => void;
@@ -35,6 +36,7 @@ function usePrevious(value: string) {
   return ref.current;
 }
 
+/** @internal */
 export function specComponentFactory<U extends Spec, D extends keyof U>(
   defaultProps: Pick<U, D | 'chartType' | 'specType'>,
 ) {
@@ -68,6 +70,7 @@ const mapDispatchToProps = (dispatch: Dispatch): DispatchProps =>
     dispatch,
   );
 
+/** @internal */
 export function getConnect() {
   /**
    * Redux assumes shallowEqual for all connected components

@@ -22,6 +22,7 @@ import { $Values } from 'utility-types';
  * A `Scale` interface. A scale can map an input value within a specified domain
  * to an output value from a specified range.
  * The the value is mapped depending on the `type` (linear, log, sqrt, time, ordinal)
+ * @internal
  */
 export interface Scale {
   domain: any[];
@@ -70,10 +71,16 @@ export type ScaleContinuousType = Exclude<ScaleType, typeof ScaleType.Ordinal>;
 
 export type ScaleOrdinalType = typeof ScaleType.Ordinal;
 
+/** @internal */
 export { ScaleBand } from './scale_band';
 
+/** @internal */
 export { ScaleContinuous } from './scale_continuous';
 
+/**
+ * Check if a scale is logaritmic
+ * @internal
+ */
 export function isLogarithmicScale(scale: Scale) {
   return scale.type === ScaleType.Log;
 }

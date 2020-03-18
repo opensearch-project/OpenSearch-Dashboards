@@ -29,6 +29,7 @@ import { renderDebugRect } from './utils/debug';
 import { stringToRGB } from '../../../partition_chart/layout/utils/d3_utils';
 import { Rect } from '../../../../geoms/types';
 
+/** @internal */
 export function renderXYChartCanvas2d(
   ctx: CanvasRenderingContext2D,
   dpr: number,

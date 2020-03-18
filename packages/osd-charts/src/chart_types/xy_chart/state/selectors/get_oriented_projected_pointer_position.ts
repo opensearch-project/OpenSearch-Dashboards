@@ -26,6 +26,7 @@ import { getSettingsSpecSelector } from '../../../../state/selectors/get_setting
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
+/** @internal */
 export const getOrientedProjectedPointerPositionSelector = createCachedSelector(
   [getProjectedPointerPositionSelector, computeChartDimensionsSelector, getSettingsSpecSelector],
   getOrientedProjectedPointerPosition,

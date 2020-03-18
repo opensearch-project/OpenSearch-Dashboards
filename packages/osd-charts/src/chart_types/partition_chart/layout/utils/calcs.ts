@@ -20,6 +20,7 @@ import { Ratio } from '../types/geometry_types';
 import { RgbTuple, stringToRGB } from './d3_utils';
 import { Color } from '../../../../utils/commons';
 
+/** @internal */
 export function hueInterpolator(colors: RgbTuple[]) {
   return (d: number) => {
     const index = Math.round(d * 255);
@@ -28,6 +29,7 @@ export function hueInterpolator(colors: RgbTuple[]) {
   };
 }
 
+/** @internal */
 export function addOpacity(hexColorString: string, opacity: Ratio) {
   // this is a super imperfect multiplicative alpha blender that assumes a "#rrggbb" or "#rrggbbaa" hexColorString
   // todo roll some proper utility that can handle "rgb(...)", "rgba(...)", "red", {r, g, b} etc.
@@ -41,10 +43,12 @@ export function addOpacity(hexColorString: string, opacity: Ratio) {
             ));
 }
 
+/** @internal */
 export function arrayToLookup(keyFun: Function, array: Array<any>) {
   return Object.assign({}, ...array.map((d) => ({ [keyFun(d)]: d })));
 }
 
+/** @internal */
 export function colorIsDark(color: Color) {
   // fixme this assumes a white or very light background
   const rgba = stringToRGB(color);

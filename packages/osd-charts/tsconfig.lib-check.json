@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "noUnusedLocals": true,
+    "removeComments": true,
+    "noEmit": true,
+    "skipLibCheck": false
+  },
+  "extends": "./tsconfig",
+  "include": ["dist/**/*"]
+}

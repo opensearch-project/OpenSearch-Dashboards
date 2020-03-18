@@ -20,6 +20,7 @@ import { SpecList, PointerState } from './chart_state';
 import { Spec } from '../specs';
 import { ChartTypes } from '../chart_types';
 
+/** @internal */
 export function getSpecsFromStore<U extends Spec>(specs: SpecList, chartType: ChartTypes, specType?: string): U[] {
   return Object.keys(specs)
     .filter((specId) => {
@@ -33,6 +34,7 @@ export function getSpecsFromStore<U extends Spec>(specs: SpecList, chartType: Ch
     });
 }
 
+/** @internal */
 export function isClicking(prevClick: PointerState | null, lastClick: PointerState | null) {
   if (prevClick === null && lastClick !== null) {
     return true;

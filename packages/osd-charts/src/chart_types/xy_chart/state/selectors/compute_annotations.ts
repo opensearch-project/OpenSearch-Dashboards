@@ -27,6 +27,7 @@ import { computeSeriesGeometriesSelector } from './compute_series_geometries';
 import { AnnotationId } from '../../../../utils/ids';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
+/** @internal */
 export const computeAnnotationDimensionsSelector = createCachedSelector(
   [
     getAnnotationSpecsSelector,

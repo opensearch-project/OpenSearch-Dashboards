@@ -48,6 +48,7 @@ import { isChartEmptySelector } from '../../state/selectors/is_chart_empty';
 import { deepEqual } from '../../../../utils/fast_deep_equal';
 import { Rotation } from '../../../../utils/commons';
 
+/** @internal */
 export interface ReactiveChartStateProps {
   initialized: boolean;
   debug: boolean;
@@ -76,7 +77,7 @@ interface ReactiveChartOwnProps {
 
 type XYChartProps = ReactiveChartStateProps & ReactiveChartDispatchProps & ReactiveChartOwnProps;
 class XYChartComponent extends React.Component<XYChartProps> {
-  static displayName = 'Partition';
+  static displayName = 'XYChart';
   private ctx: CanvasRenderingContext2D | null;
   // see example https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio#Example
   private readonly devicePixelRatio: number; // fixme this be no constant: multi-monitor window drag may necessitate modifying the `<canvas>` dimensions
@@ -237,4 +238,5 @@ const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
   };
 };
 
+/** @internal */
 export const XYChart = connect(mapStateToProps, mapDispatchToProps)(XYChartComponent);

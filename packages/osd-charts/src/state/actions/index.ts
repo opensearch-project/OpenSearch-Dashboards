@@ -24,6 +24,7 @@ import { EventsActions } from './events';
 import { MouseActions } from './mouse';
 import { ColorsActions } from './colors';
 
+/** @internal */
 export type StateActions =
   | SpecActions
   | ChartActions

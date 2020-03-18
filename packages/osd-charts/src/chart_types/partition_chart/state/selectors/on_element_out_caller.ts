@@ -29,6 +29,7 @@ import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
  * Will call the onElementOut listener every time the following preconditions are met:
  * - the onElementOut listener is available
  * - the highlighted geometries list goes from a list of at least one object to an empty one
+ * @internal
  */
 export function createOnElementOutCaller(): (state: GlobalChartState) => void {
   let prevPickedShapes: number | null = null;

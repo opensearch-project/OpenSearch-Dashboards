@@ -84,6 +84,7 @@ const valueFont = {
   },
 };
 
+/** @internal */
 export const configMetadata = {
   // shape geometry
   width: { dflt: 300, min: 0, max: 1024, type: 'number', reconfigurable: false },

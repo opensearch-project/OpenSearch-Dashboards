@@ -27,6 +27,7 @@ import {
 import { ON_MOUSE_DOWN, ON_MOUSE_UP, ON_POINTER_MOVE, MouseActions } from '../actions/mouse';
 import { getSeriesIndex, XYChartSeriesIdentifier } from '../../chart_types/xy_chart/utils/series';
 
+/** @internal */
 export function interactionsReducer(state: InteractionsState, action: LegendActions | MouseActions): InteractionsState {
   switch (action.type) {
     case ON_POINTER_MOVE:

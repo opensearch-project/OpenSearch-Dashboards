@@ -26,6 +26,7 @@ import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
 const getCurrentPointerPositionSelector = (state: GlobalChartState) => state.interactions.pointer.current.position;
 
+/** @internal */
 export const getPointerCursorSelector = createCachedSelector(
   [
     getHighlightedGeomsSelector,

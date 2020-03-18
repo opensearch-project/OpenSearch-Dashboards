@@ -525,7 +525,7 @@ export interface AxisSpec extends Spec {
   style?: AxisStyle;
   /** Show only integar values **/
   integersOnly?: boolean;
-  /** Remove duplicate ticks, default is false*/
+  /** Show duplicated ticks, default is false*/
   showDuplicatedTicks?: boolean;
 }
 

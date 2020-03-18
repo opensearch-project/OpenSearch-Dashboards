@@ -31,7 +31,7 @@ import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
 import { SettingsSpec } from '../specs';
 import { getInternalIsBrushingSelector } from '../state/selectors/get_internal_is_brushing';
 
-interface ReactiveChartStateProps {
+interface ChartContainerComponentStateProps {
   initialized: boolean;
   isChartEmpty?: boolean;
   pointerCursor: string;
@@ -43,18 +43,20 @@ interface ReactiveChartStateProps {
     forwardStageRef: React.RefObject<HTMLCanvasElement>,
   ) => JSX.Element | null;
 }
-interface ReactiveChartDispatchProps {
+interface ChartContainerComponentDispatchProps {
   onPointerMove: typeof onPointerMove;
   onMouseUp: typeof onMouseUp;
   onMouseDown: typeof onMouseDown;
 }
 
-interface ReactiveChartOwnProps {
+interface ChartContainerComponentOwnProps {
   getChartContainerRef: BackwardRef;
   forwardStageRef: React.RefObject<HTMLCanvasElement>;
 }
 
-type ReactiveChartProps = ReactiveChartStateProps & ReactiveChartDispatchProps & ReactiveChartOwnProps;
+type ReactiveChartProps = ChartContainerComponentStateProps &
+  ChartContainerComponentDispatchProps &
+  ChartContainerComponentOwnProps;
 
 class ChartContainerComponent extends React.Component<ReactiveChartProps> {
   static displayName = 'ChartContainer';
@@ -161,7 +163,7 @@ class ChartContainerComponent extends React.Component<ReactiveChartProps> {
   }
 }
 
-const mapDispatchToProps = (dispatch: Dispatch): ReactiveChartDispatchProps =>
+const mapDispatchToProps = (dispatch: Dispatch): ChartContainerComponentDispatchProps =>
   bindActionCreators(
     {
       onPointerMove,
@@ -170,7 +172,7 @@ const mapDispatchToProps = (dispatch: Dispatch): ReactiveChartDispatchProps =>
     },
     dispatch,
   );
-const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
+const mapStateToProps = (state: GlobalChartState): ChartContainerComponentStateProps => {
   if (!isInitialized(state)) {
     return {
       initialized: false,
@@ -193,4 +195,5 @@ const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
   };
 };
 
+/** @internal */
 export const ChartContainer = connect(mapStateToProps, mapDispatchToProps)(ChartContainerComponent);

@@ -34,14 +34,17 @@ export const Position = Object.freeze({
 
 export type Position = $Values<typeof Position>;
 
+/** @internal */
 export function identity<T>(value: T): T {
   return value;
 }
 
+/** @internal */
 export function compareByValueAsc(firstEl: number, secondEl: number): number {
   return firstEl - secondEl;
 }
 
+/** @internal */
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
@@ -52,6 +55,7 @@ export function clamp(value: number, min: number, max: number): number {
  * with their inputs. It takes an optional prefix as a parameter. If you don't
  * specify it, it generates a random id prefix. If you specify a custom prefix
  * it should begin with an letter to be HTML4 compliant.
+ * @internal
  */
 export function htmlIdGenerator(idPrefix?: string) {
   const prefix = idPrefix || `i${uuidV1()}`;
@@ -91,6 +95,7 @@ export interface MergeOptions {
   mergeOptionalPartialValues?: boolean;
 }
 
+/** @internal */
 export function getPartialValue<T>(base: T, partial?: RecursivePartial<T>, partials: RecursivePartial<T>[] = []): T {
   const partialWithValue = partial !== undefined ? partial : partials.find((v) => v !== undefined);
   return partialWithValue !== undefined ? (partialWithValue as T) : base;
@@ -100,6 +105,7 @@ export function getPartialValue<T>(base: T, partial?: RecursivePartial<T>, parti
  * Returns all top-level keys from one or more objects
  * @param object - first object to get keys
  * @param objects
+ * @internal
  */
 export function getAllKeys(object: any, objects: any[] = []): string[] {
   return objects.reduce((keys: any[], obj) => {
@@ -111,6 +117,7 @@ export function getAllKeys(object: any, objects: any[] = []): string[] {
   }, Object.keys(object));
 }
 
+/** @internal */
 export function hasPartialObjectToMerge<T>(
   base: T,
   partial?: RecursivePartial<T>,
@@ -131,6 +138,7 @@ export function hasPartialObjectToMerge<T>(
   return false;
 }
 
+/** @internal */
 export function shallowClone(value: any) {
   if (Array.isArray(value)) {
     return [...value];
@@ -187,6 +195,7 @@ export function mergePartial<T>(
   return getPartialValue<T>(baseClone, partial, additionalPartials);
 }
 
+/** @internal */
 export function isNumberArray(value: unknown): value is number[] {
   return Array.isArray(value) && value.every((element) => typeof element === 'number');
 }

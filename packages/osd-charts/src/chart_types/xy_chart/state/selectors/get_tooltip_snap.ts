@@ -22,6 +22,7 @@ import { SettingsSpec, isTooltipProps } from '../../../../specs/settings';
 import { DEFAULT_TOOLTIP_SNAP } from '../../../../specs/settings';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
+/** @internal */
 export const getTooltipSnapSelector = createCachedSelector(
   [getSettingsSpecSelector],
   getTooltipSnap,

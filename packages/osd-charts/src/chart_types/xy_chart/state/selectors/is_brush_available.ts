@@ -25,6 +25,7 @@ import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 /**
  * The brush is available only for Ordinal xScales charts and
  * if we have configured an onBrushEnd listener
+ * @internal
  */
 export const isBrushAvailableSelector = createCachedSelector(
   [getSettingsSpecSelector, getComputedScalesSelector],

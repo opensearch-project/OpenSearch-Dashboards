@@ -26,6 +26,7 @@ import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
 const getDeselectedSeriesSelector = (state: GlobalChartState) => state.interactions.deselectedDataSeries;
 
+/** @internal */
 export const computeSeriesDomainsSelector = createCachedSelector(
   [getSeriesSpecsSelector, mergeYCustomDomainsByGroupIdSelector, getDeselectedSeriesSelector, getSettingsSpecSelector],
   (seriesSpecs, customYDomainsByGroupId, deselectedDataSeries, settingsSpec): SeriesDomainsAndData => {

@@ -18,6 +18,7 @@
 
 import { GlobalChartState } from '../chart_state';
 
+/** @internal */
 export const getInternalIsTooltipVisibleSelector = (state: GlobalChartState): boolean => {
   if (state.internalChartState) {
     return state.internalChartState.isTooltipVisible(state);

@@ -24,6 +24,7 @@ import { meanAngle } from '../geometry';
 import { TextMeasure } from '../types/types';
 import { ValueFormatter } from '../../../../utils/commons';
 
+/** @internal */
 export function linkTextLayout(
   measure: TextMeasure,
   config: Config,

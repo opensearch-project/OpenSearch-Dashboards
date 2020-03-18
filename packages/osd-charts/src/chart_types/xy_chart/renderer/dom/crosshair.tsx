@@ -130,4 +130,5 @@ const mapStateToProps = (state: GlobalChartState): CrosshairProps => {
   };
 };
 
+/** @internal */
 export const Crosshair = connect(mapStateToProps)(CrosshairComponent);

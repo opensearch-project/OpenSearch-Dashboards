@@ -28,6 +28,7 @@ import {
 import { fitFunctionData } from './data';
 import { FullDataSeriesDatum, WithIndex } from '../../chart_types/xy_chart/utils/fit_function';
 
+/** @internal */
 export class MockDataSeries {
   private static readonly base: DataSeries = {
     specId: 'spec1',
@@ -64,6 +65,7 @@ export class MockDataSeries {
   }
 }
 
+/** @internal */
 export class MockRawDataSeries {
   private static readonly base: RawDataSeries = {
     specId: 'spec1',
@@ -101,6 +103,7 @@ export class MockRawDataSeries {
   }
 }
 
+/** @internal */
 export class MockDataSeriesDatum {
   private static readonly base: DataSeriesDatum = {
     x: 1,
@@ -163,6 +166,7 @@ export class MockDataSeriesDatum {
   }
 }
 
+/** @internal */
 export class MockRawDataSeriesDatum {
   private static readonly base: RawDataSeriesDatum = {
     x: 1,

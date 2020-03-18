@@ -34,6 +34,7 @@ interface GridProps {
   chartDimensions: Dimensions;
 }
 
+/** @internal */
 export function renderGrids(ctx: CanvasRenderingContext2D, props: GridProps) {
   const { axesGridLinesPositions, axesSpecs, chartDimensions, chartTheme } = props;
   withContext(ctx, (ctx) => {

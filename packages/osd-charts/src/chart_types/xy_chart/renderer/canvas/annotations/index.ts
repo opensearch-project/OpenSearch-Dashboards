@@ -30,6 +30,8 @@ interface AnnotationProps {
   annotationDimensions: Map<AnnotationId, AnnotationDimensions>;
   annotationSpecs: AnnotationSpec[];
 }
+
+/** @internal */
 export function renderAnnotations(
   ctx: CanvasRenderingContext2D,
   props: AnnotationProps,

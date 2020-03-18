@@ -26,6 +26,7 @@ import { Stroke } from '../../../../../geoms/types';
  * @param baseColor the assigned color of the line for this series
  * @param themeLineStyle the theme style for the line series
  * @param geometryStateStyle the highlight geometry style
+ * @internal
  */
 export function buildLineStyles(
   baseColor: string,

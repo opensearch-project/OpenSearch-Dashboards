@@ -54,6 +54,7 @@ const EMPTY_VALUES = Object.freeze({
   highlightedGeometries: [],
 });
 
+/** @internal */
 export interface TooltipAndHighlightedGeoms {
   tooltip: TooltipInfo;
   highlightedGeometries: IndexedGeometry[];
@@ -61,6 +62,7 @@ export interface TooltipAndHighlightedGeoms {
 
 const getExternalPointerEventStateSelector = (state: GlobalChartState) => state.externalEvents.pointer;
 
+/** @internal */
 export const getTooltipInfoAndGeometriesSelector = createCachedSelector(
   [
     getSeriesSpecsSelector,
@@ -182,6 +184,7 @@ function getTooltipAndHighlightFromXValue(
   };
 }
 
+/** @internal */
 export const getTooltipInfoSelector = createCachedSelector(
   [getTooltipInfoAndGeometriesSelector],
   ({ tooltip }): TooltipInfo => {
@@ -189,6 +192,7 @@ export const getTooltipInfoSelector = createCachedSelector(
   },
 )(getChartIdSelector);
 
+/** @internal */
 export const getHighlightedGeomsSelector = createCachedSelector(
   [getTooltipInfoAndGeometriesSelector],
   (values): IndexedGeometry[] => {

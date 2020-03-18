@@ -156,4 +156,5 @@ const mapStateToProps = (state: GlobalChartState): TooltipStateProps => {
   };
 };
 
+/** @internal */
 export const Tooltip = connect(mapStateToProps)(TooltipComponent);

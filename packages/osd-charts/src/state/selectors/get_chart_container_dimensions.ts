@@ -26,6 +26,7 @@ import { getChartIdSelector } from './get_chart_id';
 
 const getParentDimension = (state: GlobalChartState) => state.parentDimensions;
 
+/** @internal */
 export const getChartContainerDimensionsSelector = createCachedSelector(
   [getSettingsSpecSelector, getLegendSizeSelector, getParentDimension],
   (settings, legendSize, parentDimensions): Dimensions => {

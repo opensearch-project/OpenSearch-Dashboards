@@ -19,8 +19,13 @@
 import { SeriesKey } from '../../chart_types/xy_chart/utils/series';
 import { Color } from '../../utils/commons';
 
+/** @internal */
 export const CLEAR_TEMPORARY_COLORS = 'CLEAR_TEMPORARY_COLORS';
+
+/** @internal */
 export const SET_TEMPORARY_COLOR = 'SET_TEMPORARY_COLOR';
+
+/** @internal */
 export const SET_PERSISTED_COLOR = 'SET_PERSISTED_COLOR';
 
 interface ClearTemporaryColors {
@@ -39,16 +44,20 @@ interface SetPersistedColor {
   color: Color;
 }
 
+/** @internal */
 export function clearTemporaryColors(): ClearTemporaryColors {
   return { type: CLEAR_TEMPORARY_COLORS };
 }
 
+/** @internal */
 export function setTemporaryColor(key: SeriesKey, color: Color): SetTemporaryColor {
   return { type: SET_TEMPORARY_COLOR, key, color };
 }
 
+/** @internal */
 export function setPersistedColor(key: SeriesKey, color: Color): SetPersistedColor {
   return { type: SET_PERSISTED_COLOR, key, color };
 }
 
+/** @internal */
 export type ColorsActions = ClearTemporaryColors | SetTemporaryColor | SetPersistedColor;

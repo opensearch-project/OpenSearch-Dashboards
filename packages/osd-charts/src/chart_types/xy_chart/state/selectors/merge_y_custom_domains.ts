@@ -25,6 +25,7 @@ import { getSettingsSpecSelector } from '../../../../state/selectors/get_setting
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { GroupId } from '../../../../utils/ids';
 
+/** @internal */
 export const mergeYCustomDomainsByGroupIdSelector = createCachedSelector(
   [getAxisSpecsSelector, getSettingsSpecSelector],
   (axisSpecs, settingsSpec): Map<GroupId, DomainRange> => {
@@ -32,6 +33,7 @@ export const mergeYCustomDomainsByGroupIdSelector = createCachedSelector(
   },
 )(getChartIdSelector);
 
+/** @internal */
 export function mergeYCustomDomainsByGroupId(
   axesSpecs: AxisSpec[],
   chartRotation: Rotation,

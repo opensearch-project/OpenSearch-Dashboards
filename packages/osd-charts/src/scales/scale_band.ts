@@ -19,7 +19,10 @@
 import { scaleBand, scaleQuantize, ScaleQuantize } from 'd3-scale';
 import { clamp } from '../utils/commons';
 import { ScaleType, Scale } from '.';
-
+/**
+ * Categorical scale
+ * @internal
+ */
 export class ScaleBand implements Scale {
   readonly bandwidth: number;
   readonly bandwidthPadding: number;

@@ -17,7 +17,7 @@
  * under the License. */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 import { SpecsParser } from './specs_parser';

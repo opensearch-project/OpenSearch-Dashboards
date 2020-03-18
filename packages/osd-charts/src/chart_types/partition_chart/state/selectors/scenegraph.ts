@@ -39,10 +39,12 @@ function rawTextGetter(layers: Layer[]): RawTextGetter {
   };
 }
 
+/** @internal */
 export function valueGetterFunction(valueGetter: ValueGetter) {
   return typeof valueGetter === 'function' ? valueGetter : VALUE_GETTERS[valueGetter];
 }
 
+/** @internal */
 export function render(partitionSpec: PartitionSpec, parentDimensions: Dimensions): ShapeViewModel {
   const { width, height } = parentDimensions;
   const { layers, data: facts, config: specConfig } = partitionSpec;

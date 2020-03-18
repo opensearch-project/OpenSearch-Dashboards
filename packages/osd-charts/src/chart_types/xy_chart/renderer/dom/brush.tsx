@@ -163,4 +163,5 @@ const mapStateToProps = (state: GlobalChartState): Props => {
   };
 };
 
+/** @internal */
 export const BrushTool = connect(mapStateToProps)(BrushToolComponent);

@@ -31,6 +31,8 @@ type InjectedProps = LineAnnotationSpec &
   Readonly<{
     children?: React.ReactNode;
   }>;
+
+/** @internal */
 export class LineAnnotationSpecComponent extends Component<LineAnnotationSpec> {
   static defaultProps: Partial<LineAnnotationSpec> = {
     chartType: ChartTypes.XYAxis,

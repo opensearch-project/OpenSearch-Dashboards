@@ -42,9 +42,13 @@ import { LineAnnotationStyle } from '../../../utils/themes/theme';
 import { Point } from '../../../utils/point';
 import { isWithinRectBounds } from './rect_annotation_tooltip';
 
+/** @internal */
 export type AnnotationLinePosition = [number, number, number, number];
 
-/** Start and end points of a line annotation  */
+/**
+ * Start and end points of a line annotation
+ * @internal
+ */
 export interface AnnotationLinePathPoints {
   /** x1,y1 the start point anchored to the linked axis */
   start: {
@@ -58,6 +62,7 @@ export interface AnnotationLinePathPoints {
   };
 }
 
+/** @internal */
 export interface AnnotationLineProps {
   /** the position of the start point relative to the Chart */
   anchor: {
@@ -73,6 +78,7 @@ export interface AnnotationLineProps {
   marker?: AnnotationMarker;
 }
 
+/** @internal */
 export const DEFAULT_LINE_OVERFLOW = 0;
 
 function computeYDomainLineAnnotationDimensions(
@@ -317,6 +323,7 @@ function computeXDomainLineAnnotationDimensions(
   return lineProps;
 }
 
+/** @internal */
 export function computeLineAnnotationDimensions(
   annotationSpec: LineAnnotationSpec,
   chartDimensions: Dimensions,
@@ -370,6 +377,7 @@ export function computeLineAnnotationDimensions(
   );
 }
 
+/** @internal */
 export function getAnnotationLineTooltipXOffset(chartRotation: Rotation, axisPosition: Position): number {
   let xOffset = 0;
   const isChartHorizontalRotation = isHorizontalRotation(chartRotation);
@@ -387,6 +395,7 @@ export function getAnnotationLineTooltipXOffset(chartRotation: Rotation, axisPos
   return xOffset;
 }
 
+/** @internal */
 export function getAnnotationLineTooltipYOffset(chartRotation: Rotation, axisPosition: Position): number {
   let yOffset = 0;
   const isChartHorizontalRotation = isHorizontalRotation(chartRotation);
@@ -404,6 +413,7 @@ export function getAnnotationLineTooltipYOffset(chartRotation: Rotation, axisPos
   return yOffset;
 }
 
+/** @internal */
 export function isVerticalAnnotationLine(isXDomainAnnotation: boolean, isHorizontalChartRotation: boolean): boolean {
   if (isXDomainAnnotation) {
     return isHorizontalChartRotation;
@@ -424,6 +434,7 @@ function isWithinLineMarkerBounds(cursorPosition: Point, marker: AnnotationMarke
   return isWithinRectBounds(cursorPosition, markerRect);
 }
 
+/** @internal */
 export function computeLineAnnotationTooltipState(
   cursorPosition: Point,
   annotationLines: AnnotationLineProps[],

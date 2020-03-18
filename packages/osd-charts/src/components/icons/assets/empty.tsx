@@ -17,8 +17,9 @@
  * under the License. */
 
 import React from 'react';
-import { Props } from '../icon';
+import { IconComponentProps } from '../icon';
 
-export function EmptyIcon(extraProps: Props) {
+/** @internal */
+export function EmptyIcon(extraProps: IconComponentProps) {
   return <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" {...extraProps} />;
 }

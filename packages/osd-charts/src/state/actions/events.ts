@@ -18,6 +18,7 @@
 
 import { PointerEvent } from '../../specs/settings';
 
+/** @internal */
 export const EXTERNAL_POINTER_EVENT = 'EXTERNAL_POINTER_EVENT';
 
 interface ExternalPointerEvent {
@@ -25,8 +26,10 @@ interface ExternalPointerEvent {
   event: PointerEvent;
 }
 
+/** @internal */
 export function onExternalPointerEvent(event: PointerEvent): ExternalPointerEvent {
   return { type: EXTERNAL_POINTER_EVENT, event };
 }
 
+/** @internal */
 export type EventsActions = ExternalPointerEvent;

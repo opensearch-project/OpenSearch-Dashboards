@@ -20,6 +20,7 @@ import { getAnnotationTooltipStateSelector } from './get_annotation_tooltip_stat
 import createCachedSelector from 're-reselect';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
+/** @internal */
 export const isAnnotationTooltipVisibleSelector = createCachedSelector(
   [getAnnotationTooltipStateSelector],
   (annotationTooltipState): boolean => {

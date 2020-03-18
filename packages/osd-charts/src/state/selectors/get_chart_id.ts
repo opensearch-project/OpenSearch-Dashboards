@@ -18,4 +18,5 @@
 
 import { GlobalChartState } from '../chart_state';
 
+/** @internal */
 export const getChartIdSelector = (state: GlobalChartState) => state.chartId;

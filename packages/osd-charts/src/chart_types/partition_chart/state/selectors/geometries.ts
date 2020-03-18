@@ -29,6 +29,7 @@ const getSpecs = (state: GlobalChartState) => state.specs;
 
 const getParentDimensions = (state: GlobalChartState) => state.parentDimensions;
 
+/** @internal */
 export const partitionGeometries = createCachedSelector(
   [getSpecs, getParentDimensions],
   (specs, parentDimensions): ShapeViewModel => {

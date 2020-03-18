@@ -21,6 +21,7 @@ import { getSettingsSpecSelector } from './get_settings_specs';
 import { SettingsSpec, TooltipValueFormatter, isTooltipProps } from '../../specs/settings';
 import { getChartIdSelector } from './get_chart_id';
 
+/** @internal */
 export const getTooltipHeaderFormatterSelector = createCachedSelector(
   [getSettingsSpecSelector],
   getTooltipHeaderFormatter,

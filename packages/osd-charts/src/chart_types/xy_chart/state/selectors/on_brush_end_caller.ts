@@ -57,6 +57,7 @@ function hasDragged(prevProps: Props | null, nextProps: Props | null) {
  * Will call the onBrushEnd listener every time the following preconditions are met:
  * - the onBrushEnd listener is available
  * - we dragged the mouse pointer
+ * @internal
  */
 export function createOnBrushEndCaller(): (state: GlobalChartState) => void {
   let prevProps: Props | null = null;

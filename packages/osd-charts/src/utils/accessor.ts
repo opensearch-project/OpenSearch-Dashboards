@@ -35,6 +35,7 @@ export type AccessorFormat = string | ((value: string) => string);
 /**
  * Return an accessor function using the accessor passed as argument
  * @param accessor the spec accessor
+ * @internal
  */
 export function getAccessorFn(accessor: Accessor): AccessorFn {
   return (datum: Datum) => {
@@ -44,6 +45,7 @@ export function getAccessorFn(accessor: Accessor): AccessorFn {
 
 /**
  * Return the accessor label given as `AccessorFormat`
+ * @internal
  */
 export function getAccessorFormatLabel(accessor: AccessorFormat, label: string): string {
   if (typeof accessor === 'string') {
@@ -58,6 +60,7 @@ export function getAccessorFormatLabel(accessor: AccessorFormat, label: string):
  *
  * @param  {Datum} datum
  * @param  {AccessorString|AccessorFn} accessor
+ * @internal
  */
 export function getAccessorValue(datum: Datum, accessor: Accessor | AccessorFn) {
   if (typeof accessor === 'function') {

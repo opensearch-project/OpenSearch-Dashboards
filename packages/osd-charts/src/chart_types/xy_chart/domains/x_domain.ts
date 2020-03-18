@@ -37,6 +37,7 @@ export type XDomain = BaseDomain & {
  * @param xValues a set of unique x values from all specs
  * @param customXDomain if specified, a custom xDomain
  * @returns a merged XDomain between all series.
+ * @internal
  */
 export function mergeXDomain(
   specs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>[],
@@ -124,6 +125,7 @@ export function mergeXDomain(
 /**
  * Find the minimum interval between xValues.
  * Default to 0 if an empty array, 1 if one item array
+ * @internal
  */
 export function findMinInterval(xValues: number[]): number {
   const valuesLength = xValues.length;
@@ -152,6 +154,7 @@ export function findMinInterval(xValues: number[]): number {
  * If there are only `time` scales, we coerch the timeZone to `utc` only if we have multiple
  * different timezones.
  * @returns the coerched scale type, the timezone and a parameter that describe if its a bandScale or not
+ * @internal
  */
 export function convertXScaleTypes(
   specs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType' | 'timeZone'>[],

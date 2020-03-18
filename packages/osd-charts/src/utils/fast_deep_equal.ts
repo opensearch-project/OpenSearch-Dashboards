@@ -26,6 +26,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE. */
 
+/** @internal */
 export function deepEqual(a: any, b: any): boolean {
   if (a === b) return true;
 

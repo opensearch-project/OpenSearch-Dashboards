@@ -45,7 +45,10 @@ import { Rotation, Position, Color } from '../../../utils/commons';
 
 export type AnnotationTooltipFormatter = (details?: string) => JSX.Element | null;
 
+/** @internal */
 export type AnnotationTooltipState = AnnotationTooltipVisibleState | AnnotationTooltipHiddenState;
+
+/** @internal */
 export interface AnnotationTooltipVisibleState {
   isVisible: true;
   annotationType: AnnotationType;
@@ -54,6 +57,8 @@ export interface AnnotationTooltipVisibleState {
   anchor: { position?: Position; top: number; left: number };
   renderTooltip?: AnnotationTooltipFormatter;
 }
+
+/** @internal */
 export interface AnnotationTooltipHiddenState {
   isVisible: false;
 }
@@ -75,10 +80,13 @@ export interface AnnotationMarker {
   color: Color;
 }
 
+/** @internal */
 export type AnnotationDimensions = AnnotationLineProps[] | AnnotationRectProps[];
 
+/** @internal */
 export type Bounds = { startX: number; endX: number; startY: number; endY: number };
 
+/** @internal */
 export function scaleAndValidateDatum(dataValue: any, scale: Scale, alignWithTick: boolean): number | null {
   const isContinuous = scale.type !== ScaleType.Ordinal;
   const scaledValue = scale.scale(dataValue);
@@ -101,6 +109,7 @@ export function scaleAndValidateDatum(dataValue: any, scale: Scale, alignWithTic
   return scaledValue;
 }
 
+/** @internal */
 export function getAnnotationAxis(
   axesSpecs: AxisSpec[],
   groupId: GroupId,
@@ -115,6 +124,7 @@ export function getAnnotationAxis(
   return rotatedAnnotation ? rotatedAnnotation.position : null;
 }
 
+/** @internal */
 export function computeClusterOffset(totalBarsInCluster: number, barsShift: number, bandwidth: number): number {
   if (totalBarsInCluster > 1) {
     return barsShift - bandwidth / 2;
@@ -123,10 +133,12 @@ export function computeClusterOffset(totalBarsInCluster: number, barsShift: numb
   return 0;
 }
 
+/** @internal */
 export function isXDomain(domainType: AnnotationDomainType): boolean {
   return domainType === AnnotationDomainTypes.XDomain;
 }
 
+/** @internal */
 export function getRotatedCursor(
   /** the cursor position relative to the projection area */
   cursorPosition: Point,
@@ -147,6 +159,7 @@ export function getRotatedCursor(
   }
 }
 
+/** @internal */
 export function computeAnnotationDimensions(
   annotations: AnnotationSpec[],
   chartDimensions: Dimensions,
@@ -209,6 +222,7 @@ export function computeAnnotationDimensions(
   return annotationDimensions;
 }
 
+/** @internal */
 export function computeAnnotationTooltipState(
   cursorPosition: Point,
   annotationDimensions: Map<AnnotationId, AnnotationDimensions>,

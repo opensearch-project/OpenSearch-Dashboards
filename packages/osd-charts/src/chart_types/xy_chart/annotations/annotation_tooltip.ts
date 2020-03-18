@@ -18,6 +18,7 @@
 
 import { Dimensions } from '../../../utils/dimensions';
 
+/** @internal */
 export function getFinalAnnotationTooltipPosition(
   /** the dimensions of the chart parent container */
   container: Dimensions,

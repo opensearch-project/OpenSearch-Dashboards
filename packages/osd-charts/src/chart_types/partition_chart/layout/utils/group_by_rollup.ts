@@ -77,6 +77,7 @@ export function sortIndexAccessor(n: ArrayEntry) {
 const ascending: Sorter = (a, b) => a - b;
 const descending: Sorter = (a, b) => b - a;
 
+/** @internal */
 export function groupByRollup(
   keyAccessors: Array<((a: Datum) => Key) | ((a: Datum, i: number) => Key)>,
   valueAccessor: Function,
@@ -132,6 +133,7 @@ function getRootArrayNode(): ArrayNode {
   return result;
 }
 
+/** @internal */
 export function mapsToArrays(root: HierarchyOfMaps, sorter: NodeSorter): HierarchyOfArrays {
   const groupByMap = (node: HierarchyOfMaps, parent: ArrayNode) =>
     Array.from(
@@ -163,14 +165,17 @@ export function mapsToArrays(root: HierarchyOfMaps, sorter: NodeSorter): Hierarc
   return groupByMap(root, getRootArrayNode());
 }
 
+/** @internal */
 export function mapEntryValue(entry: ArrayEntry) {
   return entryValue(entry)[AGGREGATE_KEY];
 }
 
+/** @internal */
 export function aggregateComparator(accessor: Function, sorter: Sorter): NodeSorter {
   return (a, b) => sorter(accessor(a), accessor(b));
 }
 
+/** @internal */
 export const childOrders = {
   ascending,
   descending,
@@ -181,6 +186,7 @@ type MeanReduction = { sum: number; count: number };
 type MedianReduction = Array<number>;
 */
 
+/** @internal */
 export const aggregators = {
   one: {
     identity: () => 0,

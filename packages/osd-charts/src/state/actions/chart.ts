@@ -16,14 +16,17 @@
  * specific language governing permissions and limitations
  * under the License. */
 
+/** @internal */
 export const CHART_RENDERED = 'CHART_RENDERED';
 
 interface ChartRenderedAction {
   type: typeof CHART_RENDERED;
 }
 
+/** @internal */
 export function onChartRendered(): ChartRenderedAction {
   return { type: CHART_RENDERED };
 }
 
+/** @internal */
 export type ChartActions = ChartRenderedAction;

@@ -23,6 +23,7 @@ import { renderText } from '../primitives/text';
 import { Position } from '../../../../../utils/commons';
 import { Font, FontStyle } from '../../../../partition_chart/layout/types/types';
 
+/** @internal */
 export function renderTitle(ctx: CanvasRenderingContext2D, props: AxisProps) {
   const {
     axisSpec: { title, position },

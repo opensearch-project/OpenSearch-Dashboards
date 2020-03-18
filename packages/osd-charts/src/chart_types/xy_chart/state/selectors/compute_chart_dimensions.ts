@@ -25,6 +25,7 @@ import { Dimensions } from '../../../../utils/dimensions';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
+/** @internal */
 export const computeChartDimensionsSelector = createCachedSelector(
   [
     getChartContainerDimensionsSelector,

@@ -19,6 +19,7 @@
 import { ArrayEntry, childrenAccessor, HierarchyOfArrays } from './group_by_rollup';
 import { Origin, Part } from '../types/types';
 
+/** @internal */
 export function sunburst(
   nodes: HierarchyOfArrays,
   areaAccessor: (e: ArrayEntry) => number,

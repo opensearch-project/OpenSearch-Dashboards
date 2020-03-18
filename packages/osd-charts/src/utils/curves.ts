@@ -45,6 +45,7 @@ export const CurveType = Object.freeze({
 
 export type CurveType = $Values<typeof CurveType>;
 
+/** @internal */
 export function getCurveFactory(curveType: CurveType = CurveType.LINEAR) {
   switch (curveType) {
     case CurveType.CURVE_CARDINAL:

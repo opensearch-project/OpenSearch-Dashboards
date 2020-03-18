@@ -36,11 +36,14 @@ const typeToIconMap = {
   list: ListIcon,
   questionInCircle: QuestionInCircle,
 };
+
+/** @internal */
 export type IconColor = string;
 
+/** @internal */
 export type IconType = keyof typeof typeToIconMap;
 
-export interface IconProps {
+interface IconProps {
   className?: string;
   'aria-label'?: string;
   'data-test-subj'?: string;
@@ -48,10 +51,12 @@ export interface IconProps {
   color?: IconColor;
 }
 
-export type Props = Omit<SVGAttributes<SVGElement>, 'color' | 'type'> & IconProps;
+/** @internal */
+export type IconComponentProps = Omit<SVGAttributes<SVGElement>, 'color' | 'type'> & IconProps;
 
-export class Icon extends React.Component<Props> {
-  shouldComponentUpdate(nextProps: Props) {
+/** @internal */
+export class Icon extends React.Component<IconComponentProps> {
+  shouldComponentUpdate(nextProps: IconComponentProps) {
     return !deepEqual(this.props, nextProps);
   }
 

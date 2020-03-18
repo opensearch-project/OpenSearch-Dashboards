@@ -23,6 +23,7 @@ import { RectAnnotationStyle } from '../../../../../utils/themes/theme';
 import { stringToRGB } from '../../../../partition_chart/layout/utils/d3_utils';
 import { withContext } from '../../../../../renderers/canvas';
 
+/** @internal */
 export function renderRectAnnotations(
   ctx: CanvasRenderingContext2D,
   annotations: AnnotationRectProps[],

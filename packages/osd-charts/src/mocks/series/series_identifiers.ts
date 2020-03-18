@@ -26,6 +26,7 @@ import { mergePartial } from '../../utils/commons';
 
 type SeriesCollection = Map<string, SeriesCollectionValue>;
 
+/** @internal */
 export class MockSeriesCollection {
   static empty(): SeriesCollection {
     return new Map();
@@ -38,6 +39,7 @@ export class MockSeriesCollection {
   }
 }
 
+/** @internal */
 export class MockSeriesIdentifier {
   private static readonly base: XYChartSeriesIdentifier = {
     specId: 'bars',

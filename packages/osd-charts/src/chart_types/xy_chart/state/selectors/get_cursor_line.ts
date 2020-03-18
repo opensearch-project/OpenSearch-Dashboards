@@ -24,6 +24,7 @@ import { getProjectedPointerPositionSelector } from './get_projected_pointer_pos
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { Dimensions } from '../../../../utils/dimensions';
 
+/** @internal */
 export const getCursorLinePositionSelector = createCachedSelector(
   [computeChartDimensionsSelector, getSettingsSpecSelector, getProjectedPointerPositionSelector],
   (chartDimensions, settingsSpec, projectedPointerPosition): Dimensions | undefined => {

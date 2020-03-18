@@ -29,6 +29,7 @@ import { getSettingsSpecSelector } from '../../../../state/selectors/get_setting
 import { getBarPaddingsSelector } from './get_bar_paddings';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
+/** @internal */
 export const computeAxisTicksDimensionsSelector = createCachedSelector(
   [
     getBarPaddingsSelector,

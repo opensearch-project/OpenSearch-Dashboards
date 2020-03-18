@@ -19,6 +19,7 @@
 import { PointerEvent, isPointerOverEvent, PointerOverEvent } from '../specs';
 import { Scale } from '../scales';
 
+/** @internal */
 export function isValidPointerOverEvent(
   mainScale: Scale,
   event: PointerEvent | null | undefined,

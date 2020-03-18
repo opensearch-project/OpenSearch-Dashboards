@@ -112,6 +112,7 @@ function circlineValidSectors(refC: CirclinePredicate, c: CirclineArc): Circline
   return result;
 }
 
+/** @internal */
 export function conjunctiveConstraint(constraints: RingSector, c: CirclineArc): CirclineArc[] {
   // imperative, slightly optimized buildup of `valids` as it's in the hot loop:
   let valids = [c];

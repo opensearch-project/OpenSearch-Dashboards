@@ -22,6 +22,7 @@ import { AnnotationLineProps } from '../../../annotations/line_annotation_toolti
 import { LineAnnotationStyle } from '../../../../../utils/themes/theme';
 import { renderMultiLine } from '../primitives/line';
 
+/** @internal */
 export function renderLineAnnotations(
   ctx: CanvasRenderingContext2D,
   annotations: AnnotationLineProps[],

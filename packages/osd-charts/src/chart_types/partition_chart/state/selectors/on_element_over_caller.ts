@@ -56,6 +56,7 @@ function isOverElement(prevPickedShapes: Array<Array<LayerValue>> = [], nextPick
  * Will call the onElementOver listener every time the following preconditions are met:
  * - the onElementOver listener is available
  * - we have a new set of highlighted geometries on our state
+ * @internal
  */
 export function createOnElementOverCaller(): (state: GlobalChartState) => void {
   let prevPickedShapes: Array<Array<LayerValue>> = [];

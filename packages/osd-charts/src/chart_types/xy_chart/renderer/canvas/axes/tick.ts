@@ -23,6 +23,7 @@ import { TickStyle } from '../../../../../utils/themes/theme';
 import { renderLine, MIN_STROKE_WIDTH } from '../primitives/line';
 import { stringToRGB } from '../../../../partition_chart/layout/utils/d3_utils';
 
+/** @internal */
 export function renderTick(ctx: CanvasRenderingContext2D, tick: AxisTick, props: AxisProps) {
   const {
     axisSpec: { tickSize, position },

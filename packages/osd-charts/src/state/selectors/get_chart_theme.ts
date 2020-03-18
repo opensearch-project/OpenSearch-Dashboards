@@ -22,6 +22,7 @@ import { PartialTheme, Theme, mergeWithDefaultTheme } from '../../utils/themes/t
 import { LIGHT_THEME } from '../../utils/themes/light_theme';
 import { getChartIdSelector } from './get_chart_id';
 
+/** @internal */
 export const getChartThemeSelector = createCachedSelector(
   [getSettingsSpecSelector],
   (settingsSpec): Theme => {

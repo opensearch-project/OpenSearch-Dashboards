@@ -61,6 +61,7 @@ function isOverElement(prevProps: Props | null, nextProps: Props | null) {
  * Will call the onElementOver listener every time the following preconditions are met:
  * - the onElementOver listener is available
  * - we have a new set of highlighted geometries on our state
+ * @internal
  */
 export function createOnElementOverCaller(): (state: GlobalChartState) => void {
   let prevProps: Props | null = null;

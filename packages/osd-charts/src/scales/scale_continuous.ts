@@ -54,6 +54,7 @@ const SCALES = {
  * or strictly-negative; the domain must not include or cross zero value.
  * We need to limit the domain scale to the right value on all possible cases.
  * @param domain the domain to limit
+ * @internal
  */
 export function limitLogScaleDomain(domain: any[]) {
   if (domain[0] === 0) {
@@ -150,6 +151,11 @@ const defaultScaleOptions: ScaleOptions = {
   isSingleValueHistogram: false,
   integersOnly: false,
 };
+
+/**
+ * Continuous scale
+ * @internal
+ */
 export class ScaleContinuous implements Scale {
   readonly bandwidth: number;
   readonly totalBarsInCluster: number;

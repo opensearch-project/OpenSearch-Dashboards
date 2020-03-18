@@ -24,6 +24,7 @@ import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
 const getHighlightedLegendItemKey = (state: GlobalChartState) => state.interactions.highlightedLegendItemKey;
 
+/** @internal */
 export const getHighlightedSeriesSelector = createCachedSelector(
   [getHighlightedLegendItemKey, computeLegendSelector],
   (highlightedLegendItemKey, legendItems): LegendItem | undefined => {

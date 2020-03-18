@@ -30,6 +30,7 @@ function getColorOverrides({ colors }: GlobalChartState) {
   return colors;
 }
 
+/** @internal */
 export const getSeriesColorsSelector = createCachedSelector(
   [getSeriesSpecsSelector, computeSeriesDomainsSelector, getChartThemeSelector, getColorOverrides],
   (seriesSpecs, seriesDomainsAndData, chartTheme, colorOverrides): Map<SeriesKey, Color> => {

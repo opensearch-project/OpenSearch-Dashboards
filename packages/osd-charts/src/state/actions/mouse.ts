@@ -18,8 +18,13 @@
 
 import { Point } from '../../utils/point';
 
+/** @internal */
 export const ON_POINTER_MOVE = 'ON_POINTER_MOVE';
+
+/** @internal */
 export const ON_MOUSE_DOWN = 'ON_MOUSE_DOWN';
+
+/** @internal */
 export const ON_MOUSE_UP = 'ON_MOUSE_UP';
 
 interface MouseDownAction {
@@ -43,6 +48,7 @@ interface PointerMoveAction {
  * Action called on mouse button down event
  * @param position the x and y position (native event offsetX, offsetY)
  * @param time the timestamp of the event (native event timeStamp)
+ * @internal
  */
 export function onMouseDown(position: Point, time: number): MouseDownAction {
   return { type: ON_MOUSE_DOWN, position, time };
@@ -52,6 +58,7 @@ export function onMouseDown(position: Point, time: number): MouseDownAction {
  * Action called on mouse button up event
  * @param position the x and y position (native event offsetX, offsetY)
  * @param time the timestamp of the event (native event timeStamp)
+ * @internal
  */
 export function onMouseUp(position: Point, time: number): MouseUpAction {
   return { type: ON_MOUSE_UP, position, time };
@@ -61,9 +68,11 @@ export function onMouseUp(position: Point, time: number): MouseUpAction {
  * Action called with the mouse coordinates relatives to the chart container (exclude the legend)
  * @param position the x and y position (native event offsetX, offsetY)
  * @param time the timestamp of the event (native event timeStamp)
+ * @internal
  */
 export function onPointerMove(position: Point, time: number): PointerMoveAction {
   return { type: ON_POINTER_MOVE, position, time };
 }
 
+/** @internal */
 export type MouseActions = MouseDownAction | MouseUpAction | PointerMoveAction;

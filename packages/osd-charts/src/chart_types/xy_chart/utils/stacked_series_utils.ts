@@ -25,6 +25,7 @@ interface StackedValues {
   total: number;
 }
 
+/** @internal */
 export const datumXSortPredicate = (xScaleType: ScaleType) => (a: DataSeriesDatum, b: DataSeriesDatum) => {
   if (xScaleType === ScaleType.Ordinal || typeof a.x === 'string' || typeof b.x === 'string') {
     return 0;
@@ -36,6 +37,7 @@ export const datumXSortPredicate = (xScaleType: ScaleType) => (a: DataSeriesDatu
  * Map each y value from a RawDataSeries on it's specific x value into,
  * ordering the stack based on the dataseries index.
  * @param dataseries
+ * @internal
  */
 export function getYValueStackMap(
   dataseries: RawDataSeries[],
@@ -67,6 +69,7 @@ export function getYValueStackMap(
  * summing the previous value to the next one.
  * @param yValueStackMap
  * @param scaleToExtent
+ * @internal
  */
 export function computeYStackedMapValues(
   yValueStackMap: Map<any, number[]>,
@@ -111,6 +114,7 @@ export function computeYStackedMapValues(
   return stackedValues;
 }
 
+/** @internal */
 export function formatStackedDataSeriesValues(
   dataseries: RawDataSeries[],
   scaleToExtent: boolean,

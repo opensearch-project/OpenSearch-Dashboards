@@ -21,6 +21,7 @@ import { Circle, Stroke, Fill, Arc } from '../../../../../geoms/types';
 import { RGBtoString } from '../../../../partition_chart/layout/utils/d3_utils';
 import { MIN_STROKE_WIDTH } from './line';
 
+/** @internal */
 export function renderCircle(ctx: CanvasRenderingContext2D, circle: Circle, fill?: Fill, stroke?: Stroke) {
   if (!fill && !stroke) {
     return;
@@ -37,6 +38,7 @@ export function renderCircle(ctx: CanvasRenderingContext2D, circle: Circle, fill
   );
 }
 
+/** @internal */
 export function renderArc(ctx: CanvasRenderingContext2D, arc: Arc, fill?: Fill, stroke?: Stroke) {
   if (!fill && !stroke) {
     return;
