@@ -25,7 +25,14 @@ import { Spec, SpecTypes } from '../../../specs/index';
 import { Config, FillLabelConfig } from '../layout/types/config_types';
 import { ShapeTreeNode, ValueGetter } from '../layout/types/viewmodel_types';
 import { AGGREGATE_KEY } from '../layout/utils/group_by_rollup';
-import { Datum, LabelAccessor, RecursivePartial, ValueAccessor, ValueFormatter } from '../../../utils/commons';
+import {
+  Datum,
+  LabelAccessor,
+  RecursivePartial,
+  ShowAccessor,
+  ValueAccessor,
+  ValueFormatter,
+} from '../../../utils/commons';
 import { NodeColorAccessor } from '../layout/types/viewmodel_types';
 import { PrimitiveValue } from '../layout/utils/group_by_rollup';
 
@@ -33,6 +40,7 @@ export interface Layer {
   groupByRollup: IndexedAccessorFn;
   nodeLabel?: LabelAccessor;
   fillLabel?: Partial<FillLabelConfig>;
+  showAccessor?: ShowAccessor;
   shape?: { fillColor: string | NodeColorAccessor };
 }
 
@@ -48,6 +56,7 @@ const defaultProps = {
     {
       groupByRollup: (d: Datum, i: number) => i,
       nodeLabel: (d: PrimitiveValue) => String(d),
+      showAccessor: () => true,
       fillLabel: {},
     },
   ],

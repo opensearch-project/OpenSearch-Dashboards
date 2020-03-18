@@ -194,3 +194,4 @@ export function isNumberArray(value: unknown): value is number[] {
 export type ValueFormatter = (value: number) => string;
 export type ValueAccessor = (d: Datum) => number;
 export type LabelAccessor = (value: PrimitiveValue) => string;
+export type ShowAccessor = (value: PrimitiveValue) => boolean;
