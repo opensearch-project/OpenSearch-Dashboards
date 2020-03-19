@@ -19,6 +19,8 @@
 
 You should check out our [living style guide][docs], which contains many examples on how charts look and feel, and how to use them in your products.
 
+You could also check and fork the [codesandbox](https://codesandbox.io/s/elasticcharts-playground-puj4y) example here to play with the code directly
+
 ## Installation
 
 To install the Elastic Charts into an existing project, use the `yarn` CLI (`npm` is not supported).
