@@ -24,6 +24,7 @@ export type Datum = any; // unknown;
 export type Rotation = 0 | 90 | -90 | 180;
 export type Rendering = 'canvas' | 'svg';
 export type Color = string;
+export type StrokeStyle = Color; // now narrower than string | CanvasGradient | CanvasPattern
 
 export const Position = Object.freeze({
   Top: 'top' as 'top',

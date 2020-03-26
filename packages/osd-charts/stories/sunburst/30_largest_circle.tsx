@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { Chart, Datum, Partition } from '../../src';
+import { Chart, Datum, Partition, PartitionLayout } from '../../src';
 import { mocks } from '../../src/mocks/hierarchical/index';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
 import React from 'react';
-import { indexInterpolatedFillColor, interpolatorTurbo, productLookup } from '../utils/utils';
+import { indexInterpolatedFillColor, interpolatorCET2s, productLookup } from '../utils/utils';
 
 export const example = () => (
   <Chart className="story-chart">
@@ -33,22 +33,19 @@ export const example = () => (
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: Datum) => productLookup[d].name,
-          fillLabel: {
-            textInvertible: true,
-            fontWeight: 100,
-            fontStyle: 'italic',
-            valueFont: {
-              fontFamily: 'Menlo',
-              fontStyle: 'normal',
-              fontWeight: 900,
-            },
-          },
+          fillLabel: { textInvertible: true },
           shape: {
-            fillColor: indexInterpolatedFillColor(interpolatorTurbo),
+            fillColor: indexInterpolatedFillColor(interpolatorCET2s),
           },
         },
       ]}
-      config={{ outerSizeRatio: 0.9, linkLabel: { fontStyle: 'italic', valueFont: { fontWeight: 900 } } }}
+      config={{
+        partitionLayout: PartitionLayout.sunburst,
+        linkLabel: { maximumSection: Infinity, maxCount: 0 },
+        sectorLineWidth: 10,
+        sectorLineStroke: 'lightgrey',
+        outerSizeRatio: 1,
+      }}
     />
   </Chart>
 );

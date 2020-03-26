@@ -30,7 +30,10 @@ export type LinkLabelVM = {
   text: string;
   valueText: string;
   width: Distance;
+  valueWidth: Distance;
   verticalOffset: Distance;
+  labelFontSpec: Font;
+  valueFontSpec: Font;
 };
 
 export interface RowBox extends Font {
@@ -65,6 +68,7 @@ export interface RowSet {
 
 export interface QuadViewModel extends ShapeTreeNode {
   strokeWidth: number;
+  strokeStyle: string;
   fillColor: string;
 }
 

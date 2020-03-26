@@ -29,7 +29,7 @@ import {
 import { TAU } from '../../layout/utils/math';
 import { PartitionLayout } from '../../layout/types/config_types';
 import { cssFontShorthand } from '../../layout/utils/measure';
-import { withContext, renderLayers, clearCanvas } from '../../../../renderers/canvas';
+import { clearCanvas, renderLayers, withContext } from '../../../../renderers/canvas';
 
 // the burnout avoidance in the center of the pie
 const LINE_WIDTH_MULT = 10; // border can be a maximum 1/LINE_WIDTH_MULT - th of the sector angle, otherwise the border would dominate
@@ -62,7 +62,7 @@ function renderRowSets(ctx: CanvasRenderingContext2D, rowSets: RowSet[]) {
 
 function renderTaperedBorder(
   ctx: CanvasRenderingContext2D,
-  { strokeWidth, fillColor, x0, x1, y0px, y1px }: QuadViewModel,
+  { strokeWidth, strokeStyle, fillColor, x0, x1, y0px, y1px }: QuadViewModel,
 ) {
   const X0 = x0 - TAU / 4;
   const X1 = x1 - TAU / 4;
@@ -89,18 +89,19 @@ function renderTaperedBorder(
       ctx.arc(0, 0, y0px, X1, X0, true);
       ctx.stroke();
 
-      ctx.fillStyle = 'white';
+      ctx.fillStyle = strokeStyle;
 
       // each side (radial 'line') is modeled as a pentagon (some lines can be short arcs though)
       ctx.beginPath();
       const yThreshold = Math.max(TAPER_OFF_LIMIT, (LINE_WIDTH_MULT * strokeWidth) / (X1 - X0));
       const beta = strokeWidth / yThreshold; // angle where strokeWidth equals the lineWidthMult limit at a radius of yThreshold
       ctx.arc(0, 0, y0px, X0, X0 + beta * (yThreshold / y0px));
-      ctx.arc(0, 0, yThreshold, X0 + beta, X0 + beta);
+      ctx.arc(0, 0, Math.min(yThreshold, y1px), X0 + beta, X0 + beta);
       ctx.arc(0, 0, y1px, X0 + beta * (yThreshold / y1px), X0, true);
       ctx.arc(0, 0, y0px, X0, X0);
       ctx.fill();
     } else {
+      ctx.strokeStyle = strokeStyle;
       ctx.stroke();
     }
   }
@@ -164,28 +165,41 @@ function renderLinkLabels(
   ctx: CanvasRenderingContext2D,
   linkLabelFontSize: Pixels,
   linkLabelLineWidth: Pixels,
-  fontFamily: string,
   linkLabelTextColor: string,
   viewModels: LinkLabelVM[],
 ) {
+  const labelValueGap = linkLabelFontSize / 2; // one en space
   withContext(ctx, (ctx) => {
     ctx.lineWidth = linkLabelLineWidth;
     ctx.strokeStyle = linkLabelTextColor;
     ctx.fillStyle = linkLabelTextColor;
-    ctx.font = `${400} ${linkLabelFontSize}px ${fontFamily}`;
-    viewModels.forEach(({ link, translate, textAlign, text, valueText }: LinkLabelVM) => {
-      ctx.beginPath();
-      ctx.moveTo(...link[0]);
-      link.slice(1).forEach((point) => ctx.lineTo(...point));
-      ctx.stroke();
-      withContext(ctx, (ctx) => {
-        ctx.translate(...translate);
-        ctx.scale(1, -1); // flip for text rendering not to be upside down
-        ctx.textAlign = textAlign;
-        // only use a colon if both text and valueText are non-zero length strings
-        ctx.fillText(text + (text && valueText ? ': ' : '') + valueText, 0, 0);
-      });
-    });
+    viewModels.forEach(
+      ({
+        link,
+        translate,
+        textAlign,
+        text,
+        valueText,
+        width,
+        labelFontSpec,
+        valueFontSpec,
+        valueWidth,
+      }: LinkLabelVM) => {
+        ctx.beginPath();
+        ctx.moveTo(...link[0]);
+        link.slice(1).forEach((point) => ctx.lineTo(...point));
+        ctx.stroke();
+        withContext(ctx, (ctx) => {
+          ctx.translate(...translate);
+          ctx.scale(1, -1); // flip for text rendering not to be upside down
+          ctx.textAlign = textAlign;
+          ctx.font = `${labelFontSpec.fontStyle} ${labelFontSpec.fontVariant} ${labelFontSpec.fontWeight} ${linkLabelFontSize}px ${labelFontSpec.fontFamily}`;
+          ctx.fillText(text, textAlign === 'right' ? -valueWidth - labelValueGap : 0, 0);
+          ctx.font = `${valueFontSpec.fontStyle} ${valueFontSpec.fontVariant} ${valueFontSpec.fontWeight} ${linkLabelFontSize}px ${valueFontSpec.fontFamily}`;
+          ctx.fillText(valueText, textAlign === 'left' ? width + labelValueGap : 0, 0);
+        });
+      },
+    );
   });
 }
 
@@ -195,7 +209,7 @@ export function renderPartitionCanvas2d(
   dpr: number,
   { config, quadViewModel, rowSets, outsideLinksViewModel, linkLabelViewModels, diskCenter }: ShapeViewModel,
 ) {
-  const { sectorLineWidth, linkLabel, fontFamily /*, backgroundColor*/ } = config;
+  const { sectorLineWidth, sectorLineStroke, linkLabel /*, backgroundColor*/ } = config;
 
   const linkLabelTextColor = addOpacity(linkLabel.textColor, linkLabel.textOpacity);
 
@@ -219,7 +233,7 @@ export function renderPartitionCanvas2d(
     ctx.scale(1, -1);
 
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = 'white'; // todo make it configurable just like sectorLineWidth
+    ctx.strokeStyle = sectorLineStroke;
     ctx.lineWidth = sectorLineWidth;
 
     // painter's algorithm, like that of SVG: the sequence determines what overdraws what; first element of the array is drawn first
@@ -245,14 +259,7 @@ export function renderPartitionCanvas2d(
 
       // all the text and link lines for single-row outside texts
       (ctx: CanvasRenderingContext2D) =>
-        renderLinkLabels(
-          ctx,
-          linkLabel.fontSize,
-          linkLabel.lineWidth,
-          fontFamily,
-          linkLabelTextColor,
-          linkLabelViewModels,
-        ),
+        renderLinkLabels(ctx, linkLabel.fontSize, linkLabel.lineWidth, linkLabelTextColor, linkLabelViewModels),
     ]);
   });
 }

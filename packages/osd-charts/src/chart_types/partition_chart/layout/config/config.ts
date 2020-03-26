@@ -60,6 +60,25 @@ export function percentFormatter(d: number): string {
   return `${Math.round(d)}%`;
 }
 
+const fontSettings = {
+  fontFamily: {
+    dflt: 'Sans-Serif',
+    type: 'string',
+  },
+  fontSize: { dflt: 12, min: 4, max: 32, type: 'number' },
+  fontStyle: {
+    dflt: 'normal',
+    type: 'string',
+    values: FONT_STYLES,
+  },
+  fontVariant: {
+    dflt: 'normal',
+    type: 'string',
+    values: FONT_VARIANTS,
+  },
+  fontWeight: { dflt: 400, min: 100, max: 900, type: 'number' },
+};
+
 const valueFont = {
   type: 'group',
   values: {
@@ -70,17 +89,9 @@ const valueFont = {
       type: 'string',
     },
    */
-    fontWeight: { dflt: 400, min: 100, max: 900, type: 'number' },
-    fontStyle: {
-      dflt: 'normal',
-      type: 'string',
-      values: FONT_STYLES,
-    },
-    fontVariant: {
-      dflt: 'normal',
-      type: 'string',
-      values: FONT_VARIANTS,
-    },
+    fontWeight: fontSettings.fontWeight,
+    fontStyle: fontSettings.fontStyle,
+    fontVariant: fontSettings.fontVariant,
   },
 };
 
@@ -161,17 +172,7 @@ export const configMetadata = {
     values: {
       textColor: { dflt: '#000000', type: 'color' },
       textInvertible: { dflt: false, type: 'boolean' },
-      fontWeight: { dflt: 400, min: 100, max: 900, type: 'number' },
-      fontStyle: {
-        dflt: 'normal',
-        type: 'string',
-        values: FONT_STYLES,
-      },
-      fontVariant: {
-        dflt: 'normal',
-        type: 'string',
-        values: FONT_VARIANTS,
-      },
+      ...fontSettings,
       valueGetter: {
         dflt: sumValueGetter,
         type: 'function',
@@ -196,7 +197,7 @@ export const configMetadata = {
         reconfigurable: true,
         documentation: 'Uses linked labels below this limit of the outer sector arc length (in pixels)',
       },
-      fontSize: { dflt: 12, min: 4, max: 32, type: 'number' },
+      ...fontSettings,
       gap: { dflt: 10, min: 6, max: 16, type: 'number' },
       spacing: { dflt: 2, min: 0, max: 16, type: 'number' },
       horizontalStemLength: { dflt: 10, min: 6, max: 16, type: 'number' },
@@ -233,6 +234,7 @@ export const configMetadata = {
   // other
   backgroundColor: { dflt: '#ffffff', type: 'color' },
   sectorLineWidth: { dflt: 1, min: 0, max: 4, type: 'number' },
+  sectorLineStroke: { dflt: 'white', type: 'string' },
   colors: { dflt: 'turbo', type: 'palette', values: Object.keys(palettes) },
   palettes: { dflt: palettes, type: 'palettes', reconfigurable: false },
 };

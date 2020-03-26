@@ -19,7 +19,7 @@
 import { Distance, Pixels, Radian, Radius, Ratio, SizeRatio, TimeMs } from './geometry_types';
 import { Font, FontFamily, PartialFont } from './types';
 import { $Values as Values } from 'utility-types';
-import { Color, ValueFormatter } from '../../../../utils/commons';
+import { Color, StrokeStyle, ValueFormatter } from '../../../../utils/commons';
 
 export const PartitionLayout = Object.freeze({
   sunburst: 'sunburst' as 'sunburst',
@@ -86,9 +86,10 @@ export interface StaticConfig {
   // linked labels (primarily: single-line)
   linkLabel: LinkLabelConfig;
 
-  // other
+  // global
   backgroundColor: Color;
   sectorLineWidth: Pixels;
+  sectorLineStroke: StrokeStyle;
 }
 
 export type EasingFunction = (x: Ratio) => Ratio;
