@@ -17,7 +17,13 @@
  * under the License. */
 
 import { RawDataSeries } from './series';
-import { computeYStackedMapValues, formatStackedDataSeriesValues, getYValueStackMap } from './stacked_series_utils';
+import {
+  computeYStackedMapValues,
+  formatStackedDataSeriesValues,
+  getYValueStackMap,
+  getStackedFormattedSeriesDatum,
+  StackedValues,
+} from './stacked_series_utils';
 import { ScaleType } from '../../../scales';
 
 describe('Stacked Series Utils', () => {
@@ -437,6 +443,23 @@ describe('Stacked Series Utils', () => {
         y0: 0,
         y1: 23,
       });
+    });
+  });
+  test('Correctly handle 0 values on percentage stack', () => {
+    const stackedValues: Map<any, StackedValues> = new Map();
+    stackedValues.set(1, {
+      values: [0, 0, 0],
+      percent: [null, null, null],
+      total: 0,
+    });
+    const formattedDatum = getStackedFormattedSeriesDatum({ x: 1, y1: 0 }, stackedValues, 0, false, true);
+    expect(formattedDatum).toEqual({
+      datum: undefined,
+      initialY0: null,
+      initialY1: null,
+      x: 1,
+      y0: null,
+      y1: null,
     });
   });
 });

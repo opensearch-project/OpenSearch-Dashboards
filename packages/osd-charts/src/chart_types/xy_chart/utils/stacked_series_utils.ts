@@ -19,9 +19,10 @@
 import { DataSeries, DataSeriesDatum, RawDataSeries, RawDataSeriesDatum, FilledValues } from './series';
 import { ScaleType } from '../../../scales';
 
-interface StackedValues {
+/** @internal */
+export interface StackedValues {
   values: number[];
-  percent: number[];
+  percent: Array<number | null>;
   total: number;
 }
 
@@ -103,6 +104,9 @@ export function computeYStackedMapValues(
       },
     );
     const percent = stackArray.values.map((value) => {
+      if (stackArray.total === 0) {
+        return null;
+      }
       return value / stackArray.total;
     });
     stackedValues.set(xValue, {
@@ -124,7 +128,6 @@ export function formatStackedDataSeriesValues(
 ): DataSeries[] {
   const yValueStackMap = getYValueStackMap(dataseries, xValues);
   const stackedValues = computeYStackedMapValues(yValueStackMap, scaleToExtent);
-
   const stackedDataSeries: DataSeries[] = dataseries.map((ds, seriesIndex) => {
     const newData: DataSeriesDatum[] = [];
     const missingXValues = new Set([...xValues]);
@@ -169,11 +172,11 @@ export function formatStackedDataSeriesValues(
       data: newData,
     };
   });
-
   return stackedDataSeries;
 }
 
-function getStackedFormattedSeriesDatum(
+/** @internal */
+export function getStackedFormattedSeriesDatum(
   data: RawDataSeriesDatum,
   stackedValues: Map<any, StackedValues>,
   seriesIndex: number,
@@ -187,12 +190,19 @@ function getStackedFormattedSeriesDatum(
     return;
   }
   let y1: number | null = null;
+  let y0: number | null | undefined = null;
   if (isPercentageMode) {
-    y1 = data.y1 != null ? data.y1 / stack.total : null;
+    if (data.y1 != null && stack.total !== 0) {
+      y1 = data.y1 / stack.total;
+    }
+    if (data.y0 != null && stack.total !== 0) {
+      y0 = data.y0 / stack.total;
+    }
   } else {
     y1 = data.y1;
+    y0 = data.y0;
   }
-  const y0 = isPercentageMode && data.y0 != null ? data.y0 / stack.total : data.y0;
+
   let computedY0: number | null;
   if (scaleToExtent) {
     computedY0 = y0 ? y0 : y1;
@@ -216,11 +226,16 @@ function getStackedFormattedSeriesDatum(
     let stackedY1: number | null = null;
     let stackedY0: number | null = null;
     if (isPercentageMode) {
-      stackedY1 = y1 !== null ? stackY + y1 : null;
-      stackedY0 = y0 != null ? stackY + y0 : stackY;
+      stackedY1 = y1 !== null && stackY != null ? stackY + y1 : null;
+      stackedY0 = y0 != null && stackY != null ? stackY + y0 : stackY;
     } else {
-      stackedY1 = y1 !== null ? stackY + y1 : null;
-      stackedY0 = y0 != null ? stackY + y0 : stackY;
+      if (stackY == null) {
+        stackedY1 = y1 !== null ? y1 : null;
+        stackedY0 = y0 != null ? y0 : stackY;
+      } else {
+        stackedY1 = y1 !== null ? stackY + y1 : null;
+        stackedY0 = y0 != null ? stackY + y0 : stackY;
+      }
       // configure null y0 if y1 is null
       // it's semantically correct to say y0 is null if y1 is null
       if (stackedY1 === null) {

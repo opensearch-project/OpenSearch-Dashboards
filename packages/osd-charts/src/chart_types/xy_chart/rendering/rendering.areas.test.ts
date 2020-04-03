@@ -26,6 +26,7 @@ import { computeSeriesDomains } from '../state/utils';
 import { renderArea } from './rendering';
 import { ChartTypes } from '../..';
 import { SpecTypes } from '../../../specs/settings';
+import { MockSeriesSpec } from '../../../mocks/specs';
 
 const SPEC_ID = 'spec_1';
 const GROUP_ID = 'group_1';
@@ -1080,5 +1081,116 @@ describe('Rendering points - areas', () => {
       // 0 radius point
       expect((zeroValueIndexdGeometry[0] as PointGeometry).radius).toBe(0);
     });
+  });
+  it('Stacked areas with 0 values', () => {
+    const pointSeriesSpec1: AreaSeriesSpec = MockSeriesSpec.area({
+      id: 'spec_1',
+      data: [
+        [1546300800000, 0],
+        [1546387200000, 5],
+      ],
+      xAccessor: 0,
+      yAccessors: [1],
+      xScaleType: ScaleType.Time,
+      yScaleType: ScaleType.Linear,
+      stackAccessors: [0],
+      stackAsPercentage: true,
+    });
+    const pointSeriesSpec2: AreaSeriesSpec = MockSeriesSpec.area({
+      id: 'spec_2',
+      data: [
+        [1546300800000, 0],
+        [1546387200000, 2],
+      ],
+      xAccessor: 0,
+      yAccessors: [1],
+      xScaleType: ScaleType.Time,
+      yScaleType: ScaleType.Linear,
+      stackAccessors: [0],
+      stackAsPercentage: true,
+    });
+    const pointSeriesDomains = computeSeriesDomains([pointSeriesSpec1, pointSeriesSpec2]);
+    expect(pointSeriesDomains.formattedDataSeries.stacked[0].dataSeries[0].data).toEqual([
+      {
+        datum: [1546300800000, 0],
+        initialY0: null,
+        initialY1: null,
+        x: 1546300800000,
+        y0: null,
+        y1: null,
+      },
+      {
+        datum: [1546387200000, 5],
+        initialY0: null,
+        initialY1: 0.7142857142857143,
+        x: 1546387200000,
+        y0: null,
+        y1: 0.7142857142857143,
+      },
+    ]);
+  });
+  it('Stacked areas with null values', () => {
+    const pointSeriesSpec1: AreaSeriesSpec = MockSeriesSpec.area({
+      id: 'spec_1',
+      data: [
+        [1546300800000, null],
+        [1546387200000, 5],
+      ],
+      xAccessor: 0,
+      yAccessors: [1],
+      xScaleType: ScaleType.Time,
+      yScaleType: ScaleType.Linear,
+      stackAccessors: [0],
+    });
+    const pointSeriesSpec2: AreaSeriesSpec = MockSeriesSpec.area({
+      id: 'spec_2',
+      data: [
+        [1546300800000, 3],
+        [1546387200000, null],
+      ],
+      xAccessor: 0,
+      yAccessors: [1],
+      xScaleType: ScaleType.Time,
+      yScaleType: ScaleType.Linear,
+      stackAccessors: [0],
+    });
+    const pointSeriesDomains = computeSeriesDomains([pointSeriesSpec1, pointSeriesSpec2]);
+    expect(pointSeriesDomains.formattedDataSeries.stacked[0].dataSeries[0].data).toEqual([
+      {
+        datum: [1546300800000, null],
+        initialY0: null,
+        initialY1: null,
+        x: 1546300800000,
+        y0: null,
+        y1: null,
+      },
+      {
+        datum: [1546387200000, 5],
+        initialY0: null,
+        initialY1: 5,
+        x: 1546387200000,
+        y0: null,
+        y1: 5,
+      },
+    ]);
+
+    expect(pointSeriesDomains.formattedDataSeries.stacked[0].dataSeries[1].data).toEqual([
+      {
+        datum: [1546300800000, 3],
+        initialY0: null,
+        initialY1: 3,
+        x: 1546300800000,
+        y0: null,
+        y1: 3,
+      },
+      {
+        datum: [1546387200000, null],
+        initialY0: null,
+        initialY1: null,
+        x: 1546387200000,
+        y0: null,
+        y1: null,
+      },
+    ]);
   });
 });

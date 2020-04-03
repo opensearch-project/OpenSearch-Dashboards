@@ -33,6 +33,7 @@ export { example as with4Axes } from './5_with_4_axes';
 export { example as withAxisAndLegend } from './6_with_axis_and_legend';
 export { example as stacked } from './7_stacked';
 export { example as stackedPercentage } from './8_stacked_percentage';
+export { example as stackedPercentageWithZeros } from './8_stacked_percentage_zeros';
 export { example as stackedSeparateSpecs } from './9_stacked_separate_specs';
 export { example as stackedSameNaming } from './10_stacked_same_naming';
 export { example as bandArea } from './13_band_area';
