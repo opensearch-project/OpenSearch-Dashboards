@@ -22,7 +22,7 @@ import { ScaleType } from '../../../scales';
 /** @internal */
 export interface StackedValues {
   values: number[];
-  percent: Array<number | null>;
+  percent: Array<number>;
   total: number;
 }
 
@@ -105,7 +105,7 @@ export function computeYStackedMapValues(
     );
     const percent = stackArray.values.map((value) => {
       if (stackArray.total === 0) {
-        return null;
+        return 0;
       }
       return value / stackArray.total;
     });
@@ -192,11 +192,11 @@ export function getStackedFormattedSeriesDatum(
   let y1: number | null = null;
   let y0: number | null | undefined = null;
   if (isPercentageMode) {
-    if (data.y1 != null && stack.total !== 0) {
-      y1 = data.y1 / stack.total;
+    if (data.y1 != null) {
+      y1 = stack.total !== 0 ? data.y1 / stack.total : 0;
     }
-    if (data.y0 != null && stack.total !== 0) {
-      y0 = data.y0 / stack.total;
+    if (data.y0 != null) {
+      y0 = stack.total !== 0 ? data.y0 / stack.total : 0;
     }
   } else {
     y1 = data.y1;

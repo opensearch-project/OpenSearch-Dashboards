@@ -449,17 +449,17 @@ describe('Stacked Series Utils', () => {
     const stackedValues: Map<any, StackedValues> = new Map();
     stackedValues.set(1, {
       values: [0, 0, 0],
-      percent: [null, null, null],
+      percent: [0, 0, 0],
       total: 0,
     });
     const formattedDatum = getStackedFormattedSeriesDatum({ x: 1, y1: 0 }, stackedValues, 0, false, true);
     expect(formattedDatum).toEqual({
       datum: undefined,
       initialY0: null,
-      initialY1: null,
+      initialY1: 0,
       x: 1,
       y0: null,
-      y1: null,
+      y1: 0,
     });
   });
 });
