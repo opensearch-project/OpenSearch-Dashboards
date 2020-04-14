@@ -26,37 +26,38 @@ import {
 } from '../utils/specs';
 import { IndexedGeometry, BandedAccessorType } from '../../../utils/geometry';
 import { getAccessorFormatLabel } from '../../../utils/accessor';
-import { getSeriesName, SeriesKey } from '../utils/series';
+import { getSeriesName } from '../utils/series';
+import { SeriesKey } from '../../../commons/series_id';
 import { TooltipValue } from '../../../specs';
-
-export interface TooltipLegendValue {
-  y0: any;
-  y1: any;
-}
+import { LegendItemExtraValues } from '../../../commons/legend';
 
 export const Y0_ACCESSOR_POSTFIX = ' - lower';
 export const Y1_ACCESSOR_POSTFIX = ' - upper';
 
 /** @internal */
-export function getSeriesTooltipValues(
+export function getHighligthedValues(
   tooltipValues: TooltipValue[],
   defaultValue?: string,
-): Map<SeriesKey, TooltipLegendValue> {
-  // map from seriesKey to TooltipLegendValue
-  const seriesTooltipValues = new Map<SeriesKey, TooltipLegendValue>();
+): Map<SeriesKey, LegendItemExtraValues> {
+  // map from seriesKey to LegendItemExtraValues
+  const seriesTooltipValues = new Map<SeriesKey, LegendItemExtraValues>();
 
   tooltipValues.forEach(({ value, seriesIdentifier, valueAccessor }) => {
     const seriesValue = defaultValue ? defaultValue : value;
-    const current = seriesTooltipValues.get(seriesIdentifier.key) || {};
-    const tooltipValue: TooltipLegendValue = {
-      y0: defaultValue,
-      y1: defaultValue,
-      ...current,
-    };
-    if (valueAccessor != null && (valueAccessor === 'y0' || valueAccessor === 'y1')) {
-      tooltipValue[valueAccessor] = seriesValue;
+    const current: LegendItemExtraValues = seriesTooltipValues.get(seriesIdentifier.key) ?? new Map();
+    if (defaultValue) {
+      if (!current.has(BandedAccessorType.Y0)) {
+        current.set(BandedAccessorType.Y0, defaultValue);
+      }
+      if (!current.has(BandedAccessorType.Y1)) {
+        current.set(BandedAccessorType.Y1, defaultValue);
+      }
     }
-    seriesTooltipValues.set(seriesIdentifier.key, tooltipValue);
+
+    if (valueAccessor != null && (valueAccessor === BandedAccessorType.Y0 || valueAccessor === BandedAccessorType.Y1)) {
+      current.set(valueAccessor, seriesValue);
+    }
+    seriesTooltipValues.set(seriesIdentifier.key, current);
   });
   return seriesTooltipValues;
 }

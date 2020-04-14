@@ -27,6 +27,7 @@ import { partitionGeometries } from '../../state/selectors/geometries';
 import { nullShapeViewModel, QuadViewModel, ShapeViewModel } from '../../layout/types/viewmodel_types';
 import { renderPartitionCanvas2d } from './canvas_renderers';
 import { INPUT_KEY } from '../../layout/utils/group_by_rollup';
+import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 
 interface ReactiveChartStateProps {
   initialized: boolean;
@@ -171,7 +172,7 @@ const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
   return {
     initialized: true,
     geometries: partitionGeometries(state),
-    chartContainerDimensions: state.parentDimensions,
+    chartContainerDimensions: getChartContainerDimensionsSelector(state),
   };
 };
 

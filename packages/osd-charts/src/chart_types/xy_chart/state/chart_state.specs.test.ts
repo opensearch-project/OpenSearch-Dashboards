@@ -43,7 +43,7 @@ describe('XYChart - specs ordering', () => {
     store.dispatch(specParsed());
 
     const legendItems = getLegendItemsSelector(store.getState());
-    const names = [...legendItems.values()].map((item) => item.name);
+    const names = [...legendItems.values()].map((item) => item.label);
     expect(names).toEqual(['A', 'B', 'C']);
   });
   it('the legend respect the insert order [B, A, C]', () => {
@@ -53,7 +53,7 @@ describe('XYChart - specs ordering', () => {
     store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'C', data })));
     store.dispatch(specParsed());
     const legendItems = getLegendItemsSelector(store.getState());
-    const names = [...legendItems.values()].map((item) => item.name);
+    const names = [...legendItems.values()].map((item) => item.label);
     expect(names).toEqual(['B', 'A', 'C']);
   });
   it('the legend respect the order when changing properties of existing specs', () => {
@@ -64,7 +64,7 @@ describe('XYChart - specs ordering', () => {
     store.dispatch(specParsed());
 
     let legendItems = getLegendItemsSelector(store.getState());
-    let names = [...legendItems.values()].map((item) => item.name);
+    let names = [...legendItems.values()].map((item) => item.label);
     expect(names).toEqual(['A', 'B', 'C']);
 
     store.dispatch(specParsing());
@@ -74,7 +74,7 @@ describe('XYChart - specs ordering', () => {
     store.dispatch(specParsed());
 
     legendItems = getLegendItemsSelector(store.getState());
-    names = [...legendItems.values()].map((item) => item.name);
+    names = [...legendItems.values()].map((item) => item.label);
     expect(names).toEqual(['A', 'B updated', 'C']);
   });
   it('the legend respect the order when changing the order of the specs', () => {
@@ -85,7 +85,7 @@ describe('XYChart - specs ordering', () => {
     store.dispatch(specParsed());
 
     let legendItems = getLegendItemsSelector(store.getState());
-    let names = [...legendItems.values()].map((item) => item.name);
+    let names = [...legendItems.values()].map((item) => item.label);
     expect(names).toEqual(['A', 'B', 'C']);
 
     store.dispatch(specParsing());
@@ -95,7 +95,7 @@ describe('XYChart - specs ordering', () => {
     store.dispatch(specParsed());
 
     legendItems = getLegendItemsSelector(store.getState());
-    names = [...legendItems.values()].map((item) => item.name);
+    names = [...legendItems.values()].map((item) => item.label);
     expect(names).toEqual(['B', 'A', 'C']);
   });
 });

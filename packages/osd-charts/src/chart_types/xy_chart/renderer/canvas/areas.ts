@@ -19,7 +19,7 @@
 import { getGeometryStateStyle } from '../../rendering/rendering';
 import { AreaGeometry } from '../../../../utils/geometry';
 import { SharedGeometryStateStyle } from '../../../../utils/themes/theme';
-import { LegendItem } from '../../legend/legend';
+import { LegendItem } from '../../../../commons/legend';
 import { withClip, withContext } from '../../../../renderers/canvas';
 import { renderPoints } from './points';
 import { renderLinePaths, renderAreaPath } from './primitives/path';

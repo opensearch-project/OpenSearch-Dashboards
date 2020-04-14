@@ -10,6 +10,14 @@
   height: 100%;
 }
 
-.echHighlighter__rect {
+.echHighlighterOverlay__fill {
   fill: transparentize($euiColorGhost, 0.8);
+}
+
+.echHighlighterOverlay__stroke {
+  stroke: transparentize($euiColorGhost, 0.8);
+}
+
+.echHighlighter__mask {
+  fill: transparentize($euiColorEmptyShade, 0.5);
 }

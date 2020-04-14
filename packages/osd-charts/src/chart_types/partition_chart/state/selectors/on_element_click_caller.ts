@@ -24,7 +24,7 @@ import { SettingsSpec, LayerValue } from '../../../../specs';
 import { getPickedShapesLayerValues } from './picked_shapes';
 import { getPieSpecOrNull } from './pie_spec';
 import { ChartTypes } from '../../..';
-import { SeriesIdentifier } from '../../../xy_chart/utils/series';
+import { SeriesIdentifier } from '../../../../commons/series_id';
 import { isClicking } from '../../../../state/utils';
 import { getLastClickSelector } from '../../../../state/selectors/get_last_click';
 

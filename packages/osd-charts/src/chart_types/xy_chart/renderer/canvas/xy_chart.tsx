@@ -31,7 +31,7 @@ import { AnnotationId, AxisId } from '../../../../utils/ids';
 import { LIGHT_THEME } from '../../../../utils/themes/light_theme';
 import { Theme } from '../../../../utils/themes/theme';
 import { AnnotationDimensions } from '../../annotations/annotation_utils';
-import { LegendItem } from '../../legend/legend';
+import { LegendItem } from '../../../../commons/legend';
 import { computeAnnotationDimensionsSelector } from '../../state/selectors/compute_annotations';
 import { computeAxisTicksDimensionsSelector } from '../../state/selectors/compute_axis_ticks_dimensions';
 import { AxisVisibleTicks, computeAxisVisibleTicksSelector } from '../../state/selectors/compute_axis_visible_ticks';

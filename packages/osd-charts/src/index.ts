@@ -29,9 +29,9 @@ export { SpecId, GroupId, AxisId, AnnotationId } from './utils/ids';
 export * from './specs';
 export { CurveType } from './utils/curves';
 export { timeFormatter, niceTimeFormatter, niceTimeFormatByDay } from './utils/data/formatters';
-export { SeriesCollectionValue } from './chart_types/xy_chart/utils/series';
 export { Datum, Position, Rendering, Rotation } from './utils/commons';
-export { SeriesIdentifier, XYChartSeriesIdentifier } from './chart_types/xy_chart/utils/series';
+export { SeriesIdentifier } from './commons/series_id';
+export { XYChartSeriesIdentifier } from './chart_types/xy_chart/utils/series';
 export { AnnotationTooltipFormatter } from './chart_types/xy_chart/annotations/annotation_utils';
 export { GeometryValue } from './utils/geometry';
 export {

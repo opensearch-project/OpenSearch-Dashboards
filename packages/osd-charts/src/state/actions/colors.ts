@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { SeriesKey } from '../../chart_types/xy_chart/utils/series';
+import { SeriesKey } from '../../commons/series_id';
 import { Color } from '../../utils/commons';
 
 /** @internal */

@@ -86,6 +86,7 @@ export type ShapeViewModel = {
   outsideLinksViewModel: OutsideLinksViewModel[];
   diskCenter: PointObject;
   pickQuads: PickFunction;
+  outerRadius: number;
 };
 
 export const nullShapeViewModel = (specifiedConfig?: Config, diskCenter?: PointObject): ShapeViewModel => ({
@@ -96,6 +97,7 @@ export const nullShapeViewModel = (specifiedConfig?: Config, diskCenter?: PointO
   outsideLinksViewModel: [],
   diskCenter: diskCenter || { x: 0, y: 0 },
   pickQuads: () => [],
+  outerRadius: 0,
 });
 
 type TreeLevel = number;

@@ -17,65 +17,10 @@
  * under the License. */
 
 import React from 'react';
-import {
-  Chart,
-  ScaleType,
-  Position,
-  Axis,
-  Settings,
-  PartitionElementEvent,
-  XYChartElementEvent,
-  BarSeries,
-} from '../src';
+import { example } from '../stories/sunburst/12_very_small';
 
-export class Playground extends React.Component<{}, { isSunburstShown: boolean }> {
-  onClick = (elements: Array<PartitionElementEvent | XYChartElementEvent>) => {
-    // eslint-disable-next-line no-console
-    console.log(elements[0]);
-  };
+export class Playground extends React.Component {
   render() {
-    return (
-      <>
-        <div className="chart">
-          <Chart size={[300, 200]}>
-            <Settings
-              onElementClick={this.onClick}
-              rotation={90}
-              theme={{
-                barSeriesStyle: {
-                  displayValue: {
-                    fontSize: 15,
-                    fill: 'black',
-                    offsetX: 5,
-                    offsetY: -8,
-                  },
-                },
-              }}
-            />
-            <Axis id="y1" position={Position.Left} />
-            <BarSeries
-              id="amount"
-              xScaleType={ScaleType.Ordinal}
-              xAccessor="x"
-              yAccessors={['y']}
-              data={[
-                { x: 'trousers', y: 390, val: 1222 },
-                { x: 'watches', y: 0, val: 1222 },
-                { x: 'bags', y: 750, val: 1222 },
-                { x: 'cocktail dresses', y: 854, val: 1222 },
-              ]}
-              displayValueSettings={{
-                showValueLabel: true,
-                isValueContainedInElement: true,
-                hideClippedValue: true,
-                valueFormatter: (d) => {
-                  return `${d} $`;
-                },
-              }}
-            />
-          </Chart>
-        </div>
-      </>
-    );
+    return <div className="chart">{example()}</div>;
   }
 }

@@ -41,6 +41,7 @@ export { example as veryLargeAndSmall } from './12_very_small';
 export { example as nearFullNearEmpty } from './13_empty';
 export { example as fullAndZeroSlices } from './14_full_zero';
 export { example as singleSlice } from './15_single';
+export { example as singleSunburst } from './15_single_sunburst';
 export { example as singleSmallSice } from './16_single_small';
 export { example as singleVerySmall } from './17_single_very_small';
 export { example as noSlice } from './18_no_sliced';

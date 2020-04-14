@@ -26,8 +26,12 @@ import { Tooltip } from '../../../components/tooltip';
 import { createOnElementClickCaller } from './selectors/on_element_click_caller';
 import { createOnElementOverCaller } from './selectors/on_element_over_caller';
 import { createOnElementOutCaller } from './selectors/on_element_out_caller';
+import { LegendItem } from '../../../commons/legend';
+import { LegendItemLabel } from '../../../state/selectors/get_legend_items_labels';
 
 const EMPTY_MAP = new Map();
+const EMPTY_LEGEND_LIST: LegendItem[] = [];
+const EMPTY_LEGEND_ITEM_LIST: LegendItemLabel[] = [];
 
 /** @internal */
 export class GoalState implements InternalChartState {
@@ -51,9 +55,12 @@ export class GoalState implements InternalChartState {
     return false;
   }
   getLegendItems() {
-    return EMPTY_MAP;
+    return EMPTY_LEGEND_LIST;
   }
-  getLegendItemsValues() {
+  getLegendItemsLabels() {
+    return EMPTY_LEGEND_ITEM_LIST;
+  }
+  getLegendExtraValues() {
     return EMPTY_MAP;
   }
   chartRenderer(containerRef: BackwardRef) {

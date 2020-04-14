@@ -24,16 +24,16 @@ import { render } from './scenegraph';
 import { nullShapeViewModel, ShapeViewModel } from '../../layout/types/viewmodel_types';
 import { PartitionSpec } from '../../specs/index';
 import { SpecTypes } from '../../../../specs/settings';
+import { getTree } from './tree';
+import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 
 const getSpecs = (state: GlobalChartState) => state.specs;
 
-const getParentDimensions = (state: GlobalChartState) => state.parentDimensions;
-
 /** @internal */
 export const partitionGeometries = createCachedSelector(
-  [getSpecs, getParentDimensions],
-  (specs, parentDimensions): ShapeViewModel => {
+  [getSpecs, getChartContainerDimensionsSelector, getTree],
+  (specs, parentDimensions, tree): ShapeViewModel => {
     const pieSpecs = getSpecsFromStore<PartitionSpec>(specs, ChartTypes.Partition, SpecTypes.Series);
-    return pieSpecs.length === 1 ? render(pieSpecs[0], parentDimensions) : nullShapeViewModel();
+    return pieSpecs.length === 1 ? render(pieSpecs[0], parentDimensions, tree) : nullShapeViewModel();
   },
 )((state) => state.chartId);

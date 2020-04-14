@@ -22,13 +22,12 @@ import { Highlighter } from '../renderer/dom/highlighter';
 import { Crosshair } from '../renderer/dom/crosshair';
 import { BrushTool } from '../renderer/dom/brush';
 import { InternalChartState, GlobalChartState, BackwardRef } from '../../../state/chart_state';
-import { TooltipLegendValue } from '../tooltip/tooltip';
 import { ChartTypes } from '../..';
 import { AnnotationTooltip } from '../renderer/dom/annotation_tooltips';
 import { isBrushAvailableSelector } from './selectors/is_brush_available';
 import { isChartEmptySelector } from './selectors/is_chart_empty';
 import { computeLegendSelector } from './selectors/compute_legend';
-import { getLegendTooltipValuesSelector } from './selectors/get_legend_tooltip_values';
+import { getHighlightedValuesSelector } from './selectors/get_highlighted_values';
 import { getPointerCursorSelector } from './selectors/get_cursor_pointer';
 import { isBrushingSelector } from './selectors/is_brushing';
 import { isTooltipVisibleSelector } from './selectors/is_tooltip_visible';
@@ -36,12 +35,14 @@ import { getTooltipInfoSelector } from './selectors/get_tooltip_values_highlight
 import { htmlIdGenerator } from '../../../utils/commons';
 import { Tooltip } from '../../../components/tooltip';
 import { getTooltipAnchorPositionSelector } from './selectors/get_tooltip_position';
-import { SeriesKey } from '../utils/series';
+import { SeriesKey } from '../../../commons/series_id';
 import { createOnElementClickCaller } from './selectors/on_element_click_caller';
 import { createOnElementOverCaller } from './selectors/on_element_over_caller';
 import { createOnElementOutCaller } from './selectors/on_element_out_caller';
 import { createOnBrushEndCaller } from './selectors/on_brush_end_caller';
 import { createOnPointerMoveCaller } from './selectors/on_pointer_move_caller';
+import { getLegendItemsLabelsSelector } from './selectors/get_legend_items_labels';
+import { LegendItemExtraValues } from '../../../commons/legend';
 
 /** @internal */
 export class XYAxisChartState implements InternalChartState {
@@ -72,11 +73,14 @@ export class XYAxisChartState implements InternalChartState {
   isChartEmpty(globalState: GlobalChartState) {
     return isChartEmptySelector(globalState);
   }
+  getLegendItemsLabels(globalState: GlobalChartState) {
+    return getLegendItemsLabelsSelector(globalState);
+  }
   getLegendItems(globalState: GlobalChartState) {
     return computeLegendSelector(globalState);
   }
-  getLegendItemsValues(globalState: GlobalChartState): Map<SeriesKey, TooltipLegendValue> {
-    return getLegendTooltipValuesSelector(globalState);
+  getLegendExtraValues(globalState: GlobalChartState): Map<SeriesKey, LegendItemExtraValues> {
+    return getHighlightedValuesSelector(globalState);
   }
   chartRenderer(containerRef: BackwardRef, forwardStageRef: RefObject<HTMLCanvasElement>) {
     return (

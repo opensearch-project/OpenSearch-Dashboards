@@ -25,7 +25,7 @@ import { ChartTypes } from '../../../index';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getPieSpecOrNull } from './pie_spec';
 import { getPickedShapesLayerValues } from './picked_shapes';
-import { SeriesIdentifier } from '../../../xy_chart/utils/series';
+import { SeriesIdentifier } from '../../../../commons/series_id';
 
 function isOverElement(prevPickedShapes: Array<Array<LayerValue>> = [], nextPickedShapes: Array<Array<LayerValue>>) {
   if (nextPickedShapes.length === 0) {

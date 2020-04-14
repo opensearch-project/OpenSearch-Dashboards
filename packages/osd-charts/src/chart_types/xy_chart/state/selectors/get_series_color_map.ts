@@ -19,7 +19,8 @@
 import createCachedSelector from 're-reselect';
 import { computeSeriesDomainsSelector } from './compute_series_domains';
 import { getSeriesSpecsSelector } from './get_specs';
-import { getSeriesColors, SeriesKey } from '../../utils/series';
+import { getSeriesColors } from '../../utils/series';
+import { SeriesKey } from '../../../../commons/series_id';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getCustomSeriesColors } from '../utils';

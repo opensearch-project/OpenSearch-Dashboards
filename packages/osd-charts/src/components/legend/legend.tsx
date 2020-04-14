@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import React, { createRef } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 import { Dispatch, bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -25,14 +25,13 @@ import { GlobalChartState } from '../../state/chart_state';
 import { getLegendItemsSelector } from '../../state/selectors/get_legend_items';
 import { getSettingsSpecSelector } from '../../state/selectors/get_settings_specs';
 import { getChartThemeSelector } from '../../state/selectors/get_chart_theme';
-import { getLegendItemsValuesSelector } from '../../state/selectors/get_legend_items_values';
+import { getLegendExtraValuesSelector } from '../../state/selectors/get_legend_items_values';
 import { getLegendSizeSelector } from '../../state/selectors/get_legend_size';
 import { onToggleLegend } from '../../state/actions/legend';
 import { LIGHT_THEME } from '../../utils/themes/light_theme';
-import { LegendListItem } from './legend_item';
+import { LegendItemProps } from './legend_item';
 import { Theme } from '../../utils/themes/theme';
-import { TooltipLegendValue } from '../../chart_types/xy_chart/tooltip/tooltip';
-import { LegendItem, getItemLabel } from '../../chart_types/xy_chart/legend/legend';
+import { LegendItem, LegendItemExtraValues } from '../../commons/legend';
 import { BBox } from '../../utils/bbox/bbox_calculator';
 import {
   onToggleDeselectSeriesAction,
@@ -40,25 +39,28 @@ import {
   onLegendItemOverAction,
 } from '../../state/actions/legend';
 import { clearTemporaryColors, setTemporaryColor, setPersistedColor } from '../../state/actions/colors';
-import { SettingsSpec } from '../../specs';
-import { BandedAccessorType } from '../../utils/geometry';
-import { SeriesKey } from '../../chart_types/xy_chart/utils/series';
+import { LegendItemListener, BasicListener, LegendColorPicker } from '../../specs';
+import { getLegendStyle, getLegendListStyle } from './style_utils';
+import { renderLegendItem } from './legend_item';
 
 interface LegendStateProps {
-  legendItems: Map<SeriesKey, LegendItem>;
-  legendPosition: Position;
-  legendItemTooltipValues: Map<string, TooltipLegendValue>;
-  showLegend: boolean;
-  legendCollapsed: boolean;
   debug: boolean;
   chartTheme: Theme;
-  legendSize: BBox;
-  settings?: SettingsSpec;
+  size: BBox;
+  position: Position;
+  collapsed: boolean;
+  items: LegendItem[];
+  showExtra: boolean;
+  extraValues: Map<string, LegendItemExtraValues>;
+  colorPicker?: LegendColorPicker;
+  onItemOver?: LegendItemListener;
+  onItemOut?: BasicListener;
+  onItemClick?: LegendItemListener;
 }
 interface LegendDispatchProps {
-  onToggleLegend: typeof onToggleLegend;
-  onLegendItemOutAction: typeof onLegendItemOutAction;
-  onLegendItemOverAction: typeof onLegendItemOverAction;
+  onToggle: typeof onToggleLegend;
+  onItemOutAction: typeof onLegendItemOutAction;
+  onItemOverAction: typeof onLegendItemOverAction;
   onToggleDeselectSeriesAction: typeof onToggleDeselectSeriesAction;
   clearTemporaryColors: typeof clearTemporaryColors;
   setTemporaryColor: typeof setTemporaryColor;
@@ -66,136 +68,66 @@ interface LegendDispatchProps {
 }
 type LegendProps = LegendStateProps & LegendDispatchProps;
 
-interface LegendStyle {
-  maxHeight?: string;
-  maxWidth?: string;
-  width?: string;
-  height?: string;
-}
-
-interface LegendListStyle {
-  paddingTop?: number | string;
-  paddingBottom?: number | string;
-  paddingLeft?: number | string;
-  paddingRight?: number | string;
-  gridTemplateColumns?: string;
-}
-
-class LegendComponent extends React.Component<LegendProps> {
+/**
+ * @internal
+ */
+export class LegendComponent extends React.Component<LegendProps> {
   static displayName = 'Legend';
-  legendItemCount = 0;
-
-  private echLegend = createRef<HTMLDivElement>();
 
   render() {
-    const { legendItems, legendPosition, legendSize, showLegend, debug, chartTheme } = this.props;
-    if (!showLegend || legendItems.size === 0) {
+    const {
+      items,
+      position,
+      size,
+      debug,
+      chartTheme: { chartMargins, legend },
+    } = this.props;
+    if (items.length === 0) {
       return null;
     }
-    const legendContainerStyle = this.getLegendStyle(legendPosition, legendSize);
-    const legendListStyle = this.getLegendListStyle(legendPosition, chartTheme);
-    const legendClasses = classNames('echLegend', `echLegend--${legendPosition}`, {
+    const legendContainerStyle = getLegendStyle(position, size);
+    const legendListStyle = getLegendListStyle(position, chartMargins, legend);
+    const legendClasses = classNames('echLegend', `echLegend--${position}`, {
       'echLegend--debug': debug,
     });
 
+    const itemProps: Omit<LegendItemProps, 'item'> = {
+      position,
+      totalItems: items.length,
+      extraValues: this.props.extraValues,
+      showExtra: this.props.showExtra,
+      onMouseOut: this.props.onItemOut,
+      onMouseOver: this.props.onItemOver,
+      onClick: this.props.onItemClick,
+      clearTemporaryColorsAction: this.props.clearTemporaryColors,
+      setPersistedColorAction: this.props.setPersistedColor,
+      setTemporaryColorAction: this.props.setTemporaryColor,
+      mouseOutAction: this.props.onItemOutAction,
+      mouseOverAction: this.props.onItemOverAction,
+      toggleDeselectSeriesAction: this.props.onToggleDeselectSeriesAction,
+      colorPicker: this.props.colorPicker,
+    };
     return (
-      <div ref={this.echLegend} className={legendClasses}>
+      <div className={legendClasses}>
         <div style={legendContainerStyle} className="echLegendListContainer">
-          <div style={legendListStyle} className="echLegendList">
-            {[...legendItems.values()].map(this.renderLegendElement)}
-          </div>
+          <ul style={legendListStyle} className="echLegendList">
+            {items.map((item, index) => {
+              return renderLegendItem(item, itemProps, items.length, index);
+            })}
+          </ul>
         </div>
       </div>
     );
   }
-
-  getLegendListStyle = (position: Position, { chartMargins, legend }: Theme): LegendListStyle => {
-    const { top: paddingTop, bottom: paddingBottom, left: paddingLeft, right: paddingRight } = chartMargins;
-
-    if (position === Position.Bottom || position === Position.Top) {
-      return {
-        paddingLeft,
-        paddingRight,
-        gridTemplateColumns: `repeat(auto-fill, minmax(${legend.verticalWidth}px, 1fr))`,
-      };
-    }
-
-    return {
-      paddingTop,
-      paddingBottom,
-    };
-  };
-
-  getLegendStyle = (position: Position, size: BBox): LegendStyle => {
-    if (position === Position.Left || position === Position.Right) {
-      const width = `${size.width}px`;
-      return {
-        width,
-        maxWidth: width,
-      };
-    }
-    const height = `${size.height}px`;
-    return {
-      height,
-      maxHeight: height,
-    };
-  };
-
-  private getLegendValues(
-    tooltipValues: Map<SeriesKey, TooltipLegendValue> | undefined,
-    key: SeriesKey,
-    banded: boolean = false,
-  ): any[] {
-    const values = tooltipValues && tooltipValues.get(key);
-    if (values === null || values === undefined) {
-      return banded ? ['', ''] : [''];
-    }
-
-    const { y0, y1 } = values;
-    return banded ? [y1, y0] : [y1];
-  }
-
-  private renderLegendElement = (item: LegendItem) => {
-    if (!this.props.settings) {
-      return null;
-    }
-    const { key, displayValue, banded } = item;
-    const { legendItemTooltipValues, settings } = this.props;
-    const { showLegendExtra, legendPosition, legendColorPicker } = settings;
-    const legendValues = this.getLegendValues(legendItemTooltipValues, key, banded);
-    return legendValues.map((value, index) => {
-      const yAccessor: BandedAccessorType = index === 0 ? BandedAccessorType.Y1 : BandedAccessorType.Y0;
-      return (
-        <LegendListItem
-          key={`${key}-${yAccessor}`}
-          legendItem={item}
-          legendColorPicker={legendColorPicker}
-          legendPosition={legendPosition}
-          label={getItemLabel(item, yAccessor)}
-          extra={value !== '' ? value : displayValue.formatted[yAccessor]}
-          showExtra={showLegendExtra}
-          toggleDeselectSeriesAction={this.props.onToggleDeselectSeriesAction}
-          legendItemOutAction={this.props.onLegendItemOutAction}
-          legendItemOverAction={this.props.onLegendItemOverAction}
-          clearTemporaryColors={this.props.clearTemporaryColors}
-          setTemporaryColor={this.props.setTemporaryColor}
-          setPersistedColor={this.props.setPersistedColor}
-          onLegendItemOverListener={settings.onLegendItemOver}
-          onLegendItemOutListener={settings.onLegendItemOut}
-          onLegendItemClickListener={settings.onLegendItemClick}
-        />
-      );
-    });
-  };
 }
 
 const mapDispatchToProps = (dispatch: Dispatch): LegendDispatchProps =>
   bindActionCreators(
     {
-      onToggleLegend,
+      onToggle: onToggleLegend,
       onToggleDeselectSeriesAction,
-      onLegendItemOutAction,
-      onLegendItemOverAction,
+      onItemOutAction: onLegendItemOutAction,
+      onItemOverAction: onLegendItemOverAction,
       clearTemporaryColors,
       setTemporaryColor,
       setPersistedColor,
@@ -204,34 +136,45 @@ const mapDispatchToProps = (dispatch: Dispatch): LegendDispatchProps =>
   );
 
 const EMPTY_DEFAULT_STATE = {
-  legendItems: new Map(),
-  legendPosition: Position.Right,
-  showLegend: false,
-  legendCollapsed: false,
-  legendItemTooltipValues: new Map(),
+  items: [],
+  position: Position.Right,
+  collapsed: false,
+  extraValues: new Map(),
   debug: false,
   chartTheme: LIGHT_THEME,
-  legendSize: { width: 0, height: 0 },
+  size: { width: 0, height: 0 },
+  showExtra: false,
 };
 const mapStateToProps = (state: GlobalChartState): LegendStateProps => {
   if (!state.specsInitialized) {
     return EMPTY_DEFAULT_STATE;
   }
-  const { legendPosition, showLegend, debug } = getSettingsSpecSelector(state);
+  const {
+    legendPosition,
+    showLegend,
+    showLegendExtra,
+    debug,
+    legendColorPicker,
+    onLegendItemOver: onItemOver,
+    onLegendItemOut: onItemOut,
+    onLegendItemClick: onItemClick,
+  } = getSettingsSpecSelector(state);
   if (!showLegend) {
     return EMPTY_DEFAULT_STATE;
   }
-  const legendItems = getLegendItemsSelector(state);
   return {
-    legendItems,
-    legendPosition,
-    showLegend,
-    legendCollapsed: state.interactions.legendCollapsed,
-    legendItemTooltipValues: getLegendItemsValuesSelector(state),
     debug,
     chartTheme: getChartThemeSelector(state),
-    legendSize: getLegendSizeSelector(state),
-    settings: getSettingsSpecSelector(state),
+    size: getLegendSizeSelector(state),
+    collapsed: state.interactions.legendCollapsed,
+    items: getLegendItemsSelector(state),
+    position: legendPosition,
+    showExtra: showLegendExtra,
+    extraValues: getLegendExtraValuesSelector(state),
+    colorPicker: legendColorPicker,
+    onItemOver,
+    onItemOut,
+    onItemClick,
   };
 };
 

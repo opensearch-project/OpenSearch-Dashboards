@@ -23,7 +23,7 @@ import { EuiColorPicker, EuiWrappingPopover, EuiButton, EuiSpacer } from '@elast
 
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, LegendColorPicker } from '../../src/';
 import { BARCHART_1Y1G } from '../../src/utils/data_samples/test_dataset';
-import { SeriesKey } from '../../src/chart_types/xy_chart/utils/series';
+import { SeriesKey } from '../../src/commons/series_id';
 import { Color } from '../../src/utils/commons';
 
 const onChangeAction = action('onChange');

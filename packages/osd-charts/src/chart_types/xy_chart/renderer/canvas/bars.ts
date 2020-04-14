@@ -21,7 +21,7 @@ import { BarGeometry } from '../../../../utils/geometry';
 import { buildBarStyles } from './styles/bar';
 import { SharedGeometryStateStyle } from '../../../../utils/themes/theme';
 import { getGeometryStateStyle } from '../../rendering/rendering';
-import { LegendItem } from '../../legend/legend';
+import { LegendItem } from '../../../../commons/legend';
 import { renderRect } from './primitives/rect';
 import { Rect } from '../../../../geoms/types';
 

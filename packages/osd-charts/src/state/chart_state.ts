@@ -15,19 +15,19 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License. */
+
 import React from 'react';
 import { SPEC_PARSED, SPEC_UNMOUNTED, UPSERT_SPEC, REMOVE_SPEC, SPEC_PARSING } from './actions/specs';
 import { SET_PERSISTED_COLOR, SET_TEMPORARY_COLOR, CLEAR_TEMPORARY_COLORS } from './actions/colors';
 import { interactionsReducer } from './reducers/interactions';
 import { ChartTypes } from '../chart_types';
 import { XYAxisChartState } from '../chart_types/xy_chart/state/chart_state';
-import { XYChartSeriesIdentifier, SeriesKey } from '../chart_types/xy_chart/utils/series';
+import { SeriesKey, SeriesIdentifier } from '../commons/series_id';
 import { Spec, PointerEvent } from '../specs';
 import { DEFAULT_SETTINGS_SPEC } from '../specs/settings';
 import { Dimensions } from '../utils/dimensions';
 import { Point } from '../utils/point';
-import { LegendItem } from '../chart_types/xy_chart/legend/legend';
-import { TooltipLegendValue } from '../chart_types/xy_chart/tooltip/tooltip';
+import { LegendItem, LegendItemExtraValues } from '../commons/legend';
 import { StateActions } from './actions';
 import { CHART_RENDERED } from './actions/chart';
 import { UPDATE_PARENT_DIMENSION } from './actions/chart_settings';
@@ -38,56 +38,65 @@ import { PartitionState } from '../chart_types/partition_chart/state/chart_state
 import { TooltipInfo } from '../components/tooltip/types';
 import { TooltipAnchorPosition } from '../components/tooltip/utils';
 import { Color } from '../utils/commons';
+import { LegendItemLabel } from './selectors/get_legend_items_labels';
 
 export type BackwardRef = () => React.RefObject<HTMLDivElement>;
 
 /**
- * A set of chart-type-dependant functions that required by all char types
+ * A set of chart-type-dependant functions that required by all chart type
  * @internal
  */
 export interface InternalChartState {
   /**
-   * the chart type
+   * The chart type
    */
   chartType: ChartTypes;
   /**
-   * returns a JSX element with the chart rendered (lenged excluded)
+   * Returns a JSX element with the chart rendered (lenged excluded)
    * @param containerRef
    * @param forwardStageRef
    */
   chartRenderer(containerRef: BackwardRef, forwardStageRef: RefObject<HTMLCanvasElement>): JSX.Element | null;
   /**
-   * true if the brush is available for this chart type
+   * `true` if the brush is available for this chart type
    * @param globalState
    */
   isBrushAvailable(globalState: GlobalChartState): boolean;
   /**
-   * true if the brush is available for this chart type
+   * `true` if the brush is available for this chart type
    * @param globalState
    */
   isBrushing(globalState: GlobalChartState): boolean;
   /**
-   * true if the chart is empty (no data displayed)
+   * `true` if the chart is empty (no data displayed)
    * @param globalState
    */
   isChartEmpty(globalState: GlobalChartState): boolean;
+
   /**
-   * return the list of legend items
+   * Returns the list of legend items labels. Mainly used to compute the legend size
+   * based on labels and their hierarchy depth.
    * @param globalState
    */
-  getLegendItems(globalState: GlobalChartState): Map<SeriesKey, LegendItem>;
+  getLegendItemsLabels(globalState: GlobalChartState): LegendItemLabel[];
+
   /**
-   * return the list of values for each legend item
+   * Returns the list of legend items.
    * @param globalState
    */
-  getLegendItemsValues(globalState: GlobalChartState): Map<SeriesKey, TooltipLegendValue>;
+  getLegendItems(globalState: GlobalChartState): LegendItem[];
   /**
-   * return the CSS pointer cursor depending on the internal chart state
+   * Returns the list of extra values for each legend item
+   * @param globalState
+   */
+  getLegendExtraValues(globalState: GlobalChartState): Map<SeriesKey, LegendItemExtraValues>;
+  /**
+   * Returns the CSS pointer cursor depending on the internal chart state
    * @param globalState
    */
   getPointerCursor(globalState: GlobalChartState): string;
   /**
-   * true if the tooltip is visible, false otherwise
+   * `true` if the tooltip is visible, `false` otherwise
    * @param globalState
    */
   isTooltipVisible(globalState: GlobalChartState): boolean;
@@ -103,6 +112,10 @@ export interface InternalChartState {
    */
   getTooltipAnchor(globalState: GlobalChartState): TooltipAnchorPosition | null;
 
+  /**
+   * Called on every state change to activate any event callback
+   * @param globalState
+   */
   eventCallbacks(globalState: GlobalChartState): void;
 }
 
@@ -138,7 +151,7 @@ export interface InteractionsState {
   highlightedLegendItemKey: string | null;
   legendCollapsed: boolean;
   invertDeselect: boolean;
-  deselectedDataSeries: XYChartSeriesIdentifier[];
+  deselectedDataSeries: SeriesIdentifier[];
 }
 
 /** @internal */

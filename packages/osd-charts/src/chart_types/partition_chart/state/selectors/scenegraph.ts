@@ -26,7 +26,7 @@ import {
   nullShapeViewModel,
   ValueGetter,
 } from '../../layout/types/viewmodel_types';
-import { DEPTH_KEY } from '../../layout/utils/group_by_rollup';
+import { DEPTH_KEY, HierarchyOfArrays } from '../../layout/utils/group_by_rollup';
 import { PartitionSpec, Layer } from '../../specs/index';
 import { identity, mergePartial, RecursivePartial } from '../../../../utils/commons';
 import { config as defaultConfig, VALUE_GETTERS } from '../../layout/config/config';
@@ -45,9 +45,13 @@ export function valueGetterFunction(valueGetter: ValueGetter) {
 }
 
 /** @internal */
-export function render(partitionSpec: PartitionSpec, parentDimensions: Dimensions): ShapeViewModel {
+export function render(
+  partitionSpec: PartitionSpec,
+  parentDimensions: Dimensions,
+  tree: HierarchyOfArrays,
+): ShapeViewModel {
   const { width, height } = parentDimensions;
-  const { layers, data: facts, config: specConfig } = partitionSpec;
+  const { layers, config: specConfig } = partitionSpec;
   const textMeasurer = document.createElement('canvas');
   const textMeasurerCtx = textMeasurer.getContext('2d');
   const partialConfig: RecursivePartial<Config> = { ...specConfig, width, height };
@@ -60,12 +64,10 @@ export function render(partitionSpec: PartitionSpec, parentDimensions: Dimension
     measureText(textMeasurerCtx),
     config,
     layers,
-    facts,
     rawTextGetter(layers),
-    partitionSpec.valueAccessor,
     partitionSpec.valueFormatter,
     partitionSpec.percentFormatter,
     valueGetter,
-    [() => null, ...layers.map(({ groupByRollup }) => groupByRollup)],
+    tree,
   );
 }

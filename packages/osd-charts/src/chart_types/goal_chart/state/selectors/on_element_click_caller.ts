@@ -24,9 +24,9 @@ import { SettingsSpec, LayerValue } from '../../../../specs';
 import { getPickedShapesLayerValues } from './picked_shapes';
 import { getSpecOrNull } from './goal_spec';
 import { ChartTypes } from '../../..';
-import { SeriesIdentifier } from '../../../xy_chart/utils/series';
 import { isClicking } from '../../../../state/utils';
 import { getLastClickSelector } from '../../../../state/selectors/get_last_click';
+import { SeriesIdentifier } from '../../../../commons/series_id';
 
 /**
  * Will call the onElementClick listener every time the following preconditions are met:

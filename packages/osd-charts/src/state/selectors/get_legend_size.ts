@@ -17,42 +17,17 @@
  * under the License. */
 
 import createCachedSelector from 're-reselect';
-import { getLegendItemsSelector } from './get_legend_items';
 import { CanvasTextBBoxCalculator } from '../../utils/bbox/canvas_text_bbox_calculator';
 import { BBox } from '../../utils/bbox/bbox_calculator';
 import { getSettingsSpecSelector } from './get_settings_specs';
 import { isVerticalAxis } from '../../chart_types/xy_chart/utils/axis_utils';
 import { getChartThemeSelector } from './get_chart_theme';
 import { GlobalChartState } from '../chart_state';
-import { getItemLabel } from '../../chart_types/xy_chart/legend/legend';
 import { getChartIdSelector } from './get_chart_id';
+import { getLegendItemsLabelsSelector } from './get_legend_items_labels';
+import { LEGEND_HIERARCHY_MARGIN } from '../../components/legend/legend_item';
 
 const getParentDimensionSelector = (state: GlobalChartState) => state.parentDimensions;
-
-const legendItemLabelsSelector = createCachedSelector(
-  [getSettingsSpecSelector, getLegendItemsSelector],
-  (settings, legendItems): string[] => {
-    const labels: string[] = [];
-    const { showLegendExtra } = settings;
-    legendItems.forEach((item) => {
-      const labelY1 = getItemLabel(item, 'y1');
-      if (item.displayValue.formatted.y1 !== null) {
-        labels.push(`${labelY1}${showLegendExtra ? item.displayValue.formatted.y1 : ''}`);
-      } else {
-        labels.push(labelY1);
-      }
-      if (item.banded) {
-        const labelY0 = getItemLabel(item, 'y0');
-        if (item.displayValue.formatted.y0 !== null) {
-          labels.push(`${labelY0}${showLegendExtra ? item.displayValue.formatted.y0 : ''}`);
-        } else {
-          labels.push(labelY0);
-        }
-      }
-    });
-    return labels;
-  },
-)(getChartIdSelector);
 
 const MARKER_WIDTH = 16;
 // const MARKER_HEIGHT = 16;
@@ -62,11 +37,11 @@ const VERTICAL_PADDING = 4;
 
 /** @internal */
 export const getLegendSizeSelector = createCachedSelector(
-  [getSettingsSpecSelector, getChartThemeSelector, getParentDimensionSelector, legendItemLabelsSelector],
+  [getSettingsSpecSelector, getChartThemeSelector, getParentDimensionSelector, getLegendItemsLabelsSelector],
   (settings, theme, parentDimensions, labels): BBox => {
     const bboxCalculator = new CanvasTextBBoxCalculator();
     const bbox = labels.reduce(
-      (acc, label) => {
+      (acc, { label, depth }) => {
         const bbox = bboxCalculator.compute(
           label,
           1,
@@ -75,6 +50,7 @@ export const getLegendSizeSelector = createCachedSelector(
           1.5,
           400,
         );
+        bbox.width += depth * LEGEND_HIERARCHY_MARGIN;
         if (acc.height < bbox.height) {
           acc.height = bbox.height;
         }

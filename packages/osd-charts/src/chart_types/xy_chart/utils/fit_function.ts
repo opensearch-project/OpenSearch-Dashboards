@@ -25,24 +25,28 @@ import { ScaleType } from '../../../scales';
 
 /**
  * Fit type that requires previous and/or next `non-nullable` values
+ *
  */
-export type BoundingFit = Exclude<Fit, 'none' | 'explicit'>;
+type BoundingFit = Exclude<Fit, 'none' | 'explicit'>;
 
 /**
  * `DataSeriesDatum` with non-`null` value for `x` and `y1`
+ * @internal
  */
 export type FullDataSeriesDatum = Omit<DataSeriesDatum, 'y1' | 'x'> &
   DeepNonNullable<Pick<DataSeriesDatum, 'y1' | 'x'>>;
 
 /**
  * Embellishes `FullDataSeriesDatum` with `fittingIndex` for ordinal scales
+ * @internal
  */
 export type WithIndex<T> = T & { fittingIndex: number };
 
 /**
  * Returns `[x, y1]` values for a given datum with `fittingIndex`
+ *
  */
-export const getXYValues = ({ x, y1, fittingIndex }: WithIndex<FullDataSeriesDatum>): [number, number] => {
+const getXYValues = ({ x, y1, fittingIndex }: WithIndex<FullDataSeriesDatum>): [number, number] => {
   return [typeof x === 'string' ? fittingIndex : x, y1];
 };
 

@@ -26,6 +26,10 @@ import { Tooltip } from '../../../components/tooltip';
 import { createOnElementClickCaller } from './selectors/on_element_click_caller';
 import { createOnElementOverCaller } from './selectors/on_element_over_caller';
 import { createOnElementOutCaller } from './selectors/on_element_out_caller';
+import { computeLegendSelector } from './selectors/compute_legend';
+import { getLegendItemsLabels } from './selectors/get_legend_items_labels';
+import { HighlighterFromHover } from '../renderer/dom/highlighter_hover';
+import { HighlighterFromLegend } from '../renderer/dom/highlighter_legend';
 
 const EMPTY_MAP = new Map();
 
@@ -50,10 +54,13 @@ export class PartitionState implements InternalChartState {
   isChartEmpty() {
     return false;
   }
-  getLegendItems() {
-    return EMPTY_MAP;
+  getLegendItemsLabels(globalState: GlobalChartState) {
+    return getLegendItemsLabels(globalState);
   }
-  getLegendItemsValues() {
+  getLegendItems(globalState: GlobalChartState) {
+    return computeLegendSelector(globalState);
+  }
+  getLegendExtraValues() {
     return EMPTY_MAP;
   }
   chartRenderer(containerRef: BackwardRef) {
@@ -61,6 +68,8 @@ export class PartitionState implements InternalChartState {
       <>
         <Tooltip getChartContainerRef={containerRef} />
         <Partition />
+        <HighlighterFromHover />
+        <HighlighterFromLegend />
       </>
     );
   }

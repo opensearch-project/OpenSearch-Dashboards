@@ -41,7 +41,7 @@ import {
   BandedAccessorType,
 } from '../../../utils/geometry';
 import { mergePartial, Color } from '../../../utils/commons';
-import { LegendItem } from '../legend/legend';
+import { LegendItem } from '../../../commons/legend';
 
 /** @internal */
 export function mutableIndexedGeometryMapUpsert(

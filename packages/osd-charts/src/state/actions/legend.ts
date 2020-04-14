@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { XYChartSeriesIdentifier } from '../../chart_types/xy_chart/utils/series';
+import { SeriesIdentifier } from '../../commons/series_id';
 
 /** @internal */
 export const ON_TOGGLE_LEGEND = 'ON_TOGGLE_LEGEND';
@@ -43,7 +43,7 @@ interface LegendItemOutAction {
 
 interface ToggleDeselectSeriesAction {
   type: typeof ON_TOGGLE_DESELECT_SERIES;
-  legendItemId: XYChartSeriesIdentifier;
+  legendItemId: SeriesIdentifier;
 }
 
 /** @internal */
@@ -62,7 +62,7 @@ export function onLegendItemOutAction(): LegendItemOutAction {
 }
 
 /** @internal */
-export function onToggleDeselectSeriesAction(legendItemId: XYChartSeriesIdentifier): ToggleDeselectSeriesAction {
+export function onToggleDeselectSeriesAction(legendItemId: SeriesIdentifier): ToggleDeselectSeriesAction {
   return { type: ON_TOGGLE_DESELECT_SERIES, legendItemId };
 }
 

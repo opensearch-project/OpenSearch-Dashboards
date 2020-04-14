@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { Chart, Datum, Partition, PartitionLayout } from '../../src';
+import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../src';
 import { mocks } from '../../src/mocks/hierarchical/index';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
 import { arrayToLookup, hueInterpolator } from '../../src/chart_types/partition_chart/layout/utils/calcs';
@@ -32,16 +32,8 @@ const countryLookup = arrayToLookup((d: Datum) => d.country, countryDimension);
 const interpolatorTurbo = hueInterpolator(palettes.turbo.map(([r, g, b]) => [r, g, b, 0.7]));
 
 export const example = () => (
-  <Chart
-    className="story-chart"
-    size={
-      {
-        /*
-        height: 800,
-          */
-      }
-    }
-  >
+  <Chart className="story-chart">
+    <Settings showLegend />
     <Partition
       id="spec_1"
       data={mocks.sunburst}

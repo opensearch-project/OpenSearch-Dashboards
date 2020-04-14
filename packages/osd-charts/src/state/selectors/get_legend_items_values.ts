@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { TooltipLegendValue } from '../../chart_types/xy_chart/tooltip/tooltip';
 import { GlobalChartState } from '../chart_state';
-import { SeriesKey } from '../../chart_types/xy_chart/utils/series';
+import { SeriesKey } from '../../commons/series_id';
+import { LegendItemExtraValues } from '../../commons/legend';
 
-const EMPTY_ITEM_LIST = new Map<SeriesKey, TooltipLegendValue>();
+const EMPTY_ITEM_LIST = new Map<SeriesKey, LegendItemExtraValues>();
 
 /** @internal */
-export const getLegendItemsValuesSelector = (state: GlobalChartState): Map<SeriesKey, TooltipLegendValue> => {
+export const getLegendExtraValuesSelector = (state: GlobalChartState): Map<SeriesKey, LegendItemExtraValues> => {
   if (state.internalChartState) {
-    return state.internalChartState.getLegendItemsValues(state);
+    return state.internalChartState.getLegendExtraValues(state);
   } else {
     return EMPTY_ITEM_LIST;
   }

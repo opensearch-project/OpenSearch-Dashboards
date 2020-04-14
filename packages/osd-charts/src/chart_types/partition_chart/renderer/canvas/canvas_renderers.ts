@@ -72,6 +72,7 @@ function renderTaperedBorder(
   ctx.arc(0, 0, y0px, X0, X0);
   ctx.arc(0, 0, y1px, X0, X1, false);
   ctx.arc(0, 0, y0px, X1, X0, true);
+
   ctx.fill();
   if (strokeWidth > 0.001 && !(x0 === 0 && x1 === TAU)) {
     // canvas2d uses a default of 1 if the lineWidth is assigned 0, so we use a small value to test, to avoid it

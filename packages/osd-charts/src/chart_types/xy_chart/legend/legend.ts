@@ -16,39 +16,25 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { getAxesSpecForSpecId, LastValues, getSpecsById } from '../state/utils';
+import { getAxesSpecForSpecId, getSpecsById } from '../state/utils';
 import { identity, Color } from '../../../utils/commons';
 import {
   SeriesCollectionValue,
   getSeriesIndex,
   getSortedDataSeriesColorsValuesMap,
   getSeriesName,
-  XYChartSeriesIdentifier,
-  SeriesKey,
 } from '../utils/series';
+import { SeriesKey, SeriesIdentifier } from '../../../commons/series_id';
 import { AxisSpec, BasicSeriesSpec, Postfixes, isAreaSeriesSpec, isBarSeriesSpec } from '../utils/specs';
 import { Y0_ACCESSOR_POSTFIX, Y1_ACCESSOR_POSTFIX } from '../tooltip/tooltip';
 import { BandedAccessorType } from '../../../utils/geometry';
+import { LegendItem } from '../../../commons/legend';
 
-interface FormattedLastValues {
+/** @internal */
+export interface FormattedLastValues {
   y0: number | string | null;
   y1: number | string | null;
 }
-
-/** @internal */
-export type LegendItem = Postfixes & {
-  key: SeriesKey;
-  color: Color;
-  name: string;
-  seriesIdentifier: XYChartSeriesIdentifier;
-  isSeriesVisible?: boolean;
-  banded?: boolean;
-  isLegendItemVisible?: boolean;
-  displayValue: {
-    raw: LastValues;
-    formatted: FormattedLastValues;
-  };
-};
 
 function getPostfix(spec: BasicSeriesSpec): Postfixes {
   if (isAreaSeriesSpec(spec) || isBarSeriesSpec(spec)) {
@@ -63,15 +49,10 @@ function getPostfix(spec: BasicSeriesSpec): Postfixes {
 }
 
 /** @internal */
-export function getItemLabel(
-  { banded, name, y1AccessorFormat, y0AccessorFormat }: LegendItem,
-  yAccessor: BandedAccessorType,
-) {
-  if (!banded) {
-    return name;
-  }
-
-  return yAccessor === BandedAccessorType.Y1 ? `${name}${y1AccessorFormat}` : `${name}${y0AccessorFormat}`;
+export function getBandedLegendItemLabel(name: string, yAccessor: BandedAccessorType, postfixes: Postfixes) {
+  return yAccessor === BandedAccessorType.Y1
+    ? `${name}${postfixes.y1AccessorFormat}`
+    : `${name}${postfixes.y0AccessorFormat}`;
 }
 
 /** @internal */
@@ -81,9 +62,9 @@ export function computeLegend(
   specs: BasicSeriesSpec[],
   defaultColor: string,
   axesSpecs: AxisSpec[],
-  deselectedDataSeries: XYChartSeriesIdentifier[] = [],
-): Map<SeriesKey, LegendItem> {
-  const legendItems: Map<SeriesKey, LegendItem> = new Map();
+  deselectedDataSeries: SeriesIdentifier[] = [],
+): LegendItem[] {
+  const legendItems: LegendItem[] = [];
   const sortedCollection = getSortedDataSeriesColorsValuesMap(seriesCollection);
 
   sortedCollection.forEach((series, key) => {
@@ -92,39 +73,46 @@ export function computeLegend(
     const color = seriesColors.get(key) || defaultColor;
     const hasSingleSeries = seriesCollection.size === 1;
     const name = getSeriesName(seriesIdentifier, hasSingleSeries, false, spec);
-    const isSeriesVisible = deselectedDataSeries ? getSeriesIndex(deselectedDataSeries, seriesIdentifier) < 0 : true;
+    const isSeriesHidden = deselectedDataSeries ? getSeriesIndex(deselectedDataSeries, seriesIdentifier) >= 0 : false;
 
     if (name === '' || !spec) {
       return;
     }
+    const postFixes = getPostfix(spec);
+    const labelY1 = banded ? getBandedLegendItemLabel(name, BandedAccessorType.Y1, postFixes) : name;
 
     // Use this to get axis spec w/ tick formatter
     const { yAxis } = getAxesSpecForSpecId(axesSpecs, spec.groupId);
     const formatter = yAxis ? yAxis.tickFormat : identity;
     const { hideInLegend } = spec;
 
-    const legendItem: LegendItem = {
-      key,
+    legendItems.push({
       color,
-      name,
-      banded,
+      label: labelY1,
       seriesIdentifier,
-      isSeriesVisible,
-      isLegendItemVisible: !hideInLegend,
-      displayValue: {
-        raw: {
-          y0: lastValue && lastValue.y0 !== null ? lastValue.y0 : null,
-          y1: lastValue && lastValue.y1 !== null ? lastValue.y1 : null,
-        },
-        formatted: {
-          y0: lastValue && lastValue.y0 !== null ? formatter(lastValue.y0) : null,
-          y1: lastValue && lastValue.y1 !== null ? formatter(lastValue.y1) : null,
-        },
+      childId: BandedAccessorType.Y1,
+      isSeriesHidden,
+      isItemHidden: hideInLegend,
+      defaultExtra: {
+        raw: lastValue && lastValue.y1 !== null ? lastValue.y1 : null,
+        formatted: lastValue && lastValue.y1 !== null ? formatter(lastValue.y1) : null,
       },
-      ...getPostfix(spec),
-    };
-
-    legendItems.set(key, legendItem);
+    });
+    if (banded) {
+      const labelY0 = getBandedLegendItemLabel(name, BandedAccessorType.Y0, postFixes);
+      legendItems.push({
+        color,
+        label: labelY0,
+        seriesIdentifier,
+        childId: BandedAccessorType.Y0,
+        isSeriesHidden,
+        isItemHidden: hideInLegend,
+        defaultExtra: {
+          raw: lastValue && lastValue.y0 !== null ? lastValue.y0 : null,
+          formatted: lastValue && lastValue.y0 !== null ? formatter(lastValue.y0) : null,
+        },
+      });
+    }
   });
   return legendItems;
 }

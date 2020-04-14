@@ -47,7 +47,6 @@ import {
 import { IndexedGeometry, BandedAccessorType } from '../../../utils/geometry';
 import { mergeYCustomDomainsByGroupId } from './selectors/merge_y_custom_domains';
 import { updateDeselectedDataSeries } from './utils';
-import { LegendItem } from '../legend/legend';
 import { ChartTypes } from '../..';
 import { MockSeriesSpecs, MockSeriesSpec } from '../../../mocks/specs';
 import { MockSeriesCollection } from '../../../mocks/series/series_identifiers';
@@ -55,6 +54,7 @@ import { SeededDataGenerator } from '../../../mocks/utils';
 import { SeriesCollectionValue, getSeriesIndex, getSeriesColors } from '../utils/series';
 import { SpecTypes } from '../../../specs/settings';
 import { ColorOverrides } from '../../../state/chart_state';
+import { LegendItem } from '../../../commons/legend';
 
 describe('Chart State utils', () => {
   const emptySeriesOverrides: ColorOverrides = {
@@ -1447,67 +1447,53 @@ describe('Chart State utils', () => {
     expect(bar2.stackAccessors).toEqual(['y', 'bar']);
   });
   test('displays no data availble if chart is empty', () => {
-    const legendItems1 = new Map<string, LegendItem>();
-    legendItems1.set('specId:{bars},colors:{a}', {
-      key: 'specId:{bars},colors:{a}',
-      color: '#1EA593',
-      name: 'a',
-      seriesIdentifier: {
-        specId: 'bars',
-        seriesKeys: ['a'],
-        key: '',
-        splitAccessors: new Map(),
-        yAccessor: 'y1',
+    const legendItems1: LegendItem[] = [
+      {
+        color: '#1EA593',
+        label: 'a',
+        seriesIdentifier: {
+          key: 'specId:{bars},colors:{a}',
+          specId: 'bars',
+        },
+        defaultExtra: { raw: 6, formatted: '6.00' },
+        isSeriesHidden: true,
       },
-      displayValue: { raw: { y0: null, y1: 6 }, formatted: { y0: null, y1: '6.00' } },
-      isSeriesVisible: false,
-    });
-    legendItems1.set('specId:{bars},colors:{b}', {
-      key: 'specId:{bars},colors:{b}',
-      color: '#2B70F7',
-      name: 'b',
-      seriesIdentifier: {
-        specId: 'bars',
-        seriesKeys: ['b'],
-        key: '',
-        splitAccessors: new Map(),
-        yAccessor: 'y1',
+      {
+        color: '#2B70F7',
+        label: 'b',
+        seriesIdentifier: {
+          key: 'specId:{bars},colors:{b}',
+          specId: 'bars',
+        },
+        defaultExtra: { raw: 2, formatted: '2.00' },
+        isSeriesHidden: true,
       },
-      displayValue: { raw: { y0: null, y1: 2 }, formatted: { y0: null, y1: '2.00' } },
-      isSeriesVisible: false,
-    });
+    ];
     expect(isAllSeriesDeselected(legendItems1)).toBe(true);
   });
   test('displays data availble if chart is not empty', () => {
-    const legendItems2 = new Map<string, LegendItem>();
-    legendItems2.set('specId:{bars},colors:{a}', {
-      key: 'specId:{bars},colors:{a}',
-      color: '#1EA593',
-      name: 'a',
-      seriesIdentifier: {
-        specId: 'bars',
-        seriesKeys: ['a'],
-        key: '',
-        splitAccessors: new Map(),
-        yAccessor: 'y1',
+    const legendItems2: LegendItem[] = [
+      {
+        color: '#1EA593',
+        label: 'a',
+        seriesIdentifier: {
+          key: 'specId:{bars},colors:{a}',
+          specId: 'bars',
+        },
+        defaultExtra: { raw: 6, formatted: '6.00' },
+        isSeriesHidden: false,
       },
-      displayValue: { raw: { y0: null, y1: 6 }, formatted: { y0: null, y1: '6.00' } },
-      isSeriesVisible: true,
-    });
-    legendItems2.set('specId:{bars},colors:{b}', {
-      key: 'specId:{bars},colors:{b}',
-      color: '#2B70F7',
-      name: 'b',
-      seriesIdentifier: {
-        specId: 'bars',
-        seriesKeys: ['b'],
-        key: '',
-        splitAccessors: new Map(),
-        yAccessor: 'y1',
+      {
+        color: '#2B70F7',
+        label: 'b',
+        seriesIdentifier: {
+          key: 'specId:{bars},colors:{b}',
+          specId: 'bars',
+        },
+        defaultExtra: { raw: 2, formatted: '2.00' },
+        isSeriesHidden: true,
       },
-      displayValue: { raw: { y0: null, y1: 2 }, formatted: { y0: null, y1: '2.00' } },
-      isSeriesVisible: false,
-    });
+    ];
     expect(isAllSeriesDeselected(legendItems2)).toBe(false);
   });
 });

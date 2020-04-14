@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { Part, Relation, TextMeasure } from '../types/types';
+import { Part, TextMeasure } from '../types/types';
 import { linkTextLayout } from './link_text_layout';
 import { Config, PartitionLayout } from '../types/config_types';
 import { TAU, trueBearingToStandardPositionAngle } from '../utils/math';
@@ -24,7 +24,6 @@ import { Distance, Pixels, Radius } from '../types/geometry_types';
 import { meanAngle } from '../geometry';
 import { treemap } from '../utils/treemap';
 import { sunburst } from '../utils/sunburst';
-import { IndexedAccessorFn } from '../../../../utils/accessor';
 import { argsToRGBString, stringToRGB } from '../utils/d3_utils';
 import {
   nullShapeViewModel,
@@ -49,20 +48,16 @@ import {
 } from './fill_text_layout';
 import {
   aggregateAccessor,
-  aggregateComparator,
-  aggregators,
   ArrayEntry,
-  childOrders,
   depthAccessor,
   entryKey,
   entryValue,
-  groupByRollup,
   mapEntryValue,
-  mapsToArrays,
   parentAccessor,
   sortIndexAccessor,
+  HierarchyOfArrays,
 } from '../utils/group_by_rollup';
-import { StrokeStyle, ValueAccessor, ValueFormatter } from '../../../../utils/commons';
+import { StrokeStyle, ValueFormatter } from '../../../../utils/commons';
 import { percentValueGetter } from '../config/config';
 
 function paddingAccessor(n: ArrayEntry) {
@@ -148,13 +143,11 @@ export function shapeViewModel(
   textMeasure: TextMeasure,
   config: Config,
   layers: Layer[],
-  rawFacts: Relation,
   rawTextGetter: RawTextGetter,
-  valueAccessor: ValueAccessor,
   specifiedValueFormatter: ValueFormatter,
   specifiedPercentFormatter: ValueFormatter,
   valueGetter: ValueGetterFunction,
-  groupByRollupAccessors: IndexedAccessorFn[],
+  tree: HierarchyOfArrays,
 ): ShapeViewModel {
   const {
     width,
@@ -179,30 +172,10 @@ export function shapeViewModel(
     y: height * margin.top + innerHeight / 2,
   };
 
-  const aggregator = aggregators.sum;
-
-  const facts = rawFacts.filter((n) => {
-    const value = valueAccessor(n);
-    return Number.isFinite(value) && value >= 0;
-  });
-
   // don't render anything if the total, the width or height is not positive
-  if (
-    facts.reduce((p: number, n) => aggregator.reducer(p, valueAccessor(n)), aggregator.identity()) <= 0 ||
-    !(width > 0) ||
-    !(height > 0)
-  ) {
+  if (!(width > 0) || !(height > 0) || tree.length === 0) {
     return nullShapeViewModel(config, diskCenter);
   }
-
-  // We can precompute things invariant of how the rectangle is divvied up.
-  // By introducing `scale`, we no longer need to deal with the dichotomy of
-  // size as data value vs size as number of pixels in the rectangle
-
-  const tree = mapsToArrays(
-    groupByRollup(groupByRollupAccessors, valueAccessor, aggregator, facts),
-    aggregateComparator(mapEntryValue, childOrders.descending),
-  );
 
   const totalValue = tree.reduce((p: number, n: ArrayEntry): number => p + mapEntryValue(n), 0);
 
@@ -332,5 +305,6 @@ export function shapeViewModel(
     linkLabelViewModels,
     outsideLinksViewModel,
     pickQuads,
+    outerRadius,
   };
 }
