@@ -33,6 +33,7 @@ import { CHART_RENDERED } from './actions/chart';
 import { UPDATE_PARENT_DIMENSION } from './actions/chart_settings';
 import { EXTERNAL_POINTER_EVENT } from './actions/events';
 import { RefObject } from 'react';
+import { GoalState } from '../chart_types/goal_chart/state/chart_state';
 import { PartitionState } from '../chart_types/partition_chart/state/chart_state';
 import { TooltipInfo } from '../components/tooltip/types';
 import { TooltipAnchorPosition } from '../components/tooltip/utils';
@@ -400,6 +401,8 @@ function findMainChartType(specs: SpecList): ChartTypes | null {
 
 function initInternalChartState(chartType: ChartTypes | null): InternalChartState | null {
   switch (chartType) {
+    case ChartTypes.Goal:
+      return new GoalState();
     case ChartTypes.Partition:
       return new PartitionState();
     case ChartTypes.XYAxis:

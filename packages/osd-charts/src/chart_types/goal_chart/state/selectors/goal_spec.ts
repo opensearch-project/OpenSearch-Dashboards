@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { $Values } from 'utility-types';
+import { GlobalChartState } from '../../../../state/chart_state';
+import { getSpecsFromStore } from '../../../../state/utils';
+import { GoalSpec } from '../../specs';
+import { ChartTypes } from '../../..';
+import { SpecTypes } from '../../../../specs';
 
-export const ChartTypes = Object.freeze({
-  Global: 'global' as 'global',
-  Goal: 'goal' as 'goal',
-  Partition: 'partition' as 'partition',
-  XYAxis: 'xy_axis' as 'xy_axis',
-});
-
-export type ChartTypes = $Values<typeof ChartTypes>;
+/** @internal */
+export function getSpecOrNull(state: GlobalChartState): GoalSpec | null {
+  const specs = getSpecsFromStore<GoalSpec>(state.specs, ChartTypes.Goal, SpecTypes.Series);
+  return specs.length > 0 ? specs[0] : null;
+}

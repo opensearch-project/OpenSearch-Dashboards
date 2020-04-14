@@ -16,13 +16,28 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { $Values } from 'utility-types';
+import { Pixels, SizeRatio } from '../../../partition_chart/layout/types/geometry_types';
+import { FontFamily } from '../../../partition_chart/layout/types/types';
+import { Color } from '../../../../utils/commons';
 
-export const ChartTypes = Object.freeze({
-  Global: 'global' as 'global',
-  Goal: 'goal' as 'goal',
-  Partition: 'partition' as 'partition',
-  XYAxis: 'xy_axis' as 'xy_axis',
-});
+// todo switch to `io-ts` style, generic way of combining static and runtime type info
+export interface Config {
+  angleStart: number;
+  angleEnd: number;
 
-export type ChartTypes = $Values<typeof ChartTypes>;
+  // shape geometry
+  width: number;
+  height: number;
+  margin: { left: SizeRatio; right: SizeRatio; top: SizeRatio; bottom: SizeRatio };
+
+  // general text config
+  fontFamily: FontFamily;
+
+  // fill text config
+  minFontSize: Pixels;
+  maxFontSize: Pixels;
+
+  // other
+  backgroundColor: Color;
+  sectorLineWidth: Pixels;
+}

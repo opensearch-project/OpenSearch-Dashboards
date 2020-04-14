@@ -240,18 +240,18 @@ export const configMetadata = {
 };
 
 // todo switch to `io-ts` style, generic way of combining static and runtime type info
-function configMap(mapper: Function, configMetadata: any): Config {
-  const result: Config = Object.assign(
+export function configMap<Conf>(mapper: Function, configMetadata: any): Conf {
+  const result: Conf = Object.assign(
     {},
     ...Object.entries(configMetadata).map(([k, v]: [string, any]) => {
       if (v.type === 'group') {
-        return { [k]: configMap(mapper, v.values) };
+        return { [k]: configMap<Config>(mapper, v.values) };
       } else {
         return { [k]: mapper(v) };
       }
     }),
-  ) as Config;
+  ) as Conf;
   return result;
 }
 
-export const config: Config = configMap((item: any) => item.dflt, configMetadata);
+export const config: Config = configMap<Config>((item: any) => item.dflt, configMetadata);

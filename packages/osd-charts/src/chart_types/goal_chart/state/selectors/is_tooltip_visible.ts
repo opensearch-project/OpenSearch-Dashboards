@@ -16,13 +16,20 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { $Values } from 'utility-types';
+import createCachedSelector from 're-reselect';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 
-export const ChartTypes = Object.freeze({
-  Global: 'global' as 'global',
-  Goal: 'goal' as 'goal',
-  Partition: 'partition' as 'partition',
-  XYAxis: 'xy_axis' as 'xy_axis',
-});
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { TooltipType, getTooltipType } from '../../../../specs';
+import { getTooltipInfoSelector } from './tooltip';
 
-export type ChartTypes = $Values<typeof ChartTypes>;
+/** @internal */
+export const isTooltipVisibleSelector = createCachedSelector(
+  [getSettingsSpecSelector, getTooltipInfoSelector],
+  (settingsSpec, tooltipInfo): boolean => {
+    if (getTooltipType(settingsSpec) === TooltipType.None) {
+      return false;
+    }
+    return tooltipInfo.values.length > 0;
+  },
+)(getChartIdSelector);
