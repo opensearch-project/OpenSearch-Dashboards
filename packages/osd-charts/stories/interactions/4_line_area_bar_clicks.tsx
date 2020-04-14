@@ -39,7 +39,6 @@ export const example = () => {
         yScaleType={ScaleType.Linear}
         xAccessor="x"
         yAccessors={['y']}
-        splitSeriesAccessors={['g']}
         data={[
           { x: 0, y: 2.3 },
           { x: 1, y: 2 },

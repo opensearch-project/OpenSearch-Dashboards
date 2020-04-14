@@ -48,7 +48,6 @@ export const example = () => {
         xAccessor="x"
         yAccessors={['y']}
         stackAccessors={['x']}
-        splitSeriesAccessors={['g']}
         data={[
           { x: 0, y: 5 },
           { x: 1, y: 4 },
@@ -64,7 +63,6 @@ export const example = () => {
         xAccessor="x"
         yAccessors={['y']}
         stackAccessors={['x']}
-        splitSeriesAccessors={['g']}
         data={[
           { x: 0, y: 2 },
           { x: 1, y: 3 },

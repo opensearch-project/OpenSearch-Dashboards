@@ -18,7 +18,7 @@
 
 import { common } from '../page_objects';
 
-describe.only('Tooltips', () => {
+describe('Tooltips', () => {
   describe('rotation 0', () => {
     it('shows tooltip on first x value - top', async () => {
       await common.expectChartWithMouseAtUrlToMatchScreenshot(
@@ -103,5 +103,14 @@ describe.only('Tooltips', () => {
         },
       );
     });
+  });
+  it('should render corrent tooltip for split and y accessors', async () => {
+    await common.expectChartWithMouseAtUrlToMatchScreenshot(
+      'http://localhost:9001/iframe.html?id=bar-chart--bar-chart-2-y-2-g',
+      {
+        x: 330,
+        y: 40,
+      },
+    );
   });
 });

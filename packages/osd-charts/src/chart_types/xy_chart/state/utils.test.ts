@@ -362,8 +362,8 @@ describe('Chart State utils', () => {
 
     describe('series collection is not empty', () => {
       it('it should return an empty map if no color', () => {
-        const barSpec1 = MockSeriesSpec.bar({ id: specId1, data });
-        const barSpec2 = MockSeriesSpec.bar({ id: specId2, data });
+        const barSpec1 = MockSeriesSpec.bar({ id: specId1, data, splitSeriesAccessors: ['g'] });
+        const barSpec2 = MockSeriesSpec.bar({ id: specId2, data, splitSeriesAccessors: ['g'] });
         const barSeriesSpecs = MockSeriesSpecs.fromSpecs([barSpec1, barSpec2]);
         const barSeriesCollection = MockSeriesCollection.fromSpecs(barSeriesSpecs);
         const actual = getCustomSeriesColors(barSeriesSpecs, barSeriesCollection);
@@ -384,8 +384,13 @@ describe('Chart State utils', () => {
 
       describe('with customSeriesColors array', () => {
         const customSeriesColors = ['red', 'blue', 'green'];
-        const barSpec1 = MockSeriesSpec.bar({ id: specId1, data, color: customSeriesColors });
-        const barSpec2 = MockSeriesSpec.bar({ id: specId2, data });
+        const barSpec1 = MockSeriesSpec.bar({
+          id: specId1,
+          data,
+          color: customSeriesColors,
+          splitSeriesAccessors: ['g'],
+        });
+        const barSpec2 = MockSeriesSpec.bar({ id: specId2, data, splitSeriesAccessors: ['g'] });
         const barSeriesSpecs = MockSeriesSpecs.fromSpecs([barSpec1, barSpec2]);
         const barSeriesCollection = MockSeriesCollection.fromSpecs(barSeriesSpecs);
 
@@ -412,8 +417,14 @@ describe('Chart State utils', () => {
 
           return null;
         };
-        const barSpec1 = MockSeriesSpec.bar({ id: specId1, yAccessors: ['y'], data, color });
-        const barSpec2 = MockSeriesSpec.bar({ id: specId2, data });
+        const barSpec1 = MockSeriesSpec.bar({
+          id: specId1,
+          yAccessors: ['y'],
+          data,
+          color,
+          splitSeriesAccessors: ['g'],
+        });
+        const barSpec2 = MockSeriesSpec.bar({ id: specId2, data, splitSeriesAccessors: ['g'] });
         const barSeriesSpecs = MockSeriesSpecs.fromSpecs([barSpec1, barSpec2]);
         const barSeriesCollection = MockSeriesCollection.fromSpecs(barSeriesSpecs);
 
