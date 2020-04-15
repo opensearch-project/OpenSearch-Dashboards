@@ -1,3 +1,16 @@
+# [18.3.0](https://github.com/elastic/elastic-charts/compare/v18.2.2...v18.3.0) (2020-04-15)
+
+
+### Bug Fixes
+
+* remove series with undefined splitSeriesAccessor values ([#627](https://github.com/elastic/elastic-charts/issues/627)) ([59f0f6e](https://github.com/elastic/elastic-charts/commit/59f0f6e718afad29abc9e761f169ca49ec2148b3))
+
+
+### Features
+
+* gauge, goal and bullet graph (alpha) ([#614](https://github.com/elastic/elastic-charts/issues/614)) ([5669178](https://github.com/elastic/elastic-charts/commit/5669178416859369d801a4360b542e3bd452dffa))
+* **partition:** add legend and highlighters ([#616](https://github.com/elastic/elastic-charts/issues/616)) ([6a4247e](https://github.com/elastic/elastic-charts/commit/6a4247ebc77fd95ce34557eac128b0d57a659a9e)), closes [#486](https://github.com/elastic/elastic-charts/issues/486) [#532](https://github.com/elastic/elastic-charts/issues/532)
+
 ## [18.2.2](https://github.com/elastic/elastic-charts/compare/v18.2.1...v18.2.2) (2020-04-09)
 
 
