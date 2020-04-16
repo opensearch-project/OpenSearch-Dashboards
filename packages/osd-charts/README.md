@@ -6,12 +6,12 @@
   <a href="https://codecov.io/gh/elastic/elastic-charts">
     <img src="https://codecov.io/gh/elastic/elastic-charts/branch/master/graph/badge.svg" />
   </a>
+<a href="https://app.fossa.io/projects/git%2Bgithub.com%2Felastic%2Felastic-charts?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.io/api/projects/git%2Bgithub.com%2Felastic%2Felastic-charts.svg?type=shield"/></a>
   <a href="https://www.npmjs.com/@elastic/charts"><img alt="NPM version" src="https://img.shields.io/npm/v/@elastic/charts.svg?style=flat"></a>
   <a href="http://commitizen.github.io/cz-cli/"><img alt="Commitizen friendly" src="https://img.shields.io/badge/commitizen-friendly-brightgreen.svg"></a>
   <a href="https://elastic.github.io/elastic-charts">
     <img src="https://img.shields.io/static/v1?label=examples&message=storybook&color=blueviolet">
   </a>
-  <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Felastic%2Felastic-charts?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Felastic%2Felastic-charts.svg?type=shield"/></a>
 </p>
 
 🚨 **WARNING** While open source, the intended consumers of this repository are Elastic products. Read the [FAQ][faq] for details.
@@ -87,3 +87,6 @@ You can find documentation around creating and submitting new features in [CONTR
 [overview]: wiki/overview.md
 [theming]: wiki/theming.md
 [contributing]: CONTRIBUTING.md
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Felastic%2Felastic-charts.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Felastic%2Felastic-charts?ref=badge_large)
