@@ -11,6 +11,7 @@
   <a href="https://elastic.github.io/elastic-charts">
     <img src="https://img.shields.io/static/v1?label=examples&message=storybook&color=blueviolet">
   </a>
+  <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Felastic%2Felastic-charts?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Felastic%2Felastic-charts.svg?type=shield"/></a>
 </p>
 
 🚨 **WARNING** While open source, the intended consumers of this repository are Elastic products. Read the [FAQ][faq] for details.
