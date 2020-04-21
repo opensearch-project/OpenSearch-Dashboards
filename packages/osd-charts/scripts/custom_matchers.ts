@@ -17,6 +17,7 @@
  * under the License. */
 
 import { matcherErrorMessage } from 'jest-matcher-utils';
+import 'jest-extended'; // require to load jest-extended matchers
 
 // ensure this is parsed as a module.
 export {};

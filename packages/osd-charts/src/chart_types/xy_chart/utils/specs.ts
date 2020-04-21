@@ -25,9 +25,10 @@ import {
   LineSeriesStyle,
   PointStyle,
   RectAnnotationStyle,
+  BubbleSeriesStyle,
 } from '../../../utils/themes/theme';
-import { Accessor, AccessorFormat, AccessorFn } from '../../../utils/accessor';
 import { RecursivePartial, Color, Position, Datum } from '../../../utils/commons';
+import { Accessor, AccessorFormat, AccessorFn } from '../../../utils/accessor';
 import { AxisId, GroupId } from '../../../utils/ids';
 import { ScaleContinuousType, ScaleType } from '../../../scales';
 import { CurveType } from '../../../utils/curves';
@@ -43,8 +44,8 @@ export const SeriesTypes = Object.freeze({
   Area: 'area' as 'area',
   Bar: 'bar' as 'bar',
   Line: 'line' as 'line',
+  Bubble: 'bubble' as 'bubble',
 });
-
 export type SeriesTypes = $Values<typeof SeriesTypes>;
 
 /**
@@ -338,6 +339,8 @@ export interface SeriesAccessors {
   splitSeriesAccessors?: Accessor[];
   /** An array of fields thats indicates the stack membership */
   stackAccessors?: Accessor[];
+  /** Field name of mark size metric on `Datum` */
+  markSizeAccessor?: Accessor | AccessorFn;
 }
 
 export interface SeriesScales {
@@ -442,6 +445,21 @@ export type LineSeriesSpec = BasicSeriesSpec &
      */
     fit?: Exclude<Fit, 'explicit'> | FitConfig;
   };
+
+/**
+ * This spec describe the dataset configuration used to display a line series.
+ *
+ * @alpha
+ */
+export type BubbleSeriesSpec = BasicSeriesSpec & {
+  /** @default bubble */
+  seriesType: typeof SeriesTypes.Bubble;
+  bubbleSeriesStyle?: RecursivePartial<BubbleSeriesStyle>;
+  /**
+   * An optional functional accessor to return custom color or style for point datum
+   */
+  pointStyleAccessor?: PointStyleAccessor;
+};
 
 /**
  * This spec describe the dataset configuration used to display an area series.
@@ -682,26 +700,37 @@ export interface BaseAnnotationSpec<
 
 export type AnnotationSpec = LineAnnotationSpec | RectAnnotationSpec;
 
+/** @internal */
 export function isLineAnnotation(spec: AnnotationSpec): spec is LineAnnotationSpec {
   return spec.annotationType === AnnotationTypes.Line;
 }
 
+/** @internal */
 export function isRectAnnotation(spec: AnnotationSpec): spec is RectAnnotationSpec {
   return spec.annotationType === AnnotationTypes.Rectangle;
 }
 
+/** @internal */
 export function isBarSeriesSpec(spec: BasicSeriesSpec): spec is BarSeriesSpec {
   return spec.seriesType === SeriesTypes.Bar;
 }
 
+/** @internal */
+export function isBubbleSeriesSpec(spec: BasicSeriesSpec): spec is BubbleSeriesSpec {
+  return spec.seriesType === SeriesTypes.Bubble;
+}
+
+/** @internal */
 export function isLineSeriesSpec(spec: BasicSeriesSpec): spec is LineSeriesSpec {
   return spec.seriesType === SeriesTypes.Line;
 }
 
+/** @internal */
 export function isAreaSeriesSpec(spec: BasicSeriesSpec): spec is AreaSeriesSpec {
   return spec.seriesType === SeriesTypes.Area;
 }
 
+/** @internal */
 export function isBandedSpec(y0Accessors: SeriesAccessors['y0Accessors']): boolean {
   return Boolean(y0Accessors && y0Accessors.length > 0);
 }

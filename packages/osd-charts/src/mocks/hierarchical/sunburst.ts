@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-/** @internal */
 export const sunburstMock = [
   { sitc1: '7', dest: 'usa', exportVal: 553359100104 },
   { sitc1: '7', dest: 'chn', exportVal: 392617281424 },

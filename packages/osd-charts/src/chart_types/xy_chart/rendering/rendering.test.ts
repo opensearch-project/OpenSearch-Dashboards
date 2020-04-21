@@ -22,6 +22,7 @@ import {
   getBarStyleOverrides,
   getPointStyleOverrides,
   getClippedRanges,
+  getRadiusFn,
 } from './rendering';
 import { BarSeriesStyle, SharedGeometryStateStyle, PointStyle } from '../../../utils/themes/theme';
 import { DataSeriesDatum, XYChartSeriesIdentifier } from '../utils/series';
@@ -32,7 +33,7 @@ import { MockScale } from '../../../mocks/scale';
 import { LegendItem } from '../../../commons/legend';
 
 describe('Rendering utils', () => {
-  test('check if point is in geometry', () => {
+  test('check if point is on geometry', () => {
     const seriesStyle = {
       rect: {
         opacity: 1,
@@ -64,6 +65,7 @@ describe('Rendering utils', () => {
         accessor: 'y1',
         x: 0,
         y: 0,
+        mark: null,
       },
       x: 0,
       y: 0,
@@ -79,7 +81,7 @@ describe('Rendering utils', () => {
     expect(isPointOnGeometry(-11, 0, geometry)).toBe(false);
     expect(isPointOnGeometry(11, 11, geometry)).toBe(false);
   });
-  test('check if point is in point geometry', () => {
+  test('check if point is on point geometry', () => {
     const geometry: PointGeometry = {
       color: 'red',
       seriesIdentifier: {
@@ -93,6 +95,7 @@ describe('Rendering utils', () => {
         accessor: 'y1',
         x: 0,
         y: 0,
+        mark: null,
       },
       transform: {
         x: 0,
@@ -102,14 +105,24 @@ describe('Rendering utils', () => {
       y: 0,
       radius: 10,
     };
-    expect(isPointOnGeometry(0, 0, geometry)).toBe(true);
-    expect(isPointOnGeometry(10, 10, geometry)).toBe(true);
-    expect(isPointOnGeometry(0, 10, geometry)).toBe(true);
-    expect(isPointOnGeometry(10, 0, geometry)).toBe(true);
-    expect(isPointOnGeometry(11, 11, geometry)).toBe(false);
-    expect(isPointOnGeometry(-10, 0, geometry)).toBe(true);
-    expect(isPointOnGeometry(-11, 0, geometry)).toBe(false);
-    expect(isPointOnGeometry(11, 11, geometry)).toBe(false);
+    // with buffer
+    expect(isPointOnGeometry(10, 10, geometry, 10)).toBe(true);
+    expect(isPointOnGeometry(20, 20, geometry, 5)).toBe(false);
+
+    // without buffer
+    expect(isPointOnGeometry(0, 0, geometry, 0)).toBe(true);
+    expect(isPointOnGeometry(0, 10, geometry, 0)).toBe(true);
+    expect(isPointOnGeometry(10, 0, geometry, 0)).toBe(true);
+    expect(isPointOnGeometry(11, 11, geometry, 0)).toBe(false);
+    expect(isPointOnGeometry(-10, 0, geometry, 0)).toBe(true);
+    expect(isPointOnGeometry(-11, 0, geometry, 0)).toBe(false);
+    expect(isPointOnGeometry(11, 11, geometry, 0)).toBe(false);
+
+    // should use radial check
+    expect(isPointOnGeometry(9, 9, geometry, 0)).toBe(false);
+    expect(isPointOnGeometry(-9, 9, geometry, 0)).toBe(false);
+    expect(isPointOnGeometry(9, -9, geometry, 0)).toBe(false);
+    expect(isPointOnGeometry(-9, -9, geometry, 0)).toBe(false);
   });
 
   describe('should get common geometry style dependent on legend item highlight state', () => {
@@ -231,6 +244,8 @@ describe('Rendering utils', () => {
       y0: 3,
       initialY1: 4,
       initialY0: 5,
+      mark: null,
+      datum: null,
     };
     const seriesIdentifier: XYChartSeriesIdentifier = {
       specId: 'test',
@@ -323,6 +338,8 @@ describe('Rendering utils', () => {
       y0: 3,
       initialY1: 4,
       initialY0: 5,
+      mark: null,
+      datum: null,
     };
     const seriesIdentifier: XYChartSeriesIdentifier = {
       specId: 'test',
@@ -435,6 +452,144 @@ describe('Rendering utils', () => {
       expect(xScale.scale).toHaveBeenNthCalledWith(1, dataSeries.data[0].x);
       expect(xScale.scale).toHaveBeenCalledTimes(dataSeries.data.length);
       expect(xScale.scale).toHaveBeenCalledWith(dataSeries.data[12].x);
+    });
+  });
+  describe('#getRadiusFn', () => {
+    describe('empty data', () => {
+      const getRadius = getRadiusFn([], 1);
+
+      it('should return a function', () => {
+        expect(getRadius).toBeFunction();
+      });
+
+      it.each<[number, number]>([
+        [0, 0],
+        [10, 10],
+        [1000, 1000],
+        [10000, 10000],
+      ])('should always return 0 - %#', (...args) => {
+        expect(getRadius(...args)).toBe(0);
+      });
+    });
+
+    describe('default markSizeRatio', () => {
+      const { data } = MockDataSeries.random(
+        {
+          count: 20,
+          mark: { min: 500, max: 1000 },
+        },
+        true,
+      );
+      const getRadius = getRadiusFn(data, 1);
+
+      it('should return a function', () => {
+        expect(getRadius).toBeFunction();
+      });
+
+      describe('Dataset validations', () => {
+        const expectedValues = [
+          15.29,
+          40.89,
+          13.39,
+          36.81,
+          44.66,
+          44.34,
+          51.01,
+          6.97,
+          34.04,
+          49.07,
+          45.11,
+          25.44,
+          8.98,
+          9.33,
+          50.62,
+          48.89,
+          44.34,
+          1,
+          33.09,
+          5.94,
+        ];
+        it.each<[number | null, number]>(data.map(({ mark }, i) => [mark, expectedValues[i]]))(
+          'should return stepped value from domain - data[%#]',
+          (mark, expected) => {
+            expect(getRadius(mark)).toBeCloseTo(expected, 1);
+          },
+        );
+      });
+
+      it('should return default values when mark is null', () => {
+        expect(getRadius(null, 111)).toBe(111);
+      });
+    });
+
+    describe('variable markSizeRatio', () => {
+      const { data } = MockDataSeries.random(
+        {
+          count: 5,
+          mark: { min: 0, max: 100 },
+        },
+        true,
+      );
+
+      describe('markSizeRatio - -100', () => {
+        // Should be treated as 0
+        const getRadius = getRadiusFn(data, 1, -100);
+        it.each<[number | null]>(data.map(({ mark }) => [mark]))('should return stepped value - data[%#]', (mark) => {
+          expect(getRadius(mark)).toBe(1);
+        });
+      });
+
+      describe('markSizeRatio - 0', () => {
+        const getRadius = getRadiusFn(data, 1, 0);
+        it.each<[number | null]>(data.map(({ mark }) => [mark]))('should return stepped value - data[%#]', (mark) => {
+          expect(getRadius(mark)).toBe(1);
+        });
+      });
+
+      describe('markSizeRatio - 1', () => {
+        const getRadius = getRadiusFn(data, 1, 1);
+        const expectedRadii = [2.62, 2.59, 1, 2.73, 2.63];
+        it.each<[number | null, number]>(data.map(({ mark }, i) => [mark, expectedRadii[i]]))(
+          'should return stepped value - data[%#]',
+          (mark, expected) => {
+            expect(getRadius(mark)).toBeCloseTo(expected, 1);
+          },
+        );
+      });
+
+      describe('markSizeRatio - 10', () => {
+        const getRadius = getRadiusFn(data, 1, 10);
+        const expectedRadii = [9.09, 8.56, 1, 11.1, 9.38];
+        it.each<[number | null, number]>(data.map(({ mark }, i) => [mark, expectedRadii[i]]))(
+          'should return stepped value - data[%#]',
+          (mark, expected) => {
+            expect(getRadius(mark)).toBeCloseTo(expected, 1);
+          },
+        );
+      });
+
+      describe('markSizeRatio - 100', () => {
+        const getRadius = getRadiusFn(data, 1, 100);
+        const expectedRadii = [80.71, 75.37, 1, 101.0, 83.61];
+        it.each<[number | null, number]>(data.map(({ mark }, i) => [mark, expectedRadii[i]]))(
+          'should return stepped value - data[%#]',
+          (mark, expected) => {
+            expect(getRadius(mark)).toBeCloseTo(expected, 1);
+          },
+        );
+      });
+
+      describe('markSizeRatio - 1000', () => {
+        // Should be treated as 100
+        const getRadius = getRadiusFn(data, 1, 1000);
+        const expectedRadii = [80.71, 75.37, 1, 101.0, 83.61];
+        it.each<[number | null, number]>(data.map(({ mark }, i) => [mark, expectedRadii[i]]))(
+          'should return stepped value - data[%#]',
+          (mark, expected) => {
+            expect(getRadius(mark)).toBeCloseTo(expected, 1);
+          },
+        );
+      });
     });
   });
 });

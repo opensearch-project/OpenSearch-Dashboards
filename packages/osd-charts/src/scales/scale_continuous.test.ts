@@ -446,4 +446,30 @@ describe('Scale Continuous', () => {
       expect(scale.getTicks(10, false)).toEqual([0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7]);
     });
   });
+
+  describe('#scaleOrThrow', () => {
+    const scale = new ScaleContinuous({ type: ScaleType.Linear, domain: [0, 100], range: [0, 100] });
+
+    it('should NOT throw for values in domain', () => {
+      expect(() => scale.scaleOrThrow(10)).not.toThrow();
+    });
+
+    it('should throw for NaN values', () => {
+      // @ts-ignore
+      jest.spyOn(scale, 'd3Scale').mockImplementationOnce(() => NaN);
+      expect(() => scale.scaleOrThrow(1)).toThrow();
+    });
+
+    it('should throw for string values', () => {
+      expect(() => scale.scaleOrThrow('c')).toThrow();
+    });
+
+    it('should throw for null values', () => {
+      expect(() => scale.scaleOrThrow(null)).toThrow();
+    });
+
+    it('should throw for undefined values', () => {
+      expect(() => scale.scaleOrThrow(undefined)).toThrow();
+    });
+  });
 });

@@ -18,6 +18,10 @@
 
 const module = jest.requireActual('../d3_utils.ts');
 
+export const defaultColor = module.defaultColor;
+export const transparentColor = module.transparentColor;
+export const defaultD3Color = module.defaultD3Color;
+
 export const stringToRGB = jest.fn(module.stringToRGB);
 export const validateColor = jest.fn(module.validateColor);
 export const argsToRGB = jest.fn(module.argsToRGB);

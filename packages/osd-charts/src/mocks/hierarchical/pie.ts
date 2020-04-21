@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-/** @internal */
 export const pieMock = [
   { sitc1: '7', exportVal: 3110253391368 },
   { sitc1: '3', exportVal: 1929578418424 },

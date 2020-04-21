@@ -442,7 +442,7 @@ export function getAvailableTicks(
     const firstTick = {
       value: firstTickValue,
       label: axisSpec.tickFormat(firstTickValue, tickFormatOptions),
-      position: scale.scale(firstTickValue) + offset,
+      position: (scale.scale(firstTickValue) ?? 0) + offset,
     };
 
     const lastTickValue = firstTickValue + scale.minInterval;
@@ -469,7 +469,7 @@ export function enableDuplicatedTicks(
     return {
       value: tick,
       label: axisSpec.tickFormat(tick, tickFormatOptions),
-      position: scale.scale(tick) + offset,
+      position: (scale.scale(tick) ?? 0) + offset,
     };
   });
 

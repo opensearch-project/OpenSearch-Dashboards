@@ -1,3 +1,5 @@
+import { RandomNumberGenerator } from '../../mocks/utils';
+
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -16,8 +18,6 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-export type RandomNumberGenerator = () => number;
-
 export class Simple1DNoise {
   private maxVertices: number;
   private maxVerticesMask: number;
@@ -25,8 +25,8 @@ export class Simple1DNoise {
   private scale: number;
   private getRandomNumber: RandomNumberGenerator;
 
-  constructor(randomNumberGenerator?: RandomNumberGenerator, maxVertices = 256, amplitude = 5.1, scale = 0.6) {
-    this.getRandomNumber = randomNumberGenerator ? randomNumberGenerator : Math.random;
+  constructor(randomNumberGenerator: RandomNumberGenerator, maxVertices = 256, amplitude = 5.1, scale = 0.6) {
+    this.getRandomNumber = randomNumberGenerator;
     this.maxVerticesMask = maxVertices - 1;
     this.amplitude = amplitude;
     this.scale = scale;
@@ -34,7 +34,8 @@ export class Simple1DNoise {
   }
 
   getValue(x: number) {
-    const r = new Array(this.maxVertices).fill(0).map(this.getRandomNumber);
+    const r = new Array(this.maxVertices).fill(0).map(() => this.getRandomNumber(0, 1, 5, true));
+
     const scaledX = x * this.scale;
     const xFloor = Math.floor(scaledX);
     const t = scaledX - xFloor;

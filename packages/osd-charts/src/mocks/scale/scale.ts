@@ -22,6 +22,7 @@ import { Scale, ScaleType } from '../../scales';
 /** @internal */
 export class MockScale {
   private static readonly base: Scale = {
+    scaleOrThrow: jest.fn().mockImplementation((x) => x),
     scale: jest.fn().mockImplementation((x) => x),
     type: ScaleType.Linear,
     bandwidth: 0,

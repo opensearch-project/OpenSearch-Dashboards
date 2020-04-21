@@ -18,8 +18,8 @@
 
 import { Datum } from './commons';
 
-type UnaryAccessorFn = (datum: Datum) => any;
-type BinaryAccessorFn = (datum: Datum, index: number) => any;
+type UnaryAccessorFn<Return = any> = (datum: Datum) => Return;
+type BinaryAccessorFn<Return = any> = (datum: Datum, index: number) => Return;
 
 export type AccessorFn = UnaryAccessorFn;
 export type IndexedAccessorFn = UnaryAccessorFn | BinaryAccessorFn;

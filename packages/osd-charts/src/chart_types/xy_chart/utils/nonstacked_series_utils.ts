@@ -20,7 +20,7 @@ import { DataSeries, DataSeriesDatum, RawDataSeries } from './series';
 import { fitFunction } from './fit_function';
 import { isAreaSeriesSpec, isLineSeriesSpec, SeriesSpecs, BasicSeriesSpec } from './specs';
 import { ScaleType } from '../../../scales';
-import { getSpecsById } from '../state/utils';
+import { getSpecsById, isDefined } from '../state/utils';
 
 /** @internal */
 export const formatNonStackedDataSeriesValues = (
@@ -59,7 +59,7 @@ export const formatNonStackedDataValues = (dataSeries: RawDataSeries, scaleToExt
   };
   for (let i = 0; i < len; i++) {
     const data = dataSeries.data[i];
-    const { x, y1, datum } = data;
+    const { x, y1, mark, datum } = data;
     let y0: number | null;
     if (y1 === null) {
       y0 = null;
@@ -77,6 +77,7 @@ export const formatNonStackedDataValues = (dataSeries: RawDataSeries, scaleToExt
       y0,
       initialY1: y1,
       initialY0: data.y0 == null || y1 === null ? null : data.y0,
+      mark: isDefined(mark) ? mark : null,
       datum,
     };
     formattedValues.data.push(formattedValue);

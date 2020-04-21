@@ -27,6 +27,7 @@ import {
   LineSeriesSpec,
   BasicSeriesSpec,
   SeriesTypes,
+  BubbleSeriesSpec,
 } from '../../chart_types/xy_chart/utils/specs';
 import { ScaleType } from '../../scales';
 import { ChartTypes } from '../../chart_types';
@@ -103,6 +104,21 @@ export class MockSeriesSpec {
     yScaleToDataExtent: false,
     hideInLegend: false,
     histogramModeAlignment: HistogramModeAlignments.Center,
+    data: [],
+  };
+
+  private static readonly bubbleBase: BubbleSeriesSpec = {
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Series,
+    id: 'spec1',
+    seriesType: SeriesTypes.Bubble,
+    groupId: DEFAULT_GLOBAL_ID,
+    xScaleType: ScaleType.Ordinal,
+    yScaleType: ScaleType.Linear,
+    xAccessor: 'x',
+    yAccessors: ['y'],
+    yScaleToDataExtent: false,
+    hideInLegend: false,
     data: [],
   };
 
@@ -192,13 +208,15 @@ export class MockSeriesSpec {
     });
   }
 
-  static byType(type?: 'line' | 'bar' | 'area'): BasicSeriesSpec {
+  static byType(type?: SeriesTypes): BasicSeriesSpec {
     switch (type) {
-      case 'line':
+      case SeriesTypes.Line:
         return MockSeriesSpec.lineBase;
-      case 'area':
+      case SeriesTypes.Area:
         return MockSeriesSpec.areaBase;
-      case 'bar':
+      case SeriesTypes.Bubble:
+        return MockSeriesSpec.bubbleBase;
+      case SeriesTypes.Bar:
       default:
         return MockSeriesSpec.barBase;
     }

@@ -85,7 +85,7 @@ function getCursorBand(
   seriesSpecs: BasicSeriesSpec[],
   totalBarsInCluster: number,
   isTooltipSnapEnabled: boolean,
-  geometriesIndexKeys: any[],
+  geometriesIndexKeys: (string | number)[],
 ): (Dimensions & { visible: boolean }) | undefined {
   // update che cursorBandPosition based on chart configuration
   const isLineAreaOnly = isLineAreaOnlyChart(seriesSpecs);

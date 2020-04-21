@@ -91,7 +91,7 @@ export function scaleAndValidateDatum(dataValue: any, scale: Scale, alignWithTic
   const isContinuous = scale.type !== ScaleType.Ordinal;
   const scaledValue = scale.scale(dataValue);
   // d3.scale will return 0 for '', rendering the line incorrectly at 0
-  if (isNaN(scaledValue) || (isContinuous && dataValue === '')) {
+  if (scaledValue === null || (isContinuous && dataValue === '')) {
     return null;
   }
 

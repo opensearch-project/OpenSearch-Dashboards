@@ -16,9 +16,13 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { scaleBand, scaleQuantize, ScaleQuantize } from 'd3-scale';
+import { scaleBand, scaleQuantize, ScaleQuantize, ScaleBand as D3ScaleBand } from 'd3-scale';
+
 import { clamp } from '../utils/commons';
 import { ScaleType, Scale } from '.';
+import { stringifyNullsUndefined } from '../chart_types/xy_chart/state/utils';
+import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
+
 /**
  * Categorical scale
  * @internal
@@ -34,7 +38,7 @@ export class ScaleBand implements Scale {
   readonly invertedScale: ScaleQuantize<number>;
   readonly minInterval: number;
   readonly barsPadding: number;
-  private readonly d3Scale: any;
+  private readonly d3Scale: D3ScaleBand<NonNullable<PrimitiveValue>>;
 
   constructor(
     domain: any[],
@@ -48,7 +52,7 @@ export class ScaleBand implements Scale {
     barsPadding = 0,
   ) {
     this.type = ScaleType.Ordinal;
-    this.d3Scale = scaleBand();
+    this.d3Scale = scaleBand<NonNullable<PrimitiveValue>>();
     this.d3Scale.domain(domain);
     this.d3Scale.range(range);
     const safeBarPadding = clamp(barsPadding, 0, 1);
@@ -63,7 +67,7 @@ export class ScaleBand implements Scale {
       this.bandwidth = overrideBandwidth * (1 - safeBarPadding);
     }
     this.bandwidthPadding = this.bandwidth;
-    // TO FIX: we are assiming that it's ordered
+    // TO FIX: we are assuming that it's ordered
     this.isInverted = this.domain[0] > this.domain[1];
     this.invertedScale = scaleQuantize()
       .domain(range)
@@ -71,28 +75,53 @@ export class ScaleBand implements Scale {
     this.minInterval = 0;
   }
 
-  scale(value: any) {
-    return this.d3Scale(value);
+  private getScaledValue(value?: PrimitiveValue): number | null {
+    const scaleValue = this.d3Scale(stringifyNullsUndefined(value));
+
+    if (scaleValue === undefined || isNaN(scaleValue)) {
+      return null;
+    }
+
+    return scaleValue;
   }
-  pureScale(value: any) {
-    return this.d3Scale(value);
+
+  scaleOrThrow(value?: PrimitiveValue): number {
+    const scaleValue = this.scale(value);
+
+    if (scaleValue === null) {
+      throw new Error(`Unable to scale value: ${scaleValue})`);
+    }
+
+    return scaleValue;
+  }
+
+  scale(value?: PrimitiveValue) {
+    return this.getScaledValue(value);
+  }
+
+  pureScale(value?: PrimitiveValue) {
+    return this.getScaledValue(value);
   }
 
   ticks() {
     return this.domain;
   }
+
   invert(value: any) {
     return this.invertedScale(value);
   }
+
   invertWithStep(value: any) {
     return {
       value: this.invertedScale(value),
       withinBandwidth: true,
     };
   }
+
   isSingleValue() {
     return this.domain.length < 2;
   }
+
   isValueInDomain(value: any) {
     return this.domain.includes(value);
   }

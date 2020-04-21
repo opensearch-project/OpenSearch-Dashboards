@@ -24,7 +24,7 @@ import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 /** @internal */
 export const getGeometriesIndexKeysSelector = createCachedSelector(
   [computeSeriesGeometriesSelector],
-  (seriesGeometries): any[] => {
-    return [...seriesGeometries.geometriesIndex.keys()].sort(compareByValueAsc);
+  (seriesGeometries): (number | string)[] => {
+    return seriesGeometries.geometriesIndex.keys().sort(compareByValueAsc);
   },
 )(getChartIdSelector);

@@ -38,6 +38,7 @@ interface AreaGeometriesProps {
 export function renderAreas(ctx: CanvasRenderingContext2D, props: AreaGeometriesProps) {
   withContext(ctx, (ctx) => {
     const { sharedStyle, highlightedLegendItem, areas, clippings } = props;
+
     withClip(ctx, clippings, (ctx: CanvasRenderingContext2D) => {
       ctx.save();
 
@@ -59,16 +60,22 @@ export function renderAreas(ctx: CanvasRenderingContext2D, props: AreaGeometries
       ctx.clip();
       ctx.restore();
     });
-    for (let i = 0; i < areas.length; i++) {
-      const glyph = areas[i];
-      const { seriesPointStyle, seriesIdentifier } = glyph;
+
+    areas.forEach((area) => {
+      const { seriesPointStyle, seriesIdentifier } = area;
       if (seriesPointStyle.visible) {
         const geometryStateStyle = getGeometryStateStyle(seriesIdentifier, highlightedLegendItem, sharedStyle);
-        withContext(ctx, () => {
-          renderPoints(ctx, glyph.points, seriesPointStyle, geometryStateStyle);
-        });
+        withClip(
+          ctx,
+          clippings,
+          (ctx) => {
+            renderPoints(ctx, area.points, seriesPointStyle, geometryStateStyle);
+          },
+          // TODO: add padding over clipping
+          area.points[0]?.value.mark !== null,
+        );
       }
-    }
+    });
   });
 }
 
@@ -84,6 +91,7 @@ function renderArea(
   const fill = buildAreaStyles(color, seriesAreaStyle, geometryStateStyle);
   renderAreaPath(ctx, transform.x, area, fill, clippedRanges, clippings);
 }
+
 function renderAreaLines(
   ctx: CanvasRenderingContext2D,
   glyph: AreaGeometry,

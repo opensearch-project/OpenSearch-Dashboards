@@ -9,3 +9,4 @@
 /dist
 /coverage
 /.vscode
+src/utils/d3-delaunay/*

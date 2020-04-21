@@ -18,7 +18,7 @@
 
 import { ScaleType } from '../../../scales';
 import { CurveType } from '../../../utils/curves';
-import { IndexedGeometry, PointGeometry, AreaGeometry } from '../../../utils/geometry';
+import { PointGeometry, AreaGeometry } from '../../../utils/geometry';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { computeXScale, computeYScales } from '../utils/scales';
 import { AreaSeriesSpec, SeriesTypes } from '../utils/specs';
@@ -27,6 +27,7 @@ import { renderArea } from './rendering';
 import { ChartTypes } from '../..';
 import { SpecTypes } from '../../../specs/settings';
 import { MockSeriesSpec } from '../../../mocks/specs';
+import { IndexedGeometryMap } from '../utils/indexed_geometry_map';
 
 const SPEC_ID = 'spec_1';
 const GROUP_ID = 'group_1';
@@ -62,7 +63,7 @@ describe('Rendering points - areas', () => {
     });
     let renderedArea: {
       areaGeometry: AreaGeometry;
-      indexedGeometries: Map<any, IndexedGeometry[]>;
+      indexedGeometryMap: IndexedGeometryMap;
     };
 
     beforeEach(() => {
@@ -76,6 +77,9 @@ describe('Rendering points - areas', () => {
         false,
         0,
         LIGHT_THEME.areaSeriesStyle,
+        {
+          enabled: false,
+        },
       );
     });
     test('Render geometry but empty upper and lower lines and area paths', () => {
@@ -117,7 +121,7 @@ describe('Rendering points - areas', () => {
     const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
     let renderedArea: {
       areaGeometry: AreaGeometry;
-      indexedGeometries: Map<any, IndexedGeometry[]>;
+      indexedGeometryMap: IndexedGeometryMap;
     };
 
     beforeEach(() => {
@@ -131,6 +135,9 @@ describe('Rendering points - areas', () => {
         false,
         0,
         LIGHT_THEME.areaSeriesStyle,
+        {
+          enabled: false,
+        },
       );
     });
     test('Can render an line and area paths', () => {
@@ -148,13 +155,13 @@ describe('Rendering points - areas', () => {
     test('Can render two points', () => {
       const {
         areaGeometry: { points },
-        indexedGeometries,
+        indexedGeometryMap,
       } = renderedArea;
 
       expect(points[0]).toEqual(({
         x: 0,
         y: 0,
-        radius: 10,
+        radius: 0,
         color: 'red',
         seriesIdentifier: {
           specId: SPEC_ID,
@@ -168,6 +175,7 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 0,
           y: 10,
+          mark: null,
         },
         transform: {
           x: 25,
@@ -177,7 +185,7 @@ describe('Rendering points - areas', () => {
       expect(points[1]).toEqual(({
         x: 50,
         y: 50,
-        radius: 10,
+        radius: 0,
         color: 'red',
         seriesIdentifier: {
           specId: SPEC_ID,
@@ -191,13 +199,14 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 1,
           y: 5,
+          mark: null,
         },
         transform: {
           x: 25,
           y: 0,
         },
       } as unknown) as PointGeometry);
-      expect(indexedGeometries.size).toEqual(points.length);
+      expect(indexedGeometryMap.size).toEqual(points.length);
     });
   });
   describe('Multi series area chart - ordinal', () => {
@@ -246,11 +255,11 @@ describe('Rendering points - areas', () => {
 
     let firstLine: {
       areaGeometry: AreaGeometry;
-      indexedGeometries: Map<any, IndexedGeometry[]>;
+      indexedGeometryMap: IndexedGeometryMap;
     };
     let secondLine: {
       areaGeometry: AreaGeometry;
-      indexedGeometries: Map<any, IndexedGeometry[]>;
+      indexedGeometryMap: IndexedGeometryMap;
     };
 
     beforeEach(() => {
@@ -264,6 +273,9 @@ describe('Rendering points - areas', () => {
         false,
         0,
         LIGHT_THEME.areaSeriesStyle,
+        {
+          enabled: false,
+        },
       );
       secondLine = renderArea(
         25, // adding a ideal 25px shift, generally applied by renderGeometries
@@ -275,6 +287,9 @@ describe('Rendering points - areas', () => {
         false,
         0,
         LIGHT_THEME.areaSeriesStyle,
+        {
+          enabled: false,
+        },
       );
     });
 
@@ -296,13 +311,13 @@ describe('Rendering points - areas', () => {
     test('can render first spec points', () => {
       const {
         areaGeometry: { points },
-        indexedGeometries,
+        indexedGeometryMap,
       } = firstLine;
       expect(points.length).toEqual(2);
       expect(points[0]).toEqual(({
         x: 0,
         y: 50,
-        radius: 10,
+        radius: 0,
         color: 'red',
         seriesIdentifier: {
           specId: spec1Id,
@@ -316,6 +331,7 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 0,
           y: 10,
+          mark: null,
         },
         transform: {
           x: 25,
@@ -325,7 +341,7 @@ describe('Rendering points - areas', () => {
       expect(points[1]).toEqual(({
         x: 50,
         y: 75,
-        radius: 10,
+        radius: 0,
         color: 'red',
         seriesIdentifier: {
           specId: spec1Id,
@@ -339,24 +355,25 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 1,
           y: 5,
+          mark: null,
         },
         transform: {
           x: 25,
           y: 0,
         },
       } as unknown) as PointGeometry);
-      expect(indexedGeometries.size).toEqual(points.length);
+      expect(indexedGeometryMap.size).toEqual(points.length);
     });
     test('can render second spec points', () => {
       const {
         areaGeometry: { points },
-        indexedGeometries,
+        indexedGeometryMap,
       } = secondLine;
       expect(points.length).toEqual(2);
       expect(points[0]).toEqual(({
         x: 0,
         y: 0,
-        radius: 10,
+        radius: 0,
         color: 'blue',
         seriesIdentifier: {
           specId: spec2Id,
@@ -370,6 +387,7 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 0,
           y: 20,
+          mark: null,
         },
         transform: {
           x: 25,
@@ -379,7 +397,7 @@ describe('Rendering points - areas', () => {
       expect(points[1]).toEqual(({
         x: 50,
         y: 50,
-        radius: 10,
+        radius: 0,
         color: 'blue',
         seriesIdentifier: {
           specId: spec2Id,
@@ -393,13 +411,14 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 1,
           y: 10,
+          mark: null,
         },
         transform: {
           x: 25,
           y: 0,
         },
       } as unknown) as PointGeometry);
-      expect(indexedGeometries.size).toEqual(points.length);
+      expect(indexedGeometryMap.size).toEqual(points.length);
     });
   });
   describe('Single series area chart - linear', () => {
@@ -430,7 +449,7 @@ describe('Rendering points - areas', () => {
 
     let renderedArea: {
       areaGeometry: AreaGeometry;
-      indexedGeometries: Map<any, IndexedGeometry[]>;
+      indexedGeometryMap: IndexedGeometryMap;
     };
 
     beforeEach(() => {
@@ -444,6 +463,9 @@ describe('Rendering points - areas', () => {
         false,
         0,
         LIGHT_THEME.areaSeriesStyle,
+        {
+          enabled: false,
+        },
       );
     });
     test('Can render a linear area', () => {
@@ -457,12 +479,12 @@ describe('Rendering points - areas', () => {
     test('Can render two points', () => {
       const {
         areaGeometry: { points },
-        indexedGeometries,
+        indexedGeometryMap,
       } = renderedArea;
       expect(points[0]).toEqual(({
         x: 0,
         y: 0,
-        radius: 10,
+        radius: 0,
         color: 'red',
         seriesIdentifier: {
           specId: SPEC_ID,
@@ -476,6 +498,7 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 0,
           y: 10,
+          mark: null,
         },
         transform: {
           x: 0,
@@ -485,7 +508,7 @@ describe('Rendering points - areas', () => {
       expect(points[1]).toEqual(({
         x: 100,
         y: 50,
-        radius: 10,
+        radius: 0,
         color: 'red',
         seriesIdentifier: {
           specId: SPEC_ID,
@@ -499,13 +522,14 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 1,
           y: 5,
+          mark: null,
         },
         transform: {
           x: 0,
           y: 0,
         },
       } as unknown) as PointGeometry);
-      expect(indexedGeometries.size).toEqual(points.length);
+      expect(indexedGeometryMap.size).toEqual(points.length);
     });
   });
   describe('Multi series area chart - linear', () => {
@@ -554,11 +578,11 @@ describe('Rendering points - areas', () => {
 
     let firstLine: {
       areaGeometry: AreaGeometry;
-      indexedGeometries: Map<any, IndexedGeometry[]>;
+      indexedGeometryMap: IndexedGeometryMap;
     };
     let secondLine: {
       areaGeometry: AreaGeometry;
-      indexedGeometries: Map<any, IndexedGeometry[]>;
+      indexedGeometryMap: IndexedGeometryMap;
     };
 
     beforeEach(() => {
@@ -572,6 +596,9 @@ describe('Rendering points - areas', () => {
         false,
         0,
         LIGHT_THEME.areaSeriesStyle,
+        {
+          enabled: false,
+        },
       );
       secondLine = renderArea(
         0, // not applied any shift, renderGeometries applies it only with mixed charts
@@ -583,6 +610,9 @@ describe('Rendering points - areas', () => {
         false,
         0,
         LIGHT_THEME.areaSeriesStyle,
+        {
+          enabled: false,
+        },
       );
     });
     test('can render two linear areas', () => {
@@ -603,13 +633,13 @@ describe('Rendering points - areas', () => {
     test('can render first spec points', () => {
       const {
         areaGeometry: { points },
-        indexedGeometries,
+        indexedGeometryMap,
       } = firstLine;
       expect(points.length).toEqual(2);
       expect(points[0]).toEqual(({
         x: 0,
         y: 50,
-        radius: 10,
+        radius: 0,
         color: 'red',
         seriesIdentifier: {
           specId: spec1Id,
@@ -623,6 +653,7 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 0,
           y: 10,
+          mark: null,
         },
         transform: {
           x: 0,
@@ -632,7 +663,7 @@ describe('Rendering points - areas', () => {
       expect(points[1]).toEqual(({
         x: 100,
         y: 75,
-        radius: 10,
+        radius: 0,
         color: 'red',
         seriesIdentifier: {
           specId: spec1Id,
@@ -646,24 +677,25 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 1,
           y: 5,
+          mark: null,
         },
         transform: {
           x: 0,
           y: 0,
         },
       } as unknown) as PointGeometry);
-      expect(indexedGeometries.size).toEqual(points.length);
+      expect(indexedGeometryMap.size).toEqual(points.length);
     });
     test('can render second spec points', () => {
       const {
         areaGeometry: { points },
-        indexedGeometries,
+        indexedGeometryMap,
       } = secondLine;
       expect(points.length).toEqual(2);
       expect(points[0]).toEqual(({
         x: 0,
         y: 0,
-        radius: 10,
+        radius: 0,
         color: 'blue',
         seriesIdentifier: {
           specId: spec2Id,
@@ -677,6 +709,7 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 0,
           y: 20,
+          mark: null,
         },
         transform: {
           x: 0,
@@ -686,7 +719,7 @@ describe('Rendering points - areas', () => {
       expect(points[1]).toEqual(({
         x: 100,
         y: 50,
-        radius: 10,
+        radius: 0,
         color: 'blue',
         seriesIdentifier: {
           specId: spec2Id,
@@ -700,13 +733,14 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 1,
           y: 10,
+          mark: null,
         },
         transform: {
           x: 0,
           y: 0,
         },
       } as unknown) as PointGeometry);
-      expect(indexedGeometries.size).toEqual(points.length);
+      expect(indexedGeometryMap.size).toEqual(points.length);
     });
   });
   describe('Single series area chart - time', () => {
@@ -737,7 +771,7 @@ describe('Rendering points - areas', () => {
 
     let renderedArea: {
       areaGeometry: AreaGeometry;
-      indexedGeometries: Map<any, IndexedGeometry[]>;
+      indexedGeometryMap: IndexedGeometryMap;
     };
 
     beforeEach(() => {
@@ -751,6 +785,9 @@ describe('Rendering points - areas', () => {
         false,
         0,
         LIGHT_THEME.areaSeriesStyle,
+        {
+          enabled: false,
+        },
       );
     });
     test('Can render a time area', () => {
@@ -764,12 +801,12 @@ describe('Rendering points - areas', () => {
     test('Can render two points', () => {
       const {
         areaGeometry: { points },
-        indexedGeometries,
+        indexedGeometryMap,
       } = renderedArea;
       expect(points[0]).toEqual(({
         x: 0,
         y: 0,
-        radius: 10,
+        radius: 0,
         color: 'red',
         seriesIdentifier: {
           specId: SPEC_ID,
@@ -783,6 +820,7 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 1546300800000,
           y: 10,
+          mark: null,
         },
         transform: {
           x: 0,
@@ -792,7 +830,7 @@ describe('Rendering points - areas', () => {
       expect(points[1]).toEqual(({
         x: 100,
         y: 50,
-        radius: 10,
+        radius: 0,
         color: 'red',
         seriesIdentifier: {
           specId: SPEC_ID,
@@ -806,13 +844,14 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 1546387200000,
           y: 5,
+          mark: null,
         },
         transform: {
           x: 0,
           y: 0,
         },
       } as unknown) as PointGeometry);
-      expect(indexedGeometries.size).toEqual(points.length);
+      expect(indexedGeometryMap.size).toEqual(points.length);
     });
   });
   describe('Multi series area chart - time', () => {
@@ -861,11 +900,11 @@ describe('Rendering points - areas', () => {
 
     let firstLine: {
       areaGeometry: AreaGeometry;
-      indexedGeometries: Map<any, IndexedGeometry[]>;
+      indexedGeometryMap: IndexedGeometryMap;
     };
     let secondLine: {
       areaGeometry: AreaGeometry;
-      indexedGeometries: Map<any, IndexedGeometry[]>;
+      indexedGeometryMap: IndexedGeometryMap;
     };
 
     beforeEach(() => {
@@ -879,6 +918,9 @@ describe('Rendering points - areas', () => {
         false,
         0,
         LIGHT_THEME.areaSeriesStyle,
+        {
+          enabled: false,
+        },
       );
       secondLine = renderArea(
         0, // not applied any shift, renderGeometries applies it only with mixed charts
@@ -890,18 +932,21 @@ describe('Rendering points - areas', () => {
         false,
         0,
         LIGHT_THEME.areaSeriesStyle,
+        {
+          enabled: false,
+        },
       );
     });
     test('can render first spec points', () => {
       const {
         areaGeometry: { points },
-        indexedGeometries,
+        indexedGeometryMap,
       } = firstLine;
       expect(points.length).toEqual(2);
       expect(points[0]).toEqual(({
         x: 0,
         y: 50,
-        radius: 10,
+        radius: 0,
         color: 'red',
         seriesIdentifier: {
           specId: spec1Id,
@@ -915,6 +960,7 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 1546300800000,
           y: 10,
+          mark: null,
         },
         transform: {
           x: 0,
@@ -924,7 +970,7 @@ describe('Rendering points - areas', () => {
       expect(points[1]).toEqual(({
         x: 100,
         y: 75,
-        radius: 10,
+        radius: 0,
         color: 'red',
         seriesIdentifier: {
           specId: spec1Id,
@@ -938,24 +984,25 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 1546387200000,
           y: 5,
+          mark: null,
         },
         transform: {
           x: 0,
           y: 0,
         },
       } as unknown) as PointGeometry);
-      expect(indexedGeometries.size).toEqual(points.length);
+      expect(indexedGeometryMap.size).toEqual(points.length);
     });
     test('can render second spec points', () => {
       const {
         areaGeometry: { points },
-        indexedGeometries,
+        indexedGeometryMap,
       } = secondLine;
       expect(points.length).toEqual(2);
       expect(points[0]).toEqual(({
         x: 0,
         y: 0,
-        radius: 10,
+        radius: 0,
         color: 'blue',
         seriesIdentifier: {
           specId: spec2Id,
@@ -969,6 +1016,7 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 1546300800000,
           y: 20,
+          mark: null,
         },
         transform: {
           x: 0,
@@ -978,7 +1026,7 @@ describe('Rendering points - areas', () => {
       expect(points[1]).toEqual(({
         x: 100,
         y: 50,
-        radius: 10,
+        radius: 0,
         color: 'blue',
         seriesIdentifier: {
           specId: spec2Id,
@@ -992,13 +1040,14 @@ describe('Rendering points - areas', () => {
           accessor: 'y1',
           x: 1546387200000,
           y: 10,
+          mark: null,
         },
         transform: {
           x: 0,
           y: 0,
         },
       } as unknown) as PointGeometry);
-      expect(indexedGeometries.size).toEqual(points.length);
+      expect(indexedGeometryMap.size).toEqual(points.length);
     });
   });
   describe('Single series area chart - y log', () => {
@@ -1036,7 +1085,7 @@ describe('Rendering points - areas', () => {
 
     let renderedArea: {
       areaGeometry: AreaGeometry;
-      indexedGeometries: Map<any, IndexedGeometry[]>;
+      indexedGeometryMap: IndexedGeometryMap;
     };
 
     beforeEach(() => {
@@ -1050,6 +1099,9 @@ describe('Rendering points - areas', () => {
         false,
         0,
         LIGHT_THEME.areaSeriesStyle,
+        {
+          enabled: false,
+        },
       );
     });
     test('Can render a splitted area and line', () => {
@@ -1064,16 +1116,16 @@ describe('Rendering points - areas', () => {
     test('Can render points', () => {
       const {
         areaGeometry: { points },
-        indexedGeometries,
+        indexedGeometryMap,
       } = renderedArea;
       // all the points minus the undefined ones on a log scale
       expect(points.length).toBe(7);
       // all the points expect null geometries
-      expect(indexedGeometries.size).toEqual(8);
-      const nullIndexdGeometry = indexedGeometries.get(2)!;
-      expect(nullIndexdGeometry).toBeUndefined();
+      expect(indexedGeometryMap.size).toEqual(8);
+      const nullIndexdGeometry = indexedGeometryMap.find(2)!;
+      expect(nullIndexdGeometry).toEqual([]);
 
-      const zeroValueIndexdGeometry = indexedGeometries.get(5)!;
+      const zeroValueIndexdGeometry = indexedGeometryMap.find(5)!;
       expect(zeroValueIndexdGeometry).toBeDefined();
       expect(zeroValueIndexdGeometry.length).toBe(1);
       // moved to the bottom of the chart
@@ -1118,6 +1170,7 @@ describe('Rendering points - areas', () => {
         x: 1546300800000,
         y0: null,
         y1: 0,
+        mark: null,
       },
       {
         datum: [1546387200000, 5],
@@ -1126,6 +1179,7 @@ describe('Rendering points - areas', () => {
         x: 1546387200000,
         y0: null,
         y1: 0.7142857142857143,
+        mark: null,
       },
     ]);
   });
@@ -1163,6 +1217,7 @@ describe('Rendering points - areas', () => {
         x: 1546300800000,
         y0: null,
         y1: null,
+        mark: null,
       },
       {
         datum: [1546387200000, 5],
@@ -1171,6 +1226,7 @@ describe('Rendering points - areas', () => {
         x: 1546387200000,
         y0: null,
         y1: 5,
+        mark: null,
       },
     ]);
 
@@ -1182,6 +1238,7 @@ describe('Rendering points - areas', () => {
         x: 1546300800000,
         y0: null,
         y1: 3,
+        mark: null,
       },
       {
         datum: [1546387200000, null],
@@ -1190,7 +1247,96 @@ describe('Rendering points - areas', () => {
         x: 1546387200000,
         y0: null,
         y1: null,
+        mark: null,
       },
     ]);
+  });
+
+  describe('Error guards for scaled values', () => {
+    const pointSeriesSpec: AreaSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
+      id: SPEC_ID,
+      groupId: GROUP_ID,
+      seriesType: SeriesTypes.Area,
+      yScaleToDataExtent: false,
+      data: [
+        [0, 10],
+        [1, 5],
+      ],
+      xAccessor: 0,
+      yAccessors: [1],
+      xScaleType: ScaleType.Ordinal,
+      yScaleType: ScaleType.Linear,
+    };
+    const pointSeriesMap = [pointSeriesSpec];
+    const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
+    const xScale = computeXScale({
+      xDomain: pointSeriesDomains.xDomain,
+      totalBarsInCluster: pointSeriesMap.length,
+      range: [0, 100],
+    });
+    const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
+    let renderedArea: {
+      areaGeometry: AreaGeometry;
+      indexedGeometryMap: IndexedGeometryMap;
+    };
+
+    beforeEach(() => {
+      renderedArea = renderArea(
+        25, // adding a ideal 25px shift, generally applied by renderGeometries
+        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
+        xScale,
+        yScales.get(GROUP_ID)!,
+        'red',
+        CurveType.LINEAR,
+        false,
+        0,
+        LIGHT_THEME.areaSeriesStyle,
+        {
+          enabled: false,
+        },
+      );
+    });
+
+    describe('xScale values throw error', () => {
+      beforeAll(() => {
+        jest.spyOn(xScale, 'scaleOrThrow').mockImplementation(() => {
+          throw new Error();
+        });
+      });
+
+      test('Should include no lines nor area', () => {
+        const {
+          areaGeometry: { lines, area, color, seriesIdentifier, transform },
+        } = renderedArea;
+        expect(lines).toHaveLength(0);
+        expect(area).toBe('');
+        expect(color).toBe('red');
+        expect(seriesIdentifier.seriesKeys).toEqual([1]);
+        expect(seriesIdentifier.specId).toEqual(SPEC_ID);
+        expect(transform).toEqual({ x: 25, y: 0 });
+      });
+    });
+
+    describe('yScale values throw error', () => {
+      beforeAll(() => {
+        jest.spyOn(yScales.get(GROUP_ID)!, 'scaleOrThrow').mockImplementation(() => {
+          throw new Error();
+        });
+      });
+
+      test('Should include no lines nor area', () => {
+        const {
+          areaGeometry: { lines, area, color, seriesIdentifier, transform },
+        } = renderedArea;
+        expect(lines).toHaveLength(0);
+        expect(area).toBe('');
+        expect(color).toBe('red');
+        expect(seriesIdentifier.seriesKeys).toEqual([1]);
+        expect(seriesIdentifier.specId).toEqual(SPEC_ID);
+        expect(transform).toEqual({ x: 25, y: 0 });
+      });
+    });
   });
 });

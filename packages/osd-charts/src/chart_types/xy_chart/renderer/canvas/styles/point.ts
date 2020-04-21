@@ -35,6 +35,7 @@ export function buildPointStyles(
   baseColor: string,
   themePointStyle: PointStyle,
   geometryStateStyle: GeometryStateStyle,
+  pointRadius: number,
   overrides?: Partial<PointStyle>,
 ): { fill: Fill; stroke: Stroke; radius: number } {
   const pointStyle = mergePartial(themePointStyle, overrides);
@@ -51,6 +52,15 @@ export function buildPointStyles(
     width: pointStyle.strokeWidth,
   };
 
-  const radius = overrides && overrides.radius ? overrides.radius : themePointStyle.radius;
+  const radius = getRadius(pointRadius, themePointStyle.radius, overrides?.radius);
   return { fill, stroke, radius };
+}
+
+/** @internal */
+export function getRadius(pointRadius: number, themeRadius: number, overrideRadius?: number) {
+  if (overrideRadius !== undefined) {
+    return overrideRadius;
+  }
+
+  return Math.max(pointRadius, themeRadius);
 }

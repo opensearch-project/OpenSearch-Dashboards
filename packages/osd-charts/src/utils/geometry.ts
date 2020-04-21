@@ -34,6 +34,7 @@ export type BandedAccessorType = $Values<typeof BandedAccessorType>;
 export interface GeometryValue {
   y: any;
   x: any;
+  mark: number | null;
   accessor: BandedAccessorType;
 }
 
@@ -112,6 +113,13 @@ export interface AreaGeometry {
    * Ranges of `[x0, x1]` pairs to clip from series
    */
   clippedRanges: ClippedRanges;
+}
+
+export interface BubbleGeometry {
+  points: PointGeometry[];
+  color: Color;
+  seriesIdentifier: XYChartSeriesIdentifier;
+  seriesPointStyle: PointStyle;
 }
 
 export interface ArcGeometry {

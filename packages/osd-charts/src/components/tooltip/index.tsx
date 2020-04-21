@@ -99,41 +99,52 @@ class TooltipComponent extends React.Component<TooltipProps> {
     return <div className="echTooltip__header">{formatter ? formatter(headerData) : headerData.value}</div>;
   }
 
-  render() {
-    const { isVisible, info, headerFormatter, getChartContainerRef } = this.props;
-    const chartContainerRef = getChartContainerRef();
-    if (!this.portalNode || chartContainerRef.current === null || !isVisible || !info) {
-      return null;
-    }
-    const tooltipComponent = (
+  renderTooltip = (info: TooltipInfo) => {
+    const { headerFormatter } = this.props;
+
+    return (
       <div className="echTooltip" ref={this.tooltipRef}>
         {this.renderHeader(info.header, headerFormatter)}
         <div className="echTooltip__list">
-          {info.values.map(({ seriesIdentifier, valueAccessor, label, value, color, isHighlighted, isVisible }) => {
-            if (!isVisible) {
-              return null;
-            }
-            const classes = classNames('echTooltip__item', {
-              /* eslint @typescript-eslint/camelcase:0 */
-              echTooltip__rowHighlighted: isHighlighted,
-            });
-            return (
-              <div
-                key={`${seriesIdentifier.key}__${valueAccessor}`}
-                className={classes}
-                style={{
-                  borderLeftColor: color,
-                }}
-              >
-                <span className="echTooltip__label">{label}</span>
-                <span className="echTooltip__value">{value}</span>
-              </div>
-            );
-          })}
+          {info.values.map(
+            ({ seriesIdentifier, valueAccessor, label, value, markValue, color, isHighlighted, isVisible }, index) => {
+              if (!isVisible) {
+                return null;
+              }
+              const classes = classNames('echTooltip__item', {
+                /* eslint @typescript-eslint/camelcase:0 */
+                echTooltip__rowHighlighted: isHighlighted,
+              });
+              return (
+                <div
+                  // NOTE: temporary to avoid errors
+                  key={`${seriesIdentifier.key}__${valueAccessor}__${index}`}
+                  className={classes}
+                  style={{
+                    borderLeftColor: color,
+                  }}
+                >
+                  <span className="echTooltip__label">{label}</span>
+                  <span className="echTooltip__value">{value}</span>
+                  {markValue && <span className="echTooltip__markValue">&nbsp;({markValue})</span>}
+                </div>
+              );
+            },
+          )}
         </div>
       </div>
     );
-    return createPortal(tooltipComponent, this.portalNode);
+  };
+
+  render() {
+    const { isVisible, info, getChartContainerRef } = this.props;
+    const chartContainerRef = getChartContainerRef();
+
+    if (!this.portalNode || chartContainerRef.current === null || !isVisible || !info) {
+      return null;
+    }
+
+    return createPortal(this.renderTooltip(info), this.portalNode);
   }
 }
 

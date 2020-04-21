@@ -111,9 +111,9 @@ describe('Series', () => {
         seriesKeys: ['a'],
         key: 'a',
         data: [
-          { x: 1, y1: 1 },
-          { x: 2, y1: 2 },
-          { x: 4, y1: 4 },
+          { x: 1, y1: 1, mark: null },
+          { x: 2, y1: 2, mark: null },
+          { x: 4, y1: 4, mark: null },
         ],
       },
       {
@@ -123,8 +123,8 @@ describe('Series', () => {
         seriesKeys: ['b'],
         key: 'b',
         data: [
-          { x: 1, y1: 21 },
-          { x: 3, y1: 23 },
+          { x: 1, y1: 21, mark: null },
+          { x: 3, y1: 23, mark: null },
         ],
       },
     ];
@@ -141,10 +141,10 @@ describe('Series', () => {
         seriesKeys: ['a'],
         key: 'a',
         data: [
-          { x: 1, y1: 1 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 3 },
-          { x: 4, y1: 4 },
+          { x: 1, y1: 1, mark: null },
+          { x: 2, y1: 2, mark: null },
+          { x: 3, y1: 3, mark: null },
+          { x: 4, y1: 4, mark: null },
         ],
       },
       {
@@ -154,10 +154,10 @@ describe('Series', () => {
         seriesKeys: ['b'],
         key: 'b',
         data: [
-          { x: 1, y1: 1 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 3 },
-          { x: 4, y1: 4 },
+          { x: 1, y1: 1, mark: null },
+          { x: 2, y1: 2, mark: null },
+          { x: 3, y1: 3, mark: null },
+          { x: 4, y1: 4, mark: null },
         ],
       },
       {
@@ -167,10 +167,10 @@ describe('Series', () => {
         seriesKeys: ['b'],
         key: 'b',
         data: [
-          { x: 1, y1: 1 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 3 },
-          { x: 4, y1: 4 },
+          { x: 1, y1: 1, mark: null },
+          { x: 2, y1: 2, mark: null },
+          { x: 3, y1: 3, mark: null },
+          { x: 4, y1: 4, mark: null },
         ],
       },
       {
@@ -180,10 +180,10 @@ describe('Series', () => {
         seriesKeys: ['b'],
         key: 'b',
         data: [
-          { x: 1, y1: 1 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 3 },
-          { x: 4, y1: 4 },
+          { x: 1, y1: 1, mark: null },
+          { x: 2, y1: 2, mark: null },
+          { x: 3, y1: 3, mark: null },
+          { x: 4, y1: 4, mark: null },
         ],
       },
     ];
@@ -200,9 +200,9 @@ describe('Series', () => {
         seriesKeys: ['a'],
         key: 'a',
         data: [
-          { x: 1, y1: 1 },
-          { x: 4, y1: 4 },
-          { x: 2, y1: 2 },
+          { x: 1, y1: 1, mark: null },
+          { x: 4, y1: 4, mark: null },
+          { x: 2, y1: 2, mark: null },
         ],
       },
       {
@@ -212,8 +212,8 @@ describe('Series', () => {
         seriesKeys: ['b'],
         key: 'b',
         data: [
-          { x: 3, y1: 23 },
-          { x: 1, y1: 21 },
+          { x: 3, y1: 23, mark: null },
+          { x: 1, y1: 21, mark: null },
         ],
       },
     ];
@@ -230,7 +230,7 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['a'],
         key: 'a',
-        data: new Array(maxArrayItems).fill(0).map((d, i) => ({ x: i, y1: i })),
+        data: new Array(maxArrayItems).fill(0).map((d, i) => ({ x: i, y1: i, mark: null })),
       },
       {
         specId: 'spec1',
@@ -238,7 +238,7 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['b'],
         key: 'b',
-        data: new Array(maxArrayItems).fill(0).map((d, i) => ({ x: i, y1: i })),
+        data: new Array(maxArrayItems).fill(0).map((d, i) => ({ x: i, y1: i, mark: null })),
       },
     ];
     const xValues = new Set(new Array(maxArrayItems).fill(0).map((d, i) => i));
@@ -254,9 +254,9 @@ describe('Series', () => {
         seriesKeys: ['a'],
         key: 'a',
         data: [
-          { x: 1, y1: 1 },
-          { x: 2, y1: 2 },
-          { x: 4, y1: 4 },
+          { x: 1, y1: 1, mark: null },
+          { x: 2, y1: 2, mark: null },
+          { x: 4, y1: 4, mark: null },
         ],
       },
       {
@@ -266,8 +266,8 @@ describe('Series', () => {
         seriesKeys: ['b'],
         key: 'b',
         data: [
-          { x: 1, y1: 21 },
-          { x: 3, y1: 23 },
+          { x: 1, y1: 21, mark: null },
+          { x: 3, y1: 23, mark: null },
         ],
       },
     ];
@@ -286,10 +286,10 @@ describe('Series', () => {
         seriesKeys: ['a'],
         key: 'a',
         data: [
-          { x: 1, y1: 1 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 3 },
-          { x: 4, y1: 4 },
+          { x: 1, y1: 1, mark: null },
+          { x: 2, y1: 2, mark: null },
+          { x: 3, y1: 3, mark: null },
+          { x: 4, y1: 4, mark: null },
         ],
       },
       {
@@ -299,10 +299,10 @@ describe('Series', () => {
         seriesKeys: ['b'],
         key: 'b',
         data: [
-          { x: 1, y1: 1 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 3 },
-          { x: 4, y1: 4 },
+          { x: 1, y1: 1, mark: null },
+          { x: 2, y1: 2, mark: null },
+          { x: 3, y1: 3, mark: null },
+          { x: 4, y1: 4, mark: null },
         ],
       },
       {
@@ -312,10 +312,10 @@ describe('Series', () => {
         seriesKeys: ['b'],
         key: 'b',
         data: [
-          { x: 1, y1: 1 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 3 },
-          { x: 4, y1: 4 },
+          { x: 1, y1: 1, mark: null },
+          { x: 2, y1: 2, mark: null },
+          { x: 3, y1: 3, mark: null },
+          { x: 4, y1: 4, mark: null },
         ],
       },
       {
@@ -325,10 +325,10 @@ describe('Series', () => {
         seriesKeys: ['b'],
         key: 'b',
         data: [
-          { x: 1, y1: 1 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 3 },
-          { x: 4, y1: 4 },
+          { x: 1, y1: 1, mark: null },
+          { x: 2, y1: 2, mark: null },
+          { x: 3, y1: 3, mark: null },
+          { x: 4, y1: 4, mark: null },
         ],
       },
     ];
@@ -347,9 +347,9 @@ describe('Series', () => {
         seriesKeys: ['a'],
         key: 'a',
         data: [
-          { x: 1, y1: 3, y0: 1 },
-          { x: 2, y1: 3, y0: 2 },
-          { x: 4, y1: 4, y0: 3 },
+          { x: 1, y1: 3, y0: 1, mark: null },
+          { x: 2, y1: 3, y0: 2, mark: null },
+          { x: 4, y1: 4, y0: 3, mark: null },
         ],
       },
       {
@@ -359,10 +359,10 @@ describe('Series', () => {
         seriesKeys: ['b'],
         key: 'b',
         data: [
-          { x: 1, y1: 2, y0: 1 },
-          { x: 2, y1: 3, y0: 1 },
-          { x: 3, y1: 23, y0: 4 },
-          { x: 4, y1: 4, y0: 1 },
+          { x: 1, y1: 2, y0: 1, mark: null },
+          { x: 2, y1: 3, y0: 1, mark: null },
+          { x: 3, y1: 23, y0: 4, mark: null },
+          { x: 4, y1: 4, y0: 1, mark: null },
         ],
       },
     ];
@@ -392,9 +392,9 @@ describe('Series', () => {
         seriesKeys: ['a'],
         key: 'a',
         data: [
-          { x: 1, y1: 3, y0: 1 },
-          { x: 2, y1: 3, y0: 2 },
-          { x: 4, y1: 4, y0: 3 },
+          { x: 1, y1: 3, y0: 1, mark: null },
+          { x: 2, y1: 3, y0: 2, mark: null },
+          { x: 4, y1: 4, y0: 3, mark: null },
         ],
       },
       {
@@ -404,10 +404,10 @@ describe('Series', () => {
         seriesKeys: ['b'],
         key: 'b',
         data: [
-          { x: 1, y1: 2, y0: 1 },
-          { x: 2, y1: 3, y0: 1 },
-          { x: 3, y1: 23, y0: 4 },
-          { x: 4, y1: 4, y0: 1 },
+          { x: 1, y1: 2, y0: 1, mark: null },
+          { x: 2, y1: 3, y0: 1, mark: null },
+          { x: 3, y1: 23, y0: 4, mark: null },
+          { x: 4, y1: 4, y0: 1, mark: null },
         ],
       },
     ];

@@ -34,6 +34,7 @@ describe('Point styles', () => {
     let baseColor = COLOR;
     let themePointStyle = MockStyles.point();
     let geometryStateStyle = MockStyles.geometryState();
+    const pointRadius = 0;
     let overrides: Partial<PointStyle> = {};
 
     function setDefaults() {
@@ -44,7 +45,7 @@ describe('Point styles', () => {
     }
 
     beforeEach(() => {
-      result = buildPointStyles(baseColor, themePointStyle, geometryStateStyle, overrides);
+      result = buildPointStyles(baseColor, themePointStyle, geometryStateStyle, pointRadius, overrides);
     });
 
     it('should call getColorFromVariant with correct args for fill', () => {
@@ -59,8 +60,20 @@ describe('Point styles', () => {
       expect(result.stroke.width).toBe(themePointStyle.strokeWidth);
     });
 
-    it('should set radius from themePointStyle', () => {
-      expect(result.radius).toBe(themePointStyle.radius);
+    describe('Radius', () => {
+      it('should set radius with themePointStyle, from max value', () => {
+        expect(result.radius).toBe(themePointStyle.radius);
+      });
+
+      it('should set radius with pointRadius, from max value', () => {
+        result = buildPointStyles(baseColor, themePointStyle, geometryStateStyle, 100, overrides);
+        expect(result.radius).toBe(100);
+      });
+
+      it('should set radius with override', () => {
+        result = buildPointStyles(baseColor, themePointStyle, geometryStateStyle, 100, { radius: 21 });
+        expect(result.radius).toBe(21);
+      });
     });
 
     describe('Colors', () => {

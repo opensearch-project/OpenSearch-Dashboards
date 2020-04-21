@@ -42,6 +42,15 @@ export const LIGHT_THEME: Theme = {
       opacity: 1,
     },
   },
+  bubbleSeriesStyle: {
+    point: {
+      visible: true,
+      strokeWidth: 1,
+      fill: 'white',
+      radius: 2,
+      opacity: 1,
+    },
+  },
   areaSeriesStyle: {
     area: {
       visible: true,

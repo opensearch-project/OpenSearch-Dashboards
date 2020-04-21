@@ -79,11 +79,11 @@ describe('Scale Band', () => {
     expect(scale.scale('c')).toBe(25);
     expect(scale.scale('d')).toBe(0);
   });
-  it('shall return undefined for out of domain values', () => {
+  it('shall return null for out of domain values', () => {
     const scale = new ScaleBand(['a', 'b', 'c', 'd'], [0, 100]);
-    expect(scale.scale('e')).toBeUndefined();
-    expect(scale.scale(0)).toBeUndefined();
-    expect(scale.scale(null)).toBeUndefined();
+    expect(scale.scale('e')).toBeNull();
+    expect(scale.scale(0)).toBeNull();
+    expect(scale.scale(null)).toBeNull();
   });
   it('shall scale a numeric domain with padding', () => {
     const scale = new ScaleBand([0, 1, 2], [0, 120], undefined, 0.5);
@@ -107,8 +107,8 @@ describe('Scale Band', () => {
   });
   it('shall not scale scale null values', () => {
     const scale = new ScaleBand([0, 1, 2], [0, 120], undefined, 0.5);
-    expect(scale.scale(-1)).toBeUndefined();
-    expect(scale.scale(3)).toBeUndefined();
+    expect(scale.scale(-1)).toBeNull();
+    expect(scale.scale(3)).toBeNull();
   });
   it('shall invert all values in range', () => {
     const domain = ['a', 'b', 'c', 'd'];
@@ -131,6 +131,18 @@ describe('Scale Band', () => {
     it('should return false for multi value scale', () => {
       const scale = new ScaleBand(['a', 'b'], [0, 100]);
       expect(scale.isSingleValue()).toBe(false);
+    });
+  });
+
+  describe('#scaleOrThrow', () => {
+    const scale = new ScaleBand(['a', 'b'], [0, 100]);
+
+    it('should NOT throw for values in domain', () => {
+      expect(() => scale.scaleOrThrow('a')).not.toThrow();
+    });
+
+    it('should throw for values not in domain', () => {
+      expect(() => scale.scaleOrThrow('c')).toThrow();
     });
   });
 });

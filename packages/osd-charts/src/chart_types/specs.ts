@@ -18,12 +18,13 @@
 
 export {
   AreaSeries,
-  BarSeries,
-  LineSeries,
   Axis,
-  LineAnnotation,
-  RectAnnotation,
+  BarSeries,
+  BubbleSeries,
   HistogramBarSeries,
+  LineAnnotation,
+  LineSeries,
+  RectAnnotation,
 } from './xy_chart/specs';
 
 export * from './xy_chart/utils/specs';

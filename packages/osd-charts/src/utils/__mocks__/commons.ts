@@ -18,6 +18,9 @@
 
 const module = jest.requireActual('../commons.ts');
 
+export const ColorVariant = module.ColorVariant;
+export const Position = module.Position;
+
 export const identity = jest.fn(module.identity);
 export const compareByValueAsc = jest.fn(module.compareByValueAsc);
 export const clamp = jest.fn(module.clamp);

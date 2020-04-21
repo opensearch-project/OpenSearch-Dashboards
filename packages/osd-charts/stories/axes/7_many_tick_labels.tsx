@@ -25,6 +25,7 @@ import { SeededDataGenerator } from '../../src/mocks/utils';
 export const example = () => {
   const dg = new SeededDataGenerator();
   const data = dg.generateSimpleSeries(31);
+
   const customStyle = {
     tickLabelPadding: number('Tick Label Padding', 0),
   };

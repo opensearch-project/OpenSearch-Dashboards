@@ -27,6 +27,16 @@ import {
 } from '../../chart_types/xy_chart/utils/series';
 import { fitFunctionData } from './data';
 import { FullDataSeriesDatum, WithIndex } from '../../chart_types/xy_chart/utils/fit_function';
+import { getRandomNumberGenerator } from '../utils';
+
+const rng = getRandomNumberGenerator();
+
+interface DomainRange {
+  min?: number;
+  max?: number;
+  fractionDigits?: number;
+  inclusive?: boolean;
+}
 
 /** @internal */
 export class MockDataSeries {
@@ -57,13 +67,28 @@ export class MockDataSeries {
     };
   }
 
-  static withData(data: DataSeries['data']): DataSeries {
+  static fromData(data: DataSeries['data']): DataSeries {
+    return {
+      ...MockDataSeries.base,
+      data,
+    };
+  }
+
+  static random(
+    options: { count?: number; x?: DomainRange; y?: DomainRange; mark?: DomainRange },
+    includeMarks = false,
+  ): DataSeries {
+    const data = new Array(options?.count ?? 10).fill(0).map(() => MockDataSeriesDatum.random(options, includeMarks));
     return {
       ...MockDataSeries.base,
       data,
     };
   }
 }
+
+type RawDataSeriesPartialData = Omit<RawDataSeries, 'data'> & {
+  data: Partial<RawDataSeriesDatum>[];
+};
 
 /** @internal */
 export class MockRawDataSeries {
@@ -76,8 +101,23 @@ export class MockRawDataSeries {
     data: [],
   };
 
-  static default(partial?: Partial<RawDataSeries>) {
-    return mergePartial<RawDataSeries>(MockRawDataSeries.base, partial);
+  static default({ data, ...partial }: Partial<RawDataSeriesPartialData>): RawDataSeries {
+    return {
+      ...MockRawDataSeries.base,
+      ...partial,
+      ...(data && {
+        data: data.map((datum) => MockRawDataSeriesDatum.default(datum)),
+      }),
+    };
+  }
+
+  static defaults(partials: Partial<RawDataSeriesPartialData>[], defaults?: Partial<RawDataSeries>): RawDataSeries[] {
+    return partials.map((partial) => {
+      return MockRawDataSeries.default({
+        ...defaults,
+        ...partial,
+      });
+    });
   }
 
   static fitFunction(
@@ -95,11 +135,28 @@ export class MockRawDataSeries {
     };
   }
 
-  static withData(data: RawDataSeries['data']): RawDataSeries {
-    return {
+  static fromData<T extends Partial<RawDataSeriesDatum>[] | Partial<RawDataSeriesDatum>[][]>(
+    data: T,
+    defaults?: Partial<Omit<RawDataSeries, 'data'>>,
+  ): T extends Partial<RawDataSeriesDatum>[] ? RawDataSeries : RawDataSeries[] {
+    const mergedDefault: RawDataSeries = {
       ...MockRawDataSeries.base,
-      data,
+      ...defaults,
     };
+
+    if (Array.isArray(data) && data[0] && Array.isArray(data[0])) {
+      return (data as Partial<RawDataSeriesDatum>[][]).map((d, i) => ({
+        ...mergedDefault,
+        specId: `spec${i + 1}`,
+        key: `key${i + 1}`,
+        data: d.map((datum) => MockRawDataSeriesDatum.default(datum)),
+      })) as any;
+    }
+
+    return {
+      ...mergedDefault,
+      data: [MockRawDataSeriesDatum.default(data as any)],
+    } as any;
   }
 }
 
@@ -108,10 +165,11 @@ export class MockDataSeriesDatum {
   private static readonly base: DataSeriesDatum = {
     x: 1,
     y1: 1,
-    y0: 1,
-    initialY1: 1,
+    y0: null,
+    mark: null,
+    initialY1: null,
     initialY0: 1,
-    datum: {},
+    datum: null,
   };
 
   static default(partial?: Partial<DataSeriesDatum>): DataSeriesDatum {
@@ -125,14 +183,21 @@ export class MockDataSeriesDatum {
     x,
     y1 = null,
     y0 = null,
+    mark = null,
     filled,
   }: Partial<DataSeriesDatum> & Pick<DataSeriesDatum, 'x'>): DataSeriesDatum {
     return {
       x,
       y1,
       y0,
+      mark,
       initialY1: y1,
       initialY0: y0,
+      datum: {
+        x,
+        y1,
+        y0,
+      },
       ...(filled && filled),
     };
   }
@@ -164,6 +229,24 @@ export class MockDataSeriesDatum {
       { mergeOptionalPartialValues: true },
     );
   }
+
+  /**
+   * Psuedo-random values between a specified domain
+   *
+   * @param options
+   */
+  static random(
+    options: { x?: DomainRange; y?: DomainRange; mark?: DomainRange },
+    includeMark = false,
+  ): DataSeriesDatum {
+    return MockDataSeriesDatum.simple({
+      x: rng(options?.x?.min, options?.x?.max, options.x?.fractionDigits, options.x?.inclusive),
+      y1: rng(options?.y?.min, options?.y?.max, options.y?.fractionDigits, options.y?.inclusive),
+      ...(includeMark && {
+        mark: rng(options?.mark?.min, options?.mark?.max, options.mark?.fractionDigits, options.mark?.inclusive),
+      }),
+    });
+  }
 }
 
 /** @internal */
@@ -171,8 +254,13 @@ export class MockRawDataSeriesDatum {
   private static readonly base: RawDataSeriesDatum = {
     x: 1,
     y1: 1,
-    y0: 1,
-    datum: {},
+    y0: null,
+    mark: null,
+    datum: {
+      x: 1,
+      y1: 1,
+      y0: 1,
+    },
   };
 
   static default(partial?: Partial<RawDataSeriesDatum>): RawDataSeriesDatum {
@@ -191,6 +279,12 @@ export class MockRawDataSeriesDatum {
       x,
       y1,
       y0,
+      mark: null,
+      datum: {
+        x: 1,
+        y1: 1,
+        y0: 1,
+      },
     };
   }
 

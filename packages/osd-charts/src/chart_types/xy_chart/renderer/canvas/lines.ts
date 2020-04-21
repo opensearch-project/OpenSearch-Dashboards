@@ -20,7 +20,7 @@ import { getGeometryStateStyle } from '../../rendering/rendering';
 import { LineGeometry } from '../../../../utils/geometry';
 import { SharedGeometryStateStyle } from '../../../../utils/themes/theme';
 import { LegendItem } from '../../../../commons/legend';
-import { withContext } from '../../../../renderers/canvas';
+import { withContext, withClip } from '../../../../renderers/canvas';
 import { renderPoints } from './points';
 import { renderLinePaths } from './primitives/path';
 import { Rect } from '../../../../geoms/types';
@@ -49,10 +49,16 @@ export function renderLines(ctx: CanvasRenderingContext2D, props: LineGeometries
       }
 
       if (seriesPointStyle.visible) {
-        withContext(ctx, (ctx) => {
-          const geometryStyle = getGeometryStateStyle(line.seriesIdentifier, highlightedLegendItem, sharedStyle);
-          renderPoints(ctx, line.points, line.seriesPointStyle, geometryStyle);
-        });
+        withClip(
+          ctx,
+          clippings,
+          (ctx) => {
+            const geometryStyle = getGeometryStateStyle(line.seriesIdentifier, highlightedLegendItem, sharedStyle);
+            renderPoints(ctx, line.points, line.seriesPointStyle, geometryStyle);
+          },
+          // TODO: add padding over clipping
+          line.points[0]?.value.mark !== null,
+        );
       }
     });
   });

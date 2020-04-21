@@ -16,12 +16,15 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { Simple1DNoise, RandomNumberGenerator } from './simple_noise';
+import { Simple1DNoise } from './simple_noise';
+import { RandomNumberGenerator } from '../../mocks/utils';
 
 export class DataGenerator {
+  private randomNumberGenerator: RandomNumberGenerator;
   private generator: Simple1DNoise;
   private frequency: number;
-  constructor(frequency = 500, randomNumberGenerator?: RandomNumberGenerator) {
+  constructor(frequency = 500, randomNumberGenerator: RandomNumberGenerator) {
+    this.randomNumberGenerator = randomNumberGenerator;
     this.generator = new Simple1DNoise(randomNumberGenerator);
     this.frequency = frequency;
   }
@@ -49,6 +52,25 @@ export class DataGenerator {
     const groups = new Array(totalGroups).fill(0).map((group, i) => {
       // eslint-disable-line
       return this.generateSimpleSeries(totalPoints, i, groupPrefix);
+    });
+    return groups.reduce((acc, curr) => [...acc, ...curr]);
+  }
+  generateRandomSeries(totalPoints = 50, groupIndex = 1, groupPrefix = '') {
+    const group = String.fromCharCode(97 + groupIndex);
+    const dataPoints = new Array(totalPoints).fill(0).map(() => {
+      return {
+        x: this.randomNumberGenerator(0, 100),
+        y: this.randomNumberGenerator(0, 100),
+        z: this.randomNumberGenerator(0, 100),
+        g: `${groupPrefix}${group}`,
+      };
+    });
+    return dataPoints;
+  }
+  generateRandomGroupedSeries(totalPoints = 50, totalGroups = 2, groupPrefix = '') {
+    const groups = new Array(totalGroups).fill(0).map((group, i) => {
+      // eslint-disable-line
+      return this.generateRandomSeries(totalPoints, i, groupPrefix);
     });
     return groups.reduce((acc, curr) => [...acc, ...curr]);
   }

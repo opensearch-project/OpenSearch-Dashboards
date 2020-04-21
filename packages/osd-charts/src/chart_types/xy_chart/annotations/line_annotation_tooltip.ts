@@ -107,7 +107,7 @@ function computeYDomainLineAnnotationDimensions(
 
     const annotationValueYposition = yScale.scale(dataValue);
     // avoid rendering non scalable annotation values
-    if (isNaN(annotationValueYposition)) {
+    if (annotationValueYposition === null) {
       return;
     }
 

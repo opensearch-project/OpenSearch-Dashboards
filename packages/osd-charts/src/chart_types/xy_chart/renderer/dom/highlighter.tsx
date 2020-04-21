@@ -28,6 +28,7 @@ import { Rotation } from '../../../../utils/commons';
 import { Transform } from '../../state/utils';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { computeChartDimensionsSelector } from '../../state/selectors/compute_chart_dimensions';
+import { DEFAULT_HIGHLIGHT_PADDING } from '../../rendering/rendering';
 
 interface HighlighterProps {
   initialized: boolean;
@@ -64,10 +65,11 @@ class HighlighterComponent extends React.Component<HighlighterProps> {
                   key={i}
                   cx={x + geom.transform.x}
                   cy={y}
-                  r={geom.radius}
+                  r={geom.radius + DEFAULT_HIGHLIGHT_PADDING}
                   stroke={color}
                   strokeWidth={4}
                   fill="transparent"
+                  clipPath={geom.value.mark !== null ? `url(#${clipPathId})` : undefined}
                 />
               );
             }

@@ -20,7 +20,7 @@ import { isVerticalAxis } from '../utils/axis_utils';
 import { CurveType } from '../../../utils/curves';
 import { mergeXDomain, XDomain } from '../domains/x_domain';
 import { mergeYDomain, YDomain } from '../domains/y_domain';
-import { mutableIndexedGeometryMapUpsert, renderArea, renderBars, renderLine } from '../rendering/rendering';
+import { renderArea, renderBars, renderLine, renderBubble } from '../rendering/rendering';
 import { computeXScale, computeYScales, countBarsInCluster } from '../utils/scales';
 import {
   DataSeries,
@@ -49,16 +49,20 @@ import {
   Fit,
   FitConfig,
   SeriesTypes,
+  isBubbleSeriesSpec,
 } from '../utils/specs';
 import { ColorConfig, Theme } from '../../../utils/themes/theme';
-import { identity, mergePartial, Rotation, Color } from '../../../utils/commons';
+import { identity, mergePartial, Rotation, Color, RecursivePartial } from '../../../utils/commons';
 import { Dimensions } from '../../../utils/dimensions';
 import { Domain } from '../../../utils/domain';
 import { GroupId, SpecId } from '../../../utils/ids';
 import { Scale } from '../../../scales';
-import { PointGeometry, BarGeometry, AreaGeometry, LineGeometry, IndexedGeometry } from '../../../utils/geometry';
+import { PointGeometry, BarGeometry, AreaGeometry, LineGeometry, BubbleGeometry } from '../../../utils/geometry';
 import { LegendItem } from '../../../commons/legend';
 import { Spec } from '../../../specs';
+import { IndexedGeometryMap } from '../utils/indexed_geometry_map';
+import { Point } from '../../../utils/point';
+import { PrimitiveValue } from '../../partition_chart/layout/utils/group_by_rollup';
 
 const MAX_ANIMATABLE_BARS = 300;
 const MAX_ANIMATABLE_LINES_AREA_POINTS = 600;
@@ -86,6 +90,8 @@ export interface GeometriesCounts {
   areasPoints: number;
   lines: number;
   linePoints: number;
+  bubbles: number;
+  bubblePoints: number;
 }
 
 /** @internal */
@@ -99,13 +105,14 @@ export interface Geometries {
   bars: BarGeometry[];
   areas: AreaGeometry[];
   lines: LineGeometry[];
+  bubbles: BubbleGeometry[];
 }
 
 /** @internal */
 export interface ComputedGeometries {
   scales: ComputedScales;
   geometries: Geometries;
-  geometriesIndex: Map<any, IndexedGeometry[]>;
+  geometriesIndex: IndexedGeometryMap;
   geometriesCounts: GeometriesCounts;
 }
 
@@ -273,6 +280,7 @@ export function computeSeriesDomains(
     };
     updatedSeriesCollection.set(key, updatedColorSet);
   });
+
   return {
     xDomain,
     yDomain,
@@ -325,16 +333,18 @@ export function computeSeriesGeometries(
   const areas: AreaGeometry[] = [];
   const bars: BarGeometry[] = [];
   const lines: LineGeometry[] = [];
-  let stackedGeometriesIndex: Map<any, IndexedGeometry[]> = new Map();
-  let nonStackedGeometriesIndex: Map<any, IndexedGeometry[]> = new Map();
+  const bubbles: BubbleGeometry[] = [];
+  const geometriesIndex = new IndexedGeometryMap();
   let orderIndex = 0;
-  const geometriesCounts = {
+  const geometriesCounts: GeometriesCounts = {
     points: 0,
     bars: 0,
     areas: 0,
     areasPoints: 0,
     lines: 0,
     linePoints: 0,
+    bubbles: 0,
+    bubblePoints: 0,
   };
   formattedDataSeries.stacked.forEach((dataSeriesGroup) => {
     const { groupId, dataSeries, counts } = dataSeriesGroup;
@@ -361,8 +371,9 @@ export function computeSeriesGeometries(
     areas.push(...geometries.areas);
     lines.push(...geometries.lines);
     bars.push(...geometries.bars);
+    bubbles.push(...geometries.bubbles);
     points.push(...geometries.points);
-    stackedGeometriesIndex = mergeGeometriesIndexes(stackedGeometriesIndex, geometries.geometriesIndex);
+    geometriesIndex.merge(geometries.indexedGeometryMap);
     // update counts
     geometriesCounts.points += geometries.geometriesCounts.points;
     geometriesCounts.bars += geometries.geometriesCounts.bars;
@@ -370,6 +381,8 @@ export function computeSeriesGeometries(
     geometriesCounts.areasPoints += geometries.geometriesCounts.areasPoints;
     geometriesCounts.lines += geometries.geometriesCounts.lines;
     geometriesCounts.linePoints += geometries.geometriesCounts.linePoints;
+    geometriesCounts.bubbles += geometries.geometriesCounts.bubbles;
+    geometriesCounts.bubblePoints += geometries.geometriesCounts.bubblePoints;
   });
   formattedDataSeries.nonStacked.map((dataSeriesGroup) => {
     const { groupId, dataSeries } = dataSeriesGroup;
@@ -395,9 +408,10 @@ export function computeSeriesGeometries(
     areas.push(...geometries.areas);
     lines.push(...geometries.lines);
     bars.push(...geometries.bars);
+    bubbles.push(...geometries.bubbles);
     points.push(...geometries.points);
 
-    nonStackedGeometriesIndex = mergeGeometriesIndexes(nonStackedGeometriesIndex, geometries.geometriesIndex);
+    geometriesIndex.merge(geometries.indexedGeometryMap);
     // update counts
     geometriesCounts.points += geometries.geometriesCounts.points;
     geometriesCounts.bars += geometries.geometriesCounts.bars;
@@ -405,8 +419,9 @@ export function computeSeriesGeometries(
     geometriesCounts.areasPoints += geometries.geometriesCounts.areasPoints;
     geometriesCounts.lines += geometries.geometriesCounts.lines;
     geometriesCounts.linePoints += geometries.geometriesCounts.linePoints;
+    geometriesCounts.bubbles += geometries.geometriesCounts.bubbles;
+    geometriesCounts.bubblePoints += geometries.geometriesCounts.bubblePoints;
   });
-  const geometriesIndex = mergeGeometriesIndexes(stackedGeometriesIndex, nonStackedGeometriesIndex);
   return {
     scales: {
       xScale,
@@ -417,6 +432,7 @@ export function computeSeriesGeometries(
       areas,
       bars,
       lines,
+      bubbles,
     },
     geometriesIndex,
     geometriesCounts,
@@ -495,7 +511,8 @@ function renderGeometries(
   bars: BarGeometry[];
   areas: AreaGeometry[];
   lines: LineGeometry[];
-  geometriesIndex: Map<any, IndexedGeometry[]>;
+  bubbles: BubbleGeometry[];
+  indexedGeometryMap: IndexedGeometryMap;
   geometriesCounts: GeometriesCounts;
 } {
   const len = dataSeries.length;
@@ -504,17 +521,18 @@ function renderGeometries(
   const bars: BarGeometry[] = [];
   const areas: AreaGeometry[] = [];
   const lines: LineGeometry[] = [];
-  const pointGeometriesIndex: Map<any, IndexedGeometry[]> = new Map();
-  let barGeometriesIndex: Map<any, IndexedGeometry[]> = new Map();
-  let lineGeometriesIndex: Map<any, IndexedGeometry[]> = new Map();
-  let areaGeometriesIndex: Map<any, IndexedGeometry[]> = new Map();
-  const geometriesCounts = {
+  const bubbles: BubbleGeometry[] = [];
+  const indexedGeometryMap = new IndexedGeometryMap();
+  const isMixedChart = isUniqueArray(seriesSpecs, ({ seriesType }) => seriesType) && seriesSpecs.length > 1;
+  const geometriesCounts: GeometriesCounts = {
     points: 0,
     bars: 0,
     areas: 0,
     areasPoints: 0,
     lines: 0,
     linePoints: 0,
+    bubbles: 0,
+    bubblePoints: 0,
   };
   let barIndexOffset = 0;
   for (i = 0; i < len; i++) {
@@ -553,10 +571,34 @@ function renderGeometries(
         spec.styleAccessor,
         spec.minBarHeight,
       );
-      barGeometriesIndex = mergeGeometriesIndexes(barGeometriesIndex, renderedBars.indexedGeometries);
+      indexedGeometryMap.merge(renderedBars.indexedGeometryMap);
       bars.push(...renderedBars.barGeometries);
       geometriesCounts.bars += renderedBars.barGeometries.length;
       barIndexOffset += 1;
+    } else if (isBubbleSeriesSpec(spec)) {
+      const bubbleShift = clusteredCount > 0 ? clusteredCount : 1;
+      const bubbleSeriesStyle = spec.bubbleSeriesStyle
+        ? mergePartial(chartTheme.bubbleSeriesStyle, spec.bubbleSeriesStyle, { mergeOptionalPartialValues: true })
+        : chartTheme.bubbleSeriesStyle;
+      const renderedBubbles = renderBubble(
+        (xScale.bandwidth * bubbleShift) / 2,
+        ds,
+        xScale,
+        yScale,
+        color,
+        isBandedSpec(spec.y0Accessors),
+        bubbleSeriesStyle,
+        {
+          enabled: spec.markSizeAccessor !== undefined,
+          ratio: chartTheme.markSizeRatio,
+        },
+        isMixedChart,
+        spec.pointStyleAccessor,
+      );
+      indexedGeometryMap.merge(renderedBubbles.indexedGeometryMap);
+      bubbles.push(renderedBubbles.bubbleGeometry);
+      geometriesCounts.bubblePoints += renderedBubbles.bubbleGeometry.points.length;
+      geometriesCounts.bubbles += 1;
     } else if (isLineSeriesSpec(spec)) {
       const lineShift = clusteredCount > 0 ? clusteredCount : 1;
       const lineSeriesStyle = spec.lineSeriesStyle
@@ -576,10 +618,14 @@ function renderGeometries(
         isBandedSpec(spec.y0Accessors),
         xScaleOffset,
         lineSeriesStyle,
+        {
+          enabled: (spec as LineSeriesSpec).markSizeAccessor !== undefined,
+          ratio: chartTheme.markSizeRatio,
+        },
         spec.pointStyleAccessor,
         Boolean(spec.fit && ((spec.fit as FitConfig).type || spec.fit) !== Fit.None),
       );
-      lineGeometriesIndex = mergeGeometriesIndexes(lineGeometriesIndex, renderedLines.indexedGeometries);
+      indexedGeometryMap.merge(renderedLines.indexedGeometryMap);
       lines.push(renderedLines.lineGeometry);
       geometriesCounts.linePoints += renderedLines.lineGeometry.points.length;
       geometriesCounts.lines += 1;
@@ -592,7 +638,6 @@ function renderGeometries(
       const renderedAreas = renderArea(
         // move the point on half of the bandwidth if we have mixed bars/lines
         (xScale.bandwidth * areaShift) / 2,
-
         ds,
         xScale,
         yScale,
@@ -601,28 +646,28 @@ function renderGeometries(
         isBandedSpec(spec.y0Accessors),
         xScaleOffset,
         areaSeriesStyle,
+        {
+          enabled: (spec as LineSeriesSpec).markSizeAccessor !== undefined,
+          ratio: chartTheme.markSizeRatio,
+        },
         isStacked,
         spec.pointStyleAccessor,
         Boolean(spec.fit && ((spec.fit as FitConfig).type || spec.fit) !== Fit.None),
       );
-      areaGeometriesIndex = mergeGeometriesIndexes(areaGeometriesIndex, renderedAreas.indexedGeometries);
+      indexedGeometryMap.merge(renderedAreas.indexedGeometryMap);
       areas.push(renderedAreas.areaGeometry);
       geometriesCounts.areasPoints += renderedAreas.areaGeometry.points.length;
       geometriesCounts.areas += 1;
     }
   }
-  const geometriesIndex = mergeGeometriesIndexes(
-    pointGeometriesIndex,
-    lineGeometriesIndex,
-    areaGeometriesIndex,
-    barGeometriesIndex,
-  );
+
   return {
     points,
     bars,
     areas,
     lines,
-    geometriesIndex,
+    bubbles,
+    indexedGeometryMap,
     geometriesCounts,
   };
 }
@@ -681,24 +726,6 @@ export function computeChartTransform(chartDimensions: Dimensions, chartRotation
   }
 }
 
-/**
- * Merge multiple geometry indexes maps together.
- * @param iterables a set of maps to be merged
- * @returns a new Map where each element with the same key are concatenated on a single
- * IndexedGemoetry array for that key
- * @internal
- */
-export function mergeGeometriesIndexes(...iterables: Map<any, IndexedGeometry[]>[]) {
-  const geometriesIndex: Map<any, IndexedGeometry[]> = new Map();
-
-  for (const iterable of iterables) {
-    for (const item of iterable) {
-      mutableIndexedGeometryMapUpsert(geometriesIndex, item[0], item[1]);
-    }
-  }
-  return geometriesIndex;
-}
-
 /** @internal */
 export function isHorizontalRotation(chartRotation: Rotation) {
   return chartRotation === 0 || chartRotation === 180;
@@ -740,3 +767,84 @@ export function isAllSeriesDeselected(legendItems: LegendItem[]): boolean {
   }
   return true;
 }
+
+/** @internal */
+export function getDistance(a: Point, b: Point): number {
+  return Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
+}
+
+/** @internal */
+export function stringifyNullsUndefined(value?: PrimitiveValue): string | number {
+  if (value === undefined) {
+    return 'undefined';
+  }
+
+  if (value === null) {
+    return 'null';
+  }
+
+  return value;
+}
+
+/**
+ * Determines if an array has all unique values
+ *
+ * examples:
+ * ```ts
+ * isUniqueArray([1, 2]) // => true
+ * isUniqueArray([1, 1, 2]) // => false
+ * isUniqueArray([{ n: 1 }, { n: 1 }, { n: 2 }], ({ n }) => n) // => false
+ * ```
+ *
+ * @internal
+ * @param  {B[]} arr
+ * @param  {(d:B)=>T} extractor? extract the value from B
+ */
+export function isUniqueArray<B, T>(arr: B[], extractor?: (value: B) => T) {
+  const values = new Set<B | T>();
+
+  return (function() {
+    return arr.every((v) => {
+      const value = extractor ? extractor(v) : v;
+
+      if (values.has(value)) {
+        return false;
+      }
+
+      values.add(value);
+      return true;
+    });
+  })();
+}
+
+/**
+ * Returns defined value type if not null nor undefined
+ *
+ * @internal
+ */
+export function isDefined<T>(value?: T): value is NonNullable<T> {
+  return value !== null && value !== undefined;
+}
+
+/**
+ * Returns defined value type if value from getter function is not null nor undefined
+ *
+ * **IMPORTANT**: You must provide an accurate typeCheck function that will filter out _EVERY_
+ * item in the array that is not of type `T`. If not, the type check will override the
+ * type as `T` which may be incorrect.
+ *
+ * @internal
+ */
+export const isDefinedFrom = <T>(typeCheck: (value: RecursivePartial<T>) => boolean) => (
+  value?: RecursivePartial<T>,
+): value is NonNullable<T> => {
+  if (value === undefined) {
+    return false;
+  }
+
+  try {
+    return typeCheck(value);
+  } catch (error) {
+    return false;
+  }
+};

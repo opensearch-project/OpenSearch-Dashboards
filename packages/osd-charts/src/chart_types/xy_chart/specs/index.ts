@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-export { Axis } from './axis';
-export { LineAnnotation } from './line_annotation';
-export { RectAnnotation } from './rect_annotation';
-export { LineSeries } from './line_series';
-export { BarSeries } from './bar_series';
-export { HistogramBarSeries } from './histogram_bar_series';
 export { AreaSeries } from './area_series';
+export { Axis } from './axis';
+export { BarSeries } from './bar_series';
+export { BubbleSeries } from './bubble_series';
+export { HistogramBarSeries } from './histogram_bar_series';
+export { LineAnnotation } from './line_annotation';
+export { LineSeries } from './line_series';
+export { RectAnnotation } from './rect_annotation';

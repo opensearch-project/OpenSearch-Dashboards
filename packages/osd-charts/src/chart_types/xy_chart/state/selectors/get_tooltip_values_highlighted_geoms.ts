@@ -39,12 +39,14 @@ import {
   TooltipType,
   TooltipValueFormatter,
   isFollowTooltipType,
+  SettingsSpec,
 } from '../../../../specs';
 import { isValidPointerOverEvent } from '../../../../utils/events';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { hasSingleSeriesSelector } from './has_single_series';
 import { TooltipInfo } from '../../../../components/tooltip/types';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 
 const EMPTY_VALUES = Object.freeze({
   tooltip: {
@@ -67,6 +69,7 @@ export const getTooltipInfoAndGeometriesSelector = createCachedSelector(
   [
     getSeriesSpecsSelector,
     getAxisSpecsSelector,
+    getSettingsSpecSelector,
     getProjectedPointerPositionSelector,
     getOrientedProjectedPointerPositionSelector,
     getChartRotationSelector,
@@ -77,20 +80,21 @@ export const getTooltipInfoAndGeometriesSelector = createCachedSelector(
     getExternalPointerEventStateSelector,
     getTooltipHeaderFormatterSelector,
   ],
-  getTooltipAndHighlightFromXValue,
+  getTooltipAndHighlightFromValue,
 )((state: GlobalChartState) => {
   return state.chartId;
 });
 
-function getTooltipAndHighlightFromXValue(
+function getTooltipAndHighlightFromValue(
   seriesSpecs: BasicSeriesSpec[],
   axesSpecs: AxisSpec[],
+  settings: SettingsSpec,
   projectedPointerPosition: Point,
   orientedProjectedPointerPosition: Point,
   chartRotation: Rotation,
   hasSingleSeries: boolean,
   scales: ComputedScales,
-  xMatchingGeoms: IndexedGeometry[],
+  matchingGeoms: IndexedGeometry[],
   tooltipType: TooltipType = TooltipType.VerticalCursor,
   externalPointerEvent: PointerEvent | null,
   tooltipHeaderFormatter?: TooltipValueFormatter,
@@ -104,20 +108,28 @@ function getTooltipAndHighlightFromXValue(
   let x = orientedProjectedPointerPosition.x;
   let y = orientedProjectedPointerPosition.y;
   if (isValidPointerOverEvent(scales.xScale, externalPointerEvent)) {
-    x = scales.xScale.pureScale(externalPointerEvent.value);
+    const scaledX = scales.xScale.pureScale(externalPointerEvent.value);
+
+    if (scaledX === null) {
+      return EMPTY_VALUES;
+    }
+
+    x = scaledX;
     y = 0;
   } else if (projectedPointerPosition.x === -1 || projectedPointerPosition.y === -1) {
     return EMPTY_VALUES;
   }
 
-  if (xMatchingGeoms.length === 0) {
+  if (matchingGeoms.length === 0) {
     return EMPTY_VALUES;
   }
 
   // build the tooltip value list
   let header: TooltipValue | null = null;
   const highlightedGeometries: IndexedGeometry[] = [];
-  const values = xMatchingGeoms
+  const xValues = new Set<any>();
+
+  const values = matchingGeoms
     .filter(({ value: { y } }) => y !== null)
     .reduce<TooltipValue[]>((acc, indexedGeometry) => {
       const {
@@ -141,14 +153,14 @@ function getTooltipAndHighlightFromXValue(
       let isHighlighted = false;
       if (
         (!externalPointerEvent || isPointerOutEvent(externalPointerEvent)) &&
-        isPointOnGeometry(x, y, indexedGeometry)
+        isPointOnGeometry(x, y, indexedGeometry, settings.pointBuffer)
       ) {
         isHighlighted = true;
         highlightedGeometries.push(indexedGeometry);
       }
 
       // if it's a follow tooltip, and no element is highlighted
-      // not add that element into the tooltip list
+      // do _not_ add element into tooltip list
       if (!isHighlighted && isFollowTooltipType(tooltipType)) {
         return acc;
       }
@@ -172,8 +184,15 @@ function getTooltipAndHighlightFromXValue(
         header = formatTooltip(indexedGeometry, spec, true, false, hasSingleSeries, formatterAxis);
       }
 
+      xValues.add(indexedGeometry.value.x);
+
       return [...acc, formattedTooltip];
     }, []);
+
+  if (values.length > 1 && xValues.size === values.length) {
+    // TODO: remove after tooltip redesign
+    header = null;
+  }
 
   return {
     tooltip: {

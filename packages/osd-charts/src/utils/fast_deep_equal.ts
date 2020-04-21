@@ -1,7 +1,8 @@
 /* eslint-disable file-header/file-header */
 
-/* @notice
- * This product includes code that is adapted from fase-deep-equal@3.1.1,
+/**
+ * @notice
+ * This product includes code that is adapted from fast-deep-equal@3.1.1,
  * which is available under a "MIT" license.
  *
  * MIT License
@@ -24,7 +25,8 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE. */
+ * SOFTWARE.
+ */
 
 /** @internal */
 export function deepEqual(a: any, b: any): boolean {

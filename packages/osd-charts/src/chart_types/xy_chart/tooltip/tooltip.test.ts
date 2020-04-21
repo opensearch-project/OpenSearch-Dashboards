@@ -91,6 +91,7 @@ describe('Tooltip formatting', () => {
       x: 1,
       y: 10,
       accessor: 'y1',
+      mark: null,
     },
     seriesStyle,
   };
@@ -111,6 +112,7 @@ describe('Tooltip formatting', () => {
       x: 1,
       y: 10,
       accessor: 'y1',
+      mark: null,
     },
     seriesStyle,
   };

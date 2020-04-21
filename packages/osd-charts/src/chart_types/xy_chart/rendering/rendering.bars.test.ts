@@ -26,6 +26,7 @@ import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { GroupId } from '../../../utils/ids';
 import { ChartTypes } from '../..';
 import { SpecTypes } from '../../../specs/settings';
+import { MockBarGeometry } from '../../../mocks';
 
 const SPEC_ID = 'spec_1';
 const GROUP_ID = 'group_1';
@@ -69,82 +70,42 @@ describe('Rendering bars', () => {
         LIGHT_THEME.barSeriesStyle,
       );
 
-      expect(barGeometries[0]).toEqual({
-        x: 0,
-        y: 0,
-        width: 50,
-        height: 100,
-        color: 'red',
-        value: {
-          accessor: 'y1',
+      const getBarGeometry = MockBarGeometry.fromBaseline(
+        {
           x: 0,
-          y: 10,
-        },
-        seriesIdentifier: {
-          specId: SPEC_ID,
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-        },
-        displayValue: undefined,
-        seriesStyle: {
-          displayValue: {
-            fill: '#777',
-            fontFamily: 'sans-serif',
-            fontSize: 8,
-            fontStyle: 'normal',
-            offsetX: 0,
-            offsetY: 0,
-            padding: 0,
+          y: 0,
+          width: 50,
+          height: 100,
+          color: 'red',
+          value: {
+            accessor: 'y1',
+            x: 0,
+            y: 10,
+            mark: null,
           },
-          rect: {
-            opacity: 1,
-          },
-          rectBorder: {
-            strokeWidth: 0,
-            visible: false,
+          seriesIdentifier: {
+            specId: SPEC_ID,
+            key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
+            yAccessor: 1,
+            splitAccessors: new Map(),
+            seriesKeys: [1],
           },
         },
-      });
-      expect(barGeometries[1]).toEqual({
-        x: 50,
-        y: 50,
-        width: 50,
-        height: 50,
-        color: 'red',
-        value: {
-          accessor: 'y1',
-          x: 1,
-          y: 5,
-        },
-        seriesIdentifier: {
-          specId: SPEC_ID,
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-        },
-        displayValue: undefined,
-        seriesStyle: {
-          displayValue: {
-            fill: '#777',
-            fontFamily: 'sans-serif',
-            fontSize: 8,
-            fontStyle: 'normal',
-            offsetX: 0,
-            offsetY: 0,
-            padding: 0,
+        'displayValue',
+      );
+      expect(barGeometries[0]).toEqual(getBarGeometry());
+      expect(barGeometries[1]).toEqual(
+        getBarGeometry({
+          x: 50,
+          y: 50,
+          width: 50,
+          height: 50,
+          value: {
+            x: 1,
+            y: 5,
           },
-          rect: {
-            opacity: 1,
-          },
-          rectBorder: {
-            strokeWidth: 0,
-            visible: false,
-          },
-        },
-      });
+        }),
+      );
       expect(barGeometries.length).toBe(2);
     });
     test('Can render bars with value labels', () => {
@@ -246,6 +207,29 @@ describe('Rendering bars', () => {
       range: [0, 100],
     });
     const yScales = computeYScales({ yDomains: barSeriesDomains.yDomain, range: [100, 0] });
+    const getBarGeometry = MockBarGeometry.fromBaseline(
+      {
+        x: 0,
+        y: 0,
+        width: 50,
+        height: 100,
+        color: 'red',
+        value: {
+          accessor: 'y1',
+          x: 0,
+          y: 10,
+          mark: null,
+        },
+        seriesIdentifier: {
+          specId: spec1Id,
+          key: 'spec{bar1}yAccessor{1}splitAccessors{}',
+          yAccessor: 1,
+          splitAccessors: new Map(),
+          seriesKeys: [1],
+        },
+      },
+      'displayValue',
+    );
 
     test('can render first spec bars', () => {
       const { barGeometries } = renderBars(
@@ -257,82 +241,30 @@ describe('Rendering bars', () => {
         LIGHT_THEME.barSeriesStyle,
       );
       expect(barGeometries.length).toEqual(2);
-      expect(barGeometries[0]).toEqual({
-        x: 0,
-        y: 50,
-        width: 25,
-        height: 50,
-        color: 'red',
-        value: {
-          accessor: 'y1',
+      expect(barGeometries[0]).toEqual(
+        getBarGeometry({
           x: 0,
-          y: 10,
-        },
-        seriesIdentifier: {
-          specId: spec1Id,
-          key: 'spec{bar1}yAccessor{1}splitAccessors{}',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-        },
-        displayValue: undefined,
-        seriesStyle: {
-          displayValue: {
-            fill: '#777',
-            fontFamily: 'sans-serif',
-            fontSize: 8,
-            fontStyle: 'normal',
-            offsetX: 0,
-            offsetY: 0,
-            padding: 0,
+          y: 50,
+          width: 25,
+          height: 50,
+          value: {
+            x: 0,
+            y: 10,
           },
-          rect: {
-            opacity: 1,
+        }),
+      );
+      expect(barGeometries[1]).toEqual(
+        getBarGeometry({
+          x: 50,
+          y: 75,
+          width: 25,
+          height: 25,
+          value: {
+            x: 1,
+            y: 5,
           },
-          rectBorder: {
-            strokeWidth: 0,
-            visible: false,
-          },
-        },
-      });
-      expect(barGeometries[1]).toEqual({
-        x: 50,
-        y: 75,
-        width: 25,
-        height: 25,
-        color: 'red',
-        value: {
-          accessor: 'y1',
-          x: 1,
-          y: 5,
-        },
-        seriesIdentifier: {
-          specId: spec1Id,
-          key: 'spec{bar1}yAccessor{1}splitAccessors{}',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-        },
-        displayValue: undefined,
-        seriesStyle: {
-          displayValue: {
-            fill: '#777',
-            fontFamily: 'sans-serif',
-            fontSize: 8,
-            fontStyle: 'normal',
-            offsetX: 0,
-            offsetY: 0,
-            padding: 0,
-          },
-          rect: {
-            opacity: 1,
-          },
-          rectBorder: {
-            strokeWidth: 0,
-            visible: false,
-          },
-        },
-      });
+        }),
+      );
     });
     test('can render second spec bars', () => {
       const { barGeometries } = renderBars(
@@ -343,83 +275,53 @@ describe('Rendering bars', () => {
         'blue',
         LIGHT_THEME.barSeriesStyle,
       );
-      expect(barGeometries.length).toEqual(2);
-      expect(barGeometries[0]).toEqual({
-        x: 25,
-        y: 0,
-        width: 25,
-        height: 100,
-        color: 'blue',
-        value: {
-          accessor: 'y1',
+      const getBarGeometry = MockBarGeometry.fromBaseline(
+        {
           x: 0,
-          y: 20,
-        },
-        seriesIdentifier: {
-          specId: spec2Id,
-          key: 'spec{bar2}yAccessor{1}splitAccessors{}',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-        },
-        displayValue: undefined,
-        seriesStyle: {
-          displayValue: {
-            fill: '#777',
-            fontFamily: 'sans-serif',
-            fontSize: 8,
-            fontStyle: 'normal',
-            offsetX: 0,
-            offsetY: 0,
-            padding: 0,
+          y: 0,
+          width: 50,
+          height: 100,
+          color: 'blue',
+          value: {
+            accessor: 'y1',
+            x: 0,
+            y: 10,
           },
-          rect: {
-            opacity: 1,
-          },
-          rectBorder: {
-            strokeWidth: 0,
-            visible: false,
+          seriesIdentifier: {
+            specId: spec2Id,
+            key: 'spec{bar2}yAccessor{1}splitAccessors{}',
+            yAccessor: 1,
+            splitAccessors: new Map(),
+            seriesKeys: [1],
           },
         },
-      });
-      expect(barGeometries[1]).toEqual({
-        x: 75,
-        y: 50,
-        width: 25,
-        height: 50,
-        color: 'blue',
-        value: {
-          accessor: 'y1',
-          x: 1,
-          y: 10,
-        },
-        seriesIdentifier: {
-          specId: spec2Id,
-          key: 'spec{bar2}yAccessor{1}splitAccessors{}',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-        },
-        displayValue: undefined,
-        seriesStyle: {
-          displayValue: {
-            fill: '#777',
-            fontFamily: 'sans-serif',
-            fontSize: 8,
-            fontStyle: 'normal',
-            offsetX: 0,
-            offsetY: 0,
-            padding: 0,
+        'displayValue',
+      );
+      expect(barGeometries.length).toEqual(2);
+      expect(barGeometries[0]).toEqual(
+        getBarGeometry({
+          x: 25,
+          y: 0,
+          width: 25,
+          height: 100,
+          value: {
+            x: 0,
+            y: 20,
           },
-          rect: {
-            opacity: 1,
+        }),
+      );
+      expect(barGeometries[1]).toEqual(
+        getBarGeometry({
+          x: 75,
+          y: 50,
+          width: 25,
+          height: 50,
+          value: {
+            x: 1,
+            y: 10,
           },
-          rectBorder: {
-            strokeWidth: 0,
-            visible: false,
-          },
-        },
-      });
+        }),
+      );
     });
   });
   describe('Single series bar chart - linear', () => {
@@ -457,82 +359,42 @@ describe('Rendering bars', () => {
         'red',
         LIGHT_THEME.barSeriesStyle,
       );
-      expect(barGeometries[0]).toEqual({
-        x: 0,
-        y: 0,
-        width: 50,
-        height: 100,
-        color: 'red',
-        value: {
-          accessor: 'y1',
+      const getBarGeometry = MockBarGeometry.fromBaseline(
+        {
           x: 0,
-          y: 10,
-        },
-        seriesIdentifier: {
-          specId: SPEC_ID,
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-        },
-        displayValue: undefined,
-        seriesStyle: {
-          displayValue: {
-            fill: '#777',
-            fontFamily: 'sans-serif',
-            fontSize: 8,
-            fontStyle: 'normal',
-            offsetX: 0,
-            offsetY: 0,
-            padding: 0,
+          y: 0,
+          width: 50,
+          height: 100,
+          color: 'red',
+          value: {
+            accessor: 'y1',
+            x: 0,
+            y: 10,
+            mark: null,
           },
-          rect: {
-            opacity: 1,
-          },
-          rectBorder: {
-            strokeWidth: 0,
-            visible: false,
+          seriesIdentifier: {
+            specId: SPEC_ID,
+            key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
+            yAccessor: 1,
+            splitAccessors: new Map(),
+            seriesKeys: [1],
           },
         },
-      });
-      expect(barGeometries[1]).toEqual({
-        x: 50,
-        y: 50,
-        width: 50,
-        height: 50,
-        color: 'red',
-        value: {
-          accessor: 'y1',
-          x: 1,
-          y: 5,
-        },
-        seriesIdentifier: {
-          specId: SPEC_ID,
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-        },
-        displayValue: undefined,
-        seriesStyle: {
-          displayValue: {
-            fill: '#777',
-            fontFamily: 'sans-serif',
-            fontSize: 8,
-            fontStyle: 'normal',
-            offsetX: 0,
-            offsetY: 0,
-            padding: 0,
+        'displayValue',
+      );
+      expect(barGeometries[0]).toEqual(getBarGeometry());
+      expect(barGeometries[1]).toEqual(
+        getBarGeometry({
+          x: 50,
+          y: 50,
+          width: 50,
+          height: 50,
+          value: {
+            x: 1,
+            y: 5,
           },
-          rect: {
-            opacity: 1,
-          },
-          rectBorder: {
-            strokeWidth: 0,
-            visible: false,
-          },
-        },
-      });
+        }),
+      );
     });
   });
   describe('Single series bar chart - log', () => {
@@ -633,83 +495,42 @@ describe('Rendering bars', () => {
         'red',
         LIGHT_THEME.barSeriesStyle,
       );
-      expect(barGeometries.length).toEqual(2);
-      expect(barGeometries[0]).toEqual({
-        x: 0,
-        y: 50,
-        width: 25,
-        height: 50,
-        color: 'red',
-        value: {
-          accessor: 'y1',
+      const getBarGeometry = MockBarGeometry.fromBaseline(
+        {
           x: 0,
-          y: 10,
-        },
-        seriesIdentifier: {
-          specId: spec1Id,
-          key: 'spec{bar1}yAccessor{1}splitAccessors{}',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-        },
-        displayValue: undefined,
-        seriesStyle: {
-          displayValue: {
-            fill: '#777',
-            fontFamily: 'sans-serif',
-            fontSize: 8,
-            fontStyle: 'normal',
-            offsetX: 0,
-            offsetY: 0,
-            padding: 0,
+          y: 50,
+          width: 25,
+          height: 50,
+          color: 'red',
+          value: {
+            accessor: 'y1',
+            x: 0,
+            y: 10,
           },
-          rect: {
-            opacity: 1,
-          },
-          rectBorder: {
-            strokeWidth: 0,
-            visible: false,
+          seriesIdentifier: {
+            specId: spec1Id,
+            key: 'spec{bar1}yAccessor{1}splitAccessors{}',
+            yAccessor: 1,
+            splitAccessors: new Map(),
+            seriesKeys: [1],
           },
         },
-      });
-      expect(barGeometries[1]).toEqual({
-        x: 50,
-        y: 75,
-        width: 25,
-        height: 25,
-        color: 'red',
-        value: {
-          accessor: 'y1',
-          x: 1,
-          y: 5,
-        },
-        seriesIdentifier: {
-          specId: spec1Id,
-          key: 'spec{bar1}yAccessor{1}splitAccessors{}',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-        },
-        displayValue: undefined,
-        seriesStyle: {
-          displayValue: {
-            fill: '#777',
-            fontFamily: 'sans-serif',
-            fontSize: 8,
-            fontStyle: 'normal',
-            offsetX: 0,
-            offsetY: 0,
-            padding: 0,
+        'displayValue',
+      );
+      expect(barGeometries.length).toEqual(2);
+      expect(barGeometries[0]).toEqual(getBarGeometry());
+      expect(barGeometries[1]).toEqual(
+        getBarGeometry({
+          x: 50,
+          y: 75,
+          width: 25,
+          height: 25,
+          value: {
+            x: 1,
+            y: 5,
           },
-          rect: {
-            opacity: 1,
-          },
-          rectBorder: {
-            strokeWidth: 0,
-            visible: false,
-          },
-        },
-      });
+        }),
+      );
     });
     test('can render second spec bars', () => {
       const { barGeometries } = renderBars(
@@ -720,83 +541,43 @@ describe('Rendering bars', () => {
         'blue',
         LIGHT_THEME.barSeriesStyle,
       );
+      const getBarGeometry = MockBarGeometry.fromBaseline(
+        {
+          x: 25,
+          y: 0,
+          width: 25,
+          height: 100,
+          color: 'blue',
+          value: {
+            accessor: 'y1',
+            x: 0,
+            y: 20,
+          },
+          seriesIdentifier: {
+            specId: spec2Id,
+            key: 'spec{bar2}yAccessor{1}splitAccessors{}',
+            yAccessor: 1,
+            splitAccessors: new Map(),
+            seriesKeys: [1],
+          },
+        },
+        'displayValue',
+      );
       expect(barGeometries.length).toEqual(2);
-      expect(barGeometries[0]).toEqual({
-        x: 25,
-        y: 0,
-        width: 25,
-        height: 100,
-        color: 'blue',
-        value: {
-          accessor: 'y1',
-          x: 0,
-          y: 20,
-        },
-        seriesIdentifier: {
-          specId: spec2Id,
-          key: 'spec{bar2}yAccessor{1}splitAccessors{}',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-        },
-        displayValue: undefined,
-        seriesStyle: {
-          displayValue: {
-            fill: '#777',
-            fontFamily: 'sans-serif',
-            fontSize: 8,
-            fontStyle: 'normal',
-            offsetX: 0,
-            offsetY: 0,
-            padding: 0,
+      expect(barGeometries[0]).toEqual(getBarGeometry());
+      expect(barGeometries[1]).toEqual(
+        getBarGeometry({
+          x: 75,
+          y: 50,
+          width: 25,
+          height: 50,
+          color: 'blue',
+          value: {
+            x: 1,
+            y: 10,
           },
-          rect: {
-            opacity: 1,
-          },
-          rectBorder: {
-            strokeWidth: 0,
-            visible: false,
-          },
-        },
-      });
-      expect(barGeometries[1]).toEqual({
-        x: 75,
-        y: 50,
-        width: 25,
-        height: 50,
-        color: 'blue',
-        value: {
-          accessor: 'y1',
-          x: 1,
-          y: 10,
-        },
-        seriesIdentifier: {
-          specId: spec2Id,
-          key: 'spec{bar2}yAccessor{1}splitAccessors{}',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-        },
-        displayValue: undefined,
-        seriesStyle: {
-          displayValue: {
-            fill: '#777',
-            fontFamily: 'sans-serif',
-            fontSize: 8,
-            fontStyle: 'normal',
-            offsetX: 0,
-            offsetY: 0,
-            padding: 0,
-          },
-          rect: {
-            opacity: 1,
-          },
-          rectBorder: {
-            strokeWidth: 0,
-            visible: false,
-          },
-        },
-      });
+        }),
+      );
     });
   });
   describe('Multi series bar chart - time', () => {
@@ -852,83 +633,44 @@ describe('Rendering bars', () => {
         'red',
         LIGHT_THEME.barSeriesStyle,
       );
+      const getBarGeometry = MockBarGeometry.fromBaseline(
+        {
+          x: 0,
+          y: 50,
+          width: 25,
+          height: 50,
+          color: 'red',
+          value: {
+            accessor: 'y1',
+            x: 1546300800000,
+            y: 10,
+          },
+          seriesIdentifier: {
+            specId: spec1Id,
+            key: 'spec{bar1}yAccessor{1}splitAccessors{}',
+            yAccessor: 1,
+            splitAccessors: new Map(),
+            seriesKeys: [1],
+          },
+        },
+        'displayValue',
+      );
       expect(barGeometries.length).toEqual(2);
-      expect(barGeometries[0]).toEqual({
-        x: 0,
-        y: 50,
-        width: 25,
-        height: 50,
-        color: 'red',
-        value: {
-          accessor: 'y1',
-          x: 1546300800000,
-          y: 10,
-        },
-        seriesIdentifier: {
-          specId: spec1Id,
-          key: 'spec{bar1}yAccessor{1}splitAccessors{}',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-        },
-        displayValue: undefined,
-        seriesStyle: {
-          displayValue: {
-            fill: '#777',
-            fontFamily: 'sans-serif',
-            fontSize: 8,
-            fontStyle: 'normal',
-            offsetX: 0,
-            offsetY: 0,
-            padding: 0,
+      expect(barGeometries[0]).toEqual(getBarGeometry());
+      expect(barGeometries[1]).toEqual(
+        getBarGeometry({
+          x: 50,
+          y: 75,
+          width: 25,
+          height: 25,
+          value: {
+            accessor: 'y1',
+            x: 1546387200000,
+            y: 5,
+            mark: null,
           },
-          rect: {
-            opacity: 1,
-          },
-          rectBorder: {
-            strokeWidth: 0,
-            visible: false,
-          },
-        },
-      });
-      expect(barGeometries[1]).toEqual({
-        x: 50,
-        y: 75,
-        width: 25,
-        height: 25,
-        color: 'red',
-        value: {
-          accessor: 'y1',
-          x: 1546387200000,
-          y: 5,
-        },
-        seriesIdentifier: {
-          specId: spec1Id,
-          key: 'spec{bar1}yAccessor{1}splitAccessors{}',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-        },
-        displayValue: undefined,
-        seriesStyle: {
-          displayValue: {
-            fill: '#777',
-            fontFamily: 'sans-serif',
-            fontSize: 8,
-            fontStyle: 'normal',
-            offsetX: 0,
-            offsetY: 0,
-            padding: 0,
-          },
-          rect: {
-            opacity: 1,
-          },
-          rectBorder: {
-            strokeWidth: 0,
-            visible: false,
-          },
-        },
-      });
+        }),
+      );
     });
     test('can render second spec bars', () => {
       const { barGeometries } = renderBars(
@@ -939,83 +681,46 @@ describe('Rendering bars', () => {
         'blue',
         LIGHT_THEME.barSeriesStyle,
       );
+      const getBarGeometry = MockBarGeometry.fromBaseline(
+        {
+          x: 25,
+          y: 0,
+          width: 25,
+          height: 100,
+          color: 'blue',
+          value: {
+            accessor: 'y1',
+            x: 1546300800000,
+            y: 20,
+            mark: null,
+          },
+          seriesIdentifier: {
+            specId: spec2Id,
+            key: 'spec{bar2}yAccessor{1}splitAccessors{}',
+            yAccessor: 1,
+            splitAccessors: new Map(),
+            seriesKeys: [1],
+          },
+        },
+        'displayValue',
+      );
+
       expect(barGeometries.length).toEqual(2);
-      expect(barGeometries[0]).toEqual({
-        x: 25,
-        y: 0,
-        width: 25,
-        height: 100,
-        color: 'blue',
-        value: {
-          accessor: 'y1',
-          x: 1546300800000,
-          y: 20,
-        },
-        seriesIdentifier: {
-          specId: spec2Id,
-          key: 'spec{bar2}yAccessor{1}splitAccessors{}',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-        },
-        displayValue: undefined,
-        seriesStyle: {
-          displayValue: {
-            fill: '#777',
-            fontFamily: 'sans-serif',
-            fontSize: 8,
-            fontStyle: 'normal',
-            offsetX: 0,
-            offsetY: 0,
-            padding: 0,
+      expect(barGeometries[0]).toEqual(getBarGeometry());
+      expect(barGeometries[1]).toEqual(
+        getBarGeometry({
+          x: 75,
+          y: 50,
+          width: 25,
+          height: 50,
+          value: {
+            accessor: 'y1',
+            x: 1546387200000,
+            y: 10,
+            mark: null,
           },
-          rect: {
-            opacity: 1,
-          },
-          rectBorder: {
-            strokeWidth: 0,
-            visible: false,
-          },
-        },
-      });
-      expect(barGeometries[1]).toEqual({
-        x: 75,
-        y: 50,
-        width: 25,
-        height: 50,
-        color: 'blue',
-        value: {
-          accessor: 'y1',
-          x: 1546387200000,
-          y: 10,
-        },
-        seriesIdentifier: {
-          specId: spec2Id,
-          key: 'spec{bar2}yAccessor{1}splitAccessors{}',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-        },
-        displayValue: undefined,
-        seriesStyle: {
-          displayValue: {
-            fill: '#777',
-            fontFamily: 'sans-serif',
-            fontSize: 8,
-            fontStyle: 'normal',
-            offsetX: 0,
-            offsetY: 0,
-            padding: 0,
-          },
-          rect: {
-            opacity: 1,
-          },
-          rectBorder: {
-            strokeWidth: 0,
-            visible: false,
-          },
-        },
-      });
+        }),
+      );
     });
   });
   describe('Remove points datum is not in domain', () => {
@@ -1052,7 +757,7 @@ describe('Rendering bars', () => {
     const yScales = computeYScales({ yDomains: barSeriesDomains.yDomain, range: [100, 0] });
 
     test('Can render 3 bars', () => {
-      const { barGeometries, indexedGeometries } = renderBars(
+      const { barGeometries, indexedGeometryMap } = renderBars(
         0,
         barSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
         xScale,
@@ -1063,7 +768,7 @@ describe('Rendering bars', () => {
       expect(barGeometries.length).toBe(3);
       // will be cut by the clipping areas in the rendering component
       expect(barGeometries[2].height).toBe(1000);
-      expect(indexedGeometries.size).toBe(3);
+      expect(indexedGeometryMap.size).toBe(3);
     });
   });
   describe('Renders minBarHeight', () => {

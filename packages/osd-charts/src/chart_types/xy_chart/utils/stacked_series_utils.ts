@@ -18,6 +18,7 @@
 
 import { DataSeries, DataSeriesDatum, RawDataSeries, RawDataSeriesDatum, FilledValues } from './series';
 import { ScaleType } from '../../../scales';
+import { isDefined } from '../state/utils';
 
 /** @internal */
 export interface StackedValues {
@@ -151,6 +152,8 @@ export function formatStackedDataSeriesValues(
           x,
           // filling as 0 value
           y1: 0,
+          mark: null,
+          datum: null,
         },
         stackedValues,
         seriesIndex,
@@ -184,7 +187,7 @@ export function getStackedFormattedSeriesDatum(
   isPercentageMode = false,
   filled?: FilledValues,
 ): DataSeriesDatum | undefined {
-  const { x, datum } = data;
+  const { x, mark: markValue, datum } = data;
   const stack = stackedValues.get(x);
   if (!stack) {
     return;
@@ -210,6 +213,7 @@ export function getStackedFormattedSeriesDatum(
     computedY0 = y0 ? y0 : null;
   }
   const initialY0 = y0 == null ? null : y0;
+  const mark = isDefined(markValue) ? markValue : null;
 
   if (seriesIndex === 0) {
     return {
@@ -218,6 +222,7 @@ export function getStackedFormattedSeriesDatum(
       y0: computedY0,
       initialY1: y1,
       initialY0,
+      mark,
       datum,
       ...(filled && { filled }),
     };
@@ -249,6 +254,7 @@ export function getStackedFormattedSeriesDatum(
       y0: stackedY0,
       initialY1: y1,
       initialY0,
+      mark,
       datum,
       ...(filled && { filled }),
     };

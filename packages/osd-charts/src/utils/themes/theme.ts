@@ -168,6 +168,14 @@ export interface Theme {
    * You may use `SeriesColorAccessor` to assign colors to a given series or replace the `theme.colors.vizColors` colors to your desired colors.
    */
   barSeriesStyle: BarSeriesStyle;
+  /**
+   * Global bubble styles.
+   *
+   * __Note:__ This is not used to set the color of a specific series. As such, any changes to the styles will not be reflected in the tooltip, legend, etc..
+   *
+   * You may use `SeriesColorAccessor` to assign colors to a given series or replace the `theme.colors.vizColors` colors to your desired colors.
+   */
+  bubbleSeriesStyle: BubbleSeriesStyle;
   arcSeriesStyle: ArcSeriesStyle;
   sharedStyle: SharedGeometryStateStyle;
   axes: AxisConfig;
@@ -175,6 +183,12 @@ export interface Theme {
   colors: ColorConfig;
   legend: LegendStyle;
   crosshair: CrosshairStyle;
+  /**
+   * Used to scale radius with `markSizeAccessor`
+   *
+   * value from 1 to 100
+   */
+  markSizeRatio?: number;
 }
 
 export type PartialTheme = RecursivePartial<Theme>;
@@ -263,6 +277,10 @@ export interface BarSeriesStyle {
   rect: RectStyle;
   rectBorder: RectBorderStyle;
   displayValue: DisplayValueStyle;
+}
+
+export interface BubbleSeriesStyle {
+  point: PointStyle;
 }
 
 export interface LineSeriesStyle {

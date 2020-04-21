@@ -28,6 +28,7 @@ import { renderBarValues } from './values/bar';
 import { renderDebugRect } from './utils/debug';
 import { stringToRGB } from '../../../partition_chart/layout/utils/d3_utils';
 import { Rect } from '../../../../geoms/types';
+import { renderBubbles } from './bubbles';
 
 /** @internal */
 export function renderXYChartCanvas2d(
@@ -44,6 +45,7 @@ export function renderXYChartCanvas2d(
       chartTransform,
       chartRotation,
       geometries,
+      geometriesIndex,
       theme,
       highlightedLegendItem,
       annotationDimensions,
@@ -101,7 +103,7 @@ export function renderXYChartCanvas2d(
         });
       },
 
-      // rendering bars/areas/lines
+      // rendering bars
       (ctx: CanvasRenderingContext2D) => {
         withContext(ctx, (ctx) => {
           ctx.translate(transform.x, transform.y);
@@ -109,6 +111,7 @@ export function renderXYChartCanvas2d(
           renderBars(ctx, geometries.bars, theme.sharedStyle, clippings, highlightedLegendItem);
         });
       },
+      // rendering areas
       (ctx: CanvasRenderingContext2D) => {
         withContext(ctx, (ctx) => {
           ctx.translate(transform.x, transform.y);
@@ -121,12 +124,26 @@ export function renderXYChartCanvas2d(
           });
         });
       },
+      // rendering lines
       (ctx: CanvasRenderingContext2D) => {
         withContext(ctx, (ctx) => {
           ctx.translate(transform.x, transform.y);
           ctx.rotate((chartRotation * Math.PI) / 180);
           renderLines(ctx, {
             lines: geometries.lines,
+            clippings,
+            highlightedLegendItem: highlightedLegendItem || null,
+            sharedStyle: theme.sharedStyle,
+          });
+        });
+      },
+      // rendering bubbles
+      (ctx: CanvasRenderingContext2D) => {
+        withContext(ctx, (ctx) => {
+          ctx.translate(transform.x, transform.y);
+          ctx.rotate((chartRotation * Math.PI) / 180);
+          renderBubbles(ctx, {
+            bubbles: geometries.bubbles,
             clippings,
             highlightedLegendItem: highlightedLegendItem || null,
             sharedStyle: theme.sharedStyle,
@@ -161,18 +178,21 @@ export function renderXYChartCanvas2d(
           );
         });
       },
+      // rendering debugger
       (ctx: CanvasRenderingContext2D) => {
         if (!debug) {
           return;
         }
         withContext(ctx, (ctx) => {
+          const { left, top, width, height } = chartDimensions;
+
           renderDebugRect(
             ctx,
             {
-              x: chartDimensions.left,
-              y: chartDimensions.top,
-              width: chartDimensions.width,
-              height: chartDimensions.height,
+              x: left,
+              y: top,
+              width,
+              height,
             },
             {
               color: stringToRGB('transparent'),
@@ -183,6 +203,18 @@ export function renderXYChartCanvas2d(
               dash: [4, 4],
             },
           );
+
+          const triangulation = geometriesIndex.triangulation([0, 0, width, height]);
+
+          if (triangulation) {
+            ctx.beginPath();
+            ctx.translate(left, top);
+            ctx.setLineDash([5, 5]);
+            triangulation.render(ctx);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'blue';
+            ctx.stroke();
+          }
         });
       },
     ]);

@@ -16,205 +16,59 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { RawDataSeries } from './series';
 import { formatStackedDataSeriesValues } from './stacked_series_utils';
 import { ScaleType } from '../../../scales';
+import { MockRawDataSeries } from '../../../mocks';
 
 describe('Stacked Series Utils', () => {
-  const STANDARD_DATA_SET: RawDataSeries[] = [
+  const STANDARD_DATA_SET = MockRawDataSeries.fromData([[{ x: 0, y1: 10 }], [{ x: 0, y1: 20 }], [{ x: 0, y1: 70 }]], {
+    yAccessor: 'y1',
+    splitAccessors: new Map(),
+    seriesKeys: [],
+  });
+  const WITH_NULL_DATASET = MockRawDataSeries.fromData([[{ x: 0, y1: 10 }], [{ x: 0, y1: null }], [{ x: 0, y1: 30 }]], {
+    yAccessor: 'y1',
+    seriesKeys: [],
+  });
+  const STANDARD_DATA_SET_WY0 = MockRawDataSeries.fromData(
+    [[{ x: 0, y0: 2, y1: 10 }], [{ x: 0, y0: 4, y1: 20 }], [{ x: 0, y0: 6, y1: 70 }]],
     {
-      data: [
-        {
-          x: 0,
-          y1: 10,
-        },
-      ],
       yAccessor: 'y1',
-      splitAccessors: new Map(),
       seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec1',
     },
+  );
+  const WITH_NULL_DATASET_WY0 = MockRawDataSeries.fromData(
+    [[{ x: 0, y0: 2, y1: 10 }], [{ x: 0, y1: null }], [{ x: 0, y0: 6, y1: 90, mark: null }]],
     {
-      data: [
-        {
-          x: 0,
-          y1: 20,
-        },
-      ],
       yAccessor: 'y1',
-      splitAccessors: new Map(),
       seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec2',
     },
-    {
-      data: [
-        {
-          x: 0,
-          y1: 70,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec3',
-    },
-  ];
-  const WITH_NULL_DATASET: RawDataSeries[] = [
-    {
-      data: [
-        {
-          x: 0,
-          y1: 10,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec1',
-    },
-    {
-      data: [
-        {
-          x: 0,
-          y1: null,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec2',
-    },
-    {
-      data: [
-        {
-          x: 0,
-          y1: 30,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec3',
-    },
-  ];
-  const STANDARD_DATA_SET_WY0: RawDataSeries[] = [
-    {
-      data: [
-        {
-          x: 0,
-          y0: 2,
-          y1: 10,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec1',
-    },
-    {
-      data: [
-        {
-          x: 0,
-          y0: 4,
-          y1: 20,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec2',
-    },
-    {
-      data: [
-        {
-          x: 0,
-          y0: 6,
-          y1: 70,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec3',
-    },
-  ];
-  const WITH_NULL_DATASET_WY0: RawDataSeries[] = [
-    {
-      data: [
-        {
-          x: 0,
-          y0: 2,
-          y1: 10,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec1',
-    },
-    {
-      data: [
-        {
-          x: 0,
-          y1: null,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec2',
-    },
-    {
-      data: [
-        {
-          x: 0,
-          y0: 6,
-          y1: 90,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec3',
-    },
-  ];
-  const DATA_SET_WITH_NULL_2: RawDataSeries[] = [
+  );
+  const DATA_SET_WITH_NULL_2 = MockRawDataSeries.defaults(
+    [
+      {
+        seriesKeys: ['a'],
+        key: 'a',
+        data: [
+          { x: 1, y1: 10 },
+          { x: 2, y1: 20 },
+          { x: 4, y1: 40 },
+        ],
+      },
+      {
+        seriesKeys: ['b'],
+        key: 'b',
+        data: [
+          { x: 1, y1: 90 },
+          { x: 3, y1: 30 },
+        ],
+      },
+    ],
     {
       specId: 'spec1',
       yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: ['a'],
-      key: 'a',
-      data: [
-        { x: 1, y1: 10 },
-        { x: 2, y1: 20 },
-        { x: 4, y1: 40 },
-      ],
     },
-    {
-      specId: 'spec1',
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: ['b'],
-      key: 'b',
-      data: [
-        { x: 1, y1: 90 },
-        { x: 3, y1: 30 },
-      ],
-    },
-  ];
+  );
   const xValues = new Set([0]);
   const with2NullsXValues = new Set([1, 2, 3, 4]);
 
@@ -243,13 +97,13 @@ describe('Stacked Series Utils', () => {
       expect(data0.y0).toBeNull();
       expect(data0.y1).toBe(0.25);
 
-      expect(formattedData[1].data[0]).toEqual({
-        datum: undefined,
+      expect(formattedData[1].data[0]).toMatchObject({
         initialY0: null,
         initialY1: null,
         x: 0,
         y1: null,
         y0: 0.25,
+        mark: null,
       });
 
       const data2 = formattedData[2].data[0];
@@ -320,57 +174,57 @@ describe('Stacked Series Utils', () => {
       expect(formattedData.length).toBe(2);
       expect(formattedData[0].data.length).toBe(4);
       expect(formattedData[1].data.length).toBe(4);
-      expect(formattedData[0].data[0]).toEqual({
-        datum: undefined,
+      expect(formattedData[0].data[0]).toMatchObject({
         initialY0: null,
         initialY1: 0.1,
         x: 1,
         y0: null,
         y1: 0.1,
+        mark: null,
       });
-      expect(formattedData[0].data[1]).toEqual({
-        datum: undefined,
+      expect(formattedData[0].data[1]).toMatchObject({
         initialY0: null,
         initialY1: 1,
         x: 2,
         y0: null,
         y1: 1,
+        mark: null,
       });
-      expect(formattedData[0].data[3]).toEqual({
-        datum: undefined,
+      expect(formattedData[0].data[3]).toMatchObject({
         initialY0: null,
         initialY1: 1,
         x: 4,
         y0: null,
         y1: 1,
+        mark: null,
       });
-      expect(formattedData[1].data[0]).toEqual({
-        datum: undefined,
+      expect(formattedData[1].data[0]).toMatchObject({
         initialY0: null,
         initialY1: 0.9,
         x: 1,
         y0: 0.1,
         y1: 1,
+        mark: null,
       });
-      expect(formattedData[1].data[1]).toEqual({
-        datum: undefined,
+      expect(formattedData[1].data[1]).toMatchObject({
         initialY0: null,
         initialY1: 0,
         x: 2,
         y0: 1,
         y1: 1,
+        mark: null,
         filled: {
           x: 2,
           y1: 0,
         },
       });
-      expect(formattedData[1].data[2]).toEqual({
-        datum: undefined,
+      expect(formattedData[1].data[2]).toMatchObject({
         initialY0: null,
         initialY1: 1,
         x: 3,
         y0: 0,
         y1: 1,
+        mark: null,
       });
     });
   });

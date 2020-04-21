@@ -30,36 +30,31 @@ import {
 import { GroupId } from '../../../utils/ids';
 import { ChartTypes } from '../..';
 import { SpecTypes } from '../../../specs/settings';
+import { MockRawDataSeries, MockRawDataSeriesDatum } from '../../../mocks';
 
 describe('Y Domain', () => {
   test('Should merge Y domain', () => {
-    const dataSeries: RawDataSeries[] = [
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+    const dataSeries = MockRawDataSeries.fromData(
+      [
+        [
           { x: 1, y1: 2 },
           { x: 2, y1: 2 },
           { x: 3, y1: 2 },
           { x: 4, y1: 5 },
         ],
-      },
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+        [
           { x: 1, y1: 2 },
           { x: 4, y1: 7 },
         ],
+      ],
+      {
+        specId: 'a',
+        yAccessor: 'y1',
+        seriesKeys: [''],
+        key: '',
       },
-    ];
-    const specDataSeries = new Map();
+    );
+    const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries);
     const mergedDomain = mergeYDomain(
       specDataSeries,
@@ -86,48 +81,43 @@ describe('Y Domain', () => {
     ]);
   });
   test('Should merge Y domain different group', () => {
-    const dataSeries1: RawDataSeries[] = [
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+    const dataSeries1 = MockRawDataSeries.fromData(
+      [
+        [
           { x: 1, y1: 2 },
           { x: 2, y1: 2 },
           { x: 3, y1: 2 },
           { x: 4, y1: 5 },
         ],
-      },
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+        [
           { x: 1, y1: 2 },
           { x: 4, y1: 7 },
         ],
-      },
-    ];
-    const dataSeries2: RawDataSeries[] = [
+      ],
       {
         specId: 'a',
         yAccessor: 'y1',
-        splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [
+      },
+    );
+    const dataSeries2 = MockRawDataSeries.fromData(
+      [
+        [
           { x: 1, y1: 10 },
           { x: 2, y1: 10 },
           { x: 3, y1: 2 },
           { x: 4, y1: 5 },
         ],
+      ],
+      {
+        specId: 'a',
+        yAccessor: 'y1',
+        seriesKeys: [''],
+        key: '',
       },
-    ];
-    const specDataSeries = new Map();
+    );
+    const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries1);
     specDataSeries.set('b', dataSeries2);
     const mergedDomain = mergeYDomain(
@@ -170,48 +160,44 @@ describe('Y Domain', () => {
     ]);
   });
   test('Should merge Y domain same group all stacked', () => {
-    const dataSeries1: RawDataSeries[] = [
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+    const dataSeries1 = MockRawDataSeries.fromData(
+      [
+        [
           { x: 1, y1: 2 },
           { x: 2, y1: 2 },
           { x: 3, y1: 2 },
           { x: 4, y1: 5 },
         ],
-      },
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+        [
           { x: 1, y1: 2 },
           { x: 4, y1: 7 },
         ],
-      },
-    ];
-    const dataSeries2: RawDataSeries[] = [
+      ],
       {
         specId: 'a',
         yAccessor: 'y1',
-        splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [
+      },
+    );
+
+    const dataSeries2 = MockRawDataSeries.fromData(
+      [
+        [
           { x: 1, y1: 10 },
           { x: 2, y1: 10 },
           { x: 3, y1: 2 },
           { x: 4, y1: 5 },
         ],
+      ],
+      {
+        specId: 'a',
+        yAccessor: 'y1',
+        seriesKeys: [''],
+        key: '',
       },
-    ];
-    const specDataSeries = new Map();
+    );
+    const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries1);
     specDataSeries.set('b', dataSeries2);
     const mergedDomain = mergeYDomain(
@@ -247,48 +233,43 @@ describe('Y Domain', () => {
     ]);
   });
   test('Should merge Y domain same group partially stacked', () => {
-    const dataSeries1: RawDataSeries[] = [
+    const dataSeries1 = MockRawDataSeries.fromData(
+      [
+        [
+          { x: 1, y1: 2, mark: null },
+          { x: 2, y1: 2, mark: null },
+          { x: 3, y1: 2, mark: null },
+          { x: 4, y1: 5, mark: null },
+        ],
+        [
+          { x: 1, y1: 2, mark: null },
+          { x: 4, y1: 7, mark: null },
+        ],
+      ],
       {
         specId: 'a',
         yAccessor: 'y1',
-        splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [
-          { x: 1, y1: 2 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 2 },
-          { x: 4, y1: 5 },
-        ],
       },
+    );
+    const dataSeries2 = MockRawDataSeries.fromData(
+      [
+        [
+          { x: 1, y1: 10, mark: null },
+          { x: 2, y1: 10, mark: null },
+          { x: 3, y1: 2, mark: null },
+          { x: 4, y1: 5, mark: null },
+        ],
+      ],
       {
         specId: 'a',
         yAccessor: 'y1',
-        splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [
-          { x: 1, y1: 2 },
-          { x: 4, y1: 7 },
-        ],
       },
-    ];
-    const dataSeries2: RawDataSeries[] = [
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
-          { x: 1, y1: 10 },
-          { x: 2, y1: 10 },
-          { x: 3, y1: 2 },
-          { x: 4, y1: 5 },
-        ],
-      },
-    ];
-    const specDataSeries = new Map();
+    );
+    const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries1);
     specDataSeries.set('b', dataSeries2);
     const mergedDomain = mergeYDomain(
@@ -324,6 +305,7 @@ describe('Y Domain', () => {
   });
   test('Should merge Y high volume of data', () => {
     const maxValues = 10000;
+    const data = new Array(maxValues).fill(0).map((_, i) => MockRawDataSeriesDatum.default({ x: i, y1: i }));
     const dataSeries1: RawDataSeries[] = [
       {
         specId: 'a',
@@ -331,7 +313,7 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: new Array(maxValues).fill(0).map((d, i) => ({ x: i, y1: i })),
+        data,
       },
       {
         specId: 'a',
@@ -339,7 +321,7 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: new Array(maxValues).fill(0).map((d, i) => ({ x: i, y1: i })),
+        data,
       },
     ];
     const dataSeries2: RawDataSeries[] = [
@@ -349,10 +331,10 @@ describe('Y Domain', () => {
         splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: new Array(maxValues).fill(0).map((d, i) => ({ x: i, y1: i })),
+        data,
       },
     ];
-    const specDataSeries = new Map();
+    const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries1);
     specDataSeries.set('b', dataSeries2);
     const mergedDomain = mergeYDomain(
@@ -551,33 +533,27 @@ describe('Y Domain', () => {
   });
 
   test('Should getDataSeriesOnGroup for matching specs', () => {
-    const dataSeries: RawDataSeries[] = [
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+    const dataSeries = MockRawDataSeries.fromData(
+      [
+        [
           { x: 1, y1: 2 },
           { x: 2, y1: 2 },
           { x: 3, y1: 2 },
           { x: 4, y1: 5 },
         ],
-      },
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+        [
           { x: 1, y1: 2 },
           { x: 4, y1: 7 },
         ],
+      ],
+      {
+        specId: 'a',
+        yAccessor: 'y1',
+        seriesKeys: [''],
+        key: '',
       },
-    ];
-    const specDataSeries = new Map();
+    );
+    const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('b', dataSeries);
 
     const specs: YBasicSeriesSpec[] = [
@@ -596,34 +572,27 @@ describe('Y Domain', () => {
   });
   test('Should merge Y domain accounting for custom domain limits: complete bounded domain', () => {
     const groupId = 'a';
-
-    const dataSeries: RawDataSeries[] = [
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+    const dataSeries = MockRawDataSeries.fromData(
+      [
+        [
           { x: 1, y1: 2 },
           { x: 2, y1: 2 },
           { x: 3, y1: 2 },
           { x: 4, y1: 5 },
         ],
-      },
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+        [
           { x: 1, y1: 2 },
           { x: 4, y1: 7 },
         ],
+      ],
+      {
+        specId: 'a',
+        yAccessor: 'y1',
+        seriesKeys: [''],
+        key: '',
       },
-    ];
-    const specDataSeries = new Map();
+    );
+    const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries);
     const domainsByGroupId = new Map<GroupId, DomainRange>();
     domainsByGroupId.set(groupId, { min: 0, max: 20 });
@@ -654,34 +623,27 @@ describe('Y Domain', () => {
   });
   test('Should merge Y domain accounting for custom domain limits: partial lower bounded domain', () => {
     const groupId = 'a';
-
-    const dataSeries: RawDataSeries[] = [
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+    const dataSeries = MockRawDataSeries.fromData(
+      [
+        [
           { x: 1, y1: 2 },
           { x: 2, y1: 2 },
           { x: 3, y1: 2 },
           { x: 4, y1: 5 },
         ],
-      },
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+        [
           { x: 1, y1: 2 },
           { x: 4, y1: 7 },
         ],
+      ],
+      {
+        specId: 'a',
+        yAccessor: 'y1',
+        seriesKeys: [''],
+        key: '',
       },
-    ];
-    const specDataSeries = new Map();
+    );
+    const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries);
     const domainsByGroupId = new Map<GroupId, DomainRange>();
     domainsByGroupId.set(groupId, { min: 0 });
@@ -712,34 +674,27 @@ describe('Y Domain', () => {
   });
   test('Should not merge Y domain with invalid custom domain limits: partial lower bounded domain', () => {
     const groupId = 'a';
-
-    const dataSeries: RawDataSeries[] = [
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+    const dataSeries = MockRawDataSeries.fromData(
+      [
+        [
           { x: 1, y1: 2 },
           { x: 2, y1: 2 },
           { x: 3, y1: 2 },
           { x: 4, y1: 5 },
         ],
-      },
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+        [
           { x: 1, y1: 2 },
           { x: 4, y1: 7 },
         ],
+      ],
+      {
+        specId: 'a',
+        yAccessor: 'y1',
+        seriesKeys: [''],
+        key: '',
       },
-    ];
-    const specDataSeries = new Map();
+    );
+    const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries);
     const domainsByGroupId = new Map<GroupId, DomainRange>();
     domainsByGroupId.set(groupId, { min: 20 });
@@ -766,34 +721,27 @@ describe('Y Domain', () => {
   });
   test('Should merge Y domain accounting for custom domain limits: partial upper bounded domain', () => {
     const groupId = 'a';
-
-    const dataSeries: RawDataSeries[] = [
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+    const dataSeries = MockRawDataSeries.fromData(
+      [
+        [
           { x: 1, y1: 2 },
           { x: 2, y1: 2 },
           { x: 3, y1: 2 },
           { x: 4, y1: 5 },
         ],
-      },
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+        [
           { x: 1, y1: 2 },
           { x: 4, y1: 7 },
         ],
+      ],
+      {
+        specId: 'a',
+        yAccessor: 'y1',
+        seriesKeys: [''],
+        key: '',
       },
-    ];
-    const specDataSeries = new Map();
+    );
+    const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries);
     const domainsByGroupId = new Map<GroupId, DomainRange>();
     domainsByGroupId.set(groupId, { max: 20 });
@@ -824,34 +772,27 @@ describe('Y Domain', () => {
   });
   test('Should not merge Y domain with invalid custom domain limits: partial upper bounded domain', () => {
     const groupId = 'a';
-
-    const dataSeries: RawDataSeries[] = [
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+    const dataSeries = MockRawDataSeries.fromData(
+      [
+        [
           { x: 1, y1: 2 },
           { x: 2, y1: 2 },
           { x: 3, y1: 2 },
           { x: 4, y1: 5 },
         ],
-      },
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+        [
           { x: 1, y1: 2 },
           { x: 4, y1: 7 },
         ],
+      ],
+      {
+        specId: 'a',
+        yAccessor: 'y1',
+        seriesKeys: [''],
+        key: '',
       },
-    ];
-    const specDataSeries = new Map();
+    );
+    const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries);
     const domainsByGroupId = new Map<GroupId, DomainRange>();
     domainsByGroupId.set(groupId, { max: -1 });
@@ -877,48 +818,43 @@ describe('Y Domain', () => {
     expect(attemptToMerge).toThrowError(errorMessage);
   });
   test('Should merge Y domain with stacked as percentage', () => {
-    const dataSeries1: RawDataSeries[] = [
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+    const dataSeries1 = MockRawDataSeries.fromData(
+      [
+        [
           { x: 1, y1: 2 },
           { x: 2, y1: 2 },
           { x: 3, y1: 2 },
           { x: 4, y1: 5 },
         ],
-      },
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+        [
           { x: 1, y1: 2 },
           { x: 4, y1: 7 },
         ],
-      },
-    ];
-    const dataSeries2: RawDataSeries[] = [
+      ],
       {
         specId: 'a',
         yAccessor: 'y1',
-        splitAccessors: new Map(),
         seriesKeys: [''],
         key: '',
-        data: [
+      },
+    );
+    const dataSeries2 = MockRawDataSeries.fromData(
+      [
+        [
           { x: 1, y1: 10 },
           { x: 2, y1: 10 },
           { x: 3, y1: 2 },
           { x: 4, y1: 5 },
         ],
+      ],
+      {
+        specId: 'a',
+        yAccessor: 'y1',
+        seriesKeys: [''],
+        key: '',
       },
-    ];
-    const specDataSeries = new Map();
+    );
+    const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries1);
     specDataSeries.set('b', dataSeries2);
     const mergedDomain = mergeYDomain(
@@ -955,34 +891,27 @@ describe('Y Domain', () => {
   });
   test('Should merge Y domain with as percentage regadless of custom domains', () => {
     const groupId = 'a';
-
-    const dataSeries: RawDataSeries[] = [
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+    const dataSeries = MockRawDataSeries.fromData(
+      [
+        [
           { x: 1, y1: 2 },
           { x: 2, y1: 2 },
           { x: 3, y1: 2 },
           { x: 4, y1: 5 },
         ],
-      },
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data: [
+        [
           { x: 1, y1: 2 },
           { x: 4, y1: 7 },
         ],
+      ],
+      {
+        specId: 'a',
+        yAccessor: 'y1',
+        seriesKeys: [''],
+        key: '',
       },
-    ];
-    const specDataSeries = new Map();
+    );
+    const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries);
     const domainsByGroupId = new Map<GroupId, DomainRange>();
     domainsByGroupId.set(groupId, { min: 2, max: 20 });

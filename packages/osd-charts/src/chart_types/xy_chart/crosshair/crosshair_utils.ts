@@ -37,7 +37,7 @@ export function getSnapPosition(
   totalBarsInCluster = 1,
 ): { band: number; position: number } | undefined {
   const position = scale.scale(value);
-  if (position === undefined) {
+  if (position === null) {
     return;
   }
 

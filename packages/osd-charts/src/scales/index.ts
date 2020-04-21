@@ -18,6 +18,8 @@
 
 import { $Values } from 'utility-types';
 
+import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
+
 /**
  * A `Scale` interface. A scale can map an input value within a specified domain
  * to an output value from a specified range.
@@ -28,8 +30,9 @@ export interface Scale {
   domain: any[];
   range: number[];
   ticks: () => any[];
-  scale: (value: string | number) => number;
-  pureScale: (value: any) => number;
+  scaleOrThrow(value?: PrimitiveValue): number;
+  scale: (value?: PrimitiveValue) => number | null;
+  pureScale: (value?: PrimitiveValue) => number | null;
   invert: (value: number) => any;
   invertWithStep: (
     value: number,

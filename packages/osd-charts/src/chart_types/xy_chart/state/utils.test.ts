@@ -40,9 +40,11 @@ import {
   isHorizontalRotation,
   isLineAreaOnlyChart,
   isVerticalRotation,
-  mergeGeometriesIndexes,
   setBarSeriesAccessors,
   getCustomSeriesColors,
+  isUniqueArray,
+  isDefined,
+  isDefinedFrom,
 } from './utils';
 import { IndexedGeometry, BandedAccessorType } from '../../../utils/geometry';
 import { mergeYCustomDomainsByGroupId } from './selectors/merge_y_custom_domains';
@@ -330,6 +332,8 @@ describe('Chart State utils', () => {
       areasPoints: 0,
       lines: 0,
       linePoints: 0,
+      bubbles: 0,
+      bubblePoints: 0,
     };
     expect(isChartAnimatable(geometriesCounts, false)).toBe(false);
     expect(isChartAnimatable(geometriesCounts, true)).toBe(true);
@@ -576,10 +580,10 @@ describe('Chart State utils', () => {
         false,
       );
       expect(geometries.geometriesIndex.size).toBe(4);
-      expect(geometries.geometriesIndex.get(0)?.length).toBe(2);
-      expect(geometries.geometriesIndex.get(1)?.length).toBe(2);
-      expect(geometries.geometriesIndex.get(2)?.length).toBe(2);
-      expect(geometries.geometriesIndex.get(3)?.length).toBe(2);
+      expect(geometries.geometriesIndex.find(0)?.length).toBe(2);
+      expect(geometries.geometriesIndex.find(1)?.length).toBe(2);
+      expect(geometries.geometriesIndex.find(2)?.length).toBe(2);
+      expect(geometries.geometriesIndex.find(3)?.length).toBe(2);
     });
     test('can compute stacked geometries indexes', () => {
       const line1: LineSeriesSpec = {
@@ -640,10 +644,10 @@ describe('Chart State utils', () => {
         false,
       );
       expect(geometries.geometriesIndex.size).toBe(4);
-      expect(geometries.geometriesIndex.get(0)?.length).toBe(2);
-      expect(geometries.geometriesIndex.get(1)?.length).toBe(2);
-      expect(geometries.geometriesIndex.get(2)?.length).toBe(2);
-      expect(geometries.geometriesIndex.get(3)?.length).toBe(2);
+      expect(geometries.geometriesIndex.find(0)?.length).toBe(2);
+      expect(geometries.geometriesIndex.find(1)?.length).toBe(2);
+      expect(geometries.geometriesIndex.find(2)?.length).toBe(2);
+      expect(geometries.geometriesIndex.find(3)?.length).toBe(2);
     });
     test('can compute non stacked geometries counts', () => {
       const area: AreaSeriesSpec = {
@@ -1234,7 +1238,7 @@ describe('Chart State utils', () => {
       expect(geometries.geometries.bars[0].x).toBe(0);
     });
   });
-  test('can merge geometry indexes', () => {
+  xtest('can merge geometry indexes', () => {
     const map1 = new Map<string, IndexedGeometry[]>();
     map1.set('a', [
       {
@@ -1242,7 +1246,7 @@ describe('Chart State utils', () => {
         x: 0,
         y: 0,
         color: '#1EA593',
-        value: { x: 0, y: 5, accessor: BandedAccessorType.Y1 },
+        value: { x: 0, y: 5, accessor: BandedAccessorType.Y1, mark: null },
         transform: { x: 0, y: 0 },
         seriesIdentifier: {
           specId: 'line1',
@@ -1260,7 +1264,7 @@ describe('Chart State utils', () => {
         x: 0,
         y: 175.8,
         color: '#2B70F7',
-        value: { x: 0, y: 2, accessor: BandedAccessorType.Y1 },
+        value: { x: 0, y: 2, accessor: BandedAccessorType.Y1, mark: null },
         transform: { x: 0, y: 0 },
         seriesIdentifier: {
           specId: 'line2',
@@ -1271,9 +1275,9 @@ describe('Chart State utils', () => {
         },
       },
     ]);
-    const merged = mergeGeometriesIndexes(map1, map2);
-    expect(merged.get('a')).toBeDefined();
-    expect(merged.get('a')?.length).toBe(2);
+    // const merged = mergeGeometriesIndexes(map1, map2);
+    // expect(merged.get('a')).toBeDefined();
+    // expect(merged.get('a')?.length).toBe(2);
   });
   test('can compute xScaleOffset dependent on histogram mode', () => {
     const domain = [0, 10];
@@ -1495,5 +1499,122 @@ describe('Chart State utils', () => {
       },
     ];
     expect(isAllSeriesDeselected(legendItems2)).toBe(false);
+  });
+
+  describe('#isUniqueArray', () => {
+    it('should return true for simple unique values', () => {
+      expect(isUniqueArray([1, 2])).toBe(true);
+    });
+
+    it('should return true for complex unique values', () => {
+      expect(isUniqueArray([{ n: 1 }, { n: 2 }], ({ n }) => n)).toBe(true);
+    });
+
+    it('should return false for simple duplicated values', () => {
+      expect(isUniqueArray([1, 1, 2])).toBe(false);
+    });
+
+    it('should return false for complex duplicated values', () => {
+      expect(isUniqueArray([{ n: 1 }, { n: 1 }, { n: 2 }], ({ n }) => n)).toBe(false);
+    });
+  });
+
+  describe('#isDefined', () => {
+    it('should return false for null', () => {
+      expect(isDefined(null)).toBe(false);
+    });
+
+    it('should return false for undefined', () => {
+      expect(isDefined(undefined)).toBe(false);
+    });
+
+    it('should return true for zero', () => {
+      expect(isDefined(0)).toBe(true);
+    });
+
+    it('should return true for empty string', () => {
+      expect(isDefined('')).toBe(true);
+    });
+
+    it('should return true for empty false', () => {
+      expect(isDefined(false)).toBe(true);
+    });
+
+    it('should filter out null and undefined values', () => {
+      const values: (number | null | undefined)[] = [1, 2, null, 4, 5, undefined];
+      const result: number[] = values.filter(isDefined);
+      expect(result).toEqual([1, 2, 4, 5]);
+    });
+  });
+
+  describe('#isDefinedFrom', () => {
+    interface Test {
+      a?: number | string | boolean | null;
+    }
+    it('should filter out undefined values from complex types', () => {
+      const values: Partial<Test>[] = [
+        {
+          a: 1,
+        },
+        {
+          a: 'string',
+        },
+        {
+          a: false,
+        },
+        {},
+      ];
+      const result: NonNullable<Test>[] = values.filter(isDefinedFrom(({ a }) => a !== undefined));
+      expect(result).toEqual(values.slice(0, -1));
+    });
+
+    it('should filter out null values from complex types', () => {
+      const values: Test[] = [
+        {
+          a: 1,
+        },
+        {
+          a: 'string',
+        },
+        {
+          a: false,
+        },
+        {
+          a: null,
+        },
+      ];
+      const result: NonNullable<Test>[] = values.filter(isDefinedFrom(({ a }) => a !== null));
+      expect(result).toEqual(values.slice(0, -1));
+    });
+
+    it('should filter out null values from complex nested types', () => {
+      type NestedTest = {
+        aa: Test;
+      };
+      const values: NestedTest[] = [
+        {
+          aa: { a: 1 },
+        },
+        {
+          aa: { a: 'string' },
+        },
+        {
+          aa: { a: false },
+        },
+        {
+          aa: { a: null },
+        },
+        {
+          aa: {},
+        },
+        {
+          aa: { a: undefined },
+        },
+      ];
+      const result: NonNullable<NestedTest>[] = values.filter(
+        isDefinedFrom(({ aa }) => aa?.a !== undefined && aa?.a !== null),
+      );
+      expect(result).toEqual(values.slice(0, 3));
+    });
   });
 });

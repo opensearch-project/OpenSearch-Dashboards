@@ -26,6 +26,7 @@ export const fitFunctionData: DataSeriesDatum[] = [
     y0: null,
     initialY1: null,
     initialY0: null,
+    mark: null,
     datum: {
       x: 0,
       y: null,
@@ -37,6 +38,7 @@ export const fitFunctionData: DataSeriesDatum[] = [
     y0: 0,
     initialY1: 3,
     initialY0: null,
+    mark: null,
     datum: {
       x: 1,
       y: 3,
@@ -48,6 +50,7 @@ export const fitFunctionData: DataSeriesDatum[] = [
     y0: 0,
     initialY1: 5,
     initialY0: null,
+    mark: null,
     datum: {
       x: 2,
       y: 5,
@@ -59,6 +62,7 @@ export const fitFunctionData: DataSeriesDatum[] = [
     y0: null,
     initialY1: null,
     initialY0: null,
+    mark: null,
     datum: {
       x: 3,
       y: null,
@@ -70,6 +74,7 @@ export const fitFunctionData: DataSeriesDatum[] = [
     y0: 0,
     initialY1: 4,
     initialY0: null,
+    mark: null,
     datum: {
       x: 4,
       y: 4,
@@ -81,6 +86,7 @@ export const fitFunctionData: DataSeriesDatum[] = [
     y0: null,
     initialY1: null,
     initialY0: null,
+    mark: null,
     datum: {
       x: 5,
       y: null,
@@ -92,6 +98,7 @@ export const fitFunctionData: DataSeriesDatum[] = [
     y0: 0,
     initialY1: 5,
     initialY0: null,
+    mark: null,
     datum: {
       x: 6,
       y: 5,
@@ -103,6 +110,7 @@ export const fitFunctionData: DataSeriesDatum[] = [
     y0: 0,
     initialY1: 6,
     initialY0: null,
+    mark: null,
     datum: {
       x: 7,
       y: 6,
@@ -114,6 +122,7 @@ export const fitFunctionData: DataSeriesDatum[] = [
     y0: null,
     initialY1: null,
     initialY0: null,
+    mark: null,
     datum: {
       x: 8,
       y: null,
@@ -125,6 +134,7 @@ export const fitFunctionData: DataSeriesDatum[] = [
     y0: null,
     initialY1: null,
     initialY0: null,
+    mark: null,
     datum: {
       x: 9,
       y: null,
@@ -136,6 +146,7 @@ export const fitFunctionData: DataSeriesDatum[] = [
     y0: null,
     initialY1: null,
     initialY0: null,
+    mark: null,
     datum: {
       x: 10,
       y: null,
@@ -147,6 +158,7 @@ export const fitFunctionData: DataSeriesDatum[] = [
     y0: 0,
     initialY1: 12,
     initialY0: null,
+    mark: null,
     datum: {
       x: 11,
       y: 12,
@@ -158,6 +170,7 @@ export const fitFunctionData: DataSeriesDatum[] = [
     y0: null,
     initialY1: null,
     initialY0: null,
+    mark: null,
     datum: {
       x: 12,
       y: null,

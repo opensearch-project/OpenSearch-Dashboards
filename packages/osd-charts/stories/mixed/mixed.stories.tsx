@@ -31,3 +31,4 @@ export { example as areasAndBars } from './3_areas_and_bars';
 export { example as testBarLinesLinear } from './4_test_bar';
 export { example as testBarLinesTime } from './5_test_bar_time';
 export { example as fittingFunctionsNonStackedSeries } from './6_fitting';
+export { example as markSizeAccessor } from './7_marks';
