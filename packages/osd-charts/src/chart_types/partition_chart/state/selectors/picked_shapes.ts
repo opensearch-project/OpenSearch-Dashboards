@@ -42,8 +42,17 @@ export const getPickedShapes = createCachedSelector(
 /** @internal */
 export const getPickedShapesLayerValues = createCachedSelector(
   [getPickedShapes],
-  (pickedShapes): Array<Array<LayerValue>> => {
-    const elements = pickedShapes.map<Array<LayerValue>>((model) => {
+  pickShapesLayerValues,
+)((state) => state.chartId);
+
+/** @internal */
+export function pickShapesLayerValues(pickedShapes: QuadViewModel[]): Array<Array<LayerValue>> {
+  const maxDepth = pickedShapes.reduce((acc, curr) => {
+    return Math.max(acc, curr.depth);
+  }, 0);
+  const elements = pickedShapes
+    .filter(({ depth }) => depth === maxDepth)
+    .map<Array<LayerValue>>((model) => {
       const values: Array<LayerValue> = [];
       values.push({
         groupByRollup: model.dataName,
@@ -61,6 +70,5 @@ export const getPickedShapesLayerValues = createCachedSelector(
       }
       return values.reverse();
     });
-    return elements;
-  },
-)((state) => state.chartId);
+  return elements;
+}

@@ -18,8 +18,14 @@
 
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { Chart, Position, Settings, Partition } from '../../src';
-import { indexInterpolatedFillColor, interpolatorCET2s } from '../utils/utils';
+import { Chart, Position, Settings, Partition, PartitionLayout } from '../../src';
+import {
+  indexInterpolatedFillColor,
+  interpolatorCET2s,
+  categoricalFillColor,
+  colorBrewerCategoricalPastel12,
+} from '../utils/utils';
+import { select } from '@storybook/addon-knobs';
 
 const onElementListeners = {
   onElementClick: action('onElementClick'),
@@ -47,12 +53,20 @@ const pieData: Array<PieDatum> = [
 ];
 
 export const example = () => {
+  const partitionLayout = select(
+    'layout',
+    { sunburst: PartitionLayout.sunburst, treemap: PartitionLayout.treemap },
+    'sunburst',
+  );
   return (
     <Chart className="story-chart">
       <Settings showLegend showLegendExtra legendPosition={Position.Right} {...onElementListeners} />
       <Partition
         id="pie"
         data={pieData}
+        config={{
+          partitionLayout,
+        }}
         valueAccessor={(d) => {
           return d[3];
         }}
@@ -66,8 +80,12 @@ export const example = () => {
             },
             shape: {
               fillColor: (d) => {
-                // pick color from color palette based on mean angle - rather distinct colors in the inner ring
-                return indexInterpolatedFillColor(interpolatorCET2s)(d, (d.x0 + d.x1) / 2 / (2 * Math.PI), []);
+                if (partitionLayout === 'sunburst') {
+                  // pick color from color palette based on mean angle - rather distinct colors in the inner ring
+                  return indexInterpolatedFillColor(interpolatorCET2s)(d, (d.x0 + d.x1) / 2 / (2 * Math.PI), []);
+                } else {
+                  return categoricalFillColor(colorBrewerCategoricalPastel12)(d.sortIndex);
+                }
               },
             },
           },
@@ -80,8 +98,12 @@ export const example = () => {
             },
             shape: {
               fillColor: (d) => {
-                // pick color from color palette based on mean angle - rather distinct colors in the inner ring
-                return indexInterpolatedFillColor(interpolatorCET2s)(d, (d.x0 + d.x1) / 2 / (2 * Math.PI), []);
+                if (partitionLayout === 'sunburst') {
+                  // pick color from color palette based on mean angle - rather distinct colors in the inner ring
+                  return indexInterpolatedFillColor(interpolatorCET2s)(d, (d.x0 + d.x1) / 2 / (2 * Math.PI), []);
+                } else {
+                  return categoricalFillColor(colorBrewerCategoricalPastel12)(d.sortIndex);
+                }
               },
             },
           },

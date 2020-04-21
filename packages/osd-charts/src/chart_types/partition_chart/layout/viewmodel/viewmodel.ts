@@ -202,27 +202,9 @@ export function shapeViewModel(
   const innerRadius: Radius = outerRadius - (1 - emptySizeRatio) * outerRadius;
   const treeHeight = shownChildNodes.reduce((p: number, n: any) => Math.max(p, entryValue(n.node).depth), 0); // 1: pie, 2: two-ring donut etc.
   const ringThickness = (outerRadius - innerRadius) / treeHeight;
-
+  const partToShapeFn = partToShapeTreeNode(treemapLayout, innerRadius, ringThickness);
   const quadViewModel = makeQuadViewModel(
-    shownChildNodes.slice(1).map(
-      (n: Part): ShapeTreeNode => {
-        const node: ArrayEntry = n.node;
-        return {
-          dataName: entryKey(node),
-          depth: depthAccessor(node),
-          value: aggregateAccessor(node),
-          parent: parentAccessor(node),
-          sortIndex: sortIndexAccessor(node),
-          x0: n.x0,
-          x1: n.x1,
-          y0: n.y0,
-          y1: n.y1,
-          y0px: treemapLayout ? n.y0 : innerRadius + n.y0 * ringThickness,
-          y1px: treemapLayout ? n.y1 : innerRadius + n.y1 * ringThickness,
-          yMidPx: treemapLayout ? (n.y0 + n.y1) / 2 : innerRadius + ((n.y0 + n.y1) / 2) * ringThickness,
-        };
-      },
-    ),
+    shownChildNodes.slice(1).map(partToShapeFn),
     layers,
     config.sectorLineWidth,
     config.sectorLineStroke,
@@ -306,5 +288,25 @@ export function shapeViewModel(
     outsideLinksViewModel,
     pickQuads,
     outerRadius,
+  };
+}
+
+function partToShapeTreeNode(treemapLayout: boolean, innerRadius: Radius, ringThickness: number) {
+  return (n: Part): ShapeTreeNode => {
+    const node: ArrayEntry = n.node;
+    return {
+      dataName: entryKey(node),
+      depth: depthAccessor(node),
+      value: aggregateAccessor(node),
+      parent: parentAccessor(node),
+      sortIndex: sortIndexAccessor(node),
+      x0: n.x0,
+      x1: n.x1,
+      y0: n.y0,
+      y1: n.y1,
+      y0px: treemapLayout ? n.y0 : innerRadius + n.y0 * ringThickness,
+      y1px: treemapLayout ? n.y1 : innerRadius + n.y1 * ringThickness,
+      yMidPx: treemapLayout ? (n.y0 + n.y1) / 2 : innerRadius + ((n.y0 + n.y1) / 2) * ringThickness,
+    };
   };
 }

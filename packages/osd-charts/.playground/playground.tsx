@@ -17,10 +17,43 @@
  * under the License. */
 
 import React from 'react';
-import { example } from '../stories/sunburst/12_very_small';
+import { Chart, Partition, Settings, PartitionLayout, XYChartElementEvent, PartitionElementEvent } from '../src';
 
 export class Playground extends React.Component {
+  onElementClick = (elements: (XYChartElementEvent | PartitionElementEvent)[]) => {
+    // eslint-disable-next-line no-console
+    console.log(elements);
+  };
   render() {
-    return <div className="chart">{example()}</div>;
+    return (
+      <div className="chart">
+        <Chart>
+          <Settings onElementClick={this.onElementClick} />
+          <Partition
+            id="111"
+            config={{
+              partitionLayout: PartitionLayout.treemap,
+            }}
+            valueAccessor={(d: { v: number }) => {
+              return d.v;
+            }}
+            data={[
+              { g1: 'a', g2: 'a', v: 1 },
+              { g1: 'a', g2: 'b', v: 1 },
+              { g1: 'b', g2: 'a', v: 1 },
+              { g1: 'b', g2: 'b', v: 1 },
+            ]}
+            layers={[
+              {
+                groupByRollup: (datum: { g1: string }) => datum.g1,
+              },
+              {
+                groupByRollup: (datum: { g2: string }) => datum.g2,
+              },
+            ]}
+          />
+        </Chart>
+      </div>
+    );
   }
 }
