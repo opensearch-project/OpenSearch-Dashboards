@@ -23,16 +23,76 @@ type A = number;
 export type RgbTuple = [RGB, RGB, RGB, RGB?];
 export type RgbObject = { r: RGB; g: RGB; b: RGB; opacity: A };
 
-const defaultColor: RgbObject = { r: 255, g: 0, b: 0, opacity: 1 };
-const defaultD3Color: D3RGBColor = d3Rgb(defaultColor.r, defaultColor.g, defaultColor.b, defaultColor.opacity);
+/** @internal */
+export const defaultColor: RgbObject = { r: 255, g: 0, b: 0, opacity: 1 };
+/** @internal */
+export const transparentColor: RgbObject = { r: 0, g: 0, b: 0, opacity: 0 };
+/** @internal */
+export const defaultD3Color: D3RGBColor = d3Rgb(defaultColor.r, defaultColor.g, defaultColor.b, defaultColor.opacity);
 
 /** @internal */
-export function stringToRGB(cssColorSpecifier: string): RgbObject {
-  return d3Rgb(cssColorSpecifier) || defaultColor;
+export type OpacityFn = (colorOpacity: number) => number;
+
+/** @internal */
+export function stringToRGB(cssColorSpecifier?: string, opacity?: number | OpacityFn): RgbObject {
+  if (cssColorSpecifier === 'transparent') {
+    return transparentColor;
+  }
+  const color = getColor(cssColorSpecifier);
+
+  if (opacity === undefined) {
+    return color;
+  }
+
+  const opacityOverride = typeof opacity === 'number' ? opacity : opacity(color.opacity);
+
+  if (isNaN(opacityOverride)) {
+    return color;
+  }
+
+  return {
+    ...color,
+    opacity: opacityOverride,
+  };
 }
 
-function argsToRGB(r: number, g: number, b: number, opacity: number): D3RGBColor {
-  return d3Rgb(r, g, b, opacity) || defaultD3Color;
+/**
+ * Returns color as RgbObject or default fallback.
+ *
+ * Handles issue in d3-color for hsla and rgba colors with alpha value of `0`
+ *
+ * @param cssColorSpecifier
+ */
+function getColor(cssColorSpecifier: string = ''): RgbObject {
+  let color: D3RGBColor;
+  const endRegEx = /,\s*0+(\.0*)?\s*\)$/;
+  // TODO: make this check more robust
+  if (/^(rgba|hsla)\(/i.test(cssColorSpecifier) && endRegEx.test(cssColorSpecifier)) {
+    color = {
+      ...d3Rgb(cssColorSpecifier.replace(endRegEx, ',1)')),
+      opacity: 0,
+    };
+  } else {
+    color = d3Rgb(cssColorSpecifier);
+  }
+
+  return validateColor(color) ?? defaultColor;
+}
+
+/** @internal */
+export function validateColor(color: D3RGBColor): D3RGBColor | null {
+  const { r, g, b, opacity } = color;
+
+  if (isNaN(r) || isNaN(g) || isNaN(b) || isNaN(opacity)) {
+    return null;
+  }
+
+  return color;
+}
+
+/** @internal */
+export function argsToRGB(r: number, g: number, b: number, opacity: number): D3RGBColor {
+  return validateColor(d3Rgb(r, g, b, opacity)) ?? defaultD3Color;
 }
 
 /** @internal */

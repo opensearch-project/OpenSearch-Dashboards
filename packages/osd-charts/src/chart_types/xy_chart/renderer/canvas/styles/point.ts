@@ -17,9 +17,9 @@
  * under the License. */
 
 import { PointStyle, GeometryStateStyle } from '../../../../../utils/themes/theme';
-import { stringToRGB } from '../../../../partition_chart/layout/utils/d3_utils';
+import { stringToRGB, OpacityFn } from '../../../../partition_chart/layout/utils/d3_utils';
 import { Fill, Stroke } from '../../../../../geoms/types';
-import { mergePartial } from '../../../../../utils/commons';
+import { mergePartial, getColorFromVariant } from '../../../../../utils/commons';
 
 /**
  * Return the fill, stroke and radius styles for a point geometry.
@@ -38,14 +38,14 @@ export function buildPointStyles(
   overrides?: Partial<PointStyle>,
 ): { fill: Fill; stroke: Stroke; radius: number } {
   const pointStyle = mergePartial(themePointStyle, overrides);
-  const fillColor = stringToRGB(pointStyle.fill || baseColor);
-  fillColor.opacity = fillColor.opacity * pointStyle.opacity * geometryStateStyle.opacity;
+  const fillOpacity: OpacityFn = (opacity) => opacity * pointStyle.opacity * geometryStateStyle.opacity;
+  const fillColor = stringToRGB(getColorFromVariant(baseColor, pointStyle.fill), fillOpacity);
   const fill: Fill = {
     color: fillColor,
   };
 
-  const strokeColor = stringToRGB(pointStyle.stroke || baseColor);
-  strokeColor.opacity = strokeColor.opacity * pointStyle.opacity * geometryStateStyle.opacity;
+  const strokeOpacity: OpacityFn = (opacity) => opacity * pointStyle.opacity * geometryStateStyle.opacity;
+  const strokeColor = stringToRGB(getColorFromVariant(baseColor, pointStyle.stroke), strokeOpacity);
   const stroke: Stroke = {
     color: strokeColor,
     width: pointStyle.strokeWidth,

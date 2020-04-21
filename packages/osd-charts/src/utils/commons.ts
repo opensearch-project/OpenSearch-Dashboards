@@ -20,6 +20,23 @@ import { v1 as uuidV1 } from 'uuid';
 import { $Values } from 'utility-types';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 
+/**
+ * Color varients that are unique to `@elastic/charts`. These go beyond the standard
+ * static color allocations.
+ */
+export const ColorVariant = Object.freeze({
+  /**
+   * Uses series color. Rather than setting a static color, this will use the
+   * default series color for a given series.
+   */
+  Series: '__use__series__color__' as '__use__series__color__',
+  /**
+   * Uses empty color, similar to transparent.
+   */
+  None: '__use__empty__color__' as '__use__empty__color__',
+});
+export type ColorVariant = $Values<typeof ColorVariant>;
+
 export type Datum = any; // unknown;
 export type Rotation = 0 | 90 | -90 | 180;
 export type Rendering = 'canvas' | 'svg';
@@ -32,7 +49,6 @@ export const Position = Object.freeze({
   Left: 'left' as 'left',
   Right: 'right' as 'right',
 });
-
 export type Position = $Values<typeof Position>;
 
 /** @internal */
@@ -48,6 +64,22 @@ export function compareByValueAsc(firstEl: number, secondEl: number): number {
 /** @internal */
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
+}
+
+/**
+ * Returns color given any color variant
+ *
+ * @internal */
+export function getColorFromVariant(seriesColor: Color, color?: Color | ColorVariant): Color {
+  if (color === ColorVariant.Series) {
+    return seriesColor;
+  }
+
+  if (color === ColorVariant.None) {
+    return 'transparent';
+  }
+
+  return color || seriesColor;
 }
 
 /**

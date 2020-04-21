@@ -43,3 +43,6 @@ export { example as customSeriesNameConfig } from './13_custom_series_name_confi
 export { example as customSeriesNameFormatting } from './14_custom_series_name_formatting';
 export { example as tickLabelPaddingBothPropAndTheme } from './15_tick_label';
 export { example as styleAccessorOverrides } from './16_style_accessor';
+export { example as barSeriesColorVariant } from './17_bar_series_color_variant';
+export { example as lineSeriesColorVariant } from './18_line_series_color_variant';
+export { example as areaSeriesColorVariant } from './19_area_series_color_variant';

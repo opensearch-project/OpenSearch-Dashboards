@@ -17,8 +17,9 @@
  * under the License. */
 
 import { GeometryStateStyle, LineStyle } from '../../../../../utils/themes/theme';
-import { stringToRGB } from '../../../../partition_chart/layout/utils/d3_utils';
+import { stringToRGB, OpacityFn } from '../../../../partition_chart/layout/utils/d3_utils';
 import { Stroke } from '../../../../../geoms/types';
+import { getColorFromVariant } from '../../../../../utils/commons';
 
 /**
  * Return the rendering props for a line. The color of the line will be overwritten
@@ -33,8 +34,8 @@ export function buildLineStyles(
   themeLineStyle: LineStyle,
   geometryStateStyle: GeometryStateStyle,
 ): Stroke {
-  const strokeColor = stringToRGB(themeLineStyle.stroke || baseColor);
-  strokeColor.opacity = strokeColor.opacity * themeLineStyle.opacity * geometryStateStyle.opacity;
+  const strokeOpacity: OpacityFn = (opacity) => opacity * themeLineStyle.opacity * geometryStateStyle.opacity;
+  const strokeColor = stringToRGB(getColorFromVariant(baseColor, themeLineStyle.stroke), strokeOpacity);
   return {
     color: strokeColor,
     width: themeLineStyle.strokeWidth,

@@ -17,8 +17,9 @@
  * under the License. */
 
 import { GeometryStateStyle, AreaStyle } from '../../../../../utils/themes/theme';
-import { stringToRGB } from '../../../../partition_chart/layout/utils/d3_utils';
+import { stringToRGB, OpacityFn } from '../../../../partition_chart/layout/utils/d3_utils';
 import { Fill } from '../../../../../geoms/types';
+import { getColorFromVariant } from '../../../../../utils/commons';
 
 /**
  * Return the rendering props for an area. The color of the area will be overwritten
@@ -33,8 +34,8 @@ export function buildAreaStyles(
   themeAreaStyle: AreaStyle,
   geometryStateStyle: GeometryStateStyle,
 ): Fill {
-  const fillColor = stringToRGB(themeAreaStyle.fill || baseColor);
-  fillColor.opacity = fillColor.opacity * themeAreaStyle.opacity * geometryStateStyle.opacity;
+  const fillOpacity: OpacityFn = (opacity) => opacity * themeAreaStyle.opacity * geometryStateStyle.opacity;
+  const fillColor = stringToRGB(getColorFromVariant(baseColor, themeAreaStyle.fill), fillOpacity);
   return {
     color: fillColor,
   };

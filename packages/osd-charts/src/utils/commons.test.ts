@@ -26,6 +26,8 @@ import {
   getPartialValue,
   getAllKeys,
   shallowClone,
+  getColorFromVariant,
+  ColorVariant,
 } from './commons';
 
 describe('commons utilities', () => {
@@ -637,6 +639,26 @@ describe('commons utilities', () => {
           });
         });
       });
+    });
+  });
+
+  describe('#getColorFromVariant', () => {
+    const seriesColor = '#626825';
+    it('should return seriesColor if color is undefined', () => {
+      expect(getColorFromVariant(seriesColor)).toBe(seriesColor);
+    });
+
+    it('should return seriesColor color if ColorVariant is Series', () => {
+      expect(getColorFromVariant(seriesColor, ColorVariant.Series)).toBe(seriesColor);
+    });
+
+    it('should return transparent if ColorVariant is None', () => {
+      expect(getColorFromVariant(seriesColor, ColorVariant.None)).toBe('transparent');
+    });
+
+    it('should return color if Color is passed', () => {
+      const color = '#f61c48';
+      expect(getColorFromVariant(seriesColor, color)).toBe(color);
     });
   });
 });
