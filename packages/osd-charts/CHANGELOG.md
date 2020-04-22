@@ -1,3 +1,10 @@
+## [18.4.1](https://github.com/elastic/elastic-charts/compare/v18.4.0...v18.4.1) (2020-04-22)
+
+
+### Bug Fixes
+
+* type issue pulling from src/index ([#645](https://github.com/elastic/elastic-charts/issues/645)) ([3f3a996](https://github.com/elastic/elastic-charts/commit/3f3a996d4bfb5c1b1db9d7a4650b637f6afe996c))
+
 # [18.4.0](https://github.com/elastic/elastic-charts/compare/v18.3.0...v18.4.0) (2020-04-22)
 
 
