@@ -34,7 +34,7 @@ import { ScaleContinuousType, ScaleType } from '../../../scales';
 import { CurveType } from '../../../utils/curves';
 import { RawDataSeriesDatum, XYChartSeriesIdentifier } from './series';
 import { AnnotationTooltipFormatter } from '../annotations/annotation_utils';
-import { Spec, SpecTypes } from '../../..';
+import { SpecTypes, Spec } from '../../../specs';
 import { ChartTypes } from '../..';
 
 export type BarStyleOverride = RecursivePartial<BarSeriesStyle> | Color | null;

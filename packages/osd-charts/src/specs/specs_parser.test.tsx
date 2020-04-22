@@ -22,9 +22,9 @@ import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 import { SpecsParser } from './specs_parser';
 import { chartStoreReducer } from '../state/chart_state';
-import { BarSeries } from '../';
 import { DEFAULT_SETTINGS_SPEC } from './settings';
 import { BarSeriesSpec } from '../chart_types/xy_chart/utils/specs';
+import { BarSeries } from '../chart_types/specs';
 
 describe('Specs parser', () => {
   test('can mount the spec parser', () => {

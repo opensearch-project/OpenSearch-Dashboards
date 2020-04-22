@@ -18,7 +18,7 @@
 
 import seedrandom from 'seedrandom';
 
-import { DataGenerator } from '../../src';
+import { DataGenerator } from '../utils/data_generators/data_generator';
 
 /**
  * Forces object to be partial type for mocking tests

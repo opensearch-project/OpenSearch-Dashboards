@@ -6,7 +6,11 @@
 # Ignore
 /wiki
 /node_modules
-/dist
 /coverage
+
+# Editor configs
 /.vscode
+
+# Compiled source
 src/utils/d3-delaunay/*
+**/dist

@@ -58,6 +58,15 @@ module.exports = {
     ],
     'sort-keys': 'off',
     'import/no-unresolved': 'error',
+    'import/no-restricted-paths': [
+      'error',
+      {
+        zones: [
+          { target: './src', from: './src/index.ts' },
+          { target: './src', from: './', except: ['./src', './node_modules/'] },
+        ],
+      },
+    ],
     'no-irregular-whitespace': 'error',
     'no-unused-expressions': 'error',
     '@typescript-eslint/interface-name-prefix': 'off',

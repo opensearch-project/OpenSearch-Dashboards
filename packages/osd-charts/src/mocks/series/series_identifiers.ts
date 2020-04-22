@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { BasicSeriesSpec } from '../../';
+import { BasicSeriesSpec } from '../../specs';
 import {
   SeriesCollectionValue,
   getSplittedSeries,
