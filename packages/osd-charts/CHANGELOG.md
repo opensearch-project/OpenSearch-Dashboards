@@ -1,3 +1,17 @@
+# [18.4.0](https://github.com/elastic/elastic-charts/compare/v18.3.0...v18.4.0) (2020-04-22)
+
+
+### Bug Fixes
+
+* **partition:** single slice wrong text positioning ([#643](https://github.com/elastic/elastic-charts/issues/643)) ([6298d36](https://github.com/elastic/elastic-charts/commit/6298d36dda5349ccc91b6fb410064545e6c4becb)), closes [#637](https://github.com/elastic/elastic-charts/issues/637)
+* **treemap:** align onElementClick parameters to sunburst ([#636](https://github.com/elastic/elastic-charts/issues/636)) ([2c1d224](https://github.com/elastic/elastic-charts/commit/2c1d22460b7152bd5fd9c035ee522e6fb4eedd53)), closes [#624](https://github.com/elastic/elastic-charts/issues/624)
+
+
+### Features
+
+* allow colorVariant option for series specific color styles ([#630](https://github.com/elastic/elastic-charts/issues/630)) ([e5a206d](https://github.com/elastic/elastic-charts/commit/e5a206d13c1b1bdfa2d42b6f9c11652040de5971))
+* **series:** BubbleSeries (alpha) and markSizeAccessor ([#559](https://github.com/elastic/elastic-charts/issues/559)) ([3aa235e](https://github.com/elastic/elastic-charts/commit/3aa235e12cd843b0799282585de5795aa329296b))
+
 # [18.3.0](https://github.com/elastic/elastic-charts/compare/v18.2.2...v18.3.0) (2020-04-15)
 
 
