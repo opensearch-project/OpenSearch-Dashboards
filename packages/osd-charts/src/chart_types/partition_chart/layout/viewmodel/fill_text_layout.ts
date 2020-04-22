@@ -94,9 +94,9 @@ export function ringSectorConstruction(config: Config, innerRadius: Radius, ring
       fillRectangleWidth,
       fillRectangleHeight,
     } = config;
-    const innerR =
-      (fillOutside ? ringSectorOuterRadius : ringSectorInnerRadius)(innerRadius, ringThickness)(ringSector) +
-      circlePadding * 2;
+    const radiusGetter = fillOutside ? ringSectorOuterRadius : ringSectorInnerRadius;
+    const geometricInnerRadius = radiusGetter(innerRadius, ringThickness)(ringSector);
+    const innerR = geometricInnerRadius + circlePadding * 2;
     const outerR = Math.max(
       innerR,
       ringSectorOuterRadius(innerRadius, ringThickness)(ringSector) - circlePadding + (fillOutside ? radiusOutside : 0),
@@ -110,7 +110,7 @@ export function ringSectorConstruction(config: Config, innerRadius: Radius, ring
     const sectorEndCircle = angleToCircline(midRadius, endAngle + radialPadding, 1);
     const outerRadiusFromRectangleWidth = fillRectangleWidth / 2;
     const outerRadiusFromRectanglHeight = fillRectangleHeight / 2;
-    const fullCircle = ringSector.x0 === 0 && ringSector.x1 === TAU;
+    const fullCircle = ringSector.x0 === 0 && ringSector.x1 === TAU && geometricInnerRadius === 0;
     const sectorCirclines = [
       ...(fullCircle && innerRadius === 0 ? [] : [innerCircline]),
       outerCircline,

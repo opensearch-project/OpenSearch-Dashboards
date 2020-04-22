@@ -49,7 +49,7 @@ export const example = () => (
         },
         {
           groupByRollup: (d: Datum) => countryLookup[d.dest].continentCountry.substr(0, 2),
-          nodeLabel: (d: any) => regionLookup[d].regionName,
+          nodeLabel: (d: any) => regionLookup[d].regionName.replace(/\s/g, '\u00A0'),
           shape: {
             fillColor: (d: ShapeTreeNode) => {
               return categoricalFillColor(colorBrewerCategoricalStark9, 0.5)(d.parent.sortIndex);
@@ -58,7 +58,7 @@ export const example = () => (
         },
         {
           groupByRollup: (d: Datum) => d.dest,
-          nodeLabel: (d: any) => countryLookup[d].name,
+          nodeLabel: (d: any) => countryLookup[d].name.replace(/\s/g, '\u00A0'),
           shape: {
             fillColor: (d: ShapeTreeNode) => {
               return categoricalFillColor(colorBrewerCategoricalStark9, 0.3)(d.parent.parent.sortIndex);
