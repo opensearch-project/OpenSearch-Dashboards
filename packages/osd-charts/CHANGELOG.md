@@ -1,3 +1,10 @@
+## [18.4.2](https://github.com/elastic/elastic-charts/compare/v18.4.1...v18.4.2) (2020-04-24)
+
+
+### Bug Fixes
+
+* tickFormat called on mark value ([#649](https://github.com/elastic/elastic-charts/issues/649)) ([daf6a82](https://github.com/elastic/elastic-charts/commit/daf6a82aee5c9ea4031daa1ab992d10955caedb0))
+
 ## [18.4.1](https://github.com/elastic/elastic-charts/compare/v18.4.0...v18.4.1) (2020-04-22)
 
 
