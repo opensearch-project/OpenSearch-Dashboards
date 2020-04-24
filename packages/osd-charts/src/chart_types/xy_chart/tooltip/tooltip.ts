@@ -82,14 +82,13 @@ export function formatTooltip(
 
   const value = isHeader ? x : y;
   const tickFormatOptions: TickFormatterOptions | undefined = spec.timeZone ? { timeZone: spec.timeZone } : undefined;
-  const markValue = axisSpec ? axisSpec.tickFormat(mark, tickFormatOptions) : emptyFormatter(mark);
 
   return {
     seriesIdentifier,
     valueAccessor: accessor,
     label,
     value: axisSpec ? axisSpec.tickFormat(value, tickFormatOptions) : emptyFormatter(value),
-    markValue: isHeader || mark === null ? null : markValue,
+    markValue: isHeader || mark === null ? null : mark,
     color,
     isHighlighted: isHeader ? false : isHighlighted,
     isVisible,
