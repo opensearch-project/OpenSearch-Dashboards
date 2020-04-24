@@ -16,24 +16,23 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 import classNames from 'classnames';
 
 interface LabelProps {
   label: string;
-  onLabelClick: (event: React.MouseEvent<Element, MouseEvent>) => void;
-  hasLabelClickListener: boolean;
+  onClick?: MouseEventHandler;
 }
 /**
  * Label component used to display text in legend item
  * @internal
  */
-export function Label({ label, onLabelClick, hasLabelClickListener }: LabelProps) {
+export function Label({ label, onClick }: LabelProps) {
   const labelClassNames = classNames('echLegendItem__label', {
-    ['echLegendItem__label--hasClickListener']: hasLabelClickListener,
+    ['echLegendItem__label--clickable']: Boolean(onClick),
   });
   return (
-    <div className={labelClassNames} title={label} onClick={onLabelClick}>
+    <div className={labelClassNames} title={label} onClick={onClick}>
       {label}
     </div>
   );

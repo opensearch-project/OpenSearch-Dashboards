@@ -135,6 +135,7 @@ describe('Legends', () => {
         seriesIdentifier: seriesCollectionValue1a.seriesIdentifier,
         isItemHidden: false,
         isSeriesHidden: false,
+        isToggleable: true,
         defaultExtra: nullDisplayValue,
       },
     ];
@@ -152,6 +153,7 @@ describe('Legends', () => {
         childId: 'y1',
         isItemHidden: false,
         isSeriesHidden: false,
+        isToggleable: true,
         defaultExtra: nullDisplayValue,
       },
       {
@@ -161,6 +163,7 @@ describe('Legends', () => {
         childId: 'y1',
         isItemHidden: false,
         isSeriesHidden: false,
+        isToggleable: true,
         defaultExtra: nullDisplayValue,
       },
     ];
@@ -178,6 +181,7 @@ describe('Legends', () => {
         seriesIdentifier: seriesCollectionValue1a.seriesIdentifier,
         isItemHidden: false,
         isSeriesHidden: false,
+        isToggleable: true,
         defaultExtra: nullDisplayValue,
       },
       {
@@ -187,6 +191,7 @@ describe('Legends', () => {
         seriesIdentifier: seriesCollectionValue2a.seriesIdentifier,
         isItemHidden: false,
         isSeriesHidden: false,
+        isToggleable: true,
         defaultExtra: nullDisplayValue,
       },
     ];
@@ -209,6 +214,7 @@ describe('Legends', () => {
         seriesIdentifier: seriesCollectionValue1a.seriesIdentifier,
         isItemHidden: false,
         isSeriesHidden: false,
+        isToggleable: true,
         defaultExtra: nullDisplayValue,
       },
     ];

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 import classNames from 'classnames';
 import { Icon } from '../icons/icon';
 
@@ -24,13 +24,14 @@ interface ColorProps {
   color: string;
   isSeriesHidden?: boolean;
   hasColorPicker: boolean;
-  onColorClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  onClick?: MouseEventHandler;
 }
+
 /**
  * Color component used by the legend item
  * @internal
  */
-export function Color({ color, isSeriesHidden = false, hasColorPicker, onColorClick }: ColorProps) {
+export function Color({ color, isSeriesHidden = false, hasColorPicker, onClick }: ColorProps) {
   if (isSeriesHidden) {
     return (
       <div className="echLegendItem__color" aria-label="series hidden" title="series hidden">
@@ -45,7 +46,7 @@ export function Color({ color, isSeriesHidden = false, hasColorPicker, onColorCl
   });
 
   return (
-    <div onClick={onColorClick} className={colorClasses} aria-label="series color" title="series color">
+    <div onClick={onClick} className={colorClasses} aria-label="series color" title="series color">
       <Icon type="dot" color={color} />
     </div>
   );

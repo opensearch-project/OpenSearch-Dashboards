@@ -93,6 +93,7 @@ export function computeLegend(
       childId: BandedAccessorType.Y1,
       isSeriesHidden,
       isItemHidden: hideInLegend,
+      isToggleable: true,
       defaultExtra: {
         raw: lastValue && lastValue.y1 !== null ? lastValue.y1 : null,
         formatted: lastValue && lastValue.y1 !== null ? formatter(lastValue.y1) : null,
@@ -107,6 +108,7 @@ export function computeLegend(
         childId: BandedAccessorType.Y0,
         isSeriesHidden,
         isItemHidden: hideInLegend,
+        isToggleable: true,
         defaultExtra: {
           raw: lastValue && lastValue.y0 !== null ? lastValue.y0 : null,
           formatted: lastValue && lastValue.y0 !== null ? formatter(lastValue.y0) : null,

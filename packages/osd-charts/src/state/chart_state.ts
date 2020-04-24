@@ -39,6 +39,7 @@ import { TooltipInfo } from '../components/tooltip/types';
 import { TooltipAnchorPosition } from '../components/tooltip/utils';
 import { Color } from '../utils/commons';
 import { LegendItemLabel } from './selectors/get_legend_items_labels';
+import { getLegendItemsSelector } from './selectors/get_legend_items';
 
 export type BackwardRef = () => React.RefObject<HTMLDivElement>;
 
@@ -150,7 +151,6 @@ export interface InteractionsState {
   pointer: PointerStates;
   highlightedLegendItemKey: string | null;
   legendCollapsed: boolean;
-  invertDeselect: boolean;
   deselectedDataSeries: SeriesIdentifier[];
 }
 
@@ -246,7 +246,6 @@ export const getInitialState = (chartId: string): GlobalChartState => ({
     legendCollapsed: false,
     highlightedLegendItemKey: null,
     deselectedDataSeries: [],
-    invertDeselect: false,
   },
   externalEvents: {
     pointer: null,
@@ -380,7 +379,7 @@ export const chartStoreReducer = (chartId: string) => {
       default:
         return {
           ...state,
-          interactions: interactionsReducer(state.interactions, action),
+          interactions: interactionsReducer(state.interactions, action, getLegendItemsSelector(state)),
         };
     }
   };

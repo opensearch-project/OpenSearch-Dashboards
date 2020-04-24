@@ -41,9 +41,11 @@ interface LegendItemOutAction {
   type: typeof ON_LEGEND_ITEM_OUT;
 }
 
-interface ToggleDeselectSeriesAction {
+/** @internal */
+export interface ToggleDeselectSeriesAction {
   type: typeof ON_TOGGLE_DESELECT_SERIES;
   legendItemId: SeriesIdentifier;
+  negate: boolean;
 }
 
 /** @internal */
@@ -62,8 +64,11 @@ export function onLegendItemOutAction(): LegendItemOutAction {
 }
 
 /** @internal */
-export function onToggleDeselectSeriesAction(legendItemId: SeriesIdentifier): ToggleDeselectSeriesAction {
-  return { type: ON_TOGGLE_DESELECT_SERIES, legendItemId };
+export function onToggleDeselectSeriesAction(
+  legendItemId: SeriesIdentifier,
+  negate = false,
+): ToggleDeselectSeriesAction {
+  return { type: ON_TOGGLE_DESELECT_SERIES, legendItemId, negate };
 }
 
 /** @internal */

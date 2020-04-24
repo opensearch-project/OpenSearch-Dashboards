@@ -32,15 +32,11 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
     @include euiTextTruncate;
     flex: 1 1 auto;
 
-    &:hover {
-      cursor: pointer;
-      text-decoration: underline;
-    }
-  }
-
-  &__label--hasClickListener {
-    &:hover {
-      cursor: pointer;
+    &--clickable {
+      &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
     }
   }
 

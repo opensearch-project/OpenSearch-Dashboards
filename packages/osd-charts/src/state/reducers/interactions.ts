@@ -23,13 +23,19 @@ import {
   ON_LEGEND_ITEM_OVER,
   ON_TOGGLE_DESELECT_SERIES,
   LegendActions,
+  ToggleDeselectSeriesAction,
 } from '../actions/legend';
 import { ON_MOUSE_DOWN, ON_MOUSE_UP, ON_POINTER_MOVE, MouseActions } from '../actions/mouse';
 import { getSeriesIndex } from '../../chart_types/xy_chart/utils/series';
 import { SeriesIdentifier } from '../../commons/series_id';
+import { LegendItem } from '../../commons/legend';
 
 /** @internal */
-export function interactionsReducer(state: InteractionsState, action: LegendActions | MouseActions): InteractionsState {
+export function interactionsReducer(
+  state: InteractionsState,
+  action: LegendActions | MouseActions,
+  legendItems: LegendItem[],
+): InteractionsState {
   switch (action.type) {
     case ON_POINTER_MOVE:
       return {
@@ -120,18 +126,35 @@ export function interactionsReducer(state: InteractionsState, action: LegendActi
     case ON_TOGGLE_DESELECT_SERIES:
       return {
         ...state,
-        deselectedDataSeries: toggleDeselectedDataSeries(action.legendItemId, state.deselectedDataSeries),
+        deselectedDataSeries: toggleDeselectedDataSeries(action, state.deselectedDataSeries, legendItems),
       };
     default:
       return state;
   }
 }
 
-function toggleDeselectedDataSeries(legendItem: SeriesIdentifier, deselectedDataSeries: SeriesIdentifier[]) {
-  const index = getSeriesIndex(deselectedDataSeries, legendItem);
+/** @internal */
+function toggleDeselectedDataSeries(
+  { legendItemId: id, negate }: ToggleDeselectSeriesAction,
+  deselectedDataSeries: SeriesIdentifier[],
+  legendItems: LegendItem[],
+) {
+  if (negate) {
+    const hidden = getSeriesIndex(deselectedDataSeries, id) > -1;
+
+    if (!hidden && deselectedDataSeries.length === legendItems.length - 1) {
+      return [id];
+    }
+
+    const items = legendItems.map(({ seriesIdentifier: si }) => si);
+    const index = getSeriesIndex(items, id);
+
+    return [...items.slice(0, index), ...items.slice(index + 1)];
+  }
+
+  const index = getSeriesIndex(deselectedDataSeries, id);
   if (index > -1) {
     return [...deselectedDataSeries.slice(0, index), ...deselectedDataSeries.slice(index + 1)];
-  } else {
-    return [...deselectedDataSeries, legendItem];
   }
+  return [...deselectedDataSeries, id];
 }

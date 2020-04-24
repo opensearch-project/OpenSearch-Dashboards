@@ -17,11 +17,15 @@
  * under the License. */
 
 import classNames from 'classnames';
-import React, { Component, createRef } from 'react';
+import React, { Component, createRef, MouseEventHandler } from 'react';
 import { deepEqual } from '../../utils/fast_deep_equal';
 import { LegendItemListener, BasicListener, LegendColorPicker } from '../../specs/settings';
 import { LegendItem, LegendItemExtraValues } from '../../commons/legend';
-import { onLegendItemOutAction, onLegendItemOverAction } from '../../state/actions/legend';
+import {
+  onLegendItemOutAction,
+  onLegendItemOverAction,
+  onToggleDeselectSeriesAction,
+} from '../../state/actions/legend';
 import { Position, Color } from '../../utils/commons';
 import { SeriesIdentifier } from '../../commons/series_id';
 import {
@@ -53,7 +57,7 @@ export interface LegendItemProps {
   clearTemporaryColorsAction: typeof clearTemporaryColorsAction;
   setTemporaryColorAction: typeof setTemporaryColorAction;
   setPersistedColorAction: typeof setPersistedColorAction;
-  toggleDeselectSeriesAction: (legendItemId: SeriesIdentifier) => void;
+  toggleDeselectSeriesAction: typeof onToggleDeselectSeriesAction;
 }
 
 /**
@@ -111,9 +115,9 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
     return !deepEqual(this.props, nextProps) || !deepEqual(this.state, nextState);
   }
 
-  handleColorClick = (changable: boolean) =>
+  handleColorClick = (changable: boolean): MouseEventHandler | undefined =>
     changable
-      ? (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      ? (event) => {
           event.stopPropagation();
           this.toggleIsOpen();
         }
@@ -147,48 +151,6 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
     }
   }
 
-  render() {
-    const { extraValues, item, showExtra, onClick, colorPicker, position, totalItems } = this.props;
-    const { color, isSeriesHidden, isItemHidden, seriesIdentifier, label } = item;
-    const onLabelClick = this.onVisibilityClick(seriesIdentifier);
-    const hasLabelClickListener = Boolean(onClick);
-
-    const itemClassNames = classNames('echLegendItem', `echLegendItem--${position}`, {
-      'echLegendItem--hidden': isSeriesHidden,
-      'echLegendItem__extra--hidden': isItemHidden,
-    });
-
-    const hasColorPicker = Boolean(colorPicker);
-    const colorClick = this.handleColorClick(hasColorPicker);
-    const extra = getExtra(extraValues, item, totalItems);
-    const style = item.depth
-      ? {
-          marginLeft: LEGEND_HIERARCHY_MARGIN * (item.depth ?? 0),
-        }
-      : undefined;
-    return (
-      <>
-        <li
-          ref={this.ref}
-          className={itemClassNames}
-          onMouseEnter={this.onLegendItemMouseOver}
-          onMouseLeave={this.onLegendItemMouseOut}
-          style={style}
-        >
-          <ItemColor
-            color={color}
-            isSeriesHidden={isSeriesHidden}
-            hasColorPicker={hasColorPicker}
-            onColorClick={colorClick}
-          />
-          <ItemLabel label={label} onLabelClick={onLabelClick} hasLabelClickListener={hasLabelClickListener} />
-          {showExtra && extra != null && renderExtra(extra, isSeriesHidden)}
-        </li>
-        {this.renderColorPicker()}
-      </>
-    );
-  }
-
   toggleIsOpen = () => {
     this.setState(({ isOpen }) => ({ isOpen: !isOpen }));
   };
@@ -211,12 +173,61 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
     mouseOutAction();
   };
 
-  // TODO handle shift key
-  onVisibilityClick = (legendItemId: SeriesIdentifier) => () => {
-    const { onClick, toggleDeselectSeriesAction } = this.props;
-    if (onClick) {
-      onClick(legendItemId);
+  /**
+   * Returns click function only if toggleable or click listern is provided
+   */
+  handleLabelClick = (legendItemId: SeriesIdentifier): MouseEventHandler | undefined => {
+    const { item, onClick, toggleDeselectSeriesAction } = this.props;
+
+    if (!item.isToggleable && !onClick) {
+      return;
     }
-    toggleDeselectSeriesAction(legendItemId);
+
+    return ({ shiftKey }) => {
+      if (onClick) {
+        onClick(legendItemId);
+      }
+
+      if (item.isToggleable) {
+        toggleDeselectSeriesAction(legendItemId, shiftKey);
+      }
+    };
   };
+
+  render() {
+    const { extraValues, item, showExtra, colorPicker, position, totalItems } = this.props;
+    const { color, isSeriesHidden, isItemHidden, seriesIdentifier, label } = item;
+    const itemClassNames = classNames('echLegendItem', `echLegendItem--${position}`, {
+      'echLegendItem--hidden': isSeriesHidden,
+      'echLegendItem__extra--hidden': isItemHidden,
+    });
+    const hasColorPicker = Boolean(colorPicker);
+    const extra = getExtra(extraValues, item, totalItems);
+    const style = item.depth
+      ? {
+          marginLeft: LEGEND_HIERARCHY_MARGIN * (item.depth ?? 0),
+        }
+      : undefined;
+    return (
+      <>
+        <li
+          ref={this.ref}
+          className={itemClassNames}
+          onMouseEnter={this.onLegendItemMouseOver}
+          onMouseLeave={this.onLegendItemMouseOut}
+          style={style}
+        >
+          <ItemColor
+            color={color}
+            isSeriesHidden={isSeriesHidden}
+            hasColorPicker={hasColorPicker}
+            onClick={this.handleColorClick(hasColorPicker)}
+          />
+          <ItemLabel label={label} onClick={this.handleLabelClick(seriesIdentifier)} />
+          {showExtra && extra != null && renderExtra(extra, isSeriesHidden)}
+        </li>
+        {this.renderColorPicker()}
+      </>
+    );
+  }
 }
