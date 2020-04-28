@@ -1,3 +1,24 @@
+# [19.0.0](https://github.com/elastic/elastic-charts/compare/v18.4.2...v19.0.0) (2020-04-28)
+
+
+### Bug Fixes
+
+* tooltip container scroll issue ([#647](https://github.com/elastic/elastic-charts/issues/647)) ([f411771](https://github.com/elastic/elastic-charts/commit/f4117717690f4086805f002afb85c3a4b0d2fe22))
+* **annotations:** fix alignment at the edges ([#641](https://github.com/elastic/elastic-charts/issues/641)) ([43c5a59](https://github.com/elastic/elastic-charts/commit/43c5a59e3862b6191537b73fc0ca604e79fbc992)), closes [#586](https://github.com/elastic/elastic-charts/issues/586)
+
+
+### Features
+
+* shift click legend items & partition legend hover ([#648](https://github.com/elastic/elastic-charts/issues/648)) ([ed91744](https://github.com/elastic/elastic-charts/commit/ed9174471e31df77234ea05f307b0dce79722bea))
+* **brush:** add multi axis brushing ([#625](https://github.com/elastic/elastic-charts/issues/625)) ([9e49534](https://github.com/elastic/elastic-charts/commit/9e4953474db37d33f8a19dfb1ff1a5528b0f6d54)), closes [#587](https://github.com/elastic/elastic-charts/issues/587) [#620](https://github.com/elastic/elastic-charts/issues/620)
+
+
+### BREAKING CHANGES
+
+* **brush:** The type used by the `BrushEndListener` is now in the following form `{ x?: [number, number]; y?: Array<{ groupId: GroupId; values: [number,
+number]; }> }` where `x` contains an array of `[min, max]` values, and the  `y` property is an optional array of objects, containing the `GroupId` and the values of the brush for that specific axis.
+* **annotations:** In the rectangular annotation, the y0 parameter of the coordinates now refers to the minimum value and the y1 value refers to the maximum value of the y domain.
+
 ## [18.4.2](https://github.com/elastic/elastic-charts/compare/v18.4.1...v18.4.2) (2020-04-24)
 
 
