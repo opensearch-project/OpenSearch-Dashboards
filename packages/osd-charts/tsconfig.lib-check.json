@@ -7,5 +7,5 @@
     "skipLibCheck": false,
     "rootDir": "dist"
   },
-  "include": ["dist"],
+  "include": ["dist"]
 }

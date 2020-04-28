@@ -33,10 +33,20 @@ import { Accessor } from '../utils/accessor';
 import { Position, Rendering, Rotation, Color } from '../utils/commons';
 import { ScaleContinuousType, ScaleOrdinalType } from '../scales';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
+import { GroupId } from '../utils/ids';
 
 export interface LayerValue {
   groupByRollup: PrimitiveValue;
   value: number;
+}
+
+export interface GroupBrushExtent {
+  groupId: GroupId;
+  extent: [number, number];
+}
+export interface XYBrushArea {
+  x?: [number, number];
+  y?: Array<GroupBrushExtent>;
 }
 
 export type XYChartElementEvent = [GeometryValue, XYChartSeriesIdentifier];
@@ -44,7 +54,7 @@ export type PartitionElementEvent = [Array<LayerValue>, SeriesIdentifier];
 
 export type ElementClickListener = (elements: Array<XYChartElementEvent | PartitionElementEvent>) => void;
 export type ElementOverListener = (elements: Array<XYChartElementEvent | PartitionElementEvent>) => void;
-export type BrushEndListener = (min: number, max: number) => void;
+export type BrushEndListener = (brushArea: XYBrushArea) => void;
 export type LegendItemListener = (series: SeriesIdentifier | null) => void;
 export type PointerUpdateListener = (event: PointerEvent) => void;
 /**
@@ -100,6 +110,14 @@ export const TooltipType = Object.freeze({
 });
 
 export type TooltipType = $Values<typeof TooltipType>;
+
+export const BrushAxis = Object.freeze({
+  X: 'x' as 'x',
+  Y: 'y' as 'y',
+  Both: 'both' as 'both',
+});
+
+export type BrushAxis = $Values<typeof BrushAxis>;
 
 export interface TooltipValue {
   /**
@@ -234,6 +252,17 @@ export interface SettingsSpec extends Spec {
   xDomain?: Domain | DomainRange;
   resizeDebounce?: number;
   legendColorPicker?: LegendColorPicker;
+  /**
+   * Block the brush tool on a specific axis: x, y or both.
+   * @default BrushAxis.X
+   */
+  brushAxis?: BrushAxis;
+  /**
+   * The minimum number of pixel to consider for a valid brush event (in both axis if brushAxis prop is BrushAxis.Both).
+   * E.g. a min value of 2 means that the brush area needs to be at least 2 pixel wide and 2 pixel tall.
+   * @default 2
+   */
+  minBrushDelta?: number;
 }
 
 export type DefaultSettingsProps =
@@ -250,7 +279,9 @@ export type DefaultSettingsProps =
   | 'showLegendExtra'
   | 'theme'
   | 'legendPosition'
-  | 'hideDuplicateAxes';
+  | 'hideDuplicateAxes'
+  | 'brushAxis'
+  | 'minBrushDelta';
 
 export const DEFAULT_TOOLTIP_TYPE = TooltipType.VerticalCursor;
 export const DEFAULT_TOOLTIP_SNAP = true;
@@ -282,6 +313,8 @@ export const DEFAULT_SETTINGS_SPEC: SettingsSpec = {
   showLegendExtra: false,
   hideDuplicateAxes: false,
   theme: LIGHT_THEME,
+  brushAxis: BrushAxis.X,
+  minBrushDelta: 2,
 };
 
 export type SettingsSpecProps = Partial<Omit<SettingsSpec, 'chartType' | 'specType' | 'id'>>;

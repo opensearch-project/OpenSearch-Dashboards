@@ -21,7 +21,7 @@ import { BarSeriesSpec, BasicSeriesSpec, AxisSpec, SeriesTypes } from '../utils/
 import { Position } from '../../../utils/commons';
 import { ScaleType } from '../../../scales';
 import { chartStoreReducer, GlobalChartState } from '../../../state/chart_state';
-import { SettingsSpec, DEFAULT_SETTINGS_SPEC, SpecTypes, TooltipType } from '../../../specs';
+import { SettingsSpec, DEFAULT_SETTINGS_SPEC, SpecTypes, TooltipType, XYBrushArea, BrushAxis } from '../../../specs';
 import { computeSeriesGeometriesSelector } from './selectors/compute_series_geometries';
 import { getProjectedPointerPositionSelector } from './selectors/get_projected_pointer_position';
 import {
@@ -788,7 +788,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
   });
   describe('brush', () => {
     test('can respond to a brush end event', () => {
-      const brushEndListener = jest.fn<void, [number, number]>((): void => {
+      const brushEndListener = jest.fn<void, [XYBrushArea]>((): void => {
         return;
       });
       const onBrushCaller = createOnBrushEndCaller();
@@ -833,8 +833,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
         expect(brushEndListener).not.toBeCalled();
       } else {
         expect(brushEndListener).toBeCalled();
-        expect(brushEndListener.mock.calls[0][0]).toBe(0);
-        expect(brushEndListener.mock.calls[0][1]).toBe(2.5);
+        expect(brushEndListener.mock.calls[0][0]).toEqual({ x: [0, 2.5] });
       }
       const start2 = { x: 75, y: 0 };
       const end2 = { x: 100, y: 0 };
@@ -846,8 +845,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
         expect(brushEndListener).not.toBeCalled();
       } else {
         expect(brushEndListener).toBeCalled();
-        expect(brushEndListener.mock.calls[1][0]).toBe(2.5);
-        expect(brushEndListener.mock.calls[1][1]).toBe(3);
+        expect(brushEndListener.mock.calls[1][0]).toEqual({ x: [2.5, 3] });
       }
 
       const start3 = { x: 75, y: 0 };
@@ -859,8 +857,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
         expect(brushEndListener).not.toBeCalled();
       } else {
         expect(brushEndListener).toBeCalled();
-        expect(brushEndListener.mock.calls[2][0]).toBe(2.5);
-        expect(brushEndListener.mock.calls[2][1]).toBe(3);
+        expect(brushEndListener.mock.calls[2][0]).toEqual({ x: [2.5, 3] });
       }
 
       const start4 = { x: 25, y: 0 };
@@ -872,12 +869,11 @@ function mouseOverTestSuite(scaleType: ScaleType) {
         expect(brushEndListener).not.toBeCalled();
       } else {
         expect(brushEndListener).toBeCalled();
-        expect(brushEndListener.mock.calls[3][0]).toBe(0);
-        expect(brushEndListener.mock.calls[3][1]).toBe(0.5);
+        expect(brushEndListener.mock.calls[3][0]).toEqual({ x: [0, 0.5] });
       }
     });
     test('can respond to a brush end event on rotated chart', () => {
-      const brushEndListener = jest.fn<void, [number, number]>((): void => {
+      const brushEndListener = jest.fn<void, [XYBrushArea]>((): void => {
         return;
       });
       const onBrushCaller = createOnBrushEndCaller();
@@ -912,8 +908,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
         expect(brushEndListener).not.toBeCalled();
       } else {
         expect(brushEndListener).toBeCalled();
-        expect(brushEndListener.mock.calls[0][0]).toBe(0);
-        expect(brushEndListener.mock.calls[0][1]).toBe(1);
+        expect(brushEndListener.mock.calls[0][0]).toEqual({ x: [0, 1] });
       }
       const start2 = { x: 0, y: 75 };
       const end2 = { x: 0, y: 100 };
@@ -925,8 +920,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
         expect(brushEndListener).not.toBeCalled();
       } else {
         expect(brushEndListener).toBeCalled();
-        expect(brushEndListener.mock.calls[1][0]).toBe(1);
-        expect(brushEndListener.mock.calls[1][1]).toBe(1);
+        expect(brushEndListener.mock.calls[1][0]).toEqual({ x: [1, 1] });
       }
 
       const start3 = { x: 0, y: 75 };
@@ -938,8 +932,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
         expect(brushEndListener).not.toBeCalled();
       } else {
         expect(brushEndListener).toBeCalled();
-        expect(brushEndListener.mock.calls[2][0]).toBe(1);
-        expect(brushEndListener.mock.calls[2][1]).toBe(1); // max of chart
+        expect(brushEndListener.mock.calls[2][0]).toEqual({ x: [1, 1] }); // max of chart
       }
 
       const start4 = { x: 0, y: 25 };
@@ -951,8 +944,161 @@ function mouseOverTestSuite(scaleType: ScaleType) {
         expect(brushEndListener).not.toBeCalled();
       } else {
         expect(brushEndListener).toBeCalled();
-        expect(brushEndListener.mock.calls[3][0]).toBe(0);
-        expect(brushEndListener.mock.calls[3][1]).toBe(0);
+        expect(brushEndListener.mock.calls[3][0]).toEqual({ x: [0, 0] });
+      }
+    });
+    test('can respond to a Y brush', () => {
+      const brushEndListener = jest.fn<void, [XYBrushArea]>((): void => {
+        return;
+      });
+      const onBrushCaller = createOnBrushEndCaller();
+      store.subscribe(() => {
+        onBrushCaller(store.getState());
+      });
+      const settings = getSettingsSpecSelector(store.getState());
+      const updatedSettings: SettingsSpec = {
+        ...settings,
+        brushAxis: BrushAxis.Y,
+        theme: {
+          ...settings.theme,
+          chartMargins: {
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
+          },
+        },
+        onBrushEnd: brushEndListener,
+      };
+      store.dispatch(upsertSpec(updatedSettings));
+      store.dispatch(
+        upsertSpec({
+          ...spec,
+          data: [
+            [0, 1],
+            [1, 1],
+            [2, 2],
+            [3, 3],
+          ],
+        } as BarSeriesSpec),
+      );
+      store.dispatch(specParsed());
+
+      const start1 = { x: 0, y: 0 };
+      const end1 = { x: 0, y: 75 };
+
+      store.dispatch(onMouseDown(start1, 0));
+      store.dispatch(onPointerMove(end1, 1));
+      store.dispatch(onMouseUp(end1, 3));
+      if (scaleType === ScaleType.Ordinal) {
+        expect(brushEndListener).not.toBeCalled();
+      } else {
+        expect(brushEndListener).toBeCalled();
+        expect(brushEndListener.mock.calls[0][0]).toEqual({
+          y: [
+            {
+              groupId: spec.groupId,
+              extent: [0.75, 3],
+            },
+          ],
+        });
+      }
+      const start2 = { x: 0, y: 75 };
+      const end2 = { x: 0, y: 100 };
+
+      store.dispatch(onMouseDown(start2, 4));
+      store.dispatch(onPointerMove(end2, 5));
+      store.dispatch(onMouseUp(end2, 6));
+      if (scaleType === ScaleType.Ordinal) {
+        expect(brushEndListener).not.toBeCalled();
+      } else {
+        expect(brushEndListener).toBeCalled();
+        expect(brushEndListener.mock.calls[1][0]).toEqual({
+          y: [
+            {
+              groupId: spec.groupId,
+              extent: [0, 0.75],
+            },
+          ],
+        });
+      }
+    });
+    test('can respond to rectangular brush', () => {
+      const brushEndListener = jest.fn<void, [XYBrushArea]>((): void => {
+        return;
+      });
+      const onBrushCaller = createOnBrushEndCaller();
+      store.subscribe(() => {
+        onBrushCaller(store.getState());
+      });
+      const settings = getSettingsSpecSelector(store.getState());
+      const updatedSettings: SettingsSpec = {
+        ...settings,
+        brushAxis: BrushAxis.Both,
+        theme: {
+          ...settings.theme,
+          chartMargins: {
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
+          },
+        },
+        onBrushEnd: brushEndListener,
+      };
+      store.dispatch(upsertSpec(updatedSettings));
+      store.dispatch(
+        upsertSpec({
+          ...spec,
+          data: [
+            [0, 1],
+            [1, 1],
+            [2, 2],
+            [3, 3],
+          ],
+        } as BarSeriesSpec),
+      );
+      store.dispatch(specParsed());
+
+      const start1 = { x: 0, y: 0 };
+      const end1 = { x: 75, y: 75 };
+
+      store.dispatch(onMouseDown(start1, 0));
+      store.dispatch(onPointerMove(end1, 1));
+      store.dispatch(onMouseUp(end1, 3));
+      if (scaleType === ScaleType.Ordinal) {
+        expect(brushEndListener).not.toBeCalled();
+      } else {
+        expect(brushEndListener).toBeCalled();
+        expect(brushEndListener.mock.calls[0][0]).toEqual({
+          x: [0, 2.5],
+          y: [
+            {
+              groupId: spec.groupId,
+              extent: [0.75, 3],
+            },
+          ],
+        });
+      }
+      const start2 = { x: 75, y: 75 };
+      const end2 = { x: 100, y: 100 };
+
+      store.dispatch(onMouseDown(start2, 4));
+      store.dispatch(onPointerMove(end2, 5));
+      store.dispatch(onMouseUp(end2, 6));
+      if (scaleType === ScaleType.Ordinal) {
+        expect(brushEndListener).not.toBeCalled();
+      } else {
+        expect(brushEndListener).toBeCalled();
+        expect(brushEndListener.mock.calls[1][0]).toEqual({
+          x: [2.5, 3],
+          y: [
+            {
+              groupId: spec.groupId,
+              extent: [0, 0.75],
+            },
+          ],
+        });
       }
     });
   });

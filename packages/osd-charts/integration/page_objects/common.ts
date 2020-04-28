@@ -133,6 +133,51 @@ class CommonPage {
   }
 
   /**
+   * Drag mouse relative to element
+   *
+   * @param mousePosition
+   * @param selector
+   */
+  async dragMouseRelativeToDOMElement(
+    start: { x: number; y: number },
+    end: { x: number; y: number },
+    selector: string,
+  ) {
+    const element = await this.getBoundingClientRect(selector);
+    await page.mouse.move(element.left + start.x, element.top + start.y);
+    await page.mouse.down();
+    await page.mouse.move(element.left + end.x, element.top + end.y);
+  }
+
+  /**
+   * Drop mouse
+   *
+   * @param mousePosition
+   * @param selector
+   */
+  async dropMouse() {
+    await page.mouse.up();
+  }
+
+  /**
+   * Drag and drop mouse relative to element
+   *
+   * @param mousePosition
+   * @param selector
+   */
+  async dragAndDropMouseRelativeToDOMElement(
+    start: { x: number; y: number },
+    end: { x: number; y: number },
+    selector: string,
+  ) {
+    const element = await this.getBoundingClientRect(selector);
+    await page.mouse.move(element.left + start.x, element.top + start.y);
+    await page.mouse.down();
+    await page.mouse.move(element.left + end.x, element.top + end.y);
+    await page.mouse.up();
+  }
+
+  /**
    * Expect an element given a url and selector from storybook
    *
    * - Note: No need to fix host or port. They will be set automatically.
@@ -195,6 +240,27 @@ class CommonPage {
     options?: Omit<ScreenshotElementAtUrlOptions, 'action'>,
   ) {
     const action = async () => await this.moveMouseRelativeToDOMElement(mousePosition, this.chartSelector);
+    await this.expectChartAtUrlToMatchScreenshot(url, {
+      ...options,
+      action,
+    });
+  }
+
+  /**
+   * Expect a chart given a url from storybook with mouse move
+   *
+   * @param url Storybook url from knobs section
+   * @param start - the start postion of mouse relative to chart
+   * @param end - the end postion of mouse relative to chart
+   * @param options
+   */
+  async expectChartWithDragAtUrlToMatchScreenshot(
+    url: string,
+    start: { x: number; y: number },
+    end: { x: number; y: number },
+    options?: Omit<ScreenshotElementAtUrlOptions, 'action'>,
+  ) {
+    const action = async () => await this.dragMouseRelativeToDOMElement(start, end, this.chartSelector);
     await this.expectChartAtUrlToMatchScreenshot(url, {
       ...options,
       action,

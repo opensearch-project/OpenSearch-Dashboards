@@ -38,8 +38,11 @@ export const example = () => {
     <Chart className="story-chart">
       <Settings
         debug={boolean('debug', false)}
-        onBrushEnd={(start, end) => {
-          action('onBrushEnd')(formatter(start), formatter(end));
+        onBrushEnd={({ x }) => {
+          if (!x) {
+            return;
+          }
+          action('onBrushEnd')(formatter(x[0]), formatter(x[1]));
         }}
         onElementClick={action('onElementClick')}
         rotation={getChartRotationKnob()}

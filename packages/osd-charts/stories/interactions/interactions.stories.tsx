@@ -35,6 +35,7 @@ export { example as clickHoversOnLegendItemsAreaChart } from './6_clicks_legend_
 export { example as clickHoversOnLegendItemsLineChart } from './7_clicks_legend_items_line';
 export { example as clickHoversOnLegendItemsMixedChart } from './8_clicks_legend_items_mixed';
 export { example as brushSelectionToolOnLinear } from './9_brush_selection_linear';
+export { example as brushTool } from './9a_brush_selection_linear';
 
 export { example as brushSelectionToolOnBarChartLinear } from './10_brush_selection_bar';
 export { example as brushSelectionToolOnTimeCharts } from './11_brush_time';

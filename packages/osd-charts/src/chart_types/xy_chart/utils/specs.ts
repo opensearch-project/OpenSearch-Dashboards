@@ -73,6 +73,10 @@ export type PointStyleAccessor = (
   datum: RawDataSeriesDatum,
   seriesIdentifier: XYChartSeriesIdentifier,
 ) => PointStyleOverride;
+
+/**
+ * The global id used by default to group together series
+ */
 export const DEFAULT_GLOBAL_ID = '__global__';
 
 export type FilterPredicate = (series: XYChartSeriesIdentifier) => boolean;

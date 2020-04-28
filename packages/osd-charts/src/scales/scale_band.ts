@@ -18,7 +18,7 @@
 
 import { scaleBand, scaleQuantize, ScaleQuantize, ScaleBand as D3ScaleBand } from 'd3-scale';
 
-import { clamp } from '../utils/commons';
+import { maxValueWithUpperLimit } from '../utils/commons';
 import { ScaleType, Scale } from '.';
 import { stringifyNullsUndefined } from '../chart_types/xy_chart/state/utils';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
@@ -58,7 +58,7 @@ export class ScaleBand implements Scale {
     this.d3Scale = scaleBand<NonNullable<PrimitiveValue>>();
     this.d3Scale.domain(domain);
     this.d3Scale.range(range);
-    const safeBarPadding = clamp(barsPadding, 0, 1);
+    const safeBarPadding = maxValueWithUpperLimit(barsPadding, 0, 1);
     this.barsPadding = safeBarPadding;
     this.d3Scale.paddingInner(safeBarPadding);
     this.d3Scale.paddingOuter(safeBarPadding / 2);

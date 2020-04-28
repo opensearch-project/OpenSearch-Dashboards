@@ -103,6 +103,49 @@ describe('Tooltips', () => {
         },
       );
     });
+    it('show rectangular brush selection', async () => {
+      await common.expectChartWithDragAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/interactions--brush-tool',
+        { x: 100, y: 100 },
+        { x: 250, y: 250 },
+      );
+    });
+    it('show y brush selection', async () => {
+      await common.expectChartWithDragAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/interactions--brush-tool&knob-brush axis=y&knob-chartRotation=0',
+        { x: 100, y: 100 },
+        { x: 250, y: 250 },
+      );
+    });
+    it('show x brush selection', async () => {
+      await common.expectChartWithDragAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/interactions--brush-tool&knob-brush axis=x&knob-chartRotation=0',
+        { x: 100, y: 100 },
+        { x: 250, y: 250 },
+      );
+    });
+
+    it('show rectangular brush selection -90 degree', async () => {
+      await common.expectChartWithDragAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/interactions--brush-tool&knob-brush axis=both&knob-chartRotation=-90',
+        { x: 100, y: 100 },
+        { x: 250, y: 250 },
+      );
+    });
+    it('show y brush selection -90 degree', async () => {
+      await common.expectChartWithDragAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/interactions--brush-tool&knob-brush axis=y&knob-chartRotation=-90',
+        { x: 100, y: 100 },
+        { x: 250, y: 250 },
+      );
+    });
+    it('show x brush selection -90 degree', async () => {
+      await common.expectChartWithDragAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/interactions--brush-tool&knob-brush axis=x&knob-chartRotation=-90',
+        { x: 100, y: 100 },
+        { x: 250, y: 250 },
+      );
+    });
   });
   it('should render corrent tooltip for split and y accessors', async () => {
     await common.expectChartWithMouseAtUrlToMatchScreenshot(

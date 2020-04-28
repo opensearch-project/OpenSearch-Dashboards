@@ -17,7 +17,7 @@
  * under the License. */
 
 import {
-  clamp,
+  maxValueWithUpperLimit,
   compareByValueAsc,
   identity,
   hasPartialObjectToMerge,
@@ -26,20 +26,28 @@ import {
   getPartialValue,
   getAllKeys,
   shallowClone,
+  minValueWithLowerLimit,
   getColorFromVariant,
   ColorVariant,
 } from './commons';
 
 describe('commons utilities', () => {
-  test('can clamp a value to min max', () => {
-    expect(clamp(0, 0, 1)).toBe(0);
-    expect(clamp(1, 0, 1)).toBe(1);
+  test('return value bounded above', () => {
+    expect(maxValueWithUpperLimit(0, 0, 1)).toBe(0);
+    expect(maxValueWithUpperLimit(1, 0, 1)).toBe(1);
 
-    expect(clamp(1.1, 0, 1)).toBe(1);
-    expect(clamp(-0.1, 0, 1)).toBe(0);
+    expect(maxValueWithUpperLimit(1.1, 0, 1)).toBe(1);
+    expect(maxValueWithUpperLimit(-0.1, 0, 1)).toBe(0);
 
-    expect(clamp(0.1, 0, 1)).toBe(0.1);
-    expect(clamp(0.8, 0, 1)).toBe(0.8);
+    expect(maxValueWithUpperLimit(0.1, 0, 1)).toBe(0.1);
+    expect(maxValueWithUpperLimit(0.8, 0, 1)).toBe(0.8);
+  });
+  test('return value bounded below', () => {
+    expect(minValueWithLowerLimit(10, 20, 0)).toBe(10);
+    expect(minValueWithLowerLimit(20, 10, 0)).toBe(10);
+
+    expect(minValueWithLowerLimit(10, -20, 0)).toBe(0);
+    expect(minValueWithLowerLimit(-20, 10, 0)).toBe(0);
   });
 
   test('identity', () => {

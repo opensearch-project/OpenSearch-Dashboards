@@ -18,46 +18,40 @@
 
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { Axis, Chart, niceTimeFormatter, Position, ScaleType, Settings, HistogramBarSeries } from '../../src';
+import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, BrushAxis } from '../../src';
 
-import { boolean } from '@storybook/addon-knobs';
-import { DateTime } from 'luxon';
 import { getChartRotationKnob } from '../utils/knobs';
+import { select } from '@storybook/addon-knobs';
 
 export const example = () => {
-  const now = DateTime.fromISO('2019-01-11T00:00:00.000')
-    .setZone('utc+1')
-    .toMillis();
-  const oneDay = 1000 * 60 * 60 * 24;
-  const formatter = niceTimeFormatter([now, now + oneDay * 5]);
+  const brushAxisSelect = select(
+    'brush axis',
+    {
+      x: BrushAxis.X,
+      y: BrushAxis.Y,
+      both: BrushAxis.Both,
+    },
+    BrushAxis.Both,
+  );
   return (
     <Chart className="story-chart">
-      <Settings
-        debug={boolean('debug', false)}
-        onBrushEnd={({ x }) => {
-          if (!x) {
-            return;
-          }
-          action('onBrushEnd')(formatter(x[0]), formatter(x[1]));
-        }}
-        onElementClick={action('onElementClick')}
-        rotation={getChartRotationKnob()}
-      />
-      <Axis id="bottom" position={Position.Bottom} title="bottom" showOverlappingTicks={true} tickFormat={formatter} />
+      <Settings onBrushEnd={action('onBrushEnd')} rotation={getChartRotationKnob()} brushAxis={brushAxisSelect} />
+      <Axis id="bottom" position={Position.Bottom} title="bottom" showOverlappingTicks={true} />
       <Axis id="left" title="left" position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
+      <Axis id="top" position={Position.Top} title="top" showOverlappingTicks={true} />
+      <Axis id="right" title="right" position={Position.Right} tickFormat={(d) => Number(d).toFixed(2)} />
 
-      <HistogramBarSeries
-        id="bars"
-        xScaleType={ScaleType.Time}
+      <AreaSeries
+        id="lines"
+        xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
         yAccessors={['y']}
-        timeZone="Europe/Rome"
         data={[
-          { x: now, y: 2 },
-          { x: now + oneDay, y: 7 },
-          { x: now + oneDay * 2, y: 3 },
-          { x: now + oneDay * 5, y: 6 },
+          { x: 0, y: 2 },
+          { x: 1, y: 7 },
+          { x: 2, y: 3 },
+          { x: 3, y: 6 },
         ]}
       />
     </Chart>
