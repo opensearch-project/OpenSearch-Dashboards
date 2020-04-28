@@ -19,11 +19,7 @@
 import React from 'react';
 import { isLineAnnotation, AnnotationSpec, AnnotationTypes } from '../../utils/specs';
 import { AnnotationId } from '../../../../utils/ids';
-import {
-  AnnotationDimensions,
-  AnnotationTooltipState,
-  AnnotationTooltipFormatter,
-} from '../../annotations/annotation_utils';
+import { AnnotationDimensions, AnnotationTooltipState, AnnotationTooltipFormatter } from '../../annotations/types';
 import { connect } from 'react-redux';
 import { Dimensions } from '../../../../utils/dimensions';
 import { GlobalChartState, BackwardRef } from '../../../../state/chart_state';
@@ -32,11 +28,12 @@ import { computeAnnotationDimensionsSelector } from '../../state/selectors/compu
 import { getAnnotationSpecsSelector } from '../../state/selectors/get_specs';
 import { getAnnotationTooltipStateSelector } from '../../state/selectors/get_annotation_tooltip_state';
 import { isChartEmptySelector } from '../../state/selectors/is_chart_empty';
-import { AnnotationLineProps } from '../../annotations/line_annotation_tooltip';
+import { AnnotationLineProps } from '../../annotations/line/types';
 import { computeChartDimensionsSelector } from '../../state/selectors/compute_chart_dimensions';
 import { createPortal } from 'react-dom';
-import { getFinalAnnotationTooltipPosition } from '../../annotations/annotation_tooltip';
+import { getFinalAnnotationTooltipPosition } from '../../annotations/tooltip';
 import { getSpecsById } from '../../state/utils';
+import { Position } from '../../../../utils/commons';
 
 interface AnnotationTooltipStateProps {
   isChartEmpty: boolean;
@@ -124,8 +121,8 @@ class AnnotationTooltipComponent extends React.Component<AnnotationTooltipProps>
     if (tooltipStyle.left) {
       this.portalNode.style.left = tooltipStyle.left;
       if (this.tooltipRef.current) {
-        this.tooltipRef.current.style.left = tooltipStyle.anchor === 'right' ? 'auto' : '0px';
-        this.tooltipRef.current.style.right = tooltipStyle.anchor === 'right' ? '0px' : 'auto';
+        this.tooltipRef.current.style.left = tooltipStyle.anchor === Position.Right ? 'auto' : '0px';
+        this.tooltipRef.current.style.right = tooltipStyle.anchor === Position.Right ? '0px' : 'auto';
       }
     }
     if (tooltipStyle.top) {

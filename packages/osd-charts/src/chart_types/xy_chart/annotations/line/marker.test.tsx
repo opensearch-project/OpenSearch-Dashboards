@@ -17,16 +17,16 @@
  * under the License. */
 
 import React from 'react';
-import { AnnotationDomainTypes, AnnotationSpec, AnnotationTypes } from '../utils/specs';
-import { Position, Rotation } from '../../../utils/commons';
-import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../utils/themes/theme';
-import { Dimensions } from '../../../utils/dimensions';
-import { GroupId } from '../../../utils/ids';
-import { Scale, ScaleType, ScaleContinuous } from '../../../scales';
-import { SpecTypes } from '../../../specs/settings';
-import { computeLineAnnotationDimensions } from './line/dimensions';
-import { AnnotationLineProps } from './line/types';
-import { ChartTypes } from '../..';
+import { AnnotationDomainTypes, AnnotationSpec, AnnotationTypes } from '../../utils/specs';
+import { Position, Rotation } from '../../../../utils/commons';
+import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../../utils/themes/theme';
+import { Dimensions } from '../../../../utils/dimensions';
+import { GroupId } from '../../../../utils/ids';
+import { Scale, ScaleType, ScaleContinuous } from '../../../../scales';
+import { computeLineAnnotationDimensions } from './dimensions';
+import { AnnotationLineProps } from './types';
+import { ChartTypes } from '../../..';
+import { SpecTypes } from '../../../../specs/settings';
 
 describe('annotation marker', () => {
   const groupId = 'foo-group';

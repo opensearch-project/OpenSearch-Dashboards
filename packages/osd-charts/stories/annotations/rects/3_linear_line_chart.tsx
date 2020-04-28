@@ -28,7 +28,7 @@ export const example = () => {
   const rotation = getChartRotationKnob();
 
   const definedCoordinate = select(
-    'defined coordinate',
+    'green annotation defined coordinate',
     {
       x0: 'x0',
       x1: 'x1',
@@ -38,7 +38,7 @@ export const example = () => {
     'x0',
   );
 
-  const dataValues: RectAnnotationDatum[] = [
+  const dataValuesRed: RectAnnotationDatum[] = [
     {
       coordinates: {
         x0: 1,
@@ -46,8 +46,10 @@ export const example = () => {
         y0: 0,
         y1: 7,
       },
-      details: 'details about this annotation',
+      details: 'red annotation',
     },
+  ];
+  const dataValuesBlue: RectAnnotationDatum[] = [
     {
       coordinates: {
         x0: 2.0,
@@ -55,16 +57,18 @@ export const example = () => {
         y0: 0,
         y1: 7,
       },
-      details: 'details about this annotation',
+      details: 'blue annotation',
     },
+  ];
+  const dataValuesGreen: RectAnnotationDatum[] = [
     {
       coordinates: {
-        x0: definedCoordinate === 'x0' ? 0.25 : null,
-        x1: definedCoordinate === 'x1' ? 2.75 : null,
-        y0: definedCoordinate === BandedAccessorType.Y0 ? 0.25 : null,
-        y1: definedCoordinate === BandedAccessorType.Y1 ? 6.75 : null,
+        x0: definedCoordinate === 'x0' ? 0.5 : null,
+        x1: definedCoordinate === 'x1' ? 2.5 : null,
+        y0: definedCoordinate === BandedAccessorType.Y0 ? 1.5 : null,
+        y1: definedCoordinate === BandedAccessorType.Y1 ? 5.5 : null,
       },
-      details: 'can have null values',
+      details: 'green annotation',
     },
   ];
 
@@ -79,7 +83,9 @@ export const example = () => {
   return (
     <Chart className="story-chart">
       <Settings debug={debug} rotation={rotation} />
-      <RectAnnotation dataValues={dataValues} id="rect" />
+      <RectAnnotation dataValues={dataValuesGreen} id="rect3" style={{ fill: 'lightgreen' }} />
+      <RectAnnotation dataValues={dataValuesBlue} id="rect2" style={{ fill: 'blue' }} />
+      <RectAnnotation dataValues={dataValuesRed} id="rect1" style={{ fill: 'red' }} />
       <Axis id="bottom" position={xAxisPosition} title={xAxisTitle} />
       <Axis id="left" title={yAxisTitle} position={yAxisPosition} />
       <LineSeries

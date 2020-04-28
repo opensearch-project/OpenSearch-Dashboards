@@ -48,8 +48,7 @@ function getPostfix(spec: BasicSeriesSpec): Postfixes {
   return {};
 }
 
-/** @internal */
-export function getBandedLegendItemLabel(name: string, yAccessor: BandedAccessorType, postfixes: Postfixes) {
+function getBandedLegendItemLabel(name: string, yAccessor: BandedAccessorType, postfixes: Postfixes) {
   return yAccessor === BandedAccessorType.Y1
     ? `${name}${postfixes.y1AccessorFormat}`
     : `${name}${postfixes.y0AccessorFormat}`;

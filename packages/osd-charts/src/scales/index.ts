@@ -79,11 +79,3 @@ export { ScaleBand } from './scale_band';
 
 /** @internal */
 export { ScaleContinuous } from './scale_continuous';
-
-/**
- * Check if a scale is logaritmic
- * @internal
- */
-export function isLogarithmicScale(scale: Scale) {
-  return scale.type === ScaleType.Log;
-}

@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { AnnotationDimensions } from '../../../annotations/annotation_utils';
+import { AnnotationDimensions } from '../../../annotations/types';
 import { AnnotationSpec, isLineAnnotation, isRectAnnotation } from '../../../utils/specs';
 import { getSpecsById } from '../../../state/utils';
 import { AnnotationId } from '../../../../../utils/ids';
 import { mergeWithDefaultAnnotationLine, mergeWithDefaultAnnotationRect } from '../../../../../utils/themes/theme';
 import { renderLineAnnotations } from './lines';
-import { AnnotationLineProps } from '../../../annotations/line_annotation_tooltip';
+import { AnnotationLineProps } from '../../../annotations/line/types';
 import { renderRectAnnotations } from './rect';
-import { AnnotationRectProps } from '../../../annotations/rect_annotation_tooltip';
+import { AnnotationRectProps } from '../../../annotations/rect/types';
 
 interface AnnotationProps {
   annotationDimensions: Map<AnnotationId, AnnotationDimensions>;

@@ -20,7 +20,8 @@ import { XDomain } from '../chart_types/xy_chart/domains/x_domain';
 import { computeXScale } from '../chart_types/xy_chart/utils/scales';
 import { Domain } from '../utils/domain';
 import { DateTime, Settings } from 'luxon';
-import { ScaleContinuous, ScaleType, ScaleBand, isLogarithmicScale } from '.';
+import { ScaleContinuous, ScaleType, ScaleBand } from '.';
+import { isLogarithmicScale } from './types';
 
 describe('Scale Continuous', () => {
   test('shall invert on continuous scale linear', () => {

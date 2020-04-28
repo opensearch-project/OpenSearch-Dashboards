@@ -33,7 +33,6 @@ export function renderRect(
 
   if (fill) {
     const borderOffset = !disableBoardOffset && stroke && stroke.width > 0.001 ? stroke.width : 0;
-    // console.log(stroke, borderOffset);
     const x = rect.x + borderOffset;
     const y = rect.y + borderOffset;
     const width = rect.width - borderOffset * 2;
@@ -45,7 +44,6 @@ export function renderRect(
 
   if (stroke && stroke.width > 0.001) {
     const borderOffset = !disableBoardOffset && stroke && stroke.width > 0.001 ? stroke.width / 2 : 0;
-    // console.log(stroke, borderOffset);
     const x = rect.x + borderOffset;
     const y = rect.y + borderOffset;
     const width = rect.width - borderOffset * 2;

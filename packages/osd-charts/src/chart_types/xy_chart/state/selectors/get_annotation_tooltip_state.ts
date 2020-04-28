@@ -23,11 +23,8 @@ import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { getAxisSpecsSelector, getAnnotationSpecsSelector } from './get_specs';
 import { AxisSpec, AnnotationSpec, AnnotationTypes } from '../../utils/specs';
 import { Rotation } from '../../../../utils/commons';
-import {
-  computeAnnotationTooltipState,
-  AnnotationTooltipState,
-  AnnotationDimensions,
-} from '../../annotations/annotation_utils';
+import { computeAnnotationTooltipState } from '../../annotations/tooltip';
+import { AnnotationTooltipState, AnnotationDimensions } from '../../annotations/types';
 import { computeAnnotationDimensionsSelector } from './compute_annotations';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { AnnotationId } from '../../../../utils/ids';

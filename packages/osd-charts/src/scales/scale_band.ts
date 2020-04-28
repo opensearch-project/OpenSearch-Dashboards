@@ -31,6 +31,9 @@ export class ScaleBand implements Scale {
   readonly bandwidth: number;
   readonly bandwidthPadding: number;
   readonly step: number;
+  readonly outerPadding: number;
+  readonly innerPadding: number;
+  readonly originalBandwidth: number;
   readonly type: ScaleType;
   readonly domain: any[];
   readonly range: number[];
@@ -59,7 +62,10 @@ export class ScaleBand implements Scale {
     this.barsPadding = safeBarPadding;
     this.d3Scale.paddingInner(safeBarPadding);
     this.d3Scale.paddingOuter(safeBarPadding / 2);
+    this.outerPadding = this.d3Scale.paddingOuter();
+    this.innerPadding = this.d3Scale.paddingInner();
     this.bandwidth = this.d3Scale.bandwidth() || 0;
+    this.originalBandwidth = this.d3Scale.bandwidth() || 0;
     this.step = this.d3Scale.step();
     this.domain = this.d3Scale.domain();
     this.range = range.slice();

@@ -18,7 +18,7 @@
 
 import { XDomain } from '../domains/x_domain';
 import { YDomain } from '../domains/y_domain';
-import { AxisSpec, DomainRange, AxisStyle } from './specs';
+import { AxisSpec, DomainRange, AxisStyle, DEFAULT_GLOBAL_ID } from './specs';
 import { Position } from '../../../utils/commons';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { AxisId, GroupId } from '../../../utils/ids';
@@ -1452,7 +1452,7 @@ describe('Axis computational utils', () => {
       showDuplicatedTicks: false,
       chartType: 'xy_axis',
       specType: 'axis',
-      groupId: '__global__',
+      groupId: DEFAULT_GLOBAL_ID,
       hide: false,
       showOverlappingLabels: false,
       showOverlappingTicks: false,
@@ -1492,7 +1492,7 @@ describe('Axis computational utils', () => {
       showDuplicatedTicks: true,
       chartType: 'xy_axis',
       specType: 'axis',
-      groupId: '__global__',
+      groupId: DEFAULT_GLOBAL_ID,
       hide: false,
       showOverlappingLabels: false,
       showOverlappingTicks: false,

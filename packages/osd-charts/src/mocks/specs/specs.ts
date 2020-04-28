@@ -28,6 +28,11 @@ import {
   BasicSeriesSpec,
   SeriesTypes,
   BubbleSeriesSpec,
+  LineAnnotationSpec,
+  RectAnnotationSpec,
+  AnnotationTypes,
+  AnnotationDomainTypes,
+  AxisSpec,
 } from '../../chart_types/xy_chart/utils/specs';
 import { ScaleType } from '../../scales';
 import { ChartTypes } from '../../chart_types';
@@ -208,7 +213,7 @@ export class MockSeriesSpec {
     });
   }
 
-  static byType(type?: SeriesTypes): BasicSeriesSpec {
+  static byType(type?: SeriesTypes | 'histogram'): BasicSeriesSpec {
     switch (type) {
       case SeriesTypes.Line:
         return MockSeriesSpec.lineBase;
@@ -216,9 +221,24 @@ export class MockSeriesSpec {
         return MockSeriesSpec.areaBase;
       case SeriesTypes.Bubble:
         return MockSeriesSpec.bubbleBase;
+      case 'histogram':
+        return MockSeriesSpec.histogramBarBase;
       case SeriesTypes.Bar:
       default:
         return MockSeriesSpec.barBase;
+    }
+  }
+  static byTypePartial(type?: 'line' | 'bar' | 'area' | 'histogram') {
+    switch (type) {
+      case 'line':
+        return MockSeriesSpec.line;
+      case 'area':
+        return MockSeriesSpec.area;
+      case 'histogram':
+        return MockSeriesSpec.histogramBar;
+      case 'bar':
+      default:
+        return MockSeriesSpec.bar;
     }
   }
 }
@@ -264,7 +284,72 @@ export class MockGlobalSpec {
     theme: LIGHT_THEME,
   };
 
+  private static readonly axisBase: AxisSpec = {
+    id: 'yAxis',
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Axis,
+    groupId: DEFAULT_GLOBAL_ID,
+    hide: false,
+    showOverlappingTicks: false,
+    showOverlappingLabels: false,
+    position: Position.Left,
+    tickSize: 10,
+    tickPadding: 10,
+    tickFormat: (tick: any) => `${tick}`,
+    tickLabelRotation: 0,
+  };
+
+  private static readonly settingsBaseNoMargings: SettingsSpec = {
+    ...MockGlobalSpec.settingsBase,
+    theme: {
+      ...LIGHT_THEME,
+      chartMargins: { top: 0, left: 0, right: 0, bottom: 0 },
+      chartPaddings: { top: 0, left: 0, right: 0, bottom: 0 },
+      scales: {
+        barsPadding: 0,
+        histogramPadding: 0,
+      },
+    },
+  };
+
   static settings(partial?: Partial<SettingsSpec>): SettingsSpec {
     return mergePartial<SettingsSpec>(MockGlobalSpec.settingsBase, partial, { mergeOptionalPartialValues: true });
+  }
+  static settingsNoMargins(partial?: Partial<SettingsSpec>): SettingsSpec {
+    return mergePartial<SettingsSpec>(MockGlobalSpec.settingsBaseNoMargings, partial, {
+      mergeOptionalPartialValues: true,
+    });
+  }
+  static axis(partial?: Partial<AxisSpec>): AxisSpec {
+    return mergePartial<AxisSpec>(MockGlobalSpec.axisBase, partial, { mergeOptionalPartialValues: true });
+  }
+}
+
+/** @internal */
+export class MockAnnotationSpec {
+  private static readonly lineBase: LineAnnotationSpec = {
+    id: 'line_annotation_1',
+    groupId: DEFAULT_GLOBAL_ID,
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Annotation,
+    annotationType: AnnotationTypes.Line,
+    dataValues: [],
+    domainType: AnnotationDomainTypes.XDomain,
+  };
+
+  private static readonly rectBase: RectAnnotationSpec = {
+    id: 'rect_annotation_1',
+    groupId: DEFAULT_GLOBAL_ID,
+    chartType: ChartTypes.XYAxis,
+    specType: SpecTypes.Annotation,
+    annotationType: AnnotationTypes.Rectangle,
+    dataValues: [],
+  };
+
+  static line(partial?: Partial<LineAnnotationSpec>): LineAnnotationSpec {
+    return mergePartial<LineAnnotationSpec>(MockAnnotationSpec.lineBase, partial, { mergeOptionalPartialValues: true });
+  }
+  static rect(partial?: Partial<RectAnnotationSpec>): RectAnnotationSpec {
+    return mergePartial<RectAnnotationSpec>(MockAnnotationSpec.rectBase, partial, { mergeOptionalPartialValues: true });
   }
 }

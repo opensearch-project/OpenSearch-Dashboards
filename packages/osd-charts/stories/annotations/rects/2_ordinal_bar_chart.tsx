@@ -26,20 +26,22 @@ export const example = () => {
   const debug = boolean('debug', false);
   const rotation = getChartRotationKnob();
 
-  const dataValues = [
-    {
-      coordinates: {
-        x0: 'a',
-        x1: 'b',
-      },
-      details: 'details about this annotation',
-    },
-  ];
-
   return (
     <Chart className="story-chart">
       <Settings debug={debug} rotation={rotation} />
-      <RectAnnotation dataValues={dataValues} id="rect" />
+      <RectAnnotation
+        dataValues={[
+          {
+            coordinates: {
+              x0: 'a',
+              x1: 'c',
+            },
+            details: 'annotation on ordinal bar chart',
+          },
+        ]}
+        id="rect"
+        style={{ fill: 'red' }}
+      />
       <Axis id="bottom" position={Position.Bottom} title="x-domain axis" />
       <Axis id="left" title="y-domain axis" position={Position.Left} />
       <BarSeries
@@ -50,11 +52,22 @@ export const example = () => {
         yAccessors={['y']}
         data={[
           { x: 'a', y: 2 },
-          { x: 'b', y: 7 },
+          { x: 'b', y: 3 },
           { x: 'c', y: 0 },
           { x: 'd', y: 6 },
         ]}
       />
     </Chart>
   );
+};
+
+example.story = {
+  parameters: {
+    info: {
+      text: `On Ordinal Bar charts, you can draw a rectangular annotation the same way it's done within a linear bar chart.
+The annotation will cover fully the extent defined by the \`coordinate\` object, extending to the max/min domain values any
+missing/out-of-range parameters.
+      `,
+    },
+  },
 };

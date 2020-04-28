@@ -33,9 +33,10 @@ import { AxisId, GroupId } from '../../../utils/ids';
 import { ScaleContinuousType, ScaleType } from '../../../scales';
 import { CurveType } from '../../../utils/curves';
 import { RawDataSeriesDatum, XYChartSeriesIdentifier } from './series';
-import { AnnotationTooltipFormatter } from '../annotations/annotation_utils';
+import { AnnotationTooltipFormatter } from '../annotations/types';
 import { SpecTypes, Spec } from '../../../specs';
 import { ChartTypes } from '../..';
+import { PrimitiveValue } from '../../partition_chart/layout/utils/group_by_rollup';
 
 export type BarStyleOverride = RecursivePartial<BarSeriesStyle> | Color | null;
 export type PointStyleOverride = RecursivePartial<PointStyle> | Color | null;
@@ -630,19 +631,19 @@ export interface RectAnnotationDatum {
     /**
      * The minuimum value on the x axis. If undefined, the minuimum value of the x domain will be used.
      */
-    x0?: any;
+    x0?: PrimitiveValue;
     /**
      * The maximum value on the x axis. If undefined, the maximum value of the x domain will be used.
      */
-    x1?: any;
+    x1?: PrimitiveValue;
     /**
      * The minimum value on the y axis. If undefined, the minimum value of the y domain will be used.
      */
-    y0?: any;
+    y0?: PrimitiveValue;
     /**
      * The maximum value on the y axis. If undefined, the maximum value of the y domain will be used.
      */
-    y1?: any;
+    y1?: PrimitiveValue;
   };
   /**
    * A textual description of the annotation
@@ -668,7 +669,7 @@ export interface BaseAnnotationSpec<
   D extends RectAnnotationDatum | LineAnnotationDatum,
   S extends RectAnnotationStyle | LineAnnotationStyle
 > extends Spec {
-  chartType: ChartTypes;
+  chartType: typeof ChartTypes.XYAxis;
   specType: typeof SpecTypes.Annotation;
   /**
    * Annotation type: line, rectangle, text

@@ -30,33 +30,20 @@ import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../utils/themes/theme';
 import { Dimensions } from '../../../utils/dimensions';
 import { GroupId, AnnotationId } from '../../../utils/ids';
 import { Scale, ScaleType, ScaleBand, ScaleContinuous } from '../../../scales';
-import {
-  computeAnnotationDimensions,
-  computeAnnotationTooltipState,
-  computeClusterOffset,
-  getAnnotationAxis,
-  getRotatedCursor,
-  scaleAndValidateDatum,
-  AnnotationDimensions,
-  AnnotationTooltipState,
-  Bounds,
-} from './annotation_utils';
-import {
-  AnnotationLineProps,
-  computeLineAnnotationDimensions,
-  computeLineAnnotationTooltipState,
-  isVerticalAnnotationLine,
-  getAnnotationLineTooltipXOffset,
-  getAnnotationLineTooltipYOffset,
-} from './line_annotation_tooltip';
-import {
-  computeRectAnnotationDimensions,
-  isWithinRectBounds,
-  computeRectAnnotationTooltipState,
-} from './rect_annotation_tooltip';
+import { computeAnnotationDimensions, getAnnotationAxis, getRotatedCursor } from './utils';
+import { AnnotationDimensions, AnnotationTooltipState, Bounds } from './types';
+import { computeLineAnnotationDimensions } from './line/dimensions';
+import { AnnotationLineProps } from './line/types';
+import { computeRectAnnotationDimensions, isWithinRectBounds } from './rect/dimensions';
+import { computeRectAnnotationTooltipState } from './rect/tooltip';
 import { Point } from '../../../utils/point';
 import { ChartTypes } from '../..';
 import { SpecTypes } from '../../../specs/settings';
+import { computeLineAnnotationTooltipState } from './line/tooltip';
+import { computeAnnotationTooltipState } from './tooltip';
+import { MockStore } from '../../../mocks/store';
+import { MockGlobalSpec, MockSeriesSpec, MockAnnotationSpec } from '../../../mocks/specs';
+import { computeAnnotationDimensionsSelector } from '../state/selectors/compute_annotations';
 
 describe('annotation utils', () => {
   const minRange = 0;
@@ -116,70 +103,58 @@ describe('annotation utils', () => {
 
   axesSpecs.push(verticalAxisSpec);
 
-  test('should compute annotation dimensions', () => {
-    const chartRotation: Rotation = 0;
-    const yScales: Map<GroupId, Scale> = new Map();
-    yScales.set(groupId, continuousScale);
+  test('should compute rect annotation in x ordinal scale', () => {
+    const store = MockStore.default();
+    const settings = MockGlobalSpec.settingsNoMargins();
+    const spec = MockSeriesSpec.bar({
+      xScaleType: ScaleType.Ordinal,
+      groupId,
+      data: [
+        { x: 'a', y: 1 },
+        { x: 'b', y: 0 },
+        { x: 'c', y: 10 },
+        { x: 'd', y: 5 },
+      ],
+    });
 
-    const xScale: Scale = ordinalScale;
-
-    const annotations: AnnotationSpec[] = [];
-    const annotationId = 'foo';
-    const lineAnnotation: LineAnnotationSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Annotation,
-      annotationType: AnnotationTypes.Line,
-      id: annotationId,
+    const lineAnnotation = MockAnnotationSpec.line({
+      id: 'foo',
+      groupId,
       domainType: AnnotationDomainTypes.YDomain,
       dataValues: [{ dataValue: 2, details: 'foo' }],
-      groupId,
-      style: DEFAULT_ANNOTATION_LINE_STYLE,
-    };
+    });
 
-    const rectAnnotationId = 'rect';
-    const rectAnnotation: AnnotationSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Annotation,
-      id: rectAnnotationId,
+    const rectAnnotation = MockAnnotationSpec.rect({
+      id: 'rect',
       groupId,
-      annotationType: AnnotationTypes.Rectangle,
       dataValues: [{ coordinates: { x0: 'a', x1: 'b', y0: 3, y1: 5 } }],
-    };
+    });
 
-    annotations.push(lineAnnotation);
-    annotations.push(rectAnnotation);
+    MockStore.addSpecs([settings, spec, lineAnnotation, rectAnnotation], store);
+    const dimensions = computeAnnotationDimensionsSelector(store.getState());
 
-    const dimensions = computeAnnotationDimensions(
-      annotations,
-      chartDimensions,
-      chartRotation,
-      yScales,
-      xScale,
-      axesSpecs,
-      1,
-      false,
-    );
     const expectedDimensions = new Map<AnnotationId, AnnotationDimensions>();
-    expectedDimensions.set(annotationId, [
+    expectedDimensions.set('foo', [
       {
         anchor: {
-          top: 20,
+          top: 80,
           left: 0,
           position: Position.Left,
         },
         linePathPoints: {
-          start: { x1: 0, y1: 20 },
-          end: { x2: 10, y2: 20 },
+          start: { x1: 0, y1: 80 },
+          end: { x2: 100, y2: 80 },
         },
+        marker: undefined,
         details: { detailsText: 'foo', headerText: '2' },
       },
     ]);
-    expectedDimensions.set(rectAnnotationId, [{ rect: { x: 0, y: 30, width: 25, height: 20 } }]);
+    expectedDimensions.set('rect', [{ details: undefined, rect: { x: 0, y: 50, width: 50, height: 20 } }]);
 
     expect(dimensions).toEqual(expectedDimensions);
   });
 
-  test('should not compute annotation dimensions if a corresponding axis does not exist', () => {
+  test('should compute annotation dimensions also with missing axis', () => {
     const chartRotation: Rotation = 0;
     const yScales: Map<GroupId, Scale> = new Map();
     yScales.set(groupId, continuousScale);
@@ -208,11 +183,9 @@ describe('annotation utils', () => {
       yScales,
       xScale,
       [], // empty axesSpecs
-      1,
       false,
     );
-    const expectedDimensions = new Map();
-    expect(dimensions).toEqual(expectedDimensions);
+    expect(dimensions.size).toEqual(1);
   });
 
   test('should compute line annotation dimensions for yDomain on a yScale (chartRotation 0, left axis)', () => {
@@ -241,7 +214,6 @@ describe('annotation utils', () => {
       yScales,
       xScale,
       Position.Left,
-      0,
       false,
     );
     const expectedDimensions: AnnotationLineProps[] = [
@@ -287,7 +259,6 @@ describe('annotation utils', () => {
       yScales,
       xScale,
       Position.Right,
-      0,
       false,
     );
     const expectedDimensions: AnnotationLineProps[] = [
@@ -333,7 +304,6 @@ describe('annotation utils', () => {
       yScales,
       xScale,
       Position.Left,
-      0,
       false,
     );
     const expectedDimensions: AnnotationLineProps[] = [
@@ -378,7 +348,6 @@ describe('annotation utils', () => {
       yScales,
       xScale,
       Position.Left,
-      0,
       false,
     );
     expect(dimensions).toEqual(null);
@@ -408,7 +377,6 @@ describe('annotation utils', () => {
       yScales,
       xScale,
       Position.Left,
-      0,
       false,
     );
     const expectedDimensions: AnnotationLineProps[] = [
@@ -452,7 +420,6 @@ describe('annotation utils', () => {
       yScales,
       xScale,
       Position.Top,
-      0,
       false,
     );
     const expectedDimensions: AnnotationLineProps[] = [
@@ -497,7 +464,6 @@ describe('annotation utils', () => {
       yScales,
       xScale,
       Position.Bottom,
-      0,
       false,
     );
     const expectedDimensions: AnnotationLineProps[] = [
@@ -512,51 +478,6 @@ describe('annotation utils', () => {
           end: { x2: 25, y2: 0 },
         },
         details: { detailsText: 'foo', headerText: '2' },
-        marker: undefined,
-      },
-    ];
-    expect(dimensions).toEqual(expectedDimensions);
-  });
-
-  test('should compute line annotation dimensions for xDomain in histogramMode with extended upper bound', () => {
-    const chartRotation: Rotation = 0;
-    const yScales: Map<GroupId, Scale> = new Map();
-    const xScale: Scale = continuousScale;
-
-    const annotationId = 'foo-line';
-    const lineAnnotation: LineAnnotationSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Annotation,
-      annotationType: AnnotationTypes.Line,
-      id: annotationId,
-      domainType: AnnotationDomainTypes.XDomain,
-      dataValues: [{ dataValue: 10.5, details: 'foo' }],
-      groupId,
-      style: DEFAULT_ANNOTATION_LINE_STYLE,
-    };
-
-    const dimensions = computeLineAnnotationDimensions(
-      lineAnnotation,
-      chartDimensions,
-      chartRotation,
-      yScales,
-      xScale,
-      Position.Bottom,
-      0,
-      true,
-    );
-    const expectedDimensions: AnnotationLineProps[] = [
-      {
-        anchor: {
-          top: 20,
-          left: 110,
-          position: Position.Bottom,
-        },
-        linePathPoints: {
-          start: { x1: 110, y1: 20 },
-          end: { x2: 110, y2: 0 },
-        },
-        details: { detailsText: 'foo', headerText: '10.5' },
         marker: undefined,
       },
     ];
@@ -588,7 +509,6 @@ describe('annotation utils', () => {
       yScales,
       xScale,
       Position.Left,
-      0,
       false,
     );
     const expectedDimensions: AnnotationLineProps[] = [
@@ -634,7 +554,6 @@ describe('annotation utils', () => {
       yScales,
       xScale,
       Position.Left,
-      0,
       false,
     );
     const expectedDimensions: AnnotationLineProps[] = [
@@ -680,7 +599,6 @@ describe('annotation utils', () => {
       yScales,
       xScale,
       Position.Left,
-      0,
       false,
     );
     const expectedDimensions: AnnotationLineProps[] = [
@@ -726,7 +644,6 @@ describe('annotation utils', () => {
       yScales,
       xScale,
       Position.Top,
-      0,
       false,
     );
     const expectedDimensions: AnnotationLineProps[] = [
@@ -771,7 +688,6 @@ describe('annotation utils', () => {
       yScales,
       xScale,
       Position.Bottom,
-      0,
       false,
     );
     const expectedDimensions: AnnotationLineProps[] = [
@@ -792,7 +708,7 @@ describe('annotation utils', () => {
     expect(dimensions).toEqual(expectedDimensions);
   });
 
-  test('should not compute annotation line values for values outside of domain or AnnotationSpec.hideLines', () => {
+  test('should not compute annotation line values for invalid data values or AnnotationSpec.hideLines', () => {
     const chartRotation: Rotation = 0;
     const yScales: Map<GroupId, Scale> = new Map();
     yScales.set(groupId, continuousScale);
@@ -818,7 +734,6 @@ describe('annotation utils', () => {
       yScales,
       xScale,
       Position.Right,
-      0,
       false,
     );
 
@@ -842,7 +757,6 @@ describe('annotation utils', () => {
       yScales,
       continuousScale,
       Position.Right,
-      0,
       false,
     );
 
@@ -866,11 +780,9 @@ describe('annotation utils', () => {
       yScales,
       continuousScale,
       Position.Right,
-      0,
       false,
     );
-
-    expect(emptyOutOfBoundsXDimensions).toEqual([]);
+    expect(emptyOutOfBoundsXDimensions).toHaveLength(0);
 
     const invalidYLineAnnotation: AnnotationSpec = {
       chartType: ChartTypes.XYAxis,
@@ -883,18 +795,17 @@ describe('annotation utils', () => {
       style: DEFAULT_ANNOTATION_LINE_STYLE,
     };
 
-    const emptyYDimensions = computeLineAnnotationDimensions(
+    const emptyOutOfBoundsYDimensions = computeLineAnnotationDimensions(
       invalidYLineAnnotation,
       chartDimensions,
       chartRotation,
       yScales,
       xScale,
       Position.Right,
-      0,
       false,
     );
 
-    expect(emptyYDimensions).toEqual([]);
+    expect(emptyOutOfBoundsYDimensions).toHaveLength(0);
 
     const outOfBoundsYLineAnnotation: AnnotationSpec = {
       chartType: ChartTypes.XYAxis,
@@ -907,18 +818,17 @@ describe('annotation utils', () => {
       style: DEFAULT_ANNOTATION_LINE_STYLE,
     };
 
-    const emptyOutOfBoundsYDimensions = computeLineAnnotationDimensions(
+    const outOfBoundsYAnn = computeLineAnnotationDimensions(
       outOfBoundsYLineAnnotation,
       chartDimensions,
       chartRotation,
       yScales,
       xScale,
       Position.Right,
-      0,
       false,
     );
 
-    expect(emptyOutOfBoundsYDimensions).toEqual([]);
+    expect(outOfBoundsYAnn).toHaveLength(0);
 
     const invalidStringYLineAnnotation: AnnotationSpec = {
       chartType: ChartTypes.XYAxis,
@@ -938,7 +848,6 @@ describe('annotation utils', () => {
       yScales,
       continuousScale,
       Position.Right,
-      0,
       false,
     );
 
@@ -963,77 +872,10 @@ describe('annotation utils', () => {
       yScales,
       continuousScale,
       Position.Right,
-      0,
       false,
     );
 
     expect(hiddenAnnotationDimensions).toEqual(null);
-  });
-
-  test('should determine if an annotation line is vertical dependent on domain type & chart rotation', () => {
-    const isHorizontal = true;
-    const isXDomain = true;
-    const xDomainHorizontalRotation = isVerticalAnnotationLine(isXDomain, isHorizontal);
-    expect(xDomainHorizontalRotation).toBe(true);
-
-    const xDomainVerticalRotation = isVerticalAnnotationLine(isXDomain, !isHorizontal);
-    expect(xDomainVerticalRotation).toBe(false);
-
-    const yDomainHorizontalRotation = isVerticalAnnotationLine(!isXDomain, isHorizontal);
-    expect(yDomainHorizontalRotation).toBe(false);
-
-    const yDomainVerticalRotation = isVerticalAnnotationLine(isXDomain, !isHorizontal);
-    expect(yDomainVerticalRotation).toBe(false);
-  });
-  test('should get the x offset for an annotation line tooltip', () => {
-    const bottomHorizontalRotationOffset = getAnnotationLineTooltipXOffset(0, Position.Bottom);
-    expect(bottomHorizontalRotationOffset).toBe(50);
-
-    const topHorizontalRotationOffset = getAnnotationLineTooltipXOffset(0, Position.Top);
-    expect(topHorizontalRotationOffset).toBe(50);
-
-    const bottomVerticalRotationOffset = getAnnotationLineTooltipXOffset(90, Position.Bottom);
-    expect(bottomVerticalRotationOffset).toBe(0);
-
-    const topVerticalRotationOffset = getAnnotationLineTooltipXOffset(90, Position.Top);
-    expect(topVerticalRotationOffset).toBe(0);
-
-    const leftHorizontalRotationOffset = getAnnotationLineTooltipXOffset(0, Position.Left);
-    expect(leftHorizontalRotationOffset).toBe(0);
-
-    const rightHorizontalRotationOffset = getAnnotationLineTooltipXOffset(0, Position.Right);
-    expect(rightHorizontalRotationOffset).toBe(100);
-
-    const leftVerticalRotationOffset = getAnnotationLineTooltipXOffset(90, Position.Left);
-    expect(leftVerticalRotationOffset).toBe(50);
-
-    const rightVerticalRotationOffset = getAnnotationLineTooltipXOffset(90, Position.Right);
-    expect(rightVerticalRotationOffset).toBe(50);
-  });
-  test('should get the y offset for an annotation line tooltip', () => {
-    const bottomHorizontalRotationOffset = getAnnotationLineTooltipYOffset(0, Position.Bottom);
-    expect(bottomHorizontalRotationOffset).toBe(100);
-
-    const topHorizontalRotationOffset = getAnnotationLineTooltipYOffset(0, Position.Top);
-    expect(topHorizontalRotationOffset).toBe(0);
-
-    const bottomVerticalRotationOffset = getAnnotationLineTooltipYOffset(90, Position.Bottom);
-    expect(bottomVerticalRotationOffset).toBe(50);
-
-    const topVerticalRotationOffset = getAnnotationLineTooltipYOffset(90, Position.Top);
-    expect(topVerticalRotationOffset).toBe(50);
-
-    const leftHorizontalRotationOffset = getAnnotationLineTooltipYOffset(0, Position.Left);
-    expect(leftHorizontalRotationOffset).toBe(50);
-
-    const rightHorizontalRotationOffset = getAnnotationLineTooltipYOffset(0, Position.Right);
-    expect(rightHorizontalRotationOffset).toBe(50);
-
-    const leftVerticalRotationOffset = getAnnotationLineTooltipYOffset(90, Position.Left);
-    expect(leftVerticalRotationOffset).toBe(100);
-
-    const rightVerticalRotationOffset = getAnnotationLineTooltipYOffset(90, Position.Right);
-    expect(rightVerticalRotationOffset).toBe(100);
   });
 
   test('should compute the tooltip state for an annotation line', () => {
@@ -1379,7 +1221,7 @@ describe('annotation utils', () => {
       dataValues: [{ coordinates: { x0: 1, x1: 2, y0: 3, y1: 5 } }],
     };
 
-    const noYScale = computeRectAnnotationDimensions(annotationRectangle, yScales, xScale, false, 0);
+    const noYScale = computeRectAnnotationDimensions(annotationRectangle, yScales, xScale);
 
     expect(noYScale).toBe(null);
   });
@@ -1401,17 +1243,27 @@ describe('annotation utils', () => {
       ],
     };
 
-    const skippedInvalid = computeRectAnnotationDimensions(annotationRectangle, yScales, xScale, false, 0);
+    const skippedInvalid = computeRectAnnotationDimensions(annotationRectangle, yScales, xScale);
 
-    expect(skippedInvalid).toEqual([]);
+    expect(skippedInvalid).toHaveLength(1);
   });
   test('should compute rectangle dimensions shifted for histogram mode', () => {
     const yScales: Map<GroupId, Scale> = new Map();
-    yScales.set(groupId, continuousScale);
+    yScales.set(
+      groupId,
+      new ScaleContinuous(
+        {
+          type: ScaleType.Linear,
+          domain: continuousData,
+          range: [minRange, maxRange],
+        },
+        { bandwidth: 0, minInterval: 1 },
+      ),
+    );
 
     const xScale: Scale = new ScaleContinuous(
       { type: ScaleType.Linear, domain: continuousData, range: [minRange, maxRange] },
-      { bandwidth: 1, minInterval: 1 },
+      { bandwidth: 72, minInterval: 1 },
     );
 
     const annotationRectangle: RectAnnotationSpec = {
@@ -1428,115 +1280,30 @@ describe('annotation utils', () => {
       ],
     };
 
-    const dimensions = computeRectAnnotationDimensions(annotationRectangle, yScales, xScale, true, 0);
+    const dimensions = computeRectAnnotationDimensions(annotationRectangle, yScales, xScale);
 
     const [dims1, dims2, dims3, dims4] = dimensions;
     expect(dims1.rect.x).toBe(10);
-    expect(dims1.rect.y).toBe(0);
-    expect(dims1.rect.width).toBeCloseTo(100);
+    expect(dims1.rect.y).toBe(100);
     expect(dims1.rect.height).toBe(100);
+    expect(dims1.rect.width).toBeCloseTo(100);
 
     expect(dims2.rect.x).toBe(0);
-    expect(dims2.rect.y).toBe(0);
-    expect(dims2.rect.width).toBe(10);
+    expect(dims2.rect.y).toBe(100);
+    expect(dims2.rect.width).toBe(20);
     expect(dims2.rect.height).toBe(100);
 
     expect(dims3.rect.x).toBe(0);
-    expect(dims3.rect.y).toBe(0);
+    expect(dims3.rect.y).toBe(100);
     expect(dims3.rect.width).toBeCloseTo(110);
-    expect(dims3.rect.height).toBe(10);
+    expect(dims3.rect.height).toBe(90);
 
     expect(dims4.rect.x).toBe(0);
     expect(dims4.rect.y).toBe(10);
     expect(dims4.rect.width).toBeCloseTo(110);
-    expect(dims4.rect.height).toBe(90);
+    expect(dims4.rect.height).toBe(10);
   });
-  test('should compute rectangle dimensions when only a single coordinate defined', () => {
-    const yScales: Map<GroupId, Scale> = new Map();
-    yScales.set(groupId, continuousScale);
 
-    const xScale: Scale = continuousScale;
-
-    const annotationRectangle: RectAnnotationSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Annotation,
-      id: 'rect',
-      groupId,
-      annotationType: AnnotationTypes.Rectangle,
-      dataValues: [
-        { coordinates: { x0: 1, x1: null, y0: null, y1: null } },
-        { coordinates: { x0: null, x1: 1, y0: null, y1: null } },
-        { coordinates: { x0: null, x1: null, y0: 1, y1: null } },
-        { coordinates: { x0: null, x1: null, y0: null, y1: 1 } },
-      ],
-    };
-
-    const dimensions = computeRectAnnotationDimensions(annotationRectangle, yScales, xScale, false, 0);
-
-    const expectedDimensions = [
-      { rect: { x: 10, y: 0, width: 90, height: 100 } },
-      { rect: { x: 0, y: 0, width: 10, height: 100 } },
-      { rect: { x: 0, y: 0, width: 100, height: 10 } },
-      { rect: { x: 0, y: 10, width: 100, height: 90 } },
-    ];
-
-    expect(dimensions).toEqual(expectedDimensions);
-  });
-  test('should compute rectangle annotation dimensions continuous (0 deg rotation)', () => {
-    const yScales: Map<GroupId, Scale> = new Map();
-    yScales.set(groupId, continuousScale);
-
-    const xScale: Scale = continuousScale;
-
-    const annotationRectangle: RectAnnotationSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Annotation,
-      id: 'rect',
-      groupId,
-      annotationType: AnnotationTypes.Rectangle,
-      dataValues: [{ coordinates: { x0: 1, x1: 2, y0: 3, y1: 5 } }],
-    };
-
-    const unrotated = computeRectAnnotationDimensions(annotationRectangle, yScales, xScale, false, 0);
-
-    expect(unrotated).toEqual([{ rect: { x: 10, y: 30, width: 10, height: 20 } }]);
-  });
-  test('should compute rectangle annotation dimensions ordinal (0 deg rotation)', () => {
-    const yScales: Map<GroupId, Scale> = new Map();
-    yScales.set(groupId, continuousScale);
-
-    const xScale: Scale = ordinalScale;
-
-    const annotationRectangle: RectAnnotationSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Annotation,
-      id: 'rect',
-      groupId,
-      annotationType: AnnotationTypes.Rectangle,
-      dataValues: [{ coordinates: { x0: 'a', x1: 'b', y0: 0, y1: 2 } }],
-    };
-
-    const unrotated = computeRectAnnotationDimensions(annotationRectangle, yScales, xScale, false, 0);
-
-    expect(unrotated).toEqual([{ rect: { x: 0, y: 0, width: 25, height: 20 } }]);
-  });
-  test('should validate scaled dataValues', () => {
-    // not aligned with tick
-    expect(scaleAndValidateDatum('', ordinalScale, false)).toBe(null);
-    expect(scaleAndValidateDatum('a', continuousScale, false)).toBe(null);
-    expect(scaleAndValidateDatum(-10, continuousScale, false)).toBe(null);
-    expect(scaleAndValidateDatum(20, continuousScale, false)).toBe(null);
-
-    // allow values within domainEnd + minInterval when not alignWithTick
-    expect(scaleAndValidateDatum(10.25, continuousScale, false)).toBeCloseTo(102.5);
-    expect(scaleAndValidateDatum(10.25, continuousScale, true)).toBe(null);
-
-    expect(scaleAndValidateDatum('a', ordinalScale, false)).toBe(0);
-    expect(scaleAndValidateDatum(0, continuousScale, false)).toBe(0);
-
-    // aligned with tick
-    expect(scaleAndValidateDatum(1.25, continuousScale, true)).toBe(12.5);
-  });
   test('should determine if a point is within a rectangle annotation', () => {
     const cursorPosition = { x: 3, y: 4 };
 
@@ -1590,12 +1357,6 @@ describe('annotation utils', () => {
 
     expect(visibleTooltip).toEqual(expectedVisibleTooltipState);
   });
-  test('should determine if line is vertical annotation', () => {
-    expect(isVerticalAnnotationLine(true, true)).toBe(true);
-    expect(isVerticalAnnotationLine(true, false)).toBe(false);
-    expect(isVerticalAnnotationLine(false, true)).toBe(false);
-    expect(isVerticalAnnotationLine(false, false)).toBe(true);
-  });
 
   test('should get rotated cursor position', () => {
     const cursorPosition = { x: 1, y: 2 };
@@ -1604,16 +1365,5 @@ describe('annotation utils', () => {
     expect(getRotatedCursor(cursorPosition, chartDimensions, 90)).toEqual({ x: 2, y: 9 });
     expect(getRotatedCursor(cursorPosition, chartDimensions, -90)).toEqual({ x: 18, y: 1 });
     expect(getRotatedCursor(cursorPosition, chartDimensions, 180)).toEqual({ x: 9, y: 18 });
-  });
-
-  test('should compute cluster offset', () => {
-    const singleBarCluster = 1;
-    const multiBarCluster = 2;
-
-    const barsShift = 4;
-    const bandwidth = 2;
-
-    expect(computeClusterOffset(singleBarCluster, barsShift, bandwidth)).toBe(0);
-    expect(computeClusterOffset(multiBarCluster, barsShift, bandwidth)).toBe(3);
   });
 });

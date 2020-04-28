@@ -114,21 +114,32 @@ export const example = () => {
         marker={<div style={{ background: 'red', width: 10, height: 10 }} />}
       />
       <RectAnnotation
+        style={{
+          fill: 'green',
+        }}
         dataValues={[
           {
             coordinates: {
               x0: 0.5,
             },
-            details: 'rect annotation',
+            details: 'min=0.5, max=max',
           },
+        ]}
+        id="rect1"
+      />
+      <RectAnnotation
+        style={{
+          fill: 'red',
+        }}
+        dataValues={[
           {
             coordinates: {
               x1: 3,
             },
-            details: 'rect annotation',
+            details: 'min=min, max=3',
           },
         ]}
-        id="rect"
+        id="rect2"
       />
       <Axis id="discover-histogram-left-axis" position={Position.Left} title="left axis" />
       <Axis id="discover-histogram-bottom-axis" position={Position.Bottom} title="bottom axis" />

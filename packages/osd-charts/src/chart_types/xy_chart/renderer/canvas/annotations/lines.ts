@@ -18,7 +18,7 @@
 
 import { Stroke, Line } from '../../../../../geoms/types';
 import { stringToRGB } from '../../../../partition_chart/layout/utils/d3_utils';
-import { AnnotationLineProps } from '../../../annotations/line_annotation_tooltip';
+import { AnnotationLineProps } from '../../../annotations/line/types';
 import { LineAnnotationStyle } from '../../../../../utils/themes/theme';
 import { renderMultiLine } from '../primitives/line';
 

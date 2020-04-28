@@ -26,22 +26,24 @@ export const example = () => {
   const debug = boolean('debug', false);
   const rotation = getChartRotationKnob();
 
-  const dataValues = [
-    {
-      coordinates: {
-        x0: 0,
-        x1: 1,
-        y0: 0,
-        y1: 7,
-      },
-      details: 'details about this annotation',
-    },
-  ];
-
   return (
     <Chart className="story-chart">
       <Settings debug={debug} rotation={rotation} />
-      <RectAnnotation dataValues={dataValues} id="rect" />
+      <RectAnnotation
+        id="rect"
+        dataValues={[
+          {
+            coordinates: {
+              x0: 0,
+              x1: 1,
+              y0: 0,
+              y1: 4,
+            },
+            details: 'details about this annotation',
+          },
+        ]}
+        style={{ fill: 'red' }}
+      />
       <Axis id="bottom" position={Position.Bottom} title="x-domain axis" />
       <Axis id="left" title="y-domain axis" position={Position.Left} />
       <BarSeries
@@ -52,10 +54,55 @@ export const example = () => {
         yAccessors={['y']}
         data={[
           { x: 0, y: 2 },
-          { x: 1, y: 7 },
+          { x: 1, y: 3 },
           { x: 3, y: 6 },
         ]}
       />
     </Chart>
   );
+};
+
+example.story = {
+  parameters: {
+    info: {
+      text: `A \`<RectAnnotation />\` can be used to create a rectangular annotation.
+As for most chart component, the required props are: \`id\` to uniquely identify the annotation and
+a \`dataValues\` prop that describes one or more annotations.
+
+The \`dataValues\` prop takes an array of objects adhering to the following type:
+
+\`\`\`ts
+
+interface RectAnnotationDatum {
+  coordinates: {
+    x0?: PrimitiveValue;
+    x1?: PrimitiveValue;
+    y0?: PrimitiveValue;
+    y1?: PrimitiveValue;
+  };
+  details?: string;
+}
+
+type PrimitiveValue = string | number | null;
+\`\`\`
+
+Each coordinate value can be omitted, if omitted then the corresponding min or max value is used instead.
+A text can be issued to be shown within the tooltip. If omitted, no tooltip will be shown.
+
+In the above example, we are using a fixed set of coordinates:
+\`\`\`
+coordinates: {
+  x0: 0,
+  x1: 1,
+  y0: 0,
+  y1: 7,
+}
+\`\`\`
+
+This annotation will cover the X axis starting from the \`0\` value to the \`1\` value included. The \`y\` is covered from 0 to 7.
+In a barchart with linear or ordinal x scale, the interval covered by the annotation fully include the \`x0\` and \`x1\` values.
+If one value is out of the relative domain, we will clip the annotation to the max/min value of the chart domain.
+      `,
+    },
+  },
 };

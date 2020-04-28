@@ -16,15 +16,30 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import React from 'react';
-import { example } from '../stories/treemap/6_custom_style';
+import { ScaleContinuous } from './scale_continuous';
+import { Scale, ScaleType } from '.';
+import { ScaleBand } from './scale_band';
 
-export class Playground extends React.Component {
-  render() {
-    return (
-      <div className="testing">
-        <div className="chart">{example()}</div>
-      </div>
-    );
-  }
+/**
+ * Check if a scale is logaritmic
+ * @internal
+ */
+export function isLogarithmicScale(scale: Scale): scale is ScaleContinuous {
+  return scale.type === ScaleType.Log;
+}
+
+/**
+ * Check if a scale is Band
+ * @internal
+ */
+export function isBandScale(scale: Scale): scale is ScaleBand {
+  return scale.type === ScaleType.Ordinal;
+}
+
+/**
+ * Check if a scale is continuous
+ * @internal
+ */
+export function isContinuousScale(scale: Scale): scale is ScaleContinuous {
+  return scale.type !== ScaleType.Ordinal;
 }

@@ -28,7 +28,7 @@ import {
   LineStyle,
   BubbleSeriesStyle,
 } from '../../../utils/themes/theme';
-import { Scale, ScaleType, isLogarithmicScale } from '../../../scales';
+import { Scale, ScaleType } from '../../../scales';
 import { CurveType, getCurveFactory } from '../../../utils/curves';
 import { DataSeriesDatum, DataSeries, XYChartSeriesIdentifier } from '../utils/series';
 import { DisplayValueSpec, PointStyleAccessor, BarStyleAccessor } from '../utils/specs';
@@ -47,6 +47,7 @@ import { LegendItem } from '../../../commons/legend';
 import { IndexedGeometryMap, GeometryType } from '../utils/indexed_geometry_map';
 import { getDistance } from '../state/utils';
 import { MarkBuffer } from '../../../specs';
+import { isLogarithmicScale } from '../../../scales/types';
 
 export const DEFAULT_HIGHLIGHT_PADDING = 10;
 
