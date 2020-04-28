@@ -16,38 +16,44 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import classNames from 'classnames';
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { connect } from 'react-redux';
 import { getFinalTooltipPosition, TooltipAnchorPosition } from './utils';
 import { TooltipInfo } from './types';
-import { TooltipValueFormatter, TooltipValue } from '../../specs';
+import { TooltipValueFormatter } from '../../specs';
 import { GlobalChartState, BackwardRef } from '../../state/chart_state';
 import { isInitialized } from '../../state/selectors/is_initialized';
 import { getInternalIsTooltipVisibleSelector } from '../../state/selectors/get_internal_is_tooltip_visible';
 import { getTooltipHeaderFormatterSelector } from '../../state/selectors/get_tooltip_header_formatter';
 import { getInternalTooltipInfoSelector } from '../../state/selectors/get_internal_tooltip_info';
 import { getInternalTooltipAnchorPositionSelector } from '../../state/selectors/get_internal_tooltip_anchor_position';
+import { Tooltip } from './tooltip';
 
-interface TooltipStateProps {
+interface TooltipPortalStateProps {
   isVisible: boolean;
   position: TooltipAnchorPosition | null;
   info?: TooltipInfo;
   headerFormatter?: TooltipValueFormatter;
 }
-interface TooltipOwnProps {
+interface TooltipPortalOwnProps {
   getChartContainerRef: BackwardRef;
 }
 
-type TooltipProps = TooltipStateProps & TooltipOwnProps;
+type TooltipPortalProps = TooltipPortalStateProps & TooltipPortalOwnProps;
 
-class TooltipComponent extends React.Component<TooltipProps> {
+class TooltipPortalComponent extends React.Component<TooltipPortalProps> {
   static displayName = 'Tooltip';
+  /**
+   * Max allowable width for tooltip to grow to. Used to determine container fit.
+   *
+   * @unit px
+   */
+  static MAX_WIDTH = 256;
   portalNode: HTMLDivElement | null = null;
   tooltipRef: React.RefObject<HTMLDivElement>;
 
-  constructor(props: TooltipProps) {
+  constructor(props: TooltipPortalProps) {
     super(props);
     this.tooltipRef = React.createRef();
   }
@@ -58,6 +64,7 @@ class TooltipComponent extends React.Component<TooltipProps> {
     } else {
       this.portalNode = document.createElement('div');
       this.portalNode.id = 'echTooltipContainerPortal';
+      this.portalNode.style.width = `${TooltipPortalComponent.MAX_WIDTH}px`;
       document.body.appendChild(this.portalNode);
     }
   }
@@ -76,10 +83,16 @@ class TooltipComponent extends React.Component<TooltipProps> {
 
     const chartContainerBBox = chartContainerRef.current.getBoundingClientRect();
     const tooltipBBox = this.tooltipRef.current.getBoundingClientRect();
-    const tooltipStyle = getFinalTooltipPosition(chartContainerBBox, tooltipBBox, position);
+    const width = Math.min(TooltipPortalComponent.MAX_WIDTH, chartContainerBBox.width * 0.7);
+    this.portalNode.style.width = `${width}px`;
+    const tooltipStyle = getFinalTooltipPosition(chartContainerBBox, tooltipBBox, width, position);
 
     if (tooltipStyle.left) {
       this.portalNode.style.left = tooltipStyle.left;
+      if (this.tooltipRef.current) {
+        this.tooltipRef.current.style.left = tooltipStyle.anchor === 'right' ? 'auto' : '0px';
+        this.tooltipRef.current.style.right = tooltipStyle.anchor === 'right' ? '0px' : 'auto';
+      }
     }
     if (tooltipStyle.top) {
       this.portalNode.style.top = tooltipStyle.top;
@@ -92,50 +105,6 @@ class TooltipComponent extends React.Component<TooltipProps> {
     }
   }
 
-  renderHeader(headerData: TooltipValue | null, formatter?: TooltipValueFormatter) {
-    if (!headerData || !headerData.isVisible) {
-      return null;
-    }
-    return <div className="echTooltip__header">{formatter ? formatter(headerData) : headerData.value}</div>;
-  }
-
-  renderTooltip = (info: TooltipInfo) => {
-    const { headerFormatter } = this.props;
-
-    return (
-      <div className="echTooltip" ref={this.tooltipRef}>
-        {this.renderHeader(info.header, headerFormatter)}
-        <div className="echTooltip__list">
-          {info.values.map(
-            ({ seriesIdentifier, valueAccessor, label, value, markValue, color, isHighlighted, isVisible }, index) => {
-              if (!isVisible) {
-                return null;
-              }
-              const classes = classNames('echTooltip__item', {
-                /* eslint @typescript-eslint/camelcase:0 */
-                echTooltip__rowHighlighted: isHighlighted,
-              });
-              return (
-                <div
-                  // NOTE: temporary to avoid errors
-                  key={`${seriesIdentifier.key}__${valueAccessor}__${index}`}
-                  className={classes}
-                  style={{
-                    borderLeftColor: color,
-                  }}
-                >
-                  <span className="echTooltip__label">{label}</span>
-                  <span className="echTooltip__value">{value}</span>
-                  {markValue && <span className="echTooltip__markValue">&nbsp;({markValue})</span>}
-                </div>
-              );
-            },
-          )}
-        </div>
-      </div>
-    );
-  };
-
   render() {
     const { isVisible, info, getChartContainerRef } = this.props;
     const chartContainerRef = getChartContainerRef();
@@ -144,7 +113,10 @@ class TooltipComponent extends React.Component<TooltipProps> {
       return null;
     }
 
-    return createPortal(this.renderTooltip(info), this.portalNode);
+    return createPortal(
+      <Tooltip info={info} ref={this.tooltipRef} headerFormatter={this.props.headerFormatter} />,
+      this.portalNode,
+    );
   }
 }
 
@@ -155,7 +127,7 @@ const HIDDEN_TOOLTIP_PROPS = {
   headerFormatter: undefined,
 };
 
-const mapStateToProps = (state: GlobalChartState): TooltipStateProps => {
+const mapStateToProps = (state: GlobalChartState): TooltipPortalStateProps => {
   if (!isInitialized(state)) {
     return HIDDEN_TOOLTIP_PROPS;
   }
@@ -168,4 +140,4 @@ const mapStateToProps = (state: GlobalChartState): TooltipStateProps => {
 };
 
 /** @internal */
-export const Tooltip = connect(mapStateToProps)(TooltipComponent);
+export const TooltipPortal = connect(mapStateToProps)(TooltipPortalComponent);

@@ -16,20 +16,5 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import React from 'react';
-import { XYChartElementEvent, PartitionElementEvent } from '../src';
-import { example } from '../stories/treemap/6_custom_style';
-
-export class Playground extends React.Component {
-  onElementClick = (elements: (XYChartElementEvent | PartitionElementEvent)[]) => {
-    // eslint-disable-next-line no-console
-    console.log(elements);
-  };
-  render() {
-    return (
-      <div className="testing">
-        <div className="chart">{example()}</div>
-      </div>
-    );
-  }
-}
+/** @internal */
+export { TooltipPortal as Tooltip } from './tooltip_portal';

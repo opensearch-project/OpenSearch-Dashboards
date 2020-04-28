@@ -1,6 +1,7 @@
 #echTooltipContainerPortal {
   position: absolute;
-  width: 256px;
+  pointer-events: none;
+  z-index: 10000000;
 }
 .echTooltip {
   position: absolute;
@@ -41,7 +42,7 @@
     font-weight: $euiFontWeightBold;
     text-align: right;
     font-feature-settings: 'tnum';
-    margin-left: 8px;
+    margin-left: $euiSizeS;
   }
 
   &__rowHighlighted {
