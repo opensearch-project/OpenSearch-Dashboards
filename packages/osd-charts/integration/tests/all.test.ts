@@ -27,15 +27,11 @@ jest.mock('../../.storybook/theme_service.ts', () => ({
 const storyGroups = getStorybookInfo();
 
 describe('Baseline Visual tests for all stories', () => {
-  storyGroups.forEach(({ group, encodedGroup, stories }) => {
-    describe(group, () => {
-      stories.forEach(({ title, encodedTitle }) => {
-        describe(title, () => {
-          it('visually looks correct', async () => {
-            const url = `http://localhost:9001?id=${encodedGroup}--${encodedTitle}`;
-            await common.expectChartAtUrlToMatchScreenshot(url);
-          });
-        });
+  describe.each(storyGroups)('%s', (_group, encodedGroup, stories) => {
+    describe.each(stories)('%s', (_title, encodedTitle) => {
+      it('visually looks correct', async () => {
+        const url = `http://localhost:9001?id=${encodedGroup}--${encodedTitle}`;
+        await common.expectChartAtUrlToMatchScreenshot(url);
       });
     });
   });

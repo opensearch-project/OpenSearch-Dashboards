@@ -20,16 +20,9 @@ import { join, resolve } from 'path';
 import { lstatSync, readdirSync } from 'fs';
 import { getStorybook, configure } from '@storybook/react';
 
-export interface StoryInfo {
-  title: string;
-  encodedTitle: string;
-}
+export type StoryInfo = [string, string];
 
-export interface StoryGroupInfo {
-  group: string;
-  encodedGroup: string;
-  stories: StoryInfo[];
-}
+export type StoryGroupInfo = [string, string, StoryInfo[]];
 
 function requireAllStories(basedir: string, directory: string) {
   function enumerateFiles(basedir: string, dir: string) {
@@ -74,6 +67,7 @@ function encodeString(string: string) {
 
 export function getStorybookInfo(): StoryGroupInfo[] {
   configure(requireAllStories(__dirname, '../stories'), module);
+
   return getStorybook()
     .filter(({ kind }) => kind)
     .map(({ kind: group, stories: storiesRaw }) => {
@@ -82,19 +76,11 @@ export function getStorybookInfo(): StoryGroupInfo[] {
         .map(({ name: title }) => {
           // cleans story name to match url params
           const encodedTitle = encodeString(title);
-
-          return {
-            title,
-            encodedTitle,
-          };
+          return [title, encodedTitle];
         });
 
       const encodedGroup = encodeString(group);
 
-      return {
-        group,
-        encodedGroup,
-        stories,
-      };
+      return [group, encodedGroup, stories];
     });
 }

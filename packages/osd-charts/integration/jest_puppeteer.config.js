@@ -22,6 +22,7 @@ const defaults = require('./defaults');
 
 const port = process.env.PORT || defaults.PORT;
 const host = process.env.HOST || defaults.HOST;
+const useLocalStorybook = process.env.USE_LOCAL_STORYBOOK || defaults.USE_LOCAL_STORYBOOK;
 
 /**
  * combined config object
@@ -37,13 +38,15 @@ const customConfig = Object.assign(
       browserUrl: `http://${host}:${port}/iframe.html`,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     },
-    server: {
-      command: `RNG_SEED='elastic-charts' yarn start --port=${port} --quiet`,
-      port,
-      usedPortAction: 'error',
-      launchTimeout: 120000,
-      debug: false,
-    },
+    server: useLocalStorybook
+      ? null
+      : {
+          command: `RNG_SEED='elastic-charts' yarn start --port=${port} --quiet`,
+          port,
+          usedPortAction: 'error',
+          launchTimeout: 120000,
+          debug: false,
+        },
   },
   baseConfig,
 );

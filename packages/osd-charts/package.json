@@ -39,7 +39,8 @@
     "typecheck:all": "tsc -p ./tsconfig.json --noEmit",
     "playground": "cd .playground && webpack-dev-server",
     "playground:ie": "cd .playground && webpack-dev-server --host=0.0.0.0 --disable-host-check --useLocalIp",
-    "jest:integration": "rm -rf ./integration/tests/__image_snapshots__/__diff_output__ && TZ=UTC JEST_PUPPETEER_CONFIG=integration/jest_puppeteer.config.js jest --verbose --rootDir=integration -c=integration/jest.config.js --runInBand",
+    "test:integration": "rm -rf ./integration/tests/__image_snapshots__/__diff_output__ && TZ=UTC JEST_PUPPETEER_CONFIG=integration/jest_puppeteer.config.js jest --verbose --rootDir=integration -c=integration/jest.config.js --runInBand",
+    "test:integration:local": "LOCAL_STORYBOOK_VRT=true PORT=9001 yarn test:integration",
     "test:browsers": "cd .playground && jest -c=../browsers/jest.config.js ../browsers/browsers.test.ts",
     "ts:prune": "ts-prune",
     "backport": "backport"

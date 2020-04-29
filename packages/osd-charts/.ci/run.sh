@@ -131,4 +131,4 @@ echo " -- upload code coverage"
 ### visual testing
 ###
 echo " -- visual testing"
-yarn jest:integration --ci
+yarn test:integration --ci
