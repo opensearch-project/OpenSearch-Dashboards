@@ -33,3 +33,4 @@ export { example as multiColor } from './5_multicolor';
 export { example as customStyle } from './6_custom_style';
 export { example as percentage } from './7_percentage';
 export { example as grooveText } from './8_groove_text';
+export { example as zeroValues } from './9_zero_values';
