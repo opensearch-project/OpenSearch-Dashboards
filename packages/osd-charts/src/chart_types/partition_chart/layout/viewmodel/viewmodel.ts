@@ -22,7 +22,7 @@ import { Config, PartitionLayout } from '../types/config_types';
 import { TAU, trueBearingToStandardPositionAngle } from '../utils/math';
 import { Distance, Pixels, Radius } from '../types/geometry_types';
 import { meanAngle } from '../geometry';
-import { treemap } from '../utils/treemap';
+import { getTopPadding, treemap } from '../utils/treemap';
 import { sunburst } from '../utils/sunburst';
 import { argsToRGBString, stringToRGB } from '../utils/d3_utils';
 import {
@@ -43,7 +43,6 @@ import {
   getSectorRowGeometry,
   inSectorRotation,
   nodeId,
-  rectangleConstruction,
   ringSectorConstruction,
 } from './fill_text_layout';
 import {
@@ -59,11 +58,28 @@ import {
 } from '../utils/group_by_rollup';
 import { StrokeStyle, ValueFormatter } from '../../../../utils/commons';
 import { percentValueGetter } from '../config/config';
+import { $Values } from 'utility-types';
 
 function paddingAccessor(n: ArrayEntry) {
   return entryValue(n).depth > 1 ? 1 : [0, 2][entryValue(n).depth];
 }
-function rectangleFillOrigins(n: ShapeTreeNode): [number, number] {
+
+function topPaddingAccessor(topGroovePx: Pixels) {
+  return (n: ArrayEntry) => (entryValue(n).depth === 1 ? topGroovePx : paddingAccessor(n));
+}
+
+export const VerticalAlignments = Object.freeze({
+  top: 'top' as 'top',
+  middle: 'middle' as 'middle',
+  bottom: 'bottom' as 'bottom',
+});
+
+// we might add more in the future; also, the intent is to still be of CanvasTextBaseline
+type SupportedVerticalAlignments = $Values<typeof VerticalAlignments>;
+
+export type VerticalAlignments = CanvasTextBaseline & SupportedVerticalAlignments;
+
+function rectangleFillOrigins(n: ShapeTreeNode): [Pixels, Pixels] {
   return [(n.x0 + n.x1) / 2, (n.y0 + n.y1) / 2];
 }
 export const ringSectorInnerRadius = (n: ShapeTreeNode): Radius => n.y0px;
@@ -139,6 +155,32 @@ export function makeOutsideLinksViewModel(
 }
 
 /** @internal */
+export interface RectangleConstruction {
+  x0: Pixels;
+  x1: Pixels;
+  y0: Pixels;
+  y1: Pixels;
+}
+
+function rectangleConstruction(treeHeight: number, topGroove: number) {
+  return function(node: ShapeTreeNode): RectangleConstruction {
+    return node.depth < treeHeight
+      ? {
+          x0: node.x0,
+          y0: node.y0px,
+          x1: node.x1,
+          y1: node.y0px + getTopPadding(topGroove, node.y1px - node.y0px),
+        }
+      : {
+          x0: node.x0,
+          y0: node.y0px,
+          x1: node.x1,
+          y1: node.y1px,
+        };
+  };
+}
+
+/** @internal */
 export function shapeViewModel(
   textMeasure: TextMeasure,
   config: Config,
@@ -148,6 +190,7 @@ export function shapeViewModel(
   specifiedPercentFormatter: ValueFormatter,
   valueGetter: ValueGetterFunction,
   tree: HierarchyOfArrays,
+  topGroove: Pixels,
 ): ShapeViewModel {
   const {
     width,
@@ -187,7 +230,12 @@ export function shapeViewModel(
   const treemapAreaAccessor = (e: ArrayEntry) => treemapValueToAreaScale * mapEntryValue(e);
 
   const rawChildNodes: Array<Part> = treemapLayout
-    ? treemap(tree, treemapAreaAccessor, paddingAccessor, { x0: -width / 2, y0: -height / 2, width, height })
+    ? treemap(tree, treemapAreaAccessor, topPaddingAccessor(topGroove), paddingAccessor, {
+        x0: -width / 2,
+        y0: -height / 2,
+        width,
+        height,
+      })
     : sunburst(tree, sunburstAreaAccessor, { x0: 0, y0: -1 }, clockwiseSectors, specialFirstInnermostSector);
 
   const shownChildNodes = rawChildNodes.filter((n: Part) => {
@@ -234,9 +282,13 @@ export function shapeViewModel(
     config,
     layers,
     textFillOrigins,
-    treemapLayout ? rectangleConstruction : ringSectorConstruction(config, innerRadius, ringThickness),
+    treemapLayout
+      ? rectangleConstruction(treeHeight, topGroove)
+      : ringSectorConstruction(config, innerRadius, ringThickness),
     treemapLayout ? getRectangleRowGeometry : getSectorRowGeometry,
     treemapLayout ? () => 0 : inSectorRotation(config.horizontalTextEnforcer, config.horizontalTextAngleThreshold),
+    treemapLayout,
+    !treemapLayout,
   );
 
   // whiskers (ie. just lines, no text) for fill text outside the outer radius

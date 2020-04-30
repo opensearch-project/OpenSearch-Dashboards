@@ -45,15 +45,12 @@ export const example = () => (
           nodeLabel: (d: any) => productLookup[d].name.toUpperCase(),
           fillLabel: {
             valueFormatter: () => '',
-            fontFamily: 'Phosphate-Inline',
-            textColor: 'rgba(255,255,0, 0.6)',
+            fontFamily: 'Helvetica',
+            textColor: 'grey',
             textInvertible: true,
           },
           shape: {
-            fillColor: (d: ShapeTreeNode) => {
-              // primarily, pick color based on parent's index, but then perturb by the index within the parent
-              return interpolatorTurbo(d.sortIndex / (d.parent.children.length + 1));
-            },
+            fillColor: 'rgba(0, 0, 0, 0)',
           },
         },
         {
@@ -63,7 +60,7 @@ export const example = () => (
             valueFormatter: (d: number) => `${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
             textColor: 'black',
             textInvertible: true,
-            fontWeight: 900,
+            fontWeight: 100,
             fontStyle: 'normal',
             fontFamily: 'Helvetica',
             fontVariant: 'normal',

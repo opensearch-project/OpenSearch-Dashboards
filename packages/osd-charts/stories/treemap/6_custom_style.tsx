@@ -26,6 +26,14 @@ import { regionLookup } from '../utils/utils';
 
 const countryLookup = arrayToLookup((d: Datum) => d.country, countryDimension);
 
+const fillColor = ({ parent }: any) => {
+  const root = parent.parent;
+  const siblingCountLayer1 = root.children.length;
+  const i = parent.sortIndex;
+  const shade = Math.pow(0.3 + 0.5 * (i / (siblingCountLayer1 - 1)), 1 / 3);
+  return `rgb(${Math.round(255 * shade)},${Math.round(255 * shade)},${Math.round(255 * shade)})`;
+};
+
 export const example = () => (
   <Chart
     className="story-chart"
@@ -46,13 +54,10 @@ export const example = () => (
           nodeLabel: (d: any) => regionLookup[d].regionName,
           fillLabel: {
             valueFormatter: () => '',
-            textColor: 'rgba(0,0,0,0)',
+            textColor: 'black',
           },
           shape: {
-            fillColor: (d: any, i: any, a: any) => {
-              const shade = Math.pow(0.3 + 0.5 * (i / (a.length - 1)), 1 / 3);
-              return `rgb(${Math.round(255 * shade)},${Math.round(255 * shade)},${Math.round(255 * shade)})`;
-            },
+            fillColor: 'rgba(0,0,0,0)',
           },
         },
         {
@@ -68,7 +73,7 @@ export const example = () => (
             fontVariant: 'normal',
           },
           shape: {
-            fillColor: 'rgba(0,0,0,0)',
+            fillColor,
           },
         },
       ]}

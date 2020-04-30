@@ -44,8 +44,8 @@ export const example = () => (
           nodeLabel: (d: any) => regionLookup[d].regionName,
           fillLabel: {
             valueFormatter: (d: number) => `${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
-            fontFamily: 'Phosphate-Inline',
-            textColor: 'yellow',
+            fontFamily: 'Helvetica',
+            textColor: 'grey',
             textInvertible: false,
           },
           shape: { fillColor: 'rgba(0,0,0,0)' },

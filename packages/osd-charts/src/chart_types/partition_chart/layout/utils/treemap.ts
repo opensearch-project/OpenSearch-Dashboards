@@ -19,8 +19,10 @@
 import { ArrayEntry, CHILDREN_KEY, entryValue, HierarchyOfArrays } from './group_by_rollup';
 import { Part } from '../types/types';
 import { GOLDEN_RATIO } from './math';
+import { Pixels } from '../types/geometry_types';
 
-const MAX_PADDING_RATIO = 0.0256197; // this limits area distortion to <10% (which occurs due to pixel padding) with very small rectangles
+const MAX_U_PADDING_RATIO = 0.0256197; // this limits area distortion to <10% (which occurs due to pixel padding) with very small rectangles
+const MAX_TOP_PADDING_RATIO = 0.33; // this limits further area distortion to ~33%
 
 interface LayoutElement {
   nodes: HierarchyOfArrays;
@@ -89,9 +91,14 @@ function vectorNodeCoordinates(vectorLayout: LayoutElement, x0Base: number, y0Ba
 }
 
 /** @internal */
+export const getTopPadding = (requestedTopPadding: number, fullHeight: Pixels) =>
+  Math.min(requestedTopPadding, fullHeight * MAX_TOP_PADDING_RATIO);
+
+/** @internal */
 export function treemap(
   nodes: HierarchyOfArrays,
   areaAccessor: (e: ArrayEntry) => number,
+  topPaddingAccessor: (e: ArrayEntry) => number,
   paddingAccessor: (e: ArrayEntry) => number,
   { x0, y0, width, height }: { x0: number; y0: number; width: number; height: number },
 ): Array<Part> {
@@ -111,20 +118,22 @@ export function treemap(
         }
         const fullWidth = x1 - x0;
         const fullHeight = y1 - y0;
-        const padding = Math.min(
+        const uPadding = Math.min(
           paddingAccessor(node),
-          fullWidth * MAX_PADDING_RATIO * 2,
-          fullHeight * MAX_PADDING_RATIO * 2,
+          fullWidth * MAX_U_PADDING_RATIO * 2,
+          fullHeight * MAX_U_PADDING_RATIO * 2,
         );
-        const width = fullWidth - 2 * padding;
-        const height = fullHeight - 2 * padding;
+        const topPadding = getTopPadding(topPaddingAccessor(node), fullHeight);
+        const width = fullWidth - 2 * uPadding;
+        const height = fullHeight - uPadding - topPadding;
         return treemap(
           childrenNodes,
           (d) => ((width * height) / (fullWidth * fullHeight)) * areaAccessor(d),
+          topPaddingAccessor,
           paddingAccessor,
           {
-            x0: x0 + padding,
-            y0: y0 + padding,
+            x0: x0 + uPadding,
+            y0: y0 + topPadding,
             width,
             height,
           },
@@ -135,6 +144,7 @@ export function treemap(
       treemap(
         nodes.slice(vector.length),
         areaAccessor,
+        topPaddingAccessor,
         paddingAccessor,
         vertical
           ? { x0, y0: y0 + dependentSize, width, height: height - dependentSize }

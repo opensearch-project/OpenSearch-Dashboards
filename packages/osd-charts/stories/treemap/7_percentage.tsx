@@ -50,8 +50,9 @@ export const example = () => (
           groupByRollup: (d: Datum) => countryLookup[d.dest].continentCountry.substr(0, 2),
           nodeLabel: (d: any) => regionLookup[d].regionName,
           fillLabel: {
-            fontFamily: 'Phosphate-Inline',
-            textColor: 'yellow',
+            fontFamily: 'Helvetica',
+            textColor: 'black',
+            fontWeight: 100,
             textInvertible: false,
           },
           shape: { fillColor: 'rgba(0,0,0,0)' },

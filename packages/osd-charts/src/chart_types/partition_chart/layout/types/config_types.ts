@@ -34,6 +34,7 @@ interface LabelConfig extends Font {
   textOpacity: Ratio;
   valueFormatter: ValueFormatter;
   valueFont: PartialFont;
+  padding: number;
 }
 
 export type FillLabelConfig = LabelConfig;
@@ -51,8 +52,14 @@ export interface LinkLabelConfig extends LabelConfig {
   maxCount: number;
 }
 
+export interface FillFontSizeRange {
+  minFontSize: Pixels;
+  maxFontSize: Pixels;
+  idealFontSizeJump: Ratio;
+}
+
 // todo switch to `io-ts` style, generic way of combining static and runtime type info
-export interface StaticConfig {
+export interface StaticConfig extends FillFontSizeRange {
   // shape geometry
   width: number;
   height: number;
@@ -65,11 +72,6 @@ export interface StaticConfig {
 
   // general text config
   fontFamily: FontFamily;
-
-  // fill text config
-  minFontSize: Pixels;
-  maxFontSize: Pixels;
-  idealFontSizeJump: Ratio;
 
   // fill text layout config
   circlePadding: Distance;

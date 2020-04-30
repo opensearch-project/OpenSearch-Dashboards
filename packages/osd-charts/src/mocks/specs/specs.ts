@@ -139,6 +139,7 @@ export class MockSeriesSpec {
     valueGetter: (n: ShapeTreeNode): number => n[AGGREGATE_KEY],
     valueFormatter: (d: number): string => String(d),
     percentFormatter,
+    topGroove: 0,
     layers: [
       {
         groupByRollup: (d: Datum, i: number) => i,
@@ -162,6 +163,7 @@ export class MockSeriesSpec {
     valueGetter: (n: ShapeTreeNode): number => n[AGGREGATE_KEY],
     valueFormatter: (d: number): string => String(d),
     percentFormatter,
+    topGroove: 20,
     layers: [
       {
         groupByRollup: (d: Datum, i: number) => i,

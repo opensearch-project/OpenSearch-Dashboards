@@ -22,7 +22,7 @@ import { config, percentFormatter } from '../layout/config/config';
 import { getConnect, specComponentFactory } from '../../../state/spec_factory';
 import { IndexedAccessorFn } from '../../../utils/accessor';
 import { Spec, SpecTypes } from '../../../specs/index';
-import { Config, FillLabelConfig } from '../layout/types/config_types';
+import { Config, FillFontSizeRange, FillLabelConfig } from '../layout/types/config_types';
 import { ShapeTreeNode, ValueGetter } from '../layout/types/viewmodel_types';
 import { AGGREGATE_KEY } from '../layout/utils/group_by_rollup';
 import {
@@ -35,11 +35,14 @@ import {
 } from '../../../utils/commons';
 import { NodeColorAccessor } from '../layout/types/viewmodel_types';
 import { PrimitiveValue } from '../layout/utils/group_by_rollup';
+import { Pixels } from '../layout/types/geometry_types';
+
+interface ExtendedFillLabelConfig extends FillLabelConfig, FillFontSizeRange {}
 
 export interface Layer {
   groupByRollup: IndexedAccessorFn;
   nodeLabel?: LabelAccessor;
-  fillLabel?: Partial<FillLabelConfig>;
+  fillLabel?: Partial<ExtendedFillLabelConfig>;
   showAccessor?: ShowAccessor;
   shape?: { fillColor: string | NodeColorAccessor };
 }
@@ -52,6 +55,7 @@ const defaultProps = {
   valueGetter: (n: ShapeTreeNode): number => n[AGGREGATE_KEY],
   valueFormatter: (d: number): string => String(d),
   percentFormatter,
+  topGroove: 20,
   layers: [
     {
       groupByRollup: (d: Datum, i: number) => i,
@@ -71,6 +75,7 @@ export interface PartitionSpec extends Spec {
   valueFormatter: ValueFormatter;
   valueGetter: ValueGetter;
   percentFormatter: ValueFormatter;
+  topGroove: Pixels;
   layers: Layer[];
 }
 
@@ -80,6 +85,6 @@ type SpecOptionalProps = Partial<Omit<PartitionSpec, 'chartType' | 'specType' | 
 export const Partition: React.FunctionComponent<SpecRequiredProps & SpecOptionalProps> = getConnect()(
   specComponentFactory<
     PartitionSpec,
-    'valueAccessor' | 'valueGetter' | 'valueFormatter' | 'layers' | 'config' | 'percentFormatter'
+    'valueAccessor' | 'valueGetter' | 'valueFormatter' | 'layers' | 'config' | 'percentFormatter' | 'topGroove'
   >(defaultProps),
 );

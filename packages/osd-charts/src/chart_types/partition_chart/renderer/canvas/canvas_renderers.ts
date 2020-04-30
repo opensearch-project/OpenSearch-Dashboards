@@ -35,20 +35,40 @@ import { clearCanvas, renderLayers, withContext } from '../../../../renderers/ca
 const LINE_WIDTH_MULT = 10; // border can be a maximum 1/LINE_WIDTH_MULT - th of the sector angle, otherwise the border would dominate
 const TAPER_OFF_LIMIT = 50; // taper off within a radius of TAPER_OFF_LIMIT to avoid burnout in the middle of the pie when there are hundreds of pies
 
-function renderTextRow(ctx: CanvasRenderingContext2D, { fontSize, fillTextColor, rotation }: RowSet) {
+function renderTextRow(
+  ctx: CanvasRenderingContext2D,
+  { fontSize, fillTextColor, rotation, verticalAlignment, leftAlign /*, container*/ }: RowSet,
+) {
   return (currentRow: TextRow) => {
-    const crx = currentRow.rowCentroidX - (Math.cos(rotation) * currentRow.length) / 2;
+    const crx = leftAlign
+      ? currentRow.rowCentroidX - currentRow.maximumLength / 2
+      : currentRow.rowCentroidX - (Math.cos(rotation) * currentRow.length) / 2;
     const cry = -currentRow.rowCentroidY + (Math.sin(rotation) * currentRow.length) / 2;
     withContext(ctx, (ctx) => {
       ctx.scale(1, -1);
       ctx.translate(crx, cry);
       ctx.rotate(-rotation);
       ctx.fillStyle = fillTextColor;
+      ctx.textBaseline = verticalAlignment;
       currentRow.rowWords.forEach((box) => {
         ctx.font = cssFontShorthand(box, fontSize);
         ctx.fillText(box.text, box.width / 2 + box.wordBeginning, 0);
       });
     });
+    /*
+    // for debug use: this draws magenta boxes for where the text needs to fit
+    // note: `container` is a property of the RowSet, needs to be added
+    withContext(ctx, (ctx) => {
+      ctx.scale(1, -1);
+      ctx.rotate(-rotation);
+      ctx.beginPath();
+      ctx.strokeStyle = 'magenta';
+      ctx.fillStyle = 'magenta';
+      ctx.lineWidth = 1;
+      ctx.rect(container.x0 + 1, container.y0 + 1, container.x1 - container.x0 - 2, container.y1 - container.y0 - 2);
+      ctx.stroke();
+    });
+    */
   };
 }
 
