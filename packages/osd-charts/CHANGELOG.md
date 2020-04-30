@@ -1,3 +1,10 @@
+## [19.1.1](https://github.com/elastic/elastic-charts/compare/v19.1.0...v19.1.1) (2020-04-30)
+
+
+### Bug Fixes
+
+* render charts without series ([#657](https://github.com/elastic/elastic-charts/issues/657)) ([0c0af01](https://github.com/elastic/elastic-charts/commit/0c0af01413b00734bd3dfa13dbc3aa7571ee4240))
+
 # [19.1.0](https://github.com/elastic/elastic-charts/compare/v19.0.0...v19.1.0) (2020-04-30)
 
 
