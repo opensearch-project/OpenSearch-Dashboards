@@ -23,7 +23,6 @@ import { Dimensions } from '../../../../utils/dimensions';
 import { Theme } from '../../../../utils/themes/theme';
 import { Rotation } from '../../../../utils/commons';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { isInitialized } from '../../../../state/selectors/is_initialized';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { getCursorBandPositionSelector } from '../../state/selectors/get_cursor_band';
 import { getCursorLinePositionSelector } from '../../state/selectors/get_cursor_line';
@@ -31,6 +30,7 @@ import { getTooltipTypeSelector } from '../../state/selectors/get_tooltip_type';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { LIGHT_THEME } from '../../../../utils/themes/light_theme';
 import { TooltipType } from '../../../../specs';
+import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
 
 interface CrosshairProps {
   theme: Theme;
@@ -114,7 +114,7 @@ class CrosshairComponent extends React.Component<CrosshairProps> {
 }
 
 const mapStateToProps = (state: GlobalChartState): CrosshairProps => {
-  if (!isInitialized(state)) {
+  if (!getInternalIsInitializedSelector(state)) {
     return {
       theme: LIGHT_THEME,
       chartRotation: 0,

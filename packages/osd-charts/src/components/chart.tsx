@@ -30,10 +30,10 @@ import { Position } from '../utils/commons';
 import { ChartSize, getChartSize } from '../utils/chart_size';
 import { ChartStatus } from './chart_status';
 import { chartStoreReducer, GlobalChartState } from '../state/chart_state';
-import { isInitialized } from '../state/selectors/is_initialized';
 import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
 import { onExternalPointerEvent } from '../state/actions/events';
 import { PointerEvent } from '../specs';
+import { getInternalIsInitializedSelector } from '../state/selectors/get_internal_is_intialized';
 
 interface ChartProps {
   /** The type of rendered
@@ -87,7 +87,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
 
     this.unsubscribeToStore = this.chartStore.subscribe(() => {
       const state = this.chartStore.getState();
-      if (!isInitialized(state)) {
+      if (!getInternalIsInitializedSelector(state)) {
         return;
       }
 

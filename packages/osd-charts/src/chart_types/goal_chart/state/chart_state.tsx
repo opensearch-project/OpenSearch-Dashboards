@@ -28,6 +28,7 @@ import { createOnElementOverCaller } from './selectors/on_element_over_caller';
 import { createOnElementOutCaller } from './selectors/on_element_out_caller';
 import { LegendItem } from '../../../commons/legend';
 import { LegendItemLabel } from '../../../state/selectors/get_legend_items_labels';
+import { getSpecOrNull } from './selectors/goal_spec';
 
 const EMPTY_MAP = new Map();
 const EMPTY_LEGEND_LIST: LegendItem[] = [];
@@ -45,6 +46,9 @@ export class GoalState implements InternalChartState {
     this.onElementOutCaller = createOnElementOutCaller();
   }
   chartType = ChartTypes.Goal;
+  isInitialized(globalState: GlobalChartState) {
+    return globalState.specsInitialized && getSpecOrNull(globalState) !== null;
+  }
   isBrushAvailable() {
     return false;
   }

@@ -23,7 +23,6 @@ import { AnnotationDimensions, AnnotationTooltipState, AnnotationTooltipFormatte
 import { connect } from 'react-redux';
 import { Dimensions } from '../../../../utils/dimensions';
 import { GlobalChartState, BackwardRef } from '../../../../state/chart_state';
-import { isInitialized } from '../../../../state/selectors/is_initialized';
 import { computeAnnotationDimensionsSelector } from '../../state/selectors/compute_annotations';
 import { getAnnotationSpecsSelector } from '../../state/selectors/get_specs';
 import { getAnnotationTooltipStateSelector } from '../../state/selectors/get_annotation_tooltip_state';
@@ -34,6 +33,7 @@ import { createPortal } from 'react-dom';
 import { getFinalAnnotationTooltipPosition } from '../../annotations/tooltip';
 import { getSpecsById } from '../../state/utils';
 import { Position } from '../../../../utils/commons';
+import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
 
 interface AnnotationTooltipStateProps {
   isChartEmpty: boolean;
@@ -266,7 +266,7 @@ function LineAnnotationTooltipRender(props: LineAnnotationTooltipProps, ref: Rea
 const LineAnnotationTooltip = React.forwardRef(LineAnnotationTooltipRender);
 
 const mapStateToProps = (state: GlobalChartState): AnnotationTooltipStateProps => {
-  if (!isInitialized(state)) {
+  if (!getInternalIsInitializedSelector(state)) {
     return {
       isChartEmpty: true,
       chartDimensions: { top: 0, left: 0, width: 0, height: 0 },

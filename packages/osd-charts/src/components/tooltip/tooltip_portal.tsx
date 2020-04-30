@@ -23,12 +23,12 @@ import { getFinalTooltipPosition, TooltipAnchorPosition } from './utils';
 import { TooltipInfo } from './types';
 import { TooltipValueFormatter } from '../../specs';
 import { GlobalChartState, BackwardRef } from '../../state/chart_state';
-import { isInitialized } from '../../state/selectors/is_initialized';
 import { getInternalIsTooltipVisibleSelector } from '../../state/selectors/get_internal_is_tooltip_visible';
 import { getTooltipHeaderFormatterSelector } from '../../state/selectors/get_tooltip_header_formatter';
 import { getInternalTooltipInfoSelector } from '../../state/selectors/get_internal_tooltip_info';
 import { getInternalTooltipAnchorPositionSelector } from '../../state/selectors/get_internal_tooltip_anchor_position';
 import { Tooltip } from './tooltip';
+import { getInternalIsInitializedSelector } from '../../state/selectors/get_internal_is_intialized';
 
 interface TooltipPortalStateProps {
   isVisible: boolean;
@@ -128,7 +128,7 @@ const HIDDEN_TOOLTIP_PROPS = {
 };
 
 const mapStateToProps = (state: GlobalChartState): TooltipPortalStateProps => {
-  if (!isInitialized(state)) {
+  if (!getInternalIsInitializedSelector(state)) {
     return HIDDEN_TOOLTIP_PROPS;
   }
   return {

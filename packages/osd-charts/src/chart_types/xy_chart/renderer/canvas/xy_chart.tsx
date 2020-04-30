@@ -25,7 +25,6 @@ import { getChartContainerDimensionsSelector } from '../../../../state/selectors
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { isInitialized } from '../../../../state/selectors/is_initialized';
 import { Dimensions } from '../../../../utils/dimensions';
 import { AnnotationId, AxisId } from '../../../../utils/ids';
 import { LIGHT_THEME } from '../../../../utils/themes/light_theme';
@@ -48,6 +47,7 @@ import { isChartEmptySelector } from '../../state/selectors/is_chart_empty';
 import { deepEqual } from '../../../../utils/fast_deep_equal';
 import { Rotation } from '../../../../utils/commons';
 import { IndexedGeometryMap } from '../../utils/indexed_geometry_map';
+import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
 
 /** @internal */
 export interface ReactiveChartStateProps {
@@ -219,7 +219,7 @@ const DEFAULT_PROPS: ReactiveChartStateProps = {
 };
 
 const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
-  if (!isInitialized(state)) {
+  if (!getInternalIsInitializedSelector(state)) {
     return DEFAULT_PROPS;
   }
 

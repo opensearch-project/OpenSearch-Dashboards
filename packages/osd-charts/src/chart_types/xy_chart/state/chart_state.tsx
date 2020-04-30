@@ -43,6 +43,7 @@ import { createOnBrushEndCaller } from './selectors/on_brush_end_caller';
 import { createOnPointerMoveCaller } from './selectors/on_pointer_move_caller';
 import { getLegendItemsLabelsSelector } from './selectors/get_legend_items_labels';
 import { LegendItemExtraValues } from '../../../commons/legend';
+import { getSeriesSpecsSelector } from './selectors/get_specs';
 
 /** @internal */
 export class XYAxisChartState implements InternalChartState {
@@ -62,6 +63,9 @@ export class XYAxisChartState implements InternalChartState {
     this.onPointerMoveCaller = createOnPointerMoveCaller();
     this.chartType = ChartTypes.XYAxis;
     this.legendId = htmlIdGenerator()('legend');
+  }
+  isInitialized(globalState: GlobalChartState) {
+    return globalState.specsInitialized && getSeriesSpecsSelector(globalState).length > 0;
   }
 
   isBrushAvailable(globalState: GlobalChartState) {

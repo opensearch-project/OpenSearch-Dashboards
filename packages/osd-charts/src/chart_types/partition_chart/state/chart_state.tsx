@@ -30,6 +30,7 @@ import { computeLegendSelector } from './selectors/compute_legend';
 import { getLegendItemsLabels } from './selectors/get_legend_items_labels';
 import { HighlighterFromHover } from '../renderer/dom/highlighter_hover';
 import { HighlighterFromLegend } from '../renderer/dom/highlighter_legend';
+import { getPieSpecOrNull } from './selectors/pie_spec';
 
 const EMPTY_MAP = new Map();
 
@@ -45,6 +46,9 @@ export class PartitionState implements InternalChartState {
     this.onElementOutCaller = createOnElementOutCaller();
   }
   chartType = ChartTypes.Partition;
+  isInitialized(globalState: GlobalChartState) {
+    return globalState.specsInitialized && getPieSpecOrNull(globalState) !== null;
+  }
   isBrushAvailable() {
     return false;
   }

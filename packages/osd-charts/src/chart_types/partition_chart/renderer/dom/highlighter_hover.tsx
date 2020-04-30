@@ -18,14 +18,14 @@
 
 import { connect } from 'react-redux';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { isInitialized } from '../../../../state/selectors/is_initialized';
 import { partitionGeometries } from '../../state/selectors/geometries';
 import { getPickedShapes } from '../../state/selectors/picked_shapes';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { HighlighterComponent, HighlighterProps, DEFAULT_PROPS } from './highlighter';
+import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
 
 const hoverMapStateToProps = (state: GlobalChartState): HighlighterProps => {
-  if (!isInitialized(state)) {
+  if (!getInternalIsInitializedSelector(state)) {
     return DEFAULT_PROPS;
   }
 

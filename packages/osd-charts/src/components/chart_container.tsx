@@ -26,10 +26,10 @@ import { getInternalChartRendererSelector } from '../state/selectors/get_chart_t
 import { getInternalPointerCursor } from '../state/selectors/get_internal_cursor_pointer';
 import { getInternalIsBrushingAvailableSelector } from '../state/selectors/get_internal_is_brushing_available';
 import { isInternalChartEmptySelector } from '../state/selectors/is_chart_empty';
-import { isInitialized } from '../state/selectors/is_initialized';
 import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
 import { SettingsSpec } from '../specs';
 import { getInternalIsBrushingSelector } from '../state/selectors/get_internal_is_brushing';
+import { getInternalIsInitializedSelector } from '../state/selectors/get_internal_is_intialized';
 
 interface ChartContainerComponentStateProps {
   initialized: boolean;
@@ -173,7 +173,7 @@ const mapDispatchToProps = (dispatch: Dispatch): ChartContainerComponentDispatch
     dispatch,
   );
 const mapStateToProps = (state: GlobalChartState): ChartContainerComponentStateProps => {
-  if (!isInitialized(state)) {
+  if (!getInternalIsInitializedSelector(state)) {
     return {
       initialized: false,
       isChartEmpty: true,

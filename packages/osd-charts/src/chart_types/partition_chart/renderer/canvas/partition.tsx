@@ -20,7 +20,6 @@ import React, { MouseEvent } from 'react';
 import { bindActionCreators, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { onChartRendered } from '../../../../state/actions/chart';
-import { isInitialized } from '../../../../state/selectors/is_initialized';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { Dimensions } from '../../../../utils/dimensions';
 import { partitionGeometries } from '../../state/selectors/geometries';
@@ -28,6 +27,7 @@ import { nullShapeViewModel, QuadViewModel, ShapeViewModel } from '../../layout/
 import { renderPartitionCanvas2d } from './canvas_renderers';
 import { INPUT_KEY } from '../../layout/utils/group_by_rollup';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
+import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
 
 interface ReactiveChartStateProps {
   initialized: boolean;
@@ -166,7 +166,7 @@ const DEFAULT_PROPS: ReactiveChartStateProps = {
 };
 
 const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
-  if (!isInitialized(state)) {
+  if (!getInternalIsInitializedSelector(state)) {
     return DEFAULT_PROPS;
   }
   return {

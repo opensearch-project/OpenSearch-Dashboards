@@ -42,6 +42,7 @@ import { clearTemporaryColors, setTemporaryColor, setPersistedColor } from '../.
 import { LegendItemListener, BasicListener, LegendColorPicker } from '../../specs';
 import { getLegendStyle, getLegendListStyle } from './style_utils';
 import { renderLegendItem } from './legend_item';
+import { getInternalIsInitializedSelector } from '../../state/selectors/get_internal_is_intialized';
 
 interface LegendStateProps {
   debug: boolean;
@@ -146,7 +147,7 @@ const EMPTY_DEFAULT_STATE = {
   showExtra: false,
 };
 const mapStateToProps = (state: GlobalChartState): LegendStateProps => {
-  if (!state.specsInitialized) {
+  if (!getInternalIsInitializedSelector(state)) {
     return EMPTY_DEFAULT_STATE;
   }
   const {

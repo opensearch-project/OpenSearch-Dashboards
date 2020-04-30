@@ -40,6 +40,7 @@ import { TooltipAnchorPosition } from '../components/tooltip/utils';
 import { Color } from '../utils/commons';
 import { LegendItemLabel } from './selectors/get_legend_items_labels';
 import { getLegendItemsSelector } from './selectors/get_legend_items';
+import { getInternalIsInitializedSelector } from './selectors/get_internal_is_intialized';
 
 export type BackwardRef = () => React.RefObject<HTMLDivElement>;
 
@@ -52,6 +53,7 @@ export interface InternalChartState {
    * The chart type
    */
   chartType: ChartTypes;
+  isInitialized(globalState: GlobalChartState): boolean;
   /**
    * Returns a JSX element with the chart rendered (lenged excluded)
    * @param containerRef
@@ -377,6 +379,9 @@ export const chartStoreReducer = (chartId: string) => {
           },
         };
       default:
+        if (!getInternalIsInitializedSelector(state)) {
+          return state;
+        }
         return {
           ...state,
           interactions: interactionsReducer(state.interactions, action, getLegendItemsSelector(state)),
