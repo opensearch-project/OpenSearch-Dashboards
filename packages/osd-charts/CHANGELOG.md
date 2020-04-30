@@ -1,3 +1,10 @@
+# [19.1.0](https://github.com/elastic/elastic-charts/compare/v19.0.0...v19.1.0) (2020-04-30)
+
+
+### Features
+
+* **partition:** treemap group text in grooves ([#652](https://github.com/elastic/elastic-charts/issues/652)) ([304dd48](https://github.com/elastic/elastic-charts/commit/304dd481b0c3195022d2a1b26887901ba56c07e0))
+
 # [19.0.0](https://github.com/elastic/elastic-charts/compare/v18.4.2...v19.0.0) (2020-04-28)
 
 
