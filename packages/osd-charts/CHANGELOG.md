@@ -1,3 +1,10 @@
+## [19.1.2](https://github.com/elastic/elastic-charts/compare/v19.1.1...v19.1.2) (2020-05-04)
+
+
+### Bug Fixes
+
+* **partition:** elimination of zero values ([#658](https://github.com/elastic/elastic-charts/issues/658)) ([9ee67dc](https://github.com/elastic/elastic-charts/commit/9ee67dc89851e268edf79016915b973bcea6bd98)), closes [#642](https://github.com/elastic/elastic-charts/issues/642)
+
 ## [19.1.1](https://github.com/elastic/elastic-charts/compare/v19.1.0...v19.1.1) (2020-04-30)
 
 
