@@ -20,6 +20,7 @@ import { Distance, Pixels, Radian, Radius, Ratio, SizeRatio, TimeMs } from './ge
 import { Font, FontFamily, PartialFont } from './types';
 import { $Values as Values } from 'utility-types';
 import { Color, StrokeStyle, ValueFormatter } from '../../../../utils/commons';
+import { PerSideDistance } from '../../../../utils/dimensions';
 
 export const PartitionLayout = Object.freeze({
   sunburst: 'sunburst' as 'sunburst',
@@ -28,13 +29,17 @@ export const PartitionLayout = Object.freeze({
 
 export type PartitionLayout = Values<typeof PartitionLayout>; // could use ValuesType<typeof HierarchicalChartTypes>
 
+export type PerSidePadding = PerSideDistance;
+
+export type Padding = Pixels | Partial<PerSidePadding>;
+
 interface LabelConfig extends Font {
   textColor: Color;
   textInvertible: boolean;
   textOpacity: Ratio;
   valueFormatter: ValueFormatter;
   valueFont: PartialFont;
-  padding: number;
+  padding: Padding;
 }
 
 export type FillLabelConfig = LabelConfig;

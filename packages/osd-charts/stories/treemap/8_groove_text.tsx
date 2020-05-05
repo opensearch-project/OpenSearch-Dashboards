@@ -24,6 +24,7 @@ import { countryDimension, regionDimension } from '../../src/mocks/hierarchical/
 import { palettes } from '../../src/mocks/hierarchical/palettes';
 import React from 'react';
 import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/types/viewmodel_types';
+import { number } from '@storybook/addon-knobs';
 
 const regionLookup = arrayToLookup((d: Datum) => d.region, regionDimension);
 const countryLookup = arrayToLookup((d: Datum) => d.country, countryDimension);
@@ -55,10 +56,15 @@ export const example = () => (
             textColor: '#555',
             textInvertible: false,
             fontWeight: 100,
-            // padding: 100,
-            minFontSize: 4,
-            maxFontSize: 14,
-            idealFontSizeJump: 1.005,
+            padding: {
+              top: number('group padding top', 0, { range: true, min: 0, max: 20 }),
+              right: number('group padding right', 2, { range: true, min: 0, max: 20 }),
+              bottom: number('group padding bottom', 0, { range: true, min: 0, max: 20 }),
+              left: number('group padding left', 2, { range: true, min: 0, max: 20 }),
+            },
+            minFontSize: 2,
+            maxFontSize: 50,
+            idealFontSizeJump: 1.01,
           },
           shape: { fillColor: 'rgba(0,0,0,0)' },
         },
@@ -73,9 +79,15 @@ export const example = () => (
             fontStyle: 'normal',
             fontFamily: 'Helvetica',
             valueFont: { fontWeight: 400, fontStyle: 'italic' },
-            // padding: 100,
-            minFontSize: 8,
-            maxFontSize: 18,
+            padding: {
+              top: number('leaf padding top', 0, { range: true, min: 0, max: 200 }),
+              right: number('leaf padding right', 2, { range: true, min: 0, max: 200 }),
+              bottom: number('leaf padding bottom', 0, { range: true, min: 0, max: 200 }),
+              left: number('leaf padding left', 2, { range: true, min: 0, max: 200 }),
+            },
+            minFontSize: 2,
+            maxFontSize: 100,
+            idealFontSizeJump: 1.01,
           },
           shape: {
             fillColor: (d: ShapeTreeNode) => {

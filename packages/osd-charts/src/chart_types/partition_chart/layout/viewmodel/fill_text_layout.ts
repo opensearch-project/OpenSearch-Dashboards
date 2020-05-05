@@ -18,7 +18,7 @@
 
 import { wrapToTau } from '../geometry';
 import { Coordinate, Distance, Pixels, Radian, Radius, Ratio, RingSector } from '../types/geometry_types';
-import { Config } from '../types/config_types';
+import { Config, Padding } from '../types/config_types';
 import { logarithm, TAU, trueBearingToStandardPositionAngle } from '../utils/math';
 import {
   QuadViewModel,
@@ -138,16 +138,16 @@ function makeRowCircline(
 }
 
 /** @internal */
-export function getSectorRowGeometry(
-  ringSector: RingSector,
-  cx: Coordinate,
-  cy: Coordinate,
-  totalRowCount: number,
-  linePitch: Pixels,
-  rowIndex: number,
-  fontSize: Pixels,
-  rotation: Radian,
-): RowSpace {
+export const getSectorRowGeometry: GetShapeRowGeometry<RingSector> = (
+  ringSector,
+  cx,
+  cy,
+  totalRowCount,
+  linePitch,
+  rowIndex,
+  fontSize,
+  rotation,
+) => {
   // prettier-ignore
   const offset =
       (totalRowCount / 2) * fontSize
@@ -159,18 +159,18 @@ export function getSectorRowGeometry(
   const midCircline = makeRowCircline(cx, cy, offset, rotation, 0, 0);
 
   const valid1 = conjunctiveConstraint(ringSector, Object.assign({}, topCircline, { from: 0, to: TAU }))[0];
-  if (!valid1) return { rowCentroidX: cx, rowCentroidY: cy, maximumRowLength: 0 };
+  if (!valid1) return { rowAnchorX: cx, rowAnchorY: cy, maximumRowLength: 0 };
   const valid2 = conjunctiveConstraint(ringSector, Object.assign({}, bottomCircline, { from: 0, to: TAU }))[0];
-  if (!valid2) return { rowCentroidX: cx, rowCentroidY: cy, maximumRowLength: 0 };
+  if (!valid2) return { rowAnchorX: cx, rowAnchorY: cy, maximumRowLength: 0 };
   const from = Math.max(valid1.from, valid2.from);
   const to = Math.min(valid1.to, valid2.to);
   const midAngle = (from + to) / 2;
   const cheapTangent = Math.max(0, to - from); /* Math.tan(Math.max(0, to - from)) */ // https://en.wikipedia.org/wiki/Small-angle_approximation
-  const rowCentroidX = midCircline.r * Math.cos(midAngle) + midCircline.x;
-  const rowCentroidY = midCircline.r * Math.sin(midAngle) + midCircline.y;
+  const rowAnchorX = midCircline.r * Math.cos(midAngle) + midCircline.x;
+  const rowAnchorY = midCircline.r * Math.sin(midAngle) + midCircline.y;
   const maximumRowLength = cheapTangent * INFINITY_RADIUS;
-  return { rowCentroidX, rowCentroidY, maximumRowLength };
-}
+  return { rowAnchorX, rowAnchorY, maximumRowLength };
+};
 
 function getVerticalAlignment(
   container: RectangleConstruction,
@@ -178,60 +178,78 @@ function getVerticalAlignment(
   linePitch: Pixels,
   totalRowCount: number,
   rowIndex: number,
-  padding: Pixels,
+  paddingTop: Pixels,
+  paddingBottom: Pixels,
   fontSize: Pixels,
   overhang: Ratio,
 ) {
   switch (verticalAlignment) {
     case VerticalAlignments.top:
-      return -(container.y0 + linePitch * rowIndex + padding + fontSize * overhang);
+      return -(container.y0 + linePitch * rowIndex + paddingTop + fontSize * overhang);
     case VerticalAlignments.bottom:
-      return -(container.y1 - linePitch * (totalRowCount - 1 - rowIndex) - fontSize * overhang);
+      return -(container.y1 - linePitch * (totalRowCount - 1 - rowIndex) - paddingBottom - fontSize * overhang);
     default:
       return -((container.y0 + container.y1) / 2 + (linePitch * (rowIndex - totalRowCount)) / 2);
   }
 }
 
 /** @internal */
-export function getRectangleRowGeometry(
-  container: RectangleConstruction,
-  cx: number,
-  cy: number,
-  totalRowCount: number,
-  linePitch: Pixels,
-  rowIndex: number,
-  fontSize: Pixels,
-  _rotation: Radian,
-  verticalAlignment: VerticalAlignments,
-): RowSpace {
+export const getRectangleRowGeometry: GetShapeRowGeometry<RectangleConstruction> = (
+  container,
+  cx,
+  cy,
+  totalRowCount,
+  linePitch,
+  rowIndex,
+  fontSize,
+  _rotation,
+  verticalAlignment,
+  padding,
+) => {
+  const defaultPad: Pixels = 2;
+  const { top, right, bottom, left } =
+    typeof padding === 'number'
+      ? { top: padding, right: padding, bottom: padding, left: padding }
+      : {
+          ...{ top: defaultPad, right: defaultPad, bottom: defaultPad, left: defaultPad },
+          ...padding,
+        };
+
   const overhang = 0.05;
-  const padding = fontSize < 6 ? 0 : Math.max(1, Math.min(2, fontSize / 16)); // taper out padding with small fonts
-  if ((container.y1 - container.y0 - 2 * padding) / totalRowCount < linePitch) {
+  const topPaddingAdjustment = fontSize < 6 ? 0 : Math.max(1, Math.min(2, fontSize / 16));
+  const adjustedTop = top + topPaddingAdjustment; // taper out paddingTop with small fonts
+  if ((container.y1 - container.y0 - adjustedTop - bottom) / totalRowCount < linePitch) {
     return {
-      rowCentroidX: NaN,
-      rowCentroidY: NaN,
+      rowAnchorX: NaN,
+      rowAnchorY: NaN,
       maximumRowLength: 0,
     };
   }
-  const rowCentroidY = getVerticalAlignment(
+  const rowAnchorY = getVerticalAlignment(
     container,
     verticalAlignment,
     linePitch,
     totalRowCount,
     rowIndex,
-    padding,
+    adjustedTop,
+    bottom,
     fontSize,
     overhang,
   );
   return {
-    rowCentroidX: cx,
-    rowCentroidY,
-    maximumRowLength: container.x1 - container.x0 - 2 * padding,
+    rowAnchorX: cx + left / 2 - right / 2,
+    rowAnchorY,
+    maximumRowLength: container.x1 - container.x0 - left - right,
   };
-}
+};
 
 function rowSetComplete(rowSet: RowSet, measuredBoxes: RowBox[]) {
-  return !rowSet.rows.some((r) => isNaN(r.length)) && !measuredBoxes.length;
+  return (
+    !measuredBoxes.length &&
+    !rowSet.rows.some(
+      (r) => isNaN(r.length) || r.rowWords.length === 0 || r.rowWords.every((rw) => rw.text.length === 0),
+    )
+  );
 }
 
 function identityRowSet(): RowSet {
@@ -268,6 +286,19 @@ function getWordSpacing(fontSize: number) {
   return fontSize / 4;
 }
 
+type GetShapeRowGeometry<C> = (
+  container: C,
+  cx: Distance,
+  cy: Distance,
+  targetRowCount: number,
+  linePitch: Pixels,
+  currentRowIndex: number,
+  fontSize: Pixels,
+  rotation: Radian,
+  verticalAlignment: VerticalAlignments,
+  padding: Padding,
+) => RowSpace;
+
 function fill(
   config: Config,
   layers: Layer[],
@@ -278,7 +309,7 @@ function fill(
   formatter: ValueFormatter,
   textFillOrigins: any[],
   shapeConstructor: (n: ShapeTreeNode) => any,
-  getShapeRowGeometry: (...args: any[]) => RowSpace,
+  getShapeRowGeometry: GetShapeRowGeometry<RectangleConstruction> | GetShapeRowGeometry<RingSector>,
   getRotation: Function,
   leftAlign: boolean,
   middleAlign: boolean,
@@ -293,8 +324,17 @@ function fill(
       ? VerticalAlignments.bottom
       : VerticalAlignments.top;
     const fontSizes = allFontSizes[Math.min(node.depth, allFontSizes.length) - 1];
-    const { textColor, textInvertible, fontStyle, fontVariant, fontFamily, fontWeight, valueFormatter } = Object.assign(
-      { fontFamily: config.fontFamily, fontWeight: 'normal' },
+    const {
+      textColor,
+      textInvertible,
+      fontStyle,
+      fontVariant,
+      fontFamily,
+      fontWeight,
+      valueFormatter,
+      padding,
+    } = Object.assign(
+      { fontFamily: config.fontFamily, fontWeight: 'normal', padding: 2 },
       fillLabel,
       { valueFormatter: formatter },
       layer.fillLabel,
@@ -369,8 +409,8 @@ function fill(
           leftAlign: leftAlign,
           rows: [...Array(targetRowCount)].map(() => ({
             rowWords: [],
-            rowCentroidX: NaN,
-            rowCentroidY: NaN,
+            rowAnchorX: NaN,
+            rowAnchorY: NaN,
             maximumLength: NaN,
             length: NaN,
           })),
@@ -383,7 +423,7 @@ function fill(
           const currentRowWords = currentRow.rowWords;
 
           // current row geometries
-          const { maximumRowLength, rowCentroidX, rowCentroidY } = getShapeRowGeometry(
+          const { maximumRowLength, rowAnchorX, rowAnchorY } = getShapeRowGeometry(
             container,
             cx,
             cy,
@@ -393,10 +433,11 @@ function fill(
             fontSize,
             rotation,
             verticalAlignment,
+            padding,
           );
 
-          currentRow.rowCentroidX = rowCentroidX;
-          currentRow.rowCentroidY = rowCentroidY;
+          currentRow.rowAnchorX = rowAnchorX;
+          currentRow.rowAnchorY = rowAnchorY;
           currentRow.maximumLength = maximumRowLength;
 
           // row building starts
@@ -460,7 +501,7 @@ export function fillTextLayout(
   layers: Layer[],
   textFillOrigins: [number, number][],
   shapeConstructor: (n: ShapeTreeNode) => any,
-  getShapeRowGeometry: (...args: any[]) => RowSpace,
+  getShapeRowGeometry: GetShapeRowGeometry<RectangleConstruction> | GetShapeRowGeometry<RingSector>,
   getRotation: Function,
   leftAlign: boolean,
   middleAlign: boolean,

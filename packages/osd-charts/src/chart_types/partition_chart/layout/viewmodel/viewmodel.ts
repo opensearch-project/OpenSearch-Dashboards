@@ -60,12 +60,12 @@ import { StrokeStyle, ValueFormatter } from '../../../../utils/commons';
 import { percentValueGetter } from '../config/config';
 import { $Values } from 'utility-types';
 
-function paddingAccessor(n: ArrayEntry) {
+function grooveAccessor(n: ArrayEntry) {
   return entryValue(n).depth > 1 ? 1 : [0, 2][entryValue(n).depth];
 }
 
-function topPaddingAccessor(topGroovePx: Pixels) {
-  return (n: ArrayEntry) => (entryValue(n).depth === 1 ? topGroovePx : paddingAccessor(n));
+function topGrooveAccessor(topGroovePx: Pixels) {
+  return (n: ArrayEntry) => (entryValue(n).depth === 1 ? topGroovePx : grooveAccessor(n));
 }
 
 export const VerticalAlignments = Object.freeze({
@@ -106,6 +106,7 @@ function sectorFillOrigins(fillOutside: boolean) {
   };
 }
 
+/* @internal */
 export function makeQuadViewModel(
   childNodes: ShapeTreeNode[],
   layers: Layer[],
@@ -230,7 +231,7 @@ export function shapeViewModel(
   const treemapAreaAccessor = (e: ArrayEntry) => treemapValueToAreaScale * mapEntryValue(e);
 
   const rawChildNodes: Array<Part> = treemapLayout
-    ? treemap(tree, treemapAreaAccessor, topPaddingAccessor(topGroove), paddingAccessor, {
+    ? treemap(tree, treemapAreaAccessor, topGrooveAccessor(topGroove), grooveAccessor, {
         x0: -width / 2,
         y0: -height / 2,
         width,

@@ -83,7 +83,7 @@ export const example = () => (
         margin: { top: 0, bottom: 0, left: 0, right: 0 },
         minFontSize: 4,
         maxFontSize: 84,
-        idealFontSizeJump: 1.35,
+        idealFontSizeJump: 1.05,
         outerSizeRatio: 1,
       }}
     />

@@ -41,9 +41,9 @@ function renderTextRow(
 ) {
   return (currentRow: TextRow) => {
     const crx = leftAlign
-      ? currentRow.rowCentroidX - currentRow.maximumLength / 2
-      : currentRow.rowCentroidX - (Math.cos(rotation) * currentRow.length) / 2;
-    const cry = -currentRow.rowCentroidY + (Math.sin(rotation) * currentRow.length) / 2;
+      ? currentRow.rowAnchorX - currentRow.maximumLength / 2
+      : currentRow.rowAnchorX - (Math.cos(rotation) * currentRow.length) / 2;
+    const cry = -currentRow.rowAnchorY + (Math.sin(rotation) * currentRow.length) / 2;
     withContext(ctx, (ctx) => {
       ctx.scale(1, -1);
       ctx.translate(crx, cry);

@@ -23,9 +23,14 @@ export interface Dimensions {
   height: number;
 }
 
-export interface Margins {
+// fixme consider switching from `number` to `Pixels` or similar, once nominal typing is added
+export interface PerSideDistance {
   top: number;
   bottom: number;
   left: number;
   right: number;
 }
+
+// fixme consider deactivating @typescript-eslint/no-empty-interface
+// see https://github.com/elastic/elastic-charts/pull/660#discussion_r419474171
+export type Margins = PerSideDistance;
