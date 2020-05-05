@@ -1,3 +1,10 @@
+# [19.2.0](https://github.com/elastic/elastic-charts/compare/v19.1.2...v19.2.0) (2020-05-05)
+
+
+### Features
+
+* **partition:** treemap padding ([#660](https://github.com/elastic/elastic-charts/issues/660)) ([ed1e8be](https://github.com/elastic/elastic-charts/commit/ed1e8be1c870c748fee432a643039b4ba93b2c62))
+
 ## [19.1.2](https://github.com/elastic/elastic-charts/compare/v19.1.1...v19.1.2) (2020-05-04)
 
 
