@@ -210,6 +210,12 @@ export const configMetadata = {
         type: 'number',
         documentation: 'Limits the total count of linked labels. The first N largest slices are kept.',
       },
+      maxTextLength: {
+        dflt: 100,
+        min: 2,
+        max: 200,
+        documentation: 'Limits the total number of characters in linked labels.',
+      },
       textColor: { dflt: '#000000', type: 'color' },
       textInvertible: { dflt: false, type: 'boolean' },
       textOpacity: { dflt: 1, min: 0, max: 1, type: 'number' },

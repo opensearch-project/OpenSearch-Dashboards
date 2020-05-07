@@ -55,6 +55,7 @@ export interface LinkLabelConfig extends LabelConfig {
   radiusPadding: Distance;
   lineWidth: Pixels;
   maxCount: number;
+  maxTextLength: number;
 }
 
 export interface FillFontSizeRange {

@@ -21,6 +21,7 @@ import { mocks } from '../../src/mocks/hierarchical/index';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
 import React from 'react';
 import { indexInterpolatedFillColor, interpolatorTurbo, productLookup } from '../utils/utils';
+import { number } from '@storybook/addon-knobs';
 
 export const example = () => (
   <Chart className="story-chart">
@@ -48,7 +49,14 @@ export const example = () => (
           },
         },
       ]}
-      config={{ outerSizeRatio: 0.9, linkLabel: { fontStyle: 'italic', valueFont: { fontWeight: 900 } } }}
+      config={{
+        outerSizeRatio: 0.9,
+        linkLabel: {
+          fontStyle: 'italic',
+          valueFont: { fontWeight: 900 },
+          maxTextLength: number('maxTextLength', 20, { range: true, min: 1, max: 100 }),
+        },
+      }}
     />
   </Chart>
 );

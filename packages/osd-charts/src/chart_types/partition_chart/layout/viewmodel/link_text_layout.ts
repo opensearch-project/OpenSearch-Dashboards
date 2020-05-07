@@ -19,7 +19,7 @@
 import { Distance } from '../types/geometry_types';
 import { Config } from '../types/config_types';
 import { TAU, trueBearingToStandardPositionAngle } from '../utils/math';
-import { LinkLabelVM, ShapeTreeNode, ValueGetterFunction } from '../types/viewmodel_types';
+import { LinkLabelVM, RawTextGetter, ShapeTreeNode, ValueGetterFunction } from '../types/viewmodel_types';
 import { meanAngle } from '../geometry';
 import { TextMeasure } from '../types/types';
 import { ValueFormatter } from '../../../../utils/commons';
@@ -31,9 +31,10 @@ export function linkTextLayout(
   nodesWithoutRoom: ShapeTreeNode[],
   currentY: Distance[],
   anchorRadius: Distance,
-  rawTextGetter: Function,
+  rawTextGetter: RawTextGetter,
   valueGetter: ValueGetterFunction,
   valueFormatter: ValueFormatter,
+  maxTextLength: number,
 ): LinkLabelVM[] {
   const { linkLabel } = config;
   const maxDepth = nodesWithoutRoom.reduce((p: number, n: ShapeTreeNode) => Math.max(p, n.depth), 0);
@@ -69,7 +70,8 @@ export function linkTextLayout(
       const stemFromY = y;
       const stemToX = x + north * west * cy - west * relativeY;
       const stemToY = cy;
-      const text = rawTextGetter(node);
+      const rawText = rawTextGetter(node);
+      const text = rawText.length <= maxTextLength ? rawText : `${rawText.substr(0, maxTextLength - 1)}…`; // ellipsis is one char
       const valueText = valueFormatter(valueGetter(node));
       const labelFontSpec = {
         fontStyle: 'normal',

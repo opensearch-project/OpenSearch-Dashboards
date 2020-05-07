@@ -308,6 +308,8 @@ export function shapeViewModel(
           return !(foundInFillText && foundInFillText.rows.length !== 0);
         });
 
+  const maxLinkedLabelTextLength = config.linkLabel.maxTextLength;
+
   const linkLabelViewModels = linkTextLayout(
     textMeasure,
     config,
@@ -317,6 +319,7 @@ export function shapeViewModel(
     rawTextGetter,
     valueGetter,
     valueFormatter,
+    maxLinkedLabelTextLength,
   );
 
   const pickQuads: PickFunction = (x, y) => {
