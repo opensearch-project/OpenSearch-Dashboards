@@ -18,7 +18,7 @@
 
 import seedrandom from 'seedrandom';
 
-import { DataGenerator } from '../utils/data_generators/data_generator';
+import { DataGenerator, RandomNumberGenerator } from '../utils/data_generators/data_generator';
 
 /**
  * Forces object to be partial type for mocking tests
@@ -30,13 +30,6 @@ import { DataGenerator } from '../utils/data_generators/data_generator';
 export const forcedType = <T extends object>(obj: Partial<T>): T => {
   return obj as T;
 };
-
-export type RandomNumberGenerator = (
-  min?: number,
-  max?: number,
-  fractionDigits?: number,
-  inclusive?: boolean,
-) => number;
 
 /**
  * Return rng function with optional `min`, `max` and `fractionDigits` params

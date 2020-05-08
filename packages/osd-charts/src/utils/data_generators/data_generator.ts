@@ -17,15 +17,31 @@
  * under the License. */
 
 import { Simple1DNoise } from './simple_noise';
-import { RandomNumberGenerator } from '../../mocks/utils';
+
+export type RandomNumberGenerator = (
+  min?: number,
+  max?: number,
+  fractionDigits?: number,
+  inclusive?: boolean,
+) => number;
+
+function defaultRNG(min = 0, max = 1, fractionDigits = 0, inclusive = true) {
+  const precision = Math.pow(10, Math.max(fractionDigits, 0));
+  const scaledMax = max * precision;
+  const scaledMin = min * precision;
+  const offset = inclusive ? 1 : 0;
+  const num = Math.floor(Math.random() * (scaledMax - scaledMin + offset)) + scaledMin;
+
+  return num / precision;
+}
 
 export class DataGenerator {
   private randomNumberGenerator: RandomNumberGenerator;
   private generator: Simple1DNoise;
   private frequency: number;
-  constructor(frequency = 500, randomNumberGenerator: RandomNumberGenerator) {
+  constructor(frequency = 500, randomNumberGenerator: RandomNumberGenerator = defaultRNG) {
     this.randomNumberGenerator = randomNumberGenerator;
-    this.generator = new Simple1DNoise(randomNumberGenerator);
+    this.generator = new Simple1DNoise(this.randomNumberGenerator);
     this.frequency = frequency;
   }
   generateBasicSeries(totalPoints = 50, offset = 0, amplitude = 1) {

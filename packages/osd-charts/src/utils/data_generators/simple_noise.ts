@@ -1,5 +1,3 @@
-import { RandomNumberGenerator } from '../../mocks/utils';
-
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -17,6 +15,8 @@ import { RandomNumberGenerator } from '../../mocks/utils';
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License. */
+
+import { RandomNumberGenerator } from './data_generator';
 
 export class Simple1DNoise {
   private maxVertices: number;
