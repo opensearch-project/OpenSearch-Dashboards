@@ -1,3 +1,15 @@
+# [19.3.0](https://github.com/elastic/elastic-charts/compare/v19.2.0...v19.3.0) (2020-05-08)
+
+
+### Bug Fixes
+
+* build/type issue with DataGenerator ([#671](https://github.com/elastic/elastic-charts/issues/671)) ([86dd2b1](https://github.com/elastic/elastic-charts/commit/86dd2b1a859d6cd122902a801fe419cbbeb852ec))
+
+
+### Features
+
+* **partition:** linked text maximum length config ([#665](https://github.com/elastic/elastic-charts/issues/665)) ([7166e42](https://github.com/elastic/elastic-charts/commit/7166e422d95a60fb4685116a71a6acb87d7961cf))
+
 # [19.2.0](https://github.com/elastic/elastic-charts/compare/v19.1.2...v19.2.0) (2020-05-05)
 
 
