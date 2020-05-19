@@ -65,7 +65,7 @@ function grooveAccessor(n: ArrayEntry) {
 }
 
 function topGrooveAccessor(topGroovePx: Pixels) {
-  return (n: ArrayEntry) => (entryValue(n).depth === 1 ? topGroovePx : grooveAccessor(n));
+  return (n: ArrayEntry) => (entryValue(n).depth > 0 ? topGroovePx : grooveAccessor(n));
 }
 
 export const VerticalAlignments = Object.freeze({
