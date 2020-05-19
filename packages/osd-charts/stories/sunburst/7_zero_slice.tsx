@@ -23,7 +23,7 @@ import React from 'react';
 import { indexInterpolatedFillColor, interpolatorCET2s, productLookup } from '../utils/utils';
 
 export const example = () => (
-  <Chart className="story-chart">
+  <Chart className="story-chart" size={{ height: 180 }}>
     <Partition
       id="spec_1"
       data={mocks.pie
@@ -42,7 +42,7 @@ export const example = () => (
           },
         },
       ]}
-      config={{ partitionLayout: PartitionLayout.sunburst }}
+      config={{ partitionLayout: PartitionLayout.sunburst, margin: { left: 0.2 } }}
     />
   </Chart>
 );
