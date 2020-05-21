@@ -127,7 +127,7 @@ export interface SeriesNameConfigOptions {
   /**
    * Delimiter to join values/names
    *
-   * @default ' - '
+   * @defaultValue an hyphen with spaces ` - `
    */
   delimiter?: string;
 }
@@ -140,7 +140,7 @@ export const Fit = Object.freeze({
   /**
    * Don't draw value on the graph. Slices out area between `null` values.
    *
-   * Example:
+   * @example
    * ```js
    * [2, null, null, 8] => [2, null null, 8]
    * ```
@@ -149,29 +149,31 @@ export const Fit = Object.freeze({
   /**
    * Use the previous non-`null` value
    *
-   * Example:
+   * @remarks
+   * This is the opposite of `Fit.Lookahead`
+   *
+   * @example
    * ```js
    * [2, null, null, 8] => [2, 2, 2, 8]
    * ```
-   *
-   * @opposite `Lookahead`
    */
   Carry: 'carry' as 'carry',
   /**
    * Use the next non-`null` value
    *
-   * Example:
+   * @remarks
+   * This is the opposite of `Fit.Carry`
+   *
+   * @example
    * ```js
    * [2, null, null, 8] => [2, 8, 8, 8]
    * ```
-   *
-   * @opposite `Carry`
    */
   Lookahead: 'lookahead' as 'lookahead',
   /**
    * Use the closest non-`null` value (before or after)
    *
-   * Example:
+   * @example
    * ```js
    * [2, null, null, 8] => [2, 2, 8, 8]
    * ```
@@ -180,7 +182,7 @@ export const Fit = Object.freeze({
   /**
    * Average between the closest non-`null` values
    *
-   * Example:
+   * @example
    * ```js
    * [2, null, null, 8] => [2, 5, 5, 8]
    * ```
@@ -189,7 +191,7 @@ export const Fit = Object.freeze({
   /**
    * Linear interpolation between the closest non-`null` values
    *
-   * Example:
+   * @example
    * ```js
    * [2, null, null, 8] => [2, 4, 6, 8]
    * ```
@@ -198,7 +200,7 @@ export const Fit = Object.freeze({
   /**
    * Sets all `null` values to `0`
    *
-   * Example:
+   * @example
    * ```js
    * [2, null, null, 8] => [2, 0, 0, 8]
    * ```
@@ -207,7 +209,7 @@ export const Fit = Object.freeze({
   /**
    * Specify an explicit value `X`
    *
-   * Example:
+   * @example
    * ```js
    * [2, null, null, 8] => [2, X, X, 8]
    * ```
@@ -278,7 +280,7 @@ export interface SeriesSpec extends Spec {
    */
   name?: SeriesNameAccessor;
   /** The ID of the spec group
-   * @default __global__
+   * @defaultValue {@link DEFAULT_GLOBAL_ID}
    */
   groupId: string;
   /** when using a different groupId this option will allow compute in the same domain of the global domain */
@@ -290,7 +292,7 @@ export interface SeriesSpec extends Spec {
   /** Set colors for specific series */
   color?: SeriesColorAccessor;
   /** If the series should appear in the legend
-   * @default false
+   * @defaultValue `false`
    */
   hideInLegend?: boolean;
   /** Index per series to sort by */
@@ -299,13 +301,13 @@ export interface SeriesSpec extends Spec {
   /**
    * Postfix string or accessor function for y1 accessor when using `y0Accessors`
    *
-   * @default ' - upper'
+   * @defaultValue ` - upper`
    */
   y0AccessorFormat?: AccessorFormat;
   /**
    * Postfix string or accessor function for y1 accessor when using `y0Accessors`
    *
-   * @default ' - lower'
+   * @defaultValue ` - lower`
    */
   y1AccessorFormat?: AccessorFormat;
   /**
@@ -318,13 +320,13 @@ export interface Postfixes {
   /**
    * Postfix for y1 accessor when using `y0Accessors`
    *
-   * @default 'upper'
+   * @defaultValue `upper`
    */
   y0AccessorFormat?: string;
   /**
    * Postfix for y1 accessor when using `y0Accessors`
    *
-   * @default 'lower'
+   * @defaultValue `lower`
    */
   y1AccessorFormat?: string;
 }
@@ -351,7 +353,7 @@ export interface SeriesAccessors {
 export interface SeriesScales {
   /**
    * The x axis scale type
-   * @default ScaleType.Ordinal
+   * @defaultValue `ordinal` {@link (ScaleType:type) | ScaleType.Ordinal}
    */
   xScaleType: typeof ScaleType.Ordinal | typeof ScaleType.Linear | typeof ScaleType.Time;
   /**
@@ -363,12 +365,12 @@ export interface SeriesScales {
   timeZone?: string;
   /**
    * The y axis scale type
-   * @default ScaleType.Linear
+   * @defaultValue `linear` {@link (ScaleType:type) | ScaleType.Linear}
    */
   yScaleType: ScaleContinuousType;
   /**
    * if true, the min y value is set to the minimum domain value, 0 otherwise
-   * @default false
+   * @defaultValue `false`
    */
   yScaleToDataExtent: boolean;
 }
@@ -382,7 +384,7 @@ export type SeriesSpecs<S extends BasicSeriesSpec = BasicSeriesSpec> = Array<S>;
  */
 export type BarSeriesSpec = BasicSeriesSpec &
   Postfixes & {
-    /** @default bar */
+    /** @defaultValue `bar` {@link (SeriesTypes:type) | SeriesTypes.Bar} */
     seriesType: typeof SeriesTypes.Bar;
     /** If true, will stack all BarSeries and align bars to ticks (instead of centered on ticks) */
     enableHistogramMode?: boolean;
@@ -398,9 +400,10 @@ export type BarSeriesSpec = BasicSeriesSpec &
     /**
      * Min height to render bars for highly variable data
      *
-     * i.e. ranges from 100,000 to 1
+     * @remarks
+     * i.e. ranges from 100,000 to 1.
      *
-     * @units pixel
+     * The unit is expressed in `pixel`
      */
     minBarHeight?: number;
   };
@@ -437,7 +440,7 @@ export type FitConfig = {
  */
 export type LineSeriesSpec = BasicSeriesSpec &
   HistogramConfig & {
-    /** @default line */
+    /** @defaultValue `line` {@link (SeriesTypes:type) | SeriesTypes.Line} */
     seriesType: typeof SeriesTypes.Line;
     curve?: CurveType;
     lineSeriesStyle?: RecursivePartial<LineSeriesStyle>;
@@ -457,7 +460,7 @@ export type LineSeriesSpec = BasicSeriesSpec &
  * @alpha
  */
 export type BubbleSeriesSpec = BasicSeriesSpec & {
-  /** @default bubble */
+  /** @defaultValue `bubble` {@link (SeriesTypes:type) | SeriesTypes.Bubble} */
   seriesType: typeof SeriesTypes.Bubble;
   bubbleSeriesStyle?: RecursivePartial<BubbleSeriesStyle>;
   /**
@@ -472,7 +475,7 @@ export type BubbleSeriesSpec = BasicSeriesSpec & {
 export type AreaSeriesSpec = BasicSeriesSpec &
   HistogramConfig &
   Postfixes & {
-    /** @default area */
+    /** @defaultValue `area` {@link (SeriesTypes:type) | SeriesTypes.Area} */
     seriesType: typeof SeriesTypes.Area;
     /** The type of interpolator to be used to interpolate values between points */
     curve?: CurveType;
@@ -493,7 +496,7 @@ export type AreaSeriesSpec = BasicSeriesSpec &
 
 export interface HistogramConfig {
   /**  Determines how points in the series will align to bands in histogram mode
-   * @default 'start'
+   * @defaultValue `start`
    */
   histogramModeAlignment?: HistogramModeAlignment;
 }
@@ -517,7 +520,7 @@ export interface AxisSpec extends Spec {
   /** Style options for grid line */
   gridLineStyle?: GridLineConfig;
   /** The ID of the axis group
-   * @default __global__
+   * @defaultValue {@link DEFAULT_GLOBAL_ID}
    */
   groupId: GroupId;
   /** Hide this axis */
@@ -526,7 +529,10 @@ export interface AxisSpec extends Spec {
   showOverlappingTicks: boolean;
   /** Shows all labels, also the overlapping ones */
   showOverlappingLabels: boolean;
-  /** Shows grid lines for axis; default false */
+  /**
+   * Shows grid lines for axis
+   * @defaultValue `false`
+   */
   showGridLines?: boolean;
   /** Where the axis appear on the chart */
   position: Position;
@@ -548,7 +554,10 @@ export interface AxisSpec extends Spec {
   style?: AxisStyle;
   /** Show only integar values **/
   integersOnly?: boolean;
-  /** Show duplicated ticks, default is false*/
+  /**
+   * Show duplicated ticks
+   * @defaultValue `false`
+   */
   showDuplicatedTicks?: boolean;
 }
 
@@ -571,15 +580,24 @@ export const AnnotationTypes = Object.freeze({
 
 export type AnnotationType = $Values<typeof AnnotationTypes>;
 
+/**
+ * The domain type enum that can be associated with an annotation
+ * @public
+ */
 export const AnnotationDomainTypes = Object.freeze({
   XDomain: 'xDomain' as 'xDomain',
   YDomain: 'yDomain' as 'yDomain',
 });
 
+/**
+ * The domain type that can be associated with an annotation
+ * @public
+ */
 export type AnnotationDomainType = $Values<typeof AnnotationDomainTypes>;
 
 /**
  * The descriptive object of a line annotation
+ * @public
  */
 export interface LineAnnotationDatum {
   /**
@@ -615,11 +633,11 @@ export type LineAnnotationSpec = BaseAnnotationSpec<
   /** Annotation lines are hidden */
   hideLines?: boolean;
   /** Hide tooltip when hovering over the line
-   * @default true
+   * @defaultValue `true`
    */
   hideLinesTooltips?: boolean;
   /** z-index of the annotation relative to other elements in the chart
-   * @default 1
+   * @defaultValue 1
    */
   zIndex?: number;
 };
@@ -663,7 +681,7 @@ export type RectAnnotationSpec = BaseAnnotationSpec<
   /** Custom rendering function for tooltip */
   renderTooltip?: AnnotationTooltipFormatter;
   /** z-index of the annotation relative to other elements in the chart
-   * @default -1
+   * @defaultValue -1
    */
   zIndex?: number;
 };
@@ -676,14 +694,14 @@ export interface BaseAnnotationSpec<
   chartType: typeof ChartTypes.XYAxis;
   specType: typeof SpecTypes.Annotation;
   /**
-   * Annotation type: line, rectangle, text
+   * Annotation type: line, rectangle
    */
   annotationType: T;
   /**
-   * The ID of the axis group
-   * @default __global__
+   * The ID of the axis group, needed for yDomain position
+   * @defaultValue {@link DEFAULT_GLOBAL_ID}
    */
-  groupId: GroupId; // defaults to __global__; needed for yDomain position
+  groupId: GroupId;
   /**
    * Data values defined with coordinates and details
    */

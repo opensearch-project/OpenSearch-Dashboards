@@ -18,7 +18,7 @@
 
 import { ChartTypes } from '../../index';
 import { config } from '../layout/config/config';
-import { FunctionComponent } from 'react';
+import React from 'react';
 import { getConnect, specComponentFactory } from '../../../state/spec_factory';
 import { Spec, SpecTypes } from '../../../specs/index';
 import { Config } from '../layout/types/config_types';
@@ -72,7 +72,7 @@ type SpecRequiredProps = Pick<GoalSpec, 'id' | 'actual'>;
 type SpecOptionalProps = Partial<Omit<GoalSpec, 'chartType' | 'specType' | 'id' | 'data'>>;
 
 /** @alpha */
-export const Goal: FunctionComponent<SpecRequiredProps & SpecOptionalProps> = getConnect()(
+export const Goal: React.FunctionComponent<SpecRequiredProps & SpecOptionalProps> = getConnect()(
   specComponentFactory<
     GoalSpec,
     | 'config'

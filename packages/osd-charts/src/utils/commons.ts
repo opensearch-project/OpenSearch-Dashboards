@@ -158,14 +158,14 @@ export interface MergeOptions {
    * This is opposite to normal behavoir, which only uses keys from the base
    * object to merge values.
    *
-   * @default false
+   * @defaultValue false
    */
   mergeOptionalPartialValues?: boolean;
   /**
    * Merges Maps same as objects. By default this is disabled and Maps are replaced on the base
    * with a defined Map on any partial.
    *
-   * @default false
+   * @defaultValue false
    */
   mergeMaps?: boolean;
 }

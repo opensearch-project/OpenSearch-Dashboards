@@ -106,35 +106,35 @@ interface ScaleData {
 interface ScaleOptions {
   /**
    * The desidered bandwidth for a linear band scale.
-   * @default 0
+   * @defaultValue 0
    */
   bandwidth: number;
   /**
    * The min interval computed on the XDomain. Not available for yDomains.
-   * @default 0
+   * @defaultValue 0
    */
   minInterval: number;
   /**
    * A time zone identifier. Can be any IANA zone supported by he host environment,
    * or a fixed-offset name of the form 'utc+3', or the strings 'local' or 'utc'.
-   * @default 'utc'
+   * @defaultValue `utc`
    */
   timeZone: string;
   /**
    * The number of bars in the cluster. Used to correctly compute scales when
    * using padding between bars.
-   * @default 1
+   * @defaultValue 1
    */
   totalBarsInCluster: number;
   /**
    * The proportion of the range that is reserved for blank space between bands
    * A number between 0 and 1.
-   * @default 0
+   * @defaultValue 0
    */
   barsPadding: number;
   /**
    * The approximated number of ticks.
-   * @default 10
+   * @defaultValue 10
    */
   ticks: number;
   /** true if the scale was adjusted to fit one single value histogram */

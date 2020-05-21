@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "noUnusedLocals": true,
-    "removeComments": true
+    "removeComments": false
   },
   "extends": "./tsconfig",
   "include": ["src/**/*"],

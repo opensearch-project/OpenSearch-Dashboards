@@ -77,7 +77,7 @@
      * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
      * DEFAULT VALUE: "<projectFolder>/tsconfig.json"
      */
-    // "tsconfigFilePath": "<projectFolder>/tsconfig.json",
+    "tsconfigFilePath": "<projectFolder>/tsconfig.lib.json",
     /**
      * Provides a compiler configuration that will be used instead of reading the tsconfig.json file from disk.
      * The object must conform to the TypeScript tsconfig schema:
@@ -99,7 +99,7 @@
      *
      * DEFAULT VALUE: false
      */
-    // "skipLibCheck": true,
+    "skipLibCheck": false
   },
 
   /**
@@ -109,7 +109,7 @@
     /**
      * (REQUIRED) Whether to generate an API report.
      */
-    "enabled": true
+    "enabled": true,
 
     /**
      * The filename for the API report files.  It will be combined with "reportFolder" or "reportTempFolder" to produce
@@ -135,7 +135,7 @@
      * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
      * DEFAULT VALUE: "<projectFolder>/etc/"
      */
-    // "reportFolder": "<projectFolder>/etc/",
+    "reportFolder": "<projectFolder>/api/",
 
     /**
      * Specifies the folder where the temporary report file is written.  The file name portion is determined by
@@ -150,7 +150,7 @@
      * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
      * DEFAULT VALUE: "<projectFolder>/temp/"
      */
-    // "reportTempFolder": "<projectFolder>/temp/"
+    "reportTempFolder": "<projectFolder>/tmp/"
   },
 
   /**
@@ -160,7 +160,7 @@
     /**
      * (REQUIRED) Whether to generate a doc model file.
      */
-    "enabled": true
+    "enabled": false
 
     /**
      * The output path for the doc model file.  The file extension should be ".api.json".
@@ -181,7 +181,7 @@
     /**
      * (REQUIRED) Whether to generate the .d.ts rollup file.
      */
-    "enabled": true
+    "enabled": false,
 
     /**
      * Specifies the output path for a .d.ts rollup file to be generated without any trimming.
@@ -195,7 +195,7 @@
      * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
      * DEFAULT VALUE: "<projectFolder>/dist/<unscopedPackageName>.d.ts"
      */
-    // "untrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>.d.ts",
+    "untrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>.d.ts",
 
     /**
      * Specifies the output path for a .d.ts rollup file to be generated with trimming for a "beta" release.
@@ -207,7 +207,7 @@
      * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
      * DEFAULT VALUE: ""
      */
-    // "betaTrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>-beta.d.ts",
+    "betaTrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>-beta.d.ts",
 
     /**
      * Specifies the output path for a .d.ts rollup file to be generated with trimming for a "public" release.
@@ -221,7 +221,7 @@
      * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
      * DEFAULT VALUE: ""
      */
-    // "publicTrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>-public.d.ts",
+    "publicTrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>-public.d.ts"
 
     /**
      * When a declaration is trimmed, by default it will be replaced by a code comment such as
@@ -242,7 +242,7 @@
      *
      * DEFAULT VALUE: true
      */
-    // "enabled": true,
+    "enabled": true
     /**
      * Specifies where the TSDoc metadata file should be written.
      *
@@ -330,14 +330,15 @@
       "default": {
         "logLevel": "warning"
         // "addToApiReportFile": false
+      },
+      "ae-extra-release-tag": {
+        "logLevel": "warning",
+        "addToApiReportFile": true
+      },
+      "ae-missing-release-tag": {
+        "logLevel": "warning",
+        "addToApiReportFile": true
       }
-
-      // "ae-extra-release-tag": {
-      //   "logLevel": "warning",
-      //   "addToApiReportFile": true
-      // },
-      //
-      // . . .
     },
 
     /**

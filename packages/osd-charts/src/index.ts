@@ -41,7 +41,7 @@ export {
 } from './chart_types/partition_chart/layout/types/config_types';
 export { Layer as PartitionLayer } from './chart_types/partition_chart/specs/index';
 export { Goal } from './chart_types/goal_chart/specs/index';
-export { AccessorFn, IndexedAccessorFn } from './utils/accessor';
+export { AccessorFn, IndexedAccessorFn, UnaryAccessorFn } from './utils/accessor';
 export { SpecTypes } from './specs/settings';
 
 // scales

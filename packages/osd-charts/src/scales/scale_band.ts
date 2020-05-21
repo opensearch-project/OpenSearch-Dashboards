@@ -50,7 +50,7 @@ export class ScaleBand implements Scale {
     /**
      * The proportion of the range that is reserved for blank space between bands
      * A number between 0 and 1.
-     * @default 0
+     * @defaultValue 0
      */
     barsPadding = 0,
   ) {

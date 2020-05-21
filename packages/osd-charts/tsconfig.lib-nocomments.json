@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "removeComments": true,
+    "declaration": false,
+    "declarationMap": false
+  },
+  "extends": "./tsconfig.lib"
+}

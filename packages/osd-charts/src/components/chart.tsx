@@ -37,9 +37,9 @@ import { getInternalIsInitializedSelector } from '../state/selectors/get_interna
 
 interface ChartProps {
   /** The type of rendered
-   * @default 'canvas'
+   * @defaultValue `canvas`
    */
-  renderer: 'svg' | 'canvas';
+  renderer?: 'svg' | 'canvas';
   size?: ChartSize;
   className?: string;
   id?: string;
@@ -68,7 +68,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
   private chartContainerRef: React.RefObject<HTMLDivElement>;
   private chartStageRef: React.RefObject<HTMLCanvasElement>;
 
-  constructor(props: any) {
+  constructor(props: ChartProps) {
     super(props);
     this.chartContainerRef = createRef();
     this.chartStageRef = createRef();

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { ComponentType } from 'react';
+import React from 'react';
 import { $Values } from 'utility-types';
 
 import { DomainRange } from '../chart_types/xy_chart/utils/specs';
@@ -85,8 +85,8 @@ export interface PointerOverEvent extends BasePointerEvent {
   type: typeof PointerEventType.Over;
   scale: ScaleContinuousType | ScaleOrdinalType;
   /**
-   * @todo
-   * unit for event (i.e. `time`, `feet`, `count`, etc.)
+   * Unit for event (i.e. `time`, `feet`, `count`, etc.) Not currently used/implemented
+   * @alpha
    */
   unit?: string;
   value: number | string | null;
@@ -185,7 +185,7 @@ export interface LegendColorPickerProps {
    */
   seriesIdentifier: SeriesIdentifier;
 }
-export type LegendColorPicker = ComponentType<LegendColorPickerProps>;
+export type LegendColorPicker = React.ComponentType<LegendColorPickerProps>;
 
 /**
  * Buffer between cursor and point to trigger interaction
@@ -207,7 +207,7 @@ export interface SettingsSpec extends Spec {
   /**
    * Full default theme to use as base
    *
-   * @default `LIGHT_THEME`
+   * @defaultValue `LIGHT_THEME`
    */
   baseTheme?: Theme;
   rendering: Rendering;
@@ -220,7 +220,7 @@ export interface SettingsSpec extends Spec {
   legendPosition: Position;
   /**
    * Show an extra parameter on each legend item defined by the chart type
-   * @default false
+   * @defaultValue `false`
    */
   showLegendExtra: boolean;
   /**
@@ -254,13 +254,13 @@ export interface SettingsSpec extends Spec {
   legendColorPicker?: LegendColorPicker;
   /**
    * Block the brush tool on a specific axis: x, y or both.
-   * @default BrushAxis.X
+   * @defaultValue `x` {@link (BrushAxis:type) | BrushAxis.X}
    */
   brushAxis?: BrushAxis;
   /**
    * The minimum number of pixel to consider for a valid brush event (in both axis if brushAxis prop is BrushAxis.Both).
    * E.g. a min value of 2 means that the brush area needs to be at least 2 pixel wide and 2 pixel tall.
-   * @default 2
+   * @defaultValue 2
    */
   minBrushDelta?: number;
 }

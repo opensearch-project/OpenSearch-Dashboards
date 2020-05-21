@@ -18,13 +18,39 @@
 
 import { Datum } from './commons';
 
-type UnaryAccessorFn<Return = any> = (datum: Datum) => Return;
-type BinaryAccessorFn<Return = any> = (datum: Datum, index: number) => Return;
+/**
+ * Accessor function
+ * @param datum - the datum
+ * @public
+ */
+export type UnaryAccessorFn<Return = any> = (datum: Datum) => Return;
 
+/**
+ * Accessor function
+ * @param datum - the datum
+ * @param index - the index in the array
+ * @public
+ */
+export type BinaryAccessorFn<Return = any> = (datum: Datum, index: number) => Return;
+
+/**
+ * An accessor function
+ * @public
+ */
 export type AccessorFn = UnaryAccessorFn;
+
+/**
+ * An indexed accessor function
+ * @public
+ */
 export type IndexedAccessorFn = UnaryAccessorFn | BinaryAccessorFn;
 type AccessorObjectKey = string;
 type AccessorArrayIndex = number;
+
+/**
+ * A datum accessor in form of object key accessor string/number
+ * @public
+ */
 export type Accessor = AccessorObjectKey | AccessorArrayIndex;
 
 /**
