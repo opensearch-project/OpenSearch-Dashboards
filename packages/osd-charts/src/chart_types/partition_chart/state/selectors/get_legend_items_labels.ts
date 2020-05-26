@@ -24,17 +24,36 @@ import { HierarchyOfArrays, CHILDREN_KEY } from '../../layout/utils/group_by_rol
 import { Layer } from '../../specs';
 import { LegendItemLabel } from '../../../../state/selectors/get_legend_items_labels';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
+import { SettingsSpec } from '../../../../specs';
 
 /** @internal */
 export const getLegendItemsLabels = createCachedSelector(
   [getPieSpecOrNull, getSettingsSpecSelector, getTree],
   (pieSpec, { legendMaxDepth }, tree): LegendItemLabel[] => {
-    if (!pieSpec || (typeof legendMaxDepth === 'number' && legendMaxDepth <= 0)) {
+    if (!pieSpec) {
       return [];
     }
-    return flatSlicesNames(pieSpec.layers, 0, tree);
+    if (isInvalidLegendMaxDepth(legendMaxDepth)) {
+      return [];
+    }
+    const labels = flatSlicesNames(pieSpec.layers, 0, tree).filter(({ depth }) => {
+      if (typeof legendMaxDepth !== 'number') {
+        return true;
+      }
+      return depth <= legendMaxDepth;
+    });
+
+    return labels;
   },
 )(getChartIdSelector);
+
+/**
+ * Check if the legendMaxDepth from settings is not a valid number (NaN or <=0)
+ * @param legendMaxDepth - SettingsSpec['legendMaxDepth']
+ */
+function isInvalidLegendMaxDepth(legendMaxDepth: SettingsSpec['legendMaxDepth']): boolean {
+  return typeof legendMaxDepth === 'number' && (Number.isNaN(legendMaxDepth) || legendMaxDepth <= 0);
+}
 
 function flatSlicesNames(
   layers: Layer[],
@@ -45,6 +64,7 @@ function flatSlicesNames(
   if (tree.length === 0) {
     return [];
   }
+
   for (let i = 0; i < tree.length; i++) {
     const branch = tree[i];
     const arrayNode = branch[1];
@@ -57,9 +77,11 @@ function flatSlicesNames(
     if (key != null) {
       formattedValue = formatter ? formatter(key) : `${key}`;
     }
-
-    // save only the max depth, so we can compute the the max extension of the legend
-    keys.set(formattedValue, Math.max(depth, keys.get(formattedValue) ?? 0));
+    // preventing errors from external formatters
+    if (formattedValue != null && formattedValue !== '') {
+      // save only the max depth, so we can compute the the max extension of the legend
+      keys.set(formattedValue, Math.max(depth, keys.get(formattedValue) ?? 0));
+    }
 
     const children = arrayNode[CHILDREN_KEY];
     flatSlicesNames(layers, depth + 1, children, keys);

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { Chart, Datum, Partition, PartitionLayout } from '../../src';
+import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../src';
 import { mocks } from '../../src/mocks/hierarchical/index';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
 import React from 'react';
@@ -24,6 +24,7 @@ import { countryLookup, indexInterpolatedFillColor, interpolatorCET2s, regionLoo
 
 export const example = () => (
   <Chart className="story-chart">
+    <Settings showLegend legendMaxDepth={1} />
     <Partition
       id="spec_1"
       data={mocks.sunburst}
