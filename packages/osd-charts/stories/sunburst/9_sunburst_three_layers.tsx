@@ -28,6 +28,7 @@ import {
   productLookup,
   regionLookup,
 } from '../utils/utils';
+import { boolean } from '@storybook/addon-knobs';
 
 export const example = () => (
   <Chart className="story-chart" /*size={{ width: 1200, height: 800 }}*/>
@@ -41,6 +42,7 @@ export const example = () => (
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: any) => productLookup[d].name,
+          fillLabel: { maximizeFontSize: boolean('Maximize font size layer 1', true) },
           shape: {
             fillColor: (d: ShapeTreeNode) => {
               return categoricalFillColor(colorBrewerCategoricalStark9, 0.7)(d.sortIndex);
@@ -50,6 +52,7 @@ export const example = () => (
         {
           groupByRollup: (d: Datum) => countryLookup[d.dest].continentCountry.substr(0, 2),
           nodeLabel: (d: any) => regionLookup[d].regionName,
+          fillLabel: { maximizeFontSize: boolean('Maximize font size layer 2', true) },
           shape: {
             fillColor: (d: ShapeTreeNode) => {
               return categoricalFillColor(colorBrewerCategoricalStark9, 0.5)(d.parent.sortIndex);
@@ -59,6 +62,7 @@ export const example = () => (
         {
           groupByRollup: (d: Datum) => d.dest,
           nodeLabel: (d: any) => countryLookup[d].name,
+          fillLabel: { maximizeFontSize: boolean('Maximize font size layer 3', true) },
           shape: {
             fillColor: (d: ShapeTreeNode) => {
               return categoricalFillColor(colorBrewerCategoricalStark9, 0.3)(d.parent.parent.sortIndex);

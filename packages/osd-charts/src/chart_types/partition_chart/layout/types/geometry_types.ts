@@ -31,40 +31,40 @@ export type Radius = Cartesian;
 export type Radian = Cartesian; // we measure angle in radians, and there's unity between radians and cartesian distances which is the whole point of radians; this is also relevant as we use small-angle approximations
 export type Distance = Cartesian;
 
-/* @internal */
+/** @internal */
 export interface PointObject {
   x: Coordinate;
   y: Coordinate;
 }
 
-/* @internal */
+/** @internal */
 export type PointTuple = [Coordinate, Coordinate];
 
-/* @internal */
+/** @internal */
 export type PointTuples = [PointTuple, ...PointTuple[]]; // at least one point
 
-/* @internal */
+/** @internal */
 export class Circline {
   x: Coordinate = NaN;
   y: Coordinate = NaN;
   r: Radius = NaN;
 }
 
-/* @internal */
+/** @internal */
 export interface CirclinePredicate extends Circline {
   inside: boolean;
 }
 
-/* @internal */
+/** @internal */
 export interface CirclineArc extends Circline {
   from: Radian;
   to: Radian;
 }
 
-/* @internal */
+/** @internal */
 type CirclinePredicateSet = CirclinePredicate[];
 
-/* @internal */
-export type RingSector = CirclinePredicateSet;
+/** @internal */
+export type RingSectorConstruction = CirclinePredicateSet;
 
 export type TimeMs = number;

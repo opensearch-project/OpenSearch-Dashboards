@@ -24,6 +24,7 @@ import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/type
 import { countryLookup, productLookup, regionLookup } from '../utils/utils';
 import { hueInterpolator } from '../../src/chart_types/partition_chart/layout/utils/calcs';
 import { palettes } from '../../src/mocks/hierarchical/palettes';
+import { boolean } from '@storybook/addon-knobs';
 
 const interpolator = hueInterpolator(palettes.CET2s.map(([r, g, b]) => [r, g, b, 0.5]));
 
@@ -56,6 +57,7 @@ export const example = () => (
             minFontSize: 2,
             maxFontSize: 20,
             idealFontSizeJump: 1.01,
+            maximizeFontSize: boolean('Maximize font size layer 1', true),
           },
           shape: { fillColor: 'rgba(0,0,0,0)' },
         },
@@ -73,6 +75,7 @@ export const example = () => (
             minFontSize: 2,
             maxFontSize: 10,
             idealFontSizeJump: 1.01,
+            maximizeFontSize: boolean('Maximize font size layer 2', true),
           },
           shape: {
             fillColor: 'rgba(0, 0, 0, 0.07)',
@@ -87,13 +90,14 @@ export const example = () => (
               return interpolator(countries.indexOf(d.dataName) / countryCount);
             },
           },
+          fillLabel: { maximizeFontSize: boolean('Maximize font size layer 3', true) },
         },
       ]}
       config={{
         partitionLayout: PartitionLayout.treemap,
         margin: { top: 0, bottom: 0, left: 0, right: 0 },
         minFontSize: 4,
-        maxFontSize: 12,
+        maxFontSize: 36,
         idealFontSizeJump: 1.01,
         outerSizeRatio: 1,
       }}

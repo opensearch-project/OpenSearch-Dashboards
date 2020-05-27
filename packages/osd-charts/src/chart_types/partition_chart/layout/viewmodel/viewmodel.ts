@@ -20,7 +20,7 @@ import { Part, TextMeasure } from '../types/types';
 import { linkTextLayout } from './link_text_layout';
 import { Config, PartitionLayout } from '../types/config_types';
 import { TAU, trueBearingToStandardPositionAngle } from '../utils/math';
-import { Distance, Pixels, Radius } from '../types/geometry_types';
+import { Distance, Pixels, PointTuple, Radius } from '../types/geometry_types';
 import { meanAngle } from '../geometry';
 import { getTopPadding, treemap } from '../utils/treemap';
 import { sunburst } from '../utils/sunburst';
@@ -79,7 +79,7 @@ type SupportedVerticalAlignments = $Values<typeof VerticalAlignments>;
 
 export type VerticalAlignments = CanvasTextBaseline & SupportedVerticalAlignments;
 
-function rectangleFillOrigins(n: ShapeTreeNode): [Pixels, Pixels] {
+function rectangleFillOrigins(n: ShapeTreeNode): PointTuple {
   return [(n.x0 + n.x1) / 2, (n.y0 + n.y1) / 2];
 }
 export const ringSectorInnerRadius = (n: ShapeTreeNode): Radius => n.y0px;
@@ -106,7 +106,7 @@ function sectorFillOrigins(fillOutside: boolean) {
   };
 }
 
-/* @internal */
+/** @internal */
 export function makeQuadViewModel(
   childNodes: ShapeTreeNode[],
   layers: Layer[],
@@ -249,7 +249,7 @@ export function shapeViewModel(
   const circleMaximumSize = Math.min(innerWidth, innerHeight);
   const outerRadius: Radius = Math.min(outerSizeRatio * circleMaximumSize, circleMaximumSize - sectorLineWidth) / 2;
   const innerRadius: Radius = outerRadius - (1 - emptySizeRatio) * outerRadius;
-  const treeHeight = shownChildNodes.reduce((p: number, n: any) => Math.max(p, entryValue(n.node).depth), 0); // 1: pie, 2: two-ring donut etc.
+  const treeHeight = shownChildNodes.reduce((p: number, n: Part) => Math.max(p, entryValue(n.node).depth), 0); // 1: pie, 2: two-ring donut etc.
   const ringThickness = (outerRadius - innerRadius) / treeHeight;
   const partToShapeFn = partToShapeTreeNode(treemapLayout, innerRadius, ringThickness);
   const quadViewModel = makeQuadViewModel(
@@ -274,7 +274,15 @@ export function shapeViewModel(
 
   const valueFormatter = valueGetter === percentValueGetter ? specifiedPercentFormatter : specifiedValueFormatter;
 
-  const rowSets: RowSet[] = fillTextLayout(
+  const getRowSets = treemapLayout
+    ? fillTextLayout(rectangleConstruction(treeHeight, topGroove), getRectangleRowGeometry, () => 0)
+    : fillTextLayout(
+        ringSectorConstruction(config, innerRadius, ringThickness),
+        getSectorRowGeometry,
+        inSectorRotation(config.horizontalTextEnforcer, config.horizontalTextAngleThreshold),
+      );
+
+  const rowSets: RowSet[] = getRowSets(
     textMeasure,
     rawTextGetter,
     valueGetter,
@@ -283,11 +291,6 @@ export function shapeViewModel(
     config,
     layers,
     textFillOrigins,
-    treemapLayout
-      ? rectangleConstruction(treeHeight, topGroove)
-      : ringSectorConstruction(config, innerRadius, ringThickness),
-    treemapLayout ? getRectangleRowGeometry : getSectorRowGeometry,
-    treemapLayout ? () => 0 : inSectorRotation(config.horizontalTextEnforcer, config.horizontalTextAngleThreshold),
     treemapLayout,
     !treemapLayout,
   );

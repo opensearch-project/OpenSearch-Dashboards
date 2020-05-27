@@ -24,6 +24,7 @@ import { meanAngle } from '../geometry';
 import { Box, Font, TextAlign, TextMeasure } from '../types/types';
 import { ValueFormatter } from '../../../../utils/commons';
 import { Point } from '../../../../utils/point';
+import { integerSnap, monotonicHillClimb } from '../utils/calcs';
 
 function cutToLength(s: string, maxLength: number) {
   return s.length <= maxLength ? s : `${s.substr(0, maxLength - 1)}…`; // ellipsis is one char
@@ -98,10 +99,13 @@ export function linkTextLayout(
       };
       const translateX = stemToX + west * (linkLabel.horizontalStemLength + linkLabel.gap);
       const { width: valueWidth } = measure(linkLabel.fontSize, [{ ...valueFontSpec, text: valueText }])[0];
-      const widthAdjustment = valueWidth + 3 * linkLabel.fontSize; // gap between label and value, plus possibly 2em wide ellipsis
-      const allottedLabelWidth = rightSide
-        ? rectWidth - diskCenter.x - translateX - widthAdjustment
-        : diskCenter.x + translateX - widthAdjustment;
+      const widthAdjustment = valueWidth + 2 * linkLabel.fontSize; // gap between label and value, plus possibly 2em wide ellipsis
+      const allottedLabelWidth = Math.max(
+        0,
+        rightSide
+          ? rectWidth - diskCenter.x - translateX - widthAdjustment
+          : diskCenter.x + translateX - widthAdjustment,
+      );
       const { text, width, verticalOffset } =
         linkLabel.fontSize / 2 <= cy + diskCenter.y && cy + diskCenter.y <= rectHeight - linkLabel.fontSize / 2
           ? fitText(measure, labelText, allottedLabelWidth, linkLabel.fontSize, {
@@ -133,58 +137,10 @@ export function linkTextLayout(
     .filter((l: LinkLabelVM) => l.text !== ''); // cull linked labels whose text was truncated to nothing
 }
 
-function monotonicMaximizer(
-  test: (n: number) => number,
-  maxVar: number,
-  maxWidth: number,
-  minVar: number = 0,
-  minVarWidth: number = 0,
-) {
-  // Lowers iteration count by weakly assuming that there's a `pixelWidth(text) ~ charLength(text), ie. instead of pivoting
-  // at the 50% midpoint like a basic binary search would do, it takes proportions into account. Still works if assumption is false.
-  // It's usable for all problems where there's a monotonic relationship between the constrained output and the variable
-  // (eg. can maximize font size etc.)
-  let loVar = minVar;
-  let loWidth = minVarWidth;
-
-  let hiVar = maxVar;
-  let hiWidth = test(hiVar);
-
-  if (hiWidth <= maxWidth) return maxVar; // early bail if maxVar is compliant
-
-  let pivotVar: number = NaN;
-  while (loVar < hiVar && pivotVar !== loVar && pivotVar !== hiVar) {
-    const newPivotVar = loVar + ((hiVar - loVar) * (maxWidth - loWidth)) / (hiWidth - loWidth);
-    if (pivotVar === newPivotVar) {
-      return loVar; // early bail if we're not making progress
-    }
-    pivotVar = newPivotVar;
-    const pivotWidth = test(pivotVar);
-    const pivotIsCompliant = pivotWidth <= maxWidth;
-    if (pivotIsCompliant) {
-      loVar = pivotVar;
-      loWidth = pivotWidth;
-    } else {
-      hiVar = pivotVar;
-      hiWidth = pivotWidth;
-    }
-  }
-  return pivotVar;
-}
-
-function discreteLength(n: number) {
-  return Math.round(n);
-}
-
 function fitText(measure: TextMeasure, desiredText: string, allottedWidth: number, fontSize: number, box: Box) {
   const desiredLength = desiredText.length;
-  const visibleLength = discreteLength(
-    monotonicMaximizer(
-      (v: number) => measure(fontSize, [{ ...box, text: box.text.substr(0, discreteLength(v)) }])[0].width,
-      desiredLength,
-      allottedWidth,
-    ),
-  );
+  const response = (v: number) => measure(fontSize, [{ ...box, text: box.text.substr(0, v) }])[0].width;
+  const visibleLength = monotonicHillClimb(response, desiredLength, allottedWidth, integerSnap);
   const text = visibleLength < 2 && desiredLength >= 2 ? '' : cutToLength(box.text, visibleLength);
   const { width, emHeightAscent, emHeightDescent } = measure(fontSize, [{ ...box, text }])[0];
   return {

@@ -24,7 +24,7 @@ import { ArrayNode, HierarchyOfArrays } from '../utils/group_by_rollup';
 import { Color } from '../../../../utils/commons';
 import { VerticalAlignments } from '../viewmodel/viewmodel';
 
-/* @internal */
+/** @internal */
 export type LinkLabelVM = {
   link: PointTuples;
   translate: PointTuple;
@@ -38,7 +38,7 @@ export type LinkLabelVM = {
   valueFontSpec: Font;
 };
 
-/* @internal */
+/** @internal */
 export interface RowBox extends Font {
   text: string;
   width: Distance;
@@ -51,19 +51,19 @@ interface RowAnchor {
   rowAnchorY: Coordinate;
 }
 
-/* @internal */
+/** @internal */
 export interface RowSpace extends RowAnchor {
   maximumRowLength: Distance;
 }
 
-/* @internal */
+/** @internal */
 export interface TextRow extends RowAnchor {
   length: number;
   maximumLength: number;
   rowWords: Array<RowBox>;
 }
 
-/* @internal */
+/** @internal */
 export interface RowSet {
   id: string;
   rows: Array<TextRow>;
@@ -75,22 +75,22 @@ export interface RowSet {
   container?: any;
 }
 
-/* @internal */
+/** @internal */
 export interface QuadViewModel extends ShapeTreeNode {
   strokeWidth: number;
   strokeStyle: string;
   fillColor: string;
 }
 
-/* @internal */
+/** @internal */
 export interface OutsideLinksViewModel {
   points: Array<PointTuple>;
 }
 
-/* @internal */
+/** @internal */
 export type PickFunction = (x: Pixels, y: Pixels) => Array<QuadViewModel>;
 
-/* @internal */
+/** @internal */
 export type ShapeViewModel = {
   config: Config;
   quadViewModel: QuadViewModel[];
@@ -102,7 +102,7 @@ export type ShapeViewModel = {
   outerRadius: number;
 };
 
-/* @internal */
+/** @internal */
 export const nullShapeViewModel = (specifiedConfig?: Config, diskCenter?: PointObject): ShapeViewModel => ({
   config: specifiedConfig || config,
   quadViewModel: [],

@@ -16,7 +16,14 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { CirclineArc, Circline, CirclinePredicate, Distance, PointObject, RingSector } from './types/geometry_types';
+import {
+  CirclineArc,
+  Circline,
+  CirclinePredicate,
+  Distance,
+  PointObject,
+  RingSectorConstruction,
+} from './types/geometry_types';
 import { TAU } from './utils/math';
 
 function euclideanDistance({ x: x1, y: y1 }: PointObject, { x: x2, y: y2 }: PointObject): Distance {
@@ -113,7 +120,7 @@ function circlineValidSectors(refC: CirclinePredicate, c: CirclineArc): Circline
 }
 
 /** @internal */
-export function conjunctiveConstraint(constraints: RingSector, c: CirclineArc): CirclineArc[] {
+export function conjunctiveConstraint(constraints: RingSectorConstruction, c: CirclineArc): CirclineArc[] {
   // imperative, slightly optimized buildup of `valids` as it's in the hot loop:
   let valids = [c];
   for (let i = 0; i < constraints.length; i++) {
