@@ -1,3 +1,18 @@
+# [19.4.0](https://github.com/elastic/elastic-charts/compare/v19.3.0...v19.4.0) (2020-05-28)
+
+
+### Bug Fixes
+
+* **partition:** consider legendMaxDepth on legend size ([#654](https://github.com/elastic/elastic-charts/issues/654)) ([9429dcf](https://github.com/elastic/elastic-charts/commit/9429dcff58678e82db142fcc6579dbea6d0f7450)), closes [#639](https://github.com/elastic/elastic-charts/issues/639)
+
+
+### Features
+
+* **partition:** enable grooves in all group layers ([#666](https://github.com/elastic/elastic-charts/issues/666)) ([f5b4767](https://github.com/elastic/elastic-charts/commit/f5b47675535949f0be8302106ab3842c49412e93))
+* **partition:** linked text overflow avoidance ([#670](https://github.com/elastic/elastic-charts/issues/670)) ([b6e5911](https://github.com/elastic/elastic-charts/commit/b6e5911e55772aff0de3ccea947a794ec469abc6)), closes [#633](https://github.com/elastic/elastic-charts/issues/633)
+* **partition:** monotonic font size scaling ([#681](https://github.com/elastic/elastic-charts/issues/681)) ([ea2489b](https://github.com/elastic/elastic-charts/commit/ea2489b23bd3f66222dab042ea5b5b7e377e2809)), closes [#661](https://github.com/elastic/elastic-charts/issues/661)
+* **tooltip:** improve positioning with popperjs ([#651](https://github.com/elastic/elastic-charts/issues/651)) ([6512950](https://github.com/elastic/elastic-charts/commit/651295080b557409c95e1e4ab371bfdc94e86acc)), closes [#596](https://github.com/elastic/elastic-charts/issues/596)
+
 # [19.3.0](https://github.com/elastic/elastic-charts/compare/v19.2.0...v19.3.0) (2020-05-08)
 
 
