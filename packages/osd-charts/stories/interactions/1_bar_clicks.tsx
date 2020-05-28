@@ -26,7 +26,7 @@ const onElementListeners = {
   onElementOut: action('onElementOut'),
 };
 
-export const example = () => {
+export const Example = () => {
   const headerFormatter: TooltipValueFormatter = (tooltip: TooltipValue) => {
     if (tooltip.value % 2 === 0) {
       return (

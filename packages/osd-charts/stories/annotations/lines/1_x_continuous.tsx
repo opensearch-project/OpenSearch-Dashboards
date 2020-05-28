@@ -36,7 +36,7 @@ function generateAnnotationData(values: any[]): LineAnnotationDatum[] {
   return values.map((value, index) => ({ dataValue: value, details: `detail-${index}` }));
 }
 
-export const example = () => {
+export const Example = () => {
   const debug = boolean('debug', false);
   const rotation = getChartRotationKnob();
   const data = arrayKnobs('data values', [2.5, 7.2]);

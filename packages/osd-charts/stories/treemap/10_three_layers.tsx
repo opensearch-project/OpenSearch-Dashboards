@@ -36,7 +36,7 @@ const countries = mocks.sunburst
 
 const countryCount = countries.length;
 
-export const example = () => (
+export const Example = () => (
   <Chart className="story-chart" /*size={{ width: 1200, height: 800 }}*/>
     <Settings showLegend />
     <Partition

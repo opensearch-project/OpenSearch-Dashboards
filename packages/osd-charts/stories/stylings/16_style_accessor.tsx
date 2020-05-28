@@ -35,7 +35,7 @@ import {
   PointStyleAccessor,
 } from '../../src';
 
-export const example = () => {
+export const Example = () => {
   const hasThreshold = boolean('threshold', true);
   const threshold = number('min threshold', 3);
   const barStyle: RecursivePartial<BarSeriesStyle> = {

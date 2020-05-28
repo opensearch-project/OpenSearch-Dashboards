@@ -23,7 +23,7 @@ import React from 'react';
 import { indexInterpolatedFillColor, interpolatorTurbo, productLookup } from '../utils/utils';
 import { number } from '@storybook/addon-knobs';
 
-export const example = () => (
+export const Example = () => (
   <Chart className="story-chart">
     <Partition
       id="spec_1"

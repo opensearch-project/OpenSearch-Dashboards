@@ -23,7 +23,7 @@ import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 import { ColorVariant } from '../../src/utils/commons';
 
-export const example = () => {
+export const Example = () => {
   const customTheme: PartialTheme = {
     lineSeriesStyle: {
       point: {
@@ -54,7 +54,7 @@ export const example = () => {
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
   },

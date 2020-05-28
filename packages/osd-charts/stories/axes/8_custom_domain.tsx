@@ -21,7 +21,7 @@ import React from 'react';
 
 import { Axis, BarSeries, Chart, LineSeries, Position, ScaleType, Settings } from '../../src';
 
-export const example = () => {
+export const Example = () => {
   const leftDomain = {
     min: number('left min', 0),
     max: number('left max', 7),

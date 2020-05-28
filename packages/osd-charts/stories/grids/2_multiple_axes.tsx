@@ -74,7 +74,7 @@ function generateGridLineConfig(group: string, gridColor = 'purple'): GridLineCo
   };
 }
 
-export const example = () => {
+export const Example = () => {
   const leftAxisGridLineConfig = generateGridLineConfig(Position.Left);
   const leftAxisGridLineConfig2 = generateGridLineConfig(`${Position.Left}2`);
 

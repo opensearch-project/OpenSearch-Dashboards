@@ -20,21 +20,20 @@ import { AnnotationTypes } from '../../utils/specs';
 import { Rotation } from '../../../../utils/commons';
 import { Dimensions } from '../../../../utils/dimensions';
 import { Point } from '../../../../utils/point';
-import { getRotatedCursor } from '../utils';
+import { getTranformedCursor } from '../utils';
 import { AnnotationTooltipFormatter, AnnotationTooltipState, Bounds } from '../types';
 import { AnnotationRectProps } from './types';
 import { isWithinRectBounds } from './dimensions';
 
 /** @internal */
 export function computeRectAnnotationTooltipState(
-  /** the cursor position relative to the projection area */
   cursorPosition: Point,
   annotationRects: AnnotationRectProps[],
   chartRotation: Rotation,
   chartDimensions: Dimensions,
   renderTooltip?: AnnotationTooltipFormatter,
-): AnnotationTooltipState {
-  const rotatedCursorPosition = getRotatedCursor(cursorPosition, chartDimensions, chartRotation);
+): AnnotationTooltipState | null {
+  const rotatedProjectedCursorPosition = getTranformedCursor(cursorPosition, chartDimensions, chartRotation, true);
   const totalAnnotationRect = annotationRects.length;
   for (let i = 0; i < totalAnnotationRect; i++) {
     const rectProps = annotationRects[i];
@@ -44,21 +43,20 @@ export function computeRectAnnotationTooltipState(
     const startY = rect.y;
     const endY = startY + rect.height;
     const bounds: Bounds = { startX, endX, startY, endY };
-    const isWithinBounds = isWithinRectBounds(rotatedCursorPosition, bounds);
+    const isWithinBounds = isWithinRectBounds(rotatedProjectedCursorPosition, bounds);
     if (isWithinBounds) {
       return {
         isVisible: true,
         annotationType: AnnotationTypes.Rectangle,
         anchor: {
-          left: rotatedCursorPosition.x,
-          top: rotatedCursorPosition.y,
+          left: cursorPosition.x,
+          top: cursorPosition.y,
         },
         ...(details && { details }),
         ...(renderTooltip && { renderTooltip }),
       };
     }
   }
-  return {
-    isVisible: false,
-  };
+
+  return null;
 }

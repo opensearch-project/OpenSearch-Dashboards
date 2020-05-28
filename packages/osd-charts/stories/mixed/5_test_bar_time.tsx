@@ -22,7 +22,7 @@ import React from 'react';
 import { Axis, BarSeries, Chart, LineSeries, Position, ScaleType, Settings } from '../../src/';
 import { timeFormatter } from '../../src/utils/data/formatters';
 
-export const example = () => {
+export const Example = () => {
   const start = DateTime.fromISO('2019-01-01T00:00:00.000', { zone: 'utc' });
   const data1 = [
     [start.toMillis(), 1, 4],

@@ -31,7 +31,7 @@ const interpolatorCET2s = hueInterpolator(palettes.CET2s.map(([r, g, b]) => [r, 
 
 const defaultFillColor = (colorMaker: any) => (d: any, i: number, a: any[]) => colorMaker(i / (a.length + 1));
 
-export const example = () => (
+export const Example = () => (
   <Chart className="story-chart">
     <Partition
       id="spec_1"

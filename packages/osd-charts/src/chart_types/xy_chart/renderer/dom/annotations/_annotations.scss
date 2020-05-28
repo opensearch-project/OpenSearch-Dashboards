@@ -1,7 +1,3 @@
-#echAnnotationContainerPortal {
-  position: absolute;
-  pointer-events: none;
-}
 .echAnnotation {
   pointer-events: none;
   position: absolute;
@@ -10,20 +6,14 @@
   font-weight: $euiFontWeightBold;
 }
 
-.echAnnotation--hidden,
-.echAnnotation__tooltip--hidden {
-  opacity: 0;
-}
-
 .echAnnotation__tooltip {
   @include euiToolTipStyle;
   @include euiFontSizeXS;
-  position: absolute;
   padding: 0;
-
   transition: opacity $euiAnimSpeedNormal;
   pointer-events: none;
   user-select: none;
+  max-width: 256px;
 }
 
 .echAnnotation__header {

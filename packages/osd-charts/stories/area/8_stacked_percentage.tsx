@@ -20,7 +20,7 @@ import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '../../src';
 
-export const example = () => {
+export const Example = () => {
   const stackedAsPercentage = boolean('stacked as percentage', true);
   return (
     <Chart className="story-chart">

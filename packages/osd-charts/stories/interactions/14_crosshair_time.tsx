@@ -39,7 +39,7 @@ import { switchTheme } from '../../.storybook/theme_service';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 import { getChartRotationKnob } from '../utils/knobs';
 
-export const example = () => {
+export const Example = () => {
   const hideBars = boolean('hideBars', false);
   const formatter = timeFormatter(niceTimeFormatByDay(1));
   const darkmode = boolean('darkmode', false);
@@ -116,7 +116,7 @@ export const example = () => {
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_KNOBS_PANEL },
   },

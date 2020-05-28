@@ -22,7 +22,7 @@ import { Axis, BarSeries, Chart, Position, ScaleType, Settings, TooltipType } fr
 import { SeededDataGenerator } from '../../src/mocks/utils';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
-export const example = () => {
+export const Example = () => {
   const dg = new SeededDataGenerator();
   const data = dg.generateSimpleSeries(15000);
   const tooltipProps = {
@@ -48,7 +48,7 @@ export const example = () => {
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
   },

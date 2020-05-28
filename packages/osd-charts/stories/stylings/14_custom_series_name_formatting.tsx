@@ -23,7 +23,7 @@ import moment from 'moment';
 import { DateTime } from 'luxon';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
-export const example = () => {
+export const Example = () => {
   const start = DateTime.fromISO('2019-01-01T00:00:00.000', { zone: 'utc' });
   const data = [
     { x: 1, y: 3, percent: 0.5, time: start.plus({ month: 1 }).toMillis() },
@@ -82,7 +82,7 @@ export const example = () => {
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
   },

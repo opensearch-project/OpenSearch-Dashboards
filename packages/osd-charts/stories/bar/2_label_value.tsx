@@ -37,7 +37,7 @@ const frozenData: { [key: string]: any[] } = {
   h: frozenDataHighVolume,
 };
 
-export const example = () => {
+export const Example = () => {
   const showValueLabel = boolean('show value label', true);
   const isAlternatingValueLabel = boolean('alternating value label', false);
   const isValueContainedInElement = boolean('contain value label within bar element', false);

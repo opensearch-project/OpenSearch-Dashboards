@@ -44,8 +44,9 @@ const TEST_DATASET_DISCOVER = {
     },
   ],
 };
+
 // for testing purposes only
-export const example = () => {
+export const Example = () => {
   const formatter = timeFormatter(niceTimeFormatByDay(1));
 
   const xDomain = {
@@ -79,7 +80,7 @@ export const example = () => {
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
   },

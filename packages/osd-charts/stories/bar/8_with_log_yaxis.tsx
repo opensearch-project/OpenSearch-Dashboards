@@ -21,7 +21,7 @@ import React from 'react';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
-export const example = () => {
+export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings legendPosition={Position.Right} />
@@ -51,7 +51,7 @@ export const example = () => {
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
   },

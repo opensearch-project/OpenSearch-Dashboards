@@ -25,12 +25,12 @@ export default {
   },
 };
 
-export { example as basic } from './1_basic';
-export { example as withAxis } from './2_w_axis';
-export { example as ordinalWithAxis } from './3_ordinal';
-export { example as linearWithAxis } from './4_linear';
-export { example as withAxisAndLegend } from './5_w_axis_and_legend';
-export { example as curvedWithAxisAndLegend } from './6_curved';
-export { example as multipleWithAxisAndLegend } from './7_multiple';
-export { example as stackedWithAxisAndLegend } from './8_stacked';
-export { example as multiSeriesWithLogValues } from './9_multi_series';
+export { Example as basic } from './1_basic';
+export { Example as withAxis } from './2_w_axis';
+export { Example as ordinalWithAxis } from './3_ordinal';
+export { Example as linearWithAxis } from './4_linear';
+export { Example as withAxisAndLegend } from './5_w_axis_and_legend';
+export { Example as curvedWithAxisAndLegend } from './6_curved';
+export { Example as multipleWithAxisAndLegend } from './7_multiple';
+export { Example as stackedWithAxisAndLegend } from './8_stacked';
+export { Example as multiSeriesWithLogValues } from './9_multi_series';

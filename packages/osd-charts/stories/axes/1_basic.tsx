@@ -21,7 +21,7 @@ import React from 'react';
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, niceTimeFormatter } from '../../src';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 
-export const example = () => {
+export const Example = () => {
   const customStyle = {
     tickLabelPadding: number('Tick Label Padding', 0, {
       range: true,

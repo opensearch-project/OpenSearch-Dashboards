@@ -33,7 +33,7 @@ import { TSVB_DATASET } from '../../src/utils/data_samples/test_dataset_tsvb';
 
 const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
 
-export const example = () => {
+export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings showLegend showLegendExtra legendPosition={Position.Right} />

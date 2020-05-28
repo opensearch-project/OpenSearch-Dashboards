@@ -31,7 +31,7 @@ const onLegendItemListeners = {
   onLegendItemMinusClick: action('onLegendItemMinusClick'),
 };
 
-export const example = () => {
+export const Example = () => {
   const notSpecChange = 'not spec change';
   const specChange = 'spec change';
 

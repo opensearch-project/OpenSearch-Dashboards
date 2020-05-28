@@ -22,7 +22,7 @@ import { GlobalChartState, PointerState } from '../../../../state/chart_state';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { SettingsSpec, LayerValue } from '../../../../specs';
 import { getPickedShapesLayerValues } from './picked_shapes';
-import { getPieSpecOrNull } from './pie_spec';
+import { getPieSpec } from './pie_spec';
 import { ChartTypes } from '../../..';
 import { SeriesIdentifier } from '../../../../commons/series_id';
 import { isClicking } from '../../../../state/utils';
@@ -41,7 +41,7 @@ export function createOnElementClickCaller(): (state: GlobalChartState) => void 
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartTypes.Partition) {
       selector = createCachedSelector(
-        [getPieSpecOrNull, getLastClickSelector, getSettingsSpecSelector, getPickedShapesLayerValues],
+        [getPieSpec, getLastClickSelector, getSettingsSpecSelector, getPickedShapesLayerValues],
         (pieSpec, lastClick: PointerState | null, settings: SettingsSpec, pickedShapes): void => {
           if (!pieSpec) {
             return;

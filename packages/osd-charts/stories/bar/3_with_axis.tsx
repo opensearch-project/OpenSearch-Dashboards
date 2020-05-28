@@ -21,7 +21,7 @@ import React from 'react';
 
 import { Axis, BarSeries, Chart, DARK_THEME, LIGHT_THEME, Position, ScaleType, Settings } from '../../src';
 
-export const example = () => {
+export const Example = () => {
   const darkmode = boolean('darkmode', false);
   const className = darkmode ? 'story-chart-dark' : 'story-chart';
   const defaultTheme = darkmode ? DARK_THEME : LIGHT_THEME;

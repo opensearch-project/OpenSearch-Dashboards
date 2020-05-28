@@ -23,7 +23,7 @@ import { GlobalChartState } from '../../../../state/chart_state';
 import { Selector } from 'react-redux';
 import { ChartTypes } from '../../../index';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { getPieSpecOrNull } from './pie_spec';
+import { getPieSpec } from './pie_spec';
 import { getPickedShapesLayerValues } from './picked_shapes';
 import { SeriesIdentifier } from '../../../../commons/series_id';
 
@@ -64,7 +64,7 @@ export function createOnElementOverCaller(): (state: GlobalChartState) => void {
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartTypes.Partition) {
       selector = createCachedSelector(
-        [getPieSpecOrNull, getPickedShapesLayerValues, getSettingsSpecSelector],
+        [getPieSpec, getPickedShapesLayerValues, getSettingsSpecSelector],
         (pieSpec, nextPickedShapes, settings): void => {
           if (!pieSpec) {
             return;

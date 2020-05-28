@@ -23,7 +23,7 @@ import { button } from '@storybook/addon-knobs';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 import { SB_KNOBS_PANEL } from '../utils/storybook';
 
-export const example = () => {
+export const Example = () => {
   /**
    * The handler section of this story demonstrates the PNG export functionality
    */
@@ -82,11 +82,11 @@ export const example = () => {
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_KNOBS_PANEL },
     info: {
-      text: `Generate a PNG of the chart by clicking on the Export PNG button in the knobs section. In this example, the button handler is setting the PNG background to white with a pixel ratio of 2. If the browser is detected to be IE11, msSaveBlob will be used instead of a PNG capture.`,
+      text: `Generate a PNG of the chart by clicking on the Export PNG button in the knobs section. In this Example, the button handler is setting the PNG background to white with a pixel ratio of 2. If the browser is detected to be IE11, msSaveBlob will be used instead of a PNG capture.`,
     },
   },
 };

@@ -6,7 +6,7 @@ module.exports = {
     'plugin:prettier/recommended',
     'plugin:react/recommended',
   ],
-  plugins: ['@typescript-eslint', 'import', 'jest', 'unicorn', 'file-header'],
+  plugins: ['@typescript-eslint', 'import', 'jest', 'unicorn', 'file-header', 'react-hooks'],
 
   env: {
     es6: true,
@@ -104,6 +104,8 @@ module.exports = {
       'block',
       ['-\\*-(.*)-\\*-', 'eslint(.*)', '@jest-environment'],
     ],
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn',
   },
   settings: {
     'import/resolver': {
@@ -127,11 +129,26 @@ module.exports = {
       files: ['stories/**/*.tsx', 'stories/**/*.ts', '*.test.ts', '*.test.tsx'],
       rules: {
         'no-restricted-properties': [
-          2,
+          process.env.NODE_ENV === 'production' ? 2 : 1,
           {
             object: 'Math',
             property: 'random',
-            message: 'Please use the `getRandomNumber` to create seeded random function in `stories/` and `tests/`',
+            message: 'Please use the `getRandomNumber` to create seeded random function in `stories/` and `tests/`.',
+          },
+          {
+            object: 'describe',
+            property: 'only',
+            message: 'Please remove before committing changes.',
+          },
+          {
+            object: 'it',
+            property: 'only',
+            message: 'Please remove before committing changes.',
+          },
+          {
+            object: 'test',
+            property: 'only',
+            message: 'Please remove before committing changes.',
           },
         ],
       },

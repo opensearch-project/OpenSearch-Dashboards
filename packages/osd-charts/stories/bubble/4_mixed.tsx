@@ -32,7 +32,7 @@ const bubbleData = new Array(100).fill(0).map((_, i) => ({
   z: rng(0, 100),
 }));
 
-export const example = () => {
+export const Example = () => {
   const onElementListeners = {
     onElementClick: action('onElementClick'),
     onElementOver: action('onElementOver'),
@@ -86,4 +86,4 @@ export const example = () => {
   );
 };
 
-example.text = 'testing';
+Example.text = 'testing';

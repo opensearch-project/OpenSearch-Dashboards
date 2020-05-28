@@ -27,7 +27,7 @@ import { categoricalFillColor, colorBrewerCategoricalPastel12 } from '../utils/u
 
 const productLookup = arrayToLookup((d: Datum) => d.sitc1, productDimension);
 
-export const example = () => (
+export const Example = () => (
   <Chart className="story-chart">
     <Partition
       id="spec_1"

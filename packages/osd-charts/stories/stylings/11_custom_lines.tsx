@@ -63,7 +63,7 @@ function generateLineSeriesStyleKnobs(
   };
 }
 
-export const example = () => {
+export const Example = () => {
   const applyLineStyles = boolean('apply line series style', true, 'Chart Global Theme');
   const lineSeriesStyle1 = generateLineSeriesStyleKnobs('Line 1 style', 'line1', 'lime', 'green', 4, 10, 6);
   const lineSeriesStyle2 = generateLineSeriesStyleKnobs('Line 2 style', 'line2', 'blue', 'violet', 2, 5, 4);

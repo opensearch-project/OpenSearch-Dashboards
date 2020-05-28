@@ -64,7 +64,7 @@ function renderAxisWithOptions(position: Position, seriesGroup: string, show: bo
   return <Axis {...axisProps} />;
 }
 
-export const example = () => {
+export const Example = () => {
   const theme: PartialTheme = {
     chartMargins: {
       left: createThemeAction('margin left', 0, 50, 0),

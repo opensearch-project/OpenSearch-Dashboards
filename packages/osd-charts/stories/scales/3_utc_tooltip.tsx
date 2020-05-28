@@ -27,7 +27,7 @@ const UTC_DATASET = new Array(10).fill(0).map((d, i) => {
   return [UTC_DATE + DAY_INCREMENT_1 * i, i % 5];
 });
 
-export const example = () => {
+export const Example = () => {
   return (
     <Chart className="story-chart">
       <Axis
@@ -53,13 +53,13 @@ export const example = () => {
   );
 };
 
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
     info: {
       text: `The default timezone is UTC. If you want to visualize data in UTC,
       but you are in a different timezone, remember to format the millis from \`tickFormat\`
-      to UTC. In this example be able to see the first value on \`2019-01-01  00:00:00.000 \``,
+      to UTC. In this Example be able to see the first value on \`2019-01-01  00:00:00.000 \``,
     },
   },
 };

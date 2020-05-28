@@ -22,7 +22,7 @@ import { AnnotationDomainTypes, Axis, BarSeries, Chart, LineAnnotation, ScaleTyp
 import { getChartRotationKnob } from '../../utils/knobs';
 import { Position } from '../../../src/utils/commons';
 
-export const example = () => {
+export const Example = () => {
   const debug = boolean('debug', false);
   const rotation = getChartRotationKnob();
 

@@ -22,7 +22,7 @@ import { Axis, BarSeries, Chart, RectAnnotation, ScaleType, Settings } from '../
 import { getChartRotationKnob } from '../../utils/knobs';
 import { Position } from '../../../src/utils/commons';
 
-export const example = () => {
+export const Example = () => {
   const debug = boolean('debug', false);
   const rotation = getChartRotationKnob();
 
@@ -62,7 +62,7 @@ export const example = () => {
   );
 };
 
-example.story = {
+Example.story = {
   parameters: {
     info: {
       text: `A \`<RectAnnotation />\` can be used to create a rectangular annotation.
@@ -89,7 +89,7 @@ type PrimitiveValue = string | number | null;
 Each coordinate value can be omitted, if omitted then the corresponding min or max value is used instead.
 A text can be issued to be shown within the tooltip. If omitted, no tooltip will be shown.
 
-In the above example, we are using a fixed set of coordinates:
+In the above Example, we are using a fixed set of coordinates:
 \`\`\`
 coordinates: {
   x0: 0,

@@ -26,7 +26,7 @@ import { action } from '@storybook/addon-actions';
 const dg = new SeededDataGenerator();
 const data = dg.generateRandomSeries(100);
 
-export const example = () => {
+export const Example = () => {
   const onElementListeners = {
     onElementClick: action('onElementClick'),
     onElementOver: action('onElementOver'),

@@ -18,7 +18,7 @@
 
 import { AnnotationId } from '../../../utils/ids';
 import { AnnotationSpec, AxisSpec, isLineAnnotation, isRectAnnotation } from '../utils/specs';
-import { Rotation, Position } from '../../../utils/commons';
+import { Rotation } from '../../../utils/commons';
 import { AnnotationDimensions, AnnotationTooltipState } from './types';
 import { Dimensions } from '../../../utils/dimensions';
 import { computeLineAnnotationTooltipState } from './line/tooltip';
@@ -58,9 +58,10 @@ export function computeAnnotationTooltipState(
         groupId,
         spec.domainType,
         axesSpecs,
+        chartDimensions,
       );
 
-      if (lineAnnotationTooltipState.isVisible) {
+      if (lineAnnotationTooltipState) {
         return lineAnnotationTooltipState;
       }
     } else if (isRectAnnotation(spec)) {
@@ -72,52 +73,11 @@ export function computeAnnotationTooltipState(
         spec.renderTooltip,
       );
 
-      if (rectAnnotationTooltipState.isVisible) {
+      if (rectAnnotationTooltipState) {
         return rectAnnotationTooltipState;
       }
     }
   }
 
   return null;
-}
-
-/** @internal */
-export function getFinalAnnotationTooltipPosition(
-  /** the dimensions of the chart parent container */
-  container: Dimensions,
-  chartDimensions: Dimensions,
-  /** the dimensions of the tooltip container */
-  tooltip: Dimensions,
-  /** the tooltip computed position not adjusted within chart bounds */
-  tooltipAnchor: { top: number; left: number },
-  /** the width of the tooltip portal container */
-  portalWidth: number,
-  padding = 10,
-): {
-  left: string | null;
-  top: string | null;
-  anchor: typeof Position.Left | typeof Position.Right;
-} {
-  let left = 0;
-  let anchor: Position = Position.Left;
-
-  const annotationXOffset = window.pageXOffset + container.left + chartDimensions.left + tooltipAnchor.left;
-  if (chartDimensions.left + tooltipAnchor.left + portalWidth + padding >= container.width) {
-    left = annotationXOffset - portalWidth - padding;
-    anchor = Position.Right;
-  } else {
-    left = annotationXOffset + padding;
-  }
-  let top = window.pageYOffset + container.top + chartDimensions.top + tooltipAnchor.top;
-  if (chartDimensions.top + tooltipAnchor.top + tooltip.height + padding >= container.height) {
-    top -= tooltip.height + padding;
-  } else {
-    top += padding;
-  }
-
-  return {
-    left: `${Math.round(left)}px`,
-    top: `${Math.round(top)}px`,
-    anchor,
-  };
 }

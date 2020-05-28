@@ -17,4 +17,4 @@
  * under the License. */
 
 /** @internal */
-export { TooltipPortal as Tooltip } from './tooltip_portal';
+export { Tooltip } from './tooltip';

@@ -30,7 +30,7 @@ const countryLookup = arrayToLookup((d: Datum) => d.country, countryDimension);
 
 const interpolatorTurbo = hueInterpolator(palettes.turbo.map(([r, g, b]) => [r, g, b, 0.7]));
 
-export const example = () => (
+export const Example = () => (
   <Chart
     className="story-chart"
     size={

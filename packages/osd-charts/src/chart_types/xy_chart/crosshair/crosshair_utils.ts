@@ -21,7 +21,7 @@ import { Dimensions } from '../../../utils/dimensions';
 import { Scale } from '../../../scales';
 import { isHorizontalRotation, isVerticalRotation } from '../state/utils';
 import { Point } from '../../../utils/point';
-import { TooltipAnchorPosition } from '../../../components/tooltip/utils';
+import { TooltipAnchorPosition } from '../../../components/tooltip/types';
 
 export interface SnappedPosition {
   position: number;
@@ -204,7 +204,7 @@ function getHorizontalTooltipPosition(
   chartDimensions: Dimensions,
   isRotated: boolean,
   isSingleValueXScale: boolean,
-): { x0: number; x1: number } {
+): { x0?: number; x1: number } {
   if (!isRotated) {
     return {
       x0: cursorBandPosition.left,
@@ -212,7 +212,8 @@ function getHorizontalTooltipPosition(
     };
   }
   return {
-    x0: 0,
+    // NOTE: x0 set to zero blocks tooltip placement on left when rotated 90 deg
+    // Delete this comment before merging and verifing this doesn't break anything.
     x1: chartDimensions.left + cursorXPosition,
   };
 }

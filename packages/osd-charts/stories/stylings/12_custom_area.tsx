@@ -93,7 +93,7 @@ function generateAreaSeriesStyleKnobs(
   };
 }
 
-export const example = () => {
+export const Example = () => {
   const applyLineStyles = boolean('apply line series style', true, 'Chart Global Theme');
 
   const chartTheme = {

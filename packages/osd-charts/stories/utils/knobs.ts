@@ -18,7 +18,7 @@
 
 import { select, array } from '@storybook/addon-knobs';
 
-import { Rotation } from '../../src';
+import { Rotation, Position, TooltipType, Placement } from '../../src';
 
 export const numberSelect = <T extends number>(
   name: string,
@@ -38,6 +38,57 @@ export const getChartRotationKnob = () =>
     },
     0,
   );
+
+export const getTooltipTypeKnob = (name = 'tooltip type', defaultValue = TooltipType.VerticalCursor) =>
+  select<TooltipType>(
+    name,
+    {
+      Vertical: TooltipType.VerticalCursor,
+      Follow: TooltipType.Follow,
+      Crosshairs: TooltipType.Crosshairs,
+      None: TooltipType.None,
+    },
+    defaultValue,
+  );
+
+export const getPositionKnob = (name = 'chartRotation', defaultValue = Position.Right) =>
+  select<Position>(
+    name,
+    {
+      Right: Position.Right,
+      Left: Position.Left,
+      Top: Position.Top,
+      Bottom: Position.Bottom,
+    },
+    defaultValue,
+  );
+
+export const getPlacementKnob = (name = 'placement', defaultValue?: Placement) => {
+  const value = select<Placement | undefined>(
+    name,
+    {
+      Default: undefined,
+      Top: Placement.Top,
+      Bottom: Placement.Bottom,
+      Left: Placement.Left,
+      Right: Placement.Right,
+      TopStart: Placement.TopStart,
+      TopEnd: Placement.TopEnd,
+      BottomStart: Placement.BottomStart,
+      BottomEnd: Placement.BottomEnd,
+      RightStart: Placement.RightStart,
+      RightEnd: Placement.RightEnd,
+      LeftStart: Placement.LeftStart,
+      LeftEnd: Placement.LeftEnd,
+      Auto: Placement.Auto,
+      AutoStart: Placement.AutoStart,
+      AutoEnd: Placement.AutoEnd,
+    },
+    defaultValue,
+  );
+
+  return value || undefined;
+};
 
 export function arrayKnobs(name: string, values: (string | number)[]): (string | number)[] {
   const stringifiedValues = values.map<string>((d) => `${d}`);

@@ -5,6 +5,7 @@
 ```ts
 
 import { $Values } from 'utility-types';
+import { ComponentType } from 'react';
 import React from 'react';
 
 // @public
@@ -403,6 +404,9 @@ export const CurveType: Readonly<{
 // @public (undocumented)
 export type CurveType = $Values<typeof CurveType>;
 
+// @public
+export type CustomTooltip = ComponentType<TooltipInfo>;
+
 // Warning: (ae-missing-release-tag) "DARK_THEME" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -493,14 +497,10 @@ export const DEFAULT_MISSING_COLOR = "red";
 // @public (undocumented)
 export const DEFAULT_SETTINGS_SPEC: SettingsSpec;
 
-// Warning: (ae-missing-release-tag) "DEFAULT_TOOLTIP_SNAP" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
+// @public
 export const DEFAULT_TOOLTIP_SNAP = true;
 
-// Warning: (ae-missing-release-tag) "DEFAULT_TOOLTIP_TYPE" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
+// @public
 export const DEFAULT_TOOLTIP_TYPE: "vertical";
 
 // Warning: (ae-missing-release-tag) "DefaultSettingsProps" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -678,9 +678,9 @@ export type HistogramModeAlignment = 'start' | 'center' | 'end';
 //
 // @public (undocumented)
 export const HistogramModeAlignments: Readonly<{
-    Start: HistogramModeAlignment;
-    Center: HistogramModeAlignment;
-    End: HistogramModeAlignment;
+    Start: LineAlignSetting;
+    Center: LineAlignSetting;
+    End: LineAlignSetting;
 }>;
 
 // Warning: (ae-forgotten-export) The symbol "BinaryAccessorFn" needs to be exported by the entry point index.d.ts
@@ -930,6 +930,28 @@ export const PartitionLayout: Readonly<{
 
 // @public (undocumented)
 export type PartitionLayout = $Values<typeof PartitionLayout>;
+
+// @public
+export const Placement: Readonly<{
+    Top: "top";
+    Bottom: "bottom";
+    Left: "left";
+    Right: "right";
+    TopStart: "top-start";
+    TopEnd: "top-end";
+    BottomStart: "bottom-start";
+    BottomEnd: "bottom-end";
+    RightStart: "right-start";
+    RightEnd: "right-end";
+    LeftStart: "left-start";
+    LeftEnd: "left-end";
+    Auto: "auto";
+    AutoStart: "auto-start";
+    AutoEnd: "auto-end";
+}>;
+
+// @public
+export type Placement = $Values<typeof Placement>;
 
 // Warning: (ae-missing-release-tag) "PointerEvent" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1296,7 +1318,7 @@ export interface SettingsSpec extends Spec {
     showLegend: boolean;
     showLegendExtra: boolean;
     theme?: PartialTheme | PartialTheme[];
-    tooltip: TooltipType | TooltipProps;
+    tooltip: TooltipSettings;
     // Warning: (ae-forgotten-export) The symbol "Domain" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1428,23 +1450,28 @@ export type TickStyle = StrokeStyle & Visible;
 // @public (undocumented)
 export function timeFormatter(format: string): TickFormatter;
 
-// Warning: (ae-missing-release-tag) "TooltipProps" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
+// @public
+export interface TooltipInfo {
+    header: TooltipValue | null;
+    values: TooltipValue[];
+}
+
+// @public
 export interface TooltipProps {
-    // (undocumented)
+    boundary?: HTMLElement | 'chart';
+    customTooltip?: CustomTooltip;
+    fallbackPlacements?: Placement[];
     headerFormatter?: TooltipValueFormatter;
-    // (undocumented)
+    placement?: Placement;
     snap?: boolean;
-    // (undocumented)
     type?: TooltipType;
-    // (undocumented)
+    // @alpha
     unit?: string;
 }
 
-// Warning: (ae-missing-release-tag) "TooltipType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// Warning: (ae-missing-release-tag) "TooltipType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
+// @public
+export type TooltipSettings = TooltipType | TooltipProps;
+
 // @public
 export const TooltipType: Readonly<{
     VerticalCursor: "vertical";
@@ -1453,12 +1480,10 @@ export const TooltipType: Readonly<{
     None: "none";
 }>;
 
-// @public (undocumented)
+// @public
 export type TooltipType = $Values<typeof TooltipType>;
 
-// Warning: (ae-missing-release-tag) "TooltipValue" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
+// @public
 export interface TooltipValue {
     color: Color;
     isHighlighted: boolean;
@@ -1470,9 +1495,7 @@ export interface TooltipValue {
     valueAccessor?: Accessor;
 }
 
-// Warning: (ae-missing-release-tag) "TooltipValueFormatter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
+// @public
 export type TooltipValueFormatter = (data: TooltipValue) => JSX.Element | string;
 
 // @public

@@ -25,5 +25,5 @@ export default {
   },
 };
 
-export { example as basic } from './1_basic';
-export { example as multipleAxesWithTheSamePosition } from './2_multiple_axes';
+export { Example as basic } from './1_basic';
+export { Example as multipleAxesWithTheSamePosition } from './2_multiple_axes';

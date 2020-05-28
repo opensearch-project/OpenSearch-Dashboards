@@ -31,7 +31,7 @@ const SpecsParserComponent: React.FunctionComponent<{}> = (props) => {
     () => () => {
       injected.specUnmounted();
     },
-    [],
+    [], // eslint-disable-line react-hooks/exhaustive-deps
   );
   return props.children ? (props.children as React.ReactElement) : null;
 };

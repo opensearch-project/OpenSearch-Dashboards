@@ -26,7 +26,7 @@ const onElementListeners = {
   onElementOut: action('onElementOut'),
 };
 
-export const example = () => {
+export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings showLegend showLegendExtra legendPosition={Position.Right} {...onElementListeners} />

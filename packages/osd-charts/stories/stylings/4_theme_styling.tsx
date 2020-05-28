@@ -57,7 +57,7 @@ const data1 = dg.generateGroupedSeries(40, 4);
 const data2 = dg.generateSimpleSeries(40);
 const data3 = dg.generateSimpleSeries(40);
 
-export const example = () => {
+export const Example = () => {
   const customizeLineStroke = boolean('customizeLineStroke', false, 'line');
   const customizePointStroke = boolean('customizeLinePointStroke', false, 'line');
   const customizeAreaFill = boolean('customizeAreaFill', false, 'area');

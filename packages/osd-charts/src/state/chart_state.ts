@@ -36,7 +36,7 @@ import { RefObject } from 'react';
 import { GoalState } from '../chart_types/goal_chart/state/chart_state';
 import { PartitionState } from '../chart_types/partition_chart/state/chart_state';
 import { TooltipInfo } from '../components/tooltip/types';
-import { TooltipAnchorPosition } from '../components/tooltip/utils';
+import { TooltipAnchorPosition } from '../components/tooltip/types';
 import { Color } from '../utils/commons';
 import { LegendItemLabel } from './selectors/get_legend_items_labels';
 import { getLegendItemsSelector } from './selectors/get_legend_items';

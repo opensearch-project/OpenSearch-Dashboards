@@ -21,7 +21,7 @@ import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src
 import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
-export const example = () => {
+export const Example = () => {
   const yAccessors = ['y1', 'y2'];
   const splitSeriesAccessors = ['g1', 'g2'];
 
@@ -46,7 +46,7 @@ export const example = () => {
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
   },

@@ -20,7 +20,7 @@ import { number } from '@storybook/addon-knobs';
 import React from 'react';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, PartialTheme } from '../../src/';
 
-export const example = () => {
+export const Example = () => {
   const theme: PartialTheme = {
     legend: {
       spacingBuffer: number('legend buffer value', 80),

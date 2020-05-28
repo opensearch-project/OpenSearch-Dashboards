@@ -20,7 +20,7 @@ import React from 'react';
 
 import { AreaSeries, Axis, BarSeries, Chart, CurveType, Position, ScaleType, Settings } from '../../src/';
 
-export const example = () => {
+export const Example = () => {
   return (
     <Chart renderer="canvas" className="story-chart">
       <Settings showLegend showLegendExtra legendPosition={Position.Right} />

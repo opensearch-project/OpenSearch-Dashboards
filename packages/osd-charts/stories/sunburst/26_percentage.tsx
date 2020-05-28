@@ -29,7 +29,7 @@ import {
 } from '../utils/utils';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
 
-export const example = () => (
+export const Example = () => (
   <Chart className="story-chart">
     <Partition
       id="spec_26"

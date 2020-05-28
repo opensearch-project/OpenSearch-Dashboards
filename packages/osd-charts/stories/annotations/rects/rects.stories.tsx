@@ -25,8 +25,8 @@ export default {
   },
 };
 
-export { example as linearBarChart } from './1_linear_bar_chart';
-export { example as ordinalBarChart } from './2_ordinal_bar_chart';
-export { example as linearLineChart } from './3_linear_line_chart';
-export { example as styling } from './4_styling';
-export { example as tooltipVisibility } from './5_tooltip_visibility';
+export { Example as linearBarChart } from './1_linear_bar_chart';
+export { Example as ordinalBarChart } from './2_ordinal_bar_chart';
+export { Example as linearLineChart } from './3_linear_line_chart';
+export { Example as styling } from './4_styling';
+export { Example as tooltipVisibility } from './5_tooltip_visibility';

@@ -30,7 +30,7 @@ import {
 } from '../utils/utils';
 import { PrimitiveValue } from '../../src/chart_types/partition_chart/layout/utils/group_by_rollup';
 
-export const example = () => (
+export const Example = () => (
   <Chart className="story-chart" /*size={{ width: 1200, height: 800 }}*/>
     <Partition
       id="spec_1"

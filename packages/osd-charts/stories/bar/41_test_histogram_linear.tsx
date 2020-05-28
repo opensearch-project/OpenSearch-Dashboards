@@ -39,7 +39,7 @@ import { getChartRotationKnob } from '../utils/knobs';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 // for testing purposes only
-export const example = () => {
+export const Example = () => {
   const data = TestDatasets.BARCHART_2Y1G;
 
   const lineAnnotationStyle = {
@@ -180,7 +180,7 @@ export const example = () => {
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
   },

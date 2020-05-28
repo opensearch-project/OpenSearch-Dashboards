@@ -21,7 +21,7 @@ import React from 'react';
 
 import { Axis, BarSeries, Chart, Position, ScaleType } from '../../src';
 
-export const example = () => {
+export const Example = () => {
   const yScaleToDataExtent = boolean('yScaleDataToExtent', true);
   const mixed = [
     { x: 0, y: -4 },

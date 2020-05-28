@@ -25,7 +25,7 @@ import { SeededDataGenerator } from '../../src/mocks/utils';
 const dg = new SeededDataGenerator();
 const data1 = dg.generateGroupedSeries(40, 4);
 
-export const example = () => {
+export const Example = () => {
   const customPartialTheme: PartialTheme = {
     barSeriesStyle: {
       rectBorder: {

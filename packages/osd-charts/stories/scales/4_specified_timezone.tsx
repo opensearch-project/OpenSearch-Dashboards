@@ -21,7 +21,7 @@ import React from 'react';
 import { Axis, Chart, LineSeries, Position, ScaleType } from '../../src';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
-export const example = () => {
+export const Example = () => {
   return (
     <Chart className="story-chart">
       <Axis
@@ -51,7 +51,7 @@ export const example = () => {
   );
 };
 
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
     info: {

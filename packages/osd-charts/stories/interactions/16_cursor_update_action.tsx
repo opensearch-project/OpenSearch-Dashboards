@@ -22,7 +22,7 @@ import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src
 
 const onPointerUpdate = action('onPointerUpdate');
 
-export const example = () => {
+export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings showLegend showLegendExtra legendPosition={Position.Right} onPointerUpdate={onPointerUpdate} />
@@ -45,7 +45,7 @@ export const example = () => {
     </Chart>
   );
 };
-example.story = {
+Example.story = {
   parameters: {
     info: {
       text: `Sends an event every time the cursor changes. This is provided to sync cursors between multiple charts.`,

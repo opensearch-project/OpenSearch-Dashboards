@@ -1,17 +1,11 @@
-#echTooltipContainerPortal {
-  position: absolute;
-  pointer-events: none;
-  z-index: 10000000;
-}
 .echTooltip {
-  position: absolute;
   @include euiToolTipStyle;
   @include euiFontSizeXS;
   padding: 0;
   transition: opacity $euiAnimSpeedNormal;
   pointer-events: none;
   user-select: none;
-  margin-bottom: $euiSizeXS;
+  max-width: 256px;
 
   &__list {
     padding: $euiSizeXS;

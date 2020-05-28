@@ -23,7 +23,7 @@ import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 const dateFormatter = timeFormatter('HH:mm');
 
-export const example = () => {
+export const Example = () => {
   const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => {
     return d[1] < 7 ? [d[0], null] : [d[0], d[1] - 10];
   });
@@ -51,7 +51,7 @@ export const example = () => {
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
   },

@@ -23,7 +23,7 @@ import { ChartTypes } from '../../..';
 import { SpecTypes } from '../../../../specs';
 
 /** @internal */
-export function getPieSpecOrNull(state: GlobalChartState): PartitionSpec | null {
+export function getPieSpec(state: GlobalChartState): PartitionSpec | null {
   const pieSpecs = getSpecsFromStore<PartitionSpec>(state.specs, ChartTypes.Partition, SpecTypes.Series);
   return pieSpecs.length > 0 ? pieSpecs[0] : null;
 }

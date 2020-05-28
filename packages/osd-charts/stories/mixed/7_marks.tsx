@@ -35,7 +35,7 @@ const data2 = new Array(100).fill(0).map((_, x) => ({
   z: getRandomNumber(0, 50),
 }));
 
-export const example = () => {
+export const Example = () => {
   const onElementListeners = {
     onElementClick: action('onElementClick'),
     onElementOver: action('onElementOver'),

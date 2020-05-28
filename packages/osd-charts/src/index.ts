@@ -19,8 +19,8 @@
 // polyfill for Path2D canvas
 import 'path2d-polyfill';
 
+export * from './components';
 export { ChartTypes } from './chart_types';
-export { Chart } from './components/chart';
 export { ChartSize, ChartSizeArray, ChartSizeObject } from './utils/chart_size';
 
 export { SpecId, GroupId, AxisId, AnnotationId } from './utils/ids';
@@ -43,6 +43,7 @@ export { Layer as PartitionLayer } from './chart_types/partition_chart/specs/ind
 export { Goal } from './chart_types/goal_chart/specs/index';
 export { AccessorFn, IndexedAccessorFn, UnaryAccessorFn } from './utils/accessor';
 export { SpecTypes } from './specs/settings';
+export { CustomTooltip, TooltipInfo } from './components/tooltip/types';
 
 // scales
 export { ScaleType } from './scales';

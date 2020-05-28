@@ -35,7 +35,7 @@ function range(title: string, min: number, max: number, value: number, groupId?:
   );
 }
 
-export const example = () => {
+export const Example = () => {
   const theme: PartialTheme = {
     axes: {
       axisTitleStyle: {

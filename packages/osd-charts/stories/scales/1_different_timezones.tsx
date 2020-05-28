@@ -43,7 +43,7 @@ const OTHER_MINUS8_TIMEZONE_DATASET = new Array(10).fill(0).map((d, i) => {
   return [UTC_MINUS8_DATE + DAY_INCREMENT_1 * i, i % 5];
 });
 
-export const example = () => {
+export const Example = () => {
   const timezones = {
     utc: 'utc',
     local: 'local',

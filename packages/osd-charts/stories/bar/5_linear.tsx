@@ -22,7 +22,7 @@ import React from 'react';
 import { Axis, BarSeries, Chart, LIGHT_THEME, Position, ScaleType, Settings } from '../../src';
 import { getChartRotationKnob } from '../utils/knobs';
 
-export const example = () => {
+export const Example = () => {
   const theme = {
     ...LIGHT_THEME,
     scales: {

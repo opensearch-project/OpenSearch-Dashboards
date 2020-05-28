@@ -30,7 +30,7 @@ import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../utils/themes/theme';
 import { Dimensions } from '../../../utils/dimensions';
 import { GroupId, AnnotationId } from '../../../utils/ids';
 import { Scale, ScaleType, ScaleBand, ScaleContinuous } from '../../../scales';
-import { computeAnnotationDimensions, getAnnotationAxis, getRotatedCursor } from './utils';
+import { computeAnnotationDimensions, getAnnotationAxis, getTranformedCursor, invertTranformedCursor } from './utils';
 import { AnnotationDimensions, AnnotationTooltipState, Bounds } from './types';
 import { computeLineAnnotationDimensions } from './line/dimensions';
 import { AnnotationLineProps } from './line/types';
@@ -879,7 +879,7 @@ describe('annotation utils', () => {
   });
 
   test('should compute the tooltip state for an annotation line', () => {
-    const cursorPosition: Point = { x: 1, y: 2 };
+    const cursorPosition: Point = { x: 16, y: 7 };
     const annotationLines: AnnotationLineProps[] = [
       {
         anchor: {
@@ -928,9 +928,10 @@ describe('annotation utils', () => {
       groupId,
       AnnotationDomainTypes.XDomain,
       localAxesSpecs,
+      chartDimensions,
     );
 
-    expect(missingTooltipState).toEqual({ isVisible: false });
+    expect(missingTooltipState).toBeNull();
 
     // add axis for xDomain annotation
     localAxesSpecs.push(horizontalAxisSpec);
@@ -941,38 +942,39 @@ describe('annotation utils', () => {
       groupId,
       AnnotationDomainTypes.XDomain,
       localAxesSpecs,
+      chartDimensions,
     );
     const expectedXDomainTooltipState = {
       isVisible: true,
       annotationType: AnnotationTypes.Line,
       anchor: {
-        position: Position.Left,
-        top: 0,
-        left: 0,
+        height: 10,
+        left: 15,
+        top: 5,
+        width: 10,
       },
     };
-
-    expect(xDomainTooltipState).toEqual(expectedXDomainTooltipState);
+    expect(xDomainTooltipState).toMatchObject(expectedXDomainTooltipState);
 
     // rotated xDomain
     const xDomainRotatedTooltipState = computeLineAnnotationTooltipState(
-      { x: 9, y: 18 },
+      { x: 24, y: 23 },
       annotationLines,
       groupId,
       AnnotationDomainTypes.XDomain,
       localAxesSpecs,
+      chartDimensions,
     );
     const expectedXDomainRotatedTooltipState: AnnotationTooltipState = {
       isVisible: true,
       anchor: {
-        position: Position.Left,
-        top: 0,
-        left: 0,
+        left: 15,
+        top: 5,
       },
       annotationType: AnnotationTypes.Line,
     };
 
-    expect(xDomainRotatedTooltipState).toEqual(expectedXDomainRotatedTooltipState);
+    expect(xDomainRotatedTooltipState).toMatchObject(expectedXDomainRotatedTooltipState);
 
     // add axis for yDomain annotation
     localAxesSpecs.push(verticalAxisSpec);
@@ -983,56 +985,56 @@ describe('annotation utils', () => {
       groupId,
       AnnotationDomainTypes.YDomain,
       localAxesSpecs,
+      chartDimensions,
     );
     const expectedYDomainTooltipState: AnnotationTooltipState = {
       isVisible: true,
       anchor: {
-        position: Position.Left,
-        top: 0,
-        left: 0,
+        left: 15,
+        top: 5,
       },
       annotationType: AnnotationTypes.Line,
     };
 
-    expect(yDomainTooltipState).toEqual(expectedYDomainTooltipState);
+    expect(yDomainTooltipState).toMatchObject(expectedYDomainTooltipState);
 
     const flippedYDomainTooltipState = computeLineAnnotationTooltipState(
-      { x: 9, y: 18 },
+      { x: 24, y: 23 },
       annotationLines,
       groupId,
       AnnotationDomainTypes.YDomain,
       localAxesSpecs,
+      chartDimensions,
     );
     const expectedFlippedYDomainTooltipState: AnnotationTooltipState = {
       isVisible: true,
       anchor: {
-        position: Position.Left,
-        top: 0,
-        left: 0,
+        left: 15,
+        top: 5,
       },
       annotationType: AnnotationTypes.Line,
     };
 
-    expect(flippedYDomainTooltipState).toEqual(expectedFlippedYDomainTooltipState);
+    expect(flippedYDomainTooltipState).toMatchObject(expectedFlippedYDomainTooltipState);
 
     const rotatedYDomainTooltipState = computeLineAnnotationTooltipState(
-      { x: 10, y: 10 },
+      { x: 25, y: 15 },
       annotationLines,
       groupId,
       AnnotationDomainTypes.YDomain,
       localAxesSpecs,
+      chartDimensions,
     );
     const expectedRotatedYDomainTooltipState: AnnotationTooltipState = {
       isVisible: true,
       anchor: {
-        position: Position.Left,
-        top: 0,
-        left: 0,
+        left: 15,
+        top: 5,
       },
       annotationType: AnnotationTypes.Line,
     };
 
-    expect(rotatedYDomainTooltipState).toEqual(expectedRotatedYDomainTooltipState);
+    expect(rotatedYDomainTooltipState).toMatchObject(expectedRotatedYDomainTooltipState);
   });
 
   test('should compute the tooltip state for an annotation', () => {
@@ -1049,7 +1051,7 @@ describe('annotation utils', () => {
       style: DEFAULT_ANNOTATION_LINE_STYLE,
     };
 
-    const cursorPosition: Point = { x: 1, y: 2 };
+    const cursorPosition: Point = { x: 16, y: 7 };
 
     const annotationLines: AnnotationLineProps[] = [
       {
@@ -1136,13 +1138,14 @@ describe('annotation utils', () => {
       isVisible: true,
       annotationType: AnnotationTypes.Line,
       anchor: {
-        top: 0,
-        left: 0,
-        position: Position.Left,
+        height: 10,
+        left: 15,
+        top: 5,
+        width: 10,
       },
     };
 
-    expect(tooltipState).toEqual(expectedTooltipState);
+    expect(tooltipState).toMatchObject(expectedTooltipState);
 
     // rect annotation tooltip
     const annotationRectangle: RectAnnotationSpec = {
@@ -1161,7 +1164,7 @@ describe('annotation utils', () => {
     annotationDimensions.set(annotationRectangle.id, rectAnnotationDimensions);
 
     const rectTooltipState = computeAnnotationTooltipState(
-      { x: 3, y: 4 },
+      { x: 18, y: 9 },
       annotationDimensions,
       rectAnnotations,
       chartRotation,
@@ -1169,12 +1172,12 @@ describe('annotation utils', () => {
       chartDimensions,
     );
 
-    expect(rectTooltipState).toEqual({
+    expect(rectTooltipState).toMatchObject({
       isVisible: true,
       annotationType: AnnotationTypes.Rectangle,
       anchor: {
-        top: 4,
-        left: 3,
+        left: 18,
+        top: 9,
       },
     });
     annotationRectangle.hideTooltips = true;
@@ -1342,7 +1345,7 @@ describe('annotation utils', () => {
     expect(isWithinRectBounds(cursorPosition, withinBoundsReverseYScale)).toBe(false);
   });
   test('should compute tooltip state for rect annotation', () => {
-    const cursorPosition = { x: 3, y: 4 };
+    const cursorPosition = { x: 18, y: 9 };
     const annotationRects = [{ rect: { x: 2, y: 3, width: 3, height: 5 } }];
 
     const visibleTooltip = computeRectAnnotationTooltipState(cursorPosition, annotationRects, 0, chartDimensions);
@@ -1350,8 +1353,8 @@ describe('annotation utils', () => {
       isVisible: true,
       annotationType: AnnotationTypes.Rectangle,
       anchor: {
-        top: 4,
-        left: 3,
+        top: cursorPosition.y,
+        left: cursorPosition.x,
       },
     };
 
@@ -1361,9 +1364,34 @@ describe('annotation utils', () => {
   test('should get rotated cursor position', () => {
     const cursorPosition = { x: 1, y: 2 };
 
-    expect(getRotatedCursor(cursorPosition, chartDimensions, 0)).toEqual(cursorPosition);
-    expect(getRotatedCursor(cursorPosition, chartDimensions, 90)).toEqual({ x: 2, y: 9 });
-    expect(getRotatedCursor(cursorPosition, chartDimensions, -90)).toEqual({ x: 18, y: 1 });
-    expect(getRotatedCursor(cursorPosition, chartDimensions, 180)).toEqual({ x: 9, y: 18 });
+    expect(getTranformedCursor(cursorPosition, chartDimensions, 0)).toEqual(cursorPosition);
+    expect(getTranformedCursor(cursorPosition, chartDimensions, 90)).toEqual({ x: 2, y: 9 });
+    expect(getTranformedCursor(cursorPosition, chartDimensions, -90)).toEqual({ x: 18, y: 1 });
+    expect(getTranformedCursor(cursorPosition, chartDimensions, 180)).toEqual({ x: 9, y: 18 });
+  });
+
+  describe('#invertTranformedCursor', () => {
+    const cursorPosition = { x: 1, y: 2 };
+
+    it.each<Rotation>([0, 90, -90, 180])('Should invert rotated cursor - rotation %d', (rotation) => {
+      expect(
+        invertTranformedCursor(
+          getTranformedCursor(cursorPosition, chartDimensions, rotation),
+          chartDimensions,
+          rotation,
+        ),
+      ).toEqual(cursorPosition);
+    });
+
+    it.each<Rotation>([0, 90, -90, 180])('Should invert rotated projected cursor - rotation %d', (rotation) => {
+      expect(
+        invertTranformedCursor(
+          getTranformedCursor(cursorPosition, chartDimensions, rotation, true),
+          chartDimensions,
+          rotation,
+          true,
+        ),
+      ).toEqual(cursorPosition);
+    });
   });
 });

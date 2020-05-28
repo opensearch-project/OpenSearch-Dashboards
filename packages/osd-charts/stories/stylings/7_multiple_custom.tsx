@@ -39,7 +39,7 @@ function range(title: string, min: number, max: number, value: number, groupId?:
 const dg = new SeededDataGenerator();
 const data1 = dg.generateGroupedSeries(40, 4);
 
-export const example = () => {
+export const Example = () => {
   const primaryTheme: PartialTheme = {
     barSeriesStyle: {
       rect: {

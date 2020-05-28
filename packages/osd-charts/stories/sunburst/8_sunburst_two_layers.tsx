@@ -22,7 +22,7 @@ import { config } from '../../src/chart_types/partition_chart/layout/config/conf
 import React from 'react';
 import { countryLookup, indexInterpolatedFillColor, interpolatorCET2s, regionLookup } from '../utils/utils';
 
-export const example = () => (
+export const Example = () => (
   <Chart className="story-chart">
     <Settings showLegend legendMaxDepth={1} />
     <Partition

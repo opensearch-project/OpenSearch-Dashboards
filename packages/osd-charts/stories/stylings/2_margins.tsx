@@ -35,7 +35,7 @@ function range(title: string, min: number, max: number, value: number, groupId?:
   );
 }
 
-export const example = () => {
+export const Example = () => {
   const theme: PartialTheme = {
     chartMargins: {
       left: range('margin left', 0, 50, 10),

@@ -22,7 +22,7 @@ import { Axis, BarSeries, Chart, RectAnnotation, ScaleType, Settings } from '../
 import { getChartRotationKnob } from '../../utils/knobs';
 import { Position } from '../../../src/utils/commons';
 
-export const example = () => {
+export const Example = () => {
   const debug = boolean('debug', false);
   const rotation = getChartRotationKnob();
 
@@ -61,7 +61,7 @@ export const example = () => {
   );
 };
 
-example.story = {
+Example.story = {
   parameters: {
     info: {
       text: `On Ordinal Bar charts, you can draw a rectangular annotation the same way it's done within a linear bar chart.

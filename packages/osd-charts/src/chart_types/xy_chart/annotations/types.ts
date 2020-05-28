@@ -50,10 +50,7 @@ export interface AnnotationMarker {
 }
 
 /** @internal */
-export type AnnotationTooltipState = AnnotationTooltipVisibleState | AnnotationTooltipHiddenState;
-
-/** @internal */
-export interface AnnotationTooltipVisibleState {
+export interface AnnotationTooltipState {
   isVisible: true;
   annotationType: AnnotationType;
   header?: string;
@@ -64,11 +61,6 @@ export interface AnnotationTooltipVisibleState {
     left: number;
   };
   renderTooltip?: AnnotationTooltipFormatter;
-}
-
-/** @internal */
-export interface AnnotationTooltipHiddenState {
-  isVisible: false;
 }
 
 /** @internal */

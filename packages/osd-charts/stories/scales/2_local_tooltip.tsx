@@ -27,7 +27,7 @@ const UTC_DATASET = new Array(10).fill(0).map((d, i) => {
   return [UTC_DATE + DAY_INCREMENT_1 * i, i % 5];
 });
 
-export const example = () => {
+export const Example = () => {
   return (
     <Chart className="story-chart">
       <Axis
@@ -51,12 +51,12 @@ export const example = () => {
   );
 };
 
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
     info: {
-      text: `If your data is in UTC timezone, your tooltip and axis labels can be configured 
-      to visualize the time translated to your local timezone. You should be able to see the 
+      text: `If your data is in UTC timezone, your tooltip and axis labels can be configured
+      to visualize the time translated to your local timezone. You should be able to see the
       first value on \`2019-01-01  01:00:00.000 \``,
     },
   },

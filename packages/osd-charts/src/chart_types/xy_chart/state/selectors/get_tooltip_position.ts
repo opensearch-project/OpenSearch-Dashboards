@@ -24,7 +24,7 @@ import { getComputedScalesSelector } from './get_computed_scales';
 import { getCursorBandPositionSelector } from './get_cursor_band';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { TooltipAnchorPosition } from '../../../../components/tooltip/utils';
+import { TooltipAnchorPosition } from '../../../../components/tooltip/types';
 
 /** @internal */
 export const getTooltipAnchorPositionSelector = createCachedSelector(

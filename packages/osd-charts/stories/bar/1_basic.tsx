@@ -21,7 +21,7 @@ import React from 'react';
 
 import { BarSeries, Chart, ScaleType } from '../../src';
 
-export const example = () => {
+export const Example = () => {
   const darkmode = boolean('darkmode', false);
   const className = darkmode ? 'story-chart-dark' : 'story-chart';
   const toggleSpec = boolean('toggle bar spec', true);

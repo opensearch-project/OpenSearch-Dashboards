@@ -32,7 +32,7 @@ const data = new Array(100).fill(0).map(() => {
   };
 });
 
-export const example = () => {
+export const Example = () => {
   const onElementListeners = {
     onElementClick: action('onElementClick'),
     onElementOver: action('onElementOver'),

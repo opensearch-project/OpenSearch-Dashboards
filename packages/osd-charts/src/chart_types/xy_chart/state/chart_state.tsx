@@ -23,7 +23,7 @@ import { Crosshair } from '../renderer/dom/crosshair';
 import { BrushTool } from '../renderer/dom/brush';
 import { InternalChartState, GlobalChartState, BackwardRef } from '../../../state/chart_state';
 import { ChartTypes } from '../..';
-import { AnnotationTooltip } from '../renderer/dom/annotation_tooltips';
+import { Annotations } from '../renderer/dom/annotations';
 import { isBrushAvailableSelector } from './selectors/is_brush_available';
 import { isChartEmptySelector } from './selectors/is_chart_empty';
 import { computeLegendSelector } from './selectors/compute_legend';
@@ -88,14 +88,14 @@ export class XYAxisChartState implements InternalChartState {
   }
   chartRenderer(containerRef: BackwardRef, forwardStageRef: RefObject<HTMLCanvasElement>) {
     return (
-      <React.Fragment>
+      <>
         <Crosshair />
         <XYChart forwardStageRef={forwardStageRef} />
         <Tooltip getChartContainerRef={containerRef} />
-        <AnnotationTooltip getChartContainerRef={containerRef} />
+        <Annotations getChartContainerRef={containerRef} />
         <Highlighter />
         <BrushTool />
-      </React.Fragment>
+      </>
     );
   }
   getPointerCursor(globalState: GlobalChartState) {

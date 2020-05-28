@@ -21,7 +21,7 @@ import React from 'react';
 
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '../../src';
 
-export const example = () => {
+export const Example = () => {
   const customStyle = {
     tickLabelPadding: number('Tick Label Padding', 0),
   };

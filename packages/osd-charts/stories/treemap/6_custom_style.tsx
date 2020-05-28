@@ -34,7 +34,7 @@ const fillColor = ({ parent }: any) => {
   return `rgb(${Math.round(255 * shade)},${Math.round(255 * shade)},${Math.round(255 * shade)})`;
 };
 
-export const example = () => (
+export const Example = () => (
   <Chart
     className="story-chart"
     size={

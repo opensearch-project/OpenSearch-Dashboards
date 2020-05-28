@@ -21,7 +21,7 @@ import React from 'react';
 import { Chart, LineSeries, ScaleType } from '../../src/';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 
-export const example = () => {
+export const Example = () => {
   const toggleSpec = boolean('toggle line spec', true);
   const data1 = KIBANA_METRICS.metrics.kibana_os_load[0].data;
   const data2 = data1.map((datum) => [datum[0], datum[1] - 1]);

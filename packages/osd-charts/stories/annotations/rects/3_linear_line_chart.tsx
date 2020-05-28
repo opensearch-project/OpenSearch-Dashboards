@@ -23,7 +23,7 @@ import { getChartRotationKnob } from '../../utils/knobs';
 import { BandedAccessorType } from '../../../src/utils/geometry';
 import { Position } from '../../../src/utils/commons';
 
-export const example = () => {
+export const Example = () => {
   const debug = boolean('debug', false);
   const rotation = getChartRotationKnob();
 

@@ -25,12 +25,12 @@ export default {
   },
 };
 
-export { example as withOrdinalAxis } from './1_ordinal';
-export { example as negative90DegreeOrdinal } from './2_negative_ordinal';
-export { example as rotations0DegOrdinal } from './3_rotations_ordinal';
-export { example as rotations90DegOrdinal } from './4_90_ordinal';
-export { example as rotations180DegOrdinal } from './5_180_ordinal';
-export { example as negative90DegLinear } from './6_negative_linear';
-export { example as rotations0DegLinear } from './7_rotations_linear';
-export { example as rotations90DegLinear } from './8_90_deg_linear';
-export { example as rotations180DegLinear } from './9_180_deg_linear';
+export { Example as withOrdinalAxis } from './1_ordinal';
+export { Example as negative90DegreeOrdinal } from './2_negative_ordinal';
+export { Example as rotations0DegOrdinal } from './3_rotations_ordinal';
+export { Example as rotations90DegOrdinal } from './4_90_ordinal';
+export { Example as rotations180DegOrdinal } from './5_180_ordinal';
+export { Example as negative90DegLinear } from './6_negative_linear';
+export { Example as rotations0DegLinear } from './7_rotations_linear';
+export { Example as rotations90DegLinear } from './8_90_deg_linear';
+export { Example as rotations180DegLinear } from './9_180_deg_linear';

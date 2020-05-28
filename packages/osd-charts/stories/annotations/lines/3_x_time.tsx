@@ -44,7 +44,7 @@ function generateTimeAnnotationData(values: any[]): LineAnnotationDatum[] {
   }));
 }
 
-export const example = () => {
+export const Example = () => {
   const debug = boolean('debug', false);
   const rotation = getChartRotationKnob();
 

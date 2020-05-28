@@ -25,20 +25,20 @@ export default {
   },
 };
 
-export { example as basic } from './1_basic';
-export { example as withTimeXAxis } from './2_with_time';
-export { example as withLinearXAxis } from './3_with_linear';
-export { example as withLogYAxis } from './4_with_log';
-export { example as with4Axes } from './5_with_4_axes';
-export { example as withAxisAndLegend } from './6_with_axis_and_legend';
-export { example as stacked } from './7_stacked';
-export { example as stackedPercentage } from './8_stacked_percentage';
-export { example as stackedPercentageWithZeros } from './8_stacked_percentage_zeros';
-export { example as stackedSeparateSpecs } from './9_stacked_separate_specs';
-export { example as stackedSameNaming } from './10_stacked_same_naming';
-export { example as bandArea } from './13_band_area';
-export { example as stackedBand } from './14_stacked_band';
-export { example as stackedGrouped } from './15_stacked_grouped';
+export { Example as basic } from './1_basic';
+export { Example as withTimeXAxis } from './2_with_time';
+export { Example as withLinearXAxis } from './3_with_linear';
+export { Example as withLogYAxis } from './4_with_log';
+export { Example as with4Axes } from './5_with_4_axes';
+export { Example as withAxisAndLegend } from './6_with_axis_and_legend';
+export { Example as stacked } from './7_stacked';
+export { Example as stackedPercentage } from './8_stacked_percentage';
+export { Example as stackedPercentageWithZeros } from './8_stacked_percentage_zeros';
+export { Example as stackedSeparateSpecs } from './9_stacked_separate_specs';
+export { Example as stackedSameNaming } from './10_stacked_same_naming';
+export { Example as bandArea } from './13_band_area';
+export { Example as stackedBand } from './14_stacked_band';
+export { Example as stackedGrouped } from './15_stacked_grouped';
 
-export { example as testLinear } from './11_test_linear';
-export { example as testTime } from './12_test_time';
+export { Example as testLinear } from './11_test_linear';
+export { Example as testTime } from './12_test_time';

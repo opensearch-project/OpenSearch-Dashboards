@@ -19,7 +19,7 @@
 import createCachedSelector from 're-reselect';
 import { getTree } from './tree';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { getPieSpecOrNull } from './pie_spec';
+import { getPieSpec } from './pie_spec';
 import { HierarchyOfArrays, CHILDREN_KEY } from '../../layout/utils/group_by_rollup';
 import { Layer } from '../../specs';
 import { LegendItemLabel } from '../../../../state/selectors/get_legend_items_labels';
@@ -28,7 +28,7 @@ import { SettingsSpec } from '../../../../specs';
 
 /** @internal */
 export const getLegendItemsLabels = createCachedSelector(
-  [getPieSpecOrNull, getSettingsSpecSelector, getTree],
+  [getPieSpec, getSettingsSpecSelector, getTree],
   (pieSpec, { legendMaxDepth }, tree): LegendItemLabel[] => {
     if (!pieSpec) {
       return [];

@@ -20,7 +20,7 @@ import React from 'react';
 
 import { Axis, BarSeries, Chart, LineSeries, Position, ScaleType, Settings } from '../../src/';
 
-export const example = () => {
+export const Example = () => {
   const data1 = [
     [1, 1],
     [2, 2],

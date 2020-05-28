@@ -22,7 +22,7 @@ import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 // for testing purposes only
-export const example = () => {
+export const Example = () => {
   const data = [
     [1, 1],
     [2, 2],
@@ -56,7 +56,7 @@ export const example = () => {
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
   },

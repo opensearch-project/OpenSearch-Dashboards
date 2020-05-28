@@ -25,7 +25,7 @@ import { SB_SOURCE_PANEL } from '../utils/storybook';
 const dg = new SeededDataGenerator();
 const data2 = dg.generateSimpleSeries(40);
 
-export const example = () => {
+export const Example = () => {
   const theme: RecursivePartial<Theme> = {
     chartMargins: {
       bottom: 0,
@@ -96,7 +96,7 @@ export const example = () => {
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
   },

@@ -19,7 +19,7 @@
 import React from 'react';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
 
-export const example = () => {
+export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings showLegend showLegendExtra legendPosition={Position.Right} rotation={180} />

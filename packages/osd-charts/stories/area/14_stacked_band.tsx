@@ -23,7 +23,7 @@ import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana
 
 const dateFormatter = timeFormatter('HH:mm');
 
-export const example = () => {
+export const Example = () => {
   const data = KIBANA_METRICS.metrics.kibana_os_load[0].data;
   const data2 = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => [d[0], 20, 10]);
   const scaleToDataExtent = boolean('scale to extent', false);

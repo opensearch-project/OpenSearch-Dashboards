@@ -21,7 +21,7 @@ import React from 'react';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src/';
 import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
 
-export const example = () => {
+export const Example = () => {
   const splitSeries = boolean('split series', true) ? ['g1', 'g2'] : undefined;
   return (
     <Chart className="story-chart">

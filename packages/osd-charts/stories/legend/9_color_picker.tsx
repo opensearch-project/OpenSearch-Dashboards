@@ -29,7 +29,7 @@ import { Color } from '../../src/utils/commons';
 const onChangeAction = action('onChange');
 const onCloseAction = action('onClose');
 
-export const example = () => {
+export const Example = () => {
   const [colors, setColors] = useState<Record<SeriesKey, Color>>({});
 
   const renderColorPicker: LegendColorPicker = ({ anchor, color, onClose, seriesIdentifier, onChange }) => {
@@ -76,7 +76,7 @@ export const example = () => {
   );
 };
 
-example.story = {
+Example.story = {
   parameters: {
     info: {
       text:

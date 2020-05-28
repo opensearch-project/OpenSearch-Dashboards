@@ -53,7 +53,7 @@ export const getAnnotationTooltipStateSelector = createCachedSelector(
 )(getChartIdSelector);
 
 function getAnnotationTooltipState(
-  { x, y }: Point,
+  cursorPosition: Point,
   {
     chartDimensions,
   }: {
@@ -67,7 +67,7 @@ function getAnnotationTooltipState(
   tooltip: TooltipInfo,
 ): AnnotationTooltipState | null {
   // get positions relative to chart
-  if (x < 0 || y < 0) {
+  if (cursorPosition.x < 0 || cursorPosition.y < 0) {
     return null;
   }
   const { xScale, yScales } = geometries.scales;
@@ -75,10 +75,8 @@ function getAnnotationTooltipState(
   if (!xScale || !yScales) {
     return null;
   }
-  // use area chart projected coordinates of the pointer
-  const chartAreaProjectedPointer = { x: x - chartDimensions.left, y: y - chartDimensions.top };
   const tooltipState = computeAnnotationTooltipState(
-    chartAreaProjectedPointer,
+    cursorPosition,
     annotationDimensions,
     annotationSpecs,
     chartRotation,

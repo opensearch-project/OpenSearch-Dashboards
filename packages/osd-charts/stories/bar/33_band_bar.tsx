@@ -25,7 +25,7 @@ import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana
 
 const dateFormatter = timeFormatter('HH:mm:ss');
 
-export const example = () => {
+export const Example = () => {
   const getRandomNumber = getRandomNumberGenerator();
   const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d: any) => {
     return {

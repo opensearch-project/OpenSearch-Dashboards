@@ -22,7 +22,7 @@ import React from 'react';
 import { Axis, BarSeries, Chart, SeriesColorAccessor, LineSeries, Position, ScaleType, Settings } from '../../src';
 import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
 
-export const example = () => {
+export const Example = () => {
   const barColor = color('barSeriesColor', '#000');
   const barSeriesColorAccessor: SeriesColorAccessor = ({ specId, yAccessor, splitAccessors }) => {
     if (

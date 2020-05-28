@@ -22,7 +22,7 @@ import { config } from '../../src/chart_types/partition_chart/layout/config/conf
 import React from 'react';
 import { countryLookup, indexInterpolatedFillColor, interpolatorCET2s } from '../utils/utils';
 
-export const example = () => (
+export const Example = () => (
   <Chart className="story-chart">
     <Partition
       id="spec_1"

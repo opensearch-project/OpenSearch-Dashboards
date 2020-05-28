@@ -23,7 +23,7 @@ import React from 'react';
 import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/types/viewmodel_types';
 import { categoricalFillColor, colorBrewerCategoricalPastel12, productLookup } from '../utils/utils';
 
-export const example = () => (
+export const Example = () => (
   <Chart className="story-chart">
     <Partition
       id="spec_1"

@@ -40,25 +40,25 @@ function usePrevious(value: string) {
 export function specComponentFactory<U extends Spec, D extends keyof U>(
   defaultProps: Pick<U, D | 'chartType' | 'specType'>,
 ) {
-  const spec = (props: U & DispatchProps) => {
+  const SpecInstance = (props: U & DispatchProps) => {
     const prevId = usePrevious(props.id);
-    const { removeSpec, upsertSpec, ...spec } = props;
+    const { removeSpec, upsertSpec, ...SpecInstance } = props;
     useEffect(() => {
       if (prevId && prevId !== props.id) {
         removeSpec(prevId);
       }
-      upsertSpec(spec);
+      upsertSpec(SpecInstance);
     });
     useEffect(
       () => () => {
         removeSpec(props.id);
       },
-      [],
+      [], // eslint-disable-line react-hooks/exhaustive-deps
     );
     return null;
   };
-  spec.defaultProps = defaultProps;
-  return spec;
+  SpecInstance.defaultProps = defaultProps;
+  return SpecInstance;
 }
 
 const mapDispatchToProps = (dispatch: Dispatch): DispatchProps =>

@@ -23,7 +23,7 @@ import { boolean } from '@storybook/addon-knobs';
 import { DateTime } from 'luxon';
 import moment from 'moment-timezone';
 
-export const example = () => {
+export const Example = () => {
   const now = DateTime.fromISO('2019-01-11T00:00:00.000')
     .setZone('utc+1')
     .toMillis();

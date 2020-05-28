@@ -22,7 +22,7 @@ import React from 'react';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
 import { getChartRotationKnob } from '../utils/knobs';
 
-export const example = () => {
+export const Example = () => {
   const hasCustomDomain = boolean('has custom domain', false);
   const xDomain = hasCustomDomain
     ? {

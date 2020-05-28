@@ -22,7 +22,7 @@ import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src
 
 import { getChartRotationKnob } from '../utils/knobs';
 
-export const example = () => {
+export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings onBrushEnd={action('onBrushEnd')} rotation={getChartRotationKnob()} />

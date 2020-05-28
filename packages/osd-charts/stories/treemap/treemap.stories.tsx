@@ -25,13 +25,13 @@ export default {
   },
 };
 
-export { example as oneLayer } from './1_one_layer';
-export { example as oneLayer2 } from './2_one_layer_2';
-export { example as midTwoLayers } from './3_mid_two';
-export { example as twoLayersStressTest } from './4_two_layer_stress';
-export { example as multiColor } from './5_multicolor';
-export { example as customStyle } from './6_custom_style';
-export { example as percentage } from './7_percentage';
-export { example as grooveText } from './8_groove_text';
-export { example as zeroValues } from './9_zero_values';
-export { example as threeLayer } from './10_three_layers';
+export { Example as oneLayer } from './1_one_layer';
+export { Example as oneLayer2 } from './2_one_layer_2';
+export { Example as midTwoLayers } from './3_mid_two';
+export { Example as twoLayersStressTest } from './4_two_layer_stress';
+export { Example as multiColor } from './5_multicolor';
+export { Example as customStyle } from './6_custom_style';
+export { Example as percentage } from './7_percentage';
+export { Example as grooveText } from './8_groove_text';
+export { Example as zeroValues } from './9_zero_values';
+export { Example as threeLayer } from './10_three_layers';

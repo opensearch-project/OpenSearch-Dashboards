@@ -25,24 +25,24 @@ export default {
   },
 };
 
-export { example as chartSize } from './1_chart_size';
-export { example as marginsAndPaddings } from './2_margins';
-export { example as axis } from './3_axis';
-export { example as themeStyling } from './4_theme_styling';
-export { example as partialCustomTheme } from './5_partial_custom_theme';
-export { example as partialCustomThemeWithBaseTheme } from './6_partial_and_base';
-export { example as multipleCustomPartialThemes } from './7_multiple_custom';
-export { example as customSeriesColorsViaColorsArray } from './8_custom_series_colors_array';
-export { example as customSeriesColorsViaAccessorFunction } from './9_custom_series_colors_function';
+export { Example as chartSize } from './1_chart_size';
+export { Example as marginsAndPaddings } from './2_margins';
+export { Example as axis } from './3_axis';
+export { Example as themeStyling } from './4_theme_styling';
+export { Example as partialCustomTheme } from './5_partial_custom_theme';
+export { Example as partialCustomThemeWithBaseTheme } from './6_partial_and_base';
+export { Example as multipleCustomPartialThemes } from './7_multiple_custom';
+export { Example as customSeriesColorsViaColorsArray } from './8_custom_series_colors_array';
+export { Example as customSeriesColorsViaAccessorFunction } from './9_custom_series_colors_function';
 
-export { example as customSeriesStylesBars } from './10_custom_bars';
-export { example as customSeriesStylesLines } from './11_custom_lines';
-export { example as customSeriesStylesArea } from './12_custom_area';
-export { example as customSeriesName } from './13_custom_series_name';
-export { example as customSeriesNameConfig } from './13_custom_series_name_config';
-export { example as customSeriesNameFormatting } from './14_custom_series_name_formatting';
-export { example as tickLabelPaddingBothPropAndTheme } from './15_tick_label';
-export { example as styleAccessorOverrides } from './16_style_accessor';
-export { example as barSeriesColorVariant } from './17_bar_series_color_variant';
-export { example as lineSeriesColorVariant } from './18_line_series_color_variant';
-export { example as areaSeriesColorVariant } from './19_area_series_color_variant';
+export { Example as customSeriesStylesBars } from './10_custom_bars';
+export { Example as customSeriesStylesLines } from './11_custom_lines';
+export { Example as customSeriesStylesArea } from './12_custom_area';
+export { Example as customSeriesName } from './13_custom_series_name';
+export { Example as customSeriesNameConfig } from './13_custom_series_name_config';
+export { Example as customSeriesNameFormatting } from './14_custom_series_name_formatting';
+export { Example as tickLabelPaddingBothPropAndTheme } from './15_tick_label';
+export { Example as styleAccessorOverrides } from './16_style_accessor';
+export { Example as barSeriesColorVariant } from './17_bar_series_color_variant';
+export { Example as lineSeriesColorVariant } from './18_line_series_color_variant';
+export { Example as areaSeriesColorVariant } from './19_area_series_color_variant';

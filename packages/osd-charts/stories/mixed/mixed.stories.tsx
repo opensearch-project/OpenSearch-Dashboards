@@ -25,10 +25,10 @@ export default {
   },
 };
 
-export { example as barsAndLines } from './1_bars_and_lines';
-export { example as linesAndAreas } from './2_lines_and_areas';
-export { example as areasAndBars } from './3_areas_and_bars';
-export { example as testBarLinesLinear } from './4_test_bar';
-export { example as testBarLinesTime } from './5_test_bar_time';
-export { example as fittingFunctionsNonStackedSeries } from './6_fitting';
-export { example as markSizeAccessor } from './7_marks';
+export { Example as barsAndLines } from './1_bars_and_lines';
+export { Example as linesAndAreas } from './2_lines_and_areas';
+export { Example as areasAndBars } from './3_areas_and_bars';
+export { Example as testBarLinesLinear } from './4_test_bar';
+export { Example as testBarLinesTime } from './5_test_bar_time';
+export { Example as fittingFunctionsNonStackedSeries } from './6_fitting';
+export { Example as markSizeAccessor } from './7_marks';

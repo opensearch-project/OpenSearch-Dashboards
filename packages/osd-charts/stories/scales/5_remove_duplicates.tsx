@@ -20,7 +20,7 @@ import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 import { Axis, Chart, LineSeries, Position, ScaleType, Settings } from '../../src';
 
-export const example = () => {
+export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings hideDuplicateAxes={boolean('hideDuplicateAxes', true)} />
@@ -48,7 +48,7 @@ export const example = () => {
   );
 };
 
-example.story = {
+Example.story = {
   parameters: {
     info: {
       text: `hideDuplicateAxes will remove redundant axes that have the same min and max labels and position`,

@@ -34,7 +34,7 @@ const colorMap: { [k: number]: Color } = {
 
 const bandFillColor = (x: number): Color => colorMap[x];
 
-export const example = () => (
+export const Example = () => (
   <Chart className="story-chart" /*size={{ width: 800, height: 800 }}*/>
     <Goal
       id="spec_1"

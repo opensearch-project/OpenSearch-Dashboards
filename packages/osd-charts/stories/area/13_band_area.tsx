@@ -34,7 +34,7 @@ import { getRandomNumberGenerator } from '../../src/mocks/utils';
 
 const dateFormatter = timeFormatter('HH:mm');
 
-export const example = () => {
+export const Example = () => {
   const getRandomNumber = getRandomNumberGenerator();
   const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => {
     return {

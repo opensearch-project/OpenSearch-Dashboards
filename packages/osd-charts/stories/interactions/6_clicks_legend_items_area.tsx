@@ -20,7 +20,7 @@ import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '../../src/';
 
-export const example = () => {
+export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings

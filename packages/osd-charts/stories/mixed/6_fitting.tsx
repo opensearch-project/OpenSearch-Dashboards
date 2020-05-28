@@ -34,7 +34,7 @@ import {
 
 import { SB_KNOBS_PANEL } from '../utils/storybook';
 
-export const example = () => {
+export const Example = () => {
   const dataTypes = {
     isolated: [
       { x: 0, y: 3 },
@@ -214,7 +214,7 @@ export const example = () => {
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_KNOBS_PANEL },
   },

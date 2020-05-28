@@ -34,6 +34,8 @@ import { Position, Rendering, Rotation, Color } from '../utils/commons';
 import { ScaleContinuousType, ScaleOrdinalType } from '../scales';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { GroupId } from '../utils/ids';
+import { CustomTooltip } from '../components/tooltip/types';
+import { Placement } from '../components/portal';
 
 export interface LayerValue {
   groupByRollup: PrimitiveValue;
@@ -97,18 +99,25 @@ export interface PointerOutEvent extends BasePointerEvent {
 
 export type PointerEvent = PointerOverEvent | PointerOutEvent;
 
-/** The type of tooltip to use */
+/**
+ * This enums provides the available tooltip types
+ * @public
+ */
 export const TooltipType = Object.freeze({
   /** Vertical cursor parallel to x axis */
   VerticalCursor: 'vertical' as 'vertical',
   /** Vertical and horizontal cursors */
   Crosshairs: 'cross' as 'cross',
-  /** Follor the mouse coordinates */
+  /** Follow the mouse coordinates */
   Follow: 'follow' as 'follow',
   /** Hide every tooltip */
   None: 'none' as 'none',
 });
 
+/**
+ * The TooltipType
+ * @public
+ */
 export type TooltipType = $Values<typeof TooltipType>;
 
 export const BrushAxis = Object.freeze({
@@ -119,6 +128,10 @@ export const BrushAxis = Object.freeze({
 
 export type BrushAxis = $Values<typeof BrushAxis>;
 
+/**
+ * This interface describe the properties of single value shown in the tooltip
+ * @public
+ */
 export interface TooltipValue {
   /**
    * The label of the tooltip value
@@ -154,14 +167,67 @@ export interface TooltipValue {
   valueAccessor?: Accessor;
 }
 
+/**
+ * A value formatter of a {@link TooltipValue}
+ * @public
+ */
 export type TooltipValueFormatter = (data: TooltipValue) => JSX.Element | string;
 
+/**
+ * The advanced configuration for the tooltip
+ * @public
+ */
 export interface TooltipProps {
+  /**
+   * The {@link (TooltipType:type) | TooltipType} of the tooltip
+   */
   type?: TooltipType;
+  /**
+   * Whenever the tooltip needs to snap to the x/band position or not
+   */
   snap?: boolean;
+  /**
+   * A {@link TooltipValueFormatter} to format the header value
+   */
   headerFormatter?: TooltipValueFormatter;
+  /**
+   * Preferred placement of tooltip relative to anchor.
+   *
+   * This may not be the final placement given the positioning fallbacks.
+   *
+   * @defaultValue `right` {@link (Placement:type) | Placement.Right}
+   */
+  placement?: Placement;
+  /**
+   * If given tooltip placement is not sutable, these `Placement`s will
+   * be used as fallback placements.
+   */
+  fallbackPlacements?: Placement[];
+  /**
+   * Boundary element to contain tooltip within
+   *
+   * `'chart'` will use the chart container as the boundary
+   *
+   * @defaultValue parent scroll container
+   */
+  boundary?: HTMLElement | 'chart';
+  /**
+   * Unit for event (i.e. `time`, `feet`, `count`, etc.).
+   * Not currently used/implemented
+   * @alpha
+   */
   unit?: string;
+  /**
+   * Render custom tooltip given header and values
+   */
+  customTooltip?: CustomTooltip;
 }
+
+/**
+ * Either a TooltipType or an object with configuration of type, snap, and/or headerFormatter
+ * @public
+ */
+export type TooltipSettings = TooltipType | TooltipProps;
 
 export interface LegendColorPickerProps {
   /**
@@ -214,8 +280,10 @@ export interface SettingsSpec extends Spec {
   rotation: Rotation;
   animateData: boolean;
   showLegend: boolean;
-  /** Either a TooltipType or an object with configuration of type, snap, and/or headerFormatter */
-  tooltip: TooltipType | TooltipProps;
+  /**
+   * The tooltip configuration forr the chart {@link TooltipSettings}
+   */
+  tooltip: TooltipSettings;
   debug: boolean;
   legendPosition: Position;
   /**
@@ -283,7 +351,18 @@ export type DefaultSettingsProps =
   | 'brushAxis'
   | 'minBrushDelta';
 
+/**
+ * Default value for the tooltip type
+ * @defaultValue `vertical` {@link (TooltipType:type) | TooltipType.VerticalCursor}
+ * @public
+ */
 export const DEFAULT_TOOLTIP_TYPE = TooltipType.VerticalCursor;
+
+/**
+ * Default value for the tooltip snap
+ * @defaultValue `true`
+ * @public
+ */
 export const DEFAULT_TOOLTIP_SNAP = true;
 
 export const SpecTypes = Object.freeze({
@@ -354,16 +433,17 @@ export function isFollowTooltipType(type: TooltipType) {
 }
 
 /** @internal */
-export function getTooltipType(settings: SettingsSpec): TooltipType | undefined {
+export function getTooltipType(settings: SettingsSpec): TooltipType {
+  const defaultType = TooltipType.VerticalCursor;
   const { tooltip } = settings;
   if (tooltip === undefined || tooltip === null) {
-    return undefined;
+    return defaultType;
   }
   if (isTooltipType(tooltip)) {
     return tooltip;
   }
   if (isTooltipProps(tooltip)) {
-    return tooltip.type || undefined;
+    return tooltip.type || defaultType;
   }
-  return undefined;
+  return defaultType;
 }

@@ -25,7 +25,7 @@ import { SB_SOURCE_PANEL } from '../utils/storybook';
 const dateFormatter = timeFormatter('HH:mm');
 
 // for testing purposes only
-export const example = () => {
+export const Example = () => {
   const start = DateTime.fromISO('2019-01-01T00:00:00.000', { zone: 'utc' });
   const data = [
     [start.toMillis(), 1],
@@ -60,7 +60,7 @@ export const example = () => {
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
   },

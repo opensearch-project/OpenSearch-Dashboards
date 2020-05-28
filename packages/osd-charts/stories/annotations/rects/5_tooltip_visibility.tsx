@@ -21,7 +21,7 @@ import React from 'react';
 import { AnnotationTooltipFormatter, Axis, BarSeries, Chart, ScaleType, RectAnnotation } from '../../../src';
 import { Position } from '../../../src/utils/commons';
 
-export const example = () => {
+export const Example = () => {
   const tooltipOptions = {
     'default formatter, details defined': 'default_defined',
     'default formatter, details undefined': 'default_undefined',

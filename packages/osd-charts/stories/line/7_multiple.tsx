@@ -32,7 +32,7 @@ import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana
 
 const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
 
-export const example = () => {
+export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings showLegend showLegendExtra legendPosition={Position.Right} />

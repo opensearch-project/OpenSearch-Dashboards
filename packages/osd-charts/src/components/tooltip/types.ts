@@ -16,9 +16,57 @@
  * specific language governing permissions and limitations
  * under the License. */
 
+import { ComponentType } from 'react';
+
 import { TooltipValue } from '../../specs';
 
+/**
+ * The set of info used to render the a tooltip.
+ * @public
+ */
 export interface TooltipInfo {
+  /**
+   * The TooltipValue for the header. On XYAxis chart the x value
+   */
   header: TooltipValue | null;
+  /**
+   * The array of {@link TooltipValue}s to show on the tooltip.
+   * On XYAxis chart correspond to the set of y values for each series
+   */
   values: TooltipValue[];
+}
+
+/**
+ * The react component used to render a custom tooltip
+ * with the {@link TooltipInfo} props
+ * @public
+ */
+export type CustomTooltip = ComponentType<TooltipInfo>;
+
+/** @internal */
+export interface TooltipAnchorPosition {
+  /**
+   * true if the x axis is vertical
+   */
+  isRotated?: boolean;
+  /**
+   * the top position of the anchor
+   */
+  y0?: number;
+  /**
+   * the bottom position of the anchor
+   */
+  y1: number;
+  /**
+   * the right position of anchor
+   */
+  x0?: number;
+  /**
+   * the left position of the anchor
+   */
+  x1: number;
+  /**
+   * the padding to add between the tooltip position and the final position
+   */
+  padding?: number;
 }

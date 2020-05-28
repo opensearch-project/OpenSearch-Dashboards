@@ -22,7 +22,7 @@ import React from 'react';
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '../../src';
 import { SeededDataGenerator } from '../../src/mocks/utils';
 
-export const example = () => {
+export const Example = () => {
   const dg = new SeededDataGenerator();
   const data = dg.generateSimpleSeries(31);
 

@@ -36,7 +36,7 @@ function generateAnnotationData(values: any[]): LineAnnotationDatum[] {
   return values.map((value, index) => ({ dataValue: value, details: `detail-${index}` }));
 }
 
-export const example = () => {
+export const Example = () => {
   const debug = boolean('debug', false);
   const rotation = getChartRotationKnob();
 
@@ -63,7 +63,7 @@ export const example = () => {
   const axisPosition = Position.Bottom;
 
   const marker = select<'alert' | 'eye' | 'questionInCircle'>(
-    'marker icon (examples from internal Icon library)',
+    'marker icon (Examples from internal Icon library)',
     {
       alert: 'alert',
       eye: 'eye',

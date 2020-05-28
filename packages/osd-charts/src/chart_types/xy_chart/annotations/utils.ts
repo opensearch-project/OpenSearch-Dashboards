@@ -55,14 +55,27 @@ export function isXDomain(domainType: AnnotationDomainType): boolean {
 }
 
 /** @internal */
-export function getRotatedCursor(
-  /** the cursor position relative to the projection area */
+export function getTranformedCursor(
   cursorPosition: Point,
   chartDimensions: Dimensions,
-  chartRotation: Rotation,
+  chartRotation: Rotation | null,
+  /**
+   * Used to account for projected cursor position relative to chart dimensions
+   */
+  projectArea = false,
 ): Point {
-  const { x, y } = cursorPosition;
-  const { height, width } = chartDimensions;
+  const { height, width, left, top } = chartDimensions;
+  let { x, y } = cursorPosition;
+
+  if (projectArea) {
+    x = cursorPosition.x - left;
+    y = cursorPosition.y - top;
+  }
+
+  if (chartRotation === null) {
+    return { x, y };
+  }
+
   switch (chartRotation) {
     case 0:
       return { x, y };
@@ -73,6 +86,44 @@ export function getRotatedCursor(
     case 180:
       return { x: width - x, y: height - y };
   }
+}
+
+/** @internal */
+export function invertTranformedCursor(
+  cursorPosition: Point,
+  chartDimensions: Dimensions,
+  chartRotation: Rotation | null,
+  /**
+   * Used to account for projected cursor position relative to chart dimensions
+   */
+  projectArea = false,
+): Point {
+  const { height, width, left, top } = chartDimensions;
+  let { x, y } = cursorPosition;
+
+  switch (chartRotation) {
+    case 0:
+    case null:
+      break;
+    case 90:
+      x = width - cursorPosition.y;
+      y = cursorPosition.x;
+      break;
+    case -90:
+      y = height - cursorPosition.x;
+      x = cursorPosition.y;
+      break;
+    case 180:
+      y = height - cursorPosition.y;
+      x = width - cursorPosition.x;
+  }
+
+  if (projectArea) {
+    x = x + left;
+    y = y + top;
+  }
+
+  return { x, y };
 }
 
 /** @internal */

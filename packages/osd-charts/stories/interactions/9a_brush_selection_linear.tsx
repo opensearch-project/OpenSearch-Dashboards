@@ -23,7 +23,7 @@ import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, BrushAxis } fro
 import { getChartRotationKnob } from '../utils/knobs';
 import { select } from '@storybook/addon-knobs';
 
-export const example = () => {
+export const Example = () => {
   const brushAxisSelect = select(
     'brush axis',
     {

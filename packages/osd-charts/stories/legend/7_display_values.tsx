@@ -22,7 +22,7 @@ import { AreaSeries, Axis, Chart, CurveType, Position, ScaleType, Settings } fro
 import { TSVB_DATASET } from '../../src/utils/data_samples/test_dataset_tsvb';
 import { arrayKnobs } from '../utils/knobs';
 
-export const example = () => {
+export const Example = () => {
   const showLegendDisplayValue = boolean('show display value in legend', true);
   const legendPosition = select(
     'legendPosition',

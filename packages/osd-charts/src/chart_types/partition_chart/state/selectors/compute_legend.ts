@@ -19,7 +19,7 @@
 import createCachedSelector from 're-reselect';
 import { LegendItem } from '../../../../commons/legend';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { getPieSpecOrNull } from './pie_spec';
+import { getPieSpec } from './pie_spec';
 import { partitionGeometries } from './geometries';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { PrimitiveValue } from '../../layout/utils/group_by_rollup';
@@ -29,7 +29,7 @@ import { Position } from '../../../../utils/commons';
 
 /** @internal */
 export const computeLegendSelector = createCachedSelector(
-  [getPieSpecOrNull, getSettingsSpecSelector, partitionGeometries, getFlatHierarchy],
+  [getPieSpec, getSettingsSpecSelector, partitionGeometries, getFlatHierarchy],
   (pieSpec, settings, geoms, sortedItems): LegendItem[] => {
     if (!pieSpec) {
       return [];

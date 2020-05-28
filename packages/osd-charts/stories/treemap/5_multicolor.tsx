@@ -36,7 +36,7 @@ const defaultFillColor = (colorMaker: any) => ({ parent }: any) => {
   return colorMaker(parent.sortIndex / (siblingCountLayer1 + 1));
 };
 
-export const example = () => (
+export const Example = () => (
   <Chart
     className="story-chart"
     size={

@@ -32,7 +32,7 @@ import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 // for testing purposes only
-export const example = () => {
+export const Example = () => {
   const formatter = timeFormatter(niceTimeFormatByDay(1));
 
   const xDomain = {
@@ -63,7 +63,7 @@ export const example = () => {
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
   },

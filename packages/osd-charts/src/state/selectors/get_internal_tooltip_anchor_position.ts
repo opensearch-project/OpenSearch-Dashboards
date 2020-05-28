@@ -17,7 +17,7 @@
  * under the License. */
 
 import { GlobalChartState } from '../chart_state';
-import { TooltipAnchorPosition } from '../../components/tooltip/utils';
+import { TooltipAnchorPosition } from '../../components/tooltip/types';
 
 /** @internal */
 export const getInternalTooltipAnchorPositionSelector = (state: GlobalChartState): TooltipAnchorPosition | null => {

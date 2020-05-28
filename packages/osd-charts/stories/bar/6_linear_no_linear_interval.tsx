@@ -21,7 +21,7 @@ import React from 'react';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
-export const example = () => (
+export const Example = () => (
   <Chart className="story-chart">
     <Settings xDomain={{ max: 100 }} />
     <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
@@ -47,7 +47,7 @@ export const example = () => (
 );
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
   },

@@ -19,7 +19,7 @@
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import createCachedSelector from 're-reselect';
 import { getPickedShapesLayerValues } from './picked_shapes';
-import { getPieSpecOrNull } from './pie_spec';
+import { getPieSpec } from './pie_spec';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { Selector } from 'react-redux';
 import { ChartTypes } from '../../../index';
@@ -37,7 +37,7 @@ export function createOnElementOutCaller(): (state: GlobalChartState) => void {
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartTypes.Partition) {
       selector = createCachedSelector(
-        [getPieSpecOrNull, getPickedShapesLayerValues, getSettingsSpecSelector],
+        [getPieSpec, getPickedShapesLayerValues, getSettingsSpecSelector],
         (pieSpec, pickedShapes, settings): void => {
           if (!pieSpec) {
             return;

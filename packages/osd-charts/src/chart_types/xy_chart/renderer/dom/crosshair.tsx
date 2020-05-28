@@ -126,7 +126,7 @@ const mapStateToProps = (state: GlobalChartState): CrosshairProps => {
     chartRotation: getChartRotationSelector(state),
     cursorBandPosition: getCursorBandPositionSelector(state),
     cursorLinePosition: getCursorLinePositionSelector(state),
-    tooltipType: getTooltipTypeSelector(state) || TooltipType.VerticalCursor,
+    tooltipType: getTooltipTypeSelector(state),
   };
 };
 

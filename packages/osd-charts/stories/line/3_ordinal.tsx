@@ -24,7 +24,7 @@ import { SB_KNOBS_PANEL } from '../utils/storybook';
 
 const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
 
-export const example = () => {
+export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings rotation={getChartRotationKnob()} />
@@ -48,7 +48,7 @@ export const example = () => {
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_KNOBS_PANEL },
   },

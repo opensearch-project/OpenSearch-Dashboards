@@ -52,7 +52,7 @@ const pieData: Array<PieDatum> = [
   ['PK', 43, 'PK', 2],
 ];
 
-export const example = () => {
+export const Example = () => {
   const partitionLayout = select(
     'layout',
     { sunburst: PartitionLayout.sunburst, treemap: PartitionLayout.treemap },
@@ -113,14 +113,14 @@ export const example = () => {
   );
 };
 
-example.story = {
+Example.story = {
   parameters: {
     info: {
       text: `The \`onElementClick\` receive an argument with the following type definition: \`Array<[Array<LayerValue>, SeriesIdentifier]>\`.
 
 Usually the outer array contains only one item but, in a near future, we will group smaller slices into a single one during the interaction.
-      
-For every clicked slice, you will have an array of \`LayerValue\`s and a \`SeriesIdentifier\`. The array of \`LayerValues\` is sorted 
+
+For every clicked slice, you will have an array of \`LayerValue\`s and a \`SeriesIdentifier\`. The array of \`LayerValues\` is sorted
 in the same way as the \`layers\` props, and helps you to idenfity the \`groupByRollup\` value and the slice value on every sunburst level.
       `,
     },

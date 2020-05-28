@@ -30,7 +30,7 @@ import {
 } from '../utils/utils';
 import { boolean, number } from '@storybook/addon-knobs';
 
-export const example = () => {
+export const Example = () => {
   const flatLegend = boolean('flatLegend', true);
   const legendMaxDepth = number('legendMaxDepth', 2, {
     min: 0,
@@ -106,10 +106,10 @@ export const example = () => {
   );
 };
 
-example.story = {
+Example.story = {
   parameters: {
     info: {
-      text: `To flatten a hierarchical legend (like the rendered in a pie chart or a treemap when using a multi-layer configuration) you can 
+      text: `To flatten a hierarchical legend (like the rendered in a pie chart or a treemap when using a multi-layer configuration) you can
 add the \`flatLegend\` prop into the \`<Settings />\` component.
 
 To limit displayed hierarchy to a specific depth, you can use the \`legendMaxDepth\` prop. The first layer will have a depth of \`1\`.`,

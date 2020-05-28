@@ -18,34 +18,108 @@
 
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, TooltipProps, Placement } from '../../src';
 import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
-import { getChartRotationKnob } from '../utils/knobs';
+import { getChartRotationKnob, getPlacementKnob, getTooltipTypeKnob } from '../utils/knobs';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
+import { select, boolean, optionsKnob } from '@storybook/addon-knobs';
 
-// for testing purposes only
-export const example = () => {
+const CustomTooltip = () => (
+  <div
+    style={{
+      padding: 10,
+      height: 40,
+      backgroundColor: 'blue',
+      color: 'white',
+    }}
+  >
+    My Custom Tooltip
+  </div>
+);
+
+const getFallbackPlacements = (): Placement[] | undefined => {
+  const knob = optionsKnob<Placement>(
+    'Fallback Placements',
+    {
+      Top: Placement.Top,
+      Bottom: Placement.Bottom,
+      Left: Placement.Left,
+      Right: Placement.Right,
+      TopStart: Placement.TopStart,
+      TopEnd: Placement.TopEnd,
+      BottomStart: Placement.BottomStart,
+      BottomEnd: Placement.BottomEnd,
+      RightStart: Placement.RightStart,
+      RightEnd: Placement.RightEnd,
+      LeftStart: Placement.LeftStart,
+      LeftEnd: Placement.LeftEnd,
+      Auto: Placement.Auto,
+      AutoStart: Placement.AutoStart,
+      AutoEnd: Placement.AutoEnd,
+    },
+    [Placement.Right, Placement.Left, Placement.Top, Placement.Bottom],
+    {
+      display: 'multi-select',
+    },
+  );
+
+  if (typeof knob === 'string') {
+    // @ts-ignore
+    return knob.split(', ');
+    // @ts-ignore
+  } else if (knob.length === 0) {
+    return undefined;
+  }
+
+  return knob;
+};
+
+export const Example = () => {
+  // @ts-ignore
+  const boundary = select<TooltipProps['boundary']>(
+    'Boundary Element',
+    {
+      Chart: 'chart',
+      'Document Body': document.body,
+      Default: undefined,
+    },
+    undefined,
+  );
+
+  // Added buffer to test tooltip positioning within chart container
   return (
-    <Chart className="story-chart">
-      <Settings rotation={getChartRotationKnob()} />
-      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
-      <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
+    <div className="buffer" style={{ width: '100%', height: '100%' }}>
+      <Chart className="story-chart">
+        <Settings
+          rotation={getChartRotationKnob()}
+          tooltip={{
+            placement: getPlacementKnob('Tooltip placement'),
+            fallbackPlacements: getFallbackPlacements(),
+            type: getTooltipTypeKnob(),
+            boundary,
+            customTooltip: boolean('Custom Tooltip', false) ? CustomTooltip : undefined,
+          }}
+          showLegend={boolean('Show Legend', false)}
+        />
+        <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
+        <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
-      <BarSeries
-        id="bars1"
-        xScaleType={ScaleType.Ordinal}
-        yScaleType={ScaleType.Linear}
-        xAccessor="x"
-        yAccessors={['y1', 'y2']}
-        splitSeriesAccessors={['g']}
-        data={TestDatasets.BARCHART_2Y1G}
-      />
-    </Chart>
+        <BarSeries
+          id="bars1"
+          xScaleType={ScaleType.Ordinal}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y1', 'y2']}
+          splitSeriesAccessors={['g']}
+          data={TestDatasets.BARCHART_2Y1G}
+        />
+      </Chart>
+    </div>
   );
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
   },

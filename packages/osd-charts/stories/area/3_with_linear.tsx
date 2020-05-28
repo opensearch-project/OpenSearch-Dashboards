@@ -21,7 +21,7 @@ import { AreaSeries, Axis, Chart, CurveType, Position, ScaleType } from '../../s
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
-export const example = () => {
+export const Example = () => {
   const start = KIBANA_METRICS.metrics.kibana_os_load[0].data[0][0];
   const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 20).map((d) => {
     return [(d[0] - start) / 30000, d[1]];
@@ -50,7 +50,7 @@ export const example = () => {
 };
 
 // storybook configuration
-example.story = {
+Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
   },

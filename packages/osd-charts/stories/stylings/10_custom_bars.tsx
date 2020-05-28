@@ -36,7 +36,7 @@ function range(title: string, min: number, max: number, value: number, groupId?:
   );
 }
 
-export const example = () => {
+export const Example = () => {
   const applyBarStyle = boolean('apply bar style (bar 1 series)', true, 'Chart Global Theme');
 
   const barSeriesStyle = {
