@@ -110,6 +110,12 @@ echo " -- run linter"
 yarn lint
 
 ###
+### run prettier check
+###
+echo " -- run prettier check"
+yarn prettier:check
+
+###
 ### timezone specific testing
 ###
 echo " -- tz testing"

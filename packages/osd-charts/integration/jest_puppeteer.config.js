@@ -41,7 +41,7 @@ const customConfig = Object.assign(
     server: useLocalStorybook
       ? null
       : {
-          command: `RNG_SEED='elastic-charts' yarn start --port=${port} --quiet`,
+          command: `yarn start --port=${port} --quiet`,
           port,
           usedPortAction: 'error',
           launchTimeout: 120000,

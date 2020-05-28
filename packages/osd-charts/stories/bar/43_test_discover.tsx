@@ -18,7 +18,6 @@
 
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
-
 import {
   Axis,
   Chart,
@@ -29,13 +28,24 @@ import {
   Settings,
   timeFormatter,
 } from '../../src';
-import { TEST_DATASET_DISCOVER } from '../../src/utils/data_samples/test_dataset_discover_per_30s';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
+const TEST_DATASET_DISCOVER = {
+  xAxisLabel: 'timestamp per 30 seconds',
+  yAxisLabel: 'Count',
+  series: [
+    {
+      x: 1560438420000,
+      y: 1,
+    },
+    {
+      x: 1560438510000,
+      y: 1,
+    },
+  ],
+};
 // for testing purposes only
 export const example = () => {
-  const data = TEST_DATASET_DISCOVER.series[0].values;
-
   const formatter = timeFormatter(niceTimeFormatByDay(1));
 
   const xDomain = {
@@ -60,7 +70,7 @@ export const example = () => {
         yScaleType={ScaleType.Linear}
         xAccessor="x"
         yAccessors={['y']}
-        data={data}
+        data={TEST_DATASET_DISCOVER.series}
         timeZone="local"
         name="Count"
       />

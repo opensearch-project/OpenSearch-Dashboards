@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { palettes } from '../../../../mocks/hierarchical/palettes';
 import { Config, PartitionLayout, Numeric } from '../types/config_types';
 import { GOLDEN_RATIO, TAU } from '../utils/math';
 import { FONT_STYLES, FONT_VARIANTS } from '../types/types';
@@ -245,8 +244,6 @@ export const configMetadata = {
   backgroundColor: { dflt: '#ffffff', type: 'color' },
   sectorLineWidth: { dflt: 1, min: 0, max: 4, type: 'number' },
   sectorLineStroke: { dflt: 'white', type: 'string' },
-  colors: { dflt: 'turbo', type: 'palette', values: Object.keys(palettes) },
-  palettes: { dflt: palettes, type: 'palettes', reconfigurable: false },
 };
 
 // todo switch to `io-ts` style, generic way of combining static and runtime type info
