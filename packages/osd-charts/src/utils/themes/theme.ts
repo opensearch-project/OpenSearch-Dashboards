@@ -58,6 +58,10 @@ export interface SharedGeometryStateStyle {
   unhighlighted: GeometryStateStyle;
 }
 
+/**
+ * The stroke color style
+ * @public
+ */
 export interface StrokeStyle<C = Color> {
   /** The stroke color in hex, rgba, hsl */
   stroke: C;
@@ -67,6 +71,10 @@ export interface StrokeStyle<C = Color> {
 
 export type TickStyle = StrokeStyle & Visible;
 
+/**
+ * The dash array for a stroke
+ * @public
+ */
 export interface StrokeDashArray {
   /** The dash array for dashed strokes */
   dash: number[];
@@ -303,12 +311,24 @@ export interface CrosshairStyle {
   line: StrokeStyle & Visible & Partial<StrokeDashArray>;
 }
 
+/**
+ * The style for a linear annotation
+ * @public
+ */
 export interface LineAnnotationStyle {
-  line: StrokeStyle & Opacity;
+  /**
+   * The style for the line geometry
+   */
+  line: StrokeStyle & Opacity & Partial<StrokeDashArray>;
+  /**
+   * The style for the text shown on the tooltip.
+   * @deprecated This style is not currently used and will
+   * soon be removed.
+   */
   details: TextStyle;
 }
 
-export type RectAnnotationStyle = StrokeStyle & FillStyle & Opacity;
+export type RectAnnotationStyle = StrokeStyle & FillStyle & Opacity & Partial<StrokeDashArray>;
 
 export const DEFAULT_ANNOTATION_LINE_STYLE: LineAnnotationStyle = {
   line: {

@@ -27,6 +27,7 @@ import {
   LineAnnotationDatum,
   ScaleType,
   Settings,
+  LineAnnotationStyle,
 } from '../../../src';
 import { Icon } from '../../../src/components/icons/icon';
 import { getChartRotationKnob } from '../../utils/knobs';
@@ -43,15 +44,15 @@ export const Example = () => {
   const data = [2.5, 7.2];
   const dataValues = generateAnnotationData(data);
 
-  const dashWidth = number('dash line width', 1);
-  const dashGapWidth = number('dash gap width', 0);
+  const dashWidth = number('dash line width', 5);
+  const dashGapWidth = number('dash gap width', 8);
 
-  const style = {
+  const style: Partial<LineAnnotationStyle> = {
     line: {
-      strokeWidth: number('line stroke width', 3),
-      stroke: color('line & marker color', '#f00'),
+      strokeWidth: number('line stroke width', 5),
+      stroke: color('line & marker color', 'blue'),
       dash: [dashWidth, dashGapWidth],
-      opacity: number('line opacity', 1, {
+      opacity: number('line opacity', 0.5, {
         range: true,
         min: 0,
         max: 1,
