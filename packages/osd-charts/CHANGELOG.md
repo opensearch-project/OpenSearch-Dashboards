@@ -1,3 +1,10 @@
+## [19.4.1](https://github.com/elastic/elastic-charts/compare/v19.4.0...v19.4.1) (2020-06-01)
+
+
+### Bug Fixes
+
+* missing dash style in line annotation ([#692](https://github.com/elastic/elastic-charts/issues/692)) ([e2ba940](https://github.com/elastic/elastic-charts/commit/e2ba940f3e3483dd250879866d8d5c3e7e786e5b)), closes [#687](https://github.com/elastic/elastic-charts/issues/687)
+
 # [19.4.0](https://github.com/elastic/elastic-charts/compare/v19.3.0...v19.4.0) (2020-05-28)
 
 
