@@ -17,6 +17,7 @@
  * under the License. */
 
 const tsPreset = require('ts-jest/jest-preset');
+const jestPuppeteer = require('jest-puppeteer/jest-preset');
 const jestPuppeteerDocker = require('jest-puppeteer-docker/jest-preset');
 
 module.exports = Object.assign(
@@ -37,6 +38,6 @@ module.exports = Object.assign(
       HTMLElement: {},
     },
   },
-  jestPuppeteerDocker,
+  process.env.DEBUG === 'true' ? jestPuppeteer : jestPuppeteerDocker,
   tsPreset,
 );

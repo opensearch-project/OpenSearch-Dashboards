@@ -18,7 +18,7 @@
 
 import Url from 'url';
 
-import { JEST_TIMEOUT, toMatchImageSnapshot } from '../jest_env_setup';
+import { toMatchImageSnapshot } from '../jest_env_setup';
 // @ts-ignore
 import defaults from '../defaults';
 
@@ -26,18 +26,94 @@ const port = process.env.PORT || defaults.PORT;
 const host = process.env.HOST || defaults.HOST;
 const baseUrl = `http://${host}:${port}/iframe.html`;
 
+// Use to log console statements from within the page.evaluate blocks
+// @ts-ignore
+// page.on('console', (msg) => (msg._type === 'log' ? console.log('PAGE LOG:', msg._text) : null)); // eslint-disable-line no-console
+
 expect.extend({ toMatchImageSnapshot });
+
+interface MousePosition {
+  /**
+   * position from top of reference element, trumps bottom
+   */
+  top?: number;
+  /**
+   * position from right of reference element
+   */
+  right?: number;
+  /**
+   * position from bottom of reference element
+   */
+  bottom?: number;
+  /**
+   * position from left of reference element, trump right
+   */
+  left?: number;
+}
+
+interface ElementBBox {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * Used to get postion from any value of cursor position
+ *
+ * @param mousePosition
+ * @param element
+ */
+function getCursorPosition(
+  { top, right, bottom, left }: MousePosition,
+  element: ElementBBox,
+): { x: number; y: number } {
+  let x = element.left;
+  let y = element.top;
+
+  if (top !== undefined || bottom !== undefined) {
+    if (top !== undefined) {
+      y = element.top + top;
+    } else {
+      y = element.top + element.height - bottom!;
+    }
+  }
+
+  if (left !== undefined || right !== undefined) {
+    if (left !== undefined) {
+      x = element.left + left;
+    } else {
+      x = element.left + element.width - right!;
+    }
+  }
+
+  return { x, y };
+}
 
 interface ScreenshotDOMElementOptions {
   padding?: number;
   path?: string;
+  /**
+   * Screenshot selector override. Used to select beyond set element.
+   */
+  hiddenSelectors?: string[];
+  /**
+   * Pauses just before taking screenshot to debug dom
+   *
+   * To continue:
+   *  - resume script execution in dev tools
+   *  - press enter in the terminal running the jest tests
+   *
+   * **Only triggered when `process.env.DEBUG` is true**
+   */
+  debug?: boolean;
 }
 
 type ScreenshotElementAtUrlOptions = ScreenshotDOMElementOptions & {
   /**
    * timeout for waiting on element to appear in DOM
    *
-   * @default JEST_TIMEOUT
+   * @default 10000
    */
   timeout?: number;
   /**
@@ -52,6 +128,10 @@ type ScreenshotElementAtUrlOptions = ScreenshotDOMElementOptions & {
    * Delay to take screenshot after element is visiable
    */
   delay?: number;
+  /**
+   * Screenshot selector override. Used to select beyond set element.
+   */
+  screenshotSelector?: string;
 };
 
 class CommonPage {
@@ -70,22 +150,27 @@ class CommonPage {
   }
 
   /**
+   * Toggle element visibility
+   * @param selector
+   */
+  async toggleElementVisibility(selector: string) {
+    await page.$$eval(selector, (elements) => {
+      elements.forEach((element) => {
+        element.classList.toggle('invisible');
+      });
+    });
+  }
+
+  /**
    * Get getBoundingClientRect of selected element
    *
    * @param selector
    */
   async getBoundingClientRect(selector: string) {
-    return await page.evaluate((selector) => {
-      const element = document.querySelector(selector);
-
-      if (!element) {
-        throw Error(`Could not find element that matches selector: ${selector}.`);
-      }
-
+    return page.$eval(selector, (element) => {
       const { x, y, width, height } = element.getBoundingClientRect();
-
       return { left: x, top: y, width, height, id: element.id };
-    }, selector);
+    });
   }
 
   /**
@@ -94,12 +179,20 @@ class CommonPage {
    * @param selector
    * @param options
    */
-  async screenshotDOMElement(selector: string, options?: ScreenshotDOMElementOptions) {
+  async screenshotDOMElement(selector: string, options?: ScreenshotDOMElementOptions): Promise<Buffer> {
     const padding: number = options && options.padding ? options.padding : 0;
     const path: string | undefined = options && options.path ? options.path : undefined;
     const rect = await this.getBoundingClientRect(selector);
 
-    return page.screenshot({
+    if (options?.hiddenSelectors) {
+      await Promise.all(options.hiddenSelectors.map(this.toggleElementVisibility));
+    }
+
+    if (options?.debug && process.env.DEBUG === 'true') {
+      await jestPuppeteer.debug();
+    }
+
+    const buffer = await page.screenshot({
       path,
       clip: {
         x: rect.left - padding,
@@ -108,6 +201,12 @@ class CommonPage {
         height: rect.height + padding * 2,
       },
     });
+
+    if (options?.hiddenSelectors) {
+      await Promise.all(options.hiddenSelectors.map(this.toggleElementVisibility));
+    }
+
+    return buffer;
   }
 
   /**
@@ -116,9 +215,10 @@ class CommonPage {
    * @param mousePosition
    * @param selector
    */
-  async moveMouseRelativeToDOMElement(mousePosition: { x: number; y: number }, selector: string) {
+  async moveMouseRelativeToDOMElement(mousePosition: MousePosition, selector: string) {
     const element = await this.getBoundingClientRect(selector);
-    await page.mouse.move(element.left + mousePosition.x, element.top + mousePosition.y);
+    const { x, y } = getCursorPosition(mousePosition, element);
+    await page.mouse.move(x, y);
   }
 
   /**
@@ -127,9 +227,10 @@ class CommonPage {
    * @param mousePosition
    * @param selector
    */
-  async clickMouseRelativeToDOMElement(mousePosition: { x: number; y: number }, selector: string) {
+  async clickMouseRelativeToDOMElement(mousePosition: MousePosition, selector: string) {
     const element = await this.getBoundingClientRect(selector);
-    await page.mouse.click(element.left + mousePosition.x, element.top + mousePosition.y);
+    const { x, y } = getCursorPosition(mousePosition, element);
+    await page.mouse.click(x, y);
   }
 
   /**
@@ -138,15 +239,13 @@ class CommonPage {
    * @param mousePosition
    * @param selector
    */
-  async dragMouseRelativeToDOMElement(
-    start: { x: number; y: number },
-    end: { x: number; y: number },
-    selector: string,
-  ) {
+  async dragMouseRelativeToDOMElement(start: MousePosition, end: MousePosition, selector: string) {
     const element = await this.getBoundingClientRect(selector);
-    await page.mouse.move(element.left + start.x, element.top + start.y);
+    const { x: x0, y: y0 } = getCursorPosition(start, element);
+    const { x: x1, y: y1 } = getCursorPosition(end, element);
+    await page.mouse.move(x0, y0);
     await page.mouse.down();
-    await page.mouse.move(element.left + end.x, element.top + end.y);
+    await page.mouse.move(x1, y1);
   }
 
   /**
@@ -165,16 +264,9 @@ class CommonPage {
    * @param mousePosition
    * @param selector
    */
-  async dragAndDropMouseRelativeToDOMElement(
-    start: { x: number; y: number },
-    end: { x: number; y: number },
-    selector: string,
-  ) {
-    const element = await this.getBoundingClientRect(selector);
-    await page.mouse.move(element.left + start.x, element.top + start.y);
-    await page.mouse.down();
-    await page.mouse.move(element.left + end.x, element.top + end.y);
-    await page.mouse.up();
+  async dragAndDropMouseRelativeToDOMElement(start: MousePosition, end: MousePosition, selector: string) {
+    await this.dragMouseRelativeToDOMElement(start, end, selector);
+    await this.dropMouse();
   }
 
   /**
@@ -202,7 +294,7 @@ class CommonPage {
         await page.waitFor(options.delay);
       }
 
-      const element = await this.screenshotDOMElement(selector, options);
+      const element = await this.screenshotDOMElement(options?.screenshotSelector ?? selector, options);
 
       if (!element) {
         throw new Error(`Error: Unable to find element\n\n\t${url}`);
@@ -236,7 +328,7 @@ class CommonPage {
    */
   async expectChartWithMouseAtUrlToMatchScreenshot(
     url: string,
-    mousePosition: { x: number; y: number },
+    mousePosition: MousePosition,
     options?: Omit<ScreenshotElementAtUrlOptions, 'action'>,
   ) {
     const action = async () => await this.moveMouseRelativeToDOMElement(mousePosition, this.chartSelector);
@@ -256,8 +348,8 @@ class CommonPage {
    */
   async expectChartWithDragAtUrlToMatchScreenshot(
     url: string,
-    start: { x: number; y: number },
-    end: { x: number; y: number },
+    start: MousePosition,
+    end: MousePosition,
     options?: Omit<ScreenshotElementAtUrlOptions, 'action'>,
   ) {
     const action = async () => await this.dragMouseRelativeToDOMElement(start, end, this.chartSelector);
@@ -281,6 +373,11 @@ class CommonPage {
     if (waitSelector) {
       await this.waitForElement(waitSelector, timeout);
     }
+
+    // activate peripheral visibility
+    page.evaluate(() => {
+      document.querySelector('html')!.classList.add('echVisualTesting');
+    });
   }
 
   /**
@@ -289,7 +386,7 @@ class CommonPage {
    * @param {string} [waitSelector] the DOM selector to wait for, default to '.echChartStatus[data-ech-render-complete=true]'
    * @param {number} [timeout] - the timeout for the operation, default to 10000ms
    */
-  async waitForElement(waitSelector: string, timeout = JEST_TIMEOUT) {
+  async waitForElement(waitSelector: string, timeout = 10000) {
     await page.waitForSelector(waitSelector, { timeout });
   }
 }

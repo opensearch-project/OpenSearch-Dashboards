@@ -18,14 +18,15 @@
 
 import { configureToMatchImageSnapshot } from 'jest-image-snapshot';
 
-const customConfig = { threshold: 0.01 };
+const customConfig = { threshold: 0 };
 export const toMatchImageSnapshot = configureToMatchImageSnapshot({
   customDiffConfig: customConfig,
-  failureThreshold: 0.005,
+  failureThreshold: 0,
   failureThresholdType: 'percent',
 });
 
 expect.extend({ toMatchImageSnapshot });
 
-export const JEST_TIMEOUT = 10000;
-jest.setTimeout(JEST_TIMEOUT);
+if (process.env.DEBUG === 'true') {
+  jest.setTimeout(10 * 60 * 1000); // set timeout to 10 minutes;
+}

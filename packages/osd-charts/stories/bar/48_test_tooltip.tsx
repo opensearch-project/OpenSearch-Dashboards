@@ -75,6 +75,7 @@ const getFallbackPlacements = (): Placement[] | undefined => {
 };
 
 export const Example = () => {
+  const rotation = getChartRotationKnob();
   // @ts-ignore
   const boundary = select<TooltipProps['boundary']>(
     'Boundary Element',
@@ -85,24 +86,29 @@ export const Example = () => {
     },
     undefined,
   );
+  const tooltipOptions = {
+    placement: getPlacementKnob('Tooltip placement'),
+    fallbackPlacements: getFallbackPlacements(),
+    type: getTooltipTypeKnob(),
+    boundary,
+    customTooltip: boolean('Custom Tooltip', false) ? CustomTooltip : undefined,
+  };
+  const showAxes = boolean('Show axes', false);
+  const showLegend = boolean('Show Legend', false);
 
   // Added buffer to test tooltip positioning within chart container
   return (
-    <div className="buffer" style={{ width: '100%', height: '100%' }}>
+    <div className="buffer" style={{ width: '100%', height: '100%', paddingLeft: 80, paddingRight: 80 }}>
       <Chart className="story-chart">
-        <Settings
-          rotation={getChartRotationKnob()}
-          tooltip={{
-            placement: getPlacementKnob('Tooltip placement'),
-            fallbackPlacements: getFallbackPlacements(),
-            type: getTooltipTypeKnob(),
-            boundary,
-            customTooltip: boolean('Custom Tooltip', false) ? CustomTooltip : undefined,
-          }}
-          showLegend={boolean('Show Legend', false)}
+        <Settings rotation={rotation} tooltip={tooltipOptions} showLegend={showLegend} />
+        <Axis id="bottom" hide={!showAxes} position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
+        <Axis
+          id="left2"
+          hide={!showAxes}
+          title="Left axis"
+          position={Position.Left}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
         />
-        <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
-        <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
         <BarSeries
           id="bars1"

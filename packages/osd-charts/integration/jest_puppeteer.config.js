@@ -17,12 +17,21 @@
  * under the License. */
 
 const getConfig = require('jest-puppeteer-docker/lib/config');
-const baseConfig = getConfig();
+const isDebug = process.env.DEBUG === 'true';
+const baseConfig = isDebug ? {} : getConfig();
 const defaults = require('./defaults');
 
 const port = process.env.PORT || defaults.PORT;
-const host = process.env.HOST || defaults.HOST;
-const useLocalStorybook = process.env.USE_LOCAL_STORYBOOK || defaults.USE_LOCAL_STORYBOOK;
+const useLocalStorybook = process.env.LOCAL_STORYBOOK_VRT || defaults.LOCAL_STORYBOOK_VRT;
+
+const defaultViewport = {
+  width: 800,
+  height: 600,
+};
+const sharedConfig = {
+  defaultViewport,
+  ignoreHTTPSErrors: true,
+};
 
 /**
  * combined config object
@@ -31,13 +40,23 @@ const useLocalStorybook = process.env.USE_LOCAL_STORYBOOK || defaults.USE_LOCAL_
  */
 const customConfig = Object.assign(
   {
-    launch: {
-      dumpio: false,
-      headless: true,
-      slowMo: 0,
-      browserUrl: `http://${host}:${port}/iframe.html`,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    },
+    ...(isDebug
+      ? {
+          launch: {
+            dumpio: false,
+            headless: false,
+            slowMo: 500,
+            devtools: true,
+            ...sharedConfig,
+          },
+        }
+      : {
+          // https://github.com/gidztech/jest-puppeteer-docker/issues/24
+          chromiumFlags: [], // for docker chromium options
+          connect: {
+            ...sharedConfig,
+          },
+        }),
     server: useLocalStorybook
       ? null
       : {
@@ -45,7 +64,7 @@ const customConfig = Object.assign(
           port,
           usedPortAction: 'error',
           launchTimeout: 120000,
-          debug: false,
+          debug: true,
         },
   },
   baseConfig,

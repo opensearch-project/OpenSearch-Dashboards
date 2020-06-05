@@ -43,6 +43,7 @@
     "test:tz-ny": "TZ=America/New_York jest --verbose --config=jest.tz.config.js",
     "test:tz-jp": "TZ=Asia/Tokyo jest --verbose --config=jest.tz.config.js",
     "test:integration": "rm -rf ./integration/tests/__image_snapshots__/__diff_output__ && TZ=UTC JEST_PUPPETEER_CONFIG=integration/jest_puppeteer.config.js jest --verbose --rootDir=integration -c=integration/jest.config.js --runInBand",
+    "test:integration:debug": "DEBUG=true yarn test:integration:local",
     "test:integration:local": "LOCAL_STORYBOOK_VRT=true PORT=9001 yarn test:integration",
     "test:browsers": "cd .playground && jest -c=../browsers/jest.config.js ../browsers/browsers.test.ts",
     "typecheck:src": "yarn build:ts --noEmit",
