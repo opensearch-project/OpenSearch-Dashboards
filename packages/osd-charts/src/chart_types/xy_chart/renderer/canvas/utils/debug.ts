@@ -14,12 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { withContext } from '../../../../../renderers/canvas';
 import { Fill, Stroke, Rect } from '../../../../../geoms/types';
-import { renderRect } from '../primitives/rect';
+import { withContext } from '../../../../../renderers/canvas';
 import { Point } from '../../../../../utils/point';
+import { renderRect } from '../primitives/rect';
 
 const DEFAULT_DEBUG_FILL: Fill = {
   color: {

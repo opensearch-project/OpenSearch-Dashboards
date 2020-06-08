@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { Rect, Fill, Stroke } from '../../../../../geoms/types';
 import { RGBtoString } from '../../../../partition_chart/layout/utils/color_library_wrappers';
@@ -86,7 +87,7 @@ export function renderMultiRect(ctx: CanvasRenderingContext2D, rects: Rect[], fi
     const { width, height, x, y } = rects[i];
     ctx.moveTo(x, y);
     ctx.lineTo(x + width, y);
-    ctx.lineTo(x + width, y + height!);
+    ctx.lineTo(x + width, y + height);
     ctx.lineTo(x, y + height);
     ctx.lineTo(x, y);
   }

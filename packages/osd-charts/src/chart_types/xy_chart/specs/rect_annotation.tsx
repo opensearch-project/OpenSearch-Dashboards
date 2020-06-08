@@ -14,14 +14,16 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
-import { RectAnnotationSpec, DEFAULT_GLOBAL_ID, AnnotationTypes } from '../utils/specs';
+
+import { ChartTypes } from '../..';
+import { SpecTypes } from '../../../specs/settings';
 import { specComponentFactory, getConnect } from '../../../state/spec_factory';
 import { DEFAULT_ANNOTATION_RECT_STYLE } from '../../../utils/themes/theme';
-import { ChartTypes } from '../../index';
-import { SpecTypes } from '../../../specs/settings';
+import { RectAnnotationSpec, DEFAULT_GLOBAL_ID, AnnotationTypes } from '../utils/specs';
 
 const defaultProps = {
   chartType: ChartTypes.XYAxis,
@@ -39,5 +41,5 @@ export const RectAnnotation: React.FunctionComponent<Pick<RectAnnotationSpec, 'i
       'chartType' | 'specType' | 'seriesType' | 'id' | 'dataValues' | 'domainType' | 'annotationType'
     >
   >> = getConnect()(
-  specComponentFactory<RectAnnotationSpec, 'groupId' | 'annotationType' | 'zIndex' | 'style'>(defaultProps),
-);
+    specComponentFactory<RectAnnotationSpec, 'groupId' | 'annotationType' | 'zIndex' | 'style'>(defaultProps),
+  );

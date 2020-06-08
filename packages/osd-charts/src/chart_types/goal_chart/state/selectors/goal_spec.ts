@@ -14,13 +14,14 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { ChartTypes } from '../../..';
+import { SpecTypes } from '../../../../specs';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getSpecsFromStore } from '../../../../state/utils';
 import { GoalSpec } from '../../specs';
-import { ChartTypes } from '../../..';
-import { SpecTypes } from '../../../../specs';
 
 /** @internal */
 export function getSpecOrNull(state: GlobalChartState): GoalSpec | null {

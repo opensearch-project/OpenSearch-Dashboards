@@ -14,16 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { getGeometryStateStyle } from '../../rendering/rendering';
-import { BubbleGeometry, PointGeometry } from '../../../../utils/geometry';
-import { SharedGeometryStateStyle, GeometryStateStyle, PointStyle } from '../../../../utils/themes/theme';
-import { withContext, withClip } from '../../../../renderers/canvas';
-import { renderPointGroup } from './points';
-import { Rect } from '../../../../geoms/types';
 import { LegendItem } from '../../../../commons/legend';
 import { SeriesKey } from '../../../../commons/series_id';
+import { Rect } from '../../../../geoms/types';
+import { withContext, withClip } from '../../../../renderers/canvas';
+import { BubbleGeometry, PointGeometry } from '../../../../utils/geometry';
+import { SharedGeometryStateStyle, GeometryStateStyle, PointStyle } from '../../../../utils/themes/theme';
+import { getGeometryStateStyle } from '../../rendering/rendering';
+import { renderPointGroup } from './points';
 
 interface BubbleGeometriesDataProps {
   animated?: boolean;

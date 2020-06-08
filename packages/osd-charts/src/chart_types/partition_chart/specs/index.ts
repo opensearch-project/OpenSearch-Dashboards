@@ -14,17 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
-import { ChartTypes } from '../../index';
-import { config, percentFormatter } from '../layout/config/config';
+
+import { ChartTypes } from '../..';
+import { Spec, SpecTypes } from '../../../specs';
 import { getConnect, specComponentFactory } from '../../../state/spec_factory';
 import { IndexedAccessorFn } from '../../../utils/accessor';
-import { Spec, SpecTypes } from '../../../specs/index';
-import { Config, FillFontSizeRange, FillLabelConfig } from '../layout/types/config_types';
-import { ShapeTreeNode, ValueGetter } from '../layout/types/viewmodel_types';
-import { AGGREGATE_KEY } from '../layout/utils/group_by_rollup';
 import {
   Datum,
   LabelAccessor,
@@ -33,9 +31,11 @@ import {
   ValueAccessor,
   ValueFormatter,
 } from '../../../utils/commons';
-import { NodeColorAccessor } from '../layout/types/viewmodel_types';
-import { PrimitiveValue } from '../layout/utils/group_by_rollup';
+import { config, percentFormatter } from '../layout/config/config';
+import { Config, FillFontSizeRange, FillLabelConfig } from '../layout/types/config_types';
 import { Pixels } from '../layout/types/geometry_types';
+import { ShapeTreeNode, ValueGetter, NodeColorAccessor } from '../layout/types/viewmodel_types';
+import { AGGREGATE_KEY, PrimitiveValue } from '../layout/utils/group_by_rollup';
 
 interface ExtendedFillLabelConfig extends FillLabelConfig, FillFontSizeRange {}
 

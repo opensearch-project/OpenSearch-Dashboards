@@ -14,20 +14,21 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { computeSeriesDomains } from '../state/utils';
+import { ChartTypes } from '../..';
 import { ScaleType } from '../../../scales';
+import { SpecTypes } from '../../../specs/settings';
 import { CurveType } from '../../../utils/curves';
-import { renderLine } from './rendering';
-import { computeXScale, computeYScales } from '../utils/scales';
-import { LineSeriesSpec, DomainRange, SeriesTypes } from '../utils/specs';
-import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { LineGeometry, PointGeometry } from '../../../utils/geometry';
 import { GroupId } from '../../../utils/ids';
-import { ChartTypes } from '../..';
-import { SpecTypes } from '../../../specs/settings';
+import { LIGHT_THEME } from '../../../utils/themes/light_theme';
+import { computeSeriesDomains } from '../state/utils';
 import { IndexedGeometryMap } from '../utils/indexed_geometry_map';
+import { computeXScale, computeYScales } from '../utils/scales';
+import { LineSeriesSpec, DomainRange, SeriesTypes } from '../utils/specs';
+import { renderLine } from './rendering';
 
 const SPEC_ID = 'spec_1';
 const GROUP_ID = 'group_1';

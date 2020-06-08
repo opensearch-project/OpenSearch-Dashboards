@@ -14,13 +14,14 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { Delaunay, Bounds } from '../../../utils/d3-delaunay';
 import { IndexedGeometry, PointGeometry } from '../../../utils/geometry';
 import { Point } from '../../../utils/point';
-import { getDistance } from '../state/utils';
-import { Delaunay, Bounds } from '../../../utils/d3-delaunay';
 import { DEFAULT_HIGHLIGHT_PADDING } from '../rendering/rendering';
+import { getDistance } from '../state/utils';
 
 /** @internal */
 export type IndexedGeometrySpatialMapPoint = [number, number];
@@ -67,9 +68,7 @@ export class IndexedGeometrySpatialMap {
     }
   }
 
-  triangulation = (bounds?: Bounds) => {
-    return this.map?.voronoi(bounds);
-  };
+  triangulation = (bounds?: Bounds) => this.map?.voronoi(bounds);
 
   getMergeData() {
     return [...this.pointGeometries];

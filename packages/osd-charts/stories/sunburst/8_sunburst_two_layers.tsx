@@ -14,12 +14,14 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
+
+import React from 'react';
 
 import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../src';
-import { mocks } from '../../src/mocks/hierarchical/index';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
-import React from 'react';
+import { mocks } from '../../src/mocks/hierarchical';
 import { countryLookup, indexInterpolatedFillColor, interpolatorCET2s, regionLookup } from '../utils/utils';
 
 export const Example = () => (
@@ -29,30 +31,30 @@ export const Example = () => (
       id="spec_1"
       data={mocks.sunburst}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\u00A0Bn`}
       layers={[
         {
-          groupByRollup: (d: Datum) => countryLookup[d.dest].continentCountry.substr(0, 2),
+          groupByRollup: (d: Datum) => countryLookup[d.dest].continentCountry.slice(0, 2),
           nodeLabel: (d: any) => regionLookup[d].regionName,
           fillLabel: {
             fontFamily: 'Impact',
-            valueFormatter: (d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000000))}\xa0Tn`,
+            valueFormatter: (d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000000))}\u00A0Tn`,
           },
           shape: {
-            fillColor: (d) => {
+            fillColor: (d) =>
               // pick color from color palette based on mean angle - rather distinct colors in the inner ring
-              return indexInterpolatedFillColor(interpolatorCET2s)(d, (d.x0 + d.x1) / 2 / (2 * Math.PI), []);
-            },
+              indexInterpolatedFillColor(interpolatorCET2s)(d, (d.x0 + d.x1) / 2 / (2 * Math.PI), [])
+            ,
           },
         },
         {
           groupByRollup: (d: Datum) => d.dest,
           nodeLabel: (d: any) => countryLookup[d].name,
           shape: {
-            fillColor: (d) => {
+            fillColor: (d) =>
               // pick color from color palette based on mean angle - related yet distinct colors in the outer ring
-              return indexInterpolatedFillColor(interpolatorCET2s)(d, (d.x0 + d.x1) / 2 / (2 * Math.PI), []);
-            },
+              indexInterpolatedFillColor(interpolatorCET2s)(d, (d.x0 + d.x1) / 2 / (2 * Math.PI), [])
+            ,
           },
         },
       ]}
@@ -65,7 +67,7 @@ export const Example = () => (
         fontFamily: 'Arial',
         fillLabel: {
           textInvertible: true,
-          valueFormatter: (d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
+          valueFormatter: (d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\u00A0Bn`,
           fontStyle: 'italic',
         },
         margin: { top: 0, bottom: 0, left: 0, right: 0 },

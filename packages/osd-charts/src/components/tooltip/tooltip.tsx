@@ -14,26 +14,27 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import classNames from 'classnames';
+import React, { memo, useCallback, useMemo, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
-import React, { memo, useCallback, useMemo, useEffect } from 'react';
 
-import { TooltipInfo, TooltipAnchorPosition } from './types';
 import { TooltipValueFormatter, TooltipSettings, TooltipValue } from '../../specs';
-import { TooltipPortal, PopperSettings, AnchorPosition, Placement } from '../portal';
-import { getInternalIsTooltipVisibleSelector } from '../../state/selectors/get_internal_is_tooltip_visible';
-import { getTooltipHeaderFormatterSelector } from '../../state/selectors/get_tooltip_header_formatter';
-import { getInternalTooltipInfoSelector } from '../../state/selectors/get_internal_tooltip_info';
-import { getInternalTooltipAnchorPositionSelector } from '../../state/selectors/get_internal_tooltip_anchor_position';
-import { GlobalChartState, BackwardRef } from '../../state/chart_state';
-import { getInternalIsInitializedSelector } from '../../state/selectors/get_internal_is_intialized';
-import { getSettingsSpecSelector } from '../../state/selectors/get_settings_specs';
 import { onPointerMove } from '../../state/actions/mouse';
+import { GlobalChartState, BackwardRef } from '../../state/chart_state';
 import { getChartRotationSelector } from '../../state/selectors/get_chart_rotation';
+import { getInternalIsInitializedSelector } from '../../state/selectors/get_internal_is_intialized';
+import { getInternalIsTooltipVisibleSelector } from '../../state/selectors/get_internal_is_tooltip_visible';
+import { getInternalTooltipAnchorPositionSelector } from '../../state/selectors/get_internal_tooltip_anchor_position';
+import { getInternalTooltipInfoSelector } from '../../state/selectors/get_internal_tooltip_info';
+import { getSettingsSpecSelector } from '../../state/selectors/get_settings_specs';
+import { getTooltipHeaderFormatterSelector } from '../../state/selectors/get_tooltip_header_formatter';
 import { Rotation } from '../../utils/commons';
+import { TooltipPortal, PopperSettings, AnchorPosition, Placement } from '../portal';
+import { TooltipInfo, TooltipAnchorPosition } from './types';
 
 interface TooltipDispatchProps {
   onPointerMove: typeof onPointerMove;
@@ -97,7 +98,6 @@ const TooltipComponent = ({
             return null;
           }
           const classes = classNames('echTooltip__item', {
-            /* eslint @typescript-eslint/camelcase:0 */
             echTooltip__rowHighlighted: isHighlighted,
           });
           return (
@@ -111,7 +111,13 @@ const TooltipComponent = ({
             >
               <span className="echTooltip__label">{label}</span>
               <span className="echTooltip__value">{value}</span>
-              {markValue && <span className="echTooltip__markValue">&nbsp;({markValue})</span>}
+              {markValue && (
+                <span className="echTooltip__markValue">
+                  &nbsp;(
+                  {markValue}
+                  )
+                </span>
+              )}
             </div>
           );
         },
@@ -147,9 +153,9 @@ const TooltipComponent = ({
     const height = y0 !== undefined ? y1 - y0 : 0;
     return {
       left: x1 - width,
-      width: width,
+      width,
       top: y1 - height,
-      height: height,
+      height,
     };
   }, [isVisible, position?.x0, position?.x1, position?.y0, position?.y1]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -164,8 +170,8 @@ const TooltipComponent = ({
       ...rest,
       placement: placement ?? (rotation === 0 || rotation === 180 ? Placement.Right : Placement.Top),
       fallbackPlacements:
-        fallbackPlacements ??
-        (rotation === 0 || rotation === 180
+        fallbackPlacements
+        ?? (rotation === 0 || rotation === 180
           ? [Placement.Right, Placement.Left, Placement.Top, Placement.Bottom]
           : [Placement.Top, Placement.Bottom, Placement.Right, Placement.Left]),
       boundary: boundary === 'chart' && chartRef.current ? chartRef.current : undefined,

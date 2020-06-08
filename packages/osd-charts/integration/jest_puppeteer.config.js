@@ -14,9 +14,11 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 const getConfig = require('jest-puppeteer-docker/lib/config');
+
 const isDebug = process.env.DEBUG === 'true';
 const baseConfig = isDebug ? {} : getConfig();
 const defaults = require('./defaults');
@@ -38,36 +40,34 @@ const sharedConfig = {
  *
  * https://github.com/smooth-code/jest-puppeteer/tree/master/packages/jest-environment-puppeteer#jest-puppeteerconfigjs
  */
-const customConfig = Object.assign(
-  {
-    ...(isDebug
-      ? {
-          launch: {
-            dumpio: false,
-            headless: false,
-            slowMo: 500,
-            devtools: true,
-            ...sharedConfig,
-          },
-        }
-      : {
-          // https://github.com/gidztech/jest-puppeteer-docker/issues/24
-          chromiumFlags: [], // for docker chromium options
-          connect: {
-            ...sharedConfig,
-          },
-        }),
-    server: useLocalStorybook
-      ? null
-      : {
-          command: `yarn start --port=${port} --quiet`,
-          port,
-          usedPortAction: 'error',
-          launchTimeout: 120000,
-          debug: true,
+const customConfig = {
+  ...(isDebug
+    ? {
+        launch: {
+          dumpio: false,
+          headless: false,
+          slowMo: 500,
+          devtools: true,
+          ...sharedConfig,
         },
-  },
-  baseConfig,
-);
+      }
+    : {
+      // https://github.com/gidztech/jest-puppeteer-docker/issues/24
+        chromiumFlags: [], // for docker chromium options
+        connect: {
+          ...sharedConfig,
+        },
+      }),
+  server: useLocalStorybook
+    ? null
+    : {
+        command: `yarn start --port=${port} --quiet`,
+        port,
+        usedPortAction: 'error',
+        launchTimeout: 120000,
+        debug: true,
+      },
+  ...baseConfig,
+};
 
 module.exports = customConfig;

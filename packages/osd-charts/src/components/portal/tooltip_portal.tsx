@@ -14,15 +14,16 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { createPopper, Instance } from '@popperjs/core';
 import classNames from 'classnames';
 import React, { useRef, useEffect, useCallback, ReactNode, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { createPopper, Instance } from '@popperjs/core';
 
-import { mergePartial } from '../../utils/commons';
 import { isDefined } from '../../chart_types/xy_chart/state/utils';
+import { mergePartial } from '../../utils/commons';
 import { PopperSettings, PortalAnchorRef } from './types';
 import { DEFAULT_POPPER_SETTINGS, getOrCreateNode, isHTMLElement } from './utils';
 
@@ -195,7 +196,7 @@ const TooltipPortalComponent = ({ anchor, scope, settings, children, visible, ch
   useEffect(() => {
     if (popper.current) {
       updateAnchorDimensions();
-      popper.current.update();
+      void popper.current.update();
     }
   }, [updateAnchorDimensions, popper]);
 

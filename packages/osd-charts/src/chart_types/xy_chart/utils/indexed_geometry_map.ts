@@ -14,20 +14,21 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { $Values } from 'utility-types';
 
+import { Bounds } from '../../../utils/d3-delaunay';
 import { IndexedGeometry, isPointGeometry } from '../../../utils/geometry';
 import { Point } from '../../../utils/point';
 import { IndexedGeometryLinearMap } from './indexed_geometry_linear_map';
 import { IndexedGeometrySpatialMap } from './indexed_geometry_spatial_map';
-import { Bounds } from '../../../utils/d3-delaunay';
 
 /** @internal */
 export const GeometryType = Object.freeze({
-  linear: 'linear' as 'linear',
-  spatial: 'spatial' as 'spatial',
+  linear: 'linear' as const,
+  spatial: 'spatial' as const,
 });
 /** @internal */
 export type GeometryType = $Values<typeof GeometryType>;
@@ -85,6 +86,7 @@ export class IndexedGeometryMap {
    * @param indexedMaps
    */
   merge(...indexedMaps: IndexedGeometryMap[]) {
+    // eslint-disable-next-line no-restricted-syntax
     for (const indexedMap of indexedMaps) {
       const { spatialGeometries, linearGeometries } = indexedMap.getMergeData();
       this.spatialMap.set(spatialGeometries);

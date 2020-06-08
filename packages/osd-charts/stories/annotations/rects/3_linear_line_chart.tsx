@@ -14,14 +14,16 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { boolean, select } from '@storybook/addon-knobs';
 import React from 'react';
+
 import { Axis, Chart, LineSeries, RectAnnotation, ScaleType, Settings, RectAnnotationDatum } from '../../../src';
-import { getChartRotationKnob } from '../../utils/knobs';
-import { BandedAccessorType } from '../../../src/utils/geometry';
 import { Position } from '../../../src/utils/commons';
+import { BandedAccessorType } from '../../../src/utils/geometry';
+import { getChartRotationKnob } from '../../utils/knobs';
 
 export const Example = () => {
   const debug = boolean('debug', false);
@@ -52,7 +54,7 @@ export const Example = () => {
   const dataValuesBlue: RectAnnotationDatum[] = [
     {
       coordinates: {
-        x0: 2.0,
+        x0: 2,
         x1: 2.1,
         y0: 0,
         y1: 7,

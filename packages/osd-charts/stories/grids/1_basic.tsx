@@ -14,10 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { boolean, color, number } from '@storybook/addon-knobs';
 import React from 'react';
+
 import { Axis, BarSeries, Chart, GridLineConfig, LineSeries, Position, ScaleType, Settings } from '../../src';
 
 function generateGridLineConfig(group: string, gridColor = 'purple'): GridLineConfig {
@@ -97,7 +99,7 @@ export const Example = () => {
         id="bottom"
         position={Position.Bottom}
         title="Bottom axis"
-        showOverlappingTicks={true}
+        showOverlappingTicks
         showGridLines={boolean('show bottom axis grid lines', false, 'bottom axis')}
         gridLineStyle={toggleBottomAxisGridLineStyle ? bottomAxisGridLineConfig : undefined}
         integersOnly={boolean('bottom axis show only integer values', false, 'bottom axis')}
@@ -115,7 +117,7 @@ export const Example = () => {
         id="top"
         position={Position.Top}
         title="Top axis"
-        showOverlappingTicks={true}
+        showOverlappingTicks
         showGridLines={boolean('show top axis grid lines', false, 'top axis')}
         gridLineStyle={topAxisGridLineConfig}
         integersOnly={boolean('top axis show only integer values', false, 'top axis')}

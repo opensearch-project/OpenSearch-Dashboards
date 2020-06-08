@@ -14,14 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { TooltipAnchorPosition } from '../../../components/tooltip/types';
+import { Scale } from '../../../scales';
 import { Rotation } from '../../../utils/commons';
 import { Dimensions } from '../../../utils/dimensions';
-import { Scale } from '../../../scales';
-import { isHorizontalRotation, isVerticalRotation } from '../state/utils';
 import { Point } from '../../../utils/point';
-import { TooltipAnchorPosition } from '../../../components/tooltip/types';
+import { isHorizontalRotation, isVerticalRotation } from '../state/utils';
 
 export interface SnappedPosition {
   position: number;
@@ -49,12 +50,11 @@ export function getSnapPosition(
       position: position - halfPadding * totalBarsInCluster,
       band: band * totalBarsInCluster,
     };
-  } else {
-    return {
-      position,
-      band: DEFAULT_SNAP_POSITION_BAND,
-    };
   }
+  return {
+    position,
+    band: DEFAULT_SNAP_POSITION_BAND,
+  };
 }
 
 /** @internal */
@@ -77,16 +77,15 @@ export function getCursorLinePosition(
       top: crosshairTop,
       height: 0,
     };
-  } else {
-    const crosshairLeft = projectedPointerPosition.x + left;
-
-    return {
-      top,
-      left: crosshairLeft,
-      width: 0,
-      height,
-    };
   }
+  const crosshairLeft = projectedPointerPosition.x + left;
+
+  return {
+    top,
+    left: crosshairLeft,
+    width: 0,
+    height,
+  };
 }
 
 /** @internal */
@@ -148,24 +147,23 @@ export function getCursorBandPosition(
       height,
       visible: true,
     };
-  } else {
-    const adjustedTop = snapEnabled ? position : cursorPosition.x;
-    let topPosition = chartRotation === 90 ? top + adjustedTop : height + top - adjustedTop - bandOffset;
-    let adjustedHeight = band;
-    if (band > 1 && topPosition + band > top + height) {
-      adjustedHeight = band - (topPosition + band - (top + height));
-    } else if (band > 1 && topPosition < top) {
-      adjustedHeight = band - (top - topPosition);
-      topPosition = top;
-    }
-    return {
-      top: topPosition,
-      left,
-      width,
-      height: adjustedHeight,
-      visible: true,
-    };
   }
+  const adjustedTop = snapEnabled ? position : cursorPosition.x;
+  let topPosition = chartRotation === 90 ? top + adjustedTop : height + top - adjustedTop - bandOffset;
+  let adjustedHeight = band;
+  if (band > 1 && topPosition + band > top + height) {
+    adjustedHeight = band - (topPosition + band - (top + height));
+  } else if (band > 1 && topPosition < top) {
+    adjustedHeight = band - (top - topPosition);
+    topPosition = top;
+  }
+  return {
+    top: topPosition,
+    left,
+    width,
+    height: adjustedHeight,
+    visible: true,
+  };
 }
 
 /** @internal */

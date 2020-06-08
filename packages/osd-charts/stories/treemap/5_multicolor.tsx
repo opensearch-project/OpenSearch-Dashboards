@@ -14,15 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
+
+import React from 'react';
 
 import { Chart, Datum, Partition, PartitionLayout } from '../../src';
-import { mocks } from '../../src/mocks/hierarchical/index';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
 import { arrayToLookup, hueInterpolator } from '../../src/chart_types/partition_chart/layout/utils/calcs';
+import { mocks } from '../../src/mocks/hierarchical';
 import { countryDimension } from '../../src/mocks/hierarchical/dimension_codes';
 import { palettes } from '../../src/mocks/hierarchical/palettes';
-import React from 'react';
 import { regionLookup } from '../utils/utils';
 
 const countryLookup = arrayToLookup((d: Datum) => d.country, countryDimension);
@@ -41,7 +43,7 @@ export const Example = () => (
     className="story-chart"
     size={
       {
-        /*height: 800*/
+        /* height: 800 */
       }
     }
   >
@@ -49,11 +51,11 @@ export const Example = () => (
       id="spec_1"
       data={mocks.sunburst}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\u00A0Bn`}
       topGroove={0}
       layers={[
         {
-          groupByRollup: (d: Datum) => countryLookup[d.dest].continentCountry.substr(0, 2),
+          groupByRollup: (d: Datum) => countryLookup[d.dest].continentCountry.slice(0, 2),
           nodeLabel: (d: any) => regionLookup[d].regionName,
           fillLabel: {
             valueFormatter: () => '',
@@ -67,7 +69,7 @@ export const Example = () => (
           groupByRollup: (d: Datum) => d.dest,
           nodeLabel: (d: any) => countryLookup[d].name,
           fillLabel: {
-            valueFormatter: (d: number) => `${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
+            valueFormatter: (d: number) => `${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\u00A0Bn`,
             textColor: 'rgba(60,60,60,1)',
             textInvertible: false,
             fontWeight: 100,

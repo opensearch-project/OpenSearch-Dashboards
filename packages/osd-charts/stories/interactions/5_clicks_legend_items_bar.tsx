@@ -14,13 +14,14 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { action } from '@storybook/addon-actions';
-import React from 'react';
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src/';
-
 import { array, boolean, number, select } from '@storybook/addon-knobs';
+import React from 'react';
+
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
 import { BARCHART_2Y2G } from '../../src/utils/data_samples/test_dataset';
 
 const onLegendItemListeners = {
@@ -77,7 +78,7 @@ export const Example = () => {
         {...onLegendItemListeners}
         xDomain={xDomain}
       />
-      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
+      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
       <Axis
         id="left2"
         title="Left axis"

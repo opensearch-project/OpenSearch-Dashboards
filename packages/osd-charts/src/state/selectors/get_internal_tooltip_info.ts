@@ -14,16 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { GlobalChartState } from '../chart_state';
 import { TooltipInfo } from '../../components/tooltip/types';
+import { GlobalChartState } from '../chart_state';
 
 /** @internal */
 export const getInternalTooltipInfoSelector = (state: GlobalChartState): TooltipInfo | undefined => {
   if (state.internalChartState) {
     return state.internalChartState.getTooltipInfo(state);
-  } else {
-    return undefined;
   }
 };

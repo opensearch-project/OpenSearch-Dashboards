@@ -14,30 +14,31 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
-import { isLineAnnotation, AnnotationSpec } from '../../../utils/specs';
-import { AnnotationId } from '../../../../../utils/ids';
-import { AnnotationDimensions, AnnotationTooltipState } from '../../../annotations/types';
-import { Dimensions } from '../../../../../utils/dimensions';
+import { onPointerMove as onPointerMoveAction } from '../../../../../state/actions/mouse';
 import { GlobalChartState, BackwardRef } from '../../../../../state/chart_state';
 import { getInternalIsInitializedSelector } from '../../../../../state/selectors/get_internal_is_intialized';
-import { computeAnnotationDimensionsSelector } from '../../../state/selectors/compute_annotations';
-import { getAnnotationSpecsSelector } from '../../../state/selectors/get_specs';
-import { getAnnotationTooltipStateSelector } from '../../../state/selectors/get_annotation_tooltip_state';
-import { isChartEmptySelector } from '../../../state/selectors/is_chart_empty';
+import { Dimensions } from '../../../../../utils/dimensions';
+import { AnnotationId } from '../../../../../utils/ids';
 import { AnnotationLineProps } from '../../../annotations/line/types';
+import { AnnotationDimensions, AnnotationTooltipState } from '../../../annotations/types';
+import { computeAnnotationDimensionsSelector } from '../../../state/selectors/compute_annotations';
 import { computeChartDimensionsSelector } from '../../../state/selectors/compute_chart_dimensions';
+import { getAnnotationTooltipStateSelector } from '../../../state/selectors/get_annotation_tooltip_state';
+import { getAnnotationSpecsSelector } from '../../../state/selectors/get_specs';
+import { isChartEmptySelector } from '../../../state/selectors/is_chart_empty';
 import { getSpecsById } from '../../../state/utils';
+import { isLineAnnotation, AnnotationSpec } from '../../../utils/specs';
 import { AnnotationTooltip } from './annotation_tooltip';
-import { onPointerMove } from '../../../../../state/actions/mouse';
 
 interface AnnotationsDispatchProps {
-  onPointerMove: typeof onPointerMove;
+  onPointerMove: typeof onPointerMoveAction;
 }
 
 interface AnnotationsStateProps {
@@ -80,6 +81,7 @@ const AnnotationsComponent = ({
         };
 
         markers.push(
+          // eslint-disable-next-line react/no-array-index-key
           <div className="echAnnotation" style={{ ...style }} key={`annotation-${id}-${index}`}>
             {icon}
           </div>,
@@ -133,7 +135,7 @@ const AnnotationsComponent = ({
 AnnotationsComponent.displayName = 'Annotations';
 
 const mapDispatchToProps = (dispatch: Dispatch): AnnotationsDispatchProps =>
-  bindActionCreators({ onPointerMove }, dispatch);
+  bindActionCreators({ onPointerMove: onPointerMoveAction }, dispatch);
 
 const mapStateToProps = (state: GlobalChartState): AnnotationsStateProps => {
   if (!getInternalIsInitializedSelector(state)) {

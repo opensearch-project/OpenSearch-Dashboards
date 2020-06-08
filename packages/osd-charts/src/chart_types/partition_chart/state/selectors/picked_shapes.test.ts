@@ -14,18 +14,20 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { chartStoreReducer, GlobalChartState } from '../../../../state/chart_state';
 import { createStore, Store } from 'redux';
-import { PartitionSpec } from '../../specs';
-import { upsertSpec, specParsed, specParsing } from '../../../../state/actions/specs';
+
 import { MockGlobalSpec, MockSeriesSpec } from '../../../../mocks/specs';
-import { updateParentDimensions } from '../../../../state/actions/chart_settings';
-import { partitionGeometries } from './geometries';
-import { onMouseDown, onMouseUp, onPointerMove } from '../../../../state/actions/mouse';
-import { createOnElementClickCaller } from './on_element_click_caller';
 import { SettingsSpec, XYChartElementEvent, PartitionElementEvent } from '../../../../specs';
+import { updateParentDimensions } from '../../../../state/actions/chart_settings';
+import { onMouseDown, onMouseUp, onPointerMove } from '../../../../state/actions/mouse';
+import { upsertSpec, specParsed, specParsing } from '../../../../state/actions/specs';
+import { chartStoreReducer, GlobalChartState } from '../../../../state/chart_state';
+import { PartitionSpec } from '../../specs';
+import { partitionGeometries } from './geometries';
+import { createOnElementClickCaller } from './on_element_click_caller';
 
 describe('Picked shapes selector', () => {
   function initStore() {
@@ -45,9 +47,7 @@ describe('Picked shapes selector', () => {
   beforeEach(() => {
     store = initStore();
     const common = {
-      valueAccessor: (d: { v: number }) => {
-        return d.v;
-      },
+      valueAccessor: (d: { v: number }) => d.v,
       data: [
         { g1: 'a', g2: 'a', v: 1 },
         { g1: 'a', g2: 'b', v: 1 },

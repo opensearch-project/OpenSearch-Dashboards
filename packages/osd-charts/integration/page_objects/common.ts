@@ -14,13 +14,14 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import Url from 'url';
 
-import { toMatchImageSnapshot } from '../jest_env_setup';
 // @ts-ignore
 import defaults from '../defaults';
+import { toMatchImageSnapshot } from '../jest_env_setup';
 
 const port = process.env.PORT || defaults.PORT;
 const host = process.env.HOST || defaults.HOST;
@@ -167,7 +168,7 @@ class CommonPage {
    * @param selector
    */
   async getBoundingClientRect(selector: string) {
-    return page.$eval(selector, (element) => {
+    return await page.$eval(selector, (element) => {
       const { x, y, width, height } = element.getBoundingClientRect();
       return { left: x, top: y, width, height, id: element.id };
     });
@@ -331,7 +332,7 @@ class CommonPage {
     mousePosition: MousePosition,
     options?: Omit<ScreenshotElementAtUrlOptions, 'action'>,
   ) {
-    const action = async () => await this.moveMouseRelativeToDOMElement(mousePosition, this.chartSelector);
+    const action = async() => await this.moveMouseRelativeToDOMElement(mousePosition, this.chartSelector);
     await this.expectChartAtUrlToMatchScreenshot(url, {
       ...options,
       action,
@@ -352,7 +353,7 @@ class CommonPage {
     end: MousePosition,
     options?: Omit<ScreenshotElementAtUrlOptions, 'action'>,
   ) {
-    const action = async () => await this.dragMouseRelativeToDOMElement(start, end, this.chartSelector);
+    const action = async() => await this.dragMouseRelativeToDOMElement(start, end, this.chartSelector);
     await this.expectChartAtUrlToMatchScreenshot(url, {
       ...options,
       action,
@@ -375,7 +376,7 @@ class CommonPage {
     }
 
     // activate peripheral visibility
-    page.evaluate(() => {
+    await page.evaluate(() => {
       document.querySelector('html')!.classList.add('echVisualTesting');
     });
   }

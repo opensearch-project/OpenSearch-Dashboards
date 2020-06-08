@@ -14,19 +14,21 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
-import { GlobalChartState, PointerState } from '../../../../state/chart_state';
-import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { SettingsSpec, LayerValue } from '../../../../specs';
-import { getPickedShapesLayerValues } from './picked_shapes';
-import { getSpecOrNull } from './goal_spec';
+
 import { ChartTypes } from '../../..';
-import { isClicking } from '../../../../state/utils';
-import { getLastClickSelector } from '../../../../state/selectors/get_last_click';
 import { SeriesIdentifier } from '../../../../commons/series_id';
+import { SettingsSpec, LayerValue } from '../../../../specs';
+import { GlobalChartState, PointerState } from '../../../../state/chart_state';
+import { getLastClickSelector } from '../../../../state/selectors/get_last_click';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
+import { isClicking } from '../../../../state/utils';
+import { getSpecOrNull } from './goal_spec';
+import { getPickedShapesLayerValues } from './picked_shapes';
 
 /**
  * Will call the onElementClick listener every time the following preconditions are met:
@@ -52,15 +54,13 @@ export function createOnElementClickCaller(): (state: GlobalChartState) => void 
           const nextPickedShapesLength = pickedShapes.length;
           if (nextPickedShapesLength > 0 && isClicking(prevClick, lastClick)) {
             if (settings && settings.onElementClick) {
-              const elements = pickedShapes.map<[Array<LayerValue>, SeriesIdentifier]>((values) => {
-                return [
-                  values,
-                  {
-                    specId: spec.id,
-                    key: `spec{${spec.id}}`,
-                  },
-                ];
-              });
+              const elements = pickedShapes.map<[Array<LayerValue>, SeriesIdentifier]>((values) => [
+                values,
+                {
+                  specId: spec.id,
+                  key: `spec{${spec.id}}`,
+                },
+              ]);
               settings.onElementClick(elements);
             }
           }

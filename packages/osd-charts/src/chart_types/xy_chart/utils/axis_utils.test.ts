@@ -14,15 +14,24 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { DateTime } from 'luxon';
+import moment from 'moment-timezone';
+
+import { ChartTypes } from '../..';
+import { ScaleType, Scale } from '../../../scales';
+import { SpecTypes } from '../../../specs/settings';
+import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
+import { SvgTextBBoxCalculator } from '../../../utils/bbox/svg_text_bbox_calculator';
+import { Position } from '../../../utils/commons';
+import { niceTimeFormatter } from '../../../utils/data/formatters';
+import { AxisId, GroupId } from '../../../utils/ids';
+import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { XDomain } from '../domains/x_domain';
 import { YDomain } from '../domains/y_domain';
-import { AxisSpec, DomainRange, AxisStyle, DEFAULT_GLOBAL_ID } from './specs';
-import { Position } from '../../../utils/commons';
-import { LIGHT_THEME } from '../../../utils/themes/light_theme';
-import { AxisId, GroupId } from '../../../utils/ids';
-import { ScaleType, Scale } from '../../../scales';
+import { mergeYCustomDomainsByGroupId } from '../state/selectors/merge_y_custom_domains';
 import {
   AxisTick,
   AxisTicksDimensions,
@@ -50,15 +59,8 @@ import {
   isHorizontalGrid,
   enableDuplicatedTicks,
 } from './axis_utils';
-import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
-import { SvgTextBBoxCalculator } from '../../../utils/bbox/svg_text_bbox_calculator';
-import { niceTimeFormatter } from '../../../utils/data/formatters';
-import { mergeYCustomDomainsByGroupId } from '../state/selectors/merge_y_custom_domains';
-import { ChartTypes } from '../..';
-import { SpecTypes } from '../../../specs/settings';
-import { DateTime } from 'luxon';
 import { computeXScale } from './scales';
-import moment from 'moment-timezone';
+import { AxisSpec, DomainRange, AxisStyle, DEFAULT_GLOBAL_ID } from './specs';
 
 describe('Axis computational utils', () => {
   const mockedRect = {
@@ -108,9 +110,7 @@ describe('Axis computational utils', () => {
     position: Position.Left,
     tickSize: 10,
     tickPadding: 10,
-    tickFormat: (value: any) => {
-      return `${value}`;
-    },
+    tickFormat: (value: any) => `${value}`,
     showGridLines: true,
     integersOnly: false,
   };
@@ -126,9 +126,7 @@ describe('Axis computational utils', () => {
     position: Position.Top,
     tickSize: 10,
     tickPadding: 10,
-    tickFormat: (value: any) => {
-      return `${value}`;
-    },
+    tickFormat: (value: any) => `${value}`,
     integersOnly: false,
   };
 
@@ -144,9 +142,7 @@ describe('Axis computational utils', () => {
     position: Position.Left,
     tickSize: 10,
     tickPadding: 10,
-    tickFormat: (value: any) => {
-      return `${value}`;
-    },
+    tickFormat: (value: any) => `${value}`,
     showGridLines: true,
     integersOnly: false,
   };

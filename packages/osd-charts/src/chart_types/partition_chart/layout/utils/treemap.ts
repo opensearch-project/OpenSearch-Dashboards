@@ -14,12 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { ArrayEntry, CHILDREN_KEY, entryValue, HierarchyOfArrays } from './group_by_rollup';
-import { Part } from '../types/types';
-import { GOLDEN_RATIO } from './math';
 import { Pixels } from '../types/geometry_types';
+import { Part } from '../types/types';
+import { ArrayEntry, CHILDREN_KEY, entryValue, HierarchyOfArrays } from './group_by_rollup';
+import { GOLDEN_RATIO } from './math';
 
 const MAX_U_PADDING_RATIO = 0.0256197; // this limits area distortion to <10% (which occurs due to pixel padding) with very small rectangles
 const MAX_TOP_PADDING_RATIO = 0.33; // this limits further area distortion to ~33%
@@ -108,7 +109,7 @@ export function treemap(
   const independentSize = vertical ? width : height;
   const vectorElements = bestVector(nodes, independentSize, areaAccessor);
   const vector = vectorNodeCoordinates(vectorElements, x0, y0, vertical);
-  const dependentSize = vectorElements.dependentSize;
+  const { dependentSize } = vectorElements;
   return vector
     .concat(
       ...vector.map(({ node, x0, y0, x1, y1 }) => {

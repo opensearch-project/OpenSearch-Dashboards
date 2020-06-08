@@ -14,17 +14,19 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { BasicSeriesSpec, DomainRange, DEFAULT_GLOBAL_ID, SeriesTypes } from '../utils/specs';
-import { GroupId, SpecId } from '../../../utils/ids';
-import { ScaleContinuousType, ScaleType } from '../../../scales';
-import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_utils';
-import { BaseDomain } from './domain';
-import { RawDataSeries } from '../utils/series';
-import { computeContinuousDataDomain } from '../../../utils/domain';
-import { identity } from '../../../utils/commons';
 import { sum } from 'd3-array';
+
+import { ScaleContinuousType, ScaleType } from '../../../scales';
+import { identity } from '../../../utils/commons';
+import { computeContinuousDataDomain } from '../../../utils/domain';
+import { GroupId, SpecId } from '../../../utils/ids';
+import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_utils';
+import { RawDataSeries } from '../utils/series';
+import { BasicSeriesSpec, DomainRange, DEFAULT_GLOBAL_ID, SeriesTypes } from '../utils/specs';
+import { BaseDomain } from './domain';
 
 export type YDomain = BaseDomain & {
   type: 'yDomain';
@@ -98,16 +100,12 @@ function mergeYDomainForGroup(
     domain = computeContinuousDataDomain([0, 1], identity, customDomain?.fit);
   } else {
     // compute stacked domain
-    const isStackedScaleToExtent = groupSpecs.stacked.some((spec) => {
-      return spec.yScaleToDataExtent;
-    });
+    const isStackedScaleToExtent = groupSpecs.stacked.some(({ yScaleToDataExtent }) => yScaleToDataExtent);
     const stackedDataSeries = getDataSeriesOnGroup(dataSeries, groupSpecs.stacked);
     const stackedDomain = computeYStackedDomain(stackedDataSeries, isStackedScaleToExtent, customDomain?.fit);
 
     // compute non stacked domain
-    const isNonStackedScaleToExtent = groupSpecs.nonStacked.some((spec) => {
-      return spec.yScaleToDataExtent;
-    });
+    const isNonStackedScaleToExtent = groupSpecs.nonStacked.some(({ yScaleToDataExtent }) => yScaleToDataExtent);
     const nonStackedDataSeries = getDataSeriesOnGroup(dataSeries, groupSpecs.nonStacked);
     const nonStackedDomain = computeYNonStackedDomain(
       nonStackedDataSeries,
@@ -146,7 +144,7 @@ function mergeYDomainForGroup(
     type: 'yDomain',
     isBandScale: false,
     scaleType: groupYScaleType,
-    groupId: groupId,
+    groupId,
     domain,
   };
 }
@@ -176,6 +174,7 @@ function computeYStackedDomain(
     });
   });
   const dataValues = [];
+  // eslint-disable-next-line no-restricted-syntax
   for (const stackValues of stackMap) {
     dataValues.push(...stackValues[1]);
     if (stackValues[1].length > 1) {
@@ -213,9 +212,7 @@ export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
   // After mobx->redux https://github.com/elastic/elastic-charts/pull/281 we keep the specs untouched on mount
   // in MobX version, the stackAccessors was programmatically added to every histogram specs
   // in ReduX version, we left untouched the specs, so we have to manually check that
-  const isHistogramEnabled = specs.some(({ seriesType, enableHistogramMode }) => {
-    return seriesType === SeriesTypes.Bar && enableHistogramMode;
-  });
+  const isHistogramEnabled = specs.some(({ seriesType, enableHistogramMode }) => seriesType === SeriesTypes.Bar && enableHistogramMode);
   // split each specs by groupId and by stacked or not
   specs.forEach((spec) => {
     const group = specsByGroupIds.get(spec.groupId) || {
@@ -226,8 +223,8 @@ export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
     // stack every bars if using histogram mode
     // independenyly from lines and areas
     if (
-      (spec.seriesType === SeriesTypes.Bar && isHistogramEnabled) ||
-      (spec.stackAccessors && spec.stackAccessors.length > 0)
+      (spec.seriesType === SeriesTypes.Bar && isHistogramEnabled)
+      || (spec.stackAccessors && spec.stackAccessors.length > 0)
     ) {
       group.stacked.push(spec);
     } else {
@@ -263,7 +260,7 @@ export function coerceYScaleTypes(specs: Pick<BasicSeriesSpec, 'yScaleType'>[]):
 function coerceYScale(scaleTypes: Set<ScaleContinuousType>): ScaleContinuousType {
   if (scaleTypes.size === 1) {
     const scales = scaleTypes.values();
-    const value = scales.next().value;
+    const { value } = scales.next();
     return value;
   }
   return ScaleType.Linear;

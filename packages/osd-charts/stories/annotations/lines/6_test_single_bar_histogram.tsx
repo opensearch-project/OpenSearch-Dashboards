@@ -14,13 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
+
 import { AnnotationDomainTypes, Axis, BarSeries, Chart, LineAnnotation, ScaleType, Settings } from '../../../src';
-import { getChartRotationKnob } from '../../utils/knobs';
 import { Position } from '../../../src/utils/commons';
+import { getChartRotationKnob } from '../../utils/knobs';
 
 export const Example = () => {
   const debug = boolean('debug', false);
@@ -63,7 +65,7 @@ export const Example = () => {
       <Axis id="horizontal" position={Position.Bottom} title="x-domain axis" />
       <Axis id="vertical" title="y-domain axis" position={Position.Left} />
       <BarSeries
-        enableHistogramMode={true}
+        enableHistogramMode
         id="bars"
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}

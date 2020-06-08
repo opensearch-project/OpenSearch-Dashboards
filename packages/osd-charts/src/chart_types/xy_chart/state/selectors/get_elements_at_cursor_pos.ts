@@ -14,23 +14,25 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { Point } from '../../../../utils/point';
-import { getOrientedProjectedPointerPositionSelector } from './get_oriented_projected_pointer_position';
-import { ComputedScales } from '../utils';
-import { getComputedScalesSelector } from './get_computed_scales';
-import { getGeometriesIndexKeysSelector } from './get_geometries_index_keys';
-import { getGeometriesIndexSelector } from './get_geometries_index';
-import { IndexedGeometry } from '../../../../utils/geometry';
+
 import { PointerEvent } from '../../../../specs';
-import { computeChartDimensionsSelector } from './compute_chart_dimensions';
-import { Dimensions } from '../../../../utils/dimensions';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { isValidPointerOverEvent } from '../../../../utils/events';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { Dimensions } from '../../../../utils/dimensions';
+import { isValidPointerOverEvent } from '../../../../utils/events';
+import { IndexedGeometry } from '../../../../utils/geometry';
+import { Point } from '../../../../utils/point';
 import { IndexedGeometryMap } from '../../utils/indexed_geometry_map';
+import { ComputedScales } from '../utils';
+import { computeChartDimensionsSelector } from './compute_chart_dimensions';
+import { getComputedScalesSelector } from './get_computed_scales';
+import { getGeometriesIndexSelector } from './get_geometries_index';
+import { getGeometriesIndexKeysSelector } from './get_geometries_index_keys';
+import { getOrientedProjectedPointerPositionSelector } from './get_oriented_projected_pointer_position';
 
 const getExternalPointerEventStateSelector = (state: GlobalChartState) => state.externalEvents.pointer;
 

@@ -14,10 +14,11 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import React, { MouseEventHandler } from 'react';
 import classNames from 'classnames';
+import React, { MouseEventHandler } from 'react';
 
 interface LabelProps {
   label: string;
@@ -29,7 +30,7 @@ interface LabelProps {
  */
 export function Label({ label, onClick }: LabelProps) {
   const labelClassNames = classNames('echLegendItem__label', {
-    ['echLegendItem__label--clickable']: Boolean(onClick),
+    'echLegendItem__label--clickable': Boolean(onClick),
   });
   return (
     <div className={labelClassNames} title={label} onClick={onClick}>

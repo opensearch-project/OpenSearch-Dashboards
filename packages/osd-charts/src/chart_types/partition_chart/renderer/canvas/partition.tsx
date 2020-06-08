@@ -14,20 +14,22 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React, { MouseEvent } from 'react';
-import { bindActionCreators, Dispatch } from 'redux';
 import { connect } from 'react-redux';
+import { bindActionCreators, Dispatch } from 'redux';
+
 import { onChartRendered } from '../../../../state/actions/chart';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { Dimensions } from '../../../../utils/dimensions';
-import { partitionGeometries } from '../../state/selectors/geometries';
-import { nullShapeViewModel, QuadViewModel, ShapeViewModel } from '../../layout/types/viewmodel_types';
-import { renderPartitionCanvas2d } from './canvas_renderers';
-import { INPUT_KEY } from '../../layout/utils/group_by_rollup';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
+import { Dimensions } from '../../../../utils/dimensions';
+import { nullShapeViewModel, QuadViewModel, ShapeViewModel } from '../../layout/types/viewmodel_types';
+import { INPUT_KEY } from '../../layout/utils/group_by_rollup';
+import { partitionGeometries } from '../../state/selectors/geometries';
+import { renderPartitionCanvas2d } from './canvas_renderers';
 
 interface ReactiveChartStateProps {
   initialized: boolean;
@@ -42,16 +44,40 @@ interface ReactiveChartDispatchProps {
 type PartitionProps = ReactiveChartStateProps & ReactiveChartDispatchProps;
 class PartitionComponent extends React.Component<PartitionProps> {
   static displayName = 'Partition';
+
   // firstRender = true; // this'll be useful for stable resizing of treemaps
   private readonly canvasRef: React.RefObject<HTMLCanvasElement>;
   private ctx: CanvasRenderingContext2D | null;
   // see example https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio#Example
   private readonly devicePixelRatio: number; // fixme this be no constant: multi-monitor window drag may necessitate modifying the `<canvas>` dimensions
+
   constructor(props: Readonly<PartitionProps>) {
     super(props);
     this.canvasRef = React.createRef();
     this.ctx = null;
     this.devicePixelRatio = window.devicePixelRatio;
+  }
+
+  componentDidMount() {
+    /*
+     * the DOM element has just been appended, and getContext('2d') is always non-null,
+     * so we could use a couple of ! non-null assertions but no big plus
+     */
+    this.tryCanvasContext();
+    if (this.props.initialized) {
+      this.drawCanvas();
+      this.props.onChartRendered();
+    }
+  }
+
+  componentDidUpdate() {
+    if (!this.ctx) {
+      this.tryCanvasContext();
+    }
+    if (this.props.initialized) {
+      this.drawCanvas();
+      this.props.onChartRendered();
+    }
   }
 
   private drawCanvas() {
@@ -69,26 +95,6 @@ class PartitionComponent extends React.Component<PartitionProps> {
     this.ctx = canvas && canvas.getContext('2d');
   }
 
-  componentDidUpdate() {
-    if (!this.ctx) {
-      this.tryCanvasContext();
-    }
-    if (this.props.initialized) {
-      this.drawCanvas();
-      this.props.onChartRendered();
-    }
-  }
-
-  componentDidMount() {
-    // the DOM element has just been appended, and getContext('2d') is always non-null,
-    // so we could use a couple of ! non-null assertions but no big plus
-    this.tryCanvasContext();
-    if (this.props.initialized) {
-      this.drawCanvas();
-      this.props.onChartRendered();
-    }
-  }
-
   handleMouseMove(e: MouseEvent<HTMLCanvasElement>) {
     const {
       initialized,
@@ -99,7 +105,7 @@ class PartitionComponent extends React.Component<PartitionProps> {
     }
     const picker = this.props.geometries.pickQuads;
     const box = this.canvasRef.current.getBoundingClientRect();
-    const diskCenter = this.props.geometries.diskCenter;
+    const { diskCenter } = this.props.geometries;
     const x = e.clientX - box.left - diskCenter.x;
     const y = e.clientY - box.top - diskCenter.y;
     const pickedShapes: Array<QuadViewModel> = picker(x, y);
@@ -113,11 +119,11 @@ class PartitionComponent extends React.Component<PartitionProps> {
       }
     });
     /*
-    console.log(
-      pickedShapes.map((s) => s.value),
-      [...datumIndices.values()],
-    );
-    */
+     *console.log(
+     *  pickedShapes.map((s) => s.value),
+     *  [...datumIndices.values()],
+     *);
+     */
     return pickedShapes; // placeholder
   }
 

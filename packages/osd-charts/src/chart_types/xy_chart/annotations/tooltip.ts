@@ -14,18 +14,19 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { AnnotationId } from '../../../utils/ids';
-import { AnnotationSpec, AxisSpec, isLineAnnotation, isRectAnnotation } from '../utils/specs';
 import { Rotation } from '../../../utils/commons';
-import { AnnotationDimensions, AnnotationTooltipState } from './types';
 import { Dimensions } from '../../../utils/dimensions';
+import { AnnotationId } from '../../../utils/ids';
+import { Point } from '../../../utils/point';
+import { AnnotationSpec, AxisSpec, isLineAnnotation, isRectAnnotation } from '../utils/specs';
 import { computeLineAnnotationTooltipState } from './line/tooltip';
+import { AnnotationLineProps } from './line/types';
 import { computeRectAnnotationTooltipState } from './rect/tooltip';
 import { AnnotationRectProps } from './rect/types';
-import { Point } from '../../../utils/point';
-import { AnnotationLineProps } from './line/types';
+import { AnnotationDimensions, AnnotationTooltipState } from './types';
 
 /** @internal */
 export function computeAnnotationTooltipState(
@@ -41,12 +42,13 @@ export function computeAnnotationTooltipState(
     .slice()
     .reverse()
     .sort(({ zIndex: a = Number.MIN_SAFE_INTEGER }, { zIndex: b = Number.MIN_SAFE_INTEGER }) => b - a);
+  // eslint-disable-next-line no-restricted-syntax
   for (const spec of sortedSpecs) {
     const annotationDimension = annotationDimensions.get(spec.id);
     if (spec.hideTooltips || !annotationDimension) {
       continue;
     }
-    const groupId = spec.groupId;
+    const { groupId } = spec;
 
     if (isLineAnnotation(spec)) {
       if (spec.hideLines) {

@@ -14,30 +14,29 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-const tsPreset = require('ts-jest/jest-preset');
-const jestPuppeteer = require('jest-puppeteer/jest-preset');
 const jestPuppeteerDocker = require('jest-puppeteer-docker/jest-preset');
+const jestPuppeteer = require('jest-puppeteer/jest-preset');
+const tsPreset = require('ts-jest/jest-preset');
 
-module.exports = Object.assign(
-  {
-    setupFilesAfterEnv: ['<rootDir>/jest_env_setup.ts'],
-    globals: {
-      'ts-jest': {
-        tsConfig: '<rootDir>/tsconfig.json',
-      },
-      /*
-       * The window and HTMLElement globals are required to use @elastic/eui with VRT
-       *
-       * The jest-puppeteer-docker env extends a node test environment and not jsdom test environment.
-       * Some EUI components that are included in the bundle, but not used, require the jsdom setup.
-       * To bypass these errors we are just mocking both as empty objects.
-       */
-      window: {},
-      HTMLElement: {},
+module.exports = {
+  setupFilesAfterEnv: ['<rootDir>/jest_env_setup.ts'],
+  globals: {
+    'ts-jest': {
+      tsConfig: '<rootDir>/tsconfig.json',
     },
+    /*
+     * The window and HTMLElement globals are required to use @elastic/eui with VRT
+     *
+     * The jest-puppeteer-docker env extends a node test environment and not jsdom test environment.
+     * Some EUI components that are included in the bundle, but not used, require the jsdom setup.
+     * To bypass these errors we are just mocking both as empty objects.
+     */
+    window: {},
+    HTMLElement: {},
   },
-  process.env.DEBUG === 'true' ? jestPuppeteer : jestPuppeteerDocker,
-  tsPreset,
-);
+  ...(process.env.DEBUG === 'true' ? jestPuppeteer : jestPuppeteerDocker),
+  ...tsPreset,
+};

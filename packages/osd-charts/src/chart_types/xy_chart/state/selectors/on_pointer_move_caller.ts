@@ -14,20 +14,22 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
-import { GlobalChartState } from '../../../../state/chart_state';
-import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { SettingsSpec, PointerEvent, PointerEventType } from '../../../../specs';
-import { ChartTypes } from '../../../index';
+
+import { ChartTypes } from '../../..';
 import { Scale } from '../../../../scales';
+import { SettingsSpec, PointerEvent, PointerEventType } from '../../../../specs';
+import { GlobalChartState } from '../../../../state/chart_state';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { Point } from '../../../../utils/point';
-import { getOrientedProjectedPointerPositionSelector } from './get_oriented_projected_pointer_position';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';
 import { getGeometriesIndexKeysSelector } from './get_geometries_index_keys';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getOrientedProjectedPointerPositionSelector } from './get_oriented_projected_pointer_position';
 
 const getPointerEventSelector = createCachedSelector(
   [
@@ -36,14 +38,17 @@ const getPointerEventSelector = createCachedSelector(
     computeSeriesGeometriesSelector,
     getGeometriesIndexKeysSelector,
   ],
-  (chartId, orientedProjectedPointerPosition, seriesGeometries, geometriesIndexKeys): PointerEvent => {
-    return getPointerEvent(
-      chartId,
-      orientedProjectedPointerPosition,
-      seriesGeometries.scales.xScale,
-      geometriesIndexKeys,
-    );
-  },
+  (
+    chartId,
+    orientedProjectedPointerPosition,
+    seriesGeometries,
+    geometriesIndexKeys,
+  ): PointerEvent => getPointerEvent(
+    chartId,
+    orientedProjectedPointerPosition,
+    seriesGeometries.scales.xScale,
+    geometriesIndexKeys,
+  ),
 )(getChartIdSelector);
 
 function getPointerEvent(
@@ -87,20 +92,20 @@ function hasPointerEventChanged(prevPointerEvent: PointerEvent, nextPointerEvent
     return true;
   }
   if (
-    nextPointerEvent &&
-    prevPointerEvent.type === nextPointerEvent.type &&
-    prevPointerEvent.type === PointerEventType.Out
+    nextPointerEvent
+    && prevPointerEvent.type === nextPointerEvent.type
+    && prevPointerEvent.type === PointerEventType.Out
   ) {
     return false;
   }
   // if something changed in the pointerEvent than recompute
   if (
-    nextPointerEvent &&
-    prevPointerEvent.type === PointerEventType.Over &&
-    nextPointerEvent.type === PointerEventType.Over &&
-    (prevPointerEvent.value !== nextPointerEvent.value ||
-      prevPointerEvent.scale !== nextPointerEvent.scale ||
-      prevPointerEvent.unit !== nextPointerEvent.unit)
+    nextPointerEvent
+    && prevPointerEvent.type === PointerEventType.Over
+    && nextPointerEvent.type === PointerEventType.Over
+    && (prevPointerEvent.value !== nextPointerEvent.value
+      || prevPointerEvent.scale !== nextPointerEvent.scale
+      || prevPointerEvent.unit !== nextPointerEvent.unit)
   ) {
     return true;
   }

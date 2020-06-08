@@ -14,35 +14,36 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import React from 'react';
 import classNames from 'classnames';
-import { Dispatch, bindActionCreators } from 'redux';
+import React from 'react';
 import { connect } from 'react-redux';
-import { Position } from '../../utils/commons';
-import { GlobalChartState } from '../../state/chart_state';
-import { getLegendItemsSelector } from '../../state/selectors/get_legend_items';
-import { getSettingsSpecSelector } from '../../state/selectors/get_settings_specs';
-import { getChartThemeSelector } from '../../state/selectors/get_chart_theme';
-import { getLegendExtraValuesSelector } from '../../state/selectors/get_legend_items_values';
-import { getLegendSizeSelector } from '../../state/selectors/get_legend_size';
-import { onToggleLegend } from '../../state/actions/legend';
-import { LIGHT_THEME } from '../../utils/themes/light_theme';
-import { LegendItemProps } from './legend_item';
-import { Theme } from '../../utils/themes/theme';
+import { Dispatch, bindActionCreators } from 'redux';
+
 import { LegendItem, LegendItemExtraValues } from '../../commons/legend';
-import { BBox } from '../../utils/bbox/bbox_calculator';
+import { LegendItemListener, BasicListener, LegendColorPicker } from '../../specs';
+import { clearTemporaryColors, setTemporaryColor, setPersistedColor } from '../../state/actions/colors';
 import {
+  onToggleLegend,
   onToggleDeselectSeriesAction,
   onLegendItemOutAction,
   onLegendItemOverAction,
 } from '../../state/actions/legend';
-import { clearTemporaryColors, setTemporaryColor, setPersistedColor } from '../../state/actions/colors';
-import { LegendItemListener, BasicListener, LegendColorPicker } from '../../specs';
-import { getLegendStyle, getLegendListStyle } from './style_utils';
-import { renderLegendItem } from './legend_item';
+import { GlobalChartState } from '../../state/chart_state';
+import { getChartThemeSelector } from '../../state/selectors/get_chart_theme';
 import { getInternalIsInitializedSelector } from '../../state/selectors/get_internal_is_intialized';
+import { getLegendItemsSelector } from '../../state/selectors/get_legend_items';
+import { getLegendExtraValuesSelector } from '../../state/selectors/get_legend_items_values';
+import { getLegendSizeSelector } from '../../state/selectors/get_legend_size';
+import { getSettingsSpecSelector } from '../../state/selectors/get_settings_specs';
+import { BBox } from '../../utils/bbox/bbox_calculator';
+import { Position } from '../../utils/commons';
+import { LIGHT_THEME } from '../../utils/themes/light_theme';
+import { Theme } from '../../utils/themes/theme';
+import { LegendItemProps, renderLegendItem } from './legend_item';
+import { getLegendStyle, getLegendListStyle } from './style_utils';
 
 interface LegendStateProps {
   debug: boolean;
@@ -112,9 +113,7 @@ export class LegendComponent extends React.Component<LegendProps> {
       <div className={legendClasses}>
         <div style={legendContainerStyle} className="echLegendListContainer">
           <ul style={legendListStyle} className="echLegendList">
-            {items.map((item, index) => {
-              return renderLegendItem(item, itemProps, items.length, index);
-            })}
+            {items.map((item, index) => renderLegendItem(item, itemProps, items.length, index))}
           </ul>
         </div>
       </div>

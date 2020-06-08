@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { $Values } from 'utility-types';
 
@@ -23,21 +24,21 @@ import { $Values } from 'utility-types';
  * @public
  */
 export const Placement = Object.freeze({
-  Top: 'top' as 'top',
-  Bottom: 'bottom' as 'bottom',
-  Left: 'left' as 'left',
-  Right: 'right' as 'right',
-  TopStart: 'top-start' as 'top-start',
-  TopEnd: 'top-end' as 'top-end',
-  BottomStart: 'bottom-start' as 'bottom-start',
-  BottomEnd: 'bottom-end' as 'bottom-end',
-  RightStart: 'right-start' as 'right-start',
-  RightEnd: 'right-end' as 'right-end',
-  LeftStart: 'left-start' as 'left-start',
-  LeftEnd: 'left-end' as 'left-end',
-  Auto: 'auto' as 'auto',
-  AutoStart: 'auto-start' as 'auto-start',
-  AutoEnd: 'auto-end' as 'auto-end',
+  Top: 'top' as const,
+  Bottom: 'bottom' as const,
+  Left: 'left' as const,
+  Right: 'right' as const,
+  TopStart: 'top-start' as const,
+  TopEnd: 'top-end' as const,
+  BottomStart: 'bottom-start' as const,
+  BottomEnd: 'bottom-end' as const,
+  RightStart: 'right-start' as const,
+  RightEnd: 'right-end' as const,
+  LeftStart: 'left-start' as const,
+  LeftEnd: 'left-end' as const,
+  Auto: 'auto' as const,
+  AutoStart: 'auto-start' as const,
+  AutoEnd: 'auto-end' as const,
 });
 
 /**

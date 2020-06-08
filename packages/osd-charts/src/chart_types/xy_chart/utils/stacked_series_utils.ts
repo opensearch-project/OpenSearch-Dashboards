@@ -14,11 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { DataSeries, DataSeriesDatum, RawDataSeries, RawDataSeriesDatum, FilledValues } from './series';
 import { ScaleType } from '../../../scales';
 import { isDefined } from '../state/utils';
+import { DataSeries, DataSeriesDatum, RawDataSeries, RawDataSeriesDatum, FilledValues } from './series';
 
 /** @internal */
 export interface StackedValues {
@@ -56,6 +57,7 @@ export function getYValueStackMap(
         missingXValues.delete(datum.x);
       }
     });
+    // eslint-disable-next-line no-restricted-syntax
     for (const x of missingXValues.values()) {
       const stack = stackMap.get(x) || new Array(dataseries.length).fill(0);
       // currently filling as 0 value
@@ -146,6 +148,7 @@ export function formatStackedDataSeriesValues(
       missingXValues.delete(data.x);
       newData.push(formattedSeriesDatum);
     });
+    // eslint-disable-next-line no-restricted-syntax
     for (const x of missingXValues.values()) {
       const filledSeriesDatum = getStackedFormattedSeriesDatum(
         {
@@ -202,15 +205,17 @@ export function getStackedFormattedSeriesDatum(
       y0 = stack.total !== 0 ? data.y0 / stack.total : 0;
     }
   } else {
+    // eslint-disable-next-line prefer-destructuring
     y1 = data.y1;
+    // eslint-disable-next-line prefer-destructuring
     y0 = data.y0;
   }
 
   let computedY0: number | null;
   if (scaleToExtent) {
-    computedY0 = y0 ? y0 : y1;
+    computedY0 = y0 || y1;
   } else {
-    computedY0 = y0 ? y0 : null;
+    computedY0 = y0 || null;
   }
   const initialY0 = y0 == null ? null : y0;
   const mark = isDefined(markValue) ? markValue : null;
@@ -226,37 +231,36 @@ export function getStackedFormattedSeriesDatum(
       datum,
       ...(filled && { filled }),
     };
-  } else {
-    const stackY = isPercentageMode ? stack.percent[seriesIndex] : stack.values[seriesIndex];
-    let stackedY1: number | null = null;
-    let stackedY0: number | null = null;
-    if (isPercentageMode) {
-      stackedY1 = y1 !== null && stackY != null ? stackY + y1 : null;
-      stackedY0 = y0 != null && stackY != null ? stackY + y0 : stackY;
-    } else {
-      if (stackY == null) {
-        stackedY1 = y1 !== null ? y1 : null;
-        stackedY0 = y0 != null ? y0 : stackY;
-      } else {
-        stackedY1 = y1 !== null ? stackY + y1 : null;
-        stackedY0 = y0 != null ? stackY + y0 : stackY;
-      }
-      // configure null y0 if y1 is null
-      // it's semantically correct to say y0 is null if y1 is null
-      if (stackedY1 === null) {
-        stackedY0 = null;
-      }
-    }
-
-    return {
-      x,
-      y1: stackedY1,
-      y0: stackedY0,
-      initialY1: y1,
-      initialY0,
-      mark,
-      datum,
-      ...(filled && { filled }),
-    };
   }
+  const stackY = isPercentageMode ? stack.percent[seriesIndex] : stack.values[seriesIndex];
+  let stackedY1: number | null = null;
+  let stackedY0: number | null = null;
+  if (isPercentageMode) {
+    stackedY1 = y1 !== null && stackY != null ? stackY + y1 : null;
+    stackedY0 = y0 != null && stackY != null ? stackY + y0 : stackY;
+  } else {
+    if (stackY == null) {
+      stackedY1 = y1 !== null ? y1 : null;
+      stackedY0 = y0 != null ? y0 : stackY;
+    } else {
+      stackedY1 = y1 !== null ? stackY + y1 : null;
+      stackedY0 = y0 != null ? stackY + y0 : stackY;
+    }
+    // configure null y0 if y1 is null
+    // it's semantically correct to say y0 is null if y1 is null
+    if (stackedY1 === null) {
+      stackedY0 = null;
+    }
+  }
+
+  return {
+    x,
+    y1: stackedY1,
+    y0: stackedY0,
+    initialY1: y1,
+    initialY0,
+    mark,
+    datum,
+    ...(filled && { filled }),
+  };
 }

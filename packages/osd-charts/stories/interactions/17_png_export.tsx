@@ -14,12 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
-
-import React from 'react';
-import { Axis, BarSeries, Chart, niceTimeFormatter, Position, ScaleType, Settings } from '../../src/';
+ * under the License.
+ */
 
 import { button } from '@storybook/addon-knobs';
+import React from 'react';
+
+import { Axis, BarSeries, Chart, niceTimeFormatter, Position, ScaleType, Settings } from '../../src';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 import { SB_KNOBS_PANEL } from '../utils/storybook';
 
@@ -75,7 +76,7 @@ export const Example = () => {
         xAccessor={0}
         yAccessors={[1]}
         data={data}
-        yScaleToDataExtent={true}
+        yScaleToDataExtent
       />
     </Chart>
   );
@@ -86,7 +87,7 @@ Example.story = {
   parameters: {
     options: { selectedPanel: SB_KNOBS_PANEL },
     info: {
-      text: `Generate a PNG of the chart by clicking on the Export PNG button in the knobs section. In this Example, the button handler is setting the PNG background to white with a pixel ratio of 2. If the browser is detected to be IE11, msSaveBlob will be used instead of a PNG capture.`,
+      text: 'Generate a PNG of the chart by clicking on the Export PNG button in the knobs section. In this Example, the button handler is setting the PNG background to white with a pixel ratio of 2. If the browser is detected to be IE11, msSaveBlob will be used instead of a PNG capture.',
     },
   },
 };

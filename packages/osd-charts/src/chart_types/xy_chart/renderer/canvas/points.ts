@@ -14,14 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { SeriesKey } from '../../../../commons/series_id';
+import { Circle, Stroke, Fill } from '../../../../geoms/types';
 import { PointGeometry } from '../../../../utils/geometry';
 import { PointStyle, GeometryStateStyle } from '../../../../utils/themes/theme';
 import { renderCircle } from './primitives/arc';
-import { Circle, Stroke, Fill } from '../../../../geoms/types';
 import { buildPointStyles } from './styles/point';
-import { SeriesKey } from '../../../../commons/series_id';
 
 /**
  * Renders points from single series

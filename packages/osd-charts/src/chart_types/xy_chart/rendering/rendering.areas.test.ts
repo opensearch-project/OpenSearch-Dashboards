@@ -14,20 +14,21 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { ChartTypes } from '../..';
+import { MockSeriesSpec } from '../../../mocks/specs';
 import { ScaleType } from '../../../scales';
+import { SpecTypes } from '../../../specs/settings';
 import { CurveType } from '../../../utils/curves';
 import { PointGeometry, AreaGeometry } from '../../../utils/geometry';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
+import { computeSeriesDomains } from '../state/utils';
+import { IndexedGeometryMap } from '../utils/indexed_geometry_map';
 import { computeXScale, computeYScales } from '../utils/scales';
 import { AreaSeriesSpec, SeriesTypes } from '../utils/specs';
-import { computeSeriesDomains } from '../state/utils';
 import { renderArea } from './rendering';
-import { ChartTypes } from '../..';
-import { SpecTypes } from '../../../specs/settings';
-import { MockSeriesSpec } from '../../../mocks/specs';
-import { IndexedGeometryMap } from '../utils/indexed_geometry_map';
 
 const SPEC_ID = 'spec_1';
 const GROUP_ID = 'group_1';

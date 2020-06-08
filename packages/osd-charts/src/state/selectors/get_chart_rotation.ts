@@ -14,18 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { getSettingsSpecSelector } from './get_settings_specs';
 
 import { Rotation } from '../../utils/commons';
 import { getChartIdSelector } from './get_chart_id';
+import { getSettingsSpecSelector } from './get_settings_specs';
 
 /** @internal */
 export const getChartRotationSelector = createCachedSelector(
   [getSettingsSpecSelector],
-  (settingsSpec): Rotation => {
-    return settingsSpec.rotation;
-  },
+  (settingsSpec): Rotation => settingsSpec.rotation,
 )(getChartIdSelector);

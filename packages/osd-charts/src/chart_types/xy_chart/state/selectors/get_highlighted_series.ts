@@ -14,13 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { GlobalChartState } from '../../../../state/chart_state';
-import { computeLegendSelector } from './compute_legend';
+
 import { LegendItem } from '../../../../commons/legend';
+import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { computeLegendSelector } from './compute_legend';
 
 const getHighlightedLegendItemKey = (state: GlobalChartState) => state.interactions.highlightedLegendItemKey;
 
@@ -29,7 +31,7 @@ export const getHighlightedSeriesSelector = createCachedSelector(
   [getHighlightedLegendItemKey, computeLegendSelector],
   (highlightedLegendItemKey, legendItems): LegendItem | undefined => {
     if (!highlightedLegendItemKey) {
-      return undefined;
+      return;
     }
     return legendItems.find(({ seriesIdentifier: { key } }) => key === highlightedLegendItemKey);
   },

@@ -14,12 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { manyPieMock } from './many_pie';
+import { miniSunburstMock } from './mini_sunburst';
 import { pieMock } from './pie';
 import { sunburstMock } from './sunburst';
-import { miniSunburstMock } from './mini_sunburst';
-import { manyPieMock } from './many_pie';
 
 export const mocks = {
   pie: pieMock,

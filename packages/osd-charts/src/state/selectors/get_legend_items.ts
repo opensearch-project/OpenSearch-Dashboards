@@ -14,10 +14,11 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { GlobalChartState } from '../chart_state';
 import { LegendItem } from '../../commons/legend';
+import { GlobalChartState } from '../chart_state';
 
 const EMPTY_LEGEND_LIST: LegendItem[] = [];
 
@@ -25,7 +26,6 @@ const EMPTY_LEGEND_LIST: LegendItem[] = [];
 export const getLegendItemsSelector = (state: GlobalChartState): LegendItem[] => {
   if (state.internalChartState) {
     return state.internalChartState.getLegendItems(state);
-  } else {
-    return EMPTY_LEGEND_LIST;
   }
+  return EMPTY_LEGEND_LIST;
 };

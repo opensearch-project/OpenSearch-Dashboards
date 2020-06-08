@@ -14,14 +14,16 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React, { useEffect } from 'react';
-import { bindActionCreators, Dispatch } from 'redux';
 import { connect } from 'react-redux';
+import { bindActionCreators, Dispatch } from 'redux';
+
 import { specParsing, specParsed, specUnmounted } from '../state/actions/specs';
 
-const SpecsParserComponent: React.FunctionComponent<{}> = (props) => {
+const SpecsParserComponent: React.FunctionComponent = (props) => {
   const injected = props as DispatchProps;
   injected.specParsing();
   useEffect(() => {

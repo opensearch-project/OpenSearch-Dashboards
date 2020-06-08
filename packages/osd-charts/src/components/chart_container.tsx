@@ -14,22 +14,24 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
-import { bindActionCreators, Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import { deepEqual } from '../utils/fast_deep_equal';
-import { GlobalChartState, BackwardRef } from '../state/chart_state';
+import { bindActionCreators, Dispatch } from 'redux';
+
+import { SettingsSpec } from '../specs';
 import { onMouseUp, onMouseDown, onPointerMove } from '../state/actions/mouse';
+import { GlobalChartState, BackwardRef } from '../state/chart_state';
 import { getInternalChartRendererSelector } from '../state/selectors/get_chart_type_components';
 import { getInternalPointerCursor } from '../state/selectors/get_internal_cursor_pointer';
-import { getInternalIsBrushingAvailableSelector } from '../state/selectors/get_internal_is_brushing_available';
-import { isInternalChartEmptySelector } from '../state/selectors/is_chart_empty';
-import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
-import { SettingsSpec } from '../specs';
 import { getInternalIsBrushingSelector } from '../state/selectors/get_internal_is_brushing';
+import { getInternalIsBrushingAvailableSelector } from '../state/selectors/get_internal_is_brushing_available';
 import { getInternalIsInitializedSelector } from '../state/selectors/get_internal_is_intialized';
+import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
+import { isInternalChartEmptySelector } from '../state/selectors/is_chart_empty';
+import { deepEqual } from '../utils/fast_deep_equal';
 
 interface ChartContainerComponentStateProps {
   initialized: boolean;
@@ -80,6 +82,7 @@ class ChartContainerComponent extends React.Component<ReactiveChartProps> {
       timeStamp,
     );
   };
+
   handleMouseLeave = ({ nativeEvent: { timeStamp } }: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const { isChartEmpty, onPointerMove, isBrushing } = this.props;
     if (isChartEmpty) {
@@ -90,6 +93,7 @@ class ChartContainerComponent extends React.Component<ReactiveChartProps> {
     }
     onPointerMove({ x: -1, y: -1 }, timeStamp);
   };
+
   handleMouseDown = ({
     nativeEvent: { offsetX, offsetY, timeStamp },
   }: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -108,6 +112,7 @@ class ChartContainerComponent extends React.Component<ReactiveChartProps> {
       timeStamp,
     );
   };
+
   handleMouseUp = ({ nativeEvent: { offsetX, offsetY, timeStamp } }: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const { isChartEmpty, onMouseUp } = this.props;
     if (isChartEmpty) {
@@ -121,6 +126,7 @@ class ChartContainerComponent extends React.Component<ReactiveChartProps> {
       timeStamp,
     );
   };
+
   handleBrushEnd = () => {
     const { onMouseUp } = this.props;
 

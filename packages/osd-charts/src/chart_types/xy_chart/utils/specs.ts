@@ -14,9 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { $Values } from 'utility-types';
+
+import { ChartTypes } from '../..';
+import { ScaleContinuousType, ScaleType } from '../../../scales';
+import { SpecTypes, Spec } from '../../../specs';
+import { Accessor, AccessorFormat, AccessorFn } from '../../../utils/accessor';
+import { RecursivePartial, Color, Position, Datum } from '../../../utils/commons';
+import { CurveType } from '../../../utils/curves';
+import { AxisId, GroupId } from '../../../utils/ids';
 import {
   AreaSeriesStyle,
   BarSeriesStyle,
@@ -27,25 +36,18 @@ import {
   RectAnnotationStyle,
   BubbleSeriesStyle,
 } from '../../../utils/themes/theme';
-import { RecursivePartial, Color, Position, Datum } from '../../../utils/commons';
-import { Accessor, AccessorFormat, AccessorFn } from '../../../utils/accessor';
-import { AxisId, GroupId } from '../../../utils/ids';
-import { ScaleContinuousType, ScaleType } from '../../../scales';
-import { CurveType } from '../../../utils/curves';
-import { RawDataSeriesDatum, XYChartSeriesIdentifier } from './series';
-import { AnnotationTooltipFormatter } from '../annotations/types';
-import { SpecTypes, Spec } from '../../../specs';
-import { ChartTypes } from '../..';
 import { PrimitiveValue } from '../../partition_chart/layout/utils/group_by_rollup';
+import { AnnotationTooltipFormatter } from '../annotations/types';
+import { RawDataSeriesDatum, XYChartSeriesIdentifier } from './series';
 
 export type BarStyleOverride = RecursivePartial<BarSeriesStyle> | Color | null;
 export type PointStyleOverride = RecursivePartial<PointStyle> | Color | null;
 
 export const SeriesTypes = Object.freeze({
-  Area: 'area' as 'area',
-  Bar: 'bar' as 'bar',
-  Line: 'line' as 'line',
-  Bubble: 'bubble' as 'bubble',
+  Area: 'area' as const,
+  Bar: 'bar' as const,
+  Line: 'line' as const,
+  Bubble: 'bubble' as const,
 });
 export type SeriesTypes = $Values<typeof SeriesTypes>;
 
@@ -145,7 +147,7 @@ export const Fit = Object.freeze({
    * [2, null, null, 8] => [2, null null, 8]
    * ```
    */
-  None: 'none' as 'none',
+  None: 'none' as const,
   /**
    * Use the previous non-`null` value
    *
@@ -157,7 +159,7 @@ export const Fit = Object.freeze({
    * [2, null, null, 8] => [2, 2, 2, 8]
    * ```
    */
-  Carry: 'carry' as 'carry',
+  Carry: 'carry' as const,
   /**
    * Use the next non-`null` value
    *
@@ -169,7 +171,7 @@ export const Fit = Object.freeze({
    * [2, null, null, 8] => [2, 8, 8, 8]
    * ```
    */
-  Lookahead: 'lookahead' as 'lookahead',
+  Lookahead: 'lookahead' as const,
   /**
    * Use the closest non-`null` value (before or after)
    *
@@ -178,7 +180,7 @@ export const Fit = Object.freeze({
    * [2, null, null, 8] => [2, 2, 8, 8]
    * ```
    */
-  Nearest: 'nearest' as 'nearest',
+  Nearest: 'nearest' as const,
   /**
    * Average between the closest non-`null` values
    *
@@ -187,7 +189,7 @@ export const Fit = Object.freeze({
    * [2, null, null, 8] => [2, 5, 5, 8]
    * ```
    */
-  Average: 'average' as 'average',
+  Average: 'average' as const,
   /**
    * Linear interpolation between the closest non-`null` values
    *
@@ -196,7 +198,7 @@ export const Fit = Object.freeze({
    * [2, null, null, 8] => [2, 4, 6, 8]
    * ```
    */
-  Linear: 'linear' as 'linear',
+  Linear: 'linear' as const,
   /**
    * Sets all `null` values to `0`
    *
@@ -205,7 +207,7 @@ export const Fit = Object.freeze({
    * [2, null, null, 8] => [2, 0, 0, 8]
    * ```
    */
-  Zero: 'zero' as 'zero',
+  Zero: 'zero' as const,
   /**
    * Specify an explicit value `X`
    *
@@ -214,7 +216,7 @@ export const Fit = Object.freeze({
    * [2, null, null, 8] => [2, X, X, 8]
    * ```
    */
-  Explicit: 'explicit' as 'explicit',
+  Explicit: 'explicit' as const,
 });
 
 export type Fit = $Values<typeof Fit>;
@@ -279,7 +281,8 @@ export interface SeriesSpec extends Spec {
    * The name of the spec. Also a mechanism to provide custom series names.
    */
   name?: SeriesNameAccessor;
-  /** The ID of the spec group
+  /**
+   * The ID of the spec group
    * @defaultValue {@link DEFAULT_GLOBAL_ID}
    */
   groupId: string;
@@ -291,7 +294,8 @@ export interface SeriesSpec extends Spec {
   seriesType: SeriesTypes;
   /** Set colors for specific series */
   color?: SeriesColorAccessor;
-  /** If the series should appear in the legend
+  /**
+   * If the series should appear in the legend
    * @defaultValue `false`
    */
   hideInLegend?: boolean;
@@ -495,7 +499,8 @@ export type AreaSeriesSpec = BasicSeriesSpec &
   };
 
 export interface HistogramConfig {
-  /**  Determines how points in the series will align to bands in histogram mode
+  /**
+   *  Determines how points in the series will align to bands in histogram mode
    * @defaultValue `start`
    */
   histogramModeAlignment?: HistogramModeAlignment;
@@ -519,7 +524,8 @@ export interface AxisSpec extends Spec {
   id: AxisId;
   /** Style options for grid line */
   gridLineStyle?: GridLineConfig;
-  /** The ID of the axis group
+  /**
+   * The ID of the axis group
    * @defaultValue {@link DEFAULT_GLOBAL_ID}
    */
   groupId: GroupId;
@@ -552,7 +558,7 @@ export interface AxisSpec extends Spec {
   domain?: DomainRange;
   /** Object to hold custom styling */
   style?: AxisStyle;
-  /** Show only integar values **/
+  /** Show only integar values * */
   integersOnly?: boolean;
   /**
    * Show duplicated ticks
@@ -573,9 +579,9 @@ export interface AxisStyle {
 }
 
 export const AnnotationTypes = Object.freeze({
-  Line: 'line' as 'line',
-  Rectangle: 'rectangle' as 'rectangle',
-  Text: 'text' as 'text',
+  Line: 'line' as const,
+  Rectangle: 'rectangle' as const,
+  Text: 'text' as const,
 });
 
 export type AnnotationType = $Values<typeof AnnotationTypes>;
@@ -585,8 +591,8 @@ export type AnnotationType = $Values<typeof AnnotationTypes>;
  * @public
  */
 export const AnnotationDomainTypes = Object.freeze({
-  XDomain: 'xDomain' as 'xDomain',
-  YDomain: 'yDomain' as 'yDomain',
+  XDomain: 'xDomain' as const,
+  YDomain: 'yDomain' as const,
 });
 
 /**
@@ -632,11 +638,13 @@ export type LineAnnotationSpec = BaseAnnotationSpec<
   };
   /** Annotation lines are hidden */
   hideLines?: boolean;
-  /** Hide tooltip when hovering over the line
+  /**
+   * Hide tooltip when hovering over the line
    * @defaultValue `true`
    */
   hideLinesTooltips?: boolean;
-  /** z-index of the annotation relative to other elements in the chart
+  /**
+   * z-index of the annotation relative to other elements in the chart
    * @defaultValue 1
    */
   zIndex?: number;
@@ -680,7 +688,8 @@ export type RectAnnotationSpec = BaseAnnotationSpec<
 > & {
   /** Custom rendering function for tooltip */
   renderTooltip?: AnnotationTooltipFormatter;
-  /** z-index of the annotation relative to other elements in the chart
+  /**
+   * z-index of the annotation relative to other elements in the chart
    * @defaultValue -1
    */
   zIndex?: number;

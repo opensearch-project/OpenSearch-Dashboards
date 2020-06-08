@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { getRectangleRowGeometry, getFillTextColor } from './fill_text_layout';
 
@@ -26,7 +27,7 @@ describe('Test that getRectangleRowGeometry works with:', () => {
   const linePitch = 50;
   const rowIndex = 0;
   const fontSize = 50;
-  const _rotation = 0;
+  const rotation = 0;
   const verticalAlignment = 'top';
 
   const defaultPadding = 2;
@@ -42,7 +43,7 @@ describe('Test that getRectangleRowGeometry works with:', () => {
       linePitch,
       rowIndex,
       fontSize,
-      _rotation,
+      rotation,
       verticalAlignment,
       padding,
     );
@@ -64,7 +65,7 @@ describe('Test that getRectangleRowGeometry works with:', () => {
       linePitch,
       rowIndex,
       fontSize,
-      _rotation,
+      rotation,
       verticalAlignment,
       padding,
     );
@@ -86,7 +87,7 @@ describe('Test that getRectangleRowGeometry works with:', () => {
       linePitch,
       rowIndex,
       fontSize,
-      _rotation,
+      rotation,
       verticalAlignment,
       padding,
     );
@@ -108,7 +109,7 @@ describe('Test that getRectangleRowGeometry works with:', () => {
       linePitch,
       rowIndex,
       fontSize,
-      _rotation,
+      rotation,
       verticalAlignment,
       padding,
     );
@@ -130,7 +131,7 @@ describe('Test that getRectangleRowGeometry works with:', () => {
       linePitch,
       rowIndex,
       fontSize,
-      _rotation,
+      rotation,
       verticalAlignment,
       padding,
     );
@@ -152,7 +153,7 @@ describe('Test that getRectangleRowGeometry works with:', () => {
       linePitch,
       rowIndex,
       fontSize,
-      _rotation,
+      rotation,
       verticalAlignment,
       padding,
     );
@@ -174,7 +175,7 @@ describe('Test that getRectangleRowGeometry works with:', () => {
       linePitch,
       rowIndex,
       fontSize,
-      _rotation,
+      rotation,
       verticalAlignment,
       padding,
     );
@@ -201,7 +202,7 @@ describe('Test that getRectangleRowGeometry works with:', () => {
       smallLinePitch,
       rowIndex,
       smallFontSize,
-      _rotation,
+      rotation,
       verticalAlignment,
       padding,
     );
@@ -227,7 +228,7 @@ describe('Test that getRectangleRowGeometry works with:', () => {
       smallLinePitch,
       rowIndex,
       smallFontSize,
-      _rotation,
+      rotation,
       verticalAlignment,
       padding,
     );
@@ -253,7 +254,7 @@ describe('Test that getRectangleRowGeometry works with:', () => {
       smallLinePitch,
       rowIndex,
       smallFontSize,
-      _rotation,
+      rotation,
       'bottom',
       padding,
     );
@@ -263,10 +264,10 @@ describe('Test that getRectangleRowGeometry works with:', () => {
       rowAnchorX: 0,
       rowAnchorY: -(
         (
-          100 /*y1*/ -
-          smallLinePitch * (totalRowCount2 - 1 - rowIndex) -
-          padding.bottom -
-          smallFontSize * 0.05
+          100
+          - smallLinePitch * (totalRowCount2 - 1 - rowIndex)
+          - padding.bottom
+          - smallFontSize * 0.05
         ) /* 0.05 = 5%: default overhang multiplier */
       ),
     });

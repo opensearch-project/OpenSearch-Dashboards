@@ -1,15 +1,20 @@
 # Force include
-!/.storybook
-!/.storybook-docs
-!/.playground
+!.storybook
+!.storybook-docs
+!.playground
+!.*.js
 
 # Ignore
-/wiki
-/node_modules
-/coverage
+wiki
+node_modules
+coverage
+license_header.js
 
 # Editor configs
-/.vscode
+.vscode
+
+# Hidden directories
+.git
 
 # Compiled source
 src/utils/d3-delaunay/*

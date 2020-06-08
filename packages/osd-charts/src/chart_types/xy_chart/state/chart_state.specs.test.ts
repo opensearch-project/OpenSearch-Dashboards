@@ -14,12 +14,14 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { GlobalChartState, chartStoreReducer } from '../../../state/chart_state';
 import { createStore, Store } from 'redux';
-import { upsertSpec, specParsed, specParsing } from '../../../state/actions/specs';
+
 import { MockSeriesSpec } from '../../../mocks/specs';
+import { upsertSpec, specParsed, specParsing } from '../../../state/actions/specs';
+import { GlobalChartState, chartStoreReducer } from '../../../state/chart_state';
 import { getLegendItemsSelector } from '../../../state/selectors/get_legend_items';
 
 const data = [

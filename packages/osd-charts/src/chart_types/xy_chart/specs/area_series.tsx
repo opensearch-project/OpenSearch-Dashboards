@@ -14,14 +14,16 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
-import { AreaSeriesSpec, HistogramModeAlignments, DEFAULT_GLOBAL_ID, SeriesTypes } from '../utils/specs';
+
+import { ChartTypes } from '../..';
 import { ScaleType } from '../../../scales';
-import { specComponentFactory, getConnect } from '../../../state/spec_factory';
-import { ChartTypes } from '../../../chart_types';
 import { SpecTypes } from '../../../specs/settings';
+import { specComponentFactory, getConnect } from '../../../state/spec_factory';
+import { AreaSeriesSpec, HistogramModeAlignments, DEFAULT_GLOBAL_ID, SeriesTypes } from '../utils/specs';
 
 const defaultProps = {
   chartType: ChartTypes.XYAxis,

@@ -14,12 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { GeometryStateStyle, LineStyle } from '../../../../../utils/themes/theme';
-import { stringToRGB, OpacityFn } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { Stroke } from '../../../../../geoms/types';
 import { getColorFromVariant } from '../../../../../utils/commons';
+import { GeometryStateStyle, LineStyle } from '../../../../../utils/themes/theme';
+import { stringToRGB, OpacityFn } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 
 /**
  * Return the rendering props for a line. The color of the line will be overwritten

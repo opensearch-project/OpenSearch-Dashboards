@@ -14,15 +14,24 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { createStore, Store } from 'redux';
-import { BarSeriesSpec, BasicSeriesSpec, AxisSpec, SeriesTypes } from '../utils/specs';
-import { Position } from '../../../utils/commons';
+
+import { ChartTypes } from '../..';
 import { ScaleType } from '../../../scales';
-import { chartStoreReducer, GlobalChartState } from '../../../state/chart_state';
 import { SettingsSpec, DEFAULT_SETTINGS_SPEC, SpecTypes, TooltipType, XYBrushArea, BrushAxis } from '../../../specs';
+import { updateParentDimensions } from '../../../state/actions/chart_settings';
+import { onExternalPointerEvent } from '../../../state/actions/events';
+import { onPointerMove, onMouseDown, onMouseUp } from '../../../state/actions/mouse';
+import { upsertSpec, specParsed } from '../../../state/actions/specs';
+import { chartStoreReducer, GlobalChartState } from '../../../state/chart_state';
+import { getSettingsSpecSelector } from '../../../state/selectors/get_settings_specs';
+import { Position } from '../../../utils/commons';
+import { BarSeriesSpec, BasicSeriesSpec, AxisSpec, SeriesTypes } from '../utils/specs';
 import { computeSeriesGeometriesSelector } from './selectors/compute_series_geometries';
+import { getCursorBandPositionSelector } from './selectors/get_cursor_band';
 import { getProjectedPointerPositionSelector } from './selectors/get_projected_pointer_position';
 import {
   getHighlightedGeomsSelector,
@@ -32,14 +41,7 @@ import { isTooltipVisibleSelector } from './selectors/is_tooltip_visible';
 import { createOnBrushEndCaller } from './selectors/on_brush_end_caller';
 import { createOnElementOutCaller } from './selectors/on_element_out_caller';
 import { createOnElementOverCaller } from './selectors/on_element_over_caller';
-import { getCursorBandPositionSelector } from './selectors/get_cursor_band';
-import { getSettingsSpecSelector } from '../../../state/selectors/get_settings_specs';
-import { upsertSpec, specParsed } from '../../../state/actions/specs';
-import { updateParentDimensions } from '../../../state/actions/chart_settings';
-import { onPointerMove, onMouseDown, onMouseUp } from '../../../state/actions/mouse';
-import { ChartTypes } from '../..';
 import { createOnPointerMoveCaller } from './selectors/on_pointer_move_caller';
-import { onExternalPointerEvent } from '../../../state/actions/events';
 
 const SPEC_ID = 'spec_1';
 const GROUP_ID = 'group_1';
@@ -268,9 +270,9 @@ describe('Chart state pointer interactions', () => {
     mouseOverTestSuite(ScaleType.Linear);
   });
 
-  // TODO add test for point series
-  // TODO add test for mixed series
-  // TODO add test for clicks
+  it.todo('add test for point series');
+  it.todo('add test for mixed series');
+  it.todo('add test for clicks');
 });
 
 function mouseOverTestSuite(scaleType: ScaleType) {
@@ -788,9 +790,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
   });
   describe('brush', () => {
     test('can respond to a brush end event', () => {
-      const brushEndListener = jest.fn<void, [XYBrushArea]>((): void => {
-        return;
-      });
+      const brushEndListener = jest.fn<void, [XYBrushArea]>((): void => undefined);
       const onBrushCaller = createOnBrushEndCaller();
       store.subscribe(() => {
         onBrushCaller(store.getState());
@@ -873,9 +873,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
       }
     });
     test('can respond to a brush end event on rotated chart', () => {
-      const brushEndListener = jest.fn<void, [XYBrushArea]>((): void => {
-        return;
-      });
+      const brushEndListener = jest.fn<void, [XYBrushArea]>((): void => undefined);
       const onBrushCaller = createOnBrushEndCaller();
       store.subscribe(() => {
         onBrushCaller(store.getState());
@@ -948,9 +946,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
       }
     });
     test('can respond to a Y brush', () => {
-      const brushEndListener = jest.fn<void, [XYBrushArea]>((): void => {
-        return;
-      });
+      const brushEndListener = jest.fn<void, [XYBrushArea]>((): void => undefined);
       const onBrushCaller = createOnBrushEndCaller();
       store.subscribe(() => {
         onBrushCaller(store.getState());
@@ -1024,9 +1020,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
       }
     });
     test('can respond to rectangular brush', () => {
-      const brushEndListener = jest.fn<void, [XYBrushArea]>((): void => {
-        return;
-      });
+      const brushEndListener = jest.fn<void, [XYBrushArea]>((): void => undefined);
       const onBrushCaller = createOnBrushEndCaller();
       store.subscribe(() => {
         onBrushCaller(store.getState());

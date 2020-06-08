@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
 
@@ -23,13 +24,11 @@ import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => {
-  const isVisibleFunction: FilterPredicate = (series) => {
-    return series.splitAccessors.get('g1') === 'cloudflare.com';
-  };
+  const isVisibleFunction: FilterPredicate = (series) => series.splitAccessors.get('g1') === 'cloudflare.com';
   return (
     <Chart className="story-chart">
       <Settings showLegend showLegendExtra legendPosition={Position.Right} />
-      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
+      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
       <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries

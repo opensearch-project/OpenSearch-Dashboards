@@ -14,9 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { InteractionsState } from '../chart_state';
+import { getSeriesIndex } from '../../chart_types/xy_chart/utils/series';
+import { LegendItem } from '../../commons/legend';
+import { SeriesIdentifier } from '../../commons/series_id';
 import {
   ON_TOGGLE_LEGEND,
   ON_LEGEND_ITEM_OUT,
@@ -26,9 +29,7 @@ import {
   ToggleDeselectSeriesAction,
 } from '../actions/legend';
 import { ON_MOUSE_DOWN, ON_MOUSE_UP, ON_POINTER_MOVE, MouseActions } from '../actions/mouse';
-import { getSeriesIndex } from '../../chart_types/xy_chart/utils/series';
-import { SeriesIdentifier } from '../../commons/series_id';
-import { LegendItem } from '../../commons/legend';
+import { InteractionsState } from '../chart_state';
 
 /** @internal */
 export function interactionsReducer(
@@ -42,7 +43,7 @@ export function interactionsReducer(
         ...state,
         pointer: {
           ...state.pointer,
-          dragging: state.pointer.down && state.pointer.down.time < action.time ? true : false,
+          dragging: !!(state.pointer.down && state.pointer.down.time < action.time),
           current: {
             position: {
               ...action.position,

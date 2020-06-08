@@ -14,10 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { ColorConfig } from '../../../utils/themes/theme';
+import { ChartTypes } from '../..';
+import { MockSeriesIdentifier } from '../../../mocks/series/series_identifiers';
+import { MockSeriesSpec } from '../../../mocks/specs';
+import { SeededDataGenerator } from '../../../mocks/utils';
 import { ScaleType } from '../../../scales';
+import { SpecTypes } from '../../../specs/settings';
+import { AccessorFn } from '../../../utils/accessor';
+import * as TestDataset from '../../../utils/data_samples/test_dataset';
+import { ColorConfig } from '../../../utils/themes/theme';
 import {
   SeriesCollectionValue,
   getFormattedDataseries,
@@ -32,13 +40,6 @@ import {
 } from './series';
 import { BasicSeriesSpec, LineSeriesSpec, SeriesTypes, AreaSeriesSpec } from './specs';
 import { formatStackedDataSeriesValues } from './stacked_series_utils';
-import * as TestDataset from '../../../utils/data_samples/test_dataset';
-import { ChartTypes } from '../..';
-import { SpecTypes } from '../../../specs/settings';
-import { MockSeriesSpec } from '../../../mocks/specs';
-import { SeededDataGenerator } from '../../../mocks/utils';
-import { MockSeriesIdentifier } from '../../../mocks/series/series_identifiers';
-import { AccessorFn } from '../../../utils/accessor';
 
 const dg = new SeededDataGenerator();
 

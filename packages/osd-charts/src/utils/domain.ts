@@ -14,10 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { extent, sum } from 'd3-array';
 import { nest } from 'd3-collection';
+
 import { AccessorFn } from './accessor';
 
 export type Domain = any[];
@@ -37,9 +39,7 @@ export function computeOrdinalDataDomain(
   const domain = data.map(accessor).filter((d) => (removeNull ? d !== null : true));
   const uniqueValues = [...new Set(domain)];
   return sorted
-    ? uniqueValues.sort((a, b) => {
-        return `${a}`.localeCompare(`${b}`);
-      })
+    ? uniqueValues.sort((a, b) => `${a}`.localeCompare(`${b}`))
     : uniqueValues;
 }
 
@@ -67,7 +67,8 @@ export function computeDomainExtent(
   if (start != null && end != null) {
     if (start >= 0 && end >= 0) {
       return scaleToExtent || fitToExtent ? [start, end] : [0, end];
-    } else if (start < 0 && end < 0) {
+    }
+    if (start < 0 && end < 0) {
       return scaleToExtent || fitToExtent ? [start, end] : [start, 0];
     }
     return [start, end];
@@ -99,9 +100,7 @@ export function computeStackedContinuousDomain(
 ): any {
   const groups = nest<any, number>()
     .key((datum: any) => `${xAccessor(datum)}`)
-    .rollup((values: any) => {
-      return sum(values, yAccessor);
-    })
+    .rollup((values: any) => sum(values, yAccessor))
     .entries(data);
   const cumulativeSumAccessor = (d: any) => d.value;
   return computeContinuousDataDomain(groups, cumulativeSumAccessor, scaleToExtent);

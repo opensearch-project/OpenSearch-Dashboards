@@ -14,11 +14,10 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 const path = require('path');
-// const webpack = require('webpack');
-// eslint-disable-next-line
 
 const createCompiler = require('@storybook/addon-docs/mdx-compiler-plugin');
 
@@ -37,8 +36,8 @@ const scssLoaders = [
   'sass-loader',
 ];
 
-module.exports = async ({ config }) => {
-  //config.plugins.push(new webpack.EnvironmentPlugin({ RNG_SEED: null }));
+module.exports = async({ config }) => {
+  // config.plugins.push(new webpack.EnvironmentPlugin({ RNG_SEED: null }));
 
   // Replace default css rules with nonce
   config.module.rules = config.module.rules.filter(({ test }) => !test.test('.css'));
@@ -134,5 +133,5 @@ module.exports = async ({ config }) => {
 
   config.resolve.extensions.push('.ts', '.tsx', '.mdx');
 
-  return config;
+  return await config;
 };

@@ -14,17 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { AnnotationLineProps } from './types';
-import { isWithinRectBounds } from '../rect/dimensions';
-import { isXDomain, getTranformedCursor, invertTranformedCursor } from '../utils';
-import { AnnotationTooltipState, AnnotationMarker, Bounds } from '../types';
-import { getAxesSpecForSpecId } from '../../state/utils';
-import { AnnotationDomainType, AnnotationTypes, AxisSpec } from '../../utils/specs';
+import { Dimensions } from '../../../../utils/dimensions';
 import { GroupId } from '../../../../utils/ids';
 import { Point } from '../../../../utils/point';
-import { Dimensions } from '../../../../utils/dimensions';
+import { getAxesSpecForSpecId } from '../../state/utils';
+import { AnnotationDomainType, AnnotationTypes, AxisSpec } from '../../utils/specs';
+import { isWithinRectBounds } from '../rect/dimensions';
+import { AnnotationTooltipState, AnnotationMarker, Bounds } from '../types';
+import { isXDomain, getTranformedCursor, invertTranformedCursor } from '../utils';
+import { AnnotationLineProps } from './types';
 
 /** @internal */
 export function computeLineAnnotationTooltipState(

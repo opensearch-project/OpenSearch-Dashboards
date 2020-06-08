@@ -14,14 +14,16 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
-import { AxisSpec, DEFAULT_GLOBAL_ID } from '../utils/specs';
-import { Position } from '../../../utils/commons';
-import { ChartTypes } from '../../../chart_types';
-import { specComponentFactory, getConnect } from '../../../state/spec_factory';
+
+import { ChartTypes } from '../..';
 import { SpecTypes } from '../../../specs/settings';
+import { specComponentFactory, getConnect } from '../../../state/spec_factory';
+import { Position } from '../../../utils/commons';
+import { AxisSpec, DEFAULT_GLOBAL_ID } from '../utils/specs';
 
 const defaultProps = {
   chartType: ChartTypes.XYAxis,

@@ -14,16 +14,16 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { getAnnotationTooltipStateSelector } from './get_annotation_tooltip_state';
 import createCachedSelector from 're-reselect';
+
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getAnnotationTooltipStateSelector } from './get_annotation_tooltip_state';
 
 /** @internal */
 export const isAnnotationTooltipVisibleSelector = createCachedSelector(
   [getAnnotationTooltipStateSelector],
-  (annotationTooltipState): boolean => {
-    return annotationTooltipState !== null && annotationTooltipState.isVisible;
-  },
+  (annotationTooltipState): boolean => annotationTooltipState !== null && annotationTooltipState.isVisible,
 )(getChartIdSelector);

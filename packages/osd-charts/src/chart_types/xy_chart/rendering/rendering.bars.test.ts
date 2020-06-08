@@ -14,19 +14,20 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { computeSeriesDomains } from '../state/utils';
-import { identity } from '../../../utils/commons';
+import { ChartTypes } from '../..';
+import { MockBarGeometry } from '../../../mocks';
 import { ScaleType } from '../../../scales';
-import { renderBars } from './rendering';
+import { SpecTypes } from '../../../specs/settings';
+import { identity } from '../../../utils/commons';
+import { GroupId } from '../../../utils/ids';
+import { LIGHT_THEME } from '../../../utils/themes/light_theme';
+import { computeSeriesDomains } from '../state/utils';
 import { computeXScale, computeYScales } from '../utils/scales';
 import { BarSeriesSpec, DomainRange, SeriesTypes } from '../utils/specs';
-import { LIGHT_THEME } from '../../../utils/themes/light_theme';
-import { GroupId } from '../../../utils/ids';
-import { ChartTypes } from '../..';
-import { SpecTypes } from '../../../specs/settings';
-import { MockBarGeometry } from '../../../mocks';
+import { renderBars } from './rendering';
 
 const SPEC_ID = 'spec_1';
 const GROUP_ID = 'group_1';

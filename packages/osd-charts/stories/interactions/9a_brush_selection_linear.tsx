@@ -14,14 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { action } from '@storybook/addon-actions';
-import React from 'react';
-import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, BrushAxis } from '../../src';
-
-import { getChartRotationKnob } from '../utils/knobs';
 import { select } from '@storybook/addon-knobs';
+import React from 'react';
+
+import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, BrushAxis } from '../../src';
+import { getChartRotationKnob } from '../utils/knobs';
 
 export const Example = () => {
   const brushAxisSelect = select(
@@ -36,9 +37,9 @@ export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings onBrushEnd={action('onBrushEnd')} rotation={getChartRotationKnob()} brushAxis={brushAxisSelect} />
-      <Axis id="bottom" position={Position.Bottom} title="bottom" showOverlappingTicks={true} />
+      <Axis id="bottom" position={Position.Bottom} title="bottom" showOverlappingTicks />
       <Axis id="left" title="left" position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
-      <Axis id="top" position={Position.Top} title="top" showOverlappingTicks={true} />
+      <Axis id="top" position={Position.Top} title="top" showOverlappingTicks />
       <Axis id="right" title="right" position={Position.Right} tickFormat={(d) => Number(d).toFixed(2)} />
 
       <AreaSeries

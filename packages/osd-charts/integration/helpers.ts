@@ -14,10 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { join, resolve } from 'path';
 import { lstatSync, readdirSync } from 'fs';
+import { join, resolve } from 'path';
+
 import { getStorybook, configure } from '@storybook/react';
 
 export type StoryInfo = [string, string];
@@ -27,7 +29,7 @@ export type StoryGroupInfo = [string, string, StoryInfo[]];
 function requireAllStories(basedir: string, directory: string) {
   function enumerateFiles(basedir: string, dir: string) {
     let result: string[] = [];
-    readdirSync(join(basedir, dir)).forEach(function(file) {
+    readdirSync(join(basedir, dir)).forEach((file) => {
       const relativePath = join(dir, file);
       const stats = lstatSync(join(basedir, relativePath));
       if (stats.isDirectory()) {
@@ -59,7 +61,7 @@ function encodeString(string: string) {
     .replace(/\w-\w/g, ' ')
     .replace(/\//gi, ' ')
     .replace(/-/g, ' ')
-    .replace(/[^a-z|A-Z|0-9|\s|\/]+/gi, '')
+    .replace(/[^\d\s/a-z|]+/gi, '')
     .trim()
     .replace(/\s+/g, '-')
     .toLowerCase();

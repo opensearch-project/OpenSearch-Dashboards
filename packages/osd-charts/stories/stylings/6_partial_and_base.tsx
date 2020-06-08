@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { color } from '@storybook/addon-knobs';
 import React from 'react';
@@ -44,9 +45,9 @@ export const Example = () => {
         baseTheme={LIGHT_THEME}
         legendPosition={Position.Right}
       />
-      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
+      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
       <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
-      <Axis id="top" position={Position.Top} title="Top axis" showOverlappingTicks={true} />
+      <Axis id="top" position={Position.Top} title="Top axis" showOverlappingTicks />
       <Axis id="right" title="Right axis" position={Position.Right} tickFormat={(d) => Number(d).toFixed(2)} />
       <BarSeries
         id="bars"

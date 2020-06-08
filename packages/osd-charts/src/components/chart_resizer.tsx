@@ -14,17 +14,19 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React, { RefObject } from 'react';
+import { connect } from 'react-redux';
+import { Dispatch, bindActionCreators } from 'redux';
 import ResizeObserver from 'resize-observer-polyfill';
 import { debounce } from 'ts-debounce';
-import { Dimensions } from '../utils/dimensions';
+
 import { updateParentDimensions } from '../state/actions/chart_settings';
-import { Dispatch, bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
-import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
 import { GlobalChartState } from '../state/chart_state';
+import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
+import { Dimensions } from '../utils/dimensions';
 
 interface ResizerStateProps {
   resizeDebounce: number;
@@ -41,7 +43,6 @@ class Resizer extends React.Component<ResizerProps> {
   private containerRef: RefObject<HTMLDivElement>;
   private ro: ResizeObserver;
   private animationFrameID: number | null;
-  private onResizeDebounced: (entries: ResizeObserverEntry[]) => void = () => undefined;
 
   constructor(props: ResizerProps) {
     super(props);
@@ -66,6 +67,16 @@ class Resizer extends React.Component<ResizerProps> {
     this.ro.disconnect();
   }
 
+  private onResizeDebounced: (entries: ResizeObserverEntry[]) => void = () => {};
+  private handleResize = (entries: ResizeObserverEntry[]) => {
+    if (this.initialResizeComplete) {
+      this.onResizeDebounced(entries);
+    } else {
+      this.initialResizeComplete = true;
+      this.onResize(entries);
+    }
+  };
+
   onResize = (entries: ResizeObserverEntry[]) => {
     if (!Array.isArray(entries)) {
       return;
@@ -82,15 +93,6 @@ class Resizer extends React.Component<ResizerProps> {
   render() {
     return <div ref={this.containerRef} className="echChartResizer" />;
   }
-
-  private handleResize = (entries: ResizeObserverEntry[]) => {
-    if (this.initialResizeComplete) {
-      this.onResizeDebounced(entries);
-    } else {
-      this.initialResizeComplete = true;
-      this.onResize(entries);
-    }
-  };
 }
 
 const mapDispatchToProps = (dispatch: Dispatch): ResizerDispatchProps =>
@@ -103,8 +105,7 @@ const mapDispatchToProps = (dispatch: Dispatch): ResizerDispatchProps =>
 
 const mapStateToProps = (state: GlobalChartState): ResizerStateProps => {
   const settings = getSettingsSpecSelector(state);
-  const resizeDebounce =
-    settings.resizeDebounce === undefined || settings.resizeDebounce === null ? 200 : settings.resizeDebounce;
+  const resizeDebounce = settings.resizeDebounce === undefined || settings.resizeDebounce === null ? 200 : settings.resizeDebounce;
   return {
     resizeDebounce,
   };

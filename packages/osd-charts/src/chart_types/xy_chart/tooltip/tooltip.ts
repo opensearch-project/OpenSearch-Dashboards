@@ -14,8 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { LegendItemExtraValues } from '../../../commons/legend';
+import { SeriesKey } from '../../../commons/series_id';
+import { TooltipValue } from '../../../specs';
+import { getAccessorFormatLabel } from '../../../utils/accessor';
+import { IndexedGeometry, BandedAccessorType } from '../../../utils/geometry';
+import { getSeriesName } from '../utils/series';
 import {
   AxisSpec,
   BasicSeriesSpec,
@@ -24,12 +31,6 @@ import {
   isBarSeriesSpec,
   TickFormatterOptions,
 } from '../utils/specs';
-import { IndexedGeometry, BandedAccessorType } from '../../../utils/geometry';
-import { getAccessorFormatLabel } from '../../../utils/accessor';
-import { getSeriesName } from '../utils/series';
-import { SeriesKey } from '../../../commons/series_id';
-import { TooltipValue } from '../../../specs';
-import { LegendItemExtraValues } from '../../../commons/legend';
 
 export const Y0_ACCESSOR_POSTFIX = ' - lower';
 export const Y1_ACCESSOR_POSTFIX = ' - upper';
@@ -42,7 +43,7 @@ export function getHighligthedValues(
   const seriesTooltipValues = new Map<SeriesKey, LegendItemExtraValues>();
 
   tooltipValues.forEach(({ value, seriesIdentifier, valueAccessor }) => {
-    const seriesValue = defaultValue ? defaultValue : value;
+    const seriesValue = defaultValue || value;
     const current: LegendItemExtraValues = seriesTooltipValues.get(seriesIdentifier.key) ?? new Map();
     if (defaultValue) {
       if (!current.has(BandedAccessorType.Y0)) {

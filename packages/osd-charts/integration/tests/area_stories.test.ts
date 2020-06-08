@@ -14,18 +14,19 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { common } from '../page_objects';
 
 describe('Area series stories', () => {
-  it('stacked as NOT percentage', async () => {
+  it('stacked as NOT percentage', async() => {
     await common.expectChartAtUrlToMatchScreenshot(
       'http://localhost:9001/?path=/story/area-chart--stacked-percentage&knob-stacked as percentage=',
     );
   });
   describe('accessorFormats', () => {
-    it('should show custom format', async () => {
+    it('should show custom format', async() => {
       await common.expectChartAtUrlToMatchScreenshot(
         'http://localhost:9001/?path=/story/area-chart--band-area&knob-scale to extent=&knob-y0AccessorFormat= [min]&knob-y1AccessorFormat= [max]',
       );
@@ -33,24 +34,24 @@ describe('Area series stories', () => {
   });
   describe('scale to extents', () => {
     describe('scaleyScaleToDataExtent is true', () => {
-      it('should show correct extents - Banded', async () => {
+      it('should show correct extents - Banded', async() => {
         await common.expectChartAtUrlToMatchScreenshot(
           'http://localhost:9001/?path=/story/area-chart--stacked-band&knob-scale to extent=true',
         );
       });
-      it('should show correct extents - stacked', async () => {
+      it('should show correct extents - stacked', async() => {
         await common.expectChartAtUrlToMatchScreenshot(
           'http://localhost:9001/?path=/story/area-chart--stacked-band&knob-scale to extent=true',
         );
       });
     });
     describe('scaleyScaleToDataExtent is false', () => {
-      it('should show correct extents - Banded', async () => {
+      it('should show correct extents - Banded', async() => {
         await common.expectChartAtUrlToMatchScreenshot(
           'http://localhost:9001/?path=/story/area-chart--stacked-band&knob-scale to extent=false',
         );
       });
-      it('should show correct extents - stacked', async () => {
+      it('should show correct extents - stacked', async() => {
         await common.expectChartAtUrlToMatchScreenshot(
           'http://localhost:9001/?path=/story/area-chart--stacked-band&knob-scale to extent=false',
         );

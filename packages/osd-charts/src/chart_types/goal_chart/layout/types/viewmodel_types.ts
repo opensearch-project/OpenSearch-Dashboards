@@ -14,14 +14,14 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { Config } from './config_types';
-
-import { Pixels, PointObject } from '../../../partition_chart/layout/types/geometry_types';
-import { config } from '../config/config';
 import { SpecTypes } from '../../../../specs/settings';
-import { BandFillColorAccessorInput, GOAL_SUBTYPES } from '../../specs/index';
+import { Pixels, PointObject } from '../../../partition_chart/layout/types/geometry_types';
+import { BandFillColorAccessorInput, GOAL_SUBTYPES } from '../../specs';
+import { config } from '../config/config';
+import { Config } from './config_types';
 
 interface BandViewModel {
   value: number;
@@ -85,6 +85,7 @@ export const defaultGoalSpec = {
   },
   tickValueFormatter: ({ value }: BandFillColorAccessorInput) => String(value),
   labelMajor: ({ base }: BandFillColorAccessorInput) => String(base),
+  // eslint-disable-next-line no-empty-pattern
   labelMinor: ({}: BandFillColorAccessorInput) => 'unit',
   centralMajor: ({ base }: BandFillColorAccessorInput) => String(base),
   centralMinor: ({ target }: BandFillColorAccessorInput) => String(target),

@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { PopperSettings, Placement } from './types';
 
@@ -29,8 +30,9 @@ export const DEFAULT_POPPER_SETTINGS: PopperSettings = {
  * Creates new dom element with given id and attaches to parent
  *
  * @internal
- * */
+ */
 export function getOrCreateNode(id: string, parent: HTMLElement = document.body): HTMLDivElement {
+  // eslint-disable-next-line unicorn/prefer-query-selector
   const node = document.getElementById(id);
   if (node) {
     return node as HTMLDivElement;

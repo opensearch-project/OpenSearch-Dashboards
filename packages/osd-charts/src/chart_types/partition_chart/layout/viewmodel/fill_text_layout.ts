@@ -14,9 +14,14 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { ValueFormatter, Color } from '../../../../utils/commons';
+import { Layer } from '../../specs';
+import { conjunctiveConstraint } from '../circline_geometry';
 import { wrapToTau } from '../geometry';
+import { Config, Padding, TextContrast } from '../types/config_types';
 import {
   Coordinate,
   Distance,
@@ -27,8 +32,7 @@ import {
   RingSectorConstruction,
   PointTuple,
 } from '../types/geometry_types';
-import { Config, Padding, TextContrast } from '../types/config_types';
-import { logarithm, TAU, trueBearingToStandardPositionAngle } from '../utils/math';
+import { Box, Font, PartialFont, TextMeasure } from '../types/types';
 import {
   QuadViewModel,
   RawTextGetter,
@@ -38,9 +42,6 @@ import {
   ShapeTreeNode,
   ValueGetterFunction,
 } from '../types/viewmodel_types';
-import { Box, Font, PartialFont, TextMeasure } from '../types/types';
-import { conjunctiveConstraint } from '../circline_geometry';
-import { Layer } from '../../specs/index';
 import {
   combineColors,
   makeHighContrastColor,
@@ -49,8 +50,8 @@ import {
   integerSnap,
   monotonicHillClimb,
 } from '../utils/calcs';
-import { ValueFormatter, Color } from '../../../../utils/commons';
 import { RGBATupleToString } from '../utils/color_library_wrappers';
+import { logarithm, TAU, trueBearingToStandardPositionAngle } from '../utils/math';
 import { RectangleConstruction, VerticalAlignments } from './viewmodel';
 
 const INFINITY_RADIUS = 1e4; // far enough for a sub-2px precision on a 4k screen, good enough for text bounds; 64 bit floats still work well with it
@@ -64,10 +65,10 @@ function ringSectorEndAngle(d: ShapeTreeNode): Radian {
 }
 
 function ringSectorInnerRadius(innerRadius: Radian, ringThickness: Distance) {
-  return (d: ShapeTreeNode): Radius => innerRadius + (d.y0 as number) * ringThickness;
+  return (d: ShapeTreeNode): Radius => innerRadius + d.y0 * ringThickness;
 }
 function ringSectorOuterRadius(innerRadius: Radian, ringThickness: Distance) {
-  return (d: ShapeTreeNode): Radius => innerRadius + ((d.y0 as number) + 1) * ringThickness;
+  return (d: ShapeTreeNode): Radius => innerRadius + (d.y0 + 1) * ringThickness;
 }
 
 function angleToCircline(
@@ -123,15 +124,14 @@ export function ringSectorConstruction(config: Config, innerRadius: Radius, ring
       outerCircline,
       ...(fullCircle ? [] : [sectorStartCircle, sectorEndCircle]),
     ];
-    const rectangleCirclines =
-      outerRadiusFromRectangleWidth === Infinity && outerRadiusFromRectanglHeight === Infinity
-        ? []
-        : [
-            { x: INFINITY_RADIUS - outerRadiusFromRectangleWidth, y: 0, r: INFINITY_RADIUS, inside: true },
-            { x: -INFINITY_RADIUS + outerRadiusFromRectangleWidth, y: 0, r: INFINITY_RADIUS, inside: true },
-            { x: 0, y: INFINITY_RADIUS - outerRadiusFromRectanglHeight, r: INFINITY_RADIUS, inside: true },
-            { x: 0, y: -INFINITY_RADIUS + outerRadiusFromRectanglHeight, r: INFINITY_RADIUS, inside: true },
-          ];
+    const rectangleCirclines = outerRadiusFromRectangleWidth === Infinity && outerRadiusFromRectanglHeight === Infinity
+      ? []
+      : [
+          { x: INFINITY_RADIUS - outerRadiusFromRectangleWidth, y: 0, r: INFINITY_RADIUS, inside: true },
+          { x: -INFINITY_RADIUS + outerRadiusFromRectangleWidth, y: 0, r: INFINITY_RADIUS, inside: true },
+          { x: 0, y: INFINITY_RADIUS - outerRadiusFromRectanglHeight, r: INFINITY_RADIUS, inside: true },
+          { x: 0, y: -INFINITY_RADIUS + outerRadiusFromRectanglHeight, r: INFINITY_RADIUS, inside: true },
+        ];
     return [...sectorCirclines, ...rectangleCirclines];
   };
 }
@@ -164,19 +164,17 @@ export const getSectorRowGeometry: GetShapeRowGeometry<RingSectorConstruction> =
   fontSize,
   rotation,
 ) => {
-  // prettier-ignore
-  const offset =
-      (totalRowCount / 2) * fontSize
+  const offset = (totalRowCount / 2) * fontSize
     + fontSize / 2
-    - linePitch * rowIndex
+    - linePitch * rowIndex;
 
   const topCircline = makeRowCircline(cx, cy, offset, rotation, fontSize, 1);
   const bottomCircline = makeRowCircline(cx, cy, offset, rotation, fontSize, -1);
   const midCircline = makeRowCircline(cx, cy, offset, rotation, 0, 0);
 
-  const valid1 = conjunctiveConstraint(ringSector, Object.assign({}, topCircline, { from: 0, to: TAU }))[0];
+  const valid1 = conjunctiveConstraint(ringSector, { ...topCircline, from: 0, to: TAU })[0];
   if (!valid1) return { rowAnchorX: cx, rowAnchorY: cy, maximumRowLength: 0 };
-  const valid2 = conjunctiveConstraint(ringSector, Object.assign({}, bottomCircline, { from: 0, to: TAU }))[0];
+  const valid2 = conjunctiveConstraint(ringSector, { ...bottomCircline, from: 0, to: TAU })[0];
   if (!valid2) return { rowAnchorX: cx, rowAnchorY: cy, maximumRowLength: 0 };
   const from = Math.max(valid1.from, valid2.from);
   const to = Math.min(valid1.to, valid2.to);
@@ -223,13 +221,12 @@ export const getRectangleRowGeometry: GetShapeRowGeometry<RectangleConstruction>
   padding,
 ) => {
   const defaultPad: Pixels = 2;
-  const { top, right, bottom, left } =
-    typeof padding === 'number'
-      ? { top: padding, right: padding, bottom: padding, left: padding }
-      : {
-          ...{ top: defaultPad, right: defaultPad, bottom: defaultPad, left: defaultPad },
-          ...padding,
-        };
+  const { top, right, bottom, left } = typeof padding === 'number'
+    ? { top: padding, right: padding, bottom: padding, left: padding }
+    : {
+        ...{ top: defaultPad, right: defaultPad, bottom: defaultPad, left: defaultPad },
+        ...padding,
+      };
 
   const overhang = 0.05;
   const topPaddingAdjustment = fontSize < 6 ? 0 : Math.max(1, Math.min(2, fontSize / 16));
@@ -261,8 +258,8 @@ export const getRectangleRowGeometry: GetShapeRowGeometry<RectangleConstruction>
 
 function rowSetComplete(rowSet: RowSet, measuredBoxes: RowBox[]) {
   return (
-    !measuredBoxes.length &&
-    !rowSet.rows.some(
+    !measuredBoxes.length
+    && !rowSet.rows.some(
       (r) => isNaN(r.length) || r.rowWords.length === 0 || r.rowWords.every((rw) => rw.text.length === 0),
     )
   );
@@ -314,14 +311,12 @@ export function getFillTextColor(
   containerBackgroundColor?: Color,
 ) {
   let adjustedTextColor = textColor;
-  const containerBackgroundColorFromUser =
-    containerBackgroundColor === undefined || containerBackgroundColor === 'transparent'
-      ? 'rgba(255, 255, 255, 0)'
-      : containerBackgroundColor;
+  const containerBackgroundColorFromUser = containerBackgroundColor === undefined || containerBackgroundColor === 'transparent'
+    ? 'rgba(255, 255, 255, 0)'
+    : containerBackgroundColor;
 
   const containerBackground = combineColors(sliceFillColor, containerBackgroundColorFromUser);
-  const formattedContainerBackground =
-    typeof containerBackground !== 'string' ? RGBATupleToString(containerBackground) : containerBackground;
+  const formattedContainerBackground = typeof containerBackground !== 'string' ? RGBATupleToString(containerBackground) : containerBackground;
 
   const textShouldBeInvertedAndTextContrastIsFalse = textInvertible && !textContrast;
   const textShouldBeInvertedAndTextContrastIsSetToTrue = textInvertible && typeof textContrast !== 'number';
@@ -387,9 +382,9 @@ function fill<C>(
       const layer = layers[node.depth - 1] || {};
       const verticalAlignment = middleAlign
         ? VerticalAlignments.middle
-        : node.depth < layers.length
-        ? VerticalAlignments.bottom
-        : VerticalAlignments.top;
+        : (node.depth < layers.length
+            ? VerticalAlignments.bottom
+            : VerticalAlignments.top);
       const fontSizes = allFontSizes[Math.min(node.depth, allFontSizes.length) - 1];
       const {
         textColor,
@@ -402,13 +397,15 @@ function fill<C>(
         padding,
         textContrast,
         textOpacity,
-      } = Object.assign(
-        { fontFamily: configFontFamily, fontWeight: 'normal', padding: 2 },
-        fillLabel,
-        { valueFormatter: formatter },
-        layer.fillLabel,
-        layer.shape,
-      );
+      } = {
+        fontFamily: configFontFamily,
+        fontWeight: 'normal',
+        padding: 2,
+        ...fillLabel,
+        valueFormatter: formatter,
+        ...layer.fillLabel,
+        ...layer.shape,
+      };
       const fillTextColor = getFillTextColor(
         textColor,
         textInvertible,
@@ -417,13 +414,14 @@ function fill<C>(
         containerBackgroundColor,
       );
 
-      const valueFont = Object.assign(
-        { fontFamily: configFontFamily, fontWeight: 'normal' },
-        fillLabel,
-        fillLabel.valueFont,
-        layer.fillLabel,
-        layer.fillLabel?.valueFont,
-      );
+      const valueFont = {
+        fontFamily: configFontFamily,
+        fontWeight: 'normal',
+        ...fillLabel,
+        ...fillLabel.valueFont,
+        ...layer.fillLabel,
+        ...layer.fillLabel?.valueFont,
+      };
 
       const sizeInvariantFont: Font = {
         fontStyle,
@@ -467,7 +465,7 @@ function tryFontSize<C>(
   getShapeRowGeometry: GetShapeRowGeometry<C>,
   cx: Coordinate,
   cy: Coordinate,
-  padding: number,
+  padding: Padding,
   node: ShapeTreeNode,
   boxes: Box[],
   maxRowCount: number,
@@ -505,7 +503,7 @@ function tryFontSize<C>(
         rotation,
         verticalAlignment,
         leftAlign,
-        rows: [...Array(targetRowCount)].map(() => ({
+        rows: [...new Array(targetRowCount)].map(() => ({
           rowWords: [],
           rowAnchorX: NaN,
           rowAnchorY: NaN,
@@ -553,7 +551,7 @@ function tryFontSize<C>(
           currentRowLength += currentBox.width + wordSpacing;
 
           if (currentRowLength <= currentRow.maximumLength) {
-            currentRowWords.push(Object.assign({}, currentBox, { wordBeginning }));
+            currentRowWords.push({ ...currentBox, wordBeginning });
             currentRow.length = currentRowLength;
             measuredBoxes.shift();
           } else {
@@ -583,7 +581,7 @@ function getRowSet<C>(
   getShapeRowGeometry: GetShapeRowGeometry<C>,
   cx: Coordinate,
   cy: Coordinate,
-  padding: number,
+  padding: Padding,
   node: ShapeTreeNode,
 ) {
   const tryFunction = tryFontSize(
@@ -618,8 +616,7 @@ function getRowSet<C>(
 export function inSectorRotation(horizontalTextEnforcer: number, horizontalTextAngleThreshold: number) {
   return (node: ShapeTreeNode): Radian => {
     let rotation = trueBearingToStandardPositionAngle((node.x0 + node.x1) / 2);
-    if (Math.abs(node.x1 - node.x0) > horizontalTextAngleThreshold && horizontalTextEnforcer > 0)
-      rotation = rotation * (1 - horizontalTextEnforcer);
+    if (Math.abs(node.x1 - node.x0) > horizontalTextAngleThreshold && horizontalTextEnforcer > 0) rotation *= 1 - horizontalTextEnforcer;
     if (TAU / 4 < rotation && rotation < (3 * TAU) / 4) rotation = wrapToTau(rotation - TAU / 2);
     return rotation;
   };
@@ -660,7 +657,7 @@ export function fillTextLayout<C>(
       const fontSizes: Pixels[] = [];
       for (let i = 0; i <= fontSizeJumpCount; i++) {
         const fontSize = Math.round(minFontSize * Math.pow(realFontSizeJump, i));
-        if (fontSizes.indexOf(fontSize) === -1) {
+        if (!fontSizes.includes(fontSize)) {
           fontSizes.push(fontSize);
         }
       }

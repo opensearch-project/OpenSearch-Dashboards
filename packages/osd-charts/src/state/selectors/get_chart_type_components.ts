@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { GlobalChartState, BackwardRef } from '../chart_state';
 
@@ -27,7 +28,6 @@ type ChartRendererFn = (
 export const getInternalChartRendererSelector = (state: GlobalChartState): ChartRendererFn => {
   if (state.internalChartState) {
     return state.internalChartState.chartRenderer;
-  } else {
-    return () => null;
   }
+  return () => null;
 };

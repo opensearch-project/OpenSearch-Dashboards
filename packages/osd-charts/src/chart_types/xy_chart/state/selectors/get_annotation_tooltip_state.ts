@@ -14,26 +14,28 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { Dimensions } from '../../../../utils/dimensions';
-import { Point } from '../../../../utils/point';
-import { computeChartDimensionsSelector } from './compute_chart_dimensions';
-import { getAxisSpecsSelector, getAnnotationSpecsSelector } from './get_specs';
-import { AxisSpec, AnnotationSpec, AnnotationTypes } from '../../utils/specs';
+
+import { TooltipInfo } from '../../../../components/tooltip/types';
+import { GlobalChartState } from '../../../../state/chart_state';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { Rotation } from '../../../../utils/commons';
+import { Dimensions } from '../../../../utils/dimensions';
+import { AnnotationId } from '../../../../utils/ids';
+import { Point } from '../../../../utils/point';
 import { computeAnnotationTooltipState } from '../../annotations/tooltip';
 import { AnnotationTooltipState, AnnotationDimensions } from '../../annotations/types';
-import { computeAnnotationDimensionsSelector } from './compute_annotations';
-import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
-import { AnnotationId } from '../../../../utils/ids';
-import { computeSeriesGeometriesSelector } from './compute_series_geometries';
+import { AxisSpec, AnnotationSpec, AnnotationTypes } from '../../utils/specs';
 import { ComputedGeometries } from '../utils';
+import { computeAnnotationDimensionsSelector } from './compute_annotations';
+import { computeChartDimensionsSelector } from './compute_chart_dimensions';
+import { computeSeriesGeometriesSelector } from './compute_series_geometries';
+import { getAxisSpecsSelector, getAnnotationSpecsSelector } from './get_specs';
 import { getTooltipInfoSelector } from './get_tooltip_values_highlighted_geoms';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { GlobalChartState } from '../../../../state/chart_state';
-import { TooltipInfo } from '../../../../components/tooltip/types';
 
 const getCurrentPointerPosition = (state: GlobalChartState) => state.interactions.pointer.current.position;
 
@@ -87,10 +89,10 @@ function getAnnotationTooltipState(
   // If there's a highlighted chart element tooltip value, don't show annotation tooltip
   const isChartTooltipDisplayed = tooltip.values.some(({ isHighlighted }) => isHighlighted);
   if (
-    tooltipState &&
-    tooltipState.isVisible &&
-    tooltipState.annotationType === AnnotationTypes.Rectangle &&
-    isChartTooltipDisplayed
+    tooltipState
+    && tooltipState.isVisible
+    && tooltipState.annotationType === AnnotationTypes.Rectangle
+    && isChartTooltipDisplayed
   ) {
     return null;
   }

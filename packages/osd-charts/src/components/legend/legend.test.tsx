@@ -14,16 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import React, { Component } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { Chart } from '../chart';
-import { Settings, BarSeries, LegendColorPicker } from '../../specs';
+import React, { Component } from 'react';
+
+import { SeededDataGenerator } from '../../mocks/utils';
 import { ScaleType } from '../../scales';
+import { Settings, BarSeries, LegendColorPicker } from '../../specs';
+import { Chart } from '../chart';
 import { Legend } from './legend';
 import { LegendListItem } from './legend_item';
-import { SeededDataGenerator } from '../../mocks/utils';
 
 const dg = new SeededDataGenerator();
 
@@ -161,25 +163,24 @@ describe('Legend', () => {
 
       data = dg.generateGroupedSeries(10, 4, 'split');
 
-      legendColorPickerFn: LegendColorPicker = ({ onClose }) => {
-        return (
-          <div id="colorPicker">
-            <span>Custom Color Picker</span>
-            <button
-              id="change"
-              onClick={() => {
-                this.setState<any>({ colors: [this.props.customColor] });
-                onClose();
-              }}
-            >
-              {this.props.customColor}
-            </button>
-            <button id="close" onClick={onClose}>
-              close
-            </button>
-          </div>
-        );
-      };
+      legendColorPickerFn: LegendColorPicker = ({ onClose }) => (
+        <div id="colorPicker">
+          <span>Custom Color Picker</span>
+          <button
+            id="change"
+            type="button"
+            onClick={() => {
+              this.setState<any>({ colors: [this.props.customColor] });
+              onClose();
+            }}
+          >
+            {this.props.customColor}
+          </button>
+          <button id="close" type="button" onClick={onClose}>
+            close
+          </button>
+        </div>
+      );
 
       render() {
         return (

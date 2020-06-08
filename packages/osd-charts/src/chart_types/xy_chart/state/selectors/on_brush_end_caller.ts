@@ -14,24 +14,26 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
+
+import { ChartTypes } from '../../..';
+import { Scale } from '../../../../scales';
+import { BrushAxis, XYBrushArea, GroupBrushExtent, BrushEndListener } from '../../../../specs';
 import { GlobalChartState, DragState } from '../../../../state/chart_state';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { BrushAxis, XYBrushArea, GroupBrushExtent, BrushEndListener } from '../../../../specs';
-import { ChartTypes } from '../../../index';
-import { getComputedScalesSelector } from './get_computed_scales';
-import { computeChartDimensionsSelector } from './compute_chart_dimensions';
-import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
-import { isBrushAvailableSelector } from './is_brush_available';
-import { Scale } from '../../../../scales';
+import { Rotation, minValueWithLowerLimit, maxValueWithUpperLimit } from '../../../../utils/commons';
 import { Dimensions } from '../../../../utils/dimensions';
 import { GroupId } from '../../../../utils/ids';
-import { Rotation, minValueWithLowerLimit, maxValueWithUpperLimit } from '../../../../utils/commons';
-import { getLeftPoint, getTopPoint } from './get_brush_area';
 import { isVerticalRotation } from '../utils';
+import { computeChartDimensionsSelector } from './compute_chart_dimensions';
+import { getLeftPoint, getTopPoint } from './get_brush_area';
+import { getComputedScalesSelector } from './get_computed_scales';
+import { isBrushAvailableSelector } from './is_brush_available';
+import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
 
 const getLastDragSelector = (state: GlobalChartState) => state.interactions.pointer.lastDrag;
 

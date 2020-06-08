@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import seedrandom from 'seedrandom';
 
@@ -27,9 +28,7 @@ import { DataGenerator, RandomNumberGenerator } from '../utils/data_generators/d
  *
  * @param obj partial object type
  */
-export const forcedType = <T extends object>(obj: Partial<T>): T => {
-  return obj as T;
-};
+export const forcedType = <T extends Record<string, unknown>>(obj: Partial<T>): T => obj as T;
 
 /**
  * Return rng function with optional `min`, `max` and `fractionDigits` params

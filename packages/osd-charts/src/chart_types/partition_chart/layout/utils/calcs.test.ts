@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { makeHighContrastColor, combineColors, integerSnap, monotonicHillClimb } from './calcs';
 
@@ -59,7 +60,7 @@ describe('calcs', () => {
       const resultForCombined = 'rgba(161, 158, 201, 1)'; // 0.3 'rgba(215, 213, 232, 1)'; // 0.5 - 'rgba(188, 186, 217, 1)'; //0.7 - ;
       expect(combineColors(background, containerBackground)).toBe(resultForCombined);
       const foreground = 'white';
-      const resultForContrastedText = '#000'; //switches to black text
+      const resultForContrastedText = '#000'; // switches to black text
       expect(makeHighContrastColor(foreground, resultForCombined)).toBe(resultForContrastedText);
     });
   });

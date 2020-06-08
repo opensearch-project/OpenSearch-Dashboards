@@ -14,21 +14,23 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { isPointGeometry, IndexedGeometry } from '../../../../utils/geometry';
+
 import { GlobalChartState } from '../../../../state/chart_state';
+import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
+import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
+import { Rotation } from '../../../../utils/commons';
+import { Dimensions } from '../../../../utils/dimensions';
+import { isPointGeometry, IndexedGeometry } from '../../../../utils/geometry';
+import { DEFAULT_HIGHLIGHT_PADDING } from '../../rendering/rendering';
+import { computeChartDimensionsSelector } from '../../state/selectors/compute_chart_dimensions';
 import { computeChartTransformSelector } from '../../state/selectors/compute_chart_transform';
 import { getHighlightedGeomsSelector } from '../../state/selectors/get_tooltip_values_highlighted_geoms';
-import { Dimensions } from '../../../../utils/dimensions';
-import { Rotation } from '../../../../utils/commons';
 import { Transform } from '../../state/utils';
-import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
-import { computeChartDimensionsSelector } from '../../state/selectors/compute_chart_dimensions';
-import { DEFAULT_HIGHLIGHT_PADDING } from '../../rendering/rendering';
-import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
 
 interface HighlighterProps {
   initialized: boolean;

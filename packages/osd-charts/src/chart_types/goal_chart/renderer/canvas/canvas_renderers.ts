@@ -14,13 +14,14 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { ShapeViewModel } from '../../layout/types/viewmodel_types';
-import { cssFontShorthand } from '../../../partition_chart/layout/utils/measure';
 import { clearCanvas, renderLayers, withContext } from '../../../../renderers/canvas';
 import { GOLDEN_RATIO } from '../../../partition_chart/layout/utils/math';
-import { GOAL_SUBTYPES } from '../../specs/index';
+import { cssFontShorthand } from '../../../partition_chart/layout/utils/measure';
+import { ShapeViewModel } from '../../layout/types/viewmodel_types';
+import { GOAL_SUBTYPES } from '../../specs';
 
 // fixme turn these into config, or capitalize as constants
 const referenceCircularSizeCap = 360; // goal/gauge won't be bigger even if there's ample room: it'd be a waste of space
@@ -43,6 +44,7 @@ export function renderCanvas2d(
   dpr: number,
   { config, bulletViewModel, chartCenter }: ShapeViewModel,
 ) {
+  // eslint-disable-next-line no-empty-pattern
   const {} = config;
 
   withContext(ctx, (ctx) => {
@@ -102,12 +104,11 @@ export function renderCanvas2d(
 
     const minSize = Math.min(config.width, config.height);
 
-    const referenceSize =
-      Math.min(
-        circular ? referenceCircularSizeCap : referenceBulletSizeCap,
-        circular ? minSize : vertical ? config.height : config.width,
-      ) *
-      (1 - 2 * marginRatio);
+    const referenceSize = Math.min(
+      circular ? referenceCircularSizeCap : referenceBulletSizeCap,
+      circular ? minSize : (vertical ? config.height : config.width),
+    )
+      * (1 - 2 * marginRatio);
 
     const barThickness = Math.min(
       circular ? baselineArcThickness : baselineBarThickness,
@@ -226,120 +227,117 @@ export function renderCanvas2d(
       // clear the canvas
       (ctx: CanvasRenderingContext2D) => clearCanvas(ctx, 200000, 200000),
 
-      (ctx: CanvasRenderingContext2D) =>
-        withContext(ctx, (ctx) => {
-          const fullSize = referenceSize;
-          const labelSize = fullSize / 2;
-          const pxRangeFrom = -fullSize / 2 + (circular || vertical ? 0 : labelSize);
-          const pxRangeTo = fullSize / 2 + (!circular && vertical ? -2 * labelFontSize : 0);
-          const pxRangeMid = (pxRangeFrom + pxRangeTo) / 2;
-          const pxRange = pxRangeTo - pxRangeFrom;
+      (ctx: CanvasRenderingContext2D) => withContext(ctx, (ctx) => {
+        const fullSize = referenceSize;
+        const labelSize = fullSize / 2;
+        const pxRangeFrom = -fullSize / 2 + (circular || vertical ? 0 : labelSize);
+        const pxRangeTo = fullSize / 2 + (!circular && vertical ? -2 * labelFontSize : 0);
+        const pxRangeMid = (pxRangeFrom + pxRangeTo) / 2;
+        const pxRange = pxRangeTo - pxRangeFrom;
 
-          const domainExtent = domain[1] - domain[0];
+        const domainExtent = domain[1] - domain[0];
 
-          const linearScale = (x: number) => pxRangeFrom + (pxRange * (x - domain[0])) / domainExtent;
+        const linearScale = (x: number) => pxRangeFrom + (pxRange * (x - domain[0])) / domainExtent;
 
-          const angleStart = config.angleStart;
-          const angleEnd = config.angleEnd;
-          const angleRange = angleEnd - angleStart;
-          const angleScale = (x: number) => angleStart + (angleRange * (x - domain[0])) / domainExtent;
-          const clockwise = angleStart > angleEnd; // todo refine this crude approach
+        const { angleStart, angleEnd } = config;
+        const angleRange = angleEnd - angleStart;
+        const angleScale = (x: number) => angleStart + (angleRange * (x - domain[0])) / domainExtent;
+        const clockwise = angleStart > angleEnd; // todo refine this crude approach
 
-          geoms
-            .slice()
-            .sort((a, b) => a.order - b.order)
-            .forEach((g) => {
-              const landmarks = g.landmarks;
-              const at = get(landmarks, 'at', '');
-              const from = get(landmarks, 'from', '');
-              const to = get(landmarks, 'to', '');
-              const textAlign = get(g.aes, 'textAlign', '');
-              const textBaseline = get(g.aes, 'textBaseline', '');
-              const fontShape = get(g.aes, 'fontShape', '');
-              const axisNormalOffset = get(g.aes, 'axisNormalOffset', 0);
-              const axisTangentOffset = get(g.aes, 'axisTangentOffset', 0);
-              const lineWidth = get(g.aes, 'lineWidth', 0);
-              const strokeStyle = get(g.aes, 'fillColor', '');
-              withContext(ctx, (ctx) => {
-                ctx.beginPath();
-                if (circular) {
-                  if (g.aes.shape === 'line') {
-                    ctx.lineWidth = lineWidth;
-                    ctx.strokeStyle = strokeStyle;
-                    if (at) {
-                      ctx.arc(
-                        pxRangeMid,
-                        0,
-                        r + axisNormalOffset,
-                        angleScale(data[at].value) + Math.PI / 360,
-                        angleScale(data[at].value) - Math.PI / 360,
-                        true,
-                      );
-                    } else {
-                      const dataClockwise = data[from].value < data[to].value;
-                      ctx.arc(
-                        pxRangeMid,
-                        0,
-                        r,
-                        angleScale(data[from].value),
-                        angleScale(data[to].value),
-                        clockwise === dataClockwise,
-                      );
-                    }
-                  } else if (g.aes.shape === 'text') {
-                    const label = at.slice(0, 5) === 'label';
-                    const central = at.slice(0, 7) === 'central';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = label || central ? textBaseline : 'middle';
-                    ctx.font = cssFontShorthand(
-                      fontShape,
-                      label ? labelFontSize : central ? centralFontSize : tickFontSize,
+        geoms
+          .slice()
+          .sort((a, b) => a.order - b.order)
+          .forEach(({ landmarks, aes }) => {
+            const at = get(landmarks, 'at', '');
+            const from = get(landmarks, 'from', '');
+            const to = get(landmarks, 'to', '');
+            const textAlign = get(aes, 'textAlign', '');
+            const textBaseline = get(aes, 'textBaseline', '');
+            const fontShape = get(aes, 'fontShape', '');
+            const axisNormalOffset = get(aes, 'axisNormalOffset', 0);
+            const axisTangentOffset = get(aes, 'axisTangentOffset', 0);
+            const lineWidth = get(aes, 'lineWidth', 0);
+            const strokeStyle = get(aes, 'fillColor', '');
+            withContext(ctx, (ctx) => {
+              ctx.beginPath();
+              if (circular) {
+                if (aes.shape === 'line') {
+                  ctx.lineWidth = lineWidth;
+                  ctx.strokeStyle = strokeStyle;
+                  if (at) {
+                    ctx.arc(
+                      pxRangeMid,
+                      0,
+                      r + axisNormalOffset,
+                      angleScale(data[at].value) + Math.PI / 360,
+                      angleScale(data[at].value) - Math.PI / 360,
+                      true,
                     );
-                    ctx.scale(1, -1);
-                    const angle = angleScale(data[at].value);
-                    if (label) {
-                      ctx.translate(0, r);
-                    } else if (!central) {
-                      ctx.translate(
-                        (r - GOLDEN_RATIO * barThickness) * Math.cos(angle),
-                        -(r - GOLDEN_RATIO * barThickness) * Math.sin(angle),
-                      );
-                    }
-                    ctx.fillText(data[at].text, 0, 0);
+                  } else {
+                    const dataClockwise = data[from].value < data[to].value;
+                    ctx.arc(
+                      pxRangeMid,
+                      0,
+                      r,
+                      angleScale(data[from].value),
+                      angleScale(data[to].value),
+                      clockwise === dataClockwise,
+                    );
                   }
-                } else {
-                  ctx.translate(
-                    vertical ? axisNormalOffset : axisTangentOffset,
-                    vertical ? axisTangentOffset : axisNormalOffset,
+                } else if (aes.shape === 'text') {
+                  const label = at.slice(0, 5) === 'label';
+                  const central = at.slice(0, 7) === 'central';
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = label || central ? textBaseline : 'middle';
+                  ctx.font = cssFontShorthand(
+                    fontShape,
+                    label ? labelFontSize : (central ? centralFontSize : tickFontSize),
                   );
-                  const atPx = data[at] && linearScale(data[at].value);
-                  if (g.aes.shape === 'line') {
-                    ctx.lineWidth = lineWidth;
-                    ctx.strokeStyle = g.aes.fillColor;
-                    if (at) {
-                      const atFromPx = atPx - 1;
-                      const atToPx = atPx + 1;
-                      ctx.moveTo(vertical ? 0 : atFromPx, vertical ? atFromPx : 0);
-                      ctx.lineTo(vertical ? 0 : atToPx, vertical ? atToPx : 0);
-                    } else {
-                      const fromPx = linearScale(data[from].value);
-                      const toPx = linearScale(data[to].value);
-                      ctx.moveTo(vertical ? 0 : fromPx, vertical ? fromPx : 0);
-                      ctx.lineTo(vertical ? 0 : toPx, vertical ? toPx : 0);
-                    }
-                  } else if (g.aes.shape === 'text') {
-                    ctx.textAlign = textAlign;
-                    ctx.textBaseline = textBaseline;
-                    ctx.font = cssFontShorthand(fontShape, tickFontSize);
-                    ctx.scale(1, -1);
-                    ctx.translate(vertical ? 0 : atPx, vertical ? -atPx : 0);
-                    ctx.fillText(data[at].text, 0, 0);
+                  ctx.scale(1, -1);
+                  const angle = angleScale(data[at].value);
+                  if (label) {
+                    ctx.translate(0, r);
+                  } else if (!central) {
+                    ctx.translate(
+                      (r - GOLDEN_RATIO * barThickness) * Math.cos(angle),
+                      -(r - GOLDEN_RATIO * barThickness) * Math.sin(angle),
+                    );
                   }
+                  ctx.fillText(data[at].text, 0, 0);
                 }
-                ctx.stroke();
-              });
+              } else {
+                ctx.translate(
+                  vertical ? axisNormalOffset : axisTangentOffset,
+                  vertical ? axisTangentOffset : axisNormalOffset,
+                );
+                const atPx = data[at] && linearScale(data[at].value);
+                if (aes.shape === 'line') {
+                  ctx.lineWidth = lineWidth;
+                  ctx.strokeStyle = aes.fillColor;
+                  if (at) {
+                    const atFromPx = atPx - 1;
+                    const atToPx = atPx + 1;
+                    ctx.moveTo(vertical ? 0 : atFromPx, vertical ? atFromPx : 0);
+                    ctx.lineTo(vertical ? 0 : atToPx, vertical ? atToPx : 0);
+                  } else {
+                    const fromPx = linearScale(data[from].value);
+                    const toPx = linearScale(data[to].value);
+                    ctx.moveTo(vertical ? 0 : fromPx, vertical ? fromPx : 0);
+                    ctx.lineTo(vertical ? 0 : toPx, vertical ? toPx : 0);
+                  }
+                } else if (aes.shape === 'text') {
+                  ctx.textAlign = textAlign;
+                  ctx.textBaseline = textBaseline;
+                  ctx.font = cssFontShorthand(fontShape, tickFontSize);
+                  ctx.scale(1, -1);
+                  ctx.translate(vertical ? 0 : atPx, vertical ? -atPx : 0);
+                  ctx.fillText(data[at].text, 0, 0);
+                }
+              }
+              ctx.stroke();
             });
-        }),
+          });
+      }),
     ]);
   });
 }

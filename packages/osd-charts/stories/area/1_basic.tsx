@@ -14,15 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
+
 import { AreaSeries, Chart, ScaleType } from '../../src';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => {
-  const data = KIBANA_METRICS.metrics.kibana_os_load[0].data;
+  const { data } = KIBANA_METRICS.metrics.kibana_os_load[0];
   return (
     <Chart className="story-chart">
       <AreaSeries

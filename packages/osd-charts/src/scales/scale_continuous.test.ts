@@ -14,13 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { DateTime, Settings } from 'luxon';
+
+import { ScaleContinuous, ScaleType, ScaleBand } from '.';
 import { XDomain } from '../chart_types/xy_chart/domains/x_domain';
 import { computeXScale } from '../chart_types/xy_chart/utils/scales';
 import { Domain } from '../utils/domain';
-import { DateTime, Settings } from 'luxon';
-import { ScaleContinuous, ScaleType, ScaleBand } from '.';
 import { isLogarithmicScale } from './types';
 
 describe('Scale Continuous', () => {
@@ -222,7 +224,7 @@ describe('Scale Continuous', () => {
       Settings.defaultZoneName = currentTz;
     });
 
-    timezonesToTest.map((tz) => {
+    timezonesToTest.forEach((tz) => {
       describe(`standard tests in ${tz}`, () => {
         beforeEach(() => {
           Settings.defaultZoneName = tz;
@@ -328,7 +330,7 @@ describe('Scale Continuous', () => {
         ]);
       });
 
-      xtest('should not leave gaps in hourly ticks on dst switch summer to winter time', () => {
+      test.skip('should not leave gaps in hourly ticks on dst switch summer to winter time', () => {
         Settings.defaultZoneName = 'Europe/Berlin';
 
         const ticks = getTicksForDomain(
@@ -470,7 +472,7 @@ describe('Scale Continuous', () => {
     });
 
     it('should throw for undefined values', () => {
-      expect(() => scale.scaleOrThrow(undefined)).toThrow();
+      expect(() => scale.scaleOrThrow()).toThrow();
     });
   });
 });

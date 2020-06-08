@@ -14,12 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { GeometryStateStyle, RectStyle, RectBorderStyle } from '../../../../../utils/themes/theme';
-import { stringToRGB, OpacityFn } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { Stroke, Fill } from '../../../../../geoms/types';
 import { getColorFromVariant } from '../../../../../utils/commons';
+import { GeometryStateStyle, RectStyle, RectBorderStyle } from '../../../../../utils/themes/theme';
+import { stringToRGB, OpacityFn } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 
 /**
  * Return the rendering styles (stroke and fill) for a bar.
@@ -44,8 +45,9 @@ export function buildBarStyles(
   const fill: Fill = {
     color: fillColor,
   };
-  const defaultStrokeOpacity =
-    themeRectBorderStyle.strokeOpacity === undefined ? themeRectStyle.opacity : themeRectBorderStyle.strokeOpacity;
+  const defaultStrokeOpacity = themeRectBorderStyle.strokeOpacity === undefined
+    ? themeRectStyle.opacity
+    : themeRectBorderStyle.strokeOpacity;
   const borderStrokeOpacity = defaultStrokeOpacity * geometryStateStyle.opacity;
   const strokeOpacity: OpacityFn = (opacity) => opacity * borderStrokeOpacity;
   const strokeColor = stringToRGB(getColorFromVariant(baseColor, themeRectBorderStyle.stroke), strokeOpacity);

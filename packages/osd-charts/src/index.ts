@@ -14,9 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
-
-// polyfill for Path2D canvas
+ * under the License.
+ */
 import 'path2d-polyfill';
 
 export * from './components';
@@ -42,7 +41,6 @@ export {
 export { Layer as PartitionLayer } from './chart_types/partition_chart/specs/index';
 export { Goal } from './chart_types/goal_chart/specs/index';
 export { AccessorFn, IndexedAccessorFn, UnaryAccessorFn } from './utils/accessor';
-export { SpecTypes } from './specs/settings';
 export { CustomTooltip, TooltipInfo } from './components/tooltip/types';
 
 // scales

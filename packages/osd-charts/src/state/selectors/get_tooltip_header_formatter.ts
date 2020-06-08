@@ -14,12 +14,14 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { getSettingsSpecSelector } from './get_settings_specs';
+
 import { SettingsSpec, TooltipValueFormatter, isTooltipProps } from '../../specs/settings';
 import { getChartIdSelector } from './get_chart_id';
+import { getSettingsSpecSelector } from './get_settings_specs';
 
 /** @internal */
 export const getTooltipHeaderFormatterSelector = createCachedSelector(
@@ -32,5 +34,4 @@ function getTooltipHeaderFormatter(settings: SettingsSpec): TooltipValueFormatte
   if (tooltip && isTooltipProps(tooltip)) {
     return tooltip.headerFormatter;
   }
-  return undefined;
 }

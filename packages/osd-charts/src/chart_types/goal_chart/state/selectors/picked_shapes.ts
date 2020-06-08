@@ -14,13 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { geometries } from './geometries';
-import { GlobalChartState } from '../../../../state/chart_state';
+
 import { LayerValue } from '../../../../specs';
+import { GlobalChartState } from '../../../../state/chart_state';
 import { BulletViewModel } from '../../layout/types/viewmodel_types';
+import { geometries } from './geometries';
 
 function getCurrentPointerPosition(state: GlobalChartState) {
   return state.interactions.pointer.current.position;
@@ -31,7 +33,7 @@ export const getPickedShapes = createCachedSelector(
   [geometries, getCurrentPointerPosition],
   (geoms, pointerPosition): BulletViewModel[] => {
     const picker = geoms.pickQuads;
-    const chartCenter = geoms.chartCenter;
+    const { chartCenter } = geoms;
     const x = pointerPosition.x - chartCenter.x;
     const y = pointerPosition.y - chartCenter.y;
     return picker(x, y);

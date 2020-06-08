@@ -14,24 +14,24 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { Distance, PointTuple, PointTuples } from '../types/geometry_types';
-import { Config } from '../types/config_types';
-import { TAU, trueBearingToStandardPositionAngle } from '../utils/math';
-import { LinkLabelVM, RawTextGetter, ShapeTreeNode, ValueGetterFunction } from '../types/viewmodel_types';
-import { meanAngle } from '../geometry';
 import { ValueFormatter, Color } from '../../../../utils/commons';
-import { makeHighContrastColor, validateColor } from '../utils/calcs';
 import { Point } from '../../../../utils/point';
+import { meanAngle } from '../geometry';
+import { Config } from '../types/config_types';
+import { Distance, PointTuple, PointTuples } from '../types/geometry_types';
 import { Box, Font, TextAlign, TextMeasure } from '../types/types';
-import { integerSnap, monotonicHillClimb } from '../utils/calcs';
+import { LinkLabelVM, RawTextGetter, ShapeTreeNode, ValueGetterFunction } from '../types/viewmodel_types';
+import { makeHighContrastColor, validateColor, integerSnap, monotonicHillClimb } from '../utils/calcs';
+import { TAU, trueBearingToStandardPositionAngle } from '../utils/math';
 
 function cutToLength(s: string, maxLength: number) {
-  return s.length <= maxLength ? s : `${s.substr(0, maxLength - 1)}…`; // ellipsis is one char
+  return s.length <= maxLength ? s : `${s.slice(0, Math.max(0, maxLength - 1))}…`; // ellipsis is one char
 }
 
-/**@internal */
+/** @internal */
 export interface LinkLabelsViewModelSpec {
   linkLabels: LinkLabelVM[];
   labelFontSpec: Font;
@@ -143,13 +143,12 @@ export function linkTextLayout(
           ? rectWidth - diskCenter.x - translateX - widthAdjustment
           : diskCenter.x + translateX - widthAdjustment,
       );
-      const { text, width, verticalOffset } =
-        linkLabel.fontSize / 2 <= cy + diskCenter.y && cy + diskCenter.y <= rectHeight - linkLabel.fontSize / 2
-          ? fitText(measure, labelText, allottedLabelWidth, linkLabel.fontSize, {
-              ...labelFontSpec,
-              text: labelText,
-            })
-          : { text: '', width: 0, verticalOffset: 0 };
+      const { text, width, verticalOffset } = linkLabel.fontSize / 2 <= cy + diskCenter.y && cy + diskCenter.y <= rectHeight - linkLabel.fontSize / 2
+        ? fitText(measure, labelText, allottedLabelWidth, linkLabel.fontSize, {
+            ...labelFontSpec,
+            text: labelText,
+          })
+        : { text: '', width: 0, verticalOffset: 0 };
       const linkLabels: PointTuples = [
         [x0, y0],
         [stemFromX, stemFromY],
@@ -176,7 +175,7 @@ export function linkTextLayout(
 
   function fitText(measure: TextMeasure, desiredText: string, allottedWidth: number, fontSize: number, box: Box) {
     const desiredLength = desiredText.length;
-    const response = (v: number) => measure(fontSize, [{ ...box, text: box.text.substr(0, v) }])[0].width;
+    const response = (v: number) => measure(fontSize, [{ ...box, text: box.text.slice(0, Math.max(0, v)) }])[0].width;
     const visibleLength = monotonicHillClimb(response, desiredLength, allottedWidth, integerSnap);
     const text = visibleLength < 2 && desiredLength >= 2 ? '' : cutToLength(box.text, visibleLength);
     const { width, emHeightAscent, emHeightDescent } = measure(fontSize, [{ ...box, text }])[0];

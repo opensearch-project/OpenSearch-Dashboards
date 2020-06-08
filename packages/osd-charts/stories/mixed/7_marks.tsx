@@ -14,14 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import React from 'react';
+import { action } from '@storybook/addon-actions';
 import { number, boolean } from '@storybook/addon-knobs';
+import React from 'react';
 
 import { AreaSeries, Axis, Chart, LineSeries, Position, ScaleType, Settings } from '../../src';
 import { getRandomNumberGenerator } from '../../src/mocks/utils';
-import { action } from '@storybook/addon-actions';
 
 const getRandomNumber = getRandomNumberGenerator();
 const data1 = new Array(100).fill(0).map((_, x) => ({

@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 export interface Dimensions {
   top: number;
@@ -31,6 +32,8 @@ export interface PerSideDistance {
   right: number;
 }
 
-// fixme consider deactivating @typescript-eslint/no-empty-interface
-// see https://github.com/elastic/elastic-charts/pull/660#discussion_r419474171
+/*
+ * fixme consider deactivating @typescript-eslint/no-empty-interface
+ * see https://github.com/elastic/elastic-charts/pull/660#discussion_r419474171
+ */
 export type Margins = PerSideDistance;

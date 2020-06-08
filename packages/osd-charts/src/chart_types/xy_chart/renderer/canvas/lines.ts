@@ -14,16 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { getGeometryStateStyle } from '../../rendering/rendering';
+import { LegendItem } from '../../../../commons/legend';
+import { Rect } from '../../../../geoms/types';
+import { withContext, withClip } from '../../../../renderers/canvas';
 import { LineGeometry } from '../../../../utils/geometry';
 import { SharedGeometryStateStyle } from '../../../../utils/themes/theme';
-import { LegendItem } from '../../../../commons/legend';
-import { withContext, withClip } from '../../../../renderers/canvas';
+import { getGeometryStateStyle } from '../../rendering/rendering';
 import { renderPoints } from './points';
 import { renderLinePaths } from './primitives/path';
-import { Rect } from '../../../../geoms/types';
 import { buildLineStyles } from './styles/line';
 
 interface LineGeometriesDataProps {

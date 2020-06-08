@@ -14,17 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { Rect } from '../../../../../geoms/types';
 import { Rotation } from '../../../../../utils/commons';
 import { Dimensions } from '../../../../../utils/dimensions';
-import { Theme } from '../../../../../utils/themes/theme';
 import { BarGeometry } from '../../../../../utils/geometry';
+import { Point } from '../../../../../utils/point';
+import { Theme } from '../../../../../utils/themes/theme';
+import { Font, FontStyle, TextBaseline, TextAlign } from '../../../../partition_chart/layout/types/types';
 import { renderText, wrapLines } from '../primitives/text';
 import { renderDebugRect } from '../utils/debug';
-import { Font, FontStyle, TextBaseline, TextAlign } from '../../../../partition_chart/layout/types/types';
-import { Point } from '../../../../../utils/point';
-import { Rect } from '../../../../../geoms/types';
 
 interface BarValuesProps {
   theme: Theme;
@@ -51,7 +52,7 @@ export function renderBarValues(ctx: CanvasRenderingContext2D, props: BarValuesP
       height: displayValue.height,
     };
     const font: Font = {
-      fontFamily: fontFamily,
+      fontFamily,
       fontStyle: fontStyle ? (fontStyle as FontStyle) : 'normal',
       fontVariant: 'normal',
       fontWeight: 'normal',
@@ -107,8 +108,8 @@ function repositionTextLine(
 ) {
   const { x, y } = origin;
   const { width, height } = box;
-  let lineX = x;
-  let lineY = y + i * height;
+  let lineX: number;
+  let lineY: number;
   switch (chartRotation) {
     case 180:
       lineX = x;
@@ -117,9 +118,15 @@ function repositionTextLine(
     case -90:
       lineX = x;
       lineY = y;
+      break;
     case 90:
       lineX = x;
       lineY = y - (i - max + 1) * width;
+      break;
+    case 0:
+    default:
+      lineX = x;
+      lineY = y + i * height;
   }
 
   return { x: lineX, y: lineY };

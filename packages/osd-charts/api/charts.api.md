@@ -1540,10 +1540,10 @@ export interface XYChartSeriesIdentifier extends SeriesIdentifier {
 
 // Warnings were encountered during analysis:
 //
-// src/chart_types/partition_chart/layout/types/config_types.ts:120:5 - (ae-forgotten-export) The symbol "TimeMs" needs to be exported by the entry point index.d.ts
-// src/chart_types/partition_chart/layout/types/config_types.ts:121:5 - (ae-forgotten-export) The symbol "AnimKeyframe" needs to be exported by the entry point index.d.ts
+// src/chart_types/partition_chart/layout/types/config_types.ts:124:5 - (ae-forgotten-export) The symbol "TimeMs" needs to be exported by the entry point index.d.ts
+// src/chart_types/partition_chart/layout/types/config_types.ts:125:5 - (ae-forgotten-export) The symbol "AnimKeyframe" needs to be exported by the entry point index.d.ts
 // src/chart_types/partition_chart/specs/index.ts:47:13 - (ae-forgotten-export) The symbol "NodeColorAccessor" needs to be exported by the entry point index.d.ts
-// src/commons/series_id.ts:37:3 - (ae-forgotten-export) The symbol "SeriesKey" needs to be exported by the entry point index.d.ts
+// src/commons/series_id.ts:38:3 - (ae-forgotten-export) The symbol "SeriesKey" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

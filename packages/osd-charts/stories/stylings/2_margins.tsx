@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { boolean, number } from '@storybook/addon-knobs';
 import React from 'react';
@@ -70,7 +71,7 @@ export const Example = () => {
         id="bottom"
         position={Position.Bottom}
         title={withBottomTitle ? 'Bottom axis' : undefined}
-        showOverlappingTicks={true}
+        showOverlappingTicks
         showGridLines={boolean('show bottom axis grid lines', false)}
       />
       <Axis
@@ -84,7 +85,7 @@ export const Example = () => {
         id="top"
         position={Position.Top}
         title={withTopTitle ? 'Top axis' : undefined}
-        showOverlappingTicks={true}
+        showOverlappingTicks
         showGridLines={boolean('show top axis grid lines', false)}
       />
       <Axis

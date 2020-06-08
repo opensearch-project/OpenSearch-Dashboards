@@ -14,11 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings, TooltipValue, TooltipValueFormatter } from '../../src/';
+
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, TooltipValue, TooltipValueFormatter } from '../../src';
 
 const onElementListeners = {
   onElementClick: action('onElementClick'),
@@ -53,7 +55,7 @@ export const Example = () => {
         {...onElementListeners}
         tooltip={tooltipProps}
       />
-      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
+      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
       <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
 
       <BarSeries

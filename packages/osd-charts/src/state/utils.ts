@@ -14,11 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { SpecList, PointerState } from './chart_state';
-import { Spec } from '../specs';
 import { ChartTypes } from '../chart_types';
+import { Spec } from '../specs';
+import { SpecList, PointerState } from './chart_state';
 
 /** @internal */
 export function getSpecsFromStore<U extends Spec>(specs: SpecList, chartType: ChartTypes, specType?: string): U[] {
@@ -29,9 +30,7 @@ export function getSpecsFromStore<U extends Spec>(specs: SpecList, chartType: Ch
       const sameSpecType = specType ? currentSpec.specType === specType : true;
       return sameChartType && sameSpecType;
     })
-    .map((specId) => {
-      return specs[specId] as U;
-    });
+    .map((specId) => specs[specId] as U);
 }
 
 /** @internal */

@@ -14,15 +14,16 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { ScaleType } from '../../../scales';
-import { AxisSpec, BarSeriesSpec, SeriesTypes } from '../utils/specs';
-import { Position } from '../../../utils/commons';
-import { formatTooltip } from './tooltip';
-import { BarGeometry } from '../../../utils/geometry';
 import { ChartTypes } from '../..';
+import { ScaleType } from '../../../scales';
 import { SpecTypes } from '../../../specs/settings';
+import { Position } from '../../../utils/commons';
+import { BarGeometry } from '../../../utils/geometry';
+import { AxisSpec, BarSeriesSpec, SeriesTypes } from '../utils/specs';
+import { formatTooltip } from './tooltip';
 
 describe('Tooltip formatting', () => {
   const SPEC_ID_1 = 'bar_1';
@@ -125,7 +126,7 @@ describe('Tooltip formatting', () => {
     expect(tooltipValue.isHighlighted).toBe(false);
     expect(tooltipValue.color).toBe('blue');
     expect(tooltipValue.value).toBe('10');
-    expect(YAXIS_SPEC.tickFormat).not.toBeCalledWith(null, undefined);
+    expect(YAXIS_SPEC.tickFormat).not.toBeCalledWith(null);
   });
   it('should set name as spec name when provided', () => {
     const name = 'test - spec';

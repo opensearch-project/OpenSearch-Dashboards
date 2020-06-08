@@ -14,17 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { getSeriesSpecsSelector } from './get_specs';
-import { getInitialState } from '../../../../state/chart_state';
 import { MockSeriesSpec } from '../../../../mocks/specs';
+import { getInitialState } from '../../../../state/chart_state';
+import { getSeriesSpecsSelector } from './get_specs';
 
 describe('selector - get_specs', () => {
   const state = getInitialState('chartId1');
   beforeEach(() => {
-    state.specs['bars1'] = MockSeriesSpec.bar({ id: 'bars1' });
-    state.specs['bars2'] = MockSeriesSpec.bar({ id: 'bars2' });
+    state.specs.bars1 = MockSeriesSpec.bar({ id: 'bars1' });
+    state.specs.bars2 = MockSeriesSpec.bar({ id: 'bars2' });
   });
   it('shall return the same ref objects', () => {
     const series = getSeriesSpecsSelector(state);

@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { boolean, select } from '@storybook/addon-knobs';
 import React from 'react';
@@ -49,8 +50,8 @@ export const Example = () => {
       data = allPositive;
       break;
     case 'all negative':
+    default:
       data = allNegative;
-      break;
   }
   return (
     <Chart className="story-chart">

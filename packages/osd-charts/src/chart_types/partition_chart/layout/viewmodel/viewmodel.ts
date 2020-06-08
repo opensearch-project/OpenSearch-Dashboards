@@ -14,17 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { Part, TextMeasure } from '../types/types';
-import { linkTextLayout } from './link_text_layout';
-import { Config, PartitionLayout } from '../types/config_types';
-import { TAU, trueBearingToStandardPositionAngle } from '../utils/math';
-import { Distance, Pixels, PointTuple, Radius } from '../types/geometry_types';
+import { $Values } from 'utility-types';
+
+import { StrokeStyle, ValueFormatter, Color } from '../../../../utils/commons';
+import { Layer } from '../../specs';
+import { percentValueGetter } from '../config/config';
 import { meanAngle } from '../geometry';
-import { getTopPadding, treemap } from '../utils/treemap';
-import { sunburst } from '../utils/sunburst';
-import { argsToRGBString, stringToRGB } from '../utils/color_library_wrappers';
+import { Config, PartitionLayout } from '../types/config_types';
+import { Distance, Pixels, PointTuple, Radius } from '../types/geometry_types';
+import { TextMeasure, Part } from '../types/types';
 import {
   nullShapeViewModel,
   OutsideLinksViewModel,
@@ -36,15 +37,7 @@ import {
   ShapeViewModel,
   ValueGetterFunction,
 } from '../types/viewmodel_types';
-import { Layer } from '../../specs/index';
-import {
-  fillTextLayout,
-  getRectangleRowGeometry,
-  getSectorRowGeometry,
-  inSectorRotation,
-  nodeId,
-  ringSectorConstruction,
-} from './fill_text_layout';
+import { argsToRGBString, stringToRGB } from '../utils/color_library_wrappers';
 import {
   aggregateAccessor,
   ArrayEntry,
@@ -56,9 +49,12 @@ import {
   sortIndexAccessor,
   HierarchyOfArrays,
 } from '../utils/group_by_rollup';
-import { StrokeStyle, ValueFormatter, Color } from '../../../../utils/commons';
-import { percentValueGetter } from '../config/config';
-import { $Values } from 'utility-types';
+import { trueBearingToStandardPositionAngle, TAU } from '../utils/math';
+import { sunburst } from '../utils/sunburst';
+import { getTopPadding, treemap } from '../utils/treemap';
+import { fillTextLayout, getRectangleRowGeometry, ringSectorConstruction, getSectorRowGeometry, inSectorRotation, nodeId } from './fill_text_layout';
+import { linkTextLayout } from './link_text_layout';
+
 
 function grooveAccessor(n: ArrayEntry) {
   return entryValue(n).depth > 1 ? 1 : [0, 2][entryValue(n).depth];
@@ -69,9 +65,9 @@ function topGrooveAccessor(topGroovePx: Pixels) {
 }
 
 export const VerticalAlignments = Object.freeze({
-  top: 'top' as 'top',
-  middle: 'middle' as 'middle',
-  bottom: 'bottom' as 'bottom',
+  top: 'top' as const,
+  middle: 'middle' as const,
+  bottom: 'bottom' as const,
 });
 
 // we might add more in the future; also, the intent is to still be of CanvasTextBaseline
@@ -94,9 +90,7 @@ function sectorFillOrigins(fillOutside: boolean) {
     const divider = 10;
     const innerBias = fillOutside ? 9 : 1;
     const outerBias = divider - innerBias;
-    // prettier-ignore
-    const radius =
-    (  innerBias * ringSectorInnerRadius(node)
+    const radius = (innerBias * ringSectorInnerRadius(node)
       + outerBias * ringSectorOuterRadius(node)
     )
     / divider;
@@ -283,11 +277,11 @@ export function shapeViewModel(
         containerBackgroundColor,
       )
     : fillTextLayout(
-        ringSectorConstruction(config, innerRadius, ringThickness),
-        getSectorRowGeometry,
-        inSectorRotation(config.horizontalTextEnforcer, config.horizontalTextAngleThreshold),
-        containerBackgroundColor,
-      );
+      ringSectorConstruction(config, innerRadius, ringThickness),
+      getSectorRowGeometry,
+      inSectorRotation(config.horizontalTextEnforcer, config.horizontalTextAngleThreshold),
+      containerBackgroundColor,
+    );
 
   const rowSets: RowSet[] = getRowSets(
     textMeasure,
@@ -308,15 +302,14 @@ export function shapeViewModel(
   // linked text
   const currentY = [-height, -height, -height, -height];
 
-  const nodesWithoutRoom =
-    fillOutside || treemapLayout
-      ? [] // outsideFillNodes and linkLabels are in inherent conflict due to very likely overlaps
-      : quadViewModel.filter((n: ShapeTreeNode) => {
-          const id = nodeId(n);
-          const foundInFillText = rowSets.find((r: RowSet) => r.id === id);
-          // successful text render if found, and has some row(s)
-          return !(foundInFillText && foundInFillText.rows.length !== 0);
-        });
+  const nodesWithoutRoom = fillOutside || treemapLayout
+    ? [] // outsideFillNodes and linkLabels are in inherent conflict due to very likely overlaps
+    : quadViewModel.filter((n: ShapeTreeNode) => {
+      const id = nodeId(n);
+      const foundInFillText = rowSets.find((r: RowSet) => r.id === id);
+      // successful text render if found, and has some row(s)
+      return !(foundInFillText && foundInFillText.rows.length !== 0);
+    });
   const maxLinkedLabelTextLength = config.linkLabel.maxTextLength;
   const linkLabelViewModels = linkTextLayout(
     width,
@@ -334,17 +327,15 @@ export function shapeViewModel(
     containerBackgroundColor,
   );
 
-  const pickQuads: PickFunction = (x, y) => {
-    return quadViewModel.filter(
-      treemapLayout
-        ? ({ x0, y0, x1, y1 }) => x0 <= x && x <= x1 && y0 <= y && y <= y1
-        : ({ x0, y0px, x1, y1px }) => {
-            const angleX = (Math.atan2(y, x) + TAU / 4 + TAU) % TAU;
-            const yPx = Math.sqrt(x * x + y * y);
-            return x0 <= angleX && angleX <= x1 && y0px <= yPx && yPx <= y1px;
-          },
-    );
-  };
+  const pickQuads: PickFunction = (x, y) => quadViewModel.filter(
+    treemapLayout
+      ? ({ x0, y0, x1, y1 }) => x0 <= x && x <= x1 && y0 <= y && y <= y1
+      : ({ x0, y0px, x1, y1px }) => {
+          const angleX = (Math.atan2(y, x) + TAU / 4 + TAU) % TAU;
+          const yPx = Math.sqrt(x * x + y * y);
+          return x0 <= angleX && angleX <= x1 && y0px <= yPx && yPx <= y1px;
+        },
+  );
 
   // combined viewModel
   return {
@@ -360,21 +351,18 @@ export function shapeViewModel(
 }
 
 function partToShapeTreeNode(treemapLayout: boolean, innerRadius: Radius, ringThickness: number) {
-  return (n: Part): ShapeTreeNode => {
-    const node: ArrayEntry = n.node;
-    return {
-      dataName: entryKey(node),
-      depth: depthAccessor(node),
-      value: aggregateAccessor(node),
-      parent: parentAccessor(node),
-      sortIndex: sortIndexAccessor(node),
-      x0: n.x0,
-      x1: n.x1,
-      y0: n.y0,
-      y1: n.y1,
-      y0px: treemapLayout ? n.y0 : innerRadius + n.y0 * ringThickness,
-      y1px: treemapLayout ? n.y1 : innerRadius + n.y1 * ringThickness,
-      yMidPx: treemapLayout ? (n.y0 + n.y1) / 2 : innerRadius + ((n.y0 + n.y1) / 2) * ringThickness,
-    };
-  };
+  return ({ node, x0, x1, y0, y1 }: Part): ShapeTreeNode => ({
+    dataName: entryKey(node),
+    depth: depthAccessor(node),
+    value: aggregateAccessor(node),
+    parent: parentAccessor(node),
+    sortIndex: sortIndexAccessor(node),
+    x0,
+    x1,
+    y0,
+    y1,
+    y0px: treemapLayout ? y0 : innerRadius + y0 * ringThickness,
+    y1px: treemapLayout ? y1 : innerRadius + y1 * ringThickness,
+    yMidPx: treemapLayout ? (y0 + y1) / 2 : innerRadius + ((y0 + y1) / 2) * ringThickness,
+  });
 }

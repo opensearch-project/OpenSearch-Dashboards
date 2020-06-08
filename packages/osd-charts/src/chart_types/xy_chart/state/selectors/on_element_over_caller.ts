@@ -14,21 +14,23 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import createCachedSelector from 're-reselect';
+import { Selector } from 'react-redux';
+
+import { ChartTypes } from '../../..';
+import { SettingsSpec } from '../../../../specs';
+import { GlobalChartState } from '../../../../state/chart_state';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
+import { IndexedGeometry, GeometryValue } from '../../../../utils/geometry';
+import { XYChartSeriesIdentifier } from '../../utils/series';
 import {
   getTooltipInfoAndGeometriesSelector,
   TooltipAndHighlightedGeoms,
 } from './get_tooltip_values_highlighted_geoms';
-import { SettingsSpec } from '../../../../specs';
-import { GlobalChartState } from '../../../../state/chart_state';
-import { IndexedGeometry, GeometryValue } from '../../../../utils/geometry';
-import { Selector } from 'react-redux';
-import { ChartTypes } from '../../../index';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { XYChartSeriesIdentifier } from '../../utils/series';
 
 interface Props {
   settings: SettingsSpec | undefined;

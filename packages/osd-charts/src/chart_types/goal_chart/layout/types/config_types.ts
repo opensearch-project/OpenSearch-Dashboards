@@ -14,11 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { Color } from '../../../../utils/commons';
 import { Pixels, SizeRatio } from '../../../partition_chart/layout/types/geometry_types';
 import { FontFamily } from '../../../partition_chart/layout/types/types';
-import { Color } from '../../../../utils/commons';
 
 // todo switch to `io-ts` style, generic way of combining static and runtime type info
 export interface Config {

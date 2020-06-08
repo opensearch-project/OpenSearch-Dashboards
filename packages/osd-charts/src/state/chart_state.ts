@@ -14,33 +14,33 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import React from 'react';
-import { SPEC_PARSED, SPEC_UNMOUNTED, UPSERT_SPEC, REMOVE_SPEC, SPEC_PARSING } from './actions/specs';
-import { SET_PERSISTED_COLOR, SET_TEMPORARY_COLOR, CLEAR_TEMPORARY_COLORS } from './actions/colors';
-import { interactionsReducer } from './reducers/interactions';
+import React, { RefObject } from 'react';
+
 import { ChartTypes } from '../chart_types';
+import { GoalState } from '../chart_types/goal_chart/state/chart_state';
+import { PartitionState } from '../chart_types/partition_chart/state/chart_state';
 import { XYAxisChartState } from '../chart_types/xy_chart/state/chart_state';
+import { LegendItem, LegendItemExtraValues } from '../commons/legend';
 import { SeriesKey, SeriesIdentifier } from '../commons/series_id';
+import { TooltipInfo, TooltipAnchorPosition } from '../components/tooltip/types';
 import { Spec, PointerEvent } from '../specs';
 import { DEFAULT_SETTINGS_SPEC } from '../specs/settings';
+import { Color } from '../utils/commons';
 import { Dimensions } from '../utils/dimensions';
 import { Point } from '../utils/point';
-import { LegendItem, LegendItemExtraValues } from '../commons/legend';
 import { StateActions } from './actions';
 import { CHART_RENDERED } from './actions/chart';
 import { UPDATE_PARENT_DIMENSION } from './actions/chart_settings';
+import { SET_PERSISTED_COLOR, SET_TEMPORARY_COLOR, CLEAR_TEMPORARY_COLORS } from './actions/colors';
 import { EXTERNAL_POINTER_EVENT } from './actions/events';
-import { RefObject } from 'react';
-import { GoalState } from '../chart_types/goal_chart/state/chart_state';
-import { PartitionState } from '../chart_types/partition_chart/state/chart_state';
-import { TooltipInfo } from '../components/tooltip/types';
-import { TooltipAnchorPosition } from '../components/tooltip/types';
-import { Color } from '../utils/commons';
-import { LegendItemLabel } from './selectors/get_legend_items_labels';
-import { getLegendItemsSelector } from './selectors/get_legend_items';
+import { SPEC_PARSED, SPEC_UNMOUNTED, UPSERT_SPEC, REMOVE_SPEC, SPEC_PARSING } from './actions/specs';
+import { interactionsReducer } from './reducers/interactions';
 import { getInternalIsInitializedSelector } from './selectors/get_internal_is_intialized';
+import { getLegendItemsSelector } from './selectors/get_legend_items';
+import { LegendItemLabel } from './selectors/get_legend_items_labels';
 
 export type BackwardRef = () => React.RefObject<HTMLDivElement>;
 
@@ -285,13 +285,13 @@ export const chartStoreReducer = (chartId: string) => {
             chartType,
             internalChartState,
           };
-        } else {
-          return {
-            ...state,
-            specsInitialized: true,
-            chartType,
-          };
         }
+        return {
+          ...state,
+          specsInitialized: true,
+          chartType,
+        };
+
       case SPEC_UNMOUNTED:
         return {
           ...state,
@@ -411,9 +411,8 @@ function findMainChartType(specs: SpecList): ChartTypes | null {
     // eslint-disable-next-line no-console
     console.warn('Multiple chart type on the same configuration');
     return null;
-  } else {
-    return chartTypes[0] as ChartTypes;
   }
+  return chartTypes[0] as ChartTypes;
 }
 
 function initInternalChartState(chartType: ChartTypes | null): InternalChartState | null {

@@ -14,18 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
+
 import { AreaSeries, Axis, Chart, CurveType, Position, ScaleType } from '../../src';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => {
   const start = KIBANA_METRICS.metrics.kibana_os_load[0].data[0][0];
-  const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 20).map((d) => {
-    return [(d[0] - start) / 30000, d[1]];
-  });
+  const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 20).map((d) => [(d[0] - start) / 30000, d[1]]);
   return (
     <Chart className="story-chart">
       <Axis id="bottom" title="index" position={Position.Bottom} />

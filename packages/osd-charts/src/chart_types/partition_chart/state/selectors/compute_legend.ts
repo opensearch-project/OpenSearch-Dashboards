@@ -14,18 +14,20 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
+
 import { LegendItem } from '../../../../commons/legend';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { getPieSpec } from './pie_spec';
-import { partitionGeometries } from './geometries';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { PrimitiveValue } from '../../layout/utils/group_by_rollup';
-import { QuadViewModel } from '../../layout/types/viewmodel_types';
-import { getFlatHierarchy } from './get_flat_hierarchy';
 import { Position } from '../../../../utils/commons';
+import { QuadViewModel } from '../../layout/types/viewmodel_types';
+import { PrimitiveValue } from '../../layout/utils/group_by_rollup';
+import { partitionGeometries } from './geometries';
+import { getFlatHierarchy } from './get_flat_hierarchy';
+import { getPieSpec } from './pie_spec';
 
 /** @internal */
 export const computeLegendSelector = createCachedSelector(
@@ -93,7 +95,5 @@ export const computeLegendSelector = createCachedSelector(
 )(getChartIdSelector);
 
 function findIndex(items: Array<[PrimitiveValue, number, PrimitiveValue]>, child: QuadViewModel) {
-  return items.findIndex(([dataName, depth, value]) => {
-    return dataName === child.dataName && depth === child.depth && value === child.value;
-  });
+  return items.findIndex(([dataName, depth, value]) => dataName === child.dataName && depth === child.depth && value === child.value);
 }

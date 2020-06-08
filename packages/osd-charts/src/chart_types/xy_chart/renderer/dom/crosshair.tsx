@@ -14,23 +14,25 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React, { CSSProperties } from 'react';
 import { connect } from 'react-redux';
-import { isHorizontalRotation } from '../../state/utils';
-import { Dimensions } from '../../../../utils/dimensions';
-import { Theme } from '../../../../utils/themes/theme';
-import { Rotation } from '../../../../utils/commons';
+
+import { TooltipType } from '../../../../specs';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
+import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
+import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
+import { Rotation } from '../../../../utils/commons';
+import { Dimensions } from '../../../../utils/dimensions';
+import { LIGHT_THEME } from '../../../../utils/themes/light_theme';
+import { Theme } from '../../../../utils/themes/theme';
 import { getCursorBandPositionSelector } from '../../state/selectors/get_cursor_band';
 import { getCursorLinePositionSelector } from '../../state/selectors/get_cursor_line';
 import { getTooltipTypeSelector } from '../../state/selectors/get_tooltip_type';
-import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
-import { LIGHT_THEME } from '../../../../utils/themes/light_theme';
-import { TooltipType } from '../../../../specs';
-import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
+import { isHorizontalRotation } from '../../state/utils';
 
 interface CrosshairProps {
   theme: Theme;
@@ -49,15 +51,6 @@ function canRenderHelpLine(type: TooltipType, visible: boolean) {
 
 class CrosshairComponent extends React.Component<CrosshairProps> {
   static displayName = 'Crosshair';
-
-  render() {
-    return (
-      <div className="echCrosshair">
-        {this.renderBand()}
-        {this.renderLine()}
-      </div>
-    );
-  }
 
   renderBand() {
     const {
@@ -110,6 +103,15 @@ class CrosshairComponent extends React.Component<CrosshairProps> {
       };
     }
     return <div className="echCrosshair__line" style={style} />;
+  }
+
+  render() {
+    return (
+      <div className="echCrosshair">
+        {this.renderBand()}
+        {this.renderLine()}
+      </div>
+    );
   }
 }
 

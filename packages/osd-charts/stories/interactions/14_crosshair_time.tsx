@@ -14,11 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { SB_KNOBS_PANEL } from '../utils/storybook';
-
+import { boolean, select } from '@storybook/addon-knobs';
 import React from 'react';
+
+import { switchTheme } from '../../.storybook/theme_service';
 import {
   Axis,
   BarSeries,
@@ -32,12 +34,10 @@ import {
   Settings,
   timeFormatter,
   TooltipType,
-} from '../../src/';
-
-import { boolean, select } from '@storybook/addon-knobs';
-import { switchTheme } from '../../.storybook/theme_service';
+} from '../../src';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 import { getChartRotationKnob } from '../utils/knobs';
+import { SB_KNOBS_PANEL } from '../utils/storybook';
 
 export const Example = () => {
   const hideBars = boolean('hideBars', false);

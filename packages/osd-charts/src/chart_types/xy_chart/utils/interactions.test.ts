@@ -14,17 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { TooltipType, isCrosshairTooltipType, isFollowTooltipType } from '../../../specs';
 import { Dimensions } from '../../../utils/dimensions';
+import { IndexedGeometry, PointGeometry } from '../../../utils/geometry';
 import {
   areIndexedGeometryArraysEquals,
   areIndexedGeomsEquals,
   getOrientedXPosition,
   getOrientedYPosition,
 } from './interactions';
-import { IndexedGeometry, PointGeometry } from '../../../utils/geometry';
-import { TooltipType, isCrosshairTooltipType, isFollowTooltipType } from '../../../specs';
 
 const seriesStyle = {
   rect: {

@@ -14,13 +14,27 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { isVerticalAxis } from '../utils/axis_utils';
+import { LegendItem } from '../../../commons/legend';
+import { SeriesKey, SeriesIdentifier } from '../../../commons/series_id';
+import { Scale } from '../../../scales';
+import { Spec } from '../../../specs';
+import { identity, mergePartial, Rotation, Color, RecursivePartial } from '../../../utils/commons';
 import { CurveType } from '../../../utils/curves';
+import { Dimensions } from '../../../utils/dimensions';
+import { Domain } from '../../../utils/domain';
+import { PointGeometry, BarGeometry, AreaGeometry, LineGeometry, BubbleGeometry } from '../../../utils/geometry';
+import { GroupId, SpecId } from '../../../utils/ids';
+import { Point } from '../../../utils/point';
+import { ColorConfig, Theme } from '../../../utils/themes/theme';
+import { PrimitiveValue } from '../../partition_chart/layout/utils/group_by_rollup';
 import { mergeXDomain, XDomain } from '../domains/x_domain';
 import { mergeYDomain, YDomain } from '../domains/y_domain';
 import { renderArea, renderBars, renderLine, renderBubble } from '../rendering/rendering';
+import { isVerticalAxis } from '../utils/axis_utils';
+import { IndexedGeometryMap } from '../utils/indexed_geometry_map';
 import { computeXScale, computeYScales, countBarsInCluster } from '../utils/scales';
 import {
   DataSeries,
@@ -33,9 +47,7 @@ import {
   RawDataSeries,
   XYChartSeriesIdentifier,
 } from '../utils/series';
-import { SeriesKey, SeriesIdentifier } from '../../../commons/series_id';
 import {
-  AreaSeriesSpec,
   AxisSpec,
   BasicSeriesSpec,
   DomainRange,
@@ -44,25 +56,12 @@ import {
   isAreaSeriesSpec,
   isBarSeriesSpec,
   isLineSeriesSpec,
-  LineSeriesSpec,
   isBandedSpec,
   Fit,
   FitConfig,
   SeriesTypes,
   isBubbleSeriesSpec,
 } from '../utils/specs';
-import { ColorConfig, Theme } from '../../../utils/themes/theme';
-import { identity, mergePartial, Rotation, Color, RecursivePartial } from '../../../utils/commons';
-import { Dimensions } from '../../../utils/dimensions';
-import { Domain } from '../../../utils/domain';
-import { GroupId, SpecId } from '../../../utils/ids';
-import { Scale } from '../../../scales';
-import { PointGeometry, BarGeometry, AreaGeometry, LineGeometry, BubbleGeometry } from '../../../utils/geometry';
-import { LegendItem } from '../../../commons/legend';
-import { Spec } from '../../../specs';
-import { IndexedGeometryMap } from '../utils/indexed_geometry_map';
-import { Point } from '../../../utils/point';
-import { PrimitiveValue } from '../../partition_chart/layout/utils/group_by_rollup';
 
 const MAX_ANIMATABLE_BARS = 300;
 const MAX_ANIMATABLE_LINES_AREA_POINTS = 600;
@@ -174,6 +173,7 @@ export function getCustomSeriesColors(
 
     if (!color && spec.color) {
       if (typeof spec.color === 'string') {
+        // eslint-disable-next-line prefer-destructuring
         color = spec.color;
       } else {
         const counter = counters.get(seriesIdentifier.specId) || 0;
@@ -384,7 +384,7 @@ export function computeSeriesGeometries(
     geometriesCounts.bubbles += geometries.geometriesCounts.bubbles;
     geometriesCounts.bubblePoints += geometries.geometriesCounts.bubblePoints;
   });
-  formattedDataSeries.nonStacked.map((dataSeriesGroup) => {
+  formattedDataSeries.nonStacked.forEach((dataSeriesGroup) => {
     const { groupId, dataSeries } = dataSeriesGroup;
     const yScale = yScales.get(groupId);
     if (!yScale) {
@@ -445,6 +445,7 @@ export function setBarSeriesAccessors(isHistogramMode: boolean, seriesSpecs: Map
     return;
   }
 
+  // eslint-disable-next-line no-restricted-syntax
   for (const [, spec] of seriesSpecs) {
     if (isBarSeriesSpec(spec)) {
       let stackAccessors = spec.stackAccessors ? [...spec.stackAccessors] : spec.yAccessors;
@@ -456,15 +457,11 @@ export function setBarSeriesAccessors(isHistogramMode: boolean, seriesSpecs: Map
       spec.stackAccessors = stackAccessors;
     }
   }
-
-  return;
 }
 
 /** @internal */
 export function isHistogramModeEnabled(seriesSpecs: BasicSeriesSpec[]): boolean {
-  return seriesSpecs.some((spec) => {
-    return isBarSeriesSpec(spec) && spec.enableHistogramMode;
-  });
+  return seriesSpecs.some((spec) => isBarSeriesSpec(spec) && spec.enableHistogramMode);
 }
 
 /** @internal */
@@ -614,12 +611,12 @@ function renderGeometries(
         xScale,
         yScale,
         color,
-        (spec as LineSeriesSpec).curve || CurveType.LINEAR,
+        spec.curve || CurveType.LINEAR,
         isBandedSpec(spec.y0Accessors),
         xScaleOffset,
         lineSeriesStyle,
         {
-          enabled: (spec as LineSeriesSpec).markSizeAccessor !== undefined,
+          enabled: spec.markSizeAccessor !== undefined,
           ratio: chartTheme.markSizeRatio,
         },
         spec.pointStyleAccessor,
@@ -642,12 +639,12 @@ function renderGeometries(
         xScale,
         yScale,
         color,
-        (spec as AreaSeriesSpec).curve || CurveType.LINEAR,
+        spec.curve || CurveType.LINEAR,
         isBandedSpec(spec.y0Accessors),
         xScaleOffset,
         areaSeriesStyle,
         {
-          enabled: (spec as LineSeriesSpec).markSizeAccessor !== undefined,
+          enabled: spec.markSizeAccessor !== undefined,
           ratio: chartTheme.markSizeRatio,
         },
         isStacked,
@@ -681,6 +678,7 @@ export function getSpecsById<T extends Spec>(specs: T[], id: string): T | undefi
 export function getAxesSpecForSpecId(axesSpecs: AxisSpec[], groupId: GroupId) {
   let xAxis;
   let yAxis;
+  // eslint-disable-next-line no-restricted-syntax
   for (const axisSpec of axesSpecs) {
     if (axisSpec.groupId !== groupId) {
       continue;
@@ -705,25 +703,26 @@ export function computeChartTransform(chartDimensions: Dimensions, chartRotation
       y: 0,
       rotate: 90,
     };
-  } else if (chartRotation === -90) {
+  }
+  if (chartRotation === -90) {
     return {
       x: 0,
       y: chartDimensions.height,
       rotate: -90,
     };
-  } else if (chartRotation === 180) {
+  }
+  if (chartRotation === 180) {
     return {
       x: chartDimensions.width,
       y: chartDimensions.height,
       rotate: 180,
     };
-  } else {
-    return {
-      x: 0,
-      y: 0,
-      rotate: 0,
-    };
   }
+  return {
+    x: 0,
+    y: 0,
+    rotate: 0,
+  };
 }
 
 /** @internal */
@@ -742,9 +741,7 @@ export function isVerticalRotation(chartRotation: Rotation) {
  * @internal
  */
 export function isLineAreaOnlyChart(specs: BasicSeriesSpec[]) {
-  return !specs.some((spec) => {
-    return spec.seriesType === SeriesTypes.Bar;
-  });
+  return !specs.some((spec) => spec.seriesType === SeriesTypes.Bar);
 }
 
 /** @internal */
@@ -760,6 +757,7 @@ export function isChartAnimatable(geometriesCounts: GeometriesCounts, animationE
 
 /** @internal */
 export function isAllSeriesDeselected(legendItems: LegendItem[]): boolean {
+  // eslint-disable-next-line no-restricted-syntax
   for (const legendItem of legendItems) {
     if (!legendItem.isSeriesHidden) {
       return false;
@@ -814,7 +812,7 @@ export function isUniqueArray<B, T>(arr: B[], extractor?: (value: B) => T) {
       values.add(value);
       return true;
     });
-  })();
+  }());
 }
 
 /**
@@ -844,7 +842,7 @@ export const isDefinedFrom = <T>(typeCheck: (value: RecursivePartial<T>) => bool
 
   try {
     return typeCheck(value);
-  } catch (error) {
+  } catch {
     return false;
   }
 };

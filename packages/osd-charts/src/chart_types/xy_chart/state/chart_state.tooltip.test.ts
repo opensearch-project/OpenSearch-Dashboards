@@ -14,16 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { GlobalChartState, chartStoreReducer } from '../../../state/chart_state';
 import { createStore, Store } from 'redux';
-import { upsertSpec, specParsed } from '../../../state/actions/specs';
+
 import { MockSeriesSpec, MockGlobalSpec } from '../../../mocks/specs';
-import { updateParentDimensions } from '../../../state/actions/chart_settings';
-import { getTooltipInfoAndGeometriesSelector } from './selectors/get_tooltip_values_highlighted_geoms';
-import { onPointerMove } from '../../../state/actions/mouse';
 import { TooltipType } from '../../../specs';
+import { updateParentDimensions } from '../../../state/actions/chart_settings';
+import { onPointerMove } from '../../../state/actions/mouse';
+import { upsertSpec, specParsed } from '../../../state/actions/specs';
+import { GlobalChartState, chartStoreReducer } from '../../../state/chart_state';
+import { getTooltipInfoAndGeometriesSelector } from './selectors/get_tooltip_values_highlighted_geoms';
 
 describe('XYChart - State tooltips', () => {
   let store: Store<GlobalChartState>;

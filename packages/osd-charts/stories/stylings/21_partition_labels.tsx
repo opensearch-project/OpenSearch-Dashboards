@@ -14,14 +14,16 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
+
+import { color } from '@storybook/addon-knobs';
+import React from 'react';
 
 import { Chart, Datum, Partition, Settings } from '../../src';
-import { mocks } from '../../src/mocks/hierarchical/index';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
-import React from 'react';
+import { mocks } from '../../src/mocks/hierarchical';
 import { indexInterpolatedFillColor, interpolatorCET2s, productLookup } from '../utils/utils';
-import { color } from '@storybook/addon-knobs';
 
 export const Example = () => {
   const partialCustomTheme = {
@@ -36,7 +38,7 @@ export const Example = () => {
         id="spec_1"
         data={mocks.pie}
         valueAccessor={(d: Datum) => d.exportVal as number}
-        valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
+        valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\u00A0Bn`}
         layers={[
           {
             groupByRollup: (d: Datum) => d.sitc1,

@@ -14,13 +14,16 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
+
+import React from 'react';
 
 import { Chart, Datum, Partition, PartitionLayout } from '../../src';
-import { mocks } from '../../src/mocks/hierarchical/index';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
-import React from 'react';
 import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/types/viewmodel_types';
+import { PrimitiveValue } from '../../src/chart_types/partition_chart/layout/utils/group_by_rollup';
+import { mocks } from '../../src/mocks/hierarchical';
 import {
   categoricalFillColor,
   colorBrewerCategoricalStark9,
@@ -28,42 +31,35 @@ import {
   productLookup,
   regionLookup,
 } from '../utils/utils';
-import { PrimitiveValue } from '../../src/chart_types/partition_chart/layout/utils/group_by_rollup';
 
 export const Example = () => (
-  <Chart className="story-chart" /*size={{ width: 1200, height: 800 }}*/>
+  <Chart className="story-chart">
     <Partition
       id="spec_1"
       data={mocks.miniSunburst}
       valueAccessor={(d: Datum) => d.exportVal as number}
-      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
+      valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\u00A0Bn`}
       layers={[
         {
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: PrimitiveValue) => d !== null && productLookup[d].name,
           shape: {
-            fillColor: (d: ShapeTreeNode) => {
-              return categoricalFillColor(colorBrewerCategoricalStark9, 0.7)(d.sortIndex);
-            },
+            fillColor: (d: ShapeTreeNode) => categoricalFillColor(colorBrewerCategoricalStark9, 0.7)(d.sortIndex),
           },
         },
         {
-          groupByRollup: (d: Datum) => countryLookup[d.dest].continentCountry.substr(0, 2),
+          groupByRollup: (d: Datum) => countryLookup[d.dest].continentCountry.slice(0, 2),
           nodeLabel: (d: PrimitiveValue) => d !== null && regionLookup[d].regionName,
           shape: {
-            fillColor: (d: ShapeTreeNode) => {
-              return categoricalFillColor(colorBrewerCategoricalStark9, 0.5)(d.parent.sortIndex);
-            },
+            fillColor: (d: ShapeTreeNode) => categoricalFillColor(colorBrewerCategoricalStark9, 0.5)(d.parent.sortIndex),
           },
         },
         {
           groupByRollup: (d: Datum) => d.dest,
           nodeLabel: (d: PrimitiveValue) => d !== null && countryLookup[d].name,
-          showAccessor: (d: PrimitiveValue) => (['chn', 'hkg', 'jpn', 'kor'] as PrimitiveValue[]).indexOf(d) === -1,
+          showAccessor: (d: PrimitiveValue) => !(['chn', 'hkg', 'jpn', 'kor'] as PrimitiveValue[]).includes(d),
           shape: {
-            fillColor: (d: ShapeTreeNode) => {
-              return categoricalFillColor(colorBrewerCategoricalStark9, 0.3)(d.parent.parent.sortIndex);
-            },
+            fillColor: (d: ShapeTreeNode) => categoricalFillColor(colorBrewerCategoricalStark9, 0.3)(d.parent.parent.sortIndex),
           },
         },
       ]}
@@ -75,7 +71,7 @@ export const Example = () => (
         },
         fontFamily: 'Arial',
         fillLabel: {
-          valueFormatter: (d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
+          valueFormatter: (d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\u00A0Bn`,
           fontStyle: 'italic',
           textInvertible: true,
           fontWeight: 900,

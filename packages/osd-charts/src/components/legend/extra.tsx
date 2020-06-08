@@ -14,10 +14,11 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import React from 'react';
 import classNames from 'classnames';
+import React from 'react';
 
 /**
  * @internal
@@ -26,7 +27,7 @@ import classNames from 'classnames';
  */
 export function renderExtra(extra: string | number, isSeriesHidden?: boolean) {
   const extraClassNames = classNames('echLegendItem__extra', {
-    ['echLegendItem__extra--hidden']: isSeriesHidden,
+    'echLegendItem__extra--hidden': isSeriesHidden,
   });
   return (
     <div className={extraClassNames} title={`${extra}`}>

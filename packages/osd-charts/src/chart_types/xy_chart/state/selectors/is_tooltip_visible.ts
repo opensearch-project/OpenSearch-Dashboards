@@ -14,22 +14,22 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { Point } from '../../../../utils/point';
+
+import { TooltipInfo } from '../../../../components/tooltip/types';
+import { TooltipType, getTooltipType } from '../../../../specs';
 import { GlobalChartState, PointerStates } from '../../../../state/chart_state';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
+import { Point } from '../../../../utils/point';
 import { getProjectedPointerPositionSelector } from './get_projected_pointer_position';
 import { getTooltipInfoSelector } from './get_tooltip_values_highlighted_geoms';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { TooltipType, getTooltipType } from '../../../../specs';
 import { isAnnotationTooltipVisibleSelector } from './is_annotation_tooltip_visible';
-import { TooltipInfo } from '../../../../components/tooltip/types';
 
-const hasTooltipTypeDefinedSelector = (state: GlobalChartState): TooltipType | undefined => {
-  return getTooltipType(getSettingsSpecSelector(state));
-};
+const hasTooltipTypeDefinedSelector = (state: GlobalChartState): TooltipType | undefined => getTooltipType(getSettingsSpecSelector(state));
 
 const getPointerSelector = (state: GlobalChartState) => state.interactions.pointer;
 
@@ -53,11 +53,11 @@ function isTooltipVisible(
   isAnnotationTooltipVisible: boolean,
 ) {
   return (
-    tooltipType !== TooltipType.None &&
-    pointer.down === null &&
-    projectedPointerPosition.x > -1 &&
-    projectedPointerPosition.y > -1 &&
-    tooltip.values.length > 0 &&
-    !isAnnotationTooltipVisible
+    tooltipType !== TooltipType.None
+    && pointer.down === null
+    && projectedPointerPosition.x > -1
+    && projectedPointerPosition.y > -1
+    && tooltip.values.length > 0
+    && !isAnnotationTooltipVisible
   );
 }

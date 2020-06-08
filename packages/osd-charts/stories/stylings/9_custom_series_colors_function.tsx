@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { color } from '@storybook/addon-knobs';
 import React from 'react';
@@ -26,12 +27,10 @@ export const Example = () => {
   const barColor = color('barSeriesColor', '#000');
   const barSeriesColorAccessor: SeriesColorAccessor = ({ specId, yAccessor, splitAccessors }) => {
     if (
-      specId === 'bars' &&
-      yAccessor === 'y1' &&
-      // eslint-disable-next-line react/prop-types
-      splitAccessors.get('g1') === 'cloudflare.com' &&
-      // eslint-disable-next-line react/prop-types
-      splitAccessors.get('g2') === 'direct-cdn'
+      specId === 'bars'
+      && yAccessor === 'y1'
+      && splitAccessors.get('g1') === 'cloudflare.com'
+      && splitAccessors.get('g2') === 'direct-cdn'
     ) {
       return barColor;
     }
@@ -40,7 +39,6 @@ export const Example = () => {
 
   const lineColor = color('linelineSeriesColor', '#ff0');
   const lineSeriesColorAccessor: SeriesColorAccessor = ({ specId, yAccessor, splitAccessors }) => {
-    // eslint-disable-next-line react/prop-types
     if (specId === 'lines' && yAccessor === 'y1' && splitAccessors.size === 0) {
       return lineColor;
     }
@@ -50,7 +48,7 @@ export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings showLegend showLegendExtra legendPosition={Position.Right} />
-      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
+      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
       <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
 
       <BarSeries

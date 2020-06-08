@@ -14,23 +14,23 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { Dimensions } from '../../../../utils/dimensions';
-import { computeChartDimensionsSelector } from './compute_chart_dimensions';
+
 import { GlobalChartState } from '../../../../state/chart_state';
-import { Point } from '../../../../utils/point';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { Dimensions } from '../../../../utils/dimensions';
+import { Point } from '../../../../utils/point';
+import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 
 const getCurrentPointerPosition = (state: GlobalChartState) => state.interactions.pointer.current.position;
 
 /** @internal */
 export const getProjectedPointerPositionSelector = createCachedSelector(
   [getCurrentPointerPosition, computeChartDimensionsSelector],
-  (currentPointerPosition, chartDimensions): Point => {
-    return getProjectedPointerPosition(currentPointerPosition, chartDimensions.chartDimensions);
-  },
+  (currentPointerPosition, chartDimensions): Point => getProjectedPointerPosition(currentPointerPosition, chartDimensions.chartDimensions),
 )(getChartIdSelector);
 
 /**

@@ -14,10 +14,11 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { common } from '../page_objects';
 import { getStorybookInfo } from '../helpers';
+import { common } from '../page_objects';
 
 // mock required for importing trick, otherwise .scss files will throw an error
 jest.mock('../../.storybook/theme_service.ts', () => ({
@@ -29,7 +30,7 @@ const storyGroups = getStorybookInfo();
 describe('Baseline Visual tests for all stories', () => {
   describe.each(storyGroups)('%s', (_group, encodedGroup, stories) => {
     describe.each(stories)('%s', (_title, encodedTitle) => {
-      it('visually looks correct', async () => {
+      it('visually looks correct', async() => {
         const url = `http://localhost:9001?id=${encodedGroup}--${encodedTitle}`;
         await common.expectChartAtUrlToMatchScreenshot(url);
       });

@@ -14,17 +14,20 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
+
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 // import { isChartAnimatable } from '../utils';
 
 /** @internal */
 export const isChartAnimatableSelector = createCachedSelector(
   [computeSeriesGeometriesSelector, getSettingsSpecSelector],
+  // eslint-disable-next-line arrow-body-style
   () => {
     // const { geometriesCounts } = seriesGeometries;
     // temporary disabled until

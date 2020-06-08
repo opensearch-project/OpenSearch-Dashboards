@@ -14,11 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
+
+import React from 'react';
 
 import { Chart, Datum, Partition, PartitionLayout } from '../../src';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
-import React from 'react';
 import { indexInterpolatedFillColor, interpolatorCET2s } from '../utils/utils';
 
 export const Example = () => (

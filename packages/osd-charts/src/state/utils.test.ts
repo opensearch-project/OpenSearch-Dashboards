@@ -14,11 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { getSpecsFromStore } from './utils';
 import { ChartTypes } from '../chart_types';
 import { SpecTypes } from '../specs/settings';
+import { getSpecsFromStore } from './utils';
 
 describe('State utils', () => {
   it('getSpecsFromStore shall return always the same object reference excluding the array', () => {

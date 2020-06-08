@@ -14,16 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { Dimensions } from '../../../../utils/dimensions';
-import { shapeViewModel } from '../../layout/viewmodel/viewmodel';
-import { measureText } from '../../../partition_chart/layout/utils/measure';
-import { ShapeViewModel, nullShapeViewModel } from '../../layout/types/viewmodel_types';
-import { GoalSpec } from '../../specs/index';
 import { mergePartial, RecursivePartial } from '../../../../utils/commons';
+import { Dimensions } from '../../../../utils/dimensions';
+import { measureText } from '../../../partition_chart/layout/utils/measure';
 import { config as defaultConfig } from '../../layout/config/config';
 import { Config } from '../../layout/types/config_types';
+import { ShapeViewModel, nullShapeViewModel } from '../../layout/types/viewmodel_types';
+import { shapeViewModel } from '../../layout/viewmodel/viewmodel';
+import { GoalSpec } from '../../specs';
 
 /** @internal */
 export function render(spec: GoalSpec, parentDimensions: Dimensions): ShapeViewModel {

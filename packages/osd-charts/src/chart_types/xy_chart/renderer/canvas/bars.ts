@@ -14,16 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { LegendItem } from '../../../../commons/legend';
+import { Rect } from '../../../../geoms/types';
 import { withContext, withClip } from '../../../../renderers/canvas';
 import { BarGeometry } from '../../../../utils/geometry';
-import { buildBarStyles } from './styles/bar';
 import { SharedGeometryStateStyle } from '../../../../utils/themes/theme';
 import { getGeometryStateStyle } from '../../rendering/rendering';
-import { LegendItem } from '../../../../commons/legend';
 import { renderRect } from './primitives/rect';
-import { Rect } from '../../../../geoms/types';
+import { buildBarStyles } from './styles/bar';
 
 /** @internal */
 export function renderBars(

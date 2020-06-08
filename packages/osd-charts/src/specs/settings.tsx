@@ -14,28 +14,29 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
 import { $Values } from 'utility-types';
 
-import { DomainRange } from '../chart_types/xy_chart/utils/specs';
-import { PartialTheme, Theme } from '../utils/themes/theme';
-import { Domain } from '../utils/domain';
-import { getConnect, specComponentFactory } from '../state/spec_factory';
 import { Spec } from '.';
-import { LIGHT_THEME } from '../utils/themes/light_theme';
 import { ChartTypes } from '../chart_types';
-import { GeometryValue } from '../utils/geometry';
+import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { XYChartSeriesIdentifier } from '../chart_types/xy_chart/utils/series';
+import { DomainRange } from '../chart_types/xy_chart/utils/specs';
 import { SeriesIdentifier } from '../commons/series_id';
+import { Placement } from '../components/portal';
+import { CustomTooltip } from '../components/tooltip/types';
+import { ScaleContinuousType, ScaleOrdinalType } from '../scales';
+import { getConnect, specComponentFactory } from '../state/spec_factory';
 import { Accessor } from '../utils/accessor';
 import { Position, Rendering, Rotation, Color } from '../utils/commons';
-import { ScaleContinuousType, ScaleOrdinalType } from '../scales';
-import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
+import { Domain } from '../utils/domain';
+import { GeometryValue } from '../utils/geometry';
 import { GroupId } from '../utils/ids';
-import { CustomTooltip } from '../components/tooltip/types';
-import { Placement } from '../components/portal';
+import { LIGHT_THEME } from '../utils/themes/light_theme';
+import { PartialTheme, Theme } from '../utils/themes/theme';
 
 export interface LayerValue {
   groupByRollup: PrimitiveValue;
@@ -68,8 +69,8 @@ export type RenderChangeListener = (isRendered: boolean) => void;
 export type BasicListener = () => undefined | void;
 
 export const PointerEventType = Object.freeze({
-  Over: 'Over' as 'Over',
-  Out: 'Out' as 'Out',
+  Over: 'Over' as const,
+  Out: 'Out' as const,
 });
 
 export type PointerEventType = $Values<typeof PointerEventType>;
@@ -105,13 +106,13 @@ export type PointerEvent = PointerOverEvent | PointerOutEvent;
  */
 export const TooltipType = Object.freeze({
   /** Vertical cursor parallel to x axis */
-  VerticalCursor: 'vertical' as 'vertical',
+  VerticalCursor: 'vertical' as const,
   /** Vertical and horizontal cursors */
-  Crosshairs: 'cross' as 'cross',
+  Crosshairs: 'cross' as const,
   /** Follow the mouse coordinates */
-  Follow: 'follow' as 'follow',
+  Follow: 'follow' as const,
   /** Hide every tooltip */
-  None: 'none' as 'none',
+  None: 'none' as const,
 });
 
 /**
@@ -121,9 +122,9 @@ export const TooltipType = Object.freeze({
 export type TooltipType = $Values<typeof TooltipType>;
 
 export const BrushAxis = Object.freeze({
-  X: 'x' as 'x',
-  Y: 'y' as 'y',
-  Both: 'both' as 'both',
+  X: 'x' as const,
+  Y: 'y' as const,
+  Both: 'both' as const,
 });
 
 export type BrushAxis = $Values<typeof BrushAxis>;
@@ -366,10 +367,10 @@ export const DEFAULT_TOOLTIP_TYPE = TooltipType.VerticalCursor;
 export const DEFAULT_TOOLTIP_SNAP = true;
 
 export const SpecTypes = Object.freeze({
-  Series: 'series' as 'series',
-  Axis: 'axis' as 'axis',
-  Annotation: 'annotation' as 'annotation',
-  Settings: 'settings' as 'settings',
+  Series: 'series' as const,
+  Axis: 'axis' as const,
+  Annotation: 'annotation' as const,
+  Settings: 'settings' as const,
 });
 
 export type SpecTypes = $Values<typeof SpecTypes>;
@@ -378,8 +379,8 @@ export const DEFAULT_SETTINGS_SPEC: SettingsSpec = {
   id: '__global__settings___',
   chartType: ChartTypes.Global,
   specType: SpecTypes.Settings,
-  rendering: 'canvas' as 'canvas',
-  rotation: 0 as 0,
+  rendering: 'canvas' as const,
+  rotation: 0 as const,
   animateData: true,
   showLegend: false,
   resizeDebounce: 10,

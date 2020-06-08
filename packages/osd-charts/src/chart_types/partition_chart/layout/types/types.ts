@@ -14,26 +14,24 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { ArrayEntry } from '../utils/group_by_rollup';
 import { Datum } from '../../../../utils/commons';
+import { ArrayEntry } from '../utils/group_by_rollup';
 
 export const FONT_VARIANTS = Object.freeze(['normal', 'small-caps'] as const);
 export type FontVariant = typeof FONT_VARIANTS[number];
 
-// prettier-ignore
-export const FONT_WEIGHTS = Object.freeze([
-  100, 200, 300, 400, 500, 600, 700, 800, 900,
-  'normal', 'bold', 'lighter', 'bolder', 'inherit', 'initial', 'unset',
-] as const);
+export const FONT_WEIGHTS = Object.freeze([100, 200, 300, 400, 500, 600, 700, 800, 900, 'normal', 'bold', 'lighter', 'bolder', 'inherit', 'initial', 'unset'] as const);
 export type FontWeight = typeof FONT_WEIGHTS[number];
 export type NumericFontWeight = number & typeof FONT_WEIGHTS[number];
 
 export const FONT_STYLES = Object.freeze(['normal', 'italic', 'oblique', 'inherit', 'initial', 'unset'] as const);
 export type FontStyle = typeof FONT_STYLES[number];
 
-/** todo consider doing tighter control for permissible font families, eg. as in Kibana Canvas - expression language
+/**
+ * todo consider doing tighter control for permissible font families, eg. as in Kibana Canvas - expression language
  *  - though the same applies for permissible (eg. known available or loaded) font weights, styles, variants...
  */
 export type FontFamily = string;

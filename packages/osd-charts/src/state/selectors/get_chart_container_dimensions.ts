@@ -14,15 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { getSettingsSpecSelector } from './get_settings_specs';
-import { getLegendSizeSelector } from './get_legend_size';
-import { GlobalChartState } from '../chart_state';
-import { Dimensions } from '../../utils/dimensions';
+
 import { isVerticalAxis } from '../../chart_types/xy_chart/utils/axis_utils';
+import { Dimensions } from '../../utils/dimensions';
+import { GlobalChartState } from '../chart_state';
 import { getChartIdSelector } from './get_chart_id';
+import { getLegendSizeSelector } from './get_legend_size';
+import { getSettingsSpecSelector } from './get_settings_specs';
 
 const getParentDimension = (state: GlobalChartState) => state.parentDimensions;
 
@@ -40,13 +42,12 @@ export const getChartContainerDimensionsSelector = createCachedSelector(
         width: parentDimensions.width - legendSize.width,
         height: parentDimensions.height,
       };
-    } else {
-      return {
-        left: 0,
-        top: 0,
-        width: parentDimensions.width,
-        height: parentDimensions.height - legendSize.height,
-      };
     }
+    return {
+      left: 0,
+      top: 0,
+      width: parentDimensions.width,
+      height: parentDimensions.height - legendSize.height,
+    };
   },
 )(getChartIdSelector);

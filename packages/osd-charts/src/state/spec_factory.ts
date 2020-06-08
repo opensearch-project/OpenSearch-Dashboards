@@ -14,13 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { useEffect, useRef } from 'react';
-import { Dispatch, bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { upsertSpec, removeSpec } from './actions/specs';
+import { Dispatch, bindActionCreators } from 'redux';
+
 import { Spec } from '../specs';
+import { upsertSpec, removeSpec } from './actions/specs';
 
 /** @internal */
 export interface DispatchProps {

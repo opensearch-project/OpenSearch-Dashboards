@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { GlobalChartState } from '../chart_state';
 
@@ -22,7 +23,6 @@ import { GlobalChartState } from '../chart_state';
 export const getInternalPointerCursor = (state: GlobalChartState): string => {
   if (state.internalChartState) {
     return state.internalChartState.getPointerCursor(state);
-  } else {
-    return 'default';
   }
+  return 'default';
 };

@@ -14,11 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { getSettingsSpecSelector } from './get_settings_specs';
-import { getInitialState } from '../chart_state';
 import { DEFAULT_SETTINGS_SPEC } from '../../specs';
+import { getInitialState } from '../chart_state';
+import { getSettingsSpecSelector } from './get_settings_specs';
+
 describe('selectors - getSettingsSpecSelector', () => {
   const state = getInitialState('chartId1');
   it('shall return the same reference', () => {

@@ -14,13 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
+
+import React from 'react';
 
 import { Chart, Goal } from '../../src';
 import { config } from '../../src/chart_types/goal_chart/layout/config/config';
-import React from 'react';
+import { BandFillColorAccessorInput, GOAL_SUBTYPES } from '../../src/chart_types/goal_chart/specs';
 import { Color } from '../../src/utils/commons';
-import { BandFillColorAccessorInput, GOAL_SUBTYPES } from '../../src/chart_types/goal_chart/specs/index';
 
 const subtype = GOAL_SUBTYPES[0];
 
@@ -37,7 +39,7 @@ const colorMap: { [k: number]: Color } = {
 const bandFillColor = (x: number): Color => colorMap[x];
 
 export const Example = () => (
-  <Chart className="story-chart" /*size={{ width: 800, height: 800 }}*/>
+  <Chart className="story-chart">
     <Goal
       id="spec_1"
       subtype={subtype}

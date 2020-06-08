@@ -14,12 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { PointStyle, GeometryStateStyle } from '../../../../../utils/themes/theme';
-import { stringToRGB, OpacityFn } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { Fill, Stroke } from '../../../../../geoms/types';
 import { mergePartial, getColorFromVariant } from '../../../../../utils/commons';
+import { PointStyle, GeometryStateStyle } from '../../../../../utils/themes/theme';
+import { stringToRGB, OpacityFn } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 
 /**
  * Return the fill, stroke and radius styles for a point geometry.

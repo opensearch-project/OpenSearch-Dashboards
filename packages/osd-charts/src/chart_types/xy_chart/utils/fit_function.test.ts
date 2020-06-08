@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import {
   MockDataSeries,
@@ -23,12 +24,11 @@ import {
   getYResolvedData,
   MockDataSeriesDatum,
 } from '../../../mocks';
-import { Fit } from './specs';
 import { ScaleType } from '../../../scales';
-import { DataSeries } from './series';
-
-import * as seriesUtils from './stacked_series_utils';
 import * as testModule from './fit_function';
+import { DataSeries } from './series';
+import { Fit } from './specs';
+import * as seriesUtils from './stacked_series_utils';
 
 describe('Fit Function', () => {
   describe('getValue', () => {
@@ -179,7 +179,7 @@ describe('Fit Function', () => {
             });
           });
 
-          it('should return current datum with value from next when previous is null', () => {
+          it('should return current datum with value from previous when next is null', () => {
             const previous = MockDataSeriesDatum.full({ x: 4, y1: 20 });
             const current = MockDataSeriesDatum.simple({ x: 3 });
             const actual = testModule.getValue(current, 0, previous, null, Fit.Nearest);
@@ -191,7 +191,7 @@ describe('Fit Function', () => {
           });
         });
 
-        describe(`endValue is set to 'nearest'`, () => {
+        describe('endValue is set to \'nearest\'', () => {
           it('should return current datum with value from next when previous is null', () => {
             const current = MockDataSeriesDatum.simple({ x: 3 });
             const next = MockDataSeriesDatum.full({ x: 4, y1: 20 });
@@ -203,7 +203,7 @@ describe('Fit Function', () => {
             });
           });
 
-          it('should return current datum with value from next when previous is null', () => {
+          it('should return current datum with value from previous when next is null', () => {
             const previous = MockDataSeriesDatum.full({ x: 0, y1: 20 });
             const current = MockDataSeriesDatum.simple({ x: 3 });
             const actual = testModule.getValue(current, 0, previous, null, Fit.Average, 'nearest');
@@ -363,7 +363,7 @@ describe('Fit Function', () => {
             });
           });
 
-          it('should return current datum with value from next when previous is null', () => {
+          it('should return current datum with value from previous when next is null', () => {
             const previous = MockDataSeriesDatum.full({ x: 4, y1: 20, fittingIndex: 0 });
             const current = MockDataSeriesDatum.simple({ x: 'c' });
             const actual = testModule.getValue(current, 3, previous, null, Fit.Nearest);
@@ -375,7 +375,7 @@ describe('Fit Function', () => {
           });
         });
 
-        describe("endValue is set to 'nearest'", () => {
+        describe('endValue is set to \'nearest\'', () => {
           it('should return current datum with value from next when previous is null', () => {
             const current = MockDataSeriesDatum.simple({ x: 'c' });
             const next = MockDataSeriesDatum.full({ x: 'e', y1: 20, fittingIndex: 4 });
@@ -387,7 +387,7 @@ describe('Fit Function', () => {
             });
           });
 
-          it('should return current datum with value from next when previous is null', () => {
+          it('should return current datum with value from previous when next is null', () => {
             const previous = MockDataSeriesDatum.full({ x: 4, y1: 20, fittingIndex: 0 });
             const current = MockDataSeriesDatum.simple({ x: 'c' });
             const actual = testModule.getValue(current, 3, previous, null, Fit.Average, 'nearest');
@@ -602,7 +602,7 @@ describe('Fit Function', () => {
           });
         });
 
-        describe("'nearest' value", () => {
+        describe('\'nearest\' value', () => {
           const endValue = 'nearest';
 
           it('should set end values - None', () => {
@@ -772,7 +772,7 @@ describe('Fit Function', () => {
 
           it('should call getValue for only null values', () => {
             const actual = testModule.fitFunction(dataSeries, Fit.Lookahead, scaleType);
-            const length = getFilledNullData(actual.data).length;
+            const { length } = getFilledNullData(actual.data);
 
             expect(testModule.getValue).toBeCalledTimes(length);
           });
@@ -848,7 +848,7 @@ describe('Fit Function', () => {
 
           it('should call getValue for only null values', () => {
             const actual = testModule.fitFunction(dataSeries, Fit.Nearest, scaleType);
-            const length = getFilledNullData(actual.data).length;
+            const { length } = getFilledNullData(actual.data);
 
             expect(testModule.getValue).toBeCalledTimes(length);
           });
@@ -925,7 +925,7 @@ describe('Fit Function', () => {
 
           it('should call getValue for only null values', () => {
             const actual = testModule.fitFunction(dataSeries, Fit.Average, scaleType);
-            const length = getFilledNullData(actual.data).length;
+            const { length } = getFilledNullData(actual.data);
 
             expect(testModule.getValue).toBeCalledTimes(length);
           });
@@ -1002,7 +1002,7 @@ describe('Fit Function', () => {
 
           it('should call getValue for only null values', () => {
             const actual = testModule.fitFunction(dataSeries, Fit.Linear, scaleType);
-            const length = getFilledNullData(actual.data).length;
+            const { length } = getFilledNullData(actual.data);
 
             expect(testModule.getValue).toBeCalledTimes(length);
           });

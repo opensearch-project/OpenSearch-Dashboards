@@ -14,26 +14,26 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { isVerticalRotation } from '../utils';
-import { GlobalChartState } from '../../../../state/chart_state';
-import { Dimensions } from '../../../../utils/dimensions';
-import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
-import { computeChartDimensionsSelector } from './compute_chart_dimensions';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
+
 import { BrushAxis } from '../../../../specs';
+import { GlobalChartState } from '../../../../state/chart_state';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { Rotation } from '../../../../utils/commons';
+import { Dimensions } from '../../../../utils/dimensions';
 import { Point } from '../../../../utils/point';
+import { isVerticalRotation } from '../utils';
+import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 
 const MIN_AREA_SIZE = 1;
 
 const getMouseDownPosition = (state: GlobalChartState) => state.interactions.pointer.down;
-const getCurrentPointerPosition = (state: GlobalChartState) => {
-  return state.interactions.pointer.current.position;
-};
+const getCurrentPointerPosition = (state: GlobalChartState) => state.interactions.pointer.current.position;
 
 /** @internal */
 export const getBrushAreaSelector = createCachedSelector(

@@ -14,15 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
+
+import { GlobalChartState } from '../../../../state/chart_state';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { getHighlightedGeomsSelector } from './get_tooltip_values_highlighted_geoms';
-import { GlobalChartState } from '../../../../state/chart_state';
 import { isBrushAvailableSelector } from './is_brush_available';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
 const getCurrentPointerPositionSelector = (state: GlobalChartState) => state.interactions.pointer.current.position;
 

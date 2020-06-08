@@ -14,20 +14,21 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { shuffle } from 'lodash';
 
-import { mergePartial } from '../../utils/commons';
+import { FullDataSeriesDatum, WithIndex } from '../../chart_types/xy_chart/utils/fit_function';
 import {
   DataSeries,
   DataSeriesDatum,
   RawDataSeries,
   RawDataSeriesDatum,
 } from '../../chart_types/xy_chart/utils/series';
-import { fitFunctionData } from './data';
-import { FullDataSeriesDatum, WithIndex } from '../../chart_types/xy_chart/utils/fit_function';
+import { mergePartial } from '../../utils/commons';
 import { getRandomNumberGenerator } from '../utils';
+import { fitFunctionData } from './data';
 
 const rng = getRandomNumberGenerator();
 
@@ -112,12 +113,10 @@ export class MockRawDataSeries {
   }
 
   static defaults(partials: Partial<RawDataSeriesPartialData>[], defaults?: Partial<RawDataSeries>): RawDataSeries[] {
-    return partials.map((partial) => {
-      return MockRawDataSeries.default({
-        ...defaults,
-        ...partial,
-      });
-    });
+    return partials.map((partial) => MockRawDataSeries.default({
+      ...defaults,
+      ...partial,
+    }));
   }
 
   static fitFunction(

@@ -14,9 +14,22 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
+
+import { ChartTypes } from '../..';
+import { MockGlobalSpec, MockSeriesSpec, MockAnnotationSpec } from '../../../mocks/specs';
+import { MockStore } from '../../../mocks/store';
+import { Scale, ScaleType, ScaleBand, ScaleContinuous } from '../../../scales';
+import { SpecTypes } from '../../../specs/settings';
+import { Position, Rotation } from '../../../utils/commons';
+import { Dimensions } from '../../../utils/dimensions';
+import { GroupId, AnnotationId } from '../../../utils/ids';
+import { Point } from '../../../utils/point';
+import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../utils/themes/theme';
+import { computeAnnotationDimensionsSelector } from '../state/selectors/compute_annotations';
 import {
   AnnotationDomainTypes,
   AnnotationSpec,
@@ -25,25 +38,14 @@ import {
   RectAnnotationSpec,
   AnnotationTypes,
 } from '../utils/specs';
-import { Position, Rotation } from '../../../utils/commons';
-import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../utils/themes/theme';
-import { Dimensions } from '../../../utils/dimensions';
-import { GroupId, AnnotationId } from '../../../utils/ids';
-import { Scale, ScaleType, ScaleBand, ScaleContinuous } from '../../../scales';
-import { computeAnnotationDimensions, getAnnotationAxis, getTranformedCursor, invertTranformedCursor } from './utils';
-import { AnnotationDimensions, AnnotationTooltipState, Bounds } from './types';
 import { computeLineAnnotationDimensions } from './line/dimensions';
+import { computeLineAnnotationTooltipState } from './line/tooltip';
 import { AnnotationLineProps } from './line/types';
 import { computeRectAnnotationDimensions, isWithinRectBounds } from './rect/dimensions';
 import { computeRectAnnotationTooltipState } from './rect/tooltip';
-import { Point } from '../../../utils/point';
-import { ChartTypes } from '../..';
-import { SpecTypes } from '../../../specs/settings';
-import { computeLineAnnotationTooltipState } from './line/tooltip';
 import { computeAnnotationTooltipState } from './tooltip';
-import { MockStore } from '../../../mocks/store';
-import { MockGlobalSpec, MockSeriesSpec, MockAnnotationSpec } from '../../../mocks/specs';
-import { computeAnnotationDimensionsSelector } from '../state/selectors/compute_annotations';
+import { AnnotationDimensions, AnnotationTooltipState, Bounds } from './types';
+import { computeAnnotationDimensions, getAnnotationAxis, getTranformedCursor, invertTranformedCursor } from './utils';
 
 describe('annotation utils', () => {
   const minRange = 0;

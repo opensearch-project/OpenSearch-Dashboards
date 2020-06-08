@@ -14,18 +14,19 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_utils';
+import { ScaleType } from '../../../scales';
 import { compareByValueAsc, identity, isNumberArray } from '../../../utils/commons';
 import { computeContinuousDataDomain, computeOrdinalDataDomain, Domain } from '../../../utils/domain';
-import { ScaleType } from '../../../scales';
+import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_utils';
 import { BasicSeriesSpec, DomainRange, SeriesTypes } from '../utils/specs';
 import { BaseDomain } from './domain';
 
 export type XDomain = BaseDomain & {
   type: 'xDomain';
-  /* the minimum interval of the scale if not-ordinal band-scale*/
+  /* the minimum interval of the scale if not-ordinal band-scale */
   minInterval: number;
   /** if x domain is time, we should also specify the timezone */
   timeZone?: string;
@@ -59,7 +60,7 @@ export function mergeXDomain(
       if (Array.isArray(customXDomain)) {
         seriesXComputedDomains = customXDomain;
       } else {
-        throw new Error('xDomain for ordinal scale should be an array of values, not a DomainRange object');
+        throw new TypeError('xDomain for ordinal scale should be an array of values, not a DomainRange object');
       }
     }
   } else {
@@ -72,7 +73,7 @@ export function mergeXDomain(
     }
     if (customXDomain) {
       if (Array.isArray(customXDomain)) {
-        throw new Error('xDomain for continuous scale should be a DomainRange object, not an array');
+        throw new TypeError('xDomain for continuous scale should be a DomainRange object, not an array');
       }
 
       customMinInterval = customXDomain.minInterval;

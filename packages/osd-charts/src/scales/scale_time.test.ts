@@ -14,9 +14,11 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { DateTime } from 'luxon';
+
 import { ScaleContinuous, ScaleType } from '.';
 
 describe('[Scale Time] - timezones', () => {
@@ -228,9 +230,7 @@ describe('[Scale Time] - timezones', () => {
           { type: ScaleType.Time, domain, range: [minRange, maxRange] },
           { bandwidth: undefined, minInterval, timeZone: timezone },
         );
-        const formatFunction = (d: number) => {
-          return DateTime.fromMillis(d, { zone: timezone }).toISO();
-        };
+        const formatFunction = (d: number) => DateTime.fromMillis(d, { zone: timezone }).toISO();
         expect(scale.invert(0)).toBe(startTime);
         expect(scale.invert(49.5)).toBe(midTime);
         expect(scale.invert(99)).toBe(endTime);

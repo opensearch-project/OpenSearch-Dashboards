@@ -14,20 +14,21 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { computeSeriesDomains } from '../state/utils';
+import { ChartTypes } from '../..';
+import { MockPointGeometry } from '../../../mocks';
 import { ScaleType } from '../../../scales';
+import { SpecTypes } from '../../../specs/settings';
 import { CurveType } from '../../../utils/curves';
-import { renderArea, renderBars } from './rendering';
+import { AreaGeometry, PointGeometry } from '../../../utils/geometry';
+import { LIGHT_THEME } from '../../../utils/themes/light_theme';
+import { computeSeriesDomains } from '../state/utils';
+import { IndexedGeometryMap } from '../utils/indexed_geometry_map';
 import { computeXScale, computeYScales } from '../utils/scales';
 import { AreaSeriesSpec, BarSeriesSpec, SeriesTypes } from '../utils/specs';
-import { LIGHT_THEME } from '../../../utils/themes/light_theme';
-import { AreaGeometry, PointGeometry } from '../../../utils/geometry';
-import { ChartTypes } from '../..';
-import { SpecTypes } from '../../../specs/settings';
-import { IndexedGeometryMap } from '../utils/indexed_geometry_map';
-import { MockPointGeometry } from '../../../mocks';
+import { renderArea, renderBars } from './rendering';
 
 const SPEC_ID = 'spec_1';
 const GROUP_ID = 'group_1';

@@ -14,8 +14,22 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { ChartTypes } from '../..';
+import { LegendItem } from '../../../commons/legend';
+import { MockSeriesCollection } from '../../../mocks/series/series_identifiers';
+import { MockSeriesSpecs, MockSeriesSpec } from '../../../mocks/specs';
+import { SeededDataGenerator } from '../../../mocks/utils';
+import { ScaleType, ScaleContinuous } from '../../../scales';
+import { SpecTypes } from '../../../specs/settings';
+import { ColorOverrides } from '../../../state/chart_state';
+import { BARCHART_1Y0G, BARCHART_1Y1G } from '../../../utils/data_samples/test_dataset';
+import { IndexedGeometry, BandedAccessorType } from '../../../utils/geometry';
+import { SpecId } from '../../../utils/ids';
+import { LIGHT_THEME } from '../../../utils/themes/light_theme';
+import { SeriesCollectionValue, getSeriesIndex, getSeriesColors } from '../utils/series';
 import {
   AreaSeriesSpec,
   AxisSpec,
@@ -26,10 +40,7 @@ import {
   SeriesTypes,
   SeriesColorAccessorFn,
 } from '../utils/specs';
-import { BARCHART_1Y0G, BARCHART_1Y1G } from '../../../utils/data_samples/test_dataset';
-import { LIGHT_THEME } from '../../../utils/themes/light_theme';
-import { SpecId } from '../../../utils/ids';
-import { ScaleType, ScaleContinuous } from '../../../scales';
+import { mergeYCustomDomainsByGroupId } from './selectors/merge_y_custom_domains';
 import {
   computeSeriesDomains,
   computeSeriesGeometries,
@@ -45,18 +56,8 @@ import {
   isUniqueArray,
   isDefined,
   isDefinedFrom,
+  updateDeselectedDataSeries,
 } from './utils';
-import { IndexedGeometry, BandedAccessorType } from '../../../utils/geometry';
-import { mergeYCustomDomainsByGroupId } from './selectors/merge_y_custom_domains';
-import { updateDeselectedDataSeries } from './utils';
-import { ChartTypes } from '../..';
-import { MockSeriesSpecs, MockSeriesSpec } from '../../../mocks/specs';
-import { MockSeriesCollection } from '../../../mocks/series/series_identifiers';
-import { SeededDataGenerator } from '../../../mocks/utils';
-import { SeriesCollectionValue, getSeriesIndex, getSeriesColors } from '../utils/series';
-import { SpecTypes } from '../../../specs/settings';
-import { ColorOverrides } from '../../../state/chart_state';
-import { LegendItem } from '../../../commons/legend';
 
 describe('Chart State utils', () => {
   const emptySeriesOverrides: ColorOverrides = {
@@ -91,7 +92,7 @@ describe('Chart State utils', () => {
       yScaleToDataExtent: false,
       data: BARCHART_1Y0G,
     };
-    const domains = computeSeriesDomains([spec1, spec2], new Map(), undefined);
+    const domains = computeSeriesDomains([spec1, spec2], new Map());
     expect(domains.xDomain).toEqual({
       domain: [0, 3],
       isBandScale: false,
@@ -148,7 +149,7 @@ describe('Chart State utils', () => {
       yScaleToDataExtent: false,
       data: BARCHART_1Y1G,
     };
-    const domains = computeSeriesDomains([spec1, spec2], new Map(), undefined);
+    const domains = computeSeriesDomains([spec1, spec2], new Map());
     expect(domains.xDomain).toEqual({
       domain: [0, 3],
       isBandScale: false,
@@ -498,7 +499,7 @@ describe('Chart State utils', () => {
       };
       const chartTheme = { ...LIGHT_THEME, colors: chartColors };
       const domainsByGroupId = mergeYCustomDomainsByGroupId(axesSpecs, chartRotation);
-      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId, undefined);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
       const seriesColorMap = getSeriesColors(
         seriesDomains.seriesCollection,
         chartColors,
@@ -560,7 +561,7 @@ describe('Chart State utils', () => {
       };
       const chartTheme = { ...LIGHT_THEME, colors: chartColors };
       const domainsByGroupId = mergeYCustomDomainsByGroupId(axesSpecs, chartRotation);
-      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId, undefined);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
       const seriesColorMap = getSeriesColors(
         seriesDomains.seriesCollection,
         chartColors,
@@ -624,7 +625,7 @@ describe('Chart State utils', () => {
       };
       const chartTheme = { ...LIGHT_THEME, colors: chartColors };
       const domainsByGroupId = mergeYCustomDomainsByGroupId(axesSpecs, chartRotation);
-      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId, undefined);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
       const seriesColorMap = getSeriesColors(
         seriesDomains.seriesCollection,
         chartColors,
@@ -715,7 +716,7 @@ describe('Chart State utils', () => {
       };
       const chartTheme = { ...LIGHT_THEME, colors: chartColors };
       const domainsByGroupId = mergeYCustomDomainsByGroupId(axesSpecs, chartRotation);
-      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId, undefined);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
       const seriesColorMap = getSeriesColors(
         seriesDomains.seriesCollection,
         chartColors,
@@ -793,7 +794,7 @@ describe('Chart State utils', () => {
       };
       const chartTheme = { ...LIGHT_THEME, colors: chartColors };
       const domainsByGroupId = mergeYCustomDomainsByGroupId(axesSpecs, chartRotation);
-      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId, undefined);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
       const seriesColorMap = getSeriesColors(
         seriesDomains.seriesCollection,
         chartColors,
@@ -871,7 +872,7 @@ describe('Chart State utils', () => {
       };
       const chartTheme = { ...LIGHT_THEME, colors: chartColors };
       const domainsByGroupId = mergeYCustomDomainsByGroupId(axesSpecs, chartRotation);
-      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId, undefined);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
       const seriesColorMap = getSeriesColors(
         seriesDomains.seriesCollection,
         chartColors,
@@ -957,7 +958,7 @@ describe('Chart State utils', () => {
       };
       const chartTheme = { ...LIGHT_THEME, colors: chartColors };
       const domainsByGroupId = mergeYCustomDomainsByGroupId(axesSpecs, chartRotation);
-      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId, undefined);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
       const seriesColorMap = getSeriesColors(
         seriesDomains.seriesCollection,
         chartColors,
@@ -1055,7 +1056,7 @@ describe('Chart State utils', () => {
       };
       const chartTheme = { ...LIGHT_THEME, colors: chartColors };
       const domainsByGroupId = mergeYCustomDomainsByGroupId(axesSpecs, chartRotation);
-      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId, undefined);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
       const seriesColorMap = getSeriesColors(
         seriesDomains.seriesCollection,
         chartColors,
@@ -1146,7 +1147,7 @@ describe('Chart State utils', () => {
       };
       const chartTheme = { ...LIGHT_THEME, colors: chartColors };
       const domainsByGroupId = mergeYCustomDomainsByGroupId(axesSpecs, chartRotation);
-      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId, undefined);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
       const seriesColorMap = getSeriesColors(
         seriesDomains.seriesCollection,
         chartColors,
@@ -1216,7 +1217,7 @@ describe('Chart State utils', () => {
         },
       };
       const domainsByGroupId = mergeYCustomDomainsByGroupId(axesSpecs, chartRotation);
-      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId, undefined);
+      const seriesDomains = computeSeriesDomains(seriesSpecs, domainsByGroupId);
       const seriesColorMap = getSeriesColors(
         seriesDomains.seriesCollection,
         chartColors,
@@ -1238,7 +1239,7 @@ describe('Chart State utils', () => {
       expect(geometries.geometries.bars[0].x).toBe(0);
     });
   });
-  xtest('can merge geometry indexes', () => {
+  test.skip('can merge geometry indexes', () => {
     const map1 = new Map<string, IndexedGeometry[]>();
     map1.set('a', [
       {
@@ -1525,7 +1526,7 @@ describe('Chart State utils', () => {
     });
 
     it('should return false for undefined', () => {
-      expect(isDefined(undefined)).toBe(false);
+      expect(isDefined()).toBe(false);
     });
 
     it('should return true for zero', () => {

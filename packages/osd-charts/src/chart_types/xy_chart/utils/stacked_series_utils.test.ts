@@ -14,8 +14,10 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { ScaleType } from '../../../scales';
 import { RawDataSeries } from './series';
 import {
   computeYStackedMapValues,
@@ -24,7 +26,6 @@ import {
   getStackedFormattedSeriesDatum,
   StackedValues,
 } from './stacked_series_utils';
-import { ScaleType } from '../../../scales';
 
 describe('Stacked Series Utils', () => {
   const EMPTY_DATA_SET: RawDataSeries[] = [
@@ -377,7 +378,7 @@ describe('Stacked Series Utils', () => {
         mark: null,
       });
     });
-    test('format data with nulls', () => {
+    test('format data with nulls - missing points', () => {
       const formattedData = formatStackedDataSeriesValues(
         WITH_NULL_DATASET_WY0,
         false,

@@ -14,14 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { ChartTypes } from '../..';
 import { ScaleType } from '../../../scales';
+import { SpecTypes } from '../../../specs/settings';
 import { getSplittedSeries } from '../utils/series';
 import { BasicSeriesSpec, SeriesTypes } from '../utils/specs';
 import { convertXScaleTypes, findMinInterval, mergeXDomain } from './x_domain';
-import { ChartTypes } from '../..';
-import { SpecTypes } from '../../../specs/settings';
 
 describe('X Domain', () => {
   test('Should return null when missing specs or specs types', () => {
@@ -336,7 +337,7 @@ describe('X Domain', () => {
     );
     expect(mergedDomain.domain).toEqual([0, 7]);
   });
-  test('Should merge multi bar series correctly', () => {
+  test('Should merge multi bar series correctly - 2', () => {
     const ds1: BasicSeriesSpec = {
       chartType: ChartTypes.XYAxis,
       specType: SpecTypes.Series,

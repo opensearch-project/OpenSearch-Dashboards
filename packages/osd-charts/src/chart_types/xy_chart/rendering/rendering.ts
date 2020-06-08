@@ -14,24 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { area, line } from 'd3-shape';
-import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
-import {
-  AreaSeriesStyle,
-  LineSeriesStyle,
-  PointStyle,
-  SharedGeometryStateStyle,
-  BarSeriesStyle,
-  GeometryStateStyle,
-  LineStyle,
-  BubbleSeriesStyle,
-} from '../../../utils/themes/theme';
+
+import { LegendItem } from '../../../commons/legend';
 import { Scale, ScaleType } from '../../../scales';
+import { isLogarithmicScale } from '../../../scales/types';
+import { MarkBuffer } from '../../../specs';
+import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
+import { mergePartial, Color } from '../../../utils/commons';
 import { CurveType, getCurveFactory } from '../../../utils/curves';
-import { DataSeriesDatum, DataSeries, XYChartSeriesIdentifier } from '../utils/series';
-import { DisplayValueSpec, PointStyleAccessor, BarStyleAccessor } from '../utils/specs';
 import {
   PointGeometry,
   BarGeometry,
@@ -42,12 +36,20 @@ import {
   BandedAccessorType,
   BubbleGeometry,
 } from '../../../utils/geometry';
-import { mergePartial, Color } from '../../../utils/commons';
-import { LegendItem } from '../../../commons/legend';
-import { IndexedGeometryMap, GeometryType } from '../utils/indexed_geometry_map';
+import {
+  AreaSeriesStyle,
+  LineSeriesStyle,
+  PointStyle,
+  SharedGeometryStateStyle,
+  BarSeriesStyle,
+  GeometryStateStyle,
+  LineStyle,
+  BubbleSeriesStyle,
+} from '../../../utils/themes/theme';
 import { getDistance } from '../state/utils';
-import { MarkBuffer } from '../../../specs';
-import { isLogarithmicScale } from '../../../scales/types';
+import { IndexedGeometryMap, GeometryType } from '../utils/indexed_geometry_map';
+import { DataSeriesDatum, DataSeries, XYChartSeriesIdentifier } from '../utils/series';
+import { DisplayValueSpec, PointStyleAccessor, BarStyleAccessor } from '../utils/specs';
 
 export const DEFAULT_HIGHLIGHT_PADDING = 10;
 
@@ -263,8 +265,7 @@ export function renderBars(
 
   // default padding to 1 for now
   const padding = 1;
-  const fontSize = sharedSeriesStyle.displayValue.fontSize;
-  const fontFamily = sharedSeriesStyle.displayValue.fontFamily;
+  const { fontSize, fontFamily } = sharedSeriesStyle.displayValue;
   const absMinHeight = minBarHeight && Math.abs(minBarHeight);
 
   dataSeries.data.forEach((datum) => {
@@ -308,10 +309,10 @@ export function renderBars(
       const heightDelta = absMinHeight - Math.abs(height);
       if (height < 0) {
         height = -absMinHeight;
-        y = y + heightDelta;
+        y += heightDelta;
       } else {
         height = absMinHeight;
-        y = y - heightDelta;
+        y -= heightDelta;
       }
     }
 
@@ -324,36 +325,32 @@ export function renderBars(
     const x = xScaled + xScale.bandwidth * orderIndex;
     const width = xScale.bandwidth;
 
-    const formattedDisplayValue =
-      displayValueSettings && displayValueSettings.valueFormatter
-        ? displayValueSettings.valueFormatter(initialY1)
-        : undefined;
+    const formattedDisplayValue = displayValueSettings && displayValueSettings.valueFormatter
+      ? displayValueSettings.valueFormatter(initialY1)
+      : undefined;
 
     // only show displayValue for even bars if showOverlappingValue
-    const displayValueText =
-      displayValueSettings && displayValueSettings.isAlternatingValueLabel
-        ? barGeometries.length % 2 === 0
+    const displayValueText = displayValueSettings && displayValueSettings.isAlternatingValueLabel
+      ? barGeometries.length % 2 === 0
           ? formattedDisplayValue
           : undefined
-        : formattedDisplayValue;
+      : formattedDisplayValue;
 
     const computedDisplayValueWidth = bboxCalculator.compute(displayValueText || '', padding, fontSize, fontFamily)
       .width;
-    const displayValueWidth =
-      displayValueSettings && displayValueSettings.isValueContainedInElement ? width : computedDisplayValueWidth;
+    const displayValueWidth = displayValueSettings && displayValueSettings.isValueContainedInElement ? width : computedDisplayValueWidth;
 
     const hideClippedValue = displayValueSettings ? displayValueSettings.hideClippedValue : undefined;
 
-    const displayValue =
-      displayValueSettings && displayValueSettings.showValueLabel
-        ? {
-            text: displayValueText,
-            width: displayValueWidth,
-            height: fontSize,
-            hideClippedValue,
-            isValueContainedInElement: displayValueSettings.isValueContainedInElement,
-          }
-        : undefined;
+    const displayValue = displayValueSettings && displayValueSettings.showValueLabel
+      ? {
+          text: displayValueText,
+          width: displayValueWidth,
+          height: fontSize,
+          hideClippedValue,
+          isValueContainedInElement: displayValueSettings.isValueContainedInElement,
+        }
+      : undefined;
 
     const seriesIdentifier: XYChartSeriesIdentifier = {
       key: dataSeries.key,
@@ -450,7 +447,7 @@ export function renderLine(
 
   try {
     linePath = pathGenerator(dataSeries.data) || '';
-  } catch (e) {
+  } catch {
     // When values are not scalable
     linePath = '';
   }
@@ -586,13 +583,12 @@ export function renderArea(
     })
     .curve(getCurveFactory(curve));
 
-  const clippedRanges =
-    hasFit && !hasY0Accessors && !isStacked ? getClippedRanges(dataSeries.data, xScale, xScaleOffset) : [];
+  const clippedRanges = hasFit && !hasY0Accessors && !isStacked ? getClippedRanges(dataSeries.data, xScale, xScaleOffset) : [];
   let y1Line: string | null;
 
   try {
     y1Line = pathGenerator.lineY1()(dataSeries.data);
-  } catch (e) {
+  } catch {
     // When values are not scalable
     y1Line = null;
   }
@@ -606,7 +602,7 @@ export function renderArea(
 
     try {
       y0Line = pathGenerator.lineY0()(dataSeries.data);
-    } catch (e) {
+    } catch {
       // When values are not scalable
       y0Line = null;
     }
@@ -631,7 +627,7 @@ export function renderArea(
 
   try {
     areaPath = pathGenerator(dataSeries.data) || '';
-  } catch (e) {
+  } catch {
     // When values are not scalable
     areaPath = '';
   }

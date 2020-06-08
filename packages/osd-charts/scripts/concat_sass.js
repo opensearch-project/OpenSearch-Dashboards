@@ -14,10 +14,10 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
-
-/* eslint-disable @typescript-eslint/no-var-requires */
+ * under the License.
+ */
 const fs = require('fs');
+
 const sassGraph = require('sass-graph');
 
 const graph = sassGraph.parseFile('./src/components/_index.scss');
@@ -48,8 +48,6 @@ function removeImportsFromFile(fileContent) {
   const lines = fileContent.split(/\r\n|\r|\n/g);
 
   return lines
-    .filter((line) => {
-      return !line.match(/@import\s/i);
-    })
+    .filter((line) => !line.match(/@import\s/i))
     .join('\n');
 }

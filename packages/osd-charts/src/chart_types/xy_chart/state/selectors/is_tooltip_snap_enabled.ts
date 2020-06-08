@@ -14,20 +14,20 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { computeSeriesGeometriesSelector } from './compute_series_geometries';
+
 import { Scale } from '../../../../scales';
-import { getTooltipSnapSelector } from './get_tooltip_snap';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { computeSeriesGeometriesSelector } from './compute_series_geometries';
+import { getTooltipSnapSelector } from './get_tooltip_snap';
 
 /** @internal */
 export const isTooltipSnapEnableSelector = createCachedSelector(
   [computeSeriesGeometriesSelector, getTooltipSnapSelector],
-  (seriesGeometries, snap) => {
-    return isTooltipSnapEnabled(seriesGeometries.scales.xScale, snap);
-  },
+  (seriesGeometries, snap) => isTooltipSnapEnabled(seriesGeometries.scales.xScale, snap),
 )(getChartIdSelector);
 
 function isTooltipSnapEnabled(xScale: Scale, snap: boolean) {

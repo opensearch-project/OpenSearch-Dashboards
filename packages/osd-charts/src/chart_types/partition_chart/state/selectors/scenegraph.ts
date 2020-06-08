@@ -14,11 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { identity, mergePartial, RecursivePartial, Color } from '../../../../utils/commons';
 import { Dimensions } from '../../../../utils/dimensions';
-import { shapeViewModel } from '../../layout/viewmodel/viewmodel';
-import { measureText } from '../../layout/utils/measure';
+import { config as defaultConfig, VALUE_GETTERS } from '../../layout/config/config';
+import { Config } from '../../layout/types/config_types';
 import {
   ShapeTreeNode,
   ShapeViewModel,
@@ -27,10 +29,10 @@ import {
   ValueGetter,
 } from '../../layout/types/viewmodel_types';
 import { DEPTH_KEY, HierarchyOfArrays } from '../../layout/utils/group_by_rollup';
-import { PartitionSpec, Layer } from '../../specs/index';
-import { identity, mergePartial, RecursivePartial, Color } from '../../../../utils/commons';
-import { config as defaultConfig, VALUE_GETTERS } from '../../layout/config/config';
-import { Config } from '../../layout/types/config_types';
+import { measureText } from '../../layout/utils/measure';
+import { shapeViewModel } from '../../layout/viewmodel/viewmodel';
+import { PartitionSpec, Layer } from '../../specs';
+
 
 function rawTextGetter(layers: Layer[]): RawTextGetter {
   return (node: ShapeTreeNode) => {

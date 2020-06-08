@@ -14,13 +14,14 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { DateTime } from 'luxon';
+import moment from 'moment';
 import React from 'react';
 
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, SeriesNameFn } from '../../src';
-import moment from 'moment';
-import { DateTime } from 'luxon';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => {
@@ -64,7 +65,7 @@ export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings showLegend showLegendExtra legendPosition={Position.Right} />
-      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
+      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
       <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries

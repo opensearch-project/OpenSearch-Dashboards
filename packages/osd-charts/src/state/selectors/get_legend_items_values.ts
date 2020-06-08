@@ -14,11 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { GlobalChartState } from '../chart_state';
-import { SeriesKey } from '../../commons/series_id';
 import { LegendItemExtraValues } from '../../commons/legend';
+import { SeriesKey } from '../../commons/series_id';
+import { GlobalChartState } from '../chart_state';
 
 const EMPTY_ITEM_LIST = new Map<SeriesKey, LegendItemExtraValues>();
 
@@ -26,7 +27,6 @@ const EMPTY_ITEM_LIST = new Map<SeriesKey, LegendItemExtraValues>();
 export const getLegendExtraValuesSelector = (state: GlobalChartState): Map<SeriesKey, LegendItemExtraValues> => {
   if (state.internalChartState) {
     return state.internalChartState.getLegendExtraValues(state);
-  } else {
-    return EMPTY_ITEM_LIST;
   }
+  return EMPTY_ITEM_LIST;
 };

@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { boolean, color, number, select } from '@storybook/addon-knobs';
 import React from 'react';
@@ -42,7 +43,7 @@ export const Example = () => {
         fill: color('titleFill', '#333', 'Axis Title'),
         fontSize: range('titleFontSize', 0, 40, 12, 'Axis Title'),
         fontStyle: 'bold',
-        fontFamily: `'Open Sans', Helvetica, Arial, sans-serif`,
+        fontFamily: '\'Open Sans\', Helvetica, Arial, sans-serif',
         padding: range('titlePadding', 0, 40, 5, 'Axis Title'),
       },
       axisLineStyle: {
@@ -52,7 +53,7 @@ export const Example = () => {
       tickLabelStyle: {
         fill: color('tickFill', '#333', 'Tick Label'),
         fontSize: range('tickFontSize', 0, 40, 10, 'Tick Label'),
-        fontFamily: `'Open Sans', Helvetica, Arial, sans-serif`,
+        fontFamily: '\'Open Sans\', Helvetica, Arial, sans-serif',
         fontStyle: 'normal',
         padding: number('tickLabelPadding', 1, {}, 'Tick Label'),
       },
@@ -68,9 +69,9 @@ export const Example = () => {
       <Settings
         theme={theme}
         debug={boolean('debug', true)}
-        rotation={select('rotation', { '0': 0, '90': 90, '-90': -90, '180': 180 }, 0)}
+        rotation={select('rotation', { 0: 0, 90: 90, '-90': -90, 180: 180 }, 0)}
       />
-      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
+      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
       <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
 
       <BarSeries

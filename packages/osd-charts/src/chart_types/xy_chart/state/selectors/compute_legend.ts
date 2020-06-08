@@ -14,17 +14,19 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { computeSeriesDomainsSelector } from './compute_series_domains';
-import { getSeriesSpecsSelector, getAxisSpecsSelector } from './get_specs';
-import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
-import { getSeriesColorsSelector } from './get_series_color_map';
-import { computeLegend } from '../../legend/legend';
+
 import { LegendItem } from '../../../../commons/legend';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
+import { computeLegend } from '../../legend/legend';
+import { computeSeriesDomainsSelector } from './compute_series_domains';
+import { getSeriesColorsSelector } from './get_series_color_map';
+import { getSeriesSpecsSelector, getAxisSpecsSelector } from './get_specs';
 
 const getDeselectedSeriesSelector = (state: GlobalChartState) => state.interactions.deselectedDataSeries;
 
@@ -38,14 +40,19 @@ export const computeLegendSelector = createCachedSelector(
     getAxisSpecsSelector,
     getDeselectedSeriesSelector,
   ],
-  (seriesSpecs, seriesDomainsAndData, chartTheme, seriesColors, axesSpecs, deselectedDataSeries): LegendItem[] => {
-    return computeLegend(
-      seriesDomainsAndData.seriesCollection,
-      seriesColors,
-      seriesSpecs,
-      chartTheme.colors.defaultVizColor,
-      axesSpecs,
-      deselectedDataSeries,
-    );
-  },
+  (
+    seriesSpecs,
+    seriesDomainsAndData,
+    chartTheme,
+    seriesColors,
+    axesSpecs,
+    deselectedDataSeries,
+  ): LegendItem[] => computeLegend(
+    seriesDomainsAndData.seriesCollection,
+    seriesColors,
+    seriesSpecs,
+    chartTheme.colors.defaultVizColor,
+    axesSpecs,
+    deselectedDataSeries,
+  ),
 )(getChartIdSelector);

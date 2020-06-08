@@ -14,16 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { ChartTypes } from '../..';
+import { LegendItem } from '../../../commons/legend';
 import { ScaleType } from '../../../scales';
-import { computeLegend } from './legend';
+import { SpecTypes } from '../../../specs/settings';
+import { Position } from '../../../utils/commons';
 import { SeriesCollectionValue, getSeriesName } from '../utils/series';
 import { AxisSpec, BasicSeriesSpec, SeriesTypes } from '../utils/specs';
-import { Position } from '../../../utils/commons';
-import { ChartTypes } from '../..';
-import { SpecTypes } from '../../../specs/settings';
-import { LegendItem } from '../../../commons/legend';
+import { computeLegend } from './legend';
 
 const nullDisplayValue = {
   formatted: null,
@@ -107,9 +108,7 @@ const axisSpec: AxisSpec = {
   position: Position.Left,
   tickSize: 10,
   tickPadding: 10,
-  tickFormat: (value: any) => {
-    return `${value}`;
-  },
+  tickFormat: (value: any) => `${value}`,
 };
 axesSpecs.push(axisSpec);
 
@@ -139,7 +138,7 @@ describe('Legends', () => {
         defaultExtra: nullDisplayValue,
       },
     ];
-    expect(Array.from(legend.values())).toEqual(expected);
+    expect([...legend.values()]).toEqual(expected);
   });
   it('compute legend for a single spec but with multiple series', () => {
     seriesCollection.set('seriesCollectionValue1a', seriesCollectionValue1a);
@@ -167,7 +166,7 @@ describe('Legends', () => {
         defaultExtra: nullDisplayValue,
       },
     ];
-    expect(Array.from(legend.values())).toEqual(expected);
+    expect([...legend.values()]).toEqual(expected);
   });
   it('compute legend for multiple specs', () => {
     seriesCollection.set('seriesCollectionValue1a', seriesCollectionValue1a);
@@ -195,7 +194,7 @@ describe('Legends', () => {
         defaultExtra: nullDisplayValue,
       },
     ];
-    expect(Array.from(legend.values())).toEqual(expected);
+    expect([...legend.values()]).toEqual(expected);
   });
   it('empty legend for missing spec', () => {
     seriesCollection.set('seriesCollectionValue2b', seriesCollectionValue2b);
@@ -218,7 +217,7 @@ describe('Legends', () => {
         defaultExtra: nullDisplayValue,
       },
     ];
-    expect(Array.from(legend.values())).toEqual(expected);
+    expect([...legend.values()]).toEqual(expected);
   });
   it('default all series legend items to visible when deselectedDataSeries is null', () => {
     seriesCollection.set('seriesCollectionValue1a', seriesCollectionValue1a);

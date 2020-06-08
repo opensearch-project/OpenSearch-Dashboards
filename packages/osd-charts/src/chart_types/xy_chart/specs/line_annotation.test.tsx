@@ -14,17 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import React from 'react';
-import { createStore, Store } from 'redux';
-import { Provider } from 'react-redux';
 import { mount } from 'enzyme';
+import React from 'react';
+import { Provider } from 'react-redux';
+import { createStore, Store } from 'redux';
 
-import { chartStoreReducer, GlobalChartState } from '../../../state/chart_state';
-import { SpecsParser } from '../../../specs/specs_parser';
-import { LineSeries } from './line_series';
 import { LineAnnotation, AnnotationDomainTypes } from '../../../specs';
+import { SpecsParser } from '../../../specs/specs_parser';
+import { chartStoreReducer, GlobalChartState } from '../../../state/chart_state';
+import { LineSeries } from './line_series';
 
 function LineAnnotationChart(props: { chartStore: Store<GlobalChartState> }) {
   return (
@@ -57,8 +58,8 @@ describe('Line annotation', () => {
     const storeReducer = chartStoreReducer('chart_id');
     const chartStore = createStore(storeReducer);
     const wrapper = mount(<LineAnnotationChart chartStore={chartStore} />);
-    expect(chartStore.getState().specs['threshold']).toBeDefined();
+    expect(chartStore.getState().specs.threshold).toBeDefined();
     wrapper.setProps({});
-    expect(chartStore.getState().specs['threshold']).toBeDefined();
+    expect(chartStore.getState().specs.threshold).toBeDefined();
   });
 });

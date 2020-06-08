@@ -14,14 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import React from 'react';
+import { action } from '@storybook/addon-actions';
 import { number, boolean } from '@storybook/addon-knobs';
+import React from 'react';
 
 import { Axis, Chart, BubbleSeries, Position, ScaleType, Settings, LineSeries } from '../../src';
 import { SeededDataGenerator, getRandomNumberGenerator } from '../../src/mocks/utils';
-import { action } from '@storybook/addon-actions';
 
 const dg = new SeededDataGenerator();
 const rng = getRandomNumberGenerator();

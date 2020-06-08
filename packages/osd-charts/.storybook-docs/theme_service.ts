@@ -14,8 +14,9 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
-/* eslint-disable import/no-unresolved */
+ * under the License.
+ */
+
 // @ts-ignore
 import themeDark from '../src/theme_dark.scss?lazy';
 // @ts-ignore
@@ -28,8 +29,8 @@ export function switchTheme(theme: string) {
       themeLight.use();
       return;
     case 'dark':
+    default:
       themeLight.unuse();
       themeDark.use();
-      return;
   }
 }

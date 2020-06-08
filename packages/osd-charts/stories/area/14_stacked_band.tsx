@@ -14,17 +14,19 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
+
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, timeFormatter } from '../../src';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 
 const dateFormatter = timeFormatter('HH:mm');
 
 export const Example = () => {
-  const data = KIBANA_METRICS.metrics.kibana_os_load[0].data;
+  const { data } = KIBANA_METRICS.metrics.kibana_os_load[0];
   const data2 = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => [d[0], 20, 10]);
   const scaleToDataExtent = boolean('scale to extent', false);
 
@@ -35,7 +37,7 @@ export const Example = () => {
         id="bottom"
         title="timestamp per 1 minute"
         position={Position.Bottom}
-        showOverlappingTicks={true}
+        showOverlappingTicks
         tickFormat={dateFormatter}
       />
       <Axis

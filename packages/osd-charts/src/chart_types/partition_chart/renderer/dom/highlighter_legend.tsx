@@ -14,15 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { connect } from 'react-redux';
+
 import { GlobalChartState } from '../../../../state/chart_state';
+import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
+import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
 import { partitionGeometries } from '../../state/selectors/geometries';
 import { getHighlightedSectorsSelector } from '../../state/selectors/get_highlighted_shapes';
-import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { HighlighterComponent, HighlighterProps, DEFAULT_PROPS } from './highlighter';
-import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
 
 const legendMapStateToProps = (state: GlobalChartState): HighlighterProps => {
   if (!getInternalIsInitializedSelector(state)) {

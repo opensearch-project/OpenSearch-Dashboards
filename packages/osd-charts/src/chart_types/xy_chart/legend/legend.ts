@@ -14,21 +14,22 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { getAxesSpecForSpecId, getSpecsById } from '../state/utils';
+import { LegendItem } from '../../../commons/legend';
+import { SeriesKey, SeriesIdentifier } from '../../../commons/series_id';
 import { identity, Color } from '../../../utils/commons';
+import { BandedAccessorType } from '../../../utils/geometry';
+import { getAxesSpecForSpecId, getSpecsById } from '../state/utils';
+import { Y0_ACCESSOR_POSTFIX, Y1_ACCESSOR_POSTFIX } from '../tooltip/tooltip';
 import {
   SeriesCollectionValue,
   getSeriesIndex,
   getSortedDataSeriesColorsValuesMap,
   getSeriesName,
 } from '../utils/series';
-import { SeriesKey, SeriesIdentifier } from '../../../commons/series_id';
 import { AxisSpec, BasicSeriesSpec, Postfixes, isAreaSeriesSpec, isBarSeriesSpec } from '../utils/specs';
-import { Y0_ACCESSOR_POSTFIX, Y1_ACCESSOR_POSTFIX } from '../tooltip/tooltip';
-import { BandedAccessorType } from '../../../utils/geometry';
-import { LegendItem } from '../../../commons/legend';
 
 /** @internal */
 export interface FormattedLastValues {

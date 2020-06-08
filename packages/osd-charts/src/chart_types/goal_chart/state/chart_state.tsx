@@ -14,21 +14,23 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
-import { InternalChartState, GlobalChartState, BackwardRef } from '../../../state/chart_state';
+
 import { ChartTypes } from '../..';
-import { Goal } from '../renderer/canvas/connected_component';
-import { isTooltipVisibleSelector } from '../state/selectors/is_tooltip_visible';
-import { getTooltipInfoSelector } from '../state/selectors/tooltip';
-import { Tooltip } from '../../../components/tooltip';
-import { createOnElementClickCaller } from './selectors/on_element_click_caller';
-import { createOnElementOverCaller } from './selectors/on_element_over_caller';
-import { createOnElementOutCaller } from './selectors/on_element_out_caller';
 import { LegendItem } from '../../../commons/legend';
+import { Tooltip } from '../../../components/tooltip';
+import { InternalChartState, GlobalChartState, BackwardRef } from '../../../state/chart_state';
 import { LegendItemLabel } from '../../../state/selectors/get_legend_items_labels';
+import { Goal } from '../renderer/canvas/connected_component';
 import { getSpecOrNull } from './selectors/goal_spec';
+import { isTooltipVisibleSelector } from './selectors/is_tooltip_visible';
+import { createOnElementClickCaller } from './selectors/on_element_click_caller';
+import { createOnElementOutCaller } from './selectors/on_element_out_caller';
+import { createOnElementOverCaller } from './selectors/on_element_over_caller';
+import { getTooltipInfoSelector } from './selectors/tooltip';
 
 const EMPTY_MAP = new Map();
 const EMPTY_LEGEND_LIST: LegendItem[] = [];
@@ -36,6 +38,8 @@ const EMPTY_LEGEND_ITEM_LIST: LegendItemLabel[] = [];
 
 /** @internal */
 export class GoalState implements InternalChartState {
+  chartType = ChartTypes.Goal;
+
   onElementClickCaller: (state: GlobalChartState) => void;
   onElementOverCaller: (state: GlobalChartState) => void;
   onElementOutCaller: (state: GlobalChartState) => void;
@@ -45,28 +49,35 @@ export class GoalState implements InternalChartState {
     this.onElementOverCaller = createOnElementOverCaller();
     this.onElementOutCaller = createOnElementOutCaller();
   }
-  chartType = ChartTypes.Goal;
+
   isInitialized(globalState: GlobalChartState) {
     return globalState.specsInitialized && getSpecOrNull(globalState) !== null;
   }
+
   isBrushAvailable() {
     return false;
   }
+
   isBrushing() {
     return false;
   }
+
   isChartEmpty() {
     return false;
   }
+
   getLegendItems() {
     return EMPTY_LEGEND_LIST;
   }
+
   getLegendItemsLabels() {
     return EMPTY_LEGEND_ITEM_LIST;
   }
+
   getLegendExtraValues() {
     return EMPTY_MAP;
   }
+
   chartRenderer(containerRef: BackwardRef) {
     return (
       <>
@@ -75,23 +86,28 @@ export class GoalState implements InternalChartState {
       </>
     );
   }
+
   getPointerCursor() {
     return 'default';
   }
+
   isTooltipVisible(globalState: GlobalChartState) {
     return isTooltipVisibleSelector(globalState);
   }
+
   getTooltipInfo(globalState: GlobalChartState) {
     return getTooltipInfoSelector(globalState);
   }
+
   getTooltipAnchor(state: GlobalChartState) {
-    const position = state.interactions.pointer.current.position;
+    const { position } = state.interactions.pointer.current;
     return {
       isRotated: false,
       x1: position.x,
       y1: position.y,
     };
   }
+
   eventCallbacks(globalState: GlobalChartState) {
     this.onElementOverCaller(globalState);
     this.onElementOutCaller(globalState);

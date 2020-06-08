@@ -14,9 +14,10 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { Chart } from '../components/chart';
+import { Chart } from './chart';
 
 describe('test getPNGSnapshot in Chart class', () => {
   jest.mock('../components/chart');

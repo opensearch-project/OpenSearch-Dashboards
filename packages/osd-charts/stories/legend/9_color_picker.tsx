@@ -14,17 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
-
-import React, { useState } from 'react';
-import { action } from '@storybook/addon-actions';
+ * under the License.
+ */
 
 import { EuiColorPicker, EuiWrappingPopover, EuiButton, EuiSpacer } from '@elastic/eui';
+import { action } from '@storybook/addon-actions';
+import React, { useState } from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings, LegendColorPicker } from '../../src/';
-import { BARCHART_1Y1G } from '../../src/utils/data_samples/test_dataset';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, LegendColorPicker } from '../../src';
 import { SeriesKey } from '../../src/commons/series_id';
 import { Color } from '../../src/utils/commons';
+import { BARCHART_1Y1G } from '../../src/utils/data_samples/test_dataset';
 
 const onChangeAction = action('onChange');
 const onCloseAction = action('onClose');
@@ -47,7 +47,7 @@ export const Example = () => {
     };
     return (
       <EuiWrappingPopover isOpen button={anchor} closePopover={handleClose}>
-        <EuiColorPicker display="inline" color={color} onChange={handleChange}></EuiColorPicker>
+        <EuiColorPicker display="inline" color={color} onChange={handleChange} />
         <EuiSpacer size="m" />
         <EuiButton fullWidth size="s" onClick={handleClose}>
           Done
@@ -59,7 +59,7 @@ export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings showLegend legendColorPicker={renderColorPicker} />
-      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
+      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
       <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
       <BarSeries

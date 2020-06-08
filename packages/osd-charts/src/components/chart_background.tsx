@@ -14,11 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 import React from 'react';
 import { connect } from 'react-redux';
-import { getChartThemeSelector } from '../state/selectors/get_chart_theme';
+
 import { GlobalChartState } from '../state/chart_state';
+import { getChartThemeSelector } from '../state/selectors/get_chart_theme';
 import { getInternalIsInitializedSelector } from '../state/selectors/get_internal_is_intialized';
 
 interface ChartBackgroundProps {
@@ -27,10 +29,6 @@ interface ChartBackgroundProps {
 
 export class ChartBackgroundComponent extends React.Component<ChartBackgroundProps> {
   static displayName = 'ChartBackground';
-
-  constructor(props: ChartBackgroundProps) {
-    super(props);
-  }
 
   render() {
     const { backgroundColor } = this.props;

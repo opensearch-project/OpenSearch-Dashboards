@@ -14,15 +14,16 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { select, boolean, optionsKnob } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, TooltipProps, Placement } from '../../src';
 import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
 import { getChartRotationKnob, getPlacementKnob, getTooltipTypeKnob } from '../utils/knobs';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
-import { select, boolean, optionsKnob } from '@storybook/addon-knobs';
 
 const CustomTooltip = () => (
   <div
@@ -66,9 +67,11 @@ const getFallbackPlacements = (): Placement[] | undefined => {
   if (typeof knob === 'string') {
     // @ts-ignore
     return knob.split(', ');
-    // @ts-ignore
-  } else if (knob.length === 0) {
-    return undefined;
+  }
+
+  // @ts-ignore
+  if (knob.length === 0) {
+    return;
   }
 
   return knob;
@@ -101,7 +104,7 @@ export const Example = () => {
     <div className="buffer" style={{ width: '100%', height: '100%', paddingLeft: 80, paddingRight: 80 }}>
       <Chart className="story-chart">
         <Settings rotation={rotation} tooltip={tooltipOptions} showLegend={showLegend} />
-        <Axis id="bottom" hide={!showAxes} position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
+        <Axis id="bottom" hide={!showAxes} position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
         <Axis
           id="left2"
           hide={!showAxes}

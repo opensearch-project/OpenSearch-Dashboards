@@ -14,17 +14,19 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { createStore } from 'redux';
 import { Provider } from 'react-redux';
-import { SpecsParser } from './specs_parser';
+import { createStore } from 'redux';
+
+import { BarSeries } from '../chart_types/specs';
+import { BarSeriesSpec } from '../chart_types/xy_chart/utils/specs';
 import { chartStoreReducer } from '../state/chart_state';
 import { DEFAULT_SETTINGS_SPEC } from './settings';
-import { BarSeriesSpec } from '../chart_types/xy_chart/utils/specs';
-import { BarSeries } from '../chart_types/specs';
+import { SpecsParser } from './specs_parser';
 
 describe('Specs parser', () => {
   test('can mount the spec parser', () => {
@@ -82,8 +84,8 @@ describe('Specs parser', () => {
     const state = chartStore.getState();
     expect(state.specsInitialized).toBe(true);
     expect(Object.keys(state.specs)).toEqual([DEFAULT_SETTINGS_SPEC.id, 'bars', 'bars2']);
-    expect(state.specs['bars']).toBeDefined();
-    expect(state.specs['bars2']).toBeDefined();
+    expect(state.specs.bars).toBeDefined();
+    expect(state.specs.bars2).toBeDefined();
   });
   test('can update a component', () => {
     const storeReducer = chartStoreReducer('chart_id');
@@ -123,7 +125,7 @@ describe('Specs parser', () => {
       ),
     });
     const state = chartStore.getState();
-    expect((state.specs['bars'] as BarSeriesSpec).xAccessor).toBe(1);
+    expect((state.specs.bars as BarSeriesSpec).xAccessor).toBe(1);
   });
   test('set initialization to false on unmount', () => {
     const storeReducer = chartStoreReducer('chart_id');

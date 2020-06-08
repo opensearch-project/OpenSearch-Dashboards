@@ -14,18 +14,20 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { getAxisSpecsSelector, getAnnotationSpecsSelector } from './get_specs';
-import { computeChartDimensionsSelector } from './compute_chart_dimensions';
-import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
-import { computeAnnotationDimensions } from '../../annotations/utils';
-import { AnnotationDimensions } from '../../annotations/types';
-import { computeSeriesGeometriesSelector } from './compute_series_geometries';
-import { AnnotationId } from '../../../../utils/ids';
+
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
+import { AnnotationId } from '../../../../utils/ids';
+import { AnnotationDimensions } from '../../annotations/types';
+import { computeAnnotationDimensions } from '../../annotations/utils';
+import { computeChartDimensionsSelector } from './compute_chart_dimensions';
+import { computeSeriesGeometriesSelector } from './compute_series_geometries';
+import { getAxisSpecsSelector, getAnnotationSpecsSelector } from './get_specs';
+import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
 
 /** @internal */
 export const computeAnnotationDimensionsSelector = createCachedSelector(
@@ -45,15 +47,13 @@ export const computeAnnotationDimensionsSelector = createCachedSelector(
     { scales: { yScales, xScale } },
     axesSpecs,
     isHistogramMode,
-  ): Map<AnnotationId, AnnotationDimensions> => {
-    return computeAnnotationDimensions(
-      annotationSpecs,
-      chartDimensions.chartDimensions,
-      settingsSpec.rotation,
-      yScales,
-      xScale,
-      axesSpecs,
-      isHistogramMode,
-    );
-  },
+  ): Map<AnnotationId, AnnotationDimensions> => computeAnnotationDimensions(
+    annotationSpecs,
+    chartDimensions.chartDimensions,
+    settingsSpec.rotation,
+    yScales,
+    xScale,
+    axesSpecs,
+    isHistogramMode,
+  ),
 )(getChartIdSelector);

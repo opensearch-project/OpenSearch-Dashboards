@@ -14,11 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { Coordinate } from '../../chart_types/partition_chart/layout/types/geometry_types';
-import { ClippedRanges } from '../../utils/geometry';
 import { Rect } from '../../geoms/types';
+import { ClippedRanges } from '../../utils/geometry';
 import { Point } from '../../utils/point';
 
 /**
@@ -40,14 +41,12 @@ export function withContext(ctx: CanvasRenderingContext2D, fun: (ctx: CanvasRend
 export function clearCanvas(
   ctx: CanvasRenderingContext2D,
   width: Coordinate,
-  height: Coordinate /*, backgroundColor: string*/,
+  height: Coordinate,
 ) {
   withContext(ctx, (ctx) => {
     // two steps, as the backgroundColor may have a non-one opacity
     // todo we should avoid `fillRect` by setting the <canvas> element background via CSS
     ctx.clearRect(-width, -height, 2 * width, 2 * height); // remove past contents
-    // ctx.fillStyle = backgroundColor;
-    // ctx.fillRect(-width, -height, 2 * width, 2 * height); // new background
   });
 }
 
@@ -93,7 +92,7 @@ export function withClipRanges(
   fun: (ctx: CanvasRenderingContext2D) => void,
 ) {
   withContext(ctx, (ctx) => {
-    const length = clippedRanges.length;
+    const { length } = clippedRanges;
     const { width, height } = clippings;
     ctx.beginPath();
     if (negate) {

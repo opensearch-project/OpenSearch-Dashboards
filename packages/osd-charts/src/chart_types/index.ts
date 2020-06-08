@@ -14,15 +14,16 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { $Values } from 'utility-types';
 
 export const ChartTypes = Object.freeze({
-  Global: 'global' as 'global',
-  Goal: 'goal' as 'goal',
-  Partition: 'partition' as 'partition',
-  XYAxis: 'xy_axis' as 'xy_axis',
+  Global: 'global' as const,
+  Goal: 'goal' as const,
+  Partition: 'partition' as const,
+  XYAxis: 'xy_axis' as const,
 });
 
 export type ChartTypes = $Values<typeof ChartTypes>;

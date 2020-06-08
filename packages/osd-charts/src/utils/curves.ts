@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import {
   curveBasis,
@@ -31,16 +32,16 @@ import {
 import { $Values } from 'utility-types';
 
 export const CurveType = Object.freeze({
-  CURVE_CARDINAL: 0 as 0,
-  CURVE_NATURAL: 1 as 1,
-  CURVE_MONOTONE_X: 2 as 2,
-  CURVE_MONOTONE_Y: 3 as 3,
-  CURVE_BASIS: 4 as 4,
-  CURVE_CATMULL_ROM: 5 as 5,
-  CURVE_STEP: 6 as 6,
-  CURVE_STEP_AFTER: 7 as 7,
-  CURVE_STEP_BEFORE: 8 as 8,
-  LINEAR: 9 as 9,
+  CURVE_CARDINAL: 0 as const,
+  CURVE_NATURAL: 1 as const,
+  CURVE_MONOTONE_X: 2 as const,
+  CURVE_MONOTONE_Y: 3 as const,
+  CURVE_BASIS: 4 as const,
+  CURVE_CATMULL_ROM: 5 as const,
+  CURVE_STEP: 6 as const,
+  CURVE_STEP_AFTER: 7 as const,
+  CURVE_STEP_BEFORE: 8 as const,
+  LINEAR: 9 as const,
 });
 
 export type CurveType = $Values<typeof CurveType>;

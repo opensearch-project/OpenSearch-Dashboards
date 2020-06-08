@@ -14,17 +14,19 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { Distance, Pixels, Radian, Radius, Ratio, SizeRatio, TimeMs } from './geometry_types';
-import { Font, FontFamily, PartialFont } from './types';
 import { $Values as Values } from 'utility-types';
+
 import { Color, StrokeStyle, ValueFormatter } from '../../../../utils/commons';
 import { PerSideDistance } from '../../../../utils/dimensions';
+import { Distance, Pixels, Radian, Radius, Ratio, SizeRatio, TimeMs } from './geometry_types';
+import { Font, FontFamily, PartialFont } from './types';
 
 export const PartitionLayout = Object.freeze({
-  sunburst: 'sunburst' as 'sunburst',
-  treemap: 'treemap' as 'treemap',
+  sunburst: 'sunburst' as const,
+  treemap: 'treemap' as const,
 });
 
 export type PartitionLayout = Values<typeof PartitionLayout>; // could use ValuesType<typeof HierarchicalChartTypes>
@@ -65,9 +67,11 @@ export interface FillFontSizeRange {
   minFontSize: Pixels;
   maxFontSize: Pixels;
   idealFontSizeJump: Ratio;
-  /** When `maximizeFontSize` is false (the default), text font will not be larger than font sizes in larger sectors/rectangles in the same pie chart,
+  /**
+   * When `maximizeFontSize` is false (the default), text font will not be larger than font sizes in larger sectors/rectangles in the same pie chart,
    * sunburst ring or treemap layer. When it is set to true, the largest font, not exceeding `maxFontSize`, that fits in the slice/sector/rectangle
-   * will be chosen for easier text readability, irrespective of the value. **/
+   * will be chosen for easier text readability, irrespective of the value.
+   */
   maximizeFontSize: boolean;
 }
 

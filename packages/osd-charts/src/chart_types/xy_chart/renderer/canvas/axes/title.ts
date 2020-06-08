@@ -14,14 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { AxisProps } from '.';
-import { isHorizontalAxis } from '../../../utils/axis_utils';
-import { renderDebugRect } from '../utils/debug';
-import { renderText } from '../primitives/text';
 import { Position } from '../../../../../utils/commons';
 import { Font, FontStyle } from '../../../../partition_chart/layout/types/types';
+import { isHorizontalAxis } from '../../../utils/axis_utils';
+import { renderText } from '../primitives/text';
+import { renderDebugRect } from '../utils/debug';
 
 /** @internal */
 export function renderTitle(ctx: CanvasRenderingContext2D, props: AxisProps) {

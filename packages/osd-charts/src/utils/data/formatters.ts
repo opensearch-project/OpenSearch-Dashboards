@@ -14,16 +14,16 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
+
+import moment from 'moment-timezone';
 
 import { TickFormatter, TickFormatterOptions } from '../../chart_types/xy_chart/utils/specs';
 import { getMomentWithTz } from './date_time';
-import moment from 'moment-timezone';
 
 export function timeFormatter(format: string): TickFormatter {
-  return (value: number, options?: TickFormatterOptions): string => {
-    return getMomentWithTz(value, options && options.timeZone).format(format);
-  };
+  return (value: number, options?: TickFormatterOptions): string => getMomentWithTz(value, options && options.timeZone).format(format);
 }
 
 export function niceTimeFormatter(domain: [number, number]): TickFormatter {

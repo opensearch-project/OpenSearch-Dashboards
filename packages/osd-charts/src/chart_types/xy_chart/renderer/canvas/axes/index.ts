@@ -14,20 +14,21 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { AxisTick, AxisTicksDimensions } from '../../../utils/axis_utils';
-import { AxisSpec } from '../../../utils/specs';
-import { AxisConfig } from '../../../../../utils/themes/theme';
+import { withContext } from '../../../../../renderers/canvas';
 import { Dimensions } from '../../../../../utils/dimensions';
 import { AxisId } from '../../../../../utils/ids';
+import { AxisConfig } from '../../../../../utils/themes/theme';
 import { getSpecsById } from '../../../state/utils';
-import { withContext } from '../../../../../renderers/canvas';
+import { AxisTick, AxisTicksDimensions } from '../../../utils/axis_utils';
+import { AxisSpec } from '../../../utils/specs';
 import { renderDebugRect } from '../utils/debug';
-import { renderTitle } from './title';
 import { renderLine } from './line';
-import { renderTickLabel } from './tick_label';
 import { renderTick } from './tick';
+import { renderTickLabel } from './tick_label';
+import { renderTitle } from './title';
 
 /** @internal */
 export interface AxisProps {
@@ -90,14 +91,14 @@ function renderAxis(ctx: CanvasRenderingContext2D, props: AxisProps) {
       renderLine(ctx, props);
     });
     withContext(ctx, (ctx) => {
-      ticks.map((tick) => {
+      ticks.forEach((tick) => {
         renderTick(ctx, tick, props);
       });
     });
     withContext(ctx, (ctx) => {
       ticks
         .filter((tick) => tick.label !== null)
-        .map((tick) => {
+        .forEach((tick) => {
           renderTickLabel(ctx, tick, props);
         });
     });

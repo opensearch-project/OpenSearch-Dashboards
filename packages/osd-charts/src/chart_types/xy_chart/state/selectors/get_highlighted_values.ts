@@ -14,19 +14,19 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
+
+import { LegendItemExtraValues } from '../../../../commons/legend';
+import { SeriesKey } from '../../../../commons/series_id';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getHighligthedValues } from '../../tooltip/tooltip';
 import { getTooltipInfoSelector } from './get_tooltip_values_highlighted_geoms';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { SeriesKey } from '../../../../commons/series_id';
-import { LegendItemExtraValues } from '../../../../commons/legend';
 
 /** @internal */
 export const getHighlightedValuesSelector = createCachedSelector(
   [getTooltipInfoSelector],
-  ({ values }): Map<SeriesKey, LegendItemExtraValues> => {
-    return getHighligthedValues(values);
-  },
+  ({ values }): Map<SeriesKey, LegendItemExtraValues> => getHighligthedValues(values),
 )(getChartIdSelector);

@@ -14,22 +14,22 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { GlobalChartState } from '../../../../state/chart_state';
-import { getSpecsFromStore } from '../../../../state/utils';
-import { AxisSpec, BasicSeriesSpec, AnnotationSpec } from '../../utils/specs';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+
 import { ChartTypes } from '../../..';
 import { SpecTypes } from '../../../../specs/settings';
+import { GlobalChartState } from '../../../../state/chart_state';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getSpecsFromStore } from '../../../../state/utils';
+import { AxisSpec, BasicSeriesSpec, AnnotationSpec } from '../../utils/specs';
 
 const getSpecs = (state: GlobalChartState) => state.specs;
 
 /** @internal */
-export const getAxisSpecsSelector = createCachedSelector([getSpecs], (specs): AxisSpec[] => {
-  return getSpecsFromStore<AxisSpec>(specs, ChartTypes.XYAxis, SpecTypes.Axis);
-})(getChartIdSelector);
+export const getAxisSpecsSelector = createCachedSelector([getSpecs], (specs): AxisSpec[] => getSpecsFromStore<AxisSpec>(specs, ChartTypes.XYAxis, SpecTypes.Axis))(getChartIdSelector);
 
 /** @internal */
 export const getSeriesSpecsSelector = createCachedSelector([getSpecs], (specs) => {
@@ -38,6 +38,4 @@ export const getSeriesSpecsSelector = createCachedSelector([getSpecs], (specs) =
 })(getChartIdSelector);
 
 /** @internal */
-export const getAnnotationSpecsSelector = createCachedSelector([getSpecs], (specs) => {
-  return getSpecsFromStore<AnnotationSpec>(specs, ChartTypes.XYAxis, SpecTypes.Annotation);
-})(getChartIdSelector);
+export const getAnnotationSpecsSelector = createCachedSelector([getSpecs], (specs) => getSpecsFromStore<AnnotationSpec>(specs, ChartTypes.XYAxis, SpecTypes.Annotation))(getChartIdSelector);

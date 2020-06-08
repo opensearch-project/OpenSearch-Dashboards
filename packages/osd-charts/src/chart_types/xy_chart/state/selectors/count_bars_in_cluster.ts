@@ -14,12 +14,14 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { computeSeriesDomainsSelector } from './compute_series_domains';
-import { countBarsInCluster } from '../../utils/scales';
+
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { countBarsInCluster } from '../../utils/scales';
+import { computeSeriesDomainsSelector } from './compute_series_domains';
 
 /** @internal */
 export const countBarsInClusterSelector = createCachedSelector(

@@ -14,16 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { AnnotationTypes } from '../../utils/specs';
 import { Rotation } from '../../../../utils/commons';
 import { Dimensions } from '../../../../utils/dimensions';
 import { Point } from '../../../../utils/point';
-import { getTranformedCursor } from '../utils';
+import { AnnotationTypes } from '../../utils/specs';
 import { AnnotationTooltipFormatter, AnnotationTooltipState, Bounds } from '../types';
-import { AnnotationRectProps } from './types';
+import { getTranformedCursor } from '../utils';
 import { isWithinRectBounds } from './dimensions';
+import { AnnotationRectProps } from './types';
 
 /** @internal */
 export function computeRectAnnotationTooltipState(

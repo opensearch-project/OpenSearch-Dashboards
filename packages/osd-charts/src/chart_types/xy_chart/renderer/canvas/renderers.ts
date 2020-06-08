@@ -14,21 +14,22 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { withContext, renderLayers, clearCanvas } from '../../../../renderers/canvas';
-import { renderBars } from './bars';
-import { renderAreas } from './areas';
-import { renderLines } from './lines';
-import { renderAxes } from './axes';
-import { renderGrids } from './grids';
-import { ReactiveChartStateProps } from './xy_chart';
-import { renderAnnotations } from './annotations';
-import { renderBarValues } from './values/bar';
-import { renderDebugRect } from './utils/debug';
-import { stringToRGB } from '../../../partition_chart/layout/utils/color_library_wrappers';
 import { Rect } from '../../../../geoms/types';
+import { withContext, renderLayers, clearCanvas } from '../../../../renderers/canvas';
+import { stringToRGB } from '../../../partition_chart/layout/utils/color_library_wrappers';
+import { renderAnnotations } from './annotations';
+import { renderAreas } from './areas';
+import { renderAxes } from './axes';
+import { renderBars } from './bars';
 import { renderBubbles } from './bubbles';
+import { renderGrids } from './grids';
+import { renderLines } from './lines';
+import { renderDebugRect } from './utils/debug';
+import { renderBarValues } from './values/bar';
+import { ReactiveChartStateProps } from './xy_chart';
 
 /** @internal */
 export function renderXYChartCanvas2d(
@@ -66,7 +67,7 @@ export function renderXYChartCanvas2d(
     // The layers are callbacks, because of the need to not bake in the `ctx`, it feels more composable and uncoupled this way.
     renderLayers(ctx, [
       // clear the canvas
-      (ctx: CanvasRenderingContext2D) => clearCanvas(ctx, 200000, 200000 /*, backgroundColor*/),
+      (ctx: CanvasRenderingContext2D) => clearCanvas(ctx, 200000, 200000 /* , backgroundColor */),
 
       (ctx: CanvasRenderingContext2D) => {
         renderAxes(ctx, {

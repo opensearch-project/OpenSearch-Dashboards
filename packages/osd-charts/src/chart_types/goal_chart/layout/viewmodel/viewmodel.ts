@@ -14,12 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { TextMeasure } from '../../../partition_chart/layout/types/types';
+import { GoalSpec } from '../../specs';
 import { Config } from '../types/config_types';
 import { BulletViewModel, PickFunction, ShapeViewModel } from '../types/viewmodel_types';
-import { GoalSpec } from '../../specs/index';
 
 /** @internal */
 export function shapeViewModel(textMeasure: TextMeasure, spec: GoalSpec, config: Config): ShapeViewModel {
@@ -33,11 +34,10 @@ export function shapeViewModel(textMeasure: TextMeasure, spec: GoalSpec, config:
     y: height * margin.top + innerHeight / 2,
   };
 
-  const pickQuads: PickFunction = (x, y) => {
-    return -innerWidth / 2 <= x && x <= innerWidth / 2 && -innerHeight / 2 <= y && y <= innerHeight / 2
+  const pickQuads: PickFunction = (x, y) =>
+    -innerWidth / 2 <= x && x <= innerWidth / 2 && -innerHeight / 2 <= y && y <= innerHeight / 2
       ? [bulletViewModel]
       : [];
-  };
 
   const {
     subtype,

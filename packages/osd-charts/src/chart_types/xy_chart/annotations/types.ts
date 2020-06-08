@@ -14,12 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { Position, Color } from '../../../utils/commons';
 import { AnnotationType } from '../utils/specs';
 import { AnnotationLineProps } from './line/types';
 import { AnnotationRectProps } from './rect/types';
-import { Position, Color } from '../../../utils/commons';
 
 export type AnnotationTooltipFormatter = (details?: string) => JSX.Element | null;
 

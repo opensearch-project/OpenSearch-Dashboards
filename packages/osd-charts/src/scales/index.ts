@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { $Values } from 'utility-types';
 
@@ -61,11 +62,11 @@ export interface Scale {
  * The scale type
  */
 export const ScaleType = Object.freeze({
-  Linear: 'linear' as 'linear',
-  Ordinal: 'ordinal' as 'ordinal',
-  Log: 'log' as 'log',
-  Sqrt: 'sqrt' as 'sqrt',
-  Time: 'time' as 'time',
+  Linear: 'linear' as const,
+  Ordinal: 'ordinal' as const,
+  Log: 'log' as const,
+  Sqrt: 'sqrt' as const,
+  Time: 'time' as const,
 });
 
 export type ScaleType = $Values<typeof ScaleType>;

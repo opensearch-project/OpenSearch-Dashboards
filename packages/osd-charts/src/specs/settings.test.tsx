@@ -14,32 +14,32 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { mount } from 'enzyme';
 import React from 'react';
+import { Provider } from 'react-redux';
+import { createStore, Store } from 'redux';
+
+import { chartStoreReducer, GlobalChartState } from '../state/chart_state';
+import { getChartThemeSelector } from '../state/selectors/get_chart_theme';
+import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
 import { Position, Rendering, Rotation } from '../utils/commons';
 import { DARK_THEME } from '../utils/themes/dark_theme';
-import { Settings, SettingsSpec, TooltipType } from './settings';
-import { PartialTheme } from '../utils/themes/theme';
 import { LIGHT_THEME } from '../utils/themes/light_theme';
-import { chartStoreReducer, GlobalChartState } from '../state/chart_state';
-import { createStore, Store } from 'redux';
+import { PartialTheme } from '../utils/themes/theme';
+import { Settings, SettingsSpec, TooltipType } from './settings';
 import { SpecsParser } from './specs_parser';
-import { Provider } from 'react-redux';
-import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
-import { getChartThemeSelector } from '../state/selectors/get_chart_theme';
 
-const getProxy = (chartStore: Store<GlobalChartState>) => {
-  return function SettingsProxy({ settings }: { settings?: Partial<SettingsSpec> }) {
-    return (
-      <Provider store={chartStore}>
-        <SpecsParser>
-          <Settings {...settings} />
-        </SpecsParser>
-      </Provider>
-    );
-  };
+const getProxy = (chartStore: Store<GlobalChartState>) => function SettingsProxy({ settings }: { settings?: Partial<SettingsSpec> }) {
+  return (
+    <Provider store={chartStore}>
+      <SpecsParser>
+        <Settings {...settings} />
+      </SpecsParser>
+    </Provider>
+  );
 };
 describe('Settings spec component', () => {
   let chartStore: Store<GlobalChartState>;
@@ -120,25 +120,13 @@ describe('Settings spec component', () => {
     expect(settingSpec.onLegendItemPlusClick).toBeUndefined();
     expect(settingSpec.onLegendItemMinusClick).toBeUndefined();
 
-    const onElementClick = (): void => {
-      return;
-    };
-    const onElementOver = (): void => {
-      return;
-    };
-    const onOut = () => undefined;
-    const onBrushEnd = (): void => {
-      return;
-    };
-    const onLegendEvent = (): void => {
-      return;
-    };
-    const onPointerUpdateEvent = (): void => {
-      return;
-    };
-    const onRenderChangeEvent = (): void => {
-      return;
-    };
+    const onElementClick = (): void => {};
+    const onElementOver = (): void => {};
+    const onOut = () => {};
+    const onBrushEnd = (): void => {};
+    const onLegendEvent = (): void => {};
+    const onPointerUpdateEvent = (): void => {};
+    const onRenderChangeEvent = (): void => {};
 
     const updatedProps: Partial<SettingsSpec> = {
       onElementClick,
@@ -202,8 +190,10 @@ describe('Settings spec component', () => {
     mount(<SettingsProxy settings={updatedProps} />);
 
     settingSpec = getSettingsSpecSelector(chartStore.getState());
-    // the theme is no longer stored into the setting spec.
-    // it's final theme object is computed through selectors
+    /*
+     * the theme is no longer stored into the setting spec.
+     * it's final theme object is computed through selectors
+     */
     const theme = getChartThemeSelector(chartStore.getState());
     expect(theme).toEqual({
       ...DARK_THEME,

@@ -14,10 +14,11 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { Relation } from '../types/types';
 import { Datum } from '../../../../utils/commons';
+import { Relation } from '../types/types';
 
 export const AGGREGATE_KEY = 'value';
 export const STATISTICS_KEY = 'statistics';
@@ -80,13 +81,13 @@ const descending: Sorter = (a, b) => b - a;
 /** @internal */
 export function groupByRollup(
   keyAccessors: Array<((a: Datum) => Key) | ((a: Datum, i: number) => Key)>,
-  valueAccessor: Function,
+  valueAccessor: (v: any) => any,
   {
     reducer,
     identity,
   }: {
     reducer: (prev: number, next: number) => number;
-    identity: Function;
+    identity: () => any;
   },
   factTable: Relation,
 ): HierarchyOfMaps {
@@ -171,7 +172,7 @@ export function mapEntryValue(entry: ArrayEntry) {
 }
 
 /** @internal */
-export function aggregateComparator(accessor: Function, sorter: Sorter): NodeSorter {
+export function aggregateComparator(accessor: (v: any) => any, sorter: Sorter): NodeSorter {
   return (a, b) => sorter(accessor(a), accessor(b));
 }
 
@@ -181,10 +182,8 @@ export const childOrders = {
   descending,
 };
 
-/*
-type MeanReduction = { sum: number; count: number };
-type MedianReduction = Array<number>;
-*/
+// type MeanReduction = { sum: number; count: number };
+// type MedianReduction = Array<number>;
 
 /** @internal */
 export const aggregators = {
@@ -216,29 +215,28 @@ export const aggregators = {
     identity: () => 0,
     reducer: (r: number, n: number) => Math.max(r, n),
   },
-  /* // todo more TS typing is needed to use these
-  mean: {
-    identity: (): MeanReduction => ({ sum: 0, count: 0 }),
-    reducer: (r: MeanReduction, n: number) => {
-      r.sum += n;
-      r.count++;
-      return r;
-    },
-    finalizer: (r: MeanReduction): number => r.sum / r.count,
-  },
-  median: {
-    identity: (): MedianReduction => [],
-    reducer: (r: MedianReduction, n: number) => {
-      r.push(n);
-      return r;
-    },
-    finalizer: (r: MedianReduction): number => {
-      const sorted = r.sort(ascending);
-      const len = r.length;
-      const even = len === len % 2;
-      const half = len / 2;
-      return even ? (sorted[half - 1] + sorted[half]) / 2 : sorted[half - 0.5];
-    },
-  },
-*/
+  // todo more TS typing is needed to use these
+  // mean: {
+  //   identity: (): MeanReduction => ({ sum: 0, count: 0 }),
+  //   reducer: (r: MeanReduction, n: number) => {
+  //     r.sum += n;
+  //     r.count++;
+  //     return r;
+  //   },
+  //   finalizer: (r: MeanReduction): number => r.sum / r.count,
+  // },
+  // median: {
+  //   identity: (): MedianReduction => [],
+  //   reducer: (r: MedianReduction, n: number) => {
+  //     r.push(n);
+  //     return r;
+  //   },
+  //   finalizer: (r: MedianReduction): number => {
+  //     const sorted = r.sort(ascending);
+  //     const len = r.length;
+  //     const even = len === len % 2;
+  //     const half = len / 2;
+  //     return even ? (sorted[half - 1] + sorted[half]) / 2 : sorted[half - 0.5];
+  //   },
+  // },
 };

@@ -14,18 +14,20 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
+
+import { SeriesKey } from '../../../../commons/series_id';
+import { GlobalChartState } from '../../../../state/chart_state';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
+import { Color } from '../../../../utils/commons';
+import { getSeriesColors } from '../../utils/series';
+import { getCustomSeriesColors } from '../utils';
 import { computeSeriesDomainsSelector } from './compute_series_domains';
 import { getSeriesSpecsSelector } from './get_specs';
-import { getSeriesColors } from '../../utils/series';
-import { SeriesKey } from '../../../../commons/series_id';
-import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { getCustomSeriesColors } from '../utils';
-import { GlobalChartState } from '../../../../state/chart_state';
-import { Color } from '../../../../utils/commons';
 
 function getColorOverrides({ colors }: GlobalChartState) {
   return colors;

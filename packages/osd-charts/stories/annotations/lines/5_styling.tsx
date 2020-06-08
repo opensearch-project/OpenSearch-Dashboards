@@ -14,10 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { boolean, color, number, select } from '@storybook/addon-knobs';
 import React from 'react';
+
 import {
   AnnotationDomainTypes,
   Axis,
@@ -30,8 +32,8 @@ import {
   LineAnnotationStyle,
 } from '../../../src';
 import { Icon } from '../../../src/components/icons/icon';
-import { getChartRotationKnob } from '../../utils/knobs';
 import { Position } from '../../../src/utils/commons';
+import { getChartRotationKnob } from '../../utils/knobs';
 
 function generateAnnotationData(values: any[]): LineAnnotationDatum[] {
   return values.map((value, index) => ({ dataValue: value, details: `detail-${index}` }));

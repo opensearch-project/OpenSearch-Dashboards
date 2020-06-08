@@ -14,10 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
+
 import {
   AnnotationDomainTypes,
   Axis,
@@ -30,9 +32,9 @@ import {
   timeFormatter,
 } from '../../../src';
 import { Icon } from '../../../src/components/icons/icon';
+import { Position } from '../../../src/utils/commons';
 import { KIBANA_METRICS } from '../../../src/utils/data_samples/test_dataset_kibana';
 import { getChartRotationKnob } from '../../utils/knobs';
-import { Position } from '../../../src/utils/commons';
 
 const dateFormatter = timeFormatter('HH:mm:ss');
 

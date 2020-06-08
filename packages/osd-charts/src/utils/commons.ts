@@ -14,10 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { v1 as uuidV1 } from 'uuid';
 import { $Values } from 'utility-types';
+import { v1 as uuidV1 } from 'uuid';
+
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 
 /**
@@ -29,11 +31,11 @@ export const ColorVariant = Object.freeze({
    * Uses series color. Rather than setting a static color, this will use the
    * default series color for a given series.
    */
-  Series: '__use__series__color__' as '__use__series__color__',
+  Series: '__use__series__color__' as const,
   /**
    * Uses empty color, similar to transparent.
    */
-  None: '__use__empty__color__' as '__use__empty__color__',
+  None: '__use__empty__color__' as const,
 });
 export type ColorVariant = $Values<typeof ColorVariant>;
 
@@ -44,10 +46,10 @@ export type Color = string;
 export type StrokeStyle = Color; // now narrower than string | CanvasGradient | CanvasPattern
 
 export const Position = Object.freeze({
-  Top: 'top' as 'top',
-  Bottom: 'bottom' as 'bottom',
-  Left: 'left' as 'left',
-  Right: 'right' as 'right',
+  Top: 'top' as const,
+  Bottom: 'bottom' as const,
+  Left: 'left' as const,
+  Right: 'right' as const,
 });
 export type Position = $Values<typeof Position>;
 
@@ -86,7 +88,8 @@ export function maxValueWithUpperLimit(val1: number, val2: number, upperLimit: n
 /**
  * Returns color given any color variant
  *
- * @internal */
+ * @internal
+ */
 export function getColorFromVariant(seriesColor: Color, color?: Color | ColorVariant): Color {
   if (color === ColorVariant.Series) {
     return seriesColor;
@@ -274,10 +277,9 @@ export function mergePartial<T>(
             );
           }
         } else if (!(key in baseClone)) {
-          (baseClone as any)[key] =
-            (partial as any)[key] !== undefined
-              ? (partial as any)[key]
-              : (additionalPartials.find((v: any) => v[key] !== undefined) || ({} as any))[key];
+          baseClone[key] = (partial as any)[key] !== undefined
+            ? (partial as any)[key]
+            : (additionalPartials.find((v: any) => v[key] !== undefined) || ({} as any))[key];
         }
       });
     }
@@ -314,7 +316,7 @@ export function mergePartial<T>(
       const partialValues = additionalPartials.map((v) => (typeof v === 'object' ? (v as any)[key] : undefined));
       const baseValue = (base as any)[key];
 
-      (newBase as any)[key] = mergePartial(baseValue, partialValue, options, partialValues);
+      newBase[key] = mergePartial(baseValue, partialValue, options, partialValues);
 
       return newBase;
     }, baseClone);

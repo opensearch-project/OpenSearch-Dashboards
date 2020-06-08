@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
 
@@ -46,7 +47,7 @@ export const Example = () => {
         id="bottom"
         title="timestamp per 1 minute"
         position={Position.Bottom}
-        showOverlappingTicks={true}
+        showOverlappingTicks
         tickFormat={formatter}
       />
       <Axis id="left" title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title} position={Position.Left} />

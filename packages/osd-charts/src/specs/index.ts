@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { ChartTypes } from '../chart_types';
 
@@ -23,7 +24,7 @@ export interface Spec {
   id: string;
   /** Chart type define the type of chart that use this spec */
   chartType: ChartTypes;
-  /** The type of spec, can be series, axis, annotation, settings etc*/
+  /** The type of spec, can be series, axis, annotation, settings etc */
   specType: string;
 }
 

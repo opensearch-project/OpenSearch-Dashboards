@@ -14,13 +14,14 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { DataSeries, DataSeriesDatum, RawDataSeries } from './series';
-import { fitFunction } from './fit_function';
-import { isAreaSeriesSpec, isLineSeriesSpec, SeriesSpecs, BasicSeriesSpec } from './specs';
 import { ScaleType } from '../../../scales';
 import { getSpecsById, isDefined } from '../state/utils';
+import { fitFunction } from './fit_function';
+import { DataSeries, DataSeriesDatum, RawDataSeries } from './series';
+import { isAreaSeriesSpec, isLineSeriesSpec, SeriesSpecs, BasicSeriesSpec } from './specs';
 
 /** @internal */
 export const formatNonStackedDataSeriesValues = (
@@ -36,10 +37,10 @@ export const formatNonStackedDataSeriesValues = (
     const spec = getSpecsById<BasicSeriesSpec>(seriesSpecs, formattedDataValue.specId);
 
     if (
-      spec !== null &&
-      spec !== undefined &&
-      (isAreaSeriesSpec(spec) || isLineSeriesSpec(spec)) &&
-      spec.fit !== undefined
+      spec !== null
+      && spec !== undefined
+      && (isAreaSeriesSpec(spec) || isLineSeriesSpec(spec))
+      && spec.fit !== undefined
     ) {
       const fittedData = fitFunction(formattedDataValue, spec.fit, xScaleType);
       formattedValues.push(fittedData);
@@ -63,12 +64,10 @@ export const formatNonStackedDataValues = (dataSeries: RawDataSeries, scaleToExt
     let y0: number | null;
     if (y1 === null) {
       y0 = null;
+    } else if (scaleToExtent) {
+      y0 = data.y0 ? data.y0 : y1;
     } else {
-      if (scaleToExtent) {
-        y0 = data.y0 ? data.y0 : y1;
-      } else {
-        y0 = data.y0 ? data.y0 : 0;
-      }
+      y0 = data.y0 ? data.y0 : 0;
     }
 
     const formattedValue: DataSeriesDatum = {

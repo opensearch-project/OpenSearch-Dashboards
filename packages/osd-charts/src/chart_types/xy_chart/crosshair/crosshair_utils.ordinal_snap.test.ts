@@ -14,15 +14,16 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { ChartTypes } from '../..';
+import { ScaleType } from '../../../scales';
+import { SpecTypes } from '../../../specs/settings';
+import { computeSeriesDomains } from '../state/utils';
 import { computeXScale } from '../utils/scales';
 import { BasicSeriesSpec, SeriesTypes } from '../utils/specs';
-import { ScaleType } from '../../../scales';
 import { getSnapPosition } from './crosshair_utils';
-import { computeSeriesDomains } from '../state/utils';
-import { ChartTypes } from '../..';
-import { SpecTypes } from '../../../specs/settings';
 
 describe('Crosshair utils ordinal scales', () => {
   const barSeries1SpecId = 'barSeries1';

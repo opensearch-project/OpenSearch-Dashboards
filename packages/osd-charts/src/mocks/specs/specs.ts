@@ -14,9 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { mergePartial, Position, RecursivePartial } from '../../utils/commons';
+import { ChartTypes } from '../../chart_types';
+import { config, percentFormatter } from '../../chart_types/partition_chart/layout/config/config';
+import { PartitionLayout } from '../../chart_types/partition_chart/layout/types/config_types';
+import { ShapeTreeNode } from '../../chart_types/partition_chart/layout/types/viewmodel_types';
+import { AGGREGATE_KEY, PrimitiveValue } from '../../chart_types/partition_chart/layout/utils/group_by_rollup';
+import { PartitionSpec } from '../../chart_types/partition_chart/specs';
 import {
   SeriesSpecs,
   DEFAULT_GLOBAL_ID,
@@ -35,15 +41,9 @@ import {
   AxisSpec,
 } from '../../chart_types/xy_chart/utils/specs';
 import { ScaleType } from '../../scales';
-import { ChartTypes } from '../../chart_types';
 import { SettingsSpec, SpecTypes, TooltipType } from '../../specs';
+import { Datum, mergePartial, Position, RecursivePartial } from '../../utils/commons';
 import { LIGHT_THEME } from '../../utils/themes/light_theme';
-import { PartitionSpec } from '../../chart_types/partition_chart/specs';
-import { config, percentFormatter } from '../../chart_types/partition_chart/layout/config/config';
-import { ShapeTreeNode } from '../../chart_types/partition_chart/layout/types/viewmodel_types';
-import { Datum } from '../../utils/commons';
-import { AGGREGATE_KEY, PrimitiveValue } from '../../chart_types/partition_chart/layout/utils/group_by_rollup';
-import { PartitionLayout } from '../../chart_types/partition_chart/layout/types/config_types';
 
 /** @internal */
 export class MockSeriesSpec {
@@ -230,6 +230,7 @@ export class MockSeriesSpec {
         return MockSeriesSpec.barBase;
     }
   }
+
   static byTypePartial(type?: 'line' | 'bar' | 'area' | 'histogram') {
     switch (type) {
       case 'line':
@@ -270,8 +271,8 @@ export class MockGlobalSpec {
     id: '__global__settings___',
     chartType: ChartTypes.Global,
     specType: SpecTypes.Settings,
-    rendering: 'canvas' as 'canvas',
-    rotation: 0 as 0,
+    rendering: 'canvas' as const,
+    rotation: 0 as const,
     animateData: true,
     showLegend: false,
     resizeDebounce: 10,
@@ -317,11 +318,13 @@ export class MockGlobalSpec {
   static settings(partial?: Partial<SettingsSpec>): SettingsSpec {
     return mergePartial<SettingsSpec>(MockGlobalSpec.settingsBase, partial, { mergeOptionalPartialValues: true });
   }
+
   static settingsNoMargins(partial?: Partial<SettingsSpec>): SettingsSpec {
     return mergePartial<SettingsSpec>(MockGlobalSpec.settingsBaseNoMargings, partial, {
       mergeOptionalPartialValues: true,
     });
   }
+
   static axis(partial?: Partial<AxisSpec>): AxisSpec {
     return mergePartial<AxisSpec>(MockGlobalSpec.axisBase, partial, { mergeOptionalPartialValues: true });
   }
@@ -351,6 +354,7 @@ export class MockAnnotationSpec {
   static line(partial?: Partial<LineAnnotationSpec>): LineAnnotationSpec {
     return mergePartial<LineAnnotationSpec>(MockAnnotationSpec.lineBase, partial, { mergeOptionalPartialValues: true });
   }
+
   static rect(partial?: Partial<RectAnnotationSpec>): RectAnnotationSpec {
     return mergePartial<RectAnnotationSpec>(MockAnnotationSpec.rectBase, partial, { mergeOptionalPartialValues: true });
   }

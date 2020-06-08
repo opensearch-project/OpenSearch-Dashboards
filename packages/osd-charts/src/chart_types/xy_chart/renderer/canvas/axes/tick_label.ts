@@ -14,14 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { AxisTick, getTickLabelProps } from '../../../utils/axis_utils';
 import { AxisProps } from '.';
+import { withContext } from '../../../../../renderers/canvas';
+import { Font, FontStyle } from '../../../../partition_chart/layout/types/types';
+import { AxisTick, getTickLabelProps } from '../../../utils/axis_utils';
 import { renderText } from '../primitives/text';
 import { renderDebugRectCenterRotated } from '../utils/debug';
-import { Font, FontStyle } from '../../../../partition_chart/layout/types/types';
-import { withContext } from '../../../../../renderers/canvas';
 
 /** @internal */
 export function renderTickLabel(ctx: CanvasRenderingContext2D, tick: AxisTick, props: AxisProps) {

@@ -14,9 +14,11 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
+
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, timeFormatter } from '../../src';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
@@ -24,15 +26,15 @@ import { SB_SOURCE_PANEL } from '../utils/storybook';
 const dateFormatter = timeFormatter('HH:mm');
 
 export const Example = () => {
-  const data1 = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => {
-    return [...d, KIBANA_METRICS.metrics.kibana_os_load[0].metric.label];
-  });
-  const data2 = KIBANA_METRICS.metrics.kibana_os_load[1].data.map((d) => {
-    return [...d, KIBANA_METRICS.metrics.kibana_os_load[1].metric.label];
-  });
-  const data3 = KIBANA_METRICS.metrics.kibana_os_load[2].data.map((d) => {
-    return [...d, KIBANA_METRICS.metrics.kibana_os_load[2].metric.label];
-  });
+  const data1 = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => [
+    ...d, KIBANA_METRICS.metrics.kibana_os_load[0].metric.label,
+  ]);
+  const data2 = KIBANA_METRICS.metrics.kibana_os_load[1].data.map((d) => [
+    ...d, KIBANA_METRICS.metrics.kibana_os_load[1].metric.label,
+  ]);
+  const data3 = KIBANA_METRICS.metrics.kibana_os_load[2].data.map((d) => [
+    ...d, KIBANA_METRICS.metrics.kibana_os_load[2].metric.label,
+  ]);
   const allMetrics = [...data3, ...data2, ...data1];
   return (
     <Chart className="story-chart">
@@ -41,7 +43,7 @@ export const Example = () => {
         id="bottom"
         position={Position.Bottom}
         title="timestamp per 1 minute"
-        showOverlappingTicks={true}
+        showOverlappingTicks
         tickFormat={dateFormatter}
       />
       <Axis

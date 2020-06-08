@@ -14,17 +14,19 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
-import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
+
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
+import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
 
 /** @internal */
 export const getBarPaddingsSelector = createCachedSelector(
   [isHistogramModeEnabledSelector, getChartThemeSelector],
-  (isHistogramMode, chartTheme): number => {
-    return isHistogramMode ? chartTheme.scales.histogramPadding : chartTheme.scales.barsPadding;
-  },
+  (isHistogramMode, chartTheme): number => isHistogramMode
+    ? chartTheme.scales.histogramPadding
+    : chartTheme.scales.barsPadding,
 )(getChartIdSelector);

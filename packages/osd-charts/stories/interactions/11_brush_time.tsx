@@ -14,16 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { action } from '@storybook/addon-actions';
-import React from 'react';
-import { Axis, BarSeries, Chart, LineSeries, niceTimeFormatter, Position, ScaleType, Settings } from '../../src';
-
 import { boolean } from '@storybook/addon-knobs';
 import { DateTime } from 'luxon';
-import { getChartRotationKnob } from '../utils/knobs';
 import moment from 'moment-timezone';
+import React from 'react';
+
+import { Axis, BarSeries, Chart, LineSeries, niceTimeFormatter, Position, ScaleType, Settings } from '../../src';
+import { getChartRotationKnob } from '../utils/knobs';
 
 export const Example = () => {
   const now = DateTime.fromISO('2019-01-11T00:00:00.000')
@@ -47,7 +48,7 @@ export const Example = () => {
         onElementClick={action('onElementClick')}
         rotation={getChartRotationKnob()}
       />
-      <Axis id="bottom" position={Position.Bottom} title="bottom" showOverlappingTicks={true} tickFormat={formatter} />
+      <Axis id="bottom" position={Position.Bottom} title="bottom" showOverlappingTicks tickFormat={formatter} />
       <Axis id="left" title="left" position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
 
       <BarSeries

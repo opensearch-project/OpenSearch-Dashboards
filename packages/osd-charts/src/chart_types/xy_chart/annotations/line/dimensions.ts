@@ -14,18 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { AnnotationDomainTypes, LineAnnotationSpec, LineAnnotationDatum } from '../../utils/specs';
-import { Position, Rotation } from '../../../../utils/commons';
-import { AnnotationMarker } from '../types';
-import { isHorizontalRotation } from '../../state/utils';
-import { Dimensions } from '../../../../utils/dimensions';
 import { Scale } from '../../../../scales';
-import { GroupId } from '../../../../utils/ids';
-import { AnnotationLineProps, AnnotationLinePathPoints } from './types';
 import { isContinuousScale, isBandScale } from '../../../../scales/types';
-import { computeXScaleOffset } from '../../state/utils';
+import { Position, Rotation } from '../../../../utils/commons';
+import { Dimensions } from '../../../../utils/dimensions';
+import { GroupId } from '../../../../utils/ids';
+import { isHorizontalRotation, computeXScaleOffset } from '../../state/utils';
+import { AnnotationDomainTypes, LineAnnotationSpec, LineAnnotationDatum } from '../../utils/specs';
+import { AnnotationMarker } from '../types';
+import { AnnotationLineProps, AnnotationLinePathPoints } from './types';
 
 /** @internal */
 export const DEFAULT_LINE_OVERFLOW = 0;
@@ -45,8 +45,7 @@ function computeYDomainLineAnnotationDimensions(
   const isHorizontalChartRotation = isHorizontalRotation(chartRotation);
   // let's use a default Bottom-X/Left-Y axis orientation if we are not showing an axis
   // but we are displaying a line annotation
-  const anchorPosition =
-    axisPosition === null ? (isHorizontalChartRotation ? Position.Left : Position.Bottom) : axisPosition;
+  const anchorPosition = axisPosition === null ? (isHorizontalChartRotation ? Position.Left : Position.Bottom) : axisPosition;
   const lineProps: AnnotationLineProps[] = [];
 
   dataValues.forEach((datum: LineAnnotationDatum) => {
@@ -174,8 +173,7 @@ function computeXDomainLineAnnotationDimensions(
   const isHorizontalChartRotation = isHorizontalRotation(chartRotation);
   // let's use a default Bottom-X/Left-Y axis orientation if we are not showing an axis
   // but we are displaying a line annotation
-  const anchorPosition =
-    axisPosition === null ? (isHorizontalChartRotation ? Position.Bottom : Position.Left) : axisPosition;
+  const anchorPosition = axisPosition === null ? (isHorizontalChartRotation ? Position.Bottom : Position.Left) : axisPosition;
 
   dataValues.forEach((datum: LineAnnotationDatum) => {
     const { dataValue } = datum;
@@ -197,14 +195,14 @@ function computeXDomainLineAnnotationDimensions(
         }
         annotationValueXposition = pureScaledValue - offset;
       } else {
-        annotationValueXposition = annotationValueXposition + (xScale.bandwidth * xScale.totalBarsInCluster) / 2;
+        annotationValueXposition += (xScale.bandwidth * xScale.totalBarsInCluster) / 2;
       }
     } else if (isBandScale(xScale)) {
       if (isHistogramMode) {
         const padding = (xScale.step - xScale.originalBandwidth) / 2;
-        annotationValueXposition = annotationValueXposition - padding;
+        annotationValueXposition -= padding;
       } else {
-        annotationValueXposition = annotationValueXposition + xScale.originalBandwidth / 2;
+        annotationValueXposition += xScale.originalBandwidth / 2;
       }
     } else {
       return;
@@ -336,7 +334,7 @@ export function computeLineAnnotationDimensions(
     );
   }
 
-  const groupId = annotationSpec.groupId;
+  const { groupId } = annotationSpec;
   const yScale = yScales.get(groupId);
   if (!yScale) {
     return null;

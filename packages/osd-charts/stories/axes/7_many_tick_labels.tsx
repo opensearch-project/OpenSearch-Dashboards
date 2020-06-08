@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { number } from '@storybook/addon-knobs';
 import React from 'react';
@@ -32,14 +33,8 @@ export const Example = () => {
 
   return (
     <Chart className="story-chart">
-      <Settings debug={true} />
-      <Axis
-        id="bottom"
-        position={Position.Bottom}
-        title="Bottom axis"
-        showOverlappingTicks={true}
-        style={customStyle}
-      />
+      <Settings debug />
+      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks style={customStyle} />
       <AreaSeries
         id="lines"
         xScaleType={ScaleType.Linear}

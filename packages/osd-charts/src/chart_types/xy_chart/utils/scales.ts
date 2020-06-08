@@ -14,10 +14,11 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { GroupId } from '../../../utils/ids';
 import { Scale, ScaleType, ScaleBand, ScaleContinuous } from '../../../scales';
+import { GroupId } from '../../../utils/ids';
 import { XDomain } from '../domains/x_domain';
 import { YDomain } from '../domains/y_domain';
 import { FormattedDataSeries } from './series';
@@ -40,13 +41,9 @@ export function countBarsInCluster(
   // along x axis, we count one "space" per bar series.
   // we ignore the points, areas, lines as they are
   // aligned with the x value and doesn't occupy space
-  const nonStackedBarsInCluster = nonStacked.reduce((acc, ns) => {
-    return acc + ns.counts.barSeries;
-  }, 0);
+  const nonStackedBarsInCluster = nonStacked.reduce((acc, ns) => acc + ns.counts.barSeries, 0);
   // count stacked bars groups as 1 per group
-  const stackedBarsInCluster = stacked.reduce((acc, ns) => {
-    return acc + (ns.counts.barSeries > 0 ? 1 : 0);
-  }, 0);
+  const stackedBarsInCluster = stacked.reduce((acc, ns) => acc + (ns.counts.barSeries > 0 ? 1 : 0), 0);
   const totalBarsInCluster = nonStackedBarsInCluster + stackedBarsInCluster;
   return {
     nonStackedBarsInCluster,
@@ -97,44 +94,42 @@ export function computeXScale(options: XScaleOptions): Scale {
     const dividend = totalBarsInCluster > 0 ? totalBarsInCluster : 1;
     const bandwidth = rangeDiff / (domain.length * dividend);
     return new ScaleBand(domain, range, bandwidth, barsPadding);
-  } else {
-    if (isBandScale) {
-      const [domainMin, domainMax] = domain;
-      const isSingleValueHistogram = !!enableHistogramMode && domainMax - domainMin === 0;
-
-      const adjustedDomainMax = isSingleValueHistogram ? domainMin + minInterval : domainMax;
-      const adjustedDomain = [domainMin, adjustedDomainMax];
-
-      const intervalCount = (adjustedDomain[1] - adjustedDomain[0]) / minInterval;
-      const intervalCountOffest = isSingleValueHistogram ? 0 : 1;
-      const bandwidth = rangeDiff / (intervalCount + intervalCountOffest);
-      const { start, end } = getBandScaleRange(isInverse, isSingleValueHistogram, range[0], range[1], bandwidth);
-
-      const scale = new ScaleContinuous(
-        {
-          type: scaleType,
-          domain: adjustedDomain,
-          range: [start, end],
-        },
-        {
-          bandwidth: totalBarsInCluster > 0 ? bandwidth / totalBarsInCluster : bandwidth,
-          minInterval,
-          timeZone,
-          totalBarsInCluster,
-          barsPadding,
-          ticks,
-          isSingleValueHistogram,
-        },
-      );
-
-      return scale;
-    } else {
-      return new ScaleContinuous(
-        { type: scaleType, domain, range },
-        { bandwidth: 0, minInterval, timeZone, totalBarsInCluster, barsPadding, ticks, integersOnly },
-      );
-    }
   }
+  if (isBandScale) {
+    const [domainMin, domainMax] = domain;
+    const isSingleValueHistogram = !!enableHistogramMode && domainMax - domainMin === 0;
+
+    const adjustedDomainMax = isSingleValueHistogram ? domainMin + minInterval : domainMax;
+    const adjustedDomain = [domainMin, adjustedDomainMax];
+
+    const intervalCount = (adjustedDomain[1] - adjustedDomain[0]) / minInterval;
+    const intervalCountOffest = isSingleValueHistogram ? 0 : 1;
+    const bandwidth = rangeDiff / (intervalCount + intervalCountOffest);
+    const { start, end } = getBandScaleRange(isInverse, isSingleValueHistogram, range[0], range[1], bandwidth);
+
+    const scale = new ScaleContinuous(
+      {
+        type: scaleType,
+        domain: adjustedDomain,
+        range: [start, end],
+      },
+      {
+        bandwidth: totalBarsInCluster > 0 ? bandwidth / totalBarsInCluster : bandwidth,
+        minInterval,
+        timeZone,
+        totalBarsInCluster,
+        barsPadding,
+        ticks,
+        isSingleValueHistogram,
+      },
+    );
+
+    return scale;
+  }
+  return new ScaleContinuous(
+    { type: scaleType, domain, range },
+    { bandwidth: 0, minInterval, timeZone, totalBarsInCluster, barsPadding, ticks, integersOnly },
+  );
 }
 
 interface YScaleOptions {

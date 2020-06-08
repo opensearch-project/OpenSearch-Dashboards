@@ -14,12 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { withContext, withRotatedOrigin } from '../../../../../renderers/canvas';
+import { Point } from '../../../../../utils/point';
 import { Font, TextAlign, TextBaseline } from '../../../../partition_chart/layout/types/types';
 import { cssFontShorthand, measureText } from '../../../../partition_chart/layout/utils/measure';
-import { Point } from '../../../../../utils/point';
 
 /** @internal */
 export function renderText(
@@ -91,14 +92,14 @@ export function wrapLines(
     let lineWidth = getTextWidth(line);
     if (fixedWidth && lineWidth > maxWidth) {
       while (line.length > 0) {
-        let low = 0,
-          high = line.length,
-          match = '',
-          matchWidth = 0;
+        let low = 0;
+        let high = line.length;
+        let match = '';
+        let matchWidth = 0;
         while (low < high) {
-          const mid = (low + high) >>> 1,
-            substr = line.slice(0, mid + 1),
-            substrWidth = getTextWidth(substr) + additionalWidth;
+          const mid = (low + high) >>> 1;
+          const substr = line.slice(0, mid + 1);
+          const substrWidth = getTextWidth(substr) + additionalWidth;
           if (substrWidth <= maxWidth) {
             low = mid + 1;
             match = substr + (shouldAddEllipsis ? ELLIPSIS : '');
@@ -123,7 +124,7 @@ export function wrapLines(
               matchWidth = getTextWidth(match);
             }
           }
-          match = match.trimRight();
+          match = match.trimEnd();
           textArr.push(match);
           textWidth = Math.max(textWidth, matchWidth);
           currentHeightPx += lineHeightPx;
@@ -131,7 +132,7 @@ export function wrapLines(
             break;
           }
           line = line.slice(low);
-          line = line.trimLeft();
+          line = line.trimStart();
           if (line.length > 0) {
             lineWidth = getTextWidth(line);
             if (lineWidth <= maxWidth) {

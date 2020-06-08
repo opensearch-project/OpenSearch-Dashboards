@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -15,12 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+/* eslint-disable import/no-unresolved */
 // @ts-ignore
 import themeDark from '../src/theme_dark.scss?lazy';
 // @ts-ignore
 import themeLight from '../src/theme_light.scss?lazy';
+/* eslint-enable */
 
 export function switchTheme(theme: string) {
   switch (theme) {
@@ -29,8 +31,8 @@ export function switchTheme(theme: string) {
       themeLight.use();
       return;
     case 'dark':
+    default:
       themeLight.unuse();
       themeDark.use();
-      return;
   }
 }

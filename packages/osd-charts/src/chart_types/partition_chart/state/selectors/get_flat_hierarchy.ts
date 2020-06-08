@@ -14,19 +14,19 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { getTree } from './tree';
+
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { HierarchyOfArrays, PrimitiveValue } from '../../layout/utils/group_by_rollup';
+import { getTree } from './tree';
 
 /** @internal */
 export const getFlatHierarchy = createCachedSelector(
   [getTree],
-  (tree): Array<[PrimitiveValue, number, PrimitiveValue]> => {
-    return flatHierarchy(tree);
-  },
+  (tree): Array<[PrimitiveValue, number, PrimitiveValue]> => flatHierarchy(tree),
 )(getChartIdSelector);
 
 function flatHierarchy(tree: HierarchyOfArrays, orderedList: Array<[PrimitiveValue, number, PrimitiveValue]> = []) {

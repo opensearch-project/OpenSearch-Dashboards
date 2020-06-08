@@ -14,12 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { Stroke, Line } from '../../../../../geoms/types';
+import { LineAnnotationStyle } from '../../../../../utils/themes/theme';
 import { stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { AnnotationLineProps } from '../../../annotations/line/types';
-import { LineAnnotationStyle } from '../../../../../utils/themes/theme';
 import { renderMultiLine } from '../primitives/line';
 
 /** @internal */
@@ -41,7 +42,7 @@ export function renderLineAnnotations(
     };
   });
   const strokeColor = stringToRGB(lineStyle.line.stroke);
-  strokeColor.opacity = strokeColor.opacity * lineStyle.line.opacity;
+  strokeColor.opacity *= lineStyle.line.opacity;
   const stroke: Stroke = {
     color: strokeColor,
     width: lineStyle.line.strokeWidth,

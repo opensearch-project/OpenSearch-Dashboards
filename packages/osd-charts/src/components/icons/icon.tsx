@@ -14,10 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import classNames from 'classnames';
 import React, { SVGAttributes } from 'react';
+
 import { deepEqual } from '../../utils/fast_deep_equal';
 import { AlertIcon } from './assets/alert';
 import { DotIcon } from './assets/dot';
@@ -72,12 +74,14 @@ export class Icon extends React.Component<IconComponentProps> {
 
     const Svg = (type && typeToIconMap[type]) || EmptyIcon;
 
-    // This is a fix for IE and Edge, which ignores tabindex="-1" on an SVG, but respects
-    // focusable="false".
-    //   - If there's no tab index specified, we'll default the icon to not be focusable,
-    //     which is how SVGs behave in Chrome, Safari, and FF.
-    //   - If tab index is -1, then the consumer wants the icon to not be focusable.
-    //   - For all other values, the consumer wants the icon to be focusable.
+    /*
+     * This is a fix for IE and Edge, which ignores tabindex="-1" on an SVG, but respects
+     * focusable="false".
+     *   - If there's no tab index specified, we'll default the icon to not be focusable,
+     *     which is how SVGs behave in Chrome, Safari, and FF.
+     *   - If tab index is -1, then the consumer wants the icon to not be focusable.
+     *   - For all other values, the consumer wants the icon to be focusable.
+     */
     const focusable = tabIndex == null || tabIndex === -1 ? 'false' : 'true';
 
     return <Svg className={classes} {...optionalCustomStyles} tabIndex={tabIndex} focusable={focusable} {...rest} />;

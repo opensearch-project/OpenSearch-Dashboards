@@ -14,16 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { common } from '../page_objects';
 import { Fit } from '../../src';
+import { common } from '../page_objects';
 
 describe('Mixed series stories', () => {
   describe('Fitting functions', () => {
     describe('Area charts - no endValue', () => {
       Object.values(Fit).forEach((fitType) => {
-        it(`should display correct fit for type - ${fitType}`, async () => {
+        it(`should display correct fit for type - ${fitType}`, async() => {
           await common.expectChartAtUrlToMatchScreenshot(
             `http://localhost:9001/?path=/story/mixed-charts--fitting-functions-non-stacked-series&knob-seriesType=area&knob-dataset=all&knob-fitting function=${fitType}&knob-Curve=0&knob-End value=none&knob-Explicit valuve (using Fit.Explicit)=8`,
           );
@@ -33,7 +34,7 @@ describe('Mixed series stories', () => {
 
     describe('Area charts - endValue set to 2', () => {
       Object.values(Fit).forEach((fitType) => {
-        it(`should display correct fit for type - ${fitType}`, async () => {
+        it(`should display correct fit for type - ${fitType}`, async() => {
           await common.expectChartAtUrlToMatchScreenshot(
             `http://localhost:9001/?path=/story/mixed-charts--fitting-functions-non-stacked-series&knob-seriesType=area&knob-dataset=all&knob-fitting function=${fitType}&knob-Curve=0&knob-End value=2&knob-Explicit valuve (using Fit.Explicit)=8`,
           );
@@ -43,7 +44,7 @@ describe('Mixed series stories', () => {
 
     describe('Area charts - endValue set to "nearest"', () => {
       Object.values(Fit).forEach((fitType) => {
-        it(`should display correct fit for type - ${fitType}`, async () => {
+        it(`should display correct fit for type - ${fitType}`, async() => {
           await common.expectChartAtUrlToMatchScreenshot(
             `http://localhost:9001/?path=/story/mixed-charts--fitting-functions-non-stacked-series&knob-seriesType=area&knob-dataset=all&knob-fitting function=${fitType}&knob-Curve=0&knob-End value=nearest&knob-Explicit valuve (using Fit.Explicit)=8`,
           );
@@ -53,7 +54,7 @@ describe('Mixed series stories', () => {
 
     describe('Area charts - with curved - endValue set to 2', () => {
       Object.values(Fit).forEach((fitType) => {
-        it(`should display correct fit for type - ${fitType}`, async () => {
+        it(`should display correct fit for type - ${fitType}`, async() => {
           await common.expectChartAtUrlToMatchScreenshot(
             `http://localhost:9001/?path=/story/mixed-charts--fitting-functions-non-stacked-series&knob-seriesType=area&knob-dataset=all&knob-fitting function=${fitType}&knob-Curve=1&knob-End value=2&knob-Explicit valuve (using Fit.Explicit)=8`,
           );
@@ -63,7 +64,7 @@ describe('Mixed series stories', () => {
 
     describe('Area charts - Ordinal dataset - no endValue', () => {
       Object.values(Fit).forEach((fitType) => {
-        it(`should display correct fit for type - ${fitType}`, async () => {
+        it(`should display correct fit for type - ${fitType}`, async() => {
           await common.expectChartAtUrlToMatchScreenshot(
             `http://localhost:9001/?path=/story/mixed-charts--fitting-functions-non-stacked-series&knob-seriesType=area&knob-dataset=ordinal&knob-fitting function=${fitType}&knob-Curve=0&knob-End value=none&knob-Explicit valuve (using Fit.Explicit)=8`,
           );
@@ -73,7 +74,7 @@ describe('Mixed series stories', () => {
 
     describe('Line charts - no endValue', () => {
       Object.values(Fit).forEach((fitType) => {
-        it(`should display correct fit for type - ${fitType}`, async () => {
+        it(`should display correct fit for type - ${fitType}`, async() => {
           await common.expectChartAtUrlToMatchScreenshot(
             `http://localhost:9001/?path=/story/mixed-charts--fitting-functions-non-stacked-series&knob-seriesType=line&knob-dataset=all&knob-fitting function=${fitType}&knob-Curve=0&knob-End value=none&knob-Explicit valuve (using Fit.Explicit)=8`,
           );
@@ -83,7 +84,7 @@ describe('Mixed series stories', () => {
 
     describe('Line charts - endValue set to 2', () => {
       Object.values(Fit).forEach((fitType) => {
-        it(`should display correct fit for type - ${fitType}`, async () => {
+        it(`should display correct fit for type - ${fitType}`, async() => {
           await common.expectChartAtUrlToMatchScreenshot(
             `http://localhost:9001/?path=/story/mixed-charts--fitting-functions-non-stacked-series&knob-seriesType=line&knob-dataset=all&knob-fitting function=${fitType}&knob-Curve=0&knob-End value=2&knob-Explicit valuve (using Fit.Explicit)=8`,
           );
@@ -93,7 +94,7 @@ describe('Mixed series stories', () => {
 
     describe('Line charts - with curve - endValue set to 2', () => {
       Object.values(Fit).forEach((fitType) => {
-        it(`should display correct fit for type - ${fitType}`, async () => {
+        it(`should display correct fit for type - ${fitType}`, async() => {
           await common.expectChartAtUrlToMatchScreenshot(
             `http://localhost:9001/?path=/story/mixed-charts--fitting-functions-non-stacked-series&knob-seriesType=line&knob-dataset=all&knob-fitting function=${fitType}&knob-Curve=1&knob-End value=2&knob-Explicit valuve (using Fit.Explicit)=8`,
           );

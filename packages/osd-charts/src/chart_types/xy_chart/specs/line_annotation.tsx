@@ -14,16 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React, { createRef, CSSProperties, Component } from 'react';
-import { LineAnnotationSpec, DEFAULT_GLOBAL_ID, AnnotationTypes } from '../utils/specs';
-import { DEFAULT_ANNOTATION_LINE_STYLE, mergeWithDefaultAnnotationLine } from '../../../utils/themes/theme';
-import { bindActionCreators, Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import { upsertSpec, removeSpec } from '../../../state/actions/specs';
-import { Spec, SpecTypes } from '../../../specs';
+import { bindActionCreators, Dispatch } from 'redux';
+
 import { ChartTypes } from '../..';
+import { Spec, SpecTypes } from '../../../specs';
+import { upsertSpec as upsertSpecAction, removeSpec as removeSpecAction } from '../../../state/actions/specs';
+import { DEFAULT_ANNOTATION_LINE_STYLE, mergeWithDefaultAnnotationLine } from '../../../utils/themes/theme';
+import { LineAnnotationSpec, DEFAULT_GLOBAL_ID, AnnotationTypes } from '../utils/specs';
 
 type InjectedProps = LineAnnotationSpec &
   DispatchProps &
@@ -74,18 +76,22 @@ export class LineAnnotationSpecComponent extends Component<LineAnnotationSpec> {
     const spec = { ...config, style };
     upsertSpec(spec);
   }
+
   componentWillUnmount() {
     const { removeSpec, id } = this.props as InjectedProps;
     removeSpec(id);
   }
+
   render() {
     if (!this.props.marker) {
       return null;
     }
 
-    // We need to get the width & height of the marker passed into the spec
-    // so we render the marker offscreen if one has been defined & update the config
-    // with the width & height.
+    /*
+     * We need to get the width & height of the marker passed into the spec
+     * so we render the marker offscreen if one has been defined & update the config
+     * with the width & height.
+     */
     const offscreenStyle: CSSProperties = {
       position: 'absolute',
       left: -9999,
@@ -107,8 +113,8 @@ interface DispatchProps {
 const mapDispatchToProps = (dispatch: Dispatch): DispatchProps =>
   bindActionCreators(
     {
-      upsertSpec,
-      removeSpec,
+      upsertSpec: upsertSpecAction,
+      removeSpec: removeSpecAction,
     },
     dispatch,
   );
@@ -122,7 +128,7 @@ type SpecOptionalProps = Partial<
 >;
 
 export const LineAnnotation: React.FunctionComponent<SpecRequiredProps & SpecOptionalProps> = connect<
-  {},
+  null,
   DispatchProps,
   LineAnnotationSpec
 >(

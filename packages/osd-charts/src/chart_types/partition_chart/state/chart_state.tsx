@@ -14,28 +14,32 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
-import { InternalChartState, GlobalChartState, BackwardRef } from '../../../state/chart_state';
+
 import { ChartTypes } from '../..';
-import { Partition } from '../renderer/canvas/partition';
-import { isTooltipVisibleSelector } from '../state/selectors/is_tooltip_visible';
-import { getTooltipInfoSelector } from '../state/selectors/tooltip';
 import { Tooltip } from '../../../components/tooltip';
-import { createOnElementClickCaller } from './selectors/on_element_click_caller';
-import { createOnElementOverCaller } from './selectors/on_element_over_caller';
-import { createOnElementOutCaller } from './selectors/on_element_out_caller';
-import { computeLegendSelector } from './selectors/compute_legend';
-import { getLegendItemsLabels } from './selectors/get_legend_items_labels';
+import { InternalChartState, GlobalChartState, BackwardRef } from '../../../state/chart_state';
+import { Partition } from '../renderer/canvas/partition';
 import { HighlighterFromHover } from '../renderer/dom/highlighter_hover';
 import { HighlighterFromLegend } from '../renderer/dom/highlighter_legend';
+import { computeLegendSelector } from './selectors/compute_legend';
+import { getLegendItemsLabels } from './selectors/get_legend_items_labels';
+import { isTooltipVisibleSelector } from './selectors/is_tooltip_visible';
+import { createOnElementClickCaller } from './selectors/on_element_click_caller';
+import { createOnElementOutCaller } from './selectors/on_element_out_caller';
+import { createOnElementOverCaller } from './selectors/on_element_over_caller';
 import { getPieSpec } from './selectors/pie_spec';
+import { getTooltipInfoSelector } from './selectors/tooltip';
 
 const EMPTY_MAP = new Map();
 
 /** @internal */
 export class PartitionState implements InternalChartState {
+  chartType = ChartTypes.Partition;
+
   onElementClickCaller: (state: GlobalChartState) => void;
   onElementOverCaller: (state: GlobalChartState) => void;
   onElementOutCaller: (state: GlobalChartState) => void;
@@ -45,28 +49,35 @@ export class PartitionState implements InternalChartState {
     this.onElementOverCaller = createOnElementOverCaller();
     this.onElementOutCaller = createOnElementOutCaller();
   }
-  chartType = ChartTypes.Partition;
+
   isInitialized(globalState: GlobalChartState) {
     return globalState.specsInitialized && getPieSpec(globalState) !== null;
   }
+
   isBrushAvailable() {
     return false;
   }
+
   isBrushing() {
     return false;
   }
+
   isChartEmpty() {
     return false;
   }
+
   getLegendItemsLabels(globalState: GlobalChartState) {
     return getLegendItemsLabels(globalState);
   }
+
   getLegendItems(globalState: GlobalChartState) {
     return computeLegendSelector(globalState);
   }
+
   getLegendExtraValues() {
     return EMPTY_MAP;
   }
+
   chartRenderer(containerRef: BackwardRef) {
     return (
       <>
@@ -77,23 +88,28 @@ export class PartitionState implements InternalChartState {
       </>
     );
   }
+
   getPointerCursor() {
     return 'default';
   }
+
   isTooltipVisible(globalState: GlobalChartState) {
     return isTooltipVisibleSelector(globalState);
   }
+
   getTooltipInfo(globalState: GlobalChartState) {
     return getTooltipInfoSelector(globalState);
   }
+
   getTooltipAnchor(state: GlobalChartState) {
-    const position = state.interactions.pointer.current.position;
+    const { position } = state.interactions.pointer.current;
     return {
       isRotated: false,
       x1: position.x,
       y1: position.y,
     };
   }
+
   eventCallbacks(globalState: GlobalChartState) {
     this.onElementOverCaller(globalState);
     this.onElementOutCaller(globalState);

@@ -14,17 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
+
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { compareByValueAsc } from '../../../../utils/commons';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 
 /** @internal */
 export const getGeometriesIndexKeysSelector = createCachedSelector(
   [computeSeriesGeometriesSelector],
-  (seriesGeometries): (number | string)[] => {
-    return seriesGeometries.geometriesIndex.keys().sort(compareByValueAsc);
-  },
+  (seriesGeometries): (number | string)[] => seriesGeometries.geometriesIndex.keys().sort(compareByValueAsc),
 )(getChartIdSelector);

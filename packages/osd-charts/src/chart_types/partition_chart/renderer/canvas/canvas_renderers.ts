@@ -14,10 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { clearCanvas, renderLayers, withContext } from '../../../../renderers/canvas';
+import { PartitionLayout } from '../../layout/types/config_types';
 import { Pixels } from '../../layout/types/geometry_types';
-import { addOpacity } from '../../layout/utils/calcs';
 import {
   LinkLabelVM,
   OutsideLinksViewModel,
@@ -26,10 +28,9 @@ import {
   ShapeViewModel,
   TextRow,
 } from '../../layout/types/viewmodel_types';
+import { addOpacity } from '../../layout/utils/calcs';
 import { TAU } from '../../layout/utils/math';
-import { PartitionLayout } from '../../layout/types/config_types';
 import { cssFontShorthand } from '../../layout/utils/measure';
-import { clearCanvas, renderLayers, withContext } from '../../../../renderers/canvas';
 import { LinkLabelsViewModelSpec } from '../../layout/viewmodel/link_text_layout';
 
 // the burnout avoidance in the center of the pie
@@ -38,7 +39,7 @@ const TAPER_OFF_LIMIT = 50; // taper off within a radius of TAPER_OFF_LIMIT to a
 
 function renderTextRow(
   ctx: CanvasRenderingContext2D,
-  { fontSize, fillTextColor, rotation, verticalAlignment, leftAlign /*, container*/ }: RowSet,
+  { fontSize, fillTextColor, rotation, verticalAlignment, leftAlign /* , container */ }: RowSet,
 ) {
   return (currentRow: TextRow) => {
     const crx = leftAlign
@@ -57,19 +58,19 @@ function renderTextRow(
       });
     });
     /*
-    // for debug use: this draws magenta boxes for where the text needs to fit
-    // note: `container` is a property of the RowSet, needs to be added
-    withContext(ctx, (ctx) => {
-      ctx.scale(1, -1);
-      ctx.rotate(-rotation);
-      ctx.beginPath();
-      ctx.strokeStyle = 'magenta';
-      ctx.fillStyle = 'magenta';
-      ctx.lineWidth = 1;
-      ctx.rect(container.x0 + 1, container.y0 + 1, container.x1 - container.x0 - 2, container.y1 - container.y0 - 2);
-      ctx.stroke();
-    });
-    */
+     * // for debug use: this draws magenta boxes for where the text needs to fit
+     * // note: `container` is a property of the RowSet, needs to be added
+     *withContext(ctx, (ctx) => {
+     *  ctx.scale(1, -1);
+     *  ctx.rotate(-rotation);
+     *  ctx.beginPath();
+     *  ctx.strokeStyle = 'magenta';
+     *  ctx.fillStyle = 'magenta';
+     *  ctx.lineWidth = 1;
+     *  ctx.rect(container.x0 + 1, container.y0 + 1, container.x1 - container.x0 - 2, container.y1 - container.y0 - 2);
+     *  ctx.stroke();
+     *});
+     */
   };
 }
 

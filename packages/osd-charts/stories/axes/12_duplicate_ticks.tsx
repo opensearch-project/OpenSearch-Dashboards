@@ -14,14 +14,16 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import React from 'react';
-import { Axis, Chart, LineSeries, Position, ScaleType, niceTimeFormatter } from '../../src';
-import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 import { boolean } from '@storybook/addon-knobs';
 import { DateTime } from 'luxon';
 import moment from 'moment-timezone';
+import React from 'react';
+
+import { Axis, Chart, LineSeries, Position, ScaleType, niceTimeFormatter } from '../../src';
+import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 
 export const Example = () => {
   const now = DateTime.fromISO('2019-01-11T00:00:00.000')

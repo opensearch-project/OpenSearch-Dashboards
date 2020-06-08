@@ -14,15 +14,16 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { SpecActions } from './specs';
 import { ChartActions } from './chart';
 import { ChartSettingsActions } from './chart_settings';
-import { LegendActions } from './legend';
-import { EventsActions } from './events';
-import { MouseActions } from './mouse';
 import { ColorsActions } from './colors';
+import { EventsActions } from './events';
+import { LegendActions } from './legend';
+import { MouseActions } from './mouse';
+import { SpecActions } from './specs';
 
 /** @internal */
 export type StateActions =

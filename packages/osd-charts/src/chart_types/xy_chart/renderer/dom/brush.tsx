@@ -14,20 +14,22 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React, { RefObject } from 'react';
 import { connect } from 'react-redux';
-import { Dimensions } from '../../../../utils/dimensions';
-import { GlobalChartState } from '../../../../state/chart_state';
-import { getBrushAreaSelector } from '../../state/selectors/get_brush_area';
-import { isBrushAvailableSelector } from '../../state/selectors/is_brush_available';
-import { computeChartDimensionsSelector } from '../../state/selectors/compute_chart_dimensions';
-import { isBrushingSelector } from '../../state/selectors/is_brushing';
-import { renderRect } from '../canvas/primitives/rect';
+
 import { clearCanvas, withContext, withClip } from '../../../../renderers/canvas';
+import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
+import { Dimensions } from '../../../../utils/dimensions';
+import { computeChartDimensionsSelector } from '../../state/selectors/compute_chart_dimensions';
+import { getBrushAreaSelector } from '../../state/selectors/get_brush_area';
+import { isBrushAvailableSelector } from '../../state/selectors/is_brush_available';
+import { isBrushingSelector } from '../../state/selectors/is_brushing';
+import { renderRect } from '../canvas/primitives/rect';
 
 interface Props {
   initialized: boolean;
@@ -40,6 +42,7 @@ interface Props {
 
 class BrushToolComponent extends React.Component<Props> {
   static displayName = 'BrushToolComponent';
+
   private readonly devicePixelRatio: number;
   private ctx: CanvasRenderingContext2D | null;
   private canvasRef: RefObject<HTMLCanvasElement>;
@@ -50,10 +53,16 @@ class BrushToolComponent extends React.Component<Props> {
     this.devicePixelRatio = window.devicePixelRatio;
     this.canvasRef = React.createRef();
   }
-  private tryCanvasContext() {
-    const canvas = this.canvasRef.current;
-    this.ctx = canvas && canvas.getContext('2d');
+
+  componentDidMount() {
+    /*
+     * the DOM element has just been appended, and getContext('2d') is always non-null,
+     * so we could use a couple of ! non-null assertions but no big plus
+     */
+    this.tryCanvasContext();
+    this.drawCanvas();
   }
+
   componentDidUpdate() {
     if (!this.ctx) {
       this.tryCanvasContext();
@@ -63,12 +72,6 @@ class BrushToolComponent extends React.Component<Props> {
     }
   }
 
-  componentDidMount() {
-    // the DOM element has just been appended, and getContext('2d') is always non-null,
-    // so we could use a couple of ! non-null assertions but no big plus
-    this.tryCanvasContext();
-    this.drawCanvas();
-  }
   private drawCanvas = () => {
     const { brushArea, chartDimensions } = this.props;
     if (!this.ctx || !brushArea) {
@@ -109,6 +112,11 @@ class BrushToolComponent extends React.Component<Props> {
       );
     });
   };
+
+  private tryCanvasContext() {
+    const canvas = this.canvasRef.current;
+    this.ctx = canvas && canvas.getContext('2d');
+  }
 
   render() {
     const { initialized, isBrushAvailable, isBrushing, chartContainerDimensions } = this.props;

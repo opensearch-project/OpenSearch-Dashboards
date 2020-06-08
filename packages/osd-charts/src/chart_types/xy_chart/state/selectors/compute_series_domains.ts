@@ -14,15 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { getSeriesSpecsSelector } from './get_specs';
-import { mergeYCustomDomainsByGroupIdSelector } from './merge_y_custom_domains';
-import { computeSeriesDomains, SeriesDomainsAndData } from '../utils';
+
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
+import { computeSeriesDomains, SeriesDomainsAndData } from '../utils';
+import { getSeriesSpecsSelector } from './get_specs';
+import { mergeYCustomDomainsByGroupIdSelector } from './merge_y_custom_domains';
 
 const getDeselectedSeriesSelector = (state: GlobalChartState) => state.interactions.deselectedDataSeries;
 

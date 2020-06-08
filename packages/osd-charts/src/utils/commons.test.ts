@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import {
   maxValueWithUpperLimit,
@@ -56,7 +57,7 @@ describe('commons utilities', () => {
     const a = {};
     expect(identity(a)).toBe(a);
     expect(identity(null)).toBe(null);
-    expect(identity(undefined)).toBe(undefined);
+    expect(identity(undefined)).toBeUndefined();
     const fn = () => ({});
     expect(identity(fn)).toBe(fn);
   });
@@ -430,7 +431,7 @@ describe('commons utilities', () => {
       const newBase = mergePartial(base, partial);
       expect(newBase).toEqual({
         ...newBase,
-        array1: partial!.array1,
+        array1: partial.array1,
       });
     });
 
@@ -439,7 +440,7 @@ describe('commons utilities', () => {
       const newBase = mergePartial(base, partial);
       expect(newBase).toEqual({
         ...newBase,
-        array2: partial!.array2,
+        array2: partial.array2,
       });
     });
 
@@ -450,7 +451,7 @@ describe('commons utilities', () => {
         ...newBase,
         nested: {
           ...newBase.nested,
-          number: partial!.nested!.number,
+          number: partial.nested!.number,
         },
       });
     });
@@ -508,7 +509,7 @@ describe('commons utilities', () => {
         );
       });
 
-      it('should merge nested Maps', () => {
+      it('should merge nested Maps with partail', () => {
         const result = mergePartial(
           {
             test: new Map([
@@ -895,7 +896,7 @@ describe('commons utilities', () => {
         const newBase = mergePartial(base, partial, {}, partials);
         expect(newBase).toEqual({
           ...newBase,
-          array2: partials![1].array2,
+          array2: partials[1].array2,
         });
       });
 
@@ -907,7 +908,7 @@ describe('commons utilities', () => {
           ...newBase,
           nested: {
             ...newBase.nested,
-            number: partial!.nested!.number,
+            number: partial.nested!.number,
           },
         });
       });
@@ -920,7 +921,7 @@ describe('commons utilities', () => {
           ...newBase,
           nested: {
             ...newBase.nested,
-            number: partials![0].nested!.number,
+            number: partials[0].nested!.number,
           },
         });
       });

@@ -14,13 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { AreaGeometry, PointGeometry, BarGeometry, LineGeometry, BubbleGeometry } from '../utils/geometry';
-import { MockSeriesIdentifier } from './series/series_identifiers';
-import { mergePartial, RecursivePartial } from '../utils/commons';
-import { LIGHT_THEME } from '../utils/themes/light_theme';
 import { omit } from 'lodash';
+
+import { mergePartial, RecursivePartial } from '../utils/commons';
+import { AreaGeometry, PointGeometry, BarGeometry, LineGeometry, BubbleGeometry } from '../utils/geometry';
+import { LIGHT_THEME } from '../utils/themes/light_theme';
+import { MockSeriesIdentifier } from './series/series_identifiers';
 
 const color = 'red';
 const { barSeriesStyle, lineSeriesStyle, areaSeriesStyle, bubbleSeriesStyle } = LIGHT_THEME;

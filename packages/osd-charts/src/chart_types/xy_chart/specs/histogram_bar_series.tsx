@@ -14,14 +14,16 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
-import { HistogramBarSeriesSpec, DEFAULT_GLOBAL_ID, SeriesTypes } from '../utils/specs';
+
+import { ChartTypes } from '../..';
 import { ScaleType } from '../../../scales';
-import { specComponentFactory, getConnect } from '../../../state/spec_factory';
-import { ChartTypes } from '../../../chart_types';
 import { SpecTypes } from '../../../specs/settings';
+import { specComponentFactory, getConnect } from '../../../state/spec_factory';
+import { HistogramBarSeriesSpec, DEFAULT_GLOBAL_ID, SeriesTypes } from '../utils/specs';
 
 const defaultProps = {
   chartType: ChartTypes.XYAxis,
@@ -34,7 +36,7 @@ const defaultProps = {
   yAccessors: ['y'],
   yScaleToDataExtent: false,
   hideInLegend: false,
-  enableHistogramMode: true as true,
+  enableHistogramMode: true as const,
 };
 
 type SpecRequiredProps = Pick<HistogramBarSeriesSpec, 'id' | 'data'>;

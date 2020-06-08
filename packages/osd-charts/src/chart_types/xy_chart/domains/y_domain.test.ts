@@ -14,12 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { ChartTypes } from '../..';
+import { MockRawDataSeries, MockRawDataSeriesDatum } from '../../../mocks';
 import { ScaleType } from '../../../scales';
+import { SpecTypes } from '../../../specs/settings';
+import { BARCHART_1Y0G } from '../../../utils/data_samples/test_dataset';
+import { GroupId } from '../../../utils/ids';
 import { RawDataSeries } from '../utils/series';
 import { BasicSeriesSpec, DomainRange, SeriesTypes } from '../utils/specs';
-import { BARCHART_1Y0G } from '../../../utils/data_samples/test_dataset';
 import {
   coerceYScaleTypes,
   getDataSeriesOnGroup,
@@ -27,10 +32,6 @@ import {
   splitSpecsByGroupId,
   YBasicSeriesSpec,
 } from './y_domain';
-import { GroupId } from '../../../utils/ids';
-import { ChartTypes } from '../..';
-import { SpecTypes } from '../../../specs/settings';
-import { MockRawDataSeries, MockRawDataSeriesDatum } from '../../../mocks';
 
 describe('Y Domain', () => {
   test('Should merge Y domain', () => {

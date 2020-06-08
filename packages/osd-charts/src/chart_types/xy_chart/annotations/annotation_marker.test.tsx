@@ -14,19 +14,21 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
-import { AnnotationDomainTypes, AnnotationSpec, AnnotationTypes } from '../utils/specs';
-import { Position, Rotation } from '../../../utils/commons';
-import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../utils/themes/theme';
-import { Dimensions } from '../../../utils/dimensions';
-import { GroupId } from '../../../utils/ids';
+
+import { ChartTypes } from '../..';
 import { Scale, ScaleType, ScaleContinuous } from '../../../scales';
 import { SpecTypes } from '../../../specs/settings';
+import { Position, Rotation } from '../../../utils/commons';
+import { Dimensions } from '../../../utils/dimensions';
+import { GroupId } from '../../../utils/ids';
+import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../utils/themes/theme';
+import { AnnotationDomainTypes, AnnotationSpec, AnnotationTypes } from '../utils/specs';
 import { computeLineAnnotationDimensions } from './line/dimensions';
 import { AnnotationLineProps } from './line/types';
-import { ChartTypes } from '../..';
 
 describe('annotation marker', () => {
   const groupId = 'foo-group';

@@ -14,27 +14,29 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { Dimensions } from '../../../../utils/dimensions';
 import createCachedSelector from 're-reselect';
-import { Point } from '../../../../utils/point';
+
 import { Scale } from '../../../../scales';
-import { isLineAreaOnlyChart } from '../utils';
-import { getCursorBandPosition } from '../../crosshair/crosshair_utils';
 import { SettingsSpec, PointerEvent } from '../../../../specs/settings';
-import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { computeChartDimensionsSelector } from './compute_chart_dimensions';
-import { BasicSeriesSpec } from '../../utils/specs';
-import { countBarsInClusterSelector } from './count_bars_in_cluster';
-import { getSeriesSpecsSelector } from './get_specs';
-import { computeSeriesGeometriesSelector } from './compute_series_geometries';
-import { getOrientedProjectedPointerPositionSelector } from './get_oriented_projected_pointer_position';
-import { isTooltipSnapEnableSelector } from './is_tooltip_snap_enabled';
-import { getGeometriesIndexKeysSelector } from './get_geometries_index_keys';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { isValidPointerOverEvent } from '../../../../utils/events';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
+import { Dimensions } from '../../../../utils/dimensions';
+import { isValidPointerOverEvent } from '../../../../utils/events';
+import { Point } from '../../../../utils/point';
+import { getCursorBandPosition } from '../../crosshair/crosshair_utils';
+import { BasicSeriesSpec } from '../../utils/specs';
+import { isLineAreaOnlyChart } from '../utils';
+import { computeChartDimensionsSelector } from './compute_chart_dimensions';
+import { computeSeriesGeometriesSelector } from './compute_series_geometries';
+import { countBarsInClusterSelector } from './count_bars_in_cluster';
+import { getGeometriesIndexKeysSelector } from './get_geometries_index_keys';
+import { getOrientedProjectedPointerPositionSelector } from './get_oriented_projected_pointer_position';
+import { getSeriesSpecsSelector } from './get_specs';
+import { isTooltipSnapEnableSelector } from './is_tooltip_snap_enabled';
 
 const getExternalPointerEventStateSelector = (state: GlobalChartState) => state.externalEvents.pointer;
 
@@ -61,19 +63,17 @@ export const getCursorBandPositionSelector = createCachedSelector(
     totalBarsInCluster,
     isTooltipSnapEnabled,
     geometriesIndexKeys,
-  ) => {
-    return getCursorBand(
-      orientedProjectedPointerPosition,
-      externalPointerEvent,
-      chartDimensions.chartDimensions,
-      settingsSpec,
-      seriesGeometries.scales.xScale,
-      seriesSpec,
-      totalBarsInCluster,
-      isTooltipSnapEnabled,
-      geometriesIndexKeys,
-    );
-  },
+  ) => getCursorBand(
+    orientedProjectedPointerPosition,
+    externalPointerEvent,
+    chartDimensions.chartDimensions,
+    settingsSpec,
+    seriesGeometries.scales.xScale,
+    seriesSpec,
+    totalBarsInCluster,
+    isTooltipSnapEnabled,
+    geometriesIndexKeys,
+  ),
 )(getChartIdSelector);
 
 function getCursorBand(

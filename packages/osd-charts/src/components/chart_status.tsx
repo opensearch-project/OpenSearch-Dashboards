@@ -14,13 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
 import { connect } from 'react-redux';
+
+import { RenderChangeListener } from '../specs';
 import { GlobalChartState } from '../state/chart_state';
 import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
-import { RenderChangeListener } from '../specs';
 
 interface ChartStatusStateProps {
   rendered: boolean;
@@ -31,9 +33,11 @@ class ChartStatusComponent extends React.Component<ChartStatusStateProps> {
   componentDidMount() {
     this.dispatchRenderChange();
   }
+
   componentDidUpdate() {
     this.dispatchRenderChange();
   }
+
   dispatchRenderChange = () => {
     const { onRenderChange, rendered } = this.props;
     if (onRenderChange) {
@@ -42,19 +46,18 @@ class ChartStatusComponent extends React.Component<ChartStatusStateProps> {
       });
     }
   };
+
   render() {
     const { rendered, renderedCount } = this.props;
     return <div className="echChartStatus" data-ech-render-complete={rendered} data-ech-render-count={renderedCount} />;
   }
 }
 
-const mapStateToProps = (state: GlobalChartState): ChartStatusStateProps => {
-  return {
-    rendered: state.chartRendered,
-    renderedCount: state.chartRenderedCount,
-    onRenderChange: getSettingsSpecSelector(state).onRenderChange,
-  };
-};
+const mapStateToProps = (state: GlobalChartState): ChartStatusStateProps => ({
+  rendered: state.chartRendered,
+  renderedCount: state.chartRenderedCount,
+  onRenderChange: getSettingsSpecSelector(state).onRenderChange,
+});
 
 /** @internal */
 export const ChartStatus = connect(mapStateToProps)(ChartStatusComponent);

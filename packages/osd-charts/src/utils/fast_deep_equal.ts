@@ -1,4 +1,4 @@
-/* eslint-disable file-header/file-header */
+/* eslint-disable header/header, @typescript-eslint/explicit-module-boundary-types, prefer-destructuring, no-restricted-syntax, no-self-compare */
 
 /**
  * @notice
@@ -32,7 +32,7 @@
 export function deepEqual(a: any, b: any): boolean {
   if (a === b) return true;
 
-  if (a && b && typeof a == 'object' && typeof b == 'object') {
+  if (a && b && typeof a === 'object' && typeof b === 'object') {
     if (a.constructor !== b.constructor) return false;
 
     let length: number;
@@ -41,7 +41,7 @@ export function deepEqual(a: any, b: any): boolean {
     if (Array.isArray(a)) {
       length = a.length;
       if (length != b.length) return false;
-      for (i = length; i-- !== 0; ) if (!deepEqual(a[i], b[i])) return false;
+      for (i = length; i-- !== 0;) if (!deepEqual(a[i], b[i])) return false;
       return true;
     }
     if (a instanceof Map && b instanceof Map) {
@@ -68,9 +68,9 @@ export function deepEqual(a: any, b: any): boolean {
     length = keys.length;
     if (length !== Object.keys(b).length) return false;
 
-    for (i = length; i-- !== 0; ) if (!Object.prototype.hasOwnProperty.call(b, keys[i])) return false;
+    for (i = length; i-- !== 0;) if (!Object.prototype.hasOwnProperty.call(b, keys[i])) return false;
 
-    for (i = length; i-- !== 0; ) {
+    for (i = length; i-- !== 0;) {
       const key = keys[i];
       if (key === '_owner' && a.$$typeof) {
         // React-specific: avoid traversing React elements' _owner.
@@ -87,3 +87,5 @@ export function deepEqual(a: any, b: any): boolean {
   // true if both NaN, false otherwise
   return a !== a && b !== b;
 }
+
+/* eslint-enable */

@@ -14,11 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { Config } from '../types/config_types';
-import { TAU } from '../../../partition_chart/layout/utils/math';
 import { configMap } from '../../../partition_chart/layout/config/config';
+import { TAU } from '../../../partition_chart/layout/utils/math';
+import { Config } from '../types/config_types';
 
 export const configMetadata = {
   angleStart: { dflt: Math.PI + Math.PI / 4, min: -TAU, max: TAU, type: 'number' },

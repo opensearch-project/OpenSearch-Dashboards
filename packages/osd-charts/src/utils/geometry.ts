@@ -14,19 +14,21 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { $Values } from 'utility-types';
-import { BarSeriesStyle, PointStyle, AreaStyle, LineStyle, ArcStyle } from './themes/theme';
+
 import { XYChartSeriesIdentifier } from '../chart_types/xy_chart/utils/series';
 import { Color } from './commons';
+import { BarSeriesStyle, PointStyle, AreaStyle, LineStyle, ArcStyle } from './themes/theme';
 
 /**
  * The accessor type
  */
 export const BandedAccessorType = Object.freeze({
-  Y0: 'y0' as 'y0',
-  Y1: 'y1' as 'y1',
+  Y0: 'y0' as const,
+  Y1: 'y1' as const,
 });
 
 export type BandedAccessorType = $Values<typeof BandedAccessorType>;

@@ -14,14 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { MockStore } from '../../../../mocks/store';
 import { MockSeriesSpec, MockAnnotationSpec, MockGlobalSpec } from '../../../../mocks/specs';
-import { computeAnnotationDimensionsSelector } from '../../state/selectors/compute_annotations';
+import { MockStore } from '../../../../mocks/store';
 import { ScaleType } from '../../../../scales';
-import { AnnotationDomainTypes } from '../../utils/specs';
 import { Position } from '../../../../utils/commons';
+import { computeAnnotationDimensionsSelector } from '../../state/selectors/compute_annotations';
+import { AnnotationDomainTypes } from '../../utils/specs';
 
 function expectAnnotationAtPosition(
   data: Array<{ x: number; y: number }>,
@@ -33,13 +34,11 @@ function expectAnnotationAtPosition(
 ) {
   const store = MockStore.default();
   const settings = MockGlobalSpec.settingsNoMargins();
-  const specs = new Array(numOfSpecs).fill(0).map((d, i) => {
-    return MockSeriesSpec.byTypePartial(type)({
-      id: `spec_${i}`,
-      xScaleType,
-      data,
-    });
-  });
+  const specs = new Array(numOfSpecs).fill(0).map((d, i) => MockSeriesSpec.byTypePartial(type)({
+    id: `spec_${i}`,
+    xScaleType,
+    data,
+  }));
   const annotation = MockAnnotationSpec.line({
     dataValues: [
       {

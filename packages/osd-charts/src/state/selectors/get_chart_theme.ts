@@ -14,24 +14,24 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { getSettingsSpecSelector } from './get_settings_specs';
-import { PartialTheme, Theme, mergeWithDefaultTheme } from '../../utils/themes/theme';
+
 import { LIGHT_THEME } from '../../utils/themes/light_theme';
+import { PartialTheme, Theme, mergeWithDefaultTheme } from '../../utils/themes/theme';
 import { getChartIdSelector } from './get_chart_id';
+import { getSettingsSpecSelector } from './get_settings_specs';
 
 /** @internal */
 export const getChartThemeSelector = createCachedSelector(
   [getSettingsSpecSelector],
-  (settingsSpec): Theme => {
-    return getTheme(settingsSpec.baseTheme, settingsSpec.theme);
-  },
+  (settingsSpec): Theme => getTheme(settingsSpec.baseTheme, settingsSpec.theme),
 )(getChartIdSelector);
 
 function getTheme(baseTheme?: Theme, theme?: PartialTheme | PartialTheme[]): Theme {
-  const base = baseTheme ? baseTheme : LIGHT_THEME;
+  const base = baseTheme || LIGHT_THEME;
 
   if (Array.isArray(theme)) {
     const [firstTheme, ...axillaryThemes] = theme;

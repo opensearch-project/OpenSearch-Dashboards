@@ -14,13 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 const module = jest.requireActual('../color_library_wrappers.ts');
 
-export const defaultColor = module.defaultColor;
-export const transparentColor = module.transparentColor;
-export const defaultD3Color = module.defaultD3Color;
+export const { defaultColor, transparentColor, defaultD3Color } = module;
 
 export const stringToRGB = jest.fn(module.stringToRGB);
 export const validateColor = jest.fn(module.validateColor);

@@ -14,29 +14,31 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import classNames from 'classnames';
 import React, { Component, createRef, MouseEventHandler } from 'react';
-import { deepEqual } from '../../utils/fast_deep_equal';
-import { LegendItemListener, BasicListener, LegendColorPicker } from '../../specs/settings';
+
 import { LegendItem, LegendItemExtraValues } from '../../commons/legend';
+import { SeriesIdentifier } from '../../commons/series_id';
+import { LegendItemListener, BasicListener, LegendColorPicker } from '../../specs/settings';
+import {
+  clearTemporaryColors as clearTemporaryColorsAction,
+  setTemporaryColor as setTemporaryColorAction,
+  setPersistedColor as setPersistedColorAction,
+} from '../../state/actions/colors';
 import {
   onLegendItemOutAction,
   onLegendItemOverAction,
   onToggleDeselectSeriesAction,
 } from '../../state/actions/legend';
 import { Position, Color } from '../../utils/commons';
-import { SeriesIdentifier } from '../../commons/series_id';
-import {
-  clearTemporaryColors as clearTemporaryColorsAction,
-  setTemporaryColor as setTemporaryColorAction,
-  setPersistedColor as setPersistedColorAction,
-} from '../../state/actions/colors';
-import { getExtra } from './utils';
+import { deepEqual } from '../../utils/fast_deep_equal';
 import { Color as ItemColor } from './color';
-import { Label as ItemLabel } from './label';
 import { renderExtra } from './extra';
+import { Label as ItemLabel } from './label';
+import { getExtra } from './utils';
 
 /** @internal */
 export const LEGEND_HIERARCHY_MARGIN = 10;
@@ -105,8 +107,8 @@ interface LegendItemState {
 /** @internal */
 export class LegendListItem extends Component<LegendItemProps, LegendItemState> {
   static displayName = 'LegendItem';
-  ref = createRef<HTMLLIElement>();
 
+  ref = createRef<HTMLLIElement>();
   state: LegendItemState = {
     isOpen: false,
   };
@@ -122,34 +124,6 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
           this.toggleIsOpen();
         }
       : undefined;
-
-  renderColorPicker() {
-    const {
-      colorPicker: ColorPicker,
-      item,
-      clearTemporaryColorsAction,
-      setTemporaryColorAction,
-      setPersistedColorAction,
-    } = this.props;
-    const { seriesIdentifier, color } = item;
-
-    const handleClose = () => {
-      setPersistedColorAction(seriesIdentifier.key, color);
-      clearTemporaryColorsAction();
-      this.toggleIsOpen();
-    };
-    if (ColorPicker && this.state.isOpen && this.ref.current) {
-      return (
-        <ColorPicker
-          anchor={this.ref.current}
-          color={color}
-          onClose={handleClose}
-          onChange={(color: Color) => setTemporaryColorAction(seriesIdentifier.key, color)}
-          seriesIdentifier={seriesIdentifier}
-        />
-      );
-    }
-  }
 
   toggleIsOpen = () => {
     this.setState(({ isOpen }) => ({ isOpen: !isOpen }));
@@ -193,6 +167,34 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
       }
     };
   };
+
+  renderColorPicker() {
+    const {
+      colorPicker: ColorPicker,
+      item,
+      clearTemporaryColorsAction,
+      setTemporaryColorAction,
+      setPersistedColorAction,
+    } = this.props;
+    const { seriesIdentifier, color } = item;
+
+    const handleClose = () => {
+      setPersistedColorAction(seriesIdentifier.key, color);
+      clearTemporaryColorsAction();
+      this.toggleIsOpen();
+    };
+    if (ColorPicker && this.state.isOpen && this.ref.current) {
+      return (
+        <ColorPicker
+          anchor={this.ref.current}
+          color={color}
+          onClose={handleClose}
+          onChange={(color: Color) => setTemporaryColorAction(seriesIdentifier.key, color)}
+          seriesIdentifier={seriesIdentifier}
+        />
+      );
+    }
+  }
 
   render() {
     const { extraValues, item, showExtra, colorPicker, position, totalItems } = this.props;

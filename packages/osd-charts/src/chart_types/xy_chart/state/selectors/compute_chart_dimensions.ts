@@ -14,16 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
-import { getAxisSpecsSelector } from './get_specs';
-import { computeChartDimensions } from '../../utils/dimensions';
-import { computeAxisTicksDimensionsSelector } from './compute_axis_ticks_dimensions';
-import { Dimensions } from '../../../../utils/dimensions';
+
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
+import { Dimensions } from '../../../../utils/dimensions';
+import { computeChartDimensions } from '../../utils/dimensions';
+import { computeAxisTicksDimensionsSelector } from './compute_axis_ticks_dimensions';
+import { getAxisSpecsSelector } from './get_specs';
 
 /** @internal */
 export const computeChartDimensionsSelector = createCachedSelector(
@@ -41,7 +43,5 @@ export const computeChartDimensionsSelector = createCachedSelector(
   ): {
     chartDimensions: Dimensions;
     leftMargin: number;
-  } => {
-    return computeChartDimensions(chartContainerDimensions, chartTheme, axesTicksDimensions, axesSpecs);
-  },
+  } => computeChartDimensions(chartContainerDimensions, chartTheme, axesTicksDimensions, axesSpecs),
 )(getChartIdSelector);

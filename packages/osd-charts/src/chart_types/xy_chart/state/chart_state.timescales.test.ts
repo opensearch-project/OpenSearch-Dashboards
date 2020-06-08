@@ -14,23 +14,25 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { LineSeriesSpec, SeriesTypes } from '../utils/specs';
-import { ScaleType } from '../../../scales';
-import { createStore, Store } from 'redux';
-import { chartStoreReducer, GlobalChartState } from '../../../state/chart_state';
-import { upsertSpec, specParsed } from '../../../state/actions/specs';
-import { SettingsSpec, DEFAULT_SETTINGS_SPEC, SpecTypes } from '../../../specs';
-import { mergeWithDefaultTheme } from '../../../utils/themes/theme';
-import { LIGHT_THEME } from '../../../utils/themes/light_theme';
-import { updateParentDimensions } from '../../../state/actions/chart_settings';
-import { computeSeriesGeometriesSelector } from './selectors/compute_series_geometries';
-import { onPointerMove } from '../../../state/actions/mouse';
-import { getTooltipInfoSelector } from './selectors/get_tooltip_values_highlighted_geoms';
 import { DateTime } from 'luxon';
-import { getComputedScalesSelector } from './selectors/get_computed_scales';
+import { createStore, Store } from 'redux';
+
 import { ChartTypes } from '../..';
+import { ScaleType } from '../../../scales';
+import { SettingsSpec, DEFAULT_SETTINGS_SPEC, SpecTypes } from '../../../specs';
+import { updateParentDimensions } from '../../../state/actions/chart_settings';
+import { onPointerMove } from '../../../state/actions/mouse';
+import { upsertSpec, specParsed } from '../../../state/actions/specs';
+import { chartStoreReducer, GlobalChartState } from '../../../state/chart_state';
+import { LIGHT_THEME } from '../../../utils/themes/light_theme';
+import { mergeWithDefaultTheme } from '../../../utils/themes/theme';
+import { LineSeriesSpec, SeriesTypes } from '../utils/specs';
+import { computeSeriesGeometriesSelector } from './selectors/compute_series_geometries';
+import { getComputedScalesSelector } from './selectors/get_computed_scales';
+import { getTooltipInfoSelector } from './selectors/get_tooltip_values_highlighted_geoms';
 
 describe('Render chart', () => {
   describe('line, utc-time, day interval', () => {
@@ -75,7 +77,7 @@ describe('Render chart', () => {
       store.dispatch(specParsed());
       store.dispatch(updateParentDimensions({ width: 100, height: 100, top: 0, left: 0 }));
       const state = store.getState();
-      expect(state.specs['lines']).toBeDefined();
+      expect(state.specs.lines).toBeDefined();
       expect(state.chartType).toBe(ChartTypes.XYAxis);
     });
     test('check rendered geometries', () => {
@@ -144,7 +146,7 @@ describe('Render chart', () => {
       store.dispatch(specParsed());
       store.dispatch(updateParentDimensions({ width: 100, height: 100, top: 0, left: 0 }));
       const state = store.getState();
-      expect(state.specs['lines']).toBeDefined();
+      expect(state.specs.lines).toBeDefined();
       expect(state.chartType).toBe(ChartTypes.XYAxis);
     });
     test('check rendered geometries', () => {
@@ -212,7 +214,7 @@ describe('Render chart', () => {
       store.dispatch(specParsed());
       store.dispatch(updateParentDimensions({ width: 100, height: 100, top: 0, left: 0 }));
       const state = store.getState();
-      expect(state.specs['lines']).toBeDefined();
+      expect(state.specs.lines).toBeDefined();
       expect(state.chartType).toBe(ChartTypes.XYAxis);
     });
     test('check rendered geometries', () => {

@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { boolean, color, number } from '@storybook/addon-knobs';
 import React from 'react';
@@ -48,17 +49,17 @@ function generateLineSeriesStyleKnobs(
   return {
     line: {
       stroke: lineStroke ? color(`line.stroke (${tag})`, lineStroke, groupName) : undefined,
-      strokeWidth: range(`line.strokeWidth (${tag})`, 0, 10, lineStrokeWidth ? lineStrokeWidth : 1, groupName),
+      strokeWidth: range(`line.strokeWidth (${tag})`, 0, 10, lineStrokeWidth || 1, groupName),
       visible: boolean(`line.visible (${tag})`, true, groupName),
       opacity: range(`line.opacity (${tag})`, 0, 1, 1, groupName, 0.01),
     },
     point: {
       visible: boolean(`point.visible (${tag})`, true, groupName),
-      radius: range(`point.radius (${tag})`, 0, 20, pointRadius ? pointRadius : 5, groupName, 0.5),
+      radius: range(`point.radius (${tag})`, 0, 20, pointRadius || 5, groupName, 0.5),
       opacity: range(`point.opacity (${tag})`, 0, 1, 1, groupName, 0.01),
-      stroke: color(`point.stroke (${tag})`, pointStroke ? pointStroke : 'black', groupName),
-      fill: color(`point.fill (${tag})`, pointFill ? pointFill : 'lightgray', groupName),
-      strokeWidth: range(`point.strokeWidth (${tag})`, 0, 5, pointStrokeWidth ? pointStrokeWidth : 2, groupName, 0.01),
+      stroke: color(`point.stroke (${tag})`, pointStroke || 'black', groupName),
+      fill: color(`point.fill (${tag})`, pointFill || 'lightgray', groupName),
+      strokeWidth: range(`point.strokeWidth (${tag})`, 0, 5, pointStrokeWidth || 2, groupName, 0.01),
     },
   };
 }
@@ -115,7 +116,7 @@ export const Example = () => {
   return (
     <Chart renderer="canvas" className="story-chart">
       <Settings showLegend showLegendExtra legendPosition={Position.Right} theme={chartTheme} />
-      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
+      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
       <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
       <AreaSeries
         id="area1"

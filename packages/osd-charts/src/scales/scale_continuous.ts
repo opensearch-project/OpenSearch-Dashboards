@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { bisectLeft } from 'd3-array';
 import {
@@ -28,10 +29,10 @@ import {
   ScaleTime,
 } from 'd3-scale';
 
-import { maxValueWithUpperLimit, mergePartial } from '../utils/commons';
 import { ScaleContinuousType, ScaleType, Scale } from '.';
-import { getMomentWithTz } from '../utils/data/date_time';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
+import { maxValueWithUpperLimit, mergePartial } from '../utils/commons';
+import { getMomentWithTz } from '../utils/data/date_time';
 
 /**
  * d3 scales excluding time scale
@@ -61,36 +62,34 @@ export function limitLogScaleDomain(domain: any[]) {
   if (domain[0] === 0) {
     if (domain[1] > 0) {
       return [1, domain[1]];
-    } else if (domain[1] < 0) {
-      return [-1, domain[1]];
-    } else {
-      return [1, 1];
     }
+    if (domain[1] < 0) {
+      return [-1, domain[1]];
+    }
+    return [1, 1];
   }
   if (domain[1] === 0) {
     if (domain[0] > 0) {
       return [domain[0], 1];
-    } else if (domain[0] < 0) {
-      return [domain[0], -1];
-    } else {
-      return [1, 1];
     }
+    if (domain[0] < 0) {
+      return [domain[0], -1];
+    }
+    return [1, 1];
   }
   if (domain[0] < 0 && domain[1] > 0) {
     const isD0Min = Math.abs(domain[1]) - Math.abs(domain[0]) >= 0;
     if (isD0Min) {
       return [1, domain[1]];
-    } else {
-      return [domain[0], -1];
     }
+    return [domain[0], -1];
   }
   if (domain[0] > 0 && domain[1] < 0) {
     const isD0Max = Math.abs(domain[0]) - Math.abs(domain[1]) >= 0;
     if (isD0Max) {
       return [domain[0], 1];
-    } else {
-      return [-1, domain[1]];
     }
+    return [-1, domain[1]];
   }
   return domain;
 }
@@ -139,7 +138,7 @@ interface ScaleOptions {
   ticks: number;
   /** true if the scale was adjusted to fit one single value histogram */
   isSingleValueHistogram: boolean;
-  /** Show only integer values **/
+  /** Show only integer values */
   integersOnly?: boolean;
 }
 const defaultScaleOptions: ScaleOptions = {
@@ -222,16 +221,11 @@ export class ScaleContinuous implements Scale {
         return currentDateTime.subtract(currentOffset, 'minutes').valueOf();
       });
     } else {
-      /**
-       * This case is for the xScale (minInterval is > 0) when we want to show bars (bandwidth > 0)
-       *
-       * We want to avoid displaying inner ticks between bars in a bar chart when using linear x scale
-       */
+      // This case is for the xScale (minInterval is > 0) when we want to show bars (bandwidth > 0)
+      // We want to avoid displaying inner ticks between bars in a bar chart when using linear x scale
       if (minInterval > 0 && bandwidth > 0) {
         const intervalCount = Math.floor((this.domain[1] - this.domain[0]) / this.minInterval);
-        this.tickValues = new Array(intervalCount + 1).fill(0).map((_, i) => {
-          return this.domain[0] + i * this.minInterval;
-        });
+        this.tickValues = new Array(intervalCount + 1).fill(0).map((_, i) => this.domain[0] + i * this.minInterval);
       } else {
         this.tickValues = this.getTicks(ticks, integersOnly!);
       }
@@ -255,7 +249,7 @@ export class ScaleContinuous implements Scale {
       ? (this.d3Scale as D3ScaleNonTime)
           .ticks(ticks)
           .filter((item: number) => typeof item === 'number' && item % 1 === 0)
-          .map((item: number) => parseInt(item.toFixed(0)))
+          .map((item: number) => parseInt(item.toFixed(0), 10))
       : (this.d3Scale as D3ScaleNonTime).ticks(ticks);
   }
 

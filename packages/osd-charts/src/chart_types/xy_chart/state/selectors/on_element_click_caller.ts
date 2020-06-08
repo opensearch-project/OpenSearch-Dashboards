@@ -14,19 +14,21 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
-import { GlobalChartState, PointerState } from '../../../../state/chart_state';
-import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { getHighlightedGeomsSelector } from './get_tooltip_values_highlighted_geoms';
+
+import { ChartTypes } from '../../..';
 import { SettingsSpec } from '../../../../specs';
-import { IndexedGeometry, GeometryValue } from '../../../../utils/geometry';
-import { ChartTypes } from '../../../index';
-import { XYChartSeriesIdentifier } from '../../utils/series';
-import { isClicking } from '../../../../state/utils';
+import { GlobalChartState, PointerState } from '../../../../state/chart_state';
 import { getLastClickSelector } from '../../../../state/selectors/get_last_click';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
+import { isClicking } from '../../../../state/utils';
+import { IndexedGeometry, GeometryValue } from '../../../../utils/geometry';
+import { XYChartSeriesIdentifier } from '../../utils/series';
+import { getHighlightedGeomsSelector } from './get_tooltip_values_highlighted_geoms';
 
 /**
  * Will call the onElementClick listener every time the following preconditions are met:

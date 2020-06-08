@@ -14,10 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { Scale } from '../../../scales';
+import { BBox, BBoxCalculator } from '../../../utils/bbox/bbox_calculator';
+import { Position, Rotation, getUniqueValues } from '../../../utils/commons';
+import { Dimensions, Margins } from '../../../utils/dimensions';
+import { AxisId } from '../../../utils/ids';
+import { AxisConfig, Theme } from '../../../utils/themes/theme';
 import { XDomain } from '../domains/x_domain';
 import { YDomain } from '../domains/y_domain';
+import { getSpecsById } from '../state/utils';
 import { computeXScale, computeYScales } from './scales';
 import {
   AxisSpec,
@@ -29,13 +37,6 @@ import {
   AxisStyle,
   TickFormatterOptions,
 } from './specs';
-import { Position, Rotation, getUniqueValues } from '../../../utils/commons';
-import { AxisConfig, Theme } from '../../../utils/themes/theme';
-import { Dimensions, Margins } from '../../../utils/dimensions';
-import { AxisId } from '../../../utils/ids';
-import { Scale } from '../../../scales';
-import { BBox, BBoxCalculator } from '../../../utils/bbox/bbox_calculator';
-import { getSpecsById } from '../state/utils';
 
 export type AxisLinePosition = [number, number, number, number];
 
@@ -165,17 +166,16 @@ export function getScaleForAxisSpec(
       return yScales.get(axisSpec.groupId)!;
     }
     return null;
-  } else {
-    return computeXScale({
-      xDomain,
-      totalBarsInCluster,
-      range,
-      barsPadding,
-      enableHistogramMode,
-      ticks: axisSpec.ticks,
-      integersOnly: axisSpec.integersOnly,
-    });
   }
+  return computeXScale({
+    xDomain,
+    totalBarsInCluster,
+    range,
+    barsPadding,
+    enableHistogramMode,
+    ticks: axisSpec.ticks,
+    integersOnly: axisSpec.integersOnly,
+  });
 }
 
 /** @internal */
@@ -240,9 +240,7 @@ function computeTickDimensions(
   tickFormatOptions?: TickFormatterOptions,
 ) {
   const tickValues = scale.ticks();
-  const tickLabels = tickValues.map((d) => {
-    return tickFormat(d, tickFormatOptions);
-  });
+  const tickLabels = tickValues.map((d) => tickFormat(d, tickFormatOptions));
   const {
     tickLabelStyle: { fontFamily, fontSize },
   } = axisConfig;
@@ -296,7 +294,7 @@ export function getTickLabelProps(
       y: tickPosition,
       offsetX,
       offsetY: 0,
-      align: isRotated ? 'center' : isLeftAxis ? 'right' : 'left',
+      align: isRotated ? 'center' : (isLeftAxis ? 'right' : 'left'),
       verticalAlign: 'middle',
     };
   }
@@ -309,7 +307,7 @@ export function getTickLabelProps(
     offsetX: 0,
     offsetY: isAxisTop ? -maxLabelBboxHeight / 2 : maxLabelBboxHeight / 2,
     align: 'center',
-    verticalAlign: isRotated ? 'middle' : isAxisTop ? 'bottom' : 'top',
+    verticalAlign: isRotated ? 'middle' : (isAxisTop ? 'bottom' : 'top'),
   };
 }
 
@@ -369,15 +367,13 @@ export function getMinMaxRange(
       return getBottomTopAxisMinMaxRange(chartRotation, width);
     case Position.Left:
     case Position.Right:
+    default:
       return getLeftAxisMinMaxRange(chartRotation, height);
   }
 }
 
 function getBottomTopAxisMinMaxRange(chartRotation: Rotation, width: number) {
   switch (chartRotation) {
-    case 0:
-      // dealing with x domain
-      return { minRange: 0, maxRange: width };
     case 90:
       // dealing with y domain
       return { minRange: 0, maxRange: width };
@@ -387,13 +383,14 @@ function getBottomTopAxisMinMaxRange(chartRotation: Rotation, width: number) {
     case 180:
       // dealing with x domain
       return { minRange: width, maxRange: 0 };
+    case 0:
+    default:
+      // dealing with x domain
+      return { minRange: 0, maxRange: width };
   }
 }
 function getLeftAxisMinMaxRange(chartRotation: Rotation, height: number) {
   switch (chartRotation) {
-    case 0:
-      // dealing with y domain
-      return { minRange: height, maxRange: 0 };
     case 90:
       // dealing with x domain
       return { minRange: 0, maxRange: height };
@@ -403,6 +400,10 @@ function getLeftAxisMinMaxRange(chartRotation: Rotation, height: number) {
     case 180:
       // dealing with y domain
       return { minRange: 0, maxRange: height };
+    case 0:
+    default:
+      // dealing with y domain
+      return { minRange: height, maxRange: 0 };
   }
 }
 
@@ -465,13 +466,11 @@ export function enableDuplicatedTicks(
   tickFormatOptions?: TickFormatterOptions,
 ) {
   const ticks = scale.ticks();
-  const allTicks: AxisTick[] = ticks.map((tick) => {
-    return {
-      value: tick,
-      label: axisSpec.tickFormat(tick, tickFormatOptions),
-      position: (scale.scale(tick) ?? 0) + offset,
-    };
-  });
+  const allTicks: AxisTick[] = ticks.map((tick) => ({
+    value: tick,
+    label: axisSpec.tickFormat(tick, tickFormatOptions),
+    position: (scale.scale(tick) ?? 0) + offset,
+  }));
 
   if (axisSpec.showDuplicatedTicks === true) {
     return allTicks;
@@ -652,9 +651,7 @@ export function getAxisTicksPositions(
     if (axisSpec.showGridLines) {
       const isVertical = isVerticalAxis(axisSpec.position);
       const gridLines = visibleTicks.map(
-        (tick: AxisTick): AxisLinePosition => {
-          return computeAxisGridLinePositions(isVertical, tick.position, chartDimensions);
-        },
+        (tick: AxisTick): AxisLinePosition => computeAxisGridLinePositions(isVertical, tick.position, chartDimensions),
       );
       axisGridLinesPositions.set(id, gridLines);
     }
@@ -736,11 +733,11 @@ export const isDuplicateAxis = (
   let hasDuplicate = false;
   tickMap.forEach(({ tickLabels: axisTickLabels }, axisId) => {
     if (
-      !hasDuplicate &&
-      axisTickLabels &&
-      tickLabels.length === axisTickLabels.length &&
-      firstTickLabel === axisTickLabels[0] &&
-      lastTickLabel === axisTickLabels.slice(-1)[0]
+      !hasDuplicate
+      && axisTickLabels
+      && tickLabels.length === axisTickLabels.length
+      && firstTickLabel === axisTickLabels[0]
+      && lastTickLabel === axisTickLabels.slice(-1)[0]
     ) {
       const spec = getSpecsById<AxisSpec>(specs, axisId);
 

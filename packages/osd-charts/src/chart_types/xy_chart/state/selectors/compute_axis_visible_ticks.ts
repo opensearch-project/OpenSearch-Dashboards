@@ -14,22 +14,24 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { getAxisSpecsSelector } from './get_specs';
-import { getAxisTicksPositions, AxisTick, AxisLinePosition } from '../../utils/axis_utils';
-import { computeChartDimensionsSelector } from './compute_chart_dimensions';
+
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
+import { Dimensions } from '../../../../utils/dimensions';
+import { AxisId } from '../../../../utils/ids';
+import { getAxisTicksPositions, AxisTick, AxisLinePosition } from '../../utils/axis_utils';
 import { computeAxisTicksDimensionsSelector } from './compute_axis_ticks_dimensions';
+import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { computeSeriesDomainsSelector } from './compute_series_domains';
 import { countBarsInClusterSelector } from './count_bars_in_cluster';
-import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
 import { getBarPaddingsSelector } from './get_bar_paddings';
-import { AxisId } from '../../../../utils/ids';
-import { Dimensions } from '../../../../utils/dimensions';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getAxisSpecsSelector } from './get_specs';
+import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
 
 /** @internal */
 export interface AxisVisibleTicks {

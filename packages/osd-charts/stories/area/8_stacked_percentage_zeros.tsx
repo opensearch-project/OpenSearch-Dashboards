@@ -14,64 +14,64 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
+
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, niceTimeFormatter } from '../../src';
 
-export const Example = () => {
-  return (
-    <Chart className="story-chart">
-      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
-      <Axis
-        id="bottom"
-        position={Position.Bottom}
-        title="Bottom axis"
-        tickFormat={niceTimeFormatter([1585234800000, 1585836000000])}
-      />
-      <Axis
-        id="left2"
-        title="Left axis"
-        position={Position.Left}
-        tickFormat={(d) => `${Number(d * 100).toFixed(0)} %`}
-      />
+export const Example = () => (
+  <Chart className="story-chart">
+    <Settings showLegend showLegendExtra legendPosition={Position.Right} />
+    <Axis
+      id="bottom"
+      position={Position.Bottom}
+      title="Bottom axis"
+      tickFormat={niceTimeFormatter([1585234800000, 1585836000000])}
+    />
+    <Axis
+      id="left2"
+      title="Left axis"
+      position={Position.Left}
+      tickFormat={(d) => `${Number(d * 100).toFixed(0)} %`}
+    />
 
-      <AreaSeries
-        id="areas1"
-        name="area"
-        xScaleType={ScaleType.Linear}
-        yScaleType={ScaleType.Linear}
-        xAccessor={0}
-        yAccessors={[1]}
-        data={DATA[0].data}
-        stackAccessors={[0]}
-        stackAsPercentage
-      />
-      <AreaSeries
-        id="areas2"
-        name="area"
-        xScaleType={ScaleType.Linear}
-        yScaleType={ScaleType.Linear}
-        xAccessor={0}
-        yAccessors={[1]}
-        data={DATA[1].data}
-        stackAccessors={[0]}
-        stackAsPercentage
-      />
-      <AreaSeries
-        id="areas3"
-        name="area"
-        xScaleType={ScaleType.Linear}
-        yScaleType={ScaleType.Linear}
-        xAccessor={0}
-        yAccessors={[1]}
-        data={DATA[2].data}
-        stackAsPercentage
-        stackAccessors={[0]}
-      />
-    </Chart>
-  );
-};
+    <AreaSeries
+      id="areas1"
+      name="area"
+      xScaleType={ScaleType.Linear}
+      yScaleType={ScaleType.Linear}
+      xAccessor={0}
+      yAccessors={[1]}
+      data={DATA[0].data}
+      stackAccessors={[0]}
+      stackAsPercentage
+    />
+    <AreaSeries
+      id="areas2"
+      name="area"
+      xScaleType={ScaleType.Linear}
+      yScaleType={ScaleType.Linear}
+      xAccessor={0}
+      yAccessors={[1]}
+      data={DATA[1].data}
+      stackAccessors={[0]}
+      stackAsPercentage
+    />
+    <AreaSeries
+      id="areas3"
+      name="area"
+      xScaleType={ScaleType.Linear}
+      yScaleType={ScaleType.Linear}
+      xAccessor={0}
+      yAccessors={[1]}
+      data={DATA[2].data}
+      stackAsPercentage
+      stackAccessors={[0]}
+    />
+  </Chart>
+);
 
 const DATA = [
   {

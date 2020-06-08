@@ -14,19 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { withInfo } from '@storybook/addon-info';
 import { withKnobs } from '@storybook/addon-knobs';
 import { addDecorator, configure, addParameters } from '@storybook/react';
+import { create } from '@storybook/theming';
 
 import { switchTheme } from './theme_service';
-
-switchTheme('light');
-
 import './style.scss';
 
-import { create } from '@storybook/theming';
+switchTheme('light');
 
 addParameters({
   options: {

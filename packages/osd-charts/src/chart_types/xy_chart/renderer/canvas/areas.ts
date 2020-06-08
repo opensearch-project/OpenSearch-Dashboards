@@ -14,16 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { getGeometryStateStyle } from '../../rendering/rendering';
+import { LegendItem } from '../../../../commons/legend';
+import { Rect } from '../../../../geoms/types';
+import { withClip, withContext } from '../../../../renderers/canvas';
 import { AreaGeometry } from '../../../../utils/geometry';
 import { SharedGeometryStateStyle } from '../../../../utils/themes/theme';
-import { LegendItem } from '../../../../commons/legend';
-import { withClip, withContext } from '../../../../renderers/canvas';
+import { getGeometryStateStyle } from '../../rendering/rendering';
 import { renderPoints } from './points';
 import { renderLinePaths, renderAreaPath } from './primitives/path';
-import { Rect } from '../../../../geoms/types';
 import { buildAreaStyles } from './styles/area';
 import { buildLineStyles } from './styles/line';
 
@@ -42,8 +43,8 @@ export function renderAreas(ctx: CanvasRenderingContext2D, props: AreaGeometries
     withClip(ctx, clippings, (ctx: CanvasRenderingContext2D) => {
       ctx.save();
 
-      for (let i = 0; i < areas.length; i++) {
-        const glyph = areas[i];
+      // eslint-disable-next-line no-restricted-syntax
+      for (const glyph of areas) {
         const { seriesAreaLineStyle, seriesAreaStyle } = glyph;
         if (seriesAreaStyle.visible) {
           withContext(ctx, () => {

@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { BBox, BBoxCalculator } from './bbox_calculator';
 
@@ -23,6 +24,7 @@ export class SvgTextBBoxCalculator implements BBoxCalculator {
   textElem: SVGTextElement;
   attachedRoot: HTMLElement;
   textNode: Text;
+
   // TODO specify styles for text
   // TODO specify how to hide the svg from the current dom view
   // like moving it a -9999999px
@@ -36,6 +38,7 @@ export class SvgTextBBoxCalculator implements BBoxCalculator {
     this.attachedRoot = rootElement || document.documentElement;
     this.attachedRoot.appendChild(this.svgElem);
   }
+
   compute(text: string): BBox {
     this.textNode.textContent = text;
     const rect = this.textElem.getBoundingClientRect();
@@ -44,6 +47,7 @@ export class SvgTextBBoxCalculator implements BBoxCalculator {
       height: rect.height,
     };
   }
+
   destroy(): void {
     this.attachedRoot.removeChild(this.svgElem);
   }

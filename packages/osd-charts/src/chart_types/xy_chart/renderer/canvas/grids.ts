@@ -14,18 +14,19 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { AxisLinePosition, isVerticalGrid } from '../../utils/axis_utils';
-import { mergeGridLineConfigs, Theme } from '../../../../utils/themes/theme';
+import { Line, Stroke } from '../../../../geoms/types';
+import { withContext } from '../../../../renderers/canvas';
 import { Dimensions } from '../../../../utils/dimensions';
 import { AxisId } from '../../../../utils/ids';
-import { AxisSpec } from '../../../../chart_types/xy_chart/utils/specs';
-import { getSpecsById } from '../../state/utils';
-import { renderMultiLine, MIN_STROKE_WIDTH } from './primitives/line';
-import { Line, Stroke } from '../../../../geoms/types';
+import { mergeGridLineConfigs, Theme } from '../../../../utils/themes/theme';
 import { stringToRGB } from '../../../partition_chart/layout/utils/color_library_wrappers';
-import { withContext } from '../../../../renderers/canvas';
+import { getSpecsById } from '../../state/utils';
+import { AxisLinePosition, isVerticalGrid } from '../../utils/axis_utils';
+import { AxisSpec } from '../../utils/specs';
+import { renderMultiLine, MIN_STROKE_WIDTH } from './primitives/line';
 
 interface GridProps {
   chartTheme: Theme;
@@ -52,21 +53,13 @@ export function renderGrids(ctx: CanvasRenderingContext2D, props: GridProps) {
           return;
         }
         const strokeColor = stringToRGB(gridLineStyle.stroke);
-        strokeColor.opacity =
-          gridLineStyle.opacity !== undefined ? strokeColor.opacity * gridLineStyle.opacity : strokeColor.opacity;
+        strokeColor.opacity = gridLineStyle.opacity !== undefined ? strokeColor.opacity * gridLineStyle.opacity : strokeColor.opacity;
         const stroke: Stroke = {
           color: strokeColor,
           width: gridLineStyle.strokeWidth,
           dash: gridLineStyle.dash,
         };
-        const lines = axisGridLinesPositions.map<Line>((position) => {
-          return {
-            x1: position[0],
-            y1: position[1],
-            x2: position[2],
-            y2: position[3],
-          };
-        });
+        const lines = axisGridLinesPositions.map<Line>(([x1, y1, x2, y2]) => ({ x1, y1, x2, y2 }));
         renderMultiLine(ctx, lines, stroke);
       }
     });

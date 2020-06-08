@@ -14,11 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { formatStackedDataSeriesValues } from './stacked_series_utils';
-import { ScaleType } from '../../../scales';
 import { MockRawDataSeries } from '../../../mocks';
+import { ScaleType } from '../../../scales';
+import { formatStackedDataSeriesValues } from './stacked_series_utils';
 
 describe('Stacked Series Utils', () => {
   const STANDARD_DATA_SET = MockRawDataSeries.fromData([[{ x: 0, y1: 10 }], [{ x: 0, y1: 20 }], [{ x: 0, y1: 70 }]], {
@@ -137,7 +138,7 @@ describe('Stacked Series Utils', () => {
       expect(data2.y0).toBe(0.36);
       expect(data2.y1).toBe(1);
     });
-    test('format data with nulls', () => {
+    test('format data with nulls - missing points', () => {
       const formattedData = formatStackedDataSeriesValues(
         WITH_NULL_DATASET_WY0,
         false,

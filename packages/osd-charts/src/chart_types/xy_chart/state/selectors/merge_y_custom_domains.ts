@@ -14,23 +14,23 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import createCachedSelector from 're-reselect';
-import { getAxisSpecsSelector } from './get_specs';
+
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
+import { Rotation } from '../../../../utils/commons';
+import { GroupId } from '../../../../utils/ids';
 import { isYDomain, isCompleteBound, isLowerBound, isUpperBound, isBounded } from '../../utils/axis_utils';
 import { AxisSpec, DomainRange } from '../../utils/specs';
-import { Rotation } from '../../../../utils/commons';
-import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { GroupId } from '../../../../utils/ids';
+import { getAxisSpecsSelector } from './get_specs';
 
 /** @internal */
 export const mergeYCustomDomainsByGroupIdSelector = createCachedSelector(
   [getAxisSpecsSelector, getSettingsSpecSelector],
-  (axisSpecs, settingsSpec): Map<GroupId, DomainRange> => {
-    return mergeYCustomDomainsByGroupId(axisSpecs, settingsSpec ? settingsSpec.rotation : 0);
-  },
+  (axisSpecs, settingsSpec): Map<GroupId, DomainRange> => mergeYCustomDomainsByGroupId(axisSpecs, settingsSpec ? settingsSpec.rotation : 0),
 )(getChartIdSelector);
 
 /** @internal */
@@ -62,8 +62,7 @@ export function mergeYCustomDomainsByGroupId(
     const prevGroupDomain = domainsByGroupId.get(groupId);
 
     if (prevGroupDomain) {
-      const prevDomain = prevGroupDomain as DomainRange;
-
+      const prevDomain = prevGroupDomain;
       const prevMin = isLowerBound(prevDomain) ? prevDomain.min : undefined;
       const prevMax = isUpperBound(prevDomain) ? prevDomain.max : undefined;
 

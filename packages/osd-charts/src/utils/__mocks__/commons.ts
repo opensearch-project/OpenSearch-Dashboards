@@ -14,12 +14,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 const module = jest.requireActual('../commons.ts');
 
-export const ColorVariant = module.ColorVariant;
-export const Position = module.Position;
+export const { ColorVariant, Position } = module;
 
 export const identity = jest.fn(module.identity);
 export const compareByValueAsc = jest.fn(module.compareByValueAsc);

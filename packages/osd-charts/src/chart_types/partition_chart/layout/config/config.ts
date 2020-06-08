@@ -14,17 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { Config, PartitionLayout, Numeric } from '../types/config_types';
-import { GOLDEN_RATIO, TAU } from '../utils/math';
 import { FONT_STYLES, FONT_VARIANTS } from '../types/types';
 import { ShapeTreeNode } from '../types/viewmodel_types';
 import { AGGREGATE_KEY, STATISTICS_KEY } from '../utils/group_by_rollup';
+import { GOLDEN_RATIO, TAU } from '../utils/math';
 
 const log10 = Math.log(10);
 function significantDigitCount(d: number): number {
-  let n = Math.abs(parseFloat(String(d).replace('.', ''))); //remove decimal and make positive
+  let n = Math.abs(parseFloat(String(d).replace('.', ''))); // remove decimal and make positive
   if (n == 0) return 0;
   while (n != 0 && n % 10 == 0) n /= 10;
   return Math.floor(Math.log(n) / log10) + 1;
@@ -49,10 +50,10 @@ function defaultFormatter(d: number): string {
   return Math.abs(d) >= 10000000 || Math.abs(d) < 0.001
     ? d.toExponential(Math.min(2, Math.max(0, significantDigitCount(d) - 1)))
     : d.toLocaleString(void 0, {
-        maximumSignificantDigits: 4,
-        maximumFractionDigits: 3,
-        useGrouping: true,
-      });
+      maximumSignificantDigits: 4,
+      maximumFractionDigits: 3,
+      useGrouping: true,
+    });
 }
 
 export function percentFormatter(d: number): string {
@@ -82,12 +83,12 @@ const valueFont = {
   type: 'group',
   values: {
     /*
-    // Object.assign interprets the extant `undefined` as legit, so commenting it out till moving away from Object.assign in `const valueFont = ...`
-    fontFamily: {
-      dflt: undefined,
-      type: 'string',
-    },
-   */
+     * Object.assign interprets the extant `undefined` as legit, so commenting it out till moving away from Object.assign in `const valueFont = ...`
+     * fontFamily: {
+     *   dflt: undefined,
+     *   type: 'string',
+     * },
+     */
     fontWeight: fontSettings.fontWeight,
     fontStyle: fontSettings.fontStyle,
     fontVariant: fontSettings.fontVariant,
@@ -161,8 +162,8 @@ export const configMetadata = {
   },
 
   // fill text layout config
-  circlePadding: { dflt: 2, min: 0, max: 8, type: 'number' },
-  radialPadding: { dflt: TAU / 360, min: 0.0, max: 0.035, type: 'number' },
+  circlePadding: { dflt: 2, min: 0.0, max: 8, type: 'number' },
+  radialPadding: { dflt: TAU / 360, min: 0, max: 0.035, type: 'number' },
   horizontalTextAngleThreshold: { dflt: TAU / 12, min: 0, max: TAU, type: 'number' },
   horizontalTextEnforcer: { dflt: 1, min: 0, max: 1, type: 'number' },
   maxRowCount: { dflt: 12, min: 1, max: 16, type: 'number' },
@@ -249,15 +250,14 @@ export const configMetadata = {
 };
 
 // todo switch to `io-ts` style, generic way of combining static and runtime type info
-export function configMap<Conf>(mapper: Function, configMetadata: any): Conf {
+export function configMap<Conf>(mapper: (v: any) => any, configMetadata: any): Conf {
   const result: Conf = Object.assign(
     {},
     ...Object.entries(configMetadata).map(([k, v]: [string, any]) => {
       if (v.type === 'group') {
         return { [k]: configMap<Config>(mapper, v.values) };
-      } else {
-        return { [k]: mapper(v) };
       }
+      return { [k]: mapper(v) };
     }),
   ) as Conf;
   return result;

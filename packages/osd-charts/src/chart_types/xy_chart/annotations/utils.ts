@@ -14,8 +14,15 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { Scale } from '../../../scales';
+import { Rotation, Position } from '../../../utils/commons';
+import { Dimensions } from '../../../utils/dimensions';
+import { AnnotationId, GroupId } from '../../../utils/ids';
+import { Point } from '../../../utils/point';
+import { getAxesSpecForSpecId, isHorizontalRotation } from '../state/utils';
 import {
   AnnotationDomainType,
   AnnotationDomainTypes,
@@ -24,14 +31,8 @@ import {
   isLineAnnotation,
   isRectAnnotation,
 } from '../utils/specs';
-import { Dimensions } from '../../../utils/dimensions';
-import { AnnotationId, GroupId } from '../../../utils/ids';
-import { Scale } from '../../../scales';
-import { getAxesSpecForSpecId, isHorizontalRotation } from '../state/utils';
-import { Point } from '../../../utils/point';
 import { computeLineAnnotationDimensions } from './line/dimensions';
 import { computeRectAnnotationDimensions } from './rect/dimensions';
-import { Rotation, Position } from '../../../utils/commons';
 import { AnnotationDimensions } from './types';
 
 /** @internal */
@@ -77,14 +78,15 @@ export function getTranformedCursor(
   }
 
   switch (chartRotation) {
-    case 0:
-      return { x, y };
     case 90:
       return { x: y, y: width - x };
     case -90:
       return { x: height - y, y: x };
     case 180:
       return { x: width - x, y: height - y };
+    case 0:
+    default:
+      return { x, y };
   }
 }
 
@@ -114,13 +116,14 @@ export function invertTranformedCursor(
       x = cursorPosition.y;
       break;
     case 180:
+    default:
       y = height - cursorPosition.y;
       x = width - cursorPosition.x;
   }
 
   if (projectArea) {
-    x = x + left;
-    y = y + top;
+    x += left;
+    y += top;
   }
 
   return { x, y };

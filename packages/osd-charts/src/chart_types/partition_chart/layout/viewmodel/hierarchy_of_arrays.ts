@@ -14,13 +14,14 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { HierarchyOfArrays } from '../utils/group_by_rollup';
-import { Relation } from '../types/types';
-import { ValueAccessor } from '../../../../utils/commons';
 import { IndexedAccessorFn } from '../../../../utils/accessor';
+import { ValueAccessor } from '../../../../utils/commons';
+import { Relation } from '../types/types';
 import {
+  HierarchyOfArrays,
   aggregateComparator,
   aggregators,
   childOrders,
@@ -49,7 +50,6 @@ export function getHierarchyOfArrays(
   // We can precompute things invariant of how the rectangle is divvied up.
   // By introducing `scale`, we no longer need to deal with the dichotomy of
   // size as data value vs size as number of pixels in the rectangle
-
   return mapsToArrays(
     groupByRollup(groupByRollupAccessors, valueAccessor, aggregator, facts),
     aggregateComparator(mapEntryValue, childOrders.descending),

@@ -14,23 +14,22 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React, { useCallback } from 'react';
 
-import { AnnotationTooltipState } from '../../../annotations/types';
 import { AnnotationTypes } from '../../../../specs';
+import { AnnotationTooltipState } from '../../../annotations/types';
 
 /** @internal */
 export const TooltipContent = ({ annotationType, header, details, renderTooltip }: AnnotationTooltipState) => {
-  const renderLine = useCallback(() => {
-    return (
-      <div className="echAnnotation__tooltip">
-        <p className="echAnnotation__header">{header}</p>
-        <div className="echAnnotation__details">{details}</div>
-      </div>
-    );
-  }, [header, details]);
+  const renderLine = useCallback(() => (
+    <div className="echAnnotation__tooltip">
+      <p className="echAnnotation__header">{header}</p>
+      <div className="echAnnotation__details">{details}</div>
+    </div>
+  ), [header, details]);
 
   const renderRect = useCallback(() => {
     const tooltipContent = renderTooltip ? renderTooltip(details) : details;

@@ -14,18 +14,20 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import createCachedSelector from 're-reselect';
+import { Selector } from 'react-redux';
+
+import { ChartTypes } from '../../..';
+import { SeriesIdentifier } from '../../../../commons/series_id';
 import { LayerValue } from '../../../../specs';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { Selector } from 'react-redux';
-import { ChartTypes } from '../../../index';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { getPieSpec } from './pie_spec';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getPickedShapesLayerValues } from './picked_shapes';
-import { SeriesIdentifier } from '../../../../commons/series_id';
+import { getPieSpec } from './pie_spec';
 
 function isOverElement(prevPickedShapes: Array<Array<LayerValue>> = [], nextPickedShapes: Array<Array<LayerValue>>) {
   if (nextPickedShapes.length === 0) {

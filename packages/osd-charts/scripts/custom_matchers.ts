@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { matcherErrorMessage } from 'jest-matcher-utils';
 import 'jest-extended'; // require to load jest-extended matchers
@@ -34,7 +35,7 @@ type MatcherParameters<T extends (this: any, received: any, ...args: any[]) => a
   : never;
 
 declare global {
-  // eslint-disable-next-line
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
     interface Matchers<R> {
       /**
@@ -52,7 +53,7 @@ function toEqualArrayOf(this: jest.MatcherUtils, received: any[], value: any, le
   const matcherName = 'toEqualArrayOf';
 
   if (!Array.isArray(received)) {
-    throw new Error(
+    throw new TypeError(
       matcherErrorMessage(
         this.utils.matcherHint(matcherName),
         `${this.utils.RECEIVED_COLOR('received')} value must be an array.`,

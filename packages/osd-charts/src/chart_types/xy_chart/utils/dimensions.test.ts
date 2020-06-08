@@ -14,18 +14,19 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { AxisTicksDimensions } from './axis_utils';
-import { AxisSpec } from './specs';
-import { Position } from '../../../utils/commons';
-import { LIGHT_THEME } from '../../../utils/themes/light_theme';
-import { LegendStyle } from '../../../utils/themes/theme';
-import { computeChartDimensions } from './dimensions';
-import { AxisId } from '../../../utils/ids';
-import { Margins } from '../../../utils/dimensions';
 import { ChartTypes } from '../..';
 import { SpecTypes } from '../../../specs/settings';
+import { Position } from '../../../utils/commons';
+import { Margins } from '../../../utils/dimensions';
+import { AxisId } from '../../../utils/ids';
+import { LIGHT_THEME } from '../../../utils/themes/light_theme';
+import { LegendStyle } from '../../../utils/themes/theme';
+import { AxisTicksDimensions } from './axis_utils';
+import { computeChartDimensions } from './dimensions';
+import { AxisSpec } from './specs';
 
 describe('Computed chart dimensions', () => {
   const parentDim = {
@@ -66,9 +67,7 @@ describe('Computed chart dimensions', () => {
     position: Position.Left,
     tickSize: 10,
     tickPadding: 10,
-    tickFormat: (value: any) => {
-      return `${value}`;
-    },
+    tickFormat: (value: any) => `${value}`,
   };
   const legend: LegendStyle = {
     verticalWidth: 10,

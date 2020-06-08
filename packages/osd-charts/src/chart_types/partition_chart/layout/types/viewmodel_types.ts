@@ -14,16 +14,17 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
+import { Color } from '../../../../utils/commons';
+import { config, ValueGetterName } from '../config/config';
+import { ArrayNode, HierarchyOfArrays } from '../utils/group_by_rollup';
+import { LinkLabelsViewModelSpec } from '../viewmodel/link_text_layout';
+import { VerticalAlignments } from '../viewmodel/viewmodel';
 import { Config } from './config_types';
 import { Coordinate, Distance, Pixels, PointObject, PointTuple, PointTuples, Radian } from './geometry_types';
 import { Font } from './types';
-import { config, ValueGetterName } from '../config/config';
-import { ArrayNode, HierarchyOfArrays } from '../utils/group_by_rollup';
-import { Color } from '../../../../utils/commons';
-import { LinkLabelsViewModelSpec } from '../viewmodel/link_text_layout';
-import { VerticalAlignments } from '../viewmodel/viewmodel';
 
 /** @internal */
 export type LinkLabelVM = {

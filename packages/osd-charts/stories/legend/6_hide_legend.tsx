@@ -14,11 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
-import { Axis, BarSeries, Chart, LineSeries, Position, ScaleType, Settings } from '../../src/';
+
+import { Axis, BarSeries, Chart, LineSeries, Position, ScaleType, Settings } from '../../src';
 
 export const Example = () => {
   const hideBarSeriesInLegend = boolean('hide bar series in legend', false);
@@ -27,7 +29,7 @@ export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings showLegend showLegendExtra legendPosition={Position.Right} />
-      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
+      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
       <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
 
       <BarSeries

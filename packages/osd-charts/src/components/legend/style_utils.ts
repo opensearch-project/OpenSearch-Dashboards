@@ -14,12 +14,13 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { LegendStyle as ThemeLegendStyle } from '../../utils/themes/theme';
-import { Margins } from '../../utils/dimensions';
-import { Position } from '../../utils/commons';
 import { BBox } from '../../utils/bbox/bbox_calculator';
+import { Position } from '../../utils/commons';
+import { Margins } from '../../utils/dimensions';
+import { LegendStyle as ThemeLegendStyle } from '../../utils/themes/theme';
 
 /** @internal */
 export interface LegendStyle {

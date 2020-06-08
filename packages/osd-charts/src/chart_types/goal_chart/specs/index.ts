@@ -14,16 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { ChartTypes } from '../../index';
-import { config } from '../layout/config/config';
 import React from 'react';
+
+import { ChartTypes } from '../..';
+import { Spec, SpecTypes } from '../../../specs';
 import { getConnect, specComponentFactory } from '../../../state/spec_factory';
-import { Spec, SpecTypes } from '../../../specs/index';
+import { Color, RecursivePartial } from '../../../utils/commons';
+import { config } from '../layout/config/config';
 import { Config } from '../layout/types/config_types';
 import { defaultGoalSpec } from '../layout/types/viewmodel_types';
-import { Color, RecursivePartial } from '../../../utils/commons';
 
 export const GOAL_SUBTYPES = Object.freeze(['goal', 'horizontalBullet', 'verticalBullet'] as const);
 export type GoalSubtype = typeof GOAL_SUBTYPES[number];

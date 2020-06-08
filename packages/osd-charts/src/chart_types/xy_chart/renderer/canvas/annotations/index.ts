@@ -14,17 +14,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
-import { AnnotationDimensions } from '../../../annotations/types';
-import { AnnotationSpec, isLineAnnotation, isRectAnnotation } from '../../../utils/specs';
-import { getSpecsById } from '../../../state/utils';
 import { AnnotationId } from '../../../../../utils/ids';
 import { mergeWithDefaultAnnotationLine, mergeWithDefaultAnnotationRect } from '../../../../../utils/themes/theme';
-import { renderLineAnnotations } from './lines';
 import { AnnotationLineProps } from '../../../annotations/line/types';
-import { renderRectAnnotations } from './rect';
 import { AnnotationRectProps } from '../../../annotations/rect/types';
+import { AnnotationDimensions } from '../../../annotations/types';
+import { getSpecsById } from '../../../state/utils';
+import { AnnotationSpec, isLineAnnotation, isRectAnnotation } from '../../../utils/specs';
+import { renderLineAnnotations } from './lines';
+import { renderRectAnnotations } from './rect';
 
 interface AnnotationProps {
   annotationDimensions: Map<AnnotationId, AnnotationDimensions>;

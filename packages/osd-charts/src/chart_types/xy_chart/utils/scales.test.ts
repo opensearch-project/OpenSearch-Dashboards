@@ -14,7 +14,8 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import { ScaleType } from '../../../scales';
 import { XDomain } from '../domains/x_domain';
@@ -68,7 +69,7 @@ describe('Series scales', () => {
         type: 'xDomain',
         isBandScale: true,
         domain: [singleDomainValue, singleDomainValue],
-        minInterval: minInterval,
+        minInterval,
         scaleType: ScaleType.Linear,
       };
       const enableHistogramMode = true;
@@ -91,7 +92,7 @@ describe('Series scales', () => {
         type: 'xDomain',
         isBandScale: true,
         domain: [singleDomainValue, singleDomainValue],
-        minInterval: minInterval,
+        minInterval,
         scaleType: ScaleType.Linear,
       };
       const enableHistogramMode = false;

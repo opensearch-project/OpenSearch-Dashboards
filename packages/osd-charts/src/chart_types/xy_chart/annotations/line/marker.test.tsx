@@ -14,19 +14,21 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License. */
+ * under the License.
+ */
 
 import React from 'react';
-import { AnnotationDomainTypes, AnnotationSpec, AnnotationTypes } from '../../utils/specs';
+
+import { ChartTypes } from '../../..';
+import { Scale, ScaleType, ScaleContinuous } from '../../../../scales';
+import { SpecTypes } from '../../../../specs/settings';
 import { Position, Rotation } from '../../../../utils/commons';
-import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../../utils/themes/theme';
 import { Dimensions } from '../../../../utils/dimensions';
 import { GroupId } from '../../../../utils/ids';
-import { Scale, ScaleType, ScaleContinuous } from '../../../../scales';
+import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../../utils/themes/theme';
+import { AnnotationDomainTypes, AnnotationSpec, AnnotationTypes } from '../../utils/specs';
 import { computeLineAnnotationDimensions } from './dimensions';
 import { AnnotationLineProps } from './types';
-import { ChartTypes } from '../../..';
-import { SpecTypes } from '../../../../specs/settings';
 
 describe('annotation marker', () => {
   const groupId = 'foo-group';
