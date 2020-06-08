@@ -176,6 +176,11 @@ export interface AxisStyle {
     tickLabelPadding?: number;
 }
 
+// @public
+export interface BackgroundStyle {
+    color: string;
+}
+
 // Warning: (ae-forgotten-export) The symbol "SpecRequiredProps" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "SpecOptionalProps" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "BarSeries" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1403,6 +1408,7 @@ export interface Theme {
     areaSeriesStyle: AreaSeriesStyle;
     // (undocumented)
     axes: AxisConfig;
+    background: BackgroundStyle;
     barSeriesStyle: BarSeriesStyle;
     bubbleSeriesStyle: BubbleSeriesStyle;
     chartMargins: Margins;
@@ -1534,8 +1540,8 @@ export interface XYChartSeriesIdentifier extends SeriesIdentifier {
 
 // Warnings were encountered during analysis:
 //
-// src/chart_types/partition_chart/layout/types/config_types.ts:117:5 - (ae-forgotten-export) The symbol "TimeMs" needs to be exported by the entry point index.d.ts
-// src/chart_types/partition_chart/layout/types/config_types.ts:118:5 - (ae-forgotten-export) The symbol "AnimKeyframe" needs to be exported by the entry point index.d.ts
+// src/chart_types/partition_chart/layout/types/config_types.ts:120:5 - (ae-forgotten-export) The symbol "TimeMs" needs to be exported by the entry point index.d.ts
+// src/chart_types/partition_chart/layout/types/config_types.ts:121:5 - (ae-forgotten-export) The symbol "AnimKeyframe" needs to be exported by the entry point index.d.ts
 // src/chart_types/partition_chart/specs/index.ts:47:13 - (ae-forgotten-export) The symbol "NodeColorAccessor" needs to be exported by the entry point index.d.ts
 // src/commons/series_id.ts:37:3 - (ae-forgotten-export) The symbol "SeriesKey" needs to be exported by the entry point index.d.ts
 

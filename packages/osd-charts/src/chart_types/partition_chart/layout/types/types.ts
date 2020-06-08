@@ -43,6 +43,8 @@ export interface Font {
   fontVariant: FontVariant;
   fontWeight: FontWeight;
   fontFamily: FontFamily;
+  textColor: string;
+  textOpacity: number;
 }
 
 export type PartialFont = Partial<Font>;

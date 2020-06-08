@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { RgbObject } from '../chart_types/partition_chart/layout/utils/d3_utils';
+import { RgbObject } from '../chart_types/partition_chart/layout/utils/color_library_wrappers';
 import { Radian } from '../chart_types/partition_chart/layout/types/geometry_types';
 export interface Text {
   text: string;

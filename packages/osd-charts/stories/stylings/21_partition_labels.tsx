@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { Chart, Datum, Partition, PartitionLayout, Settings, DARK_THEME } from '../../src';
+import { Chart, Datum, Partition, Settings } from '../../src';
 import { mocks } from '../../src/mocks/hierarchical/index';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
 import React from 'react';
-import { countryLookup, indexInterpolatedFillColor, interpolatorCET2s } from '../utils/utils';
+import { indexInterpolatedFillColor, interpolatorCET2s, productLookup } from '../utils/utils';
 import { color } from '@storybook/addon-knobs';
 
 export const Example = () => {
@@ -30,29 +30,23 @@ export const Example = () => {
     },
   };
   return (
-    <Chart className="story-chart-dark">
-      <Settings baseTheme={DARK_THEME} theme={partialCustomTheme} />
+    <Chart className="story-chart">
+      <Settings theme={partialCustomTheme} />
       <Partition
         id="spec_1"
-        data={mocks.manyPie}
+        data={mocks.pie}
         valueAccessor={(d: Datum) => d.exportVal as number}
         valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
         layers={[
           {
-            groupByRollup: (d: Datum) => d.origin,
-            nodeLabel: (d: Datum) => countryLookup[d].name,
-            fillLabel: { textInvertible: true },
+            groupByRollup: (d: Datum) => d.sitc1,
+            nodeLabel: (d: Datum) => productLookup[d].name,
+            fillLabel: { textInvertible: true, textContrast: true },
             shape: {
               fillColor: indexInterpolatedFillColor(interpolatorCET2s),
             },
           },
         ]}
-        config={{
-          partitionLayout: PartitionLayout.sunburst,
-          linkLabel: { maxCount: 15, textColor: 'white' },
-          sectorLineStroke: 'rgb(26, 27, 32)', // same as the dark theme
-          sectorLineWidth: 1.2,
-        }}
       />
     </Chart>
   );

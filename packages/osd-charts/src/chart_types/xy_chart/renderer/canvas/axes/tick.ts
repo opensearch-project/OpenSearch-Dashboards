@@ -21,7 +21,7 @@ import { AxisProps } from '.';
 import { Position } from '../../../../../utils/commons';
 import { TickStyle } from '../../../../../utils/themes/theme';
 import { renderLine, MIN_STROKE_WIDTH } from '../primitives/line';
-import { stringToRGB } from '../../../../partition_chart/layout/utils/d3_utils';
+import { stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 
 /** @internal */
 export function renderTick(ctx: CanvasRenderingContext2D, tick: AxisTick, props: AxisProps) {

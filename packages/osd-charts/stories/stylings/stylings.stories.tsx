@@ -34,7 +34,6 @@ export { Example as partialCustomThemeWithBaseTheme } from './6_partial_and_base
 export { Example as multipleCustomPartialThemes } from './7_multiple_custom';
 export { Example as customSeriesColorsViaColorsArray } from './8_custom_series_colors_array';
 export { Example as customSeriesColorsViaAccessorFunction } from './9_custom_series_colors_function';
-
 export { Example as customSeriesStylesBars } from './10_custom_bars';
 export { Example as customSeriesStylesLines } from './11_custom_lines';
 export { Example as customSeriesStylesArea } from './12_custom_area';
@@ -46,3 +45,5 @@ export { Example as styleAccessorOverrides } from './16_style_accessor';
 export { Example as barSeriesColorVariant } from './17_bar_series_color_variant';
 export { Example as lineSeriesColorVariant } from './18_line_series_color_variant';
 export { Example as areaSeriesColorVariant } from './19_area_series_color_variant';
+export { Example as partitionBackground } from './20_partition_background';
+export { Example as partitionLabels } from './21_partition_labels';

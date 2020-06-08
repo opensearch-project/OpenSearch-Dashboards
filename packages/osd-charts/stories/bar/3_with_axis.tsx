@@ -24,10 +24,9 @@ import { Axis, BarSeries, Chart, DARK_THEME, LIGHT_THEME, Position, ScaleType, S
 export const Example = () => {
   const darkmode = boolean('darkmode', false);
   const className = darkmode ? 'story-chart-dark' : 'story-chart';
-  const defaultTheme = darkmode ? DARK_THEME : LIGHT_THEME;
   return (
     <Chart className={className}>
-      <Settings theme={defaultTheme} />
+      <Settings baseTheme={darkmode ? DARK_THEME : LIGHT_THEME} />
       <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks={true} />
       <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 

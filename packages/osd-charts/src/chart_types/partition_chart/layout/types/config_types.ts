@@ -33,9 +33,12 @@ export type PerSidePadding = PerSideDistance;
 
 export type Padding = Pixels | Partial<PerSidePadding>;
 
+export type TextContrast = boolean | number;
+
 interface LabelConfig extends Font {
   textColor: Color;
   textInvertible: boolean;
+  textContrast: TextContrast;
   textOpacity: Ratio;
   valueFormatter: ValueFormatter;
   valueFont: PartialFont;

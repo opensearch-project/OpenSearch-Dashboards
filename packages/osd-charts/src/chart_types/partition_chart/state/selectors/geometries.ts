@@ -26,14 +26,18 @@ import { PartitionSpec } from '../../specs/index';
 import { SpecTypes } from '../../../../specs/settings';
 import { getTree } from './tree';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
+import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
+import { isColorValid } from '../../layout/utils/calcs';
 
 const getSpecs = (state: GlobalChartState) => state.specs;
 
 /** @internal */
 export const partitionGeometries = createCachedSelector(
-  [getSpecs, getChartContainerDimensionsSelector, getTree],
-  (specs, parentDimensions, tree): ShapeViewModel => {
+  [getSpecs, getChartContainerDimensionsSelector, getTree, getChartThemeSelector],
+  (specs, parentDimensions, tree, theme): ShapeViewModel => {
     const pieSpecs = getSpecsFromStore<PartitionSpec>(specs, ChartTypes.Partition, SpecTypes.Series);
-    return pieSpecs.length === 1 ? render(pieSpecs[0], parentDimensions, tree) : nullShapeViewModel();
+    const { color } = theme.background;
+    const bgColor: string | undefined = isColorValid(color) ? color : undefined;
+    return pieSpecs.length === 1 ? render(pieSpecs[0], parentDimensions, tree, bgColor) : nullShapeViewModel();
   },
 )((state) => state.chartId);

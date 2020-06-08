@@ -16,7 +16,76 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { integerSnap, monotonicHillClimb } from './calcs';
+import { makeHighContrastColor, combineColors, integerSnap, monotonicHillClimb } from './calcs';
+
+describe('calcs', () => {
+  describe('test makeHighContrastColor', () => {
+    it('hex input - should change white text to black when background is white', () => {
+      const expected = '#000';
+      const result = makeHighContrastColor('#fff', '#fff');
+      expect(result).toBe(expected);
+    });
+    it('rgb input - should change white text to black when background is white ', () => {
+      const expected = '#000';
+      const result = makeHighContrastColor('rgb(255, 255, 255)', 'rgb(255, 255, 255)');
+      expect(result).toBe(expected);
+    });
+    it('rgba input - should change white text to black when background is white ', () => {
+      const expected = '#000';
+      const result = makeHighContrastColor('rgba(255, 255, 255, 1)', 'rgba(255, 255, 255, 1)');
+      expect(result).toBe(expected);
+    });
+    it('word input - should change white text to black when background is white ', () => {
+      const expected = '#000';
+      const result = makeHighContrastColor('white', 'white');
+      expect(result).toBe(expected);
+    });
+    // test contrast computation
+    it('should provide at least 4.5 contrast', () => {
+      const foreground = '#fff'; // white
+      const background = 'rgba(255, 255, 51, 0.3)'; // light yellow
+      const result = '#000'; // black
+      expect(result).toBe(makeHighContrastColor(foreground, background));
+    });
+    it('should use black text for hex value', () => {
+      const foreground = '#fff'; // white
+      const background = '#7874B2'; // Thailand color
+      const result = '#000'; // black
+      expect(result).toBe(makeHighContrastColor(foreground, background));
+    });
+    it('should switch to black text if background color is in rgba() format - Thailand', () => {
+      const containerBackground = 'white';
+      const background = 'rgba(120, 116, 178, 0.7)';
+      const resultForCombined = 'rgba(161, 158, 201, 1)'; // 0.3 'rgba(215, 213, 232, 1)'; // 0.5 - 'rgba(188, 186, 217, 1)'; //0.7 - ;
+      expect(combineColors(background, containerBackground)).toBe(resultForCombined);
+      const foreground = 'white';
+      const resultForContrastedText = '#000'; //switches to black text
+      expect(makeHighContrastColor(foreground, resultForCombined)).toBe(resultForContrastedText);
+    });
+  });
+  describe('test the combineColors function', () => {
+    it('should return correct RGBA with opacity greater than 0.7', () => {
+      const expected = 'rgba(102, 43, 206, 1)';
+      const result = combineColors('rgba(121, 47, 249, 0.8)', '#1c1c24');
+      expect(result).toBe(expected);
+    });
+    it('should return correct RGBA with opacity less than 0.7', () => {
+      const expected = 'rgba(226, 186, 187, 1)';
+      const result = combineColors('rgba(228, 26, 28, 0.3)', 'rgba(225, 255, 255, 1)');
+      expect(result).toBe(expected);
+    });
+    it('should return correct RGBA with the input color as a word vs rgba or hex value', () => {
+      const expected = 'rgba(0, 0, 255, 1)';
+      const result = combineColors('blue', 'black');
+      expect(result).toBe(expected);
+    });
+    it('should return the correct RGBA with hex input', () => {
+      const expected = 'rgba(212, 242, 210, 1)';
+      const result = combineColors('#D4F2D2', '#BEB7DF');
+      expect(result).toBe(expected);
+    });
+  });
+});
 
 describe('monotonicHillClimb', () => {
   const arbitraryNumber = 27;

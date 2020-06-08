@@ -20,7 +20,7 @@ import { renderRect } from '../primitives/rect';
 import { Rect, Fill, Stroke } from '../../../../../geoms/types';
 import { AnnotationRectProps } from '../../../annotations/rect/types';
 import { RectAnnotationStyle } from '../../../../../utils/themes/theme';
-import { stringToRGB } from '../../../../partition_chart/layout/utils/d3_utils';
+import { stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { withContext } from '../../../../../renderers/canvas';
 
 /** @internal */

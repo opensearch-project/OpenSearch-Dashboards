@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import { getRectangleRowGeometry } from './fill_text_layout';
+import { getRectangleRowGeometry, getFillTextColor } from './fill_text_layout';
 
 describe('Test that getRectangleRowGeometry works with:', () => {
   const container = { x0: 0, y0: 0, x1: 200, y1: 100 };
@@ -270,5 +270,29 @@ describe('Test that getRectangleRowGeometry works with:', () => {
         ) /* 0.05 = 5%: default overhang multiplier */
       ),
     });
+  });
+});
+describe('Test getTextColor function', () => {
+  test('getTextColor works with textContrast greater than default ratio', () => {
+    const textColor = 'black';
+    const textInvertible = true;
+    const textContrast = 6;
+    const fillColor = 'rgba(55, 126, 184, 0.7)';
+    const containerBackgroundColor = 'white';
+    const expectedAdjustedTextColor = 'black';
+    expect(getFillTextColor(textColor, textInvertible, textContrast, fillColor, containerBackgroundColor)).toEqual(
+      expectedAdjustedTextColor,
+    );
+  });
+  test('getTextColor works with textContrast not defined', () => {
+    const textColor = 'black';
+    const textInvertible = true;
+    const textContrast = false;
+    const fillColor = 'rgba(55, 126, 184, 0.7)';
+    const containerBackgroundColor = 'white';
+    const expectedAdjustedTextColor = 'black';
+    expect(getFillTextColor(textColor, textInvertible, textContrast, fillColor, containerBackgroundColor)).toEqual(
+      expectedAdjustedTextColor,
+    );
   });
 });

@@ -24,7 +24,7 @@ import { AxisSpec } from '../../../../chart_types/xy_chart/utils/specs';
 import { getSpecsById } from '../../state/utils';
 import { renderMultiLine, MIN_STROKE_WIDTH } from './primitives/line';
 import { Line, Stroke } from '../../../../geoms/types';
-import { stringToRGB } from '../../../partition_chart/layout/utils/d3_utils';
+import { stringToRGB } from '../../../partition_chart/layout/utils/color_library_wrappers';
 import { withContext } from '../../../../renderers/canvas';
 
 interface GridProps {

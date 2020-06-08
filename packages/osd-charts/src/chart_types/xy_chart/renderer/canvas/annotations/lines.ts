@@ -17,7 +17,7 @@
  * under the License. */
 
 import { Stroke, Line } from '../../../../../geoms/types';
-import { stringToRGB } from '../../../../partition_chart/layout/utils/d3_utils';
+import { stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { AnnotationLineProps } from '../../../annotations/line/types';
 import { LineAnnotationStyle } from '../../../../../utils/themes/theme';
 import { renderMultiLine } from '../primitives/line';

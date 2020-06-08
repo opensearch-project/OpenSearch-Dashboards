@@ -16,23 +16,14 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import createCachedSelector from 're-reselect';
-import { GlobalChartState } from '../chart_state';
-import { ChartTypes } from '../../chart_types';
-import { getSpecsFromStore } from '../utils';
-import { SettingsSpec, SpecTypes, DEFAULT_SETTINGS_SPEC } from '../../specs/settings';
-import { getChartIdSelector } from './get_chart_id';
+const module = jest.requireActual('../color_library_wrappers.ts');
 
-const getSpecs = (state: GlobalChartState) => state.specs;
+export const defaultColor = module.defaultColor;
+export const transparentColor = module.transparentColor;
+export const defaultD3Color = module.defaultD3Color;
 
-/** @internal */
-export const getSettingsSpecSelector = createCachedSelector(
-  [getSpecs],
-  (specs): SettingsSpec => {
-    const settingsSpecs = getSpecsFromStore<SettingsSpec>(specs, ChartTypes.Global, SpecTypes.Settings);
-    if (settingsSpecs.length === 1) {
-      return settingsSpecs[0];
-    }
-    return DEFAULT_SETTINGS_SPEC;
-  },
-)(getChartIdSelector);
+export const stringToRGB = jest.fn(module.stringToRGB);
+export const validateColor = jest.fn(module.validateColor);
+export const argsToRGB = jest.fn(module.argsToRGB);
+export const argsToRGBString = jest.fn(module.argsToRGBString);
+export const RGBtoString = jest.fn(module.RGBtoString);

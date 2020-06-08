@@ -30,6 +30,7 @@ import { TAU } from '../../layout/utils/math';
 import { PartitionLayout } from '../../layout/types/config_types';
 import { cssFontShorthand } from '../../layout/utils/measure';
 import { clearCanvas, renderLayers, withContext } from '../../../../renderers/canvas';
+import { LinkLabelsViewModelSpec } from '../../layout/viewmodel/link_text_layout';
 
 // the burnout avoidance in the center of the pie
 const LINE_WIDTH_MULT = 10; // border can be a maximum 1/LINE_WIDTH_MULT - th of the sector angle, otherwise the border would dominate
@@ -186,41 +187,36 @@ function renderLinkLabels(
   ctx: CanvasRenderingContext2D,
   linkLabelFontSize: Pixels,
   linkLabelLineWidth: Pixels,
-  linkLabelTextColor: string,
-  viewModels: LinkLabelVM[],
+  { linkLabels, labelFontSpec, valueFontSpec, strokeColor }: LinkLabelsViewModelSpec,
 ) {
+  const labelColor = addOpacity(labelFontSpec.textColor, labelFontSpec.textOpacity);
+  const valueColor = addOpacity(valueFontSpec.textColor, valueFontSpec.textOpacity);
   const labelValueGap = linkLabelFontSize / 2; // one en space
   withContext(ctx, (ctx) => {
     ctx.lineWidth = linkLabelLineWidth;
-    ctx.strokeStyle = linkLabelTextColor;
-    ctx.fillStyle = linkLabelTextColor;
-    viewModels.forEach(
-      ({
-        link,
-        translate,
-        textAlign,
-        text,
-        valueText,
-        width,
-        labelFontSpec,
-        valueFontSpec,
-        valueWidth,
-      }: LinkLabelVM) => {
-        ctx.beginPath();
-        ctx.moveTo(...link[0]);
-        link.slice(1).forEach((point) => ctx.lineTo(...point));
-        ctx.stroke();
-        withContext(ctx, (ctx) => {
-          ctx.translate(...translate);
-          ctx.scale(1, -1); // flip for text rendering not to be upside down
-          ctx.textAlign = textAlign;
-          ctx.font = `${labelFontSpec.fontStyle} ${labelFontSpec.fontVariant} ${labelFontSpec.fontWeight} ${linkLabelFontSize}px ${labelFontSpec.fontFamily}`;
-          ctx.fillText(text, textAlign === 'right' ? -valueWidth - labelValueGap : 0, 0);
-          ctx.font = `${valueFontSpec.fontStyle} ${valueFontSpec.fontVariant} ${valueFontSpec.fontWeight} ${linkLabelFontSize}px ${valueFontSpec.fontFamily}`;
-          ctx.fillText(valueText, textAlign === 'left' ? width + labelValueGap : 0, 0);
-        });
-      },
-    );
+    linkLabels.forEach(({ linkLabels, translate, textAlign, text, valueText, width, valueWidth }: LinkLabelVM) => {
+      // label lines
+      ctx.beginPath();
+      ctx.moveTo(...linkLabels[0]);
+      linkLabels.slice(1).forEach((point) => ctx.lineTo(...point));
+      ctx.strokeStyle = strokeColor;
+      ctx.stroke();
+      withContext(ctx, (ctx) => {
+        ctx.translate(...translate);
+        ctx.scale(1, -1); // flip for text rendering not to be upside down
+        ctx.textAlign = textAlign;
+        // label text
+        ctx.strokeStyle = labelColor;
+        ctx.fillStyle = labelColor;
+        ctx.font = `${labelFontSpec.fontStyle} ${labelFontSpec.fontVariant} ${labelFontSpec.fontWeight} ${linkLabelFontSize}px ${labelFontSpec.fontFamily}`;
+        ctx.fillText(text, textAlign === 'right' ? -valueWidth - labelValueGap : 0, 0);
+        // value text
+        ctx.strokeStyle = valueColor;
+        ctx.fillStyle = valueColor;
+        ctx.font = `${valueFontSpec.fontStyle} ${valueFontSpec.fontVariant} ${valueFontSpec.fontWeight} ${linkLabelFontSize}px ${valueFontSpec.fontFamily}`;
+        ctx.fillText(valueText, textAlign === 'left' ? width + labelValueGap : 0, 0);
+      });
+    });
   });
 }
 
@@ -230,9 +226,9 @@ export function renderPartitionCanvas2d(
   dpr: number,
   { config, quadViewModel, rowSets, outsideLinksViewModel, linkLabelViewModels, diskCenter }: ShapeViewModel,
 ) {
-  const { sectorLineWidth, sectorLineStroke, linkLabel /*, backgroundColor*/ } = config;
+  const { sectorLineWidth, sectorLineStroke, linkLabel } = config;
 
-  const linkLabelTextColor = addOpacity(linkLabel.textColor, linkLabel.textOpacity);
+  const linkLineColor = addOpacity(linkLabel.textColor, linkLabel.textOpacity);
 
   withContext(ctx, (ctx) => {
     // set some defaults for the overall rendering
@@ -263,7 +259,7 @@ export function renderPartitionCanvas2d(
     // The layers are callbacks, because of the need to not bake in the `ctx`, it feels more composable and uncoupled this way.
     renderLayers(ctx, [
       // clear the canvas
-      (ctx: CanvasRenderingContext2D) => clearCanvas(ctx, 200000, 200000 /*, backgroundColor*/),
+      (ctx: CanvasRenderingContext2D) => clearCanvas(ctx, 200000, 200000),
 
       // bottom layer: sectors (pie slices, ring sectors etc.)
       (ctx: CanvasRenderingContext2D) =>
@@ -276,11 +272,11 @@ export function renderPartitionCanvas2d(
 
       // the link lines for the outside-fill text
       (ctx: CanvasRenderingContext2D) =>
-        renderFillOutsideLinks(ctx, outsideLinksViewModel, linkLabelTextColor, linkLabel.lineWidth),
+        renderFillOutsideLinks(ctx, outsideLinksViewModel, linkLineColor, linkLabel.lineWidth),
 
       // all the text and link lines for single-row outside texts
       (ctx: CanvasRenderingContext2D) =>
-        renderLinkLabels(ctx, linkLabel.fontSize, linkLabel.lineWidth, linkLabelTextColor, linkLabelViewModels),
+        renderLinkLabels(ctx, linkLabel.fontSize, linkLabel.lineWidth, linkLabelViewModels),
     ]);
   });
 }

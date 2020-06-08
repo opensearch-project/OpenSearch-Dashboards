@@ -33,6 +33,9 @@ export const Example = () => {
         visible: true,
       },
     },
+    background: {
+      color: color('Change background container color', 'white'),
+    },
   };
 
   return (

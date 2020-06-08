@@ -81,6 +81,8 @@ export function renderTickLabel(ctx: CanvasRenderingContext2D, tick: AxisTick, p
     fontStyle: labelStyle.fontStyle ? (labelStyle.fontStyle as FontStyle) : 'normal',
     fontVariant: 'normal',
     fontWeight: 'normal',
+    textColor: labelStyle.fill,
+    textOpacity: 1,
   };
   withContext(ctx, (ctx) => {
     const textOffsetX = tickLabelRotation === 0 ? 0 : offsetX;

@@ -20,10 +20,10 @@ import { MockStyles } from '../../../../../mocks';
 import { buildPointStyles } from './point';
 import { Fill, Stroke } from '../../../../../geoms/types';
 import { getColorFromVariant } from '../../../../../utils/commons';
-import { stringToRGB } from '../../../../partition_chart/layout/utils/d3_utils';
+import { stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { PointStyle } from '../../../../../utils/themes/theme';
 
-jest.mock('../../../../partition_chart/layout/utils/d3_utils');
+jest.mock('../../../../partition_chart/layout/utils/color_library_wrappers');
 jest.mock('../../../../../utils/commons');
 
 const COLOR = 'aquamarine';

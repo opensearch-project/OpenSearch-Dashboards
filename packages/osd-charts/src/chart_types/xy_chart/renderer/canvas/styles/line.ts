@@ -17,7 +17,7 @@
  * under the License. */
 
 import { GeometryStateStyle, LineStyle } from '../../../../../utils/themes/theme';
-import { stringToRGB, OpacityFn } from '../../../../partition_chart/layout/utils/d3_utils';
+import { stringToRGB, OpacityFn } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { Stroke } from '../../../../../geoms/types';
 import { getColorFromVariant } from '../../../../../utils/commons';
 

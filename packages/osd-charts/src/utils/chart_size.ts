@@ -25,7 +25,10 @@ export interface ChartSizeObject {
 export type ChartSize = number | string | ChartSizeArray | ChartSizeObject;
 
 /** @internal */
-export function getChartSize(size: ChartSize) {
+export function getChartSize(size?: ChartSize): ChartSizeObject {
+  if (size === undefined) {
+    return {};
+  }
   if (Array.isArray(size)) {
     return {
       width: size[0] === undefined ? '100%' : size[0],

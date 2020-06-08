@@ -17,6 +17,8 @@
  * under the License. */
 
 import { rgb as d3Rgb, RGBColor as D3RGBColor } from 'd3-color';
+import { Color } from '../../../../utils/commons';
+import chroma from 'chroma-js';
 
 type RGB = number;
 type A = number;
@@ -105,4 +107,24 @@ export function argsToRGBString(r: number, g: number, b: number, opacity: number
 export function RGBtoString(rgb: RgbObject): string {
   const { r, g, b, opacity } = rgb;
   return argsToRGBString(r, g, b, opacity);
+}
+
+/** @internal */
+export function RGBATupleToString(rgba: RgbTuple): string {
+  if (rgba.length === 4) {
+    return `rgba(${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${rgba[3]})`;
+  }
+  return `rgb(${rgba[0]}, ${rgba[1]}, ${rgba[2]})`;
+}
+
+/** convert rgb to hex
+ * @internal */
+export function RGBAToHex(rgba: Color) {
+  return chroma(rgba).hex();
+}
+
+/** convert hex to rgb
+ * @internal */
+export function HexToRGB(hex: string) {
+  return chroma(hex).rgba();
 }

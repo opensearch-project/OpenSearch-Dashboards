@@ -1,3 +1,17 @@
+import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../src';
+import { mocks } from '../../src/mocks/hierarchical/index';
+import { config } from '../../src/chart_types/partition_chart/layout/config/config';
+import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/types/viewmodel_types';
+import {
+  categoricalFillColor,
+  colorBrewerCategoricalStark9,
+  countryLookup,
+  indexInterpolatedFillColor,
+  interpolatorCET2s,
+  interpolatorTurbo,
+  productLookup,
+  regionLookup,
+} from '../../stories/utils/utils';
 import { Meta, Story } from "@storybook/addon-docs/blocks";
 
 <Meta title="Introduction/Elastic Charts Overview" />
@@ -255,3 +269,155 @@ type PointStyleAccessor = (
 ```
 
 > Note: When overriding bar or point styles be mindful of performance and these accessor functions will be call on every bar/point is every series. Precomputing any expensive task before rendering.
+
+### Background Colors and Text Contrast
+You can provide the `backgroundColor` of the container that the chart will be placed onto. You can set the `textContrast` to a boolean value or a number. The default `textContrast` is set to 4.5 but you can always disable this or set your own numerical amount.
+
+> Note: This functionality is currently available for Partition charts. Please see the partition background and partition label stories.
+
+```js
+config: {
+  fillLabel: {
+    textInvertible: true,
+    textContrast: true, // can also be set to a number
+  }
+}
+```
+`textInvertible` will have to be set to true for `textContrast` to be set as well. To see an example of where this applies, please see the Partitions Background story within Stylings. Charts are included below but are static. 
+If you have `textInvertible` set to true, but do not have `textContrast` set to true, then the red slices, Europe, North America, and Asia, will have white text:
+
+<Chart className="story-chart">
+  <Settings theme={{background : {color: `rgba(155, 155, 155, 1)`}}} />
+  <Partition
+    id="spec_1"
+    data={mocks.miniSunburst}
+    valueAccessor={(d) => d.exportVal}
+    valueFormatter={(d) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
+    layers={[
+      {
+        groupByRollup: (d) => d.sitc1,
+        nodeLabel: (d) => productLookup[d].name,
+        shape: {
+          fillColor: (d) => {
+            return categoricalFillColor(colorBrewerCategoricalStark9, 0.7)(d.sortIndex);
+          },
+        },
+      },
+      {
+        groupByRollup: (d) => countryLookup[d.dest].continentCountry.substr(0, 2),
+        nodeLabel: (d) => regionLookup[d].regionName,
+        shape: {
+          fillColor: (d) => {
+            return categoricalFillColor(colorBrewerCategoricalStark9, 0.5)(d.parent.sortIndex);
+          },
+        },
+      },
+      {
+        groupByRollup: (d) => d.dest,
+        nodeLabel: (d) => countryLookup[d].name,
+        shape: {
+          fillColor: (d) => {
+            return categoricalFillColor(colorBrewerCategoricalStark9, 0.3)(d.parent.parent.sortIndex);
+          },
+        },
+      },
+    ]}
+    config={{
+      partitionLayout: PartitionLayout.sunburst,
+      linkLabel: {
+        maxCount: 0,
+        fontSize: 14,
+      },
+      fontFamily: 'Arial',
+      fillLabel: {
+        valueFormatter: (d) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
+        fontStyle: 'italic',
+        textInvertible: true,
+        textContrast: false,
+        fontWeight: 900,
+        valueFont: {
+          fontFamily: 'Menlo',
+          fontStyle: 'normal',
+          fontWeight: 100,
+        },
+      },
+      margin: { top: 0, bottom: 0, left: 0, right: 0 },
+      minFontSize: 1,
+      idealFontSizeJump: 1.1,
+      outerSizeRatio: 1,
+      emptySizeRatio: 0,
+      circlePadding: 4,
+      backgroundColor: 'rgba(229,229,229,1)',
+    }}
+  />
+</Chart>
+  
+
+
+Now if you set the `textContrast` to true as well, these slices also become black in text color: 
+
+<Chart className="story-chart">
+  <Settings theme={{background : {color: `rgba(155, 155, 155, 1)`}}} />
+  <Partition
+    id="spec_1"
+    data={mocks.miniSunburst}
+    valueAccessor={(d) => d.exportVal}
+    valueFormatter={(d) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`}
+    layers={[
+      {
+        groupByRollup: (d) => d.sitc1,
+        nodeLabel: (d) => productLookup[d].name,
+        shape: {
+          fillColor: (d) => {
+            return categoricalFillColor(colorBrewerCategoricalStark9, 0.7)(d.sortIndex);
+          },
+        },
+      },
+      {
+        groupByRollup: (d) => countryLookup[d.dest].continentCountry.substr(0, 2),
+        nodeLabel: (d) => regionLookup[d].regionName,
+        shape: {
+          fillColor: (d) => {
+            return categoricalFillColor(colorBrewerCategoricalStark9, 0.5)(d.parent.sortIndex);
+          },
+        },
+      },
+      {
+        groupByRollup: (d) => d.dest,
+        nodeLabel: (d) => countryLookup[d].name,
+        shape: {
+          fillColor: (d) => {
+            return categoricalFillColor(colorBrewerCategoricalStark9, 0.3)(d.parent.parent.sortIndex);
+          },
+        },
+      },
+    ]}
+    config={{
+      partitionLayout: PartitionLayout.sunburst,
+      linkLabel: {
+        maxCount: 0,
+        fontSize: 14,
+      },
+      fontFamily: 'Arial',
+      fillLabel: {
+        valueFormatter: (d) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\xa0Bn`,
+        fontStyle: 'italic',
+        textInvertible: true,
+        textContrast: true,
+        fontWeight: 900,
+        valueFont: {
+          fontFamily: 'Menlo',
+          fontStyle: 'normal',
+          fontWeight: 100,
+        },
+      },
+      margin: { top: 0, bottom: 0, left: 0, right: 0 },
+      minFontSize: 1,
+      idealFontSizeJump: 1.1,
+      outerSizeRatio: 1,
+      emptySizeRatio: 0,
+      circlePadding: 4,
+      backgroundColor: 'rgba(229,229,229,1)',
+    }}
+  />
+</Chart>

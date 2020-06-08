@@ -26,7 +26,7 @@ import { ReactiveChartStateProps } from './xy_chart';
 import { renderAnnotations } from './annotations';
 import { renderBarValues } from './values/bar';
 import { renderDebugRect } from './utils/debug';
-import { stringToRGB } from '../../../partition_chart/layout/utils/d3_utils';
+import { stringToRGB } from '../../../partition_chart/layout/utils/color_library_wrappers';
 import { Rect } from '../../../../geoms/types';
 import { renderBubbles } from './bubbles';
 

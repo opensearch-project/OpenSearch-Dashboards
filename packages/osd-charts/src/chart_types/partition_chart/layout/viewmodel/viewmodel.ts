@@ -24,7 +24,7 @@ import { Distance, Pixels, PointTuple, Radius } from '../types/geometry_types';
 import { meanAngle } from '../geometry';
 import { getTopPadding, treemap } from '../utils/treemap';
 import { sunburst } from '../utils/sunburst';
-import { argsToRGBString, stringToRGB } from '../utils/d3_utils';
+import { argsToRGBString, stringToRGB } from '../utils/color_library_wrappers';
 import {
   nullShapeViewModel,
   OutsideLinksViewModel,
@@ -56,7 +56,7 @@ import {
   sortIndexAccessor,
   HierarchyOfArrays,
 } from '../utils/group_by_rollup';
-import { StrokeStyle, ValueFormatter } from '../../../../utils/commons';
+import { StrokeStyle, ValueFormatter, Color } from '../../../../utils/commons';
 import { percentValueGetter } from '../config/config';
 import { $Values } from 'utility-types';
 
@@ -192,6 +192,7 @@ export function shapeViewModel(
   valueGetter: ValueGetterFunction,
   tree: HierarchyOfArrays,
   topGroove: Pixels,
+  containerBackgroundColor?: Color,
 ): ShapeViewModel {
   const {
     width,
@@ -275,11 +276,17 @@ export function shapeViewModel(
   const valueFormatter = valueGetter === percentValueGetter ? specifiedPercentFormatter : specifiedValueFormatter;
 
   const getRowSets = treemapLayout
-    ? fillTextLayout(rectangleConstruction(treeHeight, topGroove), getRectangleRowGeometry, () => 0)
+    ? fillTextLayout(
+        rectangleConstruction(treeHeight, topGroove),
+        getRectangleRowGeometry,
+        () => 0,
+        containerBackgroundColor,
+      )
     : fillTextLayout(
         ringSectorConstruction(config, innerRadius, ringThickness),
         getSectorRowGeometry,
         inSectorRotation(config.horizontalTextEnforcer, config.horizontalTextAngleThreshold),
+        containerBackgroundColor,
       );
 
   const rowSets: RowSet[] = getRowSets(
@@ -310,9 +317,7 @@ export function shapeViewModel(
           // successful text render if found, and has some row(s)
           return !(foundInFillText && foundInFillText.rows.length !== 0);
         });
-
   const maxLinkedLabelTextLength = config.linkLabel.maxTextLength;
-
   const linkLabelViewModels = linkTextLayout(
     width,
     height,
@@ -326,6 +331,7 @@ export function shapeViewModel(
     valueFormatter,
     maxLinkedLabelTextLength,
     diskCenter,
+    containerBackgroundColor,
   );
 
   const pickQuads: PickFunction = (x, y) => {

@@ -67,7 +67,12 @@ export const Example = () => {
 
   return (
     <Chart className={className}>
-      <Settings debug={boolean('debug', false)} tooltip={tooltipProps} theme={defaultTheme} rotation={chartRotation} />
+      <Settings
+        debug={boolean('debug', false)}
+        tooltip={tooltipProps}
+        baseTheme={defaultTheme}
+        rotation={chartRotation}
+      />
       <Axis
         id="bottom"
         position={Position.Bottom}

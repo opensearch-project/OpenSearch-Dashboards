@@ -173,8 +173,9 @@ export const configMetadata = {
   fillLabel: {
     type: 'group',
     values: {
-      textColor: { dflt: '#000000', type: 'color' },
+      textColor: { type: 'color', dflt: '#000000' },
       textInvertible: { dflt: false, type: 'boolean' },
+      textContrast: { dflt: false, type: 'boolean' || 'number' },
       ...fontSettings,
       valueGetter: {
         dflt: sumValueGetter,
@@ -221,6 +222,7 @@ export const configMetadata = {
       },
       textColor: { dflt: '#000000', type: 'color' },
       textInvertible: { dflt: false, type: 'boolean' },
+      textContrast: { dflt: false, type: 'boolean' || 'number' },
       textOpacity: { dflt: 1, min: 0, max: 1, type: 'number' },
       minimumStemLength: {
         dflt: 0,

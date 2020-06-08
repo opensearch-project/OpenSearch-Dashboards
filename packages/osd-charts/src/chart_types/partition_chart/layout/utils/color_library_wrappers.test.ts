@@ -24,7 +24,7 @@ import {
   RgbObject,
   argsToRGBString,
   RGBtoString,
-} from './d3_utils';
+} from './color_library_wrappers';
 
 describe('d3 Utils', () => {
   describe('stringToRGB', () => {

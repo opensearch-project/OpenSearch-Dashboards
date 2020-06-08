@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License. */
 
-import React, { CSSProperties, createRef } from 'react';
+import React, { createRef } from 'react';
 import classNames from 'classnames';
 import { Provider } from 'react-redux';
 import { createStore, Store, Unsubscribe } from 'redux';
@@ -34,6 +34,7 @@ import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
 import { onExternalPointerEvent } from '../state/actions/events';
 import { PointerEvent } from '../specs';
 import { getInternalIsInitializedSelector } from '../state/selectors/get_internal_is_intialized';
+import { ChartBackground } from './chart_background';
 
 interface ChartProps {
   /** The type of rendered
@@ -47,16 +48,6 @@ interface ChartProps {
 
 interface ChartState {
   legendPosition: Position;
-}
-
-function getContainerStyle(size: any): CSSProperties {
-  if (size) {
-    return {
-      position: 'relative',
-      ...getChartSize(size),
-    };
-  }
-  return {};
 }
 
 export class Chart extends React.Component<ChartProps, ChartState> {
@@ -84,7 +75,6 @@ export class Chart extends React.Component<ChartProps, ChartState> {
     this.state = {
       legendPosition: Position.Right,
     };
-
     this.unsubscribeToStore = this.chartStore.subscribe(() => {
       const state = this.chartStore.getState();
       if (!getInternalIsInitializedSelector(state)) {
@@ -157,14 +147,16 @@ export class Chart extends React.Component<ChartProps, ChartState> {
 
   render() {
     const { size, className } = this.props;
-    const containerStyle = getContainerStyle(size);
+    const containerSizeStyle = getChartSize(size);
     const horizontal = isHorizontalAxis(this.state.legendPosition);
     const chartClassNames = classNames('echChart', className, {
       'echChart--column': horizontal,
     });
+
     return (
       <Provider store={this.chartStore}>
-        <div style={containerStyle} className={chartClassNames} ref={this.chartContainerRef}>
+        <div className={chartClassNames} style={containerSizeStyle} ref={this.chartContainerRef}>
+          <ChartBackground />
           <ChartStatus />
           <ChartResizer />
           <Legend />
