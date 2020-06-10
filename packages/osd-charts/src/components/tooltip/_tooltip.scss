@@ -19,10 +19,29 @@
 
   &__item {
     display: flex;
-    padding: 3px;
-    box-sizing: border-box;
-    border-left: $euiSizeXS solid transparent;
     min-width: 1px;
+
+    &--container {
+      display: flex;
+      flex: 1 1 auto;
+      padding: 3px;
+      padding-left: 0;
+      min-width: 1px;
+    }
+
+    &--backgroundColor {
+      position: relative;
+      width: $euiSizeXS;
+      margin-right: 3px;
+    }
+
+    &--color {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
   }
 
   &__label {

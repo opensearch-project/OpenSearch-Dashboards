@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { Example } from '../stories/treemap/6_custom_style';
+import { Example } from '../stories/bar/23_bar_chart_2y2g';
 
 export class Playground extends React.Component {
   render() {
