@@ -23,7 +23,7 @@ import { bindActionCreators, Dispatch } from 'redux';
 
 import { onPointerMove as onPointerMoveAction } from '../../../../../state/actions/mouse';
 import { GlobalChartState, BackwardRef } from '../../../../../state/chart_state';
-import { getInternalIsInitializedSelector } from '../../../../../state/selectors/get_internal_is_intialized';
+import { getInternalIsInitializedSelector, InitStatus } from '../../../../../state/selectors/get_internal_is_intialized';
 import { Dimensions } from '../../../../../utils/dimensions';
 import { AnnotationId } from '../../../../../utils/ids';
 import { AnnotationLineProps } from '../../../annotations/line/types';
@@ -56,6 +56,33 @@ interface AnnotationsOwnProps {
 
 type AnnotationsProps = AnnotationsDispatchProps & AnnotationsStateProps & AnnotationsOwnProps;
 
+function renderAnnotationLineMarkers(
+  chartDimensions: Dimensions,
+  annotationLines: AnnotationLineProps[],
+  id: AnnotationId,
+) {
+  return annotationLines.reduce<JSX.Element[]>((markers, { marker }: AnnotationLineProps, index: number) => {
+    if (!marker) {
+      return markers;
+    }
+
+    const { icon, color, position } = marker;
+    const style = {
+      color,
+      top: chartDimensions.top + position.top,
+      left: chartDimensions.left + position.left,
+    };
+
+    markers.push(
+      // eslint-disable-next-line react/no-array-index-key
+      <div className="echAnnotation" style={{ ...style }} key={`annotation-${id}-${index}`}>
+        {icon}
+      </div>,
+    );
+
+    return markers;
+  }, []);
+}
 const AnnotationsComponent = ({
   tooltipState,
   isChartEmpty,
@@ -66,32 +93,6 @@ const AnnotationsComponent = ({
   chartId,
   onPointerMove,
 }: AnnotationsProps) => {
-  const renderAnnotationLineMarkers = useCallback(
-    (annotationLines: AnnotationLineProps[], id: AnnotationId) =>
-      annotationLines.reduce<JSX.Element[]>((markers, { marker }: AnnotationLineProps, index: number) => {
-        if (!marker) {
-          return markers;
-        }
-
-        const { icon, color, position } = marker;
-        const style = {
-          color,
-          top: chartDimensions.top + position.top,
-          left: chartDimensions.left + position.left,
-        };
-
-        markers.push(
-          // eslint-disable-next-line react/no-array-index-key
-          <div className="echAnnotation" style={{ ...style }} key={`annotation-${id}-${index}`}>
-            {icon}
-          </div>,
-        );
-
-        return markers;
-      }, []),
-    [], // eslint-disable-line react-hooks/exhaustive-deps
-  );
-
   const renderAnnotationMarkers = useCallback((): JSX.Element[] => {
     const markers: JSX.Element[] = [];
 
@@ -103,13 +104,13 @@ const AnnotationsComponent = ({
 
       if (isLineAnnotation(annotationSpec)) {
         const annotationLines = dimensions as AnnotationLineProps[];
-        const lineMarkers = renderAnnotationLineMarkers(annotationLines, id);
+        const lineMarkers = renderAnnotationLineMarkers(chartDimensions, annotationLines, id);
         markers.push(...lineMarkers);
       }
     });
 
     return markers;
-  }, [annotationDimensions, annotationSpecs, renderAnnotationLineMarkers]);
+  }, [chartDimensions, annotationDimensions, annotationSpecs]);
 
   const onScroll = useCallback(() => {
     onPointerMove({ x: -1, y: -1 }, new Date().getTime());
@@ -138,7 +139,7 @@ const mapDispatchToProps = (dispatch: Dispatch): AnnotationsDispatchProps =>
   bindActionCreators({ onPointerMove: onPointerMoveAction }, dispatch);
 
 const mapStateToProps = (state: GlobalChartState): AnnotationsStateProps => {
-  if (!getInternalIsInitializedSelector(state)) {
+  if (getInternalIsInitializedSelector(state) !== InitStatus.Initialized) {
     return {
       isChartEmpty: true,
       chartDimensions: { top: 0, left: 0, width: 0, height: 0 },

@@ -33,7 +33,7 @@ import {
 } from '../../state/actions/legend';
 import { GlobalChartState } from '../../state/chart_state';
 import { getChartThemeSelector } from '../../state/selectors/get_chart_theme';
-import { getInternalIsInitializedSelector } from '../../state/selectors/get_internal_is_intialized';
+import { getInternalIsInitializedSelector, InitStatus } from '../../state/selectors/get_internal_is_intialized';
 import { getLegendItemsSelector } from '../../state/selectors/get_legend_items';
 import { getLegendExtraValuesSelector } from '../../state/selectors/get_legend_items_values';
 import { getLegendSizeSelector } from '../../state/selectors/get_legend_size';
@@ -146,7 +146,7 @@ const EMPTY_DEFAULT_STATE = {
   showExtra: false,
 };
 const mapStateToProps = (state: GlobalChartState): LegendStateProps => {
-  if (!getInternalIsInitializedSelector(state)) {
+  if (getInternalIsInitializedSelector(state) !== InitStatus.Initialized) {
     return EMPTY_DEFAULT_STATE;
   }
   const {

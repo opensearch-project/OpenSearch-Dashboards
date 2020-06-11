@@ -27,7 +27,7 @@ import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
-import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
+import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { Rotation } from '../../../../utils/commons';
 import { Dimensions } from '../../../../utils/dimensions';
@@ -144,19 +144,12 @@ class XYChartComponent extends React.Component<XYChartProps> {
       isChartEmpty,
       chartContainerDimensions: { width, height },
     } = this.props;
-    if (!initialized || width === 0 || height === 0) {
+
+    if (!initialized || isChartEmpty) {
       this.ctx = null;
       return null;
     }
 
-    if (isChartEmpty) {
-      this.ctx = null;
-      return (
-        <div className="echReactiveChart_unavailable">
-          <p>No data to display</p>
-        </div>
-      );
-    }
     return (
       <canvas
         ref={forwardStageRef}
@@ -226,7 +219,7 @@ const DEFAULT_PROPS: ReactiveChartStateProps = {
 };
 
 const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
-  if (!getInternalIsInitializedSelector(state)) {
+  if (getInternalIsInitializedSelector(state) !== InitStatus.Initialized) {
     return DEFAULT_PROPS;
   }
 

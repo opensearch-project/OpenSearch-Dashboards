@@ -23,7 +23,7 @@ import { connect } from 'react-redux';
 import { clearCanvas, withContext, withClip } from '../../../../renderers/canvas';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
-import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
+import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
 import { Dimensions } from '../../../../utils/dimensions';
 import { computeChartDimensionsSelector } from '../../state/selectors/compute_chart_dimensions';
 import { getBrushAreaSelector } from '../../state/selectors/get_brush_area';
@@ -141,7 +141,7 @@ class BrushToolComponent extends React.Component<Props> {
 }
 
 const mapStateToProps = (state: GlobalChartState): Props => {
-  if (!getInternalIsInitializedSelector(state)) {
+  if (getInternalIsInitializedSelector(state) !== InitStatus.Initialized) {
     return {
       initialized: false,
       isBrushing: false,

@@ -17,16 +17,78 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
-import { Example } from '../stories/bar/23_bar_chart_2y2g';
+import { Chart, BarSeries, LegendColorPicker, Settings, ScaleType } from '../src';
+import { SeededDataGenerator } from '../src/mocks/utils';
+
+const dg = new SeededDataGenerator();
+
+type SetColorFn = (color: string) => void;
+const legendColorPickerFn = (setColors: SetColorFn, customColor: string): LegendColorPicker => ({ onClose }) => (
+  <div id="colorPicker">
+    <span>Custom Color Picker</span>
+    <button
+      id="change"
+      type="button"
+      onClick={() => {
+        setTimeout(() => {
+          onClose();
+          setColors(customColor);
+        }, 0);
+      }}
+    >
+      {customColor}
+    </button>
+    <button id="close" type="button" onClick={onClose}>
+      close
+    </button>
+  </div>
+);
+function LegendColorPickerMock(props: { onLegendItemClick: () => void; customColor: string }) {
+  const data = dg.generateGroupedSeries(10, 4, 'split');
+  const [color, setColor] = useState('red');
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => {
+          setColor('violet');
+        }}
+      >
+        change
+      </button>
+      <Chart className="chart">
+        <Settings
+          showLegend
+          onLegendItemClick={props.onLegendItemClick}
+          legendColorPicker={legendColorPickerFn(setColor, props.customColor)}
+        />
+        <BarSeries
+          id="areas"
+          xScaleType={ScaleType.Linear}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          splitSeriesAccessors={['g']}
+          color={color}
+          data={data}
+        />
+      </Chart>
+    </>
+  );
+}
 
 export class Playground extends React.Component {
   render() {
     return (
-      <div className="testing">
-        <div className="chart">{Example()}</div>
-      </div>
+      <LegendColorPickerMock
+        customColor="blue"
+        onLegendItemClick={() => {
+          // npo
+        }}
+      />
     );
   }
 }

@@ -22,7 +22,7 @@ import { connect } from 'react-redux';
 
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
-import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
+import { InitStatus, getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
 import { Rotation } from '../../../../utils/commons';
 import { Dimensions } from '../../../../utils/dimensions';
 import { isPointGeometry, IndexedGeometry } from '../../../../utils/geometry';
@@ -94,7 +94,7 @@ class HighlighterComponent extends React.Component<HighlighterProps> {
 }
 
 const mapStateToProps = (state: GlobalChartState): HighlighterProps => {
-  if (!getInternalIsInitializedSelector(state)) {
+  if (getInternalIsInitializedSelector(state) !== InitStatus.Initialized) {
     return {
       initialized: false,
       chartId: state.chartId,

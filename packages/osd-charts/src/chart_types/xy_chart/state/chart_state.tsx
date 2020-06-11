@@ -24,6 +24,7 @@ import { LegendItemExtraValues } from '../../../commons/legend';
 import { SeriesKey } from '../../../commons/series_id';
 import { Tooltip } from '../../../components/tooltip';
 import { InternalChartState, GlobalChartState, BackwardRef } from '../../../state/chart_state';
+import { InitStatus } from '../../../state/selectors/get_internal_is_intialized';
 import { htmlIdGenerator } from '../../../utils/commons';
 import { XYChart } from '../renderer/canvas/xy_chart';
 import { Annotations } from '../renderer/dom/annotations';
@@ -69,7 +70,7 @@ export class XYAxisChartState implements InternalChartState {
   }
 
   isInitialized(globalState: GlobalChartState) {
-    return globalState.specsInitialized && getSeriesSpecsSelector(globalState).length > 0;
+    return getSeriesSpecsSelector(globalState).length > 0 ? InitStatus.Initialized : InitStatus.SpecNotInitialized;
   }
 
   isBrushAvailable(globalState: GlobalChartState) {

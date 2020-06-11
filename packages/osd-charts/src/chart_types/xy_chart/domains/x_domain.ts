@@ -47,7 +47,7 @@ export function mergeXDomain(
 ): XDomain {
   const mainXScaleType = convertXScaleTypes(specs);
   if (!mainXScaleType) {
-    throw new Error('Cannot merge the domain. Missing X scale types');
+    throw new Error(`Cannot merge the domain. Missing X scale types ${JSON.stringify(specs)}`);
   }
 
   const values = [...xValues.values()];

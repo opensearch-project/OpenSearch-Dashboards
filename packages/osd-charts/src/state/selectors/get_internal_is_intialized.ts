@@ -17,12 +17,40 @@
  * under the License.
  */
 
+import { $Values } from 'utility-types';
+
 import { GlobalChartState } from '../chart_state';
 
+
+export const InitStatus = Object.freeze({
+  ParentSizeInvalid: 'ParentSizeInvalid' as const,
+  SpecNotInitialized: 'SpecNotInitialized' as const,
+  MissingChartType: 'MissingChartType' as const,
+  ChartNotInitialized: 'ChartNotInitialized' as const,
+  Initialized: 'Initialized' as const,
+});
+
+export type InitStatus = $Values<typeof InitStatus>;
+
 /** @internal */
-export const getInternalIsInitializedSelector = (state: GlobalChartState): boolean => {
-  if (state.internalChartState) {
-    return state.internalChartState.isInitialized(state);
+export const getInternalIsInitializedSelector = (state: GlobalChartState): InitStatus => {
+  const {
+    parentDimensions: { width, height },
+    specsInitialized,
+    internalChartState,
+  } = state;
+
+  if (!specsInitialized) {
+    return InitStatus.SpecNotInitialized;
   }
-  return false;
+
+  if (!internalChartState) {
+    return InitStatus.MissingChartType;
+  }
+
+  if (width <= 0 || height <= 0) {
+    return InitStatus.ParentSizeInvalid;
+  }
+
+  return internalChartState.isInitialized(state);
 };

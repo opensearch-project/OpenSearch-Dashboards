@@ -202,7 +202,6 @@ export function shapeViewModel(
     partitionLayout,
     sectorLineWidth,
   } = config;
-
   const innerWidth = width * (1 - Math.min(1, margin.left + margin.right));
   const innerHeight = height * (1 - Math.min(1, margin.top + margin.bottom));
 

@@ -156,7 +156,7 @@ describe('Legend', () => {
     class LegendColorPickerMock extends Component<
       { onLegendItemClick: () => void; customColor: string },
       { colors: string[] }
-    > {
+      > {
       state = {
         colors: ['red'],
       };

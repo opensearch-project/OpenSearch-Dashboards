@@ -28,13 +28,13 @@ import { getInternalChartRendererSelector } from '../state/selectors/get_chart_t
 import { getInternalPointerCursor } from '../state/selectors/get_internal_cursor_pointer';
 import { getInternalIsBrushingSelector } from '../state/selectors/get_internal_is_brushing';
 import { getInternalIsBrushingAvailableSelector } from '../state/selectors/get_internal_is_brushing_available';
-import { getInternalIsInitializedSelector } from '../state/selectors/get_internal_is_intialized';
+import { getInternalIsInitializedSelector, InitStatus } from '../state/selectors/get_internal_is_intialized';
 import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
 import { isInternalChartEmptySelector } from '../state/selectors/is_chart_empty';
 import { deepEqual } from '../utils/fast_deep_equal';
 
 interface ChartContainerComponentStateProps {
-  initialized: boolean;
+  initialized: InitStatus;
   isChartEmpty?: boolean;
   pointerCursor: string;
   isBrushing: boolean;
@@ -143,8 +143,15 @@ class ChartContainerComponent extends React.Component<ReactiveChartProps> {
   };
 
   render() {
-    const { initialized } = this.props;
-    if (!initialized) {
+    const { initialized, isChartEmpty } = this.props;
+    if (
+      initialized === InitStatus.ParentSizeInvalid
+      || initialized === InitStatus.SpecNotInitialized
+      || initialized === InitStatus.ChartNotInitialized
+    ) {
+      return null;
+    }
+    if (initialized === InitStatus.MissingChartType || isChartEmpty === true) {
       return (
         <div className="echReactiveChart_unavailable">
           <p>No data to display</p>
@@ -179,10 +186,12 @@ const mapDispatchToProps = (dispatch: Dispatch): ChartContainerComponentDispatch
     dispatch,
   );
 const mapStateToProps = (state: GlobalChartState): ChartContainerComponentStateProps => {
-  if (!getInternalIsInitializedSelector(state)) {
+  const status = getInternalIsInitializedSelector(state);
+
+  if (status !== InitStatus.Initialized) {
     return {
-      initialized: false,
-      isChartEmpty: true,
+      initialized: status,
+      isChartEmpty: undefined,
       pointerCursor: 'default',
       isBrushingAvailable: false,
       isBrushing: false,
@@ -191,7 +200,7 @@ const mapStateToProps = (state: GlobalChartState): ChartContainerComponentStateP
   }
 
   return {
-    initialized: true,
+    initialized: status,
     isChartEmpty: isInternalChartEmptySelector(state),
     pointerCursor: getInternalPointerCursor(state),
     isBrushingAvailable: getInternalIsBrushingAvailableSelector(state),

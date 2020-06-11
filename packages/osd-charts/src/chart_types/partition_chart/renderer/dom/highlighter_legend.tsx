@@ -21,13 +21,13 @@ import { connect } from 'react-redux';
 
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
-import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
+import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
 import { partitionGeometries } from '../../state/selectors/geometries';
 import { getHighlightedSectorsSelector } from '../../state/selectors/get_highlighted_shapes';
 import { HighlighterComponent, HighlighterProps, DEFAULT_PROPS } from './highlighter';
 
 const legendMapStateToProps = (state: GlobalChartState): HighlighterProps => {
-  if (!getInternalIsInitializedSelector(state)) {
+  if (getInternalIsInitializedSelector(state) !== InitStatus.Initialized) {
     return DEFAULT_PROPS;
   }
 

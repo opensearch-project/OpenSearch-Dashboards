@@ -23,7 +23,7 @@ import { bindActionCreators, Dispatch } from 'redux';
 
 import { onChartRendered } from '../../../../state/actions/chart';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
+import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
 import { Dimensions } from '../../../../utils/dimensions';
 import { BulletViewModel, nullShapeViewModel, ShapeViewModel } from '../../layout/types/viewmodel_types';
 import { geometries } from '../../state/selectors/geometries';
@@ -159,7 +159,7 @@ const DEFAULT_PROPS: ReactiveChartStateProps = {
 };
 
 const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
-  if (!getInternalIsInitializedSelector(state)) {
+  if (getInternalIsInitializedSelector(state) !== InitStatus.Initialized) {
     return DEFAULT_PROPS;
   }
   return {

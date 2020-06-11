@@ -22,6 +22,7 @@ import React, { RefObject } from 'react';
 import { ChartTypes } from '../..';
 import { Tooltip } from '../../../components/tooltip';
 import { InternalChartState, GlobalChartState, BackwardRef } from '../../../state/chart_state';
+import { InitStatus } from '../../../state/selectors/get_internal_is_intialized';
 import { Partition } from '../renderer/canvas/partition';
 import { HighlighterFromHover } from '../renderer/dom/highlighter_hover';
 import { HighlighterFromLegend } from '../renderer/dom/highlighter_legend';
@@ -51,7 +52,7 @@ export class PartitionState implements InternalChartState {
   }
 
   isInitialized(globalState: GlobalChartState) {
-    return globalState.specsInitialized && getPieSpec(globalState) !== null;
+    return getPieSpec(globalState) !== null ? InitStatus.Initialized : InitStatus.SpecNotInitialized;
   }
 
   isBrushAvailable() {

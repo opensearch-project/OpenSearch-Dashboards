@@ -28,7 +28,7 @@ import { PointerEvent } from '../specs';
 import { SpecsParser } from '../specs/specs_parser';
 import { onExternalPointerEvent } from '../state/actions/events';
 import { chartStoreReducer, GlobalChartState } from '../state/chart_state';
-import { getInternalIsInitializedSelector } from '../state/selectors/get_internal_is_intialized';
+import { getInternalIsInitializedSelector, InitStatus } from '../state/selectors/get_internal_is_intialized';
 import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
 import { ChartSize, getChartSize } from '../utils/chart_size';
 import { Position } from '../utils/commons';
@@ -68,7 +68,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
     this.chartContainerRef = createRef();
     this.chartStageRef = createRef();
 
-    const id = uuid.v4();
+    const id = props.id ?? uuid.v4();
     const storeReducer = chartStoreReducer(id);
     const enhancers = typeof window !== 'undefined' && (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
       ? (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ trace: true, name: `@elastic/charts (id: ${id})` })()
@@ -80,7 +80,7 @@ export class Chart extends React.Component<ChartProps, ChartState> {
     };
     this.unsubscribeToStore = this.chartStore.subscribe(() => {
       const state = this.chartStore.getState();
-      if (!getInternalIsInitializedSelector(state)) {
+      if (getInternalIsInitializedSelector(state) !== InitStatus.Initialized) {
         return;
       }
 
