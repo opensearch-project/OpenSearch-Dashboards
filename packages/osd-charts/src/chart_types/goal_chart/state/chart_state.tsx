@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { RefObject } from 'react';
 
 import { ChartTypes } from '../..';
 import { LegendItem } from '../../../commons/legend';
@@ -78,11 +78,11 @@ export class GoalState implements InternalChartState {
     return EMPTY_MAP;
   }
 
-  chartRenderer(containerRef: BackwardRef) {
+  chartRenderer(containerRef: BackwardRef, forwardStageRef: RefObject<HTMLCanvasElement>) {
     return (
       <>
         <Tooltip getChartContainerRef={containerRef} />
-        <Goal />
+        <Goal forwardStageRef={forwardStageRef} />
       </>
     );
   }

@@ -17,19 +17,34 @@
  * under the License.
  */
 
-import { button } from '@storybook/addon-knobs';
-import React from 'react';
+import { button, select } from '@storybook/addon-knobs';
+import React, { RefObject } from 'react';
 
-import { Axis, BarSeries, Chart, niceTimeFormatter, Position, ScaleType, Settings } from '../../src';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  niceTimeFormatter,
+  Position,
+  ScaleType,
+  Settings,
+  Partition,
+  Datum,
+  Goal,
+  ChartTypes,
+} from '../../src';
+import { GOAL_SUBTYPES, BandFillColorAccessorInput } from '../../src/chart_types/goal_chart/specs';
+import { config } from '../../src/chart_types/partition_chart/layout/config/config';
+import { mocks } from '../../src/mocks/hierarchical';
+import { Color } from '../../src/utils/commons';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 import { SB_KNOBS_PANEL } from '../utils/storybook';
+import { productLookup, indexInterpolatedFillColor, interpolatorCET2s } from '../utils/utils';
 
 export const Example = () => {
   /**
    * The handler section of this story demonstrates the PNG export functionality
    */
-  const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 100);
-  const label = 'Export PNG';
   const chartRef: React.RefObject<Chart> = React.createRef();
   const handler = () => {
     if (!chartRef.current) {
@@ -57,8 +72,49 @@ export const Example = () => {
         document.body.removeChild(link);
     }
   };
-  const groupId = '';
-  button(label, handler, groupId);
+  button('Export PNG', handler);
+  const selectedChart = select(
+    'chart type',
+    [ChartTypes.XYAxis, ChartTypes.Partition, ChartTypes.Goal],
+    ChartTypes.XYAxis,
+  );
+
+  switch (selectedChart) {
+    case ChartTypes.Partition:
+      return renderPartitionChart(chartRef);
+    case ChartTypes.Goal:
+      return renderGoalchart(chartRef);
+    case ChartTypes.XYAxis:
+    default:
+      return renderXYAxisChart(chartRef);
+  }
+};
+
+function renderPartitionChart(chartRef: RefObject<Chart>) {
+  return (
+    <Chart ref={chartRef}>
+      <Partition
+        id="spec_1"
+        data={mocks.pie}
+        valueAccessor={(d: Datum) => d.exportVal as number}
+        valueFormatter={(d: number) => `$${config.fillLabel.valueFormatter(Math.round(d / 1000000000))}\u00A0Bn`}
+        layers={[
+          {
+            groupByRollup: (d: Datum) => d.sitc1,
+            nodeLabel: (d: Datum) => productLookup[d].name,
+            fillLabel: { textInvertible: true },
+            shape: {
+              fillColor: indexInterpolatedFillColor(interpolatorCET2s),
+            },
+          },
+        ]}
+      />
+    </Chart>
+  );
+}
+
+function renderXYAxisChart(chartRef: RefObject<Chart>) {
+  const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 100);
   return (
     <Chart className="story-chart" ref={chartRef}>
       <Settings showLegend showLegendExtra />
@@ -80,7 +136,43 @@ export const Example = () => {
       />
     </Chart>
   );
-};
+}
+
+function renderGoalchart(chartRef: RefObject<Chart>) {
+  const subtype = GOAL_SUBTYPES[0];
+
+  const colorMap: { [k: number]: Color } = {
+    200: '#fc8d62',
+    250: 'lightgrey',
+    300: '#66c2a5',
+  };
+
+  const bandFillColor = (x: number): Color => colorMap[x];
+
+  return (
+    <Chart className="story-chart" ref={chartRef}>
+      <Goal
+        id="spec_1"
+        subtype={subtype}
+        base={0}
+        target={260}
+        actual={280}
+        bands={[200, 250, 300]}
+        ticks={[0, 50, 100, 150, 200, 250, 300]}
+        tickValueFormatter={({ value }: BandFillColorAccessorInput) => String(value)}
+        bandFillColor={({ value }: BandFillColorAccessorInput) => bandFillColor(value)}
+        labelMajor=""
+        labelMinor=""
+        centralMajor="280 MB/s"
+        centralMinor=""
+        config={{
+          angleStart: Math.PI + (Math.PI - (2 * Math.PI) / 3) / 2,
+          angleEnd: -(Math.PI - (2 * Math.PI) / 3) / 2,
+        }}
+      />
+    </Chart>
+  );
+}
 
 // storybook configuration
 Example.story = {

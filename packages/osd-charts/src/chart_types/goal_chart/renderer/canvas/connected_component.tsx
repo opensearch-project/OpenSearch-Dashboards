@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { MouseEvent } from 'react';
+import React, { MouseEvent, RefObject } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
@@ -39,18 +39,20 @@ interface ReactiveChartDispatchProps {
   onChartRendered: typeof onChartRendered;
 }
 
-type Props = ReactiveChartStateProps & ReactiveChartDispatchProps;
+interface ReactiveChartOwnProps {
+  forwardStageRef: RefObject<HTMLCanvasElement>;
+}
+
+type Props = ReactiveChartStateProps & ReactiveChartDispatchProps & ReactiveChartOwnProps;
 class Component extends React.Component<Props> {
   static displayName = 'Goal';
   // firstRender = true; // this'll be useful for stable resizing of treemaps
-  private readonly canvasRef: React.RefObject<HTMLCanvasElement>;
   private ctx: CanvasRenderingContext2D | null;
   // see example https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio#Example
   private readonly devicePixelRatio: number; // fixme this be no constant: multi-monitor window drag may necessitate modifying the `<canvas>` dimensions
 
   constructor(props: Readonly<Props>) {
     super(props);
-    this.canvasRef = React.createRef();
     this.ctx = null;
     this.devicePixelRatio = window.devicePixelRatio;
   }
@@ -78,7 +80,7 @@ class Component extends React.Component<Props> {
   }
 
   private tryCanvasContext() {
-    const canvas = this.canvasRef.current;
+    const canvas = this.props.forwardStageRef.current;
     this.ctx = canvas && canvas.getContext('2d');
   }
 
@@ -96,13 +98,15 @@ class Component extends React.Component<Props> {
     const {
       initialized,
       chartContainerDimensions: { width, height },
+      forwardStageRef,
+      geometries,
     } = this.props;
-    if (!this.canvasRef.current || !this.ctx || !initialized || width === 0 || height === 0) {
+    if (!forwardStageRef.current || !this.ctx || !initialized || width === 0 || height === 0) {
       return;
     }
-    const picker = this.props.geometries.pickQuads;
-    const box = this.canvasRef.current.getBoundingClientRect();
-    const { chartCenter } = this.props.geometries;
+    const picker = geometries.pickQuads;
+    const box = forwardStageRef.current.getBoundingClientRect();
+    const { chartCenter } = geometries;
     const x = e.clientX - box.left - chartCenter.x;
     const y = e.clientY - box.top - chartCenter.y;
     const pickedShapes: Array<BulletViewModel> = picker(x, y);
@@ -113,6 +117,7 @@ class Component extends React.Component<Props> {
     const {
       initialized,
       chartContainerDimensions: { width, height },
+      forwardStageRef,
     } = this.props;
     if (!initialized || width === 0 || height === 0) {
       return null;
@@ -120,7 +125,7 @@ class Component extends React.Component<Props> {
 
     return (
       <canvas
-        ref={this.canvasRef}
+        ref={forwardStageRef}
         className="echCanvasRenderer"
         width={width * this.devicePixelRatio}
         height={height * this.devicePixelRatio}

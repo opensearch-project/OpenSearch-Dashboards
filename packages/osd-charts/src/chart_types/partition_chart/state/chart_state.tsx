@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { RefObject } from 'react';
 
 import { ChartTypes } from '../..';
 import { Tooltip } from '../../../components/tooltip';
@@ -78,11 +78,11 @@ export class PartitionState implements InternalChartState {
     return EMPTY_MAP;
   }
 
-  chartRenderer(containerRef: BackwardRef) {
+  chartRenderer(containerRef: BackwardRef, forwardStageRef: RefObject<HTMLCanvasElement>) {
     return (
       <>
         <Tooltip getChartContainerRef={containerRef} />
-        <Partition />
+        <Partition forwardStageRef={forwardStageRef} />
         <HighlighterFromHover />
         <HighlighterFromLegend />
       </>

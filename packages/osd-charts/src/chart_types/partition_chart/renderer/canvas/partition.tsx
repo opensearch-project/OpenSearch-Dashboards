@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { MouseEvent } from 'react';
+import React, { MouseEvent, RefObject } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
@@ -40,20 +40,21 @@ interface ReactiveChartStateProps {
 interface ReactiveChartDispatchProps {
   onChartRendered: typeof onChartRendered;
 }
+interface ReactiveChartOwnProps {
+  forwardStageRef: RefObject<HTMLCanvasElement>;
+}
 
-type PartitionProps = ReactiveChartStateProps & ReactiveChartDispatchProps;
+type PartitionProps = ReactiveChartStateProps & ReactiveChartDispatchProps & ReactiveChartOwnProps;
 class PartitionComponent extends React.Component<PartitionProps> {
   static displayName = 'Partition';
 
   // firstRender = true; // this'll be useful for stable resizing of treemaps
-  private readonly canvasRef: React.RefObject<HTMLCanvasElement>;
   private ctx: CanvasRenderingContext2D | null;
   // see example https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio#Example
   private readonly devicePixelRatio: number; // fixme this be no constant: multi-monitor window drag may necessitate modifying the `<canvas>` dimensions
 
   constructor(props: Readonly<PartitionProps>) {
     super(props);
-    this.canvasRef = React.createRef();
     this.ctx = null;
     this.devicePixelRatio = window.devicePixelRatio;
   }
@@ -91,7 +92,7 @@ class PartitionComponent extends React.Component<PartitionProps> {
   }
 
   private tryCanvasContext() {
-    const canvas = this.canvasRef.current;
+    const canvas = this.props.forwardStageRef.current;
     this.ctx = canvas && canvas.getContext('2d');
   }
 
@@ -99,12 +100,13 @@ class PartitionComponent extends React.Component<PartitionProps> {
     const {
       initialized,
       chartContainerDimensions: { width, height },
+      forwardStageRef,
     } = this.props;
-    if (!this.canvasRef.current || !this.ctx || !initialized || width === 0 || height === 0) {
+    if (!forwardStageRef.current || !this.ctx || !initialized || width === 0 || height === 0) {
       return;
     }
     const picker = this.props.geometries.pickQuads;
-    const box = this.canvasRef.current.getBoundingClientRect();
+    const box = forwardStageRef.current.getBoundingClientRect();
     const { diskCenter } = this.props.geometries;
     const x = e.clientX - box.left - diskCenter.x;
     const y = e.clientY - box.top - diskCenter.y;
@@ -129,6 +131,7 @@ class PartitionComponent extends React.Component<PartitionProps> {
 
   render() {
     const {
+      forwardStageRef,
       initialized,
       chartContainerDimensions: { width, height },
     } = this.props;
@@ -138,7 +141,7 @@ class PartitionComponent extends React.Component<PartitionProps> {
 
     return (
       <canvas
-        ref={this.canvasRef}
+        ref={forwardStageRef}
         className="echCanvasRenderer"
         width={width * this.devicePixelRatio}
         height={height * this.devicePixelRatio}
