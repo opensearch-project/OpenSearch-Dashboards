@@ -20,8 +20,9 @@
 import React from 'react';
 
 import { ChartTypes } from '../..';
-import { Scale, ScaleType, ScaleContinuous } from '../../../scales';
-import { SpecTypes } from '../../../specs/settings';
+import { Scale, ScaleContinuous } from '../../../scales';
+import { ScaleType } from '../../../scales/constants';
+import { SpecTypes } from '../../../specs/constants';
 import { Position, Rotation } from '../../../utils/commons';
 import { Dimensions } from '../../../utils/dimensions';
 import { GroupId } from '../../../utils/ids';

@@ -18,10 +18,8 @@
  */
 
 import React from 'react';
-import { $Values } from 'utility-types';
 
 import { Spec } from '.';
-import { ChartTypes } from '../chart_types';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { XYChartSeriesIdentifier } from '../chart_types/xy_chart/utils/series';
 import { DomainRange } from '../chart_types/xy_chart/utils/specs';
@@ -35,8 +33,8 @@ import { Position, Rendering, Rotation, Color } from '../utils/commons';
 import { Domain } from '../utils/domain';
 import { GeometryValue } from '../utils/geometry';
 import { GroupId } from '../utils/ids';
-import { LIGHT_THEME } from '../utils/themes/light_theme';
 import { PartialTheme, Theme } from '../utils/themes/theme';
+import { PointerEventType, TooltipType, BrushAxis, DEFAULT_SETTINGS_SPEC } from './constants';
 
 export interface LayerValue {
   groupByRollup: PrimitiveValue;
@@ -68,13 +66,6 @@ export type PointerUpdateListener = (event: PointerEvent) => void;
 export type RenderChangeListener = (isRendered: boolean) => void;
 export type BasicListener = () => undefined | void;
 
-export const PointerEventType = Object.freeze({
-  Over: 'Over' as const,
-  Out: 'Out' as const,
-});
-
-export type PointerEventType = $Values<typeof PointerEventType>;
-
 export interface BasePointerEvent {
   chartId: string;
   type: PointerEventType;
@@ -99,35 +90,6 @@ export interface PointerOutEvent extends BasePointerEvent {
 }
 
 export type PointerEvent = PointerOverEvent | PointerOutEvent;
-
-/**
- * This enums provides the available tooltip types
- * @public
- */
-export const TooltipType = Object.freeze({
-  /** Vertical cursor parallel to x axis */
-  VerticalCursor: 'vertical' as const,
-  /** Vertical and horizontal cursors */
-  Crosshairs: 'cross' as const,
-  /** Follow the mouse coordinates */
-  Follow: 'follow' as const,
-  /** Hide every tooltip */
-  None: 'none' as const,
-});
-
-/**
- * The TooltipType
- * @public
- */
-export type TooltipType = $Values<typeof TooltipType>;
-
-export const BrushAxis = Object.freeze({
-  X: 'x' as const,
-  Y: 'y' as const,
-  Both: 'both' as const,
-});
-
-export type BrushAxis = $Values<typeof BrushAxis>;
 
 /**
  * This interface describe the properties of single value shown in the tooltip
@@ -351,51 +313,6 @@ export type DefaultSettingsProps =
   | 'hideDuplicateAxes'
   | 'brushAxis'
   | 'minBrushDelta';
-
-/**
- * Default value for the tooltip type
- * @defaultValue `vertical` {@link (TooltipType:type) | TooltipType.VerticalCursor}
- * @public
- */
-export const DEFAULT_TOOLTIP_TYPE = TooltipType.VerticalCursor;
-
-/**
- * Default value for the tooltip snap
- * @defaultValue `true`
- * @public
- */
-export const DEFAULT_TOOLTIP_SNAP = true;
-
-export const SpecTypes = Object.freeze({
-  Series: 'series' as const,
-  Axis: 'axis' as const,
-  Annotation: 'annotation' as const,
-  Settings: 'settings' as const,
-});
-
-export type SpecTypes = $Values<typeof SpecTypes>;
-
-export const DEFAULT_SETTINGS_SPEC: SettingsSpec = {
-  id: '__global__settings___',
-  chartType: ChartTypes.Global,
-  specType: SpecTypes.Settings,
-  rendering: 'canvas' as const,
-  rotation: 0 as const,
-  animateData: true,
-  showLegend: false,
-  resizeDebounce: 10,
-  debug: false,
-  tooltip: {
-    type: DEFAULT_TOOLTIP_TYPE,
-    snap: DEFAULT_TOOLTIP_SNAP,
-  },
-  legendPosition: Position.Right,
-  showLegendExtra: false,
-  hideDuplicateAxes: false,
-  theme: LIGHT_THEME,
-  brushAxis: BrushAxis.X,
-  minBrushDelta: 2,
-};
 
 export type SettingsSpecProps = Partial<Omit<SettingsSpec, 'chartType' | 'specType' | 'id'>>;
 

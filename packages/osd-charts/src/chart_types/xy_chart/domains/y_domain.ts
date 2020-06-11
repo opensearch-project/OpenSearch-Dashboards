@@ -19,21 +19,15 @@
 
 import { sum } from 'd3-array';
 
-import { ScaleContinuousType, ScaleType } from '../../../scales';
+import { ScaleContinuousType } from '../../../scales';
+import { ScaleType } from '../../../scales/constants';
 import { identity } from '../../../utils/commons';
 import { computeContinuousDataDomain } from '../../../utils/domain';
 import { GroupId, SpecId } from '../../../utils/ids';
-import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_utils';
+import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_type_utils';
 import { RawDataSeries } from '../utils/series';
 import { BasicSeriesSpec, DomainRange, DEFAULT_GLOBAL_ID, SeriesTypes } from '../utils/specs';
-import { BaseDomain } from './domain';
-
-export type YDomain = BaseDomain & {
-  type: 'yDomain';
-  isBandScale: false;
-  scaleType: ScaleContinuousType;
-  groupId: GroupId;
-};
+import { YDomain } from './types';
 
 export type YBasicSeriesSpec = Pick<
   BasicSeriesSpec,

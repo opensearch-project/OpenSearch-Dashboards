@@ -18,10 +18,10 @@
  */
 
 import { ChartTypes } from '../..';
-import { ScaleType } from '../../../scales';
-import { SpecTypes } from '../../../specs/settings';
+import { ScaleType } from '../../../scales/constants';
+import { SpecTypes } from '../../../specs/constants';
 import { Dimensions } from '../../../utils/dimensions';
-import { computeSeriesDomains } from '../state/utils';
+import { computeSeriesDomains } from '../state/utils/utils';
 import { computeXScale } from '../utils/scales';
 import { BasicSeriesSpec, SeriesTypes } from '../utils/specs';
 import { getCursorBandPosition, getSnapPosition } from './crosshair_utils';

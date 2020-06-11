@@ -17,19 +17,19 @@
  * under the License.
  */
 
-import { ChartTypes } from '../..';
-import { LegendItem } from '../../../commons/legend';
-import { MockSeriesCollection } from '../../../mocks/series/series_identifiers';
-import { MockSeriesSpecs, MockSeriesSpec } from '../../../mocks/specs';
-import { SeededDataGenerator } from '../../../mocks/utils';
-import { ScaleType, ScaleContinuous } from '../../../scales';
-import { SpecTypes } from '../../../specs/settings';
-import { ColorOverrides } from '../../../state/chart_state';
-import { BARCHART_1Y0G, BARCHART_1Y1G } from '../../../utils/data_samples/test_dataset';
-import { IndexedGeometry, BandedAccessorType } from '../../../utils/geometry';
-import { SpecId } from '../../../utils/ids';
-import { LIGHT_THEME } from '../../../utils/themes/light_theme';
-import { SeriesCollectionValue, getSeriesIndex, getSeriesColors } from '../utils/series';
+import { ChartTypes } from '../../..';
+import { MockSeriesCollection } from '../../../../mocks/series/series_identifiers';
+import { MockSeriesSpecs, MockSeriesSpec } from '../../../../mocks/specs';
+import { SeededDataGenerator } from '../../../../mocks/utils';
+import { ScaleContinuous } from '../../../../scales';
+import { ScaleType } from '../../../../scales/constants';
+import { SpecTypes } from '../../../../specs/constants';
+import { ColorOverrides } from '../../../../state/chart_state';
+import { BARCHART_1Y0G, BARCHART_1Y1G } from '../../../../utils/data_samples/test_dataset';
+import { IndexedGeometry, BandedAccessorType } from '../../../../utils/geometry';
+import { SpecId } from '../../../../utils/ids';
+import { LIGHT_THEME } from '../../../../utils/themes/light_theme';
+import { SeriesCollectionValue, getSeriesIndex, getSeriesColors } from '../../utils/series';
 import {
   AreaSeriesSpec,
   AxisSpec,
@@ -39,23 +39,15 @@ import {
   LineSeriesSpec,
   SeriesTypes,
   SeriesColorAccessorFn,
-} from '../utils/specs';
-import { mergeYCustomDomainsByGroupId } from './selectors/merge_y_custom_domains';
+} from '../../utils/specs';
+import { mergeYCustomDomainsByGroupId } from '../selectors/merge_y_custom_domains';
 import {
   computeSeriesDomains,
   computeSeriesGeometries,
   computeXScaleOffset,
-  isAllSeriesDeselected,
-  isChartAnimatable,
   isHistogramModeEnabled,
-  isHorizontalRotation,
-  isLineAreaOnlyChart,
-  isVerticalRotation,
   setBarSeriesAccessors,
   getCustomSeriesColors,
-  isUniqueArray,
-  isDefined,
-  isDefinedFrom,
   updateDeselectedDataSeries,
 } from './utils';
 
@@ -252,101 +244,6 @@ describe('Chart State utils', () => {
     expect(updateDeselectedDataSeries([], dataSeriesValuesA.seriesIdentifier)).toEqual([
       dataSeriesValuesA.seriesIdentifier,
     ]);
-  });
-  test('is horizontal chart rotation', () => {
-    expect(isHorizontalRotation(0)).toBe(true);
-    expect(isHorizontalRotation(180)).toBe(true);
-    expect(isHorizontalRotation(-90)).toBe(false);
-    expect(isHorizontalRotation(90)).toBe(false);
-    expect(isVerticalRotation(-90)).toBe(true);
-    expect(isVerticalRotation(90)).toBe(true);
-    expect(isVerticalRotation(0)).toBe(false);
-    expect(isVerticalRotation(180)).toBe(false);
-  });
-  test('is vertical chart rotation', () => {
-    expect(isVerticalRotation(-90)).toBe(true);
-    expect(isVerticalRotation(90)).toBe(true);
-    expect(isVerticalRotation(0)).toBe(false);
-    expect(isVerticalRotation(180)).toBe(false);
-  });
-  test('is an area or line only map', () => {
-    const area: AreaSeriesSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Series,
-      id: 'area',
-      groupId: 'group1',
-      seriesType: SeriesTypes.Area,
-      yScaleType: ScaleType.Log,
-      xScaleType: ScaleType.Linear,
-      xAccessor: 'x',
-      yAccessors: ['y'],
-      splitSeriesAccessors: ['g'],
-      yScaleToDataExtent: false,
-      data: BARCHART_1Y1G,
-    };
-    const line: LineSeriesSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Series,
-      id: 'line',
-      groupId: 'group2',
-      seriesType: SeriesTypes.Line,
-      yScaleType: ScaleType.Log,
-      xScaleType: ScaleType.Linear,
-      xAccessor: 'x',
-      yAccessors: ['y'],
-      splitSeriesAccessors: ['g'],
-      stackAccessors: ['x'],
-      yScaleToDataExtent: false,
-      data: BARCHART_1Y1G,
-    };
-    const bar: BarSeriesSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Series,
-      id: 'bar',
-      groupId: 'group2',
-      seriesType: SeriesTypes.Bar,
-      yScaleType: ScaleType.Log,
-      xScaleType: ScaleType.Linear,
-      xAccessor: 'x',
-      yAccessors: ['y'],
-      splitSeriesAccessors: ['g'],
-      stackAccessors: ['x'],
-      yScaleToDataExtent: false,
-      data: BARCHART_1Y1G,
-    };
-    let series = [area, line, bar];
-    expect(isLineAreaOnlyChart(series)).toBe(false);
-    series = [area, line];
-    expect(isLineAreaOnlyChart(series)).toBe(true);
-    series = [area];
-    expect(isLineAreaOnlyChart(series)).toBe(true);
-    series = [line];
-    expect(isLineAreaOnlyChart(series)).toBe(true);
-    series = [bar, { ...bar, id: 'bar2' }];
-    expect(isLineAreaOnlyChart(series)).toBe(false);
-  });
-  test('can enable the chart animation if we have a valid number of elements', () => {
-    const geometriesCounts = {
-      points: 0,
-      bars: 0,
-      areas: 0,
-      areasPoints: 0,
-      lines: 0,
-      linePoints: 0,
-      bubbles: 0,
-      bubblePoints: 0,
-    };
-    expect(isChartAnimatable(geometriesCounts, false)).toBe(false);
-    expect(isChartAnimatable(geometriesCounts, true)).toBe(true);
-    geometriesCounts.bars = 300;
-    expect(isChartAnimatable(geometriesCounts, true)).toBe(true);
-    geometriesCounts.areasPoints = 300;
-    expect(isChartAnimatable(geometriesCounts, true)).toBe(true);
-    geometriesCounts.linePoints = 300;
-    expect(isChartAnimatable(geometriesCounts, true)).toBe(true);
-    expect(isChartAnimatable(geometriesCounts, false)).toBe(false);
-    geometriesCounts.linePoints = 301;
-    expect(isChartAnimatable(geometriesCounts, true)).toBe(false);
   });
 
   describe('getCustomSeriesColors', () => {
@@ -1450,172 +1347,5 @@ describe('Chart State utils', () => {
     seriesMap.set(bar2.id, bar2);
     setBarSeriesAccessors(isHistogramEnabled, seriesMap);
     expect(bar2.stackAccessors).toEqual(['y', 'bar']);
-  });
-  test('displays no data availble if chart is empty', () => {
-    const legendItems1: LegendItem[] = [
-      {
-        color: '#1EA593',
-        label: 'a',
-        seriesIdentifier: {
-          key: 'specId:{bars},colors:{a}',
-          specId: 'bars',
-        },
-        defaultExtra: { raw: 6, formatted: '6.00' },
-        isSeriesHidden: true,
-      },
-      {
-        color: '#2B70F7',
-        label: 'b',
-        seriesIdentifier: {
-          key: 'specId:{bars},colors:{b}',
-          specId: 'bars',
-        },
-        defaultExtra: { raw: 2, formatted: '2.00' },
-        isSeriesHidden: true,
-      },
-    ];
-    expect(isAllSeriesDeselected(legendItems1)).toBe(true);
-  });
-  test('displays data availble if chart is not empty', () => {
-    const legendItems2: LegendItem[] = [
-      {
-        color: '#1EA593',
-        label: 'a',
-        seriesIdentifier: {
-          key: 'specId:{bars},colors:{a}',
-          specId: 'bars',
-        },
-        defaultExtra: { raw: 6, formatted: '6.00' },
-        isSeriesHidden: false,
-      },
-      {
-        color: '#2B70F7',
-        label: 'b',
-        seriesIdentifier: {
-          key: 'specId:{bars},colors:{b}',
-          specId: 'bars',
-        },
-        defaultExtra: { raw: 2, formatted: '2.00' },
-        isSeriesHidden: true,
-      },
-    ];
-    expect(isAllSeriesDeselected(legendItems2)).toBe(false);
-  });
-
-  describe('#isUniqueArray', () => {
-    it('should return true for simple unique values', () => {
-      expect(isUniqueArray([1, 2])).toBe(true);
-    });
-
-    it('should return true for complex unique values', () => {
-      expect(isUniqueArray([{ n: 1 }, { n: 2 }], ({ n }) => n)).toBe(true);
-    });
-
-    it('should return false for simple duplicated values', () => {
-      expect(isUniqueArray([1, 1, 2])).toBe(false);
-    });
-
-    it('should return false for complex duplicated values', () => {
-      expect(isUniqueArray([{ n: 1 }, { n: 1 }, { n: 2 }], ({ n }) => n)).toBe(false);
-    });
-  });
-
-  describe('#isDefined', () => {
-    it('should return false for null', () => {
-      expect(isDefined(null)).toBe(false);
-    });
-
-    it('should return false for undefined', () => {
-      expect(isDefined()).toBe(false);
-    });
-
-    it('should return true for zero', () => {
-      expect(isDefined(0)).toBe(true);
-    });
-
-    it('should return true for empty string', () => {
-      expect(isDefined('')).toBe(true);
-    });
-
-    it('should return true for empty false', () => {
-      expect(isDefined(false)).toBe(true);
-    });
-
-    it('should filter out null and undefined values', () => {
-      const values: (number | null | undefined)[] = [1, 2, null, 4, 5, undefined];
-      const result: number[] = values.filter(isDefined);
-      expect(result).toEqual([1, 2, 4, 5]);
-    });
-  });
-
-  describe('#isDefinedFrom', () => {
-    interface Test {
-      a?: number | string | boolean | null;
-    }
-    it('should filter out undefined values from complex types', () => {
-      const values: Partial<Test>[] = [
-        {
-          a: 1,
-        },
-        {
-          a: 'string',
-        },
-        {
-          a: false,
-        },
-        {},
-      ];
-      const result: NonNullable<Test>[] = values.filter(isDefinedFrom(({ a }) => a !== undefined));
-      expect(result).toEqual(values.slice(0, -1));
-    });
-
-    it('should filter out null values from complex types', () => {
-      const values: Test[] = [
-        {
-          a: 1,
-        },
-        {
-          a: 'string',
-        },
-        {
-          a: false,
-        },
-        {
-          a: null,
-        },
-      ];
-      const result: NonNullable<Test>[] = values.filter(isDefinedFrom(({ a }) => a !== null));
-      expect(result).toEqual(values.slice(0, -1));
-    });
-
-    it('should filter out null values from complex nested types', () => {
-      type NestedTest = {
-        aa: Test;
-      };
-      const values: NestedTest[] = [
-        {
-          aa: { a: 1 },
-        },
-        {
-          aa: { a: 'string' },
-        },
-        {
-          aa: { a: false },
-        },
-        {
-          aa: { a: null },
-        },
-        {
-          aa: {},
-        },
-        {
-          aa: { a: undefined },
-        },
-      ];
-      const result: NonNullable<NestedTest>[] = values.filter(
-        isDefinedFrom(({ aa }) => aa?.a !== undefined && aa?.a !== null),
-      );
-      expect(result).toEqual(values.slice(0, 3));
-    });
   });
 });

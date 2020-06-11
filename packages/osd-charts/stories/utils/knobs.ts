@@ -19,7 +19,8 @@
 
 import { select, array } from '@storybook/addon-knobs';
 
-import { Rotation, Position, TooltipType, Placement } from '../../src';
+import { Rotation, Position, Placement } from '../../src';
+import { TooltipType } from '../../src/specs/constants';
 
 export const numberSelect = <T extends number>(
   name: string,

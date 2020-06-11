@@ -21,8 +21,9 @@ import { DateTime } from 'luxon';
 import { createStore, Store } from 'redux';
 
 import { ChartTypes } from '../..';
-import { ScaleType } from '../../../scales';
-import { SettingsSpec, DEFAULT_SETTINGS_SPEC, SpecTypes } from '../../../specs';
+import { ScaleType } from '../../../scales/constants';
+import { SettingsSpec } from '../../../specs';
+import { SpecTypes, DEFAULT_SETTINGS_SPEC } from '../../../specs/constants';
 import { updateParentDimensions } from '../../../state/actions/chart_settings';
 import { onPointerMove } from '../../../state/actions/mouse';
 import { upsertSpec, specParsed } from '../../../state/actions/specs';

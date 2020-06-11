@@ -20,8 +20,8 @@
 import { Config, PartitionLayout, Numeric } from '../types/config_types';
 import { FONT_STYLES, FONT_VARIANTS } from '../types/types';
 import { ShapeTreeNode } from '../types/viewmodel_types';
+import { GOLDEN_RATIO, TAU } from '../utils/constants';
 import { AGGREGATE_KEY, STATISTICS_KEY } from '../utils/group_by_rollup';
-import { GOLDEN_RATIO, TAU } from '../utils/math';
 
 const log10 = Math.log(10);
 function significantDigitCount(d: number): number {

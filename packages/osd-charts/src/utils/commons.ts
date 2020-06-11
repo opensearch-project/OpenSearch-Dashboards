@@ -21,6 +21,7 @@ import { $Values } from 'utility-types';
 import { v1 as uuidV1 } from 'uuid';
 
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
+import { Point } from './point';
 
 /**
  * Color varients that are unique to `@elastic/charts`. These go beyond the standard
@@ -356,3 +357,84 @@ export type ValueFormatter = (value: number) => string;
 export type ValueAccessor = (d: Datum) => number;
 export type LabelAccessor = (value: PrimitiveValue) => string;
 export type ShowAccessor = (value: PrimitiveValue) => boolean;
+
+/** @internal */
+export function getDistance(a: Point, b: Point): number {
+  return Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
+}
+
+/** @internal */
+export function stringifyNullsUndefined(value?: PrimitiveValue): string | number {
+  if (value === undefined) {
+    return 'undefined';
+  }
+
+  if (value === null) {
+    return 'null';
+  }
+
+  return value;
+}
+
+/**
+ * Determines if an array has all unique values
+ *
+ * examples:
+ * ```ts
+ * isUniqueArray([1, 2]) // => true
+ * isUniqueArray([1, 1, 2]) // => false
+ * isUniqueArray([{ n: 1 }, { n: 1 }, { n: 2 }], ({ n }) => n) // => false
+ * ```
+ *
+ * @internal
+ * @param  {B[]} arr
+ * @param  {(d:B)=>T} extractor? extract the value from B
+ */
+export function isUniqueArray<B, T>(arr: B[], extractor?: (value: B) => T) {
+  const values = new Set<B | T>();
+
+  return (function isUniqueArrayFn() {
+    return arr.every((v) => {
+      const value = extractor ? extractor(v) : v;
+
+      if (values.has(value)) {
+        return false;
+      }
+
+      values.add(value);
+      return true;
+    });
+  }());
+}
+
+/**
+ * Returns defined value type if not null nor undefined
+ *
+ * @internal
+ */
+export function isDefined<T>(value?: T): value is NonNullable<T> {
+  return value !== null && value !== undefined;
+}
+
+/**
+ * Returns defined value type if value from getter function is not null nor undefined
+ *
+ * **IMPORTANT**: You must provide an accurate typeCheck function that will filter out _EVERY_
+ * item in the array that is not of type `T`. If not, the type check will override the
+ * type as `T` which may be incorrect.
+ *
+ * @internal
+ */
+export const isDefinedFrom = <T>(typeCheck: (value: RecursivePartial<T>) => boolean) => (
+  value?: RecursivePartial<T>,
+): value is NonNullable<T> => {
+  if (value === undefined) {
+    return false;
+  }
+
+  try {
+    return typeCheck(value);
+  } catch {
+    return false;
+  }
+};

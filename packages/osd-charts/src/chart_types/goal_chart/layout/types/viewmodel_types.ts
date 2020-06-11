@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { SpecTypes } from '../../../../specs/settings';
+import { SpecTypes } from '../../../../specs/constants';
 import { Pixels, PointObject } from '../../../partition_chart/layout/types/geometry_types';
-import { BandFillColorAccessorInput, GOAL_SUBTYPES } from '../../specs';
+import { BandFillColorAccessorInput } from '../../specs';
+import { GoalSubtype } from '../../specs/constants';
 import { config } from '../config/config';
 import { Config } from './config_types';
 
@@ -64,7 +65,7 @@ export type ShapeViewModel = {
 
 const commonDefaults = {
   specType: SpecTypes.Series,
-  subtype: GOAL_SUBTYPES[0],
+  subtype: GoalSubtype.Goal,
   base: 0,
   target: 100,
   actual: 50,

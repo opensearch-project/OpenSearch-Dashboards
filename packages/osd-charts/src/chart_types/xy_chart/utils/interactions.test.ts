@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { TooltipType, isCrosshairTooltipType, isFollowTooltipType } from '../../../specs';
+import { isCrosshairTooltipType, isFollowTooltipType } from '../../../specs';
+import { TooltipType } from '../../../specs/constants';
 import { Dimensions } from '../../../utils/dimensions';
 import { IndexedGeometry, PointGeometry } from '../../../utils/geometry';
 import {

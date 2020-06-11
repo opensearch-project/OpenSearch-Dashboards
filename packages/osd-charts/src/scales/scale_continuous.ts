@@ -29,10 +29,11 @@ import {
   ScaleTime,
 } from 'd3-scale';
 
-import { ScaleContinuousType, ScaleType, Scale } from '.';
+import { ScaleContinuousType, Scale } from '.';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { maxValueWithUpperLimit, mergePartial } from '../utils/commons';
 import { getMomentWithTz } from '../utils/data/date_time';
+import { ScaleType } from './constants';
 
 /**
  * d3 scales excluding time scale

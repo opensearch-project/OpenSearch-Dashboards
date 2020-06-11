@@ -21,7 +21,7 @@ import { LegendItem } from '../../../commons/legend';
 import { SeriesKey, SeriesIdentifier } from '../../../commons/series_id';
 import { identity, Color } from '../../../utils/commons';
 import { BandedAccessorType } from '../../../utils/geometry';
-import { getAxesSpecForSpecId, getSpecsById } from '../state/utils';
+import { getAxesSpecForSpecId, getSpecsById } from '../state/utils/spec';
 import { Y0_ACCESSOR_POSTFIX, Y1_ACCESSOR_POSTFIX } from '../tooltip/tooltip';
 import {
   SeriesCollectionValue,

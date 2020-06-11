@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { $Values } from 'utility-types';
 
 import { StrokeStyle, ValueFormatter, Color } from '../../../../utils/commons';
 import { Layer } from '../../specs';
@@ -38,6 +37,7 @@ import {
   ValueGetterFunction,
 } from '../types/viewmodel_types';
 import { argsToRGBString, stringToRGB } from '../utils/color_library_wrappers';
+import { TAU } from '../utils/constants';
 import {
   aggregateAccessor,
   ArrayEntry,
@@ -49,7 +49,7 @@ import {
   sortIndexAccessor,
   HierarchyOfArrays,
 } from '../utils/group_by_rollup';
-import { trueBearingToStandardPositionAngle, TAU } from '../utils/math';
+import { trueBearingToStandardPositionAngle } from '../utils/math';
 import { sunburst } from '../utils/sunburst';
 import { getTopPadding, treemap } from '../utils/treemap';
 import { fillTextLayout, getRectangleRowGeometry, ringSectorConstruction, getSectorRowGeometry, inSectorRotation, nodeId } from './fill_text_layout';
@@ -63,17 +63,6 @@ function grooveAccessor(n: ArrayEntry) {
 function topGrooveAccessor(topGroovePx: Pixels) {
   return (n: ArrayEntry) => (entryValue(n).depth > 0 ? topGroovePx : grooveAccessor(n));
 }
-
-export const VerticalAlignments = Object.freeze({
-  top: 'top' as const,
-  middle: 'middle' as const,
-  bottom: 'bottom' as const,
-});
-
-// we might add more in the future; also, the intent is to still be of CanvasTextBaseline
-type SupportedVerticalAlignments = $Values<typeof VerticalAlignments>;
-
-export type VerticalAlignments = CanvasTextBaseline & SupportedVerticalAlignments;
 
 function rectangleFillOrigins(n: ShapeTreeNode): PointTuple {
   return [(n.x0 + n.x1) / 2, (n.y0 + n.y1) / 2];

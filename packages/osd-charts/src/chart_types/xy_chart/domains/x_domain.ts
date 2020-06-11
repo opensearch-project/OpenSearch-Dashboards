@@ -17,20 +17,12 @@
  * under the License.
  */
 
-import { ScaleType } from '../../../scales';
+import { ScaleType } from '../../../scales/constants';
 import { compareByValueAsc, identity, isNumberArray } from '../../../utils/commons';
 import { computeContinuousDataDomain, computeOrdinalDataDomain, Domain } from '../../../utils/domain';
-import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_utils';
+import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_type_utils';
 import { BasicSeriesSpec, DomainRange, SeriesTypes } from '../utils/specs';
-import { BaseDomain } from './domain';
-
-export type XDomain = BaseDomain & {
-  type: 'xDomain';
-  /* the minimum interval of the scale if not-ordinal band-scale */
-  minInterval: number;
-  /** if x domain is time, we should also specify the timezone */
-  timeZone?: string;
-};
+import { XDomain } from './types';
 
 /**
  * Merge X domain value between a set of chart specification.

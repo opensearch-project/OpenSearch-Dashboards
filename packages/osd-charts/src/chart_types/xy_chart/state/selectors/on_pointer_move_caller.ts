@@ -22,7 +22,8 @@ import { Selector } from 'reselect';
 
 import { ChartTypes } from '../../..';
 import { Scale } from '../../../../scales';
-import { SettingsSpec, PointerEvent, PointerEventType } from '../../../../specs';
+import { SettingsSpec, PointerEvent } from '../../../../specs';
+import { PointerEventType } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';

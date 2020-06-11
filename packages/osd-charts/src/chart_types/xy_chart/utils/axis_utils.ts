@@ -23,17 +23,13 @@ import { Position, Rotation, getUniqueValues } from '../../../utils/commons';
 import { Dimensions, Margins } from '../../../utils/dimensions';
 import { AxisId } from '../../../utils/ids';
 import { AxisConfig, Theme } from '../../../utils/themes/theme';
-import { XDomain } from '../domains/x_domain';
-import { YDomain } from '../domains/y_domain';
-import { getSpecsById } from '../state/utils';
+import { XDomain, YDomain } from '../domains/types';
+import { getSpecsById } from '../state/utils/spec';
+import { isVerticalAxis } from './axis_type_utils';
 import { computeXScale, computeYScales } from './scales';
 import {
   AxisSpec,
-  CompleteBoundedDomain,
-  DomainRange,
-  LowerBoundedDomain,
   TickFormatter,
-  UpperBoundedDomain,
   AxisStyle,
   TickFormatterOptions,
 } from './specs';
@@ -565,26 +561,6 @@ export function getAxisPosition(
 }
 
 /** @internal */
-export function isVerticalAxis(axisPosition: Position) {
-  return axisPosition === Position.Left || axisPosition === Position.Right;
-}
-
-/** @internal */
-export function isHorizontalAxis(axisPosition: Position) {
-  return axisPosition === Position.Top || axisPosition === Position.Bottom;
-}
-
-/** @internal */
-export function isVerticalGrid(axisPosition: Position) {
-  return isHorizontalAxis(axisPosition);
-}
-
-/** @internal */
-export function isHorizontalGrid(axisPosition: Position) {
-  return isVerticalAxis(axisPosition);
-}
-
-/** @internal */
 export function getAxisTicksPositions(
   computedChartDims: {
     chartDimensions: Dimensions;
@@ -698,26 +674,6 @@ export function computeAxisGridLinePositions(
     : getHorizontalAxisGridLineProps(tickPosition, chartDimensions.height);
 
   return positions;
-}
-
-/** @internal */
-export function isLowerBound(domain: Partial<CompleteBoundedDomain>): domain is LowerBoundedDomain {
-  return domain.min != null;
-}
-
-/** @internal */
-export function isUpperBound(domain: Partial<CompleteBoundedDomain>): domain is UpperBoundedDomain {
-  return domain.max != null;
-}
-
-/** @internal */
-export function isCompleteBound(domain: Partial<CompleteBoundedDomain>): domain is CompleteBoundedDomain {
-  return domain.max != null && domain.min != null;
-}
-
-/** @internal */
-export function isBounded(domain: Partial<CompleteBoundedDomain>): domain is DomainRange {
-  return domain.max != null || domain.min != null;
 }
 
 /** @internal */

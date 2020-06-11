@@ -17,25 +17,21 @@
  * under the License.
  */
 
-import { LegendItem } from '../../../commons/legend';
-import { SeriesKey, SeriesIdentifier } from '../../../commons/series_id';
-import { Scale } from '../../../scales';
-import { Spec } from '../../../specs';
-import { identity, mergePartial, Rotation, Color, RecursivePartial } from '../../../utils/commons';
-import { CurveType } from '../../../utils/curves';
-import { Dimensions } from '../../../utils/dimensions';
-import { Domain } from '../../../utils/domain';
-import { PointGeometry, BarGeometry, AreaGeometry, LineGeometry, BubbleGeometry } from '../../../utils/geometry';
-import { GroupId, SpecId } from '../../../utils/ids';
-import { Point } from '../../../utils/point';
-import { ColorConfig, Theme } from '../../../utils/themes/theme';
-import { PrimitiveValue } from '../../partition_chart/layout/utils/group_by_rollup';
-import { mergeXDomain, XDomain } from '../domains/x_domain';
-import { mergeYDomain, YDomain } from '../domains/y_domain';
-import { renderArea, renderBars, renderLine, renderBubble } from '../rendering/rendering';
-import { isVerticalAxis } from '../utils/axis_utils';
-import { IndexedGeometryMap } from '../utils/indexed_geometry_map';
-import { computeXScale, computeYScales, countBarsInCluster } from '../utils/scales';
+import { SeriesKey, SeriesIdentifier } from '../../../../commons/series_id';
+import { Scale } from '../../../../scales';
+import { identity, mergePartial, Rotation, Color, isUniqueArray } from '../../../../utils/commons';
+import { CurveType } from '../../../../utils/curves';
+import { Dimensions } from '../../../../utils/dimensions';
+import { Domain } from '../../../../utils/domain';
+import { PointGeometry, BarGeometry, AreaGeometry, LineGeometry, BubbleGeometry } from '../../../../utils/geometry';
+import { GroupId, SpecId } from '../../../../utils/ids';
+import { ColorConfig, Theme } from '../../../../utils/themes/theme';
+import { XDomain, YDomain } from '../../domains/types';
+import { mergeXDomain } from '../../domains/x_domain';
+import { mergeYDomain } from '../../domains/y_domain';
+import { renderArea, renderBars, renderLine, renderBubble } from '../../rendering/rendering';
+import { IndexedGeometryMap } from '../../utils/indexed_geometry_map';
+import { computeXScale, computeYScales, countBarsInCluster } from '../../utils/scales';
 import {
   DataSeries,
   SeriesCollectionValue,
@@ -44,9 +40,8 @@ import {
   getFormattedDataseries,
   getSplittedSeries,
   getSeriesKey,
-  RawDataSeries,
   XYChartSeriesIdentifier,
-} from '../utils/series';
+} from '../../utils/series';
 import {
   AxisSpec,
   BasicSeriesSpec,
@@ -59,73 +54,13 @@ import {
   isBandedSpec,
   Fit,
   FitConfig,
-  SeriesTypes,
   isBubbleSeriesSpec,
-} from '../utils/specs';
+} from '../../utils/specs';
+import { getSpecsById, getAxesSpecForSpecId } from './spec';
+import { SeriesDomainsAndData, ComputedGeometries, GeometriesCounts, Transform, LastValues } from './types';
 
-const MAX_ANIMATABLE_BARS = 300;
-const MAX_ANIMATABLE_LINES_AREA_POINTS = 600;
-
-/** @internal */
-export interface Transform {
-  x: number;
-  y: number;
-  rotate: number;
-}
-
-/** @internal */
-export interface BrushExtent {
-  minX: number;
-  minY: number;
-  maxX: number;
-  maxY: number;
-}
-
-/** @internal */
-export interface GeometriesCounts {
-  points: number;
-  bars: number;
-  areas: number;
-  areasPoints: number;
-  lines: number;
-  linePoints: number;
-  bubbles: number;
-  bubblePoints: number;
-}
-
-/** @internal */
-export interface ComputedScales {
-  xScale: Scale;
-  yScales: Map<GroupId, Scale>;
-}
-/** @internal */
-export interface Geometries {
-  points: PointGeometry[];
-  bars: BarGeometry[];
-  areas: AreaGeometry[];
-  lines: LineGeometry[];
-  bubbles: BubbleGeometry[];
-}
-
-/** @internal */
-export interface ComputedGeometries {
-  scales: ComputedScales;
-  geometries: Geometries;
-  geometriesIndex: IndexedGeometryMap;
-  geometriesCounts: GeometriesCounts;
-}
-
-/** @internal */
-export interface SeriesDomainsAndData {
-  xDomain: XDomain;
-  yDomain: YDomain[];
-  splittedDataSeries: RawDataSeries[][];
-  formattedDataSeries: {
-    stacked: FormattedDataSeries[];
-    nonStacked: FormattedDataSeries[];
-  };
-  seriesCollection: Map<SeriesKey, SeriesCollectionValue>;
-}
+export const MAX_ANIMATABLE_BARS = 300;
+export const MAX_ANIMATABLE_LINES_AREA_POINTS = 600;
 
 /**
  * Adds or removes series from array or series
@@ -187,12 +122,6 @@ export function getCustomSeriesColors(
     }
   });
   return updatedCustomSeriesColors;
-}
-
-/** @internal */
-export interface LastValues {
-  y0: number | null;
-  y1: number | null;
 }
 
 function getLastValues(formattedDataSeries: {
@@ -670,32 +599,6 @@ function renderGeometries(
 }
 
 /** @internal */
-export function getSpecsById<T extends Spec>(specs: T[], id: string): T | undefined {
-  return specs.find((spec) => spec.id === id);
-}
-
-/** @internal */
-export function getAxesSpecForSpecId(axesSpecs: AxisSpec[], groupId: GroupId) {
-  let xAxis;
-  let yAxis;
-  // eslint-disable-next-line no-restricted-syntax
-  for (const axisSpec of axesSpecs) {
-    if (axisSpec.groupId !== groupId) {
-      continue;
-    }
-    if (isVerticalAxis(axisSpec.position)) {
-      yAxis = axisSpec;
-    } else {
-      xAxis = axisSpec;
-    }
-  }
-  return {
-    xAxis,
-    yAxis,
-  };
-}
-
-/** @internal */
 export function computeChartTransform(chartDimensions: Dimensions, chartRotation: Rotation): Transform {
   if (chartRotation === 90) {
     return {
@@ -724,125 +627,3 @@ export function computeChartTransform(chartDimensions: Dimensions, chartRotation
     rotate: 0,
   };
 }
-
-/** @internal */
-export function isHorizontalRotation(chartRotation: Rotation) {
-  return chartRotation === 0 || chartRotation === 180;
-}
-
-/** @internal */
-export function isVerticalRotation(chartRotation: Rotation) {
-  return chartRotation === -90 || chartRotation === 90;
-}
-
-/**
- * Check if a specs map contains only line or area specs
- * @param specs Map<SpecId, BasicSeriesSpec>
- * @internal
- */
-export function isLineAreaOnlyChart(specs: BasicSeriesSpec[]) {
-  return !specs.some((spec) => spec.seriesType === SeriesTypes.Bar);
-}
-
-/** @internal */
-export function isChartAnimatable(geometriesCounts: GeometriesCounts, animationEnabled: boolean): boolean {
-  if (!animationEnabled) {
-    return false;
-  }
-  const { bars, linePoints, areasPoints } = geometriesCounts;
-  const isBarsAnimatable = bars <= MAX_ANIMATABLE_BARS;
-  const isLinesAndAreasAnimatable = linePoints + areasPoints <= MAX_ANIMATABLE_LINES_AREA_POINTS;
-  return isBarsAnimatable && isLinesAndAreasAnimatable;
-}
-
-/** @internal */
-export function isAllSeriesDeselected(legendItems: LegendItem[]): boolean {
-  // eslint-disable-next-line no-restricted-syntax
-  for (const legendItem of legendItems) {
-    if (!legendItem.isSeriesHidden) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/** @internal */
-export function getDistance(a: Point, b: Point): number {
-  return Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
-}
-
-/** @internal */
-export function stringifyNullsUndefined(value?: PrimitiveValue): string | number {
-  if (value === undefined) {
-    return 'undefined';
-  }
-
-  if (value === null) {
-    return 'null';
-  }
-
-  return value;
-}
-
-/**
- * Determines if an array has all unique values
- *
- * examples:
- * ```ts
- * isUniqueArray([1, 2]) // => true
- * isUniqueArray([1, 1, 2]) // => false
- * isUniqueArray([{ n: 1 }, { n: 1 }, { n: 2 }], ({ n }) => n) // => false
- * ```
- *
- * @internal
- * @param  {B[]} arr
- * @param  {(d:B)=>T} extractor? extract the value from B
- */
-export function isUniqueArray<B, T>(arr: B[], extractor?: (value: B) => T) {
-  const values = new Set<B | T>();
-
-  return (function() {
-    return arr.every((v) => {
-      const value = extractor ? extractor(v) : v;
-
-      if (values.has(value)) {
-        return false;
-      }
-
-      values.add(value);
-      return true;
-    });
-  }());
-}
-
-/**
- * Returns defined value type if not null nor undefined
- *
- * @internal
- */
-export function isDefined<T>(value?: T): value is NonNullable<T> {
-  return value !== null && value !== undefined;
-}
-
-/**
- * Returns defined value type if value from getter function is not null nor undefined
- *
- * **IMPORTANT**: You must provide an accurate typeCheck function that will filter out _EVERY_
- * item in the array that is not of type `T`. If not, the type check will override the
- * type as `T` which may be incorrect.
- *
- * @internal
- */
-export const isDefinedFrom = <T>(typeCheck: (value: RecursivePartial<T>) => boolean) => (
-  value?: RecursivePartial<T>,
-): value is NonNullable<T> => {
-  if (value === undefined) {
-    return false;
-  }
-
-  try {
-    return typeCheck(value);
-  } catch {
-    return false;
-  }
-};

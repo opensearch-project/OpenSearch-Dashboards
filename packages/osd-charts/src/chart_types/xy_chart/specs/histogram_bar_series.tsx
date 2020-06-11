@@ -20,8 +20,8 @@
 import React from 'react';
 
 import { ChartTypes } from '../..';
-import { ScaleType } from '../../../scales';
-import { SpecTypes } from '../../../specs/settings';
+import { ScaleType } from '../../../scales/constants';
+import { SpecTypes } from '../../../specs/constants';
 import { specComponentFactory, getConnect } from '../../../state/spec_factory';
 import { HistogramBarSeriesSpec, DEFAULT_GLOBAL_ID, SeriesTypes } from '../utils/specs';
 

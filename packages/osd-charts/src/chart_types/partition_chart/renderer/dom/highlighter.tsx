@@ -23,7 +23,7 @@ import { Dimensions } from '../../../../utils/dimensions';
 import { PartitionLayout } from '../../layout/types/config_types';
 import { PointObject } from '../../layout/types/geometry_types';
 import { QuadViewModel } from '../../layout/types/viewmodel_types';
-import { TAU } from '../../layout/utils/math';
+import { TAU } from '../../layout/utils/constants';
 
 /** @internal */
 export interface HighlighterProps {

@@ -19,7 +19,7 @@
 
 import { AxisProps } from '.';
 import { Position } from '../../../../../utils/commons';
-import { isVerticalAxis } from '../../../utils/axis_utils';
+import { isVerticalAxis } from '../../../utils/axis_type_utils';
 
 /** @internal */
 export function renderLine(ctx: CanvasRenderingContext2D, props: AxisProps) {

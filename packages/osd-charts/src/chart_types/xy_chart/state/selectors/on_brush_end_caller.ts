@@ -22,13 +22,14 @@ import { Selector } from 'reselect';
 
 import { ChartTypes } from '../../..';
 import { Scale } from '../../../../scales';
-import { BrushAxis, XYBrushArea, GroupBrushExtent, BrushEndListener } from '../../../../specs';
+import { XYBrushArea, GroupBrushExtent, BrushEndListener } from '../../../../specs';
+import { BrushAxis } from '../../../../specs/constants';
 import { GlobalChartState, DragState } from '../../../../state/chart_state';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { Rotation, minValueWithLowerLimit, maxValueWithUpperLimit } from '../../../../utils/commons';
 import { Dimensions } from '../../../../utils/dimensions';
 import { GroupId } from '../../../../utils/ids';
-import { isVerticalRotation } from '../utils';
+import { isVerticalRotation } from '../utils/common';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { getLeftPoint, getTopPoint } from './get_brush_area';
 import { getComputedScalesSelector } from './get_computed_scales';

@@ -18,9 +18,9 @@
  */
 
 import { ChartTypes } from '../..';
-import { ScaleType } from '../../../scales';
-import { SpecTypes } from '../../../specs/settings';
-import { computeSeriesDomains } from '../state/utils';
+import { ScaleType } from '../../../scales/constants';
+import { SpecTypes } from '../../../specs/constants';
+import { computeSeriesDomains } from '../state/utils/utils';
 import { computeXScale } from '../utils/scales';
 import { BasicSeriesSpec, SeriesTypes } from '../utils/specs';
 import { getSnapPosition } from './crosshair_utils';

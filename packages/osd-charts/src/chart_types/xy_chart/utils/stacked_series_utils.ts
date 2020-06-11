@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { ScaleType } from '../../../scales';
-import { isDefined } from '../state/utils';
+import { ScaleType } from '../../../scales/constants';
+import { isDefined } from '../../../utils/commons';
 import { DataSeries, DataSeriesDatum, RawDataSeries, RawDataSeriesDatum, FilledValues } from './series';
 
 /** @internal */

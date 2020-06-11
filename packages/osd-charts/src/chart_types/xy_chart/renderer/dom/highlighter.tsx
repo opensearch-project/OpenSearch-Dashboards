@@ -26,11 +26,11 @@ import { InitStatus, getInternalIsInitializedSelector } from '../../../../state/
 import { Rotation } from '../../../../utils/commons';
 import { Dimensions } from '../../../../utils/dimensions';
 import { isPointGeometry, IndexedGeometry } from '../../../../utils/geometry';
-import { DEFAULT_HIGHLIGHT_PADDING } from '../../rendering/rendering';
+import { DEFAULT_HIGHLIGHT_PADDING } from '../../rendering/constants';
 import { computeChartDimensionsSelector } from '../../state/selectors/compute_chart_dimensions';
 import { computeChartTransformSelector } from '../../state/selectors/compute_chart_transform';
 import { getHighlightedGeomsSelector } from '../../state/selectors/get_tooltip_values_highlighted_geoms';
-import { Transform } from '../../state/utils';
+import { Transform } from '../../state/utils/types';
 
 interface HighlighterProps {
   initialized: boolean;

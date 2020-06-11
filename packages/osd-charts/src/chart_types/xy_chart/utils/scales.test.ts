@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { ScaleType } from '../../../scales';
-import { XDomain } from '../domains/x_domain';
+import { ScaleType } from '../../../scales/constants';
+import { XDomain } from '../domains/types';
 import { computeXScale, countBarsInCluster } from './scales';
 import { FormattedDataSeries } from './series';
 

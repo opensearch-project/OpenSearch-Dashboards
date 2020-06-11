@@ -23,8 +23,9 @@ import { Dimensions } from '../../../../utils/dimensions';
 import { AxisId } from '../../../../utils/ids';
 import { mergeGridLineConfigs, Theme } from '../../../../utils/themes/theme';
 import { stringToRGB } from '../../../partition_chart/layout/utils/color_library_wrappers';
-import { getSpecsById } from '../../state/utils';
-import { AxisLinePosition, isVerticalGrid } from '../../utils/axis_utils';
+import { getSpecsById } from '../../state/utils/spec';
+import { isVerticalGrid } from '../../utils/axis_type_utils';
+import { AxisLinePosition } from '../../utils/axis_utils';
 import { AxisSpec } from '../../utils/specs';
 import { renderMultiLine, MIN_STROKE_WIDTH } from './primitives/line';
 

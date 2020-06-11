@@ -20,7 +20,7 @@
 import { createStore, Store } from 'redux';
 
 import { MockSeriesSpec, MockGlobalSpec } from '../../../mocks/specs';
-import { TooltipType } from '../../../specs';
+import { TooltipType } from '../../../specs/constants';
 import { updateParentDimensions } from '../../../state/actions/chart_settings';
 import { onPointerMove } from '../../../state/actions/mouse';
 import { upsertSpec, specParsed } from '../../../state/actions/specs';

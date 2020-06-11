@@ -19,7 +19,7 @@
 
 import { MockRawDataSeries, MockDataSeries } from '../../../mocks';
 import { MockSeriesSpecs, MockSeriesSpec } from '../../../mocks/specs';
-import { ScaleType } from '../../../scales';
+import { ScaleType } from '../../../scales/constants';
 import * as fitFunctionModule from './fit_function';
 import * as testModule from './nonstacked_series_utils';
 import { RawDataSeries } from './series';

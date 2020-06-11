@@ -20,7 +20,7 @@
 import createCachedSelector from 're-reselect';
 
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { isAllSeriesDeselected } from '../utils';
+import { isAllSeriesDeselected } from '../utils/common';
 import { computeLegendSelector } from './compute_legend';
 
 /** @internal */

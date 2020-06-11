@@ -19,8 +19,8 @@
 
 import { ChartTypes } from '../..';
 import { LegendItem } from '../../../commons/legend';
-import { ScaleType } from '../../../scales';
-import { SpecTypes } from '../../../specs/settings';
+import { ScaleType } from '../../../scales/constants';
+import { SpecTypes } from '../../../specs/constants';
 import { Position } from '../../../utils/commons';
 import { SeriesCollectionValue, getSeriesName } from '../utils/series';
 import { AxisSpec, BasicSeriesSpec, SeriesTypes } from '../utils/specs';

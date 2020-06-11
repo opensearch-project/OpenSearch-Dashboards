@@ -23,7 +23,7 @@ import { Provider } from 'react-redux';
 import { createStore, Store, Unsubscribe } from 'redux';
 import uuid from 'uuid';
 
-import { isHorizontalAxis } from '../chart_types/xy_chart/utils/axis_utils';
+import { isHorizontalAxis } from '../chart_types/xy_chart/utils/axis_type_utils';
 import { PointerEvent } from '../specs';
 import { SpecsParser } from '../specs/specs_parser';
 import { onExternalPointerEvent } from '../state/actions/events';

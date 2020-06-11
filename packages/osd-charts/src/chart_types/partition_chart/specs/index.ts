@@ -20,7 +20,8 @@
 import React from 'react';
 
 import { ChartTypes } from '../..';
-import { Spec, SpecTypes } from '../../../specs';
+import { Spec } from '../../../specs';
+import { SpecTypes } from '../../../specs/constants';
 import { getConnect, specComponentFactory } from '../../../state/spec_factory';
 import { IndexedAccessorFn } from '../../../utils/accessor';
 import {

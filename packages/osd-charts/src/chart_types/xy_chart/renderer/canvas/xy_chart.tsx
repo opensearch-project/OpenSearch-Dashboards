@@ -45,7 +45,7 @@ import { computeSeriesGeometriesSelector } from '../../state/selectors/compute_s
 import { getHighlightedSeriesSelector } from '../../state/selectors/get_highlighted_series';
 import { getAnnotationSpecsSelector, getAxisSpecsSelector } from '../../state/selectors/get_specs';
 import { isChartEmptySelector } from '../../state/selectors/is_chart_empty';
-import { Geometries, Transform } from '../../state/utils';
+import { Geometries, Transform } from '../../state/utils/types';
 import { AxisLinePosition, AxisTicksDimensions } from '../../utils/axis_utils';
 import { IndexedGeometryMap } from '../../utils/indexed_geometry_map';
 import { AxisSpec, AnnotationSpec } from '../../utils/specs';

@@ -21,7 +21,7 @@ import { Position } from '../../../utils/commons';
 import { Dimensions } from '../../../utils/dimensions';
 import { AxisId } from '../../../utils/ids';
 import { Theme } from '../../../utils/themes/theme';
-import { getSpecsById } from '../state/utils';
+import { getSpecsById } from '../state/utils/spec';
 import { AxisTicksDimensions } from './axis_utils';
 import { AxisSpec } from './specs';
 

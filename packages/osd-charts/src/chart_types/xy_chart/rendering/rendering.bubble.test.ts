@@ -18,12 +18,12 @@
  */
 
 import { ChartTypes } from '../..';
-import { ScaleType } from '../../../scales';
-import { SpecTypes } from '../../../specs/settings';
+import { ScaleType } from '../../../scales/constants';
+import { SpecTypes } from '../../../specs/constants';
 import { BubbleGeometry, PointGeometry } from '../../../utils/geometry';
 import { GroupId } from '../../../utils/ids';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
-import { computeSeriesDomains } from '../state/utils';
+import { computeSeriesDomains } from '../state/utils/utils';
 import { IndexedGeometryMap } from '../utils/indexed_geometry_map';
 import { computeXScale, computeYScales } from '../utils/scales';
 import { BubbleSeriesSpec, DomainRange, SeriesTypes } from '../utils/specs';

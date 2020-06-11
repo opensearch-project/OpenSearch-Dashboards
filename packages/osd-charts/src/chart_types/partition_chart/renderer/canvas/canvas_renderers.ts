@@ -29,7 +29,7 @@ import {
   TextRow,
 } from '../../layout/types/viewmodel_types';
 import { addOpacity } from '../../layout/utils/calcs';
-import { TAU } from '../../layout/utils/math';
+import { TAU } from '../../layout/utils/constants';
 import { cssFontShorthand } from '../../layout/utils/measure';
 import { LinkLabelsViewModelSpec } from '../../layout/viewmodel/link_text_layout';
 

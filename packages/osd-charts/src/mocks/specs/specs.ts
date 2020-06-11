@@ -40,7 +40,7 @@ import {
   AnnotationDomainTypes,
   AxisSpec,
 } from '../../chart_types/xy_chart/utils/specs';
-import { ScaleType } from '../../scales';
+import { ScaleType } from '../../scales/constants';
 import { SettingsSpec, SpecTypes, TooltipType } from '../../specs';
 import { Datum, mergePartial, Position, RecursivePartial } from '../../utils/commons';
 import { LIGHT_THEME } from '../../utils/themes/light_theme';

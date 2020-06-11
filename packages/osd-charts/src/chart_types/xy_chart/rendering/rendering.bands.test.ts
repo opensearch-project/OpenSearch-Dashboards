@@ -19,12 +19,12 @@
 
 import { ChartTypes } from '../..';
 import { MockPointGeometry } from '../../../mocks';
-import { ScaleType } from '../../../scales';
-import { SpecTypes } from '../../../specs/settings';
+import { ScaleType } from '../../../scales/constants';
+import { SpecTypes } from '../../../specs/constants';
 import { CurveType } from '../../../utils/curves';
 import { AreaGeometry, PointGeometry } from '../../../utils/geometry';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
-import { computeSeriesDomains } from '../state/utils';
+import { computeSeriesDomains } from '../state/utils/utils';
 import { IndexedGeometryMap } from '../utils/indexed_geometry_map';
 import { computeXScale, computeYScales } from '../utils/scales';
 import { AreaSeriesSpec, BarSeriesSpec, SeriesTypes } from '../utils/specs';

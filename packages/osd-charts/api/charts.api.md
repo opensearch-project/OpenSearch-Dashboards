@@ -75,7 +75,7 @@ export interface ArcStyle {
 // Warning: (ae-missing-release-tag) "AreaSeries" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const AreaSeries: React.FunctionComponent<SpecRequiredProps_2 & SpecOptionalProps_2>;
+export const AreaSeries: React.FunctionComponent<SpecRequiredProps & SpecOptionalProps>;
 
 // Warning: (ae-missing-release-tag) "AreaSeriesSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -181,12 +181,35 @@ export interface BackgroundStyle {
     color: string;
 }
 
+// @alpha (undocumented)
+export type BandFillColorAccessor = (input: BandFillColorAccessorInput) => Color;
+
+// @alpha (undocumented)
+export interface BandFillColorAccessorInput {
+    // (undocumented)
+    aboveBaseCount: number;
+    // (undocumented)
+    base: number;
+    // (undocumented)
+    belowBaseCount: number;
+    // (undocumented)
+    highestValue: number;
+    // (undocumented)
+    index: number;
+    // (undocumented)
+    lowestValue: number;
+    // (undocumented)
+    target: number;
+    // (undocumented)
+    value: number;
+}
+
 // Warning: (ae-forgotten-export) The symbol "SpecRequiredProps" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "SpecOptionalProps" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "BarSeries" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const BarSeries: React.FunctionComponent<SpecRequiredProps_3 & SpecOptionalProps_3>;
+export const BarSeries: React.FunctionComponent<SpecRequiredProps_2 & SpecOptionalProps_2>;
 
 // Warning: (ae-missing-release-tag) "BarSeriesSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -281,7 +304,7 @@ export type BrushEndListener = (brushArea: XYBrushArea) => void;
 // Warning: (ae-forgotten-export) The symbol "SpecOptionalProps" needs to be exported by the entry point index.d.ts
 //
 // @alpha
-export const BubbleSeries: React.FunctionComponent<SpecRequiredProps_4 & SpecOptionalProps_4>;
+export const BubbleSeries: React.FunctionComponent<SpecRequiredProps_3 & SpecOptionalProps_3>;
 
 // @alpha
 export type BubbleSeriesSpec = BasicSeriesSpec & {
@@ -620,7 +643,45 @@ export interface GeometryValue {
 // Warning: (ae-forgotten-export) The symbol "SpecOptionalProps" needs to be exported by the entry point index.d.ts
 //
 // @alpha (undocumented)
-export const Goal: React.FunctionComponent<SpecRequiredProps & SpecOptionalProps>;
+export const Goal: React.FunctionComponent<SpecRequiredProps_8 & SpecOptionalProps_8>;
+
+// @alpha (undocumented)
+export interface GoalSpec extends Spec {
+    // (undocumented)
+    actual: number;
+    // (undocumented)
+    bandFillColor: BandFillColorAccessor;
+    // (undocumented)
+    bands: number[];
+    // (undocumented)
+    base: number;
+    // (undocumented)
+    centralMajor: string | BandFillColorAccessor;
+    // (undocumented)
+    centralMinor: string | BandFillColorAccessor;
+    // (undocumented)
+    chartType: typeof ChartTypes.Goal;
+    // Warning: (ae-forgotten-export) The symbol "Config" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    config: RecursivePartial<Config>;
+    // (undocumented)
+    labelMajor: string | BandFillColorAccessor;
+    // (undocumented)
+    labelMinor: string | BandFillColorAccessor;
+    // (undocumented)
+    specType: typeof SpecTypes.Series;
+    // Warning: (ae-forgotten-export) The symbol "GoalSubtype" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    subtype: GoalSubtype;
+    // (undocumented)
+    target: number;
+    // (undocumented)
+    ticks: number[];
+    // (undocumented)
+    tickValueFormatter: BandFillColorAccessor;
+}
 
 // Warning: (ae-missing-release-tag) "GridLineConfig" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -658,7 +719,7 @@ export type GroupId = string;
 // Warning: (ae-missing-release-tag) "HistogramBarSeries" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const HistogramBarSeries: React.FunctionComponent<SpecRequiredProps_5 & SpecOptionalProps_5>;
+export const HistogramBarSeries: React.FunctionComponent<SpecRequiredProps_4 & SpecOptionalProps_4>;
 
 // Warning: (ae-missing-release-tag) "HistogramBarSeriesSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -745,7 +806,7 @@ export const LIGHT_THEME: Theme;
 // Warning: (ae-missing-release-tag) "LineAnnotation" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const LineAnnotation: React.FunctionComponent<SpecRequiredProps_6 & SpecOptionalProps_6>;
+export const LineAnnotation: React.FunctionComponent<SpecRequiredProps_5 & SpecOptionalProps_5>;
 
 // @public
 export interface LineAnnotationDatum {
@@ -781,7 +842,7 @@ export interface LineAnnotationStyle {
 // Warning: (ae-missing-release-tag) "LineSeries" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const LineSeries: React.FunctionComponent<SpecRequiredProps_7 & SpecOptionalProps_7>;
+export const LineSeries: React.FunctionComponent<SpecRequiredProps_6 & SpecOptionalProps_6>;
 
 // Warning: (ae-missing-release-tag) "LineSeriesSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -872,7 +933,7 @@ export type PartialTheme = RecursivePartial<Theme>;
 // Warning: (ae-missing-release-tag) "Partition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const Partition: React.FunctionComponent<SpecRequiredProps_8 & SpecOptionalProps_8>;
+export const Partition: React.FunctionComponent<SpecRequiredProps_7 & SpecOptionalProps_7>;
 
 // Warning: (ae-forgotten-export) The symbol "StaticConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "Config" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1542,7 +1603,7 @@ export interface XYChartSeriesIdentifier extends SeriesIdentifier {
 //
 // src/chart_types/partition_chart/layout/types/config_types.ts:124:5 - (ae-forgotten-export) The symbol "TimeMs" needs to be exported by the entry point index.d.ts
 // src/chart_types/partition_chart/layout/types/config_types.ts:125:5 - (ae-forgotten-export) The symbol "AnimKeyframe" needs to be exported by the entry point index.d.ts
-// src/chart_types/partition_chart/specs/index.ts:47:13 - (ae-forgotten-export) The symbol "NodeColorAccessor" needs to be exported by the entry point index.d.ts
+// src/chart_types/partition_chart/specs/index.ts:48:13 - (ae-forgotten-export) The symbol "NodeColorAccessor" needs to be exported by the entry point index.d.ts
 // src/commons/series_id.ts:38:3 - (ae-forgotten-export) The symbol "SeriesKey" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)

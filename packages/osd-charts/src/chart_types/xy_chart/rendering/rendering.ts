@@ -20,11 +20,12 @@
 import { area, line } from 'd3-shape';
 
 import { LegendItem } from '../../../commons/legend';
-import { Scale, ScaleType } from '../../../scales';
+import { Scale } from '../../../scales';
+import { ScaleType } from '../../../scales/constants';
 import { isLogarithmicScale } from '../../../scales/types';
 import { MarkBuffer } from '../../../specs';
 import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
-import { mergePartial, Color } from '../../../utils/commons';
+import { mergePartial, Color, getDistance } from '../../../utils/commons';
 import { CurveType, getCurveFactory } from '../../../utils/curves';
 import {
   PointGeometry,
@@ -46,12 +47,10 @@ import {
   LineStyle,
   BubbleSeriesStyle,
 } from '../../../utils/themes/theme';
-import { getDistance } from '../state/utils';
 import { IndexedGeometryMap, GeometryType } from '../utils/indexed_geometry_map';
 import { DataSeriesDatum, DataSeries, XYChartSeriesIdentifier } from '../utils/series';
 import { DisplayValueSpec, PointStyleAccessor, BarStyleAccessor } from '../utils/specs';
-
-export const DEFAULT_HIGHLIGHT_PADDING = 10;
+import { DEFAULT_HIGHLIGHT_PADDING } from './constants';
 
 export interface MarkSizeOptions {
   enabled: boolean;
@@ -331,9 +330,9 @@ export function renderBars(
 
     // only show displayValue for even bars if showOverlappingValue
     const displayValueText = displayValueSettings && displayValueSettings.isAlternatingValueLabel
-      ? barGeometries.length % 2 === 0
+      ? (barGeometries.length % 2 === 0
           ? formattedDisplayValue
-          : undefined
+          : undefined)
       : formattedDisplayValue;
 
     const computedDisplayValueWidth = bboxCalculator.compute(displayValueText || '', padding, fontSize, fontFamily)

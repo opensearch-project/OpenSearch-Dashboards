@@ -20,7 +20,7 @@
 import createCachedSelector from 're-reselect';
 
 import { ChartTypes } from '../../..';
-import { SpecTypes } from '../../../../specs/settings';
+import { SpecTypes } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getSpecsFromStore } from '../../../../state/utils';
 import { nullShapeViewModel, ShapeViewModel } from '../../layout/types/viewmodel_types';

@@ -19,7 +19,7 @@
 
 import createCachedSelector from 're-reselect';
 
-import { BrushAxis } from '../../../../specs';
+import { BrushAxis } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
@@ -27,7 +27,7 @@ import { getSettingsSpecSelector } from '../../../../state/selectors/get_setting
 import { Rotation } from '../../../../utils/commons';
 import { Dimensions } from '../../../../utils/dimensions';
 import { Point } from '../../../../utils/point';
-import { isVerticalRotation } from '../utils';
+import { isVerticalRotation } from '../utils/common';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 
 const MIN_AREA_SIZE = 1;

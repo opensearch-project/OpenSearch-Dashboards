@@ -19,8 +19,8 @@
 
 import { ChartTypes } from '../..';
 import { MockRawDataSeries, MockRawDataSeriesDatum } from '../../../mocks';
-import { ScaleType } from '../../../scales';
-import { SpecTypes } from '../../../specs/settings';
+import { ScaleType } from '../../../scales/constants';
+import { SpecTypes } from '../../../specs/constants';
 import { BARCHART_1Y0G } from '../../../utils/data_samples/test_dataset';
 import { GroupId } from '../../../utils/ids';
 import { RawDataSeries } from '../utils/series';

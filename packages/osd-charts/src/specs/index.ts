@@ -29,4 +29,5 @@ export interface Spec {
 }
 
 export * from './settings';
+export * from './constants';
 export * from '../chart_types/specs';

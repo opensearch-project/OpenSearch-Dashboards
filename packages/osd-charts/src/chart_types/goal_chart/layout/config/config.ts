@@ -18,7 +18,7 @@
  */
 
 import { configMap } from '../../../partition_chart/layout/config/config';
-import { TAU } from '../../../partition_chart/layout/utils/math';
+import { TAU } from '../../../partition_chart/layout/utils/constants';
 import { Config } from '../types/config_types';
 
 export const configMetadata = {

@@ -25,7 +25,8 @@ import { Distance, PointTuple, PointTuples } from '../types/geometry_types';
 import { Box, Font, TextAlign, TextMeasure } from '../types/types';
 import { LinkLabelVM, RawTextGetter, ShapeTreeNode, ValueGetterFunction } from '../types/viewmodel_types';
 import { makeHighContrastColor, validateColor, integerSnap, monotonicHillClimb } from '../utils/calcs';
-import { TAU, trueBearingToStandardPositionAngle } from '../utils/math';
+import { TAU } from '../utils/constants';
+import { trueBearingToStandardPositionAngle } from '../utils/math';
 
 function cutToLength(s: string, maxLength: number) {
   return s.length <= maxLength ? s : `${s.slice(0, Math.max(0, maxLength - 1))}…`; // ellipsis is one char

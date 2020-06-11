@@ -19,8 +19,10 @@
 
 import { ChartTypes } from '../..';
 import { LegendItem } from '../../../commons/legend';
-import { ScaleType, ScaleContinuous, ScaleBand } from '../../../scales';
-import { SpecTypes, TooltipValue, TooltipType } from '../../../specs/settings';
+import { ScaleContinuous, ScaleBand } from '../../../scales';
+import { ScaleType } from '../../../scales/constants';
+import { SpecTypes, TooltipType } from '../../../specs/constants';
+import { TooltipValue } from '../../../specs/settings';
 import { Position } from '../../../utils/commons';
 import { IndexedGeometry, GeometryValue, BandedAccessorType } from '../../../utils/geometry';
 import { AxisId } from '../../../utils/ids';

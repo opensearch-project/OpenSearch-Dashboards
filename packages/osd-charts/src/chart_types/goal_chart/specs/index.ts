@@ -20,16 +20,16 @@
 import React from 'react';
 
 import { ChartTypes } from '../..';
-import { Spec, SpecTypes } from '../../../specs';
+import { Spec } from '../../../specs';
+import { SpecTypes } from '../../../specs/constants';
 import { getConnect, specComponentFactory } from '../../../state/spec_factory';
 import { Color, RecursivePartial } from '../../../utils/commons';
 import { config } from '../layout/config/config';
 import { Config } from '../layout/types/config_types';
 import { defaultGoalSpec } from '../layout/types/viewmodel_types';
+import { GoalSubtype } from './constants';
 
-export const GOAL_SUBTYPES = Object.freeze(['goal', 'horizontalBullet', 'verticalBullet'] as const);
-export type GoalSubtype = typeof GOAL_SUBTYPES[number];
-
+/** @alpha */
 export interface BandFillColorAccessorInput {
   value: number;
   index: number;
@@ -46,7 +46,6 @@ export type BandFillColorAccessor = (input: BandFillColorAccessorInput) => Color
 
 const defaultProps = {
   chartType: ChartTypes.Goal,
-  specType: SpecTypes.Series,
   ...defaultGoalSpec,
   config,
 };

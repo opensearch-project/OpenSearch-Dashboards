@@ -51,8 +51,10 @@ import {
   monotonicHillClimb,
 } from '../utils/calcs';
 import { RGBATupleToString } from '../utils/color_library_wrappers';
-import { logarithm, TAU, trueBearingToStandardPositionAngle } from '../utils/math';
-import { RectangleConstruction, VerticalAlignments } from './viewmodel';
+import { TAU } from '../utils/constants';
+import { logarithm, trueBearingToStandardPositionAngle } from '../utils/math';
+import { VerticalAlignments } from './constants';
+import { RectangleConstruction } from './viewmodel';
 
 const INFINITY_RADIUS = 1e4; // far enough for a sub-2px precision on a 4k screen, good enough for text bounds; 64 bit floats still work well with it
 

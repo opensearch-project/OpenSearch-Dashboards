@@ -20,8 +20,10 @@
 import { $Values } from 'utility-types';
 
 import { ChartTypes } from '../..';
-import { ScaleContinuousType, ScaleType } from '../../../scales';
-import { SpecTypes, Spec } from '../../../specs';
+import { ScaleContinuousType } from '../../../scales';
+import { ScaleType } from '../../../scales/constants';
+import { Spec } from '../../../specs';
+import { SpecTypes } from '../../../specs/constants';
 import { Accessor, AccessorFormat, AccessorFn } from '../../../utils/accessor';
 import { RecursivePartial, Color, Position, Datum } from '../../../utils/commons';
 import { CurveType } from '../../../utils/curves';

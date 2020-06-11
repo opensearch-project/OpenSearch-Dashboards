@@ -25,7 +25,7 @@ import { createStore } from 'redux';
 import { BarSeries } from '../chart_types/specs';
 import { BarSeriesSpec } from '../chart_types/xy_chart/utils/specs';
 import { chartStoreReducer } from '../state/chart_state';
-import { DEFAULT_SETTINGS_SPEC } from './settings';
+import { DEFAULT_SETTINGS_SPEC } from './constants';
 import { SpecsParser } from './specs_parser';
 
 describe('Specs parser', () => {

@@ -19,7 +19,7 @@
 
 import createCachedSelector from 're-reselect';
 
-import { isVerticalAxis } from '../../chart_types/xy_chart/utils/axis_utils';
+import { isVerticalAxis } from '../../chart_types/xy_chart/utils/axis_type_utils';
 import { LEGEND_HIERARCHY_MARGIN } from '../../components/legend/legend_item';
 import { BBox } from '../../utils/bbox/bbox_calculator';
 import { CanvasTextBBoxCalculator } from '../../utils/bbox/canvas_text_bbox_calculator';

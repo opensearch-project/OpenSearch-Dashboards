@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { DEFAULT_SETTINGS_SPEC } from '../../specs';
+import { DEFAULT_SETTINGS_SPEC } from '../../specs/constants';
 import { getInitialState } from '../chart_state';
 import { getSettingsSpecSelector } from './get_settings_specs';
 

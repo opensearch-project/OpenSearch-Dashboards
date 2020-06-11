@@ -18,7 +18,7 @@
  */
 
 import { Radian } from './types/geometry_types';
-import { TAU } from './utils/math';
+import { TAU } from './utils/constants';
 
 /** @internal */
 export function wrapToTau(a: Radian) {

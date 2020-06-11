@@ -21,7 +21,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import React, { Component } from 'react';
 
 import { SeededDataGenerator } from '../../mocks/utils';
-import { ScaleType } from '../../scales';
+import { ScaleType } from '../../scales/constants';
 import { Settings, BarSeries, LegendColorPicker } from '../../specs';
 import { Chart } from '../chart';
 import { Legend } from './legend';

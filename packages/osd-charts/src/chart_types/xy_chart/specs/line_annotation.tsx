@@ -22,7 +22,8 @@ import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
 import { ChartTypes } from '../..';
-import { Spec, SpecTypes } from '../../../specs';
+import { Spec } from '../../../specs';
+import { SpecTypes } from '../../../specs/constants';
 import { upsertSpec as upsertSpecAction, removeSpec as removeSpecAction } from '../../../state/actions/specs';
 import { DEFAULT_ANNOTATION_LINE_STYLE, mergeWithDefaultAnnotationLine } from '../../../utils/themes/theme';
 import { LineAnnotationSpec, DEFAULT_GLOBAL_ID, AnnotationTypes } from '../utils/specs';

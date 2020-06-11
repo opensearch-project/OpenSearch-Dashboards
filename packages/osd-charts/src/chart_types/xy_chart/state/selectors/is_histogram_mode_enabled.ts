@@ -20,7 +20,7 @@
 import createCachedSelector from 're-reselect';
 
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { isHistogramModeEnabled } from '../utils';
+import { isHistogramModeEnabled } from '../utils/utils';
 import { getSeriesSpecsSelector } from './get_specs';
 
 /** @internal */

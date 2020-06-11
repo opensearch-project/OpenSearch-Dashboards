@@ -18,8 +18,8 @@
  */
 
 import { ChartTypes } from '../..';
-import { ScaleType } from '../../../scales';
-import { SpecTypes } from '../../../specs/settings';
+import { ScaleType } from '../../../scales/constants';
+import { SpecTypes } from '../../../specs/constants';
 import { Position } from '../../../utils/commons';
 import { BarGeometry } from '../../../utils/geometry';
 import { AxisSpec, BarSeriesSpec, SeriesTypes } from '../utils/specs';

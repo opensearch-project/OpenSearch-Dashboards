@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { ScaleType } from '../../../scales';
-import { getSpecsById, isDefined } from '../state/utils';
+import { ScaleType } from '../../../scales/constants';
+import { isDefined } from '../../../utils/commons';
+import { getSpecsById } from '../state/utils/spec';
 import { fitFunction } from './fit_function';
 import { DataSeries, DataSeriesDatum, RawDataSeries } from './series';
 import { isAreaSeriesSpec, isLineSeriesSpec, SeriesSpecs, BasicSeriesSpec } from './specs';

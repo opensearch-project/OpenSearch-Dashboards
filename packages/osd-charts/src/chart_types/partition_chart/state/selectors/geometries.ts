@@ -20,7 +20,7 @@
 import createCachedSelector from 're-reselect';
 
 import { ChartTypes } from '../../..';
-import { SpecTypes } from '../../../../specs/settings';
+import { SpecTypes } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';

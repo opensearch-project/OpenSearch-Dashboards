@@ -19,7 +19,8 @@
 
 import createCachedSelector from 're-reselect';
 
-import { TooltipType, getTooltipType } from '../../../../specs';
+import { getTooltipType } from '../../../../specs';
+import { TooltipType } from '../../../../specs/constants';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getTooltipInfoSelector } from './tooltip';

@@ -17,11 +17,11 @@
  * under the License.
  */
 
+import { getDistance } from '../../../utils/commons';
 import { Delaunay, Bounds } from '../../../utils/d3-delaunay';
 import { IndexedGeometry, PointGeometry } from '../../../utils/geometry';
 import { Point } from '../../../utils/point';
-import { DEFAULT_HIGHLIGHT_PADDING } from '../rendering/rendering';
-import { getDistance } from '../state/utils';
+import { DEFAULT_HIGHLIGHT_PADDING } from '../rendering/constants';
 
 /** @internal */
 export type IndexedGeometrySpatialMapPoint = [number, number];

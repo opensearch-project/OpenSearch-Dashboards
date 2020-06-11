@@ -20,7 +20,7 @@
 import React, { CSSProperties } from 'react';
 import { connect } from 'react-redux';
 
-import { TooltipType } from '../../../../specs';
+import { TooltipType } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
@@ -32,7 +32,7 @@ import { Theme } from '../../../../utils/themes/theme';
 import { getCursorBandPositionSelector } from '../../state/selectors/get_cursor_band';
 import { getCursorLinePositionSelector } from '../../state/selectors/get_cursor_line';
 import { getTooltipTypeSelector } from '../../state/selectors/get_tooltip_type';
-import { isHorizontalRotation } from '../../state/utils';
+import { isHorizontalRotation } from '../../state/utils/common';
 
 interface CrosshairProps {
   theme: Theme;

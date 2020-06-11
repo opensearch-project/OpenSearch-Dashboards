@@ -19,6 +19,7 @@
 
 const path = require('path');
 
+const CircularDependencyPlugin = require('circular-dependency-plugin');
 const webpack = require('webpack');
 
 const nonce = 'Pk1rZ1XDlMuYe8ubWV3Lh0BzwrTigJQ=';
@@ -36,8 +37,29 @@ const scssLoaders = [
   'sass-loader',
 ];
 
+const MAX_CYCLES = 0;
+let numCyclesDetected = 0;
+
 module.exports = async({ config }) => {
   config.plugins.push(new webpack.EnvironmentPlugin({ RNG_SEED: null }));
+  config.plugins.push(new CircularDependencyPlugin({
+    onStart() {
+      numCyclesDetected = 0;
+    },
+    onDetected({ paths, compilation }) {
+      if (!/^node_modules\/.+/.test(paths[0])) {
+        numCyclesDetected++;
+        compilation.warnings.push(new Error(paths.join(' -> ')));
+      }
+    },
+    onEnd({ compilation }) {
+      if (numCyclesDetected > MAX_CYCLES) {
+        compilation.errors.push(new Error(
+          `Detected ${numCyclesDetected} cycles which exceeds configured limit of ${MAX_CYCLES}`
+        ));
+      }
+    },
+  }));
 
   config.module.rules.push({
     test: /\.tsx?$/,

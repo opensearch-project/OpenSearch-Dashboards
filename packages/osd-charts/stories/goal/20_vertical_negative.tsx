@@ -21,14 +21,15 @@ import React from 'react';
 
 import { Chart, Goal } from '../../src';
 import { config } from '../../src/chart_types/goal_chart/layout/config/config';
-import { BandFillColorAccessorInput, GOAL_SUBTYPES } from '../../src/chart_types/goal_chart/specs';
+import { BandFillColorAccessorInput } from '../../src/chart_types/goal_chart/specs';
+import { GoalSubtype } from '../../src/chart_types/goal_chart/specs/constants';
 import { Color } from '../../src/utils/commons';
 
 const q1 = 255 - 255 * 0.4;
 const q2 = 255 - 255 * 0.25;
 const q3 = 255 - 255 * 0.1;
 
-const subtype = GOAL_SUBTYPES[2];
+const subtype = GoalSubtype.VerticalBullet;
 
 const colorMap: { [k: number]: Color } = {
   '-200': `rgb(${q1},${q1},${q1})`,

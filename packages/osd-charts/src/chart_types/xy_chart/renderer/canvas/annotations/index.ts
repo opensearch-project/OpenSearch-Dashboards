@@ -22,7 +22,7 @@ import { mergeWithDefaultAnnotationLine, mergeWithDefaultAnnotationRect } from '
 import { AnnotationLineProps } from '../../../annotations/line/types';
 import { AnnotationRectProps } from '../../../annotations/rect/types';
 import { AnnotationDimensions } from '../../../annotations/types';
-import { getSpecsById } from '../../../state/utils';
+import { getSpecsById } from '../../../state/utils/spec';
 import { AnnotationSpec, isLineAnnotation, isRectAnnotation } from '../../../utils/specs';
 import { renderLineAnnotations } from './lines';
 import { renderRectAnnotations } from './rect';

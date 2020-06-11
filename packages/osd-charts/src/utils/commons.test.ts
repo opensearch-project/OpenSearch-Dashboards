@@ -30,6 +30,9 @@ import {
   minValueWithLowerLimit,
   getColorFromVariant,
   ColorVariant,
+  isUniqueArray,
+  isDefined,
+  isDefinedFrom,
 } from './commons';
 
 describe('commons utilities', () => {
@@ -1034,5 +1037,122 @@ describe('commons utilities', () => {
       const color = '#f61c48';
       expect(getColorFromVariant(seriesColor, color)).toBe(color);
     });
+  });
+});
+
+describe('#isUniqueArray', () => {
+  it('should return true for simple unique values', () => {
+    expect(isUniqueArray([1, 2])).toBe(true);
+  });
+
+  it('should return true for complex unique values', () => {
+    expect(isUniqueArray([{ n: 1 }, { n: 2 }], ({ n }) => n)).toBe(true);
+  });
+
+  it('should return false for simple duplicated values', () => {
+    expect(isUniqueArray([1, 1, 2])).toBe(false);
+  });
+
+  it('should return false for complex duplicated values', () => {
+    expect(isUniqueArray([{ n: 1 }, { n: 1 }, { n: 2 }], ({ n }) => n)).toBe(false);
+  });
+});
+
+describe('#isDefined', () => {
+  it('should return false for null', () => {
+    expect(isDefined(null)).toBe(false);
+  });
+
+  it('should return false for undefined', () => {
+    expect(isDefined()).toBe(false);
+  });
+
+  it('should return true for zero', () => {
+    expect(isDefined(0)).toBe(true);
+  });
+
+  it('should return true for empty string', () => {
+    expect(isDefined('')).toBe(true);
+  });
+
+  it('should return true for empty false', () => {
+    expect(isDefined(false)).toBe(true);
+  });
+
+  it('should filter out null and undefined values', () => {
+    const values: (number | null | undefined)[] = [1, 2, null, 4, 5, undefined];
+    const result: number[] = values.filter(isDefined);
+    expect(result).toEqual([1, 2, 4, 5]);
+  });
+});
+
+describe('#isDefinedFrom', () => {
+  interface Test {
+    a?: number | string | boolean | null;
+  }
+  it('should filter out undefined values from complex types', () => {
+    const values: Partial<Test>[] = [
+      {
+        a: 1,
+      },
+      {
+        a: 'string',
+      },
+      {
+        a: false,
+      },
+      {},
+    ];
+    const result: NonNullable<Test>[] = values.filter(isDefinedFrom(({ a }) => a !== undefined));
+    expect(result).toEqual(values.slice(0, -1));
+  });
+
+  it('should filter out null values from complex types', () => {
+    const values: Test[] = [
+      {
+        a: 1,
+      },
+      {
+        a: 'string',
+      },
+      {
+        a: false,
+      },
+      {
+        a: null,
+      },
+    ];
+    const result: NonNullable<Test>[] = values.filter(isDefinedFrom(({ a }) => a !== null));
+    expect(result).toEqual(values.slice(0, -1));
+  });
+
+  it('should filter out null values from complex nested types', () => {
+    type NestedTest = {
+      aa: Test;
+    };
+    const values: NestedTest[] = [
+      {
+        aa: { a: 1 },
+      },
+      {
+        aa: { a: 'string' },
+      },
+      {
+        aa: { a: false },
+      },
+      {
+        aa: { a: null },
+      },
+      {
+        aa: {},
+      },
+      {
+        aa: { a: undefined },
+      },
+    ];
+    const result: NonNullable<NestedTest>[] = values.filter(
+      isDefinedFrom(({ aa }) => aa?.a !== undefined && aa?.a !== null),
+    );
+    expect(result).toEqual(values.slice(0, 3));
   });
 });

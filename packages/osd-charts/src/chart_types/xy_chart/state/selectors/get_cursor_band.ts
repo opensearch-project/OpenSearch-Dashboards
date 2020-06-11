@@ -29,7 +29,7 @@ import { isValidPointerOverEvent } from '../../../../utils/events';
 import { Point } from '../../../../utils/point';
 import { getCursorBandPosition } from '../../crosshair/crosshair_utils';
 import { BasicSeriesSpec } from '../../utils/specs';
-import { isLineAreaOnlyChart } from '../utils';
+import { isLineAreaOnlyChart } from '../utils/common';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';
 import { countBarsInClusterSelector } from './count_bars_in_cluster';

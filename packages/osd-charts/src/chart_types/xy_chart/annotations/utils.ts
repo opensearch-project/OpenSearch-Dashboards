@@ -22,7 +22,8 @@ import { Rotation, Position } from '../../../utils/commons';
 import { Dimensions } from '../../../utils/dimensions';
 import { AnnotationId, GroupId } from '../../../utils/ids';
 import { Point } from '../../../utils/point';
-import { getAxesSpecForSpecId, isHorizontalRotation } from '../state/utils';
+import { isHorizontalRotation } from '../state/utils/common';
+import { getAxesSpecForSpecId } from '../state/utils/spec';
 import {
   AnnotationDomainType,
   AnnotationDomainTypes,
@@ -46,7 +47,7 @@ export function getAnnotationAxis(
   const isHorizontalRotated = isHorizontalRotation(chartRotation);
   const isXDomainAnnotation = isXDomain(domainType);
   const annotationAxis = isXDomainAnnotation ? xAxis : yAxis;
-  const rotatedAnnotation = isHorizontalRotated ? annotationAxis : isXDomainAnnotation ? yAxis : xAxis;
+  const rotatedAnnotation = isHorizontalRotated ? annotationAxis : (isXDomainAnnotation ? yAxis : xAxis);
   return rotatedAnnotation ? rotatedAnnotation.position : null;
 }
 

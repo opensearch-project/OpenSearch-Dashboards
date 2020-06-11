@@ -19,8 +19,9 @@
 
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings, TooltipType } from '../../src';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
 import { SeededDataGenerator } from '../../src/mocks/utils';
+import { TooltipType } from '../../src/specs/constants';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => {

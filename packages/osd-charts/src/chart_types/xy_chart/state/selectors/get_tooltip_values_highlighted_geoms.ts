@@ -24,11 +24,11 @@ import {
   PointerEvent,
   isPointerOutEvent,
   TooltipValue,
-  TooltipType,
   TooltipValueFormatter,
   isFollowTooltipType,
   SettingsSpec,
 } from '../../../../specs';
+import { TooltipType } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
@@ -41,7 +41,8 @@ import { Point } from '../../../../utils/point';
 import { isPointOnGeometry } from '../../rendering/rendering';
 import { formatTooltip } from '../../tooltip/tooltip';
 import { BasicSeriesSpec, AxisSpec } from '../../utils/specs';
-import { ComputedScales, getAxesSpecForSpecId, getSpecsById } from '../utils';
+import { getAxesSpecForSpecId, getSpecsById } from '../utils/spec';
+import { ComputedScales } from '../utils/types';
 import { getComputedScalesSelector } from './get_computed_scales';
 import { getElementAtCursorPositionSelector } from './get_elements_at_cursor_pos';
 import { getOrientedProjectedPointerPositionSelector } from './get_oriented_projected_pointer_position';

@@ -19,7 +19,7 @@
 
 import createCachedSelector from 're-reselect';
 
-import { isVerticalAxis } from '../../chart_types/xy_chart/utils/axis_utils';
+import { isVerticalAxis } from '../../chart_types/xy_chart/utils/axis_type_utils';
 import { Dimensions } from '../../utils/dimensions';
 import { GlobalChartState } from '../chart_state';
 import { getChartIdSelector } from './get_chart_id';

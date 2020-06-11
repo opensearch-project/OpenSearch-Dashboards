@@ -19,10 +19,10 @@
 
 import { scaleBand, scaleQuantize, ScaleQuantize, ScaleBand as D3ScaleBand } from 'd3-scale';
 
-import { ScaleType, Scale } from '.';
+import { Scale } from '.';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
-import { stringifyNullsUndefined } from '../chart_types/xy_chart/state/utils';
-import { maxValueWithUpperLimit } from '../utils/commons';
+import { maxValueWithUpperLimit, stringifyNullsUndefined } from '../utils/commons';
+import { ScaleType } from './constants';
 
 /**
  * Categorical scale

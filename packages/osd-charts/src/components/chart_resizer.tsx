@@ -23,10 +23,10 @@ import { Dispatch, bindActionCreators } from 'redux';
 import ResizeObserver from 'resize-observer-polyfill';
 import { debounce } from 'ts-debounce';
 
-import { isDefined } from '../chart_types/xy_chart/state/utils';
 import { updateParentDimensions } from '../state/actions/chart_settings';
 import { GlobalChartState } from '../state/chart_state';
 import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
+import { isDefined } from '../utils/commons';
 import { Dimensions } from '../utils/dimensions';
 
 interface ResizerStateProps {

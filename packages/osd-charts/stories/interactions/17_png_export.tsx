@@ -33,7 +33,8 @@ import {
   Goal,
   ChartTypes,
 } from '../../src';
-import { GOAL_SUBTYPES, BandFillColorAccessorInput } from '../../src/chart_types/goal_chart/specs';
+import { BandFillColorAccessorInput } from '../../src/chart_types/goal_chart/specs';
+import { GoalSubtype } from '../../src/chart_types/goal_chart/specs/constants';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
 import { mocks } from '../../src/mocks/hierarchical';
 import { Color } from '../../src/utils/commons';
@@ -139,7 +140,7 @@ function renderXYAxisChart(chartRef: RefObject<Chart>) {
 }
 
 function renderGoalchart(chartRef: RefObject<Chart>) {
-  const subtype = GOAL_SUBTYPES[0];
+  const subtype = GoalSubtype.Goal;
 
   const colorMap: { [k: number]: Color } = {
     200: '#fc8d62',

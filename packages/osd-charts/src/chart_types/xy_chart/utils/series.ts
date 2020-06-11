@@ -18,14 +18,14 @@
  */
 
 import { SeriesIdentifier, SeriesKey } from '../../../commons/series_id';
-import { ScaleType } from '../../../scales';
+import { ScaleType } from '../../../scales/constants';
 import { ColorOverrides } from '../../../state/chart_state';
 import { Accessor, AccessorFn, getAccessorValue } from '../../../utils/accessor';
 import { Datum, Color } from '../../../utils/commons';
 import { GroupId, SpecId } from '../../../utils/ids';
 import { ColorConfig } from '../../../utils/themes/theme';
 import { splitSpecsByGroupId, YBasicSeriesSpec } from '../domains/y_domain';
-import { LastValues } from '../state/utils';
+import { LastValues } from '../state/utils/types';
 import { formatNonStackedDataSeriesValues } from './nonstacked_series_utils';
 import { BasicSeriesSpec, SeriesTypes, SeriesSpecs, SeriesNameConfigOptions } from './specs';
 import { formatStackedDataSeriesValues } from './stacked_series_utils';

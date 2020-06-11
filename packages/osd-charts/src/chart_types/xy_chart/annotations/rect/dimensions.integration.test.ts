@@ -19,7 +19,7 @@
 
 import { MockSeriesSpec, MockAnnotationSpec, MockGlobalSpec } from '../../../../mocks/specs';
 import { MockStore } from '../../../../mocks/store';
-import { ScaleType } from '../../../../scales';
+import { ScaleType } from '../../../../scales/constants';
 import { computeAnnotationDimensionsSelector } from '../../state/selectors/compute_annotations';
 import { RectAnnotationDatum } from '../../utils/specs';
 import { AnnotationRectProps } from './types';

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { Scale, ScaleType } from '.';
+import { Scale } from '.';
+import { ScaleType } from './constants';
 import { ScaleBand } from './scale_band';
 import { ScaleContinuous } from './scale_continuous';
 

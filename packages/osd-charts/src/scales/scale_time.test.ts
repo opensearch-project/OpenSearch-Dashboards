@@ -19,7 +19,8 @@
 
 import { DateTime } from 'luxon';
 
-import { ScaleContinuous, ScaleType } from '.';
+import { ScaleContinuous } from '.';
+import { ScaleType } from './constants';
 
 describe('[Scale Time] - timezones', () => {
   describe('timezone checks', () => {
@@ -215,7 +216,7 @@ describe('[Scale Time] - timezones', () => {
     });
     test('shall invert all timezones', () => {
       for (let i = -11; i <= 12; i++) {
-        const timezone = i === 0 ? 'utc' : i > 0 ? `utc+${i}` : `utc${i}`;
+        const timezone = i === 0 ? 'utc' : (i > 0 ? `utc+${i}` : `utc${i}`);
         const startTime = DateTime.fromISO('2019-01-01T00:00:00.000', {
           zone: timezone,
         }).toMillis();

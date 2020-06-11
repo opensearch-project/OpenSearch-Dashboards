@@ -21,7 +21,8 @@ import { AxisProps } from '.';
 import { Position } from '../../../../../utils/commons';
 import { TickStyle } from '../../../../../utils/themes/theme';
 import { stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';
-import { AxisTick, isVerticalAxis } from '../../../utils/axis_utils';
+import { isVerticalAxis } from '../../../utils/axis_type_utils';
+import { AxisTick } from '../../../utils/axis_utils';
 import { renderLine, MIN_STROKE_WIDTH } from '../primitives/line';
 
 /** @internal */

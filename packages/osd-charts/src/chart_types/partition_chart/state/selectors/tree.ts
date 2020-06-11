@@ -20,7 +20,7 @@
 import createCachedSelector from 're-reselect';
 
 import { ChartTypes } from '../../..';
-import { SpecTypes } from '../../../../specs/settings';
+import { SpecTypes } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getSpecsFromStore } from '../../../../state/utils';
 import { HierarchyOfArrays } from '../../layout/utils/group_by_rollup';

@@ -18,7 +18,7 @@
  */
 
 import { ChartTypes } from '../../..';
-import { SpecTypes } from '../../../../specs';
+import { SpecTypes } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getSpecsFromStore } from '../../../../state/utils';
 import { PartitionSpec } from '../../specs';

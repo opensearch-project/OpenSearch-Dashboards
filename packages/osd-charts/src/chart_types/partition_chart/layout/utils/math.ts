@@ -18,10 +18,7 @@
  */
 
 import { wrapToTau } from '../geometry';
-
-export const TAU = 2 * Math.PI;
-export const RIGHT_ANGLE = TAU / 4;
-export const GOLDEN_RATIO = 1.618;
+import { RIGHT_ANGLE } from './constants';
 
 /** @internal */
 export function trueBearingToStandardPositionAngle(alphaIn: number) {

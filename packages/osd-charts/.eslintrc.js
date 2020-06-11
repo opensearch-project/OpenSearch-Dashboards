@@ -29,7 +29,6 @@ module.exports = {
      * Rules to consider adding/fixing later
      *****************************************
      */
-    'import/no-cycle': 0,
     '@typescript-eslint/no-unsafe-assignment': 0,
     '@typescript-eslint/no-unsafe-member-access': 0,
     '@typescript-eslint/no-unsafe-return': 0,
@@ -40,6 +39,7 @@ module.exports = {
     '@typescript-eslint/unbound-method': 1,
     'unicorn/consistent-function-scoping': 1,
     'unicorn/explicit-length-check': 1,
+    'import/no-cycle': [0, { maxDepth: 3, ignoreExternal: true }], // TODO: should error when this is fixed https://github.com/benmosher/eslint-plugin-import/issues/1453
     'no-use-before-define': 0,
     'no-restricted-properties': 0, // need to find and filter desired options
     'class-methods-use-this': 1,

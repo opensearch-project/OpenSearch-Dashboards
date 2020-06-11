@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { Scale, ScaleType } from '../../scales';
+import { Scale } from '../../scales';
+import { ScaleType } from '../../scales/constants';
 import { mergePartial } from '../../utils/commons';
 
 /** @internal */

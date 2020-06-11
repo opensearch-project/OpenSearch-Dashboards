@@ -19,10 +19,11 @@
 
 import { DateTime, Settings } from 'luxon';
 
-import { ScaleContinuous, ScaleType, ScaleBand } from '.';
-import { XDomain } from '../chart_types/xy_chart/domains/x_domain';
+import { ScaleContinuous, ScaleBand } from '.';
+import { XDomain } from '../chart_types/xy_chart/domains/types';
 import { computeXScale } from '../chart_types/xy_chart/utils/scales';
 import { Domain } from '../utils/domain';
+import { ScaleType } from './constants';
 import { isLogarithmicScale } from './types';
 
 describe('Scale Continuous', () => {

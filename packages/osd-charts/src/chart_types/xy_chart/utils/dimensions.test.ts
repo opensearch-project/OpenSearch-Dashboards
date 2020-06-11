@@ -18,7 +18,7 @@
  */
 
 import { ChartTypes } from '../..';
-import { SpecTypes } from '../../../specs/settings';
+import { SpecTypes } from '../../../specs/constants';
 import { Position } from '../../../utils/commons';
 import { Margins } from '../../../utils/dimensions';
 import { AxisId } from '../../../utils/ids';

@@ -1,3 +1,4 @@
+
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -17,12 +18,4 @@
  * under the License.
  */
 
-import { ScaleType } from '../../../scales';
-import { Domain } from '../../../utils/domain';
-
-export interface BaseDomain {
-  scaleType: ScaleType;
-  domain: Domain;
-  /* if the scale needs to be a band scale: used when displaying bars */
-  isBandScale: boolean;
-}
+export const DEFAULT_HIGHLIGHT_PADDING = 10;

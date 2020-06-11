@@ -20,8 +20,9 @@
 import { createStore, Store } from 'redux';
 
 import { ChartTypes } from '../..';
-import { ScaleType } from '../../../scales';
-import { SettingsSpec, DEFAULT_SETTINGS_SPEC, SpecTypes, TooltipType, XYBrushArea, BrushAxis } from '../../../specs';
+import { ScaleType } from '../../../scales/constants';
+import { SettingsSpec, XYBrushArea } from '../../../specs';
+import { SpecTypes, DEFAULT_SETTINGS_SPEC, TooltipType, BrushAxis } from '../../../specs/constants';
 import { updateParentDimensions } from '../../../state/actions/chart_settings';
 import { onExternalPointerEvent } from '../../../state/actions/events';
 import { onPointerMove, onMouseDown, onMouseUp } from '../../../state/actions/mouse';

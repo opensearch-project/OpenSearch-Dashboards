@@ -19,7 +19,7 @@
 
 import { MockSeriesSpec, MockAnnotationSpec, MockGlobalSpec } from '../../../../mocks/specs';
 import { MockStore } from '../../../../mocks/store';
-import { ScaleType } from '../../../../scales';
+import { ScaleType } from '../../../../scales/constants';
 import { Position } from '../../../../utils/commons';
 import { computeAnnotationDimensionsSelector } from '../../state/selectors/compute_annotations';
 import { AnnotationDomainTypes } from '../../utils/specs';

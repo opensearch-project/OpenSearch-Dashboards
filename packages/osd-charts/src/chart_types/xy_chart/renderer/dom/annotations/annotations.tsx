@@ -33,7 +33,7 @@ import { computeChartDimensionsSelector } from '../../../state/selectors/compute
 import { getAnnotationTooltipStateSelector } from '../../../state/selectors/get_annotation_tooltip_state';
 import { getAnnotationSpecsSelector } from '../../../state/selectors/get_specs';
 import { isChartEmptySelector } from '../../../state/selectors/is_chart_empty';
-import { getSpecsById } from '../../../state/utils';
+import { getSpecsById } from '../../../state/utils/spec';
 import { isLineAnnotation, AnnotationSpec } from '../../../utils/specs';
 import { AnnotationTooltip } from './annotation_tooltip';
 

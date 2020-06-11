@@ -27,7 +27,7 @@ import { LegendItem, LegendItemExtraValues } from '../commons/legend';
 import { SeriesKey, SeriesIdentifier } from '../commons/series_id';
 import { TooltipInfo, TooltipAnchorPosition } from '../components/tooltip/types';
 import { Spec, PointerEvent } from '../specs';
-import { DEFAULT_SETTINGS_SPEC } from '../specs/settings';
+import { DEFAULT_SETTINGS_SPEC } from '../specs/constants';
 import { Color } from '../utils/commons';
 import { Dimensions } from '../utils/dimensions';
 import { Point } from '../utils/point';

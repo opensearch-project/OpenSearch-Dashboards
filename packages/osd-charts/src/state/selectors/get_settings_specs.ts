@@ -20,7 +20,8 @@
 import createCachedSelector from 're-reselect';
 
 import { ChartTypes } from '../../chart_types';
-import { SettingsSpec, SpecTypes, DEFAULT_SETTINGS_SPEC } from '../../specs/settings';
+import { SpecTypes, DEFAULT_SETTINGS_SPEC } from '../../specs/constants';
+import { SettingsSpec } from '../../specs/settings';
 import { GlobalChartState } from '../chart_state';
 import { getSpecsFromStore } from '../utils';
 import { getChartIdSelector } from './get_chart_id';

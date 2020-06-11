@@ -21,7 +21,7 @@ import { withContext } from '../../../../../renderers/canvas';
 import { Dimensions } from '../../../../../utils/dimensions';
 import { AxisId } from '../../../../../utils/ids';
 import { AxisConfig } from '../../../../../utils/themes/theme';
-import { getSpecsById } from '../../../state/utils';
+import { getSpecsById } from '../../../state/utils/spec';
 import { AxisTick, AxisTicksDimensions } from '../../../utils/axis_utils';
 import { AxisSpec } from '../../../utils/specs';
 import { renderDebugRect } from '../utils/debug';

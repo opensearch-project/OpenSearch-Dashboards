@@ -21,16 +21,16 @@ import { DateTime } from 'luxon';
 import moment from 'moment-timezone';
 
 import { ChartTypes } from '../..';
-import { ScaleType, Scale } from '../../../scales';
-import { SpecTypes } from '../../../specs/settings';
+import { Scale } from '../../../scales';
+import { ScaleType } from '../../../scales/constants';
+import { SpecTypes } from '../../../specs/constants';
 import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
 import { SvgTextBBoxCalculator } from '../../../utils/bbox/svg_text_bbox_calculator';
 import { Position } from '../../../utils/commons';
 import { niceTimeFormatter } from '../../../utils/data/formatters';
 import { AxisId, GroupId } from '../../../utils/ids';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
-import { XDomain } from '../domains/x_domain';
-import { YDomain } from '../domains/y_domain';
+import { XDomain, YDomain } from '../domains/types';
 import { mergeYCustomDomainsByGroupId } from '../state/selectors/merge_y_custom_domains';
 import {
   AxisTick,
@@ -50,13 +50,8 @@ import {
   getVerticalAxisGridLineProps,
   getVerticalAxisTickLineProps,
   getVisibleTicks,
-  isBounded,
-  isHorizontalAxis,
-  isVerticalAxis,
   isYDomain,
   getAxisTickLabelPadding,
-  isVerticalGrid,
-  isHorizontalGrid,
   enableDuplicatedTicks,
 } from './axis_utils';
 import { computeXScale } from './scales';
@@ -1177,30 +1172,6 @@ describe('Axis computational utils', () => {
     expect(horizontalAxisGridLines).toEqual([25, 0, 25, 100]);
   });
 
-  test('should determine orientation of axis position', () => {
-    expect(isVerticalAxis(Position.Left)).toBe(true);
-    expect(isVerticalAxis(Position.Right)).toBe(true);
-    expect(isVerticalAxis(Position.Top)).toBe(false);
-    expect(isVerticalAxis(Position.Bottom)).toBe(false);
-
-    expect(isHorizontalAxis(Position.Left)).toBe(false);
-    expect(isHorizontalAxis(Position.Right)).toBe(false);
-    expect(isHorizontalAxis(Position.Top)).toBe(true);
-    expect(isHorizontalAxis(Position.Bottom)).toBe(true);
-  });
-
-  test('should determine orientation of gridlines from axis position', () => {
-    expect(isVerticalGrid(Position.Left)).toBe(false);
-    expect(isVerticalGrid(Position.Right)).toBe(false);
-    expect(isVerticalGrid(Position.Top)).toBe(true);
-    expect(isVerticalGrid(Position.Bottom)).toBe(true);
-
-    expect(isHorizontalGrid(Position.Left)).toBe(true);
-    expect(isHorizontalGrid(Position.Right)).toBe(true);
-    expect(isHorizontalGrid(Position.Top)).toBe(false);
-    expect(isHorizontalGrid(Position.Bottom)).toBe(false);
-  });
-
   test('should determine if axis belongs to yDomain', () => {
     const verticalY = isYDomain(Position.Left, 0);
     expect(verticalY).toBe(true);
@@ -1404,18 +1375,6 @@ describe('Axis computational utils', () => {
     expect(attemptToMerge).toThrowError(expectedError);
   });
 
-  test('should determine that a domain has at least one bound', () => {
-    const lowerBounded = {
-      min: 0,
-    };
-
-    const upperBounded = {
-      max: 0,
-    };
-
-    expect(isBounded(lowerBounded)).toBe(true);
-    expect(isBounded(upperBounded)).toBe(true);
-  });
   test('should not allow negative padding', () => {
     const negativePadding = -2;
     // value canvas_text_bbox_calculator changes negative values is 1

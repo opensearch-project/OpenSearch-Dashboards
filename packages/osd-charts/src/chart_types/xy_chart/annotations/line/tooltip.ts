@@ -20,7 +20,7 @@
 import { Dimensions } from '../../../../utils/dimensions';
 import { GroupId } from '../../../../utils/ids';
 import { Point } from '../../../../utils/point';
-import { getAxesSpecForSpecId } from '../../state/utils';
+import { getAxesSpecForSpecId } from '../../state/utils/spec';
 import { AnnotationDomainType, AnnotationTypes, AxisSpec } from '../../utils/specs';
 import { isWithinRectBounds } from '../rect/dimensions';
 import { AnnotationTooltipState, AnnotationMarker, Bounds } from '../types';

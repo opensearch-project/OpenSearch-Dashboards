@@ -44,7 +44,7 @@ if (!extension || !name) {
 }
 
 module.exports = Object.assign(baseConfig, {
-  testMatch: [`**/?(*.)tz.+(spec|test)?(.${extension}).[jt]s?(x)`],
+  testMatch: [`**/?(*.)tz.+(test)?(.${extension}).[jt]s?(x)`],
   displayName: {
     name: `TIMEZONE: ${name}`,
     color,

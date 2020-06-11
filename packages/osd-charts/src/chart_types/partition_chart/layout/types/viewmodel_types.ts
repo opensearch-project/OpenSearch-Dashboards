@@ -20,8 +20,8 @@
 import { Color } from '../../../../utils/commons';
 import { config, ValueGetterName } from '../config/config';
 import { ArrayNode, HierarchyOfArrays } from '../utils/group_by_rollup';
+import { VerticalAlignments } from '../viewmodel/constants';
 import { LinkLabelsViewModelSpec } from '../viewmodel/link_text_layout';
-import { VerticalAlignments } from '../viewmodel/viewmodel';
 import { Config } from './config_types';
 import { Coordinate, Distance, Pixels, PointObject, PointTuple, PointTuples, Radian } from './geometry_types';
 import { Font } from './types';

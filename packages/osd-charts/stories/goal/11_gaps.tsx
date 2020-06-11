@@ -21,10 +21,11 @@ import React from 'react';
 
 import { Chart, Goal } from '../../src';
 import { config } from '../../src/chart_types/goal_chart/layout/config/config';
-import { BandFillColorAccessorInput, GOAL_SUBTYPES } from '../../src/chart_types/goal_chart/specs';
+import { BandFillColorAccessorInput } from '../../src/chart_types/goal_chart/specs';
+import { GoalSubtype } from '../../src/chart_types/goal_chart/specs/constants';
 import { Color } from '../../src/utils/commons';
 
-const subtype = GOAL_SUBTYPES[0];
+const subtype = GoalSubtype.Goal;
 
 const colorMap: { [k: number]: Color } = {
   199: 'rgba(255,0,0,0.5)',

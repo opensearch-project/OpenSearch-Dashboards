@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { $Values } from 'utility-types';
 
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
+import { ScaleType } from './constants';
 
 /**
  * A `Scale` interface. A scale can map an input value within a specified domain
@@ -57,19 +57,6 @@ export interface Scale {
   isInverted: boolean;
   barsPadding: number;
 }
-
-/**
- * The scale type
- */
-export const ScaleType = Object.freeze({
-  Linear: 'linear' as const,
-  Ordinal: 'ordinal' as const,
-  Log: 'log' as const,
-  Sqrt: 'sqrt' as const,
-  Time: 'time' as const,
-});
-
-export type ScaleType = $Values<typeof ScaleType>;
 
 export type ScaleContinuousType = Exclude<ScaleType, typeof ScaleType.Ordinal>;
 

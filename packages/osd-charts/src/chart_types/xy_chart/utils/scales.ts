@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { Scale, ScaleType, ScaleBand, ScaleContinuous } from '../../../scales';
+import { Scale, ScaleBand, ScaleContinuous } from '../../../scales';
+import { ScaleType } from '../../../scales/constants';
 import { GroupId } from '../../../utils/ids';
-import { XDomain } from '../domains/x_domain';
-import { YDomain } from '../domains/y_domain';
+import { XDomain, YDomain } from '../domains/types';
 import { FormattedDataSeries } from './series';
 
 /**
