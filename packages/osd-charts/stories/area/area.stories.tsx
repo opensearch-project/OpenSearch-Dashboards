@@ -43,3 +43,4 @@ export { Example as stackedGrouped } from './15_stacked_grouped';
 
 export { Example as testLinear } from './11_test_linear';
 export { Example as testTime } from './12_test_time';
+export { Example as testStackedWithMissingValues } from './16_test_stacked_with_missing';

@@ -29,9 +29,9 @@ export interface StackedValues {
 }
 
 /** @internal */
-export const datumXSortPredicate = (xScaleType: ScaleType) => (a: DataSeriesDatum, b: DataSeriesDatum) => {
+export const datumXSortPredicate = (xScaleType: ScaleType, sortedXValues?: (string | number)[]) => (a: DataSeriesDatum, b: DataSeriesDatum) => {
   if (xScaleType === ScaleType.Ordinal || typeof a.x === 'string' || typeof b.x === 'string') {
-    return 0;
+    return sortedXValues ? sortedXValues.indexOf(a.x) - sortedXValues.indexOf(b.x) : 0;
   }
   return a.x - b.x;
 };
@@ -172,7 +172,8 @@ export function formatStackedDataSeriesValues(
         newData.push(filledSeriesDatum);
       }
     }
-    newData.sort(datumXSortPredicate(xScaleType));
+    const sortedXValues = [...xValues];
+    newData.sort(datumXSortPredicate(xScaleType, sortedXValues));
     return {
       ...ds,
       data: newData,
