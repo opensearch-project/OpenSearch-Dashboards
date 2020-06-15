@@ -120,12 +120,7 @@ class PartitionComponent extends React.Component<PartitionProps> {
         indices.forEach((i) => datumIndices.add(i));
       }
     });
-    /*
-     *console.log(
-     *  pickedShapes.map((s) => s.value),
-     *  [...datumIndices.values()],
-     *);
-     */
+
     return pickedShapes; // placeholder
   }
 

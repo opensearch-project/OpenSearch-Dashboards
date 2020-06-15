@@ -327,11 +327,6 @@ export function mergePartial<T>(
 }
 
 /** @internal */
-export function isNumberArray(value: unknown): value is number[] {
-  return Array.isArray(value) && value.every((element) => typeof element === 'number');
-}
-
-/** @internal */
 export function getUniqueValues<T>(fullArray: T[], uniqueProperty: keyof T): T[] {
   return fullArray.reduce<{
     filtered: T[];

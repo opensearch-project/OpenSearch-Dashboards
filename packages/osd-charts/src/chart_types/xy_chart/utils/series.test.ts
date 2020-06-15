@@ -683,26 +683,26 @@ describe('Series', () => {
     expect(getSortedDataSeriesColorsValuesMap(seriesCollection)).toEqual(undefinedSortedColorValues);
   });
   test('clean datum shall parse string as number for y values', () => {
-    let datum = cleanDatum([0, 1, 2], 0, 1, 2);
+    let datum = cleanDatum([0, 1, 2], 0, 1, [], 2);
     expect(datum).toBeDefined();
     expect(datum?.y1).toBe(1);
     expect(datum?.y0).toBe(2);
-    datum = cleanDatum([0, '1', 2], 0, 1, 2);
-    expect(datum).toBeDefined();
-    expect(datum?.y1).toBe(1);
-    expect(datum?.y0).toBe(2);
-
-    datum = cleanDatum([0, '1', '2'], 0, 1, 2);
+    datum = cleanDatum([0, '1', 2], 0, 1, [], 2);
     expect(datum).toBeDefined();
     expect(datum?.y1).toBe(1);
     expect(datum?.y0).toBe(2);
 
-    datum = cleanDatum([0, 1, '2'], 0, 1, 2);
+    datum = cleanDatum([0, '1', '2'], 0, 1, [], 2);
     expect(datum).toBeDefined();
     expect(datum?.y1).toBe(1);
     expect(datum?.y0).toBe(2);
 
-    datum = cleanDatum([0, 'invalid', 'invalid'], 0, 1, 2);
+    datum = cleanDatum([0, 1, '2'], 0, 1, [], 2);
+    expect(datum).toBeDefined();
+    expect(datum?.y1).toBe(1);
+    expect(datum?.y0).toBe(2);
+
+    datum = cleanDatum([0, 'invalid', 'invalid'], 0, 1, [], 2);
     expect(datum).toBeDefined();
     expect(datum?.y1).toBe(null);
     expect(datum?.y0).toBe(null);

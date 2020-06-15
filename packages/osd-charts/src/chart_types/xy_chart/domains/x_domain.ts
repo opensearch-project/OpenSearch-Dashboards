@@ -18,8 +18,9 @@
  */
 
 import { ScaleType } from '../../../scales/constants';
-import { compareByValueAsc, identity, isNumberArray } from '../../../utils/commons';
+import { compareByValueAsc, identity } from '../../../utils/commons';
 import { computeContinuousDataDomain, computeOrdinalDataDomain, Domain } from '../../../utils/domain';
+import { Logger } from '../../../utils/logger';
 import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_type_utils';
 import { BasicSeriesSpec, DomainRange, SeriesTypes } from '../utils/specs';
 import { XDomain } from './types';
@@ -36,6 +37,7 @@ export function mergeXDomain(
   specs: Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>[],
   xValues: Set<string | number>,
   customXDomain?: DomainRange | Domain,
+  fallbackScale?: ScaleType,
 ): XDomain {
   const mainXScaleType = convertXScaleTypes(specs);
   if (!mainXScaleType) {
@@ -46,7 +48,13 @@ export function mergeXDomain(
   let seriesXComputedDomains;
   let minInterval = 0;
 
-  if (mainXScaleType.scaleType === ScaleType.Ordinal) {
+  if (mainXScaleType.scaleType === ScaleType.Ordinal || fallbackScale === ScaleType.Ordinal) {
+    if (mainXScaleType.scaleType !== ScaleType.Ordinal) {
+      Logger.warn(
+        `Each X value in a ${mainXScaleType.scaleType} x scale needs be be a number. Using ordinal x scale as fallback.`,
+      );
+    }
+
     seriesXComputedDomains = computeOrdinalDataDomain(values, identity, false, true);
     if (customXDomain) {
       if (Array.isArray(customXDomain)) {
@@ -58,11 +66,7 @@ export function mergeXDomain(
   } else {
     seriesXComputedDomains = computeContinuousDataDomain(values, identity, true);
     let customMinInterval: undefined | number;
-    if (!isNumberArray(values)) {
-      throw new Error(
-        `Each X value in a ${mainXScaleType.scaleType} x scale needs be be a number. String or objects are not allowed`,
-      );
-    }
+
     if (customXDomain) {
       if (Array.isArray(customXDomain)) {
         throw new TypeError('xDomain for continuous scale should be a DomainRange object, not an array');
@@ -91,7 +95,7 @@ export function mergeXDomain(
         seriesXComputedDomains = [computedDomainMin, customXDomain.max];
       }
     }
-    const computedMinInterval = findMinInterval(values);
+    const computedMinInterval = findMinInterval(values as number[]);
     if (customMinInterval != null) {
       // Allow greater custom min iff xValues has 1 member.
       if (xValues.size > 1 && customMinInterval > computedMinInterval) {
@@ -107,7 +111,7 @@ export function mergeXDomain(
 
   return {
     type: 'xDomain',
-    scaleType: mainXScaleType.scaleType,
+    scaleType: fallbackScale ?? mainXScaleType.scaleType,
     isBandScale: mainXScaleType.isBandScale,
     domain: seriesXComputedDomains,
     minInterval,

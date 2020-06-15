@@ -443,6 +443,61 @@ describe('X Domain', () => {
     );
     expect(mergedDomain.domain).toEqual([0, 1, 2, 5, 7]);
   });
+
+  test('Should fallback to ordinal scale if not array of numbers', () => {
+    const ds1: BasicSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
+      id: 'ds1',
+      groupId: 'g1',
+      seriesType: SeriesTypes.Bar,
+      xAccessor: 'x',
+      yAccessors: ['y'],
+      xScaleType: ScaleType.Linear,
+      yScaleType: ScaleType.Linear,
+      yScaleToDataExtent: false,
+      data: [
+        { x: 0, y: 0 },
+        { x: 'a', y: 0 },
+        { x: 2, y: 0 },
+        { x: 5, y: 0 },
+      ],
+    };
+    const ds2: BasicSeriesSpec = {
+      chartType: ChartTypes.XYAxis,
+      specType: SpecTypes.Series,
+      id: 'ds2',
+      groupId: 'g2',
+      seriesType: SeriesTypes.Bar,
+      xAccessor: 'x',
+      yAccessors: ['y'],
+      xScaleType: ScaleType.Linear,
+      yScaleType: ScaleType.Linear,
+      yScaleToDataExtent: false,
+      data: [
+        { x: 0, y: 0 },
+        { x: 7, y: 0 },
+      ],
+    };
+    const specDataSeries = [ds1, ds2];
+
+    const { xValues } = getSplittedSeries(specDataSeries);
+    const mergedDomain = mergeXDomain(
+      [
+        {
+          seriesType: SeriesTypes.Bar,
+          xScaleType: ScaleType.Linear,
+        },
+        {
+          seriesType: SeriesTypes.Bar,
+          xScaleType: ScaleType.Ordinal,
+        },
+      ],
+      xValues,
+    );
+    expect(mergedDomain.domain).toEqual([0, 'a', 2, 5, 7]);
+    expect(mergedDomain.scaleType).toEqual(ScaleType.Ordinal);
+  });
   test('Should merge multi bar/line ordinal series correctly', () => {
     const ds1: BasicSeriesSpec = {
       chartType: ChartTypes.XYAxis,

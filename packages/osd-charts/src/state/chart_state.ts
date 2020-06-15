@@ -30,6 +30,7 @@ import { Spec, PointerEvent } from '../specs';
 import { DEFAULT_SETTINGS_SPEC } from '../specs/constants';
 import { Color } from '../utils/commons';
 import { Dimensions } from '../utils/dimensions';
+import { Logger } from '../utils/logger';
 import { Point } from '../utils/point';
 import { StateActions } from './actions';
 import { CHART_RENDERED } from './actions/chart';
@@ -408,8 +409,7 @@ function findMainChartType(specs: SpecList): ChartTypes | null {
   // https://stackoverflow.com/questions/55012174/why-doesnt-object-keys-return-a-keyof-type-in-typescript
   const chartTypes = Object.keys(types).filter((type) => type !== ChartTypes.Global);
   if (chartTypes.length > 1) {
-    // eslint-disable-next-line no-console
-    console.warn('Multiple chart type on the same configuration');
+    Logger.warn('Multiple chart type on the same configuration');
     return null;
   }
   return chartTypes[0] as ChartTypes;

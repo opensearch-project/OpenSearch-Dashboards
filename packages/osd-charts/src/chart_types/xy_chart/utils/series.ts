@@ -23,6 +23,7 @@ import { ColorOverrides } from '../../../state/chart_state';
 import { Accessor, AccessorFn, getAccessorValue } from '../../../utils/accessor';
 import { Datum, Color } from '../../../utils/commons';
 import { GroupId, SpecId } from '../../../utils/ids';
+import { Logger } from '../../../utils/logger';
 import { ColorConfig } from '../../../utils/themes/theme';
 import { splitSpecsByGroupId, YBasicSeriesSpec } from '../domains/y_domain';
 import { LastValues } from '../state/utils/types';
@@ -150,6 +151,7 @@ export function splitSeries({
   const series = new Map<SeriesKey, RawDataSeries>();
   const colorsValues = new Set<string>();
   const xValues = new Set<string | number>();
+  const nonNumericValues: any[] = [];
 
   data.forEach((datum) => {
     const splitAccessors = getSplitAccessors(datum, splitSeriesAccessors);
@@ -164,6 +166,7 @@ export function splitSeries({
           datum,
           xAccessor,
           accessor,
+          nonNumericValues,
           y0Accessors && y0Accessors[index],
           markSizeAccessor,
         );
@@ -175,7 +178,14 @@ export function splitSeries({
         }
       });
     } else {
-      const cleanedDatum = cleanDatum(datum, xAccessor, yAccessors[0], y0Accessors && y0Accessors[0], markSizeAccessor);
+      const cleanedDatum = cleanDatum(
+        datum,
+        xAccessor,
+        yAccessors[0],
+        nonNumericValues,
+        y0Accessors && y0Accessors[0],
+        markSizeAccessor,
+      );
       if (cleanedDatum !== null && cleanedDatum.x !== null && cleanedDatum.x !== undefined) {
         xValues.add(cleanedDatum.x);
         const seriesKey = updateSeriesMap(series, splitAccessors, yAccessors[0], cleanedDatum, specId);
@@ -183,6 +193,12 @@ export function splitSeries({
       }
     }
   });
+
+  if (nonNumericValues.length > 0) {
+    Logger.warn(`Found non-numeric y value${nonNumericValues.length > 1 ? 's' : ''} in dataset for spec "${specId}"`,
+      `(${nonNumericValues.map((v) => JSON.stringify(v)).join(', ')})`
+    );
+  }
 
   return {
     rawDataSeries: [...series.values()],
@@ -266,6 +282,7 @@ export function cleanDatum(
   datum: Datum,
   xAccessor: Accessor | AccessorFn,
   yAccessor: Accessor,
+  nonNumericValues: any[],
   y0Accessor?: Accessor,
   markSizeAccessor?: Accessor | AccessorFn,
 ): RawDataSeriesDatum | null {
@@ -280,20 +297,26 @@ export function cleanDatum(
   }
 
   const mark = markSizeAccessor === undefined ? null : getAccessorValue(datum, markSizeAccessor);
-  const y1 = castToNumber(datum[yAccessor]);
+  const y1 = castToNumber(datum[yAccessor], nonNumericValues);
   const cleanedDatum: RawDataSeriesDatum = { x, y1, datum, y0: null, mark };
   if (y0Accessor) {
-    cleanedDatum.y0 = castToNumber(datum[y0Accessor as keyof typeof datum]);
+    cleanedDatum.y0 = castToNumber(datum[y0Accessor as keyof typeof datum], nonNumericValues);
   }
   return cleanedDatum;
 }
 
-function castToNumber(value: any): number | null {
+function castToNumber(value: any, nonNumericValues: any[]): number | null {
   if (value === null || value === undefined) {
     return null;
   }
   const num = Number(value);
-  return isNaN(num) ? null : num;
+
+  if (isNaN(num)) {
+    nonNumericValues.push(value);
+
+    return null;
+  }
+  return num;
 }
 
 /** @internal */
@@ -406,10 +429,12 @@ export function getSplittedSeries(
   splittedSeries: Map<SpecId, RawDataSeries[]>;
   seriesCollection: Map<SeriesKey, SeriesCollectionValue>;
   xValues: Set<string | number>;
+  fallbackScale?: ScaleType;
 } {
   const splittedSeries = new Map<SpecId, RawDataSeries[]>();
   const seriesCollection = new Map<SeriesKey, SeriesCollectionValue>();
   const xValues: Set<any> = new Set();
+  let isNumberArray = true;
   let isOrdinalScale = false;
   // eslint-disable-next-line no-restricted-syntax
   for (const spec of seriesSpecs) {
@@ -437,6 +462,9 @@ export function getSplittedSeries(
 
     // eslint-disable-next-line no-restricted-syntax
     for (const xValue of dataSeries.xValues) {
+      if (isNumberArray && typeof xValue !== 'number') {
+        isNumberArray = false;
+      }
       xValues.add(xValue);
     }
   }
@@ -445,7 +473,8 @@ export function getSplittedSeries(
     splittedSeries,
     seriesCollection,
     // keep the user order for ordinal scales
-    xValues: isOrdinalScale ? xValues : new Set([...xValues].sort()),
+    xValues: (isOrdinalScale || !isNumberArray) ? xValues : new Set([...xValues].sort()),
+    fallbackScale: (!isOrdinalScale && !isNumberArray) ? ScaleType.Ordinal : undefined,
   };
 }
 

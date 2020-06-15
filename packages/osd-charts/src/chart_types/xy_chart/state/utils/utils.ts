@@ -180,13 +180,15 @@ export function computeSeriesDomains(
   deselectedDataSeries: SeriesIdentifier[] = [],
   customXDomain?: DomainRange | Domain,
 ): SeriesDomainsAndData {
-  const { splittedSeries, xValues, seriesCollection } = deselectedDataSeries
-    ? getSplittedSeries(seriesSpecs, deselectedDataSeries)
-    : getSplittedSeries(seriesSpecs, []);
+  const {
+    splittedSeries,
+    xValues, seriesCollection,
+    fallbackScale,
+  } = getSplittedSeries(seriesSpecs, deselectedDataSeries);
   const splittedDataSeries = [...splittedSeries.values()];
   const specsArray = [...seriesSpecs.values()];
 
-  const xDomain = mergeXDomain(specsArray, xValues, customXDomain);
+  const xDomain = mergeXDomain(specsArray, xValues, customXDomain, fallbackScale);
   const yDomain = mergeYDomain(splittedSeries, specsArray, customYDomainsByGroupId);
 
   const formattedDataSeries = getFormattedDataseries(
