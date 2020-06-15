@@ -1,3 +1,18 @@
+# [19.5.0](https://github.com/elastic/elastic-charts/compare/v19.4.1...v19.5.0) (2020-06-15)
+
+
+### Bug Fixes
+
+* **tooltip:** show true opaque colors in tooltips ([#629](https://github.com/elastic/elastic-charts/issues/629)) ([23290be](https://github.com/elastic/elastic-charts/commit/23290be8d58a46cfe5b9144c54fc849fabcb6abc)), closes [#628](https://github.com/elastic/elastic-charts/issues/628)
+* path of stacked area series with missing values ([#703](https://github.com/elastic/elastic-charts/issues/703)) ([2541180](https://github.com/elastic/elastic-charts/commit/2541180b1a477aa637120ce225c59e0f8cbd5aa4))
+* remove double rendering ([#693](https://github.com/elastic/elastic-charts/issues/693)) ([ebf2748](https://github.com/elastic/elastic-charts/commit/ebf2748b47e098197b87fe43cc6ec452443207fb)), closes [#690](https://github.com/elastic/elastic-charts/issues/690)
+
+
+### Features
+
+* **partition:** add 4.5 contrast for text in partition slices ([#608](https://github.com/elastic/elastic-charts/issues/608)) ([eded2ac](https://github.com/elastic/elastic-charts/commit/eded2ac7da909a0bd279c7f38bb83d0b713a01be)), closes [#606](https://github.com/elastic/elastic-charts/issues/606)
+* add screenshot functions to partition/goal ([#697](https://github.com/elastic/elastic-charts/issues/697)) ([5581c3c](https://github.com/elastic/elastic-charts/commit/5581c3c8fdc3730892402fa1c5cc2a068012eaf8))
+
 ## [19.4.1](https://github.com/elastic/elastic-charts/compare/v19.4.0...v19.4.1) (2020-06-01)
 
 
