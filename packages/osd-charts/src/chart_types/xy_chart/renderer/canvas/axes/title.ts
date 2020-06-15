@@ -42,7 +42,7 @@ function renderVerticalTitle(ctx: CanvasRenderingContext2D, props: AxisProps) {
   const {
     axisPosition: { height },
     axisSpec: { title, position, tickSize, tickPadding },
-    axisTicksDimensions: { maxLabelTextWidth },
+    axisTicksDimensions: { maxLabelBboxWidth },
     axisConfig: { axisTitleStyle },
     debug,
   } = props;
@@ -51,7 +51,7 @@ function renderVerticalTitle(ctx: CanvasRenderingContext2D, props: AxisProps) {
   }
   const { padding, ...titleStyle } = axisTitleStyle;
   const top = height;
-  const left = position === Position.Left ? 0 : tickSize + tickPadding + maxLabelTextWidth + padding;
+  const left = position === Position.Left ? 0 : tickSize + tickPadding + maxLabelBboxWidth + padding;
 
   if (debug) {
     renderDebugRect(ctx, { x: left, y: top, width: height, height: titleStyle.fontSize }, undefined, undefined, -90);

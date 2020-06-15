@@ -75,7 +75,7 @@ export const Example = () => {
         id="right"
         title="Bar axis"
         position={Position.Right}
-        tickLabelRotation={number('right axis tick label rotation', 0, {
+        tickLabelRotation={number('right axis tick label rotation', -90, {
           range: true,
           min: -90,
           max: 90,
