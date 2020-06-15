@@ -142,6 +142,7 @@
     "circular-dependency-plugin": "^5.2.0",
     "commitizen": "^4.0.3",
     "core-js": "^3.6.4",
+    "cross-env": "^7.0.2",
     "css-loader": "^2.1.0",
     "cz-conventional-changelog": "^3.0.2",
     "enzyme": "^3.9.0",
