@@ -1,3 +1,10 @@
+## [19.5.2](https://github.com/elastic/elastic-charts/compare/v19.5.1...v19.5.2) (2020-06-16)
+
+
+### Bug Fixes
+
+* apply fixed positioning to hidden tooltip ([#716](https://github.com/elastic/elastic-charts/issues/716)) ([12b1135](https://github.com/elastic/elastic-charts/commit/12b1135fa6a965eda17a0235d2b639a19b19df54))
+
 ## [19.5.1](https://github.com/elastic/elastic-charts/compare/v19.5.0...v19.5.1) (2020-06-16)
 
 
