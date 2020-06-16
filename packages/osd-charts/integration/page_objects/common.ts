@@ -157,7 +157,7 @@ class CommonPage {
   async toggleElementVisibility(selector: string) {
     await page.$$eval(selector, (elements) => {
       elements.forEach((element) => {
-        element.classList.toggle('invisible');
+        element.classList.toggle('echInvisible');
       });
     });
   }
