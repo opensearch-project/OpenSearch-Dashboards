@@ -1,3 +1,12 @@
+## [19.5.1](https://github.com/elastic/elastic-charts/compare/v19.5.0...v19.5.1) (2020-06-16)
+
+
+### Bug Fixes
+
+* graceful scale fallbacks and warnings ([#704](https://github.com/elastic/elastic-charts/issues/704)) ([ed49bbb](https://github.com/elastic/elastic-charts/commit/ed49bbbb5afd69a5d771fff29e9fc7742153d94e)), closes [#678](https://github.com/elastic/elastic-charts/issues/678)
+* **axis:** rotated label positioning ([#709](https://github.com/elastic/elastic-charts/issues/709)) ([2e26430](https://github.com/elastic/elastic-charts/commit/2e264305b0427969e6ffd6bfd2a21a0200ddd004)), closes [#673](https://github.com/elastic/elastic-charts/issues/673)
+* **tooltip:** popper scroll issue ([#712](https://github.com/elastic/elastic-charts/issues/712)) ([0c97c67](https://github.com/elastic/elastic-charts/commit/0c97c677af5133efa1017afa7141111667bf9d56))
+
 # [19.5.0](https://github.com/elastic/elastic-charts/compare/v19.4.1...v19.5.0) (2020-06-15)
 
 
