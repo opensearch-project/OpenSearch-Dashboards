@@ -101,7 +101,7 @@ const TooltipPortalComponent = ({ anchor, scope, settings, children, visible, ch
 
     const { fallbackPlacements, placement, boundary, offset } = popperSettings;
     popper.current = createPopper(anchorNode.current, portalNode.current, {
-      strategy: 'fixed',
+      strategy: 'absolute',
       placement,
       modifiers: [
         {
