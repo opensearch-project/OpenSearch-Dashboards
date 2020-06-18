@@ -27,6 +27,7 @@ import {
   TooltipValueFormatter,
   isFollowTooltipType,
   SettingsSpec,
+  getTooltipType,
 } from '../../../../specs';
 import { TooltipType } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
@@ -48,7 +49,6 @@ import { getElementAtCursorPositionSelector } from './get_elements_at_cursor_pos
 import { getOrientedProjectedPointerPositionSelector } from './get_oriented_projected_pointer_position';
 import { getProjectedPointerPositionSelector } from './get_projected_pointer_position';
 import { getSeriesSpecsSelector, getAxisSpecsSelector } from './get_specs';
-import { getTooltipTypeSelector } from './get_tooltip_type';
 import { hasSingleSeriesSelector } from './has_single_series';
 
 const EMPTY_VALUES = Object.freeze({
@@ -79,7 +79,6 @@ export const getTooltipInfoAndGeometriesSelector = createCachedSelector(
     hasSingleSeriesSelector,
     getComputedScalesSelector,
     getElementAtCursorPositionSelector,
-    getTooltipTypeSelector,
     getExternalPointerEventStateSelector,
     getTooltipHeaderFormatterSelector,
   ],
@@ -96,18 +95,17 @@ function getTooltipAndHighlightFromValue(
   hasSingleSeries: boolean,
   scales: ComputedScales,
   matchingGeoms: IndexedGeometry[],
-  tooltipType: TooltipType,
   externalPointerEvent: PointerEvent | null,
   tooltipHeaderFormatter?: TooltipValueFormatter,
 ): TooltipAndHighlightedGeoms {
   if (!scales.xScale || !scales.yScales) {
     return EMPTY_VALUES;
   }
-  if (tooltipType === TooltipType.None) {
-    return EMPTY_VALUES;
-  }
+
   let { x, y } = orientedProjectedPointerPosition;
+  let tooltipType = getTooltipType(settings);
   if (isValidPointerOverEvent(scales.xScale, externalPointerEvent)) {
+    tooltipType = getTooltipType(settings, true);
     const scaledX = scales.xScale.pureScale(externalPointerEvent.value);
 
     if (scaledX === null) {
@@ -117,6 +115,10 @@ function getTooltipAndHighlightFromValue(
     x = scaledX;
     y = 0;
   } else if (projectedPointerPosition.x === -1 || projectedPointerPosition.y === -1) {
+    return EMPTY_VALUES;
+  }
+
+  if (tooltipType === TooltipType.None) {
     return EMPTY_VALUES;
   }
 

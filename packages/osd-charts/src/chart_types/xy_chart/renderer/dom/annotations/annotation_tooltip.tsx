@@ -56,7 +56,9 @@ export const AnnotationTooltip = ({ state, chartRef, chartId, onScroll }: RectAn
 
   const position = useMemo(() => state?.anchor ?? null, [state?.anchor]);
   const placement = useMemo(() => state?.anchor?.position ?? Placement.Right, [state?.anchor?.position]);
-
+  if (!state?.isVisible) {
+    return null;
+  }
   return (
     <TooltipPortal
       scope="AnnotationTooltip"

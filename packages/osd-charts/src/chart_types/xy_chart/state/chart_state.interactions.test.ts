@@ -245,7 +245,7 @@ describe('Chart state pointer interactions', () => {
     // no tooltip values exist if we have a TooltipType === None
     expect(tooltipInfo.tooltip.values.length).toBe(0);
     let isTooltipVisible = isTooltipVisibleSelector(store.getState());
-    expect(isTooltipVisible).toBe(false);
+    expect(isTooltipVisible.visible).toBe(false);
 
     updatedSettings = {
       ...settingSpec,
@@ -261,7 +261,7 @@ describe('Chart state pointer interactions', () => {
     const highlightedGeometries = getHighlightedGeomsSelector(store.getState());
     expect(highlightedGeometries.length).toBe(1);
     isTooltipVisible = isTooltipVisibleSelector(store.getState());
-    expect(isTooltipVisible).toBe(true);
+    expect(isTooltipVisible.visible).toBe(true);
   });
 
   describe('mouse over with Ordinal scale', () => {
@@ -415,7 +415,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(cursorBandPosition?.left).toBe(chartLeft + 0);
     expect(cursorBandPosition?.width).toBe(45);
     let isTooltipVisible = isTooltipVisibleSelector(store.getState());
-    expect(isTooltipVisible).toBe(true);
+    expect(isTooltipVisible.visible).toBe(true);
     tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
     expect(tooltipInfo.tooltip.values.length).toBe(1);
     expect(tooltipInfo.highlightedGeometries.length).toBe(1);
@@ -443,7 +443,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     projectedPointerPosition = getProjectedPointerPositionSelector(store.getState());
     expect(projectedPointerPosition).toEqual({ x: -1, y: -1 });
     isTooltipVisible = isTooltipVisibleSelector(store.getState());
-    expect(isTooltipVisible).toBe(false);
+    expect(isTooltipVisible.visible).toBe(false);
     tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
     expect(tooltipInfo.tooltip.values.length).toBe(0);
     expect(tooltipInfo.highlightedGeometries.length).toBe(0);
@@ -460,7 +460,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(cursorBandPosition?.left).toBe(chartLeft + 0);
     expect(cursorBandPosition?.width).toBe(45);
     let isTooltipVisible = isTooltipVisibleSelector(store.getState());
-    expect(isTooltipVisible).toBe(true);
+    expect(isTooltipVisible.visible).toBe(true);
     let tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
     expect(tooltipInfo.highlightedGeometries.length).toBe(1);
     expect(tooltipInfo.tooltip.values.length).toBe(1);
@@ -487,7 +487,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     projectedPointerPosition = getProjectedPointerPositionSelector(store.getState());
     expect(projectedPointerPosition).toEqual({ x: -1, y: 89 });
     isTooltipVisible = isTooltipVisibleSelector(store.getState());
-    expect(isTooltipVisible).toBe(false);
+    expect(isTooltipVisible.visible).toBe(false);
     tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
     expect(tooltipInfo.tooltip.values.length).toBe(0);
     expect(tooltipInfo.highlightedGeometries.length).toBe(0);
@@ -508,7 +508,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(cursorBandPosition?.left).toBe(chartLeft + 0);
     expect(cursorBandPosition?.width).toBe(45);
     let isTooltipVisible = isTooltipVisibleSelector(store.getState());
-    expect(isTooltipVisible).toBe(true);
+    expect(isTooltipVisible.visible).toBe(true);
     let tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
     expect(tooltipInfo.highlightedGeometries.length).toBe(1);
     expect(tooltipInfo.tooltip.values.length).toBe(1);
@@ -540,7 +540,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(cursorBandPosition?.left).toBe(chartLeft + 45);
     expect(cursorBandPosition?.width).toBe(45);
     isTooltipVisible = isTooltipVisibleSelector(store.getState());
-    expect(isTooltipVisible).toBe(true);
+    expect(isTooltipVisible.visible).toBe(true);
     tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
     expect(tooltipInfo.tooltip.values.length).toBe(1);
     expect(tooltipInfo.highlightedGeometries.length).toBe(0);
@@ -561,7 +561,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(cursorBandPosition?.left).toBe(chartLeft + 0);
     expect(cursorBandPosition?.width).toBe(45);
     let isTooltipVisible = isTooltipVisibleSelector(store.getState());
-    expect(isTooltipVisible).toBe(true);
+    expect(isTooltipVisible.visible).toBe(true);
     let tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
     expect(tooltipInfo.highlightedGeometries.length).toBe(1);
     expect(tooltipInfo.tooltip.values.length).toBe(1);
@@ -593,7 +593,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(cursorBandPosition?.left).toBe(chartLeft + 45);
     expect(cursorBandPosition?.width).toBe(45);
     isTooltipVisible = isTooltipVisibleSelector(store.getState());
-    expect(isTooltipVisible).toBe(true);
+    expect(isTooltipVisible.visible).toBe(true);
     tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
     expect(tooltipInfo.tooltip.values.length).toBe(1);
     // we are over the second bar here
@@ -638,7 +638,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(cursorBandPosition?.width).toBe(45);
 
     const isTooltipVisible = isTooltipVisibleSelector(store.getState());
-    expect(isTooltipVisible).toBe(true);
+    expect(isTooltipVisible.visible).toBe(true);
     tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
     expect(tooltipInfo.highlightedGeometries.length).toBe(0);
     expect(tooltipInfo.tooltip.values.length).toBe(1);
@@ -690,7 +690,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
     expect(cursorBandPosition?.left).toBe(chartLeft + 45);
     expect(cursorBandPosition?.width).toBe(45);
     const isTooltipVisible = isTooltipVisibleSelector(store.getState());
-    expect(isTooltipVisible).toBe(true);
+    expect(isTooltipVisible.visible).toBe(true);
     const tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
     expect(tooltipInfo.highlightedGeometries.length).toBe(1);
     expect(tooltipInfo.tooltip.values.length).toBe(1);

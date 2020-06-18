@@ -209,4 +209,16 @@ describe('Interactions', () => {
       );
     });
   });
+
+  describe('Tooltip sync', () => {
+    it('show synced tooltips', async() => {
+      await common.expectChartWithMouseAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/interactions--cursor-update-action',
+        { left: 180, top: 80 },
+        {
+          screenshotSelector: '#story-root',
+        }
+      );
+    });
+  });
 });

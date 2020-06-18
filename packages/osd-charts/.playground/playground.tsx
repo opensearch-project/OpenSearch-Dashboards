@@ -17,78 +17,210 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
-import { Chart, BarSeries, LegendColorPicker, Settings, ScaleType } from '../src';
-import { SeededDataGenerator } from '../src/mocks/utils';
+import {
+  Chart,
+  Settings,
+  Axis,
+  Position,
+  BarSeries,
+  ScaleType,
+  PointerEvent,
+  LineSeries,
+  CustomTooltip,
+  TooltipType,
+  LineAnnotation, AnnotationDomainTypes,
+} from '../src';
+import { KIBANA_METRICS } from '../src/utils/data_samples/test_dataset_kibana';
 
-const dg = new SeededDataGenerator();
 
-type SetColorFn = (color: string) => void;
-const legendColorPickerFn = (setColors: SetColorFn, customColor: string): LegendColorPicker => ({ onClose }) => (
-  <div id="colorPicker">
-    <span>Custom Color Picker</span>
-    <button
-      id="change"
-      type="button"
-      onClick={() => {
-        setTimeout(() => {
-          onClose();
-          setColors(customColor);
-        }, 0);
-      }}
-    >
-      {customColor}
-    </button>
-    <button id="close" type="button" onClick={onClose}>
-      close
-    </button>
+const TestCustomTooltip: CustomTooltip = (props) => (
+  <div style={{ border: '1px solid black', background: 'white', fontSize: 12, padding: 4 }}>
+    <p>Testing a custom tooltip </p>
+    <ul>
+      {
+        props.values.map((value) => (
+          <li key={value.label} style={{ color: value.color }}>
+            {value.label}
+            {' - '}
+            {value.value}
+          </li>
+        ))
+      }
+    </ul>
   </div>
 );
-function LegendColorPickerMock(props: { onLegendItemClick: () => void; customColor: string }) {
-  const data = dg.generateGroupedSeries(10, 4, 'split');
-  const [color, setColor] = useState('red');
+export const Playground = () => {
+  const ref1 = React.createRef<Chart>();
+  const ref2 = React.createRef<Chart>();
+  const ref3 = React.createRef<Chart>();
+  const ref4 = React.createRef<Chart>();
+
+  const pointerUpdate = (event: PointerEvent) => {
+    if (ref1.current) {
+      ref1.current.dispatchExternalPointerEvent(event);
+    }
+    if (ref2.current) {
+      ref2.current.dispatchExternalPointerEvent(event);
+    }
+    if (ref3.current) {
+      ref3.current.dispatchExternalPointerEvent(event);
+    }
+    if (ref4.current) {
+      ref4.current.dispatchExternalPointerEvent(event);
+    }
+  };
 
   return (
-    <>
+    <div className="testing">
       <button
         type="button"
         onClick={() => {
-          setColor('violet');
+          // if (ref1.current) {
+          //   ref1.current.dispatchExternalPointerEvent({
+          //     chartId: 'chart1',
+          //     type: 'Over',
+          //     scale: 'time',
+          //     value: 1551438420000,
+          //   });
+          // }
+          if (ref1.current) {
+            ref1.current.dispatchExternalPointerEvent({ chartId: 'chart2', type: 'Over', unit: undefined, scale: 'time', value: 1551439800000 });
+          }
         }}
       >
-        change
-      </button>
-      <Chart className="chart">
-        <Settings
-          showLegend
-          onLegendItemClick={props.onLegendItemClick}
-          legendColorPicker={legendColorPickerFn(setColor, props.customColor)}
-        />
-        <BarSeries
-          id="areas"
-          xScaleType={ScaleType.Linear}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          splitSeriesAccessors={['g']}
-          color={color}
-          data={data}
-        />
-      </Chart>
-    </>
-  );
-}
+        out
 
-export class Playground extends React.Component {
-  render() {
-    return (
-      <LegendColorPickerMock
-        customColor="blue"
-        onLegendItemClick={() => {
-          // npo
+      </button>
+
+      <button
+        type="button"
+        onClick={() => {
+          if (ref1.current) {
+            ref1.current.dispatchExternalPointerEvent({ chartId: 'chart2', type: 'Over', unit: undefined, scale: 'time', value: 1551439770000 });
+          }
         }}
-      />
-    );
-  }
-}
+      >
+        valid
+
+      </button>
+
+      <div className="chart">
+        <Chart className="story-chart" ref={ref1} id="chart1">
+          <Settings onPointerUpdate={pointerUpdate} externalPointerEvents={{ tooltip: { visible: true } }} />
+          <Axis
+            id="bottom"
+            position={Position.Bottom}
+            title="External tooltip VISIBLE"
+
+          />
+          <Axis id="left2" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
+          <LineAnnotation
+            marker={<div>Hello</div>}
+            dataValues={[{ dataValue: KIBANA_METRICS.metrics.kibana_os_load[0].data[10][0], details: 'hello' }]}
+            id="test"
+            domainType={AnnotationDomainTypes.XDomain}
+          />
+          <BarSeries
+            id="bars"
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor={0}
+            yAccessors={[1]}
+            data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(3, 60)}
+          />
+        </Chart>
+
+      </div>
+
+      <div className="chart">
+        <Chart className="story-chart" ref={ref2} id="chart2">
+          <Settings onPointerUpdate={pointerUpdate} externalPointerEvents={{ tooltip: { visible: true, boundary: 'chart' } }} />
+          <Axis
+            id="bottom"
+            position={Position.Bottom}
+            title="External tooltip VISIBLE - boundary => chart"
+          />
+          <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
+
+          <BarSeries
+            id="bars"
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor={0}
+            yAccessors={[1]}
+            data={KIBANA_METRICS.metrics.kibana_os_load[1].data}
+          />
+        </Chart>
+
+      </div>
+
+
+      <div className="chart">
+        <Chart className="story-chart" ref={ref3}>
+          <Settings
+            onPointerUpdate={pointerUpdate}
+            externalPointerEvents={{ tooltip: { visible: true, boundary: 'chart' } }}
+            tooltip={{
+              type: TooltipType.Follow,
+              customTooltip: TestCustomTooltip,
+            }}
+          />
+          <Axis
+            id="bottom"
+            position={Position.Bottom}
+            title="External tooltip VISIBLE - boundary => chart"
+          />
+          <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
+
+          <LineSeries
+            id="bars"
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor={0}
+            yAccessors={[1]}
+            data={KIBANA_METRICS.metrics.kibana_os_load[1].data.slice(0, 50)}
+          />
+          <LineSeries
+            id="bars2"
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor={0}
+            yAccessors={[1]}
+            data={KIBANA_METRICS.metrics.kibana_os_load[2].data.slice(20, 30)}
+          />
+        </Chart>
+      </div>
+
+      <div className="chart">
+        <Chart className="story-chart" ref={ref4} id="chart4">
+          <Settings onPointerUpdate={pointerUpdate} tooltip={{ type: TooltipType.None }} externalPointerEvents={{ tooltip: { visible: false } }} />
+          <Axis
+            id="bottom"
+            position={Position.Bottom}
+            title="External tooltip HIDDEN"
+          />
+          <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
+
+          <LineSeries
+            id="bars"
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor={0}
+            yAccessors={[1]}
+            data={KIBANA_METRICS.metrics.kibana_os_load[1].data.slice(0, 50)}
+          />
+          <LineSeries
+            id="bars2"
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor={0}
+            yAccessors={[1]}
+            data={KIBANA_METRICS.metrics.kibana_os_load[2].data.slice(20, 30)}
+          />
+        </Chart>
+      </div>
+    </div>
+  );
+};

@@ -482,10 +482,7 @@ function renderGeometries(
       const valueFormatter = yAxis && yAxis.tickFormat ? yAxis.tickFormat : identity;
 
       const displayValueSettings = spec.displayValueSettings
-        ? {
-            valueFormatter,
-            ...spec.displayValueSettings,
-          }
+        ? { valueFormatter, ...spec.displayValueSettings }
         : undefined;
 
       const renderedBars = renderBars(

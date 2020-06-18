@@ -534,7 +534,7 @@ export const DEFAULT_TOOLTIP_TYPE: "vertical";
 // Warning: (ae-missing-release-tag) "DefaultSettingsProps" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type DefaultSettingsProps = 'id' | 'chartType' | 'specType' | 'rendering' | 'rotation' | 'resizeDebounce' | 'animateData' | 'showLegend' | 'debug' | 'tooltip' | 'showLegendExtra' | 'theme' | 'legendPosition' | 'hideDuplicateAxes' | 'brushAxis' | 'minBrushDelta';
+export type DefaultSettingsProps = 'id' | 'chartType' | 'specType' | 'rendering' | 'rotation' | 'resizeDebounce' | 'animateData' | 'showLegend' | 'debug' | 'tooltip' | 'showLegendExtra' | 'theme' | 'legendPosition' | 'hideDuplicateAxes' | 'brushAxis' | 'minBrushDelta' | 'externalPointerEvents';
 
 // Warning: (ae-missing-release-tag) "DisplayValueSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -569,6 +569,16 @@ export type ElementClickListener = (elements: Array<XYChartElementEvent | Partit
 //
 // @public (undocumented)
 export type ElementOverListener = (elements: Array<XYChartElementEvent | PartitionElementEvent>) => void;
+
+// @alpha
+export interface ExternalPointerEventsSettings {
+    tooltip: {
+        visible?: boolean;
+        placement?: Placement;
+        fallbackPlacements?: Placement[];
+        boundary?: HTMLElement | 'chart';
+    };
+}
 
 // Warning: (ae-missing-release-tag) "FillStyle" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1329,9 +1339,7 @@ export type SeriesTypes = $Values<typeof SeriesTypes>;
 // @public (undocumented)
 export const Settings: React.FunctionComponent<SettingsSpecProps>;
 
-// Warning: (ae-missing-release-tag) "SettingsSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
+// @public
 export interface SettingsSpec extends Spec {
     // (undocumented)
     animateData: boolean;
@@ -1339,6 +1347,8 @@ export interface SettingsSpec extends Spec {
     brushAxis?: BrushAxis;
     // (undocumented)
     debug: boolean;
+    // @alpha
+    externalPointerEvents: ExternalPointerEventsSettings;
     flatLegend?: boolean;
     hideDuplicateAxes: boolean;
     // (undocumented)
@@ -1391,7 +1401,9 @@ export interface SettingsSpec extends Spec {
 // Warning: (ae-missing-release-tag) "SettingsSpecProps" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type SettingsSpecProps = Partial<Omit<SettingsSpec, 'chartType' | 'specType' | 'id'>>;
+export type SettingsSpecProps = Partial<Omit<SettingsSpec, 'chartType' | 'specType' | 'id' | 'externalPointerEvents'>> & {
+    externalPointerEvents?: RecursivePartial<SettingsSpec['externalPointerEvents']>;
+};
 
 // Warning: (ae-missing-release-tag) "SharedGeometryStateStyle" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

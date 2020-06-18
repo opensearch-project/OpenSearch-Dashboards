@@ -100,10 +100,10 @@ export interface InternalChartState {
    */
   getPointerCursor(globalState: GlobalChartState): string;
   /**
-   * `true` if the tooltip is visible, `false` otherwise
+   * Describe if the tooltip is visible and comes from an external source
    * @param globalState
    */
-  isTooltipVisible(globalState: GlobalChartState): boolean;
+  isTooltipVisible(globalState: GlobalChartState): { visible: boolean, isExternal: boolean };
   /**
    * Get the tooltip information to display
    * @param globalState the GlobalChartState

@@ -86,7 +86,7 @@ function getCursorBand(
   totalBarsInCluster: number,
   isTooltipSnapEnabled: boolean,
   geometriesIndexKeys: (string | number)[],
-): (Dimensions & { visible: boolean }) | undefined {
+): (Dimensions & { visible: boolean, fromExternalEvent: boolean }) | undefined {
   // update che cursorBandPosition based on chart configuration
   const isLineAreaOnly = isLineAreaOnlyChart(seriesSpecs);
   if (!xScale) {
@@ -94,10 +94,12 @@ function getCursorBand(
   }
   let pointerPosition = orientedProjectedPoinerPosition;
   let xValue;
+  let fromExternalEvent = false;
+  // external pointer events takes precendence over the current mouse pointer
   if (isValidPointerOverEvent(xScale, externalPointerEvent)) {
+    fromExternalEvent = true;
     const x = xScale.pureScale(externalPointerEvent.value);
-
-    if (x == null || x > chartDimensions.width + chartDimensions.left) {
+    if (x == null || x > chartDimensions.width || x < 0) {
       return;
     }
     pointerPosition = { x, y: 0 };
@@ -111,7 +113,8 @@ function getCursorBand(
       return;
     }
   }
-  return getCursorBandPosition(
+
+  const cursorBand = getCursorBandPosition(
     settingsSpec.rotation,
     chartDimensions,
     pointerPosition,
@@ -123,4 +126,8 @@ function getCursorBand(
     xScale,
     isLineAreaOnly ? 1 : totalBarsInCluster,
   );
+  return {
+    ...cursorBand,
+    fromExternalEvent,
+  };
 }

@@ -68,57 +68,49 @@ interface LegendDispatchProps {
   setTemporaryColor: typeof setTemporaryColor;
   setPersistedColor: typeof setPersistedColor;
 }
-type LegendProps = LegendStateProps & LegendDispatchProps;
 
-/**
- * @internal
- */
-export class LegendComponent extends React.Component<LegendProps> {
-  static displayName = 'Legend';
-
-  render() {
-    const {
-      items,
-      position,
-      size,
-      debug,
-      chartTheme: { chartMargins, legend },
-    } = this.props;
-    if (items.length === 0) {
-      return null;
-    }
-    const legendContainerStyle = getLegendStyle(position, size);
-    const legendListStyle = getLegendListStyle(position, chartMargins, legend);
-    const legendClasses = classNames('echLegend', `echLegend--${position}`, {
-      'echLegend--debug': debug,
-    });
-
-    const itemProps: Omit<LegendItemProps, 'item'> = {
-      position,
-      totalItems: items.length,
-      extraValues: this.props.extraValues,
-      showExtra: this.props.showExtra,
-      onMouseOut: this.props.onItemOut,
-      onMouseOver: this.props.onItemOver,
-      onClick: this.props.onItemClick,
-      clearTemporaryColorsAction: this.props.clearTemporaryColors,
-      setPersistedColorAction: this.props.setPersistedColor,
-      setTemporaryColorAction: this.props.setTemporaryColor,
-      mouseOutAction: this.props.onItemOutAction,
-      mouseOverAction: this.props.onItemOverAction,
-      toggleDeselectSeriesAction: this.props.onToggleDeselectSeriesAction,
-      colorPicker: this.props.colorPicker,
-    };
-    return (
-      <div className={legendClasses}>
-        <div style={legendContainerStyle} className="echLegendListContainer">
-          <ul style={legendListStyle} className="echLegendList">
-            {items.map((item, index) => renderLegendItem(item, itemProps, items.length, index))}
-          </ul>
-        </div>
-      </div>
-    );
+function LegendComponent(props: LegendStateProps & LegendDispatchProps) {
+  const {
+    items,
+    position,
+    size,
+    debug,
+    chartTheme: { chartMargins, legend },
+  } = props;
+  if (items.length === 0) {
+    return null;
   }
+  const legendContainerStyle = getLegendStyle(position, size);
+  const legendListStyle = getLegendListStyle(position, chartMargins, legend);
+  const legendClasses = classNames('echLegend', `echLegend--${position}`, {
+    'echLegend--debug': debug,
+  });
+
+  const itemProps: Omit<LegendItemProps, 'item'> = {
+    position,
+    totalItems: items.length,
+    extraValues: props.extraValues,
+    showExtra: props.showExtra,
+    onMouseOut: props.onItemOut,
+    onMouseOver: props.onItemOver,
+    onClick: props.onItemClick,
+    clearTemporaryColorsAction: props.clearTemporaryColors,
+    setPersistedColorAction: props.setPersistedColor,
+    setTemporaryColorAction: props.setTemporaryColor,
+    mouseOutAction: props.onItemOutAction,
+    mouseOverAction: props.onItemOverAction,
+    toggleDeselectSeriesAction: props.onToggleDeselectSeriesAction,
+    colorPicker: props.colorPicker,
+  };
+  return (
+    <div className={legendClasses}>
+      <div style={legendContainerStyle} className="echLegendListContainer">
+        <ul style={legendListStyle} className="echLegendList">
+          {items.map((item, index) => renderLegendItem(item, itemProps, items.length, index))}
+        </ul>
+      </div>
+    </div>
+  );
 }
 
 const mapDispatchToProps = (dispatch: Dispatch): LegendDispatchProps =>
@@ -145,6 +137,7 @@ const EMPTY_DEFAULT_STATE = {
   size: { width: 0, height: 0 },
   showExtra: false,
 };
+
 const mapStateToProps = (state: GlobalChartState): LegendStateProps => {
   if (getInternalIsInitializedSelector(state) !== InitStatus.Initialized) {
     return EMPTY_DEFAULT_STATE;

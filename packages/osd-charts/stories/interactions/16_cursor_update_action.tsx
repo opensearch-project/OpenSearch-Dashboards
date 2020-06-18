@@ -20,35 +20,87 @@
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, PointerEvent, Placement, niceTimeFormatter } from '../../src';
+import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+import { palettes } from '../../src/utils/themes/colors';
+import { SB_SOURCE_PANEL } from '../utils/storybook';
 
-const onPointerUpdate = action('onPointerUpdate');
+export const Example = () => {
+  const ref1 = React.createRef<Chart>();
+  const ref2 = React.createRef<Chart>();
+  const pointerUpdate = (event: PointerEvent) => {
+    action('onPointerUpdate')(event);
+    if (ref1.current) {
+      ref1.current.dispatchExternalPointerEvent(event);
+    }
+    if (ref2.current) {
+      ref2.current.dispatchExternalPointerEvent(event);
+    }
+  };
+  const { data } = KIBANA_METRICS.metrics.kibana_os_load[0];
+  const data1 = KIBANA_METRICS.metrics.kibana_os_load[0].data;
+  const data2 = KIBANA_METRICS.metrics.kibana_os_load[1].data;
+  return (
+    <>
+      <Chart className="story-chart" ref={ref1} size={{ height: '50%' }} id="chart1">
+        <Settings
+          onPointerUpdate={pointerUpdate}
+          externalPointerEvents={{ tooltip: { visible: true, boundary: 'chart' } }}
+        />
+        <Axis
+          id="bottom"
+          position={Position.Bottom}
+          title="External tooltip VISIBLE"
+          tickFormat={niceTimeFormatter([data[0][0], data[data.length - 1][0]])}
+        />
+        <Axis id="left2" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
-export const Example = () => (
-  <Chart className="story-chart">
-    <Settings showLegend showLegendExtra legendPosition={Position.Right} onPointerUpdate={onPointerUpdate} />
-    <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
-    <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
+        <BarSeries
+          id="bars"
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={data1.slice(3, 60)}
+        />
+      </Chart>
+      <Chart className="story-chart" ref={ref2} size={{ height: '50%' }} id="chart2">
+        <Settings
+          onPointerUpdate={pointerUpdate}
+          externalPointerEvents={{ tooltip: { visible: true, placement: Placement.Left } }}
+        />
+        <Axis
+          id="bottom"
+          position={Position.Bottom}
+          title="External tooltip VISIBLE - boundary => chart"
+          tickFormat={niceTimeFormatter([data[0][0], data[data.length - 1][0]])}
 
-    <BarSeries
-      id="bars"
-      xScaleType={ScaleType.Linear}
-      yScaleType={ScaleType.Linear}
-      xAccessor="x"
-      yAccessors={['y']}
-      data={[
-        { x: 0, y: 2 },
-        { x: 1, y: 7 },
-        { x: 2, y: 3 },
-        { x: 3, y: 6 },
-      ]}
-    />
-  </Chart>
-);
+        />
+        <Axis
+          id="left2"
+          position={Position.Left}
+          tickFormat={(d: any) => Number(d).toFixed(2)}
+          domain={{ min: 5, max: 20 }}
+        />
+
+        <BarSeries
+          id="bars"
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Sqrt}
+          xAccessor={0}
+          yAccessors={[1]}
+          data={data2.slice(10)}
+          color={palettes.echPaletteForLightBackground.colors[0]}
+        />
+      </Chart>
+    </>
+  );
+};
 Example.story = {
   parameters: {
     info: {
       text: 'Sends an event every time the cursor changes. This is provided to sync cursors between multiple charts.',
     },
+    options: { selectedPanel: SB_SOURCE_PANEL },
   },
 };

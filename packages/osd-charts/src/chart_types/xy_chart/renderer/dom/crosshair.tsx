@@ -20,18 +20,19 @@
 import React, { CSSProperties } from 'react';
 import { connect } from 'react-redux';
 
+import { getTooltipType } from '../../../../specs';
 import { TooltipType } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { Rotation } from '../../../../utils/commons';
 import { Dimensions } from '../../../../utils/dimensions';
 import { LIGHT_THEME } from '../../../../utils/themes/light_theme';
 import { Theme } from '../../../../utils/themes/theme';
 import { getCursorBandPositionSelector } from '../../state/selectors/get_cursor_band';
 import { getCursorLinePositionSelector } from '../../state/selectors/get_cursor_line';
-import { getTooltipTypeSelector } from '../../state/selectors/get_tooltip_type';
 import { isHorizontalRotation } from '../../state/utils/common';
 
 interface CrosshairProps {
@@ -123,12 +124,16 @@ const mapStateToProps = (state: GlobalChartState): CrosshairProps => {
       tooltipType: TooltipType.None,
     };
   }
+  const settings = getSettingsSpecSelector(state);
+  const cursorBandPosition = getCursorBandPositionSelector(state);
+
+  const tooltipType = getTooltipType(settings, cursorBandPosition?.fromExternalEvent);
   return {
     theme: getChartThemeSelector(state),
     chartRotation: getChartRotationSelector(state),
-    cursorBandPosition: getCursorBandPositionSelector(state),
+    cursorBandPosition,
     cursorLinePosition: getCursorLinePositionSelector(state),
-    tooltipType: getTooltipTypeSelector(state),
+    tooltipType,
   };
 };
 

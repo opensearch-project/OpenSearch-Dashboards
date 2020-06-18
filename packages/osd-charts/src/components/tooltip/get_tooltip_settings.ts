@@ -17,12 +17,21 @@
  * under the License.
  */
 
-import { GlobalChartState } from '../chart_state';
+import { TooltipSettings, isTooltipType, SettingsSpec } from '../../specs/settings';
 
 /** @internal */
-export const getInternalIsTooltipVisibleSelector = (state: GlobalChartState): { visible: boolean, isExternal: boolean } => {
-  if (state.internalChartState) {
-    return state.internalChartState.isTooltipVisible(state);
+export function getTooltipSettings(settings: SettingsSpec, isExternalTooltipVisible: boolean): TooltipSettings {
+  if (!isExternalTooltipVisible) {
+    return settings.tooltip;
   }
-  return { visible: false, isExternal: false };
-};
+  if (isTooltipType(settings.tooltip)) {
+    return {
+      type: settings.tooltip,
+      ...settings.externalPointerEvents.tooltip,
+    };
+  }
+  return {
+    ...settings.tooltip,
+    ...settings.externalPointerEvents.tooltip,
+  };
+}

@@ -17,12 +17,9 @@
  * under the License.
  */
 
+import { PointerEventType } from '../../specs';
 import { GlobalChartState } from '../chart_state';
 
 /** @internal */
-export const getInternalIsTooltipVisibleSelector = (state: GlobalChartState): { visible: boolean, isExternal: boolean } => {
-  if (state.internalChartState) {
-    return state.internalChartState.isTooltipVisible(state);
-  }
-  return { visible: false, isExternal: false };
-};
+export const hasExternalEventSelector = ({ externalEvents: { pointer } }: GlobalChartState) =>
+  pointer !== null && pointer.type !== PointerEventType.Out;

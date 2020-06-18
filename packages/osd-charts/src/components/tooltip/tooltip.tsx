@@ -23,7 +23,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
 import { TooltipValueFormatter, TooltipSettings, TooltipValue } from '../../specs';
-import { onPointerMove } from '../../state/actions/mouse';
+import { onPointerMove as onPointerMoveAction } from '../../state/actions/mouse';
 import { GlobalChartState, BackwardRef } from '../../state/chart_state';
 import { getChartRotationSelector } from '../../state/selectors/get_chart_rotation';
 import { getChartThemeSelector } from '../../state/selectors/get_chart_theme';
@@ -35,14 +35,16 @@ import { getSettingsSpecSelector } from '../../state/selectors/get_settings_spec
 import { getTooltipHeaderFormatterSelector } from '../../state/selectors/get_tooltip_header_formatter';
 import { Rotation } from '../../utils/commons';
 import { TooltipPortal, PopperSettings, AnchorPosition, Placement } from '../portal';
+import { getTooltipSettings } from './get_tooltip_settings';
 import { TooltipInfo, TooltipAnchorPosition } from './types';
 
+
 interface TooltipDispatchProps {
-  onPointerMove: typeof onPointerMove;
+  onPointerMove: typeof onPointerMoveAction;
 }
 
 interface TooltipStateProps {
-  isVisible: boolean;
+  visible: boolean;
   position: TooltipAnchorPosition | null;
   info?: TooltipInfo;
   headerFormatter?: TooltipValueFormatter;
@@ -64,7 +66,7 @@ const TooltipComponent = ({
   position,
   getChartContainerRef,
   settings,
-  isVisible,
+  visible,
   rotation,
   chartId,
   onPointerMove,
@@ -138,7 +140,7 @@ const TooltipComponent = ({
   );
 
   const renderTooltip = () => {
-    if (!info || !isVisible) {
+    if (!info || !visible) {
       return null;
     }
 
@@ -156,7 +158,7 @@ const TooltipComponent = ({
   };
 
   const anchorPosition = useMemo((): AnchorPosition | null => {
-    if (!position || !isVisible) {
+    if (!position || !visible) {
       return null;
     }
 
@@ -169,7 +171,7 @@ const TooltipComponent = ({
       top: y1 - height,
       height,
     };
-  }, [isVisible, position?.x0, position?.x1, position?.y0, position?.y1]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [visible, position?.x0, position?.x1, position?.y0, position?.y1]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const popperSettings = useMemo((): Partial<PopperSettings> | undefined => {
     if (typeof settings === 'string') {
@@ -189,7 +191,9 @@ const TooltipComponent = ({
       boundary: boundary === 'chart' && chartRef.current ? chartRef.current : undefined,
     };
   }, [settings, chartRef, rotation]);
-
+  if (!visible) {
+    return null;
+  }
   return (
     <TooltipPortal
       scope="MainTooltip"
@@ -199,7 +203,7 @@ const TooltipComponent = ({
       }}
       settings={popperSettings}
       chartId={chartId}
-      visible={isVisible}
+      visible={visible}
     >
       {renderTooltip()}
     </TooltipPortal>
@@ -209,7 +213,7 @@ const TooltipComponent = ({
 TooltipComponent.displayName = 'Tooltip';
 
 const HIDDEN_TOOLTIP_PROPS = {
-  isVisible: false,
+  visible: false,
   info: undefined,
   position: null,
   headerFormatter: undefined,
@@ -220,18 +224,24 @@ const HIDDEN_TOOLTIP_PROPS = {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch): TooltipDispatchProps =>
-  bindActionCreators({ onPointerMove }, dispatch);
+  bindActionCreators({ onPointerMove: onPointerMoveAction }, dispatch);
 
 const mapStateToProps = (state: GlobalChartState): TooltipStateProps => {
   if (getInternalIsInitializedSelector(state) !== InitStatus.Initialized) {
     return HIDDEN_TOOLTIP_PROPS;
   }
+  const { visible, isExternal } = getInternalIsTooltipVisibleSelector(state);
+  if (state.chartId === 'chart4') {
+    // console.log(visible, isExternal);
+  }
+  const settingsSpec = getSettingsSpecSelector(state);
+  const settings = getTooltipSettings(settingsSpec, isExternal);
   return {
-    isVisible: getInternalIsTooltipVisibleSelector(state),
+    visible,
     info: getInternalTooltipInfoSelector(state),
     position: getInternalTooltipAnchorPositionSelector(state),
     headerFormatter: getTooltipHeaderFormatterSelector(state),
-    settings: getSettingsSpecSelector(state).tooltip,
+    settings,
     rotation: getChartRotationSelector(state),
     chartId: state.chartId,
     backgroundColor: getChartThemeSelector(state).background.color,

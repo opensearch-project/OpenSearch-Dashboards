@@ -31,7 +31,7 @@ export const DEFAULT_POPPER_SETTINGS: PopperSettings = {
  *
  * @internal
  */
-export function getOrCreateNode(id: string, parent: HTMLElement = document.body): HTMLDivElement {
+export function getOrCreateNode(id: string, className?: string, parent: HTMLElement = document.body): HTMLDivElement {
   // eslint-disable-next-line unicorn/prefer-query-selector
   const node = document.getElementById(id);
   if (node) {
@@ -40,6 +40,9 @@ export function getOrCreateNode(id: string, parent: HTMLElement = document.body)
 
   const newNode = document.createElement('div');
   newNode.id = id;
+  if (className) {
+    newNode.classList.add(className);
+  }
   parent.appendChild(newNode);
   return newNode;
 }

@@ -29,7 +29,7 @@ import { CustomTooltip } from '../components/tooltip/types';
 import { ScaleContinuousType, ScaleOrdinalType } from '../scales';
 import { getConnect, specComponentFactory } from '../state/spec_factory';
 import { Accessor } from '../utils/accessor';
-import { Position, Rendering, Rotation, Color } from '../utils/commons';
+import { Position, Rendering, Rotation, Color, RecursivePartial } from '../utils/commons';
 import { Domain } from '../utils/domain';
 import { GeometryValue } from '../utils/geometry';
 import { GroupId } from '../utils/ids';
@@ -171,7 +171,7 @@ export interface TooltipProps {
    *
    * `'chart'` will use the chart container as the boundary
    *
-   * @defaultValue parent scroll container
+   * @defaultValue undefined - parent scroll container
    */
   boundary?: HTMLElement | 'chart';
   /**
@@ -187,10 +187,41 @@ export interface TooltipProps {
 }
 
 /**
- * Either a TooltipType or an object with configuration of type, snap, and/or headerFormatter
+ * Either a {@link (TooltipType:type)} or an {@link (TooltipProps:interface)} configuration
  * @public
  */
 export type TooltipSettings = TooltipType | TooltipProps;
+
+/**
+ * The settings for handling external events.
+ * @alpha
+ */
+export interface ExternalPointerEventsSettings {
+  /**
+   * Tooltip settings used for external events
+   */
+  tooltip: {
+    /**
+     * `true` to show the tooltip when the chart receive an
+     * external pointer event, 'false' to hide the tooltip.
+     * @defaultValue `false`
+     */
+    visible?: boolean;
+    /**
+     * {@inheritDoc TooltipProps.placement}
+     */
+    placement?: Placement;
+    /**
+     * {@inheritDoc TooltipProps.fallbackPlacements}
+     */
+    fallbackPlacements?: Placement[];
+    /**
+     * {@inheritDoc TooltipProps.boundary}
+     */
+    boundary?: HTMLElement | 'chart';
+  }
+
+}
 
 export interface LegendColorPickerProps {
   /**
@@ -221,6 +252,10 @@ export type LegendColorPicker = React.ComponentType<LegendColorPickerProps>;
  */
 export type MarkBuffer = number | ((radius: number) => number);
 
+/**
+ * The Spec used for Chart settings
+ * @public
+ */
 export interface SettingsSpec extends Spec {
   /**
    * Partial theme to be merged with base
@@ -244,9 +279,14 @@ export interface SettingsSpec extends Spec {
   animateData: boolean;
   showLegend: boolean;
   /**
-   * The tooltip configuration forr the chart {@link TooltipSettings}
+   * The tooltip configuration {@link TooltipSettings}
    */
   tooltip: TooltipSettings;
+  /**
+   * {@inheritDoc ExternalPointerEventsSettings}
+   * @alpha
+   */
+  externalPointerEvents: ExternalPointerEventsSettings;
   debug: boolean;
   legendPosition: Position;
   /**
@@ -312,9 +352,12 @@ export type DefaultSettingsProps =
   | 'legendPosition'
   | 'hideDuplicateAxes'
   | 'brushAxis'
-  | 'minBrushDelta';
+  | 'minBrushDelta'
+  | 'externalPointerEvents';
 
-export type SettingsSpecProps = Partial<Omit<SettingsSpec, 'chartType' | 'specType' | 'id'>>;
+export type SettingsSpecProps = Partial<Omit<SettingsSpec, 'chartType' | 'specType' | 'id' | 'externalPointerEvents'>> & {
+  externalPointerEvents?: RecursivePartial<SettingsSpec['externalPointerEvents']>
+};
 
 export const Settings: React.FunctionComponent<SettingsSpecProps> = getConnect()(
   specComponentFactory<SettingsSpec, DefaultSettingsProps>(DEFAULT_SETTINGS_SPEC),
@@ -351,8 +394,11 @@ export function isFollowTooltipType(type: TooltipType) {
 }
 
 /** @internal */
-export function getTooltipType(settings: SettingsSpec): TooltipType {
+export function getTooltipType(settings: SettingsSpec, externalTooltip = false): TooltipType {
   const defaultType = TooltipType.VerticalCursor;
+  if (externalTooltip) {
+    return getExternalTooltipType(settings);
+  }
   const { tooltip } = settings;
   if (tooltip === undefined || tooltip === null) {
     return defaultType;
@@ -364,4 +410,14 @@ export function getTooltipType(settings: SettingsSpec): TooltipType {
     return tooltip.type || defaultType;
   }
   return defaultType;
+}
+
+
+/**
+ * Always return a Vertical Cursor for external pointer events or None if hidden
+ * @internal
+ * @param settings - the SettingsSpec
+ */
+export function getExternalTooltipType({ externalPointerEvents: { tooltip: { visible } } }: SettingsSpec): TooltipType {
+  return visible ? TooltipType.VerticalCursor : TooltipType.None;
 }

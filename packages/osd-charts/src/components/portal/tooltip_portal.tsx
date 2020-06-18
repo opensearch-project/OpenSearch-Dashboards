@@ -18,8 +18,7 @@
  */
 
 import { createPopper, Instance } from '@popperjs/core';
-import classNames from 'classnames';
-import React, { useRef, useEffect, useCallback, ReactNode, useMemo, useState } from 'react';
+import { useRef, useEffect, useCallback, ReactNode, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 
 import { mergePartial, isDefined } from '../../utils/commons';
@@ -58,21 +57,20 @@ type PortalTooltipProps = {
 
 const TooltipPortalComponent = ({ anchor, scope, settings, children, visible, chartId }: PortalTooltipProps) => {
   /**
-   * Used to skip first render for new position, which is used for capture initial position
-   */
-  const [invisible, setInvisible] = useState(!(visible ?? false));
-  /**
    * Anchor element used to position tooltip
    */
-  const anchorNode = useRef(
-    isHTMLElement(anchor) ? anchor : getOrCreateNode(`echAnchor${scope}__${chartId}`, anchor?.ref ?? undefined),
+  const anchorNode = useRef(isHTMLElement(anchor)
+    ? anchor
+    : getOrCreateNode(`echAnchor${scope}__${chartId}`, undefined, anchor?.ref ?? undefined),
   );
 
   /**
    * This must not be removed from DOM throughout life of this component.
    * Otherwise the portal will loose reference to the correct node.
    */
-  const portalNode = useRef(getOrCreateNode(`echTooltipPortal${scope}`));
+  const portalNodeElement = getOrCreateNode(`echTooltipPortal${scope}__${chartId}`, 'echTooltipPortal__invisible');
+
+  const portalNode = useRef(portalNodeElement);
 
   /**
    * Popper instance used to manage position of tooltip.
@@ -81,6 +79,7 @@ const TooltipPortalComponent = ({ anchor, scope, settings, children, visible, ch
 
   const popperSettings = useMemo(
     () => mergePartial(DEFAULT_POPPER_SETTINGS, settings, { mergeOptionalPartialValues: true }),
+
     [settings],
   );
 
@@ -185,11 +184,11 @@ const TooltipPortalComponent = ({ anchor, scope, settings, children, visible, ch
   }, [visible, anchorNode, position?.left, position?.top, position?.width, position?.height]);
 
   useEffect(() => {
-    if (position === null) {
-      setInvisible(true);
-    } else {
-      setInvisible(false);
+    if (!position) {
+      portalNode.current.classList.add('echTooltipPortal__invisible');
+      return;
     }
+    portalNode.current.classList.remove('echTooltipPortal__invisible');
   }, [position]);
 
   useEffect(() => {
@@ -199,12 +198,7 @@ const TooltipPortalComponent = ({ anchor, scope, settings, children, visible, ch
     }
   }, [updateAnchorDimensions, popper]);
 
-  return createPortal(
-    <div className={classNames({ echTooltipPortal__invisible: invisible })}>
-      {children}
-    </div>,
-    portalNode.current,
-  );
+  return createPortal(children, portalNode.current);
 };
 
 TooltipPortalComponent.displayName = 'TooltipPortal';

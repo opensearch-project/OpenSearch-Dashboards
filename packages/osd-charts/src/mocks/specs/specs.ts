@@ -41,7 +41,7 @@ import {
   AxisSpec,
 } from '../../chart_types/xy_chart/utils/specs';
 import { ScaleType } from '../../scales/constants';
-import { SettingsSpec, SpecTypes, TooltipType } from '../../specs';
+import { SettingsSpec, SpecTypes, DEFAULT_SETTINGS_SPEC } from '../../specs';
 import { Datum, mergePartial, Position, RecursivePartial } from '../../utils/commons';
 import { LIGHT_THEME } from '../../utils/themes/light_theme';
 
@@ -267,25 +267,7 @@ export class MockSeriesSpecs {
 
 /** @internal */
 export class MockGlobalSpec {
-  private static readonly settingsBase: SettingsSpec = {
-    id: '__global__settings___',
-    chartType: ChartTypes.Global,
-    specType: SpecTypes.Settings,
-    rendering: 'canvas' as const,
-    rotation: 0 as const,
-    animateData: true,
-    showLegend: false,
-    resizeDebounce: 10,
-    debug: false,
-    tooltip: {
-      type: TooltipType.VerticalCursor,
-      snap: true,
-    },
-    legendPosition: Position.Right,
-    showLegendExtra: true,
-    hideDuplicateAxes: false,
-    theme: LIGHT_THEME,
-  };
+  private static readonly settingsBase: SettingsSpec = DEFAULT_SETTINGS_SPEC;
 
   private static readonly axisBase: AxisSpec = {
     id: 'yAxis',

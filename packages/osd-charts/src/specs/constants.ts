@@ -93,6 +93,11 @@ export const DEFAULT_SETTINGS_SPEC: SettingsSpec = {
     type: DEFAULT_TOOLTIP_TYPE,
     snap: DEFAULT_TOOLTIP_SNAP,
   },
+  externalPointerEvents: {
+    tooltip: {
+      visible: false,
+    },
+  },
   legendPosition: Position.Right,
   showLegendExtra: false,
   hideDuplicateAxes: false,

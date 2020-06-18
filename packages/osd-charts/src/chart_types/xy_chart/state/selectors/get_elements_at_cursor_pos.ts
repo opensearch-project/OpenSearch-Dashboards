@@ -64,7 +64,7 @@ function getElementAtCursorPosition(
   if (isValidPointerOverEvent(scales.xScale, externalPointerEvent)) {
     const x = scales.xScale.pureScale(externalPointerEvent.value);
 
-    if (x == null || x > chartDimensions.width + chartDimensions.left) {
+    if (x == null || x > chartDimensions.width + chartDimensions.left || x < 0) {
       return [];
     }
     // TODO: Handle external event with spatial points
