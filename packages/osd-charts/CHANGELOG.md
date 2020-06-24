@@ -1,3 +1,10 @@
+# [19.6.0](https://github.com/elastic/elastic-charts/compare/v19.5.2...v19.6.0) (2020-06-24)
+
+
+### Features
+
+* show tooltip for external events ([#698](https://github.com/elastic/elastic-charts/issues/698)) ([cc31739](https://github.com/elastic/elastic-charts/commit/cc31739a2d2d5173ded3780f1d23890714fb61b3)), closes [#695](https://github.com/elastic/elastic-charts/issues/695)
+
 ## [19.5.2](https://github.com/elastic/elastic-charts/compare/v19.5.1...v19.5.2) (2020-06-16)
 
 
