@@ -1,6 +1,6 @@
 ## How Elastic Charts theming works
 
-Elastic Charts can be easily themed by creating a JSON object with the same shape of the existing [Theme](https://github.com/elastic/elastic-charts/tree/master/src/lib/themes/theme.ts) interface. Currently we maintain the following themes:
+Elastic Charts can be easily themed by creating a JSON object with the same shape of the existing [Theme](../src/utils/themes/theme.ts) interface. Currently we maintain the following themes:
 
 - LIGHT_THEME (the default Elastic Chart theme)
 - DARK_THEME (the same theme in dark)
