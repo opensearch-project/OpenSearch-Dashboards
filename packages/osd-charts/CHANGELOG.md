@@ -1,3 +1,10 @@
+## [19.6.1](https://github.com/elastic/elastic-charts/compare/v19.6.0...v19.6.1) (2020-06-29)
+
+
+### Bug Fixes
+
+* background color dark mode issue ([#719](https://github.com/elastic/elastic-charts/issues/719)) ([40bb526](https://github.com/elastic/elastic-charts/commit/40bb5266b5acf1f80d147c30f6ebca52272f0bec))
+
 # [19.6.0](https://github.com/elastic/elastic-charts/compare/v19.5.2...v19.6.0) (2020-06-24)
 
 
