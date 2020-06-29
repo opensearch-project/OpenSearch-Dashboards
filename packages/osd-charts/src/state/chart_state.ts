@@ -37,7 +37,7 @@ import { CHART_RENDERED } from './actions/chart';
 import { UPDATE_PARENT_DIMENSION } from './actions/chart_settings';
 import { SET_PERSISTED_COLOR, SET_TEMPORARY_COLOR, CLEAR_TEMPORARY_COLORS } from './actions/colors';
 import { EXTERNAL_POINTER_EVENT } from './actions/events';
-import { SPEC_PARSED, SPEC_UNMOUNTED, UPSERT_SPEC, REMOVE_SPEC, SPEC_PARSING } from './actions/specs';
+import { SPEC_PARSED, SPEC_UNMOUNTED, UPSERT_SPEC, REMOVE_SPEC } from './actions/specs';
 import { interactionsReducer } from './reducers/interactions';
 import { getInternalIsInitializedSelector, InitStatus } from './selectors/get_internal_is_intialized';
 import { getLegendItemsSelector } from './selectors/get_legend_items';
@@ -178,6 +178,7 @@ export interface GlobalChartState {
    * true when all all the specs are parsed ad stored into the specs object
    */
   specsInitialized: boolean;
+  specParsing: boolean;
   /**
    * true if the chart is rendered on dom
    */
@@ -220,6 +221,7 @@ export interface GlobalChartState {
 export const getInitialState = (chartId: string): GlobalChartState => ({
   chartId,
   specsInitialized: false,
+  specParsing: false,
   chartRendered: false,
   chartRenderedCount: 0,
   specs: {
@@ -266,15 +268,6 @@ export const chartStoreReducer = (chartId: string) => {
   const initialState = getInitialState(chartId);
   return (state = initialState, action: StateActions): GlobalChartState => {
     switch (action.type) {
-      case SPEC_PARSING:
-        return {
-          ...state,
-          specsInitialized: false,
-          chartRendered: false,
-          specs: {
-            [DEFAULT_SETTINGS_SPEC.id]: DEFAULT_SETTINGS_SPEC,
-          },
-        };
       case SPEC_PARSED:
         const chartType = findMainChartType(state.specs);
 
@@ -283,6 +276,7 @@ export const chartStoreReducer = (chartId: string) => {
           return {
             ...state,
             specsInitialized: true,
+            specParsing: false,
             chartType,
             internalChartState,
           };
@@ -290,6 +284,7 @@ export const chartStoreReducer = (chartId: string) => {
         return {
           ...state,
           specsInitialized: true,
+          specParsing: false,
           chartType,
         };
 
@@ -300,8 +295,22 @@ export const chartStoreReducer = (chartId: string) => {
           chartRendered: false,
         };
       case UPSERT_SPEC:
+        if (!state.specParsing) {
+          return {
+            ...state,
+            specsInitialized: false,
+            chartRendered: false,
+            specParsing: true,
+            specs: {
+              [DEFAULT_SETTINGS_SPEC.id]: DEFAULT_SETTINGS_SPEC,
+              [action.spec.id]: action.spec,
+            },
+          };
+        }
         return {
           ...state,
+          specsInitialized: false,
+          chartRendered: false,
           specs: {
             ...state.specs,
             [action.spec.id]: action.spec,

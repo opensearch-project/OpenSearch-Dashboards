@@ -29,14 +29,7 @@ export const REMOVE_SPEC = 'REMOVE_SPEC';
 export const SPEC_PARSED = 'SPEC_PARSED';
 
 /** @internal */
-export const SPEC_PARSING = 'SPEC_PARSING';
-
-/** @internal */
 export const SPEC_UNMOUNTED = 'SPEC_UNMOUNTED';
-
-interface SpecParsingAction {
-  type: typeof SPEC_PARSING;
-}
 
 interface SpecParsedAction {
   type: typeof SPEC_PARSED;
@@ -72,18 +65,12 @@ export function specParsed(): SpecParsedAction {
 }
 
 /** @internal */
-export function specParsing(): SpecParsingAction {
-  return { type: SPEC_PARSING };
-}
-
-/** @internal */
 export function specUnmounted(): SpecUnmountedAction {
   return { type: SPEC_UNMOUNTED };
 }
 
 /** @internal */
 export type SpecActions =
-  | SpecParsingAction
   | SpecParsedAction
   | SpecUnmountedAction
   | UpsertSpecAction

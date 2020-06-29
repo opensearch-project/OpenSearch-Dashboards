@@ -42,6 +42,7 @@ function usePrevious(value: string) {
 export function specComponentFactory<U extends Spec, D extends keyof U>(
   defaultProps: Pick<U, D | 'chartType' | 'specType'>,
 ) {
+  /* eslint-disable no-shadow, react-hooks/exhaustive-deps, unicorn/consistent-function-scoping */
   const SpecInstance = (props: U & DispatchProps) => {
     const prevId = usePrevious(props.id);
     const { removeSpec, upsertSpec, ...SpecInstance } = props;
@@ -55,10 +56,11 @@ export function specComponentFactory<U extends Spec, D extends keyof U>(
       () => () => {
         removeSpec(props.id);
       },
-      [], // eslint-disable-line react-hooks/exhaustive-deps
+      [],
     );
     return null;
   };
+  /* eslint-enable */
   SpecInstance.defaultProps = defaultProps;
   return SpecInstance;
 }

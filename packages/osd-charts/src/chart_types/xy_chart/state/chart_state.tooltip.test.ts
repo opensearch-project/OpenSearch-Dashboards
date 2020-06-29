@@ -64,6 +64,16 @@ describe('XYChart - State tooltips', () => {
           }),
         ),
       );
+      store.dispatch(
+        upsertSpec(
+          MockSeriesSpec.bar({
+            data: [
+              { x: 1, y: 10 },
+              { x: 2, y: 5 },
+            ],
+          }),
+        ),
+      );
       store.dispatch(specParsed());
       const state = store.getState();
       const tooltipValues = getTooltipInfoAndGeometriesSelector(state);

@@ -127,6 +127,49 @@ describe('Specs parser', () => {
     const state = chartStore.getState();
     expect((state.specs.bars as BarSeriesSpec).xAccessor).toBe(1);
   });
+  test('should remove a spec when replaced with a new', () => {
+    const storeReducer = chartStoreReducer('chart_id');
+    const chartStore = createStore(storeReducer);
+
+    expect(chartStore.getState().specsInitialized).toBe(false);
+    const component = (
+      <Provider store={chartStore}>
+        <SpecsParser>
+          <BarSeries
+            id="one"
+            xAccessor={0}
+            yAccessors={[1]}
+            data={[
+              [0, 1],
+              [1, 2],
+            ]}
+          />
+        </SpecsParser>
+      </Provider>
+    );
+    const wrapper = mount(component);
+
+    expect(chartStore.getState().specs.one).toBeDefined();
+
+    wrapper.setProps({
+      children: (
+        <SpecsParser>
+          <BarSeries
+            id="two"
+            xAccessor={0}
+            yAccessors={[1]}
+            data={[
+              [0, 4],
+              [1, 6],
+            ]}
+          />
+        </SpecsParser>
+      ),
+    });
+    const state = chartStore.getState();
+    expect(state.specs.one).toBeUndefined();
+    expect(state.specs.two).toBeDefined();
+  });
   test('set initialization to false on unmount', () => {
     const storeReducer = chartStoreReducer('chart_id');
     const chartStore = createStore(storeReducer);

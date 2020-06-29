@@ -21,11 +21,10 @@ import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
-import { specParsing, specParsed, specUnmounted } from '../state/actions/specs';
+import { specParsed, specUnmounted } from '../state/actions/specs';
 
 const SpecsParserComponent: React.FunctionComponent = (props) => {
   const injected = props as DispatchProps;
-  injected.specParsing();
   useEffect(() => {
     injected.specParsed();
   });
@@ -39,7 +38,6 @@ const SpecsParserComponent: React.FunctionComponent = (props) => {
 };
 
 interface DispatchProps {
-  specParsing: () => void;
   specParsed: () => void;
   specUnmounted: () => void;
 }
@@ -47,7 +45,6 @@ interface DispatchProps {
 const mapDispatchToProps = (dispatch: Dispatch): DispatchProps =>
   bindActionCreators(
     {
-      specParsing,
       specParsed,
       specUnmounted,
     },

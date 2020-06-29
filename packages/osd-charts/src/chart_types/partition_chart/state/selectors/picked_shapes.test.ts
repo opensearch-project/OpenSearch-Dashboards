@@ -23,7 +23,7 @@ import { MockGlobalSpec, MockSeriesSpec } from '../../../../mocks/specs';
 import { SettingsSpec, XYChartElementEvent, PartitionElementEvent } from '../../../../specs';
 import { updateParentDimensions } from '../../../../state/actions/chart_settings';
 import { onMouseDown, onMouseUp, onPointerMove } from '../../../../state/actions/mouse';
-import { upsertSpec, specParsed, specParsing } from '../../../../state/actions/specs';
+import { upsertSpec, specParsed } from '../../../../state/actions/specs';
 import { chartStoreReducer, GlobalChartState } from '../../../../state/chart_state';
 import { PartitionSpec } from '../../specs';
 import { partitionGeometries } from './geometries';
@@ -35,7 +35,6 @@ describe('Picked shapes selector', () => {
     return createStore(storeReducer);
   }
   function addSeries(store: Store<GlobalChartState>, spec: PartitionSpec, settings?: Partial<SettingsSpec>) {
-    store.dispatch(specParsing());
     store.dispatch(upsertSpec(MockGlobalSpec.settings(settings)));
     store.dispatch(upsertSpec(spec));
     store.dispatch(specParsed());

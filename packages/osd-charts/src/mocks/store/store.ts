@@ -21,7 +21,7 @@ import { createStore, Store } from 'redux';
 
 import { Spec } from '../../specs';
 import { updateParentDimensions } from '../../state/actions/chart_settings';
-import { specParsing, upsertSpec, specParsed } from '../../state/actions/specs';
+import { upsertSpec, specParsed } from '../../state/actions/specs';
 import { chartStoreReducer, GlobalChartState } from '../../state/chart_state';
 
 /** @internal */
@@ -37,7 +37,6 @@ export class MockStore {
   }
 
   static addSpecs(specs: Spec | Array<Spec>, store: Store<GlobalChartState>) {
-    store.dispatch(specParsing());
     if (Array.isArray(specs)) {
       const actions = specs.map(upsertSpec);
       actions.forEach(store.dispatch);

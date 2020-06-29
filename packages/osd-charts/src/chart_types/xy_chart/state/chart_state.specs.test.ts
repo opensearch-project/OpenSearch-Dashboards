@@ -20,7 +20,7 @@
 import { createStore, Store } from 'redux';
 
 import { MockSeriesSpec } from '../../../mocks/specs';
-import { upsertSpec, specParsed, specParsing } from '../../../state/actions/specs';
+import { MockStore } from '../../../mocks/store';
 import { GlobalChartState, chartStoreReducer } from '../../../state/chart_state';
 import { getLegendItemsSelector } from '../../../state/selectors/get_legend_items';
 
@@ -34,67 +34,65 @@ describe('XYChart - specs ordering', () => {
   beforeEach(() => {
     const storeReducer = chartStoreReducer('chartId');
     store = createStore(storeReducer);
-    store.dispatch(specParsing());
   });
 
   it('the legend respect the insert [A, B, C] order', () => {
-    store.dispatch(specParsing());
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'A', data })));
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'B', data })));
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'C', data })));
-    store.dispatch(specParsed());
+    MockStore.addSpecs([
+      MockSeriesSpec.bar({ id: 'A', data }),
+      MockSeriesSpec.bar({ id: 'B', data }),
+      MockSeriesSpec.bar({ id: 'C', data }),
+    ], store);
 
     const legendItems = getLegendItemsSelector(store.getState());
     const names = [...legendItems.values()].map((item) => item.label);
     expect(names).toEqual(['A', 'B', 'C']);
   });
   it('the legend respect the insert order [B, A, C]', () => {
-    store.dispatch(specParsing());
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'B', data })));
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'A', data })));
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'C', data })));
-    store.dispatch(specParsed());
+    MockStore.addSpecs([
+      MockSeriesSpec.bar({ id: 'B', data }),
+      MockSeriesSpec.bar({ id: 'A', data }),
+      MockSeriesSpec.bar({ id: 'C', data }),
+    ], store);
     const legendItems = getLegendItemsSelector(store.getState());
     const names = [...legendItems.values()].map((item) => item.label);
     expect(names).toEqual(['B', 'A', 'C']);
   });
   it('the legend respect the order when changing properties of existing specs', () => {
-    store.dispatch(specParsing());
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'A', data })));
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'B', data })));
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'C', data })));
-    store.dispatch(specParsed());
+    MockStore.addSpecs([
+      MockSeriesSpec.bar({ id: 'A', data }),
+      MockSeriesSpec.bar({ id: 'B', data }),
+      MockSeriesSpec.bar({ id: 'C', data }),
+    ], store);
 
     let legendItems = getLegendItemsSelector(store.getState());
     let names = [...legendItems.values()].map((item) => item.label);
     expect(names).toEqual(['A', 'B', 'C']);
 
-    store.dispatch(specParsing());
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'A', data })));
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'B', name: 'B updated', data })));
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'C', data })));
-    store.dispatch(specParsed());
+    MockStore.addSpecs([
+      MockSeriesSpec.bar({ id: 'A', data }),
+      MockSeriesSpec.bar({ id: 'B', name: 'B updated', data }),
+      MockSeriesSpec.bar({ id: 'C', data }),
+    ], store);
 
     legendItems = getLegendItemsSelector(store.getState());
     names = [...legendItems.values()].map((item) => item.label);
     expect(names).toEqual(['A', 'B updated', 'C']);
   });
   it('the legend respect the order when changing the order of the specs', () => {
-    store.dispatch(specParsing());
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'A', data })));
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'B', data })));
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'C', data })));
-    store.dispatch(specParsed());
-
+    MockStore.addSpecs([
+      MockSeriesSpec.bar({ id: 'A', data }),
+      MockSeriesSpec.bar({ id: 'B', data }),
+      MockSeriesSpec.bar({ id: 'C', data }),
+    ], store);
     let legendItems = getLegendItemsSelector(store.getState());
     let names = [...legendItems.values()].map((item) => item.label);
     expect(names).toEqual(['A', 'B', 'C']);
 
-    store.dispatch(specParsing());
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'B', data })));
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'A', data })));
-    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'C', data })));
-    store.dispatch(specParsed());
+    MockStore.addSpecs([
+      MockSeriesSpec.bar({ id: 'B', data }),
+      MockSeriesSpec.bar({ id: 'A', data }),
+      MockSeriesSpec.bar({ id: 'C', data }),
+    ], store);
 
     legendItems = getLegendItemsSelector(store.getState());
     names = [...legendItems.values()].map((item) => item.label);

@@ -20,7 +20,7 @@
 import classNames from 'classnames';
 import React, { createRef } from 'react';
 import { Provider } from 'react-redux';
-import { createStore, Store, Unsubscribe } from 'redux';
+import { createStore, Store, Unsubscribe, StoreEnhancer, applyMiddleware, Middleware } from 'redux';
 import uuid from 'uuid';
 
 import { isHorizontalAxis } from '../chart_types/xy_chart/utils/axis_type_utils';
@@ -53,6 +53,29 @@ interface ChartState {
   legendPosition: Position;
 }
 
+const getMiddlware = (id: string): StoreEnhancer => {
+  const middlware: Middleware<any, any, any>[] = [];
+
+  if (process.env.DEBUG_REDUX === 'true') {
+    /* eslint-disable @typescript-eslint/no-var-requires, import/no-extraneous-dependencies */
+    middlware.push(require('redux-immutable-state-invariant').default());
+    // https://github.com/LogRocket/redux-logger#options-description
+    middlware.push(require('redux-logger').createLogger({}));
+    /* eslint-enable */
+  }
+
+  if (typeof window !== 'undefined' && (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    return (window as any)
+      .__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
+        trace: true,
+        name: `@elastic/charts (id: ${id})`,
+      })(applyMiddleware(...middlware));
+  }
+
+  return applyMiddleware(...middlware);
+};
+
 export class Chart extends React.Component<ChartProps, ChartState> {
   static defaultProps: ChartProps = {
     renderer: 'canvas',
@@ -70,11 +93,8 @@ export class Chart extends React.Component<ChartProps, ChartState> {
 
     const id = props.id ?? uuid.v4();
     const storeReducer = chartStoreReducer(id);
-    const enhancers = typeof window !== 'undefined' && (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-      ? (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ trace: true, name: `@elastic/charts (id: ${id})` })()
-      : undefined;
-
-    this.chartStore = createStore(storeReducer, enhancers);
+    const enhancer = getMiddlware(id);
+    this.chartStore = createStore(storeReducer, enhancer);
     this.state = {
       legendPosition: Position.Right,
     };
