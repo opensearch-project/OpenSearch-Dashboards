@@ -1,3 +1,10 @@
+## [19.6.2](https://github.com/elastic/elastic-charts/compare/v19.6.1...v19.6.2) (2020-06-29)
+
+
+### Bug Fixes
+
+* react/redux issue with specParser ([#723](https://github.com/elastic/elastic-charts/issues/723)) ([f9c29ec](https://github.com/elastic/elastic-charts/commit/f9c29ec7ec8b4d16c73e556f4ea6964548c78790)), closes [#720](https://github.com/elastic/elastic-charts/issues/720)
+
 ## [19.6.1](https://github.com/elastic/elastic-charts/compare/v19.6.0...v19.6.1) (2020-06-29)
 
 
