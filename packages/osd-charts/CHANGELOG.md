@@ -1,3 +1,10 @@
+## [19.6.3](https://github.com/elastic/elastic-charts/compare/v19.6.2...v19.6.3) (2020-06-29)
+
+
+### Bug Fixes
+
+* move redux dev deps to optional deps ([#725](https://github.com/elastic/elastic-charts/issues/725)) ([df984cc](https://github.com/elastic/elastic-charts/commit/df984cccf0f087fe1dd14f38a867d8a2d95080b2))
+
 ## [19.6.2](https://github.com/elastic/elastic-charts/compare/v19.6.1...v19.6.2) (2020-06-29)
 
 
