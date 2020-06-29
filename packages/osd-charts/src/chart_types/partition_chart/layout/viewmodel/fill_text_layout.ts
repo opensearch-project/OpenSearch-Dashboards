@@ -17,7 +17,10 @@
  * under the License.
  */
 
+import chroma from 'chroma-js';
+
 import { ValueFormatter, Color } from '../../../../utils/commons';
+import { Logger } from '../../../../utils/logger';
 import { Layer } from '../../specs';
 import { conjunctiveConstraint } from '../circline_geometry';
 import { wrapToTau } from '../geometry';
@@ -49,8 +52,8 @@ import {
   getTextColorIfTextInvertible,
   integerSnap,
   monotonicHillClimb,
+  isColorValid,
 } from '../utils/calcs';
-import { RGBATupleToString } from '../utils/color_library_wrappers';
 import { TAU } from '../utils/constants';
 import { logarithm, trueBearingToStandardPositionAngle } from '../utils/math';
 import { VerticalAlignments } from './constants';
@@ -312,14 +315,25 @@ export function getFillTextColor(
   sliceFillColor: string,
   containerBackgroundColor?: Color,
 ) {
+  const bgColorAlpha = isColorValid(containerBackgroundColor) ? chroma(containerBackgroundColor).alpha() : 1;
+  if (!isColorValid(containerBackgroundColor) || bgColorAlpha < 1) {
+    if (bgColorAlpha < 1) {
+      Logger.expected('Text contrast requires a background color with an alpha value of 1', 1, bgColorAlpha);
+    } else if (containerBackgroundColor !== 'transparent') {
+      Logger.warn(`Invalid background color "${containerBackgroundColor}"`);
+    }
+
+    return getTextColorIfTextInvertible(
+      colorIsDark(sliceFillColor),
+      colorIsDark(textColor),
+      textColor,
+      false,
+      'white', // never used
+    );
+  }
+
   let adjustedTextColor = textColor;
-  const containerBackgroundColorFromUser = containerBackgroundColor === undefined || containerBackgroundColor === 'transparent'
-    ? 'rgba(255, 255, 255, 0)'
-    : containerBackgroundColor;
-
-  const containerBackground = combineColors(sliceFillColor, containerBackgroundColorFromUser);
-  const formattedContainerBackground = typeof containerBackground !== 'string' ? RGBATupleToString(containerBackground) : containerBackground;
-
+  const containerBackground = combineColors(sliceFillColor, containerBackgroundColor);
   const textShouldBeInvertedAndTextContrastIsFalse = textInvertible && !textContrast;
   const textShouldBeInvertedAndTextContrastIsSetToTrue = textInvertible && typeof textContrast !== 'number';
   const textContrastIsSetToANumberValue = typeof textContrast === 'number';
@@ -327,7 +341,7 @@ export function getFillTextColor(
 
   // change the contrast for the inverted slices
   if (textShouldBeInvertedAndTextContrastIsFalse || textShouldBeInvertedAndTextContrastIsSetToTrue) {
-    const backgroundIsDark = colorIsDark(combineColors(sliceFillColor, containerBackgroundColorFromUser));
+    const backgroundIsDark = colorIsDark(combineColors(sliceFillColor, containerBackgroundColor));
     const specifiedTextColorIsDark = colorIsDark(textColor);
     // @ts-ignore
     adjustedTextColor = getTextColorIfTextInvertible(
@@ -335,12 +349,13 @@ export function getFillTextColor(
       specifiedTextColorIsDark,
       textColor,
       textContrast,
-      formattedContainerBackground,
+      containerBackground,
     );
     // if textContrast is a number then take that into account or if textInvertible is set to false
   } else if (textContrastIsSetToANumberValue || textShouldNotBeInvertedButTextContrastIsDefined) {
-    return makeHighContrastColor(adjustedTextColor, formattedContainerBackground);
+    return makeHighContrastColor(adjustedTextColor, containerBackground);
   }
+
   return adjustedTextColor;
 }
 type GetShapeRowGeometry<C> = (
@@ -366,7 +381,7 @@ function fill<C>(
   getRotation: GetRotation,
   containerBackgroundColor?: Color,
 ) {
-  return function(
+  return function fillClosure(
     config: Config,
     layers: Layer[],
     measure: TextMeasure,
@@ -634,7 +649,7 @@ export function fillTextLayout<C>(
   containerBackgroundColor?: Color,
 ) {
   const specificFiller = fill(shapeConstructor, getShapeRowGeometry, getRotation, containerBackgroundColor);
-  return function(
+  return function fillTextLayoutClosure(
     measure: TextMeasure,
     rawTextGetter: RawTextGetter,
     valueGetter: ValueGetterFunction,

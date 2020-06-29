@@ -19,12 +19,13 @@
 
 import React from 'react';
 
-import { Chart, Datum, Partition, PartitionLayout } from '../../src';
+import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../src';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
 import { arrayToLookup, hueInterpolator } from '../../src/chart_types/partition_chart/layout/utils/calcs';
 import { mocks } from '../../src/mocks/hierarchical';
 import { countryDimension } from '../../src/mocks/hierarchical/dimension_codes';
 import { palettes } from '../../src/mocks/hierarchical/palettes';
+import { STORYBOOK_LIGHT_THEME } from '../shared';
 import { regionLookup } from '../utils/utils';
 
 const countryLookup = arrayToLookup((d: Datum) => d.country, countryDimension);
@@ -47,6 +48,7 @@ export const Example = () => (
       }
     }
   >
+    <Settings theme={STORYBOOK_LIGHT_THEME} />
     <Partition
       id="spec_1"
       data={mocks.sunburst}

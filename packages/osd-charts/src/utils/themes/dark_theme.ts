@@ -164,6 +164,6 @@ export const DARK_THEME: Theme = {
     },
   },
   background: {
-    color: '#1D1E24', // $euiColorEmptyShade
+    color: 'transparent',
   },
 };

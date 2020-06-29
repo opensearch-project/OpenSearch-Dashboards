@@ -433,3 +433,15 @@ export const isDefinedFrom = <T>(typeCheck: (value: RecursivePartial<T>) => bool
     return false;
   }
 };
+
+/**
+ * Returns rounded number to given decimals
+ *
+ * @internal
+ */
+export const round = (value: number, fractionDigits = 0): number => {
+  const precision = Math.pow(10, Math.max(fractionDigits, 0));
+  const scaledValue = Math.floor(value * precision);
+
+  return scaledValue / precision;
+};

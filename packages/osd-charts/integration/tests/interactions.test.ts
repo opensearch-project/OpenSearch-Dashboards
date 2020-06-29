@@ -162,6 +162,13 @@ describe('Interactions', () => {
         { left: 330, top: 40 },
       );
     });
+
+    it('should render corrent tooltip in dark theme', async() => {
+      await common.expectChartWithMouseAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/stylings--dark-theme',
+        { left: 120, bottom: 80 },
+      );
+    });
   });
 
   describe('brushing', () => {

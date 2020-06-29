@@ -33,16 +33,18 @@ import {
 } from '../utils/utils';
 
 export const Example = () => {
+  const bGColorDisabled = boolean('disable background color', false);
   const partialColorTheme: PartialTheme = {
     background: {
-      color: color('Color of the background container', 'rgba(255, 255, 255, 1)'),
+      color: color('Background color', 'rgba(255, 255, 255, 1)'),
     },
   };
   const invertTextColors = boolean('invert colors for lightness/darkness', true);
-  const toggleTextContrast = boolean('set text contrast to true or false', true);
+  const toggleTextContrast = boolean('text contrast', true);
+
   return (
     <Chart className="story-chart">
-      <Settings theme={partialColorTheme} />
+      <Settings theme={bGColorDisabled ? undefined : partialColorTheme} />
       <Partition
         id="spec_1"
         data={mocks.miniSunburst}

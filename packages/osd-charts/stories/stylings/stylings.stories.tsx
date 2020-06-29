@@ -48,3 +48,4 @@ export { Example as lineSeriesColorVariant } from './18_line_series_color_varian
 export { Example as areaSeriesColorVariant } from './19_area_series_color_variant';
 export { Example as partitionBackground } from './20_partition_background';
 export { Example as partitionLabels } from './21_partition_labels';
+export { Example as darkTheme } from './22_dark_theme';

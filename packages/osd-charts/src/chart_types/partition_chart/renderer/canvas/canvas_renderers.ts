@@ -18,6 +18,7 @@
  */
 
 import { clearCanvas, renderLayers, withContext } from '../../../../renderers/canvas';
+import { Color } from '../../../../utils/commons';
 import { PartitionLayout } from '../../layout/types/config_types';
 import { Pixels } from '../../layout/types/geometry_types';
 import {
@@ -39,7 +40,8 @@ const TAPER_OFF_LIMIT = 50; // taper off within a radius of TAPER_OFF_LIMIT to a
 
 function renderTextRow(
   ctx: CanvasRenderingContext2D,
-  { fontSize, fillTextColor, rotation, verticalAlignment, leftAlign /* , container */ }: RowSet,
+  { fontSize, fillTextColor, rotation, verticalAlignment, leftAlign }: RowSet,
+  linkLabelTextColor: string
 ) {
   return (currentRow: TextRow) => {
     const crx = leftAlign
@@ -50,36 +52,34 @@ function renderTextRow(
       ctx.scale(1, -1);
       ctx.translate(crx, cry);
       ctx.rotate(-rotation);
-      ctx.fillStyle = fillTextColor;
+      ctx.fillStyle = fillTextColor ?? linkLabelTextColor;
       ctx.textBaseline = verticalAlignment;
       currentRow.rowWords.forEach((box) => {
         ctx.font = cssFontShorthand(box, fontSize);
         ctx.fillText(box.text, box.width / 2 + box.wordBeginning, 0);
       });
     });
-    /*
-     * // for debug use: this draws magenta boxes for where the text needs to fit
-     * // note: `container` is a property of the RowSet, needs to be added
-     *withContext(ctx, (ctx) => {
-     *  ctx.scale(1, -1);
-     *  ctx.rotate(-rotation);
-     *  ctx.beginPath();
-     *  ctx.strokeStyle = 'magenta';
-     *  ctx.fillStyle = 'magenta';
-     *  ctx.lineWidth = 1;
-     *  ctx.rect(container.x0 + 1, container.y0 + 1, container.x1 - container.x0 - 2, container.y1 - container.y0 - 2);
-     *  ctx.stroke();
-     *});
-     */
+    // for debug use: this draws magenta boxes for where the text needs to fit
+    // note: `container` is a property of the RowSet, needs to be added
+    // withContext(ctx, (ctx) => {
+    //   ctx.scale(1, -1);
+    //   ctx.rotate(-rotation);
+    //   ctx.beginPath();
+    //   ctx.strokeStyle = 'magenta';
+    //   ctx.fillStyle = 'magenta';
+    //   ctx.lineWidth = 1;
+    //   ctx.rect(container.x0 + 1, container.y0 + 1, container.x1 - container.x0 - 2, container.y1 - container.y0 - 2);
+    //   ctx.stroke();
+    // });
   };
 }
 
-function renderTextRows(ctx: CanvasRenderingContext2D, rowSet: RowSet) {
-  rowSet.rows.forEach(renderTextRow(ctx, rowSet));
+function renderTextRows(ctx: CanvasRenderingContext2D, rowSet: RowSet, linkLabelTextColor: string) {
+  rowSet.rows.forEach(renderTextRow(ctx, rowSet, linkLabelTextColor));
 }
 
-function renderRowSets(ctx: CanvasRenderingContext2D, rowSets: RowSet[]) {
-  rowSets.forEach((rowSet: RowSet) => renderTextRows(ctx, rowSet));
+function renderRowSets(ctx: CanvasRenderingContext2D, rowSets: RowSet[], linkLabelTextColor: string) {
+  rowSets.forEach((rowSet: RowSet) => renderTextRows(ctx, rowSet, linkLabelTextColor));
 }
 
 function renderTaperedBorder(
@@ -189,6 +189,7 @@ function renderLinkLabels(
   linkLabelFontSize: Pixels,
   linkLabelLineWidth: Pixels,
   { linkLabels, labelFontSpec, valueFontSpec, strokeColor }: LinkLabelsViewModelSpec,
+  linkLineColor: Color,
 ) {
   const labelColor = addOpacity(labelFontSpec.textColor, labelFontSpec.textOpacity);
   const valueColor = addOpacity(valueFontSpec.textColor, valueFontSpec.textOpacity);
@@ -200,7 +201,8 @@ function renderLinkLabels(
       ctx.beginPath();
       ctx.moveTo(...linkLabels[0]);
       linkLabels.slice(1).forEach((point) => ctx.lineTo(...point));
-      ctx.strokeStyle = strokeColor;
+      ctx.strokeStyle = strokeColor ?? linkLineColor;
+
       ctx.stroke();
       withContext(ctx, (ctx) => {
         ctx.translate(...translate);
@@ -269,7 +271,7 @@ export function renderPartitionCanvas2d(
           : renderSectors(ctx, quadViewModel),
 
       // all the fill-based, potentially multirow text, whether inside or outside the sector
-      (ctx: CanvasRenderingContext2D) => renderRowSets(ctx, rowSets),
+      (ctx: CanvasRenderingContext2D) => renderRowSets(ctx, rowSets, linkLineColor),
 
       // the link lines for the outside-fill text
       (ctx: CanvasRenderingContext2D) =>
@@ -277,7 +279,7 @@ export function renderPartitionCanvas2d(
 
       // all the text and link lines for single-row outside texts
       (ctx: CanvasRenderingContext2D) =>
-        renderLinkLabels(ctx, linkLabel.fontSize, linkLabel.lineWidth, linkLabelViewModels),
+        renderLinkLabels(ctx, linkLabel.fontSize, linkLabel.lineWidth, linkLabelViewModels, linkLineColor),
     ]);
   });
 }

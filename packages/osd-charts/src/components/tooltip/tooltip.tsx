@@ -17,11 +17,13 @@
  * under the License.
  */
 
+import chroma from 'chroma-js';
 import classNames from 'classnames';
 import React, { memo, useCallback, useMemo, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
+import { isColorValid } from '../../chart_types/partition_chart/layout/utils/calcs';
 import { TooltipValueFormatter, TooltipSettings, TooltipValue } from '../../specs';
 import { onPointerMove as onPointerMoveAction } from '../../state/actions/mouse';
 import { GlobalChartState, BackwardRef } from '../../state/chart_state';
@@ -105,6 +107,8 @@ const TooltipComponent = ({
           const classes = classNames('echTooltip__item', {
             echTooltip__rowHighlighted: isHighlighted,
           });
+          const adjustedBGColor = (isColorValid(color) && chroma(color).alpha() === 0) ? 'transparent' : backgroundColor;
+
           return (
             <div
               // NOTE: temporary to avoid errors
@@ -114,7 +118,7 @@ const TooltipComponent = ({
                 borderLeftColor: color,
               }}
             >
-              <div className="echTooltip__item--backgroundColor" style={{ backgroundColor }}>
+              <div className="echTooltip__item--backgroundColor" style={{ backgroundColor: adjustedBGColor }}>
                 <div
                   className="echTooltip__item--color"
                   style={{ backgroundColor: color }}

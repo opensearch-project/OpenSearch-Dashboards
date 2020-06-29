@@ -19,12 +19,13 @@
 
 import React from 'react';
 
-import { Chart, Datum, Partition, PartitionLayout } from '../../src';
+import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../src';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
 import { arrayToLookup, hueInterpolator } from '../../src/chart_types/partition_chart/layout/utils/calcs';
 import { mocks } from '../../src/mocks/hierarchical';
 import { productDimension } from '../../src/mocks/hierarchical/dimension_codes';
 import { palettes } from '../../src/mocks/hierarchical/palettes';
+import { STORYBOOK_LIGHT_THEME } from '../shared';
 
 const productLookup = arrayToLookup((d: Datum) => d.sitc1, productDimension);
 
@@ -35,6 +36,7 @@ const defaultFillColor = (colorMaker: any) => (d: any, i: number, a: any[]) => c
 
 export const Example = () => (
   <Chart className="story-chart">
+    <Settings theme={STORYBOOK_LIGHT_THEME} />
     <Partition
       id="spec_1"
       data={mocks.pie.map((d: any, i: number) => (i ? d : { ...d, exportVal: 0 }))}

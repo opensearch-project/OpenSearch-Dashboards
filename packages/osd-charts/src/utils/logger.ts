@@ -26,7 +26,7 @@
  * @todo Add more helpful messages in dev for configuration errors
  */
 export class Logger {
-  static namespace = '[@elastic/chart]';
+  static namespace = '[@elastic/charts]';
 
   /**
    * Log warning to console
@@ -37,6 +37,18 @@ export class Logger {
   static warn(message?: any, ...optionalParams: any[]) {
     if (Logger.isDevelopment()) {
       console.warn(`${Logger.namespace} ${message}`, ...optionalParams);
+    }
+  }
+
+  /**
+   * Log expected value warning to console
+   */
+  static expected(message: any, expected: any, received: any) {
+    if (Logger.isDevelopment()) {
+      console.warn(`${Logger.namespace} ${message}`, `\n
+  Expected: ${expected}
+  Received: ${received}
+`);
     }
   }
 

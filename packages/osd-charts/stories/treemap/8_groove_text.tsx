@@ -20,13 +20,14 @@
 import { number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Chart, Datum, Partition, PartitionLayout } from '../../src';
+import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../src';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
 import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/types/viewmodel_types';
 import { arrayToLookup, hueInterpolator } from '../../src/chart_types/partition_chart/layout/utils/calcs';
 import { mocks } from '../../src/mocks/hierarchical';
 import { countryDimension, regionDimension } from '../../src/mocks/hierarchical/dimension_codes';
 import { palettes } from '../../src/mocks/hierarchical/palettes';
+import { STORYBOOK_LIGHT_THEME } from '../shared';
 
 const regionLookup = arrayToLookup((d: Datum) => d.region, regionDimension);
 const countryLookup = arrayToLookup((d: Datum) => d.country, countryDimension);
@@ -37,6 +38,7 @@ export const Example = () => (
   <Chart
     className="story-chart"
   >
+    <Settings theme={STORYBOOK_LIGHT_THEME} />
     <Partition
       id="spec_1"
       data={mocks.sunburst}

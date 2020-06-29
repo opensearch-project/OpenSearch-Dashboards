@@ -22,11 +22,12 @@ import React from 'react';
 import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../src';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
 import { mocks } from '../../src/mocks/hierarchical';
+import { STORYBOOK_LIGHT_THEME } from '../shared';
 import { countryLookup, indexInterpolatedFillColor, interpolatorCET2s, regionLookup } from '../utils/utils';
 
 export const Example = () => (
   <Chart className="story-chart">
-    <Settings showLegend legendMaxDepth={1} />
+    <Settings showLegend legendMaxDepth={1} theme={STORYBOOK_LIGHT_THEME} />
     <Partition
       id="spec_1"
       data={mocks.sunburst}

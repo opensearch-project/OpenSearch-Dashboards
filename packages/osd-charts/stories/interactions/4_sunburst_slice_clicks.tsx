@@ -22,6 +22,7 @@ import { select } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { Chart, Position, Settings, Partition, PartitionLayout } from '../../src';
+import { STORYBOOK_LIGHT_THEME } from '../shared';
 import {
   indexInterpolatedFillColor,
   interpolatorCET2s,
@@ -62,7 +63,13 @@ export const Example = () => {
   );
   return (
     <Chart className="story-chart">
-      <Settings showLegend showLegendExtra legendPosition={Position.Right} {...onElementListeners} />
+      <Settings
+        showLegend
+        showLegendExtra
+        theme={STORYBOOK_LIGHT_THEME}
+        legendPosition={Position.Right}
+        {...onElementListeners}
+      />
       <Partition
         id="pie"
         data={pieData}

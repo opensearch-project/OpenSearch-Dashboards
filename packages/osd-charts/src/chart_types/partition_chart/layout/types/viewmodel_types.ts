@@ -67,7 +67,7 @@ export interface TextRow extends RowAnchor {
 export interface RowSet {
   id: string;
   rows: Array<TextRow>;
-  fillTextColor: string;
+  fillTextColor?: string;
   fontSize: number;
   rotation: Radian;
   verticalAlignment: VerticalAlignments;

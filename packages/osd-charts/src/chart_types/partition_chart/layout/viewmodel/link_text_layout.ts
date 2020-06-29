@@ -24,7 +24,7 @@ import { Config } from '../types/config_types';
 import { Distance, PointTuple, PointTuples } from '../types/geometry_types';
 import { Box, Font, TextAlign, TextMeasure } from '../types/types';
 import { LinkLabelVM, RawTextGetter, ShapeTreeNode, ValueGetterFunction } from '../types/viewmodel_types';
-import { makeHighContrastColor, validateColor, integerSnap, monotonicHillClimb } from '../utils/calcs';
+import { makeHighContrastColor, integerSnap, monotonicHillClimb, isColorValid } from '../utils/calcs';
 import { TAU } from '../utils/constants';
 import { trueBearingToStandardPositionAngle } from '../utils/math';
 
@@ -37,7 +37,7 @@ export interface LinkLabelsViewModelSpec {
   linkLabels: LinkLabelVM[];
   labelFontSpec: Font;
   valueFontSpec: Font;
-  strokeColor: Color;
+  strokeColor?: Color;
 }
 
 /** @internal */
@@ -61,13 +61,13 @@ export function linkTextLayout(
   const yRelativeIncrement = Math.sin(linkLabel.stemAngle) * linkLabel.minimumStemLength;
   const rowPitch = linkLabel.fontSize + linkLabel.spacing;
   // determine the ideal contrast color for the link labels
-  const validBackgroundColor = validateColor(containerBackgroundColor);
+  const validBackgroundColor = isColorValid(containerBackgroundColor) ? containerBackgroundColor : 'rgba(255, 255, 255, 0)';
   const contrastTextColor = containerBackgroundColor
     ? makeHighContrastColor(linkLabel.textColor, validBackgroundColor)
     : linkLabel.textColor;
   const strokeColor = containerBackgroundColor
     ? makeHighContrastColor(sectorLineStroke, validBackgroundColor)
-    : sectorLineStroke;
+    : undefined;
   const labelFontSpec = {
     fontStyle: 'normal',
     fontVariant: 'normal',

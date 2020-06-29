@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import React from 'react';
+import { PartialTheme } from '../src';
 
-import { Example } from '../stories/sunburst/15_single_sunburst';
+export const STORYBOOK_DARK_THEME: PartialTheme = {
+  background: {
+    color: '#1D1E24', // $euiColorEmptyShade
+  },
+};
 
-export class Playground extends React.Component {
-  render() {
-    return (
-      <div className="testing">
-        <div className="chart">{Example()}</div>
-      </div>
-    );
-  }
-}
+export const STORYBOOK_LIGHT_THEME: PartialTheme = {
+  background: {
+    color: '#FFF', // $euiColorEmptyShade;
+  },
+};

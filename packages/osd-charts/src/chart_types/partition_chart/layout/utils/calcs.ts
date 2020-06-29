@@ -61,33 +61,25 @@ export function combineColors(foregroundColor: Color, backgroundColor: Color): C
   // For reference on alpha calculations:
   // https://en.wikipedia.org/wiki/Alpha_compositing
   const combinedAlpha = alpha1 + alpha2 * (1 - alpha1);
+
+  if (combinedAlpha === 0) {
+    return 'rgba(0,0,0,0)';
+  }
+
   const combinedRed = Math.round((red1 * alpha1 + red2 * alpha2 * (1 - alpha1)) / combinedAlpha);
   const combinedGreen = Math.round((green1 * alpha1 + green2 * alpha2 * (1 - alpha1)) / combinedAlpha);
   const combinedBlue = Math.round((blue1 * alpha1 + blue2 * alpha2 * (1 - alpha1)) / combinedAlpha);
   const rgba: RgbTuple = [combinedRed, combinedGreen, combinedBlue, combinedAlpha];
-  return RGBATupleToString(rgba);
-}
 
-/**
- * Returns a valid color
- * @param color valid color
- * @internal
- */
-export function validateColor(color?: string, defaultColor = 'rgba(255, 255, 255, 0)'): string {
-  return color === undefined || color === 'transparent' ? defaultColor : color;
+  return RGBATupleToString(rgba);
 }
 
 /**
  * Return true if the color is a valid CSS color, false otherwise
  * @param color a color written in string
  */
-export function isColorValid(color: string) {
-  try {
-    chroma(color);
-    return true;
-  } catch {
-    return false;
-  }
+export function isColorValid(color?: string): color is Color {
+  return Boolean(color) && chroma.valid(color);
 }
 
 /**

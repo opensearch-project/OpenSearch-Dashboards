@@ -26,6 +26,7 @@ import { arrayToLookup, hueInterpolator } from '../../src/chart_types/partition_
 import { mocks } from '../../src/mocks/hierarchical';
 import { countryDimension, productDimension } from '../../src/mocks/hierarchical/dimension_codes';
 import { palettes } from '../../src/mocks/hierarchical/palettes';
+import { STORYBOOK_LIGHT_THEME } from '../shared';
 
 const productLookup = arrayToLookup((d: Datum) => d.sitc1, productDimension);
 const countryLookup = arrayToLookup((d: Datum) => d.country, countryDimension);
@@ -34,7 +35,7 @@ const interpolatorTurbo = hueInterpolator(palettes.turbo.map(([r, g, b]) => [r, 
 
 export const Example = () => (
   <Chart className="story-chart">
-    <Settings showLegend />
+    <Settings showLegend theme={STORYBOOK_LIGHT_THEME} />
     <Partition
       id="spec_1"
       data={mocks.sunburst}

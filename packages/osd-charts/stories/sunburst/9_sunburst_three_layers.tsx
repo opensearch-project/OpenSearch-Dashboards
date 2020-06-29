@@ -24,6 +24,7 @@ import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../src';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
 import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/types/viewmodel_types';
 import { mocks } from '../../src/mocks/hierarchical';
+import { STORYBOOK_LIGHT_THEME } from '../shared';
 import {
   categoricalFillColor,
   colorBrewerCategoricalStark9,
@@ -34,7 +35,7 @@ import {
 
 export const Example = () => (
   <Chart className="story-chart">
-    <Settings showLegend />
+    <Settings showLegend theme={STORYBOOK_LIGHT_THEME} />
     <Partition
       id="spec_1"
       data={mocks.miniSunburst}

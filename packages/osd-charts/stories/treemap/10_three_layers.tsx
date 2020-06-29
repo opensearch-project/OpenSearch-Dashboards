@@ -26,6 +26,7 @@ import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/type
 import { hueInterpolator } from '../../src/chart_types/partition_chart/layout/utils/calcs';
 import { mocks } from '../../src/mocks/hierarchical';
 import { palettes } from '../../src/mocks/hierarchical/palettes';
+import { STORYBOOK_LIGHT_THEME } from '../shared';
 import { countryLookup, productLookup, regionLookup } from '../utils/utils';
 
 const interpolator = hueInterpolator(palettes.CET2s.map(([r, g, b]) => [r, g, b, 0.5]));
@@ -40,7 +41,7 @@ const countryCount = countries.length;
 
 export const Example = () => (
   <Chart className="story-chart">
-    <Settings showLegend />
+    <Settings showLegend theme={STORYBOOK_LIGHT_THEME} />
     <Partition
       id="spec_1"
       data={mocks.sunburst}
