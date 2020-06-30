@@ -1,3 +1,15 @@
+# [19.7.0](https://github.com/elastic/elastic-charts/compare/v19.6.3...v19.7.0) (2020-06-30)
+
+
+### Bug Fixes
+
+* **partition:** linked label on a larger than 180 degree slice ([#726](https://github.com/elastic/elastic-charts/issues/726)) ([2504bbe](https://github.com/elastic/elastic-charts/commit/2504bbef966824b0d6aa30dae05d324cbd0208c9)), closes [#699](https://github.com/elastic/elastic-charts/issues/699)
+
+
+### Features
+
+* add domain padding ([#707](https://github.com/elastic/elastic-charts/issues/707)) ([15c78c1](https://github.com/elastic/elastic-charts/commit/15c78c145afbe2183a491908ebbcd91f490a141d)), closes [#706](https://github.com/elastic/elastic-charts/issues/706)
+
 ## [19.6.3](https://github.com/elastic/elastic-charts/compare/v19.6.2...v19.6.3) (2020-06-29)
 
 
