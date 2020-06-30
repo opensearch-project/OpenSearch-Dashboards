@@ -26,6 +26,6 @@
             - name: elastic+elastic-charts+pr-vrts
               predefined-parameters: branch_specifier=${ghprbActualCommit}
             - name: elastic+elastic-charts+pr-vrts-2
-                predefined-parameters: branch_specifier=${ghprbActualCommit}
+              predefined-parameters: branch_specifier=${ghprbActualCommit}
             - name: elastic+elastic-charts+pr-license-scan
               predefined-parameters: branch_specifier=${ghprbActualCommit}
