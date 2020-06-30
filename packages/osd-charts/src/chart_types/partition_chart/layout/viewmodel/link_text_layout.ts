@@ -98,7 +98,7 @@ export function linkTextLayout(
       return dist1 - dist2;
     })
     .map((node: ShapeTreeNode) => {
-      const midAngle = trueBearingToStandardPositionAngle(meanAngle(node.x0, node.x1));
+      const midAngle = trueBearingToStandardPositionAngle((node.x0 + node.x1) / 2);
       const north = midAngle < TAU / 2 ? 1 : -1;
       const rightSide = TAU / 4 < midAngle && midAngle < (3 * TAU) / 4 ? 0 : 1;
       const west = rightSide ? 1 : -1;

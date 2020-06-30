@@ -32,6 +32,7 @@ export { Example as valueFormattedWithCategoricalColorPalette } from './3_value_
 export { Example as withFillLabels } from './4_fill_labels';
 export { Example as donutChartWithFillLabels } from './5_donut';
 export { Example as withDirectTextLabels } from './6_pie_chart_labels';
+export { Example as withLinkedTextLabels } from './6_pie_chart_linked_labels';
 export { Example as someZeroValueSlice } from './7_zero_slice';
 export { Example as sunburstWithTwoLayers } from './8_sunburst_two_layers';
 export { Example as sunburstWithThreeLayers } from './9_sunburst_three_layers';
