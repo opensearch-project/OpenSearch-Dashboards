@@ -1,0 +1,12 @@
+---
+- job:
+    name: elastic+elastic-charts+pr-lint
+    display-name: 'elastic / elastic-charts # pull-request lint'
+    description: Check linting and typecheck of elastic-charts pull requests.
+    builders:
+      - shell: |-
+          #!/usr/local/bin/runbld
+
+          set -euo pipefail
+
+          ./.ci/lint.sh

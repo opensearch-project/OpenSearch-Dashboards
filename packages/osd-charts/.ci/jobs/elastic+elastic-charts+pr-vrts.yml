@@ -1,0 +1,12 @@
+---
+- job:
+    name: elastic+elastic-charts+pr-vrts
+    display-name: 'elastic / elastic-charts # pull-request VRTs'
+    description: Visual Regression Testing of elastic-charts pull requests.
+    builders:
+      - shell: |-
+          #!/usr/local/bin/runbld
+
+          set -euo pipefail
+
+          ./.ci/vrts.sh

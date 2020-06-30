@@ -14,9 +14,9 @@
       - github:
           url: https://github.com/elastic/elastic-charts/
       - inject:
-          properties-content: 'HOME=$JENKINS_HOME
-
-            '
+          properties-content: |-
+            CI=true
+            HOME=$JENKINS_HOME
     concurrent: true
     node: linux && docker
     scm:
@@ -25,19 +25,17 @@
           credentials-id: f6c7695a-671e-4f4f-a331-acdce44ff9ba
           reference-repo: /var/lib/jenkins/.git-references/elastic-charts.git
           branches:
-            - ${ghprbActualCommit}
+            - $branch_specifier
           url: git@github.com:elastic/elastic-charts.git
           refspec: +refs/pull/${ghprbPullId}/*:refs/remotes/origin/pr/${ghprbPullId}/*
           basedir: ''
           wipe-workspace: 'True'
-    triggers:
-      - github-pull-request:
-          org-list:
-            - elastic
-          allow-whitelist-orgs-as-admins: true
-          github-hooks: true
-          status-context: kibana-ci
-          cancel-builds-on-update: true
+    parameters:
+      - string:
+          name: branch_specifier
+          default: refs/heads/master
+          description: the Git branch specifier to build (&lt;branchName&gt;,
+            &lt;tagName&gt;, &lt;commitId&gt;, etc.)
     vault:
       role_id: 443f9500-f443-19ba-d698-1a48e104f8ba
     wrappers:
@@ -47,20 +45,14 @@
           timeout: 180
           fail: true
       - timestamps
-    builders:
-      - shell: |-
-          #!/usr/local/bin/runbld
-
-          set -euo pipefail
-
-          set +x
-          export VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-          unset VAULT_ROLE_ID VAULT_SECRET_ID
-          export CODECOV_TOKEN=$(vault read -field=token secret/kibana-issues/prod/codecov)
-          unset VAULT_TOKEN
-          set -x
-
-          ./.ci/run.sh
+    triggers:
+      - github-pull-request:
+          org-list:
+            - elastic
+          allow-whitelist-orgs-as-admins: true
+          github-hooks: true
+          status-context: "@elastic/charts CI"
+          cancel-builds-on-update: true
     publishers:
       - email:
           recipients: infra-root+build@elastic.co
