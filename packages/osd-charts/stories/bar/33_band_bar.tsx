@@ -34,7 +34,7 @@ export const Example = () => {
     min: d[1] - 4 - 4 * getRandomNumber(),
   }));
   const lineData = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d: any) => [d[0], d[1]]);
-  const scaleToDataExtent = boolean('scale to extent', true);
+  const fit = boolean('fit Y domain', true);
   return (
     <Chart className="story-chart">
       <Axis
@@ -46,6 +46,7 @@ export const Example = () => {
       />
       <Axis
         id="left"
+        domain={{ fit }}
         title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
         position={Position.Left}
         tickFormat={(d: any) => Number(d).toFixed(2)}
@@ -59,7 +60,6 @@ export const Example = () => {
         yAccessors={['max']}
         y0Accessors={['min']}
         data={data}
-        yScaleToDataExtent={scaleToDataExtent}
       />
 
       <LineSeries
@@ -69,7 +69,6 @@ export const Example = () => {
         xAccessor={0}
         yAccessors={[1]}
         data={lineData}
-        yScaleToDataExtent={scaleToDataExtent}
       />
     </Chart>
   );

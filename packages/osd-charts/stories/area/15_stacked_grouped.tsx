@@ -74,7 +74,6 @@ export const Example = () => {
         yAccessors={[1]}
         stackAccessors={[0]}
         data={data1}
-        yScaleToDataExtent={false}
       />
       <AreaSeries
         id="stacked area 2"
@@ -84,7 +83,6 @@ export const Example = () => {
         yAccessors={[1]}
         stackAccessors={[0]}
         data={data2}
-        yScaleToDataExtent={false}
       />
       <AreaSeries
         id="non stacked area"
@@ -93,7 +91,6 @@ export const Example = () => {
         xAccessor={0}
         yAccessors={[1]}
         data={data3}
-        yScaleToDataExtent={false}
       />
     </Chart>
   );

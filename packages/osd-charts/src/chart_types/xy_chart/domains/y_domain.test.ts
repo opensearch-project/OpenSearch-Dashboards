@@ -24,7 +24,7 @@ import { SpecTypes } from '../../../specs/constants';
 import { BARCHART_1Y0G } from '../../../utils/data_samples/test_dataset';
 import { GroupId } from '../../../utils/ids';
 import { RawDataSeries } from '../utils/series';
-import { BasicSeriesSpec, DomainRange, SeriesTypes } from '../utils/specs';
+import { BasicSeriesSpec, SeriesTypes, YDomainRange } from '../utils/specs';
 import {
   coerceYScaleTypes,
   getDataSeriesOnGroup,
@@ -32,6 +32,11 @@ import {
   splitSpecsByGroupId,
   YBasicSeriesSpec,
 } from './y_domain';
+
+const domainGroup = new Map([
+  ['a', { fit: true }],
+  ['b', { fit: true }],
+]);
 
 describe('Y Domain', () => {
   test('Should merge Y domain', () => {
@@ -66,10 +71,9 @@ describe('Y Domain', () => {
           groupId: 'a',
           id: 'a',
           stackAccessors: ['a'],
-          yScaleToDataExtent: true,
         },
       ],
-      new Map(),
+      domainGroup,
     );
     expect(mergedDomain).toEqual([
       {
@@ -130,7 +134,6 @@ describe('Y Domain', () => {
           groupId: 'a',
           id: 'a',
           stackAccessors: ['a'],
-          yScaleToDataExtent: true,
         },
         {
           seriesType: SeriesTypes.Area,
@@ -138,10 +141,9 @@ describe('Y Domain', () => {
           groupId: 'b',
           id: 'b',
           stackAccessors: ['a'],
-          yScaleToDataExtent: true,
         },
       ],
-      new Map(),
+      domainGroup,
     );
     expect(mergedDomain).toEqual([
       {
@@ -210,7 +212,6 @@ describe('Y Domain', () => {
           groupId: 'a',
           id: 'a',
           stackAccessors: ['a'],
-          yScaleToDataExtent: true,
         },
         {
           seriesType: SeriesTypes.Area,
@@ -218,10 +219,9 @@ describe('Y Domain', () => {
           groupId: 'a',
           id: 'b',
           stackAccessors: ['a'],
-          yScaleToDataExtent: true,
         },
       ],
-      new Map(),
+      domainGroup,
     );
     expect(mergedDomain).toEqual([
       {
@@ -282,17 +282,15 @@ describe('Y Domain', () => {
           groupId: 'a',
           id: 'a',
           stackAccessors: ['a'],
-          yScaleToDataExtent: true,
         },
         {
           seriesType: SeriesTypes.Area,
           yScaleType: ScaleType.Log,
           groupId: 'a',
           id: 'b',
-          yScaleToDataExtent: true,
         },
       ],
-      new Map(),
+      domainGroup,
     );
     expect(mergedDomain).toEqual([
       {
@@ -347,17 +345,15 @@ describe('Y Domain', () => {
           groupId: 'a',
           id: 'a',
           stackAccessors: ['a'],
-          yScaleToDataExtent: true,
         },
         {
           seriesType: SeriesTypes.Area,
           yScaleType: ScaleType.Log,
           groupId: 'a',
           id: 'b',
-          yScaleToDataExtent: true,
         },
       ],
-      new Map(),
+      domainGroup,
     );
     expect(mergedDomain.length).toEqual(1);
   });
@@ -372,7 +368,6 @@ describe('Y Domain', () => {
       xScaleType: ScaleType.Linear,
       xAccessor: 'x',
       yAccessors: ['y'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y0G,
     };
     const spec2: BasicSeriesSpec = {
@@ -385,7 +380,6 @@ describe('Y Domain', () => {
       xScaleType: ScaleType.Linear,
       xAccessor: 'x',
       yAccessors: ['y'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y0G,
     };
     const splittedSpecs = splitSpecsByGroupId([spec1, spec2]);
@@ -410,7 +404,6 @@ describe('Y Domain', () => {
       xAccessor: 'x',
       yAccessors: ['y'],
       stackAccessors: ['x'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y0G,
     };
     const spec2: BasicSeriesSpec = {
@@ -424,7 +417,6 @@ describe('Y Domain', () => {
       xAccessor: 'x',
       yAccessors: ['y'],
       stackAccessors: ['x'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y0G,
     };
     const splittedSpecs = splitSpecsByGroupId([spec1, spec2]);
@@ -449,7 +441,6 @@ describe('Y Domain', () => {
       xAccessor: 'x',
       yAccessors: ['y'],
       stackAccessors: ['x'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y0G,
     };
     const spec2: BasicSeriesSpec = {
@@ -463,7 +454,6 @@ describe('Y Domain', () => {
       xAccessor: 'x',
       yAccessors: ['y'],
       stackAccessors: ['x'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y0G,
     };
     const splittedSpecs = splitSpecsByGroupId([spec1, spec2]);
@@ -486,7 +476,6 @@ describe('Y Domain', () => {
       xAccessor: 'x',
       yAccessors: ['y'],
       stackAccessors: ['x'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y0G,
     };
     const spec2: BasicSeriesSpec = {
@@ -500,7 +489,6 @@ describe('Y Domain', () => {
       xAccessor: 'x',
       yAccessors: ['y'],
       stackAccessors: ['x'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y0G,
     };
     const spec3: BasicSeriesSpec = {
@@ -514,7 +502,6 @@ describe('Y Domain', () => {
       xAccessor: 'x',
       yAccessors: ['y'],
       stackAccessors: ['x'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y0G,
     };
     const splittedSpecs = splitSpecsByGroupId([spec1, spec2, spec3]);
@@ -564,7 +551,6 @@ describe('Y Domain', () => {
         groupId: 'a',
         id: 'a',
         stackAccessors: ['a'],
-        yScaleToDataExtent: true,
       },
     ];
 
@@ -595,8 +581,8 @@ describe('Y Domain', () => {
     );
     const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries);
-    const domainsByGroupId = new Map<GroupId, DomainRange>();
-    domainsByGroupId.set(groupId, { min: 0, max: 20 });
+    const domainsByGroupId = new Map<GroupId, YDomainRange>();
+    domainsByGroupId.set(groupId, { min: 0, max: 20, fit: true });
 
     const mergedDomain = mergeYDomain(
       specDataSeries,
@@ -607,7 +593,6 @@ describe('Y Domain', () => {
           groupId,
           id: 'a',
           stackAccessors: ['a'],
-          yScaleToDataExtent: true,
         },
       ],
       domainsByGroupId,
@@ -646,8 +631,8 @@ describe('Y Domain', () => {
     );
     const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries);
-    const domainsByGroupId = new Map<GroupId, DomainRange>();
-    domainsByGroupId.set(groupId, { min: 0 });
+    const domainsByGroupId = new Map<GroupId, YDomainRange>();
+    domainsByGroupId.set(groupId, { min: 0, fit: true });
 
     const mergedDomain = mergeYDomain(
       specDataSeries,
@@ -658,7 +643,6 @@ describe('Y Domain', () => {
           groupId,
           id: 'a',
           stackAccessors: ['a'],
-          yScaleToDataExtent: true,
         },
       ],
       domainsByGroupId,
@@ -697,8 +681,8 @@ describe('Y Domain', () => {
     );
     const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries);
-    const domainsByGroupId = new Map<GroupId, DomainRange>();
-    domainsByGroupId.set(groupId, { min: 20 });
+    const domainsByGroupId = new Map<GroupId, YDomainRange>();
+    domainsByGroupId.set(groupId, { min: 20, fit: true });
 
     const attemptToMerge = () => {
       mergeYDomain(
@@ -710,7 +694,6 @@ describe('Y Domain', () => {
             groupId,
             id: 'a',
             stackAccessors: ['a'],
-            yScaleToDataExtent: true,
           },
         ],
         domainsByGroupId,
@@ -744,8 +727,8 @@ describe('Y Domain', () => {
     );
     const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries);
-    const domainsByGroupId = new Map<GroupId, DomainRange>();
-    domainsByGroupId.set(groupId, { max: 20 });
+    const domainsByGroupId = new Map<GroupId, YDomainRange>();
+    domainsByGroupId.set(groupId, { max: 20, fit: true });
 
     const mergedDomain = mergeYDomain(
       specDataSeries,
@@ -756,7 +739,6 @@ describe('Y Domain', () => {
           groupId,
           id: 'a',
           stackAccessors: ['a'],
-          yScaleToDataExtent: true,
         },
       ],
       domainsByGroupId,
@@ -795,8 +777,8 @@ describe('Y Domain', () => {
     );
     const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries);
-    const domainsByGroupId = new Map<GroupId, DomainRange>();
-    domainsByGroupId.set(groupId, { max: -1 });
+    const domainsByGroupId = new Map<GroupId, YDomainRange>();
+    domainsByGroupId.set(groupId, { max: -1, fit: true });
 
     const attemptToMerge = () => {
       mergeYDomain(
@@ -808,7 +790,6 @@ describe('Y Domain', () => {
             groupId,
             id: 'a',
             stackAccessors: ['a'],
-            yScaleToDataExtent: true,
           },
         ],
         domainsByGroupId,
@@ -867,7 +848,6 @@ describe('Y Domain', () => {
           groupId: 'a',
           id: 'a',
           stackAccessors: ['a'],
-          yScaleToDataExtent: true,
           stackAsPercentage: true,
         },
         {
@@ -875,10 +855,9 @@ describe('Y Domain', () => {
           yScaleType: ScaleType.Log,
           groupId: 'a',
           id: 'b',
-          yScaleToDataExtent: true,
         },
       ],
-      new Map(),
+      domainGroup,
     );
     expect(mergedDomain).toEqual([
       {
@@ -914,8 +893,8 @@ describe('Y Domain', () => {
     );
     const specDataSeries = new Map<string, RawDataSeries[]>();
     specDataSeries.set('a', dataSeries);
-    const domainsByGroupId = new Map<GroupId, DomainRange>();
-    domainsByGroupId.set(groupId, { min: 2, max: 20 });
+    const domainsByGroupId = new Map<GroupId, YDomainRange>();
+    domainsByGroupId.set(groupId, { min: 2, max: 20, fit: true });
 
     const mergedDomain = mergeYDomain(
       specDataSeries,
@@ -926,7 +905,6 @@ describe('Y Domain', () => {
           groupId,
           id: 'a',
           stackAccessors: ['a'],
-          yScaleToDataExtent: true,
           stackAsPercentage: true,
         },
       ],

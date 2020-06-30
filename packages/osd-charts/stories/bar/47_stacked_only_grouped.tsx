@@ -106,7 +106,6 @@ export const Example = () => {
         yAccessors={[1]}
         stackAccessors={[0]}
         data={data1}
-        yScaleToDataExtent={false}
       />
       <BarSeries
         id="stacked bar 2"
@@ -116,7 +115,6 @@ export const Example = () => {
         yAccessors={[1]}
         stackAccessors={[0]}
         data={data2}
-        yScaleToDataExtent={false}
       />
 
       <BarSeries
@@ -128,7 +126,6 @@ export const Example = () => {
         yAccessors={[1]}
         stackAccessors={[0]}
         data={data4}
-        yScaleToDataExtent={false}
       />
       <BarSeries
         id="stacked bar B"
@@ -139,7 +136,6 @@ export const Example = () => {
         yAccessors={[1]}
         stackAccessors={[0]}
         data={data5}
-        yScaleToDataExtent={false}
       />
       <BarSeries
         id="non stacked bar"
@@ -148,7 +144,6 @@ export const Example = () => {
         xAccessor={0}
         yAccessors={[1]}
         data={data3}
-        yScaleToDataExtent={false}
       />
     </Chart>
   );

@@ -55,7 +55,7 @@ export const Example = () => {
   const xAccessorOptions = { x: 'x', y1: 'y1', y2: 'y2' };
   const xAccessor = select('xAccessor', xAccessorOptions, 'x', notSpecChange);
 
-  const yScaleToDataExtent = boolean('yScaleDataToExtent', false, specChange);
+  const fit = boolean('fit Y domain', false, specChange);
 
   const splitSeriesAccessors = array('split series accessors', ['g1', 'g2'], ',', specChange);
 
@@ -84,7 +84,10 @@ export const Example = () => {
         title="Left axis"
         position={Position.Left}
         tickFormat={(d) => Number(d).toFixed(2)}
-        domain={yDomain}
+        domain={{
+          ...yDomain,
+          fit,
+        }}
       />
 
       <BarSeries
@@ -95,7 +98,6 @@ export const Example = () => {
         yAccessors={yAccessors}
         splitSeriesAccessors={splitSeriesAccessors}
         data={data}
-        yScaleToDataExtent={yScaleToDataExtent}
       />
     </Chart>
   );

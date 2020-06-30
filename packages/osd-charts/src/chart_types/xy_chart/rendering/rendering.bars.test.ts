@@ -40,7 +40,6 @@ describe('Rendering bars', () => {
       id: SPEC_ID,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Bar,
-      yScaleToDataExtent: false,
       data: [
         [-200, 0],
         [0, 10],
@@ -174,7 +173,6 @@ describe('Rendering bars', () => {
       id: spec1Id,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Bar,
-      yScaleToDataExtent: false,
       data: [
         [0, 10],
         [1, 5],
@@ -190,7 +188,6 @@ describe('Rendering bars', () => {
       id: spec2Id,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Bar,
-      yScaleToDataExtent: false,
       data: [
         [0, 20],
         [1, 10],
@@ -332,7 +329,6 @@ describe('Rendering bars', () => {
       id: SPEC_ID,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Bar,
-      yScaleToDataExtent: false,
       data: [
         [0, 10],
         [1, 5],
@@ -405,7 +401,6 @@ describe('Rendering bars', () => {
       id: SPEC_ID,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Bar,
-      yScaleToDataExtent: false,
       data: [
         [1, 0],
         [2, 1],
@@ -452,7 +447,6 @@ describe('Rendering bars', () => {
       id: spec1Id,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Bar,
-      yScaleToDataExtent: false,
       data: [
         [0, 10],
         [1, 5],
@@ -468,7 +462,6 @@ describe('Rendering bars', () => {
       id: spec2Id,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Bar,
-      yScaleToDataExtent: false,
       data: [
         [0, 20],
         [1, 10],
@@ -590,7 +583,6 @@ describe('Rendering bars', () => {
       id: spec1Id,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Bar,
-      yScaleToDataExtent: false,
       data: [
         [1546300800000, 10],
         [1546387200000, 5],
@@ -606,7 +598,6 @@ describe('Rendering bars', () => {
       id: spec2Id,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Bar,
-      yScaleToDataExtent: false,
       data: [
         [1546300800000, 20],
         [1546387200000, 10],
@@ -731,7 +722,6 @@ describe('Rendering bars', () => {
       id: SPEC_ID,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Bar,
-      yScaleToDataExtent: false,
       data: [
         [0, 0],
         [1, 1],
@@ -800,7 +790,6 @@ describe('Rendering bars', () => {
       id: SPEC_ID,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Bar,
-      yScaleToDataExtent: false,
       data,
       xAccessor: 0,
       yAccessors: [1],

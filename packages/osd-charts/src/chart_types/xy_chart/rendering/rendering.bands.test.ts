@@ -41,7 +41,6 @@ describe('Rendering bands - areas', () => {
       id: SPEC_ID,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Area,
-      yScaleToDataExtent: false,
       data: [
         [0, 2, 10],
         [1, 3, 5],
@@ -100,7 +99,6 @@ describe('Rendering bands - areas', () => {
       id: SPEC_ID,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Area,
-      yScaleToDataExtent: false,
       data: [
         [0, 2, 10],
         [1, 3, 5],
@@ -265,7 +263,6 @@ describe('Rendering bands - areas', () => {
       id: SPEC_ID,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Area,
-      yScaleToDataExtent: false,
       data: [
         [0, 2, 10],
         [1, 2, null],
@@ -424,7 +421,6 @@ describe('Rendering bands - areas', () => {
       id: SPEC_ID,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Bar,
-      yScaleToDataExtent: false,
       data: [
         [0, 2, 10],
         [1, 3, null],

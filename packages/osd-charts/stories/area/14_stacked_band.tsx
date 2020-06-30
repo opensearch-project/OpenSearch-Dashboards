@@ -28,7 +28,7 @@ const dateFormatter = timeFormatter('HH:mm');
 export const Example = () => {
   const { data } = KIBANA_METRICS.metrics.kibana_os_load[0];
   const data2 = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => [d[0], 20, 10]);
-  const scaleToDataExtent = boolean('scale to extent', false);
+  const fit = boolean('fit Y domain', false);
 
   return (
     <Chart className="story-chart">
@@ -42,6 +42,7 @@ export const Example = () => {
       />
       <Axis
         id="left"
+        domain={{ fit }}
         title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
         position={Position.Left}
         tickFormat={(d) => Number(d).toFixed(2)}
@@ -56,7 +57,6 @@ export const Example = () => {
         y0Accessors={[2]}
         data={data}
         stackAccessors={[0]}
-        yScaleToDataExtent={scaleToDataExtent}
       />
 
       <AreaSeries
@@ -68,7 +68,6 @@ export const Example = () => {
         y0Accessors={[2]}
         data={data2}
         stackAccessors={[0]}
-        yScaleToDataExtent={scaleToDataExtent}
       />
     </Chart>
   );

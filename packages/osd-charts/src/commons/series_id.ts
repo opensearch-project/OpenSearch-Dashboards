@@ -26,6 +26,7 @@ export type SeriesKey = string;
 
 /**
  * A series identifier
+ * @public
  */
 export type SeriesIdentifier = {
   /**

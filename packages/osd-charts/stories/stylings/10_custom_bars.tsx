@@ -78,7 +78,6 @@ export const Example = () => {
         xAccessor="x"
         yAccessors={['y']}
         data={TestDatasets.BARCHART_1Y0G}
-        yScaleToDataExtent={false}
         barSeriesStyle={applyBarStyle ? barSeriesStyle : undefined}
         name="bars 1"
       />
@@ -89,7 +88,6 @@ export const Example = () => {
         xAccessor="x"
         yAccessors={['y']}
         data={TestDatasets.BARCHART_1Y0G}
-        yScaleToDataExtent={false}
         name="bars 2"
       />
     </Chart>

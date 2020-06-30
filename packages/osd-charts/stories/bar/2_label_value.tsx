@@ -98,7 +98,6 @@ export const Example = () => {
         splitSeriesAccessors={splitSeriesAccessors}
         stackAccessors={stackAccessors}
         data={data}
-        yScaleToDataExtent={false}
       />
       <BarSeries
         id="bars2"

@@ -26,7 +26,7 @@ export const Example = () => (
   <Chart className="story-chart">
     <Settings legendPosition={Position.Right} />
     <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
-    <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
+    <Axis id="left2" domain={{ fit: true }} title="Left axis" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
     <BarSeries
       id="bars"
@@ -44,7 +44,6 @@ export const Example = () => (
         { x: 7, y: 6 },
         { x: 8, y: 7 },
       ]}
-      yScaleToDataExtent
     />
   </Chart>
 );

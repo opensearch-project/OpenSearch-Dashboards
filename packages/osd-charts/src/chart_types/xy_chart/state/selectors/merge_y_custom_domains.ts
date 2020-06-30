@@ -25,21 +25,24 @@ import { Rotation } from '../../../../utils/commons';
 import { GroupId } from '../../../../utils/ids';
 import { isCompleteBound, isLowerBound, isUpperBound, isBounded } from '../../utils/axis_type_utils';
 import { isYDomain } from '../../utils/axis_utils';
-import { AxisSpec, DomainRange } from '../../utils/specs';
+import { AxisSpec, YDomainRange } from '../../utils/specs';
 import { getAxisSpecsSelector } from './get_specs';
 
 /** @internal */
 export const mergeYCustomDomainsByGroupIdSelector = createCachedSelector(
   [getAxisSpecsSelector, getSettingsSpecSelector],
-  (axisSpecs, settingsSpec): Map<GroupId, DomainRange> => mergeYCustomDomainsByGroupId(axisSpecs, settingsSpec ? settingsSpec.rotation : 0),
+  (axisSpecs, settingsSpec): Map<GroupId, YDomainRange> => mergeYCustomDomainsByGroupId(
+    axisSpecs,
+    settingsSpec ? settingsSpec.rotation : 0,
+  ),
 )(getChartIdSelector);
 
 /** @internal */
 export function mergeYCustomDomainsByGroupId(
   axesSpecs: AxisSpec[],
   chartRotation: Rotation,
-): Map<GroupId, DomainRange> {
-  const domainsByGroupId = new Map<GroupId, DomainRange>();
+): Map<GroupId, YDomainRange> {
+  const domainsByGroupId = new Map<GroupId, YDomainRange>();
 
   axesSpecs.forEach((spec: AxisSpec) => {
     const { id, groupId, domain } = spec;

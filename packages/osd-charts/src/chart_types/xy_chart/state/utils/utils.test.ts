@@ -68,7 +68,6 @@ describe('Chart State utils', () => {
       xScaleType: ScaleType.Linear,
       xAccessor: 'x',
       yAccessors: ['y'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y0G,
     };
     const spec2: BasicSeriesSpec = {
@@ -81,7 +80,6 @@ describe('Chart State utils', () => {
       xScaleType: ScaleType.Linear,
       xAccessor: 'x',
       yAccessors: ['y'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y0G,
     };
     const domains = computeSeriesDomains([spec1, spec2], new Map());
@@ -123,7 +121,6 @@ describe('Chart State utils', () => {
       xAccessor: 'x',
       yAccessors: ['y'],
       splitSeriesAccessors: ['g'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y1G,
     };
     const spec2: BasicSeriesSpec = {
@@ -138,7 +135,6 @@ describe('Chart State utils', () => {
       yAccessors: ['y'],
       splitSeriesAccessors: ['g'],
       stackAccessors: ['x'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y1G,
     };
     const domains = computeSeriesDomains([spec1, spec2], new Map());
@@ -353,7 +349,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const line: LineSeriesSpec = {
@@ -368,7 +363,6 @@ describe('Chart State utils', () => {
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
         stackAccessors: ['x'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const bar: BarSeriesSpec = {
@@ -383,7 +377,6 @@ describe('Chart State utils', () => {
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
         stackAccessors: ['x'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const seriesSpecs: BasicSeriesSpec[] = [area, line, bar];
@@ -432,7 +425,6 @@ describe('Chart State utils', () => {
         xScaleType: ScaleType.Ordinal,
         xAccessor: 'x',
         yAccessors: ['y'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y0G,
       };
       const line2: LineSeriesSpec = {
@@ -445,7 +437,6 @@ describe('Chart State utils', () => {
         xScaleType: ScaleType.Ordinal,
         xAccessor: 'x',
         yAccessors: ['y'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y0G,
       };
       const seriesSpecs: BasicSeriesSpec[] = [line1, line2];
@@ -495,7 +486,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         stackAccessors: ['x'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y0G,
       };
       const line2: LineSeriesSpec = {
@@ -509,7 +499,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         stackAccessors: ['x'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y0G,
       };
       const seriesSpecs: BasicSeriesSpec[] = [line1, line2];
@@ -559,7 +548,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const line: LineSeriesSpec = {
@@ -573,7 +561,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const bar: BarSeriesSpec = {
@@ -587,7 +574,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
         barSeriesStyle: {
           rectBorder: {
@@ -650,7 +636,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const line2: LineSeriesSpec = {
@@ -664,7 +649,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const line3: LineSeriesSpec = {
@@ -678,7 +662,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const seriesSpecs: BasicSeriesSpec[] = [line1, line2, line3];
@@ -728,7 +711,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const area2: AreaSeriesSpec = {
@@ -742,7 +724,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const area3: AreaSeriesSpec = {
@@ -756,7 +737,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const seriesSpecs: BasicSeriesSpec[] = [area1, area2, area3];
@@ -806,7 +786,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         lineSeriesStyle: {
           line: {
             strokeWidth: 100,
@@ -828,7 +807,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const line3: LineSeriesSpec = {
@@ -842,7 +820,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const seriesSpecs: BasicSeriesSpec[] = [line1, line2, line3];
@@ -900,7 +877,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
         areaSeriesStyle: {
           line: {
@@ -926,7 +902,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const area3: AreaSeriesSpec = {
@@ -940,7 +915,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const seriesSpecs: BasicSeriesSpec[] = [area1, area2, area3];
@@ -1003,7 +977,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const bars2: BarSeriesSpec = {
@@ -1017,7 +990,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const bars3: BarSeriesSpec = {
@@ -1031,7 +1003,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const seriesSpecs: BasicSeriesSpec[] = [bars1, bars2, bars3];
@@ -1081,7 +1052,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const bar1: BarSeriesSpec = {
@@ -1095,7 +1065,6 @@ describe('Chart State utils', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const seriesSpecs: BasicSeriesSpec[] = [line1, bar1];
@@ -1210,7 +1179,6 @@ describe('Chart State utils', () => {
       xAccessor: 'x',
       yAccessors: ['y'],
       splitSeriesAccessors: ['g'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y1G,
     };
     const line: LineSeriesSpec = {
@@ -1225,7 +1193,6 @@ describe('Chart State utils', () => {
       yAccessors: ['y'],
       splitSeriesAccessors: ['g'],
       stackAccessors: ['x'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y1G,
     };
     const basicBar: BarSeriesSpec = {
@@ -1240,7 +1207,6 @@ describe('Chart State utils', () => {
       yAccessors: ['y'],
       splitSeriesAccessors: ['g'],
       stackAccessors: ['x'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y1G,
     };
     const histogramBar: BarSeriesSpec = {
@@ -1255,7 +1221,6 @@ describe('Chart State utils', () => {
       yAccessors: ['y'],
       splitSeriesAccessors: ['g'],
       stackAccessors: ['x'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y1G,
       enableHistogramMode: true,
     };
@@ -1283,7 +1248,6 @@ describe('Chart State utils', () => {
       xAccessor: 'x',
       yAccessors: ['y'],
       splitSeriesAccessors: ['g'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y1G,
     };
     const line: LineSeriesSpec = {
@@ -1298,7 +1262,6 @@ describe('Chart State utils', () => {
       yAccessors: ['y'],
       splitSeriesAccessors: ['g'],
       stackAccessors: ['x'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y1G,
     };
     const bar: BarSeriesSpec = {
@@ -1313,7 +1276,6 @@ describe('Chart State utils', () => {
       yAccessors: ['y'],
       splitSeriesAccessors: ['g'],
       stackAccessors: ['foo'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y1G,
     };
     const seriesMap = new Map<SpecId, BasicSeriesSpec>([
@@ -1341,7 +1303,6 @@ describe('Chart State utils', () => {
       xAccessor: 'x',
       yAccessors: ['y'],
       splitSeriesAccessors: ['bar'],
-      yScaleToDataExtent: false,
       data: BARCHART_1Y1G,
     };
     seriesMap.set(bar2.id, bar2);

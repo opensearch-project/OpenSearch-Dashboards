@@ -198,7 +198,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 1, y: 0 },
@@ -216,7 +215,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 7, y: 0 },
@@ -246,7 +244,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 1, y: 0 },
@@ -264,7 +261,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 7, y: 0 },
@@ -295,7 +291,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 1, y: 0 },
@@ -313,7 +308,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 7, y: 0 },
@@ -348,7 +342,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 1, y: 0 },
@@ -366,7 +359,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 7, y: 0 },
@@ -401,7 +393,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 1, y: 0 },
@@ -419,7 +410,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 7, y: 0 },
@@ -509,7 +499,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 1, y: 0 },
@@ -527,7 +516,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 7, y: 0 },
@@ -562,7 +550,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 1, y: 0 },
@@ -580,7 +567,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Time,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 7, y: 0 },
@@ -615,7 +601,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 1, y: 0 },
@@ -633,7 +618,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: [
         { x: 0, y: 0 },
         { x: 7, y: 0 },
@@ -670,7 +654,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: new Array(maxValues).fill(0).map((d, i) => ({ x: i, y: i })),
     };
     const ds2: BasicSeriesSpec = {
@@ -683,7 +666,6 @@ describe('X Domain', () => {
       yAccessors: ['y'],
       xScaleType: ScaleType.Ordinal,
       yScaleType: ScaleType.Linear,
-      yScaleToDataExtent: false,
       data: new Array(maxValues).fill(0).map((d, i) => ({ x: i, y: i })),
     };
     const specDataSeries = [ds1, ds2];

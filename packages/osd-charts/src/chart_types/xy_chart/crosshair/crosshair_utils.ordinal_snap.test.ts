@@ -46,7 +46,6 @@ describe('Crosshair utils ordinal scales', () => {
     yAccessors: [1],
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
-    yScaleToDataExtent: true,
   };
   const barSeries2: BasicSeriesSpec = {
     chartType: ChartTypes.XYAxis,
@@ -63,7 +62,6 @@ describe('Crosshair utils ordinal scales', () => {
     yAccessors: [1],
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
-    yScaleToDataExtent: true,
   };
   const lineSeries1: BasicSeriesSpec = {
     chartType: ChartTypes.XYAxis,
@@ -80,7 +78,6 @@ describe('Crosshair utils ordinal scales', () => {
     yAccessors: [1],
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
-    yScaleToDataExtent: true,
   };
   const lineSeries2: BasicSeriesSpec = {
     chartType: ChartTypes.XYAxis,
@@ -97,23 +94,24 @@ describe('Crosshair utils ordinal scales', () => {
     yAccessors: [1],
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
-    yScaleToDataExtent: true,
   };
 
+  const domainGroup = new Map([['group1', { fit: true }]]);
+
   const barSeries = [barSeries1];
-  const barSeriesDomains = computeSeriesDomains(barSeries);
+  const barSeriesDomains = computeSeriesDomains(barSeries, domainGroup);
 
   const multiBarSeries = [barSeries1, barSeries2];
-  const multiBarSeriesDomains = computeSeriesDomains(multiBarSeries);
+  const multiBarSeriesDomains = computeSeriesDomains(multiBarSeries, domainGroup);
 
   const lineSeries = [lineSeries1];
-  const lineSeriesDomains = computeSeriesDomains(lineSeries);
+  const lineSeriesDomains = computeSeriesDomains(lineSeries, domainGroup);
 
   const multiLineSeries = [lineSeries1, lineSeries2];
-  const multiLineSeriesDomains = computeSeriesDomains(multiLineSeries);
+  const multiLineSeriesDomains = computeSeriesDomains(multiLineSeries, domainGroup);
 
   const mixedLinesBars = [lineSeries1, lineSeries2, barSeries1, barSeries2];
-  const mixedLinesBarsSeriesDomains = computeSeriesDomains(mixedLinesBars);
+  const mixedLinesBarsSeriesDomains = computeSeriesDomains(mixedLinesBars, domainGroup);
 
   const barSeriesScale = computeXScale({
     xDomain: barSeriesDomains.xDomain,

@@ -20,6 +20,7 @@ import { $Values } from 'utility-types';
 
 /**
  * The scale type
+ * @public
  */
 export const ScaleType = Object.freeze({
   Linear: 'linear' as const,
@@ -29,4 +30,5 @@ export const ScaleType = Object.freeze({
   Time: 'time' as const,
 });
 
+/** @public */
 export type ScaleType = $Values<typeof ScaleType>;

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { extent, sum } from 'd3-array';
-import { nest } from 'd3-collection';
+import { extent } from 'd3-array';
 
+import { YDomainRange } from '../specs';
 import { AccessorFn } from './accessor';
 
 export type Domain = any[];
@@ -43,65 +43,84 @@ export function computeOrdinalDataDomain(
     : uniqueValues;
 }
 
-function computeFittedDomain(start?: number, end?: number) {
-  if (start === undefined || end === undefined) {
+function getPaddedRange(start: number, end: number, domainOptions?: YDomainRange,): [number, number] {
+  if (!domainOptions?.padding) {
     return [start, end];
   }
 
-  const delta = Math.abs(end - start);
-  const padding = (delta === 0 ? end - 0 : delta) / 12;
-  const newStart = start - padding;
-  const newEnd = end + padding;
+  let computedPadding = 0;
 
-  return [start >= 0 && newStart < 0 ? 0 : newStart, end <= 0 && newEnd > 0 ? 0 : newEnd];
+  if (typeof domainOptions.padding === 'string') {
+    const padding = domainOptions.padding.trim();
+
+    if (/\d+%$/.test(padding.trim())) {
+      const paddingPercent = Number.parseInt(padding.trim().slice(0, -1), 10);
+      const delta = Math.abs(end - start);
+      computedPadding = delta * (paddingPercent / 100);
+    } else {
+      const num = Number.parseFloat(padding);
+
+      computedPadding = num && !isNaN(num) ? num : 0;
+    }
+  } else {
+    computedPadding = domainOptions.padding;
+  }
+
+  if (computedPadding === 0) {
+    return [start, end];
+  }
+
+  const newStart = start - computedPadding;
+  const newEnd = end + computedPadding;
+
+  if (domainOptions.constrainPadding ?? true) {
+    return [
+      start >= 0 && newStart < 0 ? 0 : newStart,
+      end <= 0 && newEnd > 0 ? 0 : newEnd,
+    ];
+  }
+
+  return [newStart, newEnd];
 }
 
 /** @internal */
 export function computeDomainExtent(
-  computedDomain: [number, number] | [undefined, undefined],
-  scaleToExtent: boolean,
-  fitToExtent: boolean = false,
+  [start, end]: [number, number] | [undefined, undefined],
+  domainOptions?: YDomainRange,
 ): [number, number] {
-  const [start, end] = fitToExtent && !scaleToExtent ? computeFittedDomain(...computedDomain) : computedDomain;
-
   if (start != null && end != null) {
-    if (start >= 0 && end >= 0) {
-      return scaleToExtent || fitToExtent ? [start, end] : [0, end];
+    const [paddedStart, paddedEnd] = getPaddedRange(start, end, domainOptions);
+
+    if (paddedStart >= 0 && paddedEnd >= 0) {
+      return domainOptions?.fit ? [paddedStart, paddedEnd] : [0, paddedEnd];
     }
-    if (start < 0 && end < 0) {
-      return scaleToExtent || fitToExtent ? [start, end] : [start, 0];
+    if (paddedStart < 0 && paddedEnd < 0) {
+      return domainOptions?.fit ? [paddedStart, paddedEnd] : [paddedStart, 0];
     }
-    return [start, end];
+
+    return [paddedStart, paddedEnd];
   }
 
-  // if any of the values are null
+  // if either start or end are null
   return [0, 0];
 }
 
-/** @internal */
+/**
+ * Get Continuous domain from data. May alters domain to constrain to zero baseline.
+ *
+ * when `domainOptions` is null the domain will not be altered
+ * @internal
+ */
 export function computeContinuousDataDomain(
   data: any[],
   accessor: (n: any) => number,
-  scaleToExtent = false,
-  fitToExtent = false,
+  domainOptions?: YDomainRange | null,
 ): number[] {
   const range = extent<any, number>(data, accessor);
 
-  return computeDomainExtent(range, scaleToExtent, fitToExtent);
-}
+  if (domainOptions === null) {
+    return [range[0] ?? 0, range[1] ?? 0];
+  }
 
-// TODO: remove or incorporate this function
-/** @internal */
-export function computeStackedContinuousDomain(
-  data: any[],
-  xAccessor: AccessorFn,
-  yAccessor: AccessorFn,
-  scaleToExtent = false,
-): any {
-  const groups = nest<any, number>()
-    .key((datum: any) => `${xAccessor(datum)}`)
-    .rollup((values: any) => sum(values, yAccessor))
-    .entries(data);
-  const cumulativeSumAccessor = (d: any) => d.value;
-  return computeContinuousDataDomain(groups, cumulativeSumAccessor, scaleToExtent);
+  return computeDomainExtent(range, domainOptions);
 }

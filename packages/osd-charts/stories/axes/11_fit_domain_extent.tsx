@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { boolean, select } from '@storybook/addon-knobs';
+import { boolean, select, text } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { Axis, Chart, LineSeries, Position, ScaleType } from '../../src';
@@ -46,13 +46,15 @@ export const Example = () => {
   );
 
   const dataset = dataTypes[dataKey];
-  const fit = boolean('fit domain to data', true);
+  const fit = boolean('fit Y domain to data', true);
+  const constrainPadding = boolean('constrain padding', true);
+  const padding = text('domain padding', '10%');
 
   return (
     <Chart className="story-chart">
       <Axis id="bottom" title="index" position={Position.Bottom} />
       <Axis
-        domain={{ fit }}
+        domain={{ fit, padding, constrainPadding }}
         id="left"
         title="Value"
         position={Position.Left}

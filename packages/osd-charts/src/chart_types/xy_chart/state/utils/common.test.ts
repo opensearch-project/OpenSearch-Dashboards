@@ -63,7 +63,6 @@ describe('Type Checks', () => {
         xAccessor: 'x',
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const line: LineSeriesSpec = {
@@ -78,7 +77,6 @@ describe('Type Checks', () => {
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
         stackAccessors: ['x'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       const bar: BarSeriesSpec = {
@@ -93,7 +91,6 @@ describe('Type Checks', () => {
         yAccessors: ['y'],
         splitSeriesAccessors: ['g'],
         stackAccessors: ['x'],
-        yScaleToDataExtent: false,
         data: BARCHART_1Y1G,
       };
       let series = [area, line, bar];

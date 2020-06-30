@@ -17,13 +17,26 @@
  * under the License.
  */
 
-import { boolean, select } from '@storybook/addon-knobs';
+import { boolean, select, text } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { Axis, BarSeries, Chart, Position, ScaleType } from '../../src';
+import { computeContinuousDataDomain } from '../../src/utils/domain';
+import { SB_SOURCE_PANEL } from '../utils/storybook';
+
+const logDomains = (data: any[], customDomain: any) => {
+  /* eslint-disable no-console */
+  console.clear();
+  console.log('data domain:', JSON.stringify(computeContinuousDataDomain(data, (d) => d.y)));
+  console.log('computed domain:', JSON.stringify(computeContinuousDataDomain(data, (d) => d.y, customDomain)));
+  /* eslint-enable */
+};
 
 export const Example = () => {
-  const yScaleToDataExtent = boolean('yScaleDataToExtent', true);
+  const yScaleToDataExtent = boolean('yScaleDataToExtent', false);
+  const fit = boolean('fit Y domain to data', true);
+  const constrainPadding = boolean('constrain padding', true);
+  const padding = text('domain padding', '0');
   const mixed = [
     { x: 0, y: -4 },
     { x: 1, y: -3 },
@@ -43,20 +56,35 @@ export const Example = () => {
     },
     'all negative',
   );
+  const shouldLogDomains = boolean('console log domains', true);
 
-  let data = mixed;
+  let data;
   switch (dataChoice) {
     case 'all positive':
       data = allPositive;
       break;
     case 'all negative':
-    default:
       data = allNegative;
+      break;
+    default:
+      data = mixed;
   }
+  const customDomain = { fit, padding, constrainPadding };
+
+  if (shouldLogDomains) {
+    logDomains(data, customDomain);
+  }
+
   return (
     <Chart className="story-chart">
       <Axis id="top" position={Position.Top} title="Top axis" />
-      <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
+      <Axis
+        id="left2"
+        domain={customDomain}
+        title="Left axis"
+        position={Position.Left}
+        tickFormat={(d: any) => Number(d).toFixed(2)}
+      />
 
       <BarSeries
         id="bars"
@@ -70,4 +98,13 @@ export const Example = () => {
       />
     </Chart>
   );
+};
+
+Example.story = {
+  parameters: {
+    options: { selectedPanel: SB_SOURCE_PANEL },
+    info: {
+      text: '`yScaleToDataExtent` has been **depricated** in favor of `domain.fit`. The functionality is identical between the two.',
+    },
+  },
 };

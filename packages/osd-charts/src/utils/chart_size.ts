@@ -17,12 +17,14 @@
  * under the License.
  */
 
+/** @public */
 export type ChartSizeArray = [number | string | undefined, number | string | undefined];
 export interface ChartSizeObject {
   width?: number | string;
   height?: number | string;
 }
 
+/** @public */
 export type ChartSize = number | string | ChartSizeArray | ChartSizeObject;
 
 /** @internal */

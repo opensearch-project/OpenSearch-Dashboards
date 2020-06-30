@@ -41,7 +41,6 @@ export const Example = () => (
         { x: 2, y: 3 },
         { x: 3, y: 6 },
       ]}
-      yScaleToDataExtent={false}
     />
     <AreaSeries
       id="areas"
@@ -56,7 +55,6 @@ export const Example = () => (
         { x: 2, y: 3 },
         { x: 3, y: 6 },
       ]}
-      yScaleToDataExtent={false}
     />
   </Chart>
 );

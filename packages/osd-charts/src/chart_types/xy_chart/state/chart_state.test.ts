@@ -50,7 +50,6 @@ describe.skip('Chart Store', () => {
     id: SPEC_ID,
     groupId: GROUP_ID,
     seriesType: SeriesTypes.Bar,
-    yScaleToDataExtent: false,
     data: [
       { x: 1, y: 1, g: 0 },
       { x: 2, y: 2, g: 1 },
@@ -1176,7 +1175,6 @@ describe.skip('Chart Store', () => {
       id: SPEC_ID,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Bar,
-      yScaleToDataExtent: false,
       data: [{ x: 1, y: 1, g: 0 }],
       xAccessor: 'x',
       yAccessors: ['y'],

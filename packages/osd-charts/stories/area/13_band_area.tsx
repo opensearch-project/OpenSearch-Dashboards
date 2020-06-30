@@ -44,7 +44,7 @@ export const Example = () => {
     min: d[1] - 4 - 4 * getRandomNumber(),
   }));
   const lineData = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => [d[0], d[1]]);
-  const scaleToDataExtent = boolean('scale to extent', true);
+  const fit = boolean('fit Y domain', true);
   const y0AccessorFormat = text('y0AccessorFormat', '');
   const y1AccessorFormat = text('y1AccessorFormat', '');
   return (
@@ -59,6 +59,7 @@ export const Example = () => {
       />
       <Axis
         id="left"
+        domain={{ fit }}
         title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
         position={Position.Left}
         tickFormat={(d) => Number(d).toFixed(2)}
@@ -74,7 +75,6 @@ export const Example = () => {
         y1AccessorFormat={y1AccessorFormat || undefined}
         y0AccessorFormat={y0AccessorFormat || undefined}
         data={data}
-        yScaleToDataExtent={scaleToDataExtent}
         curve={CurveType.CURVE_MONOTONE_X}
       />
 
@@ -85,7 +85,6 @@ export const Example = () => {
         xAccessor={0}
         yAccessors={[1]}
         data={lineData}
-        yScaleToDataExtent={scaleToDataExtent}
         curve={CurveType.CURVE_MONOTONE_X}
       />
     </Chart>

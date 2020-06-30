@@ -94,7 +94,6 @@ export const Example = () => {
         xAccessor="x"
         yAccessors={['y']}
         data={dataset1}
-        yScaleToDataExtent={false}
         lineSeriesStyle={applyLineStyles ? lineSeriesStyle1 : undefined}
       />
       <LineSeries
@@ -104,7 +103,6 @@ export const Example = () => {
         xAccessor="x"
         yAccessors={['y']}
         data={dataset2}
-        yScaleToDataExtent={false}
         lineSeriesStyle={applyLineStyles ? lineSeriesStyle2 : undefined}
       />
       <LineSeries
@@ -114,7 +112,6 @@ export const Example = () => {
         xAccessor="x"
         yAccessors={['y']}
         data={dataset3}
-        yScaleToDataExtent={false}
       />
     </Chart>
   );

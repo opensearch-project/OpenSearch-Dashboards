@@ -41,7 +41,6 @@ describe('Rendering points - areas', () => {
       id: SPEC_ID,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Area,
-      yScaleToDataExtent: false,
       data: [
         [0, 10],
         [1, 5],
@@ -102,7 +101,6 @@ describe('Rendering points - areas', () => {
       id: SPEC_ID,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Area,
-      yScaleToDataExtent: false,
       data: [
         [0, 10],
         [1, 5],
@@ -219,7 +217,6 @@ describe('Rendering points - areas', () => {
       id: spec1Id,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Area,
-      yScaleToDataExtent: false,
       data: [
         [0, 10],
         [1, 5],
@@ -235,7 +232,6 @@ describe('Rendering points - areas', () => {
       id: spec2Id,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Area,
-      yScaleToDataExtent: false,
       data: [
         [0, 20],
         [1, 10],
@@ -429,7 +425,6 @@ describe('Rendering points - areas', () => {
       id: SPEC_ID,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Area,
-      yScaleToDataExtent: false,
       data: [
         [0, 10],
         [1, 5],
@@ -542,7 +537,6 @@ describe('Rendering points - areas', () => {
       id: spec1Id,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Area,
-      yScaleToDataExtent: false,
       data: [
         [0, 10],
         [1, 5],
@@ -558,7 +552,6 @@ describe('Rendering points - areas', () => {
       id: spec2Id,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Area,
-      yScaleToDataExtent: false,
       data: [
         [0, 20],
         [1, 10],
@@ -751,7 +744,6 @@ describe('Rendering points - areas', () => {
       id: SPEC_ID,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Area,
-      yScaleToDataExtent: false,
       data: [
         [1546300800000, 10],
         [1546387200000, 5],
@@ -864,7 +856,6 @@ describe('Rendering points - areas', () => {
       id: spec1Id,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Area,
-      yScaleToDataExtent: false,
       data: [
         [1546300800000, 10],
         [1546387200000, 5],
@@ -880,7 +871,6 @@ describe('Rendering points - areas', () => {
       id: spec2Id,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Area,
-      yScaleToDataExtent: false,
       data: [
         [1546300800000, 20],
         [1546387200000, 10],
@@ -1058,7 +1048,6 @@ describe('Rendering points - areas', () => {
       id: SPEC_ID,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Area,
-      yScaleToDataExtent: false,
       data: [
         [0, 10],
         [1, 5],
@@ -1260,7 +1249,6 @@ describe('Rendering points - areas', () => {
       id: SPEC_ID,
       groupId: GROUP_ID,
       seriesType: SeriesTypes.Area,
-      yScaleToDataExtent: false,
       data: [
         [0, 10],
         [1, 5],

@@ -22,7 +22,6 @@ import {
   computeContinuousDataDomain,
   computeDomainExtent,
   computeOrdinalDataDomain,
-  computeStackedContinuousDomain,
 } from './domain';
 
 describe('utils/domain', () => {
@@ -92,10 +91,7 @@ describe('utils/domain', () => {
   test('should compute continuous data domain: data scaled to extent', () => {
     const data = [{ x: 12 }, { x: 6 }, { x: 8 }];
     const accessor = (datum: any) => datum.x;
-    const scaleToExtent = true;
-
-    const continuousDataDomain = computeContinuousDataDomain(data, accessor, scaleToExtent);
-
+    const continuousDataDomain = computeContinuousDataDomain(data, accessor, { fit: true });
     const expectedContinuousDomain = [6, 12];
 
     expect(continuousDataDomain).toEqual(expectedContinuousDomain);
@@ -123,87 +119,71 @@ describe('utils/domain', () => {
     expect(continuousDataDomain).toEqual(expectedContinuousDomain);
   });
 
-  test('should compute stacked data domain: data scaled to extent', () => {
-    const data = [
-      { y: 12, x: 'a' },
-      { y: 6, x: 'b' },
-      { y: 8, x: 'a' },
-    ];
-    const yAccessor: AccessorFn = (datum: any) => datum.y;
-    const xAccessor: AccessorFn = (datum: any) => datum.x;
-    const scaleToExtent = true;
+  describe('YDomainOptions', () => {
+    it('should not effect domain when domain.fit is true', () => {
+      expect(computeDomainExtent([5, 10], { fit: true })).toEqual([5, 10]);
+    });
 
-    const stackedDataDomain = computeStackedContinuousDomain(data, xAccessor, yAccessor, scaleToExtent);
-
-    const expectedStackedDomain = [6, 20];
-
-    expect(stackedDataDomain).toEqual(expectedStackedDomain);
-  });
-
-  test('should compute stacked data domain: data not scaled to extent', () => {
-    const data = [
-      { y: 12, x: 'a' },
-      { y: 6, x: 'b' },
-      { y: 8, x: 'a' },
-    ];
-    const yAccessor: AccessorFn = (datum: any) => datum.y;
-    const xAccessor: AccessorFn = (datum: any) => datum.x;
-
-    const stackedDataDomain = computeStackedContinuousDomain(data, xAccessor, yAccessor);
-
-    const expectedStackedDomain = [0, 20];
-
-    expect(stackedDataDomain).toEqual(expectedStackedDomain);
-  });
-
-  describe('scaleToExtent', () => {
-    describe('true', () => {
+    describe('domain.fit is true', () => {
       it('should find domain when start & end are positive', () => {
-        expect(computeDomainExtent([5, 10], true)).toEqual([5, 10]);
+        expect(computeDomainExtent([5, 10], { fit: true })).toEqual([5, 10]);
       });
+
       it('should find domain when start & end are negative', () => {
-        expect(computeDomainExtent([-15, -10], true)).toEqual([-15, -10]);
+        expect(computeDomainExtent([-15, -10], { fit: true })).toEqual([-15, -10]);
       });
+
       it('should find domain when start is negative, end is positive', () => {
-        expect(computeDomainExtent([-15, 10], true)).toEqual([-15, 10]);
+        expect(computeDomainExtent([-15, 10], { fit: true })).toEqual([-15, 10]);
       });
     });
-    describe('false', () => {
+    describe('domain.fit is false', () => {
       it('should find domain when start & end are positive', () => {
-        expect(computeDomainExtent([5, 10], false)).toEqual([0, 10]);
+        expect(computeDomainExtent([5, 10])).toEqual([0, 10]);
       });
+
       it('should find domain when start & end are negative', () => {
-        expect(computeDomainExtent([-15, -10], false)).toEqual([-15, 0]);
+        expect(computeDomainExtent([-15, -10])).toEqual([-15, 0]);
       });
+
       it('should find domain when start is negative, end is positive', () => {
-        expect(computeDomainExtent([-15, 10], false)).toEqual([-15, 10]);
+        expect(computeDomainExtent([-15, 10])).toEqual([-15, 10]);
       });
     });
-  });
 
-  describe('fitToExtent', () => {
-    it('should not effect domain when scaleToExtent is true', () => {
-      expect(computeDomainExtent([5, 10], true)).toEqual([5, 10]);
-    });
-
-    describe('baseline far from zero', () => {
+    describe('padding does NOT cause domain to cross zero baseline', () => {
       it('should get domain from positive domain', () => {
-        expect(computeDomainExtent([10, 70], false, true)).toEqual([5, 75]);
+        expect(computeDomainExtent([10, 70], { fit: true, padding: 5 })).toEqual([5, 75]);
       });
+
       it('should get domain from positive & negative domain', () => {
-        expect(computeDomainExtent([-30, 30], false, true)).toEqual([-35, 35]);
+        expect(computeDomainExtent([-30, 30], { fit: true, padding: 5 })).toEqual([-35, 35]);
       });
+
       it('should get domain from negative domain', () => {
-        expect(computeDomainExtent([-70, -10], false, true)).toEqual([-75, -5]);
+        expect(computeDomainExtent([-70, -10], { fit: true, padding: 5 })).toEqual([-75, -5]);
       });
     });
 
-    describe('baseline near zero', () => {
-      it('should set min baseline as 0 if original domain is less than zero', () => {
-        expect(computeDomainExtent([5, 65], false, true)).toEqual([0, 70]);
+    describe('padding caused domain to cross zero baseline', () => {
+      describe('constrainPadding true - default', () => {
+        it('should set min baseline as 0 if original domain is less than zero', () => {
+          expect(computeDomainExtent([5, 65], { fit: true, padding: 15 })).toEqual([0, 80]);
+        });
+
+        it('should set max baseline as 0 if original domain is less than zero', () => {
+          expect(computeDomainExtent([-65, -5], { fit: true, padding: 15 })).toEqual([-80, 0]);
+        });
       });
-      it('should set max baseline as 0 if original domain is less than zero', () => {
-        expect(computeDomainExtent([-65, -5], false, true)).toEqual([-70, 0]);
+
+      describe('constrainPadding false', () => {
+        it('should allow min past baseline as 0, even if original domain is less than zero', () => {
+          expect(computeDomainExtent([5, 65], { fit: true, padding: 15, constrainPadding: false })).toEqual([-10, 80]);
+        });
+
+        it('should allow max past baseline as 0, even if original domain is less than zero', () => {
+          expect(computeDomainExtent([-65, -5], { fit: true, padding: 15, constrainPadding: false })).toEqual([-80, 10]);
+        });
       });
     });
   });

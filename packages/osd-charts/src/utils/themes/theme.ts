@@ -70,6 +70,7 @@ export interface StrokeStyle<C = Color> {
   strokeWidth: number;
 }
 
+/** @public */
 export type TickStyle = StrokeStyle & Visible;
 
 /**
@@ -216,8 +217,10 @@ export interface Theme {
   background: BackgroundStyle;
 }
 
+/** @public */
 export type PartialTheme = RecursivePartial<Theme>;
 
+/** @public */
 export type DisplayValueStyle = TextStyle & {
   offsetX: number;
   offsetY: number;
@@ -345,6 +348,7 @@ export interface LineAnnotationStyle {
   details: TextStyle;
 }
 
+/** @public */
 export type RectAnnotationStyle = StrokeStyle & FillStyle & Opacity & Partial<StrokeDashArray>;
 
 export const DEFAULT_ANNOTATION_LINE_STYLE: LineAnnotationStyle = {

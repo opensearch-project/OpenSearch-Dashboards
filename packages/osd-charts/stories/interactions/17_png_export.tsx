@@ -124,7 +124,7 @@ function renderXYAxisChart(chartRef: RefObject<Chart>) {
         position={Position.Bottom}
         tickFormat={niceTimeFormatter([data[0][0], data[data.length - 1][0]])}
       />
-      <Axis id="count" position={Position.Left} />
+      <Axis id="count" domain={{ fit: true }} position={Position.Left} />
 
       <BarSeries
         id="series bars chart"
@@ -133,7 +133,6 @@ function renderXYAxisChart(chartRef: RefObject<Chart>) {
         xAccessor={0}
         yAccessors={[1]}
         data={data}
-        yScaleToDataExtent
       />
     </Chart>
   );

@@ -82,30 +82,31 @@ export const Example = () => {
       <Axis
         id="left2"
         title="Left axis"
+        domain={{ fit: hideBars }}
         position={Position.Left}
         tickFormat={[0, 180].includes(chartRotation) ? numberFormatter : formatter}
       />
       {!hideBars && (
-        <BarSeries
-          id="data 1"
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor={0}
-          yAccessors={[1]}
-          stackAccessors={[0]}
-          data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 20)}
-        />
-      )}
-      {!hideBars && (
-        <BarSeries
-          id="data 2"
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor={0}
-          yAccessors={[1]}
-          stackAccessors={[0]}
-          data={KIBANA_METRICS.metrics.kibana_os_load[1].data.slice(0, 20)}
-        />
+        <>
+          <BarSeries
+            id="data 1"
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor={0}
+            yAccessors={[1]}
+            stackAccessors={[0]}
+            data={KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 20)}
+          />
+          <BarSeries
+            id="data 2"
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor={0}
+            yAccessors={[1]}
+            stackAccessors={[0]}
+            data={KIBANA_METRICS.metrics.kibana_os_load[1].data.slice(0, 20)}
+          />
+        </>
       )}
       <LineSeries
         id="data 3"
@@ -114,7 +115,6 @@ export const Example = () => {
         xAccessor={0}
         yAccessors={[1]}
         data={KIBANA_METRICS.metrics.kibana_os_load[2].data.slice(0, 20)}
-        yScaleToDataExtent={hideBars}
       />
     </Chart>
   );

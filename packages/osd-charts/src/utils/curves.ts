@@ -44,6 +44,7 @@ export const CurveType = Object.freeze({
   LINEAR: 9 as const,
 });
 
+/** @public */
 export type CurveType = $Values<typeof CurveType>;
 
 /** @internal */

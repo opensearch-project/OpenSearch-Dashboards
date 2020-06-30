@@ -29,6 +29,7 @@ export const PartitionLayout = Object.freeze({
   treemap: 'treemap' as const,
 });
 
+/** @public */
 export type PartitionLayout = Values<typeof PartitionLayout>; // could use ValuesType<typeof HierarchicalChartTypes>
 
 export type PerSidePadding = PerSideDistance;
@@ -47,6 +48,7 @@ interface LabelConfig extends Font {
   padding: Padding;
 }
 
+/** @public */
 export type FillLabelConfig = LabelConfig;
 
 export interface LinkLabelConfig extends LabelConfig {

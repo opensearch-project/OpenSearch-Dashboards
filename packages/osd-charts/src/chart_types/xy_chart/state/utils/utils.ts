@@ -55,6 +55,7 @@ import {
   Fit,
   FitConfig,
   isBubbleSeriesSpec,
+  YDomainRange,
 } from '../../utils/specs';
 import { getSpecsById, getAxesSpecForSpecId } from './spec';
 import { SeriesDomainsAndData, ComputedGeometries, GeometriesCounts, Transform, LastValues } from './types';
@@ -176,7 +177,7 @@ function getLastValues(formattedDataSeries: {
  */
 export function computeSeriesDomains(
   seriesSpecs: BasicSeriesSpec[],
-  customYDomainsByGroupId: Map<GroupId, DomainRange> = new Map(),
+  customYDomainsByGroupId: Map<GroupId, YDomainRange> = new Map(),
   deselectedDataSeries: SeriesIdentifier[] = [],
   customXDomain?: DomainRange | Domain,
 ): SeriesDomainsAndData {

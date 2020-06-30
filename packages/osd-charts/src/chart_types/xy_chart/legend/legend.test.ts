@@ -77,7 +77,6 @@ const spec1: BasicSeriesSpec = {
   xScaleType: ScaleType.Linear,
   xAccessor: 'x',
   yAccessors: ['y'],
-  yScaleToDataExtent: false,
   data: [],
   hideInLegend: false,
 };
@@ -91,7 +90,6 @@ const spec2: BasicSeriesSpec = {
   xScaleType: ScaleType.Linear,
   xAccessor: 'x',
   yAccessors: ['y'],
-  yScaleToDataExtent: false,
   data: [],
   hideInLegend: false,
 };

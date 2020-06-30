@@ -37,7 +37,6 @@ describe('Tooltip formatting', () => {
     data: [],
     xAccessor: 0,
     yAccessors: [1],
-    yScaleToDataExtent: false,
     yScaleType: ScaleType.Linear,
     xScaleType: ScaleType.Linear,
   };

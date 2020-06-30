@@ -60,7 +60,6 @@ describe('Render chart', () => {
           [day2, 22],
           [day3, 6],
         ],
-        yScaleToDataExtent: false,
       };
       store.dispatch(upsertSpec(lineSeries));
 
@@ -130,7 +129,6 @@ describe('Render chart', () => {
           [date2, 22],
           [date3, 6],
         ],
-        yScaleToDataExtent: false,
       };
       store.dispatch(upsertSpec(lineSeries));
       const settingSpec: SettingsSpec = {
@@ -198,7 +196,6 @@ describe('Render chart', () => {
           [date2, 22],
           [date3, 6],
         ],
-        yScaleToDataExtent: false,
       };
       store.dispatch(upsertSpec(lineSeries));
       const settingSpec: SettingsSpec = {

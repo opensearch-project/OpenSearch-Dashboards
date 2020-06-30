@@ -26,4 +26,5 @@ export const ChartTypes = Object.freeze({
   XYAxis: 'xy_axis' as const,
 });
 
+/** @public */
 export type ChartTypes = $Values<typeof ChartTypes>;

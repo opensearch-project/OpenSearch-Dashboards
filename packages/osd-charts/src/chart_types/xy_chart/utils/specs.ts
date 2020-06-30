@@ -42,7 +42,9 @@ import { PrimitiveValue } from '../../partition_chart/layout/utils/group_by_roll
 import { AnnotationTooltipFormatter } from '../annotations/types';
 import { RawDataSeriesDatum, XYChartSeriesIdentifier } from './series';
 
+/** @public */
 export type BarStyleOverride = RecursivePartial<BarSeriesStyle> | Color | null;
+/** @public */
 export type PointStyleOverride = RecursivePartial<PointStyle> | Color | null;
 
 export const SeriesTypes = Object.freeze({
@@ -51,6 +53,7 @@ export const SeriesTypes = Object.freeze({
   Line: 'line' as const,
   Bubble: 'bubble' as const,
 });
+/** @public */
 export type SeriesTypes = $Values<typeof SeriesTypes>;
 
 /**
@@ -60,6 +63,7 @@ export type SeriesTypes = $Values<typeof SeriesTypes>;
  * - `Color`: Color value as a `string` will set the bar `fill` to that color
  * - `RecursivePartial<BarSeriesStyle>`: Style values to be merged with base bar styles
  * - `null`: Keep existing bar style
+ * @public
  */
 export type BarStyleAccessor = (
   datum: RawDataSeriesDatum,
@@ -72,6 +76,7 @@ export type BarStyleAccessor = (
  * - `Color`: Color value as a `string` will set the point `stroke` to that color
  * - `RecursivePartial<PointStyle>`: Style values to be merged with base point styles
  * - `null`: Keep existing point style
+ * @public
  */
 export type PointStyleAccessor = (
   datum: RawDataSeriesDatum,
@@ -80,13 +85,17 @@ export type PointStyleAccessor = (
 
 /**
  * The global id used by default to group together series
+ * @public
  */
 export const DEFAULT_GLOBAL_ID = '__global__';
 
+/** @public */
 export type FilterPredicate = (series: XYChartSeriesIdentifier) => boolean;
+/** @public */
 export type SeriesName = string | number | null;
 /**
  * Function to create custom series name for a given series
+ * @public
  */
 export type SeriesNameFn = (series: XYChartSeriesIdentifier, isTooltip: boolean) => SeriesName;
 /**
@@ -135,10 +144,12 @@ export interface SeriesNameConfigOptions {
    */
   delimiter?: string;
 }
+/** @public */
 export type SeriesNameAccessor = string | SeriesNameFn | SeriesNameConfigOptions;
 
 /**
  * The fit function type
+ * @public
  */
 export const Fit = Object.freeze({
   /**
@@ -221,6 +232,7 @@ export const Fit = Object.freeze({
   Explicit: 'explicit' as const,
 });
 
+/** @public */
 export type Fit = $Values<typeof Fit>;
 
 interface DomainBase {
@@ -234,12 +246,35 @@ interface DomainBase {
    * be a valid interval because it is greater than the computed minInterval of 365 days betwen the other years.
    */
   minInterval?: number;
+}
+
+/**
+ * Domain option that **only** apply to `yDomains`.
+ * @public
+ */
+export interface YDomainBase {
   /**
-   * Whether to fit the domain to the data. ONLY applies to `yDomains`
+   * Whether to fit the domain to the data.
+   *
+   * Setting `max` or `min` will override this functionality.
+   * @defaultValue false
+   */
+  fit?: boolean;
+  /**
+   * Padding for computed domain. Pixel number or percent string.
    *
    * Setting `max` or `min` will override this functionality.
    */
-  fit?: boolean;
+  padding?: number | string;
+  /**
+   * Constrains padded domain to the zero baseline.
+   *
+   * e.g. If your domain is `[10, 100]` and `[-10, 120]` with padding.
+   * The domain would be `[0, 120]` if **constrained** or `[-10, 120]` if **unconstrained**.
+   *
+   * @defaultValue true
+   */
+  constrainPadding?: boolean;
 }
 
 interface LowerBound {
@@ -256,12 +291,19 @@ interface UpperBound {
   max: number;
 }
 
+/** @public */
 export type LowerBoundedDomain = DomainBase & LowerBound;
+/** @public */
 export type UpperBoundedDomain = DomainBase & UpperBound;
+/** @public */
 export type CompleteBoundedDomain = DomainBase & LowerBound & UpperBound;
+/** @public */
 export type UnboundedDomainWithInterval = DomainBase;
 
+/** @public */
 export type DomainRange = LowerBoundedDomain | UpperBoundedDomain | CompleteBoundedDomain | UnboundedDomainWithInterval;
+/** @public */
+export type YDomainRange = YDomainBase & DomainRange;
 
 export interface DisplayValueSpec {
   /** Show value label in chart element */
@@ -337,8 +379,11 @@ export interface Postfixes {
   y1AccessorFormat?: string;
 }
 
+/** @public */
 export type SeriesColorsArray = string[];
+/** @public */
 export type SeriesColorAccessorFn = (seriesIdentifier: XYChartSeriesIdentifier) => string | null;
+/** @public */
 export type SeriesColorAccessor = string | SeriesColorsArray | SeriesColorAccessorFn;
 
 export interface SeriesAccessors {
@@ -376,17 +421,20 @@ export interface SeriesScales {
   yScaleType: ScaleContinuousType;
   /**
    * if true, the min y value is set to the minimum domain value, 0 otherwise
+   * @deprecated use `domain.fit` instead
    * @defaultValue `false`
    */
-  yScaleToDataExtent: boolean;
+  yScaleToDataExtent?: boolean;
 }
 
+/** @public */
 export type BasicSeriesSpec = SeriesSpec & SeriesAccessors & SeriesScales;
 
 export type SeriesSpecs<S extends BasicSeriesSpec = BasicSeriesSpec> = Array<S>;
 
 /**
  * This spec describe the dataset configuration used to display a bar series.
+ * @public
  */
 export type BarSeriesSpec = BasicSeriesSpec &
   Postfixes & {
@@ -417,11 +465,13 @@ export type BarSeriesSpec = BasicSeriesSpec &
 /**
  * This spec describe the dataset configuration used to display a histogram bar series.
  * A histogram bar series is identical to a bar series except that stackAccessors are not allowed.
+ * @public
  */
 export type HistogramBarSeriesSpec = Omit<BarSeriesSpec, 'stackAccessors'> & {
   enableHistogramMode: true;
 };
 
+/** @public */
 export type FitConfig = {
   /**
    * Fit type for data with null values
@@ -443,6 +493,7 @@ export type FitConfig = {
 
 /**
  * This spec describe the dataset configuration used to display a line series.
+ * @public
  */
 export type LineSeriesSpec = BasicSeriesSpec &
   HistogramConfig & {
@@ -477,6 +528,7 @@ export type BubbleSeriesSpec = BasicSeriesSpec & {
 
 /**
  * This spec describe the dataset configuration used to display an area series.
+ * @public
  */
 export type AreaSeriesSpec = BasicSeriesSpec &
   HistogramConfig &
@@ -514,6 +566,7 @@ export const HistogramModeAlignments = Object.freeze({
   End: 'end' as HistogramModeAlignment,
 });
 
+/** @public */
 export type HistogramModeAlignment = 'start' | 'center' | 'end';
 
 /**
@@ -557,7 +610,7 @@ export interface AxisSpec extends Spec {
   /** The axis title */
   title?: string;
   /** If specified, it constrains the domain for these values */
-  domain?: DomainRange;
+  domain?: YDomainRange;
   /** Object to hold custom styling */
   style?: AxisStyle;
   /** Show only integar values * */
@@ -569,10 +622,12 @@ export interface AxisSpec extends Spec {
   showDuplicatedTicks?: boolean;
 }
 
+/** @public */
 export type TickFormatterOptions = {
   timeZone?: string;
 };
 
+/** @public */
 export type TickFormatter = (value: any, options?: TickFormatterOptions) => string;
 
 export interface AxisStyle {
@@ -586,6 +641,7 @@ export const AnnotationTypes = Object.freeze({
   Text: 'text' as const,
 });
 
+/** @public */
 export type AnnotationType = $Values<typeof AnnotationTypes>;
 
 /**
@@ -622,6 +678,7 @@ export interface LineAnnotationDatum {
   header?: string;
 }
 
+/** @public */
 export type LineAnnotationSpec = BaseAnnotationSpec<
   typeof AnnotationTypes.Line,
   LineAnnotationDatum,
@@ -683,6 +740,7 @@ export interface RectAnnotationDatum {
   details?: string;
 }
 
+/** @public */
 export type RectAnnotationSpec = BaseAnnotationSpec<
   typeof AnnotationTypes.Rectangle,
   RectAnnotationDatum,
@@ -732,6 +790,7 @@ export interface BaseAnnotationSpec<
   zIndex?: number;
 }
 
+/** @public */
 export type AnnotationSpec = LineAnnotationSpec | RectAnnotationSpec;
 
 /** @internal */

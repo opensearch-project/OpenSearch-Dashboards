@@ -40,8 +40,11 @@ export const ColorVariant = Object.freeze({
 });
 export type ColorVariant = $Values<typeof ColorVariant>;
 
+/** @public */
 export type Datum = any; // unknown;
+/** @public */
 export type Rotation = 0 | 90 | -90 | 180;
+/** @public */
 export type Rendering = 'canvas' | 'svg';
 export type Color = string;
 export type StrokeStyle = Color; // now narrower than string | CanvasGradient | CanvasPattern
@@ -52,6 +55,7 @@ export const Position = Object.freeze({
   Left: 'left' as const,
   Right: 'right' as const,
 });
+/** @public */
 export type Position = $Values<typeof Position>;
 
 /** @internal */

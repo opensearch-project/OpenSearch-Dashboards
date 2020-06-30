@@ -25,6 +25,7 @@ describe('Area series stories', () => {
       'http://localhost:9001/?path=/story/area-chart--stacked-percentage&knob-stacked as percentage=',
     );
   });
+
   describe('accessorFormats', () => {
     it('should show custom format', async() => {
       await common.expectChartAtUrlToMatchScreenshot(
@@ -32,29 +33,28 @@ describe('Area series stories', () => {
       );
     });
   });
+
   describe('scale to extents', () => {
-    describe('scaleyScaleToDataExtent is true', () => {
+    describe('domain.fit is true', () => {
+      const trueUrl = 'http://localhost:9001/?path=/story/area-chart--stacked-band&knob-fit Y domain=true';
       it('should show correct extents - Banded', async() => {
-        await common.expectChartAtUrlToMatchScreenshot(
-          'http://localhost:9001/?path=/story/area-chart--stacked-band&knob-scale to extent=true',
-        );
+        await common.expectChartAtUrlToMatchScreenshot(trueUrl);
       });
+
       it('should show correct extents - stacked', async() => {
-        await common.expectChartAtUrlToMatchScreenshot(
-          'http://localhost:9001/?path=/story/area-chart--stacked-band&knob-scale to extent=true',
-        );
+        await common.expectChartAtUrlToMatchScreenshot(trueUrl);
       });
     });
-    describe('scaleyScaleToDataExtent is false', () => {
+
+    describe('domain.fit is false', () => {
+      const falseUrl = 'http://localhost:9001/?path=/story/area-chart--stacked-band&knob-fit Y domain=false';
+
       it('should show correct extents - Banded', async() => {
-        await common.expectChartAtUrlToMatchScreenshot(
-          'http://localhost:9001/?path=/story/area-chart--stacked-band&knob-scale to extent=false',
-        );
+        await common.expectChartAtUrlToMatchScreenshot(falseUrl);
       });
+
       it('should show correct extents - stacked', async() => {
-        await common.expectChartAtUrlToMatchScreenshot(
-          'http://localhost:9001/?path=/story/area-chart--stacked-band&knob-scale to extent=false',
-        );
+        await common.expectChartAtUrlToMatchScreenshot(falseUrl);
       });
     });
   });

@@ -439,7 +439,6 @@ describe('Series', () => {
       xScaleType: ScaleType.Linear,
       xAccessor: 'x',
       yAccessors: ['y'],
-      yScaleToDataExtent: false,
       data: TestDataset.BARCHART_1Y0G,
       hideInLegend: false,
     };
@@ -454,7 +453,6 @@ describe('Series', () => {
       xAccessor: 'x',
       yAccessors: ['y1', 'y2'],
       stackAccessors: ['x'],
-      yScaleToDataExtent: false,
       data: TestDataset.BARCHART_2Y0G,
       hideInLegend: false,
     };
@@ -474,7 +472,6 @@ describe('Series', () => {
       xScaleType: ScaleType.Linear,
       xAccessor: 'x',
       yAccessors: ['y'],
-      yScaleToDataExtent: false,
       data: TestDataset.BARCHART_1Y0G,
       hideInLegend: false,
     };
@@ -489,7 +486,6 @@ describe('Series', () => {
       xAccessor: 'x',
       yAccessors: ['y1', 'y2'],
       stackAccessors: ['x'],
-      yScaleToDataExtent: false,
       data: TestDataset.BARCHART_2Y0G,
       hideInLegend: false,
     };
@@ -585,7 +581,6 @@ describe('Series', () => {
       xAccessor: 'x',
       yAccessors: ['y1', 'y2'],
       stackAccessors: ['x'],
-      yScaleToDataExtent: false,
       data: TestDataset.BARCHART_2Y0G,
       hideInLegend: false,
     };

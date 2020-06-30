@@ -30,12 +30,14 @@ export const SpecTypes = Object.freeze({
   Annotation: 'annotation' as const,
   Settings: 'settings' as const,
 });
+/** @public */
 export type SpecTypes = $Values<typeof SpecTypes>;
 
 export const PointerEventType = Object.freeze({
   Over: 'Over' as const,
   Out: 'Out' as const,
 });
+/** @public */
 export type PointerEventType = $Values<typeof PointerEventType>;
 
 /**
@@ -63,6 +65,7 @@ export const BrushAxis = Object.freeze({
   Y: 'y' as const,
   Both: 'both' as const,
 });
+/** @public */
 export type BrushAxis = $Values<typeof BrushAxis>;
 
 /**
