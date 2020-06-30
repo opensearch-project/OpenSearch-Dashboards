@@ -5,6 +5,7 @@
 ###
 source .ci/global_setup.sh
 
+VRT_FILES=$1
 ###
 ### visual testing
 ###

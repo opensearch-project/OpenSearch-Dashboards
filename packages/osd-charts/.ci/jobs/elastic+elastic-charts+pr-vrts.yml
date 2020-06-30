@@ -12,4 +12,4 @@
 
           set -euo pipefail
 
-          ./.ci/vrts.sh
+          ./.ci/vrts.sh "^((?\!all.test.ts).)*$"
