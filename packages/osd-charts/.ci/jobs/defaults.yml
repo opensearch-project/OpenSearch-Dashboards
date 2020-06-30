@@ -45,14 +45,6 @@
           timeout: 180
           fail: true
       - timestamps
-    triggers:
-      - github-pull-request:
-          org-list:
-            - elastic
-          allow-whitelist-orgs-as-admins: true
-          github-hooks: true
-          status-context: "@elastic/charts CI"
-          cancel-builds-on-update: true
     publishers:
       - email:
           recipients: infra-root+build@elastic.co

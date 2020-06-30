@@ -3,7 +3,7 @@
 ###
 ### global setup
 ###
-source global_setup.sh
+source .ci/global_setup.sh
 
 ###
 ### visual testing
