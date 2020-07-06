@@ -85,6 +85,7 @@
     "@commitlint/config-conventional": "^8.1.0",
     "@elastic/datemath": "^5.0.2",
     "@elastic/eui": "^16.0.1",
+    "@elastic/github-checks-reporter": "^0.0.20-b3",
     "@mdx-js/loader": "^1.5.5",
     "@microsoft/api-documenter": "^7.7.20",
     "@microsoft/api-extractor": "^7.7.9",
