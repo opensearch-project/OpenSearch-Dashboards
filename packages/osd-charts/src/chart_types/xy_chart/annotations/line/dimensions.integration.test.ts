@@ -20,7 +20,6 @@
 import { MockSeriesSpec, MockAnnotationSpec, MockGlobalSpec } from '../../../../mocks/specs';
 import { MockStore } from '../../../../mocks/store';
 import { ScaleType } from '../../../../scales/constants';
-import { Position } from '../../../../utils/commons';
 import { computeAnnotationDimensionsSelector } from '../../state/selectors/compute_annotations';
 import { AnnotationDomainTypes } from '../../utils/specs';
 
@@ -51,11 +50,10 @@ function expectAnnotationAtPosition(
   const annotations = computeAnnotationDimensionsSelector(store.getState());
   expect(annotations.get(annotation.id)).toEqual([
     {
-      anchor: { left: expectedLinePosition, position: 'bottom', top: 100 },
       details: { detailsText: undefined, headerText: `${indexPosition}` },
       linePathPoints: {
-        start: { x1: expectedLinePosition, y1: 100 },
-        end: { x2: expectedLinePosition, y2: 0 },
+        start: { x1: expectedLinePosition, y1: 0 },
+        end: { x2: expectedLinePosition, y2: 100 },
       },
       marker: undefined,
     },
@@ -145,14 +143,9 @@ describe('Render vertical line annotation within', () => {
     const annotations = computeAnnotationDimensionsSelector(store.getState());
     expect(annotations.get(annotation.id)).toEqual([
       {
-        anchor: {
-          top: 100,
-          left: 95,
-          position: Position.Bottom,
-        },
         linePathPoints: {
-          start: { x1: 95, y1: 100 },
-          end: { x2: 95, y2: 0 },
+          start: { x1: 95, y1: 0 },
+          end: { x2: 95, y2: 100 },
         },
         details: { detailsText: 'foo', headerText: '9.5' },
         marker: undefined,

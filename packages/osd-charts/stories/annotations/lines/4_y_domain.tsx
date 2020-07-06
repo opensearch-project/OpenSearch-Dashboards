@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { boolean } from '@storybook/addon-knobs';
+import { boolean, select } from '@storybook/addon-knobs';
 import React from 'react';
 
 import {
@@ -41,7 +41,13 @@ function generateAnnotationData(values: any[]): LineAnnotationDatum[] {
 export const Example = () => {
   const debug = boolean('debug', false);
   const rotation = getChartRotationKnob();
-
+  const markerPosition = select('marker position', [
+    Position.Top,
+    Position.Left,
+    Position.Bottom,
+    Position.Right,
+    'undefined',
+  ], 'undefined');
   const data = arrayKnobs('data values', [1.5, 7.2]);
   const dataValues = generateAnnotationData(data);
 
@@ -57,6 +63,7 @@ export const Example = () => {
         domainType={AnnotationDomainTypes.YDomain}
         dataValues={dataValues}
         marker={<Icon type="alert" />}
+        markerPosition={markerPosition === 'undefined' ? undefined : markerPosition}
       />
       <Axis id="bottom" position={Position.Bottom} title="x-domain axis" />
       <Axis id="left" title={axisTitle} position={axisPosition} />

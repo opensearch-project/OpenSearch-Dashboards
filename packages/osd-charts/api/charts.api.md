@@ -785,6 +785,7 @@ export type LineAnnotationSpec = BaseAnnotationSpec<typeof AnnotationTypes.Line,
         width: number;
         height: number;
     };
+    markerPosition?: Position;
     hideLines?: boolean;
     hideLinesTooltips?: boolean;
     zIndex?: number;

@@ -19,7 +19,7 @@
 
 import { createStore, Store } from 'redux';
 
-import { Spec } from '../../specs';
+import { DEFAULT_SETTINGS_SPEC, Spec } from '../../specs';
 import { updateParentDimensions } from '../../state/actions/chart_settings';
 import { upsertSpec, specParsed } from '../../state/actions/specs';
 import { chartStoreReducer, GlobalChartState } from '../../state/chart_state';
@@ -40,8 +40,14 @@ export class MockStore {
     if (Array.isArray(specs)) {
       const actions = specs.map(upsertSpec);
       actions.forEach(store.dispatch);
+      if (!specs.find((s) => s.id === DEFAULT_SETTINGS_SPEC.id)) {
+        store.dispatch(upsertSpec(DEFAULT_SETTINGS_SPEC));
+      }
     } else {
       store.dispatch(upsertSpec(specs));
+      if (specs.id !== DEFAULT_SETTINGS_SPEC.id) {
+        store.dispatch(upsertSpec(DEFAULT_SETTINGS_SPEC));
+      }
     }
     store.dispatch(specParsed());
   }

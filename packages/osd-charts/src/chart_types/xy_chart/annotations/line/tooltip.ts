@@ -24,7 +24,7 @@ import { getAxesSpecForSpecId } from '../../state/utils/spec';
 import { AnnotationDomainType, AnnotationTypes, AxisSpec } from '../../utils/specs';
 import { isWithinRectBounds } from '../rect/dimensions';
 import { AnnotationTooltipState, AnnotationMarker, Bounds } from '../types';
-import { isXDomain, getTranformedCursor, invertTranformedCursor } from '../utils';
+import { isXDomain, getTransformedCursor, invertTranformedCursor } from '../utils';
 import { AnnotationLineProps } from './types';
 
 /** @internal */
@@ -44,7 +44,7 @@ export function computeLineAnnotationTooltipState(
     return null;
   }
 
-  const projectedPointer = getTranformedCursor(cursorPosition, chartDimensions, null, true);
+  const projectedPointer = getTransformedCursor(cursorPosition, chartDimensions, null, true);
   const totalAnnotationLines = annotationLines.length;
   for (let i = 0; i < totalAnnotationLines; i++) {
     const line = annotationLines[i];

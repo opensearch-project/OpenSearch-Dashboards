@@ -46,7 +46,7 @@ import { computeRectAnnotationDimensions, isWithinRectBounds } from './rect/dime
 import { computeRectAnnotationTooltipState } from './rect/tooltip';
 import { computeAnnotationTooltipState } from './tooltip';
 import { AnnotationDimensions, AnnotationTooltipState, Bounds } from './types';
-import { computeAnnotationDimensions, getAnnotationAxis, getTranformedCursor, invertTranformedCursor } from './utils';
+import { computeAnnotationDimensions, getAnnotationAxis, getTransformedCursor, invertTranformedCursor } from './utils';
 
 describe('annotation utils', () => {
   const minRange = 0;
@@ -139,11 +139,6 @@ describe('annotation utils', () => {
     const expectedDimensions = new Map<AnnotationId, AnnotationDimensions>();
     expectedDimensions.set('foo', [
       {
-        anchor: {
-          top: 80,
-          left: 0,
-          position: Position.Left,
-        },
         linePathPoints: {
           start: { x1: 0, y1: 80 },
           end: { x2: 100, y2: 80 },
@@ -216,16 +211,11 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       xScale,
-      Position.Left,
       false,
+      Position.Left,
     );
     const expectedDimensions: AnnotationLineProps[] = [
       {
-        anchor: {
-          top: 20,
-          left: 0,
-          position: Position.Left,
-        },
         linePathPoints: {
           start: { x1: 0, y1: 20 },
           end: { x2: 10, y2: 20 },
@@ -261,19 +251,14 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       xScale,
-      Position.Right,
       false,
+      Position.Right,
     );
     const expectedDimensions: AnnotationLineProps[] = [
       {
-        anchor: {
-          top: 20,
-          left: 10,
-          position: Position.Right,
-        },
         linePathPoints: {
-          start: { x1: 10, y1: 20 },
-          end: { x2: 0, y2: 20 },
+          start: { x1: 0, y1: 20 },
+          end: { x2: 10, y2: 20 },
         },
         details: { detailsText: 'foo', headerText: '2' },
       },
@@ -306,19 +291,14 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       xScale,
-      Position.Left,
       false,
+      Position.Left,
     );
     const expectedDimensions: AnnotationLineProps[] = [
       {
-        anchor: {
-          top: 20,
-          left: -10,
-          position: Position.Left,
-        },
         linePathPoints: {
-          start: { x1: 20, y1: 20 },
-          end: { x2: 0, y2: 20 },
+          start: { x1: 0, y1: 20 },
+          end: { x2: 20, y2: 20 },
         },
         details: { detailsText: 'foo', headerText: '2' },
         marker: undefined,
@@ -350,8 +330,8 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       xScale,
-      Position.Left,
       false,
+      Position.Left,
     );
     expect(dimensions).toEqual(null);
   });
@@ -379,16 +359,11 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       xScale,
-      Position.Left,
       false,
+      Position.Left,
     );
     const expectedDimensions: AnnotationLineProps[] = [
       {
-        anchor: {
-          top: 0,
-          left: 12.5,
-          position: Position.Left,
-        },
         linePathPoints: {
           start: { x1: 12.5, y1: 0 },
           end: { x2: 12.5, y2: 20 },
@@ -422,16 +397,11 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       xScale,
-      Position.Top,
       false,
+      Position.Top,
     );
     const expectedDimensions: AnnotationLineProps[] = [
       {
-        anchor: {
-          top: 0,
-          left: 25,
-          position: Position.Top,
-        },
         linePathPoints: {
           start: { x1: 25, y1: 0 },
           end: { x2: 25, y2: 20 },
@@ -466,19 +436,14 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       xScale,
-      Position.Bottom,
       false,
+      Position.Bottom,
     );
     const expectedDimensions: AnnotationLineProps[] = [
       {
-        anchor: {
-          top: 20,
-          left: 25,
-          position: Position.Bottom,
-        },
         linePathPoints: {
-          start: { x1: 25, y1: 20 },
-          end: { x2: 25, y2: 0 },
+          start: { x1: 25, y1: 0 },
+          end: { x2: 25, y2: 20 },
         },
         details: { detailsText: 'foo', headerText: '2' },
         marker: undefined,
@@ -511,16 +476,11 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       xScale,
-      Position.Left,
       false,
+      Position.Left,
     );
     const expectedDimensions: AnnotationLineProps[] = [
       {
-        anchor: {
-          top: 12.5,
-          left: 0,
-          position: Position.Left,
-        },
         linePathPoints: {
           start: { x1: 12.5, y1: 0 },
           end: { x2: 12.5, y2: 10 },
@@ -556,16 +516,11 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       xScale,
-      Position.Left,
       false,
+      Position.Left,
     );
     const expectedDimensions: AnnotationLineProps[] = [
       {
-        anchor: {
-          top: 25,
-          left: 0,
-          position: Position.Left,
-        },
         linePathPoints: {
           start: { x1: 25, y1: 0 },
           end: { x2: 25, y2: 10 },
@@ -601,16 +556,11 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       xScale,
-      Position.Left,
       false,
+      Position.Left,
     );
     const expectedDimensions: AnnotationLineProps[] = [
       {
-        anchor: {
-          top: -5,
-          left: 0,
-          position: Position.Left,
-        },
         linePathPoints: {
           start: { x1: 25, y1: 0 },
           end: { x2: 25, y2: 10 },
@@ -646,16 +596,11 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       xScale,
-      Position.Top,
       false,
+      Position.Top,
     );
     const expectedDimensions: AnnotationLineProps[] = [
       {
-        anchor: {
-          top: 0,
-          left: -15,
-          position: Position.Top,
-        },
         linePathPoints: {
           start: { x1: 25, y1: 0 },
           end: { x2: 25, y2: 20 },
@@ -690,20 +635,15 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       xScale,
-      Position.Bottom,
       false,
+      Position.Bottom,
     );
     const expectedDimensions: AnnotationLineProps[] = [
       {
-        anchor: {
-          top: 20,
-          left: -15,
-          position: Position.Bottom,
-        },
         details: { detailsText: 'foo', headerText: '2' },
         linePathPoints: {
-          start: { x1: 25, y1: 20 },
-          end: { x2: 25, y2: 0 },
+          start: { x1: 25, y1: 0 },
+          end: { x2: 25, y2: 20 },
         },
         marker: undefined,
       },
@@ -736,8 +676,8 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       xScale,
-      Position.Right,
       false,
+      Position.Right,
     );
 
     expect(emptyXDimensions).toEqual([]);
@@ -759,8 +699,8 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       continuousScale,
-      Position.Right,
       false,
+      Position.Right,
     );
 
     expect(invalidStringXDimensions).toEqual([]);
@@ -782,8 +722,8 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       continuousScale,
-      Position.Right,
       false,
+      Position.Right,
     );
     expect(emptyOutOfBoundsXDimensions).toHaveLength(0);
 
@@ -804,8 +744,8 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       xScale,
-      Position.Right,
       false,
+      Position.Right,
     );
 
     expect(emptyOutOfBoundsYDimensions).toHaveLength(0);
@@ -827,8 +767,8 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       xScale,
-      Position.Right,
       false,
+      Position.Right,
     );
 
     expect(outOfBoundsYAnn).toHaveLength(0);
@@ -850,8 +790,8 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       continuousScale,
-      Position.Right,
       false,
+      Position.Right,
     );
 
     expect(invalidStringYDimensions).toEqual([]);
@@ -874,8 +814,8 @@ describe('annotation utils', () => {
       chartRotation,
       yScales,
       continuousScale,
-      Position.Right,
       false,
+      Position.Right,
     );
 
     expect(hiddenAnnotationDimensions).toEqual(null);
@@ -885,11 +825,6 @@ describe('annotation utils', () => {
     const cursorPosition: Point = { x: 16, y: 7 };
     const annotationLines: AnnotationLineProps[] = [
       {
-        anchor: {
-          position: Position.Left,
-          left: 0,
-          top: 0,
-        },
         linePathPoints: {
           start: { x1: 1, y1: 2 },
           end: { x2: 3, y2: 4 },
@@ -903,11 +838,6 @@ describe('annotation utils', () => {
         },
       },
       {
-        anchor: {
-          position: Position.Left,
-          left: 0,
-          top: 0,
-        },
         linePathPoints: {
           start: { x1: 0, y1: 10 },
           end: { x2: 20, y2: 10 },
@@ -1058,11 +988,6 @@ describe('annotation utils', () => {
 
     const annotationLines: AnnotationLineProps[] = [
       {
-        anchor: {
-          position: Position.Left,
-          top: 0,
-          left: 0,
-        },
         linePathPoints: { start: { x1: 1, y1: 2 }, end: { x2: 3, y2: 4 } },
         details: {},
         marker: {
@@ -1201,7 +1126,7 @@ describe('annotation utils', () => {
     const localAxesSpecs: AxisSpec[] = [];
 
     const noAxis = getAnnotationAxis(localAxesSpecs, groupId, AnnotationDomainTypes.XDomain, 0);
-    expect(noAxis).toBe(null);
+    expect(noAxis).toBeUndefined();
 
     localAxesSpecs.push(horizontalAxisSpec);
     localAxesSpecs.push(verticalAxisSpec);
@@ -1367,10 +1292,10 @@ describe('annotation utils', () => {
   test('should get rotated cursor position', () => {
     const cursorPosition = { x: 1, y: 2 };
 
-    expect(getTranformedCursor(cursorPosition, chartDimensions, 0)).toEqual(cursorPosition);
-    expect(getTranformedCursor(cursorPosition, chartDimensions, 90)).toEqual({ x: 2, y: 9 });
-    expect(getTranformedCursor(cursorPosition, chartDimensions, -90)).toEqual({ x: 18, y: 1 });
-    expect(getTranformedCursor(cursorPosition, chartDimensions, 180)).toEqual({ x: 9, y: 18 });
+    expect(getTransformedCursor(cursorPosition, chartDimensions, 0)).toEqual(cursorPosition);
+    expect(getTransformedCursor(cursorPosition, chartDimensions, 90)).toEqual({ x: 2, y: 9 });
+    expect(getTransformedCursor(cursorPosition, chartDimensions, -90)).toEqual({ x: 18, y: 1 });
+    expect(getTransformedCursor(cursorPosition, chartDimensions, 180)).toEqual({ x: 9, y: 18 });
   });
 
   describe('#invertTranformedCursor', () => {
@@ -1379,7 +1304,7 @@ describe('annotation utils', () => {
     it.each<Rotation>([0, 90, -90, 180])('Should invert rotated cursor - rotation %d', (rotation) => {
       expect(
         invertTranformedCursor(
-          getTranformedCursor(cursorPosition, chartDimensions, rotation),
+          getTransformedCursor(cursorPosition, chartDimensions, rotation),
           chartDimensions,
           rotation,
         ),
@@ -1389,7 +1314,7 @@ describe('annotation utils', () => {
     it.each<Rotation>([0, 90, -90, 180])('Should invert rotated projected cursor - rotation %d', (rotation) => {
       expect(
         invertTranformedCursor(
-          getTranformedCursor(cursorPosition, chartDimensions, rotation, true),
+          getTransformedCursor(cursorPosition, chartDimensions, rotation, true),
           chartDimensions,
           rotation,
           true,

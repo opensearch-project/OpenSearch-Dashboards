@@ -32,21 +32,24 @@ import { AnnotationLineProps, AnnotationLinePathPoints } from './types';
 export const DEFAULT_LINE_OVERFLOW = 0;
 
 function computeYDomainLineAnnotationDimensions(
-  dataValues: LineAnnotationDatum[],
+  annotationSpec: LineAnnotationSpec,
   yScale: Scale,
   chartRotation: Rotation,
-  axisPosition: Position | null,
   chartDimensions: Dimensions,
   lineColor: string,
-  marker?: JSX.Element,
-  markerDimension = { width: 0, height: 0 },
+  axisPosition?: Position,
 ): AnnotationLineProps[] {
-  const chartHeight = chartDimensions.height;
-  const chartWidth = chartDimensions.width;
+  const {
+    dataValues,
+    marker,
+    markerDimensions = { width: 0, height: 0 },
+    markerPosition: specMarkerPosition,
+  } = annotationSpec;
   const isHorizontalChartRotation = isHorizontalRotation(chartRotation);
   // let's use a default Bottom-X/Left-Y axis orientation if we are not showing an axis
   // but we are displaying a line annotation
-  const anchorPosition = axisPosition === null ? (isHorizontalChartRotation ? Position.Left : Position.Bottom) : axisPosition;
+
+  const anchorPosition = getAnchorPosition(false, isHorizontalChartRotation, specMarkerPosition, axisPosition);
   const lineProps: AnnotationLineProps[] = [];
 
   dataValues.forEach((datum: LineAnnotationDatum) => {
@@ -57,9 +60,9 @@ function computeYDomainLineAnnotationDimensions(
       return;
     }
 
-    const annotationValueYposition = yScale.scale(dataValue);
+    const annotationValueYPosition = yScale.scale(dataValue);
     // avoid rendering non scalable annotation values
-    if (annotationValueYposition === null) {
+    if (annotationValueYPosition === null) {
       return;
     }
 
@@ -69,80 +72,24 @@ function computeYDomainLineAnnotationDimensions(
       return;
     }
 
-    const anchor = {
-      position: anchorPosition,
-      top: 0,
-      left: 0,
-    };
-    const markerPosition = { top: 0, left: 0 };
-    const linePathPoints: AnnotationLinePathPoints = {
-      start: { x1: 0, y1: 0 },
-      end: { x2: 0, y2: 0 },
-    };
-    // the Y axis is vertical, X axis is horizontal  y|--x--|y
-    if (isHorizontalChartRotation) {
-      // y|__x__
-      if (anchorPosition === Position.Left) {
-        anchor.left = 0;
-        markerPosition.left = -markerDimension.width;
-        linePathPoints.start.x1 = 0;
-        linePathPoints.end.x2 = chartWidth;
-        // __x__|y
-      } else {
-        anchor.left = chartWidth;
-        markerPosition.left = chartWidth;
-        linePathPoints.start.x1 = chartWidth;
-        linePathPoints.end.x2 = 0;
-      }
-      // __x__
-      if (chartRotation === 0) {
-        anchor.top = annotationValueYposition;
-        markerPosition.top = annotationValueYposition - markerDimension.height / 2;
-        // ¯¯x¯¯
-      } else {
-        anchor.top = chartHeight - annotationValueYposition;
-        markerPosition.top = chartHeight - annotationValueYposition - markerDimension.height / 2;
-      }
-      linePathPoints.start.y1 = annotationValueYposition;
-      linePathPoints.end.y2 = annotationValueYposition;
-      // the Y axis is horizontal, X axis is vertical x|--y--|x
-    } else {
-      // ¯¯y¯¯
-      if (anchorPosition === Position.Top) {
-        anchor.top = 0;
-        markerPosition.top = -markerDimension.height;
-        linePathPoints.start.x1 = 0;
-        linePathPoints.end.x2 = chartHeight;
-        // __y__
-      } else {
-        anchor.top = chartHeight;
-        markerPosition.top = chartHeight;
-        linePathPoints.start.x1 = chartHeight;
-        linePathPoints.end.x2 = 0;
-      }
-      // __y__|x
-      if (chartRotation === -90) {
-        anchor.left = annotationValueYposition;
-        markerPosition.left = annotationValueYposition - markerDimension.width / 2;
-        // x|__y__
-      } else {
-        anchor.left = chartWidth - annotationValueYposition;
-        markerPosition.left = chartWidth - annotationValueYposition - markerDimension.width / 2;
-      }
-      linePathPoints.start.y1 = annotationValueYposition;
-      linePathPoints.end.y2 = annotationValueYposition;
-    }
+    const markerPosition = getMarkerPositionForYAnnotation(
+      chartDimensions,
+      chartRotation,
+      markerDimensions,
+      anchorPosition,
+      annotationValueYPosition,
+    );
+    const linePathPoints = getYLinePath(chartDimensions, annotationValueYPosition, chartRotation);
 
     const annotationMarker: AnnotationMarker | undefined = marker
       ? {
           icon: marker,
           color: lineColor,
-          dimension: markerDimension,
+          dimension: { ...markerDimensions },
           position: markerPosition,
         }
       : undefined;
     const lineProp: AnnotationLineProps = {
-      anchor,
       linePathPoints,
       marker: annotationMarker,
       details: {
@@ -158,32 +105,33 @@ function computeYDomainLineAnnotationDimensions(
 }
 
 function computeXDomainLineAnnotationDimensions(
-  dataValues: LineAnnotationDatum[],
+  annotationSpec: LineAnnotationSpec,
   xScale: Scale,
   chartRotation: Rotation,
-  axisPosition: Position | null,
   chartDimensions: Dimensions,
   lineColor: string,
   isHistogramMode: boolean,
-  marker?: JSX.Element,
-  markerDimension = { width: 0, height: 0 },
+  axisPosition?: Position,
 ): AnnotationLineProps[] {
-  const chartHeight = chartDimensions.height;
-  const chartWidth = chartDimensions.width;
+  const {
+    dataValues,
+    marker,
+    markerDimensions = { width: 0, height: 0 },
+    markerPosition: specMarkerPosition,
+  } = annotationSpec;
+
   const lineProps: AnnotationLineProps[] = [];
   const isHorizontalChartRotation = isHorizontalRotation(chartRotation);
-  // let's use a default Bottom-X/Left-Y axis orientation if we are not showing an axis
-  // but we are displaying a line annotation
-  const anchorPosition = axisPosition === null ? (isHorizontalChartRotation ? Position.Bottom : Position.Left) : axisPosition;
+  const anchorPosition = getAnchorPosition(true, isHorizontalChartRotation, specMarkerPosition, axisPosition);
 
   dataValues.forEach((datum: LineAnnotationDatum) => {
     const { dataValue } = datum;
-    let annotationValueXposition = xScale.scale(dataValue);
-    if (annotationValueXposition == null) {
+    let annotationValueXPosition = xScale.scale(dataValue);
+    if (annotationValueXPosition == null) {
       return;
     }
     if (isContinuousScale(xScale) && typeof dataValue === 'number') {
-      const minDomain = xScale.domain[0];
+      const [minDomain] = xScale.domain;
       const maxDomain = isHistogramMode ? xScale.domain[1] + xScale.minInterval : xScale.domain[1];
       if (dataValue < minDomain || dataValue > maxDomain) {
         return;
@@ -194,100 +142,42 @@ function computeXDomainLineAnnotationDimensions(
         if (pureScaledValue == null) {
           return;
         }
-        annotationValueXposition = pureScaledValue - offset;
+        annotationValueXPosition = pureScaledValue - offset;
       } else {
-        annotationValueXposition += (xScale.bandwidth * xScale.totalBarsInCluster) / 2;
+        annotationValueXPosition += (xScale.bandwidth * xScale.totalBarsInCluster) / 2;
       }
     } else if (isBandScale(xScale)) {
       if (isHistogramMode) {
         const padding = (xScale.step - xScale.originalBandwidth) / 2;
-        annotationValueXposition -= padding;
+        annotationValueXPosition -= padding;
       } else {
-        annotationValueXposition += xScale.originalBandwidth / 2;
+        annotationValueXPosition += xScale.originalBandwidth / 2;
       }
     } else {
       return;
     }
-    if (isNaN(annotationValueXposition) || annotationValueXposition == null) {
+    if (isNaN(annotationValueXPosition) || annotationValueXPosition == null) {
       return;
     }
 
-    const markerPosition = { top: 0, left: 0 };
-    const linePathPoints: AnnotationLinePathPoints = {
-      start: { x1: 0, y1: 0 },
-      end: { x2: 0, y2: 0 },
-    };
-    const anchor = {
-      position: anchorPosition,
-      top: 0,
-      left: 0,
-    };
-    // the Y axis is vertical, X axis is horizontal  y|--x--|y
-    if (isHorizontalChartRotation) {
-      // __x__
-      if (anchorPosition === Position.Bottom) {
-        linePathPoints.start.y1 = chartHeight;
-        linePathPoints.end.y2 = 0;
-        anchor.top = chartHeight;
-        markerPosition.top = chartHeight;
-        // ¯¯x¯¯
-      } else {
-        linePathPoints.start.y1 = 0;
-        linePathPoints.end.y2 = chartHeight;
-        anchor.top = 0;
-        markerPosition.top = 0 - markerDimension.height;
-      }
-      // __x__
-      if (chartRotation === 0) {
-        anchor.left = annotationValueXposition;
-        markerPosition.left = annotationValueXposition - markerDimension.width / 2;
-        // ¯¯x¯¯
-      } else {
-        anchor.left = chartWidth - annotationValueXposition;
-        markerPosition.left = chartWidth - annotationValueXposition - markerDimension.width / 2;
-      }
-      linePathPoints.start.x1 = annotationValueXposition;
-      linePathPoints.end.x2 = annotationValueXposition;
-      // the Y axis is horizontal, X axis is vertical x|--y--|x
-    } else {
-      // x|--y--
-      if (anchorPosition === Position.Left) {
-        anchor.left = 0;
-        markerPosition.left = -markerDimension.width;
-        linePathPoints.start.x1 = annotationValueXposition;
-        linePathPoints.end.x2 = annotationValueXposition;
-        // --y--|x
-      } else {
-        anchor.left = chartWidth;
-        markerPosition.left = chartWidth;
-        linePathPoints.start.x1 = annotationValueXposition;
-        linePathPoints.end.x2 = annotationValueXposition;
-      }
-      // __y__|x
-      if (chartRotation === -90) {
-        anchor.top = chartHeight - annotationValueXposition;
-        markerPosition.top = chartHeight - annotationValueXposition - markerDimension.height / 2;
-        linePathPoints.start.y1 = 0;
-        linePathPoints.end.y2 = chartWidth;
-        // x|__y__
-      } else {
-        anchor.top = annotationValueXposition;
-        markerPosition.top = annotationValueXposition - markerDimension.height / 2;
-        linePathPoints.start.y1 = 0;
-        linePathPoints.end.y2 = chartWidth;
-      }
-    }
+    const markerPosition = getMarkerPositionForXAnnotation(
+      chartDimensions,
+      chartRotation,
+      markerDimensions,
+      anchorPosition,
+      annotationValueXPosition,
+    );
+    const linePathPoints = getXLinePath(chartDimensions, annotationValueXPosition, chartRotation);
 
     const annotationMarker: AnnotationMarker | undefined = marker
       ? {
           icon: marker,
           color: lineColor,
-          dimension: markerDimension,
+          dimension: { ...markerDimensions },
           position: markerPosition,
         }
       : undefined;
     const lineProp: AnnotationLineProps = {
-      anchor,
       linePathPoints,
       details: {
         detailsText: datum.details,
@@ -308,10 +198,10 @@ export function computeLineAnnotationDimensions(
   chartRotation: Rotation,
   yScales: Map<GroupId, Scale>,
   xScale: Scale,
-  axisPosition: Position | null,
   isHistogramMode: boolean,
+  axisPosition?: Position,
 ): AnnotationLineProps[] | null {
-  const { domainType, dataValues, marker, markerDimensions, hideLines } = annotationSpec;
+  const { domainType, hideLines } = annotationSpec;
 
   if (hideLines) {
     return null;
@@ -323,15 +213,13 @@ export function computeLineAnnotationDimensions(
 
   if (domainType === AnnotationDomainTypes.XDomain) {
     return computeXDomainLineAnnotationDimensions(
-      dataValues,
+      annotationSpec,
       xScale,
       chartRotation,
-      axisPosition,
       chartDimensions,
       lineColor,
       isHistogramMode,
-      marker,
-      markerDimensions,
+      axisPosition,
     );
   }
 
@@ -342,13 +230,153 @@ export function computeLineAnnotationDimensions(
   }
 
   return computeYDomainLineAnnotationDimensions(
-    dataValues,
+    annotationSpec,
     yScale,
     chartRotation,
-    axisPosition,
     chartDimensions,
     lineColor,
-    marker,
-    markerDimensions,
+    axisPosition,
   );
+}
+
+function getAnchorPosition(
+  isXDomain: boolean,
+  isChartHorizontal: boolean,
+  specMarkerPosition?: Position,
+  axisPosition?: Position
+): Position {
+  const dflPositionFromAxis = getDefaultMarkerPositionFromAxis(isXDomain, isChartHorizontal, axisPosition);
+
+  if (specMarkerPosition !== undefined) {
+  // validate specMarkerPosition against domain
+    const validatedPosFromMarkerPos = validateMarkerPosition(isXDomain, isChartHorizontal, specMarkerPosition);
+    return validatedPosFromMarkerPos ?? dflPositionFromAxis;
+  }
+  return dflPositionFromAxis;
+}
+
+function validateMarkerPosition(
+  isXDomain: boolean,
+  isHorizontal: boolean,
+  position: Position,
+): Position | undefined {
+  if ((isXDomain && isHorizontal) || (!isXDomain && !isHorizontal)) {
+    return position === Position.Top || position === Position.Bottom ? position : undefined;
+  }
+  return position === Position.Left || position === Position.Right ? position : undefined;
+}
+
+function getDefaultMarkerPositionFromAxis(
+  isXDomain: boolean,
+  isHorizontal: boolean,
+  axisPosition?: Position
+): Position {
+  if (axisPosition) {
+    return axisPosition;
+  }
+  if ((isXDomain && isHorizontal) || (!isXDomain && !isHorizontal)) {
+    return Position.Left;
+  }
+  return Position.Bottom;
+}
+
+function getXLinePath(
+  { width, height }: Pick<Dimensions, 'width' | 'height'>,
+  value: number,
+  rotation: Rotation,
+): AnnotationLinePathPoints {
+  return {
+    start: {
+      x1: value,
+      y1: 0,
+    },
+    end: {
+      x2: value,
+      y2: rotation === -90 || rotation === 90 ? width : height,
+    },
+  };
+}
+function getYLinePath(
+  { width, height }: Pick<Dimensions, 'width' | 'height'>,
+  value: number,
+  rotation: Rotation,
+): AnnotationLinePathPoints {
+  return {
+    start: {
+      x1: 0,
+      y1: value,
+    },
+    end: {
+      x2: rotation === -90 || rotation === 90 ? height : width,
+      y2: value,
+    },
+  };
+}
+
+function getMarkerPositionForXAnnotation(
+  { width, height }: Pick<Dimensions, 'width' | 'height'>,
+  rotation: Rotation,
+  { width: mWidth, height: mHeight }: Pick<Dimensions, 'width' | 'height'>,
+  position: Position,
+  value: number,
+): Pick<Dimensions, 'top' | 'left'> {
+  switch (position) {
+    case Position.Right:
+      return {
+        top: rotation === -90 ? height - value - mHeight / 2 : value - mHeight / 2,
+        left: width,
+      };
+    case Position.Left:
+      return {
+        top: rotation === -90 ? height - value - mHeight / 2 : value - mHeight / 2,
+        left: -mWidth,
+      };
+    case Position.Top:
+      return {
+        top: 0 - mHeight,
+        left: rotation === 180 ? width - value - mWidth / 2 : value - mWidth / 2,
+      };
+    case Position.Bottom:
+    default:
+      return {
+        top: height,
+        left: rotation === 180 ? width - value - mWidth / 2 : value - mWidth / 2,
+      };
+  }
+}
+
+function getMarkerPositionForYAnnotation(
+  { width, height }: Pick<Dimensions, 'width' | 'height'>,
+  rotation: Rotation,
+  { width: mWidth, height: mHeight }: Pick<Dimensions, 'width' | 'height'>,
+  position: Position,
+  value: number,
+): {
+    top: number, left: number,
+  } {
+  switch (position) {
+    case Position.Right:
+      return {
+        top: rotation === 180 ? height - value - mHeight / 2 : value - mHeight / 2,
+        left: width,
+      };
+    case Position.Left:
+      return {
+        top: rotation === 180 ? height - value - mHeight / 2 : value - mHeight / 2,
+        left: -mWidth,
+
+      };
+    case Position.Top:
+      return {
+        top: 0 - mHeight,
+        left: rotation === 90 ? width - value - mWidth / 2 : value - mWidth / 2,
+
+      };
+    case Position.Bottom:
+    default:
+      return {
+        top: height,
+        left: rotation === 90 ? width - value - mWidth / 2 : value - mWidth / 2,
+      };
+  }
 }

@@ -42,13 +42,13 @@ export function getAnnotationAxis(
   groupId: GroupId,
   domainType: AnnotationDomainType,
   chartRotation: Rotation,
-): Position | null {
+): Position | undefined {
   const { xAxis, yAxis } = getAxesSpecForSpecId(axesSpecs, groupId);
   const isHorizontalRotated = isHorizontalRotation(chartRotation);
   const isXDomainAnnotation = isXDomain(domainType);
   const annotationAxis = isXDomainAnnotation ? xAxis : yAxis;
   const rotatedAnnotation = isHorizontalRotated ? annotationAxis : (isXDomainAnnotation ? yAxis : xAxis);
-  return rotatedAnnotation ? rotatedAnnotation.position : null;
+  return rotatedAnnotation ? rotatedAnnotation.position : undefined;
 }
 
 /** @internal */
@@ -57,12 +57,12 @@ export function isXDomain(domainType: AnnotationDomainType): boolean {
 }
 
 /** @internal */
-export function getTranformedCursor(
+export function getTransformedCursor(
   cursorPosition: Point,
   chartDimensions: Dimensions,
   chartRotation: Rotation | null,
   /**
-   * Used to account for projected cursor position relative to chart dimensions
+   * getTransformedCursor to account for projected cursor position relative to chart dimensions
    */
   projectArea = false,
 ): Point {
@@ -154,8 +154,8 @@ export function computeAnnotationDimensions(
         chartRotation,
         yScales,
         xScale,
-        annotationAxisPosition,
         isHistogramModeEnabled,
+        annotationAxisPosition,
       );
 
       if (dimensions) {

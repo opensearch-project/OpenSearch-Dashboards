@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { Position } from '../../../../utils/commons';
 import { AnnotationDetails, AnnotationMarker } from '../types';
 
 /**
@@ -39,12 +38,6 @@ export interface AnnotationLinePathPoints {
 
 /** @internal */
 export interface AnnotationLineProps {
-  /** the position of the start point relative to the Chart */
-  anchor: {
-    position: Position;
-    top: number;
-    left: number;
-  };
   /**
    * The path points of a line annotation
    */
