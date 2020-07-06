@@ -1,3 +1,16 @@
+# [19.8.0](https://github.com/elastic/elastic-charts/compare/v19.7.0...v19.8.0) (2020-07-06)
+
+
+### Bug Fixes
+
+* set uninitialized state when removeSpec action is called ([#739](https://github.com/elastic/elastic-charts/issues/739)) ([35b8caf](https://github.com/elastic/elastic-charts/commit/35b8caf52ea96979340102653f26aa7ffa069bc2)), closes [#723](https://github.com/elastic/elastic-charts/issues/723) [#738](https://github.com/elastic/elastic-charts/issues/738)
+
+
+### Features
+
+* **annotation:** enable marker positioning on LineAnnotation ([#737](https://github.com/elastic/elastic-charts/issues/737)) ([ab5e413](https://github.com/elastic/elastic-charts/commit/ab5e41378a7a26aca97565722439b618767609b6)), closes [#701](https://github.com/elastic/elastic-charts/issues/701)
+* add custom annotation tooltip ([#727](https://github.com/elastic/elastic-charts/issues/727)) ([435c67c](https://github.com/elastic/elastic-charts/commit/435c67c2f873c15cd7509f81faed8adf0915208a))
+
 # [19.7.0](https://github.com/elastic/elastic-charts/compare/v19.6.3...v19.7.0) (2020-06-30)
 
 
