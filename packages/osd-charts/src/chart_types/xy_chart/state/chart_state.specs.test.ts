@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import { createStore, Store } from 'redux';
+import { Store } from 'redux';
 
 import { MockSeriesSpec } from '../../../mocks/specs';
 import { MockStore } from '../../../mocks/store';
-import { GlobalChartState, chartStoreReducer } from '../../../state/chart_state';
+import { removeSpec, specParsed, upsertSpec } from '../../../state/actions/specs';
+import { GlobalChartState } from '../../../state/chart_state';
+import { getInternalIsInitializedSelector, InitStatus } from '../../../state/selectors/get_internal_is_intialized';
 import { getLegendItemsSelector } from '../../../state/selectors/get_legend_items';
 
 const data = [
@@ -32,8 +34,7 @@ const data = [
 describe('XYChart - specs ordering', () => {
   let store: Store<GlobalChartState>;
   beforeEach(() => {
-    const storeReducer = chartStoreReducer('chartId');
-    store = createStore(storeReducer);
+    store = MockStore.default({ width: 100, height: 100, left: 0, top: 0 });
   });
 
   it('the legend respect the insert [A, B, C] order', () => {
@@ -97,5 +98,36 @@ describe('XYChart - specs ordering', () => {
     legendItems = getLegendItemsSelector(store.getState());
     names = [...legendItems.values()].map((item) => item.label);
     expect(names).toEqual(['B', 'A', 'C']);
+  });
+  it('The status should switch to not initialized removing a spec', () => {
+    MockStore.addSpecs([
+      MockSeriesSpec.bar({ id: 'A', data }),
+      MockSeriesSpec.bar({ id: 'B', data }),
+      MockSeriesSpec.bar({ id: 'C', data }),
+    ], store);
+    expect(getInternalIsInitializedSelector(store.getState())).toBe(InitStatus.Initialized);
+    // check on remove
+    store.dispatch(removeSpec('A'));
+    expect(getInternalIsInitializedSelector(store.getState())).not.toBe(InitStatus.Initialized);
+
+    // initialized again after specParsed action
+    store.dispatch(specParsed());
+    expect(getInternalIsInitializedSelector(store.getState())).toBe(InitStatus.Initialized);
+  });
+  it('The status should switch to not initialized when upserting a spec', () => {
+    MockStore.addSpecs([
+      MockSeriesSpec.bar({ id: 'A', data }),
+      MockSeriesSpec.bar({ id: 'B', data }),
+      MockSeriesSpec.bar({ id: 'C', data }),
+    ], store);
+    expect(getInternalIsInitializedSelector(store.getState())).toBe(InitStatus.Initialized);
+
+    // check on upsert
+    store.dispatch(upsertSpec(MockSeriesSpec.bar({ id: 'D', data })));
+    expect(getInternalIsInitializedSelector(store.getState())).not.toBe(InitStatus.Initialized);
+
+    // initialized again after specParsed action
+    store.dispatch(specParsed());
+    expect(getInternalIsInitializedSelector(store.getState())).toBe(InitStatus.Initialized);
   });
 });

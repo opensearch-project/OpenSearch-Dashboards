@@ -320,6 +320,9 @@ export const chartStoreReducer = (chartId: string) => {
         const { [action.id]: specToRemove, ...rest } = state.specs;
         return {
           ...state,
+          specsInitialized: false,
+          chartRendered: false,
+          specParsing: true,
           specs: {
             ...rest,
           },
