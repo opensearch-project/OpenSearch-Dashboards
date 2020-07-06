@@ -84,13 +84,12 @@ export const Example = () => {
 
   const hasCustomTooltip = boolean('has custom tooltip render', false);
 
-  const customTooltip = (details?: string) => (
+  const customTooltip = ({ details } : { details?: string }) => (
     <div>
       <Icon type="alert" />
       {details}
     </div>
   );
-  const renderTooltip = hasCustomTooltip ? customTooltip : undefined;
 
   const isLeft = boolean('y-domain axis is Position.Left', true);
   const yAxisTitle = isLeft ? 'y-domain axis (left)' : 'y-domain axis (right)';
@@ -108,7 +107,7 @@ export const Example = () => {
         dataValues={dataValues}
         id="rect"
         style={style}
-        renderTooltip={renderTooltip}
+        customTooltip={hasCustomTooltip ? customTooltip : undefined}
         zIndex={zIndex}
         hideTooltips={hideTooltips}
       />

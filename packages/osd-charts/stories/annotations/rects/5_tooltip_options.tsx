@@ -17,23 +17,30 @@
  * under the License.
  */
 
-import { select } from '@storybook/addon-knobs';
+import { boolean, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AnnotationTooltipFormatter, Axis, BarSeries, Chart, ScaleType, RectAnnotation } from '../../../src';
+import { AnnotationTooltipFormatter, Axis, BarSeries, Chart, ScaleType, RectAnnotation, Settings } from '../../../src';
+import { CustomAnnotationTooltip } from '../../../src/chart_types/xy_chart/annotations/types';
 import { Position } from '../../../src/utils/commons';
+import {
+  getBoundaryKnob,
+  getChartRotationKnob,
+  getFallbackPlacementsKnob,
+  getPlacementKnob,
+} from '../../utils/knobs';
 
 export const Example = () => {
-  const tooltipOptions = {
-    'default formatter, details defined': 'default_defined',
-    'default formatter, details undefined': 'default_undefined',
-    'custom formatter, return element': 'custom_element',
-    'custom formatter, return null': 'custom_null',
-  };
-
-  const tooltipFormat = select('tooltip format', tooltipOptions, 'default_defined');
-
-  const isDefaultDefined = tooltipFormat === 'default_defined';
+  const boundary = getBoundaryKnob();
+  const placement = getPlacementKnob('Tooltip placement');
+  const fallbackPlacements = getFallbackPlacementsKnob();
+  const rotation = getChartRotationKnob();
+  const showCustomTooltip = boolean('custom tooltip', false);
+  const showCustomDetails = boolean('custom tooltip details', false);
+  const details = select('details value', {
+    foo: 'foo',
+    undefined,
+  }, 'foo');
 
   const dataValues = [
     {
@@ -43,27 +50,36 @@ export const Example = () => {
         y0: 0,
         y1: 7,
       },
-      details: isDefaultDefined ? 'foo' : undefined,
+      details,
     },
   ];
 
-  const isCustomTooltipElement = tooltipFormat === 'custom_element';
-  const tooltipFormatter: AnnotationTooltipFormatter = () => {
-    if (!isCustomTooltipElement) {
-      return null;
-    }
-
-    return <div>custom formatter</div>;
-  };
-
-  const isCustomTooltip = tooltipFormat.includes('custom');
+  const customTooltip: CustomAnnotationTooltip | undefined = showCustomTooltip ? ({ details }) => (
+    <div style={{ backgroundColor: 'blue', color: 'white', padding: 10 }}>
+      <h2>
+        custom tooltip
+      </h2>
+      <p>{details}</p>
+    </div>
+  ) : undefined;
+  const customTooltipDetails: AnnotationTooltipFormatter | undefined = showCustomDetails ? (details) => (
+    <div>
+      <h2>custom Details</h2>
+      <p>{details}</p>
+    </div>
+  ) : undefined;
 
   return (
     <Chart className="story-chart">
+      <Settings rotation={rotation} />
       <RectAnnotation
         dataValues={dataValues}
         id="rect"
-        renderTooltip={isCustomTooltip ? tooltipFormatter : undefined}
+        boundary={boundary}
+        placement={placement}
+        fallbackPlacements={fallbackPlacements}
+        customTooltip={customTooltip}
+        customTooltipDetails={customTooltipDetails}
       />
       <Axis id="bottom" position={Position.Bottom} title="x-domain axis" />
       <Axis id="left" title="y-domain axis" position={Position.Left} />

@@ -18,4 +18,4 @@
  */
 
 export { Chart } from './chart';
-export { Placement } from './portal';
+export { Placement, TooltipPortalSettings } from './portal';

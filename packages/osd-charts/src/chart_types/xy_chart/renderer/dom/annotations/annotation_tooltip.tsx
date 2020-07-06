@@ -17,21 +17,21 @@
  * under the License.
  */
 
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useMemo, useEffect, RefObject } from 'react';
 
-import { TooltipPortal, Placement } from '../../../../../components/portal';
+import { TooltipPortal, Placement, TooltipPortalSettings } from '../../../../../components/portal';
 import { AnnotationTooltipState } from '../../../annotations/types';
 import { TooltipContent } from './tooltip_content';
 
-interface RectAnnotationTooltipProps {
+interface AnnotationTooltipProps {
   state: AnnotationTooltipState | null;
-  chartRef: HTMLDivElement | null;
+  chartRef: RefObject<HTMLDivElement>;
   chartId: string;
   onScroll?: () => void;
 }
 
 /** @internal */
-export const AnnotationTooltip = ({ state, chartRef, chartId, onScroll }: RectAnnotationTooltipProps) => {
+export const AnnotationTooltip = ({ state, chartRef, chartId, onScroll }: AnnotationTooltipProps) => {
   const renderTooltip = useCallback(() => {
     if (!state || !state.isVisible) {
       return null;
@@ -54,8 +54,22 @@ export const AnnotationTooltip = ({ state, chartRef, chartId, onScroll }: RectAn
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const popperSettings = useMemo((): TooltipPortalSettings | undefined => {
+    const settings = state?.tooltipSettings;
+    if (!settings) {
+      return;
+    }
+
+    const { placement, boundary, ...rest } = settings;
+
+    return {
+      ...rest,
+      placement: placement ?? state?.anchor?.position ?? Placement.Right,
+      boundary: boundary === 'chart' && chartRef.current ? chartRef.current : undefined,
+    };
+  }, [state?.tooltipSettings, state?.anchor?.position, chartRef]);
+
   const position = useMemo(() => state?.anchor ?? null, [state?.anchor]);
-  const placement = useMemo(() => state?.anchor?.position ?? Placement.Right, [state?.anchor?.position]);
   if (!state?.isVisible) {
     return null;
   }
@@ -65,12 +79,10 @@ export const AnnotationTooltip = ({ state, chartRef, chartId, onScroll }: RectAn
       chartId={chartId}
       anchor={{
         position,
-        ref: chartRef,
+        ref: chartRef.current,
       }}
       visible={state?.isVisible ?? false}
-      settings={{
-        placement,
-      }}
+      settings={popperSettings}
     >
       {renderTooltip()}
     </TooltipPortal>

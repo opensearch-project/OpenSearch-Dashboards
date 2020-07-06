@@ -17,12 +17,18 @@
  * under the License.
  */
 
-import { select, boolean, optionsKnob } from '@storybook/addon-knobs';
+import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings, TooltipProps, Placement } from '../../src';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
 import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
-import { getChartRotationKnob, getPlacementKnob, getTooltipTypeKnob } from '../utils/knobs';
+import {
+  getBoundaryKnob,
+  getChartRotationKnob,
+  getFallbackPlacementsKnob,
+  getPlacementKnob,
+  getTooltipTypeKnob,
+} from '../utils/knobs';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 const CustomTooltip = () => (
@@ -38,62 +44,13 @@ const CustomTooltip = () => (
   </div>
 );
 
-const getFallbackPlacements = (): Placement[] | undefined => {
-  const knob = optionsKnob<Placement>(
-    'Fallback Placements',
-    {
-      Top: Placement.Top,
-      Bottom: Placement.Bottom,
-      Left: Placement.Left,
-      Right: Placement.Right,
-      TopStart: Placement.TopStart,
-      TopEnd: Placement.TopEnd,
-      BottomStart: Placement.BottomStart,
-      BottomEnd: Placement.BottomEnd,
-      RightStart: Placement.RightStart,
-      RightEnd: Placement.RightEnd,
-      LeftStart: Placement.LeftStart,
-      LeftEnd: Placement.LeftEnd,
-      Auto: Placement.Auto,
-      AutoStart: Placement.AutoStart,
-      AutoEnd: Placement.AutoEnd,
-    },
-    [Placement.Right, Placement.Left, Placement.Top, Placement.Bottom],
-    {
-      display: 'multi-select',
-    },
-  );
-
-  if (typeof knob === 'string') {
-    // @ts-ignore
-    return knob.split(', ');
-  }
-
-  // @ts-ignore
-  if (knob.length === 0) {
-    return;
-  }
-
-  return knob;
-};
-
 export const Example = () => {
   const rotation = getChartRotationKnob();
-  // @ts-ignore
-  const boundary = select<TooltipProps['boundary']>(
-    'Boundary Element',
-    {
-      Chart: 'chart',
-      'Document Body': document.body,
-      Default: undefined,
-    },
-    undefined,
-  );
   const tooltipOptions = {
     placement: getPlacementKnob('Tooltip placement'),
-    fallbackPlacements: getFallbackPlacements(),
+    fallbackPlacements: getFallbackPlacementsKnob(),
     type: getTooltipTypeKnob(),
-    boundary,
+    boundary: getBoundaryKnob(),
     customTooltip: boolean('Custom Tooltip', false) ? CustomTooltip : undefined,
   };
   const showAxes = boolean('Show axes', false);

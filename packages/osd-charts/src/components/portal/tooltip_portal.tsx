@@ -22,7 +22,7 @@ import { useRef, useEffect, useCallback, ReactNode, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 
 import { mergePartial, isDefined } from '../../utils/commons';
-import { PopperSettings, PortalAnchorRef } from './types';
+import { TooltipPortalSettings, PortalAnchorRef } from './types';
 import { DEFAULT_POPPER_SETTINGS, getOrCreateNode, isHTMLElement } from './utils';
 
 /**
@@ -44,7 +44,7 @@ type PortalTooltipProps = {
   /**
    * Settings to control portal positioning
    */
-  settings?: Partial<PopperSettings>;
+  settings?: TooltipPortalSettings;
   /**
    * Anchor element to use as position reference
    */

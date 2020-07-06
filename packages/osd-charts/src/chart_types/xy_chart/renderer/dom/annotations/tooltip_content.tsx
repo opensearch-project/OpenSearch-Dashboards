@@ -23,16 +23,22 @@ import { AnnotationTypes } from '../../../../specs';
 import { AnnotationTooltipState } from '../../../annotations/types';
 
 /** @internal */
-export const TooltipContent = ({ annotationType, header, details, renderTooltip }: AnnotationTooltipState) => {
+export const TooltipContent = ({
+  annotationType,
+  header,
+  details,
+  customTooltip: CustomTooltip,
+  customTooltipDetails,
+}: AnnotationTooltipState) => {
   const renderLine = useCallback(() => (
     <div className="echAnnotation__tooltip">
       <p className="echAnnotation__header">{header}</p>
-      <div className="echAnnotation__details">{details}</div>
+      <div className="echAnnotation__details">{customTooltipDetails ? customTooltipDetails(details) : details}</div>
     </div>
-  ), [header, details]);
+  ), [header, details, customTooltipDetails]);
 
   const renderRect = useCallback(() => {
-    const tooltipContent = renderTooltip ? renderTooltip(details) : details;
+    const tooltipContent = customTooltipDetails ? customTooltipDetails(details) : details;
     if (!tooltipContent) {
       return null;
     }
@@ -44,7 +50,11 @@ export const TooltipContent = ({ annotationType, header, details, renderTooltip 
         </div>
       </div>
     );
-  }, [details, renderTooltip]);
+  }, [details, customTooltipDetails]);
+
+  if (CustomTooltip) {
+    return <CustomTooltip details={details} header={header} />;
+  }
 
   switch (annotationType) {
     case AnnotationTypes.Line: {

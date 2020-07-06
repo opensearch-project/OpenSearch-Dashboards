@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { select, array } from '@storybook/addon-knobs';
+import { select, array, optionsKnob } from '@storybook/addon-knobs';
 
-import { Rotation, Position, Placement } from '../../src';
+import { Rotation, Position, Placement, TooltipProps } from '../../src';
 import { TooltipType } from '../../src/specs/constants';
 
 export const numberSelect = <T extends number>(
@@ -96,3 +96,53 @@ export function arrayKnobs(name: string, values: (string | number)[]): (string |
   const stringifiedValues = values.map<string>((d) => `${d}`);
   return array(name, stringifiedValues).map<string | number>((value: string) => !isNaN(parseFloat(value)) ? parseFloat(value) : value);
 }
+
+export const getFallbackPlacementsKnob = (): Placement[] | undefined => {
+  const knob = optionsKnob<Placement>(
+    'Fallback Placements',
+    {
+      Top: Placement.Top,
+      Bottom: Placement.Bottom,
+      Left: Placement.Left,
+      Right: Placement.Right,
+      TopStart: Placement.TopStart,
+      TopEnd: Placement.TopEnd,
+      BottomStart: Placement.BottomStart,
+      BottomEnd: Placement.BottomEnd,
+      RightStart: Placement.RightStart,
+      RightEnd: Placement.RightEnd,
+      LeftStart: Placement.LeftStart,
+      LeftEnd: Placement.LeftEnd,
+      Auto: Placement.Auto,
+      AutoStart: Placement.AutoStart,
+      AutoEnd: Placement.AutoEnd,
+    },
+    [Placement.Right, Placement.Left, Placement.Top, Placement.Bottom],
+    {
+      display: 'multi-select',
+    },
+  );
+
+  if (typeof knob === 'string') {
+    // @ts-ignore
+    return knob.split(', ');
+  }
+
+  // @ts-ignore
+  if (knob.length === 0) {
+    return;
+  }
+
+  return knob;
+};
+
+// @ts-ignore
+export const getBoundaryKnob = () => select<TooltipProps['boundary']>(
+  'Boundary Element',
+  {
+    Chart: 'chart',
+    'Document Body': document.body,
+    Default: undefined,
+  },
+  undefined,
+);

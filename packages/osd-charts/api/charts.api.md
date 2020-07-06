@@ -23,6 +23,12 @@ export const AnnotationDomainTypes: Readonly<{
 // @public (undocumented)
 export type AnnotationId = string;
 
+// @public
+export type AnnotationPortalSettings = TooltipPortalSettings<'chart'> & {
+    customTooltip?: CustomAnnotationTooltip;
+    customTooltipDetails?: AnnotationTooltipFormatter;
+};
+
 // @public (undocumented)
 export type AnnotationSpec = LineAnnotationSpec | RectAnnotationSpec;
 
@@ -232,7 +238,7 @@ export type BarStyleOverride = RecursivePartial<BarSeriesStyle> | Color | null;
 // Warning: (ae-missing-release-tag) "BaseAnnotationSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface BaseAnnotationSpec<T extends typeof AnnotationTypes.Rectangle | typeof AnnotationTypes.Line, D extends RectAnnotationDatum | LineAnnotationDatum, S extends RectAnnotationStyle | LineAnnotationStyle> extends Spec {
+export interface BaseAnnotationSpec<T extends typeof AnnotationTypes.Rectangle | typeof AnnotationTypes.Line, D extends RectAnnotationDatum | LineAnnotationDatum, S extends RectAnnotationStyle | LineAnnotationStyle> extends Spec, AnnotationPortalSettings {
     annotationType: T;
     // (undocumented)
     chartType: typeof ChartTypes.XYAxis;
@@ -405,6 +411,12 @@ export const CurveType: Readonly<{
 // @public (undocumented)
 export type CurveType = $Values<typeof CurveType>;
 
+// @public (undocumented)
+export type CustomAnnotationTooltip = ComponentType<{
+    header?: string;
+    details?: string;
+}> | null;
+
 // @public
 export type CustomTooltip = ComponentType<TooltipInfo>;
 
@@ -537,11 +549,8 @@ export type ElementOverListener = (elements: Array<XYChartElementEvent | Partiti
 
 // @alpha
 export interface ExternalPointerEventsSettings {
-    tooltip: {
+    tooltip: TooltipPortalSettings<'chart'> & {
         visible?: boolean;
-        placement?: Placement;
-        fallbackPlacements?: Placement[];
-        boundary?: HTMLElement | 'chart';
     };
 }
 
@@ -1432,17 +1441,21 @@ export interface TooltipInfo {
 }
 
 // @public
-export interface TooltipProps {
-    boundary?: HTMLElement | 'chart';
-    customTooltip?: CustomTooltip;
+export interface TooltipPortalSettings<B = never> {
+    boundary?: HTMLElement | B;
     fallbackPlacements?: Placement[];
-    headerFormatter?: TooltipValueFormatter;
+    offset?: number;
     placement?: Placement;
-    snap?: boolean;
-    type?: TooltipType;
-    // @alpha
-    unit?: string;
 }
+
+// @public
+export type TooltipProps = TooltipPortalSettings<'chart'> & {
+    type?: TooltipType;
+    snap?: boolean;
+    headerFormatter?: TooltipValueFormatter;
+    unit?: string;
+    customTooltip?: CustomTooltip;
+};
 
 // @public
 export type TooltipSettings = TooltipType | TooltipProps;

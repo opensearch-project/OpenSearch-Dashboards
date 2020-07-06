@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { TooltipPortalSettings } from '../../../components/portal';
 import { Rotation } from '../../../utils/commons';
 import { Dimensions } from '../../../utils/dimensions';
 import { AnnotationId } from '../../../utils/ids';
@@ -48,7 +49,9 @@ export function computeAnnotationTooltipState(
     if (spec.hideTooltips || !annotationDimension) {
       continue;
     }
-    const { groupId } = spec;
+    const { groupId, customTooltip, customTooltipDetails } = spec;
+
+    const tooltipSettings = getTooltipSettings(spec);
 
     if (isLineAnnotation(spec)) {
       if (spec.hideLines) {
@@ -64,7 +67,12 @@ export function computeAnnotationTooltipState(
       );
 
       if (lineAnnotationTooltipState) {
-        return lineAnnotationTooltipState;
+        return {
+          ...lineAnnotationTooltipState,
+          tooltipSettings,
+          customTooltip,
+          customTooltipDetails,
+        };
       }
     } else if (isRectAnnotation(spec)) {
       const rectAnnotationTooltipState = computeRectAnnotationTooltipState(
@@ -72,14 +80,32 @@ export function computeAnnotationTooltipState(
         annotationDimension as AnnotationRectProps[],
         chartRotation,
         chartDimensions,
-        spec.renderTooltip,
       );
 
       if (rectAnnotationTooltipState) {
-        return rectAnnotationTooltipState;
+        return {
+          ...rectAnnotationTooltipState,
+          tooltipSettings,
+          customTooltip,
+          customTooltipDetails: customTooltipDetails ?? spec.renderTooltip,
+        };
       }
     }
   }
 
   return null;
+}
+
+function getTooltipSettings({
+  placement,
+  fallbackPlacements,
+  boundary,
+  offset,
+}: AnnotationSpec): TooltipPortalSettings<'chart'> {
+  return {
+    placement,
+    fallbackPlacements,
+    boundary,
+    offset,
+  };
 }

@@ -24,7 +24,7 @@ import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/grou
 import { XYChartSeriesIdentifier } from '../chart_types/xy_chart/utils/series';
 import { DomainRange } from '../chart_types/xy_chart/utils/specs';
 import { SeriesIdentifier } from '../commons/series_id';
-import { Placement } from '../components/portal';
+import { TooltipPortalSettings } from '../components/portal';
 import { CustomTooltip } from '../components/tooltip/types';
 import { ScaleContinuousType, ScaleOrdinalType } from '../scales';
 import { getConnect, specComponentFactory } from '../state/spec_factory';
@@ -140,7 +140,7 @@ export type TooltipValueFormatter = (data: TooltipValue) => JSX.Element | string
  * The advanced configuration for the tooltip
  * @public
  */
-export interface TooltipProps {
+export type TooltipProps = TooltipPortalSettings<'chart'> & {
   /**
    * The {@link (TooltipType:type) | TooltipType} of the tooltip
    */
@@ -154,29 +154,9 @@ export interface TooltipProps {
    */
   headerFormatter?: TooltipValueFormatter;
   /**
-   * Preferred placement of tooltip relative to anchor.
-   *
-   * This may not be the final placement given the positioning fallbacks.
-   *
-   * @defaultValue `right` {@link (Placement:type) | Placement.Right}
-   */
-  placement?: Placement;
-  /**
-   * If given tooltip placement is not sutable, these `Placement`s will
-   * be used as fallback placements.
-   */
-  fallbackPlacements?: Placement[];
-  /**
-   * Boundary element to contain tooltip within
-   *
-   * `'chart'` will use the chart container as the boundary
-   *
-   * @defaultValue undefined - parent scroll container
-   */
-  boundary?: HTMLElement | 'chart';
-  /**
    * Unit for event (i.e. `time`, `feet`, `count`, etc.).
    * Not currently used/implemented
+   *
    * @alpha
    */
   unit?: string;
@@ -184,10 +164,10 @@ export interface TooltipProps {
    * Render custom tooltip given header and values
    */
   customTooltip?: CustomTooltip;
-}
+};
 
 /**
- * Either a {@link (TooltipType:type)} or an {@link (TooltipProps:interface)} configuration
+ * Either a {@link (TooltipType:type)} or an {@link (TooltipProps:type)} configuration
  * @public
  */
 export type TooltipSettings = TooltipType | TooltipProps;
@@ -200,27 +180,14 @@ export interface ExternalPointerEventsSettings {
   /**
    * Tooltip settings used for external events
    */
-  tooltip: {
+  tooltip: TooltipPortalSettings<'chart'> & {
     /**
      * `true` to show the tooltip when the chart receive an
      * external pointer event, 'false' to hide the tooltip.
      * @defaultValue `false`
      */
     visible?: boolean;
-    /**
-     * {@inheritDoc TooltipProps.placement}
-     */
-    placement?: Placement;
-    /**
-     * {@inheritDoc TooltipProps.fallbackPlacements}
-     */
-    fallbackPlacements?: Placement[];
-    /**
-     * {@inheritDoc TooltipProps.boundary}
-     */
-    boundary?: HTMLElement | 'chart';
   }
-
 }
 
 export interface LegendColorPickerProps {

@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import { PopperSettings, Placement } from './types';
+import { Required } from 'utility-types';
+
+import { TooltipPortalSettings, Placement } from './types';
 
 /** @internal */
-export const DEFAULT_POPPER_SETTINGS: PopperSettings = {
+export const DEFAULT_POPPER_SETTINGS: Required<TooltipPortalSettings, 'fallbackPlacements' | 'placement' | 'offset'> = {
   fallbackPlacements: [Placement.Right, Placement.Left, Placement.Top, Placement.Bottom],
   placement: Placement.Right,
   offset: 10,

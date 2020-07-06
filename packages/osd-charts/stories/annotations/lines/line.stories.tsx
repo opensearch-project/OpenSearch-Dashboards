@@ -31,5 +31,7 @@ export { Example as xOrdinalDomain } from './2_x_ordinal';
 export { Example as xTimeDomain } from './3_x_time';
 export { Example as yDomain } from './4_y_domain';
 export { Example as styling } from './5_styling';
+export { Example as tooltipOptions } from './7_tooltip_options';
+
 // for testing
 export { Example as singleBarHistogram } from './6_test_single_bar_histogram';

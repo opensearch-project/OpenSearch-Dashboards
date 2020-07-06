@@ -126,7 +126,7 @@ const AnnotationsComponent = ({
       <AnnotationTooltip
         chartId={chartId}
         state={tooltipState}
-        chartRef={getChartContainerRef().current}
+        chartRef={getChartContainerRef()}
         onScroll={onScroll}
       />
     </>

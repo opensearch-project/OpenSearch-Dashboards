@@ -48,14 +48,6 @@ export const Placement = Object.freeze({
 export type Placement = $Values<typeof Placement>;
 
 /** @internal */
-export interface PopperSettings {
-  fallbackPlacements: Placement[];
-  placement: Placement;
-  boundary?: HTMLElement;
-  offset?: number;
-}
-
-/** @internal */
 export interface AnchorPosition {
   left: number;
   top: number;
@@ -79,4 +71,37 @@ export interface PortalAnchorRef {
    * @default document.body
    */
   ref: HTMLElement | null;
+}
+
+/**
+ * Tooltip portal settings
+ *
+ * @public
+ */
+export interface TooltipPortalSettings<B = never> {
+  /**
+   * Preferred placement of tooltip relative to anchor.
+   *
+   * This may not be the final placement given the positioning fallbacks.
+   *
+   * @defaultValue `right` {@link (Placement:type) | Placement.Right}
+   */
+  placement?: Placement;
+  /**
+   * If given tooltip placement is not suitable, these `Placement`s will
+   * be used as fallback placements.
+   */
+  fallbackPlacements?: Placement[];
+  /**
+   * Boundary element to contain tooltip within
+   *
+   * `'chart'` will use the chart container as the boundary
+   *
+   * @defaultValue parent scroll container
+   */
+  boundary?: HTMLElement | B;
+  /**
+   * Custom tooltip offset
+   */
+  offset?: number;
 }
