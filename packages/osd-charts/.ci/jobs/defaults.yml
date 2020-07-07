@@ -17,6 +17,8 @@
           properties-content: |-
             CI=true
             HOME=$JENKINS_HOME
+            PR_GH_REPO=$ghprbGhRepository
+            PR_ACT_COMMIT=$ghprbActualCommit
     concurrent: true
     node: linux && docker
     scm:
