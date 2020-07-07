@@ -55,7 +55,7 @@ import {
   enableDuplicatedTicks,
 } from './axis_utils';
 import { computeXScale } from './scales';
-import { AxisSpec, DomainRange, AxisStyle, DEFAULT_GLOBAL_ID } from './specs';
+import { AxisSpec, DomainRange, AxisStyle, DEFAULT_GLOBAL_ID, TickFormatter } from './specs';
 
 describe('Axis computational utils', () => {
   const mockedRect = {
@@ -1433,6 +1433,49 @@ describe('Axis computational utils', () => {
       { value: 1547424000000, label: '2019-01-14', position: 326.8958333333333 },
       { value: 1547510400000, label: '2019-01-15', position: 447.59583333333336 },
       { value: 1547596800000, label: '2019-01-16', position: 568.2958333333333 },
+    ]);
+  });
+  test('should show unique consecutive ticks if duplicateTicks is set to false', () => {
+    const formatter: TickFormatter = (d, options = { timeZone: 'utc+1' }) => DateTime.fromMillis(d, { setZone: true, zone: options.timeZone }).toFormat('HH:mm');
+    const axisSpec: AxisSpec = {
+      id: 'bottom',
+      position: 'bottom',
+      showDuplicatedTicks: false,
+      chartType: 'xy_axis',
+      specType: 'axis',
+      groupId: DEFAULT_GLOBAL_ID,
+      hide: false,
+      showOverlappingLabels: false,
+      showOverlappingTicks: false,
+      tickSize: 10,
+      tickPadding: 10,
+      tickLabelRotation: 0,
+      tickFormat: formatter,
+    };
+    const xDomainTime: XDomain = {
+      type: 'xDomain',
+      isBandScale: false,
+      timeZone: 'utc+1',
+      domain: [1547190000000, 1547622000000],
+      minInterval: 86400000,
+      scaleType: ScaleType.Time,
+    };
+    const scale: Scale = computeXScale({ xDomain: xDomainTime, totalBarsInCluster: 0, range: [0, 603.5] });
+    const offset = 0;
+    const tickFormatOption = { timeZone: xDomainTime.timeZone };
+    const ticks = enableDuplicatedTicks(axisSpec, scale, offset, tickFormatOption);
+    const tickLabels = ticks.map(({ label }) => ({ label }));
+    expect(tickLabels).toEqual([
+      { label: '12:00' },
+      { label: '00:00' },
+      { label: '12:00' },
+      { label: '00:00' },
+      { label: '12:00' },
+      { label: '00:00' },
+      { label: '12:00' },
+      { label: '00:00' },
+      { label: '12:00' },
+      { label: '00:00' },
     ]);
   });
   test('should show duplicate tick labels if duplicateTicks is set to true', () => {

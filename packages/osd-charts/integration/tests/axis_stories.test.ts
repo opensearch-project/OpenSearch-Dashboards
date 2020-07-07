@@ -65,4 +65,9 @@ describe('Axis stories', () => {
       'http://localhost:9001/?path=/story/axes--custom-mixed&knob-left min=2&knob-xDomain max=2',
     );
   });
+  it('should hide consecutive duplicate ticks', async() => {
+    await common.expectChartAtUrlToMatchScreenshot(
+      'http://localhost:9001/?path=/story/axes--duplicate-ticks&knob-formatter=hourly&knob-Show duplicate ticks in x axis=true',
+    );
+  });
 });

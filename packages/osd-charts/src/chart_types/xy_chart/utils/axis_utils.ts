@@ -471,7 +471,7 @@ export function enableDuplicatedTicks(
   if (axisSpec.showDuplicatedTicks === true) {
     return allTicks;
   }
-  return getUniqueValues(allTicks, 'label');
+  return getUniqueValues(allTicks, 'label', true);
 }
 
 /** @internal */

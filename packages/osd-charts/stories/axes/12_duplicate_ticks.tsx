@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { boolean } from '@storybook/addon-knobs';
+import { boolean, select } from '@storybook/addon-knobs';
 import { DateTime } from 'luxon';
 import moment from 'moment-timezone';
 import React from 'react';
 
-import { Axis, Chart, LineSeries, Position, ScaleType, niceTimeFormatter } from '../../src';
+import { Axis, Chart, LineSeries, Position, ScaleType, niceTimeFormatter, TickFormatter } from '../../src';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 
 export const Example = () => {
@@ -31,11 +31,16 @@ export const Example = () => {
     .toMillis();
   const oneDay = moment.duration(1, 'd');
   const twoDays = moment.duration(2, 'd');
-  const oneMonth = moment.duration(31, 'd');
   const threeDays = moment.duration(3, 'd');
   const fourDays = moment.duration(4, 'd');
   const fiveDays = moment.duration(5, 'd');
-  const formatter = niceTimeFormatter([now, oneMonth.add(now).asMilliseconds()]);
+  const formatters: Record<string, TickFormatter> = {
+    daily: niceTimeFormatter([now, moment.duration(31, 'd').add(now).asMilliseconds()]),
+    hourly: (d) => moment(d).format('HH:mm'),
+  };
+  const formatterSelect = select<string>('formatter', ['daily', 'hourly'], 'daily');
+  const formatter = formatters[formatterSelect];
+
   const duplicateTicksInAxis = boolean('Show duplicate ticks in x axis', false);
   return (
     <Chart className="story-chart">
