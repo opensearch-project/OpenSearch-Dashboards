@@ -1,3 +1,10 @@
+## [19.8.1](https://github.com/elastic/elastic-charts/compare/v19.8.0...v19.8.1) (2020-07-07)
+
+
+### Bug Fixes
+
+* **axes:** remove only consecutive duplicated ticks ([#742](https://github.com/elastic/elastic-charts/issues/742)) ([5038a63](https://github.com/elastic/elastic-charts/commit/5038a636f63ca7f649419e640d35b1b1c80f9b5a)), closes [#667](https://github.com/elastic/elastic-charts/issues/667)
+
 # [19.8.0](https://github.com/elastic/elastic-charts/compare/v19.7.0...v19.8.0) (2020-07-06)
 
 
