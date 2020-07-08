@@ -84,7 +84,7 @@
     "@commitlint/cli": "^8.1.0",
     "@commitlint/config-conventional": "^8.1.0",
     "@elastic/datemath": "^5.0.2",
-    "@elastic/eui": "^16.0.1",
+    "@elastic/eui": "^27.0.0",
     "@elastic/github-checks-reporter": "^0.0.20-b3",
     "@mdx-js/loader": "^1.6.6",
     "@microsoft/api-documenter": "^7.7.20",
@@ -125,8 +125,8 @@
     "@types/luxon": "^1.11.1",
     "@types/moment-timezone": "^0.5.12",
     "@types/puppeteer": "^1.19.1",
-    "@types/react": "^16.8.5",
-    "@types/react-dom": "^16.8.2",
+    "@types/react": "^16.9.41",
+    "@types/react-dom": "^16.9.8",
     "@types/react-redux": "^7.1.1",
     "@types/seedrandom": "^2.4.28",
     "@types/selenium-webdriver": "^4.0.6",
@@ -175,6 +175,7 @@
     "lodash": "^4.17.15",
     "lorem-ipsum": "^2.0.3",
     "luxon": "^1.11.3",
+    "moment": "^2.27.0",
     "moment-timezone": "^0.5.27",
     "node-sass": "^4.14.1",
     "postcss-cli": "^7.1.1",
@@ -203,6 +204,7 @@
     "webpack-dev-server": "^3.11.0"
   },
   "peerDependencies": {
+    "moment": "^2.27.0",
     "moment-timezone": "^0.5.27",
     "react": "^16.12.0",
     "react-dom": "^16.12.0"
