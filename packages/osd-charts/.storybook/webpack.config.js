@@ -73,12 +73,6 @@ module.exports = async({ config }) => {
 
   config.module.rules.push({
     test: /\.tsx?$/,
-    loader: require.resolve('react-docgen-typescript-loader'),
-    exclude: /node_modules/,
-  });
-
-  config.module.rules.push({
-    test: /\.tsx?$/,
     include: [path.resolve(__dirname, '../stories/')],
     exclude: [path.resolve(__dirname, '../stories/utils')],
     loaders: [
@@ -98,7 +92,7 @@ module.exports = async({ config }) => {
       {
         loader: 'style-loader',
         options: {
-          attrs: {
+          attributes: {
             nonce,
           },
         },
@@ -117,7 +111,7 @@ module.exports = async({ config }) => {
       {
         loader: 'style-loader',
         options: {
-          attrs: {
+          attributes: {
             nonce,
           },
         },
@@ -132,9 +126,10 @@ module.exports = async({ config }) => {
     resourceQuery: /^\?lazy$/,
     use: [
       {
-        loader: 'style-loader/useable',
+        loader: 'style-loader',
         options: {
-          attrs: {
+          injectType: 'lazyStyleTag',
+          attributes: {
             nonce,
           },
         },
