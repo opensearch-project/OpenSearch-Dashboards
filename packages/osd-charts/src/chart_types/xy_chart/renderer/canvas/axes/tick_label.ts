@@ -37,7 +37,7 @@ export function renderTickLabel(ctx: CanvasRenderingContext2D, tick: AxisTick, p
   };
 
   const {
-    axisSpec: { tickSize, tickPadding, position },
+    axisSpec: { tickSize, tickPadding, position, labelFormat },
     axisTicksDimensions,
     axisPosition,
     debug,
@@ -94,7 +94,7 @@ export function renderTickLabel(ctx: CanvasRenderingContext2D, tick: AxisTick, p
         x: x + textOffsetX,
         y: y + textOffsetY,
       },
-      tick.label,
+      labelFormat ? labelFormat(tick.value) : tick.label,
       {
         ...font,
         fontSize: labelStyle.fontSize,

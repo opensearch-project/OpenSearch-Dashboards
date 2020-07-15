@@ -147,6 +147,7 @@ export interface AxisSpec extends Spec {
     hide: boolean;
     id: AxisId;
     integersOnly?: boolean;
+    labelFormat?: TickFormatter;
     position: Position;
     showDuplicatedTicks?: boolean;
     showGridLines?: boolean;

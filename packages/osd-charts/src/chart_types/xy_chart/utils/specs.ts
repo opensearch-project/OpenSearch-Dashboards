@@ -602,8 +602,16 @@ export interface AxisSpec extends Spec {
   tickSize: number;
   /** The padding between the label and the tick */
   tickPadding: number;
-  /** A function called to format each single tick label */
+  /**
+   * A function called to format every single tick label (includes tooltip)
+   */
   tickFormat: TickFormatter;
+  /**
+   * A function called to format every single label  (excludes tooltip)
+   *
+   * overrides tickFormat for axis labels
+   */
+  labelFormat?: TickFormatter;
   /** The degrees of rotation of the tick labels */
   tickLabelRotation?: number;
   /** An approximate count of how many ticks will be generated */

@@ -178,6 +178,7 @@
     "moment": "^2.27.0",
     "moment-timezone": "^0.5.27",
     "node-sass": "^4.14.1",
+    "numeral": "^2.0.6",
     "postcss-cli": "^7.1.1",
     "prettier": "^1.19.1",
     "pretty-quick": "^2.0.0",

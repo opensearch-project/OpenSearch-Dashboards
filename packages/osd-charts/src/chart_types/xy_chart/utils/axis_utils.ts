@@ -104,7 +104,7 @@ export function computeAxisTicksDimensions(
 
   const dimensions = computeTickDimensions(
     scale,
-    axisSpec.tickFormat,
+    axisSpec.labelFormat ?? axisSpec.tickFormat,
     bboxCalculator,
     axisConfig,
     tickLabelPadding,

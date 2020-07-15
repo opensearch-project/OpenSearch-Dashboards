@@ -38,3 +38,4 @@ export { Example as customMixed } from './9_custom_mixed_domain';
 export { Example as oneDomainBound } from './10_one_domain_bound';
 export { Example as fitDomain } from './11_fit_domain_extent';
 export { Example as duplicateTicks } from './12_duplicate_ticks';
+export { Example as labelFormatting } from './13_label_formatting';
