@@ -22,7 +22,7 @@ import { join, resolve } from 'path';
 
 import { getStorybook, configure } from '@storybook/react';
 
-export type StoryInfo = [string, string];
+export type StoryInfo = [string, string, number];
 
 export type StoryGroupInfo = [string, string, StoryInfo[]];
 
@@ -67,6 +67,22 @@ function encodeString(string: string) {
     .toLowerCase();
 }
 
+/**
+ * Stories to skip in all vrt based on group.
+ */
+const storiesToSkip: Record<string, string[]> = {
+  // Interactions: ['Some story name'],
+};
+
+/**
+ * Delays for stories to skip in all vrt based on group.
+ */
+const storiesToDelay: Record<string, Record<string, number>> = {
+  Legend: {
+    Actions: 200, // needed for icon to load
+  },
+};
+
 export function getStorybookInfo(): StoryGroupInfo[] {
   configure(requireAllStories(__dirname, '../stories'), module);
 
@@ -74,11 +90,12 @@ export function getStorybookInfo(): StoryGroupInfo[] {
     .filter(({ kind }) => kind)
     .map(({ kind: group, stories: storiesRaw }) => {
       const stories: StoryInfo[] = storiesRaw
-        .filter(({ name }) => name)
+        .filter(({ name }) => name && !storiesToSkip[group]?.includes(name))
         .map(({ name: title }) => {
           // cleans story name to match url params
           const encodedTitle = encodeString(title);
-          return [title, encodedTitle];
+          const delay = (storiesToDelay[group] ?? {})[title];
+          return [title, encodedTitle, delay];
         });
 
       const encodedGroup = encodeString(group);

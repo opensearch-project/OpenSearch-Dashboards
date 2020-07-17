@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { ComponentType } from 'react';
 
 import { Spec } from '.';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
@@ -190,6 +190,24 @@ export interface ExternalPointerEventsSettings {
   }
 }
 
+/**
+ * Legend action component props
+ *
+ * @public
+ */
+export interface LegendActionProps {
+  /**
+   * Series identifier for the given series
+   */
+  series: SeriesIdentifier;
+}
+/**
+ * Legend action component used to render actions next to legend items
+ *
+ * @public
+ */
+export type LegendAction = ComponentType<LegendActionProps>;
+
 export interface LegendColorPickerProps {
   /**
    * Anchor used to position picker
@@ -212,7 +230,7 @@ export interface LegendColorPickerProps {
    */
   seriesIdentifier: SeriesIdentifier;
 }
-export type LegendColorPicker = React.ComponentType<LegendColorPickerProps>;
+export type LegendColorPicker = ComponentType<LegendColorPickerProps>;
 
 /**
  * Buffer between cursor and point to trigger interaction
@@ -289,6 +307,10 @@ export interface SettingsSpec extends Spec {
   onRenderChange?: RenderChangeListener;
   xDomain?: Domain | DomainRange;
   resizeDebounce?: number;
+  /**
+   * Render slot to render action for legend
+   */
+  legendAction?: LegendAction;
   legendColorPicker?: LegendColorPicker;
   /**
    * Block the brush tool on a specific axis: x, y or both.

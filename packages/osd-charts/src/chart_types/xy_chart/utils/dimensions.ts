@@ -32,8 +32,6 @@ import { AxisSpec } from './specs';
  * @param chartTheme the theme style of the chart
  * @param axisDimensions the axis dimensions
  * @param axisSpecs the axis specs
- * @param showLegend is the legend shown
- * @param legendPosition the optional legend position
  * @internal
  */
 export function computeChartDimensions(

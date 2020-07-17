@@ -23,7 +23,7 @@ import { connect } from 'react-redux';
 import { Dispatch, bindActionCreators } from 'redux';
 
 import { LegendItem, LegendItemExtraValues } from '../../commons/legend';
-import { LegendItemListener, BasicListener, LegendColorPicker } from '../../specs';
+import { LegendItemListener, BasicListener, LegendColorPicker, LegendAction } from '../../specs';
 import { clearTemporaryColors, setTemporaryColor, setPersistedColor } from '../../state/actions/colors';
 import {
   onToggleLegend,
@@ -55,6 +55,7 @@ interface LegendStateProps {
   showExtra: boolean;
   extraValues: Map<string, LegendItemExtraValues>;
   colorPicker?: LegendColorPicker;
+  action?: LegendAction;
   onItemOver?: LegendItemListener;
   onItemOut?: BasicListener;
   onItemClick?: LegendItemListener;
@@ -80,7 +81,7 @@ function LegendComponent(props: LegendStateProps & LegendDispatchProps) {
   if (items.length === 0) {
     return null;
   }
-  const legendContainerStyle = getLegendStyle(position, size);
+  const legendContainerStyle = getLegendStyle(position, size, legend.margin);
   const legendListStyle = getLegendListStyle(position, chartMargins, legend);
   const legendClasses = classNames('echLegend', `echLegend--${position}`, {
     'echLegend--debug': debug,
@@ -101,6 +102,7 @@ function LegendComponent(props: LegendStateProps & LegendDispatchProps) {
     mouseOverAction: props.onItemOverAction,
     toggleDeselectSeriesAction: props.onToggleDeselectSeriesAction,
     colorPicker: props.colorPicker,
+    action: props.action,
   };
   return (
     <div className={legendClasses}>
@@ -148,6 +150,7 @@ const mapStateToProps = (state: GlobalChartState): LegendStateProps => {
     showLegendExtra,
     debug,
     legendColorPicker,
+    legendAction,
     onLegendItemOver: onItemOver,
     onLegendItemOut: onItemOut,
     onLegendItemClick: onItemClick,
@@ -165,6 +168,7 @@ const mapStateToProps = (state: GlobalChartState): LegendStateProps => {
     showExtra: showLegendExtra,
     extraValues: getLegendExtraValuesSelector(state),
     colorPicker: legendColorPicker,
+    action: legendAction,
     onItemOver,
     onItemOut,
     onItemClick,

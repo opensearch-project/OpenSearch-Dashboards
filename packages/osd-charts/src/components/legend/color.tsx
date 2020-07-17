@@ -48,7 +48,12 @@ export function Color({ color, isSeriesHidden = false, hasColorPicker, onClick }
   });
 
   return (
-    <div onClick={onClick} className={colorClasses} aria-label="series color" title="series color">
+    <div
+      onClick={hasColorPicker ? onClick : undefined}
+      className={colorClasses}
+      aria-label="series color"
+      title={hasColorPicker ? 'change series color' : 'series color'}
+    >
       <Icon type="dot" color={color} />
     </div>
   );

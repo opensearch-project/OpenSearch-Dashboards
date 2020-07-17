@@ -73,6 +73,7 @@ describe('Computed chart dimensions', () => {
     verticalWidth: 10,
     horizontalHeight: 10,
     spacingBuffer: 10,
+    margin: 0,
   };
   const defaultTheme = LIGHT_THEME;
   const chartTheme = {

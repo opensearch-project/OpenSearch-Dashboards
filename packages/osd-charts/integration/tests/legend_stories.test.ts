@@ -54,4 +54,16 @@ describe('Legend stories', () => {
       },
     );
   });
+
+  it('should render legend action on mouse hover', async() => {
+    const action = async() =>
+      await common.moveMouseRelativeToDOMElement({ left: 30, top: 10 }, '.echLegendItem');
+    await common.expectChartAtUrlToMatchScreenshot(
+      'http://localhost:9001/?path=/story/legend--actions',
+      {
+        action,
+        delay: 200, // needed for icon to load
+      },
+    );
+  });
 });

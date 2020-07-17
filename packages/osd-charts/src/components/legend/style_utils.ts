@@ -23,12 +23,17 @@ import { Margins } from '../../utils/dimensions';
 import { LegendStyle as ThemeLegendStyle } from '../../utils/themes/theme';
 
 /** @internal */
-export interface LegendStyle {
-  maxHeight?: string;
-  maxWidth?: string;
+export type LegendStyle = {
   width?: string;
+  maxWidth?: string;
+  marginLeft?: number;
+  marginRight?: number;
+} | {
   height?: string;
-}
+  maxHeight?: string;
+  marginTop?: number;
+  marginBottom?: number;
+};
 
 /** @internal */
 export interface LegendListStyle {
@@ -70,17 +75,21 @@ export function getLegendListStyle(
  * @param size the computed size of the legend
  * @internal
  */
-export function getLegendStyle(position: Position, size: BBox): LegendStyle {
+export function getLegendStyle(position: Position, size: BBox, margin: number): LegendStyle {
   if (position === Position.Left || position === Position.Right) {
     const width = `${size.width}px`;
     return {
       width,
       maxWidth: width,
+      marginLeft: margin,
+      marginRight: margin,
     };
   }
   const height = `${size.height}px`;
   return {
     height,
     maxHeight: height,
+    marginTop: margin,
+    marginBottom: margin,
   };
 }

@@ -29,10 +29,10 @@ const storyGroups = getStorybookInfo();
 
 describe('Baseline Visual tests for all stories', () => {
   describe.each(storyGroups)('%s', (_group, encodedGroup, stories) => {
-    describe.each(stories)('%s', (_title, encodedTitle) => {
+    describe.each(stories)('%s', (_title, encodedTitle, delay) => {
       it('visually looks correct', async() => {
         const url = `http://localhost:9001?id=${encodedGroup}--${encodedTitle}`;
-        await common.expectChartAtUrlToMatchScreenshot(url);
+        await common.expectChartAtUrlToMatchScreenshot(url, { delay });
       });
     });
   });

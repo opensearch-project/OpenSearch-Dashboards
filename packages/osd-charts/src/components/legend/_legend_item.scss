@@ -15,6 +15,19 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
     }
   }
 
+  &:hover {
+    background-color: #e7f0f7;
+  }
+
+  &__action {
+    height: 100%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: $euiSizeXS;
+  }
+
   &__color {
     margin-right: $euiSizeXS;
   }
@@ -43,6 +56,7 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
   &__extra {
     @include euiFontSizeXS;
     text-align: right;
+    flex: 0 0 auto;
     margin-left: $euiSizeXS;
     font-feature-settings: 'tnum';
 
@@ -53,8 +67,8 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
 
   &--right,
   &--left {
-    padding-top: $legendItemVerticalPadding;
-    padding-bottom: $legendItemVerticalPadding;
+    margin-top: $legendItemVerticalPadding;
+    margin-bottom: $legendItemVerticalPadding;
   }
 
   @include internetExplorerOnly {
@@ -64,8 +78,8 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
       margin-right: $euiSizeL;
     }
 
-    padding-top: $legendItemVerticalPadding;
-    padding-bottom: $legendItemVerticalPadding;
+    margin-top: $legendItemVerticalPadding;
+    margin-bottom: $legendItemVerticalPadding;
   }
 
   &--hidden {

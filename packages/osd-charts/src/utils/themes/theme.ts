@@ -155,6 +155,12 @@ export interface LegendStyle {
    * Smaller values render a more compact legend
    */
   spacingBuffer: number;
+  /**
+   * Legend padding. The Chart margins are independent of the legend.
+   *
+   * TODO: make SimplePadding when after axis changes are added
+   */
+  margin: number;
 }
 export interface Theme {
   /**

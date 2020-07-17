@@ -57,3 +57,8 @@ html.echVisualTesting {
     padding-bottom: 200px;
   }
 }
+
+// for using EuiWrappingPopover in stories
+.euiPopover__anchor {
+  width: 100%;
+}

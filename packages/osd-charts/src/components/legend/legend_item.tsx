@@ -22,7 +22,7 @@ import React, { Component, createRef, MouseEventHandler } from 'react';
 
 import { LegendItem, LegendItemExtraValues } from '../../commons/legend';
 import { SeriesIdentifier } from '../../commons/series_id';
-import { LegendItemListener, BasicListener, LegendColorPicker } from '../../specs/settings';
+import { LegendItemListener, BasicListener, LegendColorPicker, LegendAction } from '../../specs/settings';
 import {
   clearTemporaryColors as clearTemporaryColorsAction,
   setTemporaryColor as setTemporaryColorAction,
@@ -51,6 +51,7 @@ export interface LegendItemProps {
   extraValues: Map<string, LegendItemExtraValues>;
   showExtra: boolean;
   colorPicker?: LegendColorPicker;
+  action?: LegendAction;
   onClick?: LegendItemListener;
   onMouseOut?: BasicListener;
   onMouseOver?: LegendItemListener;
@@ -85,6 +86,7 @@ export function renderLegendItem(
       totalItems={totalItems}
       position={props.position}
       colorPicker={props.colorPicker}
+      action={props.action}
       extraValues={props.extraValues}
       showExtra={props.showExtra}
       toggleDeselectSeriesAction={props.toggleDeselectSeriesAction}
@@ -102,6 +104,7 @@ export function renderLegendItem(
 
 interface LegendItemState {
   isOpen: boolean;
+  actionActive: boolean;
 }
 
 /** @internal */
@@ -111,6 +114,7 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
   ref = createRef<HTMLLIElement>();
   state: LegendItemState = {
     isOpen: false,
+    actionActive: false,
   };
 
   shouldComponentUpdate(nextProps: LegendItemProps, nextState: LegendItemState) {
@@ -197,7 +201,7 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
   }
 
   render() {
-    const { extraValues, item, showExtra, colorPicker, position, totalItems } = this.props;
+    const { extraValues, item, showExtra, colorPicker, position, totalItems, action: Action } = this.props;
     const { color, isSeriesHidden, isItemHidden, seriesIdentifier, label } = item;
     const itemClassNames = classNames('echLegendItem', `echLegendItem--${position}`, {
       'echLegendItem--hidden': isSeriesHidden,
@@ -227,6 +231,12 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
           />
           <ItemLabel label={label} onClick={this.handleLabelClick(seriesIdentifier)} />
           {showExtra && extra != null && renderExtra(extra, isSeriesHidden)}
+          {Action
+            && (
+              <div className="echLegendItem__action">
+                <Action series={seriesIdentifier} />
+              </div>
+            )}
         </li>
         {this.renderColorPicker()}
       </>

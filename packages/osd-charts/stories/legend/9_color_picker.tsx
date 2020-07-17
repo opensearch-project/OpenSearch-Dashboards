@@ -46,7 +46,7 @@ export const Example = () => {
       onChangeAction(color);
     };
     return (
-      <EuiWrappingPopover isOpen button={anchor} closePopover={handleClose}>
+      <EuiWrappingPopover isOpen button={anchor} closePopover={handleClose} anchorPosition="leftCenter">
         <EuiColorPicker display="inline" color={color} onChange={handleChange} />
         <EuiSpacer size="m" />
         <EuiButton fullWidth size="s" onClick={handleClose}>

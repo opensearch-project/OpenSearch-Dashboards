@@ -738,10 +738,18 @@ export interface LayerValue {
     value: number;
 }
 
+// @public
+export type LegendAction = ComponentType<LegendActionProps>;
+
+// @public
+export interface LegendActionProps {
+    series: SeriesIdentifier;
+}
+
 // Warning: (ae-missing-release-tag) "LegendColorPicker" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type LegendColorPicker = React.ComponentType<LegendColorPickerProps>;
+export type LegendColorPicker = ComponentType<LegendColorPickerProps>;
 
 // Warning: (ae-missing-release-tag) "LegendColorPickerProps" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -764,6 +772,7 @@ export type LegendItemListener = (series: SeriesIdentifier | null) => void;
 // @public (undocumented)
 export interface LegendStyle {
     horizontalHeight: number;
+    margin: number;
     spacingBuffer: number;
     verticalWidth: number;
 }
@@ -1273,6 +1282,7 @@ export interface SettingsSpec extends Spec {
     externalPointerEvents: ExternalPointerEventsSettings;
     flatLegend?: boolean;
     hideDuplicateAxes: boolean;
+    legendAction?: LegendAction;
     // (undocumented)
     legendColorPicker?: LegendColorPicker;
     legendMaxDepth?: number;

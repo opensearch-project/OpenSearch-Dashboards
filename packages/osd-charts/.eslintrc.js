@@ -356,6 +356,8 @@ module.exports = {
     {
       files: ['stories/**/*.ts?(x)', '*.test.ts?(x)'],
       rules: {
+        'jsx-a11y/no-static-element-interactions': 0,
+        'jsx-a11y/click-events-have-key-events': 0,
         'no-restricted-properties': [
           process.env.NODE_ENV === 'production' ? 2 : 1,
           {
