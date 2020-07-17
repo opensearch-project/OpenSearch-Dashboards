@@ -30,6 +30,8 @@ To install the Elastic Charts into an existing project, use the `yarn` CLI (`npm
 yarn add @elastic/charts
 ```
 
+> **Important:** see the [consuming] wiki for detailed installation requirements
+
 ## Running Locally
 
 ### Node
