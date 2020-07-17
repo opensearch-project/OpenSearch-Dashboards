@@ -1,3 +1,11 @@
+# [19.9.0](https://github.com/elastic/elastic-charts/compare/v19.8.1...v19.9.0) (2020-07-17)
+
+
+### Features
+
+* **axis:** formatting different for label vs tooltip and legend ([#750](https://github.com/elastic/elastic-charts/issues/750)) ([daff503](https://github.com/elastic/elastic-charts/commit/daff5033cc979cb978227dcbf044f8ceb22568a9))
+* **legend:** add legend item actions and margins ([#749](https://github.com/elastic/elastic-charts/issues/749)) ([8136dca](https://github.com/elastic/elastic-charts/commit/8136dcae91fc0f7e4ee0912d23713ff2bbe46fad)), closes [#717](https://github.com/elastic/elastic-charts/issues/717)
+
 ## [19.8.1](https://github.com/elastic/elastic-charts/compare/v19.8.0...v19.8.1) (2020-07-07)
 
 
