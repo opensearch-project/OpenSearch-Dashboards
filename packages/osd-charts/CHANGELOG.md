@@ -1,3 +1,28 @@
+# [20.0.0](https://github.com/elastic/elastic-charts/compare/v19.9.1...v20.0.0) (2020-07-19)
+
+
+### Features
+
+* **axis:** improved axis styles ([#711](https://github.com/elastic/elastic-charts/issues/711)) ([3c46f9c](https://github.com/elastic/elastic-charts/commit/3c46f9c8c45a1375e4856fec7f53b85bbda4bae8)), closes [#714](https://github.com/elastic/elastic-charts/issues/714) [#312](https://github.com/elastic/elastic-charts/issues/312)
+
+
+### BREAKING CHANGES
+
+* **axis:** - `AxisSpec.gridLineStyle` => `AxisSpec.gridLine`
+- `AxisSpec.gridLineStyle` => `AxisSpec.gridLine`
+- `AxisSpec.tickLabelRotation` => `AxisStyle.tickLabel.rotation`
+- `AxisSpec.tickPadding` => `AxisStyle.tickLine.padding`
+- `AxisSpec.tickSize` => `AxisStyle.tickLine.size`
+- `AxisStyle.tickLabelPadding` => `AxisStyle.tickLabel.padding`
+- `GridLineConfig` => `GridLineStyle`
+- `AxisSpec.style` => `RecursivePartial<AxisStyle>` (new `AxisStyle` type)
+- `AxisConfig.axisLineStyle` => `AxisStyle.axisLine`
+- `AxisConfig.axisTitleStyle` => `AxisStyle.axisTitle`
+- `AxisConfig.tickLabelStyle` => `AxisStyle.tickLabel`
+- `AxisConfig.tickLineStyle` => `AxisStyle.tickLine`
+- `GridLineStyle` requires all properties
+- deprecate `AxisSpec.showGridLines` in favor of `AxisSpec.gridLine.visible`
+
 ## [19.9.1](https://github.com/elastic/elastic-charts/compare/v19.9.0...v19.9.1) (2020-07-19)
 
 
