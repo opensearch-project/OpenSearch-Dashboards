@@ -25,41 +25,50 @@ import { renderText } from '../primitives/text';
 import { renderDebugRectCenterRotated } from '../utils/debug';
 
 /** @internal */
-export function renderTickLabel(ctx: CanvasRenderingContext2D, tick: AxisTick, props: AxisProps) {
-  /**
-   * padding is already computed through width
-   * and bbox_calculator using tickLabelPadding
-   * set padding to 0 to avoid conflict
-   */
-  const labelStyle = {
-    ...props.axisConfig.tickLabelStyle,
-    padding: 0,
-  };
-
+export function renderTickLabel(ctx: CanvasRenderingContext2D, tick: AxisTick, showTicks: boolean, props: AxisProps) {
   const {
-    axisSpec: { tickSize, tickPadding, position, labelFormat },
+    axisSpec: { position, labelFormat },
     axisTicksDimensions,
     axisPosition,
     debug,
+    axisStyle,
   } = props;
+  const labelStyle = axisStyle.tickLabel;
+  const {
+    rotation: tickLabelRotation,
+    alignment,
+    offset,
+  } = labelStyle;
 
-  const tickLabelRotation = props.axisSpec.tickLabelRotation || 0;
-
-  const tickLabelProps = getTickLabelProps(
-    tickLabelRotation,
-    tickSize,
-    tickPadding,
+  const {
+    maxLabelBboxWidth,
+    maxLabelBboxHeight,
+    maxLabelTextWidth,
+    maxLabelTextHeight,
+  } = axisTicksDimensions;
+  const {
+    x,
+    y,
+    offsetX,
+    offsetY,
+    textOffsetX,
+    textOffsetY,
+    align,
+    verticalAlign,
+  } = getTickLabelProps(
+    axisStyle,
     tick.position,
     position,
     axisPosition,
     axisTicksDimensions,
+    showTicks,
+    offset,
+    alignment,
   );
 
-  const { maxLabelTextWidth, maxLabelTextHeight } = axisTicksDimensions;
-
-  const { x, y, offsetX, offsetY, align, verticalAlign } = tickLabelProps;
 
   if (debug) {
+    // full text container
     renderDebugRectCenterRotated(
       ctx,
       {
@@ -76,6 +85,25 @@ export function renderTickLabel(ctx: CanvasRenderingContext2D, tick: AxisTick, p
       undefined,
       tickLabelRotation,
     );
+    // rotated text container
+    if (![0, -90, 90, 180].includes(tickLabelRotation)) {
+      renderDebugRectCenterRotated(
+        ctx,
+        {
+          x: x + offsetX,
+          y: y + offsetY,
+        },
+        {
+          x: x + offsetX,
+          y: y + offsetY,
+          height: maxLabelBboxHeight,
+          width: maxLabelBboxWidth,
+        },
+        undefined,
+        undefined,
+        0,
+      );
+    }
   }
   const font: Font = {
     fontFamily: labelStyle.fontFamily,
@@ -86,13 +114,11 @@ export function renderTickLabel(ctx: CanvasRenderingContext2D, tick: AxisTick, p
     textOpacity: 1,
   };
   withContext(ctx, (ctx) => {
-    const textOffsetX = tickLabelRotation === 0 ? 0 : offsetX;
-    const textOffsetY = tickLabelRotation === 0 ? 0 : offsetY;
     renderText(
       ctx,
       {
-        x: x + textOffsetX,
-        y: y + textOffsetY,
+        x: x + offsetX,
+        y: y + offsetY,
       },
       labelFormat ? labelFormat(tick.value) : tick.label,
       {
@@ -103,6 +129,10 @@ export function renderTickLabel(ctx: CanvasRenderingContext2D, tick: AxisTick, p
         baseline: verticalAlign as CanvasTextBaseline,
       },
       tickLabelRotation,
+      {
+        x: textOffsetX,
+        y: textOffsetY,
+      },
     );
   });
 }

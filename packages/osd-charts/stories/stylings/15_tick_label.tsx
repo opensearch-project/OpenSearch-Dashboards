@@ -20,7 +20,17 @@
 import { boolean, color, number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, PartialTheme, Position, ScaleType, Settings } from '../../src';
+import {
+  AreaSeries,
+  Axis,
+  Chart,
+  PartialTheme,
+  Position,
+  ScaleType,
+  Settings,
+  RecursivePartial,
+  AxisStyle,
+} from '../../src';
 
 function range(title: string, min: number, max: number, value: number, groupId?: string, step = 1) {
   return number(
@@ -39,7 +49,7 @@ function range(title: string, min: number, max: number, value: number, groupId?:
 export const Example = () => {
   const theme: PartialTheme = {
     axes: {
-      tickLabelStyle: {
+      tickLabel: {
         fill: color('tickFill', '#333', 'Tick Label'),
         fontSize: range('tickFontSize', 0, 40, 10, 'Tick Label'),
         fontFamily: '\'Open Sans\', Helvetica, Arial, sans-serif',
@@ -48,9 +58,13 @@ export const Example = () => {
       },
     },
   };
-  const customStyle = {
-    tickLabelPadding: number('Tick Label Padding Axis Spec', 0),
+
+  const customStyle: RecursivePartial<AxisStyle> = {
+    tickLabel: {
+      padding: number('Tick Label Padding Axis Spec', 0),
+    },
   };
+
   return (
     <Chart className="story-chart">
       <Settings theme={theme} debug={boolean('debug', true)} />

@@ -35,7 +35,7 @@ export class Logger {
    * @param optionalParams
    */
   static warn(message?: any, ...optionalParams: any[]) {
-    if (Logger.isDevelopment()) {
+    if (Logger.isDevelopment() && !Logger.isTest()) {
       console.warn(`${Logger.namespace} ${message}`, ...optionalParams);
     }
   }
@@ -44,7 +44,7 @@ export class Logger {
    * Log expected value warning to console
    */
   static expected(message: any, expected: any, received: any) {
-    if (Logger.isDevelopment()) {
+    if (Logger.isDevelopment() && !Logger.isTest()) {
       console.warn(`${Logger.namespace} ${message}`, `\n
   Expected: ${expected}
   Received: ${received}
@@ -59,7 +59,7 @@ export class Logger {
    * @param optionalParams
    */
   static error(message?: any, ...optionalParams: any[]) {
-    if (Logger.isDevelopment()) {
+    if (Logger.isDevelopment() && !Logger.isTest()) {
       console.warn(`${Logger.namespace} ${message}`, ...optionalParams);
     }
   }
@@ -72,6 +72,16 @@ export class Logger {
    */
   private static isDevelopment(): boolean {
     return process.env.NODE_ENV !== 'production';
+  }
+
+  /**
+   * Determined development env
+   *
+   * @todo confirm this logic works
+   * @todo add more robust logic
+   */
+  private static isTest(): boolean {
+    return process.env.NODE_ENV === 'test';
   }
 }
 

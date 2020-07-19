@@ -17,10 +17,17 @@
  * under the License.
  */
 
-import { select, array, optionsKnob } from '@storybook/addon-knobs';
+import { select, array, number, optionsKnob } from '@storybook/addon-knobs';
 
 import { Rotation, Position, Placement, TooltipProps } from '../../src';
 import { TooltipType } from '../../src/specs/constants';
+import { VerticalAlignment, HorizontalAlignment } from '../../src/utils/commons';
+
+export const getPositiveNumberKnob = (
+  name: string,
+  value: number,
+  groupId?: string,
+) => number(name, value, { min: 0 }, groupId);
 
 export const numberSelect = <T extends number>(
   name: string,
@@ -146,3 +153,33 @@ export const getBoundaryKnob = () => select<TooltipProps['boundary']>(
   },
   undefined,
 );
+
+export const getVerticalTextAlignmentKnob = (group?: string) =>
+  select<VerticalAlignment | undefined>(
+    'Vertical Text alignment',
+    {
+      None: undefined,
+      Middle: VerticalAlignment.Middle,
+      Top: VerticalAlignment.Top,
+      Bottom: VerticalAlignment.Bottom,
+      Near: VerticalAlignment.Near,
+      Far: VerticalAlignment.Far,
+    },
+    undefined,
+    group,
+  ) || undefined;
+
+export const getHorizontalTextAlignmentKnob = (group?: string) =>
+  select<HorizontalAlignment | undefined>(
+    'Horizontal Text alignment',
+    {
+      None: undefined,
+      Center: HorizontalAlignment.Center,
+      Left: HorizontalAlignment.Left,
+      Right: HorizontalAlignment.Right,
+      Near: HorizontalAlignment.Near,
+      Far: HorizontalAlignment.Far,
+    },
+    undefined,
+    group,
+  ) || undefined;

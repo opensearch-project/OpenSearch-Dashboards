@@ -29,6 +29,7 @@ import { computeAxisTicksDimensionsSelector } from './compute_axis_ticks_dimensi
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { computeSeriesDomainsSelector } from './compute_series_domains';
 import { countBarsInClusterSelector } from './count_bars_in_cluster';
+import { getAxesStylesSelector } from './get_axis_styles';
 import { getBarPaddingsSelector } from './get_bar_paddings';
 import { getAxisSpecsSelector } from './get_specs';
 import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
@@ -48,6 +49,7 @@ export const computeAxisVisibleTicksSelector = createCachedSelector(
     getSettingsSpecSelector,
     getAxisSpecsSelector,
     computeAxisTicksDimensionsSelector,
+    getAxesStylesSelector,
     computeSeriesDomainsSelector,
     countBarsInClusterSelector,
     isHistogramModeEnabledSelector,
@@ -59,6 +61,7 @@ export const computeAxisVisibleTicksSelector = createCachedSelector(
     settingsSpec,
     axesSpecs,
     axesTicksDimensions,
+    axesStyles,
     seriesDomainsAndData,
     totalBarsInCluster,
     isHistogramMode,
@@ -71,6 +74,7 @@ export const computeAxisVisibleTicksSelector = createCachedSelector(
       settingsSpec.rotation,
       axesSpecs,
       axesTicksDimensions,
+      axesStyles,
       xDomain,
       yDomain,
       totalBarsInCluster,

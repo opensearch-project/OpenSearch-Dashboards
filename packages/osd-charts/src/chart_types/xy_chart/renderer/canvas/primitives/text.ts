@@ -27,18 +27,28 @@ export function renderText(
   ctx: CanvasRenderingContext2D,
   origin: Point,
   text: string,
-  font: Font & { fill: string; fontSize: number; align: TextAlign; baseline: TextBaseline },
+  font: Font & {
+    fill: string;
+    fontSize: number;
+    align: TextAlign;
+    baseline: TextBaseline;
+  },
   degree: number = 0,
+  translation?: Partial<Point>,
 ) {
   if (text === undefined || text === null) {
     return;
   }
+
   withRotatedOrigin(ctx, origin, degree, (ctx) => {
     withContext(ctx, (ctx) => {
       ctx.fillStyle = font.fill;
       ctx.textAlign = font.align;
       ctx.textBaseline = font.baseline;
       ctx.font = cssFontShorthand(font, font.fontSize);
+      if (translation?.x || translation?.y) {
+        ctx.translate(translation?.x ?? 0, translation?.y ?? 0);
+      }
       ctx.fillText(text, origin.x, origin.y);
     });
   });

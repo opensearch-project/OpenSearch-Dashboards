@@ -20,9 +20,9 @@
 import { withContext } from '../../../../../renderers/canvas';
 import { Dimensions } from '../../../../../utils/dimensions';
 import { AxisId } from '../../../../../utils/ids';
-import { AxisConfig } from '../../../../../utils/themes/theme';
+import { AxisStyle } from '../../../../../utils/themes/theme';
 import { getSpecsById } from '../../../state/utils/spec';
-import { AxisTick, AxisTicksDimensions } from '../../../utils/axis_utils';
+import { AxisTick, AxisTicksDimensions, shouldShowTicks } from '../../../utils/axis_utils';
 import { AxisSpec } from '../../../utils/specs';
 import { renderDebugRect } from '../utils/debug';
 import { renderLine } from './line';
@@ -32,7 +32,7 @@ import { renderTitle } from './title';
 
 /** @internal */
 export interface AxisProps {
-  axisConfig: AxisConfig;
+  axisStyle: AxisStyle;
   axisSpec: AxisSpec;
   axisTicksDimensions: AxisTicksDimensions;
   axisPosition: Dimensions;
@@ -47,27 +47,41 @@ export interface AxesProps {
   axesSpecs: AxisSpec[];
   axesTicksDimensions: Map<AxisId, AxisTicksDimensions>;
   axesPositions: Map<AxisId, Dimensions>;
-  axisStyle: AxisConfig;
+  axesStyles: Map<string, AxisStyle | null>;
+  sharedAxesStyle: AxisStyle;
   debug: boolean;
   chartDimensions: Dimensions;
 }
 
 /** @internal */
 export function renderAxes(ctx: CanvasRenderingContext2D, props: AxesProps) {
-  const { axesVisibleTicks, axesSpecs, axesTicksDimensions, axesPositions, axisStyle, debug, chartDimensions } = props;
+  const {
+    axesVisibleTicks,
+    axesSpecs,
+    axesTicksDimensions,
+    axesPositions,
+    axesStyles,
+    sharedAxesStyle,
+    debug,
+    chartDimensions,
+  } = props;
   axesVisibleTicks.forEach((ticks, axisId) => {
     const axisSpec = getSpecsById<AxisSpec>(axesSpecs, axisId);
     const axisTicksDimensions = axesTicksDimensions.get(axisId);
     const axisPosition = axesPositions.get(axisId);
-    if (!ticks || !axisSpec || !axisTicksDimensions || !axisPosition) {
+
+    if (!ticks || !axisSpec || !axisTicksDimensions || !axisPosition || axisSpec.hide) {
       return;
     }
+
+    const axisStyle = axesStyles.get(axisSpec.id) ?? sharedAxesStyle;
+
     renderAxis(ctx, {
       axisSpec,
       axisTicksDimensions,
       axisPosition,
       ticks,
-      axisConfig: axisStyle,
+      axisStyle,
       debug,
       chartDimensions,
     });
@@ -76,7 +90,8 @@ export function renderAxes(ctx: CanvasRenderingContext2D, props: AxesProps) {
 
 function renderAxis(ctx: CanvasRenderingContext2D, props: AxisProps) {
   withContext(ctx, (ctx) => {
-    const { ticks, axisPosition, debug } = props;
+    const { ticks, axisPosition, debug, axisStyle, axisSpec } = props;
+    const showTicks = shouldShowTicks(axisStyle.tickLine, axisSpec.hide);
     ctx.translate(axisPosition.left, axisPosition.top);
     if (debug) {
       renderDebugRect(ctx, {
@@ -90,18 +105,25 @@ function renderAxis(ctx: CanvasRenderingContext2D, props: AxisProps) {
     withContext(ctx, (ctx) => {
       renderLine(ctx, props);
     });
-    withContext(ctx, (ctx) => {
-      ticks.forEach((tick) => {
-        renderTick(ctx, tick, props);
-      });
-    });
-    withContext(ctx, (ctx) => {
-      ticks
-        .filter((tick) => tick.label !== null)
-        .forEach((tick) => {
-          renderTickLabel(ctx, tick, props);
+
+    if (showTicks) {
+      withContext(ctx, (ctx) => {
+        ticks.forEach((tick) => {
+          renderTick(ctx, tick, props);
         });
-    });
+      });
+    }
+
+    if (axisStyle.tickLabel.visible) {
+      withContext(ctx, (ctx) => {
+        ticks
+          .filter((tick) => tick.label !== null)
+          .forEach((tick) => {
+            renderTickLabel(ctx, tick, showTicks, props);
+          });
+      });
+    }
+
     withContext(ctx, (ctx) => {
       renderTitle(ctx, props);
     });

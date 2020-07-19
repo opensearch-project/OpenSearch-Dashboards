@@ -273,10 +273,7 @@ export class MockGlobalSpec {
     showOverlappingTicks: false,
     showOverlappingLabels: false,
     position: Position.Left,
-    tickSize: 10,
-    tickPadding: 10,
     tickFormat: (tick: any) => `${tick}`,
-    tickLabelRotation: 0,
   };
 
   private static readonly settingsBaseNoMargings: SettingsSpec = {

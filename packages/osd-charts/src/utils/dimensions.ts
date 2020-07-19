@@ -37,3 +37,36 @@ export interface PerSideDistance {
  * see https://github.com/elastic/elastic-charts/pull/660#discussion_r419474171
  */
 export type Margins = PerSideDistance;
+
+export type Padding = PerSideDistance;
+
+/**
+ * Simple padding declaration
+ * @public
+ */
+export interface SimplePadding {
+  outer: number;
+  inner: number;
+}
+
+/**
+ * Computes padding from number or `SimplePadding` with optional `minPadding`
+ *
+ * @param padding
+ * @param minPadding should be at least one to avoid browser measureText inconsistencies
+ */
+export function getSimplePadding(padding: number | Partial<SimplePadding>, minPadding = 0): SimplePadding {
+  if (typeof padding === 'number') {
+    const adjustedPadding = Math.max(minPadding, padding);
+
+    return {
+      inner: adjustedPadding,
+      outer: adjustedPadding,
+    };
+  }
+
+  return {
+    inner: Math.max(minPadding, padding?.inner ?? 0),
+    outer: Math.max(minPadding, padding?.outer ?? 0),
+  };
+}

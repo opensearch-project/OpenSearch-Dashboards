@@ -72,11 +72,11 @@ describe('Settings spec component', () => {
   test('should update store on component update', () => {
     const component = mount(<SettingsProxy />);
     let settingSpec = getSettingsSpecSelector(chartStore.getState());
-    expect(settingSpec.theme).toEqual(LIGHT_THEME);
+    expect(settingSpec.baseTheme).toEqual(LIGHT_THEME);
     expect(settingSpec.rotation).toBe(0);
     component.setProps({
       settings: {
-        theme: DARK_THEME,
+        baseTheme: DARK_THEME,
         rotation: 90 as Rotation,
         rendering: 'svg' as Rendering,
         animateData: true,
@@ -92,7 +92,7 @@ describe('Settings spec component', () => {
       },
     });
     settingSpec = getSettingsSpecSelector(chartStore.getState());
-    expect(settingSpec.theme).toEqual(DARK_THEME);
+    expect(settingSpec.baseTheme).toEqual(DARK_THEME);
     expect(settingSpec.rotation).toBe(90);
     expect(settingSpec.rendering).toBe('svg');
     expect(settingSpec.animateData).toBe(true);
@@ -162,7 +162,7 @@ describe('Settings spec component', () => {
   test('should allow partial theme', () => {
     mount(<SettingsProxy />);
     let settingSpec = getSettingsSpecSelector(chartStore.getState());
-    expect(settingSpec.theme).toEqual(LIGHT_THEME);
+    expect(settingSpec.baseTheme).toEqual(LIGHT_THEME);
 
     const partialTheme: PartialTheme = {
       colors: {

@@ -34,7 +34,7 @@ import { Dimensions } from '../../../../utils/dimensions';
 import { deepEqual } from '../../../../utils/fast_deep_equal';
 import { AnnotationId, AxisId } from '../../../../utils/ids';
 import { LIGHT_THEME } from '../../../../utils/themes/light_theme';
-import { Theme } from '../../../../utils/themes/theme';
+import { Theme, AxisStyle } from '../../../../utils/themes/theme';
 import { AnnotationDimensions } from '../../annotations/types';
 import { computeAnnotationDimensionsSelector } from '../../state/selectors/compute_annotations';
 import { computeAxisTicksDimensionsSelector } from '../../state/selectors/compute_axis_ticks_dimensions';
@@ -42,6 +42,7 @@ import { AxisVisibleTicks, computeAxisVisibleTicksSelector } from '../../state/s
 import { computeChartDimensionsSelector } from '../../state/selectors/compute_chart_dimensions';
 import { computeChartTransformSelector } from '../../state/selectors/compute_chart_transform';
 import { computeSeriesGeometriesSelector } from '../../state/selectors/compute_series_geometries';
+import { getAxesStylesSelector } from '../../state/selectors/get_axis_styles';
 import { getHighlightedSeriesSelector } from '../../state/selectors/get_highlighted_series';
 import { getAnnotationSpecsSelector, getAxisSpecsSelector } from '../../state/selectors/get_specs';
 import { isChartEmptySelector } from '../../state/selectors/is_chart_empty';
@@ -66,6 +67,7 @@ export interface ReactiveChartStateProps {
   highlightedLegendItem?: LegendItem;
   axesSpecs: AxisSpec[];
   axesTicksDimensions: Map<AxisId, AxisTicksDimensions>;
+  axesStyles: Map<AxisId, AxisStyle | null>;
   axisTickPositions: AxisVisibleTicks;
   axesGridLinesPositions: Map<AxisId, AxisLinePosition[]>;
   annotationDimensions: Map<AnnotationId, AnnotationDimensions>;
@@ -213,6 +215,7 @@ const DEFAULT_PROPS: ReactiveChartStateProps = {
     axisVisibleTicks: new Map(),
   },
   axesTicksDimensions: new Map(),
+  axesStyles: new Map(),
   axesGridLinesPositions: new Map(),
   annotationDimensions: new Map(),
   annotationSpecs: [],
@@ -240,6 +243,7 @@ const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
     axesSpecs: getAxisSpecsSelector(state),
     axisTickPositions: computeAxisVisibleTicksSelector(state),
     axesTicksDimensions: computeAxisTicksDimensionsSelector(state),
+    axesStyles: getAxesStylesSelector(state),
     axesGridLinesPositions: computeAxisVisibleTicksSelector(state).axisGridLinesPositions,
     annotationDimensions: computeAnnotationDimensionsSelector(state),
     annotationSpecs: getAnnotationSpecsSelector(state),

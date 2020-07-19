@@ -20,12 +20,13 @@
 import { boolean, color, number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, GridLineConfig, LineSeries, Position, ScaleType, Settings } from '../../src';
+import { Axis, BarSeries, Chart, GridLineStyle, LineSeries, Position, ScaleType, Settings } from '../../src';
 
-function generateGridLineConfig(group: string, gridColor = 'purple'): GridLineConfig {
+function generateGridLineStyle(group: string, gridColor = 'purple'): GridLineStyle {
   const groupId = `${group} axis`;
 
   return {
+    visible: true,
     stroke: color(`${groupId} grid line stroke color`, gridColor, groupId),
     strokeWidth: number(
       `${groupId} grid line stroke width`,
@@ -77,17 +78,17 @@ function generateGridLineConfig(group: string, gridColor = 'purple'): GridLineCo
 }
 
 export const Example = () => {
-  const leftAxisGridLineConfig = generateGridLineConfig(Position.Left, 'lightblue');
-  const rightAxisGridLineConfig = generateGridLineConfig(Position.Right, 'red');
-  const topAxisGridLineConfig = generateGridLineConfig(Position.Top, 'teal');
-  const bottomAxisGridLineConfig = generateGridLineConfig(Position.Bottom, 'blue');
-  const toggleBottomAxisGridLineStyle = boolean('use axis gridLineStyle vertically', false, 'bottom axis');
-  const toggleHorizontalAxisGridLineStyle = boolean('use axis gridLineStyle horizontally', false, 'left axis');
-  const bottomAxisThemeGridLineConfig = generateGridLineConfig('Vertical Axis Theme', 'violet');
-  const leftAxisThemeGridLineConfig = generateGridLineConfig('Horizontal Axis Theme', 'hotpink');
+  const leftAxisGridLineStyle = generateGridLineStyle(Position.Left, 'lightblue');
+  const rightAxisGridLineStyle = generateGridLineStyle(Position.Right, 'red');
+  const topAxisGridLineStyle = generateGridLineStyle(Position.Top, 'teal');
+  const bottomAxisGridLineStyle = generateGridLineStyle(Position.Bottom, 'blue');
+  const toggleBottomAxisGridLineStyle = boolean('use axis gridLine vertically', false, 'bottom axis');
+  const toggleHorizontalAxisGridLineStyle = boolean('use axis gridLine horizontally', false, 'left axis');
+  const bottomAxisThemeGridLineStyle = generateGridLineStyle('Vertical Axis Theme', 'violet');
+  const leftAxisThemeGridLineStyle = generateGridLineStyle('Horizontal Axis Theme', 'hotpink');
   const theme = {
     axes: {
-      gridLineStyle: { vertical: leftAxisThemeGridLineConfig, horizontal: bottomAxisThemeGridLineConfig },
+      gridLine: { vertical: leftAxisThemeGridLineStyle, horizontal: bottomAxisThemeGridLineStyle },
     },
   };
   const integersOnlyLeft = boolean('left axis show only integer values', false, 'left axis');
@@ -101,7 +102,7 @@ export const Example = () => {
         title="Bottom axis"
         showOverlappingTicks
         showGridLines={boolean('show bottom axis grid lines', false, 'bottom axis')}
-        gridLineStyle={toggleBottomAxisGridLineStyle ? bottomAxisGridLineConfig : undefined}
+        gridLine={toggleBottomAxisGridLineStyle ? bottomAxisGridLineStyle : undefined}
         integersOnly={boolean('bottom axis show only integer values', false, 'bottom axis')}
       />
       <Axis
@@ -110,7 +111,7 @@ export const Example = () => {
         title="Left axis 1"
         tickFormat={integersOnlyLeft ? (d) => Number(d).toFixed(0) : (d) => Number(d).toFixed(2)}
         showGridLines={boolean('show left axis grid lines', false, 'left axis')}
-        gridLineStyle={toggleHorizontalAxisGridLineStyle ? leftAxisGridLineConfig : undefined}
+        gridLine={toggleHorizontalAxisGridLineStyle ? leftAxisGridLineStyle : undefined}
         integersOnly={integersOnlyLeft}
       />
       <Axis
@@ -119,7 +120,7 @@ export const Example = () => {
         title="Top axis"
         showOverlappingTicks
         showGridLines={boolean('show top axis grid lines', false, 'top axis')}
-        gridLineStyle={topAxisGridLineConfig}
+        gridLine={topAxisGridLineStyle}
         integersOnly={boolean('top axis show only integer values', false, 'top axis')}
       />
       <Axis
@@ -128,7 +129,7 @@ export const Example = () => {
         position={Position.Right}
         tickFormat={integersOnlyRight ? (d) => Number(d).toFixed(0) : (d) => Number(d).toFixed(2)}
         showGridLines={boolean('show right axis grid lines', false, 'right axis')}
-        gridLineStyle={rightAxisGridLineConfig}
+        gridLine={rightAxisGridLineStyle}
         integersOnly={integersOnlyRight}
       />
       <BarSeries

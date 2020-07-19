@@ -22,12 +22,15 @@ import { Position } from '../../../../../utils/commons';
 import { isVerticalAxis } from '../../../utils/axis_type_utils';
 
 /** @internal */
-export function renderLine(ctx: CanvasRenderingContext2D, props: AxisProps) {
-  const {
-    axisSpec: { position },
-    axisPosition,
-    axisConfig: { axisLineStyle },
-  } = props;
+export function renderLine(ctx: CanvasRenderingContext2D, {
+  axisSpec: { position },
+  axisPosition,
+  axisStyle: { axisLine },
+}: AxisProps) {
+  if (!axisLine.visible) {
+    return;
+  }
+
   const lineProps: number[] = [];
   if (isVerticalAxis(position)) {
     lineProps[0] = position === Position.Left ? axisPosition.width : 0;
@@ -43,7 +46,7 @@ export function renderLine(ctx: CanvasRenderingContext2D, props: AxisProps) {
   ctx.beginPath();
   ctx.moveTo(lineProps[0], lineProps[1]);
   ctx.lineTo(lineProps[2], lineProps[3]);
-  ctx.strokeStyle = axisLineStyle.stroke;
-  ctx.lineWidth = axisLineStyle.strokeWidth;
+  ctx.strokeStyle = axisLine.stroke;
+  ctx.lineWidth = axisLine.strokeWidth;
   ctx.stroke();
 }

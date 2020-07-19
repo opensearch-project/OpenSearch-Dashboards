@@ -20,15 +20,17 @@
 import { number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '../../src';
+import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, RecursivePartial, AxisStyle } from '../../src';
 import { SeededDataGenerator } from '../../src/mocks/utils';
 
 export const Example = () => {
   const dg = new SeededDataGenerator();
   const data = dg.generateSimpleSeries(31);
 
-  const customStyle = {
-    tickLabelPadding: number('Tick Label Padding', 0),
+  const customStyle: RecursivePartial<AxisStyle> = {
+    tickLabel: {
+      padding: number('Tick Label Padding', 0),
+    },
   };
 
   return (

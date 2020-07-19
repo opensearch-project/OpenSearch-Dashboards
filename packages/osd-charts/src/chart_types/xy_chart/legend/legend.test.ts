@@ -21,7 +21,8 @@ import { ChartTypes } from '../..';
 import { LegendItem } from '../../../commons/legend';
 import { ScaleType } from '../../../scales/constants';
 import { SpecTypes } from '../../../specs/constants';
-import { Position } from '../../../utils/commons';
+import { Position, RecursivePartial } from '../../../utils/commons';
+import { AxisStyle } from '../../../utils/themes/theme';
 import { SeriesCollectionValue, getSeriesName } from '../utils/series';
 import { AxisSpec, BasicSeriesSpec, SeriesTypes } from '../utils/specs';
 import { computeLegend } from './legend';
@@ -94,6 +95,12 @@ const spec2: BasicSeriesSpec = {
   hideInLegend: false,
 };
 
+const style: RecursivePartial<AxisStyle> = {
+  tickLine: {
+    size: 10,
+    padding: 10,
+  },
+};
 const axesSpecs: AxisSpec[] = [];
 const axisSpec: AxisSpec = {
   chartType: ChartTypes.XYAxis,
@@ -104,8 +111,7 @@ const axisSpec: AxisSpec = {
   showOverlappingTicks: false,
   showOverlappingLabels: false,
   position: Position.Left,
-  tickSize: 10,
-  tickPadding: 10,
+  style,
   tickFormat: (value: any) => `${value}`,
 };
 axesSpecs.push(axisSpec);

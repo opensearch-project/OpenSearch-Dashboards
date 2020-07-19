@@ -20,17 +20,19 @@
 import { boolean, number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, niceTimeFormatter } from '../../src';
+import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, niceTimeFormatter, RecursivePartial, AxisStyle } from '../../src';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 
 export const Example = () => {
-  const customStyle = {
-    tickLabelPadding: number('Tick Label Padding', 0, {
-      range: true,
-      min: 2,
-      max: 30,
-      step: 1,
-    }),
+  const customStyle: RecursivePartial<AxisStyle> = {
+    tickLabel: {
+      padding: number('Tick Label Padding', 0, {
+        range: true,
+        min: 2,
+        max: 30,
+        step: 1,
+      }),
+    },
   };
   const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.slice(0, 60);
   return (

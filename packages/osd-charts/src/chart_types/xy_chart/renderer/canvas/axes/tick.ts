@@ -23,22 +23,19 @@ import { TickStyle } from '../../../../../utils/themes/theme';
 import { stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { isVerticalAxis } from '../../../utils/axis_type_utils';
 import { AxisTick } from '../../../utils/axis_utils';
-import { renderLine, MIN_STROKE_WIDTH } from '../primitives/line';
+import { renderLine } from '../primitives/line';
 
 /** @internal */
 export function renderTick(ctx: CanvasRenderingContext2D, tick: AxisTick, props: AxisProps) {
   const {
-    axisSpec: { tickSize, position },
+    axisSpec: { position },
     axisPosition,
-    axisConfig: { tickLineStyle },
+    axisStyle: { tickLine },
   } = props;
-  if (!tickLineStyle.visible || tickLineStyle.strokeWidth < MIN_STROKE_WIDTH) {
-    return;
-  }
   if (isVerticalAxis(position)) {
-    renderVerticalTick(ctx, position, axisPosition.width, tickSize, tick.position, tickLineStyle);
+    renderVerticalTick(ctx, position, axisPosition.width, tickLine.size, tick.position, tickLine);
   } else {
-    renderHorizontalTick(ctx, position, axisPosition.height, tickSize, tick.position, tickLineStyle);
+    renderHorizontalTick(ctx, position, axisPosition.height, tickLine.size, tick.position, tickLine);
   }
 }
 

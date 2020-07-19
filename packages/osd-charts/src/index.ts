@@ -27,8 +27,9 @@ export { SpecId, GroupId, AxisId, AnnotationId } from './utils/ids';
 // Everything related to the specs types and react-components
 export * from './specs';
 export { CurveType } from './utils/curves';
+export { SimplePadding } from './utils/dimensions';
 export { timeFormatter, niceTimeFormatter, niceTimeFormatByDay } from './utils/data/formatters';
-export { Datum, Position, Rendering, Rotation } from './utils/commons';
+export { Datum, Position, Rendering, Rotation, VerticalAlignment, HorizontalAlignment } from './utils/commons';
 export { SeriesIdentifier } from './commons/series_id';
 export { XYChartSeriesIdentifier } from './chart_types/xy_chart/utils/series';
 export { AnnotationTooltipFormatter, CustomAnnotationTooltip } from './chart_types/xy_chart/annotations/types';

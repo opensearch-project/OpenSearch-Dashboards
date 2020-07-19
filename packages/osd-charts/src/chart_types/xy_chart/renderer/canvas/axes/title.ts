@@ -19,8 +19,10 @@
 
 import { AxisProps } from '.';
 import { Position } from '../../../../../utils/commons';
+import { getSimplePadding } from '../../../../../utils/dimensions';
 import { Font, FontStyle } from '../../../../partition_chart/layout/types/types';
 import { isHorizontalAxis } from '../../../utils/axis_type_utils';
+import { shouldShowTicks } from '../../../utils/axis_utils';
 import { renderText } from '../primitives/text';
 import { renderDebugRect } from '../utils/debug';
 
@@ -28,8 +30,11 @@ import { renderDebugRect } from '../utils/debug';
 export function renderTitle(ctx: CanvasRenderingContext2D, props: AxisProps) {
   const {
     axisSpec: { title, position },
+    axisStyle: {
+      axisTitle,
+    },
   } = props;
-  if (!title) {
+  if (!title || !axisTitle.visible) {
     return null;
   }
   if (isHorizontalAxis(position)) {
@@ -41,48 +46,57 @@ export function renderTitle(ctx: CanvasRenderingContext2D, props: AxisProps) {
 function renderVerticalTitle(ctx: CanvasRenderingContext2D, props: AxisProps) {
   const {
     axisPosition: { height },
-    axisSpec: { title, position, tickSize, tickPadding },
+    axisSpec: { title, position, hide: hideAxis },
     axisTicksDimensions: { maxLabelBboxWidth },
-    axisConfig: { axisTitleStyle },
+    axisStyle: {
+      axisTitle,
+      tickLine,
+      tickLabel,
+    },
     debug,
   } = props;
   if (!title) {
     return null;
   }
-  const { padding, ...titleStyle } = axisTitleStyle;
+  const tickDimension = shouldShowTicks(tickLine, hideAxis) ? tickLine.size + tickLine.padding : 0;
+  const titlePadding = getSimplePadding(axisTitle.visible ? axisTitle.padding : 0);
+  const labelPadding = getSimplePadding(tickLabel.padding);
+  const labelWidth = tickLabel.visible ? labelPadding.outer + maxLabelBboxWidth + labelPadding.inner : 0;
   const top = height;
-  const left = position === Position.Left ? 0 : tickSize + tickPadding + maxLabelBboxWidth + padding;
+  const left = position === Position.Left ? titlePadding.outer : tickDimension + labelWidth + titlePadding.inner;
 
   if (debug) {
-    renderDebugRect(ctx, { x: left, y: top, width: height, height: titleStyle.fontSize }, undefined, undefined, -90);
+    renderDebugRect(ctx, { x: left, y: top, width: height, height: axisTitle.fontSize }, undefined, undefined, -90);
   }
 
   const font: Font = {
-    fontFamily: titleStyle.fontFamily,
+    fontFamily: axisTitle.fontFamily,
     fontVariant: 'normal',
-    fontStyle: titleStyle.fontStyle ? (titleStyle.fontStyle as FontStyle) : 'normal',
+    fontStyle: axisTitle.fontStyle ? (axisTitle.fontStyle as FontStyle) : 'normal',
     fontWeight: 'normal',
-    textColor: titleStyle.fill,
+    textColor: axisTitle.fill,
     textOpacity: 1,
   };
   renderText(
     ctx,
     {
-      x: left + titleStyle.fontSize / 2,
+      x: left + axisTitle.fontSize / 2,
       y: top - height / 2,
     },
     title,
-    { ...font, fill: titleStyle.fill, align: 'center', baseline: 'middle', fontSize: titleStyle.fontSize },
+    { ...font, fill: axisTitle.fill, align: 'center', baseline: 'middle', fontSize: axisTitle.fontSize },
     -90,
   );
 }
 function renderHorizontalTitle(ctx: CanvasRenderingContext2D, props: AxisProps) {
   const {
     axisPosition: { width },
-    axisSpec: { title, position, tickSize, tickPadding },
+    axisSpec: { title, position, hide: hideAxis },
     axisTicksDimensions: { maxLabelBboxHeight },
-    axisConfig: {
-      axisTitleStyle: { padding, ...titleStyle },
+    axisStyle: {
+      axisTitle,
+      tickLine,
+      tickLabel,
     },
     debug,
   } = props;
@@ -91,33 +105,37 @@ function renderHorizontalTitle(ctx: CanvasRenderingContext2D, props: AxisProps) 
     return;
   }
 
-  const top = position === Position.Top ? 0 : maxLabelBboxHeight + tickPadding + tickSize + padding;
+  const tickDimension = shouldShowTicks(tickLine, hideAxis) ? tickLine.size + tickLine.padding : 0;
+  const titlePadding = getSimplePadding(axisTitle.visible ? axisTitle.padding : 0);
+  const labelPadding = getSimplePadding(tickLabel.padding);
+  const labelHeight = tickLabel.visible ? maxLabelBboxHeight + labelPadding.outer + labelPadding.inner : 0;
+  const top = position === Position.Top ? titlePadding.outer : labelHeight + tickDimension + titlePadding.inner;
 
   const left = 0;
   if (debug) {
-    renderDebugRect(ctx, { x: left, y: top, width, height: titleStyle.fontSize });
+    renderDebugRect(ctx, { x: left, y: top, width, height: axisTitle.fontSize });
   }
   const font: Font = {
-    fontFamily: titleStyle.fontFamily,
+    fontFamily: axisTitle.fontFamily,
     fontVariant: 'normal',
-    fontStyle: titleStyle.fontStyle ? (titleStyle.fontStyle as FontStyle) : 'normal',
+    fontStyle: axisTitle.fontStyle ? (axisTitle.fontStyle as FontStyle) : 'normal',
     fontWeight: 'normal',
-    textColor: titleStyle.fill,
+    textColor: axisTitle.fill,
     textOpacity: 1,
   };
   renderText(
     ctx,
     {
       x: left + width / 2,
-      y: top + titleStyle.fontSize / 2,
+      y: top + axisTitle.fontSize / 2,
     },
     title,
     {
       ...font,
-      fill: titleStyle.fill,
+      fill: axisTitle.fill,
       align: 'center',
       baseline: 'middle',
-      fontSize: titleStyle.fontSize,
+      fontSize: axisTitle.fontSize,
     },
   );
 }

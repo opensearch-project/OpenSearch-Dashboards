@@ -19,32 +19,30 @@
 
 import createCachedSelector from 're-reselect';
 
-import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
-import { Dimensions } from '../../../../utils/dimensions';
-import { computeChartDimensions } from '../../utils/dimensions';
-import { computeAxisTicksDimensionsSelector } from './compute_axis_ticks_dimensions';
-import { getAxesStylesSelector } from './get_axis_styles';
+import { mergePartial, RecursivePartial } from '../../../../utils/commons';
+import { AxisId } from '../../../../utils/ids';
+import { AxisStyle } from '../../../../utils/themes/theme';
 import { getAxisSpecsSelector } from './get_specs';
 
-/** @internal */
-export const computeChartDimensionsSelector = createCachedSelector(
-  [
-    getChartContainerDimensionsSelector,
-    getChartThemeSelector,
-    computeAxisTicksDimensionsSelector,
-    getAxisSpecsSelector,
-    getAxesStylesSelector,
-  ],
-  (
-    chartContainerDimensions,
-    chartTheme,
-    axesTicksDimensions,
-    axesSpecs,
-    axesStyles,
-  ): {
-    chartDimensions: Dimensions;
-    leftMargin: number;
-  } => computeChartDimensions(chartContainerDimensions, chartTheme, axesTicksDimensions, axesStyles, axesSpecs),
+/**
+ * Get merged axis styles. **Only** include axes with styles overrides.
+ *
+ * @internal
+ */
+export const getAxesStylesSelector = createCachedSelector(
+  [getAxisSpecsSelector, getChartThemeSelector],
+  (axesSpecs, { axes: sharedAxesStyle }): Map<AxisId, AxisStyle | null> => {
+    const axesStyles = new Map<AxisId, AxisStyle | null>();
+    axesSpecs.forEach(({ id, style }) => {
+      const newStyle = style
+        ? mergePartial(sharedAxesStyle, style as RecursivePartial<AxisStyle>, {
+            mergeOptionalPartialValues: true,
+          })
+        : null;
+      axesStyles.set(id, newStyle);
+    });
+    return axesStyles;
+  },
 )(getChartIdSelector);

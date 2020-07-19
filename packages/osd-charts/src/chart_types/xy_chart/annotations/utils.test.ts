@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { RecursivePartial } from '@elastic/eui';
 import React from 'react';
 
 import { ChartTypes } from '../..';
@@ -29,7 +30,7 @@ import { Position, Rotation } from '../../../utils/commons';
 import { Dimensions } from '../../../utils/dimensions';
 import { GroupId, AnnotationId } from '../../../utils/ids';
 import { Point } from '../../../utils/point';
-import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../utils/themes/theme';
+import { DEFAULT_ANNOTATION_LINE_STYLE, AxisStyle } from '../../../utils/themes/theme';
 import { computeAnnotationDimensionsSelector } from '../state/selectors/compute_annotations';
 import {
   AnnotationDomainTypes,
@@ -73,6 +74,12 @@ describe('annotation utils', () => {
   };
 
   const groupId = 'foo-group';
+  const style: RecursivePartial<AxisStyle> = {
+    tickLine: {
+      size: 10,
+      padding: 10,
+    },
+  };
 
   const axesSpecs: AxisSpec[] = [];
   const verticalAxisSpec: AxisSpec = {
@@ -84,8 +91,7 @@ describe('annotation utils', () => {
     showOverlappingTicks: false,
     showOverlappingLabels: false,
     position: Position.Left,
-    tickSize: 10,
-    tickPadding: 10,
+    style,
     tickFormat: (value: any) => value.toString(),
     showGridLines: true,
   };
@@ -98,8 +104,7 @@ describe('annotation utils', () => {
     showOverlappingTicks: false,
     showOverlappingLabels: false,
     position: Position.Bottom,
-    tickSize: 10,
-    tickPadding: 10,
+    style,
     tickFormat: (value: any) => value.toString(),
     showGridLines: true,
   };

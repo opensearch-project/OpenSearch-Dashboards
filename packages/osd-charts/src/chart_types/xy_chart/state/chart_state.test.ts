@@ -23,9 +23,10 @@ import { ScaleContinuous, ScaleBand } from '../../../scales';
 import { ScaleType } from '../../../scales/constants';
 import { SpecTypes, TooltipType } from '../../../specs/constants';
 import { TooltipValue } from '../../../specs/settings';
-import { Position } from '../../../utils/commons';
+import { Position, RecursivePartial } from '../../../utils/commons';
 import { IndexedGeometry, GeometryValue, BandedAccessorType } from '../../../utils/geometry';
 import { AxisId } from '../../../utils/ids';
+import { AxisStyle } from '../../../utils/themes/theme';
 import { AxisTicksDimensions, isDuplicateAxis } from '../utils/axis_utils';
 import {
   AnnotationDomainTypes,
@@ -36,6 +37,13 @@ import {
   RectAnnotationSpec,
   SeriesTypes,
 } from '../utils/specs';
+
+const style: RecursivePartial<AxisStyle> = {
+  tickLine: {
+    size: 30,
+    padding: 10,
+  },
+};
 
 describe.skip('Chart Store', () => {
   let store: any = null; //
@@ -105,8 +113,7 @@ describe.skip('Chart Store', () => {
       showOverlappingTicks: false,
       showOverlappingLabels: false,
       position: Position.Left,
-      tickSize: 30,
-      tickPadding: 10,
+      style,
       tickFormat: (value: any) => `${value}%`,
     };
     const axis2: AxisSpec = {
@@ -262,8 +269,7 @@ describe.skip('Chart Store', () => {
       showOverlappingTicks: false,
       showOverlappingLabels: false,
       position: Position.Left,
-      tickSize: 30,
-      tickPadding: 10,
+      style,
       tickFormat: (value: any) => `value ${value}`,
     };
     store.addAxisSpec(axisSpec);
@@ -603,8 +609,7 @@ describe.skip('Chart Store', () => {
       showOverlappingTicks: false,
       showOverlappingLabels: false,
       position: Position.Left,
-      tickSize: 30,
-      tickPadding: 10,
+      style,
       tickFormat: (value: any) => `value ${value}`,
     };
 
@@ -809,8 +814,7 @@ describe.skip('Chart Store', () => {
         showOverlappingTicks: false,
         showOverlappingLabels: false,
         position: Position.Bottom,
-        tickSize: 30,
-        tickPadding: 10,
+        style,
         tickFormat: (value: any) => `foo ${value}`,
       };
 

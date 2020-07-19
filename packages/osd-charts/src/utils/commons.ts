@@ -40,6 +40,64 @@ export const ColorVariant = Object.freeze({
 });
 export type ColorVariant = $Values<typeof ColorVariant>;
 
+export const HorizontalAlignment = Object.freeze({
+  Center: 'center' as const,
+  Right: 'right' as const,
+  Left: 'left' as const,
+  /**
+   * Aligns to near side of axis depending on position
+   *
+   * Examples:
+   * - Left Axis, `Near` will push the label to the `Right`, _near_ the axis
+   * - Right Axis, `Near` will push the axis labels to the `Left`
+   * - Top/Bottom Axes, `Near` will default to `center`
+   */
+  Near: 'near' as const,
+  /**
+   * Aligns to far side of axis depending on position
+   *
+   * Examples:
+   * - Left Axis, `Far` will push the label to the `Left`, _far_ from the axis
+   * - Right Axis, `Far` will push the axis labels to the `Right`
+   * - Top/Bottom Axes, `Far` will default to `center`
+   */
+  Far: 'far' as const,
+});
+/**
+ * Horizontal text alignment
+ * @public
+ */
+export type HorizontalAlignment = $Values<typeof HorizontalAlignment>;
+
+export const VerticalAlignment = Object.freeze({
+  Middle: 'middle' as const,
+  Top: 'top' as const,
+  Bottom: 'bottom' as const,
+  /**
+   * Aligns to near side of axis depending on position
+   *
+   * Examples:
+   * - Top Axis, `Near` will push the label to the `Right`, _near_ the axis
+   * - Bottom Axis, `Near` will push the axis labels to the `Left`
+   * - Left/Right Axes, `Near` will default to `middle`
+   */
+  Near: 'near' as const,
+  /**
+   * Aligns to far side of axis depending on position
+   *
+   * Examples:
+   * - Top Axis, `Far` will push the label to the `Top`, _far_ from the axis
+   * - Bottom Axis, `Far` will push the axis labels to the `Bottom`
+   * - Left/Right Axes, `Far` will default to `middle`
+   */
+  Far: 'far' as const,
+});
+/**
+ * Vertical text alignment
+ * @public
+ */
+export type VerticalAlignment = $Values<typeof VerticalAlignment>;
+
 /** @public */
 export type Datum = any; // unknown;
 /** @public */
@@ -453,4 +511,29 @@ export const round = (value: number, fractionDigits = 0): number => {
   const scaledValue = Math.floor(value * precision);
 
   return scaledValue / precision;
+};
+
+/**
+ * Get number/percentage value from string
+ *
+ * i.e. `'90%'` with relative value of `100` returns `90`
+ */
+export const getPercentageValue = <T>(
+  ratio: string | number,
+  relativeValue: number,
+  defaultValue: T,
+): number | T => {
+  if (typeof ratio === 'number') {
+    return ratio;
+  }
+
+  const ratioStr = ratio.trim();
+
+  if (/\d+%$/.test(ratioStr)) {
+    const percentage = Number.parseInt(ratioStr.slice(0, -1), 10);
+    return relativeValue * (percentage / 100);
+  }
+  const num = Number.parseFloat(ratioStr);
+
+  return num && !isNaN(num) ? num : defaultValue;
 };
