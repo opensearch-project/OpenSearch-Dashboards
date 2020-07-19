@@ -1,3 +1,10 @@
+## [19.9.1](https://github.com/elastic/elastic-charts/compare/v19.9.0...v19.9.1) (2020-07-19)
+
+
+### Bug Fixes
+
+* correct bad breaking change merge ([3acc263](https://github.com/elastic/elastic-charts/commit/3acc263b1c1a7f6fed9f1820132abd656e3f153e))
+
 # [19.9.0](https://github.com/elastic/elastic-charts/compare/v19.8.1...v19.9.0) (2020-07-17)
 
 
