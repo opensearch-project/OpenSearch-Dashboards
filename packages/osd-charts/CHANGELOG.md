@@ -1,3 +1,10 @@
+## [20.0.1](https://github.com/elastic/elastic-charts/compare/v20.0.0...v20.0.1) (2020-07-21)
+
+
+### Bug Fixes
+
+* custom domain error with fallback ordinal scale ([#757](https://github.com/elastic/elastic-charts/issues/757)) ([142c3df](https://github.com/elastic/elastic-charts/commit/142c3dfd15832d1dbbc923918c662b1a40d169a4)), closes [#756](https://github.com/elastic/elastic-charts/issues/756)
+
 # [20.0.0](https://github.com/elastic/elastic-charts/compare/v19.9.1...v20.0.0) (2020-07-19)
 
 
