@@ -60,7 +60,14 @@ export function mergeXDomain(
       if (Array.isArray(customXDomain)) {
         seriesXComputedDomains = customXDomain;
       } else {
-        throw new TypeError('xDomain for ordinal scale should be an array of values, not a DomainRange object');
+        if (fallbackScale === ScaleType.Ordinal) {
+          Logger.warn(`xDomain ignored for fallback ordinal scale. Options to resolve:
+
+1) Correct data to match ${mainXScaleType.scaleType} scale type (see previous warning)
+2) Change xScaleType to ordinal and set xDomain to Domain array`);
+        } else {
+          throw new TypeError('xDomain for ordinal scale should be an array of values, not a DomainRange object.');
+        }
       }
     }
   } else {

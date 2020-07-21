@@ -470,9 +470,12 @@ describe('X Domain', () => {
       ],
     };
     const specDataSeries = [ds1, ds2];
+    const customDomain = {
+      min: 0,
+    };
 
     const { xValues } = getSplittedSeries(specDataSeries);
-    const mergedDomain = mergeXDomain(
+    const getResult = () => mergeXDomain(
       [
         {
           seriesType: SeriesTypes.Bar,
@@ -480,14 +483,21 @@ describe('X Domain', () => {
         },
         {
           seriesType: SeriesTypes.Bar,
-          xScaleType: ScaleType.Ordinal,
+          xScaleType: ScaleType.Linear,
         },
       ],
       xValues,
+      customDomain,
+      ScaleType.Ordinal,
     );
+
+    expect(getResult).not.toThrow();
+
+    const mergedDomain = getResult();
     expect(mergedDomain.domain).toEqual([0, 'a', 2, 5, 7]);
     expect(mergedDomain.scaleType).toEqual(ScaleType.Ordinal);
   });
+
   test('Should merge multi bar/line ordinal series correctly', () => {
     const ds1: BasicSeriesSpec = {
       chartType: ChartTypes.XYAxis,
