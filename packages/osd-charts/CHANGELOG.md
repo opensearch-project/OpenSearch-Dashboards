@@ -1,3 +1,11 @@
+## [20.0.2](https://github.com/elastic/elastic-charts/compare/v20.0.1...v20.0.2) (2020-07-23)
+
+
+### Bug Fixes
+
+* **axis:** dual axis x positioning of bars ([#760](https://github.com/elastic/elastic-charts/issues/760)) ([71b49f8](https://github.com/elastic/elastic-charts/commit/71b49f87bc3ae5d09f0d2d45fdc6bdb67d61c5a4))
+* **axis:** left axis sizing based on title padding ([#762](https://github.com/elastic/elastic-charts/issues/762)) ([3990589](https://github.com/elastic/elastic-charts/commit/399058939d164ca2c46652982c010a4dbfcd2628))
+
 ## [20.0.1](https://github.com/elastic/elastic-charts/compare/v20.0.0...v20.0.1) (2020-07-21)
 
 
