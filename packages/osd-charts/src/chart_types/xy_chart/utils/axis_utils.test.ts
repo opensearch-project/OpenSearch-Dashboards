@@ -938,7 +938,7 @@ describe('Axis computational utils', () => {
     expect(axisTicksPosition.axisPositions.get(verticalAxisSpecWTitle.id)).toEqual({
       top: 0,
       left: 10,
-      width: 18,
+      width: 10,
       height: 100,
     });
   });
@@ -1201,7 +1201,7 @@ describe('Axis computational utils', () => {
 
     const expectedPositionWithTopLegend = {
       height: 100,
-      width: 18,
+      width: 10,
       left: 100,
       top: 0,
     };

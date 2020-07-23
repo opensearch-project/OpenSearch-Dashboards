@@ -616,7 +616,7 @@ export function getAxisPosition(
   showLabels: boolean,
 ) {
   const titlePadding = getSimplePadding(axisTitleStyle.padding);
-  const titleDimension = axisTitleStyle.visible ? titlePadding.inner + axisTitleHeight + titlePadding.outer : 0;
+  const titleDimension = axisTitleStyle.visible && axisTitleHeight > 0 ? titlePadding.inner + axisTitleHeight + titlePadding.outer : 0;
   const { position } = axisSpec;
   const { maxLabelBboxHeight, maxLabelBboxWidth } = axisDim;
   const { top, left, height, width } = chartDimensions;
