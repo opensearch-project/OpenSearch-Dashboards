@@ -278,6 +278,7 @@ export function computeSeriesGeometries(
     bubbles: 0,
     bubblePoints: 0,
   };
+
   formattedDataSeries.stacked.forEach((dataSeriesGroup) => {
     const { groupId, dataSeries, counts } = dataSeriesGroup;
     const yScale = yScales.get(groupId);
@@ -300,6 +301,7 @@ export function computeSeriesGeometries(
       enableHistogramMode,
     );
     orderIndex = counts.barSeries > 0 ? orderIndex + 1 : orderIndex;
+
     areas.push(...geometries.areas);
     lines.push(...geometries.lines);
     bars.push(...geometries.bars);
@@ -316,14 +318,16 @@ export function computeSeriesGeometries(
     geometriesCounts.bubbles += geometries.geometriesCounts.bubbles;
     geometriesCounts.bubblePoints += geometries.geometriesCounts.bubblePoints;
   });
+  orderIndex = 0;
   formattedDataSeries.nonStacked.forEach((dataSeriesGroup) => {
-    const { groupId, dataSeries } = dataSeriesGroup;
+    const { groupId, dataSeries, counts } = dataSeriesGroup;
     const yScale = yScales.get(groupId);
     if (!yScale) {
       return;
     }
+
     const geometries = renderGeometries(
-      stackedBarsInCluster,
+      stackedBarsInCluster + orderIndex,
       totalBarsInCluster,
       false,
       dataSeries,
@@ -336,6 +340,7 @@ export function computeSeriesGeometries(
       chartTheme,
       enableHistogramMode,
     );
+    orderIndex = counts.barSeries > 0 ? orderIndex + counts.barSeries : orderIndex;
 
     areas.push(...geometries.areas);
     lines.push(...geometries.lines);
