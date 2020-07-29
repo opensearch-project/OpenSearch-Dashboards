@@ -4,9 +4,10 @@ exports[`Chart State utils should compute and format specifications for non stac
 Array [
   Object {
     "counts": Object {
-      "areaSeries": 0,
-      "barSeries": 0,
-      "lineSeries": 1,
+      "area": 0,
+      "bar": 0,
+      "bubble": 0,
+      "line": 1,
     },
     "dataSeries": Array [
       Object {
@@ -20,7 +21,7 @@ Array [
             "initialY1": 1,
             "mark": null,
             "x": 0,
-            "y0": 0,
+            "y0": null,
             "y1": 1,
           },
           Object {
@@ -32,7 +33,7 @@ Array [
             "initialY1": 2,
             "mark": null,
             "x": 1,
-            "y0": 0,
+            "y0": null,
             "y1": 2,
           },
           Object {
@@ -44,7 +45,7 @@ Array [
             "initialY1": 10,
             "mark": null,
             "x": 2,
-            "y0": 0,
+            "y0": null,
             "y1": 10,
           },
           Object {
@@ -56,7 +57,7 @@ Array [
             "initialY1": 6,
             "mark": null,
             "x": 3,
-            "y0": 0,
+            "y0": null,
             "y1": 6,
           },
         ],
@@ -73,9 +74,10 @@ Array [
   },
   Object {
     "counts": Object {
-      "areaSeries": 0,
-      "barSeries": 0,
-      "lineSeries": 1,
+      "area": 0,
+      "bar": 0,
+      "bubble": 0,
+      "line": 1,
     },
     "dataSeries": Array [
       Object {
@@ -89,7 +91,7 @@ Array [
             "initialY1": 1,
             "mark": null,
             "x": 0,
-            "y0": 0,
+            "y0": null,
             "y1": 1,
           },
           Object {
@@ -101,7 +103,7 @@ Array [
             "initialY1": 2,
             "mark": null,
             "x": 1,
-            "y0": 0,
+            "y0": null,
             "y1": 2,
           },
           Object {
@@ -113,7 +115,7 @@ Array [
             "initialY1": 10,
             "mark": null,
             "x": 2,
-            "y0": 0,
+            "y0": null,
             "y1": 10,
           },
           Object {
@@ -125,7 +127,7 @@ Array [
             "initialY1": 6,
             "mark": null,
             "x": 3,
-            "y0": 0,
+            "y0": null,
             "y1": 6,
           },
         ],
@@ -147,9 +149,10 @@ exports[`Chart State utils should compute and format specifications for stacked 
 Array [
   Object {
     "counts": Object {
-      "areaSeries": 0,
-      "barSeries": 0,
-      "lineSeries": 2,
+      "area": 0,
+      "bar": 0,
+      "bubble": 0,
+      "line": 2,
     },
     "dataSeries": Array [
       Object {
@@ -160,11 +163,12 @@ Array [
               "x": 0,
               "y": 1,
             },
+            "filled": undefined,
             "initialY0": null,
             "initialY1": 1,
             "mark": null,
             "x": 0,
-            "y0": null,
+            "y0": 0,
             "y1": 1,
           },
           Object {
@@ -173,11 +177,12 @@ Array [
               "x": 1,
               "y": 2,
             },
+            "filled": undefined,
             "initialY0": null,
             "initialY1": 2,
             "mark": null,
             "x": 1,
-            "y0": null,
+            "y0": 0,
             "y1": 2,
           },
           Object {
@@ -186,11 +191,12 @@ Array [
               "x": 2,
               "y": 3,
             },
+            "filled": undefined,
             "initialY0": null,
             "initialY1": 3,
             "mark": null,
             "x": 2,
-            "y0": null,
+            "y0": 0,
             "y1": 3,
           },
           Object {
@@ -199,11 +205,12 @@ Array [
               "x": 3,
               "y": 4,
             },
+            "filled": undefined,
             "initialY0": null,
             "initialY1": 4,
             "mark": null,
             "x": 3,
-            "y0": null,
+            "y0": 0,
             "y1": 4,
           },
         ],
@@ -226,6 +233,7 @@ Array [
               "x": 0,
               "y": 2,
             },
+            "filled": undefined,
             "initialY0": null,
             "initialY1": 2,
             "mark": null,
@@ -239,6 +247,7 @@ Array [
               "x": 1,
               "y": 3,
             },
+            "filled": undefined,
             "initialY0": null,
             "initialY1": 3,
             "mark": null,
@@ -252,6 +261,7 @@ Array [
               "x": 2,
               "y": 4,
             },
+            "filled": undefined,
             "initialY0": null,
             "initialY1": 4,
             "mark": null,
@@ -265,6 +275,7 @@ Array [
               "x": 3,
               "y": 5,
             },
+            "filled": undefined,
             "initialY0": null,
             "initialY1": 5,
             "mark": null,
@@ -286,6 +297,7 @@ Array [
       },
     ],
     "groupId": "group2",
+    "stackMode": undefined,
   },
 ]
 `;
@@ -294,9 +306,10 @@ exports[`Chart State utils should compute and format specifications for stacked 
 Array [
   Object {
     "counts": Object {
-      "areaSeries": 0,
-      "barSeries": 0,
-      "lineSeries": 2,
+      "area": 0,
+      "bar": 0,
+      "bubble": 0,
+      "line": 2,
     },
     "dataSeries": Array [
       Object {
@@ -311,7 +324,7 @@ Array [
             "initialY1": 1,
             "mark": null,
             "x": 0,
-            "y0": 0,
+            "y0": null,
             "y1": 1,
           },
           Object {
@@ -324,7 +337,7 @@ Array [
             "initialY1": 2,
             "mark": null,
             "x": 1,
-            "y0": 0,
+            "y0": null,
             "y1": 2,
           },
           Object {
@@ -337,7 +350,7 @@ Array [
             "initialY1": 3,
             "mark": null,
             "x": 2,
-            "y0": 0,
+            "y0": null,
             "y1": 3,
           },
           Object {
@@ -350,7 +363,7 @@ Array [
             "initialY1": 4,
             "mark": null,
             "x": 3,
-            "y0": 0,
+            "y0": null,
             "y1": 4,
           },
         ],
@@ -377,7 +390,7 @@ Array [
             "initialY1": 2,
             "mark": null,
             "x": 0,
-            "y0": 0,
+            "y0": null,
             "y1": 2,
           },
           Object {
@@ -390,7 +403,7 @@ Array [
             "initialY1": 3,
             "mark": null,
             "x": 1,
-            "y0": 0,
+            "y0": null,
             "y1": 3,
           },
           Object {
@@ -403,7 +416,7 @@ Array [
             "initialY1": 4,
             "mark": null,
             "x": 2,
-            "y0": 0,
+            "y0": null,
             "y1": 4,
           },
           Object {
@@ -416,7 +429,7 @@ Array [
             "initialY1": 5,
             "mark": null,
             "x": 3,
-            "y0": 0,
+            "y0": null,
             "y1": 5,
           },
         ],

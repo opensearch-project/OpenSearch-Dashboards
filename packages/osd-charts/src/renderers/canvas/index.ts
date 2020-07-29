@@ -91,31 +91,31 @@ export function withClipRanges(
   negate = false,
   fun: (ctx: CanvasRenderingContext2D) => void,
 ) {
-  withContext(ctx, (ctx) => {
+  withContext(ctx, (context) => {
     const { length } = clippedRanges;
     const { width, height } = clippings;
-    ctx.beginPath();
+    context.beginPath();
     if (negate) {
       clippedRanges.forEach(([x0, x1]) => {
-        ctx.rect(x0, 0, x1 - x0, height);
+        context.rect(x0, 0, x1 - x0, height);
       });
     } else {
       if (length > 0) {
-        ctx.rect(0, 0, clippedRanges[0][0], height);
+        context.rect(0, 0, clippedRanges[0][0], height);
         const lastX = clippedRanges[length - 1][1];
-        ctx.rect(lastX, 0, width - lastX, height);
+        context.rect(lastX, 0, width - lastX, height);
       }
 
       if (length > 1) {
         for (let i = 1; i < length; i++) {
           const [, x0] = clippedRanges[i - 1];
           const [x1] = clippedRanges[i];
-          ctx.rect(x0, 0, x1 - x0, height);
+          context.rect(x0, 0, x1 - x0, height);
         }
       }
     }
-    ctx.clip();
-    fun(ctx);
+    context.clip();
+    fun(context);
   });
 }
 

@@ -386,6 +386,7 @@ describe('Rendering utils', () => {
 
   describe('getClippedRanges', () => {
     const dataSeries = MockDataSeries.fitFunction({ shuffle: false });
+
     const xScale = MockScale.default({
       scale: jest.fn().mockImplementation((x) => x),
       bandwidth: 0,

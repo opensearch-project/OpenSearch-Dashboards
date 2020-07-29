@@ -18,134 +18,126 @@
  */
 
 import { ChartTypes } from '../..';
-import { MockRawDataSeries, MockRawDataSeriesDatum } from '../../../mocks';
+import { MockSeriesSpec, MockGlobalSpec } from '../../../mocks/specs';
+import { MockStore } from '../../../mocks/store';
 import { ScaleType } from '../../../scales/constants';
 import { SpecTypes } from '../../../specs/constants';
+import { Position } from '../../../utils/commons';
 import { BARCHART_1Y0G } from '../../../utils/data_samples/test_dataset';
-import { GroupId } from '../../../utils/ids';
-import { RawDataSeries } from '../utils/series';
-import { BasicSeriesSpec, SeriesTypes, YDomainRange } from '../utils/specs';
+import { computeSeriesDomainsSelector } from '../state/selectors/compute_series_domains';
+import { BasicSeriesSpec, SeriesTypes, DEFAULT_GLOBAL_ID, StackMode } from '../utils/specs';
 import {
   coerceYScaleTypes,
-  getDataSeriesOnGroup,
-  mergeYDomain,
   splitSpecsByGroupId,
-  YBasicSeriesSpec,
 } from './y_domain';
 
-const domainGroup = new Map([
-  ['a', { fit: true }],
-  ['b', { fit: true }],
-]);
+const DEMO_AREA_SPEC_1 = {
+  id: 'a',
+  groupId: 'a',
+  yAccessors: ['y1'],
+  stackAccessors: ['x'],
+  splitSeriesAccessors: ['g'],
+  yScaleType: ScaleType.Linear,
+  data: [
+    { x: 1, y1: 2, g: 'a' },
+    { x: 2, y1: 2, g: 'a' },
+    { x: 3, y1: 2, g: 'a' },
+    { x: 4, y1: 5, g: 'a' },
+
+    { x: 1, y1: 2, g: 'b' },
+    { x: 4, y1: 7, g: 'b' },
+  ],
+};
+const DEMO_AREA_SPEC_2 = {
+  id: 'b',
+  yAccessors: ['y1'],
+  yScaleType: ScaleType.Log,
+  data: [
+    { x: 1, y1: 10 },
+    { x: 2, y1: 10 },
+    { x: 3, y1: 2 },
+    { x: 4, y1: 5 },
+  ],
+};
 
 describe('Y Domain', () => {
-  test('Should merge Y domain', () => {
-    const dataSeries = MockRawDataSeries.fromData(
-      [
-        [
-          { x: 1, y1: 2 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 2 },
-          { x: 4, y1: 5 },
-        ],
-        [
-          { x: 1, y1: 2 },
-          { x: 4, y1: 7 },
-        ],
-      ],
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        seriesKeys: [''],
-        key: '',
-      },
-    );
-    const specDataSeries = new Map<string, RawDataSeries[]>();
-    specDataSeries.set('a', dataSeries);
-    const mergedDomain = mergeYDomain(
-      specDataSeries,
-      [
-        {
-          seriesType: SeriesTypes.Area,
-          yScaleType: ScaleType.Linear,
-          groupId: 'a',
-          id: 'a',
-          stackAccessors: ['a'],
-        },
-      ],
-      domainGroup,
-    );
-    expect(mergedDomain).toEqual([
+  test('Should merge Y domain for non zero baseline charts', () => {
+    const store = MockStore.default();
+    MockStore.addSpecs([
+      MockGlobalSpec.axis({
+        id: 'y',
+        position: Position.Left,
+        domain: { fit: true },
+      }),
+      MockSeriesSpec.line({
+        ...DEMO_AREA_SPEC_1,
+        groupId: DEFAULT_GLOBAL_ID,
+      }),
+    ], store);
+    const { yDomain } = computeSeriesDomainsSelector(store.getState());
+
+    expect(yDomain).toEqual([
       {
         type: 'yDomain',
-        groupId: 'a',
+        groupId: DEFAULT_GLOBAL_ID,
         domain: [2, 12],
         scaleType: ScaleType.Linear,
         isBandScale: false,
       },
     ]);
   });
+  test('Should merge Y domain for zero baseline charts', () => {
+    const store = MockStore.default();
+    MockStore.addSpecs([
+      MockGlobalSpec.axis({
+        id: 'y',
+        position: Position.Left,
+        domain: { fit: true },
+      }),
+      MockSeriesSpec.area({
+        ...DEMO_AREA_SPEC_1,
+        groupId: DEFAULT_GLOBAL_ID,
+      }),
+    ], store);
+    const { yDomain } = computeSeriesDomainsSelector(store.getState());
+
+    expect(yDomain).toEqual([
+      {
+        type: 'yDomain',
+        groupId: DEFAULT_GLOBAL_ID,
+        domain: [0, 12],
+        scaleType: ScaleType.Linear,
+        isBandScale: false,
+      },
+    ]);
+  });
   test('Should merge Y domain different group', () => {
-    const dataSeries1 = MockRawDataSeries.fromData(
-      [
-        [
-          { x: 1, y1: 2 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 2 },
-          { x: 4, y1: 5 },
-        ],
-        [
-          { x: 1, y1: 2 },
-          { x: 4, y1: 7 },
-        ],
-      ],
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        seriesKeys: [''],
-        key: '',
-      },
-    );
-    const dataSeries2 = MockRawDataSeries.fromData(
-      [
-        [
-          { x: 1, y1: 10 },
-          { x: 2, y1: 10 },
-          { x: 3, y1: 2 },
-          { x: 4, y1: 5 },
-        ],
-      ],
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        seriesKeys: [''],
-        key: '',
-      },
-    );
-    const specDataSeries = new Map<string, RawDataSeries[]>();
-    specDataSeries.set('a', dataSeries1);
-    specDataSeries.set('b', dataSeries2);
-    const mergedDomain = mergeYDomain(
-      specDataSeries,
-      [
-        {
-          seriesType: SeriesTypes.Area,
-          yScaleType: ScaleType.Linear,
-          groupId: 'a',
-          id: 'a',
-          stackAccessors: ['a'],
-        },
-        {
-          seriesType: SeriesTypes.Area,
-          yScaleType: ScaleType.Log,
-          groupId: 'b',
-          id: 'b',
-          stackAccessors: ['a'],
-        },
-      ],
-      domainGroup,
-    );
-    expect(mergedDomain).toEqual([
+    const store = MockStore.default();
+    MockStore.addSpecs([
+      MockGlobalSpec.axis({
+        id: 'y a',
+        groupId: 'a',
+        position: Position.Left,
+        domain: { fit: true },
+      }),
+      MockGlobalSpec.axis({
+        id: 'y b',
+        groupId: 'b',
+        position: Position.Left,
+        domain: { fit: true },
+      }),
+      MockSeriesSpec.line(DEMO_AREA_SPEC_1),
+      MockSeriesSpec.line({
+        ...DEMO_AREA_SPEC_2,
+        groupId: 'b',
+      }),
+
+
+    ], store);
+    const { yDomain } = computeSeriesDomainsSelector(store.getState());
+
+
+    expect(yDomain).toEqual([
       {
         groupId: 'a',
         domain: [2, 12],
@@ -163,70 +155,27 @@ describe('Y Domain', () => {
     ]);
   });
   test('Should merge Y domain same group all stacked', () => {
-    const dataSeries1 = MockRawDataSeries.fromData(
-      [
-        [
-          { x: 1, y1: 2 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 2 },
-          { x: 4, y1: 5 },
-        ],
-        [
-          { x: 1, y1: 2 },
-          { x: 4, y1: 7 },
-        ],
-      ],
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        seriesKeys: [''],
-        key: '',
-      },
-    );
+    const store = MockStore.default();
+    MockStore.addSpecs([
+      MockGlobalSpec.axis({
+        id: 'y a',
+        groupId: 'a',
+        position: Position.Left,
+        domain: { fit: true },
+      }),
+      MockSeriesSpec.area(DEMO_AREA_SPEC_1),
+      MockSeriesSpec.area({
+        ...DEMO_AREA_SPEC_2,
+        groupId: 'a',
+        stackAccessors: ['x'],
+      }),
+    ], store);
+    const { yDomain } = computeSeriesDomainsSelector(store.getState());
 
-    const dataSeries2 = MockRawDataSeries.fromData(
-      [
-        [
-          { x: 1, y1: 10 },
-          { x: 2, y1: 10 },
-          { x: 3, y1: 2 },
-          { x: 4, y1: 5 },
-        ],
-      ],
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        seriesKeys: [''],
-        key: '',
-      },
-    );
-    const specDataSeries = new Map<string, RawDataSeries[]>();
-    specDataSeries.set('a', dataSeries1);
-    specDataSeries.set('b', dataSeries2);
-    const mergedDomain = mergeYDomain(
-      specDataSeries,
-      [
-        {
-          seriesType: SeriesTypes.Area,
-          yScaleType: ScaleType.Linear,
-          groupId: 'a',
-          id: 'a',
-          stackAccessors: ['a'],
-        },
-        {
-          seriesType: SeriesTypes.Area,
-          yScaleType: ScaleType.Log,
-          groupId: 'a',
-          id: 'b',
-          stackAccessors: ['a'],
-        },
-      ],
-      domainGroup,
-    );
-    expect(mergedDomain).toEqual([
+    expect(yDomain).toEqual([
       {
         groupId: 'a',
-        domain: [2, 17],
+        domain: [0, 17],
         scaleType: ScaleType.Linear,
         isBandScale: false,
         type: 'yDomain',
@@ -234,129 +183,32 @@ describe('Y Domain', () => {
     ]);
   });
   test('Should merge Y domain same group partially stacked', () => {
-    const dataSeries1 = MockRawDataSeries.fromData(
-      [
-        [
-          { x: 1, y1: 2, mark: null },
-          { x: 2, y1: 2, mark: null },
-          { x: 3, y1: 2, mark: null },
-          { x: 4, y1: 5, mark: null },
-        ],
-        [
-          { x: 1, y1: 2, mark: null },
-          { x: 4, y1: 7, mark: null },
-        ],
-      ],
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        seriesKeys: [''],
-        key: '',
-      },
-    );
-    const dataSeries2 = MockRawDataSeries.fromData(
-      [
-        [
-          { x: 1, y1: 10, mark: null },
-          { x: 2, y1: 10, mark: null },
-          { x: 3, y1: 2, mark: null },
-          { x: 4, y1: 5, mark: null },
-        ],
-      ],
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        seriesKeys: [''],
-        key: '',
-      },
-    );
-    const specDataSeries = new Map<string, RawDataSeries[]>();
-    specDataSeries.set('a', dataSeries1);
-    specDataSeries.set('b', dataSeries2);
-    const mergedDomain = mergeYDomain(
-      specDataSeries,
-      [
-        {
-          seriesType: SeriesTypes.Area,
-          yScaleType: ScaleType.Linear,
-          groupId: 'a',
-          id: 'a',
-          stackAccessors: ['a'],
-        },
-        {
-          seriesType: SeriesTypes.Area,
-          yScaleType: ScaleType.Log,
-          groupId: 'a',
-          id: 'b',
-        },
-      ],
-      domainGroup,
-    );
-    expect(mergedDomain).toEqual([
+    const store = MockStore.default();
+    MockStore.addSpecs([
+      MockGlobalSpec.axis({
+        id: 'y a',
+        groupId: 'a',
+        position: Position.Left,
+        domain: { fit: true },
+      }),
+      MockSeriesSpec.area(DEMO_AREA_SPEC_1),
+      MockSeriesSpec.area({
+        ...DEMO_AREA_SPEC_2,
+        groupId: 'a',
+      }),
+    ], store);
+    const { yDomain } = computeSeriesDomainsSelector(store.getState());
+    expect(yDomain).toEqual([
       {
         groupId: 'a',
-        domain: [2, 12],
+        domain: [0, 12],
         scaleType: ScaleType.Linear,
         isBandScale: false,
         type: 'yDomain',
       },
     ]);
   });
-  test('Should merge Y high volume of data', () => {
-    const maxValues = 10000;
-    const data = new Array(maxValues).fill(0).map((_, i) => MockRawDataSeriesDatum.default({ x: i, y1: i }));
-    const dataSeries1: RawDataSeries[] = [
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data,
-      },
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data,
-      },
-    ];
-    const dataSeries2: RawDataSeries[] = [
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [''],
-        key: '',
-        data,
-      },
-    ];
-    const specDataSeries = new Map<string, RawDataSeries[]>();
-    specDataSeries.set('a', dataSeries1);
-    specDataSeries.set('b', dataSeries2);
-    const mergedDomain = mergeYDomain(
-      specDataSeries,
-      [
-        {
-          seriesType: SeriesTypes.Area,
-          yScaleType: ScaleType.Linear,
-          groupId: 'a',
-          id: 'a',
-          stackAccessors: ['a'],
-        },
-        {
-          seriesType: SeriesTypes.Area,
-          yScaleType: ScaleType.Log,
-          groupId: 'a',
-          id: 'b',
-        },
-      ],
-      domainGroup,
-    );
-    expect(mergedDomain.length).toEqual(1);
-  });
+
   test('Should split specs by groupId, two groups, non stacked', () => {
     const spec1: BasicSeriesSpec = {
       chartType: ChartTypes.XYAxis,
@@ -520,87 +372,24 @@ describe('Y Domain', () => {
     expect(coerceYScaleTypes(specs)).toBe(ScaleType.Linear);
   });
 
-  test('Should getDataSeriesOnGroup for matching specs', () => {
-    const dataSeries = MockRawDataSeries.fromData(
-      [
-        [
-          { x: 1, y1: 2 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 2 },
-          { x: 4, y1: 5 },
-        ],
-        [
-          { x: 1, y1: 2 },
-          { x: 4, y1: 7 },
-        ],
-      ],
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        seriesKeys: [''],
-        key: '',
-      },
-    );
-    const specDataSeries = new Map<string, RawDataSeries[]>();
-    specDataSeries.set('b', dataSeries);
 
-    const specs: YBasicSeriesSpec[] = [
-      {
-        seriesType: SeriesTypes.Area,
-        yScaleType: ScaleType.Linear,
-        groupId: 'a',
-        id: 'a',
-        stackAccessors: ['a'],
-      },
-    ];
-
-    const rawDataSeries = getDataSeriesOnGroup(specDataSeries, specs);
-    expect(rawDataSeries).toEqual([]);
-  });
   test('Should merge Y domain accounting for custom domain limits: complete bounded domain', () => {
-    const groupId = 'a';
-    const dataSeries = MockRawDataSeries.fromData(
-      [
-        [
-          { x: 1, y1: 2 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 2 },
-          { x: 4, y1: 5 },
-        ],
-        [
-          { x: 1, y1: 2 },
-          { x: 4, y1: 7 },
-        ],
-      ],
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        seriesKeys: [''],
-        key: '',
-      },
-    );
-    const specDataSeries = new Map<string, RawDataSeries[]>();
-    specDataSeries.set('a', dataSeries);
-    const domainsByGroupId = new Map<GroupId, YDomainRange>();
-    domainsByGroupId.set(groupId, { min: 0, max: 20, fit: true });
+    const store = MockStore.default();
+    MockStore.addSpecs([
+      MockGlobalSpec.axis({
+        id: 'y a',
+        groupId: 'a',
+        position: Position.Left,
+        domain: { min: 0, max: 20, fit: true },
+      }),
+      MockSeriesSpec.area(DEMO_AREA_SPEC_1),
+    ], store);
+    const { yDomain } = computeSeriesDomainsSelector(store.getState());
 
-    const mergedDomain = mergeYDomain(
-      specDataSeries,
-      [
-        {
-          seriesType: SeriesTypes.Area,
-          yScaleType: ScaleType.Linear,
-          groupId,
-          id: 'a',
-          stackAccessors: ['a'],
-        },
-      ],
-      domainsByGroupId,
-    );
-    expect(mergedDomain).toEqual([
+    expect(yDomain).toEqual([
       {
         type: 'yDomain',
-        groupId,
+        groupId: 'a',
         domain: [0, 20],
         scaleType: ScaleType.Linear,
         isBandScale: false,
@@ -608,49 +397,22 @@ describe('Y Domain', () => {
     ]);
   });
   test('Should merge Y domain accounting for custom domain limits: partial lower bounded domain', () => {
-    const groupId = 'a';
-    const dataSeries = MockRawDataSeries.fromData(
-      [
-        [
-          { x: 1, y1: 2 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 2 },
-          { x: 4, y1: 5 },
-        ],
-        [
-          { x: 1, y1: 2 },
-          { x: 4, y1: 7 },
-        ],
-      ],
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        seriesKeys: [''],
-        key: '',
-      },
-    );
-    const specDataSeries = new Map<string, RawDataSeries[]>();
-    specDataSeries.set('a', dataSeries);
-    const domainsByGroupId = new Map<GroupId, YDomainRange>();
-    domainsByGroupId.set(groupId, { min: 0, fit: true });
+    const store = MockStore.default();
+    MockStore.addSpecs([
+      MockGlobalSpec.axis({
+        id: 'y a',
+        groupId: 'a',
+        position: Position.Left,
+        domain: { min: 0, fit: true },
+      }),
+      MockSeriesSpec.area(DEMO_AREA_SPEC_1),
+    ], store);
+    const { yDomain } = computeSeriesDomainsSelector(store.getState());
 
-    const mergedDomain = mergeYDomain(
-      specDataSeries,
-      [
-        {
-          seriesType: SeriesTypes.Area,
-          yScaleType: ScaleType.Linear,
-          groupId,
-          id: 'a',
-          stackAccessors: ['a'],
-        },
-      ],
-      domainsByGroupId,
-    );
-    expect(mergedDomain).toEqual([
+    expect(yDomain).toEqual([
       {
         type: 'yDomain',
-        groupId,
+        groupId: 'a',
         domain: [0, 12],
         scaleType: ScaleType.Linear,
         isBandScale: false,
@@ -658,95 +420,42 @@ describe('Y Domain', () => {
     ]);
   });
   test('Should not merge Y domain with invalid custom domain limits: partial lower bounded domain', () => {
-    const groupId = 'a';
-    const dataSeries = MockRawDataSeries.fromData(
-      [
-        [
-          { x: 1, y1: 2 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 2 },
-          { x: 4, y1: 5 },
-        ],
-        [
-          { x: 1, y1: 2 },
-          { x: 4, y1: 7 },
-        ],
-      ],
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        seriesKeys: [''],
-        key: '',
-      },
-    );
-    const specDataSeries = new Map<string, RawDataSeries[]>();
-    specDataSeries.set('a', dataSeries);
-    const domainsByGroupId = new Map<GroupId, YDomainRange>();
-    domainsByGroupId.set(groupId, { min: 20, fit: true });
+    const store = MockStore.default();
+    MockStore.addSpecs([
+      MockGlobalSpec.axis({
+        id: 'y a',
+        groupId: 'a',
+        position: Position.Left,
+        domain: { min: 20, fit: true },
+      }),
+      MockSeriesSpec.area(DEMO_AREA_SPEC_1),
+    ], store);
 
     const attemptToMerge = () => {
-      mergeYDomain(
-        specDataSeries,
-        [
-          {
-            seriesType: SeriesTypes.Area,
-            yScaleType: ScaleType.Linear,
-            groupId,
-            id: 'a',
-            stackAccessors: ['a'],
-          },
-        ],
-        domainsByGroupId,
-      );
+      computeSeriesDomainsSelector(store.getState());
     };
 
     const errorMessage = 'custom yDomain for a is invalid, custom min is greater than computed max';
     expect(attemptToMerge).toThrowError(errorMessage);
   });
   test('Should merge Y domain accounting for custom domain limits: partial upper bounded domain', () => {
-    const groupId = 'a';
-    const dataSeries = MockRawDataSeries.fromData(
-      [
-        [
-          { x: 1, y1: 2 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 2 },
-          { x: 4, y1: 5 },
-        ],
-        [
-          { x: 1, y1: 2 },
-          { x: 4, y1: 7 },
-        ],
-      ],
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        seriesKeys: [''],
-        key: '',
-      },
-    );
-    const specDataSeries = new Map<string, RawDataSeries[]>();
-    specDataSeries.set('a', dataSeries);
-    const domainsByGroupId = new Map<GroupId, YDomainRange>();
-    domainsByGroupId.set(groupId, { max: 20, fit: true });
+    const store = MockStore.default();
+    MockStore.addSpecs([
+      MockGlobalSpec.axis({
+        id: 'y a',
+        groupId: 'a',
+        position: Position.Left,
+        domain: { max: 20, fit: true },
+      }),
+      MockSeriesSpec.line(DEMO_AREA_SPEC_1),
+    ], store);
 
-    const mergedDomain = mergeYDomain(
-      specDataSeries,
-      [
-        {
-          seriesType: SeriesTypes.Area,
-          yScaleType: ScaleType.Linear,
-          groupId,
-          id: 'a',
-          stackAccessors: ['a'],
-        },
-      ],
-      domainsByGroupId,
-    );
-    expect(mergedDomain).toEqual([
+
+    const { yDomain } = computeSeriesDomainsSelector(store.getState());
+    expect(yDomain).toEqual([
       {
         type: 'yDomain',
-        groupId,
+        groupId: 'a',
         domain: [2, 20],
         scaleType: ScaleType.Linear,
         isBandScale: false,
@@ -754,112 +463,40 @@ describe('Y Domain', () => {
     ]);
   });
   test('Should not merge Y domain with invalid custom domain limits: partial upper bounded domain', () => {
-    const groupId = 'a';
-    const dataSeries = MockRawDataSeries.fromData(
-      [
-        [
-          { x: 1, y1: 2 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 2 },
-          { x: 4, y1: 5 },
-        ],
-        [
-          { x: 1, y1: 2 },
-          { x: 4, y1: 7 },
-        ],
-      ],
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        seriesKeys: [''],
-        key: '',
-      },
-    );
-    const specDataSeries = new Map<string, RawDataSeries[]>();
-    specDataSeries.set('a', dataSeries);
-    const domainsByGroupId = new Map<GroupId, YDomainRange>();
-    domainsByGroupId.set(groupId, { max: -1, fit: true });
+    const store = MockStore.default();
+    MockStore.addSpecs([
+      MockGlobalSpec.axis({
+        id: 'y a',
+        groupId: 'a',
+        position: Position.Left,
+        domain: { max: -1, fit: true },
+      }),
+      MockSeriesSpec.area(DEMO_AREA_SPEC_1),
+    ], store);
 
     const attemptToMerge = () => {
-      mergeYDomain(
-        specDataSeries,
-        [
-          {
-            seriesType: SeriesTypes.Area,
-            yScaleType: ScaleType.Linear,
-            groupId,
-            id: 'a',
-            stackAccessors: ['a'],
-          },
-        ],
-        domainsByGroupId,
-      );
+      computeSeriesDomainsSelector(store.getState());
     };
 
     const errorMessage = 'custom yDomain for a is invalid, computed min is greater than custom max';
     expect(attemptToMerge).toThrowError(errorMessage);
   });
   test('Should merge Y domain with stacked as percentage', () => {
-    const dataSeries1 = MockRawDataSeries.fromData(
-      [
-        [
-          { x: 1, y1: 2 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 2 },
-          { x: 4, y1: 5 },
-        ],
-        [
-          { x: 1, y1: 2 },
-          { x: 4, y1: 7 },
-        ],
-      ],
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        seriesKeys: [''],
-        key: '',
-      },
-    );
-    const dataSeries2 = MockRawDataSeries.fromData(
-      [
-        [
-          { x: 1, y1: 10 },
-          { x: 2, y1: 10 },
-          { x: 3, y1: 2 },
-          { x: 4, y1: 5 },
-        ],
-      ],
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        seriesKeys: [''],
-        key: '',
-      },
-    );
-    const specDataSeries = new Map<string, RawDataSeries[]>();
-    specDataSeries.set('a', dataSeries1);
-    specDataSeries.set('b', dataSeries2);
-    const mergedDomain = mergeYDomain(
-      specDataSeries,
-      [
-        {
-          seriesType: SeriesTypes.Area,
-          yScaleType: ScaleType.Linear,
-          groupId: 'a',
-          id: 'a',
-          stackAccessors: ['a'],
-          stackAsPercentage: true,
-        },
-        {
-          seriesType: SeriesTypes.Area,
-          yScaleType: ScaleType.Log,
-          groupId: 'a',
-          id: 'b',
-        },
-      ],
-      domainGroup,
-    );
-    expect(mergedDomain).toEqual([
+    const store = MockStore.default();
+    MockStore.addSpecs([
+      MockSeriesSpec.area({
+        ...DEMO_AREA_SPEC_1,
+        stackMode: StackMode.Percentage,
+      }),
+      MockSeriesSpec.area({
+        ...DEMO_AREA_SPEC_2,
+        groupId: 'a',
+      }),
+    ], store);
+
+
+    const { yDomain } = computeSeriesDomainsSelector(store.getState());
+    expect(yDomain).toEqual([
       {
         groupId: 'a',
         domain: [0, 1],
@@ -870,50 +507,24 @@ describe('Y Domain', () => {
     ]);
   });
   test('Should merge Y domain with as percentage regadless of custom domains', () => {
-    const groupId = 'a';
-    const dataSeries = MockRawDataSeries.fromData(
-      [
-        [
-          { x: 1, y1: 2 },
-          { x: 2, y1: 2 },
-          { x: 3, y1: 2 },
-          { x: 4, y1: 5 },
-        ],
-        [
-          { x: 1, y1: 2 },
-          { x: 4, y1: 7 },
-        ],
-      ],
-      {
-        specId: 'a',
-        yAccessor: 'y1',
-        seriesKeys: [''],
-        key: '',
-      },
-    );
-    const specDataSeries = new Map<string, RawDataSeries[]>();
-    specDataSeries.set('a', dataSeries);
-    const domainsByGroupId = new Map<GroupId, YDomainRange>();
-    domainsByGroupId.set(groupId, { min: 2, max: 20, fit: true });
-
-    const mergedDomain = mergeYDomain(
-      specDataSeries,
-      [
-        {
-          seriesType: SeriesTypes.Area,
-          yScaleType: ScaleType.Linear,
-          groupId,
-          id: 'a',
-          stackAccessors: ['a'],
-          stackAsPercentage: true,
-        },
-      ],
-      domainsByGroupId,
-    );
-    expect(mergedDomain).toEqual([
+    const store = MockStore.default();
+    MockStore.addSpecs([
+      MockGlobalSpec.axis({
+        id: 'y a',
+        groupId: 'a',
+        position: Position.Left,
+        domain: { min: 2, max: 20, fit: true },
+      }),
+      MockSeriesSpec.area({
+        ...DEMO_AREA_SPEC_1,
+        stackMode: StackMode.Percentage,
+      }),
+    ], store);
+    const { yDomain } = computeSeriesDomainsSelector(store.getState());
+    expect(yDomain).toEqual([
       {
         type: 'yDomain',
-        groupId,
+        groupId: 'a',
         domain: [0, 1],
         scaleType: ScaleType.Linear,
         isBandScale: false,

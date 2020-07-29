@@ -54,9 +54,10 @@ describe('Fit Function', () => {
           const current = MockDataSeriesDatum.simple({ x: 3 });
           const actual = testModule.getValue(current, 0, previous, null, Fit.Carry);
 
-          expect(actual).toMatchObject(current);
-          expect(actual.filled).toEqual({
+          expect(actual).toMatchObject({
+            ...current,
             y1: 20,
+            filled: { y1: 20 },
           });
         });
       });
@@ -67,9 +68,10 @@ describe('Fit Function', () => {
           const next = MockDataSeriesDatum.full({ x: 4, y1: 20 });
           const actual = testModule.getValue(current, 0, null, next, Fit.Lookahead);
 
-          expect(actual).toMatchObject(current);
-          expect(actual.filled).toEqual({
+          expect(actual).toMatchObject({
+            ...current,
             y1: 20,
+            filled: { y1: 20 },
           });
         });
       });
@@ -82,9 +84,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 4, y1: 20 });
             const actual = testModule.getValue(current, 0, previous, next, Fit.Average);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: (10 + 20) / 2,
+              filled: { y1: (10 + 20) / 2 },
             });
           });
         });
@@ -96,9 +99,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 10, y1: 20 });
             const actual = testModule.getValue(current, 0, previous, next, Fit.Nearest);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 10,
+              filled: { y1: 10 },
             });
           });
 
@@ -108,9 +112,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 10, y1: 20 });
             const actual = testModule.getValue(current, 0, previous, next, Fit.Nearest);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 20,
+              filled: { y1: 20 },
             });
           });
         });
@@ -122,9 +127,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 10, y1: 20 });
             const actual = testModule.getValue(current, 0, previous, next, Fit.Linear);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: (10 + 20) / 2,
+              filled: { y1: (10 + 20) / 2 },
             });
           });
 
@@ -134,9 +140,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 10, y1: 20 });
             const actual = testModule.getValue(current, 0, previous, next, Fit.Linear);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 13,
+              filled: { y1: 13 },
             });
           });
 
@@ -146,9 +153,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 10, y1: 10 });
             const actual = testModule.getValue(current, 0, previous, next, Fit.Linear);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 17,
+              filled: { y1: 17 },
             });
           });
 
@@ -158,9 +166,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 10.767, y1: 20.657 });
             const actual = testModule.getValue(current, 0, previous, next, Fit.Linear);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 13.3733264,
+              filled: { y1: 13.3733264 },
             });
           });
         });
@@ -173,9 +182,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 4, y1: 20 });
             const actual = testModule.getValue(current, 0, null, next, Fit.Nearest);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 20,
+              filled: { y1: 20 },
             });
           });
 
@@ -184,9 +194,10 @@ describe('Fit Function', () => {
             const current = MockDataSeriesDatum.simple({ x: 3 });
             const actual = testModule.getValue(current, 0, previous, null, Fit.Nearest);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 20,
+              filled: { y1: 20 },
             });
           });
         });
@@ -197,9 +208,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 4, y1: 20 });
             const actual = testModule.getValue(current, 0, null, next, Fit.Average, 'nearest');
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 20,
+              filled: { y1: 20 },
             });
           });
 
@@ -208,9 +220,10 @@ describe('Fit Function', () => {
             const current = MockDataSeriesDatum.simple({ x: 3 });
             const actual = testModule.getValue(current, 0, previous, null, Fit.Average, 'nearest');
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 20,
+              filled: { y1: 20 },
             });
           });
         });
@@ -238,9 +251,10 @@ describe('Fit Function', () => {
           const current = MockDataSeriesDatum.simple({ x: 'c' });
           const actual = testModule.getValue(current, 3, previous, null, Fit.Carry);
 
-          expect(actual).toMatchObject(current);
-          expect(actual.filled).toEqual({
+          expect(actual).toMatchObject({
+            ...current,
             y1: 20,
+            filled: { y1: 20 },
           });
         });
       });
@@ -251,9 +265,10 @@ describe('Fit Function', () => {
           const next = MockDataSeriesDatum.full({ x: 'e', y1: 20, fittingIndex: 4 });
           const actual = testModule.getValue(current, 3, null, next, Fit.Lookahead);
 
-          expect(actual).toMatchObject(current);
-          expect(actual.filled).toEqual({
+          expect(actual).toMatchObject({
+            ...current,
             y1: 20,
+            filled: { y1: 20 },
           });
         });
       });
@@ -266,9 +281,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 'e', y1: 20, fittingIndex: 4 });
             const actual = testModule.getValue(current, 3, previous, next, Fit.Average);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: (10 + 20) / 2,
+              filled: { y1: (10 + 20) / 2 },
             });
           });
         });
@@ -280,9 +296,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 'e', y1: 20, fittingIndex: 10 });
             const actual = testModule.getValue(current, 3, previous, next, Fit.Nearest);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 10,
+              filled: { y1: 10 },
             });
           });
 
@@ -292,9 +309,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 'e', y1: 20, fittingIndex: 10 });
             const actual = testModule.getValue(current, 9, previous, next, Fit.Nearest);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 20,
+              filled: { y1: 20 },
             });
           });
         });
@@ -306,9 +324,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 'e', y1: 20, fittingIndex: 10 });
             const actual = testModule.getValue(current, 5, previous, next, Fit.Linear);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: (10 + 20) / 2,
+              filled: { y1: (10 + 20) / 2 },
             });
           });
 
@@ -318,9 +337,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 'e', y1: 20, fittingIndex: 10 });
             const actual = testModule.getValue(current, 3, previous, next, Fit.Linear);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 13,
+              filled: { y1: 13 },
             });
           });
 
@@ -330,9 +350,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 'e', y1: 10, fittingIndex: 10 });
             const actual = testModule.getValue(current, 3, previous, next, Fit.Linear);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 17,
+              filled: { y1: 17 },
             });
           });
 
@@ -342,9 +363,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 'e', fittingIndex: 10.767, y1: 20.657 });
             const actual = testModule.getValue(current, 3.564, previous, next, Fit.Linear);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 13.3733264,
+              filled: { y1: 13.3733264 },
             });
           });
         });
@@ -357,9 +379,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 'e', y1: 20, fittingIndex: 4 });
             const actual = testModule.getValue(current, 3, null, next, Fit.Nearest);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 20,
+              filled: { y1: 20 },
             });
           });
 
@@ -368,9 +391,10 @@ describe('Fit Function', () => {
             const current = MockDataSeriesDatum.simple({ x: 'c' });
             const actual = testModule.getValue(current, 3, previous, null, Fit.Nearest);
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 20,
+              filled: { y1: 20 },
             });
           });
         });
@@ -381,9 +405,10 @@ describe('Fit Function', () => {
             const next = MockDataSeriesDatum.full({ x: 'e', y1: 20, fittingIndex: 4 });
             const actual = testModule.getValue(current, 3, null, next, Fit.Average, 'nearest');
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 20,
+              filled: { y1: 20 },
             });
           });
 
@@ -392,9 +417,10 @@ describe('Fit Function', () => {
             const current = MockDataSeriesDatum.simple({ x: 'c' });
             const actual = testModule.getValue(current, 3, previous, null, Fit.Average, 'nearest');
 
-            expect(actual).toMatchObject(current);
-            expect(actual.filled).toEqual({
+            expect(actual).toMatchObject({
+              ...current,
               y1: 20,
+              filled: { y1: 20 },
             });
           });
         });
@@ -469,7 +495,7 @@ describe('Fit Function', () => {
 
     describe('allow mutliple fit config types', () => {
       it('should allow string config', () => {
-        testModule.fitFunction(dataSeries, Fit.None, ScaleType.Linear);
+        testModule.fitFunction(dataSeries.data, Fit.None, ScaleType.Linear);
 
         expect(testModule.parseConfig).toHaveBeenCalledWith(Fit.None);
         expect(testModule.parseConfig).toHaveBeenCalledTimes(1);
@@ -479,7 +505,7 @@ describe('Fit Function', () => {
         const fitConfig = {
           type: Fit.None,
         };
-        testModule.fitFunction(dataSeries, fitConfig, ScaleType.Linear);
+        testModule.fitFunction(dataSeries.data, fitConfig, ScaleType.Linear);
 
         expect(testModule.parseConfig).toHaveBeenCalledWith(fitConfig);
         expect(testModule.parseConfig).toHaveBeenCalledTimes(1);
@@ -504,7 +530,7 @@ describe('Fit Function', () => {
       });
 
       it('should call splice sort only', () => {
-        testModule.fitFunction(dataSeries, Fit.Linear, ScaleType.Linear);
+        testModule.fitFunction(dataSeries.data, Fit.Linear, ScaleType.Linear);
 
         expect(dataSeries.data.sort).not.toHaveBeenCalled();
         expect(dataSeries.data.slice).toHaveBeenCalledTimes(1);
@@ -512,14 +538,14 @@ describe('Fit Function', () => {
       });
 
       it('should not call splice.sort if sorted is true', () => {
-        testModule.fitFunction(dataSeries, Fit.Linear, ScaleType.Linear, true);
+        testModule.fitFunction(dataSeries.data, Fit.Linear, ScaleType.Linear, true);
 
         expect(dataSeries.data.slice).not.toHaveBeenCalled();
         expect(mockArray.sort).not.toHaveBeenCalled();
       });
 
       it('should not call splice.sort if scale is ordinal', () => {
-        testModule.fitFunction(dataSeries, Fit.Linear, ScaleType.Ordinal);
+        testModule.fitFunction(dataSeries.data, Fit.Linear, ScaleType.Ordinal);
 
         expect(dataSeries.data.slice).not.toHaveBeenCalled();
         expect(mockArray.sort).not.toHaveBeenCalled();
@@ -527,7 +553,7 @@ describe('Fit Function', () => {
 
       it('should call splice.sort with predicate', () => {
         jest.spyOn(seriesUtils, 'datumXSortPredicate');
-        testModule.fitFunction(dataSeries, Fit.Linear, ScaleType.Linear);
+        testModule.fitFunction(dataSeries.data, Fit.Linear, ScaleType.Linear);
 
         expect(seriesUtils.datumXSortPredicate).toHaveBeenCalledWith(Fit.Linear);
       });
@@ -546,56 +572,56 @@ describe('Fit Function', () => {
         describe('number value', () => {
           const endValue = 100;
           it('should set end values - None', () => {
-            const actual = testModule.fitFunction(sortedDS, { type: Fit.None, endValue }, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(sortedDS.data, { type: Fit.None, endValue }, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues[0]).toBeNull();
             expect(finalValues[finalValues.length - 1]).toBeNull();
           });
 
           it('should set end values - Zero', () => {
-            const actual = testModule.fitFunction(sortedDS, { type: Fit.Zero, endValue }, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(sortedDS.data, { type: Fit.Zero, endValue }, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues[0]).toEqual(0);
             expect(finalValues[finalValues.length - 1]).toEqual(0);
           });
 
           it('should set end values - Explicit', () => {
-            const actual = testModule.fitFunction(sortedDS, { type: Fit.Explicit, value: 20, endValue }, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(sortedDS.data, { type: Fit.Explicit, value: 20, endValue }, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues[0]).toEqual(20);
             expect(finalValues[finalValues.length - 1]).toEqual(20);
           });
 
           it('should set end values - Lookahead', () => {
-            const actual = testModule.fitFunction(dataSeries, { type: Fit.Lookahead, endValue }, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(dataSeries.data, { type: Fit.Lookahead, endValue }, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues[0]).toEqual(3);
             expect(finalValues[finalValues.length - 1]).toEqual(endValue);
           });
 
           it('should set end values - Nearest', () => {
-            const actual = testModule.fitFunction(dataSeries, { type: Fit.Nearest, endValue }, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(dataSeries.data, { type: Fit.Nearest, endValue }, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues[0]).toEqual(3);
             expect(finalValues[finalValues.length - 1]).toEqual(12);
           });
 
           it('should set end values - Average', () => {
-            const actual = testModule.fitFunction(dataSeries, { type: Fit.Average, endValue }, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(dataSeries.data, { type: Fit.Average, endValue }, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues[0]).toEqual(endValue);
             expect(finalValues[finalValues.length - 1]).toEqual(endValue);
           });
 
           it('should set end values - Linear', () => {
-            const actual = testModule.fitFunction(dataSeries, { type: Fit.Linear, endValue }, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(dataSeries.data, { type: Fit.Linear, endValue }, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues[0]).toEqual(endValue);
             expect(finalValues[finalValues.length - 1]).toEqual(endValue);
@@ -606,56 +632,56 @@ describe('Fit Function', () => {
           const endValue = 'nearest';
 
           it('should set end values - None', () => {
-            const actual = testModule.fitFunction(sortedDS, { type: Fit.None, endValue }, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(sortedDS.data, { type: Fit.None, endValue }, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues[0]).toBeNull();
             expect(finalValues[finalValues.length - 1]).toBeNull();
           });
 
           it('should set end values - Zero', () => {
-            const actual = testModule.fitFunction(sortedDS, { type: Fit.Zero, endValue }, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(sortedDS.data, { type: Fit.Zero, endValue }, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues[0]).toEqual(0);
             expect(finalValues[finalValues.length - 1]).toEqual(0);
           });
 
           it('should set end values - Explicit', () => {
-            const actual = testModule.fitFunction(sortedDS, { type: Fit.Explicit, value: 20, endValue }, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(sortedDS.data, { type: Fit.Explicit, value: 20, endValue }, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues[0]).toEqual(20);
             expect(finalValues[finalValues.length - 1]).toEqual(20);
           });
 
           it('should set end values - Lookahead', () => {
-            const actual = testModule.fitFunction(dataSeries, { type: Fit.Lookahead, endValue }, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(dataSeries.data, { type: Fit.Lookahead, endValue }, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues[0]).toEqual(3);
             expect(finalValues[finalValues.length - 1]).toEqual(12);
           });
 
           it('should set end values - Nearest', () => {
-            const actual = testModule.fitFunction(dataSeries, { type: Fit.Nearest, endValue }, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(dataSeries.data, { type: Fit.Nearest, endValue }, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues[0]).toEqual(3);
             expect(finalValues[finalValues.length - 1]).toEqual(12);
           });
 
           it('should set end values - Average', () => {
-            const actual = testModule.fitFunction(dataSeries, { type: Fit.Average, endValue }, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(dataSeries.data, { type: Fit.Average, endValue }, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues[0]).toEqual(3);
             expect(finalValues[finalValues.length - 1]).toEqual(12);
           });
 
           it('should set end values - Linear', () => {
-            const actual = testModule.fitFunction(dataSeries, { type: Fit.Linear, endValue }, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(dataSeries.data, { type: Fit.Linear, endValue }, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues[0]).toEqual(3);
             expect(finalValues[finalValues.length - 1]).toEqual(12);
@@ -666,43 +692,42 @@ describe('Fit Function', () => {
       describe('Fit Types', () => {
         describe('None', () => {
           it('should return original dataSeries', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.None, scaleType);
+            const actual = testModule.fitFunction(dataSeries.data, Fit.None, scaleType);
 
-            expect(actual).toBe(dataSeries);
+            expect(actual).toBe(dataSeries.data);
           });
 
           it('should return null data values without fit', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.None, scaleType);
+            const actual = testModule.fitFunction(dataSeries.data, Fit.None, scaleType);
 
-            expect(getFilledNullData(actual.data)).toEqualArrayOf(undefined, 7);
+            expect(getFilledNullData(actual)).toHaveLength(0);
           });
         });
 
         describe('Zero', () => {
           it('should NOT return original dataSeries', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Zero, scaleType);
+            const actual = testModule.fitFunction(dataSeries.data, Fit.Zero, scaleType);
 
-            expect(actual).not.toBe(dataSeries);
+            expect(actual).not.toBe(dataSeries.data);
           });
 
           it('should return null data values with zeros', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Zero, scaleType);
-            const testActual = getFilledNullData(actual.data);
-
+            const actual = testModule.fitFunction(dataSeries.data, Fit.Zero, scaleType);
+            const testActual = getFilledNullData(actual);
             expect(testActual).toEqualArrayOf(0, 7);
           });
         });
 
         describe('Explicit', () => {
           it('should return original dataSeries if no value provided', () => {
-            const actual = testModule.fitFunction(dataSeries, { type: Fit.Explicit }, scaleType);
+            const actual = testModule.fitFunction(dataSeries.data, { type: Fit.Explicit }, scaleType);
 
-            expect(actual).toBe(dataSeries);
+            expect(actual).toBe(dataSeries.data);
           });
 
           it('should return null data values with set value', () => {
-            const actual = testModule.fitFunction(dataSeries, { type: Fit.Explicit, value: 20 }, scaleType);
-            const testActual = getFilledNullData(actual.data);
+            const actual = testModule.fitFunction(dataSeries.data, { type: Fit.Explicit, value: 20 }, scaleType);
+            const testActual = getFilledNullData(actual);
 
             expect(testActual).toEqualArrayOf(20, 7);
           });
@@ -710,20 +735,19 @@ describe('Fit Function', () => {
 
         describe('Lookahead', () => {
           it('should not return original dataSeries', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Lookahead, scaleType);
+            const actual = testModule.fitFunction(dataSeries.data, Fit.Lookahead, scaleType);
 
-            expect(actual).not.toBe(dataSeries);
+            expect(actual).not.toBe(dataSeries.data);
           });
 
           it('should not fill non-null values', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Lookahead, scaleType);
-
-            expect(getFilledNonNullData(actual.data)).toEqualArrayOf(undefined, 6);
+            const actual = testModule.fitFunction(dataSeries.data, Fit.Lookahead, scaleType);
+            expect(getFilledNonNullData(actual)).toEqualArrayOf(undefined, 6);
           });
 
           it('should call getValue for first datum with correct args', () => {
             const ds = MockDataSeries.fitFunction({ ordinal, shuffle: false });
-            testModule.fitFunction(ds, Fit.Lookahead, scaleType);
+            testModule.fitFunction(ds.data, Fit.Lookahead, scaleType);
             const [current, next] = ds.data;
 
             expect(testModule.getValue).nthCalledWith(
@@ -739,8 +763,8 @@ describe('Fit Function', () => {
 
           it('should call getValue for 10th (4th null) datum with correct args', () => {
             const ds = MockDataSeries.fitFunction({ ordinal, shuffle: false });
-            const actual = testModule.fitFunction(ds, Fit.Lookahead, scaleType);
-            const previous = actual.data[7];
+            const actual = testModule.fitFunction(ds.data, Fit.Lookahead, scaleType);
+            const previous = actual[7];
             const current = ds.data[8];
             const next = ds.data[11];
 
@@ -757,7 +781,7 @@ describe('Fit Function', () => {
 
           it('should call getValue for last datum with correct args', () => {
             const ds = MockDataSeries.fitFunction({ ordinal, shuffle: false });
-            testModule.fitFunction(ds, Fit.Lookahead, scaleType);
+            testModule.fitFunction(ds.data, Fit.Lookahead, scaleType);
             const [current, previous] = ds.data.slice().reverse();
 
             expect(testModule.getValue).lastCalledWith(
@@ -771,35 +795,36 @@ describe('Fit Function', () => {
           });
 
           it('should call getValue for only null values', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Lookahead, scaleType);
-            const { length } = getFilledNullData(actual.data);
+            testModule.fitFunction(dataSeries.data, Fit.Lookahead, scaleType);
+
+            const { length } = dataSeries.data.filter(({ y1 }) => y1 === null);
 
             expect(testModule.getValue).toBeCalledTimes(length);
           });
 
           it('should fill null values correctly', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Lookahead, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(dataSeries.data, Fit.Lookahead, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues).toEqual([3, 3, 5, 4, 4, 5, 5, 6, 12, 12, 12, 12, null]);
           });
         });
         describe('Nearest', () => {
           it('should not return original dataSeries', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Nearest, scaleType);
+            const actual = testModule.fitFunction(dataSeries.data, Fit.Nearest, scaleType);
 
-            expect(actual).not.toBe(dataSeries);
+            expect(actual).not.toBe(dataSeries.data);
           });
 
           it('should not fill non-null values', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Nearest, scaleType);
+            const actual = testModule.fitFunction(dataSeries.data, Fit.Nearest, scaleType);
 
-            expect(getFilledNonNullData(actual.data)).toEqualArrayOf(undefined, 6);
+            expect(getFilledNonNullData(actual)).toEqualArrayOf(undefined, 6);
           });
 
           it('should call getValue for first datum with correct args', () => {
             const ds = MockDataSeries.fitFunction({ ordinal, shuffle: false });
-            testModule.fitFunction(ds, Fit.Nearest, scaleType);
+            testModule.fitFunction(ds.data, Fit.Nearest, scaleType);
             const [current, next] = ds.data;
 
             expect(testModule.getValue).nthCalledWith(
@@ -815,8 +840,8 @@ describe('Fit Function', () => {
 
           it('should call getValue for 10th (4th null) datum with correct args', () => {
             const ds = MockDataSeries.fitFunction({ ordinal, shuffle: false });
-            const actual = testModule.fitFunction(ds, Fit.Nearest, scaleType);
-            const previous = actual.data[7];
+            const actual = testModule.fitFunction(ds.data, Fit.Nearest, scaleType);
+            const previous = actual[7];
             const current = ds.data[8];
             const next = ds.data[11];
 
@@ -833,7 +858,7 @@ describe('Fit Function', () => {
 
           it('should call getValue for last datum with correct args', () => {
             const ds = MockDataSeries.fitFunction({ ordinal, shuffle: false });
-            testModule.fitFunction(ds, Fit.Nearest, scaleType);
+            testModule.fitFunction(ds.data, Fit.Nearest, scaleType);
             const [current, previous] = ds.data.slice().reverse();
 
             expect(testModule.getValue).lastCalledWith(
@@ -847,15 +872,15 @@ describe('Fit Function', () => {
           });
 
           it('should call getValue for only null values', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Nearest, scaleType);
-            const { length } = getFilledNullData(actual.data);
+            testModule.fitFunction(dataSeries.data, Fit.Nearest, scaleType);
+            const { length } = dataSeries.data.filter(({ y1 }) => y1 === null);
 
             expect(testModule.getValue).toBeCalledTimes(length);
           });
 
           it('should fill null values correctly', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Nearest, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(dataSeries.data, Fit.Nearest, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues).toEqual([3, 3, 5, 5, 4, 4, 5, 6, 6, 6, 12, 12, 12]);
           });
@@ -863,20 +888,20 @@ describe('Fit Function', () => {
 
         describe('Average', () => {
           it('should not return original dataSeries', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Average, scaleType);
+            const actual = testModule.fitFunction(dataSeries.data, Fit.Average, scaleType);
 
-            expect(actual).not.toBe(dataSeries);
+            expect(actual).not.toBe(dataSeries.data);
           });
 
           it('should not fill non-null values', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Average, scaleType);
+            const actual = testModule.fitFunction(dataSeries.data, Fit.Average, scaleType);
 
-            expect(getFilledNonNullData(actual.data)).toEqualArrayOf(undefined, 6);
+            expect(getFilledNonNullData(actual)).toEqualArrayOf(undefined, 6);
           });
 
           it('should call getValue for first datum with correct args', () => {
             const ds = MockDataSeries.fitFunction({ ordinal, shuffle: false });
-            testModule.fitFunction(ds, Fit.Average, scaleType);
+            testModule.fitFunction(ds.data, Fit.Average, scaleType);
             const [current, next] = ds.data;
 
             expect(testModule.getValue).nthCalledWith(
@@ -892,8 +917,8 @@ describe('Fit Function', () => {
 
           it('should call getValue for 10th (4th null) datum with correct args', () => {
             const ds = MockDataSeries.fitFunction({ ordinal, shuffle: false });
-            const actual = testModule.fitFunction(ds, Fit.Average, scaleType);
-            const previous = actual.data[7];
+            const actual = testModule.fitFunction(ds.data, Fit.Average, scaleType);
+            const previous = actual[7];
             const current = ds.data[8];
             const next = ds.data[11];
 
@@ -910,7 +935,7 @@ describe('Fit Function', () => {
 
           it('should call getValue for last datum with correct args', () => {
             const ds = MockDataSeries.fitFunction({ ordinal, shuffle: false });
-            testModule.fitFunction(ds, Fit.Average, scaleType);
+            testModule.fitFunction(ds.data, Fit.Average, scaleType);
             const [current, previous] = ds.data.slice().reverse();
 
             expect(testModule.getValue).lastCalledWith(
@@ -924,15 +949,15 @@ describe('Fit Function', () => {
           });
 
           it('should call getValue for only null values', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Average, scaleType);
-            const { length } = getFilledNullData(actual.data);
+            testModule.fitFunction(dataSeries.data, Fit.Average, scaleType);
+            const { length } = dataSeries.data.filter(({ y1 }) => y1 === null);
 
             expect(testModule.getValue).toBeCalledTimes(length);
           });
 
           it('should fill null values correctly', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Average, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(dataSeries.data, Fit.Average, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues).toEqual([null, 3, 5, 4.5, 4, 4.5, 5, 6, 9, 9, 9, 12, null]);
           });
@@ -940,20 +965,20 @@ describe('Fit Function', () => {
 
         describe('Linear', () => {
           it('should not return original dataSeries', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Linear, scaleType);
+            const actual = testModule.fitFunction(dataSeries.data, Fit.Linear, scaleType);
 
-            expect(actual).not.toBe(dataSeries);
+            expect(actual).not.toBe(dataSeries.data);
           });
 
           it('should not fill non-null values', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Linear, scaleType);
+            const actual = testModule.fitFunction(dataSeries.data, Fit.Linear, scaleType);
 
-            expect(getFilledNonNullData(actual.data)).toEqualArrayOf(undefined, 6);
+            expect(getFilledNonNullData(actual)).toEqualArrayOf(undefined, 6);
           });
 
           it('should call getValue for first datum with correct args', () => {
             const ds = MockDataSeries.fitFunction({ ordinal, shuffle: false });
-            testModule.fitFunction(ds, Fit.Linear, scaleType);
+            testModule.fitFunction(ds.data, Fit.Linear, scaleType);
             const [current, next] = ds.data;
 
             expect(testModule.getValue).nthCalledWith(
@@ -969,8 +994,8 @@ describe('Fit Function', () => {
 
           it('should call getValue for 10th (4th null) datum with correct args', () => {
             const ds = MockDataSeries.fitFunction({ ordinal, shuffle: false });
-            const actual = testModule.fitFunction(ds, Fit.Linear, scaleType);
-            const previous = actual.data[7];
+            const actual = testModule.fitFunction(ds.data, Fit.Linear, scaleType);
+            const previous = actual[7];
             const current = ds.data[8];
             const next = ds.data[11];
 
@@ -987,7 +1012,7 @@ describe('Fit Function', () => {
 
           it('should call getValue for last datum with correct args', () => {
             const ds = MockDataSeries.fitFunction({ ordinal, shuffle: false });
-            testModule.fitFunction(ds, Fit.Linear, scaleType);
+            testModule.fitFunction(ds.data, Fit.Linear, scaleType);
             const [current, previous] = ds.data.slice().reverse();
 
             expect(testModule.getValue).lastCalledWith(
@@ -1001,15 +1026,15 @@ describe('Fit Function', () => {
           });
 
           it('should call getValue for only null values', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Linear, scaleType);
-            const { length } = getFilledNullData(actual.data);
+            testModule.fitFunction(dataSeries.data, Fit.Linear, scaleType);
+            const { length } = dataSeries.data.filter(({ y1 }) => y1 === null);
 
             expect(testModule.getValue).toBeCalledTimes(length);
           });
 
           it('should fill null values correctly', () => {
-            const actual = testModule.fitFunction(dataSeries, Fit.Linear, scaleType);
-            const finalValues = getYResolvedData(actual.data);
+            const actual = testModule.fitFunction(dataSeries.data, Fit.Linear, scaleType);
+            const finalValues = getYResolvedData(actual);
 
             expect(finalValues).toEqual([null, 3, 5, 4.5, 4, 4.5, 5, 6, 7.5, 9, 10.5, 12, null]);
           });

@@ -17,32 +17,34 @@
  * under the License.
  */
 
-import { sum } from 'd3-array';
-
 import { ScaleContinuousType } from '../../../scales';
 import { ScaleType } from '../../../scales/constants';
 import { identity } from '../../../utils/commons';
 import { computeContinuousDataDomain } from '../../../utils/domain';
-import { GroupId, SpecId } from '../../../utils/ids';
+import { GroupId } from '../../../utils/ids';
+import { Logger } from '../../../utils/logger';
 import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_type_utils';
-import { RawDataSeries } from '../utils/series';
-import { BasicSeriesSpec, YDomainRange, DEFAULT_GLOBAL_ID, SeriesTypes } from '../utils/specs';
+import { DataSeries, FormattedDataSeries } from '../utils/series';
+import { BasicSeriesSpec, YDomainRange, DEFAULT_GLOBAL_ID, SeriesTypes, StackMode } from '../utils/specs';
 import { YDomain } from './types';
 
 export type YBasicSeriesSpec = Pick<
   BasicSeriesSpec,
   'id' | 'seriesType' | 'yScaleType' | 'groupId' | 'stackAccessors' | 'yScaleToDataExtent' | 'useDefaultGroupDomain'
-> & { stackAsPercentage?: boolean; enableHistogramMode?: boolean };
+> & { stackMode?: StackMode; enableHistogramMode?: boolean };
 
 interface GroupSpecs {
-  isPercentageStack: boolean;
+  stackMode?: StackMode;
   stacked: YBasicSeriesSpec[];
   nonStacked: YBasicSeriesSpec[];
 }
 
 /** @internal */
 export function mergeYDomain(
-  dataSeries: Map<SpecId, RawDataSeries[]>,
+  { stacked, nonStacked }:{
+    stacked: FormattedDataSeries[],
+    nonStacked: FormattedDataSeries[],
+  },
   specs: YBasicSeriesSpec[],
   domainsByGroupId: Map<GroupId, YDomainRange>,
 ): YDomain[] {
@@ -53,7 +55,15 @@ export function mergeYDomain(
 
   const yDomains = specsByGroupIdsEntries.map<YDomain>(([groupId, groupSpecs]) => {
     const customDomain = domainsByGroupId.get(groupId);
-    return mergeYDomainForGroup(dataSeries, groupId, groupSpecs, customDomain);
+    const emptyDS: FormattedDataSeries = {
+      dataSeries: [],
+      groupId,
+      counts: { area: 0, bubble: 0, bar: 0, line: 0 },
+    };
+    const stackedDS = stacked.find((d) => (d.groupId === groupId)) ?? emptyDS;
+    const nonStackedDS = nonStacked.find((d) => (d.groupId === groupId)) ?? emptyDS;
+    const nonZeroBaselineSpecs = stackedDS.counts.bar + stackedDS.counts.area + nonStackedDS.counts.bar + nonStackedDS.counts.area;
+    return mergeYDomainForGroup(stackedDS.dataSeries, nonStackedDS.dataSeries, groupId, groupSpecs, nonZeroBaselineSpecs > 0, customDomain);
   });
 
   const globalGroupIds: Set<GroupId> = specs.reduce<Set<GroupId>>((acc, { groupId, useDefaultGroupDomain }) => {
@@ -81,16 +91,18 @@ export function mergeYDomain(
 }
 
 function mergeYDomainForGroup(
-  dataSeries: Map<SpecId, RawDataSeries[]>,
+  stacked: DataSeries[],
+  nonStacked: DataSeries[],
   groupId: GroupId,
   groupSpecs: GroupSpecs,
+  hasZeroBaselineSpecs: boolean,
   customDomain?: YDomainRange,
 ): YDomain {
   const groupYScaleType = coerceYScaleTypes([...groupSpecs.stacked, ...groupSpecs.nonStacked]);
-  const { isPercentageStack } = groupSpecs;
+  const { stackMode } = groupSpecs;
 
   let domain: number[];
-  if (isPercentageStack) {
+  if (stackMode === StackMode.Percentage) {
     domain = computeContinuousDataDomain([0, 1], identity, customDomain);
   } else {
     // TODO remove when removing yScaleToDataExtent
@@ -102,12 +114,10 @@ function mergeYDomainForGroup(
     }
 
     // compute stacked domain
-    const stackedDataSeries = getDataSeriesOnGroup(dataSeries, groupSpecs.stacked);
-    const stackedDomain = computeYStackedDomain(stackedDataSeries);
+    const stackedDomain = computeYDomain(stacked, hasZeroBaselineSpecs);
 
     // compute non stacked domain
-    const nonStackedDataSeries = getDataSeriesOnGroup(dataSeries, groupSpecs.nonStacked);
-    const nonStackedDomain = computeYNonStackedDomain(nonStackedDataSeries);
+    const nonStackedDomain = computeYDomain(nonStacked, hasZeroBaselineSpecs);
 
     // merge stacked and non stacked domain together
     domain = computeContinuousDataDomain(
@@ -144,46 +154,12 @@ function mergeYDomainForGroup(
   };
 }
 
-/** @internal */
-export function getDataSeriesOnGroup(
-  dataSeries: Map<SpecId, RawDataSeries[]>,
-  specs: YBasicSeriesSpec[],
-): RawDataSeries[] {
-  return specs.reduce((acc, spec) => {
-    const ds = dataSeries.get(spec.id) || [];
-    return [...acc, ...ds];
-  }, [] as RawDataSeries[]);
-}
-
-function computeYStackedDomain(dataseries: RawDataSeries[]): number[] {
-  const stackMap = new Map<any, any[]>();
-  dataseries.forEach((ds, index) => {
-    ds.data.forEach((datum) => {
-      const stack = stackMap.get(datum.x) || [];
-      stack[index] = datum.y1;
-      stackMap.set(datum.x, stack);
-    });
-  });
-  const dataValues = [];
-  // eslint-disable-next-line no-restricted-syntax
-  for (const stackValues of stackMap) {
-    dataValues.push(...stackValues[1]);
-    if (stackValues[1].length > 1) {
-      dataValues.push(sum(stackValues[1]));
-    }
-  }
-  if (dataValues.length === 0) {
-    return [];
-  }
-  return computeContinuousDataDomain(dataValues, identity, null);
-}
-
-function computeYNonStackedDomain(dataseries: RawDataSeries[]) {
+function computeYDomain(dataseries: DataSeries[], hasZeroBaselineSpecs: boolean) {
   const yValues = new Set<any>();
   dataseries.forEach((ds) => {
     ds.data.forEach((datum) => {
       yValues.add(datum.y1);
-      if (datum.y0 != null) {
+      if (hasZeroBaselineSpecs && datum.y0 != null) {
         yValues.add(datum.y0);
       }
     });
@@ -198,16 +174,19 @@ function computeYNonStackedDomain(dataseries: RawDataSeries[]) {
 export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
   const specsByGroupIds = new Map<
     GroupId,
-    { isPercentageStack: boolean; stacked: YBasicSeriesSpec[]; nonStacked: YBasicSeriesSpec[] }
+    { stackMode: StackMode | undefined; stacked: YBasicSeriesSpec[]; nonStacked: YBasicSeriesSpec[] }
   >();
   // After mobx->redux https://github.com/elastic/elastic-charts/pull/281 we keep the specs untouched on mount
   // in MobX version, the stackAccessors was programmatically added to every histogram specs
   // in ReduX version, we left untouched the specs, so we have to manually check that
-  const isHistogramEnabled = specs.some(({ seriesType, enableHistogramMode }) => seriesType === SeriesTypes.Bar && enableHistogramMode);
-  // split each specs by groupId and by stacked or not
+  const isHistogramEnabled = specs.some(
+    ({ seriesType, enableHistogramMode }) =>
+      seriesType === SeriesTypes.Bar && enableHistogramMode
+  );
+    // split each specs by groupId and by stacked or not
   specs.forEach((spec) => {
     const group = specsByGroupIds.get(spec.groupId) || {
-      isPercentageStack: false,
+      stackMode: undefined,
       stacked: [],
       nonStacked: [],
     };
@@ -221,8 +200,12 @@ export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
     } else {
       group.nonStacked.push(spec);
     }
-    if (spec.stackAsPercentage === true) {
-      group.isPercentageStack = true;
+    if (group.stackMode === undefined && spec.stackMode !== undefined) {
+      group.stackMode = spec.stackMode;
+    }
+    if (spec.stackMode !== undefined && group.stackMode !== undefined && group.stackMode !== spec.stackMode) {
+      Logger.warn(`Is not possible to mix different stackModes, please align all stackMode on the same GroupId
+      to the same mode. The default behaviour will be to use the first encountered stackMode on the series`);
     }
     specsByGroupIds.set(spec.groupId, group);
   });

@@ -87,10 +87,10 @@ function renderArea(
   highlightedLegendItem: LegendItem | null,
   clippings: Rect,
 ) {
-  const { area, color, transform, seriesIdentifier, seriesAreaStyle, clippedRanges } = glyph;
+  const { area, color, transform, seriesIdentifier, seriesAreaStyle, clippedRanges, hideClippedRanges } = glyph;
   const geometryStateStyle = getGeometryStateStyle(seriesIdentifier, highlightedLegendItem, sharedStyle);
   const fill = buildAreaStyles(color, seriesAreaStyle, geometryStateStyle);
-  renderAreaPath(ctx, transform.x, area, fill, clippedRanges, clippings);
+  renderAreaPath(ctx, transform.x, area, fill, clippedRanges, clippings, hideClippedRanges);
 }
 
 function renderAreaLines(
@@ -100,8 +100,8 @@ function renderAreaLines(
   highlightedLegendItem: LegendItem | null,
   clippings: Rect,
 ) {
-  const { lines, color, seriesIdentifier, transform, seriesAreaLineStyle, clippedRanges } = glyph;
+  const { lines, color, seriesIdentifier, transform, seriesAreaLineStyle, clippedRanges, hideClippedRanges } = glyph;
   const geometryStateStyle = getGeometryStateStyle(seriesIdentifier, highlightedLegendItem, sharedStyle);
   const stroke = buildLineStyles(color, seriesAreaLineStyle, geometryStateStyle);
-  renderLinePaths(ctx, transform.x, lines, stroke, clippedRanges, clippings);
+  renderLinePaths(ctx, transform.x, lines, stroke, clippedRanges, clippings, hideClippedRanges);
 }

@@ -19,6 +19,7 @@
 
 import { SeriesKey, SeriesIdentifier } from '../../../../commons/series_id';
 import { Scale } from '../../../../scales';
+import { ScaleType } from '../../../../scales/constants';
 import { identity, mergePartial, Rotation, Color, isUniqueArray } from '../../../../utils/commons';
 import { CurveType } from '../../../../utils/curves';
 import { Dimensions } from '../../../../utils/dimensions';
@@ -29,7 +30,8 @@ import { ColorConfig, Theme } from '../../../../utils/themes/theme';
 import { XDomain, YDomain } from '../../domains/types';
 import { mergeXDomain } from '../../domains/x_domain';
 import { mergeYDomain } from '../../domains/y_domain';
-import { renderArea, renderBars, renderLine, renderBubble } from '../../rendering/rendering';
+import { renderArea, renderBars, renderLine, renderBubble, isDatumFilled } from '../../rendering/rendering';
+import { fillSeries } from '../../utils/fill_series';
 import { IndexedGeometryMap } from '../../utils/indexed_geometry_map';
 import { computeXScale, computeYScales, countBarsInCluster } from '../../utils/scales';
 import {
@@ -38,7 +40,7 @@ import {
   getSeriesIndex,
   FormattedDataSeries,
   getFormattedDataseries,
-  getSplittedSeries,
+  getDataSeriesBySpecId,
   getSeriesKey,
   XYChartSeriesIdentifier,
 } from '../../utils/series';
@@ -56,6 +58,8 @@ import {
   FitConfig,
   isBubbleSeriesSpec,
   YDomainRange,
+  SeriesTypes,
+  StackMode,
 } from '../../utils/specs';
 import { getSpecsById, getAxesSpecForSpecId } from './spec';
 import { SeriesDomainsAndData, ComputedGeometries, GeometriesCounts, Transform, LastValues } from './types';
@@ -132,33 +136,50 @@ function getLastValues(formattedDataSeries: {
   const lastValues = new Map<SeriesKey, LastValues>();
 
   // we need to get the latest
-  formattedDataSeries.stacked.forEach((ds) => {
-    ds.dataSeries.forEach((series) => {
-      const seriesKey = getSeriesKey(series as XYChartSeriesIdentifier);
-      if (series.data.length > 0) {
-        const last = series.data[series.data.length - 1];
-        if (last !== null) {
-          const { initialY1: y1, initialY0: y0 } = last;
+  formattedDataSeries.stacked.forEach(({ dataSeries, stackMode }) => {
+    dataSeries.forEach((series) => {
+      if (series.data.length === 0) {
+        return;
+      }
+      const last = series.data[series.data.length - 1];
+      if (!last) {
+        return;
+      }
+      if (isDatumFilled(last)) {
+        return;
+      }
 
-          if (!last.filled && (y1 !== null || y0 !== null)) {
-            lastValues.set(seriesKey, { y0, y1 });
-          }
-        }
+      const { y0, y1, initialY0, initialY1 } = last;
+      const seriesKey = getSeriesKey(series as XYChartSeriesIdentifier);
+
+      if (stackMode === StackMode.Percentage) {
+        const y1InPercentage = y1 === null || y0 === null ? null : y1 - y0;
+        lastValues.set(seriesKey, { y0, y1: y1InPercentage });
+        return;
+      }
+      if (initialY0 !== null || initialY1 !== null) {
+        lastValues.set(seriesKey, { y0: initialY0, y1: initialY1 });
       }
     });
   });
-  formattedDataSeries.nonStacked.forEach((ds) => {
-    ds.dataSeries.forEach((series) => {
-      const seriesKey = getSeriesKey(series as XYChartSeriesIdentifier);
-      if (series.data.length > 0) {
-        const last = series.data[series.data.length - 1];
-        if (last !== null) {
-          const { initialY1: y1, initialY0: y0 } = last;
-          if (y1 !== null || y0 !== null) {
-            lastValues.set(seriesKey, { y0, y1 });
-          }
-        }
+
+  formattedDataSeries.nonStacked.forEach(({ dataSeries }) => {
+    dataSeries.forEach((series) => {
+      if (series.data.length === 0) {
+        return;
       }
+      const last = series.data[series.data.length - 1];
+      if (!last) {
+        return;
+      }
+      if (isDatumFilled(last)) {
+        return;
+      }
+
+      const { initialY1, initialY0 } = last;
+      const seriesKey = getSeriesKey(series as XYChartSeriesIdentifier);
+
+      lastValues.set(seriesKey, { y0: initialY0, y1: initialY1 });
     });
   });
   return lastValues;
@@ -182,27 +203,34 @@ export function computeSeriesDomains(
   customXDomain?: DomainRange | Domain,
 ): SeriesDomainsAndData {
   const {
-    splittedSeries,
-    xValues, seriesCollection,
+    dataSeriesBySpecId,
+    xValues,
+    seriesCollection,
     fallbackScale,
-  } = getSplittedSeries(seriesSpecs, deselectedDataSeries);
-  const splittedDataSeries = [...splittedSeries.values()];
-  const specsArray = [...seriesSpecs.values()];
+  } = getDataSeriesBySpecId(seriesSpecs, deselectedDataSeries);
 
+  // compute the x domain merging any custom domain
+  const specsArray = [...seriesSpecs.values()];
   const xDomain = mergeXDomain(specsArray, xValues, customXDomain, fallbackScale);
-  const yDomain = mergeYDomain(splittedSeries, specsArray, customYDomainsByGroupId);
+
+  // fill series with missing x values
+  const filledDataSeriesBySpecId = fillSeries(dataSeriesBySpecId, xValues);
+
 
   const formattedDataSeries = getFormattedDataseries(
     specsArray,
-    splittedSeries,
+    filledDataSeriesBySpecId,
     xValues,
     xDomain.scaleType,
     seriesSpecs,
   );
 
+  // let's compute the yDomain after computing all stacked values
+  const yDomain = mergeYDomain(formattedDataSeries, seriesSpecs, customYDomainsByGroupId);
+
   // we need to get the last values from the formatted dataseries
   // because we change the format if we are on percentage mode
-  const lastValues = getLastValues(formattedDataSeries);
+  const lastValues = xDomain.scaleType !== ScaleType.Ordinal ? getLastValues(formattedDataSeries) : new Map();
   const updatedSeriesCollection = new Map<SeriesKey, SeriesCollectionValue>();
   seriesCollection.forEach((value, key) => {
     const lastValue = lastValues.get(key);
@@ -216,7 +244,6 @@ export function computeSeriesDomains(
   return {
     xDomain,
     yDomain,
-    splittedDataSeries,
     formattedDataSeries,
     seriesCollection: updatedSeriesCollection,
   };
@@ -280,7 +307,7 @@ export function computeSeriesGeometries(
   };
 
   formattedDataSeries.stacked.forEach((dataSeriesGroup) => {
-    const { groupId, dataSeries, counts } = dataSeriesGroup;
+    const { groupId, dataSeries, counts, stackMode } = dataSeriesGroup;
     const yScale = yScales.get(groupId);
     if (!yScale) {
       return;
@@ -299,9 +326,9 @@ export function computeSeriesGeometries(
       axesSpecs,
       chartTheme,
       enableHistogramMode,
+      stackMode,
     );
-    orderIndex = counts.barSeries > 0 ? orderIndex + 1 : orderIndex;
-
+    orderIndex = counts[SeriesTypes.Bar] > 0 ? orderIndex + 1 : orderIndex;
     areas.push(...geometries.areas);
     lines.push(...geometries.lines);
     bars.push(...geometries.bars);
@@ -340,7 +367,7 @@ export function computeSeriesGeometries(
       chartTheme,
       enableHistogramMode,
     );
-    orderIndex = counts.barSeries > 0 ? orderIndex + counts.barSeries : orderIndex;
+    orderIndex = counts[SeriesTypes.Bar] > 0 ? orderIndex + counts[SeriesTypes.Bar] : orderIndex;
 
     areas.push(...geometries.areas);
     lines.push(...geometries.lines);
@@ -440,6 +467,7 @@ function renderGeometries(
   axesSpecs: AxisSpec[],
   chartTheme: Theme,
   enableHistogramMode: boolean,
+  stackMode?: StackMode,
 ): {
   points: PointGeometry[];
   bars: BarGeometry[];
@@ -501,6 +529,7 @@ function renderGeometries(
         displayValueSettings,
         spec.styleAccessor,
         spec.minBarHeight,
+        stackMode
       );
       indexedGeometryMap.merge(renderedBars.indexedGeometryMap);
       bars.push(...renderedBars.barGeometries);
@@ -554,7 +583,7 @@ function renderGeometries(
           ratio: chartTheme.markSizeRatio,
         },
         spec.pointStyleAccessor,
-        Boolean(spec.fit && ((spec.fit as FitConfig).type || spec.fit) !== Fit.None),
+        hasFitFnConfigured(spec.fit),
       );
       indexedGeometryMap.merge(renderedLines.indexedGeometryMap);
       lines.push(renderedLines.lineGeometry);
@@ -583,7 +612,8 @@ function renderGeometries(
         },
         isStacked,
         spec.pointStyleAccessor,
-        Boolean(spec.fit && ((spec.fit as FitConfig).type || spec.fit) !== Fit.None),
+        hasFitFnConfigured(spec.fit),
+        stackMode
       );
       indexedGeometryMap.merge(renderedAreas.indexedGeometryMap);
       areas.push(renderedAreas.areaGeometry);
@@ -631,4 +661,8 @@ export function computeChartTransform(chartDimensions: Dimensions, chartRotation
     y: 0,
     rotate: 0,
   };
+}
+
+function hasFitFnConfigured(fit?: Fit | FitConfig) {
+  return Boolean(fit && ((fit as FitConfig).type || fit) !== Fit.None);
 }

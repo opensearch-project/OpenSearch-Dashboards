@@ -17,18 +17,17 @@
  * under the License.
  */
 
-import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, timeFormatter } from '../../src';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
+import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 const dateFormatter = timeFormatter('HH:mm');
 
 export const Example = () => {
   const { data } = KIBANA_METRICS.metrics.kibana_os_load[0];
   const data2 = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => [d[0], 20, 10]);
-  const fit = boolean('fit Y domain', false);
 
   return (
     <Chart className="story-chart">
@@ -42,7 +41,6 @@ export const Example = () => {
       />
       <Axis
         id="left"
-        domain={{ fit }}
         title={KIBANA_METRICS.metrics.kibana_os_load[0].metric.title}
         position={Position.Left}
         tickFormat={(d) => Number(d).toFixed(2)}
@@ -54,7 +52,6 @@ export const Example = () => {
         yScaleType={ScaleType.Linear}
         xAccessor={0}
         yAccessors={[1]}
-        y0Accessors={[2]}
         data={data}
         stackAccessors={[0]}
       />
@@ -71,4 +68,11 @@ export const Example = () => {
       />
     </Chart>
   );
+};
+
+// storybook configuration
+Example.story = {
+  parameters: {
+    options: { selectedPanel: SB_SOURCE_PANEL },
+  },
 };

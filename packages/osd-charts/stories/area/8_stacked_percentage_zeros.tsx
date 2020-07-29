@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, niceTimeFormatter } from '../../src';
+import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, niceTimeFormatter, StackMode } from '../../src';
 
 export const Example = () => (
   <Chart className="story-chart">
@@ -46,7 +46,7 @@ export const Example = () => (
       yAccessors={[1]}
       data={DATA[0].data}
       stackAccessors={[0]}
-      stackAsPercentage
+      stackMode={StackMode.Percentage}
     />
     <AreaSeries
       id="areas2"
@@ -57,7 +57,7 @@ export const Example = () => (
       yAccessors={[1]}
       data={DATA[1].data}
       stackAccessors={[0]}
-      stackAsPercentage
+      stackMode={StackMode.Percentage}
     />
     <AreaSeries
       id="areas3"
@@ -67,7 +67,7 @@ export const Example = () => (
       xAccessor={0}
       yAccessors={[1]}
       data={DATA[2].data}
-      stackAsPercentage
+      stackMode={StackMode.Percentage}
       stackAccessors={[0]}
     />
   </Chart>

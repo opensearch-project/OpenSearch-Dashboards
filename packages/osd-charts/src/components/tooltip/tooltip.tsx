@@ -235,9 +235,7 @@ const mapStateToProps = (state: GlobalChartState): TooltipStateProps => {
     return HIDDEN_TOOLTIP_PROPS;
   }
   const { visible, isExternal } = getInternalIsTooltipVisibleSelector(state);
-  if (state.chartId === 'chart4') {
-    // console.log(visible, isExternal);
-  }
+
   const settingsSpec = getSettingsSpecSelector(state);
   const settings = getTooltipSettings(settingsSpec, isExternal);
   return {

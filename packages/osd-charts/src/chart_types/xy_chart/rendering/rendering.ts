@@ -23,7 +23,7 @@ import { LegendItem } from '../../../commons/legend';
 import { Scale } from '../../../scales';
 import { ScaleType } from '../../../scales/constants';
 import { isLogarithmicScale } from '../../../scales/types';
-import { MarkBuffer } from '../../../specs';
+import { MarkBuffer, StackMode } from '../../../specs';
 import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
 import { mergePartial, Color, getDistance } from '../../../utils/commons';
 import { CurveType, getCurveFactory } from '../../../utils/curves';
@@ -56,6 +56,22 @@ export interface MarkSizeOptions {
   enabled: boolean;
   ratio?: number;
 }
+
+/**
+ * Returns value of `y1` or `filled.y1` or null
+ * @internal
+ */
+export const getYValue = ({ y1, filled }: DataSeriesDatum): number | null => {
+  if (y1 !== null) {
+    return y1;
+  }
+
+  if (filled && (filled.y1 !== undefined)) {
+    return filled.y1;
+  }
+
+  return null;
+};
 
 /** @internal */
 export function getPointStyleOverrides(
@@ -156,6 +172,7 @@ function renderPoints(
   markSizeOptions: MarkSizeOptions,
   styleAccessor?: PointStyleAccessor,
   spatial = false,
+  stackMode?: StackMode,
 ): {
   pointGeometries: PointGeometry[];
   indexedGeometryMap: IndexedGeometryMap;
@@ -167,9 +184,13 @@ function renderPoints(
     : () => 0;
   const geometryType = spatial ? GeometryType.spatial : GeometryType.linear;
   const pointGeometries = dataSeries.data.reduce((acc, datum) => {
-    const { x: xValue, y0, y1, initialY0, initialY1, filled, mark } = datum;
-    // don't create the point if not within the xScale domain or it that point was filled
-    if (!xScale.isValueInDomain(xValue) || (filled && filled.y1 !== undefined)) {
+    const { x: xValue, y0, y1, mark } = datum;
+    // don't create the point if not within the xScale domain
+    if (!xScale.isValueInDomain(xValue)) {
+      return acc;
+    }
+    // don't create the point if it that point was filled
+    if (isDatumFilled(datum)) {
       return acc;
     }
     const x = xScale.scale(xValue);
@@ -199,8 +220,7 @@ function renderPoints(
       if (y === null) {
         return acc;
       }
-
-      const originalY = hasY0Accessors && index === 0 ? initialY0 : initialY1;
+      const originalY = getDatumYValue(datum, index === 0, hasY0Accessors, stackMode);
       const seriesIdentifier: XYChartSeriesIdentifier = {
         key: dataSeries.key,
         specId: dataSeries.specId,
@@ -242,6 +262,35 @@ function renderPoints(
   };
 }
 
+/**
+ * Get the original/initial Y value from the datum
+ * @param datum a DataSeriesDatum
+ * @param lookingForY0 if we are interested in the y0 value, false for y1
+ * @param isBandChart if the chart is a band chart
+ * @param stackMode an optional stack mode
+ */
+function getDatumYValue(
+  { y1, y0, initialY1, initialY0 }: DataSeriesDatum,
+  lookingForY0: boolean,
+  isBandChart: boolean,
+  stackMode?: StackMode
+) {
+  if (isBandChart) {
+    return stackMode === StackMode.Percentage
+      // on band stacked charts in percentage mode, the values I'm looking for are the percentage value
+      // that are already computed and available on y0 and y1
+      ? (lookingForY0 ? y0 : y1)
+      // in all other cases for band charts, I want to get back the original/initial value of y0 and y1
+      // not the computed value
+      : (lookingForY0 ? initialY0 : initialY1);
+  }
+  // if not a band chart get use the original/initial value in every case except for stack as percentage
+  // in this case, we should take the difference between the bottom position of the bar and the top position
+  // of the bar
+  return stackMode === StackMode.Percentage ? (y1 ?? 0) - (y0 ?? 0) : initialY1;
+}
+
+
 /** @internal */
 export function renderBars(
   orderIndex: number,
@@ -253,6 +302,7 @@ export function renderBars(
   displayValueSettings?: DisplayValueSpec,
   styleAccessor?: BarStyleAccessor,
   minBarHeight?: number,
+  stackMode?: StackMode,
 ): {
   barGeometries: BarGeometry[];
   indexedGeometryMap: IndexedGeometryMap;
@@ -323,9 +373,9 @@ export function renderBars(
 
     const x = xScaled + xScale.bandwidth * orderIndex;
     const width = xScale.bandwidth;
-
+    const originalY1Value = stackMode === StackMode.Percentage ? (y1 - (y0 ?? 0)) : initialY1;
     const formattedDisplayValue = displayValueSettings && displayValueSettings.valueFormatter
-      ? displayValueSettings.valueFormatter(initialY1)
+      ? displayValueSettings.valueFormatter(originalY1Value)
       : undefined;
 
     // only show displayValue for even bars if showOverlappingValue
@@ -370,7 +420,7 @@ export function renderBars(
       color,
       value: {
         x: datum.x,
-        y: initialY1,
+        y: originalY1Value,
         mark: null,
         accessor: BandedAccessorType.Y1,
       },
@@ -441,7 +491,7 @@ export function renderLine(
     pointStyleAccessor,
   );
 
-  const clippedRanges = hasFit && !hasY0Accessors ? getClippedRanges(dataSeries.data, xScale, xScaleOffset) : [];
+  const clippedRanges = getClippedRanges(dataSeries.data, xScale, xScaleOffset);
   let linePath: string;
 
   try {
@@ -469,6 +519,7 @@ export function renderLine(
     seriesLineStyle: seriesStyle.line,
     seriesPointStyle: seriesStyle.point,
     clippedRanges,
+    hideClippedRanges: !hasFit,
   };
   return {
     lineGeometry,
@@ -523,21 +574,6 @@ export function renderBubble(
   };
 }
 
-/**
- * Returns value of `y1` or `filled.y1` or null
- * @internal
- */
-export const getYValue = ({ y1, filled }: DataSeriesDatum): number | null => {
-  if (y1 !== null) {
-    return y1;
-  }
-
-  if (filled && filled.y1 !== undefined) {
-    return filled.y1;
-  }
-
-  return null;
-};
 
 /** @internal */
 export function renderArea(
@@ -554,6 +590,7 @@ export function renderArea(
   isStacked = false,
   pointStyleAccessor?: PointStyleAccessor,
   hasFit?: boolean,
+  stackMode?: StackMode
 ): {
   areaGeometry: AreaGeometry;
   indexedGeometryMap: IndexedGeometryMap;
@@ -582,7 +619,8 @@ export function renderArea(
     })
     .curve(getCurveFactory(curve));
 
-  const clippedRanges = hasFit && !hasY0Accessors && !isStacked ? getClippedRanges(dataSeries.data, xScale, xScaleOffset) : [];
+  const clippedRanges = getClippedRanges(dataSeries.data, xScale, xScaleOffset);
+
   let y1Line: string | null;
 
   try {
@@ -620,6 +658,8 @@ export function renderArea(
     hasY0Accessors,
     markSizeOptions,
     pointStyleAccessor,
+    false,
+    stackMode
   );
 
   let areaPath: string;
@@ -652,11 +692,21 @@ export function renderArea(
     seriesPointStyle: seriesStyle.point,
     isStacked,
     clippedRanges,
+    hideClippedRanges: !hasFit,
   };
   return {
     areaGeometry,
     indexedGeometryMap,
   };
+}
+
+/**
+ *
+ * @param param0
+ * @internal
+ */
+export function isDatumFilled({ filled, initialY1 } : DataSeriesDatum) {
+  return filled?.x !== undefined || filled?.y1 !== undefined || initialY1 === null || initialY1 === undefined;
 }
 
 /**
@@ -670,14 +720,20 @@ export function getClippedRanges(dataset: DataSeriesDatum[], xScale: Scale, xSca
   let firstNonNullX: number | null = null;
   let hasNull = false;
 
-  return dataset.reduce<ClippedRanges>((acc, { x, y1 }) => {
-    const xScaled = xScale.scale(x);
+  return dataset.reduce<ClippedRanges>((acc, data) => {
+    const xScaled = xScale.scale(data.x);
     if (xScaled === null) {
       return acc;
     }
     const xValue = xScaled - xScaleOffset + xScale.bandwidth / 2;
 
-    if (y1 !== null) {
+    if (isDatumFilled(data)) {
+      const endXValue = xScale.range[1] - xScale.bandwidth * (2 / 3);
+      if (firstNonNullX !== null && xValue === endXValue) {
+        acc.push([firstNonNullX, xValue]);
+      }
+      hasNull = true;
+    } else {
       if (hasNull) {
         if (firstNonNullX !== null) {
           acc.push([firstNonNullX, xValue]);
@@ -688,12 +744,6 @@ export function getClippedRanges(dataset: DataSeriesDatum[], xScale: Scale, xSca
       }
 
       firstNonNullX = xValue;
-    } else {
-      const endXValue = xScale.range[1] - xScale.bandwidth * (2 / 3);
-      if (firstNonNullX !== null && xValue === endXValue) {
-        acc.push([firstNonNullX, xValue]);
-      }
-      hasNull = true;
     }
     return acc;
   }, []);

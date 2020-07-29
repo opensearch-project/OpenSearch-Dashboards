@@ -37,7 +37,6 @@ const defaultProps = {
   yScaleToDataExtent: false,
   hideInLegend: false,
   enableHistogramMode: false,
-  stackAsPercentage: false,
 };
 
 type SpecRequiredProps = Pick<BarSeriesSpec, 'id' | 'data'>;
@@ -55,6 +54,5 @@ export const BarSeries: React.FunctionComponent<SpecRequiredProps & SpecOptional
     | 'yScaleToDataExtent'
     | 'hideInLegend'
     | 'enableHistogramMode'
-    | 'stackAsPercentage'
   >(defaultProps),
 );

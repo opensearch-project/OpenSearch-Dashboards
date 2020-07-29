@@ -40,20 +40,12 @@ describe('Area series stories', () => {
       it('should show correct extents - Banded', async() => {
         await common.expectChartAtUrlToMatchScreenshot(trueUrl);
       });
-
-      it('should show correct extents - stacked', async() => {
-        await common.expectChartAtUrlToMatchScreenshot(trueUrl);
-      });
     });
 
     describe('domain.fit is false', () => {
       const falseUrl = 'http://localhost:9001/?path=/story/area-chart--stacked-band&knob-fit Y domain=false';
 
       it('should show correct extents - Banded', async() => {
-        await common.expectChartAtUrlToMatchScreenshot(falseUrl);
-      });
-
-      it('should show correct extents - stacked', async() => {
         await common.expectChartAtUrlToMatchScreenshot(falseUrl);
       });
     });

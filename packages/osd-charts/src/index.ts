@@ -31,7 +31,7 @@ export { SimplePadding } from './utils/dimensions';
 export { timeFormatter, niceTimeFormatter, niceTimeFormatByDay } from './utils/data/formatters';
 export { Datum, Position, Rendering, Rotation, VerticalAlignment, HorizontalAlignment } from './utils/commons';
 export { SeriesIdentifier } from './commons/series_id';
-export { XYChartSeriesIdentifier } from './chart_types/xy_chart/utils/series';
+export { XYChartSeriesIdentifier, DataSeriesDatum, FilledValues } from './chart_types/xy_chart/utils/series';
 export { AnnotationTooltipFormatter, CustomAnnotationTooltip } from './chart_types/xy_chart/annotations/types';
 export { GeometryValue } from './utils/geometry';
 export {

@@ -17,318 +17,120 @@
  * under the License.
  */
 
-import { MockRawDataSeries, MockDataSeries } from '../../../mocks';
+import { MockDataSeries } from '../../../mocks';
 import { MockSeriesSpecs, MockSeriesSpec } from '../../../mocks/specs';
+import { MockStore } from '../../../mocks/store';
 import { ScaleType } from '../../../scales/constants';
+import { computeSeriesDomainsSelector } from '../state/selectors/compute_series_domains';
 import * as fitFunctionModule from './fit_function';
-import * as testModule from './nonstacked_series_utils';
-import { RawDataSeries } from './series';
+import * as testModule from './fit_function_utils';
 import { Fit } from './specs';
 
-const EMPTY_DATA_SET: RawDataSeries[] = [
-  {
-    data: [],
-    seriesKeys: [],
-    yAccessor: 'y1',
-    splitAccessors: new Map(),
-    key: 'color-key',
-    specId: 'spec1',
-  },
-];
-const STANDARD_DATA_SET: RawDataSeries[] = [
-  {
-    data: [
-      {
-        x: 0,
-        y1: 10,
-        mark: null,
-      },
-    ],
-    seriesKeys: [],
-    yAccessor: 'y1',
-    splitAccessors: new Map(),
-    key: 'color-key',
-    specId: 'spec1',
-  },
-  {
-    data: [
-      {
-        x: 0,
-        y1: 20,
-        mark: null,
-      },
-    ],
-    seriesKeys: [],
-    yAccessor: 'y1',
-    splitAccessors: new Map(),
-    key: 'color-key',
-    specId: 'spec2',
-  },
-  {
-    data: [
-      {
-        x: 0,
-        y1: 30,
-        mark: null,
-      },
-    ],
-    seriesKeys: [],
-    yAccessor: 'y1',
-    splitAccessors: new Map(),
-    key: 'color-key',
-    specId: 'spec3',
-  },
-];
-const WITH_NULL_DATASET: RawDataSeries[] = [
-  {
-    data: [
-      {
-        x: 0,
-        y1: 10,
-        mark: null,
-      },
-    ],
-    seriesKeys: [],
-    yAccessor: 'y1',
-    splitAccessors: new Map(),
-    key: 'color-key',
-    specId: 'spec1',
-  },
-  {
-    data: [
-      {
-        x: 0,
-        y1: null,
-        mark: null,
-      },
-    ],
-    seriesKeys: [],
-    yAccessor: 'y1',
-    splitAccessors: new Map(),
-    key: 'color-key',
-    specId: 'spec2',
-  },
-  {
-    data: [
-      {
-        x: 0,
-        y1: 30,
-        mark: null,
-      },
-    ],
-    seriesKeys: [],
-    yAccessor: 'y1',
-    splitAccessors: new Map(),
-    key: 'color-key',
-    specId: 'spec3',
-  },
-];
-const STANDARD_DATA_SET_WY0: RawDataSeries[] = [
-  {
-    data: [
-      {
-        x: 0,
-        y0: 2,
-        y1: 10,
-        mark: null,
-      },
-    ],
-    seriesKeys: [],
-    yAccessor: 'y1',
-    splitAccessors: new Map(),
-    key: 'color-key',
-    specId: 'spec1',
-  },
-  {
-    data: [
-      {
-        x: 0,
-        y0: 4,
-        y1: 20,
-        mark: null,
-      },
-    ],
-    seriesKeys: [],
-    yAccessor: 'y1',
-    splitAccessors: new Map(),
-    key: 'color-key',
-    specId: 'spec2',
-  },
-  {
-    data: [
-      {
-        x: 0,
-        y0: 6,
-        y1: 30,
-        mark: null,
-      },
-    ],
-    seriesKeys: [],
-    yAccessor: 'y1',
-    splitAccessors: new Map(),
-    key: 'color-key',
-    specId: 'spec3',
-  },
-];
-const WITH_NULL_DATASET_WY0: RawDataSeries[] = [
-  {
-    data: [
-      {
-        x: 0,
-        y0: 2,
-        y1: 10,
-        mark: null,
-      },
-    ],
-    seriesKeys: [],
-    yAccessor: 'y1',
-    splitAccessors: new Map(),
-    key: 'color-key',
-    specId: 'spec1',
-  },
-  {
-    data: [
-      {
-        x: 0,
-        y1: null,
-        mark: null,
-      },
-    ],
-    seriesKeys: [],
-    yAccessor: 'y1',
-    splitAccessors: new Map(),
-    key: 'color-key',
-    specId: 'spec2',
-  },
-  {
-    data: [
-      {
-        x: 0,
-        y0: 6,
-        y1: 30,
-        mark: null,
-      },
-    ],
-    seriesKeys: [],
-    yAccessor: 'y1',
-    splitAccessors: new Map(),
-    key: 'color-key',
-    specId: 'spec3',
-  },
-];
-const DATA_SET_WITH_NULL_2: RawDataSeries[] = [
-  {
-    specId: 'spec1',
-    yAccessor: 'y1',
-    splitAccessors: new Map(),
-    seriesKeys: ['a'],
-    key: 'a',
-    data: [
-      { x: 1, y1: 1, mark: null },
-      { x: 2, y1: 2, mark: null },
-      { x: 4, y1: 4, mark: null },
-    ],
-  },
-  {
-    specId: 'spec1',
-    yAccessor: 'y1',
-    splitAccessors: new Map(),
-    seriesKeys: ['b'],
-    key: 'b',
-    data: [
-      { x: 1, y1: 21, mark: null },
-      { x: 3, y1: 23, mark: null },
-    ],
-  },
-];
+const EMPTY_DATA_SET = MockSeriesSpec.area({
+  xScaleType: ScaleType.Linear,
+  yAccessors: ['y1'],
+  splitSeriesAccessors: ['g'],
+  data: [],
+});
+const STANDARD_DATA_SET = MockSeriesSpec.area({
+  xScaleType: ScaleType.Linear,
+  yAccessors: ['y1'],
+  splitSeriesAccessors: ['g'],
+  data: [
+    { x: 0, y1: 10, g: 'a' },
+    { x: 0, y1: 20, g: 'b' },
+    { x: 0, y1: 30, g: 'c' },
+  ],
+});
+const WITH_NULL_DATASET = MockSeriesSpec.area({
+  xScaleType: ScaleType.Linear,
+  yAccessors: ['y1'],
+  splitSeriesAccessors: ['g'],
+  data: [
+    { x: 0, y1: 10, g: 'a' },
+    { x: 0, y1: null, g: 'b' },
+    { x: 0, y1: 30, g: 'c' },
+  ],
+});
+const STANDARD_DATA_SET_WY0 = MockSeriesSpec.area({
+  xScaleType: ScaleType.Linear,
+  yAccessors: ['y1'],
+  y0Accessors: ['y0'],
+  splitSeriesAccessors: ['g'],
+  data: [
+    { x: 0, y0: 2, y1: 10, g: 'a' },
+    { x: 0, y0: 4, y1: 20, g: 'b' },
+    { x: 0, y0: 6, y1: 30, g: 'c' },
+  ],
+});
+const WITH_NULL_DATASET_WY0 = MockSeriesSpec.area({
+  xScaleType: ScaleType.Linear,
+  yAccessors: ['y1'],
+  y0Accessors: ['y0'],
+  splitSeriesAccessors: ['g'],
+  data: [
+    { x: 0, y0: 2, y1: 10, g: 'a' },
+    { x: 0, y1: null, g: 'b' },
+    { x: 0, y0: 6, y1: 30, g: 'c' },
+  ],
+});
+const DATA_SET_WITH_NULL_2 = MockSeriesSpec.area({
+  xScaleType: ScaleType.Linear,
+  yAccessors: ['y1'],
+  splitSeriesAccessors: ['g'],
+  data: [
+    { x: 1, y1: 1, g: 'a' },
+    { x: 2, y1: 2, g: 'a' },
+    { x: 4, y1: 4, g: 'a' },
+    { x: 1, y1: 21, g: 'b' },
+    { x: 3, y1: 23, g: 'b' },
+  ],
+});
 describe('Non-Stacked Series Utils', () => {
   describe('Format stacked dataset', () => {
     test('empty data', () => {
-      const formattedData = testModule.formatNonStackedDataSeriesValues(
-        EMPTY_DATA_SET,
-        false,
-        MockSeriesSpecs.empty(),
-        ScaleType.Linear,
-      );
-      expect(formattedData[0].data.length).toBe(0);
+      const store = MockStore.default();
+      MockStore.addSpecs(EMPTY_DATA_SET, store);
+      const { formattedDataSeries: { nonStacked } } = computeSeriesDomainsSelector(store.getState());
+      expect(nonStacked).toHaveLength(0);
     });
     test('format data without nulls', () => {
-      let formattedData = testModule.formatNonStackedDataSeriesValues(
-        STANDARD_DATA_SET,
-        false,
-        MockSeriesSpecs.empty(),
-        ScaleType.Linear,
-      );
-      expect(formattedData[0].data[0]).toEqual({
-        datum: undefined,
+      const store = MockStore.default();
+      MockStore.addSpecs(STANDARD_DATA_SET, store);
+      const { formattedDataSeries: { nonStacked: [{ dataSeries }] } } = computeSeriesDomainsSelector(store.getState());
+
+      expect(dataSeries[0].data[0]).toMatchObject({
         initialY0: null,
         initialY1: 10,
         x: 0,
-        y0: 0,
+        y0: null,
         y1: 10,
         mark: null,
       });
-      expect(formattedData[1].data[0]).toEqual({
-        datum: undefined,
+      expect(dataSeries[1].data[0]).toMatchObject({
         initialY0: null,
         initialY1: 20,
         x: 0,
-        y0: 0,
+        y0: null,
         y1: 20,
         mark: null,
       });
-      expect(formattedData[2].data[0]).toEqual({
-        datum: undefined,
+      expect(dataSeries[2].data[0]).toMatchObject({
         initialY0: null,
         initialY1: 30,
         x: 0,
-        y0: 0,
-        y1: 30,
-        mark: null,
-      });
-      formattedData = testModule.formatNonStackedDataSeriesValues(
-        STANDARD_DATA_SET,
-        true,
-        MockSeriesSpecs.empty(),
-        ScaleType.Linear,
-      );
-      expect(formattedData[0].data[0]).toEqual({
-        datum: undefined,
-        initialY0: null,
-        initialY1: 10,
-        x: 0,
-        y0: 10,
-        y1: 10,
-        mark: null,
-      });
-      expect(formattedData[1].data[0]).toEqual({
-        datum: undefined,
-        initialY0: null,
-        initialY1: 20,
-        x: 0,
-        y0: 20,
-        y1: 20,
-        mark: null,
-      });
-      expect(formattedData[2].data[0]).toEqual({
-        datum: undefined,
-        initialY0: null,
-        initialY1: 30,
-        x: 0,
-        y0: 30,
+        y0: null,
         y1: 30,
         mark: null,
       });
     });
     test('format data with nulls', () => {
-      const formattedData = testModule.formatNonStackedDataSeriesValues(
-        WITH_NULL_DATASET,
-        false,
-        MockSeriesSpecs.empty(),
-        ScaleType.Linear,
-      );
-      expect(formattedData[1].data[0]).toEqual({
-        datum: undefined,
+      const store = MockStore.default();
+      MockStore.addSpecs(WITH_NULL_DATASET, store);
+      const { formattedDataSeries: { nonStacked: [{ dataSeries }] } } = computeSeriesDomainsSelector(store.getState());
+
+
+      expect(dataSeries[1].data[0]).toMatchObject({
         initialY0: null,
         initialY1: null,
         x: 0,
@@ -338,14 +140,12 @@ describe('Non-Stacked Series Utils', () => {
       });
     });
     test('format data without nulls with y0 values', () => {
-      const formattedData = testModule.formatNonStackedDataSeriesValues(
-        STANDARD_DATA_SET_WY0,
-        false,
-        MockSeriesSpecs.empty(),
-        ScaleType.Linear,
-      );
-      expect(formattedData[0].data[0]).toEqual({
-        datum: undefined,
+      const store = MockStore.default();
+      MockStore.addSpecs(STANDARD_DATA_SET_WY0, store);
+      const { formattedDataSeries: { nonStacked: [{ dataSeries }] } } = computeSeriesDomainsSelector(store.getState());
+
+
+      expect(dataSeries[0].data[0]).toMatchObject({
         initialY0: 2,
         initialY1: 10,
         x: 0,
@@ -353,8 +153,7 @@ describe('Non-Stacked Series Utils', () => {
         y1: 10,
         mark: null,
       });
-      expect(formattedData[1].data[0]).toEqual({
-        datum: undefined,
+      expect(dataSeries[1].data[0]).toMatchObject({
         initialY0: 4,
         initialY1: 20,
         x: 0,
@@ -362,8 +161,7 @@ describe('Non-Stacked Series Utils', () => {
         y1: 20,
         mark: null,
       });
-      expect(formattedData[2].data[0]).toEqual({
-        datum: undefined,
+      expect(dataSeries[2].data[0]).toMatchObject({
         initialY0: 6,
         initialY1: 30,
         x: 0,
@@ -373,14 +171,11 @@ describe('Non-Stacked Series Utils', () => {
       });
     });
     test('format data with nulls - fit functions', () => {
-      const formattedData = testModule.formatNonStackedDataSeriesValues(
-        WITH_NULL_DATASET_WY0,
-        false,
-        MockSeriesSpecs.empty(),
-        ScaleType.Linear,
-      );
-      expect(formattedData[0].data[0]).toEqual({
-        datum: undefined,
+      const store = MockStore.default();
+      MockStore.addSpecs(WITH_NULL_DATASET_WY0, store);
+      const { formattedDataSeries: { nonStacked: [{ dataSeries }] } } = computeSeriesDomainsSelector(store.getState());
+
+      expect(dataSeries[0].data[0]).toMatchObject({
         initialY0: 2,
         initialY1: 10,
         x: 0,
@@ -388,8 +183,7 @@ describe('Non-Stacked Series Utils', () => {
         y1: 10,
         mark: null,
       });
-      expect(formattedData[1].data[0]).toEqual({
-        datum: undefined,
+      expect(dataSeries[1].data[0]).toMatchObject({
         initialY0: null,
         initialY1: null,
         x: 0,
@@ -397,8 +191,7 @@ describe('Non-Stacked Series Utils', () => {
         y0: null,
         mark: null,
       });
-      expect(formattedData[2].data[0]).toEqual({
-        datum: undefined,
+      expect(dataSeries[2].data[0]).toMatchObject({
         initialY0: 6,
         initialY1: 30,
         x: 0,
@@ -408,58 +201,55 @@ describe('Non-Stacked Series Utils', () => {
       });
     });
     test('format data without nulls on second series', () => {
-      const formattedData = testModule.formatNonStackedDataSeriesValues(
-        DATA_SET_WITH_NULL_2,
-        false,
-        MockSeriesSpecs.empty(),
-        ScaleType.Linear,
-      );
-      expect(formattedData.length).toBe(2);
-      expect(formattedData[0].data.length).toBe(3);
-      expect(formattedData[1].data.length).toBe(2);
+      const store = MockStore.default();
+      MockStore.addSpecs(DATA_SET_WITH_NULL_2, store);
+      const { formattedDataSeries: { nonStacked: [{ dataSeries }] } } = computeSeriesDomainsSelector(store.getState());
 
-      expect(formattedData[0].data[0]).toEqual({
-        datum: undefined,
+
+      expect(dataSeries.length).toBe(2);
+      expect(dataSeries[0].data.length).toBe(4);
+      expect(dataSeries[1].data.length).toBe(4);
+
+      expect(dataSeries[0].data[0]).toMatchObject({
         initialY0: null,
         initialY1: 1,
         x: 1,
-        y0: 0,
+        y0: null, // todo check if we can move that to 0
         y1: 1,
         mark: null,
       });
-      expect(formattedData[0].data[1]).toEqual({
-        datum: undefined,
+      expect(dataSeries[0].data[1]).toMatchObject({
+
         initialY0: null,
         initialY1: 2,
         x: 2,
-        y0: 0,
+        y0: null,
         y1: 2,
         mark: null,
       });
-      expect(formattedData[0].data[2]).toEqual({
-        datum: undefined,
+      expect(dataSeries[0].data[3]).toMatchObject({
         initialY0: null,
         initialY1: 4,
         x: 4,
-        y0: 0,
+        y0: null,
         y1: 4,
         mark: null,
       });
-      expect(formattedData[1].data[0]).toEqual({
-        datum: undefined,
+      expect(dataSeries[1].data[0]).toMatchObject({
+
         initialY0: null,
         initialY1: 21,
         x: 1,
-        y0: 0,
+        y0: null,
         y1: 21,
         mark: null,
       });
-      expect(formattedData[1].data[1]).toEqual({
-        datum: undefined,
+      expect(dataSeries[1].data[2]).toMatchObject({
+
         initialY0: null,
         initialY1: 23,
         x: 3,
-        y0: 0,
+        y0: null,
         y1: 23,
         mark: null,
       });
@@ -468,70 +258,56 @@ describe('Non-Stacked Series Utils', () => {
 
   describe('Using fit functions', () => {
     describe.each(['area', 'line'])('Spec type - %s', (specType) => {
-      const rawDataSeries = [MockRawDataSeries.fitFunction({ shuffle: false })];
-      const dataSeries = MockDataSeries.fitFunction({ shuffle: false });
+      const dataSeries = [MockDataSeries.fitFunction({ shuffle: false })];
+      const dataSeriesData = MockDataSeries.fitFunction({ shuffle: false }).data;
       const spec = specType === 'area' ? MockSeriesSpec.area({ fit: Fit.Linear }) : MockSeriesSpec.line({ fit: Fit.Linear });
       const seriesSpecs = MockSeriesSpecs.fromSpecs([spec]);
 
       beforeAll(() => {
-        jest.spyOn(fitFunctionModule, 'fitFunction').mockReturnValue(dataSeries);
-        jest.spyOn(testModule, 'formatNonStackedDataValues').mockReturnValue(dataSeries);
-      });
-
-      it('return call formatNonStackedDataValues with args', () => {
-        testModule.formatNonStackedDataSeriesValues(rawDataSeries, false, seriesSpecs, ScaleType.Linear);
-
-        expect(testModule.formatNonStackedDataValues).toHaveBeenCalledWith(rawDataSeries[0], false);
+        jest.spyOn(fitFunctionModule, 'fitFunction').mockReturnValue(dataSeriesData);
       });
 
       it('return call fitFunction with args', () => {
-        testModule.formatNonStackedDataSeriesValues(rawDataSeries, false, seriesSpecs, ScaleType.Linear);
+        testModule.applyFitFunctionToDataSeries(dataSeries, seriesSpecs, ScaleType.Linear);
 
-        expect(fitFunctionModule.fitFunction).toHaveBeenCalledWith(dataSeries, Fit.Linear, ScaleType.Linear);
+        expect(fitFunctionModule.fitFunction).toHaveBeenCalledWith(dataSeriesData, Fit.Linear, ScaleType.Linear);
       });
 
       it('return not call fitFunction if no fit specified', () => {
-        const spec = specType === 'area' ? MockSeriesSpec.area({ fit: undefined }) : MockSeriesSpec.line({ fit: undefined });
-        const noFitSpec = MockSeriesSpecs.fromSpecs([spec]);
-        testModule.formatNonStackedDataSeriesValues(rawDataSeries, false, noFitSpec, ScaleType.Linear);
+        const currentSpec = specType === 'area' ? MockSeriesSpec.area({ fit: undefined }) : MockSeriesSpec.line({ fit: undefined });
+        const noFitSpec = MockSeriesSpecs.fromSpecs([currentSpec]);
+        testModule.applyFitFunctionToDataSeries(dataSeries, noFitSpec, ScaleType.Linear);
 
         expect(fitFunctionModule.fitFunction).not.toHaveBeenCalled();
       });
 
       it('return fitted dataSeries', () => {
-        const actual = testModule.formatNonStackedDataSeriesValues(rawDataSeries, false, seriesSpecs, ScaleType.Linear);
+        const actual = testModule.applyFitFunctionToDataSeries(dataSeries, seriesSpecs, ScaleType.Linear);
 
-        expect(actual[0]).toBe(dataSeries);
+        expect(actual[0].data).toBe(dataSeriesData);
       });
     });
 
     describe('Non area and line specs', () => {
-      const rawDataSeries = [MockRawDataSeries.fitFunction({ shuffle: false })];
-      const dataSeries = MockDataSeries.fitFunction({ shuffle: false });
+      const dataSeries = [MockDataSeries.fitFunction({ shuffle: false })];
+      const dataSeriesData = MockDataSeries.fitFunction({ shuffle: false }).data;
       const spec = MockSeriesSpec.bar();
       const seriesSpecs = MockSeriesSpecs.fromSpecs([spec]);
 
       beforeAll(() => {
-        jest.spyOn(fitFunctionModule, 'fitFunction').mockReturnValue(dataSeries);
-        jest.spyOn(testModule, 'formatNonStackedDataValues').mockReturnValue(dataSeries);
-      });
-
-      it('return call formatNonStackedDataValues with args', () => {
-        testModule.formatNonStackedDataSeriesValues(rawDataSeries, false, seriesSpecs, ScaleType.Linear);
-
-        expect(testModule.formatNonStackedDataValues).toHaveBeenCalledWith(rawDataSeries[0], false);
+        jest.spyOn(fitFunctionModule, 'fitFunction').mockReturnValue(dataSeriesData);
       });
 
       it('return call fitFunction with args', () => {
-        testModule.formatNonStackedDataSeriesValues(rawDataSeries, false, seriesSpecs, ScaleType.Linear);
+        testModule.applyFitFunctionToDataSeries(dataSeries, seriesSpecs, ScaleType.Linear);
 
         expect(fitFunctionModule.fitFunction).not.toHaveBeenCalled();
       });
 
       it('return fitted dataSeries', () => {
-        const actual = testModule.formatNonStackedDataSeriesValues(rawDataSeries, false, seriesSpecs, ScaleType.Linear);
+        const actual = testModule.applyFitFunctionToDataSeries(dataSeries, seriesSpecs, ScaleType.Linear);
 
-        expect(actual[0]).toBe(dataSeries);
+        expect(actual[0].data).toBe(dataSeriesData);
       });
     });
   });

@@ -20,7 +20,7 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, StackMode } from '../../src';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => {
@@ -44,7 +44,7 @@ export const Example = () => {
         xAccessor="x"
         yAccessors={['y']}
         stackAccessors={clusterBars ? [] : ['x']}
-        stackAsPercentage={clusterBars ? false : stackedAsPercentage}
+        stackMode={clusterBars ? undefined : StackMode.Percentage}
         splitSeriesAccessors={['g']}
         data={[
           { x: 0, y: 2, g: 'a' },

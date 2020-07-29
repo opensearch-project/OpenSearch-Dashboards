@@ -17,302 +17,166 @@
  * under the License.
  */
 
+import { MockSeriesSpec } from '../../../mocks/specs';
+import { MockStore } from '../../../mocks/store';
 import { ScaleType } from '../../../scales/constants';
-import { RawDataSeries } from './series';
-import {
-  computeYStackedMapValues,
-  formatStackedDataSeriesValues,
-  getYValueStackMap,
-  getStackedFormattedSeriesDatum,
-  StackedValues,
-} from './stacked_series_utils';
+import { computeSeriesDomainsSelector } from '../state/selectors/compute_series_domains';
+import { StackMode } from './specs';
 
 describe('Stacked Series Utils', () => {
-  const EMPTY_DATA_SET: RawDataSeries[] = [
-    {
-      data: [],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec1',
-    },
-  ];
-  const STANDARD_DATA_SET: RawDataSeries[] = [
-    {
-      data: [
-        {
-          x: 0,
-          y1: 10,
-          mark: null,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec1',
-    },
-    {
-      data: [
-        {
-          x: 0,
-          y1: 20,
-          mark: null,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec2',
-    },
-    {
-      data: [
-        {
-          x: 0,
-          y1: 30,
-          mark: null,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec3',
-    },
-  ];
-  const WITH_NULL_DATASET: RawDataSeries[] = [
-    {
-      data: [
-        {
-          x: 0,
-          y1: 10,
-          mark: null,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec1',
-    },
-    {
-      data: [
-        {
-          x: 0,
-          y1: null,
-          mark: null,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec2',
-    },
-    {
-      data: [
-        {
-          x: 0,
-          y1: 30,
-          mark: null,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec3',
-    },
-  ];
-  const STANDARD_DATA_SET_WY0: RawDataSeries[] = [
-    {
-      data: [
-        {
-          x: 0,
-          y0: 2,
-          y1: 10,
-          mark: null,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec1',
-    },
-    {
-      data: [
-        {
-          x: 0,
-          y0: 4,
-          y1: 20,
-          mark: null,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec2',
-    },
-    {
-      data: [
-        {
-          x: 0,
-          y0: 6,
-          y1: 30,
-          mark: null,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec3',
-    },
-  ];
-  const WITH_NULL_DATASET_WY0: RawDataSeries[] = [
-    {
-      data: [
-        {
-          x: 0,
-          y0: 2,
-          y1: 10,
-          mark: null,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec1',
-    },
-    {
-      data: [
-        {
-          x: 0,
-          y1: null,
-          mark: null,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec2',
-    },
-    {
-      data: [
-        {
-          x: 0,
-          y0: 6,
-          y1: 30,
-          mark: null,
-        },
-      ],
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: [],
-      key: 'color-key',
-      specId: 'spec3',
-    },
-  ];
-  const DATA_SET_WITH_NULL_2: RawDataSeries[] = [
-    {
-      specId: 'spec1',
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: ['a'],
-      key: 'a',
-      data: [
-        { x: 1, y1: 1, mark: null },
-        { x: 2, y1: 2, mark: null },
-        { x: 4, y1: 4, mark: null },
-      ],
-    },
-    {
-      specId: 'spec1',
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: ['b'],
-      key: 'b',
-      data: [
-        { x: 1, y1: 21, mark: null },
-        { x: 3, y1: 23, mark: null },
-      ],
-    },
-  ];
-  const xValues = new Set([0]);
-  const emptyXValues: Set<number> = new Set();
-  const with2NullsXValues = new Set([1, 2, 3, 4]);
-  describe('create stacked maps', () => {
-    test('with empty values', () => {
-      const stackedMap = getYValueStackMap(EMPTY_DATA_SET, emptyXValues);
-      expect(stackedMap.size).toBe(0);
-    });
-    test('with basic values', () => {
-      const stackedMap = getYValueStackMap(STANDARD_DATA_SET, xValues);
-      expect(stackedMap.size).toBe(1);
-      const x0StackArray = stackedMap.get(0)!;
-      expect(x0StackArray).toBeDefined();
-      expect(x0StackArray.length).toBe(3);
-      expect(x0StackArray).toEqual([10, 20, 30]);
-      // expect(x0StackArray).toEqual([10, 20, 30]);
-    });
-    test('with values with nulls', () => {
-      const stackedMap = getYValueStackMap(WITH_NULL_DATASET, xValues);
-      expect(stackedMap.size).toBe(1);
-      const x0StackArray = stackedMap.get(0)!;
-      expect(x0StackArray).toBeDefined();
-      expect(x0StackArray.length).toBe(3);
-      expect(x0StackArray).toEqual([10, null, 30]);
-    });
+  const EMPTY_DATA_SET = MockSeriesSpec.area({
+    xScaleType: ScaleType.Linear,
+    yAccessors: ['y1'],
+    splitSeriesAccessors: ['g'],
+    stackAccessors: ['x'],
+    data: [],
   });
+  const STANDARD_DATA_SET = MockSeriesSpec.area({
+    xScaleType: ScaleType.Linear,
+    yAccessors: ['y1'],
+    splitSeriesAccessors: ['g'],
+    stackAccessors: ['x'],
+    data: [
+      { x: 0, y1: 10, g: 'a' },
+      { x: 0, y1: 20, g: 'b' },
+      { x: 0, y1: 30, g: 'c' },
+    ],
+  });
+  const WITH_NULL_DATASET = MockSeriesSpec.area({
+    xScaleType: ScaleType.Linear,
+    yAccessors: ['y1'],
+    splitSeriesAccessors: ['g'],
+    stackAccessors: ['x'],
+    data: [
+      { x: 0, y1: 10, g: 'a' },
+      { x: 0, y1: null, g: 'b' },
+      { x: 0, y1: 30, g: 'c' },
+    ],
+  });
+
+  const STANDARD_DATA_SET_WY0 = MockSeriesSpec.area({
+    xScaleType: ScaleType.Linear,
+    yAccessors: ['y1'],
+    y0Accessors: ['y0'],
+    splitSeriesAccessors: ['g'],
+    stackAccessors: ['x'],
+    data: [
+      { x: 0, y0: 2, y1: 10, g: 'a' },
+      { x: 0, y0: 4, y1: 20, g: 'b' },
+      { x: 0, y0: 6, y1: 30, g: 'c' },
+    ],
+  });
+  const WITH_NULL_DATASET_WY0 = MockSeriesSpec.area({
+    xScaleType: ScaleType.Linear,
+    yAccessors: ['y1'],
+    y0Accessors: ['y0'],
+    splitSeriesAccessors: ['g'],
+    stackAccessors: ['x'],
+    data: [
+      { x: 0, y0: 2, y1: 10, g: 'a' },
+      { x: 0, y1: null, g: 'b' },
+      { x: 0, y0: 6, y1: 30, g: 'c' },
+    ],
+  });
+
+  const DATA_SET_WITH_NULL_2 = MockSeriesSpec.area({
+    xScaleType: ScaleType.Linear,
+    yAccessors: ['y1'],
+    splitSeriesAccessors: ['g'],
+    stackAccessors: ['x'],
+    data: [
+      { x: 1, y1: 1, g: 'a' },
+      { x: 2, y1: 2, g: 'a' },
+      { x: 4, y1: 4, g: 'a' },
+      { x: 1, y1: 21, g: 'b' },
+      { x: 3, y1: 23, g: 'b' },
+    ],
+  });
+
   describe('compute stacked arrays', () => {
     test('with empty values', () => {
-      const stackedMap = getYValueStackMap(EMPTY_DATA_SET, emptyXValues);
-      let computedStackedMap = computeYStackedMapValues(stackedMap, false);
-      expect(computedStackedMap.size).toBe(0);
-      computedStackedMap = computeYStackedMapValues(stackedMap, true);
-      expect(computedStackedMap.size).toBe(0);
+      const store = MockStore.default();
+      MockStore.addSpecs(EMPTY_DATA_SET, store);
+      const { formattedDataSeries: { stacked } } = computeSeriesDomainsSelector(store.getState());
+      expect(stacked).toHaveLength(0);
     });
     test('with basic values', () => {
-      const stackedMap = getYValueStackMap(STANDARD_DATA_SET, xValues);
-      const computedStackedMap = computeYStackedMapValues(stackedMap, false);
-      expect(computedStackedMap.size).toBe(1);
-      const x0Array = computedStackedMap.get(0)!;
-      expect(x0Array).toBeDefined();
-      expect(x0Array.values).toEqual([0, 10, 30, 60]);
-      expect(x0Array.percent).toEqual([0, 0.16666666666666666, 0.5, 1]);
-      expect(x0Array.total).toBe(60);
+      const store = MockStore.default();
+      MockStore.addSpecs(STANDARD_DATA_SET, store);
+      const { formattedDataSeries: { stacked: [{ dataSeries }] } } = computeSeriesDomainsSelector(store.getState());
+
+      const values = [
+        dataSeries[0].data[0].y0,
+        dataSeries[0].data[0].y1,
+        dataSeries[1].data[0].y1,
+        dataSeries[2].data[0].y1,
+      ];
+      expect(values).toEqual([0, 10, 30, 60]);
+    });
+
+    test('with basic values in percentage', () => {
+      const store = MockStore.default();
+      MockStore.addSpecs(
+        MockSeriesSpec.area({
+          ...STANDARD_DATA_SET,
+          stackMode: StackMode.Percentage,
+        }),
+        store);
+      const { formattedDataSeries: { stacked: [{ dataSeries }] } } = computeSeriesDomainsSelector(store.getState());
+
+      const values = [
+        dataSeries[0].data[0].y0,
+        dataSeries[0].data[0].y1,
+        dataSeries[1].data[0].y1,
+        dataSeries[2].data[0].y1,
+      ];
+      expect(values).toEqual([0, 0.16666666666666666, 0.5, 1]);
     });
     test('with null values', () => {
-      const stackedMap = getYValueStackMap(WITH_NULL_DATASET, xValues);
-      const computedStackedMap = computeYStackedMapValues(stackedMap, false);
-      expect(computedStackedMap.size).toBe(1);
-      const x0Array = computedStackedMap.get(0)!;
-      expect(x0Array).toBeDefined();
-      expect(x0Array.values).toEqual([0, 10, 10, 40]);
-      expect(x0Array.percent).toEqual([0, 0.25, 0.25, 1]);
-      expect(x0Array.total).toBe(40);
+      const store = MockStore.default();
+      MockStore.addSpecs(WITH_NULL_DATASET, store);
+      const { formattedDataSeries: { stacked: [{ dataSeries }] } } = computeSeriesDomainsSelector(store.getState());
+
+      const values = [
+        dataSeries[0].data[0].y0,
+        dataSeries[0].data[0].y1,
+        dataSeries[1].data[0].y1,
+        dataSeries[2].data[0].y1,
+      ];
+      expect(values).toEqual([0, 10, 10, 40]);
+    });
+    test('with null values as percentage', () => {
+      const store = MockStore.default();
+      MockStore.addSpecs(MockSeriesSpec.area({
+        ...WITH_NULL_DATASET,
+        stackMode: StackMode.Percentage,
+      }), store);
+      const { formattedDataSeries: { stacked: [{ dataSeries }] } } = computeSeriesDomainsSelector(store.getState());
+
+      const values = [
+        dataSeries[0].data[0].y0,
+        dataSeries[0].data[0].y1,
+        dataSeries[1].data[0].y1,
+        dataSeries[2].data[0].y1,
+      ];
+      expect(values).toEqual([0, 0.25, 0.25, 1]);
     });
   });
   describe('Format stacked dataset', () => {
     test('format data without nulls', () => {
-      const formattedData = formatStackedDataSeriesValues(STANDARD_DATA_SET, false, false, xValues, ScaleType.Linear);
-      expect(formattedData[0].data[0]).toEqual({
-        datum: undefined,
+      const store = MockStore.default();
+      MockStore.addSpecs(STANDARD_DATA_SET, store);
+      const { formattedDataSeries: { stacked: [{ dataSeries }] } } = computeSeriesDomainsSelector(store.getState());
+
+      expect(dataSeries[0].data[0]).toMatchObject({
         initialY0: null,
         initialY1: 10,
         x: 0,
-        y0: null,
+        y0: 0,
         y1: 10,
         mark: null,
       });
-      expect(formattedData[1].data[0]).toEqual({
-        datum: undefined,
+      expect(dataSeries[1].data[0]).toMatchObject({
         initialY0: null,
         initialY1: 20,
         x: 0,
@@ -320,8 +184,7 @@ describe('Stacked Series Utils', () => {
         y1: 30,
         mark: null,
       });
-      expect(formattedData[2].data[0]).toEqual({
-        datum: undefined,
+      expect(dataSeries[2].data[0]).toMatchObject({
         initialY0: null,
         initialY1: 30,
         x: 0,
@@ -331,27 +194,26 @@ describe('Stacked Series Utils', () => {
       });
     });
     test('format data with nulls', () => {
-      const formattedData = formatStackedDataSeriesValues(WITH_NULL_DATASET, false, false, xValues, ScaleType.Linear);
-      expect(formattedData[1].data[0]).toEqual({
-        datum: undefined,
+      const store = MockStore.default();
+      MockStore.addSpecs(WITH_NULL_DATASET, store);
+      const { formattedDataSeries: { stacked: [{ dataSeries }] } } = computeSeriesDomainsSelector(store.getState());
+
+      expect(dataSeries[1].data[0]).toMatchObject({
+
         initialY0: null,
         initialY1: null,
         x: 0,
-        y1: null,
-        y0: null,
+        y1: 10,
+        y0: 10,
         mark: null,
       });
     });
     test('format data without nulls with y0 values', () => {
-      const formattedData = formatStackedDataSeriesValues(
-        STANDARD_DATA_SET_WY0,
-        false,
-        false,
-        xValues,
-        ScaleType.Linear,
-      );
-      expect(formattedData[0].data[0]).toEqual({
-        datum: undefined,
+      const store = MockStore.default();
+      MockStore.addSpecs(STANDARD_DATA_SET_WY0, store);
+      const { formattedDataSeries: { stacked: [{ dataSeries }] } } = computeSeriesDomainsSelector(store.getState());
+
+      expect(dataSeries[0].data[0]).toMatchObject({
         initialY0: 2,
         initialY1: 10,
         x: 0,
@@ -359,8 +221,7 @@ describe('Stacked Series Utils', () => {
         y1: 10,
         mark: null,
       });
-      expect(formattedData[1].data[0]).toEqual({
-        datum: undefined,
+      expect(dataSeries[1].data[0]).toMatchObject({
         initialY0: 4,
         initialY1: 20,
         x: 0,
@@ -368,8 +229,7 @@ describe('Stacked Series Utils', () => {
         y1: 30,
         mark: null,
       });
-      expect(formattedData[2].data[0]).toEqual({
-        datum: undefined,
+      expect(dataSeries[2].data[0]).toMatchObject({
         initialY0: 6,
         initialY1: 30,
         x: 0,
@@ -379,15 +239,11 @@ describe('Stacked Series Utils', () => {
       });
     });
     test('format data with nulls - missing points', () => {
-      const formattedData = formatStackedDataSeriesValues(
-        WITH_NULL_DATASET_WY0,
-        false,
-        false,
-        xValues,
-        ScaleType.Linear,
-      );
-      expect(formattedData[0].data[0]).toEqual({
-        datum: undefined,
+      const store = MockStore.default();
+      MockStore.addSpecs(WITH_NULL_DATASET_WY0, store);
+      const { formattedDataSeries: { stacked: [{ dataSeries }] } } = computeSeriesDomainsSelector(store.getState());
+
+      expect(dataSeries[0].data[0]).toMatchObject({
         initialY0: 2,
         initialY1: 10,
         x: 0,
@@ -395,17 +251,15 @@ describe('Stacked Series Utils', () => {
         y1: 10,
         mark: null,
       });
-      expect(formattedData[1].data[0]).toEqual({
-        datum: undefined,
+      expect(dataSeries[1].data[0]).toMatchObject({
         initialY0: null,
         initialY1: null,
         x: 0,
-        y1: null,
-        y0: null,
+        y1: 10,
+        y0: 10,
         mark: null,
       });
-      expect(formattedData[2].data[0]).toEqual({
-        datum: undefined,
+      expect(dataSeries[2].data[0]).toMatchObject({
         initialY0: 6,
         initialY1: 30,
         x: 0,
@@ -415,46 +269,39 @@ describe('Stacked Series Utils', () => {
       });
     });
     test('format data without nulls on second series', () => {
-      const formattedData = formatStackedDataSeriesValues(
-        DATA_SET_WITH_NULL_2,
-        false,
-        false,
-        with2NullsXValues,
-        ScaleType.Linear,
-      );
-      expect(formattedData.length).toBe(2);
-      expect(formattedData[0].data.length).toBe(4);
-      expect(formattedData[1].data.length).toBe(4);
+      const store = MockStore.default();
+      MockStore.addSpecs(DATA_SET_WITH_NULL_2, store);
+      const { formattedDataSeries: { stacked: [{ dataSeries }] } } = computeSeriesDomainsSelector(store.getState());
 
-      expect(formattedData[0].data[0]).toEqual({
-        datum: undefined,
+      expect(dataSeries.length).toBe(2);
+      expect(dataSeries[0].data.length).toBe(4);
+      expect(dataSeries[1].data.length).toBe(4);
+
+      expect(dataSeries[0].data[0]).toMatchObject({
         initialY0: null,
         initialY1: 1,
         x: 1,
-        y0: null,
+        y0: 0,
         y1: 1,
         mark: null,
       });
-      expect(formattedData[0].data[1]).toEqual({
-        datum: undefined,
+      expect(dataSeries[0].data[1]).toMatchObject({
         initialY0: null,
         initialY1: 2,
         x: 2,
-        y0: null,
+        y0: 0,
         y1: 2,
         mark: null,
       });
-      expect(formattedData[0].data[3]).toEqual({
-        datum: undefined,
+      expect(dataSeries[0].data[3]).toMatchObject({
         initialY0: null,
         initialY1: 4,
         x: 4,
-        y0: null,
+        y0: 0,
         y1: 4,
         mark: null,
       });
-      expect(formattedData[1].data[0]).toEqual({
-        datum: undefined,
+      expect(dataSeries[1].data[0]).toMatchObject({
         initialY0: null,
         initialY1: 21,
         x: 1,
@@ -462,8 +309,7 @@ describe('Stacked Series Utils', () => {
         y1: 22,
         mark: null,
       });
-      expect(formattedData[1].data[2]).toEqual({
-        datum: undefined,
+      expect(dataSeries[1].data[2]).toMatchObject({
         initialY0: null,
         initialY1: 23,
         x: 3,
@@ -474,19 +320,32 @@ describe('Stacked Series Utils', () => {
     });
   });
   test('Correctly handle 0 values on percentage stack', () => {
-    const stackedValues: Map<any, StackedValues> = new Map();
-    stackedValues.set(1, {
-      values: [0, 0, 0],
-      percent: [0, 0, 0],
-      total: 0,
-    });
-    const formattedDatum = getStackedFormattedSeriesDatum({ x: 1, y1: 0, mark: null }, stackedValues, 0, false, true);
-    expect(formattedDatum).toEqual({
-      datum: undefined,
+    const store = MockStore.default();
+    MockStore.addSpecs(MockSeriesSpec.area({
+      xScaleType: ScaleType.Linear,
+      yAccessors: ['y1'],
+      splitSeriesAccessors: ['g'],
+      stackAccessors: ['x'],
+      data: [
+        { x: 1, y1: 0, g: 'a' },
+        { x: 1, y1: 0, g: 'b' },
+      ],
+    }), store);
+    const { formattedDataSeries: { stacked: [{ dataSeries }] } } = computeSeriesDomainsSelector(store.getState());
+
+    expect(dataSeries[0].data[0]).toMatchObject({
       initialY0: null,
       initialY1: 0,
       x: 1,
-      y0: null,
+      y0: 0,
+      y1: 0,
+      mark: null,
+    });
+    expect(dataSeries[1].data[0]).toMatchObject({
+      initialY0: null,
+      initialY1: 0,
+      x: 1,
+      y0: 0,
       y1: 0,
       mark: null,
     });

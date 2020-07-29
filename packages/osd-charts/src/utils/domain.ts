@@ -44,7 +44,7 @@ export function computeOrdinalDataDomain(
     : uniqueValues;
 }
 
-function getPaddedRange(start: number, end: number, domainOptions?: YDomainRange,): [number, number] {
+function getPaddedRange(start: number, end: number, domainOptions?: YDomainRange): [number, number] {
   if (!domainOptions?.padding) {
     return [start, end];
   }

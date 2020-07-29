@@ -20,7 +20,7 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '../../src';
+import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, StackMode } from '../../src';
 
 export const Example = () => {
   const stackedAsPercentage = boolean('stacked as percentage', true);
@@ -42,7 +42,7 @@ export const Example = () => {
         xAccessor="x"
         yAccessors={['y']}
         stackAccessors={['x']}
-        stackAsPercentage={stackedAsPercentage}
+        stackMode={stackedAsPercentage ? StackMode.Percentage : undefined}
         splitSeriesAccessors={['g']}
         data={[
           { x: 0, y: 2, g: 'a' },

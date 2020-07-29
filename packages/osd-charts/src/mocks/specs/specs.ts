@@ -59,7 +59,6 @@ export class MockSeriesSpec {
     yAccessors: ['y'],
     hideInLegend: false,
     enableHistogramMode: false,
-    stackAsPercentage: false,
     data: [] as any[],
   };
 

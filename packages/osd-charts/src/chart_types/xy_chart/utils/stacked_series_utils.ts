@@ -17,9 +17,20 @@
  * under the License.
  */
 
+import {
+  stack as D3Stack,
+  stackOffsetExpand as D3StackOffsetExpand,
+  stackOffsetNone as D3StackOffsetNone,
+  stackOffsetSilhouette as D3StackOffsetSilhouette,
+  stackOffsetWiggle as D3StackOffsetWiggle,
+  stackOrderNone,
+  SeriesPoint,
+} from 'd3-shape';
+
+import { SeriesKey } from '../../../commons/series_id';
 import { ScaleType } from '../../../scales/constants';
-import { isDefined } from '../../../utils/commons';
-import { DataSeries, DataSeriesDatum, RawDataSeries, RawDataSeriesDatum, FilledValues } from './series';
+import { DataSeries, DataSeriesDatum } from './series';
+import { StackMode } from './specs';
 
 /** @internal */
 export interface StackedValues {
@@ -29,239 +40,136 @@ export interface StackedValues {
 }
 
 /** @internal */
-export const datumXSortPredicate = (xScaleType: ScaleType, sortedXValues?: (string | number)[]) => (a: DataSeriesDatum, b: DataSeriesDatum) => {
-  if (xScaleType === ScaleType.Ordinal || typeof a.x === 'string' || typeof b.x === 'string') {
-    return sortedXValues ? sortedXValues.indexOf(a.x) - sortedXValues.indexOf(b.x) : 0;
+export const datumXSortPredicate = (
+  xScaleType: ScaleType,
+  sortedXValues?: (string | number)[]
+) => (a: { x: number | string }, b: { x: number | string }) => {
+  if (
+    xScaleType === ScaleType.Ordinal
+    || typeof a.x === 'string'
+    || typeof b.x === 'string'
+  ) {
+    return sortedXValues
+      ? sortedXValues.indexOf(a.x) - sortedXValues.indexOf(b.x)
+      : 0;
   }
   return a.x - b.x;
 };
 
-/**
- * Map each y value from a RawDataSeries on it's specific x value into,
- * ordering the stack based on the dataseries index.
- * @param dataseries
- * @internal
- */
-export function getYValueStackMap(
-  dataseries: RawDataSeries[],
-  xValues: Set<string | number>,
-): Map<string | number, number[]> {
-  const stackMap = new Map<string | number, number[]>();
-  const missingXValues = new Set([...xValues]);
-  dataseries.forEach((ds, index) => {
-    ds.data.forEach((datum) => {
-      const stack = stackMap.get(datum.x) || new Array(dataseries.length).fill(0);
-      stack[index] = datum.y1;
-      stackMap.set(datum.x, stack);
-      if (xValues.has(datum.x)) {
-        missingXValues.delete(datum.x);
-      }
-    });
-    // eslint-disable-next-line no-restricted-syntax
-    for (const x of missingXValues.values()) {
-      const stack = stackMap.get(x) || new Array(dataseries.length).fill(0);
-      // currently filling as 0 value
-      stack[index] = 0;
-      stackMap.set(x, stack);
-    }
-  });
-  return stackMap;
-}
 
-/**
- * For each key of the yValueStackMap, it stacks the values one after the other,
- * summing the previous value to the next one.
- * @param yValueStackMap
- * @param scaleToExtent
- * @internal
- */
-export function computeYStackedMapValues(
-  yValueStackMap: Map<any, number[]>,
-  scaleToExtent: boolean,
-): Map<any, StackedValues> {
-  const stackedValues = new Map<any, StackedValues>();
-
-  yValueStackMap.forEach((yStackArray, xValue) => {
-    const stackArray = yStackArray.reduce(
-      (acc, currentValue, index) => {
-        if (acc.values.length === 0) {
-          if (scaleToExtent) {
-            return {
-              values: [currentValue, currentValue],
-              total: currentValue,
-            };
-          }
-          return {
-            values: [0, currentValue],
-            total: currentValue,
-          };
-        }
-        return {
-          values: [...acc.values, acc.values[index] + currentValue],
-          total: acc.total + currentValue,
-        };
-      },
-      {
-        values: [] as number[],
-        total: 0,
-      },
-    );
-    const percent = stackArray.values.map((value) => {
-      if (stackArray.total === 0) {
-        return 0;
-      }
-      return value / stackArray.total;
-    });
-    stackedValues.set(xValue, {
-      values: stackArray.values,
-      percent,
-      total: stackArray.total,
-    });
-  });
-  return stackedValues;
-}
+type D3StackArrayElement = Record<SeriesKey, string | number | null>;
+type D3UnionStack = Record<
+  SeriesKey,
+  {
+    y0: SeriesPoint<D3StackArrayElement>[],
+    y1: SeriesPoint<D3StackArrayElement>[],
+  }
+>;
 
 /** @internal */
 export function formatStackedDataSeriesValues(
-  dataseries: RawDataSeries[],
-  scaleToExtent: boolean,
-  isPercentageMode: boolean,
+  dataSeries: DataSeries[],
   xValues: Set<string | number>,
-  xScaleType: ScaleType,
+  stackMode?: StackMode,
 ): DataSeries[] {
-  const yValueStackMap = getYValueStackMap(dataseries, xValues);
-  const stackedValues = computeYStackedMapValues(yValueStackMap, scaleToExtent);
-  const stackedDataSeries: DataSeries[] = dataseries.map((ds, seriesIndex) => {
-    const newData: DataSeriesDatum[] = [];
-    const missingXValues = new Set([...xValues]);
-    ds.data.forEach((data) => {
-      const formattedSeriesDatum = getStackedFormattedSeriesDatum(
-        data,
-        stackedValues,
-        seriesIndex,
-        scaleToExtent,
-        isPercentageMode,
-      );
-      if (formattedSeriesDatum === undefined) {
-        return;
+  const dataSeriesKeys = dataSeries.reduce<Record<SeriesKey, DataSeries>>((acc, curr) => {
+    acc[curr.key] = curr;
+    return acc;
+  }, {});
+
+  const xValuesArray = [...xValues];
+  const reorderedArray: Array<D3StackArrayElement> = [];
+  const xValueMap: Map<SeriesKey, Map<string|number, DataSeriesDatum>> = new Map();
+  // transforming the current set of series into the d3 stack required data structure
+  dataSeries.forEach(({ data, key }) => {
+    const dsMap: Map<string|number, DataSeriesDatum> = new Map();
+    data.forEach((d) => {
+      const { x, y0, y1 } = d;
+      const xIndex = xValuesArray.indexOf(x);
+
+      if (reorderedArray[xIndex] === undefined) {
+        reorderedArray[xIndex] = { x };
       }
-      missingXValues.delete(data.x);
-      newData.push(formattedSeriesDatum);
+      // y0 can be considered as always present
+      reorderedArray[xIndex][`${key}-y0`] = y0;
+      // if y0 is available, we have to count y1 as the different of y1 and y0
+      // to correctly stack them when stacking banded charts
+      reorderedArray[xIndex][`${key}-y1`] = (y1 ?? 0) - (y0 ?? 0);
+      dsMap.set(x, d);
     });
-    // eslint-disable-next-line no-restricted-syntax
-    for (const x of missingXValues.values()) {
-      const filledSeriesDatum = getStackedFormattedSeriesDatum(
-        {
-          x,
-          // filling as 0 value
-          y1: 0,
-          mark: null,
-          datum: null,
-        },
-        stackedValues,
-        seriesIndex,
-        scaleToExtent,
-        isPercentageMode,
-        {
-          x,
-          // filling as 0 value
-          y1: 0,
-        },
-      );
-      if (filledSeriesDatum) {
-        newData.push(filledSeriesDatum);
-      }
+    xValueMap.set(key, dsMap);
+  });
+
+  const stackOffset = getOffsetBasedOnStackMode(stackMode);
+
+  const keys = Object.keys(dataSeriesKeys).reduce<string[]>((acc, key) => ([...acc, `${key}-y0`, `${key}-y1`]), []);
+
+  const stack = D3Stack<D3StackArrayElement>()
+    .keys(keys)
+    .order(stackOrderNone)
+    .offset(stackOffset)(reorderedArray);
+
+  const unionedYStacks = stack.reduce<D3UnionStack>((acc, d) => {
+    const key = d.key.slice(0, -3);
+    const accessor = d.key.slice(-2);
+    if (accessor !== 'y1' && accessor !== 'y0') {
+      return acc;
     }
-    const sortedXValues = [...xValues];
-    newData.sort(datumXSortPredicate(xScaleType, sortedXValues));
+    if (!acc[key]) {
+      acc[key] = {
+        y0: [],
+        y1: [],
+      };
+    }
+    acc[key][accessor] = d.map((da) => da);
+    return acc;
+  }, {});
+
+
+  return Object.keys(unionedYStacks).map((stackedDataSeriesKey) => {
+    const dataSeriesProps = dataSeriesKeys[stackedDataSeriesKey];
+    const dsMap = xValueMap.get(stackedDataSeriesKey);
+    const { y0: y0StackArray, y1: y1StackArray } = unionedYStacks[stackedDataSeriesKey];
+    const data = y1StackArray.map<DataSeriesDatum | null>((y1Stack, index) => {
+      const { x } = y1Stack.data;
+      if (x === undefined || x === null) {
+        return null;
+      }
+      const originalData = dsMap?.get(x);
+      if (!originalData) {
+        return null;
+      }
+      const [,y0] = y0StackArray[index];
+      const [,y1] = y1Stack;
+      const { initialY0, initialY1, mark, datum, filled } = originalData;
+      return {
+        x,
+        y1,
+        y0,
+        initialY0,
+        initialY1,
+        mark,
+        datum,
+        filled,
+      };
+    }).filter((d) => d !== null) as DataSeriesDatum[];
     return {
-      ...ds,
-      data: newData,
+      ...dataSeriesProps,
+      data,
     };
   });
-  return stackedDataSeries;
 }
 
-/** @internal */
-export function getStackedFormattedSeriesDatum(
-  data: RawDataSeriesDatum,
-  stackedValues: Map<any, StackedValues>,
-  seriesIndex: number,
-  scaleToExtent: boolean,
-  isPercentageMode = false,
-  filled?: FilledValues,
-): DataSeriesDatum | undefined {
-  const { x, mark: markValue, datum } = data;
-  const stack = stackedValues.get(x);
-  if (!stack) {
-    return;
-  }
-  let y1: number | null = null;
-  let y0: number | null | undefined = null;
-  if (isPercentageMode) {
-    if (data.y1 != null) {
-      y1 = stack.total !== 0 ? data.y1 / stack.total : 0;
-    }
-    if (data.y0 != null) {
-      y0 = stack.total !== 0 ? data.y0 / stack.total : 0;
-    }
-  } else {
-    // eslint-disable-next-line prefer-destructuring
-    y1 = data.y1;
-    // eslint-disable-next-line prefer-destructuring
-    y0 = data.y0;
-  }
 
-  let computedY0: number | null;
-  if (scaleToExtent) {
-    computedY0 = y0 || y1;
-  } else {
-    computedY0 = y0 || null;
+function getOffsetBasedOnStackMode(stackMode?: StackMode) {
+  switch (stackMode) {
+    case StackMode.Percentage:
+      return D3StackOffsetExpand;
+    case StackMode.Silhouette:
+      return D3StackOffsetSilhouette;
+    case StackMode.Wiggle:
+      return D3StackOffsetWiggle;
+    default:
+      return D3StackOffsetNone;
   }
-  const initialY0 = y0 == null ? null : y0;
-  const mark = isDefined(markValue) ? markValue : null;
-
-  if (seriesIndex === 0) {
-    return {
-      x,
-      y1,
-      y0: computedY0,
-      initialY1: y1,
-      initialY0,
-      mark,
-      datum,
-      ...(filled && { filled }),
-    };
-  }
-  const stackY = isPercentageMode ? stack.percent[seriesIndex] : stack.values[seriesIndex];
-  let stackedY1: number | null = null;
-  let stackedY0: number | null = null;
-  if (isPercentageMode) {
-    stackedY1 = y1 !== null && stackY != null ? stackY + y1 : null;
-    stackedY0 = y0 != null && stackY != null ? stackY + y0 : stackY;
-  } else {
-    if (stackY == null) {
-      stackedY1 = y1 !== null ? y1 : null;
-      stackedY0 = y0 != null ? y0 : stackY;
-    } else {
-      stackedY1 = y1 !== null ? stackY + y1 : null;
-      stackedY0 = y0 != null ? stackY + y0 : stackY;
-    }
-    // configure null y0 if y1 is null
-    // it's semantically correct to say y0 is null if y1 is null
-    if (stackedY1 === null) {
-      stackedY0 = null;
-    }
-  }
-
-  return {
-    x,
-    y1: stackedY1,
-    y0: stackedY0,
-    initialY1: y1,
-    initialY0,
-    mark,
-    datum,
-    ...(filled && { filled }),
-  };
 }

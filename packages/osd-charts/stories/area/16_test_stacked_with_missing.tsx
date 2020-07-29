@@ -35,6 +35,9 @@ export const Example = () => (
       curve={CurveType.CURVE_CATMULL_ROM}
       splitSeriesAccessors={['col-1-6']}
       stackAccessors={['col-1-6']}
+      areaSeriesStyle={{
+        point: { visible: true },
+      }}
     />
   </Chart>
 );
@@ -77,6 +80,11 @@ const data = [
   },
   {
     'col-0-3': 'YWG',
+    'col-1-6': 'ES-Air',
+    'col-2-5': 10,
+  },
+  {
+    'col-0-3': 'YWG',
     'col-1-6': 'Logstash Airways',
     'col-2-5': 17,
   },
@@ -84,11 +92,6 @@ const data = [
     'col-0-3': 'YWG',
     'col-1-6': 'Kibana Airlines',
     'col-2-5': 19,
-  },
-  {
-    'col-0-3': 'YWG',
-    'col-1-6': 'JetBeats',
-    'col-2-5': 17,
   },
   {
     'col-0-3': 'YUL',

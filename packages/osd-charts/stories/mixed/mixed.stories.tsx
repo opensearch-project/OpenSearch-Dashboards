@@ -32,4 +32,5 @@ export { Example as areasAndBars } from './3_areas_and_bars';
 export { Example as testBarLinesLinear } from './4_test_bar';
 export { Example as testBarLinesTime } from './5_test_bar_time';
 export { Example as fittingFunctionsNonStackedSeries } from './6_fitting';
+export { Example as fittingFunctionsStackedSeries } from './6_fitting_stacked';
 export { Example as markSizeAccessor } from './7_marks';

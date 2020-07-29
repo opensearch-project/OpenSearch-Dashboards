@@ -108,7 +108,7 @@ export const Example = () => {
     },
     SeriesTypes.Area,
   );
-  const dataKey = select<string>(
+  const dataKey = select<keyof typeof dataTypes>(
     'dataset',
     {
       'Isolated Points': 'isolated',
@@ -119,7 +119,6 @@ export const Example = () => {
     },
     'all',
   );
-  // @ts-ignore
   const dataset = dataTypes[dataKey];
   const fit = select(
     'fitting function',
@@ -162,12 +161,14 @@ export const Example = () => {
     'none',
   );
   const parsedEndValue: number | 'nearest' = Number.isNaN(Number(endValue)) ? 'nearest' : Number(endValue);
-  const value = number('Explicit valuve (using Fit.Explicit)', 5);
+  const value = number('Explicit value (using Fit.Explicit)', 5);
   const xScaleType = dataKey === 'ordinal' ? ScaleType.Ordinal : ScaleType.Linear;
 
   return (
     <Chart className="story-chart">
       <Settings
+        showLegend
+        showLegendExtra
         theme={{
           areaSeriesStyle: {
             point: {

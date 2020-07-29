@@ -20,7 +20,7 @@
 import { ChartTypes } from '../..';
 import { ScaleType } from '../../../scales/constants';
 import { SpecTypes } from '../../../specs/constants';
-import { getSplittedSeries } from '../utils/series';
+import { getDataSeriesBySpecId } from '../utils/series';
 import { BasicSeriesSpec, SeriesTypes } from '../utils/specs';
 import { convertXScaleTypes, findMinInterval, mergeXDomain } from './x_domain';
 
@@ -221,7 +221,7 @@ describe('X Domain', () => {
       ],
     };
     const specDataSeries: BasicSeriesSpec[] = [ds1, ds2];
-    const { xValues } = getSplittedSeries(specDataSeries);
+    const { xValues } = getDataSeriesBySpecId(specDataSeries);
     const mergedDomain = mergeXDomain(
       [
         {
@@ -268,7 +268,7 @@ describe('X Domain', () => {
     };
     const specDataSeries = [ds1, ds2];
 
-    const { xValues } = getSplittedSeries(specDataSeries);
+    const { xValues } = getDataSeriesBySpecId(specDataSeries);
     const mergedDomain = mergeXDomain(
       [
         {
@@ -315,7 +315,7 @@ describe('X Domain', () => {
     };
     const specDataSeries = [ds1, ds2];
 
-    const { xValues } = getSplittedSeries(specDataSeries);
+    const { xValues } = getDataSeriesBySpecId(specDataSeries);
     const mergedDomain = mergeXDomain(
       [
         {
@@ -366,7 +366,7 @@ describe('X Domain', () => {
     };
     const specDataSeries = [ds1, ds2];
 
-    const { xValues } = getSplittedSeries(specDataSeries);
+    const { xValues } = getDataSeriesBySpecId(specDataSeries);
     const mergedDomain = mergeXDomain(
       [
         {
@@ -417,7 +417,7 @@ describe('X Domain', () => {
     };
     const specDataSeries = [ds1, ds2];
 
-    const { xValues } = getSplittedSeries(specDataSeries);
+    const { xValues } = getDataSeriesBySpecId(specDataSeries);
     const mergedDomain = mergeXDomain(
       [
         {
@@ -474,7 +474,7 @@ describe('X Domain', () => {
       min: 0,
     };
 
-    const { xValues } = getSplittedSeries(specDataSeries);
+    const { xValues } = getDataSeriesBySpecId(specDataSeries);
     const getResult = () => mergeXDomain(
       [
         {
@@ -533,7 +533,7 @@ describe('X Domain', () => {
     };
     const specDataSeries = [ds1, ds2];
 
-    const { xValues } = getSplittedSeries(specDataSeries);
+    const { xValues } = getDataSeriesBySpecId(specDataSeries);
     const mergedDomain = mergeXDomain(
       [
         {
@@ -584,7 +584,7 @@ describe('X Domain', () => {
     };
     const specDataSeries = [ds1, ds2];
 
-    const { xValues } = getSplittedSeries(specDataSeries);
+    const { xValues } = getDataSeriesBySpecId(specDataSeries);
     const mergedDomain = mergeXDomain(
       [
         {
@@ -635,7 +635,7 @@ describe('X Domain', () => {
     };
     const specDataSeries = [ds1, ds2];
 
-    const { xValues } = getSplittedSeries(specDataSeries);
+    const { xValues } = getDataSeriesBySpecId(specDataSeries);
     const mergedDomain = mergeXDomain(
       [
         {
@@ -680,7 +680,7 @@ describe('X Domain', () => {
     };
     const specDataSeries = [ds1, ds2];
 
-    const { xValues } = getSplittedSeries(specDataSeries);
+    const { xValues } = getDataSeriesBySpecId(specDataSeries);
 
     const mergedDomain = mergeXDomain(
       [

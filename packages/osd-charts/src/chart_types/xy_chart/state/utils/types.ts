@@ -22,11 +22,7 @@ import { PointGeometry, BarGeometry, AreaGeometry, LineGeometry, BubbleGeometry 
 import { GroupId } from '../../../../utils/ids';
 import { XDomain, YDomain } from '../../domains/types';
 import { IndexedGeometryMap } from '../../utils/indexed_geometry_map';
-import {
-  SeriesCollectionValue,
-  FormattedDataSeries,
-  RawDataSeries,
-} from '../../utils/series';
+import { SeriesCollectionValue, FormattedDataSeries } from '../../utils/series';
 
 /** @internal */
 export interface Transform {
@@ -83,7 +79,6 @@ export interface ComputedGeometries {
 export interface SeriesDomainsAndData {
   xDomain: XDomain;
   yDomain: YDomain[];
-  splittedDataSeries: RawDataSeries[][];
   formattedDataSeries: {
     stacked: FormattedDataSeries[];
     nonStacked: FormattedDataSeries[];
