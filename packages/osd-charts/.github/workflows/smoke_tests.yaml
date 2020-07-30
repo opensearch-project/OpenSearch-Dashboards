@@ -6,6 +6,7 @@ jobs:
   browser-ie:
     runs-on: windows-latest
     steps:
+      - run: git config --system core.longpaths true
       - uses: actions/checkout@v1
       - uses: warrenbuckley/Setup-Nuget@v1
       - uses: actions/setup-node@v1
