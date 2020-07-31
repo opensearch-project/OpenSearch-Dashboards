@@ -264,10 +264,10 @@ describe('Test that getRectangleRowGeometry works with:', () => {
       rowAnchorX: 0,
       rowAnchorY: -(
         (
-          100
-          - smallLinePitch * (totalRowCount2 - 1 - rowIndex)
-          - padding.bottom
-          - smallFontSize * 0.05
+          100 -
+          smallLinePitch * (totalRowCount2 - 1 - rowIndex) -
+          padding.bottom -
+          smallFontSize * 0.05
         ) /* 0.05 = 5%: default overhang multiplier */
       ),
     });

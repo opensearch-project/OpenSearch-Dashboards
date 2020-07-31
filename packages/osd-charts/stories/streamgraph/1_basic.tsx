@@ -56,11 +56,9 @@ export const Example = () => {
           },
         }}
       />
-
     </Chart>
   );
 };
-
 
 // storybook configuration
 Example.story = {

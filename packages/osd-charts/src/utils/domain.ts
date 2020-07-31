@@ -39,9 +39,7 @@ export function computeOrdinalDataDomain(
 
   const domain = data.map(accessor).filter((d) => (removeNull ? d !== null : true));
   const uniqueValues = [...new Set(domain)];
-  return sorted
-    ? uniqueValues.sort((a, b) => `${a}`.localeCompare(`${b}`))
-    : uniqueValues;
+  return sorted ? uniqueValues.sort((a, b) => `${a}`.localeCompare(`${b}`)) : uniqueValues;
 }
 
 function getPaddedRange(start: number, end: number, domainOptions?: YDomainRange): [number, number] {
@@ -66,10 +64,7 @@ function getPaddedRange(start: number, end: number, domainOptions?: YDomainRange
   const newEnd = end + computedPadding;
 
   if (domainOptions.constrainPadding ?? true) {
-    return [
-      start >= 0 && newStart < 0 ? 0 : newStart,
-      end <= 0 && newEnd > 0 ? 0 : newEnd,
-    ];
+    return [start >= 0 && newStart < 0 ? 0 : newStart, end <= 0 && newEnd > 0 ? 0 : newEnd];
   }
 
   return [newStart, newEnd];

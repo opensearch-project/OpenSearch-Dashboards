@@ -47,13 +47,14 @@ export const computeAnnotationDimensionsSelector = createCachedSelector(
     { scales: { yScales, xScale } },
     axesSpecs,
     isHistogramMode,
-  ): Map<AnnotationId, AnnotationDimensions> => computeAnnotationDimensions(
-    annotationSpecs,
-    chartDimensions.chartDimensions,
-    settingsSpec.rotation,
-    yScales,
-    xScale,
-    axesSpecs,
-    isHistogramMode,
-  ),
+  ): Map<AnnotationId, AnnotationDimensions> =>
+    computeAnnotationDimensions(
+      annotationSpecs,
+      chartDimensions.chartDimensions,
+      settingsSpec.rotation,
+      yScales,
+      xScale,
+      axesSpecs,
+      isHistogramMode,
+    ),
 )(getChartIdSelector);

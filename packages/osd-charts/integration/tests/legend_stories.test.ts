@@ -20,29 +20,29 @@
 import { common } from '../page_objects';
 
 describe('Legend stories', () => {
-  it('should render non-split series', async() => {
+  it('should render non-split series', async () => {
     await common.expectChartAtUrlToMatchScreenshot(
       'http://localhost:9001/?path=/story/legend--changing-specs&knob-split series=',
     );
   });
-  it('should hide line series legend item', async() => {
+  it('should hide line series legend item', async () => {
     await common.expectChartAtUrlToMatchScreenshot(
       'http://localhost:9001/?path=/story/legend--hide-legend-items-by-series&knob-hide bar series in legend=&knob-hide line series in legend=true',
     );
   });
-  it('should hide bar series legend item', async() => {
+  it('should hide bar series legend item', async () => {
     await common.expectChartAtUrlToMatchScreenshot(
       'http://localhost:9001/?path=/story/legend--hide-legend-items-by-series&knob-hide bar series in legend=true&knob-hide line series in legend=',
     );
   });
-  it('should 0 legend buffer', async() => {
+  it('should 0 legend buffer', async () => {
     await common.expectChartAtUrlToMatchScreenshot(
       'http://localhost:9001/?path=/story/legend--legend-spacing-buffer&knob-legend buffer value=0',
     );
   });
 
-  it('should render color picker on mouse click', async() => {
-    const action = async() =>
+  it('should render color picker on mouse click', async () => {
+    const action = async () =>
       await common.clickMouseRelativeToDOMElement({ left: 0, top: 0 }, '.echLegendItem__color');
     await common.expectElementAtUrlToMatchScreenshot(
       'http://localhost:9001/?path=/story/legend--color-picker',
@@ -55,15 +55,11 @@ describe('Legend stories', () => {
     );
   });
 
-  it('should render legend action on mouse hover', async() => {
-    const action = async() =>
-      await common.moveMouseRelativeToDOMElement({ left: 30, top: 10 }, '.echLegendItem');
-    await common.expectChartAtUrlToMatchScreenshot(
-      'http://localhost:9001/?path=/story/legend--actions',
-      {
-        action,
-        delay: 200, // needed for icon to load
-      },
-    );
+  it('should render legend action on mouse hover', async () => {
+    const action = async () => await common.moveMouseRelativeToDOMElement({ left: 30, top: 10 }, '.echLegendItem');
+    await common.expectChartAtUrlToMatchScreenshot('http://localhost:9001/?path=/story/legend--actions', {
+      action,
+      delay: 200, // needed for icon to load
+    });
   });
 });

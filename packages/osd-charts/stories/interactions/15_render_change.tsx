@@ -49,7 +49,8 @@ export const Example = () => (
 Example.story = {
   parameters: {
     info: {
-      text: 'Sends an event every time the chart render state changes. This is provided to bind attributes to the chart for visulaization loading checks.',
+      text:
+        'Sends an event every time the chart render state changes. This is provided to bind attributes to the chart for visulaization loading checks.',
     },
   },
 };

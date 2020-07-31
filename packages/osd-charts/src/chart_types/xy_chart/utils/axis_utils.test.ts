@@ -57,17 +57,18 @@ import {
 import { computeXScale } from './scales';
 import { AxisSpec, DomainRange, DEFAULT_GLOBAL_ID, TickFormatter } from './specs';
 
-const getCustomStyle = (rotation = 0, padding = 10): AxisStyle => mergePartial(LIGHT_THEME.axes, {
-  tickLine: {
-    size: 10,
-    padding,
-  },
-  tickLabel: {
-    fontSize: 16,
-    fontFamily: 'Arial',
-    rotation,
-  },
-});
+const getCustomStyle = (rotation = 0, padding = 10): AxisStyle =>
+  mergePartial(LIGHT_THEME.axes, {
+    tickLine: {
+      size: 10,
+      padding,
+    },
+    tickLabel: {
+      fontSize: 16,
+      fontFamily: 'Arial',
+      rotation,
+    },
+  });
 const style = getCustomStyle();
 
 describe('Axis computational utils', () => {
@@ -205,7 +206,17 @@ describe('Axis computational utils', () => {
     expect(axisDimensions).toEqual(axis1Dims);
 
     const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: 'foo' };
-    const result = computeAxisTicksDimensions(ungroupedAxisSpec, xDomain, [yDomain], 1, bboxCalculator, 0, axes, undefined, false);
+    const result = computeAxisTicksDimensions(
+      ungroupedAxisSpec,
+      xDomain,
+      [yDomain],
+      1,
+      bboxCalculator,
+      0,
+      axes,
+      undefined,
+      false,
+    );
 
     expect(result).toBeNull();
 
@@ -752,7 +763,7 @@ describe('Axis computational utils', () => {
       {
         horizontal: 'center',
         vertical: 'bottom',
-      }
+      },
     );
 
     expect(unrotatedLabelProps).toEqual({
@@ -819,7 +830,7 @@ describe('Axis computational utils', () => {
       {
         horizontal: 'center',
         vertical: 'top',
-      }
+      },
     );
 
     expect(bottomUnrotatedLabelProps).toEqual({
@@ -1052,15 +1063,11 @@ describe('Axis computational utils', () => {
       0,
       true,
     );
-    const {
-      size: tickSize,
-      padding: tickPadding,
-    } = LIGHT_THEME.axes.tickLine;
+    const { size: tickSize, padding: tickPadding } = LIGHT_THEME.axes.tickLine;
 
     const expectedTopAxisPosition = {
       dimensions: {
-        height:
-          axis1Dims.maxLabelBboxHeight + axisTitleHeight + tickSize + tickPadding,
+        height: axis1Dims.maxLabelBboxHeight + axisTitleHeight + tickSize + tickPadding,
         width: 100,
         left: 0,
         top: cumTopSum + LIGHT_THEME.chartMargins.top,
@@ -1481,7 +1488,8 @@ describe('Axis computational utils', () => {
     ]);
   });
   test('should show unique consecutive ticks if duplicateTicks is set to false', () => {
-    const formatter: TickFormatter = (d, options = { timeZone: 'utc+1' }) => DateTime.fromMillis(d, { setZone: true, zone: options.timeZone }).toFormat('HH:mm');
+    const formatter: TickFormatter = (d, options = { timeZone: 'utc+1' }) =>
+      DateTime.fromMillis(d, { setZone: true, zone: options.timeZone }).toFormat('HH:mm');
     const axisSpec: AxisSpec = {
       id: 'bottom',
       position: 'bottom',

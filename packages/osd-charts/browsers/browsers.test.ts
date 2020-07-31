@@ -27,7 +27,7 @@ jest.setTimeout(30000);
 
 let driver: webdriver.WebDriver;
 describe('smoke tests', () => {
-  beforeAll(async() => {
+  beforeAll(async () => {
     let capabilities: webdriver.Capabilities | null = null;
     switch (process.env.BROWSER || 'chrome') {
       case 'ie':
@@ -59,11 +59,11 @@ describe('smoke tests', () => {
     }
   });
 
-  afterAll(async() => {
+  afterAll(async () => {
     await driver.quit();
   });
 
-  test('elastic-chart element smoke test', async() => {
+  test('elastic-chart element smoke test', async () => {
     await driver.get('http://localhost:8080');
     await driver.sleep(5000);
 

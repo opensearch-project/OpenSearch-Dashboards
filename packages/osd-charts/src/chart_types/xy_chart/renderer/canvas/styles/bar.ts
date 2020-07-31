@@ -45,9 +45,8 @@ export function buildBarStyles(
   const fill: Fill = {
     color: fillColor,
   };
-  const defaultStrokeOpacity = themeRectBorderStyle.strokeOpacity === undefined
-    ? themeRectStyle.opacity
-    : themeRectBorderStyle.strokeOpacity;
+  const defaultStrokeOpacity =
+    themeRectBorderStyle.strokeOpacity === undefined ? themeRectStyle.opacity : themeRectBorderStyle.strokeOpacity;
   const borderStrokeOpacity = defaultStrokeOpacity * geometryStateStyle.opacity;
   const strokeOpacity: OpacityFn = (opacity) => opacity * borderStrokeOpacity;
   const strokeColor = stringToRGB(getColorFromVariant(baseColor, themeRectBorderStyle.stroke), strokeOpacity);

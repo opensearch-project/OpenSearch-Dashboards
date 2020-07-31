@@ -26,7 +26,6 @@ import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
 /** @internal */
 export const getBarPaddingsSelector = createCachedSelector(
   [isHistogramModeEnabledSelector, getChartThemeSelector],
-  (isHistogramMode, chartTheme): number => isHistogramMode
-    ? chartTheme.scales.histogramPadding
-    : chartTheme.scales.barsPadding,
+  (isHistogramMode, chartTheme): number =>
+    isHistogramMode ? chartTheme.scales.histogramPadding : chartTheme.scales.barsPadding,
 )(getChartIdSelector);

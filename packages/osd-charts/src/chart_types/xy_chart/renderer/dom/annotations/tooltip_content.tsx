@@ -30,12 +30,15 @@ export const TooltipContent = ({
   customTooltip: CustomTooltip,
   customTooltipDetails,
 }: AnnotationTooltipState) => {
-  const renderLine = useCallback(() => (
-    <div className="echAnnotation__tooltip">
-      <p className="echAnnotation__header">{header}</p>
-      <div className="echAnnotation__details">{customTooltipDetails ? customTooltipDetails(details) : details}</div>
-    </div>
-  ), [header, details, customTooltipDetails]);
+  const renderLine = useCallback(
+    () => (
+      <div className="echAnnotation__tooltip">
+        <p className="echAnnotation__header">{header}</p>
+        <div className="echAnnotation__details">{customTooltipDetails ? customTooltipDetails(details) : details}</div>
+      </div>
+    ),
+    [header, details, customTooltipDetails],
+  );
 
   const renderRect = useCallback(() => {
     const tooltipContent = customTooltipDetails ? customTooltipDetails(details) : details;

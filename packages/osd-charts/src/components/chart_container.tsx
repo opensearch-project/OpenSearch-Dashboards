@@ -145,9 +145,9 @@ class ChartContainerComponent extends React.Component<ReactiveChartProps> {
   render() {
     const { initialized, isChartEmpty } = this.props;
     if (
-      initialized === InitStatus.ParentSizeInvalid
-      || initialized === InitStatus.SpecNotInitialized
-      || initialized === InitStatus.ChartNotInitialized
+      initialized === InitStatus.ParentSizeInvalid ||
+      initialized === InitStatus.SpecNotInitialized ||
+      initialized === InitStatus.ChartNotInitialized
     ) {
       return null;
     }

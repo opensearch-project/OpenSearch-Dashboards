@@ -63,7 +63,7 @@ export function areIndexedGeometryArraysEquals(arr1: IndexedGeometry[], arr2: In
   if (arr1.length !== arr2.length) {
     return false;
   }
-  for (let i = arr1.length; i--;) {
+  for (let i = arr1.length; i--; ) {
     return areIndexedGeomsEquals(arr1[i], arr2[i]);
   }
   return true;
@@ -82,22 +82,22 @@ export function areIndexedGeomsEquals(ig1: IndexedGeometry, ig2: IndexedGeometry
 
 function arePointsEqual(ig1: PointGeometry, ig2: PointGeometry) {
   return (
-    ig1.seriesIdentifier.specId === ig2.seriesIdentifier.specId
-    && ig1.color === ig2.color
-    && ig1.x === ig2.x
-    && ig1.transform.x === ig2.transform.x
-    && ig1.transform.y === ig2.transform.y
-    && ig1.y === ig2.y
-    && ig1.radius === ig2.radius
+    ig1.seriesIdentifier.specId === ig2.seriesIdentifier.specId &&
+    ig1.color === ig2.color &&
+    ig1.x === ig2.x &&
+    ig1.transform.x === ig2.transform.x &&
+    ig1.transform.y === ig2.transform.y &&
+    ig1.y === ig2.y &&
+    ig1.radius === ig2.radius
   );
 }
 function areBarEqual(ig1: BarGeometry, ig2: BarGeometry) {
   return (
-    ig1.seriesIdentifier.specId === ig2.seriesIdentifier.specId
-    && ig1.color === ig2.color
-    && ig1.x === ig2.x
-    && ig1.y === ig2.y
-    && ig1.width === ig2.width
-    && ig1.height === ig2.height
+    ig1.seriesIdentifier.specId === ig2.seriesIdentifier.specId &&
+    ig1.color === ig2.color &&
+    ig1.x === ig2.x &&
+    ig1.y === ig2.y &&
+    ig1.width === ig2.width &&
+    ig1.height === ig2.height
   );
 }

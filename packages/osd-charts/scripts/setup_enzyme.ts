@@ -44,9 +44,9 @@ class ResizeObserverMock {
     this.callback([{ contentRect: { width: 200, height: 200 } }]);
   }
 
-  unobserve() { }
+  unobserve() {}
 
-  disconnect() { }
+  disconnect() {}
 }
 
 // @ts-ignore

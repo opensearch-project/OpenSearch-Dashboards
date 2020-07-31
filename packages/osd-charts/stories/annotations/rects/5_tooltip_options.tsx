@@ -23,12 +23,7 @@ import React from 'react';
 import { AnnotationTooltipFormatter, Axis, BarSeries, Chart, ScaleType, RectAnnotation, Settings } from '../../../src';
 import { CustomAnnotationTooltip } from '../../../src/chart_types/xy_chart/annotations/types';
 import { Position } from '../../../src/utils/commons';
-import {
-  getBoundaryKnob,
-  getChartRotationKnob,
-  getFallbackPlacementsKnob,
-  getPlacementKnob,
-} from '../../utils/knobs';
+import { getBoundaryKnob, getChartRotationKnob, getFallbackPlacementsKnob, getPlacementKnob } from '../../utils/knobs';
 
 export const Example = () => {
   const boundary = getBoundaryKnob();
@@ -37,10 +32,14 @@ export const Example = () => {
   const rotation = getChartRotationKnob();
   const showCustomTooltip = boolean('custom tooltip', false);
   const showCustomDetails = boolean('custom tooltip details', false);
-  const details = select('details value', {
-    foo: 'foo',
-    undefined,
-  }, 'foo');
+  const details = select(
+    'details value',
+    {
+      foo: 'foo',
+      undefined,
+    },
+    'foo',
+  );
 
   const dataValues = [
     {
@@ -54,20 +53,22 @@ export const Example = () => {
     },
   ];
 
-  const customTooltip: CustomAnnotationTooltip | undefined = showCustomTooltip ? ({ details }) => (
-    <div style={{ backgroundColor: 'blue', color: 'white', padding: 10 }}>
-      <h2>
-        custom tooltip
-      </h2>
-      <p>{details}</p>
-    </div>
-  ) : undefined;
-  const customTooltipDetails: AnnotationTooltipFormatter | undefined = showCustomDetails ? (details) => (
-    <div>
-      <h2>custom Details</h2>
-      <p>{details}</p>
-    </div>
-  ) : undefined;
+  const customTooltip: CustomAnnotationTooltip | undefined = showCustomTooltip
+    ? ({ details }) => (
+        <div style={{ backgroundColor: 'blue', color: 'white', padding: 10 }}>
+          <h2>custom tooltip</h2>
+          <p>{details}</p>
+        </div>
+      )
+    : undefined;
+  const customTooltipDetails: AnnotationTooltipFormatter | undefined = showCustomDetails
+    ? (details) => (
+        <div>
+          <h2>custom Details</h2>
+          <p>{details}</p>
+        </div>
+      )
+    : undefined;
 
   return (
     <Chart className="story-chart">

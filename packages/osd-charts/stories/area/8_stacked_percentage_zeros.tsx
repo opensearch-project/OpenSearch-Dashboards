@@ -30,12 +30,7 @@ export const Example = () => (
       title="Bottom axis"
       tickFormat={niceTimeFormatter([1585234800000, 1585836000000])}
     />
-    <Axis
-      id="left2"
-      title="Left axis"
-      position={Position.Left}
-      tickFormat={(d) => `${Number(d * 100).toFixed(0)} %`}
-    />
+    <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d) => `${Number(d * 100).toFixed(0)} %`} />
 
     <AreaSeries
       id="areas1"

@@ -59,9 +59,10 @@ const TooltipPortalComponent = ({ anchor, scope, settings, children, visible, ch
   /**
    * Anchor element used to position tooltip
    */
-  const anchorNode = useRef(isHTMLElement(anchor)
-    ? anchor
-    : getOrCreateNode(`echAnchor${scope}__${chartId}`, undefined, anchor?.ref ?? undefined),
+  const anchorNode = useRef(
+    isHTMLElement(anchor)
+      ? anchor
+      : getOrCreateNode(`echAnchor${scope}__${chartId}`, undefined, anchor?.ref ?? undefined),
   );
 
   /**

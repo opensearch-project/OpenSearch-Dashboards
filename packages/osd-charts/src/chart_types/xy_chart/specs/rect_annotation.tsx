@@ -41,5 +41,5 @@ export const RectAnnotation: React.FunctionComponent<Pick<RectAnnotationSpec, 'i
       'chartType' | 'specType' | 'seriesType' | 'id' | 'dataValues' | 'domainType' | 'annotationType'
     >
   >> = getConnect()(
-    specComponentFactory<RectAnnotationSpec, 'groupId' | 'annotationType' | 'zIndex' | 'style'>(defaultProps),
-  );
+  specComponentFactory<RectAnnotationSpec, 'groupId' | 'annotationType' | 'zIndex' | 'style'>(defaultProps),
+);

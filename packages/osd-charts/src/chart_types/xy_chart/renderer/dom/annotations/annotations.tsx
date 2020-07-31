@@ -23,7 +23,10 @@ import { bindActionCreators, Dispatch } from 'redux';
 
 import { onPointerMove as onPointerMoveAction } from '../../../../../state/actions/mouse';
 import { GlobalChartState, BackwardRef } from '../../../../../state/chart_state';
-import { getInternalIsInitializedSelector, InitStatus } from '../../../../../state/selectors/get_internal_is_intialized';
+import {
+  getInternalIsInitializedSelector,
+  InitStatus,
+} from '../../../../../state/selectors/get_internal_is_intialized';
 import { Dimensions } from '../../../../../utils/dimensions';
 import { AnnotationId } from '../../../../../utils/ids';
 import { AnnotationLineProps } from '../../../annotations/line/types';
@@ -123,12 +126,7 @@ const AnnotationsComponent = ({
   return (
     <>
       {renderAnnotationMarkers()}
-      <AnnotationTooltip
-        chartId={chartId}
-        state={tooltipState}
-        chartRef={getChartContainerRef()}
-        onScroll={onScroll}
-      />
+      <AnnotationTooltip chartId={chartId} state={tooltipState} chartRef={getChartContainerRef()} onScroll={onScroll} />
     </>
   );
 };

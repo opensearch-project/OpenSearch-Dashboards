@@ -45,10 +45,13 @@ export class Logger {
    */
   static expected(message: any, expected: any, received: any) {
     if (Logger.isDevelopment() && !Logger.isTest()) {
-      console.warn(`${Logger.namespace} ${message}`, `\n
+      console.warn(
+        `${Logger.namespace} ${message}`,
+        `\n
   Expected: ${expected}
   Received: ${received}
-`);
+`,
+      );
     }
   }
 

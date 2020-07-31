@@ -80,27 +80,28 @@ export const Example = () => {
   const pointAlignment = select('point series alignment', HistogramModeAlignments, HistogramModeAlignments.Center);
   const pointData = TestDatasets.BARCHART_1Y0G;
 
-  const otherSeries = otherSeriesSelection === 'line' ? (
-    <LineSeries
-      id="other-series"
-      xScaleType={ScaleType.Linear}
-      yScaleType={ScaleType.Linear}
-      xAccessor="x"
-      yAccessors={['y']}
-      data={pointData}
-      histogramModeAlignment={pointAlignment}
-    />
-  ) : (
-    <AreaSeries
-      id="other-series"
-      xScaleType={ScaleType.Linear}
-      yScaleType={ScaleType.Linear}
-      xAccessor="x"
-      yAccessors={['y']}
-      data={pointData}
-      histogramModeAlignment={pointAlignment}
-    />
-  );
+  const otherSeries =
+    otherSeriesSelection === 'line' ? (
+      <LineSeries
+        id="other-series"
+        xScaleType={ScaleType.Linear}
+        yScaleType={ScaleType.Linear}
+        xAccessor="x"
+        yAccessors={['y']}
+        data={pointData}
+        histogramModeAlignment={pointAlignment}
+      />
+    ) : (
+      <AreaSeries
+        id="other-series"
+        xScaleType={ScaleType.Linear}
+        yScaleType={ScaleType.Linear}
+        xAccessor="x"
+        yAccessors={['y']}
+        data={pointData}
+        histogramModeAlignment={pointAlignment}
+      />
+    );
 
   const hasHistogramBarSeries = boolean('hasHistogramBarSeries', false);
   return (

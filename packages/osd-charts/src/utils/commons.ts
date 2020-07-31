@@ -340,9 +340,10 @@ export function mergePartial<T>(
             );
           }
         } else if (!(key in baseClone)) {
-          baseClone[key] = (partial as any)[key] !== undefined
-            ? (partial as any)[key]
-            : (additionalPartials.find((v: any) => v[key] !== undefined) || ({} as any))[key];
+          baseClone[key] =
+            (partial as any)[key] !== undefined
+              ? (partial as any)[key]
+              : (additionalPartials.find((v: any) => v[key] !== undefined) || ({} as any))[key];
         }
       });
     }
@@ -466,7 +467,7 @@ export function isUniqueArray<B, T>(arr: B[], extractor?: (value: B) => T) {
       values.add(value);
       return true;
     });
-  }());
+  })();
 }
 
 /**
@@ -518,11 +519,7 @@ export const round = (value: number, fractionDigits = 0): number => {
  *
  * i.e. `'90%'` with relative value of `100` returns `90`
  */
-export const getPercentageValue = <T>(
-  ratio: string | number,
-  relativeValue: number,
-  defaultValue: T,
-): number | T => {
+export const getPercentageValue = <T>(ratio: string | number, relativeValue: number, defaultValue: T): number | T => {
   if (typeof ratio === 'number') {
     return ratio;
   }

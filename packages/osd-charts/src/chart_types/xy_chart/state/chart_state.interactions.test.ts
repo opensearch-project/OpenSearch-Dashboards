@@ -805,15 +805,21 @@ function mouseOverTestSuite(scaleType: ScaleType) {
         },
         onBrushEnd: brushEndListener,
       };
-      MockStore.addSpecs([{
-        ...spec,
-        data: [
-          [0, 1],
-          [1, 1],
-          [2, 2],
-          [3, 3],
+      MockStore.addSpecs(
+        [
+          {
+            ...spec,
+            data: [
+              [0, 1],
+              [1, 1],
+              [2, 2],
+              [3, 3],
+            ],
+          } as BarSeriesSpec,
+          updatedSettings,
         ],
-      } as BarSeriesSpec, updatedSettings], store);
+        store,
+      );
 
       const start1 = { x: 0, y: 0 };
       const end1 = { x: 75, y: 0 };
@@ -957,15 +963,21 @@ function mouseOverTestSuite(scaleType: ScaleType) {
         },
         onBrushEnd: brushEndListener,
       };
-      MockStore.addSpecs([{
-        ...spec,
-        data: [
-          [0, 1],
-          [1, 1],
-          [2, 2],
-          [3, 3],
+      MockStore.addSpecs(
+        [
+          {
+            ...spec,
+            data: [
+              [0, 1],
+              [1, 1],
+              [2, 2],
+              [3, 3],
+            ],
+          } as BarSeriesSpec,
+          updatedSettings,
         ],
-      } as BarSeriesSpec, updatedSettings], store);
+        store,
+      );
 
       const start1 = { x: 0, y: 0 };
       const end1 = { x: 0, y: 75 };
@@ -1027,15 +1039,21 @@ function mouseOverTestSuite(scaleType: ScaleType) {
         },
         onBrushEnd: brushEndListener,
       };
-      MockStore.addSpecs([{
-        ...spec,
-        data: [
-          [0, 1],
-          [1, 1],
-          [2, 2],
-          [3, 3],
+      MockStore.addSpecs(
+        [
+          {
+            ...spec,
+            data: [
+              [0, 1],
+              [1, 1],
+              [2, 2],
+              [3, 3],
+            ],
+          } as BarSeriesSpec,
+          updatedSettings,
         ],
-      } as BarSeriesSpec, updatedSettings], store);
+        store,
+      );
 
       const start1 = { x: 0, y: 0 };
       const end1 = { x: 75, y: 75 };

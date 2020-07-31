@@ -26,7 +26,7 @@ import { SB_SOURCE_PANEL } from '../utils/storybook';
 const dateFormatter = timeFormatter('HH:mm');
 
 export const Example = () => {
-  const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => d[1] < 7 ? [d[0], null] : [d[0], d[1] - 10]);
+  const data = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d) => (d[1] < 7 ? [d[0], null] : [d[0], d[1] - 10]));
   return (
     <Chart className="story-chart">
       <Axis id="bottom" title="index" position={Position.Bottom} tickFormat={dateFormatter} />

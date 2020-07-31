@@ -202,7 +202,7 @@ describe('Fit Function', () => {
           });
         });
 
-        describe('endValue is set to \'nearest\'', () => {
+        describe("endValue is set to 'nearest'", () => {
           it('should return current datum with value from next when previous is null', () => {
             const current = MockDataSeriesDatum.simple({ x: 3 });
             const next = MockDataSeriesDatum.full({ x: 4, y1: 20 });
@@ -399,7 +399,7 @@ describe('Fit Function', () => {
           });
         });
 
-        describe('endValue is set to \'nearest\'', () => {
+        describe("endValue is set to 'nearest'", () => {
           it('should return current datum with value from next when previous is null', () => {
             const current = MockDataSeriesDatum.simple({ x: 'c' });
             const next = MockDataSeriesDatum.full({ x: 'e', y1: 20, fittingIndex: 4 });
@@ -588,7 +588,11 @@ describe('Fit Function', () => {
           });
 
           it('should set end values - Explicit', () => {
-            const actual = testModule.fitFunction(sortedDS.data, { type: Fit.Explicit, value: 20, endValue }, scaleType);
+            const actual = testModule.fitFunction(
+              sortedDS.data,
+              { type: Fit.Explicit, value: 20, endValue },
+              scaleType,
+            );
             const finalValues = getYResolvedData(actual);
 
             expect(finalValues[0]).toEqual(20);
@@ -628,7 +632,7 @@ describe('Fit Function', () => {
           });
         });
 
-        describe('\'nearest\' value', () => {
+        describe("'nearest' value", () => {
           const endValue = 'nearest';
 
           it('should set end values - None', () => {
@@ -648,7 +652,11 @@ describe('Fit Function', () => {
           });
 
           it('should set end values - Explicit', () => {
-            const actual = testModule.fitFunction(sortedDS.data, { type: Fit.Explicit, value: 20, endValue }, scaleType);
+            const actual = testModule.fitFunction(
+              sortedDS.data,
+              { type: Fit.Explicit, value: 20, endValue },
+              scaleType,
+            );
             const finalValues = getYResolvedData(actual);
 
             expect(finalValues[0]).toEqual(20);

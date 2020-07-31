@@ -90,8 +90,7 @@ export const Example = () => (
           shape: {
             fillColor: (d: ShapeTreeNode) =>
               // pick color by country
-              interpolator(countries.indexOf(d.dataName) / countryCount)
-            ,
+              interpolator(countries.indexOf(d.dataName) / countryCount),
           },
           fillLabel: { maximizeFontSize: boolean('Maximize font size layer 3', true) },
         },

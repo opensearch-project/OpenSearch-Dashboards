@@ -72,7 +72,8 @@ export const getLegendSizeSelector = createCachedSelector(
     if (!showLegend) {
       return { width: 0, height: 0, margin: 0 };
     }
-    const legendItemWidth = MARKER_WIDTH + MARKER_LEFT_MARGIN + bbox.width + (showLegendDisplayValue ? VALUE_LEFT_MARGIN : 0);
+    const legendItemWidth =
+      MARKER_WIDTH + MARKER_LEFT_MARGIN + bbox.width + (showLegendDisplayValue ? VALUE_LEFT_MARGIN : 0);
     if (isVerticalAxis(legendPosition)) {
       const legendItemHeight = bbox.height + VERTICAL_PADDING * 2;
       return {

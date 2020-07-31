@@ -104,7 +104,8 @@ Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
     info: {
-      text: '`yScaleToDataExtent` has been **depricated** in favor of `domain.fit`. The functionality is identical between the two.',
+      text:
+        '`yScaleToDataExtent` has been **depricated** in favor of `domain.fit`. The functionality is identical between the two.',
     },
   },
 };

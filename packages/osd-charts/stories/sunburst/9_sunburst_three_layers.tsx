@@ -55,7 +55,8 @@ export const Example = () => (
           nodeLabel: (d: any) => regionLookup[d].regionName,
           fillLabel: { maximizeFontSize: boolean('Maximize font size layer 2', true) },
           shape: {
-            fillColor: (d: ShapeTreeNode) => categoricalFillColor(colorBrewerCategoricalStark9, 0.5)(d.parent.sortIndex),
+            fillColor: (d: ShapeTreeNode) =>
+              categoricalFillColor(colorBrewerCategoricalStark9, 0.5)(d.parent.sortIndex),
           },
         },
         {
@@ -63,7 +64,8 @@ export const Example = () => (
           nodeLabel: (d: any) => countryLookup[d].name,
           fillLabel: { maximizeFontSize: boolean('Maximize font size layer 3', true) },
           shape: {
-            fillColor: (d: ShapeTreeNode) => categoricalFillColor(colorBrewerCategoricalStark9, 0.3)(d.parent.parent.sortIndex),
+            fillColor: (d: ShapeTreeNode) =>
+              categoricalFillColor(colorBrewerCategoricalStark9, 0.3)(d.parent.parent.sortIndex),
           },
         },
       ]}

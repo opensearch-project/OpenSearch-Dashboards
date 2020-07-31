@@ -1,9 +1,5 @@
 *.md
 *.mdx
-*.ts
-*.tsx
-*.js
-*.jsx
 .out/
 .idea/
 .vscode/

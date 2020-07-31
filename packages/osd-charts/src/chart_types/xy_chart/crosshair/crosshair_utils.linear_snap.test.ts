@@ -304,7 +304,7 @@ describe('Crosshair utils linear scale', () => {
         });
       });
 
-      test('changes on y mouse position doesn\'t change the band position', () => {
+      test("changes on y mouse position doesn't change the band position", () => {
         const bandPosition = getCursorBandPosition(
           chartRotation,
           chartDimensions,
@@ -397,7 +397,7 @@ describe('Crosshair utils linear scale', () => {
         });
       });
 
-      test('changes on y mouse position doesn\'t change the band position', () => {
+      test("changes on y mouse position doesn't change the band position", () => {
         const bandPosition = getCursorBandPosition(
           chartRotation,
           chartDimensions,
@@ -511,7 +511,7 @@ describe('Crosshair utils linear scale', () => {
         });
       });
 
-      test('changes on y mouse position doesn\'t change the band position', () => {
+      test("changes on y mouse position doesn't change the band position", () => {
         const bandPosition = getCursorBandPosition(
           chartRotation,
           chartDimensions,
@@ -605,7 +605,7 @@ describe('Crosshair utils linear scale', () => {
         });
       });
 
-      test('changes on y mouse position doesn\'t change the band position', () => {
+      test("changes on y mouse position doesn't change the band position", () => {
         const bandPosition = getCursorBandPosition(
           chartRotation,
           chartDimensions,
@@ -718,7 +718,7 @@ describe('Crosshair utils linear scale', () => {
         });
       });
 
-      test('changes on x mouse position doesn\'t change the band position', () => {
+      test("changes on x mouse position doesn't change the band position", () => {
         const bandPosition = getCursorBandPosition(
           chartRotation,
           chartDimensions,
@@ -812,7 +812,7 @@ describe('Crosshair utils linear scale', () => {
         });
       });
 
-      test('changes on x mouse position doesn\'t change the band position', () => {
+      test("changes on x mouse position doesn't change the band position", () => {
         const bandPosition = getCursorBandPosition(
           chartRotation,
           chartDimensions,
@@ -925,7 +925,7 @@ describe('Crosshair utils linear scale', () => {
         });
       });
 
-      test('changes on x mouse position doesn\'t change the band position', () => {
+      test("changes on x mouse position doesn't change the band position", () => {
         const bandPosition = getCursorBandPosition(
           chartRotation,
           chartDimensions,
@@ -1019,7 +1019,7 @@ describe('Crosshair utils linear scale', () => {
         });
       });
 
-      test('changes on x mouse position doesn\'t change the band position', () => {
+      test("changes on x mouse position doesn't change the band position", () => {
         const bandPosition = getCursorBandPosition(
           chartRotation,
           chartDimensions,
@@ -1135,7 +1135,7 @@ describe('Crosshair utils linear scale', () => {
         });
       });
 
-      test('changes on y mouse position doesn\'t change the band position', () => {
+      test("changes on y mouse position doesn't change the band position", () => {
         const bandPosition = getCursorBandPosition(
           chartRotation,
           chartDimensions,
@@ -1245,7 +1245,7 @@ describe('Crosshair utils linear scale', () => {
         });
       });
 
-      test('changes on y mouse position doesn\'t change the band position', () => {
+      test("changes on y mouse position doesn't change the band position", () => {
         const bandPosition = getCursorBandPosition(
           chartRotation,
           chartDimensions,
@@ -1339,7 +1339,7 @@ describe('Crosshair utils linear scale', () => {
         });
       });
 
-      test('changes on x mouse position doesn\'t change the band position', () => {
+      test("changes on x mouse position doesn't change the band position", () => {
         const bandPosition = getCursorBandPosition(
           chartRotation,
           chartDimensions,
@@ -1433,7 +1433,7 @@ describe('Crosshair utils linear scale', () => {
         });
       });
 
-      test('changes on x mouse position doesn\'t change the band position', () => {
+      test("changes on x mouse position doesn't change the band position", () => {
         const bandPosition = getCursorBandPosition(
           chartRotation,
           chartDimensions,

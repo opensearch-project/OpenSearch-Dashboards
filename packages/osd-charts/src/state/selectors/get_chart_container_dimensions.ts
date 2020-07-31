@@ -39,7 +39,7 @@ export const getChartContainerDimensionsSelector = createCachedSelector(
       return {
         left: 0,
         top: 0,
-        width: parentDimensions.width - legendSize.width - (legendSize.margin * 2),
+        width: parentDimensions.width - legendSize.width - legendSize.margin * 2,
         height: parentDimensions.height,
       };
     }
@@ -47,7 +47,7 @@ export const getChartContainerDimensionsSelector = createCachedSelector(
       left: 0,
       top: 0,
       width: parentDimensions.width,
-      height: parentDimensions.height - legendSize.height - (legendSize.margin * 2),
+      height: parentDimensions.height - legendSize.height - legendSize.margin * 2,
     };
   },
 )(getChartIdSelector);

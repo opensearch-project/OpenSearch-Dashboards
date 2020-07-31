@@ -41,7 +41,7 @@ const TAPER_OFF_LIMIT = 50; // taper off within a radius of TAPER_OFF_LIMIT to a
 function renderTextRow(
   ctx: CanvasRenderingContext2D,
   { fontSize, fillTextColor, rotation, verticalAlignment, leftAlign }: RowSet,
-  linkLabelTextColor: string
+  linkLabelTextColor: string,
 ) {
   return (currentRow: TextRow) => {
     const crx = leftAlign

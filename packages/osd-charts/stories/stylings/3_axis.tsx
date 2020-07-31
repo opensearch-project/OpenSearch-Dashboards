@@ -43,7 +43,7 @@ export const Example = () => {
         fill: color('titleFill', '#333', 'Axis Title'),
         fontSize: range('titleFontSize', 0, 40, 12, 'Axis Title'),
         fontStyle: 'bold',
-        fontFamily: '\'Open Sans\', Helvetica, Arial, sans-serif',
+        fontFamily: "'Open Sans', Helvetica, Arial, sans-serif",
         padding: range('titlePadding', 0, 40, 5, 'Axis Title'),
       },
       axisLine: {
@@ -53,7 +53,7 @@ export const Example = () => {
       tickLabel: {
         fill: color('tickFill', '#333', 'Tick Label'),
         fontSize: range('tickFontSize', 0, 40, 10, 'Tick Label'),
-        fontFamily: '\'Open Sans\', Helvetica, Arial, sans-serif',
+        fontFamily: "'Open Sans', Helvetica, Arial, sans-serif",
         fontStyle: 'normal',
         padding: number('tickLabelPadding', 1, {}, 'Tick Label'),
       },

@@ -236,7 +236,7 @@ describe.skip('Chart Store', () => {
       expect(result).toBe(false);
     });
 
-    it('should return false if can\'t find spec', () => {
+    it("should return false if can't find spec", () => {
       tickMap.set(AXIS_2_ID, axisTicksDimensions);
       const result = isDuplicateAxis(axis1, axisTicksDimensions, tickMap, specMap);
 

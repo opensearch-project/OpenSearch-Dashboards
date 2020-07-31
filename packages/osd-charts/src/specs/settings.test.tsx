@@ -33,15 +33,16 @@ import { TooltipType } from './constants';
 import { Settings, SettingsSpec } from './settings';
 import { SpecsParser } from './specs_parser';
 
-const getProxy = (chartStore: Store<GlobalChartState>) => function SettingsProxy({ settings }: { settings?: Partial<SettingsSpec> }) {
-  return (
-    <Provider store={chartStore}>
-      <SpecsParser>
-        <Settings {...settings} />
-      </SpecsParser>
-    </Provider>
-  );
-};
+const getProxy = (chartStore: Store<GlobalChartState>) =>
+  function SettingsProxy({ settings }: { settings?: Partial<SettingsSpec> }) {
+    return (
+      <Provider store={chartStore}>
+        <SpecsParser>
+          <Settings {...settings} />
+        </SpecsParser>
+      </Provider>
+    );
+  };
 describe('Settings spec component', () => {
   let chartStore: Store<GlobalChartState>;
   let SettingsProxy: ({ settings }: { settings?: Partial<SettingsSpec> }) => JSX.Element;

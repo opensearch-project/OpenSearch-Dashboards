@@ -66,7 +66,9 @@ export class DataGenerator {
   }
 
   generateGroupedSeries(totalPoints = 50, totalGroups = 2, groupPrefix = '') {
-    const groups = new Array(totalGroups).fill(0).map((group, i) => this.generateSimpleSeries(totalPoints, i, groupPrefix));
+    const groups = new Array(totalGroups)
+      .fill(0)
+      .map((group, i) => this.generateSimpleSeries(totalPoints, i, groupPrefix));
     return groups.reduce((acc, curr) => [...acc, ...curr]);
   }
 
@@ -82,7 +84,9 @@ export class DataGenerator {
   }
 
   generateRandomGroupedSeries(totalPoints = 50, totalGroups = 2, groupPrefix = '') {
-    const groups = new Array(totalGroups).fill(0).map((group, i) => this.generateRandomSeries(totalPoints, i, groupPrefix));
+    const groups = new Array(totalGroups)
+      .fill(0)
+      .map((group, i) => this.generateRandomSeries(totalPoints, i, groupPrefix));
     return groups.reduce((acc, curr) => [...acc, ...curr]);
   }
 }

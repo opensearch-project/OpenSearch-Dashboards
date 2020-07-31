@@ -20,22 +20,12 @@
 import { select, number } from '@storybook/addon-knobs';
 import React from 'react';
 
-import {
-  AreaSeries,
-  Axis,
-  Chart,
-  CurveType,
-  Position,
-  ScaleType,
-  Settings,
-  Fit,
-  StackMode,
-} from '../../src';
+import { AreaSeries, Axis, Chart, CurveType, Position, ScaleType, Settings, Fit, StackMode } from '../../src';
 import { getRandomNumberGenerator } from '../../src/mocks/utils';
 import { SB_KNOBS_PANEL } from '../utils/storybook';
 
 export const Example = () => {
-  const dataTypes: Record<string, Array<{x: number | string, y: number | null}>> = {
+  const dataTypes: Record<string, Array<{ x: number | string; y: number | null }>> = {
     isolated: [
       { x: 0, y: 3 },
       { x: 1, y: 5 },

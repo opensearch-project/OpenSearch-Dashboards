@@ -57,7 +57,7 @@ export const Example = () => {
     barSeriesStyle: {
       displayValue: {
         fontSize: number('value font size', 10),
-        fontFamily: '\'Open Sans\', Helvetica, Arial, sans-serif',
+        fontFamily: "'Open Sans', Helvetica, Arial, sans-serif",
         fontStyle: 'normal',
         padding: 0,
         fill: color('value color', '#000'),

@@ -57,7 +57,8 @@ export function renderGrids(ctx: CanvasRenderingContext2D, props: GridProps) {
           return;
         }
         const strokeColor = stringToRGB(gridLine.stroke);
-        strokeColor.opacity = gridLine.opacity !== undefined ? strokeColor.opacity * gridLine.opacity : strokeColor.opacity;
+        strokeColor.opacity =
+          gridLine.opacity !== undefined ? strokeColor.opacity * gridLine.opacity : strokeColor.opacity;
         const stroke: Stroke = {
           color: strokeColor,
           width: gridLine.strokeWidth,

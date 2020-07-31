@@ -40,7 +40,7 @@ describe('Interactions', () => {
             (placement) => {
               const boundaryStr = boundary === 'default' ? '' : boundary;
               const url = `http://localhost:9001/?path=/story/bar-chart--test-tooltip-and-rotation&knob-Boundary Element=${boundaryStr}&knob-chartRotation=${rotation}&knob-Tooltip placement=${placement}`;
-              it('shows tooltip in top-left corner', async() => {
+              it('shows tooltip in top-left corner', async () => {
                 await common.expectChartWithMouseAtUrlToMatchScreenshot(
                   url,
                   { left, top },
@@ -48,7 +48,7 @@ describe('Interactions', () => {
                 );
               });
 
-              it('shows tooltip in top-right corner', async() => {
+              it('shows tooltip in top-right corner', async () => {
                 await common.expectChartWithMouseAtUrlToMatchScreenshot(
                   url,
                   { right, top },
@@ -56,7 +56,7 @@ describe('Interactions', () => {
                 );
               });
 
-              it('shows tooltip in bottom-left corner', async() => {
+              it('shows tooltip in bottom-left corner', async () => {
                 await common.expectChartWithMouseAtUrlToMatchScreenshot(
                   url,
                   { left, bottom },
@@ -64,7 +64,7 @@ describe('Interactions', () => {
                 );
               });
 
-              it('shows tooltip in bottom-right corner', async() => {
+              it('shows tooltip in bottom-right corner', async () => {
                 await common.expectChartWithMouseAtUrlToMatchScreenshot(
                   url,
                   { right, bottom },
@@ -79,28 +79,28 @@ describe('Interactions', () => {
 
     describe('Hover over specific bars', () => {
       describe('rotation 0', () => {
-        it('shows tooltip on first bar group - top', async() => {
+        it('shows tooltip on first bar group - top', async () => {
           await common.expectChartWithMouseAtUrlToMatchScreenshot(
             'http://localhost:9001/?path=/story/bar-chart--test-tooltip-and-rotation',
             { left: 50, top: 50 },
             { screenshotSelector: 'body' },
           );
         });
-        it('shows tooltip on last bar group - top', async() => {
+        it('shows tooltip on last bar group - top', async () => {
           await common.expectChartWithMouseAtUrlToMatchScreenshot(
             'http://localhost:9001/?path=/story/bar-chart--test-tooltip-and-rotation',
             { right: 50, top: 50 },
             { screenshotSelector: 'body' },
           );
         });
-        it('shows tooltip on first bar group - bottom', async() => {
+        it('shows tooltip on first bar group - bottom', async () => {
           await common.expectChartWithMouseAtUrlToMatchScreenshot(
             'http://localhost:9001/?path=/story/bar-chart--test-tooltip-and-rotation',
             { left: 50, bottom: 50 },
             { screenshotSelector: 'body' },
           );
         });
-        it('shows tooltip on last bar group - bottom', async() => {
+        it('shows tooltip on last bar group - bottom', async () => {
           await common.expectChartWithMouseAtUrlToMatchScreenshot(
             'http://localhost:9001/?path=/story/bar-chart--test-tooltip-and-rotation',
             { left: 50, bottom: 50 },
@@ -110,28 +110,28 @@ describe('Interactions', () => {
       });
 
       describe('rotation 90', () => {
-        it('shows tooltip on first bar group - top', async() => {
+        it('shows tooltip on first bar group - top', async () => {
           await common.expectChartWithMouseAtUrlToMatchScreenshot(
             'http://localhost:9001/?path=/story/bar-chart--test-tooltip-and-rotation&knob-chartRotation=90',
             { left: 50, top: 50 },
             { screenshotSelector: 'body' },
           );
         });
-        it('shows tooltip on last bar group - top', async() => {
+        it('shows tooltip on last bar group - top', async () => {
           await common.expectChartWithMouseAtUrlToMatchScreenshot(
             'http://localhost:9001/?path=/story/bar-chart--test-tooltip-and-rotation&knob-chartRotation=90',
             { left: 50, top: 50 },
             { screenshotSelector: 'body' },
           );
         });
-        it('shows tooltip on first bar group - bottom', async() => {
+        it('shows tooltip on first bar group - bottom', async () => {
           await common.expectChartWithMouseAtUrlToMatchScreenshot(
             'http://localhost:9001/?path=/story/bar-chart--test-tooltip-and-rotation&knob-chartRotation=90',
             { left: 50, bottom: 50 },
             { screenshotSelector: 'body' },
           );
         });
-        it('shows tooltip on last bar group - bottom', async() => {
+        it('shows tooltip on last bar group - bottom', async () => {
           await common.expectChartWithMouseAtUrlToMatchScreenshot(
             'http://localhost:9001/?path=/story/bar-chart--test-tooltip-and-rotation&knob-chartRotation=90',
             { right: 50, bottom: 50 },
@@ -141,14 +141,14 @@ describe('Interactions', () => {
       });
     });
 
-    it('should show tooltip on sunburst', async() => {
+    it('should show tooltip on sunburst', async () => {
       await common.expectChartWithMouseAtUrlToMatchScreenshot(
         'http://localhost:9001/?path=/story/interactions--sunburst-slice-clicks',
         { left: 350, top: 100 },
       );
     });
 
-    it('should render custom tooltip', async() => {
+    it('should render custom tooltip', async () => {
       await common.expectChartWithMouseAtUrlToMatchScreenshot(
         'http://localhost:9001/?path=/story/bar-chart--test-tooltip-and-rotation&knob-Custom Tooltip=true&knob-Show Legend=true',
         { left: 330, top: 40 },
@@ -156,14 +156,14 @@ describe('Interactions', () => {
       );
     });
 
-    it('should render corrent tooltip for split and y accessors', async() => {
+    it('should render corrent tooltip for split and y accessors', async () => {
       await common.expectChartWithMouseAtUrlToMatchScreenshot(
         'http://localhost:9001/iframe.html?id=bar-chart--bar-chart-2-y-2-g',
         { left: 330, top: 40 },
       );
     });
 
-    it('should render corrent tooltip in dark theme', async() => {
+    it('should render corrent tooltip in dark theme', async () => {
       await common.expectChartWithMouseAtUrlToMatchScreenshot(
         'http://localhost:9001/?path=/story/stylings--dark-theme',
         { left: 120, bottom: 80 },
@@ -172,21 +172,21 @@ describe('Interactions', () => {
   });
 
   describe('brushing', () => {
-    it('show rectangular brush selection', async() => {
+    it('show rectangular brush selection', async () => {
       await common.expectChartWithDragAtUrlToMatchScreenshot(
         'http://localhost:9001/?path=/story/interactions--brush-tool',
         { left: 100, top: 100 },
         { left: 250, top: 250 },
       );
     });
-    it('show y brush selection', async() => {
+    it('show y brush selection', async () => {
       await common.expectChartWithDragAtUrlToMatchScreenshot(
         'http://localhost:9001/?path=/story/interactions--brush-tool&knob-brush axis=y&knob-chartRotation=0',
         { left: 100, top: 100 },
         { left: 250, top: 250 },
       );
     });
-    it('show x brush selection', async() => {
+    it('show x brush selection', async () => {
       await common.expectChartWithDragAtUrlToMatchScreenshot(
         'http://localhost:9001/?path=/story/interactions--brush-tool&knob-brush axis=x&knob-chartRotation=0',
         { left: 100, top: 100 },
@@ -194,21 +194,21 @@ describe('Interactions', () => {
       );
     });
 
-    it('show rectangular brush selection -90 degree', async() => {
+    it('show rectangular brush selection -90 degree', async () => {
       await common.expectChartWithDragAtUrlToMatchScreenshot(
         'http://localhost:9001/?path=/story/interactions--brush-tool&knob-brush axis=both&knob-chartRotation=-90',
         { left: 100, top: 100 },
         { left: 250, top: 250 },
       );
     });
-    it('show y brush selection -90 degree', async() => {
+    it('show y brush selection -90 degree', async () => {
       await common.expectChartWithDragAtUrlToMatchScreenshot(
         'http://localhost:9001/?path=/story/interactions--brush-tool&knob-brush axis=y&knob-chartRotation=-90',
         { left: 100, top: 100 },
         { left: 250, top: 250 },
       );
     });
-    it('show x brush selection -90 degree', async() => {
+    it('show x brush selection -90 degree', async () => {
       await common.expectChartWithDragAtUrlToMatchScreenshot(
         'http://localhost:9001/?path=/story/interactions--brush-tool&knob-brush axis=x&knob-chartRotation=-90',
         { left: 100, top: 100 },
@@ -218,13 +218,13 @@ describe('Interactions', () => {
   });
 
   describe('Tooltip sync', () => {
-    it('show synced tooltips', async() => {
+    it('show synced tooltips', async () => {
       await common.expectChartWithMouseAtUrlToMatchScreenshot(
         'http://localhost:9001/?path=/story/interactions--cursor-update-action',
         { left: 180, top: 80 },
         {
           screenshotSelector: '#story-root',
-        }
+        },
       );
     });
   });

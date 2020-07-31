@@ -20,7 +20,18 @@
 import { boolean, number, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, AxisStyle, RecursivePartial, DEFAULT_CHART_MARGINS, DEFAULT_CHART_PADDING } from '../../src';
+import {
+  AreaSeries,
+  Axis,
+  Chart,
+  Position,
+  ScaleType,
+  Settings,
+  AxisStyle,
+  RecursivePartial,
+  DEFAULT_CHART_MARGINS,
+  DEFAULT_CHART_PADDING,
+} from '../../src';
 import { getVerticalTextAlignmentKnob, getHorizontalTextAlignmentKnob, getPositiveNumberKnob } from '../utils/knobs';
 
 const getAxisKnobs = (group?: string, gridLines = false): RecursivePartial<AxisStyle> => ({
@@ -41,33 +52,53 @@ const getAxisKnobs = (group?: string, gridLines = false): RecursivePartial<AxisS
   },
   tickLabel: {
     visible: !boolean('Hide tick labels', false, group),
-    rotation: number('Tick label rotation', 0, {
-      range: true,
-      min: -90,
-      max: 90,
-      step: 1,
-    }, group),
+    rotation: number(
+      'Tick label rotation',
+      0,
+      {
+        range: true,
+        min: -90,
+        max: 90,
+        step: 1,
+      },
+      group,
+    ),
     padding: {
       outer: getPositiveNumberKnob('Tick label padding - outer', 0, group),
       inner: getPositiveNumberKnob('Tick label padding - inner', 0, group),
     },
     offset: {
-      y: number('Tick label y offset', 0, {
-        range: true,
-        min: -10,
-        max: 10,
-        step: 1,
-      }, group),
-      x: number('Tick label x offset', 0, {
-        range: true,
-        min: -10,
-        max: 10,
-        step: 1,
-      }, group),
-      reference: select('Tick label offset reference', {
-        Global: 'global',
-        Local: 'local',
-      }, 'local', group),
+      y: number(
+        'Tick label y offset',
+        0,
+        {
+          range: true,
+          min: -10,
+          max: 10,
+          step: 1,
+        },
+        group,
+      ),
+      x: number(
+        'Tick label x offset',
+        0,
+        {
+          range: true,
+          min: -10,
+          max: 10,
+          step: 1,
+        },
+        group,
+      ),
+      reference: select(
+        'Tick label offset reference',
+        {
+          Global: 'global',
+          Local: 'local',
+        },
+        'local',
+        group,
+      ),
     },
     alignment: {
       vertical: getVerticalTextAlignmentKnob(group),
@@ -120,9 +151,13 @@ export const Example = () => {
         position={Position.Bottom}
         title="Bottom axis"
         showOverlappingTicks
-        gridLine={onlyGlobal ? {
-          visible: boolean('show gridLines', false, Position.Bottom),
-        } : undefined}
+        gridLine={
+          onlyGlobal
+            ? {
+                visible: boolean('show gridLines', false, Position.Bottom),
+              }
+            : undefined
+        }
         style={onlyGlobal ? bottomAxisStyles : undefined}
       />
       <Axis
@@ -131,9 +166,13 @@ export const Example = () => {
         title="Left axis"
         position={Position.Left}
         style={onlyGlobal ? leftAxisStyles : undefined}
-        gridLine={onlyGlobal ? {
-          visible: boolean('show gridLines', false, Position.Left),
-        } : undefined}
+        gridLine={
+          onlyGlobal
+            ? {
+                visible: boolean('show gridLines', false, Position.Left),
+              }
+            : undefined
+        }
         tickFormat={(d) => Number(d).toFixed(2)}
       />
       <Axis
@@ -142,9 +181,13 @@ export const Example = () => {
         title="Top axis"
         position={Position.Top}
         style={onlyGlobal ? topAxisStyles : undefined}
-        gridLine={onlyGlobal ? {
-          visible: boolean('show gridLines', false, Position.Top),
-        } : undefined}
+        gridLine={
+          onlyGlobal
+            ? {
+                visible: boolean('show gridLines', false, Position.Top),
+              }
+            : undefined
+        }
         tickFormat={(d) => Number(d).toFixed(2)}
       />
       <Axis
@@ -153,9 +196,13 @@ export const Example = () => {
         title="Right axis"
         position={Position.Right}
         style={onlyGlobal ? rightAxisStyles : undefined}
-        gridLine={onlyGlobal ? {
-          visible: boolean('show gridLines', false, Position.Right),
-        } : undefined}
+        gridLine={
+          onlyGlobal
+            ? {
+                visible: boolean('show gridLines', false, Position.Right),
+              }
+            : undefined
+        }
         tickFormat={(d) => Number(d).toFixed(2)}
         domain={{ min: 0, max: 10 }}
       />

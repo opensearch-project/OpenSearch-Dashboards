@@ -35,7 +35,13 @@ export const Example = () => {
   const fourDays = moment.duration(4, 'd');
   const fiveDays = moment.duration(5, 'd');
   const formatters: Record<string, TickFormatter> = {
-    daily: niceTimeFormatter([now, moment.duration(31, 'd').add(now).asMilliseconds()]),
+    daily: niceTimeFormatter([
+      now,
+      moment
+        .duration(31, 'd')
+        .add(now)
+        .asMilliseconds(),
+    ]),
     hourly: (d) => moment(d).format('HH:mm'),
   };
   const formatterSelect = select<string>('formatter', ['daily', 'hourly'], 'daily');

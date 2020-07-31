@@ -53,7 +53,7 @@ class Resizer extends React.Component<ResizerProps> {
     this.containerRef = React.createRef();
     this.ro = new ResizeObserver(this.handleResize);
     this.animationFrameID = null;
-    this.onResizeDebounced = () => { };
+    this.onResizeDebounced = () => {};
   }
 
   componentDidMount() {
@@ -107,8 +107,8 @@ const mapDispatchToProps = (dispatch: Dispatch): ResizerDispatchProps =>
 
 const mapStateToProps = (state: GlobalChartState): ResizerStateProps => {
   const settings = getSettingsSpecSelector(state);
-  const resizeDebounce = settings.resizeDebounce === undefined || settings.resizeDebounce === null
-    ? 200 : settings.resizeDebounce;
+  const resizeDebounce =
+    settings.resizeDebounce === undefined || settings.resizeDebounce === null ? 200 : settings.resizeDebounce;
   return {
     resizeDebounce:
       !isDefined(resizeDebounce) || Number.isNaN(resizeDebounce) ? DEFAULT_RESIZE_DEBOUNCE : resizeDebounce,

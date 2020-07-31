@@ -47,7 +47,10 @@ export type WithIndex<T> = T & { fittingIndex: number };
  * Returns `[x, y1]` values for a given datum with `fittingIndex`
  *
  */
-const getXYValues = ({ x, y1, fittingIndex }: WithIndex<FullDataSeriesDatum>): [number, number] => [typeof x === 'string' ? fittingIndex : x, y1];
+const getXYValues = ({ x, y1, fittingIndex }: WithIndex<FullDataSeriesDatum>): [number, number] => [
+  typeof x === 'string' ? fittingIndex : x,
+  y1,
+];
 
 /** @internal */
 export const getValue = (
@@ -217,7 +220,8 @@ export const fitFunction = (
     }));
   }
 
-  const sortedData = sorted || xScaleType === ScaleType.Ordinal ? data : data.slice().sort(datumXSortPredicate(xScaleType));
+  const sortedData =
+    sorted || xScaleType === ScaleType.Ordinal ? data : data.slice().sort(datumXSortPredicate(xScaleType));
   const newData: DataSeriesDatum[] = [];
   let previousNonNullDatum: WithIndex<FullDataSeriesDatum> | null = null;
   let nextNonNullDatum: WithIndex<FullDataSeriesDatum> | null = null;
@@ -227,13 +231,13 @@ export const fitFunction = (
     const currentValue = sortedData[i];
 
     if (
-      currentValue.y1 === null
-      && nextNonNullDatum === null
-      && (type === Fit.Lookahead
-        || type === Fit.Nearest
-        || type === Fit.Average
-        || type === Fit.Linear
-        || endValue === 'nearest')
+      currentValue.y1 === null &&
+      nextNonNullDatum === null &&
+      (type === Fit.Lookahead ||
+        type === Fit.Nearest ||
+        type === Fit.Average ||
+        type === Fit.Linear ||
+        endValue === 'nearest')
     ) {
       // Forward lookahead to get next non-null value
       for (j = i + 1; j < sortedData.length; j++) {
@@ -249,7 +253,10 @@ export const fitFunction = (
       }
     }
 
-    const newValue = currentValue.y1 === null ? getValue(currentValue, i, previousNonNullDatum, nextNonNullDatum, type, endValue) : currentValue;
+    const newValue =
+      currentValue.y1 === null
+        ? getValue(currentValue, i, previousNonNullDatum, nextNonNullDatum, type, endValue)
+        : currentValue;
 
     newData[i] = newValue;
 

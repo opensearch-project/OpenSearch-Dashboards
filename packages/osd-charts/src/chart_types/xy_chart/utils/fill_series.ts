@@ -19,7 +19,6 @@
 import { SpecId } from '../../../utils/ids';
 import { DataSeries } from './series';
 
-
 /**
  *
  * @param series

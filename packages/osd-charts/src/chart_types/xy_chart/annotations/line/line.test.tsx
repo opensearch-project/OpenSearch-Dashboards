@@ -35,7 +35,10 @@ describe('annotation marker', () => {
   const spec = MockSeriesSpec.line({
     xScaleType: ScaleType.Linear,
     yScaleType: ScaleType.Linear,
-    data: [{ x: 0, y: 0 }, { x: 10, y: 10 }],
+    data: [
+      { x: 0, y: 0 },
+      { x: 10, y: 10 },
+    ],
   });
   const lineYDomainAnnotation = MockAnnotationSpec.line({
     id,
@@ -59,12 +62,15 @@ describe('annotation marker', () => {
   });
 
   test('should compute line annotation dimensions with marker if defined (y domain)', () => {
-    MockStore.addSpecs([
-      spec,
-      MockGlobalSpec.settingsNoMargins(),
-      MockGlobalSpec.axis({ position: Position.Left, hide: true }),
-      lineYDomainAnnotation,
-    ], store);
+    MockStore.addSpecs(
+      [
+        spec,
+        MockGlobalSpec.settingsNoMargins(),
+        MockGlobalSpec.axis({ position: Position.Left, hide: true }),
+        lineYDomainAnnotation,
+      ],
+      store,
+    );
 
     const dimensions = computeAnnotationDimensionsSelector(store.getState());
 
@@ -94,12 +100,15 @@ describe('annotation marker', () => {
   });
 
   test('should compute line annotation dimensions with marker if defined (y domain: 180 deg rotation)', () => {
-    MockStore.addSpecs([
-      spec,
-      MockGlobalSpec.settingsNoMargins({ rotation: 180 }),
-      MockGlobalSpec.axis({ position: Position.Left, hide: true }),
-      lineYDomainAnnotation,
-    ], store);
+    MockStore.addSpecs(
+      [
+        spec,
+        MockGlobalSpec.settingsNoMargins({ rotation: 180 }),
+        MockGlobalSpec.axis({ position: Position.Left, hide: true }),
+        lineYDomainAnnotation,
+      ],
+      store,
+    );
 
     const dimensions = computeAnnotationDimensionsSelector(store.getState());
 
@@ -132,12 +141,15 @@ describe('annotation marker', () => {
   });
 
   test('should compute line annotation dimensions with marker if defined (x domain)', () => {
-    MockStore.addSpecs([
-      spec,
-      MockGlobalSpec.settingsNoMargins(),
-      MockGlobalSpec.axis({ position: Position.Bottom, hide: true }),
-      lineXDomainAnnotation,
-    ], store);
+    MockStore.addSpecs(
+      [
+        spec,
+        MockGlobalSpec.settingsNoMargins(),
+        MockGlobalSpec.axis({ position: Position.Bottom, hide: true }),
+        lineXDomainAnnotation,
+      ],
+      store,
+    );
 
     const dimensions = computeAnnotationDimensionsSelector(store.getState());
 

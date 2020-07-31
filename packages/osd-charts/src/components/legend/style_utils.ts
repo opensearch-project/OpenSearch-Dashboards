@@ -23,17 +23,19 @@ import { Margins } from '../../utils/dimensions';
 import { LegendStyle as ThemeLegendStyle } from '../../utils/themes/theme';
 
 /** @internal */
-export type LegendStyle = {
-  width?: string;
-  maxWidth?: string;
-  marginLeft?: number;
-  marginRight?: number;
-} | {
-  height?: string;
-  maxHeight?: string;
-  marginTop?: number;
-  marginBottom?: number;
-};
+export type LegendStyle =
+  | {
+      width?: string;
+      maxWidth?: string;
+      marginLeft?: number;
+      marginRight?: number;
+    }
+  | {
+      height?: string;
+      maxHeight?: string;
+      marginTop?: number;
+      marginBottom?: number;
+    };
 
 /** @internal */
 export interface LegendListStyle {

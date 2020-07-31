@@ -44,8 +44,7 @@ export const Example = () => (
           shape: {
             fillColor: (d) =>
               // pick color from color palette based on mean angle - rather distinct colors in the inner ring
-              indexInterpolatedFillColor(interpolatorCET2s)(d, (d.x0 + d.x1) / 2 / (2 * Math.PI), [])
-            ,
+              indexInterpolatedFillColor(interpolatorCET2s)(d, (d.x0 + d.x1) / 2 / (2 * Math.PI), []),
           },
         },
         {
@@ -54,8 +53,7 @@ export const Example = () => (
           shape: {
             fillColor: (d) =>
               // pick color from color palette based on mean angle - related yet distinct colors in the outer ring
-              indexInterpolatedFillColor(interpolatorCET2s)(d, (d.x0 + d.x1) / 2 / (2 * Math.PI), [])
-            ,
+              indexInterpolatedFillColor(interpolatorCET2s)(d, (d.x0 + d.x1) / 2 / (2 * Math.PI), []),
           },
         },
       ]}

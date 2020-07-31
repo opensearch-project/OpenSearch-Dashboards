@@ -103,7 +103,7 @@ export interface InternalChartState {
    * Describe if the tooltip is visible and comes from an external source
    * @param globalState
    */
-  isTooltipVisible(globalState: GlobalChartState): { visible: boolean, isExternal: boolean };
+  isTooltipVisible(globalState: GlobalChartState): { visible: boolean; isExternal: boolean };
   /**
    * Get the tooltip information to display
    * @param globalState the GlobalChartState

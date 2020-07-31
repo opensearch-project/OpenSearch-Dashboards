@@ -39,8 +39,8 @@ export function addOpacity(hexColorString: string, opacity: Ratio) {
   // todo roll some proper utility that can handle "rgb(...)", "rgba(...)", "red", {r, g, b} etc.
   return opacity === 1
     ? hexColorString
-    : hexColorString.slice(0, 7)
-        + (hexColorString.slice(7).length === 0 || parseInt(hexColorString.slice(7, 2), 16) === 255
+    : hexColorString.slice(0, 7) +
+        (hexColorString.slice(7).length === 0 || parseInt(hexColorString.slice(7, 2), 16) === 255
           ? `00${Math.round(opacity * 255).toString(16)}`.slice(-2) // color was of full opacity
           : `00${Math.round((parseInt(hexColorString.slice(7, 2), 16) / 255) * opacity * 255).toString(16)}`.slice(-2));
 }
@@ -153,21 +153,23 @@ export function getTextColorIfTextInvertible(
   const { r: tr, g: tg, b: tb, opacity: to } = stringToRGB(textColor);
   if (!textContrast) {
     return inverseForContrast
-      ? (to === undefined
-          ? `rgb(${255 - tr}, ${255 - tg}, ${255 - tb})`
-          : `rgba(${255 - tr}, ${255 - tg}, ${255 - tb}, ${to})`)
+      ? to === undefined
+        ? `rgb(${255 - tr}, ${255 - tg}, ${255 - tb})`
+        : `rgba(${255 - tr}, ${255 - tg}, ${255 - tb}, ${to})`
       : textColor;
-  } if (textContrast === true && typeof textContrast !== 'number') {
+  }
+  if (textContrast === true && typeof textContrast !== 'number') {
     return inverseForContrast
-      ? (to === undefined
-          ? makeHighContrastColor(`rgb(${255 - tr}, ${255 - tg}, ${255 - tb})`, backgroundColor)
-          : makeHighContrastColor(`rgba(${255 - tr}, ${255 - tg}, ${255 - tb}, ${to})`, backgroundColor))
+      ? to === undefined
+        ? makeHighContrastColor(`rgb(${255 - tr}, ${255 - tg}, ${255 - tb})`, backgroundColor)
+        : makeHighContrastColor(`rgba(${255 - tr}, ${255 - tg}, ${255 - tb}, ${to})`, backgroundColor)
       : makeHighContrastColor(textColor, backgroundColor);
-  } if (typeof textContrast === 'number') {
+  }
+  if (typeof textContrast === 'number') {
     return inverseForContrast
-      ? (to === undefined
-          ? makeHighContrastColor(`rgb(${255 - tr}, ${255 - tg}, ${255 - tb})`, backgroundColor, textContrast)
-          : makeHighContrastColor(`rgba(${255 - tr}, ${255 - tg}, ${255 - tb}, ${to})`, backgroundColor, textContrast))
+      ? to === undefined
+        ? makeHighContrastColor(`rgb(${255 - tr}, ${255 - tg}, ${255 - tb})`, backgroundColor, textContrast)
+        : makeHighContrastColor(`rgba(${255 - tr}, ${255 - tg}, ${255 - tb}, ${to})`, backgroundColor, textContrast)
       : makeHighContrastColor(textColor, backgroundColor, textContrast);
   }
 }

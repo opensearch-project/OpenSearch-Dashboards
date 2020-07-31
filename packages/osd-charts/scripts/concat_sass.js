@@ -47,7 +47,5 @@ function recursiveReadSCSS(branchId, branch) {
 function removeImportsFromFile(fileContent) {
   const lines = fileContent.split(/\r\n|\r|\n/g);
 
-  return lines
-    .filter((line) => !line.match(/@import\s/i))
-    .join('\n');
+  return lines.filter((line) => !line.match(/@import\s/i)).join('\n');
 }

@@ -243,23 +243,19 @@ function getAnchorPosition(
   isXDomain: boolean,
   isChartHorizontal: boolean,
   specMarkerPosition?: Position,
-  axisPosition?: Position
+  axisPosition?: Position,
 ): Position {
   const dflPositionFromAxis = getDefaultMarkerPositionFromAxis(isXDomain, isChartHorizontal, axisPosition);
 
   if (specMarkerPosition !== undefined) {
-  // validate specMarkerPosition against domain
+    // validate specMarkerPosition against domain
     const validatedPosFromMarkerPos = validateMarkerPosition(isXDomain, isChartHorizontal, specMarkerPosition);
     return validatedPosFromMarkerPos ?? dflPositionFromAxis;
   }
   return dflPositionFromAxis;
 }
 
-function validateMarkerPosition(
-  isXDomain: boolean,
-  isHorizontal: boolean,
-  position: Position,
-): Position | undefined {
+function validateMarkerPosition(isXDomain: boolean, isHorizontal: boolean, position: Position): Position | undefined {
   if ((isXDomain && isHorizontal) || (!isXDomain && !isHorizontal)) {
     return position === Position.Top || position === Position.Bottom ? position : undefined;
   }
@@ -269,7 +265,7 @@ function validateMarkerPosition(
 function getDefaultMarkerPositionFromAxis(
   isXDomain: boolean,
   isHorizontal: boolean,
-  axisPosition?: Position
+  axisPosition?: Position,
 ): Position {
   if (axisPosition) {
     return axisPosition;
@@ -352,8 +348,9 @@ function getMarkerPositionForYAnnotation(
   position: Position,
   value: number,
 ): {
-    top: number, left: number,
-  } {
+  top: number;
+  left: number;
+} {
   switch (position) {
     case Position.Right:
       return {
@@ -364,13 +361,11 @@ function getMarkerPositionForYAnnotation(
       return {
         top: rotation === 180 ? height - value - mHeight / 2 : value - mHeight / 2,
         left: -mWidth,
-
       };
     case Position.Top:
       return {
         top: 0 - mHeight,
         left: rotation === 90 ? width - value - mWidth / 2 : value - mWidth / 2,
-
       };
     case Position.Bottom:
     default:

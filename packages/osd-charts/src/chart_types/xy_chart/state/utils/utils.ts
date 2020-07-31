@@ -202,12 +202,10 @@ export function computeSeriesDomains(
   deselectedDataSeries: SeriesIdentifier[] = [],
   customXDomain?: DomainRange | Domain,
 ): SeriesDomainsAndData {
-  const {
-    dataSeriesBySpecId,
-    xValues,
-    seriesCollection,
-    fallbackScale,
-  } = getDataSeriesBySpecId(seriesSpecs, deselectedDataSeries);
+  const { dataSeriesBySpecId, xValues, seriesCollection, fallbackScale } = getDataSeriesBySpecId(
+    seriesSpecs,
+    deselectedDataSeries,
+  );
 
   // compute the x domain merging any custom domain
   const specsArray = [...seriesSpecs.values()];
@@ -215,7 +213,6 @@ export function computeSeriesDomains(
 
   // fill series with missing x values
   const filledDataSeriesBySpecId = fillSeries(dataSeriesBySpecId, xValues);
-
 
   const formattedDataSeries = getFormattedDataseries(
     specsArray,
@@ -529,7 +526,7 @@ function renderGeometries(
         displayValueSettings,
         spec.styleAccessor,
         spec.minBarHeight,
-        stackMode
+        stackMode,
       );
       indexedGeometryMap.merge(renderedBars.indexedGeometryMap);
       bars.push(...renderedBars.barGeometries);
@@ -613,7 +610,7 @@ function renderGeometries(
         isStacked,
         spec.pointStyleAccessor,
         hasFitFnConfigured(spec.fit),
-        stackMode
+        stackMode,
       );
       indexedGeometryMap.merge(renderedAreas.indexedGeometryMap);
       areas.push(renderedAreas.areaGeometry);

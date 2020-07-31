@@ -102,7 +102,9 @@ export class MockFormattedDataSeries {
   };
 
   static default(partial?: Partial<FormattedDataSeries>) {
-    return mergePartial<FormattedDataSeries>(MockFormattedDataSeries.base, partial, { mergeOptionalPartialValues: true });
+    return mergePartial<FormattedDataSeries>(MockFormattedDataSeries.base, partial, {
+      mergeOptionalPartialValues: true,
+    });
   }
 }
 
@@ -119,7 +121,9 @@ export class MockDataSeriesDatum {
   };
 
   static default(partial?: Partial<DataSeriesDatum>): DataSeriesDatum {
-    const merged = mergePartial<DataSeriesDatum>(MockDataSeriesDatum.base, partial, { mergeOptionalPartialValues: true });
+    const merged = mergePartial<DataSeriesDatum>(MockDataSeriesDatum.base, partial, {
+      mergeOptionalPartialValues: true,
+    });
     if (merged.initialY1 === null) {
       merged.initialY1 = merged.y1;
     }

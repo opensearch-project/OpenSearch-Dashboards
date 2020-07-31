@@ -29,7 +29,9 @@ import { AxisSpec, BasicSeriesSpec, AnnotationSpec } from '../../utils/specs';
 const getSpecs = (state: GlobalChartState) => state.specs;
 
 /** @internal */
-export const getAxisSpecsSelector = createCachedSelector([getSpecs], (specs): AxisSpec[] => getSpecsFromStore<AxisSpec>(specs, ChartTypes.XYAxis, SpecTypes.Axis))(getChartIdSelector);
+export const getAxisSpecsSelector = createCachedSelector([getSpecs], (specs): AxisSpec[] =>
+  getSpecsFromStore<AxisSpec>(specs, ChartTypes.XYAxis, SpecTypes.Axis),
+)(getChartIdSelector);
 
 /** @internal */
 export const getSeriesSpecsSelector = createCachedSelector([getSpecs], (specs) => {
@@ -38,4 +40,6 @@ export const getSeriesSpecsSelector = createCachedSelector([getSpecs], (specs) =
 })(getChartIdSelector);
 
 /** @internal */
-export const getAnnotationSpecsSelector = createCachedSelector([getSpecs], (specs) => getSpecsFromStore<AnnotationSpec>(specs, ChartTypes.XYAxis, SpecTypes.Annotation))(getChartIdSelector);
+export const getAnnotationSpecsSelector = createCachedSelector([getSpecs], (specs) =>
+  getSpecsFromStore<AnnotationSpec>(specs, ChartTypes.XYAxis, SpecTypes.Annotation),
+)(getChartIdSelector);

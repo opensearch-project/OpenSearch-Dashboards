@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import { mergePartial, RecursivePartial, Color, ColorVariant, HorizontalAlignment, VerticalAlignment } from '../commons';
+import {
+  mergePartial,
+  RecursivePartial,
+  Color,
+  ColorVariant,
+  HorizontalAlignment,
+  VerticalAlignment,
+} from '../commons';
 import { Margins, SimplePadding } from '../dimensions';
 import { LIGHT_THEME } from './light_theme';
 
@@ -102,16 +109,17 @@ export interface StrokeStyle<C = Color> {
 }
 
 /** @public */
-export type TickStyle = StrokeStyle & Visible & {
-  /**
-   * Amount of padding between tick line and labels
-   */
-  padding: number;
-  /**
-   * length of tick line
-   */
-  size: number;
-};
+export type TickStyle = StrokeStyle &
+  Visible & {
+    /**
+     * Amount of padding between tick line and labels
+     */
+    padding: number;
+    /**
+     * length of tick line
+     */
+    size: number;
+  };
 
 /**
  * The dash array for a stroke
@@ -133,17 +141,18 @@ export interface Opacity {
 export interface AxisStyle {
   axisTitle: TextStyle & Visible;
   axisLine: StrokeStyle & Visible;
-  tickLabel: TextStyle & Visible & {
-    /** The degrees of rotation of the tick labels */
-    rotation: number;
-    /**
-     * Offset in pixels to render text relative to anchor
-     *
-     * **Note:** rotation aligns to global cartesian coordinates
-     */
-    offset: TextOffset;
-    alignment: TextAlignment
-  };
+  tickLabel: TextStyle &
+    Visible & {
+      /** The degrees of rotation of the tick labels */
+      rotation: number;
+      /**
+       * Offset in pixels to render text relative to anchor
+       *
+       * **Note:** rotation aligns to global cartesian coordinates
+       */
+      offset: TextOffset;
+      alignment: TextAlignment;
+    };
   tickLine: TickStyle;
   gridLine: {
     horizontal: GridLineStyle;

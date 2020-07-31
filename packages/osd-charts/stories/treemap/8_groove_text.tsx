@@ -35,9 +35,7 @@ const countryLookup = arrayToLookup((d: Datum) => d.country, countryDimension);
 const interpolatorTurbo = hueInterpolator(palettes.turbo.map(([r, g, b]) => [r, g, b, 0.7]));
 
 export const Example = () => (
-  <Chart
-    className="story-chart"
-  >
+  <Chart className="story-chart">
     <Settings theme={STORYBOOK_LIGHT_THEME} />
     <Partition
       id="spec_1"
@@ -92,8 +90,7 @@ export const Example = () => (
               // primarily, pick color based on parent's index, but then perturb by the index within the parent
               interpolatorTurbo(
                 (d.parent.sortIndex + d.sortIndex / d.parent.children.length) / (d.parent.parent.children.length + 1),
-              )
-            ,
+              ),
           },
         },
       ]}

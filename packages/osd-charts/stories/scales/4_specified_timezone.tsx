@@ -25,11 +25,7 @@ import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => (
   <Chart className="story-chart">
-    <Axis
-      id="time"
-      position={Position.Bottom}
-      tickFormat={(d) => DateTime.fromMillis(d, { zone: 'utc-6' }).toISO()}
-    />
+    <Axis id="time" position={Position.Bottom} tickFormat={(d) => DateTime.fromMillis(d, { zone: 'utc-6' }).toISO()} />
     <Axis id="y" position={Position.Left} />
     <LineSeries
       id="lines"

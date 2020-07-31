@@ -39,11 +39,13 @@ function expectAnnotationAtPosition(
 ) {
   const store = MockStore.default();
   const settings = MockGlobalSpec.settingsNoMargins();
-  const specs = new Array(numOfSpecs).fill(0).map((d, i) => MockSeriesSpec.byTypePartial(type)({
-    id: `spec_${i}`,
-    xScaleType,
-    data,
-  }));
+  const specs = new Array(numOfSpecs).fill(0).map((d, i) =>
+    MockSeriesSpec.byTypePartial(type)({
+      id: `spec_${i}`,
+      xScaleType,
+      data,
+    }),
+  );
   const annotation = MockAnnotationSpec.rect({
     dataValues,
   });

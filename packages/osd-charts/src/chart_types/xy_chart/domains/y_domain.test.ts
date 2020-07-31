@@ -26,10 +26,7 @@ import { Position } from '../../../utils/commons';
 import { BARCHART_1Y0G } from '../../../utils/data_samples/test_dataset';
 import { computeSeriesDomainsSelector } from '../state/selectors/compute_series_domains';
 import { BasicSeriesSpec, SeriesTypes, DEFAULT_GLOBAL_ID, StackMode } from '../utils/specs';
-import {
-  coerceYScaleTypes,
-  splitSpecsByGroupId,
-} from './y_domain';
+import { coerceYScaleTypes, splitSpecsByGroupId } from './y_domain';
 
 const DEMO_AREA_SPEC_1 = {
   id: 'a',
@@ -63,17 +60,20 @@ const DEMO_AREA_SPEC_2 = {
 describe('Y Domain', () => {
   test('Should merge Y domain for non zero baseline charts', () => {
     const store = MockStore.default();
-    MockStore.addSpecs([
-      MockGlobalSpec.axis({
-        id: 'y',
-        position: Position.Left,
-        domain: { fit: true },
-      }),
-      MockSeriesSpec.line({
-        ...DEMO_AREA_SPEC_1,
-        groupId: DEFAULT_GLOBAL_ID,
-      }),
-    ], store);
+    MockStore.addSpecs(
+      [
+        MockGlobalSpec.axis({
+          id: 'y',
+          position: Position.Left,
+          domain: { fit: true },
+        }),
+        MockSeriesSpec.line({
+          ...DEMO_AREA_SPEC_1,
+          groupId: DEFAULT_GLOBAL_ID,
+        }),
+      ],
+      store,
+    );
     const { yDomain } = computeSeriesDomainsSelector(store.getState());
 
     expect(yDomain).toEqual([
@@ -88,17 +88,20 @@ describe('Y Domain', () => {
   });
   test('Should merge Y domain for zero baseline charts', () => {
     const store = MockStore.default();
-    MockStore.addSpecs([
-      MockGlobalSpec.axis({
-        id: 'y',
-        position: Position.Left,
-        domain: { fit: true },
-      }),
-      MockSeriesSpec.area({
-        ...DEMO_AREA_SPEC_1,
-        groupId: DEFAULT_GLOBAL_ID,
-      }),
-    ], store);
+    MockStore.addSpecs(
+      [
+        MockGlobalSpec.axis({
+          id: 'y',
+          position: Position.Left,
+          domain: { fit: true },
+        }),
+        MockSeriesSpec.area({
+          ...DEMO_AREA_SPEC_1,
+          groupId: DEFAULT_GLOBAL_ID,
+        }),
+      ],
+      store,
+    );
     const { yDomain } = computeSeriesDomainsSelector(store.getState());
 
     expect(yDomain).toEqual([
@@ -113,29 +116,29 @@ describe('Y Domain', () => {
   });
   test('Should merge Y domain different group', () => {
     const store = MockStore.default();
-    MockStore.addSpecs([
-      MockGlobalSpec.axis({
-        id: 'y a',
-        groupId: 'a',
-        position: Position.Left,
-        domain: { fit: true },
-      }),
-      MockGlobalSpec.axis({
-        id: 'y b',
-        groupId: 'b',
-        position: Position.Left,
-        domain: { fit: true },
-      }),
-      MockSeriesSpec.line(DEMO_AREA_SPEC_1),
-      MockSeriesSpec.line({
-        ...DEMO_AREA_SPEC_2,
-        groupId: 'b',
-      }),
-
-
-    ], store);
+    MockStore.addSpecs(
+      [
+        MockGlobalSpec.axis({
+          id: 'y a',
+          groupId: 'a',
+          position: Position.Left,
+          domain: { fit: true },
+        }),
+        MockGlobalSpec.axis({
+          id: 'y b',
+          groupId: 'b',
+          position: Position.Left,
+          domain: { fit: true },
+        }),
+        MockSeriesSpec.line(DEMO_AREA_SPEC_1),
+        MockSeriesSpec.line({
+          ...DEMO_AREA_SPEC_2,
+          groupId: 'b',
+        }),
+      ],
+      store,
+    );
     const { yDomain } = computeSeriesDomainsSelector(store.getState());
-
 
     expect(yDomain).toEqual([
       {
@@ -156,20 +159,23 @@ describe('Y Domain', () => {
   });
   test('Should merge Y domain same group all stacked', () => {
     const store = MockStore.default();
-    MockStore.addSpecs([
-      MockGlobalSpec.axis({
-        id: 'y a',
-        groupId: 'a',
-        position: Position.Left,
-        domain: { fit: true },
-      }),
-      MockSeriesSpec.area(DEMO_AREA_SPEC_1),
-      MockSeriesSpec.area({
-        ...DEMO_AREA_SPEC_2,
-        groupId: 'a',
-        stackAccessors: ['x'],
-      }),
-    ], store);
+    MockStore.addSpecs(
+      [
+        MockGlobalSpec.axis({
+          id: 'y a',
+          groupId: 'a',
+          position: Position.Left,
+          domain: { fit: true },
+        }),
+        MockSeriesSpec.area(DEMO_AREA_SPEC_1),
+        MockSeriesSpec.area({
+          ...DEMO_AREA_SPEC_2,
+          groupId: 'a',
+          stackAccessors: ['x'],
+        }),
+      ],
+      store,
+    );
     const { yDomain } = computeSeriesDomainsSelector(store.getState());
 
     expect(yDomain).toEqual([
@@ -184,19 +190,22 @@ describe('Y Domain', () => {
   });
   test('Should merge Y domain same group partially stacked', () => {
     const store = MockStore.default();
-    MockStore.addSpecs([
-      MockGlobalSpec.axis({
-        id: 'y a',
-        groupId: 'a',
-        position: Position.Left,
-        domain: { fit: true },
-      }),
-      MockSeriesSpec.area(DEMO_AREA_SPEC_1),
-      MockSeriesSpec.area({
-        ...DEMO_AREA_SPEC_2,
-        groupId: 'a',
-      }),
-    ], store);
+    MockStore.addSpecs(
+      [
+        MockGlobalSpec.axis({
+          id: 'y a',
+          groupId: 'a',
+          position: Position.Left,
+          domain: { fit: true },
+        }),
+        MockSeriesSpec.area(DEMO_AREA_SPEC_1),
+        MockSeriesSpec.area({
+          ...DEMO_AREA_SPEC_2,
+          groupId: 'a',
+        }),
+      ],
+      store,
+    );
     const { yDomain } = computeSeriesDomainsSelector(store.getState());
     expect(yDomain).toEqual([
       {
@@ -372,18 +381,20 @@ describe('Y Domain', () => {
     expect(coerceYScaleTypes(specs)).toBe(ScaleType.Linear);
   });
 
-
   test('Should merge Y domain accounting for custom domain limits: complete bounded domain', () => {
     const store = MockStore.default();
-    MockStore.addSpecs([
-      MockGlobalSpec.axis({
-        id: 'y a',
-        groupId: 'a',
-        position: Position.Left,
-        domain: { min: 0, max: 20, fit: true },
-      }),
-      MockSeriesSpec.area(DEMO_AREA_SPEC_1),
-    ], store);
+    MockStore.addSpecs(
+      [
+        MockGlobalSpec.axis({
+          id: 'y a',
+          groupId: 'a',
+          position: Position.Left,
+          domain: { min: 0, max: 20, fit: true },
+        }),
+        MockSeriesSpec.area(DEMO_AREA_SPEC_1),
+      ],
+      store,
+    );
     const { yDomain } = computeSeriesDomainsSelector(store.getState());
 
     expect(yDomain).toEqual([
@@ -398,15 +409,18 @@ describe('Y Domain', () => {
   });
   test('Should merge Y domain accounting for custom domain limits: partial lower bounded domain', () => {
     const store = MockStore.default();
-    MockStore.addSpecs([
-      MockGlobalSpec.axis({
-        id: 'y a',
-        groupId: 'a',
-        position: Position.Left,
-        domain: { min: 0, fit: true },
-      }),
-      MockSeriesSpec.area(DEMO_AREA_SPEC_1),
-    ], store);
+    MockStore.addSpecs(
+      [
+        MockGlobalSpec.axis({
+          id: 'y a',
+          groupId: 'a',
+          position: Position.Left,
+          domain: { min: 0, fit: true },
+        }),
+        MockSeriesSpec.area(DEMO_AREA_SPEC_1),
+      ],
+      store,
+    );
     const { yDomain } = computeSeriesDomainsSelector(store.getState());
 
     expect(yDomain).toEqual([
@@ -421,15 +435,18 @@ describe('Y Domain', () => {
   });
   test('Should not merge Y domain with invalid custom domain limits: partial lower bounded domain', () => {
     const store = MockStore.default();
-    MockStore.addSpecs([
-      MockGlobalSpec.axis({
-        id: 'y a',
-        groupId: 'a',
-        position: Position.Left,
-        domain: { min: 20, fit: true },
-      }),
-      MockSeriesSpec.area(DEMO_AREA_SPEC_1),
-    ], store);
+    MockStore.addSpecs(
+      [
+        MockGlobalSpec.axis({
+          id: 'y a',
+          groupId: 'a',
+          position: Position.Left,
+          domain: { min: 20, fit: true },
+        }),
+        MockSeriesSpec.area(DEMO_AREA_SPEC_1),
+      ],
+      store,
+    );
 
     const attemptToMerge = () => {
       computeSeriesDomainsSelector(store.getState());
@@ -440,16 +457,18 @@ describe('Y Domain', () => {
   });
   test('Should merge Y domain accounting for custom domain limits: partial upper bounded domain', () => {
     const store = MockStore.default();
-    MockStore.addSpecs([
-      MockGlobalSpec.axis({
-        id: 'y a',
-        groupId: 'a',
-        position: Position.Left,
-        domain: { max: 20, fit: true },
-      }),
-      MockSeriesSpec.line(DEMO_AREA_SPEC_1),
-    ], store);
-
+    MockStore.addSpecs(
+      [
+        MockGlobalSpec.axis({
+          id: 'y a',
+          groupId: 'a',
+          position: Position.Left,
+          domain: { max: 20, fit: true },
+        }),
+        MockSeriesSpec.line(DEMO_AREA_SPEC_1),
+      ],
+      store,
+    );
 
     const { yDomain } = computeSeriesDomainsSelector(store.getState());
     expect(yDomain).toEqual([
@@ -464,15 +483,18 @@ describe('Y Domain', () => {
   });
   test('Should not merge Y domain with invalid custom domain limits: partial upper bounded domain', () => {
     const store = MockStore.default();
-    MockStore.addSpecs([
-      MockGlobalSpec.axis({
-        id: 'y a',
-        groupId: 'a',
-        position: Position.Left,
-        domain: { max: -1, fit: true },
-      }),
-      MockSeriesSpec.area(DEMO_AREA_SPEC_1),
-    ], store);
+    MockStore.addSpecs(
+      [
+        MockGlobalSpec.axis({
+          id: 'y a',
+          groupId: 'a',
+          position: Position.Left,
+          domain: { max: -1, fit: true },
+        }),
+        MockSeriesSpec.area(DEMO_AREA_SPEC_1),
+      ],
+      store,
+    );
 
     const attemptToMerge = () => {
       computeSeriesDomainsSelector(store.getState());
@@ -483,17 +505,19 @@ describe('Y Domain', () => {
   });
   test('Should merge Y domain with stacked as percentage', () => {
     const store = MockStore.default();
-    MockStore.addSpecs([
-      MockSeriesSpec.area({
-        ...DEMO_AREA_SPEC_1,
-        stackMode: StackMode.Percentage,
-      }),
-      MockSeriesSpec.area({
-        ...DEMO_AREA_SPEC_2,
-        groupId: 'a',
-      }),
-    ], store);
-
+    MockStore.addSpecs(
+      [
+        MockSeriesSpec.area({
+          ...DEMO_AREA_SPEC_1,
+          stackMode: StackMode.Percentage,
+        }),
+        MockSeriesSpec.area({
+          ...DEMO_AREA_SPEC_2,
+          groupId: 'a',
+        }),
+      ],
+      store,
+    );
 
     const { yDomain } = computeSeriesDomainsSelector(store.getState());
     expect(yDomain).toEqual([
@@ -508,18 +532,21 @@ describe('Y Domain', () => {
   });
   test('Should merge Y domain with as percentage regadless of custom domains', () => {
     const store = MockStore.default();
-    MockStore.addSpecs([
-      MockGlobalSpec.axis({
-        id: 'y a',
-        groupId: 'a',
-        position: Position.Left,
-        domain: { min: 2, max: 20, fit: true },
-      }),
-      MockSeriesSpec.area({
-        ...DEMO_AREA_SPEC_1,
-        stackMode: StackMode.Percentage,
-      }),
-    ], store);
+    MockStore.addSpecs(
+      [
+        MockGlobalSpec.axis({
+          id: 'y a',
+          groupId: 'a',
+          position: Position.Left,
+          domain: { min: 2, max: 20, fit: true },
+        }),
+        MockSeriesSpec.area({
+          ...DEMO_AREA_SPEC_1,
+          stackMode: StackMode.Percentage,
+        }),
+      ],
+      store,
+    );
     const { yDomain } = computeSeriesDomainsSelector(store.getState());
     expect(yDomain).toEqual([
       {

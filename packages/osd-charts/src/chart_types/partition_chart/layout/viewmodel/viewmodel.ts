@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import { StrokeStyle, ValueFormatter, Color } from '../../../../utils/commons';
 import { Layer } from '../../specs';
 import { percentValueGetter } from '../config/config';
@@ -52,9 +51,15 @@ import {
 import { trueBearingToStandardPositionAngle } from '../utils/math';
 import { sunburst } from '../utils/sunburst';
 import { getTopPadding, treemap } from '../utils/treemap';
-import { fillTextLayout, getRectangleRowGeometry, ringSectorConstruction, getSectorRowGeometry, inSectorRotation, nodeId } from './fill_text_layout';
+import {
+  fillTextLayout,
+  getRectangleRowGeometry,
+  ringSectorConstruction,
+  getSectorRowGeometry,
+  inSectorRotation,
+  nodeId,
+} from './fill_text_layout';
 import { linkTextLayout } from './link_text_layout';
-
 
 function grooveAccessor(n: ArrayEntry) {
   return entryValue(n).depth > 1 ? 1 : [0, 2][entryValue(n).depth];
@@ -79,10 +84,7 @@ function sectorFillOrigins(fillOutside: boolean) {
     const divider = 10;
     const innerBias = fillOutside ? 9 : 1;
     const outerBias = divider - innerBias;
-    const radius = (innerBias * ringSectorInnerRadius(node)
-      + outerBias * ringSectorOuterRadius(node)
-    )
-    / divider;
+    const radius = (innerBias * ringSectorInnerRadius(node) + outerBias * ringSectorOuterRadius(node)) / divider;
     const cx = Math.cos(trueBearingToStandardPositionAngle(midAngle)) * radius;
     const cy = Math.sin(trueBearingToStandardPositionAngle(midAngle)) * radius;
     return [cx, cy];
@@ -265,11 +267,11 @@ export function shapeViewModel(
         containerBackgroundColor,
       )
     : fillTextLayout(
-      ringSectorConstruction(config, innerRadius, ringThickness),
-      getSectorRowGeometry,
-      inSectorRotation(config.horizontalTextEnforcer, config.horizontalTextAngleThreshold),
-      containerBackgroundColor,
-    );
+        ringSectorConstruction(config, innerRadius, ringThickness),
+        getSectorRowGeometry,
+        inSectorRotation(config.horizontalTextEnforcer, config.horizontalTextAngleThreshold),
+        containerBackgroundColor,
+      );
 
   const rowSets: RowSet[] = getRowSets(
     textMeasure,
@@ -290,14 +292,15 @@ export function shapeViewModel(
   // linked text
   const currentY = [-height, -height, -height, -height];
 
-  const nodesWithoutRoom = fillOutside || treemapLayout
-    ? [] // outsideFillNodes and linkLabels are in inherent conflict due to very likely overlaps
-    : quadViewModel.filter((n: ShapeTreeNode) => {
-      const id = nodeId(n);
-      const foundInFillText = rowSets.find((r: RowSet) => r.id === id);
-      // successful text render if found, and has some row(s)
-      return !(foundInFillText && foundInFillText.rows.length !== 0);
-    });
+  const nodesWithoutRoom =
+    fillOutside || treemapLayout
+      ? [] // outsideFillNodes and linkLabels are in inherent conflict due to very likely overlaps
+      : quadViewModel.filter((n: ShapeTreeNode) => {
+          const id = nodeId(n);
+          const foundInFillText = rowSets.find((r: RowSet) => r.id === id);
+          // successful text render if found, and has some row(s)
+          return !(foundInFillText && foundInFillText.rows.length !== 0);
+        });
   const maxLinkedLabelTextLength = config.linkLabel.maxTextLength;
   const linkLabelViewModels = linkTextLayout(
     width,
@@ -315,15 +318,16 @@ export function shapeViewModel(
     containerBackgroundColor,
   );
 
-  const pickQuads: PickFunction = (x, y) => quadViewModel.filter(
-    treemapLayout
-      ? ({ x0, y0, x1, y1 }) => x0 <= x && x <= x1 && y0 <= y && y <= y1
-      : ({ x0, y0px, x1, y1px }) => {
-          const angleX = (Math.atan2(y, x) + TAU / 4 + TAU) % TAU;
-          const yPx = Math.sqrt(x * x + y * y);
-          return x0 <= angleX && angleX <= x1 && y0px <= yPx && yPx <= y1px;
-        },
-  );
+  const pickQuads: PickFunction = (x, y) =>
+    quadViewModel.filter(
+      treemapLayout
+        ? ({ x0, y0, x1, y1 }) => x0 <= x && x <= x1 && y0 <= y && y <= y1
+        : ({ x0, y0px, x1, y1px }) => {
+            const angleX = (Math.atan2(y, x) + TAU / 4 + TAU) % TAU;
+            const yPx = Math.sqrt(x * x + y * y);
+            return x0 <= angleX && angleX <= x1 && y0px <= yPx && yPx <= y1px;
+          },
+    );
 
   // combined viewModel
   return {

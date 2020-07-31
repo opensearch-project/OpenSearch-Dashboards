@@ -41,9 +41,12 @@ interface GroupSpecs {
 
 /** @internal */
 export function mergeYDomain(
-  { stacked, nonStacked }:{
-    stacked: FormattedDataSeries[],
-    nonStacked: FormattedDataSeries[],
+  {
+    stacked,
+    nonStacked,
+  }: {
+    stacked: FormattedDataSeries[];
+    nonStacked: FormattedDataSeries[];
   },
   specs: YBasicSeriesSpec[],
   domainsByGroupId: Map<GroupId, YDomainRange>,
@@ -60,10 +63,18 @@ export function mergeYDomain(
       groupId,
       counts: { area: 0, bubble: 0, bar: 0, line: 0 },
     };
-    const stackedDS = stacked.find((d) => (d.groupId === groupId)) ?? emptyDS;
-    const nonStackedDS = nonStacked.find((d) => (d.groupId === groupId)) ?? emptyDS;
-    const nonZeroBaselineSpecs = stackedDS.counts.bar + stackedDS.counts.area + nonStackedDS.counts.bar + nonStackedDS.counts.area;
-    return mergeYDomainForGroup(stackedDS.dataSeries, nonStackedDS.dataSeries, groupId, groupSpecs, nonZeroBaselineSpecs > 0, customDomain);
+    const stackedDS = stacked.find((d) => d.groupId === groupId) ?? emptyDS;
+    const nonStackedDS = nonStacked.find((d) => d.groupId === groupId) ?? emptyDS;
+    const nonZeroBaselineSpecs =
+      stackedDS.counts.bar + stackedDS.counts.area + nonStackedDS.counts.bar + nonStackedDS.counts.area;
+    return mergeYDomainForGroup(
+      stackedDS.dataSeries,
+      nonStackedDS.dataSeries,
+      groupId,
+      groupSpecs,
+      nonZeroBaselineSpecs > 0,
+      customDomain,
+    );
   });
 
   const globalGroupIds: Set<GroupId> = specs.reduce<Set<GroupId>>((acc, { groupId, useDefaultGroupDomain }) => {
@@ -107,8 +118,9 @@ function mergeYDomainForGroup(
   } else {
     // TODO remove when removing yScaleToDataExtent
     const newCustomDomain = customDomain ? { ...customDomain } : {};
-    const shouldScaleToExtent = groupSpecs.stacked.some(({ yScaleToDataExtent }) => yScaleToDataExtent)
-      || groupSpecs.nonStacked.some(({ yScaleToDataExtent }) => yScaleToDataExtent);
+    const shouldScaleToExtent =
+      groupSpecs.stacked.some(({ yScaleToDataExtent }) => yScaleToDataExtent) ||
+      groupSpecs.nonStacked.some(({ yScaleToDataExtent }) => yScaleToDataExtent);
     if (customDomain?.fit !== true && shouldScaleToExtent) {
       newCustomDomain.fit = true;
     }
@@ -120,11 +132,7 @@ function mergeYDomainForGroup(
     const nonStackedDomain = computeYDomain(nonStacked, hasZeroBaselineSpecs);
 
     // merge stacked and non stacked domain together
-    domain = computeContinuousDataDomain(
-      [...stackedDomain, ...nonStackedDomain],
-      identity,
-      newCustomDomain,
-    );
+    domain = computeContinuousDataDomain([...stackedDomain, ...nonStackedDomain], identity, newCustomDomain);
 
     const [computedDomainMin, computedDomainMax] = domain;
 
@@ -180,10 +188,9 @@ export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
   // in MobX version, the stackAccessors was programmatically added to every histogram specs
   // in ReduX version, we left untouched the specs, so we have to manually check that
   const isHistogramEnabled = specs.some(
-    ({ seriesType, enableHistogramMode }) =>
-      seriesType === SeriesTypes.Bar && enableHistogramMode
+    ({ seriesType, enableHistogramMode }) => seriesType === SeriesTypes.Bar && enableHistogramMode,
   );
-    // split each specs by groupId and by stacked or not
+  // split each specs by groupId and by stacked or not
   specs.forEach((spec) => {
     const group = specsByGroupIds.get(spec.groupId) || {
       stackMode: undefined,
@@ -193,8 +200,8 @@ export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
     // stack every bars if using histogram mode
     // independenyly from lines and areas
     if (
-      (spec.seriesType === SeriesTypes.Bar && isHistogramEnabled)
-      || (spec.stackAccessors && spec.stackAccessors.length > 0)
+      (spec.seriesType === SeriesTypes.Bar && isHistogramEnabled) ||
+      (spec.stackAccessors && spec.stackAccessors.length > 0)
     ) {
       group.stacked.push(spec);
     } else {

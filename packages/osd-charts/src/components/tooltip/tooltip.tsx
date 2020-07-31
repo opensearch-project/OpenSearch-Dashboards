@@ -40,7 +40,6 @@ import { TooltipPortal, TooltipPortalSettings, AnchorPosition, Placement } from 
 import { getTooltipSettings } from './get_tooltip_settings';
 import { TooltipInfo, TooltipAnchorPosition } from './types';
 
-
 interface TooltipDispatchProps {
   onPointerMove: typeof onPointerMoveAction;
 }
@@ -107,7 +106,7 @@ const TooltipComponent = ({
           const classes = classNames('echTooltip__item', {
             echTooltip__rowHighlighted: isHighlighted,
           });
-          const adjustedBGColor = (isColorValid(color) && chroma(color).alpha() === 0) ? 'transparent' : backgroundColor;
+          const adjustedBGColor = isColorValid(color) && chroma(color).alpha() === 0 ? 'transparent' : backgroundColor;
 
           return (
             <div
@@ -119,22 +118,13 @@ const TooltipComponent = ({
               }}
             >
               <div className="echTooltip__item--backgroundColor" style={{ backgroundColor: adjustedBGColor }}>
-                <div
-                  className="echTooltip__item--color"
-                  style={{ backgroundColor: color }}
-                />
+                <div className="echTooltip__item--color" style={{ backgroundColor: color }} />
               </div>
 
               <div className="echTooltip__item--container">
                 <span className="echTooltip__label">{label}</span>
                 <span className="echTooltip__value">{value}</span>
-                {markValue && (
-                  <span className="echTooltip__markValue">
-                    &nbsp;(
-                    {markValue}
-                    )
-                  </span>
-                )}
+                {markValue && <span className="echTooltip__markValue">&nbsp;({markValue})</span>}
               </div>
             </div>
           );
@@ -188,8 +178,8 @@ const TooltipComponent = ({
       ...rest,
       placement: placement ?? (rotation === 0 || rotation === 180 ? Placement.Right : Placement.Top),
       fallbackPlacements:
-        fallbackPlacements
-        ?? (rotation === 0 || rotation === 180
+        fallbackPlacements ??
+        (rotation === 0 || rotation === 180
           ? [Placement.Right, Placement.Left, Placement.Top, Placement.Bottom]
           : [Placement.Top, Placement.Bottom, Placement.Right, Placement.Left]),
       boundary: boundary === 'chart' && chartRef.current ? chartRef.current : undefined,

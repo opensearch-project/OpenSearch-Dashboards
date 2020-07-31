@@ -33,7 +33,6 @@ import { measureText } from '../../layout/utils/measure';
 import { shapeViewModel } from '../../layout/viewmodel/viewmodel';
 import { PartitionSpec, Layer } from '../../specs';
 
-
 function rawTextGetter(layers: Layer[]): RawTextGetter {
   return (node: ShapeTreeNode) => {
     const accessorFn = layers[node[DEPTH_KEY] - 1].nodeLabel || identity;

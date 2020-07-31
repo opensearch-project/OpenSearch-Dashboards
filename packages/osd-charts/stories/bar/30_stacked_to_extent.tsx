@@ -29,7 +29,13 @@ export const Example = () => {
   return (
     <Chart className="story-chart">
       <Axis id="bottom" position={Position.Bottom} title="Bottom axis" />
-      <Axis id="left2" domain={{ fit }} title="Left axis" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
+      <Axis
+        id="left2"
+        domain={{ fit }}
+        title="Left axis"
+        position={Position.Left}
+        tickFormat={(d: any) => Number(d).toFixed(2)}
+      />
 
       <BarSeries
         id="bars"

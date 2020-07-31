@@ -18,11 +18,7 @@
  */
 
 import { AccessorFn } from './accessor';
-import {
-  computeContinuousDataDomain,
-  computeDomainExtent,
-  computeOrdinalDataDomain,
-} from './domain';
+import { computeContinuousDataDomain, computeDomainExtent, computeOrdinalDataDomain } from './domain';
 
 describe('utils/domain', () => {
   test('should return [0] domain if no data', () => {
@@ -182,7 +178,10 @@ describe('utils/domain', () => {
         });
 
         it('should allow max past baseline as 0, even if original domain is less than zero', () => {
-          expect(computeDomainExtent([-65, -5], { fit: true, padding: 15, constrainPadding: false })).toEqual([-80, 10]);
+          expect(computeDomainExtent([-65, -5], { fit: true, padding: 15, constrainPadding: false })).toEqual([
+            -80,
+            10,
+          ]);
         });
       });
     });

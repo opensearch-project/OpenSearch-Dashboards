@@ -30,9 +30,7 @@ import { renderDebugRect } from '../utils/debug';
 export function renderTitle(ctx: CanvasRenderingContext2D, props: AxisProps) {
   const {
     axisSpec: { title, position },
-    axisStyle: {
-      axisTitle,
-    },
+    axisStyle: { axisTitle },
   } = props;
   if (!title || !axisTitle.visible) {
     return null;
@@ -48,11 +46,7 @@ function renderVerticalTitle(ctx: CanvasRenderingContext2D, props: AxisProps) {
     axisPosition: { height },
     axisSpec: { title, position, hide: hideAxis },
     axisTicksDimensions: { maxLabelBboxWidth },
-    axisStyle: {
-      axisTitle,
-      tickLine,
-      tickLabel,
-    },
+    axisStyle: { axisTitle, tickLine, tickLabel },
     debug,
   } = props;
   if (!title) {
@@ -93,11 +87,7 @@ function renderHorizontalTitle(ctx: CanvasRenderingContext2D, props: AxisProps) 
     axisPosition: { width },
     axisSpec: { title, position, hide: hideAxis },
     axisTicksDimensions: { maxLabelBboxHeight },
-    axisStyle: {
-      axisTitle,
-      tickLine,
-      tickLabel,
-    },
+    axisStyle: { axisTitle, tickLine, tickLabel },
     debug,
   } = props;
 

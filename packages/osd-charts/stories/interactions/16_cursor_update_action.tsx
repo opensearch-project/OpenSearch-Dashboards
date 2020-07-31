@@ -20,7 +20,17 @@
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings, PointerEvent, Placement, niceTimeFormatter } from '../../src';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  Position,
+  ScaleType,
+  Settings,
+  PointerEvent,
+  Placement,
+  niceTimeFormatter,
+} from '../../src';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 import { palettes } from '../../src/utils/themes/colors';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
@@ -74,7 +84,6 @@ export const Example = () => {
           position={Position.Bottom}
           title="External tooltip VISIBLE - boundary => chart"
           tickFormat={niceTimeFormatter([data[0][0], data[data.length - 1][0]])}
-
         />
         <Axis
           id="left2"

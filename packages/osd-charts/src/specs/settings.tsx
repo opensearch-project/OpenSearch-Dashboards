@@ -187,7 +187,7 @@ export interface ExternalPointerEventsSettings {
      * @defaultValue `false`
      */
     visible?: boolean;
-  }
+  };
 }
 
 /**
@@ -344,8 +344,10 @@ export type DefaultSettingsProps =
   | 'minBrushDelta'
   | 'externalPointerEvents';
 
-export type SettingsSpecProps = Partial<Omit<SettingsSpec, 'chartType' | 'specType' | 'id' | 'externalPointerEvents'>> & {
-  externalPointerEvents?: RecursivePartial<SettingsSpec['externalPointerEvents']>
+export type SettingsSpecProps = Partial<
+  Omit<SettingsSpec, 'chartType' | 'specType' | 'id' | 'externalPointerEvents'>
+> & {
+  externalPointerEvents?: RecursivePartial<SettingsSpec['externalPointerEvents']>;
 };
 
 export const Settings: React.FunctionComponent<SettingsSpecProps> = getConnect()(
@@ -401,12 +403,15 @@ export function getTooltipType(settings: SettingsSpec, externalTooltip = false):
   return defaultType;
 }
 
-
 /**
  * Always return a Vertical Cursor for external pointer events or None if hidden
  * @internal
  * @param settings - the SettingsSpec
  */
-export function getExternalTooltipType({ externalPointerEvents: { tooltip: { visible } } }: SettingsSpec): TooltipType {
+export function getExternalTooltipType({
+  externalPointerEvents: {
+    tooltip: { visible },
+  },
+}: SettingsSpec): TooltipType {
   return visible ? TooltipType.VerticalCursor : TooltipType.None;
 }

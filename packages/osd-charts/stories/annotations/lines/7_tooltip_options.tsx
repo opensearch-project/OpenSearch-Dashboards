@@ -27,7 +27,9 @@ import {
   Chart,
   ScaleType,
   Settings,
-  LineAnnotation, AnnotationDomainTypes, LineAnnotationDatum,
+  LineAnnotation,
+  AnnotationDomainTypes,
+  LineAnnotationDatum,
 } from '../../../src';
 import { CustomAnnotationTooltip } from '../../../src/chart_types/xy_chart/annotations/types';
 import { Icon } from '../../../src/components/icons/icon';
@@ -55,22 +57,22 @@ export const Example = () => {
 
   const dataValues = generateAnnotationData(arrayKnobs('annotation values', ['a', 'c']));
 
-  const customTooltip: CustomAnnotationTooltip | undefined = showCustomTooltip ? ({ header, details }) => (
-    <div style={{ backgroundColor: 'blue', color: 'white', padding: 10 }}>
-      <h2>
-        custom tooltip -
-        {' '}
-        {header}
-      </h2>
-      <p>{details}</p>
-    </div>
-  ) : undefined;
-  const customTooltipDetails: AnnotationTooltipFormatter | undefined = showCustomDetails ? (details) => (
-    <div>
-      <h2>custom Details</h2>
-      <p>{details}</p>
-    </div>
-  ) : undefined;
+  const customTooltip: CustomAnnotationTooltip | undefined = showCustomTooltip
+    ? ({ header, details }) => (
+        <div style={{ backgroundColor: 'blue', color: 'white', padding: 10 }}>
+          <h2>custom tooltip -{header}</h2>
+          <p>{details}</p>
+        </div>
+      )
+    : undefined;
+  const customTooltipDetails: AnnotationTooltipFormatter | undefined = showCustomDetails
+    ? (details) => (
+        <div>
+          <h2>custom Details</h2>
+          <p>{details}</p>
+        </div>
+      )
+    : undefined;
 
   return (
     <Chart className="story-chart">

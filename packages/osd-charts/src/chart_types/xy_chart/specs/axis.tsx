@@ -42,11 +42,6 @@ type SpecOptionals = Partial<Omit<AxisSpec, 'chartType' | 'specType' | 'seriesTy
 export const Axis: React.FunctionComponent<SpecRequired & SpecOptionals> = getConnect()(
   specComponentFactory<
     AxisSpec,
-    | 'groupId'
-    | 'hide'
-    | 'showOverlappingTicks'
-    | 'showOverlappingLabels'
-    | 'position'
-    | 'tickFormat'
+    'groupId' | 'hide' | 'showOverlappingTicks' | 'showOverlappingLabels' | 'position' | 'tickFormat'
   >(defaultProps),
 );

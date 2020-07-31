@@ -17,11 +17,30 @@
  * under the License.
  */
 
-import { EuiIcon, EuiPopover, EuiContextMenu, EuiContextMenuPanelDescriptor, EuiWrappingPopover, EuiColorPicker, EuiSpacer, EuiButton } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiPopover,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+  EuiWrappingPopover,
+  EuiColorPicker,
+  EuiSpacer,
+  EuiButton,
+} from '@elastic/eui';
 import { boolean } from '@storybook/addon-knobs';
 import React, { useState } from 'react';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings, LegendAction, XYChartSeriesIdentifier, LegendColorPicker } from '../../src';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  Position,
+  ScaleType,
+  Settings,
+  LegendAction,
+  XYChartSeriesIdentifier,
+  LegendColorPicker,
+} from '../../src';
 import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
 import { getPositionKnob } from '../utils/knobs';
 
@@ -103,21 +122,13 @@ const getAction = (hideActions: boolean): LegendAction => ({ series }) => {
       withTitle
       anchorPosition="upLeft"
     >
-      <EuiContextMenu
-        initialPanelId={0}
-        panels={getPanels(series as XYChartSeriesIdentifier)}
-      />
+      <EuiContextMenu initialPanelId={0} panels={getPanels(series as XYChartSeriesIdentifier)} />
     </EuiPopover>
   );
 };
 
 const renderColorPicker: LegendColorPicker = ({ anchor, color, onClose, onChange }) => (
-  <EuiWrappingPopover
-    isOpen
-    button={anchor}
-    closePopover={onClose}
-    anchorPosition="leftCenter"
-  >
+  <EuiWrappingPopover isOpen button={anchor} closePopover={onClose} anchorPosition="leftCenter">
     <EuiColorPicker display="inline" color={color} onChange={onChange} />
     <EuiSpacer size="m" />
     <EuiButton fullWidth size="s" onClick={onClose}>

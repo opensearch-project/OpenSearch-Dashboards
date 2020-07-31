@@ -34,28 +34,10 @@ export function renderTickLabel(ctx: CanvasRenderingContext2D, tick: AxisTick, s
     axisStyle,
   } = props;
   const labelStyle = axisStyle.tickLabel;
-  const {
-    rotation: tickLabelRotation,
-    alignment,
-    offset,
-  } = labelStyle;
+  const { rotation: tickLabelRotation, alignment, offset } = labelStyle;
 
-  const {
-    maxLabelBboxWidth,
-    maxLabelBboxHeight,
-    maxLabelTextWidth,
-    maxLabelTextHeight,
-  } = axisTicksDimensions;
-  const {
-    x,
-    y,
-    offsetX,
-    offsetY,
-    textOffsetX,
-    textOffsetY,
-    align,
-    verticalAlign,
-  } = getTickLabelProps(
+  const { maxLabelBboxWidth, maxLabelBboxHeight, maxLabelTextWidth, maxLabelTextHeight } = axisTicksDimensions;
+  const { x, y, offsetX, offsetY, textOffsetX, textOffsetY, align, verticalAlign } = getTickLabelProps(
     axisStyle,
     tick.position,
     position,
@@ -65,7 +47,6 @@ export function renderTickLabel(ctx: CanvasRenderingContext2D, tick: AxisTick, s
     offset,
     alignment,
   );
-
 
   if (debug) {
     // full text container

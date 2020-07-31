@@ -41,13 +41,11 @@ function generateAnnotationData(values: any[]): LineAnnotationDatum[] {
 export const Example = () => {
   const debug = boolean('debug', false);
   const rotation = getChartRotationKnob();
-  const markerPosition = select('marker position', [
-    Position.Top,
-    Position.Left,
-    Position.Bottom,
-    Position.Right,
+  const markerPosition = select(
+    'marker position',
+    [Position.Top, Position.Left, Position.Bottom, Position.Right, 'undefined'],
     'undefined',
-  ], 'undefined');
+  );
   const data = arrayKnobs('data values', [1.5, 7.2]);
   const dataValues = generateAnnotationData(data);
 

@@ -70,8 +70,4 @@ export function specUnmounted(): SpecUnmountedAction {
 }
 
 /** @internal */
-export type SpecActions =
-  | SpecParsedAction
-  | SpecUnmountedAction
-  | UpsertSpecAction
-  | RemoveSpecAction;
+export type SpecActions = SpecParsedAction | SpecUnmountedAction | UpsertSpecAction | RemoveSpecAction;

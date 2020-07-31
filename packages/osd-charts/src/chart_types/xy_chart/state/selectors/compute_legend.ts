@@ -40,19 +40,13 @@ export const computeLegendSelector = createCachedSelector(
     getAxisSpecsSelector,
     getDeselectedSeriesSelector,
   ],
-  (
-    seriesSpecs,
-    seriesDomainsAndData,
-    chartTheme,
-    seriesColors,
-    axesSpecs,
-    deselectedDataSeries,
-  ): LegendItem[] => computeLegend(
-    seriesDomainsAndData.seriesCollection,
-    seriesColors,
-    seriesSpecs,
-    chartTheme.colors.defaultVizColor,
-    axesSpecs,
-    deselectedDataSeries,
-  ),
+  (seriesSpecs, seriesDomainsAndData, chartTheme, seriesColors, axesSpecs, deselectedDataSeries): LegendItem[] =>
+    computeLegend(
+      seriesDomainsAndData.seriesCollection,
+      seriesColors,
+      seriesSpecs,
+      chartTheme.colors.defaultVizColor,
+      axesSpecs,
+      deselectedDataSeries,
+    ),
 )(getChartIdSelector);

@@ -35,7 +35,6 @@ const getTooltipTypeSelector = (state: GlobalChartState): TooltipType => getTool
 
 const getPointerSelector = (state: GlobalChartState) => state.interactions.pointer;
 
-
 /** @internal */
 export const isTooltipVisibleSelector = createCachedSelector(
   [
@@ -57,14 +56,13 @@ function isTooltipVisible(
   isAnnotationTooltipVisible: boolean,
   externalTooltipVisible: boolean,
 ) {
-  const isLocalTooltop = (
-    tooltipType !== TooltipType.None
-    && pointer.down === null
-    && projectedPointerPosition.x > -1
-    && projectedPointerPosition.y > -1
-    && tooltip.values.length > 0
-    && !isAnnotationTooltipVisible
-  );
+  const isLocalTooltop =
+    tooltipType !== TooltipType.None &&
+    pointer.down === null &&
+    projectedPointerPosition.x > -1 &&
+    projectedPointerPosition.y > -1 &&
+    tooltip.values.length > 0 &&
+    !isAnnotationTooltipVisible;
   const isExternalTooltip = externalTooltipVisible && tooltip.values.length > 0;
   return {
     visible: isLocalTooltop || isExternalTooltip,

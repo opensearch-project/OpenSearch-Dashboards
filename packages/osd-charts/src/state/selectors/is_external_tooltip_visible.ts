@@ -31,7 +31,13 @@ const getExternalEventPointer = ({ externalEvents: { pointer } }: GlobalChartSta
 
 /** @internal */
 export const isExternalTooltipVisibleSelector = createCachedSelector(
-  [getSettingsSpecSelector, hasExternalEventSelector, getExternalEventPointer, getComputedScalesSelector, computeChartDimensionsSelector],
+  [
+    getSettingsSpecSelector,
+    hasExternalEventSelector,
+    getExternalEventPointer,
+    getComputedScalesSelector,
+    computeChartDimensionsSelector,
+  ],
   ({ externalPointerEvents }, hasExternalEvent, pointer, { xScale }, { chartDimensions }): boolean => {
     if (!pointer || pointer.type !== PointerEventType.Over || externalPointerEvents.tooltip?.visible === false) {
       return false;
@@ -42,5 +48,5 @@ export const isExternalTooltipVisibleSelector = createCachedSelector(
       return false;
     }
     return hasExternalEvent && externalPointerEvents.tooltip?.visible === true;
-  }
+  },
 )(getChartIdSelector);

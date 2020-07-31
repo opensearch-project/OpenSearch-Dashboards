@@ -30,7 +30,8 @@ const getCurrentPointerPosition = (state: GlobalChartState) => state.interaction
 /** @internal */
 export const getProjectedPointerPositionSelector = createCachedSelector(
   [getCurrentPointerPosition, computeChartDimensionsSelector],
-  (currentPointerPosition, chartDimensions): Point => getProjectedPointerPosition(currentPointerPosition, chartDimensions.chartDimensions),
+  (currentPointerPosition, chartDimensions): Point =>
+    getProjectedPointerPosition(currentPointerPosition, chartDimensions.chartDimensions),
 )(getChartIdSelector);
 
 /**

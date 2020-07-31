@@ -38,8 +38,6 @@ export const partitionGeometries = createCachedSelector(
   (specs, parentDimensions, tree, { background }): ShapeViewModel => {
     const pieSpecs = getSpecsFromStore<PartitionSpec>(specs, ChartTypes.Partition, SpecTypes.Series);
 
-    return pieSpecs.length === 1
-      ? render(pieSpecs[0], parentDimensions, tree, background.color)
-      : nullShapeViewModel();
+    return pieSpecs.length === 1 ? render(pieSpecs[0], parentDimensions, tree, background.color) : nullShapeViewModel();
   },
 )((state) => state.chartId);

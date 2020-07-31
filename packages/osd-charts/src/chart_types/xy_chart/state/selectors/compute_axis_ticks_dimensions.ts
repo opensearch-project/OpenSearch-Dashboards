@@ -69,8 +69,8 @@ export const computeAxisTicksDimensionsSelector = createCachedSelector(
         isHistogramMode,
       );
       if (
-        dimensions
-        && (!settingsSpec.hideDuplicateAxes || !isDuplicateAxis(axisSpec, dimensions, axesTicksDimensions, axesSpecs))
+        dimensions &&
+        (!settingsSpec.hideDuplicateAxes || !isDuplicateAxis(axisSpec, dimensions, axesTicksDimensions, axesSpecs))
       ) {
         axesTicksDimensions.set(id, dimensions);
       }

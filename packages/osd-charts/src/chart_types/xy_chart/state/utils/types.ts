@@ -66,7 +66,6 @@ export interface Geometries {
   bubbles: BubbleGeometry[];
 }
 
-
 /** @internal */
 export interface ComputedGeometries {
   scales: ComputedScales;

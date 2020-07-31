@@ -27,10 +27,10 @@ export const Example = () => {
   const barColor = color('barSeriesColor', '#000');
   const barSeriesColorAccessor: SeriesColorAccessor = ({ specId, yAccessor, splitAccessors }) => {
     if (
-      specId === 'bars'
-      && yAccessor === 'y1'
-      && splitAccessors.get('g1') === 'cloudflare.com'
-      && splitAccessors.get('g2') === 'direct-cdn'
+      specId === 'bars' &&
+      yAccessor === 'y1' &&
+      splitAccessors.get('g1') === 'cloudflare.com' &&
+      splitAccessors.get('g2') === 'direct-cdn'
     ) {
       return barColor;
     }

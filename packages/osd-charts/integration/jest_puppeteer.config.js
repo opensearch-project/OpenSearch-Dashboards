@@ -52,7 +52,7 @@ const customConfig = {
         },
       }
     : {
-      // https://github.com/gidztech/jest-puppeteer-docker/issues/24
+        // https://github.com/gidztech/jest-puppeteer-docker/issues/24
         chromiumFlags: [], // for docker chromium options
         connect: {
           ...sharedConfig,

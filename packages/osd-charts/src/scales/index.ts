@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { ScaleType } from './constants';
 

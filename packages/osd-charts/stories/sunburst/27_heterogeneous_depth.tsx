@@ -53,7 +53,8 @@ export const Example = () => (
           groupByRollup: (d: Datum) => countryLookup[d.dest].continentCountry.slice(0, 2),
           nodeLabel: (d: PrimitiveValue) => d !== null && regionLookup[d].regionName,
           shape: {
-            fillColor: (d: ShapeTreeNode) => categoricalFillColor(colorBrewerCategoricalStark9, 0.5)(d.parent.sortIndex),
+            fillColor: (d: ShapeTreeNode) =>
+              categoricalFillColor(colorBrewerCategoricalStark9, 0.5)(d.parent.sortIndex),
           },
         },
         {
@@ -61,7 +62,8 @@ export const Example = () => (
           nodeLabel: (d: PrimitiveValue) => d !== null && countryLookup[d].name,
           showAccessor: (d: PrimitiveValue) => !(['chn', 'hkg', 'jpn', 'kor'] as PrimitiveValue[]).includes(d),
           shape: {
-            fillColor: (d: ShapeTreeNode) => categoricalFillColor(colorBrewerCategoricalStark9, 0.3)(d.parent.parent.sortIndex),
+            fillColor: (d: ShapeTreeNode) =>
+              categoricalFillColor(colorBrewerCategoricalStark9, 0.3)(d.parent.parent.sortIndex),
           },
         },
       ]}

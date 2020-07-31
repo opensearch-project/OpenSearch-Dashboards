@@ -23,7 +23,24 @@ import { ArrayEntry } from '../utils/group_by_rollup';
 export const FONT_VARIANTS = Object.freeze(['normal', 'small-caps'] as const);
 export type FontVariant = typeof FONT_VARIANTS[number];
 
-export const FONT_WEIGHTS = Object.freeze([100, 200, 300, 400, 500, 600, 700, 800, 900, 'normal', 'bold', 'lighter', 'bolder', 'inherit', 'initial', 'unset'] as const);
+export const FONT_WEIGHTS = Object.freeze([
+  100,
+  200,
+  300,
+  400,
+  500,
+  600,
+  700,
+  800,
+  900,
+  'normal',
+  'bold',
+  'lighter',
+  'bolder',
+  'inherit',
+  'initial',
+  'unset',
+] as const);
 export type FontWeight = typeof FONT_WEIGHTS[number];
 export type NumericFontWeight = number & typeof FONT_WEIGHTS[number];
 

@@ -23,7 +23,6 @@ import { fitFunction } from './fit_function';
 import { DataSeries } from './series';
 import { isAreaSeriesSpec, isLineSeriesSpec, SeriesSpecs, BasicSeriesSpec } from './specs';
 
-
 /** @internal */
 export const applyFitFunctionToDataSeries = (
   dataseries: DataSeries[],
@@ -37,10 +36,10 @@ export const applyFitFunctionToDataSeries = (
     const spec = getSpecsById<BasicSeriesSpec>(seriesSpecs, specId);
 
     if (
-      spec !== null
-      && spec !== undefined
-      && (isAreaSeriesSpec(spec) || isLineSeriesSpec(spec))
-      && spec.fit !== undefined
+      spec !== null &&
+      spec !== undefined &&
+      (isAreaSeriesSpec(spec) || isLineSeriesSpec(spec)) &&
+      spec.fit !== undefined
     ) {
       const fittedData = fitFunction(data, spec.fit, xScaleType);
 

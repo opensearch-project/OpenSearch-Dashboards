@@ -63,17 +63,18 @@ export const getCursorBandPositionSelector = createCachedSelector(
     totalBarsInCluster,
     isTooltipSnapEnabled,
     geometriesIndexKeys,
-  ) => getCursorBand(
-    orientedProjectedPointerPosition,
-    externalPointerEvent,
-    chartDimensions.chartDimensions,
-    settingsSpec,
-    seriesGeometries.scales.xScale,
-    seriesSpec,
-    totalBarsInCluster,
-    isTooltipSnapEnabled,
-    geometriesIndexKeys,
-  ),
+  ) =>
+    getCursorBand(
+      orientedProjectedPointerPosition,
+      externalPointerEvent,
+      chartDimensions.chartDimensions,
+      settingsSpec,
+      seriesGeometries.scales.xScale,
+      seriesSpec,
+      totalBarsInCluster,
+      isTooltipSnapEnabled,
+      geometriesIndexKeys,
+    ),
 )(getChartIdSelector);
 
 function getCursorBand(
@@ -86,7 +87,7 @@ function getCursorBand(
   totalBarsInCluster: number,
   isTooltipSnapEnabled: boolean,
   geometriesIndexKeys: (string | number)[],
-): (Dimensions & { visible: boolean, fromExternalEvent: boolean }) | undefined {
+): (Dimensions & { visible: boolean; fromExternalEvent: boolean }) | undefined {
   // update che cursorBandPosition based on chart configuration
   const isLineAreaOnly = isLineAreaOnlyChart(seriesSpecs);
   if (!xScale) {

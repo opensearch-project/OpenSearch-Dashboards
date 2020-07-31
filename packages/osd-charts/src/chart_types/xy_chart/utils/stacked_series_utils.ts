@@ -40,29 +40,22 @@ export interface StackedValues {
 }
 
 /** @internal */
-export const datumXSortPredicate = (
-  xScaleType: ScaleType,
-  sortedXValues?: (string | number)[]
-) => (a: { x: number | string }, b: { x: number | string }) => {
-  if (
-    xScaleType === ScaleType.Ordinal
-    || typeof a.x === 'string'
-    || typeof b.x === 'string'
-  ) {
-    return sortedXValues
-      ? sortedXValues.indexOf(a.x) - sortedXValues.indexOf(b.x)
-      : 0;
+export const datumXSortPredicate = (xScaleType: ScaleType, sortedXValues?: (string | number)[]) => (
+  a: { x: number | string },
+  b: { x: number | string },
+) => {
+  if (xScaleType === ScaleType.Ordinal || typeof a.x === 'string' || typeof b.x === 'string') {
+    return sortedXValues ? sortedXValues.indexOf(a.x) - sortedXValues.indexOf(b.x) : 0;
   }
   return a.x - b.x;
 };
-
 
 type D3StackArrayElement = Record<SeriesKey, string | number | null>;
 type D3UnionStack = Record<
   SeriesKey,
   {
-    y0: SeriesPoint<D3StackArrayElement>[],
-    y1: SeriesPoint<D3StackArrayElement>[],
+    y0: SeriesPoint<D3StackArrayElement>[];
+    y1: SeriesPoint<D3StackArrayElement>[];
   }
 >;
 
@@ -79,10 +72,10 @@ export function formatStackedDataSeriesValues(
 
   const xValuesArray = [...xValues];
   const reorderedArray: Array<D3StackArrayElement> = [];
-  const xValueMap: Map<SeriesKey, Map<string|number, DataSeriesDatum>> = new Map();
+  const xValueMap: Map<SeriesKey, Map<string | number, DataSeriesDatum>> = new Map();
   // transforming the current set of series into the d3 stack required data structure
   dataSeries.forEach(({ data, key }) => {
-    const dsMap: Map<string|number, DataSeriesDatum> = new Map();
+    const dsMap: Map<string | number, DataSeriesDatum> = new Map();
     data.forEach((d) => {
       const { x, y0, y1 } = d;
       const xIndex = xValuesArray.indexOf(x);
@@ -102,7 +95,7 @@ export function formatStackedDataSeriesValues(
 
   const stackOffset = getOffsetBasedOnStackMode(stackMode);
 
-  const keys = Object.keys(dataSeriesKeys).reduce<string[]>((acc, key) => ([...acc, `${key}-y0`, `${key}-y1`]), []);
+  const keys = Object.keys(dataSeriesKeys).reduce<string[]>((acc, key) => [...acc, `${key}-y0`, `${key}-y1`], []);
 
   const stack = D3Stack<D3StackArrayElement>()
     .keys(keys)
@@ -125,41 +118,41 @@ export function formatStackedDataSeriesValues(
     return acc;
   }, {});
 
-
   return Object.keys(unionedYStacks).map((stackedDataSeriesKey) => {
     const dataSeriesProps = dataSeriesKeys[stackedDataSeriesKey];
     const dsMap = xValueMap.get(stackedDataSeriesKey);
     const { y0: y0StackArray, y1: y1StackArray } = unionedYStacks[stackedDataSeriesKey];
-    const data = y1StackArray.map<DataSeriesDatum | null>((y1Stack, index) => {
-      const { x } = y1Stack.data;
-      if (x === undefined || x === null) {
-        return null;
-      }
-      const originalData = dsMap?.get(x);
-      if (!originalData) {
-        return null;
-      }
-      const [,y0] = y0StackArray[index];
-      const [,y1] = y1Stack;
-      const { initialY0, initialY1, mark, datum, filled } = originalData;
-      return {
-        x,
-        y1,
-        y0,
-        initialY0,
-        initialY1,
-        mark,
-        datum,
-        filled,
-      };
-    }).filter((d) => d !== null) as DataSeriesDatum[];
+    const data = y1StackArray
+      .map<DataSeriesDatum | null>((y1Stack, index) => {
+        const { x } = y1Stack.data;
+        if (x === undefined || x === null) {
+          return null;
+        }
+        const originalData = dsMap?.get(x);
+        if (!originalData) {
+          return null;
+        }
+        const [, y0] = y0StackArray[index];
+        const [, y1] = y1Stack;
+        const { initialY0, initialY1, mark, datum, filled } = originalData;
+        return {
+          x,
+          y1,
+          y0,
+          initialY0,
+          initialY1,
+          mark,
+          datum,
+          filled,
+        };
+      })
+      .filter((d) => d !== null) as DataSeriesDatum[];
     return {
       ...dataSeriesProps,
       data,
     };
   });
 }
-
 
 function getOffsetBasedOnStackMode(stackMode?: StackMode) {
   switch (stackMode) {

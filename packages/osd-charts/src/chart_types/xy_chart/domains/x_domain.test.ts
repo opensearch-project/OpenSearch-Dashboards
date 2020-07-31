@@ -475,21 +475,22 @@ describe('X Domain', () => {
     };
 
     const { xValues } = getDataSeriesBySpecId(specDataSeries);
-    const getResult = () => mergeXDomain(
-      [
-        {
-          seriesType: SeriesTypes.Bar,
-          xScaleType: ScaleType.Linear,
-        },
-        {
-          seriesType: SeriesTypes.Bar,
-          xScaleType: ScaleType.Linear,
-        },
-      ],
-      xValues,
-      customDomain,
-      ScaleType.Ordinal,
-    );
+    const getResult = () =>
+      mergeXDomain(
+        [
+          {
+            seriesType: SeriesTypes.Bar,
+            xScaleType: ScaleType.Linear,
+          },
+          {
+            seriesType: SeriesTypes.Bar,
+            xScaleType: ScaleType.Linear,
+          },
+        ],
+        xValues,
+        customDomain,
+        ScaleType.Ordinal,
+      );
 
     expect(getResult).not.toThrow();
 

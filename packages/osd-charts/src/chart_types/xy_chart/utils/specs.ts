@@ -60,7 +60,6 @@ export const SeriesTypes = Object.freeze({
 /** @public */
 export type SeriesTypes = $Values<typeof SeriesTypes>;
 
-
 /**
  * The offset and mode applied when stacking values
  * @public
@@ -89,10 +88,7 @@ export type StackMode = $Values<typeof StackMode>;
  * - `null`: Keep existing bar style
  * @public
  */
-export type BarStyleAccessor = (
-  datum: DataSeriesDatum,
-  seriesIdentifier: XYChartSeriesIdentifier,
-) => BarStyleOverride;
+export type BarStyleAccessor = (datum: DataSeriesDatum, seriesIdentifier: XYChartSeriesIdentifier) => BarStyleOverride;
 /**
  * Override for bar styles per datum
  *

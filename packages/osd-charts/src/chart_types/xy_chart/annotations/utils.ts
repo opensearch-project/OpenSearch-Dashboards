@@ -47,7 +47,7 @@ export function getAnnotationAxis(
   const isHorizontalRotated = isHorizontalRotation(chartRotation);
   const isXDomainAnnotation = isXDomain(domainType);
   const annotationAxis = isXDomainAnnotation ? xAxis : yAxis;
-  const rotatedAnnotation = isHorizontalRotated ? annotationAxis : (isXDomainAnnotation ? yAxis : xAxis);
+  const rotatedAnnotation = isHorizontalRotated ? annotationAxis : isXDomainAnnotation ? yAxis : xAxis;
   return rotatedAnnotation ? rotatedAnnotation.position : undefined;
 }
 

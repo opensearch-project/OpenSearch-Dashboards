@@ -23,11 +23,8 @@ import { Rotation, Position, Placement, TooltipProps } from '../../src';
 import { TooltipType } from '../../src/specs/constants';
 import { VerticalAlignment, HorizontalAlignment } from '../../src/utils/commons';
 
-export const getPositiveNumberKnob = (
-  name: string,
-  value: number,
-  groupId?: string,
-) => number(name, value, { min: 0 }, groupId);
+export const getPositiveNumberKnob = (name: string, value: number, groupId?: string) =>
+  number(name, value, { min: 0 }, groupId);
 
 export const numberSelect = <T extends number>(
   name: string,
@@ -101,7 +98,9 @@ export const getPlacementKnob = (name = 'placement', defaultValue?: Placement) =
 
 export function arrayKnobs(name: string, values: (string | number)[]): (string | number)[] {
   const stringifiedValues = values.map<string>((d) => `${d}`);
-  return array(name, stringifiedValues).map<string | number>((value: string) => !isNaN(parseFloat(value)) ? parseFloat(value) : value);
+  return array(name, stringifiedValues).map<string | number>((value: string) =>
+    !isNaN(parseFloat(value)) ? parseFloat(value) : value,
+  );
 }
 
 export const getFallbackPlacementsKnob = (): Placement[] | undefined => {
@@ -143,16 +142,17 @@ export const getFallbackPlacementsKnob = (): Placement[] | undefined => {
   return knob;
 };
 
-// @ts-ignore
-export const getBoundaryKnob = () => select<TooltipProps['boundary']>(
-  'Boundary Element',
-  {
-    Chart: 'chart',
-    'Document Body': document.body,
-    Default: undefined,
-  },
-  undefined,
-);
+export const getBoundaryKnob = () =>
+  // @ts-ignore
+  select<TooltipProps['boundary']>(
+    'Boundary Element',
+    {
+      Chart: 'chart',
+      'Document Body': document.body,
+      Default: undefined,
+    },
+    undefined,
+  );
 
 export const getVerticalTextAlignmentKnob = (group?: string) =>
   select<VerticalAlignment | undefined>(

@@ -6,6 +6,8 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'airbnb/hooks',
+    'prettier/@typescript-eslint',
+    'plugin:prettier/recommended',
     'plugin:eslint-comments/recommended',
     'plugin:jest/recommended',
     'plugin:promise/recommended',
@@ -16,13 +18,43 @@ module.exports = {
     'plugin:import/warnings',
     'plugin:import/typescript',
   ],
-  plugins: ['@typescript-eslint', 'eslint-comments', 'jest', 'import', 'promise', 'unicorn', 'header', 'react-hooks', 'jsx-a11y'],
+  plugins: [
+    '@typescript-eslint',
+    'eslint-comments',
+    'jest',
+    'import',
+    'promise',
+    'unicorn',
+    'header',
+    'react-hooks',
+    'jsx-a11y',
+    'prettier',
+  ],
   rules: {
     /**
      * depricated to be deleted
      */
     // https://github.com/typescript-eslint/typescript-eslint/issues/2077
     '@typescript-eslint/camelcase': 0,
+
+    /**
+     *****************************************
+     * Rules with high processing demand
+     *****************************************
+     */
+    'import/no-restricted-paths':
+      process.env.NODE_ENV === 'production'
+        ? [
+            'error',
+            {
+              zones: [
+                { target: './src', from: './src/index.ts' },
+                { target: './src', from: './', except: ['./src', './node_modules/'] },
+              ],
+            },
+          ]
+        : 0,
+    'import/namespace': process.env.NODE_ENV === 'production' ? 2 : 0,
 
     /**
      *****************************************
@@ -99,14 +131,18 @@ module.exports = {
         ExportDeclaration: { consistent: true },
       },
     ],
-    quotes: ['error', 'single'],
     semi: ['error', 'always'],
     // https://github.com/typescript-eslint/typescript-eslint/issues/1824
-    indent: ['error', 2, {
-      SwitchCase: 1,
-      MemberExpression: 1,
-      offsetTernaryExpressions: true,
-    }],
+    // TODO: Add back once indent ts rule is fixed
+    // indent: [
+    //   'error',
+    //   2,
+    //   {
+    //     SwitchCase: 1,
+    //     MemberExpression: 1,
+    //     offsetTernaryExpressions: true,
+    //   },
+    // ],
     'max-len': [
       'warn',
       {
@@ -144,7 +180,6 @@ module.exports = {
     '@typescript-eslint/indent': 0,
     '@typescript-eslint/no-inferrable-types': 0,
     '@typescript-eslint/ban-ts-comment': 1,
-    '@typescript-eslint/space-before-function-paren': [2, 'never'],
     '@typescript-eslint/no-unused-vars': [
       'error',
       {
@@ -166,22 +201,15 @@ module.exports = {
     /*
      * import plugin
      */
-    'import/order': ['error', {
-      'newlines-between': 'always',
-      groups: [
-        'builtin',
-        'external',
-        ['parent', 'sibling', 'index', 'internal'],
-      ],
-      alphabetize: { order: 'asc', caseInsensitive: true }, // todo replace with directory gradient ordering
-    }],
-    'import/no-unresolved': ['error', { ignore: ['theme_dark.scss', 'theme_light.scss'] }],
-    'import/no-restricted-paths': [
+    'import/order': [
       'error',
       {
-        zones: [{ target: './src', from: './src/index.ts' }, { target: './src', from: './', except: ['./src', './node_modules/'] }],
+        'newlines-between': 'always',
+        groups: ['builtin', 'external', ['parent', 'sibling', 'index', 'internal']],
+        alphabetize: { order: 'asc', caseInsensitive: true }, // todo replace with directory gradient ordering
       },
     ],
+    'import/no-unresolved': ['error', { ignore: ['theme_dark.scss', 'theme_light.scss'] }],
     // https://basarat.gitbooks.io/typescript/docs/tips/defaultIsBad.html
     'import/prefer-default-export': 0,
     // Limit usage in development directories
@@ -192,6 +220,10 @@ module.exports = {
      */
     'react/jsx-curly-brace-presence': ['error', { props: 'never', children: 'never' }],
     'react/prop-types': 0,
+    'react/sort-comp': 0,
+    'react/jsx-one-expression-per-line': 0,
+    'react/jsx-curly-newline': 0,
+    'react/jsx-indent': 0,
     // Too restrictive: https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/destructuring-assignment.md
     'react/destructuring-assignment': 0,
     // No jsx extension: https://github.com/facebook/create-react-app/issues/87#issuecomment-234627904
@@ -345,6 +377,12 @@ module.exports = {
             ],
           },
         ],
+      },
+    },
+    {
+      files: ['.playground/**/*.ts?(x)'],
+      rules: {
+        'react/prefer-stateless-function': 0,
       },
     },
     {

@@ -66,7 +66,7 @@ export const getYValue = ({ y1, filled }: DataSeriesDatum): number | null => {
     return y1;
   }
 
-  if (filled && (filled.y1 !== undefined)) {
+  if (filled && filled.y1 !== undefined) {
     return filled.y1;
   }
 
@@ -273,23 +273,26 @@ function getDatumYValue(
   { y1, y0, initialY1, initialY0 }: DataSeriesDatum,
   lookingForY0: boolean,
   isBandChart: boolean,
-  stackMode?: StackMode
+  stackMode?: StackMode,
 ) {
   if (isBandChart) {
     return stackMode === StackMode.Percentage
-      // on band stacked charts in percentage mode, the values I'm looking for are the percentage value
-      // that are already computed and available on y0 and y1
-      ? (lookingForY0 ? y0 : y1)
-      // in all other cases for band charts, I want to get back the original/initial value of y0 and y1
+      ? // on band stacked charts in percentage mode, the values I'm looking for are the percentage value
+        // that are already computed and available on y0 and y1
+        lookingForY0
+        ? y0
+        : y1
+      : // in all other cases for band charts, I want to get back the original/initial value of y0 and y1
       // not the computed value
-      : (lookingForY0 ? initialY0 : initialY1);
+      lookingForY0
+      ? initialY0
+      : initialY1;
   }
   // if not a band chart get use the original/initial value in every case except for stack as percentage
   // in this case, we should take the difference between the bottom position of the bar and the top position
   // of the bar
   return stackMode === StackMode.Percentage ? (y1 ?? 0) - (y0 ?? 0) : initialY1;
 }
-
 
 /** @internal */
 export function renderBars(
@@ -373,33 +376,37 @@ export function renderBars(
 
     const x = xScaled + xScale.bandwidth * orderIndex;
     const width = xScale.bandwidth;
-    const originalY1Value = stackMode === StackMode.Percentage ? (y1 - (y0 ?? 0)) : initialY1;
-    const formattedDisplayValue = displayValueSettings && displayValueSettings.valueFormatter
-      ? displayValueSettings.valueFormatter(originalY1Value)
-      : undefined;
+    const originalY1Value = stackMode === StackMode.Percentage ? y1 - (y0 ?? 0) : initialY1;
+    const formattedDisplayValue =
+      displayValueSettings && displayValueSettings.valueFormatter
+        ? displayValueSettings.valueFormatter(originalY1Value)
+        : undefined;
 
     // only show displayValue for even bars if showOverlappingValue
-    const displayValueText = displayValueSettings && displayValueSettings.isAlternatingValueLabel
-      ? (barGeometries.length % 2 === 0
+    const displayValueText =
+      displayValueSettings && displayValueSettings.isAlternatingValueLabel
+        ? barGeometries.length % 2 === 0
           ? formattedDisplayValue
-          : undefined)
-      : formattedDisplayValue;
+          : undefined
+        : formattedDisplayValue;
 
     const computedDisplayValueWidth = bboxCalculator.compute(displayValueText || '', padding, fontSize, fontFamily)
       .width;
-    const displayValueWidth = displayValueSettings && displayValueSettings.isValueContainedInElement ? width : computedDisplayValueWidth;
+    const displayValueWidth =
+      displayValueSettings && displayValueSettings.isValueContainedInElement ? width : computedDisplayValueWidth;
 
     const hideClippedValue = displayValueSettings ? displayValueSettings.hideClippedValue : undefined;
 
-    const displayValue = displayValueSettings && displayValueSettings.showValueLabel
-      ? {
-          text: displayValueText,
-          width: displayValueWidth,
-          height: fontSize,
-          hideClippedValue,
-          isValueContainedInElement: displayValueSettings.isValueContainedInElement,
-        }
-      : undefined;
+    const displayValue =
+      displayValueSettings && displayValueSettings.showValueLabel
+        ? {
+            text: displayValueText,
+            width: displayValueWidth,
+            height: fontSize,
+            hideClippedValue,
+            isValueContainedInElement: displayValueSettings.isValueContainedInElement,
+          }
+        : undefined;
 
     const seriesIdentifier: XYChartSeriesIdentifier = {
       key: dataSeries.key,
@@ -574,7 +581,6 @@ export function renderBubble(
   };
 }
 
-
 /** @internal */
 export function renderArea(
   shift: number,
@@ -590,7 +596,7 @@ export function renderArea(
   isStacked = false,
   pointStyleAccessor?: PointStyleAccessor,
   hasFit?: boolean,
-  stackMode?: StackMode
+  stackMode?: StackMode,
 ): {
   areaGeometry: AreaGeometry;
   indexedGeometryMap: IndexedGeometryMap;
@@ -659,7 +665,7 @@ export function renderArea(
     markSizeOptions,
     pointStyleAccessor,
     false,
-    stackMode
+    stackMode,
   );
 
   let areaPath: string;
@@ -705,7 +711,7 @@ export function renderArea(
  * @param param0
  * @internal
  */
-export function isDatumFilled({ filled, initialY1 } : DataSeriesDatum) {
+export function isDatumFilled({ filled, initialY1 }: DataSeriesDatum) {
   return filled?.x !== undefined || filled?.y1 !== undefined || initialY1 === null || initialY1 === undefined;
 }
 

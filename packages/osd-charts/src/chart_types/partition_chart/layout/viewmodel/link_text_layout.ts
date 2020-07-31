@@ -61,7 +61,9 @@ export function linkTextLayout(
   const yRelativeIncrement = Math.sin(linkLabel.stemAngle) * linkLabel.minimumStemLength;
   const rowPitch = linkLabel.fontSize + linkLabel.spacing;
   // determine the ideal contrast color for the link labels
-  const validBackgroundColor = isColorValid(containerBackgroundColor) ? containerBackgroundColor : 'rgba(255, 255, 255, 0)';
+  const validBackgroundColor = isColorValid(containerBackgroundColor)
+    ? containerBackgroundColor
+    : 'rgba(255, 255, 255, 0)';
   const contrastTextColor = containerBackgroundColor
     ? makeHighContrastColor(linkLabel.textColor, validBackgroundColor)
     : linkLabel.textColor;
@@ -144,12 +146,13 @@ export function linkTextLayout(
           ? rectWidth - diskCenter.x - translateX - widthAdjustment
           : diskCenter.x + translateX - widthAdjustment,
       );
-      const { text, width, verticalOffset } = linkLabel.fontSize / 2 <= cy + diskCenter.y && cy + diskCenter.y <= rectHeight - linkLabel.fontSize / 2
-        ? fitText(measure, labelText, allottedLabelWidth, linkLabel.fontSize, {
-            ...labelFontSpec,
-            text: labelText,
-          })
-        : { text: '', width: 0, verticalOffset: 0 };
+      const { text, width, verticalOffset } =
+        linkLabel.fontSize / 2 <= cy + diskCenter.y && cy + diskCenter.y <= rectHeight - linkLabel.fontSize / 2
+          ? fitText(measure, labelText, allottedLabelWidth, linkLabel.fontSize, {
+              ...labelFontSpec,
+              text: labelText,
+            })
+          : { text: '', width: 0, verticalOffset: 0 };
       const linkLabels: PointTuples = [
         [x0, y0],
         [stemFromX, stemFromY],

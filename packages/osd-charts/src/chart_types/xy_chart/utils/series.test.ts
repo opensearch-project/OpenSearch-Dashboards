@@ -108,22 +108,27 @@ describe('Series', () => {
   });
   test('Can stack simple dataseries', () => {
     const store = MockStore.default();
-    MockStore.addSpecs(MockSeriesSpec.area({
-      id: 'spec1',
-      splitSeriesAccessors: ['g'],
-      yAccessors: ['y1'],
-      stackAccessors: ['x'],
-      xScaleType: ScaleType.Linear,
-      data: [
-        { x: 1, y1: 1, g: 'a' },
-        { x: 2, y1: 2, g: 'a' },
-        { x: 4, y1: 4, g: 'a' },
-        { x: 1, y1: 21, g: 'b' },
-        { x: 3, y1: 23, g: 'b' },
-      ],
-    }), store);
+    MockStore.addSpecs(
+      MockSeriesSpec.area({
+        id: 'spec1',
+        splitSeriesAccessors: ['g'],
+        yAccessors: ['y1'],
+        stackAccessors: ['x'],
+        xScaleType: ScaleType.Linear,
+        data: [
+          { x: 1, y1: 1, g: 'a' },
+          { x: 2, y1: 2, g: 'a' },
+          { x: 4, y1: 4, g: 'a' },
+          { x: 1, y1: 21, g: 'b' },
+          { x: 3, y1: 23, g: 'b' },
+        ],
+      }),
+      store,
+    );
 
-    const { formattedDataSeries: { stacked } } = computeSeriesDomainsSelector(store.getState());
+    const {
+      formattedDataSeries: { stacked },
+    } = computeSeriesDomainsSelector(store.getState());
 
     expect(stacked[0].dataSeries).toMatchSnapshot();
   });
@@ -188,21 +193,26 @@ describe('Series', () => {
   });
   test('Can stack unsorted dataseries', () => {
     const store = MockStore.default();
-    MockStore.addSpecs(MockSeriesSpec.area({
-      id: 'spec1',
-      splitSeriesAccessors: ['g'],
-      yAccessors: ['y1'],
-      stackAccessors: ['x'],
-      xScaleType: ScaleType.Linear,
-      data: [
-        { x: 1, y1: 1, g: 'a' },
-        { x: 4, y1: 4, g: 'a' },
-        { x: 2, y1: 2, g: 'a' },
-        { x: 3, y1: 23, g: 'b' },
-        { x: 1, y1: 21, g: 'b' },
-      ],
-    }), store);
-    const { formattedDataSeries: { stacked } } = computeSeriesDomainsSelector(store.getState());
+    MockStore.addSpecs(
+      MockSeriesSpec.area({
+        id: 'spec1',
+        splitSeriesAccessors: ['g'],
+        yAccessors: ['y1'],
+        stackAccessors: ['x'],
+        xScaleType: ScaleType.Linear,
+        data: [
+          { x: 1, y1: 1, g: 'a' },
+          { x: 4, y1: 4, g: 'a' },
+          { x: 2, y1: 2, g: 'a' },
+          { x: 3, y1: 23, g: 'b' },
+          { x: 1, y1: 21, g: 'b' },
+        ],
+      }),
+      store,
+    );
+    const {
+      formattedDataSeries: { stacked },
+    } = computeSeriesDomainsSelector(store.getState());
 
     expect(stacked[0].dataSeries).toMatchSnapshot();
   });
@@ -215,7 +225,9 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['a'],
         key: 'a',
-        data: new Array(maxArrayItems).fill(0).map((d, i) => ({ x: i, y1: i, mark: null, y0: null, initialY1: i, initialY0: null, datum: undefined })),
+        data: new Array(maxArrayItems)
+          .fill(0)
+          .map((d, i) => ({ x: i, y1: i, mark: null, y0: null, initialY1: i, initialY0: null, datum: undefined })),
       },
       {
         specId: 'spec1',
@@ -223,7 +235,9 @@ describe('Series', () => {
         splitAccessors: new Map(),
         seriesKeys: ['b'],
         key: 'b',
-        data: new Array(maxArrayItems).fill(0).map((d, i) => ({ x: i, y1: i, mark: null, y0: null, initialY1: i, initialY0: null, datum: undefined })),
+        data: new Array(maxArrayItems)
+          .fill(0)
+          .map((d, i) => ({ x: i, y1: i, mark: null, y0: null, initialY1: i, initialY0: null, datum: undefined })),
       },
     ];
     const xValues = new Set(new Array(maxArrayItems).fill(0).map((d, i) => i));
@@ -232,129 +246,137 @@ describe('Series', () => {
   });
   test('Can stack simple dataseries with scale to extent', () => {
     const store = MockStore.default();
-    MockStore.addSpecs([
-      MockGlobalSpec.axis({
-        id: 'y',
-        position: Position.Left,
-        domain: { fit: true },
-      }),
-      MockSeriesSpec.bar({
-        id: 'spec1',
-        yAccessors: ['y1'],
-        splitSeriesAccessors: ['g'],
-        stackAccessors: ['x'],
-        xScaleType: ScaleType.Linear,
-        data: [
-          { x: 1, y1: 1, g: 'a' },
-          { x: 2, y1: 2, g: 'a' },
-          { x: 4, y1: 4, g: 'a' },
-          { x: 1, y1: 21, g: 'b' },
-          { x: 3, y1: 23, g: 'b' },
-        ],
-      }),
-    ],
-    store);
+    MockStore.addSpecs(
+      [
+        MockGlobalSpec.axis({
+          id: 'y',
+          position: Position.Left,
+          domain: { fit: true },
+        }),
+        MockSeriesSpec.bar({
+          id: 'spec1',
+          yAccessors: ['y1'],
+          splitSeriesAccessors: ['g'],
+          stackAccessors: ['x'],
+          xScaleType: ScaleType.Linear,
+          data: [
+            { x: 1, y1: 1, g: 'a' },
+            { x: 2, y1: 2, g: 'a' },
+            { x: 4, y1: 4, g: 'a' },
+            { x: 1, y1: 21, g: 'b' },
+            { x: 3, y1: 23, g: 'b' },
+          ],
+        }),
+      ],
+      store,
+    );
 
     const seriesDomains = computeSeriesDomainsSelector(store.getState());
     expect(seriesDomains.formattedDataSeries.stacked[0].dataSeries).toMatchSnapshot();
   });
   test('Can stack multiple dataseries with scale to extent', () => {
     const store = MockStore.default();
-    MockStore.addSpecs([
-      MockGlobalSpec.axis({
-        id: 'y',
-        position: Position.Left,
-        domain: { fit: true },
-      }),
-      MockSeriesSpec.bar({
-        id: 'spec1',
-        yAccessors: ['y1'],
-        splitSeriesAccessors: ['g'],
-        stackAccessors: ['x'],
-        xScaleType: ScaleType.Linear,
-        data: [
-          { x: 1, y1: 1, g: 'a' },
-          { x: 2, y1: 2, g: 'a' },
-          { x: 3, y1: 3, g: 'a' },
-          { x: 4, y1: 4, g: 'a' },
-          { x: 1, y1: 1, g: 'b' },
-          { x: 2, y1: 2, g: 'b' },
-          { x: 3, y1: 3, g: 'b' },
-          { x: 4, y1: 4, g: 'b' },
-          { x: 1, y1: 1, g: 'c' },
-          { x: 2, y1: 2, g: 'c' },
-          { x: 3, y1: 3, g: 'c' },
-          { x: 4, y1: 4, g: 'c' },
-          { x: 1, y1: 1, g: 'd' },
-          { x: 2, y1: 2, g: 'd' },
-          { x: 3, y1: 3, g: 'd' },
-          { x: 4, y1: 4, g: 'd' },
-        ],
-      }),
-    ],
-    store);
+    MockStore.addSpecs(
+      [
+        MockGlobalSpec.axis({
+          id: 'y',
+          position: Position.Left,
+          domain: { fit: true },
+        }),
+        MockSeriesSpec.bar({
+          id: 'spec1',
+          yAccessors: ['y1'],
+          splitSeriesAccessors: ['g'],
+          stackAccessors: ['x'],
+          xScaleType: ScaleType.Linear,
+          data: [
+            { x: 1, y1: 1, g: 'a' },
+            { x: 2, y1: 2, g: 'a' },
+            { x: 3, y1: 3, g: 'a' },
+            { x: 4, y1: 4, g: 'a' },
+            { x: 1, y1: 1, g: 'b' },
+            { x: 2, y1: 2, g: 'b' },
+            { x: 3, y1: 3, g: 'b' },
+            { x: 4, y1: 4, g: 'b' },
+            { x: 1, y1: 1, g: 'c' },
+            { x: 2, y1: 2, g: 'c' },
+            { x: 3, y1: 3, g: 'c' },
+            { x: 4, y1: 4, g: 'c' },
+            { x: 1, y1: 1, g: 'd' },
+            { x: 2, y1: 2, g: 'd' },
+            { x: 3, y1: 3, g: 'd' },
+            { x: 4, y1: 4, g: 'd' },
+          ],
+        }),
+      ],
+      store,
+    );
 
     const seriesDomains = computeSeriesDomainsSelector(store.getState());
     expect(seriesDomains.formattedDataSeries.stacked[0].dataSeries).toMatchSnapshot();
   });
   test('Can stack simple dataseries with y0', () => {
     const store = MockStore.default();
-    MockStore.addSpecs([
-      MockGlobalSpec.axis({
-        id: 'y',
-        position: Position.Left,
-        domain: { fit: true },
-      }),
-      MockSeriesSpec.bar({
-        id: 'spec1',
-        yAccessors: ['y1'],
-        y0Accessors: ['y0'],
-        splitSeriesAccessors: ['g'],
-        stackAccessors: ['x'],
-        xScaleType: ScaleType.Linear,
-        data: [
-          { x: 1, y1: 3, y0: 1, g: 'a' },
-          { x: 2, y1: 3, y0: 2, g: 'a' },
-          { x: 4, y1: 4, y0: 3, g: 'a' },
-          { x: 1, y1: 2, y0: 1, g: 'b' },
-          { x: 2, y1: 3, y0: 1, g: 'b' },
-          { x: 3, y1: 23, y0: 4, g: 'b' },
-          { x: 4, y1: 4, y0: 1, g: 'b' },
-        ],
-      }),
-    ],
-    store);
+    MockStore.addSpecs(
+      [
+        MockGlobalSpec.axis({
+          id: 'y',
+          position: Position.Left,
+          domain: { fit: true },
+        }),
+        MockSeriesSpec.bar({
+          id: 'spec1',
+          yAccessors: ['y1'],
+          y0Accessors: ['y0'],
+          splitSeriesAccessors: ['g'],
+          stackAccessors: ['x'],
+          xScaleType: ScaleType.Linear,
+          data: [
+            { x: 1, y1: 3, y0: 1, g: 'a' },
+            { x: 2, y1: 3, y0: 2, g: 'a' },
+            { x: 4, y1: 4, y0: 3, g: 'a' },
+            { x: 1, y1: 2, y0: 1, g: 'b' },
+            { x: 2, y1: 3, y0: 1, g: 'b' },
+            { x: 3, y1: 23, y0: 4, g: 'b' },
+            { x: 4, y1: 4, y0: 1, g: 'b' },
+          ],
+        }),
+      ],
+      store,
+    );
 
     const seriesDomains = computeSeriesDomainsSelector(store.getState());
     expect(seriesDomains.formattedDataSeries.stacked[0].dataSeries).toMatchSnapshot();
   });
   test('Can stack simple dataseries with scale to extent with y0', () => {
     const store = MockStore.default();
-    MockStore.addSpecs([
-      MockGlobalSpec.axis({
-        id: 'y',
-        position: Position.Left,
-        domain: { fit: true },
-      }),
-      MockSeriesSpec.bar({
-        id: 'spec1',
-        yAccessors: ['y1'],
-        y0Accessors: ['y0'],
-        splitSeriesAccessors: ['g'],
-        stackAccessors: ['x'],
-        xScaleType: ScaleType.Linear,
-        data: [
-          { x: 1, y1: 3, y0: 1, g: 'a' },
-          { x: 2, y1: 3, y0: 2, g: 'a' },
-          { x: 4, y1: 4, y0: 3, g: 'a' },
-          { x: 1, y1: 2, y0: 1, g: 'b' },
-          { x: 2, y1: 3, y0: 1, g: 'b' },
-          { x: 3, y1: 23, y0: 4, g: 'b' },
-          { x: 4, y1: 4, y0: 1, g: 'b' },
-        ],
-      }),
-    ],
-    store);
+    MockStore.addSpecs(
+      [
+        MockGlobalSpec.axis({
+          id: 'y',
+          position: Position.Left,
+          domain: { fit: true },
+        }),
+        MockSeriesSpec.bar({
+          id: 'spec1',
+          yAccessors: ['y1'],
+          y0Accessors: ['y0'],
+          splitSeriesAccessors: ['g'],
+          stackAccessors: ['x'],
+          xScaleType: ScaleType.Linear,
+          data: [
+            { x: 1, y1: 3, y0: 1, g: 'a' },
+            { x: 2, y1: 3, y0: 2, g: 'a' },
+            { x: 4, y1: 4, y0: 3, g: 'a' },
+            { x: 1, y1: 2, y0: 1, g: 'b' },
+            { x: 2, y1: 3, y0: 1, g: 'b' },
+            { x: 3, y1: 23, y0: 4, g: 'b' },
+            { x: 4, y1: 4, y0: 1, g: 'b' },
+          ],
+        }),
+      ],
+      store,
+    );
 
     const seriesDomains = computeSeriesDomainsSelector(store.getState());
     expect(seriesDomains.formattedDataSeries.stacked[0].dataSeries).toMatchSnapshot();

@@ -31,10 +31,8 @@ import { getAxisSpecsSelector } from './get_specs';
 /** @internal */
 export const mergeYCustomDomainsByGroupIdSelector = createCachedSelector(
   [getAxisSpecsSelector, getSettingsSpecSelector],
-  (axisSpecs, settingsSpec): Map<GroupId, YDomainRange> => mergeYCustomDomainsByGroupId(
-    axisSpecs,
-    settingsSpec ? settingsSpec.rotation : 0,
-  ),
+  (axisSpecs, settingsSpec): Map<GroupId, YDomainRange> =>
+    mergeYCustomDomainsByGroupId(axisSpecs, settingsSpec ? settingsSpec.rotation : 0),
 )(getChartIdSelector);
 
 /** @internal */

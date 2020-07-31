@@ -31,7 +31,6 @@ import {
   isAllSeriesDeselected,
 } from './common';
 
-
 describe('Type Checks', () => {
   test('is horizontal chart rotation', () => {
     expect(isHorizontalRotation(0)).toBe(true);

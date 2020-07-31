@@ -40,13 +40,12 @@ function generateAnnotationData(values: any[]): LineAnnotationDatum[] {
 
 export const Example = () => {
   const debug = boolean('debug', false);
-  const markerPosition = select('marker position', [
-    Position.Top,
-    Position.Left,
-    Position.Bottom,
-    Position.Right,
+  const markerPosition = select(
+    'marker position',
+    [Position.Top, Position.Left, Position.Bottom, Position.Right, 'undefined'],
     'undefined',
-  ], 'undefined'); const rotation = getChartRotationKnob();
+  );
+  const rotation = getChartRotationKnob();
   const dataValues = generateAnnotationData(arrayKnobs('annotation values', ['a', 'c']));
   return (
     <Chart className="story-chart">

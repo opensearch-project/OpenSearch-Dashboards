@@ -84,7 +84,7 @@ export const Example = () => {
 
   const hasCustomTooltip = boolean('has custom tooltip render', false);
 
-  const customTooltip = ({ details } : { details?: string }) => (
+  const customTooltip = ({ details }: { details?: string }) => (
     <div>
       <Icon type="alert" />
       {details}

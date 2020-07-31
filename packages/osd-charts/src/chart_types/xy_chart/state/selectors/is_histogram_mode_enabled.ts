@@ -24,4 +24,6 @@ import { isHistogramModeEnabled } from '../utils/utils';
 import { getSeriesSpecsSelector } from './get_specs';
 
 /** @internal */
-export const isHistogramModeEnabledSelector = createCachedSelector([getSeriesSpecsSelector], (seriesSpecs): boolean => isHistogramModeEnabled(seriesSpecs))(getChartIdSelector);
+export const isHistogramModeEnabledSelector = createCachedSelector([getSeriesSpecsSelector], (seriesSpecs): boolean =>
+  isHistogramModeEnabled(seriesSpecs),
+)(getChartIdSelector);

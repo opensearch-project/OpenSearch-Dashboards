@@ -32,18 +32,12 @@ const UTC_MINUS8_DATE = DateTime.fromISO('2019-01-01T00:00:00.000-08:00', {
   setZone: true,
 }).toMillis();
 const DAY_INCREMENT_1 = 1000 * 60 * 60 * 24;
-const UTC_DATASET = new Array(10).fill(0).map((d, i) => [
-  UTC_DATE + DAY_INCREMENT_1 * i, i % 5,
-]);
-const CURRENT_TIMEZONE_DATASET = new Array(10).fill(0).map((d, i) => [
-  today + DAY_INCREMENT_1 * i, i % 5,
-]);
-const OTHER_PLUS8_TIMEZONE_DATASET = new Array(10).fill(0).map((d, i) => [
-  UTC_PLUS8_DATE + DAY_INCREMENT_1 * i, i % 5,
-]);
-const OTHER_MINUS8_TIMEZONE_DATASET = new Array(10).fill(0).map((d, i) => [
-  UTC_MINUS8_DATE + DAY_INCREMENT_1 * i, i % 5,
-]);
+const UTC_DATASET = new Array(10).fill(0).map((d, i) => [UTC_DATE + DAY_INCREMENT_1 * i, i % 5]);
+const CURRENT_TIMEZONE_DATASET = new Array(10).fill(0).map((d, i) => [today + DAY_INCREMENT_1 * i, i % 5]);
+const OTHER_PLUS8_TIMEZONE_DATASET = new Array(10).fill(0).map((d, i) => [UTC_PLUS8_DATE + DAY_INCREMENT_1 * i, i % 5]);
+const OTHER_MINUS8_TIMEZONE_DATASET = new Array(10)
+  .fill(0)
+  .map((d, i) => [UTC_MINUS8_DATE + DAY_INCREMENT_1 * i, i % 5]);
 
 export const Example = () => {
   const timezones = {
@@ -84,9 +78,10 @@ export const Example = () => {
       break;
     default:
     case 'utc':
-      tooltipFn = (d: number) => DateTime.fromMillis(d)
-        .toUTC()
-        .toFormat('yyyy-MM-dd HH:mm:ss');
+      tooltipFn = (d: number) =>
+        DateTime.fromMillis(d)
+          .toUTC()
+          .toFormat('yyyy-MM-dd HH:mm:ss');
       break;
   }
   return (

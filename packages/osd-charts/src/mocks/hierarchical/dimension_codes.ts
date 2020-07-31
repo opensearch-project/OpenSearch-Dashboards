@@ -46,7 +46,7 @@ export const countryDimension = [
   { continentCountry: 'afbfa', country: 'bfa', name: 'Burkina Faso' },
   { continentCountry: 'afbwa', country: 'bwa', name: 'Botswana' },
   { continentCountry: 'afcaf', country: 'caf', name: 'Central African Republic' },
-  { continentCountry: 'afciv', country: 'civ', name: 'Cote d\'Ivoire' },
+  { continentCountry: 'afciv', country: 'civ', name: "Cote d'Ivoire" },
   { continentCountry: 'afcmr', country: 'cmr', name: 'Cameroon' },
   { continentCountry: 'afcod', country: 'cod', name: 'Democratic Republic of the Congo' },
   { continentCountry: 'afcog', country: 'cog', name: 'Republic of the Congo' },

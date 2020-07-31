@@ -75,7 +75,8 @@ export function computeChartDimensions(
     const labelPaddingSum = tickLabel.visible ? labelPadding.inner + labelPadding.outer : 0;
 
     const tickDimension = showTicks ? tickLine.size + tickLine.padding : 0;
-    const titleHeight = title !== undefined && axisTitle.visible ? axisTitle.fontSize + titlePadding.outer + titlePadding.inner : 0;
+    const titleHeight =
+      title !== undefined && axisTitle.visible ? axisTitle.fontSize + titlePadding.outer + titlePadding.inner : 0;
     const axisDimension = labelPaddingSum + tickDimension + titleHeight;
     const maxAxisHeight = tickLabel.visible ? maxLabelBboxHeight + axisDimension : axisDimension;
     const maxAxisWidth = tickLabel.visible ? maxLabelBboxWidth + axisDimension : axisDimension;

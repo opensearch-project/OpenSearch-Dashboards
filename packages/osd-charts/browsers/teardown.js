@@ -17,6 +17,6 @@
  * under the License.
  */
 
-module.exports = async() => {
+module.exports = async () => {
   await global.__WP_SERVER__.close();
 };

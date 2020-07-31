@@ -24,11 +24,27 @@ import { computeSeriesDomainsSelector } from '../state/selectors/compute_series_
 import { StackMode } from './specs';
 
 describe('Stacked Series Utils', () => {
-  const STANDARD_DATA_SET = [{ x: 0, y1: 10, g: 'a' }, { x: 0, y1: 20, g: 'b' }, { x: 0, y1: 70, g: 'c' }];
+  const STANDARD_DATA_SET = [
+    { x: 0, y1: 10, g: 'a' },
+    { x: 0, y1: 20, g: 'b' },
+    { x: 0, y1: 70, g: 'c' },
+  ];
 
-  const WITH_NULL_DATASET = [{ x: 0, y1: 10, g: 'a' }, { x: 0, y1: null, g: 'b' }, { x: 0, y1: 30, g: 'c' }];
-  const STANDARD_DATA_SET_WY0 = [{ x: 0, y0: 2, y1: 10, g: 'a' }, { x: 0, y0: 4, y1: 20, g: 'b' }, { x: 0, y0: 6, y1: 70, g: 'c' }];
-  const WITH_NULL_DATASET_WY0 = [{ x: 0, y0: 2, y1: 10, g: 'a' }, { x: 0, y1: null, g: 'b' }, { x: 0, y0: 6, y1: 90, mark: null, g: 'c' }];
+  const WITH_NULL_DATASET = [
+    { x: 0, y1: 10, g: 'a' },
+    { x: 0, y1: null, g: 'b' },
+    { x: 0, y1: 30, g: 'c' },
+  ];
+  const STANDARD_DATA_SET_WY0 = [
+    { x: 0, y0: 2, y1: 10, g: 'a' },
+    { x: 0, y0: 4, y1: 20, g: 'b' },
+    { x: 0, y0: 6, y1: 70, g: 'c' },
+  ];
+  const WITH_NULL_DATASET_WY0 = [
+    { x: 0, y0: 2, y1: 10, g: 'a' },
+    { x: 0, y1: null, g: 'b' },
+    { x: 0, y0: 6, y1: 90, mark: null, g: 'c' },
+  ];
   const DATA_SET_WITH_NULL_2 = [
     { x: 1, y1: 10, g: 'a' },
     { x: 2, y1: 20, g: 'a' },
@@ -40,16 +56,19 @@ describe('Stacked Series Utils', () => {
   describe('Format stacked dataset', () => {
     test('format data without nulls', () => {
       const store = MockStore.default();
-      MockStore.addSpecs([
-        MockSeriesSpec.area({
-          xAccessor: 'x',
-          yAccessors: ['y1'],
-          splitSeriesAccessors: ['g'],
-          stackAccessors: ['x'],
-          stackMode: StackMode.Percentage,
-          data: STANDARD_DATA_SET,
-        }),
-      ], store);
+      MockStore.addSpecs(
+        [
+          MockSeriesSpec.area({
+            xAccessor: 'x',
+            yAccessors: ['y1'],
+            splitSeriesAccessors: ['g'],
+            stackAccessors: ['x'],
+            stackMode: StackMode.Percentage,
+            data: STANDARD_DATA_SET,
+          }),
+        ],
+        store,
+      );
       const { formattedDataSeries } = computeSeriesDomainsSelector(store.getState());
       const { stacked } = formattedDataSeries;
       const [data0] = stacked[0].dataSeries[0].data;
@@ -69,16 +88,21 @@ describe('Stacked Series Utils', () => {
     });
     test('format data with nulls', () => {
       const store = MockStore.default();
-      MockStore.addSpecs([
-        MockSeriesSpec.area({
-          yAccessors: ['y1'],
-          splitSeriesAccessors: ['g'],
-          stackAccessors: ['x'],
-          stackMode: StackMode.Percentage,
-          data: WITH_NULL_DATASET,
-        }),
-      ], store);
-      const { formattedDataSeries: { stacked } } = computeSeriesDomainsSelector(store.getState());
+      MockStore.addSpecs(
+        [
+          MockSeriesSpec.area({
+            yAccessors: ['y1'],
+            splitSeriesAccessors: ['g'],
+            stackAccessors: ['x'],
+            stackMode: StackMode.Percentage,
+            data: WITH_NULL_DATASET,
+          }),
+        ],
+        store,
+      );
+      const {
+        formattedDataSeries: { stacked },
+      } = computeSeriesDomainsSelector(store.getState());
 
       const [data0] = stacked[0].dataSeries[0].data;
       expect(data0.initialY1).toBe(10);
@@ -101,17 +125,22 @@ describe('Stacked Series Utils', () => {
     });
     test('format data without nulls with y0 values', () => {
       const store = MockStore.default();
-      MockStore.addSpecs([
-        MockSeriesSpec.area({
-          yAccessors: ['y1'],
-          y0Accessors: ['y0'],
-          splitSeriesAccessors: ['g'],
-          stackAccessors: ['x'],
-          stackMode: StackMode.Percentage,
-          data: STANDARD_DATA_SET_WY0,
-        }),
-      ], store);
-      const { formattedDataSeries: { stacked } } = computeSeriesDomainsSelector(store.getState());
+      MockStore.addSpecs(
+        [
+          MockSeriesSpec.area({
+            yAccessors: ['y1'],
+            y0Accessors: ['y0'],
+            splitSeriesAccessors: ['g'],
+            stackAccessors: ['x'],
+            stackMode: StackMode.Percentage,
+            data: STANDARD_DATA_SET_WY0,
+          }),
+        ],
+        store,
+      );
+      const {
+        formattedDataSeries: { stacked },
+      } = computeSeriesDomainsSelector(store.getState());
 
       const [data0] = stacked[0].dataSeries[0].data;
       expect(data0.initialY0).toBe(2);
@@ -133,18 +162,22 @@ describe('Stacked Series Utils', () => {
     });
     test('format data with nulls - missing points', () => {
       const store = MockStore.default();
-      MockStore.addSpecs([
-        MockSeriesSpec.area({
-          yAccessors: ['y1'],
-          y0Accessors: ['y0'],
-          splitSeriesAccessors: ['g'],
-          stackAccessors: ['x'],
-          stackMode: StackMode.Percentage,
-          data: WITH_NULL_DATASET_WY0,
-        }),
-      ], store);
-      const { formattedDataSeries: { stacked } } = computeSeriesDomainsSelector(store.getState());
-
+      MockStore.addSpecs(
+        [
+          MockSeriesSpec.area({
+            yAccessors: ['y1'],
+            y0Accessors: ['y0'],
+            splitSeriesAccessors: ['g'],
+            stackAccessors: ['x'],
+            stackMode: StackMode.Percentage,
+            data: WITH_NULL_DATASET_WY0,
+          }),
+        ],
+        store,
+      );
+      const {
+        formattedDataSeries: { stacked },
+      } = computeSeriesDomainsSelector(store.getState());
 
       const [data0] = stacked[0].dataSeries[0].data;
       expect(data0.initialY0).toBe(2);
@@ -166,19 +199,23 @@ describe('Stacked Series Utils', () => {
     });
     test('format data without nulls on second series', () => {
       const store = MockStore.default();
-      MockStore.addSpecs([
-        MockSeriesSpec.area({
-          xScaleType: ScaleType.Linear,
-          yAccessors: ['y1'],
-          y0Accessors: ['y0'],
-          splitSeriesAccessors: ['g'],
-          stackAccessors: ['x'],
-          stackMode: StackMode.Percentage,
-          data: DATA_SET_WITH_NULL_2,
-        }),
-      ], store);
-      const { formattedDataSeries: { stacked } } = computeSeriesDomainsSelector(store.getState());
-
+      MockStore.addSpecs(
+        [
+          MockSeriesSpec.area({
+            xScaleType: ScaleType.Linear,
+            yAccessors: ['y1'],
+            y0Accessors: ['y0'],
+            splitSeriesAccessors: ['g'],
+            stackAccessors: ['x'],
+            stackMode: StackMode.Percentage,
+            data: DATA_SET_WITH_NULL_2,
+          }),
+        ],
+        store,
+      );
+      const {
+        formattedDataSeries: { stacked },
+      } = computeSeriesDomainsSelector(store.getState());
 
       expect(stacked[0].dataSeries.length).toBe(2);
       expect(stacked[0].dataSeries[0].data.length).toBe(4);

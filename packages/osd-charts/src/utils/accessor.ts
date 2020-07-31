@@ -65,7 +65,8 @@ export type AccessorFormat = string | ((value: string) => string);
  * @internal
  */
 export function getAccessorFn(accessor: Accessor): AccessorFn {
-  return (datum: Datum) => typeof datum === 'object' && datum !== null ? datum[accessor as keyof typeof datum] : undefined;
+  return (datum: Datum) =>
+    typeof datum === 'object' && datum !== null ? datum[accessor as keyof typeof datum] : undefined;
 }
 
 /**

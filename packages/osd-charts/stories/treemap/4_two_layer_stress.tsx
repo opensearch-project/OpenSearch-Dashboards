@@ -75,8 +75,7 @@ export const Example = () => (
               // primarily, pick color based on parent's index, but then perturb by the index within the parent
               interpolatorTurbo(
                 (d.parent.sortIndex + d.sortIndex / d.parent.children.length) / (d.parent.parent.children.length + 1),
-              )
-            ,
+              ),
           },
         },
       ]}
