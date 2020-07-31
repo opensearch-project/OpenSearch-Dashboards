@@ -18,7 +18,7 @@
  */
 
 import classNames from 'classnames';
-import React, { SVGAttributes } from 'react';
+import React, { SVGAttributes, memo } from 'react';
 
 import { deepEqual } from '../../utils/fast_deep_equal';
 import { AlertIcon } from './assets/alert';
@@ -56,34 +56,30 @@ interface IconProps {
 /** @internal */
 export type IconComponentProps = Omit<SVGAttributes<SVGElement>, 'color' | 'type'> & IconProps;
 
-/** @internal */
-export class Icon extends React.Component<IconComponentProps> {
-  shouldComponentUpdate(nextProps: IconComponentProps) {
-    return !deepEqual(this.props, nextProps);
+function IconComponent({ type, color, className, tabIndex, ...rest }: IconComponentProps) {
+  let optionalCustomStyles = null;
+
+  if (color) {
+    optionalCustomStyles = { color };
   }
 
-  render() {
-    const { type, color, className, tabIndex, ...rest } = this.props;
-    let optionalCustomStyles = null;
+  const classes = classNames('echIcon', className);
 
-    if (color) {
-      optionalCustomStyles = { color };
-    }
+  const Svg = (type && typeToIconMap[type]) || EmptyIcon;
 
-    const classes = classNames('echIcon', className);
+  /*
+   * This is a fix for IE and Edge, which ignores tabindex="-1" on an SVG, but respects
+   * focusable="false".
+   *   - If there's no tab index specified, we'll default the icon to not be focusable,
+   *     which is how SVGs behave in Chrome, Safari, and FF.
+   *   - If tab index is -1, then the consumer wants the icon to not be focusable.
+   *   - For all other values, the consumer wants the icon to be focusable.
+   */
+  const focusable = tabIndex == null || tabIndex === -1 ? 'false' : 'true';
 
-    const Svg = (type && typeToIconMap[type]) || EmptyIcon;
-
-    /*
-     * This is a fix for IE and Edge, which ignores tabindex="-1" on an SVG, but respects
-     * focusable="false".
-     *   - If there's no tab index specified, we'll default the icon to not be focusable,
-     *     which is how SVGs behave in Chrome, Safari, and FF.
-     *   - If tab index is -1, then the consumer wants the icon to not be focusable.
-     *   - For all other values, the consumer wants the icon to be focusable.
-     */
-    const focusable = tabIndex == null || tabIndex === -1 ? 'false' : 'true';
-
-    return <Svg className={classes} {...optionalCustomStyles} tabIndex={tabIndex} focusable={focusable} {...rest} />;
-  }
+  return <Svg className={classes} {...optionalCustomStyles} tabIndex={tabIndex} focusable={focusable} {...rest} />;
 }
+IconComponent.displayName = 'Icon';
+
+/** @internal */
+export const Icon = memo(IconComponent, deepEqual);

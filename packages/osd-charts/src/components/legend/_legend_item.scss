@@ -26,10 +26,16 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
     justify-content: center;
     align-items: center;
     margin-left: $euiSizeXS;
+    height: 16px;
+    width: 20px;
   }
 
   &__color {
     margin-right: $euiSizeXS;
+
+    .euiPopover {
+      vertical-align: inherit; // prevents color dot from shifting
+    }
   }
 
   &__visibility {

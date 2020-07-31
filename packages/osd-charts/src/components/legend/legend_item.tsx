@@ -111,7 +111,7 @@ interface LegendItemState {
 export class LegendListItem extends Component<LegendItemProps, LegendItemState> {
   static displayName = 'LegendItem';
 
-  ref = createRef<HTMLLIElement>();
+  colorRef = createRef<HTMLDivElement>();
   state: LegendItemState = {
     isOpen: false,
     actionActive: false,
@@ -187,10 +187,10 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
       clearTemporaryColorsAction();
       this.toggleIsOpen();
     };
-    if (ColorPicker && this.state.isOpen && this.ref.current) {
+    if (ColorPicker && this.state.isOpen && this.colorRef.current) {
       return (
         <ColorPicker
-          anchor={this.ref.current}
+          anchor={this.colorRef.current}
           color={color}
           onClose={handleClose}
           onChange={(color: Color) => setTemporaryColorAction(seriesIdentifier.key, color)}
@@ -217,13 +217,13 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
     return (
       <>
         <li
-          ref={this.ref}
           className={itemClassNames}
           onMouseEnter={this.onLegendItemMouseOver}
           onMouseLeave={this.onLegendItemMouseOut}
           style={style}
         >
           <ItemColor
+            ref={this.colorRef}
             color={color}
             isSeriesHidden={isSeriesHidden}
             hasColorPicker={hasColorPicker}
@@ -233,7 +233,7 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
           {showExtra && extra != null && renderExtra(extra, isSeriesHidden)}
           {Action && (
             <div className="echLegendItem__action">
-              <Action series={seriesIdentifier} />
+              <Action series={seriesIdentifier} color={color} label={label} />
             </div>
           )}
         </li>

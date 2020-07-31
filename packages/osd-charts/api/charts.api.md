@@ -767,6 +767,8 @@ export type LegendAction = ComponentType<LegendActionProps>;
 
 // @public
 export interface LegendActionProps {
+    color: string;
+    label: string;
     series: SeriesIdentifier;
 }
 

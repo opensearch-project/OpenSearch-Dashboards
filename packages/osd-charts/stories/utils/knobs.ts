@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { PopoverAnchorPosition } from '@elastic/eui';
 import { select, array, number, optionsKnob } from '@storybook/addon-knobs';
 
 import { Rotation, Position, Placement, TooltipProps } from '../../src';
@@ -95,6 +96,29 @@ export const getPlacementKnob = (name = 'placement', defaultValue?: Placement) =
 
   return value || undefined;
 };
+
+export const getEuiPopoverPositionKnob = (
+  name = 'Popover position',
+  defaultValue: PopoverAnchorPosition = 'leftCenter',
+) =>
+  select<PopoverAnchorPosition>(
+    name,
+    {
+      upCenter: 'upCenter',
+      upLeft: 'upLeft',
+      upRight: 'upRight',
+      downCenter: 'downCenter',
+      downLeft: 'downLeft',
+      downRight: 'downRight',
+      leftCenter: 'leftCenter',
+      leftUp: 'leftUp',
+      leftDown: 'leftDown',
+      rightCenter: 'rightCenter',
+      rightUp: 'rightUp',
+      rightDown: 'rightDown',
+    },
+    defaultValue,
+  );
 
 export function arrayKnobs(name: string, values: (string | number)[]): (string | number)[] {
   const stringifiedValues = values.map<string>((d) => `${d}`);

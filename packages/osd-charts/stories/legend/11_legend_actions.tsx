@@ -26,6 +26,7 @@ import {
   EuiColorPicker,
   EuiSpacer,
   EuiButton,
+  PopoverAnchorPosition,
 } from '@elastic/eui';
 import { boolean } from '@storybook/addon-knobs';
 import React, { useState } from 'react';
@@ -42,15 +43,18 @@ import {
   LegendColorPicker,
 } from '../../src';
 import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
-import { getPositionKnob } from '../utils/knobs';
+import { getPositionKnob, getEuiPopoverPositionKnob } from '../utils/knobs';
 
-const getAction = (hideActions: boolean): LegendAction => ({ series }) => {
+const getAction = (hideActions: boolean, anchorPosition: PopoverAnchorPosition): LegendAction => ({
+  series,
+  label,
+}) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   const getPanels = (series: XYChartSeriesIdentifier): EuiContextMenuPanelDescriptor[] => [
     {
       id: 0,
-      title: 'Legend Actions',
+      title: label,
       items: [
         {
           name: 'Alert series specId',
@@ -120,15 +124,20 @@ const getAction = (hideActions: boolean): LegendAction => ({ series }) => {
       closePopover={() => setPopoverOpen(false)}
       panelPaddingSize="none"
       withTitle
-      anchorPosition="upLeft"
+      anchorPosition={anchorPosition}
     >
       <EuiContextMenu initialPanelId={0} panels={getPanels(series as XYChartSeriesIdentifier)} />
     </EuiPopover>
   );
 };
 
-const renderColorPicker: LegendColorPicker = ({ anchor, color, onClose, onChange }) => (
-  <EuiWrappingPopover isOpen button={anchor} closePopover={onClose} anchorPosition="leftCenter">
+const renderColorPicker = (anchorPosition: PopoverAnchorPosition): LegendColorPicker => ({
+  anchor,
+  color,
+  onClose,
+  onChange,
+}) => (
+  <EuiWrappingPopover isOpen button={anchor} closePopover={onClose} anchorPosition={anchorPosition}>
     <EuiColorPicker display="inline" color={color} onChange={onChange} />
     <EuiSpacer size="m" />
     <EuiButton fullWidth size="s" onClick={onClose}>
@@ -141,15 +150,17 @@ export const Example = () => {
   const hideActions = boolean('Hide legend action', false);
   const showLegendExtra = !boolean('Hide legend extra', false);
   const showColorPicker = !boolean('Hide color picker', true);
+  const legendPosition = getPositionKnob('Legend position');
+  const euiPopoverPosition = getEuiPopoverPositionKnob();
 
   return (
     <Chart className="story-chart">
       <Settings
         showLegend
         showLegendExtra={showLegendExtra}
-        legendPosition={getPositionKnob('Legend position')}
-        legendAction={getAction(hideActions)}
-        legendColorPicker={showColorPicker ? renderColorPicker : undefined}
+        legendPosition={legendPosition}
+        legendAction={getAction(hideActions, euiPopoverPosition)}
+        legendColorPicker={showColorPicker ? renderColorPicker(euiPopoverPosition) : undefined}
       />
       <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
       <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
@@ -171,7 +182,7 @@ Example.story = {
   parameters: {
     info: {
       text:
-        'The `legendAction` action prop allows you to pass a render function/component that will render next to the legend item.',
+        'The `legendAction` action prop allows you to pass a render function/component that will render next to the legend item.\n\n __Note:__ the context menu, color picker and popover are supplied by [eui](https://elastic.github.io/eui/#).',
     },
   },
 };

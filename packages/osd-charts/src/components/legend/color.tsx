@@ -18,7 +18,7 @@
  */
 
 import classNames from 'classnames';
-import React, { MouseEventHandler } from 'react';
+import React, { MouseEventHandler, forwardRef, memo } from 'react';
 
 import { Icon } from '../icons/icon';
 
@@ -33,28 +33,33 @@ interface ColorProps {
  * Color component used by the legend item
  * @internal
  */
-export function Color({ color, isSeriesHidden = false, hasColorPicker, onClick }: ColorProps) {
-  if (isSeriesHidden) {
+export const Color = memo(
+  forwardRef<HTMLDivElement, ColorProps>(({ color, isSeriesHidden = false, hasColorPicker, onClick }, ref) => {
+    if (isSeriesHidden) {
+      return (
+        <div className="echLegendItem__color" aria-label="series hidden" title="series hidden">
+          {/* changing the default viewBox for the eyeClosed icon to keep the same dimensions */}
+          <Icon type="eyeClosed" viewBox="-3 -3 22 22" />
+        </div>
+      );
+    }
+
+    const colorClasses = classNames('echLegendItem__color', {
+      'echLegendItem__color--changable': hasColorPicker,
+    });
+
     return (
-      <div className="echLegendItem__color" aria-label="series hidden" title="series hidden">
-        {/* changing the default viewBox for the eyeClosed icon to keep the same dimensions */}
-        <Icon type="eyeClosed" viewBox="-3 -3 22 22" />
+      <div
+        onClick={hasColorPicker ? onClick : undefined}
+        className={colorClasses}
+        aria-label="series color"
+        title={hasColorPicker ? 'change series color' : 'series color'}
+      >
+        <div ref={ref}>
+          <Icon type="dot" color={color} />
+        </div>
       </div>
     );
-  }
-
-  const colorClasses = classNames('echLegendItem__color', {
-    'echLegendItem__color--changable': hasColorPicker,
-  });
-
-  return (
-    <div
-      onClick={hasColorPicker ? onClick : undefined}
-      className={colorClasses}
-      aria-label="series color"
-      title={hasColorPicker ? 'change series color' : 'series color'}
-    >
-      <Icon type="dot" color={color} />
-    </div>
-  );
-}
+  }),
+);
+Color.displayName = 'Color';

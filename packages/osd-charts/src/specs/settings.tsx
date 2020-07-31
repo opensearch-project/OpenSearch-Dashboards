@@ -200,9 +200,19 @@ export interface LegendActionProps {
    * Series identifier for the given series
    */
   series: SeriesIdentifier;
+  /**
+   * Resolved label/name of given series
+   */
+  label: string;
+  /**
+   * Resolved color of given series
+   */
+  color: string;
 }
 /**
  * Legend action component used to render actions next to legend items
+ *
+ * render slot is constrained to 20px x 16px
  *
  * @public
  */
