@@ -21,10 +21,10 @@ import createCachedSelector from 're-reselect';
 
 import { TooltipAnchorPosition } from '../../../../components/tooltip/types';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { getLegendSizeSelector } from '../../../../state/selectors/get_legend_size';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getTooltipAnchorPosition } from '../../crosshair/crosshair_utils';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
-import { getComputedScalesSelector } from './get_computed_scales';
 import { getCursorBandPositionSelector } from './get_cursor_band';
 import { getProjectedPointerPositionSelector } from './get_projected_pointer_position';
 
@@ -35,24 +35,13 @@ export const getTooltipAnchorPositionSelector = createCachedSelector(
     getSettingsSpecSelector,
     getCursorBandPositionSelector,
     getProjectedPointerPositionSelector,
-    getComputedScalesSelector,
+    getLegendSizeSelector,
   ],
-  (
-    { chartDimensions },
-    settings,
-    cursorBandPosition,
-    projectedPointerPosition,
-    scales,
-  ): TooltipAnchorPosition | null => {
+  (chartDimensions, settings, cursorBandPosition, projectedPointerPosition): TooltipAnchorPosition | null => {
     if (!cursorBandPosition) {
       return null;
     }
-    return getTooltipAnchorPosition(
-      chartDimensions,
-      settings.rotation,
-      cursorBandPosition,
-      projectedPointerPosition,
-      scales.xScale.isSingleValue(),
-    );
+
+    return getTooltipAnchorPosition(chartDimensions, settings.rotation, cursorBandPosition, projectedPointerPosition);
   },
 )(getChartIdSelector);

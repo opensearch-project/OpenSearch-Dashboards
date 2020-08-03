@@ -22,8 +22,9 @@ import createCachedSelector from 're-reselect';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
-import { Dimensions } from '../../../../utils/dimensions';
-import { computeChartDimensions } from '../../utils/dimensions';
+import { getLegendSizeSelector, LegendSizing } from '../../../../state/selectors/get_legend_size';
+import { Position } from '../../../../utils/commons';
+import { computeChartDimensions, ChartDimensions } from '../../utils/dimensions';
 import { computeAxisTicksDimensionsSelector } from './compute_axis_ticks_dimensions';
 import { getAxesStylesSelector } from './get_axis_styles';
 import { getAxisSpecsSelector } from './get_specs';
@@ -36,15 +37,39 @@ export const computeChartDimensionsSelector = createCachedSelector(
     computeAxisTicksDimensionsSelector,
     getAxisSpecsSelector,
     getAxesStylesSelector,
+    getLegendSizeSelector,
   ],
-  (
-    chartContainerDimensions,
-    chartTheme,
-    axesTicksDimensions,
-    axesSpecs,
-    axesStyles,
-  ): {
-    chartDimensions: Dimensions;
-    leftMargin: number;
-  } => computeChartDimensions(chartContainerDimensions, chartTheme, axesTicksDimensions, axesStyles, axesSpecs),
+  (chartContainerDimensions, chartTheme, axesTicksDimensions, axesSpecs, axesStyles, legendSize): ChartDimensions =>
+    computeChartDimensions(
+      chartContainerDimensions,
+      chartTheme,
+      axesTicksDimensions,
+      axesStyles,
+      axesSpecs,
+      getLegendDimension(legendSize),
+    ),
 )(getChartIdSelector);
+
+function getLegendDimension({
+  position,
+  width,
+  height,
+  margin,
+}: LegendSizing): {
+  top: number;
+  left: number;
+} {
+  let left = 0;
+  let top = 0;
+
+  if (position === Position.Left) {
+    left = width + margin * 2;
+  } else if (position === Position.Top) {
+    top = height + margin * 2;
+  }
+
+  return {
+    left,
+    top,
+  };
+}

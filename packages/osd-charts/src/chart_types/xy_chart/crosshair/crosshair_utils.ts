@@ -23,6 +23,7 @@ import { Rotation } from '../../../utils/commons';
 import { Dimensions } from '../../../utils/dimensions';
 import { Point } from '../../../utils/point';
 import { isHorizontalRotation, isVerticalRotation } from '../state/utils/common';
+import { ChartDimensions } from '../utils/dimensions';
 
 export interface SnappedPosition {
   position: number;
@@ -168,26 +169,25 @@ export function getCursorBandPosition(
 
 /** @internal */
 export function getTooltipAnchorPosition(
-  chartDimensions: Dimensions,
+  { chartDimensions, offset }: ChartDimensions,
   chartRotation: Rotation,
   cursorBandPosition: Dimensions,
   cursorPosition: { x: number; y: number },
-  isSingleValueXScale: boolean,
 ): TooltipAnchorPosition {
   const isRotated = isVerticalRotation(chartRotation);
   const hPosition = getHorizontalTooltipPosition(
     cursorPosition.x,
     cursorBandPosition,
     chartDimensions,
+    offset.left,
     isRotated,
-    isSingleValueXScale,
   );
   const vPosition = getVerticalTooltipPosition(
     cursorPosition.y,
     cursorBandPosition,
     chartDimensions,
+    offset.top,
     isRotated,
-    isSingleValueXScale,
   );
   return {
     isRotated,
@@ -200,19 +200,19 @@ function getHorizontalTooltipPosition(
   cursorXPosition: number,
   cursorBandPosition: Dimensions,
   chartDimensions: Dimensions,
+  globalOffset: number,
   isRotated: boolean,
-  isSingleValueXScale: boolean,
 ): { x0?: number; x1: number } {
   if (!isRotated) {
     return {
-      x0: cursorBandPosition.left,
-      x1: cursorBandPosition.left + (isSingleValueXScale ? 0 : cursorBandPosition.width),
+      x0: cursorBandPosition.left + globalOffset,
+      x1: cursorBandPosition.left + cursorBandPosition.width + globalOffset,
     };
   }
   return {
     // NOTE: x0 set to zero blocks tooltip placement on left when rotated 90 deg
     // Delete this comment before merging and verifing this doesn't break anything.
-    x1: chartDimensions.left + cursorXPosition,
+    x1: chartDimensions.left + cursorXPosition + globalOffset,
   };
 }
 
@@ -220,20 +220,21 @@ function getVerticalTooltipPosition(
   cursorYPosition: number,
   cursorBandPosition: Dimensions,
   chartDimensions: Dimensions,
+  globalOffset: number,
   isRotated: boolean,
-  isSingleValueXScale: boolean,
 ): {
   y0: number;
   y1: number;
 } {
   if (!isRotated) {
+    const y = cursorYPosition + chartDimensions.top + globalOffset;
     return {
-      y0: cursorYPosition + chartDimensions.top,
-      y1: cursorYPosition + chartDimensions.top,
+      y0: y,
+      y1: y,
     };
   }
   return {
-    y0: cursorBandPosition.top,
-    y1: (isSingleValueXScale ? 0 : cursorBandPosition.height) + cursorBandPosition.top,
+    y0: cursorBandPosition.top + globalOffset,
+    y1: cursorBandPosition.height + cursorBandPosition.top + globalOffset,
   };
 }

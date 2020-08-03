@@ -62,4 +62,34 @@ describe('Legend stories', () => {
       delay: 200, // needed for icon to load
     });
   });
+
+  describe('Tooltip placement with legend', () => {
+    it('should render tooltip with left legend', async () => {
+      await common.expectChartWithMouseAtUrlToMatchScreenshot('http://localhost:9001/?path=/story/legend--left', {
+        bottom: 190,
+        left: 310,
+      });
+    });
+
+    it('should render tooltip with top legend', async () => {
+      await common.expectChartWithMouseAtUrlToMatchScreenshot('http://localhost:9001/?path=/story/legend--top', {
+        top: 150,
+        left: 320,
+      });
+    });
+
+    it('should render tooltip with right legend', async () => {
+      await common.expectChartWithMouseAtUrlToMatchScreenshot('http://localhost:9001/?path=/story/legend--right', {
+        bottom: 180,
+        left: 330,
+      });
+    });
+
+    it('should render tooltip with bottom legend', async () => {
+      await common.expectChartWithMouseAtUrlToMatchScreenshot('http://localhost:9001/?path=/story/legend--bottom', {
+        top: 150,
+        left: 320,
+      });
+    });
+  });
 });
