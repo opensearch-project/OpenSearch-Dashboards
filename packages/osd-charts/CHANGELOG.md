@@ -1,3 +1,22 @@
+# [21.0.0](https://github.com/elastic/elastic-charts/compare/v20.0.2...v21.0.0) (2020-08-10)
+
+
+### Bug Fixes
+
+* update dep vulnerabilities, minimist and kind-of ([#763](https://github.com/elastic/elastic-charts/issues/763)) ([4455281](https://github.com/elastic/elastic-charts/commit/4455281bbc23bf13e8eccbdb4ab36168c1610c7f))
+* **legend:** fix color anchor, add action context, fix action padding ([#774](https://github.com/elastic/elastic-charts/issues/774)) ([4590a22](https://github.com/elastic/elastic-charts/commit/4590a22c58359ffb13e977cb1dca854a01c3961b))
+* **tooltip:** placement with left/top legends and single bars ([#771](https://github.com/elastic/elastic-charts/issues/771)) ([e576b26](https://github.com/elastic/elastic-charts/commit/e576b2610f882a490de645e1e702a33ccebb818d)), closes [#769](https://github.com/elastic/elastic-charts/issues/769) [#770](https://github.com/elastic/elastic-charts/issues/770)
+
+
+### Features
+
+* streamgraph and fit functions on stacked charts ([#751](https://github.com/elastic/elastic-charts/issues/751)) ([268fcc0](https://github.com/elastic/elastic-charts/commit/268fcc087578b17ae6575f08653ca3be01fb5801)), closes [#766](https://github.com/elastic/elastic-charts/issues/766) [#715](https://github.com/elastic/elastic-charts/issues/715) [#450](https://github.com/elastic/elastic-charts/issues/450)
+
+
+### BREAKING CHANGES
+
+* the first parameter of `PointStyleAccessor` and `BarStyleAccessor` callbacks is changed from `RawDataSeriesDatum` to `DataSeriesDatum`. `stackAsPercentage` prop is replaced by `stackMode` that accept one `StackMode`.
+
 ## [20.0.2](https://github.com/elastic/elastic-charts/compare/v20.0.1...v20.0.2) (2020-07-23)
 
 
