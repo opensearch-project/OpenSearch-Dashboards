@@ -1,3 +1,10 @@
+## [21.0.1](https://github.com/elastic/elastic-charts/compare/v21.0.0...v21.0.1) (2020-08-18)
+
+
+### Bug Fixes
+
+* allow graceful error handling ([#779](https://github.com/elastic/elastic-charts/issues/779)) ([8183b32](https://github.com/elastic/elastic-charts/commit/8183b32f41bd9f5c0948393a4e5e05d1211cd74c)), closes [#776](https://github.com/elastic/elastic-charts/issues/776)
+
 # [21.0.0](https://github.com/elastic/elastic-charts/compare/v20.0.2...v21.0.0) (2020-08-10)
 
 
