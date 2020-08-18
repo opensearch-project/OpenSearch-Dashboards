@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { GracefulError } from '../../../components/error_boundary/errors';
 import { ScaleContinuousType } from '../../../scales';
 import { ScaleType } from '../../../scales/constants';
 import { identity } from '../../../utils/commons';
@@ -141,7 +142,7 @@ function mergeYDomainForGroup(
       domain = [newCustomDomain.min, newCustomDomain.max];
     } else if (newCustomDomain && isLowerBound(newCustomDomain)) {
       if (newCustomDomain.min > computedDomainMax) {
-        throw new Error(`custom yDomain for ${groupId} is invalid, custom min is greater than computed max`);
+        throw new GracefulError(`custom yDomain for ${groupId} is invalid, custom min is greater than computed max`);
       }
 
       domain = [newCustomDomain.min, computedDomainMax];

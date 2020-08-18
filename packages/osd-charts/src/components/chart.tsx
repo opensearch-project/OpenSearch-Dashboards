@@ -36,6 +36,7 @@ import { ChartBackground } from './chart_background';
 import { ChartContainer } from './chart_container';
 import { ChartResizer } from './chart_resizer';
 import { ChartStatus } from './chart_status';
+import { ErrorBoundary } from './error_boundary';
 import { Legend } from './legend/legend';
 
 interface ChartProps {
@@ -179,10 +180,12 @@ export class Chart extends React.Component<ChartProps, ChartState> {
           <ChartStatus />
           <ChartResizer />
           <Legend />
-          <SpecsParser>{this.props.children}</SpecsParser>
-          <div className="echContainer">
-            <ChartContainer getChartContainerRef={this.getChartContainerRef} forwardStageRef={this.chartStageRef} />
-          </div>
+          <ErrorBoundary>
+            <SpecsParser>{this.props.children}</SpecsParser>
+            <div className="echContainer">
+              <ChartContainer getChartContainerRef={this.getChartContainerRef} forwardStageRef={this.chartStageRef} />
+            </div>
+          </ErrorBoundary>
         </div>
       </Provider>
     );

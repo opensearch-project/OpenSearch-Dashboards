@@ -223,6 +223,9 @@ module.exports = {
     'react/sort-comp': 0,
     'react/jsx-one-expression-per-line': 0,
     'react/jsx-curly-newline': 0,
+    'react/jsx-indent-props': 0,
+    'react/jsx-max-props-per-line': 0,
+    'react/jsx-first-prop-new-line': 0,
     'react/jsx-indent': 0,
     // Too restrictive: https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/destructuring-assignment.md
     'react/destructuring-assignment': 0,
