@@ -53,6 +53,7 @@ import {
   getVisibleTicks,
   isYDomain,
   enableDuplicatedTicks,
+  defaultTickFormatter,
 } from './axis_utils';
 import { computeXScale } from './scales';
 import { AxisSpec, DomainRange, DEFAULT_GLOBAL_ID, TickFormatter } from './specs';
@@ -118,7 +119,6 @@ describe('Axis computational utils', () => {
     showOverlappingLabels: false,
     position: Position.Left,
     style,
-    tickFormat: (value: any) => `${value}`,
     showGridLines: true,
     integersOnly: false,
   };
@@ -133,7 +133,6 @@ describe('Axis computational utils', () => {
     showOverlappingLabels: false,
     position: Position.Top,
     style,
-    tickFormat: (value: any) => `${value}`,
     integersOnly: false,
   };
 
@@ -148,7 +147,6 @@ describe('Axis computational utils', () => {
     showOverlappingLabels: false,
     position: Position.Left,
     style,
-    tickFormat: (value: any) => `${value}`,
     showGridLines: true,
     integersOnly: false,
   };
@@ -202,7 +200,16 @@ describe('Axis computational utils', () => {
 
   test('should compute axis dimensions', () => {
     const bboxCalculator = new SvgTextBBoxCalculator();
-    const axisDimensions = computeAxisTicksDimensions(verticalAxisSpec, xDomain, [yDomain], 1, bboxCalculator, 0, axes);
+    const axisDimensions = computeAxisTicksDimensions(
+      verticalAxisSpec,
+      xDomain,
+      [yDomain],
+      1,
+      bboxCalculator,
+      0,
+      axes,
+      (v) => `${v}`,
+    );
     expect(axisDimensions).toEqual(axis1Dims);
 
     const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: 'foo' };
@@ -214,6 +221,7 @@ describe('Axis computational utils', () => {
       bboxCalculator,
       0,
       axes,
+      (v) => `${v}`,
       undefined,
       false,
     );
@@ -226,7 +234,16 @@ describe('Axis computational utils', () => {
   test('should not compute axis dimensions when spec is configured to hide', () => {
     const bboxCalculator = new CanvasTextBBoxCalculator();
     verticalAxisSpec.hide = true;
-    const axisDimensions = computeAxisTicksDimensions(verticalAxisSpec, xDomain, [yDomain], 1, bboxCalculator, 0, axes);
+    const axisDimensions = computeAxisTicksDimensions(
+      verticalAxisSpec,
+      xDomain,
+      [yDomain],
+      1,
+      bboxCalculator,
+      0,
+      axes,
+      (v) => `${v}`,
+    );
     expect(axisDimensions).toBe(null);
   });
 
@@ -240,7 +257,16 @@ describe('Axis computational utils', () => {
       minInterval: 0,
       timeZone: 'utc',
     };
-    let axisDimensions = computeAxisTicksDimensions(xAxisWithTime, xDomain, [yDomain], 1, bboxCalculator, 0, axes);
+    let axisDimensions = computeAxisTicksDimensions(
+      xAxisWithTime,
+      xDomain,
+      [yDomain],
+      1,
+      bboxCalculator,
+      0,
+      axes,
+      (v) => `${v}`,
+    );
     expect(axisDimensions).not.toBeNull();
     expect(axisDimensions?.tickLabels[0]).toBe('11:00:00');
     expect(axisDimensions?.tickLabels[11]).toBe('11:55:00');
@@ -256,6 +282,7 @@ describe('Axis computational utils', () => {
       bboxCalculator,
       0,
       axes,
+      (v) => `${v}`,
     );
     expect(axisDimensions).not.toBeNull();
     expect(axisDimensions?.tickLabels[0]).toBe('14:00:00');
@@ -272,6 +299,7 @@ describe('Axis computational utils', () => {
       bboxCalculator,
       0,
       axes,
+      (v) => `${v}`,
     );
     expect(axisDimensions).not.toBeNull();
     expect(axisDimensions?.tickLabels[0]).toBe('08:00:00');
@@ -329,7 +357,7 @@ describe('Axis computational utils', () => {
     test('should compute to end of domain when histogram mode not enabled', () => {
       const enableHistogramMode = false;
       const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
-      const axisPositions = getAvailableTicks(verticalAxisSpec, scale!, 0, enableHistogramMode);
+      const axisPositions = getAvailableTicks(verticalAxisSpec, scale!, 0, enableHistogramMode, (v) => `${v}`);
       const expectedAxisPositions = [
         { label: '0', position: 100, value: 0 },
         { label: '0.1', position: 90, value: 0.1 },
@@ -356,7 +384,13 @@ describe('Axis computational utils', () => {
         minInterval: 10,
       };
       const xScale = getScaleForAxisSpec(horizontalAxisSpec, xBandDomain, [yDomain], 1, 0, 100, 0);
-      const histogramAxisPositions = getAvailableTicks(horizontalAxisSpec, xScale!, 1, enableHistogramMode);
+      const histogramAxisPositions = getAvailableTicks(
+        horizontalAxisSpec,
+        xScale!,
+        1,
+        enableHistogramMode,
+        (v) => `${v}`,
+      );
       const histogramTickLabels = histogramAxisPositions.map(({ label }: AxisTick) => label);
       expect(histogramTickLabels).toEqual(['0', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100', '110']);
     });
@@ -371,7 +405,13 @@ describe('Axis computational utils', () => {
         minInterval: 90000,
       };
       const xScale = getScaleForAxisSpec(horizontalAxisSpec, xBandDomain, [yDomain], 1, 0, 100, 0);
-      const histogramAxisPositions = getAvailableTicks(horizontalAxisSpec, xScale!, 1, enableHistogramMode);
+      const histogramAxisPositions = getAvailableTicks(
+        horizontalAxisSpec,
+        xScale!,
+        1,
+        enableHistogramMode,
+        (v) => `${v}`,
+      );
       const histogramTickValues = histogramAxisPositions.map(({ value }: AxisTick) => value);
 
       const expectedTickValues = [
@@ -403,7 +443,13 @@ describe('Axis computational utils', () => {
         minInterval: 90000,
       };
       const xScale = getScaleForAxisSpec(horizontalAxisSpec, xBandDomain, [yDomain], 1, 0, 100, 0);
-      const histogramAxisPositions = getAvailableTicks(horizontalAxisSpec, xScale!, 1, enableHistogramMode);
+      const histogramAxisPositions = getAvailableTicks(
+        horizontalAxisSpec,
+        xScale!,
+        1,
+        enableHistogramMode,
+        (v) => `${v}`,
+      );
       const histogramTickValues = histogramAxisPositions.map(({ value }: AxisTick) => value);
       const expectedTickValues = [1560438420000, 1560438510000];
 
@@ -917,6 +963,7 @@ describe('Axis computational utils', () => {
       [yDomain],
       1,
       false,
+      (v) => `${v}`,
     );
 
     expect(axisTicksPosition.axisPositions.get(verticalAxisSpecWTitle.id)).toEqual({
@@ -944,6 +991,7 @@ describe('Axis computational utils', () => {
       [yDomain],
       1,
       false,
+      (v) => `${v}`,
     );
 
     expect(axisTicksPosition.axisPositions.get(verticalAxisSpecWTitle.id)).toEqual({
@@ -1143,6 +1191,7 @@ describe('Axis computational utils', () => {
       [yDomain],
       1,
       false,
+      (v) => `${v}`,
     );
     expect(axisTicksPosition.axisPositions.size).toBe(0);
     expect(axisTicksPosition.axisTicks.size).toBe(0);
@@ -1172,6 +1221,7 @@ describe('Axis computational utils', () => {
       [yDomain],
       1,
       false,
+      (v) => `${v}`,
     );
 
     const expectedVerticalAxisGridLines = [
@@ -1204,6 +1254,7 @@ describe('Axis computational utils', () => {
       [yDomain],
       1,
       false,
+      (v) => `${v}`,
     );
 
     const expectedPositionWithTopLegend = {
@@ -1232,6 +1283,7 @@ describe('Axis computational utils', () => {
         [yDomain],
         1,
         false,
+        (v) => `${v}`,
       );
     };
 
@@ -1478,7 +1530,7 @@ describe('Axis computational utils', () => {
     const scale: Scale = computeXScale({ xDomain: xDomainTime, totalBarsInCluster: 0, range: [0, 603.5] });
     const offset = 0;
     const tickFormatOption = { timeZone: 'utc+1' };
-    expect(enableDuplicatedTicks(axisSpec, scale, offset, tickFormatOption)).toEqual([
+    expect(enableDuplicatedTicks(axisSpec, scale, offset, (v) => `${v}`, tickFormatOption)).toEqual([
       { value: 1547208000000, label: '2019-01-11', position: 25.145833333333332 },
       { value: 1547251200000, label: '2019-01-12', position: 85.49583333333334 },
       { value: 1547337600000, label: '2019-01-13', position: 206.19583333333333 },
@@ -1514,7 +1566,7 @@ describe('Axis computational utils', () => {
     const scale: Scale = computeXScale({ xDomain: xDomainTime, totalBarsInCluster: 0, range: [0, 603.5] });
     const offset = 0;
     const tickFormatOption = { timeZone: xDomainTime.timeZone };
-    const ticks = enableDuplicatedTicks(axisSpec, scale, offset, tickFormatOption);
+    const ticks = enableDuplicatedTicks(axisSpec, scale, offset, (v) => `${v}`, tickFormatOption);
     const tickLabels = ticks.map(({ label }) => ({ label }));
     expect(tickLabels).toEqual([
       { label: '12:00' },
@@ -1558,7 +1610,7 @@ describe('Axis computational utils', () => {
     const scale: Scale = computeXScale({ xDomain: xDomainTime, totalBarsInCluster: 0, range: [0, 603.5] });
     const offset = 0;
     const tickFormatOption = { timeZone: 'utc+1' };
-    expect(enableDuplicatedTicks(axisSpec, scale, offset, tickFormatOption)).toEqual([
+    expect(enableDuplicatedTicks(axisSpec, scale, offset, (v) => `${v}`, tickFormatOption)).toEqual([
       { value: 1547208000000, label: '2019-01-11', position: 25.145833333333332 },
       { value: 1547251200000, label: '2019-01-12', position: 85.49583333333334 },
       { value: 1547294400000, label: '2019-01-12', position: 145.84583333333333 },
@@ -1570,6 +1622,142 @@ describe('Axis computational utils', () => {
       { value: 1547553600000, label: '2019-01-15', position: 507.9458333333333 },
       { value: 1547596800000, label: '2019-01-16', position: 568.2958333333333 },
     ]);
+  });
+  test('should use custom tick formatter', () => {
+    const now = DateTime.fromISO('2019-01-11T00:00:00.000')
+      .setZone('utc+1')
+      .toMillis();
+    const oneDay = moment.duration(1, 'day');
+    const formatter = niceTimeFormatter([now, oneDay.add(now).asMilliseconds() * 31]);
+    const axisSpec: AxisSpec = {
+      id: 'bottom',
+      position: 'bottom',
+      showDuplicatedTicks: true,
+      chartType: 'xy_axis',
+      specType: 'axis',
+      groupId: DEFAULT_GLOBAL_ID,
+      hide: false,
+      showOverlappingLabels: false,
+      showOverlappingTicks: false,
+      style,
+      tickFormat: formatter,
+    };
+    const xDomainTime: XDomain = {
+      type: 'xDomain',
+      isBandScale: false,
+      domain: [1547190000000, 1547622000000],
+      minInterval: 86400000,
+      scaleType: ScaleType.Time,
+    };
+    const scale: Scale = computeXScale({ xDomain: xDomainTime, totalBarsInCluster: 0, range: [0, 603.5] });
+    const offset = 0;
+    const tickFormatOption = { timeZone: 'utc+1' };
+    expect(enableDuplicatedTicks(axisSpec, scale, offset, (v) => `${v}`, tickFormatOption)).toEqual([
+      { value: 1547208000000, label: '2019-01-11', position: 25.145833333333332 },
+      { value: 1547251200000, label: '2019-01-12', position: 85.49583333333334 },
+      { value: 1547294400000, label: '2019-01-12', position: 145.84583333333333 },
+      { value: 1547337600000, label: '2019-01-13', position: 206.19583333333333 },
+      { value: 1547380800000, label: '2019-01-13', position: 266.54583333333335 },
+      { value: 1547424000000, label: '2019-01-14', position: 326.8958333333333 },
+      { value: 1547467200000, label: '2019-01-14', position: 387.24583333333334 },
+      { value: 1547510400000, label: '2019-01-15', position: 447.59583333333336 },
+      { value: 1547553600000, label: '2019-01-15', position: 507.9458333333333 },
+      { value: 1547596800000, label: '2019-01-16', position: 568.2958333333333 },
+    ]);
+  });
+
+  describe('Custom formatting', () => {
+    it('should get custom labels for y axis', () => {
+      const customFotmatter = (v: any) => `${v} custom`;
+      const axisSpecs = [verticalAxisSpec];
+      const axesStyles = new Map();
+      const axisDims = new Map();
+      axisDims.set(verticalAxisSpec.id, axis1Dims);
+
+      const axisTicksPosition = getAxisTicksPositions(
+        {
+          chartDimensions: chartDim,
+          leftMargin: 0,
+        },
+        LIGHT_THEME,
+        0,
+        axisSpecs,
+        axisDims,
+        axesStyles,
+        xDomain,
+        [yDomain],
+        1,
+        false,
+        customFotmatter,
+      );
+
+      const expected = axis1Dims.tickValues
+        .slice()
+        .reverse()
+        .map(customFotmatter);
+      expect(axisTicksPosition.axisTicks.get(verticalAxisSpec.id)!.map(({ label }) => label)).toEqual(expected);
+    });
+
+    it('should not use custom formatter with x axis', () => {
+      const customFotmatter = (v: any) => `${v} custom`;
+      const axisSpecs = [horizontalAxisSpec];
+      const axesStyles = new Map();
+      const axisDims = new Map();
+      axisDims.set(horizontalAxisSpec.id, axis1Dims);
+
+      const axisTicksPosition = getAxisTicksPositions(
+        {
+          chartDimensions: chartDim,
+          leftMargin: 0,
+        },
+        LIGHT_THEME,
+        0,
+        axisSpecs,
+        axisDims,
+        axesStyles,
+        xDomain,
+        [yDomain],
+        1,
+        false,
+        customFotmatter,
+      );
+
+      const expected = axis1Dims.tickValues.slice().map(defaultTickFormatter);
+      expect(axisTicksPosition.axisTicks.get(horizontalAxisSpec.id)!.map(({ label }) => label)).toEqual(expected);
+    });
+
+    it('should use custom axis tick formatter to get labels for x axis', () => {
+      const customFotmatter = (v: any) => `${v} custom`;
+      const customAxisFotmatter = (v: any) => `${v} custom`;
+      const spec: AxisSpec = {
+        ...horizontalAxisSpec,
+        tickFormat: customAxisFotmatter,
+      };
+      const axisSpecs = [spec];
+      const axesStyles = new Map();
+      const axisDims = new Map();
+      axisDims.set(spec.id, axis1Dims);
+
+      const axisTicksPosition = getAxisTicksPositions(
+        {
+          chartDimensions: chartDim,
+          leftMargin: 0,
+        },
+        LIGHT_THEME,
+        0,
+        axisSpecs,
+        axisDims,
+        axesStyles,
+        xDomain,
+        [yDomain],
+        1,
+        false,
+        customFotmatter,
+      );
+
+      const expected = axis1Dims.tickValues.slice().map(customAxisFotmatter);
+      expect(axisTicksPosition.axisTicks.get(spec.id)!.map(({ label }) => label)).toEqual(expected);
+    });
   });
 });
 

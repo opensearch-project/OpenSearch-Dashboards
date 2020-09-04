@@ -138,7 +138,7 @@ export interface AxisSpec extends Spec {
     // (undocumented)
     specType: typeof SpecTypes.Axis;
     style?: RecursivePartial<Omit<AxisStyle, 'gridLine'>>;
-    tickFormat: TickFormatter;
+    tickFormat?: TickFormatter;
     ticks?: number;
     title?: string;
 }
@@ -1262,6 +1262,7 @@ export interface SeriesSpec extends Spec {
     sortIndex?: number;
     // (undocumented)
     specType: typeof SpecTypes.Series;
+    tickFormat?: TickFormatter;
     useDefaultGroupDomain?: boolean;
     // Warning: (ae-forgotten-export) The symbol "AccessorFormat" needs to be exported by the entry point index.d.ts
     y0AccessorFormat?: AccessorFormat;

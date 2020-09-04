@@ -24,11 +24,16 @@ import { getChartThemeSelector } from '../../../../state/selectors/get_chart_the
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { CanvasTextBBoxCalculator } from '../../../../utils/bbox/canvas_text_bbox_calculator';
 import { AxisId } from '../../../../utils/ids';
-import { computeAxisTicksDimensions, AxisTicksDimensions, isDuplicateAxis } from '../../utils/axis_utils';
+import {
+  computeAxisTicksDimensions,
+  AxisTicksDimensions,
+  isDuplicateAxis,
+  defaultTickFormatter,
+} from '../../utils/axis_utils';
 import { computeSeriesDomainsSelector } from './compute_series_domains';
 import { countBarsInClusterSelector } from './count_bars_in_cluster';
 import { getBarPaddingsSelector } from './get_bar_paddings';
-import { getAxisSpecsSelector } from './get_specs';
+import { getAxisSpecsSelector, getSeriesSpecsSelector } from './get_specs';
 import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
 
 /** @internal */
@@ -41,6 +46,7 @@ export const computeAxisTicksDimensionsSelector = createCachedSelector(
     getSettingsSpecSelector,
     computeSeriesDomainsSelector,
     countBarsInClusterSelector,
+    getSeriesSpecsSelector,
   ],
   (
     barsPadding,
@@ -50,9 +56,10 @@ export const computeAxisTicksDimensionsSelector = createCachedSelector(
     settingsSpec,
     seriesDomainsAndData,
     totalBarsInCluster,
+    seriesSpecs,
   ): Map<AxisId, AxisTicksDimensions> => {
     const { xDomain, yDomain } = seriesDomainsAndData;
-
+    const fallBackTickFormatter = seriesSpecs.find(({ tickFormat }) => tickFormat)?.tickFormat ?? defaultTickFormatter;
     const bboxCalculator = new CanvasTextBBoxCalculator();
     const axesTicksDimensions: Map<AxisId, AxisTicksDimensions> = new Map();
     axesSpecs.forEach((axisSpec) => {
@@ -65,6 +72,7 @@ export const computeAxisTicksDimensionsSelector = createCachedSelector(
         bboxCalculator,
         settingsSpec.rotation,
         chartTheme.axes,
+        fallBackTickFormatter,
         barsPadding,
         isHistogramMode,
       );

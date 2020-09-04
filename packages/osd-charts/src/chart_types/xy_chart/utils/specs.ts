@@ -382,6 +382,11 @@ export interface SeriesSpec extends Spec {
    * Hide series in tooltip
    */
   filterSeriesInTooltip?: FilterPredicate;
+  /**
+   * A function called to format every value label.
+   * Uses axis `tickFormat` when not provided.
+   */
+  tickFormat?: TickFormatter;
 }
 
 export interface Postfixes {
@@ -621,11 +626,14 @@ export interface AxisSpec extends Spec {
   /** Where the axis appear on the chart */
   position: Position;
   /**
-   * A function called to format every single tick label (includes tooltip)
+   * A function called to format every tick value label.
+   * Uses first series spec `tickFormat` when not provided.
+   *
+   * used in tooltip when no `tickFormat` is provided from series spec
    */
-  tickFormat: TickFormatter;
+  tickFormat?: TickFormatter;
   /**
-   * A function called to format every single label  (excludes tooltip)
+   * A function called to format every label  (excludes tooltip)
    *
    * overrides tickFormat for axis labels
    */

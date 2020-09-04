@@ -32,6 +32,7 @@ export { Example as with4Axes } from './3_axis_4_axes';
 export { Example as multiAxes } from './4_multi_axis';
 export { Example as barsAndLines } from './5_multi_axis_bar_lines';
 export { Example as differentTooltip } from './6_different_tooltip';
+export { Example as differentTooltipFormatter } from './6a_different_tooltip_formatter';
 export { Example as manyTickLabels } from './7_many_tick_labels';
 export { Example as customDomain } from './8_custom_domain';
 export { Example as customMixed } from './9_custom_mixed_domain';

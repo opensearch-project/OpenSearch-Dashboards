@@ -228,4 +228,34 @@ describe('Interactions', () => {
       );
     });
   });
+
+  describe('Tooltip formatting', () => {
+    it('should use all custom tick formatters', async () => {
+      await common.expectChartWithMouseAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/axes--different-tooltip-formatter&knob-Show%20legend=true&knob-Disable%20Y%20Axis%20tickFormat=&knob-Y%20Axis%20value%20format=0[.]0&knob-Y%20Axis%20unit=pets&knob-Disable%20dog%20line%20tickFormat=&knob-Dog%20line%20unit=dogs&knob-Disable%20cat%20line%20tickFormat=&knob-Cat%20line%20unit=cats',
+        { left: 280, top: 80 },
+      );
+    });
+
+    it('should use series tick formatter with no axis tick formatter', async () => {
+      await common.expectChartWithMouseAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/axes--different-tooltip-formatter&knob-Show%20legend=true&knob-Disable%20Y%20Axis%20tickFormat=&knob-Y%20Axis%20value%20format=0[.]0&knob-Y%20Axis%20unit=pets&knob-Disable%20dog%20line%20tickFormat=&knob-Dog%20line%20unit=dogs&knob-Disable%20cat%20line%20tickFormat=&knob-Cat%20line%20unit=cats',
+        { left: 280, top: 80 },
+      );
+    });
+
+    it('should use series tick formatter with no axis tick formatter, missing series tick formatter', async () => {
+      await common.expectChartWithMouseAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/axes--different-tooltip-formatter&knob-Show%20legend=true&knob-Disable%20Y%20Axis%20tickFormat=true&knob-Y%20Axis%20value%20format=0[.]0&knob-Y%20Axis%20unit=pets&knob-Disable%20dog%20line%20tickFormat=true&knob-Dog%20line%20unit=dogs&knob-Disable%20cat%20line%20tickFormat=&knob-Cat%20line%20unit=cats',
+        { left: 280, top: 80 },
+      );
+    });
+
+    it('should use default tick formatter with no axis tick formatter, nor series tick formatter', async () => {
+      await common.expectChartWithMouseAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/axes--different-tooltip-formatter&knob-Show%20legend=true&knob-Disable%20Y%20Axis%20tickFormat=true&knob-Y%20Axis%20value%20format=0[.]0&knob-Y%20Axis%20unit=pets&knob-Disable%20dog%20line%20tickFormat=true&knob-Dog%20line%20unit=dogs&knob-Disable%20cat%20line%20tickFormat=true&knob-Cat%20line%20unit=cats',
+        { left: 280, top: 80 },
+      );
+    });
+  });
 });

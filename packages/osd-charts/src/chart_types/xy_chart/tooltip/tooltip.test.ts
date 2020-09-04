@@ -23,7 +23,7 @@ import { SpecTypes } from '../../../specs/constants';
 import { Position, RecursivePartial } from '../../../utils/commons';
 import { BarGeometry } from '../../../utils/geometry';
 import { AxisStyle } from '../../../utils/themes/theme';
-import { AxisSpec, BarSeriesSpec, SeriesTypes } from '../utils/specs';
+import { AxisSpec, BarSeriesSpec, SeriesTypes, TickFormatter } from '../utils/specs';
 import { formatTooltip } from './tooltip';
 
 const style: RecursivePartial<AxisStyle> = {
@@ -273,5 +273,60 @@ describe('Tooltip formatting', () => {
     // disable any highlight on x value
     tooltipValue = formatTooltip(geometry, SPEC_1, true, true, false, YAXIS_SPEC);
     expect(tooltipValue.isHighlighted).toBe(false);
+  });
+
+  it('should format ticks with custom formatter from spec', () => {
+    const axisTickFormatter: TickFormatter = (v) => `${v} axis`;
+    const tickFormatter: TickFormatter = (v) => `${v} spec`;
+    const axisSpec: AxisSpec = {
+      ...YAXIS_SPEC,
+      tickFormat: axisTickFormatter,
+    };
+    const spec: BarSeriesSpec = {
+      ...SPEC_1,
+      tickFormat: tickFormatter,
+    };
+    const tooltipValue = formatTooltip(indexedGeometry, spec, false, false, false, axisSpec);
+    expect(tooltipValue.value).toBe('10 spec');
+  });
+
+  it('should format ticks with custom formatter from axis', () => {
+    const axisTickFormatter: TickFormatter = (v) => `${v} axis`;
+    const axisSpec: AxisSpec = {
+      ...YAXIS_SPEC,
+      tickFormat: axisTickFormatter,
+    };
+    const tooltipValue = formatTooltip(indexedGeometry, SPEC_1, false, false, false, axisSpec);
+    expect(tooltipValue.value).toBe('10 axis');
+  });
+
+  it('should format ticks with default formatter', () => {
+    const tooltipValue = formatTooltip(indexedGeometry, SPEC_1, false, false, false, YAXIS_SPEC);
+    expect(tooltipValue.value).toBe('10');
+  });
+
+  it('should format header with custom formatter from axis', () => {
+    const axisTickFormatter: TickFormatter = (v) => `${v} axis`;
+    const tickFormatter: TickFormatter = (v) => `${v} spec`;
+    const axisSpec: AxisSpec = {
+      ...YAXIS_SPEC,
+      tickFormat: axisTickFormatter,
+    };
+    const spec: BarSeriesSpec = {
+      ...SPEC_1,
+      tickFormat: tickFormatter,
+    };
+    const tooltipValue = formatTooltip(indexedGeometry, spec, true, false, false, axisSpec);
+    expect(tooltipValue.value).toBe('1 axis');
+  });
+
+  it('should format header with default formatter from axis', () => {
+    const tickFormatter: TickFormatter = (v) => `${v} spec`;
+    const spec: BarSeriesSpec = {
+      ...SPEC_1,
+      tickFormat: tickFormatter,
+    };
+    const tooltipValue = formatTooltip(indexedGeometry, spec, true, false, false, YAXIS_SPEC);
+    expect(tooltipValue.value).toBe('1');
   });
 });

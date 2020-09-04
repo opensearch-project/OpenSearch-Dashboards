@@ -20,7 +20,7 @@
 import { SeriesKey, SeriesIdentifier } from '../../../../commons/series_id';
 import { Scale } from '../../../../scales';
 import { ScaleType } from '../../../../scales/constants';
-import { identity, mergePartial, Rotation, Color, isUniqueArray } from '../../../../utils/commons';
+import { mergePartial, Rotation, Color, isUniqueArray } from '../../../../utils/commons';
 import { CurveType } from '../../../../utils/curves';
 import { Dimensions } from '../../../../utils/dimensions';
 import { Domain } from '../../../../utils/domain';
@@ -31,6 +31,7 @@ import { XDomain, YDomain } from '../../domains/types';
 import { mergeXDomain } from '../../domains/x_domain';
 import { mergeYDomain } from '../../domains/y_domain';
 import { renderArea, renderBars, renderLine, renderBubble, isDatumFilled } from '../../rendering/rendering';
+import { defaultTickFormatter } from '../../utils/axis_utils';
 import { fillSeries } from '../../utils/fill_series';
 import { IndexedGeometryMap } from '../../utils/indexed_geometry_map';
 import { computeXScale, computeYScales, countBarsInCluster } from '../../utils/scales';
@@ -483,6 +484,7 @@ function renderGeometries(
   const bubbles: BubbleGeometry[] = [];
   const indexedGeometryMap = new IndexedGeometryMap();
   const isMixedChart = isUniqueArray(seriesSpecs, ({ seriesType }) => seriesType) && seriesSpecs.length > 1;
+  const fallBackTickFormatter = seriesSpecs.find(({ tickFormat }) => tickFormat)?.tickFormat ?? defaultTickFormatter;
   const geometriesCounts: GeometriesCounts = {
     points: 0,
     bars: 0,
@@ -510,7 +512,7 @@ function renderGeometries(
       });
 
       const { yAxis } = getAxesSpecForSpecId(axesSpecs, spec.groupId);
-      const valueFormatter = yAxis && yAxis.tickFormat ? yAxis.tickFormat : identity;
+      const valueFormatter = yAxis?.tickFormat ?? fallBackTickFormatter;
 
       const displayValueSettings = spec.displayValueSettings
         ? { valueFormatter, ...spec.displayValueSettings }

@@ -33,15 +33,13 @@ const defaultProps = {
   showOverlappingTicks: false,
   showOverlappingLabels: false,
   position: Position.Left,
-  tickFormat: (tick: any) => `${tick}`,
 };
 
 type SpecRequired = Pick<AxisSpec, 'id'>;
 type SpecOptionals = Partial<Omit<AxisSpec, 'chartType' | 'specType' | 'seriesType' | 'id'>>;
 
 export const Axis: React.FunctionComponent<SpecRequired & SpecOptionals> = getConnect()(
-  specComponentFactory<
-    AxisSpec,
-    'groupId' | 'hide' | 'showOverlappingTicks' | 'showOverlappingLabels' | 'position' | 'tickFormat'
-  >(defaultProps),
+  specComponentFactory<AxisSpec, 'groupId' | 'hide' | 'showOverlappingTicks' | 'showOverlappingLabels' | 'position'>(
+    defaultProps,
+  ),
 );

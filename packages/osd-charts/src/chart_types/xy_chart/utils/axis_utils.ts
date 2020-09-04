@@ -67,6 +67,8 @@ export interface TickLabelProps {
   verticalAlign: Extract<VerticalAlignment, 'top' | 'middle' | 'bottom'>;
 }
 
+export const defaultTickFormatter = (tick: any) => `${tick}`;
+
 /**
  * Compute the ticks values and identify max width and height of the labels
  * so we can compute the max space occupied by the axis component.
@@ -86,6 +88,7 @@ export function computeAxisTicksDimensions(
   bboxCalculator: BBoxCalculator,
   chartRotation: Rotation,
   { gridLine, tickLabel }: AxisStyle,
+  fallBackTickFormatter: TickFormatter,
   barsPadding?: number,
   enableHistogramMode?: boolean,
 ): AxisTicksDimensions | null {
@@ -113,7 +116,7 @@ export function computeAxisTicksDimensions(
 
   const dimensions = computeTickDimensions(
     scale,
-    axisSpec.labelFormat ?? axisSpec.tickFormat,
+    axisSpec.labelFormat ?? axisSpec.tickFormat ?? fallBackTickFormatter,
     bboxCalculator,
     tickLabel,
     { timeZone: xDomain.timeZone },
@@ -507,6 +510,7 @@ export function getAvailableTicks(
   scale: Scale,
   totalBarsInCluster: number,
   enableHistogramMode: boolean,
+  fallBackTickFormatter: TickFormatter,
   tickFormatOptions?: TickFormatterOptions,
 ): AxisTick[] {
   const ticks = scale.ticks();
@@ -531,25 +535,26 @@ export function getAvailableTicks(
   const band = scale.bandwidth / (1 - scale.barsPadding);
   const halfPadding = (band - scale.bandwidth) / 2;
   const offset = enableHistogramMode ? -halfPadding : (scale.bandwidth * shift) / 2;
+  const tickFormatter = axisSpec.tickFormat ?? fallBackTickFormatter;
 
   if (isSingleValueScale && hasAdditionalTicks) {
-    const firstTickValue = ticks[0];
+    const [firstTickValue] = ticks;
     const firstTick = {
       value: firstTickValue,
-      label: axisSpec.tickFormat(firstTickValue, tickFormatOptions),
+      label: tickFormatter(firstTickValue, tickFormatOptions),
       position: (scale.scale(firstTickValue) ?? 0) + offset,
     };
 
     const lastTickValue = firstTickValue + scale.minInterval;
     const lastTick = {
       value: lastTickValue,
-      label: axisSpec.tickFormat(lastTickValue, tickFormatOptions),
+      label: tickFormatter(lastTickValue, tickFormatOptions),
       position: scale.bandwidth + halfPadding * 2,
     };
 
     return [firstTick, lastTick];
   }
-  return enableDuplicatedTicks(axisSpec, scale, offset, tickFormatOptions);
+  return enableDuplicatedTicks(axisSpec, scale, offset, fallBackTickFormatter, tickFormatOptions);
 }
 
 /** @internal */
@@ -557,13 +562,14 @@ export function enableDuplicatedTicks(
   axisSpec: AxisSpec,
   scale: Scale,
   offset: number,
+  fallBackTickFormatter: TickFormatter,
   tickFormatOptions?: TickFormatterOptions,
-) {
+): AxisTick[] {
   const ticks = scale.ticks();
   const allTicks: AxisTick[] = ticks.map((tick) => ({
     value: tick,
     // TODO handle empty string tick formatting
-    label: axisSpec.tickFormat(tick, tickFormatOptions),
+    label: (axisSpec.tickFormat ?? fallBackTickFormatter)(tick, tickFormatOptions),
     position: (scale.scale(tick) ?? 0) + offset,
   }));
 
@@ -685,6 +691,7 @@ export function getAxisTicksPositions(
   yDomain: YDomain[],
   totalGroupsCount: number,
   enableHistogramMode: boolean,
+  fallBackTickFormatter: TickFormatter,
   barsPadding?: number,
 ): {
   axisPositions: Map<AxisId, Dimensions>;
@@ -731,9 +738,17 @@ export function getAxisTicksPositions(
       timeZone: xDomain.timeZone,
     };
     const { axisTitle, tickLine, tickLabel, gridLine } = axesStyles.get(id) ?? sharedAxesStyle;
-    const allTicks = getAvailableTicks(axisSpec, scale, totalGroupsCount, enableHistogramMode, tickFormatOptions);
-    const visibleTicks = getVisibleTicks(allTicks, axisSpec, axisDim);
     const isVertical = isVerticalAxis(axisSpec.position);
+    const allTicks = getAvailableTicks(
+      axisSpec,
+      scale,
+      totalGroupsCount,
+      enableHistogramMode,
+      isVertical ? fallBackTickFormatter : defaultTickFormatter,
+      tickFormatOptions,
+    );
+
+    const visibleTicks = getVisibleTicks(allTicks, axisSpec, axisDim);
     const axisSpecConfig = axisSpec.gridLine;
     const gridLineThemeStyles = isVertical ? gridLine.vertical : gridLine.horizontal;
     const gridLineStyles = axisSpecConfig ? mergePartial(gridLineThemeStyles, axisSpecConfig) : gridLineThemeStyles;

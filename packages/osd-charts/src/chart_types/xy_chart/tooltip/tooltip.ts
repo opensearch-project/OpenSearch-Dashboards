@@ -21,8 +21,8 @@ import { LegendItemExtraValues } from '../../../commons/legend';
 import { SeriesKey } from '../../../commons/series_id';
 import { TooltipValue } from '../../../specs';
 import { getAccessorFormatLabel } from '../../../utils/accessor';
-import { identity } from '../../../utils/commons';
 import { IndexedGeometry, BandedAccessorType } from '../../../utils/geometry';
+import { defaultTickFormatter } from '../utils/axis_utils';
 import { getSeriesName } from '../utils/series';
 import {
   AxisSpec,
@@ -84,12 +84,14 @@ export function formatTooltip(
 
   const value = isHeader ? x : y;
   const tickFormatOptions: TickFormatterOptions | undefined = spec.timeZone ? { timeZone: spec.timeZone } : undefined;
+  const tickFormatter =
+    (isHeader ? axisSpec?.tickFormat : spec.tickFormat ?? axisSpec?.tickFormat) ?? defaultTickFormatter;
 
   return {
     seriesIdentifier,
     valueAccessor: accessor,
     label,
-    value: axisSpec ? axisSpec.tickFormat(value, tickFormatOptions) : identity(value),
+    value: tickFormatter(value, tickFormatOptions),
     markValue: isHeader || mark === null ? null : mark,
     color,
     isHighlighted: isHeader ? false : isHighlighted,

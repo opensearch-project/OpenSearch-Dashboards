@@ -19,10 +19,11 @@
 
 import { LegendItem } from '../../../commons/legend';
 import { SeriesKey, SeriesIdentifier } from '../../../commons/series_id';
-import { identity, Color } from '../../../utils/commons';
+import { Color } from '../../../utils/commons';
 import { BandedAccessorType } from '../../../utils/geometry';
 import { getAxesSpecForSpecId, getSpecsById } from '../state/utils/spec';
 import { Y0_ACCESSOR_POSTFIX, Y1_ACCESSOR_POSTFIX } from '../tooltip/tooltip';
+import { defaultTickFormatter } from '../utils/axis_utils';
 import {
   SeriesCollectionValue,
   getSeriesIndex,
@@ -66,6 +67,7 @@ export function computeLegend(
 ): LegendItem[] {
   const legendItems: LegendItem[] = [];
   const sortedCollection = getSortedDataSeriesColorsValuesMap(seriesCollection);
+  const fallbackTickFormatter = specs.find(({ tickFormat }) => tickFormat)?.tickFormat ?? defaultTickFormatter;
 
   sortedCollection.forEach((series, key) => {
     const { banded, lastValue, seriesIdentifier } = series;
@@ -83,7 +85,7 @@ export function computeLegend(
 
     // Use this to get axis spec w/ tick formatter
     const { yAxis } = getAxesSpecForSpecId(axesSpecs, spec.groupId);
-    const formatter = yAxis ? yAxis.tickFormat : identity;
+    const formatter = yAxis?.tickFormat ?? fallbackTickFormatter;
     const { hideInLegend } = spec;
 
     legendItems.push({
