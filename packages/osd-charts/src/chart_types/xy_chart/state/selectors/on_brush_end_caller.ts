@@ -88,7 +88,14 @@ export function createOnBrushEndCaller(): (state: GlobalChartState) => void {
         ],
         (
           lastDrag,
-          { onBrushEnd, rotation, brushAxis, minBrushDelta },
+          {
+            onBrushEnd,
+            rotation,
+            brushAxis,
+            minBrushDelta,
+            roundHistogramBrushValues,
+            allowBrushingLastHistogramBucket,
+          },
           computedScales,
           { chartDimensions },
           histogramMode,
@@ -111,6 +118,8 @@ export function createOnBrushEndCaller(): (state: GlobalChartState) => void {
                   histogramMode,
                   xScale,
                   minBrushDelta,
+                  roundHistogramBrushValues,
+                  allowBrushingLastHistogramBucket,
                 );
               }
               if (brushAxis === BrushAxis.Y || brushAxis === BrushAxis.Both) {
@@ -140,6 +149,8 @@ function getXBrushExtent(
   histogramMode: boolean,
   xScale: Scale,
   minBrushDelta?: number,
+  roundHistogramBrushValues?: boolean,
+  allowBrushingLastHistogramBucket?: boolean,
 ): [number, number] | undefined {
   let startPos = getLeftPoint(chartDimensions, lastDrag.start.position);
   let endPos = getLeftPoint(chartDimensions, lastDrag.end.position);
@@ -163,10 +174,17 @@ function getXBrushExtent(
   }
 
   const offset = histogramMode ? 0 : -(xScale.bandwidth + xScale.bandwidthPadding) / 2;
-  const minPosScaled = xScale.invert(minPos + offset);
-  const maxPosScaled = xScale.invert(maxPos + offset);
+  const invertValue = roundHistogramBrushValues
+    ? (value: number) => xScale.invertWithStep(value, xScale.domain)?.value
+    : (value: number) => xScale.invert(value);
+  const minPosScaled = invertValue(minPos + offset);
+  const maxPosScaled = invertValue(maxPos + offset);
+
+  const maxDomainValue = xScale.domain[1] + (allowBrushingLastHistogramBucket ? xScale.minInterval : 0);
+
   const minValue = minValueWithLowerLimit(minPosScaled, maxPosScaled, xScale.domain[0]);
-  const maxValue = maxValueWithUpperLimit(minPosScaled, maxPosScaled, xScale.domain[1]);
+  const maxValue = maxValueWithUpperLimit(minPosScaled, maxPosScaled, maxDomainValue);
+
   return [minValue, maxValue];
 }
 

@@ -39,6 +39,7 @@ export { Example as brushSelectionToolOnLinear } from './9_brush_selection_linea
 export { Example as brushTool } from './9a_brush_selection_linear';
 
 export { Example as brushSelectionToolOnBarChartLinear } from './10_brush_selection_bar';
+export { Example as brushSelectionToolOnBarChartHistogram } from './10a_brush_selection_bar_hist';
 export { Example as brushSelectionToolOnTimeCharts } from './11_brush_time';
 export { Example as brushSelectionToolOnHistogramTimeCharts } from './12_brush_time_hist';
 export { Example as brushDisabledOnOrdinalXAxis } from './13_brush_disabled_ordinal';

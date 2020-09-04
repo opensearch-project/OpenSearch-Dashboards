@@ -23,14 +23,19 @@ import { DateTime } from 'luxon';
 import React from 'react';
 
 import { Axis, Chart, niceTimeFormatter, Position, ScaleType, Settings, HistogramBarSeries } from '../../src';
+import { isVerticalRotation } from '../../src/chart_types/xy_chart/state/utils/common';
 import { getChartRotationKnob } from '../utils/knobs';
 
 export const Example = () => {
+  const rotation = getChartRotationKnob();
+  const isVertical = isVerticalRotation(rotation);
   const now = DateTime.fromISO('2019-01-11T00:00:00.000')
     .setZone('utc+1')
     .toMillis();
   const oneDay = 1000 * 60 * 60 * 24;
-  const formatter = niceTimeFormatter([now, now + oneDay * 5]);
+  const dateFormatter = niceTimeFormatter([now, now + oneDay * 5]);
+  const numberFormatter = (d: any) => Number(d).toFixed(2);
+
   return (
     <Chart className="story-chart">
       <Settings
@@ -39,13 +44,21 @@ export const Example = () => {
           if (!x) {
             return;
           }
-          action('onBrushEnd')(formatter(x[0]), formatter(x[1]));
+          action('onBrushEnd')(dateFormatter(x[0]), dateFormatter(x[1]));
         }}
         onElementClick={action('onElementClick')}
         rotation={getChartRotationKnob()}
+        roundHistogramBrushValues={boolean('roundHistogramBrushValues', false)}
+        allowBrushingLastHistogramBucket={boolean('allowBrushingLastHistogramBucket', false)}
       />
-      <Axis id="bottom" position={Position.Bottom} title="bottom" showOverlappingTicks tickFormat={formatter} />
-      <Axis id="left" title="left" position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
+      <Axis
+        id="bottom"
+        position={Position.Bottom}
+        title="bottom"
+        showOverlappingTicks
+        tickFormat={!isVertical ? dateFormatter : numberFormatter}
+      />
+      <Axis id="left" title="left" position={Position.Left} tickFormat={isVertical ? dateFormatter : numberFormatter} />
 
       <HistogramBarSeries
         id="bars"

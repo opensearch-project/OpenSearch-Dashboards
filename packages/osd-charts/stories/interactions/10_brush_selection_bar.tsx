@@ -21,27 +21,55 @@ import { action } from '@storybook/addon-actions';
 import React from 'react';
 
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '../../src';
+import { isVerticalRotation } from '../../src/chart_types/xy_chart/state/utils/common';
 import { getChartRotationKnob } from '../utils/knobs';
 
-export const Example = () => (
-  <Chart className="story-chart">
-    <Settings onBrushEnd={action('onBrushEnd')} rotation={getChartRotationKnob()} />
-    <Axis id="bottom" position={Position.Bottom} title="bottom" showOverlappingTicks />
-    <Axis id="left" title="left" position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
-    <Axis id="top" position={Position.Top} title="top" showOverlappingTicks />
-    <Axis id="right" title="right" position={Position.Right} tickFormat={(d) => Number(d).toFixed(2)} />
+export const Example = () => {
+  const rotation = getChartRotationKnob();
+  const isVertical = isVerticalRotation(rotation);
 
-    <BarSeries
-      id="lines"
-      xScaleType={ScaleType.Linear}
-      yScaleType={ScaleType.Linear}
-      xAccessor="x"
-      yAccessors={['y']}
-      data={[
-        { x: 1, y: 2 },
-        { x: 2, y: 7 },
-        { x: 3, y: 3 },
-      ]}
-    />
-  </Chart>
-);
+  return (
+    <Chart className="story-chart">
+      <Settings onBrushEnd={action('onBrushEnd')} rotation={rotation} />
+      <Axis
+        id="bottom"
+        position={Position.Bottom}
+        title="bottom"
+        showOverlappingTicks
+        tickFormat={isVertical ? (d) => Number(d).toFixed(2) : undefined}
+      />
+      <Axis
+        id="left"
+        title="left"
+        position={Position.Left}
+        tickFormat={!isVertical ? (d) => Number(d).toFixed(2) : undefined}
+      />
+      <Axis
+        id="top"
+        position={Position.Top}
+        title="top"
+        showOverlappingTicks
+        tickFormat={isVertical ? (d) => Number(d).toFixed(2) : undefined}
+      />
+      <Axis
+        id="right"
+        title="right"
+        position={Position.Right}
+        tickFormat={!isVertical ? (d) => Number(d).toFixed(2) : undefined}
+      />
+
+      <BarSeries
+        id="lines"
+        xScaleType={ScaleType.Linear}
+        yScaleType={ScaleType.Linear}
+        xAccessor="x"
+        yAccessors={['y']}
+        data={[
+          { x: 1, y: 2 },
+          { x: 2, y: 7 },
+          { x: 3, y: 3 },
+        ]}
+      />
+    </Chart>
+  );
+};

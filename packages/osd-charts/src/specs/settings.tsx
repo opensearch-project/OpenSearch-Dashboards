@@ -333,6 +333,30 @@ export interface SettingsSpec extends Spec {
    * @defaultValue 2
    */
   minBrushDelta?: number;
+  /**
+   * Boolean to round brushed values to nearest step bounds.
+   *
+   * e.g.
+   * A brush selection range of [1.23, 3.6] with a domain of [1, 2, 3, 4].
+   *
+   * - when true returns [1, 3]
+   * - when false returns [1.23, 3.6]
+   *
+   * @defaultValue false
+   */
+  roundHistogramBrushValues?: boolean;
+  /**
+   * Boolean to allow brushing on last bucket even when outside domain or limit to end of domain.
+   *
+   * e.g.
+   * A brush selection range of [1.23, 3.6] with a domain of [1, 2, 3]
+   *
+   * - when true returns [1.23, 3.6]
+   * - when false returns [1.23, 3]
+   *
+   * @defaultValue false
+   */
+  allowBrushingLastHistogramBucket?: boolean;
 }
 
 export type DefaultSettingsProps =
