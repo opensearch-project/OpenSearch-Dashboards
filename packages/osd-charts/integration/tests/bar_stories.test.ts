@@ -20,6 +20,16 @@
 import { common } from '../page_objects';
 
 describe('Bar series stories', () => {
+  describe('[test] axis positions with histogram bar series', () => {
+    [0, 90, -90, 180].forEach((rotation) => {
+      it(`Should render correct axis - rotation ${rotation === -90 ? 'negative 90' : rotation}`, async () => {
+        await common.expectChartAtUrlToMatchScreenshot(
+          `http://localhost:9001/?path=/story/interactions--brush-selection-tool-on-histogram-time-charts&knob-debug=&knob-chartRotation=${rotation}`,
+        );
+      });
+    });
+  });
+
   describe('[test] switch ordinal/linear x axis', () => {
     it('using ordinal x axis', async () => {
       await common.expectChartAtUrlToMatchScreenshot(

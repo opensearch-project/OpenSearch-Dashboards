@@ -29,6 +29,10 @@ import { ScaleType } from './constants';
 export interface Scale {
   domain: any[];
   range: number[];
+  /**
+   * Returns the distance between the starts of adjacent bands.
+   */
+  step: number;
   ticks: () => any[];
   scaleOrThrow(value?: PrimitiveValue): number;
   scale: (value?: PrimitiveValue) => number | null;

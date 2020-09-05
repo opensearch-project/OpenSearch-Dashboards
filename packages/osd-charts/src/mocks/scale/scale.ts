@@ -27,6 +27,7 @@ export class MockScale {
     scaleOrThrow: jest.fn().mockImplementation((x) => x),
     scale: jest.fn().mockImplementation((x) => x),
     type: ScaleType.Linear,
+    step: 0,
     bandwidth: 0,
     bandwidthPadding: 0,
     minInterval: 0,

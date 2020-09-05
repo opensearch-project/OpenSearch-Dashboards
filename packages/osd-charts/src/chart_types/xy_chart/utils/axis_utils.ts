@@ -511,6 +511,7 @@ export function getAvailableTicks(
   totalBarsInCluster: number,
   enableHistogramMode: boolean,
   fallBackTickFormatter: TickFormatter,
+  rotationOffset: number,
   tickFormatOptions?: TickFormatterOptions,
 ): AxisTick[] {
   const ticks = scale.ticks();
@@ -534,7 +535,8 @@ export function getAvailableTicks(
 
   const band = scale.bandwidth / (1 - scale.barsPadding);
   const halfPadding = (band - scale.bandwidth) / 2;
-  const offset = enableHistogramMode ? -halfPadding : (scale.bandwidth * shift) / 2;
+  const offset =
+    (enableHistogramMode ? -halfPadding : (scale.bandwidth * shift) / 2) + (scale.isSingleValue() ? 0 : rotationOffset);
   const tickFormatter = axisSpec.tickFormat ?? fallBackTickFormatter;
 
   if (isSingleValueScale && hasAdditionalTicks) {
@@ -739,12 +741,20 @@ export function getAxisTicksPositions(
     };
     const { axisTitle, tickLine, tickLabel, gridLine } = axesStyles.get(id) ?? sharedAxesStyle;
     const isVertical = isVerticalAxis(axisSpec.position);
+    // TODO: Find the true cause of the this offset error
+    const rotationOffset =
+      enableHistogramMode &&
+      ((isVertical && [-90].includes(chartRotation)) || (!isVertical && [180].includes(chartRotation)))
+        ? scale.step
+        : 0;
+
     const allTicks = getAvailableTicks(
       axisSpec,
       scale,
       totalGroupsCount,
       enableHistogramMode,
       isVertical ? fallBackTickFormatter : defaultTickFormatter,
+      rotationOffset,
       tickFormatOptions,
     );
 
@@ -791,6 +801,7 @@ export function getAxisTicksPositions(
     axisVisibleTicks.set(id, visibleTicks);
     axisTicks.set(id, allTicks);
   });
+
   return {
     axisPositions,
     axisTicks,

@@ -355,9 +355,8 @@ describe('Axis computational utils', () => {
 
   describe('getAvailableTicks', () => {
     test('should compute to end of domain when histogram mode not enabled', () => {
-      const enableHistogramMode = false;
       const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
-      const axisPositions = getAvailableTicks(verticalAxisSpec, scale!, 0, enableHistogramMode, (v) => `${v}`);
+      const axisPositions = getAvailableTicks(verticalAxisSpec, scale!, 0, false, (v) => `${v}`, 0);
       const expectedAxisPositions = [
         { label: '0', position: 100, value: 0 },
         { label: '0.1', position: 90, value: 0.1 },
@@ -370,6 +369,26 @@ describe('Axis computational utils', () => {
         { label: '0.8', position: 20, value: 0.8 },
         { label: '0.9', position: 10, value: 0.9 },
         { label: '1', position: 0, value: 1 },
+      ];
+      expect(axisPositions).toEqual(expectedAxisPositions);
+    });
+
+    test('should compute positions with rotational offset', () => {
+      const rotationalOffset = 2;
+      const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
+      const axisPositions = getAvailableTicks(verticalAxisSpec, scale!, 0, false, (v) => `${v}`, rotationalOffset);
+      const expectedAxisPositions = [
+        { label: '0', position: 100 + rotationalOffset, value: 0 },
+        { label: '0.1', position: 90 + rotationalOffset, value: 0.1 },
+        { label: '0.2', position: 80 + rotationalOffset, value: 0.2 },
+        { label: '0.3', position: 70 + rotationalOffset, value: 0.3 },
+        { label: '0.4', position: 60 + rotationalOffset, value: 0.4 },
+        { label: '0.5', position: 50 + rotationalOffset, value: 0.5 },
+        { label: '0.6', position: 40 + rotationalOffset, value: 0.6 },
+        { label: '0.7', position: 30 + rotationalOffset, value: 0.7 },
+        { label: '0.8', position: 20 + rotationalOffset, value: 0.8 },
+        { label: '0.9', position: 10 + rotationalOffset, value: 0.9 },
+        { label: '1', position: 0 + rotationalOffset, value: 1 },
       ];
       expect(axisPositions).toEqual(expectedAxisPositions);
     });
@@ -390,6 +409,7 @@ describe('Axis computational utils', () => {
         1,
         enableHistogramMode,
         (v) => `${v}`,
+        0,
       );
       const histogramTickLabels = histogramAxisPositions.map(({ label }: AxisTick) => label);
       expect(histogramTickLabels).toEqual(['0', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100', '110']);
@@ -411,6 +431,7 @@ describe('Axis computational utils', () => {
         1,
         enableHistogramMode,
         (v) => `${v}`,
+        0,
       );
       const histogramTickValues = histogramAxisPositions.map(({ value }: AxisTick) => value);
 
@@ -449,6 +470,7 @@ describe('Axis computational utils', () => {
         1,
         enableHistogramMode,
         (v) => `${v}`,
+        0,
       );
       const histogramTickValues = histogramAxisPositions.map(({ value }: AxisTick) => value);
       const expectedTickValues = [1560438420000, 1560438510000];

@@ -196,7 +196,7 @@ export class ScaleContinuous implements Scale {
     this.bandwidth = bandwidth * (1 - safeBarPadding);
     this.bandwidthPadding = bandwidth * safeBarPadding;
     this.d3Scale.range(range);
-    this.step = 0;
+    this.step = this.bandwidth + this.barsPadding + this.bandwidthPadding;
     this.type = type;
     this.range = range;
     this.minInterval = minInterval;
