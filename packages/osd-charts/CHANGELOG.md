@@ -1,3 +1,16 @@
+# [21.1.0](https://github.com/elastic/elastic-charts/compare/v21.0.1...v21.1.0) (2020-09-06)
+
+
+### Bug Fixes
+
+* **axis:** misaligned axis with rotated histogram bar charts ([#805](https://github.com/elastic/elastic-charts/issues/805)) ([6c454e1](https://github.com/elastic/elastic-charts/commit/6c454e10ece3f4cbaf1bacf06f5f2b832e9c32b0))
+
+
+### Features
+
+* **brush:** histogram brushing last values and rounding ([#801](https://github.com/elastic/elastic-charts/issues/801)) ([6d0319f](https://github.com/elastic/elastic-charts/commit/6d0319f1b0898360c004ec34844ac0b441d08b38))
+* **tooltip:** series tick formatters ([#802](https://github.com/elastic/elastic-charts/issues/802)) ([fbcd92e](https://github.com/elastic/elastic-charts/commit/fbcd92e1ff4802c07561a9abf309cc88a26e8b5e))
+
 ## [21.0.1](https://github.com/elastic/elastic-charts/compare/v21.0.0...v21.0.1) (2020-08-18)
 
 
