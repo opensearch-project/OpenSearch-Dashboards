@@ -1,3 +1,10 @@
+## [21.1.1](https://github.com/elastic/elastic-charts/compare/v21.1.0...v21.1.1) (2020-09-08)
+
+
+### Bug Fixes
+
+* build issues and tooltip formatting issues ([#810](https://github.com/elastic/elastic-charts/issues/810)) ([74d9ae0](https://github.com/elastic/elastic-charts/commit/74d9ae0d9425ce494cd15037f4d952eb2db167ab))
+
 # [21.1.0](https://github.com/elastic/elastic-charts/compare/v21.0.1...v21.1.0) (2020-09-06)
 
 
