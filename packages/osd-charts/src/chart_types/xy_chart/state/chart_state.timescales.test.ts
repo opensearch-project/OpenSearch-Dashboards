@@ -91,18 +91,24 @@ describe('Render chart', () => {
       store.dispatch(onPointerMove({ x: 15, y: 10 }, 0)); // check first valid tooltip
       let tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
-      expect(tooltip.header?.value).toBe(`${day1}`);
-      expect(tooltip.values[0].value).toBe(`${10}`);
+      expect(tooltip.header?.value).toBe(day1);
+      expect(tooltip.header?.formattedValue).toBe(`${day1}`);
+      expect(tooltip.values[0].value).toBe(10);
+      expect(tooltip.values[0].formattedValue).toBe(`${10}`);
       store.dispatch(onPointerMove({ x: 35, y: 10 }, 1)); // check second valid tooltip
       tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
-      expect(tooltip.header?.value).toBe(`${day2}`);
-      expect(tooltip.values[0].value).toBe(`${22}`);
+      expect(tooltip.header?.value).toBe(day2);
+      expect(tooltip.header?.formattedValue).toBe(`${day2}`);
+      expect(tooltip.values[0].value).toBe(22);
+      expect(tooltip.values[0].formattedValue).toBe(`${22}`);
       store.dispatch(onPointerMove({ x: 76, y: 10 }, 2)); // check third valid tooltip
       tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
-      expect(tooltip.header?.value).toBe(`${day3}`);
-      expect(tooltip.values[0].value).toBe(`${6}`);
+      expect(tooltip.header?.value).toBe(day3);
+      expect(tooltip.header?.formattedValue).toBe(`${day3}`);
+      expect(tooltip.values[0].value).toBe(6);
+      expect(tooltip.values[0].formattedValue).toBe(`${6}`);
     });
   });
   describe('line, utc-time, 5m interval', () => {
@@ -159,18 +165,24 @@ describe('Render chart', () => {
       store.dispatch(onPointerMove({ x: 15, y: 10 }, 0)); // check first valid tooltip
       let tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
-      expect(tooltip.header?.value).toBe(`${date1}`);
-      expect(tooltip.values[0].value).toBe(`${10}`);
+      expect(tooltip.header?.value).toBe(date1);
+      expect(tooltip.header?.formattedValue).toBe(`${date1}`);
+      expect(tooltip.values[0].value).toBe(10);
+      expect(tooltip.values[0].formattedValue).toBe(`${10}`);
       store.dispatch(onPointerMove({ x: 35, y: 10 }, 1)); // check second valid tooltip
       tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
-      expect(tooltip.header?.value).toBe(`${date2}`);
-      expect(tooltip.values[0].value).toBe(`${22}`);
+      expect(tooltip.header?.value).toBe(date2);
+      expect(tooltip.header?.formattedValue).toBe(`${date2}`);
+      expect(tooltip.values[0].value).toBe(22);
+      expect(tooltip.values[0].formattedValue).toBe(`${22}`);
       store.dispatch(onPointerMove({ x: 76, y: 10 }, 2)); // check third valid tooltip
       tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
-      expect(tooltip.header?.value).toBe(`${date3}`);
-      expect(tooltip.values[0].value).toBe(`${6}`);
+      expect(tooltip.header?.value).toBe(date3);
+      expect(tooltip.header?.formattedValue).toBe(`${date3}`);
+      expect(tooltip.values[0].value).toBe(6);
+      expect(tooltip.values[0].formattedValue).toBe(`${6}`);
     });
   });
   describe('line, non utc-time, 5m + 1s interval', () => {
@@ -245,18 +257,24 @@ describe('Render chart', () => {
       store.dispatch(onPointerMove({ x: 15, y: 10 }, 0)); // check first valid tooltip
       let tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
-      expect(tooltip.header?.value).toBe(`${date1}`);
-      expect(tooltip.values[0].value).toBe(`${10}`);
+      expect(tooltip.header?.value).toBe(date1);
+      expect(tooltip.header?.formattedValue).toBe(`${date1}`);
+      expect(tooltip.values[0].value).toBe(10);
+      expect(tooltip.values[0].formattedValue).toBe(`${10}`);
       store.dispatch(onPointerMove({ x: 35, y: 10 }, 1)); // check second valid tooltip
       tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
-      expect(tooltip.header?.value).toBe(`${date2}`);
-      expect(tooltip.values[0].value).toBe(`${22}`);
+      expect(tooltip.header?.value).toBe(date2);
+      expect(tooltip.header?.formattedValue).toBe(`${date2}`);
+      expect(tooltip.values[0].value).toBe(22);
+      expect(tooltip.values[0].formattedValue).toBe(`${22}`);
       store.dispatch(onPointerMove({ x: 76, y: 10 }, 2)); // check third valid tooltip
       tooltip = getTooltipInfoSelector(store.getState());
       expect(tooltip.values.length).toBe(1);
-      expect(tooltip.header?.value).toBe(`${date3}`);
-      expect(tooltip.values[0].value).toBe(`${6}`);
+      expect(tooltip.header?.value).toBe(date3);
+      expect(tooltip.header?.formattedValue).toBe(`${date3}`);
+      expect(tooltip.values[0].value).toBe(6);
+      expect(tooltip.values[0].formattedValue).toBe(`${6}`);
     });
   });
 });

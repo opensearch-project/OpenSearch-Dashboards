@@ -25,14 +25,18 @@ import { Axis, Chart, LineSeries, Position, ScaleType, Settings } from '../../sr
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => {
-  const showLegend = boolean('Show legend', true);
-  const disableAxisFormat = boolean('Disable Y Axis tickFormat', false);
-  const axisFormat = text('Y Axis value format', '0[.]0');
-  const axisUnit = text('Y Axis unit', 'pets');
-  const disableDogLineFormat = boolean('Disable dog line tickFormat', false);
-  const dogLineFormat = text('Dog line unit', 'dogs');
-  const disableCatLineFormat = boolean('Disable cat line tickFormat', false);
-  const catLineFormat = text('Cat line unit', 'cats');
+  const showLegend = boolean('Show legend', true, 'Y axis');
+  const disableYAxisFormat = boolean('Disable Axis tickFormat', false, 'Y axis');
+  const yAxisFormat = text('Axis value format', '0[.]0', 'Y axis');
+  const yAxisUnit = text('Axis unit', 'pets', 'Y axis');
+  const disableHeaderFormat = boolean('Disable header tickFormat', false, 'X axis');
+  const headerUnit = text('Header unit', '(header)', 'X axis');
+  const disableXAxisFormat = boolean('Disable Axis tickFormat', false, 'X axis');
+  const xAxisUnit = text('Axis unit', '(axis)', 'X axis');
+  const disableDogLineFormat = boolean('Disable dog line tickFormat', false, 'Y axis');
+  const dogLineFormat = text('Dog line unit', 'dogs', 'Y axis');
+  const disableCatLineFormat = boolean('Disable cat line tickFormat', false, 'Y axis');
+  const catLineFormat = text('Cat line unit', 'cats', 'Y axis');
 
   return (
     <Chart className="story-chart">
@@ -45,19 +49,30 @@ export const Example = () => {
         }}
         showLegendExtra
         showLegend={showLegend}
+        tooltip={{
+          headerFormatter: disableHeaderFormat
+            ? undefined
+            : ({ value }) => `${value}${headerUnit ? ` ${headerUnit}` : ''}`,
+        }}
       />
-      <Axis id="bottom" title="Country" position={Position.Bottom} showOverlappingTicks />
+      <Axis
+        id="bottom"
+        title="Country"
+        position={Position.Bottom}
+        showOverlappingTicks
+        tickFormat={disableXAxisFormat ? undefined : (value) => `${value}${xAxisUnit ? ` ${xAxisUnit}` : ''}`}
+      />
       <Axis
         id="left"
         title="Units"
         position={Position.Left}
         tickFormat={
-          disableAxisFormat ? undefined : (d) => `${numeral(d).format(axisFormat)}${axisUnit ? ` ${axisUnit}` : ''}`
+          disableYAxisFormat ? undefined : (d) => `${numeral(d).format(yAxisFormat)}${yAxisUnit ? ` ${yAxisUnit}` : ''}`
         }
       />
       <LineSeries
         id="Dog line"
-        xScaleType={ScaleType.Linear}
+        xScaleType={ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
         yAccessors={['y']}
@@ -70,7 +85,7 @@ export const Example = () => {
       />
       <LineSeries
         id="Cat line"
-        xScaleType={ScaleType.Linear}
+        xScaleType={ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
         yAccessors={['y']}

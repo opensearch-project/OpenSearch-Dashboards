@@ -91,7 +91,9 @@ const TooltipComponent = ({
         return null;
       }
 
-      return <div className="echTooltip__header">{headerFormatter ? headerFormatter(header) : header.value}</div>;
+      return (
+        <div className="echTooltip__header">{headerFormatter ? headerFormatter(header) : header.formattedValue}</div>
+      );
     },
     [headerFormatter],
   );
@@ -99,7 +101,10 @@ const TooltipComponent = ({
   const renderValues = (values: TooltipValue[]) => (
     <div className="echTooltip__list">
       {values.map(
-        ({ seriesIdentifier, valueAccessor, label, value, markValue, color, isHighlighted, isVisible }, index) => {
+        (
+          { seriesIdentifier, valueAccessor, label, formattedValue, markValue, color, isHighlighted, isVisible },
+          index,
+        ) => {
           if (!isVisible) {
             return null;
           }
@@ -123,7 +128,7 @@ const TooltipComponent = ({
 
               <div className="echTooltip__item--container">
                 <span className="echTooltip__label">{label}</span>
-                <span className="echTooltip__value">{value}</span>
+                <span className="echTooltip__value">{formattedValue}</span>
                 {markValue && <span className="echTooltip__markValue">&nbsp;({markValue})</span>}
               </div>
             </div>

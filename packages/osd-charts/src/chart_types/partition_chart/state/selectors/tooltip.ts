@@ -52,6 +52,7 @@ export const getTooltipInfoSelector = createCachedSelector(
     pickedShapes.forEach((shape) => {
       const labelFormatter = labelFormatters[shape.depth - 1];
       const formatter = labelFormatter?.nodeLabel;
+      const value = primaryValueGetterFun(shape);
 
       tooltipInfo.values.push({
         label: formatter ? formatter(shape.dataName) : shape.dataName,
@@ -62,9 +63,8 @@ export const getTooltipInfoSelector = createCachedSelector(
           specId: pieSpec.id,
           key: pieSpec.id,
         },
-        value: `${valueFormatter(primaryValueGetterFun(shape))} (${pieSpec.percentFormatter(
-          percentValueGetter(shape),
-        )})`,
+        value,
+        formattedValue: `${valueFormatter(value)} (${pieSpec.percentFormatter(percentValueGetter(shape))})`,
         valueAccessor: shape.depth,
       });
     });

@@ -43,8 +43,8 @@ export function getHighligthedValues(
 ): Map<SeriesKey, LegendItemExtraValues> {
   const seriesTooltipValues = new Map<SeriesKey, LegendItemExtraValues>();
 
-  tooltipValues.forEach(({ value, seriesIdentifier, valueAccessor }) => {
-    const seriesValue = defaultValue || value;
+  tooltipValues.forEach(({ formattedValue, seriesIdentifier, valueAccessor }) => {
+    const seriesValue = defaultValue || formattedValue;
     const current: LegendItemExtraValues = seriesTooltipValues.get(seriesIdentifier.key) ?? new Map();
     if (defaultValue) {
       if (!current.has(BandedAccessorType.Y0)) {
@@ -91,7 +91,8 @@ export function formatTooltip(
     seriesIdentifier,
     valueAccessor: accessor,
     label,
-    value: tickFormatter(value, tickFormatOptions),
+    value,
+    formattedValue: tickFormatter(value, tickFormatOptions),
     markValue: isHeader || mark === null ? null : mark,
     color,
     isHighlighted: isHeader ? false : isHighlighted,

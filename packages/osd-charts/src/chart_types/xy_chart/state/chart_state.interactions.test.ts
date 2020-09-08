@@ -767,8 +767,10 @@ function mouseOverTestSuite(scaleType: ScaleType) {
       MockStore.addSpecs([spec, leftAxis, bottomAxis, currentSettingSpec], store);
       store.dispatch(onPointerMove({ x: chartLeft + 0, y: chartTop + 89 }, 0));
       const tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
-      expect(tooltipInfo.tooltip.header?.value).toBe('bottom 0');
-      expect(tooltipInfo.tooltip.values[0].value).toBe('left 10');
+      expect(tooltipInfo.tooltip.header?.value).toBe(0);
+      expect(tooltipInfo.tooltip.header?.formattedValue).toBe('bottom 0');
+      expect(tooltipInfo.tooltip.values[0].value).toBe(10);
+      expect(tooltipInfo.tooltip.values[0].formattedValue).toBe('left 10');
     });
 
     test('chart 90 deg rotated', () => {
@@ -780,8 +782,10 @@ function mouseOverTestSuite(scaleType: ScaleType) {
 
       store.dispatch(onPointerMove({ x: chartLeft + 0, y: chartTop + 89 }, 0));
       const tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
-      expect(tooltipInfo.tooltip.header?.value).toBe('left 1');
-      expect(tooltipInfo.tooltip.values[0].value).toBe('bottom 5');
+      expect(tooltipInfo.tooltip.header?.value).toBe(1);
+      expect(tooltipInfo.tooltip.header?.formattedValue).toBe('left 1');
+      expect(tooltipInfo.tooltip.values[0].value).toBe(5);
+      expect(tooltipInfo.tooltip.values[0].formattedValue).toBe('bottom 5');
     });
   });
   describe('brush', () => {

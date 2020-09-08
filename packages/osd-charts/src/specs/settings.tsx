@@ -101,11 +101,15 @@ export interface TooltipValue {
    */
   label: string;
   /**
-   * The value to display
+   * The value
    */
   value: any;
   /**
-   * The mark value to display
+   * The formatted value to display
+   */
+  formattedValue: string;
+  /**
+   * The mark value
    */
   markValue?: any;
   /**

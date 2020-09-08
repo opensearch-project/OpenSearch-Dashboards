@@ -58,10 +58,21 @@ const getMiddlware = (id: string): StoreEnhancer => {
   const middlware: Middleware<any, any, any>[] = [];
 
   if (process.env.DEBUG_REDUX === 'true') {
-    /* eslint-disable @typescript-eslint/no-var-requires, import/no-extraneous-dependencies */
-    middlware.push(require('redux-immutable-state-invariant').default());
-    // https://github.com/LogRocket/redux-logger#options-description
-    middlware.push(require('redux-logger').createLogger({}));
+    /* eslint-disable no-console, global-require, @typescript-eslint/no-var-requires, import/no-extraneous-dependencies, @typescript-eslint/no-unsafe-call */
+    try {
+      const mw = require('redux-immutable-state-invariant');
+      middlware.push(mw.default());
+    } catch {
+      console.warn('`redux-immutable-state-invariant` not found with DEBUG_REDUX enabled');
+    }
+
+    try {
+      // https://github.com/LogRocket/redux-logger#options-description
+      const mw = require('redux-logger');
+      middlware.push(mw.createLogger({}));
+    } catch {
+      console.warn('`redux-logger` not found with DEBUG_REDUX enabled');
+    }
     /* eslint-enable */
   }
 

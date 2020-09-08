@@ -67,7 +67,6 @@ export function computeLegend(
 ): LegendItem[] {
   const legendItems: LegendItem[] = [];
   const sortedCollection = getSortedDataSeriesColorsValuesMap(seriesCollection);
-  const fallbackTickFormatter = specs.find(({ tickFormat }) => tickFormat)?.tickFormat ?? defaultTickFormatter;
 
   sortedCollection.forEach((series, key) => {
     const { banded, lastValue, seriesIdentifier } = series;
@@ -85,7 +84,7 @@ export function computeLegend(
 
     // Use this to get axis spec w/ tick formatter
     const { yAxis } = getAxesSpecForSpecId(axesSpecs, spec.groupId);
-    const formatter = yAxis?.tickFormat ?? fallbackTickFormatter;
+    const formatter = spec.tickFormat ?? yAxis?.tickFormat ?? defaultTickFormatter;
     const { hideInLegend } = spec;
 
     legendItems.push({

@@ -1543,6 +1543,7 @@ export type TooltipType = $Values<typeof TooltipType>;
 // @public
 export interface TooltipValue {
     color: Color;
+    formattedValue: string;
     isHighlighted: boolean;
     isVisible: boolean;
     label: string;
