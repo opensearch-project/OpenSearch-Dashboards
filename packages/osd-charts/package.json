@@ -217,7 +217,8 @@
     }
   },
   "resolutions": {
-    "conventional-changelog-conventionalcommits": "^4.3.0"
+    "conventional-changelog-conventionalcommits": "^4.3.0",
+    "refractor": "~3.1.0"
   },
   "engines": {
     "node": ">=10",
