@@ -1,3 +1,10 @@
+## [21.1.2](https://github.com/elastic/elastic-charts/compare/v21.1.1...v21.1.2) (2020-09-09)
+
+
+### Bug Fixes
+
+* remove unused redux dev middlewares ([#812](https://github.com/elastic/elastic-charts/issues/812)) ([b2679e7](https://github.com/elastic/elastic-charts/commit/b2679e7248ff0475b4267a3099c7afe1dfee67b6))
+
 ## [21.1.1](https://github.com/elastic/elastic-charts/compare/v21.1.0...v21.1.1) (2020-09-08)
 
 
