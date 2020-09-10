@@ -192,6 +192,8 @@ function getLastValues(formattedDataSeries: {
  * @param customYDomainsByGroupId custom Y domains grouped by GroupId
  * @param customXDomain if specified in <Settings />, the custom X domain
  * @param deselectedDataSeries is optional; if not supplied,
+ * @param customXDomain is optional; if not supplied,
+ * @param enableVislibSeriesSort is optional; if not specified in <Settings />,
  * then all series will be factored into computations. Otherwise, selectedDataSeries
  * is used to restrict the computation for just the selected series
  * @returns `SeriesDomainsAndData`
@@ -202,10 +204,12 @@ export function computeSeriesDomains(
   customYDomainsByGroupId: Map<GroupId, YDomainRange> = new Map(),
   deselectedDataSeries: SeriesIdentifier[] = [],
   customXDomain?: DomainRange | Domain,
+  enableVislibSeriesSort?: boolean,
 ): SeriesDomainsAndData {
   const { dataSeriesBySpecId, xValues, seriesCollection, fallbackScale } = getDataSeriesBySpecId(
     seriesSpecs,
     deselectedDataSeries,
+    enableVislibSeriesSort,
   );
 
   // compute the x domain merging any custom domain
