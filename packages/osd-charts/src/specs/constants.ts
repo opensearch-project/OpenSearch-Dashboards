@@ -33,6 +33,38 @@ export const SpecTypes = Object.freeze({
 /** @public */
 export type SpecTypes = $Values<typeof SpecTypes>;
 
+/**
+ * Type of bin aggregations
+ */
+export const BinAgg = Object.freeze({
+  /**
+   * Order by sum of values in bin
+   */
+  Sum: 'sum' as const,
+  /**
+   * Order of values are used as is
+   */
+  None: 'none' as const,
+});
+/** @public */
+export type BinAgg = $Values<typeof BinAgg>;
+
+/**
+ * Direction of sorting
+ */
+export const Direction = Object.freeze({
+  /**
+   * Least to greatest
+   */
+  Ascending: 'ascending' as const,
+  /**
+   * Greatest to least
+   */
+  Descending: 'descending' as const,
+});
+/** @public */
+export type Direction = $Values<typeof Direction>;
+
 export const PointerEventType = Object.freeze({
   Over: 'Over' as const,
   Out: 'Out' as const,

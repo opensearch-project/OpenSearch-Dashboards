@@ -20,6 +20,7 @@
 import { SeriesKey, SeriesIdentifier } from '../../../../commons/series_id';
 import { Scale } from '../../../../scales';
 import { ScaleType } from '../../../../scales/constants';
+import { OrderBy } from '../../../../specs/settings';
 import { mergePartial, Rotation, Color, isUniqueArray } from '../../../../utils/commons';
 import { CurveType } from '../../../../utils/curves';
 import { Dimensions } from '../../../../utils/dimensions';
@@ -204,14 +205,15 @@ export function computeSeriesDomains(
   customYDomainsByGroupId: Map<GroupId, YDomainRange> = new Map(),
   deselectedDataSeries: SeriesIdentifier[] = [],
   customXDomain?: DomainRange | Domain,
+  orderOrdinalBinsBy?: OrderBy,
   enableVislibSeriesSort?: boolean,
 ): SeriesDomainsAndData {
   const { dataSeriesBySpecId, xValues, seriesCollection, fallbackScale } = getDataSeriesBySpecId(
     seriesSpecs,
     deselectedDataSeries,
+    orderOrdinalBinsBy,
     enableVislibSeriesSort,
   );
-
   // compute the x domain merging any custom domain
   const specsArray = [...seriesSpecs.values()];
   const xDomain = mergeXDomain(specsArray, xValues, customXDomain, fallbackScale);

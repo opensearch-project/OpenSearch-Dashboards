@@ -19,6 +19,8 @@
 
 import { SeriesIdentifier, SeriesKey } from '../../../commons/series_id';
 import { ScaleType } from '../../../scales/constants';
+import { BinAgg, Direction } from '../../../specs';
+import { OrderBy } from '../../../specs/settings';
 import { ColorOverrides } from '../../../state/chart_state';
 import { Accessor, AccessorFn, getAccessorValue } from '../../../utils/accessor';
 import { Datum, Color } from '../../../utils/commons';
@@ -72,7 +74,6 @@ export interface XYChartSeriesIdentifier extends SeriesIdentifier {
 
 /** @internal */
 export type DataSeries = XYChartSeriesIdentifier & {
-  // seriesColorKey: string;
   data: DataSeriesDatum[];
 };
 
@@ -124,6 +125,7 @@ export function splitSeriesDataByAccessors(
     BasicSeriesSpec,
     'id' | 'data' | 'xAccessor' | 'yAccessors' | 'y0Accessors' | 'splitSeriesAccessors' | 'markSizeAccessor'
   >,
+  xValueSums: Map<string | number, number>,
   enableVislibSeriesSort = false,
 ): {
   dataSeries: Map<SeriesKey, DataSeries>;
@@ -160,6 +162,7 @@ export function splitSeriesDataByAccessors(
         }
 
         xValues.push(x);
+        let sum = xValueSums.get(x) ?? 0;
 
         const cleanedDatum = extractYandMarkFromDatum(
           datum,
@@ -174,6 +177,7 @@ export function splitSeriesDataByAccessors(
           yAccessor: accessor,
           splitAccessors,
         });
+        sum += cleanedDatum.y1 ?? 0;
         const newDatum = { x, ...cleanedDatum };
         const series = dataSeries.get(seriesKey);
         if (series) {
@@ -188,6 +192,7 @@ export function splitSeriesDataByAccessors(
             seriesKeys,
           });
         }
+        xValueSums.set(x, sum);
       });
     });
   } else {
@@ -211,6 +216,7 @@ export function splitSeriesDataByAccessors(
       }
 
       xValues.push(x);
+      let sum = xValueSums.get(x) ?? 0;
 
       yAccessors.forEach((accessor, index) => {
         const cleanedDatum = extractYandMarkFromDatum(
@@ -226,6 +232,7 @@ export function splitSeriesDataByAccessors(
           yAccessor: accessor,
           splitAccessors,
         });
+        sum += cleanedDatum.y1 ?? 0;
         const newDatum = { x, ...cleanedDatum };
         const series = dataSeries.get(seriesKey);
         if (series) {
@@ -241,6 +248,7 @@ export function splitSeriesDataByAccessors(
           });
         }
       });
+      xValueSums.set(x, sum);
     });
   }
 
@@ -418,6 +426,7 @@ function getDataSeriesBySpecGroup(
 export function getDataSeriesBySpecId(
   seriesSpecs: BasicSeriesSpec[],
   deselectedDataSeries: SeriesIdentifier[] = [],
+  orderOrdinalBinsBy?: OrderBy,
   enableVislibSeriesSort?: boolean,
 ): {
   dataSeriesBySpecId: Map<SpecId, DataSeries[]>;
@@ -427,6 +436,7 @@ export function getDataSeriesBySpecId(
 } {
   const dataSeriesBySpecId = new Map<SpecId, DataSeries[]>();
   const seriesCollection = new Map<SeriesKey, SeriesCollectionValue>();
+  const mutatedXValueSums = new Map<string | number, number>();
 
   // the unique set of values along the x axis
   const globalXValues: Set<string | number> = new Set();
@@ -441,7 +451,7 @@ export function getDataSeriesBySpecId(
       isOrdinalScale = true;
     }
 
-    const { dataSeries, xValues } = splitSeriesDataByAccessors(spec, enableVislibSeriesSort);
+    const { dataSeries, xValues } = splitSeriesDataByAccessors(spec, mutatedXValueSums, enableVislibSeriesSort);
 
     // filter deleselected dataseries
     let filteredDataSeries: DataSeries[] = [...dataSeries.values()];
@@ -478,10 +488,9 @@ export function getDataSeriesBySpecId(
   return {
     dataSeriesBySpecId,
     seriesCollection,
-    // keep the user order for ordinal scales
     xValues:
       isOrdinalScale || !isNumberArray
-        ? globalXValues
+        ? getSortedOrdinalXValues(globalXValues, mutatedXValueSums, orderOrdinalBinsBy)
         : new Set(
             [...globalXValues].sort((a, b) => {
               if (typeof a === 'string' || typeof b === 'string') {
@@ -492,6 +501,31 @@ export function getDataSeriesBySpecId(
           ),
     fallbackScale: !isOrdinalScale && !isNumberArray ? ScaleType.Ordinal : undefined,
   };
+}
+
+function getSortedOrdinalXValues(
+  xValues: Set<string | number>,
+  xValueSums: Map<string | number, number>,
+  orderOrdinalBinsBy?: OrderBy,
+) {
+  if (!orderOrdinalBinsBy) {
+    return xValues; // keep the user order for ordinal scales
+  }
+
+  switch (orderOrdinalBinsBy?.binAgg) {
+    case BinAgg.None:
+      return xValues; // keep the user order for ordinal scales
+    case BinAgg.Sum:
+    default:
+      return new Set(
+        [...xValues].sort((v1, v2) => {
+          return (
+            (orderOrdinalBinsBy.direction === Direction.Ascending ? 1 : -1) *
+            ((xValueSums.get(v1) ?? 0) - (xValueSums.get(v2) ?? 0))
+          );
+        }),
+      );
+  }
 }
 
 function getSeriesNameFromOptions(

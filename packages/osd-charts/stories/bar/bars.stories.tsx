@@ -63,6 +63,7 @@ export { Example as scaleToExtent } from './32_scale_to_extent';
 export { Example as bandBarChart } from './33_band_bar';
 export { Example as minHeight } from './45_min_height';
 export { Example as stackedOnlyGroupedAreas } from './47_stacked_only_grouped';
+export { Example as orderBinsBySum } from './50_order_bins_by_sum';
 
 // for testing purposes only
 export { Example as testLinear } from './34_test_linear';

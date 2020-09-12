@@ -265,6 +265,17 @@ export type BasicListener = () => undefined | void;
 // @public (undocumented)
 export type BasicSeriesSpec = SeriesSpec & SeriesAccessors & SeriesScales;
 
+// Warning: (ae-missing-release-tag) "BinAgg" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export const BinAgg: Readonly<{
+    Sum: "sum";
+    None: "none";
+}>;
+
+// @public (undocumented)
+export type BinAgg = $Values<typeof BinAgg>;
+
 // Warning: (ae-missing-release-tag) "BrushAxis" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -522,6 +533,17 @@ export const DEFAULT_TOOLTIP_TYPE: "vertical";
 //
 // @public (undocumented)
 export type DefaultSettingsProps = 'id' | 'chartType' | 'specType' | 'rendering' | 'rotation' | 'resizeDebounce' | 'animateData' | 'showLegend' | 'debug' | 'tooltip' | 'showLegendExtra' | 'theme' | 'legendPosition' | 'hideDuplicateAxes' | 'brushAxis' | 'minBrushDelta' | 'externalPointerEvents';
+
+// Warning: (ae-missing-release-tag) "Direction" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export const Direction: Readonly<{
+    Ascending: "ascending";
+    Descending: "descending";
+}>;
+
+// @public (undocumented)
+export type Direction = $Values<typeof Direction>;
 
 // Warning: (ae-missing-release-tag) "DisplayValueSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -918,6 +940,14 @@ export function niceTimeFormatter(domain: [number, number]): TickFormatter;
 // @public (undocumented)
 export interface Opacity {
     opacity: number;
+}
+
+// @public
+export interface OrderBy {
+    // (undocumented)
+    binAgg?: BinAgg;
+    // (undocumented)
+    direction?: Direction;
 }
 
 // @public (undocumented)
@@ -1332,6 +1362,7 @@ export interface SettingsSpec extends Spec {
     onPointerUpdate?: PointerUpdateListener;
     // (undocumented)
     onRenderChange?: RenderChangeListener;
+    orderOrdinalBinsBy?: OrderBy;
     // (undocumented)
     pointBuffer?: MarkBuffer;
     // (undocumented)

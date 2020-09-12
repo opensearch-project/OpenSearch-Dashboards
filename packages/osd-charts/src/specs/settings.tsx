@@ -34,7 +34,7 @@ import { Domain } from '../utils/domain';
 import { GeometryValue } from '../utils/geometry';
 import { GroupId } from '../utils/ids';
 import { PartialTheme, Theme } from '../utils/themes/theme';
-import { PointerEventType, TooltipType, BrushAxis, DEFAULT_SETTINGS_SPEC } from './constants';
+import { PointerEventType, TooltipType, BrushAxis, DEFAULT_SETTINGS_SPEC, BinAgg, Direction } from './constants';
 
 export interface LayerValue {
   groupByRollup: PrimitiveValue;
@@ -361,6 +361,19 @@ export interface SettingsSpec extends Spec {
    * @defaultValue false
    */
   allowBrushingLastHistogramBucket?: boolean;
+  /**
+   * Orders ordinal x values
+   */
+  orderOrdinalBinsBy?: OrderBy;
+}
+
+/**
+ * Order by options
+ * @public
+ */
+export interface OrderBy {
+  binAgg?: BinAgg;
+  direction?: Direction;
 }
 
 export type DefaultSettingsProps =
