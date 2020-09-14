@@ -1,3 +1,12 @@
+# [21.2.0](https://github.com/elastic/elastic-charts/compare/v21.1.2...v21.2.0) (2020-09-14)
+
+
+### Features
+
+* blind sorting option for vislib ([#813](https://github.com/elastic/elastic-charts/issues/813)) ([8afce43](https://github.com/elastic/elastic-charts/commit/8afce435c85eeff9ed7ee7b44a246f898f4050fb))
+* order ordinal values by sum ([#814](https://github.com/elastic/elastic-charts/issues/814)) ([5b2758b](https://github.com/elastic/elastic-charts/commit/5b2758bb41fd3b89a51921b40373d5105eae4d4b))
+* **series:** add simple mark formatter ([#775](https://github.com/elastic/elastic-charts/issues/775)) ([ab95284](https://github.com/elastic/elastic-charts/commit/ab95284dcaf20dae2c29653917e70fb3ce7960bc))
+
 ## [21.1.2](https://github.com/elastic/elastic-charts/compare/v21.1.1...v21.1.2) (2020-09-09)
 
 
