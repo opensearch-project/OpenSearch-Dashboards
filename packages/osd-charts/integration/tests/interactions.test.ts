@@ -278,5 +278,12 @@ describe('Interactions', () => {
         { left: 280, top: 80 },
       );
     });
+
+    it('should use custom mark formatters', async () => {
+      await common.expectChartWithMouseAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/mixed-charts--mark-size-accessor',
+        { left: 400, top: 80 },
+      );
+    });
   });
 });

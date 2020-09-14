@@ -263,7 +263,9 @@ export interface BasePointerEvent {
 export type BasicListener = () => undefined | void;
 
 // @public (undocumented)
-export type BasicSeriesSpec = SeriesSpec & SeriesAccessors & SeriesScales;
+export type BasicSeriesSpec = SeriesSpec & SeriesAccessors & SeriesScales & {
+    markFormat?: TickFormatter<number>;
+};
 
 // Warning: (ae-missing-release-tag) "BinAgg" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1516,7 +1518,7 @@ export interface Theme {
 }
 
 // @public (undocumented)
-export type TickFormatter = (value: any, options?: TickFormatterOptions) => string;
+export type TickFormatter<V = any> = (value: V, options?: TickFormatterOptions) => string;
 
 // @public (undocumented)
 export type TickFormatterOptions = {
@@ -1574,11 +1576,12 @@ export type TooltipType = $Values<typeof TooltipType>;
 // @public
 export interface TooltipValue {
     color: Color;
+    formattedMarkValue?: string | null;
     formattedValue: string;
     isHighlighted: boolean;
     isVisible: boolean;
     label: string;
-    markValue?: any;
+    markValue?: number | null;
     seriesIdentifier: SeriesIdentifier;
     value: any;
     valueAccessor?: Accessor;

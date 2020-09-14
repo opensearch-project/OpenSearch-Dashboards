@@ -87,6 +87,7 @@ module.exports = {
     'jsx-a11y/click-events-have-key-events': 1,
     '@typescript-eslint/member-ordering': 1,
     eqeqeq: 1,
+    'unicorn/no-nested-ternary': 0,
 
     /**
      * Standard rules
@@ -249,7 +250,6 @@ module.exports = {
     'unicorn/no-fn-reference-in-iterator': 0,
     'unicorn/prefer-query-selector': 0,
     'unicorn/no-for-loop': 0,
-    'unicorn/no-nested-ternary': 1,
     'unicorn/no-reduce': 0,
     'unicorn/no-useless-undefined': 0,
     'unicorn/prefer-spread': 0,

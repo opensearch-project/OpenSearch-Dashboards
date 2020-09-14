@@ -339,4 +339,43 @@ describe('Tooltip formatting', () => {
     expect(tooltipValue.value).toBe(1);
     expect(tooltipValue.formattedValue).toBe('1');
   });
+
+  describe('markFormat', () => {
+    const markFormat = jest.fn((d) => `${d} number`);
+    const markIndexedGeometry: BarGeometry = {
+      ...indexedGeometry,
+      value: {
+        x: 1,
+        y: 10,
+        accessor: 'y1',
+        mark: 10,
+      },
+    };
+
+    it('should format mark value with markFormat', () => {
+      const tooltipValue = formatTooltip(
+        markIndexedGeometry,
+        {
+          ...SPEC_1,
+          markFormat,
+        },
+        false,
+        false,
+        false,
+        YAXIS_SPEC,
+      );
+      expect(tooltipValue).toBeDefined();
+      expect(tooltipValue.markValue).toBe(10);
+      expect(tooltipValue.formattedMarkValue).toBe('10 number');
+      expect(markFormat).toBeCalledWith(10, undefined);
+    });
+
+    it('should format mark value with defaultTickFormatter', () => {
+      const tooltipValue = formatTooltip(markIndexedGeometry, SPEC_1, false, false, false, YAXIS_SPEC);
+      expect(tooltipValue).toBeDefined();
+      expect(tooltipValue.markValue).toBe(10);
+      expect(tooltipValue.formattedMarkValue).toBe('10');
+      expect(markFormat).not.toBeCalled();
+    });
+  });
 });

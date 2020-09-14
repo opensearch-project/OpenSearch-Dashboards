@@ -422,7 +422,11 @@ export interface SeriesAccessors {
   splitSeriesAccessors?: Accessor[];
   /** An array of fields thats indicates the stack membership */
   stackAccessors?: Accessor[];
-  /** Field name of mark size metric on `Datum` */
+  /**
+   * Field name of mark size metric on `Datum`
+   *
+   * Only used with line/area series
+   */
   markSizeAccessor?: Accessor | AccessorFn;
 }
 
@@ -453,7 +457,16 @@ export interface SeriesScales {
 }
 
 /** @public */
-export type BasicSeriesSpec = SeriesSpec & SeriesAccessors & SeriesScales;
+export type BasicSeriesSpec = SeriesSpec &
+  SeriesAccessors &
+  SeriesScales & {
+    /**
+     * A function called to format every single mark value
+     *
+     * Only used with line/area series
+     */
+    markFormat?: TickFormatter<number>;
+  };
 
 export type SeriesSpecs<S extends BasicSeriesSpec = BasicSeriesSpec> = Array<S>;
 
@@ -661,7 +674,7 @@ export type TickFormatterOptions = {
 };
 
 /** @public */
-export type TickFormatter = (value: any, options?: TickFormatterOptions) => string;
+export type TickFormatter<V = any> = (value: V, options?: TickFormatterOptions) => string;
 
 export const AnnotationTypes = Object.freeze({
   Line: 'line' as const,

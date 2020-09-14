@@ -111,7 +111,11 @@ export interface TooltipValue {
   /**
    * The mark value
    */
-  markValue?: any;
+  markValue?: number | null;
+  /**
+   * The mark value to display
+   */
+  formattedMarkValue?: string | null;
   /**
    * The color of the graphic mark (by default the color of the series)
    */

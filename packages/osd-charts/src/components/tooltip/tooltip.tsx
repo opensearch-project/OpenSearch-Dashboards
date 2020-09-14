@@ -35,7 +35,7 @@ import { getInternalTooltipAnchorPositionSelector } from '../../state/selectors/
 import { getInternalTooltipInfoSelector } from '../../state/selectors/get_internal_tooltip_info';
 import { getSettingsSpecSelector } from '../../state/selectors/get_settings_specs';
 import { getTooltipHeaderFormatterSelector } from '../../state/selectors/get_tooltip_header_formatter';
-import { Rotation } from '../../utils/commons';
+import { Rotation, isDefined } from '../../utils/commons';
 import { TooltipPortal, TooltipPortalSettings, AnchorPosition, Placement } from '../portal';
 import { getTooltipSettings } from './get_tooltip_settings';
 import { TooltipInfo, TooltipAnchorPosition } from './types';
@@ -102,12 +102,23 @@ const TooltipComponent = ({
     <div className="echTooltip__list">
       {values.map(
         (
-          { seriesIdentifier, valueAccessor, label, formattedValue, markValue, color, isHighlighted, isVisible },
+          {
+            seriesIdentifier,
+            valueAccessor,
+            label,
+            markValue,
+            formattedValue,
+            formattedMarkValue,
+            color,
+            isHighlighted,
+            isVisible,
+          },
           index,
         ) => {
           if (!isVisible) {
             return null;
           }
+
           const classes = classNames('echTooltip__item', {
             echTooltip__rowHighlighted: isHighlighted,
           });
@@ -129,7 +140,7 @@ const TooltipComponent = ({
               <div className="echTooltip__item--container">
                 <span className="echTooltip__label">{label}</span>
                 <span className="echTooltip__value">{formattedValue}</span>
-                {markValue && <span className="echTooltip__markValue">&nbsp;({markValue})</span>}
+                {isDefined(markValue) && <span className="echTooltip__markValue">&nbsp;({formattedMarkValue})</span>}
               </div>
             </div>
           );

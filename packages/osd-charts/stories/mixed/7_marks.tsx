@@ -18,7 +18,8 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { number, boolean } from '@storybook/addon-knobs';
+import { number, boolean, text } from '@storybook/addon-knobs';
+import numeral from 'numeral';
 import React from 'react';
 
 import { AreaSeries, Axis, Chart, LineSeries, Position, ScaleType, Settings } from '../../src';
@@ -33,7 +34,7 @@ const data1 = new Array(100).fill(0).map((_, x) => ({
 const data2 = new Array(100).fill(0).map((_, x) => ({
   x,
   y: getRandomNumber(0, 100),
-  z: getRandomNumber(0, 50),
+  z: getRandomNumber(200, 500, 4),
 }));
 
 export const Example = () => {
@@ -54,6 +55,7 @@ export const Example = () => {
     max: 100,
     step: 10,
   });
+  const markFormat = text('markFormat', '0.0');
 
   return (
     <Chart className="story-chart">
@@ -81,6 +83,7 @@ export const Example = () => {
         yAccessors={['y']}
         markSizeAccessor="z"
         data={data1.slice(0, size)}
+        markFormat={(d) => `${numeral(d).format(markFormat)}%`}
       />
       <LineSeries
         id="line"
@@ -90,6 +93,7 @@ export const Example = () => {
         yAccessors={['y']}
         markSizeAccessor="z"
         data={data2.slice(0, size)}
+        markFormat={(d) => `$${numeral(d).format(markFormat)}`}
       />
     </Chart>
   );
