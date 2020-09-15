@@ -121,6 +121,24 @@ export interface InternalChartState {
    * @param globalState
    */
   eventCallbacks(globalState: GlobalChartState): void;
+
+  /**
+   * Get the chart main projection area: exclude legends, axis and other external marks
+   * @param globalState
+   */
+  getMainProjectionArea(globalState: GlobalChartState): Dimensions;
+
+  /**
+   * Get the chart container projection area
+   * @param globalState
+   */
+  getProjectionContainerArea(globalState: GlobalChartState): Dimensions;
+
+  /**
+   * Get the brushed area if available
+   * @param globalState
+   */
+  getBrushArea(globalState: GlobalChartState): Dimensions | null;
 }
 
 /** @internal */

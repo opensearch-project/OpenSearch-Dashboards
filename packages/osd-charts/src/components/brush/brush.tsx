@@ -20,28 +20,41 @@
 import React, { RefObject } from 'react';
 import { connect } from 'react-redux';
 
-import { clearCanvas, withContext, withClip } from '../../../../renderers/canvas';
-import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
-import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
-import { Dimensions } from '../../../../utils/dimensions';
-import { computeChartDimensionsSelector } from '../../state/selectors/compute_chart_dimensions';
-import { getBrushAreaSelector } from '../../state/selectors/get_brush_area';
-import { isBrushAvailableSelector } from '../../state/selectors/is_brush_available';
-import { isBrushingSelector } from '../../state/selectors/is_brushing';
-import { renderRect } from '../canvas/primitives/rect';
+import { RgbObject } from '../../chart_types/partition_chart/layout/utils/color_library_wrappers';
+import { renderRect } from '../../chart_types/xy_chart/renderer/canvas/primitives/rect';
+import { clearCanvas, withContext, withClip } from '../../renderers/canvas';
+import { GlobalChartState } from '../../state/chart_state';
+import { getInternalBrushAreaSelector } from '../../state/selectors/get_internal_brush_area';
+import { getInternalIsBrushingSelector } from '../../state/selectors/get_internal_is_brushing';
+import { getInternalIsBrushingAvailableSelector } from '../../state/selectors/get_internal_is_brushing_available';
+import { getInternalIsInitializedSelector, InitStatus } from '../../state/selectors/get_internal_is_intialized';
+import { getInternalMainProjectionAreaSelector } from '../../state/selectors/get_internal_main_projection_area';
+import { getInternalProjectionContainerAreaSelector } from '../../state/selectors/get_internal_projection_container_area';
+import { Dimensions } from '../../utils/dimensions';
 
-interface Props {
+interface OwnProps {
+  fillColor?: RgbObject;
+}
+interface StateProps {
   initialized: boolean;
-  chartDimensions: Dimensions;
-  chartContainerDimensions: Dimensions;
+  mainProjectionArea: Dimensions;
+  projectionContainer: Dimensions;
   isBrushing: boolean | undefined;
   isBrushAvailable: boolean | undefined;
   brushArea: Dimensions | null;
 }
 
+const DEFAULT_FILL_COLOR: RgbObject = {
+  r: 128,
+  g: 128,
+  b: 128,
+  opacity: 0.6,
+};
+
+type Props = OwnProps & StateProps;
+
 class BrushToolComponent extends React.Component<Props> {
-  static displayName = 'BrushToolComponent';
+  static displayName = 'BrushTool';
 
   private readonly devicePixelRatio: number;
   private ctx: CanvasRenderingContext2D | null;
@@ -73,7 +86,7 @@ class BrushToolComponent extends React.Component<Props> {
   }
 
   private drawCanvas = () => {
-    const { brushArea, chartDimensions } = this.props;
+    const { brushArea, mainProjectionArea, fillColor } = this.props;
     if (!this.ctx || !brushArea) {
       return;
     }
@@ -83,14 +96,14 @@ class BrushToolComponent extends React.Component<Props> {
       withClip(
         ctx,
         {
-          x: chartDimensions.left,
-          y: chartDimensions.top,
-          width: chartDimensions.width,
-          height: chartDimensions.height,
+          x: mainProjectionArea.left,
+          y: mainProjectionArea.top,
+          width: mainProjectionArea.width,
+          height: mainProjectionArea.height,
         },
         (ctx) => {
           clearCanvas(ctx, 200000, 200000);
-          ctx.translate(chartDimensions.left, chartDimensions.top);
+          ctx.translate(mainProjectionArea.left, mainProjectionArea.top);
           renderRect(
             ctx,
             {
@@ -100,12 +113,7 @@ class BrushToolComponent extends React.Component<Props> {
               height,
             },
             {
-              color: {
-                r: 128,
-                g: 128,
-                b: 128,
-                opacity: 0.6,
-              },
+              color: fillColor ?? DEFAULT_FILL_COLOR,
             },
           );
         },
@@ -119,12 +127,12 @@ class BrushToolComponent extends React.Component<Props> {
   }
 
   render() {
-    const { initialized, isBrushAvailable, isBrushing, chartContainerDimensions } = this.props;
+    const { initialized, isBrushAvailable, isBrushing, projectionContainer } = this.props;
     if (!initialized || !isBrushAvailable || !isBrushing) {
       this.ctx = null;
       return null;
     }
-    const { width, height } = chartContainerDimensions;
+    const { width, height } = projectionContainer;
     return (
       <canvas
         ref={this.canvasRef}
@@ -140,34 +148,34 @@ class BrushToolComponent extends React.Component<Props> {
   }
 }
 
-const mapStateToProps = (state: GlobalChartState): Props => {
+const mapStateToProps = (state: GlobalChartState): StateProps => {
   if (getInternalIsInitializedSelector(state) !== InitStatus.Initialized) {
     return {
       initialized: false,
+      projectionContainer: {
+        width: 0,
+        height: 0,
+        left: 0,
+        top: 0,
+      },
+      mainProjectionArea: {
+        top: 0,
+        left: 0,
+        width: 0,
+        height: 0,
+      },
       isBrushing: false,
       isBrushAvailable: false,
       brushArea: null,
-      chartContainerDimensions: {
-        width: 0,
-        height: 0,
-        left: 0,
-        top: 0,
-      },
-      chartDimensions: {
-        top: 0,
-        left: 0,
-        width: 0,
-        height: 0,
-      },
     };
   }
   return {
     initialized: state.specsInitialized,
-    chartContainerDimensions: getChartContainerDimensionsSelector(state),
-    brushArea: getBrushAreaSelector(state),
-    isBrushAvailable: isBrushAvailableSelector(state),
-    chartDimensions: computeChartDimensionsSelector(state).chartDimensions,
-    isBrushing: isBrushingSelector(state),
+    projectionContainer: getInternalProjectionContainerAreaSelector(state),
+    mainProjectionArea: getInternalMainProjectionAreaSelector(state),
+    isBrushAvailable: getInternalIsBrushingAvailableSelector(state),
+    isBrushing: getInternalIsBrushingSelector(state),
+    brushArea: getInternalBrushAreaSelector(state),
   };
 };
 

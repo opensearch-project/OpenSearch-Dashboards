@@ -22,16 +22,19 @@ import React, { RefObject } from 'react';
 import { ChartTypes } from '../..';
 import { LegendItemExtraValues } from '../../../commons/legend';
 import { SeriesKey } from '../../../commons/series_id';
+import { BrushTool } from '../../../components/brush/brush';
 import { Tooltip } from '../../../components/tooltip';
 import { InternalChartState, GlobalChartState, BackwardRef } from '../../../state/chart_state';
+import { getChartContainerDimensionsSelector } from '../../../state/selectors/get_chart_container_dimensions';
 import { InitStatus } from '../../../state/selectors/get_internal_is_intialized';
 import { htmlIdGenerator } from '../../../utils/commons';
 import { XYChart } from '../renderer/canvas/xy_chart';
 import { Annotations } from '../renderer/dom/annotations';
-import { BrushTool } from '../renderer/dom/brush';
 import { Crosshair } from '../renderer/dom/crosshair';
 import { Highlighter } from '../renderer/dom/highlighter';
+import { computeChartDimensionsSelector } from './selectors/compute_chart_dimensions';
 import { computeLegendSelector } from './selectors/compute_legend';
+import { getBrushAreaSelector } from './selectors/get_brush_area';
 import { getPointerCursorSelector } from './selectors/get_cursor_pointer';
 import { getHighlightedValuesSelector } from './selectors/get_highlighted_values';
 import { getLegendItemsLabelsSelector } from './selectors/get_legend_items_labels';
@@ -83,6 +86,18 @@ export class XYAxisChartState implements InternalChartState {
 
   isChartEmpty(globalState: GlobalChartState) {
     return isChartEmptySelector(globalState);
+  }
+
+  getMainProjectionArea(globalState: GlobalChartState) {
+    return computeChartDimensionsSelector(globalState).chartDimensions;
+  }
+
+  getProjectionContainerArea(globalState: GlobalChartState) {
+    return getChartContainerDimensionsSelector(globalState);
+  }
+
+  getBrushArea(globalState: GlobalChartState) {
+    return getBrushAreaSelector(globalState);
   }
 
   getLegendItemsLabels(globalState: GlobalChartState) {

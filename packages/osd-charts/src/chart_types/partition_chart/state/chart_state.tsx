@@ -23,6 +23,7 @@ import { ChartTypes } from '../..';
 import { Tooltip } from '../../../components/tooltip';
 import { InternalChartState, GlobalChartState, BackwardRef } from '../../../state/chart_state';
 import { InitStatus } from '../../../state/selectors/get_internal_is_intialized';
+import { Dimensions } from '../../../utils/dimensions';
 import { Partition } from '../renderer/canvas/partition';
 import { HighlighterFromHover } from '../renderer/dom/highlighter_hover';
 import { HighlighterFromLegend } from '../renderer/dom/highlighter_legend';
@@ -115,5 +116,20 @@ export class PartitionState implements InternalChartState {
     this.onElementOverCaller(globalState);
     this.onElementOutCaller(globalState);
     this.onElementClickCaller(globalState);
+  }
+
+  // TODO
+  getProjectionContainerArea(): Dimensions {
+    return { width: 0, height: 0, top: 0, left: 0 };
+  }
+
+  // TODO
+  getMainProjectionArea(): Dimensions {
+    return { width: 0, height: 0, top: 0, left: 0 };
+  }
+
+  // TODO
+  getBrushArea(): Dimensions | null {
+    return null;
   }
 }
