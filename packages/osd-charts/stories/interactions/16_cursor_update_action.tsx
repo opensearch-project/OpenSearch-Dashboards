@@ -18,6 +18,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
+import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
 import {
@@ -30,9 +31,11 @@ import {
   PointerEvent,
   Placement,
   niceTimeFormatter,
+  TooltipType,
 } from '../../src';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 import { palettes } from '../../src/utils/themes/colors';
+import { getTooltipTypeKnob, getPlacementKnob } from '../utils/knobs';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 export const Example = () => {
@@ -50,17 +53,31 @@ export const Example = () => {
   const { data } = KIBANA_METRICS.metrics.kibana_os_load[0];
   const data1 = KIBANA_METRICS.metrics.kibana_os_load[0].data;
   const data2 = KIBANA_METRICS.metrics.kibana_os_load[1].data;
+
+  const group1 = 'Top Chart';
+  const group2 = 'Bottom Chart';
+
+  const topType = getTooltipTypeKnob('local tooltip type', TooltipType.VerticalCursor, group1);
+  const bottomType = getTooltipTypeKnob('local tooltip type', TooltipType.VerticalCursor, group2);
+  const topVisible = boolean('enable external tooltip', true, group1);
+  const bottomVisible = boolean('enable external tooltip', true, group2);
+  const topPlacement = getPlacementKnob('external tooltip placement', Placement.Left, group1);
+  const bottomPlacement = getPlacementKnob('external tooltip placement', Placement.Left, group2);
+
   return (
     <>
       <Chart className="story-chart" ref={ref1} size={{ height: '50%' }} id="chart1">
         <Settings
           onPointerUpdate={pointerUpdate}
-          externalPointerEvents={{ tooltip: { visible: true, boundary: 'chart' } }}
+          externalPointerEvents={{
+            tooltip: { visible: topVisible, placement: topPlacement },
+          }}
+          tooltip={{ type: topType }}
         />
         <Axis
           id="bottom"
           position={Position.Bottom}
-          title="External tooltip VISIBLE"
+          title={`External tooltip visible: ${topVisible} - boundary: scroll parent`}
           tickFormat={niceTimeFormatter([data[0][0], data[data.length - 1][0]])}
         />
         <Axis id="left2" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
@@ -77,12 +94,17 @@ export const Example = () => {
       <Chart className="story-chart" ref={ref2} size={{ height: '50%' }} id="chart2">
         <Settings
           onPointerUpdate={pointerUpdate}
-          externalPointerEvents={{ tooltip: { visible: true, placement: Placement.Left } }}
+          tooltip={{
+            type: bottomType,
+          }}
+          externalPointerEvents={{
+            tooltip: { visible: bottomVisible, placement: bottomPlacement, boundary: 'chart' },
+          }}
         />
         <Axis
           id="bottom"
           position={Position.Bottom}
-          title="External tooltip VISIBLE - boundary => chart"
+          title={`External tooltip visible: ${bottomVisible} - boundary: chart`}
           tickFormat={niceTimeFormatter([data[0][0], data[data.length - 1][0]])}
         />
         <Axis

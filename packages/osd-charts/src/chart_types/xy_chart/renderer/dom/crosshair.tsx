@@ -41,11 +41,13 @@ interface CrosshairProps {
   cursorBandPosition?: Dimensions;
   cursorLinePosition?: Dimensions;
   tooltipType: TooltipType;
+  fromExternalEvent?: boolean;
 }
 
-function canRenderBand(type: TooltipType, visible: boolean) {
-  return visible && (type === TooltipType.Crosshairs || type === TooltipType.VerticalCursor);
+function canRenderBand(type: TooltipType, visible: boolean, fromExternalEvent?: boolean) {
+  return visible && (type === TooltipType.Crosshairs || type === TooltipType.VerticalCursor || fromExternalEvent);
 }
+
 function canRenderHelpLine(type: TooltipType, visible: boolean) {
   return visible && type === TooltipType.Crosshairs;
 }
@@ -60,9 +62,10 @@ class CrosshairComponent extends React.Component<CrosshairProps> {
       },
       cursorBandPosition,
       tooltipType,
+      fromExternalEvent,
     } = this.props;
 
-    if (!cursorBandPosition || !canRenderBand(tooltipType, band.visible)) {
+    if (!cursorBandPosition || !canRenderBand(tooltipType, band.visible, fromExternalEvent)) {
       return null;
     }
     const style: CSSProperties = {
@@ -126,14 +129,15 @@ const mapStateToProps = (state: GlobalChartState): CrosshairProps => {
   }
   const settings = getSettingsSpecSelector(state);
   const cursorBandPosition = getCursorBandPositionSelector(state);
-
   const tooltipType = getTooltipType(settings, cursorBandPosition?.fromExternalEvent);
+
   return {
     theme: getChartThemeSelector(state),
     chartRotation: getChartRotationSelector(state),
     cursorBandPosition,
     cursorLinePosition: getCursorLinePositionSelector(state),
     tooltipType,
+    fromExternalEvent: cursorBandPosition?.fromExternalEvent,
   };
 };
 

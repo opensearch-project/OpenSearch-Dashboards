@@ -220,8 +220,17 @@ describe('Interactions', () => {
   describe('Tooltip sync', () => {
     it('show synced tooltips', async () => {
       await common.expectChartWithMouseAtUrlToMatchScreenshot(
-        'http://localhost:9001/?path=/story/interactions--cursor-update-action',
-        { left: 180, top: 80 },
+        'http://localhost:9001/?path=/story/interactions--cursor-update-action&knob-local%20tooltip%20type_Top%20Chart=vertical&knob-local%20tooltip%20type_Bottom%20Chart=vertical&knob-enable%20external%20tooltip_Top%20Chart=true&knob-enable%20external%20tooltip_Bottom%20Chart=true&knob-external%20tooltip%20placement_Top%20Chart=left&knob-external%20tooltip%20placement_Bottom%20Chart=left',
+        { right: 120, top: 80 },
+        {
+          screenshotSelector: '#story-root',
+        },
+      );
+    });
+    it('show synced crosshairs', async () => {
+      await common.expectChartWithMouseAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/interactions--cursor-update-action&knob-local%20tooltip%20type_Top%20Chart=vertical&knob-local%20tooltip%20type_Bottom%20Chart=vertical&knob-enable%20external%20tooltip_Top%20Chart=true&knob-enable%20external%20tooltip_Bottom%20Chart=false&knob-external%20tooltip%20placement_Top%20Chart=left&knob-external%20tooltip%20placement_Bottom%20Chart=left',
+        { right: 120, top: 80 },
         {
           screenshotSelector: '#story-root',
         },

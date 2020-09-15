@@ -46,7 +46,11 @@ export const getChartRotationKnob = () =>
     0,
   );
 
-export const getTooltipTypeKnob = (name = 'tooltip type', defaultValue = TooltipType.VerticalCursor) =>
+export const getTooltipTypeKnob = (
+  name = 'tooltip type',
+  defaultValue = TooltipType.VerticalCursor,
+  groupId?: string,
+) =>
   select<TooltipType>(
     name,
     {
@@ -56,6 +60,7 @@ export const getTooltipTypeKnob = (name = 'tooltip type', defaultValue = Tooltip
       None: TooltipType.None,
     },
     defaultValue,
+    groupId,
   );
 
 export const getPositionKnob = (name = 'chartRotation', defaultValue = Position.Right) =>
@@ -70,7 +75,7 @@ export const getPositionKnob = (name = 'chartRotation', defaultValue = Position.
     defaultValue,
   );
 
-export const getPlacementKnob = (name = 'placement', defaultValue?: Placement) => {
+export const getPlacementKnob = (name = 'placement', defaultValue?: Placement, groupId?: string) => {
   const value = select<Placement | undefined>(
     name,
     {
@@ -92,6 +97,7 @@ export const getPlacementKnob = (name = 'placement', defaultValue?: Placement) =
       AutoEnd: Placement.AutoEnd,
     },
     defaultValue,
+    groupId,
   );
 
   return value || undefined;
