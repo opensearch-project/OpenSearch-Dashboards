@@ -16,7 +16,7 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
   }
 
   &:hover {
-    background-color: #e7f0f7;
+    background-color: $euiColorLightestShade;
   }
 
   &__action {
