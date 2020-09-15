@@ -61,3 +61,4 @@ export { Example as notANumber } from './28_not_a_number';
 export { Example as customStroke } from './29_custom_stroke';
 export { Example as largestCircle } from './30_largest_circle';
 export { Example as boldLinkValue } from './31_bold_link_value';
+export { Example as customTooltip } from './32_custom_tooltip';
