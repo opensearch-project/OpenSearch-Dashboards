@@ -17,22 +17,25 @@
  * under the License.
  */
 
-import { ChartActions } from './chart';
-import { ChartSettingsActions } from './chart_settings';
-import { ColorsActions } from './colors';
-import { EventsActions } from './events';
-import { KeyActions } from './key';
-import { LegendActions } from './legend';
-import { MouseActions } from './mouse';
-import { SpecActions } from './specs';
+/** @internal */
+export const ON_KEY_UP = 'ON_KEY_UP';
+
+interface KeyUpAction {
+  type: typeof ON_KEY_UP;
+  /**
+   * Keyboard key from event
+   */
+  key: string;
+}
+
+/**
+ * Action called on `keyup` event
+ * @param key keyboard key
+ * @internal
+ */
+export function onKeyPress(key: string): KeyUpAction {
+  return { type: ON_KEY_UP, key };
+}
 
 /** @internal */
-export type StateActions =
-  | SpecActions
-  | ChartActions
-  | ChartSettingsActions
-  | LegendActions
-  | EventsActions
-  | MouseActions
-  | KeyActions
-  | ColorsActions;
+export type KeyActions = KeyUpAction;

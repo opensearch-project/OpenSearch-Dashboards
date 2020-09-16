@@ -43,3 +43,19 @@ export function isClicking(prevClick: PointerState | null, lastClick: PointerSta
   }
   return false;
 }
+
+/** @internal */
+export const getInitialPointerState = () => ({
+  dragging: false,
+  current: {
+    position: {
+      x: -1,
+      y: -1,
+    },
+    time: 0,
+  },
+  down: null,
+  up: null,
+  lastDrag: null,
+  lastClick: null,
+});

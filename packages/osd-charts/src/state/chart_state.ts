@@ -42,6 +42,7 @@ import { interactionsReducer } from './reducers/interactions';
 import { getInternalIsInitializedSelector, InitStatus } from './selectors/get_internal_is_intialized';
 import { getLegendItemsSelector } from './selectors/get_legend_items';
 import { LegendItemLabel } from './selectors/get_legend_items_labels';
+import { getInitialPointerState } from './utils';
 
 export type BackwardRef = () => React.RefObject<HTMLDivElement>;
 
@@ -252,20 +253,7 @@ export const getInitialState = (chartId: string): GlobalChartState => ({
   chartType: null,
   internalChartState: null,
   interactions: {
-    pointer: {
-      dragging: false,
-      current: {
-        position: {
-          x: -1,
-          y: -1,
-        },
-        time: 0,
-      },
-      down: null,
-      up: null,
-      lastDrag: null,
-      lastClick: null,
-    },
+    pointer: getInitialPointerState(),
     legendCollapsed: false,
     highlightedLegendItemKey: null,
     deselectedDataSeries: [],

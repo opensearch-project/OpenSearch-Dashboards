@@ -20,6 +20,7 @@
 import { getSeriesIndex } from '../../chart_types/xy_chart/utils/series';
 import { LegendItem } from '../../commons/legend';
 import { SeriesIdentifier } from '../../commons/series_id';
+import { ON_KEY_UP, KeyActions } from '../actions/key';
 import {
   ON_TOGGLE_LEGEND,
   ON_LEGEND_ITEM_OUT,
@@ -30,14 +31,25 @@ import {
 } from '../actions/legend';
 import { ON_MOUSE_DOWN, ON_MOUSE_UP, ON_POINTER_MOVE, MouseActions } from '../actions/mouse';
 import { InteractionsState } from '../chart_state';
+import { getInitialPointerState } from '../utils';
 
 /** @internal */
 export function interactionsReducer(
   state: InteractionsState,
-  action: LegendActions | MouseActions,
+  action: LegendActions | MouseActions | KeyActions,
   legendItems: LegendItem[],
 ): InteractionsState {
   switch (action.type) {
+    case ON_KEY_UP:
+      if (action.key === 'Escape') {
+        return {
+          ...state,
+          pointer: getInitialPointerState(),
+        };
+      }
+
+      return state;
+
     case ON_POINTER_MOVE:
       return {
         ...state,
