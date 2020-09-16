@@ -1,3 +1,16 @@
+# [21.3.0](https://github.com/elastic/elastic-charts/compare/v21.2.0...v21.3.0) (2020-09-16)
+
+
+### Bug Fixes
+
+* legend dark mode hover color ([#820](https://github.com/elastic/elastic-charts/issues/820)) ([5227b2e](https://github.com/elastic/elastic-charts/commit/5227b2e811379a941d0bc23bc3160867707177ce))
+
+
+### Features
+
+* cancel brush/click event with escape key ([#819](https://github.com/elastic/elastic-charts/issues/819)) ([b599d13](https://github.com/elastic/elastic-charts/commit/b599d133c64c05400715fc9368865fdd35969736))
+* show crosshair for external pointer events ([#817](https://github.com/elastic/elastic-charts/issues/817)) ([f591a6a](https://github.com/elastic/elastic-charts/commit/f591a6a329c9297df9faf9bc7fde43eb13699500))
+
 # [21.2.0](https://github.com/elastic/elastic-charts/compare/v21.1.2...v21.2.0) (2020-09-14)
 
 
