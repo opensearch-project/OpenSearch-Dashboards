@@ -31,7 +31,7 @@ import { splitSpecsByGroupId, YBasicSeriesSpec } from '../domains/y_domain';
 import { LastValues } from '../state/utils/types';
 import { applyFitFunctionToDataSeries } from './fit_function_utils';
 import { BasicSeriesSpec, SeriesTypes, SeriesSpecs, SeriesNameConfigOptions, StackMode } from './specs';
-import { formatStackedDataSeriesValues } from './stacked_series_utils';
+import { formatStackedDataSeriesValues, datumXSortPredicate } from './stacked_series_utils';
 
 /** @internal */
 export const SERIES_DELIMITER = ' - ';
@@ -329,6 +329,22 @@ function castToNumber(value: any, nonNumericValues: any[]): number | null {
   return num;
 }
 
+/**
+ * Sorts data based on order of xValues
+ * @param dataSeries
+ * @param xValues
+ * @param xScaleType
+ */
+const getSortedDataSeries = (
+  dataSeries: DataSeries[],
+  xValues: Set<string | number>,
+  xScaleType: ScaleType,
+): DataSeries[] =>
+  dataSeries.map(({ data, ...rest }) => ({
+    ...rest,
+    data: data.sort(datumXSortPredicate(xScaleType, [...xValues.values()])),
+  }));
+
 /** @internal */
 export function getFormattedDataseries(
   specs: YBasicSeriesSpec[],
@@ -359,8 +375,12 @@ export function getFormattedDataseries(
     const { stackMode } = groupSpecs;
     // format stacked data series
     const stackedDataSeries = getDataSeriesBySpecGroup(groupSpecs.stacked, availableDataSeries);
-    const fittedDataSeries = applyFitFunctionToDataSeries(stackedDataSeries.dataSeries, seriesSpecs, xScaleType);
-    const fittedAndStackedDataSeries = formatStackedDataSeriesValues(fittedDataSeries, xValues, stackMode);
+    const fittedStackedDataSeries = applyFitFunctionToDataSeries(
+      getSortedDataSeries(stackedDataSeries.dataSeries, xValues, xScaleType),
+      seriesSpecs,
+      xScaleType,
+    );
+    const fittedAndStackedDataSeries = formatStackedDataSeriesValues(fittedStackedDataSeries, xValues, stackMode);
 
     stackedFormattedDataSeries.push({
       groupId,
@@ -371,10 +391,15 @@ export function getFormattedDataseries(
 
     // format non stacked data series
     const nonStackedDataSeries = getDataSeriesBySpecGroup(groupSpecs.nonStacked, availableDataSeries);
+    const fittedNonStackedDataSeries = applyFitFunctionToDataSeries(
+      getSortedDataSeries(nonStackedDataSeries.dataSeries, xValues, xScaleType),
+      seriesSpecs,
+      xScaleType,
+    );
     nonStackedFormattedDataSeries.push({
       groupId,
       counts: nonStackedDataSeries.counts,
-      dataSeries: applyFitFunctionToDataSeries(nonStackedDataSeries.dataSeries, seriesSpecs, xScaleType),
+      dataSeries: fittedNonStackedDataSeries,
     });
   });
   return {
@@ -485,20 +510,23 @@ export function getDataSeriesBySpecId(
       globalXValues.add(xValue);
     }
   }
+
+  const xValues =
+    isOrdinalScale || !isNumberArray
+      ? getSortedOrdinalXValues(globalXValues, mutatedXValueSums, orderOrdinalBinsBy)
+      : new Set(
+          [...globalXValues].sort((a, b) => {
+            if (typeof a === 'string' || typeof b === 'string') {
+              return 0;
+            }
+            return a - b;
+          }),
+        );
+
   return {
     dataSeriesBySpecId,
     seriesCollection,
-    xValues:
-      isOrdinalScale || !isNumberArray
-        ? getSortedOrdinalXValues(globalXValues, mutatedXValueSums, orderOrdinalBinsBy)
-        : new Set(
-            [...globalXValues].sort((a, b) => {
-              if (typeof a === 'string' || typeof b === 'string') {
-                return 0;
-              }
-              return a - b;
-            }),
-          ),
+    xValues,
     fallbackScale: !isOrdinalScale && !isNumberArray ? ScaleType.Ordinal : undefined,
   };
 }

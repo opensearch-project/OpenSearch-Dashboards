@@ -20,7 +20,7 @@ import { SpecId } from '../../../utils/ids';
 import { DataSeries } from './series';
 
 /**
- *
+ * Fill missing x values in all data series
  * @param series
  * @param xValues
  * @internal
