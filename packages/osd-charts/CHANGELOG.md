@@ -1,3 +1,10 @@
+## [21.3.1](https://github.com/elastic/elastic-charts/compare/v21.3.0...v21.3.1) (2020-09-17)
+
+
+### Bug Fixes
+
+* line path with ordered xValues ([#824](https://github.com/elastic/elastic-charts/issues/824)) ([5a73a3a](https://github.com/elastic/elastic-charts/commit/5a73a3ad7049fc80a72f6b4a09c6404e8067bd9b))
+
 # [21.3.0](https://github.com/elastic/elastic-charts/compare/v21.2.0...v21.3.0) (2020-09-16)
 
 
