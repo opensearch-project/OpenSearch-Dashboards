@@ -70,4 +70,10 @@ describe('Axis stories', () => {
       'http://localhost:9001/?path=/story/axes--duplicate-ticks&knob-formatter=hourly&knob-Show duplicate ticks in x axis=true',
     );
   });
+
+  it('should render correctly rotated ticks', async () => {
+    await common.expectChartAtUrlToMatchScreenshot(
+      'http://localhost:9001/?path=/story/axes--tick-label-rotation&knob-debug_general=true&knob-disable%20axis%20overrides_general=false&knob-Tick%20label%20rotation_bottom=47&knob-Tick%20label%20rotation_left=-54&knob-Tick%20label%20rotation_top=69&knob-Tick%20label%20rotation_right=48&knob-Tick%20label%20rotation_shared=30',
+    );
+  });
 });

@@ -32,6 +32,7 @@ import {
 } from '../../utils/axis_utils';
 import { computeSeriesDomainsSelector } from './compute_series_domains';
 import { countBarsInClusterSelector } from './count_bars_in_cluster';
+import { getAxesStylesSelector } from './get_axis_styles';
 import { getBarPaddingsSelector } from './get_bar_paddings';
 import { getAxisSpecsSelector, getSeriesSpecsSelector } from './get_specs';
 import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
@@ -47,6 +48,7 @@ export const computeAxisTicksDimensionsSelector = createCachedSelector(
     computeSeriesDomainsSelector,
     countBarsInClusterSelector,
     getSeriesSpecsSelector,
+    getAxesStylesSelector,
   ],
   (
     barsPadding,
@@ -57,6 +59,7 @@ export const computeAxisTicksDimensionsSelector = createCachedSelector(
     seriesDomainsAndData,
     totalBarsInCluster,
     seriesSpecs,
+    axesStyles,
   ): Map<AxisId, AxisTicksDimensions> => {
     const { xDomain, yDomain } = seriesDomainsAndData;
     const fallBackTickFormatter = seriesSpecs.find(({ tickFormat }) => tickFormat)?.tickFormat ?? defaultTickFormatter;
@@ -64,6 +67,7 @@ export const computeAxisTicksDimensionsSelector = createCachedSelector(
     const axesTicksDimensions: Map<AxisId, AxisTicksDimensions> = new Map();
     axesSpecs.forEach((axisSpec) => {
       const { id } = axisSpec;
+      const axisStyle = axesStyles.get(id) ?? chartTheme.axes;
       const dimensions = computeAxisTicksDimensions(
         axisSpec,
         xDomain,
@@ -71,7 +75,7 @@ export const computeAxisTicksDimensionsSelector = createCachedSelector(
         totalBarsInCluster,
         bboxCalculator,
         settingsSpec.rotation,
-        chartTheme.axes,
+        axisStyle,
         fallBackTickFormatter,
         barsPadding,
         isHistogramMode,
