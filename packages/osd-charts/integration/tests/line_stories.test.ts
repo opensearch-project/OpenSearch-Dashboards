@@ -56,4 +56,17 @@ describe('Line series stories', () => {
       );
     });
   });
+  describe('Non-Stacked Linear Line with discontinuous data points', () => {
+    it('with fit', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/line-chart--discontinuous-data-points&knob-enable fit function=false&knob-switch to area=',
+      );
+    });
+
+    it('no fit function', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/line-chart--discontinuous-data-points&knob-enable fit function=true&knob-switch to area=',
+      );
+    });
+  });
 });

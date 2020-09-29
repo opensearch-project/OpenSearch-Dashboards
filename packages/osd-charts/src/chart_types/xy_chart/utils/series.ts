@@ -27,7 +27,7 @@ import { Datum, Color } from '../../../utils/commons';
 import { GroupId, SpecId } from '../../../utils/ids';
 import { Logger } from '../../../utils/logger';
 import { ColorConfig } from '../../../utils/themes/theme';
-import { splitSpecsByGroupId, YBasicSeriesSpec } from '../domains/y_domain';
+import { YBasicSeriesSpec } from '../domains/y_domain';
 import { LastValues } from '../state/utils/types';
 import { applyFitFunctionToDataSeries } from './fit_function_utils';
 import { BasicSeriesSpec, SeriesTypes, SeriesSpecs, SeriesNameConfigOptions, StackMode } from './specs';
@@ -347,18 +347,22 @@ const getSortedDataSeries = (
 
 /** @internal */
 export function getFormattedDataseries(
-  specs: YBasicSeriesSpec[],
   availableDataSeries: Map<SpecId, DataSeries[]>,
   xValues: Set<string | number>,
   xScaleType: ScaleType,
   seriesSpecs: SeriesSpecs,
+  specsByGroupIdsEntries: Map<
+    GroupId,
+    {
+      stackMode: StackMode | undefined;
+      stacked: YBasicSeriesSpec[];
+      nonStacked: YBasicSeriesSpec[];
+    }
+  >,
 ): {
   stacked: FormattedDataSeries[];
   nonStacked: FormattedDataSeries[];
 } {
-  const specsByGroupIds = splitSpecsByGroupId(specs);
-  const specsByGroupIdsEntries = [...specsByGroupIds.entries()];
-
   const stackedFormattedDataSeries: {
     groupId: GroupId;
     dataSeries: DataSeries[];
@@ -371,7 +375,7 @@ export function getFormattedDataseries(
     counts: DataSeriesCounts;
   }[] = [];
 
-  specsByGroupIdsEntries.forEach(([groupId, groupSpecs]) => {
+  [...specsByGroupIdsEntries.entries()].forEach(([groupId, groupSpecs]) => {
     const { stackMode } = groupSpecs;
     // format stacked data series
     const stackedDataSeries = getDataSeriesBySpecGroup(groupSpecs.stacked, availableDataSeries);

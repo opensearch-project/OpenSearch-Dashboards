@@ -226,8 +226,10 @@ describe('Non-Stacked Series Utils', () => {
       } = computeSeriesDomainsSelector(store.getState());
 
       expect(dataSeries.length).toBe(2);
-      expect(dataSeries[0].data.length).toBe(4);
-      expect(dataSeries[1].data.length).toBe(4);
+      // this because linear non stacked area/lines doesn't fill up the dataset
+      // with missing x data points
+      expect(dataSeries[0].data.length).toBe(3);
+      expect(dataSeries[1].data.length).toBe(2);
 
       expect(dataSeries[0].data[0]).toMatchObject({
         initialY0: null,
@@ -245,7 +247,7 @@ describe('Non-Stacked Series Utils', () => {
         y1: 2,
         mark: null,
       });
-      expect(dataSeries[0].data[3]).toMatchObject({
+      expect(dataSeries[0].data[2]).toMatchObject({
         initialY0: null,
         initialY1: 4,
         x: 4,
@@ -261,7 +263,7 @@ describe('Non-Stacked Series Utils', () => {
         y1: 21,
         mark: null,
       });
-      expect(dataSeries[1].data[2]).toMatchObject({
+      expect(dataSeries[1].data[1]).toMatchObject({
         initialY0: null,
         initialY1: 23,
         x: 3,

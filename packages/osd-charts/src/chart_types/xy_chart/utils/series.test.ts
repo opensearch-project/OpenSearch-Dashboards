@@ -28,6 +28,7 @@ import { AccessorFn } from '../../../utils/accessor';
 import { Position } from '../../../utils/commons';
 import * as TestDataset from '../../../utils/data_samples/test_dataset';
 import { ColorConfig } from '../../../utils/themes/theme';
+import { splitSpecsByGroupId } from '../domains/y_domain';
 import { computeSeriesDomainsSelector } from '../state/selectors/compute_series_domains';
 import {
   SeriesCollectionValue,
@@ -485,12 +486,14 @@ describe('Series', () => {
     };
     const xValues = new Set([0, 1, 2, 3]);
     const splittedDataSeries = getDataSeriesBySpecId([spec1, spec2]);
+    const specsByGroupIds = splitSpecsByGroupId([spec1, spec2]);
+
     const stackedDataSeries = getFormattedDataseries(
-      [spec1, spec2],
       splittedDataSeries.dataSeriesBySpecId,
       xValues,
       ScaleType.Linear,
-      [],
+      [spec1, spec2],
+      specsByGroupIds,
     );
     expect(stackedDataSeries.stacked).toMatchSnapshot();
   });

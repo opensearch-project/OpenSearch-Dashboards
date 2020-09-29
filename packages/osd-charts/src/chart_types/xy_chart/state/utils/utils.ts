@@ -30,7 +30,7 @@ import { GroupId, SpecId } from '../../../../utils/ids';
 import { ColorConfig, Theme } from '../../../../utils/themes/theme';
 import { XDomain, YDomain } from '../../domains/types';
 import { mergeXDomain } from '../../domains/x_domain';
-import { mergeYDomain } from '../../domains/y_domain';
+import { mergeYDomain, splitSpecsByGroupId } from '../../domains/y_domain';
 import { renderArea, renderBars, renderLine, renderBubble, isDatumFilled } from '../../rendering/rendering';
 import { defaultTickFormatter } from '../../utils/axis_utils';
 import { fillSeries } from '../../utils/fill_series';
@@ -131,23 +131,36 @@ export function getCustomSeriesColors(
   return updatedCustomSeriesColors;
 }
 
-function getLastValues(formattedDataSeries: {
-  stacked: FormattedDataSeries[];
-  nonStacked: FormattedDataSeries[];
-}): Map<SeriesKey, LastValues> {
+function getLastValues(
+  formattedDataSeries: {
+    stacked: FormattedDataSeries[];
+    nonStacked: FormattedDataSeries[];
+  },
+  xDomain: XDomain,
+): Map<SeriesKey, LastValues> {
   const lastValues = new Map<SeriesKey, LastValues>();
-
+  if (xDomain.scaleType === ScaleType.Ordinal) {
+    return lastValues;
+  }
   // we need to get the latest
   formattedDataSeries.stacked.forEach(({ dataSeries, stackMode }) => {
     dataSeries.forEach((series) => {
       if (series.data.length === 0) {
         return;
       }
+
       const last = series.data[series.data.length - 1];
       if (!last) {
         return;
       }
       if (isDatumFilled(last)) {
+        return;
+      }
+
+      if (last.x !== xDomain.domain[xDomain.domain.length - 1]) {
+        // we have a dataset that is not filled with all x values
+        // and the last value of the series is not the last value for every series
+        // let's skip it
         return;
       }
 
@@ -178,6 +191,13 @@ function getLastValues(formattedDataSeries: {
         return;
       }
 
+      if (last.x !== xDomain.domain[xDomain.domain.length - 1]) {
+        // we have a dataset that is not filled with all x values
+        // and the last value of the series is not the last value for every series
+        // let's skip it
+        return;
+      }
+
       const { initialY1, initialY0 } = last;
       const seriesKey = getSeriesKey(series as XYChartSeriesIdentifier);
 
@@ -194,6 +214,7 @@ function getLastValues(formattedDataSeries: {
  * @param customXDomain if specified in <Settings />, the custom X domain
  * @param deselectedDataSeries is optional; if not supplied,
  * @param customXDomain is optional; if not supplied,
+ * @param orderOrdinalBinsBy
  * @param enableVislibSeriesSort is optional; if not specified in <Settings />,
  * then all series will be factored into computations. Otherwise, selectedDataSeries
  * is used to restrict the computation for just the selected series
@@ -215,18 +236,25 @@ export function computeSeriesDomains(
     enableVislibSeriesSort,
   );
   // compute the x domain merging any custom domain
-  const specsArray = [...seriesSpecs.values()];
-  const xDomain = mergeXDomain(specsArray, xValues, customXDomain, fallbackScale);
+  const xDomain = mergeXDomain(seriesSpecs, xValues, customXDomain, fallbackScale);
+
+  const specsByGroupIds = splitSpecsByGroupId(seriesSpecs);
 
   // fill series with missing x values
-  const filledDataSeriesBySpecId = fillSeries(dataSeriesBySpecId, xValues);
+  const filledDataSeriesBySpecId = fillSeries(
+    dataSeriesBySpecId,
+    xValues,
+    seriesSpecs,
+    xDomain.scaleType,
+    specsByGroupIds,
+  );
 
   const formattedDataSeries = getFormattedDataseries(
-    specsArray,
     filledDataSeriesBySpecId,
     xValues,
     xDomain.scaleType,
     seriesSpecs,
+    specsByGroupIds,
   );
 
   // let's compute the yDomain after computing all stacked values
@@ -234,7 +262,7 @@ export function computeSeriesDomains(
 
   // we need to get the last values from the formatted dataseries
   // because we change the format if we are on percentage mode
-  const lastValues = xDomain.scaleType !== ScaleType.Ordinal ? getLastValues(formattedDataSeries) : new Map();
+  const lastValues = getLastValues(formattedDataSeries, xDomain);
   const updatedSeriesCollection = new Map<SeriesKey, SeriesCollectionValue>();
   seriesCollection.forEach((value, key) => {
     const lastValue = lastValues.get(key);

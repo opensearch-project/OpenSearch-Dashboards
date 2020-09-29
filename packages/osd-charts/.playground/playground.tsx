@@ -19,14 +19,12 @@
 
 import React from 'react';
 
-import { Example } from '../stories/sunburst/15_single_sunburst';
+import { Example } from '../stories/bar/1_basic';
 
-export class Playground extends React.Component {
-  render() {
-    return (
-      <div className="testing">
-        <div className="chart">{Example()}</div>
-      </div>
-    );
-  }
+export function Playground() {
+  return (
+    <div className="chart">
+      <Example />
+    </div>
+  );
 }

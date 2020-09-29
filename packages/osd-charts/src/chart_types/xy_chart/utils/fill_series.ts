@@ -16,24 +16,47 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SpecId } from '../../../utils/ids';
+import { ScaleType } from '../../../scales/constants';
+import { SpecId, GroupId } from '../../../utils/ids';
+import { YBasicSeriesSpec } from '../domains/y_domain';
+import { getSpecsById } from '../state/utils/spec';
 import { DataSeries } from './series';
+import { SeriesSpecs, StackMode, BasicSeriesSpec, isLineSeriesSpec, isAreaSeriesSpec } from './specs';
 
 /**
  * Fill missing x values in all data series
- * @param series
- * @param xValues
  * @internal
  */
 export function fillSeries(
   series: Map<SpecId, DataSeries[]>,
   xValues: Set<string | number>,
+  seriesSpecs: SeriesSpecs,
+  groupScaleType: ScaleType,
+  specsByGroupIds: Map<
+    GroupId,
+    {
+      stackMode: StackMode | undefined;
+      stacked: YBasicSeriesSpec[];
+      nonStacked: YBasicSeriesSpec[];
+    }
+  >,
 ): Map<SpecId, DataSeries[]> {
   const sortedXValues = [...xValues.values()];
   const filledSeries: Map<SpecId, DataSeries[]> = new Map();
   series.forEach((dataSeries, key) => {
+    const spec = getSpecsById(seriesSpecs, key);
+    if (!spec) {
+      return;
+    }
+    const group = specsByGroupIds.get(spec.groupId);
+    if (!group) {
+      return;
+    }
+    const isStacked = Boolean(group.stacked.find(({ id }) => id === key));
+    const noFillRequired = isXFillNotRequired(spec, groupScaleType, isStacked);
+
     const filledDataSeries = dataSeries.map(({ data, ...rest }) => {
-      if (data.length === xValues.size) {
+      if (data.length === xValues.size || noFillRequired) {
         return {
           ...rest,
           data,
@@ -73,4 +96,10 @@ export function fillSeries(
     filledSeries.set(key, filledDataSeries);
   });
   return filledSeries;
+}
+
+function isXFillNotRequired(spec: BasicSeriesSpec, groupScaleType: ScaleType, isStacked: boolean) {
+  const onlyNoFitAreaLine = (isAreaSeriesSpec(spec) || isLineSeriesSpec(spec)) && !spec.fit;
+  const onlyContinuous = groupScaleType === ScaleType.Linear || groupScaleType === ScaleType.Time;
+  return onlyNoFitAreaLine && onlyContinuous && !isStacked;
 }
