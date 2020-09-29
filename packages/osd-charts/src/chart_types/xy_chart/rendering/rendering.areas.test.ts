@@ -175,6 +175,7 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 10,
           mark: null,
+          datum: [0, 10],
         },
         transform: {
           x: 25,
@@ -199,6 +200,7 @@ describe('Rendering points - areas', () => {
           x: 1,
           y: 5,
           mark: null,
+          datum: [1, 5],
         },
         transform: {
           x: 25,
@@ -329,6 +331,7 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 10,
           mark: null,
+          datum: [0, 10],
         },
         transform: {
           x: 25,
@@ -353,6 +356,7 @@ describe('Rendering points - areas', () => {
           x: 1,
           y: 5,
           mark: null,
+          datum: [1, 5],
         },
         transform: {
           x: 25,
@@ -385,6 +389,7 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 20,
           mark: null,
+          datum: [0, 20],
         },
         transform: {
           x: 25,
@@ -409,6 +414,7 @@ describe('Rendering points - areas', () => {
           x: 1,
           y: 10,
           mark: null,
+          datum: [1, 10],
         },
         transform: {
           x: 25,
@@ -495,6 +501,7 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 10,
           mark: null,
+          datum: [0, 10],
         },
         transform: {
           x: 0,
@@ -519,6 +526,7 @@ describe('Rendering points - areas', () => {
           x: 1,
           y: 5,
           mark: null,
+          datum: [1, 5],
         },
         transform: {
           x: 0,
@@ -648,6 +656,7 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 10,
           mark: null,
+          datum: [0, 10],
         },
         transform: {
           x: 0,
@@ -672,6 +681,7 @@ describe('Rendering points - areas', () => {
           x: 1,
           y: 5,
           mark: null,
+          datum: [1, 5],
         },
         transform: {
           x: 0,
@@ -704,6 +714,7 @@ describe('Rendering points - areas', () => {
           x: 0,
           y: 20,
           mark: null,
+          datum: [0, 20],
         },
         transform: {
           x: 0,
@@ -728,6 +739,7 @@ describe('Rendering points - areas', () => {
           x: 1,
           y: 10,
           mark: null,
+          datum: [1, 10],
         },
         transform: {
           x: 0,
@@ -814,6 +826,7 @@ describe('Rendering points - areas', () => {
           x: 1546300800000,
           y: 10,
           mark: null,
+          datum: [1546300800000, 10],
         },
         transform: {
           x: 0,
@@ -838,6 +851,7 @@ describe('Rendering points - areas', () => {
           x: 1546387200000,
           y: 5,
           mark: null,
+          datum: [1546387200000, 5],
         },
         transform: {
           x: 0,
@@ -952,6 +966,7 @@ describe('Rendering points - areas', () => {
           x: 1546300800000,
           y: 10,
           mark: null,
+          datum: [1546300800000, 10],
         },
         transform: {
           x: 0,
@@ -976,6 +991,7 @@ describe('Rendering points - areas', () => {
           x: 1546387200000,
           y: 5,
           mark: null,
+          datum: [1546387200000, 5],
         },
         transform: {
           x: 0,
@@ -1008,6 +1024,7 @@ describe('Rendering points - areas', () => {
           x: 1546300800000,
           y: 20,
           mark: null,
+          datum: [1546300800000, 20],
         },
         transform: {
           x: 0,
@@ -1032,6 +1049,7 @@ describe('Rendering points - areas', () => {
           x: 1546387200000,
           y: 10,
           mark: null,
+          datum: [1546387200000, 10],
         },
         transform: {
           x: 0,

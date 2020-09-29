@@ -99,6 +99,7 @@ describe('Tooltip formatting', () => {
       y: 10,
       accessor: 'y1',
       mark: null,
+      datum: { x: 1, y: 10 },
     },
     seriesStyle,
   };
@@ -120,6 +121,7 @@ describe('Tooltip formatting', () => {
       y: 10,
       accessor: 'y1',
       mark: null,
+      datum: { x: 1, y: 10 },
     },
     seriesStyle,
   };
@@ -349,6 +351,7 @@ describe('Tooltip formatting', () => {
         y: 10,
         accessor: 'y1',
         mark: 10,
+        datum: { x: 1, y: 10 },
       },
     };
 

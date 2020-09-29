@@ -38,6 +38,10 @@ export interface GeometryValue {
   x: any;
   mark: number | null;
   accessor: BandedAccessorType;
+  /**
+   * The original datum used for this geometry
+   */
+  datum: any;
 }
 
 export type IndexedGeometry = PointGeometry | BarGeometry;

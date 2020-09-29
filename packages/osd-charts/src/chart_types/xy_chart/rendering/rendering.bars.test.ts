@@ -82,6 +82,7 @@ describe('Rendering bars', () => {
             x: 0,
             y: 10,
             mark: null,
+            datum: [0, 10],
           },
           seriesIdentifier: {
             specId: SPEC_ID,
@@ -103,6 +104,7 @@ describe('Rendering bars', () => {
           value: {
             x: 1,
             y: 5,
+            datum: [1, 5],
           },
         }),
       );
@@ -217,6 +219,7 @@ describe('Rendering bars', () => {
           x: 0,
           y: 10,
           mark: null,
+          datum: [0, 10],
         },
         seriesIdentifier: {
           specId: spec1Id,
@@ -248,6 +251,7 @@ describe('Rendering bars', () => {
           value: {
             x: 0,
             y: 10,
+            datum: [0, 10],
           },
         }),
       );
@@ -260,6 +264,7 @@ describe('Rendering bars', () => {
           value: {
             x: 1,
             y: 5,
+            datum: [1, 5],
           },
         }),
       );
@@ -284,6 +289,7 @@ describe('Rendering bars', () => {
             accessor: 'y1',
             x: 0,
             y: 10,
+            datum: [0, 10],
           },
           seriesIdentifier: {
             specId: spec2Id,
@@ -305,6 +311,7 @@ describe('Rendering bars', () => {
           value: {
             x: 0,
             y: 20,
+            datum: [0, 20],
           },
         }),
       );
@@ -317,6 +324,7 @@ describe('Rendering bars', () => {
           value: {
             x: 1,
             y: 10,
+            datum: [1, 10],
           },
         }),
       );
@@ -368,6 +376,7 @@ describe('Rendering bars', () => {
             x: 0,
             y: 10,
             mark: null,
+            datum: [0, 10],
           },
           seriesIdentifier: {
             specId: SPEC_ID,
@@ -389,6 +398,7 @@ describe('Rendering bars', () => {
           value: {
             x: 1,
             y: 5,
+            datum: [1, 5],
           },
         }),
       );
@@ -500,6 +510,7 @@ describe('Rendering bars', () => {
             accessor: 'y1',
             x: 0,
             y: 10,
+            datum: [0, 10],
           },
           seriesIdentifier: {
             specId: spec1Id,
@@ -522,6 +533,7 @@ describe('Rendering bars', () => {
           value: {
             x: 1,
             y: 5,
+            datum: [1, 5],
           },
         }),
       );
@@ -546,6 +558,7 @@ describe('Rendering bars', () => {
             accessor: 'y1',
             x: 0,
             y: 20,
+            datum: [0, 20],
           },
           seriesIdentifier: {
             specId: spec2Id,
@@ -569,6 +582,7 @@ describe('Rendering bars', () => {
           value: {
             x: 1,
             y: 10,
+            datum: [1, 10],
           },
         }),
       );
@@ -636,6 +650,7 @@ describe('Rendering bars', () => {
             accessor: 'y1',
             x: 1546300800000,
             y: 10,
+            datum: [1546300800000, 10],
           },
           seriesIdentifier: {
             specId: spec1Id,
@@ -660,6 +675,7 @@ describe('Rendering bars', () => {
             x: 1546387200000,
             y: 5,
             mark: null,
+            datum: [1546387200000, 5],
           },
         }),
       );
@@ -685,6 +701,7 @@ describe('Rendering bars', () => {
             x: 1546300800000,
             y: 20,
             mark: null,
+            datum: [1546300800000, 20],
           },
           seriesIdentifier: {
             specId: spec2Id,
@@ -710,6 +727,7 @@ describe('Rendering bars', () => {
             x: 1546387200000,
             y: 10,
             mark: null,
+            datum: [1546387200000, 10],
           },
         }),
       );

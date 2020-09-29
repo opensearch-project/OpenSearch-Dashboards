@@ -175,6 +175,7 @@ describe('Rendering bands - areas', () => {
           x: 0,
           y: 2,
           mark: null,
+          datum: [0, 2, 10],
         },
         transform: {
           x: 25,
@@ -200,6 +201,7 @@ describe('Rendering bands - areas', () => {
           x: 0,
           y: 10,
           mark: null,
+          datum: [0, 2, 10],
         },
         transform: {
           x: 25,
@@ -223,6 +225,7 @@ describe('Rendering bands - areas', () => {
           x: 1,
           y: 3,
           mark: null,
+          datum: [1, 3, 5],
         },
         styleOverrides: undefined,
         transform: {
@@ -248,6 +251,7 @@ describe('Rendering bands - areas', () => {
           x: 1,
           y: 5,
           mark: null,
+          datum: [1, 3, 5],
         },
         transform: {
           x: 25,
@@ -334,6 +338,7 @@ describe('Rendering bands - areas', () => {
             x: 0,
             y: 10,
             mark: null,
+            datum: [0, 2, 10],
           },
           transform: {
             x: 25,
@@ -351,6 +356,7 @@ describe('Rendering bands - areas', () => {
             x: 0,
             y: 2,
             mark: null,
+            datum: [0, 2, 10],
           },
         }),
       );
@@ -361,6 +367,7 @@ describe('Rendering bands - areas', () => {
             x: 0,
             y: 10,
             mark: null,
+            datum: [0, 2, 10],
           },
         }),
       );
@@ -373,6 +380,7 @@ describe('Rendering bands - areas', () => {
             x: 2,
             y: 3,
             mark: null,
+            datum: [2, 3, 5],
           },
         }),
       );
@@ -385,6 +393,7 @@ describe('Rendering bands - areas', () => {
             x: 2,
             y: 5,
             mark: null,
+            datum: [2, 3, 5],
           },
         }),
       );
@@ -397,6 +406,7 @@ describe('Rendering bands - areas', () => {
             x: 3,
             y: 3,
             mark: null,
+            datum: [3, 3, 5],
           },
         }),
       );
@@ -409,6 +419,7 @@ describe('Rendering bands - areas', () => {
             x: 3,
             y: 5,
             mark: null,
+            datum: [3, 3, 5],
           },
         }),
       );
@@ -463,6 +474,7 @@ describe('Rendering bands - areas', () => {
           x: 0,
           y: 10,
           mark: null,
+          datum: [0, 2, 10],
         },
         seriesIdentifier: {
           specId: SPEC_ID,
@@ -502,6 +514,7 @@ describe('Rendering bands - areas', () => {
           x: 2,
           y: 5,
           mark: null,
+          datum: [2, 3, 5],
         },
         seriesIdentifier: {
           specId: SPEC_ID,
@@ -541,6 +554,7 @@ describe('Rendering bands - areas', () => {
           x: 3,
           y: 8,
           mark: null,
+          datum: [3, 4, 8],
         },
         seriesIdentifier: {
           specId: SPEC_ID,

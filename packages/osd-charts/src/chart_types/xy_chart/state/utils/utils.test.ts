@@ -1113,7 +1113,7 @@ describe('Chart State utils', () => {
         x: 0,
         y: 0,
         color: '#1EA593',
-        value: { x: 0, y: 5, accessor: BandedAccessorType.Y1, mark: null },
+        value: { x: 0, y: 5, accessor: BandedAccessorType.Y1, mark: null, datum: { x: 0, y: 5 } },
         transform: { x: 0, y: 0 },
         seriesIdentifier: {
           specId: 'line1',
@@ -1131,7 +1131,7 @@ describe('Chart State utils', () => {
         x: 0,
         y: 175.8,
         color: '#2B70F7',
-        value: { x: 0, y: 2, accessor: BandedAccessorType.Y1, mark: null },
+        value: { x: 0, y: 2, accessor: BandedAccessorType.Y1, mark: null, datum: { x: 0, y: 5 } },
         transform: { x: 0, y: 0 },
         seriesIdentifier: {
           specId: 'line2',

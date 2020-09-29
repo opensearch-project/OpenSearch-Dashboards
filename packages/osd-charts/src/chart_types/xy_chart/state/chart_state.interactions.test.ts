@@ -417,6 +417,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
           y: 10,
           accessor: 'y1',
           mark: null,
+          datum: [0, 10],
         },
         {
           key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
@@ -462,6 +463,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
           y: 10,
           accessor: 'y1',
           mark: null,
+          datum: [0, 10],
         },
         {
           key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
@@ -510,6 +512,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
           y: 10,
           accessor: 'y1',
           mark: null,
+          datum: [0, 10],
         },
         {
           key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
@@ -563,6 +566,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
           y: (spec.data[0] as Array<any>)[1],
           accessor: 'y1',
           mark: null,
+          datum: [(spec.data[0] as Array<any>)[0], (spec.data[0] as Array<any>)[1]],
         },
         {
           key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
@@ -595,6 +599,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
           y: (spec.data[1] as Array<any>)[1],
           accessor: 'y1',
           mark: null,
+          datum: [(spec.data[1] as Array<any>)[0], (spec.data[1] as Array<any>)[1]],
         },
         {
           key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
@@ -691,6 +696,7 @@ function mouseOverTestSuite(scaleType: ScaleType) {
           y: 5,
           accessor: 'y1',
           mark: null,
+          datum: [1, 5],
         },
         {
           key: 'spec{spec_1}yAccessor{1}splitAccessors{}',

@@ -67,6 +67,7 @@ describe('Rendering utils', () => {
         x: 0,
         y: 0,
         mark: null,
+        datum: { x: 0, y: 0 },
       },
       x: 0,
       y: 0,
@@ -97,6 +98,7 @@ describe('Rendering utils', () => {
         x: 0,
         y: 0,
         mark: null,
+        datum: { x: 0, y: 0 },
       },
       transform: {
         x: 0,

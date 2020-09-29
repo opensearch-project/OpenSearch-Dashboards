@@ -18,6 +18,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
+import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, TooltipValue, TooltipValueFormatter } from '../../src';
@@ -29,6 +30,7 @@ const onElementListeners = {
 };
 
 export const Example = () => {
+  const useObjectAsX = boolean('use object on x', false);
   const headerFormatter: TooltipValueFormatter = (tooltip: TooltipValue) => {
     if (tooltip.value % 2 === 0) {
       return (
@@ -60,15 +62,15 @@ export const Example = () => {
 
       <BarSeries
         id="bars"
-        xScaleType={ScaleType.Linear}
+        xScaleType={useObjectAsX ? ScaleType.Ordinal : ScaleType.Linear}
         yScaleType={ScaleType.Linear}
-        xAccessor="x"
+        xAccessor={useObjectAsX ? 'sObj' : 'x'}
         yAccessors={['y']}
         data={[
-          { x: 0, y: 2 },
-          { x: 1, y: 7 },
-          { x: 2, y: 3 },
-          { x: 3, y: 6 },
+          { x: 0, y: 2, obj: { from: 10, to: 20 }, sObj: 'from 10 to 20' },
+          { x: 1, y: 7, obj: { from: 20, to: 30 }, sObj: 'from 20 to 30' },
+          { x: 2, y: 3, obj: { from: 30, to: 40 }, sObj: 'from 30 to 40' },
+          { x: 3, y: 6, obj: { from: 40, to: 50 }, sObj: 'from 40 to 50' },
         ]}
       />
     </Chart>

@@ -645,6 +645,7 @@ export interface GeometryValue {
     //
     // (undocumented)
     accessor: BandedAccessorType;
+    datum: any;
     // (undocumented)
     mark: number | null;
     // (undocumented)
