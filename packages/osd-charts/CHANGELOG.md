@@ -1,3 +1,22 @@
+# [23.0.0](https://github.com/elastic/elastic-charts/compare/v22.0.0...v23.0.0) (2020-09-30)
+
+
+### Bug Fixes
+
+* render continuous line/area between non-adjacent points ([#833](https://github.com/elastic/elastic-charts/issues/833)) ([9f9892b](https://github.com/elastic/elastic-charts/commit/9f9892b255e62f6d42f4119458a791a62d592986)), closes [#825](https://github.com/elastic/elastic-charts/issues/825)
+
+
+### Features
+
+* debug state flag added to chart status ([#834](https://github.com/elastic/elastic-charts/issues/834)) ([83919ff](https://github.com/elastic/elastic-charts/commit/83919ffe294257839d360b589ce10f405e04af5b))
+* expose datum as part of GeometryValue ([#822](https://github.com/elastic/elastic-charts/issues/822)) ([dcd7077](https://github.com/elastic/elastic-charts/commit/dcd70777c2b6b8530b4518ebbac066e9f097594e))
+
+
+### BREAKING CHANGES
+
+* when rendering non-stacked line/area charts with a continuous x scale and no fit function,
+the line/area between non-consecutive data points will be rendered as a continuous line/area without adding an uncertain dashed line/ semi-transparent area that connects the two, non-adjacent, points.
+
 # [22.0.0](https://github.com/elastic/elastic-charts/compare/v21.3.2...v22.0.0) (2020-09-22)
 
 
