@@ -26,6 +26,7 @@ export { SpecId, GroupId, AxisId, AnnotationId } from './utils/ids';
 
 // Everything related to the specs types and react-components
 export * from './specs';
+export { DebugState } from './state/types';
 export { CurveType } from './utils/curves';
 export { SimplePadding } from './utils/dimensions';
 export { timeFormatter, niceTimeFormatter, niceTimeFormatByDay } from './utils/data/formatters';
@@ -41,7 +42,14 @@ export {
 } from './chart_types/partition_chart/layout/types/config_types';
 export { Layer as PartitionLayer } from './chart_types/partition_chart/specs/index';
 export * from './chart_types/goal_chart/specs/index';
-export { AccessorFn, IndexedAccessorFn, UnaryAccessorFn } from './utils/accessor';
+export {
+  Accessor,
+  AccessorFn,
+  IndexedAccessorFn,
+  UnaryAccessorFn,
+  AccessorObjectKey,
+  AccessorArrayIndex,
+} from './utils/accessor';
 export { CustomTooltip, TooltipInfo } from './components/tooltip/types';
 
 // scales

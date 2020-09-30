@@ -16,34 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Spec } from '../../../../specs';
-import { GroupId } from '../../../../utils/ids';
-import { isVerticalAxis } from '../../utils/axis_type_utils';
-import { AxisSpec } from '../../utils/specs';
+
+import { GlobalChartState } from '../chart_state';
+import { DebugState } from '../types';
+import { getChartContainerDimensionsSelector } from './get_chart_container_dimensions';
 
 /** @internal */
-export function getSpecsById<T extends Spec>(specs: T[], id: string): T | undefined {
-  return specs.find((spec) => spec.id === id);
-}
-
-/** @internal */
-export function getAxesSpecForSpecId(axesSpecs: AxisSpec[], groupId: GroupId) {
-  let xAxis: AxisSpec | undefined;
-  let yAxis: AxisSpec | undefined;
-  // eslint-disable-next-line no-restricted-syntax
-  for (const axisSpec of axesSpecs) {
-    if (axisSpec.groupId !== groupId) {
-      continue;
-    }
-    if (isVerticalAxis(axisSpec.position)) {
-      yAxis = axisSpec;
-    } else {
-      xAxis = axisSpec;
+export const getDebugStateSelector = (state: GlobalChartState): DebugState => {
+  if (state.internalChartState) {
+    const { height, width } = getChartContainerDimensionsSelector(state);
+    if (height * width > 0) {
+      return state.internalChartState.getDebugState(state);
     }
   }
-
-  return {
-    xAxis,
-    yAxis,
-  };
-}
+  return {};
+};

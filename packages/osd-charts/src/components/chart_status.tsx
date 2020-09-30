@@ -22,12 +22,15 @@ import { connect } from 'react-redux';
 
 import { RenderChangeListener } from '../specs';
 import { GlobalChartState } from '../state/chart_state';
+import { getDebugStateSelector } from '../state/selectors/get_debug_state';
 import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
+import { DebugState } from '../state/types';
 
 interface ChartStatusStateProps {
   rendered: boolean;
   renderedCount: number;
   onRenderChange?: RenderChangeListener;
+  debugState: DebugState | null;
 }
 class ChartStatusComponent extends React.Component<ChartStatusStateProps> {
   componentDidMount() {
@@ -48,16 +51,30 @@ class ChartStatusComponent extends React.Component<ChartStatusStateProps> {
   };
 
   render() {
-    const { rendered, renderedCount } = this.props;
-    return <div className="echChartStatus" data-ech-render-complete={rendered} data-ech-render-count={renderedCount} />;
+    const { rendered, renderedCount, debugState } = this.props;
+    const debugStateString: string | null = debugState && JSON.stringify(debugState);
+
+    return (
+      <div
+        className="echChartStatus"
+        data-ech-render-complete={rendered}
+        data-ech-render-count={renderedCount}
+        data-ech-debug-state={debugStateString}
+      />
+    );
   }
 }
 
-const mapStateToProps = (state: GlobalChartState): ChartStatusStateProps => ({
-  rendered: state.chartRendered,
-  renderedCount: state.chartRenderedCount,
-  onRenderChange: getSettingsSpecSelector(state).onRenderChange,
-});
+const mapStateToProps = (state: GlobalChartState): ChartStatusStateProps => {
+  const settings = getSettingsSpecSelector(state);
+
+  return {
+    rendered: state.chartRendered,
+    renderedCount: state.chartRenderedCount,
+    onRenderChange: settings.onRenderChange,
+    debugState: settings.debugState ? getDebugStateSelector(state) : null,
+  };
+};
 
 /** @internal */
 export const ChartStatus = connect(mapStateToProps)(ChartStatusComponent);

@@ -42,6 +42,7 @@ import { interactionsReducer } from './reducers/interactions';
 import { getInternalIsInitializedSelector, InitStatus } from './selectors/get_internal_is_intialized';
 import { getLegendItemsSelector } from './selectors/get_legend_items';
 import { LegendItemLabel } from './selectors/get_legend_items_labels';
+import { DebugState } from './types';
 import { getInitialPointerState } from './utils';
 
 export type BackwardRef = () => React.RefObject<HTMLDivElement>;
@@ -140,6 +141,12 @@ export interface InternalChartState {
    * @param globalState
    */
   getBrushArea(globalState: GlobalChartState): Dimensions | null;
+
+  /**
+   * Get debug state of chart
+   * @param globalState
+   */
+  getDebugState(globalState: GlobalChartState): DebugState;
 }
 
 /** @internal */

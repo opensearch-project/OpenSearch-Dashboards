@@ -45,8 +45,18 @@ export type AccessorFn = UnaryAccessorFn;
  * @public
  */
 export type IndexedAccessorFn = UnaryAccessorFn | BinaryAccessorFn;
-type AccessorObjectKey = string;
-type AccessorArrayIndex = number;
+
+/**
+ * A key accessor string
+ * @public
+ */
+export type AccessorObjectKey = string;
+
+/**
+ * An index accessor number
+ * @public
+ */
+export type AccessorArrayIndex = number;
 
 /**
  * A datum accessor in form of object key accessor string/number

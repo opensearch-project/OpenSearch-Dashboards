@@ -9,7 +9,16 @@ import { ComponentType } from 'react';
 import React from 'react';
 
 // @public
+export type Accessor = AccessorObjectKey | AccessorArrayIndex;
+
+// @public
+export type AccessorArrayIndex = number;
+
+// @public
 export type AccessorFn = UnaryAccessorFn;
+
+// @public
+export type AccessorObjectKey = string;
 
 // @public
 export type AnnotationDomainType = $Values<typeof AnnotationDomainTypes>;
@@ -149,8 +158,6 @@ export interface AxisSpec extends Spec {
 export interface AxisStyle {
     // (undocumented)
     axisLine: StrokeStyle & Visible;
-    // Warning: (ae-forgotten-export) The symbol "Visible" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     axisTitle: TextStyle & Visible;
     // (undocumented)
@@ -485,6 +492,32 @@ export interface DataSeriesDatum<T = any> {
 
 // @public (undocumented)
 export type Datum = any;
+
+// Warning: (ae-missing-release-tag) "DebugState" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export interface DebugState {
+    // Warning: (ae-forgotten-export) The symbol "DebugStateArea" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    areas?: DebugStateArea[];
+    // Warning: (ae-forgotten-export) The symbol "DebugStateAxes" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    axes?: DebugStateAxes;
+    // Warning: (ae-forgotten-export) The symbol "DebugStateBar" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    bars?: DebugStateBar[];
+    // Warning: (ae-forgotten-export) The symbol "DebugStateLegend" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    legend?: DebugStateLegend;
+    // Warning: (ae-forgotten-export) The symbol "DebugStateLine" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    lines?: DebugStateLine[];
+}
 
 // Warning: (ae-missing-release-tag) "DEFAULT_ANNOTATION_LINE_STYLE" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1218,7 +1251,6 @@ export interface SeriesAccessors {
     markSizeAccessor?: Accessor | AccessorFn;
     splitSeriesAccessors?: Accessor[];
     stackAccessors?: Accessor[];
-    // Warning: (ae-forgotten-export) The symbol "Accessor" needs to be exported by the entry point index.d.ts
     xAccessor: Accessor | AccessorFn;
     y0Accessors?: Accessor[];
     yAccessors: Accessor[];
@@ -1330,8 +1362,9 @@ export interface SettingsSpec extends Spec {
     animateData: boolean;
     baseTheme?: Theme;
     brushAxis?: BrushAxis;
-    // (undocumented)
     debug: boolean;
+    // @alpha
+    debugState?: boolean;
     // @alpha
     externalPointerEvents: ExternalPointerEventsSettings;
     flatLegend?: boolean;
@@ -1340,7 +1373,6 @@ export interface SettingsSpec extends Spec {
     // (undocumented)
     legendColorPicker?: LegendColorPicker;
     legendMaxDepth?: number;
-    // (undocumented)
     legendPosition: Position;
     minBrushDelta?: number;
     // (undocumented)
@@ -1613,6 +1645,14 @@ export const VerticalAlignment: Readonly<{
 
 // @public
 export type VerticalAlignment = $Values<typeof VerticalAlignment>;
+
+// Warning: (ae-missing-release-tag) "Visible" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface Visible {
+    // (undocumented)
+    visible: boolean;
+}
 
 // Warning: (ae-missing-release-tag) "XYBrushArea" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

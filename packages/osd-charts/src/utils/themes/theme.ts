@@ -28,7 +28,7 @@ import {
 import { Margins, SimplePadding } from '../dimensions';
 import { LIGHT_THEME } from './light_theme';
 
-interface Visible {
+export interface Visible {
   visible: boolean;
 }
 

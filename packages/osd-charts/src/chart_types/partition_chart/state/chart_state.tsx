@@ -23,6 +23,7 @@ import { ChartTypes } from '../..';
 import { Tooltip } from '../../../components/tooltip';
 import { InternalChartState, GlobalChartState, BackwardRef } from '../../../state/chart_state';
 import { InitStatus } from '../../../state/selectors/get_internal_is_intialized';
+import { DebugState } from '../../../state/types';
 import { Dimensions } from '../../../utils/dimensions';
 import { Partition } from '../renderer/canvas/partition';
 import { HighlighterFromHover } from '../renderer/dom/highlighter_hover';
@@ -131,5 +132,10 @@ export class PartitionState implements InternalChartState {
   // TODO
   getBrushArea(): Dimensions | null {
     return null;
+  }
+
+  // TODO
+  getDebugState(): DebugState {
+    return {};
   }
 }

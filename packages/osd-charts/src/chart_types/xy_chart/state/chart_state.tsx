@@ -36,6 +36,7 @@ import { computeChartDimensionsSelector } from './selectors/compute_chart_dimens
 import { computeLegendSelector } from './selectors/compute_legend';
 import { getBrushAreaSelector } from './selectors/get_brush_area';
 import { getPointerCursorSelector } from './selectors/get_cursor_pointer';
+import { getDebugStateSelector } from './selectors/get_debug_state';
 import { getHighlightedValuesSelector } from './selectors/get_highlighted_values';
 import { getLegendItemsLabelsSelector } from './selectors/get_legend_items_labels';
 import { getSeriesSpecsSelector } from './selectors/get_specs';
@@ -147,5 +148,9 @@ export class XYAxisChartState implements InternalChartState {
     this.onElementClickCaller(globalState);
     this.onBrushEndCaller(globalState);
     this.onPointerMoveCaller(globalState);
+  }
+
+  getDebugState(globalState: GlobalChartState) {
+    return getDebugStateSelector(globalState);
   }
 }
