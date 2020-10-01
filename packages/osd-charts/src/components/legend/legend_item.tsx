@@ -221,6 +221,7 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
           onMouseEnter={this.onLegendItemMouseOver}
           onMouseLeave={this.onLegendItemMouseOut}
           style={style}
+          data-ech-series-name={label}
         >
           <ItemColor
             ref={this.colorRef}
