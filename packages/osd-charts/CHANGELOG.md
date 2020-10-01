@@ -1,3 +1,10 @@
+## [23.0.1](https://github.com/elastic/elastic-charts/compare/v23.0.0...v23.0.1) (2020-10-01)
+
+
+### Bug Fixes
+
+* legend item label for functional tests ([#843](https://github.com/elastic/elastic-charts/issues/843)) ([c2d3283](https://github.com/elastic/elastic-charts/commit/c2d3283bb4b577c4024d756562c0e3dc77c127ad))
+
 # [23.0.0](https://github.com/elastic/elastic-charts/compare/v22.0.0...v23.0.0) (2020-09-30)
 
 
