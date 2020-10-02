@@ -1,3 +1,10 @@
+# [23.1.0](https://github.com/elastic/elastic-charts/compare/v23.0.1...v23.1.0) (2020-10-02)
+
+
+### Features
+
+* heatmap/swimlane chart type ([#831](https://github.com/elastic/elastic-charts/issues/831)) ([96f92b5](https://github.com/elastic/elastic-charts/commit/96f92b5684175c7d14b0c6f257c060cf60ab76fa)), closes [#752](https://github.com/elastic/elastic-charts/issues/752)
+
 ## [23.0.1](https://github.com/elastic/elastic-charts/compare/v23.0.0...v23.0.1) (2020-10-01)
 
 
