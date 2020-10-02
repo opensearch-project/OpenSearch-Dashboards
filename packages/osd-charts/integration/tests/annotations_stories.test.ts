@@ -42,4 +42,31 @@ describe('Annotations stories', () => {
       );
     });
   });
+  describe('Render within domain', () => {
+    it('cover from 0 to end domain', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/annotations-rects--linear-bar-chart&knob-debug=&knob-chartRotation=0&knob-x0 coordinate=0&knob-x1 coordinate=none',
+      );
+    });
+    it('cover from 0 to 1', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/annotations-rects--linear-bar-chart&knob-debug=&knob-chartRotation=0&knob-x0 coordinate=0&knob-x1 coordinate=1',
+      );
+    });
+    it('cover from 3 only on bar chart', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/annotations-rects--linear-bar-chart&knob-debug=&knob-chartRotation=0&knob-x0 coordinate=3&knob-x1 coordinate=none',
+      );
+    });
+    it('cover from 1 only on bar chart', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/annotations-rects--linear-bar-chart&knob-debug=&knob-chartRotation=0&knob-x0 coordinate=1&knob-x1 coordinate=1',
+      );
+    });
+    it("don't render outside domain", async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/annotations-rects--linear-bar-chart&knob-debug=&knob-chartRotation=0&knob-x0 coordinate=3.1&knob-x1 coordinate=none',
+      );
+    });
+  });
 });

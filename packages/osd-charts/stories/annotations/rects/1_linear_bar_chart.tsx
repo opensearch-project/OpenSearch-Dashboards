@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { boolean } from '@storybook/addon-knobs';
+import { boolean, select } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { Axis, BarSeries, Chart, RectAnnotation, ScaleType, Settings } from '../../../src';
@@ -27,6 +27,29 @@ import { getChartRotationKnob } from '../../utils/knobs';
 export const Example = () => {
   const debug = boolean('debug', false);
   const rotation = getChartRotationKnob();
+  const x0 = select(
+    'x0 coordinate',
+    {
+      0: 0,
+      1: 1,
+      3: 3,
+      '3.1': 3.1,
+      'not defined': 'none',
+    },
+    0,
+  );
+
+  const x1 = select(
+    'x1 coordinate',
+    {
+      0: 0,
+      1: 1,
+      3: 3,
+      '3.1': 3.1,
+      'not defined': 'none',
+    },
+    1,
+  );
 
   return (
     <Chart className="story-chart">
@@ -36,8 +59,8 @@ export const Example = () => {
         dataValues={[
           {
             coordinates: {
-              x0: 0,
-              x1: 1,
+              x0: x0 === 'none' ? undefined : Number(x0),
+              x1: x1 === 'none' ? undefined : Number(x1),
               y0: 0,
               y1: 4,
             },

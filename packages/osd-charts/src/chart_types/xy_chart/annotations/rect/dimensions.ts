@@ -159,47 +159,47 @@ function scaleXonContinuousScale(
  * @param scale the scale
  * @param minValue a min value
  * @param maxValue a max value
+ * @param isHistogram
  */
 function limitValueToDomainRange(
   scale: Scale,
   minValue?: PrimitiveValue,
   maxValue?: PrimitiveValue,
-  isHistogram: boolean = false,
+  isHistogram = false,
 ): [PrimitiveValue, PrimitiveValue] {
-  const domainStartValue = scale.domain[0];
+  const [domainStartValue] = scale.domain;
   // this fix the case where rendering on categorical scale and we have only one element
   const domainEndValue = scale.domain.length > 0 ? scale.domain[scale.domain.length - 1] : scale.domain[0];
 
+  const min = getMin(domainStartValue, minValue);
+
+  const max = getMax(isHistogram ? domainEndValue + scale.minInterval : domainEndValue, maxValue);
   // extend to edge values if values are null/undefined
-  let min = minValue == null ? domainStartValue : minValue;
-  let max = maxValue == null ? domainEndValue : maxValue;
-
-  if (isContinuousScale(scale)) {
-    if (minValue == null) {
-      // we expand null/undefined values to the edge
-      min = domainStartValue;
-    } else if (typeof minValue !== 'number') {
-      // we need to restrict to number only for continuous scales
-      min = null;
-    } else if (minValue < domainStartValue) {
-      // we limit values to the edge
-      min = domainStartValue;
-    } else {
-      min = minValue;
-    }
-
-    if (maxValue == null) {
-      // we expand null/undefined values to the edge
-      max = isHistogram ? domainEndValue + scale.minInterval : domainEndValue;
-    } else if (typeof maxValue !== 'number') {
-      // we need to restrict to number only for continuous scales
-      max = null;
-    } else if (maxValue > domainEndValue) {
-      // we limit values to the edge
-      max = domainEndValue;
-    } else {
-      max = maxValue;
-    }
+  if (!isContinuousScale(scale)) {
+    return [min, max];
+  }
+  if (min !== null && max !== null && min > max) {
+    return [null, null];
   }
   return [min, max];
+}
+
+function getMax(max: number, value?: number | string | null) {
+  if (value == null) {
+    return max;
+  }
+  if (typeof value === 'number') {
+    return Math.min(value, max);
+  }
+  return value;
+}
+
+function getMin(min: number, value?: number | string | null) {
+  if (value == null) {
+    return min;
+  }
+  if (typeof value === 'number') {
+    return Math.max(value, min);
+  }
+  return value;
 }
