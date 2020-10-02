@@ -28,6 +28,9 @@ export const ScaleType = Object.freeze({
   Log: 'log' as const,
   Sqrt: 'sqrt' as const,
   Time: 'time' as const,
+  Quantize: 'quantize' as const,
+  Quantile: 'quantile' as const,
+  Threshold: 'threshold' as const,
 });
 
 /** @public */

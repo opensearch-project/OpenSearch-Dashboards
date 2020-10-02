@@ -24,6 +24,7 @@ export const ChartTypes = Object.freeze({
   Goal: 'goal' as const,
   Partition: 'partition' as const,
   XYAxis: 'xy_axis' as const,
+  Heatmap: 'heatmap' as const,
 });
 
 /** @public */

@@ -58,6 +58,11 @@ const SPACE = ' ';
 const ELLIPSIS = '…';
 const DASH = '-';
 
+interface Options {
+  wrapAtWord: boolean;
+  shouldAddEllipsis: boolean;
+}
+
 /** @internal */
 export function wrapLines(
   ctx: CanvasRenderingContext2D,
@@ -66,6 +71,7 @@ export function wrapLines(
   fontSize: number,
   fixedWidth: number,
   fixedHeight: number,
+  { wrapAtWord, shouldAddEllipsis }: Options = { wrapAtWord: true, shouldAddEllipsis: false },
 ) {
   const lineHeight = 1;
   const lines = text.split('\n');
@@ -77,8 +83,6 @@ export function wrapLines(
   const maxHeightPx = fixedHeight - padding * 2;
   let currentHeightPx = 0;
   const shouldWrap = true;
-  const wrapAtWord = true;
-  const shouldAddEllipsis = false;
   const textArr: string[] = [];
   const textMeasureProcessor = measureText(ctx);
   const getTextWidth = (text: string) => {
@@ -95,8 +99,7 @@ export function wrapLines(
     return 0;
   };
 
-  const additionalWidth = 0;
-
+  const additionalWidth = shouldAddEllipsis ? getTextWidth(ELLIPSIS) : 0;
   for (let i = 0, max = lines.length; i < max; ++i) {
     let line = lines[i];
     let lineWidth = getTextWidth(line);

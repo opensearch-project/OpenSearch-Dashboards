@@ -38,10 +38,7 @@ export function isClicking(prevClick: PointerState | null, lastClick: PointerSta
   if (prevClick === null && lastClick !== null) {
     return true;
   }
-  if (prevClick !== null && lastClick !== null && prevClick.time !== lastClick.time) {
-    return true;
-  }
-  return false;
+  return prevClick !== null && lastClick !== null && prevClick.time !== lastClick.time;
 }
 
 /** @internal */

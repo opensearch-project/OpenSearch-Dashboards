@@ -18,7 +18,8 @@
  */
 
 import { Scale } from '../scales';
-import { PointerEvent, isPointerOverEvent, PointerOverEvent } from '../specs';
+import { BrushEndListener, isPointerOverEvent, PointerEvent, PointerOverEvent, HeatmapSpec } from '../specs';
+import { DragState } from '../state/chart_state';
 
 /** @internal */
 export function isValidPointerOverEvent(
@@ -26,4 +27,30 @@ export function isValidPointerOverEvent(
   event: PointerEvent | null | undefined,
 ): event is PointerOverEvent {
   return isPointerOverEvent(event) && (event.unit === undefined || event.unit === mainScale.unit);
+}
+
+/** @internal */
+export interface DragCheckProps {
+  onBrushEnd: BrushEndListener | HeatmapSpec['config']['onBrushEnd'] | undefined;
+  lastDrag: DragState | null;
+}
+
+/** @internal */
+export function hasDragged(prevProps: DragCheckProps | null, nextProps: DragCheckProps | null) {
+  if (nextProps === null) {
+    return false;
+  }
+  if (!nextProps.onBrushEnd) {
+    return false;
+  }
+  const prevLastDrag = prevProps !== null ? prevProps.lastDrag : null;
+  const nextLastDrag = nextProps !== null ? nextProps.lastDrag : null;
+
+  if (prevLastDrag === null && nextLastDrag !== null) {
+    return true;
+  }
+  if (prevLastDrag !== null && nextLastDrag !== null && prevLastDrag.end.time !== nextLastDrag.end.time) {
+    return true;
+  }
+  return false;
 }

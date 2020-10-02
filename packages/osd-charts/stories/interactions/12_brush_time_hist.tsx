@@ -22,7 +22,16 @@ import { boolean } from '@storybook/addon-knobs';
 import { DateTime } from 'luxon';
 import React from 'react';
 
-import { Axis, Chart, niceTimeFormatter, Position, ScaleType, Settings, HistogramBarSeries } from '../../src';
+import {
+  Axis,
+  Chart,
+  niceTimeFormatter,
+  Position,
+  ScaleType,
+  Settings,
+  HistogramBarSeries,
+  BrushEndListener,
+} from '../../src';
 import { isVerticalRotation } from '../../src/chart_types/xy_chart/state/utils/common';
 import { getChartRotationKnob } from '../utils/knobs';
 
@@ -35,17 +44,17 @@ export const Example = () => {
   const oneDay = 1000 * 60 * 60 * 24;
   const dateFormatter = niceTimeFormatter([now, now + oneDay * 5]);
   const numberFormatter = (d: any) => Number(d).toFixed(2);
-
+  const brushEndListener: BrushEndListener = ({ x }) => {
+    if (!x) {
+      return;
+    }
+    action('onBrushEnd')(dateFormatter(x[0]), dateFormatter(x[1]));
+  };
   return (
     <Chart className="story-chart">
       <Settings
         debug={boolean('debug', false)}
-        onBrushEnd={({ x }) => {
-          if (!x) {
-            return;
-          }
-          action('onBrushEnd')(dateFormatter(x[0]), dateFormatter(x[1]));
-        }}
+        onBrushEnd={brushEndListener}
         onElementClick={action('onElementClick')}
         rotation={getChartRotationKnob()}
         roundHistogramBrushValues={boolean('roundHistogramBrushValues', false)}

@@ -20,7 +20,7 @@
 import { createStore, Store } from 'redux';
 
 import { MockGlobalSpec, MockSeriesSpec } from '../../../../mocks/specs';
-import { SettingsSpec, XYChartElementEvent, PartitionElementEvent } from '../../../../specs';
+import { SettingsSpec, XYChartElementEvent, PartitionElementEvent, HeatmapElementEvent } from '../../../../specs';
 import { updateParentDimensions } from '../../../../state/actions/chart_settings';
 import { onMouseDown, onMouseUp, onPointerMove } from '../../../../state/actions/mouse';
 import { upsertSpec, specParsed } from '../../../../state/actions/specs';
@@ -75,9 +75,10 @@ describe('Picked shapes selector', () => {
     expect(sunburstGeometries.quadViewModel).toHaveLength(6);
   });
   test('treemap check picked geometries', () => {
-    const onClickListener = jest.fn<undefined, Array<(XYChartElementEvent | PartitionElementEvent)[]>>(
-      (): undefined => undefined,
-    );
+    const onClickListener = jest.fn<
+      undefined,
+      Array<(XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent)[]>
+    >((): undefined => undefined);
     addSeries(store, treemapSpec, {
       onElementClick: onClickListener,
     });
@@ -106,9 +107,10 @@ describe('Picked shapes selector', () => {
     ]);
   });
   test('sunburst check picked geometries', () => {
-    const onClickListener = jest.fn<undefined, Array<(XYChartElementEvent | PartitionElementEvent)[]>>(
-      (): undefined => undefined,
-    );
+    const onClickListener = jest.fn<
+      undefined,
+      Array<(XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent)[]>
+    >((): undefined => undefined);
     addSeries(store, sunburstSpec, {
       onElementClick: onClickListener,
     });

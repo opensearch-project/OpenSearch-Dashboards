@@ -20,6 +20,7 @@
 import React, { ComponentType } from 'react';
 
 import { Spec } from '.';
+import { Cell } from '../chart_types/heatmap/layout/types/viewmodel_types';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { XYChartSeriesIdentifier } from '../chart_types/xy_chart/utils/series';
 import { DomainRange } from '../chart_types/xy_chart/utils/specs';
@@ -29,12 +30,12 @@ import { CustomTooltip } from '../components/tooltip/types';
 import { ScaleContinuousType, ScaleOrdinalType } from '../scales';
 import { getConnect, specComponentFactory } from '../state/spec_factory';
 import { Accessor } from '../utils/accessor';
-import { Position, Rendering, Rotation, Color, RecursivePartial } from '../utils/commons';
+import { Color, Position, RecursivePartial, Rendering, Rotation } from '../utils/commons';
 import { Domain } from '../utils/domain';
 import { GeometryValue } from '../utils/geometry';
 import { GroupId } from '../utils/ids';
 import { PartialTheme, Theme } from '../utils/themes/theme';
-import { PointerEventType, TooltipType, BrushAxis, DEFAULT_SETTINGS_SPEC, BinAgg, Direction } from './constants';
+import { BinAgg, BrushAxis, DEFAULT_SETTINGS_SPEC, Direction, PointerEventType, TooltipType } from './constants';
 
 export interface LayerValue {
   groupByRollup: PrimitiveValue;
@@ -52,9 +53,14 @@ export interface XYBrushArea {
 
 export type XYChartElementEvent = [GeometryValue, XYChartSeriesIdentifier];
 export type PartitionElementEvent = [Array<LayerValue>, SeriesIdentifier];
+export type HeatmapElementEvent = [Cell, SeriesIdentifier];
 
-export type ElementClickListener = (elements: Array<XYChartElementEvent | PartitionElementEvent>) => void;
-export type ElementOverListener = (elements: Array<XYChartElementEvent | PartitionElementEvent>) => void;
+export type ElementClickListener = (
+  elements: Array<XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent>,
+) => void;
+export type ElementOverListener = (
+  elements: Array<XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent>,
+) => void;
 export type BrushEndListener = (brushArea: XYBrushArea) => void;
 export type LegendItemListener = (series: SeriesIdentifier | null) => void;
 export type PointerUpdateListener = (event: PointerEvent) => void;

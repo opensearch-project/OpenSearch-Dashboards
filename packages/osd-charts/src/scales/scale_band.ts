@@ -19,7 +19,7 @@
 
 import { scaleBand, scaleQuantize, ScaleQuantize, ScaleBand as D3ScaleBand } from 'd3-scale';
 
-import { Scale } from '.';
+import { Scale, ScaleBandType } from '.';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { maxValueWithUpperLimit, stringifyNullsUndefined } from '../utils/commons';
 import { ScaleType } from './constants';
@@ -35,7 +35,7 @@ export class ScaleBand implements Scale {
   readonly outerPadding: number;
   readonly innerPadding: number;
   readonly originalBandwidth: number;
-  readonly type: ScaleType;
+  readonly type: ScaleBandType;
   readonly domain: any[];
   readonly range: number[];
   readonly isInverted: boolean;

@@ -23,7 +23,17 @@ import { DateTime } from 'luxon';
 import moment from 'moment-timezone';
 import React from 'react';
 
-import { Axis, BarSeries, Chart, LineSeries, niceTimeFormatter, Position, ScaleType, Settings } from '../../src';
+import {
+  Axis,
+  BarSeries,
+  BrushEndListener,
+  Chart,
+  LineSeries,
+  niceTimeFormatter,
+  Position,
+  ScaleType,
+  Settings,
+} from '../../src';
 import { getChartRotationKnob } from '../utils/knobs';
 
 export const Example = () => {
@@ -35,16 +45,17 @@ export const Example = () => {
   const twoDays = moment.duration(2, 'd');
   const fiveDays = moment.duration(5, 'd');
   const formatter = niceTimeFormatter([now, fiveDays.add(now).asMilliseconds()]);
+  const brushEndListener: BrushEndListener = ({ x }) => {
+    if (!x) {
+      return;
+    }
+    action('onBrushEnd')(formatter(x[0]), formatter(x[1]));
+  };
   return (
     <Chart className="story-chart">
       <Settings
         debug={boolean('debug', false)}
-        onBrushEnd={({ x }) => {
-          if (!x) {
-            return;
-          }
-          action('onBrushEnd')(formatter(x[0]), formatter(x[1]));
-        }}
+        onBrushEnd={brushEndListener}
         onElementClick={action('onElementClick')}
         rotation={getChartRotationKnob()}
       />

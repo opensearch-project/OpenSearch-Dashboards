@@ -163,7 +163,7 @@ export class ScaleContinuous implements Scale {
   readonly bandwidthPadding: number;
   readonly minInterval: number;
   readonly step: number;
-  readonly type: ScaleType;
+  readonly type: ScaleContinuousType;
   readonly domain: any[];
   readonly range: number[];
   readonly isInverted: boolean;

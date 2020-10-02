@@ -21,6 +21,7 @@ import React, { RefObject } from 'react';
 
 import { ChartTypes } from '../chart_types';
 import { GoalState } from '../chart_types/goal_chart/state/chart_state';
+import { HeatmapState } from '../chart_types/heatmap/state/chart_state';
 import { PartitionState } from '../chart_types/partition_chart/state/chart_state';
 import { XYAxisChartState } from '../chart_types/xy_chart/state/chart_state';
 import { LegendItem, LegendItemExtraValues } from '../commons/legend';
@@ -448,6 +449,8 @@ function initInternalChartState(chartType: ChartTypes | null): InternalChartStat
       return new PartitionState();
     case ChartTypes.XYAxis:
       return new XYAxisChartState();
+    case ChartTypes.Heatmap:
+      return new HeatmapState();
     default:
       return null;
   }

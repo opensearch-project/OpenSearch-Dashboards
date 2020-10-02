@@ -19,7 +19,7 @@
 
 import { SeriesIdentifier, SeriesKey } from '../../../commons/series_id';
 import { ScaleType } from '../../../scales/constants';
-import { BinAgg, Direction } from '../../../specs';
+import { BinAgg, Direction, XScaleType } from '../../../specs';
 import { OrderBy } from '../../../specs/settings';
 import { ColorOverrides } from '../../../state/chart_state';
 import { Accessor, AccessorFn, getAccessorValue } from '../../../utils/accessor';
@@ -461,7 +461,7 @@ export function getDataSeriesBySpecId(
   dataSeriesBySpecId: Map<SpecId, DataSeries[]>;
   seriesCollection: Map<SeriesKey, SeriesCollectionValue>;
   xValues: Set<string | number>;
-  fallbackScale?: ScaleType;
+  fallbackScale?: XScaleType;
 } {
   const dataSeriesBySpecId = new Map<SpecId, DataSeries[]>();
   const seriesCollection = new Map<SeriesKey, SeriesCollectionValue>();

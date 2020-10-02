@@ -22,12 +22,13 @@ import { Selector } from 'reselect';
 
 import { ChartTypes } from '../../..';
 import { Scale } from '../../../../scales';
-import { XYBrushArea, GroupBrushExtent, BrushEndListener } from '../../../../specs';
+import { GroupBrushExtent, XYBrushArea } from '../../../../specs';
 import { BrushAxis } from '../../../../specs/constants';
-import { GlobalChartState, DragState } from '../../../../state/chart_state';
+import { DragState, GlobalChartState } from '../../../../state/chart_state';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { Rotation, minValueWithLowerLimit, maxValueWithUpperLimit } from '../../../../utils/commons';
+import { maxValueWithUpperLimit, minValueWithLowerLimit, Rotation } from '../../../../utils/commons';
 import { Dimensions } from '../../../../utils/dimensions';
+import { hasDragged, DragCheckProps } from '../../../../utils/events';
 import { GroupId } from '../../../../utils/ids';
 import { isVerticalRotation } from '../utils/common';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
@@ -38,30 +39,6 @@ import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
 
 const getLastDragSelector = (state: GlobalChartState) => state.interactions.pointer.lastDrag;
 
-interface Props {
-  onBrushEnd: BrushEndListener | undefined;
-  lastDrag: DragState | null;
-}
-
-function hasDragged(prevProps: Props | null, nextProps: Props | null) {
-  if (nextProps === null) {
-    return false;
-  }
-  if (!nextProps.onBrushEnd) {
-    return false;
-  }
-  const prevLastDrag = prevProps !== null ? prevProps.lastDrag : null;
-  const nextLastDrag = nextProps !== null ? nextProps.lastDrag : null;
-
-  if (prevLastDrag === null && nextLastDrag !== null) {
-    return true;
-  }
-  if (prevLastDrag !== null && nextLastDrag !== null && prevLastDrag.end.time !== nextLastDrag.end.time) {
-    return true;
-  }
-  return false;
-}
-
 /**
  * Will call the onBrushEnd listener every time the following preconditions are met:
  * - the onBrushEnd listener is available
@@ -69,7 +46,7 @@ function hasDragged(prevProps: Props | null, nextProps: Props | null) {
  * @internal
  */
 export function createOnBrushEndCaller(): (state: GlobalChartState) => void {
-  let prevProps: Props | null = null;
+  let prevProps: DragCheckProps | null = null;
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartTypes.XYAxis) {

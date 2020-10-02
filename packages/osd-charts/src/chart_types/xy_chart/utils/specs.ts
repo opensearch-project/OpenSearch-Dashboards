@@ -430,12 +430,14 @@ export interface SeriesAccessors {
   markSizeAccessor?: Accessor | AccessorFn;
 }
 
+export type XScaleType = typeof ScaleType.Ordinal | ScaleContinuousType;
+
 export interface SeriesScales {
   /**
    * The x axis scale type
    * @defaultValue `ordinal` {@link (ScaleType:type) | ScaleType.Ordinal}
    */
-  xScaleType: typeof ScaleType.Ordinal | typeof ScaleType.Linear | typeof ScaleType.Time;
+  xScaleType: XScaleType;
   /**
    * If using a ScaleType.Time this timezone identifier is required to
    * compute a nice set of xScale ticks. Can be any IANA zone supported by

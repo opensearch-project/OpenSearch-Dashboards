@@ -7,19 +7,38 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <style>
       html,
-      body,
-      #root {
+      body {
         background: blanchedalmond !important;
         width: 100%;
         height: 100%;
-        padding: 10px;
+        overflow: hidden;
       }
 
       .chart {
-        position: relative;
         background: white;
-        width: 800px;
-        height: 500px;
+        /*display: inline-block;
+        position: relative;
+        */
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+      }
+
+      .testing {
+        background: aquamarine;
+        position: relative;
+        width: 100%;
+        overflow: auto;
+      }
+
+      .page {
+        padding: 10px;
+        width: 100%;
+        height: 100%;
+      }
+      #root {
+        height: 100%;
+        wwidth: 100%;
       }
 
       label {
@@ -29,7 +48,9 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <div class="page">
+      <div id="root"></div>
+    </div>
     <script src="bundle.js" type="text/javascript"></script>
   </body>
 </html>

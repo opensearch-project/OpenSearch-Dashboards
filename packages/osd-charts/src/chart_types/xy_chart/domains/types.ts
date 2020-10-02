@@ -23,7 +23,7 @@ import { Domain } from '../../../utils/domain';
 import { GroupId } from '../../../utils/ids';
 
 export interface BaseDomain {
-  scaleType: ScaleType;
+  scaleType: typeof ScaleType.Ordinal | ScaleContinuousType;
   domain: Domain;
   /* if the scale needs to be a band scale: used when displaying bars */
   isBandScale: boolean;

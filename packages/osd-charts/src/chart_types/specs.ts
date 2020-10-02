@@ -31,3 +31,5 @@ export {
 export * from './xy_chart/utils/specs';
 
 export { Partition } from './partition_chart/specs';
+
+export { Heatmap, HeatmapSpec } from './heatmap/specs';

@@ -20,6 +20,16 @@
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { ScaleType } from './constants';
 
+export type ScaleContinuousType =
+  | typeof ScaleType.Linear
+  | typeof ScaleType.Time
+  | typeof ScaleType.Log
+  | typeof ScaleType.Sqrt;
+
+export type ScaleOrdinalType = typeof ScaleType.Ordinal;
+
+export type ScaleBandType = ScaleOrdinalType;
+
 /**
  * A `Scale` interface. A scale can map an input value within a specified domain
  * to an output value from a specified range.
@@ -34,8 +44,8 @@ export interface Scale {
    */
   step: number;
   ticks: () => any[];
-  scaleOrThrow(value?: PrimitiveValue): number;
   scale: (value?: PrimitiveValue) => number | null;
+  scaleOrThrow(value?: PrimitiveValue): number;
   pureScale: (value?: PrimitiveValue) => number | null;
   invert: (value: number) => any;
   invertWithStep: (
@@ -51,7 +61,7 @@ export interface Scale {
   bandwidth: number;
   bandwidthPadding: number;
   minInterval: number;
-  type: ScaleType;
+  type: ScaleContinuousType | ScaleOrdinalType;
   /**
    * @todo
    * designates unit of scale to compare to other Chart axis
@@ -60,10 +70,6 @@ export interface Scale {
   isInverted: boolean;
   barsPadding: number;
 }
-
-export type ScaleContinuousType = Exclude<ScaleType, typeof ScaleType.Ordinal>;
-
-export type ScaleOrdinalType = typeof ScaleType.Ordinal;
 
 /** @internal */
 export { ScaleBand } from './scale_band';
