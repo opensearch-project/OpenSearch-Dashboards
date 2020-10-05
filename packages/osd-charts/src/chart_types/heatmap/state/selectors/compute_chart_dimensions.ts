@@ -81,9 +81,8 @@ export const computeChartDimensionsSelector = createCachedSelector(
         };
       });
       const measuredYValues = textMeasure(config.yAxisLabel.fontSize, boxedYValues);
-      const maxTextWidth = d3Max(measuredYValues, ({ width }) => width) ?? 0;
 
-      let yColumnWidth: number = maxTextWidth;
+      let yColumnWidth: number = d3Max(measuredYValues, ({ width }) => width) ?? 0;
       if (typeof config.yAxisLabel.width === 'number') {
         yColumnWidth = config.yAxisLabel.width;
       } else if (typeof config.yAxisLabel.width === 'object' && yColumnWidth > config.yAxisLabel.width.max) {

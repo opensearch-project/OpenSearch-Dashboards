@@ -52,7 +52,7 @@ export const getXAxisRightOverflow = createCachedSelector(
       const textSize = bboxCompute.compute(text, padding, fontSize, fontFamily, 1);
       return Math.max(acc, textSize.width + padding);
     }, 0);
-
+    bboxCompute.destroy();
     return maxTextWidth / 2;
   },
 )(getChartIdSelector);
