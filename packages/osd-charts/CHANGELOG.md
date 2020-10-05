@@ -1,3 +1,10 @@
+## [23.1.1](https://github.com/elastic/elastic-charts/compare/v23.1.0...v23.1.1) (2020-10-05)
+
+
+### Bug Fixes
+
+* limit annotation to the current domain extent ([#841](https://github.com/elastic/elastic-charts/issues/841)) ([4186962](https://github.com/elastic/elastic-charts/commit/4186962a63ecb6fcee7d88abfcb98c6c3aa9666e)), closes [#832](https://github.com/elastic/elastic-charts/issues/832)
+
 # [23.1.0](https://github.com/elastic/elastic-charts/compare/v23.0.1...v23.1.0) (2020-10-02)
 
 
