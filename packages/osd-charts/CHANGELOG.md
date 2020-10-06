@@ -1,3 +1,11 @@
+## [23.2.1](https://github.com/elastic/elastic-charts/compare/v23.2.0...v23.2.1) (2020-10-06)
+
+
+### Bug Fixes
+
+* detect dragging only by the delta changes ([#853](https://github.com/elastic/elastic-charts/issues/853)) ([219f9dd](https://github.com/elastic/elastic-charts/commit/219f9dd822b15750949ee3192fa573421eb8e534))
+* filter highlighted y values ([#855](https://github.com/elastic/elastic-charts/issues/855)) ([d3ebe77](https://github.com/elastic/elastic-charts/commit/d3ebe776126af0257882d1fa3f94e8426a063fd3))
+
 # [23.2.0](https://github.com/elastic/elastic-charts/compare/v23.1.1...v23.2.0) (2020-10-06)
 
 
