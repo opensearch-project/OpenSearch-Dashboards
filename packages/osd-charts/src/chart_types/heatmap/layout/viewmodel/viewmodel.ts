@@ -23,6 +23,7 @@ import { scaleBand, scaleQuantize } from 'd3-scale';
 import { ScaleContinuous } from '../../../../scales';
 import { ScaleType } from '../../../../scales/constants';
 import { SettingsSpec } from '../../../../specs';
+import { CanvasTextBBoxCalculator } from '../../../../utils/bbox/canvas_text_bbox_calculator';
 import { Dimensions } from '../../../../utils/dimensions';
 import { Pixels } from '../../../partition_chart/layout/types/geometry_types';
 import { Box, TextMeasure } from '../../../partition_chart/layout/types/types';
@@ -53,23 +54,24 @@ export interface TextBox extends Box {
   y: number;
 }
 
-function getTicksPerWidth(width: number) {
-  if (width <= 100) {
-    return 0;
-  }
-  if (width > 100 && width <= 200) {
-    return 1;
-  }
-  if (width > 200 && width <= 300) {
-    return 2;
-  }
-  if (width > 300 && width <= 500) {
-    return 3;
-  }
-  if (width > 500 && width < 700) {
-    return 5;
-  }
-  return 10;
+/**
+ * Resolves the maximum number of ticks based on the chart width and sample label based on formatter config.
+ */
+function getTicks(chartWidth: number, xAxisLabelConfig: Config['xAxisLabel']): number {
+  const bboxCompute = new CanvasTextBBoxCalculator();
+  const labelSample = xAxisLabelConfig.formatter(Date.now());
+  const { width } = bboxCompute.compute(
+    labelSample,
+    xAxisLabelConfig.padding,
+    xAxisLabelConfig.fontSize,
+    xAxisLabelConfig.fontFamily,
+  );
+  bboxCompute.destroy();
+  const maxTicks = Math.floor(chartWidth / width);
+  // Dividing by 2 is a temp fix to make sure {@link ScaleContinuous} won't produce
+  // to many ticks creating nice rounded tick values
+  // TODO add support for limiting the number of tick in {@link ScaleContinuous}
+  return maxTicks / 2;
 }
 
 /** @internal */
@@ -130,7 +132,7 @@ export function shapeViewModel(
             range: [0, maxGridAreaWidth],
           },
           {
-            ticks: getTicksPerWidth(chartDimensions.width),
+            ticks: getTicks(chartDimensions.width, config.xAxisLabel),
             timeZone: config.timeZone,
           },
         )
