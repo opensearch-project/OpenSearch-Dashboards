@@ -835,8 +835,8 @@ function mouseOverTestSuite(scaleType: XScaleType) {
       const end1 = { x: 75, y: 0 };
 
       store.dispatch(onMouseDown(start1, 0));
-      store.dispatch(onPointerMove(end1, 1));
-      store.dispatch(onMouseUp(end1, 3));
+      store.dispatch(onPointerMove(end1, 200));
+      store.dispatch(onMouseUp(end1, 300));
       if (scaleType === ScaleType.Ordinal) {
         expect(brushEndListener).not.toBeCalled();
       } else {
@@ -846,9 +846,9 @@ function mouseOverTestSuite(scaleType: XScaleType) {
       const start2 = { x: 75, y: 0 };
       const end2 = { x: 100, y: 0 };
 
-      store.dispatch(onMouseDown(start2, 4));
-      store.dispatch(onPointerMove(end2, 5));
-      store.dispatch(onMouseUp(end2, 6));
+      store.dispatch(onMouseDown(start2, 400));
+      store.dispatch(onPointerMove(end2, 500));
+      store.dispatch(onMouseUp(end2, 600));
       if (scaleType === ScaleType.Ordinal) {
         expect(brushEndListener).not.toBeCalled();
       } else {
@@ -858,9 +858,9 @@ function mouseOverTestSuite(scaleType: XScaleType) {
 
       const start3 = { x: 75, y: 0 };
       const end3 = { x: 250, y: 0 };
-      store.dispatch(onMouseDown(start3, 7));
-      store.dispatch(onPointerMove(end3, 8));
-      store.dispatch(onMouseUp(end3, 9));
+      store.dispatch(onMouseDown(start3, 700));
+      store.dispatch(onPointerMove(end3, 800));
+      store.dispatch(onMouseUp(end3, 900));
       if (scaleType === ScaleType.Ordinal) {
         expect(brushEndListener).not.toBeCalled();
       } else {
@@ -870,14 +870,23 @@ function mouseOverTestSuite(scaleType: XScaleType) {
 
       const start4 = { x: 25, y: 0 };
       const end4 = { x: -20, y: 0 };
-      store.dispatch(onMouseDown(start4, 10));
-      store.dispatch(onPointerMove(end4, 11));
-      store.dispatch(onMouseUp(end4, 12));
+      store.dispatch(onMouseDown(start4, 1000));
+      store.dispatch(onPointerMove(end4, 1100));
+      store.dispatch(onMouseUp(end4, 1200));
       if (scaleType === ScaleType.Ordinal) {
         expect(brushEndListener).not.toBeCalled();
       } else {
         expect(brushEndListener).toBeCalled();
         expect(brushEndListener.mock.calls[3][0]).toEqual({ x: [0, 0.5] });
+      }
+
+      store.dispatch(onMouseDown(start4, 1300));
+      store.dispatch(onPointerMove(end4, 1390));
+      store.dispatch(onMouseUp(end4, 1400));
+      if (scaleType === ScaleType.Ordinal) {
+        expect(brushEndListener).not.toBeCalled();
+      } else {
+        expect(brushEndListener.mock.calls[4]).toBeUndefined();
       }
     });
     test('can respond to a brush end event on rotated chart', () => {
@@ -907,8 +916,8 @@ function mouseOverTestSuite(scaleType: XScaleType) {
       const end1 = { x: 0, y: 75 };
 
       store.dispatch(onMouseDown(start1, 0));
-      store.dispatch(onPointerMove(end1, 1));
-      store.dispatch(onMouseUp(end1, 3));
+      store.dispatch(onPointerMove(end1, 100));
+      store.dispatch(onMouseUp(end1, 200));
       if (scaleType === ScaleType.Ordinal) {
         expect(brushEndListener).not.toBeCalled();
       } else {
@@ -918,9 +927,9 @@ function mouseOverTestSuite(scaleType: XScaleType) {
       const start2 = { x: 0, y: 75 };
       const end2 = { x: 0, y: 100 };
 
-      store.dispatch(onMouseDown(start2, 4));
-      store.dispatch(onPointerMove(end2, 5));
-      store.dispatch(onMouseUp(end2, 6));
+      store.dispatch(onMouseDown(start2, 400));
+      store.dispatch(onPointerMove(end2, 500));
+      store.dispatch(onMouseUp(end2, 600));
       if (scaleType === ScaleType.Ordinal) {
         expect(brushEndListener).not.toBeCalled();
       } else {
@@ -930,9 +939,9 @@ function mouseOverTestSuite(scaleType: XScaleType) {
 
       const start3 = { x: 0, y: 75 };
       const end3 = { x: 0, y: 200 };
-      store.dispatch(onMouseDown(start3, 7));
-      store.dispatch(onPointerMove(end3, 8));
-      store.dispatch(onMouseUp(end3, 9));
+      store.dispatch(onMouseDown(start3, 700));
+      store.dispatch(onPointerMove(end3, 800));
+      store.dispatch(onMouseUp(end3, 900));
       if (scaleType === ScaleType.Ordinal) {
         expect(brushEndListener).not.toBeCalled();
       } else {
@@ -942,9 +951,9 @@ function mouseOverTestSuite(scaleType: XScaleType) {
 
       const start4 = { x: 0, y: 25 };
       const end4 = { x: 0, y: -20 };
-      store.dispatch(onMouseDown(start4, 10));
-      store.dispatch(onPointerMove(end4, 11));
-      store.dispatch(onMouseUp(end4, 12));
+      store.dispatch(onMouseDown(start4, 1000));
+      store.dispatch(onPointerMove(end4, 1100));
+      store.dispatch(onMouseUp(end4, 1200));
       if (scaleType === ScaleType.Ordinal) {
         expect(brushEndListener).not.toBeCalled();
       } else {
@@ -993,8 +1002,8 @@ function mouseOverTestSuite(scaleType: XScaleType) {
       const end1 = { x: 0, y: 75 };
 
       store.dispatch(onMouseDown(start1, 0));
-      store.dispatch(onPointerMove(end1, 1));
-      store.dispatch(onMouseUp(end1, 3));
+      store.dispatch(onPointerMove(end1, 100));
+      store.dispatch(onMouseUp(end1, 200));
       if (scaleType === ScaleType.Ordinal) {
         expect(brushEndListener).not.toBeCalled();
       } else {
@@ -1011,9 +1020,9 @@ function mouseOverTestSuite(scaleType: XScaleType) {
       const start2 = { x: 0, y: 75 };
       const end2 = { x: 0, y: 100 };
 
-      store.dispatch(onMouseDown(start2, 4));
-      store.dispatch(onPointerMove(end2, 5));
-      store.dispatch(onMouseUp(end2, 6));
+      store.dispatch(onMouseDown(start2, 400));
+      store.dispatch(onPointerMove(end2, 500));
+      store.dispatch(onMouseUp(end2, 600));
       if (scaleType === ScaleType.Ordinal) {
         expect(brushEndListener).not.toBeCalled();
       } else {
@@ -1069,8 +1078,8 @@ function mouseOverTestSuite(scaleType: XScaleType) {
       const end1 = { x: 75, y: 75 };
 
       store.dispatch(onMouseDown(start1, 0));
-      store.dispatch(onPointerMove(end1, 1));
-      store.dispatch(onMouseUp(end1, 3));
+      store.dispatch(onPointerMove(end1, 100));
+      store.dispatch(onMouseUp(end1, 300));
       if (scaleType === ScaleType.Ordinal) {
         expect(brushEndListener).not.toBeCalled();
       } else {
@@ -1088,9 +1097,9 @@ function mouseOverTestSuite(scaleType: XScaleType) {
       const start2 = { x: 75, y: 75 };
       const end2 = { x: 100, y: 100 };
 
-      store.dispatch(onMouseDown(start2, 4));
-      store.dispatch(onPointerMove(end2, 5));
-      store.dispatch(onMouseUp(end2, 6));
+      store.dispatch(onMouseDown(start2, 400));
+      store.dispatch(onPointerMove(end2, 500));
+      store.dispatch(onMouseUp(end2, 600));
       if (scaleType === ScaleType.Ordinal) {
         expect(brushEndListener).not.toBeCalled();
       } else {

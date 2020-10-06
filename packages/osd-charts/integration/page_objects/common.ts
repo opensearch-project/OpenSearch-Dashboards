@@ -19,6 +19,7 @@
 
 import Url from 'url';
 
+import { DRAG_DETECTION_TIMEOUT } from '../../src/state/reducers/interactions';
 // @ts-ignore
 import defaults from '../defaults';
 import { toMatchImageSnapshot } from '../jest_env_setup';
@@ -246,6 +247,7 @@ class CommonPage {
     const { x: x1, y: y1 } = getCursorPosition(end, element);
     await page.mouse.move(x0, y0);
     await page.mouse.down();
+    await page.waitFor(DRAG_DETECTION_TIMEOUT);
     await page.mouse.move(x1, y1);
   }
 
