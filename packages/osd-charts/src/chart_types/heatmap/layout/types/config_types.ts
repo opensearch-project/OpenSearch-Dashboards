@@ -103,6 +103,7 @@ export interface Config {
       stroke: Color;
     };
   };
+  maxLegendHeight?: number;
 }
 
 export type HeatmapBrushEvent = {

@@ -23,11 +23,11 @@ import { bindActionCreators, Dispatch } from 'redux';
 
 import { onChartRendered } from '../../../../state/actions/chart';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
 import { Dimensions } from '../../../../utils/dimensions';
 import { nullShapeViewModel, ShapeViewModel } from '../../layout/types/viewmodel_types';
 import { geometries } from '../../state/selectors/geometries';
+import { getHeatmapContainerSizeSelector } from '../../state/selectors/get_heatmap_container_size';
 import { renderCanvas2d } from './canvas_renderers';
 
 interface ReactiveChartStateProps {
@@ -145,7 +145,7 @@ const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
   return {
     initialized: true,
     geometries: geometries(state),
-    chartContainerDimensions: getChartContainerDimensionsSelector(state),
+    chartContainerDimensions: getHeatmapContainerSizeSelector(state),
   };
 };
 

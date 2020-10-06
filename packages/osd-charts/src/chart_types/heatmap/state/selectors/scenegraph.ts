@@ -28,6 +28,7 @@ import { shapeViewModel } from '../../layout/viewmodel/viewmodel';
 import { HeatmapSpec } from '../../specs';
 import { HeatmapTable } from './compute_chart_dimensions';
 import { ColorScaleType } from './get_color_scale';
+import { GridHeightParams } from './get_grid_full_height';
 
 /** @internal */
 export function render(
@@ -37,6 +38,7 @@ export function render(
   heatmapTable: HeatmapTable,
   colorScale: ColorScaleType,
   filterRanges: Array<[number, number | null]>,
+  gridHeightParams: GridHeightParams,
 ): ShapeViewModel {
   const textMeasurer = document.createElement('canvas');
   const textMeasurerCtx = textMeasurer.getContext('2d');
@@ -56,5 +58,6 @@ export function render(
     heatmapTable,
     colorScale,
     filterRanges,
+    gridHeightParams,
   );
 }

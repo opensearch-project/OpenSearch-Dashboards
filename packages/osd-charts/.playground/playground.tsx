@@ -22,17 +22,133 @@ import React from 'react';
 import { Chart, Heatmap, HeatmapConfig, RecursivePartial, ScaleType, Settings } from '../src';
 import { HeatmapSpec } from '../src/chart_types/heatmap/specs';
 import { BABYNAME_DATA } from '../src/utils/data_samples/babynames';
-import { SWIM_LANE_DATA } from '../src/utils/data_samples/test_anomaly_swim_lane';
 
+export const SWIM_LANE_DATA = [
+  {
+    laneLabel: 'Overall',
+    time: 1572825600,
+    value: 0,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572829200,
+    value: 0,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572832800,
+    value: 0,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572836400,
+    value: 0,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572840000,
+    value: 0,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572843600,
+    value: 1.066358,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572847200,
+    value: 1.813946,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572850800,
+    value: 0,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572854400,
+    value: 0.05191579,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572858000,
+    value: 1.63678,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572861600,
+    value: 2.031104,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572865200,
+    value: 0,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572868800,
+    value: 1.09738,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572872400,
+    value: 0,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572876000,
+    value: 0.2232534,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572879600,
+    value: 19.49729,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572883200,
+    value: 34.10214,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572886800,
+    value: 0,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572890400,
+    value: 55.18972,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572894000,
+    value: 0.9794427671013135,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572897600,
+    value: 1.2711643855082817,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572901200,
+    value: 0.12110509647944609,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572904800,
+    value: 0.9807310648820486,
+  },
+  {
+    laneLabel: 'Overall',
+    time: 1572908400,
+    value: 1.0793822204067567,
+  },
+];
 export class Playground extends React.Component<any, { highlightedData?: HeatmapSpec['highlightedData'] }> {
   constructor(props: any) {
     super(props);
-    this.state = {
-      highlightedData: {
-        x: [1572908400000, 1572910200000],
-        y: ['i-ca80c01a'],
-      },
-    };
+    this.state = {};
   }
 
   onBrushEnd: HeatmapConfig['onBrushEnd'] = (e) => {
@@ -46,8 +162,7 @@ export class Playground extends React.Component<any, { highlightedData?: Heatmap
     const heatmapConfig: RecursivePartial<HeatmapConfig> = {
       grid: {
         cellHeight: {
-          min: 20,
-          max: 20, // 'fill',
+          max: 30,
         },
         stroke: {
           width: 1,
@@ -65,20 +180,16 @@ export class Playground extends React.Component<any, { highlightedData?: Heatmap
           strokeWidth: 0,
         },
       },
-      brushArea: {
-        fill: 'red',
-      },
       yAxisLabel: {
         name: 'instance',
         visible: true,
-        width: { max: 50 },
-        padding: 5,
-        fill: '#6a717d',
-      },
-      xAxisLabel: {
-        fill: '#6a717d',
+        width: 170,
+        // eui color subdued
+        fill: `#6a717d`,
+        padding: 8,
       },
       onBrushEnd: this.onBrushEnd,
+      maxLegendHeight: 20,
     };
     console.log(
       BABYNAME_DATA.filter(([year]) => year > 1950).map((d) => {
@@ -87,7 +198,7 @@ export class Playground extends React.Component<any, { highlightedData?: Heatmap
     );
     return (
       <div>
-        <div className="chart" style={{ height: '500px', overflow: 'auto' }}>
+        <div className="chart" style={{ height: '88px', overflow: 'auto' }}>
           <Chart>
             <Settings
               onElementClick={console.log}

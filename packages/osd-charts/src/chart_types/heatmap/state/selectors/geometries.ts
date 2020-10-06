@@ -25,6 +25,7 @@ import { getSettingsSpecSelector } from '../../../../state/selectors/get_setting
 import { nullShapeViewModel, ShapeViewModel } from '../../layout/types/viewmodel_types';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { getColorScale } from './get_color_scale';
+import { getGridHeightParamsSelector } from './get_grid_full_height';
 import { getHeatmapSpecSelector } from './get_heatmap_spec';
 import { getHeatmapTableSelector } from './get_heatmap_table';
 import { getLegendItemsLabelsSelector } from './get_legend_items_labels';
@@ -42,6 +43,7 @@ export const geometries = createCachedSelector(
     getColorScale,
     getLegendItemsLabelsSelector,
     getDeselectedSeriesSelector,
+    getGridHeightParamsSelector,
   ],
   (
     heatmapSpec,
@@ -51,6 +53,7 @@ export const geometries = createCachedSelector(
     colorScale,
     legendItems,
     deselectedSeries,
+    gridHeightParams,
   ): ShapeViewModel => {
     const deselectedTicks = new Set(
       deselectedSeries.map(({ specId }) => {
@@ -67,7 +70,7 @@ export const geometries = createCachedSelector(
     }, []);
 
     return heatmapSpec
-      ? render(heatmapSpec, settingSpec, chartDimensions, heatmapTable, colorScale, ranges)
+      ? render(heatmapSpec, settingSpec, chartDimensions, heatmapTable, colorScale, ranges, gridHeightParams)
       : nullShapeViewModel();
   },
 )(getChartIdSelector);

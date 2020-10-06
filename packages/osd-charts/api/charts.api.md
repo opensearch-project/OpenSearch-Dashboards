@@ -832,6 +832,8 @@ export interface HeatmapConfig {
     // (undocumented)
     maxColumnWidth: Pixels;
     // (undocumented)
+    maxLegendHeight?: number;
+    // (undocumented)
     maxRowHeight: Pixels;
     // Warning: (ae-forgotten-export) The symbol "HeatmapBrushEvent" needs to be exported by the entry point index.d.ts
     //
