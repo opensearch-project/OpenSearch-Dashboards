@@ -880,9 +880,9 @@ function mouseOverTestSuite(scaleType: XScaleType) {
         expect(brushEndListener.mock.calls[3][0]).toEqual({ x: [0, 0.5] });
       }
 
-      store.dispatch(onMouseDown(start4, 1300));
-      store.dispatch(onPointerMove(end4, 1390));
-      store.dispatch(onMouseUp(end4, 1400));
+      store.dispatch(onMouseDown({ x: 25, y: 0 }, 1300));
+      store.dispatch(onPointerMove({ x: 28, y: 0 }, 1390));
+      store.dispatch(onMouseUp({ x: 28, y: 0 }, 1400));
       if (scaleType === ScaleType.Ordinal) {
         expect(brushEndListener).not.toBeCalled();
       } else {
