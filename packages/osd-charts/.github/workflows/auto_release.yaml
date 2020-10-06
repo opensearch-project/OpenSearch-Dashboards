@@ -26,7 +26,11 @@ jobs:
         run: yarn test:tz --ci
       - name: Testing
         run: yarn test --ci
-      - name: Semantic-Release
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         run: yarn semantic-release
       - name: Build static storybook
         run: yarn storybook:build
