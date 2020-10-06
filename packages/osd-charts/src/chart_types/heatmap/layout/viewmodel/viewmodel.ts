@@ -357,16 +357,18 @@ export function shapeViewModel(
     const width = endFromScale - startFromScale + (isOutOfRange ? cellWidth : 0);
 
     // resolve Y coordinated making sure the order is correct
-    const { y: yStart, totalHeight } = y.reduce(
-      (acc, current, i) => {
-        if (i === 0) {
-          acc.y = yScale(current) || 0;
-        }
-        acc.totalHeight += cellHeight;
-        return acc;
-      },
-      { y: 0, totalHeight: 0 },
-    );
+    const { y: yStart, totalHeight } = y
+      .filter((v) => yValues.includes(v))
+      .reduce(
+        (acc, current, i) => {
+          if (i === 0) {
+            acc.y = yScale(current) || 0;
+          }
+          acc.totalHeight += cellHeight;
+          return acc;
+        },
+        { y: 0, totalHeight: 0 },
+      );
 
     return {
       x: xStart,

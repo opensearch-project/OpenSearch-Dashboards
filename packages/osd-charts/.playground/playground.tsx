@@ -148,7 +148,12 @@ export const SWIM_LANE_DATA = [
 export class Playground extends React.Component<any, { highlightedData?: HeatmapSpec['highlightedData'] }> {
   constructor(props: any) {
     super(props);
-    this.state = {};
+    this.state = {
+      highlightedData: {
+        x: [1572874200000, 1572897600000],
+        y: ['Overall', 'test'],
+      },
+    };
   }
 
   onBrushEnd: HeatmapConfig['onBrushEnd'] = (e) => {
