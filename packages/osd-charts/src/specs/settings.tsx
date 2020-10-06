@@ -135,7 +135,7 @@ export interface TooltipValue {
    */
   isVisible: boolean;
   /**
-   * The idenfitier of the related series
+   * The identifier of the related series
    */
   seriesIdentifier: SeriesIdentifier;
   /**

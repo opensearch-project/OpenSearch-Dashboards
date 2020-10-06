@@ -847,6 +847,7 @@ export interface HeatmapConfig {
     //
     // (undocumented)
     xAxisLabel: Font & {
+        name: string;
         fontSize: Pixels;
         fill: string;
         align: TextAlign;
@@ -857,6 +858,7 @@ export interface HeatmapConfig {
     };
     // (undocumented)
     yAxisLabel: Font & {
+        name: string;
         fontSize: Pixels;
         width: Pixels | 'auto' | {
             max: Pixels;
@@ -899,6 +901,8 @@ export interface HeatmapSpec extends Spec {
         x: any[];
         y: any[];
     };
+    // (undocumented)
+    name?: string;
     // (undocumented)
     ranges?: number[] | [number, number];
     // (undocumented)
@@ -1866,8 +1870,8 @@ export type YDomainRange = YDomainBase & DomainRange;
 // Warnings were encountered during analysis:
 //
 // src/chart_types/heatmap/layout/types/config_types.ts:28:13 - (ae-forgotten-export) The symbol "SizeRatio" needs to be exported by the entry point index.d.ts
-// src/chart_types/heatmap/layout/types/config_types.ts:58:5 - (ae-forgotten-export) The symbol "TextAlign" needs to be exported by the entry point index.d.ts
-// src/chart_types/heatmap/layout/types/config_types.ts:59:5 - (ae-forgotten-export) The symbol "TextBaseline" needs to be exported by the entry point index.d.ts
+// src/chart_types/heatmap/layout/types/config_types.ts:59:5 - (ae-forgotten-export) The symbol "TextAlign" needs to be exported by the entry point index.d.ts
+// src/chart_types/heatmap/layout/types/config_types.ts:60:5 - (ae-forgotten-export) The symbol "TextBaseline" needs to be exported by the entry point index.d.ts
 // src/chart_types/partition_chart/layout/types/config_types.ts:126:5 - (ae-forgotten-export) The symbol "TimeMs" needs to be exported by the entry point index.d.ts
 // src/chart_types/partition_chart/layout/types/config_types.ts:127:5 - (ae-forgotten-export) The symbol "AnimKeyframe" needs to be exported by the entry point index.d.ts
 // src/chart_types/partition_chart/specs/index.ts:48:13 - (ae-forgotten-export) The symbol "NodeColorAccessor" needs to be exported by the entry point index.d.ts

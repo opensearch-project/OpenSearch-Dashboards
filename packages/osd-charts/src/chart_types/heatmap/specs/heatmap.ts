@@ -69,6 +69,7 @@ export interface HeatmapSpec extends Spec {
   xScaleType: SeriesScales['xScaleType'];
   config: RecursivePartial<Config>;
   highlightedData?: { x: any[]; y: any[] };
+  name?: string;
 }
 
 type SpecRequiredProps = Pick<HeatmapSpec, 'id' | 'data'>;

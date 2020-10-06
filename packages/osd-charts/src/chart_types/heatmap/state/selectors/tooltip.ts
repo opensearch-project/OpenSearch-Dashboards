@@ -48,9 +48,37 @@ export const getTooltipInfoSelector = createCachedSelector(
       pickedShapes
         .filter(({ visible }) => visible)
         .forEach((shape) => {
-          const xValueLabel = config.xAxisLabel.formatter(shape.datum.x);
+          // X-axis value
           tooltipInfo.values.push({
-            label: `${shape.datum.y} - ${xValueLabel}`,
+            label: config.xAxisLabel.name,
+            color: 'transparent',
+            isHighlighted: false,
+            isVisible: true,
+            seriesIdentifier: {
+              specId: spec.id,
+              key: spec.id,
+            },
+            value: `${shape.datum.x}`,
+            formattedValue: config.xAxisLabel.formatter(shape.datum.x),
+          });
+
+          // Y-axis value
+          tooltipInfo.values.push({
+            label: config.yAxisLabel.name,
+            color: 'transparent',
+            isHighlighted: false,
+            isVisible: true,
+            seriesIdentifier: {
+              specId: spec.id,
+              key: spec.id,
+            },
+            value: `${shape.datum.y}`,
+            formattedValue: config.yAxisLabel.formatter(shape.datum.y),
+          });
+
+          // Cell value
+          tooltipInfo.values.push({
+            label: spec.name ?? spec.id,
             color: RGBtoString(shape.fill.color),
             isHighlighted: false,
             isVisible: true,
@@ -59,7 +87,7 @@ export const getTooltipInfoSelector = createCachedSelector(
               key: spec.id,
             },
             value: `${shape.value}`,
-            formattedValue: `${shape.value}`,
+            formattedValue: `${shape.formatted}`,
           });
         });
     } else {
