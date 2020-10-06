@@ -1,3 +1,18 @@
+# [23.2.0](https://github.com/elastic/elastic-charts/compare/v23.1.1...v23.2.0) (2020-10-06)
+
+
+### Bug Fixes
+
+* **heatmap:** adjust pageSize based available chart height ([#849](https://github.com/elastic/elastic-charts/issues/849)) ([9aa396b](https://github.com/elastic/elastic-charts/commit/9aa396b59c1af4208663a78366a678ead54e6eca))
+* **heatmap:** destroy canvas bbox calculator when done ([#844](https://github.com/elastic/elastic-charts/issues/844)) ([42460bd](https://github.com/elastic/elastic-charts/commit/42460bd649b6a8114a01fb63cd9bee01515f37b6))
+* **heatmap:** x-axis labels overlapping for time series data ([#850](https://github.com/elastic/elastic-charts/issues/850)) ([9ebd879](https://github.com/elastic/elastic-charts/commit/9ebd8799881d6ee67a3a5a91cf0eb85f13f38ac8))
+* **interactions:** recognise drag after 100ms and 4px ([#848](https://github.com/elastic/elastic-charts/issues/848)) ([70626fe](https://github.com/elastic/elastic-charts/commit/70626fe4ef34504c9c9d59b0abb1c6ec0d19b04d)), closes [#748](https://github.com/elastic/elastic-charts/issues/748)
+
+
+### Features
+
+* heatmap tooltip enhancements and fixes ([#847](https://github.com/elastic/elastic-charts/issues/847)) ([d879e05](https://github.com/elastic/elastic-charts/commit/d879e056f05c1651d04e2de8610cc2f194e6faa9))
+
 ## [23.1.1](https://github.com/elastic/elastic-charts/compare/v23.1.0...v23.1.1) (2020-10-05)
 
 
