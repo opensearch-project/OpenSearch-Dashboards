@@ -1,0 +1,38 @@
+name: Publish release
+
+on:
+  workflow_dispatch:
+    branches:
+      - master
+
+jobs:
+  release_package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+      - uses: bahmutov/npm-install@HEAD
+      - name: Build check
+        run: yarn build
+      - name: Lint check
+        run: yarn lint
+      - name: Prettier check
+        run: yarn prettier:check
+      - name: TimeZone testing
+        run: yarn test:tz --ci
+      - name: Testing
+        run: yarn test --ci
+      - name: Semantic-Release
+        run: yarn semantic-release
+      - name: Build static storybook
+        run: yarn storybook:build
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./.out
+          force_orphan: true
