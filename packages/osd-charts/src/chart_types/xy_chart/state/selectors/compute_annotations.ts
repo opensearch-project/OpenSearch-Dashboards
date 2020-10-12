@@ -38,7 +38,6 @@ export const computeAnnotationDimensionsSelector = createCachedSelector(
     computeSeriesGeometriesSelector,
     getAxisSpecsSelector,
     isHistogramModeEnabledSelector,
-    getAxisSpecsSelector,
   ],
   (
     annotationSpecs,

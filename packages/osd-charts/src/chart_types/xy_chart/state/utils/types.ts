@@ -32,14 +32,6 @@ export interface Transform {
 }
 
 /** @internal */
-export interface BrushExtent {
-  minX: number;
-  minY: number;
-  maxX: number;
-  maxY: number;
-}
-
-/** @internal */
 export interface GeometriesCounts {
   points: number;
   bars: number;

@@ -19,6 +19,8 @@
 
 import { Scale, ScaleBand, ScaleContinuous } from '../../../../scales';
 import { isBandScale, isContinuousScale } from '../../../../scales/types';
+import { isDefined } from '../../../../utils/commons';
+import { Dimensions } from '../../../../utils/dimensions';
 import { GroupId } from '../../../../utils/ids';
 import { Point } from '../../../../utils/point';
 import { PrimitiveValue } from '../../../partition_chart/layout/utils/group_by_rollup';
@@ -37,6 +39,7 @@ export function isWithinRectBounds({ x, y }: Point, { startX, endX, startY, endY
 /** @internal */
 export function computeRectAnnotationDimensions(
   annotationSpec: RectAnnotationSpec,
+  chartDimensions: Dimensions,
   yScales: Map<GroupId, Scale>,
   xScale: Scale,
   isHistogram: boolean = false,
@@ -44,43 +47,68 @@ export function computeRectAnnotationDimensions(
   const { dataValues } = annotationSpec;
   const { groupId } = annotationSpec;
   const yScale = yScales.get(groupId);
-  if (!yScale) {
-    return null;
-  }
 
   const rectsProps: AnnotationRectProps[] = [];
   dataValues.forEach((dataValue: RectAnnotationDatum) => {
-    let { x0, x1, y0, y1 } = dataValue.coordinates;
+    const { x0: initialX0, x1: initialX1, y0: initialY0, y1: initialY1 } = dataValue.coordinates;
 
     // if everything is null, return; otherwise we coerce the other coordinates
-    if (x0 == null && x1 == null && y0 == null && y1 == null) {
+    if (initialX0 == null && initialX1 == null && initialY0 == null && initialY1 == null) {
       return;
     }
-    [x0, x1] = limitValueToDomainRange(xScale, x0, x1, isHistogram);
-    [y0, y1] = limitValueToDomainRange(yScale, y0, y1);
+    let height: number | undefined;
 
+    const [x0, x1] = limitValueToDomainRange(xScale, initialX0, initialX1, isHistogram);
     // something is wrong with the data types, don't draw this annotation
-    if (x0 == null || x1 == null || y0 == null || y1 == null) {
+    if (x0 == null || x1 == null) {
       return;
     }
 
     let xAndWidth: { x: number; width: number } | null = null;
+
     if (isBandScale(xScale)) {
       xAndWidth = scaleXonBandScale(xScale, x0, x1);
     } else if (isContinuousScale(xScale)) {
       xAndWidth = scaleXonContinuousScale(xScale, x0, x1, isHistogram);
     }
-
     // something is wrong with scales, don't draw
     if (!xAndWidth) {
       return;
     }
-    const scaledY1 = yScale.pureScale(y1);
+    if (!yScale) {
+      if (!isDefined(initialY0) && !isDefined(initialY1)) {
+        const rectDimensions = {
+          ...xAndWidth,
+          y: 0,
+          height: chartDimensions.height,
+        };
+
+        rectsProps.push({
+          rect: rectDimensions,
+          details: dataValue.details,
+        });
+      }
+      return;
+    }
+
+    const [y0, y1] = limitValueToDomainRange(yScale, initialY0, initialY1);
+    // something is wrong with the data types, don't draw this annotation
+    if (y0 == null || y1 == null) {
+      return;
+    }
+
+    let scaledY1 = yScale.pureScale(y1);
     const scaledY0 = yScale.pureScale(y0);
     if (scaledY1 == null || scaledY0 == null) {
       return;
     }
-    const height = Math.abs(scaledY0 - scaledY1);
+    height = Math.abs(scaledY0 - scaledY1);
+    // if the annotation height is 0 override it with the height from chart dimension and if the values in the domain are the same
+    if (height === 0 && yScale.domain.length === 2 && yScale.domain[0] === yScale.domain[1]) {
+      // eslint-disable-next-line prefer-destructuring
+      height = chartDimensions.height;
+      scaledY1 = 0;
+    }
 
     const rectDimensions = {
       ...xAndWidth,
@@ -93,6 +121,7 @@ export function computeRectAnnotationDimensions(
       details: dataValue.details,
     });
   });
+
   return rectsProps;
 }
 
@@ -113,12 +142,12 @@ function scaleXonBandScale(
   scaledX1 += xScale.originalBandwidth + padding;
   // give the x1 value a maximum of the chart range
   if (scaledX1 > xScale.range[1]) {
-    scaledX1 = xScale.range[1];
+    [, scaledX1] = xScale.range;
   }
 
   scaledX0 -= padding;
   if (scaledX0 < xScale.range[0]) {
-    scaledX0 = xScale.range[0];
+    [scaledX0] = xScale.range;
   }
   const width = Math.abs(scaledX1 - scaledX0);
   return {

@@ -31,3 +31,5 @@ export { Example as ordinalBarChart } from './2_ordinal_bar_chart';
 export { Example as linearLineChart } from './3_linear_line_chart';
 export { Example as styling } from './4_styling';
 export { Example as tooltipOptions } from './5_tooltip_options';
+export { Example as zeroDomain } from './6_zero_domain';
+export { Example as withGroupId } from './7_with_group_id';

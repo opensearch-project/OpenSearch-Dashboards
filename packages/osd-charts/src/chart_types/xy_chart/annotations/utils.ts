@@ -162,7 +162,13 @@ export function computeAnnotationDimensions(
         annotationDimensions.set(id, dimensions);
       }
     } else if (isRectAnnotation(annotationSpec)) {
-      const dimensions = computeRectAnnotationDimensions(annotationSpec, yScales, xScale, isHistogramModeEnabled);
+      const dimensions = computeRectAnnotationDimensions(
+        annotationSpec,
+        chartDimensions,
+        yScales,
+        xScale,
+        isHistogramModeEnabled,
+      );
 
       if (dimensions) {
         annotationDimensions.set(id, dimensions);
