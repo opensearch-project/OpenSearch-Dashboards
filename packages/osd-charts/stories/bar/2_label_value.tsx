@@ -63,6 +63,28 @@ export const Example = () => {
         fill: color('value color', '#000'),
         offsetX: number('offsetX', 0),
         offsetY: number('offsetY', 0),
+        alignment: {
+          horizontal: select(
+            'Horizontal alignment',
+            {
+              Default: undefined,
+              Left: 'left',
+              Center: 'center',
+              Right: 'right',
+            },
+            undefined,
+          ),
+          vertical: select(
+            'Vertical alignment',
+            {
+              Default: undefined,
+              Top: 'top',
+              Middle: 'middle',
+              Bottom: 'bottom',
+            },
+            undefined,
+          ),
+        },
       },
     },
   };

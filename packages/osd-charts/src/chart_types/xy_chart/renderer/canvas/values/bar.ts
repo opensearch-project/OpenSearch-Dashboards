@@ -18,11 +18,11 @@
  */
 
 import { Rect } from '../../../../../geoms/types';
-import { Rotation } from '../../../../../utils/commons';
+import { Rotation, VerticalAlignment, HorizontalAlignment } from '../../../../../utils/commons';
 import { Dimensions } from '../../../../../utils/dimensions';
 import { BarGeometry } from '../../../../../utils/geometry';
 import { Point } from '../../../../../utils/point';
-import { Theme } from '../../../../../utils/themes/theme';
+import { Theme, TextAlignment } from '../../../../../utils/themes/theme';
 import { Font, FontStyle, TextBaseline, TextAlign } from '../../../../partition_chart/layout/types/types';
 import { renderText, wrapLines } from '../primitives/text';
 import { renderDebugRect } from '../utils/debug';
@@ -35,10 +35,17 @@ interface BarValuesProps {
   bars: BarGeometry[];
 }
 
+const CHART_DIRECTION: Record<string, Rotation> = {
+  BottomUp: 0,
+  TopToBottom: 180,
+  LeftToRight: 90,
+  RightToLeft: -90,
+};
+
 /** @internal */
 export function renderBarValues(ctx: CanvasRenderingContext2D, props: BarValuesProps) {
   const { bars, debug, chartRotation, chartDimensions, theme } = props;
-  const { fontFamily, fontStyle, fill, fontSize } = theme.barSeriesStyle.displayValue;
+  const { fontFamily, fontStyle, fill, fontSize, alignment } = theme.barSeriesStyle.displayValue;
   const barsLength = bars.length;
   for (let i = 0; i < barsLength; i++) {
     const { displayValue } = bars[i];
@@ -65,6 +72,7 @@ export function renderBarValues(ctx: CanvasRenderingContext2D, props: BarValuesP
       displayValue,
       chartRotation,
       theme.barSeriesStyle.displayValue,
+      alignment,
     );
 
     if (displayValue.isValueContainedInElement) {
@@ -80,13 +88,13 @@ export function renderBarValues(ctx: CanvasRenderingContext2D, props: BarValuesP
     const { width, height } = textLines;
     const linesLength = textLines.lines.length;
 
-    for (let i = 0; i < linesLength; i++) {
-      const text = textLines.lines[i];
-      const origin = repositionTextLine({ x, y }, chartRotation, i, linesLength, { height, width });
+    for (let j = 0; j < linesLength; j++) {
+      const textLine = textLines.lines[j];
+      const origin = repositionTextLine({ x, y }, chartRotation, j, linesLength, { height, width });
       renderText(
         ctx,
         origin,
-        text,
+        textLine,
         {
           ...font,
           fill,
@@ -132,57 +140,192 @@ function repositionTextLine(
   return { x: lineX, y: lineY };
 }
 
+function computeHorizontalOffset(
+  geom: BarGeometry,
+  valueBox: { width: number; height: number },
+  chartRotation: Rotation,
+  { horizontal }: Partial<TextAlignment> = {},
+) {
+  switch (chartRotation) {
+    case CHART_DIRECTION.LeftToRight: {
+      if (horizontal === HorizontalAlignment.Left) {
+        return geom.height - valueBox.width;
+      }
+      if (horizontal === HorizontalAlignment.Center) {
+        return geom.height / 2 - valueBox.width / 2;
+      }
+      break;
+    }
+    case CHART_DIRECTION.RightToLeft: {
+      if (horizontal === HorizontalAlignment.Right) {
+        return geom.height - valueBox.width;
+      }
+      if (horizontal === HorizontalAlignment.Center) {
+        return geom.height / 2 - valueBox.width / 2;
+      }
+      break;
+    }
+    case CHART_DIRECTION.TopToBottom: {
+      if (horizontal === HorizontalAlignment.Left) {
+        return geom.width / 2 - valueBox.width / 2;
+      }
+      if (horizontal === HorizontalAlignment.Right) {
+        return -geom.width / 2 + valueBox.width / 2;
+      }
+      break;
+    }
+    case CHART_DIRECTION.BottomUp:
+    default: {
+      if (horizontal === HorizontalAlignment.Left) {
+        return -geom.width / 2 + valueBox.width / 2;
+      }
+      if (horizontal === HorizontalAlignment.Right) {
+        return geom.width / 2 - valueBox.width / 2;
+      }
+    }
+  }
+  return 0;
+}
+
+function computeVerticalOffset(
+  geom: BarGeometry,
+  valueBox: { width: number; height: number },
+  chartRotation: Rotation,
+  { vertical }: Partial<TextAlignment> = {},
+) {
+  switch (chartRotation) {
+    case CHART_DIRECTION.LeftToRight: {
+      if (vertical === VerticalAlignment.Bottom) {
+        return geom.width - valueBox.height;
+      }
+      if (vertical === VerticalAlignment.Middle) {
+        return geom.width / 2 - valueBox.height / 2;
+      }
+      break;
+    }
+    case CHART_DIRECTION.RightToLeft: {
+      if (vertical === VerticalAlignment.Bottom) {
+        return -geom.width + valueBox.height;
+      }
+      if (vertical === VerticalAlignment.Middle) {
+        return -geom.width / 2 + valueBox.height / 2;
+      }
+      break;
+    }
+    case CHART_DIRECTION.TopToBottom: {
+      if (vertical === VerticalAlignment.Top) {
+        return geom.height - valueBox.height;
+      }
+      if (vertical === VerticalAlignment.Middle) {
+        return geom.height / 2 - valueBox.height / 2;
+      }
+      break;
+    }
+    case CHART_DIRECTION.BottomUp:
+    default: {
+      if (vertical === VerticalAlignment.Bottom) {
+        return geom.height - valueBox.height;
+      }
+      if (vertical === VerticalAlignment.Middle) {
+        return geom.height / 2 - valueBox.height / 2;
+      }
+    }
+  }
+  return 0;
+}
+
+function computeAlignmentOffset(
+  geom: BarGeometry,
+  valueBox: { width: number; height: number },
+  chartRotation: Rotation,
+  textAlignment: Partial<TextAlignment> = {},
+) {
+  return {
+    alignmentOffsetX: computeHorizontalOffset(geom, valueBox, chartRotation, textAlignment),
+    alignmentOffsetY: computeVerticalOffset(geom, valueBox, chartRotation, textAlignment),
+  };
+}
+
 function positionText(
   geom: BarGeometry,
   valueBox: { width: number; height: number },
   chartRotation: Rotation,
   offsets: { offsetX: number; offsetY: number },
-) {
+  alignment?: TextAlignment,
+): { x: number; y: number; align: TextAlign; baseline: TextBaseline; rect: Rect } {
   const { offsetX, offsetY } = offsets;
-  let baseline: TextBaseline = 'top';
-  let align: TextAlign = 'center';
 
-  let x = geom.x + geom.width / 2 - offsetX;
-  let y = geom.y - offsetY;
-  const rect: Rect = {
-    x: x - valueBox.width / 2,
-    y,
-    width: valueBox.width,
-    height: valueBox.height,
-  };
-  if (chartRotation === 180) {
-    baseline = 'bottom';
-    x = geom.x + geom.width / 2 + offsetX;
-    y = geom.y + offsetY;
-    rect.x = x - valueBox.width / 2;
-    rect.y = y;
+  const { alignmentOffsetX, alignmentOffsetY } = computeAlignmentOffset(geom, valueBox, chartRotation, alignment);
+
+  switch (chartRotation) {
+    case CHART_DIRECTION.TopToBottom: {
+      const x = geom.x + geom.width / 2 - offsetX + alignmentOffsetX;
+      const y = geom.y + offsetY + alignmentOffsetY;
+      return {
+        x,
+        y,
+        align: 'center',
+        baseline: 'bottom',
+        rect: {
+          x: x - valueBox.width / 2,
+          y,
+          width: valueBox.width,
+          height: valueBox.height,
+        },
+      };
+    }
+    case CHART_DIRECTION.RightToLeft: {
+      const x = geom.x + geom.width + offsetY + alignmentOffsetY;
+      const y = geom.y - offsetX + alignmentOffsetX;
+      return {
+        x,
+        y,
+        align: 'left',
+        baseline: 'top',
+        rect: {
+          x: x - valueBox.height,
+          y,
+          width: valueBox.height,
+          height: valueBox.width,
+        },
+      };
+    }
+    case CHART_DIRECTION.LeftToRight: {
+      const x = geom.x - offsetY + alignmentOffsetY;
+      const y = geom.y + offsetX + alignmentOffsetX;
+      return {
+        x,
+        y,
+        align: 'right',
+        baseline: 'top',
+        rect: {
+          x,
+          y,
+          width: valueBox.height,
+          height: valueBox.width,
+        },
+      };
+    }
+    case CHART_DIRECTION.BottomUp:
+    default: {
+      const x = geom.x + geom.width / 2 - offsetX + alignmentOffsetX;
+      const y = geom.y - offsetY + alignmentOffsetY;
+      return {
+        x,
+        y,
+        align: 'center',
+        baseline: 'top',
+        rect: {
+          x: x - valueBox.width / 2,
+          y,
+          width: valueBox.width,
+          height: valueBox.height,
+        },
+      };
+    }
   }
-  if (chartRotation === 90) {
-    x = geom.x - offsetY;
-    y = geom.y + offsetX;
-    align = 'right';
-    rect.x = x;
-    rect.y = y;
-    rect.width = valueBox.height;
-    rect.height = valueBox.width;
-  }
-  if (chartRotation === -90) {
-    x = geom.x + geom.width + offsetY;
-    y = geom.y - offsetX;
-    align = 'left';
-    rect.x = x - valueBox.height;
-    rect.y = y;
-    rect.width = valueBox.height;
-    rect.height = valueBox.width;
-  }
-  return {
-    x,
-    y,
-    align,
-    baseline,
-    rect,
-  };
 }
+
 function isOverflow(rect: Rect, chartDimensions: Dimensions, chartRotation: Rotation) {
   let cWidth = chartDimensions.width;
   let cHeight = chartDimensions.height;

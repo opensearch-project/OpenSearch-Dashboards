@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { DisplayValueStyle, HorizontalAlignment, Rotation, VerticalAlignment } from '../../src';
 import { common } from '../page_objects';
 
 describe('Bar series stories', () => {
@@ -156,6 +157,32 @@ describe('Bar series stories', () => {
         await common.expectChartAtUrlToMatchScreenshot(
           'http://localhost:9001/?path=/story/bar-chart--test-histogram-mode-ordinal&knob-chartRotation=180&knob-bars padding=0.25&knob-hasHistogramBarSeries=true&knob-debug=true&knob-bars-1 enableHistogramMode=true&knob-bars-2 enableHistogramMode=',
         );
+      });
+    });
+  });
+
+  describe('value labels positioning', () => {
+    describe.each<[string, Rotation]>([
+      ['0', 0],
+      ['90', 90],
+      ['180', 180],
+      ['negative 90', -90],
+    ])('rotation - %s', (_, rotation) => {
+      describe.each<NonNullable<DisplayValueStyle['alignment']>['vertical']>([
+        VerticalAlignment.Middle,
+        VerticalAlignment.Top,
+        VerticalAlignment.Bottom,
+      ])('Vertical Alignment - %s', (verticalAlignment) => {
+        describe.each<NonNullable<DisplayValueStyle['alignment']>['horizontal']>([
+          HorizontalAlignment.Left,
+          HorizontalAlignment.Center,
+          HorizontalAlignment.Right,
+        ])('Horizontal Alignment - %s', (horizontalAlignment) => {
+          const url = `http://localhost:9001/?path=/story/bar-chart--with-value-label&knob-chartRotation=${rotation}&knob-Horizontal alignment=${horizontalAlignment}&knob-Vertical alignment=${verticalAlignment}`;
+          it('place the value labels on the correct area', async () => {
+            await common.expectChartAtUrlToMatchScreenshot(url);
+          });
+        });
       });
     });
   });

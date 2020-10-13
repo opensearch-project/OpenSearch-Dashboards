@@ -293,6 +293,10 @@ export type PartialTheme = RecursivePartial<Theme>;
 export type DisplayValueStyle = TextStyle & {
   offsetX: number;
   offsetY: number;
+  alignment?: {
+    horizontal: Exclude<HorizontalAlignment, 'far' | 'near'>;
+    vertical: Exclude<VerticalAlignment, 'far' | 'near'>;
+  };
 };
 
 export interface PointStyle {

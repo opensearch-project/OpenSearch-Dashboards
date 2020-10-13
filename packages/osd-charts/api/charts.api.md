@@ -596,6 +596,10 @@ export interface DisplayValueSpec {
 export type DisplayValueStyle = TextStyle & {
     offsetX: number;
     offsetY: number;
+    alignment?: {
+        horizontal: Exclude<HorizontalAlignment, 'far' | 'near'>;
+        vertical: Exclude<VerticalAlignment, 'far' | 'near'>;
+    };
 };
 
 // @public (undocumented)
