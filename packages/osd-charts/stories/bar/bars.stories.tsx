@@ -28,6 +28,7 @@ export default {
 
 export { Example as basic } from './1_basic';
 export { Example as withValueLabel } from './2_label_value';
+export { Example as withValueLabelAdvanced } from './51_label_value_advanced';
 export { Example as withAxis } from './3_with_axis';
 export { Example as withOrdinalXAxis } from './4_ordinal';
 export { Example as withLinearXAxis } from './5_linear';

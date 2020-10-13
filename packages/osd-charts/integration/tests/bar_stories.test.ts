@@ -178,7 +178,7 @@ describe('Bar series stories', () => {
           HorizontalAlignment.Center,
           HorizontalAlignment.Right,
         ])('Horizontal Alignment - %s', (horizontalAlignment) => {
-          const url = `http://localhost:9001/?path=/story/bar-chart--with-value-label&knob-chartRotation=${rotation}&knob-Horizontal alignment=${horizontalAlignment}&knob-Vertical alignment=${verticalAlignment}`;
+          const url = `http://localhost:9001/?path=/story/bar-chart--with-value-label-advanced&knob-chartRotation=${rotation}&knob-Horizontal alignment=${horizontalAlignment}&knob-Vertical alignment=${verticalAlignment}`;
           it('place the value labels on the correct area', async () => {
             await common.expectChartAtUrlToMatchScreenshot(url);
           });

@@ -32,6 +32,8 @@ export function renderText(
     fontSize: number;
     align: TextAlign;
     baseline: TextBaseline;
+    shadow?: string;
+    shadowSize?: number;
   },
   degree: number = 0,
   translation?: Partial<Point>,
@@ -48,6 +50,14 @@ export function renderText(
       ctx.font = cssFontShorthand(font, font.fontSize);
       if (translation?.x || translation?.y) {
         ctx.translate(translation?.x ?? 0, translation?.y ?? 0);
+      }
+      if (font.shadow) {
+        ctx.lineJoin = 'round';
+        const prevLineWidth = ctx.lineWidth;
+        ctx.lineWidth = font.shadowSize || 1.5;
+        ctx.strokeStyle = font.shadow;
+        ctx.strokeText(text, origin.x, origin.y);
+        ctx.lineWidth = prevLineWidth;
       }
       ctx.fillText(text, origin.x, origin.y);
     });
