@@ -70,6 +70,7 @@ export class MockBarGeometry {
     height: 0,
     color,
     displayValue: {
+      fontSize: 10,
       text: '',
       width: 0,
       height: 0,

@@ -57,10 +57,16 @@ export const Example = () => {
   const borderColor = color('value border color', 'rgba(0,0,0,1)');
   const borderSize = number('value border width', 1.5);
 
+  const fixedFontSize = number('Fixed font size', 10);
+  const useFixedFontSize = boolean('Use fixed font size', false);
+
+  const maxFontSize = number('Max font size', 25);
+  const minFontSize = number('Min font size', 10);
+
   const theme = {
     barSeriesStyle: {
       displayValue: {
-        fontSize: number('value font size', 10),
+        fontSize: useFixedFontSize ? fixedFontSize : { max: maxFontSize, min: minFontSize },
         fontFamily: "'Open Sans', Helvetica, Arial, sans-serif",
         fontStyle: 'normal',
         padding: 0,

@@ -593,9 +593,13 @@ export interface DisplayValueSpec {
 }
 
 // @public (undocumented)
-export type DisplayValueStyle = Omit<TextStyle, 'fill'> & {
+export type DisplayValueStyle = Omit<TextStyle, 'fill' | 'fontSize'> & {
     offsetX: number;
     offsetY: number;
+    fontSize: number | {
+        min: number;
+        max: number;
+    };
     fill: Color | {
         color: Color;
         borderColor?: Color;
