@@ -95,7 +95,7 @@ module.exports = {
     'no-console': process.env.NODE_ENV === 'production' ? 2 : 1,
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 1,
     'prefer-template': 'error',
-    'comma-dangle': ['error', 'always-multiline'],
+    'comma-dangle': 0,
     'consistent-return': 0,
     'no-plusplus': 0,
     'no-bitwise': 0,
