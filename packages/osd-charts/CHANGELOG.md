@@ -1,3 +1,24 @@
+# [24.0.0](https://github.com/elastic/elastic-charts/compare/v23.2.1...v24.0.0) (2020-10-19)
+
+
+### Bug Fixes
+
+* **annotation:** annotation rendering with no yDomain or groupId ([#842](https://github.com/elastic/elastic-charts/issues/842)) ([f173b49](https://github.com/elastic/elastic-charts/commit/f173b497d13b0de4a7103ea2cffc09e96d98d713)), closes [#438](https://github.com/elastic/elastic-charts/issues/438) [#798](https://github.com/elastic/elastic-charts/issues/798)
+
+
+### Features
+
+* **bar_chart:** add Alignment offset to value labels ([#784](https://github.com/elastic/elastic-charts/issues/784)) ([363aeb4](https://github.com/elastic/elastic-charts/commit/363aeb48c43537ae6906188ec0dfe43efc725f68))
+* **bar_chart:** add shadow prop for value labels ([#785](https://github.com/elastic/elastic-charts/issues/785)) ([9b29392](https://github.com/elastic/elastic-charts/commit/9b29392631e4ae92db24bb9077a9afacee051318))
+* **bar_chart:** scaled font size for value labels ([#789](https://github.com/elastic/elastic-charts/issues/789)) ([3bdd1ee](https://github.com/elastic/elastic-charts/commit/3bdd1ee1194619db4b2af64037ae8eaeb2b2b186)), closes [#788](https://github.com/elastic/elastic-charts/issues/788)
+* **heatmap:** allow fixed right margin ([#873](https://github.com/elastic/elastic-charts/issues/873)) ([16cf73c](https://github.com/elastic/elastic-charts/commit/16cf73c5c0a0fde1e10b4a89f347988d8f422bc3))
+
+
+### BREAKING CHANGES
+
+* **bar_chart:** The `DisplayValueStyle` `fontSize` property can now express an upper and lower bound as size, used for the automatic scaling.
+* **bar_chart:** The `DisplayValueStyle` `fill` property can now express a border color and width, or let the library pick the best match based on contrast using the textInvertible parameter.
+
 ## [23.2.1](https://github.com/elastic/elastic-charts/compare/v23.2.0...v23.2.1) (2020-10-06)
 
 
