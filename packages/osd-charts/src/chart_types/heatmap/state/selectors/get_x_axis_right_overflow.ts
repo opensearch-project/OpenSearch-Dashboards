@@ -32,10 +32,14 @@ import { getHeatmapTableSelector } from './get_heatmap_table';
  */
 export const getXAxisRightOverflow = createCachedSelector(
   [getHeatmapConfigSelector, getHeatmapTableSelector],
-  ({ xAxisLabel: { fontSize, fontFamily, padding, formatter }, timeZone }, { xDomain }): number => {
+  ({ xAxisLabel: { fontSize, fontFamily, padding, formatter, width }, timeZone }, { xDomain }): number => {
     if (xDomain.scaleType !== ScaleType.Time) {
       return 0;
     }
+    if (typeof width === 'number') {
+      return width / 2;
+    }
+
     const timeScale = new ScaleContinuous(
       {
         type: ScaleType.Time,

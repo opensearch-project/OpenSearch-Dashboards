@@ -55,6 +55,7 @@ export interface Config {
   xAxisLabel: Font & {
     name: string;
     fontSize: Pixels;
+    width: Pixels | 'auto';
     fill: string;
     align: TextAlign;
     baseline: TextBaseline;

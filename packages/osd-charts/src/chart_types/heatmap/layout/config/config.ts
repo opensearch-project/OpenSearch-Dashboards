@@ -50,6 +50,7 @@ export const config: Config = {
   xAxisLabel: {
     name: 'X Value',
     visible: true,
+    width: 'auto',
     fill: 'black',
     fontSize: 12,
     fontFamily: 'Sans-Serif',
