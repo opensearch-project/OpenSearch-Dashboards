@@ -41,12 +41,6 @@ export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings
-        theme={{
-          legend: {
-            // Used to allow space for long formatting
-            spacingBuffer: 60,
-          },
-        }}
         showLegendExtra
         showLegend={showLegend}
         tooltip={{

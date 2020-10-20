@@ -141,7 +141,7 @@ describe('Type Checks', () => {
             key: 'specId:{bars},colors:{a}',
             specId: 'bars',
           },
-          defaultExtra: { raw: 6, formatted: '6.00' },
+          defaultExtra: { raw: 6, formatted: '6.00', legendSizingLabel: '6.00' },
           isSeriesHidden: true,
         },
         {
@@ -151,7 +151,7 @@ describe('Type Checks', () => {
             key: 'specId:{bars},colors:{b}',
             specId: 'bars',
           },
-          defaultExtra: { raw: 2, formatted: '2.00' },
+          defaultExtra: { raw: 2, formatted: '2.00', legendSizingLabel: '2.00' },
           isSeriesHidden: true,
         },
       ];
@@ -166,7 +166,7 @@ describe('Type Checks', () => {
             key: 'specId:{bars},colors:{a}',
             specId: 'bars',
           },
-          defaultExtra: { raw: 6, formatted: '6.00' },
+          defaultExtra: { raw: 6, formatted: '6.00', legendSizingLabel: '6.00' },
           isSeriesHidden: false,
         },
         {
@@ -176,7 +176,7 @@ describe('Type Checks', () => {
             key: 'specId:{bars},colors:{b}',
             specId: 'bars',
           },
-          defaultExtra: { raw: 2, formatted: '2.00' },
+          defaultExtra: { raw: 2, formatted: '2.00', legendSizingLabel: '2.00' },
           isSeriesHidden: true,
         },
       ];

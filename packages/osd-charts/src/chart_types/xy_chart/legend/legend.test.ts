@@ -25,11 +25,12 @@ import { Position, RecursivePartial } from '../../../utils/commons';
 import { AxisStyle } from '../../../utils/themes/theme';
 import { SeriesCollectionValue, getSeriesName } from '../utils/series';
 import { AxisSpec, BasicSeriesSpec, SeriesTypes } from '../utils/specs';
-import { computeLegend } from './legend';
+import { computeLegend, getLegendExtra } from './legend';
 
 const nullDisplayValue = {
   formatted: null,
   raw: null,
+  legendSizingLabel: null,
 };
 const seriesCollectionValue1a = {
   seriesIdentifier: {
@@ -129,7 +130,7 @@ describe('Legends', () => {
   });
   it('compute legend for a single series', () => {
     seriesCollection.set('seriesCollectionValue1a', seriesCollectionValue1a);
-    const legend = computeLegend(seriesCollection, seriesCollectionMap, specs, 'violet', axesSpecs);
+    const legend = computeLegend(seriesCollection, seriesCollectionMap, specs, 'violet', axesSpecs, false);
     const expected: LegendItem[] = [
       {
         color: 'red',
@@ -147,7 +148,7 @@ describe('Legends', () => {
   it('compute legend for a single spec but with multiple series', () => {
     seriesCollection.set('seriesCollectionValue1a', seriesCollectionValue1a);
     seriesCollection.set('seriesCollectionValue1b', seriesCollectionValue1b);
-    const legend = computeLegend(seriesCollection, seriesCollectionMap, specs, 'violet', axesSpecs);
+    const legend = computeLegend(seriesCollection, seriesCollectionMap, specs, 'violet', axesSpecs, false);
     const expected: LegendItem[] = [
       {
         color: 'red',
@@ -175,7 +176,7 @@ describe('Legends', () => {
   it('compute legend for multiple specs', () => {
     seriesCollection.set('seriesCollectionValue1a', seriesCollectionValue1a);
     seriesCollection.set('seriesCollectionValue2a', seriesCollectionValue2a);
-    const legend = computeLegend(seriesCollection, seriesCollectionMap, specs, 'violet', axesSpecs);
+    const legend = computeLegend(seriesCollection, seriesCollectionMap, specs, 'violet', axesSpecs, false);
     const expected: LegendItem[] = [
       {
         color: 'red',
@@ -202,13 +203,13 @@ describe('Legends', () => {
   });
   it('empty legend for missing spec', () => {
     seriesCollection.set('seriesCollectionValue2b', seriesCollectionValue2b);
-    const legend = computeLegend(seriesCollection, seriesCollectionMap, specs, 'violet', axesSpecs);
+    const legend = computeLegend(seriesCollection, seriesCollectionMap, specs, 'violet', axesSpecs, false);
     expect(legend.length).toEqual(0);
   });
   it('compute legend with default color for missing series color', () => {
     seriesCollection.set('seriesCollectionValue1a', seriesCollectionValue1a);
     const emptyColorMap = new Map<string, string>();
-    const legend = computeLegend(seriesCollection, emptyColorMap, specs, 'violet', axesSpecs);
+    const legend = computeLegend(seriesCollection, emptyColorMap, specs, 'violet', axesSpecs, false);
     const expected: LegendItem[] = [
       {
         color: 'violet',
@@ -231,7 +232,7 @@ describe('Legends', () => {
 
     const emptyColorMap = new Map<string, string>();
 
-    const legend = computeLegend(seriesCollection, emptyColorMap, specs, 'violet', axesSpecs);
+    const legend = computeLegend(seriesCollection, emptyColorMap, specs, 'violet', axesSpecs, false);
 
     const visibility = [...legend.values()].map((item) => !item.isSeriesHidden);
 
@@ -246,7 +247,15 @@ describe('Legends', () => {
     const emptyColorMap = new Map<string, string>();
     const deselectedDataSeries = [seriesCollectionValue1a.seriesIdentifier, seriesCollectionValue1b.seriesIdentifier];
 
-    const legend = computeLegend(seriesCollection, emptyColorMap, specs, 'violet', axesSpecs, deselectedDataSeries);
+    const legend = computeLegend(
+      seriesCollection,
+      emptyColorMap,
+      specs,
+      'violet',
+      axesSpecs,
+      false,
+      deselectedDataSeries,
+    );
 
     const visibility = [...legend.values()].map((item) => !item.isSeriesHidden);
     expect(visibility).toEqual([false, false, true]);
@@ -343,5 +352,38 @@ describe('Legends', () => {
 
     name = getSeriesName(seriesIdentifier1, false, false, specWithSplit);
     expect(name).toBe('Spec 1 title');
+  });
+  it('should return correct legendSizingLabel with linear scale and showExtraLegend set to true', () => {
+    const formatter = (d: string | number) => `${Number(d).toFixed(2)} dogs`;
+    const lastValues = { y0: null, y1: 14 };
+    const showExtraLegend = true;
+    const xScaleIsLinear = ScaleType.Linear;
+
+    expect(getLegendExtra(showExtraLegend, xScaleIsLinear, formatter, 'y1', lastValues)).toMatchObject({
+      raw: 14,
+      formatted: '14.00 dogs',
+      legendSizingLabel: '14.00 dogs',
+    });
+  });
+  it('should return formatted to null with ordinal scale and showExtraLegend set to true', () => {
+    const formatter = (d: string | number) => `${Number(d).toFixed(2)} dogs`;
+    const lastValues = { y0: null, y1: 14 };
+
+    expect(getLegendExtra(true, ScaleType.Ordinal, formatter, 'y1', lastValues)).toMatchObject({
+      raw: 14,
+      formatted: null,
+      legendSizingLabel: '14.00 dogs',
+    });
+  });
+  it('should return legendSizingLabel null with showLegendExtra set to false', () => {
+    const formatter = (d: string | number) => `${Number(d).toFixed(2)} dogs`;
+    const lastValues = { y0: null, y1: 14 };
+    const showLegendExtra = false;
+
+    expect(getLegendExtra(showLegendExtra, ScaleType.Ordinal, formatter, 'y1', lastValues)).toMatchObject({
+      raw: null,
+      formatted: null,
+      legendSizingLabel: null,
+    });
   });
 });

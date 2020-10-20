@@ -295,4 +295,10 @@ describe('Interactions', () => {
       );
     });
   });
+  it('should size legends with ordinal x axis', async () => {
+    await common.expectChartWithMouseAtUrlToMatchScreenshot(
+      'http://localhost:9001/iframe.html?id=axes--different-tooltip-formatter',
+      { left: 350, top: 130 },
+    );
+  });
 });

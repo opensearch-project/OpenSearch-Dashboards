@@ -19,9 +19,12 @@
 
 import { LegendItem } from '../../../commons/legend';
 import { SeriesKey, SeriesIdentifier } from '../../../commons/series_id';
+import { ScaleType } from '../../../scales/constants';
+import { TickFormatterOptions } from '../../../specs';
 import { Color } from '../../../utils/commons';
 import { BandedAccessorType } from '../../../utils/geometry';
 import { getAxesSpecForSpecId, getSpecsById } from '../state/utils/spec';
+import { LastValues } from '../state/utils/types';
 import { Y0_ACCESSOR_POSTFIX, Y1_ACCESSOR_POSTFIX } from '../tooltip/tooltip';
 import { defaultTickFormatter } from '../utils/axis_utils';
 import {
@@ -57,15 +60,42 @@ function getBandedLegendItemLabel(name: string, yAccessor: BandedAccessorType, p
 }
 
 /** @internal */
+export function getLegendExtra(
+  showLegendExtra: boolean,
+  xScaleType: ScaleType,
+  formatter: (value: any, options?: TickFormatterOptions | undefined) => string,
+  key: keyof LastValues,
+  lastValue?: LastValues,
+): LegendItem['defaultExtra'] {
+  if (showLegendExtra) {
+    const rawValue = (lastValue && lastValue[key]) ?? null;
+    const formattedValue = rawValue !== null ? formatter(rawValue) : null;
+
+    return {
+      raw: rawValue !== null ? rawValue : null,
+      formatted: xScaleType === ScaleType.Ordinal ? null : formattedValue,
+      legendSizingLabel: formattedValue,
+    };
+  }
+  return {
+    raw: null,
+    formatted: null,
+    legendSizingLabel: null,
+  };
+}
+
+/** @internal */
 export function computeLegend(
   seriesCollection: Map<SeriesKey, SeriesCollectionValue>,
   seriesColors: Map<SeriesKey, Color>,
   specs: BasicSeriesSpec[],
   defaultColor: string,
   axesSpecs: AxisSpec[],
+  showLegendExtra: boolean,
   deselectedDataSeries: SeriesIdentifier[] = [],
 ): LegendItem[] {
   const legendItems: LegendItem[] = [];
+
   const sortedCollection = getSortedDataSeriesColorsValuesMap(seriesCollection);
 
   sortedCollection.forEach((series, key) => {
@@ -79,6 +109,7 @@ export function computeLegend(
     if (name === '' || !spec) {
       return;
     }
+
     const postFixes = getPostfix(spec);
     const labelY1 = banded ? getBandedLegendItemLabel(name, BandedAccessorType.Y1, postFixes) : name;
 
@@ -95,10 +126,7 @@ export function computeLegend(
       isSeriesHidden,
       isItemHidden: hideInLegend,
       isToggleable: true,
-      defaultExtra: {
-        raw: lastValue && lastValue.y1 !== null ? lastValue.y1 : null,
-        formatted: lastValue && lastValue.y1 !== null ? formatter(lastValue.y1) : null,
-      },
+      defaultExtra: getLegendExtra(showLegendExtra, spec.xScaleType, formatter, 'y1', lastValue),
     });
     if (banded) {
       const labelY0 = getBandedLegendItemLabel(name, BandedAccessorType.Y0, postFixes);
@@ -110,10 +138,7 @@ export function computeLegend(
         isSeriesHidden,
         isItemHidden: hideInLegend,
         isToggleable: true,
-        defaultExtra: {
-          raw: lastValue && lastValue.y0 !== null ? lastValue.y0 : null,
-          formatted: lastValue && lastValue.y0 !== null ? formatter(lastValue.y0) : null,
-        },
+        defaultExtra: getLegendExtra(showLegendExtra, spec.xScaleType, formatter, 'y0', lastValue),
       });
     }
   });

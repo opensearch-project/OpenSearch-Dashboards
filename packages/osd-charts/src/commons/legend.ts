@@ -35,6 +35,7 @@ export type LegendItem = {
   defaultExtra?: {
     raw: number | null;
     formatted: number | string | null;
+    legendSizingLabel: number | string | null;
   };
   // TODO: Remove when partition layers are toggleable
   isToggleable?: boolean;

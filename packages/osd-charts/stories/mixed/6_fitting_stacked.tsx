@@ -18,6 +18,7 @@
  */
 
 import { select, number } from '@storybook/addon-knobs';
+import numeral from 'numeral';
 import React from 'react';
 
 import { AreaSeries, Axis, Chart, CurveType, Position, ScaleType, Settings, Fit, StackMode } from '../../src';
@@ -158,6 +159,7 @@ export const Example = () => {
   const value = number('Explicit value (using Fit.Explicit)', 5);
   const xScaleType = dataKey === 'ordinal' ? ScaleType.Ordinal : ScaleType.Linear;
   const rng = getRandomNumberGenerator();
+  const tickFormat = stackMode === 'percentage' ? (d: any) => numeral(d).format('0[.]00%') : undefined;
   return (
     <Chart className="story-chart">
       <Settings
@@ -172,7 +174,7 @@ export const Example = () => {
         }}
       />
       <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
-      <Axis id="left" title="Left axis" position={Position.Left} />
+      <Axis id="left" title="Left axis" position={Position.Left} tickFormat={tickFormat} />
       <AreaSeries
         id="test3"
         xScaleType={xScaleType}

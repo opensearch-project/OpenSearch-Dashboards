@@ -19,7 +19,6 @@
 
 import { SeriesKey, SeriesIdentifier } from '../../../../commons/series_id';
 import { Scale } from '../../../../scales';
-import { ScaleType } from '../../../../scales/constants';
 import { OrderBy } from '../../../../specs/settings';
 import { mergePartial, Rotation, Color, isUniqueArray } from '../../../../utils/commons';
 import { CurveType } from '../../../../utils/curves';
@@ -139,9 +138,7 @@ function getLastValues(
   xDomain: XDomain,
 ): Map<SeriesKey, LastValues> {
   const lastValues = new Map<SeriesKey, LastValues>();
-  if (xDomain.scaleType === ScaleType.Ordinal) {
-    return lastValues;
-  }
+
   // we need to get the latest
   formattedDataSeries.stacked.forEach(({ dataSeries, stackMode }) => {
     dataSeries.forEach((series) => {

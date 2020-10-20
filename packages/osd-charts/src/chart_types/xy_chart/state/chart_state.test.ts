@@ -77,10 +77,6 @@ describe.skip('Chart Store', () => {
       specId: SPEC_ID,
       key: 'color1',
     },
-    defaultExtra: {
-      raw: null,
-      formatted: 'formatted-last',
-    },
   };
 
   const secondLegendItem: LegendItem = {
@@ -89,10 +85,6 @@ describe.skip('Chart Store', () => {
     seriesIdentifier: {
       specId: SPEC_ID,
       key: 'color2',
-    },
-    defaultExtra: {
-      raw: null,
-      formatted: 'formatted-last',
     },
   };
   beforeEach(() => {

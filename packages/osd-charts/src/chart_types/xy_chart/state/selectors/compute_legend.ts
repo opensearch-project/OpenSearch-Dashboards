@@ -23,6 +23,7 @@ import { LegendItem } from '../../../../commons/legend';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { getDeselectedSeriesSelector } from '../../../../state/selectors/get_deselected_data_series';
+import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { computeLegend } from '../../legend/legend';
 import { computeSeriesDomainsSelector } from './compute_series_domains';
 import { getSeriesColorsSelector } from './get_series_color_map';
@@ -37,14 +38,24 @@ export const computeLegendSelector = createCachedSelector(
     getSeriesColorsSelector,
     getAxisSpecsSelector,
     getDeselectedSeriesSelector,
+    getSettingsSpecSelector,
   ],
-  (seriesSpecs, seriesDomainsAndData, chartTheme, seriesColors, axesSpecs, deselectedDataSeries): LegendItem[] =>
+  (
+    seriesSpecs,
+    seriesDomainsAndData,
+    chartTheme,
+    seriesColors,
+    axesSpecs,
+    deselectedDataSeries,
+    { showLegendExtra },
+  ): LegendItem[] =>
     computeLegend(
       seriesDomainsAndData.seriesCollection,
       seriesColors,
       seriesSpecs,
       chartTheme.colors.defaultVizColor,
       axesSpecs,
+      showLegendExtra,
       deselectedDataSeries,
     ),
 )(getChartIdSelector);
