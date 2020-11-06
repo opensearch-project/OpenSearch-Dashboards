@@ -18,12 +18,14 @@
  */
 
 import { ChartTypes } from '../..';
+import { MockBarGeometry } from '../../../mocks';
+import { MockGlobalSpec, MockSeriesSpec } from '../../../mocks/specs';
 import { ScaleType } from '../../../scales/constants';
 import { SpecTypes } from '../../../specs/constants';
 import { Position, RecursivePartial } from '../../../utils/commons';
 import { BarGeometry } from '../../../utils/geometry';
 import { AxisStyle } from '../../../utils/themes/theme';
-import { AxisSpec, BarSeriesSpec, SeriesTypes, TickFormatter } from '../utils/specs';
+import { AxisSpec, BarSeriesSpec, TickFormatter } from '../utils/specs';
 import { formatTooltip } from './tooltip';
 
 const style: RecursivePartial<AxisStyle> = {
@@ -36,23 +38,20 @@ const style: RecursivePartial<AxisStyle> = {
 describe('Tooltip formatting', () => {
   const SPEC_ID_1 = 'bar_1';
   const SPEC_GROUP_ID_1 = 'bar_group_1';
-  const SPEC_1: BarSeriesSpec = {
-    chartType: ChartTypes.XYAxis,
-    specType: SpecTypes.Series,
+  const SPEC_1 = MockSeriesSpec.bar({
     id: SPEC_ID_1,
     groupId: SPEC_GROUP_ID_1,
-    seriesType: SeriesTypes.Bar,
     data: [],
     xAccessor: 0,
     yAccessors: [1],
     yScaleType: ScaleType.Linear,
     xScaleType: ScaleType.Linear,
-  };
-  const bandedSpec = {
+  });
+  const bandedSpec = MockSeriesSpec.bar({
     ...SPEC_1,
     y0Accessors: [1],
-  };
-  const YAXIS_SPEC: AxisSpec = {
+  });
+  const YAXIS_SPEC = MockGlobalSpec.axis({
     chartType: ChartTypes.XYAxis,
     specType: SpecTypes.Axis,
     id: 'axis_1',
@@ -63,7 +62,7 @@ describe('Tooltip formatting', () => {
     showOverlappingTicks: false,
     style,
     tickFormat: jest.fn((d) => `${d}`),
-  };
+  });
   const seriesStyle = {
     rect: {
       opacity: 1,
@@ -81,7 +80,7 @@ describe('Tooltip formatting', () => {
       padding: 2,
     },
   };
-  const indexedGeometry: BarGeometry = {
+  const indexedGeometry = MockBarGeometry.default({
     x: 0,
     y: 0,
     width: 0,
@@ -102,8 +101,8 @@ describe('Tooltip formatting', () => {
       datum: { x: 1, y: 10 },
     },
     seriesStyle,
-  };
-  const indexedBandedGeometry: BarGeometry = {
+  });
+  const indexedBandedGeometry = MockBarGeometry.default({
     x: 0,
     y: 0,
     width: 0,
@@ -124,7 +123,7 @@ describe('Tooltip formatting', () => {
       datum: { x: 1, y: 10 },
     },
     seriesStyle,
-  };
+  });
 
   test('format simple tooltip', () => {
     const tooltipValue = formatTooltip(indexedGeometry, SPEC_1, false, false, false, YAXIS_SPEC);

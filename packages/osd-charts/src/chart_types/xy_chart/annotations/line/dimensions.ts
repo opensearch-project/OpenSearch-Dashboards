@@ -17,16 +17,19 @@
  * under the License.
  */
 
+import { Line } from '../../../../geoms/types';
 import { Scale } from '../../../../scales';
 import { isContinuousScale, isBandScale } from '../../../../scales/types';
-import { Position, Rotation } from '../../../../utils/commons';
-import { Dimensions } from '../../../../utils/dimensions';
+import { isNil, Position, Rotation } from '../../../../utils/commons';
+import { Dimensions, Size } from '../../../../utils/dimensions';
 import { GroupId } from '../../../../utils/ids';
+import { SmallMultipleScales } from '../../state/selectors/compute_small_multiple_scales';
 import { isHorizontalRotation } from '../../state/utils/common';
 import { computeXScaleOffset } from '../../state/utils/utils';
+import { getPanelSize } from '../../utils/panel';
 import { AnnotationDomainTypes, LineAnnotationSpec, LineAnnotationDatum } from '../../utils/specs';
 import { AnnotationMarker } from '../types';
-import { AnnotationLineProps, AnnotationLinePathPoints } from './types';
+import { AnnotationLineProps } from './types';
 
 /** @internal */
 export const DEFAULT_LINE_OVERFLOW = 0;
@@ -34,8 +37,8 @@ export const DEFAULT_LINE_OVERFLOW = 0;
 function computeYDomainLineAnnotationDimensions(
   annotationSpec: LineAnnotationSpec,
   yScale: Scale,
+  { vertical, horizontal }: SmallMultipleScales,
   chartRotation: Rotation,
-  chartDimensions: Dimensions,
   lineColor: string,
   axisPosition?: Position,
 ): AnnotationLineProps[] {
@@ -51,6 +54,9 @@ function computeYDomainLineAnnotationDimensions(
 
   const anchorPosition = getAnchorPosition(false, isHorizontalChartRotation, specMarkerPosition, axisPosition);
   const lineProps: AnnotationLineProps[] = [];
+  const [domainStart, domainEnd] = yScale.domain;
+
+  const panelSize = getPanelSize({ vertical, horizontal });
 
   dataValues.forEach((datum: LineAnnotationDatum) => {
     const { dataValue } = datum;
@@ -66,39 +72,56 @@ function computeYDomainLineAnnotationDimensions(
       return;
     }
 
-    const [domainStart, domainEnd] = yScale.domain;
     // avoid rendering annotation with values outside the scale domain
     if (dataValue < domainStart || dataValue > domainEnd) {
       return;
     }
 
-    const markerPosition = getMarkerPositionForYAnnotation(
-      chartDimensions,
-      chartRotation,
-      markerDimensions,
-      anchorPosition,
-      annotationValueYPosition,
-    );
-    const linePathPoints = getYLinePath(chartDimensions, annotationValueYPosition, chartRotation);
+    vertical.domain.forEach((verticalValue) => {
+      horizontal.domain.forEach((horizontalValue) => {
+        const topPos = vertical.scaleOrThrow(verticalValue);
+        const leftPos = horizontal.scaleOrThrow(horizontalValue);
 
-    const annotationMarker: AnnotationMarker | undefined = marker
-      ? {
-          icon: marker,
-          color: lineColor,
-          dimension: { ...markerDimensions },
-          position: markerPosition,
-        }
-      : undefined;
-    const lineProp: AnnotationLineProps = {
-      linePathPoints,
-      marker: annotationMarker,
-      details: {
-        detailsText: datum.details,
-        headerText: datum.header || dataValue.toString(),
-      },
-    };
+        const width = isHorizontalChartRotation ? horizontal.bandwidth : vertical.bandwidth;
+        const height = isHorizontalChartRotation ? vertical.bandwidth : horizontal.bandwidth;
 
-    lineProps.push(lineProp);
+        const markerPosition = getMarkerPositionForYAnnotation(
+          panelSize,
+          chartRotation,
+          markerDimensions,
+          anchorPosition,
+          annotationValueYPosition,
+        );
+        const linePathPoints = getYLinePath({ width, height }, annotationValueYPosition);
+
+        const annotationMarker: AnnotationMarker | undefined = marker
+          ? {
+              icon: marker,
+              color: lineColor,
+              dimension: { ...markerDimensions },
+              position: {
+                top: markerPosition.top,
+                left: markerPosition.left,
+              },
+            }
+          : undefined;
+        const lineProp: AnnotationLineProps = {
+          linePathPoints,
+          marker: annotationMarker,
+          panel: {
+            ...panelSize,
+            top: topPos,
+            left: leftPos,
+          },
+          details: {
+            detailsText: datum.details,
+            headerText: datum.header || dataValue.toString(),
+          },
+        };
+
+        lineProps.push(lineProp);
+      });
+    });
   });
 
   return lineProps;
@@ -107,8 +130,8 @@ function computeYDomainLineAnnotationDimensions(
 function computeXDomainLineAnnotationDimensions(
   annotationSpec: LineAnnotationSpec,
   xScale: Scale,
+  { vertical, horizontal }: SmallMultipleScales,
   chartRotation: Rotation,
-  chartDimensions: Dimensions,
   lineColor: string,
   isHistogramMode: boolean,
   axisPosition?: Position,
@@ -123,11 +146,12 @@ function computeXDomainLineAnnotationDimensions(
   const lineProps: AnnotationLineProps[] = [];
   const isHorizontalChartRotation = isHorizontalRotation(chartRotation);
   const anchorPosition = getAnchorPosition(true, isHorizontalChartRotation, specMarkerPosition, axisPosition);
+  const panelSize = getPanelSize({ vertical, horizontal });
 
   dataValues.forEach((datum: LineAnnotationDatum) => {
     const { dataValue } = datum;
     let annotationValueXPosition = xScale.scale(dataValue);
-    if (annotationValueXPosition == null) {
+    if (isNil(annotationValueXPosition)) {
       return;
     }
     if (isContinuousScale(xScale) && typeof dataValue === 'number') {
@@ -160,32 +184,54 @@ function computeXDomainLineAnnotationDimensions(
       return;
     }
 
-    const markerPosition = getMarkerPositionForXAnnotation(
-      chartDimensions,
-      chartRotation,
-      markerDimensions,
-      anchorPosition,
-      annotationValueXPosition,
-    );
-    const linePathPoints = getXLinePath(chartDimensions, annotationValueXPosition, chartRotation);
-
-    const annotationMarker: AnnotationMarker | undefined = marker
-      ? {
-          icon: marker,
-          color: lineColor,
-          dimension: { ...markerDimensions },
-          position: markerPosition,
+    vertical.domain.forEach((verticalValue) => {
+      horizontal.domain.forEach((horizontalValue) => {
+        if (annotationValueXPosition == null) {
+          return;
         }
-      : undefined;
-    const lineProp: AnnotationLineProps = {
-      linePathPoints,
-      details: {
-        detailsText: datum.details,
-        headerText: datum.header || dataValue.toString(),
-      },
-      marker: annotationMarker,
-    };
-    lineProps.push(lineProp);
+
+        const topPos = vertical.scaleOrThrow(verticalValue);
+        const leftPos = horizontal.scaleOrThrow(horizontalValue);
+        const width = isHorizontalChartRotation ? horizontal.bandwidth : vertical.bandwidth;
+        const height = isHorizontalChartRotation ? vertical.bandwidth : horizontal.bandwidth;
+
+        const markerPosition = getMarkerPositionForXAnnotation(
+          panelSize,
+          chartRotation,
+          markerDimensions,
+          anchorPosition,
+          annotationValueXPosition,
+        );
+
+        const linePathPoints = getXLinePath({ width, height }, annotationValueXPosition);
+
+        const annotationMarker: AnnotationMarker | undefined = marker
+          ? {
+              icon: marker,
+              color: lineColor,
+              dimension: { ...markerDimensions },
+              position: {
+                top: markerPosition.top,
+                left: markerPosition.left,
+              },
+            }
+          : undefined;
+        const lineProp: AnnotationLineProps = {
+          linePathPoints,
+          details: {
+            detailsText: datum.details,
+            headerText: datum.header || dataValue.toString(),
+          },
+          marker: annotationMarker,
+          panel: {
+            ...panelSize,
+            top: topPos,
+            left: leftPos,
+          },
+        };
+        lineProps.push(lineProp);
+      });
+    });
   });
 
   return lineProps;
@@ -194,10 +240,10 @@ function computeXDomainLineAnnotationDimensions(
 /** @internal */
 export function computeLineAnnotationDimensions(
   annotationSpec: LineAnnotationSpec,
-  chartDimensions: Dimensions,
   chartRotation: Rotation,
   yScales: Map<GroupId, Scale>,
   xScale: Scale,
+  smallMultipleScales: SmallMultipleScales,
   isHistogramMode: boolean,
   axisPosition?: Position,
 ): AnnotationLineProps[] | null {
@@ -215,8 +261,8 @@ export function computeLineAnnotationDimensions(
     return computeXDomainLineAnnotationDimensions(
       annotationSpec,
       xScale,
+      smallMultipleScales,
       chartRotation,
-      chartDimensions,
       lineColor,
       isHistogramMode,
       axisPosition,
@@ -232,8 +278,8 @@ export function computeLineAnnotationDimensions(
   return computeYDomainLineAnnotationDimensions(
     annotationSpec,
     yScale,
+    smallMultipleScales,
     chartRotation,
-    chartDimensions,
     lineColor,
     axisPosition,
   );
@@ -276,43 +322,28 @@ function getDefaultMarkerPositionFromAxis(
   return Position.Bottom;
 }
 
-function getXLinePath(
-  { width, height }: Pick<Dimensions, 'width' | 'height'>,
-  value: number,
-  rotation: Rotation,
-): AnnotationLinePathPoints {
+function getXLinePath({ height }: Size, value: number): Line {
   return {
-    start: {
-      x1: value,
-      y1: 0,
-    },
-    end: {
-      x2: value,
-      y2: rotation === -90 || rotation === 90 ? width : height,
-    },
-  };
-}
-function getYLinePath(
-  { width, height }: Pick<Dimensions, 'width' | 'height'>,
-  value: number,
-  rotation: Rotation,
-): AnnotationLinePathPoints {
-  return {
-    start: {
-      x1: 0,
-      y1: value,
-    },
-    end: {
-      x2: rotation === -90 || rotation === 90 ? height : width,
-      y2: value,
-    },
+    x1: value,
+    y1: 0,
+    x2: value,
+    y2: height,
   };
 }
 
-function getMarkerPositionForXAnnotation(
-  { width, height }: Pick<Dimensions, 'width' | 'height'>,
+function getYLinePath({ width }: Size, value: number): Line {
+  return {
+    x1: 0,
+    y1: value,
+    x2: width,
+    y2: value,
+  };
+}
+
+export function getMarkerPositionForXAnnotation(
+  { width, height }: Size,
   rotation: Rotation,
-  { width: mWidth, height: mHeight }: Pick<Dimensions, 'width' | 'height'>,
+  { width: mWidth, height: mHeight }: Size,
   position: Position,
   value: number,
 ): Pick<Dimensions, 'top' | 'left'> {
@@ -342,9 +373,9 @@ function getMarkerPositionForXAnnotation(
 }
 
 function getMarkerPositionForYAnnotation(
-  { width, height }: Pick<Dimensions, 'width' | 'height'>,
+  { width, height }: Size,
   rotation: Rotation,
-  { width: mWidth, height: mHeight }: Pick<Dimensions, 'width' | 'height'>,
+  { width: mWidth, height: mHeight }: Size,
   position: Position,
   value: number,
 ): {
@@ -364,7 +395,7 @@ function getMarkerPositionForYAnnotation(
       };
     case Position.Top:
       return {
-        top: 0 - mHeight,
+        top: -mHeight,
         left: rotation === 90 ? width - value - mWidth / 2 : value - mWidth / 2,
       };
     case Position.Bottom:

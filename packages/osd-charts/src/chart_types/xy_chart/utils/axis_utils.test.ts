@@ -21,6 +21,8 @@ import { DateTime } from 'luxon';
 import moment from 'moment-timezone';
 
 import { ChartTypes } from '../..';
+import { MockGlobalSpec, MockSeriesSpec } from '../../../mocks/specs/specs';
+import { MockStore } from '../../../mocks/store/store';
 import { Scale } from '../../../scales';
 import { ScaleType } from '../../../scales/constants';
 import { SpecTypes } from '../../../specs/constants';
@@ -32,23 +34,24 @@ import { AxisId, GroupId } from '../../../utils/ids';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { AxisStyle, TextOffset } from '../../../utils/themes/theme';
 import { XDomain, YDomain } from '../domains/types';
+import { computeAxesGeometriesSelector } from '../state/selectors/compute_axes_geometries';
+import { computeAxisTicksDimensionsSelector } from '../state/selectors/compute_axis_ticks_dimensions';
+import { getAxesStylesSelector } from '../state/selectors/get_axis_styles';
+import { computeGridLinesSelector } from '../state/selectors/get_grid_lines';
 import { mergeYCustomDomainsByGroupId } from '../state/selectors/merge_y_custom_domains';
 import {
   AxisTick,
   AxisTicksDimensions,
-  computeAxisGridLinePositions,
   computeAxisTicksDimensions,
   computeRotatedLabelDimensions,
   getAvailableTicks,
   getAxisPosition,
-  getAxisTicksPositions,
-  getHorizontalAxisGridLineProps,
+  getAxesGeometries,
   getHorizontalAxisTickLineProps,
   getMaxLabelDimensions,
   getMinMaxRange,
   getScaleForAxisSpec,
   getTickLabelProps,
-  getVerticalAxisGridLineProps,
   getVerticalAxisTickLineProps,
   getVisibleTicks,
   isYDomain,
@@ -90,7 +93,7 @@ describe('Axis computational utils', () => {
     () =>
       (SVGElement.prototype.getBoundingClientRect = function() {
         const text = this.textContent || 0;
-        return { ...mockedRect, width: Number(text) * 10, heigh: Number(text) * 10 };
+        return { ...mockedRect, width: Number(text) * 10, height: Number(text) * 10 };
       }),
   );
   afterEach(() => (SVGElement.prototype.getBoundingClientRect = originalGetBBox));
@@ -108,8 +111,9 @@ describe('Axis computational utils', () => {
     maxLabelBboxHeight: 10,
     maxLabelTextWidth: 10,
     maxLabelTextHeight: 10,
+    isHidden: false,
   };
-  const verticalAxisSpec: AxisSpec = {
+  const verticalAxisSpec = MockGlobalSpec.axis({
     chartType: ChartTypes.XYAxis,
     specType: SpecTypes.Axis,
     id: 'axis_1',
@@ -121,9 +125,9 @@ describe('Axis computational utils', () => {
     style,
     showGridLines: true,
     integersOnly: false,
-  };
+  });
 
-  const horizontalAxisSpec: AxisSpec = {
+  const horizontalAxisSpec = MockGlobalSpec.axis({
     chartType: ChartTypes.XYAxis,
     specType: SpecTypes.Axis,
     id: 'axis_2',
@@ -134,9 +138,9 @@ describe('Axis computational utils', () => {
     position: Position.Top,
     style,
     integersOnly: false,
-  };
+  });
 
-  const verticalAxisSpecWTitle: AxisSpec = {
+  const verticalAxisSpecWTitle = MockGlobalSpec.axis({
     chartType: ChartTypes.XYAxis,
     specType: SpecTypes.Axis,
     id: 'axis_1',
@@ -149,8 +153,8 @@ describe('Axis computational utils', () => {
     style,
     showGridLines: true,
     integersOnly: false,
-  };
-  const xAxisWithTime: AxisSpec = {
+  });
+  const xAxisWithTime = MockGlobalSpec.axis({
     chartType: ChartTypes.XYAxis,
     specType: SpecTypes.Axis,
     id: 'axis_1',
@@ -164,7 +168,7 @@ describe('Axis computational utils', () => {
     tickFormat: niceTimeFormatter([1551438000000, 1551441300000]),
     showGridLines: true,
     integersOnly: false,
-  };
+  });
 
   // const horizontalAxisSpecWTitle: AxisSpec = {
   //   id: ('axis_2'),
@@ -179,7 +183,19 @@ describe('Axis computational utils', () => {
   //     return `${value}`;
   //   },
   // };
-
+  const lineSeriesSpec = MockSeriesSpec.line({
+    id: 'line',
+    groupId: 'group_1',
+    xAccessor: 0,
+    yAccessors: [1],
+    xScaleType: ScaleType.Linear,
+    yScaleType: ScaleType.Linear,
+    data: [
+      [0, 0],
+      [0.5, 0.5],
+      [1, 1],
+    ],
+  });
   const xDomain: XDomain = {
     type: 'xDomain',
     scaleType: ScaleType.Linear,
@@ -346,6 +362,7 @@ describe('Axis computational utils', () => {
     maxLabelTextWidth: 100,
     tickLabels: [],
     tickValues: [],
+    isHidden: false,
   };
   const offset: TextOffset = {
     x: 0,
@@ -562,6 +579,7 @@ describe('Axis computational utils', () => {
       maxLabelBboxHeight: 20,
       maxLabelTextWidth: 10,
       maxLabelTextHeight: 20,
+      isHidden: false,
     };
     const visibleTicks = getVisibleTicks(allTicks, verticalAxisSpec, axis2Dims);
     const expectedVisibleTicks = [
@@ -597,6 +615,7 @@ describe('Axis computational utils', () => {
       maxLabelBboxHeight: 20,
       maxLabelTextWidth: 10,
       maxLabelTextHeight: 20,
+      isHidden: false,
     };
 
     verticalAxisSpec.showOverlappingTicks = true;
@@ -639,8 +658,6 @@ describe('Axis computational utils', () => {
     const minMax = getMinMaxRange(Position.Bottom, 0, {
       width: 100,
       height: 50,
-      top: 0,
-      left: 0,
     });
     expect(minMax).toEqual({ minRange: 0, maxRange: 100 });
   });
@@ -648,8 +665,6 @@ describe('Axis computational utils', () => {
     const minMax = getMinMaxRange(Position.Bottom, 90, {
       width: 100,
       height: 50,
-      top: 0,
-      left: 0,
     });
     expect(minMax).toEqual({ minRange: 0, maxRange: 100 });
   });
@@ -657,8 +672,6 @@ describe('Axis computational utils', () => {
     const minMax = getMinMaxRange(Position.Bottom, 180, {
       width: 100,
       height: 50,
-      top: 0,
-      left: 0,
     });
     expect(minMax).toEqual({ minRange: 100, maxRange: 0 });
   });
@@ -666,8 +679,6 @@ describe('Axis computational utils', () => {
     const minMax = getMinMaxRange(Position.Bottom, -90, {
       width: 100,
       height: 50,
-      top: 0,
-      left: 0,
     });
     expect(minMax).toEqual({ minRange: 100, maxRange: 0 });
   });
@@ -675,8 +686,6 @@ describe('Axis computational utils', () => {
     const minMax = getMinMaxRange(Position.Left, 90, {
       width: 100,
       height: 50,
-      top: 0,
-      left: 0,
     });
     expect(minMax).toEqual({ minRange: 0, maxRange: 50 });
   });
@@ -684,8 +693,6 @@ describe('Axis computational utils', () => {
     const minMax = getMinMaxRange(Position.Left, 180, {
       width: 100,
       height: 50,
-      top: 0,
-      left: 0,
     });
     expect(minMax).toEqual({ minRange: 0, maxRange: 50 });
   });
@@ -693,8 +700,6 @@ describe('Axis computational utils', () => {
     const minMax = getMinMaxRange(Position.Right, -90, {
       width: 100,
       height: 50,
-      top: 0,
-      left: 0,
     });
     expect(minMax).toEqual({ minRange: 50, maxRange: 0 });
   });
@@ -921,7 +926,7 @@ describe('Axis computational utils', () => {
 
     const leftAxisTickLinePositions = getVerticalAxisTickLineProps(Position.Left, tickPadding, tickSize, tickPosition);
 
-    expect(leftAxisTickLinePositions).toEqual([5, 10, -5, 10]);
+    expect(leftAxisTickLinePositions).toEqual({ x1: 5, y1: 10, x2: -5, y2: 10 });
 
     const rightAxisTickLinePositions = getVerticalAxisTickLineProps(
       Position.Right,
@@ -930,11 +935,11 @@ describe('Axis computational utils', () => {
       tickPosition,
     );
 
-    expect(rightAxisTickLinePositions).toEqual([0, 10, 10, 10]);
+    expect(rightAxisTickLinePositions).toEqual({ x1: 0, y1: 10, x2: 10, y2: 10 });
 
     const topAxisTickLinePositions = getHorizontalAxisTickLineProps(Position.Top, axisHeight, tickSize, tickPosition);
 
-    expect(topAxisTickLinePositions).toEqual([10, 10, 10, 20]);
+    expect(topAxisTickLinePositions).toEqual({ x1: 10, y1: 10, x2: 10, y2: 20 });
 
     const bottomAxisTickLinePositions = getHorizontalAxisTickLineProps(
       Position.Bottom,
@@ -943,21 +948,7 @@ describe('Axis computational utils', () => {
       tickPosition,
     );
 
-    expect(bottomAxisTickLinePositions).toEqual([10, 0, 10, 10]);
-  });
-
-  test('should compute axis grid line positions', () => {
-    const tickPosition = 10;
-    const chartWidth = 100;
-    const chartHeight = 200;
-
-    const verticalAxisGridLinePositions = getVerticalAxisGridLineProps(tickPosition, chartWidth);
-
-    expect(verticalAxisGridLinePositions).toEqual([0, 10, 100, 10]);
-
-    const horizontalAxisGridLinePositions = getHorizontalAxisGridLineProps(tickPosition, chartHeight);
-
-    expect(horizontalAxisGridLinePositions).toEqual([10, 0, 10, 200]);
+    expect(bottomAxisTickLinePositions).toEqual({ x1: 10, y1: 0, x2: 10, y2: 10 });
   });
 
   test('should compute axis ticks positions with title', () => {
@@ -971,7 +962,7 @@ describe('Axis computational utils', () => {
     const axisDims = new Map();
     axisDims.set(verticalAxisSpecWTitle.id, axis1Dims);
 
-    let axisTicksPosition = getAxisTicksPositions(
+    let axisTicksPosition = getAxesGeometries(
       {
         chartDimensions: chartDim,
         leftMargin: 0,
@@ -983,14 +974,18 @@ describe('Axis computational utils', () => {
       axesStyles,
       xDomain,
       [yDomain],
+      chartDim,
       1,
       false,
       (v) => `${v}`,
     );
 
-    expect(axisTicksPosition.axisPositions.get(verticalAxisSpecWTitle.id)).toEqual({
-      top: 0,
-      left: 10,
+    const verticalAxisGeoms = axisTicksPosition.find(({ axis: { id } }) => id === verticalAxisSpecWTitle.id);
+    expect(verticalAxisGeoms?.anchorPoint).toEqual({
+      y: 0,
+      x: 10,
+    });
+    expect(verticalAxisGeoms?.size).toEqual({
       width: 50,
       height: 100,
     });
@@ -999,7 +994,7 @@ describe('Axis computational utils', () => {
 
     axisDims.set(verticalAxisSpec.id, axis1Dims);
 
-    axisTicksPosition = getAxisTicksPositions(
+    axisTicksPosition = getAxesGeometries(
       {
         chartDimensions: chartDim,
         leftMargin: 0,
@@ -1011,14 +1006,17 @@ describe('Axis computational utils', () => {
       axesStyles,
       xDomain,
       [yDomain],
+      chartDim,
       1,
       false,
       (v) => `${v}`,
     );
-
-    expect(axisTicksPosition.axisPositions.get(verticalAxisSpecWTitle.id)).toEqual({
-      top: 0,
-      left: 10,
+    const verticalAxisSpecWTitleGeoms = axisTicksPosition.find(({ axis: { id } }) => id === verticalAxisSpecWTitle.id);
+    expect(verticalAxisSpecWTitleGeoms?.anchorPoint).toEqual({
+      y: 0,
+      x: 10,
+    });
+    expect(verticalAxisSpecWTitleGeoms?.size).toEqual({
       width: 10,
       height: 100,
     });
@@ -1199,7 +1197,7 @@ describe('Axis computational utils', () => {
     const axisDims = new Map<AxisId, AxisTicksDimensions>();
     axisDims.set('not_a_mapped_one', axis1Dims);
 
-    const axisTicksPosition = getAxisTicksPositions(
+    const axisTicksPosition = getAxesGeometries(
       {
         chartDimensions: chartDim,
         leftMargin: 0,
@@ -1211,40 +1209,34 @@ describe('Axis computational utils', () => {
       axisStyles,
       xDomain,
       [yDomain],
+      chartDim,
       1,
       false,
       (v) => `${v}`,
     );
-    expect(axisTicksPosition.axisPositions.size).toBe(0);
-    expect(axisTicksPosition.axisTicks.size).toBe(0);
-    expect(axisTicksPosition.axisGridLinesPositions.size).toBe(0);
-    expect(axisTicksPosition.axisVisibleTicks.size).toBe(0);
+    expect(axisTicksPosition).toHaveLength(0);
+    // expect(axisTicksPosition.axisTicks.size).toBe(0);
+    // expect(axisTicksPosition.axisGridLinesPositions.size).toBe(0);
+    // expect(axisTicksPosition.axisVisibleTicks.size).toBe(0);
   });
 
   test('should compute axis ticks positions', () => {
-    const chartRotation = 0;
-
-    const axisSpecs = [verticalAxisSpec];
-    const axisStyles = new Map();
-    const axisDims = new Map<AxisId, AxisTicksDimensions>();
-    axisDims.set(verticalAxisSpec.id, axis1Dims);
-
-    const axisTicksPosition = getAxisTicksPositions(
-      {
-        chartDimensions: chartDim,
-        leftMargin: 0,
-      },
-      LIGHT_THEME,
-      chartRotation,
-      axisSpecs,
-      axisDims,
-      axisStyles,
-      xDomain,
-      [yDomain],
-      1,
-      false,
-      (v) => `${v}`,
+    const store = MockStore.default();
+    MockStore.addSpecs(
+      [
+        MockGlobalSpec.settingsNoMargins(),
+        lineSeriesSpec,
+        MockGlobalSpec.axis({
+          ...verticalAxisSpec,
+          hide: true,
+          gridLine: {
+            visible: true,
+          },
+        }),
+      ],
+      store,
     );
+    const gridLines = computeGridLinesSelector(store.getState());
 
     const expectedVerticalAxisGridLines = [
       [0, 0, 100, 0],
@@ -1260,49 +1252,37 @@ describe('Axis computational utils', () => {
       [0, 100, 100, 100],
     ];
 
-    expect(axisTicksPosition.axisGridLinesPositions.get(verticalAxisSpec.id)).toEqual(expectedVerticalAxisGridLines);
+    const [{ lines }] = gridLines[0].lineGroups;
 
-    const axisTicksPositionWithTopLegend = getAxisTicksPositions(
-      {
-        chartDimensions: chartDim,
-        leftMargin: 0,
-      },
-      LIGHT_THEME,
-      chartRotation,
-      axisSpecs,
-      axisDims,
-      axisStyles,
-      xDomain,
-      [yDomain],
-      1,
-      false,
-      (v) => `${v}`,
+    expect(lines.map(({ x1, y1, x2, y2 }) => [x1, y1, x2, y2])).toEqual(expectedVerticalAxisGridLines);
+
+    const axisTicksPositionWithTopLegend = computeAxesGeometriesSelector(store.getState());
+
+    const verticalAxisWithTopLegendPosition = axisTicksPositionWithTopLegend.find(
+      ({ axis: { id } }) => id === verticalAxisSpec.id,
     );
-
-    const expectedPositionWithTopLegend = {
-      height: 100,
-      width: 10,
-      left: 100,
-      top: 0,
-    };
-    const verticalAxisWithTopLegendPosition = axisTicksPositionWithTopLegend.axisPositions.get(verticalAxisSpec.id);
-    expect(verticalAxisWithTopLegendPosition).toEqual(expectedPositionWithTopLegend);
+    // TODO check the root cause of having with at 10 on previous implementation
+    expect(verticalAxisWithTopLegendPosition?.size).toEqual({ height: 0, width: 0 });
+    expect(verticalAxisWithTopLegendPosition?.anchorPoint).toEqual({ x: 100, y: 0 });
 
     const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: 'foo' };
     const invalidSpecs = [ungroupedAxisSpec];
     const computeScalelessSpec = () => {
-      getAxisTicksPositions(
+      const axisDims = computeAxisTicksDimensionsSelector(store.getState());
+      const axisStyles = getAxesStylesSelector(store.getState());
+      getAxesGeometries(
         {
           chartDimensions: chartDim,
           leftMargin: 0,
         },
         LIGHT_THEME,
-        chartRotation,
+        0,
         invalidSpecs,
         axisDims,
         axisStyles,
         xDomain,
         [yDomain],
+        chartDim,
         1,
         false,
         (v) => `${v}`,
@@ -1310,14 +1290,6 @@ describe('Axis computational utils', () => {
     };
 
     expect(computeScalelessSpec).toThrowError('Cannot compute scale for axis spec axis_1');
-  });
-
-  test('should compute positions for grid lines', () => {
-    const verticalAxisGridLines = computeAxisGridLinePositions(true, 25, chartDim);
-    expect(verticalAxisGridLines).toEqual([0, 25, 100, 25]);
-
-    const horizontalAxisGridLines = computeAxisGridLinePositions(false, 25, chartDim);
-    expect(horizontalAxisGridLines).toEqual([25, 0, 25, 100]);
   });
 
   test('should determine if axis belongs to yDomain', () => {
@@ -1690,13 +1662,13 @@ describe('Axis computational utils', () => {
 
   describe('Custom formatting', () => {
     it('should get custom labels for y axis', () => {
-      const customFotmatter = (v: any) => `${v} custom`;
+      const customFormatter = (v: any) => `${v} custom`;
       const axisSpecs = [verticalAxisSpec];
       const axesStyles = new Map();
       const axisDims = new Map();
       axisDims.set(verticalAxisSpec.id, axis1Dims);
 
-      const axisTicksPosition = getAxisTicksPositions(
+      const axisTicksPosition = getAxesGeometries(
         {
           chartDimensions: chartDim,
           leftMargin: 0,
@@ -1708,16 +1680,18 @@ describe('Axis computational utils', () => {
         axesStyles,
         xDomain,
         [yDomain],
+        chartDim,
         1,
         false,
-        customFotmatter,
+        customFormatter,
       );
 
       const expected = axis1Dims.tickValues
         .slice()
         .reverse()
-        .map(customFotmatter);
-      expect(axisTicksPosition.axisTicks.get(verticalAxisSpec.id)!.map(({ label }) => label)).toEqual(expected);
+        .map(customFormatter);
+      const axisPos = axisTicksPosition.find(({ axis: { id } }) => id === verticalAxisSpec.id);
+      expect(axisPos?.ticks.map(({ label }) => label)).toEqual(expected);
     });
 
     it('should not use custom formatter with x axis', () => {
@@ -1727,7 +1701,7 @@ describe('Axis computational utils', () => {
       const axisDims = new Map();
       axisDims.set(horizontalAxisSpec.id, axis1Dims);
 
-      const axisTicksPosition = getAxisTicksPositions(
+      const axisTicksPosition = getAxesGeometries(
         {
           chartDimensions: chartDim,
           leftMargin: 0,
@@ -1739,13 +1713,16 @@ describe('Axis computational utils', () => {
         axesStyles,
         xDomain,
         [yDomain],
+        chartDim,
         1,
         false,
         customFotmatter,
       );
 
       const expected = axis1Dims.tickValues.slice().map(defaultTickFormatter);
-      expect(axisTicksPosition.axisTicks.get(horizontalAxisSpec.id)!.map(({ label }) => label)).toEqual(expected);
+      expect(
+        axisTicksPosition.find(({ axis: { id } }) => id === horizontalAxisSpec.id)!.ticks.map(({ label }) => label),
+      ).toEqual(expected);
     });
 
     it('should use custom axis tick formatter to get labels for x axis', () => {
@@ -1760,7 +1737,7 @@ describe('Axis computational utils', () => {
       const axisDims = new Map();
       axisDims.set(spec.id, axis1Dims);
 
-      const axisTicksPosition = getAxisTicksPositions(
+      const axisTicksPosition = getAxesGeometries(
         {
           chartDimensions: chartDim,
           leftMargin: 0,
@@ -1772,13 +1749,16 @@ describe('Axis computational utils', () => {
         axesStyles,
         xDomain,
         [yDomain],
+        chartDim,
         1,
         false,
         customFotmatter,
       );
 
       const expected = axis1Dims.tickValues.slice().map(customAxisFotmatter);
-      expect(axisTicksPosition.axisTicks.get(spec.id)!.map(({ label }) => label)).toEqual(expected);
+      expect(axisTicksPosition.find(({ axis: { id } }) => id === spec.id)!.ticks.map(({ label }) => label)).toEqual(
+        expected,
+      );
     });
   });
 });

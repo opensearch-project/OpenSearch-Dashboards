@@ -17,30 +17,23 @@
  * under the License.
  */
 
-import { Stroke, Line } from '../../../../../geoms/types';
+import { Stroke } from '../../../../../geoms/types';
+import { Rotation } from '../../../../../utils/commons';
+import { Dimensions } from '../../../../../utils/dimensions';
 import { LineAnnotationStyle } from '../../../../../utils/themes/theme';
 import { stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { AnnotationLineProps } from '../../../annotations/line/types';
-import { renderMultiLine } from '../primitives/line';
+import { renderLine } from '../primitives/line';
+import { withPanelTransform } from '../utils/panel_transform';
 
 /** @internal */
 export function renderLineAnnotations(
   ctx: CanvasRenderingContext2D,
   annotations: AnnotationLineProps[],
   lineStyle: LineAnnotationStyle,
+  rotation: Rotation,
+  renderingArea: Dimensions,
 ) {
-  const lines = annotations.map<Line>((annotation) => {
-    const {
-      start: { x1, y1 },
-      end: { x2, y2 },
-    } = annotation.linePathPoints;
-    return {
-      x1,
-      y1,
-      x2,
-      y2,
-    };
-  });
   const strokeColor = stringToRGB(lineStyle.line.stroke);
   strokeColor.opacity *= lineStyle.line.opacity;
   const stroke: Stroke = {
@@ -49,5 +42,9 @@ export function renderLineAnnotations(
     dash: lineStyle.line.dash,
   };
 
-  renderMultiLine(ctx, lines, stroke);
+  annotations.forEach(({ linePathPoints, panel }) => {
+    withPanelTransform(ctx, panel, rotation, renderingArea, (ctx) => {
+      renderLine(ctx, linePathPoints, stroke);
+    });
+  });
 }

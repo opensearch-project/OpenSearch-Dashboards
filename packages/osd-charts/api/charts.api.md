@@ -773,6 +773,28 @@ export interface GroupBrushExtent {
     groupId: GroupId;
 }
 
+// @alpha (undocumented)
+export const GroupBy: React.FunctionComponent<GroupByProps>;
+
+// @alpha (undocumented)
+export type GroupByAccessor = (spec: Spec, datum: any) => string | number;
+
+// @alpha (undocumented)
+export type GroupByProps = Pick<GroupBySpec, 'id' | 'by' | 'sort'>;
+
+// Warning: (ae-forgotten-export) The symbol "Predicate" needs to be exported by the entry point index.d.ts
+//
+// @alpha (undocumented)
+export type GroupBySort = Predicate;
+
+// @alpha (undocumented)
+export interface GroupBySpec extends Spec {
+    // (undocumented)
+    by: GroupByAccessor;
+    // (undocumented)
+    sort: GroupBySort;
+}
+
 // @public (undocumented)
 export type GroupId = string;
 
@@ -935,8 +957,6 @@ export interface HeatmapSpec extends Spec {
     xAccessor: Accessor | AccessorFn;
     // (undocumented)
     xScaleType: SeriesScales['xScaleType'];
-    // Warning: (ae-forgotten-export) The symbol "Predicate" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     xSortPredicate: Predicate;
     // (undocumented)
@@ -1635,6 +1655,25 @@ export interface SimplePadding {
     outer: number;
 }
 
+// @alpha (undocumented)
+export const SmallMultiples: React.FunctionComponent<SmallMultiplesProps>;
+
+// @alpha (undocumented)
+export type SmallMultiplesProps = Partial<Omit<SmallMultiplesSpec, 'id' | 'chatType' | 'specType'>>;
+
+// @alpha (undocumented)
+export interface SmallMultiplesSpec extends Spec {
+    // (undocumented)
+    splitHorizontally?: string;
+    // (undocumented)
+    splitVertically?: string;
+    // (undocumented)
+    style?: {
+        verticalPanelPadding?: [number, number];
+        horizontalPanelPadding?: [number, number];
+    };
+}
+
 // Warning: (ae-missing-release-tag) "Spec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1655,6 +1694,8 @@ export const SpecTypes: Readonly<{
     Axis: "axis";
     Annotation: "annotation";
     Settings: "settings";
+    IndexOrder: "index_order";
+    SmallMultiples: "small_multiples";
 }>;
 
 // @public (undocumented)
@@ -1870,6 +1911,10 @@ export type XYChartElementEvent = [GeometryValue, XYChartSeriesIdentifier];
 export interface XYChartSeriesIdentifier extends SeriesIdentifier {
     // (undocumented)
     seriesKeys: (string | number)[];
+    // (undocumented)
+    smHorizontalAccessorValue?: string | number;
+    // (undocumented)
+    smVerticalAccessorValue?: string | number;
     // (undocumented)
     splitAccessors: Map<string | number, string | number>;
     // (undocumented)

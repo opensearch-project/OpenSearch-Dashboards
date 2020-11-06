@@ -17,85 +17,59 @@
  * under the License.
  */
 import { ScaleType } from '../../../scales/constants';
-import { SpecId, GroupId } from '../../../utils/ids';
-import { YBasicSeriesSpec } from '../domains/y_domain';
-import { getSpecsById } from '../state/utils/spec';
 import { DataSeries } from './series';
-import { SeriesSpecs, StackMode, BasicSeriesSpec, isLineSeriesSpec, isAreaSeriesSpec } from './specs';
+import { BasicSeriesSpec, isLineSeriesSpec, isAreaSeriesSpec } from './specs';
 
 /**
- * Fill missing x values in all data series
  * @internal
  */
 export function fillSeries(
-  series: Map<SpecId, DataSeries[]>,
+  dataSeries: DataSeries[],
   xValues: Set<string | number>,
-  seriesSpecs: SeriesSpecs,
   groupScaleType: ScaleType,
-  specsByGroupIds: Map<
-    GroupId,
-    {
-      stackMode: StackMode | undefined;
-      stacked: YBasicSeriesSpec[];
-      nonStacked: YBasicSeriesSpec[];
-    }
-  >,
-): Map<SpecId, DataSeries[]> {
+): DataSeries[] {
   const sortedXValues = [...xValues.values()];
-  const filledSeries: Map<SpecId, DataSeries[]> = new Map();
-  series.forEach((dataSeries, key) => {
-    const spec = getSpecsById(seriesSpecs, key);
-    if (!spec) {
-      return;
-    }
-    const group = specsByGroupIds.get(spec.groupId);
-    if (!group) {
-      return;
-    }
-    const isStacked = Boolean(group.stacked.find(({ id }) => id === key));
+  return dataSeries.map((series) => {
+    const { spec, data, isStacked } = series;
+
     const noFillRequired = isXFillNotRequired(spec, groupScaleType, isStacked);
-
-    const filledDataSeries = dataSeries.map(({ data, ...rest }) => {
-      if (data.length === xValues.size || noFillRequired) {
-        return {
-          ...rest,
-          data,
-        };
-      }
-      const filledData: typeof data = [];
-      const missingValues = new Set(xValues);
-      for (let i = 0; i < data.length; i++) {
-        const { x } = data[i];
-        filledData.push(data[i]);
-        missingValues.delete(x);
-      }
-
-      const missingValuesArray = [...missingValues.values()];
-      for (let i = 0; i < missingValuesArray.length; i++) {
-        const missingValue = missingValuesArray[i];
-        const index = sortedXValues.indexOf(missingValue);
-
-        filledData.splice(index, 0, {
-          x: missingValue,
-          y1: null,
-          y0: null,
-          initialY1: null,
-          initialY0: null,
-          mark: null,
-          datum: undefined,
-          filled: {
-            x: missingValue,
-          },
-        });
-      }
+    if (data.length === xValues.size || noFillRequired) {
       return {
-        ...rest,
-        data: filledData,
+        ...series,
+        data,
       };
-    });
-    filledSeries.set(key, filledDataSeries);
+    }
+    const filledData: typeof data = [];
+    const missingValues = new Set(xValues);
+    for (let i = 0; i < data.length; i++) {
+      const { x } = data[i];
+      filledData.push(data[i]);
+      missingValues.delete(x);
+    }
+
+    const missingValuesArray = [...missingValues.values()];
+    for (let i = 0; i < missingValuesArray.length; i++) {
+      const missingValue = missingValuesArray[i];
+      const index = sortedXValues.indexOf(missingValue);
+
+      filledData.splice(index, 0, {
+        x: missingValue,
+        y1: null,
+        y0: null,
+        initialY1: null,
+        initialY0: null,
+        mark: null,
+        datum: undefined,
+        filled: {
+          x: missingValue,
+        },
+      });
+    }
+    return {
+      ...series,
+      data: filledData,
+    };
   });
-  return filledSeries;
 }
 
 function isXFillNotRequired(spec: BasicSeriesSpec, groupScaleType: ScaleType, isStacked: boolean) {

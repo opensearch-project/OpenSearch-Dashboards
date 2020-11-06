@@ -20,6 +20,7 @@
 import createCachedSelector from 're-reselect';
 
 import { LegendItem } from '../../../../commons/legend';
+import { Line } from '../../../../geoms/types';
 import { AxisSpec } from '../../../../specs';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import {
@@ -31,12 +32,15 @@ import {
   DebugStateBar,
   DebugStateLegend,
 } from '../../../../state/types';
-import { AreaGeometry, BandedAccessorType, LineGeometry, BarGeometry } from '../../../../utils/geometry';
+import { AreaGeometry, BandedAccessorType, LineGeometry, BarGeometry, PerPanel } from '../../../../utils/geometry';
 import { FillStyle, Visible, StrokeStyle, Opacity } from '../../../../utils/themes/theme';
 import { isVerticalAxis } from '../../utils/axis_type_utils';
-import { computeAxisVisibleTicksSelector, AxisVisibleTicks } from './compute_axis_visible_ticks';
+import { AxisGeometry } from '../../utils/axis_utils';
+import { LinesGrid } from '../../utils/grid_lines';
+import { computeAxesGeometriesSelector } from './compute_axes_geometries';
 import { computeLegendSelector } from './compute_legend';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';
+import { computeGridLinesSelector } from './get_grid_lines';
 import { getAxisSpecsSelector } from './get_specs';
 
 /**
@@ -44,13 +48,19 @@ import { getAxisSpecsSelector } from './get_specs';
  * @internal
  */
 export const getDebugStateSelector = createCachedSelector(
-  [computeSeriesGeometriesSelector, computeLegendSelector, computeAxisVisibleTicksSelector, getAxisSpecsSelector],
-  ({ geometries }, legend, axes, axesSpecs): DebugState => {
+  [
+    computeSeriesGeometriesSelector,
+    computeLegendSelector,
+    computeAxesGeometriesSelector,
+    computeGridLinesSelector,
+    getAxisSpecsSelector,
+  ],
+  ({ geometries }, legend, axes, gridLines, axesSpecs): DebugState => {
     const seriesNameMap = getSeriesNameMap(legend);
 
     return {
       legend: getLegendState(legend),
-      axes: getAxes(axes, axesSpecs),
+      axes: getAxes(axes, axesSpecs, gridLines),
       areas: geometries.areas.map(getAreaState(seriesNameMap)),
       lines: geometries.lines.map(getLineState(seriesNameMap)),
       bars: getBarsState(seriesNameMap, geometries.bars),
@@ -58,18 +68,33 @@ export const getDebugStateSelector = createCachedSelector(
   },
 )(getChartIdSelector);
 
-const getAxes = (ticks: AxisVisibleTicks, axesSpecs: AxisSpec[]): DebugStateAxes | undefined => {
+function getAxes(axesGeoms: AxisGeometry[], axesSpecs: AxisSpec[], gridLines: LinesGrid[]): DebugStateAxes | undefined {
   if (axesSpecs.length === 0) {
     return;
   }
 
   return axesSpecs.reduce<DebugStateAxes>(
     (acc, { position, title, id }) => {
-      const axisTicks = ticks.axisVisibleTicks.get(id) ?? [];
-      const labels = axisTicks.map(({ label }) => label);
-      const values = axisTicks.map(({ value }) => value);
-      const grids = ticks.axisGridLinesPositions.get(id) ?? [];
-      const gridlines = grids.map(([x, y]) => ({ x, y }));
+      const geom = axesGeoms.find(({ axis }) => axis.id === id);
+      if (!geom) {
+        return acc;
+      }
+
+      const { ticks } = geom;
+      const labels = ticks.map(({ label }) => label);
+      const values = ticks.map(({ value }) => value);
+
+      const gridlines = gridLines
+        .reduce<Line[]>((accLines, { lineGroups }) => {
+          const groupLines = lineGroups.find(({ axisId }) => {
+            return axisId === geom.axis.id;
+          });
+          if (!groupLines) {
+            return accLines;
+          }
+          return [...accLines, ...groupLines.lines];
+        }, [])
+        .map(({ x1, y1 }) => ({ x: x1, y: y1 }));
 
       if (isVerticalAxis(position)) {
         acc.y.push({
@@ -99,12 +124,17 @@ const getAxes = (ticks: AxisVisibleTicks, axesSpecs: AxisSpec[]): DebugStateAxes
       x: [],
     },
   );
-};
+}
 
-const getBarsState = (seriesNameMap: Map<string, string>, barGeometries: BarGeometry[]): DebugStateBar[] => {
+function getBarsState(
+  seriesNameMap: Map<string, string>,
+  barGeometries: Array<PerPanel<BarGeometry[]>>,
+): DebugStateBar[] {
   const buckets = new Map<string, DebugStateBar>();
-
-  barGeometries.forEach(
+  const bars = barGeometries.reduce<BarGeometry[]>((acc, bars) => {
+    return [...acc, ...bars.value];
+  }, []);
+  bars.forEach(
     ({
       color,
       seriesIdentifier: { key },
@@ -136,86 +166,94 @@ const getBarsState = (seriesNameMap: Map<string, string>, barGeometries: BarGeom
   );
 
   return [...buckets.values()];
-};
+}
 
-const getLineState = (seriesNameMap: Map<string, string>) => ({
-  line: path,
-  points,
-  color,
-  seriesIdentifier: { key },
-  seriesLineStyle,
-  seriesPointStyle,
-}: LineGeometry): DebugStateLine => {
-  const name = seriesNameMap.get(key) ?? '';
+function getLineState(seriesNameMap: Map<string, string>) {
+  return ({
+    value: {
+      line: path,
+      points,
+      color,
+      seriesIdentifier: { key },
+      seriesLineStyle,
+      seriesPointStyle,
+    },
+  }: PerPanel<LineGeometry>): DebugStateLine => {
+    const name = seriesNameMap.get(key) ?? '';
 
-  return {
-    path,
-    color,
-    key,
-    name,
-    visible: hasVisibleStyle(seriesLineStyle),
-    visiblePoints: hasVisibleStyle(seriesPointStyle),
-    points: points.map(({ value: { x, y, mark } }) => ({ x, y, mark })),
+    return {
+      path,
+      color,
+      key,
+      name,
+      visible: hasVisibleStyle(seriesLineStyle),
+      visiblePoints: hasVisibleStyle(seriesPointStyle),
+      points: points.map(({ value: { x, y, mark } }) => ({ x, y, mark })),
+    };
   };
-};
+}
 
-const getAreaState = (seriesNameMap: Map<string, string>) => ({
-  area: path,
-  lines,
-  points,
-  color,
-  seriesIdentifier: { key },
-  seriesAreaStyle,
-  seriesPointStyle,
-  seriesAreaLineStyle,
-}: AreaGeometry): DebugStateArea => {
-  const [y1Path, y0Path] = lines;
-  const linePoints = points.reduce<{
-    y0: DebugStateValue[];
-    y1: DebugStateValue[];
-  }>(
-    (acc, { value: { accessor, ...value } }) => {
-      if (accessor === BandedAccessorType.Y0) {
-        acc.y0.push(value);
-      } else {
-        acc.y1.push(value);
-      }
-
-      return acc;
+function getAreaState(seriesNameMap: Map<string, string>) {
+  return ({
+    value: {
+      area: path,
+      lines,
+      points,
+      color,
+      seriesIdentifier: { key },
+      seriesAreaStyle,
+      seriesPointStyle,
+      seriesAreaLineStyle,
     },
-    {
-      y0: [],
-      y1: [],
-    },
-  );
-  const lineVisible = hasVisibleStyle(seriesAreaLineStyle);
-  const visiblePoints = hasVisibleStyle(seriesPointStyle);
-  const name = seriesNameMap.get(key) ?? '';
+  }: PerPanel<AreaGeometry>): DebugStateArea => {
+    const [y1Path, y0Path] = lines;
+    const linePoints = points.reduce<{
+      y0: DebugStateValue[];
+      y1: DebugStateValue[];
+    }>(
+      (acc, { value: { accessor, ...value } }) => {
+        if (accessor === BandedAccessorType.Y0) {
+          acc.y0.push(value);
+        } else {
+          acc.y1.push(value);
+        }
 
-  return {
-    path,
-    color,
-    key,
-    name,
-    visible: hasVisibleStyle(seriesAreaStyle),
-    lines: {
-      y0: y0Path
-        ? {
-            visible: lineVisible,
-            path: y0Path,
-            points: linePoints.y0,
-            visiblePoints,
-          }
-        : undefined,
-      y1: {
-        visible: lineVisible,
-        path: y1Path,
-        points: linePoints.y1,
-        visiblePoints,
+        return acc;
       },
-    },
+      {
+        y0: [],
+        y1: [],
+      },
+    );
+    const lineVisible = hasVisibleStyle(seriesAreaLineStyle);
+    const visiblePoints = hasVisibleStyle(seriesPointStyle);
+    const name = seriesNameMap.get(key) ?? '';
+
+    return {
+      path,
+      color,
+      key,
+      name,
+      visible: hasVisibleStyle(seriesAreaStyle),
+      lines: {
+        y0: y0Path
+          ? {
+              visible: lineVisible,
+              path: y0Path,
+              points: linePoints.y0,
+              visiblePoints,
+            }
+          : undefined,
+        y1: {
+          visible: lineVisible,
+          path: y1Path,
+          points: linePoints.y1,
+          visiblePoints,
+        },
+      },
+    };
   };
-};
+}
 
 /**
  * returns series key to name mapping

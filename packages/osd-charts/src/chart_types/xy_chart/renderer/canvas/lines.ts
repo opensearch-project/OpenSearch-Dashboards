@@ -19,46 +19,53 @@
 
 import { LegendItem } from '../../../../commons/legend';
 import { Rect } from '../../../../geoms/types';
-import { withContext, withClip } from '../../../../renderers/canvas';
-import { LineGeometry } from '../../../../utils/geometry';
+import { withContext } from '../../../../renderers/canvas';
+import { Rotation } from '../../../../utils/commons';
+import { Dimensions } from '../../../../utils/dimensions';
+import { LineGeometry, PerPanel } from '../../../../utils/geometry';
 import { SharedGeometryStateStyle } from '../../../../utils/themes/theme';
 import { getGeometryStateStyle } from '../../rendering/rendering';
 import { renderPoints } from './points';
 import { renderLinePaths } from './primitives/path';
 import { buildLineStyles } from './styles/line';
+import { withPanelTransform } from './utils/panel_transform';
 
 interface LineGeometriesDataProps {
   animated?: boolean;
-  lines: LineGeometry[];
+  lines: Array<PerPanel<LineGeometry>>;
+  renderingArea: Dimensions;
+  rotation: Rotation;
   sharedStyle: SharedGeometryStateStyle;
-  highlightedLegendItem: LegendItem | null;
+  highlightedLegendItem?: LegendItem;
   clippings: Rect;
 }
 
 /** @internal */
 export function renderLines(ctx: CanvasRenderingContext2D, props: LineGeometriesDataProps) {
   withContext(ctx, (ctx) => {
-    const { lines, sharedStyle, highlightedLegendItem, clippings } = props;
+    const { lines, sharedStyle, highlightedLegendItem, clippings, renderingArea, rotation } = props;
 
-    lines.forEach((line) => {
+    lines.forEach(({ panel, value: line }) => {
       const { seriesLineStyle, seriesPointStyle } = line;
 
       if (seriesLineStyle.visible) {
-        withContext(ctx, (ctx) => {
-          renderLine(ctx, line, highlightedLegendItem, sharedStyle, clippings);
+        withPanelTransform(ctx, panel, rotation, renderingArea, (ctx) => {
+          renderLine(ctx, line, sharedStyle, clippings, highlightedLegendItem);
         });
       }
 
       if (seriesPointStyle.visible) {
-        withClip(
+        withPanelTransform(
           ctx,
-          clippings,
+          panel,
+          rotation,
+          renderingArea,
           (ctx) => {
-            const geometryStyle = getGeometryStateStyle(line.seriesIdentifier, highlightedLegendItem, sharedStyle);
+            const geometryStyle = getGeometryStateStyle(line.seriesIdentifier, sharedStyle, highlightedLegendItem);
             renderPoints(ctx, line.points, line.seriesPointStyle, geometryStyle);
           },
           // TODO: add padding over clipping
-          line.points[0]?.value.mark !== null,
+          { area: clippings, shouldClip: line.points[0]?.value.mark !== null },
         );
       }
     });
@@ -68,12 +75,12 @@ export function renderLines(ctx: CanvasRenderingContext2D, props: LineGeometries
 function renderLine(
   ctx: CanvasRenderingContext2D,
   line: LineGeometry,
-  highlightedLegendItem: LegendItem | null,
   sharedStyle: SharedGeometryStateStyle,
   clippings: Rect,
+  highlightedLegendItem?: LegendItem,
 ) {
   const { color, transform, seriesIdentifier, seriesLineStyle, clippedRanges, hideClippedRanges } = line;
-  const geometryStyle = getGeometryStateStyle(seriesIdentifier, highlightedLegendItem, sharedStyle);
+  const geometryStyle = getGeometryStateStyle(seriesIdentifier, sharedStyle, highlightedLegendItem);
   const stroke = buildLineStyles(color, seriesLineStyle, geometryStyle);
-  renderLinePaths(ctx, transform.x, [line.line], stroke, clippedRanges, clippings, hideClippedRanges);
+  renderLinePaths(ctx, transform, [line.line], stroke, clippedRanges, clippings, hideClippedRanges);
 }

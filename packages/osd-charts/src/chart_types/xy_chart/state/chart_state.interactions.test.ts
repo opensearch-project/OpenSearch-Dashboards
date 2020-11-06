@@ -165,7 +165,7 @@ describe('Chart state pointer interactions', () => {
     const { geometries } = computeSeriesGeometriesSelector(store.getState());
     expect(geometries).toBeDefined();
     expect(geometries.bars).toBeDefined();
-    expect(geometries.bars.length).toBe(2);
+    expect(geometries.bars[0].value.length).toBe(2);
   });
 
   test('can convert/limit mouse pointer positions relative to chart projection', () => {
@@ -398,7 +398,7 @@ function mouseOverTestSuite(scaleType: XScaleType) {
     expect(tooltipInfo.tooltip.values).toEqual([]);
     store.dispatch(onPointerMove({ x: chartLeft + 0, y: chartTop + 0 }, 0));
     let projectedPointerPosition = getProjectedPointerPositionSelector(store.getState());
-    expect(projectedPointerPosition).toEqual({ x: 0, y: 0 });
+    expect(projectedPointerPosition).toMatchObject({ x: 0, y: 0 });
     const cursorBandPosition = getCursorBandPositionSelector(store.getState());
     expect(cursorBandPosition).toBeDefined();
     expect(cursorBandPosition?.left).toBe(chartLeft + 0);
@@ -420,18 +420,21 @@ function mouseOverTestSuite(scaleType: XScaleType) {
           datum: [0, 10],
         },
         {
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
+          key:
+            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
           seriesKeys: [1],
           specId: 'spec_1',
           splitAccessors: new Map(),
           yAccessor: 1,
+          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
       ],
     ]);
 
     store.dispatch(onPointerMove({ x: chartLeft - 1, y: chartTop - 1 }, 1));
     projectedPointerPosition = getProjectedPointerPositionSelector(store.getState());
-    expect(projectedPointerPosition).toEqual({ x: -1, y: -1 });
+    expect(projectedPointerPosition).toMatchObject({ x: -1, y: -1 });
     isTooltipVisible = isTooltipVisibleSelector(store.getState());
     expect(isTooltipVisible.visible).toBe(false);
     tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
@@ -444,7 +447,7 @@ function mouseOverTestSuite(scaleType: XScaleType) {
   test('can hover bottom-left corner of the first bar', () => {
     store.dispatch(onPointerMove({ x: chartLeft + 0, y: chartTop + 89 }, 0));
     let projectedPointerPosition = getProjectedPointerPositionSelector(store.getState());
-    expect(projectedPointerPosition).toEqual({ x: 0, y: 89 });
+    expect(projectedPointerPosition).toMatchObject({ x: 0, y: 89 });
     const cursorBandPosition = getCursorBandPositionSelector(store.getState());
     expect(cursorBandPosition).toBeDefined();
     expect(cursorBandPosition?.left).toBe(chartLeft + 0);
@@ -466,17 +469,21 @@ function mouseOverTestSuite(scaleType: XScaleType) {
           datum: [0, 10],
         },
         {
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
+          key:
+            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
           seriesKeys: [1],
           specId: 'spec_1',
           splitAccessors: new Map(),
           yAccessor: 1,
+
+          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
       ],
     ]);
     store.dispatch(onPointerMove({ x: chartLeft - 1, y: chartTop + 89 }, 1));
     projectedPointerPosition = getProjectedPointerPositionSelector(store.getState());
-    expect(projectedPointerPosition).toEqual({ x: -1, y: 89 });
+    expect(projectedPointerPosition).toMatchObject({ x: -1, y: 89 });
     isTooltipVisible = isTooltipVisibleSelector(store.getState());
     expect(isTooltipVisible.visible).toBe(false);
     tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
@@ -493,7 +500,7 @@ function mouseOverTestSuite(scaleType: XScaleType) {
     }
     store.dispatch(onPointerMove({ x: chartLeft + 44 + scaleOffset, y: chartTop + 0 }, 0));
     let projectedPointerPosition = getProjectedPointerPositionSelector(store.getState());
-    expect(projectedPointerPosition).toEqual({ x: 44 + scaleOffset, y: 0 });
+    expect(projectedPointerPosition).toMatchObject({ x: 44 + scaleOffset, y: 0 });
     let cursorBandPosition = getCursorBandPositionSelector(store.getState());
     expect(cursorBandPosition).toBeDefined();
     expect(cursorBandPosition?.left).toBe(chartLeft + 0);
@@ -515,18 +522,21 @@ function mouseOverTestSuite(scaleType: XScaleType) {
           datum: [0, 10],
         },
         {
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
+          key:
+            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
           seriesKeys: [1],
           specId: 'spec_1',
           splitAccessors: new Map(),
           yAccessor: 1,
+          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
       ],
     ]);
 
     store.dispatch(onPointerMove({ x: chartLeft + 45 + scaleOffset, y: chartTop + 0 }, 1));
     projectedPointerPosition = getProjectedPointerPositionSelector(store.getState());
-    expect(projectedPointerPosition).toEqual({ x: 45 + scaleOffset, y: 0 });
+    expect(projectedPointerPosition).toMatchObject({ x: 45 + scaleOffset, y: 0 });
     cursorBandPosition = getCursorBandPositionSelector(store.getState());
     expect(cursorBandPosition).toBeDefined();
     expect(cursorBandPosition?.left).toBe(chartLeft + 45);
@@ -547,7 +557,7 @@ function mouseOverTestSuite(scaleType: XScaleType) {
     }
     store.dispatch(onPointerMove({ x: chartLeft + 44 + scaleOffset, y: chartTop + 89 }, 0));
     let projectedPointerPosition = getProjectedPointerPositionSelector(store.getState());
-    expect(projectedPointerPosition).toEqual({ x: 44 + scaleOffset, y: 89 });
+    expect(projectedPointerPosition).toMatchObject({ x: 44 + scaleOffset, y: 89 });
     let cursorBandPosition = getCursorBandPositionSelector(store.getState());
     expect(cursorBandPosition).toBeDefined();
     expect(cursorBandPosition?.left).toBe(chartLeft + 0);
@@ -569,18 +579,21 @@ function mouseOverTestSuite(scaleType: XScaleType) {
           datum: [(spec.data[0] as Array<any>)[0], (spec.data[0] as Array<any>)[1]],
         },
         {
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
+          key:
+            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
           seriesKeys: [1],
           specId: 'spec_1',
           splitAccessors: new Map(),
           yAccessor: 1,
+          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
       ],
     ]);
 
     store.dispatch(onPointerMove({ x: chartLeft + 45 + scaleOffset, y: chartTop + 89 }, 1));
     projectedPointerPosition = getProjectedPointerPositionSelector(store.getState());
-    expect(projectedPointerPosition).toEqual({ x: 45 + scaleOffset, y: 89 });
+    expect(projectedPointerPosition).toMatchObject({ x: 45 + scaleOffset, y: 89 });
     cursorBandPosition = getCursorBandPositionSelector(store.getState());
     expect(cursorBandPosition).toBeDefined();
     expect(cursorBandPosition?.left).toBe(chartLeft + 45);
@@ -602,11 +615,14 @@ function mouseOverTestSuite(scaleType: XScaleType) {
           datum: [(spec.data[1] as Array<any>)[0], (spec.data[1] as Array<any>)[1]],
         },
         {
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
+          key:
+            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
           seriesKeys: [1],
           specId: 'spec_1',
           splitAccessors: new Map(),
           yAccessor: 1,
+          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
       ],
     ]);
@@ -625,7 +641,7 @@ function mouseOverTestSuite(scaleType: XScaleType) {
 
     store.dispatch(onPointerMove({ x: chartLeft + 89, y: chartTop + 0 }, 0));
     const projectedPointerPosition = getProjectedPointerPositionSelector(store.getState());
-    expect(projectedPointerPosition).toEqual({ x: 89, y: 0 });
+    expect(projectedPointerPosition).toMatchObject({ x: 89, y: 0 });
     const cursorBandPosition = getCursorBandPositionSelector(store.getState());
     expect(cursorBandPosition).toBeDefined();
     expect(cursorBandPosition?.left).toBe(chartLeft + 45);
@@ -678,7 +694,7 @@ function mouseOverTestSuite(scaleType: XScaleType) {
     store.dispatch(onPointerMove({ x: chartLeft + 89, y: chartTop + 89 }, 0));
     const projectedPointerPosition = getProjectedPointerPositionSelector(store.getState());
     // store.setCursorPosition(chartLeft + 99, chartTop + 99);
-    expect(projectedPointerPosition).toEqual({ x: 89, y: 89 });
+    expect(projectedPointerPosition).toMatchObject({ x: 89, y: 89 });
     const cursorBandPosition = getCursorBandPositionSelector(store.getState());
     expect(cursorBandPosition).toBeDefined();
     expect(cursorBandPosition?.left).toBe(chartLeft + 45);
@@ -699,11 +715,14 @@ function mouseOverTestSuite(scaleType: XScaleType) {
           datum: [1, 5],
         },
         {
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
+          key:
+            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
           seriesKeys: [1],
           specId: 'spec_1',
           splitAccessors: new Map(),
           yAccessor: 1,
+          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
       ],
     ]);

@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import { MockBarGeometry, MockPointGeometry } from '../../../mocks';
 import { isCrosshairTooltipType, isFollowTooltipType } from '../../../specs';
 import { TooltipType } from '../../../specs/constants';
 import { Dimensions } from '../../../utils/dimensions';
-import { IndexedGeometry, PointGeometry } from '../../../utils/geometry';
 import {
   areIndexedGeometryArraysEquals,
   areIndexedGeomsEquals,
@@ -46,7 +46,7 @@ const seriesStyle = {
   },
 };
 
-const ig1: IndexedGeometry = {
+const ig1 = MockBarGeometry.default({
   color: 'red',
   seriesIdentifier: {
     specId: 'ig1',
@@ -67,8 +67,8 @@ const ig1: IndexedGeometry = {
   width: 50,
   height: 50,
   seriesStyle,
-};
-const ig2: IndexedGeometry = {
+});
+const ig2 = MockBarGeometry.default({
   seriesIdentifier: {
     specId: 'ig1',
     key: '',
@@ -89,8 +89,8 @@ const ig2: IndexedGeometry = {
   width: 10,
   height: 10,
   seriesStyle,
-};
-const ig3: IndexedGeometry = {
+});
+const ig3 = MockBarGeometry.default({
   seriesIdentifier: {
     specId: 'ig1',
     key: '',
@@ -112,8 +112,8 @@ const ig3: IndexedGeometry = {
   width: 50,
   height: 50,
   seriesStyle,
-};
-const ig4: IndexedGeometry = {
+});
+const ig4 = MockBarGeometry.default({
   seriesIdentifier: {
     specId: 'ig4',
     key: '',
@@ -134,8 +134,8 @@ const ig4: IndexedGeometry = {
   width: 50,
   height: 50,
   seriesStyle,
-};
-const ig5: IndexedGeometry = {
+});
+const ig5 = MockBarGeometry.default({
   seriesIdentifier: {
     specId: 'ig5',
     key: '',
@@ -156,8 +156,8 @@ const ig5: IndexedGeometry = {
   width: 50,
   height: 50,
   seriesStyle,
-};
-const ig6: PointGeometry = {
+});
+const ig6 = MockPointGeometry.default({
   seriesIdentifier: {
     specId: 'ig5',
     key: '',
@@ -180,7 +180,8 @@ const ig6: PointGeometry = {
     x: 0,
     y: 0,
   },
-};
+});
+
 describe('Interaction utils', () => {
   const chartDimensions: Dimensions = {
     width: 200,

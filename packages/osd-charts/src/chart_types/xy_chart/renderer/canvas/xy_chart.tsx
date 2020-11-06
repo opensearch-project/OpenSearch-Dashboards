@@ -37,17 +37,21 @@ import { LIGHT_THEME } from '../../../../utils/themes/light_theme';
 import { Theme, AxisStyle } from '../../../../utils/themes/theme';
 import { AnnotationDimensions } from '../../annotations/types';
 import { computeAnnotationDimensionsSelector } from '../../state/selectors/compute_annotations';
-import { computeAxisTicksDimensionsSelector } from '../../state/selectors/compute_axis_ticks_dimensions';
-import { AxisVisibleTicks, computeAxisVisibleTicksSelector } from '../../state/selectors/compute_axis_visible_ticks';
 import { computeChartDimensionsSelector } from '../../state/selectors/compute_chart_dimensions';
 import { computeChartTransformSelector } from '../../state/selectors/compute_chart_transform';
+import { computePerPanelGridLinesSelector } from '../../state/selectors/compute_grid_lines';
+import { computePanelsSelectors, PanelGeoms } from '../../state/selectors/compute_panels';
+import {
+  computePerPanelAxesGeomsSelector,
+  PerPanelAxisGeoms,
+} from '../../state/selectors/compute_per_panel_axes_geoms';
 import { computeSeriesGeometriesSelector } from '../../state/selectors/compute_series_geometries';
 import { getAxesStylesSelector } from '../../state/selectors/get_axis_styles';
 import { getHighlightedSeriesSelector } from '../../state/selectors/get_highlighted_series';
 import { getAnnotationSpecsSelector, getAxisSpecsSelector } from '../../state/selectors/get_specs';
 import { isChartEmptySelector } from '../../state/selectors/is_chart_empty';
 import { Geometries, Transform } from '../../state/utils/types';
-import { AxisLinePosition, AxisTicksDimensions } from '../../utils/axis_utils';
+import { LinesGrid } from '../../utils/grid_lines';
 import { IndexedGeometryMap } from '../../utils/indexed_geometry_map';
 import { AxisSpec, AnnotationSpec } from '../../utils/specs';
 import { renderXYChartCanvas2d } from './renderers';
@@ -61,17 +65,17 @@ export interface ReactiveChartStateProps {
   geometriesIndex: IndexedGeometryMap;
   theme: Theme;
   chartContainerDimensions: Dimensions;
-  chartRotation: Rotation;
-  chartDimensions: Dimensions;
+  rotation: Rotation;
+  renderingArea: Dimensions;
   chartTransform: Transform;
   highlightedLegendItem?: LegendItem;
   axesSpecs: AxisSpec[];
-  axesTicksDimensions: Map<AxisId, AxisTicksDimensions>;
+  perPanelAxisGeoms: Array<PerPanelAxisGeoms>;
+  perPanelGridLines: Array<LinesGrid>;
   axesStyles: Map<AxisId, AxisStyle | null>;
-  axisTickPositions: AxisVisibleTicks;
-  axesGridLinesPositions: Map<AxisId, AxisLinePosition[]>;
   annotationDimensions: Map<AnnotationId, AnnotationDimensions>;
   annotationSpecs: AnnotationSpec[];
+  panelGeoms: PanelGeoms;
 }
 
 interface ReactiveChartDispatchProps {
@@ -123,12 +127,12 @@ class XYChartComponent extends React.Component<XYChartProps> {
 
   private drawCanvas() {
     if (this.ctx) {
-      const { chartDimensions, chartRotation } = this.props;
+      const { renderingArea, rotation } = this.props;
       const clippings = {
         x: 0,
         y: 0,
-        width: [90, -90].includes(chartRotation) ? chartDimensions.height : chartDimensions.width,
-        height: [90, -90].includes(chartRotation) ? chartDimensions.width : chartDimensions.height,
+        width: [90, -90].includes(rotation) ? renderingArea.height : renderingArea.width,
+        height: [90, -90].includes(rotation) ? renderingArea.width : renderingArea.height,
       };
       renderXYChartCanvas2d(this.ctx, this.devicePixelRatio, clippings, this.props);
     }
@@ -194,8 +198,8 @@ const DEFAULT_PROPS: ReactiveChartStateProps = {
     left: 0,
     top: 0,
   },
-  chartRotation: 0 as const,
-  chartDimensions: {
+  rotation: 0 as const,
+  renderingArea: {
     width: 0,
     height: 0,
     left: 0,
@@ -208,17 +212,12 @@ const DEFAULT_PROPS: ReactiveChartStateProps = {
   },
 
   axesSpecs: [],
-  axisTickPositions: {
-    axisGridLinesPositions: new Map(),
-    axisPositions: new Map(),
-    axisTicks: new Map(),
-    axisVisibleTicks: new Map(),
-  },
-  axesTicksDimensions: new Map(),
+  perPanelAxisGeoms: [],
+  perPanelGridLines: [],
   axesStyles: new Map(),
-  axesGridLinesPositions: new Map(),
   annotationDimensions: new Map(),
   annotationSpecs: [],
+  panelGeoms: [],
 };
 
 const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
@@ -237,16 +236,16 @@ const mapStateToProps = (state: GlobalChartState): ReactiveChartStateProps => {
     theme: getChartThemeSelector(state),
     chartContainerDimensions: getChartContainerDimensionsSelector(state),
     highlightedLegendItem: getHighlightedSeriesSelector(state),
-    chartRotation: getChartRotationSelector(state),
-    chartDimensions: computeChartDimensionsSelector(state).chartDimensions,
+    rotation: getChartRotationSelector(state),
+    renderingArea: computeChartDimensionsSelector(state).chartDimensions,
     chartTransform: computeChartTransformSelector(state),
     axesSpecs: getAxisSpecsSelector(state),
-    axisTickPositions: computeAxisVisibleTicksSelector(state),
-    axesTicksDimensions: computeAxisTicksDimensionsSelector(state),
+    perPanelAxisGeoms: computePerPanelAxesGeomsSelector(state),
+    perPanelGridLines: computePerPanelGridLinesSelector(state),
     axesStyles: getAxesStylesSelector(state),
-    axesGridLinesPositions: computeAxisVisibleTicksSelector(state).axisGridLinesPositions,
     annotationDimensions: computeAnnotationDimensionsSelector(state),
     annotationSpecs: getAnnotationSpecsSelector(state),
+    panelGeoms: computePanelsSelectors(state),
   };
 };
 

@@ -459,6 +459,7 @@ export interface SeriesScales {
 }
 
 /** @public */
+
 export type BasicSeriesSpec = SeriesSpec &
   SeriesAccessors &
   SeriesScales & {

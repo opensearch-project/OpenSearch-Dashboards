@@ -26,7 +26,7 @@ import { Position } from '../../../utils/commons';
 import { BARCHART_1Y0G } from '../../../utils/data_samples/test_dataset';
 import { computeSeriesDomainsSelector } from '../state/selectors/compute_series_domains';
 import { BasicSeriesSpec, SeriesTypes, DEFAULT_GLOBAL_ID, StackMode } from '../utils/specs';
-import { coerceYScaleTypes, splitSpecsByGroupId } from './y_domain';
+import { coerceYScaleTypes, groupSeriesByYGroup } from './y_domain';
 
 const DEMO_AREA_SPEC_1 = {
   id: 'a',
@@ -243,7 +243,7 @@ describe('Y Domain', () => {
       yAccessors: ['y'],
       data: BARCHART_1Y0G,
     };
-    const splittedSpecs = splitSpecsByGroupId([spec1, spec2]);
+    const splittedSpecs = groupSeriesByYGroup([spec1, spec2]);
     const groupKeys = [...splittedSpecs.keys()];
     const groupValues = [...splittedSpecs.values()];
     expect(groupKeys).toEqual(['group1', 'group2']);
@@ -280,7 +280,7 @@ describe('Y Domain', () => {
       stackAccessors: ['x'],
       data: BARCHART_1Y0G,
     };
-    const splittedSpecs = splitSpecsByGroupId([spec1, spec2]);
+    const splittedSpecs = groupSeriesByYGroup([spec1, spec2]);
     const groupKeys = [...splittedSpecs.keys()];
     const groupValues = [...splittedSpecs.values()];
     expect(groupKeys).toEqual(['group1', 'group2']);
@@ -317,7 +317,7 @@ describe('Y Domain', () => {
       stackAccessors: ['x'],
       data: BARCHART_1Y0G,
     };
-    const splittedSpecs = splitSpecsByGroupId([spec1, spec2]);
+    const splittedSpecs = groupSeriesByYGroup([spec1, spec2]);
     const groupKeys = [...splittedSpecs.keys()];
     const groupValues = [...splittedSpecs.values()];
     expect(groupKeys).toEqual(['group']);
@@ -365,7 +365,7 @@ describe('Y Domain', () => {
       stackAccessors: ['x'],
       data: BARCHART_1Y0G,
     };
-    const splittedSpecs = splitSpecsByGroupId([spec1, spec2, spec3]);
+    const splittedSpecs = groupSeriesByYGroup([spec1, spec2, spec3]);
     const groupKeys = [...splittedSpecs.keys()];
     const groupValues = [...splittedSpecs.values()];
     expect(groupKeys).toEqual(['group1', 'group2']);

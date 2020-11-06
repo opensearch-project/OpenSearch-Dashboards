@@ -21,7 +21,9 @@ import { LegendItem } from '../../../../commons/legend';
 import { Rotation } from '../../../../utils/commons';
 import { BasicSeriesSpec, SeriesTypes } from '../../utils/specs';
 import { GeometriesCounts } from './types';
-import { MAX_ANIMATABLE_BARS, MAX_ANIMATABLE_LINES_AREA_POINTS } from './utils';
+
+export const MAX_ANIMATABLE_BARS = 300;
+export const MAX_ANIMATABLE_LINES_AREA_POINTS = 600;
 
 /** @internal */
 export function isHorizontalRotation(chartRotation: Rotation) {

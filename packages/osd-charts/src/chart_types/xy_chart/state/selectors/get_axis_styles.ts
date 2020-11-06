@@ -24,6 +24,7 @@ import { getChartThemeSelector } from '../../../../state/selectors/get_chart_the
 import { mergePartial, RecursivePartial } from '../../../../utils/commons';
 import { AxisId } from '../../../../utils/ids';
 import { AxisStyle } from '../../../../utils/themes/theme';
+import { isVerticalAxis } from '../../utils/axis_type_utils';
 import { getAxisSpecsSelector } from './get_specs';
 
 /**
@@ -35,9 +36,16 @@ export const getAxesStylesSelector = createCachedSelector(
   [getAxisSpecsSelector, getChartThemeSelector],
   (axesSpecs, { axes: sharedAxesStyle }): Map<AxisId, AxisStyle | null> => {
     const axesStyles = new Map<AxisId, AxisStyle | null>();
-    axesSpecs.forEach(({ id, style }) => {
+    axesSpecs.forEach(({ id, style, gridLine, position }) => {
+      const isVertical = isVerticalAxis(position);
+      const axisStyleMerge: RecursivePartial<AxisStyle> = {
+        ...style,
+      };
+      if (gridLine) {
+        axisStyleMerge.gridLine = { [isVertical ? 'vertical' : 'horizontal']: gridLine };
+      }
       const newStyle = style
-        ? mergePartial(sharedAxesStyle, style as RecursivePartial<AxisStyle>, {
+        ? mergePartial(sharedAxesStyle, axisStyleMerge, {
             mergeOptionalPartialValues: true,
           })
         : null;

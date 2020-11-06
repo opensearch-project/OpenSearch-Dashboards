@@ -20,6 +20,7 @@
 import React from 'react';
 import { Store } from 'redux';
 
+import { MockAnnotationLineProps } from '../../../../mocks/annotations/annotations';
 import { MockAnnotationSpec, MockGlobalSpec, MockSeriesSpec } from '../../../../mocks/specs';
 import { MockStore } from '../../../../mocks/store';
 import { ScaleType } from '../../../../scales/constants';
@@ -75,16 +76,12 @@ describe('annotation marker', () => {
     const dimensions = computeAnnotationDimensionsSelector(store.getState());
 
     const expectedDimensions: AnnotationLineProps[] = [
-      {
+      MockAnnotationLineProps.default({
         linePathPoints: {
-          start: {
-            x1: 0,
-            y1: 80,
-          },
-          end: {
-            x2: 100,
-            y2: 80,
-          },
+          x1: 0,
+          y1: 80,
+          x2: 100,
+          y2: 80,
         },
         details: { detailsText: 'foo', headerText: '2' },
 
@@ -94,7 +91,7 @@ describe('annotation marker', () => {
           dimension: { width: 0, height: 0 },
           position: { left: -0, top: 80 },
         },
-      },
+      }),
     ];
     expect(dimensions.get(id)).toEqual(expectedDimensions);
   });
@@ -117,16 +114,12 @@ describe('annotation marker', () => {
     // so this position at 80 pixel right now, is a 20 pixel from top
     // when rotated 180 degrees
     const expectedDimensions: AnnotationLineProps[] = [
-      {
+      MockAnnotationLineProps.default({
         linePathPoints: {
-          start: {
-            x1: 0,
-            y1: 80,
-          },
-          end: {
-            x2: 100,
-            y2: 80,
-          },
+          x1: 0,
+          y1: 80,
+          x2: 100,
+          y2: 80,
         },
         details: { detailsText: 'foo', headerText: '2' },
         marker: {
@@ -135,7 +128,7 @@ describe('annotation marker', () => {
           dimension: { width: 0, height: 0 },
           position: { left: -0, top: 20 },
         },
-      },
+      }),
     ];
     expect(dimensions.get(id)).toEqual(expectedDimensions);
   });
@@ -154,17 +147,13 @@ describe('annotation marker', () => {
     const dimensions = computeAnnotationDimensionsSelector(store.getState());
 
     const expectedDimensions: AnnotationLineProps[] = [
-      {
+      MockAnnotationLineProps.default({
         details: { detailsText: 'foo', headerText: '2' },
         linePathPoints: {
-          start: {
-            x1: 20,
-            y1: 0,
-          },
-          end: {
-            x2: 20,
-            y2: 100,
-          },
+          x1: 20,
+          y1: 0,
+          x2: 20,
+          y2: 100,
         },
         marker: {
           icon: <div />,
@@ -172,7 +161,7 @@ describe('annotation marker', () => {
           dimension: { width: 0, height: 0 },
           position: { top: 100, left: 20 },
         },
-      },
+      }),
     ];
     expect(dimensions.get(id)).toEqual(expectedDimensions);
   });

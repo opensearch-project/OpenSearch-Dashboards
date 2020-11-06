@@ -262,8 +262,13 @@ export function getAllKeys(object: any, objects: any[] = []): string[] {
 }
 
 /** @internal */
-export function isArrayOrSet(value: any): boolean {
+export function isArrayOrSet<T>(value: any): value is Array<T> | Set<T> {
   return Array.isArray(value) || value instanceof Set;
+}
+
+/** @internal */
+export function isNil(value: any): value is null | undefined {
+  return value === null || value === undefined;
 }
 
 /** @internal */

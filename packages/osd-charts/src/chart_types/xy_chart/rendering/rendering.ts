@@ -27,6 +27,7 @@ import { MarkBuffer, StackMode } from '../../../specs';
 import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
 import { mergePartial, Color, getDistance } from '../../../utils/commons';
 import { CurveType, getCurveFactory } from '../../../utils/curves';
+import { Dimensions } from '../../../utils/dimensions';
 import {
   PointGeometry,
   BarGeometry,
@@ -227,13 +228,13 @@ function renderPoints(
   dataSeries: DataSeries,
   xScale: Scale,
   yScale: Scale,
+  panel: Dimensions,
   color: Color,
   lineStyle: LineStyle,
   hasY0Accessors: boolean,
   markSizeOptions: MarkSizeOptions,
   styleAccessor?: PointStyleAccessor,
   spatial = false,
-  stackMode?: StackMode,
 ): {
   pointGeometries: PointGeometry[];
   indexedGeometryMap: IndexedGeometryMap;
@@ -281,13 +282,15 @@ function renderPoints(
       if (y === null) {
         return acc;
       }
-      const originalY = getDatumYValue(datum, index === 0, hasY0Accessors, stackMode);
+      const originalY = getDatumYValue(datum, index === 0, hasY0Accessors, dataSeries.stackMode);
       const seriesIdentifier: XYChartSeriesIdentifier = {
         key: dataSeries.key,
         specId: dataSeries.specId,
         yAccessor: dataSeries.yAccessor,
         splitAccessors: dataSeries.splitAccessors,
         seriesKeys: dataSeries.seriesKeys,
+        smVerticalAccessorValue: dataSeries.smVerticalAccessorValue,
+        smHorizontalAccessorValue: dataSeries.smHorizontalAccessorValue,
       };
       const styleOverrides = getPointStyleOverrides(datum, seriesIdentifier, styleAccessor);
       const pointGeometry: PointGeometry = {
@@ -308,6 +311,7 @@ function renderPoints(
         },
         seriesIdentifier,
         styleOverrides,
+        panel,
       };
       indexedGeometryMap.set(pointGeometry, geometryType);
       // use the geometry only if the yDatum in contained in the current yScale domain
@@ -362,6 +366,7 @@ export function renderBars(
   dataSeries: DataSeries,
   xScale: Scale,
   yScale: Scale,
+  panel: Dimensions,
   color: Color,
   sharedSeriesStyle: BarSeriesStyle,
   displayValueSettings?: DisplayValueSpec,
@@ -416,7 +421,6 @@ export function renderBars(
     if (y === null || y0Scaled === null) {
       return;
     }
-
     let height = y0Scaled - y;
 
     // handle minBarHeight adjustment
@@ -492,6 +496,8 @@ export function renderBars(
       yAccessor: dataSeries.yAccessor,
       splitAccessors: dataSeries.splitAccessors,
       seriesKeys: dataSeries.seriesKeys,
+      smHorizontalAccessorValue: dataSeries.smHorizontalAccessorValue,
+      smVerticalAccessorValue: dataSeries.smVerticalAccessorValue,
     };
 
     const seriesStyle = getBarStyleOverrides(datum, seriesIdentifier, sharedSeriesStyle, styleAccessor);
@@ -499,7 +505,11 @@ export function renderBars(
     const barGeometry: BarGeometry = {
       displayValue,
       x,
-      y, // top most value
+      y,
+      transform: {
+        x: 0,
+        y: 0,
+      },
       width,
       height,
       color,
@@ -512,6 +522,7 @@ export function renderBars(
       },
       seriesIdentifier,
       seriesStyle,
+      panel,
     };
     indexedGeometryMap.set(barGeometry);
     barGeometries.push(barGeometry);
@@ -531,6 +542,7 @@ export function renderLine(
   dataSeries: DataSeries,
   xScale: Scale,
   yScale: Scale,
+  panel: Dimensions,
   color: Color,
   curve: CurveType,
   hasY0Accessors: boolean,
@@ -544,7 +556,6 @@ export function renderLine(
   indexedGeometryMap: IndexedGeometryMap;
 } {
   const isLogScale = isLogarithmicScale(yScale);
-
   const pathGenerator = line<DataSeriesDatum>()
     .x(({ x }) => xScale.scaleOrThrow(x) - xScaleOffset)
     .y((datum) => {
@@ -562,14 +573,13 @@ export function renderLine(
       return yValue !== null && !(isLogScale && yValue <= 0) && xScale.isValueInDomain(datum.x);
     })
     .curve(getCurveFactory(curve));
-  const y = 0;
-  const x = shift;
 
   const { pointGeometries, indexedGeometryMap } = renderPoints(
     shift - xScaleOffset,
     dataSeries,
     xScale,
     yScale,
+    panel,
     color,
     seriesStyle.line,
     hasY0Accessors,
@@ -592,8 +602,8 @@ export function renderLine(
     points: pointGeometries,
     color,
     transform: {
-      x,
-      y,
+      x: shift,
+      y: 0,
     },
     seriesIdentifier: {
       key: dataSeries.key,
@@ -601,6 +611,8 @@ export function renderLine(
       yAccessor: dataSeries.yAccessor,
       splitAccessors: dataSeries.splitAccessors,
       seriesKeys: dataSeries.seriesKeys,
+      smHorizontalAccessorValue: dataSeries.smHorizontalAccessorValue,
+      smVerticalAccessorValue: dataSeries.smVerticalAccessorValue,
     },
     seriesLineStyle: seriesStyle.line,
     seriesPointStyle: seriesStyle.point,
@@ -620,7 +632,9 @@ export function renderBubble(
   xScale: Scale,
   yScale: Scale,
   color: Color,
+  panel: Dimensions,
   hasY0Accessors: boolean,
+  xScaleOffset: number,
   seriesStyle: BubbleSeriesStyle,
   markSizeOptions: MarkSizeOptions,
   isMixedChart: boolean,
@@ -630,10 +644,11 @@ export function renderBubble(
   indexedGeometryMap: IndexedGeometryMap;
 } {
   const { pointGeometries, indexedGeometryMap } = renderPoints(
-    shift,
+    shift - xScaleOffset,
     dataSeries,
     xScale,
     yScale,
+    panel,
     color,
     seriesStyle.point,
     hasY0Accessors,
@@ -651,6 +666,8 @@ export function renderBubble(
       yAccessor: dataSeries.yAccessor,
       splitAccessors: dataSeries.splitAccessors,
       seriesKeys: dataSeries.seriesKeys,
+      smHorizontalAccessorValue: dataSeries.smHorizontalAccessorValue,
+      smVerticalAccessorValue: dataSeries.smVerticalAccessorValue,
     },
     seriesPointStyle: seriesStyle.point,
   };
@@ -667,6 +684,7 @@ export function renderArea(
   dataSeries: DataSeries,
   xScale: Scale,
   yScale: Scale,
+  panel: Dimensions,
   color: Color,
   curve: CurveType,
   hasY0Accessors: boolean,
@@ -676,12 +694,12 @@ export function renderArea(
   isStacked = false,
   pointStyleAccessor?: PointStyleAccessor,
   hasFit?: boolean,
-  stackMode?: StackMode,
 ): {
   areaGeometry: AreaGeometry;
   indexedGeometryMap: IndexedGeometryMap;
 } {
   const isLogScale = isLogarithmicScale(yScale);
+
   const pathGenerator = area<DataSeriesDatum>()
     .x(({ x }) => xScale.scaleOrThrow(x) - xScaleOffset)
     .y1((datum) => {
@@ -693,11 +711,7 @@ export function renderArea(
       return yScale.isInverted ? yScale.range[1] : yScale.range[0];
     })
     .y0(({ y0 }) => {
-      if (y0 === null || (isLogScale && y0 <= 0)) {
-        return yScale.range[0];
-      }
-
-      return yScale.scaleOrThrow(y0);
+      return y0 === null || (isLogScale && y0 <= 0) ? yScale.range[0] : yScale.scaleOrThrow(y0);
     })
     .defined((datum) => {
       const yValue = getYValue(datum);
@@ -739,13 +753,13 @@ export function renderArea(
     dataSeries,
     xScale,
     yScale,
+    panel,
     color,
     seriesStyle.line,
     hasY0Accessors,
     markSizeOptions,
     pointStyleAccessor,
     false,
-    stackMode,
   );
 
   let areaPath: string;
@@ -772,6 +786,8 @@ export function renderArea(
       yAccessor: dataSeries.yAccessor,
       splitAccessors: dataSeries.splitAccessors,
       seriesKeys: dataSeries.seriesKeys,
+      smHorizontalAccessorValue: dataSeries.smHorizontalAccessorValue,
+      smVerticalAccessorValue: dataSeries.smVerticalAccessorValue,
     },
     seriesAreaStyle: seriesStyle.area,
     seriesAreaLineStyle: seriesStyle.line,
@@ -800,17 +816,18 @@ export function isDatumFilled({ filled, initialY1 }: DataSeriesDatum) {
  * @param dataset
  * @param xScale
  * @param xScaleOffset
+ * @param panel
  * @internal
  */
 export function getClippedRanges(dataset: DataSeriesDatum[], xScale: Scale, xScaleOffset: number): ClippedRanges {
   let firstNonNullX: number | null = null;
   let hasNull = false;
-
   return dataset.reduce<ClippedRanges>((acc, data) => {
     const xScaled = xScale.scale(data.x);
     if (xScaled === null) {
       return acc;
     }
+
     const xValue = xScaled - xScaleOffset + xScale.bandwidth / 2;
 
     if (isDatumFilled(data)) {
@@ -838,13 +855,13 @@ export function getClippedRanges(dataset: DataSeriesDatum[], xScale: Scale, xSca
 /** @internal */
 export function getGeometryStateStyle(
   seriesIdentifier: XYChartSeriesIdentifier,
-  highlightedLegendItem: LegendItem | null,
   sharedGeometryStyle: SharedGeometryStateStyle,
+  highlightedLegendItem?: LegendItem,
   individualHighlight?: { [key: string]: boolean },
 ): GeometryStateStyle {
   const { default: defaultStyles, highlighted, unhighlighted } = sharedGeometryStyle;
 
-  if (highlightedLegendItem != null) {
+  if (highlightedLegendItem) {
     const isPartOfHighlightedSeries = seriesIdentifier.key === highlightedLegendItem.seriesIdentifier.key;
 
     return isPartOfHighlightedSeries ? highlighted : unhighlighted;
@@ -870,17 +887,18 @@ export function isPointOnGeometry(
 ) {
   const { x, y } = indexedGeometry;
   if (isPointGeometry(indexedGeometry)) {
-    const { radius, transform } = indexedGeometry;
+    const { radius } = indexedGeometry;
     const distance = getDistance(
       {
         x: xCoordinate,
         y: yCoordinate,
       },
       {
-        x: x + transform.x,
+        x,
         y,
       },
     );
+
     const radiusBuffer = typeof buffer === 'number' ? buffer : buffer(radius);
 
     if (radiusBuffer === Infinity) {

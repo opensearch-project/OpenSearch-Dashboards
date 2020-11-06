@@ -24,7 +24,7 @@ import { isVerticalAxis } from '../../../utils/axis_type_utils';
 /** @internal */
 export function renderLine(
   ctx: CanvasRenderingContext2D,
-  { axisSpec: { position }, axisPosition, axisStyle: { axisLine } }: AxisProps,
+  { axisSpec: { position }, size, axisStyle: { axisLine } }: AxisProps,
 ) {
   if (!axisLine.visible) {
     return;
@@ -32,15 +32,15 @@ export function renderLine(
 
   const lineProps: number[] = [];
   if (isVerticalAxis(position)) {
-    lineProps[0] = position === Position.Left ? axisPosition.width : 0;
-    lineProps[2] = position === Position.Left ? axisPosition.width : 0;
+    lineProps[0] = position === Position.Left ? size.width : 0;
+    lineProps[2] = position === Position.Left ? size.width : 0;
     lineProps[1] = 0;
-    lineProps[3] = axisPosition.height;
+    lineProps[3] = size.height;
   } else {
     lineProps[0] = 0;
-    lineProps[2] = axisPosition.width;
-    lineProps[1] = position === Position.Top ? axisPosition.height : 0;
-    lineProps[3] = position === Position.Top ? axisPosition.height : 0;
+    lineProps[2] = size.width;
+    lineProps[1] = position === Position.Top ? size.height : 0;
+    lineProps[3] = position === Position.Top ? size.height : 0;
   }
   ctx.beginPath();
   ctx.moveTo(lineProps[0], lineProps[1]);

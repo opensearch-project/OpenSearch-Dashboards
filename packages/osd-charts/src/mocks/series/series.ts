@@ -26,8 +26,9 @@ import {
   XYChartSeriesIdentifier,
   FormattedDataSeries,
 } from '../../chart_types/xy_chart/utils/series';
-import { DEFAULT_GLOBAL_ID } from '../../specs';
+import { DEFAULT_GLOBAL_ID, SeriesTypes } from '../../specs';
 import { mergePartial } from '../../utils/commons';
+import { MockSeriesSpec } from '../specs';
 import { getRandomNumberGenerator } from '../utils';
 import { fitFunctionData } from './data';
 
@@ -49,6 +50,11 @@ export class MockDataSeries {
     splitAccessors: new Map(),
     key: 'spec1',
     data: [],
+    groupId: 'group1',
+    seriesType: SeriesTypes.Bar,
+    stackMode: undefined,
+    spec: MockSeriesSpec.bar(),
+    isStacked: false,
   };
 
   static default(partial?: Partial<DataSeries>) {

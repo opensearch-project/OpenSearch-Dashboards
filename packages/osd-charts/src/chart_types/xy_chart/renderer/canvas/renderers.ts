@@ -27,6 +27,7 @@ import { renderBars } from './bars';
 import { renderBubbles } from './bubbles';
 import { renderGrids } from './grids';
 import { renderLines } from './lines';
+import { renderGridPanels } from './panels/panels';
 import { renderDebugRect } from './utils/debug';
 import { renderBarValues } from './values/bar';
 import { ReactiveChartStateProps } from './xy_chart';
@@ -42,25 +43,25 @@ export function renderXYChartCanvas2d(
     // let's set the devicePixelRatio once and for all; then we'll never worry about it again
     ctx.scale(dpr, dpr);
     const {
-      chartDimensions,
+      renderingArea,
       chartTransform,
-      chartRotation,
+      rotation,
       geometries,
       geometriesIndex,
-      theme,
+      theme: { axes: sharedAxesStyle, sharedStyle, barSeriesStyle },
       highlightedLegendItem,
       annotationDimensions,
       annotationSpecs,
-      axisTickPositions,
+      perPanelAxisGeoms,
+      perPanelGridLines,
       axesSpecs,
-      axesTicksDimensions,
       axesStyles,
-      axesGridLinesPositions,
       debug,
+      panelGeoms,
     } = props;
     const transform = {
-      x: chartDimensions.left + chartTransform.x,
-      y: chartDimensions.top + chartTransform.y,
+      x: renderingArea.left + chartTransform.x,
+      y: renderingArea.top + chartTransform.y,
     };
     // painter's algorithm, like that of SVG: the sequence determines what overdraws what; first element of the array is drawn first
     // (of course, with SVG, it's for ambiguous situations only, eg. when 3D transforms with different Z values aren't used, but
@@ -69,36 +70,39 @@ export function renderXYChartCanvas2d(
     renderLayers(ctx, [
       // clear the canvas
       (ctx: CanvasRenderingContext2D) => clearCanvas(ctx, 200000, 200000),
-
+      // render panel grid
+      (ctx: CanvasRenderingContext2D) => {
+        if (debug) {
+          renderGridPanels(ctx, transform, panelGeoms);
+        }
+      },
       (ctx: CanvasRenderingContext2D) => {
         renderAxes(ctx, {
-          axesPositions: axisTickPositions.axisPositions,
           axesSpecs,
-          axesTicksDimensions,
-          axesVisibleTicks: axisTickPositions.axisVisibleTicks,
-          chartDimensions,
+          perPanelAxisGeoms,
+          renderingArea,
           debug,
           axesStyles,
-          sharedAxesStyle: theme.axes,
+          sharedAxesStyle,
         });
       },
       (ctx: CanvasRenderingContext2D) => {
         renderGrids(ctx, {
           axesSpecs,
-          chartDimensions,
-          axesGridLinesPositions,
+          renderingArea,
+          perPanelGridLines,
           axesStyles,
-          sharedAxesStyle: theme.axes,
+          sharedAxesStyle,
         });
       },
       // rendering background annotations
       (ctx: CanvasRenderingContext2D) => {
         withContext(ctx, (ctx) => {
-          ctx.translate(transform.x, transform.y);
-          ctx.rotate((chartRotation * Math.PI) / 180);
           renderAnnotations(
             ctx,
             {
+              rotation,
+              renderingArea,
               annotationDimensions,
               annotationSpecs,
             },
@@ -110,73 +114,70 @@ export function renderXYChartCanvas2d(
       // rendering bars
       (ctx: CanvasRenderingContext2D) => {
         withContext(ctx, (ctx) => {
-          ctx.translate(transform.x, transform.y);
-          ctx.rotate((chartRotation * Math.PI) / 180);
-          renderBars(ctx, geometries.bars, theme.sharedStyle, clippings, highlightedLegendItem);
+          renderBars(ctx, geometries.bars, sharedStyle, clippings, renderingArea, highlightedLegendItem, rotation);
         });
       },
       // rendering areas
       (ctx: CanvasRenderingContext2D) => {
         withContext(ctx, (ctx) => {
-          ctx.translate(transform.x, transform.y);
-          ctx.rotate((chartRotation * Math.PI) / 180);
           renderAreas(ctx, {
             areas: geometries.areas,
             clippings,
-            highlightedLegendItem: highlightedLegendItem || null,
-            sharedStyle: theme.sharedStyle,
+            renderingArea,
+            rotation,
+            highlightedLegendItem,
+            sharedStyle,
           });
         });
       },
       // rendering lines
       (ctx: CanvasRenderingContext2D) => {
         withContext(ctx, (ctx) => {
-          ctx.translate(transform.x, transform.y);
-          ctx.rotate((chartRotation * Math.PI) / 180);
           renderLines(ctx, {
             lines: geometries.lines,
             clippings,
-            highlightedLegendItem: highlightedLegendItem || null,
-            sharedStyle: theme.sharedStyle,
+            renderingArea,
+            rotation,
+            highlightedLegendItem,
+            sharedStyle,
           });
         });
       },
       // rendering bubbles
       (ctx: CanvasRenderingContext2D) => {
-        withContext(ctx, (ctx) => {
-          ctx.translate(transform.x, transform.y);
-          ctx.rotate((chartRotation * Math.PI) / 180);
-          renderBubbles(ctx, {
-            bubbles: geometries.bubbles,
-            clippings,
-            highlightedLegendItem: highlightedLegendItem || null,
-            sharedStyle: theme.sharedStyle,
-          });
+        renderBubbles(ctx, {
+          bubbles: geometries.bubbles,
+          clippings,
+          highlightedLegendItem,
+          sharedStyle,
+          rotation,
+          renderingArea,
         });
       },
       (ctx: CanvasRenderingContext2D) => {
-        withContext(ctx, (ctx) => {
-          ctx.translate(transform.x, transform.y);
-          ctx.rotate((chartRotation * Math.PI) / 180);
-          renderBarValues(ctx, {
-            bars: geometries.bars,
-            chartDimensions,
-            chartRotation,
-            debug,
-            theme,
+        geometries.bars.forEach(({ value: bars, panel }) => {
+          withContext(ctx, (ctx) => {
+            renderBarValues(ctx, {
+              bars,
+              panel,
+              renderingArea,
+              rotation,
+              debug,
+              barSeriesStyle,
+            });
           });
         });
       },
       // rendering foreground annotations
       (ctx: CanvasRenderingContext2D) => {
         withContext(ctx, (ctx) => {
-          ctx.translate(transform.x, transform.y);
-          ctx.rotate((chartRotation * Math.PI) / 180);
           renderAnnotations(
             ctx,
             {
               annotationDimensions,
               annotationSpecs,
+              rotation,
+              renderingArea,
             },
             false,
           );
@@ -188,7 +189,7 @@ export function renderXYChartCanvas2d(
           return;
         }
         withContext(ctx, (ctx) => {
-          const { left, top, width, height } = chartDimensions;
+          const { left, top, width, height } = renderingArea;
 
           renderDebugRect(
             ctx,

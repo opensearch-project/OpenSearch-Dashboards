@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { Position } from '../../../utils/commons';
-import { Dimensions, getSimplePadding } from '../../../utils/dimensions';
+import { Dimensions } from '../../../utils/dimensions';
 import { AxisId } from '../../../utils/ids';
 import { Theme, AxisStyle } from '../../../utils/themes/theme';
-import { getSpecsById } from '../state/utils/spec';
-import { AxisTicksDimensions, shouldShowTicks } from './axis_utils';
+import { computeAxesSizes } from '../axes/axes_sizes';
+import { AxisTicksDimensions } from './axis_utils';
 import { AxisSpec } from './specs';
 
 /**
@@ -50,14 +49,16 @@ export interface ChartDimensions {
  * Compute the chart dimensions. It's computed removing from the parent dimensions
  * the axis spaces, the legend and any other specified style margin and padding.
  * @param parentDimensions the parent dimension
- * @param chartTheme the theme style of the chart
+ * @param theme
  * @param axisDimensions the axis dimensions
+ * @param axesStyles
  * @param axisSpecs the axis specs
+ * @param legendSizing
  * @internal
  */
 export function computeChartDimensions(
   parentDimensions: Dimensions,
-  { chartMargins, chartPaddings, axes: sharedAxesStyles }: Theme,
+  theme: Theme,
   axisDimensions: Map<AxisId, AxisTicksDimensions>,
   axesStyles: Map<AxisId, AxisStyle | null>,
   axisSpecs: AxisSpec[],
@@ -82,64 +83,16 @@ export function computeChartDimensions(
     };
   }
 
-  let vLeftAxisSpecWidth = 0;
-  let vRightAxisSpecWidth = 0;
-  let hTopAxisSpecHeight = 0;
-  let hBottomAxisSpecHeight = 0;
-  let horizontalEdgeLabelOverflow = 0;
-  let verticalEdgeLabelOverflow = 0;
-  axisDimensions.forEach(({ maxLabelBboxWidth = 0, maxLabelBboxHeight = 0 }, id) => {
-    const axisSpec = getSpecsById<AxisSpec>(axisSpecs, id);
-    if (!axisSpec || axisSpec.hide) {
-      return;
-    }
-    const { tickLine, axisTitle, tickLabel } = axesStyles.get(id) ?? sharedAxesStyles;
-    const showTicks = shouldShowTicks(tickLine, axisSpec.hide);
-    const { position, title } = axisSpec;
-    const titlePadding = getSimplePadding(axisTitle.padding);
-    const labelPadding = getSimplePadding(tickLabel.padding);
-    const labelPaddingSum = tickLabel.visible ? labelPadding.inner + labelPadding.outer : 0;
+  const axisSizes = computeAxesSizes(theme, axisDimensions, axesStyles, axisSpecs);
 
-    const tickDimension = showTicks ? tickLine.size + tickLine.padding : 0;
-    const titleHeight =
-      title !== undefined && axisTitle.visible ? axisTitle.fontSize + titlePadding.outer + titlePadding.inner : 0;
-    const axisDimension = labelPaddingSum + tickDimension + titleHeight;
-    const maxAxisHeight = tickLabel.visible ? maxLabelBboxHeight + axisDimension : axisDimension;
-    const maxAxisWidth = tickLabel.visible ? maxLabelBboxWidth + axisDimension : axisDimension;
-    switch (position) {
-      case Position.Top:
-        hTopAxisSpecHeight += maxAxisHeight + chartMargins.top;
-        // find the max half label size to accomodate the left/right labels
-        horizontalEdgeLabelOverflow = Math.max(horizontalEdgeLabelOverflow, maxLabelBboxWidth / 2);
-        break;
-      case Position.Bottom:
-        hBottomAxisSpecHeight += maxAxisHeight + chartMargins.bottom;
-        // find the max half label size to accomodate the left/right labels
-        horizontalEdgeLabelOverflow = Math.max(horizontalEdgeLabelOverflow, maxLabelBboxWidth / 2);
-        break;
-      case Position.Right:
-        vRightAxisSpecWidth += maxAxisWidth + chartMargins.right;
-        verticalEdgeLabelOverflow = Math.max(verticalEdgeLabelOverflow, maxLabelBboxHeight / 2);
-        break;
-      case Position.Left:
-      default:
-        vLeftAxisSpecWidth += maxAxisWidth + chartMargins.left;
-        verticalEdgeLabelOverflow = Math.max(verticalEdgeLabelOverflow, maxLabelBboxHeight / 2);
-    }
-  });
-  const chartLeftAxisMaxWidth = Math.max(vLeftAxisSpecWidth, horizontalEdgeLabelOverflow + chartMargins.left);
-  const chartRightAxisMaxWidth = Math.max(vRightAxisSpecWidth, horizontalEdgeLabelOverflow + chartMargins.right);
-  const chartTopAxisMaxHeight = Math.max(hTopAxisSpecHeight, verticalEdgeLabelOverflow + chartMargins.top);
-  const chartBottomAxisMaxHeight = Math.max(hBottomAxisSpecHeight, verticalEdgeLabelOverflow + chartMargins.bottom);
-
-  const chartWidth = parentDimensions.width - chartLeftAxisMaxWidth - chartRightAxisMaxWidth;
-  const chartHeight = parentDimensions.height - chartTopAxisMaxHeight - chartBottomAxisMaxHeight;
-
-  const top = chartTopAxisMaxHeight + chartPaddings.top;
-  const left = chartLeftAxisMaxWidth + chartPaddings.left;
+  const chartWidth = parentDimensions.width - axisSizes.left - axisSizes.right;
+  const chartHeight = parentDimensions.height - axisSizes.top - axisSizes.bottom;
+  const { chartPaddings } = theme;
+  const top = axisSizes.top + chartPaddings.top;
+  const left = axisSizes.left + chartPaddings.left;
 
   return {
-    leftMargin: chartLeftAxisMaxWidth - vLeftAxisSpecWidth,
+    leftMargin: axisSizes.margin.left,
     chartDimensions: {
       top,
       left,

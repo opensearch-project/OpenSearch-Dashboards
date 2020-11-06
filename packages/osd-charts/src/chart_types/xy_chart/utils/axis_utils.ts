@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Line } from '../../../geoms/types';
 import { Scale } from '../../../scales';
 import { BBox, BBoxCalculator } from '../../../utils/bbox/bbox_calculator';
 import {
@@ -26,11 +27,11 @@ import {
   VerticalAlignment,
   HorizontalAlignment,
   getPercentageValue,
-  mergePartial,
 } from '../../../utils/commons';
-import { Dimensions, Margins, getSimplePadding } from '../../../utils/dimensions';
+import { Dimensions, Margins, getSimplePadding, Size } from '../../../utils/dimensions';
 import { AxisId } from '../../../utils/ids';
 import { Logger } from '../../../utils/logger';
+import { Point } from '../../../utils/point';
 import { AxisStyle, Theme, TextAlignment, TextOffset } from '../../../utils/themes/theme';
 import { XDomain, YDomain } from '../domains/types';
 import { MIN_STROKE_WIDTH } from '../renderer/canvas/primitives/line';
@@ -38,8 +39,6 @@ import { getSpecsById } from '../state/utils/spec';
 import { isVerticalAxis } from './axis_type_utils';
 import { computeXScale, computeYScales } from './scales';
 import { AxisSpec, TickFormatterOptions, TickFormatter } from './specs';
-
-export type AxisLinePosition = [number, number, number, number];
 
 export interface AxisTick {
   value: number | string;
@@ -54,6 +53,7 @@ export interface AxisTicksDimensions {
   maxLabelBboxHeight: number;
   maxLabelTextWidth: number;
   maxLabelTextHeight: number;
+  isHidden: boolean;
 }
 
 export interface TickLabelProps {
@@ -78,6 +78,11 @@ export const defaultTickFormatter = (tick: any) => `${tick}`;
  * @param totalBarsInCluster the total number of grouped series
  * @param bboxCalculator an instance of the boundingbox calculator
  * @param chartRotation the rotation of the chart
+ * @param gridLine
+ * @param tickLabel
+ * @param fallBackTickFormatter
+ * @param barsPadding
+ * @param enableHistogramMode
  * @internal
  */
 export function computeAxisTicksDimensions(
@@ -92,7 +97,10 @@ export function computeAxisTicksDimensions(
   barsPadding?: number,
   enableHistogramMode?: boolean,
 ): AxisTicksDimensions | null {
-  if (axisSpec.hide && !gridLine.horizontal.visible && !gridLine.vertical.visible) {
+  const gridLineVisible = isVerticalAxis(axisSpec.position) ? gridLine.vertical.visible : gridLine.horizontal.visible;
+
+  // don't compute anything on this axis if grid is hidden and axis is hidden
+  if (axisSpec.hide && !gridLineVisible) {
     return null;
   }
 
@@ -124,6 +132,7 @@ export function computeAxisTicksDimensions(
 
   return {
     ...dimensions,
+    isHidden: axisSpec.hide && gridLineVisible,
   };
 }
 
@@ -349,18 +358,20 @@ function getVerticalAlign(
 /**
  * Gets the computed x/y coordinates & alignment properties for an axis tick label.
  * @param isVerticalAxis if the axis is vertical (in contrast to horizontal)
- * @param tickSize length of tick line
- * @param tickPadding amount of padding between label and tick line
  * @param tickPosition position of tick relative to axis line origin and other ticks along it
  * @param position position of where the axis sits relative to the visualization
- * @param axisTicksDimensions computed axis dimensions and values (from computeTickDimensions)
+ * @param axisSize
+ * @param tickDimensions
+ * @param showTicks
+ * @param textOffset
+ * @param textAlignment
  * @internal
  */
 export function getTickLabelProps(
   { tickLine, tickLabel }: AxisStyle,
   tickPosition: number,
   position: Position,
-  axisPosition: Dimensions,
+  axisSize: Size,
   tickDimensions: AxisTicksDimensions,
   showTicks: boolean,
   textOffset: TextOffset,
@@ -379,7 +390,7 @@ export function getTickLabelProps(
   const textOffsetY = getVerticalTextOffset(maxLabelTextHeight, verticalAlign) + userOffsets.local.y;
 
   if (isVerticalAxis(position)) {
-    const x = isLeftAxis ? axisPosition.width - tickDimension - labelPadding.inner : tickDimension + labelPadding.inner;
+    const x = isLeftAxis ? axisSize.width - tickDimension - labelPadding.inner : tickDimension + labelPadding.inner;
     const offsetX = (isLeftAxis ? -1 : 1) * (maxLabelBboxWidth / 2);
 
     return {
@@ -398,7 +409,7 @@ export function getTickLabelProps(
 
   return {
     x: tickPosition,
-    y: isAxisTop ? axisPosition.height - tickDimension - labelPadding.inner : tickDimension + labelPadding.inner,
+    y: isAxisTop ? axisSize.height - tickDimension - labelPadding.inner : tickDimension + labelPadding.inner,
     offsetX: userOffsets.global.x,
     offsetY: offsetY + userOffsets.global.y,
     textOffsetX,
@@ -414,13 +425,13 @@ export function getVerticalAxisTickLineProps(
   axisWidth: number,
   tickSize: number,
   tickPosition: number,
-): AxisLinePosition {
+): Line {
   const isLeftAxis = position === Position.Left;
   const y = tickPosition;
   const x1 = isLeftAxis ? axisWidth : 0;
   const x2 = isLeftAxis ? axisWidth - tickSize : tickSize;
 
-  return [x1, y, x2, y];
+  return { x1, y1: y, x2, y2: y };
 }
 
 /** @internal */
@@ -429,35 +440,24 @@ export function getHorizontalAxisTickLineProps(
   axisHeight: number,
   tickSize: number,
   tickPosition: number,
-): AxisLinePosition {
+): Line {
   const isTopAxis = position === Position.Top;
   const x = tickPosition;
   const y1 = isTopAxis ? axisHeight - tickSize : 0;
   const y2 = isTopAxis ? axisHeight : tickSize;
 
-  return [x, y1, x, y2];
-}
-
-/** @internal */
-export function getVerticalAxisGridLineProps(tickPosition: number, chartWidth: number): AxisLinePosition {
-  return [0, tickPosition, chartWidth, tickPosition];
-}
-
-/** @internal */
-export function getHorizontalAxisGridLineProps(tickPosition: number, chartHeight: number): AxisLinePosition {
-  return [tickPosition, 0, tickPosition, chartHeight];
+  return { x1: x, y1, x2: x, y2 };
 }
 
 /** @internal */
 export function getMinMaxRange(
   axisPosition: Position,
   chartRotation: Rotation,
-  chartDimensions: Dimensions,
+  { width, height }: Size,
 ): {
   minRange: number;
   maxRange: number;
 } {
-  const { width, height } = chartDimensions;
   switch (axisPosition) {
     case Position.Bottom:
     case Position.Top:
@@ -678,8 +678,21 @@ export function shouldShowTicks({ visible, strokeWidth, size }: AxisStyle['tickL
   return !axisHidden && visible && size > 0 && strokeWidth >= MIN_STROKE_WIDTH;
 }
 
+export interface AxisGeometry {
+  anchorPoint: Point;
+  size: Size;
+  axis: {
+    id: AxisId;
+    position: Position;
+    title?: string;
+  };
+  dimension: AxisTicksDimensions;
+  ticks: AxisTick[];
+  visibleTicks: AxisTick[];
+}
+
 /** @internal */
-export function getAxisTicksPositions(
+export function getAxesGeometries(
   computedChartDims: {
     chartDimensions: Dimensions;
     leftMargin: number;
@@ -691,35 +704,94 @@ export function getAxisTicksPositions(
   axesStyles: Map<AxisId, AxisStyle | null>,
   xDomain: XDomain,
   yDomain: YDomain[],
+  panel: Size,
   totalGroupsCount: number,
   enableHistogramMode: boolean,
   fallBackTickFormatter: TickFormatter,
   barsPadding?: number,
-): {
-  axisPositions: Map<AxisId, Dimensions>;
-  axisTicks: Map<AxisId, AxisTick[]>;
-  axisVisibleTicks: Map<AxisId, AxisTick[]>;
-  axisGridLinesPositions: Map<AxisId, AxisLinePosition[]>;
-} {
-  const axisPositions: Map<AxisId, Dimensions> = new Map();
-  const axisVisibleTicks: Map<AxisId, AxisTick[]> = new Map();
-  const axisTicks: Map<AxisId, AxisTick[]> = new Map();
-  const axisGridLinesPositions: Map<AxisId, AxisLinePosition[]> = new Map();
+): Array<AxisGeometry> {
+  const axesGeometries: Array<AxisGeometry> = [];
+
   const { chartDimensions } = computedChartDims;
-  let cumTopSum = 0;
-  let cumBottomSum = chartPaddings.bottom;
-  let cumLeftSum = computedChartDims.leftMargin;
-  let cumRightSum = chartPaddings.right;
+
+  // compute the anchor point for every axis group
+
+  const anchorPointByAxisGroups = [...axisDimensions.entries()].reduce(
+    (acc, [axisId, dimension]) => {
+      const axisSpec = getSpecsById<AxisSpec>(axisSpecs, axisId);
+      if (!axisSpec) {
+        return acc;
+      }
+
+      const { axisTitle, tickLine, tickLabel } = axesStyles.get(axisId) ?? sharedAxesStyle;
+      const labelPadding = getSimplePadding(tickLabel.padding);
+      const showTicks = shouldShowTicks(tickLine, axisSpec.hide);
+      const axisTitleHeight = axisSpec.title !== undefined ? axisTitle.fontSize : 0;
+      const tickDimension = showTicks ? tickLine.size + tickLine.padding : 0;
+      const labelPaddingSum = tickLabel.visible ? labelPadding.inner + labelPadding.outer : 0;
+
+      const { dimensions, topIncrement, bottomIncrement, leftIncrement, rightIncrement } = getAxisPosition(
+        chartDimensions,
+        chartMargins,
+        axisTitleHeight,
+        axisTitle,
+        axisSpec,
+        dimension,
+        acc.top,
+        acc.bottom,
+        acc.left,
+        acc.right,
+        labelPaddingSum,
+        tickDimension,
+        tickLabel.visible,
+      );
+      const anchor = {
+        top: acc.top + topIncrement,
+        bottom: acc.bottom + bottomIncrement,
+        left: acc.left + leftIncrement,
+        right: acc.right + rightIncrement,
+      };
+      acc.pos.set(axisId, {
+        anchor: {
+          top: acc.top,
+          left: acc.left,
+          right: acc.right,
+          bottom: acc.bottom,
+        },
+        dimensions,
+      });
+      return {
+        ...anchor,
+        pos: acc.pos,
+      };
+    },
+    {
+      top: 0,
+      bottom: chartPaddings.bottom,
+      left: computedChartDims.leftMargin,
+      right: chartPaddings.right,
+      pos: new Map<
+        AxisId,
+        {
+          anchor: { left: number; right: number; top: number; bottom: number };
+          dimensions: Dimensions;
+        }
+      >(),
+    },
+  ).pos;
 
   axisDimensions.forEach((axisDim, id) => {
     const axisSpec = getSpecsById<AxisSpec>(axisSpecs, id);
-
+    const anchorPoint = anchorPointByAxisGroups.get(id);
     // Consider refactoring this so this condition can be tested
     // Given some of the values that get passed around, maybe re-write as a reduce instead of forEach?
-    if (!axisSpec) {
+    if (!axisSpec || !anchorPoint) {
       return;
     }
-    const minMaxRanges = getMinMaxRange(axisSpec.position, chartRotation, chartDimensions);
+
+    const isVertical = isVerticalAxis(axisSpec.position);
+
+    const minMaxRanges = getMinMaxRange(axisSpec.position, chartRotation, panel);
 
     const scale = getScaleForAxisSpec(
       axisSpec,
@@ -739,8 +811,7 @@ export function getAxisTicksPositions(
     const tickFormatOptions = {
       timeZone: xDomain.timeZone,
     };
-    const { axisTitle, tickLine, tickLabel, gridLine } = axesStyles.get(id) ?? sharedAxesStyle;
-    const isVertical = isVerticalAxis(axisSpec.position);
+
     // TODO: Find the true cause of the this offset error
     const rotationOffset =
       enableHistogramMode &&
@@ -757,70 +828,31 @@ export function getAxisTicksPositions(
       rotationOffset,
       tickFormatOptions,
     );
-
     const visibleTicks = getVisibleTicks(allTicks, axisSpec, axisDim);
-    const axisSpecConfig = axisSpec.gridLine;
-    const gridLineThemeStyles = isVertical ? gridLine.vertical : gridLine.horizontal;
-    const gridLineStyles = axisSpecConfig ? mergePartial(gridLineThemeStyles, axisSpecConfig) : gridLineThemeStyles;
 
-    if (axisSpec.showGridLines ?? gridLineStyles.visible) {
-      const gridLines = visibleTicks.map(
-        (tick: AxisTick): AxisLinePosition => computeAxisGridLinePositions(isVertical, tick.position, chartDimensions),
-      );
-      axisGridLinesPositions.set(id, gridLines);
-    }
-
-    const labelPadding = getSimplePadding(tickLabel.padding);
-    const showTicks = shouldShowTicks(tickLine, axisSpec.hide);
-    const axisTitleHeight = axisSpec.title !== undefined ? axisTitle.fontSize : 0;
-    const tickDimension = showTicks ? tickLine.size + tickLine.padding : 0;
-    const labelPaddingSum = tickLabel.visible ? labelPadding.inner + labelPadding.outer : 0;
-
-    const axisPosition = getAxisPosition(
-      chartDimensions,
-      chartMargins,
-      axisTitleHeight,
-      axisTitle,
-      axisSpec,
-      axisDim,
-      cumTopSum,
-      cumBottomSum,
-      cumLeftSum,
-      cumRightSum,
-      labelPaddingSum,
-      tickDimension,
-      tickLabel.visible,
-    );
-
-    cumTopSum += axisPosition.topIncrement;
-    cumBottomSum += axisPosition.bottomIncrement;
-    cumLeftSum += axisPosition.leftIncrement;
-    cumRightSum += axisPosition.rightIncrement;
-
-    axisPositions.set(id, axisPosition.dimensions);
-    axisVisibleTicks.set(id, visibleTicks);
-    axisTicks.set(id, allTicks);
+    const size = axisDim.isHidden
+      ? { width: 0, height: 0 }
+      : {
+          width: isVertical ? anchorPoint.dimensions.width : panel.width,
+          height: isVertical ? panel.height : anchorPoint.dimensions.height,
+        };
+    axesGeometries.push({
+      axis: {
+        id: axisSpec.id,
+        position: axisSpec.position,
+        title: axisSpec.title,
+      },
+      anchorPoint: {
+        x: anchorPoint.dimensions.left,
+        y: anchorPoint.dimensions.top,
+      },
+      size,
+      dimension: axisDim,
+      ticks: allTicks,
+      visibleTicks,
+    });
   });
-
-  return {
-    axisPositions,
-    axisTicks,
-    axisVisibleTicks,
-    axisGridLinesPositions,
-  };
-}
-
-/** @internal */
-export function computeAxisGridLinePositions(
-  isVerticalAxis: boolean,
-  tickPosition: number,
-  chartDimensions: Dimensions,
-): AxisLinePosition {
-  const positions = isVerticalAxis
-    ? getVerticalAxisGridLineProps(tickPosition, chartDimensions.width)
-    : getHorizontalAxisGridLineProps(tickPosition, chartDimensions.height);
-
-  return positions;
+  return axesGeometries;
 }
 
 /** @internal */

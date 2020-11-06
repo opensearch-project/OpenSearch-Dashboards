@@ -21,37 +21,6 @@ import { Scale, ScaleBand, ScaleContinuous } from '../../../scales';
 import { ScaleType } from '../../../scales/constants';
 import { GroupId } from '../../../utils/ids';
 import { XDomain, YDomain } from '../domains/types';
-import { FormattedDataSeries } from './series';
-import { SeriesTypes } from './specs';
-
-/**
- * Count the max number of bars in cluster value.
- * Doesn't take in consideration areas, lines or points.
- * @param stacked all the stacked formatted dataseries
- * @param nonStacked all the non-stacked formatted dataseries
- * @internal
- */
-export function countBarsInCluster(
-  stacked: FormattedDataSeries[],
-  nonStacked: FormattedDataSeries[],
-): {
-  nonStackedBarsInCluster: number;
-  stackedBarsInCluster: number;
-  totalBarsInCluster: number;
-} {
-  // along x axis, we count one "space" per bar series.
-  // we ignore the points, areas, lines as they are
-  // aligned with the x value and doesn't occupy space
-  const nonStackedBarsInCluster = nonStacked.reduce((acc, ns) => acc + ns.counts[SeriesTypes.Bar], 0);
-  // count stacked bars groups as 1 per group
-  const stackedBarsInCluster = stacked.reduce((acc, ns) => acc + (ns.counts[SeriesTypes.Bar] > 0 ? 1 : 0), 0);
-  const totalBarsInCluster = nonStackedBarsInCluster + stackedBarsInCluster;
-  return {
-    nonStackedBarsInCluster,
-    stackedBarsInCluster,
-    totalBarsInCluster,
-  };
-}
 
 function getBandScaleRange(
   isInverse: boolean,

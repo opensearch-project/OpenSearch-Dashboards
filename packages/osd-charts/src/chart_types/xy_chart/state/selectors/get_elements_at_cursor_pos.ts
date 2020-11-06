@@ -22,10 +22,9 @@ import createCachedSelector from 're-reselect';
 import { PointerEvent } from '../../../../specs';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { Dimensions } from '../../../../utils/dimensions';
 import { isValidPointerOverEvent } from '../../../../utils/events';
 import { IndexedGeometry } from '../../../../utils/geometry';
-import { Point } from '../../../../utils/point';
+import { ChartDimensions } from '../../utils/dimensions';
 import { IndexedGeometryMap } from '../../utils/indexed_geometry_map';
 import { ComputedScales } from '../utils/types';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
@@ -33,6 +32,7 @@ import { getComputedScalesSelector } from './get_computed_scales';
 import { getGeometriesIndexSelector } from './get_geometries_index';
 import { getGeometriesIndexKeysSelector } from './get_geometries_index_keys';
 import { getOrientedProjectedPointerPositionSelector } from './get_oriented_projected_pointer_position';
+import { PointerPosition } from './get_projected_pointer_position';
 
 const getExternalPointerEventStateSelector = (state: GlobalChartState) => state.externalEvents.pointer;
 
@@ -50,16 +50,12 @@ export const getElementAtCursorPositionSelector = createCachedSelector(
 )(getChartIdSelector);
 
 function getElementAtCursorPosition(
-  orientedProjectedPoinerPosition: Point,
+  orientedProjectedPointerPosition: PointerPosition,
   scales: ComputedScales,
   geometriesIndexKeys: (string | number)[],
   geometriesIndex: IndexedGeometryMap,
   externalPointerEvent: PointerEvent | null,
-  {
-    chartDimensions,
-  }: {
-    chartDimensions: Dimensions;
-  },
+  { chartDimensions }: ChartDimensions,
 ): IndexedGeometry[] {
   if (isValidPointerOverEvent(scales.xScale, externalPointerEvent)) {
     const x = scales.xScale.pureScale(externalPointerEvent.value);
@@ -70,10 +66,15 @@ function getElementAtCursorPosition(
     // TODO: Handle external event with spatial points
     return geometriesIndex.find(externalPointerEvent.value, { x: -1, y: -1 });
   }
-  const xValue = scales.xScale.invertWithStep(orientedProjectedPoinerPosition.x, geometriesIndexKeys);
+  const xValue = scales.xScale.invertWithStep(orientedProjectedPointerPosition.x, geometriesIndexKeys);
   if (!xValue) {
     return [];
   }
   // get the elements at cursor position
-  return geometriesIndex.find(xValue?.value, orientedProjectedPoinerPosition);
+  return geometriesIndex.find(
+    xValue?.value,
+    orientedProjectedPointerPosition,
+    orientedProjectedPointerPosition.horizontalPanelValue,
+    orientedProjectedPointerPosition.verticalPanelValue,
+  );
 }

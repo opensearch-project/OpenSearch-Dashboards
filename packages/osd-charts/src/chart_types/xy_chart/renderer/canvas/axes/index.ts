@@ -18,10 +18,12 @@
  */
 
 import { withContext } from '../../../../../renderers/canvas';
-import { Dimensions } from '../../../../../utils/dimensions';
-import { AxisId } from '../../../../../utils/ids';
+import { Dimensions, Size } from '../../../../../utils/dimensions';
+import { Point } from '../../../../../utils/point';
 import { AxisStyle } from '../../../../../utils/themes/theme';
+import { PerPanelAxisGeoms } from '../../../state/selectors/compute_per_panel_axes_geoms';
 import { getSpecsById } from '../../../state/utils/spec';
+import { isVerticalAxis } from '../../../utils/axis_type_utils';
 import { AxisTick, AxisTicksDimensions, shouldShowTicks } from '../../../utils/axis_utils';
 import { AxisSpec } from '../../../utils/specs';
 import { renderDebugRect } from '../utils/debug';
@@ -32,73 +34,80 @@ import { renderTitle } from './title';
 
 /** @internal */
 export interface AxisProps {
+  title?: string;
+  panelAnchor: Point;
   axisStyle: AxisStyle;
   axisSpec: AxisSpec;
-  axisTicksDimensions: AxisTicksDimensions;
-  axisPosition: Dimensions;
+  size: Size;
+  anchorPoint: Point;
+  dimension: AxisTicksDimensions;
   ticks: AxisTick[];
   debug: boolean;
-  chartDimensions: Dimensions;
+  renderingArea: Dimensions;
 }
 
 /** @internal */
 export interface AxesProps {
-  axesVisibleTicks: Map<AxisId, AxisTick[]>;
   axesSpecs: AxisSpec[];
-  axesTicksDimensions: Map<AxisId, AxisTicksDimensions>;
-  axesPositions: Map<AxisId, Dimensions>;
+  perPanelAxisGeoms: PerPanelAxisGeoms[];
   axesStyles: Map<string, AxisStyle | null>;
   sharedAxesStyle: AxisStyle;
   debug: boolean;
-  chartDimensions: Dimensions;
+  renderingArea: Dimensions;
 }
 
 /** @internal */
 export function renderAxes(ctx: CanvasRenderingContext2D, props: AxesProps) {
-  const {
-    axesVisibleTicks,
-    axesSpecs,
-    axesTicksDimensions,
-    axesPositions,
-    axesStyles,
-    sharedAxesStyle,
-    debug,
-    chartDimensions,
-  } = props;
-  axesVisibleTicks.forEach((ticks, axisId) => {
-    const axisSpec = getSpecsById<AxisSpec>(axesSpecs, axisId);
-    const axisTicksDimensions = axesTicksDimensions.get(axisId);
-    const axisPosition = axesPositions.get(axisId);
+  const { axesSpecs, perPanelAxisGeoms, axesStyles, sharedAxesStyle, debug, renderingArea } = props;
+  perPanelAxisGeoms.forEach(({ axesGeoms, panelAnchor }) => {
+    withContext(ctx, (ctx) => {
+      axesGeoms.forEach((geometry) => {
+        const {
+          axis: { title, id, position },
+          anchorPoint,
+          size,
+          dimension,
+          visibleTicks: ticks,
+        } = geometry;
+        const axisSpec = getSpecsById<AxisSpec>(axesSpecs, id);
 
-    if (!ticks || !axisSpec || !axisTicksDimensions || !axisPosition || axisSpec.hide) {
-      return;
-    }
+        if (!axisSpec || !dimension || !position || axisSpec.hide) {
+          return;
+        }
 
-    const axisStyle = axesStyles.get(axisSpec.id) ?? sharedAxesStyle;
-
-    renderAxis(ctx, {
-      axisSpec,
-      axisTicksDimensions,
-      axisPosition,
-      ticks,
-      axisStyle,
-      debug,
-      chartDimensions,
+        const axisStyle = axesStyles.get(axisSpec.id) ?? sharedAxesStyle;
+        renderAxis(ctx, {
+          title,
+          panelAnchor,
+          axisSpec,
+          anchorPoint,
+          size,
+          dimension,
+          ticks,
+          axisStyle,
+          debug,
+          renderingArea,
+        });
+      });
     });
   });
 }
 
 function renderAxis(ctx: CanvasRenderingContext2D, props: AxisProps) {
   withContext(ctx, (ctx) => {
-    const { ticks, axisPosition, debug, axisStyle, axisSpec } = props;
+    const { ticks, size, anchorPoint, debug, axisStyle, axisSpec, panelAnchor } = props;
     const showTicks = shouldShowTicks(axisStyle.tickLine, axisSpec.hide);
-    ctx.translate(axisPosition.left, axisPosition.top);
+    const isVertical = isVerticalAxis(axisSpec.position);
+    const translate = {
+      y: isVertical ? anchorPoint.y + panelAnchor.y : anchorPoint.y,
+      x: isVertical ? anchorPoint.x : anchorPoint.x + panelAnchor.x,
+    };
+    ctx.translate(translate.x, translate.y);
     if (debug) {
       renderDebugRect(ctx, {
         x: 0,
         y: 0,
-        width: axisPosition.width,
-        height: axisPosition.height,
+        ...size,
       });
     }
 

@@ -22,30 +22,28 @@ import createCachedSelector from 're-reselect';
 import { SettingsSpec } from '../../../../specs/settings';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { Dimensions } from '../../../../utils/dimensions';
-import { Point } from '../../../../utils/point';
 import { getOrientedXPosition, getOrientedYPosition } from '../../utils/interactions';
-import { computeChartDimensionsSelector } from './compute_chart_dimensions';
-import { getProjectedPointerPositionSelector } from './get_projected_pointer_position';
+import { getPanelSize } from '../../utils/panel';
+import { computeSmallMultipleScalesSelector, SmallMultipleScales } from './compute_small_multiple_scales';
+import { getProjectedPointerPositionSelector, PointerPosition } from './get_projected_pointer_position';
 
 /** @internal */
 export const getOrientedProjectedPointerPositionSelector = createCachedSelector(
-  [getProjectedPointerPositionSelector, computeChartDimensionsSelector, getSettingsSpecSelector],
+  [getProjectedPointerPositionSelector, getSettingsSpecSelector, computeSmallMultipleScalesSelector],
   getOrientedProjectedPointerPosition,
 )(getChartIdSelector);
 
 function getOrientedProjectedPointerPosition(
-  projectedPointerPosition: Point,
-  chartDimensions: { chartDimensions: Dimensions },
+  { x, y, horizontalPanelValue, verticalPanelValue }: PointerPosition,
   settingsSpec: SettingsSpec,
-): Point {
-  const xPos = projectedPointerPosition.x;
-  const yPos = projectedPointerPosition.y;
+  scales: SmallMultipleScales,
+): PointerPosition {
   // get the oriented projected pointer position
-  const x = getOrientedXPosition(xPos, yPos, settingsSpec.rotation, chartDimensions.chartDimensions);
-  const y = getOrientedYPosition(xPos, yPos, settingsSpec.rotation, chartDimensions.chartDimensions);
+  const panel = getPanelSize(scales);
   return {
-    x,
-    y,
+    x: getOrientedXPosition(x, y, settingsSpec.rotation, panel),
+    y: getOrientedYPosition(x, y, settingsSpec.rotation, panel),
+    horizontalPanelValue,
+    verticalPanelValue,
   };
 }

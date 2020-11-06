@@ -18,10 +18,9 @@
  */
 
 import { LegendItem } from '../../../commons/legend';
-import { MockDataSeries } from '../../../mocks';
+import { MockBarGeometry, MockDataSeries, MockPointGeometry } from '../../../mocks';
 import { MockScale } from '../../../mocks/scale';
 import { mergePartial, RecursivePartial } from '../../../utils/commons';
-import { BarGeometry, PointGeometry } from '../../../utils/geometry';
 import { BarSeriesStyle, SharedGeometryStateStyle, PointStyle } from '../../../utils/themes/theme';
 import { DataSeriesDatum, XYChartSeriesIdentifier } from '../utils/series';
 import {
@@ -53,7 +52,7 @@ describe('Rendering utils', () => {
       },
     };
 
-    const geometry: BarGeometry = {
+    const geometry = MockBarGeometry.default({
       color: 'red',
       seriesIdentifier: {
         specId: 'id',
@@ -74,7 +73,7 @@ describe('Rendering utils', () => {
       width: 10,
       height: 10,
       seriesStyle,
-    };
+    });
     expect(isPointOnGeometry(0, 0, geometry)).toBe(true);
     expect(isPointOnGeometry(10, 10, geometry)).toBe(true);
     expect(isPointOnGeometry(0, 10, geometry)).toBe(true);
@@ -84,7 +83,7 @@ describe('Rendering utils', () => {
     expect(isPointOnGeometry(11, 11, geometry)).toBe(false);
   });
   test('check if point is on point geometry', () => {
-    const geometry: PointGeometry = {
+    const geometry = MockPointGeometry.default({
       color: 'red',
       seriesIdentifier: {
         specId: 'id',
@@ -107,7 +106,7 @@ describe('Rendering utils', () => {
       x: 0,
       y: 0,
       radius: 10,
-    };
+    });
     // with buffer
     expect(isPointOnGeometry(10, 10, geometry, 10)).toBe(true);
     expect(isPointOnGeometry(20, 20, geometry, 5)).toBe(false);
@@ -169,36 +168,36 @@ describe('Rendering utils', () => {
     };
 
     it('no highlighted elements', () => {
-      const defaultStyle = getGeometryStateStyle(seriesIdentifier, null, sharedThemeStyle);
+      const defaultStyle = getGeometryStateStyle(seriesIdentifier, sharedThemeStyle);
       expect(defaultStyle).toBe(sharedThemeStyle.default);
     });
 
     it('should equal highlighted opacity', () => {
-      const highlightedStyle = getGeometryStateStyle(seriesIdentifier, highlightedLegendItem, sharedThemeStyle);
+      const highlightedStyle = getGeometryStateStyle(seriesIdentifier, sharedThemeStyle, highlightedLegendItem);
       expect(highlightedStyle).toBe(sharedThemeStyle.highlighted);
     });
 
     it('should equal unhighlighted when not highlighted item', () => {
-      const unhighlightedStyle = getGeometryStateStyle(seriesIdentifier, unhighlightedLegendItem, sharedThemeStyle);
+      const unhighlightedStyle = getGeometryStateStyle(seriesIdentifier, sharedThemeStyle, unhighlightedLegendItem);
       expect(unhighlightedStyle).toBe(sharedThemeStyle.unhighlighted);
     });
 
     it('should equal custom spec highlighted opacity', () => {
-      const customHighlightedStyle = getGeometryStateStyle(seriesIdentifier, highlightedLegendItem, sharedThemeStyle);
+      const customHighlightedStyle = getGeometryStateStyle(seriesIdentifier, sharedThemeStyle, highlightedLegendItem);
       expect(customHighlightedStyle).toBe(sharedThemeStyle.highlighted);
     });
 
     it('unhighlighted elements remain unchanged with custom opacity', () => {
       const customUnhighlightedStyle = getGeometryStateStyle(
         seriesIdentifier,
-        unhighlightedLegendItem,
         sharedThemeStyle,
+        unhighlightedLegendItem,
       );
       expect(customUnhighlightedStyle).toBe(sharedThemeStyle.unhighlighted);
     });
 
     it('has individual highlight', () => {
-      const hasIndividualHighlight = getGeometryStateStyle(seriesIdentifier, null, sharedThemeStyle, {
+      const hasIndividualHighlight = getGeometryStateStyle(seriesIdentifier, sharedThemeStyle, undefined, {
         hasHighlight: true,
         hasGeometryHover: true,
       });
@@ -206,7 +205,7 @@ describe('Rendering utils', () => {
     });
 
     it('no highlight', () => {
-      const noHighlight = getGeometryStateStyle(seriesIdentifier, null, sharedThemeStyle, {
+      const noHighlight = getGeometryStateStyle(seriesIdentifier, sharedThemeStyle, undefined, {
         hasHighlight: false,
         hasGeometryHover: true,
       });
@@ -214,7 +213,7 @@ describe('Rendering utils', () => {
     });
 
     it('no geometry hover', () => {
-      const noHover = getGeometryStateStyle(seriesIdentifier, null, sharedThemeStyle, {
+      const noHover = getGeometryStateStyle(seriesIdentifier, sharedThemeStyle, undefined, {
         hasHighlight: true,
         hasGeometryHover: false,
       });

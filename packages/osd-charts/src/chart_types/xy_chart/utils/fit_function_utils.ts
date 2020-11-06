@@ -25,14 +25,11 @@ import { isAreaSeriesSpec, isLineSeriesSpec, SeriesSpecs, BasicSeriesSpec } from
 
 /** @internal */
 export const applyFitFunctionToDataSeries = (
-  dataseries: DataSeries[],
+  dataSeries: DataSeries[],
   seriesSpecs: SeriesSpecs,
   xScaleType: ScaleType,
 ): DataSeries[] => {
-  const len = dataseries.length;
-  const formattedValues: DataSeries[] = [];
-  for (let i = 0; i < len; i++) {
-    const { specId, data, ...rest } = dataseries[i];
+  return dataSeries.map(({ specId, data, ...rest }) => {
     const spec = getSpecsById<BasicSeriesSpec>(seriesSpecs, specId);
 
     if (
@@ -43,14 +40,12 @@ export const applyFitFunctionToDataSeries = (
     ) {
       const fittedData = fitFunction(data, spec.fit, xScaleType);
 
-      formattedValues.push({
+      return {
         specId,
         ...rest,
         data: fittedData,
-      });
-    } else {
-      formattedValues.push({ specId, data, ...rest });
+      };
     }
-  }
-  return formattedValues;
+    return { specId, data, ...rest };
+  });
 };

@@ -43,13 +43,13 @@ export function computeLineAnnotationTooltipState(
   if (!annotationAxis) {
     return null;
   }
-
+  // get cursor point relative to the rendering area (within the chartDimension margins)
   const projectedPointer = getTransformedCursor(cursorPosition, chartDimensions, null, true);
   const totalAnnotationLines = annotationLines.length;
   for (let i = 0; i < totalAnnotationLines; i++) {
     const line = annotationLines[i];
 
-    if (isWithinLineMarkerBounds(projectedPointer, line.marker)) {
+    if (isWithinLineMarkerBounds(projectedPointer, line.panel, line.marker)) {
       const position = invertTranformedCursor(
         {
           x: line.marker.position.left,
@@ -63,8 +63,8 @@ export function computeLineAnnotationTooltipState(
         annotationType: AnnotationTypes.Line,
         isVisible: true,
         anchor: {
-          top: position.y,
-          left: position.x,
+          top: position.y + line.panel.top,
+          left: position.x + line.panel.left,
           ...line.marker.dimension,
         },
         ...(line.details && { header: line.details.headerText }),
@@ -79,15 +79,26 @@ export function computeLineAnnotationTooltipState(
 /**
  * Checks if the cursorPosition is within the line annotation marker
  * @param cursorPosition the cursor position relative to the projected area
+ * @param panel
  * @param marker the line annotation marker
  */
-function isWithinLineMarkerBounds(cursorPosition: Point, marker?: AnnotationMarker): marker is AnnotationMarker {
+function isWithinLineMarkerBounds(
+  cursorPosition: Point,
+  panel: Dimensions,
+  marker?: AnnotationMarker,
+): marker is AnnotationMarker {
   if (!marker) {
     return false;
   }
-
-  const { top, left } = marker.position;
-  const { width, height } = marker.dimension;
-  const markerRect: Bounds = { startX: left, startY: top, endX: left + width, endY: top + height };
+  const {
+    position: { top, left },
+    dimension: { width, height },
+  } = marker;
+  const markerRect: Bounds = {
+    startX: left + panel.left,
+    startY: top + panel.top,
+    endX: left + panel.left + width,
+    endY: top + panel.top + height,
+  };
   return isWithinRectBounds(cursorPosition, markerRect);
 }

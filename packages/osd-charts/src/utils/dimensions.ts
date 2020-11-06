@@ -24,6 +24,11 @@ export interface Dimensions {
   height: number;
 }
 
+export interface Size {
+  width: number;
+  height: number;
+}
+
 // fixme consider switching from `number` to `Pixels` or similar, once nominal typing is added
 export interface PerSideDistance {
   top: number;

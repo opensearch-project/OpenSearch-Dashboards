@@ -25,11 +25,6 @@ import { Point } from '../../../utils/point';
 import { isHorizontalRotation, isVerticalRotation } from '../state/utils/common';
 import { ChartDimensions } from '../utils/dimensions';
 
-export interface SnappedPosition {
-  position: number;
-  band: number;
-}
-
 export const DEFAULT_SNAP_POSITION_BAND = 1;
 
 /** @internal */
@@ -71,7 +66,7 @@ export function getCursorLinePosition(
   const { left, top, width, height } = chartDimensions;
   const isHorizontalRotated = isHorizontalRotation(chartRotation);
   if (isHorizontalRotated) {
-    const crosshairTop = projectedPointerPosition.y + top;
+    const crosshairTop = y + top;
     return {
       left,
       width,
@@ -79,7 +74,7 @@ export function getCursorLinePosition(
       height: 0,
     };
   }
-  const crosshairLeft = projectedPointerPosition.x + left;
+  const crosshairLeft = x + left;
 
   return {
     top,
@@ -92,7 +87,7 @@ export function getCursorLinePosition(
 /** @internal */
 export function getCursorBandPosition(
   chartRotation: Rotation,
-  chartDimensions: Dimensions,
+  panel: Dimensions,
   cursorPosition: Point,
   invertedValue: {
     value: any;
@@ -102,7 +97,7 @@ export function getCursorBandPosition(
   xScale: Scale,
   totalBarsInCluster?: number,
 ): Dimensions & { visible: boolean } {
-  const { top, left, width, height } = chartDimensions;
+  const { top, left, width, height } = panel;
   const { x, y } = cursorPosition;
   const isHorizontalRotated = isHorizontalRotation(chartRotation);
   const chartWidth = isHorizontalRotated ? width : height;
@@ -169,26 +164,15 @@ export function getCursorBandPosition(
 
 /** @internal */
 export function getTooltipAnchorPosition(
-  { chartDimensions, offset }: ChartDimensions,
+  { offset }: ChartDimensions,
   chartRotation: Rotation,
   cursorBandPosition: Dimensions,
   cursorPosition: { x: number; y: number },
+  panel: Dimensions,
 ): TooltipAnchorPosition {
   const isRotated = isVerticalRotation(chartRotation);
-  const hPosition = getHorizontalTooltipPosition(
-    cursorPosition.x,
-    cursorBandPosition,
-    chartDimensions,
-    offset.left,
-    isRotated,
-  );
-  const vPosition = getVerticalTooltipPosition(
-    cursorPosition.y,
-    cursorBandPosition,
-    chartDimensions,
-    offset.top,
-    isRotated,
-  );
+  const hPosition = getHorizontalTooltipPosition(cursorPosition.x, cursorBandPosition, panel, offset.left, isRotated);
+  const vPosition = getVerticalTooltipPosition(cursorPosition.y, cursorBandPosition, panel, offset.top, isRotated);
   return {
     isRotated,
     ...vPosition,
@@ -199,7 +183,7 @@ export function getTooltipAnchorPosition(
 function getHorizontalTooltipPosition(
   cursorXPosition: number,
   cursorBandPosition: Dimensions,
-  chartDimensions: Dimensions,
+  panel: Dimensions,
   globalOffset: number,
   isRotated: boolean,
 ): { x0?: number; x1: number } {
@@ -211,15 +195,15 @@ function getHorizontalTooltipPosition(
   }
   return {
     // NOTE: x0 set to zero blocks tooltip placement on left when rotated 90 deg
-    // Delete this comment before merging and verifing this doesn't break anything.
-    x1: chartDimensions.left + cursorXPosition + globalOffset,
+    // Delete this comment before merging and verifying this doesn't break anything.
+    x1: panel.left + cursorXPosition + globalOffset,
   };
 }
 
 function getVerticalTooltipPosition(
   cursorYPosition: number,
   cursorBandPosition: Dimensions,
-  chartDimensions: Dimensions,
+  panel: Dimensions,
   globalOffset: number,
   isRotated: boolean,
 ): {
@@ -227,7 +211,7 @@ function getVerticalTooltipPosition(
   y1: number;
 } {
   if (!isRotated) {
-    const y = cursorYPosition + chartDimensions.top + globalOffset;
+    const y = cursorYPosition + panel.top + globalOffset;
     return {
       y0: y,
       y1: y,

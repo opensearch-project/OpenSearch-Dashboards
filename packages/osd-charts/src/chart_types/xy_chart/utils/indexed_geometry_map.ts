@@ -22,6 +22,7 @@ import { $Values } from 'utility-types';
 import { Bounds } from '../../../utils/d3-delaunay';
 import { IndexedGeometry, isPointGeometry } from '../../../utils/geometry';
 import { Point } from '../../../utils/point';
+import { PrimitiveValue } from '../../partition_chart/layout/utils/group_by_rollup';
 import { IndexedGeometryLinearMap } from './indexed_geometry_linear_map';
 import { IndexedGeometrySpatialMap } from './indexed_geometry_spatial_map';
 
@@ -64,14 +65,25 @@ export class IndexedGeometryMap {
     }
   }
 
-  find(x: number | string | null, point?: Point): IndexedGeometry[] {
+  find(
+    x: number | string | null,
+    point?: Point,
+    smHorizontalValue?: PrimitiveValue,
+    smVerticalValue?: PrimitiveValue,
+  ): IndexedGeometry[] {
     if (x === null && !point) {
       return [];
     }
 
     const spatialValues = point === undefined ? [] : this.spatialMap.find(point);
 
-    return [...this.linearMap.find(x), ...spatialValues];
+    const values = [...this.linearMap.find(x), ...spatialValues];
+    if (!smHorizontalValue || !smVerticalValue) {
+      return values;
+    }
+    return values.filter(({ seriesIdentifier: { smHorizontalAccessorValue, smVerticalAccessorValue } }) => {
+      return smVerticalAccessorValue === smVerticalValue && smHorizontalAccessorValue === smHorizontalValue;
+    });
   }
 
   getMergeData() {

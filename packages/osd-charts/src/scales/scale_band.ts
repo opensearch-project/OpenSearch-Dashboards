@@ -53,16 +53,24 @@ export class ScaleBand implements Scale {
      * A number between 0 and 1.
      * @defaultValue 0
      */
-    barsPadding = 0,
+    barsPadding: number | [number, number] = 0,
   ) {
     this.type = ScaleType.Ordinal;
     this.d3Scale = scaleBand<NonNullable<PrimitiveValue>>();
     this.d3Scale.domain(domain);
     this.d3Scale.range(range);
-    const safeBarPadding = maxValueWithUpperLimit(barsPadding, 0, 1);
-    this.barsPadding = safeBarPadding;
-    this.d3Scale.paddingInner(safeBarPadding);
-    this.d3Scale.paddingOuter(safeBarPadding / 2);
+    let safeBarPadding = 0;
+    if (Array.isArray(barsPadding)) {
+      this.d3Scale.paddingInner(barsPadding[1]);
+      this.d3Scale.paddingOuter(barsPadding[0]);
+      this.barsPadding = barsPadding[1];
+    } else {
+      safeBarPadding = maxValueWithUpperLimit(barsPadding, 0, 1);
+      this.d3Scale.paddingInner(safeBarPadding);
+      this.barsPadding = safeBarPadding;
+      this.d3Scale.paddingOuter(safeBarPadding / 2);
+    }
+
     this.outerPadding = this.d3Scale.paddingOuter();
     this.innerPadding = this.d3Scale.paddingInner();
     this.bandwidth = this.d3Scale.bandwidth() || 0;

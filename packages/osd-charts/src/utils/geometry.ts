@@ -21,6 +21,7 @@ import { $Values } from 'utility-types';
 
 import { XYChartSeriesIdentifier } from '../chart_types/xy_chart/utils/series';
 import { Color } from './commons';
+import { Dimensions } from './dimensions';
 import { BarSeriesStyle, PointStyle, AreaStyle, LineStyle, ArcStyle } from './themes/theme';
 
 /**
@@ -65,12 +66,24 @@ export interface PointGeometry {
   seriesIdentifier: XYChartSeriesIdentifier;
   value: GeometryValue;
   styleOverrides?: Partial<PointStyle>;
+  panel: Dimensions;
 }
+
+export interface PerPanel<T> {
+  panel: Dimensions;
+  value: T;
+}
+
 export interface BarGeometry {
   x: number;
   y: number;
   width: number;
   height: number;
+  transform: {
+    x: number;
+    y: number;
+    rotation?: number;
+  };
   color: Color;
   displayValue?: {
     fontScale?: number;
@@ -84,6 +97,7 @@ export interface BarGeometry {
   seriesIdentifier: XYChartSeriesIdentifier;
   value: GeometryValue;
   seriesStyle: BarSeriesStyle;
+  panel: Dimensions;
 }
 
 export interface LineGeometry {

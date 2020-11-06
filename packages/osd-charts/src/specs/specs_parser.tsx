@@ -25,6 +25,7 @@ import { specParsed, specUnmounted } from '../state/actions/specs';
 
 const SpecsParserComponent: React.FunctionComponent = (props) => {
   const injected = props as DispatchProps;
+  // clean all specs
   useEffect(() => {
     injected.specParsed();
   });

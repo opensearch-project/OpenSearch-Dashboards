@@ -20,13 +20,14 @@
 import { Rect, Stroke, Fill } from '../../../../../geoms/types';
 import { withContext, withClipRanges } from '../../../../../renderers/canvas';
 import { ClippedRanges } from '../../../../../utils/geometry';
+import { Point } from '../../../../../utils/point';
 import { RGBtoString } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { MIN_STROKE_WIDTH } from './line';
 
 /** @internal */
 export function renderLinePaths(
   context: CanvasRenderingContext2D,
-  transformX: number,
+  transform: Point,
   linePaths: Array<string>,
   stroke: Stroke,
   clippedRanges: ClippedRanges,
@@ -35,7 +36,7 @@ export function renderLinePaths(
 ) {
   if (clippedRanges.length > 0) {
     withClipRanges(context, clippedRanges, clippings, false, (ctx) => {
-      ctx.translate(transformX, 0);
+      ctx.translate(transform.x, transform.y);
       linePaths.forEach((path) => {
         renderPathStroke(ctx, path, stroke);
       });
@@ -44,7 +45,7 @@ export function renderLinePaths(
       return;
     }
     withClipRanges(context, clippedRanges, clippings, true, (ctx) => {
-      ctx.translate(transformX, 0);
+      ctx.translate(transform.x, transform.y);
       linePaths.forEach((path) => {
         renderPathStroke(ctx, path, { ...stroke, dash: [5, 5] });
       });
@@ -53,7 +54,7 @@ export function renderLinePaths(
   }
 
   withContext(context, (ctx) => {
-    ctx.translate(transformX, 0);
+    ctx.translate(transform.x, transform.y);
     linePaths.forEach((path) => {
       renderPathStroke(ctx, path, stroke);
     });
@@ -63,7 +64,7 @@ export function renderLinePaths(
 /** @internal */
 export function renderAreaPath(
   ctx: CanvasRenderingContext2D,
-  transformX: number,
+  transform: Point,
   area: string,
   fill: Fill,
   clippedRanges: ClippedRanges,
@@ -72,14 +73,14 @@ export function renderAreaPath(
 ) {
   if (clippedRanges.length > 0) {
     withClipRanges(ctx, clippedRanges, clippings, false, (ctx) => {
-      ctx.translate(transformX, 0);
+      ctx.translate(transform.x, transform.y);
       renderPathFill(ctx, area, fill);
     });
     if (hideClippedRanges) {
       return;
     }
     withClipRanges(ctx, clippedRanges, clippings, true, (ctx) => {
-      ctx.translate(transformX, 0);
+      ctx.translate(transform.x, transform.y);
       const { opacity } = fill.color;
       const color = {
         ...fill.color,
@@ -90,7 +91,7 @@ export function renderAreaPath(
     return;
   }
   withContext(ctx, (ctx) => {
-    ctx.translate(transformX, 0);
+    ctx.translate(transform.x, transform.y);
     renderPathFill(ctx, area, fill);
   });
 }

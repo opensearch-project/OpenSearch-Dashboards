@@ -20,6 +20,7 @@
 import createCachedSelector from 're-reselect';
 
 import { ChartTypes } from '../../..';
+import { GroupBySpec, SmallMultiplesSpec } from '../../../../specs';
 import { SpecTypes } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
@@ -35,11 +36,35 @@ export const getAxisSpecsSelector = createCachedSelector([getSpecs], (specs): Ax
 
 /** @internal */
 export const getSeriesSpecsSelector = createCachedSelector([getSpecs], (specs) => {
-  const seriesSpec = getSpecsFromStore<BasicSeriesSpec>(specs, ChartTypes.XYAxis, SpecTypes.Series);
-  return seriesSpec;
+  return getSpecsFromStore<BasicSeriesSpec>(specs, ChartTypes.XYAxis, SpecTypes.Series);
 })(getChartIdSelector);
 
 /** @internal */
 export const getAnnotationSpecsSelector = createCachedSelector([getSpecs], (specs) =>
   getSpecsFromStore<AnnotationSpec>(specs, ChartTypes.XYAxis, SpecTypes.Annotation),
 )(getChartIdSelector);
+
+/** @internal */
+export const getSmallMultiplesIndexOrderSelector = createCachedSelector([getSpecs], (specs) => {
+  const smallMultiples = getSpecsFromStore<SmallMultiplesSpec>(specs, ChartTypes.Global, SpecTypes.SmallMultiples);
+  if (smallMultiples.length !== 1) {
+    return undefined;
+  }
+  const indexOrders = getSpecsFromStore<GroupBySpec>(specs, ChartTypes.Global, SpecTypes.IndexOrder);
+  const [smallMultiplesConfig] = smallMultiples;
+
+  let vertical: GroupBySpec | undefined;
+  let horizontal: GroupBySpec | undefined;
+
+  if (smallMultiplesConfig.splitVertically) {
+    vertical = indexOrders.find((d) => d.id === smallMultiplesConfig.splitVertically);
+  }
+  if (smallMultiplesConfig.splitHorizontally) {
+    horizontal = indexOrders.find((d) => d.id === smallMultiplesConfig.splitHorizontally);
+  }
+
+  return {
+    vertical,
+    horizontal,
+  };
+})(getChartIdSelector);

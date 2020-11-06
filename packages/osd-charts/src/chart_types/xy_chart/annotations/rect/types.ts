@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Dimensions } from '../../../../utils/dimensions';
+
 export interface AnnotationRectProps {
   rect: {
     x: number;
@@ -23,5 +25,6 @@ export interface AnnotationRectProps {
     width: number;
     height: number;
   };
+  panel: Dimensions;
   details?: string;
 }

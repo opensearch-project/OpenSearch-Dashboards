@@ -30,6 +30,7 @@ import { XDomain } from './types';
  * @param specs an array of [{ seriesType, xScaleType }]
  * @param xValues a set of unique x values from all specs
  * @param customXDomain if specified, a custom xDomain
+ * @param fallbackScale
  * @returns a merged XDomain between all series.
  * @internal
  */

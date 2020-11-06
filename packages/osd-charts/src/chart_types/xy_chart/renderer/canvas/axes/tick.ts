@@ -29,13 +29,13 @@ import { renderLine } from '../primitives/line';
 export function renderTick(ctx: CanvasRenderingContext2D, tick: AxisTick, props: AxisProps) {
   const {
     axisSpec: { position },
-    axisPosition,
+    size,
     axisStyle: { tickLine },
   } = props;
   if (isVerticalAxis(position)) {
-    renderVerticalTick(ctx, position, axisPosition.width, tickLine.size, tick.position, tickLine);
+    renderVerticalTick(ctx, position, size.width, tickLine.size, tick.position, tickLine);
   } else {
-    renderHorizontalTick(ctx, position, axisPosition.height, tickLine.size, tick.position, tickLine);
+    renderHorizontalTick(ctx, position, size.height, tickLine.size, tick.position, tickLine);
   }
 }
 

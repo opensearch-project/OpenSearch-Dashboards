@@ -55,13 +55,13 @@ export function renderLayers(ctx: CanvasRenderingContext2D, layers: Array<(ctx: 
 /** @internal */
 export function withClip(
   ctx: CanvasRenderingContext2D,
-  clipppings: Rect,
+  clippings: Rect,
   fun: (ctx: CanvasRenderingContext2D) => void,
   shouldClip = true,
 ) {
   withContext(ctx, (ctx) => {
     if (shouldClip) {
-      const { x, y, width, height } = clipppings;
+      const { x, y, width, height } = clippings;
       ctx.beginPath();
       ctx.rect(x, y, width, height);
       ctx.clip();

@@ -39,12 +39,13 @@ export function computeAnnotationTooltipState(
   chartDimensions: Dimensions,
 ): AnnotationTooltipState | null {
   // allow picking up the last spec added as the top most or use it's zIndex value
-  const sortedSpecs = annotationSpecs
+  const sortedAnnotationSpecs = annotationSpecs
     .slice()
     .reverse()
     .sort(({ zIndex: a = Number.MIN_SAFE_INTEGER }, { zIndex: b = Number.MIN_SAFE_INTEGER }) => b - a);
-  // eslint-disable-next-line no-restricted-syntax
-  for (const spec of sortedSpecs) {
+
+  for (let i = 0; i < sortedAnnotationSpecs.length; i++) {
+    const spec = sortedAnnotationSpecs[i];
     const annotationDimension = annotationDimensions.get(spec.id);
     if (spec.hideTooltips || !annotationDimension) {
       continue;

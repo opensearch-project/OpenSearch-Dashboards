@@ -59,6 +59,7 @@ describe('Computed chart dimensions', () => {
     maxLabelBboxHeight: 10,
     maxLabelTextWidth: 10,
     maxLabelTextHeight: 10,
+    isHidden: false,
   };
   const axisLeftSpec: AxisSpec = {
     chartType: ChartTypes.XYAxis,

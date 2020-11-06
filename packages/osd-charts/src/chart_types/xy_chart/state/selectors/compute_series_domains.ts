@@ -24,16 +24,22 @@ import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { SeriesDomainsAndData } from '../utils/types';
 import { computeSeriesDomains } from '../utils/utils';
-import { getSeriesSpecsSelector } from './get_specs';
+import { getSeriesSpecsSelector, getSmallMultiplesIndexOrderSelector } from './get_specs';
 import { mergeYCustomDomainsByGroupIdSelector } from './merge_y_custom_domains';
 
 const getDeselectedSeriesSelector = (state: GlobalChartState) => state.interactions.deselectedDataSeries;
 
 /** @internal */
 export const computeSeriesDomainsSelector = createCachedSelector(
-  [getSeriesSpecsSelector, mergeYCustomDomainsByGroupIdSelector, getDeselectedSeriesSelector, getSettingsSpecSelector],
-  (seriesSpecs, customYDomainsByGroupId, deselectedDataSeries, settingsSpec): SeriesDomainsAndData => {
-    const domains = computeSeriesDomains(
+  [
+    getSeriesSpecsSelector,
+    mergeYCustomDomainsByGroupIdSelector,
+    getDeselectedSeriesSelector,
+    getSettingsSpecSelector,
+    getSmallMultiplesIndexOrderSelector,
+  ],
+  (seriesSpecs, customYDomainsByGroupId, deselectedDataSeries, settingsSpec, smallMultiples): SeriesDomainsAndData => {
+    return computeSeriesDomains(
       seriesSpecs,
       customYDomainsByGroupId,
       deselectedDataSeries,
@@ -41,7 +47,7 @@ export const computeSeriesDomainsSelector = createCachedSelector(
       settingsSpec.orderOrdinalBinsBy,
       // @ts-ignore blind sort option for vislib
       settingsSpec.enableVislibSeriesSort,
+      smallMultiples,
     );
-    return domains;
   },
 )(getChartIdSelector);

@@ -197,6 +197,12 @@ export class MockSeriesSpec {
     });
   }
 
+  static bubble(partial?: Partial<BubbleSeriesSpec>): BubbleSeriesSpec {
+    return mergePartial<BubbleSeriesSpec>(MockSeriesSpec.bubbleBase, partial as RecursivePartial<BubbleSeriesSpec>, {
+      mergeOptionalPartialValues: true,
+    });
+  }
+
   static sunburst(partial?: Partial<PartitionSpec>): PartitionSpec {
     return mergePartial<PartitionSpec>(MockSeriesSpec.sunburstBase, partial as RecursivePartial<PartitionSpec>, {
       mergeOptionalPartialValues: true,
@@ -272,7 +278,6 @@ export class MockGlobalSpec {
     showOverlappingTicks: false,
     showOverlappingLabels: false,
     position: Position.Left,
-    tickFormat: (tick: any) => `${tick}`,
   };
 
   private static readonly settingsBaseNoMargings: SettingsSpec = {

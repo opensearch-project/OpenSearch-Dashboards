@@ -17,12 +17,13 @@
  * under the License.
  */
 
+import { Rect } from '../../../../geoms/types';
 import { Rotation } from '../../../../utils/commons';
 import { Dimensions } from '../../../../utils/dimensions';
 import { Point } from '../../../../utils/point';
+import { isHorizontalRotation } from '../../state/utils/common';
 import { AnnotationTypes } from '../../utils/specs';
 import { AnnotationTooltipState, Bounds } from '../types';
-import { getTransformedCursor } from '../utils';
 import { isWithinRectBounds } from './dimensions';
 import { AnnotationRectProps } from './types';
 
@@ -30,20 +31,23 @@ import { AnnotationRectProps } from './types';
 export function computeRectAnnotationTooltipState(
   cursorPosition: Point,
   annotationRects: AnnotationRectProps[],
-  chartRotation: Rotation,
+  rotation: Rotation,
   chartDimensions: Dimensions,
 ): AnnotationTooltipState | null {
-  const rotatedProjectedCursorPosition = getTransformedCursor(cursorPosition, chartDimensions, chartRotation, true);
   const totalAnnotationRect = annotationRects.length;
+
   for (let i = 0; i < totalAnnotationRect; i++) {
     const rectProps = annotationRects[i];
-    const { rect, details } = rectProps;
-    const startX = rect.x;
+    const { details, panel } = rectProps;
+
+    const rect = transformRotateRect(rectProps.rect, rotation, panel);
+
+    const startX = rect.x + chartDimensions.left + panel.left;
     const endX = startX + rect.width;
-    const startY = rect.y;
+    const startY = rect.y + chartDimensions.top + panel.top;
     const endY = startY + rect.height;
     const bounds: Bounds = { startX, endX, startY, endY };
-    const isWithinBounds = isWithinRectBounds(rotatedProjectedCursorPosition, bounds);
+    const isWithinBounds = isWithinRectBounds(cursorPosition, bounds);
     if (isWithinBounds) {
       return {
         isVisible: true,
@@ -58,4 +62,37 @@ export function computeRectAnnotationTooltipState(
   }
 
   return null;
+}
+
+function transformRotateRect(rect: Rect, rotation: Rotation, dim: Dimensions): Rect {
+  const isHorizontalRotated = isHorizontalRotation(rotation);
+  const width = isHorizontalRotated ? dim.width : dim.height;
+  const height = isHorizontalRotated ? dim.height : dim.width;
+
+  switch (rotation) {
+    case 90:
+      return {
+        x: height - rect.height - rect.y,
+        y: rect.x,
+        width: rect.height,
+        height: rect.width,
+      };
+    case -90:
+      return {
+        x: rect.y,
+        y: width - rect.x - rect.width,
+        width: rect.height,
+        height: rect.width,
+      };
+    case 180:
+      return {
+        x: width - rect.x - rect.width,
+        y: height - rect.y - rect.height,
+        width: rect.width,
+        height: rect.height,
+      };
+    case 0:
+    default:
+      return rect;
+  }
 }

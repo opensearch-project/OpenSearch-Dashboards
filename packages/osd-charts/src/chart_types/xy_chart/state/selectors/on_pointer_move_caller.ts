@@ -27,10 +27,10 @@ import { PointerEventType } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { Point } from '../../../../utils/point';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';
 import { getGeometriesIndexKeysSelector } from './get_geometries_index_keys';
 import { getOrientedProjectedPointerPositionSelector } from './get_oriented_projected_pointer_position';
+import { PointerPosition } from './get_projected_pointer_position';
 
 const getPointerEventSelector = createCachedSelector(
   [
@@ -45,7 +45,7 @@ const getPointerEventSelector = createCachedSelector(
 
 function getPointerEvent(
   chartId: string,
-  orientedProjectedPoinerPosition: Point,
+  orientedProjectedPointerPosition: PointerPosition,
   xScale: Scale | undefined,
   geometriesIndexKeys: any[],
 ): PointerEvent {
@@ -56,7 +56,7 @@ function getPointerEvent(
       type: PointerEventType.Out,
     };
   }
-  const { x, y } = orientedProjectedPoinerPosition;
+  const { x, y } = orientedProjectedPointerPosition;
   if (x === -1 || y === -1) {
     return {
       chartId,
@@ -122,7 +122,7 @@ export function createOnPointerMoveCaller(): (state: GlobalChartState) => void {
           const tempPrev = {
             ...prevPointerEvent,
           };
-          // we have to update the prevPointerEvents before possiibly calling the onPointerUpdate
+          // we have to update the prevPointerEvents before possibly calling the onPointerUpdate
           // to avoid a recursive loop of calls caused by the impossibility to update the prevPointerEvent
           prevPointerEvent = nextPointerEvent;
           if (settings && settings.onPointerUpdate && hasPointerEventChanged(tempPrev, nextPointerEvent)) {

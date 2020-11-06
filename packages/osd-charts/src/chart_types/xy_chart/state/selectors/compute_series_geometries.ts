@@ -24,8 +24,8 @@ import { getChartThemeSelector } from '../../../../state/selectors/get_chart_the
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { ComputedGeometries } from '../utils/types';
 import { computeSeriesGeometries } from '../utils/utils';
-import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { computeSeriesDomainsSelector } from './compute_series_domains';
+import { computeSmallMultipleScalesSelector } from './compute_small_multiple_scales';
 import { getSeriesColorsSelector } from './get_series_color_map';
 import { getSeriesSpecsSelector, getAxisSpecsSelector } from './get_specs';
 import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
@@ -38,8 +38,8 @@ export const computeSeriesGeometriesSelector = createCachedSelector(
     computeSeriesDomainsSelector,
     getSeriesColorsSelector,
     getChartThemeSelector,
-    computeChartDimensionsSelector,
     getAxisSpecsSelector,
+    computeSmallMultipleScalesSelector,
     isHistogramModeEnabledSelector,
   ],
   (
@@ -48,21 +48,18 @@ export const computeSeriesGeometriesSelector = createCachedSelector(
     seriesDomainsAndData,
     seriesColors,
     chartTheme,
-    chartDimensions,
     axesSpecs,
+    smallMultiplesScales,
     isHistogramMode,
   ): ComputedGeometries => {
-    const { xDomain, yDomain, formattedDataSeries } = seriesDomainsAndData;
     return computeSeriesGeometries(
       seriesSpecs,
-      xDomain,
-      yDomain,
-      formattedDataSeries,
+      seriesDomainsAndData,
       seriesColors,
       chartTheme,
-      chartDimensions.chartDimensions,
       settingsSpec.rotation,
       axesSpecs,
+      smallMultiplesScales,
       isHistogramMode,
     );
   },

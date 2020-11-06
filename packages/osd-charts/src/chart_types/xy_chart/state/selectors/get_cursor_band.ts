@@ -21,20 +21,22 @@ import createCachedSelector from 're-reselect';
 
 import { Scale } from '../../../../scales';
 import { SettingsSpec, PointerEvent } from '../../../../specs/settings';
+import { DEFAULT_SINGLE_PANEL_SM_VALUE } from '../../../../specs/small_multiples';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { Dimensions } from '../../../../utils/dimensions';
 import { isValidPointerOverEvent } from '../../../../utils/events';
-import { Point } from '../../../../utils/point';
 import { getCursorBandPosition } from '../../crosshair/crosshair_utils';
 import { BasicSeriesSpec } from '../../utils/specs';
 import { isLineAreaOnlyChart } from '../utils/common';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';
+import { computeSmallMultipleScalesSelector, SmallMultipleScales } from './compute_small_multiple_scales';
 import { countBarsInClusterSelector } from './count_bars_in_cluster';
 import { getGeometriesIndexKeysSelector } from './get_geometries_index_keys';
 import { getOrientedProjectedPointerPositionSelector } from './get_oriented_projected_pointer_position';
+import { PointerPosition } from './get_projected_pointer_position';
 import { getSeriesSpecsSelector } from './get_specs';
 import { isTooltipSnapEnableSelector } from './is_tooltip_snap_enabled';
 
@@ -52,6 +54,7 @@ export const getCursorBandPositionSelector = createCachedSelector(
     countBarsInClusterSelector,
     isTooltipSnapEnableSelector,
     getGeometriesIndexKeysSelector,
+    computeSmallMultipleScalesSelector,
   ],
   (
     orientedProjectedPointerPosition,
@@ -63,6 +66,7 @@ export const getCursorBandPositionSelector = createCachedSelector(
     totalBarsInCluster,
     isTooltipSnapEnabled,
     geometriesIndexKeys,
+    smallMultipleScales,
   ) =>
     getCursorBand(
       orientedProjectedPointerPosition,
@@ -74,11 +78,12 @@ export const getCursorBandPositionSelector = createCachedSelector(
       totalBarsInCluster,
       isTooltipSnapEnabled,
       geometriesIndexKeys,
+      smallMultipleScales,
     ),
 )(getChartIdSelector);
 
 function getCursorBand(
-  orientedProjectedPoinerPosition: Point,
+  orientedProjectedPointerPosition: PointerPosition,
   externalPointerEvent: PointerEvent | null,
   chartDimensions: Dimensions,
   settingsSpec: SettingsSpec,
@@ -87,37 +92,54 @@ function getCursorBand(
   totalBarsInCluster: number,
   isTooltipSnapEnabled: boolean,
   geometriesIndexKeys: (string | number)[],
+  smallMultipleScales: SmallMultipleScales,
 ): (Dimensions & { visible: boolean; fromExternalEvent: boolean }) | undefined {
-  // update che cursorBandPosition based on chart configuration
-  const isLineAreaOnly = isLineAreaOnlyChart(seriesSpecs);
   if (!xScale) {
     return;
   }
-  let pointerPosition = orientedProjectedPoinerPosition;
+  // update che cursorBandPosition based on chart configuration
+  const isLineAreaOnly = isLineAreaOnlyChart(seriesSpecs);
+
+  let pointerPosition = { ...orientedProjectedPointerPosition };
+
   let xValue;
   let fromExternalEvent = false;
-  // external pointer events takes precendence over the current mouse pointer
+  // external pointer events takes precedence over the current mouse pointer
   if (isValidPointerOverEvent(xScale, externalPointerEvent)) {
     fromExternalEvent = true;
     const x = xScale.pureScale(externalPointerEvent.value);
     if (x == null || x > chartDimensions.width || x < 0) {
       return;
     }
-    pointerPosition = { x, y: 0 };
+    pointerPosition = {
+      x,
+      y: 0,
+      verticalPanelValue: DEFAULT_SINGLE_PANEL_SM_VALUE,
+      horizontalPanelValue: DEFAULT_SINGLE_PANEL_SM_VALUE,
+    };
     xValue = {
       value: externalPointerEvent.value,
       withinBandwidth: true,
     };
   } else {
-    xValue = xScale.invertWithStep(orientedProjectedPoinerPosition.x, geometriesIndexKeys);
+    xValue = xScale.invertWithStep(orientedProjectedPointerPosition.x, geometriesIndexKeys);
     if (!xValue) {
       return;
     }
   }
+  const { horizontal, vertical } = smallMultipleScales;
+  const topPos = vertical.scale(pointerPosition.verticalPanelValue) || 0;
+  const leftPos = horizontal.scale(pointerPosition.horizontalPanelValue) || 0;
 
+  const panel = {
+    width: horizontal.bandwidth,
+    height: vertical.bandwidth,
+    top: chartDimensions.top + topPos,
+    left: chartDimensions.left + leftPos,
+  };
   const cursorBand = getCursorBandPosition(
     settingsSpec.rotation,
-    chartDimensions,
+    panel,
     pointerPosition,
     {
       value: xValue.value,

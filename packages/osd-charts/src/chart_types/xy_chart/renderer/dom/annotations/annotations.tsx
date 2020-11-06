@@ -64,16 +64,15 @@ function renderAnnotationLineMarkers(
   annotationLines: AnnotationLineProps[],
   id: AnnotationId,
 ) {
-  return annotationLines.reduce<JSX.Element[]>((markers, { marker }: AnnotationLineProps, index: number) => {
+  return annotationLines.reduce<JSX.Element[]>((markers, { marker, panel }: AnnotationLineProps, index: number) => {
     if (!marker) {
       return markers;
     }
-
     const { icon, color, position } = marker;
     const style = {
       color,
-      top: chartDimensions.top + position.top,
-      left: chartDimensions.left + position.left,
+      top: chartDimensions.top + position.top + panel.top,
+      left: chartDimensions.left + position.left + panel.left,
     };
 
     markers.push(

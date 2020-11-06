@@ -43,11 +43,12 @@ export function renderTitle(ctx: CanvasRenderingContext2D, props: AxisProps) {
 
 function renderVerticalTitle(ctx: CanvasRenderingContext2D, props: AxisProps) {
   const {
-    axisPosition: { height },
-    axisSpec: { title, position, hide: hideAxis },
-    axisTicksDimensions: { maxLabelBboxWidth },
+    size: { height },
+    axisSpec: { position, hide: hideAxis },
+    dimension: { maxLabelBboxWidth },
     axisStyle: { axisTitle, tickLine, tickLabel },
     debug,
+    title,
   } = props;
   if (!title) {
     return null;
@@ -84,11 +85,12 @@ function renderVerticalTitle(ctx: CanvasRenderingContext2D, props: AxisProps) {
 }
 function renderHorizontalTitle(ctx: CanvasRenderingContext2D, props: AxisProps) {
   const {
-    axisPosition: { width },
-    axisSpec: { title, position, hide: hideAxis },
-    axisTicksDimensions: { maxLabelBboxHeight },
+    size: { width },
+    axisSpec: { position, hide: hideAxis },
+    dimension: { maxLabelBboxHeight },
     axisStyle: { axisTitle, tickLine, tickLabel },
     debug,
+    title,
   } = props;
 
   if (!title) {

@@ -199,7 +199,8 @@ function getTooltipAndHighlightFromValue(
   return {
     tooltip: {
       header,
-      values,
+      // to avoid creating a breaking change because of a different sorting order on tooltip
+      values: values.reverse(),
     },
     highlightedGeometries,
   };

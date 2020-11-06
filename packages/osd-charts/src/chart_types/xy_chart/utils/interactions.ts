@@ -18,7 +18,7 @@
  */
 
 import { Rotation } from '../../../utils/commons';
-import { Dimensions } from '../../../utils/dimensions';
+import { Size } from '../../../utils/dimensions';
 import { BarGeometry, PointGeometry, IndexedGeometry, isPointGeometry, isBarGeometry } from '../../../utils/geometry';
 
 /**
@@ -29,7 +29,7 @@ import { BarGeometry, PointGeometry, IndexedGeometry, isPointGeometry, isBarGeom
  * @param chartDimension the chart dimension
  * @internal
  */
-export function getOrientedXPosition(xPos: number, yPos: number, chartRotation: Rotation, chartDimension: Dimensions) {
+export function getOrientedXPosition(xPos: number, yPos: number, chartRotation: Rotation, chartDimension: Size) {
   switch (chartRotation) {
     case 180:
       return chartDimension.width - xPos;
@@ -44,7 +44,7 @@ export function getOrientedXPosition(xPos: number, yPos: number, chartRotation: 
 }
 
 /** @internal */
-export function getOrientedYPosition(xPos: number, yPos: number, chartRotation: Rotation, chartDimension: Dimensions) {
+export function getOrientedYPosition(xPos: number, yPos: number, chartRotation: Rotation, chartDimension: Size) {
   switch (chartRotation) {
     case 180:
       return chartDimension.height - yPos;

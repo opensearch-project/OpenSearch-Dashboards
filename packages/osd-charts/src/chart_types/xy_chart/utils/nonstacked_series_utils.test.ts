@@ -91,21 +91,15 @@ describe('Non-Stacked Series Utils', () => {
     test('empty data', () => {
       const store = MockStore.default();
       MockStore.addSpecs(EMPTY_DATA_SET, store);
-      const {
-        formattedDataSeries: { nonStacked },
-      } = computeSeriesDomainsSelector(store.getState());
-      expect(nonStacked).toHaveLength(0);
+      const { formattedDataSeries } = computeSeriesDomainsSelector(store.getState());
+      expect(formattedDataSeries).toHaveLength(0);
     });
     test('format data without nulls', () => {
       const store = MockStore.default();
       MockStore.addSpecs(STANDARD_DATA_SET, store);
-      const {
-        formattedDataSeries: {
-          nonStacked: [{ dataSeries }],
-        },
-      } = computeSeriesDomainsSelector(store.getState());
+      const { formattedDataSeries } = computeSeriesDomainsSelector(store.getState());
 
-      expect(dataSeries[0].data[0]).toMatchObject({
+      expect(formattedDataSeries[0].data[0]).toMatchObject({
         initialY0: null,
         initialY1: 10,
         x: 0,
@@ -113,7 +107,7 @@ describe('Non-Stacked Series Utils', () => {
         y1: 10,
         mark: null,
       });
-      expect(dataSeries[1].data[0]).toMatchObject({
+      expect(formattedDataSeries[1].data[0]).toMatchObject({
         initialY0: null,
         initialY1: 20,
         x: 0,
@@ -121,7 +115,7 @@ describe('Non-Stacked Series Utils', () => {
         y1: 20,
         mark: null,
       });
-      expect(dataSeries[2].data[0]).toMatchObject({
+      expect(formattedDataSeries[2].data[0]).toMatchObject({
         initialY0: null,
         initialY1: 30,
         x: 0,
@@ -133,13 +127,9 @@ describe('Non-Stacked Series Utils', () => {
     test('format data with nulls', () => {
       const store = MockStore.default();
       MockStore.addSpecs(WITH_NULL_DATASET, store);
-      const {
-        formattedDataSeries: {
-          nonStacked: [{ dataSeries }],
-        },
-      } = computeSeriesDomainsSelector(store.getState());
+      const { formattedDataSeries } = computeSeriesDomainsSelector(store.getState());
 
-      expect(dataSeries[1].data[0]).toMatchObject({
+      expect(formattedDataSeries[1].data[0]).toMatchObject({
         initialY0: null,
         initialY1: null,
         x: 0,
@@ -151,13 +141,9 @@ describe('Non-Stacked Series Utils', () => {
     test('format data without nulls with y0 values', () => {
       const store = MockStore.default();
       MockStore.addSpecs(STANDARD_DATA_SET_WY0, store);
-      const {
-        formattedDataSeries: {
-          nonStacked: [{ dataSeries }],
-        },
-      } = computeSeriesDomainsSelector(store.getState());
+      const { formattedDataSeries } = computeSeriesDomainsSelector(store.getState());
 
-      expect(dataSeries[0].data[0]).toMatchObject({
+      expect(formattedDataSeries[0].data[0]).toMatchObject({
         initialY0: 2,
         initialY1: 10,
         x: 0,
@@ -165,7 +151,7 @@ describe('Non-Stacked Series Utils', () => {
         y1: 10,
         mark: null,
       });
-      expect(dataSeries[1].data[0]).toMatchObject({
+      expect(formattedDataSeries[1].data[0]).toMatchObject({
         initialY0: 4,
         initialY1: 20,
         x: 0,
@@ -173,7 +159,7 @@ describe('Non-Stacked Series Utils', () => {
         y1: 20,
         mark: null,
       });
-      expect(dataSeries[2].data[0]).toMatchObject({
+      expect(formattedDataSeries[2].data[0]).toMatchObject({
         initialY0: 6,
         initialY1: 30,
         x: 0,
@@ -185,13 +171,9 @@ describe('Non-Stacked Series Utils', () => {
     test('format data with nulls - fit functions', () => {
       const store = MockStore.default();
       MockStore.addSpecs(WITH_NULL_DATASET_WY0, store);
-      const {
-        formattedDataSeries: {
-          nonStacked: [{ dataSeries }],
-        },
-      } = computeSeriesDomainsSelector(store.getState());
+      const { formattedDataSeries } = computeSeriesDomainsSelector(store.getState());
 
-      expect(dataSeries[0].data[0]).toMatchObject({
+      expect(formattedDataSeries[0].data[0]).toMatchObject({
         initialY0: 2,
         initialY1: 10,
         x: 0,
@@ -199,7 +181,7 @@ describe('Non-Stacked Series Utils', () => {
         y1: 10,
         mark: null,
       });
-      expect(dataSeries[1].data[0]).toMatchObject({
+      expect(formattedDataSeries[1].data[0]).toMatchObject({
         initialY0: null,
         initialY1: null,
         x: 0,
@@ -207,7 +189,7 @@ describe('Non-Stacked Series Utils', () => {
         y0: null,
         mark: null,
       });
-      expect(dataSeries[2].data[0]).toMatchObject({
+      expect(formattedDataSeries[2].data[0]).toMatchObject({
         initialY0: 6,
         initialY1: 30,
         x: 0,
@@ -219,19 +201,15 @@ describe('Non-Stacked Series Utils', () => {
     test('format data without nulls on second series', () => {
       const store = MockStore.default();
       MockStore.addSpecs(DATA_SET_WITH_NULL_2, store);
-      const {
-        formattedDataSeries: {
-          nonStacked: [{ dataSeries }],
-        },
-      } = computeSeriesDomainsSelector(store.getState());
+      const { formattedDataSeries } = computeSeriesDomainsSelector(store.getState());
 
-      expect(dataSeries.length).toBe(2);
+      expect(formattedDataSeries.length).toBe(2);
       // this because linear non stacked area/lines doesn't fill up the dataset
       // with missing x data points
-      expect(dataSeries[0].data.length).toBe(3);
-      expect(dataSeries[1].data.length).toBe(2);
+      expect(formattedDataSeries[0].data.length).toBe(3);
+      expect(formattedDataSeries[1].data.length).toBe(2);
 
-      expect(dataSeries[0].data[0]).toMatchObject({
+      expect(formattedDataSeries[0].data[0]).toMatchObject({
         initialY0: null,
         initialY1: 1,
         x: 1,
@@ -239,7 +217,7 @@ describe('Non-Stacked Series Utils', () => {
         y1: 1,
         mark: null,
       });
-      expect(dataSeries[0].data[1]).toMatchObject({
+      expect(formattedDataSeries[0].data[1]).toMatchObject({
         initialY0: null,
         initialY1: 2,
         x: 2,
@@ -247,7 +225,7 @@ describe('Non-Stacked Series Utils', () => {
         y1: 2,
         mark: null,
       });
-      expect(dataSeries[0].data[2]).toMatchObject({
+      expect(formattedDataSeries[0].data[2]).toMatchObject({
         initialY0: null,
         initialY1: 4,
         x: 4,
@@ -255,7 +233,7 @@ describe('Non-Stacked Series Utils', () => {
         y1: 4,
         mark: null,
       });
-      expect(dataSeries[1].data[0]).toMatchObject({
+      expect(formattedDataSeries[1].data[0]).toMatchObject({
         initialY0: null,
         initialY1: 21,
         x: 1,
@@ -263,7 +241,7 @@ describe('Non-Stacked Series Utils', () => {
         y1: 21,
         mark: null,
       });
-      expect(dataSeries[1].data[1]).toMatchObject({
+      expect(formattedDataSeries[1].data[1]).toMatchObject({
         initialY0: null,
         initialY1: 23,
         x: 3,

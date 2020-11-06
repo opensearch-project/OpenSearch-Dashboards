@@ -22,12 +22,12 @@ import createCachedSelector from 're-reselect';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { Dimensions } from '../../../../utils/dimensions';
-import { AxisId } from '../../../../utils/ids';
-import { getAxisTicksPositions, AxisTick, AxisLinePosition, defaultTickFormatter } from '../../utils/axis_utils';
+import { getAxesGeometries, AxisGeometry, defaultTickFormatter } from '../../utils/axis_utils';
+import { getPanelSize } from '../../utils/panel';
 import { computeAxisTicksDimensionsSelector } from './compute_axis_ticks_dimensions';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { computeSeriesDomainsSelector } from './compute_series_domains';
+import { computeSmallMultipleScalesSelector } from './compute_small_multiple_scales';
 import { countBarsInClusterSelector } from './count_bars_in_cluster';
 import { getAxesStylesSelector } from './get_axis_styles';
 import { getBarPaddingsSelector } from './get_bar_paddings';
@@ -35,14 +35,7 @@ import { getAxisSpecsSelector, getSeriesSpecsSelector } from './get_specs';
 import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
 
 /** @internal */
-export interface AxisVisibleTicks {
-  axisPositions: Map<AxisId, Dimensions>;
-  axisTicks: Map<AxisId, AxisTick[]>;
-  axisVisibleTicks: Map<AxisId, AxisTick[]>;
-  axisGridLinesPositions: Map<AxisId, AxisLinePosition[]>;
-}
-/** @internal */
-export const computeAxisVisibleTicksSelector = createCachedSelector(
+export const computeAxesGeometriesSelector = createCachedSelector(
   [
     computeChartDimensionsSelector,
     getChartThemeSelector,
@@ -55,6 +48,7 @@ export const computeAxisVisibleTicksSelector = createCachedSelector(
     isHistogramModeEnabledSelector,
     getBarPaddingsSelector,
     getSeriesSpecsSelector,
+    computeSmallMultipleScalesSelector,
   ],
   (
     chartDimensions,
@@ -68,10 +62,13 @@ export const computeAxisVisibleTicksSelector = createCachedSelector(
     isHistogramMode,
     barsPadding,
     seriesSpecs,
-  ): AxisVisibleTicks => {
+    scales,
+  ): AxisGeometry[] => {
     const fallBackTickFormatter = seriesSpecs.find(({ tickFormat }) => tickFormat)?.tickFormat ?? defaultTickFormatter;
     const { xDomain, yDomain } = seriesDomainsAndData;
-    return getAxisTicksPositions(
+    const panel = getPanelSize(scales);
+
+    return getAxesGeometries(
       chartDimensions,
       chartTheme,
       settingsSpec.rotation,
@@ -80,6 +77,7 @@ export const computeAxisVisibleTicksSelector = createCachedSelector(
       axesStyles,
       xDomain,
       yDomain,
+      panel,
       totalBarsInCluster,
       isHistogramMode,
       fallBackTickFormatter,

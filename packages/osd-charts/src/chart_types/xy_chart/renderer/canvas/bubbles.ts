@@ -20,42 +20,54 @@
 import { LegendItem } from '../../../../commons/legend';
 import { SeriesKey } from '../../../../commons/series_id';
 import { Rect } from '../../../../geoms/types';
-import { withContext, withClip } from '../../../../renderers/canvas';
-import { BubbleGeometry, PointGeometry } from '../../../../utils/geometry';
+import { withContext } from '../../../../renderers/canvas';
+import { Rotation } from '../../../../utils/commons';
+import { Dimensions } from '../../../../utils/dimensions';
+import { BubbleGeometry, PerPanel, PointGeometry } from '../../../../utils/geometry';
 import { SharedGeometryStateStyle, GeometryStateStyle, PointStyle } from '../../../../utils/themes/theme';
 import { getGeometryStateStyle } from '../../rendering/rendering';
 import { renderPointGroup } from './points';
 
 interface BubbleGeometriesDataProps {
   animated?: boolean;
-  bubbles: BubbleGeometry[];
+  bubbles: Array<PerPanel<BubbleGeometry>>;
   sharedStyle: SharedGeometryStateStyle;
-  highlightedLegendItem: LegendItem | null;
+  highlightedLegendItem?: LegendItem;
   clippings: Rect;
+  rotation: Rotation;
+  renderingArea: Dimensions;
 }
 
 /** @internal */
 export function renderBubbles(ctx: CanvasRenderingContext2D, props: BubbleGeometriesDataProps) {
   withContext(ctx, (ctx) => {
-    const { bubbles, sharedStyle, highlightedLegendItem, clippings } = props;
+    const { bubbles, sharedStyle, highlightedLegendItem, clippings, rotation, renderingArea } = props;
     const geometryStyles: Record<SeriesKey, GeometryStateStyle> = {};
     const pointStyles: Record<SeriesKey, PointStyle> = {};
 
-    const allPoints = bubbles.reduce<PointGeometry[]>((acc, { seriesIdentifier, seriesPointStyle, points }) => {
-      const geometryStyle = getGeometryStateStyle(seriesIdentifier, highlightedLegendItem, sharedStyle);
-      geometryStyles[seriesIdentifier.key] = geometryStyle;
-      pointStyles[seriesIdentifier.key] = seriesPointStyle;
+    const allPoints = bubbles.reduce<PointGeometry[]>(
+      (acc, { value: { seriesIdentifier, seriesPointStyle, points } }) => {
+        geometryStyles[seriesIdentifier.key] = getGeometryStateStyle(
+          seriesIdentifier,
+          sharedStyle,
+          highlightedLegendItem,
+        );
+        pointStyles[seriesIdentifier.key] = seriesPointStyle;
 
-      acc.push(...points);
-      return acc;
-    }, []);
-
-    withClip(
-      ctx,
-      clippings,
-      (ctx) => {
-        renderPointGroup(ctx, allPoints, pointStyles, geometryStyles);
+        acc.push(...points);
+        return acc;
       },
+      [],
+    );
+
+    renderPointGroup(
+      ctx,
+      allPoints,
+      pointStyles,
+      geometryStyles,
+      rotation,
+      renderingArea,
+      clippings,
       // TODO: add padding over clipping
       allPoints[0]?.value.mark !== null,
     );

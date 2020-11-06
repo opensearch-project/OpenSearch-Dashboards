@@ -29,6 +29,8 @@ export const SpecTypes = Object.freeze({
   Axis: 'axis' as const,
   Annotation: 'annotation' as const,
   Settings: 'settings' as const,
+  IndexOrder: 'index_order' as const,
+  SmallMultiples: 'small_multiples' as const,
 });
 /** @public */
 export type SpecTypes = $Values<typeof SpecTypes>;

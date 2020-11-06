@@ -29,21 +29,7 @@ export const MIN_STROKE_WIDTH = 0.001;
 
 /** @internal */
 export function renderLine(ctx: CanvasRenderingContext2D, line: Line, stroke: Stroke) {
-  if (stroke.width < MIN_STROKE_WIDTH) {
-    return;
-  }
-  withContext(ctx, (ctx) => {
-    if (stroke.dash) {
-      ctx.setLineDash(stroke.dash);
-    }
-    const { x1, y1, x2, y2 } = line;
-    ctx.strokeStyle = RGBtoString(stroke.color);
-    ctx.lineWidth = stroke.width;
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-  });
+  renderMultiLine(ctx, [line], stroke);
 }
 
 /** @internal */

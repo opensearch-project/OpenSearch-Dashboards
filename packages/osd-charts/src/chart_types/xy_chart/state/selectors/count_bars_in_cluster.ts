@@ -19,17 +19,45 @@
 
 import createCachedSelector from 're-reselect';
 
+import { SeriesTypes } from '../../../../specs';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { countBarsInCluster } from '../../utils/scales';
+import { groupBy } from '../../utils/group_data_series';
+import { SeriesDomainsAndData } from '../utils/types';
+import { getBarIndexKey } from '../utils/utils';
 import { computeSeriesDomainsSelector } from './compute_series_domains';
+import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
 
 /** @internal */
 export const countBarsInClusterSelector = createCachedSelector(
-  [computeSeriesDomainsSelector],
-  (seriesDomainsAndData): number => {
-    const { formattedDataSeries } = seriesDomainsAndData;
-
-    const { totalBarsInCluster } = countBarsInCluster(formattedDataSeries.stacked, formattedDataSeries.nonStacked);
-    return totalBarsInCluster;
-  },
+  [computeSeriesDomainsSelector, isHistogramModeEnabledSelector],
+  countBarsInCluster,
 )(getChartIdSelector);
+
+/** @internal */
+export function countBarsInCluster({ formattedDataSeries }: SeriesDomainsAndData, isHistogramEnabled: boolean): number {
+  const barDataSeries = formattedDataSeries.filter(({ seriesType }) => seriesType === SeriesTypes.Bar);
+
+  const dataSeriesGroupedByPanel = groupBy(
+    barDataSeries,
+    ['smVerticalAccessorValue', 'smHorizontalAccessorValue'],
+    false,
+  );
+
+  const barIndexByPanel = Object.keys(dataSeriesGroupedByPanel).reduce<Record<string, string[]>>((acc, panelKey) => {
+    const panelBars = dataSeriesGroupedByPanel[panelKey];
+    const barDataSeriesByBarIndex = groupBy(
+      panelBars,
+      (d) => {
+        return getBarIndexKey(d, isHistogramEnabled);
+      },
+      false,
+    );
+
+    acc[panelKey] = Object.keys(barDataSeriesByBarIndex);
+    return acc;
+  }, {});
+
+  return Object.values(barIndexByPanel).reduce((acc, curr) => {
+    return Math.max(acc, curr.length);
+  }, 0);
+}

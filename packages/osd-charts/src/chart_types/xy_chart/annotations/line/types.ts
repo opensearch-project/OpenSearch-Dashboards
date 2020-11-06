@@ -17,31 +17,17 @@
  * under the License.
  */
 
+import { Line } from '../../../../geoms/types';
+import { Dimensions } from '../../../../utils/dimensions';
 import { AnnotationDetails, AnnotationMarker } from '../types';
-
-/**
- * Start and end points of a line annotation
- * @internal
- */
-export interface AnnotationLinePathPoints {
-  /** x1,y1 the start point anchored to the linked axis */
-  start: {
-    x1: number;
-    y1: number;
-  };
-  /** x2,y2 the end point */
-  end: {
-    x2: number;
-    y2: number;
-  };
-}
 
 /** @internal */
 export interface AnnotationLineProps {
   /**
    * The path points of a line annotation
    */
-  linePathPoints: AnnotationLinePathPoints;
+  linePathPoints: Line;
   details: AnnotationDetails;
   marker?: AnnotationMarker;
+  panel: Dimensions;
 }

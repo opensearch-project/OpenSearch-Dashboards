@@ -25,7 +25,8 @@ import { computeContinuousDataDomain } from '../../../utils/domain';
 import { GroupId } from '../../../utils/ids';
 import { Logger } from '../../../utils/logger';
 import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_type_utils';
-import { DataSeries, FormattedDataSeries } from '../utils/series';
+import { groupBy } from '../utils/group_data_series';
+import { DataSeries } from '../utils/series';
 import { BasicSeriesSpec, YDomainRange, DEFAULT_GLOBAL_ID, SeriesTypes, StackMode } from '../utils/specs';
 import { YDomain } from './types';
 
@@ -34,84 +35,48 @@ export type YBasicSeriesSpec = Pick<
   'id' | 'seriesType' | 'yScaleType' | 'groupId' | 'stackAccessors' | 'yScaleToDataExtent' | 'useDefaultGroupDomain'
 > & { stackMode?: StackMode; enableHistogramMode?: boolean };
 
-interface GroupSpecs {
-  stackMode?: StackMode;
-  stacked: YBasicSeriesSpec[];
-  nonStacked: YBasicSeriesSpec[];
-}
-
 /** @internal */
-export function mergeYDomain(
-  {
-    stacked,
-    nonStacked,
-  }: {
-    stacked: FormattedDataSeries[];
-    nonStacked: FormattedDataSeries[];
-  },
-  specs: YBasicSeriesSpec[],
-  domainsByGroupId: Map<GroupId, YDomainRange>,
-): YDomain[] {
-  // group specs by group ids
-  const specsByGroupIds = splitSpecsByGroupId(specs);
-  const specsByGroupIdsEntries = [...specsByGroupIds.entries()];
-  const globalId = DEFAULT_GLOBAL_ID;
+export function mergeYDomain(dataSeries: DataSeries[], domainsByGroupId: Map<GroupId, YDomainRange>): YDomain[] {
+  const dataSeriesByGroupId = groupBy(
+    dataSeries,
+    ({ spec: { useDefaultGroupDomain, groupId } }) => {
+      return useDefaultGroupDomain ? DEFAULT_GLOBAL_ID : groupId;
+    },
+    true,
+  );
 
-  const yDomains = specsByGroupIdsEntries.map<YDomain>(([groupId, groupSpecs]) => {
+  return dataSeriesByGroupId.reduce<YDomain[]>((acc, groupedDataSeries) => {
+    const [{ groupId }] = groupedDataSeries;
+
+    const stacked = groupedDataSeries.filter(({ isStacked }) => isStacked);
+    const nonStacked = groupedDataSeries.filter(({ isStacked }) => !isStacked);
     const customDomain = domainsByGroupId.get(groupId);
-    const emptyDS: FormattedDataSeries = {
-      dataSeries: [],
-      groupId,
-      counts: { area: 0, bubble: 0, bar: 0, line: 0 },
-    };
-    const stackedDS = stacked.find((d) => d.groupId === groupId) ?? emptyDS;
-    const nonStackedDS = nonStacked.find((d) => d.groupId === groupId) ?? emptyDS;
-    const nonZeroBaselineSpecs =
-      stackedDS.counts.bar + stackedDS.counts.area + nonStackedDS.counts.bar + nonStackedDS.counts.area;
-    return mergeYDomainForGroup(
-      stackedDS.dataSeries,
-      nonStackedDS.dataSeries,
-      groupId,
-      groupSpecs,
-      nonZeroBaselineSpecs > 0,
-      customDomain,
+    const hasNonZeroBaselineTypes = groupedDataSeries.some(
+      ({ seriesType }) => seriesType === SeriesTypes.Bar || seriesType === SeriesTypes.Area,
     );
-  });
-
-  const globalGroupIds: Set<GroupId> = specs.reduce<Set<GroupId>>((acc, { groupId, useDefaultGroupDomain }) => {
-    if (groupId !== globalId && useDefaultGroupDomain) {
-      acc.add(groupId);
+    const domain = mergeYDomainForGroup(stacked, nonStacked, hasNonZeroBaselineTypes, customDomain);
+    if (!domain) {
+      return acc;
     }
-    return acc;
-  }, new Set());
-  globalGroupIds.add(globalId);
-
-  const globalYDomains = yDomains.filter((domain) => globalGroupIds.has(domain.groupId));
-  let globalYDomain = [Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER];
-  globalYDomains.forEach((domain) => {
-    globalYDomain = [Math.min(globalYDomain[0], domain.domain[0]), Math.max(globalYDomain[1], domain.domain[1])];
-  });
-  return yDomains.map((domain) => {
-    if (globalGroupIds.has(domain.groupId)) {
-      return {
-        ...domain,
-        domain: globalYDomain,
-      };
-    }
-    return domain;
-  });
+    return [...acc, domain];
+  }, []);
 }
 
 function mergeYDomainForGroup(
   stacked: DataSeries[],
   nonStacked: DataSeries[],
-  groupId: GroupId,
-  groupSpecs: GroupSpecs,
   hasZeroBaselineSpecs: boolean,
   customDomain?: YDomainRange,
-): YDomain {
-  const groupYScaleType = coerceYScaleTypes([...groupSpecs.stacked, ...groupSpecs.nonStacked]);
-  const { stackMode } = groupSpecs;
+): YDomain | null {
+  const dataSeries = [...stacked, ...nonStacked];
+  if (dataSeries.length === 0) {
+    return null;
+  }
+  const yScaleTypes = dataSeries.map(({ spec: { yScaleType } }) => ({
+    yScaleType,
+  }));
+  const groupYScaleType = coerceYScaleTypes(yScaleTypes);
+  const [{ stackMode, groupId }] = dataSeries;
 
   let domain: number[];
   if (stackMode === StackMode.Percentage) {
@@ -119,13 +84,10 @@ function mergeYDomainForGroup(
   } else {
     // TODO remove when removing yScaleToDataExtent
     const newCustomDomain = customDomain ? { ...customDomain } : {};
-    const shouldScaleToExtent =
-      groupSpecs.stacked.some(({ yScaleToDataExtent }) => yScaleToDataExtent) ||
-      groupSpecs.nonStacked.some(({ yScaleToDataExtent }) => yScaleToDataExtent);
+    const shouldScaleToExtent = dataSeries.some(({ spec: { yScaleToDataExtent } }) => yScaleToDataExtent);
     if (customDomain?.fit !== true && shouldScaleToExtent) {
       newCustomDomain.fit = true;
     }
-
     // compute stacked domain
     const stackedDomain = computeYDomain(stacked, hasZeroBaselineSpecs);
 
@@ -163,15 +125,16 @@ function mergeYDomainForGroup(
   };
 }
 
-function computeYDomain(dataseries: DataSeries[], hasZeroBaselineSpecs: boolean) {
+function computeYDomain(dataSeries: DataSeries[], hasZeroBaselineSpecs: boolean) {
   const yValues = new Set<any>();
-  dataseries.forEach((ds) => {
-    ds.data.forEach((datum) => {
+  dataSeries.forEach(({ data }) => {
+    for (let i = 0; i < data.length; i++) {
+      const datum = data[i];
       yValues.add(datum.y1);
       if (hasZeroBaselineSpecs && datum.y0 != null) {
         yValues.add(datum.y0);
       }
-    });
+    }
   });
   if (yValues.size === 0) {
     return [];
@@ -180,17 +143,13 @@ function computeYDomain(dataseries: DataSeries[], hasZeroBaselineSpecs: boolean)
 }
 
 /** @internal */
-export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
+export function groupSeriesByYGroup(specs: YBasicSeriesSpec[]) {
   const specsByGroupIds = new Map<
     GroupId,
     { stackMode: StackMode | undefined; stacked: YBasicSeriesSpec[]; nonStacked: YBasicSeriesSpec[] }
   >();
-  // After mobx->redux https://github.com/elastic/elastic-charts/pull/281 we keep the specs untouched on mount
-  // in MobX version, the stackAccessors was programmatically added to every histogram specs
-  // in ReduX version, we left untouched the specs, so we have to manually check that
-  const isHistogramEnabled = specs.some(
-    ({ seriesType, enableHistogramMode }) => seriesType === SeriesTypes.Bar && enableHistogramMode,
-  );
+
+  const histogramEnabled = isHistogramEnabled(specs);
   // split each specs by groupId and by stacked or not
   specs.forEach((spec) => {
     const group = specsByGroupIds.get(spec.groupId) || {
@@ -198,12 +157,8 @@ export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
       stacked: [],
       nonStacked: [],
     };
-    // stack every bars if using histogram mode
-    // independenyly from lines and areas
-    if (
-      (spec.seriesType === SeriesTypes.Bar && isHistogramEnabled) ||
-      (spec.stackAccessors && spec.stackAccessors.length > 0)
-    ) {
+
+    if (isStackedSpec(spec, histogramEnabled)) {
       group.stacked.push(spec);
     } else {
       group.nonStacked.push(spec);
@@ -221,6 +176,53 @@ export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
 }
 
 /**
+ * Histogram mode is forced on every specs if at least one specs has that prop flagged
+ * @remarks
+ * After mobx->redux https://github.com/elastic/elastic-charts/pull/281 we keep the specs untouched on mount
+ * in MobX version, the stackAccessors was programmatically added to every histogram specs
+ * in ReduX version, we left untouched the specs, so we have to manually check that
+ * @param specs
+ * @internal
+ */
+export function isHistogramEnabled(specs: YBasicSeriesSpec[]) {
+  return specs.some(({ seriesType, enableHistogramMode }) => seriesType === SeriesTypes.Bar && enableHistogramMode);
+}
+
+/**
+ * Return true if the passed spec needs to be rendered as stack
+ * @param spec
+ * @param histogramEnabled
+ * @internal
+ */
+export function isStackedSpec(spec: YBasicSeriesSpec, histogramEnabled: boolean) {
+  const isBarAndHistogram = spec.seriesType === SeriesTypes.Bar && histogramEnabled;
+  const hasStackAccessors = spec.stackAccessors && spec.stackAccessors.length > 0;
+  return isBarAndHistogram || hasStackAccessors;
+}
+
+/**
+ * Get the stack mode for every groupId
+ * @param specs
+ * @internal
+ */
+export function getStackModeForYGroup(specs: YBasicSeriesSpec[]) {
+  return specs.reduce<Record<GroupId, StackMode | undefined>>((acc, { groupId, stackMode }) => {
+    if (!acc[groupId]) {
+      acc[groupId] = undefined;
+    }
+
+    if (acc[groupId] === undefined && stackMode !== undefined) {
+      acc[groupId] = stackMode;
+    }
+    if (stackMode !== undefined && acc[groupId] !== stackMode) {
+      Logger.warn(`Is not possible to mix different stackModes, please align all stackMode on the same GroupId
+      to the same mode. The default behaviour will be to use the first encountered stackMode on the series`);
+    }
+    return acc;
+  }, {});
+}
+
+/**
  * Coerce the scale types of a set of specification to a generic one.
  * If there is at least one bar series type, than the response will specity
  * that the coerced scale is a `scaleBand` (each point needs to have a surrounding empty
@@ -228,13 +230,13 @@ export function splitSpecsByGroupId(specs: YBasicSeriesSpec[]) {
  * If there are multiple continuous scale types, is coerced to linear.
  * If there are at least one Ordinal scale type, is coerced to ordinal.
  * If none of the above, than coerce to the specified scale.
- * @returns {ChartScaleType}
+ * @returns {ScaleContinuousType}
  * @internal
  */
-export function coerceYScaleTypes(specs: Pick<BasicSeriesSpec, 'yScaleType'>[]): ScaleContinuousType {
+export function coerceYScaleTypes(scales: { yScaleType: ScaleContinuousType }[]): ScaleContinuousType {
   const scaleTypes = new Set<ScaleContinuousType>();
-  specs.forEach((spec) => {
-    scaleTypes.add(spec.yScaleType);
+  scales.forEach(({ yScaleType }) => {
+    scaleTypes.add(yScaleType);
   });
   return coerceYScale(scaleTypes);
 }
@@ -246,4 +248,14 @@ function coerceYScale(scaleTypes: Set<ScaleContinuousType>): ScaleContinuousType
     return value;
   }
   return ScaleType.Linear;
+}
+
+export function getYScaleTypeByGroupId(specs: BasicSeriesSpec[]): Map<GroupId, ScaleContinuousType> {
+  const groups = groupBy(specs, ['groupId'], true);
+  return groups.reduce((acc, group) => {
+    const scaleType = coerceYScaleTypes(group);
+    const [{ groupId }] = group;
+    acc.set(groupId, scaleType);
+    return acc;
+  }, new Map());
 }

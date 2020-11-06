@@ -18,11 +18,14 @@
  */
 
 import { SeriesKey } from '../../../../commons/series_id';
-import { Circle, Stroke, Fill } from '../../../../geoms/types';
+import { Circle, Stroke, Fill, Rect } from '../../../../geoms/types';
+import { Rotation } from '../../../../utils/commons';
+import { Dimensions } from '../../../../utils/dimensions';
 import { PointGeometry } from '../../../../utils/geometry';
 import { PointStyle, GeometryStateStyle } from '../../../../utils/themes/theme';
 import { renderCircle } from './primitives/arc';
 import { buildPointStyles } from './styles/point';
+import { withPanelTransform } from './utils/panel_transform';
 
 /**
  * Renders points from single series
@@ -48,7 +51,7 @@ export function renderPoints(
 
       const circle: Circle = {
         x: x + transform.x,
-        y,
+        y: y + transform.y,
         radius,
       };
 
@@ -68,9 +71,13 @@ export function renderPointGroup(
   points: PointGeometry[],
   themeStyles: Record<SeriesKey, PointStyle>,
   geometryStateStyles: Record<SeriesKey, GeometryStateStyle>,
+  rotation: Rotation,
+  renderingArea: Dimensions,
+  clippings: Rect,
+  shouldClip: boolean,
 ) {
   points
-    .map<[Circle, Fill, Stroke]>((point) => {
+    .map<[Circle, Fill, Stroke, Dimensions]>((point) => {
       const {
         x,
         y,
@@ -79,6 +86,7 @@ export function renderPointGroup(
         transform,
         styleOverrides,
         seriesIdentifier: { key },
+        panel,
       } = point;
       const { fill, stroke, radius } = buildPointStyles(
         color,
@@ -94,8 +102,19 @@ export function renderPointGroup(
         radius,
       };
 
-      return [circle, fill, stroke];
+      return [circle, fill, stroke, panel];
     })
     .sort(([{ radius: a }], [{ radius: b }]) => b - a)
-    .forEach((args) => renderCircle(ctx, ...args));
+    .forEach(([circle, fill, stroke, panel]) => {
+      withPanelTransform(
+        ctx,
+        panel,
+        rotation,
+        renderingArea,
+        (ctx) => {
+          renderCircle(ctx, circle, fill, stroke);
+        },
+        { area: clippings, shouldClip },
+      );
+    });
 }

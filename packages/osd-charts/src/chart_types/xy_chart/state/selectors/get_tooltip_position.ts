@@ -21,10 +21,10 @@ import createCachedSelector from 're-reselect';
 
 import { TooltipAnchorPosition } from '../../../../components/tooltip/types';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { getLegendSizeSelector } from '../../../../state/selectors/get_legend_size';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { getTooltipAnchorPosition } from '../../crosshair/crosshair_utils';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
+import { computeSmallMultipleScalesSelector } from './compute_small_multiple_scales';
 import { getCursorBandPositionSelector } from './get_cursor_band';
 import { getProjectedPointerPositionSelector } from './get_projected_pointer_position';
 
@@ -35,13 +35,35 @@ export const getTooltipAnchorPositionSelector = createCachedSelector(
     getSettingsSpecSelector,
     getCursorBandPositionSelector,
     getProjectedPointerPositionSelector,
-    getLegendSizeSelector,
+    computeSmallMultipleScalesSelector,
   ],
-  (chartDimensions, settings, cursorBandPosition, projectedPointerPosition): TooltipAnchorPosition | null => {
+  (
+    chartDimensions,
+    settings,
+    cursorBandPosition,
+    projectedPointerPosition,
+    { horizontal, vertical },
+  ): TooltipAnchorPosition | null => {
     if (!cursorBandPosition) {
       return null;
     }
 
-    return getTooltipAnchorPosition(chartDimensions, settings.rotation, cursorBandPosition, projectedPointerPosition);
+    const topPos = vertical.scale(projectedPointerPosition.verticalPanelValue) || 0;
+    const leftPos = horizontal.scale(projectedPointerPosition.horizontalPanelValue) || 0;
+
+    const panel = {
+      width: horizontal.bandwidth,
+      height: vertical.bandwidth,
+      top: chartDimensions.chartDimensions.top + topPos,
+      left: chartDimensions.chartDimensions.left + leftPos,
+    };
+
+    return getTooltipAnchorPosition(
+      chartDimensions,
+      settings.rotation,
+      cursorBandPosition,
+      projectedPointerPosition,
+      panel,
+    );
   },
 )(getChartIdSelector);

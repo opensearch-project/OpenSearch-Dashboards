@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { Rotation } from '../../../../../utils/commons';
+import { Dimensions } from '../../../../../utils/dimensions';
 import { AnnotationId } from '../../../../../utils/ids';
 import { mergeWithDefaultAnnotationLine, mergeWithDefaultAnnotationRect } from '../../../../../utils/themes/theme';
 import { AnnotationLineProps } from '../../../annotations/line/types';
@@ -30,16 +32,16 @@ import { renderRectAnnotations } from './rect';
 interface AnnotationProps {
   annotationDimensions: Map<AnnotationId, AnnotationDimensions>;
   annotationSpecs: AnnotationSpec[];
+  rotation: Rotation;
+  renderingArea: Dimensions;
 }
 
 /** @internal */
 export function renderAnnotations(
   ctx: CanvasRenderingContext2D,
-  props: AnnotationProps,
+  { annotationDimensions, annotationSpecs, rotation, renderingArea }: AnnotationProps,
   renderOnBackground: boolean = true,
 ) {
-  const { annotationDimensions, annotationSpecs } = props;
-
   annotationDimensions.forEach((annotation, id) => {
     const spec = getSpecsById<AnnotationSpec>(annotationSpecs, id);
     if (!spec) {
@@ -49,10 +51,10 @@ export function renderAnnotations(
     if ((isBackground && renderOnBackground) || (!isBackground && !renderOnBackground)) {
       if (isLineAnnotation(spec)) {
         const lineStyle = mergeWithDefaultAnnotationLine(spec.style);
-        renderLineAnnotations(ctx, annotation as AnnotationLineProps[], lineStyle);
+        renderLineAnnotations(ctx, annotation as AnnotationLineProps[], lineStyle, rotation, renderingArea);
       } else if (isRectAnnotation(spec)) {
         const rectStyle = mergeWithDefaultAnnotationRect(spec.style);
-        renderRectAnnotations(ctx, annotation as AnnotationRectProps[], rectStyle);
+        renderRectAnnotations(ctx, annotation as AnnotationRectProps[], rectStyle, rotation, renderingArea);
       }
     }
   });

@@ -85,7 +85,7 @@ describe('Render chart', () => {
       expect(geometries).toBeDefined();
       expect(geometries.lines).toBeDefined();
       expect(geometries.lines.length).toBe(1);
-      expect(geometries.lines[0].points.length).toBe(3);
+      expect(geometries.lines[0].value.points.length).toBe(3);
     });
     test('check mouse position correctly return inverted value', () => {
       store.dispatch(onPointerMove({ x: 15, y: 10 }, 0)); // check first valid tooltip
@@ -159,7 +159,7 @@ describe('Render chart', () => {
       expect(geometries).toBeDefined();
       expect(geometries.lines).toBeDefined();
       expect(geometries.lines.length).toBe(1);
-      expect(geometries.lines[0].points.length).toBe(3);
+      expect(geometries.lines[0].value.points.length).toBe(3);
     });
     test('check mouse position correctly return inverted value', () => {
       store.dispatch(onPointerMove({ x: 15, y: 10 }, 0)); // check first valid tooltip
@@ -232,7 +232,7 @@ describe('Render chart', () => {
       expect(geometries).toBeDefined();
       expect(geometries.lines).toBeDefined();
       expect(geometries.lines.length).toBe(1);
-      expect(geometries.lines[0].points.length).toBe(3);
+      expect(geometries.lines[0].value.points.length).toBe(3);
     });
     test('check scale values', () => {
       const xValues = [date1, date2, date3];

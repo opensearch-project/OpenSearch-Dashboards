@@ -31,6 +31,7 @@ import { computeChartDimensionsSelector } from '../../state/selectors/compute_ch
 import { computeChartTransformSelector } from '../../state/selectors/compute_chart_transform';
 import { getHighlightedGeomsSelector } from '../../state/selectors/get_tooltip_values_highlighted_geoms';
 import { Transform } from '../../state/utils/types';
+import { computeChartTransform } from '../../state/utils/utils';
 
 interface HighlighterProps {
   initialized: boolean;
@@ -41,13 +42,16 @@ interface HighlighterProps {
   chartRotation: Rotation;
 }
 
+function getTransformForPanel(panel: Dimensions, rotation: Rotation, { left, top }: Dimensions) {
+  const { x, y } = computeChartTransform(panel, rotation);
+  return `translate(${left + panel.left + x}, ${top + panel.top + y}) rotate(${rotation})`;
+}
+
 class HighlighterComponent extends React.Component<HighlighterProps> {
   static displayName = 'Highlighter';
 
   render() {
-    const { highlightedGeometries, chartTransform, chartDimensions, chartRotation, chartId } = this.props;
-    const left = chartDimensions.left + chartTransform.x;
-    const top = chartDimensions.top + chartTransform.y;
+    const { highlightedGeometries, chartDimensions, chartRotation, chartId } = this.props;
     const clipWidth = [90, -90].includes(chartRotation) ? chartDimensions.height : chartDimensions.width;
     const clipHeight = [90, -90].includes(chartRotation) ? chartDimensions.width : chartDimensions.height;
     const clipPathId = `echHighlighterClipPath__${chartId}`;
@@ -58,18 +62,23 @@ class HighlighterComponent extends React.Component<HighlighterProps> {
             <rect x="0" y="0" width={clipWidth} height={clipHeight} />
           </clipPath>
         </defs>
-        <g transform={`translate(${left}, ${top}) rotate(${chartRotation})`}>
+        <g>
           {highlightedGeometries.map((geom, i) => {
-            const { color, x, y } = geom;
+            const { color, panel } = geom;
+            const geomTransform = getTransformForPanel(panel, chartRotation, chartDimensions);
+            const x = geom.x + geom.transform.x;
+            const y = geom.y + geom.transform.y;
+
             if (isPointGeometry(geom)) {
               return (
                 <circle
                   key={i}
-                  cx={x + geom.transform.x}
+                  cx={x}
                   cy={y}
                   r={geom.radius + DEFAULT_HIGHLIGHT_PADDING}
                   stroke={color}
                   strokeWidth={4}
+                  transform={geomTransform}
                   fill="transparent"
                   clipPath={geom.value.mark !== null ? `url(#${clipPathId})` : undefined}
                 />
@@ -82,6 +91,7 @@ class HighlighterComponent extends React.Component<HighlighterProps> {
                 y={y}
                 width={geom.width}
                 height={geom.height}
+                transform={geomTransform}
                 className="echHighlighterOverlay__fill"
                 clipPath={`url(#${clipPathId})`}
               />

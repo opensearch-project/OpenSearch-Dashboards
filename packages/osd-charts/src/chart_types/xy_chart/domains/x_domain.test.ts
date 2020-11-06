@@ -21,7 +21,7 @@ import { ChartTypes } from '../..';
 import { MockSeriesSpecs } from '../../../mocks/specs';
 import { ScaleType } from '../../../scales/constants';
 import { SpecTypes, Direction, BinAgg } from '../../../specs/constants';
-import { getDataSeriesBySpecId } from '../utils/series';
+import { getDataSeriesFromSpecs } from '../utils/series';
 import { BasicSeriesSpec, SeriesTypes } from '../utils/specs';
 import { convertXScaleTypes, findMinInterval, mergeXDomain } from './x_domain';
 
@@ -222,7 +222,7 @@ describe('X Domain', () => {
       ],
     };
     const specDataSeries: BasicSeriesSpec[] = [ds1, ds2];
-    const { xValues } = getDataSeriesBySpecId(specDataSeries);
+    const { xValues } = getDataSeriesFromSpecs(specDataSeries);
     const mergedDomain = mergeXDomain(
       [
         {
@@ -269,7 +269,7 @@ describe('X Domain', () => {
     };
     const specDataSeries = [ds1, ds2];
 
-    const { xValues } = getDataSeriesBySpecId(specDataSeries);
+    const { xValues } = getDataSeriesFromSpecs(specDataSeries);
     const mergedDomain = mergeXDomain(
       [
         {
@@ -316,7 +316,7 @@ describe('X Domain', () => {
     };
     const specDataSeries = [ds1, ds2];
 
-    const { xValues } = getDataSeriesBySpecId(specDataSeries);
+    const { xValues } = getDataSeriesFromSpecs(specDataSeries);
     const mergedDomain = mergeXDomain(
       [
         {
@@ -367,7 +367,7 @@ describe('X Domain', () => {
     };
     const specDataSeries = [ds1, ds2];
 
-    const { xValues } = getDataSeriesBySpecId(specDataSeries);
+    const { xValues } = getDataSeriesFromSpecs(specDataSeries);
     const mergedDomain = mergeXDomain(
       [
         {
@@ -418,7 +418,7 @@ describe('X Domain', () => {
     };
     const specDataSeries = [ds1, ds2];
 
-    const { xValues } = getDataSeriesBySpecId(specDataSeries);
+    const { xValues } = getDataSeriesFromSpecs(specDataSeries);
     const mergedDomain = mergeXDomain(
       [
         {
@@ -475,7 +475,7 @@ describe('X Domain', () => {
       min: 0,
     };
 
-    const { xValues } = getDataSeriesBySpecId(specDataSeries);
+    const { xValues } = getDataSeriesFromSpecs(specDataSeries);
     const getResult = () =>
       mergeXDomain(
         [
@@ -535,7 +535,7 @@ describe('X Domain', () => {
     };
     const specDataSeries = [ds1, ds2];
 
-    const { xValues } = getDataSeriesBySpecId(specDataSeries);
+    const { xValues } = getDataSeriesFromSpecs(specDataSeries);
     const mergedDomain = mergeXDomain(
       [
         {
@@ -586,7 +586,7 @@ describe('X Domain', () => {
     };
     const specDataSeries = [ds1, ds2];
 
-    const { xValues } = getDataSeriesBySpecId(specDataSeries);
+    const { xValues } = getDataSeriesFromSpecs(specDataSeries);
     const mergedDomain = mergeXDomain(
       [
         {
@@ -637,7 +637,7 @@ describe('X Domain', () => {
     };
     const specDataSeries = [ds1, ds2];
 
-    const { xValues } = getDataSeriesBySpecId(specDataSeries);
+    const { xValues } = getDataSeriesFromSpecs(specDataSeries);
     const mergedDomain = mergeXDomain(
       [
         {
@@ -682,7 +682,7 @@ describe('X Domain', () => {
     };
     const specDataSeries = [ds1, ds2];
 
-    const { xValues } = getDataSeriesBySpecId(specDataSeries);
+    const { xValues } = getDataSeriesFromSpecs(specDataSeries);
 
     const mergedDomain = mergeXDomain(
       [
@@ -891,12 +891,12 @@ describe('X Domain', () => {
     ]);
 
     it('should sort ordinal xValues by descending sum by default', () => {
-      const { xValues } = getDataSeriesBySpecId(ordinalSpecs, [], {});
+      const { xValues } = getDataSeriesFromSpecs(ordinalSpecs, [], {});
       expect(xValues).toEqual(new Set(['c', 'd', 'b', 'a']));
     });
 
     it('should sort ordinal xValues by descending sum', () => {
-      const { xValues } = getDataSeriesBySpecId(ordinalSpecs, [], {
+      const { xValues } = getDataSeriesFromSpecs(ordinalSpecs, [], {
         binAgg: BinAgg.None,
         direction: Direction.Descending,
       });
@@ -904,7 +904,7 @@ describe('X Domain', () => {
     });
 
     it('should sort ordinal xValues by ascending sum', () => {
-      const { xValues } = getDataSeriesBySpecId(ordinalSpecs, [], {
+      const { xValues } = getDataSeriesFromSpecs(ordinalSpecs, [], {
         binAgg: BinAgg.None,
         direction: Direction.Ascending,
       });
@@ -912,12 +912,12 @@ describe('X Domain', () => {
     });
 
     it('should NOT sort ordinal xValues sum', () => {
-      const { xValues } = getDataSeriesBySpecId(ordinalSpecs, [], undefined);
+      const { xValues } = getDataSeriesFromSpecs(ordinalSpecs, [], undefined);
       expect(xValues).toEqual(new Set(['a', 'b', 'c', 'd']));
     });
 
     it('should NOT sort ordinal xValues sum when undefined', () => {
-      const { xValues } = getDataSeriesBySpecId(ordinalSpecs, [], {
+      const { xValues } = getDataSeriesFromSpecs(ordinalSpecs, [], {
         binAgg: BinAgg.None,
         direction: Direction.Descending,
       });
@@ -925,7 +925,7 @@ describe('X Domain', () => {
     });
 
     it('should NOT sort linear xValue by descending sum', () => {
-      const { xValues } = getDataSeriesBySpecId(linearSpecs, [], {
+      const { xValues } = getDataSeriesFromSpecs(linearSpecs, [], {
         direction: Direction.Descending,
       });
       expect(xValues).toEqual(new Set([1, 2, 3, 4]));

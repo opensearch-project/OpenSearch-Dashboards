@@ -26,6 +26,7 @@ import { AnnotationDimensions } from '../../annotations/types';
 import { computeAnnotationDimensions } from '../../annotations/utils';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { computeSeriesGeometriesSelector } from './compute_series_geometries';
+import { computeSmallMultipleScalesSelector } from './compute_small_multiple_scales';
 import { getAxisSpecsSelector, getAnnotationSpecsSelector } from './get_specs';
 import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
 
@@ -38,6 +39,7 @@ export const computeAnnotationDimensionsSelector = createCachedSelector(
     computeSeriesGeometriesSelector,
     getAxisSpecsSelector,
     isHistogramModeEnabledSelector,
+    computeSmallMultipleScalesSelector,
   ],
   (
     annotationSpecs,
@@ -46,6 +48,7 @@ export const computeAnnotationDimensionsSelector = createCachedSelector(
     { scales: { yScales, xScale } },
     axesSpecs,
     isHistogramMode,
+    smallMultipleScales,
   ): Map<AnnotationId, AnnotationDimensions> =>
     computeAnnotationDimensions(
       annotationSpecs,
@@ -55,5 +58,6 @@ export const computeAnnotationDimensionsSelector = createCachedSelector(
       xScale,
       axesSpecs,
       isHistogramMode,
+      smallMultipleScales,
     ),
 )(getChartIdSelector);

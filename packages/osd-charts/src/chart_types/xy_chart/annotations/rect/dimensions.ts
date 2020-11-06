@@ -20,10 +20,11 @@
 import { Scale, ScaleBand, ScaleContinuous } from '../../../../scales';
 import { isBandScale, isContinuousScale } from '../../../../scales/types';
 import { isDefined } from '../../../../utils/commons';
-import { Dimensions } from '../../../../utils/dimensions';
 import { GroupId } from '../../../../utils/ids';
 import { Point } from '../../../../utils/point';
 import { PrimitiveValue } from '../../../partition_chart/layout/utils/group_by_rollup';
+import { SmallMultipleScales } from '../../state/selectors/compute_small_multiple_scales';
+import { getPanelSize } from '../../utils/panel';
 import { RectAnnotationDatum, RectAnnotationSpec } from '../../utils/specs';
 import { Bounds } from '../types';
 import { AnnotationRectProps } from './types';
@@ -39,16 +40,17 @@ export function isWithinRectBounds({ x, y }: Point, { startX, endX, startY, endY
 /** @internal */
 export function computeRectAnnotationDimensions(
   annotationSpec: RectAnnotationSpec,
-  chartDimensions: Dimensions,
   yScales: Map<GroupId, Scale>,
   xScale: Scale,
+  smallMultiplesScales: SmallMultipleScales,
   isHistogram: boolean = false,
 ): AnnotationRectProps[] | null {
   const { dataValues } = annotationSpec;
   const { groupId } = annotationSpec;
   const yScale = yScales.get(groupId);
 
-  const rectsProps: AnnotationRectProps[] = [];
+  const rectsProps: Omit<AnnotationRectProps, 'panel'>[] = [];
+  const panelSize = getPanelSize(smallMultiplesScales);
   dataValues.forEach((dataValue: RectAnnotationDatum) => {
     const { x0: initialX0, x1: initialX1, y0: initialY0, y1: initialY1 } = dataValue.coordinates;
 
@@ -80,7 +82,7 @@ export function computeRectAnnotationDimensions(
         const rectDimensions = {
           ...xAndWidth,
           y: 0,
-          height: chartDimensions.height,
+          height: panelSize.height,
         };
 
         rectsProps.push({
@@ -106,7 +108,7 @@ export function computeRectAnnotationDimensions(
     // if the annotation height is 0 override it with the height from chart dimension and if the values in the domain are the same
     if (height === 0 && yScale.domain.length === 2 && yScale.domain[0] === yScale.domain[1]) {
       // eslint-disable-next-line prefer-destructuring
-      height = chartDimensions.height;
+      height = panelSize.height;
       scaledY1 = 0;
     }
 
@@ -122,7 +124,20 @@ export function computeRectAnnotationDimensions(
     });
   });
 
-  return rectsProps;
+  return rectsProps.reduce<AnnotationRectProps[]>((acc, props) => {
+    const duplicated: AnnotationRectProps[] = [];
+    smallMultiplesScales.vertical.domain.forEach((vDomainValue) => {
+      smallMultiplesScales.horizontal.domain.forEach((hDomainValue) => {
+        const panel = {
+          ...panelSize,
+          top: smallMultiplesScales.vertical.scaleOrThrow(vDomainValue),
+          left: smallMultiplesScales.horizontal.scaleOrThrow(hDomainValue),
+        };
+        duplicated.push({ ...props, panel });
+      });
+    });
+    return [...acc, ...duplicated];
+  }, []);
 }
 
 function scaleXonBandScale(

@@ -17,20 +17,23 @@
  * under the License.
  */
 
-import { Rect, Fill, Stroke } from '../../../../../geoms/types';
-import { withContext } from '../../../../../renderers/canvas';
+import { Fill, Stroke } from '../../../../../geoms/types';
+import { Rotation } from '../../../../../utils/commons';
+import { Dimensions } from '../../../../../utils/dimensions';
 import { RectAnnotationStyle } from '../../../../../utils/themes/theme';
 import { stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { AnnotationRectProps } from '../../../annotations/rect/types';
 import { renderRect } from '../primitives/rect';
+import { withPanelTransform } from '../utils/panel_transform';
 
 /** @internal */
 export function renderRectAnnotations(
   ctx: CanvasRenderingContext2D,
   annotations: AnnotationRectProps[],
   rectStyle: RectAnnotationStyle,
+  rotation: Rotation,
+  renderingArea: Dimensions,
 ) {
-  const rects = annotations.map<Rect>(({ rect }) => rect);
   const fillColor = stringToRGB(rectStyle.fill);
   fillColor.opacity *= rectStyle.opacity;
   const fill: Fill = {
@@ -43,11 +46,11 @@ export function renderRectAnnotations(
     width: rectStyle.strokeWidth,
   };
 
-  const rectsLength = rects.length;
+  const rectsLength = annotations.length;
 
   for (let i = 0; i < rectsLength; i++) {
-    const rect = rects[i];
-    withContext(ctx, (ctx) => {
+    const { rect, panel } = annotations[i];
+    withPanelTransform(ctx, panel, rotation, renderingArea, (ctx) => {
       renderRect(ctx, rect, fill, stroke);
     });
   }

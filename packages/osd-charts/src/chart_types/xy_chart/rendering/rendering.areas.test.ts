@@ -17,132 +17,85 @@
  * under the License.
  */
 
-import { ChartTypes } from '../..';
-import { MockSeriesSpec } from '../../../mocks/specs';
+import { Store } from 'redux';
+
+import { MockPointGeometry } from '../../../mocks/geometries';
+import { MockSeriesIdentifier } from '../../../mocks/series/series_identifiers';
+import { MockGlobalSpec, MockSeriesSpec } from '../../../mocks/specs';
+import { MockStore } from '../../../mocks/store';
 import { ScaleType } from '../../../scales/constants';
-import { SpecTypes } from '../../../specs/constants';
-import { CurveType } from '../../../utils/curves';
+import { Spec } from '../../../specs';
+import { GlobalChartState } from '../../../state/chart_state';
 import { PointGeometry, AreaGeometry } from '../../../utils/geometry';
-import { LIGHT_THEME } from '../../../utils/themes/light_theme';
-import { computeSeriesDomains } from '../state/utils/utils';
+import { computeSeriesDomainsSelector } from '../state/selectors/compute_series_domains';
+import { computeSeriesGeometriesSelector } from '../state/selectors/compute_series_geometries';
+import { ComputedGeometries } from '../state/utils/types';
 import { IndexedGeometryMap } from '../utils/indexed_geometry_map';
-import { computeXScale, computeYScales } from '../utils/scales';
-import { AreaSeriesSpec, SeriesTypes, StackMode } from '../utils/specs';
-import { renderArea } from './rendering';
+import { AreaSeriesSpec, StackMode } from '../utils/specs';
 
 const SPEC_ID = 'spec_1';
 const GROUP_ID = 'group_1';
 
-describe('Rendering points - areas', () => {
-  describe('Empty line for missing data', () => {
-    const pointSeriesSpec: AreaSeriesSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Series,
-      id: SPEC_ID,
-      groupId: GROUP_ID,
-      seriesType: SeriesTypes.Area,
-      data: [
-        [0, 10],
-        [1, 5],
-      ],
-      xAccessor: 0,
-      yAccessors: [1],
-      xScaleType: ScaleType.Ordinal,
-      yScaleType: ScaleType.Linear,
-    };
-    const pointSeriesMap = [pointSeriesSpec];
-    const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
-    const xScale = computeXScale({
-      xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.length,
-      range: [0, 100],
-    });
-    const yScales = computeYScales({
-      yDomains: pointSeriesDomains.yDomain,
-      range: [100, 0],
-    });
-    let renderedArea: {
-      areaGeometry: AreaGeometry;
-      indexedGeometryMap: IndexedGeometryMap;
-    };
-
-    beforeEach(() => {
-      renderedArea = renderArea(
-        25, // adding a ideal 25px shift, generally applied by renderGeometries
-        { ...pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0], data: [] },
-        xScale,
-        yScales.get(GROUP_ID)!,
-        'red',
-        CurveType.LINEAR,
-        false,
-        0,
-        LIGHT_THEME.areaSeriesStyle,
-        {
-          enabled: false,
+function initStore(specs: Spec[], vizColors: string[] = ['red'], width = 100): Store<GlobalChartState> {
+  const store = MockStore.default({ width, height: 100, top: 0, left: 0 });
+  MockStore.addSpecs(
+    [
+      ...specs,
+      MockGlobalSpec.settingsNoMargins({
+        theme: {
+          colors: {
+            vizColors,
+          },
         },
-      );
-    });
-    test('Render geometry but empty upper and lower lines and area paths', () => {
-      const {
-        areaGeometry: { lines, area, color, seriesIdentifier, transform },
-      } = renderedArea;
-      expect(lines.length).toBe(0);
-      expect(area).toBe('');
-      expect(color).toBe('red');
-      expect(seriesIdentifier.seriesKeys).toEqual([1]);
-      expect(seriesIdentifier.specId).toEqual(SPEC_ID);
-      expect(transform).toEqual({ x: 25, y: 0 });
-    });
+      }),
+    ],
+    store,
+  );
+  return store;
+}
+
+describe('Rendering points - areas', () => {
+  test('Missing geometry if no data', () => {
+    const store = initStore([
+      MockSeriesSpec.area({
+        id: SPEC_ID,
+        groupId: GROUP_ID,
+        xScaleType: ScaleType.Ordinal,
+        yScaleType: ScaleType.Linear,
+        xAccessor: 0,
+        yAccessors: [1],
+        data: [],
+      }),
+    ]);
+    const {
+      geometries: { areas },
+    } = computeSeriesGeometriesSelector(store.getState());
+    expect(areas).toHaveLength(0);
   });
   describe('Single series area chart - ordinal', () => {
-    const pointSeriesSpec: AreaSeriesSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Series,
-      id: SPEC_ID,
-      groupId: GROUP_ID,
-      seriesType: SeriesTypes.Area,
-      data: [
-        [0, 10],
-        [1, 5],
-      ],
-      xAccessor: 0,
-      yAccessors: [1],
-      xScaleType: ScaleType.Ordinal,
-      yScaleType: ScaleType.Linear,
-    };
-    const pointSeriesMap = [pointSeriesSpec];
-    const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
-    const xScale = computeXScale({
-      xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.length,
-      range: [0, 100],
-    });
-    const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
-    let renderedArea: {
-      areaGeometry: AreaGeometry;
-      indexedGeometryMap: IndexedGeometryMap;
-    };
-
+    let areaGeometry: AreaGeometry;
+    let geometriesIndex: IndexedGeometryMap;
     beforeEach(() => {
-      renderedArea = renderArea(
-        25, // adding a ideal 25px shift, generally applied by renderGeometries
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
-        xScale,
-        yScales.get(GROUP_ID)!,
-        'red',
-        CurveType.LINEAR,
-        false,
-        0,
-        LIGHT_THEME.areaSeriesStyle,
-        {
-          enabled: false,
-        },
-      );
+      const store = initStore([
+        MockSeriesSpec.area({
+          id: SPEC_ID,
+          groupId: GROUP_ID,
+          xScaleType: ScaleType.Ordinal,
+          yScaleType: ScaleType.Linear,
+          xAccessor: 0,
+          yAccessors: [1],
+          data: [
+            [0, 10],
+            [1, 5],
+          ],
+        }),
+      ]);
+      const geometries = computeSeriesGeometriesSelector(store.getState());
+      [{ value: areaGeometry }] = geometries.geometries.areas;
+      geometriesIndex = geometries.geometriesIndex;
     });
     test('Can render an line and area paths', () => {
-      const {
-        areaGeometry: { lines, area, color, seriesIdentifier, transform },
-      } = renderedArea;
+      const { lines, area, color, seriesIdentifier, transform } = areaGeometry;
       expect(lines[0]).toBe('M0,0L50,50');
       expect(area).toBe('M0,0L50,50L50,100L0,100Z');
       expect(color).toBe('red');
@@ -152,11 +105,7 @@ describe('Rendering points - areas', () => {
     });
 
     test('Can render two points', () => {
-      const {
-        areaGeometry: { points },
-        indexedGeometryMap,
-      } = renderedArea;
-
+      const { points } = areaGeometry;
       expect(points[0]).toEqual(({
         x: 0,
         y: 0,
@@ -167,7 +116,10 @@ describe('Rendering points - areas', () => {
           yAccessor: 1,
           splitAccessors: new Map(),
           seriesKeys: [1],
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
+          key:
+            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
         styleOverrides: undefined,
         value: {
@@ -181,6 +133,12 @@ describe('Rendering points - areas', () => {
           x: 25,
           y: 0,
         },
+        panel: {
+          width: 100,
+          height: 100,
+          top: 0,
+          left: 0,
+        },
       } as unknown) as PointGeometry);
       expect(points[1]).toEqual(({
         x: 50,
@@ -192,7 +150,10 @@ describe('Rendering points - areas', () => {
           yAccessor: 1,
           splitAccessors: new Map(),
           seriesKeys: [1],
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
+          key:
+            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
         styleOverrides: undefined,
         value: {
@@ -206,124 +167,86 @@ describe('Rendering points - areas', () => {
           x: 25,
           y: 0,
         },
+        panel: {
+          width: 100,
+          height: 100,
+          top: 0,
+          left: 0,
+        },
       } as unknown) as PointGeometry);
-      expect(indexedGeometryMap.size).toEqual(points.length);
+      expect(geometriesIndex.size).toEqual(points.length);
     });
   });
   describe('Multi series area chart - ordinal', () => {
-    const spec1Id = 'spec_1';
-    const spec2Id = 'spec_2';
-    const pointSeriesSpec1: AreaSeriesSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Series,
-      id: spec1Id,
-      groupId: GROUP_ID,
-      seriesType: SeriesTypes.Area,
-      data: [
-        [0, 10],
-        [1, 5],
-      ],
-      xAccessor: 0,
-      yAccessors: [1],
-      xScaleType: ScaleType.Ordinal,
-      yScaleType: ScaleType.Linear,
-    };
-    const pointSeriesSpec2: AreaSeriesSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Series,
-      id: spec2Id,
-      groupId: GROUP_ID,
-      seriesType: SeriesTypes.Area,
-      data: [
-        [0, 20],
-        [1, 10],
-      ],
-      xAccessor: 0,
-      yAccessors: [1],
-      xScaleType: ScaleType.Ordinal,
-      yScaleType: ScaleType.Linear,
-    };
-    const pointSeriesMap = [pointSeriesSpec1, pointSeriesSpec2];
-    const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
-    const xScale = computeXScale({
-      xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.length,
-      range: [0, 100],
-    });
-    const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
-
-    let firstLine: {
-      areaGeometry: AreaGeometry;
-      indexedGeometryMap: IndexedGeometryMap;
-    };
-    let secondLine: {
-      areaGeometry: AreaGeometry;
-      indexedGeometryMap: IndexedGeometryMap;
-    };
-
+    let geometries: ComputedGeometries;
     beforeEach(() => {
-      firstLine = renderArea(
-        25, // adding a ideal 25px shift, generally applied by renderGeometries
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
-        xScale,
-        yScales.get(GROUP_ID)!,
-        'red',
-        CurveType.LINEAR,
-        false,
-        0,
-        LIGHT_THEME.areaSeriesStyle,
-        {
-          enabled: false,
-        },
+      const store = initStore(
+        [
+          MockSeriesSpec.area({
+            id: 'spec_1',
+            groupId: GROUP_ID,
+            xScaleType: ScaleType.Ordinal,
+            yScaleType: ScaleType.Linear,
+            xAccessor: 0,
+            yAccessors: [1],
+            data: [
+              [0, 10],
+              [1, 5],
+            ],
+          }),
+          MockSeriesSpec.area({
+            id: 'spec_2',
+            groupId: GROUP_ID,
+            xScaleType: ScaleType.Ordinal,
+            yScaleType: ScaleType.Linear,
+            xAccessor: 0,
+            yAccessors: [1],
+            data: [
+              [0, 20],
+              [1, 10],
+            ],
+          }),
+        ],
+        ['red', 'blue'],
       );
-      secondLine = renderArea(
-        25, // adding a ideal 25px shift, generally applied by renderGeometries
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[1],
-        xScale,
-        yScales.get(GROUP_ID)!,
-        'blue',
-        CurveType.LINEAR,
-        false,
-        0,
-        LIGHT_THEME.areaSeriesStyle,
-        {
-          enabled: false,
-        },
-      );
+      geometries = computeSeriesGeometriesSelector(store.getState());
     });
 
     test('Can render two ordinal areas', () => {
-      expect(firstLine.areaGeometry.lines[0]).toBe('M0,50L50,75');
-      expect(firstLine.areaGeometry.area).toBe('M0,50L50,75L50,100L0,100Z');
-      expect(firstLine.areaGeometry.color).toBe('red');
-      expect(firstLine.areaGeometry.seriesIdentifier.seriesKeys).toEqual([1]);
-      expect(firstLine.areaGeometry.seriesIdentifier.specId).toEqual(spec1Id);
-      expect(firstLine.areaGeometry.transform).toEqual({ x: 25, y: 0 });
+      const { areas } = geometries.geometries;
+      const [{ value: firstArea }, { value: secondArea }] = areas;
+      expect(firstArea.lines[0]).toBe('M0,50L50,75');
+      expect(firstArea.area).toBe('M0,50L50,75L50,100L0,100Z');
+      expect(firstArea.color).toBe('red');
+      expect(firstArea.seriesIdentifier.seriesKeys).toEqual([1]);
+      expect(firstArea.seriesIdentifier.specId).toEqual('spec_1');
+      expect(firstArea.transform).toEqual({ x: 25, y: 0 });
 
-      expect(secondLine.areaGeometry.lines[0]).toBe('M0,0L50,50');
-      expect(secondLine.areaGeometry.area).toBe('M0,0L50,50L50,100L0,100Z');
-      expect(secondLine.areaGeometry.color).toBe('blue');
-      expect(secondLine.areaGeometry.seriesIdentifier.seriesKeys).toEqual([1]);
-      expect(secondLine.areaGeometry.seriesIdentifier.specId).toEqual(spec2Id);
-      expect(secondLine.areaGeometry.transform).toEqual({ x: 25, y: 0 });
+      expect(secondArea.lines[0]).toBe('M0,0L50,50');
+      expect(secondArea.area).toBe('M0,0L50,50L50,100L0,100Z');
+      expect(secondArea.color).toBe('blue');
+      expect(secondArea.seriesIdentifier.seriesKeys).toEqual([1]);
+      expect(secondArea.seriesIdentifier.specId).toEqual('spec_2');
+      expect(secondArea.transform).toEqual({ x: 25, y: 0 });
     });
     test('can render first spec points', () => {
-      const {
-        areaGeometry: { points },
-        indexedGeometryMap,
-      } = firstLine;
-      expect(points.length).toEqual(2);
-      expect(points[0]).toEqual(({
+      const { areas } = geometries.geometries;
+      const [{ value: firstArea }] = areas;
+      expect(firstArea.points.length).toEqual(2);
+      expect(firstArea.points[0]).toEqual(({
         x: 0,
         y: 50,
         radius: 0,
         color: 'red',
         seriesIdentifier: {
-          specId: spec1Id,
+          specId: 'spec_1',
           yAccessor: 1,
           splitAccessors: new Map(),
           seriesKeys: [1],
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
+          key:
+            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
         styleOverrides: undefined,
         value: {
@@ -337,18 +260,27 @@ describe('Rendering points - areas', () => {
           x: 25,
           y: 0,
         },
+        panel: {
+          width: 100,
+          height: 100,
+          top: 0,
+          left: 0,
+        },
       } as unknown) as PointGeometry);
-      expect(points[1]).toEqual(({
+      expect(firstArea.points[1]).toEqual(({
         x: 50,
         y: 75,
         radius: 0,
         color: 'red',
         seriesIdentifier: {
-          specId: spec1Id,
+          specId: 'spec_1',
           yAccessor: 1,
           splitAccessors: new Map(),
           seriesKeys: [1],
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
+          key:
+            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
         styleOverrides: undefined,
         value: {
@@ -362,26 +294,32 @@ describe('Rendering points - areas', () => {
           x: 25,
           y: 0,
         },
+        panel: {
+          width: 100,
+          height: 100,
+          top: 0,
+          left: 0,
+        },
       } as unknown) as PointGeometry);
-      expect(indexedGeometryMap.size).toEqual(points.length);
     });
     test('can render second spec points', () => {
-      const {
-        areaGeometry: { points },
-        indexedGeometryMap,
-      } = secondLine;
-      expect(points.length).toEqual(2);
-      expect(points[0]).toEqual(({
+      const { areas } = geometries.geometries;
+      const [, { value: secondArea }] = areas;
+      expect(secondArea.points.length).toEqual(2);
+      expect(secondArea.points[0]).toEqual(({
         x: 0,
         y: 0,
         radius: 0,
         color: 'blue',
         seriesIdentifier: {
-          specId: spec2Id,
+          specId: 'spec_2',
           yAccessor: 1,
           splitAccessors: new Map(),
           seriesKeys: [1],
-          key: 'spec{spec_2}yAccessor{1}splitAccessors{}',
+          key:
+            'groupId{group_1}spec{spec_2}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
         styleOverrides: undefined,
         value: {
@@ -395,18 +333,27 @@ describe('Rendering points - areas', () => {
           x: 25,
           y: 0,
         },
+        panel: {
+          width: 100,
+          height: 100,
+          top: 0,
+          left: 0,
+        },
       } as unknown) as PointGeometry);
-      expect(points[1]).toEqual(({
+      expect(secondArea.points[1]).toEqual(({
         x: 50,
         y: 50,
         radius: 0,
         color: 'blue',
         seriesIdentifier: {
-          specId: spec2Id,
+          specId: 'spec_2',
           yAccessor: 1,
           splitAccessors: new Map(),
           seriesKeys: [1],
-          key: 'spec{spec_2}yAccessor{1}splitAccessors{}',
+          key:
+            'groupId{group_1}spec{spec_2}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
         styleOverrides: undefined,
         value: {
@@ -420,652 +367,406 @@ describe('Rendering points - areas', () => {
           x: 25,
           y: 0,
         },
+        panel: {
+          width: 100,
+          height: 100,
+          top: 0,
+          left: 0,
+        },
       } as unknown) as PointGeometry);
-      expect(indexedGeometryMap.size).toEqual(points.length);
+    });
+    test('has the right number of geometry in the indexes', () => {
+      const { areas } = geometries.geometries;
+      const [{ value: firstArea }] = areas;
+      expect(geometries.geometriesIndex.size).toEqual(firstArea.points.length);
     });
   });
+
   describe('Single series area chart - linear', () => {
-    const pointSeriesSpec: AreaSeriesSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Series,
-      id: SPEC_ID,
+    let geometries: ComputedGeometries;
+    const spec = MockSeriesSpec.area({
+      id: 'spec_1',
       groupId: GROUP_ID,
-      seriesType: SeriesTypes.Area,
+      xScaleType: ScaleType.Linear,
+      yScaleType: ScaleType.Linear,
+      xAccessor: 0,
+      yAccessors: [1],
       data: [
         [0, 10],
         [1, 5],
       ],
-      xAccessor: 0,
-      yAccessors: [1],
-      xScaleType: ScaleType.Linear,
-      yScaleType: ScaleType.Linear,
-    };
-    const pointSeriesMap = [pointSeriesSpec];
-    const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
-    const xScale = computeXScale({
-      xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.length,
-      range: [0, 100],
     });
-    const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
-
-    let renderedArea: {
-      areaGeometry: AreaGeometry;
-      indexedGeometryMap: IndexedGeometryMap;
-    };
-
     beforeEach(() => {
-      renderedArea = renderArea(
-        0, // not applied any shift, renderGeometries applies it only with mixed charts
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
-        xScale,
-        yScales.get(GROUP_ID)!,
-        'red',
-        CurveType.LINEAR,
-        false,
-        0,
-        LIGHT_THEME.areaSeriesStyle,
-        {
-          enabled: false,
-        },
-      );
+      const store = initStore([spec], ['red']);
+      geometries = computeSeriesGeometriesSelector(store.getState());
     });
+
     test('Can render a linear area', () => {
-      expect(renderedArea.areaGeometry.lines[0]).toBe('M0,0L100,50');
-      expect(renderedArea.areaGeometry.area).toBe('M0,0L100,50L100,100L0,100Z');
-      expect(renderedArea.areaGeometry.color).toBe('red');
-      expect(renderedArea.areaGeometry.seriesIdentifier.seriesKeys).toEqual([1]);
-      expect(renderedArea.areaGeometry.seriesIdentifier.specId).toEqual(SPEC_ID);
-      expect(renderedArea.areaGeometry.transform).toEqual({ x: 0, y: 0 });
+      const { areas } = geometries.geometries;
+      const [{ value: firstArea }] = areas;
+      expect(firstArea.lines[0]).toBe('M0,0L100,50');
+      expect(firstArea.area).toBe('M0,0L100,50L100,100L0,100Z');
+      expect(firstArea.color).toBe('red');
+      expect(firstArea.seriesIdentifier.seriesKeys).toEqual([1]);
+      expect(firstArea.seriesIdentifier.specId).toEqual(SPEC_ID);
+      expect(firstArea.transform).toEqual({ x: 0, y: 0 });
     });
     test('Can render two points', () => {
-      const {
-        areaGeometry: { points },
-        indexedGeometryMap,
-      } = renderedArea;
-      expect(points[0]).toEqual(({
-        x: 0,
-        y: 0,
-        radius: 0,
-        color: 'red',
-        seriesIdentifier: {
-          specId: SPEC_ID,
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
-          x: 0,
-          y: 10,
-          mark: null,
-          datum: [0, 10],
-        },
-        transform: {
+      const { areas } = geometries.geometries;
+      const [{ value: firstArea }] = areas;
+      expect(firstArea.points[0]).toEqual(
+        MockPointGeometry.default({
           x: 0,
           y: 0,
-        },
-      } as unknown) as PointGeometry);
-      expect(points[1]).toEqual(({
-        x: 100,
-        y: 50,
-        radius: 0,
-        color: 'red',
-        seriesIdentifier: {
-          specId: SPEC_ID,
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
-          x: 1,
-          y: 5,
-          mark: null,
-          datum: [1, 5],
-        },
-        transform: {
-          x: 0,
-          y: 0,
-        },
-      } as unknown) as PointGeometry);
-      expect(indexedGeometryMap.size).toEqual(points.length);
+          radius: 0,
+          color: 'red',
+          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec),
+          value: {
+            accessor: 'y1',
+            x: 0,
+            y: 10,
+            mark: null,
+            datum: [0, 10],
+          },
+        }),
+      );
+      expect(firstArea.points[1]).toEqual(
+        MockPointGeometry.default({
+          x: 100,
+          y: 50,
+          radius: 0,
+          color: 'red',
+          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec),
+          value: {
+            accessor: 'y1',
+            x: 1,
+            y: 5,
+            mark: null,
+            datum: [1, 5],
+          },
+        }),
+      );
+      expect(geometries.geometriesIndex.size).toEqual(firstArea.points.length);
     });
   });
+
   describe('Multi series area chart - linear', () => {
-    const spec1Id = 'spec_1';
-    const spec2Id = 'spec_2';
-    const pointSeriesSpec1: AreaSeriesSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Series,
-      id: spec1Id,
+    let geometries: ComputedGeometries;
+    const spec1 = MockSeriesSpec.area({
+      id: 'spec_1',
       groupId: GROUP_ID,
-      seriesType: SeriesTypes.Area,
+      xScaleType: ScaleType.Linear,
+      yScaleType: ScaleType.Linear,
+      xAccessor: 0,
+      yAccessors: [1],
       data: [
         [0, 10],
         [1, 5],
       ],
-      xAccessor: 0,
-      yAccessors: [1],
+    });
+    const spec2 = MockSeriesSpec.area({
+      id: 'spec_2',
+      groupId: GROUP_ID,
       xScaleType: ScaleType.Linear,
       yScaleType: ScaleType.Linear,
-    };
-    const pointSeriesSpec2: AreaSeriesSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Series,
-      id: spec2Id,
-      groupId: GROUP_ID,
-      seriesType: SeriesTypes.Area,
+      xAccessor: 0,
+      yAccessors: [1],
       data: [
         [0, 20],
         [1, 10],
       ],
-      xAccessor: 0,
-      yAccessors: [1],
-      xScaleType: ScaleType.Linear,
-      yScaleType: ScaleType.Linear,
-    };
-    const pointSeriesMap = [pointSeriesSpec1, pointSeriesSpec2];
-    const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
-    const xScale = computeXScale({
-      xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.length,
-      range: [0, 100],
     });
-    const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
-
-    let firstLine: {
-      areaGeometry: AreaGeometry;
-      indexedGeometryMap: IndexedGeometryMap;
-    };
-    let secondLine: {
-      areaGeometry: AreaGeometry;
-      indexedGeometryMap: IndexedGeometryMap;
-    };
-
     beforeEach(() => {
-      firstLine = renderArea(
-        0, // not applied any shift, renderGeometries applies it only with mixed charts
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
-        xScale,
-        yScales.get(GROUP_ID)!,
-        'red',
-        CurveType.LINEAR,
-        false,
-        0,
-        LIGHT_THEME.areaSeriesStyle,
-        {
-          enabled: false,
-        },
-      );
-      secondLine = renderArea(
-        0, // not applied any shift, renderGeometries applies it only with mixed charts
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[1],
-        xScale,
-        yScales.get(GROUP_ID)!,
-        'blue',
-        CurveType.LINEAR,
-        false,
-        0,
-        LIGHT_THEME.areaSeriesStyle,
-        {
-          enabled: false,
-        },
-      );
+      const store = initStore([spec1, spec2], ['red', 'blue']);
+      geometries = computeSeriesGeometriesSelector(store.getState());
     });
     test('can render two linear areas', () => {
-      expect(firstLine.areaGeometry.lines[0]).toBe('M0,50L100,75');
-      expect(firstLine.areaGeometry.area).toBe('M0,50L100,75L100,100L0,100Z');
-      expect(firstLine.areaGeometry.color).toBe('red');
-      expect(firstLine.areaGeometry.seriesIdentifier.seriesKeys).toEqual([1]);
-      expect(firstLine.areaGeometry.seriesIdentifier.specId).toEqual(spec1Id);
-      expect(firstLine.areaGeometry.transform).toEqual({ x: 0, y: 0 });
+      const { areas } = geometries.geometries;
+      const [{ value: firstArea }, { value: secondArea }] = areas;
+      expect(firstArea.lines[0]).toBe('M0,50L100,75');
+      expect(firstArea.area).toBe('M0,50L100,75L100,100L0,100Z');
+      expect(firstArea.color).toBe('red');
+      expect(firstArea.seriesIdentifier.seriesKeys).toEqual([1]);
+      expect(firstArea.seriesIdentifier.specId).toEqual('spec_1');
+      expect(firstArea.transform).toEqual({ x: 0, y: 0 });
 
-      expect(secondLine.areaGeometry.lines[0]).toBe('M0,0L100,50');
-      expect(secondLine.areaGeometry.area).toBe('M0,0L100,50L100,100L0,100Z');
-      expect(secondLine.areaGeometry.color).toBe('blue');
-      expect(secondLine.areaGeometry.seriesIdentifier.seriesKeys).toEqual([1]);
-      expect(secondLine.areaGeometry.seriesIdentifier.specId).toEqual(spec2Id);
-      expect(secondLine.areaGeometry.transform).toEqual({ x: 0, y: 0 });
+      expect(secondArea.lines[0]).toBe('M0,0L100,50');
+      expect(secondArea.area).toBe('M0,0L100,50L100,100L0,100Z');
+      expect(secondArea.color).toBe('blue');
+      expect(secondArea.seriesIdentifier.seriesKeys).toEqual([1]);
+      expect(secondArea.seriesIdentifier.specId).toEqual('spec_2');
+      expect(secondArea.transform).toEqual({ x: 0, y: 0 });
     });
     test('can render first spec points', () => {
-      const {
-        areaGeometry: { points },
-        indexedGeometryMap,
-      } = firstLine;
-      expect(points.length).toEqual(2);
-      expect(points[0]).toEqual(({
-        x: 0,
-        y: 50,
-        radius: 0,
-        color: 'red',
-        seriesIdentifier: {
-          specId: spec1Id,
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
+      const { areas } = geometries.geometries;
+      const [{ value: firstArea }] = areas;
+      expect(firstArea.points.length).toEqual(2);
+      expect(firstArea.points[0]).toEqual(
+        MockPointGeometry.default({
           x: 0,
-          y: 10,
-          mark: null,
-          datum: [0, 10],
-        },
-        transform: {
-          x: 0,
-          y: 0,
-        },
-      } as unknown) as PointGeometry);
-      expect(points[1]).toEqual(({
-        x: 100,
-        y: 75,
-        radius: 0,
-        color: 'red',
-        seriesIdentifier: {
-          specId: spec1Id,
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
-          x: 1,
-          y: 5,
-          mark: null,
-          datum: [1, 5],
-        },
-        transform: {
-          x: 0,
-          y: 0,
-        },
-      } as unknown) as PointGeometry);
-      expect(indexedGeometryMap.size).toEqual(points.length);
+          y: 50,
+          radius: 0,
+          color: 'red',
+          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec1),
+
+          value: {
+            accessor: 'y1',
+            x: 0,
+            y: 10,
+            mark: null,
+            datum: [0, 10],
+          },
+        }),
+      );
+      expect(firstArea.points[1]).toEqual(
+        MockPointGeometry.default({
+          x: 100,
+          y: 75,
+          radius: 0,
+          color: 'red',
+          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec1),
+          value: {
+            accessor: 'y1',
+            x: 1,
+            y: 5,
+            mark: null,
+            datum: [1, 5],
+          },
+        }),
+      );
+      expect(geometries.geometriesIndex.size).toEqual(firstArea.points.length);
     });
     test('can render second spec points', () => {
-      const {
-        areaGeometry: { points },
-        indexedGeometryMap,
-      } = secondLine;
-      expect(points.length).toEqual(2);
-      expect(points[0]).toEqual(({
-        x: 0,
-        y: 0,
-        radius: 0,
-        color: 'blue',
-        seriesIdentifier: {
-          specId: spec2Id,
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key: 'spec{spec_2}yAccessor{1}splitAccessors{}',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
-          x: 0,
-          y: 20,
-          mark: null,
-          datum: [0, 20],
-        },
-        transform: {
+      const { areas } = geometries.geometries;
+      const [, { value: secondArea }] = areas;
+      expect(secondArea.points.length).toEqual(2);
+      expect(secondArea.points[0]).toEqual(
+        MockPointGeometry.default({
           x: 0,
           y: 0,
-        },
-      } as unknown) as PointGeometry);
-      expect(points[1]).toEqual(({
-        x: 100,
-        y: 50,
-        radius: 0,
-        color: 'blue',
-        seriesIdentifier: {
-          specId: spec2Id,
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key: 'spec{spec_2}yAccessor{1}splitAccessors{}',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
-          x: 1,
-          y: 10,
-          mark: null,
-          datum: [1, 10],
-        },
-        transform: {
-          x: 0,
-          y: 0,
-        },
-      } as unknown) as PointGeometry);
-      expect(indexedGeometryMap.size).toEqual(points.length);
+          radius: 0,
+          color: 'blue',
+          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec2),
+
+          value: {
+            accessor: 'y1',
+            x: 0,
+            y: 20,
+            mark: null,
+            datum: [0, 20],
+          },
+        }),
+      );
+      expect(secondArea.points[1]).toEqual(
+        MockPointGeometry.default({
+          x: 100,
+          y: 50,
+          radius: 0,
+          color: 'blue',
+          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec2),
+          value: {
+            accessor: 'y1',
+            x: 1,
+            y: 10,
+            mark: null,
+            datum: [1, 10],
+          },
+        }),
+      );
+      expect(geometries.geometriesIndex.size).toEqual(secondArea.points.length);
     });
   });
   describe('Single series area chart - time', () => {
-    const pointSeriesSpec: AreaSeriesSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Series,
-      id: SPEC_ID,
+    let geometries: ComputedGeometries;
+    const spec = MockSeriesSpec.area({
+      id: 'spec_1',
       groupId: GROUP_ID,
-      seriesType: SeriesTypes.Area,
+      xScaleType: ScaleType.Time,
+      yScaleType: ScaleType.Linear,
+      xAccessor: 0,
+      yAccessors: [1],
       data: [
         [1546300800000, 10],
         [1546387200000, 5],
       ],
-      xAccessor: 0,
-      yAccessors: [1],
-      xScaleType: ScaleType.Time,
-      yScaleType: ScaleType.Linear,
-    };
-    const pointSeriesMap = [pointSeriesSpec];
-    const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
-    const xScale = computeXScale({
-      xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.length,
-      range: [0, 100],
     });
-    const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
-
-    let renderedArea: {
-      areaGeometry: AreaGeometry;
-      indexedGeometryMap: IndexedGeometryMap;
-    };
-
     beforeEach(() => {
-      renderedArea = renderArea(
-        0, // not applied any shift, renderGeometries applies it only with mixed charts
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
-        xScale,
-        yScales.get(GROUP_ID)!,
-        'red',
-        CurveType.LINEAR,
-        false,
-        0,
-        LIGHT_THEME.areaSeriesStyle,
-        {
-          enabled: false,
-        },
-      );
+      const store = initStore([spec], ['red']);
+      geometries = computeSeriesGeometriesSelector(store.getState());
     });
+
     test('Can render a time area', () => {
-      expect(renderedArea.areaGeometry.lines[0]).toBe('M0,0L100,50');
-      expect(renderedArea.areaGeometry.area).toBe('M0,0L100,50L100,100L0,100Z');
-      expect(renderedArea.areaGeometry.color).toBe('red');
-      expect(renderedArea.areaGeometry.seriesIdentifier.seriesKeys).toEqual([1]);
-      expect(renderedArea.areaGeometry.seriesIdentifier.specId).toEqual(SPEC_ID);
-      expect(renderedArea.areaGeometry.transform).toEqual({ x: 0, y: 0 });
+      const { areas } = geometries.geometries;
+      const [{ value: firstArea }] = areas;
+      expect(firstArea.lines[0]).toBe('M0,0L100,50');
+      expect(firstArea.area).toBe('M0,0L100,50L100,100L0,100Z');
+      expect(firstArea.color).toBe('red');
+      expect(firstArea.seriesIdentifier.seriesKeys).toEqual([1]);
+      expect(firstArea.seriesIdentifier.specId).toEqual(SPEC_ID);
+      expect(firstArea.transform).toEqual({ x: 0, y: 0 });
     });
     test('Can render two points', () => {
-      const {
-        areaGeometry: { points },
-        indexedGeometryMap,
-      } = renderedArea;
-      expect(points[0]).toEqual(({
-        x: 0,
-        y: 0,
-        radius: 0,
-        color: 'red',
-        seriesIdentifier: {
-          specId: SPEC_ID,
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
-          x: 1546300800000,
-          y: 10,
-          mark: null,
-          datum: [1546300800000, 10],
-        },
-        transform: {
+      const { areas } = geometries.geometries;
+      const [{ value: firstArea }] = areas;
+      expect(firstArea.points[0]).toEqual(
+        MockPointGeometry.default({
           x: 0,
           y: 0,
-        },
-      } as unknown) as PointGeometry);
-      expect(points[1]).toEqual(({
-        x: 100,
-        y: 50,
-        radius: 0,
-        color: 'red',
-        seriesIdentifier: {
-          specId: SPEC_ID,
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
-          x: 1546387200000,
-          y: 5,
-          mark: null,
-          datum: [1546387200000, 5],
-        },
-        transform: {
-          x: 0,
-          y: 0,
-        },
-      } as unknown) as PointGeometry);
-      expect(indexedGeometryMap.size).toEqual(points.length);
+          radius: 0,
+          color: 'red',
+          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec),
+
+          value: {
+            accessor: 'y1',
+            x: 1546300800000,
+            y: 10,
+            mark: null,
+            datum: [1546300800000, 10],
+          },
+        }),
+      );
+      expect(firstArea.points[1]).toEqual(
+        MockPointGeometry.default({
+          x: 100,
+          y: 50,
+          radius: 0,
+          color: 'red',
+          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec),
+          styleOverrides: undefined,
+          value: {
+            accessor: 'y1',
+            x: 1546387200000,
+            y: 5,
+            mark: null,
+            datum: [1546387200000, 5],
+          },
+        }),
+      );
+      expect(geometries.geometriesIndex.size).toEqual(firstArea.points.length);
     });
   });
   describe('Multi series area chart - time', () => {
-    const spec1Id = 'spec_1';
-    const spec2Id = 'spec_2';
-    const pointSeriesSpec1: AreaSeriesSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Series,
-      id: spec1Id,
+    let geometries: ComputedGeometries;
+    const spec1 = MockSeriesSpec.area({
+      id: 'spec_1',
       groupId: GROUP_ID,
-      seriesType: SeriesTypes.Area,
+      xScaleType: ScaleType.Time,
+      yScaleType: ScaleType.Linear,
+      xAccessor: 0,
+      yAccessors: [1],
       data: [
         [1546300800000, 10],
         [1546387200000, 5],
       ],
-      xAccessor: 0,
-      yAccessors: [1],
+    });
+    const spec2 = MockSeriesSpec.area({
+      id: 'spec_2',
+      groupId: GROUP_ID,
       xScaleType: ScaleType.Time,
       yScaleType: ScaleType.Linear,
-    };
-    const pointSeriesSpec2: AreaSeriesSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Series,
-      id: spec2Id,
-      groupId: GROUP_ID,
-      seriesType: SeriesTypes.Area,
+      xAccessor: 0,
+      yAccessors: [1],
       data: [
         [1546300800000, 20],
         [1546387200000, 10],
       ],
-      xAccessor: 0,
-      yAccessors: [1],
-      xScaleType: ScaleType.Time,
-      yScaleType: ScaleType.Linear,
-    };
-    const pointSeriesMap = [pointSeriesSpec1, pointSeriesSpec2];
-    const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
-    const xScale = computeXScale({
-      xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.length,
-      range: [0, 100],
     });
-    const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
-
-    let firstLine: {
-      areaGeometry: AreaGeometry;
-      indexedGeometryMap: IndexedGeometryMap;
-    };
-    let secondLine: {
-      areaGeometry: AreaGeometry;
-      indexedGeometryMap: IndexedGeometryMap;
-    };
-
     beforeEach(() => {
-      firstLine = renderArea(
-        0, // not applied any shift, renderGeometries applies it only with mixed charts
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
-        xScale,
-        yScales.get(GROUP_ID)!,
-        'red',
-        CurveType.LINEAR,
-        false,
-        0,
-        LIGHT_THEME.areaSeriesStyle,
-        {
-          enabled: false,
-        },
-      );
-      secondLine = renderArea(
-        0, // not applied any shift, renderGeometries applies it only with mixed charts
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[1],
-        xScale,
-        yScales.get(GROUP_ID)!,
-        'blue',
-        CurveType.LINEAR,
-        false,
-        0,
-        LIGHT_THEME.areaSeriesStyle,
-        {
-          enabled: false,
-        },
-      );
+      const store = initStore([spec1, spec2], ['red', 'blue']);
+      geometries = computeSeriesGeometriesSelector(store.getState());
     });
+
     test('can render first spec points', () => {
-      const {
-        areaGeometry: { points },
-        indexedGeometryMap,
-      } = firstLine;
-      expect(points.length).toEqual(2);
-      expect(points[0]).toEqual(({
-        x: 0,
-        y: 50,
-        radius: 0,
-        color: 'red',
-        seriesIdentifier: {
-          specId: spec1Id,
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
-          x: 1546300800000,
-          y: 10,
-          mark: null,
-          datum: [1546300800000, 10],
-        },
-        transform: {
+      const { areas } = geometries.geometries;
+      const [{ value: firstArea }] = areas;
+      expect(firstArea.points.length).toEqual(2);
+      expect(firstArea.points[0]).toEqual(
+        MockPointGeometry.default({
           x: 0,
-          y: 0,
-        },
-      } as unknown) as PointGeometry);
-      expect(points[1]).toEqual(({
-        x: 100,
-        y: 75,
-        radius: 0,
-        color: 'red',
-        seriesIdentifier: {
-          specId: spec1Id,
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key: 'spec{spec_1}yAccessor{1}splitAccessors{}',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
-          x: 1546387200000,
-          y: 5,
-          mark: null,
-          datum: [1546387200000, 5],
-        },
-        transform: {
-          x: 0,
-          y: 0,
-        },
-      } as unknown) as PointGeometry);
-      expect(indexedGeometryMap.size).toEqual(points.length);
+          y: 50,
+          radius: 0,
+          color: 'red',
+          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec1),
+
+          value: {
+            accessor: 'y1',
+            x: 1546300800000,
+            y: 10,
+            mark: null,
+            datum: [1546300800000, 10],
+          },
+        }),
+      );
+      expect(firstArea.points[1]).toEqual(
+        MockPointGeometry.default({
+          x: 100,
+          y: 75,
+          radius: 0,
+          color: 'red',
+          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec1),
+
+          value: {
+            accessor: 'y1',
+            x: 1546387200000,
+            y: 5,
+            mark: null,
+            datum: [1546387200000, 5],
+          },
+        }),
+      );
+      expect(geometries.geometriesIndex.size).toEqual(firstArea.points.length);
     });
     test('can render second spec points', () => {
-      const {
-        areaGeometry: { points },
-        indexedGeometryMap,
-      } = secondLine;
-      expect(points.length).toEqual(2);
-      expect(points[0]).toEqual(({
-        x: 0,
-        y: 0,
-        radius: 0,
-        color: 'blue',
-        seriesIdentifier: {
-          specId: spec2Id,
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key: 'spec{spec_2}yAccessor{1}splitAccessors{}',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
-          x: 1546300800000,
-          y: 20,
-          mark: null,
-          datum: [1546300800000, 20],
-        },
-        transform: {
+      const { areas } = geometries.geometries;
+      const [, { value: secondArea }] = areas;
+
+      expect(secondArea.points.length).toEqual(2);
+      expect(secondArea.points[0]).toEqual(
+        MockPointGeometry.default({
           x: 0,
           y: 0,
-        },
-      } as unknown) as PointGeometry);
-      expect(points[1]).toEqual(({
-        x: 100,
-        y: 50,
-        radius: 0,
-        color: 'blue',
-        seriesIdentifier: {
-          specId: spec2Id,
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key: 'spec{spec_2}yAccessor{1}splitAccessors{}',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
-          x: 1546387200000,
-          y: 10,
-          mark: null,
-          datum: [1546387200000, 10],
-        },
-        transform: {
-          x: 0,
-          y: 0,
-        },
-      } as unknown) as PointGeometry);
-      expect(indexedGeometryMap.size).toEqual(points.length);
+          radius: 0,
+          color: 'blue',
+          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec2),
+
+          value: {
+            accessor: 'y1',
+            x: 1546300800000,
+            y: 20,
+            mark: null,
+            datum: [1546300800000, 20],
+          },
+        }),
+      );
+      expect(secondArea.points[1]).toEqual(
+        MockPointGeometry.default({
+          x: 100,
+          y: 50,
+          radius: 0,
+          color: 'blue',
+          seriesIdentifier: MockSeriesIdentifier.fromSpec(spec2),
+
+          value: {
+            accessor: 'y1',
+            x: 1546387200000,
+            y: 10,
+            mark: null,
+            datum: [1546387200000, 10],
+          },
+        }),
+      );
+      expect(geometries.geometriesIndex.size).toEqual(secondArea.points.length);
     });
   });
   describe('Single series area chart - y log', () => {
-    const pointSeriesSpec: AreaSeriesSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Series,
-      id: SPEC_ID,
+    let geometries: ComputedGeometries;
+    const spec = MockSeriesSpec.area({
+      id: 'spec_1',
       groupId: GROUP_ID,
-      seriesType: SeriesTypes.Area,
+      xScaleType: ScaleType.Linear,
+      yScaleType: ScaleType.Log,
+      xAccessor: 0,
+      yAccessors: [1],
       data: [
         [0, 10],
         [1, 5],
@@ -1077,63 +778,40 @@ describe('Rendering points - areas', () => {
         [7, 10],
         [8, 10],
       ],
-      xAccessor: 0,
-      yAccessors: [1],
-      xScaleType: ScaleType.Linear,
-      yScaleType: ScaleType.Log,
-    };
-    const pointSeriesMap = [pointSeriesSpec];
-    const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
-    const xScale = computeXScale({
-      xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.length,
-      range: [0, 90],
     });
-    const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
-
-    let renderedArea: {
-      areaGeometry: AreaGeometry;
-      indexedGeometryMap: IndexedGeometryMap;
-    };
-
     beforeEach(() => {
-      renderedArea = renderArea(
-        0, // not applied any shift, renderGeometries applies it only with mixed charts
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
-        xScale,
-        yScales.get(GROUP_ID)!,
-        'red',
-        CurveType.LINEAR,
-        false,
-        0,
-        LIGHT_THEME.areaSeriesStyle,
-        {
-          enabled: false,
-        },
-      );
+      const store = initStore([spec], ['red'], 90);
+      geometries = computeSeriesGeometriesSelector(store.getState());
     });
+
     test('Can render a splitted area and line', () => {
-      // expect(renderedArea.lineGeometry.line).toBe('ss');
-      expect(renderedArea.areaGeometry.lines[0].split('M').length - 1).toBe(3);
-      expect(renderedArea.areaGeometry.area.split('M').length - 1).toBe(3);
-      expect(renderedArea.areaGeometry.color).toBe('red');
-      expect(renderedArea.areaGeometry.seriesIdentifier.seriesKeys).toEqual([1]);
-      expect(renderedArea.areaGeometry.seriesIdentifier.specId).toEqual(SPEC_ID);
-      expect(renderedArea.areaGeometry.transform).toEqual({ x: 0, y: 0 });
+      const { areas } = geometries.geometries;
+      const [{ value: firstArea }] = areas;
+      expect(firstArea.lines[0].split('M').length - 1).toBe(3);
+      expect(firstArea.area.split('M').length - 1).toBe(3);
+      expect(firstArea.color).toBe('red');
+      expect(firstArea.seriesIdentifier.seriesKeys).toEqual([1]);
+      expect(firstArea.seriesIdentifier.specId).toEqual(SPEC_ID);
+      expect(firstArea.transform).toEqual({ x: 0, y: 0 });
     });
     test('Can render points', () => {
       const {
-        areaGeometry: { points },
-        indexedGeometryMap,
-      } = renderedArea;
+        geometriesIndex,
+        geometries: { areas },
+      } = geometries;
+      const [
+        {
+          value: { points },
+        },
+      ] = areas;
       // all the points minus the undefined ones on a log scale
       expect(points.length).toBe(7);
       // all the points expect null geometries
-      expect(indexedGeometryMap.size).toEqual(8);
-      const nullIndexdGeometry = indexedGeometryMap.find(2)!;
+      expect(geometriesIndex.size).toEqual(8);
+      const nullIndexdGeometry = geometriesIndex.find(2)!;
       expect(nullIndexdGeometry).toEqual([]);
 
-      const zeroValueIndexdGeometry = indexedGeometryMap.find(5)!;
+      const zeroValueIndexdGeometry = geometriesIndex.find(5)!;
       expect(zeroValueIndexdGeometry).toBeDefined();
       expect(zeroValueIndexdGeometry.length).toBe(1);
       // moved to the bottom of the chart
@@ -1169,8 +847,11 @@ describe('Rendering points - areas', () => {
       stackAccessors: [0],
       stackMode: StackMode.Percentage,
     });
-    const pointSeriesDomains = computeSeriesDomains([pointSeriesSpec1, pointSeriesSpec2]);
-    expect(pointSeriesDomains.formattedDataSeries.stacked[0].dataSeries[0].data).toMatchObject([
+
+    const store = initStore([pointSeriesSpec1, pointSeriesSpec2]);
+    const domains = computeSeriesDomainsSelector(store.getState());
+
+    expect(domains.formattedDataSeries[0].data).toMatchObject([
       {
         datum: [1546300800000, 0],
         initialY0: null,
@@ -1216,8 +897,10 @@ describe('Rendering points - areas', () => {
       yScaleType: ScaleType.Linear,
       stackAccessors: [0],
     });
-    const pointSeriesDomains = computeSeriesDomains([pointSeriesSpec1, pointSeriesSpec2]);
-    expect(pointSeriesDomains.formattedDataSeries.stacked[0].dataSeries[0].data).toMatchObject([
+    const store = initStore([pointSeriesSpec1, pointSeriesSpec2]);
+    const domains = computeSeriesDomainsSelector(store.getState());
+
+    expect(domains.formattedDataSeries[0].data).toMatchObject([
       {
         datum: [1546300800000, null],
         initialY0: null,
@@ -1238,7 +921,7 @@ describe('Rendering points - areas', () => {
       },
     ]);
 
-    expect(pointSeriesDomains.formattedDataSeries.stacked[0].dataSeries[1].data).toEqual([
+    expect(domains.formattedDataSeries[1].data).toEqual([
       {
         datum: [1546300800000, 3],
         initialY0: null,
@@ -1260,90 +943,90 @@ describe('Rendering points - areas', () => {
     ]);
   });
 
-  describe('Error guards for scaled values', () => {
-    const pointSeriesSpec: AreaSeriesSpec = {
-      chartType: ChartTypes.XYAxis,
-      specType: SpecTypes.Series,
-      id: SPEC_ID,
-      groupId: GROUP_ID,
-      seriesType: SeriesTypes.Area,
-      data: [
-        [0, 10],
-        [1, 5],
-      ],
-      xAccessor: 0,
-      yAccessors: [1],
-      xScaleType: ScaleType.Ordinal,
-      yScaleType: ScaleType.Linear,
-    };
-    const pointSeriesMap = [pointSeriesSpec];
-    const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
-    const xScale = computeXScale({
-      xDomain: pointSeriesDomains.xDomain,
-      totalBarsInCluster: pointSeriesMap.length,
-      range: [0, 100],
-    });
-    const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
-    let renderedArea: {
-      areaGeometry: AreaGeometry;
-      indexedGeometryMap: IndexedGeometryMap;
-    };
-
-    beforeEach(() => {
-      renderedArea = renderArea(
-        25, // adding a ideal 25px shift, generally applied by renderGeometries
-        pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
-        xScale,
-        yScales.get(GROUP_ID)!,
-        'red',
-        CurveType.LINEAR,
-        false,
-        0,
-        LIGHT_THEME.areaSeriesStyle,
-        {
-          enabled: false,
-        },
-      );
-    });
-
-    describe('xScale values throw error', () => {
-      beforeAll(() => {
-        jest.spyOn(xScale, 'scaleOrThrow').mockImplementation(() => {
-          throw new Error();
-        });
-      });
-
-      test('Should include no lines nor area', () => {
-        const {
-          areaGeometry: { lines, area, color, seriesIdentifier, transform },
-        } = renderedArea;
-        expect(lines).toHaveLength(0);
-        expect(area).toBe('');
-        expect(color).toBe('red');
-        expect(seriesIdentifier.seriesKeys).toEqual([1]);
-        expect(seriesIdentifier.specId).toEqual(SPEC_ID);
-        expect(transform).toEqual({ x: 25, y: 0 });
-      });
-    });
-
-    describe('yScale values throw error', () => {
-      beforeAll(() => {
-        jest.spyOn(yScales.get(GROUP_ID)!, 'scaleOrThrow').mockImplementation(() => {
-          throw new Error();
-        });
-      });
-
-      test('Should include no lines nor area', () => {
-        const {
-          areaGeometry: { lines, area, color, seriesIdentifier, transform },
-        } = renderedArea;
-        expect(lines).toHaveLength(0);
-        expect(area).toBe('');
-        expect(color).toBe('red');
-        expect(seriesIdentifier.seriesKeys).toEqual([1]);
-        expect(seriesIdentifier.specId).toEqual(SPEC_ID);
-        expect(transform).toEqual({ x: 25, y: 0 });
-      });
-    });
-  });
+  // describe('Error guards for scaled values', () => {
+  //   const pointSeriesSpec: AreaSeriesSpec = {
+  //     chartType: ChartTypes.XYAxis,
+  //     specType: SpecTypes.Series,
+  //     id: SPEC_ID,
+  //     groupId: GROUP_ID,
+  //     seriesType: SeriesTypes.Area,
+  //     data: [
+  //       [0, 10],
+  //       [1, 5],
+  //     ],
+  //     xAccessor: 0,
+  //     yAccessors: [1],
+  //     xScaleType: ScaleType.Ordinal,
+  //     yScaleType: ScaleType.Linear,
+  //   };
+  //   const pointSeriesMap = [pointSeriesSpec];
+  //   const pointSeriesDomains = computeSeriesDomains(pointSeriesMap, new Map());
+  //   const xScale = computeXScale({
+  //     xDomain: pointSeriesDomains.xDomain,
+  //     totalBarsInCluster: pointSeriesMap.length,
+  //     range: [0, 100],
+  //   });
+  //   const yScales = computeYScales({ yDomains: pointSeriesDomains.yDomain, range: [100, 0] });
+  //   let renderedArea: {
+  //     areaGeometry: AreaGeometry;
+  //     indexedGeometryMap: IndexedGeometryMap;
+  //   };
+  //
+  //   beforeEach(() => {
+  //     renderedArea = renderArea(
+  //       25, // adding a ideal 25px shift, generally applied by renderGeometries
+  //       pointSeriesDomains.formattedDataSeries.nonStacked[0].dataSeries[0],
+  //       xScale,
+  //       yScales.get(GROUP_ID)!,
+  //       'red',
+  //       CurveType.LINEAR,
+  //       false,
+  //       0,
+  //       LIGHT_THEME.areaSeriesStyle,
+  //       {
+  //         enabled: false,
+  //       },
+  //     );
+  //   });
+  //
+  //   describe('xScale values throw error', () => {
+  //     beforeAll(() => {
+  //       jest.spyOn(xScale, 'scaleOrThrow').mockImplementation(() => {
+  //         throw new Error();
+  //       });
+  //     });
+  //
+  //     test('Should include no lines nor area', () => {
+  //       const {
+  //         areaGeometry: { lines, area, color, seriesIdentifier, transform },
+  //       } = renderedArea;
+  //       expect(lines).toHaveLength(0);
+  //       expect(area).toBe('');
+  //       expect(color).toBe('red');
+  //       expect(seriesIdentifier.seriesKeys).toEqual([1]);
+  //       expect(seriesIdentifier.specId).toEqual(SPEC_ID);
+  //       expect(transform).toEqual({ x: 25, y: 0 });
+  //     });
+  //   });
+  //
+  //   describe('yScale values throw error', () => {
+  //     beforeAll(() => {
+  //       jest.spyOn(yScales.get(GROUP_ID)!, 'scaleOrThrow').mockImplementation(() => {
+  //         throw new Error();
+  //       });
+  //     });
+  //
+  //     test('Should include no lines nor area', () => {
+  //       const {
+  //         areaGeometry: { lines, area, color, seriesIdentifier, transform },
+  //       } = renderedArea;
+  //       expect(lines).toHaveLength(0);
+  //       expect(area).toBe('');
+  //       expect(color).toBe('red');
+  //       expect(seriesIdentifier.seriesKeys).toEqual([1]);
+  //       expect(seriesIdentifier.specId).toEqual(SPEC_ID);
+  //       expect(transform).toEqual({ x: 25, y: 0 });
+  //     });
+  //   });
+  // });
 });

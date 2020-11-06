@@ -22,6 +22,7 @@ import { Rotation, Position } from '../../../utils/commons';
 import { Dimensions } from '../../../utils/dimensions';
 import { AnnotationId, GroupId } from '../../../utils/ids';
 import { Point } from '../../../utils/point';
+import { SmallMultipleScales } from '../state/selectors/compute_small_multiple_scales';
 import { isHorizontalRotation } from '../state/utils/common';
 import { getAxesSpecForSpecId } from '../state/utils/spec';
 import {
@@ -30,7 +31,6 @@ import {
   AnnotationSpec,
   AxisSpec,
   isLineAnnotation,
-  isRectAnnotation,
 } from '../utils/specs';
 import { computeLineAnnotationDimensions } from './line/dimensions';
 import { computeRectAnnotationDimensions } from './rect/dimensions';
@@ -139,42 +139,41 @@ export function computeAnnotationDimensions(
   xScale: Scale,
   axesSpecs: AxisSpec[],
   isHistogramModeEnabled: boolean,
+  smallMultipleScales: SmallMultipleScales,
 ): Map<AnnotationId, AnnotationDimensions> {
-  const annotationDimensions = new Map<AnnotationId, AnnotationDimensions>();
-
-  annotations.forEach((annotationSpec) => {
+  return annotations.reduce<Map<AnnotationId, AnnotationDimensions>>((annotationDimensions, annotationSpec) => {
     const { id } = annotationSpec;
+
     if (isLineAnnotation(annotationSpec)) {
       const { groupId, domainType } = annotationSpec;
       const annotationAxisPosition = getAnnotationAxis(axesSpecs, groupId, domainType, chartRotation);
 
       const dimensions = computeLineAnnotationDimensions(
         annotationSpec,
-        chartDimensions,
         chartRotation,
         yScales,
         xScale,
+        smallMultipleScales,
         isHistogramModeEnabled,
         annotationAxisPosition,
       );
-
       if (dimensions) {
         annotationDimensions.set(id, dimensions);
       }
-    } else if (isRectAnnotation(annotationSpec)) {
-      const dimensions = computeRectAnnotationDimensions(
-        annotationSpec,
-        chartDimensions,
-        yScales,
-        xScale,
-        isHistogramModeEnabled,
-      );
-
-      if (dimensions) {
-        annotationDimensions.set(id, dimensions);
-      }
+      return annotationDimensions;
     }
-  });
 
-  return annotationDimensions;
+    const dimensions = computeRectAnnotationDimensions(
+      annotationSpec,
+      yScales,
+      xScale,
+      smallMultipleScales,
+      isHistogramModeEnabled,
+    );
+
+    if (dimensions) {
+      annotationDimensions.set(id, dimensions);
+    }
+    return annotationDimensions;
+  }, new Map());
 }
