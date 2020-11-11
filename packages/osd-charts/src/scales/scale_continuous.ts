@@ -33,7 +33,7 @@ import { ScaleContinuousType, Scale } from '.';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { maxValueWithUpperLimit, mergePartial } from '../utils/commons';
 import { getMomentWithTz } from '../utils/data/date_time';
-import { ScaleType } from './constants';
+import { LOG_MIN_ABS_DOMAIN, ScaleType } from './constants';
 
 /**
  * d3 scales excluding time scale
@@ -62,38 +62,39 @@ const SCALES = {
 export function limitLogScaleDomain(domain: any[]) {
   if (domain[0] === 0) {
     if (domain[1] > 0) {
-      return [1, domain[1]];
+      return [LOG_MIN_ABS_DOMAIN, domain[1]];
     }
     if (domain[1] < 0) {
-      return [-1, domain[1]];
+      return [-LOG_MIN_ABS_DOMAIN, domain[1]];
     }
-    return [1, 1];
+    return [LOG_MIN_ABS_DOMAIN, LOG_MIN_ABS_DOMAIN];
   }
   if (domain[1] === 0) {
     if (domain[0] > 0) {
-      return [domain[0], 1];
+      return [domain[0], LOG_MIN_ABS_DOMAIN];
     }
     if (domain[0] < 0) {
-      return [domain[0], -1];
+      return [domain[0], -LOG_MIN_ABS_DOMAIN];
     }
-    return [1, 1];
+    return [LOG_MIN_ABS_DOMAIN, LOG_MIN_ABS_DOMAIN];
   }
   if (domain[0] < 0 && domain[1] > 0) {
     const isD0Min = Math.abs(domain[1]) - Math.abs(domain[0]) >= 0;
     if (isD0Min) {
-      return [1, domain[1]];
+      return [LOG_MIN_ABS_DOMAIN, domain[1]];
     }
-    return [domain[0], -1];
+    return [domain[0], -LOG_MIN_ABS_DOMAIN];
   }
   if (domain[0] > 0 && domain[1] < 0) {
     const isD0Max = Math.abs(domain[0]) - Math.abs(domain[1]) >= 0;
     if (isD0Max) {
-      return [domain[0], 1];
+      return [domain[0], LOG_MIN_ABS_DOMAIN];
     }
-    return [-1, domain[1]];
+    return [-LOG_MIN_ABS_DOMAIN, domain[1]];
   }
   return domain;
 }
+
 interface ScaleData {
   /** The Type of continuous scale */
   type: ScaleContinuousType;
@@ -360,4 +361,19 @@ export class ScaleContinuous implements Scale {
   isValueInDomain(value: number) {
     return value >= this.domain[0] && value <= this.domain[1];
   }
+}
+
+/** @internal */
+export function getDomainPolarity(domain: number[]): number {
+  const [min, max] = domain;
+  // all positive or zero
+  if (min >= 0 && max >= 0) {
+    return 1;
+  }
+  // all negative or zero
+  if (min <= 0 && max <= 0) {
+    return -1;
+  }
+  // mixed
+  return 0;
 }

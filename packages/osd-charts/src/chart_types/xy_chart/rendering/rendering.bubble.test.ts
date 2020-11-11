@@ -23,7 +23,6 @@ import { MockGlobalSpec, MockSeriesSpec } from '../../../mocks/specs';
 import { MockStore } from '../../../mocks/store';
 import { ScaleType } from '../../../scales/constants';
 import { Position } from '../../../utils/commons';
-import { PointGeometry } from '../../../utils/geometry';
 import { computeSeriesGeometriesSelector } from '../state/selectors/compute_series_geometries';
 
 const SPEC_ID = 'spec_1';
@@ -739,12 +738,8 @@ describe('Rendering points - bubble', () => {
         y: 100,
       });
       expect(zeroValueIndexdGeometry).toBeDefined();
-      expect(zeroValueIndexdGeometry.length).toBe(5);
+      expect(zeroValueIndexdGeometry.length).toBe(3);
       expect(zeroValueIndexdGeometry.find(({ value: { x } }) => x === 5)).toBeDefined();
-      // moved to the bottom of the chart
-      expect((zeroValueIndexdGeometry[0] as PointGeometry).y).toBe(100);
-      // 0 radius point
-      expect((zeroValueIndexdGeometry[0] as PointGeometry).radius).toBe(0);
     });
   });
   describe('Remove points datum is not in domain', () => {

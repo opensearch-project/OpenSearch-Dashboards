@@ -24,7 +24,7 @@ import { Rotation } from '../../../../utils/commons';
 import { Dimensions } from '../../../../utils/dimensions';
 import { LineGeometry, PerPanel } from '../../../../utils/geometry';
 import { SharedGeometryStateStyle } from '../../../../utils/themes/theme';
-import { getGeometryStateStyle } from '../../rendering/rendering';
+import { getGeometryStateStyle } from '../../rendering/utils';
 import { renderPoints } from './points';
 import { renderLinePaths } from './primitives/path';
 import { buildLineStyles } from './styles/line';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getYValue } from '../../chart_types/xy_chart/rendering/rendering';
+import { getYDatumValue } from '../../chart_types/xy_chart/rendering/utils';
 import { DataSeriesDatum } from '../../chart_types/xy_chart/utils/series';
 
 /**
@@ -44,4 +44,7 @@ export const getXValueData = (data: DataSeriesDatum[]): (number | string)[] => d
  * Returns value of `y1` or `filled.y1` or null
  * @internal
  */
-export const getYResolvedData = (data: DataSeriesDatum[]): (number | null)[] => data.map(getYValue);
+export const getYResolvedData = (data: DataSeriesDatum[]): (number | null)[] =>
+  data.map((d) => {
+    return getYDatumValue(d);
+  });

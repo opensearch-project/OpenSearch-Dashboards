@@ -23,14 +23,9 @@ import { MockScale } from '../../../mocks/scale';
 import { mergePartial, RecursivePartial } from '../../../utils/commons';
 import { BarSeriesStyle, SharedGeometryStateStyle, PointStyle } from '../../../utils/themes/theme';
 import { DataSeriesDatum, XYChartSeriesIdentifier } from '../utils/series';
-import {
-  getGeometryStateStyle,
-  isPointOnGeometry,
-  getBarStyleOverrides,
-  getPointStyleOverrides,
-  getClippedRanges,
-  getRadiusFn,
-} from './rendering';
+import { getBarStyleOverrides } from './bars';
+import { getPointStyleOverrides, getRadiusFn } from './points';
+import { getGeometryStateStyle, isPointOnGeometry, getClippedRanges } from './utils';
 
 describe('Rendering utils', () => {
   test('check if point is on geometry', () => {

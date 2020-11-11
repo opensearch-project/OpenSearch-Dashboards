@@ -24,7 +24,7 @@ import { Rotation } from '../../../../utils/commons';
 import { Dimensions } from '../../../../utils/dimensions';
 import { BarGeometry, PerPanel } from '../../../../utils/geometry';
 import { SharedGeometryStateStyle } from '../../../../utils/themes/theme';
-import { getGeometryStateStyle } from '../../rendering/rendering';
+import { getGeometryStateStyle } from '../../rendering/utils';
 import { renderRect } from './primitives/rect';
 import { buildBarStyles } from './styles/bar';
 import { withPanelTransform } from './utils/panel_transform';

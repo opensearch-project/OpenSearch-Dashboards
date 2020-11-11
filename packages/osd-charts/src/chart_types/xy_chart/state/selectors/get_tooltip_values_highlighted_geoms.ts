@@ -39,7 +39,7 @@ import { Rotation } from '../../../../utils/commons';
 import { isValidPointerOverEvent } from '../../../../utils/events';
 import { IndexedGeometry } from '../../../../utils/geometry';
 import { Point } from '../../../../utils/point';
-import { isPointOnGeometry } from '../../rendering/rendering';
+import { isPointOnGeometry } from '../../rendering/utils';
 import { formatTooltip } from '../../tooltip/tooltip';
 import { BasicSeriesSpec, AxisSpec } from '../../utils/specs';
 import { getAxesSpecForSpecId, getSpecsById } from '../utils/spec';

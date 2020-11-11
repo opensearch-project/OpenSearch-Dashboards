@@ -25,7 +25,7 @@ import { Rotation } from '../../../../utils/commons';
 import { Dimensions } from '../../../../utils/dimensions';
 import { BubbleGeometry, PerPanel, PointGeometry } from '../../../../utils/geometry';
 import { SharedGeometryStateStyle, GeometryStateStyle, PointStyle } from '../../../../utils/themes/theme';
-import { getGeometryStateStyle } from '../../rendering/rendering';
+import { getGeometryStateStyle } from '../../rendering/utils';
 import { renderPointGroup } from './points';
 
 interface BubbleGeometriesDataProps {

@@ -35,3 +35,6 @@ export const ScaleType = Object.freeze({
 
 /** @public */
 export type ScaleType = $Values<typeof ScaleType>;
+
+/** @internal */
+export const LOG_MIN_ABS_DOMAIN = 1;

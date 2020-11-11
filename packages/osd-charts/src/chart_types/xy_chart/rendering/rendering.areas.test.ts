@@ -786,6 +786,7 @@ describe('Rendering points - areas', () => {
 
     test('Can render a splitted area and line', () => {
       const { areas } = geometries.geometries;
+
       const [{ value: firstArea }] = areas;
       expect(firstArea.lines[0].split('M').length - 1).toBe(3);
       expect(firstArea.area.split('M').length - 1).toBe(3);
@@ -815,7 +816,7 @@ describe('Rendering points - areas', () => {
       expect(zeroValueIndexdGeometry).toBeDefined();
       expect(zeroValueIndexdGeometry.length).toBe(1);
       // moved to the bottom of the chart
-      expect(zeroValueIndexdGeometry[0].y).toBe(100);
+      expect(zeroValueIndexdGeometry[0].y).toBe(Infinity);
       // 0 radius point
       expect((zeroValueIndexdGeometry[0] as PointGeometry).radius).toBe(0);
     });
