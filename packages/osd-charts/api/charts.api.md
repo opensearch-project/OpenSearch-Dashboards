@@ -1048,7 +1048,7 @@ export type LegendColorPicker = ComponentType<LegendColorPickerProps>;
 export interface LegendColorPickerProps {
     anchor: HTMLElement;
     color: Color;
-    onChange: (color: Color) => void;
+    onChange: (color: Color | null) => void;
     onClose: () => void;
     seriesIdentifier: SeriesIdentifier;
 }

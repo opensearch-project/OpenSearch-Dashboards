@@ -36,13 +36,13 @@ interface ClearTemporaryColors {
 interface SetTemporaryColor {
   type: typeof SET_TEMPORARY_COLOR;
   key: SeriesKey;
-  color: Color;
+  color: Color | null;
 }
 
 interface SetPersistedColor {
   type: typeof SET_PERSISTED_COLOR;
   key: SeriesKey;
-  color: Color;
+  color: Color | null;
 }
 
 /** @internal */
@@ -51,12 +51,12 @@ export function clearTemporaryColors(): ClearTemporaryColors {
 }
 
 /** @internal */
-export function setTemporaryColor(key: SeriesKey, color: Color): SetTemporaryColor {
+export function setTemporaryColor(key: SeriesKey, color: Color | null): SetTemporaryColor {
   return { type: SET_TEMPORARY_COLOR, key, color };
 }
 
 /** @internal */
-export function setPersistedColor(key: SeriesKey, color: Color): SetPersistedColor {
+export function setPersistedColor(key: SeriesKey, color: Color | null): SetPersistedColor {
   return { type: SET_PERSISTED_COLOR, key, color };
 }
 

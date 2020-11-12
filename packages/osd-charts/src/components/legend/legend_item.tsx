@@ -110,6 +110,7 @@ interface LegendItemState {
 /** @internal */
 export class LegendListItem extends Component<LegendItemProps, LegendItemState> {
   static displayName = 'LegendItem';
+  shouldClearPersistedColor = false;
 
   colorRef = createRef<HTMLDivElement>();
   state: LegendItemState = {
@@ -183,9 +184,13 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
     const { seriesIdentifier, color } = item;
 
     const handleClose = () => {
-      setPersistedColorAction(seriesIdentifier.key, color);
+      setPersistedColorAction(seriesIdentifier.key, this.shouldClearPersistedColor ? null : color);
       clearTemporaryColorsAction();
       this.toggleIsOpen();
+    };
+    const handleChange = (c: Color | null) => {
+      this.shouldClearPersistedColor = c === null;
+      setTemporaryColorAction(seriesIdentifier.key, c);
     };
     if (ColorPicker && this.state.isOpen && this.colorRef.current) {
       return (
@@ -193,7 +198,7 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
           anchor={this.colorRef.current}
           color={color}
           onClose={handleClose}
-          onChange={(color: Color) => setTemporaryColorAction(seriesIdentifier.key, color)}
+          onChange={handleChange}
           seriesIdentifier={seriesIdentifier}
         />
       );

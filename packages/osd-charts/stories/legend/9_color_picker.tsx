@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiColorPicker, EuiWrappingPopover, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiColorPicker, EuiWrappingPopover, EuiButton, EuiSpacer, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { action } from '@storybook/addon-actions';
 import React, { useState } from 'react';
 
@@ -41,14 +41,19 @@ export const Example = () => {
         [seriesIdentifier.key]: color,
       });
     };
-    const handleChange = (color: Color) => {
-      onChange(color);
-      onChangeAction(color);
+    const handleChange = (c: Color | null) => {
+      onChange(c);
+      onChangeAction(c);
     };
     return (
       <EuiWrappingPopover isOpen button={anchor} closePopover={handleClose} anchorPosition="leftCenter">
         <EuiColorPicker display="inline" color={color} onChange={handleChange} />
         <EuiSpacer size="m" />
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty size="s" onClick={() => handleChange(null)}>
+            Clear color
+          </EuiButtonEmpty>
+        </EuiFlexItem>
         <EuiButton fullWidth size="s" onClick={handleClose}>
           Done
         </EuiButton>

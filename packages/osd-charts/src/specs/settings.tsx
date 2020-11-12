@@ -248,7 +248,7 @@ export interface LegendColorPickerProps {
   /**
    * Callback to update temporary color state
    */
-  onChange: (color: Color) => void;
+  onChange: (color: Color | null) => void;
   /**
    * Series id for the active series
    */

@@ -191,7 +191,7 @@ export interface ExternalEventsState {
 
 /** @internal */
 export interface ColorOverrides {
-  temporary: Record<SeriesKey, Color>;
+  temporary: Record<SeriesKey, Color | null>;
   persisted: Record<SeriesKey, Color>;
 }
 
@@ -399,10 +399,16 @@ export const chartStoreReducer = (chartId: string) => {
           ...state,
           colors: {
             ...state.colors,
-            persisted: {
-              ...state.colors.persisted,
-              [action.key]: action.color,
-            },
+            persisted:
+              action.color !== null
+                ? {
+                    ...state.colors.persisted,
+                    [action.key]: action.color,
+                  }
+                : (() => {
+                    const { [action.key]: removed, ...others } = state.colors.persisted;
+                    return others;
+                  })(),
           },
         };
       default:
