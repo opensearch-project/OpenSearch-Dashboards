@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { number, color, array } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { Chart, Goal } from '../../src';
@@ -26,31 +27,44 @@ import { Color } from '../../src/utils/commons';
 
 const subtype = GoalSubtype.Goal;
 
-const colorMap: { [k: number]: Color } = {
-  200: 'rgba(0,0,0,0.20)',
-  250: 'rgba(0,0,0,0.12)',
-  300: 'rgba(0,0,0,0.05)',
+export const Example = () => {
+  const base = number('base', 0, { range: true, min: 0, max: 300, step: 1 });
+  const target = number('target', 260, { range: true, min: 0, max: 300, step: 1 });
+  const actual = number('actual', 170, { range: true, min: 0, max: 300, step: 1 });
+  const ticks = array('ticks', ['0', '50', '100', '150', '200', '250', '300']).map(Number);
+  const bands = array('bands', ['200', '250', '300']).map(Number);
+
+  const opacityMap: { [k: string]: number } = {
+    '200': 0.2,
+    '250': 0.12,
+    '300': 0.05,
+  };
+
+  const colorMap: { [k: number]: Color } = bands.reduce<{ [k: number]: Color }>((acc, band) => {
+    const defaultValue = opacityMap[band] ?? 0;
+    acc[band] = color(`color at ${band}`, `rgba(0,0,0,${defaultValue.toFixed(2)})`, 'colors');
+    return acc;
+  }, {});
+
+  const bandFillColor = (x: number): Color => colorMap[x];
+  return (
+    <Chart className="story-chart">
+      <Goal
+        id="spec_1"
+        subtype={subtype}
+        base={base}
+        target={target}
+        actual={actual}
+        bands={bands}
+        ticks={ticks}
+        tickValueFormatter={({ value }: BandFillColorAccessorInput) => String(value)}
+        bandFillColor={({ value }: BandFillColorAccessorInput) => bandFillColor(value)}
+        labelMajor="Revenue 2020 YTD  "
+        labelMinor="(thousand USD)  "
+        centralMajor={`${actual}`}
+        centralMinor=""
+        config={{ angleStart: Math.PI, angleEnd: 0 }}
+      />
+    </Chart>
+  );
 };
-
-const bandFillColor = (x: number): Color => colorMap[x];
-
-export const Example = () => (
-  <Chart className="story-chart">
-    <Goal
-      id="spec_1"
-      subtype={subtype}
-      base={0}
-      target={260}
-      actual={170}
-      bands={[200, 250, 300]}
-      ticks={[0, 50, 100, 150, 200, 250, 300]}
-      tickValueFormatter={({ value }: BandFillColorAccessorInput) => String(value)}
-      bandFillColor={({ value }: BandFillColorAccessorInput) => bandFillColor(value)}
-      labelMajor="Revenue 2020 YTD  "
-      labelMinor="(thousand USD)  "
-      centralMajor="170"
-      centralMinor=""
-      config={{ angleStart: Math.PI, angleEnd: 0 }}
-    />
-  </Chart>
-);
