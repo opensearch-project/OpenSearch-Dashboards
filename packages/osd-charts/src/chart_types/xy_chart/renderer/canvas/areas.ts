@@ -74,8 +74,9 @@ export function renderAreas(ctx: CanvasRenderingContext2D, props: AreaGeometries
     });
 
     areas.forEach(({ panel, value: area }) => {
-      const { seriesPointStyle, seriesIdentifier } = area;
-      if (!seriesPointStyle.visible) {
+      const { seriesPointStyle, seriesIdentifier, points } = area;
+      const visiblePoints = seriesPointStyle.visible ? points : points.filter(({ orphan }) => orphan);
+      if (visiblePoints.length === 0) {
         return;
       }
       const geometryStateStyle = getGeometryStateStyle(seriesIdentifier, sharedStyle, highlightedLegendItem);
@@ -85,9 +86,9 @@ export function renderAreas(ctx: CanvasRenderingContext2D, props: AreaGeometries
         rotation,
         renderingArea,
         (ctx) => {
-          renderPoints(ctx, area.points, seriesPointStyle, geometryStateStyle);
+          renderPoints(ctx, visiblePoints, seriesPointStyle, geometryStateStyle);
         },
-        { area: clippings, shouldClip: area.points[0]?.value.mark !== null },
+        { area: clippings, shouldClip: points[0]?.value.mark !== null },
       );
     });
   });

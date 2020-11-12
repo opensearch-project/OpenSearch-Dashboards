@@ -36,4 +36,5 @@ export { Example as multipleWithAxisAndLegend } from './7_multiple';
 export { Example as stackedWithAxisAndLegend } from './8_stacked';
 export { Example as multiSeriesWithLogValues } from './9_multi_series';
 export { Example as discontinuousDataPoints } from './11_discontinuous_data_points';
+export { Example as testOrphanDataPoints } from './12_orphan_data_points';
 export { Example as testPathOrdering } from './10_test_path_ordering';

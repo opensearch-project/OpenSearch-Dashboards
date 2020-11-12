@@ -235,6 +235,8 @@ describe('Rendering bands - areas', () => {
             mark: null,
             datum: [0, 2, 10],
           },
+          // the first point is also an orphan because the next one is null
+          orphan: true,
         }),
       );
       expect(points[1]).toMatchObject(
@@ -246,6 +248,7 @@ describe('Rendering bands - areas', () => {
             mark: null,
             datum: [0, 2, 10],
           },
+          orphan: true,
         }),
       );
       expect(points[2]).toMatchObject(

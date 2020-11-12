@@ -52,6 +52,7 @@ export class MockPointGeometry {
       left: 0,
       top: 0,
     },
+    orphan: false,
   };
 
   static default(partial?: RecursivePartial<PointGeometry>) {

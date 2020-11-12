@@ -67,6 +67,7 @@ export interface PointGeometry {
   value: GeometryValue;
   styleOverrides?: Partial<PointStyle>;
   panel: Dimensions;
+  orphan: boolean;
 }
 
 export interface PerPanel<T> {

@@ -28,7 +28,13 @@ import { IndexedGeometryMap } from '../utils/indexed_geometry_map';
 import { DataSeries, DataSeriesDatum } from '../utils/series';
 import { PointStyleAccessor } from '../utils/specs';
 import { renderPoints } from './points';
-import { getClippedRanges, getY1ScaledValueOrThrow, isYValueDefined, MarkSizeOptions } from './utils';
+import {
+  getClippedRanges,
+  getY1ScaledValueOrThrowFn,
+  getYDatumValueFn,
+  isYValueDefinedFn,
+  MarkSizeOptions,
+} from './utils';
 
 /** @internal */
 export function renderLine(
@@ -49,14 +55,15 @@ export function renderLine(
   lineGeometry: LineGeometry;
   indexedGeometryMap: IndexedGeometryMap;
 } {
-  const y1Fn = getY1ScaledValueOrThrow(yScale);
-  const definedFn = isYValueDefined(yScale, xScale);
+  const y1Fn = getY1ScaledValueOrThrowFn(yScale);
+  const definedFn = isYValueDefinedFn(yScale, xScale);
+  const y1Accessor = getYDatumValueFn();
 
   const pathGenerator = line<DataSeriesDatum>()
     .x(({ x }) => xScale.scaleOrThrow(x) - xScaleOffset)
     .y(y1Fn)
     .defined((datum) => {
-      return definedFn(datum);
+      return definedFn(datum, y1Accessor);
     })
     .curve(getCurveFactory(curve));
 

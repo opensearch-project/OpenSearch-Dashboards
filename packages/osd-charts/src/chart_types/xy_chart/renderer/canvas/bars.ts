@@ -54,6 +54,9 @@ function renderPerPanelBars(
   rotation: Rotation = 0,
 ) {
   return ({ panel, value: bars }: PerPanel<BarGeometry[]>) => {
+    if (bars.length === 0) {
+      return;
+    }
     withPanelTransform(
       ctx,
       panel,

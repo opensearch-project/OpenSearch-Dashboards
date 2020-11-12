@@ -106,74 +106,78 @@ describe('Rendering points - areas', () => {
 
     test('Can render two points', () => {
       const { points } = areaGeometry;
-      expect(points[0]).toEqual(({
-        x: 0,
-        y: 0,
-        radius: 0,
-        color: 'red',
-        seriesIdentifier: {
-          specId: SPEC_ID,
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key:
-            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
-          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
+      expect(points[0]).toEqual(
+        MockPointGeometry.default({
           x: 0,
-          y: 10,
-          mark: null,
-          datum: [0, 10],
-        },
-        transform: {
-          x: 25,
           y: 0,
-        },
-        panel: {
-          width: 100,
-          height: 100,
-          top: 0,
-          left: 0,
-        },
-      } as unknown) as PointGeometry);
-      expect(points[1]).toEqual(({
-        x: 50,
-        y: 50,
-        radius: 0,
-        color: 'red',
-        seriesIdentifier: {
-          specId: SPEC_ID,
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key:
-            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
-          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
-          x: 1,
-          y: 5,
-          mark: null,
-          datum: [1, 5],
-        },
-        transform: {
-          x: 25,
-          y: 0,
-        },
-        panel: {
-          width: 100,
-          height: 100,
-          top: 0,
-          left: 0,
-        },
-      } as unknown) as PointGeometry);
+          radius: 0,
+          color: 'red',
+          seriesIdentifier: {
+            specId: SPEC_ID,
+            yAccessor: 1,
+            splitAccessors: new Map(),
+            seriesKeys: [1],
+            key:
+              'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+            smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+            smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          },
+          styleOverrides: undefined,
+          value: {
+            accessor: 'y1',
+            x: 0,
+            y: 10,
+            mark: null,
+            datum: [0, 10],
+          },
+          transform: {
+            x: 25,
+            y: 0,
+          },
+          panel: {
+            width: 100,
+            height: 100,
+            top: 0,
+            left: 0,
+          },
+        }),
+      );
+      expect(points[1]).toEqual(
+        MockPointGeometry.default({
+          x: 50,
+          y: 50,
+          radius: 0,
+          color: 'red',
+          seriesIdentifier: {
+            specId: SPEC_ID,
+            yAccessor: 1,
+            splitAccessors: new Map(),
+            seriesKeys: [1],
+            key:
+              'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+            smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+            smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          },
+          styleOverrides: undefined,
+          value: {
+            accessor: 'y1',
+            x: 1,
+            y: 5,
+            mark: null,
+            datum: [1, 5],
+          },
+          transform: {
+            x: 25,
+            y: 0,
+          },
+          panel: {
+            width: 100,
+            height: 100,
+            top: 0,
+            left: 0,
+          },
+        }),
+      );
       expect(geometriesIndex.size).toEqual(points.length);
     });
   });
@@ -233,147 +237,155 @@ describe('Rendering points - areas', () => {
       const { areas } = geometries.geometries;
       const [{ value: firstArea }] = areas;
       expect(firstArea.points.length).toEqual(2);
-      expect(firstArea.points[0]).toEqual(({
-        x: 0,
-        y: 50,
-        radius: 0,
-        color: 'red',
-        seriesIdentifier: {
-          specId: 'spec_1',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key:
-            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
-          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
+      expect(firstArea.points[0]).toEqual(
+        MockPointGeometry.default({
           x: 0,
-          y: 10,
-          mark: null,
-          datum: [0, 10],
-        },
-        transform: {
-          x: 25,
-          y: 0,
-        },
-        panel: {
-          width: 100,
-          height: 100,
-          top: 0,
-          left: 0,
-        },
-      } as unknown) as PointGeometry);
-      expect(firstArea.points[1]).toEqual(({
-        x: 50,
-        y: 75,
-        radius: 0,
-        color: 'red',
-        seriesIdentifier: {
-          specId: 'spec_1',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key:
-            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
-          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
-          x: 1,
-          y: 5,
-          mark: null,
-          datum: [1, 5],
-        },
-        transform: {
-          x: 25,
-          y: 0,
-        },
-        panel: {
-          width: 100,
-          height: 100,
-          top: 0,
-          left: 0,
-        },
-      } as unknown) as PointGeometry);
+          y: 50,
+          radius: 0,
+          color: 'red',
+          seriesIdentifier: {
+            specId: 'spec_1',
+            yAccessor: 1,
+            splitAccessors: new Map(),
+            seriesKeys: [1],
+            key:
+              'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+            smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+            smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          },
+          styleOverrides: undefined,
+          value: {
+            accessor: 'y1',
+            x: 0,
+            y: 10,
+            mark: null,
+            datum: [0, 10],
+          },
+          transform: {
+            x: 25,
+            y: 0,
+          },
+          panel: {
+            width: 100,
+            height: 100,
+            top: 0,
+            left: 0,
+          },
+        }),
+      );
+      expect(firstArea.points[1]).toEqual(
+        MockPointGeometry.default({
+          x: 50,
+          y: 75,
+          radius: 0,
+          color: 'red',
+          seriesIdentifier: {
+            specId: 'spec_1',
+            yAccessor: 1,
+            splitAccessors: new Map(),
+            seriesKeys: [1],
+            key:
+              'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+            smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+            smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          },
+          styleOverrides: undefined,
+          value: {
+            accessor: 'y1',
+            x: 1,
+            y: 5,
+            mark: null,
+            datum: [1, 5],
+          },
+          transform: {
+            x: 25,
+            y: 0,
+          },
+          panel: {
+            width: 100,
+            height: 100,
+            top: 0,
+            left: 0,
+          },
+        }),
+      );
     });
     test('can render second spec points', () => {
       const { areas } = geometries.geometries;
       const [, { value: secondArea }] = areas;
       expect(secondArea.points.length).toEqual(2);
-      expect(secondArea.points[0]).toEqual(({
-        x: 0,
-        y: 0,
-        radius: 0,
-        color: 'blue',
-        seriesIdentifier: {
-          specId: 'spec_2',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key:
-            'groupId{group_1}spec{spec_2}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
-          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
+      expect(secondArea.points[0]).toEqual(
+        MockPointGeometry.default({
           x: 0,
-          y: 20,
-          mark: null,
-          datum: [0, 20],
-        },
-        transform: {
-          x: 25,
           y: 0,
-        },
-        panel: {
-          width: 100,
-          height: 100,
-          top: 0,
-          left: 0,
-        },
-      } as unknown) as PointGeometry);
-      expect(secondArea.points[1]).toEqual(({
-        x: 50,
-        y: 50,
-        radius: 0,
-        color: 'blue',
-        seriesIdentifier: {
-          specId: 'spec_2',
-          yAccessor: 1,
-          splitAccessors: new Map(),
-          seriesKeys: [1],
-          key:
-            'groupId{group_1}spec{spec_2}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
-          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-        },
-        styleOverrides: undefined,
-        value: {
-          accessor: 'y1',
-          x: 1,
-          y: 10,
-          mark: null,
-          datum: [1, 10],
-        },
-        transform: {
-          x: 25,
-          y: 0,
-        },
-        panel: {
-          width: 100,
-          height: 100,
-          top: 0,
-          left: 0,
-        },
-      } as unknown) as PointGeometry);
+          radius: 0,
+          color: 'blue',
+          seriesIdentifier: {
+            specId: 'spec_2',
+            yAccessor: 1,
+            splitAccessors: new Map(),
+            seriesKeys: [1],
+            key:
+              'groupId{group_1}spec{spec_2}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+            smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+            smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          },
+          styleOverrides: undefined,
+          value: {
+            accessor: 'y1',
+            x: 0,
+            y: 20,
+            mark: null,
+            datum: [0, 20],
+          },
+          transform: {
+            x: 25,
+            y: 0,
+          },
+          panel: {
+            width: 100,
+            height: 100,
+            top: 0,
+            left: 0,
+          },
+        }),
+      );
+      expect(secondArea.points[1]).toEqual(
+        MockPointGeometry.default({
+          x: 50,
+          y: 50,
+          radius: 0,
+          color: 'blue',
+          seriesIdentifier: {
+            specId: 'spec_2',
+            yAccessor: 1,
+            splitAccessors: new Map(),
+            seriesKeys: [1],
+            key:
+              'groupId{group_1}spec{spec_2}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+            smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+            smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
+          },
+          styleOverrides: undefined,
+          value: {
+            accessor: 'y1',
+            x: 1,
+            y: 10,
+            mark: null,
+            datum: [1, 10],
+          },
+          transform: {
+            x: 25,
+            y: 0,
+          },
+          panel: {
+            width: 100,
+            height: 100,
+            top: 0,
+            left: 0,
+          },
+        }),
+      );
     });
     test('has the right number of geometry in the indexes', () => {
       const { areas } = geometries.geometries;

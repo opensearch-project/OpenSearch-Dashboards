@@ -46,7 +46,7 @@ export function renderLines(ctx: CanvasRenderingContext2D, props: LineGeometries
     const { lines, sharedStyle, highlightedLegendItem, clippings, renderingArea, rotation } = props;
 
     lines.forEach(({ panel, value: line }) => {
-      const { seriesLineStyle, seriesPointStyle } = line;
+      const { seriesLineStyle, seriesPointStyle, points } = line;
 
       if (seriesLineStyle.visible) {
         withPanelTransform(ctx, panel, rotation, renderingArea, (ctx) => {
@@ -54,20 +54,22 @@ export function renderLines(ctx: CanvasRenderingContext2D, props: LineGeometries
         });
       }
 
-      if (seriesPointStyle.visible) {
-        withPanelTransform(
-          ctx,
-          panel,
-          rotation,
-          renderingArea,
-          (ctx) => {
-            const geometryStyle = getGeometryStateStyle(line.seriesIdentifier, sharedStyle, highlightedLegendItem);
-            renderPoints(ctx, line.points, line.seriesPointStyle, geometryStyle);
-          },
-          // TODO: add padding over clipping
-          { area: clippings, shouldClip: line.points[0]?.value.mark !== null },
-        );
+      const visiblePoints = seriesPointStyle.visible ? points : points.filter(({ orphan }) => orphan);
+      if (visiblePoints.length === 0) {
+        return;
       }
+      const geometryStyle = getGeometryStateStyle(line.seriesIdentifier, sharedStyle, highlightedLegendItem);
+      withPanelTransform(
+        ctx,
+        panel,
+        rotation,
+        renderingArea,
+        (ctx) => {
+          renderPoints(ctx, visiblePoints, line.seriesPointStyle, geometryStyle);
+        },
+        // TODO: add padding over clipping
+        { area: clippings, shouldClip: line.points[0]?.value.mark !== null },
+      );
     });
   });
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Scale } from '../../../scales';
-import { Color } from '../../../utils/commons';
+import { Color, isNil } from '../../../utils/commons';
 import { Dimensions } from '../../../utils/dimensions';
 import { BandedAccessorType, PointGeometry } from '../../../utils/geometry';
 import { LineStyle, PointStyle } from '../../../utils/themes/theme';
@@ -25,11 +25,13 @@ import { GeometryType, IndexedGeometryMap } from '../utils/indexed_geometry_map'
 import { DataSeries, DataSeriesDatum, FilledValues, XYChartSeriesIdentifier } from '../utils/series';
 import { PointStyleAccessor, StackMode } from '../utils/specs';
 import {
-  getY0ScaledValueOrThrow,
-  getY1ScaledValueOrThrow,
+  getY0ScaledValueOrThrowFn,
+  getY1ScaledValueOrThrowFn,
+  getYDatumValueFn,
   isDatumFilled,
-  isYValueDefined,
+  isYValueDefinedFn,
   MarkSizeOptions,
+  YDefinedFn,
 } from './utils';
 
 /** @internal */
@@ -55,12 +57,14 @@ export function renderPoints(
     : () => 0;
   const geometryType = spatial ? GeometryType.spatial : GeometryType.linear;
 
-  const y1Fn = getY1ScaledValueOrThrow(yScale);
-  const y0Fn = getY0ScaledValueOrThrow(yScale);
-  const yDefined = isYValueDefined(yScale, xScale);
+  const y1Fn = getY1ScaledValueOrThrowFn(yScale);
+  const y0Fn = getY0ScaledValueOrThrowFn(yScale);
+  const yDefined = isYValueDefinedFn(yScale, xScale);
 
-  const pointGeometries = dataSeries.data.reduce((acc, datum) => {
+  const pointGeometries = dataSeries.data.reduce((acc, datum, dataIndex) => {
     const { x: xValue, mark } = datum;
+    const prev = dataSeries.data[dataIndex - 1];
+    const next = dataSeries.data[dataIndex + 1];
     // don't create the point if not within the xScale domain
     if (!xScale.isValueInDomain(xValue)) {
       return acc;
@@ -78,7 +82,8 @@ export function renderPoints(
     const points: PointGeometry[] = [];
     const yDatumKeyNames: Array<keyof Omit<FilledValues, 'x'>> = hasY0Accessors ? ['y0', 'y1'] : ['y1'];
 
-    yDatumKeyNames.forEach((yDatumKeyName, index) => {
+    yDatumKeyNames.forEach((yDatumKeyName, keyIndex) => {
+      const valueAccessor = getYDatumValueFn(yDatumKeyName);
       // skip rendering point if y1 is null
       const radius = getRadius(mark);
       let y: number | null;
@@ -91,7 +96,7 @@ export function renderPoints(
         return;
       }
 
-      const originalY = getDatumYValue(datum, index === 0, hasY0Accessors, dataSeries.stackMode);
+      const originalY = getDatumYValue(datum, keyIndex === 0, hasY0Accessors, dataSeries.stackMode);
       const seriesIdentifier: XYChartSeriesIdentifier = {
         key: dataSeries.key,
         specId: dataSeries.specId,
@@ -102,6 +107,7 @@ export function renderPoints(
         smHorizontalAccessorValue: dataSeries.smHorizontalAccessorValue,
       };
       const styleOverrides = getPointStyleOverrides(datum, seriesIdentifier, styleAccessor);
+      const orphan = isOrphanDataPoint(dataIndex, dataSeries.data.length, yDefined, prev, next);
       const pointGeometry: PointGeometry = {
         radius,
         x,
@@ -111,7 +117,7 @@ export function renderPoints(
           x: xValue,
           y: originalY,
           mark,
-          accessor: hasY0Accessors && index === 0 ? BandedAccessorType.Y0 : BandedAccessorType.Y1,
+          accessor: hasY0Accessors && keyIndex === 0 ? BandedAccessorType.Y0 : BandedAccessorType.Y1,
           datum: datum.datum,
         },
         transform: {
@@ -121,10 +127,11 @@ export function renderPoints(
         seriesIdentifier,
         styleOverrides,
         panel,
+        orphan,
       };
       indexedGeometryMap.set(pointGeometry, geometryType);
       // use the geometry only if the yDatum in contained in the current yScale domain
-      if (yDefined(datum, yDatumKeyName)) {
+      if (yDefined(datum, valueAccessor)) {
         points.push(pointGeometry);
       }
     });
@@ -227,4 +234,27 @@ export function getRadiusFn(
     const baseMagicNumber = 2;
     return circleRadius ? Math.sqrt(circleRadius + baseMagicNumber) + lineWidth : lineWidth;
   };
+}
+
+function yAccessorForOrphanCheck(datum: DataSeriesDatum): number | null {
+  return datum.filled?.y1 ? null : datum.y1;
+}
+
+function isOrphanDataPoint(
+  index: number,
+  length: number,
+  yDefined: YDefinedFn,
+  prev?: DataSeriesDatum,
+  next?: DataSeriesDatum,
+): boolean {
+  if (index === 0 && (isNil(next) || !yDefined(next, yAccessorForOrphanCheck))) {
+    return true;
+  }
+  if (index === length - 1 && (isNil(prev) || !yDefined(prev, yAccessorForOrphanCheck))) {
+    return true;
+  }
+  return (
+    (isNil(prev) || !yDefined(prev, yAccessorForOrphanCheck)) &&
+    (isNil(next) || !yDefined(next, yAccessorForOrphanCheck))
+  );
 }

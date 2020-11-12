@@ -59,6 +59,9 @@ export function renderBubbles(ctx: CanvasRenderingContext2D, props: BubbleGeomet
       },
       [],
     );
+    if (allPoints.length === 0) {
+      return;
+    }
 
     renderPointGroup(
       ctx,

@@ -91,4 +91,11 @@ describe('Area series stories', () => {
       );
     });
   });
+  describe('Area with orphan data points', () => {
+    it('render correctly fit function', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/line-chart--test-orphan-data-points&knob-enable fit function=&knob-switch to area=true',
+      );
+    });
+  });
 });
