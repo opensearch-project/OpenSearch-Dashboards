@@ -336,7 +336,7 @@ export const chartStoreReducer = (chartId: string) => {
           ...state,
           specsInitialized: false,
           chartRendered: false,
-          specParsing: true,
+          specParsing: false,
           specs: {
             ...rest,
           },

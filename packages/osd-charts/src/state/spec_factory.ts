@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch, bindActionCreators } from 'redux';
 
@@ -30,26 +30,14 @@ export interface DispatchProps {
   removeSpec: (id: string) => void;
 }
 
-function usePrevious(value: string) {
-  const ref = useRef<string>();
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
-}
-
 /** @internal */
 export function specComponentFactory<U extends Spec, D extends keyof U>(
   defaultProps: Pick<U, D | 'chartType' | 'specType'>,
 ) {
   /* eslint-disable no-shadow, react-hooks/exhaustive-deps, unicorn/consistent-function-scoping */
   const SpecInstance = (props: U & DispatchProps) => {
-    const prevId = usePrevious(props.id);
     const { removeSpec, upsertSpec, ...SpecInstance } = props;
     useEffect(() => {
-      if (prevId && prevId !== props.id) {
-        removeSpec(prevId);
-      }
       upsertSpec(SpecInstance);
     });
     useEffect(
@@ -80,7 +68,7 @@ export function getConnect() {
    * Redux assumes shallowEqual for all connected components
    *
    * This causes an issue where the specs are cleared and memoized spec components will never be
-   * rerendered and thus never re-upserted to the state. Setting pure to false solves this issue
+   * re-rendered and thus never re-upserted to the state. Setting pure to false solves this issue
    * and doesn't cause traditional performance degradations.
    */
   return connect(null, mapDispatchToProps, null, { pure: false });
