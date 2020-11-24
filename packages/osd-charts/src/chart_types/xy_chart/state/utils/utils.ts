@@ -76,7 +76,7 @@ import {
 } from '../../utils/specs';
 import { SmallMultipleScales } from '../selectors/compute_small_multiple_scales';
 import { isHorizontalRotation } from './common';
-import { getSpecsById, getAxesSpecForSpecId } from './spec';
+import { getSpecsById, getAxesSpecForSpecId, getSpecDomainGroupId } from './spec';
 import { SeriesDomainsAndData, ComputedGeometries, GeometriesCounts, Transform, LastValues } from './types';
 
 /**
@@ -425,7 +425,7 @@ function renderGeometries(
       continue;
     }
     // compute the y scale
-    const yScale = yScales.get(ds.groupId);
+    const yScale = yScales.get(getSpecDomainGroupId(ds.spec));
     if (!yScale) {
       continue;
     }

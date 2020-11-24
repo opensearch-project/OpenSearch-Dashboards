@@ -350,8 +350,12 @@ export interface SeriesSpec extends Spec {
    * @defaultValue {@link DEFAULT_GLOBAL_ID}
    */
   groupId: string;
-  /** when using a different groupId this option will allow compute in the same domain of the global domain */
-  useDefaultGroupDomain?: boolean;
+  /**
+   * When specify a groupId on this series, this option can be used to compute this series domain as it was part
+   * of the default group (when using the boolean value true)
+   * or as the series was part of the specified group (when issuing a string)
+   */
+  useDefaultGroupDomain?: boolean | string;
   /** An array of data */
   data: Datum[];
   /** The type of series you are looking to render */

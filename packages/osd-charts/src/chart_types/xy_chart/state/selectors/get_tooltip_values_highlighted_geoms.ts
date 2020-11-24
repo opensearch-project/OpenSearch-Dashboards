@@ -42,7 +42,7 @@ import { Point } from '../../../../utils/point';
 import { isPointOnGeometry } from '../../rendering/utils';
 import { formatTooltip } from '../../tooltip/tooltip';
 import { BasicSeriesSpec, AxisSpec } from '../../utils/specs';
-import { getAxesSpecForSpecId, getSpecsById } from '../utils/spec';
+import { getAxesSpecForSpecId, getSpecDomainGroupId, getSpecsById } from '../utils/spec';
 import { ComputedScales } from '../utils/types';
 import { getComputedScalesSelector } from './get_computed_scales';
 import { getElementAtCursorPositionSelector } from './get_elements_at_cursor_pos';
@@ -146,7 +146,7 @@ function getTooltipAndHighlightFromValue(
       const { xAxis, yAxis } = getAxesSpecForSpecId(axesSpecs, spec.groupId);
 
       // yScales is ensured by the enclosing if
-      const yScale = scales.yScales.get(spec.groupId);
+      const yScale = scales.yScales.get(getSpecDomainGroupId(spec));
       if (!yScale) {
         return acc;
       }

@@ -1538,7 +1538,7 @@ export interface SeriesSpec extends Spec {
     // (undocumented)
     specType: typeof SpecTypes.Series;
     tickFormat?: TickFormatter;
-    useDefaultGroupDomain?: boolean;
+    useDefaultGroupDomain?: boolean | string;
     // Warning: (ae-forgotten-export) The symbol "AccessorFormat" needs to be exported by the entry point index.d.ts
     y0AccessorFormat?: AccessorFormat;
     y1AccessorFormat?: AccessorFormat;

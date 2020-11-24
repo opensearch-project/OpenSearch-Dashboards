@@ -24,10 +24,11 @@ import { identity } from '../../../utils/commons';
 import { computeContinuousDataDomain } from '../../../utils/domain';
 import { GroupId } from '../../../utils/ids';
 import { Logger } from '../../../utils/logger';
+import { getSpecDomainGroupId } from '../state/utils/spec';
 import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_type_utils';
 import { groupBy } from '../utils/group_data_series';
 import { DataSeries } from '../utils/series';
-import { BasicSeriesSpec, YDomainRange, DEFAULT_GLOBAL_ID, SeriesTypes, StackMode } from '../utils/specs';
+import { BasicSeriesSpec, YDomainRange, SeriesTypes, StackMode } from '../utils/specs';
 import { YDomain } from './types';
 
 export type YBasicSeriesSpec = Pick<
@@ -37,16 +38,11 @@ export type YBasicSeriesSpec = Pick<
 
 /** @internal */
 export function mergeYDomain(dataSeries: DataSeries[], domainsByGroupId: Map<GroupId, YDomainRange>): YDomain[] {
-  const dataSeriesByGroupId = groupBy(
-    dataSeries,
-    ({ spec: { useDefaultGroupDomain, groupId } }) => {
-      return useDefaultGroupDomain ? DEFAULT_GLOBAL_ID : groupId;
-    },
-    true,
-  );
+  const dataSeriesByGroupId = groupBy(dataSeries, ({ spec }) => getSpecDomainGroupId(spec), true);
 
   return dataSeriesByGroupId.reduce<YDomain[]>((acc, groupedDataSeries) => {
-    const [{ groupId }] = groupedDataSeries;
+    const [{ spec }] = groupedDataSeries;
+    const groupId = getSpecDomainGroupId(spec);
 
     const stacked = groupedDataSeries.filter(({ isStacked }) => isStacked);
     const nonStacked = groupedDataSeries.filter(({ isStacked }) => !isStacked);
@@ -76,7 +72,8 @@ function mergeYDomainForGroup(
     yScaleType,
   }));
   const groupYScaleType = coerceYScaleTypes(yScaleTypes);
-  const [{ stackMode, groupId }] = dataSeries;
+  const [{ stackMode, spec }] = dataSeries;
+  const groupId = getSpecDomainGroupId(spec);
 
   let domain: number[];
   if (stackMode === StackMode.Percentage) {
@@ -201,28 +198,6 @@ export function isStackedSpec(spec: YBasicSeriesSpec, histogramEnabled: boolean)
 }
 
 /**
- * Get the stack mode for every groupId
- * @param specs
- * @internal
- */
-export function getStackModeForYGroup(specs: YBasicSeriesSpec[]) {
-  return specs.reduce<Record<GroupId, StackMode | undefined>>((acc, { groupId, stackMode }) => {
-    if (!acc[groupId]) {
-      acc[groupId] = undefined;
-    }
-
-    if (acc[groupId] === undefined && stackMode !== undefined) {
-      acc[groupId] = stackMode;
-    }
-    if (stackMode !== undefined && acc[groupId] !== stackMode) {
-      Logger.warn(`Is not possible to mix different stackModes, please align all stackMode on the same GroupId
-      to the same mode. The default behaviour will be to use the first encountered stackMode on the series`);
-    }
-    return acc;
-  }, {});
-}
-
-/**
  * Coerce the scale types of a set of specification to a generic one.
  * If there is at least one bar series type, than the response will specity
  * that the coerced scale is a `scaleBand` (each point needs to have a surrounding empty
@@ -248,14 +223,4 @@ function coerceYScale(scaleTypes: Set<ScaleContinuousType>): ScaleContinuousType
     return value;
   }
   return ScaleType.Linear;
-}
-
-export function getYScaleTypeByGroupId(specs: BasicSeriesSpec[]): Map<GroupId, ScaleContinuousType> {
-  const groups = groupBy(specs, ['groupId'], true);
-  return groups.reduce((acc, group) => {
-    const scaleType = coerceYScaleTypes(group);
-    const [{ groupId }] = group;
-    acc.set(groupId, scaleType);
-    return acc;
-  }, new Map());
 }

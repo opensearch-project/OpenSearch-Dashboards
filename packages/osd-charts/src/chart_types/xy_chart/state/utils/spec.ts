@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Spec } from '../../../../specs';
+import { BasicSeriesSpec, DEFAULT_GLOBAL_ID, Spec } from '../../../../specs';
 import { GroupId } from '../../../../utils/ids';
 import { isVerticalAxis } from '../../utils/axis_type_utils';
 import { AxisSpec } from '../../utils/specs';
@@ -46,4 +46,12 @@ export function getAxesSpecForSpecId(axesSpecs: AxisSpec[], groupId: GroupId) {
     xAxis,
     yAxis,
   };
+}
+
+/** @internal */
+export function getSpecDomainGroupId(spec: BasicSeriesSpec): string {
+  if (!spec.useDefaultGroupDomain) {
+    return spec.groupId;
+  }
+  return typeof spec.useDefaultGroupDomain === 'boolean' ? DEFAULT_GLOBAL_ID : spec.useDefaultGroupDomain;
 }

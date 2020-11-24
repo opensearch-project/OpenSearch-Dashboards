@@ -161,6 +161,20 @@ describe('Bar series stories', () => {
     });
   });
 
+  describe('different groupId', () => {
+    it('render different axis scale', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        `http://localhost:9001/?path=/story/bar-chart--dual-axis-same-y-domain&knob-Apply a different groupId to some series=true&knob-Use the same data domain for each group=`,
+      );
+    });
+
+    it('render the same domain with useDefaultGroupDomain', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        `http://localhost:9001/?path=/story/bar-chart--dual-axis-same-y-domain&knob-Apply a different groupId to some series=true&knob-Use the same data domain for each group=true`,
+      );
+    });
+  });
+
   describe('value labels positioning', () => {
     describe.each<[string, Rotation]>([
       ['0', 0],
