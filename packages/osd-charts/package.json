@@ -90,12 +90,12 @@
     "@mdx-js/loader": "^1.6.6",
     "@microsoft/api-documenter": "^7.7.20",
     "@microsoft/api-extractor": "^7.7.9",
-    "@semantic-release/changelog": "^3.0.6",
-    "@semantic-release/commit-analyzer": "^7.0.0",
-    "@semantic-release/git": "^8.0.0",
-    "@semantic-release/github": "^6.0.1",
-    "@semantic-release/npm": "^6.0.0",
-    "@semantic-release/release-notes-generator": "^7.3.5",
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/commit-analyzer": "^8.0.1",
+    "@semantic-release/git": "^9.0.0",
+    "@semantic-release/github": "^7.2.0",
+    "@semantic-release/npm": "^7.0.8",
+    "@semantic-release/release-notes-generator": "^9.0.1",
     "@storybook/addon-actions": "^5.3.19",
     "@storybook/addon-docs": "^5.3.19",
     "@storybook/addon-info": "^5.3.19",
@@ -194,8 +194,8 @@
     "sass-loader": "^9.0.2",
     "seedrandom": "^3.0.5",
     "selenium-webdriver": "^4.0.0-alpha.5",
-    "semantic-release": "^16.0.1",
-    "semantic-release-slack-bot": "^1.4.0",
+    "semantic-release": "^17.3.0",
+    "semantic-release-slack-bot": "^1.6.2",
     "style-loader": "^1.2.1",
     "ts-jest": "^25.4.0",
     "ts-loader": "^7.0.5",
@@ -221,7 +221,7 @@
     "refractor": "~3.1.0"
   },
   "engines": {
-    "node": ">=10",
+    "node": ">=10.19",
     "yarn": "^1.10.1"
   },
   "browserslist": [
