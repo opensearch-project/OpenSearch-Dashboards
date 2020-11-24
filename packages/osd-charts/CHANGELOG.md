@@ -1,3 +1,21 @@
+# [24.1.0](https://github.com/elastic/elastic-charts/compare/v24.0.0...v24.1.0) (2020-11-24)
+
+
+### Bug Fixes
+
+* **area_charts:** correctly represent baseline with negative data points ([#896](https://github.com/elastic/elastic-charts/issues/896)) ([d1243f1](https://github.com/elastic/elastic-charts/commit/d1243f1612e43ca454db5ff48bc6689ca48bb80a))
+* **legend:** legend sizes with ordinal data ([#867](https://github.com/elastic/elastic-charts/issues/867)) ([7559e0d](https://github.com/elastic/elastic-charts/commit/7559e0dd43c76f4217c136a902f724bc0e406672)), closes [#811](https://github.com/elastic/elastic-charts/issues/811)
+* render orphan data points on lines and areas ([#900](https://github.com/elastic/elastic-charts/issues/900)) ([0be282b](https://github.com/elastic/elastic-charts/commit/0be282b2d46e867348708f74ff752ca7dbd493fd)), closes [#783](https://github.com/elastic/elastic-charts/issues/783)
+* specs swaps correctly reflected in state ([#901](https://github.com/elastic/elastic-charts/issues/901)) ([7fba882](https://github.com/elastic/elastic-charts/commit/7fba88254ce3d8f874acec34307fe2d75ffff6a6))
+
+
+### Features
+
+* **legend:** allow legend text to be copyable ([#877](https://github.com/elastic/elastic-charts/issues/877)) ([9cd3459](https://github.com/elastic/elastic-charts/commit/9cd34591b6216b8aab208177e0e4a31e1c7268d7)), closes [#710](https://github.com/elastic/elastic-charts/issues/710)
+* allow clearing series colors from memory ([#899](https://github.com/elastic/elastic-charts/issues/899)) ([ab1af38](https://github.com/elastic/elastic-charts/commit/ab1af382e6b351f4607b90024afa60a7d5f3968a))
+* merge series domain with the domain of another group ([#912](https://github.com/elastic/elastic-charts/issues/912)) ([325b013](https://github.com/elastic/elastic-charts/commit/325b013199004e45bd59bc419431656bd8c3830f))
+* small multiples for XY charts (alpha) ([#793](https://github.com/elastic/elastic-charts/issues/793)) ([d288208](https://github.com/elastic/elastic-charts/commit/d28820858d013326b3c660381e70696e9382166d)), closes [#500](https://github.com/elastic/elastic-charts/issues/500) [#500](https://github.com/elastic/elastic-charts/issues/500)
+
 # [24.0.0](https://github.com/elastic/elastic-charts/compare/v23.2.1...v24.0.0) (2020-10-19)
 
 
