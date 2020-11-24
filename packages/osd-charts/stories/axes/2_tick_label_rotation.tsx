@@ -173,7 +173,6 @@ export const Example = () => {
               }
             : undefined
         }
-        tickFormat={(d) => Number(d).toFixed(2)}
       />
       <Axis
         id="top"
@@ -188,7 +187,6 @@ export const Example = () => {
               }
             : undefined
         }
-        tickFormat={(d) => Number(d).toFixed(2)}
       />
       <Axis
         id="right"
@@ -203,8 +201,7 @@ export const Example = () => {
               }
             : undefined
         }
-        tickFormat={(d) => Number(d).toFixed(2)}
-        domain={{ min: 0, max: 10 }}
+        domain={{ min: 0, max: 100 }}
       />
       <AreaSeries
         id="lines"
@@ -213,10 +210,10 @@ export const Example = () => {
         xAccessor="x"
         yAccessors={['y']}
         data={[
-          { x: 0, y: 2 },
-          { x: 1, y: 7 },
-          { x: 2, y: 3 },
-          { x: 3, y: 6 },
+          { x: 0, y: 20 },
+          { x: 1, y: 70 },
+          { x: 2, y: 30 },
+          { x: 3, y: 60 },
         ]}
       />
     </Chart>

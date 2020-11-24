@@ -309,6 +309,7 @@ function getVerticalTextOffset(
 
 function getHorizontalAlign(
   position: Position,
+  rotation: number,
   alignment: HorizontalAlignment = HorizontalAlignment.Near,
 ): Exclude<HorizontalAlignment, 'far' | 'near'> {
   if (
@@ -317,6 +318,22 @@ function getHorizontalAlign(
     alignment === HorizontalAlignment.Left
   ) {
     return alignment;
+  }
+
+  if ([-90, 90].includes(rotation)) {
+    if (position === Position.Left || position === Position.Right) {
+      return HorizontalAlignment.Center;
+    }
+
+    if (position === Position.Top) {
+      return rotation === 90 ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+    }
+
+    return rotation === -90 ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+  }
+
+  if ([0, 180].includes(rotation) && (position === Position.Bottom || position === Position.Top)) {
+    return HorizontalAlignment.Center;
   }
 
   if (position === Position.Left) {
@@ -328,11 +345,12 @@ function getHorizontalAlign(
   }
 
   // fallback for near/far on top/bottom axis
-  return 'center';
+  return HorizontalAlignment.Center;
 }
 
 function getVerticalAlign(
   position: Position,
+  rotation: number,
   alignment: VerticalAlignment = VerticalAlignment.Middle,
 ): Exclude<VerticalAlignment, 'far' | 'near'> {
   if (
@@ -341,6 +359,18 @@ function getVerticalAlign(
     alignment === VerticalAlignment.Bottom
   ) {
     return alignment;
+  }
+
+  if ([0, 180].includes(rotation)) {
+    if (position === Position.Bottom || position === Position.Top) {
+      return VerticalAlignment.Middle;
+    }
+
+    if (position === Position.Left) {
+      return rotation === 0 ? VerticalAlignment.Bottom : VerticalAlignment.Top;
+    }
+
+    return rotation === 180 ? VerticalAlignment.Bottom : VerticalAlignment.Top;
   }
 
   if (position === Position.Top) {
@@ -371,6 +401,7 @@ export function getTickLabelProps(
   { tickLine, tickLabel }: AxisStyle,
   tickPosition: number,
   position: Position,
+  rotation: number,
   axisSize: Size,
   tickDimensions: AxisTicksDimensions,
   showTicks: boolean,
@@ -382,8 +413,8 @@ export function getTickLabelProps(
   const labelPadding = getSimplePadding(tickLabel.padding);
   const isLeftAxis = position === Position.Left;
   const isAxisTop = position === Position.Top;
-  const align = getHorizontalAlign(position, textAlignment?.horizontal);
-  const verticalAlign = getVerticalAlign(position, textAlignment?.vertical);
+  const align = getHorizontalAlign(position, rotation, textAlignment?.horizontal);
+  const verticalAlign = getVerticalAlign(position, rotation, textAlignment?.vertical);
 
   const userOffsets = getUserTextOffsets(tickDimensions, textOffset);
   const textOffsetX = getHorizontalTextOffset(maxLabelTextWidth, align) + userOffsets.local.x;
@@ -862,8 +893,8 @@ export const isDuplicateAxis = (
   tickMap: Map<AxisId, AxisTicksDimensions>,
   specs: AxisSpec[],
 ): boolean => {
-  const firstTickLabel = tickLabels[0];
-  const lastTickLabel = tickLabels.slice(-1)[0];
+  const [firstTickLabel] = tickLabels;
+  const [lastTickLabel] = tickLabels.slice(-1);
 
   let hasDuplicate = false;
   tickMap.forEach(({ tickLabels: axisTickLabels }, axisId) => {

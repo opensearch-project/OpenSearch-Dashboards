@@ -41,6 +41,7 @@ export function renderTickLabel(ctx: CanvasRenderingContext2D, tick: AxisTick, s
     axisStyle,
     tick.position,
     position,
+    tickLabelRotation,
     size,
     axisTicksDimensions,
     showTicks,

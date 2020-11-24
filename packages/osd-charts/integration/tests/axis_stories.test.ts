@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Rotation } from '../../src';
 import { common } from '../page_objects';
 
 describe('Axis stories', () => {
@@ -74,6 +75,17 @@ describe('Axis stories', () => {
   it('should render correctly rotated ticks', async () => {
     await common.expectChartAtUrlToMatchScreenshot(
       'http://localhost:9001/?path=/story/axes--tick-label-rotation&knob-debug_general=true&knob-disable%20axis%20overrides_general=false&knob-Tick%20label%20rotation_bottom=47&knob-Tick%20label%20rotation_left=-54&knob-Tick%20label%20rotation_top=69&knob-Tick%20label%20rotation_right=48&knob-Tick%20label%20rotation_shared=30',
+    );
+  });
+
+  it.each<[string, Rotation]>([
+    ['0', 0],
+    ['90', 90],
+    ['180', 180],
+    ['negative 90', -90],
+  ])('should render correctly rotated ticks - %s', async (_, rotation) => {
+    await common.expectChartAtUrlToMatchScreenshot(
+      `http://localhost:9001/?path=/story/axes--tick-label-rotation&knob-disable axis overrides_general=true&knob-Tick label rotation_shared=${rotation}`,
     );
   });
 });
