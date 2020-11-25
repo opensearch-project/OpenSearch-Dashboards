@@ -1,3 +1,15 @@
+# [24.2.0](https://github.com/elastic/elastic-charts/compare/v24.1.0...v24.2.0) (2020-11-25)
+
+
+### Bug Fixes
+
+* near and far alignments for orthogonal rotations ([#911](https://github.com/elastic/elastic-charts/issues/911)) ([cb279f3](https://github.com/elastic/elastic-charts/commit/cb279f32b0b306e590dd2c9a64b44788ab1c20bc))
+
+
+### Features
+
+* add projection click listener ([#913](https://github.com/elastic/elastic-charts/issues/913)) ([0fa9072](https://github.com/elastic/elastic-charts/commit/0fa9072566b4c9774cf7953041559a9ea99696d6)), closes [#846](https://github.com/elastic/elastic-charts/issues/846)
+
 # [24.1.0](https://github.com/elastic/elastic-charts/compare/v24.0.0...v24.1.0) (2020-11-24)
 
 
