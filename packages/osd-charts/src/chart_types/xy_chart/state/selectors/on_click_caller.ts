@@ -21,13 +21,15 @@ import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 
 import { ChartTypes } from '../../..';
-import { SettingsSpec } from '../../../../specs';
+import { ProjectedValues, SettingsSpec } from '../../../../specs';
 import { GlobalChartState, PointerState } from '../../../../state/chart_state';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getLastClickSelector } from '../../../../state/selectors/get_last_click';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { isClicking } from '../../../../state/utils';
 import { IndexedGeometry, GeometryValue } from '../../../../utils/geometry';
 import { XYChartSeriesIdentifier } from '../../utils/series';
+import { getProjectedScaledValues } from './get_projected_scaled_values';
 import { getHighlightedGeomsSelector } from './get_tooltip_values_highlighted_geoms';
 
 /**
@@ -37,33 +39,62 @@ import { getHighlightedGeomsSelector } from './get_tooltip_values_highlighted_ge
  * - the pointer state goes from down state to up state
  * @internal
  */
-export function createOnElementClickCaller(): (state: GlobalChartState) => void {
+export function createOnClickCaller(): (state: GlobalChartState) => void {
   let prevClick: PointerState | null = null;
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
-    if (selector === null && state.chartType === ChartTypes.XYAxis) {
-      selector = createCachedSelector(
-        [getLastClickSelector, getSettingsSpecSelector, getHighlightedGeomsSelector],
-        (lastClick: PointerState | null, settings: SettingsSpec, indexedGeometries: IndexedGeometry[]): void => {
-          if (!settings.onElementClick) {
-            return;
-          }
-          if (indexedGeometries.length > 0 && isClicking(prevClick, lastClick)) {
-            if (settings && settings.onElementClick) {
-              const elements = indexedGeometries.map<[GeometryValue, XYChartSeriesIdentifier]>(
-                ({ value, seriesIdentifier }) => [value, seriesIdentifier],
-              );
-              settings.onElementClick(elements);
-            }
-          }
-          prevClick = lastClick;
-        },
-      )({
-        keySelector: (state: GlobalChartState) => state.chartId,
-      });
-    }
     if (selector) {
-      selector(state);
+      return selector(state);
     }
+    if (state.chartType !== ChartTypes.XYAxis) {
+      return;
+    }
+    selector = createCachedSelector(
+      [getLastClickSelector, getSettingsSpecSelector, getHighlightedGeomsSelector, getProjectedScaledValues],
+      (
+        lastClick: PointerState | null,
+        { onElementClick, onProjectionClick }: SettingsSpec,
+        indexedGeometries: IndexedGeometry[],
+        values,
+      ): void => {
+        if (!isClicking(prevClick, lastClick)) {
+          return;
+        }
+        const elementClickFired = tryFiringOnElementClick(indexedGeometries, onElementClick);
+        if (!elementClickFired) {
+          tryFiringOnProjectionClick(values, onProjectionClick);
+        }
+        prevClick = lastClick;
+      },
+    )({
+      keySelector: getChartIdSelector,
+    });
   };
+}
+
+function tryFiringOnElementClick(
+  indexedGeometries: IndexedGeometry[],
+  onElementClick: SettingsSpec['onElementClick'],
+): boolean {
+  if (indexedGeometries.length === 0 || !onElementClick) {
+    return false;
+  }
+
+  const elements = indexedGeometries.map<[GeometryValue, XYChartSeriesIdentifier]>(({ value, seriesIdentifier }) => [
+    value,
+    seriesIdentifier,
+  ]);
+  onElementClick(elements);
+  return true;
+}
+
+function tryFiringOnProjectionClick(
+  values: ProjectedValues | undefined,
+  onProjectionClick: SettingsSpec['onProjectionClick'],
+): boolean {
+  if (values === undefined || !onProjectionClick) {
+    return false;
+  }
+  onProjectionClick(values);
+  return true;
 }

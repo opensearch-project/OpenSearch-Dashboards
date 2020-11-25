@@ -1367,6 +1367,20 @@ export interface Postfixes {
     y1AccessorFormat?: string;
 }
 
+// @public
+export type ProjectedValues = {
+    x: PrimitiveValue;
+    y: Array<{
+        value: PrimitiveValue;
+        groupId: string;
+    }>;
+    smVerticalValue: PrimitiveValue;
+    smHorizontalValue: PrimitiveValue;
+};
+
+// @public
+export type ProjectionClickListener = (values: ProjectedValues) => void;
+
 // Warning: (ae-missing-release-tag) "RectAnnotation" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1605,6 +1619,7 @@ export interface SettingsSpec extends Spec {
     onLegendItemPlusClick?: LegendItemListener;
     // (undocumented)
     onPointerUpdate?: PointerUpdateListener;
+    onProjectionClick?: ProjectionClickListener;
     // (undocumented)
     onRenderChange?: RenderChangeListener;
     orderOrdinalBinsBy?: OrderBy;

@@ -55,6 +55,38 @@ export type XYChartElementEvent = [GeometryValue, XYChartSeriesIdentifier];
 export type PartitionElementEvent = [Array<LayerValue>, SeriesIdentifier];
 export type HeatmapElementEvent = [Cell, SeriesIdentifier];
 
+/**
+ * @public
+ * An object that contains the scaled mouse position based on
+ * the current chart configuration.
+ */
+export type ProjectedValues = {
+  /**
+   * The independent variable of the chart
+   */
+  x: PrimitiveValue;
+  /**
+   * The set of dependent variable, each one with its own groupId
+   */
+  y: Array<{ value: PrimitiveValue; groupId: string }>;
+  /**
+   * The categorical value used for the vertical placement of the chart
+   * in a small multiple layout
+   */
+  smVerticalValue: PrimitiveValue;
+  /**
+   * The categorical value used for the horizontal placement of the chart
+   * in a small multiple layout
+   */
+  smHorizontalValue: PrimitiveValue;
+};
+
+/**
+ * @public
+ * The listener type for click on the projection area.
+ */
+export type ProjectionClickListener = (values: ProjectedValues) => void;
+
 export type ElementClickListener = (
   elements: Array<XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent>,
 ) => void;
@@ -77,7 +109,7 @@ export interface BasePointerEvent {
   type: PointerEventType;
 }
 /**
- * Event used to syncronize pointers/mouse positions between Charts.
+ * Event used to synchronize pointers/mouse positions between Charts.
  *
  * fired as callback argument for `PointerUpdateListener`
  */
@@ -328,6 +360,12 @@ export interface SettingsSpec extends Spec {
    * Compares title, position and first & last tick labels
    */
   hideDuplicateAxes: boolean;
+  /**
+   * Attach a listener for click on the projection area.
+   * The listener will be called with the current x value snapped to the closest
+   * X axis point, and an array of Y values for every groupId used in the chart.
+   */
+  onProjectionClick?: ProjectionClickListener;
   onElementClick?: ElementClickListener;
   onElementOver?: ElementOverListener;
   onElementOut?: BasicListener;

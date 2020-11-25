@@ -23,6 +23,7 @@ import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
+import { getProjectedScaledValues } from './get_projected_scaled_values';
 import { getHighlightedGeomsSelector } from './get_tooltip_values_highlighted_geoms';
 import { isBrushAvailableSelector } from './is_brush_available';
 
@@ -34,10 +35,18 @@ export const getPointerCursorSelector = createCachedSelector(
     getHighlightedGeomsSelector,
     getSettingsSpecSelector,
     getCurrentPointerPositionSelector,
+    getProjectedScaledValues,
     computeChartDimensionsSelector,
     isBrushAvailableSelector,
   ],
-  (highlightedGeometries, settingsSpec, currentPointerPosition, { chartDimensions }, isBrushAvailable): string => {
+  (
+    highlightedGeometries,
+    settingsSpec,
+    currentPointerPosition,
+    projectedValues,
+    { chartDimensions },
+    isBrushAvailable,
+  ): string => {
     const { x, y } = currentPointerPosition;
     // get positions relative to chart
     const xPos = x - chartDimensions.left;
@@ -51,6 +60,9 @@ export const getPointerCursorSelector = createCachedSelector(
       return 'default';
     }
     if (highlightedGeometries.length > 0 && (settingsSpec.onElementClick || settingsSpec.onElementOver)) {
+      return 'pointer';
+    }
+    if (projectedValues !== null && settingsSpec.onProjectionClick) {
       return 'pointer';
     }
     return isBrushAvailable ? 'crosshair' : 'default';

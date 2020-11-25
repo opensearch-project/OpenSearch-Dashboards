@@ -27,6 +27,7 @@ const onElementListeners = {
   onElementClick: action('onElementClick'),
   onElementOver: action('onElementOver'),
   onElementOut: action('onElementOut'),
+  onProjectionClick: action('onProjectionClick'),
 };
 
 export const Example = () => {
