@@ -544,7 +544,7 @@ function renderGeometries(
         xScaleOffset,
         lineSeriesStyle,
         {
-          enabled: spec.markSizeAccessor !== undefined,
+          enabled: spec.markSizeAccessor !== undefined && lineSeriesStyle.point.visible,
           ratio: chartTheme.markSizeRatio,
         },
         spec.pointStyleAccessor,
@@ -577,7 +577,7 @@ function renderGeometries(
         xScaleOffset,
         areaSeriesStyle,
         {
-          enabled: spec.markSizeAccessor !== undefined,
+          enabled: spec.markSizeAccessor !== undefined && areaSeriesStyle.point.visible,
           ratio: chartTheme.markSizeRatio,
         },
         spec.stackAccessors ? spec.stackAccessors.length > 0 : false,

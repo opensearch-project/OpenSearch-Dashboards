@@ -69,4 +69,16 @@ describe('Line series stories', () => {
       );
     });
   });
+
+  describe('Line with mark accessor', () => {
+    it('with hidden points, default point highlighter size', async () => {
+      await common.expectChartWithMouseAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/line-chart--line-with-mark-accessor&knob-markSizeRatio=10&knob-show line points=false&knob-debug=',
+        { left: 115, top: 170 },
+        {
+          screenshotSelector: '#story-root',
+        },
+      );
+    });
+  });
 });
