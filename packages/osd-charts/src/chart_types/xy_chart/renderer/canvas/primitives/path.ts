@@ -22,7 +22,7 @@ import { withContext, withClipRanges } from '../../../../../renderers/canvas';
 import { ClippedRanges } from '../../../../../utils/geometry';
 import { Point } from '../../../../../utils/point';
 import { RGBtoString } from '../../../../partition_chart/layout/utils/color_library_wrappers';
-import { MIN_STROKE_WIDTH } from './line';
+import { renderMultiLine } from './line';
 
 /** @internal */
 export function renderLinePaths(
@@ -37,27 +37,21 @@ export function renderLinePaths(
   if (clippedRanges.length > 0) {
     withClipRanges(context, clippedRanges, clippings, false, (ctx) => {
       ctx.translate(transform.x, transform.y);
-      linePaths.forEach((path) => {
-        renderPathStroke(ctx, path, stroke);
-      });
+      renderMultiLine(ctx, linePaths, stroke);
     });
     if (hideClippedRanges) {
       return;
     }
     withClipRanges(context, clippedRanges, clippings, true, (ctx) => {
       ctx.translate(transform.x, transform.y);
-      linePaths.forEach((path) => {
-        renderPathStroke(ctx, path, { ...stroke, dash: [5, 5] });
-      });
+      renderMultiLine(ctx, linePaths, { ...stroke, dash: [5, 5] });
     });
     return;
   }
 
   withContext(context, (ctx) => {
     ctx.translate(transform.x, transform.y);
-    linePaths.forEach((path) => {
-      renderPathStroke(ctx, path, stroke);
-    });
+    renderMultiLine(ctx, linePaths, stroke);
   });
 }
 
@@ -94,21 +88,6 @@ export function renderAreaPath(
     ctx.translate(transform.x, transform.y);
     renderPathFill(ctx, area, fill);
   });
-}
-
-function renderPathStroke(ctx: CanvasRenderingContext2D, path: string, stroke: Stroke) {
-  if (stroke.width < MIN_STROKE_WIDTH) {
-    return;
-  }
-  const path2d = new Path2D(path);
-
-  ctx.strokeStyle = RGBtoString(stroke.color);
-  ctx.lineWidth = stroke.width;
-  if (stroke.dash) {
-    ctx.setLineDash(stroke.dash);
-  }
-  ctx.beginPath();
-  ctx.stroke(path2d);
 }
 
 function renderPathFill(ctx: CanvasRenderingContext2D, path: string, fill: Fill) {

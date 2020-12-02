@@ -33,18 +33,31 @@ export function renderLine(ctx: CanvasRenderingContext2D, line: Line, stroke: St
 }
 
 /** @internal */
-export function renderMultiLine(ctx: CanvasRenderingContext2D, lines: Line[], stroke: Stroke) {
+export function renderMultiLine(ctx: CanvasRenderingContext2D, lines: Line[] | string[], stroke: Stroke) {
   if (stroke.width < MIN_STROKE_WIDTH) {
     return;
   }
   withContext(ctx, (ctx) => {
     const lineLength = lines.length;
+    if (lineLength === 0) {
+      return;
+    }
     ctx.strokeStyle = RGBtoString(stroke.color);
+    ctx.lineJoin = 'round';
     ctx.lineWidth = stroke.width;
     if (stroke.dash) {
       ctx.setLineDash(stroke.dash);
     }
+
     ctx.beginPath();
+
+    if (isStringArray(lines)) {
+      for (let i = 0; i < lineLength; i++) {
+        const path = lines[i];
+        ctx.stroke(new Path2D(path));
+      }
+      return;
+    }
     for (let i = 0; i < lineLength; i++) {
       const { x1, y1, x2, y2 } = lines[i];
       ctx.moveTo(x1, y1);
@@ -52,4 +65,8 @@ export function renderMultiLine(ctx: CanvasRenderingContext2D, lines: Line[], st
     }
     ctx.stroke();
   });
+}
+
+function isStringArray(lines: Line[] | string[]): lines is string[] {
+  return typeof lines[0] === 'string';
 }
