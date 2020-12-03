@@ -131,7 +131,7 @@ export function isPointOnGeometry(
   indexedGeometry: BarGeometry | PointGeometry,
   buffer: MarkBuffer = DEFAULT_HIGHLIGHT_PADDING,
 ) {
-  const { x, y } = indexedGeometry;
+  const { x, y, transform } = indexedGeometry;
   if (isPointGeometry(indexedGeometry)) {
     const { radius } = indexedGeometry;
     const distance = getDistance(
@@ -140,8 +140,8 @@ export function isPointOnGeometry(
         y: yCoordinate,
       },
       {
-        x,
-        y,
+        x: x + transform.x,
+        y: y + transform.y,
       },
     );
 
