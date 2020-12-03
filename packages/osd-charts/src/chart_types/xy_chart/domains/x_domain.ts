@@ -67,7 +67,9 @@ export function mergeXDomain(
 1) Correct data to match ${mainXScaleType.scaleType} scale type (see previous warning)
 2) Change xScaleType to ordinal and set xDomain to Domain array`);
         } else {
-          throw new TypeError('xDomain for ordinal scale should be an array of values, not a DomainRange object.');
+          Logger.warn(
+            'xDomain for ordinal scale should be an array of values, not a DomainRange object. xDomain is ignored.',
+          );
         }
       }
     }
@@ -77,44 +79,38 @@ export function mergeXDomain(
 
     if (customXDomain) {
       if (Array.isArray(customXDomain)) {
-        throw new TypeError('xDomain for continuous scale should be a DomainRange object, not an array');
-      }
+        Logger.warn('xDomain for continuous scale should be a DomainRange object, not an array');
+      } else {
+        customMinInterval = customXDomain.minInterval;
+        const [computedDomainMin, computedDomainMax] = seriesXComputedDomains;
 
-      customMinInterval = customXDomain.minInterval;
-      const [computedDomainMin, computedDomainMax] = seriesXComputedDomains;
-
-      if (isCompleteBound(customXDomain)) {
-        if (customXDomain.min > customXDomain.max) {
-          throw new Error('custom xDomain is invalid, min is greater than max');
+        if (isCompleteBound(customXDomain)) {
+          if (customXDomain.min > customXDomain.max) {
+            Logger.warn('custom xDomain is invalid, min is greater than max. Custom domain is ignored.');
+          } else {
+            seriesXComputedDomains = [customXDomain.min, customXDomain.max];
+          }
+        } else if (isLowerBound(customXDomain)) {
+          if (customXDomain.min > computedDomainMax) {
+            Logger.warn(
+              'custom xDomain is invalid, custom min is greater than computed max. Custom domain is ignored.',
+            );
+          } else {
+            seriesXComputedDomains = [customXDomain.min, computedDomainMax];
+          }
+        } else if (isUpperBound(customXDomain)) {
+          if (computedDomainMin > customXDomain.max) {
+            Logger.warn(
+              'custom xDomain is invalid, computed min is greater than custom max. Custom domain is ignored.',
+            );
+          } else {
+            seriesXComputedDomains = [computedDomainMin, customXDomain.max];
+          }
         }
-
-        seriesXComputedDomains = [customXDomain.min, customXDomain.max];
-      } else if (isLowerBound(customXDomain)) {
-        if (customXDomain.min > computedDomainMax) {
-          throw new Error('custom xDomain is invalid, custom min is greater than computed max');
-        }
-
-        seriesXComputedDomains = [customXDomain.min, computedDomainMax];
-      } else if (isUpperBound(customXDomain)) {
-        if (computedDomainMin > customXDomain.max) {
-          throw new Error('custom xDomain is invalid, computed min is greater than custom max');
-        }
-
-        seriesXComputedDomains = [computedDomainMin, customXDomain.max];
       }
     }
     const computedMinInterval = findMinInterval(values as number[]);
-    if (customMinInterval != null) {
-      // Allow greater custom min iff xValues has 1 member.
-      if (xValues.size > 1 && customMinInterval > computedMinInterval) {
-        throw new Error('custom xDomain is invalid, custom minInterval is greater than computed minInterval');
-      }
-      if (customMinInterval < 0) {
-        throw new Error('custom xDomain is invalid, custom minInterval is less than 0');
-      }
-    }
-
-    minInterval = customMinInterval || computedMinInterval;
+    minInterval = getMinInterval(computedMinInterval, xValues.size, customMinInterval);
   }
 
   return {
@@ -125,6 +121,25 @@ export function mergeXDomain(
     minInterval,
     timeZone: mainXScaleType.timeZone,
   };
+}
+
+function getMinInterval(computedMinInterval: number, size: number, customMinInterval?: number): number {
+  if (customMinInterval == null) {
+    return computedMinInterval;
+  }
+  // Allow greater custom min if xValues has 1 member.
+  if (size > 1 && customMinInterval > computedMinInterval) {
+    Logger.warn(
+      'custom xDomain is invalid, custom minInterval is greater than computed minInterval. Using computed minInterval.',
+    );
+    return computedMinInterval;
+  }
+  if (customMinInterval < 0) {
+    Logger.warn('custom xDomain is invalid, custom minInterval is less than 0. Using computed minInterval.');
+    return computedMinInterval;
+  }
+
+  return customMinInterval;
 }
 
 /**

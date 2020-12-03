@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { GracefulError } from '../../../components/error_boundary/errors';
 import { ScaleContinuousType } from '../../../scales';
 import { ScaleType } from '../../../scales/constants';
 import { identity } from '../../../utils/commons';
@@ -101,16 +100,18 @@ function mergeYDomainForGroup(
       domain = [newCustomDomain.min, newCustomDomain.max];
     } else if (newCustomDomain && isLowerBound(newCustomDomain)) {
       if (newCustomDomain.min > computedDomainMax) {
-        throw new GracefulError(`custom yDomain for ${groupId} is invalid, custom min is greater than computed max`);
+        Logger.warn(`custom yDomain for ${groupId} is invalid, custom min is greater than computed max.`);
+        domain = [newCustomDomain.min, newCustomDomain.min];
+      } else {
+        domain = [newCustomDomain.min, computedDomainMax];
       }
-
-      domain = [newCustomDomain.min, computedDomainMax];
     } else if (newCustomDomain && isUpperBound(newCustomDomain)) {
       if (computedDomainMin > newCustomDomain.max) {
-        throw new Error(`custom yDomain for ${groupId} is invalid, computed min is greater than custom max`);
+        Logger.warn(`custom yDomain for ${groupId} is invalid, custom max is less than computed max.`);
+        domain = [newCustomDomain.max, newCustomDomain.max];
+      } else {
+        domain = [computedDomainMin, newCustomDomain.max];
       }
-
-      domain = [computedDomainMin, newCustomDomain.max];
     }
   }
   return {

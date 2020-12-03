@@ -21,9 +21,16 @@ import { ChartTypes } from '../..';
 import { MockSeriesSpecs } from '../../../mocks/specs';
 import { ScaleType } from '../../../scales/constants';
 import { SpecTypes, Direction, BinAgg } from '../../../specs/constants';
+import { Logger } from '../../../utils/logger';
 import { getDataSeriesFromSpecs } from '../utils/series';
 import { BasicSeriesSpec, SeriesTypes } from '../utils/specs';
 import { convertXScaleTypes, findMinInterval, mergeXDomain } from './x_domain';
+
+jest.mock('../../../utils/logger', () => ({
+  Logger: {
+    warn: jest.fn(),
+  },
+}));
 
 describe('X Domain', () => {
   test('Should return null when missing specs or specs types', () => {
@@ -738,17 +745,17 @@ describe('X Domain', () => {
     expect(basicMergedDomain.domain).toEqual([0, 3]);
 
     const arrayXDomain = [1, 2];
-    const attemptToMergeArrayDomain = () => {
-      mergeXDomain(specs, xValues, arrayXDomain);
-    };
-    const errorMessage = 'xDomain for continuous scale should be a DomainRange object, not an array';
-    expect(attemptToMergeArrayDomain).toThrowError(errorMessage);
+    let { domain } = mergeXDomain(specs, xValues, arrayXDomain);
+    expect(domain).toEqual([1, 5]);
+    const warnMessage = 'xDomain for continuous scale should be a DomainRange object, not an array';
+    expect(Logger.warn).toBeCalledWith(warnMessage);
+
+    (Logger.warn as jest.Mock).mockClear();
 
     const invalidXDomain = { min: 10, max: 0 };
-    const attemptToMerge = () => {
-      mergeXDomain(specs, xValues, invalidXDomain);
-    };
-    expect(attemptToMerge).toThrowError('custom xDomain is invalid, min is greater than max');
+    domain = mergeXDomain(specs, xValues, invalidXDomain).domain;
+    expect(domain).toEqual([1, 5]);
+    expect(Logger.warn).toBeCalledWith('custom xDomain is invalid, min is greater than max. Custom domain is ignored.');
   });
 
   test('should account for custom domain when merging a linear domain: lower bounded domain', () => {
@@ -762,10 +769,11 @@ describe('X Domain', () => {
     expect(mergedDomain.domain).toEqual([0, 5]);
 
     const invalidXDomain = { min: 10 };
-    const attemptToMerge = () => {
-      mergeXDomain(specs, xValues, invalidXDomain);
-    };
-    expect(attemptToMerge).toThrowError('custom xDomain is invalid, custom min is greater than computed max');
+    const { domain } = mergeXDomain(specs, xValues, invalidXDomain);
+    expect(domain).toEqual([1, 5]);
+    expect(Logger.warn).toBeCalledWith(
+      'custom xDomain is invalid, custom min is greater than computed max. Custom domain is ignored.',
+    );
   });
 
   test('should account for custom domain when merging a linear domain: upper bounded domain', () => {
@@ -779,10 +787,11 @@ describe('X Domain', () => {
     expect(mergedDomain.domain).toEqual([1, 3]);
 
     const invalidXDomain = { max: -1 };
-    const attemptToMerge = () => {
-      mergeXDomain(specs, xValues, invalidXDomain);
-    };
-    expect(attemptToMerge).toThrowError('custom xDomain is invalid, computed min is greater than custom max');
+    const { domain } = mergeXDomain(specs, xValues, invalidXDomain);
+    expect(domain).toEqual([1, 5]);
+    expect(Logger.warn).toBeCalledWith(
+      'custom xDomain is invalid, computed min is greater than custom max. Custom domain is ignored.',
+    );
   });
 
   test('should account for custom domain when merging an ordinal domain', () => {
@@ -795,11 +804,11 @@ describe('X Domain', () => {
     expect(basicMergedDomain.domain).toEqual(['a', 'b', 'c']);
 
     const objectXDomain = { max: 10, min: 0 };
-    const attemptToMerge = () => {
-      mergeXDomain(specs, xValues, objectXDomain);
-    };
-    const errorMessage = 'xDomain for ordinal scale should be an array of values, not a DomainRange object';
-    expect(attemptToMerge).toThrowError(errorMessage);
+    const { domain } = mergeXDomain(specs, xValues, objectXDomain);
+    expect(domain).toEqual(['a', 'b', 'c', 'd']);
+    const warnMessage =
+      'xDomain for ordinal scale should be an array of values, not a DomainRange object. xDomain is ignored.';
+    expect(Logger.warn).toBeCalledWith(warnMessage);
   });
 
   describe('should account for custom minInterval', () => {
@@ -822,20 +831,20 @@ describe('X Domain', () => {
 
     test('with invalid minInterval greater than computed minInterval for multi data set', () => {
       const invalidXDomain = { minInterval: 10 };
-      const attemptToMerge = () => {
-        mergeXDomain(specs, xValues, invalidXDomain);
-      };
-      const expectedError = 'custom xDomain is invalid, custom minInterval is greater than computed minInterval';
-      expect(attemptToMerge).toThrowError(expectedError);
+      const { minInterval } = mergeXDomain(specs, xValues, invalidXDomain);
+      expect(minInterval).toEqual(1);
+      const expectedWarning =
+        'custom xDomain is invalid, custom minInterval is greater than computed minInterval. Using computed minInterval.';
+      expect(Logger.warn).toBeCalledWith(expectedWarning);
     });
 
     test('with invalid minInterval less than 0', () => {
       const invalidXDomain = { minInterval: -1 };
-      const attemptToMerge = () => {
-        mergeXDomain(specs, xValues, invalidXDomain);
-      };
-      const expectedError = 'custom xDomain is invalid, custom minInterval is less than 0';
-      expect(attemptToMerge).toThrowError(expectedError);
+      const { minInterval } = mergeXDomain(specs, xValues, invalidXDomain);
+      expect(minInterval).toEqual(1);
+      const expectedWarning =
+        'custom xDomain is invalid, custom minInterval is less than 0. Using computed minInterval.';
+      expect(Logger.warn).toBeCalledWith(expectedWarning);
     });
   });
 

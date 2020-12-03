@@ -24,9 +24,16 @@ import { ScaleType } from '../../../scales/constants';
 import { SpecTypes } from '../../../specs/constants';
 import { Position } from '../../../utils/commons';
 import { BARCHART_1Y0G } from '../../../utils/data_samples/test_dataset';
+import { Logger } from '../../../utils/logger';
 import { computeSeriesDomainsSelector } from '../state/selectors/compute_series_domains';
 import { BasicSeriesSpec, SeriesTypes, DEFAULT_GLOBAL_ID, StackMode } from '../utils/specs';
 import { coerceYScaleTypes, groupSeriesByYGroup } from './y_domain';
+
+jest.mock('../../../utils/logger', () => ({
+  Logger: {
+    warn: jest.fn(),
+  },
+}));
 
 const DEMO_AREA_SPEC_1 = {
   id: 'a',
@@ -448,12 +455,13 @@ describe('Y Domain', () => {
       store,
     );
 
-    const attemptToMerge = () => {
-      computeSeriesDomainsSelector(store.getState());
-    };
+    const {
+      yDomain: [{ domain }],
+    } = computeSeriesDomainsSelector(store.getState());
+    expect(domain).toEqual([20, 20]);
 
-    const errorMessage = 'custom yDomain for a is invalid, custom min is greater than computed max';
-    expect(attemptToMerge).toThrowError(errorMessage);
+    const warnMessage = 'custom yDomain for a is invalid, custom min is greater than computed max.';
+    expect(Logger.warn).toBeCalledWith(warnMessage);
   });
   test('Should merge Y domain accounting for custom domain limits: partial upper bounded domain', () => {
     const store = MockStore.default();
@@ -496,12 +504,13 @@ describe('Y Domain', () => {
       store,
     );
 
-    const attemptToMerge = () => {
-      computeSeriesDomainsSelector(store.getState());
-    };
+    const {
+      yDomain: [{ domain }],
+    } = computeSeriesDomainsSelector(store.getState());
+    expect(domain).toEqual([-1, -1]);
 
-    const errorMessage = 'custom yDomain for a is invalid, computed min is greater than custom max';
-    expect(attemptToMerge).toThrowError(errorMessage);
+    const warnMessage = 'custom yDomain for a is invalid, custom max is less than computed max.';
+    expect(Logger.warn).toBeCalledWith(warnMessage);
   });
   test('Should merge Y domain with stacked as percentage', () => {
     const store = MockStore.default();
