@@ -7,6 +7,7 @@
 import { $Values } from 'utility-types';
 import { ComponentType } from 'react';
 import React from 'react';
+import { ReactChild } from 'react';
 
 // @public
 export type Accessor = AccessorObjectKey | AccessorArrayIndex;
@@ -1599,6 +1600,7 @@ export interface SettingsSpec extends Spec {
     legendMaxDepth?: number;
     legendPosition: Position;
     minBrushDelta?: number;
+    noResults?: ComponentType | ReactChild;
     // (undocumented)
     onBrushEnd?: BrushEndListener;
     // (undocumented)
@@ -1646,9 +1648,7 @@ export interface SettingsSpec extends Spec {
 // Warning: (ae-missing-release-tag) "SettingsSpecProps" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type SettingsSpecProps = Partial<Omit<SettingsSpec, 'chartType' | 'specType' | 'id' | 'externalPointerEvents'>> & {
-    externalPointerEvents?: RecursivePartial<SettingsSpec['externalPointerEvents']>;
-};
+export type SettingsSpecProps = Partial<Omit<SettingsSpec, 'chartType' | 'specType' | 'id'>>;
 
 // Warning: (ae-missing-release-tag) "SharedGeometryStateStyle" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

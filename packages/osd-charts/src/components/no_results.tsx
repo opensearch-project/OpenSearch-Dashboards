@@ -17,46 +17,16 @@
  * under the License.
  */
 
-import React, { Component, ReactNode } from 'react';
+import React, { FC, Suspense } from 'react';
 
-import { SettingsSpecProps } from '../../specs';
-import { NoResults } from '../no_results';
-import { isGracefulError } from './errors';
+import { SettingsSpecProps } from '../specs';
 
-type ErrorBoundaryProps = {
-  children: ReactNode;
+interface NoResultsProps {
   renderFn?: SettingsSpecProps['noResults'];
-};
-
-interface ErrorBoundaryState {
-  hasError: boolean;
 }
 
-/**
- * Error Boundary to catch and handle custom errors
- * @internal
- */
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  hasError = false;
-
-  componentDidUpdate() {
-    if (this.hasError) {
-      this.hasError = false;
-    }
-  }
-
-  componentDidCatch(error: Error) {
-    if (isGracefulError(error)) {
-      this.hasError = true;
-      this.forceUpdate();
-    }
-  }
-
-  render() {
-    if (this.hasError) {
-      return <NoResults renderFn={this.props.renderFn} />;
-    }
-
-    return this.props.children;
-  }
-}
+export const NoResults: FC<NoResultsProps> = ({ renderFn }) => (
+  <Suspense fallback={() => null}>
+    <div className="echReactiveChart_noResults">{renderFn ?? <p>No data to display</p>}</div>
+  </Suspense>
+);

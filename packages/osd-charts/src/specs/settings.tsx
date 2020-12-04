@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { ComponentType } from 'react';
+import React, { ComponentType, ReactChild } from 'react';
 
 import { Spec } from '.';
 import { Cell } from '../chart_types/heatmap/layout/types/viewmodel_types';
@@ -30,7 +30,7 @@ import { CustomTooltip } from '../components/tooltip/types';
 import { ScaleContinuousType, ScaleOrdinalType } from '../scales';
 import { getConnect, specComponentFactory } from '../state/spec_factory';
 import { Accessor } from '../utils/accessor';
-import { Color, Position, RecursivePartial, Rendering, Rotation } from '../utils/commons';
+import { Color, Position, Rendering, Rotation } from '../utils/commons';
 import { Domain } from '../utils/domain';
 import { GeometryValue } from '../utils/geometry';
 import { GroupId } from '../utils/ids';
@@ -424,6 +424,10 @@ export interface SettingsSpec extends Spec {
    * Orders ordinal x values
    */
   orderOrdinalBinsBy?: OrderBy;
+  /**
+   * Render component for no results UI
+   */
+  noResults?: ComponentType | ReactChild;
 }
 
 /**
@@ -454,11 +458,7 @@ export type DefaultSettingsProps =
   | 'minBrushDelta'
   | 'externalPointerEvents';
 
-export type SettingsSpecProps = Partial<
-  Omit<SettingsSpec, 'chartType' | 'specType' | 'id' | 'externalPointerEvents'>
-> & {
-  externalPointerEvents?: RecursivePartial<SettingsSpec['externalPointerEvents']>;
-};
+export type SettingsSpecProps = Partial<Omit<SettingsSpec, 'chartType' | 'specType' | 'id'>>;
 
 export const Settings: React.FunctionComponent<SettingsSpecProps> = getConnect()(
   specComponentFactory<SettingsSpec, DefaultSettingsProps>(DEFAULT_SETTINGS_SPEC),
