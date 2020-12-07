@@ -80,9 +80,9 @@ function getAxes(axesGeoms: AxisGeometry[], axesSpecs: AxisSpec[], gridLines: Li
         return acc;
       }
 
-      const { ticks } = geom;
-      const labels = ticks.map(({ label }) => label);
-      const values = ticks.map(({ value }) => value);
+      const visibleTicks = geom.visibleTicks.filter(({ label }) => label !== '');
+      const labels = visibleTicks.map(({ label }) => label);
+      const values = visibleTicks.map(({ value }) => value);
 
       const gridlines = gridLines
         .reduce<Line[]>((accLines, { lineGroups }) => {
