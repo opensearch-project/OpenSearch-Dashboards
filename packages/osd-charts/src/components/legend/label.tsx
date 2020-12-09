@@ -22,19 +22,28 @@ import React, { MouseEventHandler } from 'react';
 
 interface LabelProps {
   label: string;
+  isSeriesHidden?: boolean;
   onClick?: MouseEventHandler;
 }
 /**
  * Label component used to display text in legend item
  * @internal
  */
-export function Label({ label, onClick }: LabelProps) {
+export function Label({ label, onClick, isSeriesHidden }: LabelProps) {
   const labelClassNames = classNames('echLegendItem__label', {
     'echLegendItem__label--clickable': Boolean(onClick),
   });
   return (
-    <div className={labelClassNames} title={label} onClick={onClick}>
+    <button
+      type="button"
+      className={labelClassNames}
+      title={label}
+      onClick={onClick}
+      aria-label={
+        isSeriesHidden ? `${label}; Activate to show series in graph` : `${label}; Activate to hide series in graph`
+      }
+    >
       {label}
-    </div>
+    </button>
   );
 }

@@ -101,7 +101,8 @@ const getAction = (hideActions: boolean, anchorPosition: PopoverAnchorPosition):
   ];
 
   const Button = (
-    <div
+    <button
+      type="button"
       style={{
         display: 'flex',
         justifyContent: 'center',
@@ -113,7 +114,7 @@ const getAction = (hideActions: boolean, anchorPosition: PopoverAnchorPosition):
       onClick={() => setPopoverOpen(!popoverOpen)}
     >
       <EuiIcon size="s" type="pencil" />
-    </div>
+    </button>
   );
 
   return (
@@ -125,6 +126,7 @@ const getAction = (hideActions: boolean, anchorPosition: PopoverAnchorPosition):
       panelPaddingSize="none"
       withTitle
       anchorPosition={anchorPosition}
+      ownFocus
     >
       <EuiContextMenu initialPanelId={0} panels={getPanels(series as XYChartSeriesIdentifier)} />
     </EuiPopover>
@@ -137,7 +139,7 @@ const renderColorPicker = (anchorPosition: PopoverAnchorPosition): LegendColorPi
   onClose,
   onChange,
 }) => (
-  <EuiWrappingPopover isOpen button={anchor} closePopover={onClose} anchorPosition={anchorPosition}>
+  <EuiWrappingPopover isOpen button={anchor} closePopover={onClose} anchorPosition={anchorPosition} ownFocus>
     <EuiColorPicker display="inline" color={color} onChange={onChange} />
     <EuiSpacer size="m" />
     <EuiButton fullWidth size="s" onClick={onClose}>

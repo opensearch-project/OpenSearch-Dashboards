@@ -11,6 +11,8 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
   &:not(&--hidden) {
     .echLegendItem__color--changable {
       cursor: pointer;
+      height: 18px;
+      margin-left: 5px;
     }
   }
 
@@ -30,7 +32,9 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
   }
 
   &__color {
+    display: flex;
     margin-right: $euiSizeXS;
+    line-height: 1.5;
 
     .euiPopover {
       vertical-align: inherit; // prevents color dot from shifting
@@ -49,6 +53,9 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
     @include euiFontSizeXS;
     @include euiTextTruncate;
     flex: 1 1 auto;
+    text-align: left;
+    vertical-align: baseline;
+    letter-spacing: unset;
 
     &--clickable {
       &:hover {
@@ -64,6 +71,7 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
     flex: 0 0 auto;
     margin-left: $euiSizeXS;
     font-feature-settings: 'tnum';
+    letter-spacing: unset;
 
     &--hidden {
       display: none;

@@ -43,5 +43,15 @@
     width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
+
+    .echLegendItem--right :focus {
+      margin-right: $euiSizeXS;
+    }
+
+    :focus {
+      @include euiFocusRing;
+      background-color: $euiFocusBackgroundColor;
+      border-radius: $euiBorderRadius / 2;
+    }
   }
 }

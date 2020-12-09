@@ -64,27 +64,33 @@ describe('Area series stories', () => {
     });
   });
   describe('Negative log Areas', () => {
-    it('snows negative values with log scale', async () => {
+    it('shows negative values with log scale', async () => {
       await common.expectChartAtUrlToMatchScreenshot(
         'http://localhost:9001/?path=/story/area-chart--with-negative-values&knob-Y scale=log',
       );
     });
-    it('snows only positive domain mixed polarity domain', async () => {
+    it('shows only positive domain mixed polarity domain', async () => {
       await common.expectChartAtUrlToMatchScreenshot(
         'http://localhost:9001/?path=/story/area-chart--with-negative-and-positive&knob-Y scale=log',
       );
     });
 
-    it('snows only positive values when hiding negative one', async () => {
-      const action = async () => await page.click('.echLegendItem:nth-child(2) .echLegendItem__label');
+    it('shows only positive values when hiding negative one', async () => {
+      const action = async () => {
+        await common.disableAnimations();
+        await page.click('.echLegendItem:nth-child(2) .echLegendItem__label');
+      };
       await common.expectChartAtUrlToMatchScreenshot(
         'http://localhost:9001/?path=/story/area-chart--with-negative-and-positive&knob-Y scale=log',
         { action },
       );
     });
 
-    it('snows only negative values when hiding positive one', async () => {
-      const action = async () => await page.click('.echLegendItem:nth-child(1) .echLegendItem__label');
+    it('shows only negative values when hiding positive one', async () => {
+      const action = async () => {
+        await common.disableAnimations();
+        await page.click('.echLegendItem:nth-child(1) .echLegendItem__label');
+      };
       await common.expectChartAtUrlToMatchScreenshot(
         'http://localhost:9001/?path=/story/area-chart--with-negative-and-positive&knob-Y scale=log',
         { action },

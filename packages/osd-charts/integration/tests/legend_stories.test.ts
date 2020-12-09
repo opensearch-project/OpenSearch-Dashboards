@@ -92,4 +92,50 @@ describe('Legend stories', () => {
       });
     });
   });
+  describe('keyboard navigation', () => {
+    // eslint-disable-next-line jest/expect-expect
+    it('should navigate to legend item with tab', async () => {
+      // puts mouse to the bottom left
+      await common.moveMouse(0, 0);
+      await common.expectChartWithKeyboardEventsAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/legend--right',
+        [
+          {
+            key: 'tab',
+            count: 2,
+          },
+          {
+            key: 'enter',
+            count: 1,
+          },
+        ],
+      );
+    });
+    it('should change aria label to hidden when clicked', async () => {
+      await common.loadElementFromURL('http://localhost:9001/?path=/story/legend--right', '.echLegendItem__label');
+      await common.clickMouseRelativeToDOMElement(
+        {
+          bottom: 180,
+          left: 330,
+        },
+        '.echChartStatus[data-ech-render-complete=true]',
+      );
+      // Make the first index legend item hidden
+      await page.keyboard.press('Tab');
+      await page.keyboard.press('Tab');
+      await page.keyboard.press('Enter');
+
+      const hiddenResults: number[] = [];
+      // Filter the labels
+      const labels = page.evaluate(() =>
+        Array.from(document.getElementsByClassName('echLegendItem'), (e) => e.outerHTML),
+      );
+      (await labels).forEach((label, index) => {
+        if (label.includes('Activate to show series')) {
+          hiddenResults.push(index);
+        }
+      });
+      expect(hiddenResults).toEqual([1]);
+    });
+  });
 });

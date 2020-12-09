@@ -112,7 +112,7 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
   static displayName = 'LegendItem';
   shouldClearPersistedColor = false;
 
-  colorRef = createRef<HTMLDivElement>();
+  colorRef = createRef<HTMLButtonElement>();
   state: LegendItemState = {
     isOpen: false,
     actionActive: false,
@@ -231,12 +231,13 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
           <ItemColor
             ref={this.colorRef}
             color={color}
+            seriesName={label}
             isSeriesHidden={isSeriesHidden}
             hasColorPicker={hasColorPicker}
             onClick={this.handleColorClick(hasColorPicker)}
           />
-          <ItemLabel label={label} onClick={this.handleLabelClick(seriesIdentifier)} />
-          {showExtra && extra != null && renderExtra(extra, isSeriesHidden)}
+          <ItemLabel label={label} onClick={this.handleLabelClick(seriesIdentifier)} isSeriesHidden={isSeriesHidden} />
+          {showExtra && extra && renderExtra(extra, isSeriesHidden)}
           {Action && (
             <div className="echLegendItem__action">
               <Action series={seriesIdentifier} color={color} label={label} />
