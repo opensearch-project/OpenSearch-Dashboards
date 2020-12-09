@@ -19,7 +19,7 @@
 
 import { EuiColorPicker, EuiWrappingPopover, EuiButton, EuiSpacer, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { action } from '@storybook/addon-actions';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, LegendColorPicker } from '../../src';
 import { SeriesKey } from '../../src/commons/series_id';
@@ -30,40 +30,49 @@ const onChangeAction = action('onChange');
 const onCloseAction = action('onClose');
 
 export const Example = () => {
-  const [colors, setColors] = useState<Record<SeriesKey, Color>>({});
+  const [colors, setColors] = useState<Record<SeriesKey, Color | null>>({});
+  const CustomColorPicker: LegendColorPicker = useMemo(
+    () => ({ anchor, color, onClose, seriesIdentifier, onChange }) => {
+      const handleClose = () => {
+        onClose();
+        onCloseAction();
+        setColors((prevColors) => ({
+          ...prevColors,
+          [seriesIdentifier.key]: color,
+        }));
+      };
+      const handleChange = (c: Color | null) => {
+        setColors((prevColors) => ({
+          ...prevColors,
+          [seriesIdentifier.key]: c,
+        }));
+        onChange(c);
+        onChangeAction(c);
+      };
 
-  const renderColorPicker: LegendColorPicker = ({ anchor, color, onClose, seriesIdentifier, onChange }) => {
-    const handleClose = () => {
-      onClose();
-      onCloseAction();
-      setColors({
-        ...colors,
-        [seriesIdentifier.key]: color,
-      });
-    };
-    const handleChange = (c: Color | null) => {
-      onChange(c);
-      onChangeAction(c);
-    };
-    return (
-      <EuiWrappingPopover isOpen button={anchor} closePopover={handleClose} anchorPosition="leftCenter" ownFocus>
-        <EuiColorPicker display="inline" color={color} onChange={handleChange} />
-        <EuiSpacer size="m" />
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s" onClick={() => handleChange(null)}>
-            Clear color
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiButton fullWidth size="s" onClick={handleClose}>
-          Done
-        </EuiButton>
-      </EuiWrappingPopover>
-    );
-  };
+      return (
+        <>
+          <EuiWrappingPopover isOpen button={anchor} closePopover={handleClose} anchorPosition="leftCenter" ownFocus>
+            <EuiColorPicker display="inline" color={color} onChange={handleChange} />
+            <EuiSpacer size="m" />
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="s" onClick={() => handleChange(null)}>
+                Clear color
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiButton fullWidth size="s" onClick={handleClose}>
+              Done
+            </EuiButton>
+          </EuiWrappingPopover>
+        </>
+      );
+    },
+    [setColors],
+  );
 
   return (
     <Chart className="story-chart">
-      <Settings showLegend legendColorPicker={renderColorPicker} />
+      <Settings showLegend legendColorPicker={CustomColorPicker} />
       <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
       <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
