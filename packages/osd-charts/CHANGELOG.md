@@ -1,3 +1,15 @@
+# [24.4.0](https://github.com/elastic/elastic-charts/compare/v24.3.0...v24.4.0) (2020-12-09)
+
+
+### Bug Fixes
+
+* empty labels on debug state ([#940](https://github.com/elastic/elastic-charts/issues/940)) ([3c823fd](https://github.com/elastic/elastic-charts/commit/3c823fdbc8437c907c02b58c1aa8e084bc7611d1))
+
+
+### Features
+
+* allow use of functions for y, y0, split and stack accessors ([#943](https://github.com/elastic/elastic-charts/issues/943)) ([22425d3](https://github.com/elastic/elastic-charts/commit/22425d3b9819afde208c651abb6b017839556645))
+
 # [24.3.0](https://github.com/elastic/elastic-charts/compare/v24.2.0...v24.3.0) (2020-12-04)
 
 
