@@ -200,4 +200,31 @@ describe('Bar series stories', () => {
       });
     });
   });
+
+  describe('functional accessors', () => {
+    it('functional accessors with fieldName', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/bar-chart--functional-accessors&knob-y fn name=testY&knob-split fn name=testSplit',
+      );
+    });
+
+    it('functional accessors with fieldName - with tooltip', async () => {
+      await common.expectChartWithMouseAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/bar-chart--functional-accessors&knob-y fn name=testY&knob-split fn name=testSplit',
+        {
+          top: 60,
+          right: 180,
+        },
+        {
+          screenshotSelector: 'body',
+        },
+      );
+    });
+
+    it('y1Accessors and y0Accessors', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        'http://localhost:9001/?path=/story/bar-chart--band-bar-chart&knob-fit Y domain=true&knob-use fn accessors=true',
+      );
+    });
+  });
 });

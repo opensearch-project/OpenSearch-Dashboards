@@ -68,7 +68,7 @@ export interface DataSeriesDatum<T = any> {
 }
 
 export interface XYChartSeriesIdentifier extends SeriesIdentifier {
-  yAccessor: string | number;
+  yAccessor: Accessor;
   splitAccessors: Map<string | number, string | number>; // does the map have a size vs making it optional
   smVerticalAccessorValue?: string | number;
   smHorizontalAccessorValue?: string | number;
@@ -111,6 +111,17 @@ export function getSeriesIndex(series: SeriesIdentifier[], target: SeriesIdentif
   }
 
   return series.findIndex(({ key }) => target.key === key);
+}
+
+/**
+ * Returns string form of accessor. Uses index when accessor is a function.
+ *
+ * @param accessor
+ * @param index
+ * @internal
+ */
+export function getAccessorFieldName(accessor: Accessor | AccessorFn, index: number) {
+  return typeof accessor === 'function' ? accessor.fieldName ?? `(index:${index})` : accessor;
 }
 
 /**
@@ -201,16 +212,16 @@ export function splitSeriesDataByAccessors(
           y0Accessors && y0Accessors[index],
           markSizeAccessor,
         );
-        const seriesKeys = [...splitAccessors.values(), accessor];
-        const seriesIdentifier = {
+        const accessorStr = getAccessorFieldName(accessor, index);
+        const splitAccessorStrs = [...splitAccessors.values()].map((a, si) => getAccessorFieldName(a, si));
+        const seriesKeys = [...splitAccessorStrs, accessorStr];
+        const seriesIdentifier: Omit<XYChartSeriesIdentifier, 'key'> = {
           specId,
-          groupId,
-          seriesType,
-          yAccessor: accessor,
+          yAccessor: accessorStr,
           splitAccessors,
+          seriesKeys,
           smVerticalAccessorValue: smV,
           smHorizontalAccessorValue: smH,
-          stackMode,
         };
         const seriesKey = getSeriesKey(seriesIdentifier, groupId);
         sum += cleanedDatum.y1 ?? 0;
@@ -221,8 +232,10 @@ export function splitSeriesDataByAccessors(
         } else {
           dataSeries.set(seriesKey, {
             ...seriesIdentifier,
+            stackMode,
+            seriesType,
+            groupId,
             isStacked,
-            seriesKeys,
             key: seriesKey,
             data: [newDatum],
             spec,
@@ -276,16 +289,17 @@ export function splitSeriesDataByAccessors(
           y0Accessors && y0Accessors[index],
           markSizeAccessor,
         );
-        const seriesKeys = [...splitAccessors.values(), accessor];
-        const seriesIdentifier = {
+
+        const accessorStr = getAccessorFieldName(accessor, index);
+        const splitAccessorStrs = [...splitAccessors.values()].map((a, si) => getAccessorFieldName(a, si));
+        const seriesKeys = [...splitAccessorStrs, accessorStr];
+        const seriesIdentifier: Omit<XYChartSeriesIdentifier, 'key'> = {
           specId,
-          groupId,
-          seriesType,
-          yAccessor: accessor,
+          seriesKeys,
+          yAccessor: accessorStr,
           splitAccessors,
           smVerticalAccessorValue: smV,
           smHorizontalAccessorValue: smH,
-          stackMode,
         };
         const seriesKey = getSeriesKey(seriesIdentifier, groupId);
         sum += cleanedDatum.y1 ?? 0;
@@ -296,6 +310,9 @@ export function splitSeriesDataByAccessors(
         } else {
           dataSeries.set(seriesKey, {
             ...seriesIdentifier,
+            groupId,
+            seriesType,
+            stackMode,
             isStacked,
             seriesKeys,
             key: seriesKey,
@@ -353,13 +370,17 @@ export function getSeriesKey(
  * Get the array of values that forms a series key
  * @internal
  */
-function getSplitAccessors(datum: Datum, accessors: Accessor[] = []): Map<string | number, string | number> {
+function getSplitAccessors(
+  datum: Datum,
+  accessors: (Accessor | AccessorFn)[] = [],
+): Map<string | number, string | number> {
   const splitAccessors = new Map<string | number, string | number>();
   if (typeof datum === 'object' && datum !== null) {
-    accessors.forEach((accessor: Accessor) => {
-      const value = datum[accessor as keyof typeof datum];
+    accessors.forEach((accessor: Accessor | AccessorFn, index) => {
+      const value = getAccessorValue(datum, accessor);
       if (typeof value === 'string' || typeof value === 'number') {
-        splitAccessors.set(accessor, value);
+        const accessorStr = getAccessorFieldName(accessor, index);
+        splitAccessors.set(accessorStr, value);
       }
     });
   }
@@ -372,15 +393,16 @@ function getSplitAccessors(datum: Datum, accessors: Accessor[] = []): Map<string
  */
 export function extractYAndMarkFromDatum(
   datum: Datum,
-  yAccessor: Accessor,
+  yAccessor: Accessor | AccessorFn,
   nonNumericValues: any[],
-  y0Accessor?: Accessor,
+  y0Accessor?: Accessor | AccessorFn,
   markSizeAccessor?: Accessor | AccessorFn,
 ): Pick<DataSeriesDatum, 'y0' | 'y1' | 'mark' | 'datum' | 'initialY0' | 'initialY1'> {
   const mark =
     markSizeAccessor === undefined ? null : castToNumber(getAccessorValue(datum, markSizeAccessor), nonNumericValues);
-  const y1 = castToNumber(datum[yAccessor], nonNumericValues);
-  const y0 = y0Accessor ? castToNumber(datum[y0Accessor as keyof typeof datum], nonNumericValues) : null;
+  const y1Value = getAccessorValue(datum, yAccessor);
+  const y1 = castToNumber(y1Value, nonNumericValues);
+  const y0 = y0Accessor ? castToNumber(getAccessorValue(datum, y0Accessor), nonNumericValues) : null;
   return { y1, datum, y0, mark, initialY0: y0, initialY1: y1 };
 }
 

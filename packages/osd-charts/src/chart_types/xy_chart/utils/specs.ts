@@ -419,13 +419,13 @@ export interface SeriesAccessors {
   /** The field name of the x value on Datum object */
   xAccessor: Accessor | AccessorFn;
   /** An array of field names one per y metric value */
-  yAccessors: Accessor[];
+  yAccessors: (Accessor | AccessorFn)[];
   /** An optional accessor of the y0 value: base point for area/bar charts  */
-  y0Accessors?: Accessor[];
+  y0Accessors?: (Accessor | AccessorFn)[];
   /** An array of fields thats indicates the datum series membership */
-  splitSeriesAccessors?: Accessor[];
+  splitSeriesAccessors?: (Accessor | AccessorFn)[];
   /** An array of fields thats indicates the stack membership */
-  stackAccessors?: Accessor[];
+  stackAccessors?: (Accessor | AccessorFn)[];
   /**
    * Field name of mark size metric on `Datum`
    *

@@ -1474,11 +1474,11 @@ export type ScaleType = $Values<typeof ScaleType>;
 // @public (undocumented)
 export interface SeriesAccessors {
     markSizeAccessor?: Accessor | AccessorFn;
-    splitSeriesAccessors?: Accessor[];
-    stackAccessors?: Accessor[];
+    splitSeriesAccessors?: (Accessor | AccessorFn)[];
+    stackAccessors?: (Accessor | AccessorFn)[];
     xAccessor: Accessor | AccessorFn;
-    y0Accessors?: Accessor[];
-    yAccessors: Accessor[];
+    y0Accessors?: (Accessor | AccessorFn)[];
+    yAccessors: (Accessor | AccessorFn)[];
 }
 
 // @public (undocumented)
@@ -1870,7 +1870,11 @@ export interface TooltipValue {
 export type TooltipValueFormatter = (data: TooltipValue) => JSX.Element | string;
 
 // @public
-export type UnaryAccessorFn<Return = any> = (datum: Datum) => Return;
+export interface UnaryAccessorFn<Return = any> {
+    // (undocumented)
+    (datum: Datum): Return;
+    fieldName?: string;
+}
 
 // @public (undocumented)
 export type UnboundedDomainWithInterval = DomainBase;
@@ -1933,7 +1937,7 @@ export interface XYChartSeriesIdentifier extends SeriesIdentifier {
     // (undocumented)
     splitAccessors: Map<string | number, string | number>;
     // (undocumented)
-    yAccessor: string | number;
+    yAccessor: Accessor;
 }
 
 // @public

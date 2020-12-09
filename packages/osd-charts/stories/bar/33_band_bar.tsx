@@ -35,6 +35,7 @@ export const Example = () => {
   }));
   const lineData = KIBANA_METRICS.metrics.kibana_os_load[0].data.map((d: any) => [d[0], d[1]]);
   const fit = boolean('fit Y domain', true);
+  const useFunctions = boolean('use fn accessors', false);
   return (
     <Chart className="story-chart">
       <Axis
@@ -57,8 +58,8 @@ export const Example = () => {
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
-        yAccessors={['max']}
-        y0Accessors={['min']}
+        yAccessors={[useFunctions ? (d) => d.max : 'max']}
+        y0Accessors={[useFunctions ? (d) => d.min : 'min']}
         data={data}
       />
 
