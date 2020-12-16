@@ -23,17 +23,19 @@ import React, { MouseEventHandler } from 'react';
 interface LabelProps {
   label: string;
   isSeriesHidden?: boolean;
+  isToggleable?: boolean;
   onClick?: MouseEventHandler;
 }
 /**
  * Label component used to display text in legend item
  * @internal
  */
-export function Label({ label, onClick, isSeriesHidden }: LabelProps) {
+export function Label({ label, isToggleable, onClick, isSeriesHidden }: LabelProps) {
   const labelClassNames = classNames('echLegendItem__label', {
     'echLegendItem__label--clickable': Boolean(onClick),
   });
-  return (
+
+  return isToggleable ? (
     <button
       type="button"
       className={labelClassNames}
@@ -45,5 +47,9 @@ export function Label({ label, onClick, isSeriesHidden }: LabelProps) {
     >
       {label}
     </button>
+  ) : (
+    <div className={labelClassNames} title={label} onClick={onClick}>
+      {label}
+    </div>
   );
 }

@@ -236,7 +236,12 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
             hasColorPicker={hasColorPicker}
             onClick={this.handleColorClick(hasColorPicker)}
           />
-          <ItemLabel label={label} onClick={this.handleLabelClick(seriesIdentifier)} isSeriesHidden={isSeriesHidden} />
+          <ItemLabel
+            label={label}
+            isToggleable={item.isToggleable}
+            onClick={this.handleLabelClick(seriesIdentifier)}
+            isSeriesHidden={isSeriesHidden}
+          />
           {showExtra && extra && renderExtra(extra, isSeriesHidden)}
           {Action && (
             <div className="echLegendItem__action">
