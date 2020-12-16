@@ -40,6 +40,11 @@ describe('Legend stories', () => {
       'http://localhost:9001/?path=/story/legend--legend-spacing-buffer&knob-legend buffer value=0',
     );
   });
+  it('should have the same order as nested with no indent even if there are repeated labels', async () => {
+    await common.expectChartAtUrlToMatchScreenshot(
+      'http://localhost:9001/?path=/story/legend--piechart-repeated-labels&knob-flatLegend=true&knob-legendMaxDepth=2',
+    );
+  });
 
   it('should render color picker on mouse click', async () => {
     const action = async () =>

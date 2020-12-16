@@ -135,6 +135,7 @@ export const DEFAULT_SETTINGS_SPEC: SettingsSpec = {
       visible: false,
     },
   },
+  legendMaxDepth: Infinity,
   legendPosition: Position.Right,
   showLegendExtra: false,
   hideDuplicateAxes: false,

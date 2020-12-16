@@ -47,6 +47,7 @@ import {
   parentAccessor,
   sortIndexAccessor,
   HierarchyOfArrays,
+  pathAccessor,
 } from '../utils/group_by_rollup';
 import { trueBearingToStandardPositionAngle } from '../utils/math';
 import { sunburst } from '../utils/sunburst';
@@ -349,6 +350,7 @@ function partToShapeTreeNode(treemapLayout: boolean, innerRadius: Radius, ringTh
     value: aggregateAccessor(node),
     parent: parentAccessor(node),
     sortIndex: sortIndexAccessor(node),
+    path: pathAccessor(node),
     x0,
     x1,
     y0,

@@ -19,11 +19,10 @@
 
 import createCachedSelector from 're-reselect';
 
-import { SettingsSpec } from '../../../../specs';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { LegendItemLabel } from '../../../../state/selectors/get_legend_items_labels';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { HierarchyOfArrays, CHILDREN_KEY } from '../../layout/utils/group_by_rollup';
+import { CHILDREN_KEY, HierarchyOfArrays } from '../../layout/utils/group_by_rollup';
 import { Layer } from '../../specs';
 import { getPieSpec } from './pie_spec';
 import { getTree } from './tree';
@@ -31,31 +30,9 @@ import { getTree } from './tree';
 /** @internal */
 export const getLegendItemsLabels = createCachedSelector(
   [getPieSpec, getSettingsSpecSelector, getTree],
-  (pieSpec, { legendMaxDepth }, tree): LegendItemLabel[] => {
-    if (!pieSpec) {
-      return [];
-    }
-    if (isInvalidLegendMaxDepth(legendMaxDepth)) {
-      return [];
-    }
-    const labels = flatSlicesNames(pieSpec.layers, 0, tree).filter(({ depth }) => {
-      if (typeof legendMaxDepth !== 'number') {
-        return true;
-      }
-      return depth <= legendMaxDepth;
-    });
-
-    return labels;
-  },
+  (pieSpec, { legendMaxDepth }, tree): LegendItemLabel[] =>
+    pieSpec ? flatSlicesNames(pieSpec.layers, 0, tree).filter(({ depth }) => depth <= legendMaxDepth) : [],
 )(getChartIdSelector);
-
-/**
- * Check if the legendMaxDepth from settings is not a valid number (NaN or <=0)
- * @param legendMaxDepth - SettingsSpec['legendMaxDepth']
- */
-function isInvalidLegendMaxDepth(legendMaxDepth: SettingsSpec['legendMaxDepth']): boolean {
-  return typeof legendMaxDepth === 'number' && (Number.isNaN(legendMaxDepth) || legendMaxDepth <= 0);
-}
 
 function flatSlicesNames(
   layers: Layer[],

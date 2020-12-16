@@ -27,6 +27,7 @@ export const CHILDREN_KEY = 'children';
 export const INPUT_KEY = 'inputIndex';
 export const PARENT_KEY = 'parent';
 export const SORT_INDEX_KEY = 'sortIndex';
+export const PATH_KEY = 'path';
 
 interface Statistics {
   globalAggregate: number;
@@ -45,6 +46,7 @@ export interface ArrayNode extends NodeDescriptor {
   [CHILDREN_KEY]: HierarchyOfArrays;
   [PARENT_KEY]: ArrayNode;
   [SORT_INDEX_KEY]: number;
+  [PATH_KEY]: number[];
 }
 
 type HierarchyOfMaps = Map<Key, MapNode>;
@@ -74,6 +76,9 @@ export function childrenAccessor(n: ArrayEntry) {
 }
 export function sortIndexAccessor(n: ArrayEntry) {
   return entryValue(n)[SORT_INDEX_KEY];
+}
+export function pathAccessor(n: ArrayEntry) {
+  return entryValue(n)[PATH_KEY];
 }
 const ascending: Sorter = (a, b) => a - b;
 const descending: Sorter = (a, b) => b - a;
@@ -128,7 +133,13 @@ export function groupByRollup(
 
 function getRootArrayNode(): ArrayNode {
   const children: HierarchyOfArrays = [];
-  const bootstrap = { [AGGREGATE_KEY]: NaN, [DEPTH_KEY]: NaN, [CHILDREN_KEY]: children, [INPUT_KEY]: [] as number[] };
+  const bootstrap = {
+    [AGGREGATE_KEY]: NaN,
+    [DEPTH_KEY]: NaN,
+    [CHILDREN_KEY]: children,
+    [INPUT_KEY]: [] as number[],
+    [PATH_KEY]: [] as number[],
+  };
   Object.assign(bootstrap, { [PARENT_KEY]: bootstrap });
   const result: ArrayNode = bootstrap as ArrayNode;
   return result;
@@ -149,6 +160,7 @@ export function mapsToArrays(root: HierarchyOfMaps, sorter: NodeSorter): Hierarc
           [SORT_INDEX_KEY]: NaN,
           [PARENT_KEY]: parent,
           [INPUT_KEY]: [],
+          [PATH_KEY]: [],
         };
         const newValue: ArrayNode = Object.assign(
           resultNode,
@@ -163,7 +175,14 @@ export function mapsToArrays(root: HierarchyOfMaps, sorter: NodeSorter): Hierarc
         entryValue(n).sortIndex = i;
         return n;
       }); // with the current algo, decreasing order is important
-  return groupByMap(root, getRootArrayNode());
+  const tree = groupByMap(root, getRootArrayNode());
+  const buildPaths = ([, mapNode]: ArrayEntry, currentPath: number[]) => {
+    const newPath = [...currentPath, mapNode[SORT_INDEX_KEY]];
+    mapNode[PATH_KEY] = newPath;
+    mapNode.children.forEach((entry) => buildPaths(entry, newPath));
+  };
+  buildPaths(tree[0], []);
+  return tree;
 }
 
 /** @internal */

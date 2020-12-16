@@ -32,7 +32,7 @@ module.exports = {
   ],
   rules: {
     /**
-     * depricated to be deleted
+     * deprecated to be deleted
      */
     // https://github.com/typescript-eslint/typescript-eslint/issues/2077
     '@typescript-eslint/camelcase': 0,
@@ -92,6 +92,7 @@ module.exports = {
     /**
      * Standard rules
      */
+    'no-restricted-syntax': 0, // this is a good rule, for-of is good
     'no-console': process.env.NODE_ENV === 'production' ? 2 : 1,
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 1,
     'prefer-template': 'error',

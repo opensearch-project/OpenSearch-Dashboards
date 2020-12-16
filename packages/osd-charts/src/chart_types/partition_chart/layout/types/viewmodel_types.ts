@@ -148,11 +148,14 @@ interface SectorGeomSpecY {
   y1px: Distance;
 }
 
+export type DataName = any; // todo consider narrowing it to eg. primitives
+
 export interface ShapeTreeNode extends TreeNode, SectorGeomSpecY {
   yMidPx: Distance;
   depth: number;
   sortIndex: number;
-  dataName: any;
+  path: number[];
+  dataName: DataName;
   value: number;
   parent: ArrayNode;
 }

@@ -17,14 +17,11 @@
  * under the License.
  */
 
-import { GlobalChartState } from '../chart_state';
-
+// just like [].map except on iterables, to avoid having to materialize both input and output arrays
 /** @internal */
-export interface LegendItemLabel {
-  label: string;
-  depth: number;
+export function map<InElem, OutElem>(fun: (arg: InElem, index: number) => OutElem, iterable: Iterable<InElem>) {
+  let i = 0;
+  return (function*() {
+    for (const next of iterable) yield fun(next, i++);
+  })();
 }
-
-/** @internal */
-export const getLegendItemsLabelsSelector = (state: GlobalChartState): LegendItemLabel[] =>
-  state.internalChartState?.getLegendItemsLabels(state) ?? [];

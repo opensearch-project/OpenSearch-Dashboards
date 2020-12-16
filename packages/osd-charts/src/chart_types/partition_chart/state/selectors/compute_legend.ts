@@ -22,42 +22,32 @@ import createCachedSelector from 're-reselect';
 import { LegendItem } from '../../../../commons/legend';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { Position } from '../../../../utils/commons';
+import { identity, Position } from '../../../../utils/commons';
 import { QuadViewModel } from '../../layout/types/viewmodel_types';
 import { PrimitiveValue } from '../../layout/utils/group_by_rollup';
+import { map } from '../iterables';
 import { partitionGeometries } from './geometries';
-import { getFlatHierarchy } from './get_flat_hierarchy';
 import { getPieSpec } from './pie_spec';
 
 /** @internal */
 export const computeLegendSelector = createCachedSelector(
-  [getPieSpec, getSettingsSpecSelector, partitionGeometries, getFlatHierarchy],
-  (pieSpec, settings, geoms, sortedItems): LegendItem[] => {
+  [getPieSpec, getSettingsSpecSelector, partitionGeometries],
+  (pieSpec, { flatLegend, legendMaxDepth, legendPosition }, { quadViewModel }): LegendItem[] => {
     if (!pieSpec) {
       return [];
     }
-    const { id, layers: labelFormatters } = pieSpec;
 
-    const uniqueNames = geoms.quadViewModel.reduce<Record<string, number>>((acc, { dataName, fillColor }) => {
-      const key = [dataName, fillColor].join('---');
-      if (!acc[key]) {
-        acc[key] = 0;
-      }
-      acc[key] += 1;
-      return acc;
-    }, {});
-
-    const { flatLegend, legendMaxDepth, legendPosition } = settings;
+    const uniqueNames = new Set(map(({ dataName, fillColor }) => makeKey(dataName, fillColor), quadViewModel));
     const forceFlatLegend = flatLegend || legendPosition === Position.Bottom || legendPosition === Position.Top;
 
     const excluded: Set<string> = new Set();
-    let items = geoms.quadViewModel.filter(({ depth, dataName, fillColor }) => {
+    const items = quadViewModel.filter(({ depth, dataName, fillColor }) => {
       if (legendMaxDepth != null) {
         return depth <= legendMaxDepth;
       }
       if (forceFlatLegend) {
-        const key = [dataName, fillColor].join('---');
-        if (uniqueNames[key] > 1 && excluded.has(key)) {
+        const key = makeKey(dataName, fillColor);
+        if (uniqueNames.has(key) && excluded.has(key)) {
           return false;
         }
         excluded.add(key);
@@ -65,37 +55,32 @@ export const computeLegendSelector = createCachedSelector(
       return true;
     });
 
-    if (forceFlatLegend) {
-      items = items.sort(({ depth: a }, { depth: b }) => a - b);
-    }
+    items.sort(compareTreePaths);
 
-    return items
-      .sort((a, b) => {
-        const aIndex = findIndex(sortedItems, a);
-        const bIndex = findIndex(sortedItems, b);
-        return aIndex - bIndex;
-      })
-      .map<LegendItem>(({ dataName, fillColor, depth }) => {
-        const labelFormatter = labelFormatters[depth - 1];
-        const formatter = labelFormatter?.nodeLabel;
-
-        return {
-          color: fillColor,
-          label: formatter ? formatter(dataName) : dataName,
-          dataName,
-          childId: dataName,
-          depth: forceFlatLegend ? 0 : depth - 1,
-          seriesIdentifier: {
-            key: dataName,
-            specId: id,
-          },
-        };
-      });
+    return items.map<LegendItem>(({ dataName, fillColor, depth }) => {
+      const formatter = pieSpec.layers[depth - 1]?.nodeLabel ?? identity;
+      return {
+        color: fillColor,
+        label: formatter(dataName),
+        dataName,
+        childId: dataName,
+        depth: forceFlatLegend ? 0 : depth - 1,
+        seriesIdentifier: { key: dataName, specId: pieSpec.id },
+      };
+    });
   },
 )(getChartIdSelector);
 
-function findIndex(items: Array<[PrimitiveValue, number, PrimitiveValue]>, child: QuadViewModel) {
-  return items.findIndex(
-    ([dataName, depth, value]) => dataName === child.dataName && depth === child.depth && value === child.value,
-  );
+function makeKey(...keyParts: PrimitiveValue[]): string {
+  return keyParts.join('---');
+}
+
+function compareTreePaths({ path: a }: QuadViewModel, { path: b }: QuadViewModel): number {
+  for (let i = 0; i < Math.min(a.length, b.length); i++) {
+    const diff = a[i] - b[i];
+    if (diff) {
+      return diff;
+    }
+  }
+  return a.length - b.length; // if one path is fully contained in the other, then parent (shorter) goes first
 }
