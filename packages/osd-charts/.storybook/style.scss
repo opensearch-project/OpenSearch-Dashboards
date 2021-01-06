@@ -4,6 +4,11 @@ html {
   background-color: white;
 }
 
+#root {
+  z-index: 200;
+  position: relative;
+}
+
 .story-chart {
   box-sizing: border-box;
   background: white;
@@ -23,6 +28,7 @@ html {
   width: 100%;
   height: 400px;
   position: relative;
+  z-index: 500;
   box-sizing: border-box;
   background-color: blanchedalmond;
 

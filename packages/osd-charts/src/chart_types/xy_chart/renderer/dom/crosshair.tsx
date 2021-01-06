@@ -42,6 +42,7 @@ interface CrosshairProps {
   cursorLinePosition?: Dimensions;
   tooltipType: TooltipType;
   fromExternalEvent?: boolean;
+  zIndex: number;
 }
 
 function canRenderBand(type: TooltipType, visible: boolean, fromExternalEvent?: boolean) {
@@ -84,6 +85,7 @@ class CrosshairComponent extends React.Component<CrosshairProps> {
       cursorLinePosition,
       tooltipType,
       chartRotation,
+      zIndex,
     } = this.props;
 
     if (!cursorLinePosition || !canRenderHelpLine(tooltipType, line.visible)) {
@@ -97,6 +99,7 @@ class CrosshairComponent extends React.Component<CrosshairProps> {
         borderTopWidth: line.strokeWidth,
         borderTopColor: line.stroke,
         borderTopStyle: line.dash ? 'dashed' : 'solid',
+        zIndex,
       };
     } else {
       style = {
@@ -104,6 +107,7 @@ class CrosshairComponent extends React.Component<CrosshairProps> {
         borderLeftWidth: line.strokeWidth,
         borderLeftColor: line.stroke,
         borderLeftStyle: line.dash ? 'dashed' : 'solid',
+        zIndex,
       };
     }
     return <div className="echCrosshair__line" style={style} />;
@@ -125,6 +129,7 @@ const mapStateToProps = (state: GlobalChartState): CrosshairProps => {
       theme: LIGHT_THEME,
       chartRotation: 0,
       tooltipType: TooltipType.None,
+      zIndex: 0,
     };
   }
   const settings = getSettingsSpecSelector(state);
@@ -138,6 +143,7 @@ const mapStateToProps = (state: GlobalChartState): CrosshairProps => {
     cursorLinePosition: getCursorLinePositionSelector(state),
     tooltipType,
     fromExternalEvent: cursorBandPosition?.fromExternalEvent,
+    zIndex: state.zIndex,
   };
 };
 

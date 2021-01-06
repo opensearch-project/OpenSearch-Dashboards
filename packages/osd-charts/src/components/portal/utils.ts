@@ -33,7 +33,12 @@ export const DEFAULT_POPPER_SETTINGS: Required<TooltipPortalSettings, 'fallbackP
  *
  * @internal
  */
-export function getOrCreateNode(id: string, className?: string, parent: HTMLElement = document.body): HTMLDivElement {
+export function getOrCreateNode(
+  id: string,
+  className?: string,
+  parent: HTMLElement = document.body,
+  zIndex: number = 0,
+): HTMLDivElement {
   // eslint-disable-next-line unicorn/prefer-query-selector
   const node = document.getElementById(id);
   if (node) {
@@ -45,6 +50,7 @@ export function getOrCreateNode(id: string, className?: string, parent: HTMLElem
   if (className) {
     newNode.classList.add(className);
   }
+  newNode.style.zIndex = `${zIndex}`;
   parent.appendChild(newNode);
   return newNode;
 }
@@ -55,4 +61,68 @@ export function getOrCreateNode(id: string, className?: string, parent: HTMLElem
  */
 export function isHTMLElement(value: any): value is HTMLElement {
   return typeof value === 'object' && value !== null && value.hasOwnProperty('nodeName');
+}
+
+/**
+ * Returns the top-most defined z-index in the element's ancestor hierarchy
+ * relative to the `target` element; if no z-index is defined, returns 0
+ * @param element {HTMLElement}
+ * @param cousin {HTMLElement}
+ * @returns {number}
+ */
+export function getElementZIndex(element: HTMLElement, cousin: HTMLElement): number {
+  /**
+   * finding the z-index of `element` is not the full story
+   * its the CSS stacking context that is important
+   * take this DOM for example:
+   * body
+   *   section[z-index: 1000]
+   *     p[z-index: 500]
+   *       button
+   *   div
+   *
+   * what z-index does the `div` need to display next to `button`?
+   * the `div` and `section` are where the stacking context splits
+   * so `div` needs to copy `section`'s z-index in order to
+   * appear next to / over `button`
+   *
+   * calculate this by starting at `button` and finding its offsetParents
+   * then walk the parents from top -> down until the stacking context
+   * split is found, or if there is no split then a specific z-index is unimportant
+   */
+
+  // build the array of the element + its offset parents
+  const nodesToInspect: HTMLElement[] = [];
+  while (true) {
+    nodesToInspect.push(element);
+
+    // AFAICT this is a valid cast - the libdefs appear wrong
+    element = element.offsetParent as HTMLElement;
+
+    // stop if there is no parent
+    if (element == null) {
+      break;
+    }
+
+    // stop if the parent contains the related element
+    // as this is the z-index ancestor
+    if (element.contains(cousin)) {
+      break;
+    }
+  }
+
+  // reverse the nodes to walk from top -> element
+  for (let i = nodesToInspect.length - 1; i >= 0; i--) {
+    const node = nodesToInspect[i];
+    // get this node's z-index css value
+    const zIndex = window.document.defaultView!.getComputedStyle(node).getPropertyValue('z-index');
+
+    // if the z-index is not a number (e.g. "auto") return null, else the value
+    const parsedZIndex = parseInt(zIndex, 10);
+    if (!isNaN(parsedZIndex)) {
+      return parsedZIndex;
+    }
+  }
+
+  return 0;
 }

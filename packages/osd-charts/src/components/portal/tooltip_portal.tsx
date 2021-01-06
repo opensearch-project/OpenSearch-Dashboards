@@ -29,6 +29,7 @@ import { DEFAULT_POPPER_SETTINGS, getOrCreateNode, isHTMLElement } from './utils
  * @todo make this type conditional to use PortalAnchorProps or PortalAnchorRefProps
  */
 type PortalTooltipProps = {
+  zIndex: number;
   /**
    * String used to designate unique portal
    */
@@ -55,7 +56,15 @@ type PortalTooltipProps = {
   chartId: string;
 };
 
-const TooltipPortalComponent = ({ anchor, scope, settings, children, visible, chartId }: PortalTooltipProps) => {
+const TooltipPortalComponent = ({
+  anchor,
+  scope,
+  settings,
+  children,
+  visible,
+  chartId,
+  zIndex,
+}: PortalTooltipProps) => {
   /**
    * Anchor element used to position tooltip
    */
@@ -69,7 +78,12 @@ const TooltipPortalComponent = ({ anchor, scope, settings, children, visible, ch
    * This must not be removed from DOM throughout life of this component.
    * Otherwise the portal will loose reference to the correct node.
    */
-  const portalNodeElement = getOrCreateNode(`echTooltipPortal${scope}__${chartId}`, 'echTooltipPortal__invisible');
+  const portalNodeElement = getOrCreateNode(
+    `echTooltipPortal${scope}__${chartId}`,
+    'echTooltipPortal__invisible',
+    undefined,
+    zIndex,
+  );
 
   const portalNode = useRef(portalNodeElement);
 

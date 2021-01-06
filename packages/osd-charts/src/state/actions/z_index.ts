@@ -16,25 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+export const Z_INDEX_EVENT = 'Z_INDEX_EVENT';
 
-import { ChartActions } from './chart';
-import { ChartSettingsActions } from './chart_settings';
-import { ColorsActions } from './colors';
-import { EventsActions } from './events';
-import { KeyActions } from './key';
-import { LegendActions } from './legend';
-import { MouseActions } from './mouse';
-import { SpecActions } from './specs';
-import { ZIndexActions } from './z_index';
+interface ZIndexEvent {
+  type: typeof Z_INDEX_EVENT;
+  zIndex: number;
+}
 
 /** @internal */
-export type StateActions =
-  | SpecActions
-  | ChartActions
-  | ChartSettingsActions
-  | LegendActions
-  | EventsActions
-  | MouseActions
-  | KeyActions
-  | ColorsActions
-  | ZIndexActions;
+export function onComputedZIndex(zIndex: number): ZIndexEvent {
+  return { type: Z_INDEX_EVENT, zIndex };
+}
+
+/** @internal */
+export type ZIndexActions = ZIndexEvent;

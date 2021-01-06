@@ -45,6 +45,7 @@ interface TooltipDispatchProps {
 }
 
 interface TooltipStateProps {
+  zIndex: number;
   visible: boolean;
   position: TooltipAnchorPosition | null;
   info?: TooltipInfo;
@@ -63,6 +64,7 @@ type TooltipProps = TooltipDispatchProps & TooltipStateProps & TooltipOwnProps;
 
 const TooltipComponent = ({
   info,
+  zIndex,
   headerFormatter,
   position,
   getChartContainerRef,
@@ -207,6 +209,8 @@ const TooltipComponent = ({
   return (
     <TooltipPortal
       scope="MainTooltip"
+      // increasing by 100 the tooltip portal zIndex to avoid conflicts with highlighters and other elements in the DOM
+      zIndex={zIndex + 100}
       anchor={{
         position: anchorPosition,
         ref: chartRef.current,
@@ -223,6 +227,7 @@ const TooltipComponent = ({
 TooltipComponent.displayName = 'Tooltip';
 
 const HIDDEN_TOOLTIP_PROPS = {
+  zIndex: 0,
   visible: false,
   info: undefined,
   position: null,
@@ -246,6 +251,7 @@ const mapStateToProps = (state: GlobalChartState): TooltipStateProps => {
   const settings = getTooltipSettings(settingsSpec, isExternal);
   return {
     visible,
+    zIndex: state.zIndex,
     info: getInternalTooltipInfoSelector(state),
     position: getInternalTooltipAnchorPositionSelector(state),
     headerFormatter: getTooltipHeaderFormatterSelector(state),

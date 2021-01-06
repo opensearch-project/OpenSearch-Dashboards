@@ -332,6 +332,8 @@ export interface BubbleSeriesStyle {
 export class Chart extends React.Component<ChartProps, ChartState> {
     constructor(props: ChartProps);
     // (undocumented)
+    componentDidMount(): void;
+    // (undocumented)
     componentWillUnmount(): void;
     // (undocumented)
     static defaultProps: ChartProps;

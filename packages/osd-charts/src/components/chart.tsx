@@ -27,6 +27,7 @@ import { isHorizontalAxis } from '../chart_types/xy_chart/utils/axis_type_utils'
 import { PointerEvent } from '../specs';
 import { SpecsParser } from '../specs/specs_parser';
 import { onExternalPointerEvent } from '../state/actions/events';
+import { onComputedZIndex } from '../state/actions/z_index';
 import { chartStoreReducer, GlobalChartState } from '../state/chart_state';
 import { getInternalIsInitializedSelector, InitStatus } from '../state/selectors/get_internal_is_intialized';
 import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
@@ -38,6 +39,7 @@ import { ChartResizer } from './chart_resizer';
 import { ChartStatus } from './chart_status';
 import { ErrorBoundary } from './error_boundary';
 import { Legend } from './legend/legend';
+import { getElementZIndex } from './portal/utils';
 
 interface ChartProps {
   /**
@@ -106,6 +108,13 @@ export class Chart extends React.Component<ChartProps, ChartState> {
         state.internalChartState.eventCallbacks(state);
       }
     });
+  }
+
+  componentDidMount() {
+    if (this.chartContainerRef.current) {
+      const zIndex = getElementZIndex(this.chartContainerRef.current, document.body);
+      this.chartStore.dispatch(onComputedZIndex(zIndex));
+    }
   }
 
   componentWillUnmount() {

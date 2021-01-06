@@ -51,6 +51,7 @@ interface AnnotationsStateProps {
   annotationDimensions: Map<AnnotationId, AnnotationDimensions>;
   annotationSpecs: AnnotationSpec[];
   chartId: string;
+  zIndex: number;
 }
 
 interface AnnotationsOwnProps {
@@ -93,6 +94,7 @@ const AnnotationsComponent = ({
   annotationDimensions,
   getChartContainerRef,
   chartId,
+  zIndex,
   onPointerMove,
 }: AnnotationsProps) => {
   const renderAnnotationMarkers = useCallback((): JSX.Element[] => {
@@ -125,7 +127,13 @@ const AnnotationsComponent = ({
   return (
     <>
       {renderAnnotationMarkers()}
-      <AnnotationTooltip chartId={chartId} state={tooltipState} chartRef={getChartContainerRef()} onScroll={onScroll} />
+      <AnnotationTooltip
+        chartId={chartId}
+        zIndex={zIndex}
+        state={tooltipState}
+        chartRef={getChartContainerRef()}
+        onScroll={onScroll}
+      />
     </>
   );
 };
@@ -136,6 +144,7 @@ const mapDispatchToProps = (dispatch: Dispatch): AnnotationsDispatchProps =>
   bindActionCreators({ onPointerMove: onPointerMoveAction }, dispatch);
 
 const mapStateToProps = (state: GlobalChartState): AnnotationsStateProps => {
+  const { zIndex, chartId } = state;
   if (getInternalIsInitializedSelector(state) !== InitStatus.Initialized) {
     return {
       isChartEmpty: true,
@@ -143,7 +152,8 @@ const mapStateToProps = (state: GlobalChartState): AnnotationsStateProps => {
       annotationDimensions: new Map(),
       annotationSpecs: [],
       tooltipState: null,
-      chartId: '',
+      chartId,
+      zIndex,
     };
   }
   return {
@@ -152,7 +162,8 @@ const mapStateToProps = (state: GlobalChartState): AnnotationsStateProps => {
     annotationDimensions: computeAnnotationDimensionsSelector(state),
     annotationSpecs: getAnnotationSpecsSelector(state),
     tooltipState: getAnnotationTooltipStateSelector(state),
-    chartId: state.chartId,
+    chartId,
+    zIndex,
   };
 };
 

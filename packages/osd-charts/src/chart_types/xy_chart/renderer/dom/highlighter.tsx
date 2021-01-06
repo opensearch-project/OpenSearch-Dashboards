@@ -36,6 +36,7 @@ import { computeChartTransform } from '../../state/utils/utils';
 interface HighlighterProps {
   initialized: boolean;
   chartId: string;
+  zIndex: number;
   highlightedGeometries: IndexedGeometry[];
   chartTransform: Transform;
   chartDimensions: Dimensions;
@@ -51,12 +52,12 @@ class HighlighterComponent extends React.Component<HighlighterProps> {
   static displayName = 'Highlighter';
 
   render() {
-    const { highlightedGeometries, chartDimensions, chartRotation, chartId } = this.props;
+    const { highlightedGeometries, chartDimensions, chartRotation, chartId, zIndex } = this.props;
     const clipWidth = [90, -90].includes(chartRotation) ? chartDimensions.height : chartDimensions.width;
     const clipHeight = [90, -90].includes(chartRotation) ? chartDimensions.width : chartDimensions.height;
     const clipPathId = `echHighlighterClipPath__${chartId}`;
     return (
-      <svg className="echHighlighter">
+      <svg className="echHighlighter" style={{ zIndex }}>
         <defs>
           <clipPath id={clipPathId}>
             <rect x="0" y="0" width={clipWidth} height={clipHeight} />
@@ -104,10 +105,12 @@ class HighlighterComponent extends React.Component<HighlighterProps> {
 }
 
 const mapStateToProps = (state: GlobalChartState): HighlighterProps => {
+  const { chartId, zIndex } = state;
   if (getInternalIsInitializedSelector(state) !== InitStatus.Initialized) {
     return {
       initialized: false,
-      chartId: state.chartId,
+      chartId,
+      zIndex,
       highlightedGeometries: [],
       chartTransform: {
         x: 0,
@@ -118,9 +121,11 @@ const mapStateToProps = (state: GlobalChartState): HighlighterProps => {
       chartRotation: 0,
     };
   }
+
   return {
     initialized: true,
-    chartId: state.chartId,
+    chartId,
+    zIndex,
     highlightedGeometries: getHighlightedGeomsSelector(state),
     chartTransform: computeChartTransformSelector(state),
     chartDimensions: computeChartDimensionsSelector(state).chartDimensions,
