@@ -52,17 +52,15 @@ export function createOnElementClickCaller(): (state: GlobalChartState) => void 
             return;
           }
           const nextPickedShapesLength = pickedShapes.length;
-          if (nextPickedShapesLength > 0 && isClicking(prevClick, lastClick)) {
-            if (settings && settings.onElementClick) {
-              const elements = pickedShapes.map<[Array<LayerValue>, SeriesIdentifier]>((values) => [
-                values,
-                {
-                  specId: pieSpec.id,
-                  key: `spec{${pieSpec.id}}`,
-                },
-              ]);
-              settings.onElementClick(elements);
-            }
+          if (nextPickedShapesLength > 0 && isClicking(prevClick, lastClick) && settings && settings.onElementClick) {
+            const elements = pickedShapes.map<[Array<LayerValue>, SeriesIdentifier]>((values) => [
+              values,
+              {
+                specId: pieSpec.id,
+                key: `spec{${pieSpec.id}}`,
+              },
+            ]);
+            settings.onElementClick(elements);
           }
           prevClick = lastClick;
         },

@@ -61,12 +61,8 @@ describe('Scale Test', () => {
   });
   test('Create an time scale', () => {
     const date1 = DateTime.fromISO('2019-01-01T00:00:00.000', { zone: 'utc' }).toMillis();
-    const date2 = DateTime.fromISO('2019-01-01T00:00:00.000', { zone: 'utc' })
-      .plus({ days: 90 })
-      .toMillis();
-    const date3 = DateTime.fromISO('2019-01-01T00:00:00.000', { zone: 'utc' })
-      .plus({ days: 180 })
-      .toMillis();
+    const date2 = DateTime.fromISO('2019-01-01T00:00:00.000', { zone: 'utc' }).plus({ days: 90 }).toMillis();
+    const date3 = DateTime.fromISO('2019-01-01T00:00:00.000', { zone: 'utc' }).plus({ days: 180 }).toMillis();
     const data = [date1, date3];
     const minRange = 0;
     const maxRange = 100;

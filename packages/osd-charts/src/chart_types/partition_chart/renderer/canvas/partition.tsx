@@ -50,6 +50,7 @@ class PartitionComponent extends React.Component<PartitionProps> {
 
   // firstRender = true; // this'll be useful for stable resizing of treemaps
   private ctx: CanvasRenderingContext2D | null;
+
   // see example https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio#Example
   private readonly devicePixelRatio: number; // fixme this be no constant: multi-monitor window drag may necessitate modifying the `<canvas>` dimensions
 

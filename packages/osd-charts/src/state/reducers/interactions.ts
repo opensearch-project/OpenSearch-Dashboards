@@ -23,7 +23,6 @@ import { SeriesIdentifier } from '../../commons/series_id';
 import { getDelta } from '../../utils/point';
 import { ON_KEY_UP, KeyActions } from '../actions/key';
 import {
-  ON_TOGGLE_LEGEND,
   ON_LEGEND_ITEM_OUT,
   ON_LEGEND_ITEM_OVER,
   ON_TOGGLE_DESELECT_SERIES,
@@ -135,11 +134,6 @@ export function interactionsReducer(
         },
       };
     }
-    case ON_TOGGLE_LEGEND:
-      return {
-        ...state,
-        legendCollapsed: !state.legendCollapsed,
-      };
     case ON_LEGEND_ITEM_OUT:
       return {
         ...state,

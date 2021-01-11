@@ -43,9 +43,13 @@ const DEFAULT_RESIZE_DEBOUNCE = 200;
 
 class Resizer extends React.Component<ResizerProps> {
   private initialResizeComplete = false;
+
   private containerRef: RefObject<HTMLDivElement>;
+
   private ro: ResizeObserver;
+
   private animationFrameID: number | null;
+
   private onResizeDebounced: (entries: ResizeObserverEntry[]) => void;
 
   constructor(props: ResizerProps) {

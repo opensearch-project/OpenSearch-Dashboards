@@ -25,7 +25,7 @@ import { onChartRendered } from '../../../../state/actions/chart';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
 import { Dimensions } from '../../../../utils/dimensions';
-import { BulletViewModel, nullShapeViewModel, ShapeViewModel } from '../../layout/types/viewmodel_types';
+import { nullShapeViewModel, ShapeViewModel } from '../../layout/types/viewmodel_types';
 import { geometries } from '../../state/selectors/geometries';
 import { renderCanvas2d } from './canvas_renderers';
 
@@ -46,8 +46,10 @@ interface ReactiveChartOwnProps {
 type Props = ReactiveChartStateProps & ReactiveChartDispatchProps & ReactiveChartOwnProps;
 class Component extends React.Component<Props> {
   static displayName = 'Goal';
+
   // firstRender = true; // this'll be useful for stable resizing of treemaps
   private ctx: CanvasRenderingContext2D | null;
+
   // see example https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio#Example
   private readonly devicePixelRatio: number; // fixme this be no constant: multi-monitor window drag may necessitate modifying the `<canvas>` dimensions
 
@@ -79,21 +81,6 @@ class Component extends React.Component<Props> {
     }
   }
 
-  private tryCanvasContext() {
-    const canvas = this.props.forwardStageRef.current;
-    this.ctx = canvas && canvas.getContext('2d');
-  }
-
-  private drawCanvas() {
-    if (this.ctx) {
-      const { width, height }: Dimensions = this.props.chartContainerDimensions;
-      renderCanvas2d(this.ctx, this.devicePixelRatio, {
-        ...this.props.geometries,
-        config: { ...this.props.geometries.config, width, height },
-      });
-    }
-  }
-
   handleMouseMove(e: MouseEvent<HTMLCanvasElement>) {
     const {
       initialized,
@@ -109,8 +96,7 @@ class Component extends React.Component<Props> {
     const { chartCenter } = geometries;
     const x = e.clientX - box.left - chartCenter.x;
     const y = e.clientY - box.top - chartCenter.y;
-    const pickedShapes: Array<BulletViewModel> = picker(x, y);
-    return pickedShapes;
+    return picker(x, y);
   }
 
   render() {
@@ -136,6 +122,21 @@ class Component extends React.Component<Props> {
         }}
       />
     );
+  }
+
+  private tryCanvasContext() {
+    const canvas = this.props.forwardStageRef.current;
+    this.ctx = canvas && canvas.getContext('2d');
+  }
+
+  private drawCanvas() {
+    if (this.ctx) {
+      const { width, height }: Dimensions = this.props.chartContainerDimensions;
+      renderCanvas2d(this.ctx, this.devicePixelRatio, {
+        ...this.props.geometries,
+        config: { ...this.props.geometries.config, width, height },
+      });
+    }
   }
 }
 

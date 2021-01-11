@@ -18,7 +18,7 @@
  */
 
 import { lstatSync, readdirSync } from 'fs';
-import { join, resolve } from 'path';
+import path from 'path';
 
 import { getStorybook, configure } from '@storybook/react';
 
@@ -26,28 +26,29 @@ export type StoryInfo = [string, string, number];
 
 export type StoryGroupInfo = [string, string, StoryInfo[]];
 
+function enumerateFiles(basedir: string, dir: string) {
+  let result: string[] = [];
+  readdirSync(path.join(basedir, dir)).forEach((file) => {
+    const relativePath = path.join(dir, file);
+    const stats = lstatSync(path.join(basedir, relativePath));
+    if (stats.isDirectory()) {
+      result = result.concat(enumerateFiles(basedir, relativePath));
+    } else if (/\.stories\.tsx$/.test(relativePath)) {
+      result.push(relativePath);
+    }
+  });
+  return result;
+}
+
 function requireAllStories(basedir: string, directory: string) {
-  function enumerateFiles(basedir: string, dir: string) {
-    let result: string[] = [];
-    readdirSync(join(basedir, dir)).forEach((file) => {
-      const relativePath = join(dir, file);
-      const stats = lstatSync(join(basedir, relativePath));
-      if (stats.isDirectory()) {
-        result = result.concat(enumerateFiles(basedir, relativePath));
-      } else if (/\.stories\.tsx$/.test(relativePath)) {
-        result.push(relativePath);
-      }
-    });
-    return result;
-  }
-  const absoluteDirectory = resolve(basedir, directory);
+  const absoluteDirectory = path.resolve(basedir, directory);
 
   const keys = enumerateFiles(absoluteDirectory, '.');
   function requireContext(key: string) {
     if (!keys.includes(key)) {
       throw new Error(`Cannot find module '${key}'`);
     }
-    const fullKey = require('path').resolve(absoluteDirectory, key);
+    const fullKey = path.resolve(absoluteDirectory, key);
     return require(fullKey);
   }
 

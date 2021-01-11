@@ -44,7 +44,9 @@ export class GoalState implements InternalChartState {
   chartType = ChartTypes.Goal;
 
   onElementClickCaller: (state: GlobalChartState) => void;
+
   onElementOverCaller: (state: GlobalChartState) => void;
+
   onElementOutCaller: (state: GlobalChartState) => void;
 
   constructor() {

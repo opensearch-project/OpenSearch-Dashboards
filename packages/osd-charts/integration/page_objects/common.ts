@@ -81,19 +81,11 @@ function getCursorPosition(
   let y = element.top;
 
   if (top !== undefined || bottom !== undefined) {
-    if (top !== undefined) {
-      y = element.top + top;
-    } else {
-      y = element.top + element.height - bottom!;
-    }
+    y = top !== undefined ? element.top + top : element.top + element.height - bottom!;
   }
 
   if (left !== undefined || right !== undefined) {
-    if (left !== undefined) {
-      x = element.left + left;
-    } else {
-      x = element.left + element.width - right!;
-    }
+    x = left !== undefined ? element.left + left : element.left + element.width - right!;
   }
 
   return { x, y };
@@ -145,6 +137,7 @@ type ScreenshotElementAtUrlOptions = ScreenshotDOMElementOptions & {
 
 class CommonPage {
   readonly chartWaitSelector = '.echChartStatus[data-ech-render-complete=true]';
+
   readonly chartSelector = '.echChart';
 
   /**

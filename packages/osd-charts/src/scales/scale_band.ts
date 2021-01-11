@@ -30,18 +30,31 @@ import { ScaleType } from './constants';
  */
 export class ScaleBand implements Scale {
   readonly bandwidth: number;
+
   readonly bandwidthPadding: number;
+
   readonly step: number;
+
   readonly outerPadding: number;
+
   readonly innerPadding: number;
+
   readonly originalBandwidth: number;
+
   readonly type: ScaleBandType;
+
   readonly domain: any[];
+
   readonly range: number[];
+
   readonly isInverted: boolean;
+
   readonly invertedScale: ScaleQuantize<number>;
+
   readonly minInterval: number;
+
   readonly barsPadding: number;
+
   private readonly d3Scale: D3ScaleBand<NonNullable<PrimitiveValue>>;
 
   constructor(
@@ -84,9 +97,7 @@ export class ScaleBand implements Scale {
     this.bandwidthPadding = this.bandwidth;
     // TO FIX: we are assuming that it's ordered
     this.isInverted = this.domain[0] > this.domain[1];
-    this.invertedScale = scaleQuantize()
-      .domain(range)
-      .range(this.domain);
+    this.invertedScale = scaleQuantize().domain(range).range(this.domain);
     this.minInterval = 0;
   }
 

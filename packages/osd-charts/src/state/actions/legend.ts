@@ -20,9 +20,6 @@
 import { SeriesIdentifier } from '../../commons/series_id';
 
 /** @internal */
-export const ON_TOGGLE_LEGEND = 'ON_TOGGLE_LEGEND';
-
-/** @internal */
 export const ON_LEGEND_ITEM_OVER = 'ON_LEGEND_ITEM_OVER';
 
 /** @internal */
@@ -31,9 +28,6 @@ export const ON_LEGEND_ITEM_OUT = 'ON_LEGEND_ITEM_OUT';
 /** @internal */
 export const ON_TOGGLE_DESELECT_SERIES = 'ON_TOGGLE_DESELECT_SERIES';
 
-interface ToggleLegendAction {
-  type: typeof ON_TOGGLE_LEGEND;
-}
 interface LegendItemOverAction {
   type: typeof ON_LEGEND_ITEM_OVER;
   legendItemKey: string | null;
@@ -47,11 +41,6 @@ export interface ToggleDeselectSeriesAction {
   type: typeof ON_TOGGLE_DESELECT_SERIES;
   legendItemId: SeriesIdentifier;
   negate: boolean;
-}
-
-/** @internal */
-export function onToggleLegend(): ToggleLegendAction {
-  return { type: ON_TOGGLE_LEGEND };
 }
 
 /** @internal */
@@ -73,8 +62,4 @@ export function onToggleDeselectSeriesAction(
 }
 
 /** @internal */
-export type LegendActions =
-  | ToggleLegendAction
-  | LegendItemOverAction
-  | LegendItemOutAction
-  | ToggleDeselectSeriesAction;
+export type LegendActions = LegendItemOverAction | LegendItemOutAction | ToggleDeselectSeriesAction;

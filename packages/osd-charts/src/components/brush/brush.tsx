@@ -57,7 +57,9 @@ class BrushToolComponent extends React.Component<Props> {
   static displayName = 'BrushTool';
 
   private readonly devicePixelRatio: number;
+
   private ctx: CanvasRenderingContext2D | null;
+
   private canvasRef: RefObject<HTMLCanvasElement>;
 
   constructor(props: Readonly<Props>) {

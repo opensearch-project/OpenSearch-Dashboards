@@ -32,11 +32,7 @@ export const Example = () => (
     <Axis
       id="time"
       position={Position.Bottom}
-      tickFormat={(d) =>
-        DateTime.fromMillis(d)
-          .toUTC()
-          .toFormat('yyyy-MM-dd HH:mm:ss')
-      }
+      tickFormat={(d) => DateTime.fromMillis(d).toUTC().toFormat('yyyy-MM-dd HH:mm:ss')}
     />
     <Axis id="y" position={Position.Left} />
     <LineSeries

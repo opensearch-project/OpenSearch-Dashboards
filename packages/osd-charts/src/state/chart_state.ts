@@ -180,7 +180,6 @@ export interface PointerStates {
 export interface InteractionsState {
   pointer: PointerStates;
   highlightedLegendItemKey: string | null;
-  legendCollapsed: boolean;
   deselectedDataSeries: SeriesIdentifier[];
 }
 
@@ -267,7 +266,6 @@ export const getInitialState = (chartId: string): GlobalChartState => ({
   internalChartState: null,
   interactions: {
     pointer: getInitialPointerState(),
-    legendCollapsed: false,
     highlightedLegendItemKey: null,
     deselectedDataSeries: [],
   },

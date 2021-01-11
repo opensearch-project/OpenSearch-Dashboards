@@ -41,9 +41,7 @@ const numOfDays = 60;
 const data = dg.generateGroupedSeries(numOfDays, 6, 'metric ').map((d) => {
   return {
     ...d,
-    x: DateTime.fromISO('2020-01-01T00:00:00Z')
-      .plus({ days: d.x })
-      .toMillis(),
+    x: DateTime.fromISO('2020-01-01T00:00:00Z').plus({ days: d.x }).toMillis(),
   };
 });
 

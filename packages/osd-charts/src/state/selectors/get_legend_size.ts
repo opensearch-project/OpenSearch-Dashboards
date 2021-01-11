@@ -50,7 +50,7 @@ export const getLegendSizeSelector = createCachedSelector(
     const bboxCalculator = new CanvasTextBBoxCalculator();
     const bbox = labels.reduce(
       (acc, { label, depth }) => {
-        const bbox = bboxCalculator.compute(
+        const labelBBox = bboxCalculator.compute(
           label,
           1,
           12,
@@ -58,12 +58,12 @@ export const getLegendSizeSelector = createCachedSelector(
           1.5,
           400,
         );
-        bbox.width += depth * LEGEND_HIERARCHY_MARGIN;
-        if (acc.height < bbox.height) {
-          acc.height = bbox.height;
+        labelBBox.width += depth * LEGEND_HIERARCHY_MARGIN;
+        if (acc.height < labelBBox.height) {
+          acc.height = labelBBox.height;
         }
-        if (acc.width < bbox.width) {
-          acc.width = bbox.width;
+        if (acc.width < labelBBox.width) {
+          acc.width = labelBBox.width;
         }
         return acc;
       },

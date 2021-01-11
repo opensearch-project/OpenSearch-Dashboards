@@ -92,24 +92,22 @@ class CrosshairComponent extends React.Component<CrosshairProps> {
       return null;
     }
     const isHorizontalRotated = isHorizontalRotation(chartRotation);
-    let style: CSSProperties;
-    if (isHorizontalRotated) {
-      style = {
-        ...cursorLinePosition,
-        borderTopWidth: line.strokeWidth,
-        borderTopColor: line.stroke,
-        borderTopStyle: line.dash ? 'dashed' : 'solid',
-        zIndex,
-      };
-    } else {
-      style = {
-        ...cursorLinePosition,
-        borderLeftWidth: line.strokeWidth,
-        borderLeftColor: line.stroke,
-        borderLeftStyle: line.dash ? 'dashed' : 'solid',
-        zIndex,
-      };
-    }
+
+    const style: CSSProperties = isHorizontalRotated
+      ? {
+          ...cursorLinePosition,
+          borderTopWidth: line.strokeWidth,
+          borderTopColor: line.stroke,
+          borderTopStyle: line.dash ? 'dashed' : 'solid',
+          zIndex,
+        }
+      : {
+          ...cursorLinePosition,
+          borderLeftWidth: line.strokeWidth,
+          borderLeftColor: line.stroke,
+          borderLeftStyle: line.dash ? 'dashed' : 'solid',
+          zIndex,
+        };
     return <div className="echCrosshair__line" style={style} />;
   }
 

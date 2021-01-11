@@ -70,20 +70,13 @@ export const getColorScale = createCachedSelector(
         .range(colorRange);
       colorScale.ticks = colorScale.config.ticks(spec.colors.length);
     } else if (colorScale.type === ScaleType.Quantile) {
-      colorScale.config = scaleQuantile<string>()
-        .domain(ranges)
-        .range(colorRange);
+      colorScale.config = scaleQuantile<string>().domain(ranges).range(colorRange);
       colorScale.ticks = colorScale.config.quantiles();
     } else if (colorScale.type === ScaleType.Threshold) {
-      colorScale.config = scaleThreshold<number, string>()
-        .domain(ranges)
-        .range(colorRange);
+      colorScale.config = scaleThreshold<number, string>().domain(ranges).range(colorRange);
       colorScale.ticks = colorScale.config.domain();
     } else {
-      colorScale.config = scaleLinear<string>()
-        .domain(ranges)
-        .interpolate(interpolateHcl)
-        .range(colorRange);
+      colorScale.config = scaleLinear<string>().domain(ranges).interpolate(interpolateHcl).range(colorRange);
       colorScale.ticks = addBaselineOnLinearScale(ranges[0], ranges[1], colorScale.config.ticks(6));
     }
     return colorScale;

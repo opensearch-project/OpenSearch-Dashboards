@@ -44,7 +44,9 @@ export class PartitionState implements InternalChartState {
   chartType = ChartTypes.Partition;
 
   onElementClickCaller: (state: GlobalChartState) => void;
+
   onElementOverCaller: (state: GlobalChartState) => void;
+
   onElementOutCaller: (state: GlobalChartState) => void;
 
   constructor() {

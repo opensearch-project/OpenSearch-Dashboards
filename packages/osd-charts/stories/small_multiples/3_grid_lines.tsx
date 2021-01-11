@@ -42,9 +42,7 @@ const groupNames = new Array(16).fill(0).map((d, i) => String.fromCharCode(97 + 
 const data = dg.generateGroupedSeries(numOfDays, 16).map((d) => {
   return {
     y: d.y,
-    x: DateTime.fromISO('2020-01-01T00:00:00Z')
-      .plus({ days: d.x })
-      .toMillis(),
+    x: DateTime.fromISO('2020-01-01T00:00:00Z').plus({ days: d.x }).toMillis(),
     g: d.g,
     h: `host ${groupNames.indexOf(d.g) % 4}`,
     v: `metric ${Math.floor(groupNames.indexOf(d.g) / 4)}`,

@@ -69,6 +69,8 @@ module.exports = {
     '@typescript-eslint/restrict-plus-operands': 0, // rule is broken
     '@typescript-eslint/no-unsafe-call': 1,
     '@typescript-eslint/unbound-method': 1,
+    '@typescript-eslint/no-redeclare': 'off', // we use to declare enum type and object with the same name
+    '@typescript-eslint/no-shadow': 'off', // we use shadow mostly within the canvas renderer function when we need a new context
     'unicorn/consistent-function-scoping': 1,
     'unicorn/explicit-length-check': 1,
     'import/no-cycle': [0, { maxDepth: 3, ignoreExternal: true }], // TODO: should error when this is fixed https://github.com/benmosher/eslint-plugin-import/issues/1453
@@ -82,6 +84,8 @@ module.exports = {
     'no-param-reassign': 1,
     'react/no-array-index-key': 1,
     'react/prefer-stateless-function': 1,
+    'react/require-default-props': 'off',
+    'react/display-name': 'off',
     'jsx-a11y/no-static-element-interactions': 1,
     'jsx-a11y/mouse-events-have-key-events': 1,
     'jsx-a11y/click-events-have-key-events': 1,
@@ -264,6 +268,10 @@ module.exports = {
         case: 'snakeCase',
       },
     ],
+    'unicorn/no-array-callback-reference': 'off',
+    'unicorn/no-array-reduce': 'off',
+    'unicorn/prefer-dom-node-append': 'off',
+    'unicorn/prefer-dom-node-remove': 'off',
 
     /*
      * file-header plugin

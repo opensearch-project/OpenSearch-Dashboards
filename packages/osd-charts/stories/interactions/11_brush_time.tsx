@@ -37,9 +37,7 @@ import {
 import { getChartRotationKnob } from '../utils/knobs';
 
 export const Example = () => {
-  const now = DateTime.fromISO('2019-01-11T00:00:00.000')
-    .setZone('utc+1')
-    .toMillis();
+  const now = DateTime.fromISO('2019-01-11T00:00:00.000').setZone('utc+1').toMillis();
   const oneDay = 1000 * 60 * 60 * 24;
   const oneDays = moment.duration(1, 'd');
   const twoDays = moment.duration(2, 'd');

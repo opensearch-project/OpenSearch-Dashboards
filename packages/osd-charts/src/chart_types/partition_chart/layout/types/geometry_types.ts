@@ -47,7 +47,9 @@ export type PointTuples = [PointTuple, ...PointTuple[]]; // at least one point
 /** @internal */
 export class Circline {
   x: Coordinate = NaN;
+
   y: Coordinate = NaN;
+
   r: Radius = NaN;
 }
 

@@ -117,7 +117,7 @@ const AnnotationsComponent = ({
   }, [chartDimensions, annotationDimensions, annotationSpecs]);
 
   const onScroll = useCallback(() => {
-    onPointerMove({ x: -1, y: -1 }, new Date().getTime());
+    onPointerMove({ x: -1, y: -1 }, Date.now());
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (isChartEmpty) {

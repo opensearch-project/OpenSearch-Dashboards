@@ -181,12 +181,8 @@ function scaleXonContinuousScale(
     return null;
   }
   const scaledX0 = xScale.scale(x0);
-  let scaledX1: number | null;
-  if (xScale.totalBarsInCluster > 0 && !isHistogramModeEnabled) {
-    scaledX1 = xScale.scale(x1 + xScale.minInterval);
-  } else {
-    scaledX1 = xScale.scale(x1);
-  }
+  const scaledX1: number | null =
+    xScale.totalBarsInCluster > 0 && !isHistogramModeEnabled ? xScale.scale(x1 + xScale.minInterval) : xScale.scale(x1);
   if (scaledX1 == null || scaledX0 == null) {
     return null;
   }

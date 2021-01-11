@@ -136,14 +136,12 @@ export function wrapLines(
         }
         if (match) {
           if (wrapAtWord) {
-            let wrapIndex;
             const nextChar = line[match.length];
             const nextIsSpaceOrDash = nextChar === SPACE || nextChar === DASH;
-            if (nextIsSpaceOrDash && matchWidth <= maxWidth) {
-              wrapIndex = match.length;
-            } else {
-              wrapIndex = Math.max(match.lastIndexOf(SPACE), match.lastIndexOf(DASH)) + 1;
-            }
+            const wrapIndex =
+              nextIsSpaceOrDash && matchWidth <= maxWidth
+                ? match.length
+                : Math.max(match.lastIndexOf(SPACE), match.lastIndexOf(DASH)) + 1;
             if (wrapIndex > 0) {
               low = wrapIndex;
               match = match.slice(0, low);

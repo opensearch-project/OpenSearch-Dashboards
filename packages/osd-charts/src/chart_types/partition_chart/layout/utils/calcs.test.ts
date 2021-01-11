@@ -26,17 +26,17 @@ describe('calcs', () => {
       const result = makeHighContrastColor('#fff', '#fff');
       expect(result).toBe(expected);
     });
-    it('rgb input - should change white text to black when background is white ', () => {
+    it('rgb input - should change white text to black when background is white', () => {
       const expected = '#000';
       const result = makeHighContrastColor('rgb(255, 255, 255)', 'rgb(255, 255, 255)');
       expect(result).toBe(expected);
     });
-    it('rgba input - should change white text to black when background is white ', () => {
+    it('rgba input - should change white text to black when background is white', () => {
       const expected = '#000';
       const result = makeHighContrastColor('rgba(255, 255, 255, 1)', 'rgba(255, 255, 255, 1)');
       expect(result).toBe(expected);
     });
-    it('word input - should change white text to black when background is white ', () => {
+    it('word input - should change white text to black when background is white', () => {
       const expected = '#000';
       const result = makeHighContrastColor('white', 'white');
       expect(result).toBe(expected);

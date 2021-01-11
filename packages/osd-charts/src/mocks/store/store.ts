@@ -40,7 +40,7 @@ export class MockStore {
     if (Array.isArray(specs)) {
       const actions = specs.map(upsertSpec);
       actions.forEach(store.dispatch);
-      if (!specs.find((s) => s.id === DEFAULT_SETTINGS_SPEC.id)) {
+      if (!specs.some((s) => s.id === DEFAULT_SETTINGS_SPEC.id)) {
         store.dispatch(upsertSpec(DEFAULT_SETTINGS_SPEC));
       }
     } else {

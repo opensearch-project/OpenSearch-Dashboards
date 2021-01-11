@@ -116,7 +116,7 @@ describe('Render vertical line annotation within', () => {
     expectAnnotationAtPosition(data, 'line', dataValue, linePosition, numOfSpecs, ScaleType.Ordinal);
   });
 
-  it('histogramMode with line after the max value but before the max + minInterval ', () => {
+  it('histogramMode with line after the max value but before the max + minInterval', () => {
     const store = MockStore.default();
     const settings = MockGlobalSpec.settingsNoMargins({
       xDomain: {

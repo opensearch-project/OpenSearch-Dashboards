@@ -34,12 +34,14 @@ const defaultProps = {
   style: DEFAULT_ANNOTATION_RECT_STYLE,
 };
 
-export const RectAnnotation: React.FunctionComponent<Pick<RectAnnotationSpec, 'id' | 'dataValues'> &
-  Partial<
-    Omit<
-      RectAnnotationSpec,
-      'chartType' | 'specType' | 'seriesType' | 'id' | 'dataValues' | 'domainType' | 'annotationType'
+export const RectAnnotation: React.FunctionComponent<
+  Pick<RectAnnotationSpec, 'id' | 'dataValues'> &
+    Partial<
+      Omit<
+        RectAnnotationSpec,
+        'chartType' | 'specType' | 'seriesType' | 'id' | 'dataValues' | 'domainType' | 'annotationType'
+      >
     >
-  >> = getConnect()(
+> = getConnect()(
   specComponentFactory<RectAnnotationSpec, 'groupId' | 'annotationType' | 'zIndex' | 'style'>(defaultProps),
 );

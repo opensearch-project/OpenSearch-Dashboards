@@ -21,7 +21,7 @@
 /** @internal */
 export function map<InElem, OutElem>(fun: (arg: InElem, index: number) => OutElem, iterable: Iterable<InElem>) {
   let i = 0;
-  return (function*() {
+  return (function* () {
     for (const next of iterable) yield fun(next, i++);
   })();
 }

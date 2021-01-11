@@ -101,15 +101,9 @@ export function makeHighContrastColor(foreground: Color, background: Color, rati
   let contrast = getContrast(highContrastTextColor, background);
   // brighten and darken the text color if not meeting the ratio
   while (contrast < ratio) {
-    if (isBackgroundDark) {
-      highContrastTextColor = chroma(highContrastTextColor)
-        .brighten()
-        .toString();
-    } else {
-      highContrastTextColor = chroma(highContrastTextColor)
-        .darken()
-        .toString();
-    }
+    highContrastTextColor = isBackgroundDark
+      ? chroma(highContrastTextColor).brighten().toString()
+      : chroma(highContrastTextColor).darken().toString();
     const scaledOldContrast = Math.round(contrast * precision) / precision;
     contrast = getContrast(highContrastTextColor, background);
     const scaledContrast = Math.round(contrast * precision) / precision;

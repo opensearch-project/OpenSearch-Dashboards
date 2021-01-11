@@ -131,56 +131,54 @@ describe('Type Checks', () => {
     });
   });
 
-  describe('', () => {
-    test('displays no data availble if chart is empty', () => {
-      const legendItems1: LegendItem[] = [
-        {
-          color: '#1EA593',
-          label: 'a',
-          seriesIdentifier: {
-            key: 'specId:{bars},colors:{a}',
-            specId: 'bars',
-          },
-          defaultExtra: { raw: 6, formatted: '6.00', legendSizingLabel: '6.00' },
-          isSeriesHidden: true,
+  test('displays no data available if chart is empty', () => {
+    const legendItems1: LegendItem[] = [
+      {
+        color: '#1EA593',
+        label: 'a',
+        seriesIdentifier: {
+          key: 'specId:{bars},colors:{a}',
+          specId: 'bars',
         },
-        {
-          color: '#2B70F7',
-          label: 'b',
-          seriesIdentifier: {
-            key: 'specId:{bars},colors:{b}',
-            specId: 'bars',
-          },
-          defaultExtra: { raw: 2, formatted: '2.00', legendSizingLabel: '2.00' },
-          isSeriesHidden: true,
+        defaultExtra: { raw: 6, formatted: '6.00', legendSizingLabel: '6.00' },
+        isSeriesHidden: true,
+      },
+      {
+        color: '#2B70F7',
+        label: 'b',
+        seriesIdentifier: {
+          key: 'specId:{bars},colors:{b}',
+          specId: 'bars',
         },
-      ];
-      expect(isAllSeriesDeselected(legendItems1)).toBe(true);
-    });
-    test('displays data availble if chart is not empty', () => {
-      const legendItems2: LegendItem[] = [
-        {
-          color: '#1EA593',
-          label: 'a',
-          seriesIdentifier: {
-            key: 'specId:{bars},colors:{a}',
-            specId: 'bars',
-          },
-          defaultExtra: { raw: 6, formatted: '6.00', legendSizingLabel: '6.00' },
-          isSeriesHidden: false,
+        defaultExtra: { raw: 2, formatted: '2.00', legendSizingLabel: '2.00' },
+        isSeriesHidden: true,
+      },
+    ];
+    expect(isAllSeriesDeselected(legendItems1)).toBe(true);
+  });
+  test('displays data availble if chart is not empty', () => {
+    const legendItems2: LegendItem[] = [
+      {
+        color: '#1EA593',
+        label: 'a',
+        seriesIdentifier: {
+          key: 'specId:{bars},colors:{a}',
+          specId: 'bars',
         },
-        {
-          color: '#2B70F7',
-          label: 'b',
-          seriesIdentifier: {
-            key: 'specId:{bars},colors:{b}',
-            specId: 'bars',
-          },
-          defaultExtra: { raw: 2, formatted: '2.00', legendSizingLabel: '2.00' },
-          isSeriesHidden: true,
+        defaultExtra: { raw: 6, formatted: '6.00', legendSizingLabel: '6.00' },
+        isSeriesHidden: false,
+      },
+      {
+        color: '#2B70F7',
+        label: 'b',
+        seriesIdentifier: {
+          key: 'specId:{bars},colors:{b}',
+          specId: 'bars',
         },
-      ];
-      expect(isAllSeriesDeselected(legendItems2)).toBe(false);
-    });
+        defaultExtra: { raw: 2, formatted: '2.00', legendSizingLabel: '2.00' },
+        isSeriesHidden: true,
+      },
+    ];
+    expect(isAllSeriesDeselected(legendItems2)).toBe(false);
   });
 });

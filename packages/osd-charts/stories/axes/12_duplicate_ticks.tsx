@@ -26,22 +26,14 @@ import { Axis, Chart, LineSeries, Position, ScaleType, niceTimeFormatter, TickFo
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 
 export const Example = () => {
-  const now = DateTime.fromISO('2019-01-11T00:00:00.000')
-    .setZone('utc+1')
-    .toMillis();
+  const now = DateTime.fromISO('2019-01-11T00:00:00.000').setZone('utc+1').toMillis();
   const oneDay = moment.duration(1, 'd');
   const twoDays = moment.duration(2, 'd');
   const threeDays = moment.duration(3, 'd');
   const fourDays = moment.duration(4, 'd');
   const fiveDays = moment.duration(5, 'd');
   const formatters: Record<string, TickFormatter> = {
-    daily: niceTimeFormatter([
-      now,
-      moment
-        .duration(31, 'd')
-        .add(now)
-        .asMilliseconds(),
-    ]),
+    daily: niceTimeFormatter([now, moment.duration(31, 'd').add(now).asMilliseconds()]),
     hourly: (d) => moment(d).format('HH:mm'),
   };
   const formatterSelect = select<string>('formatter', ['daily', 'hourly'], 'daily');

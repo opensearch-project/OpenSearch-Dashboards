@@ -100,13 +100,9 @@ export function shapeViewModel(
   });
 
   // compute the scale for the rows positions
-  const yScale = scaleBand<string | number>()
-    .domain(yValues)
-    .range([0, height]);
+  const yScale = scaleBand<string | number>().domain(yValues).range([0, height]);
 
-  const yInvertedScale = scaleQuantize<string | number>()
-    .domain([0, height])
-    .range(yValues);
+  const yInvertedScale = scaleQuantize<string | number>().domain([0, height]).range(yValues);
 
   let xValues = xDomain.domain;
 
@@ -137,13 +133,9 @@ export function shapeViewModel(
   }
 
   // compute the scale for the columns positions
-  const xScale = scaleBand<string | number>()
-    .domain(xValues)
-    .range([0, chartDimensions.width]);
+  const xScale = scaleBand<string | number>().domain(xValues).range([0, chartDimensions.width]);
 
-  const xInvertedScale = scaleQuantize<string | number>()
-    .domain([0, chartDimensions.width])
-    .range(xValues);
+  const xInvertedScale = scaleQuantize<string | number>().domain([0, chartDimensions.width]).range(xValues);
 
   // compute the cell width (can be smaller then the available size depending on config
   const cellWidth =
@@ -168,21 +160,14 @@ export function shapeViewModel(
   };
 
   // compute the position of each column label
-  let textXValues: Array<TextBox>;
-  if (timeScale) {
-    textXValues = timeScale
-      .ticks()
-      .map<TextBox>(getTextValue(config.xAxisLabel.formatter, (x: any) => timeScale.scale(x)));
-  } else {
-    // TODO remove overlapping labels or scale better the columns labels
-    textXValues = xValues.map<TextBox>((textBox: any) => {
-      const textValue = getTextValue(config.xAxisLabel.formatter)(textBox);
-      return {
-        ...textValue,
-        x: chartDimensions.left + (xScale(textBox) || 0) + xScale.bandwidth() / 2,
-      };
-    });
-  }
+  const textXValues: Array<TextBox> = timeScale
+    ? timeScale.ticks().map<TextBox>(getTextValue(config.xAxisLabel.formatter, (x: any) => timeScale.scale(x)))
+    : xValues.map<TextBox>((textBox: any) => {
+        return {
+          ...getTextValue(config.xAxisLabel.formatter)(textBox),
+          x: chartDimensions.left + (xScale(textBox) || 0) + xScale.bandwidth() / 2,
+        };
+      });
 
   const { padding } = config.yAxisLabel;
   const rightPadding = typeof padding === 'number' ? padding : padding.right ?? 0;

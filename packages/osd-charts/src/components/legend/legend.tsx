@@ -26,7 +26,6 @@ import { LegendItem, LegendItemExtraValues } from '../../commons/legend';
 import { LegendItemListener, BasicListener, LegendColorPicker, LegendAction } from '../../specs';
 import { clearTemporaryColors, setTemporaryColor, setPersistedColor } from '../../state/actions/colors';
 import {
-  onToggleLegend,
   onToggleDeselectSeriesAction,
   onLegendItemOutAction,
   onLegendItemOverAction,
@@ -50,7 +49,6 @@ interface LegendStateProps {
   chartTheme: Theme;
   size: BBox;
   position: Position;
-  collapsed: boolean;
   items: LegendItem[];
   showExtra: boolean;
   extraValues: Map<string, LegendItemExtraValues>;
@@ -61,7 +59,6 @@ interface LegendStateProps {
   onItemClick?: LegendItemListener;
 }
 interface LegendDispatchProps {
-  onToggle: typeof onToggleLegend;
   onItemOutAction: typeof onLegendItemOutAction;
   onItemOverAction: typeof onLegendItemOverAction;
   onToggleDeselectSeriesAction: typeof onToggleDeselectSeriesAction;
@@ -118,7 +115,6 @@ function LegendComponent(props: LegendStateProps & LegendDispatchProps) {
 const mapDispatchToProps = (dispatch: Dispatch): LegendDispatchProps =>
   bindActionCreators(
     {
-      onToggle: onToggleLegend,
       onToggleDeselectSeriesAction,
       onItemOutAction: onLegendItemOutAction,
       onItemOverAction: onLegendItemOverAction,
@@ -132,7 +128,6 @@ const mapDispatchToProps = (dispatch: Dispatch): LegendDispatchProps =>
 const EMPTY_DEFAULT_STATE = {
   items: [],
   position: Position.Right,
-  collapsed: false,
   extraValues: new Map(),
   debug: false,
   chartTheme: LIGHT_THEME,
@@ -162,7 +157,6 @@ const mapStateToProps = (state: GlobalChartState): LegendStateProps => {
     debug,
     chartTheme: getChartThemeSelector(state),
     size: getLegendSizeSelector(state),
-    collapsed: state.interactions.legendCollapsed,
     items: getLegendItemsSelector(state),
     position: legendPosition,
     showExtra: showLegendExtra,

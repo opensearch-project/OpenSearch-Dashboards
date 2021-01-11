@@ -52,8 +52,11 @@ export class HeatmapState implements InternalChartState {
   chartType = ChartTypes.Heatmap;
 
   onElementClickCaller: (state: GlobalChartState) => void = createOnElementClickCaller();
+
   onElementOverCaller: (state: GlobalChartState) => void = createOnElementOverCaller();
+
   onElementOutCaller: (state: GlobalChartState) => void = createOnElementOutCaller();
+
   onBrushEndCaller: (state: GlobalChartState) => void = createOnBrushEndCaller();
 
   isInitialized(globalState: GlobalChartState) {

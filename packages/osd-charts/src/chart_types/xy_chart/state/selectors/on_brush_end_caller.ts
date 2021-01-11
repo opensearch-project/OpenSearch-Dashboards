@@ -82,29 +82,27 @@ export function createOnBrushEndCaller(): (state: GlobalChartState) => void {
             onBrushEnd,
           };
 
-          if (lastDrag !== null && hasDragged(prevProps, nextProps)) {
-            if (onBrushEnd) {
-              const brushArea: XYBrushArea = {};
-              const { yScales, xScale } = computedScales;
+          if (lastDrag !== null && hasDragged(prevProps, nextProps) && onBrushEnd) {
+            const brushArea: XYBrushArea = {};
+            const { yScales, xScale } = computedScales;
 
-              if (brushAxis === BrushAxis.X || brushAxis === BrushAxis.Both) {
-                brushArea.x = getXBrushExtent(
-                  chartDimensions,
-                  lastDrag,
-                  rotation,
-                  histogramMode,
-                  xScale,
-                  minBrushDelta,
-                  roundHistogramBrushValues,
-                  allowBrushingLastHistogramBucket,
-                );
-              }
-              if (brushAxis === BrushAxis.Y || brushAxis === BrushAxis.Both) {
-                brushArea.y = getYBrushExtents(chartDimensions, lastDrag, rotation, yScales, minBrushDelta);
-              }
-              if (brushArea.x !== undefined || brushArea.y !== undefined) {
-                onBrushEnd(brushArea);
-              }
+            if (brushAxis === BrushAxis.X || brushAxis === BrushAxis.Both) {
+              brushArea.x = getXBrushExtent(
+                chartDimensions,
+                lastDrag,
+                rotation,
+                histogramMode,
+                xScale,
+                minBrushDelta,
+                roundHistogramBrushValues,
+                allowBrushingLastHistogramBucket,
+              );
+            }
+            if (brushAxis === BrushAxis.Y || brushAxis === BrushAxis.Both) {
+              brushArea.y = getYBrushExtents(chartDimensions, lastDrag, rotation, yScales, minBrushDelta);
+            }
+            if (brushArea.x !== undefined || brushArea.y !== undefined) {
+              onBrushEnd(brushArea);
             }
           }
           prevProps = nextProps;

@@ -23,7 +23,7 @@ import React from 'react';
 
 import { Axis, Chart, LineSeries, Position, ScaleType } from '../../src';
 
-const today = new Date().getTime();
+const today = Date.now();
 const UTC_DATE = DateTime.fromISO('2019-01-01T00:00:00.000Z').toMillis();
 const UTC_PLUS8_DATE = DateTime.fromISO('2019-01-01T00:00:00.000+08:00', {
   setZone: true,
@@ -78,10 +78,7 @@ export const Example = () => {
       break;
     default:
     case 'utc':
-      tooltipFn = (d: number) =>
-        DateTime.fromMillis(d)
-          .toUTC()
-          .toFormat('yyyy-MM-dd HH:mm:ss');
+      tooltipFn = (d: number) => DateTime.fromMillis(d).toUTC().toFormat('yyyy-MM-dd HH:mm:ss');
       break;
   }
   return (

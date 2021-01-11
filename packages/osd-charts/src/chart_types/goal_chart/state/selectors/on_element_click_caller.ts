@@ -24,6 +24,7 @@ import { ChartTypes } from '../../..';
 import { SeriesIdentifier } from '../../../../commons/series_id';
 import { SettingsSpec, LayerValue } from '../../../../specs';
 import { GlobalChartState, PointerState } from '../../../../state/chart_state';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getLastClickSelector } from '../../../../state/selectors/get_last_click';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { isClicking } from '../../../../state/utils';
@@ -52,23 +53,19 @@ export function createOnElementClickCaller(): (state: GlobalChartState) => void 
             return;
           }
           const nextPickedShapesLength = pickedShapes.length;
-          if (nextPickedShapesLength > 0 && isClicking(prevClick, lastClick)) {
-            if (settings && settings.onElementClick) {
-              const elements = pickedShapes.map<[Array<LayerValue>, SeriesIdentifier]>((values) => [
-                values,
-                {
-                  specId: spec.id,
-                  key: `spec{${spec.id}}`,
-                },
-              ]);
-              settings.onElementClick(elements);
-            }
+          if (nextPickedShapesLength > 0 && isClicking(prevClick, lastClick) && settings && settings.onElementClick) {
+            const elements = pickedShapes.map<[Array<LayerValue>, SeriesIdentifier]>((values) => [
+              values,
+              {
+                specId: spec.id,
+                key: `spec{${spec.id}}`,
+              },
+            ]);
+            settings.onElementClick(elements);
           }
           prevClick = lastClick;
         },
-      )({
-        keySelector: (state: GlobalChartState) => state.chartId,
-      });
+      )(getChartIdSelector);
     }
     if (selector) {
       selector(state);

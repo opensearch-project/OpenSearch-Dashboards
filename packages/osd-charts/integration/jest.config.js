@@ -25,7 +25,7 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/jest_env_setup.ts'],
   globals: {
     'ts-jest': {
-      tsConfig: '<rootDir>/tsconfig.json',
+      tsconfig: '<rootDir>/tsconfig.json',
     },
     /*
      * The window and HTMLElement globals are required to use @elastic/eui with VRT

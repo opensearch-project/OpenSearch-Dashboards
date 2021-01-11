@@ -36,6 +36,7 @@ window.requestAnimationFrame = (callback) => {
 type ResizeObserverMockCallback = (entries: Array<{ contentRect: { width: number; height: number } }>) => void;
 class ResizeObserverMock {
   callback: ResizeObserverMockCallback;
+
   constructor(callback: ResizeObserverMockCallback) {
     this.callback = callback;
   }

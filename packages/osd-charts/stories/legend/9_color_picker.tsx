@@ -69,7 +69,7 @@ export const Example = () => {
     },
     [setColors],
   );
-
+  CustomColorPicker.displayName = 'CustomColorPicker';
   return (
     <Chart className="story-chart">
       <Settings showLegend legendColorPicker={CustomColorPicker} />

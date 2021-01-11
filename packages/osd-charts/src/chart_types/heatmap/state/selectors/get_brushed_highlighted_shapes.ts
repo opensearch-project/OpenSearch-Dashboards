@@ -50,6 +50,4 @@ export const getBrushedHighlightedShapesSelector = createCachedSelector(
     ]);
     return shape;
   },
-)({
-  keySelector: getChartIdSelector,
-});
+)(getChartIdSelector);

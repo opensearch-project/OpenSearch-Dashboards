@@ -29,9 +29,13 @@ export type IndexedGeometrySpatialMapPoint = [number, number];
 /** @internal */
 export class IndexedGeometrySpatialMap {
   private map: Delaunay<IndexedGeometrySpatialMapPoint> | null = null;
+
   private points: IndexedGeometrySpatialMapPoint[] = [];
+
   private pointGeometries: PointGeometry[] = [];
+
   private searchStartIndex: number = 0;
+
   private maxRadius = -Infinity;
 
   constructor(points: PointGeometry[] = []) {

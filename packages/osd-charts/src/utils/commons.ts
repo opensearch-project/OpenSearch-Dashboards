@@ -24,7 +24,7 @@ import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/grou
 import { Point } from './point';
 
 /**
- * Color varients that are unique to `@elastic/charts`. These go beyond the standard
+ * Color variants that are unique to `@elastic/charts`. These go beyond the standard
  * static color allocations.
  */
 export const ColorVariant = Object.freeze({

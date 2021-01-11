@@ -160,18 +160,31 @@ const defaultScaleOptions: ScaleOptions = {
  */
 export class ScaleContinuous implements Scale {
   readonly bandwidth: number;
+
   readonly totalBarsInCluster: number;
+
   readonly bandwidthPadding: number;
+
   readonly minInterval: number;
+
   readonly step: number;
+
   readonly type: ScaleContinuousType;
+
   readonly domain: any[];
+
   readonly range: number[];
+
   readonly isInverted: boolean;
+
   readonly tickValues: number[];
+
   readonly timeZone: string;
+
   readonly barsPadding: number;
+
   readonly isSingleValueHistogram: boolean;
+
   private readonly d3Scale: D3Scale;
 
   constructor(scaleData: ScaleData, options?: Partial<ScaleOptions>) {

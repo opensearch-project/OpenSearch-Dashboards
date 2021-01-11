@@ -54,9 +54,7 @@ export function createOnElementOutCaller(): (state: GlobalChartState) => void {
           }
           prevPickedShapes = nextPickedShapes;
         },
-      )({
-        keySelector: getChartIdSelector,
-      });
+      )(getChartIdSelector);
     }
     if (selector) {
       selector(state);

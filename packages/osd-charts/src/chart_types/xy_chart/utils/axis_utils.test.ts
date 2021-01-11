@@ -59,7 +59,7 @@ import {
   defaultTickFormatter,
 } from './axis_utils';
 import { computeXScale } from './scales';
-import { AxisSpec, DomainRange, DEFAULT_GLOBAL_ID, TickFormatter } from './specs';
+import { AxisSpec, DomainRange, DEFAULT_GLOBAL_ID } from './specs';
 
 const getCustomStyle = (rotation = 0, padding = 10): AxisStyle =>
   mergePartial(LIGHT_THEME.axes, {
@@ -91,7 +91,7 @@ describe('Axis computational utils', () => {
 
   beforeEach(
     () =>
-      (SVGElement.prototype.getBoundingClientRect = function() {
+      (SVGElement.prototype.getBoundingClientRect = function () {
         const text = this.textContent || 0;
         return { ...mockedRect, width: Number(text) * 10, height: Number(text) * 10 };
       }),
@@ -1504,9 +1504,7 @@ describe('Axis computational utils', () => {
   });
 
   test('should show unique tick labels if duplicateTicks is set to false', () => {
-    const now = DateTime.fromISO('2019-01-11T00:00:00.000')
-      .setZone('utc+1')
-      .toMillis();
+    const now = DateTime.fromISO('2019-01-11T00:00:00.000').setZone('utc+1').toMillis();
     const oneDay = moment.duration(1, 'day');
     const formatter = niceTimeFormatter([now, oneDay.add(now).asMilliseconds() * 31]);
     const axisSpec: AxisSpec = {
@@ -1542,8 +1540,6 @@ describe('Axis computational utils', () => {
     ]);
   });
   test('should show unique consecutive ticks if duplicateTicks is set to false', () => {
-    const formatter: TickFormatter = (d, options = { timeZone: 'utc+1' }) =>
-      DateTime.fromMillis(d, { setZone: true, zone: options.timeZone }).toFormat('HH:mm');
     const axisSpec: AxisSpec = {
       id: 'bottom',
       position: 'bottom',
@@ -1555,7 +1551,8 @@ describe('Axis computational utils', () => {
       showOverlappingLabels: false,
       showOverlappingTicks: false,
       style,
-      tickFormat: formatter,
+      tickFormat: (d, options) =>
+        DateTime.fromMillis(d, { setZone: true, zone: options?.timeZone ?? 'utc+1' }).toFormat('HH:mm'),
     };
     const xDomainTime: XDomain = {
       type: 'xDomain',
@@ -1584,9 +1581,7 @@ describe('Axis computational utils', () => {
     ]);
   });
   test('should show duplicate tick labels if duplicateTicks is set to true', () => {
-    const now = DateTime.fromISO('2019-01-11T00:00:00.000')
-      .setZone('utc+1')
-      .toMillis();
+    const now = DateTime.fromISO('2019-01-11T00:00:00.000').setZone('utc+1').toMillis();
     const oneDay = moment.duration(1, 'day');
     const formatter = niceTimeFormatter([now, oneDay.add(now).asMilliseconds() * 31]);
     const axisSpec: AxisSpec = {
@@ -1626,9 +1621,7 @@ describe('Axis computational utils', () => {
     ]);
   });
   test('should use custom tick formatter', () => {
-    const now = DateTime.fromISO('2019-01-11T00:00:00.000')
-      .setZone('utc+1')
-      .toMillis();
+    const now = DateTime.fromISO('2019-01-11T00:00:00.000').setZone('utc+1').toMillis();
     const oneDay = moment.duration(1, 'day');
     const formatter = niceTimeFormatter([now, oneDay.add(now).asMilliseconds() * 31]);
     const axisSpec: AxisSpec = {
@@ -1694,10 +1687,7 @@ describe('Axis computational utils', () => {
         customFormatter,
       );
 
-      const expected = axis1Dims.tickValues
-        .slice()
-        .reverse()
-        .map(customFormatter);
+      const expected = axis1Dims.tickValues.slice().reverse().map(customFormatter);
       const axisPos = axisTicksPosition.find(({ axis: { id } }) => id === verticalAxisSpec.id);
       expect(axisPos?.ticks.map(({ label }) => label)).toEqual(expected);
     });

@@ -21,7 +21,9 @@ import { BBox, BBoxCalculator, DEFAULT_EMPTY_BBOX } from './bbox_calculator';
 
 export class CanvasTextBBoxCalculator implements BBoxCalculator {
   private attachedRoot: HTMLElement;
+
   private offscreenCanvas: HTMLCanvasElement;
+
   private context: CanvasRenderingContext2D | null;
 
   constructor(rootElement?: HTMLElement) {

@@ -38,9 +38,7 @@ import { getChartRotationKnob } from '../utils/knobs';
 export const Example = () => {
   const rotation = getChartRotationKnob();
   const isVertical = isVerticalRotation(rotation);
-  const now = DateTime.fromISO('2019-01-11T00:00:00.000')
-    .setZone('utc+1')
-    .toMillis();
+  const now = DateTime.fromISO('2019-01-11T00:00:00.000').setZone('utc+1').toMillis();
   const oneDay = 1000 * 60 * 60 * 24;
   const dateFormatter = niceTimeFormatter([now, now + oneDay * 5]);
   const numberFormatter = (d: any) => Number(d).toFixed(2);

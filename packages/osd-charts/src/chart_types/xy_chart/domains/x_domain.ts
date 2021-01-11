@@ -201,11 +201,7 @@ export function convertXScaleTypes(
     const scaleType = scaleTypes.values().next().value;
     let timeZone: string | undefined;
     if (scaleType === ScaleType.Time) {
-      if (timeZones.size > 1) {
-        timeZone = 'utc';
-      } else {
-        timeZone = timeZones.values().next().value;
-      }
+      timeZone = timeZones.size > 1 ? 'utc' : timeZones.values().next().value;
     }
     return { scaleType, isBandScale, timeZone };
   }

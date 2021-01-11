@@ -38,7 +38,9 @@ function defaultRNG(min = 0, max = 1, fractionDigits = 0, inclusive = true) {
 
 export class DataGenerator {
   private randomNumberGenerator: RandomNumberGenerator;
+
   private generator: Simple1DNoise;
+
   private frequency: number;
 
   constructor(frequency = 500, randomNumberGenerator: RandomNumberGenerator = defaultRNG) {
