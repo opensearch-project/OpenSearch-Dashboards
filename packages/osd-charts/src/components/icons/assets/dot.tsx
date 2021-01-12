@@ -29,13 +29,14 @@ export class DotIcon extends React.Component<IconComponentProps> {
   }
 
   render() {
+    const { color } = this.props;
     return (
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" {...this.props}>
         <defs>
-          <circle id="dot-a" cx="8" cy="8" r="4" />
+          <circle id={`dot-${color}`} cx="8" cy="8" r="4" />
         </defs>
         <g>
-          <use xlinkHref="#dot-a" />
+          <use xlinkHref={`#dot-${color}`} />
         </g>
       </svg>
     );
