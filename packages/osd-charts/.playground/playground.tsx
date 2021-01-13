@@ -38,39 +38,10 @@
 
 import React from 'react';
 
-import { Chart, Settings, Partition, PartitionLayout } from '../src';
+import { Example } from '../stories/icicle/01_unix_icicle';
 
 export class Playground extends React.Component {
   render() {
-    return (
-      <div className="chart">
-        <Chart className="story-chart">
-          <Settings showLegend flatLegend={false} />
-          <Partition
-            id="spec_1"
-            data={[
-              { cat1: 'A', cat2: 'A', val: 1 },
-              { cat1: 'A', cat2: 'B', val: 1 },
-              { cat1: 'B', cat2: 'A', val: 1 },
-              { cat1: 'B', cat2: 'B', val: 1 },
-              { cat1: 'C', cat2: 'A', val: 1 },
-              { cat1: 'C', cat2: 'B', val: 1 },
-            ]}
-            valueAccessor={(d: any) => d.val as number}
-            layers={[
-              {
-                groupByRollup: (d: any) => d.cat1,
-              },
-              {
-                groupByRollup: (d: any) => d.cat2,
-              },
-            ]}
-            config={{
-              partitionLayout: PartitionLayout.sunburst,
-            }}
-          />
-        </Chart>
-      </div>
-    );
+    return <Example />;
   }
 }

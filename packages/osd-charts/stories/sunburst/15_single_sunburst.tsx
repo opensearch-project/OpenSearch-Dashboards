@@ -25,7 +25,7 @@ import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/type
 import { mocks } from '../../src/mocks/hierarchical';
 import { STORYBOOK_LIGHT_THEME } from '../shared';
 import {
-  categoricalFillColor,
+  discreteColor,
   colorBrewerCategoricalStark9,
   countryLookup,
   productLookup,
@@ -45,15 +45,14 @@ export const Example = () => (
           groupByRollup: (d: Datum) => d.sitc1,
           nodeLabel: (d: any) => productLookup[d].name,
           shape: {
-            fillColor: (d: ShapeTreeNode) => categoricalFillColor(colorBrewerCategoricalStark9, 0.7)(d.sortIndex),
+            fillColor: (d: ShapeTreeNode) => discreteColor(colorBrewerCategoricalStark9, 0.7)(d.sortIndex),
           },
         },
         {
           groupByRollup: (d: Datum) => countryLookup[d.dest].continentCountry.slice(0, 2),
           nodeLabel: (d: any) => regionLookup[d].regionName.replace(/\s/g, '\u00A0'),
           shape: {
-            fillColor: (d: ShapeTreeNode) =>
-              categoricalFillColor(colorBrewerCategoricalStark9, 0.5)(d.parent.sortIndex),
+            fillColor: (d: ShapeTreeNode) => discreteColor(colorBrewerCategoricalStark9, 0.5)(d.parent.sortIndex),
           },
         },
         {
@@ -61,7 +60,7 @@ export const Example = () => (
           nodeLabel: (d: any) => countryLookup[d].name.replace(/\s/g, '\u00A0'),
           shape: {
             fillColor: (d: ShapeTreeNode) =>
-              categoricalFillColor(colorBrewerCategoricalStark9, 0.3)(d.parent.parent.sortIndex),
+              discreteColor(colorBrewerCategoricalStark9, 0.3)(d.parent.parent.sortIndex),
           },
         },
       ]}

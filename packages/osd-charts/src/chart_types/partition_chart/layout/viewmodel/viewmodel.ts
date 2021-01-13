@@ -103,7 +103,7 @@ export function makeQuadViewModel(
     const opacityMultiplier = 1; // could alter in the future, eg. in response to interactions
     const layer = layers[node.depth - 1];
     const fillColorSpec = layer && layer.shape && layer.shape.fillColor;
-    const fill = fillColorSpec || 'rgba(128,0,0,0.5)';
+    const fill = fillColorSpec ?? 'rgba(128,0,0,0.5)';
     const shapeFillColor = typeof fill === 'function' ? fill(node, node.sortIndex, node.parent.children) : fill;
     const { r, g, b, opacity } = stringToRGB(shapeFillColor);
     const fillColor = argsToRGBString(r, g, b, opacity * opacityMultiplier);
@@ -149,9 +149,9 @@ export interface RectangleConstruction {
   y1: Pixels;
 }
 
-function rectangleConstruction(treeHeight: number, topGroove: number) {
-  return function (node: ShapeTreeNode): RectangleConstruction {
-    return node.depth < treeHeight
+function rectangleConstruction(treeHeight: number, topGroove: number | null) {
+  return function rectangleConstructionClosure(node: ShapeTreeNode): RectangleConstruction {
+    return node.depth < treeHeight && topGroove !== null
       ? {
           x0: node.x0,
           y0: node.y0px,
@@ -166,6 +166,66 @@ function rectangleConstruction(treeHeight: number, topGroove: number) {
         };
   };
 }
+
+const rawChildNodes = (
+  partitionLayout: PartitionLayout,
+  tree: HierarchyOfArrays,
+  topGroove: number,
+  width: number,
+  height: number,
+  clockwiseSectors: boolean,
+  specialFirstInnermostSector: boolean,
+  maxDepth: number,
+): Array<Part> => {
+  const totalValue = tree.reduce((p: number, n: ArrayEntry): number => p + mapEntryValue(n), 0);
+  switch (partitionLayout) {
+    case PartitionLayout.sunburst:
+      const sunburstValueToAreaScale = TAU / totalValue;
+      const sunburstAreaAccessor = (e: ArrayEntry) => sunburstValueToAreaScale * mapEntryValue(e);
+      return sunburst(tree, sunburstAreaAccessor, { x0: 0, y0: -1 }, clockwiseSectors, specialFirstInnermostSector);
+
+    case PartitionLayout.treemap:
+      const treemapInnerArea = isTreemap(partitionLayout) ? width * height : 1; // assuming 1 x 1 unit square
+      const treemapValueToAreaScale = treemapInnerArea / totalValue;
+      const treemapAreaAccessor = (e: ArrayEntry) => treemapValueToAreaScale * mapEntryValue(e);
+      return treemap(tree, treemapAreaAccessor, topGrooveAccessor(topGroove), grooveAccessor, {
+        x0: -width / 2,
+        y0: -height / 2,
+        width,
+        height,
+      });
+
+    case PartitionLayout.icicle:
+    case PartitionLayout.flame:
+      const icicleLayout = isIcicle(partitionLayout);
+      const multiplier = icicleLayout ? -1 : 1;
+      const icicleValueToAreaScale = width / totalValue;
+      const icicleAreaAccessor = (e: ArrayEntry) => icicleValueToAreaScale * mapEntryValue(e);
+      const icicleRowHeight = height / maxDepth;
+      const result = sunburst(
+        tree,
+        icicleAreaAccessor,
+        { x0: -width / 2, y0: (multiplier * height) / 2 - icicleRowHeight },
+        true,
+        false,
+        icicleRowHeight,
+      );
+      return icicleLayout
+        ? result
+        : result.map(({ y0, y1, ...rest }) => ({ y0: height - y1, y1: height - y0, ...rest }));
+
+    default:
+      // Let's ensure TS complains if we add a new PartitionLayout type in the future without creating a `case` for it
+      // Hopefully, a future TS version will do away with the need for this boilerplate `default`. Now TS even needs a `default` even if all possible cases are covered.
+      // Even in runtime it does something sensible (returns the empty set); explicit throwing is avoided as it can deopt the function
+      return ((layout: never) => layout ?? [])(partitionLayout);
+  }
+};
+
+export const isTreemap = (partitionLayout: PartitionLayout) => partitionLayout === PartitionLayout.treemap;
+export const isSunburst = (partitionLayout: PartitionLayout) => partitionLayout === PartitionLayout.sunburst;
+const isIcicle = (partitionLayout: PartitionLayout) => partitionLayout === PartitionLayout.icicle;
+const isFlame = (partitionLayout: PartitionLayout) => partitionLayout === PartitionLayout.flame;
 
 /** @internal */
 export function shapeViewModel(
@@ -207,25 +267,25 @@ export function shapeViewModel(
     return nullShapeViewModel(config, diskCenter);
   }
 
-  const totalValue = tree.reduce((p: number, n: ArrayEntry): number => p + mapEntryValue(n), 0);
+  const treemapLayout = isTreemap(partitionLayout);
+  const sunburstLayout = isSunburst(partitionLayout);
+  const icicleLayout = isIcicle(partitionLayout);
+  const flameLayout = isFlame(partitionLayout);
+  const longestPath = ([, { children, path }]: ArrayEntry): number =>
+    children.length > 0 ? children.reduce((p, n) => Math.max(p, longestPath(n)), 0) : path.length;
+  const maxDepth = longestPath(tree[0]) - 2; // don't include the root node
+  const childNodes = rawChildNodes(
+    partitionLayout,
+    tree,
+    topGroove,
+    width,
+    height,
+    clockwiseSectors,
+    specialFirstInnermostSector,
+    maxDepth,
+  );
 
-  const sunburstValueToAreaScale = TAU / totalValue;
-  const sunburstAreaAccessor = (e: ArrayEntry) => sunburstValueToAreaScale * mapEntryValue(e);
-  const treemapLayout = partitionLayout === PartitionLayout.treemap;
-  const treemapInnerArea = treemapLayout ? width * height : 1; // assuming 1 x 1 unit square
-  const treemapValueToAreaScale = treemapInnerArea / totalValue;
-  const treemapAreaAccessor = (e: ArrayEntry) => treemapValueToAreaScale * mapEntryValue(e);
-
-  const rawChildNodes: Array<Part> = treemapLayout
-    ? treemap(tree, treemapAreaAccessor, topGrooveAccessor(topGroove), grooveAccessor, {
-        x0: -width / 2,
-        y0: -height / 2,
-        width,
-        height,
-      })
-    : sunburst(tree, sunburstAreaAccessor, { x0: 0, y0: -1 }, clockwiseSectors, specialFirstInnermostSector);
-
-  const shownChildNodes = rawChildNodes.filter((n: Part) => {
+  const shownChildNodes = childNodes.filter((n: Part) => {
     const layerIndex = entryValue(n.node).depth - 1;
     const layer = layers[layerIndex];
     return !layer || !layer.showAccessor || layer.showAccessor(entryKey(n.node));
@@ -237,7 +297,7 @@ export function shapeViewModel(
   const innerRadius: Radius = outerRadius - (1 - emptySizeRatio) * outerRadius;
   const treeHeight = shownChildNodes.reduce((p: number, n: Part) => Math.max(p, entryValue(n.node).depth), 0); // 1: pie, 2: two-ring donut etc.
   const ringThickness = (outerRadius - innerRadius) / treeHeight;
-  const partToShapeFn = partToShapeTreeNode(treemapLayout, innerRadius, ringThickness);
+  const partToShapeFn = partToShapeTreeNode(!sunburstLayout, innerRadius, ringThickness);
   const quadViewModel = makeQuadViewModel(
     shownChildNodes.slice(1).map(partToShapeFn),
     layers,
@@ -248,32 +308,31 @@ export function shapeViewModel(
   // fill text
   const roomCondition = (n: ShapeTreeNode) => {
     const diff = n.x1 - n.x0;
-    return treemapLayout
-      ? n.x1 - n.x0 > minFontSize && n.y1px - n.y0px > minFontSize
-      : (diff < 0 ? TAU + diff : diff) * ringSectorMiddleRadius(n) > Math.max(minFontSize, linkLabel.maximumSection);
+    return sunburstLayout
+      ? (diff < 0 ? TAU + diff : diff) * ringSectorMiddleRadius(n) > Math.max(minFontSize, linkLabel.maximumSection)
+      : n.x1 - n.x0 > minFontSize && n.y1px - n.y0px > minFontSize;
   };
 
   const nodesWithRoom = quadViewModel.filter(roomCondition);
-  const outsideFillNodes = fillOutside && !treemapLayout ? nodesWithRoom : [];
+  const outsideFillNodes = fillOutside && sunburstLayout ? nodesWithRoom : [];
 
-  const textFillOrigins = nodesWithRoom.map(treemapLayout ? rectangleFillOrigins : sectorFillOrigins(fillOutside));
+  const textFillOrigins = nodesWithRoom.map(sunburstLayout ? sectorFillOrigins(fillOutside) : rectangleFillOrigins);
 
   const valueFormatter = valueGetter === percentValueGetter ? specifiedPercentFormatter : specifiedValueFormatter;
 
-  const getRowSets = treemapLayout
+  const getRowSets = sunburstLayout
     ? fillTextLayout(
-        rectangleConstruction(treeHeight, topGroove),
-        getRectangleRowGeometry,
-        () => 0,
-        containerBackgroundColor,
-      )
-    : fillTextLayout(
         ringSectorConstruction(config, innerRadius, ringThickness),
         getSectorRowGeometry,
         inSectorRotation(config.horizontalTextEnforcer, config.horizontalTextAngleThreshold),
         containerBackgroundColor,
+      )
+    : fillTextLayout(
+        rectangleConstruction(treeHeight, treemapLayout ? topGroove : null),
+        getRectangleRowGeometry,
+        () => 0,
+        containerBackgroundColor,
       );
-
   const rowSets: RowSet[] = getRowSets(
     textMeasure,
     rawTextGetter,
@@ -283,7 +342,7 @@ export function shapeViewModel(
     config,
     layers,
     textFillOrigins,
-    treemapLayout,
+    !sunburstLayout,
     !treemapLayout,
   );
 
@@ -294,13 +353,13 @@ export function shapeViewModel(
   const currentY = [-height, -height, -height, -height];
 
   const nodesWithoutRoom =
-    fillOutside || treemapLayout
+    fillOutside || treemapLayout || icicleLayout || flameLayout
       ? [] // outsideFillNodes and linkLabels are in inherent conflict due to very likely overlaps
       : quadViewModel.filter((n: ShapeTreeNode) => {
           const id = nodeId(n);
           const foundInFillText = rowSets.find((r: RowSet) => r.id === id);
           // successful text render if found, and has some row(s)
-          return !(foundInFillText && foundInFillText.rows.length !== 0);
+          return !(foundInFillText && foundInFillText.rows.length > 0);
         });
   const maxLinkedLabelTextLength = config.linkLabel.maxTextLength;
   const linkLabelViewModels = linkTextLayout(
@@ -321,7 +380,7 @@ export function shapeViewModel(
 
   const pickQuads: PickFunction = (x, y) =>
     quadViewModel.filter(
-      treemapLayout
+      treemapLayout || icicleLayout || flameLayout
         ? ({ x0, y0, x1, y1 }) => x0 <= x && x <= x1 && y0 <= y && y <= y1
         : ({ x0, y0px, x1, y1px }) => {
             const angleX = (Math.atan2(y, x) + TAU / 4 + TAU) % TAU;

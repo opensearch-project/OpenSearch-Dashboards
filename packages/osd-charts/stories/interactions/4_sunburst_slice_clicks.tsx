@@ -26,7 +26,7 @@ import { STORYBOOK_LIGHT_THEME } from '../shared';
 import {
   indexInterpolatedFillColor,
   interpolatorCET2s,
-  categoricalFillColor,
+  discreteColor,
   colorBrewerCategoricalPastel12,
 } from '../utils/utils';
 
@@ -87,7 +87,7 @@ export const Example = () => {
                   // pick color from color palette based on mean angle - rather distinct colors in the inner ring
                   return indexInterpolatedFillColor(interpolatorCET2s)(d, (d.x0 + d.x1) / 2 / (2 * Math.PI), []);
                 }
-                return categoricalFillColor(colorBrewerCategoricalPastel12)(d.sortIndex);
+                return discreteColor(colorBrewerCategoricalPastel12)(d.sortIndex);
               },
             },
           },
@@ -100,7 +100,7 @@ export const Example = () => {
                   // pick color from color palette based on mean angle - rather distinct colors in the inner ring
                   return indexInterpolatedFillColor(interpolatorCET2s)(d, (d.x0 + d.x1) / 2 / (2 * Math.PI), []);
                 }
-                return categoricalFillColor(colorBrewerCategoricalPastel12)(d.sortIndex);
+                return discreteColor(colorBrewerCategoricalPastel12)(d.sortIndex);
               },
             },
           },

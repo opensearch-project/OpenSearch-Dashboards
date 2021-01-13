@@ -57,7 +57,9 @@ interface MapNode extends NodeDescriptor {
 
 export type PrimitiveValue = string | number | null; // there could be more but sufficient for now
 type Key = PrimitiveValue;
-type Sorter = (a: number, b: number) => number;
+
+export type Sorter = (a: number, b: number) => number;
+
 type NodeSorter = (a: ArrayEntry, b: ArrayEntry) => number;
 
 export const entryKey = ([key]: ArrayEntry) => key;
@@ -99,7 +101,7 @@ export function groupByRollup(
   const statistics: Statistics = {
     globalAggregate: NaN,
   };
-  const reductionMap = factTable.reduce((p: HierarchyOfMaps, n, index) => {
+  const reductionMap: HierarchyOfMaps = factTable.reduce((p: HierarchyOfMaps, n, index) => {
     const keyCount = keyAccessors.length;
     let pointer: HierarchyOfMaps = p;
     keyAccessors.forEach((keyAccessor, i) => {
@@ -132,22 +134,22 @@ export function groupByRollup(
 
 function getRootArrayNode(): ArrayNode {
   const children: HierarchyOfArrays = [];
-  const bootstrap = {
+  const bootstrap: Omit<ArrayNode, typeof PARENT_KEY> = {
     [AGGREGATE_KEY]: NaN,
     [DEPTH_KEY]: NaN,
     [CHILDREN_KEY]: children,
     [INPUT_KEY]: [] as number[],
     [PATH_KEY]: [] as number[],
+    [SORT_INDEX_KEY]: 0,
+    [STATISTICS_KEY]: { globalAggregate: 0 },
   };
-  Object.assign(bootstrap, { [PARENT_KEY]: bootstrap });
-  const result: ArrayNode = bootstrap as ArrayNode;
-  return result;
+  return { ...bootstrap, [PARENT_KEY]: bootstrap } as ArrayNode; // TS doesn't yet handle bootstrapping but the `Omit` above retains guarantee for all props except `[PARENT_KEY`
 }
 
 /** @internal */
-export function mapsToArrays(root: HierarchyOfMaps, sorter: NodeSorter): HierarchyOfArrays {
-  const groupByMap = (node: HierarchyOfMaps, parent: ArrayNode) =>
-    Array.from(
+export function mapsToArrays(root: HierarchyOfMaps, sorter: NodeSorter | null): HierarchyOfArrays {
+  const groupByMap = (node: HierarchyOfMaps, parent: ArrayNode) => {
+    const items = Array.from(
       node,
       ([key, value]: [Key, MapNode]): ArrayEntry => {
         const valueElement = value[CHILDREN_KEY];
@@ -168,12 +170,15 @@ export function mapsToArrays(root: HierarchyOfMaps, sorter: NodeSorter): Hierarc
         );
         return [key, newValue];
       },
-    )
-      .sort(sorter)
-      .map((n: ArrayEntry, i) => {
-        entryValue(n).sortIndex = i;
-        return n;
-      }); // with the current algo, decreasing order is important
+    );
+    if (sorter !== null) {
+      items.sort(sorter);
+    }
+    return items.map((n: ArrayEntry, i) => {
+      entryValue(n).sortIndex = i;
+      return n;
+    });
+  }; // with the current algo, decreasing order is important
   const tree = groupByMap(root, getRootArrayNode());
   const buildPaths = ([, mapNode]: ArrayEntry, currentPath: number[]) => {
     const newPath = [...currentPath, mapNode[SORT_INDEX_KEY]];

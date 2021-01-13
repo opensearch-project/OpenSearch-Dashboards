@@ -19,7 +19,6 @@
 
 import { clearCanvas, renderLayers, withContext } from '../../../../renderers/canvas';
 import { Color } from '../../../../utils/commons';
-import { PartitionLayout } from '../../layout/types/config_types';
 import { Pixels } from '../../layout/types/geometry_types';
 import {
   LinkLabelVM,
@@ -33,6 +32,7 @@ import { addOpacity } from '../../layout/utils/calcs';
 import { TAU } from '../../layout/utils/constants';
 import { cssFontShorthand } from '../../layout/utils/measure';
 import { LinkLabelsViewModelSpec } from '../../layout/viewmodel/link_text_layout';
+import { isSunburst } from '../../layout/viewmodel/viewmodel';
 
 // the burnout avoidance in the center of the pie
 const LINE_WIDTH_MULT = 10; // border can be a maximum 1/LINE_WIDTH_MULT - th of the sector angle, otherwise the border would dominate
@@ -266,9 +266,7 @@ export function renderPartitionCanvas2d(
 
       // bottom layer: sectors (pie slices, ring sectors etc.)
       (ctx: CanvasRenderingContext2D) =>
-        config.partitionLayout === PartitionLayout.treemap
-          ? renderRectangles(ctx, quadViewModel)
-          : renderSectors(ctx, quadViewModel),
+        isSunburst(config.partitionLayout) ? renderSectors(ctx, quadViewModel) : renderRectangles(ctx, quadViewModel),
 
       // all the fill-based, potentially multirow text, whether inside or outside the sector
       (ctx: CanvasRenderingContext2D) => renderRowSets(ctx, rowSets, linkLineColor),

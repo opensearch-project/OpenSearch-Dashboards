@@ -36,7 +36,122 @@ export const indexInterpolatedFillColor = (colorMaker: ColorMaker) => (d: any, i
 // colorbrewer2.org based, categorical color example
 type RGBStrings = [string, string, string][];
 const colorBrewerExportMatcher = /rgb\((\d{1,3}),(\d{1,3}),(\d{1,3})\)/;
-const colorStringToTuple = (s: string) => (colorBrewerExportMatcher.exec(s) as string[]).slice(1);
+const rgbStringToTuple = (s: string) => (colorBrewerExportMatcher.exec(s) as string[]).slice(1);
+const hexStringToTuple = (s: string) => [
+  String(parseInt(s.slice(1, 3), 16)),
+  String(parseInt(s.slice(3, 5), 16)),
+  String(parseInt(s.slice(5, 7), 16)),
+];
+
+export const plasma18 = [
+  '#0d0887',
+  '#2f0596',
+  '#4903a0',
+  '#6100a7',
+  '#7801a8',
+  '#8e0ca4',
+  '#a21d9a',
+  '#b42e8d',
+  '#c43e7f',
+  '#d24f71',
+  '#de6164',
+  '#e97257',
+  '#f3854b',
+  '#f99a3e',
+  '#fdaf31',
+  '#fdc627',
+  '#f8df25',
+  '#f0f921',
+].map(hexStringToTuple) as RGBStrings;
+
+export const viridis18 = [
+  '#440154',
+  '#481769',
+  '#472a7a',
+  '#433d84',
+  '#3d4e8a',
+  '#355e8d',
+  '#2e6d8e',
+  '#297b8e',
+  '#23898e',
+  '#1f978b',
+  '#21a585',
+  '#2eb37c',
+  '#46c06f',
+  '#65cb5e',
+  '#89d548',
+  '#b0dd2f',
+  '#d8e219',
+  '#fde725',
+].map(hexStringToTuple) as RGBStrings;
+
+export const cividis18 = [
+  '#002051',
+  '#002b64',
+  '#0f356c',
+  '#23406e',
+  '#374a6e',
+  '#4b556d',
+  '#5c606e',
+  '#6c6b70',
+  '#797673',
+  '#858176',
+  '#928d78',
+  '#9f9978',
+  '#aea575',
+  '#bfb26f',
+  '#d2bf66',
+  '#e4cd5a',
+  '#f4db4e',
+  '#fdea45',
+].map(hexStringToTuple) as RGBStrings;
+
+export const inferno18 = [
+  '#000004',
+  '#0a0722',
+  '#1e0c45',
+  '#380962',
+  '#510e6c',
+  '#69166e',
+  '#801f6c',
+  '#982766',
+  '#b0315b',
+  '#c63d4d',
+  '#d94d3d',
+  '#e9612b',
+  '#f47918',
+  '#fa9407',
+  '#fcb014',
+  '#f8cd37',
+  '#f2ea69',
+  '#fcffa4',
+].map(hexStringToTuple) as RGBStrings;
+
+export const colorBrewerSequential9: RGBStrings = [
+  'rgb(255,247,251)',
+  'rgb(236,231,242)',
+  'rgb(208,209,230)',
+  'rgb(166,189,219)',
+  'rgb(116,169,207)',
+  'rgb(54,144,192)',
+  'rgb(5,112,176)',
+  'rgb(4,90,141)',
+  'rgb(2,56,88)',
+].map(rgbStringToTuple) as RGBStrings;
+
+export const colorBrewerDiverging11: RGBStrings = [
+  'rgb(158,1,66)',
+  'rgb(213,62,79)',
+  'rgb(244,109,67)',
+  'rgb(253,174,97)',
+  'rgb(254,224,139)',
+  'rgb(255,255,191)',
+  'rgb(230,245,152)',
+  'rgb(171,221,164)',
+  'rgb(102,194,165)',
+  'rgb(50,136,189)',
+  'rgb(94,79,162)',
+].map(rgbStringToTuple) as RGBStrings;
 
 export const colorBrewerCategorical12: RGBStrings = [
   'rgb(166,206,227)',
@@ -51,7 +166,7 @@ export const colorBrewerCategorical12: RGBStrings = [
   'rgb(106,61,154)',
   'rgb(255,255,153)',
   'rgb(177,89,40)',
-].map(colorStringToTuple) as RGBStrings;
+].map(rgbStringToTuple) as RGBStrings;
 
 export const colorBrewerCategoricalPastel12: RGBStrings = [
   'rgb(166,206,227)',
@@ -66,7 +181,7 @@ export const colorBrewerCategoricalPastel12: RGBStrings = [
   'rgb(106,61,154)',
   'rgb(255,255,153)',
   'rgb(177,89,40)',
-].map(colorStringToTuple) as RGBStrings;
+].map(rgbStringToTuple) as RGBStrings;
 
 export const colorBrewerCategoricalStark9: RGBStrings = [
   'rgb(228,26,28)',
@@ -78,9 +193,9 @@ export const colorBrewerCategoricalStark9: RGBStrings = [
   'rgb(166,86,40)',
   'rgb(247,129,191)',
   'rgb(153,153,153)',
-].map(colorStringToTuple) as RGBStrings;
+].map(rgbStringToTuple) as RGBStrings;
 
-export const categoricalFillColor = (categoricalColors: RGBStrings, opacity = 1) => (i: number) =>
+export const discreteColor = (categoricalColors: RGBStrings, opacity = 1) => (i: number) =>
   `rgba(${categoricalColors[i % categoricalColors.length].concat([opacity.toString()]).join(',')})`;
 
 export const decreasingOpacityCET2 = (opacity: number) => (d: any, i: number, a: any[]) =>

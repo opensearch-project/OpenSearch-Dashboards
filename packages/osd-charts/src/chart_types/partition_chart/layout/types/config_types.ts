@@ -27,6 +27,8 @@ import { Font, FontFamily, PartialFont } from './types';
 export const PartitionLayout = Object.freeze({
   sunburst: 'sunburst' as const,
   treemap: 'treemap' as const,
+  icicle: 'icicle' as const,
+  flame: 'flame' as const,
 });
 
 /** @public */

@@ -25,7 +25,7 @@ import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/type
 import { arrayToLookup } from '../../src/chart_types/partition_chart/layout/utils/calcs';
 import { mocks } from '../../src/mocks/hierarchical';
 import { productDimension } from '../../src/mocks/hierarchical/dimension_codes';
-import { categoricalFillColor, colorBrewerCategoricalPastel12 } from '../utils/utils';
+import { discreteColor, colorBrewerCategoricalPastel12 } from '../utils/utils';
 
 const productLookup = arrayToLookup((d: Datum) => d.sitc1, productDimension);
 
@@ -48,7 +48,7 @@ export const Example = () => (
             },
           },
           shape: {
-            fillColor: (d: ShapeTreeNode) => categoricalFillColor(colorBrewerCategoricalPastel12)(d.sortIndex),
+            fillColor: (d: ShapeTreeNode) => discreteColor(colorBrewerCategoricalPastel12)(d.sortIndex),
           },
         },
       ]}

@@ -20,10 +20,12 @@
 import React from 'react';
 
 import { Dimensions } from '../../../../utils/dimensions';
+import { configMetadata } from '../../layout/config/config';
 import { PartitionLayout } from '../../layout/types/config_types';
 import { PointObject } from '../../layout/types/geometry_types';
 import { QuadViewModel } from '../../layout/types/viewmodel_types';
 import { TAU } from '../../layout/utils/constants';
+import { isSunburst, isTreemap } from '../../layout/viewmodel/viewmodel';
 
 /** @internal */
 export interface HighlighterProps {
@@ -97,26 +99,12 @@ function renderSector(geometry: QuadViewModel, key: string, style: SVGStyle) {
   return <path key={key} d={path} {...props} />;
 }
 
-function renderGeometries(geometries: QuadViewModel[], partitionLayout: PartitionLayout, style: SVGStyle) {
-  let maxDepth = -1;
+function renderGeometries(geoms: QuadViewModel[], partitionLayout: PartitionLayout, style: SVGStyle) {
+  const maxDepth = geoms.reduce((acc, geom) => Math.max(acc, geom.depth), 0);
   // we should render only the deepest geometries of the tree to avoid overlaying highlighted geometries
-  if (partitionLayout === PartitionLayout.treemap) {
-    maxDepth = geometries.reduce((acc, geom) => Math.max(acc, geom.depth), 0);
-  }
-  return geometries
-    .filter((geometry) => {
-      if (maxDepth !== -1) {
-        return geometry.depth >= maxDepth;
-      }
-      return true;
-    })
-    .map((geometry, index) => {
-      if (partitionLayout === PartitionLayout.sunburst) {
-        return renderSector(geometry, `${index}`, style);
-      }
-
-      return renderRectangles(geometry, `${index}`, style);
-    });
+  const highlightedGeoms = isTreemap(partitionLayout) ? geoms.filter((g) => g.depth >= maxDepth) : geoms;
+  const renderGeom = isSunburst(partitionLayout) ? renderSector : renderRectangles;
+  return highlightedGeoms.map((geometry, index) => renderGeom(geometry, `${index}`, style));
 }
 
 /** @internal */
@@ -143,7 +131,7 @@ export class HighlighterComponent extends React.Component<HighlighterProps> {
             </g>
           </mask>
         </defs>
-        {partitionLayout === PartitionLayout.sunburst && (
+        {isSunburst(partitionLayout) ? (
           <circle
             cx={diskCenter.x}
             cy={diskCenter.y}
@@ -151,8 +139,7 @@ export class HighlighterComponent extends React.Component<HighlighterProps> {
             mask={`url(#${maskId})`}
             className="echHighlighter__mask"
           />
-        )}
-        {partitionLayout === PartitionLayout.treemap && (
+        ) : (
           <rect x={0} y={0} width={width} height={height} mask={`url(#${maskId})`} className="echHighlighter__mask" />
         )}
       </>
@@ -201,5 +188,5 @@ export const DEFAULT_PROPS: HighlighterProps = {
   },
   outerRadius: 10,
   renderAsOverlay: false,
-  partitionLayout: PartitionLayout.sunburst,
+  partitionLayout: configMetadata.partitionLayout.dflt,
 };

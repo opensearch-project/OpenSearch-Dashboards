@@ -23,7 +23,7 @@ import { Chart, Datum, Partition } from '../../src';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
 import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/types/viewmodel_types';
 import { mocks } from '../../src/mocks/hierarchical';
-import { categoricalFillColor, colorBrewerCategoricalPastel12, productLookup } from '../utils/utils';
+import { discreteColor, colorBrewerCategoricalPastel12, productLookup } from '../utils/utils';
 
 export const Example = () => (
   <Chart className="story-chart">
@@ -47,7 +47,7 @@ export const Example = () => (
             },
           },
           shape: {
-            fillColor: (d: ShapeTreeNode) => categoricalFillColor(colorBrewerCategoricalPastel12)(d.sortIndex),
+            fillColor: (d: ShapeTreeNode) => discreteColor(colorBrewerCategoricalPastel12)(d.sortIndex),
           },
         },
       ]}

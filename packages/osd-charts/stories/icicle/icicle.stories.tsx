@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import { manyPieMock } from './many_pie';
-import { miniSunburstMock } from './mini_sunburst';
-import { observabilityTreeMock } from './observability_tree';
-import { pieMock } from './pie';
-import { sunburstMock } from './sunburst';
+import { SB_SOURCE_PANEL } from '../utils/storybook';
 
-export const mocks = {
-  pie: pieMock,
-  sunburst: sunburstMock,
-  miniSunburst: miniSunburstMock,
-  manyPie: manyPieMock,
-  observabilityTree: observabilityTreeMock,
+export default {
+  title: 'Flame (@alpha)',
+  parameters: {
+    options: { selectedPanel: SB_SOURCE_PANEL },
+  },
 };
+
+export { Example as flameChart } from './02_unix_flame';
+export { Example as icicleChart } from './01_unix_icicle';
