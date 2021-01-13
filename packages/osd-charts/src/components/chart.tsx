@@ -149,15 +149,6 @@ export class Chart extends React.Component<ChartProps, ChartState> {
     bgCtx.fillRect(0, 0, canvas.width, canvas.height);
     bgCtx.drawImage(canvas, 0, 0);
 
-    // @ts-ignore
-    if (bgCtx.msToBlob) {
-      // @ts-ignore
-      const blobOrDataUrl = bgCtx.msToBlob();
-      return {
-        blobOrDataUrl,
-        browser: 'IE11',
-      };
-    }
     return {
       blobOrDataUrl: backgroundCanvas.toDataURL(),
       browser: 'other',

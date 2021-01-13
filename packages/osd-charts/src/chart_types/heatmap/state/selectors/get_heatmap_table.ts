@@ -72,8 +72,6 @@ export const getHeatmapTableSelector = createCachedSelector(
       },
     );
 
-    // FIXME, typing for mergeXDomain without seriesType
-    // @ts-ignore
     resultData.xDomain = mergeXDomain([{ xScaleType: spec.xScaleType }], resultData.xValues, xDomain);
 
     // sort values by their predicates

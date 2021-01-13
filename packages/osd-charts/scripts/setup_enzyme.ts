@@ -24,6 +24,15 @@ configure({ adapter: new Adapter() });
 
 process.env.RNG_SEED = 'jest-unit-tests';
 
+declare global {
+  interface Window {
+    /**
+     * ResizeObserverMock override
+     */
+    ResizeObserver: typeof ResizeObserverMock;
+  }
+}
+
 /**
  * Mocking RAF and ResizeObserver to missing RAF and RO in jsdom
  */
@@ -50,5 +59,4 @@ class ResizeObserverMock {
   disconnect() {}
 }
 
-// @ts-ignore
 window.ResizeObserver = ResizeObserverMock;

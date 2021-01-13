@@ -187,9 +187,6 @@ function getLastValues(dataSeries: DataSeries[], xDomain: XDomain): Map<SeriesKe
  * @param deselectedDataSeries is optional; if not supplied,
  * @param customXDomain is optional; if not supplied,
  * @param orderOrdinalBinsBy
- * @param enableVislibSeriesSort is optional; if not specified in <Settings />,
- * then all series will be factored into computations. Otherwise, selectedDataSeries
- * is used to restrict the computation for just the selected series
  * @param smallMultiples
  * @returns `SeriesDomainsAndData`
  * @internal
@@ -200,14 +197,12 @@ export function computeSeriesDomains(
   deselectedDataSeries: SeriesIdentifier[] = [],
   customXDomain?: DomainRange | Domain,
   orderOrdinalBinsBy?: OrderBy,
-  enableVislibSeriesSort?: boolean,
   smallMultiples?: { vertical?: GroupBySpec; horizontal?: GroupBySpec },
 ): SeriesDomainsAndData {
   const { dataSeries, xValues, seriesCollection, fallbackScale, smHValues, smVValues } = getDataSeriesFromSpecs(
     seriesSpecs,
     deselectedDataSeries,
     orderOrdinalBinsBy,
-    enableVislibSeriesSort,
     smallMultiples,
   );
   // compute the x domain merging any custom domain
