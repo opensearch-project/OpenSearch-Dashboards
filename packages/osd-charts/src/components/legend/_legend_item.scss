@@ -6,7 +6,7 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
   flex-wrap: nowrap;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
+  position: relative;
 
   &:not(&--hidden) {
     .echLegendItem__color--changable {
@@ -16,12 +16,20 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
     }
   }
 
-  &:hover {
+  &:hover .background {
     background-color: $euiColorLightestShade;
   }
 
+  .background {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+  }
+
   &__action {
-    height: 100%;
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -80,19 +88,17 @@ $legendItemVerticalPadding: $echLegendRowGap / 2;
 
   &--right,
   &--left {
-    margin-top: $legendItemVerticalPadding;
-    margin-bottom: $legendItemVerticalPadding;
-  }
+    padding-top: $legendItemVerticalPadding / 2;
+    padding-bottom: $legendItemVerticalPadding / 2;
 
-  @include internetExplorerOnly {
-    &--bottom,
-    &--top {
-      width: $echLegendMaxWidth;
-      margin-right: $euiSizeL;
+    &:first-of-type {
+      margin-top: $legendItemVerticalPadding / 2;
     }
 
-    margin-top: $legendItemVerticalPadding;
-    margin-bottom: $legendItemVerticalPadding;
+    .background {
+      margin-top: $legendItemVerticalPadding / 2;
+      margin-bottom: $legendItemVerticalPadding / 2;
+    }
   }
 
   &--hidden {
