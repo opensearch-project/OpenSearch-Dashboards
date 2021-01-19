@@ -105,58 +105,6 @@ function initStore(spec: BasicSeriesSpec) {
   return store;
 }
 
-// const barStyle = {
-//   rect: {
-//     opacity: 1,
-//   },
-//   rectBorder: {
-//     strokeWidth: 1,
-//     visible: false,
-//   },
-//   displayValue: {
-//     fill: 'black',
-//     fontFamily: '',
-//     fontSize: 2,
-//     offsetX: 0,
-//     offsetY: 0,
-//     padding: 2,
-//   },
-// };
-// const indexedGeom1Red: BarGeometry = {
-//   color: 'red',
-//   x: 0,
-//   y: 0,
-//   width: 50,
-//   height: 100,
-//   value: {
-//     x: 0,
-//     y: 10,
-//     accessor: 'y1',
-//   },
-//   geometryId: {
-//     specId: SPEC_ID,
-//     seriesKey: [],
-//   },
-//   seriesStyle: barStyle,
-// };
-// const indexedGeom2Blue: BarGeometry = {
-//   color: 'blue',
-//   x: 50,
-//   y: 50,
-//   width: 50,
-//   height: 50,
-//   value: {
-//     x: 1,
-//     y: 5,
-//     accessor: 'y1',
-//   },
-//   geometryId: {
-//     specId: SPEC_ID,
-//     seriesKey: [],
-//   },
-//   seriesStyle: barStyle,
-// };
-
 describe('Chart state pointer interactions', () => {
   let store: Store<GlobalChartState>;
   const onElementOutCaller = createOnElementOutCaller();
@@ -421,14 +369,11 @@ function mouseOverTestSuite(scaleType: XScaleType) {
           datum: [0, 10],
         },
         {
-          key:
-            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+          key: 'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}',
           seriesKeys: [1],
           specId: 'spec_1',
           splitAccessors: new Map(),
           yAccessor: 1,
-          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
       ],
     ]);
@@ -470,15 +415,11 @@ function mouseOverTestSuite(scaleType: XScaleType) {
           datum: [0, 10],
         },
         {
-          key:
-            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+          key: 'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}',
           seriesKeys: [1],
           specId: 'spec_1',
           splitAccessors: new Map(),
           yAccessor: 1,
-
-          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
       ],
     ]);
@@ -523,14 +464,11 @@ function mouseOverTestSuite(scaleType: XScaleType) {
           datum: [0, 10],
         },
         {
-          key:
-            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+          key: 'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}',
           seriesKeys: [1],
           specId: 'spec_1',
           splitAccessors: new Map(),
           yAccessor: 1,
-          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
       ],
     ]);
@@ -580,14 +518,11 @@ function mouseOverTestSuite(scaleType: XScaleType) {
           datum: [(spec.data[0] as Array<any>)[0], (spec.data[0] as Array<any>)[1]],
         },
         {
-          key:
-            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+          key: 'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}',
           seriesKeys: [1],
           specId: 'spec_1',
           splitAccessors: new Map(),
           yAccessor: 1,
-          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
       ],
     ]);
@@ -616,14 +551,11 @@ function mouseOverTestSuite(scaleType: XScaleType) {
           datum: [(spec.data[1] as Array<any>)[0], (spec.data[1] as Array<any>)[1]],
         },
         {
-          key:
-            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+          key: 'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}',
           seriesKeys: [1],
           specId: 'spec_1',
           splitAccessors: new Map(),
           yAccessor: 1,
-          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
       ],
     ]);
@@ -716,14 +648,11 @@ function mouseOverTestSuite(scaleType: XScaleType) {
           datum: [1, 5],
         },
         {
-          key:
-            'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}smV{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}smH{__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__}',
+          key: 'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}',
           seriesKeys: [1],
           specId: 'spec_1',
           splitAccessors: new Map(),
           yAccessor: 1,
-          smHorizontalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
-          smVerticalAccessorValue: '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__',
         },
       ],
     ]);

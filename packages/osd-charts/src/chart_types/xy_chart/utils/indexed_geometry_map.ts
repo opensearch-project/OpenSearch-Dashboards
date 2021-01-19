@@ -19,6 +19,7 @@
 
 import { $Values } from 'utility-types';
 
+import { isNil } from '../../../utils/commons';
 import { Bounds } from '../../../utils/d3-delaunay';
 import { IndexedGeometry, isPointGeometry } from '../../../utils/geometry';
 import { Point } from '../../../utils/point';
@@ -77,14 +78,11 @@ export class IndexedGeometryMap {
     }
 
     const spatialValues = point === undefined ? [] : this.spatialMap.find(point);
-
-    const values = [...this.linearMap.find(x), ...spatialValues];
-    if (!smHorizontalValue || !smVerticalValue) {
-      return values;
-    }
-    return values.filter(({ seriesIdentifier: { smHorizontalAccessorValue, smVerticalAccessorValue } }) => {
-      return smVerticalAccessorValue === smVerticalValue && smHorizontalAccessorValue === smHorizontalValue;
-    });
+    return [...this.linearMap.find(x), ...spatialValues].filter(
+      ({ seriesIdentifier: { smHorizontalAccessorValue, smVerticalAccessorValue } }) =>
+        (isNil(smVerticalValue) || smVerticalAccessorValue === smVerticalValue) &&
+        (isNil(smHorizontalValue) || smHorizontalAccessorValue === smHorizontalValue),
+    );
   }
 
   getMergeData() {

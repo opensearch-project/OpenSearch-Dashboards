@@ -22,7 +22,6 @@ import createCachedSelector from 're-reselect';
 import { Line, Rect } from '../../../../geoms/types';
 import { Scale } from '../../../../scales';
 import { SettingsSpec, PointerEvent } from '../../../../specs/settings';
-import { DEFAULT_SINGLE_PANEL_SM_VALUE } from '../../../../specs/small_multiples';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
@@ -115,8 +114,8 @@ function getCursorBand(
     pointerPosition = {
       x,
       y: 0,
-      verticalPanelValue: DEFAULT_SINGLE_PANEL_SM_VALUE,
-      horizontalPanelValue: DEFAULT_SINGLE_PANEL_SM_VALUE,
+      verticalPanelValue: null,
+      horizontalPanelValue: null,
     };
     xValue = {
       value: externalPointerEvent.value,

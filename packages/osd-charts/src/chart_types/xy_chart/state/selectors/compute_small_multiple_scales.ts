@@ -22,11 +22,7 @@ import createCachedSelector from 're-reselect';
 import { ChartTypes } from '../../..';
 import { ScaleBand } from '../../../../scales';
 import { SpecTypes } from '../../../../specs/constants';
-import {
-  DEFAULT_SINGLE_PANEL_SM_VALUE,
-  DEFAULT_SM_PANEL_PADDING,
-  SmallMultiplesSpec,
-} from '../../../../specs/small_multiples';
+import { DEFAULT_SM_PANEL_PADDING, SmallMultiplesSpec } from '../../../../specs/small_multiples';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSpecsFromStore } from '../../../../state/utils';
@@ -68,6 +64,6 @@ export const computeSmallMultipleScalesSelector = createCachedSelector(
 
 function getScale(domain: Domain, maxRange: number, padding = DEFAULT_SM_PANEL_PADDING) {
   const singlePanelSmallMultiple = domain.length <= 1;
-  const defaultDomain = domain.length === 0 ? [DEFAULT_SINGLE_PANEL_SM_VALUE] : domain;
+  const defaultDomain = domain.length === 0 ? [undefined] : domain;
   return new ScaleBand(defaultDomain, [0, maxRange], undefined, singlePanelSmallMultiple ? 0 : padding);
 }

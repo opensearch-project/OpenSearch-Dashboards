@@ -22,7 +22,7 @@ import {
   getDataSeriesFromSpecs,
   XYChartSeriesIdentifier,
 } from '../../chart_types/xy_chart/utils/series';
-import { BasicSeriesSpec, DEFAULT_SINGLE_PANEL_SM_VALUE } from '../../specs';
+import { BasicSeriesSpec } from '../../specs';
 import { mergePartial } from '../../utils/commons';
 
 type SeriesCollection = Map<string, SeriesCollectionValue>;
@@ -47,9 +47,7 @@ export class MockSeriesIdentifier {
     yAccessor: 'y',
     seriesKeys: ['a'],
     splitAccessors: new Map().set('g', 'a'),
-    key: `spec{bars}yAccessor{y}splitAccessors{g-a}smV${DEFAULT_SINGLE_PANEL_SM_VALUE}smH${DEFAULT_SINGLE_PANEL_SM_VALUE}`,
-    smHorizontalAccessorValue: DEFAULT_SINGLE_PANEL_SM_VALUE,
-    smVerticalAccessorValue: DEFAULT_SINGLE_PANEL_SM_VALUE,
+    key: 'spec{bars}yAccessor{y}splitAccessors{g-a}',
   };
 
   static default(partial?: Partial<XYChartSeriesIdentifier>) {
