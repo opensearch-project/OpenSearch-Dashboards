@@ -19,7 +19,7 @@
 
 import createCachedSelector from 're-reselect';
 
-import { LegendItem } from '../../../../commons/legend';
+import { LegendItem } from '../../../../common/legend';
 import { Line } from '../../../../geoms/types';
 import { AxisSpec } from '../../../../specs';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';

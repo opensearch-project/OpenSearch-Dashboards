@@ -18,7 +18,7 @@
  */
 
 import { Scale } from '../../../scales';
-import { Rotation, Position } from '../../../utils/commons';
+import { Rotation, Position } from '../../../utils/common';
 import { Dimensions } from '../../../utils/dimensions';
 import { AnnotationId, GroupId } from '../../../utils/ids';
 import { Point } from '../../../utils/point';

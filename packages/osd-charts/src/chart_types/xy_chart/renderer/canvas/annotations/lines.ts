@@ -18,7 +18,7 @@
  */
 
 import { Stroke } from '../../../../../geoms/types';
-import { Rotation } from '../../../../../utils/commons';
+import { Rotation } from '../../../../../utils/common';
 import { Dimensions } from '../../../../../utils/dimensions';
 import { LineAnnotationStyle } from '../../../../../utils/themes/theme';
 import { stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';

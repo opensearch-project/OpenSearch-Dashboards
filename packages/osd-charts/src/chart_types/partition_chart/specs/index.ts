@@ -31,7 +31,7 @@ import {
   ShowAccessor,
   ValueAccessor,
   ValueFormatter,
-} from '../../../utils/commons';
+} from '../../../utils/common';
 import { config, percentFormatter } from '../layout/config/config';
 import { Config, FillFontSizeRange, FillLabelConfig } from '../layout/types/config_types';
 import { Pixels } from '../layout/types/geometry_types';

@@ -26,7 +26,7 @@ import { debounce } from 'ts-debounce';
 import { updateParentDimensions } from '../state/actions/chart_settings';
 import { GlobalChartState } from '../state/chart_state';
 import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
-import { isDefined } from '../utils/commons';
+import { isDefined } from '../utils/common';
 import { Dimensions } from '../utils/dimensions';
 
 interface ResizerStateProps {

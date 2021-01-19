@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getDistance } from '../../../utils/commons';
+import { getDistance } from '../../../utils/common';
 import { Delaunay, Bounds } from '../../../utils/d3-delaunay';
 import { IndexedGeometry, PointGeometry } from '../../../utils/geometry';
 import { Point } from '../../../utils/point';

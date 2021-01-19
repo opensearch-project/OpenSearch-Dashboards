@@ -778,7 +778,7 @@ describe('Rendering points - areas', () => {
       geometries = computeSeriesGeometriesSelector(store.getState());
     });
 
-    test('Can render a splitted area and line', () => {
+    test('Can render a split area and line', () => {
       const { areas } = geometries.geometries;
 
       const [{ value: firstArea }] = areas;

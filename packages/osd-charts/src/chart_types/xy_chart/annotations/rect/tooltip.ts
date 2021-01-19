@@ -18,7 +18,7 @@
  */
 
 import { Rect } from '../../../../geoms/types';
-import { Rotation } from '../../../../utils/commons';
+import { Rotation } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { Point } from '../../../../utils/point';
 import { isHorizontalRotation } from '../../state/utils/common';

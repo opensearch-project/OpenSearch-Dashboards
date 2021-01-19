@@ -23,7 +23,7 @@ import {
   XYChartSeriesIdentifier,
 } from '../../chart_types/xy_chart/utils/series';
 import { BasicSeriesSpec } from '../../specs';
-import { mergePartial } from '../../utils/commons';
+import { mergePartial } from '../../utils/common';
 
 type SeriesCollection = Map<string, SeriesCollectionValue>;
 

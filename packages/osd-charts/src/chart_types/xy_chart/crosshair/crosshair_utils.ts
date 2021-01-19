@@ -21,7 +21,7 @@ import { TooltipAnchorPosition } from '../../../components/tooltip/types';
 import { Line, Rect } from '../../../geoms/types';
 import { Scale } from '../../../scales';
 import { isContinuousScale } from '../../../scales/types';
-import { Rotation } from '../../../utils/commons';
+import { Rotation } from '../../../utils/common';
 import { Dimensions } from '../../../utils/dimensions';
 import { Point } from '../../../utils/point';
 import { isHorizontalRotation, isVerticalRotation } from '../state/utils/common';

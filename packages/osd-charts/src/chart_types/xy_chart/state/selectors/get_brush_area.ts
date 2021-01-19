@@ -24,7 +24,7 @@ import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { Rotation } from '../../../../utils/commons';
+import { Rotation } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { Point } from '../../../../utils/point';
 import { isVerticalRotation } from '../utils/common';

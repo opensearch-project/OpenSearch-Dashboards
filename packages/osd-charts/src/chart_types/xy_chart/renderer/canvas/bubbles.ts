@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { LegendItem } from '../../../../commons/legend';
-import { SeriesKey } from '../../../../commons/series_id';
+import { LegendItem } from '../../../../common/legend';
+import { SeriesKey } from '../../../../common/series_id';
 import { Rect } from '../../../../geoms/types';
 import { withContext } from '../../../../renderers/canvas';
-import { Rotation } from '../../../../utils/commons';
+import { Rotation } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { BubbleGeometry, PerPanel, PointGeometry } from '../../../../utils/geometry';
 import { SharedGeometryStateStyle, GeometryStateStyle, PointStyle } from '../../../../utils/themes/theme';

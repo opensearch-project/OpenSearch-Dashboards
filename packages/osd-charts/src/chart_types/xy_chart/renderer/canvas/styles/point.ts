@@ -18,7 +18,7 @@
  */
 
 import { Fill, Stroke } from '../../../../../geoms/types';
-import { mergePartial, getColorFromVariant } from '../../../../../utils/commons';
+import { mergePartial, getColorFromVariant } from '../../../../../utils/common';
 import { PointStyle, GeometryStateStyle } from '../../../../../utils/themes/theme';
 import { stringToRGB, OpacityFn } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 

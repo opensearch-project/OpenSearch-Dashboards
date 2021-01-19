@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { SeriesIdentifier, SeriesKey } from '../../../commons/series_id';
+import { SeriesIdentifier, SeriesKey } from '../../../common/series_id';
 import { ScaleType } from '../../../scales/constants';
 import { GroupBySpec, BinAgg, Direction, XScaleType } from '../../../specs';
 import { OrderBy } from '../../../specs/settings';
 import { ColorOverrides } from '../../../state/chart_state';
 import { Accessor, AccessorFn, getAccessorValue } from '../../../utils/accessor';
-import { Datum, Color, isNil } from '../../../utils/commons';
+import { Datum, Color, isNil } from '../../../utils/common';
 import { GroupId } from '../../../utils/ids';
 import { Logger } from '../../../utils/logger';
 import { ColorConfig } from '../../../utils/themes/theme';

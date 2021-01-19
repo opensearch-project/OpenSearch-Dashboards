@@ -19,7 +19,7 @@
 
 import chroma from 'chroma-js';
 
-import { Color } from '../../../../utils/commons';
+import { Color } from '../../../../utils/common';
 import { TextContrast } from '../types/config_types';
 import { Ratio } from '../types/geometry_types';
 import { RgbTuple, RGBATupleToString, stringToRGB } from './color_library_wrappers';

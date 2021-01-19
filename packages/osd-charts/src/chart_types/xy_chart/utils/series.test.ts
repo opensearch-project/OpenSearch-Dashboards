@@ -28,7 +28,7 @@ import { SeededDataGenerator, getRandomNumberGenerator } from '../../../mocks/ut
 import { ScaleType } from '../../../scales/constants';
 import { SpecTypes } from '../../../specs/constants';
 import { AccessorFn } from '../../../utils/accessor';
-import { Position } from '../../../utils/commons';
+import { Position } from '../../../utils/common';
 import * as TestDataset from '../../../utils/data_samples/test_dataset';
 import { KIBANA_METRICS } from '../../../utils/data_samples/test_dataset_kibana';
 import { ColorConfig } from '../../../utils/themes/theme';

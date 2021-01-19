@@ -19,7 +19,7 @@
 
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { LegendPath } from '../state/actions/legend';
-import { Color } from '../utils/commons';
+import { Color } from '../utils/common';
 import { CategoryKey, CategoryLabel } from './category';
 import { SeriesIdentifier } from './series_id';
 /** @internal */

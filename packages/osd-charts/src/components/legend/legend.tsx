@@ -22,7 +22,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Dispatch, bindActionCreators } from 'redux';
 
-import { LegendItem, LegendItemExtraValues } from '../../commons/legend';
+import { LegendItem, LegendItemExtraValues } from '../../common/legend';
 import { LegendItemListener, BasicListener, LegendColorPicker, LegendAction } from '../../specs';
 import { clearTemporaryColors, setTemporaryColor, setPersistedColor } from '../../state/actions/colors';
 import {
@@ -38,7 +38,7 @@ import { getLegendExtraValuesSelector } from '../../state/selectors/get_legend_i
 import { getLegendSizeSelector } from '../../state/selectors/get_legend_size';
 import { getSettingsSpecSelector } from '../../state/selectors/get_settings_specs';
 import { BBox } from '../../utils/bbox/bbox_calculator';
-import { Position } from '../../utils/commons';
+import { Position } from '../../utils/common';
 import { LIGHT_THEME } from '../../utils/themes/light_theme';
 import { Theme } from '../../utils/themes/theme';
 import { LegendItemProps, renderLegendItem } from './legend_item';

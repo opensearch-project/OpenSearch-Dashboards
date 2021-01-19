@@ -42,7 +42,7 @@ import {
 } from '../../chart_types/xy_chart/utils/specs';
 import { ScaleType } from '../../scales/constants';
 import { SettingsSpec, SpecTypes, DEFAULT_SETTINGS_SPEC } from '../../specs';
-import { Datum, mergePartial, Position, RecursivePartial } from '../../utils/commons';
+import { Datum, mergePartial, Position, RecursivePartial } from '../../utils/common';
 import { LIGHT_THEME } from '../../utils/themes/light_theme';
 
 /** @internal */

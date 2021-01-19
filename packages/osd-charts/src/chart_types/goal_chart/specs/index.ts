@@ -23,7 +23,7 @@ import { ChartTypes } from '../..';
 import { Spec } from '../../../specs';
 import { SpecTypes } from '../../../specs/constants';
 import { getConnect, specComponentFactory } from '../../../state/spec_factory';
-import { Color, RecursivePartial } from '../../../utils/commons';
+import { Color, RecursivePartial } from '../../../utils/common';
 import { config } from '../layout/config/config';
 import { Config } from '../layout/types/config_types';
 import { defaultGoalSpec } from '../layout/types/viewmodel_types';

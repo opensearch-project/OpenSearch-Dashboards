@@ -22,7 +22,7 @@ import { MockBarGeometry } from '../../../mocks';
 import { MockGlobalSpec, MockSeriesSpec } from '../../../mocks/specs';
 import { ScaleType } from '../../../scales/constants';
 import { SpecTypes } from '../../../specs/constants';
-import { Position, RecursivePartial } from '../../../utils/commons';
+import { Position, RecursivePartial } from '../../../utils/common';
 import { BarGeometry } from '../../../utils/geometry';
 import { AxisStyle } from '../../../utils/themes/theme';
 import { AxisSpec, BarSeriesSpec, TickFormatter } from '../utils/specs';

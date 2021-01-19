@@ -25,13 +25,13 @@ import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/grou
 import { LegendStrategy } from '../chart_types/partition_chart/state/selectors/get_highlighted_shapes';
 import { XYChartSeriesIdentifier } from '../chart_types/xy_chart/utils/series';
 import { DomainRange } from '../chart_types/xy_chart/utils/specs';
-import { SeriesIdentifier } from '../commons/series_id';
+import { SeriesIdentifier } from '../common/series_id';
 import { TooltipPortalSettings } from '../components';
 import { CustomTooltip } from '../components/tooltip/types';
 import { ScaleContinuousType, ScaleOrdinalType } from '../scales';
 import { getConnect, specComponentFactory } from '../state/spec_factory';
 import { Accessor } from '../utils/accessor';
-import { Color, Position, Rendering, Rotation } from '../utils/commons';
+import { Color, Position, Rendering, Rotation } from '../utils/common';
 import { Domain } from '../utils/domain';
 import { GeometryValue } from '../utils/geometry';
 import { GroupId } from '../utils/ids';

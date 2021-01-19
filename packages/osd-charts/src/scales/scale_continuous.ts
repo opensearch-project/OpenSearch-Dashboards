@@ -31,7 +31,7 @@ import {
 
 import { ScaleContinuousType, Scale } from '.';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
-import { maxValueWithUpperLimit, mergePartial } from '../utils/commons';
+import { maxValueWithUpperLimit, mergePartial } from '../utils/common';
 import { getMomentWithTz } from '../utils/data/date_time';
 import { LOG_MIN_ABS_DOMAIN, ScaleType } from './constants';
 

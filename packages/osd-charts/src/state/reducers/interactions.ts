@@ -18,8 +18,8 @@
  */
 
 import { getSeriesIndex } from '../../chart_types/xy_chart/utils/series';
-import { LegendItem } from '../../commons/legend';
-import { SeriesIdentifier } from '../../commons/series_id';
+import { LegendItem } from '../../common/legend';
+import { SeriesIdentifier } from '../../common/series_id';
 import { getDelta } from '../../utils/point';
 import { ON_KEY_UP, KeyActions } from '../actions/key';
 import {

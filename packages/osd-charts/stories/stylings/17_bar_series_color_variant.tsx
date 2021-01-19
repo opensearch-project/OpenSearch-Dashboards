@@ -21,7 +21,7 @@ import { select, color } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, PartialTheme } from '../../src';
-import { ColorVariant } from '../../src/utils/commons';
+import { ColorVariant } from '../../src/utils/common';
 import * as TestDatasets from '../../src/utils/data_samples/test_dataset';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 

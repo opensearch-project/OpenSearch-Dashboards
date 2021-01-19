@@ -19,7 +19,7 @@
 
 import { $Values as Values } from 'utility-types';
 
-import { Color, StrokeStyle, ValueFormatter } from '../../../../utils/commons';
+import { Color, StrokeStyle, ValueFormatter } from '../../../../utils/common';
 import { PerSideDistance } from '../../../../utils/dimensions';
 import { Distance, Pixels, Radian, Radius, Ratio, SizeRatio, TimeMs } from './geometry_types';
 import { Font, FontFamily, PartialFont } from './types';

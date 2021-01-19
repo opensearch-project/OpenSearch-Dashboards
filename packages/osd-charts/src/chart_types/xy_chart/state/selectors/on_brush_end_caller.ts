@@ -26,7 +26,7 @@ import { GroupBrushExtent, XYBrushArea } from '../../../../specs';
 import { BrushAxis } from '../../../../specs/constants';
 import { DragState, GlobalChartState } from '../../../../state/chart_state';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { maxValueWithUpperLimit, minValueWithLowerLimit, Rotation } from '../../../../utils/commons';
+import { maxValueWithUpperLimit, minValueWithLowerLimit, Rotation } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { hasDragged, DragCheckProps } from '../../../../utils/events';
 import { GroupId } from '../../../../utils/ids';

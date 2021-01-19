@@ -20,7 +20,7 @@ import React from 'react';
 
 import { Spec } from '.';
 import { ChartTypes } from '../chart_types';
-import { Predicate } from '../chart_types/heatmap/utils/commons';
+import { Predicate } from '../chart_types/heatmap/utils/common';
 import { getConnect, specComponentFactory } from '../state/spec_factory';
 import { SpecTypes } from './constants';
 

@@ -21,7 +21,7 @@ import createCachedSelector from 're-reselect';
 
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
-import { mergePartial, RecursivePartial } from '../../../../utils/commons';
+import { mergePartial, RecursivePartial } from '../../../../utils/common';
 import { AxisId } from '../../../../utils/ids';
 import { AxisStyle } from '../../../../utils/themes/theme';
 import { isVerticalAxis } from '../../utils/axis_type_utils';

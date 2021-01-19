@@ -22,7 +22,7 @@ import { select, array, number, optionsKnob } from '@storybook/addon-knobs';
 
 import { Rotation, Position, Placement, TooltipProps } from '../../src';
 import { TooltipType } from '../../src/specs/constants';
-import { VerticalAlignment, HorizontalAlignment } from '../../src/utils/commons';
+import { VerticalAlignment, HorizontalAlignment } from '../../src/utils/common';
 
 export const getPositiveNumberKnob = (name: string, value: number, groupId?: string) =>
   number(name, value, { min: 0 }, groupId);

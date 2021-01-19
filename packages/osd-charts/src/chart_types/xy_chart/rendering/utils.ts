@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { LegendItem } from '../../../commons/legend';
+import { LegendItem } from '../../../common/legend';
 import { Scale } from '../../../scales';
 import { LOG_MIN_ABS_DOMAIN } from '../../../scales/constants';
 import { getDomainPolarity } from '../../../scales/scale_continuous';
 import { isLogarithmicScale } from '../../../scales/types';
 import { MarkBuffer } from '../../../specs';
-import { getDistance } from '../../../utils/commons';
+import { getDistance } from '../../../utils/common';
 import { BarGeometry, ClippedRanges, isPointGeometry, PointGeometry } from '../../../utils/geometry';
 import { GeometryStateStyle, SharedGeometryStateStyle } from '../../../utils/themes/theme';
 import { DataSeriesDatum, FilledValues, XYChartSeriesIdentifier } from '../utils/series';

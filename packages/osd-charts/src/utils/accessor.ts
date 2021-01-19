@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Datum } from './commons';
+import { Datum } from './common';
 
 /**
  * Accessor function

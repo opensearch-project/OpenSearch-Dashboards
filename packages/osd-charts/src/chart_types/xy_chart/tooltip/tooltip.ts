@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { LegendItemExtraValues } from '../../../commons/legend';
-import { SeriesKey } from '../../../commons/series_id';
+import { LegendItemExtraValues } from '../../../common/legend';
+import { SeriesKey } from '../../../common/series_id';
 import { TooltipValue } from '../../../specs';
 import { getAccessorFormatLabel } from '../../../utils/accessor';
-import { isDefined } from '../../../utils/commons';
+import { isDefined } from '../../../utils/common';
 import { IndexedGeometry, BandedAccessorType } from '../../../utils/geometry';
 import { defaultTickFormatter } from '../utils/axis_utils';
 import { getSeriesName } from '../utils/series';

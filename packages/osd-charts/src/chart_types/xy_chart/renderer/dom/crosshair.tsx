@@ -28,7 +28,7 @@ import { getChartRotationSelector } from '../../../../state/selectors/get_chart_
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
 import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { Rotation } from '../../../../utils/commons';
+import { Rotation } from '../../../../utils/common';
 import { LIGHT_THEME } from '../../../../utils/themes/light_theme';
 import { Theme } from '../../../../utils/themes/theme';
 import { getCursorBandPositionSelector } from '../../state/selectors/get_cursor_band';

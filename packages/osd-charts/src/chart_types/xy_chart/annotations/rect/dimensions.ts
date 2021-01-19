@@ -19,7 +19,7 @@
 
 import { Scale, ScaleBand, ScaleContinuous } from '../../../../scales';
 import { isBandScale, isContinuousScale } from '../../../../scales/types';
-import { isDefined } from '../../../../utils/commons';
+import { isDefined } from '../../../../utils/common';
 import { GroupId } from '../../../../utils/ids';
 import { Point } from '../../../../utils/point';
 import { PrimitiveValue } from '../../../partition_chart/layout/utils/group_by_rollup';

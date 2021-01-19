@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { LegendItem } from '../../../commons/legend';
+import { LegendItem } from '../../../common/legend';
 import { MockBarGeometry, MockDataSeries, MockPointGeometry } from '../../../mocks';
 import { MockScale } from '../../../mocks/scale';
-import { mergePartial, RecursivePartial } from '../../../utils/commons';
+import { mergePartial, RecursivePartial } from '../../../utils/common';
 import { BarSeriesStyle, SharedGeometryStateStyle, PointStyle } from '../../../utils/themes/theme';
 import { DataSeriesDatum, XYChartSeriesIdentifier } from '../utils/series';
 import { getBarStyleOverrides } from './bars';

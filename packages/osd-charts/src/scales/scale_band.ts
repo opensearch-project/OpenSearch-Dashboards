@@ -21,7 +21,7 @@ import { scaleBand, scaleQuantize, ScaleQuantize, ScaleBand as D3ScaleBand } fro
 
 import { Scale, ScaleBandType } from '.';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
-import { maxValueWithUpperLimit, stringifyNullsUndefined } from '../utils/commons';
+import { maxValueWithUpperLimit, stringifyNullsUndefined } from '../utils/common';
 import { ScaleType } from './constants';
 
 /**

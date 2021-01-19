@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Color } from '../../../../utils/commons';
+import { Color } from '../../../../utils/common';
 import { Pixels, SizeRatio } from '../../../partition_chart/layout/types/geometry_types';
 import { Font, FontFamily, TextAlign, TextBaseline } from '../../../partition_chart/layout/types/types';
 import { Cell } from './viewmodel_types';

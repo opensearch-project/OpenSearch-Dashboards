@@ -18,7 +18,7 @@
  */
 
 import { Fill } from '../../../../../geoms/types';
-import { getColorFromVariant } from '../../../../../utils/commons';
+import { getColorFromVariant } from '../../../../../utils/common';
 import { GeometryStateStyle, AreaStyle } from '../../../../../utils/themes/theme';
 import { OpacityFn, stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 

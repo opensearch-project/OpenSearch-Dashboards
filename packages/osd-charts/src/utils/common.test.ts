@@ -33,9 +33,9 @@ import {
   isUniqueArray,
   isDefined,
   isDefinedFrom,
-} from './commons';
+} from './common';
 
-describe('commons utilities', () => {
+describe('common utilities', () => {
   test('return value bounded above', () => {
     expect(maxValueWithUpperLimit(0, 0, 1)).toBe(0);
     expect(maxValueWithUpperLimit(1, 0, 1)).toBe(1);

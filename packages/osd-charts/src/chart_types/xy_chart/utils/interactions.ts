@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Rotation } from '../../../utils/commons';
+import { Rotation } from '../../../utils/common';
 import { Size } from '../../../utils/dimensions';
 import { BarGeometry, PointGeometry, IndexedGeometry, isPointGeometry, isBarGeometry } from '../../../utils/geometry';
 

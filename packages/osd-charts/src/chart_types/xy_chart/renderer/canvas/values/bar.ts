@@ -18,7 +18,7 @@
  */
 
 import { Rect } from '../../../../../geoms/types';
-import { Rotation, VerticalAlignment, HorizontalAlignment } from '../../../../../utils/commons';
+import { Rotation, VerticalAlignment, HorizontalAlignment } from '../../../../../utils/common';
 import { Dimensions } from '../../../../../utils/dimensions';
 import { BarGeometry } from '../../../../../utils/geometry';
 import { Point } from '../../../../../utils/point';

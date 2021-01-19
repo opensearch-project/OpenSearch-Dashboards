@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { CategoryKey } from '../../../../commons/category';
+import { CategoryKey } from '../../../../common/category';
 import { LegendPath } from '../../../../state/actions/legend';
-import { Datum } from '../../../../utils/commons';
+import { Datum } from '../../../../utils/common';
 import { Relation } from '../types/types';
 
 export const AGGREGATE_KEY = 'value';

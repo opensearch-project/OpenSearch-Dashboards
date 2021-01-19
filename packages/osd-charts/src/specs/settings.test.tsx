@@ -25,7 +25,7 @@ import { createStore, Store } from 'redux';
 import { chartStoreReducer, GlobalChartState } from '../state/chart_state';
 import { getChartThemeSelector } from '../state/selectors/get_chart_theme';
 import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
-import { Position, Rendering, Rotation } from '../utils/commons';
+import { Position, Rendering, Rotation } from '../utils/common';
 import { DARK_THEME } from '../utils/themes/dark_theme';
 import { LIGHT_THEME } from '../utils/themes/light_theme';
 import { PartialTheme } from '../utils/themes/theme';

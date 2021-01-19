@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { SeriesKey } from '../../commons/series_id';
-import { Color } from '../../utils/commons';
+import { SeriesKey } from '../../common/series_id';
+import { Color } from '../../utils/common';
 
 /** @internal */
 export const CLEAR_TEMPORARY_COLORS = 'CLEAR_TEMPORARY_COLORS';

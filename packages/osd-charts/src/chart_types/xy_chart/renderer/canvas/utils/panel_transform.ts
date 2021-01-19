@@ -18,7 +18,7 @@
  */
 import { Rect } from '../../../../../geoms/types';
 import { withContext } from '../../../../../renderers/canvas';
-import { Rotation } from '../../../../../utils/commons';
+import { Rotation } from '../../../../../utils/common';
 import { Dimensions } from '../../../../../utils/dimensions';
 import { computeChartTransform } from '../../../state/utils/utils';
 

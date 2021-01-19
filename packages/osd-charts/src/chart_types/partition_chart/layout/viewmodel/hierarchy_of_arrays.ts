@@ -18,7 +18,7 @@
  */
 
 import { IndexedAccessorFn } from '../../../../utils/accessor';
-import { ValueAccessor } from '../../../../utils/commons';
+import { ValueAccessor } from '../../../../utils/common';
 import { Relation } from '../types/types';
 import {
   HierarchyOfArrays,

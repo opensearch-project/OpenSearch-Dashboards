@@ -23,7 +23,7 @@ import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getLegendSizeSelector } from '../../../../state/selectors/get_legend_size';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { Position } from '../../../../utils/commons';
+import { Position } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { Box } from '../../../partition_chart/layout/types/types';
 import { measureText } from '../../../partition_chart/layout/utils/measure';

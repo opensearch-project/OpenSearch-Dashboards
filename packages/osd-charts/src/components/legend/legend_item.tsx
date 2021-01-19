@@ -20,8 +20,8 @@
 import classNames from 'classnames';
 import React, { Component, createRef, MouseEventHandler } from 'react';
 
-import { LegendItem, LegendItemExtraValues } from '../../commons/legend';
-import { SeriesIdentifier } from '../../commons/series_id';
+import { LegendItem, LegendItemExtraValues } from '../../common/legend';
+import { SeriesIdentifier } from '../../common/series_id';
 import { LegendItemListener, BasicListener, LegendColorPicker, LegendAction } from '../../specs/settings';
 import {
   clearTemporaryColors as clearTemporaryColorsAction,
@@ -33,7 +33,7 @@ import {
   onLegendItemOverAction,
   onToggleDeselectSeriesAction,
 } from '../../state/actions/legend';
-import { Position, Color } from '../../utils/commons';
+import { Position, Color } from '../../utils/common';
 import { deepEqual } from '../../utils/fast_deep_equal';
 import { Color as ItemColor } from './color';
 import { renderExtra } from './extra';

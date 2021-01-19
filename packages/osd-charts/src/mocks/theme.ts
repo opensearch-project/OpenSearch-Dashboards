@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { RecursivePartial, mergePartial } from '../utils/commons';
+import { RecursivePartial, mergePartial } from '../utils/common';
 import {
   GeometryStateStyle,
   RectBorderStyle,

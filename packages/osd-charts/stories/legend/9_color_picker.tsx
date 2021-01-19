@@ -22,8 +22,8 @@ import { action } from '@storybook/addon-actions';
 import React, { useState, useMemo } from 'react';
 
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, LegendColorPicker } from '../../src';
-import { SeriesKey } from '../../src/commons/series_id';
-import { Color } from '../../src/utils/commons';
+import { SeriesKey } from '../../src/common/series_id';
+import { Color } from '../../src/utils/common';
 import { BARCHART_1Y1G } from '../../src/utils/data_samples/test_dataset';
 
 const onChangeAction = action('onChange');

@@ -19,7 +19,7 @@
 
 import createCachedSelector from 're-reselect';
 
-import { Rotation } from '../../utils/commons';
+import { Rotation } from '../../utils/common';
 import { getChartIdSelector } from './get_chart_id';
 import { getSettingsSpecSelector } from './get_settings_specs';
 

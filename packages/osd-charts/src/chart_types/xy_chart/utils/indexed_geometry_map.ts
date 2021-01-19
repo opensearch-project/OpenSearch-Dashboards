@@ -19,7 +19,7 @@
 
 import { $Values } from 'utility-types';
 
-import { isNil } from '../../../utils/commons';
+import { isNil } from '../../../utils/common';
 import { Bounds } from '../../../utils/d3-delaunay';
 import { IndexedGeometry, isPointGeometry } from '../../../utils/geometry';
 import { Point } from '../../../utils/point';

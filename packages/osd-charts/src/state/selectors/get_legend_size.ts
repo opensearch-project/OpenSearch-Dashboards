@@ -23,7 +23,7 @@ import { isVerticalAxis } from '../../chart_types/xy_chart/utils/axis_type_utils
 import { LEGEND_HIERARCHY_MARGIN } from '../../components/legend/legend_item';
 import { BBox } from '../../utils/bbox/bbox_calculator';
 import { CanvasTextBBoxCalculator } from '../../utils/bbox/canvas_text_bbox_calculator';
-import { Position, isDefined } from '../../utils/commons';
+import { Position, isDefined } from '../../utils/common';
 import { GlobalChartState } from '../chart_state';
 import { getChartIdSelector } from './get_chart_id';
 import { getChartThemeSelector } from './get_chart_theme';

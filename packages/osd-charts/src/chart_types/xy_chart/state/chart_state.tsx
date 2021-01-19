@@ -20,14 +20,14 @@
 import React, { RefObject } from 'react';
 
 import { ChartTypes } from '../..';
-import { LegendItemExtraValues } from '../../../commons/legend';
-import { SeriesKey } from '../../../commons/series_id';
+import { LegendItemExtraValues } from '../../../common/legend';
+import { SeriesKey } from '../../../common/series_id';
 import { BrushTool } from '../../../components/brush/brush';
 import { Tooltip } from '../../../components/tooltip';
 import { InternalChartState, GlobalChartState, BackwardRef } from '../../../state/chart_state';
 import { getChartContainerDimensionsSelector } from '../../../state/selectors/get_chart_container_dimensions';
 import { InitStatus } from '../../../state/selectors/get_internal_is_intialized';
-import { htmlIdGenerator } from '../../../utils/commons';
+import { htmlIdGenerator } from '../../../utils/common';
 import { XYChart } from '../renderer/canvas/xy_chart';
 import { Annotations } from '../renderer/dom/annotations';
 import { Crosshair } from '../renderer/dom/crosshair';

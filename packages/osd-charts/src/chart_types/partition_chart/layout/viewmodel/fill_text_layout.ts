@@ -19,7 +19,7 @@
 
 import chroma from 'chroma-js';
 
-import { ValueFormatter, Color } from '../../../../utils/commons';
+import { ValueFormatter, Color } from '../../../../utils/common';
 import { Logger } from '../../../../utils/logger';
 import { Layer } from '../../specs';
 import { conjunctiveConstraint } from '../circline_geometry';

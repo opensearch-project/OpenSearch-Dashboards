@@ -20,7 +20,7 @@ import { select, boolean, number } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { Axis, BarSeries, Chart, RectAnnotation, ScaleType, Settings } from '../../../src';
-import { Position } from '../../../src/utils/commons';
+import { Position } from '../../../src/utils/common';
 
 const getKnobs = () => {
   const enabled = boolean('enable annotation', true);

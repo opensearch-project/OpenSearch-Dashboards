@@ -19,11 +19,11 @@
 
 import createCachedSelector from 're-reselect';
 
-import { CategoryKey } from '../../../../commons/category';
-import { LegendItem } from '../../../../commons/legend';
+import { CategoryKey } from '../../../../common/category';
+import { LegendItem } from '../../../../common/legend';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { identity } from '../../../../utils/commons';
+import { identity } from '../../../../utils/common';
 import { isHierarchicalLegend } from '../../../../utils/legend';
 import { QuadViewModel } from '../../layout/types/viewmodel_types';
 import { map } from '../iterables';

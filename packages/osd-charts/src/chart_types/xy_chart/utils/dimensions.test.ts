@@ -19,7 +19,7 @@
 
 import { ChartTypes } from '../..';
 import { SpecTypes } from '../../../specs/constants';
-import { Position } from '../../../utils/commons';
+import { Position } from '../../../utils/common';
 import { Margins } from '../../../utils/dimensions';
 import { AxisId } from '../../../utils/ids';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';

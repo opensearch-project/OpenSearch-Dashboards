@@ -23,7 +23,7 @@ import { Chart, Goal } from '../../src';
 import { config } from '../../src/chart_types/goal_chart/layout/config/config';
 import { BandFillColorAccessorInput } from '../../src/chart_types/goal_chart/specs';
 import { GoalSubtype } from '../../src/chart_types/goal_chart/specs/constants';
-import { Color } from '../../src/utils/commons';
+import { Color } from '../../src/utils/common';
 
 const q1 = 255 - 255 * 0.4;
 const q2 = 255 - 255 * 0.25;

@@ -23,7 +23,7 @@ import { connect } from 'react-redux';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { InitStatus, getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
-import { Rotation } from '../../../../utils/commons';
+import { Rotation } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { isPointGeometry, IndexedGeometry } from '../../../../utils/geometry';
 import { DEFAULT_HIGHLIGHT_PADDING } from '../../rendering/constants';

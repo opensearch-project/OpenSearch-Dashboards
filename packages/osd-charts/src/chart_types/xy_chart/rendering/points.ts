@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Scale } from '../../../scales';
-import { Color, isNil } from '../../../utils/commons';
+import { Color, isNil } from '../../../utils/common';
 import { Dimensions } from '../../../utils/dimensions';
 import { BandedAccessorType, PointGeometry } from '../../../utils/geometry';
 import { LineStyle, PointStyle } from '../../../utils/themes/theme';

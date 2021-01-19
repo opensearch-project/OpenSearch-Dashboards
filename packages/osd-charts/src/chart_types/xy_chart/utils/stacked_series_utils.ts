@@ -27,7 +27,7 @@ import {
   SeriesPoint,
 } from 'd3-shape';
 
-import { SeriesKey } from '../../../commons/series_id';
+import { SeriesKey } from '../../../common/series_id';
 import { ScaleType } from '../../../scales/constants';
 import { DataSeries, DataSeriesDatum } from './series';
 import { StackMode } from './specs';

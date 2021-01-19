@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { CategoryKey } from '../../commons/category';
-import { SeriesIdentifier } from '../../commons/series_id';
+import { CategoryKey } from '../../common/category';
+import { SeriesIdentifier } from '../../common/series_id';
 
 /** @internal */
 export const ON_LEGEND_ITEM_OVER = 'ON_LEGEND_ITEM_OVER';

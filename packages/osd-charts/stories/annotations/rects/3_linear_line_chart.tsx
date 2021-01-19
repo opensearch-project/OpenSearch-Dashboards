@@ -21,7 +21,7 @@ import { boolean, select } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { Axis, Chart, LineSeries, RectAnnotation, ScaleType, Settings, RectAnnotationDatum } from '../../../src';
-import { Position } from '../../../src/utils/commons';
+import { Position } from '../../../src/utils/common';
 import { BandedAccessorType } from '../../../src/utils/geometry';
 import { getChartRotationKnob } from '../../utils/knobs';
 

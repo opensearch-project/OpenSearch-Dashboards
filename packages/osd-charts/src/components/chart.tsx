@@ -32,7 +32,7 @@ import { chartStoreReducer, GlobalChartState } from '../state/chart_state';
 import { getInternalIsInitializedSelector, InitStatus } from '../state/selectors/get_internal_is_intialized';
 import { getSettingsSpecSelector } from '../state/selectors/get_settings_specs';
 import { ChartSize, getChartSize } from '../utils/chart_size';
-import { Position } from '../utils/commons';
+import { Position } from '../utils/common';
 import { ChartBackground } from './chart_background';
 import { ChartContainer } from './chart_container';
 import { ChartResizer } from './chart_resizer';

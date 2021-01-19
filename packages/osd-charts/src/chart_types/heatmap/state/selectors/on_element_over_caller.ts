@@ -21,7 +21,7 @@ import createCachedSelector from 're-reselect';
 import { Selector } from 'react-redux';
 
 import { ChartTypes } from '../../..';
-import { SeriesIdentifier } from '../../../../commons/series_id';
+import { SeriesIdentifier } from '../../../../common/series_id';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';

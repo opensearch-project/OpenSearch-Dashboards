@@ -21,7 +21,7 @@ import { extent } from 'd3-array';
 
 import { YDomainRange } from '../specs';
 import { AccessorFn } from './accessor';
-import { getPercentageValue } from './commons';
+import { getPercentageValue } from './common';
 
 export type Domain = any[];
 

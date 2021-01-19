@@ -18,7 +18,7 @@
  */
 
 import { AxisProps } from '.';
-import { Position } from '../../../../../utils/commons';
+import { Position } from '../../../../../utils/common';
 import { isVerticalAxis } from '../../../utils/axis_type_utils';
 
 /** @internal */

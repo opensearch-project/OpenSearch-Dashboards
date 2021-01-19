@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Position } from './commons';
+import { Position } from './common';
 
 export const isHorizontalLegend = (legendPosition: Position) =>
   legendPosition === Position.Bottom || legendPosition === Position.Top;

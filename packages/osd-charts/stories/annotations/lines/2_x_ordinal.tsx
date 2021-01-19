@@ -31,7 +31,7 @@ import {
   Settings,
 } from '../../../src';
 import { Icon } from '../../../src/components/icons/icon';
-import { Position } from '../../../src/utils/commons';
+import { Position } from '../../../src/utils/common';
 import { getChartRotationKnob, arrayKnobs } from '../../utils/knobs';
 
 function generateAnnotationData(values: any[]): LineAnnotationDatum[] {

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { LegendItem } from '../../../../commons/legend';
-import { Rotation } from '../../../../utils/commons';
+import { LegendItem } from '../../../../common/legend';
+import { Rotation } from '../../../../utils/common';
 import { BasicSeriesSpec, SeriesTypes } from '../../utils/specs';
 import { GeometriesCounts } from './types';
 

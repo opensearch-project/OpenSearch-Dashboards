@@ -27,7 +27,7 @@ import {
   FormattedDataSeries,
 } from '../../chart_types/xy_chart/utils/series';
 import { DEFAULT_GLOBAL_ID, SeriesTypes } from '../../specs';
-import { mergePartial } from '../../utils/commons';
+import { mergePartial } from '../../utils/common';
 import { MockSeriesSpec } from '../specs';
 import { getRandomNumberGenerator } from '../utils';
 import { fitFunctionData } from './data';

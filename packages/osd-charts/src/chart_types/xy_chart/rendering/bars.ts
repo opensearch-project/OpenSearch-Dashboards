@@ -19,7 +19,7 @@
 import { Scale } from '../../../scales';
 import { ScaleType } from '../../../scales/constants';
 import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
-import { Color, mergePartial } from '../../../utils/commons';
+import { Color, mergePartial } from '../../../utils/common';
 import { Dimensions } from '../../../utils/dimensions';
 import { BandedAccessorType, BarGeometry } from '../../../utils/geometry';
 import { BarSeriesStyle, DisplayValueStyle } from '../../../utils/themes/theme';

@@ -19,12 +19,12 @@
 
 import { Fill } from '../../../../../geoms/types';
 import { MockStyles } from '../../../../../mocks';
-import { getColorFromVariant } from '../../../../../utils/commons';
+import { getColorFromVariant } from '../../../../../utils/common';
 import { stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { buildAreaStyles } from './area';
 
 jest.mock('../../../../partition_chart/layout/utils/color_library_wrappers');
-jest.mock('../../../../../utils/commons');
+jest.mock('../../../../../utils/common');
 
 const COLOR = 'aquamarine';
 

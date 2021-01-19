@@ -19,7 +19,7 @@
 
 import { AnnotationLineProps } from '../../chart_types/xy_chart/annotations/line/types';
 import { AnnotationRectProps } from '../../chart_types/xy_chart/annotations/rect/types';
-import { mergePartial, RecursivePartial } from '../../utils/commons';
+import { mergePartial, RecursivePartial } from '../../utils/common';
 
 /** @internal */
 export class MockAnnotationLineProps {

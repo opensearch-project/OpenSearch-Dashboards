@@ -228,9 +228,9 @@ On the current `Visualize Editor`, you can stack or cluster in the following cas
 
 ### Multiple charts/Split charts/Small Multiples (phase 2)
 
-Small multiples are created using the `<SmallMultiples>` component, that takes multiple `<SplittedSeries>` component with the usual element inside. `<SplittedSeries>` can contain only `BarSeries` `AreaSeries` and `LineSeries` Axis and other configuration need to be configured outside the `SplittedSeries` element.
+Small multiples are created using the `<SmallMultiples>` component, that takes multiple `<SplitSeries>` component with the usual element inside. `<SplitSeries>` can contain only `BarSeries` `AreaSeries` and `LineSeries` Axis and other configuration need to be configured outside the `splitSeries` element.
 
-In the case of small multiples, each `SplittedSeries` computes its own x and y domains. Then the x domains are merged and expanded. The same happens with the main Y domains; they are merged together.
+In the case of small multiples, each `splitSeries` computes its own x and y domains. Then the x domains are merged and expanded. The same happens with the main Y domains; they are merged together.
 
 ### Color/Style overrides
 
@@ -283,7 +283,7 @@ config: {
   }
 }
 ```
-`textInvertible` will have to be set to true for `textContrast` to be set as well. To see an example of where this applies, please see the Partitions Background story within Stylings. Charts are included below but are static. 
+`textInvertible` will have to be set to true for `textContrast` to be set as well. To see an example of where this applies, please see the Partitions Background story within Stylings. Charts are included below but are static.
 If you have `textInvertible` set to true, but do not have `textContrast` set to true, then the red slices, Europe, North America, and Asia, will have white text:
 
 <Chart className="story-chart">
@@ -351,10 +351,10 @@ If you have `textInvertible` set to true, but do not have `textContrast` set to 
     }}
   />
 </Chart>
-  
 
 
-Now if you set the `textContrast` to true as well, these slices also become black in text color: 
+
+Now if you set the `textContrast` to true as well, these slices also become black in text color:
 
 <Chart className="story-chart">
   <Settings theme={{background : {color: `rgba(155, 155, 155, 1)`}}} />

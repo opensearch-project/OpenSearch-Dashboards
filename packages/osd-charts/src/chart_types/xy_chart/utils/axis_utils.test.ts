@@ -28,7 +28,7 @@ import { ScaleType } from '../../../scales/constants';
 import { SpecTypes } from '../../../specs/constants';
 import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
 import { SvgTextBBoxCalculator } from '../../../utils/bbox/svg_text_bbox_calculator';
-import { Position, mergePartial } from '../../../utils/commons';
+import { Position, mergePartial } from '../../../utils/common';
 import { niceTimeFormatter } from '../../../utils/data/formatters';
 import { AxisId, GroupId } from '../../../utils/ids';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';

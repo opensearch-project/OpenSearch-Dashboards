@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { SeriesKey } from '../../../../commons/series_id';
+import { SeriesKey } from '../../../../common/series_id';
 import { Circle, Stroke, Fill, Rect } from '../../../../geoms/types';
-import { Rotation } from '../../../../utils/commons';
+import { Rotation } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { PointGeometry } from '../../../../utils/geometry';
 import { PointStyle, GeometryStateStyle } from '../../../../utils/themes/theme';

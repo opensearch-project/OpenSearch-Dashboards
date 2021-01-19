@@ -19,7 +19,7 @@
 
 import { ScaleContinuousType } from '../../../scales';
 import { ScaleType } from '../../../scales/constants';
-import { identity } from '../../../utils/commons';
+import { identity } from '../../../utils/common';
 import { computeContinuousDataDomain } from '../../../utils/domain';
 import { GroupId } from '../../../utils/ids';
 import { Logger } from '../../../utils/logger';

@@ -25,10 +25,10 @@ import { SeriesScales, Spec } from '../../../specs';
 import { SpecTypes } from '../../../specs/constants';
 import { getConnect, specComponentFactory } from '../../../state/spec_factory';
 import { Accessor, AccessorFn } from '../../../utils/accessor';
-import { Color, Datum, RecursivePartial } from '../../../utils/commons';
+import { Color, Datum, RecursivePartial } from '../../../utils/common';
 import { config } from '../layout/config/config';
 import { Config } from '../layout/types/config_types';
-import { Predicate } from '../utils/commons';
+import { Predicate } from '../utils/common';
 
 const defaultProps = {
   chartType: ChartTypes.Heatmap,

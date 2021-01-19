@@ -22,7 +22,7 @@ import { MockSeriesIdentifier } from '../../../mocks/series/series_identifiers';
 import { MockGlobalSpec, MockSeriesSpec } from '../../../mocks/specs';
 import { MockStore } from '../../../mocks/store';
 import { ScaleType } from '../../../scales/constants';
-import { identity } from '../../../utils/commons';
+import { identity } from '../../../utils/common';
 import { computeSeriesGeometriesSelector } from '../state/selectors/compute_series_geometries';
 
 const SPEC_ID = 'spec_1';

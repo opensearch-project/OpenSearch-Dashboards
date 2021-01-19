@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Position } from '../../../utils/commons';
+import { Position } from '../../../utils/common';
 import { isBounded, isVerticalAxis, isHorizontalAxis, isVerticalGrid, isHorizontalGrid } from './axis_type_utils';
 
 describe('Axis type utils', () => {

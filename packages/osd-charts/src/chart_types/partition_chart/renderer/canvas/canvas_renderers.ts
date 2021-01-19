@@ -18,7 +18,7 @@
  */
 
 import { clearCanvas, renderLayers, withContext } from '../../../../renderers/canvas';
-import { Color } from '../../../../utils/commons';
+import { Color } from '../../../../utils/common';
 import { Pixels } from '../../layout/types/geometry_types';
 import {
   LinkLabelVM,

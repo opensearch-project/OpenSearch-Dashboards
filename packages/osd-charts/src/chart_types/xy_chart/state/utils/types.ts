@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SeriesKey } from '../../../../commons/series_id';
+import { SeriesKey } from '../../../../common/series_id';
 import { Scale } from '../../../../scales';
 import { Domain } from '../../../../utils/domain';
 import {

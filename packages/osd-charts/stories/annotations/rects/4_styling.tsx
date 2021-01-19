@@ -22,7 +22,7 @@ import React from 'react';
 
 import { Axis, Chart, LineSeries, RectAnnotation, ScaleType, Settings } from '../../../src';
 import { Icon } from '../../../src/components/icons/icon';
-import { Position } from '../../../src/utils/commons';
+import { Position } from '../../../src/utils/common';
 import { getChartRotationKnob } from '../../utils/knobs';
 
 export const Example = () => {

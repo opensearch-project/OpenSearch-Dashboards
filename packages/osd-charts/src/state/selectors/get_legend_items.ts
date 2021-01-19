@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegendItem } from '../../commons/legend';
+import { LegendItem } from '../../common/legend';
 import { GlobalChartState } from '../chart_state';
 
 const EMPTY_LEGEND_LIST: LegendItem[] = [];

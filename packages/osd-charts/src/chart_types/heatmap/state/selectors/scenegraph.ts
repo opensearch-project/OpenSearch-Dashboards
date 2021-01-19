@@ -18,7 +18,7 @@
  */
 
 import { SettingsSpec } from '../../../../specs';
-import { RecursivePartial, mergePartial } from '../../../../utils/commons';
+import { RecursivePartial, mergePartial } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { measureText } from '../../../partition_chart/layout/utils/measure';
 import { config as defaultConfig } from '../../layout/config/config';

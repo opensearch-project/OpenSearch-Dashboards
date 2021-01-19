@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { LegendItem } from '../../../../commons/legend';
+import { LegendItem } from '../../../../common/legend';
 import { Rect } from '../../../../geoms/types';
 import { withContext } from '../../../../renderers/canvas';
-import { Rotation } from '../../../../utils/commons';
+import { Rotation } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { BarGeometry, PerPanel } from '../../../../utils/geometry';
 import { SharedGeometryStateStyle } from '../../../../utils/themes/theme';

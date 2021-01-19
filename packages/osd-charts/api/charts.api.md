@@ -1979,7 +1979,7 @@ export type YDomainRange = YDomainBase & DomainRange;
 // src/chart_types/partition_chart/layout/types/config_types.ts:128:5 - (ae-forgotten-export) The symbol "TimeMs" needs to be exported by the entry point index.d.ts
 // src/chart_types/partition_chart/layout/types/config_types.ts:129:5 - (ae-forgotten-export) The symbol "AnimKeyframe" needs to be exported by the entry point index.d.ts
 // src/chart_types/partition_chart/specs/index.ts:48:13 - (ae-forgotten-export) The symbol "NodeColorAccessor" needs to be exported by the entry point index.d.ts
-// src/commons/series_id.ts:40:3 - (ae-forgotten-export) The symbol "SeriesKey" needs to be exported by the entry point index.d.ts
+// src/common/series_id.ts:40:3 - (ae-forgotten-export) The symbol "SeriesKey" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

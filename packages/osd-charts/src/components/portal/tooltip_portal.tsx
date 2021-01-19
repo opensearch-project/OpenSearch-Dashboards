@@ -21,7 +21,7 @@ import { createPopper, Instance } from '@popperjs/core';
 import { useRef, useEffect, useCallback, ReactNode, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 
-import { mergePartial, isDefined } from '../../utils/commons';
+import { mergePartial, isDefined } from '../../utils/common';
 import { TooltipPortalSettings, PortalAnchorRef } from './types';
 import { DEFAULT_POPPER_SETTINGS, getOrCreateNode, isHTMLElement } from './utils';
 

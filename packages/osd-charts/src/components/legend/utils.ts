@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { LegendItemExtraValues, LegendItem } from '../../commons/legend';
+import { LegendItemExtraValues, LegendItem } from '../../common/legend';
 
 /** @internal */
 export function getExtra(extraValues: Map<string, LegendItemExtraValues>, item: LegendItem, totalItems: number) {

@@ -19,7 +19,7 @@
 
 import createCachedSelector from 're-reselect';
 
-import { LegendItem } from '../../../../commons/legend';
+import { LegendItem } from '../../../../common/legend';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { computeLegendSelector } from './compute_legend';

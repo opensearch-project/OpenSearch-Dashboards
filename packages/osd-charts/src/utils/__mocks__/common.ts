@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const module = jest.requireActual('../commons.ts');
+const module = jest.requireActual('../common.ts');
 
 export const { ColorVariant, Position } = module;
 

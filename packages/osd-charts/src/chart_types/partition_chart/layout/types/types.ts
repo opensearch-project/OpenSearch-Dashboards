@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Datum } from '../../../../utils/commons';
+import { Datum } from '../../../../utils/common';
 import { ArrayEntry } from '../utils/group_by_rollup';
 
 export const FONT_VARIANTS = Object.freeze(['normal', 'small-caps'] as const);

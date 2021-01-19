@@ -31,7 +31,7 @@ import { onExternalPointerEvent } from '../../../state/actions/events';
 import { onPointerMove, onMouseDown, onMouseUp } from '../../../state/actions/mouse';
 import { GlobalChartState } from '../../../state/chart_state';
 import { getSettingsSpecSelector } from '../../../state/selectors/get_settings_specs';
-import { Position, RecursivePartial } from '../../../utils/commons';
+import { Position, RecursivePartial } from '../../../utils/common';
 import { AxisStyle } from '../../../utils/themes/theme';
 import { BarSeriesSpec, BasicSeriesSpec, AxisSpec, SeriesTypes } from '../utils/specs';
 import { computeSeriesGeometriesSelector } from './selectors/compute_series_geometries';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { identity, mergePartial, RecursivePartial, Color } from '../../../../utils/commons';
+import { identity, mergePartial, RecursivePartial, Color } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { config as defaultConfig, VALUE_GETTERS } from '../../layout/config/config';
 import { Config } from '../../layout/types/config_types';

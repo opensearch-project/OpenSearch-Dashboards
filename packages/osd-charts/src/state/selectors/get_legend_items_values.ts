@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { LegendItemExtraValues } from '../../commons/legend';
-import { SeriesKey } from '../../commons/series_id';
+import { LegendItemExtraValues } from '../../common/legend';
+import { SeriesKey } from '../../common/series_id';
 import { GlobalChartState } from '../chart_state';
 
 const EMPTY_ITEM_LIST = new Map<SeriesKey, LegendItemExtraValues>();

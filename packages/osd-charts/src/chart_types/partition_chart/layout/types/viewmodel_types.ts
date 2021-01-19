@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { CategoryKey } from '../../../../commons/category';
+import { CategoryKey } from '../../../../common/category';
 import { LegendPath } from '../../../../state/actions/legend';
-import { Color } from '../../../../utils/commons';
+import { Color } from '../../../../utils/common';
 import { config, ValueGetterName } from '../config/config';
 import { ArrayNode, HierarchyOfArrays } from '../utils/group_by_rollup';
 import { VerticalAlignments } from '../viewmodel/constants';

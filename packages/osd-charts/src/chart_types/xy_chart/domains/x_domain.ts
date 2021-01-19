@@ -20,7 +20,7 @@
 import { Optional } from 'utility-types';
 
 import { ScaleType } from '../../../scales/constants';
-import { compareByValueAsc, identity } from '../../../utils/commons';
+import { compareByValueAsc, identity } from '../../../utils/common';
 import { computeContinuousDataDomain, computeOrdinalDataDomain, Domain } from '../../../utils/domain';
 import { Logger } from '../../../utils/logger';
 import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_type_utils';

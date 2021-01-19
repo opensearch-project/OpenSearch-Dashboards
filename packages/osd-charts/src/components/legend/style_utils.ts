@@ -18,7 +18,7 @@
  */
 
 import { BBox } from '../../utils/bbox/bbox_calculator';
-import { Position } from '../../utils/commons';
+import { Position } from '../../utils/common';
 import { Margins } from '../../utils/dimensions';
 import { isHorizontalLegend } from '../../utils/legend';
 import { LegendStyle as ThemeLegendStyle } from '../../utils/themes/theme';

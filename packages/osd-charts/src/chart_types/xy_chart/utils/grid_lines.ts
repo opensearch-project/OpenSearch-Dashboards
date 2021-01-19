@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Line, Stroke } from '../../../geoms/types';
-import { mergePartial, RecursivePartial } from '../../../utils/commons';
+import { mergePartial, RecursivePartial } from '../../../utils/common';
 import { Size } from '../../../utils/dimensions';
 import { AxisId } from '../../../utils/ids';
 import { Point } from '../../../utils/point';

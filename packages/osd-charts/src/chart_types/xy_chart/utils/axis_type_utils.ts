@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Position } from '../../../utils/commons';
+import { Position } from '../../../utils/common';
 import { CompleteBoundedDomain, LowerBoundedDomain, UpperBoundedDomain, DomainRange } from './specs';
 
 export function isLowerBound(domain: Partial<CompleteBoundedDomain>): domain is LowerBoundedDomain {

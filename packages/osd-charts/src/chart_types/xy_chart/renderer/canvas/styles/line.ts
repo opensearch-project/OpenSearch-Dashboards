@@ -18,7 +18,7 @@
  */
 
 import { Stroke } from '../../../../../geoms/types';
-import { getColorFromVariant } from '../../../../../utils/commons';
+import { getColorFromVariant } from '../../../../../utils/common';
 import { GeometryStateStyle, LineStyle } from '../../../../../utils/themes/theme';
 import { stringToRGB, OpacityFn } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 

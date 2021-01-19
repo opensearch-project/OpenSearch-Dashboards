@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { StrokeStyle, ValueFormatter, Color } from '../../../../utils/commons';
+import { StrokeStyle, ValueFormatter, Color } from '../../../../utils/common';
 import { Layer } from '../../specs';
 import { percentValueGetter } from '../config/config';
 import { meanAngle } from '../geometry';

@@ -20,7 +20,7 @@
 import chroma from 'chroma-js';
 import { rgb as d3Rgb, RGBColor as D3RGBColor } from 'd3-color';
 
-import { Color } from '../../../../utils/commons';
+import { Color } from '../../../../utils/common';
 
 type RGB = number;
 type A = number;

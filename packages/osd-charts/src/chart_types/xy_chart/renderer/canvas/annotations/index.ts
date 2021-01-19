@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Rotation } from '../../../../../utils/commons';
+import { Rotation } from '../../../../../utils/common';
 import { Dimensions } from '../../../../../utils/dimensions';
 import { AnnotationId } from '../../../../../utils/ids';
 import { mergeWithDefaultAnnotationLine, mergeWithDefaultAnnotationRect } from '../../../../../utils/themes/theme';

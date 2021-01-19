@@ -21,7 +21,7 @@ import { MockAnnotationLineProps } from '../../../../mocks/annotations/annotatio
 import { MockAnnotationSpec, MockGlobalSpec, MockSeriesSpec } from '../../../../mocks/specs';
 import { MockStore } from '../../../../mocks/store';
 import { ScaleType } from '../../../../scales/constants';
-import { Position } from '../../../../utils/commons';
+import { Position } from '../../../../utils/common';
 import { AnnotationId } from '../../../../utils/ids';
 import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../../utils/themes/theme';
 import { computeAnnotationDimensionsSelector } from '../../state/selectors/compute_annotations';

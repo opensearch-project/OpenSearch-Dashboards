@@ -27,7 +27,7 @@ import {
   VerticalAlignment,
   HorizontalAlignment,
   getPercentageValue,
-} from '../../../utils/commons';
+} from '../../../utils/common';
 import { Dimensions, Margins, getSimplePadding, Size } from '../../../utils/dimensions';
 import { AxisId } from '../../../utils/ids';
 import { Logger } from '../../../utils/logger';

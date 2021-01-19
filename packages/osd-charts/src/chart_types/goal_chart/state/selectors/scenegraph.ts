@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mergePartial, RecursivePartial } from '../../../../utils/commons';
+import { mergePartial, RecursivePartial } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { measureText } from '../../../partition_chart/layout/utils/measure';
 import { config as defaultConfig } from '../../layout/config/config';

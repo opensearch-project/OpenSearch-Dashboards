@@ -205,9 +205,9 @@ On the current `Visualize Editor`, you can stack or cluster in the following cas
 
 ### Multiple charts/Split charts/Small Multiples (phase 2)
 
-Small multiples are created using the `<SmallMultiples>` component, that takes multiple `<SplittedSeries>` component with the usual element inside. `<SplittedSeries>` can contain only `BarSeries` `AreaSeries` and `LineSeries` Axis and other configuration need to be configured outside the `SplittedSeries` element.
+Small multiples are created using the `<SmallMultiples>` component, that takes multiple `<splitSeries>` component with the usual element inside. `<splitSeries>` can contain only `BarSeries` `AreaSeries` and `LineSeries` Axis and other configuration need to be configured outside the `splitSeries` element.
 
-In the case of small multiples, each `SplittedSeries` computes its own x and y domains. Then the x domains are merged and expanded. The same happens with the main Y domains; they are merged together.
+In the case of small multiples, each `splitSeries` computes its own x and y domains. Then the x domains are merged and expanded. The same happens with the main Y domains; they are merged together.
 
 ### Color/Style overrides
 

@@ -22,7 +22,7 @@ import { MockSeriesSpec, MockGlobalSpec } from '../../../mocks/specs';
 import { MockStore } from '../../../mocks/store';
 import { ScaleType } from '../../../scales/constants';
 import { SpecTypes } from '../../../specs/constants';
-import { Position } from '../../../utils/commons';
+import { Position } from '../../../utils/common';
 import { BARCHART_1Y0G } from '../../../utils/data_samples/test_dataset';
 import { Logger } from '../../../utils/logger';
 import { computeSeriesDomainsSelector } from '../state/selectors/compute_series_domains';
@@ -250,9 +250,9 @@ describe('Y Domain', () => {
       yAccessors: ['y'],
       data: BARCHART_1Y0G,
     };
-    const splittedSpecs = groupSeriesByYGroup([spec1, spec2]);
-    const groupKeys = [...splittedSpecs.keys()];
-    const groupValues = [...splittedSpecs.values()];
+    const splitSpecs = groupSeriesByYGroup([spec1, spec2]);
+    const groupKeys = [...splitSpecs.keys()];
+    const groupValues = [...splitSpecs.values()];
     expect(groupKeys).toEqual(['group1', 'group2']);
     expect(groupValues.length).toBe(2);
     expect(groupValues[0].nonStacked).toEqual([spec1]);
@@ -287,9 +287,9 @@ describe('Y Domain', () => {
       stackAccessors: ['x'],
       data: BARCHART_1Y0G,
     };
-    const splittedSpecs = groupSeriesByYGroup([spec1, spec2]);
-    const groupKeys = [...splittedSpecs.keys()];
-    const groupValues = [...splittedSpecs.values()];
+    const splitSpecs = groupSeriesByYGroup([spec1, spec2]);
+    const groupKeys = [...splitSpecs.keys()];
+    const groupValues = [...splitSpecs.values()];
     expect(groupKeys).toEqual(['group1', 'group2']);
     expect(groupValues.length).toBe(2);
     expect(groupValues[0].stacked).toEqual([spec1]);
@@ -324,9 +324,9 @@ describe('Y Domain', () => {
       stackAccessors: ['x'],
       data: BARCHART_1Y0G,
     };
-    const splittedSpecs = groupSeriesByYGroup([spec1, spec2]);
-    const groupKeys = [...splittedSpecs.keys()];
-    const groupValues = [...splittedSpecs.values()];
+    const splitSpecs = groupSeriesByYGroup([spec1, spec2]);
+    const groupKeys = [...splitSpecs.keys()];
+    const groupValues = [...splitSpecs.values()];
     expect(groupKeys).toEqual(['group']);
     expect(groupValues.length).toBe(1);
     expect(groupValues[0].stacked).toEqual([spec1, spec2]);
@@ -372,9 +372,9 @@ describe('Y Domain', () => {
       stackAccessors: ['x'],
       data: BARCHART_1Y0G,
     };
-    const splittedSpecs = groupSeriesByYGroup([spec1, spec2, spec3]);
-    const groupKeys = [...splittedSpecs.keys()];
-    const groupValues = [...splittedSpecs.values()];
+    const splitSpecs = groupSeriesByYGroup([spec1, spec2, spec3]);
+    const groupKeys = [...splitSpecs.keys()];
+    const groupValues = [...splitSpecs.values()];
     expect(groupKeys).toEqual(['group1', 'group2']);
     expect(groupValues.length).toBe(2);
     expect(groupValues[0].stacked).toEqual([spec1, spec2]);

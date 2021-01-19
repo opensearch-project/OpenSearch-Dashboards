@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Scale } from '../../../scales';
-import { Color } from '../../../utils/commons';
+import { Color } from '../../../utils/common';
 import { Dimensions } from '../../../utils/dimensions';
 import { BubbleGeometry } from '../../../utils/geometry';
 import { BubbleSeriesStyle } from '../../../utils/themes/theme';

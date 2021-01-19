@@ -19,7 +19,7 @@
 
 import { Scale } from '../../scales';
 import { ScaleType } from '../../scales/constants';
-import { mergePartial } from '../../utils/commons';
+import { mergePartial } from '../../utils/common';
 
 /** @internal */
 export class MockScale {

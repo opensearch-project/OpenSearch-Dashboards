@@ -22,7 +22,7 @@ import React from 'react';
 
 import { AnnotationTooltipFormatter, Axis, BarSeries, Chart, ScaleType, RectAnnotation, Settings } from '../../../src';
 import { CustomAnnotationTooltip } from '../../../src/chart_types/xy_chart/annotations/types';
-import { Position } from '../../../src/utils/commons';
+import { Position } from '../../../src/utils/common';
 import { getBoundaryKnob, getChartRotationKnob, getFallbackPlacementsKnob, getPlacementKnob } from '../../utils/knobs';
 
 export const Example = () => {

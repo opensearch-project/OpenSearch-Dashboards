@@ -22,7 +22,7 @@ import React from 'react';
 import { ChartTypes } from '../..';
 import { SpecTypes } from '../../../specs/constants';
 import { specComponentFactory, getConnect } from '../../../state/spec_factory';
-import { Position } from '../../../utils/commons';
+import { Position } from '../../../utils/common';
 import { AxisSpec, DEFAULT_GLOBAL_ID } from '../utils/specs';
 
 const defaultProps = {

@@ -22,7 +22,7 @@ import { MockSeriesIdentifier } from '../../../mocks/series/series_identifiers';
 import { MockGlobalSpec, MockSeriesSpec } from '../../../mocks/specs';
 import { MockStore } from '../../../mocks/store';
 import { ScaleType } from '../../../scales/constants';
-import { Position } from '../../../utils/commons';
+import { Position } from '../../../utils/common';
 import { computeSeriesGeometriesSelector } from '../state/selectors/compute_series_geometries';
 
 const SPEC_ID = 'spec_1';
@@ -715,7 +715,7 @@ describe('Rendering points - bubble', () => {
       geometriesIndex,
     } = computeSeriesGeometriesSelector(store.getState());
 
-    test('Can render a splitted bubble', () => {
+    test('Can render a split bubble', () => {
       const [{ value: renderedBubble }] = bubbles;
       expect(renderedBubble.points).toHaveLength(7);
       expect(renderedBubble.color).toBe('red');

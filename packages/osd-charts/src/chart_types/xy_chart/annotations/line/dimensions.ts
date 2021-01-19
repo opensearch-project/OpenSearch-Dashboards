@@ -20,7 +20,7 @@
 import { Line } from '../../../../geoms/types';
 import { Scale } from '../../../../scales';
 import { isContinuousScale, isBandScale } from '../../../../scales/types';
-import { isNil, Position, Rotation } from '../../../../utils/commons';
+import { isNil, Position, Rotation } from '../../../../utils/common';
 import { Dimensions, Size } from '../../../../utils/dimensions';
 import { GroupId } from '../../../../utils/ids';
 import { SmallMultipleScales } from '../../state/selectors/compute_small_multiple_scales';

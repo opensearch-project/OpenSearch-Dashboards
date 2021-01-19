@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ValueFormatter, Color } from '../../../../utils/commons';
+import { ValueFormatter, Color } from '../../../../utils/common';
 import { Point } from '../../../../utils/point';
 import { meanAngle } from '../geometry';
 import { Config } from '../types/config_types';

@@ -17,14 +17,7 @@
  * under the License.
  */
 
-import {
-  mergePartial,
-  RecursivePartial,
-  Color,
-  ColorVariant,
-  HorizontalAlignment,
-  VerticalAlignment,
-} from '../commons';
+import { mergePartial, RecursivePartial, Color, ColorVariant, HorizontalAlignment, VerticalAlignment } from '../common';
 import { Margins, SimplePadding } from '../dimensions';
 import { LIGHT_THEME } from './light_theme';
 

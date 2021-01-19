@@ -18,7 +18,7 @@
  */
 
 import { MockGlobalSpec } from '../../../mocks/specs';
-import { Position, Rotation } from '../../../utils/commons';
+import { Position, Rotation } from '../../../utils/common';
 import { Dimensions } from '../../../utils/dimensions';
 import { AnnotationDomainTypes } from '../utils/specs';
 import { getAnnotationAxis, getTransformedCursor, invertTranformedCursor } from './utils';

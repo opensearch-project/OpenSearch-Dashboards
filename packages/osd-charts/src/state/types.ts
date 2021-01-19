@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Position } from '../utils/commons';
+import { Position } from '../utils/common';
 import { GeometryValue } from '../utils/geometry';
 
 export interface DebugStateAxis {

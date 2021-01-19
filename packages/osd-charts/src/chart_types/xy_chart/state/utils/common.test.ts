@@ -18,7 +18,7 @@
  */
 
 import { ChartTypes } from '../../..';
-import { LegendItem } from '../../../../commons/legend';
+import { LegendItem } from '../../../../common/legend';
 import { ScaleType } from '../../../../scales/constants';
 import { SpecTypes } from '../../../../specs';
 import { BARCHART_1Y1G } from '../../../../utils/data_samples/test_dataset';

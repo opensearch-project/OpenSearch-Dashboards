@@ -18,7 +18,7 @@
  */
 
 import { AxisProps } from '.';
-import { Position } from '../../../../../utils/commons';
+import { Position } from '../../../../../utils/common';
 import { getSimplePadding } from '../../../../../utils/dimensions';
 import { Font, FontStyle } from '../../../../partition_chart/layout/types/types';
 import { isHorizontalAxis } from '../../../utils/axis_type_utils';

@@ -22,7 +22,7 @@ import { ChartTypes } from '../../..';
 import { MockAnnotationLineProps, MockAnnotationRectProps } from '../../../../mocks/annotations/annotations';
 import { MockGlobalSpec } from '../../../../mocks/specs/specs';
 import { SpecTypes } from '../../../../specs/constants';
-import { Position, Rotation } from '../../../../utils/commons';
+import { Position, Rotation } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { AnnotationId } from '../../../../utils/ids';
 import { Point } from '../../../../utils/point';
