@@ -18,7 +18,9 @@
  */
 
 import { TooltipAnchorPosition } from '../../../components/tooltip/types';
+import { Line, Rect } from '../../../geoms/types';
 import { Scale } from '../../../scales';
+import { isContinuousScale } from '../../../scales/types';
 import { Rotation } from '../../../utils/commons';
 import { Dimensions } from '../../../utils/dimensions';
 import { Point } from '../../../utils/point';
@@ -58,7 +60,7 @@ export function getCursorLinePosition(
   chartRotation: Rotation,
   chartDimensions: Dimensions,
   projectedPointerPosition: { x: number; y: number },
-): Dimensions | undefined {
+): Line | undefined {
   const { x, y } = projectedPointerPosition;
   if (x < 0 || y < 0) {
     return void 0;
@@ -68,19 +70,19 @@ export function getCursorLinePosition(
   if (isHorizontalRotated) {
     const crosshairTop = y + top;
     return {
-      left,
-      width,
-      top: crosshairTop,
-      height: 0,
+      x1: left,
+      x2: left + width,
+      y1: crosshairTop,
+      y2: crosshairTop,
     };
   }
   const crosshairLeft = x + left;
 
   return {
-    top,
-    left: crosshairLeft,
-    width: 0,
-    height,
+    x1: crosshairLeft,
+    x2: crosshairLeft,
+    y1: top,
+    y2: top + height,
   };
 }
 
@@ -96,31 +98,22 @@ export function getCursorBandPosition(
   snapEnabled: boolean,
   xScale: Scale,
   totalBarsInCluster?: number,
-): Dimensions & { visible: boolean } {
+): Line | Rect | undefined {
   const { top, left, width, height } = panel;
   const { x, y } = cursorPosition;
   const isHorizontalRotated = isHorizontalRotation(chartRotation);
   const chartWidth = isHorizontalRotated ? width : height;
   const chartHeight = isHorizontalRotated ? height : width;
 
+  const isLineOrAreaOnly = !totalBarsInCluster;
+
   if (x > chartWidth || y > chartHeight || x < 0 || y < 0 || !invertedValue.withinBandwidth) {
-    return {
-      top: -1,
-      left: -1,
-      width: 0,
-      height: 0,
-      visible: false,
-    };
+    return undefined;
   }
-  const snappedPosition = getSnapPosition(invertedValue.value, xScale, totalBarsInCluster);
+
+  const snappedPosition = getSnapPosition(invertedValue.value, xScale, isLineOrAreaOnly ? 1 : totalBarsInCluster);
   if (!snappedPosition) {
-    return {
-      top: -1,
-      left: -1,
-      width: 0,
-      height: 0,
-      visible: false,
-    };
+    return undefined;
   }
 
   const { position, band } = snappedPosition;
@@ -136,12 +129,19 @@ export function getCursorBandPosition(
       adjustedWidth = band - (left - leftPosition);
       leftPosition = left;
     }
+    if (isLineOrAreaOnly && isContinuousScale(xScale)) {
+      return {
+        x1: leftPosition,
+        x2: leftPosition,
+        y1: top,
+        y2: top + height,
+      };
+    }
     return {
-      top,
-      left: leftPosition,
+      x: leftPosition,
+      y: top,
       width: adjustedWidth,
       height,
-      visible: true,
     };
   }
   const adjustedTop = snapEnabled ? position : cursorPosition.x;
@@ -153,12 +153,19 @@ export function getCursorBandPosition(
     adjustedHeight = band - (top - topPosition);
     topPosition = top;
   }
+  if (isLineOrAreaOnly && isContinuousScale(xScale)) {
+    return {
+      x1: left,
+      x2: left + width,
+      y1: topPosition,
+      y2: topPosition,
+    };
+  }
   return {
-    top: topPosition,
-    left,
+    y: topPosition,
+    x: left,
     width,
     height: adjustedHeight,
-    visible: true,
   };
 }
 
@@ -166,7 +173,7 @@ export function getCursorBandPosition(
 export function getTooltipAnchorPosition(
   { offset }: ChartDimensions,
   chartRotation: Rotation,
-  cursorBandPosition: Dimensions,
+  cursorBandPosition: Line | Rect,
   cursorPosition: { x: number; y: number },
   panel: Dimensions,
 ): TooltipAnchorPosition {
@@ -182,15 +189,17 @@ export function getTooltipAnchorPosition(
 
 function getHorizontalTooltipPosition(
   cursorXPosition: number,
-  cursorBandPosition: Dimensions,
+  cursorBandPosition: Line | Rect,
   panel: Dimensions,
   globalOffset: number,
   isRotated: boolean,
 ): { x0?: number; x1: number } {
   if (!isRotated) {
+    const left = 'x1' in cursorBandPosition ? cursorBandPosition.x1 : cursorBandPosition.x;
+    const width = 'width' in cursorBandPosition ? cursorBandPosition.width : 0;
     return {
-      x0: cursorBandPosition.left + globalOffset,
-      x1: cursorBandPosition.left + cursorBandPosition.width + globalOffset,
+      x0: left + globalOffset,
+      x1: left + width + globalOffset,
     };
   }
   return {
@@ -202,7 +211,7 @@ function getHorizontalTooltipPosition(
 
 function getVerticalTooltipPosition(
   cursorYPosition: number,
-  cursorBandPosition: Dimensions,
+  cursorBandPosition: Line | Rect,
   panel: Dimensions,
   globalOffset: number,
   isRotated: boolean,
@@ -217,8 +226,10 @@ function getVerticalTooltipPosition(
       y1: y,
     };
   }
+  const top = 'y1' in cursorBandPosition ? cursorBandPosition.y1 : cursorBandPosition.y;
+  const height = 'height' in cursorBandPosition ? cursorBandPosition.height : 0;
   return {
-    y0: cursorBandPosition.top + globalOffset,
-    y1: cursorBandPosition.height + cursorBandPosition.top + globalOffset,
+    y0: top + globalOffset,
+    y1: height + top + globalOffset,
   };
 }

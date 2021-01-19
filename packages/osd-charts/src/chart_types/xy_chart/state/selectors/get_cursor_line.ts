@@ -19,9 +19,9 @@
 
 import createCachedSelector from 're-reselect';
 
+import { Line } from '../../../../geoms/types';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { Dimensions } from '../../../../utils/dimensions';
 import { getCursorLinePosition } from '../../crosshair/crosshair_utils';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { getProjectedPointerPositionSelector } from './get_projected_pointer_position';
@@ -29,6 +29,6 @@ import { getProjectedPointerPositionSelector } from './get_projected_pointer_pos
 /** @internal */
 export const getCursorLinePositionSelector = createCachedSelector(
   [computeChartDimensionsSelector, getSettingsSpecSelector, getProjectedPointerPositionSelector],
-  (chartDimensions, settingsSpec, projectedPointerPosition): Dimensions | undefined =>
+  (chartDimensions, settingsSpec, projectedPointerPosition): Line | undefined =>
     getCursorLinePosition(settingsSpec.rotation, chartDimensions.chartDimensions, projectedPointerPosition),
 )(getChartIdSelector);

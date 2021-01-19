@@ -22,6 +22,7 @@
 import { Store } from 'redux';
 
 import { ChartTypes } from '../..';
+import { Rect } from '../../../geoms/types';
 import { MockStore } from '../../../mocks/store';
 import { ScaleType } from '../../../scales/constants';
 import { SettingsSpec, XScaleType, XYBrushArea } from '../../../specs';
@@ -362,8 +363,7 @@ function mouseOverTestSuite(scaleType: XScaleType) {
       }),
     );
     let cursorBandPosition = getCursorBandPositionSelector(store.getState());
-    expect(cursorBandPosition).toBeDefined();
-    expect(cursorBandPosition && cursorBandPosition.visible).toBe(false);
+    expect(cursorBandPosition).toBeUndefined();
 
     store.dispatch(
       onExternalPointerEvent({
@@ -376,7 +376,6 @@ function mouseOverTestSuite(scaleType: XScaleType) {
     );
     cursorBandPosition = getCursorBandPositionSelector(store.getState());
     expect(cursorBandPosition).toBeDefined();
-    expect(cursorBandPosition && cursorBandPosition.visible).toBe(true);
   });
 
   test.skip('can determine which tooltip to display if chart & annotation tooltips possible', () => {
@@ -403,8 +402,8 @@ function mouseOverTestSuite(scaleType: XScaleType) {
     expect(projectedPointerPosition).toMatchObject({ x: 0, y: 0 });
     const cursorBandPosition = getCursorBandPositionSelector(store.getState());
     expect(cursorBandPosition).toBeDefined();
-    expect(cursorBandPosition?.left).toBe(chartLeft + 0);
-    expect(cursorBandPosition?.width).toBe(45);
+    expect((cursorBandPosition as Rect).x).toBe(chartLeft + 0);
+    expect((cursorBandPosition as Rect).width).toBe(45);
     let isTooltipVisible = isTooltipVisibleSelector(store.getState());
     expect(isTooltipVisible.visible).toBe(true);
     tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
@@ -452,8 +451,8 @@ function mouseOverTestSuite(scaleType: XScaleType) {
     expect(projectedPointerPosition).toMatchObject({ x: 0, y: 89 });
     const cursorBandPosition = getCursorBandPositionSelector(store.getState());
     expect(cursorBandPosition).toBeDefined();
-    expect(cursorBandPosition?.left).toBe(chartLeft + 0);
-    expect(cursorBandPosition?.width).toBe(45);
+    expect((cursorBandPosition as Rect).x).toBe(chartLeft + 0);
+    expect((cursorBandPosition as Rect).width).toBe(45);
     let isTooltipVisible = isTooltipVisibleSelector(store.getState());
     expect(isTooltipVisible.visible).toBe(true);
     let tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
@@ -505,8 +504,8 @@ function mouseOverTestSuite(scaleType: XScaleType) {
     expect(projectedPointerPosition).toMatchObject({ x: 44 + scaleOffset, y: 0 });
     let cursorBandPosition = getCursorBandPositionSelector(store.getState());
     expect(cursorBandPosition).toBeDefined();
-    expect(cursorBandPosition?.left).toBe(chartLeft + 0);
-    expect(cursorBandPosition?.width).toBe(45);
+    expect((cursorBandPosition as Rect).x).toBe(chartLeft + 0);
+    expect((cursorBandPosition as Rect).width).toBe(45);
     let isTooltipVisible = isTooltipVisibleSelector(store.getState());
     expect(isTooltipVisible.visible).toBe(true);
     let tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
@@ -541,8 +540,8 @@ function mouseOverTestSuite(scaleType: XScaleType) {
     expect(projectedPointerPosition).toMatchObject({ x: 45 + scaleOffset, y: 0 });
     cursorBandPosition = getCursorBandPositionSelector(store.getState());
     expect(cursorBandPosition).toBeDefined();
-    expect(cursorBandPosition?.left).toBe(chartLeft + 45);
-    expect(cursorBandPosition?.width).toBe(45);
+    expect((cursorBandPosition as Rect).x).toBe(chartLeft + 45);
+    expect((cursorBandPosition as Rect).width).toBe(45);
     isTooltipVisible = isTooltipVisibleSelector(store.getState());
     expect(isTooltipVisible.visible).toBe(true);
     tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
@@ -562,8 +561,8 @@ function mouseOverTestSuite(scaleType: XScaleType) {
     expect(projectedPointerPosition).toMatchObject({ x: 44 + scaleOffset, y: 89 });
     let cursorBandPosition = getCursorBandPositionSelector(store.getState());
     expect(cursorBandPosition).toBeDefined();
-    expect(cursorBandPosition?.left).toBe(chartLeft + 0);
-    expect(cursorBandPosition?.width).toBe(45);
+    expect((cursorBandPosition as Rect).x).toBe(chartLeft + 0);
+    expect((cursorBandPosition as Rect).width).toBe(45);
     let isTooltipVisible = isTooltipVisibleSelector(store.getState());
     expect(isTooltipVisible.visible).toBe(true);
     let tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
@@ -598,8 +597,8 @@ function mouseOverTestSuite(scaleType: XScaleType) {
     expect(projectedPointerPosition).toMatchObject({ x: 45 + scaleOffset, y: 89 });
     cursorBandPosition = getCursorBandPositionSelector(store.getState());
     expect(cursorBandPosition).toBeDefined();
-    expect(cursorBandPosition?.left).toBe(chartLeft + 45);
-    expect(cursorBandPosition?.width).toBe(45);
+    expect((cursorBandPosition as Rect).x).toBe(chartLeft + 45);
+    expect((cursorBandPosition as Rect).width).toBe(45);
     isTooltipVisible = isTooltipVisibleSelector(store.getState());
     expect(isTooltipVisible.visible).toBe(true);
     tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());
@@ -646,8 +645,8 @@ function mouseOverTestSuite(scaleType: XScaleType) {
     expect(projectedPointerPosition).toMatchObject({ x: 89, y: 0 });
     const cursorBandPosition = getCursorBandPositionSelector(store.getState());
     expect(cursorBandPosition).toBeDefined();
-    expect(cursorBandPosition?.left).toBe(chartLeft + 45);
-    expect(cursorBandPosition?.width).toBe(45);
+    expect((cursorBandPosition as Rect).x).toBe(chartLeft + 45);
+    expect((cursorBandPosition as Rect).width).toBe(45);
 
     const isTooltipVisible = isTooltipVisibleSelector(store.getState());
     expect(isTooltipVisible.visible).toBe(true);
@@ -699,8 +698,8 @@ function mouseOverTestSuite(scaleType: XScaleType) {
     expect(projectedPointerPosition).toMatchObject({ x: 89, y: 89 });
     const cursorBandPosition = getCursorBandPositionSelector(store.getState());
     expect(cursorBandPosition).toBeDefined();
-    expect(cursorBandPosition?.left).toBe(chartLeft + 45);
-    expect(cursorBandPosition?.width).toBe(45);
+    expect((cursorBandPosition as Rect).x).toBe(chartLeft + 45);
+    expect((cursorBandPosition as Rect).width).toBe(45);
     const isTooltipVisible = isTooltipVisibleSelector(store.getState());
     expect(isTooltipVisible.visible).toBe(true);
     const tooltipInfo = getTooltipInfoAndGeometriesSelector(store.getState());

@@ -19,6 +19,7 @@
 
 import createCachedSelector from 're-reselect';
 
+import { Line, Rect } from '../../../../geoms/types';
 import { Scale } from '../../../../scales';
 import { SettingsSpec, PointerEvent } from '../../../../specs/settings';
 import { DEFAULT_SINGLE_PANEL_SM_VALUE } from '../../../../specs/small_multiples';
@@ -93,7 +94,7 @@ function getCursorBand(
   isTooltipSnapEnabled: boolean,
   geometriesIndexKeys: (string | number)[],
   smallMultipleScales: SmallMultipleScales,
-): (Dimensions & { visible: boolean; fromExternalEvent: boolean }) | undefined {
+): ((Line | Rect) & { fromExternalEvent: boolean }) | undefined {
   if (!xScale) {
     return;
   }
@@ -147,10 +148,12 @@ function getCursorBand(
     },
     isTooltipSnapEnabled,
     xScale,
-    isLineAreaOnly ? 1 : totalBarsInCluster,
+    isLineAreaOnly ? 0 : totalBarsInCluster,
   );
-  return {
-    ...cursorBand,
-    fromExternalEvent,
-  };
+  return (
+    cursorBand && {
+      ...cursorBand,
+      fromExternalEvent,
+    }
+  );
 }

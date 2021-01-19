@@ -407,6 +407,8 @@ export interface CrosshairStyle {
     // (undocumented)
     band: FillStyle & Visible;
     // (undocumented)
+    crossLine: StrokeStyle & Visible & Partial<StrokeDashArray>;
+    // (undocumented)
     line: StrokeStyle & Visible & Partial<StrokeDashArray>;
 }
 

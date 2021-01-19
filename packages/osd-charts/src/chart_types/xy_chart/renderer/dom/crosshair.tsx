@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import React, { CSSProperties } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 
+import { Line, Rect } from '../../../../geoms/types';
 import { getTooltipType } from '../../../../specs';
 import { TooltipType } from '../../../../specs/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
@@ -28,18 +29,16 @@ import { getChartThemeSelector } from '../../../../state/selectors/get_chart_the
 import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { Rotation } from '../../../../utils/commons';
-import { Dimensions } from '../../../../utils/dimensions';
 import { LIGHT_THEME } from '../../../../utils/themes/light_theme';
 import { Theme } from '../../../../utils/themes/theme';
 import { getCursorBandPositionSelector } from '../../state/selectors/get_cursor_band';
 import { getCursorLinePositionSelector } from '../../state/selectors/get_cursor_line';
-import { isHorizontalRotation } from '../../state/utils/common';
 
 interface CrosshairProps {
   theme: Theme;
   chartRotation: Rotation;
-  cursorBandPosition?: Dimensions;
-  cursorLinePosition?: Dimensions;
+  cursorPosition?: (Line | Rect) & { isLine?: boolean };
+  cursorCrossLinePosition?: Line;
   tooltipType: TooltipType;
   fromExternalEvent?: boolean;
   zIndex: number;
@@ -56,67 +55,64 @@ function canRenderHelpLine(type: TooltipType, visible: boolean) {
 class CrosshairComponent extends React.Component<CrosshairProps> {
   static displayName = 'Crosshair';
 
-  renderBand() {
+  renderCursor() {
     const {
       theme: {
-        crosshair: { band },
+        crosshair: { band, line },
       },
-      cursorBandPosition,
+      cursorPosition,
       tooltipType,
       fromExternalEvent,
     } = this.props;
 
-    if (!cursorBandPosition || !canRenderBand(tooltipType, band.visible, fromExternalEvent)) {
+    if (!cursorPosition || !canRenderBand(tooltipType, band.visible, fromExternalEvent)) {
       return null;
     }
-    const style: CSSProperties = {
-      ...cursorBandPosition,
-      background: band.fill,
-    };
-
-    return <div className="echCrosshair__band" style={style} />;
+    if ('x1' in cursorPosition) {
+      const { x1, x2, y1, y2 } = cursorPosition;
+      const { strokeWidth, stroke, dash } = line;
+      const strokeDasharray = (dash ?? []).join(' ');
+      return <line {...{ x1, x2, y1, y2, strokeWidth, stroke, strokeDasharray }} />;
+    }
+    const { x, y, width, height } = cursorPosition;
+    const { fill } = band;
+    return <rect {...{ x, y, width, height, fill }} />;
   }
 
-  renderLine() {
+  renderCrossLine() {
     const {
       theme: {
-        crosshair: { line },
+        crosshair: { crossLine },
       },
-      cursorLinePosition,
+      cursorCrossLinePosition,
       tooltipType,
-      chartRotation,
-      zIndex,
     } = this.props;
 
-    if (!cursorLinePosition || !canRenderHelpLine(tooltipType, line.visible)) {
+    if (!cursorCrossLinePosition || !canRenderHelpLine(tooltipType, crossLine.visible)) {
       return null;
     }
-    const isHorizontalRotated = isHorizontalRotation(chartRotation);
 
-    const style: CSSProperties = isHorizontalRotated
-      ? {
-          ...cursorLinePosition,
-          borderTopWidth: line.strokeWidth,
-          borderTopColor: line.stroke,
-          borderTopStyle: line.dash ? 'dashed' : 'solid',
-          zIndex,
-        }
-      : {
-          ...cursorLinePosition,
-          borderLeftWidth: line.strokeWidth,
-          borderLeftColor: line.stroke,
-          borderLeftStyle: line.dash ? 'dashed' : 'solid',
-          zIndex,
-        };
-    return <div className="echCrosshair__line" style={style} />;
+    const { strokeWidth, stroke, dash } = crossLine;
+    const style = {
+      strokeWidth,
+      stroke,
+      strokeDasharray: (dash ?? []).join(' '),
+    };
+
+    return <line {...cursorCrossLinePosition} {...style} />;
   }
 
   render() {
+    const { zIndex } = this.props;
     return (
-      <div className="echCrosshair">
-        {this.renderBand()}
-        {this.renderLine()}
-      </div>
+      <>
+        <svg className="echCrosshair__cursor" width="100%" height="100%">
+          {this.renderCursor()}
+        </svg>
+        <svg className="echCrosshair__crossLine" width="100%" height="100%" style={{ zIndex }}>
+          {this.renderCrossLine()}
+        </svg>
+      </>
     );
   }
 }
@@ -132,15 +128,16 @@ const mapStateToProps = (state: GlobalChartState): CrosshairProps => {
   }
   const settings = getSettingsSpecSelector(state);
   const cursorBandPosition = getCursorBandPositionSelector(state);
-  const tooltipType = getTooltipType(settings, cursorBandPosition?.fromExternalEvent);
+  const fromExternalEvent = cursorBandPosition?.fromExternalEvent;
+  const tooltipType = getTooltipType(settings, fromExternalEvent);
 
   return {
     theme: getChartThemeSelector(state),
     chartRotation: getChartRotationSelector(state),
-    cursorBandPosition,
-    cursorLinePosition: getCursorLinePositionSelector(state),
+    cursorPosition: cursorBandPosition,
+    cursorCrossLinePosition: getCursorLinePositionSelector(state),
     tooltipType,
-    fromExternalEvent: cursorBandPosition?.fromExternalEvent,
+    fromExternalEvent,
     zIndex: state.zIndex,
   };
 };
