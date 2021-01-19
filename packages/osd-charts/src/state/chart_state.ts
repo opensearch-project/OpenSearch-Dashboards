@@ -22,6 +22,7 @@ import React, { RefObject } from 'react';
 import { ChartTypes } from '../chart_types';
 import { GoalState } from '../chart_types/goal_chart/state/chart_state';
 import { HeatmapState } from '../chart_types/heatmap/state/chart_state';
+import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { PartitionState } from '../chart_types/partition_chart/state/chart_state';
 import { XYAxisChartState } from '../chart_types/xy_chart/state/chart_state';
 import { LegendItem, LegendItemExtraValues } from '../commons/legend';
@@ -37,6 +38,7 @@ import { CHART_RENDERED } from './actions/chart';
 import { UPDATE_PARENT_DIMENSION } from './actions/chart_settings';
 import { CLEAR_TEMPORARY_COLORS, SET_PERSISTED_COLOR, SET_TEMPORARY_COLOR } from './actions/colors';
 import { EXTERNAL_POINTER_EVENT } from './actions/events';
+import { LegendPath } from './actions/legend';
 import { REMOVE_SPEC, SPEC_PARSED, SPEC_UNMOUNTED, UPSERT_SPEC } from './actions/specs';
 import { Z_INDEX_EVENT } from './actions/z_index';
 import { interactionsReducer } from './reducers/interactions';
@@ -179,7 +181,8 @@ export interface PointerStates {
 /** @internal */
 export interface InteractionsState {
   pointer: PointerStates;
-  highlightedLegendItemKey: string | null;
+  highlightedLegendItemKey: PrimitiveValue;
+  highlightedLegendPath: LegendPath;
   deselectedDataSeries: SeriesIdentifier[];
 }
 
@@ -267,6 +270,7 @@ export const getInitialState = (chartId: string): GlobalChartState => ({
   interactions: {
     pointer: getInitialPointerState(),
     highlightedLegendItemKey: null,
+    highlightedLegendPath: [],
     deselectedDataSeries: [],
   },
   externalEvents: {

@@ -18,18 +18,21 @@
  */
 
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
+import { LegendPath } from '../state/actions/legend';
 import { Color } from '../utils/commons';
+import { CategoryKey, CategoryLabel } from './category';
 import { SeriesIdentifier } from './series_id';
 /** @internal */
-export type LegendItemChildId = string;
+export type LegendItemChildId = CategoryKey;
 
 /** @internal */
 export type LegendItem = {
   seriesIdentifier: SeriesIdentifier;
   childId?: LegendItemChildId;
   depth?: number;
+  path: LegendPath;
   color: Color;
-  label: string;
+  label: CategoryLabel;
   isSeriesHidden?: boolean;
   isItemHidden?: boolean;
   defaultExtra?: {

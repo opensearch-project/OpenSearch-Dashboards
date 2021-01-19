@@ -1063,6 +1063,19 @@ export interface LegendColorPickerProps {
 // @public (undocumented)
 export type LegendItemListener = (series: SeriesIdentifier | null) => void;
 
+// @public (undocumented)
+export const LegendStrategy: Readonly<{
+    Node: "node";
+    Path: "path";
+    KeyInLayer: "keyInLayer";
+    Key: "key";
+    NodeWithDescendants: "nodeWithDescendants";
+    PathWithDescendants: "pathWithDescendants";
+}>;
+
+// @public (undocumented)
+export type LegendStrategy = $Values<typeof LegendStrategy>;
+
 // Warning: (ae-missing-release-tag) "LegendStyle" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1605,6 +1618,7 @@ export interface SettingsSpec extends Spec {
     legendColorPicker?: LegendColorPicker;
     legendMaxDepth: number;
     legendPosition: Position;
+    legendStrategy?: LegendStrategy;
     minBrushDelta?: number;
     noResults?: ComponentType | ReactChild;
     // (undocumented)
@@ -1965,7 +1979,7 @@ export type YDomainRange = YDomainBase & DomainRange;
 // src/chart_types/partition_chart/layout/types/config_types.ts:128:5 - (ae-forgotten-export) The symbol "TimeMs" needs to be exported by the entry point index.d.ts
 // src/chart_types/partition_chart/layout/types/config_types.ts:129:5 - (ae-forgotten-export) The symbol "AnimKeyframe" needs to be exported by the entry point index.d.ts
 // src/chart_types/partition_chart/specs/index.ts:48:13 - (ae-forgotten-export) The symbol "NodeColorAccessor" needs to be exported by the entry point index.d.ts
-// src/commons/series_id.ts:39:3 - (ae-forgotten-export) The symbol "SeriesKey" needs to be exported by the entry point index.d.ts
+// src/commons/series_id.ts:40:3 - (ae-forgotten-export) The symbol "SeriesKey" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

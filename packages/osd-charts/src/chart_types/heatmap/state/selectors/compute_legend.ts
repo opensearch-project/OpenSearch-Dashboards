@@ -48,6 +48,7 @@ export const computeLegendSelector = createCachedSelector(
         seriesIdentifier,
         isSeriesHidden: deselectedDataSeries.some((dataSeries) => dataSeries.key === seriesIdentifier.key),
         isToggleable: true,
+        path: [{ index: 0, value: seriesIdentifier.key }],
       };
     });
   },

@@ -17,25 +17,13 @@
  * under the License.
  */
 
-import { SpecId } from '../utils/ids';
-import { CategoryKey } from './category';
-
 /**
- * A string key used to uniquely identify a series
+ * A string key is used to uniquely identify categories
+ *
+ * todo: broaden it; some options:
+ *   - allow other values of `PrimitiveValue` type (now: string | number | null) but should add Symbol
+ *   - allow a descriptor object, eg. `{ key: PrimitiveValue, label: string }`
+ *   - allow an accessor that operates on the key, and maps it to a label
  */
-export type SeriesKey = CategoryKey;
-
-/**
- * A series identifier
- * @public
- */
-export type SeriesIdentifier = {
-  /**
-   * The SpecId, used to identify the spec
-   */
-  specId: SpecId;
-  /**
-   * A string key used to uniquely identify a series
-   */
-  key: SeriesKey;
-};
+export type CategoryKey = string;
+export type CategoryLabel = string;

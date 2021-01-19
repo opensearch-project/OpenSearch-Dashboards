@@ -140,6 +140,7 @@ describe('Rendering utils', () => {
         raw: null,
         legendSizingLabel: null,
       },
+      path: [],
     };
 
     const unhighlightedLegendItem: LegendItem = {

@@ -35,7 +35,7 @@ import {
 
 export const Example = () => (
   <Chart className="story-chart">
-    <Settings showLegend theme={STORYBOOK_LIGHT_THEME} />
+    <Settings showLegend legendStrategy="pathWithDescendants" theme={STORYBOOK_LIGHT_THEME} />
     <Partition
       id="spec_1"
       data={mocks.miniSunburst}

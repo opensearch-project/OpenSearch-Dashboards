@@ -17,25 +17,10 @@
  * under the License.
  */
 
-import { SpecId } from '../utils/ids';
-import { CategoryKey } from './category';
+import { Position } from './commons';
 
-/**
- * A string key used to uniquely identify a series
- */
-export type SeriesKey = CategoryKey;
+export const isHorizontalLegend = (legendPosition: Position) =>
+  legendPosition === Position.Bottom || legendPosition === Position.Top;
 
-/**
- * A series identifier
- * @public
- */
-export type SeriesIdentifier = {
-  /**
-   * The SpecId, used to identify the spec
-   */
-  specId: SpecId;
-  /**
-   * A string key used to uniquely identify a series
-   */
-  key: SeriesKey;
-};
+export const isHierarchicalLegend = (flatLegend: boolean | undefined, legendPosition: Position) =>
+  !flatLegend && !isHorizontalLegend(legendPosition);

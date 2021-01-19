@@ -78,6 +78,7 @@ describe.skip('Chart Store', () => {
       specId: SPEC_ID,
       key: 'color1',
     },
+    path: [],
   };
 
   const secondLegendItem: LegendItem = {
@@ -87,6 +88,7 @@ describe.skip('Chart Store', () => {
       specId: SPEC_ID,
       key: 'color2',
     },
+    path: [],
   };
   beforeEach(() => {
     store = null; // new ChartStore();

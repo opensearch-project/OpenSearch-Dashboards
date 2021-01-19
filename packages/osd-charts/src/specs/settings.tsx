@@ -22,6 +22,7 @@ import React, { ComponentType, ReactChild } from 'react';
 import { Spec } from '.';
 import { Cell } from '../chart_types/heatmap/layout/types/viewmodel_types';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
+import { LegendStrategy } from '../chart_types/partition_chart/state/selectors/get_highlighted_shapes';
 import { XYChartSeriesIdentifier } from '../chart_types/xy_chart/utils/series';
 import { DomainRange } from '../chart_types/xy_chart/utils/specs';
 import { SeriesIdentifier } from '../commons/series_id';
@@ -354,6 +355,10 @@ export interface SettingsSpec extends Spec {
    * Display the legend as a flat hierarchy
    */
   flatLegend?: boolean;
+  /**
+   * Choose a partition highlighting strategy for hovering over legend items
+   */
+  legendStrategy?: LegendStrategy;
   /**
    * Removes duplicate axes
    *

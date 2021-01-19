@@ -142,6 +142,7 @@ describe('Type Checks', () => {
         },
         defaultExtra: { raw: 6, formatted: '6.00', legendSizingLabel: '6.00' },
         isSeriesHidden: true,
+        path: [],
       },
       {
         color: '#2B70F7',
@@ -152,6 +153,7 @@ describe('Type Checks', () => {
         },
         defaultExtra: { raw: 2, formatted: '2.00', legendSizingLabel: '2.00' },
         isSeriesHidden: true,
+        path: [],
       },
     ];
     expect(isAllSeriesDeselected(legendItems1)).toBe(true);
@@ -167,6 +169,7 @@ describe('Type Checks', () => {
         },
         defaultExtra: { raw: 6, formatted: '6.00', legendSizingLabel: '6.00' },
         isSeriesHidden: false,
+        path: [],
       },
       {
         color: '#2B70F7',
@@ -177,6 +180,7 @@ describe('Type Checks', () => {
         },
         defaultExtra: { raw: 2, formatted: '2.00', legendSizingLabel: '2.00' },
         isSeriesHidden: true,
+        path: [],
       },
     ];
     expect(isAllSeriesDeselected(legendItems2)).toBe(false);

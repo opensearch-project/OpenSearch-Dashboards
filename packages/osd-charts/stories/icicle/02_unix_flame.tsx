@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../src';
+import { Chart, Datum, LegendStrategy, Partition, PartitionLayout, Settings } from '../../src';
 import { STORYBOOK_LIGHT_THEME } from '../shared';
 import { config, getFlatData, getLayerSpec, maxDepth } from '../utils/hierarchical_input_utils';
 import { plasma18 as palette } from '../utils/utils';
@@ -29,7 +29,13 @@ const color = palette.slice().reverse();
 export const Example = () => {
   return (
     <Chart className="story-chart">
-      <Settings showLegend flatLegend legendMaxDepth={maxDepth} theme={STORYBOOK_LIGHT_THEME} />
+      <Settings
+        showLegend
+        flatLegend
+        legendStrategy={LegendStrategy.PathWithDescendants}
+        legendMaxDepth={maxDepth}
+        theme={STORYBOOK_LIGHT_THEME}
+      />
       <Partition
         id="spec_1"
         data={getFlatData()}

@@ -22,7 +22,7 @@ import createCachedSelector from 're-reselect';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { LegendItemLabel } from '../../../../state/selectors/get_legend_items_labels';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { CHILDREN_KEY, HierarchyOfArrays } from '../../layout/utils/group_by_rollup';
+import { CHILDREN_KEY, HierarchyOfArrays, HIERARCHY_ROOT_KEY } from '../../layout/utils/group_by_rollup';
 import { Layer } from '../../specs';
 import { getPieSpec } from './pie_spec';
 import { getTree } from './tree';
@@ -57,7 +57,7 @@ function flatSlicesNames(
       formattedValue = formatter ? formatter(key) : `${key}`;
     }
     // preventing errors from external formatters
-    if (formattedValue != null && formattedValue !== '') {
+    if (formattedValue != null && formattedValue !== '' && formattedValue !== HIERARCHY_ROOT_KEY) {
       // save only the max depth, so we can compute the the max extension of the legend
       keys.set(formattedValue, Math.max(depth, keys.get(formattedValue) ?? 0));
     }

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { CategoryKey } from '../../commons/category';
 import { SeriesIdentifier } from '../../commons/series_id';
 
 /** @internal */
@@ -28,9 +29,14 @@ export const ON_LEGEND_ITEM_OUT = 'ON_LEGEND_ITEM_OUT';
 /** @internal */
 export const ON_TOGGLE_DESELECT_SERIES = 'ON_TOGGLE_DESELECT_SERIES';
 
+export type LegendPathElement = { index: number; value: CategoryKey };
+
+export type LegendPath = LegendPathElement[];
+
 interface LegendItemOverAction {
   type: typeof ON_LEGEND_ITEM_OVER;
-  legendItemKey: string | null;
+  legendItemKey: CategoryKey | null;
+  legendPath: LegendPath;
 }
 interface LegendItemOutAction {
   type: typeof ON_LEGEND_ITEM_OUT;
@@ -44,8 +50,9 @@ export interface ToggleDeselectSeriesAction {
 }
 
 /** @internal */
-export function onLegendItemOverAction(legendItemKey: string | null): LegendItemOverAction {
-  return { type: ON_LEGEND_ITEM_OVER, legendItemKey };
+export function onLegendItemOverAction(legendPath: LegendPath): LegendItemOverAction {
+  // todo remove obsoleted `legendItemKey`
+  return { type: ON_LEGEND_ITEM_OVER, legendItemKey: legendPath[legendPath.length - 1]?.value ?? null, legendPath };
 }
 
 /** @internal */

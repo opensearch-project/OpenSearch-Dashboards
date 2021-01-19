@@ -63,11 +63,7 @@ export interface LegendItemProps {
   toggleDeselectSeriesAction: typeof onToggleDeselectSeriesAction;
 }
 
-/**
- * @internal
- * @param item
- * @param props
- */
+/** @internal */
 export function renderLegendItem(
   item: LegendItem,
   props: Omit<LegendItemProps, 'item'>,
@@ -124,8 +120,8 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
     return !deepEqual(this.props, nextProps) || !deepEqual(this.state, nextState);
   }
 
-  handleColorClick = (changable: boolean): MouseEventHandler | undefined =>
-    changable
+  handleColorClick = (changeable: boolean): MouseEventHandler | undefined =>
+    changeable
       ? (event) => {
           event.stopPropagation();
           this.toggleIsOpen();
@@ -142,7 +138,7 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
     if (onMouseOver) {
       onMouseOver(item.seriesIdentifier);
     }
-    mouseOverAction(item.seriesIdentifier.key);
+    mouseOverAction(item.path);
   };
 
   onLegendItemMouseOut = () => {

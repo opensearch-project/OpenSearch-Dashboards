@@ -35,6 +35,7 @@ export { SeriesIdentifier } from './commons/series_id';
 export { XYChartSeriesIdentifier, DataSeriesDatum, FilledValues } from './chart_types/xy_chart/utils/series';
 export { AnnotationTooltipFormatter, CustomAnnotationTooltip } from './chart_types/xy_chart/annotations/types';
 export { GeometryValue } from './utils/geometry';
+export { LegendStrategy } from './chart_types/partition_chart/state/selectors/get_highlighted_shapes';
 export {
   Config as PartitionConfig,
   FillLabelConfig as PartitionFillLabel,

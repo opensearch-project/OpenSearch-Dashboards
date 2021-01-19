@@ -107,7 +107,7 @@ module.exports = {
     'no-bitwise': 0,
     'no-void': 0,
     yoda: 0,
-    'lines-between-class-members': ['error', 'always', { exceptAfterSingleLine: true }],
+    '@typescript-eslint/lines-between-class-members': ['error', 'always', { exceptAfterSingleLine: true }],
     'no-restricted-globals': 0,
     'no-case-declarations': 0,
     'no-return-await': 0,

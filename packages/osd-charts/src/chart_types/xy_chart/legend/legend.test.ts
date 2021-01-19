@@ -141,6 +141,7 @@ describe('Legends', () => {
         isSeriesHidden: false,
         isToggleable: true,
         defaultExtra: nullDisplayValue,
+        path: [{ index: 0, value: 'seriesCollectionValue1a' }],
       },
     ];
     expect([...legend.values()]).toEqual(expected);
@@ -159,6 +160,7 @@ describe('Legends', () => {
         isSeriesHidden: false,
         isToggleable: true,
         defaultExtra: nullDisplayValue,
+        path: [{ index: 0, value: 'seriesCollectionValue1a' }],
       },
       {
         color: 'blue',
@@ -169,6 +171,7 @@ describe('Legends', () => {
         isSeriesHidden: false,
         isToggleable: true,
         defaultExtra: nullDisplayValue,
+        path: [{ index: 0, value: 'seriesCollectionValue1b' }],
       },
     ];
     expect([...legend.values()]).toEqual(expected);
@@ -187,6 +190,7 @@ describe('Legends', () => {
         isSeriesHidden: false,
         isToggleable: true,
         defaultExtra: nullDisplayValue,
+        path: [{ index: 0, value: 'seriesCollectionValue1a' }],
       },
       {
         color: 'green',
@@ -197,6 +201,7 @@ describe('Legends', () => {
         isSeriesHidden: false,
         isToggleable: true,
         defaultExtra: nullDisplayValue,
+        path: [{ index: 0, value: 'seriesCollectionValue2a' }],
       },
     ];
     expect([...legend.values()]).toEqual(expected);
@@ -220,6 +225,7 @@ describe('Legends', () => {
         isSeriesHidden: false,
         isToggleable: true,
         defaultExtra: nullDisplayValue,
+        path: [{ index: 0, value: 'seriesCollectionValue1a' }],
       },
     ];
     expect([...legend.values()]).toEqual(expected);

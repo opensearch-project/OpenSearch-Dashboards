@@ -20,6 +20,7 @@
 import { BBox } from '../../utils/bbox/bbox_calculator';
 import { Position } from '../../utils/commons';
 import { Margins } from '../../utils/dimensions';
+import { isHorizontalLegend } from '../../utils/legend';
 import { LegendStyle as ThemeLegendStyle } from '../../utils/themes/theme';
 
 /** @internal */
@@ -47,8 +48,6 @@ export interface LegendListStyle {
 }
 /**
  * Get the legend list style
- * @param position
- * @param chartMarrings, legend from the Theme
  * @internal
  */
 export function getLegendListStyle(
@@ -58,7 +57,7 @@ export function getLegendListStyle(
 ): LegendListStyle {
   const { top: paddingTop, bottom: paddingBottom, left: paddingLeft, right: paddingRight } = chartMargins;
 
-  if (position === Position.Bottom || position === Position.Top) {
+  if (isHorizontalLegend(position)) {
     return {
       paddingLeft,
       paddingRight,
@@ -73,8 +72,6 @@ export function getLegendListStyle(
 }
 /**
  * Get the legend global style
- * @param position the position of the legend
- * @param size the computed size of the legend
  * @internal
  */
 export function getLegendStyle(position: Position, size: BBox, margin: number): LegendStyle {

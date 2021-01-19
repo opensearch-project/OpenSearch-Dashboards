@@ -22,7 +22,7 @@ import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getLegendSizeSelector } from '../../../../state/selectors/get_legend_size';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { Position } from '../../../../utils/commons';
+import { isHorizontalLegend } from '../../../../utils/legend';
 import { Config } from '../../layout/types/config_types';
 import { getHeatmapConfigSelector } from './get_heatmap_config';
 import { getHeatmapTableSelector } from './get_heatmap_table';
@@ -54,7 +54,7 @@ export const getGridHeightParamsSelector = createCachedSelector(
     const xAxisHeight = visible ? fontSize : 0;
     const totalVerticalPadding = padding * 2;
     let legendHeight = 0;
-    if (showLegend && (legendPosition === Position.Top || legendPosition === Position.Bottom)) {
+    if (showLegend && isHorizontalLegend(legendPosition)) {
       legendHeight = maxLegendHeight ?? legendSize.height;
     }
     const verticalRemainingSpace = containerHeight - xAxisHeight - totalVerticalPadding - legendHeight;

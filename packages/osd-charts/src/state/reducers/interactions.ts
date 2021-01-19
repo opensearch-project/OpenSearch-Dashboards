@@ -138,11 +138,14 @@ export function interactionsReducer(
       return {
         ...state,
         highlightedLegendItemKey: null,
+        highlightedLegendPath: [],
       };
     case ON_LEGEND_ITEM_OVER:
+      const { legendItemKey: highlightedLegendItemKey, legendPath: highlightedLegendPath } = action;
       return {
         ...state,
-        highlightedLegendItemKey: action.legendItemKey,
+        highlightedLegendItemKey,
+        highlightedLegendPath,
       };
     case ON_TOGGLE_DESELECT_SERIES:
       return {
