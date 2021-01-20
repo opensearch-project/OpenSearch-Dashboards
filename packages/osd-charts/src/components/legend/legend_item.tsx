@@ -211,7 +211,7 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
       'echLegendItem__extra--hidden': isItemHidden,
     });
     const hasColorPicker = Boolean(colorPicker);
-    const extra = getExtra(extraValues, item, totalItems);
+    const extra = showExtra && getExtra(extraValues, item, totalItems);
     const style = item.depth
       ? {
           marginLeft: LEGEND_HIERARCHY_MARGIN * (item.depth ?? 0),
@@ -241,7 +241,7 @@ export class LegendListItem extends Component<LegendItemProps, LegendItemState> 
             onClick={this.handleLabelClick(seriesIdentifier)}
             isSeriesHidden={isSeriesHidden}
           />
-          {showExtra && extra && renderExtra(extra, isSeriesHidden)}
+          {extra && renderExtra(extra, isSeriesHidden)}
           {Action && (
             <div className="echLegendItem__action">
               <Action series={seriesIdentifier} color={color} label={label} />

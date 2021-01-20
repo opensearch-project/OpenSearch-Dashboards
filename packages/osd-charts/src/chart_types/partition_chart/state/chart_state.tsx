@@ -29,6 +29,7 @@ import { Partition } from '../renderer/canvas/partition';
 import { HighlighterFromHover } from '../renderer/dom/highlighter_hover';
 import { HighlighterFromLegend } from '../renderer/dom/highlighter_legend';
 import { computeLegendSelector } from './selectors/compute_legend';
+import { getLegendItemsExtra } from './selectors/get_legend_items_extra';
 import { getLegendItemsLabels } from './selectors/get_legend_items_labels';
 import { isTooltipVisibleSelector } from './selectors/is_tooltip_visible';
 import { createOnElementClickCaller } from './selectors/on_element_click_caller';
@@ -36,8 +37,6 @@ import { createOnElementOutCaller } from './selectors/on_element_out_caller';
 import { createOnElementOverCaller } from './selectors/on_element_over_caller';
 import { getPieSpec } from './selectors/pie_spec';
 import { getTooltipInfoSelector } from './selectors/tooltip';
-
-const EMPTY_MAP = new Map();
 
 /** @internal */
 export class PartitionState implements InternalChartState {
@@ -80,8 +79,8 @@ export class PartitionState implements InternalChartState {
     return computeLegendSelector(globalState);
   }
 
-  getLegendExtraValues() {
-    return EMPTY_MAP;
+  getLegendExtraValues(globalState: GlobalChartState) {
+    return getLegendItemsExtra(globalState);
   }
 
   chartRenderer(containerRef: BackwardRef, forwardStageRef: RefObject<HTMLCanvasElement>) {

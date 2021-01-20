@@ -22,6 +22,7 @@ import { LegendPath } from '../state/actions/legend';
 import { Color } from '../utils/common';
 import { CategoryKey, CategoryLabel } from './category';
 import { SeriesIdentifier } from './series_id';
+
 /** @internal */
 export type LegendItemChildId = CategoryKey;
 
@@ -30,6 +31,9 @@ export type LegendItem = {
   seriesIdentifier: SeriesIdentifier;
   childId?: LegendItemChildId;
   depth?: number;
+  /**
+   * Path to iterm in hierarchical legend
+   */
   path: LegendPath;
   color: Color;
   label: CategoryLabel;

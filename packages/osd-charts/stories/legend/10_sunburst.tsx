@@ -34,7 +34,16 @@ import {
 } from '../utils/utils';
 
 export const Example = () => {
+  const partitionLayout = select(
+    'Partition Layout',
+    {
+      treemap: PartitionLayout.treemap,
+      sunburst: PartitionLayout.sunburst,
+    },
+    PartitionLayout.sunburst,
+  );
   const flatLegend = boolean('flatLegend', true);
+  const showLegendExtra = boolean('showLegendExtra', false);
   const legendMaxDepth = number('legendMaxDepth', 2, {
     min: 0,
     max: 3,
@@ -46,6 +55,7 @@ export const Example = () => {
     <Chart className="story-chart">
       <Settings
         showLegend
+        showLegendExtra={showLegendExtra}
         flatLegend={flatLegend}
         legendStrategy={legendStrategy}
         legendMaxDepth={legendMaxDepth}
@@ -81,7 +91,7 @@ export const Example = () => {
           },
         ]}
         config={{
-          partitionLayout: PartitionLayout.sunburst,
+          partitionLayout,
           linkLabel: {
             maxCount: 0,
             fontSize: 14,
