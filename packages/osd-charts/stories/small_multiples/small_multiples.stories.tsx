@@ -30,3 +30,4 @@ export { Example as verticalAreas } from './2_vertical_areas';
 export { Example as horizontalBars } from './4_horizontal_bars';
 export { Example as gridLines } from './3_grid_lines';
 export { Example as histogramBars } from './5_histogram_bars';
+export { Example as heterogeneous } from './6_heterogeneous_cartesians';

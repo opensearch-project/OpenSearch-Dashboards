@@ -26,10 +26,10 @@ import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/grou
 import { PartitionState } from '../chart_types/partition_chart/state/chart_state';
 import { XYAxisChartState } from '../chart_types/xy_chart/state/chart_state';
 import { LegendItem, LegendItemExtraValues } from '../common/legend';
-import { SeriesKey, SeriesIdentifier } from '../common/series_id';
-import { TooltipInfo, TooltipAnchorPosition } from '../components/tooltip/types';
-import { Spec, PointerEvent, DEFAULT_SETTINGS_SPEC } from '../specs';
-import { Color } from '../utils/common';
+import { SeriesIdentifier, SeriesKey } from '../common/series_id';
+import { TooltipAnchorPosition, TooltipInfo } from '../components/tooltip/types';
+import { DEFAULT_SETTINGS_SPEC, PointerEvent, Spec } from '../specs';
+import { Color, keepDistinct } from '../utils/common';
 import { Dimensions } from '../utils/dimensions';
 import { Logger } from '../utils/logger';
 import { Point } from '../utils/point';
@@ -193,7 +193,7 @@ export interface ExternalEventsState {
 
 /** @internal */
 export interface ColorOverrides {
-  temporary: Record<SeriesKey, Color | null>;
+  temporary: Record<SeriesKey, Color | null>; // null (vs. undefined) means that `overrides.persisted[key]` in `series.ts` not be used
   persisted: Record<SeriesKey, Color>;
 }
 
@@ -295,25 +295,14 @@ export const chartStoreReducer = (chartId: string) => {
           zIndex: action.zIndex,
         };
       case SPEC_PARSED:
-        const chartType = findMainChartType(state.specs);
-
-        if (isChartTypeChanged(state, chartType)) {
-          const internalChartState = initInternalChartState(chartType);
-          return {
-            ...state,
-            specsInitialized: true,
-            specParsing: false,
-            chartType,
-            internalChartState,
-          };
-        }
+        const chartType = chartTypeFromSpecs(state.specs);
         return {
           ...state,
           specsInitialized: true,
           specParsing: false,
           chartType,
+          internalChartState: state.chartType === chartType ? state.internalChartState : newInternalState(chartType),
         };
-
       case SPEC_UNMOUNTED:
         return {
           ...state,
@@ -321,26 +310,14 @@ export const chartStoreReducer = (chartId: string) => {
           chartRendered: false,
         };
       case UPSERT_SPEC:
-        if (!state.specParsing) {
-          return {
-            ...state,
-            specsInitialized: false,
-            chartRendered: false,
-            specParsing: true,
-            specs: {
-              [DEFAULT_SETTINGS_SPEC.id]: DEFAULT_SETTINGS_SPEC,
-              [action.spec.id]: action.spec,
-            },
-          };
-        }
         return {
           ...state,
           specsInitialized: false,
           chartRendered: false,
-          specs: {
-            ...state.specs,
-            [action.spec.id]: action.spec,
-          },
+          specParsing: true,
+          specs: state.specParsing
+            ? { ...state.specs, [action.spec.id]: action.spec }
+            : { [DEFAULT_SETTINGS_SPEC.id]: DEFAULT_SETTINGS_SPEC, [action.spec.id]: action.spec },
         };
       case REMOVE_SPEC:
         const { [action.id]: specToRemove, ...rest } = state.specs;
@@ -369,22 +346,11 @@ export const chartStoreReducer = (chartId: string) => {
         };
       case EXTERNAL_POINTER_EVENT:
         // discard events from self if any
-        if (action.event.chartId === chartId) {
-          return {
-            ...state,
-            externalEvents: {
-              ...state.externalEvents,
-              pointer: null,
-            },
-          };
-        }
         return {
           ...state,
           externalEvents: {
             ...state.externalEvents,
-            pointer: {
-              ...action.event,
-            },
+            pointer: action.event.chartId === chartId ? null : action.event,
           },
         };
       case CLEAR_TEMPORARY_COLORS:
@@ -407,59 +373,41 @@ export const chartStoreReducer = (chartId: string) => {
           },
         };
       case SET_PERSISTED_COLOR:
+        const { [action.key]: removedPersistedColor, ...otherPersistentColors } = state.colors.persisted;
         return {
           ...state,
           colors: {
             ...state.colors,
-            persisted:
-              action.color !== null
-                ? {
-                    ...state.colors.persisted,
-                    [action.key]: action.color,
-                  }
-                : (() => {
-                    const { [action.key]: removed, ...others } = state.colors.persisted;
-                    return others;
-                  })(),
+            persisted: {
+              ...otherPersistentColors,
+              ...(action.color && { [action.key]: action.color }),
+            },
           },
         };
       default:
-        if (getInternalIsInitializedSelector(state) !== InitStatus.Initialized) {
-          return state;
-        }
-        return {
-          ...state,
-          interactions: interactionsReducer(state.interactions, action, getLegendItemsSelector(state)),
-        };
+        return getInternalIsInitializedSelector(state) === InitStatus.Initialized
+          ? {
+              ...state,
+              interactions: interactionsReducer(state.interactions, action, getLegendItemsSelector(state)),
+            }
+          : state;
     }
   };
 };
 
-function findMainChartType(specs: SpecList): ChartTypes | null {
-  const types: Partial<Record<ChartTypes, number>> = Object.keys(specs).reduce<Partial<Record<ChartTypes, number>>>(
-    (acc, specId) => {
-      const { chartType } = specs[specId];
-      let accumulator = acc[chartType];
-      if (accumulator === undefined) {
-        accumulator = 0;
-      } else {
-        accumulator += 1;
-      }
-      acc[chartType] = accumulator;
-      return acc;
-    },
-    {},
-  );
-  // https://stackoverflow.com/questions/55012174/why-doesnt-object-keys-return-a-keyof-type-in-typescript
-  const chartTypes = Object.keys(types).filter((type) => type !== ChartTypes.Global);
-  if (chartTypes.length > 1) {
-    Logger.warn('Multiple chart type on the same configuration');
+function chartTypeFromSpecs(specs: SpecList): ChartTypes | null {
+  const nonGlobalTypes = Object.values(specs)
+    .map((s) => s.chartType)
+    .filter((type) => type !== ChartTypes.Global)
+    .filter(keepDistinct);
+  if (nonGlobalTypes.length !== 1) {
+    Logger.warn(`${nonGlobalTypes.length === 0 ? 'Zero' : 'Multiple'} chart types in the same configuration`);
     return null;
   }
-  return chartTypes[0] as ChartTypes;
+  return nonGlobalTypes[0];
 }
 
-function initInternalChartState(chartType: ChartTypes | null): InternalChartState | null {
+function newInternalState(chartType: ChartTypes | null): InternalChartState | null {
   switch (chartType) {
     case ChartTypes.Goal:
       return new GoalState();
@@ -472,8 +420,4 @@ function initInternalChartState(chartType: ChartTypes | null): InternalChartStat
     default:
       return null;
   }
-}
-
-function isChartTypeChanged(state: GlobalChartState, newChartType: ChartTypes | null) {
-  return state.chartType !== newChartType;
 }

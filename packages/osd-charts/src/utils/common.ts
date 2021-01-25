@@ -104,7 +104,7 @@ export type Datum = any; // unknown;
 export type Rotation = 0 | 90 | -90 | 180;
 /** @public */
 export type Rendering = 'canvas' | 'svg';
-export type Color = string;
+export type Color = string; // todo static/runtime type it this for proper color string content; several places in the code, and ultimate use, dictate it not be an empty string
 export type StrokeStyle = Color; // now narrower than string | CanvasGradient | CanvasPattern
 
 export const Position = Object.freeze({
@@ -539,3 +539,9 @@ export const getPercentageValue = <T>(ratio: string | number, relativeValue: num
 
   return num && !isNaN(num) ? num : defaultValue;
 };
+
+/**
+ * Predicate function, eg. to be called with [].filter, to keep distinct values
+ * @example [1, 2, 4, 2, 4, 0, 3, 2].filter(keepDistinct) ==> [1, 2, 4, 0, 3]
+ */
+export const keepDistinct = <T>(d: T, i: number, a: T[]): boolean => a.indexOf(d) === i;

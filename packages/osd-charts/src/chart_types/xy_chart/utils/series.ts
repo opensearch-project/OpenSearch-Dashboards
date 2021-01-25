@@ -19,11 +19,11 @@
 
 import { SeriesIdentifier, SeriesKey } from '../../../common/series_id';
 import { ScaleType } from '../../../scales/constants';
-import { GroupBySpec, BinAgg, Direction, XScaleType } from '../../../specs';
+import { BinAgg, Direction, GroupBySpec, XScaleType } from '../../../specs';
 import { OrderBy } from '../../../specs/settings';
 import { ColorOverrides } from '../../../state/chart_state';
 import { Accessor, AccessorFn, getAccessorValue } from '../../../utils/accessor';
-import { Datum, Color, isNil } from '../../../utils/common';
+import { Color, Datum, isNil } from '../../../utils/common';
 import { GroupId } from '../../../utils/ids';
 import { Logger } from '../../../utils/logger';
 import { ColorConfig } from '../../../utils/themes/theme';
@@ -31,8 +31,8 @@ import { groupSeriesByYGroup, isHistogramEnabled, isStackedSpec } from '../domai
 import { LastValues } from '../state/utils/types';
 import { applyFitFunctionToDataSeries } from './fit_function_utils';
 import { groupBy } from './group_data_series';
-import { BasicSeriesSpec, SeriesTypes, SeriesSpecs, SeriesNameConfigOptions, StackMode } from './specs';
-import { formatStackedDataSeriesValues, datumXSortPredicate } from './stacked_series_utils';
+import { BasicSeriesSpec, SeriesNameConfigOptions, SeriesSpecs, SeriesTypes, StackMode } from './specs';
+import { datumXSortPredicate, formatStackedDataSeriesValues } from './stacked_series_utils';
 
 /** @internal */
 export const SERIES_DELIMITER = ' - ';
@@ -115,9 +115,6 @@ export function getSeriesIndex(series: SeriesIdentifier[], target: SeriesIdentif
 
 /**
  * Returns string form of accessor. Uses index when accessor is a function.
- *
- * @param accessor
- * @param index
  * @internal
  */
 export function getAccessorFieldName(accessor: Accessor | AccessorFn, index: number) {
@@ -126,7 +123,7 @@ export function getAccessorFieldName(accessor: Accessor | AccessorFn, index: num
 
 /**
  * Split a dataset into multiple series depending on the accessors.
- * Each series is then associated with a key thats belong to its configuration.
+ * Each series is then associated with a key that belongs to its configuration.
  * This method removes every data with an invalid x: a string or number value is required
  * `y` values and `mark` values are casted to number or null.
  * @internal
@@ -329,12 +326,7 @@ function castToNumber(value: any, nonNumericValues: any[]): number | null {
   return num;
 }
 
-/**
- * Sorts data based on order of xValues
- * @param dataSeries
- * @param xValues
- * @param xScaleType
- */
+/** Sorts data based on order of xValues */
 const getSortedDataSeries = (
   dataSeries: DataSeries[],
   xValues: Set<string | number>,
@@ -380,14 +372,7 @@ export function getFormattedDataSeries(
   return [...fittedAndStackedDataSeries, ...nonStackedDataSeries];
 }
 
-/**
- *
- * @param seriesSpecs the map for all the series spec
- * @param deselectedDataSeries the array of deselected/hidden data series
- * @param enableVislibSeriesSort is optional; if not specified in <Settings />,
- * @param smallMultiples
- * @internal
- */
+/** @internal */
 export function getDataSeriesFromSpecs(
   seriesSpecs: BasicSeriesSpec[],
   deselectedDataSeries: SeriesIdentifier[] = [],
@@ -518,6 +503,8 @@ function getSortedOrdinalXValues(
   }
 }
 
+const BIG_NUMBER = Number.MAX_SAFE_INTEGER; // the sort comparator must yield finite results, can't use infinities
+
 function getSeriesNameFromOptions(
   options: SeriesNameConfigOptions,
   { yAccessor, splitAccessors }: XYChartSeriesIdentifier,
@@ -530,7 +517,7 @@ function getSeriesNameFromOptions(
   return (
     options.names
       .slice()
-      .sort(({ sortIndex: a = Infinity }, { sortIndex: b = Infinity }) => a - b)
+      .sort(({ sortIndex: a = BIG_NUMBER }, { sortIndex: b = BIG_NUMBER }) => a - b)
       .map(({ accessor, value, name }) => {
         const accessorValue = splitAccessors.get(accessor) ?? null;
         if (accessorValue === value) {
@@ -557,41 +544,28 @@ export function getSeriesName(
   isTooltip: boolean,
   spec?: BasicSeriesSpec,
 ): string {
-  let delimiter = SERIES_DELIMITER;
-  if (spec && spec.name && typeof spec.name !== 'string') {
-    let customLabel: string | number | null = null;
-    if (typeof spec.name === 'function') {
-      customLabel = spec.name(seriesIdentifier, isTooltip);
-    } else {
-      delimiter = spec.name.delimiter ?? delimiter;
-      customLabel = getSeriesNameFromOptions(spec.name, seriesIdentifier, delimiter);
-    }
+  const customLabel =
+    typeof spec?.name === 'function'
+      ? spec.name(seriesIdentifier, isTooltip)
+      : typeof spec?.name === 'object' // extract booleans once https://github.com/microsoft/TypeScript/issues/12184 is fixed
+      ? getSeriesNameFromOptions(spec.name, seriesIdentifier, spec.name.delimiter ?? SERIES_DELIMITER)
+      : null;
 
-    if (customLabel !== null) {
-      return customLabel.toString();
-    }
+  if (customLabel !== null) {
+    return customLabel.toString();
   }
 
-  let name = '';
-  const nameKeys =
-    spec && spec.yAccessors.length > 1 ? seriesIdentifier.seriesKeys : seriesIdentifier.seriesKeys.slice(0, -1);
+  const multipleYAccessors = spec && spec.yAccessors.length > 1;
+  const nameKeys = multipleYAccessors ? seriesIdentifier.seriesKeys : seriesIdentifier.seriesKeys.slice(0, -1);
+  const nonZeroLength = nameKeys.length > 0;
 
-  // there is one series, the is only one yAccessor, the first part is not null
-  if (hasSingleSeries || nameKeys.length === 0 || nameKeys[0] == null) {
-    if (!spec) {
-      return '';
-    }
-
-    if (spec.splitSeriesAccessors && nameKeys.length > 0 && nameKeys[0] != null) {
-      name = nameKeys.join(delimiter);
-    } else {
-      name = typeof spec.name === 'string' ? spec.name : `${spec.id}`;
-    }
-  } else {
-    name = nameKeys.join(delimiter);
-  }
-
-  return name;
+  return nonZeroLength && (spec?.splitSeriesAccessors || !hasSingleSeries)
+    ? nameKeys.join(typeof spec?.name === 'object' ? spec.name.delimiter ?? SERIES_DELIMITER : SERIES_DELIMITER)
+    : spec === undefined
+    ? ''
+    : typeof spec.name === 'string'
+    ? spec.name
+    : spec.id;
 }
 
 function getSortIndex({ specSortIndex }: SeriesCollectionValue, total: number): number {
@@ -612,12 +586,7 @@ export function getSortedDataSeriesColorsValuesMap(
 
 /**
  * Helper function to get highest override color.
- *
- * from highest to lowest: `temporary`, `seriesSpec.color` then `persisted`
- *
- * @param key
- * @param customColors
- * @param overrides
+ * From highest to lowest: `temporary`, `seriesSpec.color` then, unless `temporary` is set to `null`, `persisted`
  */
 function getHighestOverride(
   key: string,
@@ -625,32 +594,13 @@ function getHighestOverride(
   overrides: ColorOverrides,
 ): Color | undefined {
   const tempColor: Color | undefined | null = overrides.temporary[key];
-
-  if (tempColor) {
-    return tempColor;
-  }
-
-  const customColor: Color | undefined | null = customColors.get(key);
-
-  if (customColor) {
-    return customColor;
-  }
-
-  if (tempColor === null) {
-    // Use default color when temporary and custom colors are null
-    return;
-  }
-
-  return overrides.persisted[key];
+  // Unexpected empty `tempColor` string is falsy and falls through, see comment in `export type Color = ...`
+  // Use default color when temporary and custom colors are null
+  return tempColor || customColors.get(key) || (tempColor === null ? undefined : overrides.persisted[key]);
 }
 
 /**
  * Returns color for a series given all color hierarchies
- *
- * @param seriesCollection
- * @param chartColors
- * @param customColors
- * @param overrides
  * @internal
  */
 export function getSeriesColors(
