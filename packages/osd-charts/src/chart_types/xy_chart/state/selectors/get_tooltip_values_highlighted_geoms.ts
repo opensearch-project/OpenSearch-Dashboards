@@ -39,8 +39,11 @@ import { Rotation } from '../../../../utils/common';
 import { isValidPointerOverEvent } from '../../../../utils/events';
 import { IndexedGeometry } from '../../../../utils/geometry';
 import { Point } from '../../../../utils/point';
+import { getTooltipCompareFn } from '../../../../utils/series_sort';
 import { isPointOnGeometry } from '../../rendering/utils';
 import { formatTooltip } from '../../tooltip/tooltip';
+import { defaultXYLegendSeriesSort } from '../../utils/default_series_sort_fn';
+import { DataSeries } from '../../utils/series';
 import { BasicSeriesSpec, AxisSpec } from '../../utils/specs';
 import { getAxesSpecForSpecId, getSpecDomainGroupId, getSpecsById } from '../utils/spec';
 import { ComputedScales } from '../utils/types';
@@ -48,6 +51,7 @@ import { getComputedScalesSelector } from './get_computed_scales';
 import { getElementAtCursorPositionSelector } from './get_elements_at_cursor_pos';
 import { getOrientedProjectedPointerPositionSelector } from './get_oriented_projected_pointer_position';
 import { getProjectedPointerPositionSelector } from './get_projected_pointer_position';
+import { getSiDataSeriesMapSelector } from './get_si_dataseries_map';
 import { getSeriesSpecsSelector, getAxisSpecsSelector } from './get_specs';
 import { hasSingleSeriesSelector } from './has_single_series';
 
@@ -79,6 +83,7 @@ export const getTooltipInfoAndGeometriesSelector = createCachedSelector(
     hasSingleSeriesSelector,
     getComputedScalesSelector,
     getElementAtCursorPositionSelector,
+    getSiDataSeriesMapSelector,
     getExternalPointerEventStateSelector,
     getTooltipHeaderFormatterSelector,
   ],
@@ -95,6 +100,7 @@ function getTooltipAndHighlightFromValue(
   hasSingleSeries: boolean,
   scales: ComputedScales,
   matchingGeoms: IndexedGeometry[],
+  serialIdentifierDataSeriesMap: Record<string, DataSeries>,
   externalPointerEvent: PointerEvent | null,
   tooltipHeaderFormatter?: TooltipValueFormatter,
 ): TooltipAndHighlightedGeoms {
@@ -196,11 +202,20 @@ function getTooltipAndHighlightFromValue(
     header = null;
   }
 
+  const tooltipSortFn = getTooltipCompareFn((settings as any).sortSeriesBy, (a, b) => {
+    const aDs = serialIdentifierDataSeriesMap[a.key];
+    const bDs = serialIdentifierDataSeriesMap[b.key];
+    return defaultXYLegendSeriesSort(aDs, bDs);
+  });
+
+  const sortedTooltipValues = values.sort((a, b) => {
+    return tooltipSortFn(a.seriesIdentifier, b.seriesIdentifier);
+  });
   return {
     tooltip: {
       header,
       // to avoid creating a breaking change because of a different sorting order on tooltip
-      values: values.reverse(),
+      values: sortedTooltipValues,
     },
     highlightedGeometries,
   };

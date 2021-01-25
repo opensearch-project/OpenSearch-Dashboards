@@ -19,8 +19,8 @@
 // eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable jest/no-conditional-expect */
 
-import { MockSeriesCollection } from '../../../../mocks/series/series_identifiers';
-import { MockSeriesSpecs, MockSeriesSpec, MockGlobalSpec } from '../../../../mocks/specs';
+import { MockDataSeries } from '../../../../mocks/series/series';
+import { MockSeriesSpec, MockGlobalSpec } from '../../../../mocks/specs';
 import { MockStore } from '../../../../mocks/store';
 import { SeededDataGenerator } from '../../../../mocks/utils';
 import { ScaleContinuous } from '../../../../scales';
@@ -28,8 +28,9 @@ import { ScaleType } from '../../../../scales/constants';
 import { Spec } from '../../../../specs';
 import { BARCHART_1Y0G, BARCHART_1Y1G } from '../../../../utils/data_samples/test_dataset';
 import { SpecId } from '../../../../utils/ids';
-import { SeriesCollectionValue, getSeriesIndex } from '../../utils/series';
+import { getSeriesIndex, XYChartSeriesIdentifier } from '../../utils/series';
 import { BasicSeriesSpec, HistogramModeAlignments, SeriesColorAccessorFn } from '../../utils/specs';
+import { computeSeriesDomainsSelector } from '../selectors/compute_series_domains';
 import { computeSeriesGeometriesSelector } from '../selectors/compute_series_geometries';
 import {
   computeSeriesDomains,
@@ -132,16 +133,16 @@ describe('Chart State utils', () => {
     });
     expect(domains.yDomain).toEqual([
       {
-        domain: [0, 9],
+        domain: [0, 5],
         scaleType: ScaleType.Log,
-        groupId: 'group2',
+        groupId: 'group1',
         isBandScale: false,
         type: 'yDomain',
       },
       {
-        domain: [0, 5],
+        domain: [0, 9],
         scaleType: ScaleType.Log,
-        groupId: 'group1',
+        groupId: 'group2',
         isBandScale: false,
         type: 'yDomain',
       },
@@ -150,81 +151,61 @@ describe('Chart State utils', () => {
     expect(domains.formattedDataSeries.filter(({ isStacked }) => !isStacked)).toMatchSnapshot();
   });
   it('should check if a SeriesCollectionValue item exists in a list of SeriesCollectionValue', () => {
-    const dataSeriesValuesA: SeriesCollectionValue = {
-      seriesIdentifier: {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: ['a', 'b', 'c'],
-        key: 'a',
-      },
+    const dataSeriesValuesA: XYChartSeriesIdentifier = {
+      specId: 'a',
+      yAccessor: 'y1',
+      splitAccessors: new Map(),
+      seriesKeys: ['a', 'b', 'c'],
+      key: 'a',
     };
-    const dataSeriesValuesB: SeriesCollectionValue = {
-      seriesIdentifier: {
-        specId: 'b',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: ['a', 'b', 'c'],
-        key: 'b',
-      },
+    const dataSeriesValuesB: XYChartSeriesIdentifier = {
+      specId: 'b',
+      yAccessor: 'y1',
+      splitAccessors: new Map(),
+      seriesKeys: ['a', 'b', 'c'],
+      key: 'b',
     };
-    const dataSeriesValuesC: SeriesCollectionValue = {
-      seriesIdentifier: {
-        specId: 'c',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: ['a', 'b', 'd'],
-        key: 'c',
-      },
+    const dataSeriesValuesC: XYChartSeriesIdentifier = {
+      specId: 'c',
+      yAccessor: 'y1',
+      splitAccessors: new Map(),
+      seriesKeys: ['a', 'b', 'd'],
+      key: 'c',
     };
-    const deselectedSeries = [dataSeriesValuesA.seriesIdentifier, dataSeriesValuesB.seriesIdentifier];
-    expect(getSeriesIndex(deselectedSeries, dataSeriesValuesA.seriesIdentifier)).toBe(0);
-    expect(getSeriesIndex(deselectedSeries, dataSeriesValuesC.seriesIdentifier)).toBe(-1);
-    expect(getSeriesIndex([], dataSeriesValuesA.seriesIdentifier)).toBe(-1);
+    const deselectedSeries = [dataSeriesValuesA, dataSeriesValuesB];
+    expect(getSeriesIndex(deselectedSeries, dataSeriesValuesA)).toBe(0);
+    expect(getSeriesIndex(deselectedSeries, dataSeriesValuesC)).toBe(-1);
+    expect(getSeriesIndex([], dataSeriesValuesA)).toBe(-1);
   });
   it('should update a list of SeriesCollectionValue given a selected SeriesCollectionValue item', () => {
-    const dataSeriesValuesA: SeriesCollectionValue = {
-      seriesIdentifier: {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: ['a', 'b', 'c'],
-        key: 'a',
-      },
+    const dataSeriesValuesA: XYChartSeriesIdentifier = {
+      specId: 'a',
+      yAccessor: 'y1',
+      splitAccessors: new Map(),
+      seriesKeys: ['a', 'b', 'c'],
+      key: 'a',
     };
-    const dataSeriesValuesB: SeriesCollectionValue = {
-      seriesIdentifier: {
-        specId: 'b',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: ['a', 'b', 'c'],
-        key: 'b',
-      },
+    const dataSeriesValuesB: XYChartSeriesIdentifier = {
+      specId: 'b',
+      yAccessor: 'y1',
+      splitAccessors: new Map(),
+      seriesKeys: ['a', 'b', 'c'],
+      key: 'b',
     };
-    const dataSeriesValuesC: SeriesCollectionValue = {
-      seriesIdentifier: {
-        specId: 'a',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: ['a', 'b', 'd'],
-        key: 'd',
-      },
+    const dataSeriesValuesC: XYChartSeriesIdentifier = {
+      specId: 'a',
+      yAccessor: 'y1',
+      splitAccessors: new Map(),
+      seriesKeys: ['a', 'b', 'd'],
+      key: 'd',
     };
-    const selectedSeries = [dataSeriesValuesA.seriesIdentifier, dataSeriesValuesB.seriesIdentifier];
-    const addedSelectedSeries = [
-      dataSeriesValuesA.seriesIdentifier,
-      dataSeriesValuesB.seriesIdentifier,
-      dataSeriesValuesC.seriesIdentifier,
-    ];
-    const removedSelectedSeries = [dataSeriesValuesB.seriesIdentifier];
+    const selectedSeries = [dataSeriesValuesA, dataSeriesValuesB];
+    const addedSelectedSeries = [dataSeriesValuesA, dataSeriesValuesB, dataSeriesValuesC];
+    const removedSelectedSeries = [dataSeriesValuesB];
 
-    expect(updateDeselectedDataSeries(selectedSeries, dataSeriesValuesC.seriesIdentifier)).toEqual(addedSelectedSeries);
-    expect(updateDeselectedDataSeries(selectedSeries, dataSeriesValuesA.seriesIdentifier)).toEqual(
-      removedSelectedSeries,
-    );
-    expect(updateDeselectedDataSeries([], dataSeriesValuesA.seriesIdentifier)).toEqual([
-      dataSeriesValuesA.seriesIdentifier,
-    ]);
+    expect(updateDeselectedDataSeries(selectedSeries, dataSeriesValuesC)).toEqual(addedSelectedSeries);
+    expect(updateDeselectedDataSeries(selectedSeries, dataSeriesValuesA)).toEqual(removedSelectedSeries);
+    expect(updateDeselectedDataSeries([], dataSeriesValuesA)).toEqual([dataSeriesValuesA]);
   });
 
   describe('getCustomSeriesColors', () => {
@@ -236,7 +217,7 @@ describe('Chart State utils', () => {
 
     describe('empty series collection and specs', () => {
       it('should return an empty map', () => {
-        const actual = getCustomSeriesColors(MockSeriesSpecs.empty(), MockSeriesCollection.empty());
+        const actual = getCustomSeriesColors(MockDataSeries.empty());
 
         expect(actual.size).toBe(0);
       });
@@ -246,9 +227,10 @@ describe('Chart State utils', () => {
       it('should return an empty map if no color', () => {
         const barSpec1 = MockSeriesSpec.bar({ id: specId1, data, splitSeriesAccessors: ['g'] });
         const barSpec2 = MockSeriesSpec.bar({ id: specId2, data, splitSeriesAccessors: ['g'] });
-        const barSeriesSpecs = MockSeriesSpecs.fromSpecs([barSpec1, barSpec2]);
-        const barSeriesCollection = MockSeriesCollection.fromSpecs(barSeriesSpecs);
-        const actual = getCustomSeriesColors(barSeriesSpecs, barSeriesCollection);
+        const store = MockStore.default();
+        MockStore.addSpecs([barSpec1, barSpec2], store);
+        const { formattedDataSeries } = computeSeriesDomainsSelector(store.getState());
+        const actual = getCustomSeriesColors(formattedDataSeries);
 
         expect(actual.size).toBe(0);
       });
@@ -257,9 +239,10 @@ describe('Chart State utils', () => {
         const color = 'green';
         const barSpec1 = MockSeriesSpec.bar({ id: specId1, data, color });
         const barSpec2 = MockSeriesSpec.bar({ id: specId2, data });
-        const barSeriesSpecs = MockSeriesSpecs.fromSpecs([barSpec1, barSpec2]);
-        const barSeriesCollection = MockSeriesCollection.fromSpecs(barSeriesSpecs);
-        const actual = getCustomSeriesColors(barSeriesSpecs, barSeriesCollection);
+        const store = MockStore.default();
+        MockStore.addSpecs([barSpec1, barSpec2], store);
+        const { formattedDataSeries } = computeSeriesDomainsSelector(store.getState());
+        const actual = getCustomSeriesColors(formattedDataSeries);
 
         expect([...actual.values()]).toEqualArrayOf(color);
       });
@@ -273,14 +256,15 @@ describe('Chart State utils', () => {
           splitSeriesAccessors: ['g'],
         });
         const barSpec2 = MockSeriesSpec.bar({ id: specId2, data, splitSeriesAccessors: ['g'] });
-        const barSeriesSpecs = MockSeriesSpecs.fromSpecs([barSpec1, barSpec2]);
-        const barSeriesCollection = MockSeriesCollection.fromSpecs(barSeriesSpecs);
+        const store = MockStore.default();
+        MockStore.addSpecs([barSpec1, barSpec2], store);
+        const { formattedDataSeries } = computeSeriesDomainsSelector(store.getState());
 
         it('should return color from color array', () => {
-          const actual = getCustomSeriesColors(barSeriesSpecs, barSeriesCollection);
+          const actual = getCustomSeriesColors(formattedDataSeries);
 
           expect(actual.size).toBe(4);
-          barSeriesCollection.forEach(({ seriesIdentifier: { specId, key } }) => {
+          formattedDataSeries.forEach(({ specId, key }) => {
             const color = actual.get(key);
             if (specId === specId1) {
               expect(customSeriesColors).toContainEqual(color);
@@ -307,11 +291,12 @@ describe('Chart State utils', () => {
           splitSeriesAccessors: ['g'],
         });
         const barSpec2 = MockSeriesSpec.bar({ id: specId2, data, splitSeriesAccessors: ['g'] });
-        const barSeriesSpecs = MockSeriesSpecs.fromSpecs([barSpec1, barSpec2]);
-        const barSeriesCollection = MockSeriesCollection.fromSpecs(barSeriesSpecs);
+        const store = MockStore.default();
+        MockStore.addSpecs([barSpec1, barSpec2], store);
+        const { formattedDataSeries } = computeSeriesDomainsSelector(store.getState());
 
         it('should return color from color function', () => {
-          const actual = getCustomSeriesColors(barSeriesSpecs, barSeriesCollection);
+          const actual = getCustomSeriesColors(formattedDataSeries);
           expect(actual.size).toBe(1);
           expect(actual.get(targetKey)).toBe('aquamarine');
         });

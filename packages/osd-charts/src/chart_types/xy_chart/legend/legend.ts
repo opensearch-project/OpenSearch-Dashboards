@@ -20,18 +20,22 @@
 import { LegendItem } from '../../../common/legend';
 import { SeriesKey, SeriesIdentifier } from '../../../common/series_id';
 import { ScaleType } from '../../../scales/constants';
-import { TickFormatterOptions } from '../../../specs';
+import { SortSeriesByConfig, TickFormatterOptions } from '../../../specs';
 import { Color } from '../../../utils/common';
 import { BandedAccessorType } from '../../../utils/geometry';
+import { getLegendCompareFn, SeriesCompareFn } from '../../../utils/series_sort';
 import { getAxesSpecForSpecId, getSpecsById } from '../state/utils/spec';
 import { LastValues } from '../state/utils/types';
 import { Y0_ACCESSOR_POSTFIX, Y1_ACCESSOR_POSTFIX } from '../tooltip/tooltip';
 import { defaultTickFormatter } from '../utils/axis_utils';
+import { defaultXYLegendSeriesSort } from '../utils/default_series_sort_fn';
 import {
-  SeriesCollectionValue,
   getSeriesIndex,
-  getSortedDataSeriesColorsValuesMap,
   getSeriesName,
+  DataSeries,
+  getSeriesKey,
+  isDataSeriesBanded,
+  getSeriesIdentifierFromDataSeries,
 } from '../utils/series';
 import { AxisSpec, BasicSeriesSpec, Postfixes, isAreaSeriesSpec, isBarSeriesSpec } from '../utils/specs';
 
@@ -86,26 +90,28 @@ export function getLegendExtra(
 
 /** @internal */
 export function computeLegend(
-  seriesCollection: Map<SeriesKey, SeriesCollectionValue>,
+  dataSeries: DataSeries[],
+  lastValues: Map<SeriesKey, LastValues>,
   seriesColors: Map<SeriesKey, Color>,
   specs: BasicSeriesSpec[],
   defaultColor: string,
   axesSpecs: AxisSpec[],
   showLegendExtra: boolean,
+  serialIdentifierDataSeriesMap: Record<string, DataSeries>,
   deselectedDataSeries: SeriesIdentifier[] = [],
+  sortSeriesBy?: SeriesCompareFn | SortSeriesByConfig,
 ): LegendItem[] {
   const legendItems: LegendItem[] = [];
 
-  const sortedCollection = getSortedDataSeriesColorsValuesMap(seriesCollection);
-
-  sortedCollection.forEach((series, key) => {
-    const { banded, lastValue, seriesIdentifier } = series;
-    const spec = getSpecsById<BasicSeriesSpec>(specs, seriesIdentifier.specId);
+  dataSeries.forEach((series) => {
+    const { specId } = series;
+    const banded = isDataSeriesBanded(series);
+    const key = getSeriesKey(series, series.groupId);
+    const spec = getSpecsById<BasicSeriesSpec>(specs, specId);
     const color = seriesColors.get(key) || defaultColor;
-    const hasSingleSeries = seriesCollection.size === 1;
-    const name = getSeriesName(seriesIdentifier, hasSingleSeries, false, spec);
-    const isSeriesHidden = deselectedDataSeries ? getSeriesIndex(deselectedDataSeries, seriesIdentifier) >= 0 : false;
-
+    const hasSingleSeries = dataSeries.length === 1;
+    const name = getSeriesName(series, hasSingleSeries, false, spec);
+    const isSeriesHidden = deselectedDataSeries ? getSeriesIndex(deselectedDataSeries, series) >= 0 : false;
     if (name === '' || !spec) {
       return;
     }
@@ -118,6 +124,8 @@ export function computeLegend(
     const formatter = spec.tickFormat ?? yAxis?.tickFormat ?? defaultTickFormatter;
     const { hideInLegend } = spec;
 
+    const lastValue = lastValues.get(key);
+    const seriesIdentifier = getSeriesIdentifierFromDataSeries(series);
     legendItems.push({
       color,
       label: labelY1,
@@ -144,5 +152,12 @@ export function computeLegend(
       });
     }
   });
-  return legendItems;
+
+  const legendSortFn = getLegendCompareFn(sortSeriesBy, (a, b) => {
+    const aDs = serialIdentifierDataSeriesMap[a.key];
+    const bDs = serialIdentifierDataSeriesMap[b.key];
+    return defaultXYLegendSeriesSort(aDs, bDs);
+  });
+
+  return legendItems.sort((a, b) => legendSortFn(a.seriesIdentifier, b.seriesIdentifier));
 }

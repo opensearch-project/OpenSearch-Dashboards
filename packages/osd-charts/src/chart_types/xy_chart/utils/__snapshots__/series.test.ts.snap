@@ -28589,6 +28589,8 @@ Array [
       },
     ],
     "groupId": "group",
+    "insertIndex": 0,
+    "isFiltered": false,
     "isStacked": false,
     "key": "groupId{group}spec{spec1}yAccessor{y}splitAccessors{}",
     "seriesKeys": Array [
@@ -28701,6 +28703,8 @@ Array [
       },
     ],
     "groupId": "group2",
+    "insertIndex": 1,
+    "isFiltered": false,
     "isStacked": true,
     "key": "groupId{group2}spec{spec2}yAccessor{y1}splitAccessors{}",
     "seriesKeys": Array [
@@ -28816,6 +28820,8 @@ Array [
       },
     ],
     "groupId": "group2",
+    "insertIndex": 2,
+    "isFiltered": false,
     "isStacked": true,
     "key": "groupId{group2}spec{spec2}yAccessor{y2}splitAccessors{}",
     "seriesKeys": Array [

@@ -62,6 +62,8 @@ Array [
       },
     ],
     "groupId": "group1",
+    "insertIndex": 0,
+    "isFiltered": false,
     "isStacked": false,
     "key": "groupId{group1}spec{spec1}yAccessor{y}splitAccessors{}",
     "seriesKeys": Array [
@@ -166,6 +168,8 @@ Array [
       },
     ],
     "groupId": "group2",
+    "insertIndex": 1,
+    "isFiltered": false,
     "isStacked": false,
     "key": "groupId{group2}spec{spec2}yAccessor{y}splitAccessors{}",
     "seriesKeys": Array [
@@ -275,6 +279,8 @@ Array [
       },
     ],
     "groupId": "group2",
+    "insertIndex": 2,
+    "isFiltered": false,
     "isStacked": true,
     "key": "groupId{group2}spec{spec2}yAccessor{y}splitAccessors{g-a}",
     "seriesKeys": Array [
@@ -412,6 +418,8 @@ Array [
       },
     ],
     "groupId": "group2",
+    "insertIndex": 3,
+    "isFiltered": false,
     "isStacked": true,
     "key": "groupId{group2}spec{spec2}yAccessor{y}splitAccessors{g-b}",
     "seriesKeys": Array [
@@ -558,6 +566,8 @@ Array [
       },
     ],
     "groupId": "group1",
+    "insertIndex": 0,
+    "isFiltered": false,
     "isStacked": false,
     "key": "groupId{group1}spec{spec1}yAccessor{y}splitAccessors{g-a}",
     "seriesKeys": Array [
@@ -696,6 +706,8 @@ Array [
       },
     ],
     "groupId": "group1",
+    "insertIndex": 1,
+    "isFiltered": false,
     "isStacked": false,
     "key": "groupId{group1}spec{spec1}yAccessor{y}splitAccessors{g-b}",
     "seriesKeys": Array [

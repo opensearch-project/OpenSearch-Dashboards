@@ -43,11 +43,12 @@ export function mergeYDomain(dataSeries: DataSeries[], domainsByGroupId: Map<Gro
     const [{ spec }] = groupedDataSeries;
     const groupId = getSpecDomainGroupId(spec);
 
-    const stacked = groupedDataSeries.filter(({ isStacked }) => isStacked);
-    const nonStacked = groupedDataSeries.filter(({ isStacked }) => !isStacked);
+    const stacked = groupedDataSeries.filter(({ isStacked, isFiltered }) => isStacked && !isFiltered);
+    const nonStacked = groupedDataSeries.filter(({ isStacked, isFiltered }) => !isStacked && !isFiltered);
     const customDomain = domainsByGroupId.get(groupId);
     const hasNonZeroBaselineTypes = groupedDataSeries.some(
-      ({ seriesType }) => seriesType === SeriesTypes.Bar || seriesType === SeriesTypes.Area,
+      ({ seriesType, isFiltered }) =>
+        seriesType === SeriesTypes.Bar || (seriesType === SeriesTypes.Area && !isFiltered),
     );
     const domain = mergeYDomainForGroup(stacked, nonStacked, hasNonZeroBaselineTypes, customDomain);
     if (!domain) {

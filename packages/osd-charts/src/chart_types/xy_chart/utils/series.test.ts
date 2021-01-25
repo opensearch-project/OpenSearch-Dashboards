@@ -34,10 +34,8 @@ import { KIBANA_METRICS } from '../../../utils/data_samples/test_dataset_kibana'
 import { ColorConfig } from '../../../utils/themes/theme';
 import { computeSeriesDomainsSelector } from '../state/selectors/compute_series_domains';
 import {
-  SeriesCollectionValue,
   getFormattedDataSeries,
   getSeriesColors,
-  getSortedDataSeriesColorsValuesMap,
   getDataSeriesFromSpecs,
   XYChartSeriesIdentifier,
   extractYAndMarkFromDatum,
@@ -60,6 +58,8 @@ function matchOnlyDataSeriesLegacySnapshot(d: DataSeries) {
     smVerticalAccessorValue,
     smHorizontalAccessorValue,
     stackMode,
+    insertIndex,
+    isFiltered,
     ...rest
   } = d;
   return {
@@ -509,24 +509,22 @@ describe('Series', () => {
   });
 
   describe('#getSeriesColors', () => {
-    const seriesKey = 'mock_series_key';
-    const mockSeries: SeriesCollectionValue = {
-      seriesIdentifier: {
-        specId: 'spec1',
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: ['a', 'b', 'c'],
-        key: seriesKey,
-      },
-    };
+    const seriesKey = 'groupId{group1}spec{spec1}yAccessor{y1}splitAccessors{}';
 
     const chartColors: ColorConfig = {
       vizColors: ['elastic_charts_c1', 'elastic_charts_c2'],
       defaultVizColor: 'elastic_charts',
     };
 
-    const seriesColors = new Map();
-    seriesColors.set(seriesKey, mockSeries);
+    const seriesColors = [
+      MockDataSeries.default({
+        specId: 'spec1',
+        yAccessor: 'y1',
+        splitAccessors: new Map(),
+        seriesKeys: ['a', 'b', 'c'],
+        key: seriesKey,
+      }),
+    ];
 
     const emptyCustomColors = new Map();
     const persistedColor = 'persisted_color';
@@ -608,82 +606,9 @@ describe('Series', () => {
       },
     ];
     const subsetSplit = getDataSeriesFromSpecs([splitSpec], deselectedDataSeries);
-    expect(subsetSplit.dataSeries.filter(({ specId }) => specId === id)).toHaveLength(1);
+    expect(subsetSplit.dataSeries.filter(({ specId, isFiltered }) => specId === id && !isFiltered)).toHaveLength(1);
   });
 
-  test('should sort series color by series spec sort index', () => {
-    const spec1Id = 'spec1';
-    const spec2Id = 'spec2';
-    const spec3Id = 'spec3';
-
-    const seriesCollection = new Map();
-    const dataSeriesValues1: SeriesCollectionValue = {
-      seriesIdentifier: {
-        specId: spec1Id,
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [],
-        key: '',
-      },
-      specSortIndex: 0,
-    };
-
-    const dataSeriesValues2: SeriesCollectionValue = {
-      seriesIdentifier: {
-        specId: spec2Id,
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [],
-        key: '',
-      },
-      specSortIndex: 1,
-    };
-
-    const dataSeriesValues3: SeriesCollectionValue = {
-      seriesIdentifier: {
-        specId: spec3Id,
-        yAccessor: 'y1',
-        splitAccessors: new Map(),
-        seriesKeys: [],
-        key: '',
-      },
-      specSortIndex: 3,
-    };
-
-    seriesCollection.set(spec3Id, dataSeriesValues3);
-    seriesCollection.set(spec1Id, dataSeriesValues1);
-    seriesCollection.set(spec2Id, dataSeriesValues2);
-
-    const descSortedColorValues = new Map();
-    descSortedColorValues.set(spec1Id, dataSeriesValues1);
-    descSortedColorValues.set(spec2Id, dataSeriesValues2);
-    descSortedColorValues.set(spec3Id, dataSeriesValues3);
-
-    expect(getSortedDataSeriesColorsValuesMap(seriesCollection)).toEqual(descSortedColorValues);
-
-    const ascSortedColorValues = new Map();
-    dataSeriesValues1.specSortIndex = 2;
-    dataSeriesValues2.specSortIndex = 1;
-    dataSeriesValues3.specSortIndex = 0;
-
-    ascSortedColorValues.set(spec3Id, dataSeriesValues3);
-    ascSortedColorValues.set(spec2Id, dataSeriesValues2);
-    ascSortedColorValues.set(spec1Id, dataSeriesValues1);
-
-    expect(getSortedDataSeriesColorsValuesMap(seriesCollection)).toEqual(ascSortedColorValues);
-
-    // Any series with undefined sort order should come last
-    const undefinedSortedColorValues = new Map();
-    dataSeriesValues1.specSortIndex = 1;
-    dataSeriesValues2.specSortIndex = undefined;
-    dataSeriesValues3.specSortIndex = 0;
-
-    undefinedSortedColorValues.set(spec3Id, dataSeriesValues3);
-    undefinedSortedColorValues.set(spec1Id, dataSeriesValues1);
-    undefinedSortedColorValues.set(spec2Id, dataSeriesValues2);
-
-    expect(getSortedDataSeriesColorsValuesMap(seriesCollection)).toEqual(undefinedSortedColorValues);
-  });
   test('clean datum shall parse string as number for y values', () => {
     let datum = extractYAndMarkFromDatum([0, 1, 2], 1, [], 2);
     expect(datum).toBeDefined();

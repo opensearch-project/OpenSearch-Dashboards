@@ -105,6 +105,7 @@ describe('Stacked Series Utils', () => {
       MockStore.addSpecs(STANDARD_DATA_SET, store);
       const { formattedDataSeries } = computeSeriesDomainsSelector(store.getState());
 
+      // stacked series are reverse ordered
       const values = [
         formattedDataSeries[0].data[0].y0,
         formattedDataSeries[0].data[0].y1,
@@ -339,7 +340,7 @@ describe('Stacked Series Utils', () => {
     );
     const { formattedDataSeries } = computeSeriesDomainsSelector(store.getState());
 
-    expect(formattedDataSeries[0].data[0]).toMatchObject({
+    expect(formattedDataSeries[1].data[0]).toMatchObject({
       initialY0: null,
       initialY1: 0,
       x: 1,
@@ -347,7 +348,7 @@ describe('Stacked Series Utils', () => {
       y1: 0,
       mark: null,
     });
-    expect(formattedDataSeries[1].data[0]).toMatchObject({
+    expect(formattedDataSeries[0].data[0]).toMatchObject({
       initialY0: null,
       initialY1: 0,
       x: 1,

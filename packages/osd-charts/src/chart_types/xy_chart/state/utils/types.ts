@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SeriesKey } from '../../../../common/series_id';
+
 import { Scale } from '../../../../scales';
 import { Domain } from '../../../../utils/domain';
 import {
@@ -30,7 +30,7 @@ import {
 import { GroupId } from '../../../../utils/ids';
 import { XDomain, YDomain } from '../../domains/types';
 import { IndexedGeometryMap } from '../../utils/indexed_geometry_map';
-import { SeriesCollectionValue, DataSeries } from '../../utils/series';
+import { DataSeries } from '../../utils/series';
 
 /** @internal */
 export interface Transform {
@@ -81,7 +81,6 @@ export interface SeriesDomainsAndData {
   smVDomain: Domain;
   smHDomain: Domain;
   formattedDataSeries: DataSeries[];
-  seriesCollection: Map<SeriesKey, SeriesCollectionValue>;
 }
 
 /** @internal */

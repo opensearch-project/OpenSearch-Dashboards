@@ -17,28 +17,9 @@
  * under the License.
  */
 
-import {
-  SeriesCollectionValue,
-  getDataSeriesFromSpecs,
-  XYChartSeriesIdentifier,
-} from '../../chart_types/xy_chart/utils/series';
+import { getDataSeriesFromSpecs, XYChartSeriesIdentifier } from '../../chart_types/xy_chart/utils/series';
 import { BasicSeriesSpec } from '../../specs';
 import { mergePartial } from '../../utils/common';
-
-type SeriesCollection = Map<string, SeriesCollectionValue>;
-
-/** @internal */
-export class MockSeriesCollection {
-  static empty(): SeriesCollection {
-    return new Map();
-  }
-
-  static fromSpecs(seriesSpecs: BasicSeriesSpec[]) {
-    const { seriesCollection } = getDataSeriesFromSpecs(seriesSpecs, []);
-
-    return seriesCollection;
-  }
-}
 
 /** @internal */
 export class MockSeriesIdentifier {
@@ -59,7 +40,9 @@ export class MockSeriesIdentifier {
   static fromSpecs(specs: BasicSeriesSpec[]): XYChartSeriesIdentifier[] {
     const { dataSeries } = getDataSeriesFromSpecs(specs);
 
-    return dataSeries.map(({ groupId, seriesType, data, isStacked, stackMode, spec, ...rest }) => rest);
+    return dataSeries.map(
+      ({ groupId, seriesType, data, isStacked, stackMode, spec, insertIndex, isFiltered, ...rest }) => rest,
+    );
   }
 
   static fromSpec(specs: BasicSeriesSpec): XYChartSeriesIdentifier {

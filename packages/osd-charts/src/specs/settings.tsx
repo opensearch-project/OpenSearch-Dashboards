@@ -35,6 +35,7 @@ import { Color, Position, Rendering, Rotation } from '../utils/common';
 import { Domain } from '../utils/domain';
 import { GeometryValue } from '../utils/geometry';
 import { GroupId } from '../utils/ids';
+import { SeriesCompareFn } from '../utils/series_sort';
 import { PartialTheme, Theme } from '../utils/themes/theme';
 import { BinAgg, BrushAxis, DEFAULT_SETTINGS_SPEC, Direction, PointerEventType, TooltipType } from './constants';
 
@@ -355,6 +356,7 @@ export interface SettingsSpec extends Spec {
    * Display the legend as a flat hierarchy
    */
   flatLegend?: boolean;
+
   /**
    * Choose a partition highlighting strategy for hovering over legend items
    */
@@ -429,10 +431,49 @@ export interface SettingsSpec extends Spec {
    * Orders ordinal x values
    */
   orderOrdinalBinsBy?: OrderBy;
+
+  /**
+   * A compare function or an object of compare functions to sort
+   * series in different part of the chart like tooltip, legend and
+   * the rendering order on the screen. To assign the same compare function.
+   *  @defaultValue the series are sorted in order of appearance in the chart configuration
+   *  @alpha
+   */
+  // sortSeriesBy?: SeriesCompareFn | SortSeriesByConfig;
+
   /**
    * Render component for no results UI
    */
   noResults?: ComponentType | ReactChild;
+}
+
+/**
+ * An object of compare functions to sort
+ * series in different part of the chart like tooltip, legend and rendering order.
+ */
+export interface SortSeriesByConfig {
+  /**
+   * A SeriesSortFn to sort the legend values (top-bottom)
+   * It has precedence over the general one
+   */
+  legend?: SeriesCompareFn;
+  /**
+   * A SeriesSortFn to sort tooltip values (top-bottom)
+   * It has precedence over the general one
+   */
+  tooltip?: SeriesCompareFn;
+  /**
+   * A SeriesSortFn to sort the rendering order of series.
+   * Left/right for cluster, bottom-up for stacked.
+   * It has precedence over the general one
+   * Currently available only on XY charts
+   */
+  rendering?: SeriesCompareFn;
+  /**
+   * The default SeriesSortFn in case no other specific sorting fn are used.
+   * The rendering sorting is applied only to XY charts at the moment
+   */
+  default?: SeriesCompareFn;
 }
 
 /**

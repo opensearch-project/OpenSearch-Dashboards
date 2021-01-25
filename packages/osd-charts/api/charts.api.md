@@ -1568,6 +1568,7 @@ export interface SeriesSpec extends Spec {
     hideInLegend?: boolean;
     name?: SeriesNameAccessor;
     seriesType: SeriesTypes;
+    // @deprecated
     sortIndex?: number;
     // (undocumented)
     specType: typeof SpecTypes.Series;
@@ -1707,6 +1708,17 @@ export interface SmallMultiplesSpec extends Spec {
         verticalPanelPadding?: [number, number];
         horizontalPanelPadding?: [number, number];
     };
+}
+
+// Warning: (ae-missing-release-tag) "SortSeriesByConfig" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export interface SortSeriesByConfig {
+    default?: SeriesCompareFn;
+    // Warning: (ae-forgotten-export) The symbol "SeriesCompareFn" needs to be exported by the entry point index.d.ts
+    legend?: SeriesCompareFn;
+    rendering?: SeriesCompareFn;
+    tooltip?: SeriesCompareFn;
 }
 
 // Warning: (ae-missing-release-tag) "Spec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

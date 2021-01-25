@@ -30,7 +30,6 @@ export interface Spec {
 
 export * from './group_by';
 export * from './small_multiples';
-
 export * from './settings';
 export * from './constants';
 export * from '../chart_types/specs';

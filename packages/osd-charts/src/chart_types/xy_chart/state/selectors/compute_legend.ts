@@ -25,8 +25,11 @@ import { getChartThemeSelector } from '../../../../state/selectors/get_chart_the
 import { getDeselectedSeriesSelector } from '../../../../state/selectors/get_deselected_data_series';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { computeLegend } from '../../legend/legend';
+import { DataSeries } from '../../utils/series';
+import { getLastValues } from '../utils/get_last_value';
 import { computeSeriesDomainsSelector } from './compute_series_domains';
 import { getSeriesColorsSelector } from './get_series_color_map';
+import { getSiDataSeriesMapSelector } from './get_si_dataseries_map';
 import { getSeriesSpecsSelector, getAxisSpecsSelector } from './get_specs';
 
 /** @internal */
@@ -39,23 +42,31 @@ export const computeLegendSelector = createCachedSelector(
     getAxisSpecsSelector,
     getDeselectedSeriesSelector,
     getSettingsSpecSelector,
+    getSiDataSeriesMapSelector,
   ],
   (
     seriesSpecs,
-    seriesDomainsAndData,
+    { formattedDataSeries, xDomain },
     chartTheme,
     seriesColors,
     axesSpecs,
     deselectedDataSeries,
-    { showLegendExtra },
-  ): LegendItem[] =>
-    computeLegend(
-      seriesDomainsAndData.seriesCollection,
+    settings,
+    siDataSeriesMap: Record<string, DataSeries>,
+  ): LegendItem[] => {
+    const lastValues = getLastValues(formattedDataSeries, xDomain);
+    return computeLegend(
+      formattedDataSeries,
+      lastValues,
       seriesColors,
       seriesSpecs,
       chartTheme.colors.defaultVizColor,
       axesSpecs,
-      showLegendExtra,
+      settings.showLegendExtra,
+      siDataSeriesMap,
       deselectedDataSeries,
-    ),
+      // @ts-ignore
+      settings.sortSeriesBy,
+    );
+  },
 )(getChartIdSelector);
