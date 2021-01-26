@@ -19,28 +19,28 @@
 
 import React, { useCallback } from 'react';
 
-import { AnnotationTypes } from '../../../../specs';
+import { AnnotationTypes, LineAnnotationDatum, RectAnnotationDatum } from '../../../../specs';
 import { AnnotationTooltipState } from '../../../annotations/types';
 
 /** @internal */
 export const TooltipContent = ({
   annotationType,
-  header,
-  details,
+  datum,
   customTooltip: CustomTooltip,
   customTooltipDetails,
 }: AnnotationTooltipState) => {
-  const renderLine = useCallback(
-    () => (
+  const renderLine = useCallback(() => {
+    const { details, dataValue, header = dataValue.toString() } = datum as LineAnnotationDatum;
+    return (
       <div className="echAnnotation__tooltip">
         <p className="echAnnotation__header">{header}</p>
         <div className="echAnnotation__details">{customTooltipDetails ? customTooltipDetails(details) : details}</div>
       </div>
-    ),
-    [header, details, customTooltipDetails],
-  );
+    );
+  }, [datum, customTooltipDetails]);
 
   const renderRect = useCallback(() => {
+    const { details } = datum as RectAnnotationDatum;
     const tooltipContent = customTooltipDetails ? customTooltipDetails(details) : details;
     if (!tooltipContent) {
       return null;
@@ -53,10 +53,14 @@ export const TooltipContent = ({
         </div>
       </div>
     );
-  }, [details, customTooltipDetails]);
+  }, [datum, customTooltipDetails]);
 
   if (CustomTooltip) {
-    return <CustomTooltip details={details} header={header} />;
+    const { details } = datum;
+    if ('header' in datum) {
+      return <CustomTooltip details={details} header={datum.header} datum={datum} />;
+    }
+    return <CustomTooltip details={details} datum={datum} />;
   }
 
   switch (annotationType) {

@@ -21,7 +21,7 @@ import { ComponentType } from 'react';
 
 import { TooltipPortalSettings } from '../../../components/portal';
 import { Position, Color } from '../../../utils/common';
-import { AnnotationType } from '../utils/specs';
+import { AnnotationType, LineAnnotationDatum, RectAnnotationDatum } from '../utils/specs';
 import { AnnotationLineProps } from './line/types';
 import { AnnotationRectProps } from './rect/types';
 
@@ -32,6 +32,7 @@ export type AnnotationTooltipFormatter = (details?: string) => JSX.Element | nul
 export type CustomAnnotationTooltip = ComponentType<{
   header?: string;
   details?: string;
+  datum: LineAnnotationDatum | RectAnnotationDatum;
 }> | null;
 
 /**
@@ -53,10 +54,11 @@ export interface AnnotationMarker {
     top: number;
     left: number;
   };
-  dimension: {
+  dimension?: {
     width: number;
     height: number;
   };
+  alignment: Position;
   color: Color;
 }
 
@@ -64,10 +66,8 @@ export interface AnnotationMarker {
 export interface AnnotationTooltipState {
   isVisible: true;
   annotationType: AnnotationType;
-  header?: string;
-  details?: string;
+  datum: LineAnnotationDatum | RectAnnotationDatum;
   anchor: {
-    position?: Position;
     top: number;
     left: number;
   };
@@ -77,7 +77,7 @@ export interface AnnotationTooltipState {
 }
 
 /** @internal */
-export type AnnotationDimensions = AnnotationLineProps[] | AnnotationRectProps[];
+export type AnnotationDimensions = Array<AnnotationLineProps | AnnotationRectProps>;
 
 /** @internal */
 export type Bounds = {

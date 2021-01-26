@@ -36,7 +36,8 @@ import { Point } from '../utils/point';
 import { StateActions } from './actions';
 import { CHART_RENDERED } from './actions/chart';
 import { UPDATE_PARENT_DIMENSION } from './actions/chart_settings';
-import { CLEAR_TEMPORARY_COLORS, SET_PERSISTED_COLOR, SET_TEMPORARY_COLOR } from './actions/colors';
+import { SET_PERSISTED_COLOR, SET_TEMPORARY_COLOR, CLEAR_TEMPORARY_COLORS } from './actions/colors';
+import { DOMElement } from './actions/dom_element';
 import { EXTERNAL_POINTER_EVENT } from './actions/events';
 import { LegendPath } from './actions/legend';
 import { REMOVE_SPEC, SPEC_PARSED, SPEC_UNMOUNTED, UPSERT_SPEC } from './actions/specs';
@@ -184,6 +185,7 @@ export interface InteractionsState {
   highlightedLegendItemKey: PrimitiveValue;
   highlightedLegendPath: LegendPath;
   deselectedDataSeries: SeriesIdentifier[];
+  hoveredDOMElement: DOMElement | null;
 }
 
 /** @internal */
@@ -272,6 +274,7 @@ export const getInitialState = (chartId: string): GlobalChartState => ({
     highlightedLegendItemKey: null,
     highlightedLegendPath: [],
     deselectedDataSeries: [],
+    hoveredDOMElement: null,
   },
   externalEvents: {
     pointer: null,

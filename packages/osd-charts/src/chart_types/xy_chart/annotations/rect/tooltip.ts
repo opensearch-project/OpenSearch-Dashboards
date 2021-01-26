@@ -28,7 +28,7 @@ import { isWithinRectBounds } from './dimensions';
 import { AnnotationRectProps } from './types';
 
 /** @internal */
-export function computeRectAnnotationTooltipState(
+export function getRectAnnotationTooltipState(
   cursorPosition: Point,
   annotationRects: AnnotationRectProps[],
   rotation: Rotation,
@@ -38,7 +38,7 @@ export function computeRectAnnotationTooltipState(
 
   for (let i = 0; i < totalAnnotationRect; i++) {
     const rectProps = annotationRects[i];
-    const { details, panel } = rectProps;
+    const { panel, datum } = rectProps;
 
     const rect = transformRotateRect(rectProps.rect, rotation, panel);
 
@@ -56,7 +56,7 @@ export function computeRectAnnotationTooltipState(
           left: cursorPosition.x,
           top: cursorPosition.y,
         },
-        ...(details && { details }),
+        datum,
       };
     }
   }

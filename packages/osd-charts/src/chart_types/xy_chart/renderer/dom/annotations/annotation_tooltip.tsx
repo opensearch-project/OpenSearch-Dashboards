@@ -65,10 +65,10 @@ export const AnnotationTooltip = ({ state, chartRef, chartId, onScroll, zIndex }
 
     return {
       ...rest,
-      placement: placement ?? state?.anchor?.position ?? Placement.Right,
+      placement: placement ?? Placement.Right,
       boundary: boundary === 'chart' && chartRef.current ? chartRef.current : undefined,
     };
-  }, [state?.tooltipSettings, state?.anchor?.position, chartRef]);
+  }, [state?.tooltipSettings, chartRef]);
 
   const position = useMemo(() => state?.anchor ?? null, [state?.anchor]);
   if (!state?.isVisible) {

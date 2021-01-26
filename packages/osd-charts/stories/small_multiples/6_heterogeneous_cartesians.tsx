@@ -66,6 +66,7 @@ export const Example = () => {
         margin: 'auto',
         fontSize: 8,
         borderRadius: 2,
+        lineHeight: 8,
       }}
     >
       MIN

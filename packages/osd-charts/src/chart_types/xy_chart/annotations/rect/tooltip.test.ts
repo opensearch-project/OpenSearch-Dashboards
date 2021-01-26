@@ -16,10 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { MockAnnotationRectProps } from '../../../../mocks/annotations/annotations';
 import { Dimensions } from '../../../../utils/dimensions';
 import { AnnotationTypes } from '../../utils/specs';
 import { AnnotationTooltipState } from '../types';
-import { computeRectAnnotationTooltipState } from './tooltip';
+import { getRectAnnotationTooltipState } from './tooltip';
+import { AnnotationRectProps } from './types';
 
 describe('Rect annotation tooltip', () => {
   test('should compute tooltip state for rect annotation', () => {
@@ -30,11 +32,15 @@ describe('Rect annotation tooltip', () => {
       left: 15,
     };
     const cursorPosition = { x: 18, y: 9 };
-    const annotationRects = [
-      { rect: { x: 2, y: 3, width: 3, height: 5 }, panel: { top: 0, left: 0, width: 10, height: 20 } },
+    const annotationRects: AnnotationRectProps[] = [
+      MockAnnotationRectProps.default({
+        rect: { x: 2, y: 3, width: 3, height: 5 },
+        panel: { top: 0, left: 0, width: 10, height: 20 },
+        datum: { coordinates: { x0: 0, x1: 10, y0: 0, y1: 10 } },
+      }),
     ];
 
-    const visibleTooltip = computeRectAnnotationTooltipState(cursorPosition, annotationRects, 0, chartDimensions);
+    const visibleTooltip = getRectAnnotationTooltipState(cursorPosition, annotationRects, 0, chartDimensions);
     const expectedVisibleTooltipState: AnnotationTooltipState = {
       isVisible: true,
       annotationType: AnnotationTypes.Rectangle,
@@ -42,6 +48,7 @@ describe('Rect annotation tooltip', () => {
         top: cursorPosition.y,
         left: cursorPosition.x,
       },
+      datum: { coordinates: { x0: 0, x1: 10, y0: 0, y1: 10 } },
     };
 
     expect(visibleTooltip).toEqual(expectedVisibleTooltipState);

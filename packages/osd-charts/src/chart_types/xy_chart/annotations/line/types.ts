@@ -19,15 +19,18 @@
 
 import { Line } from '../../../../geoms/types';
 import { Dimensions } from '../../../../utils/dimensions';
-import { AnnotationDetails, AnnotationMarker } from '../types';
+import { LineAnnotationDatum } from '../../utils/specs';
+import { AnnotationMarker } from '../types';
 
 /** @internal */
 export interface AnnotationLineProps {
+  specId: string;
+  id: string;
+  datum: LineAnnotationDatum;
   /**
    * The path points of a line annotation
    */
   linePathPoints: Line;
-  details: AnnotationDetails;
-  marker?: AnnotationMarker;
+  markers: Array<AnnotationMarker>;
   panel: Dimensions;
 }

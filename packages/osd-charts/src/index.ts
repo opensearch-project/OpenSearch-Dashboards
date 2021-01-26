@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import 'path2d-polyfill';
-
 export * from './components';
 export { ChartTypes } from './chart_types';
 export { ChartSize, ChartSizeArray, ChartSizeObject } from './utils/chart_size';

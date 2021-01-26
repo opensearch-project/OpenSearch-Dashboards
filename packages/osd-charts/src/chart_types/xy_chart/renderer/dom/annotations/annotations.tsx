@@ -21,12 +21,18 @@ import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
+import {
+  DOMElementType,
+  onDOMElementEnter as onDOMElementEnterAction,
+  onDOMElementLeave as onDOMElementLeaveAction,
+} from '../../../../../state/actions/dom_element';
 import { onPointerMove as onPointerMoveAction } from '../../../../../state/actions/mouse';
 import { GlobalChartState, BackwardRef } from '../../../../../state/chart_state';
 import {
   getInternalIsInitializedSelector,
   InitStatus,
 } from '../../../../../state/selectors/get_internal_is_intialized';
+import { Position } from '../../../../../utils/common';
 import { Dimensions } from '../../../../../utils/dimensions';
 import { AnnotationId } from '../../../../../utils/ids';
 import { AnnotationLineProps } from '../../../annotations/line/types';
@@ -42,6 +48,8 @@ import { AnnotationTooltip } from './annotation_tooltip';
 
 interface AnnotationsDispatchProps {
   onPointerMove: typeof onPointerMoveAction;
+  onDOMElementEnter: typeof onDOMElementEnterAction;
+  onDOMElementLeave: typeof onDOMElementLeaveAction;
 }
 
 interface AnnotationsStateProps {
@@ -60,30 +68,58 @@ interface AnnotationsOwnProps {
 
 type AnnotationsProps = AnnotationsDispatchProps & AnnotationsStateProps & AnnotationsOwnProps;
 
+const MARKER_TRANSFORMS = {
+  [Position.Right]: 'translate(-50%, 0%)',
+  [Position.Left]: 'translate(-100%, -50%)',
+  [Position.Top]: 'translate(-50%, -100%)',
+  [Position.Bottom]: 'translate(-50%, 0%)',
+};
+
+function getMarkerCentredTransform(alignment: Position, hasMarkerDimensions: boolean): string | undefined {
+  if (hasMarkerDimensions) {
+    return undefined;
+  }
+  return MARKER_TRANSFORMS[alignment];
+}
+
 function renderAnnotationLineMarkers(
   chartDimensions: Dimensions,
   annotationLines: AnnotationLineProps[],
-  id: AnnotationId,
+  onDOMElementEnter: typeof onDOMElementEnterAction,
+  onDOMElementLeave: typeof onDOMElementLeaveAction,
 ) {
-  return annotationLines.reduce<JSX.Element[]>((markers, { marker, panel }: AnnotationLineProps, index: number) => {
-    if (!marker) {
-      return markers;
+  return annotationLines.reduce<JSX.Element[]>((acc, { id, specId, datum, markers, panel }: AnnotationLineProps) => {
+    if (markers.length === 0) {
+      return acc;
     }
-    const { icon, color, position } = marker;
+    const { icon, color, position, alignment, dimension } = markers[0];
     const style = {
       color,
       top: chartDimensions.top + position.top + panel.top,
       left: chartDimensions.left + position.left + panel.left,
     };
 
-    markers.push(
-      // eslint-disable-next-line react/no-array-index-key
-      <div className="echAnnotation" style={{ ...style }} key={`annotation-${id}-${index}`}>
+    const transform = { transform: getMarkerCentredTransform(alignment, Boolean(dimension)) };
+    acc.push(
+      <div
+        className="echAnnotation"
+        key={`annotation-${specId}-${id}`}
+        onMouseEnter={() => {
+          onDOMElementEnter({
+            createdBySpecId: specId,
+            id,
+            type: DOMElementType.LineAnnotationMarker,
+            datum,
+          });
+        }}
+        onMouseLeave={onDOMElementLeave}
+        style={{ ...style, ...transform }}
+      >
         {icon}
       </div>,
     );
 
-    return markers;
+    return acc;
   }, []);
 }
 const AnnotationsComponent = ({
@@ -96,6 +132,8 @@ const AnnotationsComponent = ({
   chartId,
   zIndex,
   onPointerMove,
+  onDOMElementEnter,
+  onDOMElementLeave,
 }: AnnotationsProps) => {
   const renderAnnotationMarkers = useCallback((): JSX.Element[] => {
     const markers: JSX.Element[] = [];
@@ -108,13 +146,18 @@ const AnnotationsComponent = ({
 
       if (isLineAnnotation(annotationSpec)) {
         const annotationLines = dimensions as AnnotationLineProps[];
-        const lineMarkers = renderAnnotationLineMarkers(chartDimensions, annotationLines, id);
+        const lineMarkers = renderAnnotationLineMarkers(
+          chartDimensions,
+          annotationLines,
+          onDOMElementEnter,
+          onDOMElementLeave,
+        );
         markers.push(...lineMarkers);
       }
     });
 
     return markers;
-  }, [chartDimensions, annotationDimensions, annotationSpecs]);
+  }, [onDOMElementEnter, onDOMElementLeave, chartDimensions, annotationDimensions, annotationSpecs]);
 
   const onScroll = useCallback(() => {
     onPointerMove({ x: -1, y: -1 }, Date.now());
@@ -141,7 +184,14 @@ const AnnotationsComponent = ({
 AnnotationsComponent.displayName = 'Annotations';
 
 const mapDispatchToProps = (dispatch: Dispatch): AnnotationsDispatchProps =>
-  bindActionCreators({ onPointerMove: onPointerMoveAction }, dispatch);
+  bindActionCreators(
+    {
+      onPointerMove: onPointerMoveAction,
+      onDOMElementLeave: onDOMElementLeaveAction,
+      onDOMElementEnter: onDOMElementEnterAction,
+    },
+    dispatch,
+  );
 
 const mapStateToProps = (state: GlobalChartState): AnnotationsStateProps => {
   const { zIndex, chartId } = state;

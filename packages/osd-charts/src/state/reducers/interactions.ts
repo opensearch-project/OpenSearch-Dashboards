@@ -21,15 +21,16 @@ import { getSeriesIndex } from '../../chart_types/xy_chart/utils/series';
 import { LegendItem } from '../../common/legend';
 import { SeriesIdentifier } from '../../common/series_id';
 import { getDelta } from '../../utils/point';
-import { ON_KEY_UP, KeyActions } from '../actions/key';
+import { DOMElementActions, ON_DOM_ELEMENT_ENTER, ON_DOM_ELEMENT_LEAVE } from '../actions/dom_element';
+import { KeyActions, ON_KEY_UP } from '../actions/key';
 import {
+  LegendActions,
   ON_LEGEND_ITEM_OUT,
   ON_LEGEND_ITEM_OVER,
   ON_TOGGLE_DESELECT_SERIES,
-  LegendActions,
   ToggleDeselectSeriesAction,
 } from '../actions/legend';
-import { ON_MOUSE_DOWN, ON_MOUSE_UP, ON_POINTER_MOVE, MouseActions } from '../actions/mouse';
+import { MouseActions, ON_MOUSE_DOWN, ON_MOUSE_UP, ON_POINTER_MOVE } from '../actions/mouse';
 import { InteractionsState } from '../chart_state';
 import { getInitialPointerState } from '../utils';
 
@@ -46,7 +47,7 @@ const DRAG_DETECTION_PIXEL_DELTA = 4;
 /** @internal */
 export function interactionsReducer(
   state: InteractionsState,
-  action: LegendActions | MouseActions | KeyActions,
+  action: LegendActions | MouseActions | KeyActions | DOMElementActions,
   legendItems: LegendItem[],
 ): InteractionsState {
   switch (action.type) {
@@ -151,6 +152,17 @@ export function interactionsReducer(
       return {
         ...state,
         deselectedDataSeries: toggleDeselectedDataSeries(action, state.deselectedDataSeries, legendItems),
+      };
+
+    case ON_DOM_ELEMENT_ENTER:
+      return {
+        ...state,
+        hoveredDOMElement: action.element,
+      };
+    case ON_DOM_ELEMENT_LEAVE:
+      return {
+        ...state,
+        hoveredDOMElement: null,
       };
     default:
       return state;

@@ -22,15 +22,13 @@ import { Rotation } from '../../../utils/common';
 import { Dimensions } from '../../../utils/dimensions';
 import { AnnotationId } from '../../../utils/ids';
 import { Point } from '../../../utils/point';
-import { AnnotationSpec, AxisSpec, isLineAnnotation, isRectAnnotation } from '../utils/specs';
-import { computeLineAnnotationTooltipState } from './line/tooltip';
-import { AnnotationLineProps } from './line/types';
-import { computeRectAnnotationTooltipState } from './rect/tooltip';
+import { AnnotationSpec, AxisSpec, isRectAnnotation } from '../utils/specs';
+import { getRectAnnotationTooltipState } from './rect/tooltip';
 import { AnnotationRectProps } from './rect/types';
 import { AnnotationDimensions, AnnotationTooltipState } from './types';
 
 /** @internal */
-export function computeAnnotationTooltipState(
+export function computeRectAnnotationTooltipState(
   cursorPosition: Point,
   annotationDimensions: Map<AnnotationId, AnnotationDimensions>,
   annotationSpecs: AnnotationSpec[],
@@ -40,7 +38,7 @@ export function computeAnnotationTooltipState(
 ): AnnotationTooltipState | null {
   // allow picking up the last spec added as the top most or use it's zIndex value
   const sortedAnnotationSpecs = annotationSpecs
-    .slice()
+    .filter(isRectAnnotation)
     .reverse()
     .sort(({ zIndex: a = Number.MIN_SAFE_INTEGER }, { zIndex: b = Number.MIN_SAFE_INTEGER }) => b - a);
 
@@ -50,47 +48,24 @@ export function computeAnnotationTooltipState(
     if (spec.hideTooltips || !annotationDimension) {
       continue;
     }
-    const { groupId, customTooltip, customTooltipDetails } = spec;
+    const { customTooltip, customTooltipDetails } = spec;
 
     const tooltipSettings = getTooltipSettings(spec);
 
-    if (isLineAnnotation(spec)) {
-      if (spec.hideLines) {
-        continue;
-      }
-      const lineAnnotationTooltipState = computeLineAnnotationTooltipState(
-        cursorPosition,
-        annotationDimension as AnnotationLineProps[],
-        groupId,
-        spec.domainType,
-        axesSpecs,
-        chartDimensions,
-      );
+    const rectAnnotationTooltipState = getRectAnnotationTooltipState(
+      cursorPosition,
+      annotationDimension as AnnotationRectProps[],
+      chartRotation,
+      chartDimensions,
+    );
 
-      if (lineAnnotationTooltipState) {
-        return {
-          ...lineAnnotationTooltipState,
-          tooltipSettings,
-          customTooltip,
-          customTooltipDetails,
-        };
-      }
-    } else if (isRectAnnotation(spec)) {
-      const rectAnnotationTooltipState = computeRectAnnotationTooltipState(
-        cursorPosition,
-        annotationDimension as AnnotationRectProps[],
-        chartRotation,
-        chartDimensions,
-      );
-
-      if (rectAnnotationTooltipState) {
-        return {
-          ...rectAnnotationTooltipState,
-          tooltipSettings,
-          customTooltip,
-          customTooltipDetails: customTooltipDetails ?? spec.renderTooltip,
-        };
-      }
+    if (rectAnnotationTooltipState) {
+      return {
+        ...rectAnnotationTooltipState,
+        tooltipSettings,
+        customTooltip,
+        customTooltipDetails: customTooltipDetails ?? spec.renderTooltip,
+      };
     }
   }
 

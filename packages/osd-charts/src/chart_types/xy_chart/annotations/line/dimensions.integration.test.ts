@@ -53,7 +53,10 @@ function expectAnnotationAtPosition(
   const annotations = computeAnnotationDimensionsSelector(store.getState());
   expect(annotations.get(annotation.id)).toEqual([
     MockAnnotationLineProps.default({
-      details: { detailsText: undefined, headerText: `${indexPosition}` },
+      specId: 'line_annotation_1',
+      datum: {
+        dataValue: indexPosition,
+      },
       linePathPoints: {
         x1: expectedLinePosition,
         y1: 0,
@@ -147,13 +150,14 @@ describe('Render vertical line annotation within', () => {
     const annotations = computeAnnotationDimensionsSelector(store.getState());
     expect(annotations.get(annotation.id)).toEqual([
       MockAnnotationLineProps.default({
+        specId: 'line_annotation_1',
         linePathPoints: {
           x1: 95,
           y1: 0,
           x2: 95,
           y2: 100,
         },
-        details: { detailsText: 'foo', headerText: '9.5' },
+        datum: { dataValue: 9.5, details: 'foo' },
       }),
     ]);
   });

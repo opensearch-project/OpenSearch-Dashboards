@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { getAnnotationLinePropsId } from '../../chart_types/xy_chart/annotations/line/dimensions';
 import { AnnotationLineProps } from '../../chart_types/xy_chart/annotations/line/types';
 import { AnnotationRectProps } from '../../chart_types/xy_chart/annotations/rect/types';
 import { mergePartial, RecursivePartial } from '../../utils/common';
@@ -24,6 +25,8 @@ import { mergePartial, RecursivePartial } from '../../utils/common';
 /** @internal */
 export class MockAnnotationLineProps {
   private static readonly base: AnnotationLineProps = {
+    id: getAnnotationLinePropsId('spec1', { dataValue: 0 }),
+    specId: 'spec1',
     linePathPoints: {
       x1: 0,
       y1: 0,
@@ -31,13 +34,27 @@ export class MockAnnotationLineProps {
       y2: 0,
     },
     panel: { top: 0, left: 0, width: 100, height: 100 },
-    details: {},
+    datum: { dataValue: 0 },
+    markers: [],
   };
 
-  static default(partial?: RecursivePartial<AnnotationLineProps>) {
-    return mergePartial<AnnotationLineProps>(MockAnnotationLineProps.base, partial, {
-      mergeOptionalPartialValues: true,
-    });
+  static default(partial?: RecursivePartial<AnnotationLineProps>, smVerticalValue?: any, smHorizontalValue?: any) {
+    const id = getAnnotationLinePropsId(
+      partial?.specId ?? MockAnnotationLineProps.base.specId,
+      {
+        ...MockAnnotationLineProps.base.datum,
+        ...partial?.datum,
+      },
+      smVerticalValue,
+      smHorizontalValue,
+    );
+    return mergePartial<AnnotationLineProps>(
+      MockAnnotationLineProps.base,
+      { id, ...partial },
+      {
+        mergeOptionalPartialValues: true,
+      },
+    );
   }
 
   static fromPoints(x1 = 0, y1 = 0, x2 = 0, y2 = 0): AnnotationLineProps {
@@ -50,11 +67,18 @@ export class MockAnnotationLineProps {
       },
     });
   }
+
+  static fromPartialAndId(partial?: RecursivePartial<AnnotationLineProps>) {
+    return mergePartial<AnnotationLineProps>(MockAnnotationLineProps.base, partial, {
+      mergeOptionalPartialValues: true,
+    });
+  }
 }
 
 /** @internal */
 export class MockAnnotationRectProps {
   private static readonly base: AnnotationRectProps = {
+    datum: { coordinates: { x0: 0, x1: 1, y0: 0, y1: 1 } },
     rect: {
       x: 0,
       y: 0,

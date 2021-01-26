@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { MockAnnotationLineProps } from '../../../../mocks/annotations/annotations';
+import { MockAnnotationLineProps, MockAnnotationRectProps } from '../../../../mocks/annotations/annotations';
 import { MockAnnotationSpec, MockGlobalSpec, MockSeriesSpec } from '../../../../mocks/specs';
 import { MockStore } from '../../../../mocks/store';
 import { ScaleType } from '../../../../scales/constants';
@@ -88,21 +88,22 @@ describe('Annotation utils', () => {
     const expectedDimensions = new Map<AnnotationId, AnnotationDimensions>();
     expectedDimensions.set('foo', [
       MockAnnotationLineProps.default({
+        specId: 'foo',
         linePathPoints: {
           x1: 0,
           y1: 80,
           x2: 100,
           y2: 80,
         },
-        details: { detailsText: 'foo', headerText: '2' },
+        datum: { dataValue: 2, details: 'foo' },
       }),
     ]);
     expectedDimensions.set('rect', [
-      {
-        details: undefined,
+      MockAnnotationRectProps.default({
         rect: { x: 0, y: 50, width: 50, height: 20 },
         panel: { top: 0, left: 0, width: 100, height: 100 },
-      },
+        datum: { coordinates: { x0: 'a', x1: 'b', y0: 3, y1: 5 } },
+      }),
     ]);
 
     expect(dimensions).toEqual(expectedDimensions);
@@ -156,6 +157,7 @@ describe('Annotation utils', () => {
 
     const expectedDimensions: AnnotationLineProps[] = [
       MockAnnotationLineProps.default({
+        specId: 'foo-line',
         linePathPoints: {
           x1: 0,
           y1: 80,
@@ -163,7 +165,7 @@ describe('Annotation utils', () => {
           y2: 80,
         },
         panel,
-        details: { detailsText: 'foo', headerText: '2' },
+        datum: { dataValue: 2, details: 'foo' },
       }),
     ];
     expect(dimensions.get('foo-line')).toEqual(expectedDimensions);
@@ -199,6 +201,7 @@ describe('Annotation utils', () => {
 
     const expectedDimensions: AnnotationLineProps[] = [
       MockAnnotationLineProps.default({
+        specId: 'foo-line',
         linePathPoints: {
           x1: 0,
           y1: 80,
@@ -206,7 +209,7 @@ describe('Annotation utils', () => {
           y2: 80,
         },
         panel: { width: 10, height: 100, top: 0, left: 0 },
-        details: { detailsText: 'foo', headerText: '2' },
+        datum: { dataValue: 2, details: 'foo' },
       }),
     ];
     expect(dimensions.get('foo-line')).toEqual(expectedDimensions);
@@ -241,13 +244,14 @@ describe('Annotation utils', () => {
 
     const expectedDimensions: AnnotationLineProps[] = [
       MockAnnotationLineProps.default({
+        specId: 'foo-line',
         linePathPoints: {
           x1: 0,
           y1: 80,
           x2: 100,
           y2: 80,
         },
-        details: { detailsText: 'foo', headerText: '2' },
+        datum: { dataValue: 2, details: 'foo' },
       }),
     ];
     expect(dimensions.get('foo-line')).toEqual(expectedDimensions);
@@ -313,13 +317,14 @@ describe('Annotation utils', () => {
 
     const expectedDimensions: AnnotationLineProps[] = [
       MockAnnotationLineProps.default({
+        specId: 'foo-line',
         linePathPoints: {
           x1: 12.5,
           y1: 0,
           x2: 12.5,
           y2: 100,
         },
-        details: { detailsText: 'foo', headerText: 'a' },
+        datum: { dataValue: 'a', details: 'foo' },
       }),
     ];
     expect(dimensions.get('foo-line')).toEqual(expectedDimensions);
@@ -354,13 +359,14 @@ describe('Annotation utils', () => {
     const dimensions = computeAnnotationDimensionsSelector(store.getState());
     const expectedDimensions: AnnotationLineProps[] = [
       MockAnnotationLineProps.default({
+        specId: 'foo-line',
         linePathPoints: {
           x1: 25,
           y1: 0,
           x2: 25,
           y2: 100,
         },
-        details: { detailsText: 'foo', headerText: '2' },
+        datum: { dataValue: 2, details: 'foo' },
       }),
     ];
     expect(dimensions.get('foo-line')).toEqual(expectedDimensions);
@@ -395,13 +401,14 @@ describe('Annotation utils', () => {
     const dimensions = computeAnnotationDimensionsSelector(store.getState());
     const expectedDimensions: AnnotationLineProps[] = [
       MockAnnotationLineProps.default({
+        specId: 'foo-line',
         linePathPoints: {
           x1: 25,
           y1: 0,
           x2: 25,
           y2: 100,
         },
-        details: { detailsText: 'foo', headerText: '2' },
+        datum: { dataValue: 2, details: 'foo' },
       }),
     ];
     expect(dimensions.get('foo-line')).toEqual(expectedDimensions);
@@ -436,13 +443,14 @@ describe('Annotation utils', () => {
     const dimensions = computeAnnotationDimensionsSelector(store.getState());
     const expectedDimensions: AnnotationLineProps[] = [
       MockAnnotationLineProps.default({
+        specId: 'foo-line',
         linePathPoints: {
           x1: 12.5,
           y1: 0,
           x2: 12.5,
           y2: 100,
         },
-        details: { detailsText: 'foo', headerText: 'a' },
+        datum: { dataValue: 'a', details: 'foo' },
       }),
     ];
     expect(dimensions.get('foo-line')).toEqual(expectedDimensions);
@@ -478,6 +486,7 @@ describe('Annotation utils', () => {
     const dimensions = computeAnnotationDimensionsSelector(store.getState());
     const expectedDimensions: AnnotationLineProps[] = [
       MockAnnotationLineProps.default({
+        specId: 'foo-line',
         linePathPoints: {
           x1: 12.5,
           y1: 0,
@@ -485,7 +494,7 @@ describe('Annotation utils', () => {
           y2: 100,
         },
         panel,
-        details: { detailsText: 'foo', headerText: '2' },
+        datum: { dataValue: 2, details: 'foo' },
       }),
     ];
     expect(dimensions.get('foo-line')).toEqual(expectedDimensions);
@@ -521,6 +530,7 @@ describe('Annotation utils', () => {
     const dimensions = computeAnnotationDimensionsSelector(store.getState());
     const expectedDimensions: AnnotationLineProps[] = [
       MockAnnotationLineProps.default({
+        specId: 'foo-line',
         linePathPoints: {
           x1: 12.5,
           y1: 0,
@@ -528,7 +538,7 @@ describe('Annotation utils', () => {
           y2: 100,
         },
         panel,
-        details: { detailsText: 'foo', headerText: '2' },
+        datum: { dataValue: 2, details: 'foo' },
       }),
     ];
     expect(dimensions.get('foo-line')).toEqual(expectedDimensions);
@@ -563,13 +573,14 @@ describe('Annotation utils', () => {
     const dimensions = computeAnnotationDimensionsSelector(store.getState());
     const expectedDimensions: AnnotationLineProps[] = [
       MockAnnotationLineProps.default({
+        specId: 'foo-line',
         linePathPoints: {
           x1: 25,
           y1: 0,
           x2: 25,
           y2: 100,
         },
-        details: { detailsText: 'foo', headerText: '2' },
+        datum: { dataValue: 2, details: 'foo' },
       }),
     ];
     expect(dimensions.get('foo-line')).toEqual(expectedDimensions);
@@ -605,6 +616,7 @@ describe('Annotation utils', () => {
     const dimensions = computeAnnotationDimensionsSelector(store.getState());
     const expectedDimensions: AnnotationLineProps[] = [
       MockAnnotationLineProps.default({
+        specId: 'foo-line',
         linePathPoints: {
           x1: 25,
           y1: 0,
@@ -612,7 +624,7 @@ describe('Annotation utils', () => {
           y2: 50,
         },
         panel,
-        details: { detailsText: 'foo', headerText: '2' },
+        datum: { dataValue: 2, details: 'foo' },
       }),
     ];
     expect(dimensions.get('foo-line')).toEqual(expectedDimensions);

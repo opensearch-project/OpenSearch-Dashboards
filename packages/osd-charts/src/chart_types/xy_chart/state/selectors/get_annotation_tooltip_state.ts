@@ -19,7 +19,9 @@
 
 import createCachedSelector from 're-reselect';
 
+import { TooltipPortalSettings } from '../../../../components/portal/types';
 import { TooltipInfo } from '../../../../components/tooltip/types';
+import { DOMElement } from '../../../../state/actions/dom_element';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
@@ -27,7 +29,9 @@ import { Rotation } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { AnnotationId } from '../../../../utils/ids';
 import { Point } from '../../../../utils/point';
-import { computeAnnotationTooltipState } from '../../annotations/tooltip';
+import { AnnotationLineProps } from '../../annotations/line/types';
+import { AnnotationRectProps } from '../../annotations/rect/types';
+import { computeRectAnnotationTooltipState } from '../../annotations/tooltip';
 import { AnnotationTooltipState, AnnotationDimensions } from '../../annotations/types';
 import { AxisSpec, AnnotationSpec, AnnotationTypes } from '../../utils/specs';
 import { ComputedGeometries } from '../utils/types';
@@ -38,6 +42,7 @@ import { getAxisSpecsSelector, getAnnotationSpecsSelector } from './get_specs';
 import { getTooltipInfoSelector } from './get_tooltip_values_highlighted_geoms';
 
 const getCurrentPointerPosition = (state: GlobalChartState) => state.interactions.pointer.current.position;
+const getHoveredDOMElement = (state: GlobalChartState) => state.interactions.hoveredDOMElement;
 
 /** @internal */
 export const getAnnotationTooltipStateSelector = createCachedSelector(
@@ -50,6 +55,7 @@ export const getAnnotationTooltipStateSelector = createCachedSelector(
     getAxisSpecsSelector,
     computeAnnotationDimensionsSelector,
     getTooltipInfoSelector,
+    getHoveredDOMElement,
   ],
   getAnnotationTooltipState,
 )(getChartIdSelector);
@@ -67,7 +73,17 @@ function getAnnotationTooltipState(
   axesSpecs: AxisSpec[],
   annotationDimensions: Map<AnnotationId, AnnotationDimensions>,
   tooltip: TooltipInfo,
+  hoveredDOMElement: DOMElement | null,
 ): AnnotationTooltipState | null {
+  const hoveredTooltip = getTooltipStateForDOMElements(
+    chartDimensions,
+    annotationSpecs,
+    annotationDimensions,
+    hoveredDOMElement,
+  );
+  if (hoveredTooltip) {
+    return hoveredTooltip;
+  }
   // get positions relative to chart
   if (cursorPosition.x < 0 || cursorPosition.y < 0) {
     return null;
@@ -77,7 +93,7 @@ function getAnnotationTooltipState(
   if (!xScale || !yScales) {
     return null;
   }
-  const tooltipState = computeAnnotationTooltipState(
+  const tooltipState = computeRectAnnotationTooltipState(
     cursorPosition,
     annotationDimensions,
     annotationSpecs,
@@ -98,4 +114,60 @@ function getAnnotationTooltipState(
   }
 
   return tooltipState;
+}
+
+function getTooltipStateForDOMElements(
+  chartDimensions: Dimensions,
+  annotationSpecs: AnnotationSpec[],
+  annotationDimensions: Map<AnnotationId, AnnotationDimensions>,
+  hoveredDOMElement: DOMElement | null,
+): AnnotationTooltipState | null {
+  if (!hoveredDOMElement) {
+    return null;
+  }
+  // current type for hoveredDOMElement is only used for line annotation markers
+  // and we can safety cast the union types to the respective Line types
+  const spec = annotationSpecs.find(({ id }) => id === hoveredDOMElement.createdBySpecId);
+  if (!spec || spec.hideTooltips) {
+    return null;
+  }
+  const dimension = (annotationDimensions.get(hoveredDOMElement.createdBySpecId) ?? [])
+    .filter(isAnnotationLineProps)
+    .find((d) => {
+      return d.id === hoveredDOMElement.id && d.datum === hoveredDOMElement.datum;
+    });
+
+  if (!dimension) {
+    return null;
+  }
+
+  return {
+    isVisible: true,
+    annotationType: AnnotationTypes.Line,
+    datum: dimension.datum,
+    anchor: {
+      top: (dimension.markers[0]?.position.top ?? 0) + dimension.panel.top + chartDimensions.top,
+      left: (dimension.markers[0]?.position.left ?? 0) + dimension.panel.left + chartDimensions.left,
+    },
+    customTooltipDetails: spec.customTooltipDetails,
+    customTooltip: spec.customTooltip,
+    tooltipSettings: getTooltipSettings(spec),
+  };
+}
+function isAnnotationLineProps(prop: AnnotationLineProps | AnnotationRectProps): prop is AnnotationLineProps {
+  return 'linePathPoints' in prop;
+}
+
+function getTooltipSettings({
+  placement,
+  fallbackPlacements,
+  boundary,
+  offset,
+}: AnnotationSpec): TooltipPortalSettings<'chart'> {
+  return {
+    placement,
+    fallbackPlacements,
+    boundary,
+    offset,
+  };
 }
