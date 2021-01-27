@@ -95,14 +95,9 @@
   "workspaces": {
     "packages": [
       "packages/*",
-      "x-pack",
-      "x-pack/plugins/*",
-      "x-pack/legacy/plugins/*",
       "examples/*",
       "test/plugin_functional/plugins/*",
-      "test/interpreter_functional/plugins/*",
-      "x-pack/test/functional_with_es_ssl/fixtures/plugins/*",
-      "x-pack/test/plugin_api_integration/plugins/*"
+      "test/interpreter_functional/plugins/*"
     ],
     "nohoist": [
       "**/@types/*",
