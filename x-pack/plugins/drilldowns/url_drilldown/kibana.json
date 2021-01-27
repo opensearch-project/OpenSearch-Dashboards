@@ -1,8 +1,0 @@
-{
-  "id": "urlDrilldown",
-  "version": "kibana",
-  "server": false,
-  "ui": true,
-  "requiredPlugins": ["embeddable", "uiActions", "uiActionsEnhanced"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact"]
-}

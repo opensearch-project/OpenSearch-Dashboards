@@ -1,9 +1,0 @@
-{
-  "id": "encryptedSavedObjects",
-  "version": "8.0.0",
-  "kibanaVersion": "kibana",
-  "configPath": ["xpack", "encryptedSavedObjects"],
-  "optionalPlugins": ["security"],
-  "server": true,
-  "ui": false
-}
