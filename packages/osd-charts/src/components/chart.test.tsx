@@ -55,6 +55,6 @@ describe('Chart', () => {
         <BarSeries id="test" data={[{ x: 0, y: 2 }]} />
       </Chart>,
     );
-    expect(wrapper.html()).toMatchSnapshot();
+    expect(wrapper.debug()).toMatchSnapshot();
   });
 });
