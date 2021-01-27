@@ -203,9 +203,7 @@ const TooltipComponent = ({
       boundary: boundary === 'chart' && chartRef.current ? chartRef.current : undefined,
     };
   }, [settings, chartRef, rotation]);
-  if (!visible) {
-    return null;
-  }
+
   return (
     <TooltipPortal
       scope="MainTooltip"

@@ -18,7 +18,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { boolean } from '@storybook/addon-knobs';
+import { boolean, select } from '@storybook/addon-knobs';
 import React from 'react';
 
 import {
@@ -32,11 +32,34 @@ import {
   Placement,
   niceTimeFormatter,
   TooltipType,
+  LineSeries,
+  AreaSeries,
 } from '../../src';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 import { palettes } from '../../src/utils/themes/colors';
 import { getTooltipTypeKnob, getPlacementKnob } from '../utils/knobs';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
+
+const chartTypes: Record<string, any> = {
+  bar: BarSeries,
+  line: LineSeries,
+  area: AreaSeries,
+};
+
+const getSeriesKnob = (group?: string) => {
+  const type =
+    select<string>(
+      'Series type',
+      {
+        Bar: 'bar',
+        Line: 'line',
+        Area: 'area',
+      },
+      'bar',
+      group,
+    ) ?? 'bar';
+  return chartTypes[type] ?? BarSeries;
+};
 
 export const Example = () => {
   const ref1 = React.createRef<Chart>();
@@ -57,6 +80,8 @@ export const Example = () => {
   const group1 = 'Top Chart';
   const group2 = 'Bottom Chart';
 
+  const TopSeries = getSeriesKnob(group1);
+  const BottomSeries = getSeriesKnob(group2);
   const topType = getTooltipTypeKnob('local tooltip type', TooltipType.VerticalCursor, group1);
   const bottomType = getTooltipTypeKnob('local tooltip type', TooltipType.VerticalCursor, group2);
   const topVisible = boolean('enable external tooltip', true, group1);
@@ -68,6 +93,8 @@ export const Example = () => {
     <>
       <Chart className="story-chart" ref={ref1} size={{ height: '50%' }} id="chart1">
         <Settings
+          showLegend
+          showLegendExtra
           onPointerUpdate={pointerUpdate}
           externalPointerEvents={{
             tooltip: { visible: topVisible, placement: topPlacement },
@@ -82,8 +109,8 @@ export const Example = () => {
         />
         <Axis id="left2" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
 
-        <BarSeries
-          id="bars"
+        <TopSeries
+          id="Top"
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={0}
@@ -93,6 +120,8 @@ export const Example = () => {
       </Chart>
       <Chart className="story-chart" ref={ref2} size={{ height: '50%' }} id="chart2">
         <Settings
+          showLegend
+          showLegendExtra
           onPointerUpdate={pointerUpdate}
           tooltip={{
             type: bottomType,
@@ -114,8 +143,8 @@ export const Example = () => {
           domain={{ min: 5, max: 20 }}
         />
 
-        <BarSeries
-          id="bars"
+        <BottomSeries
+          id="Bottom"
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Sqrt}
           xAccessor={0}
@@ -127,6 +156,7 @@ export const Example = () => {
     </>
   );
 };
+
 Example.story = {
   parameters: {
     info: {
