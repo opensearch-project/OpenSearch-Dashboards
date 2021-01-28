@@ -26,6 +26,7 @@ import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
 import { Dimensions } from '../../../../utils/dimensions';
+import { MODEL_KEY } from '../../layout/types/types';
 import { nullShapeViewModel, QuadViewModel, ShapeViewModel } from '../../layout/types/viewmodel_types';
 import { INPUT_KEY } from '../../layout/utils/group_by_rollup';
 import { partitionGeometries } from '../../state/selectors/geometries';
@@ -114,7 +115,7 @@ class PartitionComponent extends React.Component<PartitionProps> {
     const pickedShapes: Array<QuadViewModel> = picker(x, y);
     const datumIndices = new Set();
     pickedShapes.forEach((shape) => {
-      const node = shape.parent;
+      const node = shape[MODEL_KEY];
       const shapeNode = node.children.find(([key]) => key === shape.dataName);
       if (shapeNode) {
         const indices = shapeNode[1][INPUT_KEY] || [];

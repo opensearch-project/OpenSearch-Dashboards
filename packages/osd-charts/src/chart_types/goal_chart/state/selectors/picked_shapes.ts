@@ -49,6 +49,9 @@ export const getPickedShapesLayerValues = createCachedSelector(
       values.push({
         groupByRollup: 'Actual',
         value: model.actual,
+        sortIndex: 0,
+        path: [],
+        depth: 0,
       });
       return values.reverse();
     });

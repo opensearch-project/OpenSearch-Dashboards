@@ -29,6 +29,7 @@ import { SeriesIdentifier } from '../common/series_id';
 import { TooltipPortalSettings } from '../components';
 import { CustomTooltip } from '../components/tooltip/types';
 import { ScaleContinuousType, ScaleOrdinalType } from '../scales';
+import { LegendPath } from '../state/actions/legend';
 import { getConnect, specComponentFactory } from '../state/spec_factory';
 import { Accessor } from '../utils/accessor';
 import { Color, Position, Rendering, Rotation } from '../utils/common';
@@ -39,9 +40,33 @@ import { SeriesCompareFn } from '../utils/series_sort';
 import { PartialTheme, Theme } from '../utils/themes/theme';
 import { BinAgg, BrushAxis, DEFAULT_SETTINGS_SPEC, Direction, PointerEventType, TooltipType } from './constants';
 
+/** @public */
 export interface LayerValue {
+  /**
+   * The category value as retrieved by the `groupByRollup` callback
+   */
   groupByRollup: PrimitiveValue;
+  /**
+   * Numerical value of the partition
+   */
   value: number;
+  /**
+   * The position index of the sub-partition within its containing partition
+   */
+  sortIndex: number;
+  /**
+   * The depth of the partition in terms of the layered partition tree, where
+   * 0 is root (single, not visualized root of the partitioning tree),
+   * 1 is pie chart slices and innermost layer of sunburst, or 1st level treemap/flame/icicle breakdown
+   * 2 and above are increasingly outer layers
+   * maximum value is on the deepest leaf node
+   */
+  depth: number;
+  /**
+   * It contains the full path of the partition node, which is an array of `{index, value}` tuples
+   * where `index` corresponds to `sortIndex` and `value` corresponds `groupByRollup`
+   */
+  path: LegendPath;
 }
 
 export interface GroupBrushExtent {

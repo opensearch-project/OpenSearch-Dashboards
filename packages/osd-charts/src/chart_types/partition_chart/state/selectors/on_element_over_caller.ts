@@ -26,8 +26,8 @@ import { LayerValue } from '../../../../specs';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
+import { getPartitionSpec } from './partition_spec';
 import { getPickedShapesLayerValues } from './picked_shapes';
-import { getPieSpec } from './pie_spec';
 
 function isOverElement(prevPickedShapes: Array<Array<LayerValue>> = [], nextPickedShapes: Array<Array<LayerValue>>) {
   if (nextPickedShapes.length === 0) {
@@ -66,7 +66,7 @@ export function createOnElementOverCaller(): (state: GlobalChartState) => void {
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartTypes.Partition) {
       selector = createCachedSelector(
-        [getPieSpec, getPickedShapesLayerValues, getSettingsSpecSelector],
+        [getPartitionSpec, getPickedShapesLayerValues, getSettingsSpecSelector],
         (pieSpec, nextPickedShapes, settings): void => {
           if (!pieSpec) {
             return;

@@ -18,17 +18,22 @@
  */
 
 import { Config, PartitionLayout, Numeric } from '../types/config_types';
-import { FONT_STYLES, FONT_VARIANTS } from '../types/types';
+import { FONT_STYLES, FONT_VARIANTS, MODEL_KEY } from '../types/types';
 import { ShapeTreeNode } from '../types/viewmodel_types';
 import { GOLDEN_RATIO, TAU } from '../utils/constants';
 import { AGGREGATE_KEY, STATISTICS_KEY } from '../utils/group_by_rollup';
 
-const log10 = Math.log(10);
+const LOG_10 = Math.log(10);
+
 function significantDigitCount(d: number): number {
-  let n = Math.abs(parseFloat(String(d).replace('.', ''))); // remove decimal and make positive
-  if (n == 0) return 0;
-  while (n != 0 && n % 10 == 0) n /= 10;
-  return Math.floor(Math.log(n) / log10) + 1;
+  let n = Math.abs(parseFloat(String(d).replace('.', '')));
+  if (n === 0) {
+    return 0;
+  }
+  while (n !== 0 && n % 10 === 0) {
+    n /= 10;
+  }
+  return Math.floor(Math.log(n) / LOG_10) + 1;
 }
 
 export function sumValueGetter(node: ShapeTreeNode): number {
@@ -36,11 +41,11 @@ export function sumValueGetter(node: ShapeTreeNode): number {
 }
 
 export function percentValueGetter(node: ShapeTreeNode): number {
-  return (100 * node[AGGREGATE_KEY]) / node.parent[STATISTICS_KEY].globalAggregate;
+  return (100 * node[AGGREGATE_KEY]) / node[MODEL_KEY][STATISTICS_KEY].globalAggregate;
 }
 
 export function ratioValueGetter(node: ShapeTreeNode): number {
-  return node[AGGREGATE_KEY] / node.parent[STATISTICS_KEY].globalAggregate;
+  return node[AGGREGATE_KEY] / node[MODEL_KEY][STATISTICS_KEY].globalAggregate;
 }
 
 export const VALUE_GETTERS = Object.freeze({ percent: percentValueGetter, ratio: ratioValueGetter } as const);

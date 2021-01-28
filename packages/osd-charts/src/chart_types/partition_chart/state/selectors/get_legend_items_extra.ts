@@ -26,12 +26,12 @@ import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { HierarchyOfArrays, CHILDREN_KEY } from '../../layout/utils/group_by_rollup';
 import { PartitionSpec } from '../../specs';
-import { getPieSpec } from './pie_spec';
+import { getPartitionSpec } from './partition_spec';
 import { getTree } from './tree';
 
 /** @internal */
 export const getLegendItemsExtra = createCachedSelector(
-  [getPieSpec, getSettingsSpecSelector, getTree],
+  [getPartitionSpec, getSettingsSpecSelector, getTree],
   (pieSpec, { legendMaxDepth }, tree): Map<SeriesKey, LegendItemExtraValues> => {
     const legendExtraValues = new Map<SeriesKey, LegendItemExtraValues>();
 

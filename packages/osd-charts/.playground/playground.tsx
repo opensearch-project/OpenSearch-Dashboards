@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { Example } from '../stories/small_multiples/6_heterogeneous_cartesians';
+import { Example } from '../stories/icicle/02_unix_flame';
 
 export class Playground extends React.Component {
   render() {

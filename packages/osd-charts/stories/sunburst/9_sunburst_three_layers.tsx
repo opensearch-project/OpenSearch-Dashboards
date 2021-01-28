@@ -22,6 +22,7 @@ import React from 'react';
 
 import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../src';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
+import { MODEL_KEY } from '../../src/chart_types/partition_chart/layout/types/types';
 import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/types/viewmodel_types';
 import { mocks } from '../../src/mocks/hierarchical';
 import { STORYBOOK_LIGHT_THEME } from '../shared';
@@ -55,7 +56,7 @@ export const Example = () => (
           nodeLabel: (d: any) => regionLookup[d].regionName,
           fillLabel: { maximizeFontSize: boolean('Maximize font size layer 2', true) },
           shape: {
-            fillColor: (d: ShapeTreeNode) => discreteColor(colorBrewerCategoricalStark9, 0.5)(d.parent.sortIndex),
+            fillColor: (d: ShapeTreeNode) => discreteColor(colorBrewerCategoricalStark9, 0.5)(d[MODEL_KEY].sortIndex),
           },
         },
         {
@@ -64,7 +65,7 @@ export const Example = () => (
           fillLabel: { maximizeFontSize: boolean('Maximize font size layer 3', true) },
           shape: {
             fillColor: (d: ShapeTreeNode) =>
-              discreteColor(colorBrewerCategoricalStark9, 0.3)(d.parent.parent.sortIndex),
+              discreteColor(colorBrewerCategoricalStark9, 0.3)(d[MODEL_KEY].parent.sortIndex),
           },
         },
       ]}

@@ -25,6 +25,7 @@ import { updateParentDimensions } from '../../../../state/actions/chart_settings
 import { onMouseDown, onMouseUp, onPointerMove } from '../../../../state/actions/mouse';
 import { upsertSpec, specParsed } from '../../../../state/actions/specs';
 import { chartStoreReducer, GlobalChartState } from '../../../../state/chart_state';
+import { HIERARCHY_ROOT_KEY } from '../../layout/utils/group_by_rollup';
 import { PartitionSpec } from '../../specs';
 import { partitionGeometries } from './geometries';
 import { createOnElementClickCaller } from './on_element_click_caller';
@@ -96,8 +97,27 @@ describe('Picked shapes selector', () => {
     expect(onClickListener.mock.calls[0][0]).toEqual([
       [
         [
-          { groupByRollup: 'b', value: 2 },
-          { groupByRollup: 'b', value: 1 },
+          {
+            groupByRollup: 'b',
+            value: 2,
+            depth: 1,
+            sortIndex: 1,
+            path: [
+              { index: 0, value: HIERARCHY_ROOT_KEY },
+              { index: 1, value: 'b' },
+            ],
+          },
+          {
+            groupByRollup: 'b',
+            value: 1,
+            depth: 2,
+            sortIndex: 1,
+            path: [
+              { index: 0, value: HIERARCHY_ROOT_KEY },
+              { index: 1, value: 'b' },
+              { index: 1, value: 'b' },
+            ],
+          },
         ],
         {
           specId: treemapSpec.id,
@@ -128,8 +148,27 @@ describe('Picked shapes selector', () => {
     expect(onClickListener.mock.calls[0][0]).toEqual([
       [
         [
-          { groupByRollup: 'b', value: 2 },
-          { groupByRollup: 'b', value: 1 },
+          {
+            groupByRollup: 'b',
+            value: 2,
+            depth: 1,
+            sortIndex: 1,
+            path: [
+              { index: 0, value: HIERARCHY_ROOT_KEY },
+              { index: 1, value: 'b' },
+            ],
+          },
+          {
+            groupByRollup: 'b',
+            value: 1,
+            depth: 2,
+            sortIndex: 1,
+            path: [
+              { index: 0, value: HIERARCHY_ROOT_KEY },
+              { index: 1, value: 'b' },
+              { index: 1, value: 'b' },
+            ],
+          },
         ],
         {
           specId: sunburstSpec.id,

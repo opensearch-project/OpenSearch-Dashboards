@@ -29,8 +29,10 @@ export const ON_LEGEND_ITEM_OUT = 'ON_LEGEND_ITEM_OUT';
 /** @internal */
 export const ON_TOGGLE_DESELECT_SERIES = 'ON_TOGGLE_DESELECT_SERIES';
 
+/** @public */
 export type LegendPathElement = { index: number; value: CategoryKey };
 
+/** @public */
 export type LegendPath = LegendPathElement[];
 
 interface LegendItemOverAction {

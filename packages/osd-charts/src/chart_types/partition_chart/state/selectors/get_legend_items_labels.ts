@@ -24,12 +24,12 @@ import { LegendItemLabel } from '../../../../state/selectors/get_legend_items_la
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { CHILDREN_KEY, HierarchyOfArrays, HIERARCHY_ROOT_KEY } from '../../layout/utils/group_by_rollup';
 import { Layer } from '../../specs';
-import { getPieSpec } from './pie_spec';
+import { getPartitionSpec } from './partition_spec';
 import { getTree } from './tree';
 
 /** @internal */
 export const getLegendItemsLabels = createCachedSelector(
-  [getPieSpec, getSettingsSpecSelector, getTree],
+  [getPartitionSpec, getSettingsSpecSelector, getTree],
   (pieSpec, { legendMaxDepth }, tree): LegendItemLabel[] =>
     pieSpec ? flatSlicesNames(pieSpec.layers, 0, tree).filter(({ depth }) => depth <= legendMaxDepth) : [],
 )(getChartIdSelector);

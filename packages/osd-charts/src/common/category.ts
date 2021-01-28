@@ -25,5 +25,8 @@
  *   - allow a descriptor object, eg. `{ key: PrimitiveValue, label: string }`
  *   - allow an accessor that operates on the key, and maps it to a label
  */
+
+/** @public */
 export type CategoryKey = string;
+
 export type CategoryLabel = string;

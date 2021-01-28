@@ -108,3 +108,18 @@ export interface Rectangle extends Origin {
 export interface Part extends Rectangle {
   node: ArrayEntry;
 }
+
+/**
+ * It's an unfortunate accident that 'parent' is used both
+ *   - for linking an ArrayNode to a QuadViewModel, and
+ *   - for recursively linking the parent ArrayNode to an ArrayNode (child) in the tree
+ *
+ * By extracting out the 'MODEL_KEY', we make the distinction clear, while the API, which depends on this, doesn't
+ * change. This makes an eventual API change a single-line change, assuming `[MODEL_KEY]` is used where needed, and just there
+ *
+ *  Todo:
+ *   - replace users' use of `s.parent` with `s[MODEL_KEY]` for the ShapeTreeNode -> ArrayNode access
+ *   - change MODEL_KEY to something other than 'parent' when it's done (might still be breaking change)
+ */
+/** @public */
+export const MODEL_KEY = 'parent';

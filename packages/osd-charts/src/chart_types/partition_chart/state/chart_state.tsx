@@ -35,7 +35,7 @@ import { isTooltipVisibleSelector } from './selectors/is_tooltip_visible';
 import { createOnElementClickCaller } from './selectors/on_element_click_caller';
 import { createOnElementOutCaller } from './selectors/on_element_out_caller';
 import { createOnElementOverCaller } from './selectors/on_element_over_caller';
-import { getPieSpec } from './selectors/pie_spec';
+import { getPartitionSpec } from './selectors/partition_spec';
 import { getTooltipInfoSelector } from './selectors/tooltip';
 
 /** @internal */
@@ -55,7 +55,7 @@ export class PartitionState implements InternalChartState {
   }
 
   isInitialized(globalState: GlobalChartState) {
-    return getPieSpec(globalState) !== null ? InitStatus.Initialized : InitStatus.SpecNotInitialized;
+    return getPartitionSpec(globalState) !== null ? InitStatus.Initialized : InitStatus.SpecNotInitialized;
   }
 
   isBrushAvailable() {
@@ -99,7 +99,10 @@ export class PartitionState implements InternalChartState {
   }
 
   isTooltipVisible(globalState: GlobalChartState) {
-    return { visible: isTooltipVisibleSelector(globalState), isExternal: false };
+    return {
+      visible: isTooltipVisibleSelector(globalState),
+      isExternal: false,
+    };
   }
 
   getTooltipInfo(globalState: GlobalChartState) {

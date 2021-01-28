@@ -34,6 +34,8 @@ export { XYChartSeriesIdentifier, DataSeriesDatum, FilledValues } from './chart_
 export { AnnotationTooltipFormatter, CustomAnnotationTooltip } from './chart_types/xy_chart/annotations/types';
 export { GeometryValue } from './utils/geometry';
 export { LegendStrategy } from './chart_types/partition_chart/state/selectors/get_highlighted_shapes';
+export { LegendPath, LegendPathElement } from './state/actions/legend';
+export { CategoryKey } from './common/category';
 export {
   Config as PartitionConfig,
   FillLabelConfig as PartitionFillLabel,
@@ -41,6 +43,8 @@ export {
 } from './chart_types/partition_chart/layout/types/config_types';
 export { Config as HeatmapConfig } from './chart_types/heatmap/layout/types/config_types';
 export { Layer as PartitionLayer } from './chart_types/partition_chart/specs/index';
+export { PrimitiveValue } from './chart_types/partition_chart/layout/utils/group_by_rollup';
+export { MODEL_KEY } from './chart_types/partition_chart/layout/types/types';
 export * from './chart_types/goal_chart/specs/index';
 export {
   Accessor,

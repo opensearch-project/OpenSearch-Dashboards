@@ -28,11 +28,11 @@ import { isHierarchicalLegend } from '../../../../utils/legend';
 import { QuadViewModel } from '../../layout/types/viewmodel_types';
 import { map } from '../iterables';
 import { partitionGeometries } from './geometries';
-import { getPieSpec } from './pie_spec';
+import { getPartitionSpec } from './partition_spec';
 
 /** @internal */
 export const computeLegendSelector = createCachedSelector(
-  [getPieSpec, getSettingsSpecSelector, partitionGeometries],
+  [getPartitionSpec, getSettingsSpecSelector, partitionGeometries],
   (pieSpec, { flatLegend, legendMaxDepth, legendPosition }, { quadViewModel }): LegendItem[] => {
     if (!pieSpec) {
       return [];

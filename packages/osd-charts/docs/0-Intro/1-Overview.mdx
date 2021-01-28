@@ -317,7 +317,7 @@ If you have `textInvertible` set to true, but do not have `textContrast` set to 
         nodeLabel: (d) => countryLookup[d].name,
         shape: {
           fillColor: (d) => {
-            return categoricalFillColor(colorBrewerCategoricalStark9, 0.3)(d.parent.parent.sortIndex);
+            return categoricalFillColor(colorBrewerCategoricalStark9, 0.3)(d[MODEL_KEY].parent.sortIndex);
           },
         },
       },
@@ -387,7 +387,7 @@ Now if you set the `textContrast` to true as well, these slices also become blac
         nodeLabel: (d) => countryLookup[d].name,
         shape: {
           fillColor: (d) => {
-            return categoricalFillColor(colorBrewerCategoricalStark9, 0.3)(d.parent.parent.sortIndex);
+            return categoricalFillColor(colorBrewerCategoricalStark9, 0.3)(d[MODEL_KEY].parent.sortIndex);
           },
         },
       },

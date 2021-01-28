@@ -26,7 +26,7 @@ import { VerticalAlignments } from '../viewmodel/constants';
 import { LinkLabelsViewModelSpec } from '../viewmodel/link_text_layout';
 import { Config } from './config_types';
 import { Coordinate, Distance, Pixels, PointObject, PointTuple, PointTuples, Radian } from './geometry_types';
-import { Font } from './types';
+import { Font, MODEL_KEY } from './types';
 
 /** @internal */
 export type LinkLabelVM = {
@@ -159,7 +159,7 @@ export interface ShapeTreeNode extends TreeNode, SectorGeomSpecY {
   path: LegendPath;
   dataName: DataName;
   value: number;
-  parent: ArrayNode;
+  [MODEL_KEY]: ArrayNode;
 }
 
 export type RawTextGetter = (node: ShapeTreeNode) => string;

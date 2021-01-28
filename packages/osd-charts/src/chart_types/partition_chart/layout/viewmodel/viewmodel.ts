@@ -23,7 +23,7 @@ import { percentValueGetter } from '../config/config';
 import { meanAngle } from '../geometry';
 import { Config, PartitionLayout } from '../types/config_types';
 import { Distance, Pixels, PointTuple, Radius } from '../types/geometry_types';
-import { TextMeasure, Part } from '../types/types';
+import { TextMeasure, Part, MODEL_KEY } from '../types/types';
 import {
   nullShapeViewModel,
   OutsideLinksViewModel,
@@ -104,7 +104,7 @@ export function makeQuadViewModel(
     const layer = layers[node.depth - 1];
     const fillColorSpec = layer && layer.shape && layer.shape.fillColor;
     const fill = fillColorSpec ?? 'rgba(128,0,0,0.5)';
-    const shapeFillColor = typeof fill === 'function' ? fill(node, node.sortIndex, node.parent.children) : fill;
+    const shapeFillColor = typeof fill === 'function' ? fill(node, node.sortIndex, node[MODEL_KEY].children) : fill;
     const { r, g, b, opacity } = stringToRGB(shapeFillColor);
     const fillColor = argsToRGBString(r, g, b, opacity * opacityMultiplier);
     const strokeWidth = sectorLineWidth;
@@ -407,7 +407,7 @@ function partToShapeTreeNode(treemapLayout: boolean, innerRadius: Radius, ringTh
     dataName: entryKey(node),
     depth: depthAccessor(node),
     value: aggregateAccessor(node),
-    parent: parentAccessor(node),
+    [MODEL_KEY]: parentAccessor(node),
     sortIndex: sortIndexAccessor(node),
     path: pathAccessor(node),
     x0,

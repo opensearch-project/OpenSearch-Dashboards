@@ -27,8 +27,8 @@ import { GlobalChartState, PointerState } from '../../../../state/chart_state';
 import { getLastClickSelector } from '../../../../state/selectors/get_last_click';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { isClicking } from '../../../../state/utils';
+import { getPartitionSpec } from './partition_spec';
 import { getPickedShapesLayerValues } from './picked_shapes';
-import { getPieSpec } from './pie_spec';
 
 /**
  * Will call the onElementClick listener every time the following preconditions are met:
@@ -43,7 +43,7 @@ export function createOnElementClickCaller(): (state: GlobalChartState) => void 
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartTypes.Partition) {
       selector = createCachedSelector(
-        [getPieSpec, getLastClickSelector, getSettingsSpecSelector, getPickedShapesLayerValues],
+        [getPartitionSpec, getLastClickSelector, getSettingsSpecSelector, getPickedShapesLayerValues],
         (pieSpec, lastClick: PointerState | null, settings: SettingsSpec, pickedShapes): void => {
           if (!pieSpec) {
             return;

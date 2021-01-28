@@ -21,6 +21,7 @@ import React from 'react';
 
 import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../src';
 import { config } from '../../src/chart_types/partition_chart/layout/config/config';
+import { MODEL_KEY } from '../../src/chart_types/partition_chart/layout/types/types';
 import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/types/viewmodel_types';
 import { arrayToLookup, hueInterpolator } from '../../src/chart_types/partition_chart/layout/utils/calcs';
 import { mocks } from '../../src/mocks/hierarchical';
@@ -70,7 +71,8 @@ export const Example = () => (
             fillColor: (d: ShapeTreeNode) =>
               // primarily, pick color based on parent's index, but then perturb by the index within the parent
               interpolatorTurbo(
-                (d.parent.sortIndex + d.sortIndex / d.parent.children.length) / (d.parent.parent.children.length + 1),
+                (d[MODEL_KEY].sortIndex + d.sortIndex / d[MODEL_KEY].children.length) /
+                  (d[MODEL_KEY].parent.children.length + 1),
               ),
           },
         },

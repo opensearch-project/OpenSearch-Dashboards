@@ -24,8 +24,8 @@ import { ChartTypes } from '../../..';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
+import { getPartitionSpec } from './partition_spec';
 import { getPickedShapesLayerValues } from './picked_shapes';
-import { getPieSpec } from './pie_spec';
 
 /**
  * Will call the onElementOut listener every time the following preconditions are met:
@@ -39,7 +39,7 @@ export function createOnElementOutCaller(): (state: GlobalChartState) => void {
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartTypes.Partition) {
       selector = createCachedSelector(
-        [getPieSpec, getPickedShapesLayerValues, getSettingsSpecSelector],
+        [getPartitionSpec, getPickedShapesLayerValues, getSettingsSpecSelector],
         (pieSpec, pickedShapes, settings): void => {
           if (!pieSpec) {
             return;
