@@ -176,7 +176,7 @@ describe('copyAll()', () => {
     }
   });
 
-  it('copies files and directories from source to dest, creating dest if necessary, respecting mode', async () => {
+  it.skip('copies files and directories from source to dest, creating dest if necessary, respecting mode', async () => {
     const path777 = resolve(FIXTURES, 'bin/world_executable');
     const path644 = resolve(FIXTURES, 'foo_dir/bar.txt');
 
