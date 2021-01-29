@@ -74,7 +74,6 @@ export function renderLine(
     yScale,
     panel,
     color,
-    seriesStyle.line,
     seriesStyle.point,
     hasY0Accessors,
     markSizeOptions,

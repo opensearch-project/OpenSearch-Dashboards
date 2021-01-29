@@ -20,7 +20,7 @@ import { Scale } from '../../../scales';
 import { Color, isNil } from '../../../utils/common';
 import { Dimensions } from '../../../utils/dimensions';
 import { BandedAccessorType, PointGeometry } from '../../../utils/geometry';
-import { LineStyle, PointStyle } from '../../../utils/themes/theme';
+import { PointStyle } from '../../../utils/themes/theme';
 import { GeometryType, IndexedGeometryMap } from '../utils/indexed_geometry_map';
 import { DataSeries, DataSeriesDatum, FilledValues, XYChartSeriesIdentifier } from '../utils/series';
 import { PointStyleAccessor, StackMode } from '../utils/specs';
@@ -35,8 +35,6 @@ import {
   YDefinedFn,
 } from './utils';
 
-const DEFAULT_RADIUS = 1;
-
 /** @internal */
 export function renderPoints(
   shift: number,
@@ -45,7 +43,6 @@ export function renderPoints(
   yScale: Scale,
   panel: Dimensions,
   color: Color,
-  lineStyle: LineStyle,
   pointStyle: PointStyle,
   hasY0Accessors: boolean,
   markSizeOptions: MarkSizeOptions,
@@ -113,11 +110,14 @@ export function renderPoints(
       const styleOverrides = getPointStyleOverrides(datum, seriesIdentifier, styleAccessor);
       const style = buildPointGeometryStyles(color, pointStyle, styleOverrides);
       const orphan = isOrphanDataPoint(dataIndex, dataSeries.data.length, yDefined, prev, next);
-      const radius = markSizeOptions.enabled ? getRadius(mark) : styleOverrides?.radius ?? pointStyle.radius;
+      // if radius is defined with the mark, limit the minimum radius to the theme radius value
+      const radius = markSizeOptions.enabled
+        ? Math.max(getRadius(mark), pointStyle.radius)
+        : styleOverrides?.radius ?? pointStyle.radius;
       const pointGeometry: PointGeometry = {
         x,
         y,
-        radius: Math.max(radius, DEFAULT_RADIUS),
+        radius,
         color,
         style,
         value: {
