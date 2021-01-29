@@ -218,10 +218,6 @@
     "conventional-changelog-conventionalcommits": "^4.3.0",
     "refractor": "~3.1.0"
   },
-  "engines": {
-    "node": ">=10.23",
-    "yarn": "^1.10.1"
-  },
   "browserslist": [
     "last 2 versions",
     "ie 11"
