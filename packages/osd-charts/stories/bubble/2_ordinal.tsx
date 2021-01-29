@@ -23,6 +23,7 @@ import React from 'react';
 
 import { Axis, Chart, BubbleSeries, Position, ScaleType, Settings, TooltipType } from '../../src';
 import { getRandomNumberGenerator } from '../../src/mocks/utils';
+import { SB_KNOBS_PANEL } from '../utils/storybook';
 
 const rng = getRandomNumberGenerator();
 const data = new Array(100).fill(0).map(() => ({
@@ -78,4 +79,11 @@ export const Example = () => {
       />
     </Chart>
   );
+};
+
+// storybook configuration
+Example.story = {
+  parameters: {
+    options: { selectedPanel: SB_KNOBS_PANEL },
+  },
 };

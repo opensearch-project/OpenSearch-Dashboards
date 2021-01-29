@@ -29,7 +29,7 @@ import { onPointerMove } from '../../../state/actions/mouse';
 import { upsertSpec, specParsed } from '../../../state/actions/specs';
 import { chartStoreReducer, GlobalChartState } from '../../../state/chart_state';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
-import { mergeWithDefaultTheme } from '../../../utils/themes/theme';
+import { mergeWithDefaultTheme } from '../../../utils/themes/merge_utils';
 import { LineSeriesSpec, SeriesTypes } from '../utils/specs';
 import { computeSeriesGeometriesSelector } from './selectors/compute_series_geometries';
 import { getComputedScalesSelector } from './selectors/get_computed_scales';

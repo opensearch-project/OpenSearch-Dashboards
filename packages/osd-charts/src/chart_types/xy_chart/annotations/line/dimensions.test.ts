@@ -23,7 +23,7 @@ import { MockStore } from '../../../../mocks/store';
 import { ScaleType } from '../../../../scales/constants';
 import { Position } from '../../../../utils/common';
 import { AnnotationId } from '../../../../utils/ids';
-import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../../utils/themes/theme';
+import { DEFAULT_ANNOTATION_LINE_STYLE } from '../../../../utils/themes/merge_utils';
 import { computeAnnotationDimensionsSelector } from '../../state/selectors/compute_annotations';
 import { AnnotationDomainTypes } from '../../utils/specs';
 import { AnnotationDimensions } from '../types';

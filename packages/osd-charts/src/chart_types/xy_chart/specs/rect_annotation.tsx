@@ -22,7 +22,7 @@ import React from 'react';
 import { ChartTypes } from '../..';
 import { SpecTypes } from '../../../specs/constants';
 import { specComponentFactory, getConnect } from '../../../state/spec_factory';
-import { DEFAULT_ANNOTATION_RECT_STYLE } from '../../../utils/themes/theme';
+import { DEFAULT_ANNOTATION_RECT_STYLE } from '../../../utils/themes/merge_utils';
 import { RectAnnotationSpec, DEFAULT_GLOBAL_ID, AnnotationTypes } from '../utils/specs';
 
 const defaultProps = {

@@ -75,6 +75,7 @@ export function renderLine(
     panel,
     color,
     seriesStyle.line,
+    seriesStyle.point,
     hasY0Accessors,
     markSizeOptions,
     pointStyleAccessor,

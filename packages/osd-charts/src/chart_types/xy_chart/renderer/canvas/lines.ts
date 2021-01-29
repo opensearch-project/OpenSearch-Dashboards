@@ -65,7 +65,7 @@ export function renderLines(ctx: CanvasRenderingContext2D, props: LineGeometries
         rotation,
         renderingArea,
         (ctx) => {
-          renderPoints(ctx, visiblePoints, line.seriesPointStyle, geometryStyle);
+          renderPoints(ctx, visiblePoints, geometryStyle);
         },
         // TODO: add padding over clipping
         { area: clippings, shouldClip: line.points[0]?.value.mark !== null },

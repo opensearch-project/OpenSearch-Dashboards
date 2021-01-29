@@ -24,6 +24,7 @@ import { MockStore } from '../../../mocks/store';
 import { ScaleType } from '../../../scales/constants';
 import { Position } from '../../../utils/common';
 import { PointGeometry } from '../../../utils/geometry';
+import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { computeSeriesGeometriesSelector } from '../state/selectors/compute_series_geometries';
 import { SeriesTypes } from '../utils/specs';
 
@@ -71,10 +72,8 @@ describe('Rendering points - line', () => {
         MockPointGeometry.default({
           x: 0,
           y: 0,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec),
-          styleOverrides: undefined,
           value: {
             accessor: 'y1',
             x: 0,
@@ -92,7 +91,6 @@ describe('Rendering points - line', () => {
         MockPointGeometry.default({
           x: 50,
           y: 50,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec),
           value: {
@@ -172,7 +170,6 @@ describe('Rendering points - line', () => {
         MockPointGeometry.default({
           x: 0,
           y: 50,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec1),
           value: {
@@ -193,7 +190,6 @@ describe('Rendering points - line', () => {
           x: 50,
           y: 75,
           color: 'red',
-          radius: 0,
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec1),
           value: {
             accessor: 'y1',
@@ -223,7 +219,6 @@ describe('Rendering points - line', () => {
           x: 0,
           y: 0,
           color: 'blue',
-          radius: 0,
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec2),
           value: {
             accessor: 'y1',
@@ -243,7 +238,6 @@ describe('Rendering points - line', () => {
           x: 50,
           y: 50,
           color: 'blue',
-          radius: 0,
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec2),
           value: {
             accessor: 'y1',
@@ -302,7 +296,6 @@ describe('Rendering points - line', () => {
           x: 0,
           y: 0,
           color: 'red',
-          radius: 0,
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec),
           value: {
             accessor: 'y1',
@@ -318,7 +311,6 @@ describe('Rendering points - line', () => {
           x: 100,
           y: 50,
           color: 'red',
-          radius: 0,
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec),
           value: {
             accessor: 'y1',
@@ -392,7 +384,6 @@ describe('Rendering points - line', () => {
         MockPointGeometry.default({
           x: 0,
           y: 50,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec1),
           value: {
@@ -408,7 +399,6 @@ describe('Rendering points - line', () => {
         MockPointGeometry.default({
           x: 100,
           y: 75,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec1),
           value: {
@@ -435,7 +425,6 @@ describe('Rendering points - line', () => {
           x: 0,
           y: 0,
           color: 'blue',
-          radius: 0,
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec2),
           value: {
             accessor: 'y1',
@@ -451,7 +440,6 @@ describe('Rendering points - line', () => {
           x: 100,
           y: 50,
           color: 'blue',
-          radius: 0,
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec2),
           value: {
             accessor: 'y1',
@@ -505,7 +493,6 @@ describe('Rendering points - line', () => {
         MockPointGeometry.default({
           x: 0,
           y: 0,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec),
           value: {
@@ -521,7 +508,6 @@ describe('Rendering points - line', () => {
         MockPointGeometry.default({
           x: 100,
           y: 50,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec),
           value: {
@@ -582,7 +568,6 @@ describe('Rendering points - line', () => {
         MockPointGeometry.default({
           x: 0,
           y: 50,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec1),
           value: {
@@ -598,7 +583,6 @@ describe('Rendering points - line', () => {
         MockPointGeometry.default({
           x: 100,
           y: 75,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec1),
           value: {
@@ -621,7 +605,6 @@ describe('Rendering points - line', () => {
         MockPointGeometry.default({
           x: 0,
           y: 0,
-          radius: 0,
           color: 'blue',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec2),
           value: {
@@ -631,13 +614,21 @@ describe('Rendering points - line', () => {
             mark: null,
             datum: [1546300800000, 20],
           },
+          style: {
+            stroke: {
+              color: {
+                r: 0,
+                g: 0,
+                b: 255,
+              },
+            },
+          },
         }),
       );
       expect(points[1]).toEqual(
         MockPointGeometry.default({
           x: 100,
           y: 50,
-          radius: 0,
           color: 'blue',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec2),
           value: {
@@ -646,6 +637,15 @@ describe('Rendering points - line', () => {
             y: 10,
             mark: null,
             datum: [1546387200000, 10],
+          },
+          style: {
+            stroke: {
+              color: {
+                r: 0,
+                g: 0,
+                b: 255,
+              },
+            },
           },
         }),
       );
@@ -706,8 +706,7 @@ describe('Rendering points - line', () => {
       expect(zeroValueIndexdGeometry.length).toBe(1);
       // the zero value is moved vertically to infinity
       expect((zeroValueIndexdGeometry[0] as PointGeometry).y).toBe(Infinity);
-      // 0 radius point
-      expect((zeroValueIndexdGeometry[0] as PointGeometry).radius).toBe(0);
+      expect((zeroValueIndexdGeometry[0] as PointGeometry).radius).toBe(LIGHT_THEME.lineSeriesStyle.point.radius);
     });
   });
   describe('Remove points datum is not in domain', () => {
@@ -750,7 +749,6 @@ describe('Rendering points - line', () => {
         MockPointGeometry.default({
           x: 0,
           y: 100,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec),
           value: {
@@ -766,7 +764,6 @@ describe('Rendering points - line', () => {
         MockPointGeometry.default({
           x: 50,
           y: 0,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec),
           value: {

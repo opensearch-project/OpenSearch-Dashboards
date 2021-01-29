@@ -23,7 +23,7 @@ import { isContinuousScale, isBandScale } from '../../../../scales/types';
 import { isNil, Position, Rotation } from '../../../../utils/common';
 import { Dimensions, Size } from '../../../../utils/dimensions';
 import { GroupId } from '../../../../utils/ids';
-import { mergeWithDefaultAnnotationLine } from '../../../../utils/themes/theme';
+import { mergeWithDefaultAnnotationLine } from '../../../../utils/themes/merge_utils';
 import { SmallMultipleScales } from '../../state/selectors/compute_small_multiple_scales';
 import { isHorizontalRotation } from '../../state/utils/common';
 import { computeXScaleOffset } from '../../state/utils/utils';

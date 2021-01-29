@@ -96,7 +96,6 @@ exports[`Chart should render the legend name test 1`] = `
                           <rect x=\\"0\\" y=\\"0\\" width={130} height={180} />
                         </clipPath>
                       </defs>
-                      <g />
                     </svg>
                   </Highlighter>
                 </Connect(Highlighter)>

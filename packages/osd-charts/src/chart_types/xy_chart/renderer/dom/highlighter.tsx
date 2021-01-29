@@ -25,13 +25,15 @@ import { getChartRotationSelector } from '../../../../state/selectors/get_chart_
 import { InitStatus, getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
 import { Rotation } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
-import { isPointGeometry, IndexedGeometry } from '../../../../utils/geometry';
+import { isPointGeometry, IndexedGeometry, PointGeometry } from '../../../../utils/geometry';
+import { RGBtoString } from '../../../partition_chart/layout/utils/color_library_wrappers';
 import { DEFAULT_HIGHLIGHT_PADDING } from '../../rendering/constants';
 import { computeChartDimensionsSelector } from '../../state/selectors/compute_chart_dimensions';
 import { computeChartTransformSelector } from '../../state/selectors/compute_chart_transform';
 import { getHighlightedGeomsSelector } from '../../state/selectors/get_tooltip_values_highlighted_geoms';
 import { Transform } from '../../state/utils/types';
 import { computeChartTransform } from '../../state/utils/utils';
+import { ShapeRendererFn } from '../shapes_paths';
 
 interface HighlighterProps {
   initialized: boolean;
@@ -43,9 +45,19 @@ interface HighlighterProps {
   chartRotation: Rotation;
 }
 
-function getTransformForPanel(panel: Dimensions, rotation: Rotation, { left, top }: Dimensions) {
+function getTransformForPanel(panel: Dimensions, rotation: Rotation, { left, top }: Pick<Dimensions, 'top' | 'left'>) {
   const { x, y } = computeChartTransform(panel, rotation);
   return `translate(${left + panel.left + x}, ${top + panel.top + y}) rotate(${rotation})`;
+}
+
+function renderPath(geom: PointGeometry) {
+  // keep the highlighter radius to a minimum
+  const radius = Math.max(geom.radius, DEFAULT_HIGHLIGHT_PADDING);
+  const [shapeFn, rotate] = ShapeRendererFn[geom.style.shape];
+  return {
+    d: shapeFn(radius),
+    rotate,
+  };
 }
 
 class HighlighterComponent extends React.Component<HighlighterProps> {
@@ -63,42 +75,45 @@ class HighlighterComponent extends React.Component<HighlighterProps> {
             <rect x="0" y="0" width={clipWidth} height={clipHeight} />
           </clipPath>
         </defs>
-        <g>
-          {highlightedGeometries.map((geom, i) => {
-            const { color, panel } = geom;
-            const geomTransform = getTransformForPanel(panel, chartRotation, chartDimensions);
-            const x = geom.x + geom.transform.x;
-            const y = geom.y + geom.transform.y;
 
-            if (isPointGeometry(geom)) {
-              return (
-                <circle
-                  key={i}
-                  cx={x}
-                  cy={y}
-                  r={geom.radius + DEFAULT_HIGHLIGHT_PADDING}
-                  stroke={color}
-                  strokeWidth={4}
-                  transform={geomTransform}
-                  fill="transparent"
-                  clipPath={geom.value.mark !== null ? `url(#${clipPathId})` : undefined}
-                />
-              );
-            }
+        {highlightedGeometries.map((geom, i) => {
+          const { panel } = geom;
+          const x = geom.x + geom.transform.x;
+          const y = geom.y + geom.transform.y;
+          const geomTransform = getTransformForPanel(panel, chartRotation, chartDimensions);
+
+          if (isPointGeometry(geom)) {
+            const { color } = geom.style.stroke;
+            const { d, rotate } = renderPath(geom);
             return (
-              <rect
+              <g
                 key={i}
-                x={x}
-                y={y}
-                width={geom.width}
-                height={geom.height}
                 transform={geomTransform}
-                className="echHighlighterOverlay__fill"
-                clipPath={`url(#${clipPathId})`}
-              />
+                clipPath={geom.value.mark !== null ? `url(#${clipPathId})` : undefined}
+              >
+                <path
+                  d={d}
+                  stroke={RGBtoString(color)}
+                  strokeWidth={4}
+                  transform={`translate(${x}, ${y}) rotate(${rotate || 0})`}
+                  fill="transparent"
+                />
+              </g>
             );
-          })}
-        </g>
+          }
+          return (
+            <rect
+              key={i}
+              x={x}
+              y={y}
+              width={geom.width}
+              height={geom.height}
+              transform={geomTransform}
+              className="echHighlighterOverlay__fill"
+              clipPath={`url(#${clipPathId})`}
+            />
+          );
+        })}
       </svg>
     );
   }

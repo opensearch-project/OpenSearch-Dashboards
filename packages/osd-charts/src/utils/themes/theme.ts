@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { mergePartial, RecursivePartial, Color, ColorVariant, HorizontalAlignment, VerticalAlignment } from '../common';
+import { $Values } from 'utility-types';
+
+import { Color, ColorVariant, HorizontalAlignment, RecursivePartial, VerticalAlignment } from '../common';
 import { Margins, SimplePadding } from '../dimensions';
-import { LIGHT_THEME } from './light_theme';
 
 export interface Visible {
   visible: boolean;
@@ -306,6 +307,17 @@ export type DisplayValueStyle = Omit<TextStyle, 'fill' | 'fontSize'> & {
   };
 };
 
+export const PointShape = Object.freeze({
+  Circle: 'circle' as const,
+  Square: 'square' as const,
+  Diamond: 'diamond' as const,
+  Plus: 'plus' as const,
+  X: 'x' as const,
+  Triangle: 'triangle' as const,
+});
+/** @public */
+export type PointShape = $Values<typeof PointShape>;
+
 export interface PointStyle {
   /** is the point visible or hidden */
   visible: boolean;
@@ -319,6 +331,8 @@ export interface PointStyle {
   opacity: number;
   /** the radius of each point of the theme/series */
   radius: number;
+  /** shape for the point, default to circle */
+  shape?: PointShape;
 }
 
 export interface LineStyle {
@@ -431,79 +445,3 @@ export interface LineAnnotationStyle {
 
 /** @public */
 export type RectAnnotationStyle = StrokeStyle & FillStyle & Opacity & Partial<StrokeDashArray>;
-
-export const DEFAULT_ANNOTATION_LINE_STYLE: LineAnnotationStyle = {
-  line: {
-    stroke: '#777',
-    strokeWidth: 1,
-    opacity: 1,
-  },
-  details: {
-    fontSize: 10,
-    fontFamily: 'sans-serif',
-    fontStyle: 'normal',
-    fill: '#777',
-    padding: 0,
-  },
-};
-
-export const DEFAULT_ANNOTATION_RECT_STYLE: RectAnnotationStyle = {
-  stroke: '#FFEEBC',
-  strokeWidth: 0,
-  opacity: 0.25,
-  fill: '#FFEEBC',
-};
-
-export function mergeWithDefaultAnnotationLine(config?: Partial<LineAnnotationStyle>): LineAnnotationStyle {
-  const defaultLine = DEFAULT_ANNOTATION_LINE_STYLE.line;
-  const defaultDetails = DEFAULT_ANNOTATION_LINE_STYLE.details;
-  const mergedConfig: LineAnnotationStyle = { ...DEFAULT_ANNOTATION_LINE_STYLE };
-
-  if (!config) {
-    return mergedConfig;
-  }
-
-  if (config.line) {
-    mergedConfig.line = {
-      ...defaultLine,
-      ...config.line,
-    };
-  }
-
-  if (config.details) {
-    mergedConfig.details = {
-      ...defaultDetails,
-      ...config.details,
-    };
-  }
-
-  return mergedConfig;
-}
-
-export function mergeWithDefaultAnnotationRect(config?: Partial<RectAnnotationStyle>): RectAnnotationStyle {
-  if (!config) {
-    return DEFAULT_ANNOTATION_RECT_STYLE;
-  }
-
-  return {
-    ...DEFAULT_ANNOTATION_RECT_STYLE,
-    ...config,
-  };
-}
-
-/**
- * Merge theme or themes with a base theme
- *
- * priority is based on spatial order
- *
- * @param theme - primary partial theme
- * @param defaultTheme - base theme
- * @param axillaryThemes - additional themes to be merged
- */
-export function mergeWithDefaultTheme(
-  theme: PartialTheme,
-  defaultTheme: Theme = LIGHT_THEME,
-  axillaryThemes: PartialTheme[] = [],
-): Theme {
-  return mergePartial(defaultTheme, theme, { mergeOptionalPartialValues: true }, axillaryThemes);
-}

@@ -75,10 +75,8 @@ describe('Rendering bands - areas', () => {
         MockPointGeometry.default({
           x: 0,
           y: 80,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec),
-          styleOverrides: undefined,
           value: {
             accessor: 'y0',
             x: 0,
@@ -97,10 +95,8 @@ describe('Rendering bands - areas', () => {
         MockPointGeometry.default({
           x: 0,
           y: 0,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec),
-          styleOverrides: undefined,
           value: {
             accessor: 'y1',
             x: 0,
@@ -118,7 +114,6 @@ describe('Rendering bands - areas', () => {
         MockPointGeometry.default({
           x: 50,
           y: 70,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec),
           value: {
@@ -128,7 +123,6 @@ describe('Rendering bands - areas', () => {
             mark: null,
             datum: [1, 3, 5],
           },
-          styleOverrides: undefined,
           transform: {
             x: 25,
             y: 0,
@@ -139,10 +133,8 @@ describe('Rendering bands - areas', () => {
         MockPointGeometry.default({
           x: 50,
           y: 50,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(pointSeriesSpec),
-          styleOverrides: undefined,
           value: {
             accessor: 'y1',
             x: 1,
@@ -208,7 +200,6 @@ describe('Rendering bands - areas', () => {
         {
           x: 0,
           y: 0,
-          radius: 0,
           color: 'red',
           value: {
             accessor: 'y1',

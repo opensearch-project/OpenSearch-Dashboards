@@ -18,7 +18,7 @@
  */
 
 import { palettes } from './colors';
-import { Theme } from './theme';
+import { PointShape, Theme } from './theme';
 import {
   DEFAULT_CHART_MARGINS,
   DEFAULT_CHART_PADDING,
@@ -41,6 +41,7 @@ export const LIGHT_THEME: Theme = {
       fill: 'white',
       radius: 2,
       opacity: 1,
+      shape: PointShape.Circle,
     },
   },
   bubbleSeriesStyle: {
@@ -50,6 +51,7 @@ export const LIGHT_THEME: Theme = {
       fill: 'white',
       radius: 2,
       opacity: 1,
+      shape: PointShape.Circle,
     },
   },
   areaSeriesStyle: {
@@ -68,6 +70,7 @@ export const LIGHT_THEME: Theme = {
       fill: 'white',
       radius: 2,
       opacity: 1,
+      shape: PointShape.Circle,
     },
   },
   barSeriesStyle: {

@@ -108,6 +108,7 @@ export function renderArea(
     panel,
     color,
     seriesStyle.line,
+    seriesStyle.point,
     hasY0Accessors,
     markSizeOptions,
     pointStyleAccessor,

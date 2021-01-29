@@ -19,8 +19,7 @@
 
 import { Circle, Stroke, Fill, Arc } from '../../../../../geoms/types';
 import { withContext } from '../../../../../renderers/canvas';
-import { RGBtoString } from '../../../../partition_chart/layout/utils/color_library_wrappers';
-import { MIN_STROKE_WIDTH } from './line';
+import { fillAndStroke } from './utils';
 
 /** @internal */
 export function renderCircle(ctx: CanvasRenderingContext2D, circle: Circle, fill?: Fill, stroke?: Stroke) {
@@ -49,17 +48,6 @@ export function renderArc(ctx: CanvasRenderingContext2D, arc: Arc, fill?: Fill, 
     ctx.translate(x, y);
     ctx.beginPath();
     ctx.arc(0, 0, radius, startAngle, endAngle, false);
-    if (fill) {
-      ctx.fillStyle = RGBtoString(fill.color);
-      ctx.fill();
-    }
-    if (stroke && stroke.width > MIN_STROKE_WIDTH) {
-      ctx.strokeStyle = RGBtoString(stroke.color);
-      ctx.lineWidth = stroke.width;
-      if (stroke.dash) {
-        ctx.setLineDash(stroke.dash);
-      }
-      ctx.stroke();
-    }
+    fillAndStroke(ctx, fill, stroke);
   });
 }

@@ -20,9 +20,10 @@
 import { $Values } from 'utility-types';
 
 import { XYChartSeriesIdentifier } from '../chart_types/xy_chart/utils/series';
+import { Fill, Stroke } from '../geoms/types';
 import { Color } from './common';
 import { Dimensions } from './dimensions';
-import { BarSeriesStyle, PointStyle, AreaStyle, LineStyle, ArcStyle } from './themes/theme';
+import { BarSeriesStyle, PointStyle, AreaStyle, LineStyle, PointShape } from './themes/theme';
 
 /**
  * The accessor type
@@ -55,6 +56,7 @@ export type IndexedGeometry = PointGeometry | BarGeometry;
 export type ClippedRanges = [number, number][];
 
 export interface PointGeometry {
+  seriesIdentifier: XYChartSeriesIdentifier;
   x: number;
   y: number;
   radius: number;
@@ -63,11 +65,15 @@ export interface PointGeometry {
     x: number;
     y: number;
   };
-  seriesIdentifier: XYChartSeriesIdentifier;
   value: GeometryValue;
-  styleOverrides?: Partial<PointStyle>;
+  style: PointGeometryStyle;
   panel: Dimensions;
   orphan: boolean;
+}
+export interface PointGeometryStyle {
+  fill: Fill;
+  stroke: Stroke;
+  shape: PointShape;
 }
 
 export interface PerPanel<T> {
@@ -145,17 +151,6 @@ export interface BubbleGeometry {
   color: Color;
   seriesIdentifier: XYChartSeriesIdentifier;
   seriesPointStyle: PointStyle;
-}
-
-export interface ArcGeometry {
-  arc: string;
-  color: Color;
-  seriesIdentifier: XYChartSeriesIdentifier;
-  seriesArcStyle: ArcStyle;
-  transform: {
-    x: number;
-    y: number;
-  };
 }
 
 export function isPointGeometry(ig: IndexedGeometry): ig is PointGeometry {

@@ -68,3 +68,4 @@ export { DARK_THEME } from './utils/themes/dark_theme';
 // utilities
 export { RecursivePartial } from './utils/common';
 export { DataGenerator } from './utils/data_generators/data_generator';
+export * from './utils/themes/merge_utils';

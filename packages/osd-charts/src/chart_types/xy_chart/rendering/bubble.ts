@@ -53,6 +53,7 @@ export function renderBubble(
     panel,
     color,
     seriesStyle.point,
+    seriesStyle.point,
     hasY0Accessors,
     markSizeOptions,
     pointStyleAccessor,

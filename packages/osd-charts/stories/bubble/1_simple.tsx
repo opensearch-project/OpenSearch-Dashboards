@@ -18,11 +18,12 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { number, boolean } from '@storybook/addon-knobs';
+import { number, boolean, select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { Axis, Chart, BubbleSeries, Position, ScaleType, Settings, TooltipType } from '../../src';
+import { Axis, Chart, BubbleSeries, Position, ScaleType, Settings, TooltipType, PointShape } from '../../src';
 import { SeededDataGenerator } from '../../src/mocks/utils';
+import { SB_KNOBS_PANEL } from '../utils/storybook';
 
 const dg = new SeededDataGenerator();
 const data = dg.generateRandomSeries(100);
@@ -44,6 +45,13 @@ export const Example = () => {
     min: 10,
     max: 100,
     step: 10,
+  });
+  const shape = select('shape', PointShape, PointShape.Circle);
+  const opacity = number('shape fill opacity', 1, {
+    range: true,
+    min: 0,
+    max: 1,
+    step: 0.01,
   });
 
   return (
@@ -71,8 +79,21 @@ export const Example = () => {
         xAccessor="x"
         yAccessors={['y']}
         markSizeAccessor="z"
+        bubbleSeriesStyle={{
+          point: {
+            shape,
+            opacity,
+          },
+        }}
         data={data.slice(0, size)}
       />
     </Chart>
   );
+};
+
+// storybook configuration
+Example.story = {
+  parameters: {
+    options: { selectedPanel: SB_KNOBS_PANEL },
+  },
 };

@@ -39,3 +39,4 @@ export { Example as discontinuousDataPoints } from './11_discontinuous_data_poin
 export { Example as testOrphanDataPoints } from './12_orphan_data_points';
 export { Example as testPathOrdering } from './10_test_path_ordering';
 export { Example as lineWithMarkAccessor } from './13_line_mark_accessor';
+export { Example as pointShapes } from './14_point_shapes';

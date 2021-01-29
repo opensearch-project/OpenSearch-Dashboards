@@ -21,16 +21,13 @@ import { Margins } from '../dimensions';
 import { DARK_THEME } from './dark_theme';
 import { LIGHT_THEME } from './light_theme';
 import {
-  AreaSeriesStyle,
   DEFAULT_ANNOTATION_LINE_STYLE,
   DEFAULT_ANNOTATION_RECT_STYLE,
-  LineSeriesStyle,
   mergeWithDefaultAnnotationLine,
   mergeWithDefaultAnnotationRect,
   mergeWithDefaultTheme,
-  PartialTheme,
-  Theme,
-} from './theme';
+} from './merge_utils';
+import { AreaSeriesStyle, LineSeriesStyle, PartialTheme, PointShape, Theme } from './theme';
 
 describe('Theme', () => {
   let CLONED_LIGHT_THEME: Theme;
@@ -176,14 +173,26 @@ describe('Theme', () => {
       const customTheme = mergeWithDefaultTheme({
         lineSeriesStyle,
       });
-      expect(customTheme.lineSeriesStyle).toEqual(lineSeriesStyle);
+      expect(customTheme.lineSeriesStyle).toEqual({
+        ...lineSeriesStyle,
+        point: {
+          ...lineSeriesStyle.point,
+          shape: PointShape.Circle,
+        },
+      });
       const customDarkTheme = mergeWithDefaultTheme(
         {
           lineSeriesStyle,
         },
         DARK_THEME,
       );
-      expect(customDarkTheme.lineSeriesStyle).toEqual(lineSeriesStyle);
+      expect(customDarkTheme.lineSeriesStyle).toEqual({
+        ...lineSeriesStyle,
+        point: {
+          ...lineSeriesStyle.point,
+          shape: PointShape.Circle,
+        },
+      });
     });
 
     it('should merge partial theme: areaSeriesStyle', () => {
@@ -211,14 +220,26 @@ describe('Theme', () => {
       const customTheme = mergeWithDefaultTheme({
         areaSeriesStyle,
       });
-      expect(customTheme.areaSeriesStyle).toEqual(areaSeriesStyle);
+      expect(customTheme.areaSeriesStyle).toEqual({
+        ...areaSeriesStyle,
+        point: {
+          ...areaSeriesStyle.point,
+          shape: PointShape.Circle,
+        },
+      });
       const customDarkTheme = mergeWithDefaultTheme(
         {
           areaSeriesStyle,
         },
         DARK_THEME,
       );
-      expect(customDarkTheme.areaSeriesStyle).toEqual(areaSeriesStyle);
+      expect(customDarkTheme.areaSeriesStyle).toEqual({
+        ...areaSeriesStyle,
+        point: {
+          ...areaSeriesStyle.point,
+          shape: PointShape.Circle,
+        },
+      });
     });
 
     it('should merge partial theme: barSeriesStyle', () => {
@@ -382,7 +403,7 @@ describe('Theme', () => {
       expect(mergedTheme).toEqual(LIGHT_THEME);
     });
 
-    it('should merge partial theme wtih axillaryThemes', () => {
+    it('should merge partial theme with axillaryThemes', () => {
       const customTheme = mergeWithDefaultTheme(
         {
           chartMargins: {

@@ -16,25 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Circle, Fill, Stroke } from '../../../../../geoms/types';
+import { withContext } from '../../../../../renderers/canvas';
+import { PointShape } from '../../../../../utils/themes/theme';
+import { ShapeRendererFn } from '../../shapes_paths';
+import { fillAndStroke } from './utils';
 
-import { getRadius } from './point';
+/** @internal */
+export function renderShape(
+  ctx: CanvasRenderingContext2D,
+  shape: PointShape,
+  coordinates: Circle,
+  fill?: Fill,
+  stroke?: Stroke,
+) {
+  if (!stroke || !fill) {
+    return;
+  }
+  withContext(ctx, (ctx) => {
+    const [pathFn, rotation] = ShapeRendererFn[shape];
+    const { x, y, radius } = coordinates;
+    ctx.translate(x, y);
+    ctx.rotate((rotation * Math.PI) / 180);
+    ctx.beginPath();
 
-describe('point', () => {
-  describe('#getRadius', () => {
-    it('should return max of point and theme radius - theme', () => {
-      expect(getRadius(10, 20)).toBe(20);
-    });
-
-    it('should return max of point and theme radius - point', () => {
-      expect(getRadius(30, 20)).toBe(30);
-    });
-
-    it('should return override if provided - lower', () => {
-      expect(getRadius(10, 20, 5)).toBe(5);
-    });
-
-    it('should return override if provided - higher', () => {
-      expect(getRadius(10, 20, 50)).toBe(50);
-    });
+    const path = new Path2D(pathFn(radius));
+    fillAndStroke(ctx, fill, stroke, path);
   });
-});
+}

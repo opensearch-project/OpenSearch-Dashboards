@@ -22,9 +22,9 @@ import { Circle, Stroke, Fill, Rect } from '../../../../geoms/types';
 import { Rotation } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { PointGeometry } from '../../../../utils/geometry';
-import { PointStyle, GeometryStateStyle } from '../../../../utils/themes/theme';
-import { renderCircle } from './primitives/arc';
-import { buildPointStyles } from './styles/point';
+import { PointStyle, GeometryStateStyle, PointShape } from '../../../../utils/themes/theme';
+import { RgbObject } from '../../../partition_chart/layout/utils/color_library_wrappers';
+import { renderShape } from './primitives/shapes';
 import { withPanelTransform } from './utils/panel_transform';
 
 /**
@@ -32,33 +32,28 @@ import { withPanelTransform } from './utils/panel_transform';
  *
  * @internal
  */
-export function renderPoints(
-  ctx: CanvasRenderingContext2D,
-  points: PointGeometry[],
-  themeStyle: PointStyle,
-  geometryStateStyle: GeometryStateStyle,
-) {
+export function renderPoints(ctx: CanvasRenderingContext2D, points: PointGeometry[], { opacity }: GeometryStateStyle) {
   points
-    .map<[Circle, Fill, Stroke]>((point) => {
-      const { x, y, color, radius: pointRadius, transform, styleOverrides } = point;
-      const { fill, stroke, radius } = buildPointStyles(
-        color,
-        themeStyle,
-        geometryStateStyle,
-        pointRadius,
-        styleOverrides,
-      );
+    .map<[Circle, Fill, Stroke, PointShape]>(({ x, y, radius, transform, style }) => {
+      const fill: Fill = {
+        color: applyOpacity(style.fill.color, opacity),
+      };
 
-      const circle: Circle = {
+      const stroke: Stroke = {
+        ...style.stroke,
+        color: applyOpacity(style.stroke.color, opacity),
+      };
+
+      const coordinates: Circle = {
         x: x + transform.x,
         y: y + transform.y,
         radius,
       };
 
-      return [circle, fill, stroke];
+      return [coordinates, fill, stroke, style.shape];
     })
     .sort(([{ radius: a }], [{ radius: b }]) => b - a)
-    .forEach((args) => renderCircle(ctx, ...args));
+    .forEach(([coordinates, fill, stroke, shape]) => renderShape(ctx, shape, coordinates, fill, stroke));
 }
 
 /**
@@ -77,44 +72,45 @@ export function renderPointGroup(
   shouldClip: boolean,
 ) {
   points
-    .map<[Circle, Fill, Stroke, Dimensions]>((point) => {
-      const {
-        x,
-        y,
-        color,
-        radius: pointRadius,
-        transform,
-        styleOverrides,
-        seriesIdentifier: { key },
-        panel,
-      } = point;
-      const { fill, stroke, radius } = buildPointStyles(
-        color,
-        themeStyles[key],
-        geometryStateStyles[key],
-        pointRadius,
-        styleOverrides,
-      );
+    .map<[Circle, Fill, Stroke, Dimensions, PointShape]>(
+      ({ x, y, radius, transform, style, seriesIdentifier: { key }, panel }) => {
+        const { opacity } = geometryStateStyles[key];
+        const fill: Fill = {
+          color: applyOpacity(style.fill.color, opacity),
+        };
 
-      const circle: Circle = {
-        x: x + transform.x,
-        y,
-        radius,
-      };
+        const stroke: Stroke = {
+          ...style.stroke,
+          color: applyOpacity(style.stroke.color, opacity),
+        };
 
-      return [circle, fill, stroke, panel];
-    })
+        const coordinates: Circle = {
+          x: x + transform.x,
+          y,
+          radius,
+        };
+
+        return [coordinates, fill, stroke, panel, style.shape];
+      },
+    )
     .sort(([{ radius: a }], [{ radius: b }]) => b - a)
-    .forEach(([circle, fill, stroke, panel]) => {
+    .forEach(([coordinates, fill, stroke, panel, shape]) => {
       withPanelTransform(
         ctx,
         panel,
         rotation,
         renderingArea,
         (ctx) => {
-          renderCircle(ctx, circle, fill, stroke);
+          renderShape(ctx, shape, coordinates, fill, stroke);
         },
         { area: clippings, shouldClip },
       );
     });
+}
+
+function applyOpacity(color: RgbObject, opacity: number): RgbObject {
+  return {
+    ...color,
+    opacity: color.opacity * opacity,
+  };
 }

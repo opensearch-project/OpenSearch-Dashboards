@@ -86,7 +86,7 @@ export function renderAreas(ctx: CanvasRenderingContext2D, props: AreaGeometries
         rotation,
         renderingArea,
         (ctx) => {
-          renderPoints(ctx, visiblePoints, seriesPointStyle, geometryStateStyle);
+          renderPoints(ctx, visiblePoints, geometryStateStyle);
         },
         { area: clippings, shouldClip: points[0]?.value.mark !== null },
       );

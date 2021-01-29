@@ -23,6 +23,7 @@ import React from 'react';
 
 import { Axis, Chart, BubbleSeries, Position, ScaleType, Settings, TooltipType } from '../../src';
 import { SeededDataGenerator } from '../../src/mocks/utils';
+import { SB_KNOBS_PANEL } from '../utils/storybook';
 
 const dg = new SeededDataGenerator();
 
@@ -76,4 +77,11 @@ export const Example = () => {
       />
     </Chart>
   );
+};
+
+// storybook configuration
+Example.story = {
+  parameters: {
+    options: { selectedPanel: SB_KNOBS_PANEL },
+  },
 };

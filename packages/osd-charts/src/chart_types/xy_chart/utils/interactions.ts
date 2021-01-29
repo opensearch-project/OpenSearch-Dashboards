@@ -19,7 +19,6 @@
 
 import { Rotation } from '../../../utils/common';
 import { Size } from '../../../utils/dimensions';
-import { BarGeometry, PointGeometry, IndexedGeometry, isPointGeometry, isBarGeometry } from '../../../utils/geometry';
 
 /**
  * Get the cursor position depending on the chart rotation
@@ -56,48 +55,4 @@ export function getOrientedYPosition(xPos: number, yPos: number, chartRotation: 
     default:
       return yPos;
   }
-}
-
-/** @internal */
-export function areIndexedGeometryArraysEquals(arr1: IndexedGeometry[], arr2: IndexedGeometry[]) {
-  if (arr1.length !== arr2.length) {
-    return false;
-  }
-  for (let i = arr1.length; i--; ) {
-    return areIndexedGeomsEquals(arr1[i], arr2[i]);
-  }
-  return true;
-}
-
-/** @internal */
-export function areIndexedGeomsEquals(ig1: IndexedGeometry, ig2: IndexedGeometry) {
-  if (isPointGeometry(ig1) && isPointGeometry(ig2)) {
-    return arePointsEqual(ig1, ig2);
-  }
-  if (isBarGeometry(ig1) && isBarGeometry(ig2)) {
-    return areBarEqual(ig1, ig2);
-  }
-  return false;
-}
-
-function arePointsEqual(ig1: PointGeometry, ig2: PointGeometry) {
-  return (
-    ig1.seriesIdentifier.specId === ig2.seriesIdentifier.specId &&
-    ig1.color === ig2.color &&
-    ig1.x === ig2.x &&
-    ig1.transform.x === ig2.transform.x &&
-    ig1.transform.y === ig2.transform.y &&
-    ig1.y === ig2.y &&
-    ig1.radius === ig2.radius
-  );
-}
-function areBarEqual(ig1: BarGeometry, ig2: BarGeometry) {
-  return (
-    ig1.seriesIdentifier.specId === ig2.seriesIdentifier.specId &&
-    ig1.color === ig2.color &&
-    ig1.x === ig2.x &&
-    ig1.y === ig2.y &&
-    ig1.width === ig2.width &&
-    ig1.height === ig2.height
-  );
 }

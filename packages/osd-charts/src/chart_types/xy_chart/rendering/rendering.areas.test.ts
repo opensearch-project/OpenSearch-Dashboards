@@ -27,6 +27,7 @@ import { ScaleType } from '../../../scales/constants';
 import { Spec } from '../../../specs';
 import { GlobalChartState } from '../../../state/chart_state';
 import { PointGeometry, AreaGeometry } from '../../../utils/geometry';
+import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { computeSeriesDomainsSelector } from '../state/selectors/compute_series_domains';
 import { computeSeriesGeometriesSelector } from '../state/selectors/compute_series_geometries';
 import { ComputedGeometries } from '../state/utils/types';
@@ -110,7 +111,6 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 0,
           y: 0,
-          radius: 0,
           color: 'red',
           seriesIdentifier: {
             specId: SPEC_ID,
@@ -119,7 +119,6 @@ describe('Rendering points - areas', () => {
             seriesKeys: [1],
             key: 'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}',
           },
-          styleOverrides: undefined,
           value: {
             accessor: 'y1',
             x: 0,
@@ -143,7 +142,6 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 50,
           y: 50,
-          radius: 0,
           color: 'red',
           seriesIdentifier: {
             specId: SPEC_ID,
@@ -152,7 +150,6 @@ describe('Rendering points - areas', () => {
             seriesKeys: [1],
             key: 'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}',
           },
-          styleOverrides: undefined,
           value: {
             accessor: 'y1',
             x: 1,
@@ -235,7 +232,6 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 0,
           y: 50,
-          radius: 0,
           color: 'red',
           seriesIdentifier: {
             specId: 'spec_1',
@@ -244,7 +240,6 @@ describe('Rendering points - areas', () => {
             seriesKeys: [1],
             key: 'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}',
           },
-          styleOverrides: undefined,
           value: {
             accessor: 'y1',
             x: 0,
@@ -268,7 +263,6 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 50,
           y: 75,
-          radius: 0,
           color: 'red',
           seriesIdentifier: {
             specId: 'spec_1',
@@ -277,7 +271,6 @@ describe('Rendering points - areas', () => {
             seriesKeys: [1],
             key: 'groupId{group_1}spec{spec_1}yAccessor{1}splitAccessors{}',
           },
-          styleOverrides: undefined,
           value: {
             accessor: 'y1',
             x: 1,
@@ -306,7 +299,6 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 0,
           y: 0,
-          radius: 0,
           color: 'blue',
           seriesIdentifier: {
             specId: 'spec_2',
@@ -315,7 +307,6 @@ describe('Rendering points - areas', () => {
             seriesKeys: [1],
             key: 'groupId{group_1}spec{spec_2}yAccessor{1}splitAccessors{}',
           },
-          styleOverrides: undefined,
           value: {
             accessor: 'y1',
             x: 0,
@@ -339,7 +330,6 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 50,
           y: 50,
-          radius: 0,
           color: 'blue',
           seriesIdentifier: {
             specId: 'spec_2',
@@ -348,7 +338,6 @@ describe('Rendering points - areas', () => {
             seriesKeys: [1],
             key: 'groupId{group_1}spec{spec_2}yAccessor{1}splitAccessors{}',
           },
-          styleOverrides: undefined,
           value: {
             accessor: 'y1',
             x: 1,
@@ -412,7 +401,6 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 0,
           y: 0,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(spec),
           value: {
@@ -428,7 +416,6 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 100,
           y: 50,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(spec),
           value: {
@@ -499,7 +486,6 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 0,
           y: 50,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(spec1),
 
@@ -516,7 +502,6 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 100,
           y: 75,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(spec1),
           value: {
@@ -538,7 +523,6 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 0,
           y: 0,
-          radius: 0,
           color: 'blue',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(spec2),
 
@@ -555,7 +539,6 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 100,
           y: 50,
-          radius: 0,
           color: 'blue',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(spec2),
           value: {
@@ -606,7 +589,6 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 0,
           y: 0,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(spec),
 
@@ -623,10 +605,8 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 100,
           y: 50,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(spec),
-          styleOverrides: undefined,
           value: {
             accessor: 'y1',
             x: 1546387200000,
@@ -678,7 +658,6 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 0,
           y: 50,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(spec1),
 
@@ -695,7 +674,6 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 100,
           y: 75,
-          radius: 0,
           color: 'red',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(spec1),
 
@@ -719,7 +697,6 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 0,
           y: 0,
-          radius: 0,
           color: 'blue',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(spec2),
 
@@ -736,7 +713,6 @@ describe('Rendering points - areas', () => {
         MockPointGeometry.default({
           x: 100,
           y: 50,
-          radius: 0,
           color: 'blue',
           seriesIdentifier: MockSeriesIdentifier.fromSpec(spec2),
 
@@ -811,8 +787,8 @@ describe('Rendering points - areas', () => {
       expect(zeroValueIndexdGeometry.length).toBe(1);
       // moved to the bottom of the chart
       expect(zeroValueIndexdGeometry[0].y).toBe(Infinity);
-      // 0 radius point
-      expect((zeroValueIndexdGeometry[0] as PointGeometry).radius).toBe(0);
+      // default area theme point radius
+      expect((zeroValueIndexdGeometry[0] as PointGeometry).radius).toBe(LIGHT_THEME.areaSeriesStyle.point.radius);
     });
   });
   it('Stacked areas with 0 values', () => {
