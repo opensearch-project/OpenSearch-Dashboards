@@ -32,11 +32,4 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         run: yarn semantic-release
-      - name: Build static storybook
-        run: yarn storybook:build
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./.out
-          force_orphan: true
+
