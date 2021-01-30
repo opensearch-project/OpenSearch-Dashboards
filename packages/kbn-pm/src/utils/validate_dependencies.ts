@@ -183,7 +183,6 @@ function getDevOnlyProductionDepsTree(kbn: Kibana, projectName: string) {
   const project = kbn.getProject(projectName);
   const childProjectNames = [
     ...Object.keys(project.productionDependencies).filter((name) => kbn.hasProject(name)),
-    ...(projectName === 'kibana' ? ['x-pack'] : []),
   ];
 
   const children = childProjectNames

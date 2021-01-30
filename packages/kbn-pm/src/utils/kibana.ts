@@ -146,15 +146,6 @@ export class Kibana {
       log,
     })!;
 
-    const xpackDeps = resolveDepsForProject({
-      project: this.getProject('x-pack')!,
-      yarnLock,
-      kbn: this,
-      includeDependentProject: true,
-      productionDepsOnly: true,
-      log,
-    })!;
-
-    return new Map([...kibanaDeps.entries(), ...xpackDeps.entries()]);
+    return new Map([...kibanaDeps.entries()]);
   }
 }
