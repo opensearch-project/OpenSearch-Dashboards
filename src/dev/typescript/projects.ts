@@ -25,21 +25,8 @@ import { Project } from './project';
 export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), { name: 'kibana/test' }),
-  new Project(resolve(REPO_ROOT, 'x-pack/tsconfig.json')),
-  new Project(resolve(REPO_ROOT, 'x-pack/test/tsconfig.json'), { name: 'x-pack/test' }),
   new Project(resolve(REPO_ROOT, 'src/test_utils/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'src/core/tsconfig.json')),
-  new Project(resolve(REPO_ROOT, 'x-pack/plugins/security_solution/cypress/tsconfig.json'), {
-    name: 'security_solution/cypress',
-  }),
-  new Project(resolve(REPO_ROOT, 'x-pack/plugins/apm/e2e/tsconfig.json'), {
-    name: 'apm/cypress',
-    disableTypeCheck: true,
-  }),
-  new Project(resolve(REPO_ROOT, 'x-pack/plugins/apm/scripts/tsconfig.json'), {
-    name: 'apm/scripts',
-    disableTypeCheck: true,
-  }),
 
   // NOTE: using glob.sync rather than glob-all or globby
   // because it takes less than 10 ms, while the other modules
@@ -51,13 +38,7 @@ export const PROJECTS = [
     .sync('src/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
     .map((path) => new Project(resolve(REPO_ROOT, path))),
   ...glob
-    .sync('x-pack/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
-    .map((path) => new Project(resolve(REPO_ROOT, path))),
-  ...glob
     .sync('examples/*/tsconfig.json', { cwd: REPO_ROOT })
-    .map((path) => new Project(resolve(REPO_ROOT, path))),
-  ...glob
-    .sync('x-pack/examples/*/tsconfig.json', { cwd: REPO_ROOT })
     .map((path) => new Project(resolve(REPO_ROOT, path))),
   ...glob
     .sync('test/plugin_functional/plugins/*/tsconfig.json', { cwd: REPO_ROOT })

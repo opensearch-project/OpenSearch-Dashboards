@@ -85,7 +85,7 @@ it('builds a generated plugin into a viable archive', async () => {
      info compressing plugin into [fooTestPlugin-7.9.0.zip]"
   `);
 
-  await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR });
+  await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR }, () => {});
 
   const files = await globby(['**/*'], { cwd: TMP_DIR });
   files.sort((a, b) => a.localeCompare(b));
