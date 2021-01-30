@@ -18,7 +18,6 @@
  */
 
 import execa from 'execa';
-import Path from 'path';
 import { run, ToolingLog } from '@kbn/dev-utils';
 
 export async function buildAllRefs(log: ToolingLog) {

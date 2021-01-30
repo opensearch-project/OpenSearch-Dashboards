@@ -170,8 +170,9 @@ export class OptimizerConfig {
       Path.resolve(repoRoot, 'plugins'),
       ...(examples ? [Path.resolve('examples')] : []),
       ...(examples && !oss ? [Path.resolve('x-pack/examples')] : []),
-      Path.resolve(repoRoot, '../kibana-extra'),
+      Path.resolve(repoRoot, 'kibana-extra'),
     ];
+
     if (!pluginScanDirs.every((p) => Path.isAbsolute(p))) {
       throw new TypeError('pluginScanDirs must all be absolute paths');
     }

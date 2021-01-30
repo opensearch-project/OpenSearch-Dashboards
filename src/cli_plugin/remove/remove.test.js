@@ -18,7 +18,7 @@
  */
 
 import { join } from 'path';
-import { writeFileSync, existsSync, mkdirSync } from 'fs';
+import { writeFileSync, mkdirSync } from 'fs';
 
 import sinon from 'sinon';
 import glob from 'glob-all';
@@ -66,25 +66,6 @@ describe('kibana cli', function () {
       remove(settings, logger);
       expect(logger.error.firstCall.args[0]).toMatch(/not a plugin/);
       expect(process.exit.called).toBe(true);
-    });
-
-    it('remove x-pack if it exists', () => {
-      settings.pluginPath = join(pluginDir, 'x-pack');
-      settings.plugin = 'x-pack';
-      mkdirSync(join(pluginDir, 'x-pack'), { recursive: true });
-      expect(existsSync(settings.pluginPath)).toEqual(true);
-      remove(settings, logger);
-      expect(existsSync(settings.pluginPath)).toEqual(false);
-    });
-
-    it('distribution error if x-pack does not exist', () => {
-      settings.pluginPath = join(pluginDir, 'x-pack');
-      settings.plugin = 'x-pack';
-      expect(existsSync(settings.pluginPath)).toEqual(false);
-      remove(settings, logger);
-      expect(logger.error.getCall(0).args[0]).toMatch(
-        /Please install the OSS-only distribution to remove X-Pack features/
-      );
     });
 
     it('delete the specified folder.', function () {

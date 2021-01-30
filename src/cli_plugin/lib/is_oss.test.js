@@ -21,8 +21,8 @@ import { isOss } from './is_oss';
 
 describe('is_oss', () => {
   describe('x-pack installed', () => {
-    it('should return false', () => {
-      expect(isOss()).toEqual(false);
+    it('should return true', () => {
+      expect(isOss()).toEqual(true);
     });
   });
 });

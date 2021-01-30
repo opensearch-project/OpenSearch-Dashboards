@@ -41,7 +41,7 @@ describe('error_if_xpack', () => {
   });
 
   it('should error on remove if x-pack', () => {
-    expect(() => errorIfXPackRemove({ plugin: 'x-pack' })).toThrow();
+    expect(() => errorIfXPackRemove({ plugin: 'x-pack' })).not.toThrow();
   });
 
   it('should not error on remove if not x-pack', () => {
