@@ -1,6 +1,0 @@
-{
-  "id": "savedObjectTestPlugin",
-  "version": "kibana",
-  "server": true,
-  "ui": false
-}
