@@ -18,6 +18,7 @@
  */
 
 import { run, createFlagError } from '@kbn/dev-utils';
+// @ts-ignore
 import { runStorybookCli } from '@kbn/storybook';
 import { storybookAliases } from './aliases';
 import { clean } from './commands/clean';
