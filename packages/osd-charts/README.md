@@ -2,7 +2,7 @@
   Elastic Charts
 </h1>
 <p align="center">
-  <a href="(https://travis-ci.org/elastic/elastic-charts"><img alt="Build Status" src="https://travis-ci.org/elastic/elastic-charts.svg?branch=master"></a>
+  <img alt="Build Status" src="https://github.com/elastic/elastic-charts/workflows/Unit%20testing/badge.svg?branch=master">
   <a href="https://codecov.io/gh/elastic/elastic-charts">
     <img src="https://codecov.io/gh/elastic/elastic-charts/branch/master/graph/badge.svg" />
   </a>
