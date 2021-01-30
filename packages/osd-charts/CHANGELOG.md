@@ -1,3 +1,27 @@
+# [24.5.0](https://github.com/elastic/elastic-charts/compare/v24.4.0...v24.5.0) (2021-01-30)
+
+
+### Bug Fixes
+
+* add theme min radius to point shape ([#996](https://github.com/elastic/elastic-charts/issues/996)) ([eb37175](https://github.com/elastic/elastic-charts/commit/eb3717584a5db5a0ea56fdcfea1839c23d92900b))
+* align tooltip z-index to EUI tooltip z-index ([#931](https://github.com/elastic/elastic-charts/issues/931)) ([ffd626b](https://github.com/elastic/elastic-charts/commit/ffd626baa8bc7ba3c00b8f5257ce9bac7d72c660))
+* chart state and series functions cleanup ([#989](https://github.com/elastic/elastic-charts/issues/989)) ([944ac6c](https://github.com/elastic/elastic-charts/commit/944ac6cf1ce12f9993411cf44bb3fa51f25b1241))
+* create unique ids for dot icons ([#971](https://github.com/elastic/elastic-charts/issues/971)) ([e1ce768](https://github.com/elastic/elastic-charts/commit/e1ce76893fe7ccb0e59116d4a8d420aef4655fea))
+* external tooltip legend extra value sync ([#993](https://github.com/elastic/elastic-charts/issues/993)) ([13ad05a](https://github.com/elastic/elastic-charts/commit/13ad05ab19b58a034f81d6b43b8925315b49de6d))
+* **legend:** disable focus and keyboard navigation for legend in partition ch… ([#952](https://github.com/elastic/elastic-charts/issues/952)) ([03bd2f7](https://github.com/elastic/elastic-charts/commit/03bd2f755038117b19e3e5b6459bfc75a51656d4))
+* **legend:** hierarchical legend order should follow the tree paths ([#947](https://github.com/elastic/elastic-charts/issues/947)) ([f9218ad](https://github.com/elastic/elastic-charts/commit/f9218ad842d07a67eef4cbfb1209937db9da6853)), closes [#944](https://github.com/elastic/elastic-charts/issues/944)
+* **legend:** remove ids for circles ([#973](https://github.com/elastic/elastic-charts/issues/973)) ([b3f4f90](https://github.com/elastic/elastic-charts/commit/b3f4f90e006f5b4c9b476460a71685396486cc54))
+
+
+### Features
+
+* **cursor:** improve theme styling for crosshair ([#980](https://github.com/elastic/elastic-charts/issues/980)) ([6c4dafd](https://github.com/elastic/elastic-charts/commit/6c4dafd1cdeed5b61ca4c89790faa707b5c083b5))
+* **legend:**  display pie chart legend extra ([#939](https://github.com/elastic/elastic-charts/issues/939)) ([d14de01](https://github.com/elastic/elastic-charts/commit/d14de010c1d7ced362da274153d7f3c464c3170b))
+* **legend:** add keyboard navigation ([#880](https://github.com/elastic/elastic-charts/issues/880)) ([87c227d](https://github.com/elastic/elastic-charts/commit/87c227da41dc4a6860f7ae895e80586ce8211092))
+* **partition:** Flame and icicle chart ([#965](https://github.com/elastic/elastic-charts/issues/965)) ([3df73d0](https://github.com/elastic/elastic-charts/commit/3df73d0e1f74b66e688a64e477c78d5ed3225f0a))
+* **partition:** legend hover options ([#978](https://github.com/elastic/elastic-charts/issues/978)) ([f810d94](https://github.com/elastic/elastic-charts/commit/f810d94c03f91191e9d86d156b25db22be888a59))
+* **xy:** support multiple point shapes on line, area and bubble charts ([#988](https://github.com/elastic/elastic-charts/issues/988)) ([1392b7d](https://github.com/elastic/elastic-charts/commit/1392b7d8f77087fcb8592a3697e3eadae8db1f33))
+
 # [24.4.0](https://github.com/elastic/elastic-charts/compare/v24.3.0...v24.4.0) (2020-12-09)
 
 
