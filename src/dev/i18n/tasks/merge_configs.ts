@@ -23,9 +23,8 @@ import { ErrorReporter, I18nConfig, assignConfigFromPath, arrayify } from '..';
 export function mergeConfigs(additionalConfigPaths: string | string[] = []) {
   const root = join(__dirname, '../../../../');
   const kibanaRC = resolve(root, '.i18nrc.json');
-  const xpackRC = resolve(root, 'x-pack/.i18nrc.json');
 
-  const configPaths = [kibanaRC, xpackRC, ...arrayify(additionalConfigPaths)];
+  const configPaths = [kibanaRC, ...arrayify(additionalConfigPaths)];
 
   return configPaths.map((configPath) => ({
     task: async (context: { reporter: ErrorReporter; config?: I18nConfig }) => {
