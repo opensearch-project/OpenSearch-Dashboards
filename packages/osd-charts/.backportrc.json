@@ -1,6 +1,6 @@
 {
   "upstream": "elastic/elastic-charts",
-  "branches": ["13.5.x"],
+  "branches": [],
   "all": true,
   "prTitle": "{commitMessages} [{baseBranch}]",
   "labels": ["backport"]
