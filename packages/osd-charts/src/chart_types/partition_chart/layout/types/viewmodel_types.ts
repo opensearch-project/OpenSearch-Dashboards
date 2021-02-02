@@ -130,14 +130,14 @@ export const nullShapeViewModel = (specifiedConfig?: Config, diskCenter?: PointO
   outerRadius: 0,
 });
 
-type TreeLevel = number;
+export type TreeLevel = number;
 
-interface AngleFromTo {
+export interface AngleFromTo {
   x0: Radian;
   x1: Radian;
 }
 
-interface TreeNode extends AngleFromTo {
+export interface TreeNode extends AngleFromTo {
   x0: Radian;
   x1: Radian;
   y0: TreeLevel;
@@ -145,7 +145,7 @@ interface TreeNode extends AngleFromTo {
   fill?: Color;
 }
 
-interface SectorGeomSpecY {
+export interface SectorGeomSpecY {
   y0px: Distance;
   y1px: Distance;
 }

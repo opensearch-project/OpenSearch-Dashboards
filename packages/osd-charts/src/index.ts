@@ -28,11 +28,10 @@ export { DebugState } from './state/types';
 export { CurveType } from './utils/curves';
 export { SimplePadding } from './utils/dimensions';
 export { timeFormatter, niceTimeFormatter, niceTimeFormatByDay } from './utils/data/formatters';
-export { Datum, Position, Rendering, Rotation, VerticalAlignment, HorizontalAlignment } from './utils/common';
 export { SeriesIdentifier } from './common/series_id';
 export { XYChartSeriesIdentifier, DataSeriesDatum, FilledValues } from './chart_types/xy_chart/utils/series';
 export { AnnotationTooltipFormatter, CustomAnnotationTooltip } from './chart_types/xy_chart/annotations/types';
-export { GeometryValue } from './utils/geometry';
+export { GeometryValue, BandedAccessorType } from './utils/geometry';
 export { LegendStrategy } from './chart_types/partition_chart/state/selectors/get_highlighted_shapes';
 export { LegendPath, LegendPathElement } from './state/actions/legend';
 export { CategoryKey } from './common/category';
@@ -41,9 +40,7 @@ export {
   FillLabelConfig as PartitionFillLabel,
   PartitionLayout,
 } from './chart_types/partition_chart/layout/types/config_types';
-export { Config as HeatmapConfig } from './chart_types/heatmap/layout/types/config_types';
 export { Layer as PartitionLayer } from './chart_types/partition_chart/specs/index';
-export { PrimitiveValue } from './chart_types/partition_chart/layout/utils/group_by_rollup';
 export { MODEL_KEY } from './chart_types/partition_chart/layout/types/types';
 export * from './chart_types/goal_chart/specs/index';
 export {
@@ -58,6 +55,7 @@ export { CustomTooltip, TooltipInfo } from './components/tooltip/types';
 
 // scales
 export { ScaleType } from './scales/constants';
+export { ScaleContinuousType, ScaleOrdinalType, ScaleBandType } from './scales';
 
 // theme
 export * from './utils/themes/theme';
@@ -65,7 +63,29 @@ export * from './utils/themes/theme_common';
 export { LIGHT_THEME } from './utils/themes/light_theme';
 export { DARK_THEME } from './utils/themes/dark_theme';
 
+// partition
+export * from './chart_types/partition_chart/layout/types/viewmodel_types';
+export * from './chart_types/partition_chart/layout/utils/group_by_rollup';
+
+// heatmap
+export { Cell } from './chart_types/heatmap/layout/types/viewmodel_types';
+export { Config as HeatmapConfig, HeatmapBrushEvent } from './chart_types/heatmap/layout/types/config_types';
+
 // utilities
-export { RecursivePartial } from './utils/common';
+export {
+  Datum,
+  Position,
+  Rendering,
+  Rotation,
+  VerticalAlignment,
+  HorizontalAlignment,
+  RecursivePartial,
+  ColorVariant,
+  Color,
+  LabelAccessor,
+  ShowAccessor,
+  ValueAccessor,
+  ValueFormatter,
+} from './utils/common';
 export { DataGenerator } from './utils/data_generators/data_generator';
 export * from './utils/themes/merge_utils';

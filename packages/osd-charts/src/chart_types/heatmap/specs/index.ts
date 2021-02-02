@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { Heatmap, HeatmapSpec } from './heatmap';
+export * from './heatmap';

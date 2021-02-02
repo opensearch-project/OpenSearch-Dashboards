@@ -72,11 +72,10 @@ export interface HeatmapSpec extends Spec {
   name?: string;
 }
 
-type SpecRequiredProps = Pick<HeatmapSpec, 'id' | 'data'>;
-type SpecOptionalProps = Partial<Omit<HeatmapSpec, 'chartType' | 'specType' | 'id' | 'data'>>;
-
 /** @alpha */
-export const Heatmap: React.FunctionComponent<SpecRequiredProps & SpecOptionalProps> = getConnect()(
+export const Heatmap: React.FunctionComponent<
+  Pick<HeatmapSpec, 'id' | 'data'> & Partial<Omit<HeatmapSpec, 'chartType' | 'specType' | 'id' | 'data'>>
+> = getConnect()(
   specComponentFactory<
     HeatmapSpec,
     | 'xAccessor'

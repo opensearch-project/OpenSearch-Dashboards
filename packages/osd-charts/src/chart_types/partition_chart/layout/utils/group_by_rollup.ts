@@ -31,11 +31,11 @@ export const PARENT_KEY = 'parent';
 export const SORT_INDEX_KEY = 'sortIndex';
 export const PATH_KEY = 'path';
 
-interface Statistics {
+export interface Statistics {
   globalAggregate: number;
 }
 
-interface NodeDescriptor {
+export interface NodeDescriptor {
   [AGGREGATE_KEY]: number;
   [DEPTH_KEY]: number;
   [STATISTICS_KEY]: Statistics;
@@ -62,7 +62,7 @@ export const HIERARCHY_ROOT_KEY: Key = '__root_key__';
 
 /** @public */
 export type PrimitiveValue = string | number | null; // there could be more but sufficient for now
-type Key = CategoryKey;
+export type Key = CategoryKey;
 export type Sorter = (a: number, b: number) => number;
 type NodeSorter = (a: ArrayEntry, b: ArrayEntry) => number;
 
