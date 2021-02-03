@@ -2,5 +2,5 @@
   "id": "newsfeed",
   "version": "kibana",
   "server": true,
-  "ui": true
+  "ui": false
 }
