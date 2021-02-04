@@ -22,8 +22,8 @@ import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { NewsLoadingPrompt } from './loading_news';
 
-describe('news_loading', () => {
-  describe('rendering', () => {
+describe.skip('news_loading', () => {
+  describe.skip('rendering', () => {
     it('renders the default News Loading', () => {
       const wrapper = shallow(<NewsLoadingPrompt />);
       expect(toJson(wrapper)).toMatchSnapshot();

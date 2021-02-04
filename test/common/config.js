@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import path from 'path';
+//import path from 'path';
 import { format as formatUrl } from 'url';
 import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { services } from './services';
@@ -58,9 +58,9 @@ export default function () {
         '--telemetry.optInStatusUrl=https://telemetry-staging.elastic.co/opt_in_status/v2/send',
         `--server.maxPayloadBytes=1679958`,
         // newsfeed mock service
-        `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'newsfeed')}`,
-        `--newsfeed.service.urlRoot=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
-        `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json`,
+        // `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'newsfeed')}`,
+        // `--newsfeed.service.urlRoot=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
+        // `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json`,
       ],
     },
     services,

@@ -51,7 +51,7 @@ jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
 }));
 
-describe('NewsfeedApiDriver', () => {
+describe.skip('NewsfeedApiDriver', () => {
   const kibanaVersion = '99.999.9-test_version'; // It'll remove the `-test_version` bit
   const userLanguage = 'en';
   const fetchInterval = 2000;
@@ -61,7 +61,7 @@ describe('NewsfeedApiDriver', () => {
     sinon.reset();
   });
 
-  describe('shouldFetch', () => {
+  describe.skip('shouldFetch', () => {
     it('defaults to true', () => {
       const driver = getDriver();
       expect(driver.shouldFetch()).toBe(true);
@@ -86,7 +86,7 @@ describe('NewsfeedApiDriver', () => {
     });
   });
 
-  describe('updateHashes', () => {
+  describe.skip('updateHashes', () => {
     it('returns previous and current storage', () => {
       const driver = getDriver();
       const items: NewsfeedItem[] = [
@@ -178,7 +178,7 @@ describe('NewsfeedApiDriver', () => {
     ).toBe(false);
   });
 
-  describe('modelItems', () => {
+  describe.skip('modelItems', () => {
     it('Models empty set with defaults', () => {
       const driver = getDriver();
       const apiItems: ApiItem[] = [];
@@ -451,7 +451,7 @@ describe('NewsfeedApiDriver', () => {
   });
 });
 
-describe('getApi', () => {
+describe.skip('getApi', () => {
   const mockHttpGet = jest.fn();
   let httpMock = ({
     fetch: mockHttpGet,
@@ -616,7 +616,7 @@ describe('getApi', () => {
     });
   });
 
-  describe('Retry fetching', () => {
+  describe.skip('Retry fetching', () => {
     const successItems: ApiItem[] = [
       {
         title: { en: 'hasNew test' },
