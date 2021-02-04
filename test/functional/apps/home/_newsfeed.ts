@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const deployment = getService('deployment');
   const PageObjects = getPageObjects(['newsfeed']);
 
-  describe('Newsfeed', () => {
+  describe.skip('Newsfeed', () => {
     before(async () => {
       await PageObjects.newsfeed.resetPage();
     });
