@@ -1,21 +1,18 @@
-#!/bin/groovy
-
-library 'kibana-pipeline-library'
-kibanaLibrary.load()
-
-kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true) {
-  slackNotifications.onFailure(disabled: !params.NOTIFY_ON_FAILURE) {
-    githubPr.withDefaultPrComments {
-      ciStats.trackBuild {
-        catchError {
-          retryable.enable()
-          kibanaPipeline.allCiTasks()
-        }
-      }
+node {
+    label 'website'
+    sh "env"
+    echo "BRANCH: ${scmVars.GIT_BRANCH}, COMMIT: ${scmVars.GIT_COMMIT}"
+    stage('bootstrap') {
+        sh 'yarn kbn bootstrap'
     }
-  }
-
-  if (params.NOTIFY_ON_FAILURE) {
-    kibanaPipeline.sendMail()
-  }
+    stage('unit tests') {
+      sh 'yarn test:jest'
+    }
+    stage('integration tests') {
+      sh 'yarn test:jest_integration'
+      sh 'yarn test:mocha'
+    }
+    stage('build'){
+      sh 'yarn build --oss --skip-os-packages'
+    }
 }
