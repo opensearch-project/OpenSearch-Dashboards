@@ -28,14 +28,14 @@ jest.mock('../kibana_services', () => ({
     trackUiMetric: () => {},
   }),
 }));
-
+/*
 test('should render a Welcome screen with the telemetry disclaimer', () => {
   const telemetry = telemetryPluginMock.createStartContract();
   const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} />);
 
   expect(component).toMatchSnapshot();
 });
-
+*/
 test('should render a Welcome screen with the telemetry disclaimer when optIn is true', () => {
   const telemetry = telemetryPluginMock.createStartContract();
   telemetry.telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);

@@ -21,8 +21,8 @@
 import { FetcherTask } from './fetcher';
 import { coreMock } from '../../../core/server/mocks';
 
-describe('FetcherTask', () => {
-  describe('sendIfDue', () => {
+describe.skip('FetcherTask', () => {
+  describe.skip('sendIfDue', () => {
     it('stops when it fails to get telemetry configs', async () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
       const fetcherTask = new FetcherTask(initializerContext);

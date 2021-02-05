@@ -57,10 +57,13 @@ export class TelemetryService {
   }
 
   public get isOptedIn() {
-    return this.config.optIn;
+    // return this.config.optIn;
+    return false;
   }
 
   public set isOptedIn(optIn) {
+    // set to always false
+    optIn = false;
     this.config = { ...this.config, optIn };
   }
 

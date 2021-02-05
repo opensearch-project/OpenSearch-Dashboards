@@ -51,11 +51,11 @@ export default function () {
         // Needed for async search functional tests to introduce a delay
         `--data.search.aggs.shardDelay.enabled=true`,
         `--security.showInsecureClusterWarning=false`,
-        '--telemetry.banner=false',
-        '--telemetry.optIn=false',
+        // '--telemetry.banner=false',
+        // '--telemetry.optIn=false',
         // These are *very* important to have them pointing to staging
-        '--telemetry.url=https://telemetry-staging.elastic.co/xpack/v2/send',
-        '--telemetry.optInStatusUrl=https://telemetry-staging.elastic.co/opt_in_status/v2/send',
+        // '--telemetry.url=https://telemetry-staging.elastic.co/xpack/v2/send',
+        // '--telemetry.optInStatusUrl=https://telemetry-staging.elastic.co/opt_in_status/v2/send',
         `--server.maxPayloadBytes=1679958`,
         // newsfeed mock service
         // `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'newsfeed')}`,

@@ -25,6 +25,7 @@ export function registerUiMetricRoute(
   router: IRouter,
   getSavedObjects: () => ISavedObjectsRepository | undefined
 ) {
+  /*
   router.post(
     {
       path: '/api/ui_metric/report',
@@ -47,5 +48,5 @@ export function registerUiMetricRoute(
         return res.ok({ body: { status: 'fail' } });
       }
     }
-  );
+  );*/
 }

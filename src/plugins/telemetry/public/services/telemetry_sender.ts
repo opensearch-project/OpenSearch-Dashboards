@@ -47,13 +47,15 @@ export class TelemetrySender {
     // check if opt-in for telemetry is enabled
     if (this.telemetryService.getIsOptedIn()) {
       if (!this.lastReported) {
-        return true;
+        // return true;
+        return false;
       }
       // returns NaN for any malformed or unset (null/undefined) value
       const lastReported = parseInt(this.lastReported, 10);
       // If it's been a day since we last sent telemetry
       if (isNaN(lastReported) || Date.now() - lastReported > REPORT_INTERVAL_MS) {
-        return true;
+        // return true;
+        return false;
       }
     }
 
