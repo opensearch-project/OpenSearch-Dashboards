@@ -77,7 +77,7 @@ export interface ComputedGeometries {
 /** @internal */
 export interface SeriesDomainsAndData {
   xDomain: XDomain;
-  yDomain: YDomain[];
+  yDomains: YDomain[];
   smVDomain: Domain;
   smHDomain: Domain;
   formattedDataSeries: DataSeries[];

@@ -35,8 +35,10 @@ import { Point } from '../../../utils/point';
 import { AxisStyle, Theme, TextAlignment, TextOffset } from '../../../utils/themes/theme';
 import { XDomain, YDomain } from '../domains/types';
 import { MIN_STROKE_WIDTH } from '../renderer/canvas/primitives/line';
+import { SmallMultipleScales } from '../state/selectors/compute_small_multiple_scales';
 import { getSpecsById } from '../state/utils/spec';
 import { isVerticalAxis } from './axis_type_utils';
+import { getPanelSize, hasSMDomain } from './panel';
 import { computeXScale, computeYScales } from './scales';
 import { AxisSpec, TickFormatterOptions, TickFormatter } from './specs';
 
@@ -74,7 +76,7 @@ export const defaultTickFormatter = (tick: any) => `${tick}`;
  * so we can compute the max space occupied by the axis component.
  * @param axisSpec the spec of the axis
  * @param xDomain the x domain associated
- * @param yDomain the y domain array
+ * @param yDomains the y domain array
  * @param totalBarsInCluster the total number of grouped series
  * @param bboxCalculator an instance of the boundingbox calculator
  * @param chartRotation the rotation of the chart
@@ -88,7 +90,7 @@ export const defaultTickFormatter = (tick: any) => `${tick}`;
 export function computeAxisTicksDimensions(
   axisSpec: AxisSpec,
   xDomain: XDomain,
-  yDomain: YDomain[],
+  yDomains: YDomain[],
   totalBarsInCluster: number,
   bboxCalculator: BBoxCalculator,
   chartRotation: Rotation,
@@ -107,7 +109,7 @@ export function computeAxisTicksDimensions(
   const scale = getScaleForAxisSpec(
     axisSpec,
     xDomain,
-    yDomain,
+    yDomains,
     totalBarsInCluster,
     chartRotation,
     0,
@@ -150,7 +152,7 @@ export function isYDomain(position: Position, chartRotation: Rotation): boolean 
 export function getScaleForAxisSpec(
   axisSpec: AxisSpec,
   xDomain: XDomain,
-  yDomain: YDomain[],
+  yDomains: YDomain[],
   totalBarsInCluster: number,
   chartRotation: Rotation,
   minRange: number,
@@ -162,7 +164,7 @@ export function getScaleForAxisSpec(
   const range: [number, number] = [minRange, maxRange];
   if (axisIsYDomain) {
     const yScales = computeYScales({
-      yDomains: yDomain,
+      yDomains,
       range,
       ticks: axisSpec.ticks,
       integersOnly: axisSpec.integersOnly,
@@ -648,13 +650,24 @@ export function getVisibleTicks(allTicks: AxisTick[], axisSpec: AxisSpec, axisDi
 }
 
 /** @internal */
+export function getTitleDimension({
+  visible,
+  fontSize,
+  padding,
+}: AxisStyle['axisTitle'] | AxisStyle['axisPanelTitle']): number {
+  if (!visible || fontSize <= 0) return 0;
+  const { inner, outer } = getSimplePadding(padding);
+  return inner + fontSize + outer;
+}
+
+/** @internal */
 export function getAxisPosition(
   chartDimensions: Dimensions,
   chartMargins: Margins,
-  axisTitleHeight: number,
-  axisTitleStyle: AxisStyle['axisTitle'],
+  { axisTitle, axisPanelTitle }: Pick<AxisStyle, 'axisTitle' | 'axisPanelTitle'>,
   axisSpec: AxisSpec,
   axisDim: AxisTicksDimensions,
+  smScales: SmallMultipleScales,
   cumTopSum: number,
   cumBottomSum: number,
   cumLeftSum: number,
@@ -663,9 +676,7 @@ export function getAxisPosition(
   labelPaddingSum: number,
   showLabels: boolean,
 ) {
-  const titlePadding = getSimplePadding(axisTitleStyle.padding);
-  const titleDimension =
-    axisTitleStyle.visible && axisTitleHeight > 0 ? titlePadding.inner + axisTitleHeight + titlePadding.outer : 0;
+  const titleDimension = axisSpec.title ? getTitleDimension(axisTitle) : 0;
   const { position } = axisSpec;
   const { maxLabelBboxHeight, maxLabelBboxWidth } = axisDim;
   const { top, left, height, width } = chartDimensions;
@@ -681,7 +692,9 @@ export function getAxisPosition(
   let rightIncrement = 0;
 
   if (isVerticalAxis(position)) {
-    const dimWidth = labelPaddingSum + (showLabels ? maxLabelBboxWidth : 0) + tickDimension + titleDimension;
+    const panelTitleDimension = hasSMDomain(smScales.vertical) ? getTitleDimension(axisPanelTitle) : 0;
+    const dimWidth =
+      labelPaddingSum + (showLabels ? maxLabelBboxWidth : 0) + tickDimension + titleDimension + panelTitleDimension;
     if (position === Position.Left) {
       leftIncrement = chartMargins.left + dimWidth;
       dimensions.left = cumLeftSum + chartMargins.left;
@@ -691,7 +704,9 @@ export function getAxisPosition(
     }
     dimensions.width = dimWidth;
   } else {
-    const dimHeight = labelPaddingSum + (showLabels ? maxLabelBboxHeight : 0) + tickDimension + titleDimension;
+    const panelTitleDimension = hasSMDomain(smScales.horizontal) ? getTitleDimension(axisPanelTitle) : 0;
+    const dimHeight =
+      labelPaddingSum + (showLabels ? maxLabelBboxHeight : 0) + tickDimension + titleDimension + panelTitleDimension;
     if (position === Position.Top) {
       topIncrement = dimHeight + chartMargins.top;
       dimensions.top = cumTopSum + chartMargins.top;
@@ -712,10 +727,12 @@ export function shouldShowTicks({ visible, strokeWidth, size }: AxisStyle['tickL
 export interface AxisGeometry {
   anchorPoint: Point;
   size: Size;
+  parentSize: Size;
   axis: {
     id: AxisId;
     position: Position;
-    title?: string;
+    panelTitle?: string; // defined later per panel
+    secondary?: boolean; // defined later per panel
   };
   dimension: AxisTicksDimensions;
   ticks: AxisTick[];
@@ -734,54 +751,47 @@ export function getAxesGeometries(
   axisDimensions: Map<AxisId, AxisTicksDimensions>,
   axesStyles: Map<AxisId, AxisStyle | null>,
   xDomain: XDomain,
-  yDomain: YDomain[],
-  panel: Size,
+  yDomains: YDomain[],
+  smScales: SmallMultipleScales,
   totalGroupsCount: number,
   enableHistogramMode: boolean,
   fallBackTickFormatter: TickFormatter,
   barsPadding?: number,
 ): Array<AxisGeometry> {
   const axesGeometries: Array<AxisGeometry> = [];
-
   const { chartDimensions } = computedChartDims;
-
-  // compute the anchor point for every axis group
+  const panel = getPanelSize(smScales);
 
   const anchorPointByAxisGroups = [...axisDimensions.entries()].reduce(
     (acc, [axisId, dimension]) => {
       const axisSpec = getSpecsById<AxisSpec>(axisSpecs, axisId);
+
       if (!axisSpec) {
         return acc;
       }
 
-      const { axisTitle, tickLine, tickLabel } = axesStyles.get(axisId) ?? sharedAxesStyle;
+      const { tickLine, tickLabel, ...otherStyles } = axesStyles.get(axisId) ?? sharedAxesStyle;
       const labelPadding = getSimplePadding(tickLabel.padding);
       const showTicks = shouldShowTicks(tickLine, axisSpec.hide);
-      const axisTitleHeight = axisSpec.title !== undefined ? axisTitle.fontSize : 0;
       const tickDimension = showTicks ? tickLine.size + tickLine.padding : 0;
       const labelPaddingSum = tickLabel.visible ? labelPadding.inner + labelPadding.outer : 0;
 
       const { dimensions, topIncrement, bottomIncrement, leftIncrement, rightIncrement } = getAxisPosition(
         chartDimensions,
         chartMargins,
-        axisTitleHeight,
-        axisTitle,
+        otherStyles,
         axisSpec,
         dimension,
+        smScales,
         acc.top,
         acc.bottom,
         acc.left,
         acc.right,
-        labelPaddingSum,
         tickDimension,
+        labelPaddingSum,
         tickLabel.visible,
       );
-      const anchor = {
-        top: acc.top + topIncrement,
-        bottom: acc.bottom + bottomIncrement,
-        left: acc.left + leftIncrement,
-        right: acc.right + rightIncrement,
-      };
+
       acc.pos.set(axisId, {
         anchor: {
           top: acc.top,
@@ -792,7 +802,10 @@ export function getAxesGeometries(
         dimensions,
       });
       return {
-        ...anchor,
+        top: acc.top + topIncrement,
+        bottom: acc.bottom + bottomIncrement,
+        left: acc.left + leftIncrement,
+        right: acc.right + rightIncrement,
         pos: acc.pos,
       };
     },
@@ -821,13 +834,11 @@ export function getAxesGeometries(
     }
 
     const isVertical = isVerticalAxis(axisSpec.position);
-
     const minMaxRanges = getMinMaxRange(axisSpec.position, chartRotation, panel);
-
     const scale = getScaleForAxisSpec(
       axisSpec,
       xDomain,
-      yDomain,
+      yDomains,
       totalGroupsCount,
       chartRotation,
       minMaxRanges.minRange,
@@ -871,13 +882,16 @@ export function getAxesGeometries(
       axis: {
         id: axisSpec.id,
         position: axisSpec.position,
-        title: axisSpec.title,
       },
       anchorPoint: {
         x: anchorPoint.dimensions.left,
         y: anchorPoint.dimensions.top,
       },
       size,
+      parentSize: {
+        height: anchorPoint.dimensions.height,
+        width: anchorPoint.dimensions.width,
+      },
       dimension: axisDim,
       ticks: allTicks,
       visibleTicks,

@@ -545,3 +545,18 @@ export const getPercentageValue = <T>(ratio: string | number, relativeValue: num
  * @example [1, 2, 4, 2, 4, 0, 3, 2].filter(keepDistinct) ==> [1, 2, 4, 0, 3]
  */
 export const keepDistinct = <T>(d: T, i: number, a: T[]): boolean => a.indexOf(d) === i;
+
+/**
+ * Safely format values with error handling
+ */
+export const safeFormat = <V = any>(value: V, formatter?: (value: V) => string): string => {
+  if (formatter) {
+    try {
+      return formatter(value);
+    } catch {
+      // fallthrough
+    }
+  }
+
+  return `${value}`;
+};

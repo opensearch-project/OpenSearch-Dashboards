@@ -17,7 +17,8 @@
  * under the License.
  */
 import { action } from '@storybook/addon-actions';
-import { boolean } from '@storybook/addon-knobs';
+import { boolean, text } from '@storybook/addon-knobs';
+import { startCase } from 'lodash';
 import { DateTime } from 'luxon';
 import React from 'react';
 
@@ -33,7 +34,9 @@ import {
   LIGHT_THEME,
   niceTimeFormatByDay,
   timeFormatter,
+  AxisSpec,
 } from '../../src';
+import { isVerticalAxis } from '../../src/chart_types/xy_chart/utils/axis_type_utils';
 import { SeededDataGenerator } from '../../src/mocks/utils';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
@@ -45,18 +48,64 @@ const data = dg.generateGroupedSeries(numOfDays, 16).map((d) => {
     y: d.y,
     x: DateTime.fromISO('2020-01-01T00:00:00Z').plus({ days: d.x }).toMillis(),
     g: d.g,
-    h: `host ${groupNames.indexOf(d.g) % 4}`,
-    v: `metric ${Math.floor(groupNames.indexOf(d.g) / 4)}`,
+    h: groupNames.indexOf(d.g) % 4,
+    v: Math.floor(groupNames.indexOf(d.g) / 4),
   };
 });
 
+const getAxisStyle = (position: Position): AxisSpec['style'] => ({
+  tickLabel: {
+    padding: 5,
+  },
+  axisPanelTitle: {
+    visible: !boolean('Hide panel titles', false, position),
+  },
+  axisTitle: {
+    padding: 2,
+    visible: !boolean('Hide title', false, position),
+  },
+  tickLine: {
+    visible: false,
+  },
+});
+
+const getAxisOptions = (
+  position: Position,
+): Pick<AxisSpec, 'id' | 'title' | 'gridLine' | 'ticks' | 'domain' | 'tickFormat' | 'style' | 'hide' | 'position'> => {
+  const isPrimary = position === Position.Left || position === Position.Bottom;
+  const isVertical = isVerticalAxis(position);
+  return {
+    id: position,
+    position,
+    ticks: isVertical ? 2 : undefined,
+    tickFormat: isVertical ? (d) => d.toFixed(2) : timeFormatter(niceTimeFormatByDay(numOfDays)),
+    domain: isVertical
+      ? {
+          max: 10,
+        }
+      : undefined,
+    hide: boolean('Hide', !isPrimary, position),
+    gridLine: {
+      visible: boolean('Show grid line', isPrimary, position),
+    },
+    style: getAxisStyle(position),
+    title: text(
+      'Title',
+      isVertical ? `Metrics - ${startCase(position)}` : `Hosts - ${startCase(position)}`,
+      position,
+    ).trim(),
+  };
+};
+
 export const Example = () => {
+  const debug = boolean('Debug', false);
   const showLegend = boolean('Show Legend', false);
   const onElementClick = action('onElementClick');
 
   return (
     <Chart className="story-chart">
       <Settings
+        debug={debug}
         onElementClick={onElementClick}
         showLegend={showLegend}
         theme={{
@@ -67,68 +116,13 @@ export const Example = () => {
           },
         }}
       />
-      <Axis
-        id="time"
-        title="timestamp"
-        position={Position.Bottom}
-        gridLine={{ visible: true }}
-        ticks={2}
-        style={{
-          tickLabel: {
-            padding: 10,
-          },
-          axisTitle: {
-            padding: 0,
-          },
-          tickLine: {
-            visible: false,
-          },
-          axisLine: {
-            visible: false,
-          },
-        }}
-        tickFormat={timeFormatter(niceTimeFormatByDay(numOfDays))}
-      />
-      <Axis
-        id="y"
-        title="metric"
-        position={Position.Left}
-        gridLine={{ visible: true }}
-        domain={{
-          max: 10,
-        }}
-        ticks={2}
-        style={{
-          axisTitle: {
-            padding: 0,
-          },
-          tickLabel: {
-            padding: 5,
-          },
-          tickLine: {
-            visible: false,
-          },
-          axisLine: {
-            visible: false,
-          },
-        }}
-        tickFormat={(d) => d.toFixed(2)}
-      />
+      <Axis {...getAxisOptions(Position.Left)} />
+      <Axis {...getAxisOptions(Position.Bottom)} />
+      <Axis {...getAxisOptions(Position.Top)} />
+      <Axis {...getAxisOptions(Position.Right)} />
 
-      <GroupBy
-        id="v_split"
-        by={(spec, { v }) => {
-          return v;
-        }}
-        sort="numDesc"
-      />
-      <GroupBy
-        id="h_split"
-        by={(spec, { h }) => {
-          return h;
-        }}
-        sort="numAsc"
-      />
+      <GroupBy id="v_split" by={(_, { v }) => v} format={(v) => `Metric ${v}`} sort="numDesc" />
+      <GroupBy id="h_split" by={(_, { h }) => h} format={(v) => `Host ${v}`} sort="numAsc" />
       <SmallMultiples
         splitVertically="v_split"
         splitHorizontally="h_split"

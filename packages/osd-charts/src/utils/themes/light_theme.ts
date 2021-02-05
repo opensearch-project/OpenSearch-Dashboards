@@ -116,6 +116,17 @@ export const LIGHT_THEME: Theme = {
       },
       fill: '#333',
     },
+    axisPanelTitle: {
+      visible: true,
+      fontSize: 10,
+      fontStyle: 'bold',
+      fontFamily: 'sans-serif',
+      padding: {
+        inner: 8,
+        outer: 0,
+      },
+      fill: '#333',
+    },
     axisLine: {
       visible: true,
       stroke: '#eaeaea',

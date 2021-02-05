@@ -16,14 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Size } from '../../../utils/dimensions';
-import { SmallMultipleScales } from '../state/selectors/compute_small_multiple_scales';
 
-/** @internal */
-export function getPanelSize({ horizontal, vertical }: SmallMultipleScales): Size {
-  return { width: horizontal.bandwidth, height: vertical.bandwidth };
-}
+import { ChartTypes } from '../../..';
+import { SpecTypes } from '../../../../specs/constants';
+import { SmallMultiplesSpec } from '../../../../specs/small_multiples';
+import { GlobalChartState } from '../../../../state/chart_state';
+import { getSpecsFromStore } from '../../../../state/utils';
 
-/** @internal */
-export const hasSMDomain = ({ domain }: SmallMultipleScales['horizontal'] | SmallMultipleScales['vertical']) =>
-  domain.length > 0 && domain[0] !== undefined;
+/**
+ * Return the small multiple spec
+ * @internal
+ */
+export const getSmallMultipleSpec = (state: GlobalChartState) => {
+  const smallMultiples = getSpecsFromStore<SmallMultiplesSpec>(
+    state.specs,
+    ChartTypes.Global,
+    SpecTypes.SmallMultiples,
+  );
+  if (smallMultiples.length !== 1) {
+    return undefined;
+  }
+  return smallMultiples[0];
+};

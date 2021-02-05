@@ -75,7 +75,7 @@ export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings onElementClick={onElementClick} rotation={90} showLegend={showLegend} />
-      <Axis id="time" title="metric" position={Position.Bottom} gridLine={{ visible: false }} />
+      <Axis id="time" position={Position.Bottom} gridLine={{ visible: false }} />
       <Axis id="y" title="Day of week" position={Position.Left} gridLine={{ visible: false }} />
 
       <GroupBy

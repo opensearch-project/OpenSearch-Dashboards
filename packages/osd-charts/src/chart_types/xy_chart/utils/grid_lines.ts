@@ -53,7 +53,7 @@ export function getGridLines(
 ): Array<LinesGrid> {
   const panelSize = getPanelSize(scales);
   return getPerPanelMap(scales, () => {
-    // get grids per panel (depends on all the axis that exist
+    // get grids per panel (depends on all the axis that exist)
     const lines = axesGeoms.reduce<Array<GridLineGroup>>((linesAcc, { axis, visibleTicks }) => {
       const axisSpec = axesSpecs.find(({ id }) => id === axis.id);
       if (!axisSpec) {

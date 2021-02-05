@@ -199,6 +199,8 @@ export interface AxisStyle {
     // (undocumented)
     axisLine: StrokeStyle & Visible;
     // (undocumented)
+    axisPanelTitle: TextStyle & Visible;
+    // (undocumented)
     axisTitle: TextStyle & Visible;
     // (undocumented)
     gridLine: {
@@ -926,8 +928,13 @@ export const GroupBy: React.FunctionComponent<GroupByProps>;
 // @alpha (undocumented)
 export type GroupByAccessor = (spec: Spec, datum: any) => string | number;
 
+// Warning: (ae-incompatible-release-tags) The symbol "GroupByFormatter" is marked as @public, but its signature references "GroupByAccessor" which is marked as @alpha
+//
+// @public
+export type GroupByFormatter = (value: ReturnType<GroupByAccessor>) => string;
+
 // @alpha (undocumented)
-export type GroupByProps = Pick<GroupBySpec, 'id' | 'by' | 'sort'>;
+export type GroupByProps = Pick<GroupBySpec, 'id' | 'by' | 'sort' | 'format'>;
 
 // Warning: (ae-forgotten-export) The symbol "Predicate" needs to be exported by the entry point index.d.ts
 //
@@ -936,9 +943,8 @@ export type GroupBySort = Predicate;
 
 // @alpha (undocumented)
 export interface GroupBySpec extends Spec {
-    // (undocumented)
     by: GroupByAccessor;
-    // (undocumented)
+    format?: GroupByFormatter;
     sort: GroupBySort;
 }
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Rotation } from '../../src';
+import { Position, Rotation } from '../../src';
 import { common } from '../page_objects';
 
 describe('Axis stories', () => {
@@ -87,5 +87,35 @@ describe('Axis stories', () => {
     await common.expectChartAtUrlToMatchScreenshot(
       `http://localhost:9001/?path=/story/axes--tick-label-rotation&knob-disable axis overrides_general=true&knob-Tick label rotation_shared=${rotation}`,
     );
+  });
+
+  describe('Small multiples', () => {
+    const allPositions = [Position.Top, Position.Right, Position.Bottom, Position.Left];
+    const showAllParams = allPositions.map((p) => `knob-Hide_${p}=false`).join('&');
+
+    it('should render four axes with titles and panel titles', async () => {
+      await common.expectChartAtUrlToMatchScreenshot(
+        `http://localhost:9001/?path=/story/small-multiples-alpha--grid-lines&${showAllParams}`,
+      );
+    });
+
+    it('should render four axes with no gridlines', async () => {
+      const hideAllGridParams = allPositions.map((p) => `knob-Show grid line_${p}=false`).join('&');
+      await common.expectChartAtUrlToMatchScreenshot(
+        `http://localhost:9001/?path=/story/small-multiples-alpha--grid-lines&${showAllParams}&${hideAllGridParams}`,
+      );
+    });
+
+    describe.each<Position>(allPositions)('Axis position - %s', (position) => {
+      it.each<[string, string]>([
+        ['should hide title', `knob-Hide title_${position}=true`],
+        ['should hide empty title', `knob-Title_${position}=%20&knob-Hide title_${position}=false`],
+        ['should hide panel titles', `knob-Hide panel titles_${position}=true`],
+      ])('%s', async (_, params) => {
+        await common.expectChartAtUrlToMatchScreenshot(
+          `http://localhost:9001/?path=/story/small-multiples-alpha--grid-lines&${showAllParams}&${params}`,
+        );
+      });
+    });
   });
 });

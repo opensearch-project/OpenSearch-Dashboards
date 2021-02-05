@@ -81,9 +81,9 @@ describe('Y Domain', () => {
       ],
       store,
     );
-    const { yDomain } = computeSeriesDomainsSelector(store.getState());
+    const { yDomains } = computeSeriesDomainsSelector(store.getState());
 
-    expect(yDomain).toEqual([
+    expect(yDomains).toEqual([
       {
         type: 'yDomain',
         groupId: DEFAULT_GLOBAL_ID,
@@ -109,9 +109,9 @@ describe('Y Domain', () => {
       ],
       store,
     );
-    const { yDomain } = computeSeriesDomainsSelector(store.getState());
+    const { yDomains } = computeSeriesDomainsSelector(store.getState());
 
-    expect(yDomain).toEqual([
+    expect(yDomains).toEqual([
       {
         type: 'yDomain',
         groupId: DEFAULT_GLOBAL_ID,
@@ -145,9 +145,9 @@ describe('Y Domain', () => {
       ],
       store,
     );
-    const { yDomain } = computeSeriesDomainsSelector(store.getState());
+    const { yDomains } = computeSeriesDomainsSelector(store.getState());
 
-    expect(yDomain).toEqual([
+    expect(yDomains).toEqual([
       {
         groupId: 'a',
         domain: [2, 12],
@@ -183,9 +183,9 @@ describe('Y Domain', () => {
       ],
       store,
     );
-    const { yDomain } = computeSeriesDomainsSelector(store.getState());
+    const { yDomains } = computeSeriesDomainsSelector(store.getState());
 
-    expect(yDomain).toEqual([
+    expect(yDomains).toEqual([
       {
         groupId: 'a',
         domain: [0, 17],
@@ -213,8 +213,8 @@ describe('Y Domain', () => {
       ],
       store,
     );
-    const { yDomain } = computeSeriesDomainsSelector(store.getState());
-    expect(yDomain).toEqual([
+    const { yDomains } = computeSeriesDomainsSelector(store.getState());
+    expect(yDomains).toEqual([
       {
         groupId: 'a',
         domain: [0, 12],
@@ -402,9 +402,9 @@ describe('Y Domain', () => {
       ],
       store,
     );
-    const { yDomain } = computeSeriesDomainsSelector(store.getState());
+    const { yDomains } = computeSeriesDomainsSelector(store.getState());
 
-    expect(yDomain).toEqual([
+    expect(yDomains).toEqual([
       {
         type: 'yDomain',
         groupId: 'a',
@@ -428,9 +428,9 @@ describe('Y Domain', () => {
       ],
       store,
     );
-    const { yDomain } = computeSeriesDomainsSelector(store.getState());
+    const { yDomains } = computeSeriesDomainsSelector(store.getState());
 
-    expect(yDomain).toEqual([
+    expect(yDomains).toEqual([
       {
         type: 'yDomain',
         groupId: 'a',
@@ -456,7 +456,7 @@ describe('Y Domain', () => {
     );
 
     const {
-      yDomain: [{ domain }],
+      yDomains: [{ domain }],
     } = computeSeriesDomainsSelector(store.getState());
     expect(domain).toEqual([20, 20]);
 
@@ -478,8 +478,8 @@ describe('Y Domain', () => {
       store,
     );
 
-    const { yDomain } = computeSeriesDomainsSelector(store.getState());
-    expect(yDomain).toEqual([
+    const { yDomains } = computeSeriesDomainsSelector(store.getState());
+    expect(yDomains).toEqual([
       {
         type: 'yDomain',
         groupId: 'a',
@@ -505,7 +505,7 @@ describe('Y Domain', () => {
     );
 
     const {
-      yDomain: [{ domain }],
+      yDomains: [{ domain }],
     } = computeSeriesDomainsSelector(store.getState());
     expect(domain).toEqual([-1, -1]);
 
@@ -528,8 +528,8 @@ describe('Y Domain', () => {
       store,
     );
 
-    const { yDomain } = computeSeriesDomainsSelector(store.getState());
-    expect(yDomain).toEqual([
+    const { yDomains } = computeSeriesDomainsSelector(store.getState());
+    expect(yDomains).toEqual([
       {
         groupId: 'a',
         domain: [0, 1],
@@ -556,8 +556,8 @@ describe('Y Domain', () => {
       ],
       store,
     );
-    const { yDomain } = computeSeriesDomainsSelector(store.getState());
-    expect(yDomain).toEqual([
+    const { yDomains } = computeSeriesDomainsSelector(store.getState());
+    expect(yDomains).toEqual([
       {
         type: 'yDomain',
         groupId: 'a',

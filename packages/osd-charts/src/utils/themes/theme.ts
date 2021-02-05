@@ -134,6 +134,7 @@ export interface Opacity {
 
 export interface AxisStyle {
   axisTitle: TextStyle & Visible;
+  axisPanelTitle: TextStyle & Visible;
   axisLine: StrokeStyle & Visible;
   tickLabel: TextStyle &
     Visible & {

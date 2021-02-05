@@ -27,6 +27,7 @@ import { Position } from '../../../../utils/common';
 import { computeChartDimensions, ChartDimensions } from '../../utils/dimensions';
 import { computeAxisTicksDimensionsSelector } from './compute_axis_ticks_dimensions';
 import { getAxesStylesSelector } from './get_axis_styles';
+import { getSmallMultipleSpec } from './get_small_multiples_spec';
 import { getAxisSpecsSelector } from './get_specs';
 
 /** @internal */
@@ -38,8 +39,17 @@ export const computeChartDimensionsSelector = createCachedSelector(
     getAxisSpecsSelector,
     getAxesStylesSelector,
     getLegendSizeSelector,
+    getSmallMultipleSpec,
   ],
-  (chartContainerDimensions, chartTheme, axesTicksDimensions, axesSpecs, axesStyles, legendSize): ChartDimensions =>
+  (
+    chartContainerDimensions,
+    chartTheme,
+    axesTicksDimensions,
+    axesSpecs,
+    axesStyles,
+    legendSize,
+    smSpec,
+  ): ChartDimensions =>
     computeChartDimensions(
       chartContainerDimensions,
       chartTheme,
@@ -47,6 +57,7 @@ export const computeChartDimensionsSelector = createCachedSelector(
       axesStyles,
       axesSpecs,
       getLegendDimension(legendSize),
+      smSpec,
     ),
 )(getChartIdSelector);
 

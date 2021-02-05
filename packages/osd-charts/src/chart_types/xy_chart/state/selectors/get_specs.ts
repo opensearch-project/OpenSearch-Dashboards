@@ -30,6 +30,12 @@ import { AxisSpec, BasicSeriesSpec, AnnotationSpec } from '../../utils/specs';
 const getSpecs = (state: GlobalChartState) => state.specs;
 
 /** @internal */
+export interface SmallMultiplesGroupBy {
+  vertical?: GroupBySpec;
+  horizontal?: GroupBySpec;
+}
+
+/** @internal */
 export const getAxisSpecsSelector = createCachedSelector([getSpecs], (specs): AxisSpec[] =>
   getSpecsFromStore<AxisSpec>(specs, ChartTypes.XYAxis, SpecTypes.Axis),
 )(getChartIdSelector);
@@ -45,7 +51,9 @@ export const getAnnotationSpecsSelector = createCachedSelector([getSpecs], (spec
 )(getChartIdSelector);
 
 /** @internal */
-export const getSmallMultiplesIndexOrderSelector = createCachedSelector([getSpecs], (specs) => {
+export const getSmallMultiplesIndexOrderSelector = createCachedSelector([getSpecs], (specs):
+  | SmallMultiplesGroupBy
+  | undefined => {
   const smallMultiples = getSpecsFromStore<SmallMultiplesSpec>(specs, ChartTypes.Global, SpecTypes.SmallMultiples);
   if (smallMultiples.length !== 1) {
     return undefined;

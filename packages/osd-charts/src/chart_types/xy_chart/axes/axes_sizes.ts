@@ -16,12 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SmallMultiplesSpec } from '../../../specs';
 import { Position } from '../../../utils/common';
 import { getSimplePadding } from '../../../utils/dimensions';
 import { AxisId } from '../../../utils/ids';
 import { AxisStyle, Theme } from '../../../utils/themes/theme';
 import { getSpecsById } from '../state/utils/spec';
-import { AxisTicksDimensions, shouldShowTicks } from '../utils/axis_utils';
+import { isVerticalAxis } from '../utils/axis_type_utils';
+import { AxisTicksDimensions, getTitleDimension, shouldShowTicks } from '../utils/axis_utils';
 import { AxisSpec } from '../utils/specs';
 
 /**
@@ -37,6 +39,7 @@ export function computeAxesSizes(
   axisDimensions: Map<AxisId, AxisTicksDimensions>,
   axesStyles: Map<AxisId, AxisStyle | null>,
   axisSpecs: AxisSpec[],
+  smSpec?: SmallMultiplesSpec,
 ): { left: number; right: number; top: number; bottom: number; margin: { left: number } } {
   const axisMainSize = {
     left: 0,
@@ -56,17 +59,17 @@ export function computeAxesSizes(
     if (!axisSpec || isHidden) {
       return;
     }
-    const { tickLine, axisTitle, tickLabel } = axesStyles.get(id) ?? sharedAxesStyles;
+    const { tickLine, axisTitle, axisPanelTitle, tickLabel } = axesStyles.get(id) ?? sharedAxesStyles;
     const showTicks = shouldShowTicks(tickLine, axisSpec.hide);
     const { position, title } = axisSpec;
-    const titlePadding = getSimplePadding(axisTitle.padding);
     const labelPadding = getSimplePadding(tickLabel.padding);
     const labelPaddingSum = tickLabel.visible ? labelPadding.inner + labelPadding.outer : 0;
 
     const tickDimension = showTicks ? tickLine.size + tickLine.padding : 0;
-    const titleHeight =
-      title !== undefined && axisTitle.visible ? axisTitle.fontSize + titlePadding.outer + titlePadding.inner : 0;
-    const axisDimension = labelPaddingSum + tickDimension + titleHeight;
+    const titleDimension = title ? getTitleDimension(axisTitle) : 0;
+    const hasPanelTitle = Boolean(isVerticalAxis(position) ? smSpec?.splitVertically : smSpec?.splitHorizontally);
+    const panelTitleDimension = hasPanelTitle ? getTitleDimension(axisPanelTitle) : 0;
+    const axisDimension = labelPaddingSum + tickDimension + titleDimension + panelTitleDimension;
     const maxAxisHeight = tickLabel.visible ? maxLabelBboxHeight + axisDimension : axisDimension;
     const maxAxisWidth = tickLabel.visible ? maxLabelBboxWidth + axisDimension : axisDimension;
 

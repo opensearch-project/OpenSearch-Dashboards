@@ -61,7 +61,7 @@ export const computeAxisTicksDimensionsSelector = createCachedSelector(
     seriesSpecs,
     axesStyles,
   ): Map<AxisId, AxisTicksDimensions> => {
-    const { xDomain, yDomain } = seriesDomainsAndData;
+    const { xDomain, yDomains } = seriesDomainsAndData;
     const fallBackTickFormatter = seriesSpecs.find(({ tickFormat }) => tickFormat)?.tickFormat ?? defaultTickFormatter;
     const bboxCalculator = new CanvasTextBBoxCalculator();
     const axesTicksDimensions: Map<AxisId, AxisTicksDimensions> = new Map();
@@ -71,7 +71,7 @@ export const computeAxisTicksDimensionsSelector = createCachedSelector(
       const dimensions = computeAxisTicksDimensions(
         axisSpec,
         xDomain,
-        yDomain,
+        yDomains,
         totalBarsInCluster,
         bboxCalculator,
         settingsSpec.rotation,

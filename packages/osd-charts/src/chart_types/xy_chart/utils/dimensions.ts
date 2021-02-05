@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { SmallMultiplesSpec } from '../../../specs';
 import { Dimensions } from '../../../utils/dimensions';
 import { AxisId } from '../../../utils/ids';
 import { Theme, AxisStyle } from '../../../utils/themes/theme';
@@ -66,6 +67,7 @@ export function computeChartDimensions(
     top: number;
     left: number;
   },
+  smSpec?: SmallMultiplesSpec,
 ): ChartDimensions {
   if (parentDimensions.width <= 0 || parentDimensions.height <= 0) {
     return {
@@ -83,8 +85,7 @@ export function computeChartDimensions(
     };
   }
 
-  const axisSizes = computeAxesSizes(theme, axisDimensions, axesStyles, axisSpecs);
-
+  const axisSizes = computeAxesSizes(theme, axisDimensions, axesStyles, axisSpecs, smSpec);
   const chartWidth = parentDimensions.width - axisSizes.left - axisSizes.right;
   const chartHeight = parentDimensions.height - axisSizes.top - axisSizes.bottom;
   const { chartPaddings } = theme;

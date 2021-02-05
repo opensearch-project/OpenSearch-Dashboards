@@ -19,7 +19,7 @@
 
 import { SeriesIdentifier, SeriesKey } from '../../../common/series_id';
 import { ScaleType } from '../../../scales/constants';
-import { BinAgg, Direction, GroupBySpec, XScaleType } from '../../../specs';
+import { BinAgg, Direction, XScaleType } from '../../../specs';
 import { OrderBy } from '../../../specs/settings';
 import { ColorOverrides } from '../../../state/chart_state';
 import { Accessor, AccessorFn, getAccessorValue } from '../../../utils/accessor';
@@ -28,6 +28,7 @@ import { GroupId } from '../../../utils/ids';
 import { Logger } from '../../../utils/logger';
 import { ColorConfig } from '../../../utils/themes/theme';
 import { groupSeriesByYGroup, isHistogramEnabled, isStackedSpec } from '../domains/y_domain';
+import { SmallMultiplesGroupBy } from '../state/selectors/get_specs';
 import { applyFitFunctionToDataSeries } from './fit_function_utils';
 import { groupBy } from './group_data_series';
 import { BasicSeriesSpec, SeriesNameConfigOptions, SeriesSpecs, SeriesTypes, StackMode } from './specs';
@@ -118,7 +119,7 @@ export function splitSeriesDataByAccessors(
   xValueSums: Map<string | number, number>,
   isStacked = false,
   stackMode?: StackMode,
-  smallMultiples?: { vertical?: GroupBySpec; horizontal?: GroupBySpec },
+  groupBySpec?: SmallMultiplesGroupBy,
 ): {
   dataSeries: Map<SeriesKey, DataSeries>;
   xValues: Array<string | number>;
@@ -164,12 +165,12 @@ export function splitSeriesDataByAccessors(
     let sum = xValueSums.get(x) ?? 0;
 
     // extract small multiples aggregation values
-    const smH = smallMultiples?.horizontal?.by?.(spec, datum);
+    const smH = groupBySpec?.horizontal?.by?.(spec, datum);
     if (!isNil(smH)) {
       smHValues.add(smH);
     }
 
-    const smV = smallMultiples?.vertical?.by?.(spec, datum);
+    const smV = groupBySpec?.vertical?.by?.(spec, datum);
     if (!isNil(smV)) {
       smVValues.add(smV);
     }
@@ -191,8 +192,8 @@ export function splitSeriesDataByAccessors(
         seriesKeys,
         yAccessor: accessorStr,
         splitAccessors,
-        ...(smV && { smVerticalAccessorValue: smV }),
-        ...(smH && { smHorizontalAccessorValue: smH }),
+        ...(!isNil(smV) && { smVerticalAccessorValue: smV }),
+        ...(!isNil(smH) && { smHorizontalAccessorValue: smH }),
       };
       const seriesKey = getSeriesKey(seriesIdentifier, groupId);
       sum += cleanedDatum.y1 ?? 0;
@@ -365,7 +366,7 @@ export function getDataSeriesFromSpecs(
   seriesSpecs: BasicSeriesSpec[],
   deselectedDataSeries: SeriesIdentifier[] = [],
   orderOrdinalBinsBy?: OrderBy,
-  smallMultiples?: { vertical?: GroupBySpec; horizontal?: GroupBySpec },
+  groupBySpec?: SmallMultiplesGroupBy,
 ): {
   dataSeries: DataSeries[];
   xValues: Set<string | number>;
@@ -404,7 +405,7 @@ export function getDataSeriesFromSpecs(
       mutatedXValueSums,
       isStacked,
       specGroup?.stackMode,
-      smallMultiples,
+      groupBySpec,
     );
 
     // filter deselected DataSeries

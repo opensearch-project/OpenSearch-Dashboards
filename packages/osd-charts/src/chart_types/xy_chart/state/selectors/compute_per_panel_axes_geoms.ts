@@ -20,54 +20,67 @@
 import createCachedSelector from 're-reselect';
 
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
+import { Position, safeFormat } from '../../../../utils/common';
 import { isHorizontalAxis, isVerticalAxis } from '../../utils/axis_type_utils';
 import { AxisGeometry } from '../../utils/axis_utils';
+import { hasSMDomain } from '../../utils/panel';
 import { PerPanelMap, getPerPanelMap } from '../../utils/panel_utils';
 import { computeAxesGeometriesSelector } from './compute_axes_geometries';
-import { computeSmallMultipleScalesSelector } from './compute_small_multiple_scales';
+import { computeSmallMultipleScalesSelector, SmallMultipleScales } from './compute_small_multiple_scales';
+import { getSmallMultiplesIndexOrderSelector, SmallMultiplesGroupBy } from './get_specs';
 
 /** @internal */
 export type PerPanelAxisGeoms = {
   axesGeoms: AxisGeometry[];
 } & PerPanelMap;
 
+const getPanelTitle = (
+  isVertical: boolean,
+  verticalValue: any,
+  horizontalValue: any,
+  groupBy?: SmallMultiplesGroupBy,
+): string => {
+  const formatter = isVertical ? groupBy?.vertical?.format : groupBy?.horizontal?.format;
+  const value = isVertical ? `${verticalValue}` : `${horizontalValue}`;
+
+  return safeFormat(value, formatter);
+};
+
+const isPrimaryColumnFn = ({ horizontal: { domain } }: SmallMultipleScales) => (
+  position: Position,
+  horizontalValue: any,
+) => isVerticalAxis(position) && domain[0] === horizontalValue;
+
+const isPrimaryRowFn = ({ vertical: { domain } }: SmallMultipleScales) => (position: Position, verticalValue: any) =>
+  isHorizontalAxis(position) && domain[0] === verticalValue;
+
 /** @internal */
 export const computePerPanelAxesGeomsSelector = createCachedSelector(
-  [computeAxesGeometriesSelector, computeSmallMultipleScalesSelector],
-  (axesGeoms, scales): Array<PerPanelAxisGeoms> => {
+  [computeAxesGeometriesSelector, computeSmallMultipleScalesSelector, getSmallMultiplesIndexOrderSelector],
+  (axesGeoms, scales, groupBySpec): Array<PerPanelAxisGeoms> => {
     const { horizontal, vertical } = scales;
-    return getPerPanelMap(scales, (anchor, h, v) => {
-      const lastLine = horizontal.domain.includes(h) && vertical.domain[vertical.domain.length - 1] === v;
-      const firstColumn = horizontal.domain[0] === h;
-      if (firstColumn || lastLine) {
-        return {
-          axesGeoms: axesGeoms
-            .filter(({ axis: { position } }) => {
-              if (firstColumn && lastLine) {
-                return true;
-              }
-              return firstColumn ? isVerticalAxis(position) : isHorizontalAxis(position);
-            })
-            .map((geom) => {
-              const {
-                axis: { position, title },
-              } = geom;
-              const panelTitle = isVerticalAxis(position) ? `${v}` : `${h}`;
-              const useSmallMultiplePanelTitles = isVerticalAxis(position)
-                ? vertical.domain.length > 1
-                : horizontal.domain.length > 1;
-              return {
-                ...geom,
-                axis: {
-                  ...geom.axis,
-                  title: useSmallMultiplePanelTitles ? panelTitle : title,
-                },
-              };
-            }),
-        };
-      }
+    const isPrimaryColumn = isPrimaryColumnFn(scales);
+    const isPrimaryRow = isPrimaryRowFn(scales);
 
-      return null;
-    });
+    return getPerPanelMap(scales, (_, h, v) => ({
+      axesGeoms: axesGeoms.map((geom) => {
+        const {
+          axis: { position },
+        } = geom;
+        const isVertical = isVerticalAxis(position);
+        const usePanelTitle = isVertical ? hasSMDomain(vertical) : hasSMDomain(horizontal);
+        const panelTitle = usePanelTitle ? getPanelTitle(isVertical, v, h, groupBySpec) : undefined;
+        const secondary = !isPrimaryColumn(position, h) && !isPrimaryRow(position, v);
+
+        return {
+          ...geom,
+          axis: {
+            ...geom.axis,
+            panelTitle,
+            secondary,
+          },
+        };
+      }),
+    }));
   },
 )(getChartIdSelector);
