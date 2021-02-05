@@ -1,4 +1,5 @@
 <h1 align="center">
+  <img src="https://raw.githubusercontent.com/elastic/elastic-charts/master/public/logo.png" alt="elastic-charts logo" width="100" /><br />
   Elastic Charts
 </h1>
 <p align="center">
