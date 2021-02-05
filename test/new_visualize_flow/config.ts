@@ -34,7 +34,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--oss',
-        '--telemetry.optIn=false',
+        // '--telemetry.optIn=false',
         '--dashboard.allowByValueEmbeddables=true',
       ],
     },

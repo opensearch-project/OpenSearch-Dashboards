@@ -46,7 +46,7 @@ const mockedNodesFetchResponse = {
   },
 };
 
-describe('get_nodes_usage', () => {
+describe.skip('get_nodes_usage', () => {
   it('returns a modified array of nodes usage data', async () => {
     const response = Promise.resolve({ body: mockedNodesFetchResponse });
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;

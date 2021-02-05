@@ -79,7 +79,7 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
   return esClient;
 }
 
-describe('get_local_stats', () => {
+describe.skip('get_local_stats', () => {
   const clusterUuid = 'abc123';
   const clusterName = 'my-cool-cluster';
   const version = '2.3.4';
@@ -181,7 +181,7 @@ describe('get_local_stats', () => {
     version: '8.0.0',
   };
 
-  describe('handleLocalStats', () => {
+  describe.skip('handleLocalStats', () => {
     it('returns expected object without xpack or kibana data', () => {
       const result = handleLocalStats(
         clusterInfo,
@@ -222,7 +222,7 @@ describe('get_local_stats', () => {
     });
   });
 
-  describe('getLocalStats', () => {
+  describe.skip('getLocalStats', () => {
     it('returns expected object with kibana data', async () => {
       const callCluster = jest.fn();
       const usageCollection = mockUsageCollection(kibana);

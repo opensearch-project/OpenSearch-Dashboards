@@ -54,7 +54,7 @@ export const PATH_TO_ADVANCED_SETTINGS = 'management/kibana/settings';
 /**
  * Link to the Elastic Telemetry privacy statement.
  */
-export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/privacy-statement`;
+export const PRIVACY_STATEMENT_URL = ``;
 
 /**
  * The endpoint version when hitting the remote telemetry service
