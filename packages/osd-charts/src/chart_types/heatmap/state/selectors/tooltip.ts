@@ -19,9 +19,9 @@
 
 import createCachedSelector from 're-reselect';
 
+import { RGBtoString } from '../../../../common/color_library_wrappers';
 import { TooltipInfo } from '../../../../components/tooltip/types';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { RGBtoString } from '../../../partition_chart/layout/utils/color_library_wrappers';
 import { getHeatmapConfigSelector } from './get_heatmap_config';
 import { getSpecOrNull } from './heatmap_spec';
 import { getPickedShapes } from './picked_shapes';

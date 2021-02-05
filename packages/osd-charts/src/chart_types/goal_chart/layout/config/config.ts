@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { configMap } from '../../../partition_chart/layout/config/config';
-import { TAU } from '../../../partition_chart/layout/utils/constants';
+import { ConfigItem, configMap } from '../../../../common/config_objects';
+import { TAU } from '../../../../common/constants';
 import { Config } from '../types/config_types';
 
-export const configMetadata = {
+/** @internal */
+export const configMetadata: Record<string, ConfigItem> = {
   angleStart: { dflt: Math.PI + Math.PI / 4, min: -TAU, max: TAU, type: 'number' },
   angleEnd: { dflt: -Math.PI / 4, min: -TAU, max: TAU, type: 'number' },
 
@@ -52,4 +53,4 @@ export const configMetadata = {
   sectorLineWidth: { dflt: 1, min: 0, max: 4, type: 'number' },
 };
 
-export const config: Config = configMap<Config>((item: any) => item.dflt, configMetadata);
+export const config: Config = configMap<Config>((item: ConfigItem) => item.dflt, configMetadata);

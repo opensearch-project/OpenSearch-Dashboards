@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { RGBtoString } from '../../../../../common/color_library_wrappers';
 import { Fill, Stroke } from '../../../../../geoms/types';
-import { RGBtoString } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { MIN_STROKE_WIDTH } from './line';
 
 /**

@@ -17,13 +17,13 @@
  * under the License.
  */
 
+import { RgbObject } from '../../../../common/color_library_wrappers';
 import { SeriesKey } from '../../../../common/series_id';
 import { Circle, Stroke, Fill, Rect } from '../../../../geoms/types';
 import { Rotation } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { PointGeometry } from '../../../../utils/geometry';
 import { PointStyle, GeometryStateStyle, PointShape } from '../../../../utils/themes/theme';
-import { RgbObject } from '../../../partition_chart/layout/utils/color_library_wrappers';
 import { renderShape } from './primitives/shapes';
 import { withPanelTransform } from './utils/panel_transform';
 

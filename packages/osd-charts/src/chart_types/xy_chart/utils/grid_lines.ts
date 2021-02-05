@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { stringToRGB } from '../../../common/color_library_wrappers';
 import { Line, Stroke } from '../../../geoms/types';
 import { mergePartial, RecursivePartial } from '../../../utils/common';
 import { Size } from '../../../utils/dimensions';
 import { AxisId } from '../../../utils/ids';
 import { Point } from '../../../utils/point';
 import { AxisStyle } from '../../../utils/themes/theme';
-import { stringToRGB } from '../../partition_chart/layout/utils/color_library_wrappers';
 import { MIN_STROKE_WIDTH } from '../renderer/canvas/primitives/line';
 import { SmallMultipleScales } from '../state/selectors/compute_small_multiple_scales';
 import { isVerticalAxis } from './axis_type_utils';

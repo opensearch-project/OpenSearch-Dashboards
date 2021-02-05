@@ -17,11 +17,12 @@
  * under the License.
  */
 
+import { Pixels, SizeRatio } from '../../../../common/geometry';
+import { FontFamily } from '../../../../common/text_utils';
 import { Color } from '../../../../utils/common';
-import { Pixels, SizeRatio } from '../../../partition_chart/layout/types/geometry_types';
-import { FontFamily } from '../../../partition_chart/layout/types/types';
 
 // todo switch to `io-ts` style, generic way of combining static and runtime type info
+/** potential internal */
 export interface Config {
   angleStart: number;
   angleEnd: number;

@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { Radian } from '../chart_types/partition_chart/layout/types/geometry_types';
-import { RgbObject } from '../chart_types/partition_chart/layout/utils/color_library_wrappers';
+import { RgbObject } from '../common/color_library_wrappers';
+import { Radian } from '../common/geometry';
 
+/** potential internal */
 export interface Text {
   text: string;
   x: number;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { RgbTuple } from '../../chart_types/partition_chart/layout/utils/color_library_wrappers';
+import { RgbTuple } from '../../common/color_library_wrappers';
 
 const CET2s: RgbTuple[] = [
   [46, 34, 235],

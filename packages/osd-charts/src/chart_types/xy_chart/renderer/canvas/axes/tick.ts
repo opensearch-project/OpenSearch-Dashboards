@@ -18,9 +18,9 @@
  */
 
 import { AxisProps } from '.';
+import { stringToRGB } from '../../../../../common/color_library_wrappers';
 import { Position } from '../../../../../utils/common';
 import { TickStyle } from '../../../../../utils/themes/theme';
-import { stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { isVerticalAxis } from '../../../utils/axis_type_utils';
 import { AxisTick } from '../../../utils/axis_utils';
 import { renderLine } from '../primitives/line';

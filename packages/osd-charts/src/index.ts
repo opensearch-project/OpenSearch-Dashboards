@@ -41,7 +41,6 @@ export {
   PartitionLayout,
 } from './chart_types/partition_chart/layout/types/config_types';
 export { Layer as PartitionLayer } from './chart_types/partition_chart/specs/index';
-export { MODEL_KEY } from './chart_types/partition_chart/layout/types/types';
 export * from './chart_types/goal_chart/specs/index';
 export {
   Accessor,
@@ -89,3 +88,4 @@ export {
 } from './utils/common';
 export { DataGenerator } from './utils/data_generators/data_generator';
 export * from './utils/themes/merge_utils';
+export { MODEL_KEY } from './chart_types/partition_chart/layout/config';

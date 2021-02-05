@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+const module = jest.requireActual('../color_calcs.ts');
 
-export const TAU = 2 * Math.PI;
-export const RIGHT_ANGLE = TAU / 4;
-export const GOLDEN_RATIO = 1.618;
+export const getBackgroundWithContainerColorFromUser = jest.fn(module.getBackgroundWithContainerColorFromUser);
+export const makeHighContrastColor = jest.fn(module.makeHighContrastColor);

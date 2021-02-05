@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import { stringToRGB } from '../../../../common/color_library_wrappers';
 import { Rect } from '../../../../geoms/types';
 import { withContext, renderLayers, clearCanvas } from '../../../../renderers/canvas';
-import { stringToRGB } from '../../../partition_chart/layout/utils/color_library_wrappers';
 import { renderAnnotations } from './annotations';
 import { renderAreas } from './areas';
 import { renderAxes } from './axes';

@@ -18,9 +18,9 @@
  */
 
 import { CategoryKey } from '../../../../common/category';
+import { Relation } from '../../../../common/text_utils';
 import { LegendPath } from '../../../../state/actions/legend';
 import { Datum, ValueAccessor } from '../../../../utils/common';
-import { Relation } from '../types/types';
 
 export const AGGREGATE_KEY = 'value';
 export const STATISTICS_KEY = 'statistics';

@@ -19,10 +19,10 @@
 
 import { $Values as Values } from 'utility-types';
 
+import { Distance, Pixels, Radian, Radius, Ratio, SizeRatio, TimeMs } from '../../../../common/geometry';
+import { Font, FontFamily, PartialFont, TextContrast } from '../../../../common/text_utils';
 import { Color, StrokeStyle, ValueFormatter } from '../../../../utils/common';
 import { PerSideDistance } from '../../../../utils/dimensions';
-import { Distance, Pixels, Radian, Radius, Ratio, SizeRatio, TimeMs } from './geometry_types';
-import { Font, FontFamily, PartialFont } from './types';
 
 export const PartitionLayout = Object.freeze({
   sunburst: 'sunburst' as const,
@@ -37,8 +37,6 @@ export type PartitionLayout = Values<typeof PartitionLayout>; // could use Value
 export type PerSidePadding = PerSideDistance;
 
 export type Padding = Pixels | Partial<PerSidePadding>;
-
-export type TextContrast = boolean | number;
 
 interface LabelConfig extends Font {
   textColor: Color;
@@ -128,45 +126,4 @@ export interface Config extends StaticConfig {
     duration: TimeMs;
     keyframes: Array<AnimKeyframe>;
   };
-}
-
-// switching to `io-ts` style, generic way of combining static and runtime type info - 1st step
-class Type<A> {
-  dflt: A;
-
-  reconfigurable: boolean | string;
-
-  documentation = 'string';
-
-  constructor(dflt: A, reconfigurable: boolean | string, documentation: string) {
-    this.dflt = dflt;
-    this.reconfigurable = reconfigurable;
-    this.documentation = documentation;
-  }
-}
-
-export class Numeric extends Type<number> {
-  min: number;
-
-  max: number;
-
-  type = 'number';
-
-  constructor({
-    dflt,
-    min,
-    max,
-    reconfigurable,
-    documentation,
-  }: {
-    dflt: number;
-    min: number;
-    max: number;
-    reconfigurable: boolean | string;
-    documentation: string;
-  }) {
-    super(dflt, reconfigurable, documentation);
-    this.min = min;
-    this.max = max;
-  }
 }

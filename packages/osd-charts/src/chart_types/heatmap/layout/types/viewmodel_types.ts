@@ -18,9 +18,9 @@
  */
 
 import { ChartTypes } from '../../..';
+import { Pixels } from '../../../../common/geometry';
 import { Fill, Line, Stroke } from '../../../../geoms/types';
 import { Point } from '../../../../utils/point';
-import { Pixels } from '../../../partition_chart/layout/types/geometry_types';
 import { config } from '../config/config';
 import { HeatmapCellDatum, TextBox } from '../viewmodel/viewmodel';
 import { Config, HeatmapBrushEvent } from './config_types';

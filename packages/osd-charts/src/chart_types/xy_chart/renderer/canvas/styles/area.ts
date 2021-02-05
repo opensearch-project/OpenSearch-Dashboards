@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import { OpacityFn, stringToRGB } from '../../../../../common/color_library_wrappers';
 import { Fill } from '../../../../../geoms/types';
 import { getColorFromVariant } from '../../../../../utils/common';
 import { GeometryStateStyle, AreaStyle } from '../../../../../utils/themes/theme';
-import { OpacityFn, stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 
 /**
  * Return the rendering props for an area. The color of the area will be overwritten

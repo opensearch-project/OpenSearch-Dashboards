@@ -20,7 +20,7 @@
 import createCachedSelector from 're-reselect';
 
 import { TooltipInfo } from '../../../../components/tooltip/types';
-import { percentValueGetter, sumValueGetter } from '../../layout/config/config';
+import { percentValueGetter, sumValueGetter } from '../../layout/config';
 import { getPartitionSpec } from './partition_spec';
 import { getPickedShapes } from './picked_shapes';
 import { valueGetterFunction } from './scenegraph';

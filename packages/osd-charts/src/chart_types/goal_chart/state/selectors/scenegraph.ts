@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import { measureText } from '../../../../common/text_utils';
 import { mergePartial, RecursivePartial } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
-import { measureText } from '../../../partition_chart/layout/utils/measure';
 import { config as defaultConfig } from '../../layout/config/config';
 import { Config } from '../../layout/types/config_types';
 import { ShapeViewModel, nullShapeViewModel } from '../../layout/types/viewmodel_types';

@@ -17,19 +17,7 @@
  * under the License.
  */
 
-import { Pixels } from '../types/geometry_types';
-import { Box, Font, TextMeasure } from '../types/types';
-
 /** @internal */
-export function cssFontShorthand({ fontStyle, fontVariant, fontWeight, fontFamily }: Font, fontSize: Pixels) {
-  return `${fontStyle} ${fontVariant} ${fontWeight} ${fontSize}px ${fontFamily}`;
-}
-
-/** @internal */
-export function measureText(ctx: CanvasRenderingContext2D): TextMeasure {
-  return (fontSize: number, boxes: Box[]): TextMetrics[] =>
-    boxes.map((box: Box) => {
-      ctx.font = cssFontShorthand(box, fontSize);
-      return ctx.measureText(box.text);
-    });
+export function logarithm(base: number, y: number) {
+  return Math.log(y) / Math.log(base);
 }

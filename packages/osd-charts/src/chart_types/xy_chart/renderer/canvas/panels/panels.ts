@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { stringToRGB } from '../../../../../common/color_library_wrappers';
 import { withContext } from '../../../../../renderers/canvas';
 import { Point } from '../../../../../utils/point';
-import { stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { PanelGeoms } from '../../../state/selectors/compute_panels';
 import { renderRect } from '../primitives/rect';
 

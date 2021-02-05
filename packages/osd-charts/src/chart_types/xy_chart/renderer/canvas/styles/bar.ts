@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import { stringToRGB, OpacityFn } from '../../../../../common/color_library_wrappers';
 import { Stroke, Fill } from '../../../../../geoms/types';
 import { getColorFromVariant } from '../../../../../utils/common';
 import { GeometryStateStyle, RectStyle, RectBorderStyle } from '../../../../../utils/themes/theme';
-import { stringToRGB, OpacityFn } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 
 /**
  * Return the rendering styles (stroke and fill) for a bar.

@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { Pixels, PointObject } from '../../../../common/geometry';
 import { SpecTypes } from '../../../../specs/constants';
-import { Pixels, PointObject } from '../../../partition_chart/layout/types/geometry_types';
 import { BandFillColorAccessorInput } from '../../specs';
 import { GoalSubtype } from '../../specs/constants';
 import { config } from '../config/config';

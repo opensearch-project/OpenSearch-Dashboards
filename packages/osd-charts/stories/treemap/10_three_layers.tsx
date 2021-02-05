@@ -21,9 +21,9 @@ import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { Chart, Datum, Partition, PartitionLayout, Settings } from '../../src';
-import { config } from '../../src/chart_types/partition_chart/layout/config/config';
+import { config } from '../../src/chart_types/partition_chart/layout/config';
 import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/types/viewmodel_types';
-import { hueInterpolator } from '../../src/chart_types/partition_chart/layout/utils/calcs';
+import { hueInterpolator } from '../../src/common/color_calcs';
 import { mocks } from '../../src/mocks/hierarchical';
 import { palettes } from '../../src/mocks/hierarchical/palettes';
 import { keepDistinct } from '../../src/utils/common';

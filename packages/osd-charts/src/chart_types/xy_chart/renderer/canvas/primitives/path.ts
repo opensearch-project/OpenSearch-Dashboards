@@ -17,11 +17,11 @@
  * under the License.
  */
 
+import { RGBtoString } from '../../../../../common/color_library_wrappers';
 import { Rect, Stroke, Fill } from '../../../../../geoms/types';
 import { withContext, withClipRanges } from '../../../../../renderers/canvas';
 import { ClippedRanges } from '../../../../../utils/geometry';
 import { Point } from '../../../../../utils/point';
-import { RGBtoString } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { renderMultiLine } from './line';
 
 /** @internal */

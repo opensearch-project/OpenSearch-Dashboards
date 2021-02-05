@@ -20,7 +20,7 @@
 import React from 'react';
 
 import { Chart, Datum, Partition, PartitionLayout } from '../../src';
-import { config } from '../../src/chart_types/partition_chart/layout/config/config';
+import { config } from '../../src/chart_types/partition_chart/layout/config';
 import { mocks } from '../../src/mocks/hierarchical';
 import { countryLookup, indexInterpolatedFillColor, interpolatorCET2s } from '../utils/utils';
 

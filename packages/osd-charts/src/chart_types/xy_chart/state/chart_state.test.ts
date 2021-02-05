@@ -18,6 +18,7 @@
  */
 
 import { ChartTypes } from '../..';
+import { DEFAULT_CSS_CURSOR } from '../../../common/constants';
 import { LegendItem } from '../../../common/legend';
 import { MockBarGeometry } from '../../../mocks';
 import { ScaleContinuous, ScaleBand } from '../../../scales';
@@ -1113,7 +1114,7 @@ describe.skip('Chart Store', () => {
       store.cursorPosition.x = -1;
       store.cursorPosition.y = -1;
       store.onBrushEndListener = brushEndListener;
-      expect(store.chartCursor.get()).toBe('default');
+      expect(store.chartCursor.get()).toBe(DEFAULT_CSS_CURSOR);
     });
 
     test.skip('when cursor is within chart bounds and brush enabled', () => {
@@ -1127,7 +1128,7 @@ describe.skip('Chart Store', () => {
       store.cursorPosition.x = 10;
       store.cursorPosition.y = 10;
       store.onBrushEndListener = undefined;
-      expect(store.chartCursor.get()).toBe('default');
+      expect(store.chartCursor.get()).toBe(DEFAULT_CSS_CURSOR);
     });
     test.skip('when cursor is within chart bounds and brush enabled but over one geom', () => {
       store.cursorPosition.x = 10;

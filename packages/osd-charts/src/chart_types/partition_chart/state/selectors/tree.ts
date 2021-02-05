@@ -23,7 +23,7 @@ import { ChartTypes } from '../../..';
 import { SpecTypes } from '../../../../specs';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getSpecsFromStore } from '../../../../state/utils';
-import { configMetadata } from '../../layout/config/config';
+import { configMetadata } from '../../layout/config';
 import { childOrders, HierarchyOfArrays, HIERARCHY_ROOT_KEY } from '../../layout/utils/group_by_rollup';
 import { getHierarchyOfArrays } from '../../layout/viewmodel/hierarchy_of_arrays';
 import { isSunburst, isTreemap } from '../../layout/viewmodel/viewmodel';

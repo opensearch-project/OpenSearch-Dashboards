@@ -20,13 +20,13 @@
 import createCachedSelector from 're-reselect';
 
 import { CategoryKey } from '../../../../common/category';
+import { map } from '../../../../common/iterables';
 import { LegendItem } from '../../../../common/legend';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { identity } from '../../../../utils/common';
 import { isHierarchicalLegend } from '../../../../utils/legend';
 import { QuadViewModel } from '../../layout/types/viewmodel_types';
-import { map } from '../iterables';
 import { partitionGeometries } from './geometries';
 import { getPartitionSpec } from './partition_spec';
 

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { TAU } from '../../../../common/constants';
 import {
   CirclineArc,
   Circline,
@@ -24,8 +25,7 @@ import {
   Distance,
   PointObject,
   RingSectorConstruction,
-} from './types/geometry_types';
-import { TAU } from './utils/constants';
+} from '../../../../common/geometry';
 
 function euclideanDistance({ x: x1, y: y1 }: PointObject, { x: x2, y: y2 }: PointObject): Distance {
   return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));

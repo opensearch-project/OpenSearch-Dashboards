@@ -20,8 +20,9 @@
 import React, { RefObject } from 'react';
 
 import { ChartTypes } from '../..';
+import { DEFAULT_CSS_CURSOR } from '../../../common/constants';
 import { Tooltip } from '../../../components/tooltip';
-import { InternalChartState, GlobalChartState, BackwardRef } from '../../../state/chart_state';
+import { BackwardRef, GlobalChartState, InternalChartState } from '../../../state/chart_state';
 import { InitStatus } from '../../../state/selectors/get_internal_is_intialized';
 import { DebugState } from '../../../state/types';
 import { Dimensions } from '../../../utils/dimensions';
@@ -37,6 +38,17 @@ import { createOnElementOutCaller } from './selectors/on_element_out_caller';
 import { createOnElementOverCaller } from './selectors/on_element_over_caller';
 import { getPartitionSpec } from './selectors/partition_spec';
 import { getTooltipInfoSelector } from './selectors/tooltip';
+
+function render(containerRef: BackwardRef, forwardStageRef: RefObject<HTMLCanvasElement>) {
+  return (
+    <>
+      <Tooltip getChartContainerRef={containerRef} />
+      <Partition forwardStageRef={forwardStageRef} />
+      <HighlighterFromHover />
+      <HighlighterFromLegend />
+    </>
+  );
+}
 
 /** @internal */
 export class PartitionState implements InternalChartState {
@@ -84,18 +96,11 @@ export class PartitionState implements InternalChartState {
   }
 
   chartRenderer(containerRef: BackwardRef, forwardStageRef: RefObject<HTMLCanvasElement>) {
-    return (
-      <>
-        <Tooltip getChartContainerRef={containerRef} />
-        <Partition forwardStageRef={forwardStageRef} />
-        <HighlighterFromHover />
-        <HighlighterFromLegend />
-      </>
-    );
+    return render(containerRef, forwardStageRef);
   }
 
   getPointerCursor() {
-    return 'default';
+    return DEFAULT_CSS_CURSOR;
   }
 
   isTooltipVisible(globalState: GlobalChartState) {

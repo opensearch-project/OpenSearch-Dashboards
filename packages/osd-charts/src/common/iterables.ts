@@ -17,14 +17,11 @@
  * under the License.
  */
 
-import { $Values } from 'utility-types';
-
-export const VerticalAlignments = Object.freeze({
-  top: 'top' as const,
-  middle: 'middle' as const,
-  bottom: 'bottom' as const,
-  alphabetic: 'alphabetic' as const,
-  hanging: 'hanging' as const,
-  ideographic: 'ideographic' as const,
-});
-export type VerticalAlignments = $Values<typeof VerticalAlignments>;
+// just like [].map except on iterables, to avoid having to materialize both input and output arrays
+/** @internal */
+export function map<InElem, OutElem>(fun: (arg: InElem, index: number) => OutElem, iterable: Iterable<InElem>) {
+  let i = 0;
+  return (function* mapGenerator() {
+    for (const next of iterable) yield fun(next, i++);
+  })();
+}

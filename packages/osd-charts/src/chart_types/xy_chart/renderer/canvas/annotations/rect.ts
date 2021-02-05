@@ -17,11 +17,11 @@
  * under the License.
  */
 
+import { stringToRGB } from '../../../../../common/color_library_wrappers';
 import { Fill, Stroke } from '../../../../../geoms/types';
 import { Rotation } from '../../../../../utils/common';
 import { Dimensions } from '../../../../../utils/dimensions';
 import { RectAnnotationStyle } from '../../../../../utils/themes/theme';
-import { stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { AnnotationRectProps } from '../../../annotations/rect/types';
 import { renderRect } from '../primitives/rect';
 import { withPanelTransform } from '../utils/panel_transform';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { arrayToLookup, hueInterpolator } from '../../src/chart_types/partition_chart/layout/utils/calcs';
+import { arrayToLookup, hueInterpolator } from '../../src/common/color_calcs';
 import { countryDimension, productDimension, regionDimension } from '../../src/mocks/hierarchical/dimension_codes';
 import { palettes } from '../../src/mocks/hierarchical/palettes';
 

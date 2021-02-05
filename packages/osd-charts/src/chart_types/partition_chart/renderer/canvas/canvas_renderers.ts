@@ -17,9 +17,12 @@
  * under the License.
  */
 
+import { addOpacity } from '../../../../common/color_calcs';
+import { TAU } from '../../../../common/constants';
+import { Pixels } from '../../../../common/geometry';
+import { cssFontShorthand } from '../../../../common/text_utils';
 import { clearCanvas, renderLayers, withContext } from '../../../../renderers/canvas';
 import { Color } from '../../../../utils/common';
-import { Pixels } from '../../layout/types/geometry_types';
 import {
   LinkLabelVM,
   OutsideLinksViewModel,
@@ -28,9 +31,6 @@ import {
   ShapeViewModel,
   TextRow,
 } from '../../layout/types/viewmodel_types';
-import { addOpacity } from '../../layout/utils/calcs';
-import { TAU } from '../../layout/utils/constants';
-import { cssFontShorthand } from '../../layout/utils/measure';
 import { LinkLabelsViewModelSpec } from '../../layout/viewmodel/link_text_layout';
 import { isSunburst } from '../../layout/viewmodel/viewmodel';
 

@@ -26,7 +26,7 @@ import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
 import { Dimensions } from '../../../../utils/dimensions';
-import { MODEL_KEY } from '../../layout/types/types';
+import { MODEL_KEY } from '../../layout/config';
 import { nullShapeViewModel, QuadViewModel, ShapeViewModel } from '../../layout/types/viewmodel_types';
 import { INPUT_KEY } from '../../layout/utils/group_by_rollup';
 import { partitionGeometries } from '../../state/selectors/geometries';
@@ -83,21 +83,6 @@ class PartitionComponent extends React.Component<PartitionProps> {
     }
   }
 
-  private drawCanvas() {
-    if (this.ctx) {
-      const { width, height }: Dimensions = this.props.chartContainerDimensions;
-      renderPartitionCanvas2d(this.ctx, this.devicePixelRatio, {
-        ...this.props.geometries,
-        config: { ...this.props.geometries.config, width, height },
-      });
-    }
-  }
-
-  private tryCanvasContext() {
-    const canvas = this.props.forwardStageRef.current;
-    this.ctx = canvas && canvas.getContext('2d');
-  }
-
   handleMouseMove(e: MouseEvent<HTMLCanvasElement>) {
     const {
       initialized,
@@ -149,6 +134,21 @@ class PartitionComponent extends React.Component<PartitionProps> {
         }}
       />
     );
+  }
+
+  private drawCanvas() {
+    if (this.ctx) {
+      const { width, height }: Dimensions = this.props.chartContainerDimensions;
+      renderPartitionCanvas2d(this.ctx, this.devicePixelRatio, {
+        ...this.props.geometries,
+        config: { ...this.props.geometries.config, width, height },
+      });
+    }
+  }
+
+  private tryCanvasContext() {
+    const canvas = this.props.forwardStageRef.current;
+    this.ctx = canvas && canvas.getContext('2d');
   }
 }
 

@@ -17,10 +17,9 @@
  * under the License.
  */
 
+import { cssFontShorthand, Font, measureText, TextAlign, TextBaseline } from '../../../../../common/text_utils';
 import { withContext, withRotatedOrigin } from '../../../../../renderers/canvas';
 import { Point } from '../../../../../utils/point';
-import { Font, TextAlign, TextBaseline } from '../../../../partition_chart/layout/types/types';
-import { cssFontShorthand, measureText } from '../../../../partition_chart/layout/utils/measure';
 
 /** @internal */
 export function renderText(

@@ -21,6 +21,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
+import { DEFAULT_CSS_CURSOR } from '../common/constants';
 import { SettingsSpec } from '../specs';
 import { onKeyPress as onKeyPressAction } from '../state/actions/key';
 import {
@@ -44,7 +45,7 @@ interface ChartContainerComponentStateProps {
   isChartEmpty?: boolean;
   pointerCursor: string;
   isBrushing: boolean;
-  initalized?: boolean;
+  initialized?: boolean;
   isBrushingAvailable: boolean;
   settings?: SettingsSpec;
   internalChartRenderer: (
@@ -171,9 +172,9 @@ class ChartContainerComponent extends React.Component<ReactiveChartProps> {
   };
 
   render() {
-    const { status, isChartEmpty, settings, initalized } = this.props;
+    const { status, isChartEmpty, settings, initialized } = this.props;
 
-    if (!initalized || status === InitStatus.ParentSizeInvalid) {
+    if (!initialized || status === InitStatus.ParentSizeInvalid) {
       // TODO: Display error on chart
       return null;
     }
@@ -218,13 +219,13 @@ const mapDispatchToProps = (dispatch: Dispatch): ChartContainerComponentDispatch
 const mapStateToProps = (state: GlobalChartState): ChartContainerComponentStateProps => {
   const status = getInternalIsInitializedSelector(state);
   const settings = getSettingsSpecSelector(state);
-  const initalized = !state.specParsing && state.specsInitialized;
+  const initialized = !state.specParsing && state.specsInitialized;
 
   if (status !== InitStatus.Initialized) {
     return {
       status,
-      initalized,
-      pointerCursor: 'default',
+      initialized,
+      pointerCursor: DEFAULT_CSS_CURSOR,
       isBrushingAvailable: false,
       isBrushing: false,
       internalChartRenderer: () => null,
@@ -234,7 +235,7 @@ const mapStateToProps = (state: GlobalChartState): ChartContainerComponentStateP
 
   return {
     status,
-    initalized,
+    initialized,
     isChartEmpty: isInternalChartEmptySelector(state),
     pointerCursor: getInternalPointerCursor(state),
     isBrushingAvailable: getInternalIsBrushingAvailableSelector(state),

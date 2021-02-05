@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import { GOLDEN_RATIO } from '../../../../common/constants';
+import { cssFontShorthand } from '../../../../common/text_utils';
 import { clearCanvas, renderLayers, withContext } from '../../../../renderers/canvas';
-import { GOLDEN_RATIO } from '../../../partition_chart/layout/utils/constants';
-import { cssFontShorthand } from '../../../partition_chart/layout/utils/measure';
 import { ShapeViewModel } from '../../layout/types/viewmodel_types';
 import { GoalSubtype } from '../../specs/constants';
 

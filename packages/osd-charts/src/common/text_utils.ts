@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import { Datum } from '../../../../utils/common';
-import { ArrayEntry } from '../utils/group_by_rollup';
+import { $Values as Values } from 'utility-types';
+
+import { ArrayEntry } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
+import { Datum } from '../utils/common';
+import { Pixels } from './geometry';
 
 export const FONT_VARIANTS = Object.freeze(['normal', 'small-caps'] as const);
 export type FontVariant = typeof FONT_VARIANTS[number];
-
 export const FONT_WEIGHTS = Object.freeze([
   100,
   200,
@@ -43,15 +45,8 @@ export const FONT_WEIGHTS = Object.freeze([
 ] as const);
 export type FontWeight = typeof FONT_WEIGHTS[number];
 export type NumericFontWeight = number & typeof FONT_WEIGHTS[number];
-
 export const FONT_STYLES = Object.freeze(['normal', 'italic', 'oblique', 'inherit', 'initial', 'unset'] as const);
 export type FontStyle = typeof FONT_STYLES[number];
-
-/**
- * todo consider doing tighter control for permissible font families, eg. as in Kibana Canvas - expression language
- *  - though the same applies for permissible (eg. known available or loaded) font weights, styles, variants...
- */
-export type FontFamily = string;
 
 export interface Font {
   fontStyle: FontStyle;
@@ -63,10 +58,8 @@ export interface Font {
 }
 
 export type PartialFont = Partial<Font>;
-
 export const TEXT_ALIGNS = Object.freeze(['start', 'end', 'left', 'right', 'center'] as const);
 export type TextAlign = typeof TEXT_ALIGNS[number];
-
 export const TEXT_BASELINE = Object.freeze([
   'top',
   'hanging',
@@ -77,21 +70,10 @@ export const TEXT_BASELINE = Object.freeze([
 ] as const);
 export type TextBaseline = typeof TEXT_BASELINE[number];
 
+/** potential internal */
 export interface Box extends Font {
   text: string;
 }
-export type TextMeasure = (fontSize: number, boxes: Box[]) => TextMetrics[];
-
-/**
- * Part-to-whole visualizations such as treemap, sunburst, pie hinge on an aggregation
- * function such that the value is independent of the order of how the constituents are aggregated
- * https://en.wikipedia.org/wiki/Associative_property
- * Hierarchical, space-filling part-to-whole visualizations also need that the
- * the value of a node is equal to the sum of the values of its children
- * https://mboehm7.github.io/teaching/ss19_dbs/04_RelationalAlgebra.pdf p21
- * It's now `count` and `sum` but subject to change
- */
-export type AdditiveAggregation = 'count' | 'sum';
 
 export type Relation = Array<Datum>;
 
@@ -109,17 +91,39 @@ export interface Part extends Rectangle {
   node: ArrayEntry;
 }
 
+/** potential internal */
+export type TextMeasure = (fontSize: number, boxes: Box[]) => TextMetrics[];
+
+/** @internal */
+export function cssFontShorthand({ fontStyle, fontVariant, fontWeight, fontFamily }: Font, fontSize: Pixels) {
+  return `${fontStyle} ${fontVariant} ${fontWeight} ${fontSize}px ${fontFamily}`;
+}
+
+/** @internal */
+export function measureText(ctx: CanvasRenderingContext2D): TextMeasure {
+  return (fontSize: number, boxes: Box[]): TextMetrics[] =>
+    boxes.map((box: Box) => {
+      ctx.font = cssFontShorthand(box, fontSize);
+      return ctx.measureText(box.text);
+    });
+}
+
 /**
- * It's an unfortunate accident that 'parent' is used both
- *   - for linking an ArrayNode to a QuadViewModel, and
- *   - for recursively linking the parent ArrayNode to an ArrayNode (child) in the tree
- *
- * By extracting out the 'MODEL_KEY', we make the distinction clear, while the API, which depends on this, doesn't
- * change. This makes an eventual API change a single-line change, assuming `[MODEL_KEY]` is used where needed, and just there
- *
- *  Todo:
- *   - replace users' use of `s.parent` with `s[MODEL_KEY]` for the ShapeTreeNode -> ArrayNode access
- *   - change MODEL_KEY to something other than 'parent' when it's done (might still be breaking change)
+ * todo consider doing tighter control for permissible font families, eg. as in Kibana Canvas - expression language
+ *  - though the same applies for permissible (eg. known available or loaded) font weights, styles, variants...
  */
-/** @public */
-export const MODEL_KEY = 'parent';
+export type FontFamily = string;
+
+/** potential internal */
+export type TextContrast = boolean | number;
+
+export const VerticalAlignments = Object.freeze({
+  top: 'top' as const,
+  middle: 'middle' as const,
+  bottom: 'bottom' as const,
+  alphabetic: 'alphabetic' as const,
+  hanging: 'hanging' as const,
+  ideographic: 'ideographic' as const,
+});
+
+export type VerticalAlignments = Values<typeof VerticalAlignments>;

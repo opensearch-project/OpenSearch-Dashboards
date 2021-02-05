@@ -17,11 +17,11 @@
  * under the License.
  */
 
+import { stringToRGB } from '../../../../../common/color_library_wrappers';
 import { Stroke } from '../../../../../geoms/types';
 import { Rotation } from '../../../../../utils/common';
 import { Dimensions } from '../../../../../utils/dimensions';
 import { LineAnnotationStyle } from '../../../../../utils/themes/theme';
-import { stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { AnnotationLineProps } from '../../../annotations/line/types';
 import { renderLine } from '../primitives/line';
 import { withPanelTransform } from '../utils/panel_transform';

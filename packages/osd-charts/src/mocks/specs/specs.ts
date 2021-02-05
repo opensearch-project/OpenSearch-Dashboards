@@ -18,7 +18,7 @@
  */
 
 import { ChartTypes } from '../../chart_types';
-import { config, percentFormatter } from '../../chart_types/partition_chart/layout/config/config';
+import { config, percentFormatter } from '../../chart_types/partition_chart/layout/config';
 import { PartitionLayout } from '../../chart_types/partition_chart/layout/types/config_types';
 import { ShapeTreeNode } from '../../chart_types/partition_chart/layout/types/viewmodel_types';
 import { AGGREGATE_KEY, PrimitiveValue } from '../../chart_types/partition_chart/layout/utils/group_by_rollup';

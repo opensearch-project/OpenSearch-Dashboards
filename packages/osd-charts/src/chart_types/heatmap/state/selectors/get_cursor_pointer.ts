@@ -18,6 +18,7 @@
  */
 import createCachedSelector from 're-reselect';
 
+import { DEFAULT_CSS_CURSOR } from '../../../../common/constants';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { isBrushingSelector } from './is_brushing';
 import { getPickedShapes } from './picked_shapes';
@@ -26,6 +27,6 @@ import { getPickedShapes } from './picked_shapes';
 export const getPointerCursorSelector = createCachedSelector(
   [getPickedShapes, isBrushingSelector],
   (pickedShapes, isBrushing) => {
-    return isBrushing || (Array.isArray(pickedShapes) && pickedShapes.length > 0) ? 'pointer' : 'default';
+    return isBrushing || (Array.isArray(pickedShapes) && pickedShapes.length > 0) ? 'pointer' : DEFAULT_CSS_CURSOR;
   },
 )(getChartIdSelector);

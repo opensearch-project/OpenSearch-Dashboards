@@ -17,16 +17,21 @@
  * under the License.
  */
 
+import { makeHighContrastColor, isColorValid } from '../../../../common/color_calcs';
+import { TAU } from '../../../../common/constants';
+import {
+  Distance,
+  meanAngle,
+  PointTuple,
+  PointTuples,
+  trueBearingToStandardPositionAngle,
+} from '../../../../common/geometry';
+import { integerSnap, monotonicHillClimb } from '../../../../common/optimize';
+import { Box, Font, TextAlign, TextMeasure } from '../../../../common/text_utils';
 import { ValueFormatter, Color } from '../../../../utils/common';
 import { Point } from '../../../../utils/point';
-import { meanAngle } from '../geometry';
 import { Config } from '../types/config_types';
-import { Distance, PointTuple, PointTuples } from '../types/geometry_types';
-import { Box, Font, TextAlign, TextMeasure } from '../types/types';
 import { LinkLabelVM, RawTextGetter, ShapeTreeNode, ValueGetterFunction } from '../types/viewmodel_types';
-import { makeHighContrastColor, integerSnap, monotonicHillClimb, isColorValid } from '../utils/calcs';
-import { TAU } from '../utils/constants';
-import { trueBearingToStandardPositionAngle } from '../utils/math';
 
 function cutToLength(s: string, maxLength: number) {
   return s.length <= maxLength ? s : `${s.slice(0, Math.max(0, maxLength - 1))}…`; // ellipsis is one char

@@ -20,9 +20,9 @@
 import React from 'react';
 
 import { Chart, Datum, Partition, PartitionLayout } from '../../src';
-import { config } from '../../src/chart_types/partition_chart/layout/config/config';
+import { config } from '../../src/chart_types/partition_chart/layout/config';
 import { ShapeTreeNode } from '../../src/chart_types/partition_chart/layout/types/viewmodel_types';
-import { arrayToLookup } from '../../src/chart_types/partition_chart/layout/utils/calcs';
+import { arrayToLookup } from '../../src/common/color_calcs';
 import { mocks } from '../../src/mocks/hierarchical';
 import { productDimension } from '../../src/mocks/hierarchical/dimension_codes';
 import { discreteColor, colorBrewerCategoricalPastel12 } from '../utils/utils';

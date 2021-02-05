@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Origin, Part } from '../types/types';
+import { Origin, Part } from '../../../../common/text_utils';
 import { ArrayEntry, childrenAccessor, HierarchyOfArrays } from './group_by_rollup';
 
 /** @internal */

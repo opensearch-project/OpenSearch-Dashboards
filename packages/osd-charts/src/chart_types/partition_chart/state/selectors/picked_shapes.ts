@@ -21,7 +21,7 @@ import createCachedSelector from 're-reselect';
 
 import { LayerValue } from '../../../../specs';
 import { GlobalChartState } from '../../../../state/chart_state';
-import { MODEL_KEY } from '../../layout/types/types';
+import { MODEL_KEY } from '../../layout/config';
 import { QuadViewModel } from '../../layout/types/viewmodel_types';
 import {
   AGGREGATE_KEY,

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { makeHighContrastColor, combineColors, integerSnap, monotonicHillClimb } from './calcs';
+import { makeHighContrastColor, combineColors } from './color_calcs';
+import { integerSnap, monotonicHillClimb } from './optimize';
 
 describe('calcs', () => {
   describe('test makeHighContrastColor', () => {

@@ -19,6 +19,7 @@
 
 import createCachedSelector from 're-reselect';
 
+import { DEFAULT_CSS_CURSOR } from '../../../../common/constants';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
@@ -53,11 +54,8 @@ export const getPointerCursorSelector = createCachedSelector(
     const yPos = y - chartDimensions.top;
 
     // limit cursorPosition to chartDimensions
-    if (xPos < 0 || xPos >= chartDimensions.width) {
-      return 'default';
-    }
-    if (yPos < 0 || yPos >= chartDimensions.height) {
-      return 'default';
+    if (xPos < 0 || xPos >= chartDimensions.width || yPos < 0 || yPos >= chartDimensions.height) {
+      return DEFAULT_CSS_CURSOR;
     }
     if (highlightedGeometries.length > 0 && (settingsSpec.onElementClick || settingsSpec.onElementOver)) {
       return 'pointer';
@@ -65,6 +63,6 @@ export const getPointerCursorSelector = createCachedSelector(
     if (projectedValues !== null && settingsSpec.onProjectionClick) {
       return 'pointer';
     }
-    return isBrushAvailable ? 'crosshair' : 'default';
+    return isBrushAvailable ? 'crosshair' : DEFAULT_CSS_CURSOR;
   },
 )(getChartIdSelector);

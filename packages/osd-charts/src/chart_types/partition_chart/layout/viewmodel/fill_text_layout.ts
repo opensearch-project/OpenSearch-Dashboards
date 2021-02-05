@@ -19,12 +19,14 @@
 
 import chroma from 'chroma-js';
 
-import { ValueFormatter, Color } from '../../../../utils/common';
-import { Logger } from '../../../../utils/logger';
-import { Layer } from '../../specs';
-import { conjunctiveConstraint } from '../circline_geometry';
-import { wrapToTau } from '../geometry';
-import { Config, Padding, TextContrast } from '../types/config_types';
+import {
+  combineColors,
+  makeHighContrastColor,
+  colorIsDark,
+  getTextColorIfTextInvertible,
+  isColorValid,
+} from '../../../../common/color_calcs';
+import { TAU } from '../../../../common/constants';
 import {
   Coordinate,
   Distance,
@@ -34,8 +36,16 @@ import {
   Ratio,
   RingSectorConstruction,
   PointTuple,
-} from '../types/geometry_types';
-import { Box, Font, PartialFont, TextMeasure } from '../types/types';
+  trueBearingToStandardPositionAngle,
+  wrapToTau,
+} from '../../../../common/geometry';
+import { logarithm } from '../../../../common/math';
+import { integerSnap, monotonicHillClimb } from '../../../../common/optimize';
+import { Box, Font, PartialFont, TextContrast, TextMeasure, VerticalAlignments } from '../../../../common/text_utils';
+import { ValueFormatter, Color } from '../../../../utils/common';
+import { Logger } from '../../../../utils/logger';
+import { Layer } from '../../specs';
+import { Config, Padding } from '../types/config_types';
 import {
   QuadViewModel,
   RawTextGetter,
@@ -45,18 +55,7 @@ import {
   ShapeTreeNode,
   ValueGetterFunction,
 } from '../types/viewmodel_types';
-import {
-  combineColors,
-  makeHighContrastColor,
-  colorIsDark,
-  getTextColorIfTextInvertible,
-  integerSnap,
-  monotonicHillClimb,
-  isColorValid,
-} from '../utils/calcs';
-import { TAU } from '../utils/constants';
-import { logarithm, trueBearingToStandardPositionAngle } from '../utils/math';
-import { VerticalAlignments } from './constants';
+import { conjunctiveConstraint } from '../utils/circline_geometry';
 import { RectangleConstruction } from './viewmodel';
 
 const INFINITY_RADIUS = 1e4; // far enough for a sub-2px precision on a 4k screen, good enough for text bounds; 64 bit floats still work well with it

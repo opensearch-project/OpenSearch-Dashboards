@@ -20,13 +20,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
+import { RGBtoString } from '../../../../common/color_library_wrappers';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartRotationSelector } from '../../../../state/selectors/get_chart_rotation';
 import { InitStatus, getInternalIsInitializedSelector } from '../../../../state/selectors/get_internal_is_intialized';
 import { Rotation } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
 import { isPointGeometry, IndexedGeometry, PointGeometry } from '../../../../utils/geometry';
-import { RGBtoString } from '../../../partition_chart/layout/utils/color_library_wrappers';
 import { DEFAULT_HIGHLIGHT_PADDING } from '../../rendering/constants';
 import { computeChartDimensionsSelector } from '../../state/selectors/compute_chart_dimensions';
 import { computeChartTransformSelector } from '../../state/selectors/compute_chart_transform';

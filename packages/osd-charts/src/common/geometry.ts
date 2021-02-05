@@ -23,6 +23,8 @@
 // could in theory be three-valued (in,on,out)
 // It also serves as documentation.
 
+import { RIGHT_ANGLE, TAU } from './constants';
+
 export type Pixels = number;
 export type Ratio = number;
 export type SizeRatio = Ratio;
@@ -70,4 +72,27 @@ type CirclinePredicateSet = CirclinePredicate[];
 /** @internal */
 export type RingSectorConstruction = CirclinePredicateSet;
 
+/** potential internal */
 export type TimeMs = number;
+
+/** @internal */
+export function wrapToTau(a: Radian) {
+  if (0 <= a && a <= TAU) return a; // efficient shortcut
+  if (a < 0) a -= TAU * Math.floor(a / TAU);
+  return a > TAU ? a % TAU : a;
+}
+
+/** @internal */
+export function diffAngle(a: Radian, b: Radian) {
+  return ((a - b + Math.PI + TAU) % TAU) - Math.PI;
+}
+
+/** @internal */
+export function meanAngle(a: Radian, b: Radian) {
+  return (TAU + b + diffAngle(a, b) / 2) % TAU;
+}
+
+/** @internal */
+export function trueBearingToStandardPositionAngle(alphaIn: number) {
+  return wrapToTau(RIGHT_ANGLE - alphaIn);
+}

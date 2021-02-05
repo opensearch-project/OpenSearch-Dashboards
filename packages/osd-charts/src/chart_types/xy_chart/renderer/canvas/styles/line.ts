@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import { stringToRGB, OpacityFn } from '../../../../../common/color_library_wrappers';
 import { Stroke } from '../../../../../geoms/types';
 import { getColorFromVariant } from '../../../../../utils/common';
 import { GeometryStateStyle, LineStyle } from '../../../../../utils/themes/theme';
-import { stringToRGB, OpacityFn } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 
 /**
  * Return the rendering props for a line. The color of the line will be overwritten

@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import { RGBtoString } from '../../../../../common/color_library_wrappers';
 import { Stroke, Line } from '../../../../../geoms/types';
 import { withContext } from '../../../../../renderers/canvas';
-import { RGBtoString } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 
 /**
  * Canvas2d stroke ignores an exact zero line width

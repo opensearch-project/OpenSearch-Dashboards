@@ -17,13 +17,13 @@
  * under the License.
  */
 
+import { stringToRGB } from '../../../../../common/color_library_wrappers';
 import { Fill } from '../../../../../geoms/types';
 import { MockStyles } from '../../../../../mocks';
 import { getColorFromVariant } from '../../../../../utils/common';
-import { stringToRGB } from '../../../../partition_chart/layout/utils/color_library_wrappers';
 import { buildAreaStyles } from './area';
 
-jest.mock('../../../../partition_chart/layout/utils/color_library_wrappers');
+jest.mock('../../../../../common/color_library_wrappers');
 jest.mock('../../../../../utils/common');
 
 const COLOR = 'aquamarine';
