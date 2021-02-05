@@ -33,7 +33,7 @@ export function mockGetClusterInfo(clusterInfo: any) {
   return esClient;
 }
 
-describe('get_cluster_info using the elasticsearch client', () => {
+describe.skip('get_cluster_info using the elasticsearch client', () => {
   it('uses the esClient to get info API', async () => {
     const clusterInfo = {
       cluster_uuid: '1234',

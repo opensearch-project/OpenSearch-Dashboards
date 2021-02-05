@@ -133,14 +133,14 @@ export class Reporter {
   public reportApplicationUsage(appId?: string) {
     this.log(`Reporting application changed to ${appId}`);
     this.lastAppId = appId || this.lastAppId;
-    const appChangedReport = this.applicationUsage.appChanged(appId);
-    if (appChangedReport) this.saveToReport([appChangedReport]);
+    // const appChangedReport = this.applicationUsage.appChanged(appId);
+    // if (appChangedReport) this.saveToReport([appChangedReport]);
   }
 
   public sendReports = async () => {
     if (!this.reportManager.isReportEmpty()) {
       try {
-        await this.http(this.reportManager.report);
+        // await this.http(this.reportManager.report);
         this.flushReport();
       } catch (err) {
         this.log(`Error Sending Metrics Report ${err}`);

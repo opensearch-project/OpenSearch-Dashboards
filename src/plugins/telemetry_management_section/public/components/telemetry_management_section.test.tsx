@@ -23,7 +23,7 @@ import { TelemetryService } from '../../../telemetry/public/services';
 import { coreMock } from '../../../../core/public/mocks';
 import { render } from '@testing-library/react';
 
-describe('TelemetryManagementSectionComponent', () => {
+describe.skip('TelemetryManagementSectionComponent', () => {
   const coreStart = coreMock.createStart();
   const coreSetup = coreMock.createSetup();
 

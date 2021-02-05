@@ -21,7 +21,7 @@ import { EuiButton } from '@elastic/eui';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { OptedInNoticeBanner } from './opted_in_notice_banner';
 
-describe('OptInDetailsComponent', () => {
+describe.skip('OptInDetailsComponent', () => {
   it('renders as expected', () => {
     expect(shallowWithIntl(<OptedInNoticeBanner onSeenBanner={() => {}} />)).toMatchSnapshot();
   });

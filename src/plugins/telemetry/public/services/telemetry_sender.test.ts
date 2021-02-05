@@ -32,7 +32,7 @@ Object.defineProperty(window, 'localStorage', {
   value: mockLocalStorage,
 });
 
-describe('TelemetrySender', () => {
+describe.skip('TelemetrySender', () => {
   beforeEach(() => {
     mockLocalStorage.getItem.mockClear();
     mockLocalStorage.setItem.mockClear();
@@ -43,7 +43,7 @@ describe('TelemetrySender', () => {
     })
   );
 
-  describe('constructor', () => {
+  describe.skip('constructor', () => {
     it('defaults lastReport if unset', () => {
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService);
@@ -61,7 +61,7 @@ describe('TelemetrySender', () => {
     });
   });
 
-  describe('saveToBrowser', () => {
+  describe.skip('saveToBrowser', () => {
     it('uses lastReport', () => {
       const lastReport = `${Date.now()}`;
       const telemetryService = mockTelemetryService();
@@ -77,7 +77,7 @@ describe('TelemetrySender', () => {
     });
   });
 
-  describe('shouldSendReport', () => {
+  describe.skip('shouldSendReport', () => {
     it('returns false whenever optIn is false', () => {
       const telemetryService = mockTelemetryService();
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(false);
@@ -129,7 +129,7 @@ describe('TelemetrySender', () => {
       expect(shouldSendRerpot).toBe(true);
     });
 
-    describe('sendIfDue', () => {
+    describe.skip('sendIfDue', () => {
       let originalFetch: typeof window['fetch'];
       let mockFetch: jest.Mock<typeof window['fetch']>;
 
@@ -252,7 +252,7 @@ describe('TelemetrySender', () => {
       });
     });
   });
-  describe('startChecking', () => {
+  describe.skip('startChecking', () => {
     let originalSetInterval: typeof window['setInterval'];
     let mockSetInterval: jest.Mock<typeof window['setInterval']>;
 
