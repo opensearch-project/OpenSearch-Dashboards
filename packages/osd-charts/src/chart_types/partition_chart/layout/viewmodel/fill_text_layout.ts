@@ -20,29 +20,28 @@
 import chroma from 'chroma-js';
 
 import {
-  combineColors,
-  makeHighContrastColor,
   colorIsDark,
+  combineColors,
   getTextColorIfTextInvertible,
   isColorValid,
+  makeHighContrastColor,
 } from '../../../../common/color_calcs';
 import { TAU } from '../../../../common/constants';
 import {
   Coordinate,
   Distance,
   Pixels,
+  PointTuple,
   Radian,
-  Radius,
   Ratio,
   RingSectorConstruction,
-  PointTuple,
   trueBearingToStandardPositionAngle,
   wrapToTau,
 } from '../../../../common/geometry';
 import { logarithm } from '../../../../common/math';
 import { integerSnap, monotonicHillClimb } from '../../../../common/optimize';
 import { Box, Font, PartialFont, TextContrast, TextMeasure, VerticalAlignments } from '../../../../common/text_utils';
-import { ValueFormatter, Color } from '../../../../utils/common';
+import { Color, ValueFormatter } from '../../../../utils/common';
 import { Logger } from '../../../../utils/logger';
 import { Layer } from '../../specs';
 import { Config, Padding } from '../types/config_types';
@@ -55,107 +54,13 @@ import {
   ShapeTreeNode,
   ValueGetterFunction,
 } from '../types/viewmodel_types';
-import { conjunctiveConstraint } from '../utils/circline_geometry';
+import { conjunctiveConstraint, INFINITY_RADIUS, makeRowCircline } from '../utils/circline_geometry';
 import { RectangleConstruction } from './viewmodel';
-
-const INFINITY_RADIUS = 1e4; // far enough for a sub-2px precision on a 4k screen, good enough for text bounds; 64 bit floats still work well with it
-
-function ringSectorStartAngle(d: ShapeTreeNode): Radian {
-  return trueBearingToStandardPositionAngle(d.x0 + Math.max(0, d.x1 - d.x0 - TAU / 2) / 2);
-}
-
-function ringSectorEndAngle(d: ShapeTreeNode): Radian {
-  return trueBearingToStandardPositionAngle(d.x1 - Math.max(0, d.x1 - d.x0 - TAU / 2) / 2);
-}
-
-function ringSectorInnerRadius(innerRadius: Radian, ringThickness: Distance) {
-  return (d: ShapeTreeNode): Radius => innerRadius + d.y0 * ringThickness;
-}
-function ringSectorOuterRadius(innerRadius: Radian, ringThickness: Distance) {
-  return (d: ShapeTreeNode): Radius => innerRadius + (d.y0 + 1) * ringThickness;
-}
-
-function angleToCircline(
-  midRadius: Radius,
-  alpha: Radian,
-  direction: 1 | -1 /* 1 for clockwise and -1 for anticlockwise circline */,
-) {
-  const sectorRadiusLineX = Math.cos(alpha) * midRadius;
-  const sectorRadiusLineY = Math.sin(alpha) * midRadius;
-  const normalAngle = alpha + (direction * Math.PI) / 2;
-  const x = sectorRadiusLineX + INFINITY_RADIUS * Math.cos(normalAngle);
-  const y = sectorRadiusLineY + INFINITY_RADIUS * Math.sin(normalAngle);
-  const sectorRadiusCircline = { x, y, r: INFINITY_RADIUS, inside: false, from: 0, to: TAU };
-  return sectorRadiusCircline;
-}
 
 /** @internal */
 // todo pick a better unique key for the slices (D3 doesn't keep track of an index)
 export function nodeId(node: ShapeTreeNode): string {
   return `${node.x0}|${node.y0}`;
-}
-
-/** @internal */
-export function ringSectorConstruction(config: Config, innerRadius: Radius, ringThickness: Distance) {
-  return (ringSector: ShapeTreeNode): RingSectorConstruction => {
-    const {
-      circlePadding,
-      radialPadding,
-      fillOutside,
-      radiusOutside,
-      fillRectangleWidth,
-      fillRectangleHeight,
-    } = config;
-    const radiusGetter = fillOutside ? ringSectorOuterRadius : ringSectorInnerRadius;
-    const geometricInnerRadius = radiusGetter(innerRadius, ringThickness)(ringSector);
-    const innerR = geometricInnerRadius + circlePadding * 2;
-    const outerR = Math.max(
-      innerR,
-      ringSectorOuterRadius(innerRadius, ringThickness)(ringSector) - circlePadding + (fillOutside ? radiusOutside : 0),
-    );
-    const startAngle = ringSectorStartAngle(ringSector);
-    const endAngle = ringSectorEndAngle(ringSector);
-    const innerCircline = { x: 0, y: 0, r: innerR, inside: true, from: 0, to: TAU };
-    const outerCircline = { x: 0, y: 0, r: outerR, inside: false, from: 0, to: TAU };
-    const midRadius = (innerR + outerR) / 2;
-    const sectorStartCircle = angleToCircline(midRadius, startAngle - radialPadding, -1);
-    const sectorEndCircle = angleToCircline(midRadius, endAngle + radialPadding, 1);
-    const outerRadiusFromRectangleWidth = fillRectangleWidth / 2;
-    const outerRadiusFromRectanglHeight = fillRectangleHeight / 2;
-    const fullCircle = ringSector.x0 === 0 && ringSector.x1 === TAU && geometricInnerRadius === 0;
-    const sectorCirclines = [
-      ...(fullCircle && innerRadius === 0 ? [] : [innerCircline]),
-      outerCircline,
-      ...(fullCircle ? [] : [sectorStartCircle, sectorEndCircle]),
-    ];
-    const rectangleCirclines =
-      outerRadiusFromRectangleWidth === Infinity && outerRadiusFromRectanglHeight === Infinity
-        ? []
-        : [
-            { x: INFINITY_RADIUS - outerRadiusFromRectangleWidth, y: 0, r: INFINITY_RADIUS, inside: true },
-            { x: -INFINITY_RADIUS + outerRadiusFromRectangleWidth, y: 0, r: INFINITY_RADIUS, inside: true },
-            { x: 0, y: INFINITY_RADIUS - outerRadiusFromRectanglHeight, r: INFINITY_RADIUS, inside: true },
-            { x: 0, y: -INFINITY_RADIUS + outerRadiusFromRectanglHeight, r: INFINITY_RADIUS, inside: true },
-          ];
-    return [...sectorCirclines, ...rectangleCirclines];
-  };
-}
-
-function makeRowCircline(
-  cx: Coordinate,
-  cy: Coordinate,
-  radialOffset: Distance,
-  rotation: Radian,
-  fontSize: number,
-  offsetSign: -1 | 0 | 1,
-) {
-  const r = INFINITY_RADIUS;
-  const offset = (offsetSign * fontSize) / 2;
-  const topRadius = r - offset;
-  const x = cx + topRadius * Math.cos(-rotation + TAU / 4);
-  const y = cy + topRadius * Math.cos(-rotation + TAU / 2);
-  const circline = { r: r + radialOffset, x, y };
-  return circline;
 }
 
 /** @internal */
@@ -319,7 +224,7 @@ export function getFillTextColor(
     if (bgColorAlpha < 1) {
       Logger.expected('Text contrast requires a background color with an alpha value of 1', 1, bgColorAlpha);
     } else if (containerBackgroundColor !== 'transparent') {
-      Logger.warn(`Invalid background color "${containerBackgroundColor}"`);
+      Logger.warn(`Invalid background color "${String(containerBackgroundColor)}"`);
     }
 
     return getTextColorIfTextInvertible(
@@ -356,6 +261,7 @@ export function getFillTextColor(
 
   return adjustedTextColor;
 }
+
 type GetShapeRowGeometry<C> = (
   container: C,
   cx: Distance,

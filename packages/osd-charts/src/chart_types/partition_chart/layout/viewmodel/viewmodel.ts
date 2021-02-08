@@ -43,6 +43,7 @@ import {
   ShapeViewModel,
   ValueGetterFunction,
 } from '../types/viewmodel_types';
+import { ringSectorConstruction } from '../utils/circline_geometry';
 import {
   aggregateAccessor,
   ArrayEntry,
@@ -60,7 +61,6 @@ import { getTopPadding, treemap } from '../utils/treemap';
 import {
   fillTextLayout,
   getRectangleRowGeometry,
-  ringSectorConstruction,
   getSectorRowGeometry,
   inSectorRotation,
   nodeId,

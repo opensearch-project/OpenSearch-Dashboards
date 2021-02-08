@@ -144,6 +144,13 @@ export interface AngleFromTo {
   x1: Radian;
 }
 
+/** @internal */
+export interface LayerFromTo {
+  y0: TreeLevel;
+  y1: TreeLevel;
+}
+
+/** potential internal */
 export interface TreeNode extends AngleFromTo {
   x0: Radian;
   x1: Radian;
@@ -152,6 +159,7 @@ export interface TreeNode extends AngleFromTo {
   fill?: Color;
 }
 
+/** potential internal */
 export interface SectorGeomSpecY {
   y0px: Distance;
   y1px: Distance;

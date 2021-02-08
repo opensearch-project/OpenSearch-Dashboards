@@ -21,6 +21,7 @@ import createCachedSelector from 're-reselect';
 import { Selector } from 'react-redux';
 
 import { ChartTypes } from '../../..';
+import { getOnElementOutSelector } from '../../../../common/event_handler_selectors';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
@@ -34,26 +35,13 @@ import { getPickedShapesLayerValues } from './picked_shapes';
  * @internal
  */
 export function createOnElementOutCaller(): (state: GlobalChartState) => void {
-  let prevPickedShapes: number | null = null;
+  const prev: { pickedShapes: number | null } = { pickedShapes: null };
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartTypes.Partition) {
       selector = createCachedSelector(
         [getPartitionSpec, getPickedShapesLayerValues, getSettingsSpecSelector],
-        (pieSpec, pickedShapes, settings): void => {
-          if (!pieSpec) {
-            return;
-          }
-          if (!settings.onElementOut) {
-            return;
-          }
-          const nextPickedShapes = pickedShapes.length;
-
-          if (prevPickedShapes !== null && prevPickedShapes > 0 && nextPickedShapes === 0) {
-            settings.onElementOut();
-          }
-          prevPickedShapes = nextPickedShapes;
-        },
+        getOnElementOutSelector(prev),
       )({
         keySelector: getChartIdSelector,
       });

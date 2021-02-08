@@ -36,7 +36,7 @@ const hoverMapStateToProps = (state: GlobalChartState): HighlighterProps => {
     outerRadius,
     diskCenter,
     config: { partitionLayout },
-  } = partitionGeometries(state);
+  } = partitionGeometries(state)[0];
 
   const geometries = getPickedShapes(state);
   const canvasDimension = getChartContainerDimensionsSelector(state);

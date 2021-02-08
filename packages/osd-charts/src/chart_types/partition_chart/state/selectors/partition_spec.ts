@@ -25,6 +25,6 @@ import { PartitionSpec } from '../../specs';
 
 /** @internal */
 export function getPartitionSpec(state: GlobalChartState): PartitionSpec | null {
-  const pieSpecs = getSpecsFromStore<PartitionSpec>(state.specs, ChartTypes.Partition, SpecTypes.Series);
-  return pieSpecs.length > 0 ? pieSpecs[0] : null;
+  const partitionSpecs = getSpecsFromStore<PartitionSpec>(state.specs, ChartTypes.Partition, SpecTypes.Series);
+  return partitionSpecs.length > 0 ? partitionSpecs[0] : null; // singleton!
 }

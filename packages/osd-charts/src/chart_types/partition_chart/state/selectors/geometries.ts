@@ -19,25 +19,29 @@
 
 import createCachedSelector from 're-reselect';
 
-import { ChartTypes } from '../../..';
-import { SpecTypes } from '../../../../specs/constants';
-import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getChartThemeSelector } from '../../../../state/selectors/get_chart_theme';
-import { getSpecsFromStore } from '../../../../state/utils';
 import { nullShapeViewModel, ShapeViewModel } from '../../layout/types/viewmodel_types';
-import { PartitionSpec } from '../../specs';
-import { render } from './scenegraph';
+import { getShapeViewModel } from '../../layout/viewmodel/scenegraph';
+import { getPartitionSpecs } from './get_partition_specs';
 import { getTree } from './tree';
-
-const getSpecs = (state: GlobalChartState) => state.specs;
 
 /** @internal */
 export const partitionGeometries = createCachedSelector(
-  [getSpecs, getChartContainerDimensionsSelector, getTree, getChartThemeSelector],
-  (specs, parentDimensions, tree, { background }): ShapeViewModel => {
-    const pieSpecs = getSpecsFromStore<PartitionSpec>(specs, ChartTypes.Partition, SpecTypes.Series);
+  [getPartitionSpecs, getChartContainerDimensionsSelector, getTree, getChartThemeSelector],
+  (partitionSpecs, parentDimensions, tree, { background }): ShapeViewModel[] => {
+    return [
+      partitionSpecs.length > 0 // singleton!
+        ? getShapeViewModel(partitionSpecs[0], parentDimensions, tree, background.color)
+        : nullShapeViewModel(),
+    ];
+  },
+)((state) => state.chartId);
 
-    return pieSpecs.length === 1 ? render(pieSpecs[0], parentDimensions, tree, background.color) : nullShapeViewModel();
+/** @internal */
+export const partitionMultiGeometries = createCachedSelector(
+  [getPartitionSpecs, getChartContainerDimensionsSelector, getTree, getChartThemeSelector],
+  (partitionSpecs, parentDimensions, tree, { background }): ShapeViewModel[] => {
+    return partitionSpecs.map((spec) => getShapeViewModel(spec, parentDimensions, tree, background.color));
   },
 )((state) => state.chartId);

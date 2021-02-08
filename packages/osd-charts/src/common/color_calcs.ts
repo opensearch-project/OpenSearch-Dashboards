@@ -167,3 +167,23 @@ export function getTextColorIfTextInvertible(
       : makeHighContrastColor(textColor, backgroundColor, textContrast);
   }
 }
+
+/**
+ * This function generates color for non-occluded text rendering directly on the
+ * paper, with possible background color, ie. not on some data ink
+ *
+ * @internal
+ */
+export function getOnPaperColorSet(textColor: Color, sectorLineStroke: Color, containerBackgroundColor?: Color) {
+  // determine the ideal contrast color for the link labels
+  const validBackgroundColor = isColorValid(containerBackgroundColor)
+    ? containerBackgroundColor
+    : 'rgba(255, 255, 255, 0)';
+  const contrastTextColor = containerBackgroundColor
+    ? makeHighContrastColor(textColor, validBackgroundColor)
+    : textColor;
+  const strokeColor = containerBackgroundColor
+    ? makeHighContrastColor(sectorLineStroke, validBackgroundColor)
+    : undefined;
+  return { contrastTextColor, strokeColor };
+}

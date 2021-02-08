@@ -24,7 +24,7 @@ import { STORYBOOK_LIGHT_THEME } from '../shared';
 import { config, getFlatData, getLayerSpec, maxDepth } from '../utils/hierarchical_input_utils';
 import { plasma18 as palette } from '../utils/utils';
 
-const color = palette.slice().reverse();
+const color = [...palette].reverse();
 
 export const Example = () => {
   return (
@@ -32,13 +32,10 @@ export const Example = () => {
       <Settings
         showLegend
         flatLegend
+        legendPosition="right"
         legendStrategy={LegendStrategy.PathWithDescendants}
         legendMaxDepth={maxDepth}
         theme={STORYBOOK_LIGHT_THEME}
-        onElementClick={(e) => {
-          // eslint-disable-next-line no-console
-          console.log(e);
-        }}
       />
       <Partition
         id="spec_1"

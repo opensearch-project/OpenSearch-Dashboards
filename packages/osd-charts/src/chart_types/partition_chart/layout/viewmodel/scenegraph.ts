@@ -20,18 +20,18 @@
 import { measureText } from '../../../../common/text_utils';
 import { identity, mergePartial, RecursivePartial, Color } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
-import { config as defaultConfig, VALUE_GETTERS } from '../../layout/config';
-import { Config } from '../../layout/types/config_types';
+import { PartitionSpec, Layer } from '../../specs';
+import { config as defaultConfig, VALUE_GETTERS } from '../config';
+import { Config } from '../types/config_types';
 import {
   ShapeTreeNode,
   ShapeViewModel,
   RawTextGetter,
   nullShapeViewModel,
   ValueGetter,
-} from '../../layout/types/viewmodel_types';
-import { DEPTH_KEY, HierarchyOfArrays } from '../../layout/utils/group_by_rollup';
-import { shapeViewModel } from '../../layout/viewmodel/viewmodel';
-import { PartitionSpec, Layer } from '../../specs';
+} from '../types/viewmodel_types';
+import { DEPTH_KEY, HierarchyOfArrays } from '../utils/group_by_rollup';
+import { shapeViewModel } from './viewmodel';
 
 function rawTextGetter(layers: Layer[]): RawTextGetter {
   return (node: ShapeTreeNode) => {
@@ -46,7 +46,7 @@ export function valueGetterFunction(valueGetter: ValueGetter) {
 }
 
 /** @internal */
-export function render(
+export function getShapeViewModel(
   partitionSpec: PartitionSpec,
   parentDimensions: Dimensions,
   tree: HierarchyOfArrays,

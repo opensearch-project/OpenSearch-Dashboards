@@ -1741,7 +1741,7 @@ export type ScaleType = $Values<typeof ScaleType>;
 
 // Warning: (ae-missing-release-tag) "SectorGeomSpecY" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
-// @public (undocumented)
+// @public
 export interface SectorGeomSpecY {
     // Warning: (ae-forgotten-export) The symbol "Distance" needs to be exported by the entry point index.d.ts
     //
@@ -2224,7 +2224,7 @@ export type TreeLevel = number;
 
 // Warning: (ae-missing-release-tag) "TreeNode" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
-// @public (undocumented)
+// @public
 export interface TreeNode extends AngleFromTo {
     // (undocumented)
     fill?: Color;

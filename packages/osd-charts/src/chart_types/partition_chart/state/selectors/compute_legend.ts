@@ -19,69 +19,27 @@
 
 import createCachedSelector from 're-reselect';
 
-import { CategoryKey } from '../../../../common/category';
-import { map } from '../../../../common/iterables';
 import { LegendItem } from '../../../../common/legend';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { identity } from '../../../../utils/common';
-import { isHierarchicalLegend } from '../../../../utils/legend';
-import { QuadViewModel } from '../../layout/types/viewmodel_types';
+import { getLegendItems } from '../../layout/utils/legend';
 import { partitionGeometries } from './geometries';
 import { getPartitionSpec } from './partition_spec';
 
 /** @internal */
 export const computeLegendSelector = createCachedSelector(
   [getPartitionSpec, getSettingsSpecSelector, partitionGeometries],
-  (pieSpec, { flatLegend, legendMaxDepth, legendPosition }, { quadViewModel }): LegendItem[] => {
-    if (!pieSpec) {
-      return [];
-    }
-
-    const uniqueNames = new Set(map(({ dataName, fillColor }) => makeKey(dataName, fillColor), quadViewModel));
-    const useHierarchicalLegend = isHierarchicalLegend(flatLegend, legendPosition);
-
-    const excluded: Set<string> = new Set();
-    const items = quadViewModel.filter(({ depth, dataName, fillColor }) => {
-      if (legendMaxDepth != null) {
-        return depth <= legendMaxDepth;
-      }
-      if (!useHierarchicalLegend) {
-        const key = makeKey(dataName, fillColor);
-        if (uniqueNames.has(key) && excluded.has(key)) {
-          return false;
-        }
-        excluded.add(key);
-      }
-      return true;
-    });
-
-    items.sort(compareTreePaths);
-
-    return items.map<LegendItem>(({ dataName, fillColor, depth, path }) => {
-      const formatter = pieSpec.layers[depth - 1]?.nodeLabel ?? identity;
-      return {
-        color: fillColor,
-        label: formatter(dataName),
-        childId: dataName,
-        depth: useHierarchicalLegend ? depth - 1 : 0,
-        path,
-        seriesIdentifier: { key: dataName, specId: pieSpec.id },
-      };
-    });
+  (partitionSpec, { flatLegend, legendMaxDepth, legendPosition }, geometries): LegendItem[] => {
+    const { quadViewModel } = geometries[0];
+    return partitionSpec
+      ? getLegendItems(
+          partitionSpec.id,
+          partitionSpec.layers,
+          flatLegend,
+          legendMaxDepth,
+          legendPosition,
+          quadViewModel,
+        )
+      : [];
   },
 )(getChartIdSelector);
-
-function makeKey(...keyParts: CategoryKey[]): string {
-  return keyParts.join('---');
-}
-
-function compareTreePaths({ path: a }: QuadViewModel, { path: b }: QuadViewModel): number {
-  for (let i = 0; i < Math.min(a.length, b.length); i++) {
-    const diff = a[i].index - b[i].index;
-    if (diff) {
-      return diff;
-    }
-  }
-  return a.length - b.length; // if one path is fully contained in the other, then parent (shorter) goes first
-}

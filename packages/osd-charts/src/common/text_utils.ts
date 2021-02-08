@@ -22,6 +22,7 @@ import { $Values as Values } from 'utility-types';
 import { ArrayEntry } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { Datum } from '../utils/common';
 import { Pixels } from './geometry';
+import { integerSnap, monotonicHillClimb } from './optimize';
 
 export const FONT_VARIANTS = Object.freeze(['normal', 'small-caps'] as const);
 export type FontVariant = typeof FONT_VARIANTS[number];
@@ -48,6 +49,7 @@ export type NumericFontWeight = number & typeof FONT_WEIGHTS[number];
 export const FONT_STYLES = Object.freeze(['normal', 'italic', 'oblique', 'inherit', 'initial', 'unset'] as const);
 export type FontStyle = typeof FONT_STYLES[number];
 
+// this doesn't include the font size, so it's more like a font face (?) - unfortunately all vague terms
 export interface Font {
   fontStyle: FontStyle;
   fontVariant: FontVariant;
@@ -127,3 +129,33 @@ export const VerticalAlignments = Object.freeze({
 });
 
 export type VerticalAlignments = Values<typeof VerticalAlignments>;
+
+/** @internal */
+export function measureOneBoxWidth(measure: TextMeasure, fontSize: number, box: Box) {
+  return measure(fontSize, [box])[0].width;
+}
+
+/** @internal */
+export function cutToLength(s: string, maxLength: number) {
+  return s.length <= maxLength ? s : `${s.slice(0, Math.max(0, maxLength - 1))}…`; // ellipsis is one char
+}
+
+/** @internal */
+export function fitText(
+  measure: TextMeasure,
+  desiredText: string,
+  allottedWidth: number,
+  fontSize: number,
+  font: Font,
+) {
+  const desiredLength = desiredText.length;
+  const response = (v: number) => measure(fontSize, [{ ...font, text: desiredText.slice(0, Math.max(0, v)) }])[0].width;
+  const visibleLength = monotonicHillClimb(response, desiredLength, allottedWidth, integerSnap);
+  const text = visibleLength < 2 && desiredLength >= 2 ? '' : cutToLength(desiredText, visibleLength);
+  const { width, emHeightAscent, emHeightDescent } = measure(fontSize, [{ ...font, text }])[0];
+  return {
+    width,
+    verticalOffset: -(emHeightDescent + emHeightAscent) / 2, // meaning, `middle`
+    text,
+  };
+}

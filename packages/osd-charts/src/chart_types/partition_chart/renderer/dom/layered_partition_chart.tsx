@@ -17,22 +17,21 @@
  * under the License.
  */
 
-import createCachedSelector from 're-reselect';
+import React, { RefObject } from 'react';
 
-import { getTooltipType } from '../../../../specs';
-import { TooltipType } from '../../../../specs/constants';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { getTooltipInfoSelector } from './tooltip';
+import { Tooltip } from '../../../../components/tooltip';
+import { BackwardRef } from '../../../../state/chart_state';
+import { Partition } from '../canvas/partition';
+import { HighlighterFromHover } from './highlighter_hover';
+import { HighlighterFromLegend } from './highlighter_legend';
 
-/**
- * The brush is available only for Ordinal xScales charts and
- * if we have configured an onBrushEnd listener
- * @internal
- */
-export const isTooltipVisibleSelector = createCachedSelector(
-  [getSettingsSpecSelector, getTooltipInfoSelector],
-  (settingsSpec, tooltipInfo): boolean => {
-    return getTooltipType(settingsSpec) !== TooltipType.None && tooltipInfo.values.length > 0;
-  },
-)(getChartIdSelector);
+export function render(containerRef: BackwardRef, forwardStageRef: RefObject<HTMLCanvasElement>) {
+  return (
+    <>
+      <Tooltip getChartContainerRef={containerRef} />
+      <Partition forwardStageRef={forwardStageRef} />
+      <HighlighterFromHover />
+      <HighlighterFromLegend />
+    </>
+  );
+}

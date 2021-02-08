@@ -22,7 +22,7 @@ import React, { ComponentType, ReactChild } from 'react';
 import { Spec } from '.';
 import { Cell } from '../chart_types/heatmap/layout/types/viewmodel_types';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
-import { LegendStrategy } from '../chart_types/partition_chart/state/selectors/get_highlighted_shapes';
+import { LegendStrategy } from '../chart_types/partition_chart/layout/utils/highlighted_geoms';
 import { XYChartSeriesIdentifier } from '../chart_types/xy_chart/utils/series';
 import { DomainRange } from '../chart_types/xy_chart/utils/specs';
 import { SeriesIdentifier } from '../common/series_id';

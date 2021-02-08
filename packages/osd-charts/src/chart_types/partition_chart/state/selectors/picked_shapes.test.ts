@@ -68,11 +68,11 @@ describe('Picked shapes selector', () => {
   });
   test('check initial geoms', () => {
     addSeries(store, treemapSpec);
-    const treemapGeometries = partitionGeometries(store.getState());
+    const treemapGeometries = partitionGeometries(store.getState())[0];
     expect(treemapGeometries.quadViewModel).toHaveLength(6);
 
     addSeries(store, sunburstSpec);
-    const sunburstGeometries = partitionGeometries(store.getState());
+    const sunburstGeometries = partitionGeometries(store.getState())[0];
     expect(sunburstGeometries.quadViewModel).toHaveLength(6);
   });
   test('treemap check picked geometries', () => {
@@ -83,7 +83,7 @@ describe('Picked shapes selector', () => {
     addSeries(store, treemapSpec, {
       onElementClick: onClickListener,
     });
-    const geometries = partitionGeometries(store.getState());
+    const geometries = partitionGeometries(store.getState())[0];
     expect(geometries.quadViewModel).toHaveLength(6);
 
     const onElementClickCaller = createOnElementClickCaller();
@@ -134,7 +134,7 @@ describe('Picked shapes selector', () => {
     addSeries(store, sunburstSpec, {
       onElementClick: onClickListener,
     });
-    const geometries = partitionGeometries(store.getState());
+    const geometries = partitionGeometries(store.getState())[0];
     expect(geometries.quadViewModel).toHaveLength(6);
 
     const onElementClickCaller = createOnElementClickCaller();

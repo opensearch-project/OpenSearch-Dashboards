@@ -36,7 +36,7 @@ import { Point } from '../utils/point';
 import { StateActions } from './actions';
 import { CHART_RENDERED } from './actions/chart';
 import { UPDATE_PARENT_DIMENSION } from './actions/chart_settings';
-import { SET_PERSISTED_COLOR, SET_TEMPORARY_COLOR, CLEAR_TEMPORARY_COLORS } from './actions/colors';
+import { CLEAR_TEMPORARY_COLORS, SET_PERSISTED_COLOR, SET_TEMPORARY_COLOR } from './actions/colors';
 import { DOMElement } from './actions/dom_element';
 import { EXTERNAL_POINTER_EVENT } from './actions/events';
 import { LegendPath } from './actions/legend';
@@ -410,17 +410,14 @@ function chartTypeFromSpecs(specs: SpecList): ChartTypes | null {
   return nonGlobalTypes[0];
 }
 
+const constructors: Record<ChartTypes, () => InternalChartState | null> = {
+  [ChartTypes.Goal]: () => new GoalState(),
+  [ChartTypes.Partition]: () => new PartitionState(),
+  [ChartTypes.XYAxis]: () => new XYAxisChartState(),
+  [ChartTypes.Heatmap]: () => new HeatmapState(),
+  [ChartTypes.Global]: () => null,
+}; // with no default, TS signals if a new chart type isn't added here too
+
 function newInternalState(chartType: ChartTypes | null): InternalChartState | null {
-  switch (chartType) {
-    case ChartTypes.Goal:
-      return new GoalState();
-    case ChartTypes.Partition:
-      return new PartitionState();
-    case ChartTypes.XYAxis:
-      return new XYAxisChartState();
-    case ChartTypes.Heatmap:
-      return new HeatmapState();
-    default:
-      return null;
-  }
+  return chartType ? constructors[chartType]() : null;
 }

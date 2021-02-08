@@ -22,51 +22,13 @@ import createCachedSelector from 're-reselect';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { LegendItemLabel } from '../../../../state/selectors/get_legend_items_labels';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { CHILDREN_KEY, HierarchyOfArrays, HIERARCHY_ROOT_KEY } from '../../layout/utils/group_by_rollup';
-import { Layer } from '../../specs';
+import { getLegendLabels } from '../../layout/utils/legend_labels';
 import { getPartitionSpec } from './partition_spec';
 import { getTree } from './tree';
 
 /** @internal */
 export const getLegendItemsLabels = createCachedSelector(
   [getPartitionSpec, getSettingsSpecSelector, getTree],
-  (pieSpec, { legendMaxDepth }, tree): LegendItemLabel[] =>
-    pieSpec ? flatSlicesNames(pieSpec.layers, 0, tree).filter(({ depth }) => depth <= legendMaxDepth) : [],
+  (spec, { legendMaxDepth }, tree): LegendItemLabel[] =>
+    spec ? getLegendLabels(spec.layers, tree, legendMaxDepth) : [],
 )(getChartIdSelector);
-
-function flatSlicesNames(
-  layers: Layer[],
-  depth: number,
-  tree: HierarchyOfArrays,
-  keys: Map<string, number> = new Map(),
-): LegendItemLabel[] {
-  if (tree.length === 0) {
-    return [];
-  }
-
-  for (let i = 0; i < tree.length; i++) {
-    const branch = tree[i];
-    const arrayNode = branch[1];
-    const key = branch[0];
-
-    // format the key with the layer formatter
-    const layer = layers[depth - 1];
-    const formatter = layer?.nodeLabel;
-    let formattedValue = '';
-    if (key != null) {
-      formattedValue = formatter ? formatter(key) : `${key}`;
-    }
-    // preventing errors from external formatters
-    if (formattedValue != null && formattedValue !== '' && formattedValue !== HIERARCHY_ROOT_KEY) {
-      // save only the max depth, so we can compute the the max extension of the legend
-      keys.set(formattedValue, Math.max(depth, keys.get(formattedValue) ?? 0));
-    }
-
-    const children = arrayNode[CHILDREN_KEY];
-    flatSlicesNames(layers, depth + 1, children, keys);
-  }
-  return [...keys.keys()].map((k) => ({
-    label: k,
-    depth: keys.get(k) ?? 0,
-  }));
-}

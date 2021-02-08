@@ -19,20 +19,15 @@
 
 import createCachedSelector from 're-reselect';
 
-import { getTooltipType } from '../../../../specs';
-import { TooltipType } from '../../../../specs/constants';
-import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
-import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { getTooltipInfoSelector } from './tooltip';
+import { ChartTypes } from '../../..';
+import { SpecTypes } from '../../../../specs';
+import { GlobalChartState } from '../../../../state/chart_state';
+import { getSpecsFromStore } from '../../../../state/utils';
+import { PartitionSpec } from '../../specs';
 
-/**
- * The brush is available only for Ordinal xScales charts and
- * if we have configured an onBrushEnd listener
- * @internal
- */
-export const isTooltipVisibleSelector = createCachedSelector(
-  [getSettingsSpecSelector, getTooltipInfoSelector],
-  (settingsSpec, tooltipInfo): boolean => {
-    return getTooltipType(settingsSpec) !== TooltipType.None && tooltipInfo.values.length > 0;
-  },
-)(getChartIdSelector);
+const getSpecs = (state: GlobalChartState) => state.specs;
+
+/** @internal */
+export const getPartitionSpecs = createCachedSelector([getSpecs], (specs) => {
+  return getSpecsFromStore<PartitionSpec>(specs, ChartTypes.Partition, SpecTypes.Series);
+})((state) => state.chartId);

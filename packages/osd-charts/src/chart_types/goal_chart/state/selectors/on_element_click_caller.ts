@@ -21,13 +21,11 @@ import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 
 import { ChartTypes } from '../../..';
-import { SeriesIdentifier } from '../../../../common/series_id';
-import { SettingsSpec, LayerValue } from '../../../../specs';
-import { GlobalChartState, PointerState } from '../../../../state/chart_state';
+import { getOnElementClickSelector } from '../../../../common/event_handler_selectors';
+import { GlobalChartState, PointerStates } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getLastClickSelector } from '../../../../state/selectors/get_last_click';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { isClicking } from '../../../../state/utils';
 import { getSpecOrNull } from './goal_spec';
 import { getPickedShapesLayerValues } from './picked_shapes';
 
@@ -39,32 +37,13 @@ import { getPickedShapesLayerValues } from './picked_shapes';
  * @internal
  */
 export function createOnElementClickCaller(): (state: GlobalChartState) => void {
-  let prevClick: PointerState | null = null;
+  const prev: { click: PointerStates['lastClick'] } = { click: null };
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartTypes.Goal) {
       selector = createCachedSelector(
         [getSpecOrNull, getLastClickSelector, getSettingsSpecSelector, getPickedShapesLayerValues],
-        (spec, lastClick: PointerState | null, settings: SettingsSpec, pickedShapes): void => {
-          if (!spec) {
-            return;
-          }
-          if (!settings.onElementClick) {
-            return;
-          }
-          const nextPickedShapesLength = pickedShapes.length;
-          if (nextPickedShapesLength > 0 && isClicking(prevClick, lastClick) && settings && settings.onElementClick) {
-            const elements = pickedShapes.map<[Array<LayerValue>, SeriesIdentifier]>((values) => [
-              values,
-              {
-                specId: spec.id,
-                key: `spec{${spec.id}}`,
-              },
-            ]);
-            settings.onElementClick(elements);
-          }
-          prevClick = lastClick;
-        },
+        getOnElementClickSelector(prev),
       )(getChartIdSelector);
     }
     if (selector) {

@@ -21,12 +21,10 @@ import createCachedSelector from 're-reselect';
 import { Selector } from 'reselect';
 
 import { ChartTypes } from '../../..';
-import { SeriesIdentifier } from '../../../../common/series_id';
-import { SettingsSpec, LayerValue } from '../../../../specs';
-import { GlobalChartState, PointerState } from '../../../../state/chart_state';
+import { getOnElementClickSelector } from '../../../../common/event_handler_selectors';
+import { GlobalChartState, PointerStates } from '../../../../state/chart_state';
 import { getLastClickSelector } from '../../../../state/selectors/get_last_click';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
-import { isClicking } from '../../../../state/utils';
 import { getPartitionSpec } from './partition_spec';
 import { getPickedShapesLayerValues } from './picked_shapes';
 
@@ -38,34 +36,15 @@ import { getPickedShapesLayerValues } from './picked_shapes';
  * @internal
  */
 export function createOnElementClickCaller(): (state: GlobalChartState) => void {
-  let prevClick: PointerState | null = null;
+  const prev: { click: PointerStates['lastClick'] } = { click: null };
   let selector: Selector<GlobalChartState, void> | null = null;
   return (state: GlobalChartState) => {
     if (selector === null && state.chartType === ChartTypes.Partition) {
       selector = createCachedSelector(
         [getPartitionSpec, getLastClickSelector, getSettingsSpecSelector, getPickedShapesLayerValues],
-        (pieSpec, lastClick: PointerState | null, settings: SettingsSpec, pickedShapes): void => {
-          if (!pieSpec) {
-            return;
-          }
-          if (!settings.onElementClick) {
-            return;
-          }
-          const nextPickedShapesLength = pickedShapes.length;
-          if (nextPickedShapesLength > 0 && isClicking(prevClick, lastClick) && settings && settings.onElementClick) {
-            const elements = pickedShapes.map<[Array<LayerValue>, SeriesIdentifier]>((values) => [
-              values,
-              {
-                specId: pieSpec.id,
-                key: `spec{${pieSpec.id}}`,
-              },
-            ]);
-            settings.onElementClick(elements);
-          }
-          prevClick = lastClick;
-        },
+        getOnElementClickSelector(prev),
       )({
-        keySelector: (state: GlobalChartState) => state.chartId,
+        keySelector: (s: GlobalChartState) => s.chartId,
       });
     }
     if (selector) {

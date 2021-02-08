@@ -32,7 +32,6 @@ export { SeriesIdentifier } from './common/series_id';
 export { XYChartSeriesIdentifier, DataSeriesDatum, FilledValues } from './chart_types/xy_chart/utils/series';
 export { AnnotationTooltipFormatter, CustomAnnotationTooltip } from './chart_types/xy_chart/annotations/types';
 export { GeometryValue, BandedAccessorType } from './utils/geometry';
-export { LegendStrategy } from './chart_types/partition_chart/state/selectors/get_highlighted_shapes';
 export { LegendPath, LegendPathElement } from './state/actions/legend';
 export { CategoryKey } from './common/category';
 export {
@@ -89,3 +88,4 @@ export {
 export { DataGenerator } from './utils/data_generators/data_generator';
 export * from './utils/themes/merge_utils';
 export { MODEL_KEY } from './chart_types/partition_chart/layout/config';
+export { LegendStrategy } from './chart_types/partition_chart/layout/utils/highlighted_geoms';
