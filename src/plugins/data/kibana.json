@@ -7,4 +7,5 @@
   "optionalPlugins": [],
   "extraPublicDirs": ["common", "common/utils/abort_utils"],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "inspector"]
+}
 
