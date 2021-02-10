@@ -70,9 +70,10 @@ export class TelemetrySender {
     // mark that we are working so future requests are ignored until we're done
     this.isSending = true;
     try {
-      const telemetryUrl = this.telemetryService.getTelemetryUrl();
-      const telemetryData: any | any[] = await this.telemetryService.fetchTelemetry();
-      const clusters: string[] = [].concat(telemetryData);
+      // const telemetryUrl = this.telemetryService.getTelemetryUrl();
+      // const telemetryData: any | any[] = await this.telemetryService.fetchTelemetry();
+      // const clusters: string[] = [].concat(telemetryData);
+      /*
       await Promise.all(
         clusters.map(
           async (cluster) =>
@@ -85,6 +86,7 @@ export class TelemetrySender {
             })
         )
       );
+      */
       this.lastReported = `${Date.now()}`;
       this.saveToBrowser();
     } catch (err) {
