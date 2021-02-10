@@ -25,6 +25,7 @@ import { HeatmapState } from '../chart_types/heatmap/state/chart_state';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { PartitionState } from '../chart_types/partition_chart/state/chart_state';
 import { XYAxisChartState } from '../chart_types/xy_chart/state/chart_state';
+import { CategoryKey } from '../common/category';
 import { LegendItem, LegendItemExtraValues } from '../common/legend';
 import { SeriesIdentifier, SeriesKey } from '../common/series_id';
 import { TooltipAnchorPosition, TooltipInfo } from '../components/tooltip/types';
@@ -186,6 +187,7 @@ export interface InteractionsState {
   highlightedLegendPath: LegendPath;
   deselectedDataSeries: SeriesIdentifier[];
   hoveredDOMElement: DOMElement | null;
+  drilldown: CategoryKey[];
 }
 
 /** @internal */
@@ -275,6 +277,7 @@ export const getInitialState = (chartId: string): GlobalChartState => ({
     highlightedLegendPath: [],
     deselectedDataSeries: [],
     hoveredDOMElement: null,
+    drilldown: [],
   },
   externalEvents: {
     pointer: null,
@@ -391,7 +394,7 @@ export const chartStoreReducer = (chartId: string) => {
         return getInternalIsInitializedSelector(state) === InitStatus.Initialized
           ? {
               ...state,
-              interactions: interactionsReducer(state.interactions, action, getLegendItemsSelector(state)),
+              interactions: interactionsReducer(state, action, getLegendItemsSelector(state)),
             }
           : state;
     }

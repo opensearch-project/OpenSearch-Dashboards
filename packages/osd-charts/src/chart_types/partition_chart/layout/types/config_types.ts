@@ -88,6 +88,8 @@ export interface StaticConfig extends FillFontSizeRange {
   clockwiseSectors: boolean;
   specialFirstInnermostSector: boolean;
   partitionLayout: PartitionLayout;
+  /** @alpha */
+  drilldown: boolean;
 
   // general text config
   fontFamily: FontFamily;
@@ -115,6 +117,7 @@ export interface StaticConfig extends FillFontSizeRange {
 
 export type EasingFunction = (x: Ratio) => Ratio;
 
+/** @alpha */
 export interface AnimKeyframe {
   time: number;
   easingFunction: EasingFunction;
@@ -122,6 +125,7 @@ export interface AnimKeyframe {
 }
 
 export interface Config extends StaticConfig {
+  /** @alpha */
   animation: {
     duration: TimeMs;
     keyframes: Array<AnimKeyframe>;

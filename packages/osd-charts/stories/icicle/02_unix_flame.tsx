@@ -43,7 +43,7 @@ export const Example = () => {
         valueAccessor={(d: Datum) => d.value as number}
         valueFormatter={() => ''}
         layers={getLayerSpec(color)}
-        config={{ ...config, partitionLayout: PartitionLayout.flame }}
+        config={{ ...config, partitionLayout: PartitionLayout.flame, drilldown: true }}
       />
     </Chart>
   );

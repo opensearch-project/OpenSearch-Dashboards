@@ -17,9 +17,12 @@
  * under the License.
  */
 
+import { ChartTypes } from '../../chart_types';
+import { getPickedShapesLayerValues } from '../../chart_types/partition_chart/state/selectors/picked_shapes';
 import { getSeriesIndex } from '../../chart_types/xy_chart/utils/series';
 import { LegendItem } from '../../common/legend';
 import { SeriesIdentifier } from '../../common/series_id';
+import { LayerValue } from '../../specs';
 import { getDelta } from '../../utils/point';
 import { DOMElementActions, ON_DOM_ELEMENT_ENTER, ON_DOM_ELEMENT_LEAVE } from '../actions/dom_element';
 import { KeyActions, ON_KEY_UP } from '../actions/key';
@@ -31,7 +34,7 @@ import {
   ToggleDeselectSeriesAction,
 } from '../actions/legend';
 import { MouseActions, ON_MOUSE_DOWN, ON_MOUSE_UP, ON_POINTER_MOVE } from '../actions/mouse';
-import { InteractionsState } from '../chart_state';
+import { GlobalChartState, InteractionsState } from '../chart_state';
 import { getInitialPointerState } from '../utils';
 
 /**
@@ -46,10 +49,11 @@ const DRAG_DETECTION_PIXEL_DELTA = 4;
 
 /** @internal */
 export function interactionsReducer(
-  state: InteractionsState,
+  globalState: GlobalChartState,
   action: LegendActions | MouseActions | KeyActions | DOMElementActions,
   legendItems: LegendItem[],
 ): InteractionsState {
+  const { interactions: state } = globalState;
   switch (action.type) {
     case ON_KEY_UP:
       if (action.key === 'Escape') {
@@ -81,6 +85,7 @@ export function interactionsReducer(
     case ON_MOUSE_DOWN:
       return {
         ...state,
+        drilldown: getDrilldownData(globalState),
         pointer: {
           ...state.pointer,
           dragging: false,
@@ -169,7 +174,10 @@ export function interactionsReducer(
   }
 }
 
-/** @internal */
+/**
+ * Helper functions that currently depend on chart type eg. xy or partition
+ */
+
 function toggleDeselectedDataSeries(
   { legendItemId: id, negate }: ToggleDeselectSeriesAction,
   deselectedDataSeries: SeriesIdentifier[],
@@ -193,4 +201,12 @@ function toggleDeselectedDataSeries(
     return [...deselectedDataSeries.slice(0, index), ...deselectedDataSeries.slice(index + 1)];
   }
   return [...deselectedDataSeries, id];
+}
+
+function getDrilldownData(globalState: GlobalChartState) {
+  if (globalState.chartType !== ChartTypes.Partition) {
+    return [];
+  }
+  const layerValues: LayerValue[] = getPickedShapesLayerValues(globalState)[0];
+  return layerValues ? layerValues[layerValues.length - 1].path.map((n) => n.value) : [];
 }

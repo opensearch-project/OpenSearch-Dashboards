@@ -19,21 +19,33 @@
 
 import createCachedSelector from 're-reselect';
 
+import { CategoryKey } from '../../../../common/category';
+import { GlobalChartState } from '../../../../state/chart_state';
 import { configMetadata } from '../../layout/config';
 import { HierarchyOfArrays } from '../../layout/utils/group_by_rollup';
 import { partitionTree } from '../../layout/viewmodel/hierarchy_of_arrays';
 import { PartitionSpec } from '../../specs';
 import { getPartitionSpecs } from './get_partition_specs';
 
-function getTreeForSpec(spec: PartitionSpec) {
+function getTreeForSpec(spec: PartitionSpec, drilldownSelection: CategoryKey[]) {
   const { data, valueAccessor, layers, config } = spec;
-  return partitionTree(data, valueAccessor, layers, configMetadata.partitionLayout.dflt, config.partitionLayout);
+  return partitionTree(
+    data,
+    valueAccessor,
+    layers,
+    configMetadata.partitionLayout.dflt,
+    config.partitionLayout,
+    Boolean(config.drilldown),
+    drilldownSelection,
+  );
 }
+
+const getDrilldownSelection = (state: GlobalChartState) => state.interactions.drilldown || [];
 
 /** @internal */
 export const getTree = createCachedSelector(
-  [getPartitionSpecs],
-  (partitionSpecs): HierarchyOfArrays => {
-    return partitionSpecs.length > 0 ? getTreeForSpec(partitionSpecs[0]) : []; // singleton!
+  [getPartitionSpecs, getDrilldownSelection],
+  (partitionSpecs, drilldownSelection): HierarchyOfArrays => {
+    return partitionSpecs.length > 0 ? getTreeForSpec(partitionSpecs[0], drilldownSelection) : []; // singleton!
   },
 )((state) => state.chartId);

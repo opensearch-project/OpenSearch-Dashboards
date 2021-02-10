@@ -36,7 +36,7 @@ export const Example = () => {
         valueAccessor={(d: Datum) => d.value as number}
         valueFormatter={() => ''}
         layers={getLayerSpec(color)}
-        config={{ ...config, partitionLayout: PartitionLayout.icicle }}
+        config={{ ...config, partitionLayout: PartitionLayout.icicle, drilldown: true }}
       />
     </Chart>
   );
