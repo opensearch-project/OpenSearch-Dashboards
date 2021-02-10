@@ -103,12 +103,18 @@ class CrosshairComponent extends React.Component<CrosshairProps> {
   }
 
   render() {
-    const { zIndex } = this.props;
+    const { zIndex, cursorPosition } = this.props;
     return (
       <>
-        <svg className="echCrosshair__cursor" width="100%" height="100%">
+        <svg
+          className="echCrosshair__cursor"
+          width="100%"
+          height="100%"
+          style={{ zIndex: cursorPosition && 'x1' in cursorPosition ? zIndex : undefined }}
+        >
           {this.renderCursor()}
         </svg>
+
         <svg className="echCrosshair__crossLine" width="100%" height="100%" style={{ zIndex }}>
           {this.renderCrossLine()}
         </svg>

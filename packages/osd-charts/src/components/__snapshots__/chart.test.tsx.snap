@@ -67,7 +67,7 @@ exports[`Chart should render the legend name test 1`] = `
               <div className=\\"echChartPointerContainer\\" style={{...}} onMouseMove={[Function (anonymous)]} onMouseLeave={[Function (anonymous)]} onMouseDown={[Function (anonymous)]} onMouseUp={[Function (anonymous)]}>
                 <Connect(Crosshair)>
                   <Crosshair theme={{...}} chartRotation={0} cursorPosition={[undefined]} cursorCrossLinePosition={[undefined]} tooltipType=\\"vertical\\" fromExternalEvent={[undefined]} zIndex={0} dispatch={[Function: dispatch]}>
-                    <svg className=\\"echCrosshair__cursor\\" width=\\"100%\\" height=\\"100%\\" />
+                    <svg className=\\"echCrosshair__cursor\\" width=\\"100%\\" height=\\"100%\\" style={{...}} />
                     <svg className=\\"echCrosshair__crossLine\\" width=\\"100%\\" height=\\"100%\\" style={{...}} />
                   </Crosshair>
                 </Connect(Crosshair)>
@@ -100,7 +100,7 @@ exports[`Chart should render the legend name test 1`] = `
                   </Highlighter>
                 </Connect(Highlighter)>
                 <Connect(BrushTool)>
-                  <BrushTool initialized={true} projectionContainer={{...}} mainProjectionArea={{...}} isBrushAvailable={false} isBrushing={false} brushArea={{...}} dispatch={[Function: dispatch]} />
+                  <BrushTool initialized={true} projectionContainer={{...}} mainProjectionArea={{...}} isBrushAvailable={false} isBrushing={false} brushArea={{...}} zIndex={0} dispatch={[Function: dispatch]} />
                 </Connect(BrushTool)>
               </div>
             </ChartContainer>

@@ -48,7 +48,7 @@ export const getChartRotationKnob = () =>
 
 export const getTooltipTypeKnob = (
   name = 'tooltip type',
-  defaultValue = TooltipType.VerticalCursor,
+  defaultValue: TooltipType = TooltipType.VerticalCursor,
   groupId?: string,
 ) =>
   select<TooltipType>(
