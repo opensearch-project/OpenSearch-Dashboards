@@ -36,8 +36,8 @@ import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
-// import { SearchUsageCollector, createUsageCollector } from './collectors';
-// import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { SearchUsageCollector, createUsageCollector } from './collectors';
+import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { esdsl, esRawResponse } from './expressions';
 import { ExpressionsSetup } from '../../../expressions/public';
 import { ConfigSchema } from '../../config';
@@ -50,7 +50,7 @@ import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 /** @internal */
 export interface SearchServiceSetupDependencies {
   expressions: ExpressionsSetup;
-  // usageCollection?: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 /** @internal */
@@ -63,16 +63,15 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
   private searchInterceptor!: ISearchInterceptor;
-  // private usageCollector?: SearchUsageCollector;
+  private usageCollector?: SearchUsageCollector;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
     { http, getStartServices, notifications, uiSettings }: CoreSetup,
-    // { expressions, usageCollection }: SearchServiceSetupDependencies
-    { expressions }: SearchServiceSetupDependencies
+    { expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
-    // this.usageCollector = createUsageCollector(getStartServices, usageCollection);
+    this.usageCollector = createUsageCollector(getStartServices, usageCollection);
 
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
@@ -83,7 +82,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       http,
       uiSettings,
       startServices: getStartServices(),
-      usageCollector: undefined, // this.usageCollector!,
+      usageCollector: this.usageCollector!,
     });
 
     expressions.registerFunction(esdsl);
@@ -101,7 +100,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     return {
       aggs,
-      usageCollector: undefined, // this.usageCollector!,
+      usageCollector: this.usageCollector!,
       __enhance: (enhancements: SearchEnhancements) => {
         this.searchInterceptor = enhancements.searchInterceptor;
       },
