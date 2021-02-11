@@ -426,7 +426,10 @@ export type ValueAccessor = (d: Datum) => number;
 export type LabelAccessor = (value: PrimitiveValue) => string;
 export type ShowAccessor = (value: PrimitiveValue) => boolean;
 
-/** @internal */
+/**
+ * Returns planar distance bewtween two points
+ * @internal
+ */
 export function getDistance(a: Point, b: Point): number {
   return Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
 }

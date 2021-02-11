@@ -22,6 +22,7 @@ import { LegendItem } from '../../../../common/legend';
 import { ScaleType } from '../../../../scales/constants';
 import { SpecTypes } from '../../../../specs';
 import { BARCHART_1Y1G } from '../../../../utils/data_samples/test_dataset';
+import { Point } from '../../../../utils/point';
 import { AreaSeriesSpec, SeriesTypes, LineSeriesSpec, BarSeriesSpec } from '../../utils/specs';
 import {
   isHorizontalRotation,
@@ -29,10 +30,11 @@ import {
   isLineAreaOnlyChart,
   isChartAnimatable,
   isAllSeriesDeselected,
+  sortClosestToPoint,
 } from './common';
 
 describe('Type Checks', () => {
-  test('is horizontal chart rotation', () => {
+  it('is horizontal chart rotation', () => {
     expect(isHorizontalRotation(0)).toBe(true);
     expect(isHorizontalRotation(180)).toBe(true);
     expect(isHorizontalRotation(-90)).toBe(false);
@@ -42,7 +44,7 @@ describe('Type Checks', () => {
     expect(isVerticalRotation(0)).toBe(false);
     expect(isVerticalRotation(180)).toBe(false);
   });
-  test('is vertical chart rotation', () => {
+  it('is vertical chart rotation', () => {
     expect(isVerticalRotation(-90)).toBe(true);
     expect(isVerticalRotation(90)).toBe(true);
     expect(isVerticalRotation(0)).toBe(false);
@@ -50,7 +52,7 @@ describe('Type Checks', () => {
   });
 
   describe('#isLineAreaOnlyChart', () => {
-    test('is an area or line only map', () => {
+    it('is an area or line only map', () => {
       const area: AreaSeriesSpec = {
         chartType: ChartTypes.XYAxis,
         specType: SpecTypes.Series,
@@ -106,7 +108,7 @@ describe('Type Checks', () => {
   });
 
   describe('#isChartAnimatable', () => {
-    test('can enable the chart animation if we have a valid number of elements', () => {
+    it('can enable the chart animation if we have a valid number of elements', () => {
       const geometriesCounts = {
         points: 0,
         bars: 0,
@@ -131,7 +133,7 @@ describe('Type Checks', () => {
     });
   });
 
-  test('displays no data available if chart is empty', () => {
+  it('displays no data available if chart is empty', () => {
     const legendItems1: LegendItem[] = [
       {
         color: '#1EA593',
@@ -158,7 +160,7 @@ describe('Type Checks', () => {
     ];
     expect(isAllSeriesDeselected(legendItems1)).toBe(true);
   });
-  test('displays data availble if chart is not empty', () => {
+  it('displays data availble if chart is not empty', () => {
     const legendItems2: LegendItem[] = [
       {
         color: '#1EA593',
@@ -184,5 +186,91 @@ describe('Type Checks', () => {
       },
     ];
     expect(isAllSeriesDeselected(legendItems2)).toBe(false);
+  });
+
+  describe('#sortClosestToPoint', () => {
+    describe('positive cursor', () => {
+      const cursor: Point = { x: 10, y: 10 };
+
+      it('should sort points with same x', () => {
+        const points: Point[] = [
+          { x: 10, y: -10 },
+          { x: 10, y: 12 },
+          { x: 10, y: 11 },
+          { x: 10, y: 10 },
+          { x: 10, y: 5 },
+          { x: 10, y: -12 },
+        ];
+        expect(points.sort(sortClosestToPoint(cursor))).toEqual([
+          { x: 10, y: 10 },
+          { x: 10, y: 11 },
+          { x: 10, y: 12 },
+          { x: 10, y: 5 },
+          { x: 10, y: -10 },
+          { x: 10, y: -12 },
+        ]);
+      });
+
+      it('should sort points with different x', () => {
+        const points: Point[] = [
+          { x: 9, y: -10 },
+          { x: -6, y: 12 },
+          { x: 3, y: 11 },
+          { x: 9, y: 10 },
+          { x: 1, y: 5 },
+          { x: -9, y: -12 },
+        ];
+        expect(points.sort(sortClosestToPoint(cursor))).toEqual([
+          { x: 9, y: 10 },
+          { x: 3, y: 11 },
+          { x: 1, y: 5 },
+          { x: -6, y: 12 },
+          { x: 9, y: -10 },
+          { x: -9, y: -12 },
+        ]);
+      });
+    });
+
+    describe('negative cursor', () => {
+      const cursor: Point = { x: -10, y: -10 };
+
+      it('should sort points with same x', () => {
+        const points: Point[] = [
+          { x: 10, y: -10 },
+          { x: 10, y: 12 },
+          { x: 10, y: 11 },
+          { x: 10, y: 10 },
+          { x: 10, y: 5 },
+          { x: 10, y: -12 },
+        ];
+        expect(points.sort(sortClosestToPoint(cursor))).toEqual([
+          { x: 10, y: -10 },
+          { x: 10, y: -12 },
+          { x: 10, y: 5 },
+          { x: 10, y: 10 },
+          { x: 10, y: 11 },
+          { x: 10, y: 12 },
+        ]);
+      });
+
+      it('should sort points with different x', () => {
+        const points: Point[] = [
+          { x: 9, y: -10 },
+          { x: -6, y: 12 },
+          { x: 3, y: 11 },
+          { x: 9, y: 10 },
+          { x: 1, y: 5 },
+          { x: -9, y: -12 },
+        ];
+        expect(points.sort(sortClosestToPoint(cursor))).toEqual([
+          { x: -9, y: -12 },
+          { x: 1, y: 5 },
+          { x: 9, y: -10 },
+          { x: -6, y: 12 },
+          { x: 3, y: 11 },
+          { x: 9, y: 10 },
+        ]);
+      });
+    });
   });
 });

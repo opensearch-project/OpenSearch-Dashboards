@@ -26,6 +26,7 @@ import { isValidPointerOverEvent } from '../../../../utils/events';
 import { IndexedGeometry } from '../../../../utils/geometry';
 import { ChartDimensions } from '../../utils/dimensions';
 import { IndexedGeometryMap } from '../../utils/indexed_geometry_map';
+import { sortClosestToPoint } from '../utils/common';
 import { ComputedScales } from '../utils/types';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
 import { getComputedScalesSelector } from './get_computed_scales';
@@ -71,10 +72,12 @@ function getElementAtCursorPosition(
     return [];
   }
   // get the elements at cursor position
-  return geometriesIndex.find(
-    xValue?.value,
-    orientedProjectedPointerPosition,
-    orientedProjectedPointerPosition.horizontalPanelValue,
-    orientedProjectedPointerPosition.verticalPanelValue,
-  );
+  return geometriesIndex
+    .find(
+      xValue?.value,
+      orientedProjectedPointerPosition,
+      orientedProjectedPointerPosition.horizontalPanelValue,
+      orientedProjectedPointerPosition.verticalPanelValue,
+    )
+    .sort(sortClosestToPoint(orientedProjectedPointerPosition));
 }

@@ -18,7 +18,8 @@
  */
 
 import { LegendItem } from '../../../../common/legend';
-import { Rotation } from '../../../../utils/common';
+import { getDistance, Rotation } from '../../../../utils/common';
+import { Point } from '../../../../utils/point';
 import { BasicSeriesSpec, SeriesTypes } from '../../utils/specs';
 import { GeometriesCounts } from './types';
 
@@ -64,3 +65,11 @@ export function isAllSeriesDeselected(legendItems: LegendItem[]): boolean {
   }
   return true;
 }
+
+/**
+ * Sorts points in order from closest to farthest from cursor
+ * @internal
+ */
+export const sortClosestToPoint = (cursor: Point) => (a: Point, b: Point): number => {
+  return getDistance(cursor, a) - getDistance(cursor, b);
+};
