@@ -33,8 +33,7 @@ addParameters({
       base: 'light',
       brandTitle: 'Elastic Charts',
       brandUrl: 'https://github.com/elastic/elastic-charts',
-      brandImage:
-        'https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt6ae3d6980b5fd629/5bbca1d1af3a954c36f95ed3/logo-elastic.svg',
+      brandImage: 'logo-name.svg',
     }),
     panelPosition: 'right',
     sidebarAnimations: true,
