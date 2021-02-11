@@ -69,6 +69,12 @@ describe('Legend stories', () => {
     });
   });
 
+  it('should adjust legend width for scrollbar', async () => {
+    await common.expectChartAtUrlToMatchScreenshot(
+      'http://localhost:9001/?path=/story/small-multiples-alpha--grid-lines&knob-Debug=true&knob-Show Legend=true',
+    );
+  });
+
   describe('Tooltip placement with legend', () => {
     it('should render tooltip with left legend', async () => {
       await common.expectChartWithMouseAtUrlToMatchScreenshot('http://localhost:9001/?path=/story/legend--left', {

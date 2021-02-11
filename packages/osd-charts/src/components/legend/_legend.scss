@@ -7,12 +7,6 @@
       grid-row-gap: $echLegendRowGap;
       margin-top: $echLegendRowGap;
       margin-bottom: $echLegendRowGap;
-
-      @include internetExplorerOnly {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-      }
     }
   }
 
@@ -34,7 +28,7 @@
   }
 
   &--debug {
-    background: red;
+    background: rgba(238, 130, 238, 0.2);
     position: relative;
   }
 
