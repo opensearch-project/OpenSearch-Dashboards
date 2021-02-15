@@ -29,7 +29,7 @@ import {
   ISearchOptions,
   ES_SEARCH_STRATEGY,
 } from '../../common';
-// import { SearchUsageCollector } from './collectors';
+import { SearchUsageCollector } from './collectors';
 import { SearchTimeoutError, PainlessError, isPainlessError, TimeoutErrorMode } from './errors';
 import { toMountPoint } from '../../../kibana_react/public';
 
@@ -38,7 +38,7 @@ export interface SearchInterceptorDeps {
   uiSettings: CoreSetup['uiSettings'];
   startServices: Promise<[CoreStart, any, unknown]>;
   toasts: ToastsSetup;
-  // usageCollector?: SearchUsageCollector;
+  usageCollector?: SearchUsageCollector;
 }
 
 export class SearchInterceptor {

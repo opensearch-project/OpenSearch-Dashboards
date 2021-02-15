@@ -25,7 +25,7 @@ import { SEARCH_EVENT_TYPE, SearchUsageCollector } from './types';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { from } from 'rxjs';
 
-describe.skip('Search Usage Collector', () => {
+describe('Search Usage Collector', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;
   let mockUsageCollectionSetup: Setup;
   let usageCollector: SearchUsageCollector;
