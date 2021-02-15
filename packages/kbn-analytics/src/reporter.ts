@@ -25,7 +25,7 @@ import { Report, ReportManager } from './report';
 import { ApplicationUsage } from './metrics';
 
 export interface ReporterConfig {
-  http: ReportHTTP;
+  // http: ReportHTTP;
   storage?: Storage;
   checkInterval?: number;
   debug?: boolean;
@@ -38,7 +38,7 @@ export class Reporter {
   checkInterval: number;
   private interval?: NodeJS.Timer;
   private lastAppId?: string;
-  private http: ReportHTTP;
+  // private http: ReportHTTP;
   private reportManager: ReportManager;
   private storageManager: ReportStorageManager;
   private readonly applicationUsage: ApplicationUsage;
@@ -48,8 +48,8 @@ export class Reporter {
   private started = false;
 
   constructor(config: ReporterConfig) {
-    const { http, storage, debug, checkInterval = 90000, storageKey = 'analytics' } = config;
-    this.http = http;
+    const { storage, debug, checkInterval = 90000, storageKey = 'analytics' } = config;
+    // this.http = http;
     this.checkInterval = checkInterval;
     this.applicationUsage = new ApplicationUsage();
     this.storageManager = new ReportStorageManager(storageKey, storage);
