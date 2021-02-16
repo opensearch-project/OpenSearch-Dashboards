@@ -121,7 +121,7 @@ export type ElementOverListener = (
   elements: Array<XYChartElementEvent | PartitionElementEvent | HeatmapElementEvent>,
 ) => void;
 export type BrushEndListener = (brushArea: XYBrushArea) => void;
-export type LegendItemListener = (series: SeriesIdentifier | null) => void;
+export type LegendItemListener = (series: SeriesIdentifier[]) => void;
 export type PointerUpdateListener = (event: PointerEvent) => void;
 /**
  * Listener to be called when chart render state changes
@@ -270,9 +270,9 @@ export interface ExternalPointerEventsSettings {
  */
 export interface LegendActionProps {
   /**
-   * Series identifier for the given series
+   * Series identifiers for the given series
    */
-  series: SeriesIdentifier;
+  series: SeriesIdentifier[];
   /**
    * Resolved label/name of given series
    */
@@ -309,9 +309,9 @@ export interface LegendColorPickerProps {
    */
   onChange: (color: Color | null) => void;
   /**
-   * Series id for the active series
+   * Series ids for the active series
    */
-  seriesIdentifier: SeriesIdentifier;
+  seriesIdentifiers: SeriesIdentifier[];
 }
 export type LegendColorPicker = ComponentType<LegendColorPickerProps>;
 

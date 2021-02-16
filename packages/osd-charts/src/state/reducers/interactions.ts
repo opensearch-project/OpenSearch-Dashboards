@@ -19,7 +19,6 @@
 
 import { ChartTypes } from '../../chart_types';
 import { getPickedShapesLayerValues } from '../../chart_types/partition_chart/state/selectors/picked_shapes';
-import { getSeriesIndex } from '../../chart_types/xy_chart/utils/series';
 import { LegendItem } from '../../common/legend';
 import { SeriesIdentifier } from '../../common/series_id';
 import { LayerValue } from '../../specs';
@@ -143,14 +142,12 @@ export function interactionsReducer(
     case ON_LEGEND_ITEM_OUT:
       return {
         ...state,
-        highlightedLegendItemKey: null,
         highlightedLegendPath: [],
       };
     case ON_LEGEND_ITEM_OVER:
-      const { legendItemKey: highlightedLegendItemKey, legendPath: highlightedLegendPath } = action;
+      const { legendPath: highlightedLegendPath } = action;
       return {
         ...state,
-        highlightedLegendItemKey,
         highlightedLegendPath,
       };
     case ON_TOGGLE_DESELECT_SERIES:
@@ -179,28 +176,31 @@ export function interactionsReducer(
  */
 
 function toggleDeselectedDataSeries(
-  { legendItemId: id, negate }: ToggleDeselectSeriesAction,
+  { legendItemIds, negate }: ToggleDeselectSeriesAction,
   deselectedDataSeries: SeriesIdentifier[],
   legendItems: LegendItem[],
 ) {
-  if (negate) {
-    const hidden = getSeriesIndex(deselectedDataSeries, id) > -1;
+  const actionSeriesKeys = legendItemIds.map(({ key }) => key);
+  const deselectedDataSeriesKeys = new Set(deselectedDataSeries.map(({ key }) => key));
+  const legendItemsKeys = legendItems.map(({ seriesIdentifiers }) => seriesIdentifiers);
 
-    if (!hidden && deselectedDataSeries.length === legendItems.length - 1) {
-      return [id];
+  const alreadyDeselected = actionSeriesKeys.every((key) => deselectedDataSeriesKeys.has(key));
+
+  if (negate) {
+    if (!alreadyDeselected && deselectedDataSeries.length === legendItemsKeys.length - 1) {
+      return legendItemIds;
     }
 
-    const items = legendItems.map(({ seriesIdentifier: si }) => si);
-    const index = getSeriesIndex(items, id);
-
-    return [...items.slice(0, index), ...items.slice(index + 1)];
+    return legendItems
+      .map(({ seriesIdentifiers }) => seriesIdentifiers)
+      .flat()
+      .filter(({ key }) => !actionSeriesKeys.includes(key));
   }
 
-  const index = getSeriesIndex(deselectedDataSeries, id);
-  if (index > -1) {
-    return [...deselectedDataSeries.slice(0, index), ...deselectedDataSeries.slice(index + 1)];
+  if (alreadyDeselected) {
+    return deselectedDataSeries.filter(({ key }) => !actionSeriesKeys.includes(key));
   }
-  return [...deselectedDataSeries, id];
+  return [...deselectedDataSeries, ...legendItemIds];
 }
 
 function getDrilldownData(globalState: GlobalChartState) {

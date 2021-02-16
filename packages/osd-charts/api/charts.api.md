@@ -1207,7 +1207,7 @@ export type LegendAction = ComponentType<LegendActionProps>;
 export interface LegendActionProps {
     color: string;
     label: string;
-    series: SeriesIdentifier;
+    series: SeriesIdentifier[];
 }
 
 // Warning: (ae-missing-release-tag) "LegendColorPicker" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1223,13 +1223,13 @@ export interface LegendColorPickerProps {
     color: Color;
     onChange: (color: Color | null) => void;
     onClose: () => void;
-    seriesIdentifier: SeriesIdentifier;
+    seriesIdentifiers: SeriesIdentifier[];
 }
 
 // Warning: (ae-missing-release-tag) "LegendItemListener" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type LegendItemListener = (series: SeriesIdentifier | null) => void;
+export type LegendItemListener = (series: SeriesIdentifier[]) => void;
 
 // @public (undocumented)
 export type LegendPath = LegendPathElement[];
@@ -1778,6 +1778,11 @@ export type SeriesIdentifier = {
     key: SeriesKey;
 };
 
+// Warning: (ae-missing-release-tag) "SeriesKey" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export type SeriesKey = CategoryKey;
+
 // @public (undocumented)
 export type SeriesName = string | number | null;
 
@@ -2163,6 +2168,11 @@ export type TickStyle = StrokeStyle & Visible & {
 // @public (undocumented)
 export function timeFormatter(format: string): TickFormatter;
 
+// Warning: (ae-missing-release-tag) "toEntries" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export function toEntries<T extends Record<string, string>, S>(array: T[], accessor: keyof T, staticValue: S): Record<string, S>;
+
 // @public
 export interface TooltipInfo {
     header: TooltipValue | null;
@@ -2348,7 +2358,6 @@ export type YDomainRange = YDomainBase & DomainRange;
 // src/chart_types/heatmap/layout/types/config_types.ts:62:5 - (ae-forgotten-export) The symbol "TextBaseline" needs to be exported by the entry point index.d.ts
 // src/chart_types/partition_chart/layout/types/config_types.ts:130:5 - (ae-forgotten-export) The symbol "TimeMs" needs to be exported by the entry point index.d.ts
 // src/chart_types/partition_chart/layout/types/config_types.ts:131:5 - (ae-forgotten-export) The symbol "AnimKeyframe" needs to be exported by the entry point index.d.ts
-// src/common/series_id.ts:40:3 - (ae-forgotten-export) The symbol "SeriesKey" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

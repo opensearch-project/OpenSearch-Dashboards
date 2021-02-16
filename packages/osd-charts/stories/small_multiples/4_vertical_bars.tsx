@@ -34,26 +34,34 @@ import {
   AnnotationDomainTypes,
   LIGHT_THEME,
   LineSeries,
-  AreaSeries,
 } from '../../src';
 import { SeededDataGenerator } from '../../src/mocks/utils';
+import { ColorVariant } from '../../src/utils/common';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
 const dg = new SeededDataGenerator();
 const numOfDays = 7;
-function generateData() {
-  return dg.generateGroupedSeries(numOfDays, 2).map((d) => {
+function generateData(totalGroups = 2, mappings: Record<string, string>) {
+  return dg.generateGroupedSeries(numOfDays, totalGroups).map((d) => {
     return {
       ...d,
       x: DateTime.fromFormat(`${d.x + 1}`, 'E').toFormat('EEEE'),
       y: Math.floor(d.y * 10),
-      g: d.g === 'a' ? 'new user' : 'existing user',
+      g: mappings[d.g],
     };
   });
 }
-const data1 = generateData();
-const data2 = generateData();
-const data3 = generateData();
+const data1 = generateData(2, { a: 'new user', b: 'existing user' }).map((d) => ({ ...d, site: 'website A' }));
+const data2 = generateData(2, { a: 'new user', b: 'existing user' }).map((d) => ({ ...d, site: 'website B' }));
+
+const datal1 = generateData(2, { a: 'avg new user', b: 'avg existing user' }).map((d) => ({
+  ...d,
+  site: 'website A',
+}));
+const datal2 = generateData(2, { a: 'avg new user', b: 'avg existing user' }).map((d) => ({
+  ...d,
+  site: 'website B',
+}));
 
 export const Example = () => {
   const marker = (
@@ -66,7 +74,6 @@ export const Example = () => {
         margin: 'auto',
         fontSize: 8,
         borderRadius: 2,
-        lineHeight: 8,
       }}
     >
       MIN
@@ -78,17 +85,17 @@ export const Example = () => {
   return (
     <Chart className="story-chart">
       <Settings onElementClick={onElementClick} showLegend={showLegend} />
-      <Axis id="time" position={Position.Bottom} gridLine={{ visible: false }} />
-      <Axis id="y" title="Day of week" position={Position.Left} gridLine={{ visible: false }} />
+      <Axis id="time" title="Day of week" position={Position.Bottom} gridLine={{ visible: false }} />
+      <Axis id="y" title="Count of logins" position={Position.Left} gridLine={{ visible: false }} />
 
       <GroupBy
         id="h_split"
-        by={(spec) => {
-          return spec.id;
+        by={(spec, datum) => {
+          return datum.site;
         }}
         sort="alphaAsc"
       />
-      <SmallMultiples splitHorizontally="h_split" />
+      <SmallMultiples splitVertically="h_split" />
       <LineAnnotation
         dataValues={[
           {
@@ -117,42 +124,41 @@ export const Example = () => {
         yAccessors={['y']}
         stackAccessors={['x']}
         splitSeriesAccessors={['g']}
-        data={data1}
+        data={[...data1, ...data2]}
         color={[LIGHT_THEME.colors.vizColors[0], 'lightgray']}
       />
       <LineSeries
-        id="website b"
+        id="avg"
         xScaleType={ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         timeZone="local"
         xAccessor="x"
         yAccessors={['y']}
-        stackAccessors={['x']}
         splitSeriesAccessors={['g']}
-        data={data2}
-        color={[LIGHT_THEME.colors.vizColors[0], 'lightgray']}
-      />
-      <AreaSeries
-        id="website c"
-        xScaleType={ScaleType.Ordinal}
-        yScaleType={ScaleType.Linear}
-        timeZone="local"
-        xAccessor="x"
-        yAccessors={['y']}
-        stackAccessors={['x']}
-        splitSeriesAccessors={['g']}
-        data={data3}
-        color={[LIGHT_THEME.colors.vizColors[0], 'lightgray']}
+        data={[...datal1, ...datal2]}
+        lineSeriesStyle={{
+          point: {
+            radius: 1,
+            fill: ColorVariant.Series,
+          },
+        }}
+        color={['black', 'darkgray']}
       />
     </Chart>
   );
 };
-
 Example.story = {
   parameters: {
     options: { selectedPanel: SB_SOURCE_PANEL },
     info: {
-      text: '',
+      text: `Similarly to the Vertical Areas example, the above chart shows an example of small multiples technique
+that splits our dataset into multiple sub-series horizontally positioned one aside the other.
+In this case, the \`<GroupBy />\` id is used to specify the horizontal split via the \`splitHorizontally\` prop.
+
+As for single charts, we can merge and handle multiple data-series together and specify a \`by\` accessor to consider
+the specific case. An additional property \`sort\` is available to configure the sorting order of the vertical or
+horizontal split.
+`,
     },
   },
 };

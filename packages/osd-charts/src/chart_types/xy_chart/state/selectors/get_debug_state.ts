@@ -259,8 +259,10 @@ function getAreaState(seriesNameMap: Map<string, string>) {
  * returns series key to name mapping
  */
 function getSeriesNameMap(legendItems: LegendItem[]): Map<string, string> {
-  return legendItems.reduce((acc, { label: name, seriesIdentifier: { key } }) => {
-    acc.set(key, name);
+  return legendItems.reduce((acc, { label: name, seriesIdentifiers }) => {
+    seriesIdentifiers.forEach(({ key }) => {
+      acc.set(key, name);
+    });
     return acc;
   }, new Map<string, string>());
 }
@@ -268,11 +270,14 @@ function getSeriesNameMap(legendItems: LegendItem[]): Map<string, string> {
 function getLegendState(legendItems: LegendItem[]): DebugStateLegend {
   const items = legendItems
     .filter(({ isSeriesHidden }) => !isSeriesHidden)
-    .map(({ label: name, color, seriesIdentifier: { key } }) => ({
-      key,
-      name,
-      color,
-    }));
+    .map(({ label: name, color, seriesIdentifiers }) => {
+      return seriesIdentifiers.map(({ key }) => ({
+        key,
+        name,
+        color,
+      }));
+    })
+    .flat();
 
   return { items };
 }

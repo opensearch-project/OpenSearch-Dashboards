@@ -103,7 +103,8 @@ describe('Retain hierarchy even with arbitrary names', () => {
           ],
           depth: 0,
           label: 'A',
-          seriesIdentifier: { key: 'A', specId: 'spec1' },
+          seriesIdentifiers: [{ key: 'A', specId: 'spec1' }],
+          keys: [],
         },
         {
           childId: 'A',
@@ -115,7 +116,8 @@ describe('Retain hierarchy even with arbitrary names', () => {
           ],
           depth: 1,
           label: 'A',
-          seriesIdentifier: { key: 'A', specId: 'spec1' },
+          seriesIdentifiers: [{ key: 'A', specId: 'spec1' }],
+          keys: [],
         },
         {
           childId: 'B',
@@ -127,7 +129,8 @@ describe('Retain hierarchy even with arbitrary names', () => {
           ],
           depth: 1,
           label: 'B',
-          seriesIdentifier: { key: 'B', specId: 'spec1' },
+          seriesIdentifiers: [{ key: 'B', specId: 'spec1' }],
+          keys: [],
         },
         {
           childId: 'B',
@@ -138,7 +141,8 @@ describe('Retain hierarchy even with arbitrary names', () => {
           ],
           depth: 0,
           label: 'B',
-          seriesIdentifier: { key: 'B', specId: 'spec1' },
+          seriesIdentifiers: [{ key: 'B', specId: 'spec1' }],
+          keys: [],
         },
         {
           childId: 'A',
@@ -150,7 +154,8 @@ describe('Retain hierarchy even with arbitrary names', () => {
           ],
           depth: 1,
           label: 'A',
-          seriesIdentifier: { key: 'A', specId: 'spec1' },
+          seriesIdentifiers: [{ key: 'A', specId: 'spec1' }],
+          keys: [],
         },
         {
           childId: 'B',
@@ -162,7 +167,8 @@ describe('Retain hierarchy even with arbitrary names', () => {
           ],
           depth: 1,
           label: 'B',
-          seriesIdentifier: { key: 'B', specId: 'spec1' },
+          seriesIdentifiers: [{ key: 'B', specId: 'spec1' }],
+          keys: [],
         },
         {
           childId: 'C',
@@ -173,7 +179,8 @@ describe('Retain hierarchy even with arbitrary names', () => {
           ],
           depth: 0,
           label: 'C',
-          seriesIdentifier: { key: 'C', specId: 'spec1' },
+          seriesIdentifiers: [{ key: 'C', specId: 'spec1' }],
+          keys: [],
         },
         {
           childId: 'A',
@@ -185,7 +192,8 @@ describe('Retain hierarchy even with arbitrary names', () => {
           ],
           depth: 1,
           label: 'A',
-          seriesIdentifier: { key: 'A', specId: 'spec1' },
+          seriesIdentifiers: [{ key: 'A', specId: 'spec1' }],
+          keys: [],
         },
         {
           childId: 'B',
@@ -197,7 +205,8 @@ describe('Retain hierarchy even with arbitrary names', () => {
           ],
           depth: 1,
           label: 'B',
-          seriesIdentifier: { key: 'B', specId: 'spec1' },
+          seriesIdentifiers: [{ key: 'B', specId: 'spec1' }],
+          keys: [],
         },
       ]);
     });
@@ -220,7 +229,8 @@ describe('Retain hierarchy even with arbitrary names', () => {
           ],
           depth: 0,
           label: 'A',
-          seriesIdentifier: { key: 'A', specId: 'spec1' },
+          seriesIdentifiers: [{ key: 'A', specId: 'spec1' }],
+          keys: [],
         },
         {
           childId: 'A',
@@ -242,7 +252,8 @@ describe('Retain hierarchy even with arbitrary names', () => {
 
           depth: 1,
           label: 'A',
-          seriesIdentifier: { key: 'A', specId: 'spec1' },
+          seriesIdentifiers: [{ key: 'A', specId: 'spec1' }],
+          keys: [],
         },
       ]);
     });
@@ -265,7 +276,8 @@ describe('Retain hierarchy even with arbitrary names', () => {
           ],
           depth: 0,
           label: 'C',
-          seriesIdentifier: { key: 'C', specId: 'spec1' },
+          seriesIdentifiers: [{ key: 'C', specId: 'spec1' }],
+          keys: [],
         },
         {
           childId: 'B',
@@ -286,7 +298,8 @@ describe('Retain hierarchy even with arbitrary names', () => {
           ],
           depth: 1,
           label: 'B',
-          seriesIdentifier: { key: 'B', specId: 'spec1' },
+          seriesIdentifiers: [{ key: 'B', specId: 'spec1' }],
+          keys: [],
         },
       ]);
     });

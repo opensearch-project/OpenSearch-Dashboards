@@ -37,7 +37,6 @@ export type LegendPath = LegendPathElement[];
 
 interface LegendItemOverAction {
   type: typeof ON_LEGEND_ITEM_OVER;
-  legendItemKey: CategoryKey | null;
   legendPath: LegendPath;
 }
 interface LegendItemOutAction {
@@ -47,14 +46,13 @@ interface LegendItemOutAction {
 /** @internal */
 export interface ToggleDeselectSeriesAction {
   type: typeof ON_TOGGLE_DESELECT_SERIES;
-  legendItemId: SeriesIdentifier;
+  legendItemIds: SeriesIdentifier[];
   negate: boolean;
 }
 
 /** @internal */
 export function onLegendItemOverAction(legendPath: LegendPath): LegendItemOverAction {
-  // todo remove obsoleted `legendItemKey`
-  return { type: ON_LEGEND_ITEM_OVER, legendItemKey: legendPath[legendPath.length - 1]?.value ?? null, legendPath };
+  return { type: ON_LEGEND_ITEM_OVER, legendPath };
 }
 
 /** @internal */
@@ -64,10 +62,10 @@ export function onLegendItemOutAction(): LegendItemOutAction {
 
 /** @internal */
 export function onToggleDeselectSeriesAction(
-  legendItemId: SeriesIdentifier,
+  legendItemIds: SeriesIdentifier[],
   negate = false,
 ): ToggleDeselectSeriesAction {
-  return { type: ON_TOGGLE_DESELECT_SERIES, legendItemId, negate };
+  return { type: ON_TOGGLE_DESELECT_SERIES, legendItemIds, negate };
 }
 
 /** @internal */

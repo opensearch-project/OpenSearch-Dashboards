@@ -39,7 +39,6 @@ import {
   isHistogramModeEnabled,
   setBarSeriesAccessors,
   getCustomSeriesColors,
-  updateDeselectedDataSeries,
 } from './utils';
 
 function getGeometriesFromSpecs(specs: Spec[]) {
@@ -177,36 +176,6 @@ describe('Chart State utils', () => {
     expect(getSeriesIndex(deselectedSeries, dataSeriesValuesA)).toBe(0);
     expect(getSeriesIndex(deselectedSeries, dataSeriesValuesC)).toBe(-1);
     expect(getSeriesIndex([], dataSeriesValuesA)).toBe(-1);
-  });
-  it('should update a list of SeriesCollectionValue given a selected SeriesCollectionValue item', () => {
-    const dataSeriesValuesA: XYChartSeriesIdentifier = {
-      specId: 'a',
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: ['a', 'b', 'c'],
-      key: 'a',
-    };
-    const dataSeriesValuesB: XYChartSeriesIdentifier = {
-      specId: 'b',
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: ['a', 'b', 'c'],
-      key: 'b',
-    };
-    const dataSeriesValuesC: XYChartSeriesIdentifier = {
-      specId: 'a',
-      yAccessor: 'y1',
-      splitAccessors: new Map(),
-      seriesKeys: ['a', 'b', 'd'],
-      key: 'd',
-    };
-    const selectedSeries = [dataSeriesValuesA, dataSeriesValuesB];
-    const addedSelectedSeries = [dataSeriesValuesA, dataSeriesValuesB, dataSeriesValuesC];
-    const removedSelectedSeries = [dataSeriesValuesB];
-
-    expect(updateDeselectedDataSeries(selectedSeries, dataSeriesValuesC)).toEqual(addedSelectedSeries);
-    expect(updateDeselectedDataSeries(selectedSeries, dataSeriesValuesA)).toEqual(removedSelectedSeries);
-    expect(updateDeselectedDataSeries([], dataSeriesValuesA)).toEqual([dataSeriesValuesA]);
   });
 
   describe('getCustomSeriesColors', () => {

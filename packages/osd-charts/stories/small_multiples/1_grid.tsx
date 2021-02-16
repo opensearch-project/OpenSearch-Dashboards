@@ -56,7 +56,7 @@ export const Example = () => {
   const splitHorizontally = boolean('horizontal split', true);
   const [rotationIndex, setRotationIndex] = useState(0);
   const rot: Rotation = ([0, -90, 90, 0] as Rotation[])[rotationIndex];
-  const showLegend = boolean('Show Legend', false);
+  const showLegend = boolean('Show Legend', true);
   return (
     <>
       g

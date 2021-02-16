@@ -51,7 +51,7 @@ const getAction = (hideActions: boolean, anchorPosition: PopoverAnchorPosition):
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
 
-  const getPanels = (series: XYChartSeriesIdentifier): EuiContextMenuPanelDescriptor[] => [
+  const getPanels = (series: XYChartSeriesIdentifier[]): EuiContextMenuPanelDescriptor[] => [
     {
       id: 0,
       title: label,
@@ -62,7 +62,7 @@ const getAction = (hideActions: boolean, anchorPosition: PopoverAnchorPosition):
           onClick: () => {
             setPopoverOpen(false);
             setTimeout(() => {
-              window.alert(`Selected series: ${series.specId}`);
+              window.alert(`Selected series: ${series.map(({ specId }) => specId).join(', ')}`);
             }, 100);
           },
         },
@@ -72,7 +72,7 @@ const getAction = (hideActions: boolean, anchorPosition: PopoverAnchorPosition):
           onClick: () => {
             setPopoverOpen(false);
             setTimeout(() => {
-              window.alert(`Selected series: [${series.seriesKeys.join(', ')}]`);
+              window.alert(`Selected series: [${series.map(({ seriesKeys }) => seriesKeys.join(', ')).join(' -- ')}]`);
             }, 100);
           },
         },
@@ -128,7 +128,7 @@ const getAction = (hideActions: boolean, anchorPosition: PopoverAnchorPosition):
       anchorPosition={anchorPosition}
       ownFocus
     >
-      <EuiContextMenu initialPanelId={0} panels={getPanels(series as XYChartSeriesIdentifier)} />
+      <EuiContextMenu initialPanelId={0} panels={getPanels(series as XYChartSeriesIdentifier[])} />
     </EuiPopover>
   );
 };

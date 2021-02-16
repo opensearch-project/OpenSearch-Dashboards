@@ -25,10 +25,11 @@ export { SpecId, GroupId, AxisId, AnnotationId } from './utils/ids';
 // Everything related to the specs types and react-components
 export * from './specs';
 export { DebugState } from './state/types';
+export { toEntries } from './utils/common';
 export { CurveType } from './utils/curves';
 export { SimplePadding } from './utils/dimensions';
 export { timeFormatter, niceTimeFormatter, niceTimeFormatByDay } from './utils/data/formatters';
-export { SeriesIdentifier } from './common/series_id';
+export { SeriesIdentifier, SeriesKey } from './common/series_id';
 export { XYChartSeriesIdentifier, DataSeriesDatum, FilledValues } from './chart_types/xy_chart/utils/series';
 export { AnnotationTooltipFormatter, CustomAnnotationTooltip } from './chart_types/xy_chart/annotations/types';
 export { GeometryValue, BandedAccessorType } from './utils/geometry';

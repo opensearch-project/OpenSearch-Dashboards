@@ -76,7 +76,8 @@ export function getLegendItems(
       childId: dataName,
       depth: useHierarchicalLegend ? depth - 1 : 0,
       path,
-      seriesIdentifier: { key: dataName, specId: id },
+      seriesIdentifiers: [{ key: dataName, specId: id }],
+      keys: [],
     };
   });
 }

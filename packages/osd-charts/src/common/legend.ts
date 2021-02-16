@@ -28,7 +28,7 @@ export type LegendItemChildId = CategoryKey;
 
 /** @internal */
 export type LegendItem = {
-  seriesIdentifier: SeriesIdentifier;
+  seriesIdentifiers: SeriesIdentifier[];
   childId?: LegendItemChildId;
   depth?: number;
   /**
@@ -46,6 +46,7 @@ export type LegendItem = {
   };
   // TODO: Remove when partition layers are toggleable
   isToggleable?: boolean;
+  keys: Array<string | number>;
 };
 
 /** @internal */

@@ -24,15 +24,18 @@ import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { computeLegendSelector } from './compute_legend';
 
-const getHighlightedLegendItemKey = (state: GlobalChartState) => state.interactions.highlightedLegendItemKey;
+const getHighlightedLegendPath = (state: GlobalChartState) => state.interactions.highlightedLegendPath;
 
 /** @internal */
 export const getHighlightedSeriesSelector = createCachedSelector(
-  [getHighlightedLegendItemKey, computeLegendSelector],
-  (highlightedLegendItemKey, legendItems): LegendItem | undefined => {
-    if (!highlightedLegendItemKey) {
+  [getHighlightedLegendPath, computeLegendSelector],
+  (highlightedLegendPaths, legendItems): LegendItem | undefined => {
+    if (highlightedLegendPaths.length === 0) {
       return;
     }
-    return legendItems.find(({ seriesIdentifier: { key } }) => key === highlightedLegendItemKey);
+    const highlightedSeriesKeys = highlightedLegendPaths.map(({ value }) => value);
+    return legendItems.find(({ seriesIdentifiers }) =>
+      seriesIdentifiers.some(({ key }) => highlightedSeriesKeys.some((hKey) => hKey === key)),
+    );
   },
 )(getChartIdSelector);

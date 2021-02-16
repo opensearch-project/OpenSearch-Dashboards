@@ -29,6 +29,7 @@ import { LastValues } from '../state/utils/types';
 import { Y0_ACCESSOR_POSTFIX, Y1_ACCESSOR_POSTFIX } from '../tooltip/tooltip';
 import { defaultTickFormatter } from '../utils/axis_utils';
 import { defaultXYLegendSeriesSort } from '../utils/default_series_sort_fn';
+import { groupBy } from '../utils/group_data_series';
 import {
   getSeriesIndex,
   getSeriesName,
@@ -104,11 +105,21 @@ export function computeLegend(
   const legendItems: LegendItem[] = [];
 
   dataSeries.forEach((series) => {
-    const { specId } = series;
+    const { specId, yAccessor } = series;
     const banded = isDataSeriesBanded(series);
     const key = getSeriesKey(series, series.groupId);
     const spec = getSpecsById<BasicSeriesSpec>(specs, specId);
-    const color = seriesColors.get(key) || defaultColor;
+    const dataSeriesKey = getSeriesKey(
+      {
+        specId: series.specId,
+        yAccessor: series.yAccessor,
+        splitAccessors: series.splitAccessors,
+      },
+      series.groupId,
+    );
+
+    const color = seriesColors.get(dataSeriesKey) || defaultColor;
+
     const hasSingleSeries = dataSeries.length === 1;
     const name = getSeriesName(series, hasSingleSeries, false, spec);
     const isSeriesHidden = deselectedDataSeries ? getSeriesIndex(deselectedDataSeries, series) >= 0 : false;
@@ -129,26 +140,28 @@ export function computeLegend(
     legendItems.push({
       color,
       label: labelY1,
-      seriesIdentifier,
+      seriesIdentifiers: [seriesIdentifier],
       childId: BandedAccessorType.Y1,
       isSeriesHidden,
       isItemHidden: hideInLegend,
       isToggleable: true,
       defaultExtra: getLegendExtra(showLegendExtra, spec.xScaleType, formatter, 'y1', lastValue),
       path: [{ index: 0, value: seriesIdentifier.key }],
+      keys: [specId, spec.groupId, yAccessor, ...series.splitAccessors.values()],
     });
     if (banded) {
       const labelY0 = getBandedLegendItemLabel(name, BandedAccessorType.Y0, postFixes);
       legendItems.push({
         color,
         label: labelY0,
-        seriesIdentifier,
+        seriesIdentifiers: [seriesIdentifier],
         childId: BandedAccessorType.Y0,
         isSeriesHidden,
         isItemHidden: hideInLegend,
         isToggleable: true,
         defaultExtra: getLegendExtra(showLegendExtra, spec.xScaleType, formatter, 'y0', lastValue),
         path: [{ index: 0, value: seriesIdentifier.key }],
+        keys: [specId, spec.groupId, yAccessor, ...series.splitAccessors.values()],
       });
     }
   });
@@ -159,5 +172,17 @@ export function computeLegend(
     return defaultXYLegendSeriesSort(aDs, bDs);
   });
 
-  return legendItems.sort((a, b) => legendSortFn(a.seriesIdentifier, b.seriesIdentifier));
+  return groupBy(
+    legendItems.sort((a, b) => legendSortFn(a.seriesIdentifiers[0], b.seriesIdentifiers[0])),
+    ({ keys, childId }) => {
+      return [...keys, childId].join('__'); // childId is used for band charts
+    },
+    true,
+  ).map((d) => {
+    return {
+      ...d[0],
+      seriesIdentifiers: d.map(({ seriesIdentifiers: [s] }) => s),
+      path: d.map(({ path: [p] }) => p),
+    };
+  });
 }

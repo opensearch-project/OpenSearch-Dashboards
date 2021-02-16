@@ -31,7 +31,6 @@ import {
   GroupBy,
   SmallMultiples,
   Settings,
-  LIGHT_THEME,
   niceTimeFormatByDay,
   timeFormatter,
   AxisSpec,
@@ -131,15 +130,13 @@ export const Example = () => {
 
       <LineSeries
         id="line"
+        name={({ splitAccessors }) => `Host ${splitAccessors.get('h')}`}
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         timeZone="UTC"
         xAccessor="x"
         yAccessors={['y']}
-        color={({ smHorizontalAccessorValue }) => {
-          const val = Number(`${smHorizontalAccessorValue}`.split('host ')[1]);
-          return LIGHT_THEME.colors.vizColors[val];
-        }}
+        splitSeriesAccessors={['h']}
         data={data}
       />
     </Chart>

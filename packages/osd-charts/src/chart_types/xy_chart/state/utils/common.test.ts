@@ -138,24 +138,30 @@ describe('Type Checks', () => {
       {
         color: '#1EA593',
         label: 'a',
-        seriesIdentifier: {
-          key: 'specId:{bars},colors:{a}',
-          specId: 'bars',
-        },
+        seriesIdentifiers: [
+          {
+            key: 'specId:{bars},colors:{a}',
+            specId: 'bars',
+          },
+        ],
         defaultExtra: { raw: 6, formatted: '6.00', legendSizingLabel: '6.00' },
         isSeriesHidden: true,
         path: [],
+        keys: [],
       },
       {
         color: '#2B70F7',
         label: 'b',
-        seriesIdentifier: {
-          key: 'specId:{bars},colors:{b}',
-          specId: 'bars',
-        },
+        seriesIdentifiers: [
+          {
+            key: 'specId:{bars},colors:{b}',
+            specId: 'bars',
+          },
+        ],
         defaultExtra: { raw: 2, formatted: '2.00', legendSizingLabel: '2.00' },
         isSeriesHidden: true,
         path: [],
+        keys: [],
       },
     ];
     expect(isAllSeriesDeselected(legendItems1)).toBe(true);
@@ -165,24 +171,30 @@ describe('Type Checks', () => {
       {
         color: '#1EA593',
         label: 'a',
-        seriesIdentifier: {
-          key: 'specId:{bars},colors:{a}',
-          specId: 'bars',
-        },
+        seriesIdentifiers: [
+          {
+            key: 'specId:{bars},colors:{a}',
+            specId: 'bars',
+          },
+        ],
         defaultExtra: { raw: 6, formatted: '6.00', legendSizingLabel: '6.00' },
         isSeriesHidden: false,
         path: [],
+        keys: [],
       },
       {
         color: '#2B70F7',
         label: 'b',
-        seriesIdentifier: {
-          key: 'specId:{bars},colors:{b}',
-          specId: 'bars',
-        },
+        seriesIdentifiers: [
+          {
+            key: 'specId:{bars},colors:{b}',
+            specId: 'bars',
+          },
+        ],
         defaultExtra: { raw: 2, formatted: '2.00', legendSizingLabel: '2.00' },
         isSeriesHidden: true,
         path: [],
+        keys: [],
       },
     ];
     expect(isAllSeriesDeselected(legendItems2)).toBe(false);

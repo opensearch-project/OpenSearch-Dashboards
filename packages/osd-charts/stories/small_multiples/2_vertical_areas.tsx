@@ -47,7 +47,7 @@ const data = dg.generateGroupedSeries(numOfDays, 6, 'metric ').map((d) => {
 });
 
 export const Example = () => {
-  const showLegend = boolean('Show Legend', false);
+  const showLegend = boolean('Show Legend', true);
   const onElementClick = action('onElementClick');
   return (
     <Chart className="story-chart">

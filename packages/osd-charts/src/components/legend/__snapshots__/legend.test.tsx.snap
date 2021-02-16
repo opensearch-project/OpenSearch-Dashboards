@@ -203,7 +203,7 @@ exports[`Legend #legendColorPicker should render colorPicker when color is click
       </button>
     </Label>
   </li>
-  <Component anchor={{...}} color=\\"red\\" onClose={[Function: handleClose]} onChange={[Function: handleChange]} seriesIdentifier={{...}}>
+  <Component anchor={{...}} color=\\"red\\" onClose={[Function: handleClose]} onChange={[Function: handleChange]} seriesIdentifiers={{...}}>
     <div id=\\"colorPicker\\">
       <span>
         Custom Color Picker

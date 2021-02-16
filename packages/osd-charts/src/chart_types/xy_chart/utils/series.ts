@@ -123,8 +123,6 @@ export function splitSeriesDataByAccessors(
 ): {
   dataSeries: Map<SeriesKey, DataSeries>;
   xValues: Array<string | number>;
-  smVValues: Set<string | number>;
-  smHValues: Set<string | number>;
 } {
   const {
     seriesType,
@@ -139,8 +137,6 @@ export function splitSeriesDataByAccessors(
   } = spec;
   const dataSeries = new Map<SeriesKey, DataSeries>();
   const xValues: Array<string | number> = [];
-  const smVValues: Set<string | number> = new Set();
-  const smHValues: Set<string | number> = new Set();
   const nonNumericValues: any[] = [];
 
   for (let i = 0; i < data.length; i++) {
@@ -166,14 +162,7 @@ export function splitSeriesDataByAccessors(
 
     // extract small multiples aggregation values
     const smH = groupBySpec?.horizontal?.by?.(spec, datum);
-    if (!isNil(smH)) {
-      smHValues.add(smH);
-    }
-
     const smV = groupBySpec?.vertical?.by?.(spec, datum);
-    if (!isNil(smV)) {
-      smVValues.add(smV);
-    }
 
     yAccessors.forEach((accessor, index) => {
       const cleanedDatum = extractYAndMarkFromDatum(
@@ -231,8 +220,6 @@ export function splitSeriesDataByAccessors(
   return {
     dataSeries,
     xValues,
-    smVValues,
-    smHValues,
   };
 }
 
@@ -380,11 +367,6 @@ export function getDataSeriesFromSpecs(
   // the unique set of values along the x axis
   const globalXValues: Set<string | number> = new Set();
 
-  // the unique set of values along for the vertical small multiple grid
-  let globalSMVValues: Set<string | number> = new Set();
-  // the unique set of values along for the horizontal small multiple grid
-  let globalSMHValues: Set<string | number> = new Set();
-
   let isNumberArray = true;
   let isOrdinalScale = false;
 
@@ -400,7 +382,7 @@ export function getDataSeriesFromSpecs(
 
     const specGroup = specsByYGroup.get(spec.groupId);
     const isStacked = Boolean(specGroup?.stacked.find(({ id }) => id === spec.id));
-    const { dataSeries, xValues, smVValues, smHValues } = splitSeriesDataByAccessors(
+    const { dataSeries, xValues } = splitSeriesDataByAccessors(
       spec,
       mutatedXValueSums,
       isStacked,
@@ -429,8 +411,6 @@ export function getDataSeriesFromSpecs(
       }
       globalXValues.add(xValue);
     }
-    globalSMVValues = new Set([...globalSMVValues, ...smVValues]);
-    globalSMHValues = new Set([...globalSMHValues, ...smHValues]);
   }
 
   const xValues =
@@ -450,12 +430,30 @@ export function getDataSeriesFromSpecs(
     insertIndex: i,
   }));
 
+  const smallMultipleUniqueValues = dataSeries.reduce<{
+    smVValues: Set<string | number>;
+    smHValues: Set<string | number>;
+  }>(
+    (acc, curr) => {
+      if (curr.isFiltered) {
+        return acc;
+      }
+      if (!isNil(curr.smHorizontalAccessorValue)) {
+        acc.smHValues.add(curr.smHorizontalAccessorValue);
+      }
+      if (!isNil(curr.smVerticalAccessorValue)) {
+        acc.smVValues.add(curr.smVerticalAccessorValue);
+      }
+      return acc;
+    },
+    { smVValues: new Set(), smHValues: new Set() },
+  );
+
   return {
     dataSeries,
     // keep the user order for ordinal scales
     xValues,
-    smVValues: globalSMVValues,
-    smHValues: globalSMHValues,
+    ...smallMultipleUniqueValues,
     fallbackScale: !isOrdinalScale && !isNumberArray ? ScaleType.Ordinal : undefined,
   };
 }
@@ -581,19 +579,28 @@ export function getSeriesColors(
 ): Map<SeriesKey, Color> {
   const seriesColorMap = new Map<SeriesKey, Color>();
   let counter = 0;
+  const sortedDataSeries = dataSeries.slice().sort((a, b) => a.insertIndex - b.insertIndex);
+  groupBy(
+    sortedDataSeries,
+    (ds) => {
+      return [ds.specId, ds.groupId, ds.yAccessor, ...ds.splitAccessors.values()].join('__');
+    },
+    true,
+  ).forEach((ds) => {
+    const dsKeys = {
+      specId: ds[0].specId,
+      yAccessor: ds[0].yAccessor,
+      splitAccessors: ds[0].splitAccessors,
+      smVerticalAccessorValue: undefined,
+      smHorizontalAccessorValue: undefined,
+    };
+    const seriesKey = getSeriesKey(dsKeys, ds[0].groupId);
+    const colorOverride = getHighestOverride(seriesKey, customColors, overrides);
+    const color = colorOverride || chartColors.vizColors[counter % chartColors.vizColors.length];
 
-  dataSeries
-    .slice()
-    // use the insert index order to avoid color assignment breaking changes
-    .sort((a, b) => a.insertIndex - b.insertIndex)
-    .forEach((ds) => {
-      const seriesKey = getSeriesKey(ds, ds.groupId);
-      const colorOverride = getHighestOverride(seriesKey, customColors, overrides);
-      const color = colorOverride || chartColors.vizColors[counter % chartColors.vizColors.length];
-
-      seriesColorMap.set(seriesKey, color);
-      counter++;
-    });
+    seriesColorMap.set(seriesKey, color);
+    counter++;
+  });
   return seriesColorMap;
 }
 

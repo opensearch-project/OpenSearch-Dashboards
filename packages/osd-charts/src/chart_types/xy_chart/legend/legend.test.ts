@@ -311,7 +311,7 @@ describe('Legends', () => {
       formattedDataSeries: [{ key, specId }],
     } = computeSeriesDomainsSelector(store.getState());
 
-    store.dispatch(onToggleDeselectSeriesAction({ key, specId }));
+    store.dispatch(onToggleDeselectSeriesAction([{ key, specId }]));
     const legend = computeLegendSelector(store.getState());
     const visibility = legend.map((item) => !item.isSeriesHidden);
     expect(visibility).toEqual([false, true]);

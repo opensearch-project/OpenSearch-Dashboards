@@ -50,14 +50,7 @@ import { fillSeries } from '../../utils/fill_series';
 import { groupBy } from '../../utils/group_data_series';
 import { IndexedGeometryMap } from '../../utils/indexed_geometry_map';
 import { computeXScale, computeYScales } from '../../utils/scales';
-import {
-  DataSeries,
-  getSeriesIndex,
-  getFormattedDataSeries,
-  getDataSeriesFromSpecs,
-  XYChartSeriesIdentifier,
-  getSeriesKey,
-} from '../../utils/series';
+import { DataSeries, getFormattedDataSeries, getDataSeriesFromSpecs, getSeriesKey } from '../../utils/series';
 import {
   AxisSpec,
   BasicSeriesSpec,
@@ -80,27 +73,6 @@ import { getSpecsById, getAxesSpecForSpecId, getSpecDomainGroupId } from './spec
 import { SeriesDomainsAndData, ComputedGeometries, GeometriesCounts, Transform } from './types';
 
 /**
- * Adds or removes series from array or series
- * @param series
- * @param target
- * @internal
- */
-export function updateDeselectedDataSeries(
-  series: XYChartSeriesIdentifier[],
-  target: XYChartSeriesIdentifier,
-): XYChartSeriesIdentifier[] {
-  const seriesIndex = getSeriesIndex(series, target);
-  const updatedSeries = series ? [...series] : [];
-
-  if (seriesIndex > -1) {
-    updatedSeries.splice(seriesIndex, 1);
-  } else {
-    updatedSeries.push(target);
-  }
-  return updatedSeries;
-}
-
-/**
  * Return map association between `seriesKey` and only the custom colors string
  * @internal
  * @param dataSeries
@@ -111,7 +83,14 @@ export function getCustomSeriesColors(dataSeries: DataSeries[]): Map<SeriesKey, 
 
   dataSeries.forEach((ds) => {
     const { spec, specId } = ds;
-    const seriesKey = getSeriesKey(ds, ds.groupId);
+    const dataSeriesKey = {
+      specId: ds.specId,
+      yAccessor: ds.yAccessor,
+      splitAccessors: ds.splitAccessors,
+      smVerticalAccessorValue: undefined,
+      smHorizontalAccessorValue: undefined,
+    };
+    const seriesKey = getSeriesKey(dataSeriesKey, ds.groupId);
 
     if (!spec || !spec.color) {
       return;
@@ -398,8 +377,16 @@ function renderGeometries(
       top: topPos,
       left: leftPos,
     };
+    const dataSeriesKey = getSeriesKey(
+      {
+        specId: ds.specId,
+        yAccessor: ds.yAccessor,
+        splitAccessors: ds.splitAccessors,
+      },
+      ds.groupId,
+    );
 
-    const color = seriesColorsMap.get(ds.key) || defaultColor;
+    const color = seriesColorsMap.get(dataSeriesKey) || defaultColor;
 
     if (isBarSeriesSpec(spec)) {
       const key = getBarIndexKey(ds, enableHistogramMode);
