@@ -23,7 +23,11 @@ import Path from 'path';
 import * as LmdbStore from 'lmdb-store';
 import { REPO_ROOT, UPSTREAM_BRANCH } from '@kbn/dev-utils';
 
-const CACHE_DIR = Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache', UPSTREAM_BRANCH);
+// This is to enable parallel jobs on CI.
+const CACHE_DIR = process.env.CACHE_DIR
+  ? Path.resolve(REPO_ROOT, process.env.CACHE_DIR)
+  : Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache', UPSTREAM_BRANCH);
+
 const reportError = () => {
   // right now I'm not sure we need to worry about errors, the cache isn't actually
   // necessary, and if the cache is broken it should just rebuild on the next restart

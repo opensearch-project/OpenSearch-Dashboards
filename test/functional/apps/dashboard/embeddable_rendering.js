@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.vegaTextsDoNotExist(['5,000']);
   };
 
-  describe('dashboard embeddable rendering', function describeIndexTests() {
+  describe.skip('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
       await esArchiver.load('dashboard/current/kibana');

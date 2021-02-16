@@ -75,7 +75,7 @@ it('rejects if neither path is absolute', async () => {
   );
 });
 
-it('copies files and directories from source to dest, including dot files, creating dest if necessary, respecting mode', async () => {
+it.skip('copies files and directories from source to dest, including dot files, creating dest if necessary, respecting mode', async () => {
   const destination = resolve(TMP, 'a/b/c');
   await scanCopy({
     source: FIXTURES,
