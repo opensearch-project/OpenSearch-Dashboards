@@ -19,12 +19,11 @@
 
 import { ScaleContinuousType } from '../../../scales';
 import { ScaleType } from '../../../scales/constants';
-import { Domain } from '../../../utils/domain';
+import { OrdinalDomain, ContinuousDomain } from '../../../utils/domain';
 import { GroupId } from '../../../utils/ids';
 
 export interface BaseDomain {
   scaleType: typeof ScaleType.Ordinal | ScaleContinuousType;
-  domain: Domain;
   /* if the scale needs to be a band scale: used when displaying bars */
   isBandScale: boolean;
 }
@@ -35,6 +34,7 @@ export type XDomain = BaseDomain & {
   minInterval: number;
   /** if x domain is time, we should also specify the timezone */
   timeZone?: string;
+  domain: OrdinalDomain | ContinuousDomain;
 };
 
 export type YDomain = BaseDomain & {
@@ -42,4 +42,5 @@ export type YDomain = BaseDomain & {
   isBandScale: false;
   scaleType: ScaleContinuousType;
   groupId: GroupId;
+  domain: ContinuousDomain;
 };

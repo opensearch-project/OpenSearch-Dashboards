@@ -57,7 +57,7 @@ export const computeSeriesGeometriesSelector = createCachedSelector(
       seriesDomainsAndData,
       seriesColors,
       chartTheme,
-      settingsSpec.rotation,
+      settingsSpec,
       axesSpecs,
       smallMultiplesScales,
       isHistogramMode,

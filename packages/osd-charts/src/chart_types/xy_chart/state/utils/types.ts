@@ -18,7 +18,7 @@
  */
 
 import { Scale } from '../../../../scales';
-import { Domain } from '../../../../utils/domain';
+import { OrdinalDomain } from '../../../../utils/domain';
 import {
   PointGeometry,
   BarGeometry,
@@ -78,8 +78,8 @@ export interface ComputedGeometries {
 export interface SeriesDomainsAndData {
   xDomain: XDomain;
   yDomains: YDomain[];
-  smVDomain: Domain;
-  smHDomain: Domain;
+  smVDomain: OrdinalDomain;
+  smHDomain: OrdinalDomain;
   formattedDataSeries: DataSeries[];
 }
 

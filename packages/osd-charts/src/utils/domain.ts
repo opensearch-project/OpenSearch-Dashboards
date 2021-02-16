@@ -23,7 +23,9 @@ import { YDomainRange } from '../specs';
 import { AccessorFn } from './accessor';
 import { getPercentageValue } from './common';
 
-export type Domain = any[];
+export type OrdinalDomain = (number | string)[];
+export type ContinuousDomain = [min: number, max: number];
+export type Range = [min: number, max: number];
 
 /** @internal */
 export function computeOrdinalDataDomain(
@@ -49,12 +51,8 @@ function getPaddedRange(start: number, end: number, domainOptions?: YDomainRange
 
   let computedPadding = 0;
 
-  if (typeof domainOptions.padding === 'string') {
-    const delta = Math.abs(end - start);
-    computedPadding = getPercentageValue(domainOptions.padding, delta, 0);
-  } else {
-    computedPadding = domainOptions.padding;
-  }
+  const delta = Math.abs(end - start);
+  computedPadding = getPercentageValue(domainOptions.padding, delta, 0);
 
   if (computedPadding === 0) {
     return [start, end];
@@ -73,16 +71,17 @@ function getPaddedRange(start: number, end: number, domainOptions?: YDomainRange
 /** @internal */
 export function computeDomainExtent(
   [start, end]: [number, number] | [undefined, undefined],
+  isLogScale: boolean,
   domainOptions?: YDomainRange,
 ): [number, number] {
   if (start != null && end != null) {
     const [paddedStart, paddedEnd] = getPaddedRange(start, end, domainOptions);
 
     if (paddedStart >= 0 && paddedEnd >= 0) {
-      return domainOptions?.fit ? [paddedStart, paddedEnd] : [0, paddedEnd];
+      return domainOptions?.fit || isLogScale ? [paddedStart, paddedEnd] : [0, paddedEnd];
     }
     if (paddedStart < 0 && paddedEnd < 0) {
-      return domainOptions?.fit ? [paddedStart, paddedEnd] : [paddedStart, 0];
+      return domainOptions?.fit || isLogScale ? [paddedStart, paddedEnd] : [paddedStart, 0];
     }
 
     return [paddedStart, paddedEnd];
@@ -101,13 +100,14 @@ export function computeDomainExtent(
 export function computeContinuousDataDomain(
   data: any[],
   accessor: (n: any) => number,
+  isLogScale: boolean,
   domainOptions?: YDomainRange | null,
-): number[] {
+): ContinuousDomain {
   const range = extent<any, number>(data, accessor);
 
   if (domainOptions === null) {
     return [range[0] ?? 0, range[1] ?? 0];
   }
 
-  return computeDomainExtent(range, domainOptions);
+  return computeDomainExtent(range, isLogScale, domainOptions);
 }

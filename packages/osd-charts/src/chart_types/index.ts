@@ -19,6 +19,10 @@
 
 import { $Values } from 'utility-types';
 
+/**
+ * Available chart types
+ * @public
+ */
 export const ChartTypes = Object.freeze({
   Global: 'global' as const,
   Goal: 'goal' as const,
@@ -26,6 +30,4 @@ export const ChartTypes = Object.freeze({
   XYAxis: 'xy_axis' as const,
   Heatmap: 'heatmap' as const,
 });
-
-/** @public */
 export type ChartTypes = $Values<typeof ChartTypes>;

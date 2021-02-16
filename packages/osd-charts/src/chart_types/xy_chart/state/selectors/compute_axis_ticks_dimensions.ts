@@ -74,7 +74,7 @@ export const computeAxisTicksDimensionsSelector = createCachedSelector(
         yDomains,
         totalBarsInCluster,
         bboxCalculator,
-        settingsSpec.rotation,
+        settingsSpec,
         axisStyle,
         fallBackTickFormatter,
         barsPadding,

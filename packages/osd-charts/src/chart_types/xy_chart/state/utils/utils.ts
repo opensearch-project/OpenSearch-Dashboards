@@ -18,13 +18,13 @@
  */
 
 import { SeriesKey, SeriesIdentifier } from '../../../../common/series_id';
-import { Scale } from '../../../../scales';
+import { LogBase, Scale } from '../../../../scales';
 import { SortSeriesByConfig } from '../../../../specs';
-import { OrderBy } from '../../../../specs/settings';
+import { OrderBy, SettingsSpec } from '../../../../specs/settings';
 import { mergePartial, Rotation, Color, isUniqueArray } from '../../../../utils/common';
 import { CurveType } from '../../../../utils/curves';
 import { Dimensions, Size } from '../../../../utils/dimensions';
-import { Domain } from '../../../../utils/domain';
+import { ContinuousDomain, OrdinalDomain } from '../../../../utils/domain';
 import {
   PointGeometry,
   BarGeometry,
@@ -133,7 +133,7 @@ export function computeSeriesDomains(
   seriesSpecs: BasicSeriesSpec[],
   customYDomainsByGroupId: Map<GroupId, YDomainRange> = new Map(),
   deselectedDataSeries: SeriesIdentifier[] = [],
-  customXDomain?: DomainRange | Domain,
+  customXDomain?: DomainRange | ContinuousDomain | OrdinalDomain,
   orderOrdinalBinsBy?: OrderBy,
   smallMultiples?: SmallMultiplesGroupBy,
   sortSeriesBy?: SeriesCompareFn | SortSeriesByConfig,
@@ -183,7 +183,7 @@ export function computeSeriesGeometries(
   { xDomain, yDomains, formattedDataSeries: nonFilteredDataSeries }: SeriesDomainsAndData,
   seriesColorMap: Map<SeriesKey, Color>,
   chartTheme: Theme,
-  chartRotation: Rotation,
+  { rotation: chartRotation, scaleLogOptions: { yLogBase, yLogMinLimit, xLogBase, xLogMinLimit } = {} }: SettingsSpec,
   axesSpecs: AxisSpec[],
   smallMultiplesScales: SmallMultipleScales,
   enableHistogramMode: boolean,
@@ -217,6 +217,8 @@ export function computeSeriesGeometries(
   const yScales = computeYScales({
     yDomains,
     range: [isHorizontalRotation(chartRotation) ? vertical.bandwidth : horizontal.bandwidth, 0],
+    logBase: yLogBase,
+    logMinLimit: yLogMinLimit,
   });
 
   const computedGeoms = renderGeometries(
@@ -233,6 +235,8 @@ export function computeSeriesGeometries(
     chartTheme,
     enableHistogramMode,
     chartRotation,
+    xLogBase,
+    xLogMinLimit,
   );
 
   const totalBarsInCluster = Object.values(barIndexByPanel).reduce((acc, curr) => {
@@ -245,6 +249,8 @@ export function computeSeriesGeometries(
     range: [0, isHorizontalRotation(chartRotation) ? horizontal.bandwidth : vertical.bandwidth],
     barsPadding: enableHistogramMode ? chartTheme.scales.histogramPadding : chartTheme.scales.barsPadding,
     enableHistogramMode,
+    logBase: xLogBase,
+    logMinLimit: xLogMinLimit,
   });
 
   return {
@@ -321,6 +327,8 @@ function renderGeometries(
   chartTheme: Theme,
   enableHistogramMode: boolean,
   chartRotation: Rotation,
+  xLogBase?: LogBase,
+  xLogMinLimit?: number,
 ): Omit<ComputedGeometries, 'scales'> {
   const len = dataSeries.length;
   let i;
@@ -365,6 +373,8 @@ function renderGeometries(
       range: [0, isHorizontalRotation(chartRotation) ? smHScale.bandwidth : smVScale.bandwidth],
       barsPadding,
       enableHistogramMode,
+      logBase: xLogBase,
+      logMinLimit: xLogMinLimit,
     });
 
     const { stackMode } = ds;

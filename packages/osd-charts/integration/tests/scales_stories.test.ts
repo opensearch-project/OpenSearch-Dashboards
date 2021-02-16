@@ -17,19 +17,13 @@
  * under the License.
  */
 
-import { SB_KNOBS_PANEL } from '../utils/storybook';
+import { LogBase } from '../../src/scales/scale_continuous';
+import { common } from '../page_objects';
 
-export default {
-  title: 'Scales',
-  parameters: {
-    options: { selectedPanel: SB_KNOBS_PANEL },
-  },
-};
-
-export { Example as timezoneConfiguration } from './1_different_timezones';
-export { Example as tooltipInLocalTimezone } from './2_local_tooltip';
-export { Example as tooltipInUTC } from './3_utc_tooltip';
-export { Example as specifiedTimezone } from './4_specified_timezone';
-export { Example as removeDuplicateAxis } from './5_remove_duplicates';
-export { Example as xScaleFallback } from './6_x_scale_fallback';
-export { Example as logScaleOptions } from './7_log_scale_options';
+describe('Scales stories', () => {
+  it.each(Object.values(LogBase))('should render proper tick count', async (base) => {
+    await common.expectChartAtUrlToMatchScreenshot(
+      `http://localhost:9001/?path=/story/scales--log-scale-options&knob-Log base_Y - Axis=${base}`,
+    );
+  });
+});

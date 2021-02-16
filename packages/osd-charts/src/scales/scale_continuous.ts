@@ -28,6 +28,7 @@ import {
   ScalePower,
   ScaleTime,
 } from 'd3-scale';
+import { $Values } from 'utility-types';
 
 import { ScaleContinuousType, Scale } from '.';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
@@ -56,44 +57,90 @@ const SCALES = {
  * As log(0) = -Infinite, a log scale domain must be strictly-positive
  * or strictly-negative; the domain must not include or cross zero value.
  * We need to limit the domain scale to the right value on all possible cases.
+ *
  * @param domain the domain to limit
  * @internal
  */
-export function limitLogScaleDomain(domain: any[]) {
-  if (domain[0] === 0) {
-    if (domain[1] > 0) {
-      return [LOG_MIN_ABS_DOMAIN, domain[1]];
+export function limitLogScaleDomain([min, max]: [min: number, max: number], logMinLimit?: number) {
+  const absLimit = logMinLimit !== undefined ? Math.abs(logMinLimit) : undefined;
+  if (absLimit !== undefined && absLimit > 0) {
+    if (min > 0 && min < absLimit) {
+      if (max > absLimit) {
+        return [absLimit, max];
+      }
+      return [absLimit, absLimit];
     }
-    if (domain[1] < 0) {
-      return [-LOG_MIN_ABS_DOMAIN, domain[1]];
+
+    if (max < 0 && max > -absLimit) {
+      if (min < -absLimit) {
+        return [min, -absLimit];
+      }
+      return [-absLimit, -absLimit];
     }
-    return [LOG_MIN_ABS_DOMAIN, LOG_MIN_ABS_DOMAIN];
   }
-  if (domain[1] === 0) {
-    if (domain[0] > 0) {
-      return [domain[0], LOG_MIN_ABS_DOMAIN];
+
+  const fallbackLimit = absLimit || LOG_MIN_ABS_DOMAIN;
+
+  if (min === 0) {
+    if (max > 0) {
+      return [fallbackLimit, max];
     }
-    if (domain[0] < 0) {
-      return [domain[0], -LOG_MIN_ABS_DOMAIN];
+    if (max < 0) {
+      return [-fallbackLimit, max];
     }
-    return [LOG_MIN_ABS_DOMAIN, LOG_MIN_ABS_DOMAIN];
+    return [fallbackLimit, fallbackLimit];
   }
-  if (domain[0] < 0 && domain[1] > 0) {
-    const isD0Min = Math.abs(domain[1]) - Math.abs(domain[0]) >= 0;
+  if (max === 0) {
+    if (min > 0) {
+      return [min, fallbackLimit];
+    }
+    if (min < 0) {
+      return [min, -fallbackLimit];
+    }
+    return [fallbackLimit, fallbackLimit];
+  }
+  if (min < 0 && max > 0) {
+    const isD0Min = Math.abs(max) - Math.abs(min) >= 0;
     if (isD0Min) {
-      return [LOG_MIN_ABS_DOMAIN, domain[1]];
+      return [fallbackLimit, max];
     }
-    return [domain[0], -LOG_MIN_ABS_DOMAIN];
+    return [min, -fallbackLimit];
   }
-  if (domain[0] > 0 && domain[1] < 0) {
-    const isD0Max = Math.abs(domain[0]) - Math.abs(domain[1]) >= 0;
+  if (min > 0 && max < 0) {
+    const isD0Max = Math.abs(min) - Math.abs(max) >= 0;
     if (isD0Max) {
-      return [domain[0], LOG_MIN_ABS_DOMAIN];
+      return [min, fallbackLimit];
     }
-    return [-LOG_MIN_ABS_DOMAIN, domain[1]];
+    return [-fallbackLimit, max];
   }
-  return domain;
+  return [min, max];
 }
+
+export const LogBase = Object.freeze({
+  /**
+   * log base `10`
+   */
+  Common: 'common' as const,
+  /**
+   * log base `2`
+   */
+  Binary: 'binary' as const,
+  /**
+   * log base `e` (aka ln)
+   */
+  Natural: 'natural' as const,
+});
+/**
+ * Log bases
+ */
+export type LogBase = $Values<typeof LogBase>;
+
+/** @internal */
+export const logBaseMap: Record<LogBase, number> = {
+  [LogBase.Common]: 10,
+  [LogBase.Binary]: 2,
+  [LogBase.Natural]: Math.E,
+};
 
 interface ScaleData {
   /** The Type of continuous scale */
@@ -101,7 +148,7 @@ interface ScaleData {
   /** The data input domain */
   domain: any[];
   /** The data output range */
-  range: [number, number];
+  range: [min: number, max: number];
 }
 
 interface ScaleOptions {
@@ -138,11 +185,25 @@ interface ScaleOptions {
    * @defaultValue 10
    */
   ticks: number;
-  /** true if the scale was adjusted to fit one single value histogram */
+  /**
+   * true if the scale was adjusted to fit one single value histogram
+   */
   isSingleValueHistogram: boolean;
-  /** Show only integer values */
+  /**
+   * Show only integer values
+   */
   integersOnly?: boolean;
+  /**
+   * Set base for log scales, otherwise ignored
+   * @defaultValue 10
+   */
+  logBase: LogBase;
+  /**
+   * Set min limit for log scales, otherwise ignored
+   */
+  logMinLimit?: number;
 }
+
 const defaultScaleOptions: ScaleOptions = {
   bandwidth: 0,
   minInterval: 0,
@@ -152,6 +213,7 @@ const defaultScaleOptions: ScaleOptions = {
   ticks: 10,
   isSingleValueHistogram: false,
   integersOnly: false,
+  logBase: LogBase.Common,
 };
 
 /**
@@ -198,12 +260,20 @@ export class ScaleContinuous implements Scale {
       ticks,
       isSingleValueHistogram,
       integersOnly,
-    } = mergePartial(defaultScaleOptions, options);
+      logBase,
+      logMinLimit,
+    } = mergePartial(defaultScaleOptions, options, { mergeOptionalPartialValues: true });
 
     this.d3Scale = SCALES[type]();
-    const cleanDomain = type === ScaleType.Log ? limitLogScaleDomain(domain) : domain;
-    this.domain = cleanDomain;
-    this.d3Scale.domain(cleanDomain);
+
+    if (type === ScaleType.Log) {
+      (this.d3Scale as ScaleLogarithmic<PrimitiveValue, number>).base(logBaseMap[logBase]);
+      this.domain = limitLogScaleDomain(domain as [number, number], logMinLimit);
+    } else {
+      this.domain = domain;
+    }
+
+    this.d3Scale.domain(this.domain);
 
     const safeBarPadding = maxValueWithUpperLimit(barsPadding, 0, 1);
     this.barsPadding = safeBarPadding;
@@ -218,6 +288,7 @@ export class ScaleContinuous implements Scale {
     this.timeZone = timeZone;
     this.totalBarsInCluster = totalBarsInCluster;
     this.isSingleValueHistogram = isSingleValueHistogram;
+
     if (type === ScaleType.Time) {
       const startDomain = getMomentWithTz(this.domain[0], this.timeZone);
       const endDomain = getMomentWithTz(this.domain[1], this.timeZone);

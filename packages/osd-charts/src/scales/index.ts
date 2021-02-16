@@ -76,3 +76,5 @@ export { ScaleBand } from './scale_band';
 
 /** @internal */
 export { ScaleContinuous } from './scale_continuous';
+
+export { LogBase } from './scale_continuous';

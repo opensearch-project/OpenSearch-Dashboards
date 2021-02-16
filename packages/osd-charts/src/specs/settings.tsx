@@ -29,11 +29,12 @@ import { SeriesIdentifier } from '../common/series_id';
 import { TooltipPortalSettings } from '../components';
 import { CustomTooltip } from '../components/tooltip/types';
 import { ScaleContinuousType, ScaleOrdinalType } from '../scales';
+import { LogBase } from '../scales/scale_continuous';
 import { LegendPath } from '../state/actions/legend';
 import { getConnect, specComponentFactory } from '../state/spec_factory';
 import { Accessor } from '../utils/accessor';
 import { Color, Position, Rendering, Rotation } from '../utils/common';
-import { Domain } from '../utils/domain';
+import { ContinuousDomain, OrdinalDomain } from '../utils/domain';
 import { GeometryValue } from '../utils/geometry';
 import { GroupId } from '../utils/ids';
 import { SeriesCompareFn } from '../utils/series_sort';
@@ -320,6 +321,38 @@ export type LegendColorPicker = ComponentType<LegendColorPickerProps>;
  */
 export type MarkBuffer = number | ((radius: number) => number);
 
+export interface ScaleLogOptions {
+  /**
+   * Min log value to render y scale
+   *
+   * Defaults to min value of domain, or LOG_MIN_ABS_DOMAIN if mixed polarity
+   */
+  yLogMinLimit?: number;
+
+  /**
+   * Base for log y scales
+   *
+   * @defaultValue `common` {@link (LogBase:type) | LogBase.Common}
+   * (i.e. log base 10)
+   */
+  yLogBase?: LogBase;
+
+  /**
+   * Min log value to render x scale
+   *
+   * Defaults to min value of domain, or LOG_MIN_ABS_DOMAIN if mixed polarity
+   */
+  xLogMinLimit?: number;
+
+  /**
+   * Base for log x scales
+   *
+   * @defaultValue `common` {@link (LogBase:type) | LogBase.Common}
+   * (i.e. log base 10)
+   */
+  xLogBase?: LogBase;
+}
+
 /**
  * The Spec used for Chart settings
  * @public
@@ -410,7 +443,7 @@ export interface SettingsSpec extends Spec {
   onLegendItemMinusClick?: LegendItemListener;
   onPointerUpdate?: PointerUpdateListener;
   onRenderChange?: RenderChangeListener;
-  xDomain?: Domain | DomainRange;
+  xDomain?: ContinuousDomain | OrdinalDomain | DomainRange;
   resizeDebounce?: number;
   /**
    * Render slot to render action for legend
@@ -470,6 +503,11 @@ export interface SettingsSpec extends Spec {
    * Render component for no results UI
    */
   noResults?: ComponentType | ReactChild;
+  /**
+   * Options to configure log scales
+   * TODO: move into scales component to be per scale not per chart
+   */
+  scaleLogOptions?: ScaleLogOptions;
 }
 
 /**

@@ -19,6 +19,8 @@
 
 import { Line } from '../../../geoms/types';
 import { Scale } from '../../../scales';
+import { LogBase } from '../../../scales/scale_continuous';
+import { SettingsSpec } from '../../../specs';
 import { BBox, BBoxCalculator } from '../../../utils/bbox/bbox_calculator';
 import {
   Position,
@@ -93,7 +95,7 @@ export function computeAxisTicksDimensions(
   yDomains: YDomain[],
   totalBarsInCluster: number,
   bboxCalculator: BBoxCalculator,
-  chartRotation: Rotation,
+  { rotation: chartRotation, scaleLogOptions: { yLogBase, yLogMinLimit, xLogBase, xLogMinLimit } = {} }: SettingsSpec,
   { gridLine, tickLabel }: AxisStyle,
   fallBackTickFormatter: TickFormatter,
   barsPadding?: number,
@@ -106,14 +108,17 @@ export function computeAxisTicksDimensions(
     return null;
   }
 
+  const axisIsYDomain = isYDomain(axisSpec.position, chartRotation);
   const scale = getScaleForAxisSpec(
     axisSpec,
     xDomain,
     yDomains,
     totalBarsInCluster,
-    chartRotation,
+    axisIsYDomain,
     0,
     1,
+    axisIsYDomain ? yLogBase : xLogBase,
+    axisIsYDomain ? yLogMinLimit : xLogMinLimit,
     barsPadding,
     enableHistogramMode,
   );
@@ -154,20 +159,23 @@ export function getScaleForAxisSpec(
   xDomain: XDomain,
   yDomains: YDomain[],
   totalBarsInCluster: number,
-  chartRotation: Rotation,
+  axisIsYDomain: boolean,
   minRange: number,
   maxRange: number,
+  logBase?: LogBase,
+  logMinLimit?: number,
   barsPadding?: number,
   enableHistogramMode?: boolean,
 ): Scale | null {
-  const axisIsYDomain = isYDomain(axisSpec.position, chartRotation);
-  const range: [number, number] = [minRange, maxRange];
+  const range: [min: number, max: number] = [minRange, maxRange];
   if (axisIsYDomain) {
     const yScales = computeYScales({
       yDomains,
       range,
       ticks: axisSpec.ticks,
       integersOnly: axisSpec.integersOnly,
+      logBase,
+      logMinLimit,
     });
     if (yScales.has(axisSpec.groupId)) {
       return yScales.get(axisSpec.groupId)!;
@@ -182,6 +190,8 @@ export function getScaleForAxisSpec(
     enableHistogramMode,
     ticks: axisSpec.ticks,
     integersOnly: axisSpec.integersOnly,
+    logBase,
+    logMinLimit,
   });
 }
 
@@ -746,7 +756,7 @@ export function getAxesGeometries(
     leftMargin: number;
   },
   { chartPaddings, chartMargins, axes: sharedAxesStyle }: Theme,
-  chartRotation: Rotation,
+  { rotation: chartRotation, scaleLogOptions: { yLogBase, yLogMinLimit, xLogBase, xLogMinLimit } = {} }: SettingsSpec,
   axisSpecs: AxisSpec[],
   axisDimensions: Map<AxisId, AxisTicksDimensions>,
   axesStyles: Map<AxisId, AxisStyle | null>,
@@ -835,14 +845,18 @@ export function getAxesGeometries(
 
     const isVertical = isVerticalAxis(axisSpec.position);
     const minMaxRanges = getMinMaxRange(axisSpec.position, chartRotation, panel);
+    const axisIsYDomain = isYDomain(axisSpec.position, chartRotation);
+
     const scale = getScaleForAxisSpec(
       axisSpec,
       xDomain,
       yDomains,
       totalGroupsCount,
-      chartRotation,
+      axisIsYDomain,
       minMaxRanges.minRange,
       minMaxRanges.maxRange,
+      axisIsYDomain ? yLogBase : xLogBase,
+      axisIsYDomain ? yLogMinLimit : xLogMinLimit,
       barsPadding,
       enableHistogramMode,
     );
