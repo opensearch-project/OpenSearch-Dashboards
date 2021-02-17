@@ -1,31 +1,98 @@
-node {
-    label 'website'
-    def scmVars = checkout scm
-    sh "env"
-    def imageName = "test-image:${env.BUILD_ID}"
-    def testImage
-    stage('Build container image') {
-        sh 'ls -l'
-        testImage = docker.build imageName
+def IMAGE_NAME
+def DOCKER_IMAGE
+pipeline {
+	agent { label 'fork' }
+    // Ensure we don't take any other build, this is needed to ensure we build only once.
+    options {
+      throttleJobProperty(
+          categories: ['Website_PR'],
+          throttleEnabled: true,
+          throttleOption: 'category'
+      )
     }
-    testImage.inside {
-        try {
-            stage('bootstrap') {
-              sh 'yarn kbn bootstrap'
-            }
-            stage('unit tests') {
-                sh 'yarn test:jest -u --ci --verbose --maxWorkers=5'
-            }
-            stage('integration tests') {
-                sh 'yarn test:jest_integration -u --ci'
-                sh 'yarn test:mocha'
-            }
-        } catch (e) {
-            echo 'This will run only if failed'
-            currentBuild.result = 'FAILURE'
-            // Since we're catching the exception in order to report on it,
-            // we need to re-throw it, to ensure that the build is marked as failed
-            throw e
+	stages {
+    stage("Build") {
+      steps {
+        script {
+          IMAGE_NAME = "website-src-image:${env.BUILD_ID}"
+          DOCKER_IMAGE = docker.build IMAGE_NAME
+          DOCKER_IMAGE.inside {
+              stage('bootstrap') {
+                  echo "Bootstrap here"
+                  sh 'yarn kbn bootstrap'
+                  sh 'node scripts/build_kibana_platform_plugins --oss --no-examples --workers 10'
+              }
+          }
         }
+      }
     }
+    stage('Unit tests') {
+      steps {
+        script { 
+          DOCKER_IMAGE.inside {
+              sh 'yarn test:jest -u --ci --verbose' // TODO::Need to remove -u and fix the CI
+          }
+        }
+      }
+    }
+    stage('Integ tests') {
+      steps {
+        script {
+          DOCKER_IMAGE.inside {
+              sh 'yarn test:jest_integration -u --ci --verbose' // TODO::Need to remove -u and fix the CI
+              sh 'yarn test:mocha'
+          }
+        }
+      }
+    }
+		stage("Functional tests") {
+      steps {
+        functionalDynamicParallelSteps(DOCKER_IMAGE)
+      }
+		}
+	}
+}
+
+def functionalDynamicParallelSteps(image){
+    ciGroupsMap = [:]
+    ciGroups = [
+      "ciGroup1",
+      "ciGroup2",
+      "ciGroup3",
+      "ciGroup4",
+      "ciGroup5",
+      "ciGroup6",
+      "ciGroup7",
+      "ciGroup8",
+      "ciGroup9",
+      "ciGroup10",
+      "ciGroup11",
+      "ciGroup12",
+    ]
+    for (int i = 0; i < ciGroups.size(); i++) {
+      def currentCiGroup = ciGroups[i];
+      def currentStep = i;
+      ciGroupsMap["${currentCiGroup}"] = {
+        stage("${currentCiGroup}") {
+          withEnv([
+              "TEST_BROWSER_HEADLESS=1",
+              "CI=1",
+              "CI_GROUP=${currentCiGroup}",
+              "GCS_UPLOAD_PREFIX=fake",
+              "TEST_KIBANA_HOST=localhost",
+              "TEST_KIBANA_PORT=6610",
+              "TEST_ES_TRANSPORT_PORT=9403",
+              "TEST_ES_PORT=9400",
+              "CI_PARALLEL_PROCESS_NUMBER=${currentStep}",
+              "JOB=ci${currentStep}",
+              "CACHE_DIR=${currentCiGroup}"
+          ]) {
+              image.inside {
+                  sh "node scripts/functional_tests.js --config test/functional/config.js --include ${currentCiGroup}"
+              }
+          }
+        }
+      }
+    }
+    parallel ciGroupsMap
 }

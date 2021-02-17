@@ -42,14 +42,14 @@ export default function ({ getService }) {
         .expect(200)
         .expect('Content-Encoding', 'gzip'));
 
-    it('returns br files when client only supports br', () =>
+    it.skip('returns br files when client only supports br', () =>
       supertest
         .get(`/${buildNum}/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.js`)
         .set('Accept-Encoding', 'br')
         .expect(200)
         .expect('Content-Encoding', 'br'));
 
-    it('returns br files when client only supports gzip and br', () =>
+    it.skip('returns br files when client only supports gzip and br', () =>
       supertest
         .get(`/${buildNum}/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.js`)
         .set('Accept-Encoding', 'gzip, br')
