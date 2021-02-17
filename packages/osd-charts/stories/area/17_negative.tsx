@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { select, number } from '@storybook/addon-knobs';
+import { select } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, Position, ScaleType, timeFormatter, Settings } from '../../src';
+import { AreaSeries, Axis, Chart, Position, ScaleType, timeFormatter } from '../../src';
 import { KIBANA_METRICS } from '../../src/utils/data_samples/test_dataset_kibana';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
 
@@ -40,7 +40,6 @@ export const Example = () => {
   );
   return (
     <Chart className="story-chart">
-      <Settings scaleLogOptions={{ yLogMinLimit: number('Y log limit', 1, { min: 0 }) }} />
       <Axis id="bottom" position={Position.Bottom} showOverlappingTicks tickFormat={dateFormatter} />
       <Axis id="left" title="negative metric" position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
 

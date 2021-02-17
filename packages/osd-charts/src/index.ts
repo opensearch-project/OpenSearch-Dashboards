@@ -27,7 +27,6 @@ export * from './specs';
 export { DebugState } from './state/types';
 export { toEntries } from './utils/common';
 export { CurveType } from './utils/curves';
-export { ContinuousDomain, OrdinalDomain } from './utils/domain';
 export { SimplePadding } from './utils/dimensions';
 export { timeFormatter, niceTimeFormatter, niceTimeFormatByDay } from './utils/data/formatters';
 export { SeriesIdentifier, SeriesKey } from './common/series_id';
@@ -55,7 +54,7 @@ export { CustomTooltip, TooltipInfo } from './components/tooltip/types';
 
 // scales
 export { ScaleType } from './scales/constants';
-export { ScaleContinuousType, ScaleOrdinalType, ScaleBandType, LogBase } from './scales';
+export { ScaleContinuousType, ScaleOrdinalType, ScaleBandType } from './scales';
 
 // theme
 export * from './utils/themes/theme';

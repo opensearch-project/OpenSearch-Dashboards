@@ -19,8 +19,6 @@
 
 import { Scale, ScaleBand, ScaleContinuous } from '../../../scales';
 import { ScaleType } from '../../../scales/constants';
-import { LogBase } from '../../../scales/scale_continuous';
-import { ContinuousDomain } from '../../../utils/domain';
 import { GroupId } from '../../../utils/ids';
 import { XDomain, YDomain } from '../domains/types';
 
@@ -43,13 +41,11 @@ function getBandScaleRange(
 interface XScaleOptions {
   xDomain: XDomain;
   totalBarsInCluster: number;
-  range: [min: number, max: number];
+  range: [number, number];
   barsPadding?: number;
   enableHistogramMode?: boolean;
   ticks?: number;
   integersOnly?: boolean;
-  logBase?: LogBase;
-  logMinLimit?: number;
 }
 
 /**
@@ -60,17 +56,7 @@ interface XScaleOptions {
  * @internal
  */
 export function computeXScale(options: XScaleOptions): Scale {
-  const {
-    xDomain,
-    totalBarsInCluster,
-    range,
-    barsPadding,
-    enableHistogramMode,
-    ticks,
-    integersOnly,
-    logBase,
-    logMinLimit,
-  } = options;
+  const { xDomain, totalBarsInCluster, range, barsPadding, enableHistogramMode, ticks, integersOnly } = options;
   const { scaleType, minInterval, domain, isBandScale, timeZone } = xDomain;
   const rangeDiff = Math.abs(range[1] - range[0]);
   const isInverse = range[1] < range[0];
@@ -80,7 +66,7 @@ export function computeXScale(options: XScaleOptions): Scale {
     return new ScaleBand(domain, range, bandwidth, barsPadding);
   }
   if (isBandScale) {
-    const [domainMin, domainMax] = domain as ContinuousDomain;
+    const [domainMin, domainMax] = domain;
     const isSingleValueHistogram = !!enableHistogramMode && domainMax - domainMin === 0;
 
     const adjustedDomainMax = isSingleValueHistogram ? domainMin + minInterval : domainMax;
@@ -105,8 +91,6 @@ export function computeXScale(options: XScaleOptions): Scale {
         barsPadding,
         ticks,
         isSingleValueHistogram,
-        logBase,
-        logMinLimit,
       },
     );
 
@@ -114,29 +98,16 @@ export function computeXScale(options: XScaleOptions): Scale {
   }
   return new ScaleContinuous(
     { type: scaleType, domain, range },
-    {
-      bandwidth: 0,
-      minInterval,
-      timeZone,
-      totalBarsInCluster,
-      barsPadding,
-      ticks,
-      integersOnly,
-      logBase,
-      logMinLimit,
-    },
+    { bandwidth: 0, minInterval, timeZone, totalBarsInCluster, barsPadding, ticks, integersOnly },
   );
 }
 
 interface YScaleOptions {
   yDomains: YDomain[];
-  range: [min: number, max: number];
+  range: [number, number];
   ticks?: number;
   integersOnly?: boolean;
-  logBase?: LogBase;
-  logMinLimit?: number;
 }
-
 /**
  * Compute the y scales, one per groupId for the y axis.
  * @param yDomains the y domains
@@ -145,7 +116,7 @@ interface YScaleOptions {
  */
 export function computeYScales(options: YScaleOptions): Map<GroupId, Scale> {
   const yScales: Map<GroupId, Scale> = new Map();
-  const { yDomains, range, ticks, integersOnly, logBase, logMinLimit } = options;
+  const { yDomains, range, ticks, integersOnly } = options;
   yDomains.forEach(({ scaleType: type, domain, groupId }) => {
     const yScale = new ScaleContinuous(
       {
@@ -156,8 +127,6 @@ export function computeYScales(options: YScaleOptions): Map<GroupId, Scale> {
       {
         ticks,
         integersOnly,
-        logBase,
-        logMinLimit,
       },
     );
     yScales.set(groupId, yScale);

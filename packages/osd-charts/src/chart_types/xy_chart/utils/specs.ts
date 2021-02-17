@@ -49,16 +49,15 @@ export type BarStyleOverride = RecursivePartial<BarSeriesStyle> | Color | null;
 /** @public */
 export type PointStyleOverride = RecursivePartial<PointStyle> | Color | null;
 
+/** @public */
 export const SeriesTypes = Object.freeze({
   Area: 'area' as const,
   Bar: 'bar' as const,
   Line: 'line' as const,
   Bubble: 'bubble' as const,
 });
-/**
- * XY series types
- * @public
- */
+
+/** @public */
 export type SeriesTypes = $Values<typeof SeriesTypes>;
 
 /**
@@ -282,7 +281,7 @@ export interface YDomainBase {
    */
   fit?: boolean;
   /**
-   * Padding for computed domain. Positive pixel number or percent string.
+   * Padding for computed domain. Pixel number or percent string.
    *
    * Setting `max` or `min` will override this functionality.
    */
@@ -693,6 +692,7 @@ export const AnnotationTypes = Object.freeze({
   Rectangle: 'rectangle' as const,
   Text: 'text' as const,
 });
+
 /** @public */
 export type AnnotationType = $Values<typeof AnnotationTypes>;
 

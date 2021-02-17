@@ -75,18 +75,6 @@ describe('Area series stories', () => {
       );
     });
 
-    it('shows only positive domain mixed polarity domain with limit', async () => {
-      await common.expectChartAtUrlToMatchScreenshot(
-        'http://localhost:9001/?path=/story/area-chart--with-negative-and-positive&knob-Y scale=log&knob-Y log limit=0.01',
-      );
-    });
-
-    it('shows only positive domain mixed polarity domain with limit of 0', async () => {
-      await common.expectChartAtUrlToMatchScreenshot(
-        'http://localhost:9001/?path=/story/area-chart--with-negative-and-positive&knob-Y scale=log&knob-Y log limit=0',
-      );
-    });
-
     it('shows only positive values when hiding negative one', async () => {
       const action = async () => {
         await common.disableAnimations();

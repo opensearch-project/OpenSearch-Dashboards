@@ -25,13 +25,12 @@ import { MockGlobalSpec, MockSeriesSpec } from '../../../mocks/specs/specs';
 import { MockStore } from '../../../mocks/store/store';
 import { Scale } from '../../../scales';
 import { ScaleType } from '../../../scales/constants';
-import { LogBase } from '../../../scales/scale_continuous';
 import { SpecTypes } from '../../../specs/constants';
 import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_calculator';
 import { SvgTextBBoxCalculator } from '../../../utils/bbox/svg_text_bbox_calculator';
 import { Position, mergePartial } from '../../../utils/common';
 import { niceTimeFormatter } from '../../../utils/data/formatters';
-import { OrdinalDomain } from '../../../utils/domain';
+import { Domain } from '../../../utils/domain';
 import { AxisId, GroupId } from '../../../utils/ids';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { AxisStyle, TextOffset } from '../../../utils/themes/theme';
@@ -204,7 +203,7 @@ describe('Axis computational utils', () => {
     isBandScale: false,
   };
 
-  const getSmScales = (smHDomain: OrdinalDomain = [], smVDomain: OrdinalDomain = []): SmallMultipleScales => ({
+  const getSmScales = (smHDomain: Domain = [], smVDomain: Domain = []): SmallMultipleScales => ({
     horizontal: getScale(smHDomain, chartDim.width),
     vertical: getScale(smVDomain, chartDim.height),
   });
@@ -235,7 +234,7 @@ describe('Axis computational utils', () => {
       [yDomain],
       1,
       bboxCalculator,
-      MockGlobalSpec.settings(),
+      0,
       axes,
       (v) => `${v}`,
     );
@@ -248,7 +247,7 @@ describe('Axis computational utils', () => {
       [yDomain],
       1,
       bboxCalculator,
-      MockGlobalSpec.settings(),
+      0,
       axes,
       (v) => `${v}`,
       undefined,
@@ -269,7 +268,7 @@ describe('Axis computational utils', () => {
       [yDomain],
       1,
       bboxCalculator,
-      MockGlobalSpec.settings(),
+      0,
       axes,
       (v) => `${v}`,
     );
@@ -292,7 +291,7 @@ describe('Axis computational utils', () => {
       [yDomain],
       1,
       bboxCalculator,
-      MockGlobalSpec.settings(),
+      0,
       axes,
       (v) => `${v}`,
     );
@@ -309,7 +308,7 @@ describe('Axis computational utils', () => {
       [yDomain],
       1,
       bboxCalculator,
-      MockGlobalSpec.settings(),
+      0,
       axes,
       (v) => `${v}`,
     );
@@ -326,7 +325,7 @@ describe('Axis computational utils', () => {
       [yDomain],
       1,
       bboxCalculator,
-      MockGlobalSpec.settings(),
+      0,
       axes,
       (v) => `${v}`,
     );
@@ -353,7 +352,7 @@ describe('Axis computational utils', () => {
   });
 
   test('should generate a valid scale', () => {
-    const yScale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, true, 100, 0, LogBase.Common);
+    const yScale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
     expect(yScale).toBeDefined();
     expect(yScale?.bandwidth).toBe(0);
     expect(yScale?.domain).toEqual([0, 1]);
@@ -361,10 +360,10 @@ describe('Axis computational utils', () => {
     expect(yScale?.ticks()).toEqual([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]);
 
     const ungroupedAxisSpec = { ...verticalAxisSpec, groupId: 'foo' };
-    const nullYScale = getScaleForAxisSpec(ungroupedAxisSpec, xDomain, [yDomain], 0, true, 100, 0, LogBase.Common);
+    const nullYScale = getScaleForAxisSpec(ungroupedAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
     expect(nullYScale).toBe(null);
 
-    const xScale = getScaleForAxisSpec(horizontalAxisSpec, xDomain, [yDomain], 0, false, 100, 0, LogBase.Common);
+    const xScale = getScaleForAxisSpec(horizontalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
     expect(xScale).toBeDefined();
   });
 
@@ -385,7 +384,7 @@ describe('Axis computational utils', () => {
 
   describe('getAvailableTicks', () => {
     test('should compute to end of domain when histogram mode not enabled', () => {
-      const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, true, 100, 0, LogBase.Common);
+      const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
       const axisPositions = getAvailableTicks(verticalAxisSpec, scale!, 0, false, (v) => `${v}`, 0);
       const expectedAxisPositions = [
         { label: '0', position: 100, value: 0 },
@@ -405,7 +404,7 @@ describe('Axis computational utils', () => {
 
     test('should compute positions with rotational offset', () => {
       const rotationalOffset = 2;
-      const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, true, 100, 0, LogBase.Common);
+      const scale = getScaleForAxisSpec(verticalAxisSpec, xDomain, [yDomain], 0, 0, 100, 0);
       const axisPositions = getAvailableTicks(verticalAxisSpec, scale!, 0, false, (v) => `${v}`, rotationalOffset);
       const expectedAxisPositions = [
         { label: '0', position: 100 + rotationalOffset, value: 0 },
@@ -432,7 +431,7 @@ describe('Axis computational utils', () => {
         isBandScale: true,
         minInterval: 10,
       };
-      const xScale = getScaleForAxisSpec(horizontalAxisSpec, xBandDomain, [yDomain], 1, false, 100, 0, LogBase.Common);
+      const xScale = getScaleForAxisSpec(horizontalAxisSpec, xBandDomain, [yDomain], 1, 0, 100, 0);
       const histogramAxisPositions = getAvailableTicks(
         horizontalAxisSpec,
         xScale!,
@@ -454,7 +453,7 @@ describe('Axis computational utils', () => {
         isBandScale: true,
         minInterval: 90000,
       };
-      const xScale = getScaleForAxisSpec(horizontalAxisSpec, xBandDomain, [yDomain], 1, false, 100, 0, LogBase.Common);
+      const xScale = getScaleForAxisSpec(horizontalAxisSpec, xBandDomain, [yDomain], 1, 0, 100, 0);
       const histogramAxisPositions = getAvailableTicks(
         horizontalAxisSpec,
         xScale!,
@@ -493,7 +492,7 @@ describe('Axis computational utils', () => {
         isBandScale: true,
         minInterval: 90000,
       };
-      const xScale = getScaleForAxisSpec(horizontalAxisSpec, xBandDomain, [yDomain], 1, false, 100, 0, LogBase.Common);
+      const xScale = getScaleForAxisSpec(horizontalAxisSpec, xBandDomain, [yDomain], 1, 0, 100, 0);
       const histogramAxisPositions = getAvailableTicks(
         horizontalAxisSpec,
         xScale!,
@@ -973,6 +972,8 @@ describe('Axis computational utils', () => {
   });
 
   test('should compute axis ticks positions with title', () => {
+    const chartRotation = 0;
+
     // validate assumptions for test
     expect(verticalAxisSpec.id).toEqual(verticalAxisSpecWTitle.id);
 
@@ -987,7 +988,7 @@ describe('Axis computational utils', () => {
         leftMargin: 0,
       },
       LIGHT_THEME,
-      MockGlobalSpec.settings(),
+      chartRotation,
       axisSpecs,
       axisDims,
       axesStyles,
@@ -1019,7 +1020,7 @@ describe('Axis computational utils', () => {
         leftMargin: 0,
       },
       LIGHT_THEME,
-      MockGlobalSpec.settings(),
+      chartRotation,
       axisSpecs,
       axisDims,
       axesStyles,
@@ -1202,6 +1203,8 @@ describe('Axis computational utils', () => {
   });
 
   test('should not compute axis ticks positions if missaligned specs', () => {
+    const chartRotation = 0;
+
     const axisSpecs = [verticalAxisSpec];
     const axisStyles = new Map();
     const axisDims = new Map<AxisId, AxisTicksDimensions>();
@@ -1213,7 +1216,7 @@ describe('Axis computational utils', () => {
         leftMargin: 0,
       },
       LIGHT_THEME,
-      MockGlobalSpec.settings(),
+      chartRotation,
       axisSpecs,
       axisDims,
       axisStyles,
@@ -1286,7 +1289,7 @@ describe('Axis computational utils', () => {
           leftMargin: 0,
         },
         LIGHT_THEME,
-        MockGlobalSpec.settings(),
+        0,
         invalidSpecs,
         axisDims,
         axisStyles,
@@ -1677,7 +1680,7 @@ describe('Axis computational utils', () => {
           leftMargin: 0,
         },
         LIGHT_THEME,
-        MockGlobalSpec.settings(),
+        0,
         axisSpecs,
         axisDims,
         axesStyles,
@@ -1707,7 +1710,7 @@ describe('Axis computational utils', () => {
           leftMargin: 0,
         },
         LIGHT_THEME,
-        MockGlobalSpec.settings(),
+        0,
         axisSpecs,
         axisDims,
         axesStyles,
@@ -1743,7 +1746,7 @@ describe('Axis computational utils', () => {
           leftMargin: 0,
         },
         LIGHT_THEME,
-        MockGlobalSpec.settings(),
+        0,
         axisSpecs,
         axisDims,
         axesStyles,

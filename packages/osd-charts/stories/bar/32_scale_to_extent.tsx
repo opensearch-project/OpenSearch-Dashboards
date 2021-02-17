@@ -27,8 +27,8 @@ import { SB_SOURCE_PANEL } from '../utils/storybook';
 const logDomains = (data: any[], customDomain: any) => {
   /* eslint-disable no-console */
   console.clear();
-  console.log('data domain:', JSON.stringify(computeContinuousDataDomain(data, (d) => d.y, false)));
-  console.log('computed domain:', JSON.stringify(computeContinuousDataDomain(data, (d) => d.y, false, customDomain)));
+  console.log('data domain:', JSON.stringify(computeContinuousDataDomain(data, (d) => d.y)));
+  console.log('computed domain:', JSON.stringify(computeContinuousDataDomain(data, (d) => d.y, customDomain)));
   /* eslint-enable */
 };
 

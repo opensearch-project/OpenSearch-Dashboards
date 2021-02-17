@@ -19,6 +19,7 @@
 
 import { LegendItem } from '../../../common/legend';
 import { Scale } from '../../../scales';
+import { LOG_MIN_ABS_DOMAIN } from '../../../scales/constants';
 import { getDomainPolarity } from '../../../scales/scale_continuous';
 import { isLogarithmicScale } from '../../../scales/types';
 import { MarkBuffer } from '../../../specs';
@@ -162,6 +163,11 @@ export function isPointOnGeometry(
  * The default zero baseline for area charts.
  */
 const DEFAULT_ZERO_BASELINE = 0;
+/**
+ * The zero baseline for log scales.
+ * We are currently limiting to 1 as min accepted domain for a log scale.
+ */
+const DEFAULT_LOG_ZERO_BASELINE = LOG_MIN_ABS_DOMAIN;
 
 /** @internal */
 export type YDefinedFn = (
@@ -197,13 +203,12 @@ export function getY1ScaledValueOrThrowFn(yScale: Scale): (datum: DataSeriesDatu
 export function getY0ScaledValueOrThrowFn(yScale: Scale): (datum: DataSeriesDatum) => number {
   const isLogScale = isLogarithmicScale(yScale);
   const domainPolarity = getDomainPolarity(yScale.domain);
-  const logBaseline = domainPolarity >= 0 ? Math.min(...yScale.domain) : Math.max(...yScale.domain);
 
   return ({ y0 }) => {
     if (y0 === null) {
       if (isLogScale) {
         // if all positive domain use 1 as baseline, -1 otherwise
-        return yScale.scaleOrThrow(logBaseline);
+        return yScale.scaleOrThrow(domainPolarity >= 0 ? DEFAULT_LOG_ZERO_BASELINE : -DEFAULT_LOG_ZERO_BASELINE);
       }
       return yScale.scaleOrThrow(DEFAULT_ZERO_BASELINE);
     }
@@ -211,7 +216,7 @@ export function getY0ScaledValueOrThrowFn(yScale: Scale): (datum: DataSeriesDatu
       // wrong y0 polarity
       if ((domainPolarity >= 0 && y0 <= 0) || (domainPolarity < 0 && y0 >= 0)) {
         // if all positive domain use 1 as baseline, -1 otherwise
-        return yScale.scaleOrThrow(logBaseline);
+        return yScale.scaleOrThrow(domainPolarity >= 0 ? DEFAULT_LOG_ZERO_BASELINE : -DEFAULT_LOG_ZERO_BASELINE);
       }
       // if negative value, use -1 as max reference, 1 otherwise
       return yScale.scaleOrThrow(y0);

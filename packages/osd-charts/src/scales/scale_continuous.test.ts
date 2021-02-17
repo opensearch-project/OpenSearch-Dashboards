@@ -22,14 +22,13 @@ import { DateTime, Settings } from 'luxon';
 import { ScaleContinuous, ScaleBand } from '.';
 import { XDomain } from '../chart_types/xy_chart/domains/types';
 import { computeXScale } from '../chart_types/xy_chart/utils/scales';
-import { ContinuousDomain, Range } from '../utils/domain';
-import { LOG_MIN_ABS_DOMAIN, ScaleType } from './constants';
-import { limitLogScaleDomain } from './scale_continuous';
+import { Domain } from '../utils/domain';
+import { ScaleType } from './constants';
 import { isLogarithmicScale } from './types';
 
 describe('Scale Continuous', () => {
   test('shall invert on continuous scale linear', () => {
-    const domain: ContinuousDomain = [0, 2];
+    const domain: Domain = [0, 2];
     const minRange = 0;
     const maxRange = 100;
     const scale = new ScaleContinuous({ type: ScaleType.Linear, domain, range: [minRange, maxRange] });
@@ -38,7 +37,7 @@ describe('Scale Continuous', () => {
     expect(scale.invert(100)).toBe(2);
   });
   test('is value within domain', () => {
-    const domain: ContinuousDomain = [0, 2];
+    const domain: Domain = [0, 2];
     const minRange = 0;
     const maxRange = 100;
     const scale = new ScaleContinuous({ type: ScaleType.Linear, domain, range: [minRange, maxRange] });
@@ -60,8 +59,8 @@ describe('Scale Continuous', () => {
     expect(scale.invert(100)).toBe(endTime.toMillis());
   });
   test('check if a scale is log scale', () => {
-    const domain: ContinuousDomain = [0, 2];
-    const range: Range = [0, 100];
+    const domain: Domain = [0, 2];
+    const range: [number, number] = [0, 100];
     const scaleLinear = new ScaleContinuous({ type: ScaleType.Linear, domain, range });
     const scaleLog = new ScaleContinuous({ type: ScaleType.Log, domain, range });
     const scaleTime = new ScaleContinuous({ type: ScaleType.Time, domain, range });
@@ -74,9 +73,9 @@ describe('Scale Continuous', () => {
     expect(isLogarithmicScale(scaleBand)).toBe(false);
   });
   test('can get the right x value on linear scale', () => {
-    const domain: ContinuousDomain = [0, 2];
+    const domain: Domain = [0, 2];
     const data = [0, 0.5, 0.8, 2];
-    const range: Range = [0, 2];
+    const range: [number, number] = [0, 2];
     const scaleLinear = new ScaleContinuous({ type: ScaleType.Linear, domain, range });
     expect(scaleLinear.bandwidth).toBe(0);
     expect(scaleLinear.invertWithStep(0, data)).toEqual({ value: 0, withinBandwidth: true });
@@ -128,7 +127,7 @@ describe('Scale Continuous', () => {
 
     // we tweak the maxRange removing the bandwidth to correctly compute
     // a band linear scale in computeXScale
-    const range: Range = [0, 100 - 10];
+    const range: [number, number] = [0, 100 - 10];
     const scaleLinear = new ScaleContinuous(
       { type: ScaleType.Linear, domain, range },
       { bandwidth: 10, minInterval: 10 },
@@ -436,7 +435,7 @@ describe('Scale Continuous', () => {
     });
   });
   describe('ticks as integers or floats', () => {
-    const domain: ContinuousDomain = [0, 7];
+    const domain: Domain = [0, 7];
     const minRange = 0;
     const maxRange = 100;
     let scale: ScaleContinuous;
@@ -476,48 +475,5 @@ describe('Scale Continuous', () => {
     it('should throw for undefined values', () => {
       expect(() => scale.scaleOrThrow()).toThrow();
     });
-  });
-
-  describe('#limitLogScaleDomain', () => {
-    const LIMIT = 2;
-    const ZERO_LIMIT = 0;
-
-    test.each`
-      domain              | logMinLimit   | expectedDomain
-      ${[0, 10]}          | ${undefined}  | ${[LOG_MIN_ABS_DOMAIN, 10]}
-      ${[0, 10]}          | ${ZERO_LIMIT} | ${[LOG_MIN_ABS_DOMAIN, 10]}
-      ${[0, -10]}         | ${undefined}  | ${[-LOG_MIN_ABS_DOMAIN, -10]}
-      ${[0, -10]}         | ${ZERO_LIMIT} | ${[-LOG_MIN_ABS_DOMAIN, -10]}
-      ${[0, 10]}          | ${LIMIT}      | ${[LIMIT, 10]}
-      ${[0, -10]}         | ${LIMIT}      | ${[-LIMIT, -10]}
-      ${[10, 0]}          | ${undefined}  | ${[10, LOG_MIN_ABS_DOMAIN]}
-      ${[10, 0]}          | ${ZERO_LIMIT} | ${[10, LOG_MIN_ABS_DOMAIN]}
-      ${[-10, 0]}         | ${undefined}  | ${[-10, -LOG_MIN_ABS_DOMAIN]}
-      ${[-10, 0]}         | ${ZERO_LIMIT} | ${[-10, -LOG_MIN_ABS_DOMAIN]}
-      ${[10, 0]}          | ${LIMIT}      | ${[10, LIMIT]}
-      ${[-10, 0]}         | ${LIMIT}      | ${[-10, -LIMIT]}
-      ${[0, 0]}           | ${undefined}  | ${[LOG_MIN_ABS_DOMAIN, LOG_MIN_ABS_DOMAIN]}
-      ${[0, 0]}           | ${ZERO_LIMIT} | ${[LOG_MIN_ABS_DOMAIN, LOG_MIN_ABS_DOMAIN]}
-      ${[0, 0]}           | ${LIMIT}      | ${[LIMIT, LIMIT]}
-      ${[-10, 10]}        | ${undefined}  | ${[1, 10]}
-      ${[-10, 10]}        | ${ZERO_LIMIT} | ${[1, 10]}
-      ${[-10, 10]}        | ${LIMIT}      | ${[LIMIT, 10]}
-      ${[10, -10]}        | ${undefined}  | ${[10, 1]}
-      ${[10, -10]}        | ${ZERO_LIMIT} | ${[10, 1]}
-      ${[10, -10]}        | ${LIMIT}      | ${[10, LIMIT]}
-      ${[10, 100]}        | ${undefined}  | ${[10, 100]}
-      ${[10, 100]}        | ${ZERO_LIMIT} | ${[10, 100]}
-      ${[10, 100]}        | ${LIMIT}      | ${[10, 100]}
-      ${[LIMIT + 1, 100]} | ${LIMIT}      | ${[LIMIT + 1, 100]}
-      ${[0.1, 100]}       | ${LIMIT}      | ${[LIMIT, 100]}
-      ${[0.1, 0.12]}      | ${LIMIT}      | ${[LIMIT, LIMIT]}
-      ${[-100, -0.1]}     | ${LIMIT}      | ${[-100, -LIMIT]}
-      ${[-0.12, -0.1]}    | ${LIMIT}      | ${[-LIMIT, -LIMIT]}
-    `(
-      'should limit $domain with limit of $logMinLimit to $expectedDomain',
-      ({ domain, logMinLimit, expectedDomain }) => {
-        expect(limitLogScaleDomain(domain, logMinLimit)).toEqual(expectedDomain);
-      },
-    );
   });
 });

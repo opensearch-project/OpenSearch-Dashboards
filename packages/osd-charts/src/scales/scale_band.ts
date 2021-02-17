@@ -22,7 +22,6 @@ import { scaleBand, scaleQuantize, ScaleQuantize, ScaleBand as D3ScaleBand } fro
 import { Scale, ScaleBandType } from '.';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { maxValueWithUpperLimit, stringifyNullsUndefined } from '../utils/common';
-import { Range } from '../utils/domain';
 import { ScaleType } from './constants';
 
 /**
@@ -60,7 +59,7 @@ export class ScaleBand implements Scale {
 
   constructor(
     domain: any[],
-    range: Range,
+    range: [number, number],
     overrideBandwidth?: number,
     /**
      * The proportion of the range that is reserved for blank space between bands

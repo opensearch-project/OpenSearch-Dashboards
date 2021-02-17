@@ -69,7 +69,7 @@ export const computeAxesGeometriesSelector = createCachedSelector(
     return getAxesGeometries(
       chartDimensions,
       chartTheme,
-      settingsSpec,
+      settingsSpec.rotation,
       axesSpecs,
       axesTicksDimensions,
       axesStyles,

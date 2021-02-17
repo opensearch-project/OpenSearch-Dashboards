@@ -18,6 +18,10 @@
  */
 import { $Values } from 'utility-types';
 
+/**
+ * The scale type
+ * @public
+ */
 export const ScaleType = Object.freeze({
   Linear: 'linear' as const,
   Ordinal: 'ordinal' as const,
@@ -28,10 +32,8 @@ export const ScaleType = Object.freeze({
   Quantile: 'quantile' as const,
   Threshold: 'threshold' as const,
 });
-/**
- * The scale type
- * @public
- */
+
+/** @public */
 export type ScaleType = $Values<typeof ScaleType>;
 
 /** @internal */

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { select, number } from '@storybook/addon-knobs';
+import { select } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, timeFormatter } from '../../src';
@@ -39,7 +39,7 @@ export const Example = () => {
 
   return (
     <Chart className="story-chart">
-      <Settings showLegend scaleLogOptions={{ yLogMinLimit: number('Y log limit', 1, { min: 0 }) }} />
+      <Settings showLegend />
       <Axis
         id="bottom"
         title="timestamp per 1 minute"

@@ -20,7 +20,7 @@
 import { ScaleContinuousType } from '../../../scales';
 import { ScaleType } from '../../../scales/constants';
 import { identity } from '../../../utils/common';
-import { computeContinuousDataDomain, ContinuousDomain } from '../../../utils/domain';
+import { computeContinuousDataDomain } from '../../../utils/domain';
 import { GroupId } from '../../../utils/ids';
 import { Logger } from '../../../utils/logger';
 import { getSpecDomainGroupId } from '../state/utils/spec';
@@ -74,11 +74,10 @@ function mergeYDomainForGroup(
   const groupYScaleType = coerceYScaleTypes(yScaleTypes);
   const [{ stackMode, spec }] = dataSeries;
   const groupId = getSpecDomainGroupId(spec);
-  const isLogScale = groupYScaleType === ScaleType.Log;
 
-  let domain: ContinuousDomain;
+  let domain: number[];
   if (stackMode === StackMode.Percentage) {
-    domain = computeContinuousDataDomain([0, 1], identity, isLogScale, customDomain);
+    domain = computeContinuousDataDomain([0, 1], identity, customDomain);
   } else {
     // TODO remove when removing yScaleToDataExtent
     const newCustomDomain = customDomain ? { ...customDomain } : {};
@@ -86,20 +85,14 @@ function mergeYDomainForGroup(
     if (customDomain?.fit !== true && shouldScaleToExtent) {
       newCustomDomain.fit = true;
     }
-
     // compute stacked domain
-    const stackedDomain = computeYDomain(stacked, isLogScale, hasZeroBaselineSpecs);
+    const stackedDomain = computeYDomain(stacked, hasZeroBaselineSpecs);
 
     // compute non stacked domain
-    const nonStackedDomain = computeYDomain(nonStacked, isLogScale, hasZeroBaselineSpecs);
+    const nonStackedDomain = computeYDomain(nonStacked, hasZeroBaselineSpecs);
 
     // merge stacked and non stacked domain together
-    domain = computeContinuousDataDomain(
-      [...stackedDomain, ...nonStackedDomain],
-      identity,
-      isLogScale,
-      newCustomDomain,
-    );
+    domain = computeContinuousDataDomain([...stackedDomain, ...nonStackedDomain], identity, newCustomDomain);
 
     const [computedDomainMin, computedDomainMax] = domain;
 
@@ -131,7 +124,7 @@ function mergeYDomainForGroup(
   };
 }
 
-function computeYDomain(dataSeries: DataSeries[], isLogScale: boolean, hasZeroBaselineSpecs: boolean) {
+function computeYDomain(dataSeries: DataSeries[], hasZeroBaselineSpecs: boolean) {
   const yValues = new Set<any>();
   dataSeries.forEach(({ data }) => {
     for (let i = 0; i < data.length; i++) {
@@ -145,7 +138,7 @@ function computeYDomain(dataSeries: DataSeries[], isLogScale: boolean, hasZeroBa
   if (yValues.size === 0) {
     return [];
   }
-  return computeContinuousDataDomain([...yValues.values()], identity, isLogScale, null);
+  return computeContinuousDataDomain([...yValues.values()], identity, null);
 }
 
 /** @internal */
