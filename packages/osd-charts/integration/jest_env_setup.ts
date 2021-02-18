@@ -28,6 +28,4 @@ export const toMatchImageSnapshot = configureToMatchImageSnapshot({
 
 expect.extend({ toMatchImageSnapshot });
 
-if (process.env.DEBUG === 'true') {
-  jest.setTimeout(10 * 60 * 1000); // set timeout to 10 minutes;
-}
+jest.setTimeout(10 * 1000); // set timeout in milliseconds;
