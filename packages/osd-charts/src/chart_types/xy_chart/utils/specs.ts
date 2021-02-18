@@ -23,11 +23,13 @@ import { ChartTypes } from '../..';
 import { TooltipPortalSettings } from '../../../components/portal/types';
 import { ScaleContinuousType } from '../../../scales';
 import { ScaleType } from '../../../scales/constants';
+import { LogScaleOptions } from '../../../scales/scale_continuous';
 import { Spec } from '../../../specs';
 import { SpecTypes } from '../../../specs/constants';
 import { Accessor, AccessorFormat, AccessorFn } from '../../../utils/accessor';
 import { RecursivePartial, Color, Position, Datum } from '../../../utils/common';
 import { CurveType } from '../../../utils/curves';
+import { OrdinalDomain } from '../../../utils/domain';
 import { AxisId, GroupId } from '../../../utils/ids';
 import {
   AreaSeriesStyle,
@@ -49,7 +51,6 @@ export type BarStyleOverride = RecursivePartial<BarSeriesStyle> | Color | null;
 /** @public */
 export type PointStyleOverride = RecursivePartial<PointStyle> | Color | null;
 
-/** @public */
 export const SeriesTypes = Object.freeze({
   Area: 'area' as const,
   Bar: 'bar' as const,
@@ -57,7 +58,10 @@ export const SeriesTypes = Object.freeze({
   Bubble: 'bubble' as const,
 });
 
-/** @public */
+/**
+ * XY series type
+ * @public
+ */
 export type SeriesTypes = $Values<typeof SeriesTypes>;
 
 /**
@@ -281,7 +285,7 @@ export interface YDomainBase {
    */
   fit?: boolean;
   /**
-   * Padding for computed domain. Pixel number or percent string.
+   * Padding for computed domain. Positive pixel number or percent string.
    *
    * Setting `max` or `min` will override this functionality.
    */
@@ -323,7 +327,10 @@ export type UnboundedDomainWithInterval = DomainBase;
 /** @public */
 export type DomainRange = LowerBoundedDomain | UpperBoundedDomain | CompleteBoundedDomain | UnboundedDomainWithInterval;
 /** @public */
-export type YDomainRange = YDomainBase & DomainRange;
+export type YDomainRange = YDomainBase & DomainRange & LogScaleOptions;
+
+/** @public */
+export type CustomXDomain = (DomainRange & Pick<LogScaleOptions, 'logBase'>) | OrdinalDomain;
 
 export interface DisplayValueSpec {
   /** Show value label in chart element */
@@ -692,7 +699,6 @@ export const AnnotationTypes = Object.freeze({
   Rectangle: 'rectangle' as const,
   Text: 'text' as const,
 });
-
 /** @public */
 export type AnnotationType = $Values<typeof AnnotationTypes>;
 

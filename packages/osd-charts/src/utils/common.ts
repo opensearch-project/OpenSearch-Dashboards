@@ -529,18 +529,18 @@ export const round = (value: number, fractionDigits = 0): number => {
  */
 export const getPercentageValue = <T>(ratio: string | number, relativeValue: number, defaultValue: T): number | T => {
   if (typeof ratio === 'number') {
-    return ratio;
+    return Math.abs(ratio);
   }
 
   const ratioStr = ratio.trim();
 
   if (/\d+%$/.test(ratioStr)) {
-    const percentage = Number.parseInt(ratioStr.slice(0, -1), 10);
+    const percentage = Math.abs(Number.parseInt(ratioStr.slice(0, -1), 10));
     return relativeValue * (percentage / 100);
   }
   const num = Number.parseFloat(ratioStr);
 
-  return num && !isNaN(num) ? num : defaultValue;
+  return num && !isNaN(num) ? Math.abs(num) : defaultValue;
 };
 
 /**

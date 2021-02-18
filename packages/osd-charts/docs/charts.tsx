@@ -100,7 +100,7 @@ function generateAnnotationData(values: any[]): LineAnnotationDatum[] {
   return values.map((value, index) => ({ dataValue: value, details: `detail-${index}` }));
 }
 
-export const lineBasicXDomainContinous = () => {
+export const lineBasicXDomainContinuous = () => {
   const data = arrayKnobs('data values', [2.5, 7.2]);
   const dataValues = generateAnnotationData(data);
 
@@ -149,7 +149,7 @@ export const lineBasicXDomainContinous = () => {
     </Chart>
   );
 };
-lineBasicXDomainContinous.story = {
+lineBasicXDomainContinuous.story = {
   name: '[line] basic xDomain continuous',
 };
 

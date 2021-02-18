@@ -29,6 +29,7 @@ import {
   getPercentageValue,
 } from '../../../utils/common';
 import { Dimensions, Margins, getSimplePadding, Size } from '../../../utils/dimensions';
+import { Range } from '../../../utils/domain';
 import { AxisId } from '../../../utils/ids';
 import { Logger } from '../../../utils/logger';
 import { Point } from '../../../utils/point';
@@ -161,7 +162,7 @@ export function getScaleForAxisSpec(
   enableHistogramMode?: boolean,
 ): Scale | null {
   const axisIsYDomain = isYDomain(axisSpec.position, chartRotation);
-  const range: [number, number] = [minRange, maxRange];
+  const range: Range = [minRange, maxRange];
   if (axisIsYDomain) {
     const yScales = computeYScales({
       yDomains,
@@ -835,6 +836,7 @@ export function getAxesGeometries(
 
     const isVertical = isVerticalAxis(axisSpec.position);
     const minMaxRanges = getMinMaxRange(axisSpec.position, chartRotation, panel);
+
     const scale = getScaleForAxisSpec(
       axisSpec,
       xDomain,

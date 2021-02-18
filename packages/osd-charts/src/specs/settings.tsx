@@ -19,12 +19,11 @@
 
 import React, { ComponentType, ReactChild } from 'react';
 
-import { Spec } from '.';
+import { CustomXDomain, Spec } from '.';
 import { Cell } from '../chart_types/heatmap/layout/types/viewmodel_types';
 import { PrimitiveValue } from '../chart_types/partition_chart/layout/utils/group_by_rollup';
 import { LegendStrategy } from '../chart_types/partition_chart/layout/utils/highlighted_geoms';
 import { XYChartSeriesIdentifier } from '../chart_types/xy_chart/utils/series';
-import { DomainRange } from '../chart_types/xy_chart/utils/specs';
 import { SeriesIdentifier } from '../common/series_id';
 import { TooltipPortalSettings } from '../components';
 import { CustomTooltip } from '../components/tooltip/types';
@@ -33,7 +32,6 @@ import { LegendPath } from '../state/actions/legend';
 import { getConnect, specComponentFactory } from '../state/spec_factory';
 import { Accessor } from '../utils/accessor';
 import { Color, Position, Rendering, Rotation } from '../utils/common';
-import { Domain } from '../utils/domain';
 import { GeometryValue } from '../utils/geometry';
 import { GroupId } from '../utils/ids';
 import { SeriesCompareFn } from '../utils/series_sort';
@@ -410,7 +408,7 @@ export interface SettingsSpec extends Spec {
   onLegendItemMinusClick?: LegendItemListener;
   onPointerUpdate?: PointerUpdateListener;
   onRenderChange?: RenderChangeListener;
-  xDomain?: Domain | DomainRange;
+  xDomain?: CustomXDomain;
   resizeDebounce?: number;
   /**
    * Render slot to render action for legend

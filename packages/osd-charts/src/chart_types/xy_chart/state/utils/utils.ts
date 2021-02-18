@@ -19,12 +19,11 @@
 
 import { SeriesKey, SeriesIdentifier } from '../../../../common/series_id';
 import { Scale } from '../../../../scales';
-import { SortSeriesByConfig } from '../../../../specs';
+import { CustomXDomain, SortSeriesByConfig } from '../../../../specs';
 import { OrderBy } from '../../../../specs/settings';
 import { mergePartial, Rotation, Color, isUniqueArray } from '../../../../utils/common';
 import { CurveType } from '../../../../utils/curves';
 import { Dimensions, Size } from '../../../../utils/dimensions';
-import { Domain } from '../../../../utils/domain';
 import {
   PointGeometry,
   BarGeometry,
@@ -54,7 +53,6 @@ import { DataSeries, getFormattedDataSeries, getDataSeriesFromSpecs, getSeriesKe
 import {
   AxisSpec,
   BasicSeriesSpec,
-  DomainRange,
   HistogramModeAlignment,
   HistogramModeAlignments,
   isAreaSeriesSpec,
@@ -133,7 +131,7 @@ export function computeSeriesDomains(
   seriesSpecs: BasicSeriesSpec[],
   customYDomainsByGroupId: Map<GroupId, YDomainRange> = new Map(),
   deselectedDataSeries: SeriesIdentifier[] = [],
-  customXDomain?: DomainRange | Domain,
+  customXDomain?: CustomXDomain,
   orderOrdinalBinsBy?: OrderBy,
   smallMultiples?: SmallMultiplesGroupBy,
   sortSeriesBy?: SeriesCompareFn | SortSeriesByConfig,

@@ -30,7 +30,7 @@ import { CanvasTextBBoxCalculator } from '../../../utils/bbox/canvas_text_bbox_c
 import { SvgTextBBoxCalculator } from '../../../utils/bbox/svg_text_bbox_calculator';
 import { Position, mergePartial } from '../../../utils/common';
 import { niceTimeFormatter } from '../../../utils/data/formatters';
-import { Domain } from '../../../utils/domain';
+import { OrdinalDomain } from '../../../utils/domain';
 import { AxisId, GroupId } from '../../../utils/ids';
 import { LIGHT_THEME } from '../../../utils/themes/light_theme';
 import { AxisStyle, TextOffset } from '../../../utils/themes/theme';
@@ -62,6 +62,8 @@ import {
 } from './axis_utils';
 import { computeXScale } from './scales';
 import { AxisSpec, DomainRange, DEFAULT_GLOBAL_ID } from './specs';
+
+const NO_ROTATION = 0;
 
 const getCustomStyle = (rotation = 0, padding = 10): AxisStyle =>
   mergePartial(LIGHT_THEME.axes, {
@@ -203,7 +205,7 @@ describe('Axis computational utils', () => {
     isBandScale: false,
   };
 
-  const getSmScales = (smHDomain: Domain = [], smVDomain: Domain = []): SmallMultipleScales => ({
+  const getSmScales = (smHDomain: OrdinalDomain = [], smVDomain: OrdinalDomain = []): SmallMultipleScales => ({
     horizontal: getScale(smHDomain, chartDim.width),
     vertical: getScale(smVDomain, chartDim.height),
   });
@@ -234,7 +236,7 @@ describe('Axis computational utils', () => {
       [yDomain],
       1,
       bboxCalculator,
-      0,
+      NO_ROTATION,
       axes,
       (v) => `${v}`,
     );
@@ -247,7 +249,7 @@ describe('Axis computational utils', () => {
       [yDomain],
       1,
       bboxCalculator,
-      0,
+      NO_ROTATION,
       axes,
       (v) => `${v}`,
       undefined,
@@ -268,7 +270,7 @@ describe('Axis computational utils', () => {
       [yDomain],
       1,
       bboxCalculator,
-      0,
+      NO_ROTATION,
       axes,
       (v) => `${v}`,
     );
@@ -291,7 +293,7 @@ describe('Axis computational utils', () => {
       [yDomain],
       1,
       bboxCalculator,
-      0,
+      NO_ROTATION,
       axes,
       (v) => `${v}`,
     );
@@ -308,7 +310,7 @@ describe('Axis computational utils', () => {
       [yDomain],
       1,
       bboxCalculator,
-      0,
+      NO_ROTATION,
       axes,
       (v) => `${v}`,
     );
@@ -325,7 +327,7 @@ describe('Axis computational utils', () => {
       [yDomain],
       1,
       bboxCalculator,
-      0,
+      NO_ROTATION,
       axes,
       (v) => `${v}`,
     );
@@ -972,8 +974,6 @@ describe('Axis computational utils', () => {
   });
 
   test('should compute axis ticks positions with title', () => {
-    const chartRotation = 0;
-
     // validate assumptions for test
     expect(verticalAxisSpec.id).toEqual(verticalAxisSpecWTitle.id);
 
@@ -988,7 +988,7 @@ describe('Axis computational utils', () => {
         leftMargin: 0,
       },
       LIGHT_THEME,
-      chartRotation,
+      NO_ROTATION,
       axisSpecs,
       axisDims,
       axesStyles,
@@ -1020,7 +1020,7 @@ describe('Axis computational utils', () => {
         leftMargin: 0,
       },
       LIGHT_THEME,
-      chartRotation,
+      NO_ROTATION,
       axisSpecs,
       axisDims,
       axesStyles,
@@ -1203,8 +1203,6 @@ describe('Axis computational utils', () => {
   });
 
   test('should not compute axis ticks positions if missaligned specs', () => {
-    const chartRotation = 0;
-
     const axisSpecs = [verticalAxisSpec];
     const axisStyles = new Map();
     const axisDims = new Map<AxisId, AxisTicksDimensions>();
@@ -1216,7 +1214,7 @@ describe('Axis computational utils', () => {
         leftMargin: 0,
       },
       LIGHT_THEME,
-      chartRotation,
+      NO_ROTATION,
       axisSpecs,
       axisDims,
       axisStyles,
@@ -1289,7 +1287,7 @@ describe('Axis computational utils', () => {
           leftMargin: 0,
         },
         LIGHT_THEME,
-        0,
+        NO_ROTATION,
         invalidSpecs,
         axisDims,
         axisStyles,
@@ -1680,7 +1678,7 @@ describe('Axis computational utils', () => {
           leftMargin: 0,
         },
         LIGHT_THEME,
-        0,
+        NO_ROTATION,
         axisSpecs,
         axisDims,
         axesStyles,
@@ -1710,7 +1708,7 @@ describe('Axis computational utils', () => {
           leftMargin: 0,
         },
         LIGHT_THEME,
-        0,
+        NO_ROTATION,
         axisSpecs,
         axisDims,
         axesStyles,
@@ -1746,7 +1744,7 @@ describe('Axis computational utils', () => {
           leftMargin: 0,
         },
         LIGHT_THEME,
-        0,
+        NO_ROTATION,
         axisSpecs,
         axisDims,
         axesStyles,

@@ -32,3 +32,4 @@ export { Example as tooltipInUTC } from './3_utc_tooltip';
 export { Example as specifiedTimezone } from './4_specified_timezone';
 export { Example as removeDuplicateAxis } from './5_remove_duplicates';
 export { Example as xScaleFallback } from './6_x_scale_fallback';
+export { Example as logScaleOptions } from './7_log_scale_options';

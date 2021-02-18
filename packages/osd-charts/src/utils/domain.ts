@@ -23,7 +23,9 @@ import { YDomainRange } from '../specs';
 import { AccessorFn } from './accessor';
 import { getPercentageValue } from './common';
 
-export type Domain = any[];
+export type OrdinalDomain = (number | string)[];
+export type ContinuousDomain = [min: number, max: number];
+export type Range = [min: number, max: number];
 
 /** @internal */
 export function computeOrdinalDataDomain(
@@ -49,12 +51,8 @@ function getPaddedRange(start: number, end: number, domainOptions?: YDomainRange
 
   let computedPadding = 0;
 
-  if (typeof domainOptions.padding === 'string') {
-    const delta = Math.abs(end - start);
-    computedPadding = getPercentageValue(domainOptions.padding, delta, 0);
-  } else {
-    computedPadding = domainOptions.padding;
-  }
+  const delta = Math.abs(end - start);
+  computedPadding = getPercentageValue(domainOptions.padding, delta, 0);
 
   if (computedPadding === 0) {
     return [start, end];
@@ -102,7 +100,7 @@ export function computeContinuousDataDomain(
   data: any[],
   accessor: (n: any) => number,
   domainOptions?: YDomainRange | null,
-): number[] {
+): ContinuousDomain {
   const range = extent<any, number>(data, accessor);
 
   if (domainOptions === null) {

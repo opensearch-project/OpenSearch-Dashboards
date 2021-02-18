@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { select } from '@storybook/addon-knobs';
+import { select, number } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, timeFormatter } from '../../src';
@@ -47,7 +47,13 @@ export const Example = () => {
         showOverlappingTicks
         tickFormat={dateFormatter}
       />
-      <Axis id="left" title={dataset.metric.title} position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
+      <Axis
+        id="left"
+        title={dataset.metric.title}
+        position={Position.Left}
+        tickFormat={(d) => Number(d).toFixed(2)}
+        domain={{ logMinLimit: number('Y log limit', 1, { min: 0 }) }}
+      />
 
       <AreaSeries
         id="area1"

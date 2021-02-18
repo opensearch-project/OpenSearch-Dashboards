@@ -120,6 +120,15 @@ describe('utils/domain', () => {
       expect(computeDomainExtent([5, 10], { fit: true })).toEqual([5, 10]);
     });
 
+    // Note: padded domains are possible with log scale but not very practical
+    it('should not effect positive domain if log scale with padding', () => {
+      expect(computeDomainExtent([0.001, 10], { padding: 5 })).toEqual([0, 15]);
+    });
+
+    it('should not effect negative domain if log scale with padding', () => {
+      expect(computeDomainExtent([-10, -0.001], { padding: 5 })).toEqual([-15, 0]);
+    });
+
     describe('domain.fit is true', () => {
       it('should find domain when start & end are positive', () => {
         expect(computeDomainExtent([5, 10], { fit: true })).toEqual([5, 10]);
@@ -158,6 +167,10 @@ describe('utils/domain', () => {
 
       it('should get domain from negative domain', () => {
         expect(computeDomainExtent([-70, -10], { fit: true, padding: 5 })).toEqual([-75, -5]);
+      });
+
+      it('should use absolute padding value', () => {
+        expect(computeDomainExtent([10, 70], { fit: true, padding: -5 })).toEqual([5, 75]);
       });
     });
 

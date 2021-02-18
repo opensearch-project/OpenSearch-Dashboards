@@ -33,7 +33,10 @@ export const ScaleType = Object.freeze({
   Threshold: 'threshold' as const,
 });
 
-/** @public */
+/**
+ * The scale type
+ * @public
+ */
 export type ScaleType = $Values<typeof ScaleType>;
 
 /** @internal */

@@ -20,7 +20,7 @@
 import { ScaleContinuousType } from '../../../scales';
 import { ScaleType } from '../../../scales/constants';
 import { identity } from '../../../utils/common';
-import { computeContinuousDataDomain } from '../../../utils/domain';
+import { computeContinuousDataDomain, ContinuousDomain } from '../../../utils/domain';
 import { GroupId } from '../../../utils/ids';
 import { Logger } from '../../../utils/logger';
 import { getSpecDomainGroupId } from '../state/utils/spec';
@@ -75,7 +75,7 @@ function mergeYDomainForGroup(
   const [{ stackMode, spec }] = dataSeries;
   const groupId = getSpecDomainGroupId(spec);
 
-  let domain: number[];
+  let domain: ContinuousDomain;
   if (stackMode === StackMode.Percentage) {
     domain = computeContinuousDataDomain([0, 1], identity, customDomain);
   } else {
@@ -85,6 +85,7 @@ function mergeYDomainForGroup(
     if (customDomain?.fit !== true && shouldScaleToExtent) {
       newCustomDomain.fit = true;
     }
+
     // compute stacked domain
     const stackedDomain = computeYDomain(stacked, hasZeroBaselineSpecs);
 
@@ -121,6 +122,8 @@ function mergeYDomainForGroup(
     scaleType: groupYScaleType,
     groupId,
     domain,
+    logBase: customDomain?.logBase,
+    logMinLimit: customDomain?.logMinLimit,
   };
 }
 

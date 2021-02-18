@@ -21,10 +21,10 @@ import { Optional } from 'utility-types';
 
 import { ScaleType } from '../../../scales/constants';
 import { compareByValueAsc, identity } from '../../../utils/common';
-import { computeContinuousDataDomain, computeOrdinalDataDomain, Domain } from '../../../utils/domain';
+import { computeContinuousDataDomain, computeOrdinalDataDomain } from '../../../utils/domain';
 import { Logger } from '../../../utils/logger';
 import { isCompleteBound, isLowerBound, isUpperBound } from '../utils/axis_type_utils';
-import { BasicSeriesSpec, DomainRange, SeriesTypes, XScaleType } from '../utils/specs';
+import { BasicSeriesSpec, CustomXDomain, SeriesTypes, XScaleType } from '../utils/specs';
 import { XDomain } from './types';
 
 /**
@@ -39,7 +39,7 @@ import { XDomain } from './types';
 export function mergeXDomain(
   specs: Optional<Pick<BasicSeriesSpec, 'seriesType' | 'xScaleType'>, 'seriesType'>[],
   xValues: Set<string | number>,
-  customXDomain?: DomainRange | Domain,
+  customXDomain?: CustomXDomain,
   fallbackScale?: XScaleType,
 ): XDomain {
   const mainXScaleType = convertXScaleTypes(specs);
@@ -76,7 +76,9 @@ export function mergeXDomain(
       }
     }
   } else {
-    seriesXComputedDomains = computeContinuousDataDomain(values, identity, { fit: true });
+    seriesXComputedDomains = computeContinuousDataDomain(values, identity, {
+      fit: true,
+    });
     let customMinInterval: undefined | number;
 
     if (customXDomain) {
@@ -122,6 +124,7 @@ export function mergeXDomain(
     domain: seriesXComputedDomains,
     minInterval,
     timeZone: mainXScaleType.timeZone,
+    logBase: customXDomain && 'logBase' in customXDomain ? customXDomain.logBase : undefined,
   };
 }
 

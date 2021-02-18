@@ -104,7 +104,8 @@ export function shapeViewModel(
 
   const yInvertedScale = scaleQuantize<string | number>().domain([0, height]).range(yValues);
 
-  let xValues = xDomain.domain;
+  // TODO: Fix domain type to be `Array<number | string>`
+  let xValues = xDomain.domain as any[];
 
   const timeScale =
     xDomain.scaleType === ScaleType.Time
@@ -123,8 +124,8 @@ export function shapeViewModel(
 
   if (timeScale) {
     const result = [];
-    let [timePoint] = xDomain.domain;
-    while (timePoint < xDomain.domain[1]) {
+    let [timePoint] = xValues;
+    while (timePoint < xValues[1]) {
       result.push(timePoint);
       timePoint += xDomain.minInterval;
     }
