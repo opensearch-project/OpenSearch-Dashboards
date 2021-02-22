@@ -40,7 +40,7 @@ const TAPER_OFF_LIMIT = 50; // taper off within a radius of TAPER_OFF_LIMIT to a
 
 function renderTextRow(
   ctx: CanvasRenderingContext2D,
-  { fontSize, fillTextColor, rotation, verticalAlignment, leftAlign }: RowSet,
+  { fontSize, fillTextColor, rotation, verticalAlignment, leftAlign, container, clipText }: RowSet,
   linkLabelTextColor: string,
 ) {
   return (currentRow: TextRow) => {
@@ -48,8 +48,16 @@ function renderTextRow(
       ? currentRow.rowAnchorX - currentRow.maximumLength / 2
       : currentRow.rowAnchorX - (Math.cos(rotation) * currentRow.length) / 2;
     const cry = -currentRow.rowAnchorY + (Math.sin(rotation) * currentRow.length) / 2;
+    if (!Number.isFinite(crx) || !Number.isFinite(cry)) {
+      return;
+    }
     withContext(ctx, (ctx) => {
       ctx.scale(1, -1);
+      if (clipText) {
+        ctx.rect(container.x0 + 1, container.y0 + 1, container.x1 - container.x0 - 2, container.y1 - container.y0 - 2);
+        ctx.clip();
+      }
+      ctx.beginPath();
       ctx.translate(crx, cry);
       ctx.rotate(-rotation);
       ctx.fillStyle = fillTextColor ?? linkLabelTextColor;
@@ -58,6 +66,7 @@ function renderTextRow(
         ctx.font = cssFontShorthand(box, fontSize);
         ctx.fillText(box.text, box.width / 2 + box.wordBeginning, 0);
       });
+      ctx.closePath();
     });
     // for debug use: this draws magenta boxes for where the text needs to fit
     // note: `container` is a property of the RowSet, needs to be added

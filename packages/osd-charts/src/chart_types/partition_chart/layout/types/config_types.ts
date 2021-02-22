@@ -49,7 +49,9 @@ interface LabelConfig extends Font {
 }
 
 /** @public */
-export type FillLabelConfig = LabelConfig;
+export interface FillLabelConfig extends LabelConfig {
+  clipText: boolean;
+}
 
 export interface LinkLabelConfig extends LabelConfig {
   fontSize: Pixels; // todo consider putting it in Font

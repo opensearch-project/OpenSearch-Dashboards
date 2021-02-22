@@ -1484,7 +1484,10 @@ export type PartitionElementEvent = [Array<LayerValue>, SeriesIdentifier];
 // Warning: (ae-forgotten-export) The symbol "LabelConfig" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type PartitionFillLabel = LabelConfig;
+export interface PartitionFillLabel extends LabelConfig {
+    // (undocumented)
+    clipText: boolean;
+}
 
 // Warning: (ae-missing-release-tag) "Layer" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -2392,8 +2395,8 @@ export type YDomainRange = YDomainBase & DomainRange & LogScaleOptions;
 // src/chart_types/heatmap/layout/types/config_types.ts:29:13 - (ae-forgotten-export) The symbol "SizeRatio" needs to be exported by the entry point index.d.ts
 // src/chart_types/heatmap/layout/types/config_types.ts:61:5 - (ae-forgotten-export) The symbol "TextAlign" needs to be exported by the entry point index.d.ts
 // src/chart_types/heatmap/layout/types/config_types.ts:62:5 - (ae-forgotten-export) The symbol "TextBaseline" needs to be exported by the entry point index.d.ts
-// src/chart_types/partition_chart/layout/types/config_types.ts:130:5 - (ae-forgotten-export) The symbol "TimeMs" needs to be exported by the entry point index.d.ts
-// src/chart_types/partition_chart/layout/types/config_types.ts:131:5 - (ae-forgotten-export) The symbol "AnimKeyframe" needs to be exported by the entry point index.d.ts
+// src/chart_types/partition_chart/layout/types/config_types.ts:132:5 - (ae-forgotten-export) The symbol "TimeMs" needs to be exported by the entry point index.d.ts
+// src/chart_types/partition_chart/layout/types/config_types.ts:133:5 - (ae-forgotten-export) The symbol "AnimKeyframe" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

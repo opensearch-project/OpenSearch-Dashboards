@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { Chart, Datum, Partition, PartitionLayout, PrimitiveValue, Settings } from '../../src';
@@ -38,6 +39,7 @@ const getLayerSpec = (maxDepth: number = 30) =>
   }));
 
 export const Example = () => {
+  const clipText = boolean("Allow, and clip, texts that wouldn't otherwise fit", true);
   return (
     <Chart className="story-chart">
       <Settings theme={STORYBOOK_LIGHT_THEME} />
@@ -51,6 +53,13 @@ export const Example = () => {
           ...config,
           partitionLayout: PartitionLayout.icicle,
           drilldown: true,
+          fillLabel: {
+            clipText,
+            padding: { left: 0, right: 0, top: 0, bottom: 0 },
+          },
+          minFontSize: clipText ? 9 : 6,
+          maxFontSize: clipText ? 9 : 20,
+          maxRowCount: 1,
         }}
       />
     </Chart>

@@ -212,6 +212,48 @@ export const configMetadata: Record<string, ConfigItem> = {
         type: 'function',
       },
       valueFont,
+      padding: {
+        type: 'group',
+        values: {
+          top: {
+            dflt: 2,
+            min: 0,
+            max: 20,
+            type: 'number',
+            reconfigurable: true,
+            documentation: 'Top padding for fill text',
+          },
+          bottom: {
+            dflt: 2,
+            min: 0,
+            max: 20,
+            type: 'number',
+            reconfigurable: true,
+            documentation: 'Bottom padding for fill text',
+          },
+          left: {
+            dflt: 2,
+            min: 0,
+            max: 20,
+            type: 'number',
+            reconfigurable: true,
+            documentation: 'Left padding for fill text',
+          },
+          right: {
+            dflt: 2,
+            min: 0,
+            max: 20,
+            type: 'number',
+            reconfigurable: true,
+            documentation: 'Right padding for fill text',
+          },
+        },
+      },
+      clipText: {
+        type: 'boolean',
+        dflt: false,
+        documentation: "Renders, but clips, text that's longer than what would fit in a box entirely",
+      },
     },
   },
 

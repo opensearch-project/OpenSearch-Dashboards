@@ -111,7 +111,7 @@ function getVerticalAlignment(
     case VerticalAlignments.bottom:
       return -(container.y1 - linePitch * (totalRowCount - 1 - rowIndex) - paddingBottom - fontSize * overhang);
     default:
-      return -((container.y0 + container.y1) / 2 + (linePitch * (rowIndex - totalRowCount)) / 2);
+      return -((container.y0 + container.y1) / 2 + (linePitch * (rowIndex + 1 - totalRowCount)) / 2);
   }
 }
 
@@ -147,6 +147,7 @@ export const getRectangleRowGeometry: GetShapeRowGeometry<RectangleConstruction>
       maximumRowLength: 0,
     };
   }
+
   const rowAnchorY = getVerticalAlignment(
     container,
     verticalAlignment,
@@ -196,10 +197,12 @@ function getAllBoxes(
 ): Box[] {
   return rawTextGetter(node)
     .split(' ')
+    .filter(Boolean)
     .map((text) => ({ text, ...sizeInvariantFontShorthand }))
     .concat(
       valueFormatter(valueGetter(node))
         .split(' ')
+        .filter(Boolean)
         .map((text) => ({ text, ...sizeInvariantFontShorthand, ...valueFont })),
     );
 }
@@ -318,6 +321,7 @@ function fill<C>(
         padding,
         textContrast,
         textOpacity,
+        clipText,
       } = {
         ...fillLabel,
         valueFormatter: formatter,
@@ -365,6 +369,7 @@ function fill<C>(
           cy,
           padding,
           node,
+          clipText,
         ),
         fillTextColor,
       };
@@ -385,6 +390,7 @@ function tryFontSize<C>(
   node: ShapeTreeNode,
   boxes: Box[],
   maxRowCount: number,
+  clipText?: boolean,
 ) {
   return function tryFontSizeFn(initialRowSet: RowSet, fontSize: Pixels): { rowSet: RowSet; completed: boolean } {
     let rowSet: RowSet = initialRowSet;
@@ -419,6 +425,7 @@ function tryFontSize<C>(
         rotation,
         verticalAlignment,
         leftAlign,
+        clipText,
         rows: [...new Array(targetRowCount)].map(() => ({
           rowWords: [],
           rowAnchorX: NaN,
@@ -466,7 +473,7 @@ function tryFontSize<C>(
           const wordBeginning = currentRowLength;
           currentRowLength += currentBox.width + wordSpacing;
 
-          if (currentRowLength <= currentRow.maximumLength) {
+          if (clipText || currentRowLength <= currentRow.maximumLength) {
             currentRowWords.push({ ...currentBox, wordBeginning });
             currentRow.length = currentRowLength;
             measuredBoxes.shift();
@@ -499,6 +506,7 @@ function getRowSet<C>(
   cy: Coordinate,
   padding: Padding,
   node: ShapeTreeNode,
+  clipText: boolean,
 ) {
   const tryFunction = tryFontSize(
     measure,
@@ -513,6 +521,7 @@ function getRowSet<C>(
     node,
     boxes,
     maxRowCount,
+    clipText,
   );
 
   // find largest fitting font size
@@ -605,7 +614,7 @@ export function fillTextLayout<C>(
           return {
             rowSets: [...rowSets, nextRowSet],
             fontSizes: fontSizes.map((layerFontSizes: Pixels[], index: number) =>
-              index === layerIndex && !layers[layerIndex]?.fillLabel?.maximizeFontSize
+              !isNaN(nextRowSet.fontSize) && index === layerIndex && !layers[layerIndex]?.fillLabel?.maximizeFontSize
                 ? layerFontSizes.filter((size: Pixels) => size <= nextRowSet.fontSize)
                 : layerFontSizes,
             ),
