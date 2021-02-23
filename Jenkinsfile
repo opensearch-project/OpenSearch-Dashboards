@@ -15,7 +15,7 @@ pipeline {
       steps {
         script {
           IMAGE_NAME = "website-src-image:${env.BUILD_ID}"
-          DOCKER_IMAGE = docker.build IMAGE_NAME
+          DOCKER_IMAGE = docker.build(IMAGE_NAME)
           DOCKER_IMAGE.inside {
               stage('bootstrap') {
                   echo "Bootstrap here"
