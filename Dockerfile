@@ -14,19 +14,9 @@ RUN curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add - 
   && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
   && apt-get update \
   && apt-get install -y rsync jq bsdtar google-chrome-stable \
-  --no-install-recommends \
+  --no-install-recommends python-pip \
+  && pip install awscli \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-RUN LATEST_VAULT_RELEASE=$(curl -s https://api.github.com/repos/hashicorp/vault/tags | jq --raw-output .[0].name[1:]) \
-  && curl -L https://releases.hashicorp.com/vault/${LATEST_VAULT_RELEASE}/vault_${LATEST_VAULT_RELEASE}_linux_amd64.zip -o vault.zip \
-  && unzip vault.zip \
-  && rm vault.zip \
-  && chmod +x vault \
-  && mv vault /usr/local/bin/vault
-
-RUN apt-get update && apt-get install -y \
-    python-pip
-RUN pip install awscli
 
 RUN groupadd -r kibana && useradd -r -g kibana kibana && mkdir /home/kibana && chown kibana:kibana /home/kibana
 
