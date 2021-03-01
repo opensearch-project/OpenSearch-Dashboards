@@ -2,7 +2,8 @@
   "extends": "../tsconfig",
   "compilerOptions": {
     "downlevelIteration": true,
-    "target": "es5"
+    "target": "es5",
+    "resolveJsonModule": true
   },
   "include": ["../src/**/*", "./**/*"],
   "exclude": ["../**/*.test.*"]

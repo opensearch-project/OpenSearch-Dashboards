@@ -126,6 +126,10 @@ export function compareByValueAsc(a: number | string, b: number | string): numbe
   return a > b ? 1 : -1;
 }
 
+export function clamp(value: number, lowerBound: number, upperBound: number) {
+  return minValueWithLowerLimit(value, upperBound, lowerBound);
+}
+
 /**
  * Return the minimum value between val1 and val2. The value is bounded from below by lowerLimit
  * @param val1 a numeric value

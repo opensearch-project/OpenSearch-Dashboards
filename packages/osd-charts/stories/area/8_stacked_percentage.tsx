@@ -20,41 +20,46 @@
 import { boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, StackMode } from '../../src';
+import { AreaSeries, Axis, Chart, niceTimeFormatter, Position, ScaleType, Settings, StackMode } from '../../src';
+import DATA from '../../src/utils/data_samples/4_time_series.json';
 
+const dataNames = Object.keys(DATA);
 export const Example = () => {
   const stackedAsPercentage = boolean('stacked as percentage', true);
   return (
     <Chart className="story-chart">
       <Settings showLegend showLegendExtra legendPosition={Position.Right} />
-      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
+      <Axis
+        id="bottom"
+        position={Position.Bottom}
+        title="Time"
+        tickFormat={niceTimeFormatter([1583100000000, 1583622000000])}
+      />
       <Axis
         id="left2"
         title="Left axis"
         position={Position.Left}
-        tickFormat={(d) => `${Number(d * 100).toFixed(0)} %`}
+        tickFormat={(d) => (stackedAsPercentage ? `${Number(d * 100).toFixed(0)} %` : d.toFixed(0))}
       />
-
-      <AreaSeries
-        id="areas"
-        xScaleType={ScaleType.Linear}
-        yScaleType={ScaleType.Linear}
-        xAccessor="x"
-        yAccessors={['y']}
-        stackAccessors={['x']}
-        stackMode={stackedAsPercentage ? StackMode.Percentage : undefined}
-        splitSeriesAccessors={['g']}
-        data={[
-          { x: 0, y: 2, g: 'a' },
-          { x: 1, y: 7, g: 'a' },
-          { x: 2, y: 3, g: 'a' },
-          { x: 3, y: 6, g: 'a' },
-          { x: 0, y: 4, g: 'b' },
-          { x: 1, y: 5, g: 'b' },
-          { x: 2, y: 8, g: 'b' },
-          { x: 3, y: 2, g: 'b' },
-        ]}
-      />
+      {Object.values(DATA).map((d, i) => {
+        return (
+          <AreaSeries
+            key={dataNames[i]}
+            id={dataNames[i]}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor="key"
+            yAccessors={[
+              (datum) => {
+                return datum['ffbd09b8-04af-4fcc-ba5f-b0fd50c4862b'].value;
+              },
+            ]}
+            stackMode={stackedAsPercentage ? StackMode.Percentage : undefined}
+            stackAccessors={['key']}
+            data={d.buckets}
+          />
+        );
+      })}
     </Chart>
   );
 };
