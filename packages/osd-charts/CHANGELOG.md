@@ -1,3 +1,16 @@
+# [25.1.0](https://github.com/elastic/elastic-charts/compare/v25.0.1...v25.1.0) (2021-03-01)
+
+
+### Bug Fixes
+
+* rounding values on stacked w percentage charts ([#1039](https://github.com/elastic/elastic-charts/issues/1039)) ([ee63a70](https://github.com/elastic/elastic-charts/commit/ee63a7050f4230e85cd11f83df0d47bc6851cc83))
+
+
+### Features
+
+* **axis:** log scale limit and base options ([#1032](https://github.com/elastic/elastic-charts/issues/1032)) ([b38d110](https://github.com/elastic/elastic-charts/commit/b38d11083b921bb1e2759640cfa9498087c47b52))
+* **partition:** clip text in partition chart fill label ([#1033](https://github.com/elastic/elastic-charts/issues/1033)) ([be9bea0](https://github.com/elastic/elastic-charts/commit/be9bea0f4c4f2a2020dfde7a98d4e9e1baaf8a9a))
+
 ## [25.0.1](https://github.com/elastic/elastic-charts/compare/v25.0.0...v25.0.1) (2021-02-17)
 
 
