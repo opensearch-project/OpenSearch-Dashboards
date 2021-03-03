@@ -18,10 +18,10 @@
  */
 
 export {
-  ElasticsearchSqlHighlightRules,
+  OpenSearchSqlHighlightRules,
   ScriptHighlightRules,
   XJsonHighlightRules,
   addXJsonToRules,
-  XJsonMode,
-  installXJsonMode,
-} from './ace/modes';
+} from './lexer_rules';
+
+export { installXJsonMode, XJsonMode } from './x_json';
