@@ -24,25 +24,25 @@ const { debug } = require('./debug');
 const DEFAULT_PLUGIN_PATH = '../..';
 
 /*
- * Resolves the path to OpenSearch Dashboards, either from default setting or config
+ * Resolves the path to Kibana, either from default setting or config
  */
-exports.getOpenSearchDashboardsPath = function (config, projectRoot) {
-  const inConfig = config != null && config.opensearchDashboardsPath;
+exports.getKibanaPath = function (config, projectRoot) {
+  const inConfig = config != null && config.kibanaPath;
 
-  // We only allow `.` in the config as we need it for OpenSearch Dashboards itself
-  if (inConfig && config.opensearchDashboardsPath !== '.') {
+  // We only allow `.` in the config as we need it for Kibana itself
+  if (inConfig && config.kibanaPath !== '.') {
     throw new Error(
-      'The `opensearchDashboardsPath` option has been removed from `eslint-import-resolver-opensearch-dashboards`. ' +
-      'During development your plugin must live in `./plugins/{pluginName}` ' +
-      'inside the OpenSearch Dashboards folder or `../opensearch-dashboards-extra/{pluginName}` ' +
-      'relative to the OpenSearch Dashboards folder to work with this package.'
+      'The `kibanaPath` option has been removed from `eslint-import-resolver-kibana`. ' +
+        'During development your plugin must live in `./plugins/{pluginName}` ' +
+        'inside the Kibana folder or `../kibana-extra/{pluginName}` ' +
+        'relative to the Kibana folder to work with this package.'
     );
   }
 
-  const opensearchDashboardsPath = inConfig
-    ? resolve(projectRoot, config.opensearchDashboardsPath)
+  const kibanaPath = inConfig
+    ? resolve(projectRoot, config.kibanaPath)
     : resolve(projectRoot, DEFAULT_PLUGIN_PATH);
 
-  debug(`Resolved OpenSearch Dashboards path: ${opensearchDashboardsPath}`);
-  return opensearchDashboardsPath;
+  debug(`Resolved Kibana path: ${kibanaPath}`);
+  return kibanaPath;
 };

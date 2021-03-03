@@ -23,7 +23,7 @@ const webpackResolver = require('eslint-import-resolver-webpack');
 const nodeResolver = require('eslint-import-resolver-node');
 
 const {
-  getOpenSearchDashboardsPath,
+  getKibanaPath,
   getProjectRoot,
   getWebpackConfig,
   isFile,
@@ -39,8 +39,8 @@ function initContext(file, config) {
   }
 
   const projectRoot = getProjectRoot(file, config);
-  const opensearchDashboardsPath = getOpenSearchDashboardsPath(config, projectRoot);
-  const webpackConfig = getWebpackConfig(opensearchDashboardsPath, projectRoot, config);
+  const kibanaPath = getKibanaPath(config, projectRoot);
+  const webpackConfig = getWebpackConfig(kibanaPath, projectRoot, config);
   const aliasEntries = Object.entries(webpackConfig.resolve.alias || {});
 
   context = {
@@ -65,7 +65,7 @@ function tryNodeResolver(importRequest, file, config) {
   );
 }
 
-exports.resolve = function resolveOpenSearchDashboardsPath(importRequest, file, config) {
+exports.resolve = function resolveKibanaPath(importRequest, file, config) {
   config = config || {};
 
   if (config.forceNode) {

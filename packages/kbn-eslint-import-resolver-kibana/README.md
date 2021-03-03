@@ -1,13 +1,13 @@
-# @osd/eslint-import-resolver-opensearch-dashboards
+# @kbn/eslint-import-resolver-kibana
 
-Resolver for OpenSearch Dashboards imports, meant to be used with [eslint-plugin-import](https://github.com/benmosher/eslint-plugin-import).
+Resolver for Kibana imports, meant to be used with [eslint-plugin-import](https://github.com/benmosher/eslint-plugin-import).
 
 ## Installation
 
-To install this utility use `yarn` to link to the package from the OpenSearch Dashboards project:
+To install this utility use `yarn` to link to the package from the Kibana project:
 
 ```sh
-yarn add --dev link:../../opensearchDashboards/packages/osd-eslint-import-resolver-opensearch-dashboards
+yarn add --dev link:../../kibana/packages/kbn-eslint-import-resolver-kibana
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ Specify this resolver with the `import/resolver` setting in your eslint config f
 ```yml
 # .eslintrc.yml
 settings:
-  import/resolver: "@osd/eslint-import-resolver-opensearch-dashboards"
+  import/resolver: "@kbn/eslint-import-resolver-kibana"
 ```
 
 ## Settings
@@ -27,9 +27,9 @@ settings:
 Property | Default | Description
 -------- | ------- | -----------
 rootPackageName | `null` | The `"name"` property of the root `package.json` file. If your project has multiple `package.json` files then specify this setting to tell the resolver which `package.json` file sits at the root of your project.
-pluginPaths | `[]` if `rootPackageName` is set, otherwise `[.]` | Array of relative paths which contain a OpenSearch Dashboards plugin. Plugins must contain a `package.json` file to be valid.
-pluginDirs | `[]` | Array of relative paths pointing to directories which contain OpenSearch Dashboards plugins. Plugins must contain a `package.json` file to be valid.
-pluginMap | `{}` | A map of plugin ids to relative paths, explicitly pointing to the location where OpenSearch Dashboards should map `plugin/{pluginId}` import statements. Directories do not need to contain a `package.json` file to work.
+pluginPaths | `[]` if `rootPackageName` is set, otherwise `[.]` | Array of relative paths which contain a Kibana plugin. Plugins must contain a `package.json` file to be valid.
+pluginDirs | `[]` | Array of relative paths pointing to directories which contain Kibana plugins. Plugins must contain a `package.json` file to be valid.
+pluginMap | `{}` | A map of plugin ids to relative paths, explicitly pointing to the location where Kibana should map `plugin/{pluginId}` import statements. Directories do not need to contain a `package.json` file to work.
 
 ## Settings Usage
 To specify additional config add a `:` after the resolver name and specify the argument as key-value pairs:
@@ -38,7 +38,7 @@ To specify additional config add a `:` after the resolver name and specify the a
 # .eslintrc.yml
 settings:
   import/resolver:
-    "@osd/eslint-import-resolver-opensearch-dashboards":
+    "@kbn/eslint-import-resolver-kibana":
       # if your project has multiple package.json files
       rootPackageName: my-project
 
@@ -51,7 +51,7 @@ settings:
       # if all of your plugins have the same parent directory you can specify
       # that directory and we will look for plugins there
       pluginDirs:
-        - ./opensearch-dashboards-plugins
+        - ./kibana-plugins
 
       # if you have some other special configuration supply a map of plugin
       # ids to the directory containing their code
@@ -64,6 +64,6 @@ See [the resolvers docs](https://github.com/benmosher/eslint-plugin-import#resol
 
 ## Debugging
 
-For debugging output from this resolver, run your linter with `DEBUG=eslint-plugin-import:resolver:opensearch-dashboards`.
+For debugging output from this resolver, run your linter with `DEBUG=eslint-plugin-import:resolver:kibana`.
 
 This resolver defers to [*eslint-import-resolver-node*](https://www.npmjs.com/package/eslint-import-resolver-node) and [*eslint-import-resolver-webpack*](https://www.npmjs.com/package/eslint-import-resolver-webpack) for all of it's actual resolution logic. To get debugging output from all resolvers use `DEBUG=eslint-plugin-import:resolver:*`.
