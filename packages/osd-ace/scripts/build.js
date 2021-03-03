@@ -21,7 +21,7 @@ const path = require('path');
 const del = require('del');
 const fs = require('fs');
 const supportsColor = require('supports-color');
-const { run } = require('@kbn/dev-utils');
+const { run } = require('@osd/dev-utils');
 
 const TARGET_BUILD_DIR = path.resolve(__dirname, '../target');
 const ROOT_DIR = path.resolve(__dirname, '../');
