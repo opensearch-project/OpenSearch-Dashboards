@@ -1,7 +1,7 @@
 {
   "name": "spec-to-console",
   "version": "0.0.0",
-  "description": "ES REST spec -> Console autocomplete",
+  "description": "OpenSearch REST spec -> Console autocomplete",
   "main": "index.js",
   "directories": {
     "lib": "lib"
@@ -12,7 +12,7 @@
   },
   "author": "",
   "license": "Apache-2.0",
-  "kibana": {
+  "opensearchDashboards": {
     "devOnly": true
   },
   "bugs": {
