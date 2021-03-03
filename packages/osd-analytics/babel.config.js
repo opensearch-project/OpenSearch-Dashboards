@@ -17,15 +17,15 @@
  * under the License.
  */
 
-// We can't use common Kibana presets here because of babel versions incompatibility
+// We can't use common OpenSearch Dashboards presets here because of babel versions incompatibility
 module.exports = {
   plugins: ['@babel/plugin-proposal-class-properties'],
   env: {
     web: {
-      presets: ['@kbn/babel-preset/webpack_preset'],
+      presets: ['@osd/babel-preset/webpack_preset'],
     },
     node: {
-      presets: ['@kbn/babel-preset/node_preset'],
+      presets: ['@osd/babel-preset/node_preset'],
     },
   },
   ignore: ['**/*.test.ts', '**/*.test.tsx'],
