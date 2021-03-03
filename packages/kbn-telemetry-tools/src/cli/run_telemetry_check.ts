@@ -19,7 +19,7 @@
 
 import Listr from 'listr';
 import chalk from 'chalk';
-import { createFailError, run } from '@kbn/dev-utils';
+import { createFailError, run } from '@osd/dev-utils';
 
 import {
   createTaskContext,

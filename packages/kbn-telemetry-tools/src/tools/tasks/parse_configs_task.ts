@@ -22,10 +22,10 @@ import { parseTelemetryRC } from '../config';
 import { TaskContext } from './task_context';
 
 export function parseConfigsTask() {
-  const kibanaRoot = process.cwd();
-  const xpackRoot = path.join(kibanaRoot, 'x-pack');
+  const opensearchDashboardsRoot = process.cwd();
+  const xpackRoot = path.join(opensearchDashboardsRoot, 'x-pack');
 
-  const configRoots = [kibanaRoot, xpackRoot];
+  const configRoots = [opensearchDashboardsRoot, xpackRoot];
 
   return configRoots.map((configRoot) => ({
     task: async (context: TaskContext) => {

@@ -18,7 +18,7 @@
  */
 
 import Listr from 'listr';
-import { run } from '@kbn/dev-utils';
+import { run } from '@osd/dev-utils';
 
 import {
   createTaskContext,
