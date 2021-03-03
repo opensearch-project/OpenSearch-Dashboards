@@ -17,15 +17,11 @@
  * under the License.
  */
 
-import path from 'path';
-import { kibanaPackageJSON } from './';
+import { dirname, resolve } from 'path';
+import { REPO_ROOT } from '../repo_root';
 
-it('parses package.json', () => {
-  expect(kibanaPackageJSON.name).toEqual('kibana');
-});
-
-it('includes __dirname and __filename', () => {
-  const root = path.resolve(__dirname, '../../../../');
-  expect(kibanaPackageJSON.__filename).toEqual(path.resolve(root, 'package.json'));
-  expect(kibanaPackageJSON.__dirname).toEqual(root);
-});
+export const opensearchDashboardsPackageJSON = {
+  __filename: resolve(REPO_ROOT, 'package.json'),
+  __dirname: dirname(resolve(REPO_ROOT, 'package.json')),
+  ...require(resolve(REPO_ROOT, 'package.json')),
+};

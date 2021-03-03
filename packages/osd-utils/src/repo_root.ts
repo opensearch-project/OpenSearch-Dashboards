@@ -22,11 +22,11 @@ import Fs from 'fs';
 
 import loadJsonFile from 'load-json-file';
 
-const readKibanaPkgJson = (dir: string) => {
+const readOpenSearchDashboardsPkgJson = (dir: string) => {
   try {
     const path = Path.resolve(dir, 'package.json');
     const json = loadJsonFile.sync(path);
-    if (json && typeof json === 'object' && 'name' in json && json.name === 'kibana') {
+    if (json && typeof json === 'object' && 'name' in json && json.name === 'opensearch-dashboards') {
       return json;
     }
   } catch (error) {
@@ -38,19 +38,19 @@ const readKibanaPkgJson = (dir: string) => {
   }
 };
 
-const findKibanaPackageJson = () => {
-  // search for the kibana directory, since this file is moved around it might
+const findOpensearchDashboardsPackageJson = () => {
+  // search for the opensearch-dashboards directory, since this file is moved around it might
   // not be where we think but should always be a relatively close parent
   // of this directory
   const startDir = Fs.realpathSync(__dirname);
   const { root: rootDir } = Path.parse(startDir);
   let cursor = startDir;
   while (true) {
-    const kibanaPkgJson = readKibanaPkgJson(cursor);
-    if (kibanaPkgJson) {
+    const opensearchDashboardsPkgJson = readOpenSearchDashboardsPkgJson(cursor);
+    if (opensearchDashboardsPkgJson) {
       return {
-        kibanaDir: cursor,
-        kibanaPkgJson: kibanaPkgJson as {
+        opensearchDashboardsDir: cursor,
+        opensearchDashboardsPkgJson: opensearchDashboardsPkgJson as {
           name: string;
           branch: string;
         },
@@ -59,13 +59,13 @@ const findKibanaPackageJson = () => {
 
     const parent = Path.dirname(cursor);
     if (parent === rootDir) {
-      throw new Error(`unable to find kibana directory from ${startDir}`);
+      throw new Error(`unable to find opensearch-dashboards directory from ${startDir}`);
     }
     cursor = parent;
   }
 };
 
-const { kibanaDir, kibanaPkgJson } = findKibanaPackageJson();
+const { opensearchDashboardsDir, opensearchDashboardsPkgJson } = findOpensearchDashboardsPackageJson();
 
-export const REPO_ROOT = kibanaDir;
-export const UPSTREAM_BRANCH = kibanaPkgJson.branch;
+export const REPO_ROOT = opensearchDashboardsDir;
+export const UPSTREAM_BRANCH = opensearchDashboardsPkgJson.branch;
