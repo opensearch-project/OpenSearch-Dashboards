@@ -1,4 +1,4 @@
-/* eslint-disable @kbn/eslint/require-license-header */
+/* eslint-disable @osd/eslint/require-license-header */
 
 /* @notice
  * This product bundles code based on probot-metadata@1.0.0 which is
