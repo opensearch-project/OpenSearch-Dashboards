@@ -21,7 +21,7 @@ import ace from 'brace';
 const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
 const oop = ace.acequire('ace/lib/oop');
 
-export const ElasticsearchSqlHighlightRules = function (this: any) {
+export const OpenSearchSqlHighlightRules = function (this: any) {
   // See https://www.elastic.co/guide/en/elasticsearch/reference/current/sql-commands.html
   const keywords =
     'describe|between|in|like|not|and|or|desc|select|from|where|having|group|by|order' +
@@ -110,4 +110,4 @@ export const ElasticsearchSqlHighlightRules = function (this: any) {
   this.normalizeRules();
 };
 
-oop.inherits(ElasticsearchSqlHighlightRules, TextHighlightRules);
+oop.inherits(OpenSearchSqlHighlightRules, TextHighlightRules);
