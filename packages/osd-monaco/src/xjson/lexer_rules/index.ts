@@ -17,35 +17,17 @@
  * under the License.
  */
 
-const path = require('path');
+/* eslint-disable-next-line @osd/eslint/module_migration */
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import * as xJson from './xjson';
+import * as esql from './esql';
+import * as painless from './painless';
 
-const createLangWorkerConfig = (lang) => ({
-  mode: 'production',
-  entry: path.resolve(__dirname, 'src', lang, 'worker', `${lang}.worker.ts`),
-  output: {
-    path: path.resolve(__dirname, 'target/public'),
-    filename: `${lang}.editor.worker.js`,
-  },
-  resolve: {
-    modules: ['node_modules'],
-    extensions: ['.js', '.ts', '.tsx'],
-  },
-  stats: 'errors-only',
-  module: {
-    rules: [
-      {
-        test: /\.(js|ts)$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            babelrc: false,
-            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-          },
-        },
-      },
-    ],
-  },
-});
-
-module.exports = [createLangWorkerConfig('xjson')];
+export const registerLexerRules = (m: typeof monaco) => {
+  m.languages.register({ id: xJson.ID });
+  m.languages.setMonarchTokensProvider(xJson.ID, xJson.lexerRules);
+  m.languages.register({ id: painless.ID });
+  m.languages.setMonarchTokensProvider(painless.ID, painless.lexerRules);
+  m.languages.register({ id: esql.ID });
+  m.languages.setMonarchTokensProvider(esql.ID, esql.lexerRules);
+};
