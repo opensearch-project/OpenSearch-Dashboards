@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { kbnTestConfig } from './kbn_test_config';
-export { kibanaTestUser, kibanaServerTestUser, adminTestUser } from './users';
+export { osdTestConfig } from './osd_test_config';
+export { opensearchDashboardsTestUser, opensearchDashboardsServerTestUser, adminTestUser } from './users';

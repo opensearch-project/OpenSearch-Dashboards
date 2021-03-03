@@ -17,7 +17,19 @@
  * under the License.
  */
 
-module.exports = {
-  presets: ['@kbn/babel-preset/node_preset'],
-  ignore: ['**/*.test.js'],
+const env = process.env;
+
+export const opensearchDashboardsTestUser = {
+  username: env.TEST_OPENSEARCH_DASHBOARDS_USER || 'elastic',
+  password: env.TEST_OPENSEARCH_DASHBOARDS_PASS || 'changeme',
+};
+
+export const opensearchDashboardsServerTestUser = {
+  username: env.TEST_OPENSEARCH_DASHBOARDS_SERVER_USER || 'opensearch',
+  password: env.TEST_OPENSEARCH_DASHBOARDS_SERVER_PASS || 'changeme',
+};
+
+export const adminTestUser = {
+  username: env.TEST_OPENSEARCH_USER || 'elastic',
+  password: env.TEST_OPENSEARCH_PASS || 'changeme',
 };

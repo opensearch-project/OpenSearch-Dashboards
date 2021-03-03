@@ -20,72 +20,72 @@
 import { resolve } from 'path';
 import { format } from 'url';
 import { get, toPath } from 'lodash';
-import { Cluster } from '@kbn/es';
+import { Cluster } from '@osd/opensearch';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
-import { esTestConfig } from './es_test_config';
+import { opensearchTestConfig } from './opensearch_test_config';
 
-import { KIBANA_ROOT } from '../';
-import * as legacyElasticsearch from 'elasticsearch';
+import { OPENSEARCH_DASHBOARDS_ROOT } from '../';
+import * as legacyOpenSearch from 'elasticsearch';
 const path = require('path');
 const del = require('del');
 
-export function createLegacyEsTestCluster(options = {}) {
+export function createLegacyOpenSearchTestCluster(options = {}) {
   const {
-    port = esTestConfig.getPort(),
+    port = opensearchTestConfig.getPort(),
     password = 'changeme',
     license = 'oss',
     log,
-    basePath = resolve(KIBANA_ROOT, '.es'),
-    esFrom = esTestConfig.getBuildFrom(),
+    basePath = resolve(OPENSEARCH_DASHBOARDS_ROOT, '.opensearch'),
+    opensearchFrom = opensearchTestConfig.getBuildFrom(),
     dataArchive,
-    esArgs: customEsArgs = [],
-    esEnvVars,
-    clusterName: customClusterName = 'es-test-cluster',
+    opensearchArgs: customOpenSearchArgs = [],
+    opensearchEnvVars,
+    clusterName: customClusterName = 'opensearch-test-cluster',
     ssl,
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
 
-  const esArgs = [
+  const opensearchArgs = [
     `cluster.name=${clusterName}`,
     `http.port=${port}`,
     'discovery.type=single-node',
-    `transport.port=${esTestConfig.getTransportPort()}`,
+    `transport.port=${opensearchTestConfig.getTransportPort()}`,
     `indices.id_field_data.enabled=false`,
-    ...customEsArgs,
+    ...customOpenSearchArgs,
   ];
 
   const config = {
-    version: esTestConfig.getVersion(),
+    version: opensearchTestConfig.getVersion(),
     installPath: resolve(basePath, clusterName),
-    sourcePath: resolve(KIBANA_ROOT, '../elasticsearch'),
+    sourcePath: resolve(OPENSEARCH_DASHBOARDS_ROOT, '../opensearch'),
     password,
     license,
     basePath,
-    esArgs,
+    opensearchArgs,
   };
 
   const cluster = new Cluster({ log, ssl });
 
-  return new (class EsTestCluster {
+  return new (class OpenSearchTestCluster {
     getStartTimeout() {
       const second = 1000;
       const minute = second * 60;
 
-      return esFrom === 'snapshot' ? 3 * minute : 6 * minute;
+      return opensearchFrom === 'snapshot' ? 3 * minute : 6 * minute;
     }
 
     async start() {
       let installPath;
 
-      if (esFrom === 'source') {
+      if (opensearchFrom === 'source') {
         installPath = (await cluster.installSource(config)).installPath;
-      } else if (esFrom === 'snapshot') {
+      } else if (opensearchFrom === 'snapshot') {
         installPath = (await cluster.installSnapshot(config)).installPath;
-      } else if (path.isAbsolute(esFrom)) {
-        installPath = esFrom;
+      } else if (path.isAbsolute(opensearchFrom)) {
+        installPath = opensearchFrom;
       } else {
-        throw new Error(`unknown option esFrom "${esFrom}"`);
+        throw new Error(`unknown option opensearchFrom "${opensearchFrom}"`);
       }
 
       if (dataArchive) {
@@ -94,27 +94,27 @@ export function createLegacyEsTestCluster(options = {}) {
 
       await cluster.start(installPath, {
         password: config.password,
-        esArgs,
-        esEnvVars,
+        opensearchArgs,
+        opensearchEnvVars,
       });
     }
 
     async stop() {
       await cluster.stop();
-      log.info('[es] stopped');
+      log.info('[opensearch] stopped');
     }
 
     async cleanup() {
       await this.stop();
       await del(config.installPath, { force: true });
-      log.info('[es] cleanup complete');
+      log.info('[opensearch] cleanup complete');
     }
 
     /**
-     * Returns an ES Client to the configured cluster
+     * Returns an opensearch Client to the configured cluster
      */
     getClient() {
-      return new legacyElasticsearch.Client({
+      return new legacyOpenSearch.Client({
         host: this.getUrl(),
       });
     }
@@ -124,7 +124,7 @@ export function createLegacyEsTestCluster(options = {}) {
     }
 
     getUrl() {
-      const parts = esTestConfig.getUrlParts();
+      const parts = opensearchTestConfig.getUrlParts();
       parts.port = port;
 
       return format(parts);
@@ -136,16 +136,16 @@ export function createLegacyEsTestCluster(options = {}) {
  *  Create a callCluster function that properly executes methods on an
  *  elasticsearch-js client
  *
- *  @param  {elasticsearch.Client} esClient
+ *  @param  {elasticsearch.Client} opensearchClient
  *  @return {Function}
  */
-function createCallCluster(esClient) {
+function createCallCluster(opensearchClient) {
   return function callCluster(method, params) {
     const path = toPath(method);
     const contextPath = path.slice(0, -1);
 
-    const action = get(esClient, path);
-    const context = contextPath.length ? get(esClient, contextPath) : esClient;
+    const action = get(opensearchClient, path);
+    const context = contextPath.length ? get(opensearchClient, contextPath) : opensearchClient;
 
     return action.call(context, params);
   };
