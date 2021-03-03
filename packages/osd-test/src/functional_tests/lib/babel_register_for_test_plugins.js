@@ -17,18 +17,23 @@
  * under the License.
  */
 
-import { resolve, relative } from 'path';
+const Path = require('path');
 
-// resolve() treats relative paths as relative to process.cwd(),
-// so to return a relative path we use relative()
-function resolveRelative(path) {
-  return relative(process.cwd(), resolve(path));
-}
+const { REPO_ROOT } = require('@osd/dev-utils');
 
-export const KIBANA_EXEC = 'node';
-export const KIBANA_EXEC_PATH = resolveRelative('scripts/kibana');
-export const KIBANA_ROOT = resolve(__dirname, '../../../../../');
-export const KIBANA_FTR_SCRIPT = resolve(KIBANA_ROOT, 'scripts/functional_test_runner');
-export const PROJECT_ROOT = resolve(__dirname, '../../../../../../');
-export const FUNCTIONAL_CONFIG_PATH = resolve(KIBANA_ROOT, 'test/functional/config');
-export const API_CONFIG_PATH = resolve(KIBANA_ROOT, 'test/api_integration/config');
+// modifies all future calls to require() to automatically
+// compile the required source with babel
+require('@babel/register')({
+  ignore: [/[\/\\](node_modules|target|dist)[\/\\]/],
+  only: [
+    Path.resolve(REPO_ROOT, 'test'),
+    Path.resolve(REPO_ROOT, 'x-pack/test'),
+    Path.resolve(REPO_ROOT, 'examples'),
+    Path.resolve(REPO_ROOT, 'x-pack/examples'),
+    // TODO: should should probably remove this link back to the source
+    Path.resolve(REPO_ROOT, 'x-pack/plugins/task_manager/server/config.ts'),
+  ],
+  babelrc: false,
+  presets: [require.resolve('@osd/babel-preset/node_preset')],
+  extensions: ['.js', '.ts', '.tsx'],
+});

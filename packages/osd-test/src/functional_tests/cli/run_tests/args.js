@@ -20,7 +20,7 @@
 import { resolve } from 'path';
 
 import dedent from 'dedent';
-import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
+import { ToolingLog, pickLevelFromFlags } from '@osd/dev-utils';
 
 const options = {
   help: { desc: 'Display this menu and exit.' },
@@ -28,15 +28,15 @@ const options = {
     arg: '<file>',
     desc: 'Pass in a config. Can pass in multiple configs.',
   },
-  esFrom: {
+  opensearchFrom: {
     arg: '<snapshot|source>',
     choices: ['snapshot', 'source'],
     desc: 'Build Elasticsearch from source or run from snapshot.',
-    defaultHelp: 'Default: $TEST_ES_FROM or snapshot',
+    defaultHelp: 'Default: $TEST_OPENSEARCH_FROM or snapshot',
   },
-  'kibana-install-dir': {
+  'opensearch-dashboards-install-dir': {
     arg: '<dir>',
-    desc: 'Run Kibana from existing install directory instead of from source.',
+    desc: 'Run Opensearch Dashboards from existing install directory instead of from source.',
   },
   bail: { desc: 'Stop the test run at the first failure.' },
   grep: {
@@ -114,13 +114,13 @@ export function processOptions(userOptions, defaultConfigPaths) {
     }
   }
 
-  if (!userOptions.esFrom) {
-    userOptions.esFrom = process.env.TEST_ES_FROM || 'snapshot';
+  if (!userOptions.opensearchFrom) {
+    userOptions.opensearchFrom = process.env.TEST_OPENSEARCH_FROM || 'snapshot';
   }
 
-  if (userOptions['kibana-install-dir']) {
-    userOptions.installDir = userOptions['kibana-install-dir'];
-    delete userOptions['kibana-install-dir'];
+  if (userOptions['opensearch-dashboards-install-dir']) {
+    userOptions.installDir = userOptions['opensearch-dashboards-install-dir'];
+    delete userOptions['opensearch-dashboards-install-dir'];
   }
 
   userOptions.suiteFiles = {
@@ -151,7 +151,7 @@ export function processOptions(userOptions, defaultConfigPaths) {
     ...userOptions,
     configs: configs.map((c) => resolve(c)),
     createLogger,
-    extraKbnOpts: userOptions._,
+    extraOsdOpts: userOptions._,
   };
 }
 

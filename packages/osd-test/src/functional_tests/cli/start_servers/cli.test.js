@@ -19,16 +19,16 @@
 
 import { Writable } from 'stream';
 
-import { runTestsCli } from './cli';
+import { startServersCli } from './cli';
 import { checkMockConsoleLogSnapshot } from '../../test_helpers';
 
-// Note: Stub the runTests function to keep testing only around the cli
+// Note: Stub the startServers function to keep testing only around the cli
 // method and arguments.
 jest.mock('../../tasks', () => ({
-  runTests: jest.fn(),
+  startServers: jest.fn(),
 }));
 
-describe('run tests CLI', () => {
+describe('start servers CLI', () => {
   describe('options', () => {
     const originalObjects = { process, console };
     const exitMock = jest.fn();
@@ -42,7 +42,7 @@ describe('run tests CLI', () => {
       cwd: jest.fn(),
       env: {
         ...originalObjects.process.env,
-        TEST_ES_FROM: 'snapshot',
+        TEST_OPENSEARCH_FROM: 'snapshot',
       },
     };
 
@@ -60,7 +60,7 @@ describe('run tests CLI', () => {
       global.process.argv = [...argvMock];
       global.process.env = {
         ...originalObjects.process.env,
-        TEST_ES_FROM: 'snapshot',
+        TEST_OPENSEARCH_FROM: 'snapshot',
       };
       jest.resetAllMocks();
     });
@@ -68,7 +68,7 @@ describe('run tests CLI', () => {
     it('rejects boolean config value', async () => {
       global.process.argv.push('--config');
 
-      await runTestsCli();
+      await startServersCli();
 
       expect(exitMock).toHaveBeenCalledWith(1);
       checkMockConsoleLogSnapshot(logMock);
@@ -77,7 +77,7 @@ describe('run tests CLI', () => {
     it('rejects empty config value if no default passed', async () => {
       global.process.argv.push('--config', '');
 
-      await runTestsCli();
+      await startServersCli();
 
       expect(exitMock).toHaveBeenCalledWith(1);
       checkMockConsoleLogSnapshot(logMock);
@@ -86,32 +86,32 @@ describe('run tests CLI', () => {
     it('accepts empty config value if default passed', async () => {
       global.process.argv.push('--config', '');
 
-      await runTestsCli(['foo']);
+      await startServersCli('foo');
 
       expect(exitMock).not.toHaveBeenCalled();
     });
 
-    it('rejects non-boolean value for bail', async () => {
-      global.process.argv.push('--bail', 'peanut');
+    it('rejects bail', async () => {
+      global.process.argv.push('--bail', true);
 
-      await runTestsCli(['foo']);
+      await startServersCli('foo');
 
       expect(exitMock).toHaveBeenCalledWith(1);
       checkMockConsoleLogSnapshot(logMock);
     });
 
-    it('accepts string value for kibana-install-dir', async () => {
-      global.process.argv.push('--kibana-install-dir', 'foo');
+    it('accepts string value for opensearch-dashboards-install-dir', async () => {
+      global.process.argv.push('--opensearch-dashboards-install-dir', 'foo');
 
-      await runTestsCli(['foo']);
+      await startServersCli('foo');
 
       expect(exitMock).not.toHaveBeenCalled();
     });
 
-    it('rejects boolean value for kibana-install-dir', async () => {
-      global.process.argv.push('--kibana-install-dir');
+    it('rejects boolean value for opensearch-dashboards-install-dir', async () => {
+      global.process.argv.push('--opensearch-dashboards-install-dir');
 
-      await runTestsCli(['foo']);
+      await startServersCli('foo');
 
       expect(exitMock).toHaveBeenCalledWith(1);
       checkMockConsoleLogSnapshot(logMock);
@@ -120,32 +120,16 @@ describe('run tests CLI', () => {
     it('accepts boolean value for updateBaselines', async () => {
       global.process.argv.push('--updateBaselines');
 
-      await runTestsCli(['foo']);
-
-      expect(exitMock).not.toHaveBeenCalledWith();
-    });
-
-    it('accepts source value for esFrom', async () => {
-      global.process.argv.push('--esFrom', 'source');
-
-      await runTestsCli(['foo']);
-
-      expect(exitMock).not.toHaveBeenCalled();
-    });
-
-    it('rejects non-enum value for esFrom', async () => {
-      global.process.argv.push('--esFrom', 'butter');
-
-      await runTestsCli(['foo']);
+      await startServersCli('foo');
 
       expect(exitMock).toHaveBeenCalledWith(1);
       checkMockConsoleLogSnapshot(logMock);
     });
 
-    it('accepts value for grep', async () => {
-      global.process.argv.push('--grep', 'management');
+    it('accepts source value for opensearchFrom', async () => {
+      global.process.argv.push('--opensearchFrom', 'source');
 
-      await runTestsCli(['foo']);
+      await startServersCli('foo');
 
       expect(exitMock).not.toHaveBeenCalled();
     });
@@ -153,7 +137,7 @@ describe('run tests CLI', () => {
     it('accepts debug option', async () => {
       global.process.argv.push('--debug');
 
-      await runTestsCli(['foo']);
+      await startServersCli('foo');
 
       expect(exitMock).not.toHaveBeenCalled();
     });
@@ -161,7 +145,7 @@ describe('run tests CLI', () => {
     it('accepts silent option', async () => {
       global.process.argv.push('--silent');
 
-      await runTestsCli(['foo']);
+      await startServersCli('foo');
 
       expect(exitMock).not.toHaveBeenCalled();
     });
@@ -169,7 +153,7 @@ describe('run tests CLI', () => {
     it('accepts quiet option', async () => {
       global.process.argv.push('--quiet');
 
-      await runTestsCli(['foo']);
+      await startServersCli('foo');
 
       expect(exitMock).not.toHaveBeenCalled();
     });
@@ -177,7 +161,7 @@ describe('run tests CLI', () => {
     it('accepts verbose option', async () => {
       global.process.argv.push('--verbose');
 
-      await runTestsCli(['foo']);
+      await startServersCli('foo');
 
       expect(exitMock).not.toHaveBeenCalled();
     });
@@ -185,24 +169,23 @@ describe('run tests CLI', () => {
     it('accepts extra server options', async () => {
       global.process.argv.push('--', '--server.foo=bar');
 
-      await runTestsCli(['foo']);
+      await startServersCli('foo');
 
       expect(exitMock).not.toHaveBeenCalled();
     });
 
     it('accepts help option even if invalid options passed', async () => {
-      global.process.argv.push('--debug', '--aintnothang', '--help');
+      global.process.argv.push('--debug', '--grep', '--help');
 
-      await runTestsCli(['foo']);
+      await startServersCli('foo');
 
       expect(exitMock).not.toHaveBeenCalledWith(1);
-      checkMockConsoleLogSnapshot(logMock);
     });
 
     it('rejects invalid options even if valid options exist', async () => {
-      global.process.argv.push('--debug', '--aintnothang', '--bail');
+      global.process.argv.push('--debug', '--grep', '--bail');
 
-      await runTestsCli(['foo']);
+      await startServersCli('foo');
 
       expect(exitMock).toHaveBeenCalledWith(1);
       checkMockConsoleLogSnapshot(logMock);

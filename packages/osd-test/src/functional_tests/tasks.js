@@ -20,30 +20,30 @@
 import { relative } from 'path';
 import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
-import { withProcRunner } from '@kbn/dev-utils';
+import { withProcRunner } from '@osd/dev-utils';
 import dedent from 'dedent';
 
 import {
   runElasticsearch,
-  runKibanaServer,
+  runOpenSearchDashboardsServer,
   runFtr,
   assertNoneExcluded,
   hasTests,
-  KIBANA_FTR_SCRIPT,
+  OPENSEARCH_DASHBOARDS_FTR_SCRIPT,
 } from './lib';
 
 import { readConfigFile } from '../functional_test_runner/lib';
 
 const makeSuccessMessage = (options) => {
-  const installDirFlag = options.installDir ? ` --kibana-install-dir=${options.installDir}` : '';
+  const installDirFlag = options.installDir ? ` --opensearch-dashboards-install-dir=${options.installDir}` : '';
 
   return (
     '\n\n' +
     dedent`
-      Elasticsearch and Kibana are ready for functional testing. Start the functional tests
+      Elasticsearch and Opensearch Dashboards are ready for functional testing. Start the functional tests
       in another terminal session by running this command from this directory:
 
-          node ${relative(process.cwd(), KIBANA_FTR_SCRIPT)}${installDirFlag}
+          node ${relative(process.cwd(), OPENSEARCH_DASHBOARDS_FTR_SCRIPT)}${installDirFlag}
     ` +
     '\n\n'
   );
@@ -54,18 +54,18 @@ const makeSuccessMessage = (options) => {
  * @param {object} options                   Optional
  * @property {string[]} options.configs      Array of paths to configs
  * @property {function} options.log          An instance of the ToolingLog
- * @property {string} options.installDir     Optional installation dir from which to run Kibana
+ * @property {string} options.installDir     Optional installation dir from which to run Opensearch Dashboards
  * @property {boolean} options.bail          Whether to exit test run at the first failure
- * @property {string} options.esFrom         Optionally run from source instead of snapshot
+ * @property {string} options.opensearchFrom         Optionally run from source instead of snapshot
  */
 export async function runTests(options) {
-  if (!process.env.KBN_NP_PLUGINS_BUILT) {
+  if (!process.env.OSD_NP_PLUGINS_BUILT) {
     const log = options.createLogger();
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
     log.warning(
-      "   Don't forget to use `node scripts/build_kibana_platform_plugins` to build plugins you plan on testing"
+      "   Don't forget to use `node scripts/build_opensearch_dashboards_platform_plugins` to build plugins you plan on testing"
     );
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
@@ -95,17 +95,17 @@ export async function runTests(options) {
     await withProcRunner(log, async (procs) => {
       const config = await readConfigFile(log, configPath);
 
-      let es;
+      let opensearch;
       try {
-        es = await runElasticsearch({ config, options: opts });
-        await runKibanaServer({ procs, config, options: opts });
+        opensearch = await runElasticsearch({ config, options: opts });
+        await runOpenSearchDashboardsServer({ procs, config, options: opts });
         await runFtr({ configPath, options: opts });
       } finally {
         try {
-          await procs.stop('kibana');
+          await procs.stop('opensearch-dashboards');
         } finally {
-          if (es) {
-            await es.cleanup();
+          if (opensearch) {
+            await opensearch.cleanup();
           }
         }
       }
@@ -118,8 +118,8 @@ export async function runTests(options) {
  * @param {object} options                   Optional
  * @property {string} options.config         Path to a config file
  * @property {function} options.log          An instance of the ToolingLog
- * @property {string} options.installDir     Optional installation dir from which to run Kibana
- * @property {string} options.esFrom         Optionally run from source instead of snapshot
+ * @property {string} options.installDir     Optional installation dir from which to run Opensearch Dashboards
+ * @property {string} options.opensearchFrom         Optionally run from source instead of snapshot
  */
 export async function startServers(options) {
   const log = options.createLogger();
@@ -131,14 +131,14 @@ export async function startServers(options) {
   await withProcRunner(log, async (procs) => {
     const config = await readConfigFile(log, options.config);
 
-    const es = await runElasticsearch({ config, options: opts });
-    await runKibanaServer({
+    const opensearch = await runElasticsearch({ config, options: opts });
+    await runOpenSearchDashboardsServer({
       procs,
       config,
       options: {
         ...opts,
-        extraKbnOpts: [
-          ...options.extraKbnOpts,
+        extraOsdOpts: [
+          ...options.extraOsdOpts,
           ...(options.installDir ? [] : ['--dev', '--no-dev-config']),
         ],
       },
@@ -150,7 +150,7 @@ export async function startServers(options) {
     log.success(makeSuccessMessage(options));
 
     await procs.waitForAllToStop();
-    await es.cleanup();
+    await opensearch.cleanup();
   });
 }
 
