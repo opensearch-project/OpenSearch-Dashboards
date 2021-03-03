@@ -86,7 +86,7 @@ export class Reporter {
       window.addEventListener('beforeunload', () => this.reportApplicationUsage());
 
       // Monitoring dashboards might be open in background and we are fine with that
-      // but we don't want to report hours if the user goes to another tab and Kibana is not shown
+      // but we don't want to report hours if the user goes to another tab and OpenSearch Dashboards is not shown
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible' && this.lastAppId) {
           this.reportApplicationUsage(this.lastAppId);
