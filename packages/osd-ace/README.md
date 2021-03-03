@@ -1,4 +1,4 @@
-# @kbn/ace
+# @osd/ace
 
 This package contains the XJSON mode for brace. This is an extension of the `brace/mode/json` mode.
 

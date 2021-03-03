@@ -17,6 +17,11 @@
  * under the License.
  */
 
-export { ElasticsearchSqlHighlightRules } from './elasticsearch_sql_highlight_rules';
-export { ScriptHighlightRules } from './script_highlight_rules';
-export { XJsonHighlightRules, addToRules as addXJsonToRules } from './x_json_highlight_rules';
+export {
+  OpenSearchSqlHighlightRules,
+  ScriptHighlightRules,
+  XJsonHighlightRules,
+  addXJsonToRules,
+  XJsonMode,
+  installXJsonMode,
+} from './ace/modes';
