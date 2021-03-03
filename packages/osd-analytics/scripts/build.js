@@ -21,7 +21,7 @@ const { resolve } = require('path');
 
 const del = require('del');
 const supportsColor = require('supports-color');
-const { run, withProcRunner } = require('@kbn/dev-utils');
+const { run, withProcRunner } = require('@osd/dev-utils');
 
 const ROOT_DIR = resolve(__dirname, '..');
 const BUILD_DIR = resolve(ROOT_DIR, 'target');
@@ -82,7 +82,7 @@ run(
     });
   },
   {
-    description: 'Simple build tool for @kbn/analytics package',
+    description: 'Simple build tool for @osd/analytics package',
     flags: {
       boolean: ['watch', 'source-maps'],
       help: `
