@@ -1,9 +1,9 @@
 {
-  "name": "@kbn/eslint-plugin-eslint",
+  "name": "@osd/eslint-plugin-eslint",
   "version": "1.0.0",
   "private": true,
   "license": "Apache-2.0",
-  "kibana": {
+  "opensearchDashboards": {
     "devOnly": true
   },
   "peerDependencies": {

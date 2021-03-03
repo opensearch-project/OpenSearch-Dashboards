@@ -39,7 +39,7 @@ const ruleTester = new RuleTester({
   },
 });
 
-ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
+ruleTester.run('@osd/eslint/no-restricted-paths', rule, {
   valid: [
     {
       code: 'import a from "../client/a.js"',
