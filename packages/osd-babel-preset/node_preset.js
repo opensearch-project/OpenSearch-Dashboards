@@ -26,8 +26,8 @@ module.exports = (_, options = {}) => {
           targets: {
             // only applies the necessary transformations based on the
             // current node.js processes version. For example: running
-            // `nvm install 8 && node ./src/cli` will run kibana in node
-            // version 8 and babel will stop transpiling async/await
+            // `nvm install 8 && node ./src/cli` will run OpenSearch Dashboards
+            // in node version 8 and babel will stop transpiling async/await
             // because they are supported in the "current" version of node
             node: 'current',
           },
