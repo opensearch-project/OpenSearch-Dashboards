@@ -154,7 +154,7 @@ export class GuideNav extends Component {
         <div className="guideNav__header">
           <div className={buttonClasses} onClick={this.props.onToggleNav} />
           <Link className="guideNav__title" to="/" onClick={this.props.onClickNavItem}>
-            Kibana UI Framework <span className="guideNav__version">{this.props.version}</span>
+            OpenSearch Dashboards UI Framework <span className="guideNav__version">{this.props.version}</span>
           </Link>
           <a
             href="http://elastic.co"

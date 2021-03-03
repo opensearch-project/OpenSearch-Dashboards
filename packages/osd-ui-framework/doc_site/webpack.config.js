@@ -46,7 +46,7 @@ module.exports = {
         loader: 'babel-loader',
         exclude: /node_modules/,
         query: {
-          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+          presets: [require.resolve('@osd/babel-preset/webpack_preset')],
         },
       },
       {
