@@ -56,8 +56,8 @@ function assertDeepClones(a: any, b: any) {
   } catch (err) {
     throw new Error(
       `Expected a and b to be deep clones of each other, error at:\n\n` +
-      `  "${path.join('.') || '-'}"\n\n` +
-      err.stack
+        `  "${path.join('.') || '-'}"\n\n` +
+        err.stack
     );
   }
 }

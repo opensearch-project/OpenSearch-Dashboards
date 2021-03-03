@@ -27,31 +27,31 @@ type StubStats = Stats & {
 };
 
 export const createStubStats = (): StubStats =>
-({
-  createdIndex: sinon.stub(),
-  createdAliases: sinon.stub(),
-  deletedIndex: sinon.stub(),
-  skippedIndex: sinon.stub(),
-  archivedIndex: sinon.stub(),
-  getTestSummary() {
-    const summary: Record<string, number> = {};
-    Object.keys(this).forEach((key) => {
-      if (this[key].callCount) {
-        summary[key] = this[key].callCount;
-      }
-    });
-    return summary;
-  },
-} as any);
+  ({
+    createdIndex: sinon.stub(),
+    createdAliases: sinon.stub(),
+    deletedIndex: sinon.stub(),
+    skippedIndex: sinon.stub(),
+    archivedIndex: sinon.stub(),
+    getTestSummary() {
+      const summary: Record<string, number> = {};
+      Object.keys(this).forEach((key) => {
+        if (this[key].callCount) {
+          summary[key] = this[key].callCount;
+        }
+      });
+      return summary;
+    },
+  } as any);
 
 export const createStubLogger = (): ToolingLog =>
-({
-  debug: sinon.stub(),
-  info: sinon.stub(),
-  success: sinon.stub(),
-  warning: sinon.stub(),
-  error: sinon.stub(),
-} as any);
+  ({
+    debug: sinon.stub(),
+    info: sinon.stub(),
+    success: sinon.stub(),
+    warning: sinon.stub(),
+    error: sinon.stub(),
+  } as any);
 
 export const createStubIndexRecord = (index: string, aliases = {}) => ({
   type: 'index',
@@ -82,73 +82,73 @@ export const createStubClient = (
   existingIndices: string[] = [],
   aliases: Record<string, any> = {}
 ): StubClient =>
-({
-  indices: {
-    get: sinon.spy(async ({ index }) => {
-      if (!existingIndices.includes(index)) {
-        throw createOpenSearchClientError('index_not_found_exception');
-      }
-
-      return {
-        [index]: {
-          mappings: {},
-          settings: {},
-        },
-      };
-    }),
-    existsAlias: sinon.spy(({ name }) => {
-      return Promise.resolve(aliases.hasOwnProperty(name));
-    }),
-    getAlias: sinon.spy(async ({ index, name }) => {
-      if (index && existingIndices.indexOf(index) >= 0) {
-        const result = indexAlias(aliases, index);
-        return { [index]: { aliases: result ? { [result]: {} } : {} } };
-      }
-
-      if (name && aliases[name]) {
-        return { [aliases[name]]: { aliases: { [name]: {} } } };
-      }
-
-      return { status: 404 };
-    }),
-    updateAliases: sinon.spy(async ({ body }) => {
-      body.actions.forEach(
-        ({ add: { index, alias } }: { add: { index: string; alias: string } }) => {
-          if (!existingIndices.includes(index)) {
-            throw createOpenSearchClientError('index_not_found_exception');
-          }
-          existingIndices.push({ index, alias } as any);
+  ({
+    indices: {
+      get: sinon.spy(async ({ index }) => {
+        if (!existingIndices.includes(index)) {
+          throw createOpenSearchClientError('index_not_found_exception');
         }
-      );
 
-      return { ok: true };
-    }),
-    create: sinon.spy(async ({ index }) => {
-      if (existingIndices.includes(index) || aliases.hasOwnProperty(index)) {
-        throw createOpenSearchClientError('resource_already_exists_exception');
-      } else {
-        existingIndices.push(index);
-        return { ok: true };
-      }
-    }),
-    delete: sinon.spy(async ({ index }) => {
-      const indices = Array.isArray(index) ? index : [index];
-      if (indices.every((ix) => existingIndices.includes(ix))) {
-        // Delete aliases associated with our indices
-        indices.forEach((ix) => {
-          const alias = Object.keys(aliases).find((k) => aliases[k] === ix);
-          if (alias) {
-            delete aliases[alias];
+        return {
+          [index]: {
+            mappings: {},
+            settings: {},
+          },
+        };
+      }),
+      existsAlias: sinon.spy(({ name }) => {
+        return Promise.resolve(aliases.hasOwnProperty(name));
+      }),
+      getAlias: sinon.spy(async ({ index, name }) => {
+        if (index && existingIndices.indexOf(index) >= 0) {
+          const result = indexAlias(aliases, index);
+          return { [index]: { aliases: result ? { [result]: {} } : {} } };
+        }
+
+        if (name && aliases[name]) {
+          return { [aliases[name]]: { aliases: { [name]: {} } } };
+        }
+
+        return { status: 404 };
+      }),
+      updateAliases: sinon.spy(async ({ body }) => {
+        body.actions.forEach(
+          ({ add: { index, alias } }: { add: { index: string; alias: string } }) => {
+            if (!existingIndices.includes(index)) {
+              throw createOpenSearchClientError('index_not_found_exception');
+            }
+            existingIndices.push({ index, alias } as any);
           }
-        });
-        indices.forEach((ix) => existingIndices.splice(existingIndices.indexOf(ix), 1));
+        );
+
         return { ok: true };
-      } else {
-        throw createOpenSearchClientError('index_not_found_exception');
-      }
-    }),
-    exists: sinon.spy(async () => {
-      throw new Error('Do not use indices.exists(). React to errors instead.');
-    }),
-  },
-} as any);
+      }),
+      create: sinon.spy(async ({ index }) => {
+        if (existingIndices.includes(index) || aliases.hasOwnProperty(index)) {
+          throw createOpenSearchClientError('resource_already_exists_exception');
+        } else {
+          existingIndices.push(index);
+          return { ok: true };
+        }
+      }),
+      delete: sinon.spy(async ({ index }) => {
+        const indices = Array.isArray(index) ? index : [index];
+        if (indices.every((ix) => existingIndices.includes(ix))) {
+          // Delete aliases associated with our indices
+          indices.forEach((ix) => {
+            const alias = Object.keys(aliases).find((k) => aliases[k] === ix);
+            if (alias) {
+              delete aliases[alias];
+            }
+          });
+          indices.forEach((ix) => existingIndices.splice(existingIndices.indexOf(ix), 1));
+          return { ok: true };
+        } else {
+          throw createOpenSearchClientError('index_not_found_exception');
+        }
+      }),
+      exists: sinon.spy(async () => {
+        throw new Error('Do not use indices.exists(). React to errors instead.');
+      }),
+    },
+  } as any);

@@ -85,9 +85,15 @@ export async function migrateOpenSearchDashboardsIndex({
  * index (e.g. we don't want to remove .opensearch-dashboards_task_manager or the like).
  */
 async function fetchOpenSearchDashboardsIndices(client: Client) {
-  const opensearchDashboardsIndices = await client.cat.indices({ index: '.opensearch-dashboards*', format: 'json' });
-  const isOpenSearchDashboardsIndex = (index: string) => /^\.opensearch-dashboards(:?_\d*)?$/.test(index);
-  return opensearchDashboardsIndices.map((x: { index: string }) => x.index).filter(isOpenSearchDashboardsIndex);
+  const opensearchDashboardsIndices = await client.cat.indices({
+    index: '.opensearch-dashboards*',
+    format: 'json',
+  });
+  const isOpenSearchDashboardsIndex = (index: string) =>
+    /^\.opensearch-dashboards(:?_\d*)?$/.test(index);
+  return opensearchDashboardsIndices
+    .map((x: { index: string }) => x.index)
+    .filter(isOpenSearchDashboardsIndex);
 }
 
 export async function cleanOpenSearchDashboardsIndices({
@@ -141,7 +147,7 @@ export async function cleanOpenSearchDashboardsIndices({
 
   log.warning(
     `since spaces are enabled, all objects other than the default space were deleted from ` +
-    `.opensearch-dashboards rather than deleting the whole index`
+      `.opensearch-dashboards rather than deleting the whole index`
   );
 
   stats.deletedIndex('.opensearch-dashboards');

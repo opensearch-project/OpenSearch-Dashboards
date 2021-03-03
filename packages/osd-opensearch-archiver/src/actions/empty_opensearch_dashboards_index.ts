@@ -20,7 +20,11 @@
 import { Client } from 'elasticsearch';
 import { ToolingLog, OsdClient } from '@osd/dev-utils';
 
-import { migrateOpenSearchDashboardsIndex, deleteOpenSearchDashboardsIndices, createStats } from '../lib';
+import {
+  migrateOpenSearchDashboardsIndex,
+  deleteOpenSearchDashboardsIndices,
+  createStats,
+} from '../lib';
 
 export async function emptyOpenSearchDashboardsIndexAction({
   client,

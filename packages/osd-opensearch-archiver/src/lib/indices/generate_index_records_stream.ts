@@ -55,7 +55,9 @@ export function createGenerateIndexRecordsStream(client: Client, stats: Stats) {
             value: {
               // always rewrite the .opensearch-dashboards_* index to .opensearch-dashboards_1 so that
               // when it is loaded it can skip migration, if possible
-              index: index.startsWith('.opensearch-dashboards') ? '.opensearch-dashboards_1' : index,
+              index: index.startsWith('.opensearch-dashboards')
+                ? '.opensearch-dashboards_1'
+                : index,
               settings,
               mappings,
               aliases,

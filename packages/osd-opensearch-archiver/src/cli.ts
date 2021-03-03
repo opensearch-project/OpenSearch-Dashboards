@@ -99,7 +99,7 @@ export function runCli() {
         log,
         client,
         dataDir: dir,
-        opensearchDashboardsUrl: opensearchDashboardsUrl,
+        opensearchDashboardsUrl,
       });
 
       return {
