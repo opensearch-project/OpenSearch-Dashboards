@@ -21,7 +21,7 @@ import { defaultsDeep } from 'lodash';
 import ace from 'brace';
 import 'brace/mode/json';
 
-import { ElasticsearchSqlHighlightRules } from './elasticsearch_sql_highlight_rules';
+import { OpenSearchSqlHighlightRules } from './opensearch_sql_highlight_rules';
 import { ScriptHighlightRules } from './script_highlight_rules';
 
 const { JsonHighlightRules } = ace.acequire('ace/mode/json_highlight_rules');
@@ -164,7 +164,7 @@ export function XJsonHighlightRules(this: any) {
     },
   ]);
 
-  this.embedRules(ElasticsearchSqlHighlightRules, 'sql-', [
+  this.embedRules(OpenSearchSqlHighlightRules, 'sql-', [
     {
       token: 'punctuation.end_triple_quote',
       regex: '"""',
@@ -184,7 +184,7 @@ export function addToRules(otherRules: any, embedUnder: any) {
       next: 'pop',
     },
   ]);
-  otherRules.embedRules(ElasticsearchSqlHighlightRules, 'sql-', [
+  otherRules.embedRules(OpenSearchSqlHighlightRules, 'sql-', [
     {
       token: 'punctuation.end_triple_quote',
       regex: '"""',
