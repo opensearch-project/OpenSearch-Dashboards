@@ -112,7 +112,7 @@ export function modifyUrl(
  */
 export function isRelativeUrl(candidatePath: string) {
   // validate that `candidatePath` is not attempting a redirect to somewhere
-  // outside of this Kibana install
+  // outside of this OpenSearch Dashboards install
   const all = parseUrl(candidatePath, false /* parseQueryString */, true /* slashesDenoteHost */);
   const { protocol, hostname, port } = all;
   // We should explicitly compare `protocol`, `port` and `hostname` to null to make sure these are not
