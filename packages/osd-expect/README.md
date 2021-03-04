@@ -1,6 +1,6 @@
 > NOTE: This is a local fork of https://github.com/Automattic/expect.js
 
-# @kbn/expect
+# @osd/expect
 
 Minimalistic BDD assertion toolkit based on
 [should.js](http://github.com/visionmedia/should.js)
@@ -17,7 +17,7 @@ expect(window).not.to.be.an(Image);
 
 - Cross-browser: works on IE6+, Firefox, Safari, Chrome, Opera.
 - Compatible with all test frameworks.
-- Node.JS ready (`require('@kbn/expect')`).
+- Node.JS ready (`require('@osd/expect')`).
 
 ## API
 
