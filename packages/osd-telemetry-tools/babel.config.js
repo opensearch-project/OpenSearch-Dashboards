@@ -18,6 +18,6 @@
  */
 
 module.exports = {
-  presets: ['@kbn/babel-preset/node_preset'],
+  presets: ['@osd/babel-preset/node_preset'],
   ignore: ['**/*.test.ts', '**/__fixture__/**'],
 };
