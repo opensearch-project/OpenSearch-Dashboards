@@ -1,9 +1,9 @@
 # I18n
 
-Kibana relies on several UI frameworks (ReactJS and AngularJS) and
+OpenSearch Dashboards relies on several UI frameworks (ReactJS and AngularJS) and
 requires localization in different environments (browser and NodeJS).
 Internationalization engine is framework agnostic and consumable in
-all parts of Kibana (ReactJS, AngularJS and NodeJS). In order to simplify
+all parts of OpenSearch Dashboards (ReactJS, AngularJS and NodeJS). In order to simplify
 internationalization in UI frameworks, the additional abstractions are
 built around the I18n engine: `react-intl` for React and custom
 components for AngularJS. [React-intl](https://github.com/yahoo/react-intl)
@@ -21,7 +21,7 @@ are used in order to simplify message location search. For example, if
 we are going to translate the title of `/management/sections/objects/_objects.html`
 file, we should use message path like this: `'management.objects.objectsTitle'`.
 
-Each Kibana plugin has a separate folder with translation files located at
+Each OpenSearch Dashboards plugin has a separate folder with translation files located at
 ```
 {path/to/plugin}/translations/{locale}.json
 ```
@@ -30,13 +30,13 @@ where `locale` is [ISO 639 language code](https://en.wikipedia.org/wiki/List_of_
 
 For example:
 ```
-src/legacy/core_plugins/kibana/translations/fr.json
+src/legacy/core_plugins/opensearch-dashboards/translations/fr.json
 ```
 
 The engine scans `x-pack/legacy/plugins/*/translations`, `src/core_plugins/*/translations`, `plugins/*/translations` and `src/legacy/ui/translations` folders on initialization, so there is no need to register translation files.
 
-The engine uses a `config/kibana.yml` file for locale resolution process. If locale is
-defined via `i18n.locale` option in `config/kibana.yml` then it will be used as a base
+The engine uses a `config/opensearch_dashboards.yml` file for locale resolution process. If locale is
+defined via `i18n.locale` option in `config/opensearch_dashboards.yml` then it will be used as a base
 locale, otherwise i18n engine will fall back to `en`. The `en` locale will also be used
 if translation can't be found for the base non-English locale.
 
@@ -439,6 +439,6 @@ In order to translate attributes in AngularJS we should use `i18nFilter`:
 
 In order to simplify localization process, some additional tools were implemented:
 - tool for verifying all translations have translatable strings and extracting default messages from templates
-- tool for verifying translation files and integrating them to Kibana
+- tool for verifying translation files and integrating them to OpenSearch Dashboards
 
 [I18n tools documentation](../../src/dev/i18n/README.md)

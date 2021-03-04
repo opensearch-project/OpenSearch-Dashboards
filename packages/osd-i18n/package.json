@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/i18n",
+  "name": "@osd/i18n",
   "browser": "./target/web/browser.js",
   "main": "./target/node/index.js",
   "types": "./target/types/index.d.ts",
@@ -8,14 +8,14 @@
   "private": true,
   "scripts": {
     "build": "node scripts/build",
-    "kbn:bootstrap": "node scripts/build --source-maps",
-    "kbn:watch": "node scripts/build --watch --source-maps"
+    "osd:bootstrap": "node scripts/build --source-maps",
+    "osd:watch": "node scripts/build --watch --source-maps"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.5",
     "@babel/core": "^7.11.6",
-    "@kbn/babel-preset": "1.0.0",
-    "@kbn/dev-utils": "1.0.0",
+    "@osd/babel-preset": "1.0.0",
+    "@osd/dev-utils": "1.0.0",
     "@types/intl-relativeformat": "^2.1.0",
     "@types/react-intl": "^2.3.15",
     "del": "^5.1.0",

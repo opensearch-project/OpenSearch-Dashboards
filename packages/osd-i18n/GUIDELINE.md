@@ -26,7 +26,7 @@ For example the message before translation looks like:
 
   ```html
   <p>
-      The following deprecated languages are in use: {deprecatedLangsInUse.join(', ')}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert your scripted fields to <EuiLink href={painlessDocLink}>Painless</EuiLink> to avoid any problems.
+      The following deprecated languages are in use: {deprecatedLangsInUse.join(', ')}. Support for these languages will be removed in the next major version of OpenSearch Dashboards and OpenSearch. Convert your scripted fields to <EuiLink href={painlessDocLink}>Painless</EuiLink> to avoid any problems.
   </p>
   ```
 
@@ -37,7 +37,7 @@ It is used the following message id naming structure:
 
 ```js
 {
-  'kbn.management.editIndexPattern.scripted.deprecationLangLabel.deprecationLangDetail': 'The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert your scripted fields to {link} to avoid any problems.'
+  'osd.management.editIndexPattern.scripted.deprecationLangLabel.deprecationLangDetail': 'The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be removed in the next major version of OpenSearch Dashboards and OpenSearch. Convert your scripted fields to {link} to avoid any problems.'
 }
 ```
 
@@ -47,7 +47,7 @@ For example:
 
 ```js
 {
-  'kbn.management.editIndexPattern.scripted.deprecationLangLabel.painlessLinkLabel': 'Painless'
+  'osd.management.editIndexPattern.scripted.deprecationLangLabel.painlessLinkLabel': 'Painless'
 }
 ```
 
@@ -57,8 +57,8 @@ Messages can contain placeholders for embedding a value of a variable. For examp
 
 ```js
 {
-  'kbn.management.editIndexPattern.scripted.deleteFieldLabel': "Delete scripted field '{fieldName}'?"
-  'kbn.management.editIndexPattern.scripted.noFieldLabel': "'{indexPatternTitle}' index pattern doesn't have a scripted field called '{fieldName}'"
+  'osd.management.editIndexPattern.scripted.deleteFieldLabel': "Delete scripted field '{fieldName}'?"
+  'osd.management.editIndexPattern.scripted.noFieldLabel': "'{indexPatternTitle}' index pattern doesn't have a scripted field called '{fieldName}'"
 }
 ```
 
@@ -72,7 +72,7 @@ For example:
 
 ```js
 {
-  'kbn.management.createIndexPattern.step.status.successLabel.strongIndicesLabel': '{indicesLength, plural, one {# index} other {# indices}}'
+  'osd.management.createIndexPattern.step.status.successLabel.strongIndicesLabel': '{indicesLength, plural, one {# index} other {# indices}}'
 }
 ```
 
@@ -84,19 +84,19 @@ In case when `indicesLength` has value 1, the result string will be "`1 index`".
 
 #### In ReactJS
 
-The long term plan is to rely on using `FormattedMessage` and `i18n.translate()` by statically importing `i18n` from the `@kbn/i18n` package. **Avoid using `injectI18n` and use `i18n.translate()` instead.**
+The long term plan is to rely on using `FormattedMessage` and `i18n.translate()` by statically importing `i18n` from the `@osd/i18n` package. **Avoid using `injectI18n` and use `i18n.translate()` instead.**
 
 - You should use `<FormattedMessage>` most of the time.
-- In the case where the string is expected (`aria-label`, `placeholder`), Call JS function `i18n.translate()` from the`@kbn/i18n` package.
+- In the case where the string is expected (`aria-label`, `placeholder`), Call JS function `i18n.translate()` from the`@osd/i18n` package.
 
 Currently, we support the following ReactJS `i18n` tools, but they will be removed in future releases:
 - Usage of `props.intl.formatmessage()` (where `intl` is  passed to `props` by `injectI18n` HOC).
 
 #### In AngularJS
 
-The long term plan is to rely on using `i18n.translate()` by statically importing `i18n` from the `@kbn/i18n` package. **Avoid using the `i18n` filter and the `i18n` service injected in controllers, directives, services.**
+The long term plan is to rely on using `i18n.translate()` by statically importing `i18n` from the `@osd/i18n` package. **Avoid using the `i18n` filter and the `i18n` service injected in controllers, directives, services.**
 
-- Call JS function `i18n.translate()` from the `@kbn/i18n` package.
+- Call JS function `i18n.translate()` from the `@osd/i18n` package.
 - Use `i18nId` directive in template.
 
 Currently, we support the following AngluarJS `i18n` tools, but they will be removed in future releases:
@@ -105,7 +105,7 @@ Currently, we support the following AngluarJS `i18n` tools, but they will be rem
 
 #### In JavaScript
 
-- Use `i18n.translate()` in NodeJS or any other framework agnostic code, where `i18n` is the I18n engine from `@kbn/i18n` package.
+- Use `i18n.translate()` in NodeJS or any other framework agnostic code, where `i18n` is the I18n engine from `@osd/i18n` package.
 
 ### Naming convention
 
@@ -114,12 +114,12 @@ Here's a rule of id maning:
 
 `{plugin}.{area}.[{sub-area}].{element}`
 
-- Message id should start with namespace that identifies a functional area of the app (`common.ui` or `common.server`) or a plugin (`kbn`, `vega`, etc.).
+- Message id should start with namespace that identifies a functional area of the app (`common.ui` or `common.server`) or a plugin (`osd`, `vega`, etc.).
 
     For example:
 
   ```js
-  'kbn.management.createIndexPattern.stepTime.options.patternHeader'
+  'osd.management.createIndexPattern.stepTime.options.patternHeader'
   'common.ui.indexPattern.warningLabel'
   ```
 
@@ -128,16 +128,16 @@ Here's a rule of id maning:
 - Each message id should end with a type. For example:
 
   ```js
-  'kbn.management.editIndexPattern.createIndexButtonLabel'
-  'kbn.management.editIndexPattern.mappingConflictTitle'
-  'kbn.management.editIndexPattern.mappingConflictLabel'
-  'kbn.management.editIndexPattern.fields.filterAriaLabel'
-  'kbn.management.editIndexPattern.fields.filterPlaceholder'
-  'kbn.management.editIndexPattern.refreshTooltip'
-  'kbn.management.editIndexPattern.fields.allTypesDropDown'
-  'kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch'
-  'kbn.management.editIndexPattern.wrongTypeErrorMessage'
-  'kbn.management.editIndexPattern.scripted.table.nameDescription'
+  'osd.management.editIndexPattern.createIndexButtonLabel'
+  'osd.management.editIndexPattern.mappingConflictTitle'
+  'osd.management.editIndexPattern.mappingConflictLabel'
+  'osd.management.editIndexPattern.fields.filterAriaLabel'
+  'osd.management.editIndexPattern.fields.filterPlaceholder'
+  'osd.management.editIndexPattern.refreshTooltip'
+  'osd.management.editIndexPattern.fields.allTypesDropDown'
+  'osd.management.createIndexPattern.includeSystemIndicesToggleSwitch'
+  'osd.management.editIndexPattern.wrongTypeErrorMessage'
+  'osd.management.editIndexPattern.scripted.table.nameDescription'
   ```
 
 - For complex messages, which are divided into several parts, use the following approach:
@@ -155,20 +155,20 @@ Here's a rule of id maning:
 
   ```js
   <FormattedMessage
-    id="kbn.management.createIndexPattern.step.status.successLabel.successDetail"
+    id="osd.management.createIndexPattern.step.status.successLabel.successDetail"
     defaultMessage="{strongSuccess} Your index pattern matches {strongIndices}."
     values={{
       strongSuccess: (
         <strong>
           <FormattedMessage
-            id="kbn.management.createIndexPattern.step.status.successLabel.strongSuccessLabel"
+            id="osd.management.createIndexPattern.step.status.successLabel.strongSuccessLabel"
             defaultMessage="Success!"
           />
         </strong>),
       strongIndices: (
         <strong>
           <FormattedMessage
-            id="kbn.management.createIndexPattern.step.status.successLabel.strongIndicesLabel"
+            id="osd.management.createIndexPattern.step.status.successLabel.strongIndicesLabel"
             defaultMessage="{indicesLength, plural, one {# index} other {# indices}}"
             values={{ indicesLength: exactMatchedIndices.length }}
           />
@@ -183,15 +183,15 @@ Each message id should end with a type of the message.
 
 | type | example message id |
 | --- | --- |
-| header | `kbn.management.createIndexPatternTitle` |
-| label | `kbn.management.createIndexPatternLabel ` |
-| button | `kbn.management.editIndexPattern.scripted.addFieldButtonLabel` |
-| drop down | `kbn.management.editIndexPattern.fields.allTypesDropDown` |
-| placeholder | `kbn.management.createIndexPattern.stepTime.options.patternPlaceholder` |
-| `aria-label` attribute | `kbn.management.editIndexPattern.removeAriaLabel` |
-| tooltip | `kbn.management.editIndexPattern.removeTooltip` |
-| error message | `kbn.management.createIndexPattern.step.invalidCharactersErrorMessage` |
-| toggleSwitch | `kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch` |
+| header | `osd.management.createIndexPatternTitle` |
+| label | `osd.management.createIndexPatternLabel ` |
+| button | `osd.management.editIndexPattern.scripted.addFieldButtonLabel` |
+| drop down | `osd.management.editIndexPattern.fields.allTypesDropDown` |
+| placeholder | `osd.management.createIndexPattern.stepTime.options.patternPlaceholder` |
+| `aria-label` attribute | `osd.management.editIndexPattern.removeAriaLabel` |
+| tooltip | `osd.management.editIndexPattern.removeTooltip` |
+| error message | `osd.management.createIndexPattern.step.invalidCharactersErrorMessage` |
+| toggleSwitch | `osd.management.createIndexPattern.includeSystemIndicesToggleSwitch` |
 
 For example:
 
@@ -200,7 +200,7 @@ For example:
   ```js
   <h1>
       <FormattedMessage
-        id="kbn.management.createIndexPatternTitle"
+        id="osd.management.createIndexPatternTitle"
         defaultMessage="Create index pattern"
       />
   </h1>
@@ -211,8 +211,8 @@ For example:
   ```js
   <EuiTextColor color="subdued">
       <FormattedMessage
-        id="kbn.management.createIndexPatternLabel"
-        defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
+        id="osd.management.createIndexPatternLabel"
+        defaultMessage="OpenSearch Dashboards uses index patterns to retrieve data from OpenSearch indices for things like visualizations."
       />
   </EuiTextColor>
   ```
@@ -222,7 +222,7 @@ For example:
   ```js
 
   <EuiButton data-test-subj="addScriptedFieldLink" href={addScriptedFieldUrl}>
-       <FormattedMessage id="kbn.management.editIndexPattern.scripted.addFieldButtonLabel" defaultMessage="Add scripted field"/>
+       <FormattedMessage id="osd.management.editIndexPattern.scripted.addFieldButtonLabel" defaultMessage="Add scripted field"/>
   </EuiButton>
   ```
 
@@ -231,7 +231,7 @@ For example:
   ```js
   <select ng-model="indexedFieldTypeFilter" ng-options="o for o in indexedFieldTypes">
       <option value=""
-          i18n-id="kbn.management.editIndexPattern.fields.allTypesDropDown"
+          i18n-id="osd.management.editIndexPattern.fields.allTypesDropDown"
           i18n-default-message="All field types"></option>
   </select>
   ```
@@ -242,7 +242,7 @@ For example:
   <EuiFieldText
       name="indexPatternId"
       placeholder={intl.formatMessage({
-        id: 'kbn.management.createIndexPattern.stepTime.options.patternPlaceholder',
+        id: 'osd.management.createIndexPattern.stepTime.options.patternPlaceholder',
         defaultMessage: 'custom-index-pattern-id' })}
   />
   ```
@@ -251,8 +251,8 @@ For example:
 
   ```js
   <button
-      aria-label="{{ ::'kbn.management.editIndexPattern.removeAriaLabel' | i18n: {defaultMessage: 'Remove index pattern'} }}"
-      tooltip="{{ ::'kbn.management.editIndexPattern.removeTooltip' | i18n: {defaultMessage: 'Remove index pattern'} }}"
+      aria-label="{{ ::'osd.management.editIndexPattern.removeAriaLabel' | i18n: {defaultMessage: 'Remove index pattern'} }}"
+      tooltip="{{ ::'osd.management.editIndexPattern.removeTooltip' | i18n: {defaultMessage: 'Remove index pattern'} }}"
       >
   </button>
   ```
@@ -263,7 +263,7 @@ For example:
   errors.push(
       intl.formatMessage(
               {
-                  id: 'kbn.management.createIndexPattern.step.invalidCharactersErrorMessage',
+                  id: 'osd.management.createIndexPattern.step.invalidCharactersErrorMessage',
                   defaultMessage: 'An index pattern cannot contain spaces or the characters: {characterList}'
               },
               { characterList }
@@ -275,7 +275,7 @@ For example:
   ```js
   <EuiSwitch
       label={<FormattedMessage
-        id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch"
+        id="osd.management.createIndexPattern.includeSystemIndicesToggleSwitch"
         defaultMessage="Include system indices"
       />}
   />
@@ -286,14 +286,14 @@ For example:
 - Variables
 
   ```html
-  <span i18n-id="kbn.management.editIndexPattern.timeFilterHeader"
+  <span i18n-id="osd.management.editIndexPattern.timeFilterHeader"
     i18n-default-message="Time Filter field name: {timeFieldName}"
     i18n-values="{ timeFieldName: indexPattern.timeFieldName }"></span>
   ```
 
   ```html
   <FormattedMessage
-    id="kbn.management.createIndexPatternHeader"
+    id="osd.management.createIndexPatternHeader"
     defaultMessage="Create {indexPatternName}"
     values={{
       indexPatternName
@@ -304,7 +304,7 @@ For example:
 - Labels and variables in tag
 
   ```html
-  <span i18n-id="kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail"
+  <span i18n-id="osd.management.editIndexPattern.timeFilterLabel.timeFilterDetail"
     i18n-default-message="This page lists every field in the {indexPatternTitle} index"
     i18n-values="{ indexPatternTitle: '<strong>' + indexPattern.title + '</strong>' }"></span>
   ```
@@ -313,7 +313,7 @@ For example:
   **BUT** we can not use tags that should be compiled:
 
   ```html
-  <span i18n-id="kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail"
+  <span i18n-id="osd.management.editIndexPattern.timeFilterLabel.timeFilterDetail"
     i18n-default-message="This page lists every field in the {indexPatternTitle} index"
     i18n-values="{ indexPatternTitle: '<div my-directive>' + indexPattern.title + '</div>' }"></span>
   ```
@@ -324,7 +324,7 @@ For example:
 
   ```html
   <FormattedMessage
-    id="kbn.management.createIndexPattern.step.indexPattern.disallowLabel"
+    id="osd.management.createIndexPattern.step.indexPattern.disallowLabel"
     defaultMessage="You can't use spaces or the characters {characterList}."
     values={{ characterList: <strong>{characterList}</strong> }}
   />
@@ -332,13 +332,13 @@ For example:
 
   ```html
   <FormattedMessage
-    id="kbn.management.settings.form.noSearchResultText"
+    id="osd.management.settings.form.noSearchResultText"
     defaultMessage="No settings found {clearSearch}"
     values={{
       clearSearch: (
         <EuiLink onClick={clearQuery}>
           <FormattedMessage
-            id="kbn.management.settings.form.clearNoSearchResultText"
+            id="osd.management.settings.form.clearNoSearchResultText"
             defaultMessage="(clear search)"
           />
         </EuiLink>
@@ -351,10 +351,10 @@ For example:
 
   ```html
   <FormattedMessage
-    id="xpack.security.management.users.editUser.changePasswordUpdateKibanaTitle"
-    defaultMessage="After you change the password for the kibana user, you must update the {kibana}
-    file and restart Kibana."
-    values={{ kibana: 'kibana.yml' }}
+    id="xpack.security.management.users.editUser.changePasswordUpdateOpenSearchDashboardsTitle"
+    defaultMessage="After you change the password for the opensearch dashboards user, you must update the {opensearchDashboards}
+    file and restart OpenSearch Dashboards."
+    values={{ opensearchDashboards: 'opensearch_dashboards.yml' }}
   />
   ```
 
@@ -365,7 +365,7 @@ The numeric input is mapped to a plural category, some subset of "zero", "one", 
 Here is an example of message translation depending on a plural category:
 
 ```html
-<span i18n-id="kbn.management.editIndexPattern.mappingConflictLabel"
+<span i18n-id="osd.management.editIndexPattern.mappingConflictLabel"
       i18n-default-message="{conflictFieldsLength, plural, one {A field is} other {# fields are}} defined as several types (string, integer, etc) across the indices that match this pattern."
       i18n-values="{ conflictFieldsLength: conflictFields.length }"></span>
 ```
@@ -412,7 +412,7 @@ export const AddFilter = injectI18n(
               value={filter}
               onChange={e => this.setState({ filter: e.target.value.trim() })}
               placeholder={this.props.intl.formatMessage({
-                id: 'kbn.management.indexPattern.edit.source.placeholder',
+                id: 'osd.management.indexPattern.edit.source.placeholder',
                 defaultMessage: 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')'
               })}
             />
@@ -456,7 +456,7 @@ it('should render normally', async () => {
 
 6. Run tests.
 
-7. Run Kibana with enabled pseudo-locale (either pass `--i18n.locale=en-xa` as a command-line argument or add it to the `kibana.yml`) and observe the text you've just localized.
+7. Run OpenSearch Dashboards with enabled pseudo-locale (either pass `--i18n.locale=en-xa` as a command-line argument or add it to the `opensearch_dashboards.yml`) and observe the text you've just localized.
 
     If you did everything correctly, it should turn into something like this `Ĥéļļļô ŴŴôŕļļð!` assuming your text was `Hello World!`.
 
