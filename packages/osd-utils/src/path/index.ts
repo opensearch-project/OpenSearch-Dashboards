@@ -25,10 +25,10 @@ import { REPO_ROOT } from '../repo_root';
 const isString = (v: any): v is string => typeof v === 'string';
 
 const CONFIG_PATHS = [
-  process.env.OSD_PATH_CONF && join(process.env.OSD_PATH_CONF, 'opensearch-dashboards.yml'),
-  process.env.OPENSEARCH_DASHBOARDS_PATH_CONF && join(process.env.OPENSEARCH_DASHBOARDS_PATH_CONF, 'opensearch-dashboards.yml'),
+  process.env.OSD_PATH_CONF && join(process.env.OSD_PATH_CONF, 'opensearch_dashboards'),
+  process.env.OPENSEARCH_DASHBOARDS_PATH_CONF && join(process.env.OPENSEARCH_DASHBOARDS_PATH_CONF, 'opensearch_dashboards'),
   process.env.CONFIG_PATH, // deprecated
-  join(REPO_ROOT, 'config/opensearch-dashboards.yml'),
+  join(REPO_ROOT, 'config/opensearch_dashboards'),
 ].filter(isString);
 
 const CONFIG_DIRECTORIES = [
@@ -57,7 +57,7 @@ function findFile(paths: string[]) {
 }
 
 /**
- * Get the path of opensearch-dashboards.yml
+ * Get the path of opensearch_dashboards
  * @internal
  */
 export const getConfigPath = () => findFile(CONFIG_PATHS);

@@ -38,7 +38,7 @@ const readOpenSearchDashboardsPkgJson = (dir: string) => {
   }
 };
 
-const findOpensearchDashboardsPackageJson = () => {
+const findOpenSearchDashboardsPackageJson = () => {
   // search for the opensearch-dashboards directory, since this file is moved around it might
   // not be where we think but should always be a relatively close parent
   // of this directory
@@ -65,7 +65,7 @@ const findOpensearchDashboardsPackageJson = () => {
   }
 };
 
-const { opensearchDashboardsDir, opensearchDashboardsPkgJson } = findOpensearchDashboardsPackageJson();
+const { opensearchDashboardsDir, opensearchDashboardsPkgJson } = findOpenSearchDashboardsPackageJson();
 
 export const REPO_ROOT = opensearchDashboardsDir;
 export const UPSTREAM_BRANCH = opensearchDashboardsPkgJson.branch;
