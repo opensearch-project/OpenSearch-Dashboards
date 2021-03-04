@@ -20,10 +20,10 @@
 module.exports = {
   env: {
     web: {
-      presets: ['@kbn/babel-preset/webpack_preset'],
+      presets: ['@osd/babel-preset/webpack_preset'],
     },
     node: {
-      presets: ['@kbn/babel-preset/node_preset'],
+      presets: ['@osd/babel-preset/node_preset'],
     },
   },
   ignore: ['**/*.test.ts', '**/*.test.tsx'],
