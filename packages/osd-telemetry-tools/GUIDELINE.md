@@ -28,7 +28,7 @@ node scripts/telemetry_check.js --path=<relative_path_to_collector>.ts
 
 ### 1. Update the telemetryrc file
 
-Make sure your collector is not excluded in the `telemetryrc.json` files (located at the root of the kibana project, and another on in the `x-pack` dir).
+Make sure your collector is not excluded in the `telemetryrc.json` files (located at the root of the OpenSearch Dashboards project, and another on in the `x-pack` dir).
 
 ```s
 [
@@ -103,7 +103,7 @@ The `--fix` flag will automatically update the persisted json files used by the 
 node scripts/telemetry_check.js --fix
 ```
 
-Note that any updates to the stored json files will require a review by the kibana-telemetry team to help us update the telemetry cluster mappings and ensure your changes adhere to our best practices.
+Note that any updates to the stored json files will require a review by the opensearch-dashboards-telemetry team to help us update the telemetry cluster mappings and ensure your changes adhere to our best practices.
 
 
 ## Updating the collector schema
@@ -116,12 +116,12 @@ Once youre run the changes to both the `fetch` function and the `schema` field r
 node scripts/telemetry_check.js --fix
 ```
 
-The `--fix` flag will automatically update the persisted json files used by the telemetry team. Note that any updates to the stored json files will require a review by the kibana-telemetry team to help us update the telemetry cluster mappings and ensure your changes adhere to our best practices.
+The `--fix` flag will automatically update the persisted json files used by the telemetry team. Note that any updates to the stored json files will require a review by the opesearch-opensearch-telemetry team to help us update the telemetry cluster mappings and ensure your changes adhere to our best practices.
 
 
 ## Writing the schema
 
-We've designed the schema object to closely resemble elasticsearch mapping object to reduce any cognitive complexity.
+We've designed the schema object to closely resemble opensearch mapping object to reduce any cognitive complexity.
 
 ### Basics
 
@@ -198,7 +198,7 @@ usageCollection.makeUsageCollector<Usage>({
 })
 ```
 
-Be careful adding arrays of objects due to the limitation in correlating the properties inside those objects inside kibana. It is advised to look for an alternative schema based on your use cases.
+Be careful adding arrays of objects due to the limitation in correlating the properties inside those objects inside opesearch-opensearch. It is advised to look for an alternative schema based on your use cases.
 
 
 ## Schema Restrictions
