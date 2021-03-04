@@ -18,20 +18,39 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
+import { pipeline } from 'stream';
 import { promisify } from 'util';
 
-const existsAsync = promisify(Fs.exists);
+import del from 'del';
+import vfs from 'vinyl-fs';
+import zip from 'gulp-zip';
 
-export async function findKibanaJson(directory: string): Promise<string | undefined> {
-  if (await existsAsync(Path.resolve(directory, 'kibana.json'))) {
-    return directory;
-  }
+import { BuildContext } from '../build_context';
 
-  const parent = Path.dirname(directory);
-  if (parent === directory) {
-    return undefined;
-  }
+const asyncPipeline = promisify(pipeline);
 
-  return findKibanaJson(parent);
+export async function createArchive({ opensearchDashboardsVersion, plugin, log }: BuildContext) {
+  const {
+    manifest: { id },
+    directory,
+  } = plugin;
+
+  const zipName = `${id}-${opensearchDashboardsVersion}.zip`;
+  log.info(`compressing plugin into [${zipName}]`);
+
+  const buildDir = Path.resolve(directory, 'build');
+
+  // zip up the build files
+  await asyncPipeline(
+    vfs.src([`opensearch-dashboards/${id}/**/*`], {
+      cwd: buildDir,
+      base: buildDir,
+      dot: true,
+    }),
+    zip(zipName),
+    vfs.dest(buildDir)
+  );
+
+  // delete the files that were zipped
+  await del(Path.resolve(buildDir, 'opensearch-dashboards'));
 }

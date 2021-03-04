@@ -17,40 +17,37 @@
  * under the License.
  */
 
+import Fs from 'fs';
 import Path from 'path';
-import { pipeline } from 'stream';
 import { promisify } from 'util';
 
-import del from 'del';
-import vfs from 'vinyl-fs';
-import zip from 'gulp-zip';
+import { REPO_ROOT } from '@osd/utils';
+import { OptimizerConfig, runOptimizer, logOptimizerState } from '@osd/optimizer';
 
 import { BuildContext } from '../build_context';
 
-const asyncPipeline = promisify(pipeline);
+const asyncRename = promisify(Fs.rename);
 
-export async function createArchive({ kibanaVersion, plugin, log }: BuildContext) {
-  const {
-    manifest: { id },
-    directory,
-  } = plugin;
+export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContext) {
+  if (!plugin.manifest.ui) {
+    return;
+  }
 
-  const zipName = `${id}-${kibanaVersion}.zip`;
-  log.info(`compressing plugin into [${zipName}]`);
+  log.info('running @osd/optimizer');
+  log.indent(2);
 
-  const buildDir = Path.resolve(directory, 'build');
+  // build bundles into target
+  const config = OptimizerConfig.create({
+    repoRoot: REPO_ROOT,
+    pluginPaths: [sourceDir],
+    cache: false,
+    dist: true,
+    pluginScanDirs: [],
+  });
 
-  // zip up the build files
-  await asyncPipeline(
-    vfs.src([`kibana/${id}/**/*`], {
-      cwd: buildDir,
-      base: buildDir,
-      dot: true,
-    }),
-    zip(zipName),
-    vfs.dest(buildDir)
-  );
+  await runOptimizer(config).pipe(logOptimizerState(log, config)).toPromise();
 
-  // delete the files that were zipped
-  await del(Path.resolve(buildDir, 'kibana'));
+  // move target into buildDir
+  await asyncRename(Path.resolve(sourceDir, 'target'), Path.resolve(buildDir, 'target'));
+  log.indent(-2);
 }

@@ -1,10 +1,10 @@
 {
-  "name": "@kbn/plugin-helpers",
+  "name": "@osd/plugin-helpers",
   "version": "1.0.0",
   "private": true,
-  "description": "Just some helpers for kibana plugin devs.",
+  "description": "Just some helpers for OpenSearch Dashboards plugin devs.",
   "license": "Apache-2.0",
-  "kibana": {
+  "opensearchDashboards": {
     "devOnly": true
   },
   "main": "target/index.js",
@@ -12,12 +12,12 @@
     "plugin-helpers": "bin/plugin-helpers.js"
   },
   "scripts": {
-    "kbn:bootstrap": "rm -rf target && tsc",
-    "kbn:watch": "tsc --watch"
+    "osd:bootstrap": "rm -rf target && tsc",
+    "osd:watch": "tsc --watch"
   },
   "dependencies": {
-    "@kbn/dev-utils": "1.0.0",
-    "@kbn/optimizer": "1.0.0",
+    "@osd/dev-utils": "1.0.0",
+    "@osd/optimizer": "1.0.0",
     "del": "^5.1.0",
     "execa": "^4.0.2",
     "gulp-zip": "^5.0.2",

@@ -21,8 +21,8 @@ import Path from 'path';
 
 import loadJsonFile from 'load-json-file';
 
-import { ToolingLog } from '@kbn/dev-utils';
-import { Plugin } from './load_kibana_platform_plugin';
+import { ToolingLog } from '@osd/dev-utils';
+import { Plugin } from './load_opensearch_dashboards_platform_plugin';
 
 export interface Config {
   skipInstallDependencies: boolean;
@@ -34,7 +34,7 @@ const isArrayOfStrings = (v: any): v is string[] =>
 
 export async function loadConfig(log: ToolingLog, plugin: Plugin): Promise<Config> {
   try {
-    const path = Path.resolve(plugin.directory, '.kibana-plugin-helpers.json');
+    const path = Path.resolve(plugin.directory, '.opensearch-dashboards-plugin-helpers.json');
     const file = await loadJsonFile(path);
 
     if (!(typeof file === 'object' && file && !Array.isArray(file))) {
