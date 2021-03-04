@@ -45,8 +45,8 @@ import {
   EuiSwitchEvent,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { FieldSetting, FieldState } from '../../types';
 import { isDefaultValue } from '../../lib';
 import {
@@ -428,7 +428,7 @@ export class Field extends PureComponent<FieldProps> {
         <EuiText size="xs">
           <FormattedMessage
             id="advancedSettings.field.helpText"
-            defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+            defaultMessage="This setting is overridden by the OpenSearch Dashboards server and can not be changed."
           />
         </EuiText>
       );

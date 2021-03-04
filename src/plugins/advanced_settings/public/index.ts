@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from 'opensearch-dashboards/public';
 import { AdvancedSettingsPlugin } from './plugin';
 export { AdvancedSettingsSetup, AdvancedSettingsStart } from './types';
 export { ComponentRegistry } from './component_registry';
