@@ -1,10 +1,10 @@
 {
-  "name": "@kbn/expect",
+  "name": "@osd/expect",
   "main": "./expect.js",
   "version": "1.0.0",
   "license": "MIT",
   "private": true,
-  "kibana": {
+  "opensearchDashboards": {
     "devOnly": true
   }
 }
