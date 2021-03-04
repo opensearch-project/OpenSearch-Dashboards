@@ -103,7 +103,7 @@ The `--fix` flag will automatically update the persisted json files used by the 
 node scripts/telemetry_check.js --fix
 ```
 
-Note that any updates to the stored json files will require a review by the opesearch-dashboards-telemetry team to help us update the telemetry cluster mappings and ensure your changes adhere to our best practices.
+Note that any updates to the stored json files will require a review by the opensearch-dashboards-telemetry team to help us update the telemetry cluster mappings and ensure your changes adhere to our best practices.
 
 
 ## Updating the collector schema
@@ -116,7 +116,7 @@ Once youre run the changes to both the `fetch` function and the `schema` field r
 node scripts/telemetry_check.js --fix
 ```
 
-The `--fix` flag will automatically update the persisted json files used by the telemetry team. Note that any updates to the stored json files will require a review by the opesearch-dashboards-telemetry team to help us update the telemetry cluster mappings and ensure your changes adhere to our best practices.
+The `--fix` flag will automatically update the persisted json files used by the telemetry team. Note that any updates to the stored json files will require a review by the opesearch-opensearch-telemetry team to help us update the telemetry cluster mappings and ensure your changes adhere to our best practices.
 
 
 ## Writing the schema
@@ -198,7 +198,7 @@ usageCollection.makeUsageCollector<Usage>({
 })
 ```
 
-Be careful adding arrays of objects due to the limitation in correlating the properties inside those objects inside opesearch-dashboards. It is advised to look for an alternative schema based on your use cases.
+Be careful adding arrays of objects due to the limitation in correlating the properties inside those objects inside opesearch-opensearch. It is advised to look for an alternative schema based on your use cases.
 
 
 ## Schema Restrictions
