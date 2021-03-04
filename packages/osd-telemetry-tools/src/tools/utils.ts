@@ -35,7 +35,7 @@ import glob from 'glob';
 import { readFile, writeFile } from 'fs';
 import { promisify } from 'util';
 import normalize from 'normalize-path';
-import { Optional } from '@kbn/utility-types';
+import { Optional } from '@osd/utility-types';
 
 export const readFileAsync = promisify(readFile);
 export const writeFileAsync = promisify(writeFile);
