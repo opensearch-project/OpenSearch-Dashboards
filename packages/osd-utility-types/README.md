@@ -1,6 +1,6 @@
-# `@kbn/utility-types`
+# `@osd/utility-types`
 
-TypeScript utility types for usage in Kibana.
+TypeScript utility types for usage in OpenSearch Dashboards.
 
 - This package re-exports a subset of the items in [`utility-types`](https://github.com/piotrwitek/utility-types)
 - You can also add more utility types here.
@@ -9,7 +9,7 @@ TypeScript utility types for usage in Kibana.
 ## Usage
 
 ```ts
-import { UnwrapPromise } from '@kbn/utility-types';
+import { UnwrapPromise } from '@osd/utility-types';
 
 type A = Promise<string>;
 type B = UnwrapPromise<A>; // string
