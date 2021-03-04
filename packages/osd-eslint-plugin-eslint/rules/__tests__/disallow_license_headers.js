@@ -28,7 +28,7 @@ const ruleTester = new RuleTester({
   },
 });
 
-ruleTester.run('@kbn/eslint/disallow-license-headers', rule, {
+ruleTester.run('@osd/eslint/disallow-license-headers', rule, {
   valid: [
     {
       code: dedent`
