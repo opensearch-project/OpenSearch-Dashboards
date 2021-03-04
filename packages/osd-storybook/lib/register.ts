@@ -25,8 +25,8 @@ import { create } from '@storybook/theming';
 addons.setConfig({
   theme: create({
     base: 'light',
-    brandTitle: 'Kibana Storybook',
-    brandUrl: 'https://github.com/opensearch/opensearch-dashboards/tree/master/packages/osd-storybook',
+    brandTitle: 'OpenSearch Dashboards Storybook',
+    brandUrl: 'https://github.com/elastic/kibana/tree/master/packages/osd-storybook',
   }),
   showPanel: false,
   isFullscreen: false,
