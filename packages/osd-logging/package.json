@@ -1,16 +1,16 @@
 {
-  "name": "@kbn/logging",
+  "name": "@osd/logging",
   "version": "1.0.0",
   "private": true,
   "license": "Apache-2.0",
   "main": "./target/index.js",
   "scripts": {
     "build": "tsc",
-    "kbn:bootstrap": "yarn build",
-    "kbn:watch": "yarn build --watch"
+    "osd:bootstrap": "yarn build",
+    "osd:watch": "yarn build --watch"
   },
   "dependencies": {
-    "@kbn/std": "1.0.0"
+    "@osd/std": "1.0.0"
   },
   "devDependencies": {
     "typescript": "4.0.2"
