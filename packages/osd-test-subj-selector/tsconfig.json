@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/kbn-test-subj-selector"
+    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/osd-test-subj-selector"
   },
   "include": [
     "index.d.ts"

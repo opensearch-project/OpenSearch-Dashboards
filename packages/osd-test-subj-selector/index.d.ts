@@ -17,20 +17,5 @@
  * under the License.
  */
 
-const testSubjSelector = require('../');
-const expect = require('@kbn/expect');
-
-describe('testSubjSelector()', function () {
-  it('converts subjectSelectors to cssSelectors', function () {
-    expect(testSubjSelector('foo bar')).to.eql('[data-test-subj="foo bar"]');
-    expect(testSubjSelector('foo > bar')).to.eql('[data-test-subj="foo"] [data-test-subj="bar"]');
-    expect(testSubjSelector('foo > bar baz')).to.eql(
-      '[data-test-subj="foo"] [data-test-subj="bar baz"]'
-    );
-    expect(testSubjSelector('foo> ~bar')).to.eql('[data-test-subj="foo"] [data-test-subj~="bar"]');
-    expect(testSubjSelector('~ foo')).to.eql('[data-test-subj~="foo"]');
-    expect(testSubjSelector('~foo & ~ bar')).to.eql(
-      '[data-test-subj~="foo"][data-test-subj~="bar"]'
-    );
-  });
-});
+// eslint-disable-next-line import/no-default-export
+export default function osdTestSubjSelector(selector: string): string;
