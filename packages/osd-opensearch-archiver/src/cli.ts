@@ -40,7 +40,7 @@ export function runCli() {
   new RunWithCommands({
     description: 'CLI to manage archiving/restoring data in opensearch',
     globalFlags: {
-      string: ['opensearch-url', 'kibana-url', 'dir', 'config'],
+      string: ['opensearch-url', 'opensearch-dashboards-url', 'dir', 'config'],
       help: `
         --config           path to an FTR config file that sets --opensearch-url, --opensearchDashboards-url, and --dir
                              default: ${defaultConfigPath}

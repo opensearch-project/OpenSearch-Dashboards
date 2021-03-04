@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { delay } from 'bluebird';
 
 import { createListStream, createPromiseFromStreams } from '../../streams';

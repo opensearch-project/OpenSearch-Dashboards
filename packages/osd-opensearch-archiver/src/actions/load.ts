@@ -20,7 +20,7 @@
 import { resolve } from 'path';
 import { createReadStream } from 'fs';
 import { Readable } from 'stream';
-import { ToolingLog, KbnClient } from '@osd/dev-utils';
+import { ToolingLog, OsdClient } from '@osd/dev-utils';
 import { Client } from 'elasticsearch';
 
 import { createPromiseFromStreams, concatStreamProviders } from '../lib/streams';
@@ -106,7 +106,7 @@ export async function loadAction({
     allowNoIndices: true,
   });
 
-  // If we affected the Kibana index, we need to ensure it's migrated...
+  // If we affected the OpenSearch Dashboards index, we need to ensure it's migrated...
   if (Object.keys(result).some((k) => k.startsWith('.opensearch-dashboards'))) {
     await migrateOpenSearchDashboardsIndex({ client, osdClient });
 

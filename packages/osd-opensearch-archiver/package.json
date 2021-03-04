@@ -7,8 +7,8 @@
     "devOnly": true
   },
   "scripts": {
-    "kbn:bootstrap": "rm -rf target && tsc",
-    "kbn:watch": "rm -rf target && tsc --watch"
+    "osd:bootstrap": "rm -rf target && tsc",
+    "osd:watch": "rm -rf target && tsc --watch"
   },
   "dependencies": {
     "@osd/dev-utils": "1.0.0",
