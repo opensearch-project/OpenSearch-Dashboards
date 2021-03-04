@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { assertNever } from '@kbn/std';
+import { assertNever } from '@osd/std';
 
 /**
  * Possible log level string values.
