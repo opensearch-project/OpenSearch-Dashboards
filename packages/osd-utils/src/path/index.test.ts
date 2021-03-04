@@ -21,7 +21,7 @@ import { accessSync, constants } from 'fs';
 import { getConfigPath, getDataPath, getConfigDirectory } from './';
 
 describe('Default path finder', () => {
-  it('should find a opensearch_dashboards', () => {
+  it('should find a opensearch_dashboards.yml', () => {
     const configPath = getConfigPath();
     expect(() => accessSync(configPath, constants.R_OK)).not.toThrow();
   });
