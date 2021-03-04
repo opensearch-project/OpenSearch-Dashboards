@@ -1,17 +1,17 @@
 {
-  "name": "@kbn/utility-types",
+  "name": "@osd/utility-types",
   "version": "1.0.0",
   "private": true,
   "license": "Apache-2.0",
   "main": "target",
   "types": "target/index.d.ts",
-  "kibana": {
+  "opensearchDashboards": {
     "devOnly": true
   },
   "scripts": {
     "build": "tsc",
-    "kbn:bootstrap": "tsc",
-    "kbn:watch": "tsc --watch",
+    "osd:bootstrap": "tsc",
+    "osd:watch": "tsc --watch",
     "test": "tsd",
     "clean": "del target"
   },
