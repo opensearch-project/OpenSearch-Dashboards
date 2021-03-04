@@ -32,18 +32,18 @@ test('returns value for valid URI as per RFC3986', () => {
     'http://tools.ietf.org/html/rfc3986'
   );
   expect(uriSchema.validate('udp://3domain.local')).toBe('udp://3domain.local');
-  expect(uriSchema.validate('urn:elastic:kibana')).toBe('urn:elastic:kibana');
+  expect(uriSchema.validate('urn:opensearch:opensearchDashboards')).toBe('urn:opensearch:opensearchDashboards');
   expect(uriSchema.validate('ftp://ftp.ietf.org/rfc/rfc3986.txt')).toBe(
     'ftp://ftp.ietf.org/rfc/rfc3986.txt'
   );
-  expect(uriSchema.validate('mailto:Platform.Kibana@elastic.co')).toBe(
-    'mailto:Platform.Kibana@elastic.co'
+  expect(uriSchema.validate('mailto:Platform.opensearchDashboards@opensearch.co')).toBe(
+    'mailto:Platform.opensearchDashboards@opensearch.co'
   );
   expect(uriSchema.validate('tel:+500-111-222-333')).toBe('tel:+500-111-222-333');
-  expect(uriSchema.validate('file:///kibana.log')).toBe('file:///kibana.log');
-  expect(uriSchema.validate('http://elastic@localhost:9200')).toBe('http://elastic@localhost:9200');
-  expect(uriSchema.validate('http://elastic:changeme@localhost:9200')).toBe(
-    'http://elastic:changeme@localhost:9200'
+  expect(uriSchema.validate('file:///opensearch_dashboards.log')).toBe('file:///opensearch_dashboards.log');
+  expect(uriSchema.validate('http://opensearch@localhost:9200')).toBe('http://opensearch@localhost:9200');
+  expect(uriSchema.validate('http://opensearch:changeme@localhost:9200')).toBe(
+    'http://opensearch:changeme@localhost:9200'
   );
   expect(uriSchema.validate('ldap://[2001:db8::7]/c=GB?objectClass?one')).toBe(
     'ldap://[2001:db8::7]/c=GB?objectClass?one'
@@ -79,17 +79,17 @@ describe('#scheme', () => {
   test('returns value when URI has required scheme', () => {
     const uriSchema = schema.uri({ scheme: ['http', 'https'] });
 
-    expect(uriSchema.validate('http://elastic.co')).toBe('http://elastic.co');
-    expect(uriSchema.validate('https://elastic.co')).toBe('https://elastic.co');
+    expect(uriSchema.validate('http://opensearch.co')).toBe('http://opensearch.co');
+    expect(uriSchema.validate('https://opensearch.co')).toBe('https://opensearch.co');
   });
 
   test('returns error when shorter string', () => {
     const uriSchema = schema.uri({ scheme: ['http', 'https'] });
 
-    expect(() => uriSchema.validate('ftp://elastic.co')).toThrowErrorMatchingInlineSnapshot(
+    expect(() => uriSchema.validate('ftp://opensearch.co')).toThrowErrorMatchingInlineSnapshot(
       `"expected URI with scheme [http|https]."`
     );
-    expect(() => uriSchema.validate('file:///kibana.log')).toThrowErrorMatchingInlineSnapshot(
+    expect(() => uriSchema.validate('file:///opensearch_dashboards.log')).toThrowErrorMatchingInlineSnapshot(
       `"expected URI with scheme [http|https]."`
     );
   });

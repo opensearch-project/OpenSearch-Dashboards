@@ -33,7 +33,7 @@ export abstract class Type<V> {
   public readonly type: V = null! as V;
 
   // used for the `isConfigSchema` typeguard
-  public readonly __isKbnConfigSchemaType = true;
+  public readonly __isOsdConfigSchemaType = true;
 
   /**
    * Internal "schema" backed by Joi.
