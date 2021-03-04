@@ -23,8 +23,8 @@ import { first, take } from 'rxjs/operators';
 import { mockApplyDeprecations } from './config_service.test.mocks';
 import { rawConfigServiceMock } from './raw/raw_config_service.mock';
 
-import { schema } from '@kbn/config-schema';
-import { MockedLogger, loggerMock } from '@kbn/logging/target/mocks';
+import { schema } from '@osd/config-schema';
+import { MockedLogger, loggerMock } from '@osd/logging/target/mocks';
 
 import { ConfigService, Env, RawPackageInfo } from '.';
 
@@ -39,7 +39,7 @@ const packageInfos: RawPackageInfo = {
   },
 };
 const emptyArgv = getEnvOptions();
-const defaultEnv = new Env('/kibana', packageInfos, emptyArgv);
+const defaultEnv = new Env('/open', packageInfos, emptyArgv);
 
 let logger: MockedLogger;
 
@@ -261,7 +261,7 @@ test('correctly passes context', async () => {
     },
   };
 
-  const env = new Env('/kibana', mockPackage, getEnvOptions());
+  const env = new Env('/opensearchDashboards', mockPackage, getEnvOptions());
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: { foo: {} } });
 
   const schemaDefinition = schema.object({

@@ -80,7 +80,7 @@ describe('#get', () => {
   test('correctly handles server config.', () => {
     const configAdapter = new LegacyObjectToConfigAdapter({
       server: {
-        name: 'kibana-hostname',
+        name: 'opensearch-dashboards-hostname',
         autoListen: true,
         basePath: '/abc',
         cors: false,
@@ -103,7 +103,7 @@ describe('#get', () => {
 
     const configAdapterWithDisabledSSL = new LegacyObjectToConfigAdapter({
       server: {
-        name: 'kibana-hostname',
+        name: 'opensearch-dashboards-hostname',
         autoListen: true,
         basePath: '/abc',
         cors: false,

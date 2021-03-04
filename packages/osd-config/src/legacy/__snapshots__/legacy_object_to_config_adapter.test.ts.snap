@@ -14,7 +14,7 @@ Object {
   "host": "host",
   "keepaliveTimeout": 5000,
   "maxPayload": 1000,
-  "name": "kibana-hostname",
+  "name": "opensearch-dashboards-hostname",
   "port": 1234,
   "rewriteBasePath": false,
   "socketTimeout": 2000,
