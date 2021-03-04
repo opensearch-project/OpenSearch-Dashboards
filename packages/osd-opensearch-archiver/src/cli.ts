@@ -29,7 +29,7 @@ import readline from 'readline';
 
 import { RunWithCommands, createFlagError } from '@osd/dev-utils';
 import { readConfigFile } from '@osd/test';
-import legacyOpenSearch from 'opensearch';
+import legacyElasticsearch from 'elasticsearch';
 
 import { OpenSearchArchiver } from './opensearch_archiver';
 
@@ -89,7 +89,7 @@ export function runCli() {
         throw createFlagError('--dir or --config must be defined');
       }
 
-      const client = new legacyOpenSearch.Client({
+      const client = new legacyElasticsearch.Client({
         host: opensearchUrl,
         log: flags.verbose ? 'trace' : [],
       });
