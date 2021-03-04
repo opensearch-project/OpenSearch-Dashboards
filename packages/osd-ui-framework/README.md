@@ -1,4 +1,4 @@
-# Opensearch Dashboards UI Framework
+# OpenSearch Dashboards UI Framework
 
 > The OpenSearch Dashboards UI Framework is a collection of React UI components for quickly building user interfaces
 > for OpenSearch Dashboards. Not using React? No problem! You can still use the CSS behind each component.
