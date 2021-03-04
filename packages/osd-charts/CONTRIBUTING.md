@@ -93,14 +93,19 @@ git push <Upstream remote> # must push to remote fork!
 git checkout -b <New Branch Name> <TAG Name>
 ```
 
-Once you have the new branch added to `elastic/elastic-charts` add the new branch to `branches` in [`.backportrc.json`](.backportrc.json). The branch name should follow the [maintenance branch convention](https://github.com/semantic-release/semantic-release/blob/0785a844fa8ac1320383452ce531898be3b01f92/docs/recipes/maintenance-releases.md#publishing-maintenance-releases) of `semantic-release`.
-
-> `N.N.x` or `N.x.x` or `N.x` with `N` being a `number`
+> The branch name should follow the [maintenance branch convention](https://github.com/semantic-release/semantic-release/blob/0785a844fa8ac1320383452ce531898be3b01f92/docs/recipes/maintenance-releases.md#publishing-maintenance-releases) of `semantic-release`.
+> (e.g. `N.N.x` or `N.x.x` or `N.x` with `N` being a `number`)
 
 From there, run the backport command and follow cli prompts to select code, targets, etc. in which to backport. You may want to use the [cli arguments](https://github.com/sqren/backport/blob/master/README.md#cli-arguments) to simplify the selection.
 
 ```bash
-yarn backport
+# use cli to select commit to backport
+yarn backport --branch 15.x
+yarn backport --branch <New Branch Name>
+
+# specify the pr number to backport
+yarn backport --branch 15.x --pr 1000
+yarn backport --branch <New Branch Name> --pr <PR number to backport>
 ```
 
 > The first time this is run it will fork the repo locally to `~./.backport/repositories/elastic/elastic-charts`
