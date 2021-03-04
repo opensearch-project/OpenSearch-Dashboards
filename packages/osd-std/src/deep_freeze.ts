@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { RecursiveReadonly } from '@kbn/utility-types';
+import { RecursiveReadonly } from '@osd/utility-types';
 
 /** @public */
 export type Freezable = { [k: string]: any } | any[];
