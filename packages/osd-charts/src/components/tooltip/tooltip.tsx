@@ -200,7 +200,7 @@ const TooltipComponent = ({
         (rotation === 0 || rotation === 180
           ? [Placement.Right, Placement.Left, Placement.Top, Placement.Bottom]
           : [Placement.Top, Placement.Bottom, Placement.Right, Placement.Left]),
-      boundary: boundary === 'chart' && chartRef.current ? chartRef.current : undefined,
+      boundary: boundary === 'chart' ? chartRef.current ?? undefined : boundary,
     };
   }, [settings, chartRef, rotation]);
 

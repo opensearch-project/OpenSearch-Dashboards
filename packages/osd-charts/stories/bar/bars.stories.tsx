@@ -83,4 +83,5 @@ export { Example as testDiscover } from './43_test_discover';
 export { Example as testSingleHistogramBarChart } from './44_test_single_histogram';
 export { Example as testMinHeightPositiveAndNegativeValues } from './46_test_min_height';
 export { Example as testTooltipAndRotation } from './48_test_tooltip';
+export { Example as tooltipBoundary } from './55_tooltip_boundary';
 export { Example as testDualYAxis } from './49_test_dual_axis';

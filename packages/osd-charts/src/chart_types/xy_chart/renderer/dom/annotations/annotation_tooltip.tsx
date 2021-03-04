@@ -66,7 +66,7 @@ export const AnnotationTooltip = ({ state, chartRef, chartId, onScroll, zIndex }
     return {
       ...rest,
       placement: placement ?? Placement.Right,
-      boundary: boundary === 'chart' && chartRef.current ? chartRef.current : undefined,
+      boundary: boundary === 'chart' ? chartRef.current ?? undefined : boundary,
     };
   }, [state?.tooltipSettings, chartRef]);
 

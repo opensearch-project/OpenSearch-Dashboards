@@ -209,17 +209,24 @@ export const getFallbackPlacementsKnob = (): Placement[] | undefined => {
   return knob;
 };
 
-export const getBoundaryKnob = () =>
-  // @ts-ignore
-  select<TooltipProps['boundary']>(
-    'Boundary Element',
-    {
-      Chart: 'chart',
-      'Document Body': document.body,
-      Default: undefined,
-    },
-    undefined,
-  );
+const boundaryMap: Record<string, TooltipProps['boundary'] | null> = {
+  default: undefined,
+  chart: 'chart',
+};
+
+export const getBoundaryKnob = () => {
+  const boundaryString =
+    select<string>(
+      'Boundary Element',
+      {
+        Default: 'default',
+        Chart: 'chart',
+      },
+      'default',
+    ) ?? '';
+
+  return boundaryMap[boundaryString] ?? undefined;
+};
 
 export const getVerticalTextAlignmentKnob = (group?: string) =>
   select<VerticalAlignment | undefined>(

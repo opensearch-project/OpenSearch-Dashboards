@@ -169,6 +169,30 @@ describe('Interactions', () => {
         { left: 120, bottom: 80 },
       );
     });
+
+    describe.each([
+      // TODO: find why these vrt don't position tooltip wrt boundary
+      // ['Root', 'root', 7],
+      // ['Red', 'red', 6],
+      // ['White', 'white', 5],
+      // ['Blue', 'blue', 3],
+      ['Chart', 'chart', 2],
+    ])('Boundary - %s', (_, boundary, groups) => {
+      it('should contain tooltip inside boundary near top', async () => {
+        await common.expectChartWithMouseAtUrlToMatchScreenshot(
+          `http://localhost:9001/?path=/story/bar-chart--tooltip-boundary&knob-Boundary Element=${boundary}&knob-Groups=${groups}&knob-Show axes=false`,
+          { left: 100, top: 20 },
+          { screenshotSelector: 'body' },
+        );
+      });
+      it('should contain tooltip inside boundary near bottom', async () => {
+        await common.expectChartWithMouseAtUrlToMatchScreenshot(
+          `http://localhost:9001/?path=/story/bar-chart--tooltip-boundary&knob-Boundary Element=${boundary}&knob-Groups=${groups}&knob-Show axes=false`,
+          { left: 100, bottom: 20 },
+          { screenshotSelector: 'body' },
+        );
+      });
+    });
   });
 
   describe('brushing', () => {
