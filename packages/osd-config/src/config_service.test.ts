@@ -39,7 +39,7 @@ const packageInfos: RawPackageInfo = {
   },
 };
 const emptyArgv = getEnvOptions();
-const defaultEnv = new Env('/open', packageInfos, emptyArgv);
+const defaultEnv = new Env('/opensearch-dashboards', packageInfos, emptyArgv);
 
 let logger: MockedLogger;
 
@@ -261,7 +261,7 @@ test('correctly passes context', async () => {
     },
   };
 
-  const env = new Env('/opensearchDashboards', mockPackage, getEnvOptions());
+  const env = new Env('/opensearch-dashboards', mockPackage, getEnvOptions());
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: { foo: {} } });
 
   const schemaDefinition = schema.object({
