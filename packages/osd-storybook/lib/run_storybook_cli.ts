@@ -20,8 +20,8 @@
 import { join } from 'path';
 import { logger } from '@storybook/node-logger';
 import buildStandalone from '@storybook/react/standalone';
-import { Flags, run } from '@kbn/dev-utils';
-import { distDir } from '@kbn/ui-shared-deps';
+import { Flags, run } from '@osd/dev-utils';
+import { distDir } from '@osd/ui-shared-deps';
 import * as constants from './constants';
 
 // Convert the flags to a Storybook loglevel
