@@ -40,7 +40,7 @@ filters
 | render
 ----
 
-To produce a filtered set of random data, the expression uses the <<filters_fn, filters>> and <<demodata_fn, demodata>> functions. This time, however, the output becomes the context for the <<pointseries_fn, pointseries>> function, which is a way to aggregate your data, similar to how Elasticsearch works, but more generalized. In this case, the data is split up using the `color` and `size` dimensions, using arguments on the <<pointseries_fn, pointseries>> function. Each unique value in the state column will have an associated size value, which in this case, will be the maximum value of the price column.
+To produce a filtered set of random data, the expression uses the <<filters_fn, filters>> and <<demodata_fn, demodata>> functions. This time, however, the output becomes the context for the <<pointseries_fn, pointseries>> function, which is a way to aggregate your data, similar to how OpenSearch works, but more generalized. In this case, the data is split up using the `color` and `size` dimensions, using arguments on the <<pointseries_fn, pointseries>> function. Each unique value in the state column will have an associated size value, which in this case, will be the maximum value of the price column.
 
 If the expression stopped there, it would produce a `pointseries` data type as the output of this expression. But instead of looking at the raw values, the result is inserted into the <<pie_fn, pie>> function, which will produce an output that will render a pie visualization. And just like before, this is inserted into the <<render_fn, render>> function, which is useful for its arguments.
 
@@ -211,7 +211,7 @@ demodata
 
 This time, `getCell price` is run, and the result is passed into the next function as the context.  Then, each sub-expression of the <<all_fn, all>> function is run, with the context given to their parent, which in this case is the result of `getCell price`. If `all` of these sub-expressions evaluate to `true`, then the `if` condition argument will be true. 
 
-Sub-expressions can seem a little foreign, especially if you aren’t a developer, but they’re worth getting familiar with, since they provide a ton of power and flexibility. Since you can nest any expression you want, you can also use this behavior to mix data from multiple indices, or even data from multiple sources. As an example, you could query an API for a value to use as part of the query provided to <<essql_fn, essql>>. 
+Sub-expressions can seem a little foreign, especially if you aren’t a developer, but they’re worth getting familiar with, since they provide a ton of power and flexibility. Since you can nest any expression you want, you can also use this behavior to mix data from multiple indices, or even data from multiple sources. As an example, you could query an API for a value to use as part of the query provided to <<opensearchsql_fn, opensearchsql>>. 
 
 This whole section is really just scratching the surface, but hopefully after reading it, you at least understand how to read expressions and make sense of what they are doing. With a little practice, you’ll get the hang of mixing _context_ and sub-expressions together to turn any input into your desired output.
 
@@ -250,12 +250,12 @@ Most `primitive` types can be converted automatically, as you might expect. You 
 
 There are other useful type casting options available. For example, something of type `datatable` can be cast to a type `pointseries` simply by only preserving specific columns from the data (namely x, y, size, color, and text). This allows you to treat your source data, which is generally of type `datatable`, like a `pointseries` type simply by convention. 
 
-You can fetch data from Elasticsearch using `essql`, which allows you to aggregate the data, provide a custom name for the value, and insert that data directly to another function that only accepts `pointseries` even though `essql` will output a `datatable` type. This makes the following example expression valid:
+You can fetch data from OpenSearch using `opensearchsql`, which allows you to aggregate the data, provide a custom name for the value, and insert that data directly to another function that only accepts `pointseries` even though `opensearchsql` will output a `datatable` type. This makes the following example expression valid:
 
 [source,text]
 ----
-essql "SELECT user AS x, sum(cost) AS y FROM index GROUP BY user"
+opensearchsql "SELECT user AS x, sum(cost) AS y FROM index GROUP BY user"
 | plot
 ----
 
-In the docs you can see that `essql` returns a `datatable` type, but `plot` expects a `pointseries` context. This works because the `datatable` output will have the columns `x` and `y` as a result of using `AS` in the sql statement to name them. Because the data follows the convention of the `pointseries` data type, casting it into `pointseries` is possible, and it can be passed directly to `plot` as a result. 
+In the docs you can see that `opensearchsql` returns a `datatable` type, but `plot` expects a `pointseries` context. This works because the `datatable` output will have the columns `x` and `y` as a result of using `AS` in the sql statement to name them. Because the data follows the convention of the `pointseries` data type, casting it into `pointseries` is possible, and it can be passed directly to `plot` as a result. 

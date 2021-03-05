@@ -134,13 +134,13 @@ any condition={lte 10} condition={gt 30}
 filters
 | demodata
 | filterrows {
-    getCell "project" | any {eq "elasticsearch"} {eq "kibana"} {eq "x-pack"}
+    getCell "project" | any {eq "opensearch"} {eq "opensearchDashboards"} {eq "x-pack"}
   }
 | pointseries color="project" size="max(price)"
 | pie
 | render
 ----
-This filters out any rows that don’t contain `"elasticsearch"`, `"kibana"` or `"x-pack"` in the `project` field.
+This filters out any rows that don’t contain `"opensearch"`, `"opensearchDashboards"` or `"x-pack"` in the `project` field.
 
 *Accepts:* `null`
 
@@ -429,7 +429,7 @@ Compares the _context_ to specified value to determine `true` or `false`. Usuall
 *Expression syntax*
 [source,js]
 ----
-compare "neq" to="elasticsearch"
+compare "neq" to="opensearch"
 compare op="lte" to=100
 ----
 
@@ -441,15 +441,15 @@ filters
 | mapColumn project
   fn={getCell project |
     switch
-      {case if={compare eq to=kibana} then=kibana}
-      {case if={compare eq to=elasticsearch} then=elasticsearch}
+      {case if={compare eq to=opensearchDashboards} then=opensearchDashboards}
+      {case if={compare eq to=opensearch} then=opensearch}
       default="other"
   }
 | pointseries size="size(cost)" color="project"
 | pie
 | render
 ----
-This maps all `project` values that aren’t `"kibana"` and `"elasticsearch"` to `"other"`. Alternatively, you can use the individual comparator functions instead of compare.
+This maps all `project` values that aren’t `"opensearchDashboards"` and `"opensearch"` to `"other"`. Alternatively, you can use the individual comparator functions instead of compare.
 
 *Accepts:* `string`, `number`, `boolean`, `null`
 
@@ -775,7 +775,7 @@ demodata
 | dropdownControl valueColumn=project filterColumn=project
 | render
 ----
-This creates a dropdown filter element. It requires a data source and uses the unique values from the given `valueColumn` (i.e. `project`) and applies the filter to the `project` column. Note: `filterColumn` should point to a keyword type field for Elasticsearch data sources.
+This creates a dropdown filter element. It requires a data source and uses the unique values from the given `valueColumn` (i.e. `project`) and applies the filter to the `project` column. Note: `filterColumn` should point to a keyword type field for OpenSearch data sources.
 
 *Accepts:* `datatable`
 
@@ -825,15 +825,15 @@ filters
 | mapColumn project
   fn={getCell project |
     switch
-      {case if={eq kibana} then=kibana}
-      {case if={eq elasticsearch} then=elasticsearch}
+      {case if={eq opensearchDashboards} then=opensearchDashboards}
+      {case if={eq opensearch} then=opensearch}
       default="other"
   }
 | pointseries size="size(cost)" color="project"
 | pie
 | render
 ----
-This changes all values in the project column that don’t equal `"kibana"` or `"elasticsearch"` to `"other"`.
+This changes all values in the project column that don’t equal `"opensearchDashboards"` or `"opensearch"` to `"other"`.
 
 *Accepts:* `boolean`, `number`, `string`, `null`
 
@@ -852,32 +852,32 @@ Alias: `value`
 
 
 [float]
-[[escount_fn]]
-=== `escount`
+[[opensearchcount_fn]]
+=== `opensearchcount`
 
-Query Elasticsearch for the number of hits matching the specified query.
+Query OpenSearch for the number of hits matching the specified query.
 
 *Expression syntax*
 [source,js]
 ----
-escount index="logstash-*"
-escount "currency:"EUR"" index="kibana_sample_data_ecommerce"
-escount query="response:404" index="kibana_sample_data_logs"
+opensearchcount index="logstash-*"
+opensearchcount "currency:"EUR"" index="opensearch_dashboards_sample_data_ecommerce"
+opensearchcount query="response:404" index="opensearch_dashboards_sample_data_logs"
 ----
 
 *Code example*
 [source,text]
 ----
 filters
-| escount "Cancelled:true" index="kibana_sample_data_flights"
+| opensearchcount "Cancelled:true" index="opensearch_dashboards_sample_data_flights"
 | math "value"
 | progress shape="semicircle"
   label={formatnumber 0,0}
   font={font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center}
-  max={filters | escount index="kibana_sample_data_flights"}
+  max={filters | opensearchcount index="opensearch_dashboards_sample_data_flights"}
 | render
 ----
-The first `escount` expression retrieves the number of flights that were cancelled. The second `escount` expression retrieves the total number of flights.
+The first `opensearchcount` expression retrieves the number of flights that were cancelled. The second `opensearchcount` expression retrieves the total number of flights.
 
 *Accepts:* `filter`
 
@@ -891,7 +891,7 @@ Aliases: `q`, `query`
 |`string`
 |A Lucene query string.
 
-Default: `"-_index:.kibana"`
+Default: `"-_index:.opensearch-dashboards"`
 
 |`index`
 |`string`
@@ -904,26 +904,26 @@ Default: `"_all"`
 
 
 [float]
-[[esdocs_fn]]
-=== `esdocs`
+[[opensearchdocs_fn]]
+=== `opensearchdocs`
 
-Query Elasticsearch for raw documents. Specify the fields you want to retrieve, especially if you are asking for a lot of rows.
+Query OpenSearch for raw documents. Specify the fields you want to retrieve, especially if you are asking for a lot of rows.
 
 *Expression syntax*
 [source,js]
 ----
-esdocs index="logstash-*"
-esdocs "currency:"EUR"" index="kibana_sample_data_ecommerce"
-esdocs query="response:404" index="kibana_sample_data_logs"
-esdocs index="kibana_sample_data_flights" count=100
-esdocs index="kibana_sample_data_flights" sort="AvgTicketPrice, asc"
+opensearchdocs index="logstash-*"
+opensearchdocs "currency:"EUR"" index="opensearch_dashboards_sample_data_ecommerce"
+opensearchdocs query="response:404" index="opensearch_dashboards_sample_data_logs"
+opensearchdocs index="opensearch_dashboards_sample_data_flights" count=100
+opensearchdocs index="opensearch_dashboards_sample_data_flights" sort="AvgTicketPrice, asc"
 ----
 
 *Code example*
 [source,text]
 ----
 filters
-| esdocs index="kibana_sample_data_ecommerce"
+| opensearchdocs index="opensearch_dashboards_sample_data_ecommerce"
   fields="customer_gender, taxful_total_price, order_date"
   sort="order_date, asc"
   count=10000
@@ -935,7 +935,7 @@ filters
   palette={palette "#7ECAE3" "#003A4D" gradient=true}
 | render
 ----
-This retrieves the first 10000 documents data from the `kibana_sample_data_ecommerce` index sorted by `order_date` in ascending order, and only requests the `customer_gender`, `taxful_total_price`, and `order_date` fields.
+This retrieves the first 10000 documents data from the `opensearch_dashboards_sample_data_ecommerce` index sorted by `order_date` in ascending order, and only requests the `customer_gender`, `taxful_total_price`, and `order_date` fields.
 
 *Accepts:* `filter`
 
@@ -949,7 +949,7 @@ Aliases: `q`, `query`
 |`string`
 |A Lucene query string.
 
-Default: `"-_index:.kibana"`
+Default: `"-_index:.opensearch-dashboards"`
 
 |`count`
 |`number`
@@ -980,27 +980,27 @@ Default: `"_all"`
 
 
 [float]
-[[essql_fn]]
-=== `essql`
+[[opensearchsql_fn]]
+=== `opensearchsql`
 
-Queries Elasticsearch using Elasticsearch SQL.
+Queries OpenSearch using OpenSearch SQL.
 
 *Expression syntax*
 [source,js]
 ----
-essql query="SELECT * FROM "logstash*""
-essql "SELECT * FROM "apm*"" count=10000
+opensearchsql query="SELECT * FROM "logstash*""
+opensearchsql "SELECT * FROM "apm*"" count=10000
 ----
 
 *Code example*
 [source,text]
 ----
 filters
-| essql query="SELECT Carrier, FlightDelayMin, AvgTicketPrice FROM   "kibana_sample_data_flights""
+| opensearchsql query="SELECT Carrier, FlightDelayMin, AvgTicketPrice FROM   "opensearch_dashboards_sample_data_flights""
 | table
 | render
 ----
-This retrieves the `Carrier`, `FlightDelayMin`, and `AvgTicketPrice` fields from the "kibana_sample_data_flights" index.
+This retrieves the `Carrier`, `FlightDelayMin`, and `AvgTicketPrice` fields from the "opensearch_dashboards_sample_data_flights" index.
 
 *Accepts:* `filter`
 
@@ -1012,7 +1012,7 @@ This retrieves the `Carrier`, `FlightDelayMin`, and `AvgTicketPrice` fields from
 
 Aliases: `q`, `query`
 |`string`
-|An Elasticsearch SQL query.
+|An OpenSearch SQL query.
 
 |`count`
 |`number`
@@ -1050,13 +1050,13 @@ exactly column="project" value="beats"
 [source,text]
 ----
 filters
-| exactly column=project value=elasticsearch
+| exactly column=project value=opensearch
 | demodata
 | pointseries x=project y="mean(age)"
 | plot defaultStyle={seriesStyle bars=1}
 | render
 ----
-The `exactly` filter here is added to existing filters retrieved by the `filters` function and further filters down the data to only have `"elasticsearch"` data. The `exactly` filter only applies to this one specific element and will not affect other elements in the workpad.
+The `exactly` filter here is added to existing filters retrieved by the `filters` function and further filters down the data to only have `"opensearch"` data. The `exactly` filter only applies to this one specific element and will not affect other elements in the workpad.
 
 *Accepts:* `filter`
 
@@ -1096,7 +1096,7 @@ Filters rows in a `datatable` based on the return value of a sub-expression.
 *Expression syntax*
 [source,js]
 ----
-filterrows {getCell "project" | eq "kibana"}
+filterrows {getCell "project" | eq "opensearchDashboards"}
 filterrows fn={getCell "age" | gt 50}
 ----
 
@@ -1754,7 +1754,7 @@ Interprets a `TinyMath` math expression using a `number` or `datatable` as _cont
 
 Alias: `expression`
 |`string`
-|An evaluated `TinyMath` expression. See https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html.
+|An evaluated `TinyMath` expression. See https://www.elastic.co/guide/en/opensearch-dashboards/current/canvas-tinymath-functions.html.
 |===
 
 *Returns:* `number`
@@ -2018,7 +2018,7 @@ Aliases: `exp`, `fn`, `function`
 [[pointseries_fn]]
 === `pointseries`
 
-Turn a `datatable` into a point series model. Currently we differentiate measure from dimensions by looking for a `TinyMath` expression. See https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html. If you enter a `TinyMath` expression in your argument, we treat that argument as a measure, otherwise it is a dimension. Dimensions are combined to create unique keys. Measures are then deduplicated by those keys using the specified `TinyMath` function
+Turn a `datatable` into a point series model. Currently we differentiate measure from dimensions by looking for a `TinyMath` expression. See https://www.elastic.co/guide/en/opensearch-dashboards/current/canvas-tinymath-functions.html. If you enter a `TinyMath` expression in your argument, we treat that argument as a measure, otherwise it is a dimension. Dimensions are combined to create unique keys. Measures are then deduplicated by those keys using the specified `TinyMath` function
 
 *Accepts:* `datatable`
 
@@ -2702,13 +2702,13 @@ Default: `"@timestamp"`
 
 Aliases: `f`, `start`
 |`string`
-|The beginning of the range, in ISO8601 or Elasticsearch `datemath` format
+|The beginning of the range, in ISO8601 or OpenSearch `datemath` format
 
 |`to`
 
 Aliases: `end`, `t`
 |`string`
-|The end of the range, in ISO8601 or Elasticsearch `datemath` format
+|The end of the range, in ISO8601 or OpenSearch `datemath` format
 |===
 
 *Returns:* `filter`
@@ -2766,11 +2766,11 @@ Aliases: `q`, `query`
 |`string`
 |A Timelion query
 
-Default: `".es(*)"`
+Default: `".opensearch(*)"`
 
 |`from`
 |`string`
-|The Elasticsearch `datemath` string for the beginning of the time range.
+|The OpenSearch `datemath` string for the beginning of the time range.
 
 Default: `"now-1y"`
 
@@ -2788,7 +2788,7 @@ Default: `"UTC"`
 
 |`to`
 |`string`
-|The Elasticsearch `datemath` string for the end of the time range.
+|The OpenSearch `datemath` string for the end of the time range.
 
 Default: `"now"`
 |===
@@ -2880,7 +2880,7 @@ Default: `""`
 [[var_fn]]
 === `var`
 
-Updates the Kibana global context.
+Updates the OpenSearchDashboards global context.
 
 *Accepts:* `any`
 
@@ -2902,7 +2902,7 @@ Alias: `name`
 [[var_set_fn]]
 === `var_set`
 
-Updates the Kibana global context.
+Updates the OpenSearchDashboards global context.
 
 *Accepts:* `any`
 
