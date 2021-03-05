@@ -18,7 +18,7 @@
  */
 
 import { resolve, join } from 'path';
-import { getConfigPath } from '@kbn/utils';
+import { getConfigPath } from '@osd/utils';
 import { getConfigurationFilePaths } from './get_config_file_paths';
 
 describe('getConfigurationFilePaths', () => {
