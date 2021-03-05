@@ -17,24 +17,21 @@
  * under the License.
  */
 
-import inquirer from 'inquirer';
+import Path from 'path';
+import Fs from 'fs';
+import { promisify } from 'util';
 
-import { Plugin } from './load_kibana_platform_plugin';
+const existsAsync = promisify(Fs.exists);
 
-export async function resolveKibanaVersion(option: string | undefined, plugin: Plugin) {
-  const preselectedVersion = option || plugin.manifest.kibanaVersion || plugin.manifest.version;
-
-  if (preselectedVersion && preselectedVersion !== 'kibana') {
-    return preselectedVersion;
+export async function findOpenSearchDashboardsJson(directory: string): Promise<string | undefined> {
+  if (await existsAsync(Path.resolve(directory, 'opensearch_dashboards.json'))) {
+    return directory;
   }
 
-  const answers = await inquirer.prompt([
-    {
-      type: 'input',
-      name: 'kibanaVersion',
-      message: 'What version of Kibana are you building for?',
-    },
-  ]);
+  const parent = Path.dirname(directory);
+  if (parent === directory) {
+    return undefined;
+  }
 
-  return answers.kibanaVersion;
+  return findOpenSearchDashboardsJson(parent);
 }
