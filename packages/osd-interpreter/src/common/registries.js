@@ -65,7 +65,7 @@ export function register(registries, specs) {
 export function registryFactory(registries) {
   return {
     // This is a getter function. We can't make it a property or a proper
-    // getter, because Kibana server will improperly clone it.
+    // getter, because OpenSearch Dashboards server will improperly clone it.
     registries() {
       return registries;
     },
