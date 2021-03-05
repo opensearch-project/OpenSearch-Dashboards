@@ -21,16 +21,16 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 
 import { Logger } from '../cli_plugin/lib/logger';
-import { getConfigDirectory, getDataPath } from '@kbn/utils';
+import { getConfigDirectory, getDataPath } from '@osd/utils';
 
 export function getKeystore() {
-  const configKeystore = join(getConfigDirectory(), 'kibana.keystore');
-  const dataKeystore = join(getDataPath(), 'kibana.keystore');
+  const configKeystore = join(getConfigDirectory(), 'opensearchDashboards.keystore');
+  const dataKeystore = join(getDataPath(), 'opensearchDashboards.keystore');
   let keystorePath = null;
   if (existsSync(dataKeystore)) {
     const logger = new Logger();
     logger.log(
-      `kibana.keystore located in the data folder is deprecated.  Future versions will use the config folder.`
+      `opensearchDashboards.keystore located in the data folder is deprecated.  Future versions will use the config folder.`
     );
     keystorePath = dataKeystore;
   } else {

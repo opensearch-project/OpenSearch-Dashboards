@@ -35,7 +35,7 @@ export async function add(keystore, key, options = {}) {
   let value;
 
   if (!keystore.exists()) {
-    return logger.error("ERROR: Kibana keystore not found. Use 'create' command to create one.");
+    return logger.error("ERROR: OpenSearch Dashboards keystore not found. Use 'create' command to create one.");
   }
 
   if (!options.force && keystore.has(key)) {

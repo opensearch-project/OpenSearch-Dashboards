@@ -33,7 +33,7 @@ import sinon from 'sinon';
 import { Keystore } from '../legacy/server/keystore';
 import { remove } from './remove';
 
-describe('Kibana keystore', () => {
+describe('OpenSearch Dashboards keystore', () => {
   describe('remove', () => {
     const sandbox = sinon.createSandbox();
 

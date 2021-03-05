@@ -40,7 +40,7 @@ import { Keystore } from '../legacy/server/keystore';
 import { list } from './list';
 import { Logger } from '../cli_plugin/lib/logger';
 
-describe('Kibana keystore', () => {
+describe('OpenSearch Dashboards keystore', () => {
   describe('list', () => {
     const sandbox = sinon.createSandbox();
 
@@ -68,7 +68,7 @@ describe('Kibana keystore', () => {
       sinon.assert.calledOnce(Logger.prototype.error);
       sinon.assert.calledWith(
         Logger.prototype.error,
-        "ERROR: Kibana keystore not found. Use 'create' command to create one."
+        "ERROR: OpenSearch Dashboards keystore not found. Use 'create' command to create one."
       );
     });
   });
