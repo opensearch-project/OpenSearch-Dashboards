@@ -22,7 +22,7 @@ const { relative } = require('path');
 const getopts = require('getopts');
 const del = require('del');
 const supportsColor = require('supports-color');
-const { ToolingLog, withProcRunner, pickLevelFromFlags } = require('@kbn/dev-utils');
+const { ToolingLog, withProcRunner, pickLevelFromFlags } = require('@osd/dev-utils');
 
 const { ROOT_DIR, BUILD_DIR } = require('./paths');
 
@@ -47,7 +47,7 @@ if (unknownFlags.length) {
 
 if (flags.help) {
   log.info(`
-    Simple build tool for @kbn/interpreter package
+    Simple build tool for @osd/interpreter package
 
     --dev      Build for development, include source maps
     --watch    Run in watch mode
