@@ -29,19 +29,19 @@ describe('cli/serve/read_keystore', () => {
   });
 
   it('returns structured keystore data', () => {
-    const keystoreData = { 'elasticsearch.password': 'changeme' };
+    const keystoreData = { 'opensearch.password': 'changeme' };
     Keystore.prototype.data = keystoreData;
 
     const data = readKeystore();
     expect(data).toEqual({
-      elasticsearch: {
+      opensearch: {
         password: 'changeme',
       },
     });
   });
 
   it('uses data path if provided', () => {
-    const keystorePath = path.join('/foo/', 'kibana.keystore');
+    const keystorePath = path.join('/foo/', 'opensearch_dashboards.keystore');
 
     readKeystore(keystorePath);
     expect(Keystore.mock.calls[0][0]).toContain(keystorePath);

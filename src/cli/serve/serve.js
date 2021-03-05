@@ -23,8 +23,8 @@ import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { getConfigPath } from '@kbn/utils';
-import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
+import { getConfigPath } from '@osd/utils';
+import { IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE } from '../../legacy/utils';
 import { fromRoot } from '../../core/server/utils';
 import { bootstrap } from '../../core/server';
 import { readKeystore } from './read_keystore';
@@ -73,20 +73,20 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   if (opts.dev) {
     set('env', 'development');
 
-    if (!has('elasticsearch.username')) {
-      set('elasticsearch.username', 'kibana_system');
+    if (!has('opensearch.username')) {
+      set('opensearch.username', 'opensearch_dashboards_system');
     }
 
-    if (!has('elasticsearch.password')) {
-      set('elasticsearch.password', 'changeme');
+    if (!has('opensearch.password')) {
+      set('opensearch.password', 'changeme');
     }
 
     if (opts.ssl) {
-      // @kbn/dev-utils is part of devDependencies
-      const { CA_CERT_PATH, KBN_KEY_PATH, KBN_CERT_PATH } = require('@kbn/dev-utils');
-      const customElasticsearchHosts = opts.elasticsearch
-        ? opts.elasticsearch.split(',')
-        : [].concat(get('elasticsearch.hosts') || []);
+      // @osd/dev-utils is part of devDependencies
+      const { CA_CERT_PATH, OSD_KEY_PATH, OSD_CERT_PATH } = require('@osd/dev-utils');
+      const customOpenSearchHosts = opts.opensearch
+        ? opts.opensearch.split(',')
+        : [].concat(get('opensearch.hosts') || []);
 
       function ensureNotDefined(path) {
         if (has(path)) {
@@ -98,10 +98,10 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       ensureNotDefined('server.ssl.keystore.path');
       ensureNotDefined('server.ssl.truststore.path');
       ensureNotDefined('server.ssl.certificateAuthorities');
-      ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
+      ensureNotDefined('opensearch.ssl.certificateAuthorities');
 
-      const elasticsearchHosts = (
-        (customElasticsearchHosts.length > 0 && customElasticsearchHosts) || [
+      const opensearchHosts = (
+        (customOpenSearchHosts.length > 0 && customOpenSearchHosts) || [
           'https://localhost:9200',
         ]
       ).map((hostUrl) => {
@@ -115,15 +115,15 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       });
 
       set('server.ssl.enabled', true);
-      set('server.ssl.certificate', KBN_CERT_PATH);
-      set('server.ssl.key', KBN_KEY_PATH);
+      set('server.ssl.certificate', OSD_CERT_PATH);
+      set('server.ssl.key', OSD_KEY_PATH);
       set('server.ssl.certificateAuthorities', CA_CERT_PATH);
-      set('elasticsearch.hosts', elasticsearchHosts);
-      set('elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
+      set('opensearch.hosts', opensearchHosts);
+      set('opensearch.ssl.certificateAuthorities', CA_CERT_PATH);
     }
   }
 
-  if (opts.elasticsearch) set('elasticsearch.hosts', opts.elasticsearch.split(','));
+  if (opts.opensearch) set('opensearch.hosts', opts.opensearch.split(','));
   if (opts.port) set('server.port', opts.port);
   if (opts.host) set('server.host', opts.host);
   if (opts.quiet) set('logging.quiet', true);
@@ -144,9 +144,9 @@ export default function (program) {
   const command = program.command('serve');
 
   command
-    .description('Run the kibana server')
+    .description('Run the opensearch-dashboards server')
     .collectUnknownOptions()
-    .option('-e, --elasticsearch <uri1,uri2>', 'Elasticsearch instances')
+    .option('-e, --opensearch <uri1,uri2>', 'OpenSearch instances')
     .option(
       '-c, --config <path>',
       'Path to the config file, use multiple --config args to include multiple config files',
@@ -180,12 +180,12 @@ export default function (program) {
     command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
   }
 
-  if (!IS_KIBANA_DISTRIBUTABLE) {
+  if (!IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE) {
     command
-      .option('--oss', 'Start Kibana without X-Pack')
+      .option('--oss', 'Start OpenSearch Dashboards without X-Pack')
       .option(
         '--run-examples',
-        'Adds plugin paths for all the Kibana example plugins and runs with no base path'
+        'Adds plugin paths for all the OpenSearch Dashboards example plugins and runs with no base path'
       );
   }
 
@@ -193,26 +193,26 @@ export default function (program) {
     command
       .option('--dev', 'Run the server with development mode defaults')
       .option('--ssl', 'Run the dev server using HTTPS')
-      .option('--dist', 'Use production assets from kbn/optimizer')
+      .option('--dist', 'Use production assets from osd/optimizer')
       .option(
         '--no-base-path',
         "Don't put a proxy in front of the dev server, which adds a random basePath"
       )
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
-      .option('--no-optimizer', 'Disable the kbn/optimizer completely')
-      .option('--no-cache', 'Disable the kbn/optimizer cache')
-      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
+      .option('--no-optimizer', 'Disable the osd/optimizer completely')
+      .option('--no-cache', 'Disable the osd/optimizer cache')
+      .option('--no-dev-config', 'Prevents loading the opensearch_dashboards.dev.yml file in --dev mode');
   }
 
   command.action(async function (opts) {
     if (opts.dev && opts.devConfig !== false) {
       try {
-        const kbnDevConfig = fromRoot('config/kibana.dev.yml');
-        if (statSync(kbnDevConfig).isFile()) {
-          opts.config.push(kbnDevConfig);
+        const osdDevConfig = fromRoot('config/opensearch_dashboards.dev.yml');
+        if (statSync(osdDevConfig).isFile()) {
+          opts.config.push(osdDevConfig);
         }
       } catch (err) {
-        // ignore, kibana.dev.yml does not exist
+        // ignore, opensearch_dashboards.dev.yml does not exist
       }
     }
 
