@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/es-archiver').runCli();
+require('@osd/opensearch-archiver').runCli();

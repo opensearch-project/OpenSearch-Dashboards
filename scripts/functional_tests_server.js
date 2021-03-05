@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/test').startServersCli(require.resolve('../test/functional/config.js'));
+require('@osd/test').startServersCli(require.resolve('../test/functional/config.js'));

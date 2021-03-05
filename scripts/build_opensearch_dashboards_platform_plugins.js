@@ -17,4 +17,4 @@
  * under the License.
  */
 
-require('@kbn/optimizer/target/cli');
+require('@osd/optimizer/target/cli');
