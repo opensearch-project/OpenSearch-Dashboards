@@ -1,14 +1,14 @@
 {
-  "name": "@kbn/storybook",
+  "name": "@osd/storybook",
   "version": "1.0.0",
   "private": true,
   "license": "Apache-2.0",
   "main": "./target/index.js",
-  "kibana": {
+  "opensearchDashboards": {
     "devOnly": true
   },
   "dependencies": {
-    "@kbn/dev-utils": "1.0.0",
+    "@osd/dev-utils": "1.0.0",
     "@storybook/addon-actions": "^6.0.16",
     "@storybook/addon-essentials": "^6.0.16",
     "@storybook/addon-knobs": "^6.0.16",
@@ -20,7 +20,7 @@
     "@types/webpack": "^4.41.3",
     "@types/webpack-env": "^1.15.2",
     "@types/webpack-merge": "^4.1.5",
-    "@kbn/utils": "1.0.0",
+    "@osd/utils": "1.0.0",
     "babel-loader": "^8.0.6",
     "copy-webpack-plugin": "^6.0.2",
     "fast-glob": "2.2.7",
@@ -38,7 +38,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "kbn:bootstrap": "yarn build",
+    "osd:bootstrap": "yarn build",
     "watch": "yarn build --watch"
   }
 }
