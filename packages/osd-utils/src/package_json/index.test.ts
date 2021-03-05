@@ -18,14 +18,14 @@
  */
 
 import path from 'path';
-import { kibanaPackageJSON } from './';
+import { opensearchDashboardsPackageJSON } from './';
 
 it('parses package.json', () => {
-  expect(kibanaPackageJSON.name).toEqual('kibana');
+  expect(opensearchDashboardsPackageJSON.name).toEqual('opensearch-dashboards');
 });
 
 it('includes __dirname and __filename', () => {
   const root = path.resolve(__dirname, '../../../../');
-  expect(kibanaPackageJSON.__filename).toEqual(path.resolve(root, 'package.json'));
-  expect(kibanaPackageJSON.__dirname).toEqual(root);
+  expect(opensearchDashboardsPackageJSON.__filename).toEqual(path.resolve(root, 'package.json'));
+  expect(opensearchDashboardsPackageJSON.__dirname).toEqual(root);
 });
