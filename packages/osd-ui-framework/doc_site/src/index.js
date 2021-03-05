@@ -61,8 +61,8 @@ const routes = [
 const onRouteEnter = (route) => {
   const leafRoute = route.routes[route.routes.length - 1];
   document.title = leafRoute.name
-    ? `Kibana UI Framework - ${leafRoute.name}`
-    : 'Kibana UI Framework';
+    ? `OpenSearch Dashboards UI Framework - ${leafRoute.name}`
+    : 'OpenSearch Dashboards UI Framework';
 };
 
 const syncTitleWithRoutes = (routesList) => {

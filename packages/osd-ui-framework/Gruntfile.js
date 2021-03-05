@@ -19,7 +19,7 @@
 
 const sass = require('node-sass');
 const postcss = require('postcss');
-const postcssConfig = require('@kbn/optimizer/postcss.config.js');
+const postcssConfig = require('@osd/optimizer/postcss.config.js');
 const chokidar = require('chokidar');
 const { debounce } = require('lodash');
 
@@ -51,7 +51,7 @@ module.exports = function (grunt) {
         src: ['target/components/**/*.js', 'target/src/**/*.js'],
         dest: '.',
         options: {
-          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+          presets: [require.resolve('@osd/babel-preset/webpack_preset')],
         },
       },
     },

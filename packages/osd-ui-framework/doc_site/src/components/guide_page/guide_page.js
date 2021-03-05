@@ -59,7 +59,7 @@ export class GuidePage extends Component {
 
         <div className="guidePageBody">
           <div className="guidePageKillScreen">
-            <h1 className="guideTitle">The Kibana UI Framework has been DEPRECATED.</h1>
+            <h1 className="guideTitle">The OpenSearch Dashboards UI Framework has been DEPRECATED.</h1>
 
             <h2 className="guideTitle">
               Please use the <a href="https://github.com/elastic/eui">EUI Framework instead</a>.
