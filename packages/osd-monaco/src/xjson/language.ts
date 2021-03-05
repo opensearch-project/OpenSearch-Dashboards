@@ -38,7 +38,7 @@ registerLexerRules(monaco);
 window.MonacoEnvironment = {
   getWorker: (module: string, languageId: string) => {
     if (languageId === ID) {
-      // In kibana we will probably build this once and then load with raw-loader
+      // In OpenSearch Dashboards we will probably build this once and then load with raw-loader
       const blob = new Blob([workerSrc], { type: 'application/javascript' });
       return new Worker(URL.createObjectURL(blob));
     }

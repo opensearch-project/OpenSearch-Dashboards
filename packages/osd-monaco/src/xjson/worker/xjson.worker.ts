@@ -17,21 +17,16 @@
  * under the License.
  */
 
-/* eslint-disable-next-line @kbn/eslint/module_migration */
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-import { createParser, Parser, ParseResult } from '../grammar';
+// Please note: this module is intended to be run inside of a webworker.
+/* eslint-disable @osd/eslint/module_migration */
 
-export class XJsonWorker {
-  constructor(private ctx: monaco.worker.IWorkerContext) {}
-  private parser: Parser | undefined;
+import 'regenerator-runtime/runtime';
+// @ts-ignore
+import * as worker from 'monaco-editor/esm/vs/editor/editor.worker';
+import { XJsonWorker } from './xjson_worker';
 
-  async parse(modelUri: string): Promise<ParseResult | undefined> {
-    if (!this.parser) {
-      this.parser = createParser();
-    }
-    const model = this.ctx.getMirrorModels().find((m) => m.uri.toString() === modelUri);
-    if (model) {
-      return this.parser(model.getValue());
-    }
-  }
-}
+self.onmessage = () => {
+  worker.initialize((ctx: any, createData: any) => {
+    return new XJsonWorker(ctx);
+  });
+};

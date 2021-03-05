@@ -17,9 +17,21 @@
  * under the License.
  */
 
-export { monaco } from './monaco';
-export { XJsonLang } from './xjson';
+/* eslint-disable-next-line @osd/eslint/module_migration */
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import { createParser, Parser, ParseResult } from '../grammar';
 
-/* eslint-disable-next-line @kbn/eslint/module_migration */
-import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
-export { BarePluginApi };
+export class XJsonWorker {
+  constructor(private ctx: monaco.worker.IWorkerContext) {}
+  private parser: Parser | undefined;
+
+  async parse(modelUri: string): Promise<ParseResult | undefined> {
+    if (!this.parser) {
+      this.parser = createParser();
+    }
+    const model = this.ctx.getMirrorModels().find((m) => m.uri.toString() === modelUri);
+    if (model) {
+      return this.parser(model.getValue());
+    }
+  }
+}

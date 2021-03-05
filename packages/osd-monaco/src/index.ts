@@ -17,16 +17,9 @@
  * under the License.
  */
 
-// Please note: this module is intended to be run inside of a webworker.
-/* eslint-disable @kbn/eslint/module_migration */
+export { monaco } from './monaco';
+export { XJsonLang } from './xjson';
 
-import 'regenerator-runtime/runtime';
-// @ts-ignore
-import * as worker from 'monaco-editor/esm/vs/editor/editor.worker';
-import { XJsonWorker } from './xjson_worker';
-
-self.onmessage = () => {
-  worker.initialize((ctx: any, createData: any) => {
-    return new XJsonWorker(ctx);
-  });
-};
+/* eslint-disable-next-line @osd/eslint/module_migration */
+import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
+export { BarePluginApi };
