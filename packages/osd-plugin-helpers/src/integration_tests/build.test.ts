@@ -21,17 +21,17 @@ import Path from 'path';
 import Fs from 'fs';
 
 import execa from 'execa';
-import { REPO_ROOT } from '@kbn/utils';
-import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@osd/utils';
+import { createStripAnsiSerializer, createReplaceSerializer } from '@osd/dev-utils';
 import extract from 'extract-zip';
 import del from 'del';
 import globby from 'globby';
 import loadJsonFile from 'load-json-file';
 
-const KIBANA_VERSION = '7.9.0';
+const OPENSEARCH_DASHBOARDS_VERSION = '7.9.0';
 const PLUGIN_DIR = Path.resolve(REPO_ROOT, 'plugins/foo_test_plugin');
 const PLUGIN_BUILD_DIR = Path.resolve(PLUGIN_DIR, 'build');
-const PLUGIN_ARCHIVE = Path.resolve(PLUGIN_BUILD_DIR, `fooTestPlugin-${KIBANA_VERSION}.zip`);
+const PLUGIN_ARCHIVE = Path.resolve(PLUGIN_BUILD_DIR, `fooTestPlugin-${OPENSEARCH_DASHBOARDS_VERSION}.zip`);
 const TMP_DIR = Path.resolve(__dirname, '__tmp__');
 
 expect.addSnapshotSerializer(createReplaceSerializer(/[\d\.]+ sec/g, '<time>'));
@@ -65,7 +65,7 @@ it('builds a generated plugin into a viable archive', async () => {
 
   const buildProc = await execa(
     process.execPath,
-    ['../../scripts/plugin_helpers', 'build', '--kibana-version', KIBANA_VERSION],
+    ['../../scripts/plugin_helpers', 'build', '--opensearch-dashboards-version', OPENSEARCH_DASHBOARDS_VERSION],
     {
       cwd: PLUGIN_DIR,
       all: true,
@@ -75,7 +75,7 @@ it('builds a generated plugin into a viable archive', async () => {
   expect(buildProc.all).toMatchInlineSnapshot(`
     " warn These tools might work with 7.9 versions, but there are known workarounds required. See https://github.com/elastic/kibana/issues/82466 for more info
      info deleting the build and target directories
-     info running @kbn/optimizer
+     info running @osd/optimizer
      │ info initialized, 0 bundles cached
      │ info starting worker [1 bundle]
      │ warn worker stderr Browserslist: caniuse-lite is outdated. Please run:
@@ -87,36 +87,36 @@ it('builds a generated plugin into a viable archive', async () => {
      info compressing plugin into [fooTestPlugin-7.9.0.zip]"
   `);
 
-  await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR }, () => {});
+  await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR }, () => { });
 
   const files = await globby(['**/*'], { cwd: TMP_DIR });
   files.sort((a, b) => a.localeCompare(b));
 
   expect(files).toMatchInlineSnapshot(`
     Array [
-      "kibana/fooTestPlugin/common/index.js",
-      "kibana/fooTestPlugin/kibana.json",
-      "kibana/fooTestPlugin/package.json",
-      "kibana/fooTestPlugin/server/index.js",
-      "kibana/fooTestPlugin/server/plugin.js",
-      "kibana/fooTestPlugin/server/routes/index.js",
-      "kibana/fooTestPlugin/server/types.js",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js.br",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js.gz",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js.br",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js.gz",
-      "kibana/fooTestPlugin/translations/ja-JP.json",
-      "kibana/fooTestPlugin/tsconfig.json",
+      "opensearch-dashboards/fooTestPlugin/common/index.js",
+      "opensearch-dashboards/fooTestPlugin/opensearch_dashboards.json",
+      "opensearch-dashboards/fooTestPlugin/package.json",
+      "opensearch-dashboards/fooTestPlugin/server/index.js",
+      "opensearch-dashboards/fooTestPlugin/server/plugin.js",
+      "opensearch-dashboards/fooTestPlugin/server/routes/index.js",
+      "opensearch-dashboards/fooTestPlugin/server/types.js",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js.br",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js.gz",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.plugin.js",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.plugin.js.br",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.plugin.js.gz",
+      "opensearch-dashboards/fooTestPlugin/translations/ja-JP.json",
+      "opensearch-dashboards/fooTestPlugin/tsconfig.json",
     ]
   `);
 
-  expect(loadJsonFile.sync(Path.resolve(TMP_DIR, 'kibana', 'fooTestPlugin', 'kibana.json')))
+  expect(loadJsonFile.sync(Path.resolve(TMP_DIR, 'opensearch-dashboards', 'fooTestPlugin', 'opensearch_dashboards.json')))
     .toMatchInlineSnapshot(`
     Object {
       "id": "fooTestPlugin",
-      "kibanaVersion": "7.9.0",
+      "opensearchDashboardsVersion": "7.9.0",
       "optionalPlugins": Array [],
       "requiredPlugins": Array [
         "navigation",
