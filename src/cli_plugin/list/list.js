@@ -26,11 +26,11 @@ export function list(pluginDir, logger) {
 
     if (stat.isDirectory() && name[0] !== '.') {
       try {
-        const packagePath = join(pluginDir, name, 'kibana.json');
+        const packagePath = join(pluginDir, name, 'opensearch_dashboards.json');
         const pkg = JSON.parse(readFileSync(packagePath, 'utf8'));
         logger.log(pkg.id + '@' + pkg.version);
       } catch (e) {
-        throw new Error('Unable to read kibana.json file for plugin ' + name);
+        throw new Error('Unable to read opensearch_dashboards.json file for plugin ' + name);
       }
     }
   });

@@ -21,7 +21,7 @@ import sinon from 'sinon';
 
 import { Logger } from './logger';
 
-describe('kibana cli', function () {
+describe('opensearchDashboards cli', function () {
   describe('plugin installer', function () {
     describe('logger', function () {
       let logger;

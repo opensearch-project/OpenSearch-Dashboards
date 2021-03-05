@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getConfigPath } from '@kbn/utils';
+import { getConfigPath } from '@osd/utils';
 import { pkg } from '../../core/server/utils';
 import { install } from './install';
 import { Logger } from '../lib/logger';

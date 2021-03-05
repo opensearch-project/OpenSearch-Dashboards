@@ -23,7 +23,7 @@ import fs from 'fs';
 import sinon from 'sinon';
 import del from 'del';
 
-import { existingInstall, assertVersion } from './kibana';
+import { existingInstall, assertVersion } from './opensearch_dashboards';
 import { Logger } from '../lib/logger';
 
 jest.spyOn(fs, 'statSync');
@@ -32,10 +32,10 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('kibana cli', function () {
+describe('opensearchDashboards cli', function () {
   describe('plugin installer', function () {
-    describe('kibana', function () {
-      const testWorkingPath = join(__dirname, '.test.data.kibana');
+    describe('OpenSearch Dashboards', function () {
+      const testWorkingPath = join(__dirname, '.test.data.opensearchDashboards');
       const tempArchiveFilePath = join(testWorkingPath, 'archive.part');
       const pluginDir = join(__dirname, 'plugins');
 
@@ -73,7 +73,7 @@ describe('kibana cli', function () {
             plugins: [
               {
                 id: 'foo',
-                kibanaVersion: '5.0.0-SNAPSHOT',
+                opensearchDashboardsVersion: '5.0.0-SNAPSHOT',
               },
             ],
           };
@@ -81,37 +81,37 @@ describe('kibana cli', function () {
           expect(() => assertVersion(settings)).not.toThrow();
         });
 
-        it('should throw an error if plugin is missing a kibana version.', function () {
+        it('should throw an error if plugin is missing a opensearchDashboardsVersion version.', function () {
           expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
-            `"Plugin kibana.json is missing both a version property (required) and a kibanaVersion property (optional)."`
+            `"Plugin opensearch_dashboards.json is missing both a version property (required) and a opensearchDashboardsVersion property (optional)."`
           );
         });
 
-        it('should throw an error if plugin kibanaVersion does not match kibana version', function () {
-          settings.plugins[0].kibanaVersion = '1.2.3.4';
+        it('should throw an error if plugin opensearchDashboardsVersion does not match opensearch-dashboards version', function () {
+          settings.plugins[0].opensearchDashboardsVersion = '1.2.3.4';
 
           expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
-            `"Plugin foo [1.2.3] is incompatible with Kibana [1.0.0]"`
+            `"Plugin foo [1.2.3] is incompatible with OpenSearch Dashboards [1.0.0]"`
           );
         });
 
-        it('should not throw an error if plugin kibanaVersion matches kibana version', function () {
-          settings.plugins[0].kibanaVersion = '1.0.0';
+        it('should not throw an error if plugin opensearchDashboardsVersion matches opensearch-dashboards version', function () {
+          settings.plugins[0].opensearchDashboardsVersion = '1.0.0';
 
           expect(() => assertVersion(settings)).not.toThrow();
         });
 
         it('should ignore version info after the dash in checks on valid version', function () {
-          settings.plugins[0].kibanaVersion = '1.0.0-foo-bar-version-1.2.3';
+          settings.plugins[0].opensearchDashboardsVersion = '1.0.0-foo-bar-version-1.2.3';
 
           expect(() => assertVersion(settings)).not.toThrow();
         });
 
         it('should ignore version info after the dash in checks on invalid version', function () {
-          settings.plugins[0].kibanaVersion = '2.0.0-foo-bar-version-1.2.3';
+          settings.plugins[0].opensearchDashboardsVersion = '2.0.0-foo-bar-version-1.2.3';
 
           expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
-            `"Plugin foo [2.0.0] is incompatible with Kibana [1.0.0]"`
+            `"Plugin foo [2.0.0] is incompatible with OpenSearch Dashboards [1.0.0]"`
           );
         });
       });

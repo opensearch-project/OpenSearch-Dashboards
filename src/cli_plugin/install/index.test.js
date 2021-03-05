@@ -21,7 +21,7 @@ import sinon from 'sinon';
 
 import { installCommand } from './index';
 
-describe('kibana cli', function () {
+describe('opensearchDashboards cli', function () {
   describe('plugin installer', function () {
     describe('commander options', function () {
       const program = {

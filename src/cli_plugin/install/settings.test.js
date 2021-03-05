@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@osd/dev-utils';
 
 import { fromRoot } from '../../core/server/utils';
 import { parseMilliseconds, parse } from './settings';
@@ -47,10 +47,10 @@ describe('parseMilliseconds function', function () {
 describe('parse function', function () {
   const command = 'plugin name';
   const defaultOptions = { pluginDir: fromRoot('plugins') };
-  const kbnPackage = { version: 1234 };
+  const osdPackage = { version: 1234 };
 
   it('produces expected defaults', function () {
-    expect(parse(command, { ...defaultOptions }, kbnPackage)).toMatchInlineSnapshot(`
+    expect(parse(command, { ...defaultOptions }, osdPackage)).toMatchInlineSnapshot(`
       Object {
         "config": "",
         "plugin": "plugin name",
@@ -77,7 +77,7 @@ describe('parse function', function () {
       ...defaultOptions,
     };
 
-    expect(parse(command, options, kbnPackage)).toMatchInlineSnapshot(`
+    expect(parse(command, options, osdPackage)).toMatchInlineSnapshot(`
       Object {
         "config": "foo bar baz",
         "plugin": "plugin name",

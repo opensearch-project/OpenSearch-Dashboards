@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getConfigPath } from '@kbn/utils';
+import { getConfigPath } from '@osd/utils';
 import { remove } from './remove';
 import { Logger } from '../lib/logger';
 import { parse } from './settings';

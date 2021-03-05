@@ -43,14 +43,14 @@ export function parseMilliseconds(val) {
   return result;
 }
 
-export function parse(command, options, kbnPackage) {
+export function parse(command, options, osdPackage) {
   const settings = {
     timeout: options.timeout || 0,
     quiet: options.quiet || false,
     silent: options.silent || false,
     config: options.config || '',
     plugin: command,
-    version: kbnPackage.version,
+    version: osdPackage.version,
     pluginDir: fromRoot('plugins'),
   };
 

@@ -34,7 +34,7 @@ function isDirectory(filename) {
 
 export function analyzeArchive(archive) {
   const plugins = [];
-  const regExp = new RegExp('(kibana[\\\\/][^\\\\/]+)[\\\\/]kibana.json', 'i');
+  const regExp = new RegExp('(opensearch-dashboards[\\\\/][^\\\\/]+)[\\\\/]opensearch_dashboards.json', 'i');
 
   return new Promise((resolve, reject) => {
     yauzl.open(archive, { lazyEntries: true }, function (err, zipfile) {
@@ -68,12 +68,12 @@ export function analyzeArchive(archive) {
               stripPrefix: match[1],
 
               // Plugins must specify their version, and by default that version in the plugin
-              // manifest should match the version of kibana down to the patch level. If these
-              // two versions need plugins can specify a kibanaVersion to indicate the version
-              // of kibana the plugin is intended to work with.
-              kibanaVersion:
-                typeof manifest.kibanaVersion === 'string' && manifest.kibanaVersion
-                  ? manifest.kibanaVersion
+              // manifest should match the version of opensearch-dashboards down to the patch level. If these
+              // two versions need plugins can specify a opensearchDashboardsVersion to indicate the version
+              // of opensearch-dashboards the plugin is intended to work with.
+              opensearchDashboardsVersion:
+                typeof manifest.opensearchDashboardsVersion === 'string' && manifest.opensearchDashboardsVersion
+                  ? manifest.opensearchDashboardsVersion
                   : manifest.version,
             });
 

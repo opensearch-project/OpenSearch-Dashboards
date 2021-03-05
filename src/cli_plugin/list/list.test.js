@@ -28,7 +28,7 @@ function createPlugin(name, version, pluginBaseDir) {
   const pluginDir = join(pluginBaseDir, name);
   mkdirSync(pluginDir, { recursive: true });
   writeFileSync(
-    join(pluginDir, 'kibana.json'),
+    join(pluginDir, 'opensearch_dashboards.json'),
     JSON.stringify({
       id: name,
       version,
@@ -46,7 +46,7 @@ const logger = {
   },
 };
 
-describe('kibana cli', function () {
+describe('opensearchDashboards cli', function () {
   describe('plugin lister', function () {
     const pluginDir = join(__dirname, '.test.data.list');
 
@@ -87,7 +87,7 @@ describe('kibana cli', function () {
       expect(function () {
         list(pluginDir, logger);
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to read kibana.json file for plugin empty-plugin"`
+        `"Unable to read opensearch_dashboards.json file for plugin empty-plugin"`
       );
     });
 
@@ -100,7 +100,7 @@ describe('kibana cli', function () {
       expect(function () {
         list(pluginDir, logger);
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to read kibana.json file for plugin invalid-plugin"`
+        `"Unable to read opensearch_dashboards.json file for plugin invalid-plugin"`
       );
     });
   });
