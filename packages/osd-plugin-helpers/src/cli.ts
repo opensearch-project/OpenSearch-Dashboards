@@ -20,13 +20,13 @@
 import Path from 'path';
 
 import semver from 'semver';
-import { RunWithCommands, createFlagError, createFailError } from '@kbn/dev-utils';
+import { RunWithCommands, createFlagError, createFailError } from '@osd/dev-utils';
 
-import { findKibanaJson } from './find_kibana_json';
-import { loadKibanaPlatformPlugin } from './load_kibana_platform_plugin';
+import { findOpenSearchDashboardsJson } from './find_opensearch_dashboards_json';
+import { loadOpenSearchDashboardsPlatformPlugin } from './load_opensearch_dashboards_platform_plugin';
 import * as Tasks from './tasks';
 import { BuildContext } from './build_context';
-import { resolveKibanaVersion } from './resolve_kibana_version';
+import { resolveOpenSearchDashboardsVersion } from './resolve_opensearch_dashboards_version';
 import { loadConfig } from './config';
 
 export function runCli() {
@@ -37,29 +37,29 @@ export function runCli() {
       name: 'build',
       description: `
         Copies files from the source into a zip archive that can be distributed for
-        installation into production Kibana installs. The archive includes the non-
+        installation into production OpenSearch Dashboards installs. The archive includes the non-
         development npm dependencies and builds itself using raw files in the source
         directory so make sure they are clean/up to date. The resulting archive can
         be found at:
 
-          build/{plugin.id}-{kibanaVersion}.zip
+          build/{plugin.id}-{opensearchDashboardsVersion}.zip
 
       `,
       flags: {
         boolean: ['skip-archive'],
-        string: ['kibana-version'],
+        string: ['opensearch-dashboards-version'],
         alias: {
-          k: 'kibana-version',
+          k: 'opensearch-dashboards-version',
         },
         help: `
-          --skip-archive        Don't create the zip file, just create the build/kibana directory
-          --kibana-version, -v  Kibana version that the
+          --skip-archive        Don't create the zip file, just create the build/opensearch-dashboards directory
+          --opensearch-dashboards-version, -v  OpenSearch version that the
         `,
       },
       async run({ log, flags }) {
-        const versionFlag = flags['kibana-version'];
+        const versionFlag = flags['opensearch-dashboards-version'];
         if (versionFlag !== undefined && typeof versionFlag !== 'string') {
-          throw createFlagError('expected a single --kibana-version flag');
+          throw createFlagError('expected a single --opensearch-dashboards-version flag');
         }
 
         const skipArchive = flags['skip-archive'];
@@ -67,31 +67,31 @@ export function runCli() {
           throw createFlagError('expected a single --skip-archive flag');
         }
 
-        const pluginDir = await findKibanaJson(process.cwd());
+        const pluginDir = await findOpenSearchDashboardsJson(process.cwd());
         if (!pluginDir) {
           throw createFailError(
-            `Unable to find Kibana Platform plugin in [${process.cwd()}] or any of its parent directories. Has it been migrated properly? Does it have a kibana.json file?`
+            `Unable to find OpenSearch Dashboards Platform plugin in [${process.cwd()}] or any of its parent directories. Has it been migrated properly? Does it have a opensearch_dashboards.json file?`
           );
         }
 
-        const plugin = loadKibanaPlatformPlugin(pluginDir);
+        const plugin = loadOpenSearchDashboardsPlatformPlugin(pluginDir);
         const config = await loadConfig(log, plugin);
-        const kibanaVersion = await resolveKibanaVersion(versionFlag, plugin);
+        const opensearchDashboardsVersion = await resolveOpenSearchDashboardsVersion(versionFlag, plugin);
 
-        if (semver.satisfies(kibanaVersion, '<7.9')) {
+        if (semver.satisfies(opensearchDashboardsVersion, '<7.9')) {
           log.error(
-            'These tools are not designed to work with version before 7.9, please checkout an earlier version of Kibana to build your plugin'
+            'These tools are not designed to work with version before 7.9, please checkout an earlier version of OpenSearch Dashboards to build your plugin'
           );
           process.exit(1);
         }
-        if (semver.satisfies(kibanaVersion, '~7.9.0')) {
+        if (semver.satisfies(opensearchDashboardsVersion, '~7.9.0')) {
           log.warning(
             'These tools might work with 7.9 versions, but there are known workarounds required. See https://github.com/elastic/kibana/issues/82466 for more info'
           );
         }
 
         const sourceDir = plugin.directory;
-        const buildDir = Path.resolve(plugin.directory, 'build/kibana', plugin.manifest.id);
+        const buildDir = Path.resolve(plugin.directory, 'build/opensearch-dashboards', plugin.manifest.id);
 
         const context: BuildContext = {
           log,
@@ -99,7 +99,7 @@ export function runCli() {
           config,
           sourceDir,
           buildDir,
-          kibanaVersion,
+          opensearchDashboardsVersion,
         };
 
         await Tasks.initTargets(context);
