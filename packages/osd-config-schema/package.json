@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/config-schema",
+  "name": "@osd/config-schema",
   "main": "./target/out/index.js",
   "types": "./target/types/index.d.ts",
   "version": "1.0.0",
@@ -7,7 +7,7 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "kbn:bootstrap": "yarn build"
+    "osd:bootstrap": "yarn build"
   },
   "devDependencies": {
     "typescript": "4.0.2",
