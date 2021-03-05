@@ -17,12 +17,19 @@
  * under the License.
  */
 
-import { StorybookConfig } from '@storybook/core/types';
+import { addons } from '@storybook/addons';
+import { create } from '@storybook/theming';
 
-export const defaultConfig: StorybookConfig = {
-  addons: ['@kbn/storybook/preset', '@storybook/addon-knobs', '@storybook/addon-essentials'],
-  stories: ['../**/*.stories.tsx'],
-  typescript: {
-    reactDocgen: false,
-  },
-};
+// This configures the "Manager", or main outer view of Storybook. It is an
+// addon that's loaded by the `managerEntries` part of the preset in ../preset.js.
+addons.setConfig({
+  theme: create({
+    base: 'light',
+    brandTitle: 'OpenSearch Dashboards Storybook',
+    brandUrl: 'https://github.com/elastic/kibana/tree/master/packages/osd-storybook',
+  }),
+  showPanel: false,
+  isFullscreen: false,
+  panelPosition: 'bottom',
+  isToolshown: true,
+});

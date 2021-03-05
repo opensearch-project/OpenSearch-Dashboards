@@ -21,7 +21,7 @@ import { resolve } from 'path';
 import { stringifyRequest } from 'loader-utils';
 import { Configuration, Stats } from 'webpack';
 import webpackMerge from 'webpack-merge';
-import { externals } from '@kbn/ui-shared-deps';
+import { externals } from '@osd/ui-shared-deps';
 import { REPO_ROOT } from './lib/constants';
 
 const stats = {
@@ -59,7 +59,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
               loader: 'postcss-loader',
               options: {
                 config: {
-                  path: require.resolve('@kbn/optimizer/postcss.config.js'),
+                  path: require.resolve('@osd/optimizer/postcss.config.js'),
                 },
               },
             },

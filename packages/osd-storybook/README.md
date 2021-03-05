@@ -2,7 +2,7 @@
 
 This package provides ability to add [Storybook](https://storybook.js.org/) to any Kibana plugin.
 
-- [Kibana Storybook](#kibana-storybook)
+- [Kibana Storybook](#opensearch-dashboards-storybook)
   - [Setup Instructions](#setup-instructions)
   - [Customizing configuration](#customizing-configuration)
 
@@ -12,7 +12,7 @@ This package provides ability to add [Storybook](https://storybook.js.org/) to a
   `src/plugins/<plugin>/.storybook/main.js`, with the following contents:
 
   ```js
-  module.exports = require('@kbn/storybook').defaultConfig;
+  module.exports = require('@osd/storybook').defaultConfig;
   ```
 
 - Add your plugin alias to `src/dev/storybook/aliases.ts` config.
@@ -37,5 +37,5 @@ This package provides ability to add [Storybook](https://storybook.js.org/) to a
 
 ## Customizing configuration
 
-The `defaultConfig` object provided by the @kbn/storybook package should be all you need to get running, but you can
+The `defaultConfig` object provided by the @osd/storybook package should be all you need to get running, but you can
 override this in your .storybook/main.js. Using [Storybook's configuration options](https://storybook.js.org/docs/react/configure/overview).

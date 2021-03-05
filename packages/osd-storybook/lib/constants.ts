@@ -18,7 +18,7 @@
  */
 
 import { resolve } from 'path';
-import { REPO_ROOT as KIBANA_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT as OPENSEARCH_DASHBOARDS_ROOT } from '@osd/dev-utils';
 
-export const REPO_ROOT = KIBANA_ROOT;
-export const ASSET_DIR = resolve(KIBANA_ROOT, 'built_assets/storybook');
+export const REPO_ROOT = OPENSEARCH_DASHBOARDS_ROOT;
+export const ASSET_DIR = resolve(OPENSEARCH_DASHBOARDS_ROOT, 'built_assets/storybook');
