@@ -40,7 +40,7 @@ $ curl -X POST api/upgrade_assistant/reindex/batch
   ]
 }
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 <1> The order of the indices determines the order that the reindex tasks are executed.
 

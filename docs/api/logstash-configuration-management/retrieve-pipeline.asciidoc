@@ -9,7 +9,7 @@ experimental[] Retrieve a centrally-managed Logstash pipeline.
 [[logstash-configuration-management-api-retrieve-request]]
 ==== Request
 
-`GET <kibana host>:<port>/api/logstash/pipeline/<id>`
+`GET <opensearchDashboards host>:<port>/api/logstash/pipeline/<id>`
 
 [[logstash-configuration-management-api-retrieve-path-params]]
 ==== Path parameters

@@ -1,20 +1,20 @@
 [role="xpack"]
 [[spaces-api]]
-== {kib} spaces APIs
+== {osd} spaces APIs
 
-Manage your {kib} spaces.
+Manage your {osd} spaces.
 
-The following {kib} spaces APIs are available:
+The following {osd} spaces APIs are available:
 
-* <<spaces-api-post, Create space API>> to create a {kib} space
+* <<spaces-api-post, Create space API>> to create a {osd} space
 
-* <<spaces-api-put, Update space API>> to update an existing {kib} space
+* <<spaces-api-put, Update space API>> to update an existing {osd} space
 
-* <<spaces-api-get, Get a space API>> to retrieve a specified {kib} space
+* <<spaces-api-get, Get a space API>> to retrieve a specified {osd} space
 
-* <<spaces-api-get-all, Get all {kib} spaces API>> to retrieve all {kib} spaces
+* <<spaces-api-get-all, Get all {osd} spaces API>> to retrieve all {osd} spaces
 
-* <<spaces-api-delete, Delete space API>> to delete a {kib} space
+* <<spaces-api-delete, Delete space API>> to delete a {osd} space
 
 * <<spaces-api-copy-saved-objects, Copy saved objects to space API>> to copy saved objects between spaces
 

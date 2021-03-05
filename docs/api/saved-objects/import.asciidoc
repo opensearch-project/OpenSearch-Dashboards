@@ -4,14 +4,14 @@
 <titleabbrev>Import objects</titleabbrev>
 ++++
 
-experimental[] Create sets of {kib} saved objects from a file created by the export API.
+experimental[] Create sets of {osd} saved objects from a file created by the export API.
 
 [[saved-objects-api-import-request]]
 ==== Request
 
-`POST <kibana host>:<port>/api/saved_objects/_import`
+`POST <opensearchDashboards host>:<port>/api/saved_objects/_import`
 
-`POST <kibana host>:<port>/s/<space_id>/api/saved_objects/_import`
+`POST <opensearchDashboards host>:<port>/s/<space_id>/api/saved_objects/_import`
 
 [[saved-objects-api-import-path-params]]
 ==== Path parameters
@@ -80,9 +80,9 @@ Import an index pattern and dashboard:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/_import?createNewCopies=true -H "kbn-xsrf: true" --form file=@file.ndjson
+$ curl -X POST api/saved_objects/_import?createNewCopies=true -H "osd-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The `file.ndjson` file contains the following:
 
@@ -132,9 +132,9 @@ Import an index pattern and dashboard:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/_import -H "kbn-xsrf: true" --form file=@file.ndjson
+$ curl -X POST api/saved_objects/_import -H "osd-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The `file.ndjson` file contains the following:
 
@@ -181,9 +181,9 @@ Import an index pattern, visualization, *Canvas* workpad, and dashboard that inc
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/_import -H "kbn-xsrf: true" --form file=@file.ndjson
+$ curl -X POST api/saved_objects/_import -H "osd-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The `file.ndjson` file contains the following:
 
@@ -292,9 +292,9 @@ Import a visualization and dashboard when the index pattern for the visualizatio
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/_import -H "kbn-xsrf: true" --form file=@file.ndjson
+$ curl -X POST api/saved_objects/_import -H "osd-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The `file.ndjson` file contains the following:
 

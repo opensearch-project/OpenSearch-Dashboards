@@ -4,7 +4,7 @@
 <titleabbrev>Get features</titleabbrev>
 ++++
 
-experimental[] Retrieves all {kib} features.
+experimental[] Retrieves all {osd} features.
 
 [[features-api-get-request]]
 ==== Request
@@ -28,9 +28,9 @@ The API returns the following:
     "id": "discover",
     "name": "Discover",
     "icon": "discoverApp",
-    "navLinkId": "kibana:discover",
+    "navLinkId": "opensearchDashboards:discover",
     "app": [
-      "kibana"
+      "opensearchDashboards"
     ],
     "catalogue": [
       "discover"
@@ -73,9 +73,9 @@ The API returns the following:
     "id": "visualize",
     "name": "Visualize",
     "icon": "visualizeApp",
-    "navLinkId": "kibana:visualize",
+    "navLinkId": "opensearchDashboards:visualize",
     "app": [
-      "kibana"
+      "opensearchDashboards"
     ],
     "catalogue": [
       "visualize"
@@ -120,9 +120,9 @@ The API returns the following:
     "id": "dashboard",
     "name": "Dashboard",
     "icon": "dashboardApp",
-    "navLinkId": "kibana:dashboard",
+    "navLinkId": "opensearchDashboards:dashboard",
     "app": [
-      "kibana"
+      "opensearchDashboards"
     ],
     "catalogue": [
       "dashboard"
@@ -172,9 +172,9 @@ The API returns the following:
     "id": "dev_tools",
     "name": "Dev Tools",
     "icon": "devToolsApp",
-    "navLinkId": "kibana:dev_tools",
+    "navLinkId": "opensearchDashboards:dev_tools",
     "app": [
-      "kibana"
+      "opensearchDashboards"
     ],
     "catalogue": [
       "console",
@@ -211,6 +211,6 @@ The API returns the following:
         ]
       }
     },
-    "privilegesTooltip": "User should also be granted the appropriate Elasticsearch cluster and index privileges"
+    "privilegesTooltip": "User should also be granted the appropriate OpenSearch cluster and index privileges"
   },
 --------------------------------------------------

@@ -4,18 +4,18 @@
 <titleabbrev>Update space</titleabbrev>
 ++++
 
-experimental[] Update an existing {kib} space.
+experimental[] Update an existing {osd} space.
 
 [[spaces-api-put-api-request]]
 ==== Request
 
-`PUT <kibana host>:<port>/api/spaces/space/<space_id>`
+`PUT <opensearchDashboards host>:<port>/api/spaces/space/<space_id>`
 
 [[spaces-api-put-request-body]]
 ==== Request body
 
 `id`::
-  (Required, string) The space ID that is part of the {kib} URL when inside the space. You are unable to change the ID with the update operation.
+  (Required, string) The space ID that is part of the {osd} URL when inside the space. You are unable to change the ID with the update operation.
 
 `name`::
   (Required, string) The display name for the space.
@@ -58,4 +58,4 @@ $ curl -X PUT api/spaces/space/marketing
   "imageUrl": ""
 }
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS

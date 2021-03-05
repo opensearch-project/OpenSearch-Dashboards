@@ -2,13 +2,13 @@
 [[features-api-get]]
 == Get features API
 
-experimental[] Retrieves all {kib} features. Features are used by spaces and security to refine and secure access to {kib}.
+experimental[] Retrieves all {osd} features. Features are used by spaces and security to refine and secure access to {osd}.
 
 [float]
 [[features-api-get-request]]
 === Request
 
-`GET <kibana host>:<port>/api/features`
+`GET <opensearchDashboards host>:<port>/api/features`
 
 [float]
 [[features-api-get-codes]]
@@ -31,7 +31,7 @@ The API returns the following:
     "icon": "discoverApp",
     "navLinkId": "discover",
     "app": [
-      "kibana"
+      "opensearchDashboards"
     ],
     "catalogue": [
       "discover"
@@ -76,7 +76,7 @@ The API returns the following:
     "icon": "visualizeApp",
     "navLinkId": "visualize",
     "app": [
-      "kibana"
+      "opensearchDashboards"
     ],
     "catalogue": [
       "visualize"
@@ -123,7 +123,7 @@ The API returns the following:
     "icon": "dashboardApp",
     "navLinkId": "dashboards",
     "app": [
-      "kibana"
+      "opensearchDashboards"
     ],
     "catalogue": [
       "dashboard"
@@ -175,7 +175,7 @@ The API returns the following:
     "icon": "devToolsApp",
     "navLinkId": "dev_tools",
     "app": [
-      "kibana"
+      "opensearchDashboards"
     ],
     "catalogue": [
       "console",
@@ -212,6 +212,6 @@ The API returns the following:
         ]
       }
     },
-    "privilegesTooltip": "User should also be granted the appropriate Elasticsearch cluster and index privileges"
+    "privilegesTooltip": "User should also be granted the appropriate OpenSearch cluster and index privileges"
   },
 --------------------------------------------------

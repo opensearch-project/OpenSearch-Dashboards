@@ -9,9 +9,9 @@ experimental[] Import dashboards and corresponding saved objects.
 [[dashboard-api-import-request]]
 ==== Request
 
-`POST <kibana host>:<port>/api/kibana/dashboards/import`
+`POST <opensearchDashboards host>:<port>/api/opensearch-dashboards/dashboards/import`
 
-`POST <kibana host>:<port>/s/<space-id>/api/kibana/dashboards/import`
+`POST <opensearchDashboards host>:<port>/s/<space-id>/api/opensearch-dashboards/dashboards/import`
 
 [[dashboard-api-import-params]]
 ==== Query parameters
@@ -44,7 +44,7 @@ Use the complete response body from the <<dashboard-api-export, Export dashboard
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/kibana/dashboards/import?exclude=index-pattern
+$ curl -X POST api/opensearch-dashboards/dashboards/import?exclude=index-pattern
 {
   "objects": [
     {
@@ -58,7 +58,7 @@ $ curl -X POST api/kibana/dashboards/import?exclude=index-pattern
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
-        "kibanaSavedObjectMeta": {
+        "opensearchDashboardsSavedObjectMeta": {
           "searchSourceJSON": "{\"index\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
         }
       }
@@ -69,7 +69,7 @@ $ curl -X POST api/kibana/dashboards/import?exclude=index-pattern
       "updated_at": "2018-09-07T18:39:47.683Z",
       "version": 1,
       "attributes": {
-        "title": "kibana_sample_data_logs",
+        "title": "opensearch_dashboards_sample_data_logs",
         "timeFieldName": "timestamp",
         "fields": "<truncated for example>",
         "fieldFormatMap": "{\"hour_of_day\":{}}"
@@ -88,7 +88,7 @@ $ curl -X POST api/kibana/dashboards/import?exclude=index-pattern
         "optionsJSON": "{\"useMargins\":true,\"hidePanelTitles\":false}",
         "version": 1,
         "timeRestore": false,
-        "kibanaSavedObjectMeta": {
+        "opensearchDashboardsSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
         }
       }
@@ -96,4 +96,4 @@ $ curl -X POST api/kibana/dashboards/import?exclude=index-pattern
   ]
 }
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS

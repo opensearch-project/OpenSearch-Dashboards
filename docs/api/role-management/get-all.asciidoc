@@ -1,10 +1,10 @@
 [[role-management-api-get]]
-=== Get all {kib} roles API
+=== Get all {osd} roles API
 ++++
 <titleabbrev>Get all roles</titleabbrev>
 ++++
 
-experimental[] Retrieve all {kib} roles.
+experimental[] Retrieve all {osd} roles.
 
 [[role-management-api-get-prereqs]]
 ==== Prerequisite
@@ -14,7 +14,7 @@ To use the get role API, you must have the `manage_security` cluster privilege.
 [[role-management-api-retrieve-all-request-body]]
 ==== Request
 
-`GET <kibana host>:<port>/api/security/role`
+`GET <opensearchDashboards host>:<port>/api/security/role`
 
 [[role-management-api-retrieve-all-response-codes]]
 ==== Response code
@@ -31,19 +31,19 @@ The API returns the following:
 --------------------------------------------------
 [
   {
-    "name": "my_kibana_role",
+    "name": "my_opensearch_dashboards_role",
     "metadata" : {
       "version" : 1
     },
     "transient_metadata": {
       "enabled": true
     },
-    "elasticsearch": {
+    "opensearch": {
       "indices": [ ],
       "cluster": [ ],
       "run_as": [ ]
     },
-    "kibana": [{
+    "opensearchDashboards": [{
       "base": [
         "all"
       ],
@@ -61,7 +61,7 @@ The API returns the following:
     "transient_metadata": {
       "enabled": true
     },
-    "elasticsearch": {
+    "opensearch": {
       "cluster" : [ "all" ],
       "indices" : [ {
         "names" : [ "index1", "index2" ],
@@ -72,7 +72,7 @@ The API returns the following:
         "query" : "{\"match\": {\"title\": \"foo\"}}"
       } ],
     },
-    "kibana": [ ]
+    "opensearchDashboards": [ ]
   }
 ]
 --------------------------------------------------

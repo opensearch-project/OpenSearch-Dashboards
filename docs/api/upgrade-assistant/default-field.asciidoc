@@ -4,16 +4,16 @@
 <titleabbrev>Add default field</titleabbrev>
 ++++
 
-experimental[] In {es} 7.0 and later, some query types, such as Simple Query String, have a limit to the number of fields they can query against. 
-To configure the cap in {es}, set the `indices.query.bool.max_clause_count` cluster setting, which is 1024 by default.
+experimental[] In {opensearch} 7.0 and later, some query types, such as Simple Query String, have a limit to the number of fields they can query against. 
+To configure the cap in {opensearch}, set the `indices.query.bool.max_clause_count` cluster setting, which is 1024 by default.
 
-For indices with more fields than the cap, add the `index.query.default_field` index setting to inform {es} which 
-fields to use by default when no field is specified for a query. Use the add default field API to add the `index.query.default_field` setting to an {es} index.
+For indices with more fields than the cap, add the `index.query.default_field` index setting to inform {opensearch} which 
+fields to use by default when no field is specified for a query. Use the add default field API to add the `index.query.default_field` setting to an {opensearch} index.
 
 [[upgrade-assistant-api-default-field-request]]
 ==== Request
 
-To add the `index.query.default_field` setting to an {es} index, submit a POST request to `/api/upgrade_assistant/add_query_default_field/<index>`:
+To add the `index.query.default_field` setting to an {opensearch} index, submit a POST request to `/api/upgrade_assistant/add_query_default_field/<index>`:
 
 [source,js]
 --------------------------------------------------
@@ -23,13 +23,13 @@ POST /api/upgrade_assistant/add_query_default_field/myIndex
   "otherFields": ["myField.*"] <2>
 }
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
-<1> A required array of {es} field types that generate the list of fields.
+<1> A required array of {opensearch} field types that generate the list of fields.
 <2> An optional array of additional field names, dot-deliminated.
 
-To add the `index.query.default_field` index setting to the specified index, {kib} generates an array of all fields from the index mapping.
-The fields contain the types specified in `fieldTypes`. {kib} appends any other fields specified in `otherFields` to the array of default fields.
+To add the `index.query.default_field` index setting to the specified index, {osd} generates an array of all fields from the index mapping.
+The fields contain the types specified in `fieldTypes`. {osd} appends any other fields specified in `otherFields` to the array of default fields.
 
 [[upgrade-assistant-api-default-field-response-codes]]
 ==== Response codes
@@ -79,7 +79,7 @@ GET /myIndex/_mappings
 --------------------------------------------------
 // CONSOLE
 
-Make the following request to {kib}:
+Make the following request to {osd}:
 
 [source,js]
 --------------------------------------------------
@@ -89,7 +89,7 @@ POST /api/upgrade_assistant/add_query_default_field/myIndex
   "otherFields": ["field2"]
 }
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The API returns the following:
 
@@ -110,4 +110,4 @@ GET /myIndex/_settings?flat_settings=true
 --------------------------------------------------
 // CONSOLE
 
-{kib} generates the `field1` and `nestedfield.field4` values based on the specified `fieldTypes`, then appends the `otherFields` to the array.
+{osd} generates the `field1` and `nestedfield.field4` values based on the specified `fieldTypes`, then appends the `otherFields` to the array.

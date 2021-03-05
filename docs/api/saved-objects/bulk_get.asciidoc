@@ -4,14 +4,14 @@
 <titleabbrev>Bulk get objects</titleabbrev>
 ++++
 
-experimental[] Retrieve multiple {kib} saved objects by ID.
+experimental[] Retrieve multiple {osd} saved objects by ID.
 
 [[saved-objects-api-bulk-get-request]]
 ==== Request
 
-`POST <kibana host>:<port>/api/saved_objects/_bulk_get`
+`POST <opensearchDashboards host>:<port>/api/saved_objects/_bulk_get`
 
-`POST <kibana host>:<port>/s/<space_id>/api/saved_objects/_bulk_get`
+`POST <opensearchDashboards host>:<port>/s/<space_id>/api/saved_objects/_bulk_get`
 
 [[saved-objects-api-bulk-get-path-params]]
 ==== Path parameters
@@ -26,7 +26,7 @@ experimental[] Retrieve multiple {kib} saved objects by ID.
   (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
 
 `id`::
-  (Required, string) ID of the retrieved object. The ID includes the {kib} unique identifier or a custom identifier.
+  (Required, string) ID of the retrieved object. The ID includes the {osd} unique identifier or a custom identifier.
 
 `fields`::
   (Optional, array) The fields to return in the `attributes` key of the object response.
@@ -65,7 +65,7 @@ $ curl -X POST api/saved_objects/_bulk_get
   }
 ]
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The API returns the following:
 

@@ -11,7 +11,7 @@ Check the status of your cluster.
 [[upgrade-assistant-api-status-request]]
 ==== Request
 
-`GET <kibana host>:<port>/api/upgrade_assistant/status`
+`GET <opensearchDashboards host>:<port>/api/upgrade_assistant/status`
 
 [[upgrade-assistant-api-status-response-codes]]
 ==== Response codes

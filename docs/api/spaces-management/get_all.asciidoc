@@ -1,15 +1,15 @@
 [[spaces-api-get-all]]
-=== Get all {kib} spaces API
+=== Get all {osd} spaces API
 ++++
 <titleabbrev>Get all spaces</titleabbrev>
 ++++
 
-experimental[] Retrieve all {kib} spaces.
+experimental[] Retrieve all {osd} spaces.
 
 [[spaces-api-get-all-request]]
 ==== Request
 
-`GET <kibana host>:<port>/api/spaces/space`
+`GET <opensearchDashboards host>:<port>/api/spaces/space`
 
 [[spaces-api-get-all-response-codes]]
 ==== Response code

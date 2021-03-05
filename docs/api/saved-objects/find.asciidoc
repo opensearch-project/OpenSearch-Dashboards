@@ -4,14 +4,14 @@
 <titleabbrev>Find objects</titleabbrev>
 ++++
 
-experimental[] Retrieve a paginated set of {kib} saved objects by various conditions.
+experimental[] Retrieve a paginated set of {osd} saved objects by various conditions.
 
 [[saved-objects-api-find-request]]
 ==== Request
 
-`GET <kibana host>:<port>/api/saved_objects/_find`
+`GET <opensearchDashboards host>:<port>/api/saved_objects/_find`
 
-`GET <kibana host>:<port>/s/<space_id>/api/saved_objects/_find`
+`GET <opensearchDashboards host>:<port>/s/<space_id>/api/saved_objects/_find`
 
 [[saved-objects-api-find-path-params]]
 ==== Path parameters
@@ -32,7 +32,7 @@ experimental[] Retrieve a paginated set of {kib} saved objects by various condit
   (Optional, number) The page of objects to return.
 
 `search`::
-  (Optional, string) An Elasticsearch {ref}/query-dsl-simple-query-string-query.html[simple_query_string] query that filters the objects in the response.
+  (Optional, string) An OpenSearch {ref}/query-dsl-simple-query-string-query.html[simple_query_string] query that filters the objects in the response.
 
 `default_search_operator`::
   (Optional, string) The default operator to use for the `simple_query_string`.
@@ -57,7 +57,7 @@ experimental[] Retrieve a paginated set of {kib} saved objects by various condit
   It should look like that savedObjectType.attributes.title: "myTitle". However, If you used a direct attribute of a saved object like `updatedAt`,
   you will have to define your filter like that savedObjectType.updatedAt > 2018-12-22.
 
-NOTE: As objects change in {kib}, the results on each page of the response also
+NOTE: As objects change in {osd}, the results on each page of the response also
 change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.
 
 [[saved-objects-api-find-request-codes]]
@@ -74,7 +74,7 @@ Find index patterns with titles that start with `my`:
 --------------------------------------------------
 $ curl -X GET api/saved_objects/_find?type=index-pattern&search_fields=title&search=my*
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The API returns the following:
 
@@ -102,4 +102,4 @@ query parameter for each value:
 --------------------------------------------------
 $ curl -X GET api/saved_objects/_find?fields=id&fields=title
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS

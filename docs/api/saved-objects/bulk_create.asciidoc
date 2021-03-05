@@ -4,14 +4,14 @@
 <titleabbrev>Bulk create saved objects</titleabbrev>
 ++++
 
-experimental[] Create multiple {kib} saved objects.
+experimental[] Create multiple {osd} saved objects.
 
 [[saved-objects-api-bulk-create-request]]
 ==== Request
 
-`POST <kibana host>:<port>/api/saved_objects/_bulk_create`
+`POST <opensearchDashboards host>:<port>/api/saved_objects/_bulk_create`
 
-`POST <kibana host>:<port>/s/<space_id>/api/saved_objects/_bulk_create`
+`POST <opensearchDashboards host>:<port>/s/<space_id>/api/saved_objects/_bulk_create`
 
 [[saved-objects-api-bulk-create-path-params]]
 ==== Path parameters
@@ -87,7 +87,7 @@ $ curl -X POST api/saved_objects/_bulk_create
   }
 ]
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The API returns the following:
 

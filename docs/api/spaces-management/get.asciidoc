@@ -4,12 +4,12 @@
 <titleabbrev>Get space</titleabbrev>
 ++++
 
-experimental[] Retrieve a specified {kib} space.
+experimental[] Retrieve a specified {osd} space.
 
 [[spaces-api-get-request]]
 ==== Request
 
-`GET <kibana host>:<port>/api/spaces/space/marketing`
+`GET <opensearchDashboards host>:<port>/api/spaces/space/marketing`
 
 [[spaces-api-get-response-codes]]
 ==== Response code

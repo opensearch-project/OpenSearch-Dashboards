@@ -11,7 +11,7 @@ Start a new reindex or resume a paused reindex.
 [[start-resume-reindex-request]]
 ==== Request
 
-`POST <kibana host>:<port>/api/upgrade_assistant/reindex/myIndex`
+`POST <opensearchDashboards host>:<port>/api/upgrade_assistant/reindex/myIndex`
 
 [[start-resume-reindex-codes]]
 ==== Response code
@@ -40,6 +40,6 @@ The API returns the following:
 <1> The name of the new index.
 <2> The reindex status. For more information, refer to <<status-code,Status codes>>.
 <3> The last successfully completed step of the reindex. For more information, refer to <<step-code,Step codes>>.
-<4> The task ID of the reindex task in {es}. Appears when the reindexing starts.
-<5> The progress of the reindexing task in {es}. Appears in decimal form, from 0 to 1.
+<4> The task ID of the reindex task in {opensearch}. Appears when the reindexing starts.
+<5> The progress of the reindexing task in {opensearch}. Appears in decimal form, from 0 to 1.
 <6> The error that caused the reindex to fail, if it failed.

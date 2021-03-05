@@ -7,7 +7,7 @@
 
 experimental[] Rotate the encryption key for encrypted saved objects.
 
-If a saved object cannot be decrypted using the primary encryption key, then {kib} will attempt to decrypt it using the specified <<xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys, decryption-only keys>>. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.
+If a saved object cannot be decrypted using the primary encryption key, then {osd} will attempt to decrypt it using the specified <<xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys, decryption-only keys>>. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.
 
 [IMPORTANT]
 ============================================================================
@@ -17,30 +17,30 @@ Bulk key rotation can consume a considerable amount of resources and hence only 
 [[saved-objects-api-rotate-encryption-key-request]]
 ==== Request
 
-`POST <kibana host>:<port>/api/encrypted_saved_objects/_rotate_key`
+`POST <opensearchDashboards host>:<port>/api/encrypted_saved_objects/_rotate_key`
 
 [[saved-objects-api-rotate-encryption-key-request-query-params]]
 ==== Query parameters
 
 `type`::
-(Optional, string) Limits encryption key rotation only to the saved objects with the specified type. By default, {kib} tries to rotate the encryption key for all saved object types that may contain encrypted attributes.
+(Optional, string) Limits encryption key rotation only to the saved objects with the specified type. By default, {osd} tries to rotate the encryption key for all saved object types that may contain encrypted attributes.
 
 `batch_size`::
-(Optional, number) Specifies a maximum number of saved objects that {kib} can process in a single batch. Bulk key rotation is an iterative process since {kib} may not be able to fetch and process all required saved objects in one go and splits processing into consequent batches. By default, the batch size is 10000, which is also a maximum allowed value.
+(Optional, number) Specifies a maximum number of saved objects that {osd} can process in a single batch. Bulk key rotation is an iterative process since {osd} may not be able to fetch and process all required saved objects in one go and splits processing into consequent batches. By default, the batch size is 10000, which is also a maximum allowed value.
 
 [[saved-objects-api-rotate-encryption-key-response-body]]
 ==== Response body
 
 `total`::
-(number) Indicates the total number of _all_ encrypted saved objects (optionally filtered by the requested `type`), regardless of the key {kib} used for encryption.
+(number) Indicates the total number of _all_ encrypted saved objects (optionally filtered by the requested `type`), regardless of the key {osd} used for encryption.
 
 `successful`::
-(number) Indicates the total number of _all_ encrypted saved objects (optionally filtered by the requested `type`), regardless of the key {kib} used for encryption.
+(number) Indicates the total number of _all_ encrypted saved objects (optionally filtered by the requested `type`), regardless of the key {osd} used for encryption.
 +
-NOTE: In most cases, `total` will be greater than `successful` even if `failed` is zero. The reason is that {kib} may not need or may not be able to rotate encryption keys for all encrypted saved objects.
+NOTE: In most cases, `total` will be greater than `successful` even if `failed` is zero. The reason is that {osd} may not need or may not be able to rotate encryption keys for all encrypted saved objects.
 
 `failed`::
-(number) Indicates the number of the saved objects that were still encrypted with one of the old encryption keys that {kib} failed to re-encrypt with the primary key.
+(number) Indicates the number of the saved objects that were still encrypted with one of the old encryption keys that {osd} failed to re-encrypt with the primary key.
 
 [[saved-objects-api-rotate-encryption-key-response-codes]]
 ==== Response code
@@ -64,7 +64,7 @@ Indicates that key rotation is already in progress.
 --------------------------------------------------
 $ curl -X POST /api/encrypted_saved_objects/_rotate_key
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The API returns the following:
 
@@ -93,7 +93,7 @@ In this example, key rotation is performed for all saved objects with the `alert
 --------------------------------------------------
 $ curl -X POST /api/encrypted_saved_objects/_rotate_key?type=alert&batch_size=5000
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The API returns the following:
 

@@ -10,9 +10,9 @@ experimental[] Overwrite saved objects that are returned as errors from the <<sp
 [[spaces-api-resolve-copy-saved-objects-conflicts-request]]
 ==== {api-request-title}
 
-`POST <kibana host>:<port>/api/spaces/_resolve_copy_saved_objects_errors`
+`POST <opensearchDashboards host>:<port>/api/spaces/_resolve_copy_saved_objects_errors`
 
-`POST <kibana host>:<port>/s/<space_id>/api/spaces/_resolve_copy_saved_objects_errors`
+`POST <opensearchDashboards host>:<port>/s/<space_id>/api/spaces/_resolve_copy_saved_objects_errors`
 
 [[spaces-api-resolve-copy-saved-objects-conflicts-prereqs]]
 ==== {api-prereq-title}
@@ -175,7 +175,7 @@ $ curl -X POST api/spaces/_resolve_copy_saved_objects_errors
   }
 }
 ----
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The API returns the following:
 
@@ -265,7 +265,7 @@ $ curl -X POST api/spaces/_resolve_copy_saved_objects_errors
   }
 }
 ----
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The API returns the following:
 

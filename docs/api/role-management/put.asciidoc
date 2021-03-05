@@ -4,13 +4,13 @@
 <titleabbrev>Create or update role</titleabbrev>
 ++++
 
-experimental[] Create a new {kib} role, or update the attributes of an existing role. {kib} roles are stored in the
-{es} native realm.
+experimental[] Create a new {osd} role, or update the attributes of an existing role. {osd} roles are stored in the
+{opensearch} native realm.
 
 [[role-management-api-put-request]]
 ==== Request
 
-`PUT <kibana host>:<port>/api/security/role/my_kibana_role`
+`PUT <opensearchDashboards host>:<port>/api/security/role/my_opensearch_dashboards_role`
 
 [[role-management-api-put-prereqs]]
 ==== Prerequisite
@@ -24,22 +24,22 @@ To use the create or update role API, you must have the `manage_security` cluste
 `metadata`::
   (Optional, object) In the `metadata` object, keys that begin with `_` are reserved for system usage.
 
-`elasticsearch`::
-  (Optional, object) {es} cluster and index privileges. Valid keys include
+`opensearch`::
+  (Optional, object) {opensearch} cluster and index privileges. Valid keys include
   `cluster`, `indices`, and `run_as`. For more information, see
   {ref}/defining-roles.html[Defining roles].
 
-`kibana`::
-  (list) Objects that specify the <<kibana-privileges, Kibana privileges>> for the role.
+`opensearchDashboards`::
+  (list) Objects that specify the <<opensearch-dashboards-privileges, OpenSearchDashboards privileges>> for the role.
 +
-.Properties of `kibana`
+.Properties of `opensearchDashboards`
 [%collapsible%open]
 =====
 `base` :::
   (Optional, list) A base privilege. When specified, the base must be `["all"]` or `["read"]`.
   When the `base` privilege is specified, you are unable to use the `feature` section.
-  "all" grants read/write access to all {kib} features for the specified spaces.
-  "read" grants read-only access to all {kib} features for the specified spaces.
+  "all" grants read/write access to all {osd} features for the specified spaces.
+  "read" grants read-only access to all {osd} features for the specified spaces.
 
 `feature` :::
   (object) Contains privileges for specific features.
@@ -63,16 +63,16 @@ Grant access to various features in all spaces:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X PUT api/security/role/my_kibana_role
+$ curl -X PUT api/security/role/my_opensearch_dashboards_role
 {
   "metadata" : {
     "version" : 1
   },
-  "elasticsearch": {
+  "opensearch": {
     "cluster" : [ ],
     "indices" : [ ]
   },
-  "kibana": [
+  "opensearchDashboards": [
     {
       "base": [],
       "feature": {
@@ -126,22 +126,22 @@ $ curl -X PUT api/security/role/my_kibana_role
   ]
 }
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 Grant dashboard-only access to only the Marketing space:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X PUT api/security/role/my_kibana_role
+$ curl -X PUT api/security/role/my_opensearch_dashboards_role
 {
   "metadata" : {
     "version" : 1
   },
-  "elasticsearch": {
+  "opensearch": {
     "cluster" : [ ],
     "indices" : [ ]
   },
-  "kibana": [
+  "opensearchDashboards": [
     {
       "base": [],
       "feature": {
@@ -154,22 +154,22 @@ $ curl -X PUT api/security/role/my_kibana_role
   ]
 }
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 Grant full access to all features in the Default space:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X PUT api/security/role/my_kibana_role
+$ curl -X PUT api/security/role/my_opensearch_dashboards_role
 {
   "metadata" : {
     "version" : 1
   },
-  "elasticsearch": {
+  "opensearch": {
     "cluster" : [ ],
     "indices" : [ ]
   },
-  "kibana": [
+  "opensearchDashboards": [
     {
       "base": ["all"],
       "feature": {
@@ -181,22 +181,22 @@ $ curl -X PUT api/security/role/my_kibana_role
   ]
 }
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 Grant different access to different spaces:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X PUT api/security/role/my_kibana_role
+$ curl -X PUT api/security/role/my_opensearch_dashboards_role
 {
   "metadata" : {
     "version" : 1
   },
-  "elasticsearch": {
+  "opensearch": {
     "cluster" : [ ],
     "indices" : [ ]
   },
-  "kibana": [
+  "opensearchDashboards": [
     {
       "base": [],
       "feature": {
@@ -217,18 +217,18 @@ $ curl -X PUT api/security/role/my_kibana_role
   ]
 }
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
-Grant access to {kib} and {es}:
+Grant access to {osd} and {opensearch}:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X PUT api/security/role/my_kibana_role
+$ curl -X PUT api/security/role/my_opensearch_dashboards_role
 {
   "metadata" : {
     "version" : 1
   },
-  "elasticsearch": {
+  "opensearch": {
     "cluster" : [ "all" ],
     "indices" : [ {
       "names" : [ "index1", "index2" ],
@@ -239,7 +239,7 @@ $ curl -X PUT api/security/role/my_kibana_role
       "query" : "{\"match\": {\"title\": \"foo\"}}"
     } ]
   },
-  "kibana": [
+  "opensearchDashboards": [
     {
       "base": ["all"],
       "feature": {
@@ -251,4 +251,4 @@ $ curl -X PUT api/security/role/my_kibana_role
   ]
 }
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS

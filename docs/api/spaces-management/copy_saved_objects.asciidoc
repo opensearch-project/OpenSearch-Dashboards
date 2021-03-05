@@ -16,9 +16,9 @@ You can request to overwrite any objects that already exist in the target space 
 [[spaces-api-copy-saved-objects-request]]
 ==== {api-request-title}
 
-`POST <kibana host>:<port>/api/spaces/_copy_saved_objects`
+`POST <opensearchDashboards host>:<port>/api/spaces/_copy_saved_objects`
 
-`POST <kibana host>:<port>/s/<space_id>/api/spaces/_copy_saved_objects`
+`POST <opensearchDashboards host>:<port>/s/<space_id>/api/spaces/_copy_saved_objects`
 
 [[spaces-api-copy-saved-objects-path-params]]
 ==== {api-path-parms-title}
@@ -132,7 +132,7 @@ $ curl -X POST api/spaces/_copy_saved_objects
   "createNewCopies": true
 }
 ----
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The API returns the following:
 
@@ -196,7 +196,7 @@ $ curl -X POST api/spaces/_copy_saved_objects
   "includeReferences": true
 }
 ----
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The API returns the following:
 
@@ -257,7 +257,7 @@ $ curl -X POST api/spaces/_copy_saved_objects
   "includeReferences": true
 }
 ----
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The API returns the following:
 
@@ -408,7 +408,7 @@ $ curl -X POST api/spaces/_copy_saved_objects
   "includeReferences": true
 }
 ----
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The API returns the following:
 

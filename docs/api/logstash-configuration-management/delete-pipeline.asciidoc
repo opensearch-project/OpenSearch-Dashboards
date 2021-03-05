@@ -9,7 +9,7 @@ experimental[] Delete a centrally-managed Logstash pipeline.
 [[logstash-configuration-management-api-delete-request]]
 ==== Request
 
-`DELETE <kibana host>:<port>/api/logstash/pipeline/<id>`
+`DELETE <opensearchDashboards host>:<port>/api/logstash/pipeline/<id>`
 
 [[logstash-configuration-management-api-delete-params]]
 ==== Path parameters
@@ -30,4 +30,4 @@ experimental[] Delete a centrally-managed Logstash pipeline.
 --------------------------------------------------
 $ curl -X DELETE api/logstash/pipeline/hello-world
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS

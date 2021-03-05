@@ -4,8 +4,8 @@
 Import and export dashboards with the corresponding saved objects, such as visualizations, saved
 searches, and index patterns.
 
-WARNING: Do not write documents directly to the `.kibana` index. When you write directly
-to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
+WARNING: Do not write documents directly to the `.opensearch-dashboards` index. When you write directly
+to the `.opensearch-dashboards` index, the data becomes corrupted and permanently breaks future {osd} versions.
 
 The following import and export dashboard APIs are available:
 

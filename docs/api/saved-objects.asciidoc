@@ -1,30 +1,30 @@
 [[saved-objects-api]]
 == Saved objects APIs
 
-Manage {kib} saved objects, including dashboards, visualizations, index patterns, and more.
+Manage {osd} saved objects, including dashboards, visualizations, index patterns, and more.
 
-WARNING: Do not write documents directly to the `.kibana` index. When you write directly
-to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
+WARNING: Do not write documents directly to the `.opensearch-dashboards` index. When you write directly
+to the `.opensearch-dashboards` index, the data becomes corrupted and permanently breaks future {osd} versions.
 
 The following saved objects APIs are available: 
 
-* <<saved-objects-api-get, Get object API>> to retrieve a single {kib} saved object by ID
+* <<saved-objects-api-get, Get object API>> to retrieve a single {osd} saved object by ID
 
-* <<saved-objects-api-bulk-get, Bulk get objects API>> to retrieve multiple {kib} saved objects by ID
+* <<saved-objects-api-bulk-get, Bulk get objects API>> to retrieve multiple {osd} saved objects by ID
 
-* <<saved-objects-api-find, Find objects API>> to retrieve a paginated set of {kib} saved objects by various conditions
+* <<saved-objects-api-find, Find objects API>> to retrieve a paginated set of {osd} saved objects by various conditions
 
-* <<saved-objects-api-create, Create saved object API>> to create {kib} saved objects
+* <<saved-objects-api-create, Create saved object API>> to create {osd} saved objects
 
-* <<saved-objects-api-bulk-create, Bulk create saved objects API>> to create multiple {kib} saved objects
+* <<saved-objects-api-bulk-create, Bulk create saved objects API>> to create multiple {osd} saved objects
 
-* <<saved-objects-api-update, Update object API>> to update the attributes for existing {kib} saved objects
+* <<saved-objects-api-update, Update object API>> to update the attributes for existing {osd} saved objects
 
-* <<saved-objects-api-delete, Delete object API>> to remove {kib} saved objects
+* <<saved-objects-api-delete, Delete object API>> to remove {osd} saved objects
 
-* <<saved-objects-api-export, Export objects API>> to retrieve sets of saved objects that you want to import into {kib}
+* <<saved-objects-api-export, Export objects API>> to retrieve sets of saved objects that you want to import into {osd}
 
-* <<saved-objects-api-import, Import objects API>> to create sets of {kib} saved objects from a file created by the export API
+* <<saved-objects-api-import, Import objects API>> to create sets of {osd} saved objects from a file created by the export API
 
 * <<saved-objects-api-resolve-import-errors, Resolve import errors API>> to resolve errors from the import API
 

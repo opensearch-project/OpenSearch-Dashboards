@@ -17,9 +17,9 @@ To resolve errors, you can:
 [[saved-objects-api-resolve-import-errors-request]]
 ==== Request
 
-`POST <kibana host>:<port>/api/saved_objects/_resolve_import_errors`
+`POST <opensearchDashboards host>:<port>/api/saved_objects/_resolve_import_errors`
 
-`POST <kibana host>:<port>/s/<space_id>/api/saved_objects/_resolve_import_errors`
+`POST <opensearchDashboards host>:<port>/s/<space_id>/api/saved_objects/_resolve_import_errors`
 
 [[saved-objects-api-resolve-import-errors-path-params]]
 ==== Path parameters
@@ -103,9 +103,9 @@ Resolve conflict errors for an index pattern, visualization, and *Canvas* workpa
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/_resolve_import_errors -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"index-pattern","id":"my-pattern","overwrite":true},{"type":"visualization","id":"my-vis","overwrite":true,"destinationId":"another-vis"},{"type":"canvas","id":"my-canvas","overwrite":true,"destinationId":"yet-another-canvas"},{"type":"dashboard","id":"my-dashboard"}]'
+$ curl -X POST api/saved_objects/_resolve_import_errors -H "osd-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"index-pattern","id":"my-pattern","overwrite":true},{"type":"visualization","id":"my-vis","overwrite":true,"destinationId":"another-vis"},{"type":"canvas","id":"my-canvas","overwrite":true,"destinationId":"yet-another-canvas"},{"type":"dashboard","id":"my-dashboard"}]'
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The `file.ndjson` file contains the following:
 
@@ -178,9 +178,9 @@ a search by ignoring it:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/_resolve_import_errors -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"my-pattern-*","to":"existing-pattern"}]},{"type":"search","id":"my-search","ignoreMissingReferences":true},{"type":"dashboard","id":"my-dashboard"}]'
+$ curl -X POST api/saved_objects/_resolve_import_errors -H "osd-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"my-pattern-*","to":"existing-pattern"}]},{"type":"search","id":"my-search","ignoreMissingReferences":true},{"type":"dashboard","id":"my-dashboard"}]'
 --------------------------------------------------
-// KIBANA
+// OPENSEARCH_DASHBOARDS
 
 The `file.ndjson` file contains the following:
 
