@@ -17,11 +17,22 @@
  * under the License.
  */
 
-import { dirname, resolve } from 'path';
-import { REPO_ROOT } from '../repo_root';
+import { accessSync, constants } from 'fs';
+import { getConfigPath, getDataPath, getConfigDirectory } from './';
 
-export const kibanaPackageJSON = {
-  __filename: resolve(REPO_ROOT, 'package.json'),
-  __dirname: dirname(resolve(REPO_ROOT, 'package.json')),
-  ...require(resolve(REPO_ROOT, 'package.json')),
-};
+describe('Default path finder', () => {
+  it('should find a opensearch_dashboards.yml', () => {
+    const configPath = getConfigPath();
+    expect(() => accessSync(configPath, constants.R_OK)).not.toThrow();
+  });
+
+  it('should find a data directory', () => {
+    const dataPath = getDataPath();
+    expect(() => accessSync(dataPath, constants.R_OK)).not.toThrow();
+  });
+
+  it('should find a config directory', () => {
+    const configDirectory = getConfigDirectory();
+    expect(() => accessSync(configDirectory, constants.R_OK)).not.toThrow();
+  });
+});
