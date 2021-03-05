@@ -64,7 +64,7 @@ export function runCli() {
         opensearchUrl = Url.format(config.get('servers.opensearch'));
       }
       if (!opensearchUrl) {
-        throw createFlagError('--es-url or --config must be defined');
+        throw createFlagError('--opensearch-url or --config must be defined');
       }
 
       let opensearchDashboardsUrl = flags['opensearch-dashboards-url'];
