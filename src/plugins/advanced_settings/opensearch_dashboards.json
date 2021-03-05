@@ -1,9 +1,9 @@
 {
   "id": "advancedSettings",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": true,
   "ui": true,
   "requiredPlugins": ["management"],
   "optionalPlugins": ["home"],
-  "requiredBundles": ["kibanaReact", "home"]
+  "requiredBundles": ["opensearchDashboardsReact", "home"]
 }

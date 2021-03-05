@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { getCategoryName } from './get_category_name';
 
 describe('Settings', function () {
   describe('Advanced', function () {
     describe('getCategoryName(category)', function () {
       it('should capitalize unknown category', function () {
-        expect(getCategoryName('elasticsearch')).to.be('Elasticsearch');
+        expect(getCategoryName('opensearch')).to.be('OpenSearch');
       });
 
       it('should return empty string for no category', function () {

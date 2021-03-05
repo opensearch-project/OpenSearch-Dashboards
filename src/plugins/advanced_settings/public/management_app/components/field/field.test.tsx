@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@osd/i18n/react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { mount, ReactWrapper } from 'enzyme';
 import { FieldSetting } from '../../types';
