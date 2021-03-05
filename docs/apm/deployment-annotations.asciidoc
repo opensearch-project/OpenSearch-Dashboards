@@ -23,7 +23,7 @@ so that each time you deploy, a POST request is sent to the annotation API endpo
 curl -X POST \
   http://localhost:5601/api/apm/services/${SERVICE_NAME}/annotation \ <1>
 -H 'Content-Type: application/json' \
--H 'kbn-xsrf: true' \
+-H 'osd-xsrf: true' \
 -H 'Authorization: Basic ${API_KEY}' \ <2>
 -d '{
       "@timestamp": "${DEPLOY_TIME}", <3>
@@ -45,4 +45,4 @@ See the <<apm-annotation-api,annotation API>> reference for more information.
 NOTE: If custom annotations have been created for the selected time period, any derived annotations, i.e., those created automatically when `service.version` changes, will not be shown.
 
 [role="screenshot"]
-image::apm/images/apm-transaction-annotation.png[Example view of transactions annotation in the APM app in Kibana]
+image::apm/images/apm-transaction-annotation.png[Example view of transactions annotation in the APM app in OpenSearchDashboards]

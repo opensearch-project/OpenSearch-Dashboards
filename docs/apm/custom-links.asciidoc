@@ -155,24 +155,24 @@ See the {jira-query-params}[Jira application administration knowledge base]
 for a full list of supported query parameters.
 
 [float]
-[[custom-links-examples-kib]]
-==== Kibana dashboards
+[[custom-links-examples-osd]]
+==== OpenSearchDashboards dashboards
 
-Link to a custom dashboard in Kibana.
+Link to a custom dashboard in OpenSearchDashboards.
 
 |====
 |Label |`Open transaction in custom visualization`
-|Link |`https://kibana-instance/app/kibana#/dashboard?_g=query:(language:kuery,query:'transaction.id:{{transaction.id}}'...`
+|Link |`https://opensearch-dashboards-instance/app/opensearch-dashboards#/dashboard?_g=query:(language:kuery,query:'transaction.id:{{transaction.id}}'...`
 |====
 
 **Example**
 
-This link opens the current `transaction.id` in a custom kibana dashboard.
+This link opens the current `transaction.id` in a custom OpenSearch Dashboards dashboard.
 There are no filters set.
 
 |====
 |Label |`Open transaction in Python drilldown viz`
-|URL |`https://kibana-instance/app/kibana#/dashboard?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(description:'',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),panels:!((embeddableConfig:(),gridData:(h:15,i:cb79c1c0-1af8-472c-aaf7-d158a76946fb,w:24,x:0,y:0),id:c8c74b20-6a30-11ea-92ab-b5d3feff11df,panelIndex:cb79c1c0-1af8-472c-aaf7-d158a76946fb,type:visualization,version:'7.7')),query:(language:kuery,query:'transaction.id:{{transaction.id}}'),timeRestore:!f,title:'',viewMode:edit)`
+|URL |`https://opensearch-dashboards-instance/app/opensearch-dashboards#/dashboard?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(description:'',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),panels:!((embeddableConfig:(),gridData:(h:15,i:cb79c1c0-1af8-472c-aaf7-d158a76946fb,w:24,x:0,y:0),id:c8c74b20-6a30-11ea-92ab-b5d3feff11df,panelIndex:cb79c1c0-1af8-472c-aaf7-d158a76946fb,type:visualization,version:'7.7')),query:(language:kuery,query:'transaction.id:{{transaction.id}}'),timeRestore:!f,title:'',viewMode:edit)`
 |====
 
 [float]

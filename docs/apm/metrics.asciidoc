@@ -9,7 +9,7 @@ If you're experiencing a problem with your service, you can use this page to att
 For example, you might be able to correlate a high number of errors with a long transaction duration, high CPU usage, or a memory leak.
 
 [role="screenshot"]
-image::apm/images/apm-metrics.png[Example view of the Metrics overview in APM app in Kibana]
+image::apm/images/apm-metrics.png[Example view of the Metrics overview in APM app in OpenSearchDashboards]
 
 If you're using the Java Agent, you can view metrics for each JVM.
 

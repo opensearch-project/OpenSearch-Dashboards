@@ -1,7 +1,7 @@
 // Do not link directly to this page.
 // Link to the anchor in `/docs/settings/apm-settings.asciidoc` instead.
 [role="xpack"]
-[[apm-settings-in-kibana]]
+[[apm-settings-in-opensearch-dashboards]]
 == APM app settings
 
 ++++

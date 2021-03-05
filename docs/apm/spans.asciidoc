@@ -6,7 +6,7 @@ The trace sample timeline visualization is a bird's-eye view of what your applic
 This makes it useful for visualizing where a selected transaction spent most of its time.
 
 [role="screenshot"]
-image::apm/images/apm-transaction-sample.png[Example of distributed trace colors in the APM app in Kibana]
+image::apm/images/apm-transaction-sample.png[Example of distributed trace colors in the APM app in OpenSearchDashboards]
 
 View a span in detail by clicking on it in the timeline waterfall.
 For example, when you click on an SQL Select database query,
@@ -21,7 +21,7 @@ Spans are automatically captured by APM agents, and you can also define custom s
 Each span has a type and is defined by a different color in the timeline/waterfall visualization.
 
 [role="screenshot"]
-image::apm/images/apm-span-detail.png[Example view of a span detail in the APM app in Kibana]
+image::apm/images/apm-span-detail.png[Example view of a span detail in the APM app in OpenSearchDashboards]
 
 [float]
 [[distributed-tracing]]
@@ -31,7 +31,7 @@ If your trace sample timeline is colorful, it's indicative of a distributed trac
 Services in a distributed trace are separated by color and listed in the order they occur.
 
 [role="screenshot"]
-image::apm/images/apm-services-trace.png[Example of distributed trace colors in the APM app in Kibana]
+image::apm/images/apm-services-trace.png[Example of distributed trace colors in the APM app in OpenSearchDashboards]
 
 As application architectures are shifting from monolithic to more distributed, service-based architectures,
 distributed tracing has become a crucial feature of modern application performance monitoring.
@@ -40,7 +40,7 @@ From initial web requests to your front-end service, to queries made to your bac
 this makes finding possible bottlenecks throughout your application much easier and faster.
 
 [role="screenshot"]
-image::apm/images/apm-distributed-tracing.png[Example view of the distributed tracing in APM app in Kibana]
+image::apm/images/apm-distributed-tracing.png[Example view of the distributed tracing in APM app in OpenSearchDashboards]
 
 Don't forget; by definition, a distributed trace includes more than one transaction.
 When viewing distributed traces in the timeline waterfall,

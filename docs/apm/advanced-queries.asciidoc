@@ -14,22 +14,22 @@ or, to only show transactions that are slower than a specified time threshold.
 * Filter by response status code: `context.response.status_code ≥ 400`
 * Filter by single user ID: `context.user.id : 12`
 
-When querying in the APM app, you're merely searching and selecting data from fields in Elasticsearch documents.
+When querying in the APM app, you're merely searching and selecting data from fields in OpenSearch documents.
 Queries entered into the query bar are also added as parameters to the URL,
 so it's easy to share a specific query or view with others.
 
 When you type, you can begin to see some of the transaction fields available for filtering:
 
 [role="screenshot"]
-image::apm/images/apm-query-bar.png[Example of the Kibana Query bar in APM app in Kibana]
+image::apm/images/apm-query-bar.png[Example of the OpenSearchDashboards Query bar in APM app in OpenSearchDashboards]
 
-TIP: Read the {kibana-ref}/kuery-query.html[Kibana Query Language Enhancements] documentation to learn more about the capabilities of the {kib} query language.
+TIP: Read the {opensearch-dashboards-ref}/kuery-query.html[OpenSearchDashboards Query Language Enhancements] documentation to learn more about the capabilities of the {osd} query language.
 
 [float]
 [[discover-advanced-queries]]
 === Querying in Discover
 
-Alternatively, you can query your APM documents in {kibana-ref}/discover.html[*Discover*].
+Alternatively, you can query your APM documents in {opensearch-dashboards-ref}/discover.html[*Discover*].
 Querying documents in *Discover* works the same way as querying in the APM app,
 and *Discover* supports all of the example APM app queries shown on this page.
 

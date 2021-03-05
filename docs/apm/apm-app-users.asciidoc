@@ -3,7 +3,7 @@
 == APM app users and privileges
 
 :beat_default_index_prefix: apm
-:beat_kib_app: APM app
+:beat_osd_app: APM app
 :annotation_index: observability-annotations
 
 ++++
@@ -14,15 +14,15 @@ You can use role-based access control to grant users access to secured
 resources. The roles that you set up depend on your organization's security
 requirements and the minimum privileges required to use specific features.
 
-{es-security-features} provides {ref}/built-in-roles.html[built-in roles] that grant a
+{opensearch-security-features} provides {ref}/built-in-roles.html[built-in roles] that grant a
 subset of the privileges needed by APM users.
 When possible, assign users the built-in roles to minimize the affect of future changes on your security strategy.
 If no built-in role is available, you can assign users the privileges needed to accomplish a specific task.
 In general, there are three types of privileges you'll work with:
 
-* **Elasticsearch cluster privileges**: Manage the actions a user can perform against your cluster.
-* **Elasticsearch index privileges**: Control access to the data in specific indices your cluster.
-* **Kibana space privileges**: Grant users write or read access to features and apps within Kibana.
+* **OpenSearch cluster privileges**: Manage the actions a user can perform against your cluster.
+* **OpenSearch index privileges**: Control access to the data in specific indices your cluster.
+* **OpenSearchDashboards space privileges**: Grant users write or read access to features and apps within OpenSearchDashboards.
 
 ////
 ***********************************  ***********************************
@@ -48,8 +48,8 @@ These users might also need to create and edit dashboards, visualizations, and m
 |====
 |Role | Purpose
 
-|`kibana_admin`
-|Grants access to all features in Kibana.
+|`opensearch_dashboards_admin`
+|Grants access to all features in OpenSearchDashboards.
 
 |`apm_user`
 |Grants the privileges required for APM users on +{beat_default_index_prefix}*+ indices
@@ -61,7 +61,7 @@ These users might also need to create and edit dashboards, visualizations, and m
 [[apm-app-reader-partial]]
 ==== Partial APM reader
 
-In some instances, you may wish to restrict certain Kibana apps that a user has access to.
+In some instances, you may wish to restrict certain OpenSearchDashboards apps that a user has access to.
 
 . Assign the following built in roles:
 +
@@ -72,7 +72,7 @@ In some instances, you may wish to restrict certain Kibana apps that a user has 
 |Grants the privileges required for APM users on +{beat_default_index_prefix}*+ indices
 |====
 
-. Assign space privileges to any Kibana space that the user needs access to.
+. Assign space privileges to any OpenSearchDashboards space that the user needs access to.
 Here are two examples:
 +
 [options="header"]
@@ -80,8 +80,8 @@ Here are two examples:
 |Type | Privilege | Purpose
 
 | Spaces
-| `Read` or `All` on the {beat_kib_app}
-| Allow the use of the the {beat_kib_app}
+| `Read` or `All` on the {beat_osd_app}
+| Allow the use of the the {beat_osd_app}
 
 | Spaces
 | `Read` or `All` on Dashboards and Discover
@@ -112,7 +112,7 @@ Here are two examples:
 
 NOTE: By default, the `apm_user` built-in role provides access to Observability annotations.
 You only need to create an annotation user if the default annotation index
-defined in <<apm-settings-kb,`xpack.observability.annotations.index`>> has been customized.
+defined in <<apm-settings-osd,`xpack.observability.annotations.index`>> has been customized.
 
 [[apm-app-annotation-user]]
 ==== Annotation user
@@ -136,7 +136,7 @@ and assign the following privileges:
 |====
 +
 ^1^ +\{ANNOTATION_INDEX\}+ should be the index name you've defined in
-<<apm-settings-kb,`xpack.observability.annotations.index`>>.
+<<apm-settings-osd,`xpack.observability.annotations.index`>>.
 
 . Assign the `annotation_user` created previously, and the built-in roles necessary to create
 a <<apm-app-reader-full,full>> or <<apm-app-reader-partial,partial>> APM reader to any users that need to view annotations in the APM app
@@ -173,15 +173,15 @@ Central configuration users need to be able to view, create, update, and delete 
 |Grants the privileges required for APM users on +{beat_default_index_prefix}*+ indices
 |====
 
-. Assign the following Kibana space privileges:
+. Assign the following OpenSearchDashboards space privileges:
 +
 [options="header"]
 |====
 |Type | Privilege | Purpose
 
 | Spaces
-|`All` on {beat_kib_app}
-|Allow full use of the {beat_kib_app}
+|`All` on {beat_osd_app}
+|Allow full use of the {beat_osd_app}
 |====
 
 [[apm-app-central-config-reader]]
@@ -199,15 +199,15 @@ but not create, update, or delete them.
 |Grants the privileges required for APM users on +{beat_default_index_prefix}*+ indices
 |====
 
-. Assign the following Kibana space privileges:
+. Assign the following OpenSearchDashboards space privileges:
 +
 [options="header"]
 |====
 |Type | Privilege | Purpose
 
 | Spaces
-|`read` on the {beat_kib_app}
-|Allow read access to the {beat_kib_app}
+|`read` on the {beat_osd_app}
+|Allow read access to the {beat_osd_app}
 |====
 
 [[apm-app-central-config-api]]
@@ -232,15 +232,15 @@ See <<apm-app-api-user>>.
 
 Users can list, search, create, update, and delete central configurations via the APM app API.
 
-. Assign the following Kibana space privileges:
+. Assign the following OpenSearchDashboards space privileges:
 +
 [options="header"]
 |====
 |Type | Privilege | Purpose
 
 | Spaces
-|`all` on the {beat_kib_app}
-|Allow all access to the {beat_kib_app}
+|`all` on the {beat_osd_app}
+|Allow all access to the {beat_osd_app}
 |====
 
 [[apm-app-api-config-reader]]
@@ -248,15 +248,15 @@ Users can list, search, create, update, and delete central configurations via th
 
 Sometimes a user only needs to list and search central configurations via the APM app API.
 
-. Assign the following Kibana space privileges:
+. Assign the following OpenSearchDashboards space privileges:
 +
 [options="header"]
 |====
 |Type | Privilege | Purpose
 
 | Spaces
-|`read` on the {beat_kib_app}
-|Allow read access to the {beat_kib_app}
+|`read` on the {beat_osd_app}
+|Allow read access to the {beat_osd_app}
 |====
 
 [[apm-app-api-annotation-manager]]
@@ -289,16 +289,16 @@ and assign the following privileges:
 |====
 
 . Assign the `annotation_role` created previously,
-and the following Kibana space privileges to any annotation API users:
+and the following OpenSearchDashboards space privileges to any annotation API users:
 +
 [options="header"]
 |====
 |Type | Privilege | Purpose
 
 | Spaces
-|`all` on the {beat_kib_app}
-|Allow all access to the {beat_kib_app}
+|`all` on the {beat_osd_app}
+|Allow all access to the {beat_osd_app}
 |====
 
 //LEARN MORE
-//Learn more about <<kibana-feature-privileges,feature privileges>>.
+//Learn more about <<opensearch-dashboards-feature-privileges,feature privileges>>.

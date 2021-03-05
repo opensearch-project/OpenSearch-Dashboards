@@ -14,7 +14,7 @@ We currently surface two types of service maps:
 * Service-specific: Highlight connections for a selected service.
 
 [role="screenshot"]
-image::apm/images/service-maps.png[Example view of service maps in the APM app in Kibana]
+image::apm/images/service-maps.png[Example view of service maps in the APM app in OpenSearchDashboards]
 
 [float]
 [[service-maps-how]]
@@ -47,7 +47,7 @@ Use the environment drop-down to only see the data you're interested in, like `d
 Additional filters are not currently available for service maps.
 
 [role="screenshot"]
-image::apm/images/service-maps-java.png[Example view of service maps with Java highlighted in the APM app in Kibana]
+image::apm/images/service-maps-java.png[Example view of service maps with Java highlighted in the APM app in OpenSearchDashboards]
 
 [float]
 [[service-map-anomaly-detection]]
@@ -77,7 +77,7 @@ Nodes appear on the map in one of two shapes:
 
 * **Circle**: Instrumented services. Interior icons are based on the language of the agent used.
 * **Diamond**: Databases, external, and messaging. Interior icons represent the generic type,
-with specific icons for known entities, like Elasticsearch.
+with specific icons for known entities, like OpenSearch.
 Type and subtype are based on `span.type`, and `span.subtype`.
 
 [float]

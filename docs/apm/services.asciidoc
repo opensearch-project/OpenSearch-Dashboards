@@ -11,4 +11,4 @@ Health status is powered by machine learning and requires anomaly detection to b
 Learn more in <<machine-learning-integration,machine learning>>.
 
 [role="screenshot"]
-image::apm/images/apm-services-overview.png[Example view of services table the APM app in Kibana]
+image::apm/images/apm-services-overview.png[Example view of services table the APM app in OpenSearchDashboards]

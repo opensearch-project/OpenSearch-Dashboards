@@ -17,4 +17,4 @@ it's the collective amount of pain a specific endpoint is causing your users.
 If there's a particular endpoint you're worried about, you can click on it to view the <<transaction-details, transaction details>>.
 
 [role="screenshot"]
-image::apm/images/apm-traces.png[Example view of the Traces overview in APM app in Kibana]
+image::apm/images/apm-traces.png[Example view of the Traces overview in APM app in OpenSearchDashboards]

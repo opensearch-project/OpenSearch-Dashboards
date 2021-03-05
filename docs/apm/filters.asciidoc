@@ -19,19 +19,19 @@ They are available in the Services, Transactions, Errors, Metrics, and Traces vi
 and any filter applied will persist as you move between pages.
 
 [role="screenshot"]
-image::apm/images/global-filters.png[Global filters available in the APM app in Kibana]
+image::apm/images/global-filters.png[Global filters available in the APM app in OpenSearchDashboards]
 
 [float]
 ===== Global time range
 
-The <<set-time-filter,global time range filter>> in {kib} restricts APM data to a specific time period.
+The <<set-time-filter,global time range filter>> in {osd} restricts APM data to a specific time period.
 
 [float]
 [[query-bar]]
 ===== Query bar
 
 The query bar is a powerful data query feature.
-Similar to the query bar in {kibana-ref}/discover.html[Discover],
+Similar to the query bar in {opensearch-dashboards-ref}/discover.html[Discover],
 it enables you to pass advanced queries on your data to filter on particular pieces of information that you're interested in.
 It comes with a handy autocomplete that helps find the fields and even provides suggestions to the data they include.
 You can select the query bar and hit the down arrow on your keyboard to begin seeing recommendations.
@@ -72,4 +72,4 @@ With just a click, you can filter your transactions by the transaction result,
 host, container ID, Kubernetes pod, and more.
 
 [role="screenshot"]
-image::apm/images/local-filter.png[Local filters available in the APM app in Kibana]
+image::apm/images/local-filter.png[Local filters available in the APM app in OpenSearchDashboards]

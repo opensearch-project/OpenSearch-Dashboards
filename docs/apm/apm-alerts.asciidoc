@@ -8,15 +8,15 @@
 
 beta::[]
 
-The APM app integrates with Kibana's {kibana-ref}/alerting-getting-started.html[alerting and actions] feature.
+The APM app integrates with OpenSearchDashboards's {opensearch-dashboards-ref}/alerting-getting-started.html[alerting and actions] feature.
 It provides a set of built-in **actions** and APM specific threshold **alerts** for you to use
-and enables central management of all alerts from <<management,Kibana Management>>.
+and enables central management of all alerts from <<management,OpenSearchDashboards Management>>.
 
 [role="screenshot"]
 image::apm/images/apm-alert.png[Create an alert in the APM app]
 
 For a walkthrough of the alert flyout panel, including detailed information on each configurable property,
-see Kibana's <<defining-alerts,defining alerts>>.
+see OpenSearchDashboards's <<defining-alerts,defining alerts>>.
 
 The APM app supports four different types of alerts:
 
@@ -116,15 +116,15 @@ Select **Save**. The alert has been created and is now active!
 [[apm-alert-manage]]
 === Manage alerts and actions
 
-From the APM app, select **Alerts** > **View active alerts** to be taken to the Kibana alerts and actions management page.
+From the APM app, select **Alerts** > **View active alerts** to be taken to the OpenSearchDashboards alerts and actions management page.
 From this page, you can create, edit, disable, mute, and delete alerts, and create, edit, and disable connectors.
 
 [float]
 [[apm-alert-more-info]]
 === More information
 
-See {kibana-ref}/alerting-getting-started.html[alerting and actions] for more information.
+See {opensearch-dashboards-ref}/alerting-getting-started.html[alerting and actions] for more information.
 
 NOTE: If you are using an **on-premise** Elastic Stack deployment with security,
-communication between Elasticsearch and Kibana must have TLS configured.
-More information is in the alerting {kibana-ref}/alerting-getting-started.html#alerting-setup-prerequisites[prerequisites].
+communication between OpenSearch and OpenSearchDashboards must have TLS configured.
+More information is in the alerting {opensearch-dashboards-ref}/alerting-getting-started.html#alerting-setup-prerequisites[prerequisites].

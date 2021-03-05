@@ -10,7 +10,7 @@ Some APM app features are provided via a REST API:
 
 * <<agent-config-api>>
 * <<apm-annotation-api>>
-* <<kibana-api,Kibana API>>
+* <<opensearch-dashboards-api,OpenSearchDashboards API>>
 
 [float]
 [[apm-api-example]]
@@ -19,15 +19,15 @@ Some APM app features are provided via a REST API:
 // The following content is reused throughout the API docs
 // tag::using-the-APIs[]
 Interact with APM APIs using cURL or another API tool.
-All APM APIs are Kibana APIs, not Elasticsearch APIs;
-because of this, the Kibana dev tools console cannot be used to interact with APM APIs.
+All APM APIs are OpenSearchDashboards APIs, not OpenSearch APIs;
+because of this, the OpenSearchDashboards dev tools console cannot be used to interact with APM APIs.
 
 For all APM APIs, you must use a request header.
-Supported headers are `Authorization`, `kbn-xsrf`, and `Content-Type`.
+Supported headers are `Authorization`, `osd-xsrf`, and `Content-Type`.
 
 `Authorization: ApiKey {credentials}`::
-Kibana supports token-based authentication with the Elasticsearch API key service.
-The API key returned by the  {ref}/security-api-create-api-key.html[Elasticsearch create API key API]
+OpenSearchDashboards supports token-based authentication with the OpenSearch API key service.
+The API key returned by the  {ref}/security-api-create-api-key.html[OpenSearch create API key API]
 can be used by sending a request with an `Authorization` header that has a value of `ApiKey` followed by the `{credentials}`,
 where `{credentials}` is the base64 encoding of `id` and `api_key` joined by a colon.
 +
@@ -36,8 +36,8 @@ Alternatively, you can create a user and use their username and password to auth
 Whether using `Authorization: ApiKey {credentials}`, or `-u $USER:$PASSWORD`,
 users interacting with APM APIs must have <<apm-app-api-user,sufficient privileges>>.
 
-`kbn-xsrf: true`::
-  By default, you must use `kbn-xsrf` for all API calls, except in the following scenarios:
+`osd-xsrf: true`::
+  By default, you must use `osd-xsrf` for all API calls, except in the following scenarios:
 
 * The API endpoint uses the `GET` or `HEAD` operations
 * The path is whitelisted using the <<settings-xsrf-whitelist, `server.xsrf.whitelist`>> setting
@@ -45,8 +45,8 @@ users interacting with APM APIs must have <<apm-app-api-user,sufficient privileg
 
 `Content-Type: application/json`::
   Applicable only when you send a payload in the API request.
-  {kib} API requests and responses use JSON.
-  Typically, if you include the `kbn-xsrf` header, you must also include the `Content-Type` header.
+  {osd} API requests and responses use JSON.
+  Typically, if you include the `osd-xsrf` header, you must also include the `Content-Type` header.
 // end::using-the-APIs[]
 
 Here's an example CURL request that adds an annotation to the APM app:
@@ -56,7 +56,7 @@ Here's an example CURL request that adds an annotation to the APM app:
 curl -X POST \
   http://localhost:5601/api/apm/services/opbeans-java/annotation \
 -H 'Content-Type: application/json' \
--H 'kbn-xsrf: true' \
+-H 'osd-xsrf: true' \
 -H 'Authorization: Basic YhUlubWZhM0FDbnlQeE6WRtaW49FQmSGZ4RUWXdX' \
 -d '{
       "@timestamp": "2020-05-11T10:31:30.452Z",
@@ -425,7 +425,7 @@ The following example creates an annotation for a service named `opbeans-java`.
 curl -X POST \
   http://localhost:5601/api/apm/services/opbeans-java/annotation \
 -H 'Content-Type: application/json' \
--H 'kbn-xsrf: true' \
+-H 'osd-xsrf: true' \
 -H 'Authorization: Basic YhUlubWZhM0FDbnlQeE6WRtaW49FQmSGZ4RUWXdX' \
 -d '{
       "@timestamp": "2020-05-08T10:31:30.452Z",
@@ -474,18 +474,18 @@ curl -X POST \
 *******************************************************
 ////
 
-[[kibana-api]]
-=== Kibana API
+[[opensearch-dashboards-api]]
+=== OpenSearchDashboards API
 
-In addition to the APM specific API endpoints, Kibana provides its own <<api,REST API>>
-which you can use to automate certain aspects of configuring and deploying Kibana.
+In addition to the APM specific API endpoints, OpenSearchDashboards provides its own <<api,REST API>>
+which you can use to automate certain aspects of configuring and deploying OpenSearchDashboards.
 An example is below.
 
 [[api-create-apm-index-pattern]]
 ==== Customize the APM index pattern
 
-As an alternative to updating <<apm-settings-in-kibana,`apm_oss.indexPattern`>> in your `kibana.yml` configuration file,
-you can use Kibana's <<saved-objects-api-update,update object API>> to update the default APM index pattern on the fly.
+As an alternative to updating <<apm-settings-in-opensearch-dashboards,`apm_oss.indexPattern`>> in your `opensearch_dashboards.yml` configuration file,
+you can use OpenSearchDashboards's <<saved-objects-api-update,update object API>> to update the default APM index pattern on the fly.
 
 The following example sets the default APM app index pattern to `some-other-pattern-*`:
 
@@ -493,7 +493,7 @@ The following example sets the default APM app index pattern to `some-other-patt
 ----
 curl -X PUT "localhost:5601/api/saved_objects/index-pattern/apm_static_index_pattern_id" \ <1>
 -H 'Content-Type: application/json' \
--H 'kbn-xsrf: true' \
+-H 'osd-xsrf: true' \
 -H 'Authorization: Basic ${YOUR_AUTH_TOKEN}' \
 -d' {
       "attributes": {
@@ -525,7 +525,7 @@ To view the new APM app index pattern, use the <<saved-objects-api-get,GET objec
 [source,sh]
 ----
 curl -X GET "localhost:5601/api/saved_objects/index-pattern/apm_static_index_pattern_id" \ <1>
--H 'kbn-xsrf: true' \
+-H 'osd-xsrf: true' \
 -H 'Authorization: Basic ${YOUR_AUTH_TOKEN}'
 ----
 <1> `apm_static_index_pattern_id` is the internal, hard-coded ID of the APM index pattern.
@@ -552,4 +552,4 @@ The API returns the following:
 
 // More examples will go here
 
-More information on Kibana's API is available in <<api,REST API>>.
+More information on OpenSearchDashboards's API is available in <<api,REST API>>.

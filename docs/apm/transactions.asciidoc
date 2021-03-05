@@ -8,7 +8,7 @@ APM agents automatically collect performance metrics on HTTP requests, database 
 Selecting a <<services,*service*>> brings you to the *transactions* overview.
 
 [role="screenshot"]
-image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM app in Kibana]
+image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM app in OpenSearchDashboards]
 
 The *transaction duration*, *transactions per minute*, *transaction error rate*, and *time spent by span type*
 charts display information on all transactions associated with the selected service:
@@ -47,7 +47,7 @@ In other words, this view groups all transactions of the same name together,
 and only displays one entry for each group.
 
 [role="screenshot"]
-image::apm/images/apm-transactions-table.png[Example view of the transactions table in the APM app in Kibana]
+image::apm/images/apm-transactions-table.png[Example view of the transactions table in the APM app in OpenSearchDashboards]
 
 By default, transaction groups are sorted by _Impact_.
 Impact helps show the most used and slowest endpoints in your service - in other words,
@@ -125,5 +125,5 @@ For a particular transaction sample, we can get even more information in the *me
 * User - Requires additional configuration, but allows you to see which user experienced the current transaction.
 * Custom - You can configure your agent to add custom contextual information on transactions.
 
-TIP: All of this data is stored in documents in Elasticsearch.
-This means you can select "Actions - View sample document" to see the actual Elasticsearch document under the discover tab.
+TIP: All of this data is stored in documents in OpenSearch.
+This means you can select "Actions - View sample document" to see the actual OpenSearch document under the discover tab.
