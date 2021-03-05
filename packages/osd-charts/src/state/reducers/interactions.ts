@@ -18,6 +18,7 @@
  */
 
 import { ChartTypes } from '../../chart_types';
+import { drilldownActive } from '../../chart_types/partition_chart/state/selectors/drilldown_active';
 import { getPickedShapesLayerValues } from '../../chart_types/partition_chart/state/selectors/picked_shapes';
 import { LegendItem } from '../../common/legend';
 import { SeriesIdentifier } from '../../common/series_id';
@@ -85,6 +86,7 @@ export function interactionsReducer(
       return {
         ...state,
         drilldown: getDrilldownData(globalState),
+        prevDrilldown: state.drilldown,
         pointer: {
           ...state.pointer,
           dragging: false,
@@ -204,7 +206,7 @@ function toggleDeselectedDataSeries(
 }
 
 function getDrilldownData(globalState: GlobalChartState) {
-  if (globalState.chartType !== ChartTypes.Partition) {
+  if (globalState.chartType !== ChartTypes.Partition || !drilldownActive(globalState)) {
     return [];
   }
   const layerValues: LayerValue[] = getPickedShapesLayerValues(globalState)[0];

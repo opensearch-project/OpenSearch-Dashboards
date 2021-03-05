@@ -54,12 +54,14 @@ export const Example = () => {
           partitionLayout: PartitionLayout.icicle,
           drilldown: true,
           fillLabel: {
+            ...config.fillLabel,
             clipText,
             padding: { left: 0, right: 0, top: 0, bottom: 0 },
           },
           minFontSize: clipText ? 9 : 6,
           maxFontSize: clipText ? 9 : 20,
           maxRowCount: 1,
+          animation: { duration: 500 },
         }}
       />
     </Chart>

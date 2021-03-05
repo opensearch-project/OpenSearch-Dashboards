@@ -19,21 +19,10 @@
 
 import createCachedSelector from 're-reselect';
 
-import { configMetadata } from '../../layout/config';
-import { HierarchyOfArrays } from '../../layout/utils/group_by_rollup';
-import { partitionTree } from '../../layout/viewmodel/hierarchy_of_arrays';
-import { PartitionSpec } from '../../specs';
-import { getPartitionSpecs } from './get_partition_specs';
-
-function getTreeForSpec(spec: PartitionSpec) {
-  const { data, valueAccessor, layers, config } = spec;
-  return partitionTree(data, valueAccessor, layers, configMetadata.partitionLayout.dflt, config.partitionLayout);
-}
+import { isLinear, isSimpleLinear } from '../../layout/viewmodel/viewmodel';
+import { getPartitionSpec } from './partition_spec';
 
 /** @internal */
-export const getTree = createCachedSelector(
-  [getPartitionSpecs],
-  (partitionSpecs): HierarchyOfArrays => {
-    return partitionSpecs.length > 0 ? getTreeForSpec(partitionSpecs[0]) : []; // singleton!
-  },
-)((state) => state.chartId);
+export const drilldownActive = createCachedSelector([getPartitionSpec], (spec) => {
+  return spec && isLinear(spec.config.partitionLayout) && isSimpleLinear(spec.config, spec.layers);
+})((state) => state.chartId);

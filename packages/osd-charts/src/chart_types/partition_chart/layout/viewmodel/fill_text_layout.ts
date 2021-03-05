@@ -17,15 +17,6 @@
  * under the License.
  */
 
-import chroma from 'chroma-js';
-
-import {
-  colorIsDark,
-  combineColors,
-  getTextColorIfTextInvertible,
-  isColorValid,
-  makeHighContrastColor,
-} from '../../../../common/color_calcs';
 import { TAU } from '../../../../common/constants';
 import {
   Coordinate,
@@ -40,9 +31,8 @@ import {
 } from '../../../../common/geometry';
 import { logarithm } from '../../../../common/math';
 import { integerSnap, monotonicHillClimb } from '../../../../common/optimize';
-import { Box, Font, PartialFont, TextContrast, TextMeasure, VerticalAlignments } from '../../../../common/text_utils';
-import { Color, ValueFormatter } from '../../../../utils/common';
-import { Logger } from '../../../../utils/logger';
+import { Box, Font, PartialFont, TextMeasure, VerticalAlignments } from '../../../../common/text_utils';
+import { ValueFormatter } from '../../../../utils/common';
 import { Layer } from '../../specs';
 import { Config, Padding } from '../types/config_types';
 import {
@@ -211,60 +201,6 @@ function getWordSpacing(fontSize: number) {
   return fontSize / 4;
 }
 
-/**
- * Determine the color for the text hinging on the parameters of textInvertible and textContrast
- * @internal
- */
-export function getFillTextColor(
-  textColor: Color,
-  textInvertible: boolean,
-  textContrast: TextContrast,
-  sliceFillColor: string,
-  containerBackgroundColor?: Color,
-): string | undefined {
-  const bgColorAlpha = isColorValid(containerBackgroundColor) ? chroma(containerBackgroundColor).alpha() : 1;
-  if (!isColorValid(containerBackgroundColor) || bgColorAlpha < 1) {
-    if (bgColorAlpha < 1) {
-      Logger.expected('Text contrast requires a background color with an alpha value of 1', 1, bgColorAlpha);
-    } else if (containerBackgroundColor !== 'transparent') {
-      Logger.warn(`Invalid background color "${String(containerBackgroundColor)}"`);
-    }
-
-    return getTextColorIfTextInvertible(
-      colorIsDark(sliceFillColor),
-      colorIsDark(textColor),
-      textColor,
-      false,
-      'white', // never used
-    );
-  }
-
-  let adjustedTextColor: string | undefined = textColor;
-  const containerBackground = combineColors(sliceFillColor, containerBackgroundColor);
-  const textShouldBeInvertedAndTextContrastIsFalse = textInvertible && !textContrast;
-  const textShouldBeInvertedAndTextContrastIsSetToTrue = textInvertible && typeof textContrast !== 'number';
-  const textContrastIsSetToANumberValue = typeof textContrast === 'number';
-  const textShouldNotBeInvertedButTextContrastIsDefined = textContrast && !textInvertible;
-
-  // change the contrast for the inverted slices
-  if (textShouldBeInvertedAndTextContrastIsFalse || textShouldBeInvertedAndTextContrastIsSetToTrue) {
-    const backgroundIsDark = colorIsDark(combineColors(sliceFillColor, containerBackgroundColor));
-    const specifiedTextColorIsDark = colorIsDark(textColor);
-    adjustedTextColor = getTextColorIfTextInvertible(
-      backgroundIsDark,
-      specifiedTextColorIsDark,
-      textColor,
-      textContrast,
-      containerBackground,
-    );
-    // if textContrast is a number then take that into account or if textInvertible is set to false
-  } else if (textContrastIsSetToANumberValue || textShouldNotBeInvertedButTextContrastIsDefined) {
-    return makeHighContrastColor(adjustedTextColor, containerBackground);
-  }
-
-  return adjustedTextColor;
-}
-
 type GetShapeRowGeometry<C> = (
   container: C,
   cx: Distance,
@@ -286,7 +222,6 @@ function fill<C>(
   shapeConstructor: ShapeConstructor<C>,
   getShapeRowGeometry: GetShapeRowGeometry<C>,
   getRotation: GetRotation,
-  containerBackgroundColor?: Color,
 ) {
   return function fillClosure(
     config: Config,
@@ -310,31 +245,12 @@ function fill<C>(
         ? VerticalAlignments.bottom
         : VerticalAlignments.top;
       const fontSizes = allFontSizes[Math.min(node.depth, allFontSizes.length) - 1];
-      const {
-        textColor,
-        textInvertible,
-        fontStyle,
-        fontVariant,
-        fontFamily,
-        fontWeight,
-        valueFormatter,
-        padding,
-        textContrast,
-        textOpacity,
-        clipText,
-      } = {
+      const { fontStyle, fontVariant, fontFamily, fontWeight, valueFormatter, padding, textOpacity, clipText } = {
         ...fillLabel,
         valueFormatter: formatter,
         ...layer.fillLabel,
         ...layer.shape,
       };
-      const fillTextColor = getFillTextColor(
-        textColor,
-        textInvertible,
-        textContrast,
-        node.fillColor,
-        containerBackgroundColor,
-      );
 
       const valueFont = {
         ...fillLabel,
@@ -348,7 +264,7 @@ function fill<C>(
         fontVariant,
         fontWeight,
         fontFamily,
-        textColor,
+        textColor: node.textColor,
         textOpacity,
       };
       const allBoxes = getAllBoxes(rawTextGetter, valueGetter, valueFormatter, sizeInvariantFont, valueFont, node);
@@ -371,7 +287,7 @@ function fill<C>(
           node,
           clipText,
         ),
-        fillTextColor,
+        fillTextColor: node.textColor,
       };
     };
   };
@@ -555,9 +471,8 @@ export function fillTextLayout<C>(
   shapeConstructor: ShapeConstructor<C>,
   getShapeRowGeometry: GetShapeRowGeometry<C>,
   getRotation: GetRotation,
-  containerBackgroundColor?: Color,
 ) {
-  const specificFiller = fill(shapeConstructor, getShapeRowGeometry, getRotation, containerBackgroundColor);
+  const specificFiller = fill(shapeConstructor, getShapeRowGeometry, getRotation);
   return function fillTextLayoutClosure(
     measure: TextMeasure,
     rawTextGetter: RawTextGetter,

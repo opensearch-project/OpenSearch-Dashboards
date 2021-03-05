@@ -22,7 +22,7 @@ import { connect } from 'react-redux';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
-import { partitionGeometries } from '../../state/selectors/geometries';
+import { partitionDrilldownFocus, partitionGeometries } from '../../state/selectors/geometries';
 import { legendHoverHighlightNodes } from '../../state/selectors/get_highlighted_shapes';
 import { HighlighterComponent, HighlighterProps, DEFAULT_PROPS } from './highlighter';
 
@@ -39,6 +39,7 @@ const legendMapStateToProps = (state: GlobalChartState): HighlighterProps => {
   } = partitionGeometries(state)[0];
 
   const geometries = legendHoverHighlightNodes(state);
+  const geometriesFocus = partitionDrilldownFocus(state)[0];
   const canvasDimension = getChartContainerDimensionsSelector(state);
   return {
     chartId,
@@ -46,6 +47,7 @@ const legendMapStateToProps = (state: GlobalChartState): HighlighterProps => {
     renderAsOverlay: false,
     canvasDimension,
     geometries,
+    geometriesFocus,
     diskCenter,
     outerRadius,
     partitionLayout,

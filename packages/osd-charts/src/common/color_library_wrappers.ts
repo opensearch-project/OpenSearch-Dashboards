@@ -28,6 +28,9 @@ export type RgbTuple = [RGB, RGB, RGB, RGB?];
 export type RgbObject = { r: RGB; g: RGB; b: RGB; opacity: A };
 
 /** @internal */
+export type RgbaTuple = [RGB, RGB, RGB, RGB];
+
+/** @internal */
 export const defaultColor: RgbObject = { r: 255, g: 0, b: 0, opacity: 1 };
 /** @internal */
 export const transparentColor: RgbObject = { r: 0, g: 0, b: 0, opacity: 0 };

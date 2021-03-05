@@ -314,6 +314,7 @@ export const configMetadata: Record<string, ConfigItem> = {
   backgroundColor: { dflt: '#ffffff', type: 'color' },
   sectorLineWidth: { dflt: 1, min: 0, max: 4, type: 'number' },
   sectorLineStroke: { dflt: 'white', type: 'string' },
+  animation: { type: 'group', values: { duration: { dflt: 0, min: 0, max: 3000, type: 'number' } } },
 };
 
 export const config: Config = configMap<Config>((item: ConfigItem) => item.dflt, configMetadata);

@@ -22,7 +22,7 @@ import { connect } from 'react-redux';
 import { GlobalChartState } from '../../../../state/chart_state';
 import { getChartContainerDimensionsSelector } from '../../../../state/selectors/get_chart_container_dimensions';
 import { getInternalIsInitializedSelector, InitStatus } from '../../../../state/selectors/get_internal_is_intialized';
-import { partitionGeometries } from '../../state/selectors/geometries';
+import { partitionDrilldownFocus, partitionGeometries } from '../../state/selectors/geometries';
 import { getPickedShapes } from '../../state/selectors/picked_shapes';
 import { HighlighterComponent, HighlighterProps, DEFAULT_PROPS } from './highlighter';
 
@@ -39,6 +39,7 @@ const hoverMapStateToProps = (state: GlobalChartState): HighlighterProps => {
   } = partitionGeometries(state)[0];
 
   const geometries = getPickedShapes(state);
+  const geometriesFocus = partitionDrilldownFocus(state)[0];
   const canvasDimension = getChartContainerDimensionsSelector(state);
   return {
     chartId,
@@ -48,6 +49,7 @@ const hoverMapStateToProps = (state: GlobalChartState): HighlighterProps => {
     diskCenter,
     outerRadius,
     geometries,
+    geometriesFocus,
     partitionLayout,
   };
 };

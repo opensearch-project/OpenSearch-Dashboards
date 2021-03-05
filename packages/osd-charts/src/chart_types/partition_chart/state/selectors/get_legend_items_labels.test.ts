@@ -65,7 +65,8 @@ describe('Partition - Legend items labels', () => {
   });
 
   it('no filter for no legendMaxDepth + filter duplicates', () => {
-    MockStore.addSpecs([spec], store);
+    const settings = MockGlobalSpec.settings({ showLegend: true });
+    MockStore.addSpecs([settings, spec], store);
 
     const labels = getLegendItemsLabels(store.getState());
     expect(labels).toEqual([
@@ -137,7 +138,7 @@ describe('Partition - Legend items labels', () => {
   });
 
   it('filters labels at the first layer', () => {
-    const settings = MockGlobalSpec.settings({ legendMaxDepth: 1 });
+    const settings = MockGlobalSpec.settings({ showLegend: true, legendMaxDepth: 1 });
     MockStore.addSpecs([settings, spec], store);
 
     const labels = getLegendItemsLabels(store.getState());
@@ -154,7 +155,7 @@ describe('Partition - Legend items labels', () => {
   });
 
   it('filters labels at the second layer', () => {
-    const settings = MockGlobalSpec.settings({ legendMaxDepth: 2 });
+    const settings = MockGlobalSpec.settings({ showLegend: true, legendMaxDepth: 2 });
     MockStore.addSpecs([settings, spec], store);
 
     const labels = getLegendItemsLabels(store.getState());
@@ -183,14 +184,14 @@ describe('Partition - Legend items labels', () => {
   });
 
   it('filters all labels is depth is 0', () => {
-    const settings = MockGlobalSpec.settings({ legendMaxDepth: 0 });
+    const settings = MockGlobalSpec.settings({ showLegend: true, legendMaxDepth: 0 });
     MockStore.addSpecs([settings, spec], store);
 
     const labels = getLegendItemsLabels(store.getState());
     expect(labels).toEqual([]);
   });
   it('filters all labels is depth is NaN', () => {
-    const settings = MockGlobalSpec.settings({ legendMaxDepth: NaN });
+    const settings = MockGlobalSpec.settings({ showLegend: true, legendMaxDepth: NaN });
     MockStore.addSpecs([settings, spec], store);
 
     const labels = getLegendItemsLabels(store.getState());

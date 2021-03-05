@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { CategoryKey } from '../../../../common/category';
 import { LegendItemExtraValues } from '../../../../common/legend';
 import { SeriesKey } from '../../../../common/series_id';
 import { Relation } from '../../../../common/text_utils';
@@ -45,8 +44,6 @@ export function getHierarchyOfArrays(
   valueAccessor: ValueAccessor,
   groupByRollupAccessors: IndexedAccessorFn[],
   sorter: Sorter | null = childOrders.descending,
-  drilldown: boolean,
-  drilldownSelection: CategoryKey[],
 ): HierarchyOfArrays {
   const aggregator = aggregators.sum;
 
@@ -64,7 +61,7 @@ export function getHierarchyOfArrays(
   // By introducing `scale`, we no longer need to deal with the dichotomy of
   // size as data value vs size as number of pixels in the rectangle
   return mapsToArrays(
-    groupByRollup(groupByRollupAccessors, valueAccessor, aggregator, facts, drilldown, drilldownSelection),
+    groupByRollup(groupByRollupAccessors, valueAccessor, aggregator, facts),
     sorter && aggregateComparator(mapEntryValue, sorter),
   );
 }
@@ -76,8 +73,6 @@ export function partitionTree(
   layers: Layer[],
   defaultLayout: PartitionLayout,
   layout: PartitionLayout = defaultLayout,
-  drilldown: boolean,
-  drilldownSelection: CategoryKey[],
 ) {
   const sorter = isTreemap(layout) || isSunburst(layout) ? childOrders.descending : null;
   return getHierarchyOfArrays(
@@ -86,8 +81,6 @@ export function partitionTree(
     // eslint-disable-next-line no-shadow
     [() => HIERARCHY_ROOT_KEY, ...layers.map(({ groupByRollup }) => groupByRollup)],
     sorter,
-    drilldown,
-    drilldownSelection,
   );
 }
 

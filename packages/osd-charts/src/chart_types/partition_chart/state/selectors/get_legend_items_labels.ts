@@ -29,6 +29,6 @@ import { getTree } from './tree';
 /** @internal */
 export const getLegendItemsLabels = createCachedSelector(
   [getPartitionSpec, getSettingsSpecSelector, getTree],
-  (spec, { legendMaxDepth }, tree): LegendItemLabel[] =>
-    spec ? getLegendLabels(spec.layers, tree, legendMaxDepth) : [],
+  (spec, { legendMaxDepth, showLegend }, tree): LegendItemLabel[] =>
+    spec && showLegend ? getLegendLabels(spec.layers, tree, legendMaxDepth) : [],
 )(getChartIdSelector);

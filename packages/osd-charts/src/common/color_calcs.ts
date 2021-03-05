@@ -20,7 +20,7 @@
 import chroma from 'chroma-js';
 
 import { Color } from '../utils/common';
-import { RGBATupleToString, RgbTuple, stringToRGB } from './color_library_wrappers';
+import { RgbaTuple, RGBATupleToString, RgbTuple, stringToRGB } from './color_library_wrappers';
 import { Ratio } from './geometry';
 import { TextContrast } from './text_utils';
 
@@ -29,7 +29,7 @@ export function hueInterpolator(colors: RgbTuple[]) {
   return (d: number) => {
     const index = Math.round(d * 255);
     const [r, g, b, a] = colors[index];
-    return colors[index].length === 3 ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${a})`;
+    return colors[index].length === 3 ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${a ?? 1})`;
   };
 }
 
@@ -50,13 +50,25 @@ export function arrayToLookup(keyFun: (v: any) => any, array: Array<any>) {
   return Object.assign({}, ...array.map((d) => ({ [keyFun(d)]: d })));
 }
 
+const rgbaCache: Map<string | undefined, RgbaTuple> = new Map();
+
+function colorToRgba(color: Color): RgbaTuple {
+  const cachedValue = rgbaCache.get(color);
+  if (cachedValue === undefined) {
+    const newValue = chroma(color).rgba();
+    rgbaCache.set(color, newValue);
+    return newValue;
+  }
+  return cachedValue;
+}
+
 /** If the user specifies the background of the container in which the chart will be on, we can use that color
  * and make sure to provide optimal contrast
  * @internal
  */
 export function combineColors(foregroundColor: Color, backgroundColor: Color): Color {
-  const [red1, green1, blue1, alpha1] = chroma(foregroundColor).rgba();
-  const [red2, green2, blue2, alpha2] = chroma(backgroundColor).rgba();
+  const [red1, green1, blue1, alpha1] = colorToRgba(foregroundColor);
+  const [red2, green2, blue2, alpha2] = colorToRgba(backgroundColor);
 
   // For reference on alpha calculations:
   // https://en.wikipedia.org/wiki/Alpha_compositing
@@ -74,12 +86,20 @@ export function combineColors(foregroundColor: Color, backgroundColor: Color): C
   return RGBATupleToString(rgba);
 }
 
+const validCache: Map<string | undefined, boolean> = new Map();
+
 /**
  * Return true if the color is a valid CSS color, false otherwise
- * @param color a color written in string
+ * @internal
  */
 export function isColorValid(color?: string): color is Color {
-  return Boolean(color) && chroma.valid(color);
+  const cachedValue = validCache.get(color);
+  if (cachedValue === undefined) {
+    const newValue = Boolean(color) && chroma.valid(color);
+    validCache.set(color, newValue);
+    return newValue;
+  }
+  return cachedValue;
 }
 
 /**
@@ -142,7 +162,7 @@ export function getTextColorIfTextInvertible(
   textColor: Color,
   textContrast: TextContrast,
   backgroundColor: Color,
-) {
+): Color {
   const inverseForContrast = specifiedTextColorIsDark === backgroundIsDark;
   const { r: tr, g: tg, b: tb, opacity: to } = stringToRGB(textColor);
   if (!textContrast) {
@@ -166,6 +186,7 @@ export function getTextColorIfTextInvertible(
         : makeHighContrastColor(`rgba(${255 - tr}, ${255 - tg}, ${255 - tb}, ${to})`, backgroundColor, textContrast)
       : makeHighContrastColor(textColor, backgroundColor, textContrast);
   }
+  return 'black'; // this should never happen; added it as previously function return type included undefined; todo
 }
 
 /**

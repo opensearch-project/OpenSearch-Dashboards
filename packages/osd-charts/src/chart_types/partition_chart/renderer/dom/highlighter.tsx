@@ -26,6 +26,7 @@ import { configMetadata } from '../../layout/config';
 import { PartitionLayout } from '../../layout/types/config_types';
 import { QuadViewModel } from '../../layout/types/viewmodel_types';
 import { isSunburst, isTreemap } from '../../layout/viewmodel/viewmodel';
+import { ContinuousDomainFocus } from '../canvas/partition';
 
 /** @internal */
 export interface HighlighterProps {
@@ -34,6 +35,7 @@ export interface HighlighterProps {
   canvasDimension: Dimensions;
   partitionLayout: PartitionLayout;
   geometries: QuadViewModel[];
+  geometriesFocus: ContinuousDomainFocus;
   diskCenter: PointObject;
   outerRadius: number;
   renderAsOverlay: boolean;
@@ -64,21 +66,24 @@ function getSectorShapeFromCanvasArc(x: number, y: number, r: number, a0: number
 
 /**
  * Renders an SVG Rect from a partition chart QuadViewModel
- * @param geometry the QuadViewModel
- * @param key the key to apply to the react element
- * @param fillColor the optional fill color
  */
-function renderRectangles(geometry: QuadViewModel, key: string, style: SVGStyle) {
+function renderRectangles(
+  geometry: QuadViewModel,
+  key: string,
+  style: SVGStyle,
+  { currentFocusX0, currentFocusX1 }: ContinuousDomainFocus,
+  width: number,
+) {
   const { x0, x1, y0px, y1px } = geometry;
   const props = style.color ? { fill: style.color } : { className: style.fillClassName };
-  return <rect key={key} x={x0} y={y0px} width={Math.abs(x1 - x0)} height={Math.abs(y1px - y0px)} {...props} />;
+  const scale = width / (currentFocusX1 - currentFocusX0);
+  const fx0 = Math.max((x0 - currentFocusX0) * scale, 0);
+  const fx1 = Math.min((x1 - currentFocusX0) * scale, width);
+  return <rect key={key} x={fx0} y={y0px} width={Math.abs(fx1 - fx0)} height={Math.abs(y1px - y0px)} {...props} />;
 }
 
 /**
  * Render an SVG path or circle from a partition chart QuadViewModel
- * @param geometry the QuadViewModel
- * @param key the key to apply to the react element
- * @param fillColor the optional fill color
  */
 function renderSector(geometry: QuadViewModel, key: string, style: SVGStyle) {
   const { x0, x1, y0px, y1px } = geometry;
@@ -99,12 +104,18 @@ function renderSector(geometry: QuadViewModel, key: string, style: SVGStyle) {
   return <path key={key} d={path} {...props} />;
 }
 
-function renderGeometries(geoms: QuadViewModel[], partitionLayout: PartitionLayout, style: SVGStyle) {
+function renderGeometries(
+  geoms: QuadViewModel[],
+  partitionLayout: PartitionLayout,
+  style: SVGStyle,
+  focus: ContinuousDomainFocus,
+  width: number,
+) {
   const maxDepth = geoms.reduce((acc, geom) => Math.max(acc, geom.depth), 0);
   // we should render only the deepest geometries of the tree to avoid overlaying highlighted geometries
   const highlightedGeoms = isTreemap(partitionLayout) ? geoms.filter((g) => g.depth >= maxDepth) : geoms;
   const renderGeom = isSunburst(partitionLayout) ? renderSector : renderRectangles;
-  return highlightedGeoms.map((geometry, index) => renderGeom(geometry, `${index}`, style));
+  return highlightedGeoms.map((geometry, index) => renderGeom(geometry, `${index}`, style, focus, width));
 }
 
 /** @internal */
@@ -114,6 +125,7 @@ export class HighlighterComponent extends React.Component<HighlighterProps> {
   renderAsMask() {
     const {
       geometries,
+      geometriesFocus,
       diskCenter,
       outerRadius,
       partitionLayout,
@@ -127,7 +139,7 @@ export class HighlighterComponent extends React.Component<HighlighterProps> {
           <mask id={maskId}>
             <rect x={0} y={0} width={width} height={height} fill="white" />
             <g transform={`translate(${diskCenter.x}, ${diskCenter.y})`}>
-              {renderGeometries(geometries, partitionLayout, { color: 'black' })}
+              {renderGeometries(geometries, partitionLayout, { color: 'black' }, geometriesFocus, width)}
             </g>
           </mask>
         </defs>
@@ -147,13 +159,25 @@ export class HighlighterComponent extends React.Component<HighlighterProps> {
   }
 
   renderAsOverlay() {
-    const { geometries, diskCenter, partitionLayout } = this.props;
+    const {
+      geometries,
+      geometriesFocus,
+      diskCenter,
+      partitionLayout,
+      canvasDimension: { width },
+    } = this.props;
     return (
       <g transform={`translate(${diskCenter.x}, ${diskCenter.y})`}>
-        {renderGeometries(geometries, partitionLayout, {
-          fillClassName: 'echHighlighterOverlay__fill',
-          strokeClassName: 'echHighlighterOverlay__stroke',
-        })}
+        {renderGeometries(
+          geometries,
+          partitionLayout,
+          {
+            fillClassName: 'echHighlighterOverlay__fill',
+            strokeClassName: 'echHighlighterOverlay__stroke',
+          },
+          geometriesFocus,
+          width,
+        )}
       </g>
     );
   }
@@ -182,6 +206,7 @@ export const DEFAULT_PROPS: HighlighterProps = {
     top: 0,
   },
   geometries: [],
+  geometriesFocus: { currentFocusX0: NaN, currentFocusX1: NaN, prevFocusX0: NaN, prevFocusX1: NaN },
   diskCenter: {
     x: 0,
     y: 0,
