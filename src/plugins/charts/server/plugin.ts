@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
-import { CoreSetup, Plugin } from 'kibana/server';
+import { i18n } from '@osd/i18n';
+import { schema } from '@osd/config-schema';
+import { CoreSetup, Plugin } from 'opensearch-dashboards/server';
 import { COLOR_MAPPING_SETTING } from '../common';
 
 export class ChartsServerPlugin implements Plugin<object, object> {
@@ -48,5 +48,5 @@ export class ChartsServerPlugin implements Plugin<object, object> {
     return {};
   }
 
-  public stop() {}
+  public stop() { }
 }
