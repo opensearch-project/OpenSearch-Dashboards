@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/osd-interpreter"
+  },
+  "include": [
+    "index.d.ts",
+    "src/**/*.d.ts"
+  ]
+}
