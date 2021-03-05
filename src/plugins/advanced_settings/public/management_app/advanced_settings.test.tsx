@@ -96,14 +96,14 @@ function mockConfig() {
           value: ['default_value'],
           name: 'Test array setting',
           description: 'Description for Test array setting',
-          category: ['elasticsearch'],
+          category: ['opensearch'],
         },
         'test:boolean:setting': {
           ...defaultConfig,
           value: true,
           name: 'Test boolean setting',
           description: 'Description for Test boolean setting',
-          category: ['elasticsearch'],
+          category: ['opensearch'],
         },
         'test:image:setting': {
           ...defaultConfig,
