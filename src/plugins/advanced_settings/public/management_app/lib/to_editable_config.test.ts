@@ -18,7 +18,7 @@
  */
 
 import { PublicUiSettingsParams, StringValidationRegex } from 'src/core/public';
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { toEditableConfig } from './to_editable_config';
 
 const defDefault = {

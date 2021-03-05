@@ -18,7 +18,7 @@
  */
 
 import React, { Fragment, PureComponent } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { EuiSearchBar, EuiFormErrorText, Query } from '@elastic/eui';
 
 import { getCategoryName } from '../../lib';

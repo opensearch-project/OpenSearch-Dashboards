@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { isDefaultValue } from './is_default_value';
 import { UiSettingsType } from '../../../../../core/public';
 
