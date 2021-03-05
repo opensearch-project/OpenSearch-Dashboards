@@ -42,10 +42,10 @@ export function runCli() {
     globalFlags: {
       string: ['opensearch-url', 'opensearch-dashboards-url', 'dir', 'config'],
       help: `
-        --config           path to an FTR config file that sets --opensearch-url, --opensearchDashboards-url, and --dir
+        --config           path to an FTR config file that sets --opensearch-url, --opensearch-dashboards-url, and --dir
                              default: ${defaultConfigPath}
         --opensearch-url           url for OpenSearch, prefer the --config flag
-        --opensearchDashboards-url       url for OpenSearch Dashboards, prefer the --config flag
+        --opensearch-dashboards-url       url for OpenSearch Dashboards, prefer the --config flag
         --dir              where arechives are stored, prefer the --config flag
       `,
     },
@@ -67,9 +67,9 @@ export function runCli() {
         throw createFlagError('--es-url or --config must be defined');
       }
 
-      let opensearchDashboardsUrl = flags['opensearchDashboards-url'];
+      let opensearchDashboardsUrl = flags['opensearch-dashboards-url'];
       if (opensearchDashboardsUrl && typeof opensearchDashboardsUrl !== 'string') {
-        throw createFlagError('--opensearchDashboards-url must be a string');
+        throw createFlagError('--opensearch-dashboards-url must be a string');
       }
       if (!opensearchDashboardsUrl && config) {
         opensearchDashboardsUrl = Url.format(config.get('servers.opensearchDashboards'));
