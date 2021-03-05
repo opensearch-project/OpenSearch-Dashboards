@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@osd/dev-utils';
 
-import { Plugin } from './load_kibana_platform_plugin';
+import { Plugin } from './load_opensearch_dashboards_platform_plugin';
 import { Config } from './config';
 
 export interface BuildContext {
@@ -28,5 +28,5 @@ export interface BuildContext {
   config: Config;
   sourceDir: string;
   buildDir: string;
-  kibanaVersion: string;
+  opensearchDashboardsVersion: string;
 }

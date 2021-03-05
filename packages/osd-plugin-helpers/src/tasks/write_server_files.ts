@@ -22,7 +22,7 @@ import { promisify } from 'util';
 
 import semver from 'semver';
 import vfs from 'vinyl-fs';
-import { transformFileWithBabel, transformFileStream } from '@kbn/dev-utils';
+import { transformFileWithBabel, transformFileStream } from '@osd/dev-utils';
 
 import { BuildContext } from '../build_context';
 
@@ -34,28 +34,28 @@ export async function writeServerFiles({
   plugin,
   sourceDir,
   buildDir,
-  kibanaVersion,
+  opensearchDashboardsVersion,
 }: BuildContext) {
   log.info('copying server source into the build and converting with babel');
 
-  const KIBANA_VERSION_79 = semver.satisfies(kibanaVersion, '~7.9.0');
+  const OPENSEARCH_DASHBOARDS_VERSION_79 = semver.satisfies(opensearchDashboardsVersion, '~7.9.0');
 
   // copy source files and apply some babel transformations in the process
   await asyncPipeline(
     vfs.src(
       [
-        'kibana.json',
+        'opensearch_dashboards.json',
         // always copy over the package.json file if we're building for 7.9
-        ...(KIBANA_VERSION_79 ? ['package.json'] : []),
-        // always copy over server files if we're building for 7.9, otherwise rely on `server: true` in kibana.json manifest
-        ...(KIBANA_VERSION_79 || plugin.manifest.server
+        ...(OPENSEARCH_DASHBOARDS_VERSION_79 ? ['package.json'] : []),
+        // always copy over server files if we're building for 7.9, otherwise rely on `server: true` in opensearch_dashboards.json manifest
+        ...(OPENSEARCH_DASHBOARDS_VERSION_79 || plugin.manifest.server
           ? config.serverSourcePatterns || [
-              'yarn.lock',
-              'tsconfig.json',
-              'package.json',
-              'index.{js,ts}',
-              '{lib,server,common,translations}/**/*',
-            ]
+            'yarn.lock',
+            'tsconfig.json',
+            'package.json',
+            'index.{js,ts}',
+            '{lib,server,common,translations}/**/*',
+          ]
           : []),
       ],
       {
@@ -72,12 +72,12 @@ export async function writeServerFiles({
       }
     ),
 
-    // add kibanaVersion to kibana.json files and kibana.version to package.json files
-    // we don't check for `kibana.version` in 7.10+ but the plugin helpers can still be used
-    // to build plugins for older Kibana versions so we do our best to support those needs by
+    // add opensearchDashboardsVersion to opensearch_dashboards.json files and opensearchDashboards.version to package.json files
+    // we don't check for `opensearchDashboards.version` in 7.10+ but the plugin helpers can still be used
+    // to build plugins for older OpenSearch Dashboards versions so we do our best to support those needs by
     // setting the property if the package.json file is encountered
     transformFileStream((file) => {
-      if (file.relative !== 'kibana.json' && file.relative !== 'package.json') {
+      if (file.relative !== 'opensearch_dashboards.json' && file.relative !== 'package.json') {
         return;
       }
 
@@ -86,18 +86,18 @@ export async function writeServerFiles({
 
       file.contents = Buffer.from(
         JSON.stringify(
-          file.relative === 'kibana.json'
+          file.relative === 'opensearch_dashboards.json'
             ? {
-                ...parsed,
-                kibanaVersion,
-              }
+              ...parsed,
+              opensearchDashboardsVersion,
+            }
             : {
-                ...parsed,
-                kibana: {
-                  ...parsed.kibana,
-                  version: kibanaVersion,
-                },
+              ...parsed,
+              opensearchDashboards: {
+                ...parsed.opensearchDashboards,
+                version: opensearchDashboardsVersion,
               },
+            },
           null,
           2
         )
