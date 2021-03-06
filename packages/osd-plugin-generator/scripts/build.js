@@ -19,7 +19,7 @@
 
 const Path = require('path');
 
-const { run } = require('@kbn/dev-utils');
+const { run } = require('@osd/dev-utils');
 const del = require('del');
 const execa = require('execa');
 

@@ -23,8 +23,8 @@ import { promisify } from 'util';
 
 import vfs from 'vinyl-fs';
 import prettier from 'prettier';
-import { REPO_ROOT } from '@kbn/utils';
-import { transformFileStream } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@osd/utils';
+import { transformFileStream } from '@osd/dev-utils';
 import ejs from 'ejs';
 import { Minimatch } from 'minimatch';
 

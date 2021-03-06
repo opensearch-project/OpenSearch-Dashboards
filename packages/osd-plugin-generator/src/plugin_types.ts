@@ -19,7 +19,7 @@
 
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@osd/utils';
 
 export interface PluginType {
   thirdParty: boolean;
@@ -32,15 +32,15 @@ export const PLUGIN_TYPE_OPTIONS: Array<{ name: string; value: PluginType }> = [
     value: { thirdParty: true, installDir: Path.resolve(REPO_ROOT, 'plugins') },
   },
   {
-    name: 'Kibana Example',
+    name: 'OpenSearch Dashboards Example',
     value: { thirdParty: false, installDir: Path.resolve(REPO_ROOT, 'examples') },
   },
   {
-    name: 'Kibana OSS',
+    name: 'OpenSearch Dashboards OSS',
     value: { thirdParty: false, installDir: Path.resolve(REPO_ROOT, 'src/plugins') },
   },
   {
-    name: 'Kibana OSS Functional Testing',
+    name: 'OpenSearch Dashboards OSS Functional Testing',
     value: {
       thirdParty: false,
       installDir: Path.resolve(REPO_ROOT, 'test/plugin_functional/plugins'),

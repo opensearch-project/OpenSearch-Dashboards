@@ -21,8 +21,8 @@ import Path from 'path';
 
 import del from 'del';
 import execa from 'execa';
-import { REPO_ROOT } from '@kbn/utils';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@osd/utils';
+import { createAbsolutePathSerializer } from '@osd/dev-utils';
 import globby from 'globby';
 
 const GENERATED_DIR = Path.resolve(REPO_ROOT, `plugins`);
@@ -57,7 +57,7 @@ it('generates a plugin', async () => {
       <absolute path>/plugins/foo/.gitignore,
       <absolute path>/plugins/foo/.i18nrc.json,
       <absolute path>/plugins/foo/common/index.ts,
-      <absolute path>/plugins/foo/kibana.json,
+      <absolute path>/plugins/foo/opensearch_dashboards.json,
       <absolute path>/plugins/foo/package.json,
       <absolute path>/plugins/foo/public/application.tsx,
       <absolute path>/plugins/foo/public/components/app.tsx,
@@ -96,7 +96,7 @@ it('generates a plugin without UI', async () => {
       <absolute path>/plugins/bar/.gitignore,
       <absolute path>/plugins/bar/.i18nrc.json,
       <absolute path>/plugins/bar/common/index.ts,
-      <absolute path>/plugins/bar/kibana.json,
+      <absolute path>/plugins/bar/opensearch_dashboards.json,
       <absolute path>/plugins/bar/package.json,
       <absolute path>/plugins/bar/README.md,
       <absolute path>/plugins/bar/server/index.ts,
@@ -128,7 +128,7 @@ it('generates a plugin without server plugin', async () => {
       <absolute path>/plugins/baz/.gitignore,
       <absolute path>/plugins/baz/.i18nrc.json,
       <absolute path>/plugins/baz/common/index.ts,
-      <absolute path>/plugins/baz/kibana.json,
+      <absolute path>/plugins/baz/opensearch_dashboards.json,
       <absolute path>/plugins/baz/package.json,
       <absolute path>/plugins/baz/public/application.tsx,
       <absolute path>/plugins/baz/public/components/app.tsx,
