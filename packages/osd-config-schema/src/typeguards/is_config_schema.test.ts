@@ -50,7 +50,7 @@ describe('isConfigSchema', () => {
     expect(isConfigSchema(function () {})).toBe(false);
   });
 
-  it('returns true as long as `__isKbnConfigSchemaType` is true', () => {
-    expect(isConfigSchema({ __isKbnConfigSchemaType: true })).toBe(true);
+  it('returns true as long as `__isOsdConfigSchemaType` is true', () => {
+    expect(isConfigSchema({ __isOsdConfigSchemaType: true })).toBe(true);
   });
 });
