@@ -21,8 +21,8 @@ import Path from 'path';
 import Fs from 'fs';
 
 import execa from 'execa';
-import { REPO_ROOT } from '@kbn/utils';
-import { run, createFailError, createFlagError } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@osd/utils';
+import { run, createFailError, createFlagError } from '@osd/dev-utils';
 
 import { snakeCase } from './casing';
 import { askQuestions, getDefaultAnswers } from './ask_questions';
@@ -73,7 +73,7 @@ export function runCli() {
     {
       usage: 'node scripts/generate_plugin',
       description: `
-        Generate a fresh Kibana plugin in the plugins/ directory
+        Generate a fresh OpenSearch Dashboards plugin in the plugins/ directory
       `,
       flags: {
         string: ['name'],
