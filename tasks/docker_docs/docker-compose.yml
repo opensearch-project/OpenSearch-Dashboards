@@ -1,8 +1,8 @@
 version: '2'
 services:
-  kibana_docs:
-    container_name: $KIBANA_DOCS_CONTAINER_NAME
+  opensearch_dashboards_docs:
+    container_name: $OPENSEARCH_DASHBOARDS_DOCS_CONTAINER_NAME
     build:
-      context: $KIBANA_DOCS_CONTEXT/tasks/docker_docs
+      context: $OPENSEARCH_DASHBOARDS_DOCS_CONTEXT/tasks/docker_docs
     volumes:
-      - $KIBANA_DOCS_CONTEXT/docs:/home/kibana/ascii_docs
+      - $OPENSEARCH_DASHBOARDS_DOCS_CONTEXT/docs:/home/opensearch-dashboards/ascii_docs
