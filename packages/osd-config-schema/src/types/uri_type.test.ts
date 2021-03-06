@@ -104,16 +104,16 @@ describe('#defaultValue', () => {
 
   test('returns value when specified', () => {
     expect(
-      schema.uri({ defaultValue: 'http://localhost:9200' }).validate('http://opensearchDashboard.local')
-    ).toBe('http://opensearchDashboard.local');
+      schema.uri({ defaultValue: 'http://localhost:9200' }).validate('http://opensearch-dashboards.local')
+    ).toBe('http://opensearch-dashboards.local');
   });
 
   test('returns value from context when context reference is specified', () => {
     expect(
       schema.uri({ defaultValue: schema.contextRef('some_uri') }).validate(undefined, {
-        some_uri: 'http://opensearchDashboard.local',
+        some_uri: 'http://opensearch-dashboards.local',
       })
-    ).toBe('http://opensearchDashboard.local');
+    ).toBe('http://opensearch-dashboards.local');
   });
 });
 
@@ -125,15 +125,15 @@ describe('#validate', () => {
       calledWith = val;
     };
 
-    schema.uri({ validate: validator }).validate('http://opensearchDashboard.local');
+    schema.uri({ validate: validator }).validate('http://opensearch-dashboards.local');
 
-    expect(calledWith).toBe('http://opensearchDashboard.local');
+    expect(calledWith).toBe('http://opensearch-dashboards.local');
   });
 
   test('is not called with default value in no input', () => {
     const validate = jest.fn();
 
-    schema.uri({ validate, defaultValue: 'http://opensearchDashboard.local' }).validate(undefined);
+    schema.uri({ validate, defaultValue: 'http://opensearch-dashboards.local' }).validate(undefined);
 
     expect(validate).not.toHaveBeenCalled();
   });
@@ -142,7 +142,7 @@ describe('#validate', () => {
     const validate = () => 'validator failure';
 
     expect(() =>
-      schema.uri({ validate }).validate('http://opensearchDashboard.local')
+      schema.uri({ validate }).validate('http://opensearch-dashboards.local')
     ).toThrowErrorMatchingInlineSnapshot(`"validator failure"`);
   });
 });
