@@ -43,7 +43,7 @@ export type OpenSearchClient = Omit<
 };
 
 /**
- * All response typings are maintained until opensearch-js provides them out of the box
+ * All response typings are maintained until elasticsearch-js provides them out of the box
  * https://github.com/elastic/elasticsearch-js/pull/970
  */
 
