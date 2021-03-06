@@ -19,7 +19,7 @@
 import { Buffer } from 'buffer';
 import { Readable } from 'stream';
 
-import { RequestEvent, errors } from '@elastic/opensearch';
+import { RequestEvent, errors } from '@elastic/elasticsearch';
 import { TransportRequestParams, RequestBody } from '@elastic/elasticsearch/lib/Transport';
 
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';

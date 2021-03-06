@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Client, ApiResponse } from '@elastic/opensearch';
+import { Client, ApiResponse } from '@elastic/elasticsearch';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { OpenSearchClient } from './types';
 import { ICustomClusterClient } from './cluster_client';

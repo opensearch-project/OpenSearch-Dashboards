@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import type { KibanaClient } from '@elastic/opensearch/api/kibana';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import type {
   ApiResponse,
   TransportRequestOptions,

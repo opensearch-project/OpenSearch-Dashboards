@@ -20,7 +20,7 @@
 import { ConnectionOptions as TlsConnectionOptions } from 'tls';
 import { URL } from 'url';
 import { Duration } from 'moment';
-import { ClientOptions, NodeOptions } from '@elastic/opensearch';
+import { ClientOptions, NodeOptions } from '@elastic/elasticsearch';
 import { OpenSearchConfig } from '../opensearch_config';
 import { DEFAULT_HEADERS } from '../default_headers';
 

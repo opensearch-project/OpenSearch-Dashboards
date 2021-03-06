@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Client } from '@elastic/opensearch';
+import { Client } from '@elastic/elasticsearch';
 import { Logger } from '../../logging';
 import { GetAuthHeaders, Headers, isOpenSearchDashboardsRequest, isRealRequest } from '../../http';
 import { ensureRawRequest, filterHeaders } from '../../http/router';

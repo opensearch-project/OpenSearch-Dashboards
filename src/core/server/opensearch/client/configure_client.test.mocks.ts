@@ -23,8 +23,8 @@ jest.doMock('./client_config', () => ({
 }));
 
 export const ClientMock = jest.fn();
-jest.doMock('@elastic/opensearch', () => {
-  const actual = jest.requireActual('@elastic/opensearch');
+jest.doMock('@elastic/elasticsearch', () => {
+  const actual = jest.requireActual('@elastic/elasticsearch');
   return {
     ...actual,
     Client: ClientMock,
