@@ -19,14 +19,14 @@
 
 import { resolve } from 'path';
 // deep import to avoid loading the whole package
-import { getConfigPath } from '@kbn/utils/target/path';
+import { getConfigPath } from '@osd/utils/target/path';
 import { getArgValues } from './read_argv';
 
 /**
  * Return the configuration files that needs to be loaded.
  *
  * This mimics the behavior of the `src/cli/serve/serve.js` cli script by reading
- * `-c` and `--config` options from process.argv, and fallbacks to `@kbn/utils`'s `getConfigPath()`
+ * `-c` and `--config` options from process.argv, and fallbacks to `@osd/utils`'s `getConfigPath()`
  */
 export const getConfigurationFilePaths = (argv: string[]): string[] => {
   const rawPaths = getArgValues(argv, ['-c', '--config']);

@@ -69,21 +69,21 @@ describe('ApmConfiguration', () => {
     expect(config.getConfig('serviceName').globalLabels.git_rev).toBe('distribution-sha');
   });
 
-  it('reads the kibana uuid from the uuid file', () => {
+  it('reads the opensearchDashboards uuid from the uuid file', () => {
     readUuidFileMock.mockReturnValue('instance-uuid');
     const config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName').globalLabels.kibana_uuid).toBe('instance-uuid');
+    expect(config.getConfig('serviceName').globalLabels.opensearch_dashboards_uuid).toBe('instance-uuid');
   });
 
-  it('uses the uuid from the kibana config if present', () => {
+  it('uses the uuid from the opensearchDashboards config if present', () => {
     readUuidFileMock.mockReturnValue('uuid-from-file');
-    const kibanaConfig = {
+    const opensearchDashboardsConfig = {
       server: {
         uuid: 'uuid-from-config',
       },
     };
-    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
-    expect(config.getConfig('serviceName').globalLabels.kibana_uuid).toBe('uuid-from-config');
+    const config = new ApmConfiguration(mockedRootDir, opensearchDashboardsConfig, false);
+    expect(config.getConfig('serviceName').globalLabels.opensearch_dashboards_uuid).toBe('uuid-from-config');
   });
 
   it('uses the correct default config depending on the `isDistributable` parameter', () => {
@@ -99,9 +99,9 @@ describe('ApmConfiguration', () => {
     expect(Object.keys(config.getConfig('serviceName'))).not.toContain('serverUrl');
   });
 
-  it('loads the configuration from the kibana config file', () => {
-    const kibanaConfig = {
-      elastic: {
+  it('loads the configuration from the opensearchDashboards config file', () => {
+    const opensearchDashboardsConfig = {
+      opensearch: {
         apm: {
           active: true,
           serverUrl: 'https://url',
@@ -109,7 +109,7 @@ describe('ApmConfiguration', () => {
         },
       },
     };
-    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, true);
+    const config = new ApmConfiguration(mockedRootDir, opensearchDashboardsConfig, true);
     expect(config.getConfig('serviceName')).toEqual(
       expect.objectContaining({
         active: true,
@@ -134,8 +134,8 @@ describe('ApmConfiguration', () => {
   });
 
   it('respect the precedence of the dev config', () => {
-    const kibanaConfig = {
-      elastic: {
+    const opensearchDashboardsConfig = {
+      opensearch: {
         apm: {
           active: true,
           serverUrl: 'https://url',
@@ -147,7 +147,7 @@ describe('ApmConfiguration', () => {
       active: true,
       serverUrl: 'https://dev-url.co',
     };
-    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, true);
+    const config = new ApmConfiguration(mockedRootDir, opensearchDashboardsConfig, true);
     expect(config.getConfig('serviceName')).toEqual(
       expect.objectContaining({
         active: true,
