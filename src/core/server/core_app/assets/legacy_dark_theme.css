@@ -4247,12 +4247,12 @@ a.label:focus {
   background-color: #1D1E24;
   color: #000000;
 }
-.navbar-inverse .kbnGlobalNav__logoBrand {
+.navbar-inverse .osdGlobalNav__logoBrand {
   height: 45px;
   width: 252px;
   background-color: #ffffff;
 }
-.navbar-inverse .kbnGlobalNav__smallLogoBrand {
+.navbar-inverse .osdGlobalNav__smallLogoBrand {
   height: 45px;
   width: 45px;
   background-color: #ffffff;
