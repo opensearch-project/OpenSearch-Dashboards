@@ -24,7 +24,7 @@ import { ApmConfiguration } from './config';
  * Load the APM configuration.
  *
  * @param argv the `process.argv` arguments
- * @param rootDir The root directory of opensearchDashboards (where the sources and the `package.json` file are)
+ * @param rootDir The root directory of opensearch-dashboards (where the sources and the `package.json` file are)
  * @param production true for production builds, false otherwise
  */
 export const loadConfiguration = (
