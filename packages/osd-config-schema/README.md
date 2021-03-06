@@ -1,11 +1,11 @@
-# `@kbn/config-schema` — The Kibana config validation library
+# `@osd/config-schema` — The OpenSearch Dashboards config validation library
 
-`@kbn/config-schema` is a TypeScript library inspired by Joi and designed to allow run-time validation of the
-Kibana configuration entries providing developers with a fully typed model of the validated data.
+`@osd/config-schema` is a TypeScript library inspired by Joi and designed to allow run-time validation of the
+OpenSearch Dashboards configuration entries providing developers with a fully typed model of the validated data.
 
 ## Table of Contents
 
-- [Why `@kbn/config-schema`?](#why-kbnconfig-schema)
+- [Why `@osd/config-schema`?](#why-osdconfig-schema)
 - [Schema building blocks](#schema-building-blocks)
   - [Basic types](#basic-types)
     - [`schema.string()`](#schemastring)
@@ -35,9 +35,9 @@ Kibana configuration entries providing developers with a fully typed model of th
 - [Custom validation](#custom-validation)
 - [Default values](#default-values)
 
-## Why `@kbn/config-schema`?
+## Why `@osd/config-schema`?
 
-Validation of externally supplied data is very important for Kibana. Especially if this data is used to configure how it operates.
+Validation of externally supplied data is very important for OpenSearch Dashboards. Especially if this data is used to configure how it operates.
 
 There are a number of reasons why we decided to roll our own solution for the configuration validation:
 
@@ -95,7 +95,7 @@ expect(() =>
 
 __Notes:__
 * `validate` method throws as soon as the first schema violation is encountered, no further validation is performed.
-* when you retrieve configuration within a Kibana plugin `validate` function is called by the Core automatically providing appropriate namespace and context variables (environment name, package info etc.).
+* when you retrieve configuration within a OpenSearch Dashboards plugin `validate` function is called by the Core automatically providing appropriate namespace and context variables (environment name, package info etc.).
 
 ### Basic types
 
@@ -478,8 +478,8 @@ valueSchema.validate({}, { envName: 'dev' });
 ```
 
 __Notes:__
-* The `@kbn/config-schema` neither validates nor coerces the "dereferenced" value and the developer is responsible for making sure that it has the appropriate type.
-* The root context that Kibana provides during config validation includes lots of useful properties like `environment name` that can be used to provide a strict schema for production and more relaxed one for development. 
+* The `@osd/config-schema` neither validates nor coerces the "dereferenced" value and the developer is responsible for making sure that it has the appropriate type.
+* The root context that OpenSearch Dashboards provides during config validation includes lots of useful properties like `environment name` that can be used to provide a strict schema for production and more relaxed one for development. 
 
 #### `schema.siblingRef()`
 
@@ -496,14 +496,14 @@ const valueSchema = schema.object({
 ```
 
 __Notes:__
-* The `@kbn/config-schema` neither validates nor coerces the "dereferenced" value and the developer is responsible for making sure that it has the appropriate type.
+* The `@osd/config-schema` neither validates nor coerces the "dereferenced" value and the developer is responsible for making sure that it has the appropriate type.
 
 ## Custom validation
 
 Using built-in schema primitives may not be enough in some scenarios or sometimes the attempt to model complex schemas with built-in primitives only may result in unreadable code.
-For these cases `@kbn/config-schema` provides a way to specify a custom validation function for almost any schema building block through the `validate` option.
+For these cases `@osd/config-schema` provides a way to specify a custom validation function for almost any schema building block through the `validate` option.
 
-For example `@kbn/config-schema` doesn't have a dedicated primitive for the `RegExp` based validation currently, but you can easily do that with a custom `validate` function:
+For example `@osd/config-schema` doesn't have a dedicated primitive for the `RegExp` based validation currently, but you can easily do that with a custom `validate` function:
 
 ```typescript
 const valueSchema = schema.string({
@@ -552,4 +552,4 @@ const valueSchemaWithFunctionEvaluatedDefault = schema.string({ defaultValue: ()
 ```
 
 __Notes:__
-* `@kbn/config-schema` neither validates nor coerces default value and developer is responsible for making sure that it has the appropriate type.
+* `@osd/config-schema` neither validates nor coerces default value and developer is responsible for making sure that it has the appropriate type.

@@ -32,18 +32,18 @@ test('returns value for valid URI as per RFC3986', () => {
     'http://tools.ietf.org/html/rfc3986'
   );
   expect(uriSchema.validate('udp://3domain.local')).toBe('udp://3domain.local');
-  expect(uriSchema.validate('urn:elastic:kibana')).toBe('urn:elastic:kibana');
+  expect(uriSchema.validate('urn:opensearch:opensearchDashboards')).toBe('urn:opensearch:opensearchDashboards');
   expect(uriSchema.validate('ftp://ftp.ietf.org/rfc/rfc3986.txt')).toBe(
     'ftp://ftp.ietf.org/rfc/rfc3986.txt'
   );
-  expect(uriSchema.validate('mailto:Platform.Kibana@elastic.co')).toBe(
-    'mailto:Platform.Kibana@elastic.co'
+  expect(uriSchema.validate('mailto:Platform.OpenSearchDashboards@opensearch.co')).toBe(
+    'mailto:Platform.OpenSearchDashboards@opensearch.co'
   );
   expect(uriSchema.validate('tel:+500-111-222-333')).toBe('tel:+500-111-222-333');
-  expect(uriSchema.validate('file:///kibana.log')).toBe('file:///kibana.log');
-  expect(uriSchema.validate('http://elastic@localhost:9200')).toBe('http://elastic@localhost:9200');
-  expect(uriSchema.validate('http://elastic:changeme@localhost:9200')).toBe(
-    'http://elastic:changeme@localhost:9200'
+  expect(uriSchema.validate('file:///opensearch_dashboards.log')).toBe('file:///opensearch_dashboards.log');
+  expect(uriSchema.validate('http://opensearch@localhost:9200')).toBe('http://opensearch@localhost:9200');
+  expect(uriSchema.validate('http://opensearch:changeme@localhost:9200')).toBe(
+    'http://opensearch:changeme@localhost:9200'
   );
   expect(uriSchema.validate('ldap://[2001:db8::7]/c=GB?objectClass?one')).toBe(
     'ldap://[2001:db8::7]/c=GB?objectClass?one'
@@ -79,17 +79,17 @@ describe('#scheme', () => {
   test('returns value when URI has required scheme', () => {
     const uriSchema = schema.uri({ scheme: ['http', 'https'] });
 
-    expect(uriSchema.validate('http://elastic.co')).toBe('http://elastic.co');
-    expect(uriSchema.validate('https://elastic.co')).toBe('https://elastic.co');
+    expect(uriSchema.validate('http://opensearch.co')).toBe('http://opensearch.co');
+    expect(uriSchema.validate('https://opensearch.co')).toBe('https://opensearch.co');
   });
 
   test('returns error when shorter string', () => {
     const uriSchema = schema.uri({ scheme: ['http', 'https'] });
 
-    expect(() => uriSchema.validate('ftp://elastic.co')).toThrowErrorMatchingInlineSnapshot(
+    expect(() => uriSchema.validate('ftp://opensearch.co')).toThrowErrorMatchingInlineSnapshot(
       `"expected URI with scheme [http|https]."`
     );
-    expect(() => uriSchema.validate('file:///kibana.log')).toThrowErrorMatchingInlineSnapshot(
+    expect(() => uriSchema.validate('file:///opensearch_dashboards.log')).toThrowErrorMatchingInlineSnapshot(
       `"expected URI with scheme [http|https]."`
     );
   });
@@ -104,16 +104,16 @@ describe('#defaultValue', () => {
 
   test('returns value when specified', () => {
     expect(
-      schema.uri({ defaultValue: 'http://localhost:9200' }).validate('http://kibana.local')
-    ).toBe('http://kibana.local');
+      schema.uri({ defaultValue: 'http://localhost:9200' }).validate('http://opensearch-dashboards.local')
+    ).toBe('http://opensearch-dashboards.local');
   });
 
   test('returns value from context when context reference is specified', () => {
     expect(
       schema.uri({ defaultValue: schema.contextRef('some_uri') }).validate(undefined, {
-        some_uri: 'http://kibana.local',
+        some_uri: 'http://opensearch-dashboards.local',
       })
-    ).toBe('http://kibana.local');
+    ).toBe('http://opensearch-dashboards.local');
   });
 });
 
@@ -125,15 +125,15 @@ describe('#validate', () => {
       calledWith = val;
     };
 
-    schema.uri({ validate: validator }).validate('http://kibana.local');
+    schema.uri({ validate: validator }).validate('http://opensearch-dashboards.local');
 
-    expect(calledWith).toBe('http://kibana.local');
+    expect(calledWith).toBe('http://opensearch-dashboards.local');
   });
 
   test('is not called with default value in no input', () => {
     const validate = jest.fn();
 
-    schema.uri({ validate, defaultValue: 'http://kibana.local' }).validate(undefined);
+    schema.uri({ validate, defaultValue: 'http://opensearch-dashboards.local' }).validate(undefined);
 
     expect(validate).not.toHaveBeenCalled();
   });
@@ -142,7 +142,7 @@ describe('#validate', () => {
     const validate = () => 'validator failure';
 
     expect(() =>
-      schema.uri({ validate }).validate('http://kibana.local')
+      schema.uri({ validate }).validate('http://opensearch-dashboards.local')
     ).toThrowErrorMatchingInlineSnapshot(`"validator failure"`);
   });
 });
