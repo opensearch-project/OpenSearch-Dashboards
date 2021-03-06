@@ -20,9 +20,9 @@
 import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
 
 const { version } = require('../../package.json');
-const KIBANA_INSTALL_DIR =
-  process.env.KIBANA_INSTALL_DIR ||
-  `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
+const OPENSEARCH_DASHBOARDS_INSTALL_DIR =
+  process.env.OPENSEARCH_DASHBOARDS_INSTALL_DIR ||
+  `./build/oss/opensearch-dashboards-${version}-SNAPSHOT-${process.platform}-x86_64`;
 
 module.exports = function () {
   const NODE = 'node';
@@ -132,7 +132,7 @@ module.exports = function () {
       args: [
         'nyc',
         '--reporter=html',
-        '--report-dir=./target/kibana-coverage/mocha',
+        '--report-dir=./target/opensearch-dashboards-coverage/mocha',
         NODE,
         'scripts/mocha',
       ],
@@ -182,8 +182,8 @@ module.exports = function () {
         'test/server_integration/http/ssl_with_p12_intermediate/config.js',
         '--bail',
         '--debug',
-        '--kibana-install-dir',
-        KIBANA_INSTALL_DIR,
+        '--opensearch-dashboards-install-dir',
+        OPENSEARCH_DASHBOARDS_INSTALL_DIR,
       ],
     }),
 
@@ -196,8 +196,8 @@ module.exports = function () {
         'test/interpreter_functional/config.ts',
         '--bail',
         '--debug',
-        '--kibana-install-dir',
-        KIBANA_INSTALL_DIR,
+        '--opensearch-dashboards-install-dir',
+        OPENSEARCH_DASHBOARDS_INSTALL_DIR,
       ],
     }),
 
@@ -251,7 +251,7 @@ module.exports = function () {
     test_projects: gruntTaskWithGithubChecks('Project tests', 'test:projects'),
 
     ...getFunctionalTestGroupRunConfigs({
-      kibanaInstallDir: KIBANA_INSTALL_DIR,
+      opensearchDashboardsInstallDir: OPENSEARCH_DASHBOARDS_INSTALL_DIR,
     }),
   };
 };
