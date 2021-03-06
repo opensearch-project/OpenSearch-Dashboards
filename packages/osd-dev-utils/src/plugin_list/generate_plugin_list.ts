@@ -53,7 +53,7 @@ export function generatePluginList(ossPlugins: Plugins, xpackPlugins: Plugins) {
 
 NOTE:
   This is an automatically generated file. Please do not edit directly. Instead, run the
-  following from within the opensearchDashboards repository:
+  following from within the opensearch-dashboards repository:
 
     node scripts/build_plugin_list_docs
 
