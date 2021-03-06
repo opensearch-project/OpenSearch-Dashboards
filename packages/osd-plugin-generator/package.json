@@ -1,15 +1,15 @@
 {
-  "name": "@kbn/plugin-generator",
+  "name": "@osd/plugin-generator",
   "version": "1.0.0",
   "private": true,
   "license": "Apache-2.0",
   "main": "target/index.js",
   "scripts": {
-    "kbn:bootstrap": "node scripts/build",
-    "kbn:watch": "node scripts/build --watch"
+    "osd:bootstrap": "node scripts/build",
+    "osd:watch": "node scripts/build --watch"
   },
   "dependencies": {
-    "@kbn/dev-utils": "1.0.0",
+    "@osd/dev-utils": "1.0.0",
     "ejs": "^3.1.5",
     "execa": "^4.0.2",
     "inquirer": "^7.3.3",
