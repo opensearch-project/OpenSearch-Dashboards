@@ -21,7 +21,7 @@ import { join } from 'path';
 import { merge, get } from 'lodash';
 import { execSync } from 'child_process';
 // deep import to avoid loading the whole package
-import { getDataPath } from '@kbn/utils/target/path';
+import { getDataPath } from '@osd/utils/target/path';
 import { readFileSync } from 'fs';
 import { ApmAgentConfig } from './types';
 
@@ -42,6 +42,7 @@ const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
   return {
     active: false,
     serverUrl: 'https://f1542b814f674090afd914960583265f.apm.us-central1.gcp.cloud.es.io:443',
+    // TODO: serverUrl
     // The secretToken below is intended to be hardcoded in this file even though
     // it makes it public. This is not a security/privacy issue. Normally we'd
     // instead disable the need for a secretToken in the APM Server config where
@@ -57,17 +58,17 @@ const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
 
 export class ApmConfiguration {
   private baseConfig?: any;
-  private kibanaVersion: string;
+  private opensearchDashboardsVersion: string;
   private pkgBuild: Record<string, any>;
 
   constructor(
     private readonly rootDir: string,
-    private readonly rawKibanaConfig: Record<string, any>,
+    private readonly rawOpenSearchDashboardsConfig: Record<string, any>,
     private readonly isDistributable: boolean
   ) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { version, build } = require(join(this.rootDir, 'package.json'));
-    this.kibanaVersion = version;
+    this.opensearchDashboardsVersion = version;
     this.pkgBuild = build;
   }
 
@@ -82,7 +83,7 @@ export class ApmConfiguration {
     if (!this.baseConfig) {
       const apmConfig = merge(
         getDefaultConfig(this.isDistributable),
-        this.getConfigFromKibanaConfig(),
+        this.getConfigFromOpenSearchDashboardsConfig(),
         this.getDevConfig(),
         this.getDistConfig()
       );
@@ -92,32 +93,32 @@ export class ApmConfiguration {
         apmConfig.globalLabels.git_rev = rev;
       }
 
-      const uuid = this.getKibanaUuid();
+      const uuid = this.getOpenSearchDashboardsUuid();
       if (uuid) {
-        apmConfig.globalLabels.kibana_uuid = uuid;
+        apmConfig.globalLabels.opensearch_dashboards_uuid = uuid;
       }
 
-      apmConfig.serviceVersion = this.kibanaVersion;
+      apmConfig.serviceVersion = this.opensearchDashboardsVersion;
       this.baseConfig = apmConfig;
     }
 
     return this.baseConfig;
   }
 
-  private getConfigFromKibanaConfig(): ApmAgentConfig {
-    return get(this.rawKibanaConfig, 'elastic.apm', {});
+  private getConfigFromOpenSearchDashboardsConfig(): ApmAgentConfig {
+    return get(this.rawOpenSearchDashboardsConfig, 'opensearch.apm', {});
   }
 
-  private getKibanaUuid() {
+  private getOpenSearchDashboardsUuid() {
     // try to access the `server.uuid` value from the config file first.
     // if not manually defined, we will then read the value from the `{DATA_FOLDER}/uuid` file.
     // note that as the file is created by the platform AFTER apm init, the file
     // will not be present at first startup, but there is nothing we can really do about that.
-    if (get(this.rawKibanaConfig, 'server.uuid')) {
-      return this.rawKibanaConfig.server.uuid;
+    if (get(this.rawOpenSearchDashboardsConfig, 'server.uuid')) {
+      return this.rawOpenSearchDashboardsConfig.server.uuid;
     }
 
-    const dataPath: string = get(this.rawKibanaConfig, 'path.data') || getDataPath();
+    const dataPath: string = get(this.rawOpenSearchDashboardsConfig, 'path.data') || getDataPath();
     try {
       const filename = join(dataPath, 'uuid');
       return readFileSync(filename, 'utf-8');
