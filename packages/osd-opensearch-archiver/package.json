@@ -1,0 +1,20 @@
+{
+  "name": "@osd/opensearch-archiver",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "main": "target/index.js",
+  "opensearchDashboards": {
+    "devOnly": true
+  },
+  "scripts": {
+    "osd:bootstrap": "rm -rf target && tsc",
+    "osd:watch": "rm -rf target && tsc --watch"
+  },
+  "dependencies": {
+    "@osd/dev-utils": "1.0.0",
+    "elasticsearch": "^16.7.0"
+  },
+  "devDependencies": {
+    "@types/elasticsearch": "^5.0.33"
+  }
+}
