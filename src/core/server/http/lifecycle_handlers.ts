@@ -24,9 +24,9 @@ import { isSafeMethod } from './router';
 import { Env } from '../config';
 import { LifecycleRegistrar } from './http_server';
 
-const VERSION_HEADER = 'kbn-version';
-const XSRF_HEADER = 'kbn-xsrf';
-const KIBANA_NAME_HEADER = 'kbn-name';
+const VERSION_HEADER = 'osd-version';
+const XSRF_HEADER = 'osd-xsrf';
+const OPENSEARCH_DASHBOARDS_NAME_HEADER = 'osd-name';
 
 export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler => {
   const { whitelist, disableProtection } = config.xsrf;
@@ -79,7 +79,7 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
   return (request, response, toolkit) => {
     const additionalHeaders = {
       ...customHeaders,
-      [KIBANA_NAME_HEADER]: serverName,
+      [OPENSEARCH_DASHBOARDS_NAME_HEADER]: serverName,
     };
 
     return toolkit.next({ headers: additionalHeaders });

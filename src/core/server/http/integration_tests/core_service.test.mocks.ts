@@ -16,32 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { elasticsearchServiceMock } from '../../elasticsearch/elasticsearch_service.mock';
+import { opensearchServiceMock } from '../../opensearch/opensearch_service.mock';
 
 export const MockLegacyScopedClusterClient = jest.fn();
-export const legacyClusterClientInstanceMock = elasticsearchServiceMock.createLegacyScopedClusterClient();
-jest.doMock('../../elasticsearch/legacy/scoped_cluster_client', () => ({
+export const legacyClusterClientInstanceMock = opensearchServiceMock.createLegacyScopedClusterClient();
+jest.doMock('../../opensearch/legacy/scoped_cluster_client', () => ({
   LegacyScopedClusterClient: MockLegacyScopedClusterClient.mockImplementation(
     () => legacyClusterClientInstanceMock
   ),
 }));
 
-jest.doMock('elasticsearch', () => {
-  const realES = jest.requireActual('elasticsearch');
+jest.doMock('opensearch', () => {
+  const realES = jest.requireActual('opensearch');
   return {
     ...realES,
     // eslint-disable-next-line object-shorthand
     Client: function () {
-      return elasticsearchServiceMock.createLegacyElasticsearchClient();
+      return opensearchServiceMock.createLegacyOpenSearchClient();
     },
   };
 });
 
-export const MockElasticsearchClient = jest.fn();
-jest.doMock('@elastic/elasticsearch', () => {
-  const real = jest.requireActual('@elastic/elasticsearch');
+export const MockOpenSearchClient = jest.fn();
+jest.doMock('@elastic/opensearch', () => {
+  const real = jest.requireActual('@elastic/opensearch');
   return {
     ...real,
-    Client: MockElasticsearchClient,
+    Client: MockOpenSearchClient,
   };
 });

@@ -19,19 +19,19 @@
 
 import {
   MockLegacyScopedClusterClient,
-  MockElasticsearchClient,
+  MockOpenSearchClient,
   legacyClusterClientInstanceMock,
 } from './core_service.test.mocks';
 
 import Boom from 'boom';
 import { Request } from 'hapi';
-import { errors as esErrors } from 'elasticsearch';
-import { LegacyElasticsearchErrorHelpers } from '../../elasticsearch/legacy';
+import { errors as opensearchErrors } from 'elasticsearch';
+import { LegacyOpenSearchErrorHelpers } from '../../opensearch/legacy';
 
-import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import * as kbnTestServer from '../../../test_helpers/kbn_server';
-import { InternalElasticsearchServiceStart } from '../../elasticsearch';
+import { opensearchClientMock } from '../../opensearch/client/mocks';
+import { ResponseError } from '@elastic/opensearch/lib/errors';
+import * as osdTestServer from '../../../test_helpers/osd_server';
+import { InternalOpenSearchServiceStart } from '../../opensearch';
 
 interface User {
   id: string;
@@ -51,21 +51,21 @@ const cookieOptions = {
 };
 
 describe('http service', () => {
-  let esClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
+  let opensearchClient: ReturnType<typeof opensearchClientMock.createInternalClient>;
 
   beforeEach(async () => {
-    esClient = elasticsearchClientMock.createInternalClient();
-    MockElasticsearchClient.mockImplementation(() => esClient);
+    opensearchClient = opensearchClientMock.createInternalClient();
+    MockOpenSearchClient.mockImplementation(() => opensearchClient);
   }, 30000);
 
   afterEach(async () => {
-    MockElasticsearchClient.mockClear();
+    MockOpenSearchClient.mockClear();
   });
 
   describe('auth', () => {
-    let root: ReturnType<typeof kbnTestServer.createRoot>;
+    let root: ReturnType<typeof osdTestServer.createRoot>;
     beforeEach(async () => {
-      root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+      root = osdTestServer.createRoot({ plugins: { initialize: false } });
     }, 30000);
 
     afterEach(async () => {
@@ -84,7 +84,7 @@ describe('http service', () => {
         );
 
         await root.start();
-        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: true });
+        await osdTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: true });
       });
 
       it('returns false if has not been authenticated', async () => {
@@ -100,7 +100,7 @@ describe('http service', () => {
         );
 
         await root.start();
-        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
+        await osdTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
       });
 
       it('returns false if no authentication mechanism has been registered', async () => {
@@ -114,7 +114,7 @@ describe('http service', () => {
         );
 
         await root.start();
-        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
+        await osdTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
       });
 
       it('returns true if authenticated on a route with "optional" auth', async () => {
@@ -129,7 +129,7 @@ describe('http service', () => {
         );
 
         await root.start();
-        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: true });
+        await osdTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: true });
       });
 
       it('returns false if not authenticated on a route with "optional" auth', async () => {
@@ -145,7 +145,7 @@ describe('http service', () => {
         );
 
         await root.start();
-        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
+        await osdTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
       });
     });
     describe('#get()', () => {
@@ -167,7 +167,7 @@ describe('http service', () => {
 
         await root.start();
 
-        await kbnTestServer.request
+        await osdTestServer.request
           .get(root, '/get-auth')
           .expect(200, { state: user, status: 'authenticated' });
       });
@@ -182,7 +182,7 @@ describe('http service', () => {
         );
 
         await root.start();
-        await kbnTestServer.request.get(root, '/get-auth').expect(200, { status: 'unknown' });
+        await osdTestServer.request.get(root, '/get-auth').expect(200, { status: 'unknown' });
       });
 
       it('returns correct unauthenticated status', async () => {
@@ -199,7 +199,7 @@ describe('http service', () => {
 
         await root.start();
 
-        await kbnTestServer.request
+        await osdTestServer.request
           .get(root, '/get-auth')
           .expect(200, { status: 'unauthenticated' });
 
@@ -212,9 +212,9 @@ describe('http service', () => {
     describe('#registerAuth()', () => {
       const sessionDurationMs = 1000;
 
-      let root: ReturnType<typeof kbnTestServer.createRoot>;
+      let root: ReturnType<typeof osdTestServer.createRoot>;
       beforeEach(async () => {
-        root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+        root = osdTestServer.createRoot({ plugins: { initialize: false } });
       }, 30000);
 
       afterEach(async () => {
@@ -240,14 +240,14 @@ describe('http service', () => {
         await root.start();
 
         const legacyUrl = '/legacy';
-        const kbnServer = kbnTestServer.getKbnServer(root);
-        kbnServer.server.route({
+        const osdServer = osdTestServer.getKbnServer(root);
+        osdServer.server.route({
           method: 'GET',
           path: legacyUrl,
           handler: () => 'ok from legacy server',
         });
 
-        const response = await kbnTestServer.request
+        const response = await osdTestServer.request
           .get(root, legacyUrl)
           .expect(200, 'ok from legacy server');
 
@@ -278,8 +278,8 @@ describe('http service', () => {
         await root.start();
 
         const legacyUrl = '/legacy';
-        const kbnServer = kbnTestServer.getKbnServer(root);
-        kbnServer.server.route({
+        const osdServer = osdTestServer.getKbnServer(root);
+        osdServer.server.route({
           method: 'GET',
           path: legacyUrl,
           handler: (req: Request) => ({
@@ -288,7 +288,7 @@ describe('http service', () => {
           }),
         });
 
-        await kbnTestServer.request
+        await osdTestServer.request
           .get(root, legacyUrl)
           .set({ custom: 'custom-header' })
           .expect(200, { authorization: token, custom: 'custom-header' });
@@ -307,14 +307,14 @@ describe('http service', () => {
 
         await root.start();
 
-        const kbnServer = kbnTestServer.getKbnServer(root);
-        kbnServer.server.route({
+        const osdServer = osdTestServer.getKbnServer(root);
+        osdServer.server.route({
           method: 'GET',
           path: '/legacy',
           handler: () => 'ok',
         });
 
-        const response = await kbnTestServer.request.get(root, '/legacy').expect(200);
+        const response = await osdTestServer.request.get(root, '/legacy').expect(200);
         expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
       });
 
@@ -331,8 +331,8 @@ describe('http service', () => {
 
         await root.start();
 
-        const kbnServer = kbnTestServer.getKbnServer(root);
-        kbnServer.server.route({
+        const osdServer = osdTestServer.getKbnServer(root);
+        osdServer.server.route({
           method: 'GET',
           path: '/legacy',
           handler: () => {
@@ -340,15 +340,15 @@ describe('http service', () => {
           },
         });
 
-        const response = await kbnTestServer.request.get(root, '/legacy').expect(400);
+        const response = await osdTestServer.request.get(root, '/legacy').expect(400);
         expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
       });
     });
 
     describe('#basePath()', () => {
-      let root: ReturnType<typeof kbnTestServer.createRoot>;
+      let root: ReturnType<typeof osdTestServer.createRoot>;
       beforeEach(async () => {
-        root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+        root = osdTestServer.createRoot({ plugins: { initialize: false } });
       }, 30000);
 
       afterEach(async () => await root.shutdown());
@@ -363,21 +363,21 @@ describe('http service', () => {
         await root.start();
 
         const legacyUrl = '/legacy';
-        const kbnServer = kbnTestServer.getKbnServer(root);
-        kbnServer.server.route({
+        const osdServer = osdTestServer.getKbnServer(root);
+        osdServer.server.route({
           method: 'GET',
           path: legacyUrl,
-          handler: kbnServer.newPlatform.setup.core.http.basePath.get,
+          handler: osdServer.newPlatform.setup.core.http.basePath.get,
         });
 
-        await kbnTestServer.request.get(root, legacyUrl).expect(200, reqBasePath);
+        await osdTestServer.request.get(root, legacyUrl).expect(200, reqBasePath);
       });
     });
   });
-  describe('legacy elasticsearch client', () => {
-    let root: ReturnType<typeof kbnTestServer.createRoot>;
+  describe('legacy opensearch client', () => {
+    let root: ReturnType<typeof osdTestServer.createRoot>;
     beforeEach(async () => {
-      root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+      root = osdTestServer.createRoot({ plugins: { initialize: false } });
     }, 30000);
 
     afterEach(async () => {
@@ -385,7 +385,7 @@ describe('http service', () => {
       await root.shutdown();
     });
 
-    it('rewrites authorization header via authHeaders to make a request to Elasticsearch', async () => {
+    it('rewrites authorization header via authHeaders to make a request to OpenSearch', async () => {
       const authHeaders = { authorization: 'Basic: user:password' };
       const { http } = await root.setup();
       const { registerAuth, createRouter } = http;
@@ -395,13 +395,13 @@ describe('http service', () => {
       const router = createRouter('/new-platform');
       router.get({ path: '/', validate: false }, async (context, req, res) => {
         // it forces client initialization since the core creates them lazily.
-        await context.core.elasticsearch.legacy.client.callAsCurrentUser('ping');
+        await context.core.opensearch.legacy.client.callAsCurrentUser('ping');
         return res.ok();
       });
 
       await root.start();
 
-      await kbnTestServer.request.get(root, '/new-platform/').expect(200);
+      await osdTestServer.request.get(root, '/new-platform/').expect(200);
 
       // client contains authHeaders for BWC with legacy platform.
       const [client] = MockLegacyScopedClusterClient.mock.calls;
@@ -412,7 +412,7 @@ describe('http service', () => {
       });
     });
 
-    it('passes request authorization header to Elasticsearch if registerAuth was not set', async () => {
+    it('passes request authorization header to OpenSearch if registerAuth was not set', async () => {
       const authorizationHeader = 'Basic: username:password';
       const { http } = await root.setup();
       const { createRouter } = http;
@@ -420,13 +420,13 @@ describe('http service', () => {
       const router = createRouter('/new-platform');
       router.get({ path: '/', validate: false }, async (context, req, res) => {
         // it forces client initialization since the core creates them lazily.
-        await context.core.elasticsearch.legacy.client.callAsCurrentUser('ping');
+        await context.core.opensearch.legacy.client.callAsCurrentUser('ping');
         return res.ok();
       });
 
       await root.start();
 
-      await kbnTestServer.request
+      await osdTestServer.request
         .get(root, '/new-platform/')
         .set('Authorization', authorizationHeader)
         .expect(200);
@@ -439,12 +439,12 @@ describe('http service', () => {
       });
     });
 
-    it('forwards 401 errors returned from elasticsearch', async () => {
+    it('forwards 401 errors returned from opensearch', async () => {
       const { http } = await root.setup();
       const { createRouter } = http;
 
-      const authenticationError = LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(
-        new (esErrors.AuthenticationException as any)('Authentication Exception', {
+      const authenticationError = LegacyOpenSearchErrorHelpers.decorateNotAuthorizedError(
+        new (opensearchErrors.AuthenticationException as any)('Authentication Exception', {
           body: { error: { header: { 'WWW-Authenticate': 'authenticate header' } } },
           statusCode: 401,
         })
@@ -454,38 +454,38 @@ describe('http service', () => {
 
       const router = createRouter('/new-platform');
       router.get({ path: '/', validate: false }, async (context, req, res) => {
-        await context.core.elasticsearch.legacy.client.callAsCurrentUser('ping');
+        await context.core.opensearch.legacy.client.callAsCurrentUser('ping');
         return res.ok();
       });
 
       await root.start();
 
-      const response = await kbnTestServer.request.get(root, '/new-platform/').expect(401);
+      const response = await osdTestServer.request.get(root, '/new-platform/').expect(401);
 
       expect(response.header['www-authenticate']).toEqual('authenticate header');
     });
   });
 
-  describe('elasticsearch client', () => {
-    let root: ReturnType<typeof kbnTestServer.createRoot>;
+  describe('opensearch client', () => {
+    let root: ReturnType<typeof osdTestServer.createRoot>;
 
     beforeEach(async () => {
-      root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+      root = osdTestServer.createRoot({ plugins: { initialize: false } });
     }, 30000);
 
     afterEach(async () => {
-      MockElasticsearchClient.mockClear();
+      MockOpenSearchClient.mockClear();
       await root.shutdown();
     });
 
-    it('forwards unauthorized errors from elasticsearch', async () => {
+    it('forwards unauthorized errors from opensearch', async () => {
       const { http } = await root.setup();
       const { createRouter } = http;
       // eslint-disable-next-line prefer-const
-      let elasticsearch: InternalElasticsearchServiceStart;
+      let opensearch: InternalOpenSearchServiceStart;
 
-      esClient.ping.mockImplementation(() =>
-        elasticsearchClientMock.createErrorTransportRequestPromise(
+      opensearchClient.ping.mockImplementation(() =>
+        opensearchClientMock.createErrorTransportRequestPromise(
           new ResponseError({
             statusCode: 401,
             body: {
@@ -504,26 +504,26 @@ describe('http service', () => {
 
       const router = createRouter('/new-platform');
       router.get({ path: '/', validate: false }, async (context, req, res) => {
-        await elasticsearch.client.asScoped(req).asInternalUser.ping();
+        await opensearch.client.asScoped(req).asInternalUser.ping();
         return res.ok();
       });
 
       const coreStart = await root.start();
-      elasticsearch = coreStart.elasticsearch;
+      opensearch = coreStart.opensearch;
 
-      const { header } = await kbnTestServer.request.get(root, '/new-platform/').expect(401);
+      const { header } = await osdTestServer.request.get(root, '/new-platform/').expect(401);
 
       expect(header['www-authenticate']).toEqual('content');
     });
 
-    it('uses a default value for `www-authenticate` header when ES 401 does not specify it', async () => {
+    it('uses a default value for `www-authenticate` header when OpenSearch 401 does not specify it', async () => {
       const { http } = await root.setup();
       const { createRouter } = http;
       // eslint-disable-next-line prefer-const
-      let elasticsearch: InternalElasticsearchServiceStart;
+      let opensearch: InternalOpenSearchServiceStart;
 
-      esClient.ping.mockImplementation(() =>
-        elasticsearchClientMock.createErrorTransportRequestPromise(
+      opensearchClient.ping.mockImplementation(() =>
+        opensearchClientMock.createErrorTransportRequestPromise(
           new ResponseError({
             statusCode: 401,
             body: {
@@ -540,14 +540,14 @@ describe('http service', () => {
 
       const router = createRouter('/new-platform');
       router.get({ path: '/', validate: false }, async (context, req, res) => {
-        await elasticsearch.client.asScoped(req).asInternalUser.ping();
+        await opensearch.client.asScoped(req).asInternalUser.ping();
         return res.ok();
       });
 
       const coreStart = await root.start();
-      elasticsearch = coreStart.elasticsearch;
+      opensearch = coreStart.opensearch;
 
-      const { header } = await kbnTestServer.request.get(root, '/new-platform/').expect(401);
+      const { header } = await osdTestServer.request.get(root, '/new-platform/').expect(401);
 
       expect(header['www-authenticate']).toEqual('Basic realm="Authorization Required"');
     });

@@ -22,12 +22,12 @@ import { readFileSync } from 'fs';
 import supertest from 'supertest';
 import { omit } from 'lodash';
 
-import { ByteSizeValue, schema } from '@kbn/config-schema';
+import { ByteSizeValue, schema } from '@osd/config-schema';
 import { HttpConfig } from './http_config';
 import {
   Router,
-  KibanaRequest,
-  KibanaResponseFactory,
+  OpenSearchDashboardsRequest,
+  OpenSearchDashboardsResponseFactory,
   RequestHandler,
   RouteValidationResultFactory,
   RouteValidationFunction,
@@ -36,7 +36,7 @@ import { loggingSystemMock } from '../logging/logging_system.mock';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
 import { RequestHandlerContext } from 'kibana/server';
-import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { OSD_CERT_PATH, OSD_KEY_PATH } from '@osd/dev-utils';
 
 const cookieOptions = {
   name: 'sid',
@@ -57,8 +57,8 @@ let certificate: string;
 let key: string;
 
 beforeAll(() => {
-  certificate = readFileSync(KBN_CERT_PATH, 'utf8');
-  key = readFileSync(KBN_KEY_PATH, 'utf8');
+  certificate = readFileSync(OSD_CERT_PATH, 'utf8');
+  key = readFileSync(OSD_KEY_PATH, 'utf8');
 });
 
 beforeEach(() => {
@@ -432,13 +432,13 @@ test('not inline validation - specifying validation handler', async () => {
 });
 
 // https://github.com/elastic/kibana/issues/47047
-test('not inline handler - KibanaRequest', async () => {
+test('not inline handler - OpenSearchDashboardsRequest', async () => {
   const router = new Router('/foo', logger, enhanceWithContext);
 
   const handler = (
     context: RequestHandlerContext,
-    req: KibanaRequest<unknown, unknown, { bar: string; baz: number }>,
-    res: KibanaResponseFactory
+    req: OpenSearchDashboardsRequest<unknown, unknown, { bar: string; baz: number }>,
+    res: OpenSearchDashboardsResponseFactory
   ) => {
     const body = {
       bar: req.body.bar.toUpperCase(),

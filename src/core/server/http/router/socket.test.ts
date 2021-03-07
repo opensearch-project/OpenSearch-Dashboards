@@ -18,12 +18,12 @@
  */
 import { Socket } from 'net';
 import { DetailedPeerCertificate, TLSSocket } from 'tls';
-import { KibanaSocket } from './socket';
+import { OpenSearchDashboardsSocket } from './socket';
 
-describe('KibanaSocket', () => {
+describe('OpenSearchDashboardsSocket', () => {
   describe('getPeerCertificate', () => {
     it('returns null for net.Socket instance', () => {
-      const socket = new KibanaSocket(new Socket());
+      const socket = new OpenSearchDashboardsSocket(new Socket());
 
       expect(socket.getPeerCertificate()).toBe(null);
     });
@@ -32,7 +32,7 @@ describe('KibanaSocket', () => {
       const tlsSocket = new TLSSocket(new Socket());
       const cert = { issuerCertificate: {} } as DetailedPeerCertificate;
       const spy = jest.spyOn(tlsSocket, 'getPeerCertificate').mockImplementation(() => cert);
-      const socket = new KibanaSocket(tlsSocket);
+      const socket = new OpenSearchDashboardsSocket(tlsSocket);
       const result = socket.getPeerCertificate(true);
 
       expect(spy).toBeCalledTimes(1);
@@ -43,7 +43,7 @@ describe('KibanaSocket', () => {
     it('returns null if tls.Socket getPeerCertificate returns null', () => {
       const tlsSocket = new TLSSocket(new Socket());
       jest.spyOn(tlsSocket, 'getPeerCertificate').mockImplementation(() => null as any);
-      const socket = new KibanaSocket(tlsSocket);
+      const socket = new OpenSearchDashboardsSocket(tlsSocket);
 
       expect(socket.getPeerCertificate()).toBe(null);
     });
@@ -51,7 +51,7 @@ describe('KibanaSocket', () => {
     it('returns null if tls.Socket getPeerCertificate returns empty object', () => {
       const tlsSocket = new TLSSocket(new Socket());
       jest.spyOn(tlsSocket, 'getPeerCertificate').mockImplementation(() => ({} as any));
-      const socket = new KibanaSocket(tlsSocket);
+      const socket = new OpenSearchDashboardsSocket(tlsSocket);
 
       expect(socket.getPeerCertificate()).toBe(null);
     });
@@ -59,7 +59,7 @@ describe('KibanaSocket', () => {
 
   describe('authorized', () => {
     it('returns `undefined` for net.Socket instance', () => {
-      const socket = new KibanaSocket(new Socket());
+      const socket = new OpenSearchDashboardsSocket(new Socket());
 
       expect(socket.authorized).toBeUndefined();
     });
@@ -68,12 +68,12 @@ describe('KibanaSocket', () => {
       const tlsSocket = new TLSSocket(new Socket());
 
       tlsSocket.authorized = true;
-      let socket = new KibanaSocket(tlsSocket);
+      let socket = new OpenSearchDashboardsSocket(tlsSocket);
       expect(tlsSocket.authorized).toBe(true);
       expect(socket.authorized).toBe(true);
 
       tlsSocket.authorized = false;
-      socket = new KibanaSocket(tlsSocket);
+      socket = new OpenSearchDashboardsSocket(tlsSocket);
       expect(tlsSocket.authorized).toBe(false);
       expect(socket.authorized).toBe(false);
     });
@@ -81,7 +81,7 @@ describe('KibanaSocket', () => {
 
   describe('authorizationError', () => {
     it('returns `undefined` for net.Socket instance', () => {
-      const socket = new KibanaSocket(new Socket());
+      const socket = new OpenSearchDashboardsSocket(new Socket());
 
       expect(socket.authorizationError).toBeUndefined();
     });
@@ -90,13 +90,13 @@ describe('KibanaSocket', () => {
       const tlsSocket = new TLSSocket(new Socket());
       tlsSocket.authorizationError = undefined as any;
 
-      let socket = new KibanaSocket(tlsSocket);
+      let socket = new OpenSearchDashboardsSocket(tlsSocket);
       expect(tlsSocket.authorizationError).toBeUndefined();
       expect(socket.authorizationError).toBeUndefined();
 
       const authorizationError = new Error('some error');
       tlsSocket.authorizationError = authorizationError;
-      socket = new KibanaSocket(tlsSocket);
+      socket = new OpenSearchDashboardsSocket(tlsSocket);
 
       expect(tlsSocket.authorizationError).toBe(authorizationError);
       expect(socket.authorizationError).toBe(authorizationError);

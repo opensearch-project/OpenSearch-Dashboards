@@ -23,7 +23,7 @@ import * as stream from 'stream';
 
 import {
   HttpResponsePayload,
-  KibanaResponse,
+  OpenSearchDashboardsResponse,
   ResponseError,
   ResponseErrorAttributes,
 } from './response';
@@ -62,10 +62,10 @@ export class HapiResponseAdapter {
     return error;
   }
 
-  public handle(kibanaResponse: KibanaResponse) {
-    if (!(kibanaResponse instanceof KibanaResponse)) {
+  public handle(kibanaResponse: OpenSearchDashboardsResponse) {
+    if (!(kibanaResponse instanceof OpenSearchDashboardsResponse)) {
       throw new Error(
-        `Unexpected result from Route Handler. Expected KibanaResponse, but given: ${typeDetect(
+        `Unexpected result from Route Handler. Expected OpenSearchDashboardsResponse, but given: ${typeDetect(
           kibanaResponse
         )}.`
       );
@@ -74,7 +74,7 @@ export class HapiResponseAdapter {
     return this.toHapiResponse(kibanaResponse);
   }
 
-  private toHapiResponse(kibanaResponse: KibanaResponse) {
+  private toHapiResponse(kibanaResponse: OpenSearchDashboardsResponse) {
     if (statusHelpers.isError(kibanaResponse.status)) {
       return this.toError(kibanaResponse);
     }
@@ -89,7 +89,7 @@ export class HapiResponseAdapter {
     );
   }
 
-  private toSuccess(kibanaResponse: KibanaResponse<HttpResponsePayload>) {
+  private toSuccess(kibanaResponse: OpenSearchDashboardsResponse<HttpResponsePayload>) {
     const response = this.responseToolkit
       .response(kibanaResponse.payload)
       .code(kibanaResponse.status);
@@ -97,7 +97,7 @@ export class HapiResponseAdapter {
     return response;
   }
 
-  private toRedirect(kibanaResponse: KibanaResponse<HttpResponsePayload>) {
+  private toRedirect(kibanaResponse: OpenSearchDashboardsResponse<HttpResponsePayload>) {
     const { headers } = kibanaResponse.options;
     if (!headers || typeof headers.location !== 'string') {
       throw new Error("expected 'location' header to be set");
@@ -113,7 +113,7 @@ export class HapiResponseAdapter {
     return response;
   }
 
-  private toError(kibanaResponse: KibanaResponse<ResponseError | Buffer | stream.Readable>) {
+  private toError(kibanaResponse: OpenSearchDashboardsResponse<ResponseError | Buffer | stream.Readable>) {
     const { payload } = kibanaResponse;
 
     // Special case for when we are proxying requests and want to enable streaming back error responses opaquely.

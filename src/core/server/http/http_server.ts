@@ -33,8 +33,8 @@ import { adoptToHapiOnPreResponseFormat, OnPreResponseHandler } from './lifecycl
 import {
   IRouter,
   RouteConfigOptions,
-  KibanaRouteOptions,
-  KibanaRequestState,
+  OpenSearchDashboardsRouteOptions,
+  OpenSearchDashboardsRequestState,
   isSafeMethod,
 } from './router';
 import {
@@ -154,7 +154,7 @@ export class HttpServer {
         protocol: this.server!.info.protocol,
       }),
       // Return server instance with the connection options so that we can properly
-      // bridge core and the "legacy" Kibana internally. Once this bridge isn't
+      // bridge core and the "legacy" OpenSearch Dashboards internally. Once this bridge isn't
       // needed anymore we shouldn't return the instance from this method.
       server: this.server,
     };
@@ -178,7 +178,7 @@ export class HttpServer {
         const { authRequired, tags, body = {}, timeout } = route.options;
         const { accepts: allow, maxBytes, output, parse } = body;
 
-        const kibanaRouteOptions: KibanaRouteOptions = {
+        const kibanaRouteOptions: OpenSearchDashboardsRouteOptions = {
           xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
         };
 
@@ -323,7 +323,7 @@ export class HttpServer {
         ...(request.app ?? {}),
         requestId: getRequestId(request, config.requestId),
         requestUuid: uuid.v4(),
-      } as KibanaRequestState;
+      } as OpenSearchDashboardsRequestState;
       return responseToolkit.continue;
     });
   }

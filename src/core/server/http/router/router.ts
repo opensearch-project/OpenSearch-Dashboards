@@ -20,18 +20,18 @@
 import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 import Boom from 'boom';
 
-import { isConfigSchema } from '@kbn/config-schema';
+import { isConfigSchema } from '@osd/config-schema';
 import { Logger } from '../../logging';
-import { LegacyElasticsearchErrorHelpers } from '../../elasticsearch/legacy/errors';
+import { LegacyOpenSearchErrorHelpers } from '../../opensearch/legacy/errors';
 import {
-  isUnauthorizedError as isElasticsearchUnauthorizedError,
-  UnauthorizedError as EsNotAuthorizedError,
-} from '../../elasticsearch/client/errors';
-import { KibanaRequest } from './request';
+  isUnauthorizedError as isOpenSearchUnauthorizedError,
+  UnauthorizedError as OpenSearchNotAuthorizedError,
+} from '../../opensearch/client/errors';
+import { OpenSearchDashboardsRequest } from './request';
 import {
-  KibanaResponseFactory,
+  OpenSearchDashboardsResponseFactory,
   kibanaResponseFactory,
-  IKibanaResponse,
+  IOpenSearchDashboardsResponse,
   ErrorHttpResponseOptions,
 } from './response';
 import { RouteConfig, RouteConfigOptions, RouteMethod, validBodyOutput } from './route';
@@ -151,7 +151,7 @@ function routeSchemasFromRouteConfig<P, Q, B>(
     Object.entries(route.validate).forEach(([key, schema]) => {
       if (!(isConfigSchema(schema) || typeof schema === 'function')) {
         throw new Error(
-          `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [${key}].`
+          `Expected a valid validation logic declared with '@osd/config-schema' package or a RouteValidationFunction at key: [${key}].`
         );
       }
     });
@@ -260,10 +260,10 @@ export class Router implements IRouter {
     handler: RequestHandlerEnhanced<P, Q, B, typeof request.method>;
     routeSchemas?: RouteValidator<P, Q, B>;
   }) {
-    let kibanaRequest: KibanaRequest<P, Q, B, typeof request.method>;
+    let kibanaRequest: OpenSearchDashboardsRequest<P, Q, B, typeof request.method>;
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
-      kibanaRequest = KibanaRequest.from(request, routeSchemas);
+      kibanaRequest = OpenSearchDashboardsRequest.from(request, routeSchemas);
     } catch (e) {
       return hapiResponseAdapter.toBadRequest(e.message);
     }
@@ -273,14 +273,14 @@ export class Router implements IRouter {
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (e) {
       this.log.error(e);
-      // forward 401 errors from ES client
-      if (isElasticsearchUnauthorizedError(e)) {
+      // forward 401 errors from OpenSearch client
+      if (isOpenSearchUnauthorizedError(e)) {
         return hapiResponseAdapter.handle(
           kibanaResponseFactory.unauthorized(convertEsUnauthorized(e))
         );
       }
-      // forward 401 (boom) errors from legacy ES client
-      if (LegacyElasticsearchErrorHelpers.isNotAuthorizedError(e)) {
+      // forward 401 (boom) errors from legacy OpenSearch client
+      if (LegacyOpenSearchErrorHelpers.isNotAuthorizedError(e)) {
         return e;
       }
       return hapiResponseAdapter.toInternalError();
@@ -288,7 +288,7 @@ export class Router implements IRouter {
   }
 }
 
-const convertEsUnauthorized = (e: EsNotAuthorizedError): ErrorHttpResponseOptions => {
+const convertEsUnauthorized = (e: OpenSearchNotAuthorizedError): ErrorHttpResponseOptions => {
   const getAuthenticateHeaderValue = () => {
     const header = Object.entries(e.headers).find(
       ([key]) => key.toLowerCase() === 'www-authenticate'
@@ -313,11 +313,11 @@ type RequestHandlerEnhanced<P, Q, B, Method extends RouteMethod> = WithoutHeadAr
 
 /**
  * A function executed when route path matched requested resource path.
- * Request handler is expected to return a result of one of {@link KibanaResponseFactory} functions.
+ * Request handler is expected to return a result of one of {@link OpenSearchDashboardsResponseFactory} functions.
  * @param context {@link RequestHandlerContext} - the core context exposed for this request.
- * @param request {@link KibanaRequest} - object containing information about requested resource,
+ * @param request {@link OpenSearchDashboardsRequest} - object containing information about requested resource,
  * such as path, method, headers, parameters, query, body, etc.
- * @param response {@link KibanaResponseFactory} - a set of helper functions used to respond to a request.
+ * @param response {@link OpenSearchDashboardsResponseFactory} - a set of helper functions used to respond to a request.
  *
  * @example
  * ```ts
@@ -350,12 +350,12 @@ export type RequestHandler<
   Q = unknown,
   B = unknown,
   Method extends RouteMethod = any,
-  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+  ResponseFactory extends OpenSearchDashboardsResponseFactory = OpenSearchDashboardsResponseFactory
 > = (
   context: RequestHandlerContext,
-  request: KibanaRequest<P, Q, B, Method>,
+  request: OpenSearchDashboardsRequest<P, Q, B, Method>,
   response: ResponseFactory
-) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+) => IOpenSearchDashboardsResponse<any> | Promise<IOpenSearchDashboardsResponse<any>>;
 
 /**
  * Type-safe wrapper for {@link RequestHandler} function.
@@ -375,7 +375,7 @@ export type RequestHandlerWrapper = <
   Q,
   B,
   Method extends RouteMethod = any,
-  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+  ResponseFactory extends OpenSearchDashboardsResponseFactory = OpenSearchDashboardsResponseFactory
 >(
   handler: RequestHandler<P, Q, B, Method, ResponseFactory>
 ) => RequestHandler<P, Q, B, Method, ResponseFactory>;

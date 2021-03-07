@@ -36,7 +36,7 @@ export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
 export type SafeRouteMethod = 'get' | 'options';
 
 /**
- * The set of common HTTP methods supported by Kibana routing.
+ * The set of common HTTP methods supported by OpenSearch Dashboards routing.
  * @public
  */
 export type RouteMethod = SafeRouteMethod | DestructiveRouteMethod;
@@ -128,7 +128,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
 
   /**
    * Defines xsrf protection requirements for a route:
-   * - true. Requires an incoming POST/PUT/DELETE request to contain `kbn-xsrf` header.
+   * - true. Requires an incoming POST/PUT/DELETE request to contain `osd-xsrf` header.
    * - false. Disables xsrf protection.
    *
    * Set to true by default
@@ -170,19 +170,19 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * The endpoint _within_ the router path to register the route.
    *
    * @remarks
-   * E.g. if the router is registered at `/elasticsearch` and the route path is
-   * `/search`, the full path for the route is `/elasticsearch/search`.
+   * E.g. if the router is registered at `/opensearch` and the route path is
+   * `/search`, the full path for the route is `/opensearch/search`.
    * Supports:
    *   - named path segments `path/{name}`.
    *   - optional path segments `path/{position?}`.
    *   - multi-segments `path/{coordinates*2}`.
-   * Segments are accessible within a handler function as `params` property of {@link KibanaRequest} object.
+   * Segments are accessible within a handler function as `params` property of {@link OpenSearchDashboardsRequest} object.
    * To have read access to `params` you *must* specify validation schema with {@link RouteConfig.validate}.
    */
   path: string;
 
   /**
-   * A schema created with `@kbn/config-schema` that every request will be validated against.
+   * A schema created with `@osd/config-schema` that every request will be validated against.
    *
    * @remarks
    * You *must* specify a validation schema to be able to read:
@@ -193,12 +193,12 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * request params, query, and body will be **empty** objects and have no
    * access to raw values.
    * In some cases you may want to use another validation library. To do this, you need to
-   * instruct the `@kbn/config-schema` library to output **non-validated values** with
+   * instruct the `@osd/config-schema` library to output **non-validated values** with
    * setting schema as `schema.object({}, { unknowns: 'allow' })`;
    *
    * @example
    * ```ts
-   *  import { schema } from '@kbn/config-schema';
+   *  import { schema } from '@osd/config-schema';
    *  router.get({
    *   path: 'path/{id}',
    *   validate: {

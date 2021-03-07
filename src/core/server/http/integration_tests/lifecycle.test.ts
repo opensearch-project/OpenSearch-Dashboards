@@ -19,7 +19,7 @@
 
 import supertest from 'supertest';
 import request from 'request';
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 
 import { ensureRawRequest } from '../router';
 import { HttpService } from '../http_service';
@@ -204,7 +204,7 @@ describe('OnPreRouting', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          [Error: Unexpected result from OnPreRouting. Expected OnPreRoutingResult or KibanaResponse, but given: [object Object].],
+          [Error: Unexpected result from OnPreRouting. Expected OnPreRoutingResult or OpenSearchDashboardsResponse, but given: [object Object].],
         ],
       ]
     `);
@@ -342,7 +342,7 @@ describe('OnPreAuth', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          [Error: Unexpected result from OnPreAuth. Expected OnPreAuthResult or KibanaResponse, but given: [object Object].],
+          [Error: Unexpected result from OnPreAuth. Expected OnPreAuthResult or OpenSearchDashboardsResponse, but given: [object Object].],
         ],
       ]
     `);
@@ -508,7 +508,7 @@ describe('OnPostAuth', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          [Error: Unexpected result from OnPostAuth. Expected OnPostAuthResult or KibanaResponse, but given: [object Object].],
+          [Error: Unexpected result from OnPostAuth. Expected OnPostAuthResult or OpenSearchDashboardsResponse, but given: [object Object].],
         ],
       ]
     `);
@@ -1038,7 +1038,7 @@ describe('Auth', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          [Error: Unexpected result from OnPostAuth. Expected OnPostAuthResult or KibanaResponse, but given: [object Object].],
+          [Error: Unexpected result from OnPostAuth. Expected OnPostAuthResult or OpenSearchDashboardsResponse, but given: [object Object].],
         ],
       ]
     `);

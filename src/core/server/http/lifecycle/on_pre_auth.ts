@@ -21,8 +21,8 @@ import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from 'hapi
 import { Logger } from '../../logging';
 import {
   HapiResponseAdapter,
-  KibanaRequest,
-  KibanaResponse,
+  OpenSearchDashboardsRequest,
+  OpenSearchDashboardsResponse,
   lifecycleResponseFactory,
   LifecycleResponseFactory,
 } from '../router';
@@ -64,10 +64,10 @@ const toolkit: OnPreAuthToolkit = {
  * @public
  */
 export type OnPreAuthHandler = (
-  request: KibanaRequest,
+  request: OpenSearchDashboardsRequest,
   response: LifecycleResponseFactory,
   toolkit: OnPreAuthToolkit
-) => OnPreAuthResult | KibanaResponse | Promise<OnPreAuthResult | KibanaResponse>;
+) => OnPreAuthResult | OpenSearchDashboardsResponse | Promise<OnPreAuthResult | OpenSearchDashboardsResponse>;
 
 /**
  * @public
@@ -83,8 +83,8 @@ export function adoptToHapiOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
 
     try {
-      const result = await fn(KibanaRequest.from(request), lifecycleResponseFactory, toolkit);
-      if (result instanceof KibanaResponse) {
+      const result = await fn(OpenSearchDashboardsRequest.from(request), lifecycleResponseFactory, toolkit);
+      if (result instanceof OpenSearchDashboardsResponse) {
         return hapiResponseAdapter.handle(result);
       }
 
@@ -93,7 +93,7 @@ export function adoptToHapiOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
       }
 
       throw new Error(
-        `Unexpected result from OnPreAuth. Expected OnPreAuthResult or KibanaResponse, but given: ${result}.`
+        `Unexpected result from OnPreAuth. Expected OnPreAuthResult or OpenSearchDashboardsResponse, but given: ${result}.`
       );
     } catch (error) {
       log.error(error);

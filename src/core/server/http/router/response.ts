@@ -40,13 +40,13 @@ export type ResponseError =
  * A response data object, expected to returned as a result of {@link RequestHandler} execution
  * @public
  */
-export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError = any> {
+export interface IOpenSearchDashboardsResponse<T extends HttpResponsePayload | ResponseError = any> {
   readonly status: number;
   readonly payload?: T;
   readonly options: HttpResponseOptions;
 }
 
-export function isKibanaResponse(response: Record<string, any>): response is IKibanaResponse {
+export function isOpenSearchDashboardsResponse(response: Record<string, any>): response is IOpenSearchDashboardsResponse {
   return typeof response.status === 'number' && typeof response.options === 'object';
 }
 
@@ -54,8 +54,8 @@ export function isKibanaResponse(response: Record<string, any>): response is IKi
  * A response data object, expected to returned as a result of {@link RequestHandler} execution
  * @internal
  */
-export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any>
-  implements IKibanaResponse<T> {
+export class OpenSearchDashboardsResponse<T extends HttpResponsePayload | ResponseError = any>
+  implements IOpenSearchDashboardsResponse<T> {
   constructor(
     public readonly status: number,
     public readonly payload?: T,
@@ -119,21 +119,21 @@ const successResponseFactory = {
    * Status code: `200`.
    * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
    */
-  ok: (options: HttpResponseOptions = {}) => new KibanaResponse(200, options.body, options),
+  ok: (options: HttpResponseOptions = {}) => new OpenSearchDashboardsResponse(200, options.body, options),
 
   /**
    * The request has been accepted for processing.
    * Status code: `202`.
    * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
    */
-  accepted: (options: HttpResponseOptions = {}) => new KibanaResponse(202, options.body, options),
+  accepted: (options: HttpResponseOptions = {}) => new OpenSearchDashboardsResponse(202, options.body, options),
 
   /**
    * The server has successfully fulfilled the request and that there is no additional content to send in the response payload body.
    * Status code: `204`.
    * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
    */
-  noContent: (options: HttpResponseOptions = {}) => new KibanaResponse(204, undefined, options),
+  noContent: (options: HttpResponseOptions = {}) => new OpenSearchDashboardsResponse(204, undefined, options),
 };
 
 const redirectionResponseFactory = {
@@ -143,7 +143,7 @@ const redirectionResponseFactory = {
    * @param options - {@link RedirectResponseOptions} configures HTTP response body & headers.
    * Expects `location` header to be set.
    */
-  redirected: (options: RedirectResponseOptions) => new KibanaResponse(302, options.body, options),
+  redirected: (options: RedirectResponseOptions) => new OpenSearchDashboardsResponse(302, options.body, options),
 };
 
 const errorResponseFactory = {
@@ -153,7 +153,7 @@ const errorResponseFactory = {
    * @param options - {@link HttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client
    */
   badRequest: (options: ErrorHttpResponseOptions = {}) =>
-    new KibanaResponse(400, options.body || 'Bad Request', options),
+    new OpenSearchDashboardsResponse(400, options.body || 'Bad Request', options),
 
   /**
    * The request cannot be applied because it lacks valid authentication credentials for the target resource.
@@ -161,7 +161,7 @@ const errorResponseFactory = {
    * @param options - {@link HttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client
    */
   unauthorized: (options: ErrorHttpResponseOptions = {}) =>
-    new KibanaResponse(401, options.body || 'Unauthorized', options),
+    new OpenSearchDashboardsResponse(401, options.body || 'Unauthorized', options),
 
   /**
    * Server cannot grant access to a resource.
@@ -169,7 +169,7 @@ const errorResponseFactory = {
    * @param options - {@link HttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client
    */
   forbidden: (options: ErrorHttpResponseOptions = {}) =>
-    new KibanaResponse(403, options.body || 'Forbidden', options),
+    new OpenSearchDashboardsResponse(403, options.body || 'Forbidden', options),
 
   /**
    * Server cannot find a current representation for the target resource.
@@ -177,7 +177,7 @@ const errorResponseFactory = {
    * @param options - {@link HttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client
    */
   notFound: (options: ErrorHttpResponseOptions = {}) =>
-    new KibanaResponse(404, options.body || 'Not Found', options),
+    new OpenSearchDashboardsResponse(404, options.body || 'Not Found', options),
 
   /**
    * The request could not be completed due to a conflict with the current state of the target resource.
@@ -185,7 +185,7 @@ const errorResponseFactory = {
    * @param options - {@link HttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client
    */
   conflict: (options: ErrorHttpResponseOptions = {}) =>
-    new KibanaResponse(409, options.body || 'Conflict', options),
+    new OpenSearchDashboardsResponse(409, options.body || 'Conflict', options),
 
   // Server error
   /**
@@ -194,7 +194,7 @@ const errorResponseFactory = {
    * @param options - {@link HttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client
    */
   internalError: (options: ErrorHttpResponseOptions = {}) =>
-    new KibanaResponse(500, options.body || 'Internal Error', options),
+    new OpenSearchDashboardsResponse(500, options.body || 'Internal Error', options),
 
   /**
    * Creates an error response with defined status code and payload.
@@ -211,11 +211,11 @@ const errorResponseFactory = {
         `Unexpected Http status code. Expected from 400 to 599, but given: ${options.statusCode}`
       );
     }
-    return new KibanaResponse(options.statusCode, options.body, options);
+    return new OpenSearchDashboardsResponse(options.statusCode, options.body, options);
   },
 };
 /**
- * Set of helpers used to create `KibanaResponse` to form HTTP response on an incoming request.
+ * Set of helpers used to create `OpenSearchDashboardsResponse` to form HTTP response on an incoming request.
  * Should be returned as a result of {@link RequestHandler} execution.
  *
  * @example
@@ -322,7 +322,7 @@ export const kibanaResponseFactory = {
       );
     }
     const { statusCode: code, body, ...rest } = options;
-    return new KibanaResponse(code, body, rest);
+    return new OpenSearchDashboardsResponse(code, body, rest);
   },
 };
 
@@ -335,7 +335,7 @@ export const lifecycleResponseFactory = {
  * Creates an object containing request response payload, HTTP headers, error details, and other data transmitted to the client.
  * @public
  */
-export type KibanaResponseFactory = typeof kibanaResponseFactory;
+export type OpenSearchDashboardsResponseFactory = typeof kibanaResponseFactory;
 
 /**
  * Creates an object containing redirection or error response with error details, HTTP headers, and other data transmitted to the client.

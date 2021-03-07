@@ -21,8 +21,8 @@ import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from 'hapi
 import { Logger } from '../../logging';
 import {
   HapiResponseAdapter,
-  KibanaRequest,
-  KibanaResponse,
+  OpenSearchDashboardsRequest,
+  OpenSearchDashboardsResponse,
   lifecycleResponseFactory,
   LifecycleResponseFactory,
 } from '../router';
@@ -79,10 +79,10 @@ const toolkit: OnPreRoutingToolkit = {
  * @public
  */
 export type OnPreRoutingHandler = (
-  request: KibanaRequest,
+  request: OpenSearchDashboardsRequest,
   response: LifecycleResponseFactory,
   toolkit: OnPreRoutingToolkit
-) => OnPreRoutingResult | KibanaResponse | Promise<OnPreRoutingResult | KibanaResponse>;
+) => OnPreRoutingResult | OpenSearchDashboardsResponse | Promise<OnPreRoutingResult | OpenSearchDashboardsResponse>;
 
 /**
  * @public
@@ -98,8 +98,8 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
 
     try {
-      const result = await fn(KibanaRequest.from(request), lifecycleResponseFactory, toolkit);
-      if (result instanceof KibanaResponse) {
+      const result = await fn(OpenSearchDashboardsRequest.from(request), lifecycleResponseFactory, toolkit);
+      if (result instanceof OpenSearchDashboardsResponse) {
         return hapiResponseAdapter.handle(result);
       }
 
@@ -115,7 +115,7 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
         return responseToolkit.continue;
       }
       throw new Error(
-        `Unexpected result from OnPreRouting. Expected OnPreRoutingResult or KibanaResponse, but given: ${result}.`
+        `Unexpected result from OnPreRouting. Expected OnPreRoutingResult or OpenSearchDashboardsResponse, but given: ${result}.`
       );
     } catch (error) {
       log.error(error);

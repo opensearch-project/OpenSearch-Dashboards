@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ensureRawRequest, KibanaRequest, LegacyRequest } from './router';
+import { ensureRawRequest, OpenSearchDashboardsRequest, LegacyRequest } from './router';
 
 /**
  * Status indicating an outcome of the authentication.
@@ -39,28 +39,28 @@ export enum AuthStatus {
 
 /**
  * Gets authentication state for a request. Returned by `auth` interceptor.
- * @param request {@link KibanaRequest} - an incoming request.
+ * @param request {@link OpenSearchDashboardsRequest} - an incoming request.
  * @public
  */
 export type GetAuthState = <T = unknown>(
-  request: KibanaRequest | LegacyRequest
+  request: OpenSearchDashboardsRequest | LegacyRequest
 ) => { status: AuthStatus; state: T };
 
 /**
  * Returns authentication status for a request.
- * @param request {@link KibanaRequest} - an incoming request.
+ * @param request {@link OpenSearchDashboardsRequest} - an incoming request.
  * @public
  */
-export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolean;
+export type IsAuthenticated = (request: OpenSearchDashboardsRequest | LegacyRequest) => boolean;
 
 /** @internal */
 export class AuthStateStorage {
   private readonly storage = new WeakMap<LegacyRequest, unknown>();
   constructor(private readonly canBeAuthenticated: () => boolean) {}
-  public set = (request: KibanaRequest | LegacyRequest, state: unknown) => {
+  public set = (request: OpenSearchDashboardsRequest | LegacyRequest, state: unknown) => {
     this.storage.set(ensureRawRequest(request), state);
   };
-  public get = <T = unknown>(request: KibanaRequest | LegacyRequest) => {
+  public get = <T = unknown>(request: OpenSearchDashboardsRequest | LegacyRequest) => {
     const key = ensureRawRequest(request);
     const state = this.storage.get(key) as T;
     const status: AuthStatus = this.storage.has(key)

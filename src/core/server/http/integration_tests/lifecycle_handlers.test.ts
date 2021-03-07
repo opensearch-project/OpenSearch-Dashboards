@@ -19,7 +19,7 @@
 
 import supertest from 'supertest';
 import { BehaviorSubject } from 'rxjs';
-import { ByteSizeValue } from '@kbn/config-schema';
+import { ByteSizeValue } from '@osd/config-schema';
 
 import { createHttpServer } from '../test_utils';
 import { HttpService } from '../http_service';
@@ -33,9 +33,9 @@ import { contextServiceMock } from '../../context/context_service.mock';
 const pkg = require('../../../../../package.json');
 
 const actualVersion = pkg.version;
-const versionHeader = 'kbn-version';
-const xsrfHeader = 'kbn-xsrf';
-const nameHeader = 'kbn-name';
+const versionHeader = 'osd-version';
+const xsrfHeader = 'osd-xsrf';
+const nameHeader = 'osd-name';
 const whitelistedTestPath = '/xsrf/test/route/whitelisted';
 const xsrfDisabledTestPath = '/xsrf/test/route/disabled';
 const kibanaName = 'my-kibana-name';
@@ -124,7 +124,7 @@ describe('core lifecycle handlers', () => {
       await server.start();
     });
 
-    it('adds the kbn-name header', async () => {
+    it('adds the osd-name header', async () => {
       const result = await supertest(innerServer.listener).get(testRoute).expect(200, 'ok');
       const headers = result.header as Record<string, string>;
       expect(headers).toEqual(
@@ -134,7 +134,7 @@ describe('core lifecycle handlers', () => {
       );
     });
 
-    it('adds the kbn-name header in case of error', async () => {
+    it('adds the osd-name header in case of error', async () => {
       const result = await supertest(innerServer.listener).get(testErrorRoute).expect(400);
       const headers = result.header as Record<string, string>;
       expect(headers).toEqual(
@@ -230,7 +230,7 @@ describe('core lifecycle handlers', () => {
           await getSupertest(method.toLowerCase(), testPath).expect(400, {
             statusCode: 400,
             error: 'Bad Request',
-            message: 'Request must contain a kbn-xsrf header.',
+            message: 'Request must contain a osd-xsrf header.',
           });
         });
 
