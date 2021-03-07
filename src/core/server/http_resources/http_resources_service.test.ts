@@ -32,7 +32,7 @@ describe('HttpResources service', () => {
   let service: HttpResourcesService;
   let setupDeps: SetupDeps;
   let router: jest.Mocked<IRouter>;
-  const kibanaRequest = httpServerMock.createKibanaRequest();
+  const kibanaRequest = httpServerMock.createOpenSearchDashboardsRequest();
   const context = { core: coreMock.createRequestHandlerContext() };
   describe('#createRegistrar', () => {
     beforeEach(() => {

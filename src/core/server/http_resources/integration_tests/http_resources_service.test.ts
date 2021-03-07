@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { schema } from '@kbn/config-schema';
-import * as kbnTestServer from '../../../test_helpers/kbn_server';
+import { schema } from '@osd/config-schema';
+import * as osdTestServer from '../../../test_helpers/osd_server';
 
 describe('http resources service', () => {
   describe('register', () => {
-    let root: ReturnType<typeof kbnTestServer.createRoot>;
+    let root: ReturnType<typeof osdTestServer.createRoot>;
     const defaultCspRules = "script-src 'self'";
     beforeEach(async () => {
-      root = kbnTestServer.createRoot({
+      root = osdTestServer.createRoot({
         csp: {
           rules: [defaultCspRules],
         },
@@ -47,7 +47,7 @@ describe('http resources service', () => {
         );
 
         await root.start();
-        const response = await kbnTestServer.request.get(root, '/render-core').expect(200);
+        const response = await osdTestServer.request.get(root, '/render-core').expect(200);
 
         expect(response.text.length).toBeGreaterThan(0);
       });
@@ -62,7 +62,7 @@ describe('http resources service', () => {
         );
 
         await root.start();
-        const response = await kbnTestServer.request.get(root, '/render-core').expect(200);
+        const response = await osdTestServer.request.get(root, '/render-core').expect(200);
 
         expect(response.header['content-security-policy']).toBe(defaultCspRules);
       });
@@ -82,7 +82,7 @@ describe('http resources service', () => {
         );
 
         await root.start();
-        const response = await kbnTestServer.request.get(root, '/render-core').expect(200);
+        const response = await osdTestServer.request.get(root, '/render-core').expect(200);
 
         expect(response.header['content-security-policy']).toBe(defaultCspRules);
         expect(response.header['x-kibana']).toBe('42');
@@ -108,7 +108,7 @@ describe('http resources service', () => {
         );
 
         await root.start();
-        const response = await kbnTestServer.request.get(root, '/render-html').expect(200);
+        const response = await osdTestServer.request.get(root, '/render-html').expect(200);
 
         expect(response.text).toBe(htmlBody);
         expect(response.header['content-type']).toBe('text/html; charset=utf-8');
@@ -125,7 +125,7 @@ describe('http resources service', () => {
         );
 
         await root.start();
-        const response = await kbnTestServer.request.get(root, '/render-js').expect(200);
+        const response = await osdTestServer.request.get(root, '/render-js').expect(200);
 
         expect(response.text).toBe(jsBody);
         expect(response.header['content-type']).toBe('text/javascript; charset=utf-8');
@@ -149,7 +149,7 @@ describe('http resources service', () => {
         );
 
         await root.start();
-        const response = await kbnTestServer.request.get(root, '/render-html').expect(200);
+        const response = await osdTestServer.request.get(root, '/render-html').expect(200);
 
         expect(response.header['content-security-policy']).toBe(defaultCspRules);
       });
@@ -171,7 +171,7 @@ describe('http resources service', () => {
         );
 
         await root.start();
-        const response = await kbnTestServer.request.get(root, '/render-core').expect(200);
+        const response = await osdTestServer.request.get(root, '/render-core').expect(200);
 
         expect(response.header['content-security-policy']).toBe(defaultCspRules);
         expect(response.header['x-kibana']).toBe('42');
@@ -193,7 +193,7 @@ describe('http resources service', () => {
         );
 
         await root.start();
-        const response = await kbnTestServer.request
+        const response = await osdTestServer.request
           .get(root, '/render-js-with-param/42')
           .expect(200);
 
