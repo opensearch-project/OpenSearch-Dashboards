@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@osd/utility-types';
 import { StatusService } from './status_service';
 import {
   InternalStatusServiceSetup,
@@ -32,7 +32,7 @@ const available: ServiceStatus = {
   summary: 'Service is working',
 };
 const availableCoreStatus: CoreStatus = {
-  elasticsearch: available,
+  opensearch: available,
   savedObjects: available,
 };
 

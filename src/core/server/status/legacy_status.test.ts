@@ -57,7 +57,7 @@ describe('calculateLegacyStatus', () => {
     const legacyStatus = calculateLegacyStatus({
       overall: available,
       core: {
-        elasticsearch: degraded,
+        opensearch: degraded,
         savedObjects: critical,
       },
       plugins: {
@@ -71,7 +71,7 @@ describe('calculateLegacyStatus', () => {
     expect(legacyStatus.statuses).toEqual([
       {
         icon: 'warning',
-        id: 'core:elasticsearch@1.1.1',
+        id: 'core:opensearch@1.1.1',
         message: 'This is degraded!',
         since: expect.any(String),
         state: 'yellow',

@@ -18,7 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { deepFreeze } from '@kbn/std';
+import { deepFreeze } from '@osd/std';
 import { PluginName } from '../plugins';
 
 /**
@@ -123,7 +123,7 @@ export type ServiceStatusLevel = typeof ServiceStatusLevels[keyof typeof Service
  * @public
  */
 export interface CoreStatus {
-  elasticsearch: ServiceStatus;
+  opensearch: ServiceStatus;
   savedObjects: ServiceStatus;
 }
 
@@ -192,7 +192,7 @@ export interface StatusServiceSetup {
   core$: Observable<CoreStatus>;
 
   /**
-   * Overall system status for all of Kibana.
+   * Overall system status for all of OpenSearch Dashboards.
    *
    * @remarks
    * The level of the overall status will reflect the most severe status of any core service or plugin.
