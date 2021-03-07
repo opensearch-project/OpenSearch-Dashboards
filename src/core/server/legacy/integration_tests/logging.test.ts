@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { LegacyLoggingConfig } from '@kbn/config';
-import * as kbnTestServer from '../../../test_helpers/kbn_server';
+import { LegacyLoggingConfig } from '@osd/config';
+import * as osdTestServer from '../../../test_helpers/osd_server';
 
 import {
   getPlatformLogsFromMock,
@@ -26,8 +26,8 @@ import {
 } from '../../logging/integration_tests/utils';
 
 function createRoot(legacyLoggingConfig: LegacyLoggingConfig = {}) {
-  return kbnTestServer.createRoot({
-    migrations: { skip: true }, // otherwise stuck in polling ES
+  return osdTestServer.createRoot({
+    migrations: { skip: true }, // otherwise stuck in polling OpenSearch
     plugins: { initialize: false },
     logging: {
       // legacy platform config

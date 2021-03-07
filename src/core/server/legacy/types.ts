@@ -34,7 +34,7 @@ type LegacyCoreSetup = InternalCoreSetup & {
 type LegacyCoreStart = InternalCoreStart & { plugins: PluginsServiceStart };
 
 /**
- * New platform representation of the legacy configuration (KibanaConfig)
+ * New platform representation of the legacy configuration (OpenSearchDashboardsConfig)
  *
  * @internal
  * @deprecated

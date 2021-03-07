@@ -92,19 +92,19 @@ describe('getUnusedConfigKeys', () => {
         await getUnusedConfigKeys({
           coreHandledConfigPaths: [],
           settings: {
-            elasticsearch: {
+            opensearch: {
               username: 'foo',
               password: 'bar',
             },
           },
           legacyConfig: getConfig({
-            elasticsearch: {
+            opensearch: {
               username: 'foo',
               onlyInConfig: 'default',
             },
           }),
         })
-      ).toEqual(['elasticsearch.password']);
+      ).toEqual(['opensearch.password']);
     });
 
     it('correctly handle "env" specific case', async () => {
