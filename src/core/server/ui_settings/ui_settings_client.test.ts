@@ -18,7 +18,7 @@
  */
 
 import Chance from 'chance';
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { createOrUpgradeSavedConfigMock } from './create_or_upgrade_saved_config/create_or_upgrade_saved_config.test.mock';
@@ -31,22 +31,22 @@ import { CannotOverrideError } from './ui_settings_errors';
 const logger = loggingSystemMock.create().get();
 
 const TYPE = 'config';
-const ID = 'kibana-version';
+const ID = 'opensearch-dashboards-version';
 const BUILD_NUM = 1234;
 const chance = new Chance();
 
 interface SetupOptions {
   defaults?: Record<string, any>;
-  esDocSource?: Record<string, any>;
+  opensearchDocSource?: Record<string, any>;
   overrides?: Record<string, any>;
 }
 
 describe('ui settings', () => {
   function setup(options: SetupOptions = {}) {
-    const { defaults = {}, overrides = {}, esDocSource = {} } = options;
+    const { defaults = {}, overrides = {}, opensearchDocSource = {} } = options;
 
     const savedObjectsClient = savedObjectsClientMock.create();
-    savedObjectsClient.get.mockReturnValue({ attributes: esDocSource } as any);
+    savedObjectsClient.get.mockReturnValue({ attributes: opensearchDocSource } as any);
 
     const uiSettings = new UiSettingsClient({
       type: TYPE,
@@ -323,7 +323,7 @@ describe('ui settings', () => {
   });
 
   describe('#getUserProvided()', () => {
-    it('pulls user configuration from ES', async () => {
+    it('pulls user configuration from OpenSearch', async () => {
       const { uiSettings, savedObjectsClient } = setup();
       await uiSettings.getUserProvided();
 
@@ -332,8 +332,8 @@ describe('ui settings', () => {
     });
 
     it('returns user configuration', async () => {
-      const esDocSource = { user: 'customized' };
-      const { uiSettings } = setup({ esDocSource });
+      const opensearchDocSource = { user: 'customized' };
+      const { uiSettings } = setup({ opensearchDocSource });
       const result = await uiSettings.getUserProvided();
 
       expect(result).toStrictEqual({
@@ -344,8 +344,8 @@ describe('ui settings', () => {
     });
 
     it('ignores null user configuration (because default values)', async () => {
-      const esDocSource = { user: 'customized', usingDefault: null, something: 'else' };
-      const { uiSettings } = setup({ esDocSource });
+      const opensearchDocSource = { user: 'customized', usingDefault: null, something: 'else' };
+      const { uiSettings } = setup({ opensearchDocSource });
       const result = await uiSettings.getUserProvided();
 
       expect(result).toStrictEqual({
@@ -359,14 +359,14 @@ describe('ui settings', () => {
     });
 
     it('ignores user-configured value if it fails validation', async () => {
-      const esDocSource = { user: 'foo', id: 'bar' };
+      const opensearchDocSource = { user: 'foo', id: 'bar' };
       const defaults = {
         id: {
           value: 42,
           schema: schema.number(),
         },
       };
-      const { uiSettings } = setup({ esDocSource, defaults });
+      const { uiSettings } = setup({ opensearchDocSource, defaults });
       const result = await uiSettings.getUserProvided();
 
       expect(result).toStrictEqual({
@@ -421,7 +421,7 @@ describe('ui settings', () => {
       expect(createOrUpgradeSavedConfig).toHaveBeenCalledTimes(0);
     });
 
-    it('returns an empty object on EsUnavailable responses', async () => {
+    it('returns an empty object on OpenSearchUnavailable responses', async () => {
       const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
 
       const error = SavedObjectsClient.errors.decorateEsUnavailableError(new Error());
@@ -460,7 +460,7 @@ describe('ui settings', () => {
     });
 
     it('includes overridden values for overridden keys', async () => {
-      const esDocSource = {
+      const opensearchDocSource = {
         user: 'customized',
       };
 
@@ -469,7 +469,7 @@ describe('ui settings', () => {
         baz: null,
       };
 
-      const { uiSettings } = setup({ esDocSource, overrides });
+      const { uiSettings } = setup({ opensearchDocSource, overrides });
       expect(await uiSettings.getUserProvided()).toStrictEqual({
         user: {
           userValue: 'customized',
@@ -484,32 +484,32 @@ describe('ui settings', () => {
   });
 
   describe('#getAll()', () => {
-    it('pulls user configuration from ES', async () => {
-      const esDocSource = {};
-      const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+    it('pulls user configuration from OpenSearch', async () => {
+      const opensearchDocSource = {};
+      const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
       await uiSettings.getAll();
       expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
     });
 
-    it('returns defaults when es doc is empty', async () => {
-      const esDocSource = {};
+    it('returns defaults when opensearch doc is empty', async () => {
+      const opensearchDocSource = {};
       const defaults = { foo: { value: 'bar' } };
-      const { uiSettings } = setup({ esDocSource, defaults });
+      const { uiSettings } = setup({ opensearchDocSource, defaults });
       expect(await uiSettings.getAll()).toStrictEqual({
         foo: 'bar',
       });
     });
 
     it('ignores user-configured value if it fails validation', async () => {
-      const esDocSource = { user: 'foo', id: 'bar' };
+      const opensearchDocSource = { user: 'foo', id: 'bar' };
       const defaults = {
         id: {
           value: 42,
           schema: schema.number(),
         },
       };
-      const { uiSettings } = setup({ esDocSource, defaults });
+      const { uiSettings } = setup({ opensearchDocSource, defaults });
       const result = await uiSettings.getAll();
 
       expect(result).toStrictEqual({
@@ -527,7 +527,7 @@ describe('ui settings', () => {
     });
 
     it(`merges user values, including ones without defaults, into key value pairs`, async () => {
-      const esDocSource = {
+      const opensearchDocSource = {
         foo: 'user-override',
         bar: 'user-provided',
       };
@@ -538,7 +538,7 @@ describe('ui settings', () => {
         },
       };
 
-      const { uiSettings } = setup({ esDocSource, defaults });
+      const { uiSettings } = setup({ opensearchDocSource, defaults });
 
       expect(await uiSettings.getAll()).toStrictEqual({
         foo: 'user-override',
@@ -547,7 +547,7 @@ describe('ui settings', () => {
     });
 
     it('includes the values for overridden keys', async () => {
-      const esDocSource = {
+      const opensearchDocSource = {
         foo: 'user-override',
         bar: 'user-provided',
       };
@@ -562,7 +562,7 @@ describe('ui settings', () => {
         foo: 'bax',
       };
 
-      const { uiSettings } = setup({ esDocSource, defaults, overrides });
+      const { uiSettings } = setup({ opensearchDocSource, defaults, overrides });
 
       expect(await uiSettings.getAll()).toStrictEqual({
         foo: 'bax',
@@ -572,9 +572,9 @@ describe('ui settings', () => {
   });
 
   describe('#get()', () => {
-    it('pulls user configuration from ES', async () => {
-      const esDocSource = {};
-      const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+    it('pulls user configuration from OpenSearch', async () => {
+      const opensearchDocSource = {};
+      const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
       await uiSettings.get('any');
 
       expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
@@ -582,42 +582,42 @@ describe('ui settings', () => {
     });
 
     it(`returns the promised value for a key`, async () => {
-      const esDocSource = {};
+      const opensearchDocSource = {};
       const defaults = { dateFormat: { value: chance.word() } };
-      const { uiSettings } = setup({ esDocSource, defaults });
+      const { uiSettings } = setup({ opensearchDocSource, defaults });
       const result = await uiSettings.get('dateFormat');
 
       expect(result).toBe(defaults.dateFormat.value);
     });
 
     it(`returns the user-configured value for a custom key`, async () => {
-      const esDocSource = { custom: 'value' };
-      const { uiSettings } = setup({ esDocSource });
+      const opensearchDocSource = { custom: 'value' };
+      const { uiSettings } = setup({ opensearchDocSource });
       const result = await uiSettings.get('custom');
 
       expect(result).toBe('value');
     });
 
     it(`returns the user-configured value for a modified key`, async () => {
-      const esDocSource = { dateFormat: 'YYYY-MM-DD' };
-      const { uiSettings } = setup({ esDocSource });
+      const opensearchDocSource = { dateFormat: 'YYYY-MM-DD' };
+      const { uiSettings } = setup({ opensearchDocSource });
       const result = await uiSettings.get('dateFormat');
       expect(result).toBe('YYYY-MM-DD');
     });
 
     it('returns the overridden value for an overrided key', async () => {
-      const esDocSource = { dateFormat: 'YYYY-MM-DD' };
+      const opensearchDocSource = { dateFormat: 'YYYY-MM-DD' };
       const overrides = { dateFormat: 'foo' };
-      const { uiSettings } = setup({ esDocSource, overrides });
+      const { uiSettings } = setup({ opensearchDocSource, overrides });
 
       expect(await uiSettings.get('dateFormat')).toBe('foo');
     });
 
     it('returns the default value for an override with value null', async () => {
-      const esDocSource = { dateFormat: 'YYYY-MM-DD' };
+      const opensearchDocSource = { dateFormat: 'YYYY-MM-DD' };
       const overrides = { dateFormat: null };
       const defaults = { dateFormat: { value: 'foo' } };
-      const { uiSettings } = setup({ esDocSource, overrides, defaults });
+      const { uiSettings } = setup({ opensearchDocSource, overrides, defaults });
 
       expect(await uiSettings.get('dateFormat')).toBe('foo');
     });
@@ -633,7 +633,7 @@ describe('ui settings', () => {
     });
 
     it('returns the default value if user-configured value fails validation', async () => {
-      const esDocSource = { id: 'bar' };
+      const opensearchDocSource = { id: 'bar' };
       const defaults = {
         id: {
           value: 42,
@@ -641,7 +641,7 @@ describe('ui settings', () => {
         },
       };
 
-      const { uiSettings } = setup({ esDocSource, defaults });
+      const { uiSettings } = setup({ opensearchDocSource, defaults });
 
       expect(await uiSettings.get('id')).toBe(42);
 

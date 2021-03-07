@@ -20,20 +20,20 @@
 import { getServices, chance } from './lib';
 
 export function docMissingAndIndexReadOnlySuite() {
-  // ensure the kibana index has no documents
+  // ensure the opensearch-dashboards index has no documents
   beforeEach(async () => {
-    const { kbnServer, callCluster } = getServices();
+    const { osdServer, callCluster } = getServices();
 
-    // write a setting to ensure kibana index is created
-    await kbnServer.inject({
+    // write a setting to ensure opensearch-dashboards index is created
+    await osdServer.inject({
       method: 'POST',
-      url: '/api/kibana/settings/defaultIndex',
+      url: '/api/opensearch-dashboards/settings/defaultIndex',
       payload: { value: 'abc' },
     });
 
-    // delete all docs from kibana index to ensure savedConfig is not found
+    // delete all docs from opensearch-dashboards index to ensure savedConfig is not found
     await callCluster('deleteByQuery', {
-      index: kbnServer.config.get('kibana.index'),
+      index: osdServer.config.get('opensearchDashboards.index'),
       body: {
         query: { match_all: {} },
       },
@@ -41,7 +41,7 @@ export function docMissingAndIndexReadOnlySuite() {
 
     // set the index to read only
     await callCluster('indices.putSettings', {
-      index: kbnServer.config.get('kibana.index'),
+      index: osdServer.config.get('opensearchDashboards.index'),
       body: {
         index: {
           blocks: {
@@ -53,11 +53,11 @@ export function docMissingAndIndexReadOnlySuite() {
   });
 
   afterEach(async () => {
-    const { kbnServer, callCluster } = getServices();
+    const { osdServer, callCluster } = getServices();
 
     // disable the read only block
     await callCluster('indices.putSettings', {
-      index: kbnServer.config.get('kibana.index'),
+      index: osdServer.config.get('opensearchDashboards.index'),
       body: {
         index: {
           blocks: {
@@ -70,11 +70,11 @@ export function docMissingAndIndexReadOnlySuite() {
 
   describe('get route', () => {
     it('returns simulated doc with buildNum', async () => {
-      const { kbnServer } = getServices();
+      const { osdServer } = getServices();
 
-      const { statusCode, result } = await kbnServer.inject({
+      const { statusCode, result } = await osdServer.inject({
         method: 'GET',
-        url: '/api/kibana/settings',
+        url: '/api/opensearch-dashboards/settings',
       });
 
       expect(statusCode).toBe(200);
@@ -95,12 +95,12 @@ export function docMissingAndIndexReadOnlySuite() {
 
   describe('set route', () => {
     it('fails with 403 forbidden', async () => {
-      const { kbnServer } = getServices();
+      const { osdServer } = getServices();
 
       const defaultIndex = chance.word();
-      const { statusCode, result } = await kbnServer.inject({
+      const { statusCode, result } = await osdServer.inject({
         method: 'POST',
-        url: '/api/kibana/settings/defaultIndex',
+        url: '/api/opensearch-dashboards/settings/defaultIndex',
         payload: { value: defaultIndex },
       });
 
@@ -116,12 +116,12 @@ export function docMissingAndIndexReadOnlySuite() {
 
   describe('setMany route', () => {
     it('fails with 403 forbidden', async () => {
-      const { kbnServer } = getServices();
+      const { osdServer } = getServices();
 
       const defaultIndex = chance.word();
-      const { statusCode, result } = await kbnServer.inject({
+      const { statusCode, result } = await osdServer.inject({
         method: 'POST',
-        url: '/api/kibana/settings',
+        url: '/api/opensearch-dashboards/settings',
         payload: {
           changes: { defaultIndex },
         },
@@ -138,11 +138,11 @@ export function docMissingAndIndexReadOnlySuite() {
 
   describe('delete route', () => {
     it('fails with 403 forbidden', async () => {
-      const { kbnServer } = getServices();
+      const { osdServer } = getServices();
 
-      const { statusCode, result } = await kbnServer.inject({
+      const { statusCode, result } = await osdServer.inject({
         method: 'DELETE',
-        url: '/api/kibana/settings/defaultIndex',
+        url: '/api/opensearch-dashboards/settings/defaultIndex',
       });
 
       expect(statusCode).toBe(403);

@@ -23,11 +23,11 @@ export function docExistsSuite() {
   async function setup(options: any = {}) {
     const { initialSettings } = options;
 
-    const { kbnServer, uiSettings, callCluster } = getServices();
+    const { osdServer, uiSettings, callCluster } = getServices();
 
-    // delete the kibana index to ensure we start fresh
+    // delete the opensearch-dashboards index to ensure we start fresh
     await callCluster('deleteByQuery', {
-      index: kbnServer.config.get('kibana.index'),
+      index: osdServer.config.get('opensearchDashboards.index'),
       body: {
         conflicts: 'proceed',
         query: { match_all: {} },
@@ -38,21 +38,21 @@ export function docExistsSuite() {
       await uiSettings.setMany(initialSettings);
     }
 
-    return { kbnServer, uiSettings };
+    return { osdServer, uiSettings };
   }
 
   describe('get route', () => {
     it('returns a 200 and includes userValues', async () => {
       const defaultIndex = chance.word({ length: 10 });
-      const { kbnServer } = await setup({
+      const { osdServer } = await setup({
         initialSettings: {
           defaultIndex,
         },
       });
 
-      const { statusCode, result } = await kbnServer.inject({
+      const { statusCode, result } = await osdServer.inject({
         method: 'GET',
-        url: '/api/kibana/settings',
+        url: '/api/opensearch-dashboards/settings',
       });
 
       expect(statusCode).toBe(200);
@@ -75,12 +75,12 @@ export function docExistsSuite() {
 
   describe('set route', () => {
     it('returns a 200 and all values including update', async () => {
-      const { kbnServer } = await setup();
+      const { osdServer } = await setup();
 
       const defaultIndex = chance.word();
-      const { statusCode, result } = await kbnServer.inject({
+      const { statusCode, result } = await osdServer.inject({
         method: 'POST',
-        url: '/api/kibana/settings/defaultIndex',
+        url: '/api/opensearch-dashboards/settings/defaultIndex',
         payload: {
           value: defaultIndex,
         },
@@ -105,11 +105,11 @@ export function docExistsSuite() {
     });
 
     it('returns a 400 if trying to set overridden value', async () => {
-      const { kbnServer } = await setup();
+      const { osdServer } = await setup();
 
-      const { statusCode, result } = await kbnServer.inject({
+      const { statusCode, result } = await osdServer.inject({
         method: 'POST',
-        url: '/api/kibana/settings/foo',
+        url: '/api/opensearch-dashboards/settings/foo',
         payload: {
           value: 'baz',
         },
@@ -126,12 +126,12 @@ export function docExistsSuite() {
 
   describe('setMany route', () => {
     it('returns a 200 and all values including updates', async () => {
-      const { kbnServer } = await setup();
+      const { osdServer } = await setup();
 
       const defaultIndex = chance.word();
-      const { statusCode, result } = await kbnServer.inject({
+      const { statusCode, result } = await osdServer.inject({
         method: 'POST',
-        url: '/api/kibana/settings',
+        url: '/api/opensearch-dashboards/settings',
         payload: {
           changes: {
             defaultIndex,
@@ -158,11 +158,11 @@ export function docExistsSuite() {
     });
 
     it('returns a 400 if trying to set overridden value', async () => {
-      const { kbnServer } = await setup();
+      const { osdServer } = await setup();
 
-      const { statusCode, result } = await kbnServer.inject({
+      const { statusCode, result } = await osdServer.inject({
         method: 'POST',
-        url: '/api/kibana/settings',
+        url: '/api/opensearch-dashboards/settings',
         payload: {
           changes: {
             foo: 'baz',
@@ -183,15 +183,15 @@ export function docExistsSuite() {
     it('returns a 200 and deletes the setting', async () => {
       const defaultIndex = chance.word({ length: 10 });
 
-      const { kbnServer, uiSettings } = await setup({
+      const { osdServer, uiSettings } = await setup({
         initialSettings: { defaultIndex },
       });
 
       expect(await uiSettings.get('defaultIndex')).toBe(defaultIndex);
 
-      const { statusCode, result } = await kbnServer.inject({
+      const { statusCode, result } = await osdServer.inject({
         method: 'DELETE',
-        url: '/api/kibana/settings/defaultIndex',
+        url: '/api/opensearch-dashboards/settings/defaultIndex',
       });
 
       expect(statusCode).toBe(200);
@@ -208,11 +208,11 @@ export function docExistsSuite() {
       });
     });
     it('returns a 400 if deleting overridden value', async () => {
-      const { kbnServer } = await setup();
+      const { osdServer } = await setup();
 
-      const { statusCode, result } = await kbnServer.inject({
+      const { statusCode, result } = await osdServer.inject({
         method: 'DELETE',
-        url: '/api/kibana/settings/foo',
+        url: '/api/opensearch-dashboards/settings/foo',
       });
 
       expect(statusCode).toBe(400);

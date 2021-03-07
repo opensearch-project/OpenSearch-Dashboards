@@ -21,10 +21,10 @@ import { SavedObjectsClientContract } from 'src/core/server';
 
 import {
   createTestServers,
-  TestElasticsearchUtils,
-  TestKibanaUtils,
+  TestOpensearchUtils,
+  TestOpenSearchDashboardsUtils,
   TestUtils,
-} from '../../../../test_helpers/kbn_server';
+} from '../../../../test_helpers/osd_server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { httpServerMock } from '../../../http/http_server.mocks';
@@ -33,8 +33,8 @@ const logger = loggingSystemMock.create().get();
 describe('createOrUpgradeSavedConfig()', () => {
   let savedObjectsClient: SavedObjectsClientContract;
   let servers: TestUtils;
-  let esServer: TestElasticsearchUtils;
-  let kbn: TestKibanaUtils;
+  let opensearchServer: TestOpensearchUtils;
+  let osd: TestOpenSearchDashboardsUtils;
 
   beforeAll(async function () {
     servers = createTestServers({
@@ -42,11 +42,11 @@ describe('createOrUpgradeSavedConfig()', () => {
         jest.setTimeout(t);
       },
     });
-    esServer = await servers.startES();
-    kbn = await servers.startKibana();
+    opensearchServer = await servers.startES();
+    osd = await servers.startOpenSearchDashboards();
 
-    savedObjectsClient = kbn.coreStart.savedObjects.getScopedClient(
-      httpServerMock.createKibanaRequest()
+    savedObjectsClient = osd.coreStart.savedObjects.getScopedClient(
+      httpServerMock.createOpenSearchDashboardsRequest()
     );
 
     await savedObjectsClient.bulkCreate([
@@ -78,8 +78,8 @@ describe('createOrUpgradeSavedConfig()', () => {
   });
 
   afterAll(async () => {
-    await esServer.stop();
-    await kbn.stop();
+    await opensearchServer.stop();
+    await osd.stop();
   }, 30000);
 
   it('upgrades the previous version on each increment', async function () {

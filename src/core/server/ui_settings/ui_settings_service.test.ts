@@ -17,7 +17,7 @@
  * under the License.
  */
 import { BehaviorSubject } from 'rxjs';
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 
 import {
   MockUiSettingsClientConstructor,

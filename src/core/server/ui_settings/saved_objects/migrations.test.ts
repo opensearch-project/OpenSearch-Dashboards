@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { SavedObjectUnsanitizedDoc } from 'opensearch-dsahboards/server';
 import { migrations } from './migrations';
 
 describe('ui_settings 7.9.0 migrations', () => {
