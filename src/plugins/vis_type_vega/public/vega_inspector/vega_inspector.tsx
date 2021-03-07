@@ -18,11 +18,11 @@
  */
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from 'kibana/public';
+import { i18n } from '@osd/i18n';
+import { IUiSettingsClient } from 'opensearch_dashboards/public';
 import { VegaAdapter } from './vega_adapter';
 import { VegaDataInspector, VegaDataInspectorProps } from './vega_data_inspector';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { Adapters, RequestAdapter, InspectorViewDescription } from '../../../inspector/public';
 
 export interface VegaInspectorAdapters extends Adapters {
@@ -45,9 +45,9 @@ export const getVegaInspectorView = (dependencies: VegaInspectorViewDependencies
       return Boolean(adapters.vega);
     },
     component: (props) => (
-      <KibanaContextProvider services={dependencies}>
+      <OpenSearchDashboardsContextProvider services={dependencies}>
         <VegaDataInspector {...(props as VegaDataInspectorProps)}> </VegaDataInspector>
-      </KibanaContextProvider>
+      </OpenSearchDashboardsContextProvider>
     ),
   } as InspectorViewDescription);
 

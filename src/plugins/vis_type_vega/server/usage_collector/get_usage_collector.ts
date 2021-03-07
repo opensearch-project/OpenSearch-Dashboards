@@ -111,7 +111,7 @@ const getStats = async (
             if (checkVegaSchemaType(spec.$schema, 'vega-lite')) {
               telemetry.vega_lite_lib_specs_total++;
             }
-            if (spec.config?.kibana?.type === 'map') {
+            if (spec.config?.opensearchDashboards?.type === 'map') {
               telemetry.vega_use_map_total++;
             }
           }
@@ -139,7 +139,7 @@ export function getUsageCollector(
     type: VEGA_USAGE_TYPE,
     isReady: () => true,
     fetch: async (callCluster: LegacyAPICaller) => {
-      const { index } = (await config.pipe(first()).toPromise()).kibana;
+      const { index } = (await config.pipe(first()).toPromise()).opensearchDashboards;
 
       return await getStats(callCluster, index, dependencies);
     },

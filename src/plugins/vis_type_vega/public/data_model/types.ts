@@ -69,8 +69,8 @@ interface Mark {
 
 type Renderer = 'svg' | 'canvas';
 
-interface VegaSpecConfig extends KibanaConfig {
-  kibana?: KibanaConfig;
+interface VegaSpecConfig extends OpenSearchDashboards {
+  opensearchDashboards?: OpenSearchDashboards;
   padding: Padding;
   projection: Projection;
   autosize: AutoSize;
@@ -96,7 +96,7 @@ type ContextVarsObjectProps =
 
 type ToolTipPositions = 'top' | 'right' | 'bottom' | 'left';
 
-export interface KibanaConfig {
+export interface OpenSearchDashboards {
   controlsLocation: ControlsLocation;
   controlsDirection: ControlsDirection;
   hideWarnings: boolean;
@@ -116,7 +116,7 @@ export interface VegaSpec {
   width?: number | 'container';
   height?: number | 'container';
   padding?: number | Padding;
-  _hostConfig?: KibanaConfig;
+  _hostConfig?: OpenSearchDashboards;
   config: VegaSpecConfig;
 }
 

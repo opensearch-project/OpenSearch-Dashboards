@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { parse } from 'hjson';
 import { BaseVisTypeOptions } from 'src/plugins/visualizations/public';
 import { DefaultEditorSize } from '../../vis_default_editor/public';

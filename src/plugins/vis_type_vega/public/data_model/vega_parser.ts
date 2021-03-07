@@ -22,8 +22,8 @@ import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
 import hjson from 'hjson';
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
-import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+import { i18n } from '@osd/i18n';
 // @ts-ignore
 import { vega, vegaLite } from '../lib/vega';
 import { EsQueryParser } from './es_query_parser';
@@ -44,10 +44,10 @@ import {
   PendingType,
   ControlsLocation,
   ControlsDirection,
-  KibanaConfig,
+  OpenSearchDashboards,
 } from './types';
 
-// Set default single color to match other Kibana visualizations
+// Set default single color to match other OpenSearch Dashboards visualizations
 const defaultColor: string = euiPaletteColorBlind()[0];
 
 const locToDirMap: Record<string, ControlsLocation> = {
@@ -104,7 +104,7 @@ export class VegaParser {
     try {
       await this._parseAsync();
     } catch (err) {
-      // if we reject current promise, it will use the standard Kibana error handling
+      // if we reject current promise, it will use the standard OpenSearch Dashboards error handling
       this.error = Utils.formatErrorToStr(err);
     }
     return this;
@@ -122,7 +122,7 @@ export class VegaParser {
             defaultMessage: `Your specification requires a {schemaParam} field with a valid URL for
 Vega (see {vegaSchemaUrl}) or
 Vega-Lite (see {vegaLiteSchemaUrl}).
-The URL is an identifier only. Kibana and your browser will never access this URL.`,
+The URL is an identifier only. OpenSearch Dashboards and your browser will never access this URL.`,
             values: {
               schemaParam: '"$schema"',
               vegaLiteSchemaUrl: 'https://vega.github.io/vega-lite/docs/spec.html#top-level',
@@ -332,12 +332,12 @@ The URL is an identifier only. Kibana and your browser will never access this UR
   }
 
   /**
-   * Parse {config: kibana: {...}} portion of the Vega spec (or root-level _hostConfig for backward compat)
-   * @returns {object} kibana config
+   * Parse {config: opensearchDashboards: {...}} portion of the Vega spec (or root-level _hostConfig for backward compat)
+   * @returns {object} opensearchDashboards config
    * @private
    */
-  _parseConfig(): KibanaConfig | {} {
-    let result: KibanaConfig | null = null;
+  _parseConfig(): OpenSearchDashboards | {} {
+    let result: OpenSearchDashboards | null = null;
     if (this.spec) {
       if (this.spec._hostConfig !== undefined) {
         result = this.spec._hostConfig;
@@ -356,19 +356,19 @@ The URL is an identifier only. Kibana and your browser will never access this UR
               '{deprecatedConfigName} has been deprecated. Use {newConfigName} instead.',
             values: {
               deprecatedConfigName: '"_hostConfig"',
-              newConfigName: 'config.kibana',
+              newConfigName: 'config.opensearchDashboards',
             },
           })
         );
       }
-      if (_.isPlainObject(this.spec.config) && this.spec.config.kibana !== undefined) {
-        result = this.spec.config.kibana;
-        delete this.spec.config.kibana;
+      if (_.isPlainObject(this.spec.config) && this.spec.config.opensearchDashboards !== undefined) {
+        result = this.spec.config.opensearchDashboards;
+        delete this.spec.config.opensearchDashboards;
         if (!_.isPlainObject(result)) {
           throw new Error(
-            i18n.translate('visTypeVega.vegaParser.kibanaConfigValueTypeErrorMessage', {
+            i18n.translate('visTypeVega.vegaParser.opensearchDashboardsConfigValueTypeErrorMessage', {
               defaultMessage: 'If present, {configName} must be an object',
-              values: { configName: 'config.kibana' },
+              values: { configName: 'config.opensearchDashboards' },
             })
           );
         }
@@ -404,7 +404,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       throw new Error(
         i18n.translate('visTypeVega.vegaParser.paddingConfigValueTypeErrorMessage', {
           defaultMessage: '{configName} is expected to be a number',
-          values: { configName: 'config.kibana.result.padding' },
+          values: { configName: 'config.opensearchDashboards.result.padding' },
         })
       );
     }
@@ -419,7 +419,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
         i18n.translate('visTypeVega.vegaParser.centerOnMarkConfigValueTypeErrorMessage', {
           defaultMessage: '{configName} is expected to be {trueValue}, {falseValue}, or a number',
           values: {
-            configName: 'config.kibana.result.centerOnMark',
+            configName: 'config.opensearchDashboards.result.centerOnMark',
             trueValue: 'true',
             falseValue: 'false',
           },
@@ -449,9 +449,9 @@ The URL is an identifier only. Kibana and your browser will never access this UR
           return;
         }
         this._onWarning(
-          i18n.translate('visTypeVega.vegaParser.someKibanaConfigurationIsNoValidWarningMessage', {
+          i18n.translate('visTypeVega.vegaParser.someOpenSearchDashboardsurationIsNoValidWarningMessage', {
             defaultMessage: '{configName} is not valid',
-            values: { configName: `config.kibana.${name}` },
+            values: { configName: `config.opensearchDashboards.${name}` },
           })
         );
       }
@@ -472,7 +472,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
           defaultMessage:
             '{mapStyleConfigName} may either be {mapStyleConfigFirstAllowedValue} or {mapStyleConfigSecondAllowedValue}',
           values: {
-            mapStyleConfigName: 'config.kibana.mapStyle',
+            mapStyleConfigName: 'config.opensearchDashboards.mapStyle',
             mapStyleConfigFirstAllowedValue: 'false',
             mapStyleConfigSecondAllowedValue: '"default"',
           },
@@ -495,7 +495,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
           i18n.translate('visTypeVega.vegaParser.maxBoundsValueTypeWarningMessage', {
             defaultMessage: '{maxBoundsConfigName} must be an array with four numbers',
             values: {
-              maxBoundsConfigName: 'config.kibana.maxBounds',
+              maxBoundsConfigName: 'config.opensearchDashboards.maxBounds',
             },
           })
         );
@@ -513,10 +513,10 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       dstObj[paramName] = dflt;
     } else if (typeof val !== 'boolean') {
       this._onWarning(
-        i18n.translate('visTypeVega.vegaParser.someKibanaParamValueTypeWarningMessage', {
+        i18n.translate('visTypeVega.vegaParser.someOpenSearchDashboardsParamValueTypeWarningMessage', {
           defaultMessage: '{configName} must be a boolean value',
           values: {
-            configName: `config.kibana.${paramName}`,
+            configName: `config.opensearchDashboards.${paramName}`,
           },
         })
       );

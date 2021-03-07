@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { vega } from '../lib/vega';
 import { VegaBaseView } from './vega_base_view';
 import { VegaMapLayer } from './vega_map_layer';
@@ -109,7 +109,7 @@ export class VegaMapView extends VegaBaseView {
 
     const modules = await lazyLoadMapsLegacyModules();
 
-    this._kibanaMap = new modules.KibanaMap(this._$container.get(0), {
+    this._opensearchDashboardsMap = new modules.OpenSearchDashboardsMap(this._$container.get(0), {
       zoom,
       minZoom,
       maxZoom,
@@ -119,7 +119,7 @@ export class VegaMapView extends VegaBaseView {
     });
 
     if (baseMapOpts) {
-      this._kibanaMap.setBaseLayer({
+      this._opensearchDashboardsMap.setBaseLayer({
         baseLayerType: 'tms',
         options: baseMapOpts,
       });
@@ -138,14 +138,14 @@ export class VegaMapView extends VegaBaseView {
       modules.L
     );
 
-    this._kibanaMap.addLayer(vegaMapLayer);
+    this._opensearchDashboardsMap.addLayer(vegaMapLayer);
 
     this._addDestroyHandler(() => {
-      this._kibanaMap.removeLayer(vegaMapLayer);
+      this._opensearchDashboardsMap.removeLayer(vegaMapLayer);
       if (baseMapOpts) {
-        this._kibanaMap.setBaseLayer(null);
+        this._opensearchDashboardsMap.setBaseLayer(null);
       }
-      this._kibanaMap.destroy();
+      this._opensearchDashboardsMap.destroy();
     });
 
     const vegaView = vegaMapLayer.getVegaView();

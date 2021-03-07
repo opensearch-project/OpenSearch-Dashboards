@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import {
   ExecutionContext,
   ExpressionFunctionDefinition,
@@ -57,7 +57,7 @@ export const createVegaFn = (
 > => ({
   name: 'vega',
   type: 'render',
-  inputTypes: ['kibana_context', 'null'],
+  inputTypes: ['opensearch_dashboards_context', 'null'],
   help: i18n.translate('visTypeVega.function.help', {
     defaultMessage: 'Vega visualization',
   }),

@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { cloneDeep, isPlainObject } from 'lodash';
 import { SearchParams } from 'elasticsearch';
 import { TimeCache } from './time_cache';
@@ -47,7 +47,7 @@ const TIMEFIELD: string = '%timefield%';
 
 const getRequestName = (request: EsQueryRequest, index: number) =>
   request.dataObject.name ||
-  i18n.translate('visTypeVega.esQueryParser.unnamedRequest', {
+  i18n.translate('visTypeVega.opensearchQueryParser.unnamedRequest', {
     defaultMessage: 'Unnamed request #{index}',
     values: { index },
   });
@@ -89,7 +89,7 @@ export class EsQueryParser {
       url.body = body = {};
     } else if (!isPlainObject(body)) {
       throw new Error(
-        i18n.translate('visTypeVega.esQueryParser.urlBodyValueTypeErrorMessage', {
+        i18n.translate('visTypeVega.opensearchQueryParser.urlBodyValueTypeErrorMessage', {
           defaultMessage: '{configName} must be an object',
           values: { configName: 'url.body' },
         })
@@ -103,7 +103,7 @@ export class EsQueryParser {
       if (body.query !== undefined) {
         throw new Error(
           i18n.translate(
-            'visTypeVega.esQueryParser.dataUrlMustNotHaveLegacyAndBodyQueryValuesAtTheSameTimeErrorMessage',
+            'visTypeVega.opensearchQueryParser.dataUrlMustNotHaveLegacyAndBodyQueryValuesAtTheSameTimeErrorMessage',
             {
               defaultMessage:
                 '{dataUrlParam} must not have legacy {legacyContext} and {bodyQueryConfigName} values at the same time',
@@ -118,7 +118,7 @@ export class EsQueryParser {
       } else if (usesContext) {
         throw new Error(
           i18n.translate(
-            'visTypeVega.esQueryParser.dataUrlMustNotHaveLegacyContextTogetherWithContextOrTimefieldErrorMessage',
+            'visTypeVega.opensearchQueryParser.dataUrlMustNotHaveLegacyContextTogetherWithContextOrTimefieldErrorMessage',
             {
               defaultMessage:
                 '{dataUrlParam} must not have {legacyContext} together with {context} or {timefield}',
@@ -136,7 +136,7 @@ export class EsQueryParser {
         (typeof legacyContext !== 'string' || legacyContext.length === 0)
       ) {
         throw new Error(
-          i18n.translate('visTypeVega.esQueryParser.legacyContextCanBeTrueErrorMessage', {
+          i18n.translate('visTypeVega.opensearchQueryParser.legacyContextCanBeTrueErrorMessage', {
             defaultMessage:
               'Legacy {legacyContext} can either be {trueValue} (ignores time range picker), or it can be the name of the time field, e.g. {timestampParam}',
             values: {
@@ -158,7 +158,7 @@ export class EsQueryParser {
       result += '}';
 
       this._onWarning(
-        i18n.translate('visTypeVega.esQueryParser.legacyUrlShouldChangeToWarningMessage', {
+        i18n.translate('visTypeVega.opensearchQueryParser.legacyUrlShouldChangeToWarningMessage', {
           defaultMessage: 'Legacy {urlParam}: {legacyUrl} should change to {result}',
           values: {
             legacyUrl: `"${LEGACY_CONTEXT}": ${JSON.stringify(legacyContext)}`,
@@ -173,7 +173,7 @@ export class EsQueryParser {
       if (usesContext) {
         throw new Error(
           i18n.translate(
-            'visTypeVega.esQueryParser.urlContextAndUrlTimefieldMustNotBeUsedErrorMessage',
+            'visTypeVega.opensearchQueryParser.urlContextAndUrlTimefieldMustNotBeUsedErrorMessage',
             {
               defaultMessage:
                 '{urlContext} and {timefield} must not be used when {queryParam} is set',
@@ -289,7 +289,7 @@ export class EsQueryParser {
               size = 50; // by default, try to get ~80 values
             } else if (typeof size !== 'number') {
               throw new Error(
-                i18n.translate('visTypeVega.esQueryParser.autointervalValueTypeErrorMessage', {
+                i18n.translate('visTypeVega.opensearchQueryParser.autointervalValueTypeErrorMessage', {
                   defaultMessage: '{autointerval} must be either {trueValue} or a number',
                   values: {
                     autointerval: `"${AUTOINTERVAL}"`,
@@ -321,7 +321,7 @@ export class EsQueryParser {
               continue;
             default:
               throw new Error(
-                i18n.translate('visTypeVega.esQueryParser.timefilterValueErrorMessage', {
+                i18n.translate('visTypeVega.opensearchQueryParser.timefilterValueErrorMessage', {
                   defaultMessage:
                     '{timefilter} property must be set to {trueValue}, {minValue}, or {maxValue}',
                   values: {
@@ -369,7 +369,7 @@ export class EsQueryParser {
       const shift = opts.shift;
       if (typeof shift !== 'number') {
         throw new Error(
-          i18n.translate('visTypeVega.esQueryParser.shiftMustValueTypeErrorMessage', {
+          i18n.translate('visTypeVega.opensearchQueryParser.shiftMustValueTypeErrorMessage', {
             defaultMessage: '{shiftParam} must be a numeric value',
             values: {
               shiftParam: '"shift"',
@@ -401,7 +401,7 @@ export class EsQueryParser {
           break;
         default:
           throw new Error(
-            i18n.translate('visTypeVega.esQueryParser.unknownUnitValueErrorMessage', {
+            i18n.translate('visTypeVega.opensearchQueryParser.unknownUnitValueErrorMessage', {
               defaultMessage: 'Unknown {unitParamName} value. Must be one of: [{unitParamValues}]',
               values: {
                 unitParamName: '"unit"',
