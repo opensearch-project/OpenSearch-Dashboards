@@ -10,13 +10,13 @@
 - [Logging config migration](#logging-config-migration)
 - [Log record format changes](#log-record-format-changes)
 
-The way logging works in Kibana is inspired by `log4j 2` logging framework used by [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html#logging).
-The main idea is to have consistent logging behaviour (configuration, log format etc.) across the entire Elastic Stack 
+The way logging works in OpenSearch Dashboards is inspired by `log4j 2` logging framework used by [OpenSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html#logging).
+The main idea is to have consistent logging behaviour (configuration, log format etc.) across the entire OpenSearch Stack 
 where possible.
 
 ## Loggers, Appenders and Layouts
 
-Kibana logging system has three main components: _loggers_, _appenders_ and _layouts_. These components allow us to log
+OpenSearch Dashboards logging system has three main components: _loggers_, _appenders_ and _layouts_. These components allow us to log
 messages according to message type and level, and to control how these messages are formatted and where the final logs
 will be displayed or stored.
 
@@ -86,7 +86,7 @@ Example of `%logger` output:
 ```bash
 server
 server.http
-server.http.Kibana
+server.http.OpenSearchDashboards
 ```
 
 #### message
@@ -130,7 +130,7 @@ text and any other metadata that may be associated with the log message itself.
 ## Configuration
 
 As any configuration in the platform, logging configuration is validated against the predefined schema and if there are
-any issues with it, Kibana will fail to start with the detailed error message.
+any issues with it, OpenSearch Dashboards will fail to start with the detailed error message.
 
 Once the code acquired a logger instance it should not care about any runtime changes in the configuration that may
 happen: all changes will be applied to existing logger instances under the hood.
@@ -147,7 +147,7 @@ logging:
         highlight: true
     file:
       kind: file
-      path: /var/log/kibana.log
+      path: /var/log/opensearch_dashboards.log
       layout:
         kind: pattern
     custom:
@@ -157,7 +157,7 @@ logging:
         pattern: "[%date][%level] %message"
     json-file-appender:
       kind: file
-      path: /var/log/kibana-json.log
+      path: /var/log/opensearch-dashboards-json.log
 
   root:
     appenders: [console, file]
@@ -212,7 +212,7 @@ Usage is very straightforward, one should just get a logger for a specific conte
 different log level. 
 
 ```typescript
-const logger = kibana.logger.get('server');
+const logger = OpenSearchDashboards.logger.get('server');
 
 logger.trace('Message with `trace` log level.');
 logger.debug('Message with `debug` log level.');
@@ -221,7 +221,7 @@ logger.warn('Message with `warn` log level.');
 logger.error('Message with `error` log level.');
 logger.fatal('Message with `fatal` log level.');
 
-const loggerWithNestedContext = kibana.logger.get('server', 'http');
+const loggerWithNestedContext = OpenSearchDashboards.logger.get('server', 'http');
 loggerWithNestedContext.trace('Message with `trace` log level.');
 loggerWithNestedContext.debug('Message with `debug` log level.');
 ```
@@ -254,7 +254,7 @@ root appenders, make sure that it contains `default` appender to provide backwar
 `root` context anymore and not forwarded to the legacy logging service.
  
 #### logging.dest
-By default logs in *stdout*. With new Kibana logging you can use pre-existing `console` appender or
+By default logs in *stdout*. With new OpenSearch Dashboards logging you can use pre-existing `console` appender or
 define a custom one.
 ```yaml
 logging:
@@ -269,7 +269,7 @@ logging:
   appenders:
     file:
       kind: file
-      path: /var/log/kibana.log
+      path: /var/log/opensearch_dashboards.log
       layout:
         kind: pattern
   loggers:

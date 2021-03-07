@@ -18,7 +18,7 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
-import { Logger } from '@kbn/logging';
+import { Logger } from '@osd/logging';
 import { CoreService } from '../../types';
 import { LoggingConfig, LoggerContextConfigInput } from './logging_config';
 import { ILoggingSystem } from './logging_system';

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { LogRecord, Layout } from '@kbn/logging';
+import { schema } from '@osd/config-schema';
+import { LogRecord, Layout } from '@osd/logging';
 
 import {
   Conversion,

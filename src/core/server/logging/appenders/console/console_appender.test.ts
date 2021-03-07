@@ -19,7 +19,7 @@
 
 jest.mock('../../layouts/layouts', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { schema } = require('@kbn/config-schema');
+  const { schema } = require('@osd/config-schema');
   return {
     Layouts: {
       configSchema: schema.object({
@@ -29,7 +29,7 @@ jest.mock('../../layouts/layouts', () => {
   };
 });
 
-import { LogRecord, LogLevel } from '@kbn/logging';
+import { LogRecord, LogLevel } from '@osd/logging';
 import { ConsoleAppender } from './console_appender';
 
 test('`configSchema` creates correct schema.', () => {

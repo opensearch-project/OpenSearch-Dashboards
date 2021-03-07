@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { assertNever } from '@kbn/std';
-import { DisposableAppender } from '@kbn/logging';
+import { schema } from '@osd/config-schema';
+import { assertNever } from '@osd/std';
+import { DisposableAppender } from '@osd/logging';
 
 import {
   LegacyAppender,

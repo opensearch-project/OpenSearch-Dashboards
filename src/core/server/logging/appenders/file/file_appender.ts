@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { LogRecord, Layout, DisposableAppender } from '@kbn/logging';
+import { schema } from '@osd/config-schema';
+import { LogRecord, Layout, DisposableAppender } from '@osd/logging';
 import { createWriteStream, WriteStream } from 'fs';
 
 import { Layouts, LayoutConfigType } from '../../layouts/layouts';
