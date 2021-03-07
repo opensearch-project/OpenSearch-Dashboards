@@ -20,7 +20,7 @@
 import os from 'os';
 import getosAsync, { LinuxOs } from 'getos';
 import { promisify } from 'util';
-import { Logger } from '@kbn/logging';
+import { Logger } from '@osd/logging';
 import { OpsOsMetrics, MetricsCollector } from './types';
 import { OsCgroupMetricsCollector } from './cgroup';
 
