@@ -726,11 +726,11 @@ describe('SavedObjectsRepository', () => {
         references: [{ name: 'ref_0', type: 'test', id: '2' }],
       };
 
-      const bulkCreateError = async (obj, esError, expectedError) => {
+      const bulkCreateError = async (obj, opensearchError, expectedError) => {
         let response;
-        if (esError) {
+        if (opensearchError) {
           response = getMockBulkCreateResponse([obj1, obj, obj2]);
-          response.items[1].create = { error: esError };
+          response.items[1].create = { error: opensearchError };
         } else {
           response = getMockBulkCreateResponse([obj1, obj2]);
         }
@@ -741,7 +741,7 @@ describe('SavedObjectsRepository', () => {
         const objects = [obj1, obj, obj2];
         const result = await savedObjectsRepository.bulkCreate(objects);
         expect(client.bulk).toHaveBeenCalled();
-        const objCall = esError ? expectObjArgs(obj) : [];
+        const objCall = opensearchError ? expectObjArgs(obj) : [];
         const body = [...expectObjArgs(obj1), ...objCall, ...expectObjArgs(obj2)];
         expect(client.bulk).toHaveBeenCalledWith(
           expect.objectContaining({ body }),
@@ -840,24 +840,24 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`returns error when there is a version conflict (bulk)`, async () => {
-        const esError = { type: 'version_conflict_engine_exception' };
-        await bulkCreateError(obj3, esError, expectErrorConflict(obj3));
+        const opensearchError = { type: 'version_conflict_engine_exception' };
+        await bulkCreateError(obj3, opensearchError, expectErrorConflict(obj3));
       });
 
       it(`returns error when document is missing`, async () => {
-        const esError = { type: 'document_missing_exception' };
-        await bulkCreateError(obj3, esError, expectErrorNotFound(obj3));
+        const opensearchError = { type: 'document_missing_exception' };
+        await bulkCreateError(obj3, opensearchError, expectErrorNotFound(obj3));
       });
 
       it(`returns error reason for other errors`, async () => {
-        const esError = { reason: 'some_other_error' };
-        await bulkCreateError(obj3, esError, expectErrorResult(obj3, { message: esError.reason }));
+        const opensearchError = { reason: 'some_other_error' };
+        await bulkCreateError(obj3, opensearchError, expectErrorResult(obj3, { message: opensearchError.reason }));
       });
 
       it(`returns error string for other errors if no reason is defined`, async () => {
-        const esError = { foo: 'some_other_error' };
-        const expectedError = expectErrorResult(obj3, { message: JSON.stringify(esError) });
-        await bulkCreateError(obj3, esError, expectedError);
+        const opensearchError = { foo: 'some_other_error' };
+        const expectedError = expectErrorResult(obj3, { message: JSON.stringify(opensearchError) });
+        await bulkCreateError(obj3, opensearchError, expectedError);
       });
     });
 
@@ -1486,11 +1486,11 @@ describe('SavedObjectsRepository', () => {
         id: 'three',
       };
 
-      const bulkUpdateError = async (obj, esError, expectedError) => {
+      const bulkUpdateError = async (obj, opensearchError, expectedError) => {
         const objects = [obj1, obj, obj2];
         const mockResponse = getMockBulkUpdateResponse(objects);
-        if (esError) {
-          mockResponse.items[1].update = { error: esError };
+        if (opensearchError) {
+          mockResponse.items[1].update = { error: opensearchError };
         }
         client.bulk.mockResolvedValueOnce(
           opensearchClientMock.createSuccessTransportRequestPromise(mockResponse)
@@ -1498,7 +1498,7 @@ describe('SavedObjectsRepository', () => {
 
         const result = await savedObjectsRepository.bulkUpdate(objects);
         expect(client.bulk).toHaveBeenCalled();
-        const objCall = esError ? expectObjArgs(obj) : [];
+        const objCall = opensearchError ? expectObjArgs(obj) : [];
         const body = [...expectObjArgs(obj1), ...objCall, ...expectObjArgs(obj2)];
         expect(client.bulk).toHaveBeenCalledWith(
           expect.objectContaining({ body }),
@@ -1579,24 +1579,24 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`returns error when there is a version conflict (bulk)`, async () => {
-        const esError = { type: 'version_conflict_engine_exception' };
-        await bulkUpdateError(obj, esError, expectErrorConflict(obj));
+        const opensearchError = { type: 'version_conflict_engine_exception' };
+        await bulkUpdateError(obj, opensearchError, expectErrorConflict(obj));
       });
 
       it(`returns error when document is missing (bulk)`, async () => {
-        const esError = { type: 'document_missing_exception' };
-        await bulkUpdateError(obj, esError, expectErrorNotFound(obj));
+        const opensearchError = { type: 'document_missing_exception' };
+        await bulkUpdateError(obj, opensearchError, expectErrorNotFound(obj));
       });
 
       it(`returns error reason for other errors (bulk)`, async () => {
-        const esError = { reason: 'some_other_error' };
-        await bulkUpdateError(obj, esError, expectErrorResult(obj, { message: esError.reason }));
+        const opensearchError = { reason: 'some_other_error' };
+        await bulkUpdateError(obj, opensearchError, expectErrorResult(obj, { message: opensearchError.reason }));
       });
 
       it(`returns error string for other errors if no reason is defined (bulk)`, async () => {
-        const esError = { foo: 'some_other_error' };
-        const expectedError = expectErrorResult(obj, { message: JSON.stringify(esError) });
-        await bulkUpdateError(obj, esError, expectedError);
+        const opensearchError = { foo: 'some_other_error' };
+        const expectedError = expectErrorResult(obj, { message: JSON.stringify(opensearchError) });
+        await bulkUpdateError(obj, opensearchError, expectedError);
       });
     });
 
@@ -2539,7 +2539,7 @@ describe('SavedObjectsRepository', () => {
         expect(client.search).toHaveBeenCalledTimes(1);
       });
 
-      it(`merges output of getSearchDsl into es request body`, async () => {
+      it(`merges output of getSearchDsl into opensearch request body`, async () => {
         const query = { query: 1, aggregations: 2 };
         getSearchDslNS.getSearchDsl.mockReturnValue(query);
         await findSuccess({ type });

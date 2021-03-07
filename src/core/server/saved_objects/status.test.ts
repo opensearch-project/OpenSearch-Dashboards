@@ -36,52 +36,52 @@ describe('calculateStatus$', () => {
     });
 
   describe('when opensearch is unavailable', () => {
-    const esStatus$ = of<ServiceStatus>({
+    const openSearchStatus$ = of<ServiceStatus>({
       level: ServiceStatusLevels.unavailable,
       summary: 'xxx',
     });
 
     it('is unavailable before migrations have ran', async () => {
-      await expectUnavailableDueToOpenSearch(calculateStatus$(of<any>(), esStatus$));
+      await expectUnavailableDueToOpenSearch(calculateStatus$(of<any>(), openSearchStatus$));
     });
     it('is unavailable after migrations have ran', async () => {
       await expectUnavailableDueToOpenSearch(
-        calculateStatus$(of({ status: 'completed', result: [] }), esStatus$)
+        calculateStatus$(of({ status: 'completed', result: [] }), openSearchStatus$)
       );
     });
   });
 
   describe('when opensearch is critical', () => {
-    const esStatus$ = of<ServiceStatus>({
+    const openSearchStatus$ = of<ServiceStatus>({
       level: ServiceStatusLevels.critical,
       summary: 'xxx',
     });
 
     it('is unavailable before migrations have ran', async () => {
-      await expectUnavailableDueToOpenSearch(calculateStatus$(of<any>(), esStatus$));
+      await expectUnavailableDueToOpenSearch(calculateStatus$(of<any>(), openSearchStatus$));
     });
     it('is unavailable after migrations have ran', async () => {
       await expectUnavailableDueToOpenSearch(
         calculateStatus$(
           of({ status: 'completed', result: [{ status: 'migrated' } as any] }),
-          esStatus$
+          openSearchStatus$
         )
       );
     });
   });
 
   describe('when opensearch is available', () => {
-    const esStatus$ = of<ServiceStatus>({
+    const openSearchStatus$ = of<ServiceStatus>({
       level: ServiceStatusLevels.available,
       summary: 'Available',
     });
 
     it('is unavailable before migrations have ran', async () => {
-      await expectUnavailableDueToMigrations(calculateStatus$(of<any>(), esStatus$));
+      await expectUnavailableDueToMigrations(calculateStatus$(of<any>(), openSearchStatus$));
     });
     it('is unavailable while migrations are running', async () => {
       await expect(
-        calculateStatus$(of({ status: 'running' }), esStatus$)
+        calculateStatus$(of({ status: 'running' }), openSearchStatus$)
           .pipe(take(2))
           .toPromise()
       ).resolves.toEqual({
@@ -93,7 +93,7 @@ describe('calculateStatus$', () => {
       await expect(
         calculateStatus$(
           of({ status: 'completed', result: [{ status: 'skipped' }, { status: 'patched' }] }),
-          esStatus$
+          openSearchStatus$
         )
           .pipe(take(2))
           .toPromise()
@@ -112,16 +112,16 @@ describe('calculateStatus$', () => {
   });
 
   describe('when opensearch is degraded', () => {
-    const esStatus$ = of<ServiceStatus>({ level: ServiceStatusLevels.degraded, summary: 'xxx' });
+    const openSearchStatus$ = of<ServiceStatus>({ level: ServiceStatusLevels.degraded, summary: 'xxx' });
 
     it('is unavailable before migrations have ran', async () => {
-      await expectUnavailableDueToMigrations(calculateStatus$(of<any>(), esStatus$));
+      await expectUnavailableDueToMigrations(calculateStatus$(of<any>(), openSearchStatus$));
     });
     it('is degraded after migrations have ran', async () => {
       await expect(
         calculateStatus$(
           of<any>([{ status: 'skipped' }]),
-          esStatus$
+          openSearchStatus$
         )
           .pipe(take(2))
           .toPromise()

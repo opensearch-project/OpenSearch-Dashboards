@@ -33,7 +33,7 @@ import { getRootProperties } from './get_root_properties';
  *  throw an error.
  *
  *  This data can be found at `{indexName}.mappings.{typeName}.properties`
- *  in the es indices.get() response where the properties are objects.
+ *  in the opensearch indices.get() response where the properties are objects.
  *
  *  @param  {OpenSearchMappingsDsl} mappings
  *  @return {OpenSearchPropertyMappings}

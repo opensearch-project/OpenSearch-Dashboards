@@ -32,7 +32,7 @@ import { IndexMapping } from '../types';
  *  key whose value follows the same format.
  *
  *  This data can be found at `{indexName}.mappings.{typeName}.properties`
- *  in the es indices.get() response.
+ *  in the opensearch indices.get() response.
  */
 export function getRootProperties(mapping: IndexMapping) {
   if (!mapping.properties) {

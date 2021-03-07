@@ -129,7 +129,7 @@ describe('savedObjectsClient/decorateOpenSearchError', () => {
     expect(SavedObjectsErrorHelpers.isBadRequestError(error)).toBe(true);
   });
 
-  describe('when es.BadRequest has a reason', () => {
+  describe('when opensearch.BadRequest has a reason', () => {
     it('makes a SavedObjectsClient/esCannotExecuteScriptError error when script context is disabled', () => {
       const error = new opensearchErrors.ResponseError(
         opensearchClientMock.createApiResponse({

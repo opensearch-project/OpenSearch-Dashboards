@@ -88,7 +88,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
 
-  test('removes references that exist within es', async () => {
+  test('removes references that exist within opensearch', async () => {
     const savedObjects = [
       {
         id: '2',

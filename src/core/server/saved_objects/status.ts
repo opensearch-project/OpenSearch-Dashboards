@@ -63,18 +63,18 @@ export const calculateStatus$ = (
   );
 
   return combineLatest([opensearchStatus$, migratorStatus$]).pipe(
-    map(([esStatus, migratorStatus]) => {
-      if (esStatus.level >= ServiceStatusLevels.unavailable) {
+    map(([openSearchStatus, migratorStatus]) => {
+      if (openSearchStatus.level >= ServiceStatusLevels.unavailable) {
         return {
           level: ServiceStatusLevels.unavailable,
           summary: `SavedObjects service is not available without a healthy Elasticearch connection`,
         };
       } else if (migratorStatus.level === ServiceStatusLevels.unavailable) {
         return migratorStatus;
-      } else if (esStatus.level === ServiceStatusLevels.degraded) {
+      } else if (openSearchStatus.level === ServiceStatusLevels.degraded) {
         return {
-          level: esStatus.level,
-          summary: `SavedObjects service is degraded due to OpenSearch: [${esStatus.summary}]`,
+          level: openSearchStatus.level,
+          summary: `SavedObjects service is degraded due to OpenSearch: [${openSearchStatus.summary}]`,
         };
       } else {
         return migratorStatus;
