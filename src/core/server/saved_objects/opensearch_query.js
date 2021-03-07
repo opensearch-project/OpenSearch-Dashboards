@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export const migrationRetryCallClusterMock = jest.fn((fn) => fn());
-jest.doMock('../../../elasticsearch/client/retry_call_cluster', () => ({
-  migrationRetryCallCluster: migrationRetryCallClusterMock,
-}));
+// a temporary file to remove circular deps in TS code between platform & data plugin
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+export { opensearchKuery } from '../../../plugins/data/server';

@@ -20,4 +20,4 @@
 export { getProperty } from './get_property';
 export { getTypes } from './get_types';
 export { getRootProperties } from './get_root_properties';
-export { getRootPropertiesObjects } from './get_root_properties_objects';
+export { getRootPropertiesObjects } from './get_root_propertiopensearch_objects';

@@ -277,7 +277,7 @@ describe('DocumentMigrator', () => {
     });
   });
 
-  it('rejects docs that belong to a newer Kibana instance', () => {
+  it('rejects docs that belong to a newer OpenSearch Dashboards instance', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
       kibanaVersion: '8.0.1',
@@ -290,7 +290,7 @@ describe('DocumentMigrator', () => {
         migrationVersion: { dog: '10.2.0' },
       })
     ).toThrow(
-      /Document "smelly" has property "dog" which belongs to a more recent version of Kibana \[10\.2\.0\]\. The last known version is \[undefined\]/i
+      /Document "smelly" has property "dog" which belongs to a more recent version of OpenSearch Dashboards \[10\.2\.0\]\. The last known version is \[undefined\]/i
     );
   });
 
@@ -312,7 +312,7 @@ describe('DocumentMigrator', () => {
         migrationVersion: { dawg: '1.2.4' },
       })
     ).toThrow(
-      /Document "fleabag" has property "dawg" which belongs to a more recent version of Kibana \[1\.2\.4\]\. The last known version is \[1\.2\.3\]/i
+      /Document "fleabag" has property "dawg" which belongs to a more recent version of OpenSearch Dashboards \[1\.2\.4\]\. The last known version is \[1\.2\.3\]/i
     );
   });
 

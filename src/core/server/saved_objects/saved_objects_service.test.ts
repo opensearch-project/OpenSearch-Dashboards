@@ -18,25 +18,25 @@
  */
 
 import {
-  KibanaMigratorMock,
+  OpenSearchDashboardsMigratorMock,
   migratorInstanceMock,
   clientProviderInstanceMock,
   typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
-import { ByteSizeValue } from '@kbn/config-schema';
-import { errors as esErrors } from '@elastic/elasticsearch';
+import { ByteSizeValue } from '@osd/config-schema';
+import { errors as opensearchErrors } from '@elastic/elasticsearch';
 
 import { SavedObjectsService } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
 import { Env } from '../config';
 import { configServiceMock } from '../mocks';
-import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
-import { elasticsearchClientMock } from '../elasticsearch/client/mocks';
+import { opensearchServiceMock } from '../opensearch/opensearch_service.mock';
+import { opensearchClientMock } from '../opensearch/client/mocks';
 import { httpServiceMock } from '../http/http_service.mock';
 import { httpServerMock } from '../http/http_server.mocks';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
-import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
+import { NodesVersionCompatibility } from '../opensearch/version_check/ensure_opensearch_version';
 import { SavedObjectsRepository } from './service/lib/repository';
 
 jest.mock('./service/lib/repository');
@@ -60,17 +60,17 @@ describe('SavedObjectsService', () => {
   };
 
   const createSetupDeps = () => {
-    const elasticsearchMock = elasticsearchServiceMock.createInternalSetup();
+    const opensearchMock = opensearchServiceMock.createInternalSetup();
     return {
       http: httpServiceMock.createInternalSetupContract(),
-      elasticsearch: elasticsearchMock,
+      opensearch: opensearchMock,
     };
   };
 
   const createStartDeps = (pluginsInitialized: boolean = true) => {
     return {
       pluginsInitialized,
-      elasticsearch: elasticsearchServiceMock.createInternalStart(),
+      opensearch: opensearchServiceMock.createInternalStart(),
     };
   };
 
@@ -161,30 +161,30 @@ describe('SavedObjectsService', () => {
   });
 
   describe('#start()', () => {
-    it('creates a KibanaMigrator which retries NoLivingConnectionsError errors from ES client', async () => {
+    it('creates a OpenSearchDashboardsMigrator which retries NoLivingConnectionsError errors from OpenSearch client', async () => {
       const coreContext = createCoreContext();
 
       const soService = new SavedObjectsService(coreContext);
       const coreSetup = createSetupDeps();
       const coreStart = createStartDeps();
 
-      coreStart.elasticsearch.client.asInternalUser.indices.create = jest
+      coreStart.opensearch.client.asInternalUser.indices.create = jest
         .fn()
         .mockImplementationOnce(() =>
-          Promise.reject(new esErrors.NoLivingConnectionsError('reason', {} as any))
+          Promise.reject(new opensearchErrors.NoLivingConnectionsError('reason', {} as any))
         )
         .mockImplementationOnce(() =>
-          elasticsearchClientMock.createSuccessTransportRequestPromise('success')
+          opensearchClientMock.createSuccessTransportRequestPromise('success')
         );
 
       await soService.setup(coreSetup);
       await soService.start(coreStart, 1);
 
-      const response = await KibanaMigratorMock.mock.calls[0][0].client.indices.create();
+      const response = await OpenSearchDashboardsMigratorMock.mock.calls[0][0].client.indices.create();
       return expect(response.body).toBe('success');
     });
 
-    it('skips KibanaMigrator migrations when pluginsInitialized=false', async () => {
+    it('skips OpenSearchDashboardsMigrator migrations when pluginsInitialized=false', async () => {
       const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);
 
@@ -193,7 +193,7 @@ describe('SavedObjectsService', () => {
       expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
     });
 
-    it('skips KibanaMigrator migrations when migrations.skip=true', async () => {
+    it('skips OpenSearchDashboardsMigrator migrations when migrations.skip=true', async () => {
       const coreContext = createCoreContext({ skipMigration: true });
       const soService = new SavedObjectsService(coreContext);
       await soService.setup(createSetupDeps());
@@ -208,7 +208,7 @@ describe('SavedObjectsService', () => {
       const setupDeps = createSetupDeps();
       // Create an new subject so that we can control when isCompatible=true
       // is emitted.
-      setupDeps.elasticsearch.esNodesCompatibility$ = new BehaviorSubject({
+      setupDeps.opensearch.esNodesCompatibility$ = new BehaviorSubject({
         isCompatible: false,
         incompatibleNodes: [],
         warningNodes: [],
@@ -217,7 +217,7 @@ describe('SavedObjectsService', () => {
       await soService.setup(setupDeps);
       soService.start(createStartDeps());
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(0);
-      ((setupDeps.elasticsearch.esNodesCompatibility$ as any) as BehaviorSubject<
+      ((setupDeps.opensearch.esNodesCompatibility$ as any) as BehaviorSubject<
         NodesVersionCompatibility
       >).next({
         isCompatible: true,
@@ -231,7 +231,7 @@ describe('SavedObjectsService', () => {
       });
     });
 
-    it('resolves with KibanaMigrator after waiting for migrations to complete', async () => {
+    it('resolves with OpenSearchDashboardsMigrator after waiting for migrations to complete', async () => {
       const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);
       await soService.setup(createSetupDeps());
@@ -291,10 +291,10 @@ describe('SavedObjectsService', () => {
         const coreStart = createStartDeps();
         const { createScopedRepository } = await soService.start(coreStart);
 
-        const req = httpServerMock.createKibanaRequest();
+        const req = httpServerMock.createOpenSearchDashboardsRequest();
         createScopedRepository(req);
 
-        expect(coreStart.elasticsearch.client.asScoped).toHaveBeenCalledWith(req);
+        expect(coreStart.opensearch.client.asScoped).toHaveBeenCalledWith(req);
 
         const [
           [, , , , includedHiddenTypes],
@@ -311,7 +311,7 @@ describe('SavedObjectsService', () => {
         const coreStart = createStartDeps();
         const { createScopedRepository } = await soService.start(coreStart);
 
-        const req = httpServerMock.createKibanaRequest();
+        const req = httpServerMock.createOpenSearchDashboardsRequest();
         createScopedRepository(req, ['someHiddenType']);
 
         const [
@@ -337,7 +337,7 @@ describe('SavedObjectsService', () => {
           [, , , client, includedHiddenTypes],
         ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
 
-        expect(coreStart.elasticsearch.client.asInternalUser).toBe(client);
+        expect(coreStart.opensearch.client.asInternalUser).toBe(client);
         expect(includedHiddenTypes).toEqual([]);
       });
 

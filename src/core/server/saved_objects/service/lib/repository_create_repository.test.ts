@@ -17,8 +17,8 @@
  * under the License.
  */
 import { SavedObjectsRepository } from './repository';
-import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
-import { KibanaMigrator } from '../../migrations';
+import { mockOpenSearchDashboardsMigrator } from '../../migrations/kibana/kibana_migrator.mock';
+import { OpenSearchDashboardsMigrator } from '../../migrations';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
 jest.mock('./repository');
@@ -65,7 +65,7 @@ describe('SavedObjectsRepository#createRepository', () => {
     migrations: {},
   });
 
-  const migrator = mockKibanaMigrator.create({ types: typeRegistry.getAllTypes() });
+  const migrator = mockOpenSearchDashboardsMigrator.create({ types: typeRegistry.getAllTypes() });
   const RepositoryConstructor = (SavedObjectsRepository as unknown) as jest.Mock<
     SavedObjectsRepository
   >;
@@ -77,7 +77,7 @@ describe('SavedObjectsRepository#createRepository', () => {
   it('should not allow a repository with an undefined type', () => {
     try {
       originalRepository.createRepository(
-        (migrator as unknown) as KibanaMigrator,
+        (migrator as unknown) as OpenSearchDashboardsMigrator,
         typeRegistry,
         '.kibana-test',
         callAdminCluster,
@@ -92,7 +92,7 @@ describe('SavedObjectsRepository#createRepository', () => {
 
   it('should create a repository without hidden types', () => {
     const repository = originalRepository.createRepository(
-      (migrator as unknown) as KibanaMigrator,
+      (migrator as unknown) as OpenSearchDashboardsMigrator,
       typeRegistry,
       '.kibana-test',
       callAdminCluster,
@@ -110,7 +110,7 @@ describe('SavedObjectsRepository#createRepository', () => {
 
   it('should create a repository with a unique list of hidden types', () => {
     const repository = originalRepository.createRepository(
-      (migrator as unknown) as KibanaMigrator,
+      (migrator as unknown) as OpenSearchDashboardsMigrator,
       typeRegistry,
       '.kibana-test',
       callAdminCluster,

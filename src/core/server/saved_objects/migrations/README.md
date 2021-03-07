@@ -1,19 +1,19 @@
 # Saved Object Migrations
 
-Migrations are the mechanism by which saved object indices are kept up to date with the Kibana system. Plugin authors write their plugins to work with a certain set of mappings, and documents of a certain shape. Migrations ensure that the index actually conforms to those expectations.
+Migrations are the mechanism by which saved object indices are kept up to date with the OpenSearch Dashboards system. Plugin authors write their plugins to work with a certain set of mappings, and documents of a certain shape. Migrations ensure that the index actually conforms to those expectations.
 
 ## Migrating the index
 
-When Kibana boots, prior to serving any requests, it performs a check to see if the kibana index needs to be migrated.
+When OpenSearch Dashboards boots, prior to serving any requests, it performs a check to see if the kibana index needs to be migrated.
 
 - If there are out of date docs, or mapping changes, or the current index is not aliased, the index is migrated.
-- If the Kibana index does not exist, it is created.
+- If the OpenSearch Dashboards index does not exist, it is created.
 
-All of this happens prior to Kibana serving any http requests.
+All of this happens prior to OpenSearch Dashboards serving any http requests.
 
 Here is the gist of what happens if an index migration is necessary:
 
-* If `.kibana` (or whatever the Kibana index is named) is not an alias, it will be converted to one:
+* If `.kibana` (or whatever the OpenSearch Dashboards index is named) is not an alias, it will be converted to one:
   * Reindex `.kibana` into `.kibana_1`
   * Delete `.kibana`
   * Create an alias `.kibana` that points to `.kibana_1`
@@ -21,9 +21,9 @@ Here is the gist of what happens if an index migration is necessary:
 * Copy all documents from `.kibana_1` into `.kibana_2`, running them through any applicable migrations
 * Point the `.kibana` alias to `.kibana_2`
 
-## Migrating Kibana clusters
+## Migrating OpenSearch Dashboards clusters
 
-If Kibana is being run in a cluster, migrations will be coordinated so that they only run on one Kibana instance at a time. This is done in a fairly rudimentary way. Let's say we have two Kibana instances, kibana1 and kibana2.
+If OpenSearch Dashboards is being run in a cluster, migrations will be coordinated so that they only run on one OpenSearch Dashboards instance at a time. This is done in a fairly rudimentary way. Let's say we have two OpenSearch Dashboards instances, kibana1 and kibana2.
 
 * kibana1 and kibana2 both start simultaneously and detect that the index requires migration
 * kibana1 begins the migration and creates index `.kibana_4`
@@ -32,17 +32,17 @@ If Kibana is being run in a cluster, migrations will be coordinated so that they
   * Every few seconds, kibana2 instance checks the `.kibana` index to see if it is done migrating
   * Once `.kibana` is determined to be up to date, the kibana2 instance continues booting
 
-In this example, if the `.kibana_4` index existed prior to Kibana booting, the entire migration process will fail, as all Kibana instances will assume another instance is migrating to the `.kibana_4` index. This problem is only fixable by deleting the `.kibana_4` index.
+In this example, if the `.kibana_4` index existed prior to OpenSearch Dashboards booting, the entire migration process will fail, as all OpenSearch Dashboards instances will assume another instance is migrating to the `.kibana_4` index. This problem is only fixable by deleting the `.kibana_4` index.
 
 ## Import / export
 
-If a user attempts to import FanciPlugin 1.0 documents into a Kibana system that is running FanciPlugin 2.0, those documents will be migrated prior to being persisted in the Kibana index. If a user attempts to import documents having a migration version that is _greater_ than the current Kibana version, the documents will fail to import.
+If a user attempts to import FanciPlugin 1.0 documents into a OpenSearch Dashboards system that is running FanciPlugin 2.0, those documents will be migrated prior to being persisted in the OpenSearch Dashboards index. If a user attempts to import documents having a migration version that is _greater_ than the current OpenSearch Dashboards version, the documents will fail to import.
 
 ## Validation
 
-It might happen that a user modifies their FanciPlugin 1.0 export file to have documents with a migrationVersion of 2.0.0. In this scenario, Kibana will store those documents as if they are up to date, even though they are not, and the result will be unknown, but probably undesirable behavior.
+It might happen that a user modifies their FanciPlugin 1.0 export file to have documents with a migrationVersion of 2.0.0. In this scenario, OpenSearch Dashboards will store those documents as if they are up to date, even though they are not, and the result will be unknown, but probably undesirable behavior.
 
-Similarly, Kibana server APIs assume that they are sent up to date documents unless a document specifies a migrationVersion. This means that out-of-date callers of our APIs will send us out-of-date documents, and those documents will be accepted and stored as if they are up-to-date.
+Similarly, OpenSearch Dashboards server APIs assume that they are sent up to date documents unless a document specifies a migrationVersion. This means that out-of-date callers of our APIs will send us out-of-date documents, and those documents will be accepted and stored as if they are up-to-date.
 
 To prevent this from happening, migration authors should _always_ write a [validation](../validation) function that throws an error if a document is not up to date, and this validation function should always be updated any time a new migration is added for the relevent document types.
 
@@ -60,7 +60,7 @@ So, let's say we have a document that looks like this:
 }
 ```
 
-In this document, one plugin might own the `dashboard` type, and another plugin might own the `securityKey` type. If two or more plugins define securityKey migrations `{ migrations: { securityKey: { ... } } }`, Kibana will fail to start.
+In this document, one plugin might own the `dashboard` type, and another plugin might own the `securityKey` type. If two or more plugins define securityKey migrations `{ migrations: { securityKey: { ... } } }`, OpenSearch Dashboards will fail to start.
 
 To write a migration for this document, the dashboard plugin might look something like this:
 
@@ -86,17 +86,17 @@ uiExports: {
 }
 ```
 
-After Kibana migrates the index, our example document would have `{ attributes: { title: 'WHATEVER!!' } }`.
+After OpenSearch Dashboards migrates the index, our example document would have `{ attributes: { title: 'WHATEVER!!' } }`.
 
 Each migration function only needs to be able to handle documents belonging to the previous version. The initial migration function (in this example, `1.9.0`) needs to be more flexible, as it may be passed documents of any pre `1.9.0` shape.
 
 ## Disabled plugins
 
-If a plugin is disbled, all of its documents are retained in the Kibana index. They can be imported and exported. When the plugin is re-enabled, Kibana will migrate any out of date documents that were imported or retained while it was disabled.
+If a plugin is disbled, all of its documents are retained in the OpenSearch Dashboards index. They can be imported and exported. When the plugin is re-enabled, OpenSearch Dashboards will migrate any out of date documents that were imported or retained while it was disabled.
 
 ## Configuration
 
-Kibana index migrations expose a few config settings which might be tweaked:
+OpenSearch Dashboards index migrations expose a few config settings which might be tweaked:
 
 * `migrations.scrollDuration` - The
   [scroll](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-scroll.html#scroll-search-context)
@@ -104,13 +104,13 @@ Kibana index migrations expose a few config settings which might be tweaked:
   `15m`. 
 * `migrations.batchSize` - The number of documents to read / transform / write
   at a time during index migrations 
-* `migrations.pollInterval` - How often, in milliseconds, secondary Kibana
-  instances will poll to see if the primary Kibana instance has finished
+* `migrations.pollInterval` - How often, in milliseconds, secondary OpenSearchDashboards
+  instances will poll to see if the primary OpenSearch Dashboards instance has finished
   migrating the index.
 * `migrations.skip` - Skip running migrations on startup (defaults to false).
   This should only be used for running integration tests without a running
-  elasticsearch cluster. Note: even though migrations won't run on startup,
-  individual docs will still be migrated when read from ES.
+  opensearch cluster. Note: even though migrations won't run on startup,
+  individual docs will still be migrated when read from OpenSearch.
 
 ## Example
 
@@ -170,9 +170,9 @@ uiExports: {
 }
 ```
 
-Now, whenever Kibana boots, if FanciPlugin is enabled, Kibana scans its index for any documents that have type 'fanci' and have a `migrationVersion.fanci` property that is anything other than `2.0.0`. If any such documents are found, the index is determined to be out of date (or at least of the wrong version), and Kibana attempts to migrate the index.
+Now, whenever OpenSearch Dashboards boots, if FanciPlugin is enabled, OpenSearch Dashboards scans its index for any documents that have type 'fanci' and have a `migrationVersion.fanci` property that is anything other than `2.0.0`. If any such documents are found, the index is determined to be out of date (or at least of the wrong version), and OpenSearch Dashboards attempts to migrate the index.
 
-At the end of the migration, Kibana's fanci documents will look something like this:
+At the end of the migration, OpenSearchDashboards's fanci documents will look something like this:
 
 ```js
 {
@@ -194,7 +194,7 @@ The migrations source code is grouped into two folders:
 * `core` - Contains index-agnostic, general migration logic, which could be reused for indices other than `.kibana`
 * `kibana` - Contains a relatively light-weight wrapper around core, which provides `.kibana` index-specific logic
 
-Generally, the code eschews classes in favor of functions and basic data structures. The publicly exported code is all class-based, however, in an attempt to conform to Kibana norms.
+Generally, the code eschews classes in favor of functions and basic data structures. The publicly exported code is all class-based, however, in an attempt to conform to OpenSearch Dashboards norms.
 
 ### Core
 

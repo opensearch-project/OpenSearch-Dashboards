@@ -25,7 +25,7 @@ import {
 import { getRootProperties } from './get_root_properties';
 
 /**
- *  Get the property mappings for the root type in the EsMappingsDsl
+ *  Get the property mappings for the root type in the OpenSearchMappingsDsl
  *  where the properties are objects
  *
  *  If the mappings don't have a root type, or the root type is not
@@ -35,8 +35,8 @@ import { getRootProperties } from './get_root_properties';
  *  This data can be found at `{indexName}.mappings.{typeName}.properties`
  *  in the es indices.get() response where the properties are objects.
  *
- *  @param  {EsMappingsDsl} mappings
- *  @return {EsPropertyMappings}
+ *  @param  {OpenSearchMappingsDsl} mappings
+ *  @return {OpenSearchPropertyMappings}
  */
 
 const omittedRootProps = ['migrationVersion', 'references'];

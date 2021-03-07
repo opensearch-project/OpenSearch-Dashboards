@@ -20,7 +20,7 @@ import { PriorityCollection } from './priority_collection';
 import { SavedObjectsClientContract } from '../../types';
 import { SavedObjectsRepositoryFactory } from '../../saved_objects_service';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { KibanaRequest } from '../../../http';
+import { OpenSearchDashboardsRequest } from '../../../http';
 
 /**
  * Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance.
@@ -29,7 +29,7 @@ import { KibanaRequest } from '../../../http';
 export interface SavedObjectsClientWrapperOptions {
   client: SavedObjectsClientContract;
   typeRegistry: ISavedObjectTypeRegistry;
-  request: KibanaRequest;
+  request: OpenSearchDashboardsRequest;
 }
 
 /**
@@ -48,7 +48,7 @@ export type SavedObjectsClientFactory = ({
   request,
   includedHiddenTypes,
 }: {
-  request: KibanaRequest;
+  request: OpenSearchDashboardsRequest;
   includedHiddenTypes?: string[];
 }) => SavedObjectsClientContract;
 
@@ -123,7 +123,7 @@ export class SavedObjectsClientProvider {
   }
 
   getClient(
-    request: KibanaRequest,
+    request: OpenSearchDashboardsRequest,
     { includedHiddenTypes, excludedWrappers = [] }: SavedObjectsClientProviderOptions = {}
   ): SavedObjectsClientContract {
     const client = this._clientFactory({

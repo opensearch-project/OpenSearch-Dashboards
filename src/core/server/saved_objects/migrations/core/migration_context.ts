@@ -25,7 +25,7 @@
  */
 
 import { Logger } from 'src/core/server/logging';
-import { MigrationEsClient } from './migration_es_client';
+import { MigrationOpenSearchClient } from './migration_opensearch_client';
 import { SavedObjectsSerializer } from '../../serialization';
 import {
   SavedObjectsTypeMappingDefinitions,
@@ -34,14 +34,14 @@ import {
 } from '../../mappings';
 import { buildActiveMappings } from './build_active_mappings';
 import { VersionedTransformer } from './document_migrator';
-import * as Index from './elastic_index';
+import * as Index from './opensearch_index';
 import { SavedObjectsMigrationLogger, MigrationLogger } from './migration_logger';
 
 export interface MigrationOpts {
   batchSize: number;
   pollInterval: number;
   scrollDuration: string;
-  client: MigrationEsClient;
+  client: MigrationOpenSearchClient;
   index: string;
   log: Logger;
   mappingProperties: SavedObjectsTypeMappingDefinitions;
@@ -60,7 +60,7 @@ export interface MigrationOpts {
  * @internal
  */
 export interface Context {
-  client: MigrationEsClient;
+  client: MigrationOpenSearchClient;
   alias: string;
   source: Index.FullIndexInfo;
   dest: Index.FullIndexInfo;
@@ -148,7 +148,7 @@ function createDestContext(
  * target index.)
  *
  * @param activeMappings The mappings compiled from all the Saved Object types
- * known to this Kibana node.
+ * known to this OpenSearch Dashboards node.
  * @param sourceMappings The mappings of index used as the migration source.
  * @returns The mappings that should be applied to the target index.
  */

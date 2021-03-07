@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { KibanaMigrator, IKibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
+export { OpenSearchDashboardsMigrator, IOpenSearchDashboardsMigrator, OpenSearchDashboardsMigratorStatus } from './kibana_migrator';

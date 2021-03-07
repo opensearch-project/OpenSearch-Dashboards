@@ -18,11 +18,11 @@
  */
 
 /*
- * This file contains the logic for managing the Kibana index version
+ * This file contains the logic for managing the OpenSearch Dashboards index version
  * (the shape of the mappings and documents in the index).
  */
 
-import { KibanaConfigType } from 'src/core/server/kibana_config';
+import { OpenSearchDashboardsConfigType } from 'src/core/server/kibana_config';
 import { BehaviorSubject } from 'rxjs';
 
 import { Logger } from '../../../logging';
@@ -30,48 +30,48 @@ import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { buildActiveMappings, IndexMigrator, MigrationResult, MigrationStatus } from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
-import { MigrationEsClient } from '../core/';
+import { MigrationOpenSearchClient } from '../core/';
 import { createIndexMap } from '../core/build_index_map';
 import { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 
-export interface KibanaMigratorOptions {
-  client: MigrationEsClient;
+export interface OpenSearchDashboardsMigratorOptions {
+  client: MigrationOpenSearchClient;
   typeRegistry: ISavedObjectTypeRegistry;
   savedObjectsConfig: SavedObjectsMigrationConfigType;
-  kibanaConfig: KibanaConfigType;
+  kibanaConfig: OpenSearchDashboardsConfigType;
   kibanaVersion: string;
   logger: Logger;
 }
 
-export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
+export type IOpenSearchDashboardsMigrator = Pick<OpenSearchDashboardsMigrator, keyof OpenSearchDashboardsMigrator>;
 
-export interface KibanaMigratorStatus {
+export interface OpenSearchDashboardsMigratorStatus {
   status: MigrationStatus;
   result?: MigrationResult[];
 }
 
 /**
- * Manages the shape of mappings and documents in the Kibana index.
+ * Manages the shape of mappings and documents in the OpenSearch Dashboards index.
  */
-export class KibanaMigrator {
-  private readonly client: MigrationEsClient;
+export class OpenSearchDashboardsMigrator {
+  private readonly client: MigrationOpenSearchClient;
   private readonly savedObjectsConfig: SavedObjectsMigrationConfigType;
   private readonly documentMigrator: VersionedTransformer;
-  private readonly kibanaConfig: KibanaConfigType;
+  private readonly kibanaConfig: OpenSearchDashboardsConfigType;
   private readonly log: Logger;
   private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
   private readonly typeRegistry: ISavedObjectTypeRegistry;
   private readonly serializer: SavedObjectsSerializer;
   private migrationResult?: Promise<MigrationResult[]>;
-  private readonly status$ = new BehaviorSubject<KibanaMigratorStatus>({
+  private readonly status$ = new BehaviorSubject<OpenSearchDashboardsMigratorStatus>({
     status: 'waiting',
   });
   private readonly activeMappings: IndexMapping;
 
   /**
-   * Creates an instance of KibanaMigrator.
+   * Creates an instance of OpenSearchDashboardsMigrator.
    */
   constructor({
     client,
@@ -80,7 +80,7 @@ export class KibanaMigrator {
     savedObjectsConfig,
     kibanaVersion,
     logger,
-  }: KibanaMigratorOptions) {
+  }: OpenSearchDashboardsMigratorOptions) {
     this.client = client;
     this.kibanaConfig = kibanaConfig;
     this.savedObjectsConfig = savedObjectsConfig;
@@ -99,13 +99,13 @@ export class KibanaMigrator {
   }
 
   /**
-   * Migrates the mappings and documents in the Kibana index. By default, this will run only
+   * Migrates the mappings and documents in the OpenSearch Dashboards index. By default, this will run only
    * once and subsequent calls will return the result of the original call.
    *
    * @param rerun - If true, method will run a new migration when called again instead of
    * returning the result of the initial migration. This should only be used when factors external
-   * to Kibana itself alter the kibana index causing the saved objects mappings or data to change
-   * after the Kibana server performed the initial migration.
+   * to OpenSearch Dashboards itself alter the kibana index causing the saved objects mappings or data to change
+   * after the OpenSearch Dashboards server performed the initial migration.
    *
    * @remarks When the `rerun` parameter is set to true, no checks are performed to ensure that no migration
    * is currently running. Chained or concurrent calls to `runMigrations({ rerun: true })` can lead to
@@ -114,13 +114,13 @@ export class KibanaMigrator {
    *
    * @returns - A promise which resolves once all migrations have been applied.
    *    The promise resolves with an array of migration statuses, one for each
-   *    elasticsearch index which was migrated.
+   *    opensearch index which was migrated.
    */
   public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<
     Array<{ status: string }>
   > {
     if (this.migrationResult === undefined || rerun) {
-      // Reruns are only used by CI / EsArchiver. Publishing status updates on reruns results in slowing down CI
+      // Reruns are only used by CI / OpenSearchArchiver. Publishing status updates on reruns results in slowing down CI
       // unnecessarily, so we skip it in this case.
       if (!rerun) {
         this.status$.next({ status: 'running' });
@@ -172,7 +172,7 @@ export class KibanaMigrator {
   }
 
   /**
-   * Gets all the index mappings defined by Kibana's enabled plugins.
+   * Gets all the index mappings defined by OpenSearchDashboards's enabled plugins.
    *
    */
   public getActiveMappings(): IndexMapping {

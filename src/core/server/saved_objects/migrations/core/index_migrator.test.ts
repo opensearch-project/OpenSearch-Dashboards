@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
+import { opensearchClientMock } from '../../../opensearch/client/mocks';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { IndexMigrator } from './index_migrator';
@@ -27,13 +27,13 @@ import { loggingSystemMock } from '../../../logging/logging_system.mock';
 
 describe('IndexMigrator', () => {
   let testOpts: jest.Mocked<MigrationOpts> & {
-    client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
+    client: ReturnType<typeof opensearchClientMock.createOpenSearchClient>;
   };
 
   beforeEach(() => {
     testOpts = {
       batchSize: 10,
-      client: elasticsearchClientMock.createElasticsearchClient(),
+      client: opensearchClientMock.createOpenSearchClient(),
       index: '.kibana',
       log: loggingSystemMock.create().get(),
       mappingProperties: {},
@@ -396,7 +396,7 @@ describe('IndexMigrator', () => {
 });
 
 function withIndex(
-  client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>,
+  client: ReturnType<typeof opensearchClientMock.createOpenSearchClient>,
   opts: any = {}
 ) {
   const defaultIndex = {
@@ -431,32 +431,32 @@ function withIndex(
   let scrollCallCounter = 1;
 
   client.indices.get.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise(index, {
+    opensearchClientMock.createSuccessTransportRequestPromise(index, {
       statusCode: index.statusCode,
     })
   );
   client.indices.getAlias.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise(alias, {
+    opensearchClientMock.createSuccessTransportRequestPromise(alias, {
       statusCode: index.statusCode,
     })
   );
   client.reindex.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({
+    opensearchClientMock.createSuccessTransportRequestPromise({
       task: 'zeid',
       _shards: { successful: 1, total: 1 },
     })
   );
   client.tasks.get.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({ completed: true })
+    opensearchClientMock.createSuccessTransportRequestPromise({ completed: true })
   );
   client.search.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult(0))
+    opensearchClientMock.createSuccessTransportRequestPromise(searchResult(0))
   );
   client.bulk.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({ items: [] })
+    opensearchClientMock.createSuccessTransportRequestPromise({ items: [] })
   );
   client.count.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({
+    opensearchClientMock.createSuccessTransportRequestPromise({
       count: numOutOfDate,
       _shards: { successful: 1, total: 1 },
     })
@@ -465,8 +465,8 @@ function withIndex(
     if (scrollCallCounter <= docs.length) {
       const result = searchResult(scrollCallCounter);
       scrollCallCounter++;
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(result);
+      return opensearchClientMock.createSuccessTransportRequestPromise(result);
     }
-    return elasticsearchClientMock.createSuccessTransportRequestPromise({});
+    return opensearchClientMock.createSuccessTransportRequestPromise({});
   });
 }

@@ -477,7 +477,7 @@ describe('validateReferences()', () => {
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
   });
 
-  test(`doesn't return errors when references exist in Elasticsearch`, async () => {
+  test(`doesn't return errors when references exist in OpenSearch`, async () => {
     savedObjectsClient.bulkGet.mockResolvedValue({
       saved_objects: [
         {

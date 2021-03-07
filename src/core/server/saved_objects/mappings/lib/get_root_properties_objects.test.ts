@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getRootPropertiesObjects } from './get_root_properties_objects';
+import { getRootPropertiesObjects } from './get_root_propertiopensearch_objects';
 
 test(`returns single object with properties`, () => {
   const mappings = {
