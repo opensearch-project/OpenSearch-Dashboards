@@ -64,7 +64,7 @@ export interface CoreEnvironmentUsageData {
  * @internal
  */
 export interface CoreConfigUsageData {
-  elasticsearch: {
+  opensearch: {
     sniffOnStart: boolean;
     sniffIntervalMs?: number;
     sniffOnConnectionFault: boolean;

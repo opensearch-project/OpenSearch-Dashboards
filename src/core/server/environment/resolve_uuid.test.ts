@@ -18,7 +18,7 @@
  */
 
 import { join } from 'path';
-import { PathConfigType } from '@kbn/utils';
+import { PathConfigType } from '@osd/utils';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { readFile, writeFile } from './fs';
 import { resolveInstanceUuid, UUID_7_6_0_BUG } from './resolve_uuid';
@@ -238,7 +238,7 @@ describe('resolveInstanceUuid', () => {
       await expect(
         resolveInstanceUuid({ pathConfig, serverConfig, logger })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to read Kibana UUID file, please check the uuid.server configuration value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: EACCES"`
+        `"Unable to read OpenSearch Dashboards UUID file, please check the uuid.server configuration value in opensearch_dashboards.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: EACCES"`
       );
     });
     it('throws an explicit error for file write errors', async () => {
@@ -246,7 +246,7 @@ describe('resolveInstanceUuid', () => {
       await expect(
         resolveInstanceUuid({ pathConfig, serverConfig, logger })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to write Kibana UUID file, please check the uuid.server configuration value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: EISDIR"`
+        `"Unable to write OpenSearch Dashboards UUID file, please check the uuid.server configuration value in opensearch_dashboards.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: EISDIR"`
       );
     });
   });

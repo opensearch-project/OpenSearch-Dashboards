@@ -23,14 +23,14 @@ import { takeUntil } from 'rxjs/operators';
 import { CoreService } from 'src/core/types';
 import { SavedObjectsServiceStart } from 'src/core/server';
 import { CoreContext } from '../core_context';
-import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
+import { OpenSearchConfigType } from '../opensearch/opensearch_config';
 import { HttpConfigType } from '../http';
 import { LoggingConfigType } from '../logging';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import { CoreServicesUsageData, CoreUsageData, CoreUsageDataStart } from './types';
 import { isConfigured } from './is_configured';
-import { ElasticsearchServiceStart } from '../elasticsearch';
-import { KibanaConfigType } from '../kibana_config';
+import { OpenSearchServiceStart } from '../opensearch';
+import { OpenSearchDashboardsConfigType } from '../opensearch_dashboards_config';
 import { MetricsServiceSetup, OpsMetrics } from '..';
 
 export interface SetupDeps {
@@ -39,36 +39,36 @@ export interface SetupDeps {
 
 export interface StartDeps {
   savedObjects: SavedObjectsServiceStart;
-  elasticsearch: ElasticsearchServiceStart;
+  opensearch: OpenSearchServiceStart;
 }
 
 /**
  * Because users can configure their Saved Object to any arbitrary index name,
  * we need to map customized index names back to a "standard" index name.
  *
- * e.g. If a user configures `kibana.index: .my_saved_objects` we want to the
- * collected data to be grouped under `.kibana` not ".my_saved_objects".
+ * e.g. If a user configures `opensearchDashboards.index: .my_saved_objects` we want to the
+ * collected data to be grouped under `.opensearch_dashboards` not ".my_saved_objects".
  *
  * This is rather brittle, but the option to configure index names might go
  * away completely anyway (see #60053).
  *
  * @param index The index name configured for this SO type
- * @param kibanaConfigIndex The default kibana index as configured by the user
- * with `kibana.index`
+ * @param opensearchDashboardsConfigIndex The default opensearch_dashboards index as configured by the user
+ * with `opensearchDashboards.index`
  */
-const kibanaOrTaskManagerIndex = (index: string, kibanaConfigIndex: string) => {
-  return index === kibanaConfigIndex ? '.kibana' : '.kibana_task_manager';
+const opensearchDashboardsOrTaskManagerIndex = (index: string, opensearchDashboardsConfigIndex: string) => {
+  return index === opensearchDashboardsConfigIndex ? '.opensearch_dashboards' : '.opensearch_dashboards_task_manager';
 };
 
 export class CoreUsageDataService implements CoreService<void, CoreUsageDataStart> {
-  private elasticsearchConfig?: ElasticsearchConfigType;
+  private opensearchConfig?: OpenSearchConfigType;
   private configService: CoreContext['configService'];
   private httpConfig?: HttpConfigType;
   private loggingConfig?: LoggingConfigType;
   private soConfig?: SavedObjectsConfigType;
   private stop$: Subject<void>;
   private opsMetrics?: OpsMetrics;
-  private kibanaConfig?: KibanaConfigType;
+  private opensearchDashboardsConfig?: OpenSearchDashboardsConfigType;
 
   constructor(core: CoreContext) {
     this.configService = core.configService;
@@ -77,7 +77,7 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
 
   private async getSavedObjectIndicesUsageData(
     savedObjects: SavedObjectsServiceStart,
-    elasticsearch: ElasticsearchServiceStart
+    opensearch: OpenSearchServiceStart
   ): Promise<CoreServicesUsageData['savedObjects']> {
     const indices = await Promise.all(
       Array.from(
@@ -85,7 +85,7 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
           .getTypeRegistry()
           .getAllTypes()
           .reduce((acc, type) => {
-            const index = type.indexPattern ?? this.kibanaConfig!.index;
+            const index = type.indexPattern ?? this.opensearchDashboardsConfig!.index;
             return index != null ? acc.add(index) : acc;
           }, new Set<string>())
           .values()
@@ -93,7 +93,7 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
         // The _cat/indices API returns the _index_ and doesn't return a way
         // to map back from the index to the alias. So we have to make an API
         // call for every alias
-        return elasticsearch.client.asInternalUser.cat
+        return opensearch.client.asInternalUser.cat
           .indices<any[]>({
             index,
             format: 'JSON',
@@ -102,7 +102,7 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
           .then(({ body }) => {
             const stats = body[0];
             return {
-              alias: kibanaOrTaskManagerIndex(index, this.kibanaConfig!.index),
+              alias: opensearchDashboardsOrTaskManagerIndex(index, this.opensearchDashboardsConfig!.index),
               docsCount: stats['docs.count'],
               docsDeleted: stats['docs.deleted'],
               storeSizeBytes: stats['store.size'],
@@ -119,53 +119,53 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
 
   private async getCoreUsageData(
     savedObjects: SavedObjectsServiceStart,
-    elasticsearch: ElasticsearchServiceStart
+    opensearch: OpenSearchServiceStart
   ): Promise<CoreUsageData> {
     if (
-      this.elasticsearchConfig == null ||
+      this.opensearchConfig == null ||
       this.httpConfig == null ||
       this.soConfig == null ||
       this.opsMetrics == null
     ) {
-      throw new Error('Unable to read config values. Ensure that setup() has completed.');
+      throw new Error('Unable to read config valuopensearch. Ensure that setup() has completed.');
     }
 
-    const es = this.elasticsearchConfig;
-    const soUsageData = await this.getSavedObjectIndicesUsageData(savedObjects, elasticsearch);
+    const es = this.opensearchConfig;
+    const soUsageData = await this.getSavedObjectIndicesUsageData(savedObjects, opensearch);
 
     const http = this.httpConfig;
     return {
       config: {
-        elasticsearch: {
-          apiVersion: es.apiVersion,
-          sniffOnStart: es.sniffOnStart,
-          sniffIntervalMs: es.sniffInterval !== false ? es.sniffInterval.asMilliseconds() : -1,
-          sniffOnConnectionFault: es.sniffOnConnectionFault,
-          numberOfHostsConfigured: Array.isArray(es.hosts)
-            ? es.hosts.length
-            : isConfigured.string(es.hosts)
+        opensearch: {
+          apiVersion: opensearch.apiVersion,
+          sniffOnStart: opensearch.sniffOnStart,
+          sniffIntervalMs: opensearch.sniffInterval !== false ? opensearch.sniffInterval.asMilliseconds() : -1,
+          sniffOnConnectionFault: opensearch.sniffOnConnectionFault,
+          numberOfHostsConfigured: Array.isArray(opensearch.hosts)
+            ? opensearch.hosts.length
+            : isConfigured.string(opensearch.hosts)
             ? 1
             : 0,
-          customHeadersConfigured: isConfigured.record(es.customHeaders),
-          healthCheckDelayMs: es.healthCheck.delay.asMilliseconds(),
-          logQueries: es.logQueries,
-          pingTimeoutMs: es.pingTimeout.asMilliseconds(),
+          customHeadersConfigured: isConfigured.record(opensearch.customHeaders),
+          healthCheckDelayMs: opensearch.healthCheck.delay.asMilliseconds(),
+          logQueries: opensearch.logQueries,
+          pingTimeoutMs: opensearch.pingTimeout.asMilliseconds(),
           requestHeadersWhitelistConfigured: isConfigured.stringOrArray(
-            es.requestHeadersWhitelist,
+            opensearch.requestHeadersWhitelist,
             ['authorization']
           ),
-          requestTimeoutMs: es.requestTimeout.asMilliseconds(),
-          shardTimeoutMs: es.shardTimeout.asMilliseconds(),
+          requestTimeoutMs: opensearch.requestTimeout.asMilliseconds(),
+          shardTimeoutMs: opensearch.shardTimeout.asMilliseconds(),
           ssl: {
-            alwaysPresentCertificate: es.ssl.alwaysPresentCertificate,
+            alwaysPresentCertificate: opensearch.ssl.alwaysPresentCertificate,
             certificateAuthoritiesConfigured: isConfigured.stringOrArray(
-              es.ssl.certificateAuthorities
+              opensearch.ssl.certificateAuthorities
             ),
-            certificateConfigured: isConfigured.string(es.ssl.certificate),
-            keyConfigured: isConfigured.string(es.ssl.key),
-            verificationMode: es.ssl.verificationMode,
-            truststoreConfigured: isConfigured.record(es.ssl.truststore),
-            keystoreConfigured: isConfigured.record(es.ssl.keystore),
+            certificateConfigured: isConfigured.string(opensearch.ssl.certificate),
+            keyConfigured: isConfigured.string(opensearch.ssl.key),
+            verificationMode: opensearch.ssl.verificationMode,
+            truststoreConfigured: isConfigured.record(opensearch.ssl.truststore),
+            keystoreConfigured: isConfigured.record(opensearch.ssl.keystore),
           },
         },
         http: {
@@ -235,10 +235,10 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
       .subscribe((opsMetrics) => (this.opsMetrics = opsMetrics));
 
     this.configService
-      .atPath<ElasticsearchConfigType>('elasticsearch')
+      .atPath<OpenSearchConfigType>('opensearch')
       .pipe(takeUntil(this.stop$))
       .subscribe((config) => {
-        this.elasticsearchConfig = config;
+        this.opensearchConfig = config;
       });
 
     this.configService
@@ -263,17 +263,17 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
       });
 
     this.configService
-      .atPath<KibanaConfigType>('kibana')
+      .atPath<OpenSearchDashboardsConfigType>('opensearchDashboards')
       .pipe(takeUntil(this.stop$))
       .subscribe((config) => {
-        this.kibanaConfig = config;
+        this.opensearchDashboardsConfig = config;
       });
   }
 
-  start({ savedObjects, elasticsearch }: StartDeps) {
+  start({ savedObjects, opensearch }: StartDeps) {
     return {
       getCoreUsageData: () => {
-        return this.getCoreUsageData(savedObjects, elasticsearch);
+        return this.getCoreUsageData(savedObjects, opensearch);
       },
     };
   }
