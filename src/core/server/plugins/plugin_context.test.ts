@@ -19,7 +19,7 @@
 
 import { duration } from 'moment';
 import { first } from 'rxjs/operators';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@osd/dev-utils';
 import { createPluginInitializerContext, InstanceInfo } from './plugin_context';
 import { CoreContext } from '../core_context';
 import { Env } from '../config';
@@ -28,7 +28,7 @@ import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
 import { PluginManifest } from './types';
 import { Server } from '../server';
 import { fromRoot } from '../utils';
-import { ByteSizeValue } from '@kbn/config-schema';
+import { ByteSizeValue } from '@osd/config-schema';
 
 const logger = loggingSystemMock.create();
 
@@ -43,7 +43,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     id: 'some-plugin-id',
     version: 'some-version',
     configPath: 'path',
-    kibanaVersion: '7.0.0',
+    OpenSearchDashboardsVersion: '7.0.0',
     requiredPlugins: ['some-required-dep'],
     requiredBundles: [],
     optionalPlugins: ['some-optional-dep'],
@@ -82,12 +82,12 @@ describe('createPluginInitializerContext', () => {
       .pipe(first())
       .toPromise();
     expect(configObject).toStrictEqual({
-      kibana: {
-        index: '.kibana',
+      OpenSearchDashboards: {
+        index: '.opensearch-dashboards',
         autocompleteTerminateAfter: duration(100000),
         autocompleteTimeout: duration(1000),
       },
-      elasticsearch: {
+      opensearch: {
         shardTimeout: duration(30, 's'),
         requestTimeout: duration(30, 's'),
         pingTimeout: duration(30, 's'),
@@ -101,7 +101,7 @@ describe('createPluginInitializerContext', () => {
     const manifest = createPluginManifest();
     const opaqueId = Symbol();
     instanceInfo = {
-      uuid: 'kibana-uuid',
+      uuid: 'opensearch-dashboards-uuid',
     };
     const pluginInitializerContext = createPluginInitializerContext(
       coreContext,
@@ -109,6 +109,6 @@ describe('createPluginInitializerContext', () => {
       manifest,
       instanceInfo
     );
-    expect(pluginInitializerContext.env.instanceUuid).toBe('kibana-uuid');
+    expect(pluginInitializerContext.env.instanceUuid).toBe('opensearch-dashboards-uuid');
   });
 });

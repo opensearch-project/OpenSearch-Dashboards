@@ -46,7 +46,7 @@ interface PluginSearchPathEntry {
  * all the errors that occurred during discovery process.
  *
  * @param config Plugin config instance.
- * @param coreContext Kibana core values.
+ * @param coreContext OpenSearch Dashboards core values.
  * @internal
  */
 export function discover(
@@ -135,9 +135,9 @@ function findManifestInFolder(
   dir: string,
   notFound: () => never[] | Observable<string | PluginDiscoveryError>
 ): string[] | Observable<string | PluginDiscoveryError> {
-  return fsStat$(resolve(dir, 'kibana.json')).pipe(
+  return fsStat$(resolve(dir, 'opensearch_dashboards.json')).pipe(
     mergeMap((stats) => {
-      // `kibana.json` exists in given directory, we got a plugin
+      // `opensearch_dashboards.json` exists in given directory, we got a plugin
       if (stats.isFile()) {
         return [dir];
       }
@@ -182,7 +182,7 @@ function mapSubdirectories(
  * isn't valid.
  * @param path Path to the plugin directory where manifest should be loaded from.
  * @param log Plugin discovery logger instance.
- * @param coreContext Kibana core context.
+ * @param coreContext OpenSearch Dashboards core context.
  */
 function createPlugin$(
   path: string,

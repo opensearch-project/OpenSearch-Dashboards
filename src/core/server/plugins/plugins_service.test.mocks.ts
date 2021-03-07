@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@osd/utils';
 import { resolve } from 'path';
 
 const loadJsonFile = jest.requireActual('load-json-file');
-const kibanaPackagePath = resolve(REPO_ROOT, 'package.json');
+const opensearchDashboardsPackagePath = resolve(REPO_ROOT, 'package.json');
 
 export const mockPackage = {
-  raw: { __dirname: '/tmp', name: 'kibana' } as any,
+  raw: { __dirname: '/tmp', name: 'opensearch-dashboards' } as any,
 };
 
 jest.doMock('load-json-file', () => ({
   ...loadJsonFile,
   sync: (path: string) => {
-    if (path === kibanaPackagePath) {
+    if (path === opensearchDashboardsPackagePath) {
       return mockPackage.raw;
     }
     return loadJsonFile.sync(path);

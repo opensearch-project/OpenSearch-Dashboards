@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@osd/config-schema';
 import { Env } from '../config';
 
 export type PluginsConfigType = TypeOf<typeof config.schema>;
