@@ -24,13 +24,13 @@ import { Logger } from '../cli_plugin/lib/logger';
 import { getConfigDirectory, getDataPath } from '@osd/utils';
 
 export function getKeystore() {
-  const configKeystore = join(getConfigDirectory(), 'opensearchDashboards.keystore');
-  const dataKeystore = join(getDataPath(), 'opensearchDashboards.keystore');
+  const configKeystore = join(getConfigDirectory(), 'opensearch_dashboards.keystore');
+  const dataKeystore = join(getDataPath(), 'opensearch_dashboards.keystore');
   let keystorePath = null;
   if (existsSync(dataKeystore)) {
     const logger = new Logger();
     logger.log(
-      `opensearchDashboards.keystore located in the data folder is deprecated.  Future versions will use the config folder.`
+      `opensearch_dashboards.keystore located in the data folder is deprecated.  Future versions will use the config folder.`
     );
     keystorePath = dataKeystore;
   } else {

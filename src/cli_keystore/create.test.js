@@ -84,7 +84,7 @@ describe('OpenSearch Dashboards keystore', () => {
       sinon.assert.calledOnce(prompt.confirm);
       const { args } = prompt.confirm.getCall(0);
 
-      expect(args[0]).toEqual('A OpenSearch Dashboards keystore already exists. Overwrite?');
+      expect(args[0]).toEqual('An OpenSearch Dashboards keystore already exists. Overwrite?');
     });
 
     it('aborts if overwrite is denied', async () => {
