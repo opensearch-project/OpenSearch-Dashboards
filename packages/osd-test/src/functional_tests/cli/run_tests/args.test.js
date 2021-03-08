@@ -18,16 +18,16 @@
  */
 
 import { displayHelp, processOptions } from './args';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@osd/dev-utils';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer(process.cwd()));
 
-const INITIAL_TEST_ES_FROM = process.env.TEST_ES_FROM;
+const INITIAL_TEST_OPENSEARCH_FROM = process.env.TEST_OPENSEARCH_FROM;
 beforeEach(() => {
-  process.env.TEST_ES_FROM = 'snapshot';
+  process.env.TEST_OPENSEARCH_FROM = 'snapshot';
 });
 afterEach(() => {
-  process.env.TEST_ES_FROM = INITIAL_TEST_ES_FROM;
+  process.env.TEST_OPENSEARCH_FROM = INITIAL_TEST_OPENSEARCH_FROM;
 });
 
 describe('display help for run tests CLI', () => {
@@ -60,15 +60,15 @@ describe('process options for run tests CLI', () => {
     }).toThrow('functional_tests: invalid argument [peanut] to option [bail]');
   });
 
-  it('accepts string value for kibana-install-dir', () => {
-    const options = processOptions({ 'kibana-install-dir': 'foo' }, ['foo']);
+  it('accepts string value for opensearch-dashboards-install-dir', () => {
+    const options = processOptions({ 'opensearch-dashboards-install-dir': 'foo' }, ['foo']);
     expect(options).toMatchSnapshot();
   });
 
-  it('rejects boolean value for kibana-install-dir', () => {
+  it('rejects boolean value for opensearch-dashboards-install-dir', () => {
     expect(() => {
-      processOptions({ 'kibana-install-dir': true }, ['foo']);
-    }).toThrow('functional_tests: invalid argument [true] to option [kibana-install-dir]');
+      processOptions({ 'opensearch-dashboards-install-dir': true }, ['foo']);
+    }).toThrow('functional_tests: invalid argument [true] to option [opensearch-dashboards-install-dir]');
   });
 
   it('accepts boolean value for updateBaselines', () => {
@@ -76,27 +76,27 @@ describe('process options for run tests CLI', () => {
     expect(options).toMatchSnapshot();
   });
 
-  it('accepts source value for esFrom', () => {
-    const options = processOptions({ esFrom: 'source' }, ['foo']);
+  it('accepts source value for opensearchFrom', () => {
+    const options = processOptions({ opensearchFrom: 'source' }, ['foo']);
     expect(options).toMatchSnapshot();
   });
 
-  it('accepts source value for $TEST_ES_FROM', () => {
-    process.env.TEST_ES_FROM = 'source';
+  it('accepts source value for $TEST_OPENSEARCH_FROM', () => {
+    process.env.TEST_OPENSEARCH_FROM = 'source';
     const options = processOptions({}, ['foo']);
     expect(options).toMatchSnapshot();
   });
 
-  it('prioritizes source flag over $TEST_ES_FROM', () => {
-    process.env.TEST_ES_FROM = 'source';
-    const options = processOptions({ esFrom: 'snapshot' }, ['foo']);
+  it('prioritizes source flag over $TEST_OPENSEARCH_FROM', () => {
+    process.env.TEST_OPENSEARCH_FROM = 'source';
+    const options = processOptions({ opensearchFrom: 'snapshot' }, ['foo']);
     expect(options).toMatchSnapshot();
   });
 
-  it('rejects non-enum value for esFrom', () => {
+  it('rejects non-enum value for opensearchFrom', () => {
     expect(() => {
-      processOptions({ esFrom: 'butter' }, ['foo']);
-    }).toThrow('functional_tests: invalid argument [butter] to option [esFrom]');
+      processOptions({ opensearchFrom: 'butter' }, ['foo']);
+    }).toThrow('functional_tests: invalid argument [butter] to option [opensearchFrom]');
   });
 
   it('accepts value for grep', () => {

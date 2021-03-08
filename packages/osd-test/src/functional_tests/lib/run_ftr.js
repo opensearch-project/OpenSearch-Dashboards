@@ -33,7 +33,7 @@ async function createFtr({
         bail: !!bail,
         grep,
       },
-      kbnTestServer: {
+      osdTestServer: {
         installDir,
       },
       updateBaselines,
