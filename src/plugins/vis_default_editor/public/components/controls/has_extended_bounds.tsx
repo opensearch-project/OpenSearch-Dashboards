@@ -18,7 +18,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { search } from '../../../../data/public';
 import { SwitchParamEditor } from './switch';

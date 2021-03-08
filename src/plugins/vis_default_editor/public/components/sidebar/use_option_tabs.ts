@@ -18,7 +18,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { Vis } from 'src/plugins/visualizations/public';
 import { DefaultEditorDataTab, DefaultEditorDataTabProps } from './data_tab';

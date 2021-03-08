@@ -19,7 +19,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { InputList, InputListConfig, InputObject, InputModel, InputItem } from './input_list';
 import { search } from '../../../../../data/public';

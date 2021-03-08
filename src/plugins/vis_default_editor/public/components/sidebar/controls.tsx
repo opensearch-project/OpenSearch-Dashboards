@@ -26,8 +26,8 @@ import {
   EuiButtonToggle,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 import { useDebounce } from 'react-use';
 
 import { Vis } from 'src/plugins/visualizations/public';
