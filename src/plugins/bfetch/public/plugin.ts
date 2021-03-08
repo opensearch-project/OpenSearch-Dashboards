@@ -27,10 +27,10 @@ import {
 } from './batching/create_streaming_batched_function';
 
 // eslint-disable-next-line
-export interface BfetchPublicSetupDependencies {}
+export interface BfetchPublicSetupDependencies { }
 
 // eslint-disable-next-line
-export interface BfetchPublicStartDependencies {}
+export interface BfetchPublicStartDependencies { }
 
 export interface BfetchPublicContract {
   fetchStreaming: (params: FetchStreamingParams) => ReturnType<typeof fetchStreamingStatic>;
@@ -44,15 +44,15 @@ export type BfetchPublicStart = BfetchPublicContract;
 
 export class BfetchPublicPlugin
   implements
-    Plugin<
-      BfetchPublicSetup,
-      BfetchPublicStart,
-      BfetchPublicSetupDependencies,
-      BfetchPublicStartDependencies
-    > {
+  Plugin<
+  BfetchPublicSetup,
+  BfetchPublicStart,
+  BfetchPublicSetupDependencies,
+  BfetchPublicStartDependencies
+  > {
   private contract!: BfetchPublicContract;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext) { }
 
   public setup(core: CoreSetup, plugins: BfetchPublicSetupDependencies): BfetchPublicSetup {
     const { version } = this.initializerContext.env.packageInfo;
@@ -73,27 +73,27 @@ export class BfetchPublicPlugin
     return this.contract;
   }
 
-  public stop() {}
+  public stop() { }
 
   private fetchStreaming = (
     version: string,
     basePath: string
   ): BfetchPublicSetup['fetchStreaming'] => (params) =>
-    fetchStreamingStatic({
-      ...params,
-      url: `${basePath}/${removeLeadingSlash(params.url)}`,
-      headers: {
-        'Content-Type': 'application/json',
-        'kbn-version': version,
-        ...(params.headers || {}),
-      },
-    });
+      fetchStreamingStatic({
+        ...params,
+        url: `${basePath}/${removeLeadingSlash(params.url)}`,
+        headers: {
+          'Content-Type': 'application/json',
+          'osd-version': version,
+          ...(params.headers || {}),
+        },
+      });
 
   private batchedFunction = (
     fetchStreaming: BfetchPublicContract['fetchStreaming']
   ): BfetchPublicContract['batchedFunction'] => (params) =>
-    createStreamingBatchedFunction({
-      ...params,
-      fetchStreaming: params.fetchStreaming || fetchStreaming,
-    });
+      createStreamingBatchedFunction({
+        ...params,
+        fetchStreaming: params.fetchStreaming || fetchStreaming,
+      });
 }
