@@ -31,7 +31,7 @@ import {
   EuiComboBox,
   EuiFieldNumber,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 
 export const newPercentile = (opts) => {
   return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);

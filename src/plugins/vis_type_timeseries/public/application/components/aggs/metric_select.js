@@ -20,7 +20,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { includes } from 'lodash';
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n } from '@osd/i18n/react';
 import { EuiComboBox } from '@elastic/eui';
 import { calculateSiblings } from '../lib/calculate_siblings';
 import { calculateLabel } from '../../../../../../plugins/vis_type_timeseries/common/calculate_label';

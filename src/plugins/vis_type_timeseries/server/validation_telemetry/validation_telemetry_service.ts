@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegacyAPICaller, CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { LegacyAPICaller, CoreSetup, Plugin, PluginInitializerContext } from 'opensearch-dashboards/server';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { tsvbTelemetrySavedObjectType } from '../saved_objects';
 
@@ -29,7 +29,7 @@ export interface Usage {
 }
 
 export class ValidationTelemetryService implements Plugin<ValidationTelemetryServiceSetup> {
-  private kibanaIndex: string = '';
+  private opensearchDashboardsIndex: string = '';
   async setup(
     core: CoreSetup,
     {
@@ -42,17 +42,17 @@ export class ValidationTelemetryService implements Plugin<ValidationTelemetrySer
   ) {
     core.savedObjects.registerType(tsvbTelemetrySavedObjectType);
     globalConfig$.subscribe((config) => {
-      this.kibanaIndex = config.kibana.index;
+      this.opensearchDashboardsIndex = config.opensearchDashboards.index;
     });
     if (usageCollection) {
       usageCollection.registerCollector(
         usageCollection.makeUsageCollector<Usage>({
           type: 'tsvb-validation',
-          isReady: () => this.kibanaIndex !== '',
+          isReady: () => this.opensearchDashboardsIndex !== '',
           fetch: async (callCluster: LegacyAPICaller) => {
             try {
               const response = await callCluster('get', {
-                index: this.kibanaIndex,
+                index: this.opensearchDashboardsIndex,
                 id: 'tsvb-validation-telemetry:tsvb-validation-telemetry',
                 ignore: [404],
               });

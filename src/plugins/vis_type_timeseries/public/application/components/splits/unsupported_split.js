@@ -30,7 +30,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 export const SplitUnsupported = (props) => {
   const { onChange, model, uiRestrictions } = props;

@@ -19,9 +19,9 @@
 
 import { offsetTime } from '../../offset_time';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
-import { esQuery } from '../../../../../../data/server';
+import { opensearchQuery } from '../../../../../../data/server';
 
-export function query(req, panel, series, esQueryConfig, indexPatternObject) {
+export function query(req, panel, series, opensearchQueryConfig, indexPatternObject) {
   return (next) => (doc) => {
     const { timeField } = getIntervalAndTimefield(panel, series, indexPatternObject);
     const { from, to } = offsetTime(req, series.offset_time);
@@ -29,7 +29,7 @@ export function query(req, panel, series, esQueryConfig, indexPatternObject) {
     doc.size = 0;
     const queries = !panel.ignore_global_filter ? req.payload.query : [];
     const filters = !panel.ignore_global_filter ? req.payload.filters : [];
-    doc.query = esQuery.buildEsQuery(indexPatternObject, queries, filters, esQueryConfig);
+    doc.query = opensearchQuery.buildEsQuery(indexPatternObject, queries, filters, opensearchQueryConfig);
 
     const timerange = {
       range: {
@@ -44,13 +44,13 @@ export function query(req, panel, series, esQueryConfig, indexPatternObject) {
 
     if (panel.filter) {
       doc.query.bool.must.push(
-        esQuery.buildEsQuery(indexPatternObject, [panel.filter], [], esQueryConfig)
+        opensearchQuery.buildEsQuery(indexPatternObject, [panel.filter], [], opensearchQueryConfig)
       );
     }
 
     if (series.filter) {
       doc.query.bool.must.push(
-        esQuery.buildEsQuery(indexPatternObject, [series.filter], [], esQueryConfig)
+        opensearchQuery.buildEsQuery(indexPatternObject, [series.filter], [], opensearchQueryConfig)
       );
     }
 

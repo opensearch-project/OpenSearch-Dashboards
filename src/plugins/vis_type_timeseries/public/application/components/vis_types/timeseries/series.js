@@ -34,7 +34,7 @@ import {
 } from '@elastic/eui';
 import { Split } from '../../split';
 import { createTextHandler } from '../../lib/create_text_handler';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@osd/i18n/react';
 import { PANEL_TYPES } from '../../../../../../../plugins/vis_type_timeseries/common/panel_types';
 
 const TimeseriesSeriesUI = injectI18n(function (props) {

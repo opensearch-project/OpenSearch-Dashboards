@@ -86,7 +86,7 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     const logger = this.initializerContext.logger.get('visTypeTimeseries');
     core.uiSettings.register(uiSettings);
     const config$ = this.initializerContext.config.create<VisTypeTimeseriesConfig>();
-    // Global config contains things like the ES shard timeout
+    // Global config contains things like the OpenSearch shard timeout
     const globalConfig$ = this.initializerContext.config.legacy.globalConfig$;
     const router = core.http.createRouter();
 

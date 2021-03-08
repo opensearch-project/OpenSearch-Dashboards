@@ -34,7 +34,7 @@ describe('AbstractSearchStrategy', () => {
       },
     };
 
-    abstractSearchStrategy = new AbstractSearchStrategy('es');
+    abstractSearchStrategy = new AbstractSearchStrategy('opensearch');
   });
 
   test('should init an AbstractSearchStrategy instance', () => {
@@ -91,7 +91,7 @@ describe('AbstractSearchStrategy', () => {
         indexType: undefined,
       },
       {
-        strategy: 'es',
+        strategy: 'opensearch',
       }
     );
   });

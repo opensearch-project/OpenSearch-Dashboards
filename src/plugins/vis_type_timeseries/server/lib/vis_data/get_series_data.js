@@ -28,7 +28,7 @@ export async function getSeriesData(req, panel) {
     searchStrategy,
     capabilities,
   } = await req.framework.searchStrategyRegistry.getViableStrategyForPanel(req, panel);
-  const esQueryConfig = await getEsQueryConfig(req);
+  const opensearchQueryConfig = await getEsQueryConfig(req);
   const meta = {
     type: panel.type,
     uiRestrictions: capabilities.uiRestrictions,
@@ -36,7 +36,7 @@ export async function getSeriesData(req, panel) {
 
   try {
     const bodiesPromises = getActiveSeries(panel).map((series) =>
-      getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities)
+      getSeriesRequestParams(req, panel, series, opensearchQueryConfig, capabilities)
     );
 
     const searches = (await Promise.all(bodiesPromises)).reduce(
@@ -58,7 +58,7 @@ export async function getSeriesData(req, panel) {
         req,
         panel,
         series,
-        esQueryConfig,
+        opensearchQueryConfig,
         searchStrategy,
         capabilities,
       });

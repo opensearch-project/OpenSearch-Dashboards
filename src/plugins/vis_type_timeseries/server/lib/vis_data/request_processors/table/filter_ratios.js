@@ -18,12 +18,12 @@
  */
 
 const filter = (metric) => metric.type === 'filter_ratio';
-import { esQuery } from '../../../../../../data/server';
+import { opensearchQuery } from '../../../../../../data/server';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import { overwrite } from '../../helpers';
 import { calculateAggRoot } from './calculate_agg_root';
 
-export function ratios(req, panel, esQueryConfig, indexPatternObject) {
+export function ratios(req, panel, opensearchQueryConfig, indexPatternObject) {
   return (next) => (doc) => {
     panel.series.forEach((column) => {
       const aggRoot = calculateAggRoot(doc, column);
@@ -32,12 +32,12 @@ export function ratios(req, panel, esQueryConfig, indexPatternObject) {
           overwrite(
             doc,
             `${aggRoot}.timeseries.aggs.${metric.id}-numerator.filter`,
-            esQuery.buildEsQuery(indexPatternObject, metric.numerator, [], esQueryConfig)
+            opensearchQuery.buildEsQuery(indexPatternObject, metric.numerator, [], opensearchQueryConfig)
           );
           overwrite(
             doc,
             `${aggRoot}.timeseries.aggs.${metric.id}-denominator.filter`,
-            esQuery.buildEsQuery(indexPatternObject, metric.denominator, [], esQueryConfig)
+            opensearchQuery.buildEsQuery(indexPatternObject, metric.denominator, [], opensearchQueryConfig)
           );
 
           let numeratorPath = `${metric.id}-numerator>_count`;

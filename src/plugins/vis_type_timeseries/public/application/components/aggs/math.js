@@ -37,7 +37,7 @@ import {
   EuiCode,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 const checkModel = (model) => Array.isArray(model.variables) && model.script !== undefined;
 

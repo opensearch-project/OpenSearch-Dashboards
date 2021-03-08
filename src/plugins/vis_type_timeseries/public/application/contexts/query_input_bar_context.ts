@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 
 export interface ICoreStartContext {
   appName: string;

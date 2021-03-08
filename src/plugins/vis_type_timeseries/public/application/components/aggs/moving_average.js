@@ -35,7 +35,7 @@ import {
   EuiFormRow,
   EuiFieldNumber,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { MODEL_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/model_options';
 
 const DEFAULTS = {

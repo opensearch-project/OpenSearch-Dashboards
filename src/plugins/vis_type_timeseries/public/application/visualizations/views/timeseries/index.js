@@ -94,7 +94,7 @@ export const TimeSeries = ({
   const classes = classNames('tvbVisTimeSeries', getChartClasses(backgroundColor));
 
   // If the color isn't configured by the user, use the color mapping service
-  // to assign a color from the Kibana palette. Colors will be shared across the
+  // to assign a color from the OpenSearch Dashboards palette. Colors will be shared across the
   // session, including dashboards.
   const { colors, theme: themeService } = getChartsSetup();
   const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);

@@ -17,7 +17,7 @@
  * under the License.
  */
 import moment from 'moment';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { get } from 'lodash';
 import { search } from '../../../../../../plugins/data/public';
 const { parseEsInterval } = search.aggs;

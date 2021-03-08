@@ -20,7 +20,7 @@
 import { getEsShardTimeout } from './get_es_shard_timeout';
 
 describe('getEsShardTimeout', () => {
-  test('should return the elasticsearch.shardTimeout', async () => {
+  test('should return the opensearch.shardTimeout', async () => {
     const req = {
       getEsShardTimeout: async () => {
         return 12345;

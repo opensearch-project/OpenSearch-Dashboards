@@ -30,7 +30,7 @@ export async function getTableData(req, panel) {
     searchStrategy,
     capabilities,
   } = await req.framework.searchStrategyRegistry.getViableStrategy(req, panelIndexPattern);
-  const esQueryConfig = await getEsQueryConfig(req);
+  const opensearchQueryConfig = await getEsQueryConfig(req);
   const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
 
   const meta = {
@@ -39,7 +39,7 @@ export async function getTableData(req, panel) {
   };
 
   try {
-    const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities);
+    const body = buildRequestBody(req, panel, opensearchQueryConfig, indexPatternObject, capabilities);
     const [resp] = await searchStrategy.search(req, [
       {
         body,
