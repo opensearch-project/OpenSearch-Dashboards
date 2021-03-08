@@ -22,7 +22,7 @@ import { httpServiceMock } from '../../../../../core/public/mocks';
 import { HistoryMock } from '../../services/history.mock';
 import { SettingsMock } from '../../services/settings.mock';
 import { StorageMock } from '../../services/storage.mock';
-import { createApi, createEsHostService } from '../lib';
+import { createApi, createOpenSearchHostService } from '../lib';
 
 import { ContextValue } from './services_context';
 
@@ -31,11 +31,11 @@ export const serviceContextMock = {
     const storage = new StorageMock({} as any, 'test');
     const http = httpServiceMock.createSetupContract();
     const api = createApi({ http });
-    const esHostService = createEsHostService({ api });
+    const esHostService = createOpenSearchHostService({ api });
     (storage.keys as jest.Mock).mockImplementation(() => []);
     return {
       services: {
-        trackUiMetric: { count: () => {}, load: () => {} },
+        trackUiMetric: { count: () => { }, load: () => { } },
         storage,
         esHostService,
         settings: new SettingsMock(storage),

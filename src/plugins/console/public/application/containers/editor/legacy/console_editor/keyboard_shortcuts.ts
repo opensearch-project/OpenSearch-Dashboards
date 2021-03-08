@@ -21,13 +21,13 @@ import { SenseEditor } from '../../../../models/sense_editor';
 
 interface Actions {
   senseEditor: SenseEditor;
-  sendCurrentRequestToES: () => void;
+  sendCurrentRequestToOpenSearch: () => void;
   openDocumentation: () => void;
 }
 
 export function registerCommands({
   senseEditor,
-  sendCurrentRequestToES,
+  sendCurrentRequestToOpenSearch,
   openDocumentation,
 }: Actions) {
   const throttledAutoIndent = throttle(() => senseEditor.autoIndent(), 500, {
@@ -39,7 +39,7 @@ export function registerCommands({
   coreEditor.registerKeyboardShortcut({
     keys: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
     name: 'send to Elasticsearch',
-    fn: () => sendCurrentRequestToES(),
+    fn: () => sendCurrentRequestToOpenSearch(),
   });
 
   coreEditor.registerKeyboardShortcut({

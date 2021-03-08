@@ -17,18 +17,18 @@
  * under the License.
  */
 
-import { IRouter, Logger } from 'kibana/server';
+import { IRouter, Logger } from 'opensearch-dashboards/server';
 
-import { EsLegacyConfigService, SpecDefinitionsService } from '../services';
-import { ESConfigForProxy } from '../types';
+import { OpenSearchLegacyConfigService, SpecDefinitionsService } from '../services';
+import { OpenSearchConfigForProxy } from '../types';
 import { ProxyConfigCollection } from '../lib';
 
-import { registerEsConfigRoute } from './api/console/es_config';
+import { registerOpenSearchConfigRoute } from './api/console/opensearch_config';
 import { registerProxyRoute } from './api/console/proxy';
 import { registerSpecDefinitionsRoute } from './api/console/spec_definitions';
 
 export interface ProxyDependencies {
-  readLegacyESConfig: () => Promise<ESConfigForProxy>;
+  readLegacyOpenSearchConfig: () => Promise<OpenSearchConfigForProxy>;
   pathFilters: RegExp[];
   proxyConfigCollection: ProxyConfigCollection;
 }
@@ -38,13 +38,13 @@ export interface RouteDependencies {
   log: Logger;
   proxy: ProxyDependencies;
   services: {
-    esLegacyConfigService: EsLegacyConfigService;
+    opensearchLegacyConfigService: OpenSearchLegacyConfigService;
     specDefinitionService: SpecDefinitionsService;
   };
 }
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
-  registerEsConfigRoute(dependencies);
+  registerOpenSearchConfigRoute(dependencies);
   registerProxyRoute(dependencies);
   registerSpecDefinitionsRoute(dependencies);
 };

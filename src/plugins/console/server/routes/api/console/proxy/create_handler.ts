@@ -21,11 +21,11 @@ import { Agent, IncomingMessage } from 'http';
 import * as url from 'url';
 import { pick, trimStart, trimEnd } from 'lodash';
 
-import { KibanaRequest, RequestHandler } from 'kibana/server';
+import { OpenSearchDashboardsRequest, RequestHandler } from 'opensearch-dashboards/server';
 
-import { ESConfigForProxy } from '../../../../types';
+import { OpenSearchConfigForProxy as OpenSearchConfigForProxy } from '../../../../types';
 import {
-  getElasticsearchProxyConfig,
+  getOpenSearchProxyConfig,
   ProxyConfigCollection,
   proxyRequest,
   setHeaders,
@@ -33,7 +33,7 @@ import {
 
 // TODO: find a better way to get information from the request like remoteAddress and remotePort
 // for forwarding.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../../../../core/server/http/router';
 
 import { RouteDependencies } from '../../../';
@@ -42,7 +42,7 @@ import { Body, Query } from './validation_config';
 
 function toURL(base: string, path: string) {
   const urlResult = new url.URL(`${trimEnd(base, '/')}/${trimStart(path, '/')}`);
-  // Appending pretty here to have Elasticsearch do the JSON formatting, as doing
+  // Appending pretty here to have OpenSearch do the JSON formatting, as doing
   // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
   // measurement precision)
   if (!urlResult.searchParams.get('pretty')) {
@@ -68,12 +68,12 @@ function filterHeaders(originalHeaders: object, headersToKeep: string[]): object
 
 function getRequestConfig(
   headers: object,
-  esConfig: ESConfigForProxy,
+  opensearchConfig: OpenSearchConfigForProxy,
   proxyConfigCollection: ProxyConfigCollection,
   uri: string
 ): { agent: Agent; timeout: number; headers: object; rejectUnauthorized?: boolean } {
-  const filteredHeaders = filterHeaders(headers, esConfig.requestHeadersWhitelist);
-  const newHeaders = setHeaders(filteredHeaders, esConfig.customHeaders);
+  const filteredHeaders = filterHeaders(headers, opensearchConfig.requestHeadersWhitelist);
+  const newHeaders = setHeaders(filteredHeaders, opensearchConfig.customHeaders);
 
   if (proxyConfigCollection.hasConfig()) {
     return {
@@ -83,12 +83,12 @@ function getRequestConfig(
   }
 
   return {
-    ...getElasticsearchProxyConfig(esConfig),
+    ...getOpenSearchProxyConfig(opensearchConfig),
     headers: newHeaders,
   };
 }
 
-function getProxyHeaders(req: KibanaRequest) {
+function getProxyHeaders(req: OpenSearchDashboardsRequest) {
   const headers = Object.create(null);
 
   // Scope this proto-unsafe functionality to where it is being used.
@@ -115,7 +115,7 @@ function getProxyHeaders(req: KibanaRequest) {
 
 export const createHandler = ({
   log,
-  proxy: { readLegacyESConfig, pathFilters, proxyConfigCollection },
+  proxy: { readLegacyopensearchConfig, pathFilters, proxyConfigCollection },
 }: RouteDependencies): RequestHandler<unknown, Query, Body> => async (ctx, request, response) => {
   const { body, query } = request;
   const { path, method } = query;
@@ -129,9 +129,9 @@ export const createHandler = ({
     });
   }
 
-  const legacyConfig = await readLegacyESConfig();
+  const legacyConfig = await readLegacyopensearchConfig();
   const { hosts } = legacyConfig;
-  let esIncomingMessage: IncomingMessage;
+  let opensearchIncomingMessage: IncomingMessage;
 
   for (let idx = 0; idx < hosts.length; ++idx) {
     const host = hosts[idx];
@@ -152,7 +152,7 @@ export const createHandler = ({
         ...getProxyHeaders(request),
       };
 
-      esIncomingMessage = await proxyRequest({
+      opensearchIncomingMessage = await proxyRequest({
         method: method.toLowerCase() as any,
         headers: requestHeaders,
         uri,
@@ -168,7 +168,7 @@ export const createHandler = ({
       // We try contacting another node in that case.
       log.error(e);
       if (idx === hosts.length - 1) {
-        log.warn(`Could not connect to any configured ES node [${hosts.join(', ')}]`);
+        log.warn(`Could not connect to any configured OpenSearch node [${hosts.join(', ')}]`);
         return response.customError({
           statusCode: 502,
           body: e,
@@ -182,12 +182,12 @@ export const createHandler = ({
     statusCode,
     statusMessage,
     headers: { warning },
-  } = esIncomingMessage!;
+  } = opensearchIncomingMessage!;
 
   if (method.toUpperCase() !== 'HEAD') {
     return response.custom({
       statusCode: statusCode!,
-      body: esIncomingMessage!,
+      body: opensearchIncomingMessage!,
       headers: {
         warning: warning || '',
       },

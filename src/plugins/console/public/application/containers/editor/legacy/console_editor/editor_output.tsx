@@ -18,7 +18,7 @@
  */
 
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import React, { useEffect, useRef } from 'react';
 import { expandLiteralStrings } from '../../../../../shared_imports';
 import {

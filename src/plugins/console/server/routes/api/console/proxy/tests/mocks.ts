@@ -24,11 +24,11 @@ jest.mock('../../../../../lib/proxy_request', () => ({
 import { duration } from 'moment';
 import { ProxyConfigCollection } from '../../../../../lib';
 import { RouteDependencies, ProxyDependencies } from '../../../../../routes';
-import { EsLegacyConfigService, SpecDefinitionsService } from '../../../../../services';
+import { OpenSearchLegacyConfigService, SpecDefinitionsService } from '../../../../../services';
 import { coreMock, httpServiceMock } from '../../../../../../../../core/server/mocks';
 
 const defaultProxyValue = Object.freeze({
-  readLegacyESConfig: async () => ({
+  readLegacyOpenSearchConfig: async () => ({
     requestTimeout: duration(30000),
     customHeaders: {},
     requestHeadersWhitelist: [],
@@ -48,7 +48,7 @@ export const getProxyRouteHandlerDeps = ({
   router = httpServiceMock.createSetupContract().createRouter(),
 }: MockDepsArgument): RouteDependencies => {
   const services: RouteDependencies['services'] = {
-    esLegacyConfigService: new EsLegacyConfigService(),
+    OpenSearchLegacyConfigService: new OpenSearchLegacyConfigService(),
     specDefinitionService: new SpecDefinitionsService(),
   };
 
@@ -57,9 +57,9 @@ export const getProxyRouteHandlerDeps = ({
     router,
     proxy: proxy
       ? {
-          ...defaultProxyValue,
-          ...proxy,
-        }
+        ...defaultProxyValue,
+        ...proxy,
+      }
       : defaultProxyValue,
     log,
   };

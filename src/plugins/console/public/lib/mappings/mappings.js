@@ -19,7 +19,7 @@
 
 import $ from 'jquery';
 import _ from 'lodash';
-import * as es from '../es/es';
+import * as opensearch from '../opensearch/opensearch';
 
 // NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness
 // due to timing issues in our app.js tests.
@@ -261,7 +261,7 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
 
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
   if (settingsToRetrieve[settingsKey] === true) {
-    return es.send('GET', settingKeyToPathMap[settingsKey], null);
+    return opensearch.send('GET', settingKeyToPathMap[settingsKey], null);
   } else {
     const settingsPromise = new $.Deferred();
     if (settingsToRetrieve[settingsKey] === false) {

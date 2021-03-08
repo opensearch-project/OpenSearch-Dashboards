@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 // @ts-ignore
 import {
@@ -89,7 +89,7 @@ export function WelcomePanel(props: Props) {
             <li>
               <FormattedMessage
                 id="console.welcomePage.quickTips.submitRequestDescription"
-                defaultMessage="Submit requests to ES using the green triangle button."
+                defaultMessage="Submit requests to OpenSearch using the green triangle button."
               />
             </li>
             <li>

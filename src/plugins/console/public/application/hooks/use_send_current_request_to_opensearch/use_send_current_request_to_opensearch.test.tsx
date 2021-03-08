@@ -17,7 +17,7 @@
  * under the License.
  */
 
-jest.mock('./send_request_to_es', () => ({ sendRequestToES: jest.fn() }));
+jest.mock('./send_request_to_opensearch', () => ({ sendRequestToOpenSearch: jest.fn() }));
 jest.mock('../../contexts/editor_context/editor_registry', () => ({
   instance: { getInputEditor: jest.fn() },
 }));
@@ -32,10 +32,10 @@ import { serviceContextMock } from '../../contexts/services_context.mock';
 import { useRequestActionContext } from '../../contexts/request_context';
 import { instance as editorRegistry } from '../../contexts/editor_context/editor_registry';
 
-import { sendRequestToES } from './send_request_to_es';
-import { useSendCurrentRequestToES } from './use_send_current_request_to_es';
+import { sendRequestToOpenSearch } from './send_request_to_opensearch';
+import { useSendCurrentRequestToOpenSearch } from './use_send_current_request_to_opensearch';
 
-describe('useSendCurrentRequestToES', () => {
+describe('useSendCurrentRequestToOpenSearch', () => {
   let mockContextValue: ContextValue;
   let dispatch: (...args: any[]) => void;
   const contexts = ({ children }: { children?: any }) => (
@@ -52,18 +52,18 @@ describe('useSendCurrentRequestToES', () => {
     jest.resetAllMocks();
   });
 
-  it('calls send request to ES', async () => {
+  it('calls send request to OpenSearch', async () => {
     // Set up mocks
     (mockContextValue.services.settings.toJSON as jest.Mock).mockReturnValue({});
     // This request should succeed
-    (sendRequestToES as jest.Mock).mockResolvedValue([]);
+    (sendRequestToOpenSearch as jest.Mock).mockResolvedValue([]);
     (editorRegistry.getInputEditor as jest.Mock).mockImplementation(() => ({
       getRequestsInRange: () => ['test'],
     }));
 
-    const { result } = renderHook(() => useSendCurrentRequestToES(), { wrapper: contexts });
+    const { result } = renderHook(() => useSendCurrentRequestToOpenSearch(), { wrapper: contexts });
     await act(() => result.current());
-    expect(sendRequestToES).toHaveBeenCalledWith({ requests: ['test'] });
+    expect(sendRequestToOpenSearch).toHaveBeenCalledWith({ requests: ['test'] });
 
     // Second call should be the request success
     const [, [requestSucceededCall]] = (dispatch as jest.Mock).mock.calls;
@@ -72,12 +72,12 @@ describe('useSendCurrentRequestToES', () => {
 
   it('handles known errors', async () => {
     // Set up mocks
-    (sendRequestToES as jest.Mock).mockRejectedValue({ response: 'nada' });
+    (sendRequestToOpenSearch as jest.Mock).mockRejectedValue({ response: 'nada' });
     (editorRegistry.getInputEditor as jest.Mock).mockImplementation(() => ({
       getRequestsInRange: () => ['test'],
     }));
 
-    const { result } = renderHook(() => useSendCurrentRequestToES(), { wrapper: contexts });
+    const { result } = renderHook(() => useSendCurrentRequestToOpenSearch(), { wrapper: contexts });
     await act(() => result.current());
     // Second call should be the request failure
     const [, [requestFailedCall]] = (dispatch as jest.Mock).mock.calls;
@@ -88,12 +88,12 @@ describe('useSendCurrentRequestToES', () => {
 
   it('handles unknown errors', async () => {
     // Set up mocks
-    (sendRequestToES as jest.Mock).mockRejectedValue(NaN /* unexpected error value */);
+    (sendRequestToOpenSearch as jest.Mock).mockRejectedValue(NaN /* unexpected error value */);
     (editorRegistry.getInputEditor as jest.Mock).mockImplementation(() => ({
       getRequestsInRange: () => ['test'],
     }));
 
-    const { result } = renderHook(() => useSendCurrentRequestToES(), { wrapper: contexts });
+    const { result } = renderHook(() => useSendCurrentRequestToOpenSearch(), { wrapper: contexts });
     await act(() => result.current());
     // Second call should be the request failure
     const [, [requestFailedCall]] = (dispatch as jest.Mock).mock.calls;

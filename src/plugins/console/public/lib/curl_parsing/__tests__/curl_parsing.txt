@@ -17,23 +17,23 @@ PUT /twitter/tweet/1
 Curl 2
 -------------------------------------
 curl -XGET "localhost/twitter/tweet/1?version=2" -d '{
-   "message" : "elasticsearch now has versioning support, double cool!"
+   "message" : "opensearch now has versioning support, double cool!"
 }'
 -------------------------------------
 GET /twitter/tweet/1?version=2
 {
-   "message" : "elasticsearch now has versioning support, double cool!"
+   "message" : "opensearch now has versioning support, double cool!"
 }
 ===========
 Curl 3
 -------------------------------------
 curl -XPOST https://localhost/twitter/tweet/1?version=2 -d '{
-   "message" : "elasticsearch now has versioning support, double cool!"
+   "message" : "opensearch now has versioning support, double cool!"
 }'
 -------------------------------------
 POST /twitter/tweet/1?version=2
 {
-   "message" : "elasticsearch now has versioning support, double cool!"
+   "message" : "opensearch now has versioning support, double cool!"
 }
 =========
 Curl 4

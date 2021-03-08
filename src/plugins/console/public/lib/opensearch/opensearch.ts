@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import $ from 'jquery';
+import opensearch from 'jquery';
 import { stringify } from 'query-string';
 
 const esVersion: string[] = [];
@@ -32,12 +32,12 @@ export function getContentType(body: any) {
 }
 
 export function send(method: string, path: string, data: any) {
-  const wrappedDfd = $.Deferred();
+  const wrappedDfd = opensearch.Deferred();
 
   const options: JQuery.AjaxSettings = {
     url: '../api/console/proxy?' + stringify({ path, method }, { sort: false }),
     headers: {
-      'kbn-xsrf': 'kibana',
+      'osd-xsrf': 'opensearchDashboards',
     },
     data,
     contentType: getContentType(data),
@@ -47,14 +47,14 @@ export function send(method: string, path: string, data: any) {
     dataType: 'text', // disable automatic guessing
   };
 
-  $.ajax(options).then(
+  opensearch.ajax(options).then(
     (responseData: any, textStatus: string, jqXHR: any) => {
       wrappedDfd.resolveWith({}, [responseData, textStatus, jqXHR]);
     },
     ((jqXHR: any, textStatus: string, errorThrown: Error) => {
       if (jqXHR.status === 0) {
         jqXHR.responseText =
-          "\n\nFailed to connect to Console's backend.\nPlease check the Kibana server is up and running";
+          "\n\nFailed to connect to Console's backend.\nPlease check the OpenSearch Dashboards server is up and running";
       }
       wrappedDfd.rejectWith({}, [jqXHR, textStatus, errorThrown]);
     }) as any

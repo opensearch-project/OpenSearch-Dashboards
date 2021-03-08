@@ -19,8 +19,8 @@
 
 import _ from 'lodash';
 import React, { Fragment, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 
 import {
   EuiButton,

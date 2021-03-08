@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { Plugin, CoreSetup } from 'src/core/public';
 
 import { FeatureCatalogueCategory } from '../../home/public';
@@ -73,5 +73,5 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
     });
   }
 
-  public start() {}
+  public start() { }
 }
