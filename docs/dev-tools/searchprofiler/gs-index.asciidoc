@@ -4,7 +4,7 @@
 
 [partintro]
 --
-{es} has a powerful {ref}/search-profile.html[Profile API] which can be used to inspect and analyze
+{opensearch} has a powerful {ref}/search-profile.html[Profile API] which can be used to inspect and analyze
 your search queries. The response returns a large JSON blob, which can be
 difficult to analyze manually.
 

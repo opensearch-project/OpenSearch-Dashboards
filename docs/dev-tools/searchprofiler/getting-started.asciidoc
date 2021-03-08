@@ -2,7 +2,7 @@
 [[profiler-getting-started]]
 === Getting Started
 
-The {searchprofiler} is automatically enabled in {kib}. Open the main menu, click *Dev Tools*, then click *Search Profiler*
+The {searchprofiler} is automatically enabled in {osd}. Open the main menu, click *Dev Tools*, then click *Search Profiler*
 to get started.
 
 {searchprofiler} displays the names of the indices searched, the shards in each index,
@@ -10,7 +10,7 @@ and how long it took for the query to complete. To try it out, replace the defau
 with the query you want to profile and click *Profile*.
 
 The following example shows the results of profiling the `match_all` query.
-If we take a closer look at the information for the `.kibana_1` sample index, the
+If we take a closer look at the information for the `.opensearch_dashboards_1` sample index, the
 Cumulative Time field shows us that the query took 1.279ms to execute.
 
 [role="screenshot"]
@@ -42,8 +42,8 @@ to `GET /_search`. It searches across your entire cluster (all indices, all type
 If you need to query a specific index or type (or several), you can use the Index
 and Type filters.
 
-In the following example, the query is executed against the indices `test` and `kibana_1`
-and the type `my_type`. This is equivalent making a request to `GET /test,kibana_1/my_type/_search`.
+In the following example, the query is executed against the indices `test` and `opensearch_dashboards_1`
+and the type `my_type`. This is equivalent making a request to `GET /test,opensearch_dashboards_1/my_type/_search`.
 
 [role="screenshot"]
 image::dev-tools/searchprofiler/images/filter.png["Filtering by index and type"]

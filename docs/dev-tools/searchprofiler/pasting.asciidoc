@@ -2,7 +2,7 @@
 [[profiler-render]]
 === Rendering pre-captured profiler JSON
 
-The {searchprofiler} queries the cluster that the Kibana node is attached to.
+The {searchprofiler} queries the cluster that the OpenSearchDashboards node is attached to.
 It does this by executing the query against the cluster and collecting the results.
 
 But sometimes you may want to investigate performance problems that are temporal in nature. 
