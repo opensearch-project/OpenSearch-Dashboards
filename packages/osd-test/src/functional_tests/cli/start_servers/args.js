@@ -20,7 +20,7 @@
 import { resolve } from 'path';
 
 import dedent from 'dedent';
-import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
+import { ToolingLog, pickLevelFromFlags } from '@osd/dev-utils';
 
 const options = {
   help: { desc: 'Display this menu and exit.' },
@@ -28,14 +28,14 @@ const options = {
     arg: '<file>',
     desc: 'Pass in a config',
   },
-  esFrom: {
+  opensearchFrom: {
     arg: '<snapshot|source|path>',
-    desc: 'Build Elasticsearch from source, snapshot or path to existing install dir.',
-    defaultHelp: 'Default: $TEST_ES_FROM or snapshot',
+    desc: 'Build OpenSearch from source, snapshot or path to existing install dir.',
+    defaultHelp: 'Default: $TEST_OPENSEARCH_FROM or snapshot',
   },
-  'kibana-install-dir': {
+  'opensearch-dashboards-install-dir': {
     arg: '<dir>',
-    desc: 'Run Kibana from existing install directory instead of from source.',
+    desc: 'Run Opensearch Dashboards from existing install directory instead of from source.',
   },
   verbose: { desc: 'Log everything.' },
   debug: { desc: 'Run in debug mode.' },
@@ -81,13 +81,13 @@ export function processOptions(userOptions, defaultConfigPath) {
     throw new Error(`functional_tests_server: config is required`);
   }
 
-  if (!userOptions.esFrom) {
-    userOptions.esFrom = process.env.TEST_ES_FROM || 'snapshot';
+  if (!userOptions.opensearchFrom) {
+    userOptions.opensearchFrom = process.env.TEST_OPENSEARCH_FROM || 'snapshot';
   }
 
-  if (userOptions['kibana-install-dir']) {
-    userOptions.installDir = userOptions['kibana-install-dir'];
-    delete userOptions['kibana-install-dir'];
+  if (userOptions['opensearch-dashboards-install-dir']) {
+    userOptions.installDir = userOptions['opensearch-dashboards-install-dir'];
+    delete userOptions['opensearch-dashboards-install-dir'];
   }
 
   function createLogger() {
@@ -101,7 +101,7 @@ export function processOptions(userOptions, defaultConfigPath) {
     ...userOptions,
     config: resolve(config),
     createLogger,
-    extraKbnOpts: userOptions._,
+    extraOsdOpts: userOptions._,
   };
 }
 
