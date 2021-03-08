@@ -31,7 +31,7 @@ const options = {
   opensearchFrom: {
     arg: '<snapshot|source>',
     choices: ['snapshot', 'source'],
-    desc: 'Build Elasticsearch from source or run from snapshot.',
+    desc: 'Build OpenSearch from source or run from snapshot.',
     defaultHelp: 'Default: $TEST_OPENSEARCH_FROM or snapshot',
   },
   'opensearch-dashboards-install-dir': {

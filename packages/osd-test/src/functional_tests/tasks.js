@@ -24,7 +24,7 @@ import { withProcRunner } from '@osd/dev-utils';
 import dedent from 'dedent';
 
 import {
-  runElasticsearch,
+  runOpenSearch,
   runOpenSearchDashboardsServer,
   runFtr,
   assertNoneExcluded,
@@ -40,7 +40,7 @@ const makeSuccessMessage = (options) => {
   return (
     '\n\n' +
     dedent`
-      Elasticsearch and Opensearch Dashboards are ready for functional testing. Start the functional tests
+      OpenSearch and Opensearch Dashboards are ready for functional testing. Start the functional tests
       in another terminal session by running this command from this directory:
 
           node ${relative(process.cwd(), OPENSEARCH_DASHBOARDS_FTR_SCRIPT)}${installDirFlag}
@@ -97,7 +97,7 @@ export async function runTests(options) {
 
       let opensearch;
       try {
-        opensearch = await runElasticsearch({ config, options: opts });
+        opensearch = await runOpenSearch({ config, options: opts });
         await runOpenSearchDashboardsServer({ procs, config, options: opts });
         await runFtr({ configPath, options: opts });
       } finally {
@@ -131,7 +131,7 @@ export async function startServers(options) {
   await withProcRunner(log, async (procs) => {
     const config = await readConfigFile(log, options.config);
 
-    const opensearch = await runElasticsearch({ config, options: opts });
+    const opensearch = await runOpenSearch({ config, options: opts });
     await runOpenSearchDashboardsServer({
       procs,
       config,

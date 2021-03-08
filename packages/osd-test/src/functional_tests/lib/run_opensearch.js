@@ -61,8 +61,8 @@ export async function runOpenSearch({ config, options }) {
   return cluster;
 }
 
-function getRelativeCertificateAuthorityPath(esConfig = []) {
-  const caConfig = esConfig.find(
+function getRelativeCertificateAuthorityPath(opensearchConfig = []) {
+  const caConfig = opensearchConfig.find(
     (config) => config.indexOf('--opensearch.ssl.certificateAuthorities') === 0
   );
   return caConfig ? caConfig.split('=')[1] : undefined;
