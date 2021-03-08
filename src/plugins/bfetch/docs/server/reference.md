@@ -30,7 +30,7 @@ plugins.bfetch.addBatchProcessingRoute<object, object>(
 );
 ```
 
-`request` is the `KibanaRequest` object. `addBatchProcessingRoute` together with `batchedFunction`
+`request` is the `OpenSearchDashboardsRequest` object. `addBatchProcessingRoute` together with `batchedFunction`
 ensure that errors are handled and that all items in the batch get executed.
 
 
