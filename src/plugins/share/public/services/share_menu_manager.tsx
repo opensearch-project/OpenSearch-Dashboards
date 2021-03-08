@@ -19,10 +19,10 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@osd/i18n/react';
 import { EuiWrappingPopover } from '@elastic/eui';
 
-import { CoreStart, HttpStart } from 'kibana/public';
+import { CoreStart, HttpStart } from 'opensearch-dashboards/public';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';

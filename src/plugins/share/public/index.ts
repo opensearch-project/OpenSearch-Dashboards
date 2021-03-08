@@ -40,6 +40,6 @@ export {
 
 import { SharePlugin } from './plugin';
 
-export { KibanaURL } from './kibana_url';
+export { OpenSearchDashboardsURL } from './opensearch_dashboards_url';
 
 export const plugin = () => new SharePlugin();
