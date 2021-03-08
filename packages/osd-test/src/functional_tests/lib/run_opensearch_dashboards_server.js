@@ -18,7 +18,7 @@
  */
 
 import { resolve, relative } from 'path';
-import { KIBANA_ROOT, KIBANA_EXEC, KIBANA_EXEC_PATH } from './paths';
+import { OPENSEARCH_DASHBOARDS_ROOT, OPENSEARCH_DASHBOARDS_EXEC, OPENSEARCH_DASHBOARDS_EXEC_PATH } from './paths';
 
 function extendNodeOptions(installDir) {
   if (!installDir) {
@@ -37,48 +37,48 @@ function extendNodeOptions(installDir) {
   };
 }
 
-export async function runKibanaServer({ procs, config, options }) {
+export async function runOpenSearchDashboardsServer({ procs, config, options }) {
   const { installDir } = options;
 
-  await procs.run('kibana', {
-    cmd: getKibanaCmd(installDir),
+  await procs.run('opensearch-dashboards', {
+    cmd: getOpenSearchDashboardsCmd(installDir),
     args: filterCliArgs(collectCliArgs(config, options)),
     env: {
       FORCE_COLOR: 1,
       ...process.env,
       ...extendNodeOptions(installDir),
     },
-    cwd: installDir || KIBANA_ROOT,
+    cwd: installDir || OPENSEARCH_DASHBOARDS_ROOT,
     wait: /http server running/,
   });
 }
 
-function getKibanaCmd(installDir) {
+function getOpenSearchDashboardsCmd(installDir) {
   if (installDir) {
     return process.platform.startsWith('win')
-      ? resolve(installDir, 'bin/kibana.bat')
-      : resolve(installDir, 'bin/kibana');
+      ? resolve(installDir, 'bin/opensearch_dashboards.bat')
+      : resolve(installDir, 'bin/opensearch_dashboards');
   }
 
-  return KIBANA_EXEC;
+  return OPENSEARCH_DASHBOARDS_EXEC;
 }
 
 /**
- * When installDir is passed, we run from a built version of Kibana,
+ * When installDir is passed, we run from a built version of Opensearch Dashboards,
  * which uses different command line arguments. If installDir is not
  * passed, we run from source code. We also allow passing in extra
- * Kibana server options, so we tack those on here.
+ * Opensearch Dashboards server options, so we tack those on here.
  */
-function collectCliArgs(config, { installDir, extraKbnOpts }) {
-  const buildArgs = config.get('kbnTestServer.buildArgs') || [];
-  const sourceArgs = config.get('kbnTestServer.sourceArgs') || [];
-  const serverArgs = config.get('kbnTestServer.serverArgs') || [];
+function collectCliArgs(config, { installDir, extraOsdOpts }) {
+  const buildArgs = config.get('osdTestServer.buildArgs') || [];
+  const sourceArgs = config.get('osdTestServer.sourceArgs') || [];
+  const serverArgs = config.get('osdTestServer.serverArgs') || [];
 
   return pipe(
     serverArgs,
     (args) => (installDir ? args.filter((a) => a !== '--oss') : args),
-    (args) => (installDir ? [...buildArgs, ...args] : [KIBANA_EXEC_PATH, ...sourceArgs, ...args]),
-    (args) => args.concat(extraKbnOpts || [])
+    (args) => (installDir ? [...buildArgs, ...args] : [OPENSEARCH_DASHBOARDS_EXEC_PATH, ...sourceArgs, ...args]),
+    (args) => args.concat(extraOsdOpts || [])
   );
 }
 
@@ -119,7 +119,7 @@ function pipe(arr, ...fns) {
 
 /**
  * Checks whether a specific parameter is allowed to appear multiple
- * times in the Kibana parameters.
+ * times in the Opensearch Dashboards parameters.
  */
 function allowsDuplicate(val) {
   return ['--plugin-path'].includes(val.split('=')[0]);

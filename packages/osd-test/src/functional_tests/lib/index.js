@@ -17,23 +17,8 @@
  * under the License.
  */
 
-const Path = require('path');
-
-const { REPO_ROOT } = require('@kbn/dev-utils');
-
-// modifies all future calls to require() to automatically
-// compile the required source with babel
-require('@babel/register')({
-  ignore: [/[\/\\](node_modules|target|dist)[\/\\]/],
-  only: [
-    Path.resolve(REPO_ROOT, 'test'),
-    Path.resolve(REPO_ROOT, 'x-pack/test'),
-    Path.resolve(REPO_ROOT, 'examples'),
-    Path.resolve(REPO_ROOT, 'x-pack/examples'),
-    // TODO: should should probably remove this link back to the source
-    Path.resolve(REPO_ROOT, 'x-pack/plugins/task_manager/server/config.ts'),
-  ],
-  babelrc: false,
-  presets: [require.resolve('@kbn/babel-preset/node_preset')],
-  extensions: ['.js', '.ts', '.tsx'],
-});
+export { runOpenSearchDashboardsServer } from './run_opensearch_dashboards_server';
+export { runOpenSearch } from './run_opensearch';
+export { runFtr, hasTests, assertNoneExcluded } from './run_ftr';
+export { OPENSEARCH_DASHBOARDS_ROOT, OPENSEARCH_DASHBOARDS_FTR_SCRIPT, FUNCTIONAL_CONFIG_PATH, API_CONFIG_PATH } from './paths';
+export { runCli } from './run_cli';
