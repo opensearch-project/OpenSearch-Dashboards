@@ -229,12 +229,12 @@ describe('#start()', () => {
     await core.start();
   }
 
-  it('clears the children of the rootDomElement and appends container for rendering service with #kibana-body, notifications, overlays', async () => {
+  it('clears the children of the rootDomElement and appends container for rendering service with #opensearch-dashboards-body, notifications, overlays', async () => {
     const root = document.createElement('div');
     root.innerHTML = '<p>foo bar</p>';
     await startCore(root);
     expect(root.innerHTML).toMatchInlineSnapshot(
-      `"<div id=\\"kibana-body\\"></div><div></div><div></div>"`
+      `"<div id=\\"opensearch-dashboards-body\\"></div><div></div><div></div>"`
     );
   });
 

@@ -34,7 +34,7 @@ describe('ServerStatus', () => {
   it('renders correctly for green state', () => {
     const status = getStatus();
     const component = mount(<ServerStatus serverState={status} name="My Computer" />);
-    expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(`"Kibana status is Green"`);
+    expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(`"OpenSearch Dashboards status is Green"`);
     expect(component.find('EuiBadge')).toMatchSnapshot();
   });
 
@@ -44,7 +44,7 @@ describe('ServerStatus', () => {
       title: 'Red',
     });
     const component = mount(<ServerStatus serverState={status} name="My Computer" />);
-    expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(`"Kibana status is Red"`);
+    expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(`"OpenSearch Dashboards status is Red"`);
     expect(component.find('EuiBadge')).toMatchSnapshot();
   });
 
@@ -52,7 +52,7 @@ describe('ServerStatus', () => {
     let component = mount(<ServerStatus serverState={getStatus()} name="Localhost" />);
     expect(component.find('EuiText').text()).toMatchInlineSnapshot(`"Localhost"`);
 
-    component = mount(<ServerStatus serverState={getStatus()} name="Kibana" />);
-    expect(component.find('EuiText').text()).toMatchInlineSnapshot(`"Kibana"`);
+    component = mount(<ServerStatus serverState={getStatus()} name="OpenSearchDashboards" />);
+    expect(component.find('EuiText').text()).toMatchInlineSnapshot(`"OpenSearchDashboards"`);
   });
 });

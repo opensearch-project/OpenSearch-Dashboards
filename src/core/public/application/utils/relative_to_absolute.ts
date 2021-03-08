@@ -25,7 +25,7 @@
  * @example
  * ```ts
  * // current url: `https://kibana:8000/base-path/app/my-app`
- * relativeToAbsolute('/base-path/app/another-app') => `https://kibana:8000/base-path/app/another-app`
+ * relativeToAbsolute('/base-path/app/another-app') => `https://opensearch-dashboards:8000/base-path/app/another-app`
  * ```
  */
 export const relativeToAbsolute = (url: string): string => {

@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EuiText } from '@elastic/eui';
 
 import { IBasePath } from '../../http';
@@ -39,11 +39,11 @@ export const UrlOverflowUi: React.FC<{ basePath: IBasePath }> = ({ basePath }) =
         <li>
           <FormattedMessage
             id="core.ui.errorUrlOverflow.optionsToFixError.enableOptionText"
-            defaultMessage="Enable the {storeInSessionStorageConfig} option in {kibanaSettingsLink}."
+            defaultMessage="Enable the {storeInSessionStorageConfig} option in {opensearchDashboardsSettingsLink}."
             values={{
               storeInSessionStorageConfig: <code>state:storeInSessionStorage</code>,
-              kibanaSettingsLink: (
-                <a href={basePath.prepend('/app/management/kibana/settings')}>
+              opensearchDashboardsSettingsLink: (
+                <a href={basePath.prepend('/app/management/opensearch-dashboards/settings')}>
                   <FormattedMessage
                     id="core.ui.errorUrlOverflow.optionsToFixError.enableOptionText.advancedSettingsLinkText"
                     defaultMessage="Advanced Settings"

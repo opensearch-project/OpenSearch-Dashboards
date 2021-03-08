@@ -28,7 +28,7 @@ import {
   EuiShowFor,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { groupBy, sortBy } from 'lodash';
 import React, { Fragment, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -241,7 +241,7 @@ export function CollapsibleNav({
             color="subdued"
             gutterSize="none"
             size="s"
-            className="kbnCollapsibleNav__recentsListGroup"
+            className="osdCollapsibleNav__recentsListGroup"
           />
         ) : (
           <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
@@ -257,7 +257,7 @@ export function CollapsibleNav({
       <EuiHorizontalRule margin="none" />
 
       <EuiFlexItem className="eui-yScroll">
-        {/* Kibana, Observability, Security, and Management sections */}
+        {/* OpenSearchDashboards, Observability, Security, and Management sections */}
         {orderedCategories.map((categoryName) => {
           const category = categoryDictionary[categoryName]!;
 

@@ -16,18 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { apmSystem, fatalErrorMock, i18nLoad } from './kbn_bootstrap.test.mocks';
-import { __kbnBootstrap__ } from './';
+import { apmSystem, fatalErrorMock, i18nLoad } from './osd_bootstrap.test.mocks';
+import { __osdBootstrap__ } from './';
 
-describe('kbn_bootstrap', () => {
+describe('osd_bootstrap', () => {
   beforeAll(() => {
     const metadata = {
       i18n: { translationsUrl: 'http://localhost' },
       vars: { apmConfig: null },
     };
     // eslint-disable-next-line no-unsanitized/property
-    document.body.innerHTML = `<kbn-injected-metadata data=${JSON.stringify(metadata)}>
-</kbn-injected-metadata>`;
+    document.body.innerHTML = `<osd-injected-metadata data=${JSON.stringify(metadata)}>
+</osd-injected-metadata>`;
   });
 
   beforeEach(() => {
@@ -38,7 +38,7 @@ describe('kbn_bootstrap', () => {
     apmSystem.setup.mockRejectedValueOnce(new Error('reason'));
     const consoleSpy = jest.spyOn(console, 'warn').mockImplementationOnce(() => undefined);
 
-    await __kbnBootstrap__();
+    await __osdBootstrap__();
 
     expect(fatalErrorMock.add).toHaveBeenCalledTimes(0);
     expect(consoleSpy).toHaveBeenCalledTimes(1);
@@ -47,7 +47,7 @@ describe('kbn_bootstrap', () => {
   it('reports a fatal error if i18n load fails', async () => {
     i18nLoad.mockRejectedValueOnce(new Error('reason'));
 
-    await __kbnBootstrap__();
+    await __osdBootstrap__();
 
     expect(fatalErrorMock.add).toHaveBeenCalledTimes(1);
   });

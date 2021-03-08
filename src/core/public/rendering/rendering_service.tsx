@@ -19,7 +19,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@osd/i18n/react';
 
 import { InternalChromeStart } from '../chrome';
 import { InternalApplicationStart } from '../application';
@@ -49,7 +49,7 @@ export class RenderingService {
 
     ReactDOM.render(
       <I18nProvider>
-        <div className="content" data-test-subj="kibanaChrome">
+        <div className="content" data-test-subj="opensearchDashboardsChrome">
           {chromeUi}
 
           <AppWrapper chromeVisible$={chrome.getIsVisible$()}>

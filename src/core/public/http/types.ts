@@ -18,7 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { MaybePromise } from '@kbn/utility-types';
+import { MaybePromise } from '@osd/utility-types';
 
 /** @public */
 export interface HttpSetup {
@@ -120,7 +120,7 @@ export interface IAnonymousPaths {
 }
 
 /**
- * Headers to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause
+ * Headers to append to the request. Any headers that begin with `osd-` are considered private to Core and will cause
  * {@link HttpHandler} to throw an error.
  * @public
  */
@@ -236,8 +236,8 @@ export interface HttpFetchOptions extends HttpRequestInit {
 
   /**
    * Whether or not the request should include the "system request" header to differentiate an end user request from
-   * Kibana internal request.
-   * Can be read on the server-side using KibanaRequest#isSystemRequest. Defaults to `false`.
+   * OpenSearch Dashboards internal request.
+   * Can be read on the server-side using OpenSearchDashboardsRequest#isSystemRequest. Defaults to `false`.
    */
   asSystemRequest?: boolean;
 
@@ -254,16 +254,16 @@ export interface HttpFetchOptions extends HttpRequestInit {
  */
 export interface HttpFetchOptionsWithPath extends HttpFetchOptions {
   /*
-   * The path on the Kibana server to send the request to. Should not include the basePath.
+   * The path on the OpenSearch Dashboards server to send the request to. Should not include the basePath.
    */
   path: string;
 }
 
 /**
- * A function for making an HTTP requests to Kibana's backend. See {@link HttpFetchOptions} for options and
+ * A function for making an HTTP requests to OpenSearchDashboards's backend. See {@link HttpFetchOptions} for options and
  * {@link HttpResponse} for the response.
  *
- * @param path the path on the Kibana server to send the request to. Should not include the basePath.
+ * @param path the path on the OpenSearch Dashboards server to send the request to. Should not include the basePath.
  * @param options {@link HttpFetchOptions}
  * @returns a Promise that resolves to a {@link HttpResponse}
  * @public
@@ -283,7 +283,7 @@ export interface HttpHandler {
 export interface HttpResponse<TResponseBody = any> {
   /** The original {@link HttpFetchOptionsWithPath} used to send this request. */
   readonly fetchOptions: Readonly<HttpFetchOptionsWithPath>;
-  /** Raw request sent to Kibana server. */
+  /** Raw request sent to OpenSearch Dashboards server. */
   readonly request: Readonly<Request>;
   /** Raw response received, may be undefined if there was an error. */
   readonly response?: Readonly<Response>;

@@ -31,12 +31,12 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 import { FatalErrorInfo } from './get_error_info';
 
 interface Props {
-  kibanaVersion: string;
+  opensearchDashboardsVersion: string;
   buildNumber: number;
   errorInfo$: Rx.Observable<FatalErrorInfo>;
 }
@@ -133,7 +133,7 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
             {this.state.errors.map((error, i) => (
               <EuiCallOut key={i} title={error.message} color="danger" iconType="alert">
                 <EuiCodeBlock language="bash" className="eui-textBreakAll">
-                  {`Version: ${this.props.kibanaVersion}` +
+                  {`Version: ${this.props.opensearchDashboardsVersion}` +
                     '\n' +
                     `Build: ${this.props.buildNumber}` +
                     '\n' +

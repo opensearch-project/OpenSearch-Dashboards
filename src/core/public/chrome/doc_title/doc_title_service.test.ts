@@ -20,7 +20,7 @@
 import { DocTitleService } from './doc_title_service';
 
 describe('DocTitleService', () => {
-  const defaultTitle = 'KibanaTest';
+  const defaultTitle = 'OpenSearchDashboardsTest';
   const document = { title: '' };
 
   const getStart = (title: string = defaultTitle) => {
@@ -35,7 +35,7 @@ describe('DocTitleService', () => {
   describe('#change()', () => {
     it('changes the title of the document', async () => {
       getStart().change('TitleA');
-      expect(document.title).toEqual('TitleA - KibanaTest');
+      expect(document.title).toEqual('TitleA - OpenSearchDashboardsTest');
     });
 
     it('appends the baseTitle to the title', async () => {

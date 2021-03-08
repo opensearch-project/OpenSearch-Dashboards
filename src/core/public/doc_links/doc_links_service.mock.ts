@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@osd/utility-types';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { DocLinksService, DocLinksStart } from './doc_links_service';
 
 const createStartContractMock = (): DocLinksStart => {
   // This service is so simple that we actually use the real implementation
   const injectedMetadata = injectedMetadataServiceMock.createStartContract();
-  injectedMetadata.getKibanaBranch.mockReturnValue('mocked-test-branch');
+  injectedMetadata.getOpenSearchDashboardsBranch.mockReturnValue('mocked-test-branch');
   return new DocLinksService().start({ injectedMetadata });
 };
 

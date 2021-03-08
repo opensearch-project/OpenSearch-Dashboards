@@ -27,7 +27,7 @@ interface Props {
 }
 
 /**
- * BannersList is a list of "banners". A banner something that is displayed at the top of Kibana that may or may not
+ * BannersList is a list of "banners". A banner something that is displayed at the top of OpenSearch Dashboards that may or may not
  * disappear.
  *
  * Whether or not a banner can be closed is completely up to the author of the banner. Some banners make sense to be
@@ -46,7 +46,7 @@ export const BannersList: React.FunctionComponent<Props> = ({ banners$ }) => {
   }
 
   return (
-    <div className="kbnGlobalBannerList">
+    <div className="osdGlobalBannerList">
       {banners.map((banner) => (
         <BannerItem key={banner.id} banner={banner} />
       ))}
@@ -59,6 +59,6 @@ const BannerItem: React.FunctionComponent<{ banner: OverlayBanner }> = ({ banner
   useEffect(() => banner.mount(element.current!), [banner]); // Only unmount / remount if banner object changed.
 
   return (
-    <div data-test-priority={banner.priority} className="kbnGlobalBannerList__item" ref={element} />
+    <div data-test-priority={banner.priority} className="osdGlobalBannerList__item" ref={element} />
   );
 };

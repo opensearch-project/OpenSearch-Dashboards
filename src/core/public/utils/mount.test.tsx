@@ -33,7 +33,7 @@ describe('MountWrapper', () => {
     const wrapper = <MountWrapper mount={mountPoint} />;
     const container = mount(wrapper);
     expect(container.html()).toMatchInlineSnapshot(
-      `"<div class=\\"kbnMountWrapper\\"><p class=\\"bar\\">hello</p></div>"`
+      `"<div class=\\"osdMountWrapper\\"><p class=\\"bar\\">hello</p></div>"`
     );
   });
 
@@ -49,13 +49,13 @@ describe('MountWrapper', () => {
     const wrapper = <MountWrapper mount={mountPoint} />;
     const container = mount(wrapper);
     expect(container.html()).toMatchInlineSnapshot(
-      `"<div class=\\"kbnMountWrapper\\"><p>initial</p></div>"`
+      `"<div class=\\"osdMountWrapper\\"><p>initial</p></div>"`
     );
 
     el.textContent = 'changed';
     container.update();
     expect(container.html()).toMatchInlineSnapshot(
-      `"<div class=\\"kbnMountWrapper\\"><p>changed</p></div>"`
+      `"<div class=\\"osdMountWrapper\\"><p>changed</p></div>"`
     );
   });
 
@@ -64,7 +64,7 @@ describe('MountWrapper', () => {
     const wrapper = <MountWrapper mount={mountPoint} />;
     const container = mount(wrapper);
     expect(container.html()).toMatchInlineSnapshot(
-      `"<div class=\\"kbnMountWrapper\\"><span>detached</span></div>"`
+      `"<div class=\\"osdMountWrapper\\"><span>detached</span></div>"`
     );
   });
 

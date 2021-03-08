@@ -30,11 +30,11 @@
 
 // We apply brute force focus states to anything not coming from Eui
 // which has focus states designed at the component level.
-// You can also use "kbn-resetFocusState" to not apply the default focus
+// You can also use "osd-resetFocusState" to not apply the default focus
 // state. This is useful when you've already hand crafted your own
-// focus states in Kibana.
+// focus states in OpenSearch Dashboards.
 :focus {
-  &:not([class^='eui']):not(.kbn-resetFocusState) {
+  &:not([class^='eui']):not(.osd-resetFocusState) {
     @include euiFocusRing;
   }
 }
