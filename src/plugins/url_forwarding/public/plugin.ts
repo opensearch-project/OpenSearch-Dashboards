@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { CoreStart, CoreSetup } from 'kibana/public';
-import { KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
+import { CoreStart, CoreSetup } from 'opensearch-dashboards/public';
+import { OpenSearchDashboardsLegacyStart } from 'src/plugins/opensearch_dashboards_legacy/public';
 import { Subscription } from 'rxjs';
 import { navigateToDefaultApp } from './navigate_to_default_app';
 import { createLegacyUrlForwardApp } from './forward_app';
-import { navigateToLegacyKibanaUrl } from './forward_app/navigate_to_legacy_kibana_url';
+import { navigateToLegacyOpenSearchDashboardsUrl } from './forward_app/navigate_to_legacy_opensearch_dashboards_url';
 
 export interface ForwardDefinition {
   legacyAppId: string;
@@ -39,7 +39,7 @@ export class UrlForwardingPlugin {
     core.application.register(createLegacyUrlForwardApp(core, this.forwardDefinitions));
     return {
       /**
-       * Forwards URLs within the legacy `kibana` app to a new platform application.
+       * Forwards URLs within the legacy `opensearchDashboards` app to a new platform application.
        *
        * @param legacyAppId The name of the old app to forward URLs from
        * @param newAppId The name of the new app that handles the URLs now
@@ -64,8 +64,8 @@ export class UrlForwardingPlugin {
        * ```
        * This will cause the following redirects:
        *
-       * * app/kibana#/old/ -> app/new#/home
-       * * app/kibana#/old/item/123 -> app/new#/items/123
+       * * app/opensearch-dashboards#/old/ -> app/new#/home
+       * * app/opensearch-dashboards#/old/item/123 -> app/new#/items/123
        *
        */
       forwardApp: (
@@ -84,21 +84,21 @@ export class UrlForwardingPlugin {
 
   public start(
     { application, http: { basePath }, uiSettings }: CoreStart,
-    { kibanaLegacy }: { kibanaLegacy: KibanaLegacyStart }
+    { opensearchDashboardsLegacy }: { opensearchDashboardsLegacy: OpenSearchDashboardsLegacyStart }
   ) {
     this.currentAppIdSubscription = application.currentAppId$.subscribe((currentAppId) => {
       this.currentAppId = currentAppId;
     });
     return {
       /**
-       * Navigates to the app defined as kibana.defaultAppId.
+       * Navigates to the app defined as opensearch-dashboards.defaultAppId.
        * This takes redirects into account and uses the right mechanism to navigate.
        */
       navigateToDefaultApp: (
         { overwriteHash }: { overwriteHash: boolean } = { overwriteHash: true }
       ) => {
         navigateToDefaultApp(
-          kibanaLegacy.config.defaultAppId,
+          opensearchDashboardsLegacy.config.defaultAppId,
           this.forwardDefinitions,
           application,
           basePath,
@@ -112,8 +112,8 @@ export class UrlForwardingPlugin {
        * If no matching forward is found, `{ navigated: false }` will be returned.
        * @param hash
        */
-      navigateToLegacyKibanaUrl: (hash: string) => {
-        return navigateToLegacyKibanaUrl(hash, this.forwardDefinitions, basePath, application);
+      navigateToLegacyOpenSearchDashboardsUrl: (hash: string) => {
+        return navigateToLegacyOpenSearchDashboardsUrl(hash, this.forwardDefinitions, basePath, application);
       },
       /**
        * @deprecated

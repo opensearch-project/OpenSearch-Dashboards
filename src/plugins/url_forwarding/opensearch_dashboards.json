@@ -1,0 +1,7 @@
+{
+  "id": "urlForwarding",
+  "version": "opensearchDashboards",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["opensearchDashboardsLegacy"]
+}

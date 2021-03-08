@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ApplicationStart, IBasePath } from 'kibana/public';
+import { ApplicationStart, IBasePath } from 'opensearch-dashboards/public';
 import { ForwardDefinition } from './plugin';
 
 export function navigateToDefaultApp(
@@ -28,8 +28,8 @@ export function navigateToDefaultApp(
   currentAppId: string | undefined,
   overwriteHash: boolean
 ) {
-  // navigate to the respective path in the legacy kibana plugin by default (for unmigrated plugins)
-  let targetAppId = 'kibana';
+  // navigate to the respective path in the legacy OpenSearch Dashboards plugin by default (for unmigrated plugins)
+  let targetAppId = 'opensearchDashboards';
   let targetAppPath = `#/${defaultAppId}`;
 
   // try to find an existing redirect for the target path if possible
@@ -41,7 +41,7 @@ export function navigateToDefaultApp(
   }
 
   // when the correct app is already loaded, just set the hash to the right value
-  // otherwise use navigateToApp (or setting href in case of kibana app)
+  // otherwise use navigateToApp (or setting href in case of OpenSearchDashboards, app)
   if (currentAppId !== targetAppId) {
     application.navigateToApp(targetAppId, { path: targetAppPath, replace: true });
   } else if (overwriteHash) {
