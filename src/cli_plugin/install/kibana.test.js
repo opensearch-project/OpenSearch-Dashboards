@@ -35,7 +35,7 @@ beforeEach(() => {
 describe('opensearchDashboards cli', function () {
   describe('plugin installer', function () {
     describe('OpenSearch Dashboards', function () {
-      const testWorkingPath = join(__dirname, '.test.data.opensearchDashboards');
+      const testWorkingPath = join(__dirname, '.test.data.opensearch_dashboards');
       const tempArchiveFilePath = join(testWorkingPath, 'archive.part');
       const pluginDir = join(__dirname, 'plugins');
 
@@ -81,7 +81,7 @@ describe('opensearchDashboards cli', function () {
           expect(() => assertVersion(settings)).not.toThrow();
         });
 
-        it('should throw an error if plugin is missing a opensearchDashboardsVersion version.', function () {
+        it('should throw an error if plugin is missing a opensearch-dashboards version.', function () {
           expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
             `"Plugin opensearch_dashboards.json is missing both a version property (required) and a opensearchDashboardsVersion property (optional)."`
           );
