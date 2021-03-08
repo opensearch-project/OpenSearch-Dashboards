@@ -31,7 +31,7 @@ program
   .version(pkg.version)
   .description(
     'OpenSearch Dashboards is an open source (Apache Licensed), browser ' +
-      'based analytics and search dashboard for Opensearch.'
+      'based analytics and search dashboard for OpenSearch.'
   );
 
 // attach commands

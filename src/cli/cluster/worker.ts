@@ -90,7 +90,7 @@ export class Worker extends EventEmitter {
       NODE_OPTIONS: process.env.NODE_OPTIONS || '',
       osdWorkerType: this.type,
       osdWorkerArgv: JSON.stringify([...(opts.baseArgv || baseArgv), ...(opts.argv || [])]),
-      ELASTIC_APM_SERVICE_NAME: opts.apmServiceName || '',
+      OPENSEARCH_APM_SERVICE_NAME: opts.apmServiceName || '',
     };
   }
 
