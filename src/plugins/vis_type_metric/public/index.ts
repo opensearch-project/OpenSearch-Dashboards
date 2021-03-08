@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from 'opensearch-dashboards/public';
 import { MetricVisPlugin as Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
