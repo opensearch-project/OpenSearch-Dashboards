@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { onPremInstructions } from './envs/on_prem';
 import apmIndexPattern from './index_pattern.json';
 import { ArtifactsSchema, TutorialsCategory } from '../../../../../src/plugins/home/server';
