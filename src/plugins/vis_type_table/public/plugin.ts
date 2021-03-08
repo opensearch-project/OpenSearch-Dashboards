@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'opensearch-dashboards/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 
 import { createTableVisFn } from './table_vis_fn';
 import { getTableVisTypeDefinition } from './table_vis_type';
 import { DataPublicPluginStart } from '../../data/public';
-import { setFormatService, setKibanaLegacy } from './services';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import { setFormatService, setOpenSearchDashboardsLegacy } from './services';
+import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboardslegacy/public';
 
 /** @internal */
 export interface TablePluginSetupDependencies {
@@ -35,7 +35,7 @@ export interface TablePluginSetupDependencies {
 /** @internal */
 export interface TablePluginStartDependencies {
   data: DataPublicPluginStart;
-  kibanaLegacy: KibanaLegacyStart;
+  opensearchDashboardsLegacy: OpenSearchDashboardsLegacyStart;
 }
 
 /** @internal */
@@ -57,8 +57,8 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
     );
   }
 
-  public start(core: CoreStart, { data, kibanaLegacy }: TablePluginStartDependencies) {
+  public start(core: CoreStart, { data, opensearchDashboardsLegacy }: TablePluginStartDependencies) {
     setFormatService(data.fieldFormats);
-    setKibanaLegacy(kibanaLegacy);
+    setOpenSearchDashboardsLegacy(opensearchDashboardsLegacy);
   }
 }

@@ -26,7 +26,7 @@ import { round } from 'lodash';
 
 import { getFieldFormatsRegistry } from '../../../data/public/test_utils';
 import { coreMock } from '../../../../core/public/mocks';
-import { initAngularBootstrap } from '../../../kibana_legacy/public';
+import { initAngularBootstrap } from '../../../opensearch_dashboardslegacy/public';
 import { setUiSettings } from '../../../data/public/services';
 import { UI_SETTINGS } from '../../../data/public/';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../share/public';
@@ -67,7 +67,7 @@ describe('Table Vis - AggTable Directive', function () {
   let settings;
 
   const initLocalAngular = () => {
-    const tableVisModule = getInnerAngular('kibana/table_vis', core);
+    const tableVisModule = getInnerAngular('opensearch-dashboards/table_vis', core);
     initTableVisLegacyModule(tableVisModule);
   };
 
@@ -76,7 +76,7 @@ describe('Table Vis - AggTable Directive', function () {
     setFormatService(getFieldFormatsRegistry(core));
     initAngularBootstrap();
     initLocalAngular();
-    angular.mock.module('kibana/table_vis');
+    angular.mock.module('opensearch-dashboards/table_vis');
     angular.mock.inject(($injector, config) => {
       settings = config;
 
@@ -100,7 +100,7 @@ describe('Table Vis - AggTable Directive', function () {
     };
     $scope.table = tabifiedData.metricOnly.tables[0];
 
-    const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')(
+    const $el = $compile('<osd-agg-table table="table" dimensions="dimensions"></osd-agg-table>')(
       $scope
     );
     $scope.$digest();
@@ -113,7 +113,7 @@ describe('Table Vis - AggTable Directive', function () {
   test('renders nothing if the table is empty', function () {
     $scope.dimensions = {};
     $scope.table = null;
-    const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')(
+    const $el = $compile('<osd-agg-table table="table" dimensions="dimensions"></osd-agg-table>')(
       $scope
     );
     $scope.$digest();
@@ -135,7 +135,7 @@ describe('Table Vis - AggTable Directive', function () {
       ],
     };
     $scope.table = tabifiedData.threeTermBuckets.tables[0];
-    const $el = $('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>');
+    const $el = $('<osd-agg-table table="table" dimensions="dimensions"></osd-agg-table>');
     $compile($el)($scope);
     $scope.$digest();
 
@@ -200,11 +200,11 @@ describe('Table Vis - AggTable Directive', function () {
         tabifiedData.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative.tables[0];
       $scope.showTotal = true;
       $scope.totalFunc = totalFunc;
-      const $el = $(`<kbn-agg-table
+      const $el = $(`<osd-agg-table
                       table="table"
                       show-total="showTotal"
                       total-func="totalFunc"
-                      dimensions="dimensions"></kbn-agg-table>`);
+                      dimensions="dimensions"></osd-agg-table>`);
       $compile($el)($scope);
       $scope.$digest();
 
@@ -255,7 +255,7 @@ describe('Table Vis - AggTable Directive', function () {
 
   describe('aggTable.toCsv()', function () {
     test('escapes rows and columns properly', function () {
-      const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')(
+      const $el = $compile('<osd-agg-table table="table" dimensions="dimensions"></osd-agg-table>')(
         $scope
       );
       $scope.$digest();
@@ -291,7 +291,7 @@ describe('Table Vis - AggTable Directive', function () {
       };
       $scope.table = tabifiedData.threeTermBuckets.tables[0];
 
-      const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')(
+      const $el = $compile('<osd-agg-table table="table" dimensions="dimensions"></osd-agg-table>')(
         $scope
       );
       $scope.$digest();
@@ -346,7 +346,7 @@ describe('Table Vis - AggTable Directive', function () {
       };
       $scope.table = tabifiedData.threeTermBuckets.tables[0];
 
-      const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')(
+      const $el = $compile('<osd-agg-table table="table" dimensions="dimensions"></osd-agg-table>')(
         $scope
       );
       $scope.$digest();
@@ -407,11 +407,11 @@ describe('Table Vis - AggTable Directive', function () {
       tabifiedData.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative.tables[0];
     $scope.percentageCol = 'Average bytes';
 
-    const $el = $(`<kbn-agg-table
+    const $el = $(`<osd-agg-table
       table="table"
       dimensions="dimensions"
       percentage-col="percentageCol"
-    ></kbn-agg-table>`);
+    ></osd-agg-table>`);
 
     $compile($el)($scope);
     $scope.$digest();
@@ -448,7 +448,7 @@ describe('Table Vis - AggTable Directive', function () {
     });
 
     test('calls _saveAs properly', function () {
-      const $el = $compile('<kbn-agg-table table="table"  dimensions="dimensions">')($scope);
+      const $el = $compile('<osd-agg-table table="table"  dimensions="dimensions">')($scope);
       $scope.$digest();
 
       const $tableScope = $el.isolateScope();
@@ -482,7 +482,7 @@ describe('Table Vis - AggTable Directive', function () {
     test('should use the export-title attribute', function () {
       const expected = 'export file name';
       const $el = $compile(
-        `<kbn-agg-table table="table"  dimensions="dimensions" export-title="exportTitle">`
+        `<osd-agg-table table="table"  dimensions="dimensions" export-title="exportTitle">`
       )($scope);
       $scope.$digest();
 

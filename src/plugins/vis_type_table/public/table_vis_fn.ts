@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { tableVisResponseHandler, TableContext } from './table_vis_response_handler';
-import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
+import { ExpressionFunctionDefinition, OpenSearchDashboardsDatatable, Render } from '../../expressions/public';
 
-export type Input = KibanaDatatable;
+export type Input = OpenSearchDashboardsDatatable;
 
 interface Arguments {
   visConfig: string | null;
@@ -39,14 +39,14 @@ interface RenderValue {
 }
 
 export const createTableVisFn = (): ExpressionFunctionDefinition<
-  'kibana_table',
+  'opensearch_dashboardstable',
   Input,
   Arguments,
   Render<RenderValue>
 > => ({
-  name: 'kibana_table',
+  name: 'opensearch_dashboardstable',
   type: 'render',
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['opensearch_dashboardsdatatable'],
   help: i18n.translate('visTypeTable.function.help', {
     defaultMessage: 'Table visualization',
   }),

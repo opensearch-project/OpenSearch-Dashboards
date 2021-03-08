@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { createGetterSetter } from '../../kibana_utils/public';
+import { createGetterSetter } from '../../opensearch_dashboardsutils/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboardslegacy/public';
 
 export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
 >('table data.fieldFormats');
 
-export const [getKibanaLegacy, setKibanaLegacy] = createGetterSetter<KibanaLegacyStart>(
-  'table kibanaLegacy'
+export const [getOpenSearchDashboardsLegacy, setOpenSearchDashboardsLegacy] = createGetterSetter<OpenSearchDashboardsLegacyStart>(
+  'table opensearchDashboardsLegacy'
 );

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Required } from '@kbn/utility-types';
+import { Required } from '@osd/utility-types';
 
 import { getFormatService } from './services';
 import { Input } from './table_vis_fn';

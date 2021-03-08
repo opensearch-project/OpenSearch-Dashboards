@@ -19,7 +19,7 @@
 
 import aggTableGroupTemplate from './agg_table_group.html';
 
-export function KbnAggTableGroup(RecursionHelper) {
+export function OsdAggTableGroup(RecursionHelper) {
   return {
     restrict: 'E',
     template: aggTableGroupTemplate,
