@@ -18,7 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { KibanaRequest, RequestHandlerContext, RouteMethod } from 'kibana/server';
+import { OpenSearchDashboardsRequest, RequestHandlerContext, RouteMethod } from 'opensearch-dashboards/server';
 
 /**
  * Request handler modified to allow to return an observable.
@@ -32,7 +32,7 @@ export type StreamingRequestHandler<
   Q = unknown,
   B = unknown,
   Method extends RouteMethod = any
-> = (
-  context: RequestHandlerContext,
-  request: KibanaRequest<P, Q, B, Method>
-) => Observable<Response> | Promise<Observable<Response>>;
+  > = (
+    context: RequestHandlerContext,
+    request: OpenSearchDashboardsRequest<P, Q, B, Method>
+  ) => Observable<Response> | Promise<Observable<Response>>;
