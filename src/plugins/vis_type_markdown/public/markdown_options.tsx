@@ -28,7 +28,7 @@ import {
   EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { MarkdownVisParams } from './types';
