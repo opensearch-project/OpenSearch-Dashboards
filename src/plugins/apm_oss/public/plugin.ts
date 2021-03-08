@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin } from 'opensearch-dashboards/public';
 import { ApmOssPluginSetup, ApmOssPluginStart } from './types';
 
 export class ApmOssPlugin implements Plugin<ApmOssPluginSetup, ApmOssPluginStart> {
@@ -29,5 +29,5 @@ export class ApmOssPlugin implements Plugin<ApmOssPluginSetup, ApmOssPluginStart
     return {};
   }
 
-  public stop() {}
+  public stop() { }
 }
