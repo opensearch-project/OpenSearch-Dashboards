@@ -1,9 +1,9 @@
-[[testing-kibana-plugin]]
-== Testing {kib} Plugins
+[[testing-opensearch-dashboards-plugin]]
+== Testing {osd} Plugins
 === Writing tests
 Learn about <<development-tests, recommended testing approaches >>.
 
-=== Mock {kib} Core services in tests
+=== Mock {osd} Core services in tests
 
 Core services already provide mocks to simplify testing and make sure
 plugins always rely on valid public contracts:
@@ -11,7 +11,7 @@ plugins always rely on valid public contracts:
 *my_plugin/server/plugin.test.ts*
 [source,typescript]
 ----
-import { configServiceMock } from 'kibana/server/mocks';
+import { configServiceMock } from 'opensearch-dashboards/server/mocks';
 
 const configService = configServiceMock.create();
 configService.atPath.mockReturnValue(config$);
@@ -24,7 +24,7 @@ Or if you need to get the whole core `setup` or `start` contracts:
 *my_plugin/server/plugin.test.ts*
 [source,typescript] 
 ----
-import { coreMock } from 'kibana/public/mocks';
+import { coreMock } from 'opensearch-dashboards/public/mocks';
 
 const coreSetup = coreMock.createSetup();
 coreSetup.uiSettings.get.mockImplementation((key: string) => {

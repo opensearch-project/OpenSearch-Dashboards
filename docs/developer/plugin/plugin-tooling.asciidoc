@@ -5,7 +5,7 @@
 [[automatic-plugin-generator]]
 === Automatic plugin generator
 
-We recommend that you kick-start your plugin by generating it with the {kib-repo}tree/{branch}/packages/kbn-plugin-generator[{kib} Plugin Generator]. Run the following in the {kib} repo, and you will be asked a couple of questions, see some progress bars, and have a freshly generated plugin ready for you to play with in {kib}'s `plugins` folder.
+We recommend that you kick-start your plugin by generating it with the {osd-repo}tree/{branch}/packages/osd-plugin-generator[{osd} Plugin Generator]. Run the following in the {osd} repo, and you will be asked a couple of questions, see some progress bars, and have a freshly generated plugin ready for you to play with in {osd}'s `plugins` folder.
 
 ["source","shell"]
 -----------
@@ -15,21 +15,21 @@ node scripts/generate_plugin my_plugin_name # replace "my_plugin_name" with your
 [discrete]
 === Plugin location
 
-The {kib} directory must be named `kibana`, and your plugin directory should be located in the root of `kibana` in a `plugins` directory, for example:
+The {osd} directory must be named `opensearchDashboards`, and your plugin directory should be located in the root of `opensearchDashboards` in a `plugins` directory, for example:
 
 ["source","shell"]
 ----
 .
-└── kibana
+└── opensearchDashboards
     └── plugins
         ├── foo-plugin
         └── bar-plugin
 ----
 
 === Build plugin distributable
-WARNING: {kib} distributable is not shipped with `@kbn/optimizer` anymore. You need to pre-build your plugin for use in production.
+WARNING: {osd} distributable is not shipped with `@osd/optimizer` anymore. You need to pre-build your plugin for use in production.
 
-You can leverage {kib-repo}blob/{branch}/packages/kbn-plugin-helpers[@kbn/plugin-helpers] to build a distributable archive for your plugin.
+You can leverage {osd-repo}blob/{branch}/packages/osd-plugin-helpers[@osd/plugin-helpers] to build a distributable archive for your plugin.
 The package transpiles the plugin code, adds polyfills, and links necessary js modules in the runtime.
 You don't need to install the `plugin-helpers`: the `package.json` is already pre-configured if you created your plugin with `node scripts/generate_plugin` script.
 To build your plugin run within your plugin folder:
@@ -37,13 +37,13 @@ To build your plugin run within your plugin folder:
 -----------
 yarn build
 -----------
-It will output a`zip` archive in `kibana/plugins/my_plugin_name/build/` folder.
+It will output a`zip` archive in `opensearch-dashboards/plugins/my_plugin_name/build/` folder.
 
 === Install a plugin from archive
 See <<install-plugin, How to install a plugin>>.
 
-=== Run {kib} with your plugin in dev mode
-Run `yarn start` in the {kib} root folder. Make sure {kib} found and bootstrapped your plugin:
+=== Run {osd} with your plugin in dev mode
+Run `yarn start` in the {osd} root folder. Make sure {osd} found and bootstrapped your plugin:
 ["source","shell"]
 -----------
 [info][plugins-system] Setting up […] plugins: […, myPluginName, …]

@@ -1,7 +1,7 @@
-[[running-kibana-advanced]]
-== Running {kib}
+[[running-opensearch-dashboards-advanced]]
+== Running {osd}
 
-Change to your local {kib} directory. Start the development server.
+Change to your local {osd} directory. Start the development server.
 
 [source,bash]
 ----
@@ -15,26 +15,26 @@ optional packages zip, tar, and shasum.
 ____
 
 Now you can point your web browser to http://localhost:5601 and start
-using {kib}! When running `yarn start`, {kib} will also log that it
+using {osd}! When running `yarn start`, {osd} will also log that it
 is listening on port 5603 due to the base path proxy, but you should
-still access {kib} on port 5601.
+still access {osd} on port 5601.
 
 By default, you can log in with username `elastic` and password
-`changeme`. See the `--help` options on `yarn es <command>` if
+`changeme`. See the `--help` options on `yarn opensearch <command>` if
 you’d like to configure a different password.
 
 [discrete]
-=== Running {kib} in Open-Source mode
+=== Running {osd} in Open-Source mode
 
 If you’re looking to only work with the open-source software, supply the
-license type to `yarn es`:
+license type to `yarn opensearch`:
 
 [source,bash]
 ----
-yarn es snapshot --license oss
+yarn opensearch snapshot --license oss
 ----
 
-And start {kib} with only open-source code:
+And start {osd} with only open-source code:
 
 [source,bash]
 ----
@@ -48,26 +48,26 @@ If you’re installing dependencies and seeing an error that looks
 something like
 
 ....
-Unsupported URL Type: link:packages/elastic-eslint-config-kibana
+Unsupported URL Type: link:packages/elastic-eslint-config-opensearch-dashboards
 ....
 
-you’re likely running `npm`. To install dependencies in {kib} you
-need to run `yarn kbn bootstrap`. For more info, see
+you’re likely running `npm`. To install dependencies in {osd} you
+need to run `yarn osd bootstrap`. For more info, see
 link:#setting-up-your-development-environment[Setting Up Your
 Development Environment] above.
 
 [discrete]
-[[customize-kibana-yml]]
-=== Customizing `config/kibana.dev.yml`
+[[customize-opensearch-dashboards-yml]]
+=== Customizing `config/opensearch_dashboards.dev.yml`
 
-The `config/kibana.yml` file stores user configuration directives.
+The `config/opensearch_dashboards.yml` file stores user configuration directives.
 Since this file is checked into source control, however, developer
 preferences can’t be saved without the risk of accidentally committing
 the modified version. To make customizing configuration easier during
-development, the {kib} CLI will look for a `config/kibana.dev.yml`
+development, the {osd} CLI will look for a `config/opensearch_dashboards.dev.yml`
 file if run with the `--dev` flag. This file behaves just like the
 non-dev version and accepts any of the
-https://www.elastic.co/guide/en/kibana/current/settings.html[standard
+https://www.elastic.co/guide/en/opensearch-dashboards/current/settings.html[standard
 settings].
 
 [discrete]
@@ -82,6 +82,6 @@ directory, but webpack isn’t adapting
 [discrete]
 === Setting Up SSL
 
-{kib} includes self-signed certificates that can be used for
+{osd} includes self-signed certificates that can be used for
 development purposes in the browser and for communicating with
-{es}: `yarn start --ssl` & `yarn es snapshot --ssl`.
+{opensearch}: `yarn start --ssl` & `yarn opensearch snapshot --ssl`.

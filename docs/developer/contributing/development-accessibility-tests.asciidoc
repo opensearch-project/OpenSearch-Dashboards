@@ -11,12 +11,12 @@ export default function ({ getService, getPageObjects }) {
   const { common, home } = getPageObjects(['common', 'home']);
   const a11y = getService('a11y'); /* this is the wrapping service around axe */
 
-  describe('Kibana Home', () => {
+  describe('OpenSearchDashboards Home', () => {
     before(async () => {
       await common.navigateToApp('home'); /* navigates to the page we want to test */
     });
 
-    it('Kibana Home view', async () => {
+    it('OpenSearchDashboards Home view', async () => {
       await retry.waitFor(
         'home page visible',
         async () => await testSubjects.exists('homeApp')
@@ -28,9 +28,9 @@ export default function ({ getService, getPageObjects }) {
      * If these tests were added by our QA team, tests that fail that require significant app code
      * changes to be fixed will be skipped with a corresponding issue label with more info
      */
-    // Skipped due to https://github.com/elastic/kibana/issues/99999
+    // Skipped due to https://github.com/elastic/opensearch-dashboards/issues/99999
     it.skip('all plugins view page meets a11y requirements', async () => {
-      await home.clickAllKibanaPlugins();
+      await home.clickAllOpenSearchDashboardsPlugins();
       await a11y.testAppSnapshot();
     });
 
@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }) {
      * coverage. Things like empty states, different license levels, different permissions, and
      * loaded data can all significantly change the UI which necessitates their own test.
      */
-    it('Add Kibana sample data page', async () => {
+    it('Add OpenSearchDashboards sample data page', async () => {
       await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });

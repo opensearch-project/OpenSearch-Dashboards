@@ -1,40 +1,40 @@
 [[migrating-legacy-plugins]]
-== Migrating legacy plugins to the {kib} Platform
+== Migrating legacy plugins to the {osd} Platform
 
 [IMPORTANT]
 ==============================================
-In {kib} 7.10, support for legacy-style {kib} plugins was completely removed.
-Moving forward, all plugins must be built on the new {kib} Platform Plugin API.
+In {osd} 7.10, support for legacy-style {osd} plugins was completely removed.
+Moving forward, all plugins must be built on the new {osd} Platform Plugin API.
 This guide is intended to assist plugin authors in migrating their legacy plugin
-to the {kib} Platform Plugin API.
+to the {osd} Platform Plugin API.
 ==============================================
 
 Make no mistake, it is going to take a lot of work to move certain
-plugins to the {kib} Platform.
+plugins to the {osd} Platform.
 
 The goal of this document is to guide developers through the recommended
 process of migrating at a high level. Every plugin is different, so
 developers should tweak this plan based on their unique requirements.
 
-First, we recommend you read <<kibana-platform-plugin-api>> to get an overview
-of how plugins work in the {kib} Platform. Then continue here to follow our
+First, we recommend you read <<opensearch-dashboards-platform-plugin-api>> to get an overview
+of how plugins work in the {osd} Platform. Then continue here to follow our
 generic plan of action that can be applied to any legacy plugin.
 
 === Challenges to overcome with legacy plugins
 
-{kib} Platform plugins have an identical architecture in the browser and on
+{osd} Platform plugins have an identical architecture in the browser and on
 the server. Legacy plugins have one architecture that they use in the
 browser and an entirely different architecture that they use on the
 server.
 
 This means that there are unique sets of challenges for migrating to the
-{kib} Platform, depending on whether the legacy plugin code is on the
+{osd} Platform, depending on whether the legacy plugin code is on the
 server or in the browser.
 
 ==== Challenges on the server
 
 The general architecture of legacy server-side code is similar to
-the {kib} Platform architecture in one important way: most legacy
+the {osd} Platform architecture in one important way: most legacy
 server-side plugins define an `init` function where the bulk of their
 business logic begins, and they access both `core` and
 `plugin-provided` functionality through the arguments given to `init`.
@@ -42,7 +42,7 @@ Rarely does legacy server-side code share stateful services via import
 statements.
 
 Although not exactly the same, legacy plugin `init` functions behave
-similarly today as {kib} Platform `setup` functions. `KbnServer` also
+similarly today as {osd} Platform `setup` functions. `OsdServer` also
 exposes an `afterPluginsInit` method, which behaves similarly to `start`.
 There is no corresponding legacy concept of `stop`.
 
@@ -59,7 +59,7 @@ decoupling from hapi.
 ==== Challenges in the browser
 
 The legacy plugin system in the browser is fundamentally incompatible
-with the {kib} Platform. There is no client-side plugin definition. There
+with the {osd} Platform. There is no client-side plugin definition. There
 are no services that get passed to plugins at runtime. There really
 isn’t even a concrete notion of `core`.
 
@@ -70,13 +70,13 @@ some sort of state mutation. Sometimes this module exists inside the
 plugin itself, and it gets imported via the `plugin/` webpack alias.
 Sometimes this module exists outside the context of plugins entirely and
 gets imported via the `ui/` webpack alias. Neither of these concepts
-exists in the {kib} Platform.
+exists in the {osd} Platform.
 
 Legacy browser plugins rely on the feature known as `uiExports/`, which
 integrates directly with our build system to ensure that plugin code is
 bundled together in such a way to enable that global singleton module
-state. There is no corresponding feature in the {kib} Platform, and in
-the fact we intend down the line to build {kib} Platform plugins as immutable
+state. There is no corresponding feature in the {osd} Platform, and in
+the fact we intend down the line to build {osd} Platform plugins as immutable
 bundles that can not share state in this way.
 
 The key challenge to overcome with legacy browser-side plugins will be
@@ -94,10 +94,10 @@ The approach and level of effort varies significantly between server and
 browser plugins, but at a high level, the approach is the same.
 
 First, decouple your plugin’s business logic from the dependencies that
-are not exposed through the {kib} Platform, hapi.js, and Angular.js. Then
+are not exposed through the {osd} Platform, hapi.js, and Angular.js. Then
 introduce plugin definitions that more accurately reflect how plugins
-are defined in the {kib} Platform. Finally, replace the functionality you
-consume from the core and other plugins with their {kib} Platform equivalents.
+are defined in the {osd} Platform. Finally, replace the functionality you
+consume from the core and other plugins with their {osd} Platform equivalents.
 
 Once those things are finished for any given plugin, it can officially
 be switched to the new plugin system.
@@ -115,17 +115,17 @@ For migration examples, see <<migrating-legacy-plugins-examples>>.
 === Browser-side plan of action
 
 It is generally a much greater challenge preparing legacy browser-side
-code for the {kib} Platform than it is server-side, and as such there are
+code for the {osd} Platform than it is server-side, and as such there are
 a few more steps. The level of effort here is proportional to the extent
 to which a plugin is dependent on Angular.js.
 
 To complicate matters further, a significant amount of the business
-logic in {kib} client-side code exists inside the `ui/public`
+logic in {osd} client-side code exists inside the `ui/public`
 directory (aka ui modules), and all of that must be migrated as well.
 
 Because the usage of Angular and `ui/public` modules varies widely between
 legacy plugins, there is no `one size fits all` solution to migrating
-your browser-side code to the {kib} Platform.
+your browser-side code to the {osd} Platform.
 
 For migration examples, see <<migrating-legacy-plugins-examples>>.
 
@@ -210,11 +210,11 @@ A plugin author, who decides some set of code should diverge from having
 a single `common` definition, can now safely change the implementation
 details without impacting downstream consumers.
 
-==== How do I find {kib} Platform services?
+==== How do I find {osd} Platform services?
 
 Most of the utilities you used to build legacy plugins are available
-in the {kib} Platform or {kib} Platform plugins. To help you find the new
-home for new services, use the tables below to find where the {kib}
+in the {osd} Platform or {osd} Platform plugins. To help you find the new
+home for new services, use the tables below to find where the {osd}
 Platform equivalent lives.
 
 ===== Client-side
@@ -226,116 +226,116 @@ In client code, `core` can be imported in legacy plugins via the
 [[client-side-core-migration-table]]
 [width="100%",cols="15%,85%",options="header",]
 |===
-|Legacy Platform |{kib} Platform
+|Legacy Platform |{osd} Platform
 |`chrome.addBasePath`
-|{kib-repo}/tree/{branch}/docs/development/core/public/kibana-plugin-core-public.ibasepath.md[`core.http.basePath.prepend`]
+|{osd-repo}/tree/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.ibasepath.md[`core.http.basePath.prepend`]
 
 |`chrome.breadcrumbs.set`
-|{kib-repo}/tree/{branch}/docs/development/core/public/kibana-plugin-core-public.chromestart.setbreadcrumbs.md[`core.chrome.setBreadcrumbs`]
+|{osd-repo}/tree/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.chromestart.setbreadcrumbs.md[`core.chrome.setBreadcrumbs`]
 
 |`chrome.getUiSettingsClient`
-|{kib-repo}/tree/{branch}/docs/development/core/public/kibana-plugin-core-public.corestart.uisettings.md[`core.uiSettings`]
+|{osd-repo}/tree/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.corestart.uisettings.md[`core.uiSettings`]
 
 |`chrome.helpExtension.set`
-|{kib-repo}/tree/{branch}/docs/development/core/public/kibana-plugin-core-public.chromestart.sethelpextension.md[`core.chrome.setHelpExtension`]
+|{osd-repo}/tree/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.chromestart.sethelpextension.md[`core.chrome.setHelpExtension`]
 
 |`chrome.setVisible`
-|{kib-repo}/tree/{branch}/docs/development/core/public/kibana-plugin-core-public.chromestart.setisvisible.md[`core.chrome.setIsVisible`]
+|{osd-repo}/tree/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.chromestart.setisvisible.md[`core.chrome.setIsVisible`]
 
 |`chrome.getInjected`
 | Request Data with your plugin REST HTTP API.
 
 |`chrome.setRootTemplate` / `chrome.setRootController`
-|Use application mounting via {kib-repo}/tree/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationsetup.register.md[`core.application.register`]
+|Use application mounting via {osd-repo}/tree/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.applicationsetup.register.md[`core.application.register`]
 
 |`chrome.navLinks.update`
-|{kib-repo}/tree/{branch}/docs/development/core/public/kibana-plugin-core-public.app.updater_.md[`core.appbase.updater`]. Use the `updater$` property when registering your application via
+|{osd-repo}/tree/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.app.updater_.md[`core.appbase.updater`]. Use the `updater$` property when registering your application via
 `core.application.register`
 
 |`import { recentlyAccessed } from 'ui/persisted_log'`
-|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.chromerecentlyaccessed.md[`core.chrome.recentlyAccessed`]
+|{osd-repo}blob/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.chromerecentlyaccessed.md[`core.chrome.recentlyAccessed`]
 
 |`ui/capabilities`
-|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.capabilities.md[`core.application.capabilities`]
+|{osd-repo}blob/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.capabilities.md[`core.application.capabilities`]
 
 |`ui/documentation_links`
-|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.doclinksstart.md[`core.docLinks`]
+|{osd-repo}blob/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.doclinksstart.md[`core.docLinks`]
 
 |`ui/kfetch`
-|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.httpsetup.md[`core.http`]
+|{osd-repo}blob/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.httpsetup.md[`core.http`]
 
 |`ui/notify`
-|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.notificationsstart.md[`core.notifications`]
+|{osd-repo}blob/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.notificationsstart.md[`core.notifications`]
 and
-{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.overlaystart.md[`core.overlays`]. Toast messages are in `notifications`, banners are in `overlays`.
+{osd-repo}blob/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.overlaystart.md[`core.overlays`]. Toast messages are in `notifications`, banners are in `overlays`.
 
 |`ui/routes`
 |There is no global routing mechanism. Each app
-{kib-repo}blob/{branch}/rfcs/text/0004_application_service_mounting.md#complete-example[configures
+{osd-repo}blob/{branch}/rfcs/text/0004_application_service_mounting.md#complete-example[configures
 its own routing].
 
 |`ui/saved_objects`
-|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.savedobjectsstart.md[`core.savedObjects`]
+|{osd-repo}blob/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.savedobjectsstart.md[`core.savedObjects`]
 
 |`ui/doc_title`
-|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.chromedoctitle.md[`core.chrome.docTitle`]
+|{osd-repo}blob/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.chromedoctitle.md[`core.chrome.docTitle`]
 
 |`uiExports/injectedVars` / `chrome.getInjected`
 |<<configuration-service, Configuration service>>. Can only be used to expose configuration properties
 |===
 
 _See also:
-{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.corestart.md[Public’s
+{osd-repo}blob/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.corestart.md[Public’s
 CoreStart API Docs]_
 
 ====== Plugins for shared application services
 
 In client code, we have a series of plugins that house shared
 application services, which are not technically part of `core`, but are
-often used in {kib} plugins.
+often used in {osd} plugins.
 
-This table maps some of the most commonly used legacy items to their {kib}
-Platform locations. For the API provided by {kib} Plugins see <<plugin-list, the plugin list>>.
+This table maps some of the most commonly used legacy items to their {osd}
+Platform locations. For the API provided by {osd} Plugins see <<plugin-list, the plugin list>>.
 
 [width="100%",cols="15,85",options="header"]
 |===
-|Legacy Platform |{kib} Platform
+|Legacy Platform |{osd} Platform
 |`import 'ui/apply_filters'` |N/A. Replaced by triggering an
-{kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.action_global_apply_filter.md[APPLY_FILTER_TRIGGER trigger]. Directive is deprecated.
+{osd-repo}blob/{branch}/docs/development/plugins/data/public/opensearch-dashboards-plugin-plugins-data-public.action_global_apply_filter.md[APPLY_FILTER_TRIGGER trigger]. Directive is deprecated.
 
 |`import 'ui/filter_bar'`
 |`import { FilterBar } from 'plugins/data/public'`. Directive is deprecated.
 
 |`import 'ui/query_bar'`
-|`import { QueryStringInput } from 'plugins/data/public'` {kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.querystringinput.md[QueryStringInput]. Directives are deprecated.
+|`import { QueryStringInput } from 'plugins/data/public'` {osd-repo}blob/{branch}/docs/development/plugins/data/public/opensearch-dashboards-plugin-plugins-data-public.querystringinput.md[QueryStringInput]. Directives are deprecated.
 
 |`import 'ui/search_bar'`
-|`import { SearchBar } from 'plugins/data/public'` {kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.datapublicpluginstartui.searchbar.md[SearchBar]. Directive is deprecated.
+|`import { SearchBar } from 'plugins/data/public'` {osd-repo}blob/{branch}/docs/development/plugins/data/public/opensearch-dashboards-plugin-plugins-data-public.datapublicpluginstartui.searchbar.md[SearchBar]. Directive is deprecated.
 
-|`import 'ui/kbn_top_nav'`
+|`import 'ui/osd_top_nav'`
 |`import { TopNavMenu } from 'plugins/navigation/public'`. Directive was removed.
 
 |`ui/saved_objects/saved_object_finder`
 |`import { SavedObjectFinder } from 'plugins/saved_objects/public'`
 
 |`core_plugins/interpreter`
-|{kib-repo}blob/{branch}/docs/development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.md[`plugins.data.expressions`]
+|{osd-repo}blob/{branch}/docs/development/plugins/expressions/public/opensearch-dashboards-plugin-plugins-expressions-public.md[`plugins.data.expressions`]
 
 |`ui/courier`
-|{kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.datapublicpluginsetup.search.md[`plugins.data.search`]
+|{osd-repo}blob/{branch}/docs/development/plugins/data/public/opensearch-dashboards-plugin-plugins-data-public.datapublicpluginsetup.search.md[`plugins.data.search`]
 
 |`ui/agg_types`
-|{kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.searchsourcefields.aggs.md[`plugins.data.search.aggs`]. Most code is available for
+|{osd-repo}blob/{branch}/docs/development/plugins/data/public/opensearch-dashboards-plugin-plugins-data-public.searchsourcefields.aggs.md[`plugins.data.search.aggs`]. Most code is available for
 static import. Stateful code is part of the `search` service.
 
 |`ui/embeddable`
-|{kib-repo}blob/{branch}/docs/development/plugins/embeddable/public/kibana-plugin-plugins-embeddable-public.embeddablesetup.md[`plugins.embeddables`]
+|{osd-repo}blob/{branch}/docs/development/plugins/embeddable/public/opensearch-dashboards-plugin-plugins-embeddable-public.embeddablesetup.md[`plugins.embeddables`]
 
 |`ui/filter_manager`
-|`import { FilterManager } from 'plugins/data/public'` {kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.filtermanager.md[`FilterManager`]
+|`import { FilterManager } from 'plugins/data/public'` {osd-repo}blob/{branch}/docs/development/plugins/data/public/opensearch-dashboards-plugin-plugins-data-public.filtermanager.md[`FilterManager`]
 
 |`ui/index_patterns`
-|`import { IndexPatternsService } from 'plugins/data/public'` {kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.indexpatternsservice.md[IndexPatternsService]
+|`import { IndexPatternsService } from 'plugins/data/public'` {osd-repo}blob/{branch}/docs/development/plugins/data/public/opensearch-dashboards-plugin-plugins-data-public.indexpatternsservice.md[IndexPatternsService]
 
 |`import 'ui/management'`
 |`plugins.management.sections`. Management plugin `setup` contract.
@@ -344,7 +344,7 @@ static import. Stateful code is part of the `search` service.
 |`plugins.indexPatternManagement.fieldFormatEditors` indexPatternManagement plugin `setup` contract.
 
 |`ui/registry/field_formats`
-|{kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.fieldformats.md[`plugins.data.fieldFormats`]
+|{osd-repo}blob/{branch}/docs/development/plugins/data/public/opensearch-dashboards-plugin-plugins-data-public.fieldformats.md[`plugins.data.fieldFormats`]
 
 |`ui/registry/feature_catalogue`
 |`plugins.home.featureCatalogue.register`  home plugin `setup` contract
@@ -366,9 +366,9 @@ is now called `register`
 |`ui/vis/vis_filters`
 |`plugins.visualizations.filters`
 
-|`ui/utils/parse_es_interval`
-|`import { search: { aggs: { parseEsInterval } } } from 'plugins/data/public'`. `parseEsInterval`, `ParsedInterval`, `InvalidEsCalendarIntervalError`,
-`InvalidEsIntervalFormatError` items were moved to the `Data Plugin` as
+|`ui/utils/parse_opensearchinterval`
+|`import { search: { aggs: { parseOpenSearchInterval } } } from 'plugins/data/public'`. `parseOpenSearchInterval`, `ParsedInterval`, `InvalidOpenSearchCalendarIntervalError`,
+`InvalidOpenSearchIntervalFormatError` items were moved to the `Data Plugin` as
 a static code
 |===
 
@@ -377,215 +377,215 @@ a static code
 ====== Core services
 
 In server code, `core` can be accessed from either `server.newPlatform`
-or `kbnServer.newPlatform`:
+or `osdServer.newPlatform`:
 
 [width="100%",cols="17, 83",options="header"]
 |===
-|Legacy Platform |{kib} Platform
+|Legacy Platform |{osd} Platform
 |`server.config()`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.config.md[`initializerContext.config.create()`]. Must also define schema. See <<config-migration>>
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.plugininitializercontext.config.md[`initializerContext.config.create()`]. Must also define schema. See <<config-migration>>
 
 |`server.route`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.createrouter.md[`core.http.createRouter`]. See <<http-routes-migration, HTTP routes migration>>.
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.httpservicesetup.createrouter.md[`core.http.createRouter`]. See <<http-routes-migration, HTTP routes migration>>.
 
 |`server.renderApp()`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.httpresourcesservicetoolkit.rendercoreapp.md[`response.renderCoreApp()`]. See <<render-html-migration, Render HTML migration>>.
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.httpresourcesservicetoolkit.rendercoreapp.md[`response.renderCoreApp()`]. See <<render-html-migration, Render HTML migration>>.
 
 |`server.renderAppWithDefaultConfig()`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.httpresourcesservicetoolkit.renderanonymouscoreapp.md[`response.renderAnonymousCoreApp()`]. See <<render-html-migration, Render HTML migration>>.
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.httpresourcesservicetoolkit.renderanonymouscoreapp.md[`response.renderAnonymousCoreApp()`]. See <<render-html-migration, Render HTML migration>>.
 
 |`request.getBasePath()`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.basepath.md[`core.http.basePath.get`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.httpservicesetup.basepath.md[`core.http.basePath.get`]
 
-|`server.plugins.elasticsearch.getCluster('data')`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md[`context.core.elasticsearch.client`]
+|`server.plugins.opensearch.getCluster('data')`
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.iscopedclusterclient.md[`context.core.opensearch.client`]
 
-|`server.plugins.elasticsearch.getCluster('admin')`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md[`context.core.elasticsearch.client`]
+|`server.plugins.opensearch.getCluster('admin')`
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.iscopedclusterclient.md[`context.core.opensearch.client`]
 
-|`server.plugins.elasticsearch.createCluster(...)`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.elasticsearchservicestart.createclient.md[`core.elasticsearch.createClient`]
+|`server.plugins.opensearch.createCluster(...)`
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.opensearchservicestart.createclient.md[`core.opensearch.createClient`]
 
 |`server.savedObjects.setScopedSavedObjectsClientFactory`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.setclientfactoryprovider.md[`core.savedObjects.setClientFactoryProvider`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.savedobjectsservicesetup.setclientfactoryprovider.md[`core.savedObjects.setClientFactoryProvider`]
 
 |`server.savedObjects.addScopedSavedObjectsClientWrapperFactory`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.addclientwrapper.md[`core.savedObjects.addClientWrapper`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.savedobjectsservicesetup.addclientwrapper.md[`core.savedObjects.addClientWrapper`]
 
 |`server.savedObjects.getSavedObjectsRepository`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicestart.createinternalrepository.md[`core.savedObjects.createInternalRepository`]
-{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicestart.createscopedrepository.md[`core.savedObjects.createScopedRepository`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.savedobjectsservicestart.createinternalrepository.md[`core.savedObjects.createInternalRepository`]
+{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.savedobjectsservicestart.createscopedrepository.md[`core.savedObjects.createScopedRepository`]
 
 |`server.savedObjects.getScopedSavedObjectsClient`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicestart.getscopedclient.md[`core.savedObjects.getScopedClient`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.savedobjectsservicestart.getscopedclient.md[`core.savedObjects.getScopedClient`]
 
 |`request.getSavedObjectsClient`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.requesthandlercontext.core.md[`context.core.savedObjects.client`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.requesthandlercontext.core.md[`context.core.savedObjects.client`]
 
 |`request.getUiSettingsService`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md[`context.core.uiSettings.client`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.iuisettingsclient.md[`context.core.uiSettings.client`]
 
-|`kibana.Plugin.deprecations`
-|<<handle-plugin-configuration-deprecations, Handle plugin configuration deprecations>> and {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginconfigdescriptor.md[`PluginConfigDescriptor.deprecations`]. Deprecations from {kib} Platform are not applied to legacy configuration
+|`opensearchDashboards.Plugin.deprecations`
+|<<handle-plugin-configuration-deprecations, Handle plugin configuration deprecations>> and {osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.pluginconfigdescriptor.md[`PluginConfigDescriptor.deprecations`]. Deprecations from {osd} Platform are not applied to legacy configuration
 
-|`kibana.Plugin.savedObjectSchemas`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
+|`opensearchDashboards.Plugin.savedObjectSchemas`
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
 
-|`kibana.Plugin.mappings`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]. Learn more in <<saved-objects-migration, SavedObjects migration>>.
+|`opensearchDashboards.Plugin.mappings`
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]. Learn more in <<saved-objects-migration, SavedObjects migration>>.
 
-|`kibana.Plugin.migrations`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]. Learn more in <<saved-objects-migration, SavedObjects migration>>.
+|`opensearchDashboards.Plugin.migrations`
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]. Learn more in <<saved-objects-migration, SavedObjects migration>>.
 
-|`kibana.Plugin.savedObjectsManagement`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]. Learn more in <<saved-objects-migration, SavedObjects migration>>.
+|`opensearchDashboards.Plugin.savedObjectsManagement`
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]. Learn more in <<saved-objects-migration, SavedObjects migration>>.
 |===
 
 _See also:
-{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.coresetup.md[Server’s
+{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.coresetup.md[Server’s
 CoreSetup API Docs]_
 
 ====== Plugin services
 
 [width="100%",cols="50%,50%",options="header",]
 |===
-|Legacy Platform |{kib} Platform
+|Legacy Platform |{osd} Platform
 |`xpack_main.registerFeature`
-|{kib-repo}blob/{branch}/x-pack/plugins/features/server/plugin.ts[`plugins.features.registerKibanaFeature`]
+|{osd-repo}blob/{branch}/x-pack/plugins/features/server/plugin.ts[`plugins.features.registerOpenSearchDashboardsFeature`]
 
 |`xpack_main.feature(pluginID).registerLicenseCheckResultsGenerator`
-|{kib-repo}blob/{branch}/x-pack/plugins/licensing/README.md[`x-pack licensing plugin`]
+|{osd-repo}blob/{branch}/x-pack/plugins/licensing/README.md[`x-pack licensing plugin`]
 |===
 
 ===== UI Exports
 
 The legacy platform used a set of `uiExports` to inject modules from
 one plugin into other plugins. This mechanism is not necessary for the
-{kib} Platform because _all plugins are executed on the page at once_,
+{osd} Platform because _all plugins are executed on the page at once_,
 though only one application is rendered at a time.
 
-This table shows where these uiExports have moved to in the {kib}
+This table shows where these uiExports have moved to in the {osd}
 Platform.
 
 [width="100%",cols="15%,85%",options="header"]
 |===
-|Legacy Platform |{kib} Platform
+|Legacy Platform |{osd} Platform
 |`aliases`
 |`N/A`.
 
 |`app`
-|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationsetup.register.md[`core.application.register`]
+|{osd-repo}blob/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.applicationsetup.register.md[`core.application.register`]
 
 |`canvas`
-|{kib-repo}blob/{branch}/x-pack/plugins/canvas/README.md[Canvas plugin API]
+|{osd-repo}blob/{branch}/x-pack/plugins/canvas/README.md[Canvas plugin API]
 
 |`chromeNavControls`
-|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.chromenavcontrols.md[`core.chrome.navControls.register{Left,Right}`]
+|{osd-repo}blob/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.chromenavcontrols.md[`core.chrome.navControls.register{Left,Right}`]
 
 |`docViews`
-|{kib-repo}blob/{branch}/src/plugins/discover/public/[`discover.docViews.addDocView`]
+|{osd-repo}blob/{branch}/src/plugins/discover/public/[`discover.docViews.addDocView`]
 
 |`embeddableActions`
-|{kib-repo}blob/{branch}/src/plugins/embeddable/README.asciidoc[`embeddable plugin`]
+|{osd-repo}blob/{branch}/src/plugins/embeddable/README.asciidoc[`embeddable plugin`]
 
 |`embeddableFactories`
-|{kib-repo}blob/{branch}/src/plugins/embeddable/README.asciidoc[`embeddable plugin`], {kib-repo}blob/{branch}/docs/development/plugins/embeddable/server/kibana-plugin-plugins-embeddable-server.embeddablesetup.registerembeddablefactory.md[`embeddable.registerEmbeddableFactory`]
+|{osd-repo}blob/{branch}/src/plugins/embeddable/README.asciidoc[`embeddable plugin`], {osd-repo}blob/{branch}/docs/development/plugins/embeddable/server/opensearch-dashboards-plugin-plugins-embeddable-server.embeddablesetup.registerembeddablefactory.md[`embeddable.registerEmbeddableFactory`]
 
 |`fieldFormatEditors`, `fieldFormats`
-|{kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.fieldformats.md[`data.fieldFormats`]
+|{osd-repo}blob/{branch}/docs/development/plugins/data/public/opensearch-dashboards-plugin-plugins-data-public.fieldformats.md[`data.fieldFormats`]
 
 |`hacks`
 |`N/A`. Just run the code in your plugin’s `start` method.
 
 |`home`
-|{kib-repo}blob/{branch}/src/plugins/embeddable/README.asciidoc[`home plugin`] {kib-repo}blob/{branch}/src/plugins/home/public/services/feature_catalogue[`home.featureCatalogue.register`]
+|{osd-repo}blob/{branch}/src/plugins/embeddable/README.asciidoc[`home plugin`] {osd-repo}blob/{branch}/src/plugins/home/public/services/feature_catalogue[`home.featureCatalogue.register`]
 
 |`indexManagement`
-|{kib-repo}blob/{branch}/x-pack/plugins/index_management/README.md[`index management plugin`]
+|{osd-repo}blob/{branch}/x-pack/plugins/index_management/README.md[`index management plugin`]
 
 |`injectDefaultVars`
 |`N/A`. Plugins will only be able to allow config values for the frontend. See<<configuration-service>>
 
 |`inspectorViews`
-|{kib-repo}blob/{branch}/src/plugins/inspector/README.md[`inspector plugin`]
+|{osd-repo}blob/{branch}/src/plugins/inspector/README.md[`inspector plugin`]
 
 |`interpreter`
-|{kib-repo}blob/{branch}/docs/development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.md[`plugins.data.expressions`]
+|{osd-repo}blob/{branch}/docs/development/plugins/expressions/public/opensearch-dashboards-plugin-plugins-expressions-public.md[`plugins.data.expressions`]
 
 |`links`
-|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationsetup.register.md[`core.application.register`]
+|{osd-repo}blob/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.applicationsetup.register.md[`core.application.register`]
 
 |`managementSections`
-|{kib-repo}blob/{branch}/src/plugins/management/README.md[`plugins.management.sections.register`]
+|{osd-repo}blob/{branch}/src/plugins/management/README.md[`plugins.management.sections.register`]
 
 |`mappings`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
 
 |`migrations`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
 
 |`navbarExtensions`
 |`N/A`. Deprecated.
 
 |`savedObjectSchemas`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
 
 |`savedObjectsManagement`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
 
 |`savedObjectTypes`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
 
 |`search`
-|{kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.search.md[`data.search`]
+|{osd-repo}blob/{branch}/docs/development/plugins/data/public/opensearch-dashboards-plugin-plugins-data-public.search.md[`data.search`]
 
 |`shareContextMenuExtensions`
-|{kib-repo}blob/{branch}/src/plugins/share/README.md[`plugins.share`]
+|{osd-repo}blob/{branch}/src/plugins/share/README.md[`plugins.share`]
 
 |`taskDefinitions`
-|{kib-repo}blob/{branch}/x-pack/plugins/task_manager/README.md[`taskManager plugin`]
+|{osd-repo}blob/{branch}/x-pack/plugins/task_manager/README.md[`taskManager plugin`]
 
 |`uiCapabilities`
-|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationsetup.register.md[`core.application.register`]
+|{osd-repo}blob/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.applicationsetup.register.md[`core.application.register`]
 
 |`uiSettingDefaults`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsservicesetup.md[`core.uiSettings.register`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.uisettingsservicesetup.md[`core.uiSettings.register`]
 
 |`validations`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
 
 |`visEditorTypes`
-|{kib-repo}blob/{branch}/src/plugins/visualizations[`visualizations plugin`]
+|{osd-repo}blob/{branch}/src/plugins/visualizations[`visualizations plugin`]
 
 |`visTypeEnhancers`
-|{kib-repo}blob/{branch}/src/plugins/visualizations[`visualizations plugin`]
+|{osd-repo}blob/{branch}/src/plugins/visualizations[`visualizations plugin`]
 
 |`visTypes`
-|{kib-repo}blob/{branch}/src/plugins/visualizations[`visualizations plugin`]
+|{osd-repo}blob/{branch}/src/plugins/visualizations[`visualizations plugin`]
 
 |`visualize`
-|{kib-repo}blob/{branch}/src/plugins/visualize/README.md[`visualize plugin`]
+|{osd-repo}blob/{branch}/src/plugins/visualize/README.md[`visualize plugin`]
 |===
 
 ===== Plugin Spec
 
 [width="100%",cols="22%,78%",options="header",]
 |===
-|Legacy Platform |{kib} Platform
+|Legacy Platform |{osd} Platform
 |`id`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[`manifest.id`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.pluginmanifest.md[`manifest.id`]
 
 |`require`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[`manifest.requiredPlugins`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.pluginmanifest.md[`manifest.requiredPlugins`]
 
 |`version`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[`manifest.version`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.pluginmanifest.md[`manifest.version`]
 
-|`kibanaVersion`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[`manifest.kibanaVersion`]
+|`opensearchDashboardsVersion`
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.pluginmanifest.md[`manifest.opensearchDashboardsVersion`]
 
 |`configPrefix`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[`manifest.configPath`]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.pluginmanifest.md[`manifest.configPath`]
 
 |`config`
 |<<configuration-service>>
@@ -597,10 +597,10 @@ Platform.
 |`N/A`. Use platform & plugin public contracts
 
 |`publicDir`
-|`N/A`. {kib} Platform serves static assets from `/public/assets` folder under `/plugins/{id}/assets/{path*}` URL.
+|`N/A`. {osd} Platform serves static assets from `/public/assets` folder under `/plugins/{id}/assets/{path*}` URL.
 
 |`preInit`, `init`, `postInit`
-|`N/A`. Use {kib} Platform <<plugin-lifecycles,plugin-lifecycles>>
+|`N/A`. Use {osd} Platform <<plugin-lifecycles,plugin-lifecycles>>
 |===
 
 === See also

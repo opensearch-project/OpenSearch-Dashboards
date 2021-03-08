@@ -1,7 +1,7 @@
-[[building-kibana]]
-== Building a {kib} distributable
+[[building-opensearch-dashboards]]
+== Building a {osd} distributable
 
-The following command will build a {kib} production distributable:
+The following command will build a {osd} production distributable:
 
 [source,bash]
 ----

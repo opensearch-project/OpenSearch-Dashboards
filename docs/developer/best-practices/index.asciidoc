@@ -1,8 +1,8 @@
 [[development-best-practices]]
 == Best practices
 
-Consider these best practices, whether developing code directly to the {kib} repo or building your own plugins.
-They are intended to support our https://github.com/elastic/engineering/blob/master/kibana_dev_principles.md[{kib} development principals].
+Consider these best practices, whether developing code directly to the {osd} repo or building your own plugins.
+They are intended to support our https://github.com/elastic/engineering/blob/master/opensearch_dashboards_dev_principles.md[{osd} development principals].
 
 [discrete]
 === Performance
@@ -15,42 +15,42 @@ Are you planning with scalability in mind?
 * Are you loading a minimal amount of JS code in the browser?
 ** See <<plugin-performance>> for more guidance.
 * Do you make lots of requests to the server?
-** If so, have you considered using the streaming {kib-repo}tree/{branch}/src/plugins/bfetch[bfetch service]?
+** If so, have you considered using the streaming {osd-repo}tree/{branch}/src/plugins/bfetch[bfetch service]?
 
 [discrete]
 === Accessibility
 
-Did you know {kib} makes a public statement about our commitment to
+Did you know {osd} makes a public statement about our commitment to
 creating an accessible product for people with disabilities?
-https://www.elastic.co/guide/en/kibana/master/accessibility.html[We do]!
+https://www.elastic.co/guide/en/opensearch-dashboards/master/accessibility.html[We do]!
 It’s very important all of our apps are accessible.
 
 * Learn how https://elastic.github.io/eui/#/guidelines/accessibility[EUI
 tackles accessibility]
 * If you don’t use EUI, follow the same EUI accessibility standards
 
-[[kibana-localization-best-practices]]
+[[opensearch-dashboards-localization-best-practices]]
 [discrete]
 === Localization
 
-{kib} is translated into other languages. Use our i18n utilities to
+{osd} is translated into other languages. Use our i18n utilities to
 ensure your public facing strings will be translated to ensure all
-{kib} apps are localized.
+{osd} apps are localized.
 
 * Read and adhere to our
-{kib-repo}blob/{branch}/packages/kbn-i18n/GUIDELINE.md[i18n
+{osd-repo}blob/{branch}/packages/osd-i18n/GUIDELINE.md[i18n
 guidelines]
 
 [discrete]
 === Conventions
 
 * Become familiar with our
-{kib-repo}blob/{branch}/STYLEGUIDE.md[styleguide]
+{osd-repo}blob/{branch}/STYLEGUIDE.md[styleguide]
 (use Typescript!)
 * Write all new code on
-{kib-repo}blob/{branch}/src/core/README.md[the
+{osd-repo}blob/{branch}/src/core/README.md[the
 platform], and following
-{kib-repo}blob/{branch}/src/core/CONVENTIONS.md[conventions].
+{osd-repo}blob/{branch}/src/core/CONVENTIONS.md[conventions].
 * _Always_ use the `SavedObjectClient` for reading and writing Saved
 Objects.
 * Add `README`s to all your plugins and services.
@@ -60,7 +60,7 @@ them.
 * Use https://elastic.github.io/eui[EUI] for all your basic UI
 components to create a consistent UI experience.
 
-[discrete]
+[discrete] 
 === Re-inventing the wheel
 
 Over-refactoring can be a problem in it’s own right, but it’s still
@@ -71,32 +71,32 @@ They take care of the nitty gritty so you can focus on creative
 solutions to your particular problem sphere. Some examples of common
 services you should consider:
 
-* {kib-repo}tree/{branch}/src/plugins/data/README.md[Data
+* {osd-repo}tree/{branch}/src/plugins/data/README.md[Data
 services]
-** {kib-repo}tree/{branch}/src/plugins/data/public/search/README.md[Search
+** {osd-repo}tree/{branch}/src/plugins/data/public/search/README.md[Search
 strategies]
-*** Use the `esSearchStrategy` to make raw queries to ES that will
+*** Use the `opensearchSearchStrategy` to make raw queries to OPENSEARCH that will
 support async searching and partial results, as well as injecting the
 right advanced settings like whether to include frozen indices or not.
-* {kib-repo}tree/{branch}/src/plugins/embeddable/README.md[Embeddables]
+* {osd-repo}tree/{branch}/src/plugins/embeddable/README.md[Embeddables]
 ** Rendering maps, visualizations, dashboards in your application
 ** Register new widgets that will can be added to a dashboard or Canvas
 workpad, or rendered in another plugin.
-* {kib-repo}tree/{branch}/src/plugins/ui_actions/README.md[UiActions]
+* {osd-repo}tree/{branch}/src/plugins/ui_actions/README.md[UiActions]
 ** Let other plugins inject functionality into your application
 ** Inject custom functionality into other plugins
 * Stateless helper utilities
-* {kib-repo}tree/{branch}/src/plugins/kibana_utils/docs/state_sync/README.md[state
+* {osd-repo}tree/{branch}/src/plugins/opensearch_dashboards_utils/docs/state_sync/README.md[state
 syncing] and
-* {kib-repo}tree/{branch}/src/plugins/kibana_utils/docs/state_containers/README.md[state
+* {osd-repo}tree/{branch}/src/plugins/opensearch_dashboards_utils/docs/state_containers/README.md[state
 container] utilities provided by
-* {kib-repo}tree/{branch}/src/plugins/kibana_utils/README.md[kibana_utils]
+* {osd-repo}tree/{branch}/src/plugins/opensearch_dashboards_utils/README.md[opensearch_dashboards_utils]
 if you want to sync your application state to the URL?
-** {kib-repo}tree/{branch}/src/plugins/kibana_react/README.md[kibana_react]
+** {osd-repo}tree/{branch}/src/plugins/opensearch_dashboards_react/README.md[opensearch_dashboards_react]
 for react specific helpers
 
 Re-using these services will help create a consistent experience across
-{kib} from every solution.
+{osd} from every solution.
 
 [discrete]
 === Backward compatibility
@@ -105,10 +105,10 @@ Eventually we want to guarantee to our plugin developers that their plugins will
 
 Any time you create or change a public API, keep this in mind, and consider potential
 backward compatibility issues. While we have a formal
-{kib-repo}tree/{branch}/src/core/server/saved_objects/migrations/README.md[saved
+{osd-repo}tree/{branch}/src/core/server/saved_objects/migrations/README.md[saved
 object migration system] and are working on adding a formal state migration system, introducing state changes and migrations in a
 minor always comes with a risk. Consider this before making huge and
-risky changes in minors, _especially_ to saved objects.
+risky changes in minors, _opensearchpecially_ to saved objects.
 
 * Are you persisting state from registries? Consider what will happen if
 the author of the implementation changed their interfaces.
@@ -119,7 +119,7 @@ interfaces can break their code.
 Be very careful when changing the shape of saved objects or persistable
 data.
 
-Saved object exported from past {kib} versions should continue to work.
+Saved object exported from past {osd} versions should continue to work.
 In addition, if users are relying on state stored in your app’s URL as
 part of your public contract, keep in mind that you may also need to
 provide backwards compatibility for bookmarked URLs.
@@ -127,10 +127,10 @@ provide backwards compatibility for bookmarked URLs.
 [discrete]
 === Routing, Navigation and URL
 
-The {kib} platform provides a set of tools to help developers build consistent experience around routing and browser navigation.
+The {osd} platform provides a set of tools to help developers build consistent experience around routing and browser navigation.
 Some of that tooling is inside `core`, some is available as part of various plugins.
 
-<<kibana-navigation, Follow this guide>> to get an idea of available tools and common approaches for handling routing and browser navigation.
+<<opensearch-dashboards-navigation, Follow this guide>> to get an idea of available tools and common approaches for handling routing and browser navigation.
 
 [discrete]
 === Testing & stability

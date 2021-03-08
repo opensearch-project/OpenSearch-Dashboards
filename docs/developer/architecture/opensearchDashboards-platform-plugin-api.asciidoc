@@ -1,28 +1,28 @@
-[[kibana-platform-plugin-api]]
-== {kib} Plugin API
+[[opensearch-dashboards-platform-plugin-api]]
+== {osd} Plugin API
 
 experimental[]
 
-{kib} platform plugins are a significant step toward stabilizing {kib} architecture for all the developers.
+{osd} platform plugins are a significant step toward stabilizing {osd} architecture for all the developers.
 We made sure plugins could continue to use most of the same technologies they use today, at least from a technical perspective.
 
 === Anatomy of a plugin
 
-Plugins are defined as classes and present themselves to {kib} 
+Plugins are defined as classes and present themselves to {osd} 
 through a simple wrapper function. A plugin can have browser-side code,
 server-side code, or both. There is no architectural difference between
 a plugin in the browser and a plugin on the server.
 In both places, you describe your plugin similarly, and you interact with
 Core and other plugins in the same way.
 
-The basic file structure of a {kib} plugin named `demo` that
+The basic file structure of a {osd} plugin named `demo` that
 has both client-side and server-side code would be:
 
 [source,tree]
 ----
 plugins/
   demo
-    kibana.json [1]
+    opensearch_dashboards.json [1]
     public
       index.ts  [2]
       plugin.ts [3]
@@ -31,33 +31,33 @@ plugins/
       plugin.ts [5]
 ----
 
-*[1] `kibana.json`* is a static manifest file that is used to identify the
+*[1] `opensearch_dashboards.json`* is a static manifest file that is used to identify the
 plugin and to specify if this plugin has server-side code, browser-side code, or both:
 
 [source,json]
 ----
 {
   "id": "demo",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": true,
   "ui": true
 }
 ----
 
-Learn about the {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[manifest
+Learn about the {osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.pluginmanifest.md[manifest
 file format].
 
-NOTE: `package.json` files are irrelevant to and ignored by {kib} for discovering and loading plugins.
+NOTE: `package.json` files are irrelevant to and ignored by {osd} for discovering and loading plugins.
 
 *[2] `public/index.ts`* is the entry point into the client-side code of
 this plugin. It must export a function named `plugin`, which will
-receive {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.plugininitializercontext.md[a standard set of core capabilities] as an argument.
+receive {osd-repo}blob/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.plugininitializercontext.md[a standard set of core capabilities] as an argument.
 It should return an instance of its plugin class for
-{kib} to load.
+{osd} to load.
 
 [source,typescript]
 ----
-import type { PluginInitializerContext } from 'kibana/server';
+import type { PluginInitializerContext } from 'opensearch-dashboards/server';
 import { MyPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -68,18 +68,18 @@ export function plugin(initializerContext: PluginInitializerContext) {
 *[3] `public/plugin.ts`* is the client-side plugin definition itself.
 Technically speaking, it does not need to be a class or even a separate
 file from the entry point, but _all plugins at Elastic_ should be
-consistent in this way. See all {kib-repo}blob/{branch}/src/core/CONVENTIONS.md[conventions
+consistent in this way. See all {osd-repo}blob/{branch}/src/core/CONVENTIONS.md[conventions
 for first-party Elastic plugins].
 
 [source,typescript]
 ----
-import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
+import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from 'opensearch-dashboards/server';
 
 export class MyPlugin implements Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
-    // called when plugin is setting up during Kibana's startup sequence
+    // called when plugin is setting up during OpenSearchDashboards's startup sequence
   }
 
   public start(core: CoreStart) {
@@ -87,19 +87,19 @@ export class MyPlugin implements Plugin {
   }
 
   public stop() {
-    // called when plugin is torn down during Kibana's shutdown sequence
+    // called when plugin is torn down during OpenSearchDashboards's shutdown sequence
   }
 }
 ----
 
 *[4] `server/index.ts`* is the entry-point into the server-side code of
-this plugin. {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.md[It is identical] in almost every way to the client-side
+this plugin. {osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.plugininitializercontext.md[It is identical] in almost every way to the client-side
 entry-point:
 
 
 [source,typescript]
 ----
-import type { PluginInitializerContext } from 'kibana/server';
+import type { PluginInitializerContext } from 'opensearch-dashboards/server';
 import { MyPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -112,13 +112,13 @@ shape of this plugin is the same as it’s client-side counter-part:
 
 [source,typescript]
 ----
-import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
+import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from 'opensearch-dashboards/server';
 
 export class MyPlugin implements Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
-    // called when plugin is setting up during Kibana's startup sequence
+    // called when plugin is setting up during OpenSearchDashboards's startup sequence
   }
 
   public start(core: CoreStart) {
@@ -126,12 +126,12 @@ export class MyPlugin implements Plugin {
   }
 
   public stop() {
-    // called when plugin is torn down during Kibana's shutdown sequence
+    // called when plugin is torn down during OpenSearchDashboards's shutdown sequence
   }
 }
 ----
 
-{kib} does not impose any technical restrictions on how the
+{osd} does not impose any technical restrictions on how the
 the internals of a plugin are architected, though there are certain
 considerations related to how plugins integrate with core APIs 
 and APIs exposed by other plugins that may greatly impact how 
@@ -146,16 +146,16 @@ at different parts of their lifecycle. We describe the lifecycle of
 core services and plugins with specifically-named functions on the
 service definition.
 
-{kib} has three lifecycles: `setup`,
+{osd} has three lifecycles: `setup`,
 `start`, and `stop`. Each plugin's `setup` functions is called sequentially
-while Kibana is setting up on the server or when it is being loaded in
+while OpenSearchDashboards is setting up on the server or when it is being loaded in
 the browser. The `start` functions are called sequentially after `setup`
 has been completed for all plugins. The `stop` functions are called
-sequentially while Kibana is gracefully shutting down the server or
+sequentially while OpenSearchDashboards is gracefully shutting down the server or
 when the browser tab or window is being closed.
 
 The table below explains how each lifecycle relates to the state
-of Kibana.
+of OpenSearchDashboards.
 
 [width="100%",cols="10%, 15%, 37%, 38%",options="header",]
 |===
@@ -167,17 +167,17 @@ of Kibana.
 
 |_start_
 |bootstrap runtime logic
-|respond to an incoming request, request Elasticsearch server, etc.
-|start polling Kibana server, update DOM tree in response to user interactions, etc.
+|respond to an incoming request, request OpenSearch server, etc.
+|start polling OpenSearchDashboards server, update DOM tree in response to user interactions, etc.
 
 |_stop_
 |cleanup runtime
 |dispose of active handles before the server shutdown.
-|store session data in the LocalStorage when the user navigates away from {kib}, etc.
+|store session data in the LocalStorage when the user navigates away from {osd}, etc.
 |===
 
 There is no equivalent behavior to `start` or `stop` in legacy plugins.
-Conversely, there is no equivalent to `uiExports` in Kibana Platform plugins.
+Conversely, there is no equivalent to `uiExports` in OpenSearchDashboards Platform plugins.
 As a general rule of thumb, features that were registered via `uiExports` are
 now registered during the `setup` phase. Most of everything else should move
 to the `start` phase.
@@ -190,7 +190,7 @@ an HTTP route handler, a plugin just accesses it off of the first argument:
 
 [source, typescript]
 ----
-import type { CoreSetup } from 'kibana/server';
+import type { CoreSetup } from 'opensearch-dashboards/server';
 
 export class MyPlugin {
   public setup(core: CoreSetup) {
@@ -222,16 +222,16 @@ These are the contracts exposed by the core services for each lifecycle:
 |===
 |lifecycle |server contract|browser contract
 |_contructor_
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.md[PluginInitializerContext]
-|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.plugininitializercontext.md[PluginInitializerContext]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.plugininitializercontext.md[PluginInitializerContext]
+|{osd-repo}blob/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.plugininitializercontext.md[PluginInitializerContext]
 
 |_setup_
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.coresetup.md[CoreSetup]
-|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.coresetup.md[CoreSetup]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.coresetup.md[CoreSetup]
+|{osd-repo}blob/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.coresetup.md[CoreSetup]
 
 |_start_
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.corestart.md[CoreStart]
-|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.corestart.md[CoreStart]
+|{osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.corestart.md[CoreStart]
+|{osd-repo}blob/{branch}/docs/development/core/public/opensearch-dashboards-plugin-core-public.corestart.md[CoreStart]
 
 |_stop_ |
 |===
@@ -252,7 +252,7 @@ encouraged to expose types for their plugin interfaces.
 
 [source, typescript]
 ----
-import type { Plugin } from 'kibana/server';
+import type { Plugin } from 'opensearch-dashboards/server';
 export interface FoobarPluginSetup { <1>
   getFoo(): string;
 }
@@ -284,9 +284,9 @@ export class MyPlugin implements Plugin<FoobarPluginSetup, FoobarPluginStart> {
 Unlike core, capabilities exposed by plugins are _not_ automatically
 injected into all plugins. Instead, if a plugin wishes to use the public
 interface provided by another plugin, it must first declare that
-plugin as a dependency in it's {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[`kibana.json`] manifest file.
+plugin as a dependency in it's {osd-repo}blob/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.pluginmanifest.md[`opensearch_dashboards.json`] manifest file.
 
-*demo kibana.json:*
+*demo opensearch_dashboards.json:*
 
 [source,json]
 ----
@@ -305,7 +305,7 @@ are then available via the second argument of `setup` and/or `start`:
 
 [source,typescript]
 ----
-import type { CoreSetup, CoreStart } from 'kibana/server';
+import type { CoreSetup, CoreStart } from 'opensearch-dashboards/server';
 import type { FoobarPluginSetup, FoobarPluginStart } from '../../foobar/server';
 
 interface DemoSetupPlugins { <1>
@@ -342,6 +342,6 @@ functions can only access the APIs that are exposed _during_ that lifecycle.
 
 === Migrating legacy plugins
 
-In Kibana 7.10, support for legacy plugins was removed. See
+In OpenSearchDashboards 7.10, support for legacy plugins was removed. See
 <<migrating-legacy-plugins>> for detailed information on how to convert existing
 legacy plugins to this new API.

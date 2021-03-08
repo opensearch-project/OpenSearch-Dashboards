@@ -15,10 +15,10 @@ Documentation about specific services a plugin offers should be encapsulated in:
 === End user documentation
 
 Documentation about user facing features should be written in http://asciidoc.org/[asciidoc] at
-{kib-repo}/tree/master/docs[https://github.com/elastic/kibana/tree/master/docs]
+{osd-repo}/tree/master/docs[https://github.com/elastic/opensearch-dashboards/tree/master/docs]
 
 To build the docs, you must clone the https://github.com/elastic/docs[elastic/docs]
-repo as a sibling of your {kib} repo. Follow the instructions in that project's
+repo as a sibling of your {osd} repo. Follow the instructions in that project's
 README for getting the docs tooling set up.
 
 **To build the docs:**
@@ -31,4 +31,4 @@ node scripts/docs.js --open
 === General developer documentation and guidelines
 
 General developer guildlines and documentation, like this right here, should be written in http://asciidoc.org/[asciidoc]
-at {kib-repo}/tree/master/docs/developer[https://github.com/elastic/kibana/tree/master/docs/developer]
+at {osd-repo}/tree/master/docs/developer[https://github.com/elastic/opensearch-dashboards/tree/master/docs/developer]

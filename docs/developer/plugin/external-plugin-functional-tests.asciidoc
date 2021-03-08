@@ -1,19 +1,19 @@
 [[external-plugin-functional-tests]]
-== Functional Tests for Plugins outside the {kib} repo
+== Functional Tests for Plugins outside the {osd} repo
 
-Plugins use the `FunctionalTestRunner` by running it out of the {kib} repo. Ensure that your {kib} Development Environment is setup properly before continuing.
+Plugins use the `FunctionalTestRunner` by running it out of the {osd} repo. Ensure that your {osd} Development Environment is setup properly before continuing.
 
 [discrete]
 === Writing your own configuration
 
-Every project or plugin should have its own `FunctionalTestRunner` config file. Just like {kib}'s, this config file will define all of the test files to load, providers for Services and PageObjects, as well as configuration options for certain services.
+Every project or plugin should have its own `FunctionalTestRunner` config file. Just like {osd}'s, this config file will define all of the test files to load, providers for Services and PageObjects, as well as configuration options for certain services.
 
 To get started copy and paste this example to `test/functional/config.js`:
 
 ["source","js"]
 -----------
 import { resolve } from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@osd/utils';
 
 import { MyServiceProvider } from './services/my_service';
 import { MyAppPageProvider } from './services/my_app_page';
@@ -22,9 +22,9 @@ import { MyAppPageProvider } from './services/my_app_page';
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
 
-  // read the {kib} config file so that we can utilize some of
+  // read the {osd} config file so that we can utilize some of
   // its services and PageObjects
-  const kibanaConfig = await readConfigFile(resolve(REPO_ROOT, 'test/functional/config.js'));
+  const opensearchDashboardsConfig = await readConfigFile(resolve(REPO_ROOT, 'test/functional/config.js'));
 
   return {
     // list paths to the files that contain your plugins tests
@@ -36,31 +36,31 @@ export default async function ({ readConfigFile }) {
     // available to your tests. If you don't specify anything here
     // only the built-in services will be available
     services: {
-      ...kibanaConfig.get('services'),
+      ...opensearchDashboardsConfig.get('services'),
       myService: MyServiceProvider,
     },
 
     // just like services, PageObjects are defined as a map of
-    // names to Providers. Merge in {kib}'s or pick specific ones
+    // names to Providers. Merge in {osd}'s or pick specific ones
     pageObjects: {
-      management: kibanaConfig.get('pageObjects.management'),
+      management: opensearchDashboardsConfig.get('pageObjects.management'),
       myApp: MyAppPageProvider,
     },
 
     // the apps section defines the urls that
     // `PageObjects.common.navigateTo(appKey)` will use.
     // Merge urls for your plugin with the urls defined in
-    // {kib}'s config in order to use this helper
+    // {osd}'s config in order to use this helper
     apps: {
-      ...kibanaConfig.get('apps'),
+      ...opensearchDashboardsConfig.get('apps'),
       myApp: {
         pathname: '/app/my_app',
       }
     },
 
-    // choose where esArchiver should load archives from
-    esArchiver: {
-      directory: resolve(__dirname, './es_archives'),
+    // choose where opensearchArchiver should load archives from
+    opensearchArchiver: {
+      directory: resolve(__dirname, './opensearcharchives'),
     },
 
     // choose where screenshots should be saved
@@ -79,11 +79,11 @@ From the root of your repo you should now be able to run the `FunctionalTestRunn
 
 ["source","shell"]
 -----------
-node ../../kibana/scripts/functional_test_runner
+node ../../opensearch-dashboards/scripts/functional_test_runner
 -----------
 
 [discrete]
-=== Using esArchiver
+=== Using opensearchArchiver
 
-We're working on documentation for this, but for now the best place to look is the original {kib-repo}/issues/10359[pull request].
+We're working on documentation for this, but for now the best place to look is the original {osd-repo}/issues/10359[pull request].
 

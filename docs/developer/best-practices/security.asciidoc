@@ -9,7 +9,7 @@
 latexmath:[$.prepend`, `$].prependTo`is escaped. Instead use`$.text`, or
 don’t use jQuery at all.
 * CSRF
-** Ensure all APIs are running inside the {kib} HTTP service.
+** Ensure all APIs are running inside the {osd} HTTP service.
 * RCE
 ** Ensure no usages of `eval`
 ** Ensure no usages of dynamic requires
@@ -31,7 +31,7 @@ which only allows specific keys/values. At a very minimum, black-list
 code generation from strings, defensively protect against Prototype
 Pollution by checking `Object.hasOwnProperty` if the arguments to the
 APIs originate from an Object. An example is the Code app’s
-https://github.com/elastic/kibana/blob/b49192626a8528af5d888545fb14cd1ce66a72e7/x-pack/legacy/plugins/code/server/lsp/workspace_command.ts#L40-L44[spawnProcess].
+https://github.com/elastic/opensearch-dashboards/blob/b49192626a8528af5d888545fb14cd1ce66a72e7/x-pack/legacy/plugins/code/server/lsp/workspace_command.ts#L40-L44[spawnProcess].
 *** Common Node.js offenders: `child_process.spawn`,
 `child_process.exec`, `eval`, `Function('some string')`,
 `vm.runIn*Context(x)`
@@ -44,7 +44,7 @@ sensitive information which end up in the HTTP Response
 ** Ensure no sensitive cookies are forwarded to external resources.
 ** Ensure that all user controllable variables that are used in
 constructing a URL are escaped properly. This is relevant when using
-`transport.request` with the {es} client as no automatic
+`transport.request` with the {opensearch} client as no automatic
 escaping is performed.
 * Reverse tabnabbing -
 https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/HTML5_Security_Cheat_Sheet.md#tabnabbing
@@ -52,4 +52,4 @@ https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/HTML5_Security
 third-party domains that specify target="_blank" or target="_window", the a tag should have the rel="noreferrer noopener" attribute specified.
 Allowing users to input markdown is a common culprit, a custom link renderer should be used
 * SSRF - https://www.owasp.org/index.php/Server_Side_Request_Forgery
-All network requests made from the {kib} server should use an explicit configuration or white-list specified in the kibana.yml
+All network requests made from the {osd} server should use an explicit configuration or white-list specified in the opensearch_dashboards.yml

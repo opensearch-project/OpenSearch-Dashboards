@@ -1,0 +1,113 @@
+[[development-opensearch-snapshots]]
+== Daily {opensearch} Snapshots
+
+For local development and CI, {osd}, by default, uses {opensearch} snapshots that are built daily when running tasks that require {opensearch} (e.g. functional tests).
+
+A snapshot is just a group of tarballs, one for each supported distribution/architecture/os of {opensearch}, and a JSON-based manifest file containing metadata about the distributions.
+
+https://ci.opensearch-dashboards.dev/opensearch-snapshots[A dashboard] is available that shows the current status and compatibility of the latest {opensearch} snapshots.
+
+=== Process Overview
+
+1. {opensearch} snapshots are built for each current tracked branch of {osd}.
+2. Each snapshot is uploaded to a public Google Cloud Storage bucket, `opensearch-dashboards-ci-opensearch-snapshots-daily`.
+** At this point, the snapshot is not automatically used in CI or local development. It needs to be tested/verified first.
+3. Each snapshot is tested with the latest commit of the corresponding {osd} branch, using the full CI suite.
+4. After CI
+** If the snapshot passes, it is promoted and automatically used in CI and local development.
+** If the snapshot fails, the issue must be investigated and resolved. A new incompatibility may exist between {opensearch} and {osd}.
+
+=== Using the latest snapshot
+
+When developing locally, you may wish to use the most recent {opensearch} snapshot, even if it's failing CI. To do so, prefix your commands with the follow environment variable:
+
+["source","bash"]
+-----------
+OSD_OPENSEARCH_SNAPSHOT_USE_UNVERIFIED=true
+-----------
+
+You can use this flag with any command that downloads and runs {opensearch} snapshots, such as `scripts/opensearch` or the FTR.
+
+For example, to run functional tests with the latest snapshot:
+
+["source","bash"]
+-----------
+OSD_OPENSEARCH_SNAPSHOT_USE_UNVERIFIED=true node scripts/functional_tests_server
+-----------
+
+==== For Pull Requests
+
+Currently, there is not a way to run your pull request with the latest unverified snapshot without a code change. You can, however, do it with a small code change.
+
+1. Edit `Jenkinsfile` in the root of the {osd} repo
+2. Add `env.OSD_OPENSEARCH_SNAPSHOT_USE_UNVERIFIED = 'true'` at the top of the file.
+3. Commit the change
+
+Your pull request should then use the latest snapshot the next time that it runs. Just don't merge the change to `Jenkinsfile`!
+
+=== Google Cloud Storage buckets
+
+==== opensearch-dashboards-ci-opensearch-snapshots-daily
+
+This bucket stores snapshots that are created on a daily basis, and is the primary location used by `osd-opensearch` to download snapshots.
+
+Snapshots are automatically deleted after 10 days.
+
+The file structure for this bucket looks like this:
+
+* `<version>/manifest-latest.json`
+* `<version>/manifest-latest-verified.json`
+* `<version>/archives/<unique id>/*.tar.gz`
+* `<version>/archives/<unique id>/*.tar.gz.sha512`
+* `<version>/archives/<unique id>/manifest.json`
+
+==== opensearch-dashboards-ci-opensearch-snapshots-permanent
+
+This bucket stores only the most recently promoted snapshot for each version. Old snapshots are only deleted when new ones are uploaded.
+
+This bucket serves as permanent snapshot storage for old branches/versions that are no longer being built. `osd-opensearch` checks the daily bucket first, followed by this one if no snapshots were found.
+
+The file structure for this bucket looks like this:
+
+* `<version>/*.tar.gz`
+* `<version>/*.tar.gz.sha512`
+* `<version>/manifest.json`
+
+=== How snapshots are built, tested, and promoted
+
+Each day, a https://opensearch-dashboards-ci.elastic.co/job/opensearch+snapshots+trigger/[Jenkins job] runs that triggers {opensearch} builds for each currently tracked branch/version. This job is automatically updated with the correct branches whenever we release new versions of {osd}.
+
+==== Build
+
+https://opensearch-dashboards-ci.elastic.co/job/opensearch+snapshots+build/[This Jenkins job] builds the {opensearch} snapshots and uploads them to GCS.
+
+The Jenkins job pipeline definition is https://github.com/elastic/opensearch-dashboards/blob/master/.ci/opensearch-snapshots/Jenkinsfile_build_opensearch[in the {osd} repo].
+
+1. Checkout {opensearch} repo for the given branch/version.
+2. Run `./gradlew -p distribution/archives assemble --parallel` to create all of the {opensearch} distributions.
+3. Create a tarball for each distribution.
+4. Create a manifest JSON file containing info about the distribution, as well as its download URL.
+5. Upload the tarballs and manifest to a unique location in the GCS bucket `opensearch-dashboards-ci-opensearch-snapshots-daily`.
+** e.g. `<version>/archives/<unique id>`
+6. Replace `<version>/manifest-latest.json` in GCS with this newest manifest.
+** This allows the `OSD_OPENSEARCH_SNAPSHOT_USE_UNVERIFIED` flag to work.
+7. Trigger the verification job, to run the full {osd} CI test suite with this snapshot.
+
+==== Verification and Promotion
+
+https://opensearch-dashboards-ci.elastic.co/job/opensearch+snapshots+verify/[This Jenkins job] tests the latest {opensearch} snapshot with the full {osd} CI pipeline, and promotes if it there are no test failures.
+
+The Jenkins job pipeline definition is https://github.com/elastic/opensearch-dashboards/blob/master/.ci/opensearch-snapshots/Jenkinsfile_verify_opensearch[in the {osd} repo].
+
+1. Checkout {osd} and set up CI environment as normal.
+2. Set the `OPENSEARCH_SNAPSHOT_MANIFEST` env var to point to the latest snapshot manifest.
+3. Run CI (functional tests, integration tests, etc).
+4. After CI
+** If there was a test failure or other build error, send out an e-mail notification and stop.
+** If there were no errors, promote the snapshot.
+
+Promotion is done as part of the same pipeline:
+
+1. Replace the manifest at `opensearch-dashboards-ci-opensearch-snapshots-daily/<version>/manifest-latest-verified.json` with the manifest from the tested snapshot.
+** At this point, the snapshot has been promoted and will automatically be used in CI and in local development.
+2. Replace the snapshot at `opensearch-dashboards-ci-opensearch-snapshots-permanent/<version>/` with the tested snapshot by copying all of the tarballs and the manifest file.

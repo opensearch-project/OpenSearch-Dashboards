@@ -2,14 +2,14 @@
 == Migration Examples
 
 This document is a list of examples of how to migrate plugin code from
-legacy APIs to their {kib} Platform equivalents.
+legacy APIs to their {osd} Platform equivalents.
 
 [[config-migration]]
 === Configuration
 ==== Declaring config schema
 
 Declaring the schema of your configuration fields is similar to the
-Legacy Platform, but uses the `@kbn/config-schema` package instead of
+Legacy Platform, but uses the `@osd/config-schema` package instead of
 Joi. This package has full TypeScript support out-of-the-box.
 
 *Legacy config schema*
@@ -17,12 +17,12 @@ Joi. This package has full TypeScript support out-of-the-box.
 ----
 import Joi from 'joi';
 
-new kibana.Plugin({
+new opensearchDashboards.Plugin({
   config() {
     return Joi.object({
       enabled: Joi.boolean().default(true),
       defaultAppId: Joi.string().default('home'),
-      index: Joi.string().default('.kibana'),
+      index: Joi.string().default('.opensearch-dashboards'),
       disableWelcomeScreen: Joi.boolean().default(false),
       autocompleteTerminateAfter: Joi.number().integer().min(1).default(100000),
     })
@@ -30,37 +30,37 @@ new kibana.Plugin({
 });
 ----
 
-*{kib} Platform equivalent*
+*{osd} Platform equivalent*
 [source,typescript]
 ----
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@osd/config-schema';
 
 export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     defaultAppId: schema.string({ defaultValue: true }),
-    index: schema.string({ defaultValue: '.kibana' }),
+    index: schema.string({ defaultValue: '.opensearch-dashboards' }),
     disableWelcomeScreen: schema.boolean({ defaultValue: false }),
     autocompleteTerminateAfter: schema.duration({ min: 1, defaultValue: 100000 }),
   })
 };
 
-// @kbn/config-schema is written in TypeScript, so you can use your schema
+// @osd/config-schema is written in TypeScript, so you can use your schema
 // definition to create a type to use in your plugin code.
 export type MyPluginConfig = TypeOf<typeof config.schema>;
 ----
 
-==== Using {kib} config in a new plugin
+==== Using {osd} config in a new plugin
 
 After setting the config schema for your plugin, you might want to read
 configuration values from your plugin. It is provided as part of the
-{kib-repo}/tree/{branch}/docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.md[PluginInitializerContext]
+{osd-repo}/tree/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.plugininitializercontext.md[PluginInitializerContext]
 in the _constructor_ of the plugin:
 
 *plugins/my_plugin/(public|server)/index.ts*
 [source,typescript]
 ----
-import type { PluginInitializerContext } from 'kibana/server';
+import type { PluginInitializerContext } from 'opensearch-dashboards/server';
 import { MyPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -73,7 +73,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 ----
 import type { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { CoreSetup, Logger, Plugin, PluginInitializerContext, PluginName } from 'kibana/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext, PluginName } from 'opensearch-dashboards/server';
 import type { MyPluginConfig } from './config';
 
 export class MyPlugin implements Plugin {
@@ -101,13 +101,13 @@ export class MyPlugin implements Plugin {
   }
 ----
 
-=== Creating a {kib} Platform plugin
+=== Creating a {osd} Platform plugin
 
 For example, if you want to move the legacy `demoplugin` plugin's
-configuration to the {kib} Platform, you could create the {kib} Platform plugin with the
+configuration to the {osd} Platform, you could create the {osd} Platform plugin with the
 same name in `plugins/demoplugin` with the following files:
 
-*plugins/demoplugin/kibana.json*
+*plugins/demoplugin/opensearch_dashboards.json*
 [source,json5]
 ----
 {
@@ -119,8 +119,8 @@ same name in `plugins/demoplugin` with the following files:
 *plugins/demoplugin/server/index.ts*
 [source,typescript]
 ----
-import { schema, TypeOf } from '@kbn/config-schema';
-import type { PluginInitializerContext } from 'kibana/server';
+import { schema, TypeOf } from '@osd/config-schema';
+import type { PluginInitializerContext } from 'opensearch-dashboards/server';
 import { DemoPlugin } from './plugin';
 
 export const config = {
@@ -138,7 +138,7 @@ export { DemoPluginSetup } from './plugin';
 *plugins/demoplugin/server/plugin.ts*
 [source,typescript]
 ----
-import type { PluginInitializerContext, Plugin, CoreSetup } from 'kibana/server';
+import type { PluginInitializerContext, Plugin, CoreSetup } from 'opensearch-dashboards/server';
 import type { DemoPluginConfig } from '.';
 export interface DemoPluginSetup {};
 
@@ -160,15 +160,15 @@ export class DemoPlugin implements Plugin<DemoPluginSetup> {
 In the legacy platform, plugins have direct access to the Hapi `server`
 object, which gives full access to all of Hapi’s API. In the New
 Platform, plugins have access to the
-{kib-repo}/tree/{branch}/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.md[HttpServiceSetup]
+{osd-repo}/tree/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.httpservicesetup.md[HttpServiceSetup]
 interface, which is exposed via the
-{kib-repo}/tree/{branch}/docs/development/core/server/kibana-plugin-core-server.coresetup.md[CoreSetup]
+{osd-repo}/tree/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.coresetup.md[CoreSetup]
 object injected into the `setup` method of server-side plugins.
 
 This interface has a different API with slightly different behaviors.
 
 * All input (body, query parameters, and URL parameters) must be
-validated using the `@kbn/config-schema` package. If no validation
+validated using the `@osd/config-schema` package. If no validation
 schema is provided, these values will be empty objects.
 * All exceptions thrown by handlers result in 500 errors. If you need a
 specific HTTP error code, catch any exceptions in your handler and
@@ -183,7 +183,7 @@ Migrate legacy route registration:
 ----
 import Joi from 'joi';
 
-new kibana.Plugin({
+new opensearchDashboards.Plugin({
   init(server) {
     server.route({
       path: '/api/demoplugin/search',
@@ -202,12 +202,12 @@ new kibana.Plugin({
   }
 });
 ----
-to the {kib} platform format:
+to the {osd} platform format:
 *plugins/demoplugin/server/plugin.ts*
 [source,typescript]
 ----
-import { schema } from '@kbn/config-schema';
-import type { CoreSetup } from 'kibana/server';
+import { schema } from '@osd/config-schema';
+import type { CoreSetup } from 'opensearch-dashboards/server';
 
 export class DemoPlugin {
   public setup(core: CoreSetup) {
@@ -240,8 +240,8 @@ migration is complete:
 *plugins/demoplugin/server/plugin.ts*
 [source,typescript]
 ----
-import { schema } from '@kbn/config-schema';
-import { CoreSetup } from 'kibana/server';
+import { schema } from '@osd/config-schema';
+import { CoreSetup } from 'opensearch-dashboards/server';
 import Boom from 'boom';
 
 export class DemoPlugin {
@@ -267,18 +267,18 @@ export class DemoPlugin {
 === Accessing Services
 
 Services in the Legacy Platform were typically available via methods on
-either `server.plugins.*`, `server.*`, or `req.*`. In the {kib} Platform,
+either `server.plugins.*`, `server.*`, or `req.*`. In the {osd} Platform,
 all services are available via the `context` argument to the route
 handler. The type of this argument is the
-{kib-repo}/tree/{branch}/docs/development/core/server/kibana-plugin-core-server.requesthandlercontext.md[RequestHandlerContext].
+{osd-repo}/tree/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.requesthandlercontext.md[RequestHandlerContext].
 The APIs available here will include all Core services and any services registered by plugins this plugin depends on.
 
 *legacy/plugins/demoplugin/index.ts*
 [source,typescript]
 ----
-new kibana.Plugin({
+new opensearchDashboards.Plugin({
   init(server) {
-    const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+    const { callWithRequest } = server.plugins.opensearch.getCluster('data');
 
     server.route({
       path: '/api/my-plugin/my-route',
@@ -303,7 +303,7 @@ export class DemoPlugin {
         path: '/api/my-plugin/my-route',
       },
       async (context, req, res) => {
-        const results = await context.core.elasticsearch.client.asCurrentUser.search(query);
+        const results = await context.core.opensearch.client.asCurrentUser.search(query);
         return res.ok({
           body: { results }
         });
@@ -318,10 +318,10 @@ export class DemoPlugin {
 In the Legacy Platform, routes could provide a `pre` option in their
 config to register a function that should be run before the route
 handler. These `pre` handlers allow routes to share some business
-logic that may do some pre-work or validation. In {kib}, these are
+logic that may do some pre-work or validation. In {osd}, these are
 often used for license checks.
 
-The {kib} Platform’s HTTP interface does not provide this
+The {osd} Platform’s HTTP interface does not provide this
 functionality. However, it is simple enough to port over using
 a higher-order function that can wrap the route handler.
 
@@ -353,7 +353,7 @@ server.route({
 })
 ----
 
-In the {kib} Platform, the same functionality can be achieved by
+In the {osd} Platform, the same functionality can be achieved by
 creating a function that takes a route handler (or factory for a route
 handler) as an argument and either successfully invokes it or
 returns an error response.
@@ -363,7 +363,7 @@ component` pattern common in the React ecosystem.
 
 [source,typescript]
 ----
-// Kibana Platform high-order handler
+// OpenSearchDashboards Platform high-order handler
 const checkLicense = <P, Q, B>(
   handler: RequestHandler<P, Q, B, RouteMethod>
 ): RequestHandler<P, Q, B, RouteMethod> => {
@@ -430,7 +430,7 @@ pass arbitrary arguments to the route handler.
 
 [source,typescript]
 ----
-// Kibana Platform high-order handler
+// OpenSearchDashboards Platform high-order handler
 const checkLicense = <P, Q, B>(
   handlerFactory: (licenseInfo: MyPluginLicenseInfo) => RequestHandler<P, Q, B, RouteMethod>
 ): RequestHandler<P, Q, B, RouteMethod> => {
@@ -458,7 +458,7 @@ router.get(
 === Chrome
 
 In the Legacy Platform, the `ui/chrome` import contained APIs for a very
-wide range of features. In the {kib} Platform, some of these APIs have
+wide range of features. In the {osd} Platform, some of these APIs have
 changed or moved elsewhere. See <<client-side-core-migration-table>>.
 
 ==== Updating an application navlink
@@ -482,7 +482,7 @@ uiModules.get('xpack/ml').run(() => {
 });
 ----
 
-In the {kib} Platform, navlinks should not be updated directly. Instead,
+In the {osd} Platform, navlinks should not be updated directly. Instead,
 it is now possible to add an `updater` when registering an application
 to change the application or the navlink state at runtime.
 
@@ -518,10 +518,10 @@ export class MyPlugin implements Plugin {
 
 === Chromeless Applications
 
-In {kib}, a `chromeless` application is one where the primary {kib}
+In {osd}, a `chromeless` application is one where the primary {osd}
 UI components such as header or navigation can be hidden. In the legacy
 platform, these were referred to as `hidden` applications and were set
-via the `hidden` property in a {kib} plugin. Chromeless applications
+via the `hidden` property in a {osd} plugin. Chromeless applications
 are also not displayed in the left navbar.
 
 To mark an application as chromeless, specify `chromeless: false` when
@@ -598,11 +598,11 @@ httpResources.register(
 In the legacy platform, saved object types were registered using static
 definitions in the `uiExports` part of the plugin manifest.
 
-In the {kib} Platform, all these registrations are performed
+In the {osd} Platform, all these registrations are performed
 programmatically during your plugin’s `setup` phase, using the core
 `savedObjects`’s `registerType` setup API.
 
-The most notable difference is that in the {kib} Platform, the type
+The most notable difference is that in the {osd} Platform, the type
 registration is performed in a single call to `registerType`, passing a
 new `SavedObjectsType` structure that is a superset of the legacy
 `schema`, `migrations` `mappings` and `savedObjectsManagement`.
@@ -617,7 +617,7 @@ Suppose you have the following in a legacy plugin:
 import mappings from './mappings.json';
 import { migrations } from './migrations';
 
-new kibana.Plugin({
+new opensearchDashboards.Plugin({
   init(server){
     // [...]
   },
@@ -708,7 +708,7 @@ First type:
 *plugins/demoplugin/server/saved_objects/first_type.ts*
 [source,typescript]
 ----
-import type { SavedObjectsType } from 'kibana/server';
+import type { SavedObjectsType } from 'opensearch-dashboards/server';
 
 export const firstType: SavedObjectsType = {
   name: 'first-type',
@@ -746,7 +746,7 @@ Second type:
 *plugins/demoplugin/server/saved_objects/second_type.ts*
 [source,typescript]
 ----
-import type { SavedObjectsType } from 'kibana/server';
+import type { SavedObjectsType } from 'opensearch-dashboards/server';
 
 export const secondType: SavedObjectsType = {
   name: 'second-type',
@@ -797,13 +797,13 @@ export class DemoPlugin implements Plugin {
 
 ==== Changes in structure compared to legacy
 
-The {kib} Platform `registerType` expected input is very close to the legacy format.
+The {osd} Platform `registerType` expected input is very close to the legacy format.
 However, there are some minor changes:
 
 * The `schema.isNamespaceAgnostic` property has been renamed:
 `SavedObjectsType.namespaceType`. It no longer accepts a boolean but
 instead an enum of `single`, `multiple`, or `agnostic` (see
-{kib-repo}/tree/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsnamespacetype.md[SavedObjectsNamespaceType]).
+{osd-repo}/tree/{branch}/docs/development/core/server/opensearch-dashboards-plugin-core-server.savedobjectsnamespacetype.md[SavedObjectsNamespaceType]).
 * The `schema.indexPattern` was accepting either a `string` or a
 `(config: LegacyConfig) => string`. `SavedObjectsType.indexPattern` only
 accepts a string, as you can access the configuration during your
@@ -815,7 +815,7 @@ been renamed: `SavedObjectsType.management.importableAndExportable`.
 ----
 `(doc: SavedObjectUnsanitizedDoc, log: SavedObjectsMigrationLogger) => SavedObjectUnsanitizedDoc;`
 ----
-In {kib} Platform, it is 
+In {osd} Platform, it is 
 [source,typescript]
 ----
 `(doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;`
@@ -880,24 +880,24 @@ setup(core: CoreSetup){
 }
 ----
 
-=== Elasticsearch client
+=== OpenSearch client
 
-The new elasticsearch client is a thin wrapper around
-`@elastic/elasticsearch`’s `Client` class. Even if the API is quite
-close to the legacy client {kib} was previously using, there are some
+The new opensearch client is a thin wrapper around
+`@elastic/opensearch`’s `Client` class. Even if the API is quite
+close to the legacy client {osd} was previously using, there are some
 subtle changes to take into account during migration.
 
-https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/index.html[Official
+https://www.elastic.co/guide/en/opensearch/client/javascript-api/current/index.html[Official
 client documentation]
 
 ==== Client API Changes
 
 Refer to the
-https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/breaking-changes.html[Breaking
+https://www.elastic.co/guide/en/opensearch/client/javascript-api/current/breaking-changes.html[Breaking
 changes list] for more information about the changes between the legacy
 and new client.
 
-The most significant changes on the Kibana side for the consumers are the following:
+The most significant changes on the OpenSearchDashboards side for the consumers are the following:
 
 ===== User client accessor
 Internal /current user client accessors has been renamed and are now
@@ -923,7 +923,7 @@ const { body } = await client.asInternalUser.indices.get({ index: 'id' });
 ----
 
 ===== Response object
-Calling any ES endpoint now returns the whole response object instead
+Calling any OPENSEARCH endpoint now returns the whole response object instead
 of only the body payload.
 
 Before:
@@ -940,7 +940,7 @@ After:
 const { body } = await client.asInternalUser.get({ id: 'id' });
 ----
 
-Note that more information from the ES response is available:
+Note that more information from the OPENSEARCH response is available:
 
 [source,typescript]
 ----
@@ -948,7 +948,7 @@ const {
   body,        // response payload
   statusCode,  // http status code of the response
   headers,     // response headers
-  warnings,    // warnings returned from ES
+  warnings,    // warnings returned from OPENSEARCH
   meta         // meta information about the request, such as request parameters, number of attempts and so on
 } = await client.asInternalUser.get({ id: 'id' });
 ----
@@ -976,12 +976,12 @@ const { body } = await client.asInternalUser.get({ id: 'id' });
 
 The new client doesn’t provide exhaustive typings for the response
 object yet. You might have to copy response type definitions from the
-Legacy Elasticsearch library until the additional announcements.
+Legacy OpenSearch library until the additional announcements.
 
 [source,typescript]
 ----
-// Kibana provides a few typings for internal purposes
-import type { SearchResponse } from 'kibana/server';
+// OpenSearchDashboards provides a few typings for internal purposes
+import type { SearchResponse } from 'opensearch-dashboards/server';
 type SearchSource = {...};
 type SearchBody = SearchResponse<SearchSource>;
 const { body } = await client.search<SearchBody>(...);
@@ -1000,7 +1000,7 @@ Before:
 
 [source,typescript]
 ----
-import { errors } from 'elasticsearch';
+import { errors } from 'opensearch';
 try {
   await legacyClient.callAsInternalUser('ping');
 } catch(e) {
@@ -1015,7 +1015,7 @@ After:
 
 [source,typescript]
 ----
-import { errors } from '@elastic/elasticsearch';
+import { errors } from '@elastic/opensearch';
 try {
   await client.asInternalUser.ping();
 } catch(e) {
@@ -1089,7 +1089,7 @@ It is now possible to override headers when performing specific API
 calls.
 
 Note that doing so is strongly discouraged due to potential side effects
-with the ES service internal behavior when scoping as the internal or as
+with the OPENSEARCH service internal behavior when scoping as the internal or as
 the current user.
 
 [source,typescript]
@@ -1109,14 +1109,14 @@ Before:
 
 [source,typescript]
 ----
-const client = getService('legacyEs');
+const client = getService('legacyOpenSearch');
 ----
 
 After:
 
 [source,typescript]
 ----
-const client = getService('es');
+const client = getService('opensearch');
 ----
 
 ==== Accessing the client from a route handler
@@ -1133,7 +1133,7 @@ router.get(
     path: '/my-route',
   },
   async (context, req, res) => {
-    const { client } = context.core.elasticsearch;
+    const { client } = context.core.opensearch;
     // call as current user
     const res = await client.asCurrentUser.ping();
     // call as internal user
@@ -1155,7 +1155,7 @@ Before:
 
 [source,typescript]
 ----
-const customClient = coreStart.elasticsearch.legacy.createClient('my-custom-client', customConfig);
+const customClient = coreStart.opensearch.legacy.createClient('my-custom-client', customConfig);
 // do something with the client, such as
 await customClient.callAsInternalUser('ping');
 // custom client are closable
@@ -1166,7 +1166,7 @@ After:
 
 [source,typescript]
 ----
-const customClient = coreStart.elasticsearch.createClient('my-custom-client', customConfig);
+const customClient = coreStart.opensearch.createClient('my-custom-client', customConfig);
 // do something with the client, such as
 await customClient.asInternalUser.ping();
 // custom client are closable

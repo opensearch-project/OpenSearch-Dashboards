@@ -1,7 +1,7 @@
 [[interpreting-ci-failures]]
 == Interpreting CI Failures
 
-{kib} CI uses a Jenkins feature called "Pipelines" to automate testing of the code in pull requests and on tracked branches. Pipelines are defined within the repository via the `Jenkinsfile` at the root of the project.
+{osd} CI uses a Jenkins feature called "Pipelines" to automate testing of the code in pull requests and on tracked branches. Pipelines are defined within the repository via the `Jenkinsfile` at the root of the project.
 
 More information about Jenkins Pipelines can be found link:https://jenkins.io/doc/book/pipeline/[in the Jenkins book].
 
@@ -15,7 +15,7 @@ Clicking the link next to the check in the conversation tab of a pull request wi
 [discrete]
 === Viewing Job Executions in Jenkins
 
-To view the results of a job execution in Jenkins, either click the link in the comment left by `@elasticmachine` or search for the `kibana-ci` check in the list at the bottom of the PR. This link will take you to the top-level page for the specific job execution that failed.
+To view the results of a job execution in Jenkins, either click the link in the comment left by `@elasticmachine` or search for the `opensearch-dashboards-ci` check in the list at the bottom of the PR. This link will take you to the top-level page for the specific job execution that failed.
 
 image::images/jenkins/job_view.png[]
 

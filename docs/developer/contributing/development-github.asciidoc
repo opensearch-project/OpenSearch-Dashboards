@@ -5,20 +5,20 @@
 === Forking
 
 We follow the https://help.github.com/articles/fork-a-repo/[GitHub
-forking model] for collaborating on {kib} code. This model assumes that
-you have a remote called `upstream` which points to the official {kib}
+forking model] for collaborating on {osd} code. This model assumes that
+you have a remote called `upstream` which points to the official {osd}
 repo, which we'll refer to in later code snippets.
 
 [discrete]
 === Branching
 
-At Elastic, all products in the stack, including Kibana, are released at the same time with the same version number. Most of these projects have the following branching strategy:
+At Elastic, all products in the stack, including OpenSearchDashboards, are released at the same time with the same version number. Most of these projects have the following branching strategy:
 
 * `master` is the next major version.
 * `<major>.x` is the next minor version.
 * `<major>.<minor>` is the next release of a minor version, including patch releases.
 
-As an example, let's assume that the `7.x` branch is currently a not-yet-released `7.6.0`. Once `7.6.0` has reached feature freeze, it will be branched to `7.6` and `7.x` will be updated to reflect `7.7.0`. The release of `7.6.0` and subsequent patch releases will be cut from the `7.6` branch. At any time, you can verify the current version of a branch by inspecting the `version` attribute in the `package.json` file within the Kibana source.
+As an example, let's assume that the `7.x` branch is currently a not-yet-released `7.6.0`. Once `7.6.0` has reached feature freeze, it will be branched to `7.6` and `7.x` will be updated to reflect `7.7.0`. The release of `7.6.0` and subsequent patch releases will be cut from the `7.6` branch. At any time, you can verify the current version of a branch by inspecting the `version` attribute in the `package.json` file within the OpenSearchDashboards source.
 
 Pull requests are made into the `master` branch and then backported when it is safe and appropriate.
 
@@ -101,7 +101,7 @@ This will overwrite the remote branch with what you have locally. You're done!
 ["source","shell"]
 -----------
 ! [rejected] name-of-your-branch -> name-of-your-branch (non-fast-forward)
-error: failed to push some refs to 'https://github.com/YourGitHubHandle/kibana.git'
+error: failed to push some refs to 'https://github.com/YourGitHubHandle/opensearch-dashboards.git'
 hint: Updates were rejected because the tip of your current branch is behind
 hint: its remote counterpart. Integrate the remote changes (e.g.
 hint: 'git pull ...') before pushing again.
@@ -113,4 +113,4 @@ Assuming you've successfully rebased and you're happy with the code, you should 
 [discrete]
 === Creating a pull request
 
-See <<development-pull-request>> for the next steps on getting your code changes merged into {kib}.
+See <<development-pull-request>> for the next steps on getting your code changes merged into {osd}.

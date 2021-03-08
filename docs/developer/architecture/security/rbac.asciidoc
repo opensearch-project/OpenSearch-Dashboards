@@ -1,30 +1,30 @@
 [[development-rbac]]
 == Role-based access control
 
-Role-based access control (RBAC) in {kib} relies upon the
+Role-based access control (RBAC) in {osd} relies upon the
 {ref}/security-privileges.html#application-privileges[application privileges]
-that {es} exposes. This allows {kib} to define the privileges that
-{kib} wishes to grant to users, assign them to the relevant users using roles,
+that {opensearch} exposes. This allows {osd} to define the privileges that
+{osd} wishes to grant to users, assign them to the relevant users using roles,
 and then authorize the user to perform a specific action. This is handled within
 a secured instance of the `SavedObjectsClient` and available transparently to
 consumers when using `request.getSavedObjectsClient()` or
 `savedObjects.getScopedSavedObjectsClient()`.
 
 [[development-rbac-privileges]]
-=== {kib} Privileges
+=== {osd} Privileges
 
-When {kib} first starts up, it executes the following `POST` request against {es}. This synchronizes the definition of the privileges with various `actions` which are later used to authorize a user:
+When {osd} first starts up, it executes the following `POST` request against {opensearch}. This synchronizes the definition of the privileges with various `actions` which are later used to authorize a user:
 
 [source,js]
 ----------------------------------
 POST /_security/privilege
 Content-Type: application/json
-Authorization: Basic {kib} changeme
+Authorization: Basic {osd} changeme
 
 {
-   "kibana-.kibana":{
+   "opensearch-dashboards-.opensearch_dashboards":{
        "all":{
-           "application":"kibana-.kibana",
+           "application":"opensearch-dashboards-.opensearch_dashboards",
            "name":"all",
            "actions":[
                "version:7.0.0-alpha1-SNAPSHOT",
@@ -34,7 +34,7 @@ Authorization: Basic {kib} changeme
            "metadata":{}
        },
        "read":{
-           "application":"kibana-.kibana",
+           "application":"opensearch-dashboards-.opensearch_dashboards",
            "name":"read",
            "actions":[
                "version:7.0.0-alpha1-SNAPSHOT",
@@ -51,21 +51,21 @@ Authorization: Basic {kib} changeme
 [NOTE]
 ==============================================
 
-The application is created by concatenating the prefix of `kibana-` with the value of `kibana.index` from the `kibana.yml`, so different {kib} tenants are isolated from one another.
+The application is created by concatenating the prefix of `opensearch-dashboards-` with the value of `opensearch-dashboards.index` from the `opensearch_dashboards.yml`, so different {osd} tenants are isolated from one another.
 
 ==============================================
 
 [[development-rbac-assigning-privileges]]
-=== Assigning {kib} Privileges
+=== Assigning {osd} Privileges
 
-{kib} privileges are assigned to specific roles using the `applications` element. For example, the following role assigns the <<kibana-privileges-all, all>> privilege at `*` `resources` (which will in the future be used to secure spaces) to the default {kib} `application`:
+{osd} privileges are assigned to specific roles using the `applications` element. For example, the following role assigns the <<opensearch-dashboards-privileges-all, all>> privilege at `*` `resources` (which will in the future be used to secure spaces) to the default {osd} `application`:
 
 [source,js]
 ----------------------------------
-"new_kibana_user": {
+"new_opensearch_dashboards_user": {
    "applications": [
      {
-       "application": "kibana-.kibana",
+       "application": "opensearch-dashboards-.opensearch_dashboards",
        "privileges": [
          "all"
        ],
@@ -77,13 +77,13 @@ The application is created by concatenating the prefix of `kibana-` with the val
  }
 ----------------------------------
 
-Roles that grant <<kibana-privileges>> should be managed using the <<role-management-api>> or the *Management -> Security -> Roles* page, not directly using the {es} {ref}/security-api.html#security-role-apis[role management API]. This role can then be assigned to users using the {es}
+Roles that grant <<opensearch-dashboards-privileges>> should be managed using the <<role-management-api>> or the *Management -> Security -> Roles* page, not directly using the {opensearch} {ref}/security-api.html#security-role-apis[role management API]. This role can then be assigned to users using the {opensearch}
 {ref}/security-api.html#security-user-apis[user management APIs].
 
 [[development-rbac-authorization]]
 === Authorization
 
-The {es} {ref}/security-api-has-privileges.html[has privileges API] determines whether the user is authorized to perform a specific action:
+The {opensearch} {ref}/security-api-has-privileges.html[has privileges API] determines whether the user is authorized to perform a specific action:
 
 [source,js]
 ----------------------------------
@@ -94,7 +94,7 @@ Authorization: Basic foo_read_only_user password
 {
    "applications":[
        {
-           "application":"kibana-.kibana",
+           "application":"opensearch-dashboards-.opensearch_dashboards",
            "resources":["*"],
            "privileges":[
              "saved_object:dashboard/save",
@@ -104,6 +104,6 @@ Authorization: Basic foo_read_only_user password
 }
 ----------------------------------
 
-{es} checks if the user is granted a specific action. If the user is assigned a role that grants a privilege, {es} uses the <<development-rbac-privileges, {kib} privileges>> definition to associate this with the actions, which makes authorizing users more intuitive and flexible programatically.
+{opensearch} checks if the user is granted a specific action. If the user is assigned a role that grants a privilege, {opensearch} uses the <<development-rbac-privileges, {osd} privileges>> definition to associate this with the actions, which makes authorizing users more intuitive and flexible programatically.
 
 Once we have authorized the user to perform a specific action, we can execute the request using `callWithInternalUser`.

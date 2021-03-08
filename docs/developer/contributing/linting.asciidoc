@@ -1,4 +1,4 @@
-[[kibana-linting]]
+[[opensearch-dashboards-linting]]
 == Linting
 
 A note about linting: We use http://eslint.org[eslint] to check that the
@@ -31,7 +31,7 @@ EditorConfig, which can be set up by installing a plugin in your editor
 that dynamically updates its configuration. Take a look at the
 http://editorconfig.org/#download[EditorConfig] site to find a plugin
 for your editor, and browse our
-https://github.com/elastic/kibana/blob/master/.editorconfig[`.editorconfig`]
+https://github.com/elastic/opensearch-dashboards/blob/master/.editorconfig[`.editorconfig`]
 file to see what config rules we set up.
 
 [discrete]
@@ -62,7 +62,7 @@ file by adding this line in your setting.
 
 :warning: It is *not* recommended to use the
 https://prettier.io/[`Prettier` extension/IDE plugin] while
-maintaining the {kib} project. Formatting and styling roles are set in
+maintaining the {osd} project. Formatting and styling roles are set in
 the multiple `.eslintrc.js` files across the project and some of them
 use the https://www.npmjs.com/package/prettier[NPM version of Prettier].
 Using the IDE extension might cause conflicts, applying the formatting

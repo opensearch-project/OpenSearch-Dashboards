@@ -1,0 +1,118 @@
+[[running-opensearch]]
+== Running {opensearch} during development
+
+There are many ways to run {opensearch} while you are developing.
+
+[discrete]
+
+=== By snapshot
+
+This will run a snapshot of {opensearch} that is usually built nightly. Read more about <<development-opensearch-snapshots>>.
+
+[source,bash]
+----
+yarn opensearch snapshot
+----
+
+See all available options, like how to specify a specific license, with the `--help` flag.
+
+[source,bash]
+----
+yarn opensearch snapshot --help
+----
+
+`trial` will give you access to all capabilities.
+
+**Keeping data between snapshots**
+
+If you want to keep the data inside your {opensearch} between usages of this command, you should use the following command, to keep your data folder outside the downloaded snapshot folder:
+
+[source,bash]
+----
+yarn opensearch snapshot -E path.data=../data
+----
+
+=== By source
+
+If you have the {opensearch} repo checked out locally and wish to run against that, use `source`. By default, it will reference an {opensearch} checkout which is a sibling to the {osd} directory named opensearch. If you wish to use a checkout in another location you can provide that by supplying --source-path 
+
+[source,bash]
+----
+yarn opensearch source
+----
+
+=== From an archive
+
+Use this if you already have a distributable. For released versions, one can be obtained on the {opensearch} downloads page.
+
+[source,bash]
+----
+yarn opensearch archive <full_path_to_archive>
+----
+
+Each of these will run {opensearch} with a basic license. Additional options are available, pass --help for more information.
+
+=== From a remote host
+
+You can save some system resources, and the effort of generating sample data, if you have a remote {opensearch} cluster to connect to. (Elasticians: you do! Check with your team about where to find credentials)
+
+You'll need to create a opensearch_dashboards.dev.yml (<<customize-opensearch-dashboards-yml>>) and add the following to it:
+
+[source,bash]
+----
+opensearch.hosts:
+  - {{ url }}
+opensearch.username: {{ username }}
+opensearch.password: {{ password }}
+opensearch.ssl.verificationMode: none
+----
+
+If many other users will be interacting with your remote cluster, you'll want to add the following to avoid causing conflicts:
+
+[source,bash]
+----
+opensearch-dashboards.index: '.{YourGitHubHandle}-opensearch-dashboards'
+xpack.task_manager.index: '.{YourGitHubHandle}-task-manager-opensearch-dashboards'
+----
+
+==== Running remote clusters
+
+Setup remote clusters for cross cluster search (CCS) and cross cluster replication (CCR).
+
+Start your primary cluster by running:
+
+[source,bash]
+----
+yarn opensearch snapshot -E path.data=../data_prod1
+----
+
+Start your remote cluster by running:
+
+[source,bash]
+----
+yarn opensearch snapshot -E transport.port=9500 -E http.port=9201 -E path.data=../data_prod2
+----
+
+Once both clusters are running, start {osd}. {osd} will connect to the primary cluster.
+
+Setup the remote cluster in {osd} from either Management -> {opensearch} -> Remote Clusters UI or by running the following script in Console.
+
+[source,bash]
+----
+PUT _cluster/settings
+{
+  "persistent": {
+    "cluster": {
+      "remote": {
+        "cluster_one": {
+          "seeds": [
+            "localhost:9500"
+          ]
+        }
+      }
+    }
+  }
+}
+----
+
+Follow the cross-cluster search instructions for setting up index patterns to search across clusters (<<management-cross-cluster-search>>).

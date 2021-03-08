@@ -12,11 +12,11 @@ Read <<development-getting-started>> to get your environment up and running, the
 * <<ci-metrics>>
 * <<development-documentation>>
 * <<development-pull-request>>
-* <<kibana-issue-reporting>>
+* <<opensearch-dashboards-issue-reporting>>
 * <<signing-contributor-agreement>>
-* <<kibana-localization>>
-* <<kibana-release-notes-process>>
-* <<kibana-linting>>
+* <<opensearch-dashboards-localization>>
+* <<opensearch-dashboards-release-notes-process>>
+* <<opensearch-dashboards-linting>>
 
 [discrete]
 [[signing-contributor-agreement]]
@@ -25,22 +25,22 @@ Read <<development-getting-started>> to get your environment up and running, the
 Please make sure you have signed the [Contributor License Agreement](http://www.elastic.co/contributor-agreement/). We are not asking you to assign copyright to us, but to give us the right to distribute your code without restriction. We ask this of all contributors in order to assure our users of the origin and continuing existence of the code. You only need to sign the CLA once.
 
 [discrete]
-[[kibana-localization]]
+[[opensearch-dashboards-localization]]
 === Localization
 
-Read <<kibana-localization-best-practices>> for details on our localization practices.
+Read <<opensearch-dashboards-localization-best-practices>> for details on our localization practices.
 
 Note that we cannot support accepting contributions to the translations from any source other than the translators we have engaged to do the work.
 We are still to develop a proper process to accept any contributed translations. We certainly appreciate that people care enough about the localization effort to want to help improve the quality. We aim to build out a more comprehensive localization process for the future and will notify you once contributions can be supported, but for the time being, we are not able to incorporate suggestions.
 
 [discrete]
-[[kibana-release-notes-process]]
+[[opensearch-dashboards-release-notes-process]]
 === Release Notes Process
 
 Part of this process only applies to maintainers, since it requires
 access to GitHub labels.
 
-{kib} publishes https://www.elastic.co/guide/en/kibana/current/release-notes.html[Release Notes] for major and minor releases. 
+{osd} publishes https://www.elastic.co/guide/en/opensearch-dashboards/current/release-notes.html[Release Notes] for major and minor releases. 
 The Release Notes summarize what the PRs accomplish in language that is meaningful to users.
  To generate the Release Notes, the team runs a script against this repo to collect the merged PRs against the release.
 
@@ -49,7 +49,7 @@ The Release Notes summarize what the PRs accomplish in language that is meaningf
 
 The text that appears in the Release Notes is pulled directly from your PR title, or a single paragraph of text that you specify in the PR description.
 
-To use a single paragraph of text, enter a `Release note:` or `## Release note` header in the PR description ("dev docs" works too), followed by your text. For example, refer to this https://github.com/elastic/kibana/pull/65796[PR] that uses the `## Release note` header.
+To use a single paragraph of text, enter a `Release note:` or `## Release note` header in the PR description ("dev docs" works too), followed by your text. For example, refer to this https://github.com/elastic/opensearch-dashboards/pull/65796[PR] that uses the `## Release note` header.
 
 When you create the Release Notes text, use the following best practices:
 
@@ -85,7 +85,7 @@ include::development-documentation.asciidoc[leveloffset=+1]
 
 include::development-pull-request.asciidoc[leveloffset=+1]
 
-include::kibana-issue-reporting.asciidoc[leveloffset=+1]
+include::opensearch-dashboards-issue-reporting.asciidoc[leveloffset=+1]
 
 include::pr-review.asciidoc[leveloffset=+1]
 
