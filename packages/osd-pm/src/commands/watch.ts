@@ -30,7 +30,7 @@ import { ICommand } from './';
 const watchScriptName = 'osd:watch';
 
 /**
- * Name of the OpenSearch Dashboards  project.
+ * Name of the OpenSearch Dashboards project.
  */
 const opensearchDashboardsProjectName = 'opensearch-dashboards';
 
@@ -66,7 +66,7 @@ export const WatchCommand: ICommand = {
     const projectNames = Array.from(projectsToWatch.keys());
     log.info(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`);
 
-    // OpenSearch Dashboards  should always be run the last, so we don't rely on automatic
+    // OpenSearch Dashboards should always be run the last, so we don't rely on automatic
     // topological batching and push it to the last one-entry batch manually.
     const shouldWatchOpenSearchDashboardsProject = projectsToWatch.delete(opensearchDashboardsProjectName);
 

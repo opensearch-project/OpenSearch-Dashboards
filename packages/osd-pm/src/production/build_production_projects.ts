@@ -112,8 +112,8 @@ async function buildProject(project: Project) {
  * project or some other location defined in the project's `package.json`.
  *
  * When copying all the files into the build, we exclude `node_modules` because
- * we want the OpenSearch Dashboards  build to be responsible for actually installing all
- * dependencies. The primary reason for allowing the OpenSearch Dashboards  build process to
+ * we want the OpenSearch Dashboards build to be responsible for actually installing all
+ * dependencies. The primary reason for allowing the OpenSearch Dashboards build process to
  * manage dependencies is that it will "dedupe" them, so we don't include
  * unnecessary copies of dependencies.
  */

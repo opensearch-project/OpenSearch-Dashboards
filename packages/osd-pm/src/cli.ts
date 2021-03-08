@@ -31,7 +31,7 @@ function help() {
     dedent`
       usage: osd <command> [<args>]
 
-      By default commands are run for OpenSearch Dashboards  itself, all packages in the 'packages/'
+      By default commands are run for OpenSearch Dashboards itself, all packages in the 'packages/'
       folder and for all plugins in './plugins' and '../opensearch-dashboards-extra'.
 
       Available commands:

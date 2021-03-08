@@ -1,52 +1,52 @@
-# `@osd/pm` — The OpenSearch Dashboards  project management tool
+# `@osd/pm` — The OpenSearch Dashboards project management tool
 
 `@osd/pm` is a project management tool inspired by Lerna, which enables sharing
-code between OpenSearch Dashboards  and OpenSearch Dashboards  plugins.
+code between OpenSearch Dashboards and OpenSearch Dashboards plugins.
 
-To run `@osd/pm`, go to OpenSearch Dashboards  root and run `yarn osd`.
+To run `@osd/pm`, go to OpenSearch Dashboards root and run `yarn osd`.
 
 ## Why `@osd/pm`?
 
 Long-term we want to get rid of Webpack from production (basically, it's causing
 a lot of problems, using a lot of memory and adding a lot of complexity).
 Ideally we want each plugin to build its own separate production bundles for
-both server and UI. To get there all OpenSearch Dashboards  plugins (including x-pack) need to
+both server and UI. To get there all OpenSearch Dashboards plugins (including x-pack) need to
 be able to build their production bundles separately from OpenSearch Dashboards , which means
-they need to be able to depend on code from OpenSearch Dashboards  without `import`-ing random
-files directly from the OpenSearch Dashboards  source code.
+they need to be able to depend on code from OpenSearch Dashboards without `import`-ing random
+files directly from the OpenSearch Dashboards source code.
 
-From a plugin perspective there are two different types of OpenSearch Dashboards  dependencies:
+From a plugin perspective there are two different types of OpenSearch Dashboards dependencies:
 runtime and static dependencies. Runtime dependencies are things that are
 instantiated at runtime and that are injected into the plugin, for example
 config and opensearch clients. Static dependencies are those dependencies
-that we want to `import`. `elastic-eslint-config-opensearch-dashboards` is one example of this, and
+that we want to `import`. `opensearch-eslint-config-opensearch-dashboards` is one example of this, and
 it's actually needed because eslint requires it to be a separate package. But we
 also have dependencies like `datemath`, `flot`, `eui` and others that we
 control, but where we want to `import` them in plugins instead of injecting them
 (because injecting them would be painful to work with). (Btw, these examples
-aren't necessarily a part of the OpenSearch Dashboards  repo today, they are just meant as
+aren't necessarily a part of the OpenSearch Dashboards repo today, they are just meant as
 examples of code that we might at some point want to include in the repo while
-having them be `import`able in OpenSearch Dashboards  plugins like any other npm package)
+having them be `import`able in OpenSearch Dashboards plugins like any other npm package)
 
 Another reason we need static dependencies is that we're starting to introduce
 TypeScript into OpenSearch Dashboards , and to work nicely with TypeScript across plugins we
 need to be able to statically import dependencies. We have for example built an
-observable library for OpenSearch Dashboards  in TypeScript and we need to expose both the
+observable library for OpenSearch Dashboards in TypeScript and we need to expose both the
 functionality and the TypeScript types to plugins (so other plugins built with
 TypeScript can depend on the types for the lib).
 
 However, even though we have multiple packages we don't necessarily want to
 `npm publish` them. The ideal solution for us is being able to work on code
-locally in the OpenSearch Dashboards  repo and have a nice workflow that doesn't require
+locally in the OpenSearch Dashboards repo and have a nice workflow that doesn't require
 publishing, but where we still get the value of having "packages" that are
 available to plugins, without these plugins having to import files directly from
-the OpenSearch Dashboards  folder.
+the OpenSearch Dashboards folder.
 
 Basically, we just want to be able to share "static code" (aka being able to
-`import`) between OpenSearch Dashboards  and OpenSearch Dashboards  plugins. To get there we need tooling.
+`import`) between OpenSearch Dashboards and OpenSearch Dashboards plugins. To get there we need tooling.
 
 `@osd/pm` is a tool that helps us manage these static dependencies, and it
-enables us to share these packages between OpenSearch Dashboards  and OpenSearch Dashboards  plugins. It also
+enables us to share these packages between OpenSearch Dashboards and OpenSearch Dashboards plugins. It also
 enables these packages to have their own dependencies and their own build
 scripts, while still having a nice developer experience.
 
@@ -54,22 +54,22 @@ scripts, while still having a nice developer experience.
 
 ### Internal usage
 
-For packages that are referenced within the OpenSearch Dashboards  repo itself (for example,
+For packages that are referenced within the OpenSearch Dashboards repo itself (for example,
 using the `@osd/i18n` package from an `x-pack` plugin), we are leveraging
 Yarn's workspaces feature. This allows yarn to optimize node_modules within
 the entire repo to avoid duplicate modules by hoisting common packages as high
 in the dependency tree as possible.
 
-To reference a package from within the OpenSearch Dashboards  repo, simply use the current
+To reference a package from within the OpenSearch Dashboards repo, simply use the current
 version number from that package's package.json file. Then, running `yarn osd
 bootstrap` will symlink that package into your dependency tree. That means
 you can make changes to `@osd/i18n` and immediately have them available
-in OpenSearch Dashboards  itself. No `npm publish` needed anymore — OpenSearch Dashboards  will always rely
+in OpenSearch Dashboards itself. No `npm publish` needed anymore — OpenSearch Dashboards will always rely
 directly on the code that's in the local packages.
 
 ### External Plugins
 
-For external plugins, referencing packages in OpenSearch Dashboards  relies on
+For external plugins, referencing packages in OpenSearch Dashboards relies on
 `link:` style dependencies in Yarn. With `link:` dependencies you specify the
 relative location to a package instead of a version when adding it to
 `package.json`. For example:
@@ -80,14 +80,14 @@ relative location to a package instead of a version when adding it to
 
 Now when you run `yarn` it will set up a symlink to this folder instead of
 downloading code from the npm registry. This allows external plugins to always
-use the versions of the package that is bundled with the OpenSearch Dashboards  version they
+use the versions of the package that is bundled with the OpenSearch Dashboards version they
 are running inside of.
 
 ```
 "@osd/i18n": "link:../../opensearch-dashboards/packages/osd-date-math"
 ```
 
-This works because we moved to a strict location of OpenSearch Dashboards  plugins,
+This works because we moved to a strict location of OpenSearch Dashboards plugins,
 `./plugins/{pluginName}` inside of OpenSearch Dashboards , or `../opensearch-dashboards-extra/{pluginName}`
 relative to OpenSearch Dashboards . This is one of the reasons we wanted to move towards a setup
 that looks like this:
@@ -101,8 +101,8 @@ opensearch
 ```
 
 Relying on `link:` style dependencies means we no longer need to `npm publish`
-our OpenSearch Dashboards  specific packages. It also means that plugin authors no longer need
-to worry about the versions of the OpenSearch Dashboards  packages, as they will always use the
+our OpenSearch Dashboards specific packages. It also means that plugin authors no longer need
+to worry about the versions of the OpenSearch Dashboards packages, as they will always use the
 packages from their local OpenSearch Dashboards .
 
 ## The `osd` use-cases
@@ -120,7 +120,7 @@ yarn osd bootstrap
 ```
 
 By default, `@osd/pm` will bootstrap all packages within OpenSearch Dashboards , plus all
-OpenSearch Dashboards  plugins located in `./plugins` or `../opensearch-dashboards-extra`. There are several
+OpenSearch Dashboards plugins located in `./plugins` or `../opensearch-dashboards-extra`. There are several
 options for skipping parts of this, e.g. to skip bootstrapping of OpenSearch Dashboards 
 plugins:
 
@@ -169,7 +169,7 @@ package should define `osd:watch` script in the `package.json`:
 yarn osd watch
 ``` 
 
-By default `osd watch` will sort all packages within OpenSearch Dashboards  into batches based on
+By default `osd watch` will sort all packages within OpenSearch Dashboards into batches based on
 their mutual dependencies and run watch script for all packages in the correct order.
 
 As with any other `osd` command, you can use `--include` and `--exclude` filters to watch
@@ -182,12 +182,12 @@ yarn osd watch --include @osd/pm --include opensearch-dashboards
 ## Building packages for production
 
 The production build process relies on both the Grunt setup at the root of the
-OpenSearch Dashboards  project and code in `@osd/pm`. The full process is described in
+OpenSearch Dashboards project and code in `@osd/pm`. The full process is described in
 `tasks/build/packages.js`.
 
 ## Development
 
-This package is run from OpenSearch Dashboards  root, using `yarn osd`. This will run the
+This package is run from OpenSearch Dashboards root, using `yarn osd`. This will run the
 "pre-built" (aka built and committed to git) version of this tool, which is
 located in the `dist/` folder. This will also use the included version of Yarn
 instead of using your local install of Yarn.

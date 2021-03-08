@@ -141,7 +141,7 @@ export class Project {
   }
 
   /**
-   * Returns the directory that should be copied into the OpenSearch Dashboards  build artifact.
+   * Returns the directory that should be copied into the OpenSearch Dashboards build artifact.
    * This config can be specified to only include the project's build artifacts
    * instead of everything located in the project directory.
    */

@@ -30,14 +30,14 @@ import { getProjectPaths } from '../config';
 
 /**
  * Helper class for dealing with a set of projects as children of
- * the OpenSearch Dashboards  project. The osd/pm is currently implemented to be
+ * the OpenSearch Dashboards project. The osd/pm is currently implemented to be
  * more generic, where everything is an operation of generic projects,
  * but that leads to exceptions where we need the OpenSearch Dashboards project and
  * do things like `project.get('opensearch-dashboards')!`.
  *
  * Using this helper we can restructre the generic list of projects
- * as a OpenSearch Dashboards  object which encapulates all the projects in the
- * workspace and knows about the root OpenSearch Dashboards  project.
+ * as a OpenSearch Dashboards object which encapulates all the projects in the
+ * workspace and knows about the root OpenSearch Dashboards project.
  */
 export class OpenSearchDashboards {
   static async loadFrom(rootPath: string) {
@@ -51,7 +51,7 @@ export class OpenSearchDashboards {
 
     if (!opensearchDashboardsProject) {
       throw new TypeError(
-        'Unable to create OpenSearch Dashboards  object without all projects, including the OpenSearch Dashboards  project.'
+        'Unable to create OpenSearch Dashboards object without all projects, including the OpenSearch Dashboards project.'
       );
     }
 

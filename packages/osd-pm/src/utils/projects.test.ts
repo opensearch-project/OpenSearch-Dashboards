@@ -236,7 +236,7 @@ describe('#topologicallyBatchProjects', () => {
 });
 
 describe('#includeTransitiveProjects', () => {
-  test('includes transitive dependencies for OpenSearch Dashboards  package', async () => {
+  test('includes transitive dependencies for OpenSearch Dashboards package', async () => {
     const projects = await getProjects(rootPath, ['.', 'packages/*']);
 
     const opensearch-dashboards = projects.get('opensearch-dashboards')!;

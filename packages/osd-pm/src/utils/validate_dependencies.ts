@@ -159,13 +159,13 @@ export async function validateDependencies(osd: OpenSearchDashboards, yarnLock: 
     process.exit(1);
   }
 
-  // look for packages that have the the `OpensearchDashboards.devOnly` flag in their package.json
+  // look for packages that have the the `opensearchDashboards.devOnly` flag in their package.json
   // and make sure they aren't included in the production dependencies of OpenSearch Dashboards 
   const devOnlyProjectsInProduction = getDevOnlyProductionDepsTree(osd, 'opensearch-dashboards');
   if (devOnlyProjectsInProduction) {
     log.error(dedent`
-      Some of the packages in the production dependency chain for OpenSearch Dashboards  and X-Pack are
-      flagged with "OpensearchDashboards.devOnly" in their package.json. Please check changes made to
+      Some of the packages in the production dependency chain for OpenSearch Dashboards and X-Pack are
+      flagged with "opensearchDashboards.devOnly" in their package.json. Please check changes made to
       packages and their dependencies to ensure they don't end up in production.
 
       The devOnly dependencies that are being dependend on in production are:
