@@ -5,13 +5,13 @@ The easiest way to get started with *Code* is to import a real-world repository.
 
 [float]
 ==== Before you begin
-You must have a {kib} instance up and running.
+You must have a {osd} instance up and running.
 
-If you are in an environment where you have multiple {kib} instances in a cluster, see the <<code-multiple-kibana-instances-config, config instructions for multiple Kibana instances>>.
+If you are in an environment where you have multiple {osd} instances in a cluster, see the <<code-multiple-opensearch-dashboards-instances-config, config instructions for multiple OpenSearchDashboards instances>>.
 
 [float]
 ==== Enable Code app
-While in beta, you can turn on *Code* by adding the following line to `kibana.yaml`:
+While in beta, you can turn on *Code* by adding the following line to `opensearch_dashboards.yaml`:
 
 [source,yaml]
 ----
@@ -20,7 +20,7 @@ xpack.code.ui.enabled: true
 
 [float]
 ==== Import your first repository
-. In {Kib}, navigate to *Code*.
+. In {Osd}, navigate to *Code*.
 
 . In the *Repository URL* field, paste the following GitHub clone URL:
 +
