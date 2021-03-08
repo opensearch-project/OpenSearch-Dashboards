@@ -1,6 +1,6 @@
 {
   "id": "charts",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": true,
   "ui": true,
   "requiredBundles": ["visDefaultEditor"]
