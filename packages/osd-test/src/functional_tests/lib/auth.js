@@ -82,26 +82,26 @@ async function updateCredentials({
   throw new Error(`${statusCode} response, expected 200 -- ${JSON.stringify(body)}`);
 }
 
-export async function setupUsers({ log, esPort, updates, protocol = 'http', caPath }) {
-  // track the current credentials for the `elastic` user as
+export async function setupUsers({ log, opensearchPort, updates, protocol = 'http', caPath }) {
+  // track the current credentials for the `opensearch` user as
   // they will likely change as we apply updates
-  let auth = `elastic:${DEFAULT_SUPERUSER_PASS}`;
+  let auth = `opensearch:${DEFAULT_SUPERUSER_PASS}`;
   const caCert = caPath && (await readFile(caPath));
 
   for (const { username, password, roles } of updates) {
     // If working with a built-in user, just change the password
-    if (['logstash_system', 'elastic', 'kibana'].includes(username)) {
-      await updateCredentials({ port: esPort, auth, username, password, protocol, caCert });
+    if (['logstash_system', 'opensearch', 'opensearchDashboards'].includes(username)) {
+      await updateCredentials({ port: opensearchPort, auth, username, password, protocol, caCert });
       log.info('setting %j user password to %j', username, password);
 
       // If not a builtin user, add them
     } else {
-      await insertUser({ port: esPort, auth, username, password, roles, protocol, caCert });
+      await insertUser({ port: opensearchPort, auth, username, password, roles, protocol, caCert });
       log.info('Added %j user with password to %j', username, password);
     }
 
-    if (username === 'elastic') {
-      auth = `elastic:${password}`;
+    if (username === 'opensearch') {
+      auth = `opensearch:${password}`;
     }
   }
 }
