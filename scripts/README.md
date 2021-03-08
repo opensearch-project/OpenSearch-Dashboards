@@ -41,19 +41,19 @@ node scripts/functional_test_runner --config path/to/config
 
 For details on how the internal methods work, [read this readme](../packages/osd-test/README.md).
 
-### ES archiver 
+### OpenSearch archiver 
 
 #### Loading data
 
-If you wish to load up specific es archived data for your test, you can do so via:
+If you wish to load up specific opensearch archived data for your test, you can do so via:
 
 ```
-node scripts/opensearch_archiver.js load <archive> [--es-url=http://username:password@localhost:9200] [--opensearch-dashboards-url=http://username:password@localhost:5601/{basepath?}]
+node scripts/opensearch_archiver.js load <archive> [--opensearch-url=http://username:password@localhost:9200] [--opensearch-dashboards-url=http://username:password@localhost:5601/{basepath?}]
 ```
 
 That will load the specified archive located in the archive directory specified by the default functional config file, located in `test/functional/config.js`. To load archives from other function config files you can pass `--config path/to/config.js`.
 
-*Note:* The `--es-url` and `--opensearch-dashboards-url` options may or may not be neccessary depending on your current OpenSearch Dashboards configuration settings, and their values
+*Note:* The `--opensearch-url` and `--opensearch-dashboards-url` options may or may not be neccessary depending on your current OpenSearch Dashboards configuration settings, and their values
 may also change based on those settings (for example if you are not running with security you will not need the `username:password` portion).
 
 #### Saving data
