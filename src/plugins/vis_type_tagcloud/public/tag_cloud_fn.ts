@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
-import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
+import { ExpressionFunctionDefinition, OpenSearchDashboardsDatatable, Render } from '../../expressions/public';
 import { TagCloudVisParams } from './types';
 
 const name = 'tagcloud';
@@ -31,13 +31,13 @@ interface Arguments extends TagCloudVisParams {
 
 export interface TagCloudVisRenderValue {
   visType: typeof name;
-  visData: KibanaDatatable;
+  visData: OpenSearchDashboardsDatatable;
   visParams: Arguments;
 }
 
 export type TagcloudExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof name,
-  KibanaDatatable,
+  OpenSearchDashboardsDatatable,
   Arguments,
   Render<TagCloudVisRenderValue>
 >;
@@ -45,7 +45,7 @@ export type TagcloudExpressionFunctionDefinition = ExpressionFunctionDefinition<
 export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
   name,
   type: 'render',
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['opensearch_dashboards_datatable'],
   help: i18n.translate('visTypeTagCloud.function.help', {
     defaultMessage: 'Tagcloud visualization',
   }),

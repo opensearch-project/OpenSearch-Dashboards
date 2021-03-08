@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EsaggsExpressionFunctionDefinition } from '../../data/common/search/expressions';
+import { OpenSearchaggsExpressionFunctionDefinition } from '../../data/common/search/expressions';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { getVisSchemas, SchemaConfig, Vis, BuildPipelineParams } from '../../visualizations/public';
 import { TagcloudExpressionFunctionDefinition } from './tag_cloud_fn';
@@ -35,7 +35,7 @@ const prepareDimension = (params: SchemaConfig) => {
 };
 
 export const toExpressionAst = (vis: Vis<TagCloudVisParams>, params: BuildPipelineParams) => {
-  const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
+  const esaggs = buildExpressionFunction<OpenSearchaggsExpressionFunctionDefinition>('esaggs', {
     index: vis.data.indexPattern!.id!,
     metricsAtAllLevels: vis.isHierarchical(),
     partialRows: false,
