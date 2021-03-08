@@ -18,25 +18,25 @@
  */
 
 import _ from 'lodash';
-import { IRouter, CoreSetup } from 'kibana/server';
-import { ES_SEARCH_STRATEGY } from '../../../data/server';
+import { IRouter, CoreSetup } from 'opensearch-dashboardsserver';
+import { OPENSEARCH_SEARCH_STRATEGY } from '../../../data/server';
 import { TimelionPluginStartDeps } from '../plugin';
 
 export function validateEsRoute(router: IRouter, core: CoreSetup) {
   router.get(
     {
-      path: '/api/timelion/validate/es',
+      path: '/api/timelion/validate/opensearch',
       validate: false,
     },
     async function (context, request, response) {
       const uiSettings = await context.core.uiSettings.client.getAll();
       const deps = (await core.getStartServices())[1] as TimelionPluginStartDeps;
 
-      const timefield = uiSettings['timelion:es.timefield'];
+      const timefield = uiSettings['timelion:opensearch.timefield'];
 
       const body = {
         params: {
-          index: uiSettings['es.default_index'],
+          index: uiSettings['opensearch.default_index'],
           body: {
             aggs: {
               maxAgg: {
@@ -58,7 +58,7 @@ export function validateEsRoute(router: IRouter, core: CoreSetup) {
       let resp;
       try {
         resp = await deps.data.search.search(context, body, {
-          strategy: ES_SEARCH_STRATEGY,
+          strategy: OPENSEARCH_SEARCH_STRATEGY,
         });
         resp = resp.rawResponse;
       } catch (errResp) {

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-// Totally cribbed this from Kibana 3.
-// I bet there's something similar in the Kibana 4 code. Somewhere. Somehow.
+// Totally cribbed this from Opensearch Dashboards 3.
+// I bet there's something similar in the Opensearch Dashboards 4 code. Somewhere. Somehow.
 import { toMS } from './to_milliseconds';
 
 function roundInterval(interval: number) {

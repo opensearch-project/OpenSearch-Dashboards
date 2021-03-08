@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
-import { TimeRange, Filter, esQuery, Query } from '../../../data/public';
+import { i18n } from '@osd/i18n';
+import { OPENSEARCH_DASHBOARDS_CONTEXT_NAME } from 'src/plugins/expressions/public';
+import { TimeRange, Filter, opensearchQuery, Query } from '../../../data/public';
 import { TimelionVisDependencies } from '../plugin';
 import { getTimezone } from './get_timezone';
 import { TimelionVisParams } from '../timelion_vis_fn';
@@ -58,7 +58,7 @@ export interface TimelionSuccessResponse {
   sheet: Sheet[];
   stats: Stats;
   visType: string;
-  type: KIBANA_CONTEXT_NAME;
+  type: OPENSEARCH_DASHBOARDS_CONTEXT_NAME;
 }
 
 export function getTimelionRequestHandler({
@@ -89,7 +89,7 @@ export function getTimelionRequestHandler({
       );
     }
 
-    const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
+    const opensearchQueryConfigs = opensearchQuery.getEsQueryConfig(uiSettings);
 
     // parse the time range client side to make sure it behaves like other charts
     const timeRangeBounds = timefilter.calculateBounds(timeRange);
@@ -99,8 +99,8 @@ export function getTimelionRequestHandler({
         body: JSON.stringify({
           sheet: [expression],
           extended: {
-            es: {
-              filter: esQuery.buildEsQuery(undefined, query, filters, esQueryConfigs),
+            opensearch: {
+              filter: opensearchQuery.buildEsQuery(undefined, query, filters, opensearchQueryConfigs),
             },
           },
           time: {

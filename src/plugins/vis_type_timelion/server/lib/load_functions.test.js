@@ -37,6 +37,6 @@ describe('load_functions.js', () => {
     const fnList = fn('series_functions');
 
     expect(fnList).to.be.an('object');
-    expect(fnList.es).to.be.a('object');
+    expect(fnList.opensearch).to.be.a('object');
   });
 });

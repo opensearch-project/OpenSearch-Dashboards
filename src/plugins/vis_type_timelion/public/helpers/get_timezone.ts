@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment-timezone';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from 'opensearch-dashboardspublic';
 
 export function getTimezone(config: IUiSettingsClient) {
   if (config.isDefault('dateFormat:tz')) {

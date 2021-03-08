@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
-import { TypeOf } from '@kbn/config-schema';
+import { PluginInitializerContext } from 'opensearch-dashboardsserver';
+import { TypeOf } from '@osd/config-schema';
 import { configSchema } from '../../config';
 
 export class ConfigManager {
-  private esShardTimeout: number = 0;
+  private opensearchShardTimeout: number = 0;
   private graphiteUrls: string[] = [];
 
   constructor(config: PluginInitializerContext['config']) {
@@ -31,12 +31,12 @@ export class ConfigManager {
     });
 
     config.legacy.globalConfig$.subscribe((configUpdate) => {
-      this.esShardTimeout = configUpdate.elasticsearch.shardTimeout.asMilliseconds();
+      this.opensearchShardTimeout = configUpdate.opensearch.shardTimeout.asMilliseconds();
     });
   }
 
   getEsShardTimeout() {
-    return this.esShardTimeout;
+    return this.opensearchShardTimeout;
   }
 
   getGraphiteUrls() {

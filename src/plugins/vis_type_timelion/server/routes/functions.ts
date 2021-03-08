@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { IRouter } from 'kibana/server';
+import { IRouter } from 'opensearch-dashboardsserver';
 import { LoadFunctions } from '../lib/load_functions';
 
 export function functionsRoute(router: IRouter, { functions }: { functions: LoadFunctions }) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import _ from 'lodash';
 import fetch from 'node-fetch';
 import moment from 'moment';
@@ -37,7 +37,7 @@ export default new Datasource('graphite', {
     },
   ],
   help: i18n.translate('timelion.help.functions.graphiteHelpText', {
-    defaultMessage: `[experimental] Pull data from graphite. Configure your graphite server in Kibana's Advanced Settings`,
+    defaultMessage: `[experimental] Pull data from graphite. Configure your graphite server in Opensearch Dashboards's Advanced Settings`,
   }),
   fn: function graphite(args, tlConfig) {
     const config = args.byName;
@@ -51,9 +51,9 @@ export default new Datasource('graphite', {
     if (!allowedUrls.includes(configuredUrl)) {
       throw new Error(
         i18n.translate('timelion.help.functions.notAllowedGraphiteUrl', {
-          defaultMessage: `This graphite URL is not configured on the kibana.yml file.
-          Please configure your graphite server list in the kibana.yml file under 'timelion.graphiteUrls' and
-          select one from Kibana's Advanced Settings`,
+          defaultMessage: `This graphite URL is not configured on the opensearch_dashbpards.yml file.
+          Please configure your graphite server list in the opensearch_dashbpards.yml file under 'timelion.graphiteUrls' and
+          select one from Opensearch Dashboards's Advanced Settings`,
         })
       );
     }
