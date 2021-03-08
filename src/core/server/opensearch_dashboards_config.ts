@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@osd/config-schema';
 
-export type KibanaConfigType = TypeOf<typeof config.schema>;
+export type OpenSearchDashboardsConfigType = TypeOf<typeof config.schema>;
 
 export const config = {
-  path: 'kibana',
+  path: 'opensearchDashboards',
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    index: schema.string({ defaultValue: '.kibana' }),
+    index: schema.string({ defaultValue: '.opensearch-dashboards' }),
     autocompleteTerminateAfter: schema.duration({ defaultValue: 100000 }),
     autocompleteTimeout: schema.duration({ defaultValue: 1000 }),
   }),

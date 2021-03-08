@@ -24,7 +24,7 @@ import { LoggerFactory } from './logging';
 export type CoreId = symbol;
 
 /**
- * Groups all main Kibana's core modules/systems/services that are consumed in a
+ * Groups all main OpenSearch Dashboards's core modules/systems/services that are consumed in a
  * variety of places within the core itself.
  * @internal
  */
