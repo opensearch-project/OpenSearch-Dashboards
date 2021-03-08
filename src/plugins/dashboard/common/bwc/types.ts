@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { SavedObjectReference } from 'kibana/public';
+import { SavedObjectReference } from 'opensearch-dashboards/public';
 
 import { GridData } from '../';
 
 interface SavedObjectAttributes {
-  kibanaSavedObjectMeta: {
+  opensearchDashboardsSavedObjectMeta: {
     searchSourceJSON: string;
   };
 }

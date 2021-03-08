@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 /** READONLY VIEW CONSTANTS **/
 export const emptyDashboardTitle: string = i18n.translate('dashboard.emptyDashboardTitle', {

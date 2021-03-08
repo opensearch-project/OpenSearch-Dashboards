@@ -84,13 +84,13 @@ test('DashboardContainer.addNewEmbeddable', async () => {
   const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
     CONTACT_CARD_EMBEDDABLE,
     {
-      firstName: 'Kibana',
+      firstName: 'opensearchDashboards',
     }
   );
   expect(embeddable).toBeDefined();
 
   if (!isErrorEmbeddable(embeddable)) {
-    expect(embeddable.getInput().firstName).toBe('Kibana');
+    expect(embeddable.getInput().firstName).toBe('opensearchDashboards');
   } else {
     expect(false).toBe(true);
   }

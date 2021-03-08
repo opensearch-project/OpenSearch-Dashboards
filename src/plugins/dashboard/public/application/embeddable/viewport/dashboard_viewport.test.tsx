@@ -21,7 +21,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import React from 'react';
 import { skip } from 'rxjs/operators';
 import { mount } from 'enzyme';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@osd/i18n/react';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
 import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
@@ -30,7 +30,7 @@ import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
 } from '../../../embeddable_plugin_test_samples';
-import { KibanaContextProvider } from '../../../../../kibana_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { applicationServiceMock } from '../../../../../../core/public/mocks';
 
@@ -99,9 +99,9 @@ test('renders DashboardViewport', () => {
   const { props, options } = getProps();
   const component = mount(
     <I18nProvider>
-      <KibanaContextProvider services={options}>
+      <OpenSearchDashboardsContextProvider services={options}>
         <DashboardViewport {...props} />
-      </KibanaContextProvider>
+      </OpenSearchDashboardsContextProvider>
     </I18nProvider>
   );
   const panels = findTestSubject(component, 'dashboardPanel');
@@ -113,9 +113,9 @@ test('renders DashboardViewport with no visualizations', () => {
   props.container.updateInput({ panels: {} });
   const component = mount(
     <I18nProvider>
-      <KibanaContextProvider services={options}>
+      <OpenSearchDashboardsContextProvider services={options}>
         <DashboardViewport {...props} />
-      </KibanaContextProvider>
+      </OpenSearchDashboardsContextProvider>
     </I18nProvider>
   );
   const panels = findTestSubject(component, 'dashboardPanel');
@@ -130,9 +130,9 @@ test('renders DashboardEmptyScreen', () => {
   props.container.updateInput({ isEmptyState: true });
   const component = mount(
     <I18nProvider>
-      <KibanaContextProvider services={options}>
+      <OpenSearchDashboardsContextProvider services={options}>
         <DashboardViewport {...props} />
-      </KibanaContextProvider>
+      </OpenSearchDashboardsContextProvider>
     </I18nProvider>
   );
   const dashboardEmptyScreenDiv = component.find('.dshDashboardEmptyScreen');
@@ -147,9 +147,9 @@ test('renders exit full screen button when in full screen mode', async () => {
   props.container.updateInput({ isFullScreenMode: true });
   const component = mount(
     <I18nProvider>
-      <KibanaContextProvider services={options}>
+      <OpenSearchDashboardsContextProvider services={options}>
         <DashboardViewport {...props} />
-      </KibanaContextProvider>
+      </OpenSearchDashboardsContextProvider>
     </I18nProvider>
   );
 
@@ -175,9 +175,9 @@ test('renders exit full screen button when in full screen mode and empty screen'
   props.container.updateInput({ isEmptyState: true, isFullScreenMode: true });
   const component = mount(
     <I18nProvider>
-      <KibanaContextProvider services={options}>
+      <OpenSearchDashboardsContextProvider services={options}>
         <DashboardViewport {...props} />
-      </KibanaContextProvider>
+      </OpenSearchDashboardsContextProvider>
     </I18nProvider>
   );
   expect((component.find('.dshDashboardEmptyScreen').childAt(0).type() as any).name).toBe(
@@ -199,9 +199,9 @@ test('DashboardViewport unmount unsubscribes', async (done) => {
   const { props, options } = getProps();
   const component = mount(
     <I18nProvider>
-      <KibanaContextProvider services={options}>
+      <OpenSearchDashboardsContextProvider services={options}>
         <DashboardViewport {...props} />
-      </KibanaContextProvider>
+      </OpenSearchDashboardsContextProvider>
     </I18nProvider>
   );
   component.unmount();

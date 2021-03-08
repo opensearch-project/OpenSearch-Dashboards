@@ -18,7 +18,7 @@
  */
 
 import { inspect } from 'util';
-import { SavedObjectMigrationContext } from 'kibana/server';
+import { SavedObjectMigrationContext } from 'opensearch-dashboards/server';
 import { DashboardDoc730ToLatest } from '../../common';
 import { isDashboardDoc } from './is_dashboard_doc';
 import { moveFiltersToQuery } from './move_filters_to_query';
@@ -32,15 +32,15 @@ export const migrations730 = (doc: DashboardDoc700To720, { log }: SavedObjectMig
   }
 
   try {
-    const searchSource = JSON.parse(doc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
-    doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
+    const searchSource = JSON.parse(doc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON);
+    doc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON = JSON.stringify(
       moveFiltersToQuery(searchSource)
     );
   } catch (e) {
     log.warning(
       `Exception @ migrations730 while trying to migrate dashboard query filters!\n` +
-        `${e.stack}\n` +
-        `dashboard: ${inspect(doc, false, null)}`
+      `${e.stack}\n` +
+      `dashboard: ${inspect(doc, false, null)}`
     );
     return doc;
   }
@@ -66,8 +66,8 @@ export const migrations730 = (doc: DashboardDoc700To720, { log }: SavedObjectMig
   } catch (e) {
     log.warning(
       `Exception @ migrations730 while trying to migrate dashboard panels!\n` +
-        `Error: ${e.stack}\n` +
-        `dashboard: ${inspect(doc, false, null)}`
+      `Error: ${e.stack}\n` +
+      `dashboard: ${inspect(doc, false, null)}`
     );
     return doc;
   }

@@ -68,7 +68,7 @@ beforeEach(async () => {
     ContactCardEmbeddableOutput,
     ContactCardEmbeddable
   >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Kibana',
+    firstName: 'opensearchDashboards',
   });
 
   if (isErrorEmbeddable(contactCardEmbeddable)) {

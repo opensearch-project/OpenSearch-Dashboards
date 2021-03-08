@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectAttributes, SavedObjectReference } from 'kibana/public';
+import { SavedObjectAttributes, SavedObjectReference } from 'opensearch-dashboards/public';
 import { SavedObjectDashboard } from './saved_dashboard';
 
 export function extractReferences({
@@ -61,7 +61,7 @@ export function injectReferences(
 ) {
   // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
   // importing objects without panelsJSON. At development time of this, there is no guarantee each saved
-  // object has panelsJSON in all previous versions of kibana.
+  // object has panelsJSON in all previous versions of OpenSearch Dashboards.
   if (typeof savedObject.panelsJSON !== 'string') {
     return;
   }
