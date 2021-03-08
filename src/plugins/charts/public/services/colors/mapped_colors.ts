@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import Color from 'color';
 
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup } from 'opensearch-dashboards/public';
 
 import { COLOR_MAPPING_SETTING } from '../../../common';
 import { createColorPalette } from './color_palette';
