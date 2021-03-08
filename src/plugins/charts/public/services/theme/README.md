@@ -1,8 +1,8 @@
 # Theme Service
 
-The `theme` service offers utilities to interact with the kibana theme. EUI provides a light and dark theme object to supplement the Elastic-Charts `baseTheme`. However, every instance of a Chart would need to pass down the correct EUI theme depending on Kibana's light or dark mode. There are several ways you can use the `theme` service to get the correct shared `theme` and `baseTheme`.
+The `theme` service offers utilities to interact with the OpenSearch Dashboards theme. EUI provides a light and dark theme object to supplement the OpenSearchDashboards-Charts `baseTheme`. However, every instance of a Chart would need to pass down the correct EUI theme depending on OpenSearch Dashboards's light or dark mode. There are several ways you can use the `theme` service to get the correct shared `theme` and `baseTheme`.
 
-> The current theme (light or dark) of Kibana is typically taken into account for the functions below.
+> The current theme (light or dark) of OpenSearch Dashboards is typically taken into account for the functions below.
 
 ## `chartsDefaultBaseTheme`
 

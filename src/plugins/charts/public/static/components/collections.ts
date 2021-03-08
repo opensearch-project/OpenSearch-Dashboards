@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { $Values } from '@kbn/utility-types';
+import { $Values } from '@osd/utility-types';
 
 export const ColorModes = Object.freeze({
   BACKGROUND: 'Background' as 'Background',
