@@ -1,7 +1,7 @@
 {
   "id": "core_app_status",
   "version": "0.0.1",
-  "kibanaVersion": "kibana",
+  "opensearchDashboardsVersion": "opensearchDashboards",
   "configPath": ["core_app_status"],
   "server": false,
   "ui": true

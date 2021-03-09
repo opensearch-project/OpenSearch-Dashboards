@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".opensearch-dashboards",
     "id": "visualization:title-with-dash",
     "source": {
       "type": "visualization",
@@ -12,7 +12,7 @@
         "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
         "description": "",
         "version": 1,
-        "kibanaSavedObjectMeta": {
+        "opensearchDashboardsSavedObjectMeta": {
           "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
         }
       },
@@ -24,7 +24,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".opensearch-dashboards",
     "id": "visualization:title-with-asterisk",
     "source": {
       "type": "visualization",
@@ -35,7 +35,7 @@
         "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
         "description": "",
         "version": 1,
-        "kibanaSavedObjectMeta": {
+        "opensearchDashboardsSavedObjectMeta": {
           "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
         }
       },
@@ -48,7 +48,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".opensearch-dashboards",
     "id": "visualization:noise-1",
     "source": {
       "type": "visualization",
@@ -59,7 +59,7 @@
         "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
         "description": "",
         "version": 1,
-        "kibanaSavedObjectMeta": {
+        "opensearchDashboardsSavedObjectMeta": {
           "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
         }
       },
@@ -71,7 +71,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".opensearch-dashboards",
     "id": "visualization:noise-2",
     "source": {
       "type": "visualization",
@@ -82,7 +82,7 @@
         "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
         "description": "",
         "version": 1,
-        "kibanaSavedObjectMeta": {
+        "opensearchDashboardsSavedObjectMeta": {
           "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
         }
       },

@@ -17,33 +17,33 @@
  * under the License.
  */
 
-const ES_ARCHIVER_LOAD_METHODS = ['load', 'loadIfNeeded', 'unload'];
-const KIBANA_INDEX = '.kibana';
+const OPENSEARCH_ARCHIVER_LOAD_METHODS = ['load', 'loadIfNeeded', 'unload'];
+const OPENSEARCH_DASHBOARDS_INDEX = '.opensearch-dashboards';
 
-export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }) {
-  // only extend the esArchiver if there are default uiSettings to restore
+export function extendOpenSearchArchiver({ opensearchArchiver, opensearchDashboardsServer, retry, defaults }) {
+  // only extend the opensearchArchiver if there are default uiSettings to restore
   if (!defaults) {
     return;
   }
 
-  ES_ARCHIVER_LOAD_METHODS.forEach((method) => {
-    const originalMethod = esArchiver[method];
+  OPENSEARCH_ARCHIVER_LOAD_METHODS.forEach((method) => {
+    const originalMethod = opensearchArchiver[method];
 
-    esArchiver[method] = async (...args) => {
-      // esArchiver methods return a stats object, with information about the indexes created
-      const stats = await originalMethod.apply(esArchiver, args);
+    opensearchArchiver[method] = async (...args) => {
+      // opensearchArchiver methods return a stats object, with information about the indexes created
+      const stats = await originalMethod.apply(opensearchArchiver, args);
 
       const statsKeys = Object.keys(stats);
-      const kibanaKeys = statsKeys.filter(
-        // this also matches stats keys like '.kibana_1' and '.kibana_2,.kibana_1'
-        (key) => key.includes(KIBANA_INDEX) && (stats[key].created || stats[key].deleted)
+      const opensearchDashboardsKeys = statsKeys.filter(
+        // this also matches stats keys like '.opensearch-dashboards_1' and '.opensearch-dashboards_2,.opensearch-dashboards_1'
+        (key) => key.includes(OPENSEARCH_DASHBOARDS_INDEX) && (stats[key].created || stats[key].deleted)
       );
 
-      // if the kibana index was created by the esArchiver then update the uiSettings
+      // if the opensearch-dashboards index was created by the opensearchArchiver then update the uiSettings
       // with the defaults to make sure that they are always in place initially
-      if (kibanaKeys.length > 0) {
+      if (opensearchDashboardsKeys.length > 0) {
         await retry.try(async () => {
-          await kibanaServer.uiSettings.update(defaults);
+          await opensearchDashboardsServer.uiSettings.update(defaults);
         });
       }
 

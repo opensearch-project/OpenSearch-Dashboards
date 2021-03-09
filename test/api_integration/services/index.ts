@@ -19,10 +19,10 @@
 
 import { services as commonServices } from '../../common/services';
 
-import { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './supertest';
+import { OpenSearchDashboardsSupertestProvider, OpenSearchSupertestProvider } from './supertest';
 
 export const services = {
   ...commonServices,
-  supertest: KibanaSupertestProvider,
-  esSupertest: ElasticsearchSupertestProvider,
+  supertest: OpenSearchDashboardsSupertestProvider,
+  opensearchSupertest: OpenSearchSupertestProvider,
 };

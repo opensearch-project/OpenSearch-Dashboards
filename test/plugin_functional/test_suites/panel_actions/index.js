@@ -19,27 +19,27 @@
 
 import path from 'path';
 
-export const KIBANA_ARCHIVE_PATH = path.resolve(
+export const OPENSEARCH_DASHBOARDS_ARCHIVE_PATH = path.resolve(
   __dirname,
-  '../../../functional/fixtures/es_archiver/dashboard/current/kibana'
+  '../../../functional/fixtures/opensearch_archiver/dashboard/current/opensearch_dashboards'
 );
 export const DATA_ARCHIVE_PATH = path.resolve(
   __dirname,
-  '../../../functional/fixtures/es_archiver/dashboard/current/data'
+  '../../../functional/fixtures/opensearch_archiver/dashboard/current/data'
 );
 
 export default function ({ getService, getPageObjects, loadTestFile }) {
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const PageObjects = getPageObjects(['common', 'dashboard']);
 
   describe('pluggable panel actions', function () {
     before(async () => {
       await browser.setWindowSize(1300, 900);
-      await esArchiver.load(KIBANA_ARCHIVE_PATH);
-      await esArchiver.loadIfNeeded(DATA_ARCHIVE_PATH);
-      await kibanaServer.uiSettings.replace({
+      await opensearchArchiver.load(OPENSEARCH_DASHBOARDS_ARCHIVE_PATH);
+      await opensearchArchiver.loadIfNeeded(DATA_ARCHIVE_PATH);
+      await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
       await PageObjects.common.navigateToApp('dashboard');
@@ -48,8 +48,8 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
 
     after(async function () {
       await PageObjects.dashboard.clearSavedObjectsFromAppLinks();
-      await esArchiver.unload(KIBANA_ARCHIVE_PATH);
-      await esArchiver.unload(DATA_ARCHIVE_PATH);
+      await opensearchArchiver.unload(OPENSEARCH_DASHBOARDS_ARCHIVE_PATH);
+      await opensearchArchiver.unload(DATA_ARCHIVE_PATH);
     });
 
     loadTestFile(require.resolve('./panel_actions'));

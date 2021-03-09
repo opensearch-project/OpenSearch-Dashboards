@@ -17,18 +17,18 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const log = getService('log');
   const PageObjects = getPageObjects(['settings', 'common']);
 
   describe('index result popularity', function describeIndexTests() {
     const fieldName = 'geo.coordinates';
     before(async function () {
-      // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({});
+      // delete .opensearch-dashboards index and then wait for OpenSearch Dashboardsto re-create it
+      await opensearchDashboardsServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
     });
 

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import { Plugin, CoreSetup } from 'opensearch-dashboards/server';
 
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 
 export class RenderingPlugin implements Plugin {
   public setup(core: CoreSetup) {

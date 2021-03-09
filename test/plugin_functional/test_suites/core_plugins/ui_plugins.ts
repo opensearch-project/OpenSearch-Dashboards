@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
 
@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         await PageObjects.common.navigateToApp('settings');
       });
 
-      it('should send kbn-system-request header when asSystemRequest: true', async () => {
+      it('should send osd-system-request header when asSystemRequest: true', async () => {
         expect(
           await browser.executeAsync(async (cb) => {
             window._coreProvider.start.plugins.core_plugin_b.sendSystemRequest(true).then(cb);
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         ).to.be('/core_plugin_b/system_request says: "System request? true"');
       });
 
-      it('should not send kbn-system-request header when asSystemRequest: false', async () => {
+      it('should not send osd-system-request header when asSystemRequest: false', async () => {
         expect(
           await browser.executeAsync(async (cb) => {
             window._coreProvider.start.plugins.core_plugin_b.sendSystemRequest(false).then(cb);
@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       it('does not allow file tree traversing', async function () {
-        await supertest.get('/plugins/corePluginStaticAssets/assets/../../kibana.json').expect(404);
+        await supertest.get('/plugins/corePluginStaticAssets/assets/../../opensearch_dashboards.json').expect(404);
       });
 
       it('generates "etag" & "last-modified" headers', async () => {

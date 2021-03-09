@@ -21,7 +21,7 @@ import { dirname, resolve } from 'path';
 import { writeFile, readFileSync, mkdir } from 'fs';
 import { promisify } from 'util';
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import del from 'del';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

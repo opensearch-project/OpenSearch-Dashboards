@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('pattern', () => {
-    before(() => esArchiver.load('index_patterns/daily_index'));
-    after(() => esArchiver.unload('index_patterns/daily_index'));
+    before(() => opensearchArchiver.load('index_patterns/daily_index'));
+    after(() => opensearchArchiver.unload('index_patterns/daily_index'));
 
     it('matches indices with compatible patterns', () =>
       supertest
@@ -41,7 +41,7 @@ export default function ({ getService }) {
               {
                 name: '@timestamp',
                 type: 'date',
-                esTypes: ['date'],
+                opensearchTypes: ['date'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -49,7 +49,7 @@ export default function ({ getService }) {
               {
                 name: 'Jan01',
                 type: 'boolean',
-                esTypes: ['boolean'],
+                opensearchTypes: ['boolean'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -57,7 +57,7 @@ export default function ({ getService }) {
               {
                 name: 'Jan02',
                 type: 'boolean',
-                esTypes: ['boolean'],
+                opensearchTypes: ['boolean'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -80,7 +80,7 @@ export default function ({ getService }) {
               {
                 name: '@timestamp',
                 type: 'date',
-                esTypes: ['date'],
+                opensearchTypes: ['date'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -88,7 +88,7 @@ export default function ({ getService }) {
               {
                 name: 'Jan02',
                 type: 'boolean',
-                esTypes: ['boolean'],
+                opensearchTypes: ['boolean'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -112,7 +112,7 @@ export default function ({ getService }) {
               {
                 name: '@timestamp',
                 type: 'date',
-                esTypes: ['date'],
+                opensearchTypes: ['date'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -120,7 +120,7 @@ export default function ({ getService }) {
               {
                 name: 'Jan02',
                 type: 'boolean',
-                esTypes: ['boolean'],
+                opensearchTypes: ['boolean'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,

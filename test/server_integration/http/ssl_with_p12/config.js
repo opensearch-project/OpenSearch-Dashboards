@@ -18,8 +18,8 @@
  */
 
 import { readFileSync } from 'fs';
-import { CA_CERT_PATH, KBN_P12_PATH, KBN_P12_PASSWORD } from '@kbn/dev-utils';
-import { createKibanaSupertestProvider } from '../../services';
+import { CA_CERT_PATH, OSD_P12_PATH, OSD_P12_PASSWORD } from '@osd/dev-utils';
+import { createOpenSearchDashboardsSupertestProvider } from '../../services';
 
 export default async function ({ readConfigFile }) {
   const httpConfig = await readConfigFile(require.resolve('../../config'));
@@ -29,14 +29,14 @@ export default async function ({ readConfigFile }) {
     testFiles: [require.resolve('./')],
     services: {
       ...httpConfig.get('services'),
-      supertest: createKibanaSupertestProvider({
+      supertest: createOpenSearchDashboardsSupertestProvider({
         certificateAuthorities,
       }),
     },
     servers: {
       ...httpConfig.get('servers'),
-      kibana: {
-        ...httpConfig.get('servers.kibana'),
+      opensearchDashboards: {
+        ...httpConfig.get('servers.opensearchDashboards'),
         protocol: 'https',
         certificateAuthorities,
       },
@@ -44,14 +44,14 @@ export default async function ({ readConfigFile }) {
     junit: {
       reportName: 'Http SSL Integration Tests',
     },
-    esTestCluster: httpConfig.get('esTestCluster'),
-    kbnTestServer: {
-      ...httpConfig.get('kbnTestServer'),
+    opensearchTestCluster: httpConfig.get('opensearchTestCluster'),
+    osdTestServer: {
+      ...httpConfig.get('osdTestServer'),
       serverArgs: [
-        ...httpConfig.get('kbnTestServer.serverArgs'),
+        ...httpConfig.get('osdTestServer.serverArgs'),
         '--server.ssl.enabled=true',
-        `--server.ssl.keystore.path=${KBN_P12_PATH}`,
-        `--server.ssl.keystore.password=${KBN_P12_PASSWORD}`,
+        `--server.ssl.keystore.path=${OSD_P12_PATH}`,
+        `--server.ssl.keystore.password=${OSD_P12_PASSWORD}`,
       ],
     },
   };

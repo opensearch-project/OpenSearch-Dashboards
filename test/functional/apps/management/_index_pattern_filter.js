@@ -17,19 +17,19 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['settings']);
 
   describe('index pattern filter', function describeIndexTests() {
     before(async function () {
-      // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({});
+      // delete .opensearch-dashboards index and then wait for OpenSearch Dashboardsto re-create it
+      await opensearchDashboardsServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
     });
 
     beforeEach(async function () {
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should filter indexed fields', async function () {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.getFieldTypes();
       await PageObjects.settings.setFieldTypeFilter('string');

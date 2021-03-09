@@ -21,22 +21,22 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'header']);
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const a11y = getService('a11y');
 
   describe('Management', () => {
     before(async () => {
-      await esArchiver.load('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await kibanaServer.uiSettings.update({
+      await opensearchArchiver.load('discover');
+      await opensearchArchiver.loadIfNeeded('logstash_functional');
+      await opensearchDashboardsServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });
       await PageObjects.settings.navigateTo();
     });
 
     after(async () => {
-      await esArchiver.unload('logstash_functional');
+      await opensearchArchiver.unload('logstash_functional');
     });
 
     it('main view', async () => {
@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('index pattern page', async () => {
-      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await a11y.testAppSnapshot();
     });
 
@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Open create index pattern wizard', async () => {
-      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.clickAddNewIndexPatternButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await a11y.testAppSnapshot();
@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // We are navigating back to index pattern page to test field formatters
     it('Navigate back to logstash index page', async () => {
-      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
       await a11y.testAppSnapshot();
     });
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Advanced settings', async () => {
-      await PageObjects.settings.clickKibanaSettings();
+      await PageObjects.settings.clickOpenSearchDashboardsSettings();
       await a11y.testAppSnapshot();
     });
   });

@@ -17,6 +17,6 @@
  * under the License.
  */
 
-import { ElasticsearchClientPlugin } from './plugin';
+import { OpenSearchClientPlugin } from './plugin';
 
-export const plugin = () => new ElasticsearchClientPlugin();
+export const plugin = () => new OpenSearchClientPlugin();

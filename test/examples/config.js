@@ -44,19 +44,19 @@ export default async function ({ readConfigFile }) {
     },
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),
-    esTestCluster: functionalConfig.get('esTestCluster'),
+    opensearchTestCluster: functionalConfig.get('opensearchTestCluster'),
     apps: functionalConfig.get('apps'),
-    esArchiver: {
-      directory: path.resolve(__dirname, '../es_archives'),
+    opensearchArchiver: {
+      directory: path.resolve(__dirname, '../opensearch_archives'),
     },
     screenshots: functionalConfig.get('screenshots'),
     junit: {
       reportName: 'Example plugin functional tests',
     },
-    kbnTestServer: {
-      ...functionalConfig.get('kbnTestServer'),
+    osdTestServer: {
+      ...functionalConfig.get('osdTestServer'),
       serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        ...functionalConfig.get('osdTestServer.serverArgs'),
         '--run-examples',
         // Required to run examples
         '--env.name=development',

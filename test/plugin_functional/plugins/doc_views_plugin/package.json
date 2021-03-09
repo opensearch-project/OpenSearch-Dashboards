@@ -2,13 +2,13 @@
   "name": "docViewPlugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/doc_views_plugin",
-  "kibana": {
-    "version": "kibana",
+  "opensearchDashboards": {
+    "version": "opensearchDashboards",
     "templateVersion": "1.0.0"
   },
   "license": "Apache-2.0",
   "scripts": {
-    "kbn": "node ../../../../scripts/kbn.js",
+    "osd": "node ../../../../scripts/osd.js",
     "build": "rm -rf './target' && tsc"
   },
   "devDependencies": {

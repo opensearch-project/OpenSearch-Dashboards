@@ -17,44 +17,44 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const retry = getService('retry');
   const log = getService('log');
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const PageObjects = getPageObjects(['settings']);
 
   // this functionality is no longer functional as of 7.0 but still needs cleanup
   // https://github.com/elastic/kibana/issues/74118
   describe.skip('filter scripted fields', function describeIndexTests() {
     before(async function () {
-      // delete .kibana index and then wait for Kibana to re-create it
+      // delete .opensearch-dashboards index and then wait for OpenSearch Dashboardsto re-create it
       await browser.setWindowSize(1200, 800);
-      await esArchiver.load('management');
-      await kibanaServer.uiSettings.replace({
+      await opensearchArchiver.load('management');
+      await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: 'f1e4c910-a2e6-11e7-bb30-233be9be6a15',
       });
     });
 
     after(async function () {
-      await esArchiver.unload('management');
-      await kibanaServer.uiSettings.replace({});
+      await opensearchArchiver.unload('management');
+      await opensearchDashboardsServer.uiSettings.replace({});
     });
 
     const scriptedPainlessFieldName = 'ram_pain1';
 
     it('should filter scripted fields', async function () {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.clickScriptedFieldsTab();
       const scriptedFieldLangsBefore = await PageObjects.settings.getScriptedFieldLangs();
       await log.debug('add scripted field');
 
-      // The expression scripted field has been pre-created in the management esArchiver pack since it is no longer
+      // The expression scripted field has been pre-created in the management opensearchArchiver pack since it is no longer
       // possible to create an expression script via the UI
       await PageObjects.settings.addScriptedField(
         scriptedPainlessFieldName,

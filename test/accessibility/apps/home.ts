@@ -23,16 +23,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'home']);
   const a11y = getService('a11y');
 
-  describe('Kibana Home', () => {
+  describe('OpenSearch DashboardsHome', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('home');
     });
 
-    it('Kibana Home view', async () => {
+    it('OpenSearch DashboardsHome view', async () => {
       await a11y.testAppSnapshot();
     });
 
-    it('Add Kibana sample data page', async () => {
+    it('Add OpenSearch Dashboardssample data page', async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });

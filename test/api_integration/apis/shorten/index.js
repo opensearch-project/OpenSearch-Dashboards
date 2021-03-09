@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService }) {
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const supertest = getService('supertest');
 
   describe('url shortener', () => {
-    before(() => esArchiver.load('saved_objects/basic'));
-    after(() => esArchiver.unload('saved_objects/basic'));
+    before(() => opensearchArchiver.load('saved_objects/basic'));
+    after(() => opensearchArchiver.unload('saved_objects/basic'));
 
     it('generates shortened urls', async () => {
       const resp = await supertest

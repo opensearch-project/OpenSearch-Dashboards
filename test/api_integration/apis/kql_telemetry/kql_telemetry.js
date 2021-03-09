@@ -17,29 +17,29 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import Bluebird from 'bluebird';
 import { get } from 'lodash';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearch = getService('legacyOpenSearch');
 
   describe('telemetry API', () => {
-    before(() => esArchiver.load('saved_objects/basic'));
-    after(() => esArchiver.unload('saved_objects/basic'));
+    before(() => opensearchArchiver.load('saved_objects/basic'));
+    after(() => opensearchArchiver.unload('saved_objects/basic'));
 
-    it('should increment the opt *in* counter in the .kibana/kql-telemetry document', async () => {
+    it('should increment the opt *in* counter in the .opensearch-dashboards/kql-telemetry document', async () => {
       await supertest
-        .post('/api/kibana/kql_opt_in_stats')
+        .post('/api/opensearch-dashboards/kql_opt_in_stats')
         .set('content-type', 'application/json')
         .send({ opt_in: true })
         .expect(200);
 
-      return es
+      return opensearch
         .search({
-          index: '.kibana',
+          index: '.opensearch-dashboards',
           q: 'type:kql-telemetry',
         })
         .then((response) => {
@@ -48,16 +48,16 @@ export default function ({ getService }) {
         });
     });
 
-    it('should increment the opt *out* counter in the .kibana/kql-telemetry document', async () => {
+    it('should increment the opt *out* counter in the .opensearch-dashboards/kql-telemetry document', async () => {
       await supertest
-        .post('/api/kibana/kql_opt_in_stats')
+        .post('/api/opensearch-dashboards/kql_opt_in_stats')
         .set('content-type', 'application/json')
         .send({ opt_in: false })
         .expect(200);
 
-      return es
+      return opensearch
         .search({
-          index: '.kibana',
+          index: '.opensearch-dashboards',
           q: 'type:kql-telemetry',
         })
         .then((response) => {
@@ -68,7 +68,7 @@ export default function ({ getService }) {
 
     it('should report success when opt *in* is incremented successfully', () => {
       return supertest
-        .post('/api/kibana/kql_opt_in_stats')
+        .post('/api/opensearch-dashboards/kql_opt_in_stats')
         .set('content-type', 'application/json')
         .send({ opt_in: true })
         .expect('Content-Type', /json/)
@@ -80,7 +80,7 @@ export default function ({ getService }) {
 
     it('should report success when opt *out* is incremented successfully', () => {
       return supertest
-        .post('/api/kibana/kql_opt_in_stats')
+        .post('/api/opensearch-dashboards/kql_opt_in_stats')
         .set('content-type', 'application/json')
         .send({ opt_in: false })
         .expect('Content-Type', /json/)
@@ -93,27 +93,27 @@ export default function ({ getService }) {
     it('should only accept literal boolean values for the opt_in POST body param', function () {
       return Bluebird.all([
         supertest
-          .post('/api/kibana/kql_opt_in_stats')
+          .post('/api/opensearch-dashboards/kql_opt_in_stats')
           .set('content-type', 'application/json')
           .send({ opt_in: 'notabool' })
           .expect(400),
         supertest
-          .post('/api/kibana/kql_opt_in_stats')
+          .post('/api/opensearch-dashboards/kql_opt_in_stats')
           .set('content-type', 'application/json')
           .send({ opt_in: 0 })
           .expect(400),
         supertest
-          .post('/api/kibana/kql_opt_in_stats')
+          .post('/api/opensearch-dashboards/kql_opt_in_stats')
           .set('content-type', 'application/json')
           .send({ opt_in: null })
           .expect(400),
         supertest
-          .post('/api/kibana/kql_opt_in_stats')
+          .post('/api/opensearch-dashboards/kql_opt_in_stats')
           .set('content-type', 'application/json')
           .send({ opt_in: undefined })
           .expect(400),
         supertest
-          .post('/api/kibana/kql_opt_in_stats')
+          .post('/api/opensearch-dashboards/kql_opt_in_stats')
           .set('content-type', 'application/json')
           .send({})
           .expect(400),

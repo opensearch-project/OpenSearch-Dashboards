@@ -19,11 +19,11 @@
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, loadTestFile }: PluginFunctionalProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('doc views', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/discover');
+      await opensearchArchiver.loadIfNeeded('../functional/fixtures/opensearch_archiver/discover');
     });
 
     loadTestFile(require.resolve('./doc_views'));

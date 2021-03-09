@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function ElasticChartProvider({ getService }: FtrProviderContext) {
+export function OpenSearchChartProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const retry = getService('retry');

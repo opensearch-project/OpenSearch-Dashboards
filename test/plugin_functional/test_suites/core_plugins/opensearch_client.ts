@@ -21,16 +21,16 @@ import '../../plugins/core_provider_plugin/types';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
-  describe('elasticsearch client', () => {
-    it('server plugins have access to elasticsearch client via request context', async () => {
-      await supertest.get('/api/elasticsearch_client_plugin/context/ping').expect(200, 'true');
+  describe('opensearch client', () => {
+    it('server plugins have access to opensearch client via request context', async () => {
+      await supertest.get('/api/opensearch_client_plugin/context/ping').expect(200, 'true');
     });
-    it('server plugins have access to elasticsearch client via core contract', async () => {
-      await supertest.get('/api/elasticsearch_client_plugin/contract/ping').expect(200, 'true');
+    it('server plugins have access to opensearch client via core contract', async () => {
+      await supertest.get('/api/opensearch_client_plugin/contract/ping').expect(200, 'true');
     });
-    it('server plugins can create a custom elasticsearch client', async () => {
+    it('server plugins can create a custom opensearch client', async () => {
       await supertest
-        .get('/api/elasticsearch_client_plugin/custom_client/ping')
+        .get('/api/opensearch_client_plugin/custom_client/ping')
         .expect(200, 'true');
     });
   });

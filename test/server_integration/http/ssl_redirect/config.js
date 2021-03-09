@@ -19,24 +19,24 @@
 
 import Url from 'url';
 import { readFileSync } from 'fs';
-import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { CA_CERT_PATH, OSD_CERT_PATH, OSD_KEY_PATH } from '@osd/dev-utils';
 
-import { createKibanaSupertestProvider } from '../../services';
+import { createOpenSearchDashboardsSupertestProvider } from '../../services';
 
 export default async function ({ readConfigFile }) {
   const httpConfig = await readConfigFile(require.resolve('../../config'));
   const certificateAuthorities = [readFileSync(CA_CERT_PATH)];
 
-  const redirectPort = httpConfig.get('servers.kibana.port') + 1234;
+  const redirectPort = httpConfig.get('servers.opensearchDashboards.port') + 1234;
 
   return {
     testFiles: [require.resolve('./')],
     services: {
       ...httpConfig.get('services'),
-      supertest: createKibanaSupertestProvider({
+      supertest: createOpenSearchDashboardsSupertestProvider({
         certificateAuthorities,
-        kibanaUrl: Url.format({
-          ...httpConfig.get('servers.kibana'),
+        opensearchDashboardsUrl: Url.format({
+          ...httpConfig.get('servers.opensearchDashboards'),
           port: redirectPort,
           // test with non ssl protocol
           protocol: 'http',
@@ -45,8 +45,8 @@ export default async function ({ readConfigFile }) {
     },
     servers: {
       ...httpConfig.get('servers'),
-      kibana: {
-        ...httpConfig.get('servers.kibana'),
+      opensearchDashboards: {
+        ...httpConfig.get('servers.opensearchDashboards'),
         // start the server with https
         protocol: 'https',
         certificateAuthorities,
@@ -55,14 +55,14 @@ export default async function ({ readConfigFile }) {
     junit: {
       reportName: 'Http SSL Integration Tests',
     },
-    esTestCluster: httpConfig.get('esTestCluster'),
-    kbnTestServer: {
-      ...httpConfig.get('kbnTestServer'),
+    opensearchTestCluster: httpConfig.get('opensearchTestCluster'),
+    osdTestServer: {
+      ...httpConfig.get('osdTestServer'),
       serverArgs: [
-        ...httpConfig.get('kbnTestServer.serverArgs'),
+        ...httpConfig.get('osdTestServer.serverArgs'),
         '--server.ssl.enabled=true',
-        `--server.ssl.key=${KBN_KEY_PATH}`,
-        `--server.ssl.certificate=${KBN_CERT_PATH}`,
+        `--server.ssl.key=${OSD_KEY_PATH}`,
+        `--server.ssl.certificate=${OSD_CERT_PATH}`,
         `--server.ssl.redirectHttpFromPort=${redirectPort}`,
       ],
     },

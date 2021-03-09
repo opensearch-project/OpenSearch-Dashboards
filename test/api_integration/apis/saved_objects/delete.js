@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
-  const esArchiver = getService('esArchiver');
+  const opensearch = getService('legacyOpenSearch');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('delete', () => {
-    describe('with kibana index', () => {
-      before(() => esArchiver.load('saved_objects/basic'));
-      after(() => esArchiver.unload('saved_objects/basic'));
+    describe('with opensearch-dashboards index', () => {
+      before(() => opensearchArchiver.load('saved_objects/basic'));
+      after(() => opensearchArchiver.unload('saved_objects/basic'));
 
       it('should return 200 when deleting a doc', async () =>
         await supertest
@@ -50,17 +50,17 @@ export default function ({ getService }) {
           }));
     });
 
-    describe('without kibana index', () => {
+    describe('without opensearch-dashboards index', () => {
       before(
         async () =>
-          // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana',
+          // just in case the opensearch-dashboards server has recreated it
+          await opensearch.indices.delete({
+            index: '.opensearch-dashboards',
             ignore: [404],
           })
       );
 
-      it('returns generic 404 when kibana index is missing', async () =>
+      it('returns generic 404 when opensearch-dashboards index is missing', async () =>
         await supertest
           .delete(`/api/saved_objects/dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab`)
           .expect(404)

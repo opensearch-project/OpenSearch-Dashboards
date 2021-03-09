@@ -18,7 +18,7 @@
  */
 
 import { map as mapAsync } from 'bluebird';
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SettingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -39,19 +39,19 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async clickLinkText(text: string) {
       await find.clickByDisplayedLinkText(text);
     }
-    async clickKibanaSettings() {
+    async clickOpenSearchDashboardsSettings() {
       await testSubjects.click('settings');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('managementSettingsTitle');
     }
 
-    async clickKibanaSavedObjects() {
+    async clickOpenSearchDashboardsSavedObjects() {
       await testSubjects.click('objects');
       await PageObjects.savedObjects.waitTableIsLoaded();
     }
 
-    async clickKibanaIndexPatterns() {
-      log.debug('clickKibanaIndexPatterns link');
+    async clickOpenSearchDashboardsIndexPatterns() {
+      log.debug('clickOpenSearchDashboardsIndexPatterns link');
       await testSubjects.click('indexPatterns');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -323,7 +323,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     ) {
       await retry.try(async () => {
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await this.clickKibanaIndexPatterns();
+        await this.clickOpenSearchDashboardsIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickAddNewIndexPatternButton();
         if (!isStandardIndexPattern) {
@@ -356,7 +356,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async clickAddNewIndexPatternButton() {
-      await PageObjects.common.scrollKibanaBodyTop();
+      await PageObjects.common.scrollOpenSearchDashboardsBodyTop();
       await testSubjects.click('createIndexPatternButton');
     }
 

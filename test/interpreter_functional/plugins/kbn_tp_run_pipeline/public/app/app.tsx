@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { AppMountContext, AppMountParameters } from 'kibana/public';
+import { AppMountContext, AppMountParameters } from 'opensearch-dashboards/public';
 import { Main } from './components/main';
 
 export const renderApp = (context: AppMountContext, { element }: AppMountParameters) => {

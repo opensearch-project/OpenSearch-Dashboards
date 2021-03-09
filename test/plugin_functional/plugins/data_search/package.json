@@ -1,12 +1,12 @@
 {
   "name": "data_search_plugin",
   "version": "1.0.0",
-  "kibana": {
-    "version": "kibana"
+  "opensearchDashboards": {
+    "version": "opensearchDashboards"
   },
   "license": "Apache-2.0",
   "scripts": {
-    "kbn": "node ../../../../scripts/kbn.js",
+    "osd": "node ../../../../scripts/osd.js",
     "build": "rm -rf './target' && tsc"
   },
   "devDependencies": {

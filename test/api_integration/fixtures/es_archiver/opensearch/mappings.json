@@ -1,7 +1,7 @@
 {
   "type": "index",
   "value": {
-    "index": "elasticsearch",
+    "index": "opensearch",
     "settings": {
       "index": {
         "number_of_shards": "5",

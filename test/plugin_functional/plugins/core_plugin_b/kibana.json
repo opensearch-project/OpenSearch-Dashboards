@@ -1,7 +1,7 @@
 {
   "id": "core_plugin_b",
   "version": "0.0.1",
-  "kibanaVersion": "kibana",
+  "opensearchDashboardsVersion": "opensearchDashboards",
   "configPath": ["core_plugin_b"],
   "server": true,
   "ui": true,

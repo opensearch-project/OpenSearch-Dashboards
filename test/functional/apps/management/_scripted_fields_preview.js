@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.createIndexPattern();
 
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.clickScriptedFieldsTab();
       await PageObjects.settings.clickAddScriptedField();
@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }) {
 
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });
 

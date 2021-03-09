@@ -17,21 +17,21 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const testSubjects = getService('testSubjects');
-  const es = getService('legacyEs');
+  const opensearch = getService('legacyOpenSearch');
   const PageObjects = getPageObjects(['settings', 'common']);
   const security = getService('security');
 
   describe('"Create Index Pattern" wizard', function () {
     before(async function () {
-      // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({});
+      // delete .opensearch-dashboards index and then wait for OpenSearch Dashboardsto re-create it
+      await opensearchDashboardsServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
     });
 
     describe('step 1 next button', function () {
@@ -53,16 +53,16 @@ export default function ({ getService, getPageObjects }) {
 
     describe('index alias', () => {
       before(async function () {
-        await security.testUser.setRoles(['kibana_admin', 'test_alias1_reader']);
+        await security.testUser.setRoles(['opensearch_dashboards_admin', 'test_alias1_reader']);
       });
       it('can be an index pattern', async () => {
-        await es.transport.request({
+        await opensearch.transport.request({
           path: '/blogs/_doc',
           method: 'POST',
           body: { user: 'matt', message: 20 },
         });
 
-        await es.transport.request({
+        await opensearch.transport.request({
           path: '/_aliases',
           method: 'POST',
           body: { actions: [{ add: { index: 'blogs', alias: 'alias1' } }] },
@@ -72,12 +72,12 @@ export default function ({ getService, getPageObjects }) {
       });
 
       after(async () => {
-        await es.transport.request({
+        await opensearch.transport.request({
           path: '/_aliases',
           method: 'POST',
           body: { actions: [{ remove: { index: 'blogs', alias: 'alias1' } }] },
         });
-        await es.transport.request({
+        await opensearch.transport.request({
           path: '/blogs',
           method: 'DELETE',
         });

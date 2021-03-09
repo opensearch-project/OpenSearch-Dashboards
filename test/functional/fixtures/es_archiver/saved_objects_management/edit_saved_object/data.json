@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".opensearch-dashboards",
     "id": "index-pattern:logstash-*",
     "source": {
       "index-pattern": {
@@ -21,7 +21,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".opensearch-dashboards",
     "id": "visualization:75c3e060-1e7c-11e9-8488-65449e65d0ed",
     "source": {
       "visualization": {
@@ -30,7 +30,7 @@
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
-        "kibanaSavedObjectMeta": {
+        "opensearchDashboardsSavedObjectMeta": {
           "searchSourceJSON": "{\"index\":\"logstash-*\",\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
         }
       },
@@ -39,7 +39,7 @@
     },
     "references" : [
       {
-        "name" : "kibanaSavedObjectMeta.searchSourceJSON.index",
+        "name" : "opensearchDashboardsSavedObjectMeta.searchSourceJSON.index",
         "type" : "index-pattern",
         "id" : "logstash-*"
       }
@@ -50,7 +50,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".opensearch-dashboards",
     "id": "dashboard:i-exist",
     "source": {
       "dashboard": {
@@ -61,7 +61,7 @@
         "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
         "version": 1,
         "timeRestore": false,
-        "kibanaSavedObjectMeta": {
+        "opensearchDashboardsSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
         }
       },
@@ -74,7 +74,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".opensearch-dashboards",
     "id": "config:6.0.0",
     "source": {
       "config": {

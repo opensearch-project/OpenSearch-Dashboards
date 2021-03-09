@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": "kibana_sample_data_flights",
+    "index": "opensearch_dashboards_sample_data_flights",
     "mappings": {
       "properties": {
         "AvgTicketPrice": {

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
+import { Plugin, CoreSetup } from 'opensearch-dashboards/server';
+import { schema } from '@osd/config-schema';
 import { PluginARequestContext } from '../../core_plugin_a/server';
 
-declare module 'kibana/server' {
+declare module 'opensearch-dashboards/server' {
   interface RequestHandlerContext {
     pluginA?: PluginARequestContext;
   }

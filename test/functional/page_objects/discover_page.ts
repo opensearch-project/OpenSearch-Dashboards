@@ -29,7 +29,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
   const globalNav = getService('globalNav');
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
-  const elasticChart = getService('elasticChart');
+  const opensearchChart = getService('opensearchChart');
   const docTable = getService('docTable');
 
   class DiscoverPage {
@@ -148,13 +148,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickHistogramBar() {
-      const el = await elasticChart.getCanvas();
+      const el = await opensearchChart.getCanvas();
 
       await browser.getActions().move({ x: 0, y: 20, origin: el._webElement }).click().perform();
     }
 
     public async brushHistogram() {
-      const el = await elasticChart.getCanvas();
+      const el = await opensearchChart.getCanvas();
 
       await browser.dragAndDrop(
         { location: el, offset: { x: -300, y: 20 } },
@@ -354,7 +354,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async waitForChartLoadingComplete(renderCount: number) {
-      await elasticChart.waitForRenderingCount('discoverChart', renderCount);
+      await opensearchChart.waitForRenderingCount('discoverChart', renderCount);
     }
 
     public async waitForDocTableLoadingComplete() {

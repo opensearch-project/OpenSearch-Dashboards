@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('sample data', function describeIndexTests() {
     before(async () => {
-      await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
+      await security.testUser.setRoles(['opensearch_dashboards_admin', 'opensearch_dashboards_sample_admin']);
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });

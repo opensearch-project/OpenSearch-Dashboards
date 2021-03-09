@@ -17,45 +17,45 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { errors as esErrors } from 'elasticsearch';
+import expect from '@osd/expect';
+import { errors as opensearchErrors } from 'elasticsearch';
 import Boom from 'boom';
 
 import {
-  isEsIndexNotFoundError,
+  isOpenSearchIndexNotFoundError,
   createNoMatchingIndicesError,
   isNoMatchingIndicesError,
-  convertEsError,
+  convertOpenSearchError,
 } from '../../../../../src/plugins/data/server/index_patterns/fetcher/lib/errors';
 
 import { getIndexNotFoundError, getDocNotFoundError } from './lib';
 
 export default function ({ getService }) {
-  const es = getService('legacyEs');
-  const esArchiver = getService('esArchiver');
+  const opensearch = getService('legacyOpenSearch');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('index_patterns/* error handler', () => {
     let indexNotFoundError;
     let docNotFoundError;
     before(async () => {
-      await esArchiver.load('index_patterns/basic_index');
-      indexNotFoundError = await getIndexNotFoundError(es);
-      docNotFoundError = await getDocNotFoundError(es);
+      await opensearchArchiver.load('index_patterns/basic_index');
+      indexNotFoundError = await getIndexNotFoundError(opensearch);
+      docNotFoundError = await getDocNotFoundError(opensearch);
     });
     after(async () => {
-      await esArchiver.unload('index_patterns/basic_index');
+      await opensearchArchiver.unload('index_patterns/basic_index');
     });
 
-    describe('isEsIndexNotFoundError()', () => {
+    describe('isOpenSearchIndexNotFoundError()', () => {
       it('identifies index not found errors', () => {
-        if (!isEsIndexNotFoundError(indexNotFoundError)) {
-          throw new Error(`Expected isEsIndexNotFoundError(indexNotFoundError) to be true`);
+        if (!isOpenSearchIndexNotFoundError(indexNotFoundError)) {
+          throw new Error(`Expected isOpenSearchIndexNotFoundError(indexNotFoundError) to be true`);
         }
       });
 
       it('rejects doc not found errors', () => {
-        if (isEsIndexNotFoundError(docNotFoundError)) {
-          throw new Error(`Expected isEsIndexNotFoundError(docNotFoundError) to be true`);
+        if (isOpenSearchIndexNotFoundError(docNotFoundError)) {
+          throw new Error(`Expected isOpenSearchIndexNotFoundError(docNotFoundError) to be true`);
         }
       });
     });
@@ -96,20 +96,20 @@ export default function ({ getService }) {
       });
     });
 
-    describe('convertEsError()', () => {
+    describe('convertOpenSearchError()', () => {
       const indices = ['foo', 'bar'];
 
       it('converts indexNotFoundErrors into NoMatchingIndices errors', async () => {
-        const converted = convertEsError(indices, indexNotFoundError);
+        const converted = convertOpenSearchError(indices, indexNotFoundError);
         if (!isNoMatchingIndicesError(converted)) {
           throw new Error(
-            'expected convertEsError(indexNotFoundError) to return NoMatchingIndices error'
+            'expected convertOpenSearchError(indexNotFoundError) to return NoMatchingIndices error'
           );
         }
       });
 
       it('wraps other errors in Boom', async () => {
-        const error = new esErrors.AuthenticationException(
+        const error = new opensearchErrors.AuthenticationException(
           {
             root_cause: [
               {
@@ -126,7 +126,7 @@ export default function ({ getService }) {
         );
 
         expect(error).to.not.have.property('isBoom');
-        const converted = convertEsError(indices, error);
+        const converted = convertOpenSearchError(indices, error);
         expect(converted).to.have.property('isBoom');
         expect(converted.output.statusCode).to.be(403);
       });
@@ -136,7 +136,7 @@ export default function ({ getService }) {
         error.statusCode = 401;
         const boomError = Boom.boomify(error, { statusCode: error.statusCode });
 
-        const converted = convertEsError(indices, boomError);
+        const converted = convertOpenSearchError(indices, boomError);
 
         expect(converted.output.statusCode).to.be(401);
       });
@@ -147,7 +147,7 @@ export default function ({ getService }) {
         const boomError = Boom.boomify(error, { statusCode: error.statusCode });
         const wwwAuthenticate = 'Basic realm="Authorization Required"';
         boomError.output.headers['WWW-Authenticate'] = wwwAuthenticate;
-        const converted = convertEsError(indices, boomError);
+        const converted = convertOpenSearchError(indices, boomError);
 
         expect(converted.output.headers['WWW-Authenticate']).to.be(wwwAuthenticate);
       });

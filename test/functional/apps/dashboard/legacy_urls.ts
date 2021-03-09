@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
+ * Licensed to Elasticsearch B.V under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
+ * ownership. Elasticsearch B.V licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,17 +34,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const listingTable = getService('listingTable');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const security = getService('security');
 
-  let kibanaLegacyBaseUrl: string;
-  let kibanaVisualizeBaseUrl: string;
+  let opensearchDashboardsLegacyBaseUrl: string;
+  let opensearchDashboardsVisualizeBaseUrl: string;
   let testDashboardId: string;
 
   describe('legacy urls', function describeIndexTests() {
     before(async function () {
-      await security.testUser.setRoles(['kibana_admin', 'animals']);
-      await esArchiver.load('dashboard/current/kibana');
+      await security.testUser.setRoles(['opensearch_dashboards_admin', 'animals']);
+      await opensearchArchiver.load('dashboard/current/opensearch-dashboards');
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
@@ -53,9 +53,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const currentUrl = await browser.getCurrentUrl();
       await log.debug(`Current url is ${currentUrl}`);
       testDashboardId = /#\/view\/(.+)\?/.exec(currentUrl)![1];
-      kibanaLegacyBaseUrl =
+      opensearchDashboardsLegacyBaseUrl =
         currentUrl.substring(0, currentUrl.indexOf('/app/dashboards')) + '/app/kibana';
-      kibanaVisualizeBaseUrl =
+      opensearchDashboardsVisualizeBaseUrl =
         currentUrl.substring(0, currentUrl.indexOf('/app/dashboards')) + '/app/visualize';
       await log.debug(`id is ${testDashboardId}`);
     });
@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('kibana link redirect', () => {
       it('redirects from old kibana app URL', async () => {
-        const url = `${kibanaLegacyBaseUrl}#/dashboard/${testDashboardId}`;
+        const url = `${opensearchDashboardsLegacyBaseUrl}#/dashboard/${testDashboardId}`;
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.timePicker.setDefaultDataRange();
@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('redirects from legacy hash in wrong app', async () => {
-        const url = `${kibanaVisualizeBaseUrl}#/dashboard/${testDashboardId}`;
+        const url = `${opensearchDashboardsVisualizeBaseUrl}#/dashboard/${testDashboardId}`;
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.timePicker.setDefaultDataRange();

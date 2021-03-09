@@ -19,17 +19,17 @@
 
 import { format as formatUrl } from 'url';
 
-import * as legacyElasticsearch from 'elasticsearch';
+import * as legacyOpenSearch from 'elasticsearch';
 
-import { DEFAULT_API_VERSION } from '../../../src/core/server/elasticsearch/elasticsearch_config';
+import { DEFAULT_API_VERSION } from '../../../src/core/server/opensearch/opensearch_config';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function LegacyEsProvider({ getService }: FtrProviderContext): legacyElasticsearch.Client {
+export function LegacyOpenSearchProvider({ getService }: FtrProviderContext): legacyOpenSearch.Client {
   const config = getService('config');
 
-  return new legacyElasticsearch.Client({
+  return new legacyOpenSearch.Client({
     apiVersion: DEFAULT_API_VERSION,
-    host: formatUrl(config.get('servers.elasticsearch')),
-    requestTimeout: config.get('timeouts.esRequestTimeout'),
+    host: formatUrl(config.get('servers.opensearch')),
+    requestTimeout: config.get('timeouts.opensearchRequestTimeout'),
   });
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@osd/test/types/ftr';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -31,7 +31,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     services,
 
     junit: {
-      reportName: 'Kibana Visual Regression Tests',
+      reportName: 'OpenSearch DashboardsVisual Regression Tests',
     },
   };
 }

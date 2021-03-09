@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const toasts = getService('toasts');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
@@ -31,9 +31,9 @@ export default function ({ getService, getPageObjects }) {
   describe.skip('discover tab', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async function () {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('discover');
-      await kibanaServer.uiSettings.replace({
+      await opensearchArchiver.loadIfNeeded('logstash_functional');
+      await opensearchArchiver.load('discover');
+      await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();

@@ -18,38 +18,38 @@
  */
 
 import { format as formatUrl } from 'url';
-import { EsArchiver } from '@kbn/es-archiver';
+import { OpenSearchArchiver } from '@osd/opensearch-archiver';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // @ts-ignore not TS yet
-import * as KibanaServer from './kibana_server';
+import * as OpenSearchDashboardsServer from './opensearch_dasboards_server';
 
-export function EsArchiverProvider({ getService, hasService }: FtrProviderContext): EsArchiver {
+export function OpenSearchArchiverProvider({ getService, hasService }: FtrProviderContext): OpenSearchArchiver {
   const config = getService('config');
-  const client = getService('legacyEs');
+  const client = getService('legacyOpenSearch');
   const log = getService('log');
 
-  if (!config.get('esArchiver')) {
-    throw new Error(`esArchiver can't be used unless you specify it's config in your config file`);
+  if (!config.get('opensearchArchiver')) {
+    throw new Error(`opensearchArchiver can't be used unless you specify it's config in your config file`);
   }
 
-  const dataDir = config.get('esArchiver.directory');
+  const dataDir = config.get('opensearchArchiver.directory');
 
-  const esArchiver = new EsArchiver({
+  const opensearchArchiver = new OpenSearchArchiver({
     client,
     dataDir,
     log,
-    kibanaUrl: formatUrl(config.get('servers.kibana')),
+    opensearchDashboardsUrl: formatUrl(config.get('servers.opensearchDashboards')),
   });
 
-  if (hasService('kibanaServer')) {
-    KibanaServer.extendEsArchiver({
-      esArchiver,
-      kibanaServer: getService('kibanaServer'),
+  if (hasService('opensearchDashboardsServer')) {
+    OpenSearchDashboardsServer.extendOpenSearchArchiver({
+      opensearchArchiver,
+      opensearchDashboardsServer: getService('opensearchDashboardsServer'),
       retry: getService('retry'),
       defaults: config.get('uiSettings.defaults'),
     });
   }
 
-  return esArchiver;
+  return opensearchArchiver;
 }

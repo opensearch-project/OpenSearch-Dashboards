@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { ExpectExpression, expectExpressionProvider } from './helpers';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-function getCell(esaggsResult: any, column: number, row: number): unknown | undefined {
-  const columnId = esaggsResult?.columns[column]?.id;
+function getCell(opensearchaggsResult: any, column: number, row: number): unknown | undefined {
+  const columnId = opensearchaggsResult?.columns[column]?.id;
   if (!columnId) {
     return;
   }
-  return esaggsResult?.rows[row]?.[columnId];
+  return opensearchaggsResult?.rows[row]?.[columnId];
 }
 
 export default function ({
@@ -34,7 +34,7 @@ export default function ({
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
   let expectExpression: ExpectExpression;
-  describe('esaggs pipeline expression tests', () => {
+  describe('opensearchaggs pipeline expression tests', () => {
     before(() => {
       expectExpression = expectExpressionProvider({ getService, updateBaselines });
     });
@@ -47,10 +47,10 @@ export default function ({
           to: '2015-09-22T00:00:00Z',
         };
         const expression = `
-          kibana_context timeRange='${JSON.stringify(timeRange)}'
-          | esaggs index='logstash-*' aggConfigs='${JSON.stringify(aggConfigs)}'
+          opensearch_dashboards_context timeRange='${JSON.stringify(timeRange)}'
+          | opensearchaggs index='logstash-*' aggConfigs='${JSON.stringify(aggConfigs)}'
         `;
-        const result = await expectExpression('esaggs_primary_timefield', expression).getResponse();
+        const result = await expectExpression('opensearchaggs_primary_timefield', expression).getResponse();
         expect(getCell(result, 0, 0)).to.be(9375);
       });
 
@@ -61,12 +61,12 @@ export default function ({
           to: '2015-09-22T00:00:00Z',
         };
         const expression = `
-          kibana_context timeRange='${JSON.stringify(timeRange)}'
-          | esaggs index='logstash-*' timeFields='relatedContent.article:published_time' aggConfigs='${JSON.stringify(
+          opensearch_dashboards_context timeRange='${JSON.stringify(timeRange)}'
+          | opensearchaggs index='logstash-*' timeFields='relatedContent.article:published_time' aggConfigs='${JSON.stringify(
             aggConfigs
           )}'
         `;
-        const result = await expectExpression('esaggs_other_timefield', expression).getResponse();
+        const result = await expectExpression('opensearchaggs_other_timefield', expression).getResponse();
         expect(getCell(result, 0, 0)).to.be(11134);
       });
 
@@ -77,13 +77,13 @@ export default function ({
           to: '2015-09-22T00:00:00Z',
         };
         const expression = `
-          kibana_context timeRange='${JSON.stringify(timeRange)}'
-          | esaggs index='logstash-*' timeFields='relatedContent.article:published_time' timeFields='@timestamp' aggConfigs='${JSON.stringify(
+          opensearch_dashboards_context timeRange='${JSON.stringify(timeRange)}'
+          | opensearchaggs index='logstash-*' timeFields='relatedContent.article:published_time' timeFields='@timestamp' aggConfigs='${JSON.stringify(
             aggConfigs
           )}'
         `;
         const result = await expectExpression(
-          'esaggs_multiple_timefields',
+          'opensearchaggs_multiple_timefields',
           expression
         ).getResponse();
         expect(getCell(result, 0, 0)).to.be(7452);

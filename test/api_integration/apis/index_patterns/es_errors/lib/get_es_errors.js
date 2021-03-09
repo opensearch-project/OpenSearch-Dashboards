@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
-export async function getIndexNotFoundError(es) {
+export async function getIndexNotFoundError(opensearch) {
   try {
-    await es.indices.get({
+    await opensearch.indices.get({
       index: 'SHOULD NOT EXIST',
     });
   } catch (err) {
@@ -29,12 +29,12 @@ export async function getIndexNotFoundError(es) {
     return err;
   }
 
-  throw new Error('Expected es.indices.get() call to fail');
+  throw new Error('Expected opensearch.indices.get() call to fail');
 }
 
-export async function getDocNotFoundError(es) {
+export async function getDocNotFoundError(opensearch) {
   try {
-    await es.get({
+    await opensearch.get({
       index: 'basic_index',
       type: 'type',
       id: '1234',
@@ -44,5 +44,5 @@ export async function getDocNotFoundError(es) {
     return err;
   }
 
-  throw new Error('Expected es.get() call to fail');
+  throw new Error('Expected opensearch.get() call to fail');
 }

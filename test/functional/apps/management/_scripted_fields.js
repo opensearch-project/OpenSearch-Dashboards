@@ -33,11 +33,11 @@
 //   appends closing braces, for exmaple, if you type opening square brace [
 //   it will automatically insert a a closing square brace ], etc.
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const log = getService('log');
   const browser = getService('browser');
   const retry = getService('retry');
@@ -59,21 +59,21 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await esArchiver.load('discover');
-      // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({});
-      await kibanaServer.uiSettings.update({});
+      await opensearchArchiver.load('discover');
+      // delete .opensearch-dashboards index and then wait for OpenSearch Dashboardsto re-create it
+      await opensearchDashboardsServer.uiSettings.replace({});
+      await opensearchDashboardsServer.uiSettings.update({});
     });
 
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });
 
     it('should not allow saving of invalid scripts', async function () {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.clickScriptedFieldsTab();
       await PageObjects.settings.clickAddScriptedField();
@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create and edit scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
@@ -245,7 +245,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
@@ -340,7 +340,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
@@ -436,7 +436,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();

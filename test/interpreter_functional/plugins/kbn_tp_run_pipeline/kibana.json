@@ -1,11 +1,11 @@
 {
-  "id": "kbn_tp_run_pipeline",
+  "id": "osd_tp_run_pipeline",
   "version": "0.0.1",
-  "kibanaVersion": "kibana",
+  "opensearchDashboardsVersion": "opensearchDashboards",
   "requiredPlugins": [
     "data",
     "savedObjects",
-    "kibanaUtils",
+    "opensearchDashboardsUtils",
     "expressions"
   ],
   "server": false,

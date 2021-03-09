@@ -1,8 +1,7 @@
 {
-  "id": "core_plugin_route_timeouts",
+  "id": "opensearch_client_plugin",
   "version": "0.0.1",
   "opensearchDashboardsVersion": "opensearchDashboards",
-  "configPath": ["core_plugin_route_timeouts"],
   "server": true,
   "ui": false
 }

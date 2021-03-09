@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -25,7 +25,7 @@ export default function ({ getService }) {
     describe('compression', () => {
       it(`uses compression when there isn't a referer`, async () => {
         await supertest
-          .get('/app/kibana')
+          .get('/app/opensearch-dashboards')
           .set('accept-encoding', 'gzip')
           .then((response) => {
             expect(response.headers).to.have.property('content-encoding', 'gzip');
@@ -34,7 +34,7 @@ export default function ({ getService }) {
 
       it(`uses compression when there is a whitelisted referer`, async () => {
         await supertest
-          .get('/app/kibana')
+          .get('/app/opensearch-dashboards')
           .set('accept-encoding', 'gzip')
           .set('referer', 'https://some-host.com')
           .then((response) => {
@@ -44,7 +44,7 @@ export default function ({ getService }) {
 
       it(`doesn't use compression when there is a non-whitelisted referer`, async () => {
         await supertest
-          .get('/app/kibana')
+          .get('/app/opensearch-dashboards')
           .set('accept-encoding', 'gzip')
           .set('referer', 'https://other.some-host.com')
           .then((response) => {

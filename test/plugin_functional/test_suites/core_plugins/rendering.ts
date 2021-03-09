@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 import '../../plugins/core_provider_plugin/types';
 import { PluginFunctionalProviderContext } from '../../services';
@@ -54,11 +54,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
   const getUserSettings = () =>
     browser.execute(() => {
-      return JSON.parse(document.querySelector('kbn-injected-metadata')!.getAttribute('data')!)
+      return JSON.parse(document.querySelector('osd-injected-metadata')!.getAttribute('data')!)
         .legacyMetadata.uiSettings.user;
     });
   const exists = (selector: string) => testSubjects.exists(selector, { timeout: 5000 });
-  const findLoadingMessage = () => testSubjects.find('kbnLoadingMessage', 5000);
+  const findLoadingMessage = () => testSubjects.find('osdLoadingMessage', 5000);
   const getRenderingSession = () =>
     browser.execute(() => {
       return window.__RENDERING_SESSION__;

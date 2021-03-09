@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from 'opensearch-dashboards/public';
 import { NewsFeedSimulatorPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {

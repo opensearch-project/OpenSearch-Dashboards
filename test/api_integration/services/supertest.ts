@@ -21,14 +21,14 @@ import { format as formatUrl } from 'url';
 
 import supertestAsPromised from 'supertest-as-promised';
 
-export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
+export function OpenSearchDashboardsSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
-  const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
-  return supertestAsPromised(kibanaServerUrl);
+  const opensearchDashboardsServerUrl = formatUrl(config.get('servers.opensearchDashboards'));
+  return supertestAsPromised(opensearchDashboardsServerUrl);
 }
 
-export function ElasticsearchSupertestProvider({ getService }: FtrProviderContext) {
+export function OpenSearchSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
-  const elasticSearchServerUrl = formatUrl(config.get('servers.elasticsearch'));
+  const elasticSearchServerUrl = formatUrl(config.get('servers.opensearch'));
   return supertestAsPromised(elasticSearchServerUrl);
 }

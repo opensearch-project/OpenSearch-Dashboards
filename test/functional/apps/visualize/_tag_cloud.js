@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
@@ -150,7 +150,7 @@ export default function ({ getService, getPageObjects }) {
     describe('formatted field', function () {
       before(async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
@@ -168,7 +168,7 @@ export default function ({ getService, getPageObjects }) {
       after(async function () {
         await filterBar.removeFilter(termsField);
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);

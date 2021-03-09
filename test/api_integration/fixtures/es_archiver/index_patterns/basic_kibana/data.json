@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".opensearch-dashboards",
     "id": "index-pattern:91200a00-9efd-11e7-acb3-3dab96693fab",
     "source": {
       "type": "index-pattern",

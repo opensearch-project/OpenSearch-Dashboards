@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { Client, DeleteDocumentParams, GetParams, GetResponse } from 'elasticsearch';
 import { TelemetrySavedObjectAttributes } from 'src/plugins/telemetry/server/telemetry_repository';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function optInTest({ getService }: FtrProviderContext) {
-  const client: Client = getService('legacyEs');
+  const client: Client = getService('legacyOpenSearch');
   const supertest = getService('supertest');
 
   describe('/api/telemetry/v2/userHasSeenNotice API Telemetry User has seen OptIn Notice', () => {
     it('should update telemetry setting field via PUT', async () => {
       try {
         await client.delete({
-          index: '.kibana',
+          index: '.opensearch-dashboards',
           id: 'telemetry:telemetry',
         } as DeleteDocumentParams);
       } catch (err) {
@@ -39,14 +39,14 @@ export default function optInTest({ getService }: FtrProviderContext) {
         }
       }
 
-      await supertest.put('/api/telemetry/v2/userHasSeenNotice').set('kbn-xsrf', 'xxx').expect(200);
+      await supertest.put('/api/telemetry/v2/userHasSeenNotice').set('osd-xsrf', 'xxx').expect(200);
 
       const {
         _source: { telemetry },
       }: GetResponse<{
         telemetry: TelemetrySavedObjectAttributes;
       }> = await client.get({
-        index: '.kibana',
+        index: '.opensearch-dashboards',
         id: 'telemetry:telemetry',
       } as GetParams);
 

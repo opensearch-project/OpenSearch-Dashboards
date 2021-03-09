@@ -17,29 +17,29 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['settings', 'common', 'dashboard', 'timePicker', 'header']);
 
-  describe('kibana settings', function describeIndexTests() {
+  describe('opensearch-dashboards settings', function describeIndexTests() {
     before(async function () {
-      // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({});
+      // delete .opensearch-dashboards index and then wait for OpenSearch Dashboardsto re-create it
+      await opensearchDashboardsServer.uiSettings.replace({});
       await PageObjects.settings.createIndexPattern('logstash-*');
       await PageObjects.settings.navigateTo();
     });
 
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });
 
     it('should allow setting advanced settings', async function () {
-      await PageObjects.settings.clickKibanaSettings();
+      await PageObjects.settings.clickOpenSearchDashboardsSettings();
       await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'America/Phoenix');
       const advancedSetting = await PageObjects.settings.getAdvancedSettings('dateFormat:tz');
       expect(advancedSetting).to.be('America/Phoenix');
@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
       }
 
       it('defaults to null', async () => {
-        await PageObjects.settings.clickKibanaSettings();
+        await PageObjects.settings.clickOpenSearchDashboardsSettings();
         const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox(
           'state:storeInSessionStorage'
         );
@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('setting to true change is preserved', async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaSettings();
+        await PageObjects.settings.clickOpenSearchDashboardsSettings();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
         const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox(
           'state:storeInSessionStorage'
@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }) {
       it("changing 'state:storeInSessionStorage' also takes effect without full page reload", async () => {
         await PageObjects.dashboard.preserveCrossAppState();
         await PageObjects.header.clickStackManagement();
-        await PageObjects.settings.clickKibanaSettings();
+        await PageObjects.settings.clickOpenSearchDashboardsSettings();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
         await PageObjects.header.clickDashboard();
         const [globalState, appState] = await getStateFromUrl();
@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async function () {
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+      await opensearchDashboardsServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
       await browser.refresh();
     });
   });

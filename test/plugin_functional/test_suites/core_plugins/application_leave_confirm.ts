@@ -17,14 +17,14 @@
  * under the License.
  */
 import url from 'url';
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
-const getKibanaUrl = (pathname?: string, search?: string) =>
+const getOpenSearchDashboardsUrl = (pathname?: string, search?: string) =>
   url.format({
     protocol: 'http:',
-    hostname: process.env.TEST_KIBANA_HOST || 'localhost',
-    port: process.env.TEST_KIBANA_PORT || '5620',
+    hostname: process.env.TEST_OPENSEARCH_DASHBOARDS_HOST || 'localhost',
+    port: process.env.TEST_OPENSEARCH_DASHBOARDS_PORT || '5620',
     pathname,
     search,
   });
@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
         await testSubjects.existOrFail('appLeaveConfirmModal');
         await PageObjects.common.clickCancelOnModal(false);
-        expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/appleave1'));
+        expect(await browser.getCurrentUrl()).to.eql(getOpenSearchDashboardsUrl('/app/appleave1'));
       });
       it('allows navigation if user click confirm on the confirmation dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');
@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
         await testSubjects.existOrFail('appLeaveConfirmModal');
         await PageObjects.common.clickConfirmOnModal();
-        expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/appleave2'));
+        expect(await browser.getCurrentUrl()).to.eql(getOpenSearchDashboardsUrl('/app/appleave2'));
       });
     });
   });

@@ -1,8 +1,8 @@
 {
-  "id": "kbn_top_nav",
+  "id": "osd_top_nav",
   "version": "0.0.1",
-  "kibanaVersion": "kibana",
-  "configPath": ["kbn_top_nav"],
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "configPath": ["osd_top_nav"],
   "server": false,
   "ui": true,
   "requiredPlugins": ["navigation"]

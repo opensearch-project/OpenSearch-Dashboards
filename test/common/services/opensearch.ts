@@ -20,25 +20,25 @@
 import { format as formatUrl } from 'url';
 import fs from 'fs';
 import { Client } from '@elastic/elasticsearch';
-import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { CA_CERT_PATH } from '@osd/dev-utils';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function ElasticsearchProvider({ getService }: FtrProviderContext) {
+export function OpenSearchProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
 
   if (process.env.TEST_CLOUD) {
     return new Client({
-      nodes: [formatUrl(config.get('servers.elasticsearch'))],
-      requestTimeout: config.get('timeouts.esRequestTimeout'),
+      nodes: [formatUrl(config.get('servers.opensearch'))],
+      requestTimeout: config.get('timeouts.opensearchRequestTimeout'),
     });
   } else {
     return new Client({
       ssl: {
         ca: fs.readFileSync(CA_CERT_PATH, 'utf-8'),
       },
-      nodes: [formatUrl(config.get('servers.elasticsearch'))],
-      requestTimeout: config.get('timeouts.esRequestTimeout'),
+      nodes: [formatUrl(config.get('servers.opensearch'))],
+      requestTimeout: config.get('timeouts.opensearchRequestTimeout'),
     });
   }
 }

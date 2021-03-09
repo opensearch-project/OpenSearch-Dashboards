@@ -23,12 +23,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'home']);
   const a11y = getService('a11y');
 
-  describe('Kibana overview', () => {
-    const esArchiver = getService('esArchiver');
+  describe('OpenSearch Dashboardsoverview', () => {
+    const opensearchArchiver = getService('opensearchArchiver');
 
     before(async () => {
-      await esArchiver.load('empty_kibana');
-      await PageObjects.common.navigateToApp('kibanaOverview');
+      await opensearchArchiver.load('empty_opensearch_dashboards');
+      await PageObjects.common.navigateToApp('opensearchDashboardsOverview');
     });
 
     after(async () => {
@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         useActualUrl: true,
       });
       await PageObjects.home.removeSampleDataSet('flights');
-      await esArchiver.unload('empty_kibana');
+      await opensearchArchiver.unload('empty_opensearch_dashboards');
     });
 
     it('Getting started view', async () => {
@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         useActualUrl: true,
       });
       await PageObjects.home.addSampleDataSet('flights');
-      await PageObjects.common.navigateToApp('kibanaOverview');
+      await PageObjects.common.navigateToApp('opensearchDashboardsOverview');
       await a11y.testAppSnapshot();
     });
   });

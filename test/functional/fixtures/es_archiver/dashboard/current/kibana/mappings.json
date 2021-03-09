@@ -2,10 +2,10 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".kibana": {
+      ".opensearch-dashboards": {
       }
     },
-    "index": ".kibana_1",
+    "index": ".opensearch-dashboards_1",
     "mappings": {
       "_meta": {
         "migrationMappingPropertyHashes": {
@@ -115,7 +115,7 @@
             "hits": {
               "type": "integer"
             },
-            "kibanaSavedObjectMeta": {
+            "opensearchDashboardsSavedObjectMeta": {
               "properties": {
                 "searchSourceJSON": {
                   "type": "text"
@@ -313,7 +313,7 @@
             "hits": {
               "type": "integer"
             },
-            "kibanaSavedObjectMeta": {
+            "opensearchDashboardsSavedObjectMeta": {
               "properties": {
                 "searchSourceJSON": {
                   "type": "text"
@@ -374,7 +374,7 @@
             "hits": {
               "type": "integer"
             },
-            "kibanaSavedObjectMeta": {
+            "opensearchDashboardsSavedObjectMeta": {
               "properties": {
                 "searchSourceJSON": {
                   "type": "text"
@@ -453,7 +453,7 @@
             "description": {
               "type": "text"
             },
-            "kibanaSavedObjectMeta": {
+            "opensearchDashboardsSavedObjectMeta": {
               "properties": {
                 "searchSourceJSON": {
                   "type": "text"

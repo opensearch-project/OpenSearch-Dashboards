@@ -17,28 +17,28 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const security = getService('security');
   const fromTime = 'Jan 1, 2019 @ 00:00:00.000';
   const toTime = 'Jan 1, 2019 @ 23:59:59.999';
 
   describe('date_nanos_mixed', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('date_nanos_mixed');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'timestamp-*' });
-      await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_mixed']);
+      await opensearchArchiver.loadIfNeeded('date_nanos_mixed');
+      await opensearchDashboardsServer.uiSettings.replace({ defaultIndex: 'timestamp-*' });
+      await security.testUser.setRoles(['opensearch_dashboards_admin', 'opensearch_dashboards_date_nanos_mixed']);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      esArchiver.unload('date_nanos_mixed');
+      opensearchArchiver.unload('date_nanos_mixed');
     });
 
     it('shows a list of records of indices with date & date_nanos fields in the right order', async function () {

@@ -22,17 +22,17 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'share', 'timePicker']);
   const a11y = getService('a11y');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
   const TEST_COLUMN_NAMES = ['extension', 'geo.src'];
 
   describe('Discover a11y tests', () => {
     before(async () => {
-      await esArchiver.load('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await kibanaServer.uiSettings.update({
+      await opensearchArchiver.load('discover');
+      await opensearchArchiver.loadIfNeeded('logstash_functional');
+      await opensearchDashboardsServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });
       await PageObjects.common.navigateToApp('discover');
@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('logstash_functional');
+      await opensearchArchiver.unload('logstash_functional');
     });
 
     it('Discover main page', async () => {

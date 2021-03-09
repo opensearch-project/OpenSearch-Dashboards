@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'opensearch-dashboards/public';
 import { CorePluginAPluginSetup } from '../../core_plugin_a/public/plugin';
 
 declare global {

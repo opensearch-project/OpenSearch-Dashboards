@@ -17,25 +17,25 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 const TEST_INDEX_PATTERN = 'date_nanos_custom_timestamp';
 const TEST_DEFAULT_CONTEXT_SIZE = 1;
 const TEST_STEP_SIZE = 3;
 
 export default function ({ getService, getPageObjects }) {
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const docTable = getService('docTable');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('context view for date_nanos with custom timestamp', () => {
     before(async function () {
-      await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_custom']);
-      await esArchiver.loadIfNeeded('date_nanos_custom');
-      await kibanaServer.uiSettings.replace({ defaultIndex: TEST_INDEX_PATTERN });
-      await kibanaServer.uiSettings.update({
+      await security.testUser.setRoles(['opensearch_dashboards_admin', 'opensearch_dashboards_date_nanos_custom']);
+      await opensearchArchiver.loadIfNeeded('date_nanos_custom');
+      await opensearchDashboardsServer.uiSettings.replace({ defaultIndex: TEST_INDEX_PATTERN });
+      await opensearchDashboardsServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
       });
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }) {
 
     after(async function () {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('date_nanos_custom');
+      await opensearchArchiver.unload('date_nanos_custom');
     });
   });
 }

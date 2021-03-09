@@ -25,7 +25,7 @@ import {
   AppUpdatableFields,
   CoreStart,
   AppMountParameters,
-} from 'kibana/public';
+} from 'opensearch-dashboards/public';
 import { renderApp } from './application';
 import './types';
 

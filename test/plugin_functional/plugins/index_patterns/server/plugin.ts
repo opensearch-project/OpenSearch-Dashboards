@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
+import { CoreSetup, Plugin } from 'opensearch-dashboards/server';
+import { schema } from '@osd/config-schema';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 
 export interface IndexPatternsTestStartDeps {

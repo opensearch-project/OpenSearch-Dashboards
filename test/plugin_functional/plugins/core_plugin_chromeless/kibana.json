@@ -1,7 +1,7 @@
 {
   "id": "core_plugin_chromeless",
   "version": "0.0.1",
-  "kibanaVersion": "kibana",
+  "opensearchDashboardsVersion": "opensearchDashboards",
   "configPath": ["core_plugin_chromeless"],
   "server": false,
   "ui": true

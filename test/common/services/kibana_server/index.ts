@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { KibanaServerProvider } from './kibana_server';
+export { OpenSearchDashboardsServerProvider } from './opensearch_dasboards_server';
 // @ts-ignore
-export { extendEsArchiver } from './extend_es_archiver';
+export { extendOpenSearchArchiver } from './extend_opensearch_archiver';

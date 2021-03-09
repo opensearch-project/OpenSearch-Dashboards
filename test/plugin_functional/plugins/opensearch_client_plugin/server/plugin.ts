@@ -18,27 +18,27 @@
  */
 import { Plugin, CoreSetup, CoreStart, ICustomClusterClient } from 'src/core/server';
 
-export class ElasticsearchClientPlugin implements Plugin {
+export class OpenSearchClientPlugin implements Plugin {
   private client?: ICustomClusterClient;
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
     router.get(
-      { path: '/api/elasticsearch_client_plugin/context/ping', validate: false },
+      { path: '/api/opensearch_client_plugin/context/ping', validate: false },
       async (context, req, res) => {
-        const { body } = await context.core.elasticsearch.client.asInternalUser.ping();
+        const { body } = await context.core.opensearch.client.asInternalUser.ping();
         return res.ok({ body: JSON.stringify(body) });
       }
     );
     router.get(
-      { path: '/api/elasticsearch_client_plugin/contract/ping', validate: false },
+      { path: '/api/opensearch_client_plugin/contract/ping', validate: false },
       async (context, req, res) => {
         const [coreStart] = await core.getStartServices();
-        const { body } = await coreStart.elasticsearch.client.asInternalUser.ping();
+        const { body } = await coreStart.opensearch.client.asInternalUser.ping();
         return res.ok({ body: JSON.stringify(body) });
       }
     );
     router.get(
-      { path: '/api/elasticsearch_client_plugin/custom_client/ping', validate: false },
+      { path: '/api/opensearch_client_plugin/custom_client/ping', validate: false },
       async (context, req, res) => {
         const { body } = await this.client!.asInternalUser.ping();
         return res.ok({ body: JSON.stringify(body) });
@@ -47,7 +47,7 @@ export class ElasticsearchClientPlugin implements Plugin {
   }
 
   public start(core: CoreStart) {
-    this.client = core.elasticsearch.createClient('my-custom-client-test');
+    this.client = core.opensearch.createClient('my-custom-client-test');
   }
   public stop() {}
 }

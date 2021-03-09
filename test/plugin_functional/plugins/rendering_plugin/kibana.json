@@ -1,7 +1,7 @@
 {
   "id": "rendering_plugin",
   "version": "0.0.1",
-  "kibanaVersion": "kibana",
+  "opensearchDashboardsVersion": "opensearchDashboards",
   "configPath": ["rendering_plugin"],
   "server": true,
   "ui": true

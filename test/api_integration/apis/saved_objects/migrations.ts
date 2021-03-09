@@ -23,13 +23,13 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
-import expect from '@kbn/expect';
-import { ElasticsearchClient, SavedObjectMigrationMap, SavedObjectsType } from 'src/core/server';
-import { SearchResponse } from '../../../../src/core/server/elasticsearch/client';
+import expect from '@osd/expect';
+import { OpenSearchClient, SavedObjectMigrationMap, SavedObjectsType } from 'src/core/server';
+import { SearchResponse } from '../../../../src/core/server/opensearch/client';
 import {
   DocumentMigrator,
   IndexMigrator,
-  createMigrationEsClient,
+  createMigrationOpenSearchClient,
 } from '../../../../src/core/server/saved_objects/migrations/core';
 import { SavedObjectsTypeMappingDefinitions } from '../../../../src/core/server/saved_objects/mappings';
 
@@ -52,10 +52,10 @@ function getLogMock() {
   };
 }
 export default ({ getService }: FtrProviderContext) => {
-  const esClient = getService('es');
+  const opensearchClient = getService('opensearch');
 
-  describe('Kibana index migration', () => {
-    before(() => esClient.indices.delete({ index: '.migrate-*' }));
+  describe('OpenSearch Dashboardsindex migration', () => {
+    before(() => opensearchClient.indices.delete({ index: '.migrate-*' }));
 
     it('Migrates an existing index that has never been migrated before', async () => {
       const index = '.migration-a';
@@ -83,11 +83,11 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
 
-      await createIndex({ esClient, index });
-      await createDocs({ esClient, index, docs: originalDocs });
+      await createIndex({ opensearchClient, index });
+      await createDocs({ opensearchClient, index, docs: originalDocs });
 
       // Test that unrelated index templates are unaffected
-      await esClient.indices.putTemplate({
+      await opensearchClient.indices.putTemplate({
         name: 'migration_test_a_template',
         body: {
           index_patterns: 'migration_test_a',
@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       // Test that obsolete index templates get removed
-      await esClient.indices.putTemplate({
+      await opensearchClient.indices.putTemplate({
         name: 'migration_a_template',
         body: {
           index_patterns: index,
@@ -110,25 +110,25 @@ export default ({ getService }: FtrProviderContext) => {
         },
       });
 
-      const migrationATemplate = await esClient.indices.existsTemplate({
+      const migrationATemplate = await opensearchClient.indices.existsTemplate({
         name: 'migration_a_template',
       });
       expect(migrationATemplate.body).to.be.ok();
 
       const result = await migrateIndex({
-        esClient,
+        opensearchClient,
         index,
         migrations,
         mappingProperties,
         obsoleteIndexTemplatePattern: 'migration_a*',
       });
 
-      const migrationATemplateAfter = await esClient.indices.existsTemplate({
+      const migrationATemplateAfter = await opensearchClient.indices.existsTemplate({
         name: 'migration_a_template',
       });
 
       expect(migrationATemplateAfter.body).not.to.be.ok();
-      const migrationTestATemplateAfter = await esClient.indices.existsTemplate({
+      const migrationTestATemplateAfter = await opensearchClient.indices.existsTemplate({
         name: 'migration_test_a_template',
       });
 
@@ -140,7 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       // The docs in the original index are unchanged
-      expect(await fetchDocs(esClient, `${index}_1`)).to.eql([
+      expect(await fetchDocs(opensearchClient, `${index}_1`)).to.eql([
         { id: 'bar:i', type: 'bar', bar: { nomnom: 33 } },
         { id: 'bar:o', type: 'bar', bar: { nomnom: 2 } },
         { id: 'baz:u', type: 'baz', baz: { title: 'Terrific!' } },
@@ -149,7 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
 
       // The docs in the alias have been migrated
-      expect(await fetchDocs(esClient, index)).to.eql([
+      expect(await fetchDocs(opensearchClient, index)).to.eql([
         {
           id: 'bar:i',
           type: 'bar',
@@ -207,20 +207,20 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
 
-      await createIndex({ esClient, index });
-      await createDocs({ esClient, index, docs: originalDocs });
+      await createIndex({ opensearchClient, index });
+      await createDocs({ opensearchClient, index, docs: originalDocs });
 
-      await migrateIndex({ esClient, index, migrations, mappingProperties });
+      await migrateIndex({ opensearchClient, index, migrations, mappingProperties });
 
       // @ts-expect-error name doesn't exist on mynum type
       mappingProperties.bar.properties.name = { type: 'keyword' };
       migrations.foo['2.0.1'] = (doc) => set(doc, 'attributes.name', `${doc.attributes.name}v2`);
       migrations.bar['2.3.4'] = (doc) => set(doc, 'attributes.name', `NAME ${doc.id}`);
 
-      await migrateIndex({ esClient, index, migrations, mappingProperties });
+      await migrateIndex({ opensearchClient, index, migrations, mappingProperties });
 
       // The index for the initial migration has not been destroyed...
-      expect(await fetchDocs(esClient, `${index}_2`)).to.eql([
+      expect(await fetchDocs(opensearchClient, `${index}_2`)).to.eql([
         {
           id: 'bar:i',
           type: 'bar',
@@ -252,7 +252,7 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
 
       // The docs were migrated again...
-      expect(await fetchDocs(esClient, index)).to.eql([
+      expect(await fetchDocs(opensearchClient, index)).to.eql([
         {
           id: 'bar:i',
           type: 'bar',
@@ -284,7 +284,7 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
     });
 
-    it('Coordinates migrations across the Kibana cluster', async () => {
+    it('Coordinates migrations across the OpenSearch Dashboardscluster', async () => {
       const index = '.migration-c';
       const originalDocs = [{ id: 'foo:lotr', type: 'foo', foo: { name: 'Lord of the Rings' } }];
 
@@ -298,12 +298,12 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
 
-      await createIndex({ esClient, index });
-      await createDocs({ esClient, index, docs: originalDocs });
+      await createIndex({ opensearchClient, index });
+      await createDocs({ opensearchClient, index, docs: originalDocs });
 
       const result = await Promise.all([
-        migrateIndex({ esClient, index, migrations, mappingProperties }),
-        migrateIndex({ esClient, index, migrations, mappingProperties }),
+        migrateIndex({ opensearchClient, index, migrations, mappingProperties }),
+        migrateIndex({ opensearchClient, index, migrations, mappingProperties }),
       ]);
 
       // The polling instance and the migrating instance should both
@@ -318,17 +318,17 @@ export default ({ getService }: FtrProviderContext) => {
         { status: 'skipped', destIndex: undefined },
       ]);
 
-      const { body } = await esClient.cat.indices({ index: '.migration-c*', format: 'json' });
+      const { body } = await opensearchClient.cat.indices({ index: '.migration-c*', format: 'json' });
       // It only created the original and the dest
       expect(_.map(body, 'index').sort()).to.eql(['.migration-c_1', '.migration-c_2']);
 
       // The docs in the original index are unchanged
-      expect(await fetchDocs(esClient, `${index}_1`)).to.eql([
+      expect(await fetchDocs(opensearchClient, `${index}_1`)).to.eql([
         { id: 'foo:lotr', type: 'foo', foo: { name: 'Lord of the Rings' } },
       ]);
 
       // The docs in the alias have been migrated
-      expect(await fetchDocs(esClient, index)).to.eql([
+      expect(await fetchDocs(opensearchClient, index)).to.eql([
         {
           id: 'foo:lotr',
           type: 'foo',
@@ -341,47 +341,47 @@ export default ({ getService }: FtrProviderContext) => {
   });
 };
 
-async function createIndex({ esClient, index }: { esClient: ElasticsearchClient; index: string }) {
-  await esClient.indices.delete({ index: `${index}*` }, { ignore: [404] });
+async function createIndex({ opensearchClient, index }: { opensearchClient: OpenSearchClient; index: string }) {
+  await opensearchClient.indices.delete({ index: `${index}*` }, { ignore: [404] });
   const properties = {
     type: { type: 'keyword' },
     foo: { properties: { name: { type: 'keyword' } } },
     bar: { properties: { nomnom: { type: 'integer' } } },
     baz: { properties: { title: { type: 'keyword' } } },
   };
-  await esClient.indices.create({
+  await opensearchClient.indices.create({
     index,
     body: { mappings: { dynamic: 'strict', properties } },
   });
 }
 
 async function createDocs({
-  esClient,
+  opensearchClient,
   index,
   docs,
 }: {
-  esClient: ElasticsearchClient;
+  opensearchClient: OpenSearchClient;
   index: string;
   docs: any[];
 }) {
-  await esClient.bulk({
+  await opensearchClient.bulk({
     body: docs.reduce((acc, doc) => {
       acc.push({ index: { _id: doc.id, _index: index } });
       acc.push(_.omit(doc, 'id'));
       return acc;
     }, []),
   });
-  await esClient.indices.refresh({ index });
+  await opensearchClient.indices.refresh({ index });
 }
 
 async function migrateIndex({
-  esClient,
+  opensearchClient,
   index,
   migrations,
   mappingProperties,
   obsoleteIndexTemplatePattern,
 }: {
-  esClient: ElasticsearchClient;
+  opensearchClient: OpenSearchClient;
   index: string;
   migrations: Record<string, SavedObjectMigrationMap>;
   mappingProperties: SavedObjectsTypeMappingDefinitions;
@@ -392,13 +392,13 @@ async function migrateIndex({
   types.forEach((type) => typeRegistry.registerType(type));
 
   const documentMigrator = new DocumentMigrator({
-    kibanaVersion: '99.9.9',
+    opensearchDashboardsVersion: '99.9.9',
     typeRegistry,
     log: getLogMock(),
   });
 
   const migrator = new IndexMigrator({
-    client: createMigrationEsClient(esClient, getLogMock()),
+    client: createMigrationOpenSearchClient(opensearchClient, getLogMock()),
     documentMigrator,
     index,
     obsoleteIndexTemplatePattern,
@@ -425,8 +425,8 @@ function migrationsToTypes(
   }));
 }
 
-async function fetchDocs(esClient: ElasticsearchClient, index: string) {
-  const { body } = await esClient.search<SearchResponse<any>>({ index });
+async function fetchDocs(opensearchClient: OpenSearchClient, index: string) {
+  const { body } = await opensearchClient.search<SearchResponse<any>>({ index });
 
   return body.hits.hits
     .map((h) => ({
