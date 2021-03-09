@@ -1,3 +1,15 @@
+# [25.2.0](https://github.com/elastic/elastic-charts/compare/v25.1.1...v25.2.0) (2021-03-09)
+
+
+### Bug Fixes
+
+* **tooltip:** add boundary padding ([#1065](https://github.com/elastic/elastic-charts/issues/1065)) ([25a247e](https://github.com/elastic/elastic-charts/commit/25a247ef043d3ba2a5029f68ebcfebb6493df8ab))
+
+
+### Features
+
+* **partition:** flame and icicle performance and tweening ([#1041](https://github.com/elastic/elastic-charts/issues/1041)) ([a9648a4](https://github.com/elastic/elastic-charts/commit/a9648a40d4aa06f5c715f293121d278543aec94c))
+
 ## [25.1.1](https://github.com/elastic/elastic-charts/compare/v25.1.0...v25.1.1) (2021-03-05)
 
 
