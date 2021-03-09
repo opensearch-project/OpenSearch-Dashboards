@@ -3,10 +3,10 @@
 [[xpack-ingest-manager]]
 = Ingest Manager
 
-The {ingest-manager} app in Kibana enables you to add and manage integrations for popular services and platforms, as well as manage {elastic-agent} installations in standalone or {fleet} mode.
+The {ingest-manager} app in OpenSearchDashboards enables you to add and manage integrations for popular services and platforms, as well as manage {elastic-agent} installations in standalone or {fleet} mode.
 
 [role="screenshot"]
-image::ingest_manager/images/ingest-manager-start.png[Ingest Manager App in Kibana]
+image::ingest_manager/images/ingest-manager-start.png[Ingest Manager App in OpenSearchDashboards]
 
 [float]
 === Get started
