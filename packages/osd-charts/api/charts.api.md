@@ -1444,6 +1444,12 @@ export interface OrderBy {
 // @public (undocumented)
 export type OrdinalDomain = (number | string)[];
 
+// Warning: (ae-forgotten-export) The symbol "PerSideDistance" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "Padding" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type Padding = PerSideDistance;
+
 // Warning: (ae-missing-release-tag) "PARENT_KEY" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -2221,6 +2227,7 @@ export interface TooltipInfo {
 // @public
 export interface TooltipPortalSettings<B = never> {
     boundary?: HTMLElement | B;
+    boundaryPadding?: Partial<Padding> | number;
     fallbackPlacements?: Placement[];
     offset?: number;
     placement?: Placement;

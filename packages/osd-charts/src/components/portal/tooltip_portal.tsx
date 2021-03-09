@@ -22,6 +22,7 @@ import { useRef, useEffect, useCallback, ReactNode, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 
 import { mergePartial, isDefined } from '../../utils/common';
+import { Padding } from '../../utils/dimensions';
 import { TooltipPortalSettings, PortalAnchorRef } from './types';
 import { DEFAULT_POPPER_SETTINGS, getOrCreateNode, isHTMLElement } from './utils';
 
@@ -55,6 +56,20 @@ type PortalTooltipProps = {
    */
   chartId: string;
 };
+
+function addToPadding(padding?: Partial<Padding> | number, extra: number = 0): Padding | number | undefined {
+  if (!padding) return undefined;
+  if (typeof padding === 'number') return padding + extra;
+
+  const { top = 0, right = 0, bottom = 0, left = 0 } = padding;
+
+  return {
+    top: top + extra,
+    right: right + extra,
+    bottom: bottom + extra,
+    left: left + extra,
+  };
+}
 
 const TooltipPortalComponent = ({
   anchor,
@@ -113,7 +128,7 @@ const TooltipPortalComponent = ({
       return;
     }
 
-    const { fallbackPlacements, placement, boundary, offset } = popperSettings;
+    const { fallbackPlacements, placement, boundary, offset, boundaryPadding } = popperSettings;
     popper.current = createPopper(anchorNode.current, portalNode.current, {
       strategy: 'absolute',
       placement,
@@ -128,6 +143,7 @@ const TooltipPortalComponent = ({
           name: 'preventOverflow',
           options: {
             boundary,
+            padding: boundaryPadding,
           },
         },
         {
@@ -138,7 +154,7 @@ const TooltipPortalComponent = ({
             boundary,
             // checks main axis overflow before trying to flip
             altAxis: false,
-            padding: offset || 10,
+            padding: addToPadding(boundaryPadding, offset),
           },
         },
       ],
