@@ -1,29 +1,29 @@
 [role="xpack"]
-[[ml-settings-kb]]
-=== Machine learning settings in {kib}
+[[ml-settings-osd]]
+=== Machine learning settings in {osd}
 ++++
 <titleabbrev>Machine learning settings</titleabbrev>
 ++++
 
-You do not need to configure any settings to use {kib} {ml-features}. They are
+You do not need to configure any settings to use {osd} {ml-features}. They are
 enabled by default.
 
-[[general-ml-settings-kb]]
+[[general-ml-settings-osd]]
 ==== General {ml} settings
 
 [cols="2*<"]
 |===
-| `xpack.ml.enabled` {ess-icon}
-  | Set to `true` (default) to enable {kib} {ml-features}. +
+| `xpack.ml.enabled` {opensearchs-icon}
+  | Set to `true` (default) to enable {osd} {ml-features}. +
   +
-  If set to `false` in `kibana.yml`, the {ml} icon is hidden in this {kib}
-  instance. If `xpack.ml.enabled` is set to `true` in `elasticsearch.yml`, however,
+  If set to `false` in `opensearch_dashboards.yml`, the {ml} icon is hidden in this {osd}
+  instance. If `xpack.ml.enabled` is set to `true` in `opensearch.yml`, however,
   you can still use the {ml} APIs. To disable {ml} entirely, see the
-  {ref}/ml-settings.html[{es} {ml} settings].
+  {ref}/ml-settings.html[{opensearch} {ml} settings].
 
 |===
 
-[[advanced-ml-settings-kb]]
+[[advanced-ml-settings-osd]]
 ==== Advanced {ml} settings
 
-Refer to <<kibana-ml-settings,Advanced {ml} settings in {kib}>>.
+Refer to <<opensearch-dashboards-ml-settings,Advanced {ml} settings in {osd}>>.

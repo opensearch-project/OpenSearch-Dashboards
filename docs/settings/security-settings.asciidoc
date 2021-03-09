@@ -1,12 +1,12 @@
 [role="xpack"]
-[[security-settings-kb]]
-=== Security settings in {kib}
+[[security-settings-osd]]
+=== Security settings in {osd}
 ++++
 <titleabbrev>Security settings</titleabbrev>
 ++++
 
 You do not need to configure any additional settings to use the
-{security-features} in {kib}. They are enabled by default.
+{security-features} in {osd}. They are enabled by default.
 
 [float]
 [[general-security-settings]]
@@ -15,14 +15,14 @@ You do not need to configure any additional settings to use the
 [cols="2*<"]
 |===
 | `xpack.security.enabled`
-  | By default, {kib} automatically detects whether to enable the
-  {security-features} based on the license and whether {es} {security-features}
+  | By default, {osd} automatically detects whether to enable the
+  {security-features} based on the license and whether {opensearch} {security-features}
   are enabled. +
   +
   Do not set this to `false`; it disables the login form, user and role management
-  screens, and authorization using <<kibana-privileges>>. To disable
+  screens, and authorization using <<opensearch-dashboards-privileges>>. To disable
   {security-features} entirely, see
-  {ref}/security-settings.html[{es} security settings].
+  {ref}/security-settings.html[{opensearch} security settings].
 
 | `xpack.security.audit.enabled`
   | Set to `true` to enable audit logging for security events. By default, it is set
@@ -34,7 +34,7 @@ You do not need to configure any additional settings to use the
 [[authentication-security-settings]]
 ==== Authentication security settings
 
-You configure authentication settings in the `xpack.security.authc` namespace in `kibana.yml`.
+You configure authentication settings in the `xpack.security.authc` namespace in `opensearch_dashboards.yml`.
 
 For example:
 
@@ -64,7 +64,7 @@ xpack.security.authc:
 <3> Specifies the settings for the SAML authentication provider with a `saml1` name.
 <4> Specifies the settings for the SAML authentication provider with a `saml2` name.
 
-The valid settings in the `xpack.security.authc.providers` namespace vary depending on the authentication provider type. For more information, refer to <<kibana-authentication>>.
+The valid settings in the `xpack.security.authc.providers` namespace vary depending on the authentication provider type. For more information, refer to <<opensearch-dashboards-authentication>>.
 
 [float]
 [[authentication-provider-settings]]
@@ -73,27 +73,27 @@ The valid settings in the `xpack.security.authc.providers` namespace vary depend
 [cols="2*<"]
 |===
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.enabled` {ess-icon}
-| Determines if the authentication provider should be enabled. By default, {kib} enables the provider as soon as you configure any of its properties.
+`<provider-type>.<provider-name>.enabled` {opensearchs-icon}
+| Determines if the authentication provider should be enabled. By default, {osd} enables the provider as soon as you configure any of its properties.
 
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.order` {ess-icon}
+`<provider-type>.<provider-name>.order` {opensearchs-icon}
 | Order of the provider in the authentication chain and on the Login Selector UI.
 
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.description` {ess-icon}
+`<provider-type>.<provider-name>.description` {opensearchs-icon}
 | Custom description of the provider entry displayed on the Login Selector UI.
 
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.hint` {ess-icon}
+`<provider-type>.<provider-name>.hint` {opensearchs-icon}
 | Custom hint for the provider entry displayed on the Login Selector UI.
 
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.icon` {ess-icon}
+`<provider-type>.<provider-name>.icon` {opensearchs-icon}
 | Custom icon for the provider entry displayed on the Login Selector UI.
 
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.showInSelector` {ess-icon}
+`<provider-type>.<provider-name>.showInSelector` {opensearchs-icon}
 | Flag that indicates if the provider should have an entry on the Login Selector UI. Setting this to `false` doesn't remove the provider from the authentication chain.
 
 2+a|
@@ -104,8 +104,8 @@ You are unable to set this setting to `false` for `basic` and `token` authentica
 ============
 
 | `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.accessAgreement.message` {ess-icon}
-| Access agreement text in Markdown format. For more information, refer to <<xpack-security-access-agreement>>.
+`<provider-type>.<provider-name>.accessAgreement.message` {opensearchs-icon}
+| Access agreement text in Markdown format. For more information, refer to <<xpack-security-accopensearchs-agreement>>.
 
 |===
 
@@ -118,12 +118,12 @@ In addition to <<authentication-provider-settings,the settings that are valid fo
 [cols="2*<"]
 |===
 | `xpack.security.authc.providers.`
-`saml.<provider-name>.realm` {ess-icon}
-| SAML realm in {es} that provider should use.
+`saml.<provider-name>.realm` {opensearchs-icon}
+| SAML realm in {opensearch} that provider should use.
 
 | `xpack.security.authc.providers.`
-`saml.<provider-name>.useRelayStateDeepLink` {ess-icon}
-| Determines if the provider should treat the `RelayState` parameter as a deep link in {kib} during Identity Provider initiated log in. By default, this setting is set to `false`. The link specified in `RelayState` should be a relative, URL-encoded {kib} URL. For example, the `/app/dashboards#/list` link in `RelayState` parameter would look like this: `RelayState=%2Fapp%2Fdashboards%23%2Flist`.
+`saml.<provider-name>.useRelayStateDeepLink` {opensearchs-icon}
+| Determines if the provider should treat the `RelayState` parameter as a deep link in {osd} during Identity Provider initiated log in. By default, this setting is set to `false`. The link specified in `RelayState` should be a relative, URL-encoded {osd} URL. For example, the `/app/dashboards#/list` link in `RelayState` parameter would look like this: `RelayState=%2Fapp%2Fdashboards%23%2Flist`.
 
 |===
 
@@ -136,8 +136,8 @@ In addition to <<authentication-provider-settings,the settings that are valid fo
 [cols="2*<"]
 |===
 | `xpack.security.authc.providers.`
-`oidc.<provider-name>.realm` {ess-icon}
-| OpenID Connect realm in {es} that the provider should use.
+`oidc.<provider-name>.realm` {opensearchs-icon}
+| OpenID Connect realm in {opensearch} that the provider should use.
 
 |===
 
@@ -156,7 +156,7 @@ There is a very limited set of cases when you'd want to change these settings. F
 | Determines if HTTP authentication schemes used by the enabled authentication providers should be automatically supported during HTTP authentication. By default, this setting is set to `true`.
 
 | `xpack.security.authc.http.schemes`
-| List of HTTP authentication schemes that {kib} HTTP authentication should support. By default, this setting is set to `['apikey']` to support HTTP authentication with <<api-keys, `ApiKey`>> scheme.
+| List of HTTP authentication schemes that {osd} HTTP authentication should support. By default, this setting is set to `['apikey']` to support HTTP authentication with <<api-keys, `ApiKey`>> scheme.
 
 |===
 
@@ -164,17 +164,17 @@ There is a very limited set of cases when you'd want to change these settings. F
 [[login-ui-settings]]
 ===== Login user interface settings
 
-You can configure the following settings in the `kibana.yml` file.
+You can configure the following settings in the `opensearch_dashboards.yml` file.
 
 [cols="2*<"]
 |===
-| `xpack.security.loginAssistanceMessage` {ess-icon}
+| `xpack.security.loginAssistanceMessage` {opensearchs-icon}
 | Adds a message to the login UI. Useful for displaying information about maintenance windows, links to corporate sign up pages, and so on.
 
-| `xpack.security.loginHelp` {ess-icon}
+| `xpack.security.loginHelp` {opensearchs-icon}
 | Adds a message accessible at the login UI with additional help information for the login process.
 
-| `xpack.security.authc.selector.enabled` {ess-icon}
+| `xpack.security.authc.selector.enabled` {opensearchs-icon}
 | Determines if the login selector UI should be enabled. By default, this setting is set to `true` if more than one authentication provider is configured.
 
 |===
@@ -183,7 +183,7 @@ You can configure the following settings in the `kibana.yml` file.
 [[security-session-and-cookie-settings]]
 ==== Session and cookie security settings
 
-You can configure the following settings in the `kibana.yml` file.
+You can configure the following settings in the `opensearch_dashboards.yml` file.
 
 [cols="2*<"]
 |===
@@ -191,24 +191,24 @@ You can configure the following settings in the `kibana.yml` file.
   | Sets the name of the cookie used for the session. The default value is `"sid"`.
 
 |[[xpack-security-encryptionKey]] `xpack.security.encryptionKey`
-  | An arbitrary string of 32 characters or more that is used to encrypt session information. Do **not** expose this key to users of {kib}. By
+  | An arbitrary string of 32 characters or more that is used to encrypt session information. Do **not** expose this key to users of {osd}. By
   default, a value is automatically generated in memory. If you use that default
-  behavior, all sessions are invalidated when {kib} restarts.
-  In addition, high-availability deployments of {kib} will behave unexpectedly
-  if this setting isn't the same for all instances of {kib}.
+  behavior, all sessions are invalidated when {osd} restarts.
+  In addition, high-availability deployments of {osd} will behave unexpectedly
+  if this setting isn't the same for all instances of {osd}.
 
 |[[xpack-security-secureCookies]] `xpack.security.secureCookies`
   | Sets the `secure` flag of the session cookie. The default value is `false`. It
   is automatically set to `true` if <<server-ssl-enabled, `server.ssl.enabled`>> is set to `true`. Set
-  this to `true` if SSL is configured outside of {kib} (for example, you are
+  this to `true` if SSL is configured outside of {osd} (for example, you are
   routing requests through a load balancer or proxy).
 
-| `xpack.security.sameSiteCookies` {ess-icon}
+| `xpack.security.sameSiteCookies` {opensearchs-icon}
   | Sets the `SameSite` attribute of the session cookie. This allows you to declare whether your cookie should be restricted to a first-party or same-site context.
   Valid values are `Strict`, `Lax`, `None`.
-  This is *not set* by default, which modern browsers will treat as `Lax`. If you use Kibana embedded in an iframe in modern browsers, you might need to set it to `None`. Setting this value to `None` requires cookies to be sent over a secure connection by setting <<xpack-security-secureCookies, `xpack.security.secureCookies`>>: true`. Some old versions of IE11 do not support `SameSite: None`.
+  This is *not set* by default, which modern browsers will treat as `Lax`. If you use OpenSearchDashboards embedded in an iframe in modern browsers, you might need to set it to `None`. Setting this value to `None` requires cookies to be sent over a secure connection by setting <<xpack-security-secureCookies, `xpack.security.secureCookies`>>: true`. Some old versions of IE11 do not support `SameSite: None`.
 
-|[[xpack-session-idleTimeout]] `xpack.security.session.idleTimeout` {ess-icon}
+|[[xpack-session-idleTimeout]] `xpack.security.session.idleTimeout` {opensearchs-icon}
   | Ensures that user sessions will expire after a period of inactivity. This and <<xpack-session-lifespan,`xpack.security.session.lifespan`>> are both
 highly recommended. By default, this setting is not set.
 
@@ -218,7 +218,7 @@ highly recommended. By default, this setting is not set.
 The format is a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 ============
 
-|[[xpack-session-lifespan]] `xpack.security.session.lifespan` {ess-icon}
+|[[xpack-session-lifespan]] `xpack.security.session.lifespan` {opensearchs-icon}
   | Ensures that user sessions will expire after the defined time period. This behavior also known as an "absolute timeout". If
 this is _not_ set, user sessions could stay active indefinitely. This and <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>> are both highly
 recommended. By default, this setting is not set.
@@ -230,7 +230,7 @@ The format is a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h',
 ============
 
 | `xpack.security.session.cleanupInterval`
-| Sets the interval at which {kib} tries to remove expired and invalid sessions from the session index. By default, this value is 1 hour. The minimum value is 10 seconds.
+| Sets the interval at which {osd} tries to remove expired and invalid sessions from the session index. By default, this value is 1 hour. The minimum value is 10 seconds.
 
 2+a|
 [TIP]
@@ -248,17 +248,17 @@ These settings control the encryption of saved objects with sensitive data. For 
 
 [IMPORTANT]
 ============
-In high-availability deployments, make sure you use the same encryption and decryption keys for all instances of {kib}. Although the keys can be specified in clear text in `kibana.yml`, it's recommended to store them securely in the <<secure-settings,{kib} Keystore>>.
+In high-availability deployments, make sure you use the same encryption and decryption keys for all instances of {osd}. Although the keys can be specified in clear text in `opensearch_dashboards.yml`, it's recommended to store them securely in the <<secure-settings,{osd} Keystore>>.
 ============
 
 [cols="2*<"]
 |===
 | [[xpack-encryptedSavedObjects-encryptionKey]] `xpack.encryptedSavedObjects.`
 `encryptionKey`
-| An arbitrary string of at least 32 characters that is used to encrypt sensitive properties of saved objects before they're stored in {es}. If not set, {kib} will generate a random key on startup, but certain features won't be available until you set the encryption key explicitly.
+| An arbitrary string of at least 32 characters that is used to encrypt sensitive properties of saved objects before they're stored in {opensearch}. If not set, {osd} will generate a random key on startup, but certain features won't be available until you set the encryption key explicitly.
 
 | [[xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys]] `xpack.encryptedSavedObjects.`
 `keyRotation.decryptionOnlyKeys`
-| An optional list of previously used encryption keys. Like <<xpack-encryptedSavedObjects-encryptionKey, `xpack.encryptedSavedObjects.encryptionKey`>>, these must be at least 32 characters in length. {kib} doesn't use these keys for encryption, but may still require them to decrypt some existing saved objects. Use this setting if you wish to change your encryption key, but don't want to lose access to saved objects that were previously encrypted with a different key.
+| An optional list of previously used encryption keys. Like <<xpack-encryptedSavedObjects-encryptionKey, `xpack.encryptedSavedObjects.encryptionKey`>>, these must be at least 32 characters in length. {osd} doesn't use these keys for encryption, but may still require them to decrypt some existing saved objects. Use this setting if you wish to change your encryption key, but don't want to lose access to saved objects that were previously encrypted with a different key.
 
 |===

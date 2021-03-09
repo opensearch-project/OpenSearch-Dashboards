@@ -1,11 +1,11 @@
 [role="xpack"]
-[[dev-settings-kb]]
-=== Development tools settings in {kib}
+[[dev-settings-osd]]
+=== Development tools settings in {osd}
 ++++
 <titleabbrev>Development tools settings</titleabbrev>
 ++++
 
-You do not need to configure any settings to use the development tools in {kib}.
+You do not need to configure any settings to use the development tools in {osd}.
 They are enabled by default.
 
 [float]
@@ -14,7 +14,7 @@ They are enabled by default.
 
 [cols="2*<"]
 |===
-| `xpack.grokdebugger.enabled` {ess-icon}
+| `xpack.grokdebugger.enabled` {opensearchs-icon}
   | Set to `true` to enable the <<xpack-grokdebugger,Grok Debugger>>. Defaults to `true`.
 
 |===

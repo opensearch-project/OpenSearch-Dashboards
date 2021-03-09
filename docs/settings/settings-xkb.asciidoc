@@ -1,6 +1,6 @@
 [role="xpack"]
-[[settings-xpack-kb]]
-== {xpack} settings in {kib}
+[[settings-xpack-osd]]
+== {xpack} settings in {osd}
 [subs="attributes"]
 ++++
 <titleabbrev>{xpack} settings</titleabbrev>
@@ -8,7 +8,7 @@
 
 include::{asciidoc-dir}/../../shared/settings.asciidoc[]
 
-For more {kib} configuration settings, see <<settings>>.
+For more {osd} configuration settings, see <<settings>>.
 
 include::alert-action-settings.asciidoc[]
 include::apm-settings.asciidoc[]

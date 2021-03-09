@@ -1,6 +1,6 @@
 [role="xpack"]
-[[apm-settings-kb]]
-=== APM settings in Kibana
+[[apm-settings-osd]]
+=== APM settings in OpenSearchDashboards
 ++++
 <titleabbrev>APM settings</titleabbrev>
 ++++
@@ -16,23 +16,23 @@ you do not need to configure any settings to use the APM app.
 It is enabled by default.
 
 [float]
-[[apm-indices-settings-kb]]
+[[apm-indices-settings-osd]]
 ==== APM indices
 
 // This content is reused in the APM app documentation.
 // Any changes made in this file will be seen there as well.
 // tag::apm-indices-settings[]
 
-Index defaults can be changed in Kibana. Open the main menu, then click *APM > Settings > Indices*.
-Index settings in the APM app take precedence over those set in `kibana.yml`.
+Index defaults can be changed in OpenSearchDashboards. Open the main menu, then click *APM > Settings > Indices*.
+Index settings in the APM app take precedence over those set in `opensearch_dashboards.yml`.
 
 [role="screenshot"]
-image::settings/images/apm-settings.png[APM app settings in Kibana]
+image::settings/images/apm-settings.png[APM app settings in OpenSearchDashboards]
 
 // end::apm-indices-settings[]
 
 [float]
-[[general-apm-settings-kb]]
+[[general-apm-settings-osd]]
 ==== General APM settings
 
 // This content is reused in the APM app documentation.
@@ -40,7 +40,7 @@ image::settings/images/apm-settings.png[APM app settings in Kibana]
 // tag::general-apm-settings[]
 
 If you'd like to change any of the default values,
-copy and paste the relevant settings into your `kibana.yml` configuration file.
+copy and paste the relevant settings into your `opensearch_dashboards.yml` configuration file.
 Changing these settings may disable features of the APM App.
 
 [cols="2*<"]
@@ -54,13 +54,13 @@ Changing these settings may disable features of the APM App.
 | `xpack.apm.serviceMapFingerprintGlobalBucketSize`
   | Maximum number of unique transaction combinations sampled for generating the global service map. Defaults to `100`.
 
-| `xpack.apm.ui.enabled` {ess-icon}
+| `xpack.apm.ui.enabled` {opensearchs-icon}
   | Set to `false` to hide the APM app from the main menu. Defaults to `true`.
 
 | `xpack.apm.ui.transactionGroupBucketSize`
   | Number of top transaction groups displayed in the APM app. Defaults to `1000`.
 
-| `xpack.apm.ui.maxTraceItems` {ess-icon}
+| `xpack.apm.ui.maxTraceItems` {opensearchs-icon}
   | Maximum number of child items displayed when viewing trace details. Defaults to `1000`.
 
 | `xpack.observability.annotations.index`
@@ -70,20 +70,20 @@ Changing these settings may disable features of the APM App.
   | experimental[] Enables Transaction histogram metrics. Defaults to `false`. When `true`, additional configuration in APM Server is required.
     See {apm-server-ref-v}/transaction-metrics.html[Configure transaction metrics] for more information.
 
-| `apm_oss.indexPattern` {ess-icon}
+| `apm_oss.indexPattern` {opensearchs-icon}
   | The index pattern used for integrations with Machine Learning and Query Bar.
   It must match all apm indices. Defaults to `apm-*`.
 
-| `apm_oss.errorIndices` {ess-icon}
+| `apm_oss.errorIndices` {opensearchs-icon}
   | Matcher for all {apm-server-ref}/error-indices.html[error indices]. Defaults to `apm-*`.
 
 | `apm_oss.onboardingIndices`
   | Matcher for all onboarding indices. Defaults to `apm-*`.
 
-| `apm_oss.spanIndices` {ess-icon}
+| `apm_oss.spanIndices` {opensearchs-icon}
   | Matcher for all {apm-server-ref}/span-indices.html[span indices]. Defaults to `apm-*`.
 
-| `apm_oss.transactionIndices` {ess-icon}
+| `apm_oss.transactionIndices` {opensearchs-icon}
   | Matcher for all {apm-server-ref}/transaction-indices.html[transaction indices]. Defaults to `apm-*`.
 
 | `apm_oss.metricsIndices`

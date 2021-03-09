@@ -1,14 +1,14 @@
 [role="xpack"]
-[[logs-ui-settings-kb]]
-=== Logs settings in {kib}
+[[logs-ui-settings-osd]]
+=== Logs settings in {osd}
 ++++
 <titleabbrev>Logs settings</titleabbrev>
 ++++
 
-You do not need to configure any settings to use the Logs app in {kib}. It is enabled by default.
+You do not need to configure any settings to use the Logs app in {osd}. It is enabled by default.
 
 [float]
-[[general-logs-ui-settings-kb]]
+[[general-logs-ui-settings-osd]]
 ==== General Logs settings
 
 include::general-infra-logs-ui-settings.asciidoc[]

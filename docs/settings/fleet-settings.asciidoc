@@ -1,25 +1,25 @@
 [role="xpack"]
-[[fleet-settings-kb]]
-=== {fleet} settings in {kib}
+[[fleet-settings-osd]]
+=== {fleet} settings in {osd}
 ++++
 <titleabbrev>{fleet} settings</titleabbrev>
 ++++
 
 experimental[]
 
-You can configure `xpack.fleet` settings in your `kibana.yml`. 
-By default, {fleet} is enabled. To use {fleet}, you also need to configure {kib} and {es} hosts.
+You can configure `xpack.fleet` settings in your `opensearch_dashboards.yml`. 
+By default, {fleet} is enabled. To use {fleet}, you also need to configure {osd} and {opensearch} hosts.
 
 See the {fleet-guide}/index.html[{fleet}] docs for more information.
 
-[[general-fleet-settings-kb]]
+[[general-fleet-settings-osd]]
 ==== General {fleet} settings
 
 [cols="2*<"]
 |===
-| `xpack.fleet.enabled` {ess-icon}
+| `xpack.fleet.enabled` {opensearchs-icon}
   | Set to `true` (default) to enable {fleet}. 
-| `xpack.fleet.agents.enabled` {ess-icon}
+| `xpack.fleet.agents.enabled` {opensearchs-icon}
   | Set to `true` (default) to enable {fleet}. 
 |===
 
@@ -37,12 +37,12 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
 
 [cols="2*<"]
 |===
-| `xpack.fleet.agents.kibana.host`
-  | The hostname used by {agent} for accessing {kib}.
-| `xpack.fleet.agents.elasticsearch.host`
-  | The hostname used by {agent} for accessing {es}.
+| `xpack.fleet.agents.opensearchDashboards.host`
+  | The hostname used by {agent} for accessing {osd}.
+| `xpack.fleet.agents.opensearch.host`
+  | The hostname used by {agent} for accessing {opensearch}.
 | `xpack.fleet.agents.tlsCheckDisabled`
-  | Set to `true` to allow {fleet} to run on a {kib} instance without TLS enabled.
+  | Set to `true` to allow {fleet} to run on a {osd} instance without TLS enabled.
 |===
 
 [NOTE]

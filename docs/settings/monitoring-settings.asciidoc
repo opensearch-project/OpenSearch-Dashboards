@@ -1,29 +1,29 @@
 [role="xpack"]
-[[monitoring-settings-kb]]
-=== Monitoring settings in {kib}
+[[monitoring-settings-osd]]
+=== Monitoring settings in {osd}
 ++++
 <titleabbrev>Monitoring settings</titleabbrev>
 ++++
 
 By default, *{stack-monitor-app}* is enabled, but data collection is disabled.
-When you first start {kib} monitoring, you are prompted to enable data
+When you first start {osd} monitoring, you are prompted to enable data
 collection. If you are using {stack-security-features}, you must be signed in as
 a user with the `cluster:manage` privilege to enable data collection. The
 built-in `superuser` role has this privilege and the built-in `elastic` user has
 this role.
 
 You can adjust how monitoring data is
-collected from {kib} and displayed in {kib} by configuring settings in the
-`kibana.yml` file. There are also `monitoring.ui.elasticsearch.*` settings,
-which support the same values as <<settings,{kib} configuration settings>>.
+collected from {osd} and displayed in {osd} by configuring settings in the
+`opensearch_dashboards.yml` file. There are also `monitoring.ui.opensearch.*` settings,
+which support the same values as <<settings,{osd} configuration settings>>.
 
-To control how data is collected from your {es} nodes, you configure
+To control how data is collected from your {opensearch} nodes, you configure
 {ref}/monitoring-settings.html[`xpack.monitoring.collection`
-settings] in `elasticsearch.yml`. To control how monitoring data is collected
+settings] in `opensearch.yml`. To control how monitoring data is collected
 from Logstash, configure monitoring settings in `logstash.yml`.
 
 For more information, see
-{ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].
+{ref}/monitor-opensearch-cluster.html[Monitor a cluster].
 
 [float]
 [[monitoring-general-settings]]
@@ -32,52 +32,52 @@ For more information, see
 [cols="2*<"]
 |===
 | `monitoring.enabled`
-  | Set to `true` (default) to enable the {monitor-features} in {kib}. Unlike the
+  | Set to `true` (default) to enable the {monitor-features} in {osd}. Unlike the
   <<monitoring-ui-enabled, `monitoring.ui.enabled`>> setting, when this setting is `false`, the
-  monitoring back-end does not run and {kib} stats are not sent to the monitoring
+  monitoring back-end does not run and {osd} stats are not sent to the monitoring
   cluster.
 
 a|`monitoring.cluster_alerts.`
-`email_notifications.email_address` {ess-icon}
+`email_notifications.email_address` {opensearchs-icon}
     | Specifies the email address where you want to receive cluster alerts.
     See <<cluster-alert-email-notifications, email notifications>> for details.
 
-| `monitoring.ui.elasticsearch.hosts`
-  | Specifies the location of the {es} cluster where your monitoring data is stored.
-  By default, this is the same as <<elasticsearch-hosts, `elasticsearch.hosts`>>. This setting enables
-  you to use a single {kib} instance to search and visualize data in your
+| `monitoring.ui.opensearch.hosts`
+  | Specifies the location of the {opensearch} cluster where your monitoring data is stored.
+  By default, this is the same as <<opensearch-hosts, `opensearch.hosts`>>. This setting enables
+  you to use a single {osd} instance to search and visualize data in your
   production cluster as well as monitor data sent to a dedicated monitoring
   cluster.
 
-| `monitoring.ui.elasticsearch.username`
-  | Specifies the username used by {kib} monitoring to establish a persistent connection
-  in {kib}  to the {es} monitoring cluster and to verify licensing status on the {es}
+| `monitoring.ui.opensearch.username`
+  | Specifies the username used by {osd} monitoring to establish a persistent connection
+  in {osd}  to the {opensearch} monitoring cluster and to verify licensing status on the {opensearch}
   monitoring cluster. +
   +
-  Every other request performed by *{stack-monitor-app}* to the monitoring {es}
+  Every other request performed by *{stack-monitor-app}* to the monitoring {opensearch}
   cluster uses the authenticated user's credentials, which must be the same on
-  both the {es} monitoring cluster and the {es} production cluster. +
+  both the {opensearch} monitoring cluster and the {opensearch} production cluster. +
   +
-  If not set, {kib} uses the value of the <<elasticsearch-user-passwd, `elasticsearch.username`>> setting.
+  If not set, {osd} uses the value of the <<opensearch-user-passwd, `opensearch.username`>> setting.
 
-| `monitoring.ui.elasticsearch.password`
-  | Specifies the password used by {kib} monitoring to establish a persistent connection
-  in {kib}  to the {es} monitoring cluster and to verify licensing status on the {es}
+| `monitoring.ui.opensearch.password`
+  | Specifies the password used by {osd} monitoring to establish a persistent connection
+  in {osd}  to the {opensearch} monitoring cluster and to verify licensing status on the {opensearch}
   monitoring cluster. +
   +
-  Every other request performed by *{stack-monitor-app}* to the monitoring {es}
+  Every other request performed by *{stack-monitor-app}* to the monitoring {opensearch}
   cluster uses the authenticated user's credentials, which must be the same on
-  both the {es} monitoring cluster and the {es} production cluster. +
+  both the {opensearch} monitoring cluster and the {opensearch} production cluster. +
   +
-  If not set, {kib} uses the value of the <<elasticsearch-user-passwd, `elasticsearch.password`>> setting.
+  If not set, {osd} uses the value of the <<opensearch-user-passwd, `opensearch.password`>> setting.
 
-| `monitoring.ui.elasticsearch.pingTimeout`
-  | Specifies the time in milliseconds to wait for {es} to respond to internal
-  health checks. By default, it matches the <<elasticsearch-pingTimeout, `elasticsearch.pingTimeout`>> setting,
+| `monitoring.ui.opensearch.pingTimeout`
+  | Specifies the time in milliseconds to wait for {opensearch} to respond to internal
+  health checks. By default, it matches the <<opensearch-pingTimeout, `opensearch.pingTimeout`>> setting,
   which has a default value of `30000`.
 
-| `monitoring.ui.elasticsearch.ssl`
-  | Shares the same configuration as <<elasticsearch-ssl-cert-key, `elasticsearch.ssl`>>. These settings configure encrypted communication between {kib} and the monitoring cluster.
+| `monitoring.ui.opensearch.ssl`
+  | Shares the same configuration as <<opensearch-ssl-cert-key, `opensearch.ssl`>>. These settings configure encrypted communication between {osd} and the monitoring cluster.
 
 |===
 
@@ -85,17 +85,17 @@ a|`monitoring.cluster_alerts.`
 [[monitoring-collection-settings]]
 ==== Monitoring collection settings
 
-These settings control how data is collected from {kib}.
+These settings control how data is collected from {osd}.
 
 [cols="2*<"]
 |===
-| `monitoring.kibana.collection.enabled`
-  | Set to `true` (default) to enable data collection from the {kib} NodeJS server
-  for {kib} dashboards to be featured in *{stack-monitor-app}*.
+| `monitoring.opensearchDashboards.collection.enabled`
+  | Set to `true` (default) to enable data collection from the {osd} NodeJS server
+  for {osd} dashboards to be featured in *{stack-monitor-app}*.
 
-| `monitoring.kibana.collection.interval` {ess-icon}
+| `monitoring.opensearchDashboards.collection.interval` {opensearchs-icon}
   | Specifies the number of milliseconds to wait in between data sampling on the
-  {kib} NodeJS server for the metrics that are displayed in the {kib} dashboards.
+  {osd} NodeJS server for the metrics that are displayed in the {osd} dashboards.
   Defaults to `10000` (10 seconds).
 
 |===
@@ -106,18 +106,18 @@ These settings control how data is collected from {kib}.
 
 These settings adjust how *{stack-monitor-app}* displays monitoring data.
 However, the defaults work best in most circumstances. For more information
-about configuring {kib}, see
-{kibana-ref}/settings.html[Setting {kib} server properties].
+about configuring {osd}, see
+{opensearch-dashboards-ref}/settings.html[Setting {osd} server properties].
 
 [cols="2*<"]
 |===
-| `monitoring.ui.elasticsearch.logFetchCount`
+| `monitoring.ui.opensearch.logFetchCount`
   | Specifies the number of log entries to display in *{stack-monitor-app}*.
   Defaults to `10`. The maximum value is `50`.
 
 |[[monitoring-ui-enabled]] `monitoring.ui.enabled`
   | Set to `false` to hide *{stack-monitor-app}*. The monitoring back-end
-    continues to run as an agent for sending {kib} stats to the monitoring
+    continues to run as an agent for sending {osd} stats to the monitoring
     cluster. Defaults to `true`.
 
 | `monitoring.ui.logs.index`
@@ -132,10 +132,10 @@ about configuring {kib}, see
   {ref}/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-size[Terms Aggregation].
   Defaults to `10000`.
 
-| `monitoring.ui.min_interval_seconds` {ess-icon}
+| `monitoring.ui.min_interval_seconds` {opensearchs-icon}
   | Specifies the minimum number of seconds that a time bucket in a chart can
   represent. Defaults to 10. If you modify the
-  `monitoring.ui.collection.interval` in `elasticsearch.yml`, use the same
+  `monitoring.ui.collection.interval` in `opensearch.yml`, use the same
   value in this setting.
 
 |===
@@ -151,8 +151,8 @@ container, then Cgroup statistics are not useful.
 
 [cols="2*<"]
 |===
-| `monitoring.ui.container.elasticsearch.enabled` {ess-icon}
-  | For {es} clusters that are running in containers, this setting changes the
+| `monitoring.ui.container.opensearch.enabled` {opensearchs-icon}
+  | For {opensearch} clusters that are running in containers, this setting changes the
   *Node Listing* to display the CPU utilization based on the reported Cgroup
   statistics. It also adds the calculated Cgroup CPU utilization to the
   *Node Overview* page instead of the overall operating system's CPU

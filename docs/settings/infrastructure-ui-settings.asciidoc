@@ -1,14 +1,14 @@
 [role="xpack"]
-[[infrastructure-ui-settings-kb]]
-=== Metrics settings in {kib}
+[[infrastructure-ui-settings-osd]]
+=== Metrics settings in {osd}
 ++++
 <titleabbrev>Metrics settings</titleabbrev>
 ++++
 
-You do not need to configure any settings to use the Metrics app in {kib}. It is enabled by default.
+You do not need to configure any settings to use the Metrics app in {osd}. It is enabled by default.
 
 [float]
-[[general-infra-ui-settings-kb]]
+[[general-infra-ui-settings-osd]]
 ==== General Metrics settings
 
 include::general-infra-logs-ui-settings.asciidoc[]

@@ -1,10 +1,10 @@
 [cols="2*<"]
 |===
 | `xpack.infra.enabled`
-  | Set to `false` to disable the Logs and Metrics app plugin {kib}. Defaults to `true`.
+  | Set to `false` to disable the Logs and Metrics app plugin {osd}. Defaults to `true`.
 
 | `xpack.infra.sources.default.logAlias`
-  | Index pattern for matching indices that contain log data. Defaults to `filebeat-*,kibana_sample_data_logs*`. To match multiple wildcard patterns, use a comma to separate the names, with no space after the comma. For example, `logstash-app1-*,default-logs-*`.
+  | Index pattern for matching indices that contain log data. Defaults to `filebeat-*,opensearch_dashboards_sample_data_logs*`. To match multiple wildcard patterns, use a comma to separate the names, with no space after the comma. For example, `logstash-app1-*,default-logs-*`.
 
 | `xpack.infra.sources.default.metricAlias`
   | Index pattern for matching indices that contain Metricbeat data. Defaults to `metricbeat-*`. To match multiple wildcard patterns, use a comma to separate the names, with no space after the comma. For example, `logstash-app1-*,default-logs-*`.

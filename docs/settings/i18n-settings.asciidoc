@@ -1,18 +1,18 @@
 [role="xpack"]
-[[i18n-settings-kb]]
-=== i18n settings in {kib}
+[[i18n-settings-osd]]
+=== i18n settings in {osd}
 ++++
 <titleabbrev>i18n settings</titleabbrev>
 ++++
 
-You do not need to configure any settings to run Kibana in English.
+You do not need to configure any settings to run OpenSearchDashboards in English.
 
 [float]
-[[general-i18n-settings-kb]]
+[[general-i18n-settings-osd]]
 ==== General i18n settings
 
 `i18n.locale`::
-  {kib} supports the following locales:
+  {osd} supports the following locales:
   * English - `en` (default)
   * Chinese - `zh-CN`
   * Japanese - `ja-JP`
