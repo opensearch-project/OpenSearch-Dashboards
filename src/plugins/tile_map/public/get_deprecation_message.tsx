@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import React from 'react';
 import { UrlGeneratorContract } from 'src/plugins/share/public';
 import { getCoreService, getQueryService, getShareService } from './services';
