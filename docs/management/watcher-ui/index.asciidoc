@@ -2,7 +2,7 @@
 [[watcher-ui]]
 == Watcher
 
-Watcher is an {es} feature that you can use to create actions based on
+Watcher is an {opensearch} feature that you can use to create actions based on
 conditions, which are periodically evaluated using queries on your data.
 Watches are helpful for analyzing mission-critical and business-critical
 streaming data. For example, you might watch application logs for performance
@@ -27,24 +27,24 @@ threshold watch, take a look at the different watcher actions. If you are
 creating an advanced watch, you should be familiar with the parts of a
 watch&#8212;input, schedule, condition, and actions.
 
-NOTE: There are limitations in *Watcher* that affect {kib}. For information, refer to {ref}/watcher-limitations.html[Alerting].
+NOTE: There are limitations in *Watcher* that affect {osd}. For information, refer to {ref}/watcher-limitations.html[Alerting].
 
 [float]
 [[watcher-security]]
 === Watcher security
 
-If the {es} {security-features} are enabled, you must have the
+If the {opensearch} {security-features} are enabled, you must have the
 {ref}/security-privileges.html[`manage_watcher` or `monitor_watcher`]
-cluster privileges to use Watcher in {kib}.
+cluster privileges to use Watcher in {osd}.
 
-Alternately, you can have the built-in `kibana_admin` role
+Alternately, you can have the built-in `opensearch_dashboards_admin` role
 and either of these watcher roles:
 
 * `watcher_admin`. You can perform all Watcher actions, including create and edit watches.
 * `watcher_user`. You can view watches, but not create or edit them.
 
 To manage roles, open then main menu, then click *Stack Management > Roles*, or use the
-<<role-management-api, Kibana Role Management API>>. Watches are shared between
+<<role-management-api, OpenSearchDashboards Role Management API>>. Watches are shared between
 all users with the same role.
 
 NOTE: If you are creating a threshold watch, you must also have the `view_index_metadata` index privilege. See
@@ -115,7 +115,7 @@ when the watch condition is met. For a complete list of actions and how to confi
 {ref}/action-conditions.html[Adding conditions to actions].
 
 In this example, you’ll configure an email action. You must have an {ref}/actions-email.html#configuring-email[email account configured]
-in {es} for this example to work.
+in {opensearch} for this example to work.
 
 . Click *Add action* and select *Email*.
 
@@ -201,7 +201,7 @@ delete watches in bulk.
 [[watcher-create-advanced-watch]]
 === Create an advanced watch
 
-Advanced watches are for users who are more familiar with {es} query syntax and
+Advanced watches are for users who are more familiar with {opensearch} query syntax and
 the Watcher framework. The UI is aligned with using the REST APIs.
 For more information, see {ref}/query-dsl.html[Query DSL].
 
@@ -210,7 +210,7 @@ For more information, see {ref}/query-dsl.html[Query DSL].
 
 On the Watch overview page, click *Create* and choose *Create advanced watch*.
 An advanced watch requires a name and ID.  Name is a user-friendly way to
-identify the watch, and ID refers to the identifier used by {es}.  Refer to
+identify the watch, and ID refers to the identifier used by {opensearch}.  Refer to
 {ref}/how-watcher-works.html#watch-definition[Watch definition] for how
 to input the watch JSON.
 
@@ -239,5 +239,5 @@ image:management/watcher-ui/images/advanced-watch/advanced-watch-simulate.png["C
 
 Refer to these examples for creating an advanced watch:
 
-* {ref}/watch-cluster-status.html[Watch the status of an {es} cluster]
+* {ref}/watch-cluster-status.html[Watch the status of an {opensearch} cluster]
 * {ref}/watching-meetup-data.html[Watch event data]

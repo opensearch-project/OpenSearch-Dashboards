@@ -2,7 +2,7 @@
 == Advanced Settings
 
 The *Advanced Settings* UI enables you to edit settings that control the
-behavior of Kibana. For example, you can change the format used to display dates,
+behavior of OpenSearchDashboards. For example, you can change the format used to display dates,
 specify the default index pattern, and set the precision for displayed decimal
 values.
 
@@ -14,7 +14,7 @@ values.
 [float]
 === Required permissions
 
-The `Advanced Settings` {kib} privilege is required to access *Advanced Settings*.
+The `Advanced Settings` {osd} privilege is required to access *Advanced Settings*.
 
 To add the privilege, open the menu, then click *Stack Management > Roles*.
 
@@ -23,26 +23,26 @@ To add the privilege, open the menu, then click *Stack Management > Roles*.
 [[settings-read-only-access]]
 === [xpack]#Read only access#
 When you have insufficient privileges to edit advanced settings, the following
-indicator in Kibana will be displayed. The buttons to edit settings won't be
-visible. For more information on granting access to Kibana, see
+indicator in OpenSearchDashboards will be displayed. The buttons to edit settings won't be
+visible. For more information on granting access to OpenSearchDashboards, see
 <<xpack-security-authorization>>.
 
 [role="screenshot"]
-image::images/settings-read-only-badge.png[Example of Advanced Settings Management's read only access indicator in Kibana's header]
+image::images/settings-read-only-badge.png[Example of Advanced Settings Management's read only access indicator in OpenSearchDashboards's header]
 
 [float]
-[[kibana-settings-reference]]
-=== Kibana settings reference
+[[opensearch-dashboards-settings-reference]]
+=== OpenSearchDashboards settings reference
 
-WARNING: Modifying a setting can affect {kib} performance and cause problems
+WARNING: Modifying a setting can affect {osd} performance and cause problems
 that are difficult to diagnose. Setting a property value to a blank field
 reverts to the default behavior, which might not be compatible with other
-configuration settings. Deleting a custom setting removes it from {kib}
+configuration settings. Deleting a custom setting removes it from {osd}
 permanently.
 
 
 [float]
-[[kibana-general-settings]]
+[[opensearch-dashboards-general-settings]]
 ==== General
 
 [horizontal]
@@ -65,19 +65,19 @@ Formatted timestamps must adapt to the interval between measurements. Keys are
 http://en.wikipedia.org/wiki/ISO_8601#Time_intervals[ISO8601 intervals].
 
 [[dateformat-tz]]`dateFormat:tz`::
-The timezone that Kibana uses. The default value of `Browser` uses the timezone
+The timezone that OpenSearchDashboards uses. The default value of `Browser` uses the timezone
 detected by the browser.
 
 [[datenanosformat]]`dateNanosFormat`::
 The format to use for displaying
 https://momentjs.com/docs/#/displaying/format/[pretty formatted dates] of
-{ref}/date_nanos.html[Elasticsearch date_nanos type].
+{ref}/date_nanos.html[OpenSearch date_nanos type].
 
 [[defaultindex]]`defaultIndex`::
 The index to access if no index is set. The default is `null`.
 
 [[defaultroute]]`defaultRoute`::
-The default route when opening Kibana. Use this setting to route users to a
+The default route when opening OpenSearchDashboards. Use this setting to route users to a
 specific dashboard, application, or saved object as they enter each space.
 
 [[fields-popularlimit]]`fields:popularLimit`::
@@ -111,7 +111,7 @@ The <<numeral, numeral pattern>> for the "number" format.
 The <<numeral, numeral pattern>> for the "percent" format.
 
 [[histogram-bartarget]]`histogram:barTarget`::
-When date histograms use the `auto` interval, Kibana attempts to generate this
+When date histograms use the `auto` interval, OpenSearchDashboards attempts to generate this
 number of bars.
 
 [[histogram-maxbars]]`histogram:maxBars`::
@@ -126,7 +126,7 @@ The default placeholder value to use in
 *Management > Index Patterns > Create Index Pattern*.
 
 [[metafields]]`metaFields`::
-Fields that exist outside of `_source`. Kibana merges these fields into the
+Fields that exist outside of `_source`. OpenSearchDashboards merges these fields into the
 document when displaying it.
 
 [[metrics-maxbuckets]]`metrics:max_buckets`::
@@ -135,7 +135,7 @@ arise when the user selects a short interval (for example, 1s) for a long time
 period (1 year).
 
 [[pagenavigation]]`pageNavigation`::
-The style of navigation menu for Kibana. Choices are Legacy, the legacy style
+The style of navigation menu for OpenSearchDashboards. Choices are Legacy, the legacy style
 where every plugin is represented in the nav, and Modern, a new format that
 bundles related plugins together in flyaway nested navigation.
 
@@ -158,7 +158,7 @@ default is 5.
 
 [[search-querylanguage]]`search:queryLanguage`::
 The query language to use in the query bar. Choices are <<kuery-query, KQL>>, a
-language built specifically for {kib}, and the
+language built specifically for {osd}, and the
 <<lucene-query, Lucene query syntax>>.
 
 [[shortdots-enable]]`shortDots:enable`::
@@ -166,17 +166,17 @@ Set this property to `true` to shorten long field names in visualizations. For
 example, show `f.b.baz` instead of `foo.bar.baz`.
 
 [[sort-options]]`sort:options`::
-Options for the Elasticsearch
+Options for the OpenSearch
 {ref}/search-request-body.html#request-body-search-sort[sort] parameter.
 
 [[state-storeinsessionstorage]]`state:storeInSessionStorage`::
 experimental:[]
-Kibana tracks UI state in the URL, which can lead to problems when there is a
+OpenSearchDashboards tracks UI state in the URL, which can lead to problems when there is a
 lot of state information, and the URL gets very long. Enabling this setting
 stores part of the URL in your browser session to keep the URL short.
 
 [[theme-darkmode]]`theme:darkMode`::
-Set to `true` to enable a dark mode for the {kib} UI. You must refresh the page
+Set to `true` to enable a dark mode for the {osd} UI. You must refresh the page
 to apply the setting.
 
 [[timepicker-quickranges]]`timepicker:quickRanges`::
@@ -203,25 +203,25 @@ from *{stack-monitor-app}*.
 
 
 [float]
-[[kibana-accessibility-settings]]
+[[opensearch-dashboards-accessibility-settings]]
 ==== Accessibility
 
 [horizontal]
 [[accessibility-disableanimations]]`accessibility:disableAnimations`::
-Turns off all unnecessary animations in the {kib} UI. Refresh the page to apply
+Turns off all unnecessary animations in the {osd} UI. Refresh the page to apply
 the changes.
 
 [float]
-[[kibana-dashboard-settings]]
+[[opensearch-dashboards-dashboard-settings]]
 ==== Dashboard
 
 [horizontal]
 [[xpackdashboardmode-roles]]`xpackDashboardMode:roles`::
-**Deprecated. Use <<kibana-feature-privileges,feature privileges>> instead.**
+**Deprecated. Use <<opensearch-dashboards-feature-privileges,feature privileges>> instead.**
 The roles that belong to <<xpack-dashboard-only-mode, dashboard only mode>>.
 
 [float]
-[[kibana-discover-settings]]
+[[opensearch-dashboards-discover-settings]]
 ==== Discover
 
 [horizontal]
@@ -264,7 +264,7 @@ Highlights results in *Discover* and saved searches on dashboards. Highlighting
 slows requests when working on big documents.
 
 [float]
-[[kibana-ml-settings]]
+[[opensearch-dashboards-ml-settings]]
 ==== Machine learning
 
 [horizontal]
@@ -285,7 +285,7 @@ value is `100MB`. The highest supported value for this setting is `1GB`.
 
 
 [float]
-[[kibana-notification-settings]]
+[[opensearch-dashboards-notification-settings]]
 ==== Notifications
 
 [horizontal]
@@ -312,7 +312,7 @@ value is 10000. Set this field to `Infinity` to disable warning notifications.
 
 
 [float]
-[[kibana-reporting-settings]]
+[[opensearch-dashboards-reporting-settings]]
 ==== Reporting
 
 [horizontal]
@@ -321,7 +321,7 @@ A custom image to use in the footer of the PDF.
 
 
 [float]
-[[kibana-rollups-settings]]
+[[opensearch-dashboards-rollups-settings]]
 ==== Rollup
 
 [horizontal]
@@ -332,7 +332,7 @@ changes.
 
 
 [float]
-[[kibana-search-settings]]
+[[opensearch-dashboards-search-settings]]
 ==== Search
 
 [horizontal]
@@ -354,8 +354,8 @@ index patterns.
 
 [[courier-maxconcurrentshardrequests]]`courier:maxConcurrentShardRequests`::
 Controls the {ref}/search-multi-search.html[max_concurrent_shard_requests]
-setting used for `_msearch` requests sent by {kib}. Set to 0 to disable this
-config and use the {es} default.
+setting used for `_msearch` requests sent by {osd}. Set to 0 to disable this
+config and use the {opensearch} default.
 
 [[courier-setrequestpreference]]`courier:setRequestPreference`::
 Enables you to set which shards handle your search requests.
@@ -377,7 +377,7 @@ session or set to 0 to disable the timeout and allow queries to run to
 completion.
 
 [float]
-[[kibana-siem-settings]]
+[[opensearch-dashboards-siem-settings]]
 ==== Security solution
 
 [horizontal]
@@ -385,7 +385,7 @@ completion.
 The threshold above which {ml} job anomalies are displayed in the {security-app}.
 
 [[securitysolution-defaultindex]]`securitySolution:defaultIndex`::
-A comma-delimited list of {es} indices from which the {security-app} collects
+A comma-delimited list of {opensearch} indices from which the {security-app} collects
 events.
 
 [[securitysolution-ipreputationlinks]]`securitySolution:ipReputationLinks`::
@@ -406,7 +406,7 @@ The default refresh interval for the Security time filter, in milliseconds.
 The default period of time in the Security time filter.
 
 [float]
-[[kibana-timelion-settings]]
+[[opensearch-dashboards-timelion-settings]]
 ==== Timelion
 
 [horizontal]
@@ -416,17 +416,17 @@ The default number of columns to use on a Timelion sheet.
 [[timelion-defaultrows]]`timelion:default_rows`::
 The default number of rows to use on a Timelion sheet.
 
-[[timelion-esdefaultindex]]`timelion:es.default_index`::
-The default index when using the `.es()` query.
+[[timelion-opensearchdefaultindex]]`timelion:opensearch.default_index`::
+The default index when using the `.opensearch()` query.
 
-[[timelion-estimefield]]`timelion:es.timefield`::
-The default field containing a timestamp when using the `.es()` query.
+[[timelion-opensearchtimefield]]`timelion:opensearch.timefield`::
+The default field containing a timestamp when using the `.opensearch()` query.
 
 [[timelion-graphite-url]]`timelion:graphite.url`::
 experimental:[]
 Used with graphite queries, this is the URL of your graphite host
 in the form https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite. This URL can
-be selected from an allow-list configured in the `kibana.yml` under
+be selected from an allow-list configured in the `opensearch_dashboards.yml` under
 `timelion.graphiteUrls`.
 
 [[timelion-maxbuckets]]`timelion:max_buckets`::
@@ -450,7 +450,7 @@ of buckets to try to represent.
 
 
 [float]
-[[kibana-visualization-settings]]
+[[opensearch-dashboards-visualization-settings]]
 ==== Visualization
 
 [horizontal]
@@ -480,7 +480,7 @@ user.
 
 
 [float]
-[[kibana-telemetry-settings]]
+[[opensearch-dashboards-telemetry-settings]]
 ==== Usage data
 
 Helps improve the Elastic Stack by providing usage statistics for

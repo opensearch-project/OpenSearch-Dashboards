@@ -1,7 +1,7 @@
 [[managing-licenses]]
 == License Management
 
-When you install the default distribution of {kib}, you receive free features
+When you install the default distribution of {osd}, you receive free features
 with no expiration date. For the full list of features, refer to
 {subscriptions}.
 
@@ -24,9 +24,9 @@ At the end of the trial period, some features operate in a
 or purchase a subscription.
 
 TIP: If {security-features} are enabled, unless you have a trial license,
-you must configure Transport Layer Security (TLS) in {es}.
+you must configure Transport Layer Security (TLS) in {opensearch}.
 See {ref}/encrypting-communications.html[Encrypting communications].
-{kib} and the {ref}/start-basic.html[start basic API] provide a list of all of
+{osd} and the {ref}/start-basic.html[start basic API] provide a list of all of
 the features that will no longer be supported if you revert to a basic license.
 
 [float]
@@ -40,9 +40,9 @@ To add the privilege, open the main menu, then click *Stack Management > Roles*.
 [[update-license]]
 === Update your license
 
-You can update your license at runtime without shutting down your {es} nodes.
+You can update your license at runtime without shutting down your {opensearch} nodes.
 License updates take effect immediately. The license is provided as a _JSON_
-file that you install in {kib} or by using the
+file that you install in {osd} or by using the
 {ref}/update-license.html[update license API].
 
 TIP: If you are using a basic or trial license, {security-features} are disabled
@@ -56,13 +56,13 @@ you must secure the {stack} or disable the {security-features}.
 Your license is time based and expires at a future date. If you're using
 {monitor-features} and your license will expire within 30 days, a license
 expiration warning is displayed prominently. Warnings are also displayed on
-startup and written to the {es} log starting 30 days from the expiration date.
+startup and written to the {opensearch} log starting 30 days from the expiration date.
 These error messages tell you when the license expires and what features will be
 disabled if you do not update the license.
 
 IMPORTANT: You should update your license as soon as possible. You are
 essentially flying blind when running with an expired license. Access to the
-cluster health and stats APIs is critical for monitoring and managing an {es}
+cluster health and stats APIs is critical for monitoring and managing an {opensearch}
 cluster.
 
 [discrete]
@@ -72,8 +72,8 @@ cluster.
 *  Beats will continue to poll centrally-managed configuration.
 
 [discrete]
-[[expiration-elasticsearch]]
-==== {es}
+[[expiration-opensearch]]
+==== {opensearch}
 
 // Upgrade API is disabled
 * The deprecation API is disabled.
@@ -104,7 +104,7 @@ and start {dfeeds} are disabled.
 * All open {anomaly-jobs} are closed.
 * APIs to create and start {dfanalytics-jobs} are disabled.
 * Existing {anomaly-job} and {dfanalytics-job} results continue to be available
-by using {kib} or APIs.
+by using {osd} or APIs.
 
 [discrete]
 [[expiration-monitoring]]
@@ -156,20 +156,20 @@ failure without immediately impacting other users.
 //TBD: * Logstash will continue to poll centrally-managed pipelines
 
 [discrete]
-[[expiration-kibana]]
-==== {kib}
+[[expiration-opensearch-dashboards]]
+==== {osd}
 
-* Users can still log into {kib}.
-* {kib} works for data exploration and visualization, but some features
+* Users can still log into {osd}.
+* {osd} works for data exploration and visualization, but some features
 are disabled.
 * The license management UI is available to easily upgrade your license. See
 <<update-license>> and <<managing-licenses>>.
 
 [discrete]
 [[expiration-reporting]]
-==== {kib} {report-features}
+==== {osd} {report-features}
 
-* Reporting is no longer available in {kib}.
+* Reporting is no longer available in {osd}.
 * Report generation URLs stop working.
 * Existing reports are no longer accessible.
 

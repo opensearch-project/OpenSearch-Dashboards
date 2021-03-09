@@ -26,7 +26,7 @@ If you want to suppress actions on all current and future instances, you can mut
 [role="screenshot"]
 image::images/alerts-details-muting.png[Use the mute toggle to suppress all action on current and future instances]
 
-You can also disable an alert altogether. When disabled, the alert stops running checks altogether and will clear any instances it is tracking. You may want to disable alerts that are not currently needed to reduce the load on {kib} and {es}.
+You can also disable an alert altogether. When disabled, the alert stops running checks altogether and will clear any instances it is tracking. You may want to disable alerts that are not currently needed to reduce the load on {osd} and {opensearch}.
 
 [role="screenshot"]
 image::images/alerts-details-disabling.png[Use the disable toggle to turn off alert checks and clear instances tracked]

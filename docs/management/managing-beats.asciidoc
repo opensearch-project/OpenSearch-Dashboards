@@ -6,7 +6,7 @@ include::{asciidoc-dir}/../../shared/discontinued.asciidoc[tag=cm-discontinued]
 
 To use {beats} Central Management, open the main menu, click *Stack Management >
 {beats} Central Management*, then define and
-manage configurations in a central location in {kib} and quickly deploy
+manage configurations in a central location in {osd} and quickly deploy
 configuration changes to all {beats} running across your enterprise. For more
 about central management, see the related {beats} documentation:
 
@@ -25,7 +25,7 @@ more information, see https://www.elastic.co/subscriptions and
 <<managing-licenses>>.
 ====
 
-{kib} makes it easy for you to use central management by walking you through the
+{osd} makes it easy for you to use central management by walking you through the
 enrollment and configuration process step by step the first time you use the
 Central Management UI.
 
@@ -42,7 +42,7 @@ To assign the role, open the menu, then click *Stack Management > Users*.
 
 You need to enroll {beats} to register them in central management and establish
 trust. Enrolled {beats} will have the credentials needed to retrieve
-configurations from {kib}.
+configurations from {osd}.
 
 [float]
 === Create configuration tags
@@ -72,7 +72,7 @@ Central management supports configuration settings for:
 * {filebeat} inputs
 * {filebeat} and {metricbeat} outputs
 
-NOTE: Central management supports the following outputs only: {es}, {ls}, Kafka,
+NOTE: Central management supports the following outputs only: {opensearch}, {ls}, Kafka,
 and Redis. Other output types are not supported for {beats} that are enrolled in
 central management.
 

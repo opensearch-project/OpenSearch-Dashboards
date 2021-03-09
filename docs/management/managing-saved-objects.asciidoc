@@ -13,12 +13,12 @@ image::images/management-saved-objects.png[Saved Objects]
 [float]
 === Required permissions
 
-The `Saved Objects Management` {kib} privilege is required to access the *Saved Objects* UI.
+The `Saved Objects Management` {osd} privilege is required to access the *Saved Objects* UI.
 
 To add the privilege, open the menu, then click *Stack Management > Roles*.
 
 NOTE:
-Granting access to Saved Objects Management will authorize users to manage all saved objects in {kib}, including objects that are managed by applications they may not otherwise be authorized to access.
+Granting access to Saved Objects Management will authorize users to manage all saved objects in {osd}, including objects that are managed by applications they may not otherwise be authorized to access.
 
 
 [float]
@@ -38,7 +38,7 @@ and select *Relationships*.
 === Import and export
 
 Using the import and export commands, you can move objects between different
-{kib} instances. This action is useful when you
+{osd} instances. This action is useful when you
 have multiple environments for development and production.
 Import and export also work well when you have a large number
 of objects to update and want to batch the process.
@@ -50,7 +50,7 @@ of objects to update and want to batch the process.
 You can import multiple objects in a single operation. Click *Import* and
 navigate to the NDJSON file that
 represents the objects to import.  By default,
-saved objects already in {kib} are overwritten.
+saved objects already in {osd} are overwritten.
 
 [float]
 ==== Export
@@ -66,7 +66,7 @@ objects. Exported dashboards include their associated index patterns.
 [float]
 [role="xpack"]
 [[managing-saved-objects-copy-to-space]]
-=== Copy to other {kib} spaces
+=== Copy to other {osd} spaces
 
 To copy a saved object to another space, click the actions icon image:images/actions_icon.png[Actions icon]
 and select *Copy to space*. From here, you can select the spaces in which to copy the object.

@@ -27,7 +27,7 @@ To add the privilege, open the main menu, then click *Stack Management > Roles*.
 [[create-and-manage-rollup-job]]
 === Create a rollup job
 
-{kib} makes it easy for you to create a rollup job by walking you through
+{osd} makes it easy for you to create a rollup job by walking you through
 the process. You fill in the name, data flow, and how often you want to roll
 up the data.  Then you define a date histogram aggregation for the rollup job
 and optionally define terms, histogram, and metrics aggregations.
@@ -65,7 +65,7 @@ You can read more at {ref}/rollup-job-config.html[rollup job configuration].
 This example creates a rollup job to capture log data from sample web logs.
 To follow along, add the sample web logs data set.
 
-In this example, you want data that is older than 7 days in the target index pattern `kibana_sample_data_logs`
+In this example, you want data that is older than 7 days in the target index pattern `opensearch_dashboards_sample_data_logs`
 to roll up once a day into the index `rollup_logstash`. You’ll bucket the
 rolled up data on an hourly basis, using 60m for the time bucket configuration.
 This allows for more granular queries, such as 2h and 12h.
@@ -82,7 +82,7 @@ As you walk through the *Create rollup job* UI, enter the data:
 |logs_job
 
 |Index pattern
-|`kibana_sample_data_logs`
+|`opensearch_dashboards_sample_data_logs`
 
 |Rollup index name
 |`rollup_logstash`
@@ -140,17 +140,17 @@ Most visualizations support rolled up data, with the exception of Timelion and V
 [role="screenshot"]
 image::images/management-rollup-index-pattern.png[][Create rollup index pattern]
 
-. Enter *rollup_logstash,kibana_sample_logs* as your *Index Pattern* and `@timestamp`
+. Enter *rollup_logstash,opensearch_dashboards_sample_logs* as your *Index Pattern* and `@timestamp`
 as the *Time Filter field name*.
 +
 The notation for a combination index pattern with both raw and rolled up data
-is `rollup_logstash,kibana_sample_data_logs`. In this index pattern, `rollup_logstash`
-matches the rolled up index pattern and `kibana_sample_data_logs` matches the index
+is `rollup_logstash,opensearch_dashboards_sample_data_logs`. In this index pattern, `rollup_logstash`
+matches the rolled up index pattern and `opensearch_dashboards_sample_data_logs` matches the index
 pattern for raw data.
 
 . Open the main menu, click *Dashboard*, then create and add a vertical bar chart.
  
-. Choose `rollup_logstash,kibana_sample_data_logs`
+. Choose `rollup_logstash,opensearch_dashboards_sample_data_logs`
 as your source to see both the raw and rolled up data.
 +
 [role="screenshot"]

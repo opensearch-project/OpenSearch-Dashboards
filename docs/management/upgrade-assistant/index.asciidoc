@@ -2,7 +2,7 @@
 [[upgrade-assistant]]
 == Upgrade Assistant
 
-The Upgrade Assistant helps you prepare for your upgrade to the next major {es} version.
+The Upgrade Assistant helps you prepare for your upgrade to the next major {opensearch} version.
 For example, if you are using 6.8, the Upgrade Assistant helps you to upgrade to 7.0.
 To access the assistant, open the main menu, then click *Stack Management > Upgrade Assistant*.
 
@@ -10,7 +10,7 @@ The assistant identifies the deprecated settings in your cluster and indices
 and guides you through the process of resolving issues, including reindexing.
 
 Before you upgrade, make sure that you are using the latest released minor
-version of {es} to see the most up-to-date deprecation issues.
+version of {opensearch} to see the most up-to-date deprecation issues.
 For example, if you want to upgrade to to 7.0, make sure that you are using 6.8.
 
 [float]
@@ -25,7 +25,7 @@ To add the privilege, open the main menu, then click *Stack Management > Roles*.
 === Reindexing
 
 The *Indices* page lists the indices that are incompatible with the next
-major version of {es}. You can initiate a reindex to resolve the issues.
+major version of {opensearch}. You can initiate a reindex to resolve the issues.
 
 [role="screenshot"]
 image::images/management-upgrade-assistant-8.0.png[]
@@ -43,7 +43,7 @@ new index is deleted, and the original index becomes writable. An error
 message explains the reason for the failure.
 
 You can reindex multiple indices at a time, but keep an eye on the
-{es} metrics, including CPU usage, memory pressure, and disk usage. If a
+{opensearch} metrics, including CPU usage, memory pressure, and disk usage. If a
 metric is so high it affects query performance, cancel the reindex and
 continue by reindexing fewer indices at a time.
 

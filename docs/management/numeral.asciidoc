@@ -1,19 +1,19 @@
 [[numeral]]
 == Numeral Formatting
 
-Numeral formatting in {kib} is done through a pattern-based syntax.
+Numeral formatting in {osd} is done through a pattern-based syntax.
 These patterns express common number formats in a concise way, similar
 to date formatting. While these patterns are originally based on Numeral.js,
-they are now maintained by {kib}.
+they are now maintained by {osd}.
 
-Numeral formatting patterns are used in multiple places in {kib}, including:
+Numeral formatting patterns are used in multiple places in {osd}, including:
 
 * <<advanced-options, Advanced settings>>
 * <<field-formatters-numeric, Index pattern formatters>>
 * <<tsvb, TSVB>>
 * <<canvas, Canvas>>
 
-The simplest pattern format is `0`, and the default {kib} pattern is `0,0.[000]`.
+The simplest pattern format is `0`, and the default {osd} pattern is `0,0.[000]`.
 The numeral pattern syntax expresses:
 
 Number of decimal places:: The `.` character turns on the option to show decimal
@@ -25,7 +25,7 @@ thousands using a locale-specific separator. The separator is most often `,` or 
 and sometimes ` `.
 Accounting notation:: Putting parentheses around your format like `(0.00)` will use accounting notation to show negative numbers.
 
-The display of these patterns is affected by the <<kibana-general-settings, advanced setting>> `format:number:defaultLocale`.
+The display of these patterns is affected by the <<opensearch-dashboards-general-settings, advanced setting>> `format:number:defaultLocale`.
 The default locale is `en`, but some examples will specify that they are using an alternate locale.
 
 Most basic examples:
@@ -47,7 +47,7 @@ Most basic examples:
 By adding the `%` symbol to any of the previous patterns, the value
 is multiplied by 100 and the `%` symbol is added in the place indicated.
 
-The default percentage formatter in {kib} is `0,0.[000]%`, which shows
+The default percentage formatter in {osd} is `0,0.[000]%`, which shows
 up to three decimal places.
 
 |===
@@ -84,7 +84,7 @@ Suffixes are not localized with this formatter.
 [float]
 === Currency
 
-Currency formatting is limited in {kib} due to the limitations of the pattern
+Currency formatting is limited in {osd} due to the limitations of the pattern
 syntax. To enable currency formatting, use the symbol `$` in the pattern syntax.
 The number formatting locale will affect the result.
 

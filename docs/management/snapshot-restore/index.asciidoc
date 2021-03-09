@@ -2,7 +2,7 @@
 [[snapshot-repositories]]
 == Snapshot and Restore
 
-*Snapshot and Restore* enables you to backup your {es}
+*Snapshot and Restore* enables you to backup your {opensearch}
 indices and clusters using data and state snapshots.
 Snapshots are important because they provide a copy of your data in case
 something goes wrong. If you need to roll back to an older version of your data,
@@ -38,14 +38,14 @@ To add privileges, open the main menu, then click *Stack Management > Roles*.
 image:management/snapshot-restore/images/snapshot_permissions.png["Edit Role"]
 
 [float]
-[[kib-snapshot-register-repository]]
+[[osd-snapshot-register-repository]]
 === Register a repository
 A repository is where your snapshots live. You must register a snapshot
 repository before you can perform snapshot and restore operations.
 
-If you don't have a repository, Kibana walks you through the process of
+If you don't have a repository, OpenSearchDashboards walks you through the process of
 registering one.
-{kib} supports three repository types
+{osd} supports three repository types
 out of the box: shared file system, read-only URL, and source-only.
 For more information on these repositories and their settings,
 see {ref}/snapshots-register-repository.html[Repositories].
@@ -63,17 +63,17 @@ image:management/snapshot-restore/images/repository_list.png["Repository list"]
 
 
 [float]
-[[kib-view-snapshot]]
+[[osd-view-snapshot]]
 === View your snapshots
 
-A snapshot is a backup taken from a running {es} cluster. You'll find an overview of
+A snapshot is a backup taken from a running {opensearch} cluster. You'll find an overview of
 your snapshots in the *Snapshots* view, and you can drill down
 into each snapshot for further investigation.
 
 [role="screenshot"]
 image:management/snapshot-restore/images/snapshot_details.png["Snapshot details"]
 
-If you don’t have any snapshots, you can create them from the {kib} <<console-kibana, Console>>. The
+If you don’t have any snapshots, you can create them from the {osd} <<console-opensearch-dashboards, Console>>. The
 {ref}/snapshots-take-snapshot.html[snapshot API]
 takes the current state and data in your index or cluster, and then saves it to a
 shared repository.
@@ -84,7 +84,7 @@ All subsequent snapshots save the changes between the existing snapshots and
 the new data.
 
 [float]
-[[kib-restore-snapshot]]
+[[osd-restore-snapshot]]
 === Restore a snapshot
 
 The information stored in a snapshot is not tied to a specific
@@ -93,7 +93,7 @@ restore a snapshot made from one cluster to another cluster. You might
 use the restore operation to:
 
 * Recover data lost due to a failure
-* Migrate a current Elasticsearch cluster to a new version
+* Migrate a current OpenSearch cluster to a new version
 * Move data from one cluster to another cluster
 
 To get started, go to the *Snapshots* view, find the
@@ -112,17 +112,17 @@ image:management/snapshot-restore/images/snapshot-restore.png["Snapshot details"
 
 
 [float]
-[[kib-snapshot-policy]]
+[[osd-snapshot-policy]]
 === Create a snapshot lifecycle policy
 
 Use a {ref}/snapshot-lifecycle-management-api.html[snapshot lifecycle policy]
 to automate the creation and deletion
 of cluster snapshots. Taking automatic snapshots:
 
-* Ensures your {es} indices and clusters are backed up on a regular basis
+* Ensures your {opensearch} indices and clusters are backed up on a regular basis
 * Ensures a recent and relevant snapshot is available if a situation
 arises where a cluster needs to be recovered
-* Allows you to manage your snapshots in {kib}, instead of using a
+* Allows you to manage your snapshots in {osd}, instead of using a
 third-party tool
 
 If you don’t have any snapshot policies, follow the
@@ -148,7 +148,7 @@ This action does not cancel any currently ongoing snapshots or remove any previo
 image:management/snapshot-restore/images/create-policy.png["Snapshot details"]
 
 [float]
-[[kib-delete-snapshot]]
+[[osd-delete-snapshot]]
 === Delete a snapshot
 
 Delete snapshots to manage your repository storage space.
@@ -178,11 +178,11 @@ Before you begin, you must register the location of the repository in the
 {ref}/snapshots-register-repository.html#snapshots-filesystem-repository[path.repo] setting on
 your master and data nodes.  You can do this in one of two ways:
 
-* Edit  your `elasticsearch.yml` to include the `path.repo` setting.
+* Edit  your `opensearch.yml` to include the `path.repo` setting.
 
-* Pass the `path.repo` setting when you start Elasticsearch.
+* Pass the `path.repo` setting when you start OpenSearch.
 +
-`bin/elasticsearch -E path.repo=/tmp/es-backups`
+`bin/opensearch -E path.repo=/tmp/opensearch-backups`
 
 [float]
 [[register-repo-example]]
@@ -200,7 +200,7 @@ will live.
 image:management/snapshot-restore/images/register_repo.png["Register repository"]
 
 . Click *Next*.
-. In *File system location*, enter the path to the snapshot repository, `/tmp/es-backups`.
+. In *File system location*, enter the path to the snapshot repository, `/tmp/opensearch-backups`.
 . In *Chunk size*, enter `100mb` so that snapshot files are not bigger than that size.
 . Use the defaults for all other fields, and then click *Register*.
 +

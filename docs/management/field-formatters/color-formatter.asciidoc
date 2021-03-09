@@ -1,6 +1,6 @@
 The `Color` field formatter enables you to specify colors with specific ranges of values for a numeric field.
 
-When you select the `Color` field formatter, Kibana displays the *Range*, *Font Color*, *Background Color*, and 
+When you select the `Color` field formatter, OpenSearchDashboards displays the *Range*, *Font Color*, *Background Color*, and 
 *Example* fields.
 
 Click the *Add Color* button to add a range of values to associate with a particular color. You can click in the *Font 

@@ -2,7 +2,7 @@
 [[ingest-node-pipelines]]
 == Ingest Node Pipelines
 
-*Ingest Node Pipelines* enables you to create and manage {es}
+*Ingest Node Pipelines* enables you to create and manage {opensearch}
 pipelines that perform common transformations and
 enrichments on your data.  For example, you might remove a field,
 rename an existing field, or set a new field.
@@ -57,7 +57,7 @@ AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36\"
 ----------------------------------
 
 The log contains an IP address, timestamp, and user agent. You want to give
-these three items their own field in {es} for fast search and visualization.
+these three items their own field in {opensearch} for fast search and visualization.
 You also want to know where the request is coming from.
 
 . In *Ingest Node Pipelines*, click *Create a pipeline*.
@@ -148,10 +148,10 @@ view the verbose output and refresh the output from this view.
 
 . If everything looks correct, close the panel, and then click *Create pipeline*.
 +
-At this point, you’re ready to use the Elasticsearch index API to load
+At this point, you’re ready to use the OpenSearch index API to load
 the logs data.
 
-. In the Kibana Console, index a document with the pipeline
+. In the OpenSearchDashboards Console, index a document with the pipeline
 you created.
 +
 [source,js]

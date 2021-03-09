@@ -2,11 +2,11 @@
 == Field management
 
 Whenever possible,
-{kib} uses the same field type for display as {es}.  However, a few field types
-{es} supports are not available in {kib}. Use field formatters to customize how your
-fields are displayed in Kibana, regardless of how they are stored in {es}.
+{osd} uses the same field type for display as {opensearch}.  However, a few field types
+{opensearch} supports are not available in {osd}. Use field formatters to customize how your
+fields are displayed in OpenSearchDashboards, regardless of how they are stored in {opensearch}.
 
-Kibana provides these field formatters:
+OpenSearchDashboards provides these field formatters:
 
 * <<field-formatters-string, Strings>>
 * <<field-formatters-date, Dates>>
@@ -59,7 +59,7 @@ include::field-formatters/string-formatter.asciidoc[]
 Numeric fields support the `Url`, `Bytes`, `Duration`, `Number`, `Percentage`, `String`, and `Color` formatters.
 
 The `Bytes`, `Number`, and `Percentage` formatters enable you to choose the display formats of numbers in this field using
-the <<numeral, Elastic numeral pattern>> syntax that {kib} maintains.
+the <<numeral, Elastic numeral pattern>> syntax that {osd} maintains.
 
 include::field-formatters/url-formatter.asciidoc[]
 
@@ -72,15 +72,15 @@ include::field-formatters/color-formatter.asciidoc[]
 [[scripted-fields]]
 === Scripted fields
 
-Scripted fields compute data on the fly from the data in your {es} indices. The data is shown on
-the Discover tab as part of the document data, and you can use scripted fields in your visualizations. You query scripted fields with the <<kuery-query, {kib} query language>>, and can filter them using the filter bar. The scripted field values are computed at query time, so they aren't indexed and cannot be searched using the {kib} default
+Scripted fields compute data on the fly from the data in your {opensearch} indices. The data is shown on
+the Discover tab as part of the document data, and you can use scripted fields in your visualizations. You query scripted fields with the <<kuery-query, {osd} query language>>, and can filter them using the filter bar. The scripted field values are computed at query time, so they aren't indexed and cannot be searched using the {osd} default
 query language.
 
 WARNING: Computing data on the fly with scripted fields can be very resource intensive and can have a direct impact on
-{kib} performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
+{osd} performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
 buggy, you'll get exceptions whenever you try to view the dynamically generated data.
 
-When you define a scripted field in {kib}, you have a choice of the {ref}/modules-scripting-expression.html[Lucene expressions] or the 
+When you define a scripted field in {osd}, you have a choice of the {ref}/modules-scripting-expression.html[Lucene expressions] or the 
 {ref}/modules-scripting-painless.html[Painless] scripting language.
 
 You can reference any single value numeric field in your expressions, for example:
@@ -90,7 +90,7 @@ doc['field_name'].value
 ----
 
 For more information on scripted fields and additional examples, refer to
-https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless in {kib} scripted fields]
+https://www.elastic.co/blog/using-painless-opensearch-dashboards-scripted-fields[Using Painless in {osd} scripted fields]
 
 [float]
 [[create-scripted-field]]
@@ -103,7 +103,7 @@ https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless
 . Enter the expression that you want to use to compute a value on the fly from your index data.
 . Click *Create field*.
 
-For more information about scripted fields in {es}, see
+For more information about scripted fields in {opensearch}, see
 {ref}/modules-scripting.html[Scripting].
 
 [float]
