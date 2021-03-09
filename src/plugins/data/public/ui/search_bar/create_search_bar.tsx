@@ -20,8 +20,8 @@
 import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
 import { CoreStart } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
+import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import { QueryStart, SavedQuery } from '../../query';
 import { SearchBar, SearchBarOwnProps } from './';
 import { useFilterManager } from './lib/use_filter_manager';
@@ -165,7 +165,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
     }, [query, timeRange, useDefaultBehaviors]);
 
     return (
-      <KibanaContextProvider
+      <OpenSearchDashboardsContextProvider
         services={{
           appName: props.appName,
           data,
@@ -199,7 +199,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           {...overrideDefaultBehaviors(props)}
         />
-      </KibanaContextProvider>
+      </OpenSearchDashboardsContextProvider>
     );
   };
 }

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { Assign } from '@kbn/utility-types';
+import { i18n } from '@osd/i18n';
+import { Assign } from '@osd/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
@@ -65,10 +65,10 @@ export const aggDateHistogram = (): FunctionDefinition => ({
         defaultMessage: 'Field to use for this aggregation',
       }),
     },
-    useNormalizedEsInterval: {
+    useNormalizedOpenSearchInterval: {
       types: ['boolean'],
-      help: i18n.translate('data.search.aggs.buckets.dateHistogram.useNormalizedEsInterval.help', {
-        defaultMessage: 'Specifies whether to use useNormalizedEsInterval for this aggregation',
+      help: i18n.translate('data.search.aggs.buckets.dateHistogram.useNormalizedOpenSearchInterval.help', {
+        defaultMessage: 'Specifies whether to use useNormalizedOpenSearchInterval for this aggregation',
       }),
     },
     time_zone: {
@@ -123,7 +123,7 @@ export const aggDateHistogram = (): FunctionDefinition => ({
     json: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.buckets.dateHistogram.json.help', {
-        defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
+        defaultMessage: 'Advanced json to include when the agg is sent to OpenSearch',
       }),
     },
     customLabel: {

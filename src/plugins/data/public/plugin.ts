@@ -21,7 +21,7 @@ import './index.scss';
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ConfigSchema } from '../config';
-import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
+import { Storage, IStorageWrapper, createStartServicesGetter } from '../../opensearch_dashboards_utils/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -84,12 +84,12 @@ declare module '../../ui_actions/public' {
 
 export class DataPublicPlugin
   implements
-    Plugin<
-      DataPublicPluginSetup,
-      DataPublicPluginStart,
-      DataSetupDependencies,
-      DataStartDependencies
-    > {
+  Plugin<
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  DataSetupDependencies,
+  DataStartDependencies
+  > {
   private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
   private readonly fieldFormatsService: FieldFormatsService;

@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { withKibana } from '../../../../kibana_react/public';
+import { withOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import type { QueryBarTopRowProps } from './query_bar_top_row';
 import type { QueryStringInputProps } from './query_string_input';
 
@@ -31,7 +31,7 @@ export const QueryBarTopRow = (props: QueryBarTopRowProps) => (
   </React.Suspense>
 );
 
-const LazyQueryStringInputUI = withKibana(React.lazy(() => import('./query_string_input')));
+const LazyQueryStringInputUI = withOpenSearchDashboards(React.lazy(() => import('./query_string_input')));
 export const QueryStringInput = (props: QueryStringInputProps) => (
   <React.Suspense fallback={<Fallback />}>
     <LazyQueryStringInputUI {...props} />

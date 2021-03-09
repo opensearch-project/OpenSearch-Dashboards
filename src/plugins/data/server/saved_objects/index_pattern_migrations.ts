@@ -18,7 +18,7 @@
  */
 
 import { flow, omit } from 'lodash';
-import { SavedObjectMigrationFn } from 'kibana/server';
+import { SavedObjectMigrationFn } from 'opensearch-dashboards/server';
 
 const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn<any, any> = (doc) => ({
   ...doc,

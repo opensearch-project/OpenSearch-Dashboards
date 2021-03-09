@@ -22,7 +22,7 @@ import { pick } from 'lodash';
 import {
   CoreSetup,
   CoreStart,
-  KibanaRequest,
+  OpenSearchDashboardsRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -38,17 +38,17 @@ import { AggsService, AggsSetupDependencies } from './aggs';
 import { FieldFormatsStart } from '../field_formats';
 import { IndexPatternsServiceStart } from '../index_patterns';
 import { getCallMsearch, registerMsearchRoute, registerSearchRoute } from './routes';
-import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
+import { OPENSEARCH_SEARCH_STRATEGY, opensearchSearchStrategyProvider } from './opensearch_search';
 import { DataPluginStart } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
 import { searchTelemetry } from '../saved_objects';
 import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  IEsSearchRequest,
-  IEsSearchResponse,
+  IOpenSearchDashboardsSearchRequest,
+  IOpenSearchDashboardsSearchResponse,
+  IOpenSearchSearchRequest,
+  IOpenSearchSearchResponse,
   ISearchOptions,
   SearchSourceDependencies,
   SearchSourceService,
@@ -84,13 +84,13 @@ export interface SearchRouteDependencies {
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
-  private defaultSearchStrategyName: string = ES_SEARCH_STRATEGY;
+  private defaultSearchStrategyName: string = OPENSEARCH_SEARCH_STRATEGY;
   private searchStrategies: StrategyMap = {};
 
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,
     private readonly logger: Logger
-  ) {}
+  ) { }
 
   public setup(
     core: CoreSetup<{}, DataPluginStart>,
@@ -107,8 +107,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     registerMsearchRoute(router, routeDependencies);
 
     this.registerSearchStrategy(
-      ES_SEARCH_STRATEGY,
-      esSearchStrategyProvider(
+      OPENSEARCH_SEARCH_STRATEGY,
+      opensearchSearchStrategyProvider(
         this.initializerContext.config.legacy.globalConfig$,
         this.logger,
         usage
@@ -153,14 +153,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       getSearchStrategy: this.getSearchStrategy,
       search: (
         context: RequestHandlerContext,
-        searchRequest: IKibanaSearchRequest,
+        searchRequest: IOpenSearchDashboardsSearchRequest,
         options: Record<string, any>
       ) => {
         return this.search(context, searchRequest, options);
       },
       searchSource: {
-        asScoped: async (request: KibanaRequest) => {
-          const esClient = elasticsearch.client.asScoped(request);
+        asScoped: async (request: OpenSearchDashboardsRequest) => {
+          const opensearchClient = elasticsearch.client.asScoped(request);
           const savedObjectsClient = savedObjects.getScopedClient(request);
           const scopedIndexPatterns = await indexPatterns.indexPatternsServiceFactory(request);
           const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
@@ -175,18 +175,18 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: (searchRequest, options) => {
               /**
-               * Unless we want all SearchSource users to provide both a KibanaRequest
+               * Unless we want all SearchSource users to provide both a OpenSearchDashboardsRequest
                * (needed for index patterns) AND the RequestHandlerContext (needed for
                * low-level search), we need to fake the context as it can be derived
                * from the request object anyway. This will pose problems for folks who
                * are registering custom search strategies as they are only getting a
                * subset of the entire context. Ideally low-level search should be
-               * refactored to only require the needed dependencies: esClient & uiSettings.
+               * refactored to only require the needed dependencies: opensearchClient & uiSettings.
                */
               const fakeRequestHandlerContext = {
                 core: {
                   elasticsearch: {
-                    client: esClient,
+                    client: opensearchClient,
                   },
                   uiSettings: {
                     client: uiSettingsClient,
@@ -199,7 +199,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             onResponse: (req, res) => res,
             legacy: {
               callMsearch: getCallMsearch({
-                esClient,
+                opensearchClient,
                 globalConfig$: this.initializerContext.config.legacy.globalConfig$,
                 uiSettings: uiSettingsClient,
               }),
@@ -218,8 +218,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   private registerSearchStrategy = <
-    SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+    SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
+    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
   >(
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
@@ -229,8 +229,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   };
 
   private search = <
-    SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+    SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
+    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
   >(
     context: RequestHandlerContext,
     searchRequest: SearchStrategyRequest,
@@ -242,8 +242,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   };
 
   private getSearchStrategy = <
-    SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+    SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
+    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
   >(
     name: string
   ): ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse> => {

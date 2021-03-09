@@ -115,35 +115,35 @@ export {
 } from '../common';
 
 /*
- * esQuery and esKuery:
+ * opensearchQuery and opensearchKuery:
  */
 
 import {
   fromKueryExpression,
-  toElasticsearchQuery,
+  toOpenSearchQuery,
   nodeTypes,
-  buildEsQuery,
-  getEsQueryConfig,
+  buildOpenSearchQuery,
+  getOpenSearchQueryConfig,
   buildQueryFromFilters,
   luceneStringToDsl,
   decorateQuery,
 } from '../common';
 
-export const esKuery = {
+export const opensearchKuery = {
   nodeTypes,
   fromKueryExpression,
-  toElasticsearchQuery,
+  toOpenSearchQuery,
 };
 
-export const esQuery = {
-  buildEsQuery,
-  getEsQueryConfig,
+export const opensearchQuery = {
+  buildOpenSearchQuery,
+  getOpenSearchQueryConfig,
   buildQueryFromFilters,
   luceneStringToDsl,
   decorateQuery,
 };
 
-export { EsQueryConfig, KueryNode } from '../common';
+export { OpenSearchQueryConfig, KueryNode } from '../common';
 
 /*
  * Field Formatters:
@@ -258,8 +258,8 @@ export {
   IIndexPattern,
   IFieldType,
   IFieldSubType,
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
+  OPENSEARCH_FIELD_TYPES,
+  OSD_FIELD_TYPES,
   IndexPatternAttributes,
   UI_SETTINGS,
   TypeMeta as IndexPatternTypeMeta,
@@ -301,12 +301,12 @@ import {
   siblingPipelineType,
   termsAggFilter,
   dateHistogramInterval,
-  InvalidEsCalendarIntervalError,
-  InvalidEsIntervalFormatError,
+  InvalidOpenSearchCalendarIntervalError,
+  InvalidOpenSearchIntervalFormatError,
   Ipv4Address,
-  isValidEsInterval,
+  isValidOpenSearchInterval,
   isValidInterval,
-  parseEsInterval,
+  parseOpenSearchInterval,
   parseInterval,
   toAbsoluteDates,
   // expressions utils
@@ -328,7 +328,7 @@ export {
   AggParamType,
   AggConfigOptions,
   BUCKET_TYPES,
-  EsaggsExpressionFunctionDefinition,
+  OpenSearchaggsExpressionFunctionDefinition,
   IAggConfig,
   IAggConfigs,
   IAggType,
@@ -348,15 +348,15 @@ export type { AggConfigs, AggConfig } from '../common';
 
 export {
   // search
-  ES_SEARCH_STRATEGY,
-  EsQuerySortValue,
+  OPENSEARCH_SEARCH_STRATEGY,
+  OpenSearchQuerySortValue,
   extractSearchSourceReferences,
-  getEsPreference,
+  getOpenSearchPreference,
   getSearchParamsFromRequest,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
+  IOpenSearchSearchRequest,
+  IOpenSearchSearchResponse,
+  IOpenSearchDashboardsSearchRequest,
+  IOpenSearchDashboardsSearchResponse,
   injectSearchSourceReferences,
   ISearch,
   ISearchSetup,
@@ -371,8 +371,8 @@ export {
   SearchSourceFields,
   SortDirection,
   // expression functions and types
-  EsdslExpressionFunctionDefinition,
-  EsRawResponseExpressionTypeDefinition,
+  OpenSearchdslExpressionFunctionDefinition,
+  OpenSearchRawResponseExpressionTypeDefinition,
   // errors
   SearchError,
   SearchTimeoutError,
@@ -390,17 +390,17 @@ export const search = {
     CidrMask,
     dateHistogramInterval,
     intervalOptions,
-    InvalidEsCalendarIntervalError,
-    InvalidEsIntervalFormatError,
+    InvalidOpenSearchCalendarIntervalError,
+    InvalidOpenSearchIntervalFormatError,
     Ipv4Address,
     isDateHistogramBucketAggConfig, // TODO: remove in build_pipeline refactor
     isNumberType,
     isStringType,
     isType,
-    isValidEsInterval,
+    isValidOpenSearchInterval,
     isValidInterval,
     parentPipelineType,
-    parseEsInterval,
+    parseOpenSearchInterval,
     parseInterval,
     propFilter,
     siblingPipelineType,
@@ -454,9 +454,9 @@ export { AggsStart } from './search/aggs';
 
 export {
   getTime,
-  // kbn field types
-  castEsToKbnFieldTypeName,
-  getKbnTypeNames,
+  // osd field types
+  castOpenSearchToOsdFieldTypeName,
+  getOsdTypeNames,
 } from '../common';
 
 export { isTimeRange, isQuery, isFilter, isFilters } from '../common';

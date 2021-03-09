@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'opensearch-dashboards/server';
 
 import { getFieldCapabilities, resolveTimePattern, createNoMatchingIndicesError } from './lib';
 
@@ -27,7 +27,7 @@ export interface FieldDescriptor {
   readFromDocValues: boolean;
   searchable: boolean;
   type: string;
-  esTypes: string[];
+  opensearchTypes: string[];
   subType?: FieldSubType;
 }
 

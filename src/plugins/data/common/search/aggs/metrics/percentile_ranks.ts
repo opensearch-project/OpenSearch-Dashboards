@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { OSD_FIELD_TYPES } from '../../../../common';
 import { AggTypesDependencies } from '../agg_types';
 import { BaseAggParams } from '../types';
 
@@ -47,7 +47,7 @@ const getValueProps = (
     makeLabel(this: IPercentileRanksAggConfig) {
       const { getDefaultInstance } = getFieldFormatsStart();
       const field = this.getField();
-      const format = (field && field.format) || getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
+      const format = (field && field.format) || getDefaultInstance(OSD_FIELD_TYPES.NUMBER);
       const customLabel = this.getParam('customLabel');
       const label = customLabel || this.getFieldDisplayName();
 
@@ -77,7 +77,7 @@ export const getPercentileRanksMetricAgg = ({
       {
         name: 'field',
         type: 'field',
-        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM],
+        filterFieldTypes: [OSD_FIELD_TYPES.NUMBER, OSD_FIELD_TYPES.HISTOGRAM],
       },
       {
         name: 'values',

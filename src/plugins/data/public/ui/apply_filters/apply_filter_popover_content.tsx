@@ -28,7 +28,7 @@ import {
   EuiModalHeaderTitle,
   EuiSwitch,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import React, { Component } from 'react';
 import { IIndexPattern } from '../..';
 import { getDisplayValueFromFilter, Filter } from '../../../common';

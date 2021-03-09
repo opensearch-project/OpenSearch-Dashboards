@@ -22,11 +22,11 @@ import { UsageCollectionSetup } from '../../../../usage_collection/server';
 
 export async function makeKQLUsageCollector(
   usageCollection: UsageCollectionSetup,
-  kibanaIndex: string
+  opensearchDashboardsIndex: string
 ) {
   const kqlUsageCollector = usageCollection.makeUsageCollector<Usage>({
     type: 'kql',
-    fetch: fetchProvider(kibanaIndex),
+    fetch: fetchProvider(opensearchDashboardsIndex),
     isReady: () => true,
     schema: {
       optInCount: { type: 'long' },

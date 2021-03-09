@@ -18,10 +18,10 @@
  */
 
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { OSD_FIELD_TYPES } from '../../../../common';
 import { BaseAggParams } from '../types';
 
 export interface AggParamsTopHit extends BaseAggParams {
@@ -35,7 +35,7 @@ export interface AggParamsTopHit extends BaseAggParams {
 const isNumericFieldSelected = (agg: IMetricAggConfig) => {
   const field = agg.getParam('field');
 
-  return field && field.type && field.type === KBN_FIELD_TYPES.NUMBER;
+  return field && field.type && field.type === OSD_FIELD_TYPES.NUMBER;
 };
 
 export const getTopHitMetricAgg = () => {
@@ -70,8 +70,8 @@ export const getTopHitMetricAgg = () => {
         name: 'field',
         type: 'field',
         onlyAggregatable: false,
-        filterFieldTypes: Object.values(KBN_FIELD_TYPES).filter(
-          (type) => type !== KBN_FIELD_TYPES.HISTOGRAM
+        filterFieldTypes: Object.values(OSD_FIELD_TYPES).filter(
+          (type) => type !== OSD_FIELD_TYPES.HISTOGRAM
         ),
         write(agg, output) {
           const field = agg.getParam('field');
@@ -94,7 +94,7 @@ export const getTopHitMetricAgg = () => {
                   // always format date fields as date_time to avoid
                   // displaying unformatted dates like epoch_millis
                   // or other not-accepted momentjs formats
-                  ...(field.type === KBN_FIELD_TYPES.DATE && { format: 'date_time' }),
+                  ...(field.type === OSD_FIELD_TYPES.DATE && { format: 'date_time' }),
                 },
               ];
             }
@@ -159,10 +159,10 @@ export const getTopHitMetricAgg = () => {
         name: 'sortField',
         type: 'field',
         filterFieldTypes: [
-          KBN_FIELD_TYPES.NUMBER,
-          KBN_FIELD_TYPES.DATE,
-          KBN_FIELD_TYPES.IP,
-          KBN_FIELD_TYPES.STRING,
+          OSD_FIELD_TYPES.NUMBER,
+          OSD_FIELD_TYPES.DATE,
+          OSD_FIELD_TYPES.IP,
+          OSD_FIELD_TYPES.STRING,
         ],
         default(agg: IMetricAggConfig) {
           return agg.getIndexPattern().timeFieldName;

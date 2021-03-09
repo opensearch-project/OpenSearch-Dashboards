@@ -18,7 +18,7 @@
  */
 
 import { IUiSettingsClient } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { Query } from '../../../common';
 import { getQueryLog } from './get_query_log';
 

@@ -29,7 +29,7 @@ import { AggGroupNames, IAggConfigs } from '../aggs';
  */
 export function tabifyAggResponse(
   aggConfigs: IAggConfigs,
-  esResponse: Record<string, any>,
+  opensearchResponse: Record<string, any>,
   respOpts?: Partial<TabbedResponseWriterOptions>
 ) {
   /**
@@ -149,8 +149,8 @@ export function tabifyAggResponse(
 
   const write = new TabbedAggResponseWriter(aggConfigs, respOpts || {});
   const topLevelBucket: AggResponseBucket = {
-    ...esResponse.aggregations,
-    doc_count: esResponse.hits.total,
+    ...opensearchResponse.aggregations,
+    doc_count: opensearchResponse.hits.total,
   };
 
   collectBucket(aggConfigs, write, topLevelBucket, '', 1);

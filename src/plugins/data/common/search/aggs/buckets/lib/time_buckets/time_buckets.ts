@@ -24,18 +24,18 @@ import { parseInterval } from '../../../utils';
 import { TimeRangeBounds } from '../../../../../query';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
-  convertDurationToNormalizedEsInterval,
-  convertIntervalToEsInterval,
-  EsInterval,
-} from './calc_es_interval';
+  convertDurationToNormalizedOpenSearchInterval,
+  convertIntervalToOpenSearchInterval,
+  OpenSearchInterval,
+} from './calc_opensearch_interval';
 import { autoInterval } from '../../_interval_options';
 
 interface TimeBucketsInterval extends moment.Duration {
   // TODO double-check whether all of these are needed
   description: string;
-  esValue: EsInterval['value'];
-  esUnit: EsInterval['unit'];
-  expression: EsInterval['expression'];
+  opensearchValue: OpenSearchInterval['value'];
+  opensearchUnit: OpenSearchInterval['unit'];
+  expression: OpenSearchInterval['expression'];
   preScaled?: TimeBucketsInterval;
   scale?: number;
   scaled?: boolean;
@@ -70,7 +70,7 @@ export class TimeBuckets {
   private _originalInterval: string | null = null;
   private _i?: moment.Duration | 'auto';
 
-  // because other parts of Kibana arbitrarily add properties
+  // because other parts of OpenSearch Dashboards arbitrarily add properties
   [key: string]: any;
 
   constructor(timeBucketConfig: TimeBucketsConfig) {
@@ -234,8 +234,8 @@ export class TimeBuckets {
    *     - "10 days"
    *     - "3 years"
    *
-   * interval.expression: the elasticsearch expression that creates this
-   *   interval. If the interval does not properly form an elasticsearch
+   * interval.expression: the OpenSearch expression that creates this
+   *   interval. If the interval does not properly form an OpenSearch
    *   expression it will be forced into one.
    *
    * interval.scaled: the interval was adjusted to
@@ -244,7 +244,7 @@ export class TimeBuckets {
    * interval.scale: the number that y-values should be
    *   multiplied by
    */
-  getInterval(useNormalizedEsInterval = true): TimeBucketsInterval {
+  getInterval(useNormalizedOpenSearchInterval = true): TimeBucketsInterval {
     const duration = this.getDuration();
 
     // either pull the interval from state or calculate the auto-interval
@@ -285,21 +285,21 @@ export class TimeBuckets {
 
     // append some TimeBuckets specific props to the interval
     const decorateInterval = (interval: moment.Duration): TimeBucketsInterval => {
-      const esInterval = useNormalizedEsInterval
-        ? convertDurationToNormalizedEsInterval(interval)
-        : convertIntervalToEsInterval(String(this._originalInterval));
-      const prettyUnits = moment.normalizeUnits(esInterval.unit);
+      const OpenSearchInterval = useNormalizedOpenSearchInterval
+        ? convertDurationToNormalizedOpenSearchInterval(interval)
+        : convertIntervalToOpenSearchInterval(String(this._originalInterval));
+      const prettyUnits = moment.normalizeUnits(OpenSearchInterval.unit);
 
       return Object.assign(interval, {
         description:
-          esInterval.value === 1 ? prettyUnits : esInterval.value + ' ' + prettyUnits + 's',
-        esValue: esInterval.value,
-        esUnit: esInterval.unit,
-        expression: esInterval.expression,
+          OpenSearchInterval.value === 1 ? prettyUnits : OpenSearchInterval.value + ' ' + prettyUnits + 's',
+        opensearchValue: OpenSearchInterval.value,
+        opensearchUnit: OpenSearchInterval.unit,
+        expression: OpenSearchInterval.expression,
       });
     };
 
-    if (useNormalizedEsInterval) {
+    if (useNormalizedOpenSearchInterval) {
       return decorateInterval(maybeScaleInterval(parsedInterval));
     } else {
       return decorateInterval(parsedInterval);

@@ -19,7 +19,7 @@
 
 import { BaseParamType } from './base';
 import { FieldParamType } from './field';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../common';
+import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../common';
 import { IAggConfig } from '../agg_config';
 
 describe('Field', () => {
@@ -29,16 +29,16 @@ describe('Field', () => {
     fields: [
       {
         name: 'field1',
-        type: KBN_FIELD_TYPES.NUMBER,
-        esTypes: [ES_FIELD_TYPES.INTEGER],
+        type: OSD_FIELD_TYPES.NUMBER,
+        opensearchTypes: [OPENSEARCH_FIELD_TYPES.INTEGER],
         aggregatable: true,
         filterable: true,
         searchable: true,
       },
       {
         name: 'field2',
-        type: KBN_FIELD_TYPES.STRING,
-        esTypes: [ES_FIELD_TYPES.TEXT],
+        type: OSD_FIELD_TYPES.STRING,
+        opensearchTypes: [OPENSEARCH_FIELD_TYPES.TEXT],
         aggregatable: false,
         filterable: false,
         searchable: true,

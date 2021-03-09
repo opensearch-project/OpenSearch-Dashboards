@@ -33,7 +33,7 @@ export const fieldFormatsMock: IFieldFormatsRegistry = {
   getDefaultTypeName: jest.fn(),
   getInstance: jest.fn() as any,
   getType: jest.fn(),
-  getTypeNameByEsTypes: jest.fn(),
+  getTypeNameByOpenSearchTypes: jest.fn(),
   init: jest.fn(),
   register: jest.fn(),
   parseDefaultTypeMap: jest.fn(),

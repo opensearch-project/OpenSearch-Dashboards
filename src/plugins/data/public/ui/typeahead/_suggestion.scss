@@ -1,31 +1,31 @@
 // These are the various types in the dropdown, they each get a color
-$kbnTypeaheadTypes: (
+$osdTypeaheadTypes: (
   field: $euiColorWarning,
   value: $euiColorSecondary,
   operator: $euiColorPrimary,
   conjunction: $euiColorVis3,
 );
 
-.kbnTypeahead.kbnTypeahead--small {
+.osdTypeahead.osdTypeahead--small {
   max-height: 20vh;
 }
 
-.kbnTypeahead__popover--top {
+.osdTypeahead__popover--top {
   @include euiBottomShadowFlat;
   border-top-left-radius: $euiBorderRadius;
   border-top-right-radius: $euiBorderRadius;
 }
 
-.kbnTypeahead__popover--bottom {
+.osdTypeahead__popover--bottom {
   @include euiBottomShadow($adjustBorders: true);
   border-bottom-left-radius: $euiBorderRadius;
   border-bottom-right-radius: $euiBorderRadius;
 }
 
-.kbnTypeahead {
+.osdTypeahead {
   max-height: 60vh;
 
-  .kbnTypeahead__popover {
+  .osdTypeahead__popover {
     max-height: inherit;
     @include euiScrollBar;
     border: 1px solid;
@@ -37,7 +37,7 @@ $kbnTypeaheadTypes: (
     width: 100%;
     overflow-y: auto;
 
-    .kbnTypeahead__item {
+    .osdTypeahead__item {
       height: $euiSizeXL;
       white-space: nowrap;
       font-size: $euiFontSizeXS;
@@ -47,38 +47,38 @@ $kbnTypeaheadTypes: (
       line-height: normal;
     }
 
-    .kbnTypeahead__item:hover {
+    .osdTypeahead__item:hover {
       cursor: pointer;
     }
 
-    .kbnTypeahead__item:last-child {
+    .osdTypeahead__item:last-child {
       border-bottom: none;
       border-radius: 0 0 $euiBorderRadius $euiBorderRadius;
     }
 
-    .kbnTypeahead__item:first-child {
+    .osdTypeahead__item:first-child {
       border-bottom: none;
       border-radius: $euiBorderRadius $euiBorderRadius 0 0;
     }
 
-    .kbnTypeahead__item.active {
+    .osdTypeahead__item.active {
       background-color: $euiColorLightestShade;
 
-      .kbnSuggestionItem__callout {
+      .osdSuggestionItem__callout {
         background: $euiColorEmptyShade;
       }
 
-      .kbnSuggestionItem__text {
+      .osdSuggestionItem__text {
         color: $euiColorFullShade;
       }
 
-      .kbnSuggestionItem__type {
+      .osdSuggestionItem__type {
         color: $euiColorFullShade;
       }
 
-      @each $name, $color in $kbnTypeaheadTypes {
-        .kbnSuggestionItem--#{$name} {
-          .kbnSuggestionItem__type {
+      @each $name, $color in $osdTypeaheadTypes {
+        .osdSuggestionItem--#{$name} {
+          .osdSuggestionItem__type {
             background-color: tintOrShade($color, 80%, 60%);
           }
         }
@@ -87,44 +87,44 @@ $kbnTypeaheadTypes: (
   }
 }
 
-.kbnSuggestionItem {
+.osdSuggestionItem {
   display: flex;
   flex-grow: 1;
   align-items: center;
   font-size: $euiFontSizeXS;
   white-space: nowrap;
 
-  @each $name, $color in $kbnTypeaheadTypes {
-    &.kbnSuggestionItem--#{$name} {
-      .kbnSuggestionItem__type {
+  @each $name, $color in $osdTypeaheadTypes {
+    &.osdSuggestionItem--#{$name} {
+      .osdSuggestionItem__type {
         background-color: tintOrShade($color, 90%, 50%);
         color: makeHighContrastColor($color, tintOrShade($color, 90%, 50%));
       }
     }
   }
 
-  &.kbnSuggestionItem--recentSearch {
-    .kbnSuggestionItem__type {
+  &.osdSuggestionItem--recentSearch {
+    .osdSuggestionItem__type {
       background-color: $euiColorLightShade;
       color: $euiColorMediumShade;
     }
 
-    .kbnSuggestionItem__text {
+    .SuggestionItem__text {
       width: auto;
     }
   }
 }
 
-.kbnSuggestionItem__text,
-.kbnSuggestionItem__type,
-.kbnSuggestionItem__description {
+.osdSuggestionItem__text,
+.osdSuggestionItem__type,
+.osdSuggestionItem__description {
   flex-grow: 1;
   flex-basis: 0%;
   display: flex;
   flex-direction: column;
 }
 
-.kbnSuggestionItem__type {
+.osdSuggestionItem__type {
   flex-grow: 0;
   flex-shrink: 0;
   flex-basis: auto;
@@ -137,7 +137,7 @@ $kbnTypeaheadTypes: (
   align-items: center;
 }
 
-.kbnSuggestionItem__text {
+.osdSuggestionItem__text {
   flex-grow: 0; /* 2 */
   flex-basis: auto; /* 2 */
   font-family: $euiCodeFontFamily;
@@ -148,7 +148,7 @@ $kbnTypeaheadTypes: (
   color: $euiTextColor;
 }
 
-.kbnSuggestionItem__description {
+.osdSuggestionItem__description {
   color: $euiColorDarkShade;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -160,7 +160,7 @@ $kbnTypeaheadTypes: (
   }
 }
 
-.kbnSuggestionItem__callout {
+.osdSuggestionItem__callout {
   font-family: $euiCodeFontFamily;
   background: $euiColorLightestShade;
   color: $euiColorFullShade;
@@ -168,7 +168,7 @@ $kbnTypeaheadTypes: (
   display: inline-block;
 }
 
-.kbnSuggestionItem--value .kbnSuggestionItem__text {
+osdnSuggestionItem--value .osdSuggestionItem__text {
   flex-basis: 50%;
   flex-grow: 1;
 }

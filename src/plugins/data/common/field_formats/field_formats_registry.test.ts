@@ -19,7 +19,7 @@
 import { FieldFormatsRegistry } from './field_formats_registry';
 import { BoolFormat, PercentFormat, StringFormat } from './converters';
 import { FieldFormatsGetConfigFn, FieldFormatInstanceType } from './types';
-import { KBN_FIELD_TYPES } from '../../common';
+import { OSD_FIELD_TYPES } from '../../common';
 
 const getValueOfPrivateField = (instance: any, field: string) => instance[field];
 
@@ -152,7 +152,7 @@ describe('FieldFormatsRegistry', () => {
     test('should decorate returns types', () => {
       fieldFormatsRegistry.register([StringFormat, BoolFormat]);
 
-      const [DecoratedStringFormat] = fieldFormatsRegistry.getByFieldType(KBN_FIELD_TYPES.STRING);
+      const [DecoratedStringFormat] = fieldFormatsRegistry.getByFieldType(OSD_FIELD_TYPES.STRING);
 
       expect(DecoratedStringFormat).toBeDefined();
 

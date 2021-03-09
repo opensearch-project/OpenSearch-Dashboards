@@ -19,7 +19,7 @@
 
 import { CoreSetup } from '../../../../core/public';
 import { coreMock } from '../../../../core/public/mocks';
-import { IEsSearchRequest } from '../../common/search';
+import { IOpenSearchSearchRequest } from '../../common/search';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '../../common';
 import { SearchTimeoutError, PainlessError } from './errors';
@@ -45,7 +45,7 @@ describe('SearchInterceptor', () => {
     test('Observable should resolve if fetch is successful', async () => {
       const mockResponse: any = { result: 200 };
       mockCoreSetup.http.fetch.mockResolvedValueOnce(mockResponse);
-      const mockRequest: IEsSearchRequest = {
+      const mockRequest: IOpenSearchSearchRequest = {
         params: {},
       };
       const response = searchInterceptor.search(mockRequest);
@@ -57,7 +57,7 @@ describe('SearchInterceptor', () => {
     test('Observable should fail if fetch has an internal error', async () => {
       const mockResponse: any = { result: 500, message: 'Internal Error' };
       mockCoreSetup.http.fetch.mockRejectedValueOnce(mockResponse);
-      const mockRequest: IEsSearchRequest = {
+      const mockRequest: IOpenSearchSearchRequest = {
         params: {},
       };
       const response = searchInterceptor.search(mockRequest);
@@ -77,7 +77,7 @@ describe('SearchInterceptor', () => {
         },
       };
       mockCoreSetup.http.fetch.mockRejectedValueOnce(mockResponse);
-      const mockRequest: IEsSearchRequest = {
+      const mockRequest: IOpenSearchSearchRequest = {
         params: {},
       };
       const response = searchInterceptor.search(mockRequest);
@@ -99,7 +99,7 @@ describe('SearchInterceptor', () => {
         },
       };
       mockCoreSetup.http.fetch.mockRejectedValue(mockResponse);
-      const mockRequest: IEsSearchRequest = {
+      const mockRequest: IOpenSearchSearchRequest = {
         params: {},
       };
       try {
@@ -135,7 +135,7 @@ describe('SearchInterceptor', () => {
         },
       };
       mockCoreSetup.http.fetch.mockRejectedValueOnce(mockResponse);
-      const mockRequest: IEsSearchRequest = {
+      const mockRequest: IOpenSearchSearchRequest = {
         params: {},
       };
       const response = searchInterceptor.search(mockRequest);
@@ -159,7 +159,7 @@ describe('SearchInterceptor', () => {
           setTimeout(resolve, 500);
         });
       });
-      const mockRequest: IEsSearchRequest = {
+      const mockRequest: IOpenSearchSearchRequest = {
         params: {},
       };
       const response = searchInterceptor.search(mockRequest, {
@@ -180,7 +180,7 @@ describe('SearchInterceptor', () => {
 
     test('Immediately aborts if passed an aborted abort signal', async (done) => {
       const abort = new AbortController();
-      const mockRequest: IEsSearchRequest = {
+      const mockRequest: IOpenSearchSearchRequest = {
         params: {},
       };
       const response = searchInterceptor.search(mockRequest, { abortSignal: abort.signal });

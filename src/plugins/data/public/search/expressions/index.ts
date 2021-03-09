@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export * from './esaggs';
-export * from './es_raw_response';
-export * from './esdsl';
+export * from './opensearchaggs';
+export * from './opensearch_raw_response';
+export * from './opensearchdsl';
 export * from './utils';

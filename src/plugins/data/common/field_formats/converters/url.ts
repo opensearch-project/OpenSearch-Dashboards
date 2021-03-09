@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { escape, memoize } from 'lodash';
 import { getHighlightHtml } from '../utils';
-import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { OSD_FIELD_TYPES } from '../../osd_field_types/types';
 import { FieldFormat } from '../field_format';
 import {
   TextContextTypeConvert,
@@ -60,14 +60,14 @@ export class UrlFormat extends FieldFormat {
     defaultMessage: 'Url',
   });
   static fieldType = [
-    KBN_FIELD_TYPES.NUMBER,
-    KBN_FIELD_TYPES.BOOLEAN,
-    KBN_FIELD_TYPES.DATE,
-    KBN_FIELD_TYPES.IP,
-    KBN_FIELD_TYPES.STRING,
-    KBN_FIELD_TYPES.MURMUR3,
-    KBN_FIELD_TYPES.UNKNOWN,
-    KBN_FIELD_TYPES.CONFLICT,
+    OSD_FIELD_TYPES.NUMBER,
+    OSD_FIELD_TYPES.BOOLEAN,
+    OSD_FIELD_TYPES.DATE,
+    OSD_FIELD_TYPES.IP,
+    OSD_FIELD_TYPES.STRING,
+    OSD_FIELD_TYPES.MURMUR3,
+    OSD_FIELD_TYPES.UNKNOWN,
+    OSD_FIELD_TYPES.CONFLICT,
   ];
   static urlTypes = URL_TYPES;
 
@@ -168,26 +168,26 @@ export class UrlFormat extends FieldFormat {
 
         let prefix = '';
         /**
-         * This code attempts to convert a relative url into a kibana absolute url
+         * This code attempts to convert a relative url into a OpenSearch Dashboards absolute url
          *
          * SUPPORTED:
-         *  - /app/kibana/
-         *  - ../app/kibana
+         *  - /app/opensearch-dashboards/
+         *  - ../app/opensearch-dashboards
          *  - #/discover
          *
          * UNSUPPORTED
-         *  - app/kibana
+         *  - app/opensearch-dashboards
          */
         if (!allowed) {
           // Handles urls like: `#/discover`
           if (url[0] === '#') {
             prefix = `${origin}${pathname}`;
           }
-          // Handle urls like: `/app/kibana` or `/xyz/app/kibana`
+          // Handle urls like: `/app/opensearch-dashboards` or `/xyz/app/opensearch-dashboards`
           else if (url.indexOf(basePath || '/') === 0) {
             prefix = `${origin}`;
           }
-          // Handle urls like: `../app/kibana`
+          // Handle urls like: `../app/opensearch-dashboards`
           else {
             const prefixEnd = url[0] === '/' ? '' : '/';
 

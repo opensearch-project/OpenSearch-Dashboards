@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { i18n } from '@osd/i18n';
+import { OSD_FIELD_TYPES } from '../../osd_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
@@ -38,10 +38,10 @@ export class StaticLookupFormat extends FieldFormat {
     defaultMessage: 'Static lookup',
   });
   static fieldType = [
-    KBN_FIELD_TYPES.STRING,
-    KBN_FIELD_TYPES.NUMBER,
-    KBN_FIELD_TYPES.IP,
-    KBN_FIELD_TYPES.BOOLEAN,
+    OSD_FIELD_TYPES.STRING,
+    OSD_FIELD_TYPES.NUMBER,
+    OSD_FIELD_TYPES.IP,
+    OSD_FIELD_TYPES.BOOLEAN,
   ];
 
   getParamDefaults() {

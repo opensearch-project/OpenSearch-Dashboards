@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 
-import { Required } from '@kbn/utility-types';
+import { Required } from '@osd/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 
 import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';

@@ -22,7 +22,7 @@ import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notificatio
 import type { SavedObject } from 'src/core/server';
 import { IFieldType } from './fields';
 import { SerializedFieldFormat } from '../../../expressions/common';
-import { KBN_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
+import { OSD_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
@@ -142,8 +142,8 @@ export interface FieldSpecExportFmt {
   lang?: string;
   conflictDescriptions?: FieldSpecConflictDescriptions;
   name: string;
-  type: KBN_FIELD_TYPES;
-  esTypes?: string[];
+  type: OSD_FIELD_TYPES;
+  opensearchTypes?: string[];
   scripted: boolean;
   searchable: boolean;
   aggregatable: boolean;
@@ -162,7 +162,7 @@ export interface FieldSpec {
 
   name: string;
   type: string;
-  esTypes?: string[];
+  opensearchTypes?: string[];
   scripted?: boolean;
   searchable: boolean;
   aggregatable: boolean;

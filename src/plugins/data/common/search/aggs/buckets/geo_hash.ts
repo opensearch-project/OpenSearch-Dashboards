@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { OSD_FIELD_TYPES } from '../../../../common';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { GeoBoundingBox } from './lib/geo_point';
 import { BaseAggParams } from '../types';
@@ -53,12 +53,12 @@ export const getGeoHashBucketAgg = () =>
       {
         name: 'field',
         type: 'field',
-        filterFieldTypes: KBN_FIELD_TYPES.GEO_POINT,
+        filterFieldTypes: OSD_FIELD_TYPES.GEO_POINT,
       },
       {
         name: 'autoPrecision',
         default: true,
-        write: () => {},
+        write: () => { },
       },
       {
         name: 'precision',
@@ -70,17 +70,17 @@ export const getGeoHashBucketAgg = () =>
       {
         name: 'useGeocentroid',
         default: true,
-        write: () => {},
+        write: () => { },
       },
       {
         name: 'isFilteredByCollar',
         default: true,
-        write: () => {},
+        write: () => { },
       },
       {
         name: 'boundingBox',
         default: null,
-        write: () => {},
+        write: () => { },
       },
     ],
     getRequestAggs(agg) {

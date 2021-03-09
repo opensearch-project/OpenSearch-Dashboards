@@ -21,7 +21,7 @@ import React, { useState, ReactElement } from 'react';
 import { EuiInMemoryTable, EuiButtonIcon } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { ShardFailureDescription } from './shard_failure_description';
 import { ShardFailure } from './shard_failure_types';
 import { getFailureSummaryText } from './shard_failure_description_header';

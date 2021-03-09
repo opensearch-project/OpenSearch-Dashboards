@@ -23,10 +23,10 @@ import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 import { handleResponse } from './fetch';
 import {
-  IEsSearchRequest,
-  IEsSearchResponse,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
+  IOpenSearchSearchRequest,
+  IOpenSearchSearchResponse,
+  IOpenSearchDashboardsSearchRequest,
+  IOpenSearchDashboardsSearchResponse,
   ISearchGeneric,
   ISearchOptions,
   SearchSourceService,
@@ -38,7 +38,7 @@ import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { esdsl, esRawResponse } from './expressions';
+import { opensearchdsl, opensearchRawResponse } from './expressions';
 import { ExpressionsSetup } from '../../../expressions/public';
 import { ConfigSchema } from '../../config';
 import {
@@ -65,7 +65,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
 
-  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) { }
 
   public setup(
     { http, getStartServices, notifications, uiSettings }: CoreSetup,
@@ -85,8 +85,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       usageCollector: this.usageCollector!,
     });
 
-    expressions.registerFunction(esdsl);
-    expressions.registerType(esRawResponse);
+    expressions.registerFunction(opensearchdsl);
+    expressions.registerType(opensearchRawResponse);
 
     const aggs = this.aggsService.setup({
       registerFunction: expressions.registerFunction,
@@ -121,8 +121,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
       search: <
-        SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-        SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+        SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
+        SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
       >(
         request: SearchStrategyRequest,
         options: ISearchOptions

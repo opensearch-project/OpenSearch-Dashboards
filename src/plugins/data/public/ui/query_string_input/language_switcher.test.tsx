@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { QueryLanguageSwitcher } from './language_switcher';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
@@ -33,9 +33,9 @@ describe('LanguageSwitcher', () => {
     };
 
     return (
-      <KibanaContextProvider services={services}>
+      <OpenSearchDashboardsContextProvider services={services}>
         <QueryLanguageSwitcher {...testProps} />
-      </KibanaContextProvider>
+      </OpenSearchDashboardsContextProvider>
     );
   }
 

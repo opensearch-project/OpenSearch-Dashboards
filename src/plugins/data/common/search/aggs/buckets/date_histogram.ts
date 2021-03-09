@@ -19,9 +19,9 @@
 
 import { get, noop, find, every } from 'lodash';
 import moment from 'moment-timezone';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
-import { KBN_FIELD_TYPES, TimeRange, TimeRangeBounds, UI_SETTINGS } from '../../../../common';
+import { OSD_FIELD_TYPES, TimeRange, TimeRangeBounds, UI_SETTINGS } from '../../../../common';
 
 import { intervalOptions, autoInterval, isAutoInterval } from './_interval_options';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
@@ -69,7 +69,7 @@ export function isDateHistogramBucketAggConfig(agg: any): agg is IBucketDateHist
 export interface AggParamsDateHistogram extends BaseAggParams {
   field?: string;
   timeRange?: TimeRange;
-  useNormalizedEsInterval?: boolean;
+  useNormalizedOpenSearchInterval?: boolean;
   scaleMetricValues?: boolean;
   interval?: string;
   time_zone?: string;
@@ -144,7 +144,7 @@ export const getDateHistogramBucketAgg = ({
       {
         name: 'field',
         type: 'field',
-        filterFieldTypes: KBN_FIELD_TYPES.DATE,
+        filterFieldTypes: OSD_FIELD_TYPES.DATE,
         default(agg: IBucketDateHistogramAggConfig) {
           return agg.getIndexPattern().timeFieldName;
         },
@@ -160,7 +160,7 @@ export const getDateHistogramBucketAgg = ({
         write: noop,
       },
       {
-        name: 'useNormalizedEsInterval',
+        name: 'useNormalizedOpenSearchInterval',
         default: true,
         write: noop,
       },
@@ -192,13 +192,13 @@ export const getDateHistogramBucketAgg = ({
         write(agg, output, aggs) {
           updateTimeBuckets(agg, calculateBounds);
 
-          const { useNormalizedEsInterval, scaleMetricValues } = agg.params;
-          const interval = agg.buckets.getInterval(useNormalizedEsInterval);
+          const { useNormalizedOpenSearchInterval, scaleMetricValues } = agg.params;
+          const interval = agg.buckets.getInterval(useNormalizedOpenSearchInterval);
           output.bucketInterval = interval;
           if (interval.expression === '0ms') {
             // We are hitting this code a couple of times while configuring in editor
             // with an interval of 0ms because the overall time range has not yet been
-            // set. Since 0ms is not a valid ES interval, we cannot pass it through dateHistogramInterval
+            // set. Since 0ms is not a valid OpenSearch interval, we cannot pass it through dateHistogramInterval
             // below, since it would throw an exception. So in the cases we still have an interval of 0ms
             // here we simply skip the rest of the method and never write an interval into the DSL, since
             // this DSL will anyway not be used before we're passing this code with an actual interval.

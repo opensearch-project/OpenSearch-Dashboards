@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { PersistedLog } from '../persisted_log';
 import { TimeRange } from '../../../common';
 
@@ -33,7 +33,7 @@ export class TimeHistory {
         return oldItem.from === newItem.from && oldItem.to === newItem.to;
       },
     };
-    this.history = new PersistedLog('kibana.timepicker.timeHistory', historyOptions, storage);
+    this.history = new PersistedLog('opensearchDashboards.timepicker.timeHistory', historyOptions, storage);
   }
 
   add(time: TimeRange) {

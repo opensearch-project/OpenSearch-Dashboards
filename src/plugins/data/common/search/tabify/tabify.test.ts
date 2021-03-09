@@ -63,7 +63,7 @@ describe('tabifyAggResponse Integration', () => {
   });
 
   describe('transforms a complex response', () => {
-    let esResp: typeof threeTermBuckets;
+    let opensearchResp: typeof threeTermBuckets;
     let aggConfigs: IAggConfigs;
     let avg: IAggConfig;
     let ext: IAggConfig;
@@ -80,8 +80,8 @@ describe('tabifyAggResponse Integration', () => {
 
       [avg, ext, src, os] = aggConfigs.aggs;
 
-      esResp = threeTermBuckets;
-      esResp.aggregations.agg_2.buckets[1].agg_3.buckets[0].agg_4.buckets = [];
+      opensearchResp = threeTermBuckets;
+      opensearchResp.aggregations.agg_2.buckets[1].agg_3.buckets[0].agg_4.buckets = [];
     });
 
     // check that the columns of a table are formed properly
@@ -133,7 +133,7 @@ describe('tabifyAggResponse Integration', () => {
       // the default for a non-hierarchical vis is to display
       // only complete rows, and only put the metrics at the end.
 
-      const tabbed = tabifyAggResponse(aggConfigs, esResp, { metricsAtAllLevels: false });
+      const tabbed = tabifyAggResponse(aggConfigs, opensearchResp, { metricsAtAllLevels: false });
 
       expectColumns(tabbed, [ext, src, os, avg]);
 
@@ -143,7 +143,7 @@ describe('tabifyAggResponse Integration', () => {
     });
 
     test('for hierarchical vis', () => {
-      const tabbed = tabifyAggResponse(aggConfigs, esResp, { metricsAtAllLevels: true });
+      const tabbed = tabifyAggResponse(aggConfigs, opensearchResp, { metricsAtAllLevels: true });
 
       expectColumns(tabbed, [ext, avg, src, avg, os, avg]);
 

@@ -20,12 +20,12 @@
 import React from 'react';
 import { debounce } from 'lodash';
 
-import { withKibana, KibanaReactContextValue } from '../../../../../kibana_react/public';
+import { withOpenSearchDashboards, OpenSearchDashboardsReactContextValue } from '../../../../../opensearch_dashboards_react/public';
 import { IDataPluginServices, IIndexPattern, IFieldType } from '../../..';
 import { UI_SETTINGS } from '../../../../common';
 
 export interface PhraseSuggestorProps {
-  kibana: KibanaReactContextValue<IDataPluginServices>;
+  opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
   indexPattern: IIndexPattern;
   field?: IFieldType;
 }
@@ -44,7 +44,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
   T,
   PhraseSuggestorState
 > {
-  private services = this.props.kibana.services;
+  private services = this.props.opensearchDashboards.services;
   private abortController?: AbortController;
   public state: PhraseSuggestorState = {
     suggestions: [],
@@ -91,4 +91,4 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
   }, 500);
 }
 
-export const PhraseSuggestor = withKibana(PhraseSuggestorUI as any);
+export const PhraseSuggestor = withOpenSearchDashboards(PhraseSuggestorUI as any);

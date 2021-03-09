@@ -22,7 +22,7 @@ import { map, tap } from 'rxjs/operators';
 import { TimefilterSetup } from '../timefilter';
 import { FilterManager } from '../filter_manager';
 import { QueryState, QueryStateChange } from './index';
-import { createStateContainer } from '../../../../kibana_utils/public';
+import { createStateContainer } from '../../../../opensearch_dashboards_utils/public';
 import { isFilterPinned, compareFilters, COMPARE_ALL_OPTIONS } from '../../../common';
 import { QueryStringContract } from '../query_string';
 

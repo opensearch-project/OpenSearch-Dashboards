@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { Assign } from '@kbn/utility-types';
+import { Assign } from '@osd/utility-types';
 
 import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';

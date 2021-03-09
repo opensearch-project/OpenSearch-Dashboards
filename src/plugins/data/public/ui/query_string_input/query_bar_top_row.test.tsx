@@ -28,8 +28,8 @@ import { QueryBarTopRow } from './';
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
-import { I18nProvider } from '@kbn/i18n/react';
+import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
+import { I18nProvider } from '@osd/i18n/react';
 import { stubIndexPatternWithFields } from '../../stubs';
 import { UI_SETTINGS } from '../../../common';
 const startMock = coreMock.createStart();
@@ -107,9 +107,9 @@ function wrapQueryBarTopRowInContext(testProps: any) {
 
   return (
     <I18nProvider>
-      <KibanaContextProvider services={services}>
+      <OpenSearchDashboardsContextProvider services={services}>
         <QueryBarTopRow {...defaultOptions} {...testProps} />
-      </KibanaContextProvider>
+      </OpenSearchDashboardsContextProvider>
     </I18nProvider>
   );
 }

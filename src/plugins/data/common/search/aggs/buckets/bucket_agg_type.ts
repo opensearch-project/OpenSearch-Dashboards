@@ -18,7 +18,7 @@
  */
 
 import { IAggConfig } from '../agg_config';
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { OSD_FIELD_TYPES } from '../../../../common';
 import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 
@@ -29,7 +29,7 @@ export interface IBucketAggConfig extends IAggConfig {
 export interface BucketAggParam<TBucketAggConfig extends IAggConfig>
   extends AggParamType<TBucketAggConfig> {
   scriptable?: boolean;
-  filterFieldTypes?: KBN_FIELD_TYPES | KBN_FIELD_TYPES[] | '*';
+  filterFieldTypes?: OSD_FIELD_TYPES | OSD_FIELD_TYPES[] | '*';
 }
 
 const bucketType = 'buckets';
@@ -42,7 +42,7 @@ interface BucketAggTypeConfig<TBucketAggConfig extends IAggConfig>
 export class BucketAggType<TBucketAggConfig extends IAggConfig = IBucketAggConfig> extends AggType<
   TBucketAggConfig,
   BucketAggParam<TBucketAggConfig>
-> {
+  > {
   getKey: (bucket: any, key: any, agg: TBucketAggConfig) => any;
   type = bucketType;
 

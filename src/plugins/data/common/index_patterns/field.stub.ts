@@ -22,7 +22,7 @@ import { IFieldType } from '.';
 export const stubFields: IFieldType[] = [
   {
     name: 'machine.os',
-    esTypes: ['text'],
+    opensearchTypes: ['text'],
     type: 'string',
     aggregatable: false,
     searchable: false,
@@ -31,7 +31,7 @@ export const stubFields: IFieldType[] = [
   {
     name: 'machine.os.raw',
     type: 'string',
-    esTypes: ['keyword'],
+    opensearchTypes: ['keyword'],
     aggregatable: true,
     searchable: true,
     filterable: true,
@@ -39,7 +39,7 @@ export const stubFields: IFieldType[] = [
   {
     name: 'not.filterable',
     type: 'string',
-    esTypes: ['text'],
+    opensearchTypes: ['text'],
     aggregatable: true,
     searchable: false,
     filterable: false,
@@ -47,7 +47,7 @@ export const stubFields: IFieldType[] = [
   {
     name: 'bytes',
     type: 'number',
-    esTypes: ['long'],
+    opensearchTypes: ['long'],
     aggregatable: true,
     searchable: true,
     filterable: true,
@@ -55,7 +55,7 @@ export const stubFields: IFieldType[] = [
   {
     name: '@timestamp',
     type: 'date',
-    esTypes: ['date'],
+    opensearchTypes: ['date'],
     aggregatable: true,
     searchable: true,
     filterable: true,
@@ -63,7 +63,7 @@ export const stubFields: IFieldType[] = [
   {
     name: 'clientip',
     type: 'ip',
-    esTypes: ['ip'],
+    opensearchTypes: ['ip'],
     aggregatable: true,
     searchable: true,
     filterable: true,
@@ -71,7 +71,7 @@ export const stubFields: IFieldType[] = [
   {
     name: 'bool.field',
     type: 'boolean',
-    esTypes: ['boolean'],
+    opensearchTypes: ['boolean'],
     aggregatable: true,
     searchable: true,
     filterable: true,
