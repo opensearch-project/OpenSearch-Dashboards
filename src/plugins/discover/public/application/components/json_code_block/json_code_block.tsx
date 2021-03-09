@@ -18,12 +18,12 @@
  */
 import React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 
 export function JsonCodeBlock({ hit }: DocViewRenderProps) {
   const label = i18n.translate('discover.docViews.json.codeEditorAriaLabel', {
-    defaultMessage: 'Read only JSON view of an elasticsearch document',
+    defaultMessage: 'Read only JSON view of an opensearch document',
   });
   return (
     <EuiCodeBlock aria-label={label} language="json" isCopyable paddingSize="s">

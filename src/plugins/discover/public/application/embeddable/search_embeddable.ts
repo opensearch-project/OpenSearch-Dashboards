@@ -21,7 +21,7 @@ import angular from 'angular';
 import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../../ui_actions/public';
 import { RequestAdapter, Adapters } from '../../../../inspector/public';
 import {
@@ -45,7 +45,7 @@ import {
   getServices,
   IndexPattern,
   ISearchSource,
-} from '../../kibana_services';
+} from '../../opensearch_dashboards_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../..';
 import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
@@ -290,7 +290,7 @@ export class SearchEmbeddable
       defaultMessage: 'Data',
     });
     const description = i18n.translate('discover.embeddable.inspectorRequestDescription', {
-      defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
+      defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
     });
     const inspectorRequest = this.inspectorAdaptors.requests.start(title, { description });
     inspectorRequest.stats(getRequestInspectorStats(searchSource));

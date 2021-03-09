@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { getAngularModule, getServices } from '../../kibana_services';
+import { getAngularModule, getServices } from '../../opensearch_dashboards_services';
 // @ts-ignore
 import { getRootBreadcrumbs } from '../helpers/breadcrumbs';
 import html from './doc.html';

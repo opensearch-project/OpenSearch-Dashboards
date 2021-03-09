@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { IndexPattern } from '../../../../../kibana_services';
+import { IndexPattern } from '../../../../../opensearch_dashboards_services';
 // @ts-ignore
 import { TableHeaderColumn } from './table_header_column';
 import { SortOrder, getDisplayedColumns } from './helpers';
@@ -49,7 +49,7 @@ export function TableHeader({
   const displayedColumns = getDisplayedColumns(columns, indexPattern, hideTimeColumn, isShortDots);
 
   return (
-    <tr data-test-subj="docTableHeader" className="kbnDocTableHeader">
+    <tr data-test-subj="docTableHeader" className="osdDocTableHeader">
       <th style={{ width: '24px' }} />
       {displayedColumns.map((col) => {
         return (

@@ -18,15 +18,15 @@
  */
 import { isEqual } from 'lodash';
 import { History } from 'history';
-import { NotificationsStart } from 'kibana/public';
+import { NotificationsStart } from 'opensearch-dashboards/public';
 import {
   createStateContainer,
-  createKbnUrlStateStorage,
+  createOsdUrlStateStorage,
   syncState,
   ReduxLikeStateContainer,
-  IKbnUrlStateStorage,
+  IOsdUrlStateStorage,
   withNotifyOnErrors,
-} from '../../../../kibana_utils/public';
+} from '../../../../opensearch_dashboards_utils/public';
 import { esFilters, Filter, Query } from '../../../../data/public';
 import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
 
@@ -78,16 +78,16 @@ interface GetStateParams {
   /**
    * Core's notifications.toasts service
    * In case it is passed in,
-   * kbnUrlStateStorage will use it notifying about inner errors
+   * osdUrlStateStorage will use it notifying about inner errors
    */
   toasts?: NotificationsStart['toasts'];
 }
 
 export interface GetStateReturn {
   /**
-   * kbnUrlStateStorage
+   * osdUrlStateStorage
    */
-  kbnUrlStateStorage: IKbnUrlStateStorage;
+  osdUrlStateStorage: IOsdUrlStateStorage;
   /**
    * App state, the _a part of the URL
    */
@@ -137,7 +137,7 @@ export function getState({
   history,
   toasts,
 }: GetStateParams): GetStateReturn {
-  const stateStorage = createKbnUrlStateStorage({
+  const stateStorage = createOsdUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
     ...(toasts && withNotifyOnErrors(toasts)),
@@ -173,7 +173,7 @@ export function getState({
   });
 
   return {
-    kbnUrlStateStorage: stateStorage,
+    osdUrlStateStorage: stateStorage,
     appStateContainer: appStateContainerModified,
     startSync: start,
     stopSync: stop,

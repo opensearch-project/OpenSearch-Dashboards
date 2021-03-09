@@ -29,7 +29,7 @@ import { coreMock } from '../../../../../../../core/public/mocks';
 import { initializeInnerAngularModule } from '../../../../get_inner_angular';
 import { navigationPluginMock } from '../../../../../../navigation/public/mocks';
 import { dataPluginMock } from '../../../../../../data/public/mocks';
-import { initAngularBootstrap } from '../../../../../../kibana_legacy/public';
+import { initAngularBootstrap } from '../../../../../../opensearch_dashboards_legacy/public';
 
 describe('debounce service', function () {
   let debounce: (fn: () => void, timeout: number, options?: any) => any;
@@ -58,7 +58,7 @@ describe('debounce service', function () {
   });
 
   it('should have a cancel method', function () {
-    const bouncer = debounce(() => {}, 100);
+    const bouncer = debounce(() => { }, 100);
 
     expect(bouncer).toHaveProperty('cancel');
   });

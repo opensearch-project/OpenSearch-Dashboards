@@ -19,10 +19,10 @@
 import {
   createSavedObjectClass,
   SavedObject,
-  SavedObjectKibanaServices,
+  SavedObjectOpenSearchDashboardsServices,
 } from '../../../saved_objects/public';
 
-export function createSavedSearchClass(services: SavedObjectKibanaServices) {
+export function createSavedSearchClass(services: SavedObjectOpenSearchDashboardsServices) {
   const SavedObjectClass = createSavedObjectClass(services);
 
   class SavedSearch extends SavedObjectClass {

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { getAngularModule, getServices, getUrlTracker } from '../../kibana_services';
+import { getAngularModule, getServices, getUrlTracker } from '../../opensearch_dashboards_services';
 
 getAngularModule().config(($routeProvider: any) => {
   $routeProvider.otherwise({
@@ -25,13 +25,13 @@ getAngularModule().config(($routeProvider: any) => {
       getUrlTracker().restorePreviousUrl();
       $rootScope.$applyAsync(() => {
         const { urlForwarding } = getServices();
-        const { navigated } = urlForwarding.navigateToLegacyKibanaUrl(path);
+        const { navigated } = urlForwarding.navigateToLegacyOpenSearchDashboardsUrl(path);
         if (!navigated) {
           urlForwarding.navigateToDefaultApp();
         }
       });
       // prevent angular from completing the navigation
-      return new Promise(() => {});
+      return new Promise(() => { });
     },
   });
 });

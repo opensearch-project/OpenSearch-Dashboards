@@ -20,7 +20,7 @@
 import { getSort, getSortArray } from './get_sort';
 // @ts-ignore
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { IndexPattern } from '../../../../kibana_services';
+import { IndexPattern } from '../../../../opensearch_dashboards_services';
 
 describe('docTable', function () {
   let indexPattern: IndexPattern;

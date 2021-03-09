@@ -26,7 +26,7 @@ import sinon from 'sinon';
 import { getFakeRow } from 'fixtures/fake_row';
 import $ from 'jquery';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { setScopedHistory, setServices, setDocViewsRegistry } from '../../../../kibana_services';
+import { setScopedHistory, setServices, setDocViewsRegistry } from '../../../../opensearch_dashboards_services';
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../../data/public/mocks';
 import { navigationPluginMock } from '../../../../../../navigation/public/mocks';
@@ -177,14 +177,14 @@ describe('Doc Table', () => {
     });
   };
 
-  describe('kbnTableRow', () => {
+  describe('osdTableRow', () => {
     const $elem = $(
-      '<tr kbn-table-row="row" ' +
-        'columns="columns" ' +
-        'sorting="sorting"' +
-        'filter="filter"' +
-        'index-pattern="indexPattern"' +
-        '></tr>'
+      '<tr osd-table-row="row" ' +
+      'columns="columns" ' +
+      'sorting="sorting"' +
+      'filter="filter"' +
+      'index-pattern="indexPattern"' +
+      '></tr>'
     );
     let row;
 
@@ -239,14 +239,14 @@ describe('Doc Table', () => {
     });
   });
 
-  describe('kbnTableRow meta', () => {
+  describe('osdTableRow meta', () => {
     const $elem = angular.element(
-      '<tr kbn-table-row="row" ' +
-        'columns="columns" ' +
-        'sorting="sorting"' +
-        'filtering="filtering"' +
-        'index-pattern="indexPattern"' +
-        '></tr>'
+      '<tr osd-table-row="row" ' +
+      'columns="columns" ' +
+      'sorting="sorting"' +
+      'filtering="filtering"' +
+      'index-pattern="indexPattern"' +
+      '></tr>'
     );
     let row;
 
@@ -299,7 +299,7 @@ describe('Doc Table', () => {
         $root.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
         $row = $('<tr>').attr({
-          'kbn-table-row': 'row',
+          'osd-table-row': 'row',
           columns: 'columns',
           sorting: 'sorting',
           filtering: 'filtering',

@@ -21,7 +21,7 @@ import moment from 'moment';
 import { get, last } from 'lodash';
 import { createIndexPatternsStub, createContextSearchSourceStub } from './_stubs';
 import { fetchContextProvider } from './context';
-import { setServices } from '../../../../kibana_services';
+import { setServices } from '../../../../opensearch_dashboards_services';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();

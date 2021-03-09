@@ -18,10 +18,10 @@
  */
 import './discover_sidebar.scss';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { EuiButtonIcon, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { sortBy } from 'lodash';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
@@ -33,7 +33,7 @@ import { IndexPatternField, IndexPattern, UI_SETTINGS } from '../../../../../dat
 import { getDetails } from './lib/get_details';
 import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
-import { getServices } from '../../../kibana_services';
+import { getServices } from '../../../opensearch_dashboards_services';
 
 export interface DiscoverSidebarProps {
   /**
@@ -45,7 +45,7 @@ export interface DiscoverSidebarProps {
    */
   fieldCounts: Record<string, number>;
   /**
-   * hits fetched from ES, displayed in the doc table
+   * hits fetched from OpenSearch, displayed in the doc table
    */
   hits: Array<Record<string, unknown>>;
   /**

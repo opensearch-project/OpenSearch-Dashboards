@@ -43,11 +43,11 @@ import {
   Theme,
 } from '@elastic/charts';
 
-import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from 'kibana/public';
+import { i18n } from '@osd/i18n';
+import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
 import { Subscription, combineLatest } from 'rxjs';
-import { getServices } from '../../../kibana_services';
+import { getServices } from '../../../opensearch_dashboards_services';
 import { Chart as IChart } from '../helpers/point_series';
 
 export interface DiscoverHistogramProps {
@@ -222,7 +222,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
      * see https://github.com/elastic/kibana/issues/27410
      * TODO: Once the Discover query has been update, we should change the below to use the new field
      */
-    const { intervalESValue, intervalESUnit, interval } = chartData.ordered;
+    const { intervalOpenSearchValue, intervalOpenSearchUnit, interval } = chartData.ordered;
     const xInterval = interval.asMilliseconds();
 
     const xValues = chartData.xAxisOrderedValues;
@@ -238,7 +238,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     const xDomain = {
       min: domainMin,
       max: domainMax,
-      minInterval: findMinInterval(xValues, intervalESValue, intervalESUnit, timeZone),
+      minInterval: findMinInterval(xValues, intervalOpenSearchValue, intervalOpenSearchUnit, timeZone),
     };
 
     // Domain end of 'now' will be milliseconds behind current time, so we extend time by 1 minute and check if

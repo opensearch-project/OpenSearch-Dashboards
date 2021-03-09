@@ -19,8 +19,8 @@
 import React from 'react';
 import { EuiToolTip, EuiFlexItem, EuiFlexGroup, EuiTitle, EuiButtonEmpty } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 export interface DiscoverIndexPatternTitleProps {
   /**
    * determines whether the change link is displayed

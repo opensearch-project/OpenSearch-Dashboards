@@ -18,7 +18,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { EuiLink, EuiIconTip, EuiText, EuiPopoverFooter, EuiButton, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
 import {

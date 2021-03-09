@@ -23,7 +23,7 @@ import { Subscription, Subject, merge } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { getState, splitState } from './discover_state';
 
 import { RequestAdapter } from '../../../../inspector/public';
@@ -52,7 +52,7 @@ import {
   tabifyAggResponse,
   getAngularModule,
   redirectWhenMissing,
-} from '../../kibana_services';
+} from '../../opensearch_dashboards_services';
 
 const {
   core,
@@ -73,7 +73,7 @@ import { validateTimeRange } from '../helpers/validate_time_range';
 import { popularizeField } from '../helpers/popularize_field';
 import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_pattern_app_state';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
-import { addFatalError } from '../../../../kibana_legacy/public';
+import { addFatalError } from '../../../../opensearch_dashboards_legacy/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
@@ -163,7 +163,7 @@ app.config(($routeProvider) => {
                     search: '/',
                     'index-pattern': {
                       app: 'management',
-                      path: `kibana/objects/savedSearches/${$route.current.params.id}`,
+                      path: `opensearch-dashboards/objects/savedSearches/${$route.current.params.id}`,
                     },
                   },
                   toastNotifications,
@@ -214,7 +214,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     setAppState,
     replaceUrlAppState,
     isAppStateDirty,
-    kbnUrlStateStorage,
+    osdUrlStateStorage,
     getPreviousAppState,
     resetInitialAppState,
   } = getState({
@@ -232,7 +232,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   // syncs `_g` portion of url with query services
   const { stop: stopSyncingGlobalStateWithUrl } = syncQueryStateWithUrl(
     data.query,
-    kbnUrlStateStorage
+    osdUrlStateStorage
   );
 
   // sync initial app filters from state to filterManager
@@ -394,7 +394,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         const saveModal = (
           <SavedObjectSaveModal
             onSave={onSave}
-            onClose={() => {}}
+            onClose={() => { }}
             title={savedSearch.title}
             showCopyOnSave={!!savedSearch.id}
             objectType="search"
@@ -841,7 +841,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
     agg.buckets.setBounds(bounds);
 
-    const { esUnit, esValue } = agg.buckets.getInterval();
+    const { opensearchUnit, opensearchValue } = agg.buckets.getInterval();
     return {
       x: {
         accessor: 0,
@@ -849,9 +849,9 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         format: agg.toSerializedFieldFormat(),
         params: {
           date: true,
-          interval: moment.duration(esValue, esUnit),
-          intervalESValue: esValue,
-          intervalESUnit: esUnit,
+          interval: moment.duration(opensearchValue, opensearchUnit),
+          intervalOpenSearchValue: opensearchValue,
+          intervalOpenSearchUnit: opensearchUnit,
           format: agg.buckets.getScaledDateFormat(),
           bounds: agg.buckets.getBounds(),
         },
@@ -899,7 +899,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       defaultMessage: 'data',
     });
     const description = i18n.translate('discover.inspectorRequestDescription', {
-      defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
+      defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
     });
     inspectorRequest = inspectorAdapters.requests.start(title, { description });
     inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));

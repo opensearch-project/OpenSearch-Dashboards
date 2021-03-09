@@ -22,7 +22,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TableHeader } from './table_header';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { SortOrder } from './helpers';
-import { IndexPattern, IFieldType } from '../../../../../kibana_services';
+import { IndexPattern, IFieldType } from '../../../../../opensearch_dashboards_services';
 
 function getMockIndexPattern() {
   return ({

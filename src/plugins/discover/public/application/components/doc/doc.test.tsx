@@ -26,7 +26,7 @@ import { Doc, DocProps } from './doc';
 
 const mockSearchApi = jest.fn();
 
-jest.mock('../../../kibana_services', () => {
+jest.mock('../../../opensearch_dashboards_services', () => {
   let registry: any[] = [];
 
   return {
@@ -117,7 +117,7 @@ describe('Test of <Doc /> of Discover', () => {
     expect(findTestSubject(comp, 'doc-msg-error').length).toBe(1);
   });
 
-  test('renders elasticsearch hit ', async () => {
+  test('renders opensearch hit ', async () => {
     mockSearchApi.mockImplementation(() =>
       of({ rawResponse: { hits: { total: 1, hits: [{ _id: 1, _source: { test: 1 } }] } } })
     );

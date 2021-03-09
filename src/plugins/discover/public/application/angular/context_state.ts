@@ -18,14 +18,14 @@
  */
 import _ from 'lodash';
 import { History } from 'history';
-import { NotificationsStart } from 'kibana/public';
+import { NotificationsStart } from 'opensearch-dashboards/public';
 import {
   createStateContainer,
-  createKbnUrlStateStorage,
+  createOsdUrlStateStorage,
   syncStates,
   BaseStateContainer,
   withNotifyOnErrors,
-} from '../../../../kibana_utils/public';
+} from '../../../../opensearch_dashboards_utils/public';
 import { esFilters, FilterManager, Filter, Query } from '../../../../data/public';
 
 export interface AppState {
@@ -80,7 +80,7 @@ interface GetStateParams {
   /**
    * Core's notifications.toasts service
    * In case it is passed in,
-   * kbnUrlStateStorage will use it notifying about inner errors
+   * osdUrlStateStorage will use it notifying about inner errors
    */
   toasts?: NotificationsStart['toasts'];
 }
@@ -134,7 +134,7 @@ export function getState({
   history,
   toasts,
 }: GetStateParams): GetStateReturn {
-  const stateStorage = createKbnUrlStateStorage({
+  const stateStorage = createOsdUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
     ...(toasts && withNotifyOnErrors(toasts)),

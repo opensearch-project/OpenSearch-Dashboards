@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 interface Props {
   hasPreviousPage: boolean;

@@ -20,7 +20,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-jest.mock('../../../kibana_services', () => {
+jest.mock('../../../opensearch_dashboards_services', () => {
   return {
     getServices: () => ({
       core: { uiSettings: {}, savedObjects: {} },
@@ -32,6 +32,6 @@ jest.mock('../../../kibana_services', () => {
 import { OpenSearchPanel } from './open_search_panel';
 
 test('render', () => {
-  const component = shallow(<OpenSearchPanel onClose={() => {}} makeUrl={() => {}} />);
+  const component = shallow(<OpenSearchPanel onClose={() => { }} makeUrl={() => { }} />);
   expect(component).toMatchSnapshot();
 });

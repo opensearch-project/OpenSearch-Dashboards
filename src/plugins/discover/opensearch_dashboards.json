@@ -1,6 +1,6 @@
 {
   "id": "discover",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": true,
   "ui": true,
   "requiredPlugins": [
@@ -8,7 +8,7 @@
     "data",
     "embeddable",
     "inspector",
-    "kibanaLegacy",
+    "opensearchDashboardsLegacy",
     "urlForwarding",
     "navigation",
     "uiActions",
@@ -16,9 +16,9 @@
   ],
   "optionalPlugins": ["home", "share"],
   "requiredBundles": [
-    "kibanaUtils",
+    "opensearchDashboardsUtils",
     "home",
     "savedObjects",
-    "kibanaReact"
+    "opensearchDashboardsReact"
   ]
 }
