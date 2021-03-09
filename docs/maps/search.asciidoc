@@ -3,10 +3,10 @@
 == Search geographic data
 
 Maps embeds the search bar for real-time search.
-Only layers requesting data from {es} are filtered when you submit a search request.
+Only layers requesting data from {opensearch} are filtered when you submit a search request.
 Layers narrowed by the search context contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
 
-You can create a layer that requests data from {es} from the following:
+You can create a layer that requests data from {opensearch} from the following:
 
 * <<vector-layer>> with:
 
@@ -49,7 +49,7 @@ Spatial filters have the following properties:
 * *Geometry label* enables you to provide a meaningful name for your spatial filter.
 * *Spatial field* specifies the geo_point or geo_shape field used to determine if a document matches the spatial relation with the specified geometry.
 * *Spatial relation* determines the {ref}/query-dsl-geo-shape-query.html#_spatial_relations[spatial relation operator] to use at search time. Only available when *Spatial field* is set to geo_shape.
-* *Action* specifies whether to apply the filter to the current view or to a drilldown action. Only available when the map is a panel in a {kibana-ref}/dashboard.html[dashboard] with {kibana-ref}/drilldowns.html[drilldowns].
+* *Action* specifies whether to apply the filter to the current view or to a drilldown action. Only available when the map is a panel in a {opensearch-dashboards-ref}/dashboard.html[dashboard] with {opensearch-dashboards-ref}/drilldowns.html[drilldowns].
 
 [float]
 [[maps-phrase-filter]]
@@ -75,9 +75,9 @@ image::maps/images/layer_search.png[]
 [[maps-search-across-multiple-indices]]
 === Search across multiple indices
 
-Your map might contain multiple {es} indices.
-This can occur when your map contains two or more layers with {es} sources from different indices.
-This can also occur with a single layer with an {es} source and a <<terms-join>>.
+Your map might contain multiple {opensearch} indices.
+This can occur when your map contains two or more layers with {opensearch} sources from different indices.
+This can also occur with a single layer with an {opensearch} source and a <<terms-join>>.
 
 Searching across multiple indices might sometimes result in empty layers.
 The most common cause for empty layers are searches for a field that exists in one index, but does not exist in other indices.
@@ -98,26 +98,26 @@ You can prevent the search bar from applying search context to a layer by config
 
 Add {ref}/mapping-index-field.html[_index] to your search to include documents from indices that do not contain a search field.
 
-For example, suppose you have a vector layer showing the `kibana_sample_data_logs` documents
-and another vector layer with `kibana_sample_data_flights` documents.
+For example, suppose you have a vector layer showing the `opensearch_dashboards_sample_data_logs` documents
+and another vector layer with `opensearch_dashboards_sample_data_flights` documents.
 (See <<add-sample-data, adding sample data>>
-to install the `kibana_sample_data_logs` and `kibana_sample_data_flights` indices.)
+to install the `opensearch_dashboards_sample_data_logs` and `opensearch_dashboards_sample_data_flights` indices.)
 
 If you query for
 --------------------------------------------------
 machine.os.keyword : "osx"
 --------------------------------------------------
-the `kibana_sample_data_flights` layer is empty because the index
-`kibana_sample_data_flights` does not contain the field `machine.os.keyword` and no documents match the query.
+the `opensearch_dashboards_sample_data_flights` layer is empty because the index
+`opensearch_dashboards_sample_data_flights` does not contain the field `machine.os.keyword` and no documents match the query.
 
 [role="screenshot"]
-image::maps/images/global_search_multiple_indices_query1.png[]
+image::maps/images/global_search_multiple_indicopensearch_query1.png[]
 
 If you instead query for
 --------------------------------------------------
-machine.os.keyword : "osx" or _index : "kibana_sample_data_flights"
+machine.os.keyword : "osx" or _index : "opensearch_dashboards_sample_data_flights"
 --------------------------------------------------
-the `kibana_sample_data_flights` layer includes data.
+the `opensearch_dashboards_sample_data_flights` layer includes data.
 
 [role="screenshot"]
-image::maps/images/global_search_multiple_indices_query2.png[]
+image::maps/images/global_search_multiple_indicopensearch_query2.png[]

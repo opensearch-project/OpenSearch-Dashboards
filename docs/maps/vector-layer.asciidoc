@@ -14,7 +14,7 @@ To add a vector layer to your map, click *Add layer*, then select one of the fol
 *Clusters and grids*:: Geospatial data grouped in grids with metrics for each gridded cell.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
 
-*Documents*:: Points, lines, and polyons from Elasticsearch.
+*Documents*:: Points, lines, and polyons from OpenSearch.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
 +
 Results are limited to the `index.max_result_window` index setting, which defaults to 10000.
@@ -36,7 +36,7 @@ Tiles exceeding `index.max_result_window` have a visual indicator when there are
 *Point to point*:: Aggregated data paths between the source and destination.
 The index must contain at least 2 fields mapped as {ref}/geo-point.html[geo_point], source and destination.
 
-*Upload Geojson*:: Index GeoJSON data in Elasticsearch.
+*Upload Geojson*:: Index GeoJSON data in OpenSearch.
 
 include::vector-style.asciidoc[]
 include::vector-style-properties.asciidoc[]

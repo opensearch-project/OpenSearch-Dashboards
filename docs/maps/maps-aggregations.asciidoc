@@ -8,7 +8,7 @@
 
 
 Use {ref}/search-aggregations.html[aggregations] to plot large data sets without overwhelming your network or your browser.
-When using aggregations, the documents stay in Elasticsearch and only the calculated values for each group are returned to your computer.
+When using aggregations, the documents stay in OpenSearch and only the calculated values for each group are returned to your computer.
 
 Aggregations group your documents into buckets and calculate metrics for each bucket.
 Use metric aggregations for <<maps-vector-style-data-driven, data driven styling>>. For example, use the count aggregation to shade world countries by web log traffic.
@@ -33,7 +33,7 @@ Use aggregated layers with document layers to show aggregated views when the map
 amounts of the globe and individual documents when the map shows smaller regions.
 
 In the following example, the Grid aggregation layer is only visible when the map is at zoom levels 0 through 5. The Documents layer is only visible when the map is at zoom levels 4 through 24.
-See the <<maps-add-elasticsearch-layer, Getting started>> tutorial for more details on configuring the layers.
+See the <<maps-add-opensearch-layer, Getting started>> tutorial for more details on configuring the layers.
 
 [role="screenshot"]
 image::maps/images/grid_to_docs.gif[]
@@ -69,7 +69,7 @@ To enable a blended layer that dynamically shows clusters or documents:
 === Top hits per entity
 
 You can display the most relevant documents per entity, for example, the most recent GPS tracks per flight.
-To get this data, {es} first groups your data using a {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation],
+To get this data, {opensearch} first groups your data using a {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation],
 then accumulates the most relevant documents based on sort order for each entry using a {ref}/search-aggregations-metrics-top-hits-aggregation.html[top hits metric aggregation].
 
 To enable top hits:
@@ -92,7 +92,7 @@ image::maps/images/top_hits.png[]
 A point-to-point connection plots aggregated data paths between the source and the destination.
 Thicker, darker lines symbolize more connections between a source and destination, and thinner, lighter lines symbolize less connections.
 
-Point to point uses an {es} {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation] to group your documents by destination.
+Point to point uses an {opensearch} {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation] to group your documents by destination.
 Then, a nested {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[GeoTile grid aggregation] groups sources for each destination into grids.
 A line connects each source grid centroid to each destination.
 
@@ -120,7 +120,7 @@ image::maps/images/gs_add_cloropeth_layer.png[]
 
 ===== How a term join works
 
-A term join uses a shared key to combine vector features, the left source, with the results of an {es} terms aggregation, the right source.
+A term join uses a shared key to combine vector features, the left source, with the results of an {opensearch} terms aggregation, the right source.
 
 The cloropeth example uses the shared key, https://wikipedia.org/wiki/ISO_3166-1_alpha-2[ISO 3166-1 alpha-2 code], to join world countries and web log traffic.
 ISO 3166-1 alpha-2 code is an international standard that identifies countries by a two-letter country code.
@@ -150,7 +150,7 @@ In the following example, *iso2* property defines the shared key for the left so
 
 ===== Right source
 
-The right source uses the Kibana sample data set "Sample web logs".
+The right source uses the OpenSearchDashboards sample data set "Sample web logs".
 In this data set, the *geo.src* field contains the ISO 3166-1 alpha-2 code of the country of origin.
 
 A {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation] groups the sample web log documents by *geo.src* and calculates metrics for each term.

@@ -4,8 +4,8 @@
 
 Maps makes it easy to import geospatial data into the Elastic Stack.
 Using the GeoJSON Upload feature, you can drag and drop your point and shape
-data files directly into {es}, and then use them as layers
-in the map.  You can also use the GeoJSON data in the broader Kibana ecosystem,
+data files directly into {opensearch}, and then use them as layers
+in the map.  You can also use the GeoJSON data in the broader OpenSearchDashboards ecosystem,
 for example, in visualizations and Canvas workpads.
 
 [float]
@@ -35,9 +35,9 @@ file minus its extension). You might need to change the index name if it is inva
 . Click *Import file*.
 +
 Upon completing the indexing process and creating the associated index pattern,
-the Elasticsearch responses are shown on the *Layer add panel* and the indexed data
+the OpenSearch responses are shown on the *Layer add panel* and the indexed data
 appears on the map. The geospatial data on the map
-should be identical to the locally-previewed data, but now it's indexed data from Elasticsearch.
+should be identical to the locally-previewed data, but now it's indexed data from OpenSearch.
 
 . To continue adding data to the map, click *Add layer*.
 . In *Layer settings*, adjust any settings or <<maps-vector-style-properties, properties>> as needed.

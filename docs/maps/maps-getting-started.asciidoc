@@ -24,12 +24,12 @@ image::maps/images/sample_data_web_logs.png[]
 [float]
 === Prerequisites
 
-- If you don’t already have {kib}, set it up with https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
+- If you don’t already have {osd}, set it up with https://www.elastic.co/cloud/opensearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 - This tutorial requires the <<get-started, web logs sample data set>>. The sample data includes a [Logs] Total Requests and Bytes map, which you’ll re-create in this tutorial.
 - You must have the correct privileges for creating a map.
 If you don't have sufficient privileges to create or save maps,
 a read-only icon appears in the toolbar. For more information,
-refer to <<xpack-security-authorization,Granting access to {kib}>>.
+refer to <<xpack-security-authorization,Granting access to {osd}>>.
 
 [float]
 [[maps-create]]
@@ -54,7 +54,7 @@ and lighter shades will symbolize countries with less traffic.
 . From the **Layer** dropdown menu, select **World Countries**.
 
 . In **Statistics source**, set:
-** **Index pattern** to **kibana_sample_data_logs**
+** **Index pattern** to **opensearch_dashboards_sample_data_logs**
 ** **Join field** to **geo.src**
 
 . Click **Add layer**.
@@ -82,11 +82,11 @@ Your map now looks like this:
 image::maps/images/gs_add_cloropeth_layer.png[]
 
 [float]
-[[maps-add-elasticsearch-layer]]
-=== Step 3. Add layers for the Elasticsearch data
+[[maps-add-opensearch-layer]]
+=== Step 3. Add layers for the OpenSearch data
 
 To avoid overwhelming the user with too much data at once, you'll add two layers
-for the Elasticsearch data. The first layer will display individual documents
+for the OpenSearch data. The first layer will display individual documents
 when users zoom in on the map. The second layer will
 display aggregated data when users zoom the map out.
 
@@ -98,7 +98,7 @@ The layer is only visible when users zoom in.
 
 . Click **Add layer**, and then click **Documents**.
 
-. Set **Index pattern** to **kibana_sample_data_logs**.
+. Set **Index pattern** to **opensearch_dashboards_sample_data_logs**.
 
 . Set **Scaling** to *Limits results to 10000.*
 
@@ -119,7 +119,7 @@ The layer is only visible when users zoom in.
 Your map will look like this from zoom level 9 to 24:
 +
 [role="screenshot"]
-image::maps/images/gs_add_es_document_layer.png[]
+image::maps/images/gs_add_opensearch_document_layer.png[]
 
 [float]
 ==== Add a layer for aggregated data
@@ -132,7 +132,7 @@ more total bytes transferred, and smaller circles will symbolize
 grids with less bytes transferred.
 
 . Click **Add layer**, and select **Clusters and grids**.
-. Set **Index pattern** to **kibana_sample_data_logs**.
+. Set **Index pattern** to **opensearch_dashboards_sample_data_logs**.
 . Click **Add layer**.
 . In **Layer settings**, set:
 ** **Name** to `Total Requests and Bytes`
