@@ -1,0 +1,9 @@
+{
+  "id": "mapsLegacy",
+  "version": "8.0.0",
+  "opensearchDashboards": "opensearchDashboards",
+  "configPath": ["map"],
+  "ui": true,
+  "server": true,
+  "requiredBundles": ["opensearchDashboardsReact", "charts"]
+}

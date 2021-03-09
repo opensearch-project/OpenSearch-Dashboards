@@ -20,11 +20,11 @@
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { EMSClient } from '@elastic/ems-client';
-import { i18n } from '@kbn/i18n';
-import { getKibanaVersion } from '../kibana_services';
+import { i18n } from '@osd/i18n';
+import { getOpenSearchDashboardsVersion } from '../opensearch_dashboards_services';
 import { ORIGIN } from '../common/constants/origin';
 
-const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
+const TMS_IN_YML_ID = 'TMS in config/opensearch_dashboards.yml';
 
 export class ServiceSettings {
   constructor(mapConfig, tilemapsConfig) {
@@ -35,8 +35,8 @@ export class ServiceSettings {
     this._showZoomMessage = true;
     this._emsClient = new EMSClient({
       language: i18n.getLocale(),
-      appVersion: getKibanaVersion(),
-      appName: 'kibana',
+      appVersion: getOpenSearchDashboardsVersion(),
+      appName: 'opensearch-dashboards',
       fileApiUrl: this._mapConfig.emsFileApiUrl,
       tileApiUrl: this._mapConfig.emsTileApiUrl,
       landingPageUrl: this._mapConfig.emsLandingPageUrl,
@@ -88,7 +88,7 @@ export class ServiceSettings {
   }
 
   _backfillSettings = (fileLayer) => {
-    // Older version of Kibana stored EMS state in the URL-params
+    // Older version of OpenSearch Dashboards stored EMS state in the URL-params
     // Creates object literal with required parameters as key-value pairs
     const format = fileLayer.getDefaultFormatType();
     const meta = fileLayer.getDefaultFormatMeta();
@@ -106,7 +106,7 @@ export class ServiceSettings {
   };
 
   async getFileLayers() {
-    if (!this._mapConfig.includeElasticMapsService) {
+    if (!this._mapConfig.includeOpenSearchDashboardsMapsService) {
       return [];
     }
 
@@ -124,11 +124,11 @@ export class ServiceSettings {
       //use tilemap.* settings from yml
       const tmsService = _.cloneDeep(this.tmsOptionsFromConfig);
       tmsService.id = TMS_IN_YML_ID;
-      tmsService.origin = ORIGIN.KIBANA_YML;
+      tmsService.origin = ORIGIN.OPENSEARCH_DASHBOARDS_YML;
       allServices.push(tmsService);
     }
 
-    if (this._mapConfig.includeElasticMapsService) {
+    if (this._mapConfig.includeOpenSearchDashboardsMapsService) {
       const servicesFromManifest = await this._emsClient.getTMSServices();
       const strippedServiceFromManifest = await Promise.all(
         servicesFromManifest
@@ -207,14 +207,14 @@ export class ServiceSettings {
   async getAttributesForTMSLayer(tmsServiceConfig, isDesaturated, isDarkMode) {
     if (tmsServiceConfig.origin === ORIGIN.EMS) {
       return this._getAttributesForEMSTMSLayer(isDesaturated, isDarkMode);
-    } else if (tmsServiceConfig.origin === ORIGIN.KIBANA_YML) {
+    } else if (tmsServiceConfig.origin === ORIGIN.OPENSEARCH_DASHBOARDS_YML) {
       const attrs = _.pick(this._tilemapsConfig, ['url', 'minzoom', 'maxzoom', 'attribution']);
-      return { ...attrs, ...{ origin: ORIGIN.KIBANA_YML } };
+      return { ...attrs, ...{ origin: ORIGIN.OPENSEARCH_DASHBOARDS_YML } };
     } else {
       //this is an older config. need to resolve this dynamically.
       if (tmsServiceConfig.id === TMS_IN_YML_ID) {
         const attrs = _.pick(this._tilemapsConfig, ['url', 'minzoom', 'maxzoom', 'attribution']);
-        return { ...attrs, ...{ origin: ORIGIN.KIBANA_YML } };
+        return { ...attrs, ...{ origin: ORIGIN.OPENSEARCH_DASHBOARDS_YML } };
       } else {
         //assume ems
         return this._getAttributesForEMSTMSLayer(isDesaturated, isDarkMode);
@@ -246,7 +246,7 @@ export class ServiceSettings {
       url = this._getFileUrlFromEMS(fileLayerConfig);
     } else if (
       fileLayerConfig.layerId &&
-      fileLayerConfig.layerId.startsWith(`${ORIGIN.KIBANA_YML}.`)
+      fileLayerConfig.layerId.startsWith(`${ORIGIN.OPENSEARCH_DASHBOARDS_YML}.`)
     ) {
       //fallback for older saved objects
       url = fileLayerConfig.url;
@@ -275,5 +275,5 @@ function getAttributionString(emsService) {
     anchorTag.textContent = attribution.label;
     return anchorTag.outerHTML;
   });
-  return attributionSnippets.join(' | '); //!!!this is the current convention used in Kibana
+  return attributionSnippets.join(' | '); //!!!this is the current convention used in OpenSearch Dashboards
 }

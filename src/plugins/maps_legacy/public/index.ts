@@ -18,12 +18,12 @@
  */
 
 // @ts-ignore
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from 'opensearch-dashboards/public';
 import { MapsLegacyPlugin } from './plugin';
 // @ts-ignore
 import * as colorUtil from './map/color_util';
 // @ts-ignore
-import { KibanaMapLayer } from './map/kibana_map_layer';
+import { OpensearchDashboardsMapLayer } from './map/opensearch_dashboards_map_layer';
 // @ts-ignore
 import { convertToGeoJson } from './map/convert_to_geojson';
 // @ts-ignore
@@ -51,7 +51,7 @@ export {
   colorUtil,
   convertToGeoJson,
   IServiceSettings,
-  KibanaMapLayer,
+  OpensearchDashboardsMapLayer,
   VectorLayer,
   FileLayerField,
   FileLayer,

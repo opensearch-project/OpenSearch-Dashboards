@@ -19,8 +19,8 @@
 
 import React from 'react';
 import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 
 interface Props {
   isMapsAvailable: boolean;
@@ -32,12 +32,13 @@ export function LegacyMapDeprecationMessage(props: Props) {
   const getMapsMessage = !props.isMapsAvailable ? (
     <FormattedMessage
       id="maps_legacy.defaultDistributionMessage"
-      defaultMessage="To get Maps, upgrade to the {defaultDistribution} of Elasticsearch and Kibana."
+      defaultMessage="To get Maps, upgrade to the {defaultDistribution} of OpenSearch and Opensearch Dashboards."
       values={{
         defaultDistribution: (
           <EuiLink
             color="accent"
             external
+            // TODO: link
             href="https://www.elastic.co/downloads/kibana"
             target="_blank"
           >

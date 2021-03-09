@@ -14,10 +14,10 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
@@ -420,7 +420,7 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
             "en": "javascript:alert('foobar')"
@@ -462,17 +462,17 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
       "formats": [
         {
           "type": "geojson",
-          "url": "/files/australia_states_v1.geo.json?elastic_tile_service_tos=agree",
+          "url": "/files/australia_states_v1.geo.json?opensearch_tile_service_tos=agree",
           "legacy_default": true
         }
       ],
@@ -661,17 +661,17 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
       "formats": [
         {
           "type": "geojson",
-          "url": "/files/canada_provinces_v1.geo.json?elastic_tile_service_tos=agree",
+          "url": "/files/canada_provinces_v1.geo.json?opensearch_tile_service_tos=agree",
           "legacy_default": true
         }
       ],
@@ -940,17 +940,17 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
       "formats": [
         {
           "type": "geojson",
-          "url": "/files/china_provinces_v1.geo.json?elastic_tile_service_tos=agree",
+          "url": "/files/china_provinces_v1.geo.json?opensearch_tile_service_tos=agree",
           "legacy_default": true
         }
       ],
@@ -1298,17 +1298,17 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
       "formats": [
         {
           "type": "geojson",
-          "url": "/files/finland_regions_v1.geo.json?elastic_tile_service_tos=agree",
+          "url": "/files/finland_regions_v1.geo.json?opensearch_tile_service_tos=agree",
           "legacy_default": true
         }
       ],
@@ -1666,17 +1666,17 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
       "formats": [
         {
           "type": "geojson",
-          "url": "/files/france_departments_v1.geo.json?elastic_tile_service_tos=agree",
+          "url": "/files/france_departments_v1.geo.json?opensearch_tile_service_tos=agree",
           "legacy_default": true
         }
       ],
@@ -2016,17 +2016,17 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
       "formats": [
         {
           "type": "geojson",
-          "url": "/files/germany_states_v1.geo.json?elastic_tile_service_tos=agree",
+          "url": "/files/germany_states_v1.geo.json?opensearch_tile_service_tos=agree",
           "legacy_default": true
         }
       ],
@@ -2360,17 +2360,17 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
       "formats": [
         {
           "type": "geojson",
-          "url": "/files/ireland_counties_v1.geo.json?elastic_tile_service_tos=agree",
+          "url": "/files/ireland_counties_v1.geo.json?opensearch_tile_service_tos=agree",
           "legacy_default": true
         }
       ],
@@ -2669,17 +2669,17 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
       "formats": [
         {
           "type": "geojson",
-          "url": "/files/japan_prefectures_v1.geo.json?elastic_tile_service_tos=agree",
+          "url": "/files/japan_prefectures_v1.geo.json?opensearch_tile_service_tos=agree",
           "legacy_default": true
         }
       ],
@@ -3035,17 +3035,17 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
       "formats": [
         {
           "type": "geojson",
-          "url": "/files/netherlands_provinces_v1.geo.json?elastic_tile_service_tos=agree",
+          "url": "/files/netherlands_provinces_v1.geo.json?opensearch_tile_service_tos=agree",
           "legacy_default": true
         }
       ],
@@ -3341,17 +3341,17 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
       "formats": [
         {
           "type": "geojson",
-          "url": "/files/norway_counties_v1.geo.json?elastic_tile_service_tos=agree",
+          "url": "/files/norway_counties_v1.geo.json?opensearch_tile_service_tos=agree",
           "legacy_default": true
         }
       ],
@@ -3703,17 +3703,17 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
       "formats": [
         {
           "type": "geojson",
-          "url": "/files/spain_provinces_v1.geo.json?elastic_tile_service_tos=agree",
+          "url": "/files/spain_provinces_v1.geo.json?opensearch_tile_service_tos=agree",
           "legacy_default": true
         }
       ],
@@ -4034,17 +4034,17 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
       "formats": [
         {
           "type": "geojson",
-          "url": "/files/sweden_counties_v1.geo.json?elastic_tile_service_tos=agree",
+          "url": "/files/sweden_counties_v1.geo.json?opensearch_tile_service_tos=agree",
           "legacy_default": true
         }
       ],
@@ -4343,17 +4343,17 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
       "formats": [
         {
           "type": "geojson",
-          "url": "/files/switzerland_cantons_v1.geo.json?elastic_tile_service_tos=agree",
+          "url": "/files/switzerland_cantons_v1.geo.json?opensearch_tile_service_tos=agree",
           "legacy_default": true
         }
       ],
@@ -4859,17 +4859,17 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
       "formats": [
         {
           "type": "geojson",
-          "url": "/files/uk_subdivisions_v1.geo.json?elastic_tile_service_tos=agree",
+          "url": "/files/uk_subdivisions_v1.geo.json?opensearch_tile_service_tos=agree",
           "legacy_default": true
         }
       ],
@@ -5106,17 +5106,17 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
       "formats": [
         {
           "type": "topojson",
-          "url": "/files/usa_counties_v2.topo.json?elastic_tile_service_tos=agree",
+          "url": "/files/usa_counties_v2.topo.json?opensearch_tile_service_tos=agree",
           "legacy_default": true
         }
       ],
@@ -5473,17 +5473,17 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
       "formats": [
         {
           "type": "geojson",
-          "url": "/files/usa_states_v1.geo.json?elastic_tile_service_tos=agree",
+          "url": "/files/usa_states_v1.geo.json?opensearch_tile_service_tos=agree",
           "legacy_default": true
         }
       ],
@@ -5763,17 +5763,17 @@
         },
         {
           "label": {
-            "en": "Elastic Maps Service"
+            "en": "OpenSearch Maps Service"
           },
           "url": {
-            "en": "https://www.elastic.co/elastic-maps-service"
+            "en": "https://www.opensearch.co/opensearch-maps-service"
           }
         }
       ],
       "formats": [
         {
           "type": "topojson",
-          "url": "/files/usa_zip_codes_v2.topo.json?elastic_tile_service_tos=agree",
+          "url": "/files/usa_zip_codes_v2.topo.json?opensearch_tile_service_tos=agree",
           "legacy_default": true
         }
       ],
