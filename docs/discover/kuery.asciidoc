@@ -1,8 +1,8 @@
 [[kuery-query]]
-=== Kibana Query Language
+=== OpenSearchDashboards Query Language
 
-The Kibana Query Language (KQL) makes it easy to find
-the fields and syntax for your {es} query. If you have the
+The OpenSearchDashboards Query Language (KQL) makes it easy to find
+the fields and syntax for your {opensearch} query. If you have the
 https://www.elastic.co/subscriptions[Basic tier] or above,
 simply place your cursor in the *Search* field. As you type, you’ll get suggestions for fields,
 values, and operators.
@@ -10,7 +10,7 @@ values, and operators.
 [role="screenshot"]
 image::images/kql-autocomplete.png[Autocomplete in Search bar]
 
-If you prefer to use Kibana’s legacy query language, based on the
+If you prefer to use OpenSearchDashboards’s legacy query language, based on the
 <<lucene-query, Lucene query syntax>>, click *KQL* next to the *Search* field, and then turn off KQL.
 
 [discrete]
@@ -121,7 +121,7 @@ account_number >= 100 and items_sold <= 200
 [discrete]
 === Date range queries
 
-Typically, Kibana's <<set-time-filter,time filter>> is sufficient for setting a time range,
+Typically, OpenSearchDashboards's <<set-time-filter,time filter>> is sufficient for setting a time range,
 but in some cases you might need to search on dates. Include the date range in quotes.
 
 [source,yaml]

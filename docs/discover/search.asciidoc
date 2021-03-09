@@ -1,6 +1,6 @@
 [[search]]
 == Search data
-Many Kibana apps embed a query bar for real-time search, including
+Many OpenSearchDashboards apps embed a query bar for real-time search, including
 *Discover* and *Dashboard*.
 
 [float]
@@ -8,14 +8,14 @@ Many Kibana apps embed a query bar for real-time search, including
 
 To search the indices that match the current <<index-patterns, index pattern>>,
 enter your search criteria in the query bar. By default, you'll use
-{kib}'s <<kuery-query, standard query language>> (KQL), which
+{osd}'s <<kuery-query, standard query language>> (KQL), which
 features autocomplete and a simple, easy-to-use syntax. If you prefer to use
-{kib}'s legacy query
+{osd}'s legacy query
 language, based on the
 Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax],
 you can switch to it from the KQL popup in the query bar. When you enable the
 legacy query language, you can use the full
-JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL].
+JSON-based {ref}/query-dsl.html[OpenSearch Query DSL].
 
 
 [float]
@@ -53,7 +53,7 @@ include::kuery.asciidoc[]
 
 [[lucene-query]]
 === Lucene query syntax
-Kibana's legacy query language was based on the Lucene query syntax. For the time being this syntax
+OpenSearchDashboards's legacy query language was based on the Lucene query syntax. For the time being this syntax
 is still available under the options menu in the Query Bar and in Advanced Settings. The following
 are some tips that can help get you started.
 
@@ -74,15 +74,15 @@ status codes, you could enter `status:[400 TO 499]`.
 codes and have an extension of `php` or `html`, you could enter `status:[400 TO
 499] AND (extension:php OR extension:html)`.
 
-IMPORTANT: When you use the Lucene Query Syntax in the *KQL* search bar, {kib} is unable to search on nested objects and perform aggregations across fields that contain nested objects.
-Using `include_in_parent` or `copy_to` as a workaround can cause {kib} to fail.
+IMPORTANT: When you use the Lucene Query Syntax in the *KQL* search bar, {osd} is unable to search on nested objects and perform aggregations across fields that contain nested objects.
+Using `include_in_parent` or `copy_to` as a workaround can cause {osd} to fail.
 
 For more detailed information about the Lucene query syntax, see the
 {ref}/query-dsl-query-string-query.html#query-string-syntax[Query String Query]
 docs.
 
 NOTE: These examples use the Lucene query syntax. When lucene is selected as your
-query language you can also submit queries using the {ref}/query-dsl.html[Elasticsearch Query DSL].
+query language you can also submit queries using the {ref}/query-dsl.html[OpenSearch Query DSL].
 
 
 [[save-open-search]]
@@ -94,17 +94,17 @@ A saved search includes the query text, filters, and optionally, the time filter
 [role="xpack"]
 [[discover-read-only-access]]
 ==== Read-only access
-When you have insufficient privileges to save searches, the following indicator in Kibana will be
+When you have insufficient privileges to save searches, the following indicator in OpenSearchDashboards will be
 displayed and the *Save* button won't be visible. For more information on granting access to
-Kibana see <<xpack-security-authorization>>.
+OpenSearchDashboards see <<xpack-security-authorization>>.
 
 [role="screenshot"]
-image::discover/images/read-only-badge.png[Example of Discover's read only access indicator in Kibana's header]
+image::discover/images/read-only-badge.png[Example of Discover's read only access indicator in OpenSearchDashboards's header]
 
 ==== Save a search
 To save the current search:
 
-. Click *Save* in the Kibana toolbar.
+. Click *Save* in the OpenSearchDashboards toolbar.
 . Enter a name for the search and click *Save*.
 
 To import, export, and delete saved searches, open the main menu,
@@ -113,7 +113,7 @@ then click *Stack Management > Saved Objects*.
 ==== Open a saved search
 To load a saved search into Discover:
 
-. Click *Open* in the Kibana toolbar.
+. Click *Open* in the OpenSearchDashboards toolbar.
 . Select the search you want to open.
 
 If the saved search is associated with a different index pattern than is currently
@@ -132,7 +132,7 @@ Saved queries don't include information specific to Discover, such as the curren
 
 [role="xpack"]
 ==== Read-only access
-If you have insufficient privileges to save queries, the *Save current query* button isn't visible in the saved query management popover. For more information, see <<xpack-security-authorization, Granting access to Kibana>>
+If you have insufficient privileges to save queries, the *Save current query* button isn't visible in the saved query management popover. For more information, see <<xpack-security-authorization, Granting access to OpenSearchDashboards>>
 
 ==== Save a query
 To save the current query text, filters, and time filter:
