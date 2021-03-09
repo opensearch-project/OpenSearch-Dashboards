@@ -1,7 +1,7 @@
 [[get-started]]
 == Quick start
 
-To quickly get up and running with {kib}, set up on Cloud, then add a sample data set that you can explore and analyze.
+To quickly get up and running with {osd}, set up on Cloud, then add a sample data set that you can explore and analyze.
 
 When you've finished, you'll know how to:
 
@@ -11,20 +11,20 @@ When you've finished, you'll know how to:
 
 [float]
 === Required privileges
-When security is enabled, you must have `read`, `write`, and `manage` privileges on the `kibana_sample_data_*` indices. 
+When security is enabled, you must have `read`, `write`, and `manage` privileges on the `opensearch_dashboards_sample_data_*` indices. 
 For more information, refer to {ref}/security-privileges.html[Security privileges].
 
 [float]
 [[set-up-on-cloud]]
 == Set up on cloud
 
-include::{docs-root}/shared/cloud/ess-getting-started.asciidoc[]
+include::{docs-root}/shared/cloud/opensearchs-getting-started.asciidoc[]
 
 [float]
-[[gs-get-data-into-kibana]]
+[[gs-get-data-into-opensearch-dashboards]]
 == Add the sample data
 
-Sample data sets come with sample visualizations, dashboards, and more to help you explore {kib} without adding your own data.
+Sample data sets come with sample visualizations, dashboards, and more to help you explore {osd} without adding your own data.
 
 . From the home page, click *Try our sample data*.
 
@@ -46,7 +46,7 @@ image::getting-started/images/add-sample-data.png[Add data UI]
 [role="screenshot"]
 image::images/tutorial-discover-2.png[]
 
-. To focus in on the documents you want to view, use the <<kuery-query,{kib} Query Language>>. In the *KQL* search field, enter:
+. To focus in on the documents you want to view, use the <<kuery-query,{osd} Query Language>>. In the *KQL* search field, enter:
 +
 [source,text]
 products.taxless_price >= 60 AND category : Women's Clothing
@@ -138,6 +138,6 @@ For more information, refer to <<lens, *Lens*>>.
 [[quick-start-whats-next]]
 == What's next?
 
-If you are you ready to add your own data, refer to <<connect-to-elasticsearch,Add data to {kib}>>.
+If you are you ready to add your own data, refer to <<connect-to-opensearch,Add data to {osd}>>.
 
 If you want to ingest your data, refer to {fleet-guide}/fleet-quick-start.html[Quick start: Get logs and metrics into the Elastic Stack].

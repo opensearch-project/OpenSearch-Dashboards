@@ -1,9 +1,9 @@
 [[create-your-own-dashboard]]
 == Create your own dashboard
 
-Ready to add data to {kib} and create your own dashboard? In this tutorial, you'll use three types of data sets that'll help you learn to:
+Ready to add data to {osd} and create your own dashboard? In this tutorial, you'll use three types of data sets that'll help you learn to:
 
-* <<load-the-data-sets, Load data into Elasticsearch>>
+* <<load-the-data-sets, Load data into OpenSearch>>
 * <<tutorial-define-index, Define an index pattern>>
 * <<explore-your-data, Discover and explore data>>
 * <<tutorial-visualizing, Visualize data>>
@@ -21,9 +21,9 @@ To complete the tutorial, you'll download and use the following data sets:
 Create a new working directory where you want to download the files. From that directory, run the following commands:
 
 [source,shell]
-curl -O https://download.elastic.co/demos/kibana/gettingstarted/8.x/shakespeare.json
-curl -O https://download.elastic.co/demos/kibana/gettingstarted/8.x/accounts.zip
-curl -O https://download.elastic.co/demos/kibana/gettingstarted/8.x/logs.jsonl.gz
+curl -O https://download.elastic.co/demos/opensearch-dashboards/gettingstarted/8.x/shakespeare.json
+curl -O https://download.elastic.co/demos/opensearch-dashboards/gettingstarted/8.x/accounts.zip
+curl -O https://download.elastic.co/demos/opensearch-dashboards/gettingstarted/8.x/logs.jsonl.gz
 
 Two of the data sets are compressed. To extract the files, use the following commands:
 
@@ -80,7 +80,7 @@ Mappings divide the documents in the index into logical groups and specify the c
 of the fields. These characteristics include the searchability of the field
 and whether it's _tokenized_, or broken up into separate words.
 
-NOTE: If security is enabled, you must have the `all` Kibana privilege to run this tutorial.
+NOTE: If security is enabled, you must have the `all` OpenSearchDashboards privilege to run this tutorial.
 You must also have the `create`, `manage` `read`, `write,` and `delete` 
 index privileges. See {ref}/security-privileges.html[Security privileges] 
 for more information.
@@ -172,7 +172,7 @@ The accounts data set doesn't require any mappings.
 [[load-the-data-sets]]
 ==== Load the data sets
 
-At this point, you're ready to use the Elasticsearch {ref}/docs-bulk.html[bulk]
+At this point, you're ready to use the OpenSearch {ref}/docs-bulk.html[bulk]
 API to load the data sets:
 
 [source,shell]
@@ -189,7 +189,7 @@ Invoke-RestMethod "http://<host>:<port>/_bulk?pretty" -Method Post -ContentType 
 These commands might take some time to execute, depending on the available computing resources.
 
 When you define an index pattern, the indices that match the pattern must
-exist in {es} and contain data. 
+exist in {opensearch} and contain data. 
 
 To verify the availability of the indices, open the menu, go to *Dev Tools > Console*, then enter:
 

@@ -1,7 +1,7 @@
 [[tutorial-define-index]]
 === Define your index patterns
 
-Index patterns tell {kib} which {es} indices you want to explore.
+Index patterns tell {osd} which {opensearch} indices you want to explore.
 An index pattern can match the name of a single index, or include a wildcard
 (*) to match multiple indices. 
 
@@ -17,7 +17,7 @@ First you'll create index patterns for the Shakespeare data set, which has an
 index named `shakespeare,` and the accounts data set, which has an index named
 `bank`. These data sets don't contain time series data.
 
-. Open the menu, then go to *Stack Management > {kib} > Index Patterns*.
+. Open the menu, then go to *Stack Management > {osd} > Index Patterns*.
 
 . If this is your first index pattern, the *Create index pattern* page opens.
 
