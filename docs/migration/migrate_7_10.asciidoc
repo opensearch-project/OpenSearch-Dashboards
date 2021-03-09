@@ -5,7 +5,7 @@
 ++++
 
 This page discusses the breaking changes that you need to be aware of when migrating
-your application to {kib} 7.10.
+your application to {osd} 7.10.
 
 * <<user-facing-changes-7-10, Breaking changes for users>>
 * <<general-plugin-API-changes-7-10, Breaking changes for plugin developers>>
@@ -20,22 +20,22 @@ your application to {kib} 7.10.
 
 
 [discrete]
-[[breaking_kibana_legacy_plugins]]
+[[breaking_opensearch_dashboards_legacy_plugins]]
 ==== Legacy plugins support removed
 
 The legacy plugin system and the legacy plugin API have been removed.
-Legacy plugin owners should migrate their plugins to the {kib} Platform plugin API.
+Legacy plugin owners should migrate their plugins to the {osd} Platform plugin API.
 
-*via https://github.com/elastic/kibana/pull/77599[#77599]*
+*via https://github.com/elastic/opensearch-dashboards/pull/77599[#77599]*
 
 [discrete]
-[[breaking_kibana_plugins]]
-==== Support added for Kibana Platform plugins
+[[breaking_opensearch_dashboards_plugins]]
+==== Support added for OpenSearchDashboards Platform plugins
 
-The `bin/kibana-plugin` CLI has been updated to work with the new {kib}
+The `bin/opensearch-dashboards-plugin` CLI has been updated to work with the new {osd}
 Platform plugin format instead of the legacy plugin format.
 
-*via https://github.com/elastic/kibana/pull/74604[#74604]*
+*via https://github.com/elastic/opensearch-dashboards/pull/74604[#74604]*
 
 [discrete]
 [[breaking_vega_visualizations]]
@@ -51,7 +51,7 @@ param exists, an error message is returned.
 Refer to the https://vega.github.io/vega/docs/specification/[Vega docs] for
 more information about this property.
 
-*via https://github.com/elastic/kibana/pull/73805[#73805]*
+*via https://github.com/elastic/opensearch-dashboards/pull/73805[#73805]*
 
 // end::notable-breaking-changes[]
 
@@ -66,10 +66,10 @@ more information about this property.
 
 To rename the Ingest Manger plugin to Fleet:
 
-* The {kib} config for Ingest Manager moved from `xpack.ingestManager.*` to `xpack.fleet.*`.
+* The {osd} config for Ingest Manager moved from `xpack.ingestManager.*` to `xpack.fleet.*`.
 * The config options specific to agents moved to `xpack.ingestManager.fleet.*` and `xpack.fleet.agents.*`.
 
-*via https://github.com/elastic/kibana/pull/79406[#79406]*
+*via https://github.com/elastic/opensearch-dashboards/pull/79406[#79406]*
 
 ====
 
@@ -78,12 +78,12 @@ To rename the Ingest Manger plugin to Fleet:
 [%collapsible]
 ====
 
-Kibana plugins can no longer rely on their server code being automatically transpiled with Babel.
-The https://github.com/elastic/kibana/tree/master/packages/kbn-plugin-helpers[`@kbn/plugin-helpers`]
+OpenSearchDashboards plugins can no longer rely on their server code being automatically transpiled with Babel.
+The https://github.com/elastic/opensearch-dashboards/tree/master/packages/osd-plugin-helpers[`@osd/plugin-helpers`]
 provide a build task that will transform a plugin's server code to plain JS via Babel,
 but plugin authors can use a tool of their choosing to accomplish the same result.
 
-*via https://github.com/elastic/kibana/pull/79176[#79176]* and https://github.com/elastic/kibana/pull/79379[#79379]*
+*via https://github.com/elastic/opensearch-dashboards/pull/79176[#79176]* and https://github.com/elastic/opensearch-dashboards/pull/79379[#79379]*
 
 ====
 
@@ -100,7 +100,7 @@ The following Ingest Manager API routes changed:
 ** `/api/ingest_manager/fleet/enrollment-api-keys` => `/api/fleet/enrollment-api-keys`
 * The Fleet setup API moved from `/api/ingest_manager/fleet/setup` to `/api/fleet/agents/setup`
 
-*via https://github.com/elastic/kibana/pull/79193[#79193]*
+*via https://github.com/elastic/opensearch-dashboards/pull/79193[#79193]*
 
 ====
 
@@ -117,7 +117,7 @@ function async myRouteHandler(context, request, response) {
 }
 ```
 
-*via https://github.com/elastic/kibana/pull/78383[#78383]*
+*via https://github.com/elastic/opensearch-dashboards/pull/78383[#78383]*
 
 ====
 
@@ -133,7 +133,7 @@ This release introduces the following `search` helpers:
 * `isPartialResponse`
 
 
-*via https://github.com/elastic/kibana/pull/78006[#78006]*
+*via https://github.com/elastic/opensearch-dashboards/pull/78006[#78006]*
 
 ====
 
@@ -164,7 +164,7 @@ The refactoring includes the following changes:
 ** `indexPatternService.createAndSave(indexPatternSpec)` convenience method added
 ** `indexPatternService.getFieldsForWildcard` can be called directly. Previously a temp index pattern had to be created.
 
-*via https://github.com/elastic/kibana/pull/77791[#77791]*
+*via https://github.com/elastic/opensearch-dashboards/pull/77791[#77791]*
 
 ====
 
@@ -192,7 +192,7 @@ data.search.search(...)
    }
 ```
 
-*via https://github.com/elastic/kibana/pull/77788[#77788]*
+*via https://github.com/elastic/opensearch-dashboards/pull/77788[#77788]*
 
 ====
 
@@ -203,18 +203,18 @@ data.search.search(...)
 
 A `className` prop was added to the main container of the QueryStringInput component.
 
-*via https://github.com/elastic/kibana/pull/76848[#76848]*
+*via https://github.com/elastic/opensearch-dashboards/pull/76848[#76848]*
 
 ====
 
 [[breaking_plugin_v7.10.0_76822]]
-.KibanaRequest now has a `uuid` property
+.OpenSearchDashboardsRequest now has a `uuid` property
 [%collapsible]
 ====
 
-`KibanaRequest` now has a `uuid` property, which is a UUID that uniquely identifies the request.
+`OpenSearchDashboardsRequest` now has a `uuid` property, which is a UUID that uniquely identifies the request.
 
-*via https://github.com/elastic/kibana/pull/76822[#76822]*
+*via https://github.com/elastic/opensearch-dashboards/pull/76822[#76822]*
 
 ====
 
@@ -225,7 +225,7 @@ A `className` prop was added to the main container of the QueryStringInput compo
 
 `IndexPattern.save` has been replaced with `IndexPatternsService.save`.
 
-*via https://github.com/elastic/kibana/pull/76706[#76706]*
+*via https://github.com/elastic/opensearch-dashboards/pull/76706[#76706]*
 
 ====
 
@@ -237,22 +237,22 @@ A `className` prop was added to the main container of the QueryStringInput compo
 The `FetchOptions` type was removed&mdash;use the `ISearchOptions` type instead.
 The `ISearchOptions` `signal` option was renamed to `abortSignal`.
 
-*via https://github.com/elastic/kibana/pull/76538[#76538]*
+*via https://github.com/elastic/opensearch-dashboards/pull/76538[#76538]*
 
 ====
 
 [[breaking_plugin_v7.10.0_75943]]
-.Legacy {es} client APIs removed
+.Legacy {opensearch} client APIs removed
 [%collapsible]
 ====
 
 The `__LEGACY` APIs have been removed from the `data` plugin's client-side search service.
-Specifically, `data.search.__LEGACY.esClient` is no longer exposed,
- and the legacy `elasticsearch-browser` package has been removed from the repo.
+Specifically, `data.search.__LEGACY.opensearchClient` is no longer exposed,
+ and the legacy `opensearch-browser` package has been removed from the repo.
  If you rely on this client in your plugin, we recommend migrating to
- the new https://github.com/elastic/elasticsearch-js[`elasticsearch-js` client].
+ the new https://github.com/elastic/opensearch-js[`opensearch-js` client].
 
-*via https://github.com/elastic/kibana/pull/75943[#75943]*
+*via https://github.com/elastic/opensearch-dashboards/pull/75943[#75943]*
 
 ====
 
@@ -261,22 +261,22 @@ Specifically, `data.search.__LEGACY.esClient` is no longer exposed,
 [%collapsible]
 ====
 
-Kibana Platform plugins can now read the status of their dependencies,
+OpenSearchDashboards Platform plugins can now read the status of their dependencies,
 their plugin's default status, and manually override that status as
 reported to the end user and on the `/api/status` endpoint.
 
 ```ts
 class MyPlugin {
   setup(core) {
-    // Override default behavior and only elevate severity when elasticsearch is not available
+    // Override default behavior and only elevate severity when opensearch is not available
     core.status.set(
-      core.status.core$.pipe(core => core.elasticsearch);
+      core.status.core$.pipe(core => core.opensearch);
     );
   }
 }
 ```
 
-*via https://github.com/elastic/kibana/pull/75819[#75819]*
+*via https://github.com/elastic/opensearch-dashboards/pull/75819[#75819]*
 
 ====
 
@@ -287,17 +287,17 @@ class MyPlugin {
 
 The behavior of how search requests timeout changed:
 
- * The {kib} server uses the new {es} client. The client already uses all timeout configurations
+ * The {osd} server uses the new {opensearch} client. The client already uses all timeout configurations
  such as `requestTimeout`, `shardTimeout`, and `maxRetries`.
  Because the client can't override those settings, in OSS,
- we removed the code governing the {es} timeout on the client. Instead, this change adds handling for a timeout error response.
+ we removed the code governing the {opensearch} timeout on the client. Instead, this change adds handling for a timeout error response.
   A nice side effect is being able to remove `injectDefaultVars` from the legacy core plugin.
 * With Basic+ licenses, users can control the maximum time for a search session
  (for example, a single re-load of a dashboard), per space. Aa new Advanced Setting
  can be set to a positive value, or to 0, allowing queries to run without a timeout, as long as a user stays on screen.
 
 
-*via https://github.com/elastic/kibana/pull/75728[#75728]*
+*via https://github.com/elastic/opensearch-dashboards/pull/75728[#75728]*
 
 ====
 
@@ -309,7 +309,7 @@ The behavior of how search requests timeout changed:
 The `IndexPattern` class now takes `shortDotsEnable` (boolean) and `metaFields` (string[]) as arguments.
 These were formerly provided by `uiSettings`
 
-*via https://github.com/elastic/kibana/pull/75717[#75717]*
+*via https://github.com/elastic/opensearch-dashboards/pull/75717[#75717]*
 
 ====
 
@@ -323,10 +323,10 @@ which were designed for internal use in Canvas.
 In the unlikely event that you rely on the `expressions.__LEGACY` namespace,
 you will need to copy the relevant code into your plugin before updating.
 
-Also removed is the `createKibanaUtilsCore` helper from the `kibana_utils` plugin,
+Also removed is the `createOpenSearchDashboardsUtilsCore` helper from the `opensearch_dashboards_utils` plugin,
 which was only used in the legacy Expressions APIs.
 
-*via https://github.com/elastic/kibana/pull/75517[#75517]*
+*via https://github.com/elastic/opensearch-dashboards/pull/75517[#75517]*
 
 ====
 
@@ -345,12 +345,12 @@ helper, update the dependencies passed to it as follows:
        const params = getSearchParamsFromRequest(request, {
 -          injectedMetadata: core.injectedMetadata,
 -          uiSettings: core.uiSettings,
-+          esShardTimeout: core.injectedMetadata.getInjectedVar('esShardTimeout') as number,
++          opensearchShardTimeout: core.injectedMetadata.getInjectedVar('opensearchShardTimeout') as number,
 +          getConfig: core.uiSettings.get.bind(core.uiSettings),
        });
 ```
 
-*via https://github.com/elastic/kibana/pull/75368[#75368]*
+*via https://github.com/elastic/opensearch-dashboards/pull/75368[#75368]*
 
 ====
 
@@ -376,7 +376,7 @@ Instead it throws `FieldTypeUnknownError`.
 - `toSpec` now takes an optional argument, `{ getFormatterForField }`. This argument takes
 the field as an argument and returns a formatter.
 
-*via https://github.com/elastic/kibana/pull/75185[#75185]*
+*via https://github.com/elastic/opensearch-dashboards/pull/75185[#75185]*
 
 ====
 
@@ -403,7 +403,7 @@ The following Ingest Manager settings changed:
 - `xpack.ingestManager.fleet.agentConfigRolloutRateLimitIntervalMs` renamed to `xpack.fleet.agents.agentPolicyRolloutRateLimitIntervalMs`
 - `xpack.fleet.agents.agentConfigRolloutRateLimitRequestPerInterval` renamed to `xpack.fleet.agents.agentPolicyRolloutRateLimitRequestPerInterval`
 
-*via https://github.com/elastic/kibana/pull/74914[#74914]*
+*via https://github.com/elastic/opensearch-dashboards/pull/74914[#74914]*
 
 ====
 
@@ -417,7 +417,7 @@ removed from the static exports of the `data` plugin's contract.
 If you rely on these, copy the code directly into your plugin.
 The `SearchError` interface is still exposed.
 
-*via https://github.com/elastic/kibana/pull/74607[#74607]*
+*via https://github.com/elastic/opensearch-dashboards/pull/74607[#74607]*
 
 ====
 
@@ -431,7 +431,7 @@ The usage is the same as on the client, except that a scoped saved objects clien
 must be provided on the server to retrieve the `start` contract:
 
 ```ts
-const savedObjectsClient = savedObjects.getScopedClient(kibanaRequest);
+const savedObjectsClient = savedObjects.getScopedClient(opensearchDashboardsRequest);
 // `aggs.asScopedToClient` will return the same contract as is available in the browser
 const aggs = await data.search.aggs.asScopedToClient(savedObjectsClient);
 const allAggTypes = aggs.types.getAll();
@@ -439,7 +439,7 @@ const allAggTypes = aggs.types.getAll();
 
 The `calculateAutoTimeExpression` method was removed from the `setup` contract,
 and now only exists on the `data` plugin's `start` contract. The method was
-was not used in `setup` elsewhere in {kib}, so it was removed for simplicity.
+was not used in `setup` elsewhere in {osd}, so it was removed for simplicity.
 
 In addition, the agg types registry changed and now accepts a provider
 function, which is used to inject dependencies. This might be needed in the agg type definition,
@@ -466,7 +466,7 @@ const getMyAgg = ({ getConfig }) =>
 dataSetup.search.aggs.registerMetric('myAgg', getMyAgg);
 ```
 
-*via https://github.com/elastic/kibana/pull/74472[#74472]*
+*via https://github.com/elastic/opensearch-dashboards/pull/74472[#74472]*
 
 ====
 
@@ -477,23 +477,23 @@ dataSetup.search.aggs.registerMetric('myAgg', getMyAgg);
 
 Route definitions can now specify the `idleSocket` timeout in addition to the `payload` timeout.
 
-Resolves https://github.com/elastic/kibana/issues/73557[#73557].
+Resolves https://github.com/elastic/opensearch-dashboards/issues/73557[#73557].
 
-*via https://github.com/elastic/kibana/pull/73730[#73730]*
+*via https://github.com/elastic/opensearch-dashboards/pull/73730[#73730]*
 
 ====
 
 [[breaking_plugin_v7.10.0_73651]]
-.New {es} client exposed
+.New {opensearch} client exposed
 [%collapsible]
 ====
 
-{kib} provides the new {es} client
-as a part of the {es} service on the server-side.
+{osd} provides the new {opensearch} client
+as a part of the {opensearch} service on the server-side.
 The legacy client is deprecated on and subject for removal in `7.x`. Reference
-the https://github.com/elastic/kibana/blob/master/src/core/MIGRATION_EXAMPLES.md#elasticsearch-client[migration guide] to refactor your code
+the https://github.com/elastic/opensearch-dashboards/blob/master/src/core/MIGRATION_EXAMPLES.md#opensearch-client[migration guide] to refactor your code
 
-*via https://github.com/elastic/kibana/pull/73651[#73651]*
+*via https://github.com/elastic/opensearch-dashboards/pull/73651[#73651]*
 
 ====
 
@@ -510,13 +510,13 @@ data.query.state$.subscribe((queryState: QueryState) => {...})
 ```
 
 This PR also adds the `data.query.queryString` service, allowing to you set the
-query string https://github.com/elastic/kibana/issues/52522[programmatically].
+query string https://github.com/elastic/opensearch-dashboards/issues/52522[programmatically].
 ```TypeScript
 data.query.queryString.setQuery({query: 'abc', language: 'kuery'});
 ```
 
 
-*via https://github.com/elastic/kibana/pull/72093[#72093]*
+*via https://github.com/elastic/opensearch-dashboards/pull/72093[#72093]*
 
 ====
 
@@ -526,7 +526,7 @@ data.query.queryString.setQuery({query: 'abc', language: 'kuery'});
 ====
 
 This PR allows you to assign privileges to the Alerting framework when
-defining your feature in *Kibana*. When registering your feature, you can add
+defining your feature in *OpenSearchDashboards*. When registering your feature, you can add
 a list of AlertTypes under your `read` and `all` keys of the `privileges` object, as such:
 
 ```ts
@@ -600,7 +600,7 @@ The one exception to this is when the _producer_ is `alerts`, which represents a
 in which case we only check for _consumer_ privileges as all users are privileged to create built-in types by definition.
 
 
-*via https://github.com/elastic/kibana/pull/67157[#67157]*
+*via https://github.com/elastic/opensearch-dashboards/pull/67157[#67157]*
 
 ====
 
@@ -632,10 +632,10 @@ This example shows a provider for the alert SavedObject type,
 which creates a new AlertsClient for the request and returns a getter
 that attempts to get the SavedObject by its id.
 
-*via https://github.com/elastic/kibana/pull/73257[#73257]*
+*via https://github.com/elastic/opensearch-dashboards/pull/73257[#73257]*
 
 ```ts
-eventLogService.registerSavedObjectProvider('alert', (request: KibanaRequest) => {
+eventLogService.registerSavedObjectProvider('alert', (request: OpenSearchDashboardsRequest) => {
     const client = getAlertsClientWithRequest(request);
     return (type: string, id: string) => client.get({ id });
 });
@@ -652,19 +652,19 @@ This means a single provider is used for multiple gets made by the request.
 ====
 
 [[breaking_plugin_v7.10.0_72289]]
-.New {es} client in SO service
+.New {opensearch} client in SO service
 [%collapsible]
 ====
 
-The SO service was refactored to use https://github.com/elastic/elasticsearch-js[elasticsearch-js]
+The SO service was refactored to use https://github.com/elastic/opensearch-js[opensearch-js]
 under the hood. This change might affect plugins reading the response status field
-from the SO error bubbled to the Solutions code because the {es} error no longer
+from the SO error bubbled to the Solutions code because the {opensearch} error no longer
 provides the status field (statusCode is still provided).
 
 Several plugins were adjusted to check SO errors with `SavedObjectsErrorHelpers`.
 Plugins must use this because we are going to stop wrapping errors in the Boom object.
 
-*via https://github.com/elastic/kibana/pull/72289[#72289]*
+*via https://github.com/elastic/opensearch-dashboards/pull/72289[#72289]*
 
 ====
 
@@ -696,13 +696,13 @@ to every role granted the `read` privilege to the Feature via Feature Controls.
 
 You're likely to have to specify this in 3 places in your plugin
 to cover all 3 scenarios. Although this is more verbose than before,
-it aligns with the rest of {kib}.
+it aligns with the rest of {osd}.
 It also means that the Triggers and Actions plugin no longer needs to
 know about each plugin that wants to gain access
-(which means {kib} can more easily support future alerting usage).
+(which means {osd} can more easily support future alerting usage).
 
 
-*via https://github.com/elastic/kibana/pull/72029[#72029]*
+*via https://github.com/elastic/opensearch-dashboards/pull/72029[#72029]*
 
 ====
 
@@ -714,7 +714,7 @@ know about each plugin that wants to gain access
 
 `casesConfiguration` was renamed to `incidentConfiguration`. Added optional `attributeisCaseOwned`.
 
-*via https://github.com/elastic/kibana/pull/73778[#73778]*
+*via https://github.com/elastic/opensearch-dashboards/pull/73778[#73778]*
 
 ====
 
@@ -726,7 +726,7 @@ know about each plugin that wants to gain access
 
 `casesConfiguration` was renamed to `incidentConfiguration`. Added optional `attributeisCaseOwned`.
 
-*via https://github.com/elastic/kibana/pull/74357[#74357]*
+*via https://github.com/elastic/opensearch-dashboards/pull/74357[#74357]*
 
 ====
 
@@ -736,19 +736,19 @@ know about each plugin that wants to gain access
 [%collapsible]
 ====
 
-- To create a case (`POST <kibana host>:<port>/api/cases`), you must provide a `connector`.
+- To create a case (`POST <opensearchDashboards host>:<port>/api/cases`), you must provide a `connector`.
 Requests without a `connector` get a `400 Bad Request`.
-- To update the connector of a case (`PATCH <kibana host>:<port>/api/cases`),
+- To update the connector of a case (`PATCH <opensearchDashboards host>:<port>/api/cases`),
 you must provide the `connector`. The `connector_id` attribute has been
 removed in favor of the `connector` attribute.
-- To set the default connector (`POST <kibana host>:<port>/api/cases/configure`),
+- To set the default connector (`POST <opensearchDashboards host>:<port>/api/cases/configure`),
 you must provide a `connector`. The `connector_id` and `connector_name`
 attributes have been removed in favor of the `connector` attribute.
 - To update the connector’s case closure settings
-(`PATCH <kibana host>:<port>/api/cases/configure`), you must provide a `connector`.
+(`PATCH <opensearchDashboards host>:<port>/api/cases/configure`), you must provide a `connector`.
 The `connector_id` and `connector_name` attributes have been removed in
 favor of the `connector` attribute.
 
-*via https://github.com/elastic/kibana/pull/77327[#77327]*
+*via https://github.com/elastic/opensearch-dashboards/pull/77327[#77327]*
 
 ====

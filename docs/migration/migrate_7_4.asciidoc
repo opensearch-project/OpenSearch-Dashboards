@@ -5,9 +5,9 @@
 ++++
 
 This section discusses the changes that you need to be aware of when migrating
-your application to Kibana 7.4.
+your application to OpenSearchDashboards 7.4.
 
-//See also {kibana-ref-all}/7.4/release-highlights-7.4.0.html[release highlights] and <<release-notes-7.4.0, release notes>>.
+//See also {opensearch-dashboards-ref-all}/7.4/release-highlights-7.4.0.html[release highlights] and <<release-notes-7.4.0, release notes>>.
 
 //NOTE: The notable-breaking-changes tagged regions are re-used in the
 //Installation and Upgrade Guide
@@ -30,7 +30,7 @@ We now use `_search` when batching is disabled.
 
 *Impact:*
 When the advanced setting `courier:batchSearches` is disabled, 
-requests from *Discover*, *Visualize*, and *Dashboard* will now query {es} 
+requests from *Discover*, *Visualize*, and *Dashboard* will now query {opensearch} 
 using the `_search` endpoint rather than the `_msearch` endpoint.
 
 

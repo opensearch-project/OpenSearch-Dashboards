@@ -5,9 +5,9 @@
 ++++
 
 This section discusses the changes that you need to be aware of when migrating
-your application to Kibana 7.2.
+your application to OpenSearchDashboards 7.2.
 
-See also {kibana-ref-all}/7.2/release-highlights-7.2.0.html[release highlights]
+See also {opensearch-dashboards-ref-all}/7.2/release-highlights-7.2.0.html[release highlights]
 and <<release-notes-7.2.0, release notes>>.
 
 //NOTE: The notable-breaking-changes tagged regions are re-used in the
@@ -24,7 +24,7 @@ and <<release-notes-7.2.0, release notes>>.
 === Time-based internal index patterns queried as wildcard index patterns
 *Details:* Time-based interval index patterns were deprecated in 5.x. In 6.x, 
 you could no longer create time-based interval index patterns, but they continued 
-to function as expected. In 7.2, functionality has changed such that {kib} will 
+to function as expected. In 7.2, functionality has changed such that {osd} will 
 automatically query a time-based interval index pattern as a wildcard index pattern.
 Support for time-based index patterns will be removed in 8.0. You can migrate your 
 time-based index patterns to a wildcard pattern to prepare for this change.

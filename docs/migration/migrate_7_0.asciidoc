@@ -5,7 +5,7 @@
 ++++
 
 This section discusses the changes that you need to be aware of when migrating
-your application to Kibana 7.0.
+your application to OpenSearchDashboards 7.0.
 
 See also <<whats-new>> and <<release-notes>>.
 
@@ -89,8 +89,8 @@ Example structure after:
 
 [float]
 ==== Removed support for using PhantomJS browser for screenshots in Reporting
-*Details:* Since the first release of Kibana Reporting, PhantomJS was used as
-the headless browser to capture screenshots of Kibana dashboards and
+*Details:* Since the first release of OpenSearchDashboards Reporting, PhantomJS was used as
+the headless browser to capture screenshots of OpenSearchDashboards dashboards and
 visualizations. In that short time, Chromium has started offering a new
 headless browser library and the PhantomJS maintainers abandoned their project.
 We started planning for a transition in 6.5.0, when we made Chromium the
@@ -100,26 +100,26 @@ will still exist for compatibility, but the only valid option will be
 `chromium`.
 
 *Impact:* Before upgrading to 7.0, if you have `xpack.reporting.capture.browser.type`
-set in kibana.yml, make sure it is set to `chromium`.
+set in opensearch_dashboards.yml, make sure it is set to `chromium`.
 
 [NOTE]
 ============
 Reporting 7.0 uses a version of the Chromium headless browser that RHEL 6,
 CentOS 6.x, and other old versions of Linux derived from RHEL 6. This change
-effectively removes RHEL 6 OS server support from Kibana Reporting. Users with
-RHEL 6 must upgrade to RHEL 7 to use Kibana Reporting starting with version
+effectively removes RHEL 6 OS server support from OpenSearchDashboards Reporting. Users with
+RHEL 6 must upgrade to RHEL 7 to use OpenSearchDashboards Reporting starting with version
 7.0.0 of the Elastic stack.
 ============
 
 
 [float]
-==== Legacy browsers (namely IE11) will see a security warning message whenever they load Kibana
-*Details:* Kibana now has a Content Security Policy, but it's only effective if browsers enforce it, and since older
-browsers like Internet Explorer 11 do not support CSP, we show them a warning message whenever they load Kibana.
+==== Legacy browsers (namely IE11) will see a security warning message whenever they load OpenSearchDashboards
+*Details:* OpenSearchDashboards now has a Content Security Policy, but it's only effective if browsers enforce it, and since older
+browsers like Internet Explorer 11 do not support CSP, we show them a warning message whenever they load OpenSearchDashboards.
 
 *Impact:* Nothing needs to be done necessarily, but if you don't need to support legacy browsers like IE11, we recommend
-that you set `csp.strict: true` in your kibana.yml to block access to those browsers entirely. If your organization requires
-users to use IE11, you might like to disable the warning entirely with `csp.warnLegacyBrowsers: false` in your kibana.yml.
+that you set `csp.strict: true` in your opensearch_dashboards.yml to block access to those browsers entirely. If your organization requires
+users to use IE11, you might like to disable the warning entirely with `csp.warnLegacyBrowsers: false` in your opensearch_dashboards.yml.
 
 
 [float]
@@ -131,7 +131,7 @@ users to use IE11, you might like to disable the warning entirely with `csp.warn
 
 *Details:* Overseas territories in the France Departments vector layer have 
 been removed. These territories have no ISO 3166-2 or INSEE codes to join to 
-{es} data.
+{opensearch} data.
 
 *Impact:* Region Map, Vega, and Maps plugin visualizations using the France 
 Departments layer will not show overseas territories. 
@@ -153,11 +153,11 @@ in some areas. Also, some zip codes have been deprecated and new ones have been 
 === Packaging changes
 
 [float]
-==== Removed support for running Kibana with a global Node.js installation
-*Details:* Previous versions of Kibana would fallback to using a global installation of Node.js if the distribution included with Kibana was not found.
-Kibana 7.0 will only use the Node.js distribution included in the package.
+==== Removed support for running OpenSearchDashboards with a global Node.js installation
+*Details:* Previous versions of OpenSearchDashboards would fallback to using a global installation of Node.js if the distribution included with OpenSearchDashboards was not found.
+OpenSearchDashboards 7.0 will only use the Node.js distribution included in the package.
 
-*Impact:* There is no expected impact unless Kibana is installed in a non-standard way.
+*Impact:* There is no expected impact unless OpenSearchDashboards is installed in a non-standard way.
 
 [float]
 [[breaking_70_plugin_changes]]
@@ -165,30 +165,30 @@ Kibana 7.0 will only use the Node.js distribution included in the package.
 
 [float]
 ==== Optimization step deferred until server start
-*Details:* Prior versions of Kibana would run the optimization step after each plugin installation.  This is now run on server start when necessary.
+*Details:* Prior versions of OpenSearchDashboards would run the optimization step after each plugin installation.  This is now run on server start when necessary.
 
-*Impact:* Users can trigger a standalone optimization after all plugins have been installed with `bin/kibana --optimize` or let the server manage it on startup.
+*Impact:* Users can trigger a standalone optimization after all plugins have been installed with `bin/opensearch-dashboards --optimize` or let the server manage it on startup.
 
 [float]
 [[breaking_70_security_changes]]
 === Security changes
 
 [float]
-==== Removed support for users relying on direct index privileges to the Kibana index in Elasticsearch
-*Details:* With the introduction of Kibana RBAC in 6.4, users no longer require privileges to the Kibana index in Elasticsearch. Instead, users
-should be granted <<kibana-privileges>>. Prior to 7.0, when a user who relies upon direct index privileges logged into Kibana, a deprecation warning was logged. 
+==== Removed support for users relying on direct index privileges to the OpenSearchDashboards index in OpenSearch
+*Details:* With the introduction of OpenSearchDashboards RBAC in 6.4, users no longer require privileges to the OpenSearchDashboards index in OpenSearch. Instead, users
+should be granted <<opensearch-dashboards-privileges>>. Prior to 7.0, when a user who relies upon direct index privileges logged into OpenSearchDashboards, a deprecation warning was logged. 
 
-*Impact:* You must change any roles that grant access to Kibana using index privileges to use <<kibana-privileges>> instead. 
+*Impact:* You must change any roles that grant access to OpenSearchDashboards using index privileges to use <<opensearch-dashboards-privileges>> instead. 
 Watcher jobs using the Reporting attachment type must also be updated.
 
-If you use a custom `kibana.index` for multitenancy, you can 
-no longer use `kibana_user` or `kibana_dashboard_only_user` to provide access, 
-and will have to start using {kib} privileges.
+If you use a custom `opensearch-dashboards.index` for multitenancy, you can 
+no longer use `opensearch_dashboards_user` or `opensearch_dashboards_dashboard_only_user` to provide access, 
+and will have to start using {osd} privileges.
 
-In addition, roles cannot be shared across Kibana tenants when granting access to Kibana privileges.
-For example, a tenant using `kibana.index: .kibana` will have its own set 
-of roles created to grant access to Kibana. If you create another tenant 
-at `kibana.index: .some-other-index`, it will need its own set of roles 
+In addition, roles cannot be shared across OpenSearchDashboards tenants when granting access to OpenSearchDashboards privileges.
+For example, a tenant using `opensearch-dashboards.index: .opensearchDashboards` will have its own set 
+of roles created to grant access to OpenSearchDashboards. If you create another tenant 
+at `opensearch-dashboards.index: .some-other-index`, it will need its own set of roles 
 to grant access to that tenant.
 
 [float]
@@ -197,54 +197,54 @@ to grant access to that tenant.
 
 [float]
 ==== Removed support for tribe nodes
-*Details:* Elasticsearch 7.0 removes the tribe node feature, so Kibana removes it as well.
+*Details:* OpenSearch 7.0 removes the tribe node feature, so OpenSearchDashboards removes it as well.
 
-*Impact:* You must remove any tribe node configurations in Kibana. Consider using <<management-cross-cluster-search>> instead, which does not require kibana.yml configurations in Kibana.
+*Impact:* You must remove any tribe node configurations in OpenSearchDashboards. Consider using <<management-cross-cluster-search>> instead, which does not require opensearch_dashboards.yml configurations in OpenSearchDashboards.
 
 
 [float]
-==== `elasticsearch.ssl.ca` is no longer valid
+==== `opensearch.ssl.ca` is no longer valid
 
-*Details:* The deprecated `elasticsearch.ssl.ca` setting in the `kibana.yml` 
+*Details:* The deprecated `opensearch.ssl.ca` setting in the `opensearch_dashboards.yml` 
 file has been removed.
 
-*Impact:* Use `elasticsearch.ssl.certificateAuthorities` instead.
+*Impact:* Use `opensearch.ssl.certificateAuthorities` instead.
 
 [float]
-==== `elasticsearch.ssl.cert` is no longer valid
+==== `opensearch.ssl.cert` is no longer valid
 
-*Details:* The deprecated `elasticsearch.ssl.cert` setting in the `kibana.yml`
+*Details:* The deprecated `opensearch.ssl.cert` setting in the `opensearch_dashboards.yml`
 file has been removed.
 
-*Impact:* Use `elasticsearch.ssl.certificate` instead.
+*Impact:* Use `opensearch.ssl.certificate` instead.
 
 [float]
-==== `elasticsearch.ssl.verify` is no longer valid
+==== `opensearch.ssl.verify` is no longer valid
 
-*Details:* The deprecated `elasticsearch.ssl.verify` setting in the `kibana.yml`
+*Details:* The deprecated `opensearch.ssl.verify` setting in the `opensearch_dashboards.yml`
 file has been removed.
 
-*Impact:* Use `elasticsearch.ssl.verificationMode` instead. If you set
-`elasticsearch.ssl.verify` to `true`, that is equal to setting 
-`elasticsearch.ssl.verificationMode` to `full`.
+*Impact:* Use `opensearch.ssl.verificationMode` instead. If you set
+`opensearch.ssl.verify` to `true`, that is equal to setting 
+`opensearch.ssl.verificationMode` to `full`.
 
 [float]
-==== `elasticsearch.url` is no longer valid
+==== `opensearch.url` is no longer valid
 
-*Details:* The deprecated `elasticsearch.url` setting in the `kibana.yml` file
+*Details:* The deprecated `opensearch.url` setting in the `opensearch_dashboards.yml` file
 has been removed. 
 
-*Impact:* Use `elasticsearch.hosts` instead. In prior versions of Kibana, if no
-port was specified in `elasticsearch.url`, a default of 9200 was chosen. The
-port in `elasticsearch.hosts` is protocol dependent: https ports will use 443,
-and http ports will use 80. If your `elasticsearch.url` setting was dependent on
+*Impact:* Use `opensearch.hosts` instead. In prior versions of OpenSearchDashboards, if no
+port was specified in `opensearch.url`, a default of 9200 was chosen. The
+port in `opensearch.hosts` is protocol dependent: https ports will use 443,
+and http ports will use 80. If your `opensearch.url` setting was dependent on
 an unspecified port set to 9200, append `:9200` to the url in the
-`elasticsearch.hosts` setting.
+`opensearch.hosts` setting.
 
 [float]
 ==== `i18n.defaultLocale` is no longer valid
 
-*Details:* The deprecated `i18n.defaultLocale` setting in the `kibana.yml` file
+*Details:* The deprecated `i18n.defaultLocale` setting in the `opensearch_dashboards.yml` file
 has been removed.
 
 *Impact:* Use `i18n.locale` instead.
@@ -252,7 +252,7 @@ has been removed.
 [float]
 ==== `index_management.<any setting>` is no longer valid
 
-*Details:* The deprecated `index_management.*` settings in the `kibana.yml`
+*Details:* The deprecated `index_management.*` settings in the `opensearch_dashboards.yml`
 file have been removed.
 
 *Impact:* Use `xpack.index_management.<any setting>` instead.
@@ -260,7 +260,7 @@ file have been removed.
 [float]
 ==== `license_management.<any setting>` is no longer valid
 
-*Details:* The deprecated `license_management.*` settings in the `kibana.yml`
+*Details:* The deprecated `license_management.*` settings in the `opensearch_dashboards.yml`
 file have been removed.
 
 *Impact:* Use `xpack.license_management.<any setting>` instead.
@@ -268,7 +268,7 @@ file have been removed.
 [float]
 ==== `logging.useUTC` is no longer valid
 
-*Details:* The deprecated `logging.useUTC` setting in the `kibana.yml` file has
+*Details:* The deprecated `logging.useUTC` setting in the `opensearch_dashboards.yml` file has
 been removed. 
 
 *Impact:* If `logging.useUTC` was set to `true` (its default value), the
@@ -278,7 +278,7 @@ specified by canonical id.
 [float]
 ==== `regionmap` is no longer valid
 
-*Details:* The deprecated `regionmap` setting in the `kibana.yml` file has been
+*Details:* The deprecated `regionmap` setting in the `opensearch_dashboards.yml` file has been
 removed.
 
 *Impact:* Use `map.regionmap` instead.
@@ -286,7 +286,7 @@ removed.
 [float]
 ==== `rollup.<any setting>` is no longer valid
 
-*Details:* The deprecated `rollup.*` settings in the `kibana.yml` file have been
+*Details:* The deprecated `rollup.*` settings in the `opensearch_dashboards.yml` file have been
 removed.
 
 *Impact:* Use `xpack.rollup.<any setting>` instead.
@@ -294,7 +294,7 @@ removed.
 [float]
 ==== `server.ssl.cert` is no longer valid
 
-*Details:* The deprecated `server.ssl.cert` setting in the `kibana.yml` file has
+*Details:* The deprecated `server.ssl.cert` setting in the `opensearch_dashboards.yml` file has
 been removed.
 
 *Impact:* Use `server.ssl.certificate` instead
@@ -303,7 +303,7 @@ been removed.
 ==== `server.ssl.enabled` must be set to `true` to enable SSL
 
 *Details:* Previously, if the `server.ssl.certificate` and `server.ssl.key`
-settins were specified in the `kibana.yml` file, SSL would be automatically
+settins were specified in the `opensearch_dashboards.yml` file, SSL would be automatically
 enabled. It's now required that you set `server.ssl.enabled` to `true` for this
 to occur.
 
@@ -315,15 +315,15 @@ now also set `server.ssl.enabled` to enable SSL.
 
 *Details:* By default, TLSv1 support has been removed. It's still possible to
 opt-in to TLSv1 support by explicitly setting `server.ssl.supportedProtocols` in
-the `kibana.yml` file.
+the `opensearch_dashboards.yml` file.
 
-*Impact:* Users relying on TLSv1 will be unable to use Kibana unless
+*Impact:* Users relying on TLSv1 will be unable to use OpenSearchDashboards unless
 `server.ssl.supportedProtocols` is explicitly set.
 
 [float]
 ==== `tilemap` is no longer valid
 
-*Details:* The deprecated `tilemap` setting in the `kibana.yml` file has been
+*Details:* The deprecated `tilemap` setting in the `opensearch_dashboards.yml` file has been
 removed.
 
 *Impact:* Use `map.tilemap` instead.
@@ -331,7 +331,7 @@ removed.
 [float]
 ==== `upgrade_assistant.<any setting>` is no longer valid
 
-*Details:* The deprecated `upgrade_assistant.*` settings in the `kibana.yml`
+*Details:* The deprecated `upgrade_assistant.*` settings in the `opensearch_dashboards.yml`
 file have been removed.
 
 *Impact:* Use `xpack.upgrade_assistant.<any setting>` instead.
@@ -340,7 +340,7 @@ file have been removed.
 ==== `xpack.monitoring.beats.index_pattern` is no longer valid
 
 *Details:* The unsupported `xpack.monitoring.beats.index_pattern` setting in the
-`kibana.yml` file has been officially removed.
+`opensearch_dashboards.yml` file has been officially removed.
 
 *Impact:* The ability to customize this pattern is no longer supported.
 
@@ -348,70 +348,70 @@ file have been removed.
 ==== `xpack.monitoring.cluster_alerts.index` is no longer valid
 
 *Details:* The unsupported `xpack.monitoring.cluster_alerts.index` setting in
-the `kibana.yml` file has been officially removed. 
+the `opensearch_dashboards.yml` file has been officially removed. 
 
 *Impact:* The ability to customize this index is no longer supported.
 
 [float]
-==== `xpack.monitoring.elasticsearch.index_pattern` is no longer valid
+==== `xpack.monitoring.opensearch.index_pattern` is no longer valid
 
-*Details:* The unsupported `xpack.monitoring.elasticsearch.index_pattern`
-setting in the `kibana.yml` file has been officially removed.
+*Details:* The unsupported `xpack.monitoring.opensearch.index_pattern`
+setting in the `opensearch_dashboards.yml` file has been officially removed.
 
 *Impact:* The ability to customize this pattern is no longer supported.
 
 [float]
-==== `xpack.monitoring.elasticsearch.ssl.ca` is no longer valid
+==== `xpack.monitoring.opensearch.ssl.ca` is no longer valid
 
-*Details:* The deprecated `xpack.monitoring.elasticsearch.ssl.ca` setting in the
-`kibana.yml` file has been removed. 
+*Details:* The deprecated `xpack.monitoring.opensearch.ssl.ca` setting in the
+`opensearch_dashboards.yml` file has been removed. 
 
-*Impact:* Use `xpack.monitoring.elasticsearch.ssl.certificateAuthorities` instead.
-
-[float]
-==== `xpack.monitoring.elasticsearch.ssl.cert` is no longer valid
-
-*Details:* The deprecated `xpack.monitoring.elasticsearch.ssl.cert` setting in
-the `kibana.yml` file has been removed. 
-
-*Impact:* Use `xpack.monitoring.elasticsearch.ssl.certificate` instead.
+*Impact:* Use `xpack.monitoring.opensearch.ssl.certificateAuthorities` instead.
 
 [float]
-==== `xpack.monitoring.elasticsearch.ssl.verify` is no longer valid
+==== `xpack.monitoring.opensearch.ssl.cert` is no longer valid
 
-*Details:* The deprecated `xpack.monitoring.elasticsearch.ssl.verify` setting in
-the `kibana.yml` file has been removed. 
+*Details:* The deprecated `xpack.monitoring.opensearch.ssl.cert` setting in
+the `opensearch_dashboards.yml` file has been removed. 
 
-*Impact:* Use `xpack.monitoring.elasticsearch.ssl.verificationMode` instead. If
-you previously set `xpack.monitoring.elasticsearch.ssl.verify` to `true`, it is
-equal to setting `xpack.monitoring.elasticsearch.ssl.verificationMode` to `full`.
+*Impact:* Use `xpack.monitoring.opensearch.ssl.certificate` instead.
 
 [float]
-==== `xpack.monitoring.elasticsearch.url` is no longer valid
+==== `xpack.monitoring.opensearch.ssl.verify` is no longer valid
 
-*Details:* The deprecated `xpack.monitoring.elasticsearch.url` setting in the
-`kibana.yml` file has been removed. 
+*Details:* The deprecated `xpack.monitoring.opensearch.ssl.verify` setting in
+the `opensearch_dashboards.yml` file has been removed. 
 
-*Impact:* Use `xpack.monitoring.elasticsearch.hosts` instead. In prior versions
-of Kibana, if no port was specified in `xpack.monitoring.elasticsearch.url` a
-default of 9200 was chosen. The port in `xpack.monitoring.elasticsearch.hosts`
+*Impact:* Use `xpack.monitoring.opensearch.ssl.verificationMode` instead. If
+you previously set `xpack.monitoring.opensearch.ssl.verify` to `true`, it is
+equal to setting `xpack.monitoring.opensearch.ssl.verificationMode` to `full`.
+
+[float]
+==== `xpack.monitoring.opensearch.url` is no longer valid
+
+*Details:* The deprecated `xpack.monitoring.opensearch.url` setting in the
+`opensearch_dashboards.yml` file has been removed. 
+
+*Impact:* Use `xpack.monitoring.opensearch.hosts` instead. In prior versions
+of OpenSearchDashboards, if no port was specified in `xpack.monitoring.opensearch.url` a
+default of 9200 was chosen. The port in `xpack.monitoring.opensearch.hosts`
 is protocol dependent: https ports will use 443, and http ports will use 80. If
-`xpack.monitoring.elasticsearch.url` was dependent on an unspecified port set to
-9200, append `:9200` to the url in `xpack.monitoring.elasticsearch.hosts`.
+`xpack.monitoring.opensearch.url` was dependent on an unspecified port set to
+9200, append `:9200` to the url in `xpack.monitoring.opensearch.hosts`.
 
 [float]
 ==== `xpack.monitoring.index_pattern` is no longer valid
 
 *Details:* The unsupported `xpack.monitoring.index_pattern` setting in the
-`kibana.yml` file has been officially removed.
+`opensearch_dashboards.yml` file has been officially removed.
 
 *Impact:* The ability to customize this pattern is no longer supported.
 
 [float]
-==== `xpack.monitoring.kibana.index_pattern` is no longer valid
+==== `xpack.monitoring.opensearchDashboards.index_pattern` is no longer valid
 
-*Details:* The unsupported `xpack.monitoring.kibana.index_pattern` setting in
-the `kibana.yml` file has been officially removed.
+*Details:* The unsupported `xpack.monitoring.opensearchDashboards.index_pattern` setting in
+the `opensearch_dashboards.yml` file has been officially removed.
 
 *Impact:* The ability to customize this pattern is no longer supported.
 
@@ -419,7 +419,7 @@ the `kibana.yml` file has been officially removed.
 ==== `xpack.monitoring.logstash.index_pattern` is no longer valid
 
 *Details:* The unsupported `xpack.monitoring.logstash.index_pattern` setting in
-the `kibana.yml` file has been officially removed.
+the `opensearch_dashboards.yml` file has been officially removed.
 
 *Impact:* The ability to customize this pattern is no longer supported.
 
@@ -427,12 +427,12 @@ the `kibana.yml` file has been officially removed.
 ==== `xpack.monitoring.node_resolver` is no longer valid
 
 *Details:* The deprecated `xpack.monitoring.node_resolver` setting in the
-`kibana.yml` file has been removed. This setting has been deprecated since 5.6,
+`opensearch_dashboards.yml` file has been removed. This setting has been deprecated since 5.6,
 when it was explicitly recommended to use `uuid` as its value.
 
 *Impact:* This setting is no longer necessary. If you enable the {stack}
-{monitor-features}, a monitoring agent runs on each Elasticsearch node, Logstash
-node, Kibana instance, and Beat to collect and index metrics. Each node and
+{monitor-features}, a monitoring agent runs on each OpenSearch node, Logstash
+node, OpenSearchDashboards instance, and Beat to collect and index metrics. Each node and
 instance is considered unique based on its persistent UUID, which is written to
 the `path.data` directory when the node or instance starts.
 
@@ -440,17 +440,17 @@ the `path.data` directory when the node or instance starts.
 ==== `xpack.monitoring.report_stats` is no longer valid
 
 *Details:* The deprecated `xpack.monitoring.report_stats` setting in the
-`kibana.yml` file has been removed. 
+`opensearch_dashboards.yml` file has been removed. 
 
 *Impact:* Use `xpack.xpack_main.telemetry.enabled` instead.
 
 [float]
-==== `management/kibana/(index|indices)` => `management/kibana/index_pattern(?s)`
+==== `management/opensearch-dashboards/(index|indices)` => `management/opensearch-dashboards/index_pattern(?s)`
 
-*Details:* Kibana management URLs pertaining to index patterns have been changed
-to accurately reflect their content, from `management/kibana/index` or
-`management/kibana/indices` to `managemen/kibana/index_pattern` or
-`management/kibana/index_patterns`. 
+*Details:* OpenSearchDashboards management URLs pertaining to index patterns have been changed
+to accurately reflect their content, from `management/opensearch-dashboards/index` or
+`management/opensearch-dashboards/indices` to `managemen/opensearch-dashboards/index_pattern` or
+`management/opensearch-dashboards/index_patterns`. 
 
 *Impact:* References to these URLs will need to be updated.
 
@@ -461,7 +461,7 @@ to accurately reflect their content, from `management/kibana/index` or
 
 [float]
 ==== Advanced setting query:queryString:options no longer applies to filters
-*Details:* In previous versions of Kibana the Advanced Setting `query:queryString:options` was applied to both queries
+*Details:* In previous versions of OpenSearchDashboards the Advanced Setting `query:queryString:options` was applied to both queries
 and custom filters using the `query_string` query. This could cause errors if a custom filter used options that
 conflicted with the Advanced Setting. In 7.0 `query:queryString:options` will no longer be applied to filters so that
 users can have full control over their custom filters.
@@ -471,16 +471,16 @@ users can have full control over their custom filters.
 
 [float]
 ==== Advanced setting query:queryString:options no longer applies `default_field: *` by default.
-*Details:* Elasticsearch removed the ability to create indices with an _all field in 6.0. As a result, a user could end
-up with a mix of indices with and without _all fields if they upgraded from an older version of ES. This could lead to
+*Details:* OpenSearch removed the ability to create indices with an _all field in 6.0. As a result, a user could end
+up with a mix of indices with and without _all fields if they upgraded from an older version of OPENSEARCH. This could lead to
 inconsistent highlighting in Discover. To work around this issue we added `default_field: *` to query:queryString:options
 to force consistent querying across indices with and without _all. In 7.0 the _all field will be gone from all indices
 so we no longer need this workaround.
 
-*Impact:* Since we'll no longer send the `default_field` parameter in Kibana's query_string query, Elasticsearch
+*Impact:* Since we'll no longer send the `default_field` parameter in OpenSearchDashboards's query_string query, OpenSearch
 will use the index setting instead. The default for the index setting is also `*`, so most users should not be impacted.
 If some of your indices have a non-default `default_field` setting, you may want to update it or re-add the parameter
-to Kibana's advanced setting.
+to OpenSearchDashboards's advanced setting.
 
 [float]
 [[breaking_70_UI_changes]]
@@ -520,20 +520,20 @@ should be required as a result of this change, but be aware that users with save
 multiple split tables will now see those tables rendered differently.
 
 [float]
-==== Imported Kibana dashboards might require small grid layout adjustments due to design changes
-*Details:* Kibana 7.0 introduces a new default font for the application and also comes with several design changes in dashboards that slightly change padding and margin for dashboard panels. You may find you need to adjust grid layouts to compensate.
+==== Imported OpenSearchDashboards dashboards might require small grid layout adjustments due to design changes
+*Details:* OpenSearchDashboards 7.0 introduces a new default font for the application and also comes with several design changes in dashboards that slightly change padding and margin for dashboard panels. You may find you need to adjust grid layouts to compensate.
 
 *Impact:* Minimal. In most cases, the dashboards should render as they did previously. In some cases, panels might overflow and require scroll bars where they did not previously. Simply adjust the panel sizes and edit your dashboard layouts if these bother you.
 
 [float]
 ==== Timelion no longer appears in the side navigation
 *Details:* Timelion sheets will continue to work in *Visualize*, but the 
-Timelion application no longer appears by default in the {kib} side navigation. 
+Timelion application no longer appears by default in the {osd} side navigation. 
 
 *Impact:* To create a Timelion visualization, go to *Visualize* and select 
 *Timelion* from the visualization types. If you have a lot of existing Timelion 
 visualizations and want to add Timelion back in the side
-navigation, set `timelion.ui.enabled` to `true` in `kibana.yml`.
+navigation, set `timelion.ui.enabled` to `true` in `opensearch_dashboards.yml`.
 
 
 

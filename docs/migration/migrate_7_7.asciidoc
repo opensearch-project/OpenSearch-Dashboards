@@ -5,7 +5,7 @@
 ++++
 
 This page discusses the breaking changes that you need to be aware of when migrating
-your application to Kibana 7.7.
+your application to OpenSearchDashboards 7.7.
 
 // The following section is re-used in the Installation and Upgrade Guide
 // tag::notable-breaking-changes[]
@@ -25,7 +25,7 @@ There are no user-facing breaking changes in 7.7.
 
 This Info toast will be used for the async search notifications.
 
-*via {kib-pull}60574[#60574]*
+*via {osd-pull}60574[#60574]*
 
 [discrete]
 ==== Goodbye, legacy data plugin
@@ -48,14 +48,14 @@ For scenario 2, the equivalent static code you've been importing should now be a
 + import { someStaticUtilOrType } from 'src/plugins/data/public';
 ```
 
-For scenario 3, you should be able to safely drop the reference to the plugin, and add `data` to your list of dependencies in `kibana.json` whenever your plugin migrates to the new Kibana platform:
+For scenario 3, you should be able to safely drop the reference to the plugin, and add `data` to your list of dependencies in `opensearch_dashboards.json` whenever your plugin migrates to the new OpenSearchDashboards platform:
 ```diff
 // index.ts
 const myPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
     id: 'my_plugin',
--    require: ['kibana', 'elasticsearch', 'visualizations', 'data'],
-+    require: ['kibana', 'elasticsearch', 'visualizations'],
+-    require: ['opensearchDashboards', 'opensearch', 'visualizations', 'data'],
++    require: ['opensearchDashboards', 'opensearch', 'visualizations'],
     ...,
   })
 );
@@ -63,24 +63,24 @@ const myPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginAp
 
 For more information on where to locate new platform `data` services,
 please refer to the table of
-https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
+https://github.com/elastic/opensearch-dashboards/blob/master/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
 in `src/core/MIGRATION.md`.
 
-*via {kib-pull}60449[#60449]*
+*via {osd-pull}60449[#60449]*
 
 [discrete]
 ==== Delete FilterStateManager and QueryFilter
 
 Delete unused legacy exports `FilterStateManager`, `QueryFilter`, and `SavedQuery`.
 
-*via {kib-pull}59872[#59872]*
+*via {osd-pull}59872[#59872]*
 
 [discrete]
-==== Add UiSettings validation & Kibana default route redirection
+==== Add UiSettings validation & OpenSearchDashboards default route redirection
 
 UiSettings definition allows to specify validation functions:
 ```js
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 
 uiSettings.register({
    myUiSetting: {
@@ -91,7 +91,7 @@ uiSettings.register({
 })
 ```
 
-*via {kib-pull}59694[#59694]*
+*via {osd-pull}59694[#59694]*
 
 [discrete]
 ==== Allow disabling xsrf protection per an endpoint
@@ -101,7 +101,7 @@ Route configuration allows to disable xsrf protection for destructive HTTP metho
 ```js
 routet.get({ path: ..., validate: ..., options: { xsrfRequired: false } })
 ```
-*via {kib-pull}58717[#58717]*
+*via {osd-pull}58717[#58717]*
 
 [discrete]
 ==== Add core metrics service
@@ -115,7 +115,7 @@ core.metrics.getOpsMetrics$().subscribe(metrics => {
 })
 ```
 
-*via {kib-pull}58623[#58623]*
+*via {osd-pull}58623[#58623]*
 
 [discrete]
 ==== Add an optional authentication mode for HTTP resources
@@ -125,7 +125,7 @@ A route config accepts `authRequired: 'optional'`. A user can access a resource 
 router.get( { path: '/',  options: { authRequired: 'optional' } }, handler);
 ```
 
-*via {kib-pull}58589[#58589]*
+*via {osd-pull}58589[#58589]*
 
 [discrete]
 ==== Migrate doc view part of discover
@@ -152,7 +152,7 @@ export class MyPlugin implements Plugin<void, void> {
 
 ```
 
-*via {kib-pull}58094[#58094]*
+*via {osd-pull}58094[#58094]*
 
 [discrete]
 ==== [Telemetry] Server backpressure mechanism
@@ -165,18 +165,18 @@ request before `POST`ing the data to our cluster to ensure the endpoint is reach
 [discrete]
 *Fallback mechanism*
 
-. Always send usage from browser regardless of the `telemetry.sendUsageFrom` kibana config.
+. Always send usage from browser regardless of the `telemetry.sendUsageFrom` opensearchDashboards config.
 
 
 *Server usage backpressure*
 
 . Send usage from server in addition to browser if `telemetry.sendUsageFrom` is set to `server`.
 
-. Initial server usage attempt is after 5 minutes from starting kibana. Attempt to send every 12 hours afterwards.
+. Initial server usage attempt is after 5 minutes from starting OpenSearch Dashboards. Attempt to send every 12 hours afterwards.
 
 . Stop attempting to send usage from the server if the attempts fail three times (initial attempt 5 minutes from server start, and two consecutive 12 hours attempts).
 
-. Restart attempt count after each kibana version upgrade (patch/minor/major).
+. Restart attempt count after each OpenSearch Dashboards version upgrade (patch/minor/major).
 
 . Restart attempt count if it succeeds in any of the 3 tries.
 
@@ -188,19 +188,19 @@ Send `OPTIONS` request before attempting to send telemetry from server. `OPTIONS
 
 * If `OPTIONS` request fails; dont send usage and follow the retry logic above.
 
-*via {kib-pull}57556[#57556]*
+*via {osd-pull}57556[#57556]*
 
 [discrete]
 ==== Expressions server-side
 
-It is now possible to register expression functions and types on the Kibana server and execute expressions on the server. The API is the same as in the browser-side plugin, e.g:
+It is now possible to register expression functions and types on the OpenSearchDashboards server and execute expressions on the server. The API is the same as in the browser-side plugin, e.g:
 
 ```ts
 plugins.expressions.registerFunction(/* ... */);
 const result = await plugins.expressions.run('var_set name="foo" value="bar" | var name="foo"', null);
 ```
 
-*via {kib-pull}57537[#57537]*
+*via {osd-pull}57537[#57537]*
 
 [discrete]
 ==== Local actions
@@ -220,15 +220,15 @@ const trigger = {
 };
 ```
 
-*via {kib-pull}57451[#57451]*
+*via {osd-pull}57451[#57451]*
 
 [discrete]
 ==== Use log4j pattern syntax
 
 Logging output of the New platform plugins can use adjusted
-via https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md[new config].
+via https://github.com/elastic/opensearch-dashboards/blob/master/src/core/server/logging/README.md[new config].
 
-*via {kib-pull}57433[#57433]*
+*via {osd-pull}57433[#57433]*
 
 [discrete]
 ==== Allow savedObjects types registration from NP
@@ -274,7 +274,7 @@ export class Plugin() {
 
 Please check the migration guide for more complete examples and migration procedure.
 
-*via {kib-pull}57430[#57430]*
+*via {osd-pull}57430[#57430]*
 
 [discrete]
 ==== Expose Vis on the contract as it requires visTypes
@@ -292,12 +292,12 @@ new visualizationsStart.Vis(....);
 import { Vis } from '../../../../../core_plugins/visualizations/public';
 ```
 
-*via {kib-pull}56968[#56968]*
+*via {osd-pull}56968[#56968]*
 
 [discrete]
 ==== Add ScopedHistory to AppMountParams
 
-Kibana Platform applications should use the provided `history` instance to integrate routing rather than setting up their own using `appBasePath` (which is now deprecated).
+OpenSearchDashboards Platform applications should use the provided `history` instance to integrate routing rather than setting up their own using `appBasePath` (which is now deprecated).
 
 *Before*
 
@@ -332,7 +332,7 @@ core.application.register({
 });
 ```
 
-*via {kib-pull}56705[#56705]*
+*via {osd-pull}56705[#56705]*
 
 [discrete]
 ==== Move new_vis_modal to visualizations plugin
@@ -348,14 +348,14 @@ NewVisModal component and showNewVisModal function were statically exported and 
 ```tsx
 npStart.plugins.visualizations.showNewVisModal();
 ```
-*via {kib-pull}56654[#56654]*
+*via {osd-pull}56654[#56654]*
 
 [discrete]
 ==== UiComponent
 
-`UiComponent` interface was added to `kibana_utils` plugin. `UiComponent` represents a user interface building block, like a React component, but `UiComponent` does not have to be implemented in React&mdash;it can be implemented in plain JS or React, or Angular, etc.
+`UiComponent` interface was added to `opensearch_dashboards_utils` plugin. `UiComponent` represents a user interface building block, like a React component, but `UiComponent` does not have to be implemented in React&mdash;it can be implemented in plain JS or React, or Angular, etc.
 
-In many places in Kibana we want to be agnostic to frontend view library, i.e. instead of exposing React-specific APIs we want to expose APIs that are orthogonal to any rendering library. `UiComponent` interface represents such UI components. UI component receives a DOM element and `props` through `render()` method, the `render()` method can be called many times.
+In many places in OpenSearchDashboards we want to be agnostic to frontend view library, i.e. instead of exposing React-specific APIs we want to expose APIs that are orthogonal to any rendering library. `UiComponent` interface represents such UI components. UI component receives a DOM element and `props` through `render()` method, the `render()` method can be called many times.
 
 ```ts
 export type UiComponent<Props extends object = object> = () => {
@@ -364,13 +364,13 @@ export type UiComponent<Props extends object = object> = () => {
 };
 ```
 
-Although Kibana aims to be library agnostic, Kibana itself is written in React,
+Although OpenSearchDashboards aims to be library agnostic, OpenSearchDashboards itself is written in React,
 therefore `UiComponent` is designed such that it maps directly to a
 functional React component: `UiCompnent` interface corresponds
 to `React.ComponentType` type and `UiCompnent` props map to React component props.
 
 To help use `UiComponent` interface in the codebase `uiToReactComponent` and
-`reactToUiComponent` helper functions were added to `kibana_react` plugin,
+`reactToUiComponent` helper functions were added to `opensearch_dashboards_react` plugin,
 they transform a `UiComponent` into a React component and vice versa, respectively.
 
 ```ts
@@ -378,23 +378,23 @@ const uiToReactComponent: (comp: UiComponent) => React.ComponentType;
 const reactToUiComponent: (comp: React.ComponentType) => UiComponent;
 ```
 
-*via {kib-pull}56555[#56555]*
+*via {osd-pull}56555[#56555]*
 
 [discrete]
 ==== Start consuming np logging config
 
 Provides experimental support of new logging format for **new platform plugins**.
-More about https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md[the logging format].
+More about https://github.com/elastic/opensearch-dashboards/blob/master/src/core/server/logging/README.md[the logging format].
 
-*via {kib-pull}56480[#56480]*
+*via {osd-pull}56480[#56480]*
 
 [discrete]
 ==== [State Management] State syncing utils docs
 
-Refer to https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync[these docs]
+Refer to https://github.com/elastic/opensearch-dashboards/tree/master/src/plugins/opensearch_dashboards_utils/docs/state_sync[these docs]
 on state syncing utils.
 
-*via {kib-pull}56479[#56479]*
+*via {osd-pull}56479[#56479]*
 
 
 [discrete]
@@ -402,7 +402,7 @@ on state syncing utils.
 
 `SavedObjectSaveModal`, `showSaveModal` and `SaveResult` from _`ui/saved_objects`_,
 and `SavedObjectFinderUi`, `SavedObjectMetaData` and `OnSaveProps`
-from _`src/plugins/kibana_react/public`_ were moved to a new plugin **`src/plugins/saved_objects`**.
+from _`src/plugins/opensearch_dashboards_react/public`_ were moved to a new plugin **`src/plugins/saved_objects`**.
 
 Also now `showSaveModal` requires the second argument  - `I18nContext`:
 
@@ -414,7 +414,7 @@ showSaveModal(saveModal, npStart.core.i18n.Context);
 
 ```
 
-*via {kib-pull}56383[#56383]*
+*via {osd-pull}56383[#56383]*
 
 [discrete]
 ==== [State Management] State syncing helpers for query service
@@ -440,7 +440,7 @@ interface QueryStateChange {
 state$: Observable<{ changes: QueryStateChange; state: QueryState }>;
 ```
 
-*via {kib-pull}56128[#56128]*
+*via {osd-pull}56128[#56128]*
 
 [discrete]
 ==== Migrate saved_object_save_as_checkbox directive to Timelion
@@ -460,25 +460,25 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
  />
 ```
 
-*via {kib-pull}56114[#56114]*
+*via {osd-pull}56114[#56114]*
 
 [discrete]
 ==== `ui/public` cleanup
 
 *Removed / moved modules*
 
-In preparation for Kibana's upcoming https://github.com/elastic/kibana/issues/9675[new platform],
-we are in the process of https://github.com/elastic/kibana/issues/26505[migrating away]
+In preparation for OpenSearchDashboards's upcoming https://github.com/elastic/opensearch-dashboards/issues/9675[new platform],
+we are in the process of https://github.com/elastic/opensearch-dashboards/issues/26505[migrating away]
 from the `ui/public` directory. Over time, the contents of this directory will
 be either deprecated or housed inside a parent plugin. If your plugin imports
 the listed items from the following `ui/public` modules, you will need to
 either update your import statements as indicated below, so that you are
 pulling these modules from their new locations, or copy the relevant code directly into your plugin.
 
-*`ui/agg_types`* https://github.com/elastic/kibana/pull/59605[#59605]
+*`ui/agg_types`* https://github.com/elastic/opensearch-dashboards/pull/59605[#59605]
 
 The `ui/agg_types` module has been removed in favor of the service provided by
-the `data` plugin in the new Kibana platform.
+the `data` plugin in the new OpenSearchDashboards platform.
 
 Additionally, `aggTypes` and `AggConfigs` have been removed in favor of a
 `types` registry and a `createAggConfigs` function:
@@ -507,11 +507,11 @@ import { BUCKET_TYPES, METRIC_TYPES } from 'src/plugins/data/public';
 
 The above examples are not comprehensive, but represent some of the more
 common uses of `agg_types`. For more details, please refer to the interfaces
-in https://github.com/elastic/kibana/blob/master/src/plugins/data/public/types.ts#L50[the source code],
-as well as the data plugin's https://github.com/elastic/kibana/blob/master/src/plugins/data/public/index.ts#L282[`public/index` file].
+in https://github.com/elastic/opensearch-dashboards/blob/master/src/plugins/data/public/types.ts#L50[the source code],
+as well as the data plugin's https://github.com/elastic/opensearch-dashboards/blob/master/src/plugins/data/public/index.ts#L282[`public/index` file].
 
 
-*`ui/time_buckets`* https://github.com/elastic/kibana/pull/58805[#58805]
+*`ui/time_buckets`* https://github.com/elastic/opensearch-dashboards/pull/58805[#58805]
 
 The `ui/time_buckets` module has been removed and is now internal to the `data` plugin's
 search & aggregations infrastructure. We are working on an improved set of helper utilities
@@ -520,12 +520,12 @@ to eventually replace the need for the `TimeBuckets` class.
 In the meantime, if you currently rely on `TimeBuckets`, please copy the relevant pieces into your plugin code.
 
 
-*`ui/filter_manager`* https://github.com/elastic/kibana/pull/59872[#59872]
+*`ui/filter_manager`* https://github.com/elastic/opensearch-dashboards/pull/59872[#59872]
 
 The `ui/filter_manager` module has been removed and now services and UI components
 are available on the `data` plugin's query infrastructure.
 
-*via {kib-pull}55926[#55926]*
+*via {osd-pull}55926[#55926]*
 
 [discrete]
 ==== Add savedObjects mappings API to core
@@ -558,7 +558,7 @@ export const mappings: SavedObjectsTypeMappingDefinitions = {
  }
 ```
 
-*via {kib-pull}55825[#55825]*
+*via {osd-pull}55825[#55825]*
 
 [discrete]
 ==== Remove the VisEditorTypesRegistryProvider
@@ -579,7 +579,7 @@ a class with your own controller as a value in a vis type definition:
   }
 ```
 
-*via {kib-pull}55370[#55370]*
+*via {osd-pull}55370[#55370]*
 
 [discrete]
 ==== Explicitly test custom appRoutes
@@ -587,7 +587,7 @@ a class with your own controller as a value in a vis type definition:
 Tests for custom `appRoute`s are now more clear and explicitly separate
 from those that test other rendering service interactions.
 
-*via {kib-pull}55405[#55405]*
+*via {osd-pull}55405[#55405]*
 
 [discrete]
 ==== [NP] Platform exposes API to get authenticated user data
@@ -601,7 +601,7 @@ HttpService exposes:
 
 * `auth.isAuthenticated()` - returns true, if `auth` interceptor successfully authenticated a user.
 
-*via {kib-pull}55327[#55327]*
+*via {osd-pull}55327[#55327]*
 
 [discrete]
 ==== Implements `getStartServices` on server-side
@@ -624,7 +624,7 @@ class MyPlugin implements Plugin {
 }
 ```
 
-*via {kib-pull}55156[#55156]*
+*via {osd-pull}55156[#55156]*
 
 [discrete]
 ====  Expressions refactor
@@ -632,7 +632,7 @@ class MyPlugin implements Plugin {
 * `context.types` > `inputTypes`
 * Objects should be registered instead of function wrappers around those objects.
 
-*via {kib-pull}54342[#54342]*
+*via {osd-pull}54342[#54342]*
 
 [discrete]
 ==== Refactor saved object management registry usage
@@ -667,13 +667,13 @@ const savedVisualizations = createSavedVisLoader(servicesForVisualizations);
 const savedDashboards = createSavedDashboardLoader(services);
 ```
 
-*via {kib-pull}54155[#54155]*
+*via {osd-pull}54155[#54155]*
 
 [discrete]
 ==== Enforce camelCase format for a plugin id
 
 When creating a new platform plugin, you need to make sure that
-pluginId declared in camelCase within `kibana.json` manifest file.
+pluginId declared in camelCase within `opensearch_dashboards.json` manifest file.
 It might not match `pluginPath`, which is recommended to be in snake_case format.
 
 ```js
@@ -685,12 +685,12 @@ It might not match `pluginPath`, which is recommended to be in snake_case format
 "id": "fooBar"
 ```
 
-*via {kib-pull}53759[#53759]*
+*via {osd-pull}53759[#53759]*
 
 [discrete]
 ==== bfetch (2)
 
-Request batching and response streaming functionality of legacy Interpreter plugin has been moved out into a separate `bfetch` Kibana platform plugin. Now every plugin can create server endpoints and browser wrappers that can batch HTTP requests and stream responses back.
+Request batching and response streaming functionality of legacy Interpreter plugin has been moved out into a separate `bfetch` OpenSearchDashboards platform plugin. Now every plugin can create server endpoints and browser wrappers that can batch HTTP requests and stream responses back.
 
 As an example, we will create a batch processing endpoint that receives a number then doubles it
 and streams it back. We will also consider the number to be time in milliseconds
@@ -736,27 +736,27 @@ double({ num: 2 }).then(console.log, console.error); // { num: 4 }
 double({ num: 3 }).then(console.log, console.error); // { num: 6 }
 ```
 
-*via {kib-pull}53711[#53711]*
+*via {osd-pull}53711[#53711]*
 
 [discrete]
-==== Grouped Kibana nav
+==== Grouped OpenSearchDashboards nav
 
 Plugins should now define a category if they have a navigation item:
 
 * If you want to fit into our default categories, you can use our `DEFAULT_APP_CATEGORIES` defined in `src/core/utils/default_app_categories.ts`.
 * If you want to create their own category, you can also provide any object matching the `AppCategory` interface defined in `src/core/types/app_category.ts`.
 
-*via {kib-pull}53545[#53545]*
+*via {osd-pull}53545[#53545]*
 
 [discrete]
-==== Expose Elasticsearch from start and deprecate from setup
+==== Expose OpenSearch from start and deprecate from setup
 
 Remove any API that could allow access/query to savedObjects from core setup
 contract, and move them to the start contract instead. Deprecate
-the `CoreSetup.elasticsearch` API and expose `CoreStart.elasticsearch` instead.
+the `CoreSetup.opensearch` API and expose `CoreStart.opensearch` instead.
 
 
-*via {kib-pull}59886[#59886]*
+*via {osd-pull}59886[#59886]*
 
 [discrete]
 ==== Embeddable triggers
@@ -774,7 +774,7 @@ class MyEmbeddable extends Embeddable {
 The returned list of triggers will be used in the drilldowns feature on Dashboard,
 where users will be able to add drilldowns to embeddable triggers.
 
-*via {kib-pull}58440[#58440]*
+*via {osd-pull}58440[#58440]*
 
 [discrete]
 ==== Force savedObject API consumers to define SO type explicitly
@@ -783,14 +783,14 @@ The new interface enforces API consumers to specify SO type explicitly.
 Plugins can use `SavedObjectAttributes` to ensure their type are serializable,
 but it shouldn't be used as their domain-specific type.
 
-*via {kib-pull}58022[#58022]*
+*via {osd-pull}58022[#58022]*
 
 [discrete]
 ==== Trigger context
 
 Improved types for trigger contexts, which are consumed by actions.
 
-*via {kib-pull}57870[#57870]*
+*via {osd-pull}57870[#57870]*
 
 [discrete]
 ==== Expressions debug mode
@@ -799,7 +799,7 @@ Add ability to execute expression in "debug" mode, which would collect execution
 information about each function. This is used in the Expression Explorer
 (developed by Canvas) and in Canvas when the expression editor is open.
 
-*via {kib-pull}57841[#57841]*
+*via {osd-pull}57841[#57841]*
 
 [discrete]
 ==== Move ui/agg_types in to shim data plugin
@@ -810,7 +810,7 @@ information about each function. This is used in the Expression Explorer
 ** Right now these are just re-exporting the class as a type;
 eventually we should put more detailed typings in place.
 
-*via {kib-pull}56353[#56353]*
+*via {osd-pull}56353[#56353]*
 
 [discrete]
 ==== Stateful search bar default behaviors
@@ -819,7 +819,7 @@ The goal of the stateful version of SearchBar / TopNavMenu is to be an easy way
 to consume the services offered by `plugins.data.query` where developers
 should be able to provide minimal configuration and get a fully working SearchBar.
 
-*via {kib-pull}56160[#56160]*
+*via {osd-pull}56160[#56160]*
 
 [discrete]
 ==== Guide for creating alert / action types in the UI
@@ -827,15 +827,15 @@ should be able to provide minimal configuration and get a fully working SearchBa
 Documentation to help developers integrate their alert / action type within
 our Management UIs
 
-*via {kib-pull}55963[#55963]*
+*via {osd-pull}55963[#55963]*
 
 [discrete]
 ==== Move search service code to NP
 
-Move all of the search service code to Kibana new platform. Also deletes `courier` folder
+Move all of the search service code to OpenSearchDashboards new platform. Also deletes `courier` folder
 and moves `getFlattenedObject` to `src/core/utils`.
 
-*via {kib-pull}55430[#55430]*
+*via {osd-pull}55430[#55430]*
 
 [discrete]
 ==== Expose NP FieldFormats service to server side
@@ -844,20 +844,20 @@ The fieldFormats service is used on the server side as well.
 At the moment, it resides in `src/legacy/ui/field_formats/mixin/field_formats_service.ts`
 and only the FE plugin exposes it.
 
-*via {kib-pull}55419[#55419]*
+*via {osd-pull}55419[#55419]*
 
 [discrete]
 ==== Update plugin generator to generate NP plugins
 
-Add more options for Kibana new platform plugin generator.
+Add more options for OpenSearchDashboards new platform plugin generator.
 
 * Generate FE components
 * Generate server side endpoint
 * Generate SCSS
-* Generate an optional .eslintrc.js file (for 3rd party plugins mostly)
+* Generate an optional .opensearchlintrc.js file (for 3rd party plugins mostly)
 * Init git repo (for 3rd party plugins)
 
-*via {kib-pull}55281[#55281]*
+*via {osd-pull}55281[#55281]*
 
 [discrete]
 ==== Run SO migration after plugins setup phase
@@ -873,7 +873,7 @@ SO repository provider when registering the client factory.
 * Adapts the existing plugin calls to the removed APIs from `setup` to be now
 using `getStartServices` to access them on the core `start` contract.
 
-*via {kib-pull}55012[#55012]*
+*via {osd-pull}55012[#55012]*
 
 [discrete]
 ==== Build immutable bundles for new platform plugins
@@ -881,19 +881,19 @@ using `getStartServices` to access them on the core `start` contract.
 Plugins that have been migrated to the "new platform" are built with a new system
 into their own `target/public` directory. To build third-party plugin's with
 this new system either pass `--plugin-path` to `node scripts/build_new_platform_plugins`
-or use the `@kbn/optimizer` package in the Kibana repo to build your plugin as
+or use the `@osd/optimizer` package in the OpenSearchDashboards repo to build your plugin as
 described in the readme for that package.
 
-*via {kib-pull}53976[#53976]*
+*via {osd-pull}53976[#53976]*
 
 
 [discrete]
-==== [Search service] Asynchronous ES search strategy
+==== [Search service] Asynchronous OPENSEARCH search strategy
 
-Adds an async {es} search strategy, which utilizes the async search strategy to
-call the `_async_search` APIs in Elasticsearch, returning an observable over the responses.
+Adds an async {opensearch} search strategy, which utilizes the async search strategy to
+call the `_async_search` APIs in OpenSearch, returning an observable over the responses.
 
-*via {kib-pull}53538[#53538]*
+*via {osd-pull}53538[#53538]*
 
 [discrete]
 ==== [Vis: Default editor] EUIficate and Reactify the sidebar
@@ -920,12 +920,12 @@ These tabs should be React components:
   }
 ```
 
-*via {kib-pull}49864[#49864]*
+*via {osd-pull}49864[#49864]*
 
 [discrete]
 ==== [test] Consolidate top-level yarn scripts
 
-Over time Kibana has added a number of testing frameworks,
+Over time OpenSearchDashboards has added a number of testing frameworks,
 but our top-level scripts have remained the same to avoid workflow changes.
 The current naming convention with the number of test options can leave room for ambiguity.
 
@@ -936,4 +936,4 @@ frameworks out and avoid workflow interruptions (`grunt/gulp -> node scripts/*`)
 type (`yarn test:server -> yarn test:mocha`)
 
 
-*via {kib-pull}44679[#44679]*
+*via {osd-pull}44679[#44679]*

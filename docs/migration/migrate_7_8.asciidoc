@@ -5,7 +5,7 @@
 ++++
 
 This page discusses the breaking changes that you need to be aware of when migrating
-your application to Kibana 7.8.
+your application to OpenSearchDashboards 7.8.
 
 * <<user-facing-changes-78, Breaking changes for users>>
 * <<general-plugin-API-changes-78, Breaking changes for plugin developers>>
@@ -36,7 +36,7 @@ but their action messages might no longer provide useful information and
 must be reconfigured. The new default action message will show an example
 of how to use `context.reason`.
 
-*via https://github.com/elastic/kibana/pull/64365[#64365]*
+*via https://github.com/elastic/opensearch-dashboards/pull/64365[#64365]*
 
 
 [float]
@@ -50,7 +50,7 @@ In dashboard in view mode, `.panels` are no longer synced with the URL.
 *Impact* +
 This fixes the Back button when navigating between dashboards using drilldowns.
 
-*via https://github.com/elastic/kibana/pull/62415[#62415]*
+*via https://github.com/elastic/opensearch-dashboards/pull/62415[#62415]*
 ====
 
 
@@ -67,7 +67,7 @@ This fixes the Back button when navigating between dashboards using drilldowns.
 ====
 
 The following action plugin REST APIs changed so that they are consistent with the
-{kib} styleguide.
+{osd} styleguide.
 
 * `GET /api/action/_getAll` -> `GET /api/actions`
 * `GET /api/action/types` -> `GET /api/actions/list_action_types`
@@ -77,20 +77,20 @@ The following action plugin REST APIs changed so that they are consistent with t
 * `DELETE /api/action/{id}` -> `DELETE /api/actions/action/{id}`
 * `POST /api/action/{id}/_execute` -> `POST /api/actions/action/{id}/_execute`
 
-*via https://github.com/elastic/kibana/pull/65936[#65936]*
+*via https://github.com/elastic/opensearch-dashboards/pull/65936[#65936]*
 
 ====
 
 
 [[breaking_78_canvas]]
-.Canvas applications now run on the new {kib} platform
+.Canvas applications now run on the new {osd} platform
 [%collapsible]
 ====
 
 Any existing user-created plugins that extend
-Canvas functionality must also move to the Kibana Platform to continue extending Canvas.
+Canvas functionality must also move to the OpenSearchDashboards Platform to continue extending Canvas.
 
-*via https://github.com/elastic/kibana/pull/64831[#64831]*
+*via https://github.com/elastic/opensearch-dashboards/pull/64831[#64831]*
 
 ====
 
@@ -119,7 +119,7 @@ discriminate between the different values it passes between functions.
 The `filter` function was the only function that exposed this field to users.
 After this change, all expression values will consistently use `type` to determine a type of expression value.
 
-*via https://github.com/elastic/kibana/pull/64215[#64215]*
+*via https://github.com/elastic/opensearch-dashboards/pull/64215[#64215]*
 
 ====
 
@@ -130,7 +130,7 @@ After this change, all expression values will consistently use `type` to determi
 Calling `core.application.navigateToApp` to a legacy
 application now retains the `path` specified.
 
-*via https://github.com/elastic/kibana/pull/65112[#65112]*
+*via https://github.com/elastic/opensearch-dashboards/pull/65112[#65112]*
 
 ====
 
@@ -168,7 +168,7 @@ search.aggs.convertDateRangeToString,
 search.aggs.convertIPRangeToString,
 ```
 
-*via https://github.com/elastic/kibana/pull/64719[#64719]*
+*via https://github.com/elastic/opensearch-dashboards/pull/64719[#64719]*
 
 ====
 
@@ -177,7 +177,7 @@ search.aggs.convertIPRangeToString,
 [%collapsible]
 ====
 
-{kib} platform applications can now define and update the `defaultPath`
+{osd} platform applications can now define and update the `defaultPath`
 to use when navigating to them from another application or from the navigation bar.
 
 
@@ -201,7 +201,7 @@ core.application.register({
 appUpdater.next(() => ({ defaultPath: '/some-updated-path' }));
 ```
 
-*via https://github.com/elastic/kibana/pull/64498[#64498]*
+*via https://github.com/elastic/opensearch-dashboards/pull/64498[#64498]*
 
 ====
 
@@ -210,7 +210,7 @@ appUpdater.next(() => ({ defaultPath: '/some-updated-path' }));
 [%collapsible]
 ====
 
-{kib} static assets are now served under a release-specific URL
+{osd} static assets are now served under a release-specific URL
 with long-term caching headers `Cache-Control: max-age=31536000`.
 
 Before:
@@ -221,7 +221,7 @@ After:
 
 http://localhost:5601/bundles/8467/plugin/dashboard/dashboard.plugin.js
 
-*via https://github.com/elastic/kibana/pull/64414[#64414]*
+*via https://github.com/elastic/opensearch-dashboards/pull/64414[#64414]*
 
 ====
 
@@ -230,14 +230,14 @@ http://localhost:5601/bundles/8467/plugin/dashboard/dashboard.plugin.js
 [%collapsible]
 ====
 
-{kib} developers can now create example plugins in
-X-Pack&mdash;create your plugin in `/x-pack/examples` folder and start {kib} with:
+{osd} developers can now create example plugins in
+X-Pack&mdash;create your plugin in `/x-pack/examples` folder and start {osd} with:
 
 ```ts
 yarn start --run-examples
 ```
 
-*via https://github.com/elastic/kibana/pull/63823[#63823]*
+*via https://github.com/elastic/opensearch-dashboards/pull/63823[#63823]*
 
 ====
 
@@ -250,7 +250,7 @@ yarn start --run-examples
 `getHref` is now used only to support right click behavior.
 `execute()` takes control on regular click.
 
-*via https://github.com/elastic/kibana/pull/63228[#63228]*
+*via https://github.com/elastic/opensearch-dashboards/pull/63228[#63228]*
 
 ====
 
@@ -261,7 +261,7 @@ yarn start --run-examples
 
 State syncing utils now seamlessly support the platform's `ScopedHistory`.
 
-*via https://github.com/elastic/kibana/pull/62761[#62761]*
+*via https://github.com/elastic/opensearch-dashboards/pull/62761[#62761]*
 
 ====
 
@@ -270,14 +270,14 @@ State syncing utils now seamlessly support the platform's `ScopedHistory`.
 [%collapsible]
 ====
 
-When the TSVB visualization was added to {kib},
+When the TSVB visualization was added to {osd},
 two configuration properties were declared: `chartResolution` and `minimumBucketSize`.
 No one used these properties, and
 an implementation has not been added.
 The `chartResolution` and `minimumBucketSize` are now marked as deprecated configuration
 properties for TSVB.
 
-*via https://github.com/elastic/kibana/pull/62543[#62543]*
+*via https://github.com/elastic/opensearch-dashboards/pull/62543[#62543]*
 
 ====
 
@@ -287,7 +287,7 @@ properties for TSVB.
 ====
 
 If your server-side plugin needs to respond to an incoming request with the
-HTML page bootstrapping {kib} client app, a custom HTML page, or a custom JS script,
+HTML page bootstrapping {osd} client app, a custom HTML page, or a custom JS script,
 you can use the `HttpResources` service.
 
 ```js
@@ -304,7 +304,7 @@ httpResources.register({ path: 'my_app/bar', validate: false }, (context, req, r
 );
 ```
 
-*via https://github.com/elastic/kibana/pull/61797[#61797]*
+*via https://github.com/elastic/opensearch-dashboards/pull/61797[#61797]*
 
 ====
 
@@ -314,7 +314,7 @@ httpResources.register({ path: 'my_app/bar', validate: false }, (context, req, r
 ====
 
 The legacy `embeddable_api` plugin in `src/legacy/core_plugins/embeddable_api`
-has been removed in favor of the `embeddable` plugin in the new {kib} Platform.
+has been removed in favor of the `embeddable` plugin in the new {osd} Platform.
 If you used the `embeddable_api` in `7.7`, you already used the new
 `embeddable` plugin API, which was re-exported from the legacy platform as a convenience.
 
@@ -343,19 +343,19 @@ For plugins using the legacy platform, you also must remove
 the `embeddable_api` from your list of required plugins in your plugin's `index.ts`:
 
 ```diff
-export default function MyPlugin(kibana: any) {
+export default function MyPlugin(opensearchDashboards: any) {
   const config: Legacy.PluginSpecOptions = {
     id: 'my_plugin',
--    require: ['kibana', 'elasticsearch', 'embeddable_api'],
-+    require: ['kibana', 'elasticsearch'],
+-    require: ['opensearchDashboards', 'opensearch', 'embeddable_api'],
++    require: ['opensearchDashboards', 'opensearch'],
     ...,
   };
-  return new kibana.Plugin(config);
+  return new opensearchDashboards.Plugin(config);
 }
 ```
 
-For plugins using the new {kib} platform, make sure to list `embeddable` as
-either a required or optional dependency in your `kibana.json`:
+For plugins using the new {osd} platform, make sure to list `embeddable` as
+either a required or optional dependency in your `opensearch_dashboards.json`:
 
 ```diff
 {
@@ -369,7 +369,7 @@ either a required or optional dependency in your `kibana.json`:
 }
 ```
 
-*via https://github.com/elastic/kibana/pull/61767[#61767]*
+*via https://github.com/elastic/opensearch-dashboards/pull/61767[#61767]*
 
 ====
 
@@ -383,10 +383,10 @@ The corresponding code was previously moved to the new platform.
 
 For more information on where to locate new platform `data` services,
 refer to the
-https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
+https://github.com/elastic/opensearch-dashboards/blob/master/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
 in `src/core/MIGRATION.md`.
 
-*via https://github.com/elastic/kibana/pull/61618[#61618]*
+*via https://github.com/elastic/opensearch-dashboards/pull/61618[#61618]*
 
 ====
 
@@ -395,10 +395,10 @@ in `src/core/MIGRATION.md`.
 [%collapsible]
 ====
 
-The {kib} Platform serves plugin static assets from the
+The {osd} Platform serves plugin static assets from the
 `my_plugin/public/assets` folder. No additional configuration is required.
 
-*via https://github.com/elastic/kibana/pull/60490[#60490]*
+*via https://github.com/elastic/opensearch-dashboards/pull/60490[#60490]*
 
 ====
 
@@ -519,5 +519,5 @@ Response
 }
 ```
 
-*via https://github.com/elastic/kibana/pull/63450[#63450]*
+*via https://github.com/elastic/opensearch-dashboards/pull/63450[#63450]*
 ====
