@@ -20,7 +20,7 @@
 import React, { useState, Fragment, useEffect } from 'react';
 import * as Rx from 'rxjs';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { NewsfeedFlyout } from './flyout_list';
 import { FetchResult } from '../types';
 

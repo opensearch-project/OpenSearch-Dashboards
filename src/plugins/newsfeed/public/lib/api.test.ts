@@ -52,10 +52,10 @@ jest.mock('uuid', () => ({
 }));
 
 describe.skip('NewsfeedApiDriver', () => {
-  const kibanaVersion = '99.999.9-test_version'; // It'll remove the `-test_version` bit
+  const opensearchDashboardsVersion = '99.999.9-test_version'; // It'll remove the `-test_version` bit
   const userLanguage = 'en';
   const fetchInterval = 2000;
-  const getDriver = () => new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
+  const getDriver = () => new NewsfeedApiDriver(opensearchDashboardsVersion, userLanguage, fetchInterval);
 
   afterEach(() => {
     sinon.reset();
@@ -187,7 +187,7 @@ describe.skip('NewsfeedApiDriver', () => {
           "error": null,
           "feedItems": Array [],
           "hasNew": false,
-          "kibanaVersion": "99.999.9",
+          "opensearchDashboardsVersion": "99.999.9",
         }
       `);
     });
@@ -235,13 +235,13 @@ describe.skip('NewsfeedApiDriver', () => {
           },
         ],
         hasNew: true,
-        kibanaVersion: '99.999.9',
+        opensearchDashboardsVersion: '99.999.9',
       });
     });
 
     it("Falls back to English when user language isn't present", () => {
       // Set Language to French
-      const driver = new NewsfeedApiDriver(kibanaVersion, 'fr', fetchInterval);
+      const driver = new NewsfeedApiDriver(opensearchDashboardsVersion, 'fr', fetchInterval);
       const apiItems: ApiItem[] = [
         {
           title: {
@@ -317,7 +317,7 @@ describe.skip('NewsfeedApiDriver', () => {
           },
         ],
         hasNew: true,
-        kibanaVersion: '99.999.9',
+        opensearchDashboardsVersion: '99.999.9',
       });
     });
 
@@ -383,7 +383,7 @@ describe.skip('NewsfeedApiDriver', () => {
           },
         ],
         hasNew: true,
-        kibanaVersion: '99.999.9',
+        opensearchDashboardsVersion: '99.999.9',
       });
     });
 
@@ -413,7 +413,7 @@ describe.skip('NewsfeedApiDriver', () => {
           "error": null,
           "feedItems": Array [],
           "hasNew": false,
-          "kibanaVersion": "99.999.9",
+          "opensearchDashboardsVersion": "99.999.9",
         }
       `);
     });
@@ -444,7 +444,7 @@ describe.skip('NewsfeedApiDriver', () => {
           "error": null,
           "feedItems": Array [],
           "hasNew": false,
-          "kibanaVersion": "99.999.9",
+          "opensearchDashboardsVersion": "99.999.9",
         }
       `);
     });
@@ -461,7 +461,7 @@ describe.skip('getApi', () => {
     arg2: { method: string }
   ) => {
     if (
-      arg1 === 'http://fakenews.co/kibana-test/v6.8.2.json' &&
+      arg1 === 'http://fakenews.co/opensearch-dashboards-test/v6.8.2.json' &&
       arg2.method &&
       arg2.method === 'GET'
     ) {
@@ -479,7 +479,7 @@ describe.skip('getApi', () => {
     configMock = {
       service: {
         urlRoot: 'http://fakenews.co',
-        pathTemplate: '/kibana-test/v{VERSION}.json',
+        pathTemplate: '/opensearch-dashboards-test/v{VERSION}.json',
       },
       mainInterval: moment.duration(86400000),
       fetchInterval: moment.duration(86400000),
@@ -497,7 +497,7 @@ describe.skip('getApi', () => {
           "error": null,
           "feedItems": Array [],
           "hasNew": false,
-          "kibanaVersion": "6.8.2",
+          "opensearchDashboardsVersion": "6.8.2",
         }
       `);
       done();
@@ -553,7 +553,7 @@ describe.skip('getApi', () => {
             },
           ],
           "hasNew": true,
-          "kibanaVersion": "6.8.2",
+          "opensearchDashboardsVersion": "6.8.2",
         }
       `);
       done();
@@ -593,7 +593,7 @@ describe.skip('getApi', () => {
             },
           ],
           "hasNew": false,
-          "kibanaVersion": "6.8.2",
+          "opensearchDashboardsVersion": "6.8.2",
         }
       `);
       done();
@@ -609,7 +609,7 @@ describe.skip('getApi', () => {
           "error": "sorry, try again later!",
           "feedItems": Array [],
           "hasNew": false,
-          "kibanaVersion": "6.8.2",
+          "opensearchDashboardsVersion": "6.8.2",
         }
       `);
       done();
@@ -647,19 +647,19 @@ describe.skip('getApi', () => {
                 "error": "Sorry, try again later!",
                 "feedItems": Array [],
                 "hasNew": false,
-                "kibanaVersion": "6.8.2",
+                "opensearchDashboardsVersion": "6.8.2",
               },
               Object {
                 "error": "Sorry, internal server error!",
                 "feedItems": Array [],
                 "hasNew": false,
-                "kibanaVersion": "6.8.2",
+                "opensearchDashboardsVersion": "6.8.2",
               },
               Object {
                 "error": "Sorry, it's too cold to go outside!",
                 "feedItems": Array [],
                 "hasNew": false,
-                "kibanaVersion": "6.8.2",
+                "opensearchDashboardsVersion": "6.8.2",
               },
               Object {
                 "error": null,
@@ -676,7 +676,7 @@ describe.skip('getApi', () => {
                   },
                 ],
                 "hasNew": false,
-                "kibanaVersion": "6.8.2",
+                "opensearchDashboardsVersion": "6.8.2",
               },
             ]
           `);

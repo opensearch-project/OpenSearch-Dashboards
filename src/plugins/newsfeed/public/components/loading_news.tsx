@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { EuiLoadingElastic } from '@elastic/eui';
