@@ -20,7 +20,7 @@
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { MountPoint } from 'kibana/public';
+import { MountPoint } from 'opensearch-dashboards/public';
 import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
@@ -32,7 +32,7 @@ const dataShim = {
 };
 
 describe('TopNavMenu', () => {
-  const WRAPPER_SELECTOR = '.kbnTopNavMenu__wrapper';
+  const WRAPPER_SELECTOR = '.osdTopNavMenu__wrapper';
   const TOP_NAV_ITEM_SELECTOR = 'TopNavMenuItem';
   const SEARCH_BAR_SELECTOR = 'SearchBar';
   const menuItems: TopNavMenuData[] = [
@@ -109,7 +109,7 @@ describe('TopNavMenu', () => {
         className={'myCoolClass'}
       />
     );
-    expect(component.find('.kbnTopNavMenu').length).toBe(1);
+    expect(component.find('.osdTopNavMenu').length).toBe(1);
     expect(component.find('.myCoolClass').length).toBeTruthy();
   });
 
