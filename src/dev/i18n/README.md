@@ -122,7 +122,7 @@ The `description` is optional, `values` is optional too unless `defaultMessage` 
 node scripts/i18n_extract --path path/to/plugin --path path/to/another/plugin --output-dir ./translations --output-format json5
 ```
 
-* `path/to/plugin` is an example of path to a directory(-es) where messages searching should start. By default `--path` is `.`, it means that messages from all paths in `.i18nrc.json` will be parsed. Each specified path should start with any path in `.i18nrc.json` or be a part of it.
+* `path/to/plugin` is an example of path to a directory(-opensearch) where messages searching should start. By default `--path` is `.`, it means that messages from all paths in `.i18nrc.json` will be parsed. Each specified path should start with any path in `.i18nrc.json` or be a part of it.
 * `--output-dir` specifies a path to a directory, where `en.json` will be created.\
 In case of parsing issues, exception with the necessary information will be thrown to console and extraction will be aborted.
 * `--output-format` specifies format of generated `en.json`. By default it is `json`. Use it only if you need a JSON5 file.
@@ -168,7 +168,7 @@ node scripts/i18n_integrate --source path/to/locale.json --target x-pack/legacy/
 
 * `--source` path to the JSON file with translations that should be integrated.
 * `--target` defines a single path to the JSON file where translations should be integrated to, path mappings from
-[.i18nrc.json](../../../.i18nrc.json) are ignored in this case. It's currently used for integrating of Kibana built-in
+[.i18nrc.json](../../../.i18nrc.json) are ignored in this case. It's currently used for integrating of OpenSearch Dashboards built-in
 translations that are located in a single JSON file within `x-pack/translations` plugin.
 * `--dry-run` tells the tool to exit after verification phase and not write translations to the disk.
 * `--ignore-incompatible` specifies whether tool should ignore incompatible translations. It may be useful when the code base you're

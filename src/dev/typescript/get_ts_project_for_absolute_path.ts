@@ -18,7 +18,7 @@
  */
 
 import { relative, resolve } from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@osd/utils';
 import { File } from '../file';
 import { Project } from './project';
 import { PROJECTS } from './projects';

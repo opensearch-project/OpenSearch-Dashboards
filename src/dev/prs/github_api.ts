@@ -19,7 +19,7 @@
 
 import axios, { AxiosError, AxiosResponse } from 'axios';
 
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError } from '@osd/dev-utils';
 
 interface ResponseError extends AxiosError {
   request: any;
@@ -38,7 +38,7 @@ export class GithubApi {
     baseURL: 'https://api.github.com/',
     headers: {
       Accept: 'application/vnd.github.v3+json',
-      'User-Agent': 'kibana/update_prs_cli',
+      'User-Agent': 'opensearch-dashboards/update_prs_cli',
       ...(this.accessToken ? { Authorization: `token ${this.accessToken} ` } : {}),
     },
   });

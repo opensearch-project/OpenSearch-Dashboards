@@ -3,7 +3,7 @@
 set -e
 
 if [ -z "$VAULT_SECRET_ID" ]; then
-  if [ -n "$GITHUB_TOKEN" ] && [ -n "$KIBANA_CI_REPORTER_KEY" ] && [ -n "$PERCY_TOKEN" ]; then
+  if [ -n "$GITHUB_TOKEN" ] && [ -n "$OPENSEARCH_DASHBOARDS_CI_REPORTER_KEY" ] && [ -n "$PERCY_TOKEN" ]; then
     echo " -- secrets already loaded from vault";
   else
     echo ""
@@ -28,8 +28,8 @@ else
   GITHUB_TOKEN=$(retry 5 vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
   export GITHUB_TOKEN
 
-  KIBANA_CI_REPORTER_KEY=$(retry 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
-  export KIBANA_CI_REPORTER_KEY
+  OPENSEARCH_DASHBOARDS_CI_REPORTER_KEY=$(retry 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
+  export OPENSEARCH_DASHBOARDS_CI_REPORTER_KEY
 
   PERCY_TOKEN=$(retry 5 vault read -field=value secret/kibana-issues/dev/percy)
   export PERCY_TOKEN

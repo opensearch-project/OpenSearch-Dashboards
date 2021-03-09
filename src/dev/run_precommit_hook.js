@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { run, combineErrors } from '@kbn/dev-utils';
+import { run, combineErrors } from '@osd/dev-utils';
 import * as Eslint from './eslint';
 import * as Sasslint from './sasslint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';

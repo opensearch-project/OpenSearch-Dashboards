@@ -19,8 +19,8 @@
 
 import { CLIEngine } from 'eslint';
 
-import { REPO_ROOT } from '@kbn/utils';
-import { createFailError, ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@osd/utils';
+import { createFailError, ToolingLog } from '@osd/dev-utils';
 import { File } from '../file';
 
 /**

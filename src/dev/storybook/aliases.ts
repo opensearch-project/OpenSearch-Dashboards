@@ -20,7 +20,7 @@
 export const storybookAliases = {
   apm: 'x-pack/plugins/apm/.storybook',
   canvas: 'x-pack/plugins/canvas/storybook',
-  codeeditor: 'src/plugins/kibana_react/public/code_editor/.storybook',
+  codeeditor: 'src/plugins/opensearch_dashboards_react/public/code_editor/.storybook',
   dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/.storybook',
   embeddable: 'src/plugins/embeddable/.storybook',
   infra: 'x-pack/plugins/infra/.storybook',
