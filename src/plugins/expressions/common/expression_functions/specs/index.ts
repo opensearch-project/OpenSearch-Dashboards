@@ -19,8 +19,8 @@
 
 import { clog } from './clog';
 import { font } from './font';
-import { kibana } from './kibana';
-import { kibanaContextFunction } from './kibana_context';
+import { opensearchDashboards } from './opensearch_dashboards';
+import { opensearchDashboardsContextFunction } from './opensearch_dashboards_context';
 import { variableSet } from './var_set';
 import { variable } from './var';
 import { AnyExpressionFunctionDefinition } from '../types';
@@ -29,8 +29,8 @@ import { theme } from './theme';
 export const functionSpecs: AnyExpressionFunctionDefinition[] = [
   clog,
   font,
-  kibana,
-  kibanaContextFunction,
+  opensearchDashboards,
+  opensearchDashboardsContextFunction,
   variableSet,
   variable,
   theme,
@@ -38,8 +38,8 @@ export const functionSpecs: AnyExpressionFunctionDefinition[] = [
 
 export * from './clog';
 export * from './font';
-export * from './kibana';
-export * from './kibana_context';
+export * from './opensearch_dashboards';
+export * from './opensearch_dashboards_context';
 export * from './var_set';
 export * from './var';
 export * from './theme';

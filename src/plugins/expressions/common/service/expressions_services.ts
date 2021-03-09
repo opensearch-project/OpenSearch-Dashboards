@@ -24,7 +24,7 @@ import { ExecutionContract } from '../execution/execution_contract';
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
- * in Kibana Platform in *setup* life-cycle.
+ * in OpenSearch Dashboards Platform in *setup* life-cycle.
  */
 export type ExpressionsServiceSetup = Pick<
   ExpressionsService,
@@ -43,7 +43,7 @@ export type ExpressionsServiceSetup = Pick<
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
- * in Kibana Platform in *start* life-cycle.
+ * in OpenSearch Dashboards Platform in *start* life-cycle.
  */
 export type ExpressionsServiceStart = Pick<
   ExpressionsService,
@@ -71,7 +71,7 @@ export interface ExpressionServiceParams {
  * 2. It implements the same Expressions service that users can fork/clone,
  *    thus have their own instance of the Expressions plugin.
  * 3. `ExpressionsService` defines the public contracts of *setup* and *start*
- *    Kibana Platform life-cycles for ease-of-use on server-side and browser-side.
+ *    OpenSearch Dashboards Platform life-cycles for ease-of-use on server-side and browser-side.
  * 4. `ExpressionsService` creates a bound version of all exported contract functions.
  * 5. Functions are bound the way there are:
  *
@@ -257,7 +257,7 @@ export class ExpressionsService {
   };
 
   /**
-   * Returns Kibana Platform *setup* life-cycle contract. Useful to return the
+   * Returns OpenSearch Dashboards Platform *setup* life-cycle contract. Useful to return the
    * same contract on server-side and browser-side.
    */
   public setup(): ExpressionsServiceSetup {
@@ -265,12 +265,12 @@ export class ExpressionsService {
   }
 
   /**
-   * Returns Kibana Platform *start* life-cycle contract. Useful to return the
+   * Returns OpenSearch Dashboards Platform *start* life-cycle contract. Useful to return the
    * same contract on server-side and browser-side.
    */
   public start(): ExpressionsServiceStart {
     return this;
   }
 
-  public stop() {}
+  public stop() { }
 }

@@ -22,8 +22,8 @@ import { datatable } from './datatable';
 import { error } from './error';
 import { filter } from './filter';
 import { image } from './image';
-import { kibanaContext } from './kibana_context';
-import { kibanaDatatable } from './kibana_datatable';
+import { opensearchDashboardsContext } from './opensearch_dashboards_context';
+import { opensearchDashboardsDatatable } from './opensearch_dashboards_datatable';
 import { nullType } from './null';
 import { num } from './num';
 import { number } from './number';
@@ -41,8 +41,8 @@ export const typeSpecs: AnyExpressionTypeDefinition[] = [
   error,
   filter,
   image,
-  kibanaContext,
-  kibanaDatatable,
+  opensearchDashboardsContext,
+  opensearchDashboardsDatatable,
   nullType,
   num,
   number,
@@ -59,8 +59,8 @@ export * from './datatable';
 export * from './error';
 export * from './filter';
 export * from './image';
-export * from './kibana_context';
-export * from './kibana_datatable';
+export * from './opensearch_dashboards_context';
+export * from './opensearch_dashboards_datatable';
 export * from './null';
 export * from './num';
 export * from './number';

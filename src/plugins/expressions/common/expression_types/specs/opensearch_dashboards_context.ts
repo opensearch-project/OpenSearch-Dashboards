@@ -21,20 +21,20 @@ import { ExpressionValueBoxed } from '../types';
 import { ExecutionContextSearch } from '../../execution/types';
 
 export type ExpressionValueSearchContext = ExpressionValueBoxed<
-  'kibana_context',
+  'opensearch_dashboards_context',
   ExecutionContextSearch
 >;
 
 // TODO: These two are exported for legacy reasons - remove them eventually.
-export type KIBANA_CONTEXT_NAME = 'kibana_context';
-export type KibanaContext = ExpressionValueSearchContext;
+export type OPENSEARCH_DASHBOARDS_CONTEXT_NAME = 'opensearch_dashboards_context';
+export type OpenSearchDashboardsContext = ExpressionValueSearchContext;
 
-export const kibanaContext = {
-  name: 'kibana_context',
+export const opensearchDashboardsContext = {
+  name: 'opensearch_dashboards_context',
   from: {
     null: () => {
       return {
-        type: 'kibana_context',
+        type: 'opensearch_dashboards_context',
       };
     },
   },

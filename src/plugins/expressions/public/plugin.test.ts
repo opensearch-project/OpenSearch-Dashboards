@@ -51,11 +51,11 @@ describe('ExpressionsPublicPlugin', () => {
         expect(bar).toBe('bar');
       });
 
-      test('kibana_context function is available', async () => {
+      test('opensearch_dashboards_context function is available', async () => {
         const { setup } = await expressionsPluginMock.createPlugin();
-        const result = await setup.run('kibana_context', null);
+        const result = await setup.run('opensearch_dashboards_context', null);
         expect(result).toMatchObject({
-          type: 'kibana_context',
+          type: 'opensearch_dashboards_context',
         });
       });
     });
@@ -82,13 +82,13 @@ describe('ExpressionsPublicPlugin', () => {
         `);
       });
 
-      test('"kibana" function return value of type "kibana_context"', async () => {
+      test('"opensearchDashboards" function return value of type "opensearch_dashboards_context"', async () => {
         const { doStart } = await expressionsPluginMock.createPlugin();
         const start = await doStart();
-        const execution = start.execute('kibana');
+        const execution = start.execute('opensearchDashboards');
         const result = await execution.getData();
 
-        expect((result as any).type).toBe('kibana_context');
+        expect((result as any).type).toBe('opensearch_dashboards_context');
       });
     });
   });
