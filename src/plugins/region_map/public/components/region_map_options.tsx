@@ -19,8 +19,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiIcon, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { FileLayerField, VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
 import { NumberInputOption, SelectOption, SwitchOption } from '../../../charts/public';
@@ -111,7 +111,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
                   href={stateParams.emsHotLink}
                   target="_blank"
                   title={i18n.translate('regionMap.visParams.previewOnEMSLinkTitle', {
-                    defaultMessage: 'Preview {selectedLayerName} on the Elastic Maps Service',
+                    defaultMessage: 'Preview {selectedLayerName} on the OpenSearch Maps Service',
                     values: {
                       selectedLayerName:
                         stateParams.selectedLayer && stateParams.selectedLayer.name,

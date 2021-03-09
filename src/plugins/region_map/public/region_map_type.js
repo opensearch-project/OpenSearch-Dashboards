@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
 import { RegionMapOptions } from './components/region_map_options';
@@ -109,11 +109,11 @@ provided base maps, or add your own. Darker colors represent higher values.',
       }
 
       const vectorLayers = regionmapsConfig.layers.map(
-        mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML)
+        mapToLayerWithId.bind(null, ORIGIN.OPENSEARCH_DASHBOARDS_YML)
       );
       let selectedLayer = vectorLayers[0];
       let selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
-      if (regionmapsConfig.includeElasticMapsService) {
+      if (regionmapsConfig.includeOpenSearchMapsService) {
         const layers = await serviceSettings.getFileLayers();
         const newLayers = layers
           .map(mapToLayerWithId.bind(null, ORIGIN.EMS))
