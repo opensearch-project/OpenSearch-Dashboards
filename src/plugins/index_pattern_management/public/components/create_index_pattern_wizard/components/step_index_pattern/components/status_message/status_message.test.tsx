@@ -28,11 +28,11 @@ const tagsPartial = {
 
 const matchedIndices = {
   allIndices: ([
-    { name: 'kibana', ...tagsPartial },
-    { name: 'es', ...tagsPartial },
+    { name: 'opensearch-dashboards', ...tagsPartial },
+    { name: 'opensearch', ...tagsPartial },
   ] as unknown) as MatchedItem[],
   exactMatchedIndices: [] as MatchedItem[],
-  partialMatchedIndices: ([{ name: 'kibana', ...tagsPartial }] as unknown) as MatchedItem[],
+  partialMatchedIndices: ([{ name: 'opensearch-dashboards', ...tagsPartial }] as unknown) as MatchedItem[],
 };
 
 describe('StatusMessage', () => {
@@ -52,7 +52,7 @@ describe('StatusMessage', () => {
   it('should render with exact matches', () => {
     const localMatchedIndices = {
       ...matchedIndices,
-      exactMatchedIndices: ([{ name: 'kibana', ...tagsPartial }] as unknown) as MatchedItem[],
+      exactMatchedIndices: ([{ name: 'opensearch-dashboards', ...tagsPartial }] as unknown) as MatchedItem[],
     };
 
     const component = shallow(

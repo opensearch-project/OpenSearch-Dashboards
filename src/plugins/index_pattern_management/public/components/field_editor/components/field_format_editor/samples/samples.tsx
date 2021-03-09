@@ -23,8 +23,8 @@ import React, { PureComponent } from 'react';
 
 import { EuiBasicTable, EuiFormRow } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { Sample } from '../../../types';
 
 interface FormatEditorSamplesProps {
@@ -78,7 +78,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
         }
       >
         <EuiBasicTable<Sample>
-          className="kbnFieldFormatEditor__samples"
+          className="osdFieldFormatEditor__samples"
           compressed={true}
           items={samples}
           columns={columns}

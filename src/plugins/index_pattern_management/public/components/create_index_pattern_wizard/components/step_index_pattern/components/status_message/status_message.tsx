@@ -22,7 +22,7 @@ import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { MatchedItem } from '../../../../types';
 
 interface StatusMessageProps {
@@ -70,7 +70,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <span>
           <FormattedMessage
             id="indexPatternManagement.createIndexPattern.step.status.noSystemIndicesWithPromptLabel"
-            defaultMessage="No Elasticsearch indices match your pattern. To view the matching system indices, toggle the switch above."
+            defaultMessage="No OpenSearch indices match your pattern. To view the matching system indices, toggle the switch above."
           />
         </span>
       );
@@ -79,7 +79,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <span>
           <FormattedMessage
             id="indexPatternManagement.createIndexPattern.step.status.noSystemIndicesLabel"
-            defaultMessage="No Elasticsearch indices match your pattern."
+            defaultMessage="No OpenSearch indices match your pattern."
           />
         </span>
       );

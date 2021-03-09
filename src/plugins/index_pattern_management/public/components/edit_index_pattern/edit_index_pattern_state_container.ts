@@ -21,8 +21,8 @@ import { createHashHistory } from 'history';
 import {
   createStateContainer,
   syncState,
-  createKbnUrlStateStorage,
-} from '../../../../../plugins/kibana_utils/public';
+  createOsdUrlStateStorage,
+} from '../../../../../plugins/opensearch_dashboards_utils/public';
 
 interface IEditIndexPatternState {
   tab: string;
@@ -45,12 +45,12 @@ export function createEditIndexPatternPageStateContainer({
   const defaultState = {
     tab: defaultTab,
   };
-  const kbnUrlStateStorage = createKbnUrlStateStorage({
+  const osdUrlStateStorage = createOsdUrlStateStorage({
     useHash: useHashedUrl,
     history,
   });
   // extract starting app state from URL and use it as starting app state in state container
-  const initialStateFromUrl = kbnUrlStateStorage.get<IEditIndexPatternState>(stateStorageKey);
+  const initialStateFromUrl = osdUrlStateStorage.get<IEditIndexPatternState>(stateStorageKey);
   const stateContainer = createStateContainer(
     {
       ...defaultState,
@@ -71,11 +71,11 @@ export function createEditIndexPatternPageStateContainer({
       // state syncing utility requires state containers to handle "null"
       set: (state) => state && stateContainer.set(state),
     },
-    stateStorage: kbnUrlStateStorage,
+    stateStorage: osdUrlStateStorage,
   });
 
   // makes sure initial url is the same as initial state (this is not really required)
-  kbnUrlStateStorage.set(stateStorageKey, stateContainer.getState(), { replace: true });
+  osdUrlStateStorage.set(stateStorageKey, stateContainer.getState(), { replace: true });
 
   return {
     startSyncingState: start,

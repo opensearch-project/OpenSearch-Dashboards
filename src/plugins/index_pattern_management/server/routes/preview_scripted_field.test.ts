@@ -33,16 +33,16 @@ describe('preview_scripted_field route', () => {
     const mockClient = { search: jest.fn().mockResolvedValue(response) };
     const mockContext = {
       core: {
-        elasticsearch: { client: { asCurrentUser: mockClient } },
+        opensearch: { client: { asCurrentUser: mockClient } },
       },
     };
     const mockBody = {
-      index: 'kibana_sample_data_logs',
+      index: 'opensearch_dashboards_sample_data_logs',
       name: 'my_scripted_field',
       script: `doc['foo'].value`,
     };
     const mockQuery = {};
-    const mockRequest = httpServerMock.createKibanaRequest({
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
       body: mockBody,
       query: mockQuery,
     });
@@ -70,7 +70,7 @@ describe('preview_scripted_field route', () => {
             },
           },
         },
-        "index": "kibana_sample_data_logs",
+        "index": "opensearch_dashboards_sample_data_logs",
         "size": 10,
         "timeout": "30s",
       }
@@ -85,11 +85,11 @@ describe('preview_scripted_field route', () => {
     const mockClient = { search: jest.fn().mockResolvedValue(response) };
     const mockContext = {
       core: {
-        elasticsearch: { client: { asCurrentUser: mockClient } },
+        opensearch: { client: { asCurrentUser: mockClient } },
       },
     };
     const mockBody = {
-      index: 'kibana_sample_data_logs',
+      index: 'opensearch_dashboards_sample_data_logs',
       name: 'my_scripted_field',
       script: `doc['foo'].value`,
       query: {
@@ -98,7 +98,7 @@ describe('preview_scripted_field route', () => {
       additionalFields: ['a', 'b', 'c'],
     };
     const mockQuery = {};
-    const mockRequest = httpServerMock.createKibanaRequest({
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
       body: mockBody,
       query: mockQuery,
     });
@@ -132,7 +132,7 @@ describe('preview_scripted_field route', () => {
             },
           },
         },
-        "index": "kibana_sample_data_logs",
+        "index": "opensearch_dashboards_sample_data_logs",
         "size": 10,
         "timeout": "30s",
       }
@@ -147,12 +147,12 @@ describe('preview_scripted_field route', () => {
     const mockClient = { search: jest.fn().mockReturnValue(Promise.reject(response)) };
     const mockContext = {
       core: {
-        elasticsearch: { client: { asCurrentUser: mockClient } },
+        opensearch: { client: { asCurrentUser: mockClient } },
       },
     };
     const mockBody = { searches: [{ header: {}, body: {} }] };
     const mockQuery = {};
-    const mockRequest = httpServerMock.createKibanaRequest({
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
       body: mockBody,
       query: mockQuery,
     });

@@ -19,7 +19,7 @@
 
 import React, { PureComponent } from 'react';
 import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { ScriptedFieldItem } from '../../types';

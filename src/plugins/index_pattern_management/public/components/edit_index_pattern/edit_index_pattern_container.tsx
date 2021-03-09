@@ -20,14 +20,14 @@
 import React, { useEffect, useState } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { IndexPattern } from '../../../../../plugins/data/public';
-import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
 import { EditIndexPattern } from '../edit_index_pattern';
 
 const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ ...props }) => {
-  const { data, setBreadcrumbs } = useKibana<IndexPatternManagmentContext>().services;
+  const { data, setBreadcrumbs } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
   const [indexPattern, setIndexPattern] = useState<IndexPattern>();
 
   useEffect(() => {

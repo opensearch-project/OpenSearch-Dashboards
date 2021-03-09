@@ -23,8 +23,8 @@ import { shallow } from 'enzyme';
 import { MatchedItem } from '../../../../types';
 
 const indices = ([
-  { name: 'kibana', tags: [] },
-  { name: 'es', tags: [] },
+  { name: 'opensearch-dashboards', tags: [] },
+  { name: 'opensearch', tags: [] },
 ] as unknown) as MatchedItem[];
 
 describe('IndicesList', () => {

@@ -20,12 +20,12 @@
 import React, { Fragment } from 'react';
 import { EuiCode, EuiIcon, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { useKibana } from '../../../../../../../plugins/kibana_react/public';
+import { FormattedMessage } from '@osd/i18n/react';
+import { useOpenSearchDashboards } from '../../../../../../../plugins/opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../../../types';
 
 export const ScriptingSyntax = () => {
-  const docLinksScriptedFields = useKibana<IndexPatternManagmentContext>().services.docLinks?.links
+  const docLinksScriptedFields = useOpenSearchDashboards<IndexPatternManagmentContext>().services.docLinks?.links
     .scriptedFields;
   return (
     <Fragment>
@@ -37,8 +37,8 @@ export const ScriptingSyntax = () => {
         <p>
           <FormattedMessage
             id="indexPatternManagement.syntax.defaultLabel.defaultDetail"
-            defaultMessage="By default, Kibana scripted fields use {painless}, a simple and secure scripting language designed
-          specifically for use with Elasticsearch, to access values in the document use the following format:"
+            defaultMessage="By default, OpenSearch Dashboards scripted fields use {painless}, a simple and secure scripting language designed
+          specifically for use with OpenSearch, to access values in the document use the following format:"
             values={{
               painless: (
                 <EuiLink target="_blank" href={docLinksScriptedFields.painless}>
@@ -91,15 +91,15 @@ export const ScriptingSyntax = () => {
         </p>
         <p>
           <FormattedMessage
-            id="indexPatternManagement.syntax.kibanaLabel"
-            defaultMessage="Kibana currently imposes one special limitation on the painless scripts you write. They cannot contain named
+            id="indexPatternManagement.syntax.opensearchDashboardsLabel"
+            defaultMessage="OpenSearch Dashboards currently imposes one special limitation on the painless scripts you write. They cannot contain named
           functions."
           />
         </p>
         <p>
           <FormattedMessage
             id="indexPatternManagement.syntax.lucene.commonLabel.commonDetail"
-            defaultMessage="Coming from an older version of Kibana? The {lucene} you know and love are still available. Lucene expressions
+            defaultMessage="Coming from an older version of OpenSearch Dashboards? The {lucene} you know and love are still available. Lucene expressions
           are a lot like JavaScript, but limited to basic arithmetic, bitwise and comparison operations."
             values={{
               lucene: (

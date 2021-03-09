@@ -30,10 +30,10 @@ import {
   EuiCallOut,
   EuiPanel,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { IndexPattern, IndexPatternField } from '../../../../../plugins/data/public';
-import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
@@ -89,7 +89,7 @@ export const EditIndexPattern = withRouter(
       savedObjects,
       chrome,
       data,
-    } = useKibana<IndexPatternManagmentContext>().services;
+    } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
       indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
@@ -171,7 +171,7 @@ export const EditIndexPattern = withRouter(
       'indexPatternManagement.editIndexPattern.mappingConflictLabel',
       {
         defaultMessage:
-          '{conflictFieldsLength, plural, one {A field is} other {# fields are}} defined as several types (string, integer, etc) across the indices that match this pattern. You may still be able to use these conflict fields in parts of Kibana, but they will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.',
+          '{conflictFieldsLength, plural, one {A field is} other {# fields are}} defined as several types (string, integer, etc) across the indices that match this pattern. You may still be able to use these conflict fields in parts of OpenSearch Dashboards, but they will be unavailable for functions that require OpenSearch Dashboards to know their type. Correcting this issue will require reindexing your data.',
         values: { conflictFieldsLength: conflictedFields.length },
       }
     );
@@ -214,7 +214,7 @@ export const EditIndexPattern = withRouter(
             <p>
               <FormattedMessage
                 id="indexPatternManagement.editIndexPattern.timeFilterLabel.timeFilterDetail"
-                defaultMessage="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by Elasticsearch. To change a field type, use the Elasticsearch"
+                defaultMessage="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by OpenSearch. To change a field type, use the OpenSearch"
                 values={{ indexPatternTitle: <strong>{indexPattern.title}</strong> }}
               />{' '}
               <EuiLink

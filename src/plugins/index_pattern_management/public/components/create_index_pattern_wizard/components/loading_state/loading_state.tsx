@@ -21,7 +21,7 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiTitle } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 export const LoadingState = () => (
   <EuiFlexGroup justifyContent="center" alignItems="center" direction="column" gutterSize="s">
@@ -30,7 +30,7 @@ export const LoadingState = () => (
         <h2 style={{ textAlign: 'center' }}>
           <FormattedMessage
             id="indexPatternManagement.createIndexPattern.loadingState.checkingLabel"
-            defaultMessage="Checking for Elasticsearch data"
+            defaultMessage="Checking for OpenSearch data"
           />
         </h2>
       </EuiTitle>

@@ -29,11 +29,11 @@ import {
   EuiPageContent,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
+import { i18n } from '@osd/i18n';
+import { reactRouterNavigate, useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { CreateButton } from '../create_button';
 import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
@@ -89,7 +89,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     http,
     getMlCardState,
     data,
-  } = useKibana<IndexPatternManagmentContext>().services;
+  } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
   const [sources, setSources] = useState<MatchedItem[]>([]);
@@ -230,7 +230,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
             <p>
               <FormattedMessage
                 id="indexPatternManagement.indexPatternTable.indexPatternExplanation"
-                defaultMessage="Create and manage the index patterns that help you retrieve your data from Elasticsearch."
+                defaultMessage="Create and manage the index patterns that help you retrieve your data from OpenSearch."
               />
             </p>
           </EuiText>

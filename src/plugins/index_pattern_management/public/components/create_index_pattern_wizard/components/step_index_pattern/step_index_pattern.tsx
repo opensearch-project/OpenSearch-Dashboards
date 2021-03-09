@@ -19,8 +19,8 @@
 
 import React, { Component } from 'react';
 import { EuiSpacer, EuiCallOut, EuiSwitchEvent } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import {
   indexPatterns,
   IndexPatternAttributes,
@@ -37,7 +37,7 @@ import { LoadingIndices } from './components/loading_indices';
 import { StatusMessage } from './components/status_message';
 import { IndicesList } from './components/indices_list';
 import { Header } from './components/header';
-import { context as contextType } from '../../../../../../kibana_react/public';
+import { context as contextType } from '../../../../../../opensearch_dashboards_react/public';
 import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
 import { MatchedItem } from '../../types';
 import { IndexPatternManagmentContextValue } from '../../../../types';
