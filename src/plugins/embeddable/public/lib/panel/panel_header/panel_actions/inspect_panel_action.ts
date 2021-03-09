@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { Action } from 'src/plugins/ui_actions/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { IEmbeddable } from '../../../embeddables';
@@ -33,7 +33,7 @@ export class InspectPanelAction implements Action<ActionContext> {
   public readonly id = ACTION_INSPECT_PANEL;
   public order = 20;
 
-  constructor(private readonly inspector: InspectorStartContract) {}
+  constructor(private readonly inspector: InspectorStartContract) { }
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.panel.inspectPanel.displayName', {

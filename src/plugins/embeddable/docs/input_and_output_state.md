@@ -15,7 +15,7 @@ Non-real examples to showcase the difference:
 | Input          | Output      |
 | -----------    | ----------- |
 | savedObjectId  |     savedObjectAttributes  |
-| esQueryRequest |     esQueryResponse        |
+| opensearchQueryRequest |     opensearchQueryResponse        |
 |   props        |     renderComplete         |
 
 ### Types of input state
