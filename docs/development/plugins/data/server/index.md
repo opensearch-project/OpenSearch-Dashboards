@@ -8,5 +8,5 @@
 
 |  Package | Description |
 |  --- | --- |
-|  [kibana-plugin-plugins-data-server](./kibana-plugin-plugins-data-server.md) |  |
+|  [opensearch-dashboards-plugin-plugins-data-server](./opensearch-dashboards-plugin-plugins-data-server.md) |  |
 

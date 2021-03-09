@@ -8,5 +8,5 @@
 
 |  Package | Description |
 |  --- | --- |
-|  [kibana-plugin-plugins-data-public](./kibana-plugin-plugins-data-public.md) |  |
+|  [opensearch-dashboards-plugin-plugins-data-public](./opensearch-dashboards-plugin-plugins-data-public.md) |  |
 
