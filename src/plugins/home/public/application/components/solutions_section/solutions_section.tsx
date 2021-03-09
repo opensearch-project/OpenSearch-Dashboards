@@ -20,7 +20,7 @@
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiScreenReaderOnly } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { SolutionPanel } from './solution_panel';
 import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../';
 
@@ -36,12 +36,12 @@ interface Props {
 }
 
 export const SolutionsSection: FC<Props> = ({ addBasePath, solutions, directories }) => {
-  // Separate Kibana from other solutions
-  const kibana = solutions.find(({ id }) => id === 'kibana');
-  const kibanaApps = directories
-    .filter(({ solutionId }) => solutionId === 'kibana')
+  // Separate OpenSearch Dashboards from other solutions
+  const opensearchDashboards = solutions.find(({ id }) => id === 'opensearchdashboards');
+  const opensearchDashboardsApps = directories
+    .filter(({ solutionId }) => solutionId === 'opensearchdashboards')
     .sort(sortByOrder);
-  solutions = solutions.sort(sortByOrder).filter(({ id }) => id !== 'kibana');
+  solutions = solutions.sort(sortByOrder).filter(({ id }) => id !== 'opensearchdashboards');
 
   return (
     <>
@@ -65,11 +65,11 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions, directorie
               </EuiFlexGroup>
             </EuiFlexItem>
           ) : null}
-          {kibana ? (
+          {opensearchDashboards ? (
             <SolutionPanel
-              solution={kibana}
+              solution={opensearchDashboards}
               addBasePath={addBasePath}
-              apps={kibanaApps.length ? kibanaApps : undefined}
+              apps={opensearchDashboardsApps.length ? opensearchDashboardsApps : undefined}
             />
           ) : null}
         </EuiFlexGroup>

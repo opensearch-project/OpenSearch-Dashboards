@@ -20,7 +20,7 @@
 export { HomeServerPluginSetup, HomeServerPluginStart } from './plugin';
 export { TutorialProvider } from './services';
 export { SampleDatasetProvider, SampleDataRegistrySetup } from './services';
-import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from 'opensearch-dashboards/server';
 import { HomeServerPlugin } from './plugin';
 import { configSchema, ConfigSchema } from '../config';
 
@@ -30,7 +30,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('kibana.disableWelcomeScreen', 'home.disableWelcomeScreen'),
+    renameFromRoot('opensearchdashboards.disableWelcomeScreen', 'home.disableWelcomeScreen'),
   ],
 };
 

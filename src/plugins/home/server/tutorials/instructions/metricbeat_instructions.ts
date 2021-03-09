@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from 'src/plugins/home/server/tutorials/opensearch_metrics/node_modules/@osd/i18n';
 import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
@@ -37,9 +37,9 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'tar xzvf metricbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'cd metricbeat-{config.kibana.version}-darwin-x86_64/',
+        'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.opensearchdashboards.version}-darwin-x86_64.tar.gz',
+        'tar xzvf metricbeat-{config.opensearchdashboards.version}-darwin-x86_64.tar.gz',
+        'cd metricbeat-{config.opensearchdashboards.version}-darwin-x86_64/',
       ],
     },
     DEB: {
@@ -53,8 +53,8 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-amd64.deb',
-        'sudo dpkg -i metricbeat-{config.kibana.version}-amd64.deb',
+        'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.opensearchdashboards.version}-amd64.deb',
+        'sudo dpkg -i metricbeat-{config.opensearchdashboards.version}-amd64.deb',
       ],
       textPost: i18n.translate('home.tutorials.common.metricbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
@@ -72,8 +72,8 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-x86_64.rpm',
-        'sudo rpm -vi metricbeat-{config.kibana.version}-x86_64.rpm',
+        'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.opensearchdashboards.version}-x86_64.rpm',
+        'sudo rpm -vi metricbeat-{config.opensearchdashboards.version}-x86_64.rpm',
       ],
       textPost: i18n.translate('home.tutorials.common.metricbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
@@ -96,7 +96,7 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
 **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
  5. From the PowerShell prompt, run the following commands to install Metricbeat as a Windows service.',
           values: {
-            directoryName: '`metricbeat-{config.kibana.version}-windows`',
+            directoryName: '`metricbeat-{config.opensearchdashboards.version}-windows`',
             folderPath: '`C:\\Program Files`',
             metricbeatLink:
               '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
@@ -109,7 +109,7 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
         'home.tutorials.common.metricbeatInstructions.install.windowsTextPost',
         {
           defaultMessage:
-            'Modify the settings under `output.elasticsearch` in the {path} file to point to your Elasticsearch installation.',
+            'Modify the settings under `output.opensearch` in the {path} file to point to your opensearch installation.',
           values: { path: '`C:\\Program Files\\Metricbeat\\metricbeat.yml`' },
         }
       ),
@@ -122,7 +122,7 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
       }),
       textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.start.osxTextPre', {
         defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+          'The `setup` command loads the OpenSearch Dashboards dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: ['./metricbeat setup', './metricbeat -e'],
     },
@@ -132,7 +132,7 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
       }),
       textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.start.debTextPre', {
         defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+          'The `setup` command loads the OpenSearch Dashboards dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: ['sudo metricbeat setup', 'sudo service metricbeat start'],
     },
@@ -142,7 +142,7 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
       }),
       textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.start.rpmTextPre', {
         defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+          'The `setup` command loads the OpenSearch Dashboards dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: ['sudo metricbeat setup', 'sudo service metricbeat start'],
     },
@@ -152,7 +152,7 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
       }),
       textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.start.windowsTextPre', {
         defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+          'The `setup` command loads the OpenSearch Dashboards dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: ['.\\metricbeat.exe setup', 'Start-Service metricbeat'],
     },
@@ -169,22 +169,22 @@ export const createMetricbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchdashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('home.tutorials.common.metricbeatInstructions.config.osxTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
+          opensearchUrlTemplate: '`<opensearch_url>`',
+          opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
         },
       }),
     },
@@ -199,22 +199,22 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         },
       }),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchdashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('home.tutorials.common.metricbeatInstructions.config.debTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
+          opensearchUrlTemplate: '`<opensearch_url>`',
+          opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
         },
       }),
     },
@@ -229,22 +229,22 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         },
       }),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchdashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('home.tutorials.common.metricbeatInstructions.config.rpmTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
+          opensearchUrlTemplate: '`<opensearch_url>`',
+          opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
         },
       }),
     },
@@ -262,24 +262,24 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         }
       ),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchdashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate(
         'home.tutorials.common.metricbeatInstructions.config.windowsTextPost',
         {
           defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+            'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           values: {
             passwordTemplate: '`<password>`',
-            esUrlTemplate: '`<es_url>`',
-            kibanaUrlTemplate: '`<kibana_url>`',
+            opensearchUrlTemplate: '`<opensearch_url>`',
+            opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
           },
         }
       ),
@@ -438,7 +438,7 @@ export function metricbeatStatusCheck(moduleName: string) {
     error: i18n.translate('home.tutorials.common.metricbeatStatusCheck.errorText', {
       defaultMessage: 'No data has been received from this module yet',
     }),
-    esHitsCheck: {
+    opensearchHitsCheck: {
       index: 'metricbeat-*',
       query: {
         bool: {

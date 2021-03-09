@@ -17,57 +17,55 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
-} from '../instructions/filebeat_instructions';
+} from '../instructions/metricbeat_instructions';
 import {
   TutorialContext,
   TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
-export function elasticsearchLogsSpecProvider(context: TutorialContext): TutorialSchema {
-  const moduleName = 'elasticsearch';
-  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
+export function opensearchMetricsSpecProvider(context: TutorialContext): TutorialSchema {
+  const moduleName = 'opensearch';
   return {
-    id: 'elasticsearchLogs',
-    name: i18n.translate('home.tutorials.elasticsearchLogs.nameTitle', {
-      defaultMessage: 'Elasticsearch logs',
+    id: 'opensearchMetrics',
+    name: i18n.translate('home.tutorials.opensearchMetrics.nameTitle', {
+      defaultMessage: 'OpenSearch metrics',
     }),
     moduleName,
-    category: TutorialsCategory.LOGGING,
-    isBeta: true,
-    shortDescription: i18n.translate('home.tutorials.elasticsearchLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs created by Elasticsearch.',
+    isBeta: false,
+    category: TutorialsCategory.METRICS,
+    shortDescription: i18n.translate('home.tutorials.opensearchMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from OpenSearch.',
     }),
-    longDescription: i18n.translate('home.tutorials.elasticsearchLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.opensearchMetrics.longDescription', {
       defaultMessage:
-        'The `elasticsearch` Filebeat module parses logs created by Elasticsearch. \
+        'The `opensearch` Metricbeat module fetches internal metrics from OpenSearch. \
 [Learn more]({learnMoreLink}).',
       values: {
-        learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-elasticsearch.html',
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-opensearch.html',
       },
     }),
     euiIconType: 'logoElasticsearch',
     artifacts: {
       application: {
-        label: i18n.translate('home.tutorials.elasticsearchLogs.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.opensearchMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-elasticsearch.html',
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-opensearch.html',
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/elasticsearch_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    onPrem: onPremInstructions(moduleName, context),
+    elasticCloud: cloudInstructions(moduleName),
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

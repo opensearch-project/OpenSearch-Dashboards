@@ -22,7 +22,7 @@ export const createIndexName = function (sampleDataSetId: string, dataIndexId: s
   // This if statement ensures that sample data sets that used a single index prior to the schema change
   // have the same index name to avoid orphaned indices when uninstalling.
   if (sampleDataSetId === dataIndexId) {
-    return `kibana_sample_data_${sampleDataSetId}`;
+    return `opensearch_dashboards_sample_data_${sampleDataSetId}`;
   }
-  return `kibana_sample_data_${sampleDataSetId}_${dataIndexId}`;
+  return `opensearch_dashboards_sample_data_${sampleDataSetId}_${dataIndexId}`;
 };

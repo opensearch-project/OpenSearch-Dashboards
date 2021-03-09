@@ -24,10 +24,10 @@ const dataIndexSchema = Joi.object({
     .regex(/^[a-zA-Z0-9-]+$/)
     .required(),
 
-  // path to newline delimented JSON file containing data relative to KIBANA_HOME
+  // path to newline delimented JSON file containing data relative to OPENSEARCH_DASHBOARDS_HOME
   dataPath: Joi.string().required(),
 
-  // Object defining Elasticsearch field mappings (contents of index.mappings.type.properties)
+  // Object defining OpenSearch field mappings (contents of index.mappings.type.properties)
   fields: Joi.object().required(),
 
   // times fields that will be updated relative to now when data is installed
@@ -68,8 +68,8 @@ export const sampleDataSchema = {
   // saved object id of default index-pattern for sample data set
   defaultIndex: Joi.string().required(),
 
-  // Kibana saved objects (index patter, visualizations, dashboard, ...)
-  // Should provide a nice demo of Kibana's functionality with the sample data set
+  // OpenSearch Dashboards saved objects (index patter, visualizations, dashboard, ...)
+  // Should provide a nice demo of OpenSearch Dashboards's functionality with the sample data set
   savedObjects: Joi.array().items(Joi.object()).required(),
   dataIndices: Joi.array().items(dataIndexSchema).required(),
 };

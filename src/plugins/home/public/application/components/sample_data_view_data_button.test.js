@@ -22,7 +22,7 @@ import { shallow } from 'enzyme';
 
 import { SampleDataViewDataButton } from './sample_data_view_data_button';
 
-jest.mock('../kibana_services', () => ({
+jest.mock('../opensearch_dashboards_services', () => ({
   getServices: () => ({
     addBasePath: (path) => `root${path}`,
   }),

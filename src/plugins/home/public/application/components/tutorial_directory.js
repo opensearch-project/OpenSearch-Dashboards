@@ -22,7 +22,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { SampleDataSetCards } from './sample_data_set_cards';
-import { getServices } from '../kibana_services';
+import { getServices } from '../opensearch_dashboards_services';
 
 import {
   EuiPage,
@@ -38,8 +38,8 @@ import {
 
 import { getTutorials } from '../load_tutorials';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { injectI18n, FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 
 const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
@@ -142,7 +142,7 @@ class TutorialDirectoryUi extends React.Component {
         name: tutorialConfig.name,
         description: tutorialConfig.shortDescription,
         url: this.props.addBasePath(`#/tutorial/${tutorialConfig.id}`),
-        elasticCloud: tutorialConfig.elasticCloud,
+        opensearchCloud: tutorialConfig.opensearchCloud,
         // Beta label is skipped on the tutorial overview page for now. Too many beta labels.
         //isBeta: tutorialConfig.isBeta,
       };
@@ -157,16 +157,16 @@ class TutorialDirectoryUi extends React.Component {
       }),
       description: this.props.intl.formatMessage({
         id: 'home.tutorial.card.sampleDataDescription',
-        defaultMessage: 'Get started exploring Kibana with these "one click" data sets.',
+        defaultMessage: 'Get started exploring OpenSearch Dashboards with these "one click" data sets.',
       }),
       url: this.props.addBasePath('#/tutorial_directory/sampleData'),
-      elasticCloud: true,
+      opensearchCloud: true,
       onClick: this.onSelectedTabChanged.bind(null, SAMPLE_DATA_TAB_ID),
     });
 
     if (this.props.isCloudEnabled) {
       tutorialCards = tutorialCards.filter((tutorial) => {
-        return _.has(tutorial, 'elasticCloud');
+        return _.has(tutorial, 'opensearchCloud');
       });
     }
 
@@ -269,7 +269,7 @@ class TutorialDirectoryUi extends React.Component {
             <EuiTitle size="l">
               <h1>
                 <FormattedMessage
-                  id="home.tutorial.addDataToKibanaTitle"
+                  id="home.tutorial.addDataToOpenSearchDashboardsTitle"
                   defaultMessage="Add data"
                 />
               </h1>

@@ -22,13 +22,13 @@ import { shallow } from 'enzyme';
 import { SolutionPanel } from './solution_panel';
 
 const solutionEntry = {
-  id: 'kibana',
-  title: 'Kibana',
+  id: 'opensearchdashboards',
+  title: 'OpenSearch Dashboards',
   subtitle: 'Visualize & analyze',
   description: 'Explore and analyze your data',
   appDescriptions: ['Analyze data in dashboards'],
   icon: 'logoKibana',
-  path: 'kibana_landing_page',
+  path: 'opensearch_dashboards_landing_page',
   order: 1,
 };
 

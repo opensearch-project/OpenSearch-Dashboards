@@ -46,7 +46,7 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
         const dataIndexConfig = sampleDataset.dataIndices[i];
         const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
         try {
-          const indexExists = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
+          const indexExists = await context.core.opensearch.legacy.client.callAsCurrentUser(
             'indices.exists',
             { index }
           );
@@ -55,7 +55,7 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
             return;
           }
 
-          const { count } = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
+          const { count } = await context.core.opensearch.legacy.client.callAsCurrentUser(
             'count',
             {
               index,

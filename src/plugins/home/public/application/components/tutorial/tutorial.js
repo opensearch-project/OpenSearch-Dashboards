@@ -35,14 +35,14 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
-import { getServices } from '../../kibana_services';
+import { injectI18n, FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
+import { getServices } from '../../opensearch_dashboards_services';
 
 const INSTRUCTIONS_TYPE = {
-  ELASTIC_CLOUD: 'elasticCloud',
+  OPENSEARCH_CLOUD: 'OpenSearchCloud',
   ON_PREM: 'onPrem',
-  ON_PREM_ELASTIC_CLOUD: 'onPremElasticCloud',
+  ON_PREM_OPENSEARCH_CLOUD: 'onPremOpenSearchCloud',
 };
 
 const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
@@ -62,7 +62,7 @@ class TutorialUi extends React.Component {
     };
 
     if (props.isCloudEnabled) {
-      this.state.visibleInstructions = INSTRUCTIONS_TYPE.ELASTIC_CLOUD;
+      this.state.visibleInstructions = INSTRUCTIONS_TYPE.OPENSEARCH_CLOUD;
     } else {
       this.state.visibleInstructions = INSTRUCTIONS_TYPE.ON_PREM;
     }
@@ -119,12 +119,12 @@ class TutorialUi extends React.Component {
     }
 
     switch (this.state.visibleInstructions) {
-      case INSTRUCTIONS_TYPE.ELASTIC_CLOUD:
-        return this.state.tutorial.elasticCloud;
+      case INSTRUCTIONS_TYPE.OPENSEARCH_CLOUD:
+        return this.state.tutorial.OpenSearchCloud;
       case INSTRUCTIONS_TYPE.ON_PREM:
         return this.state.tutorial.onPrem;
-      case INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD:
-        return this.state.tutorial.onPremElasticCloud;
+      case INSTRUCTIONS_TYPE.ON_PREM_OPENSEARCH_CLOUD:
+        return this.state.tutorial.onPremOpenSearchCloud;
       default:
         throw new Error(
           this.props.intl.formatMessage(
@@ -181,10 +181,10 @@ class TutorialUi extends React.Component {
 
   checkInstructionSetStatus = async (instructionSetIndex) => {
     const instructionSet = this.getInstructionSets()[instructionSetIndex];
-    const esHitsCheckConfig = _.get(instructionSet, `statusCheck.esHitsCheck`);
+    const opensearchHitsCheckConfig = _.get(instructionSet, `statusCheck.opensearchHitsCheck`);
 
-    if (esHitsCheckConfig) {
-      const statusCheckState = await this.fetchEsHitsStatus(esHitsCheckConfig);
+    if (opensearchHitsCheckConfig) {
+      const statusCheckState = await this.fetchOpenSearchHitsStatus(opensearchHitsCheckConfig);
 
       this.setState((prevState) => ({
         statusCheckStates: {
@@ -197,16 +197,16 @@ class TutorialUi extends React.Component {
 
   /**
    *
-   * @param esHitsCheckConfig
+   * @param opensearchHitsCheckConfig
    * @return {Promise<string>}
    */
-  fetchEsHitsStatus = async (esHitsCheckConfig) => {
+  fetchOpenSearchHitsStatus = async (opensearchHitsCheckConfig) => {
     const { http } = getServices();
     try {
       const response = await http.post('/api/home/hits_status', {
         body: JSON.stringify({
-          index: esHitsCheckConfig.index,
-          query: esHitsCheckConfig.query,
+          index: opensearchHitsCheckConfig.index,
+          query: opensearchHitsCheckConfig.query,
         }),
       });
       return response.count > 0 ? StatusCheckStates.HAS_DATA : StatusCheckStates.NO_DATA;
@@ -216,14 +216,14 @@ class TutorialUi extends React.Component {
   };
 
   renderInstructionSetsToggle = () => {
-    if (!this.props.isCloudEnabled && this.state.tutorial.onPremElasticCloud) {
+    if (!this.props.isCloudEnabled && this.state.tutorial.onPremOpenSearchCloud) {
       const selfManagedLabel = this.props.intl.formatMessage({
         id: 'home.tutorial.selfManagedButtonLabel',
         defaultMessage: 'Self managed',
       });
       const cloudLabel = this.props.intl.formatMessage({
-        id: 'home.tutorial.elasticCloudButtonLabel',
-        defaultMessage: 'Elastic Cloud',
+        id: 'home.tutorial.OpenSearchCloudButtonLabel',
+        defaultMessage: 'OpenSearch Cloud',
       });
       const radioButtons = [
         {
@@ -232,7 +232,7 @@ class TutorialUi extends React.Component {
           'data-test-subj': 'selfManagedTutorial',
         },
         {
-          id: INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD,
+          id: INSTRUCTIONS_TYPE.ON_PREM_OPENSEARCH_CLOUD,
           label: cloudLabel,
           'data-test-subj': 'onCloudTutorial',
         },

@@ -20,8 +20,8 @@
 /* eslint max-len: 0 */
 /* eslint-disable */
 
-import { i18n } from '@kbn/i18n';
-import { SavedObject } from 'kibana/server';
+import { i18n } from 'src/plugins/home/server/tutorials/opensearch_metrics/node_modules/@osd/i18n';
+import { SavedObject } from 'opensearch-dashboards/server';
 
 export const getSavedObjects = (): SavedObject[] => [
   {
@@ -39,7 +39,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON: '{}',
       },
     },
@@ -61,7 +61,7 @@ export const getSavedObjects = (): SavedObject[] => [
         '{"vis":{"legendOpen":true,"colors":{"Average Ticket Price":"#629E51","Flight Count":"#AEA2E0"}}}',
       description: '',
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
@@ -93,7 +93,7 @@ export const getSavedObjects = (): SavedObject[] => [
       ],
       sort: [['timestamp', 'desc']],
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","highlightAll":true,"version":true,"query":{"language":"kuery","query":""},"filter":[]}',
       },
@@ -115,7 +115,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{"vis":{"legendOpen":false}}',
       description: '',
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
@@ -137,7 +137,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
@@ -155,11 +155,11 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[Flights] Delays & Cancellations',
       }),
       visState:
-        '{"title":"[Flights] Delays & Cancellations","type":"metrics","params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"rgba(0,156,224,1)","split_mode":"everything","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"filter_ratio","numerator":"FlightDelay:true"}],"separate_axis":0,"axis_position":"right","formatter":"percent","chart_type":"line","line_width":"2","point_size":"0","fill":0.5,"stacked":"none","label":"Percent Delays"}],"time_field":"timestamp","index_pattern":"kibana_sample_data_flights","interval":">=1h","axis_position":"left","axis_formatter":"number","show_legend":1,"show_grid":1,"annotations":[{"fields":"FlightDelay,Cancelled,Carrier","template":"{{Carrier}}: Flight Delayed and Cancelled!","index_pattern":"kibana_sample_data_flights","query_string":"FlightDelay:true AND Cancelled:true","id":"53b7dff0-4c89-11e8-a66a-6989ad5a0a39","color":"rgba(0,98,177,1)","time_field":"timestamp","icon":"fa-exclamation-triangle","ignore_global_filters":1,"ignore_panel_filters":1}],"legend_position":"bottom"},"aggs":[]}',
+        '{"title":"[Flights] Delays & Cancellations","type":"metrics","params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"rgba(0,156,224,1)","split_mode":"everything","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"filter_ratio","numerator":"FlightDelay:true"}],"separate_axis":0,"axis_position":"right","formatter":"percent","chart_type":"line","line_width":"2","point_size":"0","fill":0.5,"stacked":"none","label":"Percent Delays"}],"time_field":"timestamp","index_pattern":"opensearch_dashboards_sample_data_flights","interval":">=1h","axis_position":"left","axis_formatter":"number","show_legend":1,"show_grid":1,"annotations":[{"fields":"FlightDelay,Cancelled,Carrier","template":"{{Carrier}}: Flight Delayed and Cancelled!","index_pattern":"opensearch_dashboards_sample_data_flights","query_string":"FlightDelay:true AND Cancelled:true","id":"53b7dff0-4c89-11e8-a66a-6989ad5a0a39","color":"rgba(0,98,177,1)","time_field":"timestamp","icon":"fa-exclamation-triangle","ignore_global_filters":1,"ignore_panel_filters":1}],"legend_position":"bottom"},"aggs":[]}',
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON: '{}',
       },
     },
@@ -180,7 +180,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{"vis":{"legendOpen":false}}',
       description: '',
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[{"meta":{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","negate":true,"disabled":false,"alias":null,"type":"phrase","key":"FlightDelayMin","value":"0","params":{"query":0,"type":"phrase"}},"query":{"match":{"FlightDelayMin":{"query":0,"type":"phrase"}}},"$state":{"store":"appState"}}],"query":{"query":"","language":"kuery"}}',
       },
@@ -202,7 +202,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
@@ -224,7 +224,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
@@ -246,7 +246,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
@@ -264,11 +264,11 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[Flights] Markdown Instructions',
       }),
       visState:
-        '{"title":"[Flights] Markdown Instructions","type":"markdown","params":{"fontSize":10,"openLinksInNewTab":true,"markdown":"### Sample Flight data\\nThis dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about Kibana, check our [docs](https://www.elastic.co/guide/en/kibana/current/index.html)."},"aggs":[]}',
+        '{"title":"[Flights] Markdown Instructions","type":"markdown","params":{"fontSize":10,"openLinksInNewTab":true,"markdown":"### Sample Flight data\\nThis dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about OpenSearch Dashboards, check our [docs](https://www.elastic.co/guide/en/kibana/current/index.html)."},"aggs":[]}',
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON: '{}',
       },
     },
@@ -284,11 +284,11 @@ export const getSavedObjects = (): SavedObject[] => [
       title: i18n.translate('home.sampleData.flightsSpec.departuresCountMapTitle', {
         defaultMessage: '[Flights] Departures Count Map',
       }),
-      visState: '{\"title\":\"[Flights] Departure Count Map\",\"type\":\"vega\",\"aggs\":[],\"params\":{\"spec\":\"{\\n  $schema: https://vega.github.io/schema/vega/v5.json\\n  config: {\\n    kibana: {type: \\\"map\\\", latitude: 25, longitude: -40, zoom: 3}\\n  }\\n  data: [\\n    {\\n      name: table\\n      url: {\\n        index: kibana_sample_data_flights\\n        %context%: true\\n        %timefield%: timestamp\\n        body: {\\n          size: 0\\n          aggs: {\\n            gridSplit: {\\n              geotile_grid: {field: \\\"OriginLocation\\\", precision: 4, size: 10000}\\n              aggs: {\\n                gridCentroid: {\\n                  geo_centroid: {\\n                    field: \\\"OriginLocation\\\"\\n                  }\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n      format: {property: \\\"aggregations.gridSplit.buckets\\\"}\\n      transform: [\\n        {\\n          type: geopoint\\n          projection: projection\\n          fields: [\\n            gridCentroid.location.lon\\n            gridCentroid.location.lat\\n          ]\\n        }\\n      ]\\n    }\\n  ]\\n  scales: [\\n    {\\n      name: gridSize\\n      type: linear\\n      domain: {data: \\\"table\\\", field: \\\"doc_count\\\"}\\n      range: [\\n        50\\n        1000\\n      ]\\n    }\\n  ]\\n  marks: [\\n    {\\n      name: gridMarker\\n      type: symbol\\n      from: {data: \\\"table\\\"}\\n      encode: {\\n        update: {\\n          size: {scale: \\\"gridSize\\\", field: \\\"doc_count\\\"}\\n          xc: {signal: \\\"datum.x\\\"}\\n          yc: {signal: \\\"datum.y\\\"}\\n          tooltip: {\\n            signal: \\\"{flights: datum.doc_count}\\\"\\n          }\\n        }\\n      }\\n    }\\n  ]\\n}\"}}',
+      visState: '{\"title\":\"[Flights] Departure Count Map\",\"type\":\"vega\",\"aggs\":[],\"params\":{\"spec\":\"{\\n  $schema: https://vega.github.io/schema/vega/v5.json\\n  config: {\\n    opensearchdashboards: {type: \\\"map\\\", latitude: 25, longitude: -40, zoom: 3}\\n  }\\n  data: [\\n    {\\n      name: table\\n      url: {\\n        index: opensearch_dashboards_sample_data_flights\\n        %context%: true\\n        %timefield%: timestamp\\n        body: {\\n          size: 0\\n          aggs: {\\n            gridSplit: {\\n              geotile_grid: {field: \\\"OriginLocation\\\", precision: 4, size: 10000}\\n              aggs: {\\n                gridCentroid: {\\n                  geo_centroid: {\\n                    field: \\\"OriginLocation\\\"\\n                  }\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n      format: {property: \\\"aggregations.gridSplit.buckets\\\"}\\n      transform: [\\n        {\\n          type: geopoint\\n          projection: projection\\n          fields: [\\n            gridCentroid.location.lon\\n            gridCentroid.location.lat\\n          ]\\n        }\\n      ]\\n    }\\n  ]\\n  scales: [\\n    {\\n      name: gridSize\\n      type: linear\\n      domain: {data: \\\"table\\\", field: \\\"doc_count\\\"}\\n      range: [\\n        50\\n        1000\\n      ]\\n    }\\n  ]\\n  marks: [\\n    {\\n      name: gridMarker\\n      type: symbol\\n      from: {data: \\\"table\\\"}\\n      encode: {\\n        update: {\\n          size: {scale: \\\"gridSize\\\", field: \\\"doc_count\\\"}\\n          xc: {signal: \\\"datum.x\\\"}\\n          yc: {signal: \\\"datum.y\\\"}\\n          tooltip: {\\n            signal: \\\"{flights: datum.doc_count}\\\"\\n          }\\n        }\\n      }\\n    }\\n  ]\\n}\"}}',
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
@@ -311,7 +311,7 @@ export const getSavedObjects = (): SavedObject[] => [
         '{"vis":{"defaultColors":{"0 - 75":"rgb(8,48,107)","75 - 150":"rgb(55,135,192)","150 - 225":"rgb(171,208,230)","225 - 300":"rgb(247,251,255)"}}}',
       description: '',
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[{"meta":{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","negate":false,"disabled":false,"alias":null,"type":"phrase","key":"FlightDelay","value":"true","params":{"query":true,"type":"phrase"}},"query":{"match":{"FlightDelay":{"query":true,"type":"phrase"}}},"$state":{"store":"appState"}}],"query":{"query":"","language":"kuery"}}',
       },
@@ -334,7 +334,7 @@ export const getSavedObjects = (): SavedObject[] => [
         '{"vis":{"defaultColors":{"0 - 75":"rgb(8,48,107)","75 - 150":"rgb(55,135,192)","150 - 225":"rgb(171,208,230)","225 - 300":"rgb(247,251,255)"}}}',
       description: '',
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[{"meta":{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","negate":false,"disabled":false,"alias":null,"type":"phrase","key":"Cancelled","value":"true","params":{"query":true,"type":"phrase"}},"query":{"match":{"Cancelled":{"query":true,"type":"phrase"}}},"$state":{"store":"appState"}}],"query":{"query":"","language":"kuery"}}',
       },
@@ -357,7 +357,7 @@ export const getSavedObjects = (): SavedObject[] => [
         '{"vis":{"defaultColors":{"0 - 22":"rgb(247,251,255)","22 - 44":"rgb(208,225,242)","44 - 66":"rgb(148,196,223)","66 - 88":"rgb(74,152,201)","88 - 110":"rgb(23,100,171)"}}}',
       description: '',
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
@@ -379,7 +379,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
@@ -401,7 +401,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON:
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
@@ -419,11 +419,11 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[Flights] Airport Connections (Hover Over Airport)',
       }),
       visState:
-        '{"aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega/v5.json\\n  config: {\\n    kibana: {type: \\"map\\", latitude: 25, longitude: -70, zoom: 3}\\n  }\\n  data: [\\n    {\\n      name: table\\n      url: {\\n        index: kibana_sample_data_flights\\n        %context%: true\\n        // Uncomment to enable time filtering\\n        // %timefield%: timestamp\\n        body: {\\n          size: 0\\n          aggs: {\\n            origins: {\\n              terms: {field: \\"OriginAirportID\\", size: 10000}\\n              aggs: {\\n                originLocation: {\\n                  top_hits: {\\n                    size: 1\\n                    _source: {\\n                      includes: [\\"OriginLocation\\", \\"Origin\\"]\\n                    }\\n                  }\\n                }\\n                distinations: {\\n                  terms: {field: \\"DestAirportID\\", size: 10000}\\n                  aggs: {\\n                    destLocation: {\\n                      top_hits: {\\n                        size: 1\\n                        _source: {\\n                          includes: [\\"DestLocation\\"]\\n                        }\\n                      }\\n                    }\\n                  }\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n      format: {property: \\"aggregations.origins.buckets\\"}\\n      transform: [\\n        {\\n          type: geopoint\\n          projection: projection\\n          fields: [\\n            originLocation.hits.hits[0]._source.OriginLocation.lon\\n            originLocation.hits.hits[0]._source.OriginLocation.lat\\n          ]\\n        }\\n      ]\\n    }\\n    {\\n      name: selectedDatum\\n      on: [\\n        {trigger: \\"!selected\\", remove: true}\\n        {trigger: \\"selected\\", insert: \\"selected\\"}\\n      ]\\n    }\\n  ]\\n  signals: [\\n    {\\n      name: selected\\n      value: null\\n      on: [\\n        {events: \\"@airport:mouseover\\", update: \\"datum\\"}\\n        {events: \\"@airport:mouseout\\", update: \\"null\\"}\\n      ]\\n    }\\n  ]\\n  scales: [\\n    {\\n      name: airportSize\\n      type: linear\\n      domain: {data: \\"table\\", field: \\"doc_count\\"}\\n      range: [\\n        {signal: \\"zoom*zoom*0.2+1\\"}\\n        {signal: \\"zoom*zoom*10+1\\"}\\n      ]\\n    }\\n  ]\\n  marks: [\\n    {\\n      type: group\\n      from: {\\n        facet: {\\n          name: facetedDatum\\n          data: selectedDatum\\n          field: distinations.buckets\\n        }\\n      }\\n      data: [\\n        {\\n          name: facetDatumElems\\n          source: facetedDatum\\n          transform: [\\n            {\\n              type: geopoint\\n              projection: projection\\n              fields: [\\n                destLocation.hits.hits[0]._source.DestLocation.lon\\n                destLocation.hits.hits[0]._source.DestLocation.lat\\n              ]\\n            }\\n            {type: \\"formula\\", expr: \\"{x:parent.x, y:parent.y}\\", as: \\"source\\"}\\n            {type: \\"formula\\", expr: \\"{x:datum.x, y:datum.y}\\", as: \\"target\\"}\\n            {type: \\"linkpath\\", shape: \\"diagonal\\"}\\n          ]\\n        }\\n      ]\\n      scales: [\\n        {\\n          name: lineThickness\\n          type: log\\n          clamp: true\\n          range: [1, 8]\\n        }\\n        {\\n          name: lineOpacity\\n          type: log\\n          clamp: true\\n          range: [0.2, 0.8]\\n        }\\n      ]\\n      marks: [\\n        {\\n          from: {data: \\"facetDatumElems\\"}\\n          type: path\\n          interactive: false\\n          encode: {\\n            update: {\\n              path: {field: \\"path\\"}\\n              stroke: {value: \\"black\\"}\\n              strokeWidth: {scale: \\"lineThickness\\", field: \\"doc_count\\"}\\n              strokeOpacity: {scale: \\"lineOpacity\\", field: \\"doc_count\\"}\\n            }\\n          }\\n        }\\n      ]\\n    }\\n    {\\n      name: airport\\n      type: symbol\\n      from: {data: \\"table\\"}\\n      encode: {\\n        update: {\\n          size: {scale: \\"airportSize\\", field: \\"doc_count\\"}\\n          xc: {signal: \\"datum.x\\"}\\n          yc: {signal: \\"datum.y\\"}\\n          tooltip: {\\n            signal: \\"{title: datum.originLocation.hits.hits[0]._source.Origin + \' (\' + datum.key + \')\', connnections: length(datum.distinations.buckets), flights: datum.doc_count}\\"\\n          }\\n        }\\n      }\\n    }\\n  ]\\n}"},"title":"[Flights] Airport Connections (Hover Over Airport)","type":"vega"}',
+        '{"aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega/v5.json\\n  config: {\\n    opensearchdashboards: {type: \\"map\\", latitude: 25, longitude: -70, zoom: 3}\\n  }\\n  data: [\\n    {\\n      name: table\\n      url: {\\n        index: opensearch_dashboards_sample_data_flights\\n        %context%: true\\n        // Uncomment to enable time filtering\\n        // %timefield%: timestamp\\n        body: {\\n          size: 0\\n          aggs: {\\n            origins: {\\n              terms: {field: \\"OriginAirportID\\", size: 10000}\\n              aggs: {\\n                originLocation: {\\n                  top_hits: {\\n                    size: 1\\n                    _source: {\\n                      includes: [\\"OriginLocation\\", \\"Origin\\"]\\n                    }\\n                  }\\n                }\\n                distinations: {\\n                  terms: {field: \\"DestAirportID\\", size: 10000}\\n                  aggs: {\\n                    destLocation: {\\n                      top_hits: {\\n                        size: 1\\n                        _source: {\\n                          includes: [\\"DestLocation\\"]\\n                        }\\n                      }\\n                    }\\n                  }\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n      format: {property: \\"aggregations.origins.buckets\\"}\\n      transform: [\\n        {\\n          type: geopoint\\n          projection: projection\\n          fields: [\\n            originLocation.hits.hits[0]._source.OriginLocation.lon\\n            originLocation.hits.hits[0]._source.OriginLocation.lat\\n          ]\\n        }\\n      ]\\n    }\\n    {\\n      name: selectedDatum\\n      on: [\\n        {trigger: \\"!selected\\", remove: true}\\n        {trigger: \\"selected\\", insert: \\"selected\\"}\\n      ]\\n    }\\n  ]\\n  signals: [\\n    {\\n      name: selected\\n      value: null\\n      on: [\\n        {events: \\"@airport:mouseover\\", update: \\"datum\\"}\\n        {events: \\"@airport:mouseout\\", update: \\"null\\"}\\n      ]\\n    }\\n  ]\\n  scales: [\\n    {\\n      name: airportSize\\n      type: linear\\n      domain: {data: \\"table\\", field: \\"doc_count\\"}\\n      range: [\\n        {signal: \\"zoom*zoom*0.2+1\\"}\\n        {signal: \\"zoom*zoom*10+1\\"}\\n      ]\\n    }\\n  ]\\n  marks: [\\n    {\\n      type: group\\n      from: {\\n        facet: {\\n          name: facetedDatum\\n          data: selectedDatum\\n          field: distinations.buckets\\n        }\\n      }\\n      data: [\\n        {\\n          name: facetDatumElems\\n          source: facetedDatum\\n          transform: [\\n            {\\n              type: geopoint\\n              projection: projection\\n              fields: [\\n                destLocation.hits.hits[0]._source.DestLocation.lon\\n                destLocation.hits.hits[0]._source.DestLocation.lat\\n              ]\\n            }\\n            {type: \\"formula\\", expr: \\"{x:parent.x, y:parent.y}\\", as: \\"source\\"}\\n            {type: \\"formula\\", expr: \\"{x:datum.x, y:datum.y}\\", as: \\"target\\"}\\n            {type: \\"linkpath\\", shape: \\"diagonal\\"}\\n          ]\\n        }\\n      ]\\n      scales: [\\n        {\\n          name: lineThickness\\n          type: log\\n          clamp: true\\n          range: [1, 8]\\n        }\\n        {\\n          name: lineOpacity\\n          type: log\\n          clamp: true\\n          range: [0.2, 0.8]\\n        }\\n      ]\\n      marks: [\\n        {\\n          from: {data: \\"facetDatumElems\\"}\\n          type: path\\n          interactive: false\\n          encode: {\\n            update: {\\n              path: {field: \\"path\\"}\\n              stroke: {value: \\"black\\"}\\n              strokeWidth: {scale: \\"lineThickness\\", field: \\"doc_count\\"}\\n              strokeOpacity: {scale: \\"lineOpacity\\", field: \\"doc_count\\"}\\n            }\\n          }\\n        }\\n      ]\\n    }\\n    {\\n      name: airport\\n      type: symbol\\n      from: {data: \\"table\\"}\\n      encode: {\\n        update: {\\n          size: {scale: \\"airportSize\\", field: \\"doc_count\\"}\\n          xc: {signal: \\"datum.x\\"}\\n          yc: {signal: \\"datum.y\\"}\\n          tooltip: {\\n            signal: \\"{title: datum.originLocation.hits.hits[0]._source.Origin + \' (\' + datum.key + \')\', connnections: length(datum.distinations.buckets), flights: datum.doc_count}\\"\\n          }\\n        }\\n      }\\n    }\\n  ]\\n}"},"title":"[Flights] Airport Connections (Hover Over Airport)","type":"vega"}',
       uiStateJSON: '{}',
       description: '',
       version: 1,
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
@@ -436,10 +436,10 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: 'kibana_sample_data_flights',
+      title: 'opensearch_dashboards_sample_data_flights',
       timeFieldName: 'timestamp',
       fields:
-        '[{"name":"AvgTicketPrice","type":"number","esTypes":["float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"Cancelled","type":"boolean","esTypes":["boolean"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"Carrier","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"Dest","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"DestAirportID","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"DestCityName","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"DestCountry","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"DestLocation","type":"geo_point","esTypes":["geo_point"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"DestRegion","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"DestWeather","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"DistanceKilometers","type":"number","esTypes":["float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"DistanceMiles","type":"number","esTypes":["float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"FlightDelay","type":"boolean","esTypes":["boolean"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"FlightDelayMin","type":"number","esTypes":["integer"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"FlightDelayType","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"FlightNum","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"FlightTimeHour","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"FlightTimeMin","type":"number","esTypes":["float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"Origin","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"OriginAirportID","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"OriginCityName","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"OriginCountry","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"OriginLocation","type":"geo_point","esTypes":["geo_point"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"OriginRegion","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"OriginWeather","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"_id","type":"string","esTypes":["_id"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":false},{"name":"_index","type":"string","esTypes":["_index"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":false},{"name":"_score","type":"number","count":0,"scripted":false,"searchable":false,"aggregatable":false,"readFromDocValues":false},{"name":"_source","type":"_source","esTypes":["_source"],"count":0,"scripted":false,"searchable":false,"aggregatable":false,"readFromDocValues":false},{"name":"_type","type":"string","esTypes":["_type"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":false},{"name":"dayOfWeek","type":"number","esTypes":["integer"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"timestamp","type":"date","esTypes":["date"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"hour_of_day","type":"number","count":0,"scripted":true,"script":"doc[\'timestamp\'].value.hourOfDay","lang":"painless","searchable":true,"aggregatable":true,"readFromDocValues":false}]',
+        '[{"name":"AvgTicketPrice","type":"number","opensearchTypes":["float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"Cancelled","type":"boolean","opensearchTypes":["boolean"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"Carrier","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"Dest","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"DestAirportID","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"DestCityName","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"DestCountry","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"DestLocation","type":"geo_point","opensearchTypes":["geo_point"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"DestRegion","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"DestWeather","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"DistanceKilometers","type":"number","opensearchTypes":["float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"DistanceMiles","type":"number","opensearchTypes":["float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"FlightDelay","type":"boolean","opensearchTypes":["boolean"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"FlightDelayMin","type":"number","opensearchTypes":["integer"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"FlightDelayType","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"FlightNum","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"FlightTimeHour","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"FlightTimeMin","type":"number","opensearchTypes":["float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"Origin","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"OriginAirportID","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"OriginCityName","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"OriginCountry","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"OriginLocation","type":"geo_point","opensearchTypes":["geo_point"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"OriginRegion","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"OriginWeather","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"_id","type":"string","opensearchTypes":["_id"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":false},{"name":"_index","type":"string","opensearchTypes":["_index"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":false},{"name":"_score","type":"number","count":0,"scripted":false,"searchable":false,"aggregatable":false,"readFromDocValues":false},{"name":"_source","type":"_source","opensearchTypes":["_source"],"count":0,"scripted":false,"searchable":false,"aggregatable":false,"readFromDocValues":false},{"name":"_type","type":"string","opensearchTypes":["_type"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":false},{"name":"dayOfWeek","type":"number","opensearchTypes":["integer"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"timestamp","type":"date","opensearchTypes":["date"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"hour_of_day","type":"number","count":0,"scripted":true,"script":"doc[\'timestamp\'].value.hourOfDay","lang":"painless","searchable":true,"aggregatable":true,"readFromDocValues":false}]',
       fieldFormatMap:
         '{"hour_of_day":{"id":"number","params":{"pattern":"00"}},"AvgTicketPrice":{"id":"number","params":{"pattern":"$0,0.[00]"}}}',
     },
@@ -554,11 +554,11 @@ export const getSavedObjects = (): SavedObject[] => [
         'home.sampleData.flightsSpec.globalFlightDashboardDescription',
         {
           defaultMessage:
-            'Analyze mock flight data for ES-Air, Logstash Airways, Kibana Airlines and JetBeats',
+            'Analyze mock flight data for OpenSearch-Air, Logstash Airways, OpenSearch Dashboards Airlines and JetBeats',
         }
       ),
       panelsJSON:
-        '[{"panelIndex":"1","gridData":{"x":0,"y":0,"w":32,"h":7,"i":"1"},"embeddableConfig":{},"version":"6.3.0","panelRefName":"panel_0"},{"panelIndex":"3","gridData":{"x":17,"y":7,"w":23,"h":12,"i":"3"},"embeddableConfig":{"vis":{"colors":{"Average Ticket Price":"#0A50A1","Flight Count":"#82B5D8"},"legendOpen":false}},"version":"6.3.0","panelRefName":"panel_1"},{"panelIndex":"4","gridData":{"x":0,"y":85,"w":48,"h":15,"i":"4"},"embeddableConfig":{},"version":"6.3.0","panelRefName":"panel_2"},{"panelIndex":"5","gridData":{"x":0,"y":7,"w":17,"h":12,"i":"5"},"embeddableConfig":{"vis":{"colors":{"ES-Air":"#447EBC","JetBeats":"#65C5DB","Kibana Airlines":"#BA43A9","Logstash Airways":"#E5AC0E"},"legendOpen":false}},"version":"6.3.0","panelRefName":"panel_3"},{"panelIndex":"6","gridData":{"x":24,"y":33,"w":24,"h":14,"i":"6"},"embeddableConfig":{"vis":{"colors":{"Carrier Delay":"#5195CE","Late Aircraft Delay":"#1F78C1","NAS Delay":"#70DBED","No Delay":"#BADFF4","Security Delay":"#052B51","Weather Delay":"#6ED0E0"}}},"version":"6.3.0","panelRefName":"panel_4"},{"panelIndex":"7","gridData":{"x":24,"y":19,"w":24,"h":14,"i":"7"},"embeddableConfig":{},"version":"6.3.0","panelRefName":"panel_5"},{"panelIndex":"10","gridData":{"x":0,"y":35,"w":24,"h":12,"i":"10"},"embeddableConfig":{"vis":{"colors":{"Count":"#1F78C1"},"legendOpen":false}},"version":"6.3.0","panelRefName":"panel_6"},{"panelIndex":"13","gridData":{"x":10,"y":19,"w":14,"h":8,"i":"13"},"embeddableConfig":{"vis":{"colors":{"Count":"#1F78C1"},"legendOpen":false}},"version":"6.3.0","panelRefName":"panel_7"},{"panelIndex":"14","gridData":{"x":10,"y":27,"w":14,"h":8,"i":"14"},"embeddableConfig":{"vis":{"colors":{"Count":"#1F78C1"},"legendOpen":false}},"version":"6.3.0","panelRefName":"panel_8"},{"panelIndex":"21","gridData":{"x":0,"y":62,"w":48,"h":8,"i":"21"},"embeddableConfig":{},"version":"6.3.0","panelRefName":"panel_10"},{"panelIndex":"22","gridData":{"x":32,"y":0,"w":16,"h":7,"i":"22"},"embeddableConfig":{},"version":"6.3.0","panelRefName":"panel_11"},{"panelIndex":"23","gridData":{"x":0,"y":70,"w":48,"h":15,"i":"23"},"embeddableConfig":{"mapCenter":[42.19556096274418,9.536742995308601e-7],"mapZoom":1},"version":"6.3.0","panelRefName":"panel_12"},{"panelIndex":"25","gridData":{"x":0,"y":19,"w":10,"h":8,"i":"25"},"embeddableConfig":{"vis":{"defaultColors":{"0 - 50":"rgb(247,251,255)","100 - 150":"rgb(107,174,214)","150 - 200":"rgb(33,113,181)","200 - 250":"rgb(8,48,107)","50 - 100":"rgb(198,219,239)"},"legendOpen":false}},"version":"6.3.0","panelRefName":"panel_13"},{"panelIndex":"27","gridData":{"x":0,"y":27,"w":10,"h":8,"i":"27"},"embeddableConfig":{"vis":{"defaultColors":{"0 - 50":"rgb(247,251,255)","100 - 150":"rgb(107,174,214)","150 - 200":"rgb(33,113,181)","200 - 250":"rgb(8,48,107)","50 - 100":"rgb(198,219,239)"},"legendOpen":false}},"version":"6.3.0","panelRefName":"panel_14"},{"panelIndex":"28","gridData":{"x":0,"y":47,"w":24,"h":15,"i":"28"},"embeddableConfig":{"vis":{"defaultColors":{"0 - 11":"rgb(247,251,255)","11 - 22":"rgb(208,225,242)","22 - 33":"rgb(148,196,223)","33 - 44":"rgb(74,152,201)","44 - 55":"rgb(23,100,171)"},"legendOpen":false}},"version":"6.3.0","panelRefName":"panel_15"},{"panelIndex":"29","gridData":{"x":40,"y":7,"w":8,"h":6,"i":"29"},"embeddableConfig":{},"version":"6.3.0","panelRefName":"panel_16"},{"panelIndex":"30","gridData":{"x":40,"y":13,"w":8,"h":6,"i":"30"},"embeddableConfig":{},"version":"6.3.0","panelRefName":"panel_17"},{"panelIndex":"31","gridData":{"x":24,"y":47,"w":24,"h":15,"i":"31"},"embeddableConfig":{},"version":"6.3.0","panelRefName":"panel_18"}]',
+        '[{"panelIndex":"1","gridData":{"x":0,"y":0,"w":32,"h":7,"i":"1"},"embeddableConfig":{},"version":"6.3.0","panelRefName":"panel_0"},{"panelIndex":"3","gridData":{"x":17,"y":7,"w":23,"h":12,"i":"3"},"embeddableConfig":{"vis":{"colors":{"Average Ticket Price":"#0A50A1","Flight Count":"#82B5D8"},"legendOpen":false}},"version":"6.3.0","panelRefName":"panel_1"},{"panelIndex":"4","gridData":{"x":0,"y":85,"w":48,"h":15,"i":"4"},"embeddableConfig":{},"version":"6.3.0","panelRefName":"panel_2"},{"panelIndex":"5","gridData":{"x":0,"y":7,"w":17,"h":12,"i":"5"},"embeddableConfig":{"vis":{"colors":{"OpenSearch-Air":"#447EBC","JetBeats":"#65C5DB","OpenSearch Dashboards Airlines":"#BA43A9","Logstash Airways":"#E5AC0E"},"legendOpen":false}},"version":"6.3.0","panelRefName":"panel_3"},{"panelIndex":"6","gridData":{"x":24,"y":33,"w":24,"h":14,"i":"6"},"embeddableConfig":{"vis":{"colors":{"Carrier Delay":"#5195CE","Late Aircraft Delay":"#1F78C1","NAS Delay":"#70DBED","No Delay":"#BADFF4","Security Delay":"#052B51","Weather Delay":"#6ED0E0"}}},"version":"6.3.0","panelRefName":"panel_4"},{"panelIndex":"7","gridData":{"x":24,"y":19,"w":24,"h":14,"i":"7"},"embeddableConfig":{},"version":"6.3.0","panelRefName":"panel_5"},{"panelIndex":"10","gridData":{"x":0,"y":35,"w":24,"h":12,"i":"10"},"embeddableConfig":{"vis":{"colors":{"Count":"#1F78C1"},"legendOpen":false}},"version":"6.3.0","panelRefName":"panel_6"},{"panelIndex":"13","gridData":{"x":10,"y":19,"w":14,"h":8,"i":"13"},"embeddableConfig":{"vis":{"colors":{"Count":"#1F78C1"},"legendOpen":false}},"version":"6.3.0","panelRefName":"panel_7"},{"panelIndex":"14","gridData":{"x":10,"y":27,"w":14,"h":8,"i":"14"},"embeddableConfig":{"vis":{"colors":{"Count":"#1F78C1"},"legendOpen":false}},"version":"6.3.0","panelRefName":"panel_8"},{"panelIndex":"21","gridData":{"x":0,"y":62,"w":48,"h":8,"i":"21"},"embeddableConfig":{},"version":"6.3.0","panelRefName":"panel_10"},{"panelIndex":"22","gridData":{"x":32,"y":0,"w":16,"h":7,"i":"22"},"embeddableConfig":{},"version":"6.3.0","panelRefName":"panel_11"},{"panelIndex":"23","gridData":{"x":0,"y":70,"w":48,"h":15,"i":"23"},"embeddableConfig":{"mapCenter":[42.19556096274418,9.536742995308601e-7],"mapZoom":1},"version":"6.3.0","panelRefName":"panel_12"},{"panelIndex":"25","gridData":{"x":0,"y":19,"w":10,"h":8,"i":"25"},"embeddableConfig":{"vis":{"defaultColors":{"0 - 50":"rgb(247,251,255)","100 - 150":"rgb(107,174,214)","150 - 200":"rgb(33,113,181)","200 - 250":"rgb(8,48,107)","50 - 100":"rgb(198,219,239)"},"legendOpen":false}},"version":"6.3.0","panelRefName":"panel_13"},{"panelIndex":"27","gridData":{"x":0,"y":27,"w":10,"h":8,"i":"27"},"embeddableConfig":{"vis":{"defaultColors":{"0 - 50":"rgb(247,251,255)","100 - 150":"rgb(107,174,214)","150 - 200":"rgb(33,113,181)","200 - 250":"rgb(8,48,107)","50 - 100":"rgb(198,219,239)"},"legendOpen":false}},"version":"6.3.0","panelRefName":"panel_14"},{"panelIndex":"28","gridData":{"x":0,"y":47,"w":24,"h":15,"i":"28"},"embeddableConfig":{"vis":{"defaultColors":{"0 - 11":"rgb(247,251,255)","11 - 22":"rgb(208,225,242)","22 - 33":"rgb(148,196,223)","33 - 44":"rgb(74,152,201)","44 - 55":"rgb(23,100,171)"},"legendOpen":false}},"version":"6.3.0","panelRefName":"panel_15"},{"panelIndex":"29","gridData":{"x":40,"y":7,"w":8,"h":6,"i":"29"},"embeddableConfig":{},"version":"6.3.0","panelRefName":"panel_16"},{"panelIndex":"30","gridData":{"x":40,"y":13,"w":8,"h":6,"i":"30"},"embeddableConfig":{},"version":"6.3.0","panelRefName":"panel_17"},{"panelIndex":"31","gridData":{"x":24,"y":47,"w":24,"h":15,"i":"31"},"embeddableConfig":{},"version":"6.3.0","panelRefName":"panel_18"}]',
       optionsJSON: '{"hidePanelTitles":false,"useMargins":true}',
       version: 1,
       timeRestore: true,
@@ -570,7 +570,7 @@ export const getSavedObjects = (): SavedObject[] => [
         section: 2,
         value: 900000,
       },
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         searchSourceJSON:
           '{"query":{"language":"kuery","query":""},"filter":[],"highlightAll":true,"version":true}',
       },

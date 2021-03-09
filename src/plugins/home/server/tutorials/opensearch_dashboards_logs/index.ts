@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from 'src/plugins/home/server/tutorials/opensearch_metrics/node_modules/@osd/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
@@ -29,37 +29,37 @@ import {
   TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
-export function kibanaLogsSpecProvider(context: TutorialContext): TutorialSchema {
-  const moduleName = 'kibana';
+export function opensearchDashboardsLogsSpecProvider(context: TutorialContext): TutorialSchema {
+  const moduleName = 'opensearchDashboards';
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
-    id: 'kibanaLogs',
-    name: i18n.translate('home.tutorials.kibanaLogs.nameTitle', {
-      defaultMessage: 'Kibana Logs',
+    id: 'opensearchDashboardsLogs',
+    name: i18n.translate('home.tutorials.opensearchDashboardsLogs.nameTitle', {
+      defaultMessage: 'OpenSearch Dashboards Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
-    shortDescription: i18n.translate('home.tutorials.kibanaLogs.shortDescription', {
-      defaultMessage: 'Collect Kibana logs.',
+    shortDescription: i18n.translate('home.tutorials.opensearchDashboardsLogs.shortDescription', {
+      defaultMessage: 'Collect OpenSearch Dashboards logs.',
     }),
-    longDescription: i18n.translate('home.tutorials.kibanaLogs.longDescription', {
-      defaultMessage: 'This is the Kibana module. \
+    longDescription: i18n.translate('home.tutorials.opensearchDashboardsLogs.longDescription', {
+      defaultMessage: 'This is the OpenSearch Dashboards module. \
 [Learn more]({learnMoreLink}).',
       values: {
-        learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-kibana.html',
+        learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-opensearch-dashboards.html',
       },
     }),
     euiIconType: 'logoKibana',
     artifacts: {
       dashboards: [],
       application: {
-        label: i18n.translate('home.tutorials.kibanaLogs.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.opensearchDashboardsLogs.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/discover#/',
       },
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-kibana.html',
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-opensearch-dashboards.html',
       },
     },
     completionTimeMinutes: 10,

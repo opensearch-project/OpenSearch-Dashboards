@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import { IRouter } from 'src/core/server';
 
 export const registerHitsStatusRoute = (router: IRouter) => {
@@ -33,7 +33,7 @@ export const registerHitsStatusRoute = (router: IRouter) => {
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { index, query } = req.body;
-      const client = context.core.elasticsearch.client;
+      const client = context.core.opensearch.client;
 
       try {
         const { body } = await client.asCurrentUser.search({
