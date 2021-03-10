@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 import { FilterManager } from './filter_manager';
 import { coreMock } from '../../../../../core/public/mocks';
@@ -40,25 +40,25 @@ describe('FilterManager', function () {
 
   describe('findFilters', function () {
     const indexPatternMock = {} as IndexPattern;
-    let kbnFilters: Filter[];
+    let osdFilters: Filter[];
     const queryFilterMock = new QueryFilterManager(setupMock.uiSettings);
-    queryFilterMock.getAppFilters = () => kbnFilters;
+    queryFilterMock.getAppFilters = () => osdFilters;
     queryFilterMock.getGlobalFilters = () => [];
 
     let filterManager: FilterManagerTest;
     beforeEach(() => {
-      kbnFilters = [];
+      osdFilters = [];
       filterManager = new FilterManagerTest(controlId, 'field1', indexPatternMock, queryFilterMock);
     });
 
     test('should not find filters that are not controlled by any visualization', function () {
-      kbnFilters.push({} as Filter);
+      osdFilters.push({} as Filter);
       const foundFilters = filterManager.findFilters();
       expect(foundFilters.length).to.be(0);
     });
 
     test('should not find filters that are controlled by other Visualizations', function () {
-      kbnFilters.push({
+      osdFilters.push({
         meta: {
           controlledBy: 'anotherControl',
         },
@@ -68,7 +68,7 @@ describe('FilterManager', function () {
     });
 
     test('should find filter that is controlled by target Visualization', function () {
-      kbnFilters.push({
+      osdFilters.push({
         meta: {
           controlledBy: controlId,
         },

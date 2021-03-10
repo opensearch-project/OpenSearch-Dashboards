@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { CoreSetup, PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
+import { CoreSetup, PluginConfigDescriptor, PluginInitializerContext } from 'opensearch-dashboards/server';
+import { schema } from '@osd/config-schema';
 import { first } from 'rxjs/operators';
 
 export const config: PluginConfigDescriptor = {
@@ -28,7 +28,7 @@ export const config: PluginConfigDescriptor = {
 export const plugin = (initializerContext: PluginInitializerContext) => ({
   setup(core: CoreSetup) {
     // TODO this is a workaround to pass global config settings to the client
-    // once kibana.autocompleteTerminateAfter and kibana.autocompleteTimeout
+    // once opensearchDashboards.autocompleteTerminateAfter and opensearchDashboards.autocompleteTimeout
     // are migrated completely and owned by a plugin, this can be done completely
     // client side and the additional endpoint is not required anymore
     core.http.createRouter().get(
@@ -42,12 +42,12 @@ export const plugin = (initializerContext: PluginInitializerContext) => ({
           .toPromise();
         return response.ok({
           body: {
-            autocompleteTimeout: legacyConfig.kibana.autocompleteTimeout.asMilliseconds(),
-            autocompleteTerminateAfter: legacyConfig.kibana.autocompleteTerminateAfter.asMilliseconds(),
+            autocompleteTimeout: legacyConfig.opensearchDashboards.autocompleteTimeout.asMilliseconds(),
+            autocompleteTerminateAfter: legacyConfig.opensearchDashboards.autocompleteTerminateAfter.asMilliseconds(),
           },
         });
       }
     );
   },
-  start() {},
+  start() { },
 });

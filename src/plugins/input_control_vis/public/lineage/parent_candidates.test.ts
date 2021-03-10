@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { getLineageMap } from './lineage_map';
 import { getParentCandidates } from './parent_candidates';
 import { CONTROL_TYPES, newControl } from '../editor_utils';

@@ -20,7 +20,7 @@
 import React, { PureComponent } from 'react';
 
 import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EuiSwitchEvent } from '@elastic/eui';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
@@ -58,7 +58,7 @@ export class OptionsTab extends PureComponent<OptionsTabProps> {
             label={
               <FormattedMessage
                 id="inputControl.editor.optionsTab.updateFilterLabel"
-                defaultMessage="Update Kibana filters on each change"
+                defaultMessage="Update OpenSearch Dashboards filters on each change"
               />
             }
             checked={this.props.stateParams.updateFiltersOnChange}

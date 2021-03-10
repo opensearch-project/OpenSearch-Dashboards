@@ -35,13 +35,13 @@ describe('rangeControlFactory', () => {
     const useTimeFilter = false;
 
     test('should set min and max from aggregation results', async () => {
-      const esSearchResponse = {
+      const opensearchSearchResponse = {
         aggregations: {
           maxAgg: { value: 100 },
           minAgg: { value: 10 },
         },
       };
-      const searchSourceMock = getSearchSourceMock(esSearchResponse);
+      const searchSourceMock = getSearchSourceMock(opensearchSearchResponse);
       const deps = getDepsMock({
         searchSource: {
           create: searchSourceMock,
@@ -57,14 +57,14 @@ describe('rangeControlFactory', () => {
     });
 
     test('should disable control when there are 0 hits', async () => {
-      // ES response when the query does not match any documents
-      const esSearchResponse = {
+      // OpenSearch response when the query does not match any documents
+      const opensearchSearchResponse = {
         aggregations: {
           maxAgg: { value: null },
           minAgg: { value: null },
         },
       };
-      const searchSourceMock = getSearchSourceMock(esSearchResponse);
+      const searchSourceMock = getSearchSourceMock(opensearchSearchResponse);
       const deps = getDepsMock({
         searchSource: {
           create: searchSourceMock,
@@ -78,10 +78,10 @@ describe('rangeControlFactory', () => {
     });
 
     test('should disable control when response is empty', async () => {
-      // ES response for dashboardonly user who does not have read permissions on index is 200 (which is weird)
+      // OpenSearch response for dashboardonly user who does not have read permissions on index is 200 (which is weird)
       // and there is not aggregations key
-      const esSearchResponse = {};
-      const searchSourceMock = getSearchSourceMock(esSearchResponse);
+      const opensearchSearchResponse = {};
+      const searchSourceMock = getSearchSourceMock(opensearchSearchResponse);
       const deps = getDepsMock({
         searchSource: {
           create: searchSourceMock,

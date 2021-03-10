@@ -22,7 +22,7 @@ import _ from 'lodash';
 import { FilterManager } from './filter_manager';
 import {
   PhraseFilter,
-  esFilters,
+  opensearchFilters,
   IndexPattern,
   FilterManager as QueryFilterManager,
 } from '../../../../data/public';
@@ -46,9 +46,9 @@ export class PhraseFilterManager extends FilterManager {
     }
 
     if (phrases.length === 1) {
-      newFilter = esFilters.buildPhraseFilter(value, phrases[0], this.indexPattern);
+      newFilter = opensearchFilters.buildPhraseFilter(value, phrases[0], this.indexPattern);
     } else {
-      newFilter = esFilters.buildPhrasesFilter(value, phrases, this.indexPattern);
+      newFilter = opensearchFilters.buildPhrasesFilter(value, phrases, this.indexPattern);
     }
 
     newFilter.meta.key = this.fieldName;
@@ -57,14 +57,14 @@ export class PhraseFilterManager extends FilterManager {
   }
 
   getValueFromFilterBar() {
-    const kbnFilters = this.findFilters();
-    if (kbnFilters.length === 0) {
+    const osdFilters = this.findFilters();
+    if (osdFilters.length === 0) {
       return;
     }
 
-    const values = kbnFilters
-      .map((kbnFilter) => {
-        return this.getValueFromFilter(kbnFilter);
+    const values = osdFilters
+      .map((osdFilter) => {
+        return this.getValueFromFilter(osdFilter);
       })
       .filter((value) => value != null);
 
@@ -78,17 +78,17 @@ export class PhraseFilterManager extends FilterManager {
   }
 
   /**
-   * Extract filtering value from kibana filters
+   * Extract filtering value from OpenSearch Dashboards filters
    *
-   * @param  {PhraseFilter} kbnFilter
+   * @param  {PhraseFilter} osdFilter
    * @return {Array.<string>} array of values pulled from filter
    */
-  private getValueFromFilter(kbnFilter: PhraseFilter): any {
+  private getValueFromFilter(osdFilter: PhraseFilter): any {
     // bool filter - multiple phrase filters
-    if (_.has(kbnFilter, 'query.bool.should')) {
-      return _.get(kbnFilter, 'query.bool.should')
-        .map((kbnQueryFilter: PhraseFilter) => {
-          return this.getValueFromFilter(kbnQueryFilter);
+    if (_.has(osdFilter, 'query.bool.should')) {
+      return _.get(osdFilter, 'query.bool.should')
+        .map((osdQueryFilter: PhraseFilter) => {
+          return this.getValueFromFilter(osdQueryFilter);
         })
         .filter((value: any) => {
           if (value) {
@@ -99,22 +99,22 @@ export class PhraseFilterManager extends FilterManager {
     }
 
     // scripted field filter
-    if (_.has(kbnFilter, 'script')) {
-      return _.get(kbnFilter, 'script.script.params.value');
+    if (_.has(osdFilter, 'script')) {
+      return _.get(osdFilter, 'script.script.params.value');
     }
 
     // single phrase filter
-    if (esFilters.isPhraseFilter(kbnFilter)) {
-      if (esFilters.getPhraseFilterField(kbnFilter) !== this.fieldName) {
+    if (opensearchFilters.isPhraseFilter(osdFilter)) {
+      if (opensearchFilters.getPhraseFilterField(osdFilter) !== this.fieldName) {
         return;
       }
 
-      return esFilters.getPhraseFilterValue(kbnFilter);
+      return opensearchFilters.getPhraseFilterValue(osdFilter);
     }
 
     // single phrase filter from bool filter
-    if (_.has(kbnFilter, ['match_phrase', this.fieldName])) {
-      return _.get(kbnFilter, ['match_phrase', this.fieldName]);
+    if (_.has(osdFilter, ['match_phrase', this.fieldName])) {
+      return _.get(osdFilter, ['match_phrase', this.fieldName]);
     }
   }
 }

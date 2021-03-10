@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { Filter } from 'src/plugins/data/public';
 import { ControlParams, ControlParamsOptions, CONTROL_TYPES } from '../editor_utils';
@@ -43,7 +43,7 @@ export function noIndexPatternMsg(indexPatternId: string) {
 }
 
 export abstract class Control<FilterManager extends BaseFilterManager> {
-  private kbnFilter: Filter | null = null;
+  private osdFilter: Filter | null = null;
 
   enable: boolean = false;
   disabledReason: string = '';
@@ -66,7 +66,7 @@ export abstract class Control<FilterManager extends BaseFilterManager> {
     this.type = controlParams.type;
     this.label = controlParams.label ? controlParams.label : controlParams.fieldName;
 
-    // restore state from kibana filter context
+    // restore state from OpenSearch Dashboards filter context
     this.reset();
     // disable until initialized
     this.disable(
@@ -128,17 +128,17 @@ export abstract class Control<FilterManager extends BaseFilterManager> {
   set(newValue: any) {
     this.value = newValue;
     if (this.hasValue()) {
-      this.kbnFilter = this.filterManager.createFilter(this.value);
+      this.osdFilter = this.filterManager.createFilter(this.value);
     } else {
-      this.kbnFilter = null;
+      this.osdFilter = null;
     }
   }
 
   /*
-   * Remove any user changes to value by resetting value to that as provided by Kibana filter pills
+   * Remove any user changes to value by resetting value to that as provided by OpenSearch Dashboards filter pills
    */
   reset() {
-    this.kbnFilter = null;
+    this.osdFilter = null;
     this.value = this.filterManager.getValueFromFilterBar();
   }
 
@@ -153,15 +153,15 @@ export abstract class Control<FilterManager extends BaseFilterManager> {
     return !_.isEqual(this.value, this.filterManager.getValueFromFilterBar());
   }
 
-  hasKbnFilter() {
-    if (this.kbnFilter) {
+  hasOsdFilter() {
+    if (this.osdFilter) {
       return true;
     }
     return false;
   }
 
-  getKbnFilter() {
-    return this.kbnFilter;
+  getOsdFilter() {
+    return this.osdFilter;
   }
 
   hasValue(): boolean {
