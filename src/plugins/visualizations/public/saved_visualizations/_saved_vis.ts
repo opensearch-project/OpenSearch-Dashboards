@@ -111,7 +111,7 @@ export function createSavedVisClass(services: SavedObjectOpenSearchDashboardsSer
           savedSearchId: opts.savedSearchId,
           version: 1,
         },
-        afterESResp: async (savedObject: SavedObject) => {
+        afterOpenSearchResp: async (savedObject: SavedObject) => {
           const savedVis = (savedObject as any) as ISavedVis;
           savedVis.visState = await updateOldState(savedVis.visState);
           if (savedVis.searchSourceFields?.index) {
