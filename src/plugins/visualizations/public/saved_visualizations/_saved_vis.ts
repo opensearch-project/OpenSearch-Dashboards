@@ -27,7 +27,7 @@
 import {
   createSavedObjectClass,
   SavedObject,
-  SavedObjectKibanaServices,
+  SavedObjectOpenSearchDashboardsServices,
 } from '../../../../plugins/saved_objects/public';
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
@@ -73,7 +73,7 @@ export const convertFromSerializedVis = (vis: SerializedVis): ISavedVis => {
   };
 };
 
-export function createSavedVisClass(services: SavedObjectKibanaServices) {
+export function createSavedVisClass(services: SavedObjectOpenSearchDashboardsServices) {
   const SavedObjectClass = createSavedObjectClass(services);
   const savedSearch = createSavedSearchesLoader(services);
 

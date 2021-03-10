@@ -20,9 +20,9 @@
 import React from 'react';
 
 import { EuiModal, EuiOverlayMask } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
-import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
+import { METRIC_TYPE, UiStatsMetricType } from '@osd/analytics';
 import { ApplicationStart, IUiSettingsClient, SavedObjectsStart } from '../../../../core/public';
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';

@@ -24,7 +24,7 @@ import { getUsageCollector } from './get_usage_collector';
 
 export function registerVisualizationsCollector(
   collectorSet: UsageCollectionSetup,
-  config: Observable<{ kibana: { index: string } }>
+  config: Observable<{ opensearchDashboards: { index: string } }>
 ) {
   const collector = collectorSet.makeUsageCollector(getUsageCollector(config));
   collectorSet.registerCollector(collector);

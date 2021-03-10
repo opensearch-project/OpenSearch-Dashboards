@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { SavedObjectMigrationFn } from 'kibana/server';
+import { SavedObjectMigrationFn } from 'opensearch-dashboards/server';
 import { cloneDeep, get, omit, has, flow } from 'lodash';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
-  const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+  const searchSourceJSON = get(doc, 'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON');
   if (typeof searchSourceJSON !== 'string') {
     return doc;
   }
@@ -35,7 +35,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
   }
 
   if (searchSource.index && Array.isArray(doc.references)) {
-    searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+    searchSource.indexRefName = 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index';
     doc.references.push({
       name: searchSource.indexRefName,
       type: 'index-pattern',
@@ -48,7 +48,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
       if (!filterRow.meta || !filterRow.meta.index || !Array.isArray(doc.references)) {
         return;
       }
-      filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
+      filterRow.meta.indexRefName = `opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
       doc.references.push({
         name: filterRow.meta.indexRefName,
         type: 'index-pattern',
@@ -58,7 +58,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
     });
   }
 
-  doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
+  doc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
 
   return doc;
 };
@@ -173,7 +173,7 @@ const migrateOperatorKeyTypo: SavedObjectMigrationFn<any, any> = (doc) => {
 /**
  * Moving setting wether to do a row or column split to vis.params
  *
- * @see https://github.com/elastic/kibana/pull/58462/files#diff-ae69fe15b20a5099d038e9bbe2ed3849
+ * @see https://github.com/elastic/opensearch-dashboards/pull/58462/files#diff-ae69fe15b20a5099d038e9bbe2ed3849
  **/
 const migrateSplitByChartRow: SavedObjectMigrationFn<any, any> = (doc) => {
   const visStateJSON = get(doc, 'attributes.visState');
@@ -288,7 +288,7 @@ const removeDateHistogramTimeZones: SavedObjectMigrationFn<any, any> = (doc) => 
 };
 
 // migrate gauge verticalSplit to alignment
-// https://github.com/elastic/kibana/issues/34636
+// https://github.com/elastic/opensearch-dashboards/issues/34636
 const migrateGaugeVerticalSplitToAlignment: SavedObjectMigrationFn<any, any> = (doc, logger) => {
   const visStateJSON = get(doc, 'attributes.visState');
 
@@ -657,12 +657,12 @@ const migrateTableSplits: SavedObjectMigrationFn<any, any> = (doc) => {
 
 /**
  * This migration script is related to:
- *   @link https://github.com/elastic/kibana/pull/62194
- *   @link https://github.com/elastic/kibana/pull/14644
+ *   @link https://github.com/elastic/opensearch-dashboards/pull/62194
+ *   @link https://github.com/elastic/opensearch-dashboards/pull/14644
  * This is only a problem when you import an object from 5.x into 6.x but to be sure that all saved objects migrated we should execute it twice in 6.7.2 and 7.9.3
  */
 const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
-  const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+  const searchSourceJSON = get(doc, 'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON');
 
   if (searchSourceJSON) {
     let searchSource: any;
@@ -679,7 +679,7 @@ const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
         ...doc,
         attributes: {
           ...doc.attributes,
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({
               ...searchSource,
               query: {
@@ -733,7 +733,7 @@ const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
   const visStateJSON = get(doc, 'attributes.visState');
   let visState;
 
-  const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+  const searchSourceJSON = get(doc, 'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON');
 
   if (visStateJSON) {
     try {
@@ -746,8 +746,8 @@ const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
         ...doc,
         attributes: {
           ...doc.attributes,
-          kibanaSavedObjectMeta: {
-            ...get(doc, 'attributes.kibanaSavedObjectMeta'),
+          opensearchDashboardsSavedObjectMeta: {
+            ...get(doc, 'attributes.opensearchDashboardsSavedObjectMeta'),
             searchSourceJSON: '{}',
           },
         },
@@ -764,7 +764,7 @@ export const visualizationSavedObjectTypeMigrations = {
    * released. Thus a user who already had 7.0.0 installed already got the 7.0.0 migrations below running,
    * so we need a version higher than that. But this fix was backported to the 6.7 release, meaning if we
    * would only have the 7.0.1 migration in here a user on the 6.7 release will migrate their saved objects
-   * to the 7.0.1 state, and thus when updating their Kibana to 7.0, will never run the 7.0.0 migrations introduced
+   * to the 7.0.1 state, and thus when updating their OpenSearch Dashboards to 7.0, will never run the 7.0.0 migrations introduced
    * in that version. So we apply this twice, once with 6.7.2 and once with 7.0.1 while the backport to 6.7
    * only contained the 6.7.2 migration and not the 7.0.1 migration.
    */
