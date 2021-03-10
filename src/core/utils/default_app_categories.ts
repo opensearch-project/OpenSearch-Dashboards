@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { AppCategory } from '../types';
 
 /** @internal */
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze({
-  kibana: {
-    id: 'kibana',
-    label: i18n.translate('core.ui.kibanaNavList.label', {
-      defaultMessage: 'Kibana',
+  openSearchDashboards: {
+    id: 'openSearchDashboards',
+    label: i18n.translate('core.ui.openSearchDashboardsNavList.label', {
+      defaultMessage: 'OpenSearch Dashboards',
     }),
     euiIconType: 'logoKibana',
     order: 1000,
