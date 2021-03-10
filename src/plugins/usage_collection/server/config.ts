@@ -18,7 +18,7 @@
  */
 
 import { schema, TypeOf } from '@osd/config-schema';
-import { PluginConfigDescriptor } from 'opensearch-dashboardsserver';
+import { PluginConfigDescriptor } from 'opensearch-dashboards/server';
 import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../common/constants';
 
 export const configSchema = schema.object({

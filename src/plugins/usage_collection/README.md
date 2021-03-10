@@ -25,7 +25,7 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
     ```ts
     // server/plugin.ts
     import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-    import { CoreSetup, CoreStart } from 'opensearch-dashboardsserver';
+    import { CoreSetup, CoreStart } from 'opensearch-dashboards/server';
 
     class Plugin {
       public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
@@ -41,7 +41,7 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
     ```ts
     // server/collectors/register.ts
     import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-    import { APICluster } from 'opensearch-dashboardsserver';
+    import { APICluster } from 'opensearch-dashboards/server';
 
     interface Usage {
       my_objects: {
@@ -86,14 +86,14 @@ Some background:
 
 - `MY_USAGE_TYPE` can be any string. It usually matches the plugin name. As a safety mechanism, we double check there are no duplicates at the moment of registering the collector.
 - The `fetch` method needs to support multiple contexts in which it is called. For example, when stats are pulled from a OpenSearch Dashboards Metricbeat module, the Beat calls OpenSearch Dashboards's stats API to invoke usage collection.
-In this case, the `fetch` method is called as a result of an HTTP API request and `callCluster` wraps `callWithRequest` or `opensearchClient` wraps `asCurrentUser`, where the request headers are expected to have read privilege on the entire `..opensearch-dashboards' index. 
+In this case, the `fetch` method is called as a result of an HTTP API request and `callCluster` wraps `callWithRequest` or `opensearchClient` wraps `asCurrentUser`, where the request headers are expected to have read privilege on the entire `.opensearch-dashboards' index. 
 
 Note: there will be many cases where you won't need to use the `callCluster` (or `opensearchClient`) function that gets passed in to your `fetch` method at all. Your feature might have an accumulating value in server memory, or read something from the OS, or use other clients like a custom SavedObjects client. In that case it's up to the plugin to initialize those clients like the example below:
 
 ```ts
 // server/plugin.ts
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CoreSetup, CoreStart } from 'opensearch-dashboardsserver';
+import { CoreSetup, CoreStart } from 'opensearch-dashboards/server';
 
 class Plugin {
   private savedObjectsRepository?: ISavedObjectsRepository;

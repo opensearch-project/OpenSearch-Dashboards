@@ -22,7 +22,7 @@ import {
   ISavedObjectsRepository,
   MetricsServiceSetup,
   ServiceStatus,
-} from 'opensearch-dashboardsserver';
+} from 'opensearch-dashboards/server';
 import { Observable } from 'rxjs';
 import { CollectorSet } from '../collector';
 import { registerUiMetricRoute } from './report_metrics';

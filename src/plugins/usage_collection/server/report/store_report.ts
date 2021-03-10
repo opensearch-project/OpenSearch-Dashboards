@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ISavedObjectsRepository, SavedObject } from 'opensearch-dashboardsserver';
+import { ISavedObjectsRepository, SavedObject } from 'opensearch-dashboards/server';
 import { ReportSchemaType } from './schema';
 
 export async function storeReport(

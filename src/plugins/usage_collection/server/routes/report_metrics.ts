@@ -18,7 +18,7 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter, ISavedObjectsRepository } from 'opensearch-dashboardsserver';
+import { IRouter, ISavedObjectsRepository } from 'opensearch-dashboards/server';
 import { storeReport, reportSchema } from '../report';
 
 export function registerUiMetricRoute(

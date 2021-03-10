@@ -18,7 +18,7 @@
  */
 
 import { snakeCase } from 'lodash';
-import { Logger, LegacyAPICaller, OpenSearchClient } from 'opensearch-dashboardsserver';
+import { Logger, LegacyAPICaller, OpenSearchClient } from 'opensearch-dashboards/server';
 import { Collector, CollectorOptions } from './collector';
 import { UsageCollector } from './usage_collector';
 

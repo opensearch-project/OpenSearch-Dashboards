@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Logger, LegacyAPICaller, OpenSearchClient } from 'opensearch-dashboardsserver';
+import { Logger, LegacyAPICaller, OpenSearchClient } from 'opensearch-dashboards/server';
 
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
 

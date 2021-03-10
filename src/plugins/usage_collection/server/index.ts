@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'opensearch-dashboardsserver';
+import { PluginInitializerContext } from 'opensearch-dashboards/server';
 import { UsageCollectionPlugin } from './plugin';
 
 export {
