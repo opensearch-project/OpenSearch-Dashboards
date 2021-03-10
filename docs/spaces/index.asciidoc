@@ -6,15 +6,15 @@ Spaces enable you to organize your dashboards and other saved
 objects into meaningful categories. Once inside a space, you see only
 the dashboards and saved objects that belong to that space.
 
-{kib} creates a default space for you.
+{osd} creates a default space for you.
 After you create your own
-spaces, you're asked to choose a space when you log in to Kibana. You can change your
+spaces, you're asked to choose a space when you log in to OpenSearchDashboards. You can change your
 current space at any time by using the menu.
 
 [role="screenshot"]
 image::spaces/images/change-space.png["Change current space menu"]
 
-Kibana supports spaces in several ways.  You can:
+OpenSearchDashboards supports spaces in several ways.  You can:
 
 [[spaces-getting-started]]
 
@@ -28,7 +28,7 @@ Kibana supports spaces in several ways.  You can:
 [float]
 ==== Required permissions
 
-The `kibana_admin` role or equivilent is required to manage **Spaces**.
+The `opensearch_dashboards_admin` role or equivilent is required to manage **Spaces**.
 
 [float]
 [[spaces-managing]]
@@ -47,11 +47,11 @@ You can create as many spaces as you like. Click *Create a space* and provide a 
 URL identifier, optional description.
 
 The URL identifier is a short text string that becomes part of the
-{kib} URL when you are inside that space. {kib} suggests a URL identifier based
+{osd} URL when you are inside that space. {osd} suggests a URL identifier based
 on the name of your space, but you can customize the identifier to your liking.
 You cannot change the space identifier once you create the space.
 
-{kib} also has an <<spaces-api, API>>
+{osd} also has an <<spaces-api, API>>
 if you prefer to create spaces programatically.
 
 [role="screenshot"]
@@ -76,7 +76,7 @@ You can define which features to show or hide when you add or edit a space.
 Controlling feature
 visibility is not a security feature. To secure access
 to specific features on a per-user basis, you must configure
-<<xpack-security-authorization, Kibana Security>>.
+<<xpack-security-authorization, OpenSearchDashboards Security>>.
 
 [role="screenshot"]
 image::spaces/images/edit-space-feature-visibility.png["Controlling features visiblity"]
@@ -85,12 +85,12 @@ image::spaces/images/edit-space-feature-visibility.png["Controlling features vis
 [[spaces-control-user-access]]
 === Control feature access based on user privileges
 
-When using Kibana with security, you can configure applications and features
+When using OpenSearchDashboards with security, you can configure applications and features
 based on your users’ privileges. This means different roles can have access
 to different features in the same space.
 Power users might have privileges to create and edit visualizations and dashboards,
 while analysts or executives might have Dashboard and Canvas with read-only privileges.
-See <<adding_kibana_privileges>> for details.
+See <<adding_opensearch_dashboards_privileges>> for details.
 
 [role="screenshot"]
 image::spaces/images/spaces-roles.png["Controlling features visiblity"]
@@ -102,7 +102,7 @@ image::spaces/images/spaces-roles.png["Controlling features visiblity"]
 To <<managing-saved-objects-copy-to-space, copy objects>> from one space to another, open the main menu,
 then click *Stack Management > Saved Objects*.
 
-Alternately, you can move objects using {kib}'s <<managing-saved-objects-export-objects, import and export>>
+Alternately, you can move objects using {osd}'s <<managing-saved-objects-export-objects, import and export>>
 interface.
 
 . Navigate to the space that contains your saved objects.
@@ -111,19 +111,19 @@ interface.
 . Import your saved objects.
 . (Optional) Delete objects in the export space that you no longer need.
 
-{kib} also has beta <<saved-objects-api-import, import>> and
+{osd} also has beta <<saved-objects-api-import, import>> and
 <<saved-objects-api-export, export>> APIs if you want to automate this process.
 
 [float]
 [[spaces-default-route]]
 === Configure a Space-level landing page
 
-You can create a custom experience for users by configuring the {kib} landing page on a per-space basis.
+You can create a custom experience for users by configuring the {osd} landing page on a per-space basis.
 The landing page can route users to a specific dashboard, application, or saved object as they enter each space.
 
 To configure the landing page, use the default route setting in
-<<kibana-general-settings, Stack Management > {kib} > Advanced settings>>.
-For example, you might set the default route to `/app/kibana#/dashboards`.
+<<opensearch-dashboards-general-settings, Stack Management > {osd} > Advanced settings>>.
+For example, you might set the default route to `/app/opensearch-dashboards#/dashboards`.
 
 [role="screenshot"]
 image::spaces/images/spaces-configure-landing-page.png["Configure space-level landing page"]
@@ -133,10 +133,10 @@ image::spaces/images/spaces-configure-landing-page.png["Configure space-level la
 [[spaces-delete-started]]
 === Disable and version updates
 
-Spaces are automatically enabled in {kib}. If you don't want use this feature,
+Spaces are automatically enabled in {osd}. If you don't want use this feature,
 you can disable it
 by setting `xpack.spaces.enabled` to `false` in your
-`kibana.yml` configuration file.
+`opensearch_dashboards.yml` configuration file.
 
 If you are upgrading your
-version of {kib}, the default space will contain all of your existing saved objects.
+version of {osd}, the default space will contain all of your existing saved objects.
