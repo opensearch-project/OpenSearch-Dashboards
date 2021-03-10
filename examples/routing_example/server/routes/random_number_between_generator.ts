@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import { RANDOM_NUMBER_BETWEEN_ROUTE_PATH } from '../../common';
 
 import { IRouter } from '../../../../src/core/server';

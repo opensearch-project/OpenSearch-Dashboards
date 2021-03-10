@@ -18,9 +18,9 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';
-import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import {
   EmbeddableFactoryDefinition,
   IContainer,

@@ -19,7 +19,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from 'opensearch-dashboards/public';
 import {
   EuiPage,
   EuiPageBody,
@@ -59,7 +59,7 @@ function RoutingExplorer({
                 {
                   label: 'IRouter API docs',
                   href:
-                    'https://github.com/elastic/kibana/blob/master/docs/development/core/server/kibana-plugin-core-server.irouter.md',
+                    'https://github.com/elastic/opensearchDashboards/blob/master/docs/development/core/server/opensearchDashboards-plugin-core-server.irouter.md',
                   iconType: 'logoGithub',
                   target: '_blank',
                   size: 's',
@@ -67,14 +67,14 @@ function RoutingExplorer({
                 {
                   label: 'HttpHandler (core.http.fetch) API docs',
                   href:
-                    'https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.httphandler.md',
+                    'https://github.com/elastic/opensearchDashboards/blob/master/docs/development/core/public/opensearchDashboards-plugin-core-public.httphandler.md',
                   iconType: 'logoGithub',
                   target: '_blank',
                   size: 's',
                 },
                 {
                   label: 'Conventions',
-                  href: 'https://github.com/elastic/kibana/tree/master/STYLEGUIDE.md#api-endpoints',
+                  href: 'https://github.com/elastic/opensearchDashboards/tree/master/STYLEGUIDE.md#api-endpoints',
                   iconType: 'logoGithub',
                   target: '_blank',
                   size: 's',

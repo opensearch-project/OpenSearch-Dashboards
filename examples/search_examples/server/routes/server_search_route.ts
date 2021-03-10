@@ -18,7 +18,7 @@
  */
 
 import { PluginStart as DataPluginStart, IEsSearchRequest } from 'src/plugins/data/server';
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import { IEsSearchResponse } from 'src/plugins/data/common';
 import { IRouter } from '../../../../src/core/server';
 import { SERVER_SEARCH_ROUTE_PATH } from '../../common';

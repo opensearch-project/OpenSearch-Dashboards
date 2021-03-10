@@ -18,11 +18,11 @@
  */
 import React, { useState } from 'react';
 import { EuiModalBody } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { OverlayStart } from 'kibana/public';
+import { i18n } from '@osd/i18n';
+import { OverlayStart } from 'opensearch-dashboards/public';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
-import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import {
   IContainer,
   EmbeddableFactoryDefinition,

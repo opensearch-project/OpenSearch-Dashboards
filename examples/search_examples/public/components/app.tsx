@@ -18,8 +18,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { BrowserRouter as Router } from 'react-router-dom';
 
 import {
@@ -272,14 +272,14 @@ export const SearchExamplesApp = ({
                   <EuiSpacer />
                   <EuiTitle size="s">
                     <h3>
-                      Searching Elasticsearch using <EuiCode>data.search</EuiCode>
+                      Searching OpenSearch using <EuiCode>data.search</EuiCode>
                     </h3>
                   </EuiTitle>
                   <EuiText>
-                    If you want to fetch data from Elasticsearch, you can use the different services
+                    If you want to fetch data from OpenSearch, you can use the different services
                     provided by the <EuiCode>data</EuiCode> plugin. These help you get the index
                     pattern and search bar configuration, format them into a DSL query and send it
-                    to Elasticsearch.
+                    to OpenSearch.
                     <EuiSpacer />
                     <EuiButton type="primary" size="s" onClick={onClickHandler}>
                       <FormattedMessage id="searchExamples.buttonText" defaultMessage="Get data" />
