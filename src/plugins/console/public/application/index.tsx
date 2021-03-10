@@ -56,7 +56,7 @@ export function renderApp({
   const settings = createSettings({ storage });
   const objectStorageClient = localStorageObjectClient.create(storage);
   const api = createApi({ http });
-  const esHostService = createOpenSearchHostService({ api });
+  const opensearchHostService = createOpenSearchHostService({ api });
 
   render(
     <I18nContext>
@@ -64,7 +64,7 @@ export function renderApp({
         value={{
           docLinkVersion,
           services: {
-            esHostService,
+            opensearchHostService,
             storage,
             history,
             settings,

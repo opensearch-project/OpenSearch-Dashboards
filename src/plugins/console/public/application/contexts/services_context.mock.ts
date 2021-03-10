@@ -31,13 +31,13 @@ export const serviceContextMock = {
     const storage = new StorageMock({} as any, 'test');
     const http = httpServiceMock.createSetupContract();
     const api = createApi({ http });
-    const esHostService = createOpenSearchHostService({ api });
+    const opensearchHostService = createOpenSearchHostService({ api });
     (storage.keys as jest.Mock).mockImplementation(() => []);
     return {
       services: {
         trackUiMetric: { count: () => { }, load: () => { } },
         storage,
-        esHostService,
+        opensearchHostService,
         settings: new SettingsMock(storage),
         history: new HistoryMock(storage),
         notifications: notificationServiceMock.createSetupContract(),

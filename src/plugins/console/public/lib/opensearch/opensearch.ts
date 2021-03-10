@@ -20,10 +20,10 @@
 import opensearch from 'jquery';
 import { stringify } from 'query-string';
 
-const esVersion: string[] = [];
+const opensearchVersion: string[] = [];
 
 export function getVersion() {
-  return esVersion;
+  return opensearchVersion;
 }
 
 export function getContentType(body: any) {
