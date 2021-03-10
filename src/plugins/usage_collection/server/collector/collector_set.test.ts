@@ -21,7 +21,7 @@ import { noop } from 'lodash';
 import { Collector } from './collector';
 import { CollectorSet } from './collector_set';
 import { UsageCollector } from './usage_collector';
-import { elasticsearchServiceMock, loggingSystemMock } from '../../../../core/server/mocks';
+import { opensearchServiceMock, loggingSystemMock } from '../../../../core/server/mocks';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -42,7 +42,7 @@ describe('CollectorSet', () => {
     });
 
     const mockCallCluster = jest.fn().mockResolvedValue({ passTest: 1000 });
-    const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const mockEsClient = opensearchServiceMock.createClusterClient().asInternalUser;
 
     it('should throw an error if non-Collector type of object is registered', () => {
       const collectors = new CollectorSet({ logger });

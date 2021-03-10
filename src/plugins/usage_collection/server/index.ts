@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext } from 'opensearch-dashboardsserver';
 import { UsageCollectionPlugin } from './plugin';
 
 export {

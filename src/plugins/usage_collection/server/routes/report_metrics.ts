@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { IRouter, ISavedObjectsRepository } from 'kibana/server';
+import { schema } from '@osd/config-schema';
+import { IRouter, ISavedObjectsRepository } from 'opensearch-dashboardsserver';
 import { storeReport, reportSchema } from '../report';
 
 export function registerUiMetricRoute(

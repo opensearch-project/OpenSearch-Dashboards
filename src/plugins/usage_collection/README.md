@@ -1,4 +1,4 @@
-# Kibana Usage Collection Service
+# OpenSearch Dashboards Usage Collection Service
 
 Usage Collection allows collecting usage data for other services to consume (telemetry and monitoring).
 To integrate with the telemetry services for usage collection of your feature, there are 2 steps:
@@ -13,7 +13,7 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
 1. Make sure `usageCollection` is in your optional Plugins:
 
     ```json
-    // plugin/kibana.json
+    // plugin/opensearch_dashboards.json
     {
       "id": "...",
       "optionalPlugins": ["usageCollection"]
@@ -25,7 +25,7 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
     ```ts
     // server/plugin.ts
     import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-    import { CoreSetup, CoreStart } from 'kibana/server';
+    import { CoreSetup, CoreStart } from 'opensearch-dashboardsserver';
 
     class Plugin {
       public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
@@ -41,7 +41,7 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
     ```ts
     // server/collectors/register.ts
     import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-    import { APICluster } from 'kibana/server';
+    import { APICluster } from 'opensearch-dashboardsserver';
 
     interface Usage {
       my_objects: {
@@ -63,9 +63,9 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
             total: 'long',
           },
         },
-        fetch: async (callCluster: APICluster, esClient: IClusterClient) => {
+        fetch: async (callCluster: APICluster, opensearchClient: IClusterClient) => {
 
-        // query ES and get some data
+        // query OpenSearch and get some data
         // summarize the data into a model
         // return the modeled object that includes whatever you want to track
 
@@ -85,15 +85,15 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
 Some background: 
 
 - `MY_USAGE_TYPE` can be any string. It usually matches the plugin name. As a safety mechanism, we double check there are no duplicates at the moment of registering the collector.
-- The `fetch` method needs to support multiple contexts in which it is called. For example, when stats are pulled from a Kibana Metricbeat module, the Beat calls Kibana's stats API to invoke usage collection.
-In this case, the `fetch` method is called as a result of an HTTP API request and `callCluster` wraps `callWithRequest` or `esClient` wraps `asCurrentUser`, where the request headers are expected to have read privilege on the entire `.kibana' index. 
+- The `fetch` method needs to support multiple contexts in which it is called. For example, when stats are pulled from a OpenSearch Dashboards Metricbeat module, the Beat calls OpenSearch Dashboards's stats API to invoke usage collection.
+In this case, the `fetch` method is called as a result of an HTTP API request and `callCluster` wraps `callWithRequest` or `opensearchClient` wraps `asCurrentUser`, where the request headers are expected to have read privilege on the entire `..opensearch-dashboards' index. 
 
-Note: there will be many cases where you won't need to use the `callCluster` (or `esClient`) function that gets passed in to your `fetch` method at all. Your feature might have an accumulating value in server memory, or read something from the OS, or use other clients like a custom SavedObjects client. In that case it's up to the plugin to initialize those clients like the example below:
+Note: there will be many cases where you won't need to use the `callCluster` (or `opensearchClient`) function that gets passed in to your `fetch` method at all. Your feature might have an accumulating value in server memory, or read something from the OS, or use other clients like a custom SavedObjects client. In that case it's up to the plugin to initialize those clients like the example below:
 
 ```ts
 // server/plugin.ts
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CoreSetup, CoreStart } from 'kibana/server';
+import { CoreSetup, CoreStart } from 'opensearch-dashboardsserver';
 
 class Plugin {
   private savedObjectsRepository?: ISavedObjectsRepository;
@@ -193,16 +193,16 @@ export const myCollector = makeUsageCollector<Usage>({
 
 There is a module in the telemetry service that creates the payload of data that gets sent up to the telemetry cluster.
 
-New fields added to the telemetry payload currently mean that telemetry cluster field mappings have to be updated, so they can be searched and aggregated in Kibana visualizations. This is also a short-term obligation. In the next refactoring phase, collectors will need to use a proscribed data model that eliminates maintenance of mappings in the telemetry cluster.
+New fields added to the telemetry payload currently mean that telemetry cluster field mappings have to be updated, so they can be searched and aggregated in OpenSearch Dashboards visualizations. This is also a short-term obligation. In the next refactoring phase, collectors will need to use a proscribed data model that eliminates maintenance of mappings in the telemetry cluster.
 
 ## Testing
 
 There are a few ways you can test that your usage collector is working properly.
 
-1. The `/api/stats?extended=true&legacy=true` HTTP API in Kibana (added in 6.4.0) will call the fetch methods of all the registered collectors, and add them to a stats object you can see in a browser or in curl. To test that your usage collector has been registered correctly and that it has the model of data you expected it to have, call that HTTP API manually and you should see a key in the `usage` object of the response named after your usage collector's `type` field. This method tests the Metricbeat scenario described above where `callCluster` wraps `callWithRequest`.
+1. The `/api/stats?extended=true&legacy=true` HTTP API in OpenSearch Dashboards (added in 6.4.0) will call the fetch methods of all the registered collectors, and add them to a stats object you can see in a browser or in curl. To test that your usage collector has been registered correctly and that it has the model of data you expected it to have, call that HTTP API manually and you should see a key in the `usage` object of the response named after your usage collector's `type` field. This method tests the Metricbeat scenario described above where `callCluster` wraps `callWithRequest`.
 2. There is a dev script in x-pack that will give a sample of a payload of data that gets sent up to the telemetry cluster for the sending phase of telemetry. Collected data comes from:
     - The `.monitoring-*` indices, when Monitoring is enabled. Monitoring enhances the sent payload of telemetry by producing usage data potentially of multiple clusters that exist in the monitoring data. Monitoring data is time-based, and the time frame of collection is the last 15 minutes.
-    - Live-pulled from ES API endpoints. This will get just real-time stats without context of historical data.
+    - Live-pulled from OpenSearch API endpoints. This will get just real-time stats without context of historical data.
     - The dev script in x-pack can be run on the command-line with:
 
       ```shell
@@ -210,17 +210,17 @@ There are a few ways you can test that your usage collector is working properly.
       node scripts/api_debug.js telemetry --host=http://localhost:5601
       ```
 
-      Where `http://localhost:5601` is a Kibana server running in dev mode. If needed, authentication and basePath info can be provided in the command as well.
-    - Automatic inclusion of all the stats fetched by collectors is added in [#22336](https://github.com/elastic/kibana/pull/22336) / 6.5.0
-3. In Dev mode, Kibana will send telemetry data to a staging telemetry cluster. Assuming you have access to the staging cluster, you can log in and check the latest documents for your new fields.
+      Where `http://localhost:5601` is a OpenSearch Dashboards server running in dev mode. If needed, authentication and basePath info can be provided in the command as well.
+    - Automatic inclusion of all the stats fetched by collectors is added in [#22336](https://github.com/elastic/opensearch-dashboardspull/22336) / 6.5.0
+3. In Dev mode, OpenSearch Dashboards will send telemetry data to a staging telemetry cluster. Assuming you have access to the staging cluster, you can log in and check the latest documents for your new fields.
 4. If you catch the network traffic coming from your browser when a telemetry payload is sent, you can examine the request payload body to see the data. This can be tricky as telemetry payloads are sent only once per day per browser. Use incognito mode or clear your localStorage data to force a telemetry payload.
 
 ## FAQ
 
 1. **How should I design my data model?**  
-   Keep it simple, and keep it to a model that Kibana will be able to understand. In short, that means don't rely on nested fields (arrays with objects). Flat arrays, such as arrays of strings are fine.
-2. **If I accumulate an event counter in server memory, which my fetch method returns, won't it reset when the Kibana server restarts?**  
-   Yes, but that is not a major concern. A visualization on such info might be a date histogram that gets events-per-second or something, which would be impacted by server restarts, so we'll have to offset the beginning of the time range when we detect that the latest metric is smaller than the earliest metric. That would be a pretty custom visualization, but perhaps future Kibana enhancements will be able to support that.
+   Keep it simple, and keep it to a model that OpenSearch Dashboards will be able to understand. In short, that means don't rely on nested fields (arrays with objects). Flat arrays, such as arrays of strings are fine.
+2. **If I accumulate an event counter in server memory, which my fetch method returns, won't it reset when the OpenSearch Dashboards server restarts?**  
+   Yes, but that is not a major concern. A visualization on such info might be a date histogram that gets events-per-second or something, which would be impacted by server restarts, so we'll have to offset the beginning of the time range when we detect that the latest metric is smaller than the earliest metric. That would be a pretty custom visualization, but perhaps future OpenSearch Dashboards enhancements will be able to support that.
 
 
 # UI Metric app
@@ -232,7 +232,7 @@ The UI metrics implementation in its current state is not useful. We are working
 ## Purpose
 
 The purpose of the UI Metric app is to provide a tool for gathering data on how users interact with
-various UIs within Kibana. It's useful for gathering _aggregate_ information, e.g. "How many times
+various UIs within OpenSearch Dashboards. It's useful for gathering _aggregate_ information, e.g. "How many times
 has Button X been clicked" or "How many times has Page Y been viewed".
 
 With some finagling, it's even possible to add more meaning to the info you gather, such as "How many
@@ -250,7 +250,7 @@ To track a user interaction, use the `reportUiStats` method exposed by the plugi
 1. Similarly to the server-side usage collection, make sure `usageCollection` is in your optional Plugins:
 
     ```json
-    // plugin/kibana.json
+    // plugin/opensearch_dashboards.json
     {
       "id": "...",
       "optionalPlugins": ["usageCollection"]
@@ -322,9 +322,9 @@ These saved objects are automatically consumed by the stats API and surfaced und
 ```
 
 By storing these metrics and their counts as key-value pairs, we can add more metrics without having
-to worry about exceeding the 1000-field soft limit in Elasticsearch.
+to worry about exceeding the 1000-field soft limit in OpenSearch.
 
-The only caveat is that it makes it harder to consume in Kibana when analysing each entry in the array separately. In the telemetry team we are working to find a solution to this. We are building a new way of reporting telemetry called [Pulse](../../../rfcs/text/0008_pulse.md) that will help on making these UI-Metrics easier to consume.
+The only caveat is that it makes it harder to consume in OpenSearch Dashboards when analysing each entry in the array separately. In the telemetry team we are working to find a solution to this. We are building a new way of reporting telemetry called [Pulse](../../../rfcs/text/0008_pulse.md) that will help on making these UI-Metrics easier to consume.
 
 # Routes registered by this plugin
 

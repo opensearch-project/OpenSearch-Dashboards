@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from 'kibana/server';
+import { schema, TypeOf } from '@osd/config-schema';
+import { PluginConfigDescriptor } from 'opensearch-dashboardsserver';
 import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../common/constants';
 
 export const configSchema = schema.object({

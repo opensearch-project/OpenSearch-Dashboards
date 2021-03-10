@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { METRIC_TYPE } from '@kbn/analytics';
+import { schema, TypeOf } from '@osd/config-schema';
+import { METRIC_TYPE } from '@osd/analytics';
 
 export const reportSchema = schema.object({
   reportVersion: schema.maybe(schema.literal(1)),
