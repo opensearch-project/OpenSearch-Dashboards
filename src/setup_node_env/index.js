@@ -18,4 +18,4 @@
  */
 
 require('./no_transpilation');
-require('@kbn/optimizer').registerNodeAutoTranspilation();
+require('@osd/optimizer').registerNodeAutoTranspilation();

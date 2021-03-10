@@ -19,17 +19,17 @@
 
 var pkg = require('../../package.json');
 
-// Note: This is written in ES5 so we can run this before anything else
+// Note: This is written in OpenSearch5 so we can run this before anything else
 // and gives support for older NodeJS versions
 var currentVersion = (process && process.version) || null;
 var rawRequiredVersion = (pkg && pkg.engines && pkg.engines.node) || null;
 var requiredVersion = rawRequiredVersion ? 'v' + rawRequiredVersion : rawRequiredVersion;
 var isVersionValid = !!currentVersion && !!requiredVersion && currentVersion === requiredVersion;
 
-// Validates current the NodeJS version compatibility when Kibana starts.
+// Validates current the NodeJS version compatibility when OpenSearch Dashboards starts.
 if (!isVersionValid) {
   var errorMessage =
-    'Kibana does not support the current Node.js version ' +
+    'OpenSearch Dashboards does not support the current Node.js version ' +
     currentVersion +
     '. Please use Node.js ' +
     requiredVersion +
