@@ -22,29 +22,29 @@ import { createClusterDataCheck } from './check_cluster_data';
 
 describe('checkClusterForUserData', () => {
   it('returns false if no data is found', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.cat.indices.mockResolvedValue(
+    const opensearchClient = elasticsearchServiceMock.createOpenSearchClient();
+    opensearchClient.cat.indices.mockResolvedValue(
       elasticsearchServiceMock.createApiResponse({ body: [] })
     );
 
     const log = loggingSystemMock.createLogger();
 
-    const response = await createClusterDataCheck()(esClient, log);
+    const response = await createClusterDataCheck()(opensearchClient, log);
     expect(response).toEqual(false);
-    expect(esClient.cat.indices).toHaveBeenCalledTimes(1);
+    expect(opensearchClient.cat.indices).toHaveBeenCalledTimes(1);
   });
 
   it('returns false if data only exists in system indices', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.cat.indices.mockResolvedValue(
+    const opensearchClient = elasticsearchServiceMock.createOpenSearchClient();
+    opensearchClient.cat.indices.mockResolvedValue(
       elasticsearchServiceMock.createApiResponse({
         body: [
           {
-            index: '.kibana',
+            index: '.opensearch-dashboards',
             'docs.count': 500,
           },
           {
-            index: 'kibana_sample_ecommerce_data',
+            index: 'opensearch_dashboards_sample_ecommerce_data',
             'docs.count': 20,
           },
           {
@@ -57,18 +57,18 @@ describe('checkClusterForUserData', () => {
 
     const log = loggingSystemMock.createLogger();
 
-    const response = await createClusterDataCheck()(esClient, log);
+    const response = await createClusterDataCheck()(opensearchClient, log);
     expect(response).toEqual(false);
-    expect(esClient.cat.indices).toHaveBeenCalledTimes(1);
+    expect(opensearchClient.cat.indices).toHaveBeenCalledTimes(1);
   });
 
   it('returns true if data exists in non-system indices', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.cat.indices.mockResolvedValue(
+    const opensearchClient = elasticsearchServiceMock.createOpenSearchClient();
+    opensearchClient.cat.indices.mockResolvedValue(
       elasticsearchServiceMock.createApiResponse({
         body: [
           {
-            index: '.kibana',
+            index: '.opensearch-dashboards',
             'docs.count': 500,
           },
           {
@@ -81,13 +81,13 @@ describe('checkClusterForUserData', () => {
 
     const log = loggingSystemMock.createLogger();
 
-    const response = await createClusterDataCheck()(esClient, log);
+    const response = await createClusterDataCheck()(opensearchClient, log);
     expect(response).toEqual(true);
   });
 
   it('checks each time until the first true response is returned, then stops checking', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.cat.indices
+    const opensearchClient = elasticsearchServiceMock.createOpenSearchClient();
+    opensearchClient.cat.indices
       .mockResolvedValueOnce(
         elasticsearchServiceMock.createApiResponse({
           body: [],
@@ -98,7 +98,7 @@ describe('checkClusterForUserData', () => {
         elasticsearchServiceMock.createApiResponse({
           body: [
             {
-              index: '.kibana',
+              index: '.opensearch-dashboards',
               'docs.count': 500,
             },
           ],
@@ -119,19 +119,19 @@ describe('checkClusterForUserData', () => {
 
     const doesClusterHaveUserData = createClusterDataCheck();
 
-    let response = await doesClusterHaveUserData(esClient, log);
+    let response = await doesClusterHaveUserData(opensearchClient, log);
     expect(response).toEqual(false);
 
-    response = await doesClusterHaveUserData(esClient, log);
+    response = await doesClusterHaveUserData(opensearchClient, log);
     expect(response).toEqual(false);
 
-    response = await doesClusterHaveUserData(esClient, log);
+    response = await doesClusterHaveUserData(opensearchClient, log);
     expect(response).toEqual(false);
 
-    response = await doesClusterHaveUserData(esClient, log);
+    response = await doesClusterHaveUserData(opensearchClient, log);
     expect(response).toEqual(true);
 
-    expect(esClient.cat.indices).toHaveBeenCalledTimes(4);
+    expect(opensearchClient.cat.indices).toHaveBeenCalledTimes(4);
     expect(log.warn.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -140,9 +140,9 @@ describe('checkClusterForUserData', () => {
       ]
     `);
 
-    response = await doesClusterHaveUserData(esClient, log);
+    response = await doesClusterHaveUserData(opensearchClient, log);
     expect(response).toEqual(true);
     // Same number of calls as above. We should not have to interrogate again.
-    expect(esClient.cat.indices).toHaveBeenCalledTimes(4);
+    expect(opensearchClient.cat.indices).toHaveBeenCalledTimes(4);
   });
 });

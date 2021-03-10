@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IRouter, Logger } from 'kibana/server';
+import { IRouter, Logger } from 'opensearch-dashboards/server';
 import { combineLatest, Observable } from 'rxjs';
 import { createClusterDataCheck } from '../check_cluster_data';
 import { ConfigType } from '../config';
@@ -54,7 +54,7 @@ export const setupDisplayInsecureClusterAlertRoute = ({
       }
 
       const hasData = await doesClusterHaveUserData(
-        context.core.elasticsearch.client.asInternalUser,
+        context.core.opensearch.client.asInternalUser,
         log
       );
       return response.ok({ body: { displayAlert: hasData } });

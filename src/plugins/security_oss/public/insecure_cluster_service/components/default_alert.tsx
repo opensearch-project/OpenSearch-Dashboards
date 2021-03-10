@@ -25,9 +25,9 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
-import { MountPoint } from 'kibana/public';
+import { i18n } from '@osd/i18n';
+import { I18nProvider, FormattedMessage } from '@osd/i18n/react';
+import { MountPoint } from 'opensearch-dashboards/public';
 import React, { useState } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
