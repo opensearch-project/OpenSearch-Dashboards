@@ -29,8 +29,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import { PRIVACY_STATEMENT_URL } from '../../../telemetry/common/constants';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
@@ -167,13 +167,13 @@ export class TelemetryManagementSection extends Component<Props, State> {
           <p>
             <FormattedMessage
               id="telemetry.callout.appliesSettingTitle"
-              defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
+              defaultMessage="Changes to this setting apply to {allOfOpenSearchDashboardsText} and are saved automatically."
               values={{
-                allOfKibanaText: (
+                allOfOpenSearchDashboardsText: (
                   <strong>
                     <FormattedMessage
-                      id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
-                      defaultMessage="all of Kibana"
+                      id="telemetry.callout.appliesSettingTitle.allOfOpenSearchDashboardsText"
+                      defaultMessage="all of OpenSearchDashboards"
                     />
                   </strong>
                 ),

@@ -34,7 +34,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 interface Props {
   onClose: () => void;
@@ -117,7 +117,7 @@ export class OptInSecurityExampleFlyout extends React.PureComponent<Props, State
             <EuiTextColor color="subdued">
               <EuiText>
                 This is a representative sample of the endpoint security alert event that we
-                collect. Endpoint security data is collected only when the Elastic Endpoint is
+                collect. Endpoint security data is collected only when the OpenSearch Endpoint is
                 enabled. It includes information about the endpoint configuration and detection
                 events.
               </EuiText>
@@ -181,7 +181,7 @@ export class OptInSecurityExampleFlyout extends React.PureComponent<Props, State
     ecs: {
       version: '1.5.0',
     },
-    elastic: {
+    opensearch: {
       agent: {
         id: 'b2e88aea-2671-402a-828a-957526bac315',
       },
@@ -230,6 +230,6 @@ export class OptInSecurityExampleFlyout extends React.PureComponent<Props, State
       kind: 'alert',
     },
     cluster_uuid: 'kLbKvSMcRiiFAR0t8LebDA',
-    cluster_name: 'elasticsearch',
+    cluster_name: 'opensearch',
   };
 }
