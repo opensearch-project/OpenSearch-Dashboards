@@ -20,7 +20,7 @@
 import { extname, join } from 'path';
 
 import Hapi from 'hapi';
-import * as UiSharedDeps from '@kbn/ui-shared-deps';
+import * as UiSharedDeps from '@osd/ui-shared-deps';
 
 import { createDynamicAssetResponse } from './dynamic_asset_response';
 import { FileHashCache } from './file_hash_cache';
@@ -64,8 +64,8 @@ export function createBundlesRoute({
 
   return [
     buildRouteForBundles({
-      publicPath: `${basePublicPath}/${buildHash}/bundles/kbn-ui-shared-deps/`,
-      routePath: `/${buildHash}/bundles/kbn-ui-shared-deps/`,
+      publicPath: `${basePublicPath}/${buildHash}/bundles/osd-ui-shared-deps/`,
+      routePath: `/${buildHash}/bundles/osd-ui-shared-deps/`,
       bundlesPath: UiSharedDeps.distDir,
       fileHashCache,
       isDist,
