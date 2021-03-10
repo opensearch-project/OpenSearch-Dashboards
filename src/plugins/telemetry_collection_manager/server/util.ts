@@ -18,5 +18,5 @@
  */
 
 export const isClusterOptedIn = (clusterUsage: any): boolean => {
-  return clusterUsage?.stack_stats?.kibana?.plugins?.telemetry?.opt_in_status === true;
+  return clusterUsage?.stack_stats?.opensearch_dashboards?.plugins?.telemetry?.opt_in_status === true;
 };

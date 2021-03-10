@@ -21,7 +21,7 @@ import { createRequestEncryptor } from '@elastic/request-crypto';
 import { telemetryJWKS } from './telemetry_jwks';
 
 export function getKID(useProdKey = false): string {
-  return useProdKey ? 'kibana' : 'kibana_dev';
+  return useProdKey ? 'opensearch_dashboards' : 'opensearch_dashboards_dev';
 }
 
 export async function encryptTelemetry(
