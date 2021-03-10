@@ -16,12 +16,12 @@ prevention and response capabilities in one solution, including:
 detection rules
 
 [role="screenshot"]
-image::siem/images/overview-ui.png[Elastic Security in Kibana]
+image::siem/images/overview-ui.png[Elastic Security in OpenSearchDashboards]
 
 [float]
 == Add data
 
-Kibana provides step-by-step instructions to help you add data. The
+OpenSearchDashboards provides step-by-step instructions to help you add data. The
 {security-guide}[Security Guide] is a good source for more
 detailed information and instructions.
 
@@ -32,7 +32,7 @@ https://www.elastic.co/products/beats/auditbeat[{auditbeat}],
 https://www.elastic.co/products/beats/filebeat[{filebeat}],
 https://www.elastic.co/products/beats/winlogbeat[{winlogbeat}], and
 https://www.elastic.co/products/beats/packetbeat[{packetbeat}]
-send security events and other data to Elasticsearch.
+send security events and other data to OpenSearch.
 
 The default index patterns for Elastic Security events are `auditbeat-*`, `winlogbeat-*`,
 `filebeat-*`, `packetbeat-*`, `endgame-*`, `logs-*`, and `apm-*-transaction*`. To change the default pattern patterns, go to *Stack Management > Advanced Settings > securitySolution:defaultIndex*.
@@ -47,7 +47,7 @@ events directly to Elastic Security.
 === Elastic Common Schema (ECS) for normalizing data
 
 The {ecs-ref}[Elastic Common Schema (ECS)] defines a common set of fields to be
-used for storing event data in Elasticsearch. ECS helps users normalize their
+used for storing event data in OpenSearch. ECS helps users normalize their
 event data to better analyze, visualize, and correlate the data represented in
 their events.
 
