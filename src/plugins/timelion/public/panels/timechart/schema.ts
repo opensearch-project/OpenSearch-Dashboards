@@ -105,7 +105,7 @@ export function timechartFn(dependencies: TimelionVisualizationDependencies) {
               const numberSpan = document.createElement('span');
 
               wrapperSpan.setAttribute('class', 'ngLegendValue');
-              wrapperSpan.setAttribute('kbn-accessible-click', '');
+              wrapperSpan.setAttribute('osd-accessible-click', '');
               wrapperSpan.setAttribute('ng-click', `toggleSeries(${series._id})`);
               wrapperSpan.setAttribute('ng-focus', `focusSeries(${series._id})`);
               wrapperSpan.setAttribute('ng-mouseover', `highlightSeries(${series._id})`);
