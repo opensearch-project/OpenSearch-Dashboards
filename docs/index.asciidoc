@@ -1,19 +1,19 @@
-[[kibana-guide]]
-= Kibana Guide
+[[opensearch-dashboards-guide]]
+= OpenSearchDashboards Guide
 
 :include-xpack:  true
 :lang:           en
-:kib-repo-dir:   {kibana-root}/docs
+:osd-repo-dir:   {opensearch-dashboards-root}/docs
 :blog-ref:       https://www.elastic.co/blog/
 :wikipedia:      https://en.wikipedia.org/wiki
 
 include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 
-:docker-repo:    docker.elastic.co/kibana/kibana
-:docker-image:   docker.elastic.co/kibana/kibana:{version}
-:blob:           {kib-repo}blob/{branch}/
+:docker-repo:    docker.elastic.co/opensearch-dashboards/opensearch-dashboards
+:docker-image:   docker.elastic.co/opensearch-dashboards/opensearch-dashboards:{version}
+:blob:           {osd-repo}blob/{branch}/
 :security-ref:   https://www.elastic.co/community/security/
-:kibana-ref-all: https://www.elastic.co/guide/en/kibana
+:opensearch-dashboards-ref-all: https://www.elastic.co/guide/en/opensearch-dashboards
 
 include::{docs-root}/shared/attributes.asciidoc[]
 

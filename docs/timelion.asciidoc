@@ -4,11 +4,11 @@
 [partintro]
 --
 
-WARNING: In 7.x, you’ll no longer see the Timelion application in the {kib} 
+WARNING: In 7.x, you’ll no longer see the Timelion application in the {osd} 
 side navigation. However, Timelion visualizations still exist in <<createvis,Visualize>>. 
 To enable Timelion in the side navigation, set `timelion.ui.enabled` in your 
-kibana.yml file. In 8.0, the Timelion application will be deprecated. When 
-you upgrade from {kib} 7.x to 8.0, your Timelion sheets will be migrated to Timelion visualization objects.
+opensearch_dashboards.yml file. In 8.0, the Timelion application will be deprecated. When 
+you upgrade from {osd} 7.x to 8.0, your Timelion sheets will be migrated to Timelion visualization objects.
 
 Timelion is a time series data visualizer that enables you to combine totally
 independent data sources within a single visualization. It's driven by a simple
@@ -27,8 +27,8 @@ For example, Timelion enables you to easily get the answers to questions like:
 You might also be interested in these tutorial videos:
 
 * https://www.elastic.co/elasticon/conf/2017/sf/timelion-magic-math-and-everything-in-the-middle[Timelion: Magic, Math, and Everything in the Middle]
-* https://www.elastic.co/videos/timelion-plugin-for-kibana-enables-times-series-paris-meetup[Timelion Plugin for Kibana Enables Time Series]
-* https://www.elastic.co/videos/using-kibana-and-timelion-to-analyze-earthquake-data[Using Kibana and Timelion to Analyze Earthquake Data]
+* https://www.elastic.co/videos/timelion-plugin-for-opensearch-dashboards-enables-times-series-paris-meetup[Timelion Plugin for OpenSearchDashboards Enables Time Series]
+* https://www.elastic.co/videos/using-opensearch-dashboards-and-timelion-to-analyze-earthquake-data[Using OpenSearchDashboards and Timelion to Analyze Earthquake Data]
 --
 
 include::timelion/timelion-getting-started.asciidoc[]
