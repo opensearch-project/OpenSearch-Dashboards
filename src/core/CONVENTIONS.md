@@ -21,7 +21,7 @@ Definition of done for a feature:
 - there is no contradiction between client and server API
 - works for OSS version
    - works with and without a `server.basePath` configured
-   - cannot crash the Kibana server when it fails
+   - cannot crash the OpenSearch Dashboards server when it fails
 - works for the commercial version with a license
    - for a logged-in user
    - for anonymous user
@@ -37,11 +37,11 @@ Definition of done for a feature:
 ## Technical Conventions
 ### Plugin Structure
 
-All Kibana plugins built at Elastic should follow the same structure.
+All OpenSearch Dashboards plugins built at Elastic should follow the same structure.
 
 ```
 my_plugin/
-├── kibana.json
+├── opensearch-dashboards.json
 ├── public
 │   ├── applications
 │   │   ├── my_app
@@ -68,7 +68,7 @@ my_plugin/
     ├── index.ts
     └── plugin.ts
 ```
-- [Manifest file](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md) should be defined on top level.
+- [Manifest file](/docs/development/core/server/opensearch-dashboards-plugin-core-server.pluginmanifest.md) should be defined on top level.
 - Both `server` and `public` should have an `index.ts` and a `plugin.ts` file:
   - `index.ts` should only contain:
     - The `plugin` export
@@ -293,7 +293,7 @@ For creating and registering a Usage Collector. Collectors should be defined in 
 ```ts
 // server/collectors/register.ts
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { CallCluster } from 'src/legacy/core_plugins/opensearch';
 
 export function registerMyPluginUsageCollector(usageCollection?: UsageCollectionSetup): void {
   // usageCollection is an optional dependency, so make sure to return if it is not registered.
@@ -306,7 +306,7 @@ export function registerMyPluginUsageCollector(usageCollection?: UsageCollection
     type: MY_USAGE_TYPE,
     fetch: async (callCluster: CallCluster) => {
 
-    // query ES and get some data
+    // query OpeSearch and get some data
     // summarize the data into a model
     // return the modeled object that includes whatever you want to track
 
