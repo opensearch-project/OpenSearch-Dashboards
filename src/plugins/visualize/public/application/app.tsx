@@ -21,9 +21,9 @@ import './app.scss';
 import React, { useEffect } from 'react';
 import { Route, Switch, useLocation } from 'react-router-dom';
 
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from 'opensearch-dashboards/public';
 import { syncQueryStateWithUrl } from '../../../data/public';
-import { useKibana } from '../../../kibana_react/public';
+import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { VisualizeServices } from './types';
 import {
   VisualizeEditor,
@@ -41,20 +41,20 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
   const {
     services: {
       data: { query },
-      kbnUrlStateStorage,
+      osdUrlStateStorage,
     },
-  } = useKibana<VisualizeServices>();
+  } = useOpenSearchDashboards<VisualizeServices>();
   const { pathname } = useLocation();
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
-    const { stop } = syncQueryStateWithUrl(query, kbnUrlStateStorage);
+    const { stop } = syncQueryStateWithUrl(query, osdUrlStateStorage);
 
     return () => stop();
 
     // this effect should re-run when pathname is changed to preserve querystring part,
     // so the global state is always preserved
-  }, [query, kbnUrlStateStorage, pathname]);
+  }, [query, osdUrlStateStorage, pathname]);
 
   return (
     <Switch>

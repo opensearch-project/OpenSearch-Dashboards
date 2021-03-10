@@ -19,9 +19,9 @@
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 
-import { AppMountParameters, OverlayRef } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../kibana_react/public';
+import { AppMountParameters, OverlayRef } from 'opensearch-dashboards/public';
+import { i18n } from '@osd/i18n';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import {
   VisualizeServices,
   VisualizeAppState,
@@ -63,7 +63,7 @@ const TopNav = ({
   embeddableId,
   onAppLeave,
 }: VisualizeTopNavProps) => {
-  const { services } = useKibana<VisualizeServices>();
+  const { services } = useOpenSearchDashboards<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
   const { setHeaderActionMenu, visualizeCapabilities } = services;
   const { embeddableHandler, vis } = visInstance;

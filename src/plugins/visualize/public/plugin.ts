@@ -18,7 +18,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { filter, map } from 'rxjs/operators';
 import { createHashHistory } from 'history';
 import {
@@ -29,14 +29,14 @@ import {
   Plugin,
   PluginInitializerContext,
   ScopedHistory,
-} from 'kibana/public';
+} from 'opensearch-dashboards/public';
 
 import {
   Storage,
-  createKbnUrlTracker,
-  createKbnUrlStateStorage,
+  createOsdUrlTracker,
+  createOsdUrlStateStorage,
   withNotifyOnErrors,
-} from '../../kibana_utils/public';
+} from '../../opensearch_dashboards_utils/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { SharePluginStart, SharePluginSetup } from '../../share/public';
@@ -98,7 +98,7 @@ export class VisualizePlugin
       stop: stopUrlTracker,
       setActiveUrl,
       restorePreviousUrl,
-    } = createKbnUrlTracker({
+    } = createOsdUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/visualize'),
       defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:visualize`,
@@ -106,7 +106,7 @@ export class VisualizePlugin
       toastNotifications: core.notifications.toasts,
       stateParams: [
         {
-          kbnUrlKey: '_g',
+          osdUrlKey: '_g',
           stateUpdate$: data.query.state$.pipe(
             filter(
               ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
@@ -143,7 +143,7 @@ export class VisualizePlugin
       order: 8000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
-      category: DEFAULT_APP_CATEGORIES.kibana,
+      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       updater$: this.appStateUpdater.asObservable(),
       // remove all references to visualize
       mount: async (params: AppMountParameters) => {
@@ -173,7 +173,7 @@ export class VisualizePlugin
         const services: VisualizeServices = {
           ...coreStart,
           history,
-          kbnUrlStateStorage: createKbnUrlStateStorage({
+          osdUrlStateStorage: createOsdUrlStateStorage({
             history,
             useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
             ...withNotifyOnErrors(coreStart.notifications.toasts),
@@ -220,7 +220,7 @@ export class VisualizePlugin
         title: 'Visualize',
         description: i18n.translate('visualize.visualizeDescription', {
           defaultMessage:
-            'Create visualizations and aggregate data stores in your Elasticsearch indices.',
+            'Create visualizations and aggregate data stores in your OpenSearch indices.',
         }),
         icon: 'visualizeApp',
         path: `/app/visualize#${VisualizeConstants.LANDING_PAGE_PATH}`,

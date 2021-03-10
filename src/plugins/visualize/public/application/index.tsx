@@ -21,8 +21,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 
-import { AppMountParameters } from 'kibana/public';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { AppMountParameters } from 'opensearch-dashboards/public';
+import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { VisualizeApp } from './app';
 import { VisualizeServices } from './types';
 import { addHelpMenuToAppChrome, addBadgeToAppChrome } from './utils';
@@ -40,11 +40,11 @@ export const renderApp = (
 
   const app = (
     <Router history={services.history}>
-      <KibanaContextProvider services={services}>
+      <OpenSearchDashboardsContextProvider services={services}>
         <services.i18n.Context>
           <VisualizeApp onAppLeave={onAppLeave} />
         </services.i18n.Context>
-      </KibanaContextProvider>
+      </OpenSearchDashboardsContextProvider>
     </Router>
   );
 

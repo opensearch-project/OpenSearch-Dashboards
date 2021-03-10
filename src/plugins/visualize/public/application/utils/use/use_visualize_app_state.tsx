@@ -21,9 +21,9 @@ import React, { useEffect, useState } from 'react';
 import { cloneDeep, isEqual } from 'lodash';
 import { map } from 'rxjs/operators';
 import { EventEmitter } from 'events';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
-import { MarkdownSimple, toMountPoint } from '../../../../../kibana_react/public';
+import { MarkdownSimple, toMountPoint } from '../../../../../opensearch_dashboards_react/public';
 import { migrateLegacyQuery } from '../migrate_legacy_query';
 import { esFilters, connectToQueryState } from '../../../../../data/public';
 import {
@@ -52,7 +52,7 @@ export const useVisualizeAppState = (
       const byValue = !('savedVis' in instance);
       const { stateContainer, stopStateSync } = createVisualizeAppState({
         stateDefaults,
-        kbnUrlStateStorage: services.kbnUrlStateStorage,
+        osdUrlStateStorage: services.osdUrlStateStorage,
         byValue,
       });
 
@@ -98,7 +98,7 @@ export const useVisualizeAppState = (
         }
       );
 
-      // The savedVis is pulled from elasticsearch, but the appState is pulled from the url, with the
+      // The savedVis is pulled from OpenSearch, but the appState is pulled from the url, with the
       // defaults applied. If the url was from a previous session which included modifications to the
       // appState then they won't be equal.
       if (!isEqual(stateContainer.getState().vis, stateDefaults.vis)) {

@@ -25,7 +25,7 @@ import {
   QueryState,
   RefreshInterval,
 } from '../../data/public';
-import { setStateToKbnUrl } from '../../kibana_utils/public';
+import { setStateToOsdUrl } from '../../opensearch_dashboards_utils/public';
 import { UrlGeneratorsDefinition } from '../../share/public';
 
 const STATE_STORAGE_KEY = '_a';
@@ -121,8 +121,8 @@ export const createVisualizeUrlGenerator = (
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
 
     let url = `${appBasePath}#/${mode}`;
-    url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, queryState, { useHash }, url);
-    url = setStateToKbnUrl(STATE_STORAGE_KEY, appState, { useHash }, url);
+    url = setStateToOsdUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, queryState, { useHash }, url);
+    url = setStateToOsdUrl(STATE_STORAGE_KEY, appState, { useHash }, url);
 
     if (indexPatternId) {
       url = `${url}&indexPattern=${indexPatternId}`;

@@ -18,10 +18,10 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { TopNavMenuData } from 'src/plugins/navigation/public';
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from 'opensearch-dashboards/public';
 import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
 import {
   showSaveModal,
@@ -29,7 +29,7 @@ import {
   SavedObjectSaveOpts,
   OnSaveProps,
 } from '../../../../saved_objects/public';
-import { unhashUrl } from '../../../../kibana_utils/public';
+import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
 
 import {
   VisualizeServices,
