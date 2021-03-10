@@ -23,9 +23,9 @@ import { registerExportRoute } from './export';
 
 export const registerRoutes = (
   router: IRouter,
-  kibanaVersion: string,
+  opensearchDashboardsVersion: string,
   maxImportPayloadBytes: number
 ) => {
-  registerExportRoute(router, kibanaVersion);
+  registerExportRoute(router, opensearchDashboardsVersion);
   registerImportRoute(router, maxImportPayloadBytes);
 };
