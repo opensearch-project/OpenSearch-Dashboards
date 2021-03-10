@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '../../../core/server/mocks';
+import { opensearchServiceMock, loggingSystemMock } from '../../../core/server/mocks';
 import { createClusterDataCheck } from './check_cluster_data';
 
 describe('checkClusterForUserData', () => {
   it('returns false if no data is found', async () => {
-    const opensearchClient = elasticsearchServiceMock.createOpenSearchClient();
+    const opensearchClient = opensearchServiceMock.createOpenSearchClient();
     opensearchClient.cat.indices.mockResolvedValue(
-      elasticsearchServiceMock.createApiResponse({ body: [] })
+      opensearchServiceMock.createApiResponse({ body: [] })
     );
 
     const log = loggingSystemMock.createLogger();
@@ -35,9 +35,9 @@ describe('checkClusterForUserData', () => {
   });
 
   it('returns false if data only exists in system indices', async () => {
-    const opensearchClient = elasticsearchServiceMock.createOpenSearchClient();
+    const opensearchClient = opensearchServiceMock.createOpenSearchClient();
     opensearchClient.cat.indices.mockResolvedValue(
-      elasticsearchServiceMock.createApiResponse({
+      opensearchServiceMock.createApiResponse({
         body: [
           {
             index: '.opensearch-dashboards',
@@ -63,9 +63,9 @@ describe('checkClusterForUserData', () => {
   });
 
   it('returns true if data exists in non-system indices', async () => {
-    const opensearchClient = elasticsearchServiceMock.createOpenSearchClient();
+    const opensearchClient = opensearchServiceMock.createOpenSearchClient();
     opensearchClient.cat.indices.mockResolvedValue(
-      elasticsearchServiceMock.createApiResponse({
+      opensearchServiceMock.createApiResponse({
         body: [
           {
             index: '.opensearch-dashboards',
@@ -86,16 +86,16 @@ describe('checkClusterForUserData', () => {
   });
 
   it('checks each time until the first true response is returned, then stops checking', async () => {
-    const opensearchClient = elasticsearchServiceMock.createOpenSearchClient();
+    const opensearchClient = opensearchServiceMock.createOpenSearchClient();
     opensearchClient.cat.indices
       .mockResolvedValueOnce(
-        elasticsearchServiceMock.createApiResponse({
+        opensearchServiceMock.createApiResponse({
           body: [],
         })
       )
       .mockRejectedValueOnce(new Error('something terrible happened'))
       .mockResolvedValueOnce(
-        elasticsearchServiceMock.createApiResponse({
+        opensearchServiceMock.createApiResponse({
           body: [
             {
               index: '.opensearch-dashboards',
@@ -105,7 +105,7 @@ describe('checkClusterForUserData', () => {
         })
       )
       .mockResolvedValueOnce(
-        elasticsearchServiceMock.createApiResponse({
+        opensearchServiceMock.createApiResponse({
           body: [
             {
               index: 'some_real_index',
