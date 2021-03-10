@@ -53,9 +53,9 @@ const type = _.memoize(function (t) {
   return color(t)(_.pad(t, 7).slice(0, 7));
 });
 
-const workerType = process.env.kbnWorkerType ? `${type(process.env.kbnWorkerType)} ` : '';
+const workerType = process.env.osdWorkerType ? `${type(process.env.osdWorkerType)} ` : '';
 
-export default class KbnLoggerStringFormat extends LogFormat {
+export default class OsdLoggerStringFormat extends LogFormat {
   format(data) {
     const time = color('time')(this.extractAndFormatTimestamp(data, 'HH:mm:ss.SSS'));
     const msg = data.error ? color('error')(data.error.stack) : color('message')(data.message);

@@ -20,7 +20,7 @@
 import { constant, once, compact, flatten } from 'lodash';
 
 import { isWorker } from 'cluster';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { fromRoot, pkg } from '../../core/server/utils';
 import { Config } from './config';
 import loggingConfiguration from './logging/configuration';
@@ -34,18 +34,18 @@ import { uiMixin } from '../ui';
 import { i18nMixin } from './i18n';
 
 /**
- * @typedef {import('./kbn_server').KibanaConfig} KibanaConfig
- * @typedef {import('./kbn_server').KibanaCore} KibanaCore
- * @typedef {import('./kbn_server').LegacyPlugins} LegacyPlugins
+ * @typedef {import('./osd_server').OpenSearchDashboardsConfig} OpenSearchDashboardsConfig
+ * @typedef {import('./osd_server').OpenSearchDashboardsCore} OpenSearchDashboardsCore
+ * @typedef {import('./osd_server').LegacyPlugins} LegacyPlugins
  */
 
 const rootDir = fromRoot('.');
 
-export default class KbnServer {
+export default class OsdServer {
   /**
    * @param {Record<string, any>} settings
-   * @param {KibanaConfig} config
-   * @param {KibanaCore} core
+   * @param {OpenSearchDashboardsConfig} config
+   * @param {OpenSearchDashboardsCore} core
    */
   constructor(settings, config, core) {
     this.name = pkg.name;
@@ -90,7 +90,7 @@ export default class KbnServer {
 
         uiMixin,
 
-        // setup routes that serve the @kbn/optimizer output
+        // setup routes that serve the @osd/optimizer output
         optimizeMixin
       )
     );
@@ -99,12 +99,12 @@ export default class KbnServer {
   }
 
   /**
-   * Extend the KbnServer outside of the constraints of a plugin. This allows access
+   * Extend the OsdServer outside of the constraints of a plugin. This allows access
    * to APIs that are not exposed (intentionally) to the plugins and should only
-   * be used when the code will be kept up to date with Kibana.
+   * be used when the code will be kept up to date with OpenSearchDashboards.
    *
    * @param {...function} - functions that should be called to mixin functionality.
-   *                         They are called with the arguments (kibana, server, config)
+   *                         They are called with the arguments (opensearchDashboards, server, config)
    *                         and can return a promise to delay execution of the next mixin
    * @return {Promise} - promise that is resolved when the final mixin completes.
    */

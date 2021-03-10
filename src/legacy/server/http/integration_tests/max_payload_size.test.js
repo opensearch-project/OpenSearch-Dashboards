@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import * as kbnTestServer from '../../../../core/test_helpers/kbn_server';
+import * as osdTestServer from '../../../../core/test_helpers/osd_server';
 
 let root;
 beforeAll(async () => {
-  root = kbnTestServer.createRoot({
+  root = osdTestServer.createRoot({
     server: { maxPayloadBytes: 100 },
     migrations: { skip: true },
     plugins: { initialize: false },
@@ -30,7 +30,7 @@ beforeAll(async () => {
   await root.setup();
   await root.start();
 
-  kbnTestServer.getKbnServer(root).server.route({
+  osdTestServer.getOsdServer(root).server.route({
     path: '/payload_size_check/test/route',
     method: 'POST',
     config: { payload: { maxBytes: 200 } },
@@ -41,7 +41,7 @@ beforeAll(async () => {
 afterAll(async () => await root.shutdown());
 
 test('accepts payload with a size larger than default but smaller than route config allows', async () => {
-  await kbnTestServer.request
+  await osdTestServer.request
     .post(root, '/payload_size_check/test/route')
     .send({
       data: Array(150).fill('+').join(''),
@@ -50,7 +50,7 @@ test('accepts payload with a size larger than default but smaller than route con
 });
 
 test('fails with 413 if payload size is larger than default and route config allows', async () => {
-  await kbnTestServer.request
+  await osdTestServer.request
     .post(root, '/payload_size_check/test/route')
     .send({
       data: Array(250).fill('+').join(''),

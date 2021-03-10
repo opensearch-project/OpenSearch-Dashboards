@@ -18,14 +18,14 @@
  */
 
 import { Server } from 'hapi';
-import KbnServer from '../kbn_server';
+import OsdServer from '../osd_server';
 
 /**
- * Exposes `kbnServer.newPlatform` through Hapi API.
- * @param kbnServer KbnServer singleton instance.
+ * Exposes `osdServer.newPlatform` through Hapi API.
+ * @param osdServer OsdServer singleton instance.
  * @param server Hapi server instance to expose `core` on.
  */
-export function coreMixin(kbnServer: KbnServer, server: Server) {
+export function coreMixin(osdServer: OsdServer, server: Server) {
   // we suppress type error because hapi expect a function here not an object
-  server.decorate('server', 'newPlatform', kbnServer.newPlatform as any);
+  server.decorate('server', 'newPlatform', osdServer.newPlatform as any);
 }

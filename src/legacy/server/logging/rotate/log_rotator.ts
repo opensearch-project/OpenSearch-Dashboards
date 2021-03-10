@@ -27,7 +27,7 @@ import { basename, dirname, join, sep } from 'path';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { promisify } from 'util';
-import { KibanaConfig } from '../../kbn_server';
+import { OpenSearchDashboardsConfig } from '../../osd_server';
 
 const mkdirAsync = promisify(fs.mkdir);
 const readdirAsync = promisify(fs.readdir);
@@ -37,7 +37,7 @@ const unlinkAsync = promisify(fs.unlink);
 const writeFileAsync = promisify(fs.writeFile);
 
 export class LogRotator {
-  private readonly config: KibanaConfig;
+  private readonly config: OpenSearchDashboardsConfig;
   private readonly log: Server['log'];
   public logFilePath: string;
   public everyBytes: number;
@@ -52,7 +52,7 @@ export class LogRotator {
   private stalkerUsePollingPolicyTestTimeout: NodeJS.Timeout | null;
   public shouldUsePolling: boolean;
 
-  constructor(config: KibanaConfig, server: Server) {
+  constructor(config: OpenSearchDashboardsConfig, server: Server) {
     this.config = config;
     this.log = server.log.bind(server);
     this.logFilePath = config.get('logging.dest');
@@ -105,7 +105,7 @@ export class LogRotator {
       // Setup a test file in order to try the fs env
       // and understand if we need to usePolling or not
       const tempFileDir = tmpdir();
-      const tempFile = join(tempFileDir, 'kbn_log_rotation_use_polling_test_file.log');
+      const tempFile = join(tempFileDir, 'osd_log_rotation_use_polling_test_file.log');
 
       await mkdirAsync(tempFileDir, { recursive: true });
       await writeFileAsync(tempFile, '');

@@ -29,7 +29,7 @@ export async function setupLogging(server, config) {
   });
 }
 
-export async function loggingMixin(kbnServer, server, config) {
+export async function loggingMixin(osdServer, server, config) {
   logWithMetadata.decorateServer(server);
 
   await setupLogging(server, config);
