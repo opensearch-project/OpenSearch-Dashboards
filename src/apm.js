@@ -19,18 +19,18 @@
 
 const { join } = require('path');
 const { name, build } = require('../package.json');
-const { loadConfiguration } = require('@kbn/apm-config-loader');
+const { loadConfiguration } = require('@osd/apm-config-loader');
 
 const ROOT_DIR = join(__dirname, '..');
 let apmConfig;
 
 /**
- * Flag to disable APM RUM support on all kibana builds by default
+ * Flag to disable APM RUM support on all opensearch-dashboards builds by default
  */
 const isKibanaDistributable = Boolean(build && build.distributable === true);
 
 module.exports = function (serviceName = name) {
-  if (process.env.kbnWorkerType === 'optmzr') {
+  if (process.env.osdWorkerType === 'optmzr') {
     return;
   }
 
@@ -55,7 +55,7 @@ module.exports = function (serviceName = name) {
 };
 
 module.exports.getConfig = (serviceName) => {
-  // integration test runner starts a kibana server that import the module without initializing APM.
+  // integration test runner starts a opensearch-dashboards server that import the module without initializing APM.
   // so we need to check initialization of the config.
   // note that we can't just load the configuration during this module's import
   // because jest IT are ran with `--config path-to-jest-config.js` which conflicts with the CLI's `config` arg
