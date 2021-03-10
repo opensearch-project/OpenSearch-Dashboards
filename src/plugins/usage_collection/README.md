@@ -211,7 +211,7 @@ There are a few ways you can test that your usage collector is working properly.
       ```
 
       Where `http://localhost:5601` is a OpenSearch Dashboards server running in dev mode. If needed, authentication and basePath info can be provided in the command as well.
-    - Automatic inclusion of all the stats fetched by collectors is added in [#22336](https://github.com/elastic/opensearch-dashboardspull/22336) / 6.5.0
+    - Automatic inclusion of all the stats fetched by collectors is added in [#22336](https://github.com/elastic/kibana/pull/22336) / 6.5.0
 3. In Dev mode, OpenSearch Dashboards will send telemetry data to a staging telemetry cluster. Assuming you have access to the staging cluster, you can log in and check the latest documents for your new fields.
 4. If you catch the network traffic coming from your browser when a telemetry payload is sent, you can examine the request payload body to see the data. This can be tricky as telemetry payloads are sent only once per day per browser. Use incognito mode or clear your localStorage data to force a telemetry payload.
 

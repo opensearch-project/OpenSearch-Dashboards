@@ -18,7 +18,7 @@
  */
 
 import { Reporter, Storage } from '@osd/analytics';
-import { HttpSetup } from 'opensearch-dashboardspublic';
+import { HttpSetup } from 'opensearch-dashboard/spublic';
 
 interface AnalyicsReporterConfig {
   localStorage: Storage;
