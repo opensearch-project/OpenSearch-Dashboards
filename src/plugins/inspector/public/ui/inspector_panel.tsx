@@ -18,7 +18,7 @@
  */
 
 import './inspector_panel.scss';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';

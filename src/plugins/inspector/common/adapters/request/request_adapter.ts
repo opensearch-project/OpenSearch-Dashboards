@@ -25,7 +25,7 @@ import { Request, RequestParams, RequestStatus } from './types';
 /**
  * An generic inspector adapter to log requests.
  * These can be presented in the inspector using the requests view.
- * The adapter is not coupled to a specific implementation or even Elasticsearch
+ * The adapter is not coupled to a specific implementation or even OpenSearch
  * instead it offers a generic API to log requests of any kind.
  * @extends EventEmitter
  */

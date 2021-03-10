@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
