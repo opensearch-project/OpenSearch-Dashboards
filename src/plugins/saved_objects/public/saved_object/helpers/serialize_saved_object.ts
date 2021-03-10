@@ -44,7 +44,7 @@ export function serializeSavedObject(savedObject: SavedObject, config: SavedObje
       searchSourceJSON,
       references: searchSourceReferences,
     } = savedObject.searchSource.serialize();
-    attributes.kibanaSavedObjectMeta = { searchSourceJSON };
+    attributes.opensearchDashboardsSavedObjectMeta = { searchSourceJSON };
     references.push(...searchSourceReferences);
   }
 
@@ -53,7 +53,7 @@ export function serializeSavedObject(savedObject: SavedObject, config: SavedObje
       savedObject.searchSourceFields
     );
     const searchSourceJSON = JSON.stringify(searchSourceFields);
-    attributes.kibanaSavedObjectMeta = { searchSourceJSON };
+    attributes.opensearchDashboardsSavedObjectMeta = { searchSourceJSON };
     references.push(...searchSourceReferences);
   }
 

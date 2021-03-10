@@ -19,7 +19,7 @@
 import {
   SavedObject,
   SavedObjectConfig,
-  SavedObjectKibanaServices,
+  SavedObjectOpenSearchDashboardsServices,
   SavedObjectSaveOpts,
 } from '../../types';
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from '../../constants';
@@ -38,7 +38,7 @@ export function isErrorNonFatal(error: { message: string }) {
 /**
  * Saves this object.
  *
- * @param {string} [esType]
+ * @param {string} [opensearchType]
  * @param {SavedObject} [savedObject]
  * @param {SavedObjectConfig} [config]
  * @param {object} [options={}]
@@ -47,7 +47,7 @@ export function isErrorNonFatal(error: { message: string }) {
  * @property {boolean} [options.isTitleDuplicateConfirmed=false] - If true, save allowed with duplicate title
  * @property {func} [options.onTitleDuplicate] - function called if duplicate title exists.
  * When not provided, confirm modal will be displayed asking user to confirm or cancel save.
- * @param {SavedObjectKibanaServices} [services]
+ * @param {SavedObjectOpenSearchDashboardsServices} [services]
  * @return {Promise}
  * @resolved {String} - The id of the doc
  */
@@ -59,11 +59,11 @@ export async function saveSavedObject(
     isTitleDuplicateConfirmed = false,
     onTitleDuplicate,
   }: SavedObjectSaveOpts = {},
-  services: SavedObjectKibanaServices
+  services: SavedObjectOpenSearchDashboardsServices
 ): Promise<string> {
   const { savedObjectsClient, chrome } = services;
 
-  const esType = config.type || '';
+  const opensearchType = config.type || '';
   const extractReferences = config.extractReferences;
   // Save the original id in case the save fails.
   const originalId = savedObject.id;
@@ -96,12 +96,12 @@ export async function saveSavedObject(
       ? await createSource(
           attributes,
           savedObject,
-          esType,
+          opensearchType,
           savedObject.creationOpts({ references }),
           services
         )
       : await savedObjectsClient.create(
-          esType,
+          opensearchType,
           attributes,
           savedObject.creationOpts({ references, overwrite: true })
         );

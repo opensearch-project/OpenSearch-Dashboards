@@ -22,14 +22,14 @@ import { createSavedObjectClass } from './saved_object';
 import {
   SavedObject,
   SavedObjectConfig,
-  SavedObjectKibanaServices,
+  SavedObjectOpenSearchDashboardsServices,
   SavedObjectSaveOpts,
 } from '../types';
 
 import { coreMock } from '../../../../core/public/mocks';
 import { dataPluginMock, createSearchSourceMock } from '../../../../plugins/data/public/mocks';
 import { getStubIndexPattern, StubIndexPattern } from '../../../../plugins/data/public/test_utils';
-import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
+import { SavedObjectAttributes, SimpleSavedObject } from 'opensearch-dashboards/public';
 import { IIndexPattern } from '../../../data/common/index_patterns';
 
 const getConfig = (cfg: any) => cfg;
@@ -63,7 +63,7 @@ describe('Saved Object', () => {
    * Stubs some of the es retrieval calls so it returns the given response.
    * @param {Object} mockDocResponse
    */
-  function stubESResponse(mockDocResponse: SimpleSavedObject<SavedObjectAttributes>) {
+  function stubOpenSearchResponse(mockDocResponse: SimpleSavedObject<SavedObjectAttributes>) {
     // Stub out search for duplicate title:
     savedObjectsClientStub.get = jest.fn().mockReturnValue(Bluebird.resolve(mockDocResponse));
     savedObjectsClientStub.update = jest.fn().mockReturnValue(Bluebird.resolve(mockDocResponse));
@@ -113,13 +113,13 @@ describe('Saved Object', () => {
           createEmpty: createSearchSourceMock,
         },
       },
-    } as unknown) as SavedObjectKibanaServices);
+    } as unknown) as SavedObjectOpenSearchDashboardsServices);
   });
 
   describe('save', () => {
     describe('with confirmOverwrite', () => {
       it('when false does not request overwrite', () => {
-        stubESResponse(getMockedDocResponse('myId'));
+        stubOpenSearchResponse(getMockedDocResponse('myId'));
 
         return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(
           (savedObject) => {
@@ -137,7 +137,7 @@ describe('Saved Object', () => {
 
     describe('with copyOnSave', () => {
       it('as true creates a copy on save success', () => {
-        stubESResponse(getMockedDocResponse('myId'));
+        stubOpenSearchResponse(getMockedDocResponse('myId'));
 
         return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(
           (savedObject) => {
@@ -156,7 +156,7 @@ describe('Saved Object', () => {
 
       it('as true does not create a copy when save fails', () => {
         const originalId = 'id1';
-        stubESResponse(getMockedDocResponse(originalId));
+        stubOpenSearchResponse(getMockedDocResponse(originalId));
 
         return createInitializedSavedObject({ type: 'dashboard', id: originalId }).then(
           (savedObject) => {
@@ -177,7 +177,7 @@ describe('Saved Object', () => {
 
       it('as false does not create a copy', () => {
         const myId = 'myId';
-        stubESResponse(getMockedDocResponse(myId));
+        stubOpenSearchResponse(getMockedDocResponse(myId));
 
         return createInitializedSavedObject({ type: 'dashboard', id: myId }).then((savedObject) => {
           savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
@@ -195,7 +195,7 @@ describe('Saved Object', () => {
 
     it('returns id from server on success', () => {
       return createInitializedSavedObject({ type: 'dashboard' }).then((savedObject) => {
-        stubESResponse(getMockedDocResponse('myId'));
+        stubOpenSearchResponse(getMockedDocResponse('myId'));
         stubSavedObjectsClientCreate({
           type: 'dashboard',
           id: 'myId',
@@ -211,7 +211,7 @@ describe('Saved Object', () => {
     describe('updates isSaving variable', () => {
       it('on success', () => {
         const id = 'id';
-        stubESResponse(getMockedDocResponse(id));
+        stubOpenSearchResponse(getMockedDocResponse(id));
 
         return createInitializedSavedObject({ type: 'dashboard', id }).then((savedObject) => {
           savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
@@ -231,7 +231,7 @@ describe('Saved Object', () => {
       });
 
       it('on failure', () => {
-        stubESResponse(getMockedDocResponse('id'));
+        stubOpenSearchResponse(getMockedDocResponse('id'));
         return createInitializedSavedObject({ type: 'dashboard' }).then((savedObject) => {
           savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
             expect(savedObject.isSaving).toBe(true);
@@ -249,7 +249,7 @@ describe('Saved Object', () => {
     describe('to extract references', () => {
       it('when "extractReferences" function when passed in', async () => {
         const id = '123';
-        stubESResponse(getMockedDocResponse(id));
+        stubOpenSearchResponse(getMockedDocResponse(id));
         const extractReferences: SavedObjectConfig['extractReferences'] = ({
           attributes,
           references,
@@ -284,7 +284,7 @@ describe('Saved Object', () => {
 
       it('when search source references saved object', () => {
         const id = '123';
-        stubESResponse(getMockedDocResponse(id));
+        stubOpenSearchResponse(getMockedDocResponse(id));
         return createInitializedSavedObject({ type: 'dashboard', searchSource: true }).then(
           (savedObject) => {
             stubSavedObjectsClientCreate({
@@ -305,16 +305,16 @@ describe('Saved Object', () => {
             return savedObject.save(saveOptionsMock).then(() => {
               const args = (savedObjectsClientStub.create as jest.Mock).mock.calls[0];
               expect(args[1]).toEqual({
-                kibanaSavedObjectMeta: {
+                opensearchDashboardsSavedObjectMeta: {
                   searchSourceJSON: JSON.stringify({
-                    indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                    indexRefName: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
                   }),
                 },
               });
 
               expect(args[2].references).toHaveLength(1);
               expect(args[2].references[0]).toEqual({
-                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
                 type: 'index-pattern',
                 id: 'my-index',
               });
@@ -325,7 +325,7 @@ describe('Saved Object', () => {
 
       it('when index in searchSourceJSON is not found', () => {
         const id = '123';
-        stubESResponse(getMockedDocResponse(id));
+        stubOpenSearchResponse(getMockedDocResponse(id));
         return createInitializedSavedObject({ type: 'dashboard', searchSource: true }).then(
           (savedObject) => {
             stubSavedObjectsClientCreate({
@@ -345,15 +345,15 @@ describe('Saved Object', () => {
             return savedObject.save(saveOptionsMock).then(() => {
               const args = (savedObjectsClientStub.create as jest.Mock).mock.calls[0];
               expect(args[1]).toEqual({
-                kibanaSavedObjectMeta: {
+                opensearchDashboardsSavedObjectMeta: {
                   searchSourceJSON: JSON.stringify({
-                    indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                    indexRefName: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
                   }),
                 },
               });
               expect(args[2].references).toHaveLength(1);
               expect(args[2].references[0]).toEqual({
-                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
                 type: 'index-pattern',
                 id: 'non-existant-index',
               });
@@ -364,7 +364,7 @@ describe('Saved Object', () => {
 
       it('when indexes exists in filter of searchSourceJSON', () => {
         const id = '123';
-        stubESResponse(getMockedDocResponse(id));
+        stubOpenSearchResponse(getMockedDocResponse(id));
         return createInitializedSavedObject({ type: 'dashboard', searchSource: true }).then(
           (savedObject) => {
             stubSavedObjectsClientCreate({
@@ -383,13 +383,13 @@ describe('Saved Object', () => {
             return savedObject.save(saveOptionsMock).then(() => {
               const args = (savedObjectsClientStub.create as jest.Mock).mock.calls[0];
               expect(args[1]).toEqual({
-                kibanaSavedObjectMeta: {
+                opensearchDashboardsSavedObjectMeta: {
                   searchSourceJSON: JSON.stringify({
                     filter: [
                       {
                         meta: {
                           indexRefName:
-                            'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                            'opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
                         },
                       },
                     ],
@@ -398,7 +398,7 @@ describe('Saved Object', () => {
               });
               expect(args[2].references).toHaveLength(1);
               expect(args[2].references[0]).toEqual({
-                name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
                 type: 'index-pattern',
                 id: 'my-index',
               });
@@ -409,12 +409,12 @@ describe('Saved Object', () => {
     });
   });
 
-  describe('applyESResp', () => {
+  describe('applyOpenSearchResp', () => {
     it('throws error if not found', () => {
       return createInitializedSavedObject({ type: 'dashboard' }).then((savedObject) => {
         const response = { _source: {} };
         try {
-          savedObject.applyESResp(response);
+          savedObject.applyOpenSearchResp(response);
           expect(true).toBe(false);
         } catch (err) {
           expect(!!err).toBe(true);
@@ -434,14 +434,14 @@ describe('Saved Object', () => {
       };
 
       const mockDocResponse = getMockedDocResponse(id);
-      stubESResponse(mockDocResponse);
+      stubOpenSearchResponse(mockDocResponse);
 
       const savedObject = new SavedObjectClass(config);
       return savedObject.init!()
         .then(() => {
           expect(savedObject._source.preserveMe).toEqual(preserveMeValue);
           const response = { found: true, _source: {} };
-          return savedObject.applyESResp(response);
+          return savedObject.applyOpenSearchResp(response);
         })
         .then(() => {
           expect(savedObject._source.preserveMe).toEqual(preserveMeValue);
@@ -458,7 +458,7 @@ describe('Saved Object', () => {
         id,
       };
 
-      stubESResponse(getMockedDocResponse(id));
+      stubOpenSearchResponse(getMockedDocResponse(id));
 
       const savedObject = new SavedObjectClass(config);
       return savedObject.init!()
@@ -470,7 +470,7 @@ describe('Saved Object', () => {
               flower: 'orchid',
             },
           };
-          return savedObject.applyESResp(response);
+          return savedObject.applyOpenSearchResp(response);
         })
         .then(() => {
           expect(savedObject._source.flower).toEqual('orchid');
@@ -492,7 +492,7 @@ describe('Saved Object', () => {
       const mockDocResponse = getMockedDocResponse(id, {
         attributes: { dinosaurs: { tRex: 'is not so bad' } },
       });
-      stubESResponse(mockDocResponse);
+      stubOpenSearchResponse(mockDocResponse);
 
       const savedObject = new SavedObjectClass(config);
       return savedObject.init!()
@@ -502,7 +502,7 @@ describe('Saved Object', () => {
             _source: { dinosaurs: { tRex: 'has big teeth' } },
           };
 
-          return savedObject.applyESResp(response);
+          return savedObject.applyOpenSearchResp(response);
         })
         .then(() => {
           expect((savedObject._source as any).dinosaurs.tRex).toEqual('has big teeth');
@@ -524,7 +524,7 @@ describe('Saved Object', () => {
               dinosaurs: { tRex: 'has big teeth' },
             },
           };
-          return savedObject.applyESResp(response);
+          return savedObject.applyOpenSearchResp(response);
         })
         .then(() => {
           expect(injectReferences).not.toHaveBeenCalled();
@@ -547,7 +547,7 @@ describe('Saved Object', () => {
             },
             references: [],
           };
-          return savedObject.applyESResp(response);
+          return savedObject.applyOpenSearchResp(response);
         })
         .then(() => {
           expect(injectReferences).not.toHaveBeenCalled();
@@ -570,7 +570,7 @@ describe('Saved Object', () => {
             },
             references: [{}],
           };
-          return savedObject.applyESResp(response);
+          return savedObject.applyOpenSearchResp(response);
         })
         .then(() => {
           expect(injectReferences).toHaveBeenCalledTimes(1);
@@ -584,15 +584,15 @@ describe('Saved Object', () => {
         search: {
           ...dataStartMock.search,
         },
-      } as unknown) as SavedObjectKibanaServices);
+      } as unknown) as SavedObjectOpenSearchDashboardsServices);
       const savedObject = new SavedObjectClass({ type: 'dashboard', searchSource: true });
       return savedObject.init!().then(async () => {
         const searchSourceJSON = JSON.stringify({
-          indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          indexRefName: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
           filter: [
             {
               meta: {
-                indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                indexRefName: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
               },
             },
           ],
@@ -600,24 +600,24 @@ describe('Saved Object', () => {
         const response = {
           found: true,
           _source: {
-            kibanaSavedObjectMeta: {
+            opensearchDashboardsSavedObjectMeta: {
               searchSourceJSON,
             },
           },
           references: [
             {
-              name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+              name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
               type: 'index-pattern',
               id: 'my-index-1',
             },
             {
-              name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+              name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
               type: 'index-pattern',
               id: 'my-index-2',
             },
           ],
         };
-        await savedObject.applyESResp(response);
+        await savedObject.applyOpenSearchResp(response);
         expect(dataStartMock.search.searchSource.create).toBeCalledWith({
           filter: [{ meta: { index: 'my-index-2' } }],
           index: 'my-index-1',
@@ -627,31 +627,31 @@ describe('Saved Object', () => {
   });
 
   describe('config', () => {
-    it('afterESResp is called', () => {
-      const afterESRespCallback = jest.fn();
+    it('afterOpenSearchResp is called', () => {
+      const afterOpenSearchRespCallback = jest.fn();
       const config = {
         type: 'dashboard',
-        afterESResp: afterESRespCallback,
+        afterOpenSearchResp: afterOpenSearchRespCallback,
       };
 
       return createInitializedSavedObject(config).then(() => {
-        expect(afterESRespCallback).toHaveBeenCalled();
+        expect(afterOpenSearchRespCallback).toHaveBeenCalled();
       });
     });
 
     describe('searchSource', () => {
       it('when true, creates index', () => {
         const indexPatternId = 'testIndexPattern';
-        const afterESRespCallback = jest.fn();
+        const afterOpenSearchRespCallback = jest.fn();
 
         const config: SavedObjectConfig = {
           type: 'dashboard',
-          afterESResp: afterESRespCallback,
+          afterOpenSearchResp: afterOpenSearchRespCallback,
           searchSource: true,
           indexPattern: { id: indexPatternId } as IIndexPattern,
         };
 
-        stubESResponse(
+        stubOpenSearchResponse(
           getMockedDocResponse(indexPatternId, {
             attributes: {
               title: 'testIndexPattern',
@@ -675,7 +675,7 @@ describe('Saved Object', () => {
         expect(!!savedObject.searchSource!.getField('index')).toBe(false);
 
         return savedObject.init!().then(() => {
-          expect(afterESRespCallback).toHaveBeenCalled();
+          expect(afterOpenSearchRespCallback).toHaveBeenCalled();
           const index = savedObject.searchSource!.getField('index');
           expect(index instanceof StubIndexPattern).toBe(true);
           expect(index!.id).toEqual(indexPatternId);
@@ -684,22 +684,22 @@ describe('Saved Object', () => {
 
       it('when false, does not create index', () => {
         const indexPatternId = 'testIndexPattern';
-        const afterESRespCallback = jest.fn();
+        const afterOpenSearchRespCallback = jest.fn();
 
         const config: SavedObjectConfig = {
           type: 'dashboard',
-          afterESResp: afterESRespCallback,
+          afterOpenSearchResp: afterOpenSearchRespCallback,
           searchSource: false,
           indexPattern: { id: indexPatternId } as IIndexPattern,
         };
 
-        stubESResponse(getMockedDocResponse(indexPatternId));
+        stubOpenSearchResponse(getMockedDocResponse(indexPatternId));
 
         const savedObject = new SavedObjectClass(config);
         expect(!!savedObject.searchSource).toBe(false);
 
         return savedObject.init!().then(() => {
-          expect(afterESRespCallback).toHaveBeenCalled();
+          expect(afterOpenSearchRespCallback).toHaveBeenCalled();
           expect(!!savedObject.searchSource).toBe(false);
         });
       });
@@ -786,7 +786,7 @@ describe('Saved Object', () => {
           attributes: { overwriteMe: serverValue },
         });
 
-        stubESResponse(mockDocResponse);
+        stubOpenSearchResponse(mockDocResponse);
 
         return createInitializedSavedObject(config).then((savedObject) => {
           expect(!!savedObject._source).toBe(true);

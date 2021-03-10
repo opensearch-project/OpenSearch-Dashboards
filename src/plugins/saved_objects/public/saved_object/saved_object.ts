@@ -27,10 +27,10 @@
  * This class seems to interface with ES primarily through the es Angular
  * service and the saved object api.
  */
-import { SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../types';
+import { SavedObject, SavedObjectConfig, SavedObjectOpenSearchDashboardsServices } from '../types';
 import { buildSavedObject } from './helpers/build_saved_object';
 
-export function createSavedObjectClass(services: SavedObjectKibanaServices) {
+export function createSavedObjectClass(services: SavedObjectOpenSearchDashboardsServices) {
   /**
    * The SavedObject class is a base class for saved objects loaded from the server and
    * provides additional functionality besides loading/saving/deleting/etc.
