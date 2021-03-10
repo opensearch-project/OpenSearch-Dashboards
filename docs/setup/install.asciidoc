@@ -1,23 +1,23 @@
 [[install]]
-== Install {kib}
+== Install {osd}
 
 [float]
-=== Hosted {kib}
+=== Hosted {osd}
 
-If you are running our hosted Elasticsearch Service on Elastic Cloud, you access Kibana with a single click. (You can {ess-trial}[sign up for a free trial] and start exploring data in minutes.)
+If you are running our hosted OpenSearch Service on Elastic Cloud, you access OpenSearchDashboards with a single click. (You can {opensearchs-trial}[sign up for a free trial] and start exploring data in minutes.)
 
 [float]
-=== Install {kib} yourself
+=== Install {osd} yourself
 
-NOTE: Starting with version 6.0.0, Kibana only supports 64 bit operating systems.
+NOTE: Starting with version 6.0.0, OpenSearchDashboards only supports 64 bit operating systems.
 
-Kibana is provided in the following package formats:
+OpenSearchDashboards is provided in the following package formats:
 
 [horizontal]
 `tar.gz`/`zip`::
 
 The `tar.gz` packages are provided for installation on Linux and Darwin and are
-the easiest choice for getting started with Kibana.
+the easiest choice for getting started with OpenSearchDashboards.
 +
 The `zip` package is the only supported package for Windows.
 +
@@ -41,20 +41,20 @@ Elastic website or from our RPM repository.
 
 `docker`::
 
-Images are available for running Kibana as a Docker container. They may be
+Images are available for running OpenSearchDashboards as a Docker container. They may be
 downloaded from the Elastic Docker Registry.
 +
-<<docker,Running Kibana on Docker>>
+<<docker,Running OpenSearchDashboards on Docker>>
 
 `brew`::
 
-Formulae are available from the Elastic Homebrew tap for installing {kib} on macOS with the Homebrew package manager.
+Formulae are available from the Elastic Homebrew tap for installing {osd} on macOS with the Homebrew package manager.
 +
 <<brew>>
 
-IMPORTANT: If your Elasticsearch installation is protected by
-{ref}/elasticsearch-security.html[{stack-security-features}] see
-{kibana-ref}/using-kibana-with-security.html[Configuring security in {kib}] for
+IMPORTANT: If your OpenSearch installation is protected by
+{ref}/opensearch-security.html[{stack-security-features}] see
+{opensearch-dashboards-ref}/using-opensearch-dashboards-with-security.html[Configuring security in {osd}] for
 additional setup instructions.
 
 include::install/targz.asciidoc[]
@@ -65,6 +65,6 @@ include::install/deb.asciidoc[]
 
 include::install/rpm.asciidoc[]
 
-include::{kib-repo-dir}/setup/docker.asciidoc[]
+include::{osd-repo-dir}/setup/docker.asciidoc[]
 
 include::install/brew.asciidoc[]

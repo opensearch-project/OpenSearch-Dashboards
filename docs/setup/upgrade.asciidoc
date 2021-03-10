@@ -1,30 +1,30 @@
 [[upgrade]]
-== Upgrade {kib}
+== Upgrade {osd}
 
-Depending on the {kib} version you're upgrading from, the upgrade process to 7.0
+Depending on the {osd} version you're upgrading from, the upgrade process to 7.0
 varies.
 
 [float]
 [[upgrade-before-you-begin]]
 === Before you begin
 
-WARNING: {kib} automatically runs upgrade migrations when required. To roll back to an earlier version in case of an upgrade failure, you **must** have a backup snapshot available. Use <<snapshot-repositories, Snapshot and Restore>> to back up {kib} data by targeting the `.kibana*` indices. For more information see <<upgrade-migrations, upgrade migrations>>.
+WARNING: {osd} automatically runs upgrade migrations when required. To roll back to an earlier version in case of an upgrade failure, you **must** have a backup snapshot available. Use <<snapshot-repositories, Snapshot and Restore>> to back up {osd} data by targeting the `.opensearchDashboards*` indices. For more information see <<upgrade-migrations, upgrade migrations>>.
 
-Before you upgrade {kib}:
+Before you upgrade {osd}:
 
 * Consult the <<breaking-changes,breaking changes>>.
-* Back up your data with <<snapshot-repositories, Snapshot and Restore>>. To roll back to an earlier version, you **must** have a snapshot of the `.kibana*` indices. 
-* Although not a requirement for rollbacks, we recommend taking a snapshot of all {kib} indices created by the plugins you use such as the `.reporting*` indices created by the reporting plugin.  
+* Back up your data with <<snapshot-repositories, Snapshot and Restore>>. To roll back to an earlier version, you **must** have a snapshot of the `.opensearchDashboards*` indices. 
+* Although not a requirement for rollbacks, we recommend taking a snapshot of all {osd} indices created by the plugins you use such as the `.reporting*` indices created by the reporting plugin.  
 * Before you upgrade production servers, test the upgrades in a dev environment.
 * See <<preventing-migration-failures, preventing migration failures>> for common reasons upgrades fail and how to prevent these.
 * If you are using custom plugins, check that a compatible version is
   available.
-* Shut down all {kib} instances. Running more than one {kib} version against
-  the same Elasticseach index is unsupported. Upgrading while older {kib}
+* Shut down all {osd} instances. Running more than one {osd} version against
+  the same Elasticseach index is unsupported. Upgrading while older {osd}
   instances are running can cause data loss or upgrade failures.
 
 To identify the changes you need to make to upgrade, and to enable you to
-perform an Elasticsearch rolling upgrade with no downtime, you must upgrade to
+perform an OpenSearch rolling upgrade with no downtime, you must upgrade to
 6.7 before you upgrade to 7.0.
 
 For a comprehensive overview of the upgrade process, refer to
@@ -34,7 +34,7 @@ For a comprehensive overview of the upgrade process, refer to
 [float]
 [[upgrade-5x-earlier]]
 === Upgrade from 5.x or earlier
-{es} can read indices created in the previous major version. Before you upgrade
+{opensearch} can read indices created in the previous major version. Before you upgrade
 to 7.0.0, you must reindex or delete any indices created in 5.x or earlier.
 For more information, refer to
 {stack-ref}/upgrading-elastic-stack.html#oss-stack-upgrade[Upgrading the Elastic Stack].
@@ -50,13 +50,13 @@ The recommended path is to upgrade to 6.8 before upgrading to 7.0. This makes it
 easier to identify the required changes, and enables you to use the Upgrade
 Assistant to prepare for your upgrade to 7.0.
 
-TIP: The ability to import {kib} 6.x saved searches, visualizations, and
+TIP: The ability to import {osd} 6.x saved searches, visualizations, and
 dashboards is supported.
 
 [float]
 [[upgrade-67]]
 === Upgrade from 6.8
-To help you prepare for your upgrade to 7.0, 6.8 includes an https://www.elastic.co/guide/en/kibana/6.8/upgrade-assistant.html[Upgrade Assistant]
+To help you prepare for your upgrade to 7.0, 6.8 includes an https://www.elastic.co/guide/en/opensearch-dashboards/6.8/upgrade-assistant.html[Upgrade Assistant]
 To access the assistant, go to *Management > 7.0 Upgrade Assistant*.
 
 After you have addressed any issues that were identified by the Upgrade
@@ -66,12 +66,12 @@ Assistant, <<upgrade-standard,upgrade to 7.0>>.
 === Known issues
 
 [float]
-==== "shard failed" error when viewing {beats} dashboards in {kib}
-After upgrading to {es} 7.0, any indices created by {beats} 6.6 or older will not
-work in {kib} dashboards until the `index.query.default_field` setting is added
+==== "shard failed" error when viewing {beats} dashboards in {osd}
+After upgrading to {opensearch} 7.0, any indices created by {beats} 6.6 or older will not
+work in {osd} dashboards until the `index.query.default_field` setting is added
 to each index. Indices created in {beats} 6.7 or later are unaffected.
 To add the setting to the index, you can use the 7.0
-{kibana-ref}/upgrade-assistant.html[Upgrade Assistant], or
+{opensearch-dashboards-ref}/upgrade-assistant.html[Upgrade Assistant], or
 //{beats-ref}/upgrading.html#dashboard-shard-failed[
 add the setting manually
 //]

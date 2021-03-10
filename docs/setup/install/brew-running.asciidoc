@@ -1,9 +1,9 @@
-==== Run {kib} with `brew services`
+==== Run {osd} with `brew services`
 
-With Homebrew, Kibana can be started and stopped as follows:
+With Homebrew, OpenSearchDashboards can be started and stopped as follows:
 
 [source,sh]
 --------------------------------------------------
-brew services start elastic/tap/kibana-full
-brew services stop elastic/tap/kibana-full
+brew services start elastic/tap/opensearch-dashboards-full
+brew services stop elastic/tap/opensearch-dashboards-full
 --------------------------------------------------

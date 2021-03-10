@@ -1,10 +1,10 @@
 [[windows]]
-=== Install {kib} on Windows
+=== Install {osd} on Windows
 ++++
 <titleabbrev>Install on Windows</titleabbrev>
 ++++
 
-Kibana can be installed on Windows using the `.zip` package.
+OpenSearchDashboards can be installed on Windows using the `.zip` package.
 
 This package is free to use under the Elastic license. It contains open source
 and free commercial features and access to paid commercial features.
@@ -13,8 +13,8 @@ paid commercial features. See the
 https://www.elastic.co/subscriptions[Subscriptions] page for information about
 Elastic license levels.
 
-The latest stable version of Kibana can be found on the
-link:/downloads/kibana[Download Kibana] page.
+The latest stable version of OpenSearchDashboards can be found on the
+link:/downloads/opensearch-dashboards[Download OpenSearchDashboards] page.
 Other versions can be found on the
 link:/downloads/past-releases[Past Releases page].
 
@@ -23,28 +23,28 @@ link:/downloads/past-releases[Past Releases page].
 
 ifeval::["{release-state}"=="unreleased"]
 
-Version {version} of Kibana has not yet been released.
+Version {version} of OpenSearchDashboards has not yet been released.
 
 endif::[]
 
 ifeval::["{release-state}"!="unreleased"]
 
-Download the `.zip` windows archive for Kibana v{version} from
-https://artifacts.elastic.co/downloads/kibana/kibana-{version}-windows-x86_64.zip
+Download the `.zip` windows archive for OpenSearchDashboards v{version} from
+https://artifacts.elastic.co/downloads/opensearch-dashboards/opensearch-dashboards-{version}-windows-x86_64.zip
 
 Unzip it with your favourite unzip tool. This will create a folder called
-kibana-{version}-windows-x86_64, which we will refer to as `$KIBANA_HOME`. In a
-terminal window, `CD` to the `$KIBANA_HOME` directory, for instance:
+opensearch-dashboards-{version}-windows-x86_64, which we will refer to as `$OPENSEARCH_DASHBOARDS_HOME`. In a
+terminal window, `CD` to the `$OPENSEARCH_DASHBOARDS_HOME` directory, for instance:
 
 
 ["source","sh",subs="attributes"]
 ----------------------------
-CD c:\kibana-{version}-windows-x86_64
+CD c:\opensearch-dashboards-{version}-windows-x86_64
 ----------------------------
 
 Alternatively, you can download the following package, which contains only
 features that are available under the Apache 2.0 license:
-https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-windows-x86_64.zip
+https://artifacts.elastic.co/downloads/opensearch-dashboards/opensearch-dashboards-oss-{version}-windows-x86_64.zip
 
 endif::[]
 
@@ -52,22 +52,22 @@ endif::[]
 include::windows-running.asciidoc[]
 
 [[windows-configuring]]
-==== Configure {kib} via the config file
+==== Configure {osd} via the config file
 
-Kibana loads its configuration from the `$KIBANA_HOME/config/kibana.yml`
+OpenSearchDashboards loads its configuration from the `$OPENSEARCH_DASHBOARDS_HOME/config/opensearch_dashboards.yml`
 file by default.  The format of this config file is explained in
-{kibana-ref}/settings.html[Configuring Kibana].
+{opensearch-dashboards-ref}/settings.html[Configuring OpenSearchDashboards].
 
 [[windows-layout]]
 ==== Directory layout of `.zip` archive
 
 The `.zip` package is entirely self-contained. All files and directories are,
-by default, contained within `$KIBANA_HOME` -- the directory created when
+by default, contained within `$OPENSEARCH_DASHBOARDS_HOME` -- the directory created when
 unpacking the archive.
 
 This is very convenient because you don't have to create any directories to
-start using Kibana, and uninstalling Kibana is as easy as removing the
-`$KIBANA_HOME` directory.  However, it is advisable to change the default
+start using OpenSearchDashboards, and uninstalling OpenSearchDashboards is as easy as removing the
+`$OPENSEARCH_DASHBOARDS_HOME` directory.  However, it is advisable to change the default
 locations of the config and data directories so that you do not delete
 important data later on.
 
@@ -76,29 +76,29 @@ important data later on.
 |=======================================================================
 | Type | Description | Default Location | Setting
 | home
-  | Kibana home directory or `$KIBANA_HOME`
+  | OpenSearchDashboards home directory or `$OPENSEARCH_DASHBOARDS_HOME`
  d| Directory created by unpacking the archive
  d|
 
 | bin
-  | Binary scripts including `kibana` to start the Kibana server
-    and `kibana-plugin` to install plugins
-  | $KIBANA_HOME\bin
+  | Binary scripts including `opensearchDashboards` to start the OpenSearchDashboards server
+    and `opensearch-dashboards-plugin` to install plugins
+  | $OPENSEARCH_DASHBOARDS_HOME\bin
  d|
 
 | config
-  | Configuration files including `kibana.yml`
-  | $KIBANA_HOME\config
+  | Configuration files including `opensearch_dashboards.yml`
+  | $OPENSEARCH_DASHBOARDS_HOME\config
  d|
 
 | data
-  | The location of the data files written to disk by Kibana and its plugins
-  | $KIBANA_HOME\data
+  | The location of the data files written to disk by OpenSearchDashboards and its plugins
+  | $OPENSEARCH_DASHBOARDS_HOME\data
  d|
 
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.
-  | $KIBANA_HOME\plugins
+  | $OPENSEARCH_DASHBOARDS_HOME\plugins
  d|
 
 |=======================================================================

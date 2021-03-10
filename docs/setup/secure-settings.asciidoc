@@ -2,23 +2,23 @@
 === Secure settings
 
 Some settings are sensitive, and relying on filesystem permissions to protect
-their values is not sufficient. For this use case, Kibana provides a
-keystore, and the `kibana-keystore` tool to manage the settings in the keystore.
+their values is not sufficient. For this use case, OpenSearchDashboards provides a
+keystore, and the `opensearch-dashboards-keystore` tool to manage the settings in the keystore.
 
-NOTE: All commands here should be run as the user which will run Kibana.
+NOTE: All commands here should be run as the user which will run OpenSearchDashboards.
 
 [float]
 [[creating-keystore]]
 === Create the keystore
 
-To create the `kibana.keystore`, use the `create` command:
+To create the `opensearchDashboards.keystore`, use the `create` command:
 
 [source,sh]
 ----------------------------------------------------------------
-bin/kibana-keystore create
+bin/opensearch-dashboards-keystore create
 ----------------------------------------------------------------
 
-The file `kibana.keystore` will be created in the directory defined by the
+The file `opensearchDashboards.keystore` will be created in the directory defined by the
 <<path-data, `path.data`>> configuration setting.
 
 [float]
@@ -29,30 +29,30 @@ A list of the settings in the keystore is available with the `list` command:
 
 [source,sh]
 ----------------------------------------------------------------
-bin/kibana-keystore list
+bin/opensearch-dashboards-keystore list
 ----------------------------------------------------------------
 
 [float]
 [[add-string-to-keystore]]
 === Add string settings
 
-Sensitive string settings, like authentication credentials for Elasticsearch
+Sensitive string settings, like authentication credentials for OpenSearch
 can be added using the `add` command:
 
 [source,sh]
 ----------------------------------------------------------------
-bin/kibana-keystore add the.setting.name.to.set
+bin/opensearch-dashboards-keystore add the.setting.name.to.set
 ----------------------------------------------------------------
 
 Once added to the keystore, these setting will be automatically applied
-to this instance of Kibana when started. For example if you do
+to this instance of OpenSearchDashboards when started. For example if you do
 
 [source,sh]
 ----------------------------------------------------------------
-bin/kibana-keystore add elasticsearch.username
+bin/opensearch-dashboards-keystore add opensearch.username
 ----------------------------------------------------------------
 
-you will be prompted to provide the value for elasticsearch.username.
+you will be prompted to provide the value for opensearch.username.
 (Your input will show as asterisks.)
 
 The tool will prompt for the value of the setting. To pass the value
@@ -60,7 +60,7 @@ through stdin, use the `--stdin` flag:
 
 [source,sh]
 ----------------------------------------------------------------
-cat /file/containing/setting/value | bin/kibana-keystore add the.setting.name.to.set --stdin
+cat /file/containing/setting/value | bin/opensearch-dashboards-keystore add the.setting.name.to.set --stdin
 ----------------------------------------------------------------
 
 [float]
@@ -71,5 +71,5 @@ To remove a setting from the keystore, use the `remove` command:
 
 [source,sh]
 ----------------------------------------------------------------
-bin/kibana-keystore remove the.setting.name.to.remove
+bin/opensearch-dashboards-keystore remove the.setting.name.to.remove
 ----------------------------------------------------------------

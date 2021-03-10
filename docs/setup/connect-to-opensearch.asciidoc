@@ -1,25 +1,25 @@
-[[connect-to-elasticsearch]]
+[[connect-to-opensearch]]
 == Add data
 ++++
 <titleabbrev>Add data</titleabbrev>
 ++++
 
-To start working with your data in {kib}, use one of the many ingest options,
+To start working with your data in {osd}, use one of the many ingest options,
 available from the home page.
 You can collect data from an app or service
 or upload a file that contains your data.  If you're not ready to use your own data,
-add a sample data set and give {kib} a test drive.
+add a sample data set and give {osd} a test drive.
 
 [role="screenshot"]
-image::images/add-data-home.png[Built-in options for adding data to Kibana:  Add data, Add Elastic Agent, Upload a file]
+image::images/add-data-home.png[Built-in options for adding data to OpenSearchDashboards:  Add data, Add Elastic Agent, Upload a file]
 
 [float]
-[[add-data-tutorial-kibana]]
+[[add-data-tutorial-opensearch-dashboards]]
 ===  Add data
 
 Want to ingest logs, metrics, security, or application data?
 Install and configure a Beats data shipper or other module to periodically collect the data
-and send it to {es}. You can then use the pre-built dashboards to explore and analyze the data.
+and send it to {opensearch}. You can then use the pre-built dashboards to explore and analyze the data.
 
 [role="screenshot"]
 image::images/add-data-tutorials.png[Add Data tutorials]
@@ -43,12 +43,12 @@ To get started, refer to
 image::images/add-data-fleet.png[Add data using Fleet]
 
 [discrete]
-[[upload-data-kibana]]
+[[upload-data-opensearch-dashboards]]
 === Upload a file
 
 experimental[] If your data is in a CSV, JSON, or log file, you can upload it using the File
 Data Visualizer. You can upload a file up to 100 MB. This value is configurable up to 1 GB in
-<<kibana-ml-settings, Advanced Settings>>. To upload a file with geospatial data,
+<<opensearch-dashboards-ml-settings, Advanced Settings>>. To upload a file with geospatial data,
 refer to <<import-geospatial-data, Import geospatial data>>.
 
 [role="screenshot"]
@@ -63,11 +63,11 @@ repeated production process, but rather for the initial exploration of your data
 [discrete]
 === Additional options for loading your data
 
-If the {kib} ingest options don't work for you, you can index your
-data into Elasticsearch with {ref}/getting-started-index.html[REST APIs]
-or https://www.elastic.co/guide/en/elasticsearch/client/index.html[client libraries].
+If the {osd} ingest options don't work for you, you can index your
+data into OpenSearch with {ref}/getting-started-index.html[REST APIs]
+or https://www.elastic.co/guide/en/opensearch/client/index.html[client libraries].
 After you add your data, you're required to create an <<index-patterns,index pattern>> to tell
-{kib} where to find the data.
+{osd} where to find the data.
 
-* To add data for Elastic Observability, refer to {observability-guide}/add-observability-data.html[Send data to Elasticsearch].
+* To add data for Elastic Observability, refer to {observability-guide}/add-observability-data.html[Send data to OpenSearch].
 * To add data for Elastic Security, refer to https://www.elastic.co/guide/en/security/current/ingest-data.html[Ingest data to Elastic Security].

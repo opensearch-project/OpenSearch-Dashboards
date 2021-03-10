@@ -1,22 +1,22 @@
-==== Run {kib} with `systemd`
+==== Run {osd} with `systemd`
 
-To configure Kibana to start automatically when the system boots up,
+To configure OpenSearchDashboards to start automatically when the system boots up,
 run the following commands:
 
 [source,sh]
 --------------------------------------------------
 sudo /bin/systemctl daemon-reload
-sudo /bin/systemctl enable kibana.service
+sudo /bin/systemctl enable opensearchDashboards.service
 --------------------------------------------------
 
-Kibana can be started and stopped as follows:
+OpenSearchDashboards can be started and stopped as follows:
 
 [source,sh]
 --------------------------------------------
-sudo systemctl start kibana.service
-sudo systemctl stop kibana.service
+sudo systemctl start opensearchDashboards.service
+sudo systemctl stop opensearchDashboards.service
 --------------------------------------------
 
-These commands provide no feedback as to whether Kibana was started
+These commands provide no feedback as to whether OpenSearchDashboards was started
 successfully or not. Log information can be accessed via
-`journalctl -u kibana.service`.
+`journalctl -u opensearchDashboards.service`.

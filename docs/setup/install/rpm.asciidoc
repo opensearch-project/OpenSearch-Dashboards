@@ -1,13 +1,13 @@
 [[rpm]]
-=== Install {kib} with RPM
+=== Install {osd} with RPM
 ++++
 <titleabbrev>Install with RPM</titleabbrev>
 ++++
 
 
-The RPM for Kibana can be <<install-rpm,downloaded from our website>>
+The RPM for OpenSearchDashboards can be <<install-rpm,downloaded from our website>>
 or from our <<rpm-repo,RPM repository>>. It can be used to install
-Kibana on any RPM-based system such as OpenSuSE, SLES, Centos, Red Hat,
+OpenSearchDashboards on any RPM-based system such as OpenSuSE, SLES, Centos, Red Hat,
 and Oracle Enterprise.
 
 NOTE: RPM install is not supported on distributions with old versions of RPM,
@@ -20,8 +20,8 @@ paid commercial features. See the
 https://www.elastic.co/subscriptions[Subscriptions] page for information about
 Elastic license levels.
 
-The latest stable version of Kibana can be found on the
-link:/downloads/kibana[Download Kibana] page. Other versions can
+The latest stable version of OpenSearchDashboards can be found on the
+link:/downloads/opensearch-dashboards[Download OpenSearchDashboards] page. Other versions can
 be found on the link:/downloads/past-releases[Past Releases page].
 
 [[rpm-key]]
@@ -31,7 +31,7 @@ include::key.asciidoc[]
 
 [source,sh]
 -------------------------
-rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+rpm --import https://artifacts.elastic.co/GPG-KEY-opensearch
 -------------------------
 
 [[rpm-repo]]
@@ -39,13 +39,13 @@ rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
 
 ifeval::["{release-state}"=="unreleased"]
 
-Version {version} of Kibana has not yet been released.
+Version {version} of OpenSearchDashboards has not yet been released.
 
 endif::[]
 
 ifeval::["{release-state}"!="unreleased"]
 
-Create a file called `kibana.repo` in the `/etc/yum.repos.d/` directory
+Create a file called `opensearchDashboards.repo` in the `/etc/yum.repos.d/` directory
 for RedHat based distributions, or in the `/etc/zypp/repos.d/` directory for
 OpenSuSE based distributions, containing:
 
@@ -53,11 +53,11 @@ ifeval::["{release-state}"=="released"]
 
 ["source","sh",subs="attributes,callouts"]
 --------------------------------------------------
-[kibana-{major-version}]
-name=Kibana repository for {major-version} packages
+[opensearch-dashboards-{major-version}]
+name=OpenSearchDashboards repository for {major-version} packages
 baseurl=https://artifacts.elastic.co/packages/{major-version}/yum
 gpgcheck=1
-gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+gpgkey=https://artifacts.elastic.co/GPG-KEY-opensearch
 enabled=1
 autorefresh=1
 type=rpm-md
@@ -69,11 +69,11 @@ ifeval::["{release-state}"=="prerelease"]
 
 ["source","sh",subs="attributes,callouts"]
 --------------------------------------------------
-[kibana-{major-version}]
-name=Kibana repository for {major-version} packages
+[opensearch-dashboards-{major-version}]
+name=OpenSearchDashboards repository for {major-version} packages
 baseurl=https://artifacts.elastic.co/packages/{major-version}-prerelease/yum
 gpgcheck=1
-gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+gpgkey=https://artifacts.elastic.co/GPG-KEY-opensearch
 enabled=1
 autorefresh=1
 type=rpm-md
@@ -81,13 +81,13 @@ type=rpm-md
 
 endif::[]
 
-And your repository is ready for use. You can now install Kibana with one of the following commands:
+And your repository is ready for use. You can now install OpenSearchDashboards with one of the following commands:
 
 [source,sh]
 --------------------------------------------------
-sudo yum install kibana <1>
-sudo dnf install kibana <2>
-sudo zypper install kibana <3>
+sudo yum install opensearchDashboards <1>
+sudo dnf install opensearchDashboards <2>
+sudo zypper install opensearchDashboards <3>
 --------------------------------------------------
 <1> Use `yum` on CentOS and older Red Hat based distributions.
 <2> Use `dnf` on Fedora and other newer Red Hat distributions.
@@ -100,8 +100,8 @@ ifeval::["{release-state}"!="unreleased"]
 [NOTE]
 ==================================================
 
-An alternative package, `kibana-oss`, which contains only features that are available under the
-Apache 2.0 license is also available. To install it, use the following `baseurl` in your `kibana.repo` file:
+An alternative package, `opensearch-dashboards-oss`, which contains only features that are available under the
+Apache 2.0 license is also available. To install it, use the following `baseurl` in your `opensearchDashboards.repo` file:
 
 ifeval::["{release-state}"=="prerelease"]
 
@@ -130,26 +130,26 @@ endif::[]
 
 ifeval::["{release-state}"=="unreleased"]
 
-Version {version} of Kibana has not yet been released.
+Version {version} of OpenSearchDashboards has not yet been released.
 
 endif::[]
 
 ifeval::["{release-state}"!="unreleased"]
 
-The RPM for Kibana v{version} can be downloaded from the website and installed as follows:
+The RPM for OpenSearchDashboards v{version} can be downloaded from the website and installed as follows:
 
 ["source","sh",subs="attributes"]
 --------------------------------------------
-wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-x86_64.rpm
-shasum -a 512 kibana-{version}-x86_64.rpm <1>
-sudo rpm --install kibana-{version}-x86_64.rpm
+wget https://artifacts.elastic.co/downloads/opensearch-dashboards/opensearch-dashboards-{version}-x86_64.rpm
+shasum -a 512 opensearch-dashboards-{version}-x86_64.rpm <1>
+sudo rpm --install opensearch-dashboards-{version}-x86_64.rpm
 --------------------------------------------
 <1> Compare the SHA produced by `shasum` with the
-    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-x86_64.rpm.sha512[published SHA].
+    https://artifacts.elastic.co/downloads/opensearch-dashboards/opensearch-dashboards-{version}-x86_64.rpm.sha512[published SHA].
 
 Alternatively, you can download the following package, which contains only
 features that are available under the Apache 2.0 license:
-https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-x86_64.rpm
+https://artifacts.elastic.co/downloads/opensearch-dashboards/opensearch-dashboards-oss-{version}-x86_64.rpm
 
 endif::[]
 
@@ -164,11 +164,11 @@ include::rpm-init.asciidoc[]
 include::systemd.asciidoc[]
 
 [[rpm-configuring]]
-==== Configure {kib} via the config file
+==== Configure {osd} via the config file
 
-Kibana loads its configuration from the `/etc/kibana/kibana.yml`
+OpenSearchDashboards loads its configuration from the `/etc/opensearch-dashboards/opensearch_dashboards.yml`
 file by default.  The format of this config file is explained in
-{kibana-ref}/settings.html[Configuring Kibana].
+{opensearch-dashboards-ref}/settings.html[Configuring OpenSearchDashboards].
 
 [[rpm-layout]]
 ==== Directory layout of RPM
@@ -181,34 +181,34 @@ locations for an RPM-based system:
 |=======================================================================
 | Type | Description | Default Location | Setting
 | home
-  | Kibana home directory or `$KIBANA_HOME`
-  | /usr/share/kibana
+  | OpenSearchDashboards home directory or `$OPENSEARCH_DASHBOARDS_HOME`
+  | /usr/share/opensearch-dashboards
  d|
 
 | bin
-  | Binary scripts including `kibana` to start the Kibana server
-    and `kibana-plugin` to install plugins
-  | /usr/share/kibana/bin
+  | Binary scripts including `opensearchDashboards` to start the OpenSearchDashboards server
+    and `opensearch-dashboards-plugin` to install plugins
+  | /usr/share/opensearch-dashboards/bin
  d|
 
 | config
-  | Configuration files including `kibana.yml`
-  | /etc/kibana
+  | Configuration files including `opensearch_dashboards.yml`
+  | /etc/opensearch-dashboards
  d|
 
 | data
-  | The location of the data files written to disk by Kibana and its plugins
-  | /var/lib/kibana
+  | The location of the data files written to disk by OpenSearchDashboards and its plugins
+  | /var/lib/opensearch-dashboards
   | path.data
 
 | logs
     | Logs files location
-    |  /var/log/kibana
+    |  /var/log/opensearch-dashboards
     | path.logs
 
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.
-  | /usr/share/kibana/plugins
+  | /usr/share/opensearch-dashboards/plugins
  d|
 
 |=======================================================================

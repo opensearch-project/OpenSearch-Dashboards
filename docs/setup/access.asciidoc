@@ -1,36 +1,36 @@
 [[access]]
-== Access {kib}
+== Access {osd}
 
-The fastest way to access {kib} is to use our hosted {es} Service. If you <<install, installed {kib} on your own>>, access {kib} through the web application.
+The fastest way to access {osd} is to use our hosted {opensearch} Service. If you <<install, installed {osd} on your own>>, access {osd} through the web application.
 
 [float]
 === Set up on cloud
 
-include::{docs-root}/shared/cloud/ess-getting-started.asciidoc[]
+include::{docs-root}/shared/cloud/opensearchs-getting-started.asciidoc[]
 
 [float]
 [[log-on-to-the-web-application]]
 === Log on to the web application
 
-If you are using a self-managed deployment, you access {kib} through the web application on port 5601.
+If you are using a self-managed deployment, you access {osd} through the web application on port 5601.
 
-. Point your web browser to the machine where you are running {kib} and specify the port number. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
+. Point your web browser to the machine where you are running {osd} and specify the port number. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
 
-. To allow remote users to connect to {kib}, set the parameter `server.host` in kibana.yml to a non-loopback address.
+. To allow remote users to connect to {osd}, set the parameter `server.host` in opensearch_dashboards.yml to a non-loopback address.
 
-. On the home page, click *{kib}*.
+. On the home page, click *{osd}*.
 +
-To make the {kib} page your landing page, click *Make this my landing page*.
+To make the {osd} page your landing page, click *Make this my landing page*.
 
 [float]
 [[status]]
-=== Check the {kib} status
+=== Check the {osd} status
 
-To view the {kib} status page, use the status endpoint. For example, `localhost:5601/status`. The status page displays
+To view the {osd} status page, use the status endpoint. For example, `localhost:5601/status`. The status page displays
 information about the server resource usage and installed plugins.
 
 [role="screenshot"]
-image::images/kibana-status-page-7_5_0.png[]
+image::images/opensearch-dashboards-status-page-7_5_0.png[]
 
 For JSON-formatted server status details, use the `localhost:5601/api/status` API endpoint. 
 

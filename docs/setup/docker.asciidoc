@@ -1,15 +1,15 @@
 [[docker]]
-=== Install {kib} with Docker
+=== Install {osd} with Docker
 ++++
 <titleabbrev>Install with Docker </titleabbrev>
 ++++
 
-Docker images for Kibana are available from the Elastic Docker registry. The
+Docker images for OpenSearchDashboards are available from the Elastic Docker registry. The
 base image is https://hub.docker.com/_/centos/[centos:7].
 
 A list of all published Docker images and tags is available at
 https://www.docker.elastic.co[www.docker.elastic.co]. The source code is in
-https://github.com/elastic/dockerfiles/tree/{branch}/kibana[GitHub].
+https://github.com/elastic/dockerfiles/tree/{branch}/opensearch-dashboards[GitHub].
 
 These images are free to use under the Elastic license. They contain open source
 and free commercial features and access to paid commercial features.
@@ -22,12 +22,12 @@ Elastic license levels.
 [[pull-image]]
 === Pull the image
 
-Obtaining Kibana for Docker is as simple as issuing a +docker pull+ command
+Obtaining OpenSearchDashboards for Docker is as simple as issuing a +docker pull+ command
 against the Elastic Docker registry.
 
 ifeval::["{release-state}"=="unreleased"]
 
-However, version {version} of Kibana has not yet been released, so no Docker
+However, version {version} of OpenSearchDashboards has not yet been released, so no Docker
 image is currently available for this version.
 
 endif::[]
@@ -44,54 +44,54 @@ available under the Apache 2.0 license. To download the images, go to
 https://www.docker.elastic.co[www.docker.elastic.co].
 
 [float]
-=== Run Kibana on Docker for development
-Kibana can be quickly started and connected to a local Elasticsearch container for development
+=== Run OpenSearchDashboards on Docker for development
+OpenSearchDashboards can be quickly started and connected to a local OpenSearch container for development
 or testing use with the following command:
 
 [source,sh,subs="attributes"]
 --------------------------------------------
-docker run --link YOUR_ELASTICSEARCH_CONTAINER_NAME_OR_ID:elasticsearch -p 5601:5601 {docker-repo}:{version}
+docker run --link YOUR_OPENSEARCH_CONTAINER_NAME_OR_ID:opensearch -p 5601:5601 {docker-repo}:{version}
 --------------------------------------------
 endif::[]
 
 [float]
-[[configuring-kibana-docker]]
-=== Configure Kibana on Docker
+[[configuring-opensearch-dashboards-docker]]
+=== Configure OpenSearchDashboards on Docker
 
-The Docker images provide several methods for configuring Kibana. The
-conventional approach is to provide a `kibana.yml` file as described in
-{kibana-ref}/settings.html[Configuring Kibana], but it's also possible to use
+The Docker images provide several methods for configuring OpenSearchDashboards. The
+conventional approach is to provide a `opensearch_dashboards.yml` file as described in
+{opensearch-dashboards-ref}/settings.html[Configuring OpenSearchDashboards], but it's also possible to use
 environment variables to define settings.
 
 [float]
 [[bind-mount-config]]
 ==== Bind-mounted configuration
 
-One way to configure Kibana on Docker is to provide `kibana.yml` via bind-mounting.
+One way to configure OpenSearchDashboards on Docker is to provide `opensearch_dashboards.yml` via bind-mounting.
 With +docker-compose+, the bind-mount can be specified like this:
 
 ["source","yaml",subs="attributes"]
 --------------------------------------------
 version: '2'
 services:
-  kibana:
+  opensearchDashboards:
     image: {docker-image}
     volumes:
-      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+      - ./opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
 --------------------------------------------
 
 [float]
 [[environment-variable-config]]
 ==== Environment variable configuration
 
-Under Docker, {kib} can be configured via environment variables. When
+Under Docker, {osd} can be configured via environment variables. When
 the container starts, a helper process checks the environment for variables that
-can be mapped to Kibana command-line arguments.
+can be mapped to OpenSearchDashboards command-line arguments.
 
 For compatibility with container orchestration systems, these
 environment variables are written in all capitals, with underscores as
 word separators. The helper translates these names to valid
-{kib} setting names.
+{osd} setting names.
 
 WARNING: All information that you include in environment variables is visible through the `ps` command, including sensitive information.
 
@@ -99,7 +99,7 @@ Some example translations are shown here:
 
 .Example Docker Environment Variables
 [horizontal]
-**Environment Variable**:: **Kibana Setting**
+**Environment Variable**:: **OpenSearchDashboards Setting**
 `SERVER_NAME`:: `server.name`
 `SERVER_BASEPATH`:: `server.basePath`
 `MONITORING_ENABLED`:: `monitoring.enabled`
@@ -113,15 +113,15 @@ These variables can be set with +docker-compose+ like this:
 ----------------------------------------------------------
 version: '2'
 services:
-  kibana:
+  opensearchDashboards:
     image: {docker-image}
     environment:
-      SERVER_NAME: kibana.example.org
-      ELASTICSEARCH_HOSTS: http://elasticsearch.example.org
+      SERVER_NAME: opensearchDashboards.example.org
+      OPENSEARCH_HOSTS: http://opensearch.example.org
 ----------------------------------------------------------
 
 Since environment variables are translated to CLI arguments, they take
-precedence over settings configured in `kibana.yml`.
+precedence over settings configured in `opensearch_dashboards.yml`.
 
 [float]
 [[docker-defaults]]
@@ -130,18 +130,18 @@ The following settings have different default values when using the Docker
 images:
 
 [horizontal]
-`server.name`:: `kibana`
+`server.name`:: `opensearchDashboards`
 `server.host`:: `"0"`
-`elasticsearch.hosts`:: `http://elasticsearch:9200`
-`monitoring.ui.container.elasticsearch.enabled`:: `true`
+`opensearch.hosts`:: `http://opensearch:9200`
+`monitoring.ui.container.opensearch.enabled`:: `true`
 
-NOTE: The setting `monitoring.ui.container.elasticsearch.enabled` is not
+NOTE: The setting `monitoring.ui.container.opensearch.enabled` is not
 defined in the `-oss` image.
 
-These settings are defined in the default `kibana.yml`. They can be overridden
-with a <<bind-mount-config,custom `kibana.yml`>> or via
+These settings are defined in the default `opensearch_dashboards.yml`. They can be overridden
+with a <<bind-mount-config,custom `opensearch_dashboards.yml`>> or via
 <<environment-variable-config,environment variables>>.
 
-IMPORTANT: If replacing `kibana.yml` with a custom version, be sure to copy the
+IMPORTANT: If replacing `opensearch_dashboards.yml` with a custom version, be sure to copy the
 defaults to the custom file if you want to retain them. If not, they will
 be "masked" by the new file.

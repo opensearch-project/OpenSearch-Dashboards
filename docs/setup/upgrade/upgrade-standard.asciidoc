@@ -1,49 +1,49 @@
 [[upgrade-standard]]
 === Standard upgrade
 
-NOTE: 6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant]
+NOTE: 6.7 includes an https://www.elastic.co/guide/en/opensearch-dashboards/6.7/upgrade-assistant.html[Upgrade Assistant]
 to help you prepare for your upgrade to 7.0. To access the assistant, go to *Management > 7.0 Upgrade Assistant*.
 
 [IMPORTANT]
 ===========================================
-If you've saved and/or exported objects in {kib} that rely on the
-<<search,Elasticsearch Query DSL>>, make sure to check the {es}
+If you've saved and/or exported objects in {osd} that rely on the
+<<search,OpenSearch Query DSL>>, make sure to check the {opensearch}
 {ref}/breaking-changes.html[breaking changes] documentation and take the
 necessary remediation steps as per those instructions.
 ===========================================
 
 [float]
-==== Upgrading multiple {kib} instances
+==== Upgrading multiple {osd} instances
 
-WARNING: Kibana does not support rolling upgrades. If you're running multiple {kib} instances, all instances should be stopped before upgrading.
+WARNING: OpenSearchDashboards does not support rolling upgrades. If you're running multiple {osd} instances, all instances should be stopped before upgrading.
 
-Different versions of {kib} running against the same {es} index, such as during a rolling upgrade, can cause upgrade migration failures and data loss. This is because acknowledged writes from the older instances could be written into the _old_ index while the migration is in progress. To prevent this from happening ensure that all old {kib} instances are shutdown before starting up instances on a newer version.
+Different versions of {osd} running against the same {opensearch} index, such as during a rolling upgrade, can cause upgrade migration failures and data loss. This is because acknowledged writes from the older instances could be written into the _old_ index while the migration is in progress. To prevent this from happening ensure that all old {osd} instances are shutdown before starting up instances on a newer version.
 
 The first instance that triggers saved object migrations will run the entire process. Any other instances started up while a migration is running will log a message and then wait until saved object migrations has completed before they start serving HTTP traffic.
 
 [float]
 ==== Upgrade using a `deb` or `rpm` package
 
-. Stop the existing {kib} process using the appropriate command for your
-  system. If you have multiple {kib} instances connecting to the same {es} cluster ensure that all instances are stopped before proceeding to the next step to avoid data loss.
+. Stop the existing {osd} process using the appropriate command for your
+  system. If you have multiple {osd} instances connecting to the same {opensearch} cluster ensure that all instances are stopped before proceeding to the next step to avoid data loss.
 . Use `rpm` or `dpkg` to install the new package. All files should be placed in
   their proper locations and config files should not be overwritten.
 +
 [NOTE]
 --
-{kib} 4.x used a different config location than 5.0+, so if you're upgrading
+{osd} 4.x used a different config location than 5.0+, so if you're upgrading
 from 4.x, you will need to copy the configurations from your old config
-(`/opt/kibana/config/kibana.yml`) to your new config
-(`/etc/kibana/kibana.yml`).
+(`/opt/opensearch-dashboards/config/opensearch_dashboards.yml`) to your new config
+(`/etc/opensearch-dashboards/opensearch_dashboards.yml`).
 
 Make sure you remove or update any configurations
 that are indicated in the <<breaking-changes,breaking changes>> documentation
-otherwise {kib} will fail to start.
+otherwise {osd} will fail to start.
 --
 . Upgrade any plugins by removing the existing plugin and reinstalling the
-  appropriate version using the `kibana-plugin` script. Check out the
-  <<kibana-plugins,plugins>> documentation for more information.
-. Start the new {kib} process using the appropriate command for your system.
+  appropriate version using the `opensearch-dashboards-plugin` script. Check out the
+  <<opensearch-dashboards-plugins,plugins>> documentation for more information.
+. Start the new {osd} process using the appropriate command for your system.
 
 [float]
 ==== Upgrade using a `zip` or `tar.gz` archive
@@ -52,18 +52,18 @@ otherwise {kib} will fail to start.
   don't overwrite the `config` or `data` directories. +
 +
 --
-IMPORTANT: If you use {monitor-features}, you must re-use the data directory when you upgrade {kib}. Otherwise, the {kib} instance is assigned a new persistent UUID
+IMPORTANT: If you use {monitor-features}, you must re-use the data directory when you upgrade {osd}. Otherwise, the {osd} instance is assigned a new persistent UUID
 and becomes a new instance in the monitoring data.
 
 --
 . Copy the files from the `config` directory from your old installation to your
   new installation. Make sure you remove or update any configurations that are
   indicated in the <<breaking-changes,breaking changes>> documentation
-  otherwise {kib} will fail to start.
+  otherwise {osd} will fail to start.
 . Copy the files from the `data` directory from your old installation to your
   new installation.
 . Install the appropriate versions of all your plugins for your new
-  installation using the `kibana-plugin` script. Check out the
-  <<kibana-plugins,plugins>> documentation for more information.
-. Stop the old {kib} process. If you have multiple {kib} instances connecting to the same {es} cluster ensure that all instances are stopped before proceeding to the next step to avoid data loss.
-. Start the new {kib} process.
+  installation using the `opensearch-dashboards-plugin` script. Check out the
+  <<opensearch-dashboards-plugins,plugins>> documentation for more information.
+. Stop the old {osd} process. If you have multiple {osd} instances connecting to the same {opensearch} cluster ensure that all instances are stopped before proceeding to the next step to avoid data loss.
+. Start the new {osd} process.

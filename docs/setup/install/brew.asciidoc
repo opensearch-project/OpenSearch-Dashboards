@@ -1,10 +1,10 @@
 [[brew]]
-=== Install {kib} on macOS with Homebrew
+=== Install {osd} on macOS with Homebrew
 ++++
 <titleabbrev>Install on macOS with Homebrew</titleabbrev>
 ++++
 
-Elastic publishes Homebrew formulae so you can install {kib} with the https://brew.sh/[Homebrew] package manager.
+Elastic publishes Homebrew formulae so you can install {osd} with the https://brew.sh/[Homebrew] package manager.
 
 To install with Homebrew, you first need to tap the Elastic Homebrew repository:
 
@@ -14,55 +14,55 @@ brew tap elastic/tap
 -------------------------
 
 Once you've tapped the Elastic Homebrew repo, you can use `brew install` to
-install the default distribution of {kib}:
+install the default distribution of {osd}:
 
 [source,sh]
 -------------------------
-brew install elastic/tap/kibana-full
+brew install elastic/tap/opensearch-dashboards-full
 -------------------------
 
-This installs the most recently released default distribution of {kib}. To install the OSS distribution,
-specify `elastic/tap/kibana-oss`.
+This installs the most recently released default distribution of {osd}. To install the OSS distribution,
+specify `elastic/tap/opensearch-dashboards-oss`.
 
 [[brew-layout]]
 ==== Directory layout for Homebrew installs
 
-When you install {kib} with `brew install`, the config files, logs,
+When you install {osd} with `brew install`, the config files, logs,
 and data directory are stored in the following locations.
 
 [cols="<h,<,<m,<m",options="header",]
 |=======================================================================
 | Type | Description | Default Location | Setting
 | home
-  | Kibana home directory or `$KIBANA_HOME`
-  | /usr/local/var/homebrew/linked/kibana-full
+  | OpenSearchDashboards home directory or `$OPENSEARCH_DASHBOARDS_HOME`
+  | /usr/local/var/homebrew/linked/opensearch-dashboards-full
  d|
 
 | bin
-  | Binary scripts including `kibana` to start a node
-    and `kibana-plugin` to install plugins
-  | /usr/local/var/homebrew/linked/kibana-full/bin
+  | Binary scripts including `opensearchDashboards` to start a node
+    and `opensearch-dashboards-plugin` to install plugins
+  | /usr/local/var/homebrew/linked/opensearch-dashboards-full/bin
  d|
 
 | conf
-  | Configuration files including `kibana.yml`
-  | /usr/local/etc/kibana
+  | Configuration files including `opensearch_dashboards.yml`
+  | /usr/local/etc/opensearch-dashboards
  d|
 
 | data
   | The location of the data files of each index / shard allocated
     on the node. Can hold multiple locations.
-  | /usr/local/var/lib/kibana
+  | /usr/local/var/lib/opensearch-dashboards
   | path.data
 
 | logs
   | Log files location.
-  | /usr/local/var/log/kibana
+  | /usr/local/var/log/opensearch-dashboards
   | path.logs
 
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.
-  | /usr/local/var/homebrew/linked/kibana-full/plugins
+  | /usr/local/var/homebrew/linked/opensearch-dashboards-full/plugins
  d|
 
 |=======================================================================

@@ -1,12 +1,12 @@
 [[deb]]
-=== Install {kib} with Debian package
+=== Install {osd} with Debian package
 ++++
 <titleabbrev>Install with Debian package</titleabbrev>
 ++++
 
-The Debian package for Kibana can be <<install-deb,downloaded from our website>>
+The Debian package for OpenSearchDashboards can be <<install-deb,downloaded from our website>>
 or from our <<deb-repo,APT repository>>. It can be used to install
-Kibana on any Debian-based system such as Debian and Ubuntu.
+OpenSearchDashboards on any Debian-based system such as Debian and Ubuntu.
 
 This package is free to use under the Elastic license. It contains open source
 and free commercial features and access to paid commercial features.
@@ -15,8 +15,8 @@ paid commercial features. See the
 https://www.elastic.co/subscriptions[Subscriptions] page for information about
 Elastic license levels.
 
-The latest stable version of Kibana can be found on the
-link:/downloads/kibana[Download Kibana] page. Other versions can
+The latest stable version of OpenSearchDashboards can be found on the
+link:/downloads/opensearch-dashboards[Download OpenSearchDashboards] page. Other versions can
 be found on the link:/downloads/past-releases[Past Releases page].
 
 [[deb-key]]
@@ -26,7 +26,7 @@ include::key.asciidoc[]
 
 [source,sh]
 -------------------------
-wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+wget -qO - https://artifacts.elastic.co/GPG-KEY-opensearch | sudo apt-key add -
 -------------------------
 
 [[deb-repo]]
@@ -34,7 +34,7 @@ wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add
 
 ifeval::["{release-state}"=="unreleased"]
 
-Version {version} of Kibana has not yet been released.
+Version {version} of OpenSearchDashboards has not yet been released.
 
 endif::[]
 
@@ -82,22 +82,22 @@ Delete the `deb-src` entry from the `/etc/apt/sources.list` file and the
 installation should work as expected.
 ==================================================
 
-You can install the Kibana Debian package with:
+You can install the OpenSearchDashboards Debian package with:
 
 [source,sh]
 --------------------------------------------------
-sudo apt-get update && sudo apt-get install kibana
+sudo apt-get update && sudo apt-get install opensearchDashboards
 --------------------------------------------------
 
 [WARNING]
 ==================================================
-If two entries exist for the same Kibana repository, you will see an error like this during `apt-get update`:
+If two entries exist for the same OpenSearchDashboards repository, you will see an error like this during `apt-get update`:
 
 ["literal",subs="attributes,callouts"]
 
 Duplicate sources.list entry https://artifacts.elastic.co/packages/{major-version}/apt/ ...`
 
-Examine +/etc/apt/sources.list.d/kibana-{major-version}.list+ for the duplicate entry or locate the duplicate entry amongst the files in `/etc/apt/sources.list.d/` and the `/etc/apt/sources.list` file.
+Examine +/etc/apt/sources.list.d/opensearch-dashboards-{major-version}.list+ for the duplicate entry or locate the duplicate entry amongst the files in `/etc/apt/sources.list.d/` and the `/etc/apt/sources.list` file.
 ==================================================
 
 endif::[]
@@ -107,7 +107,7 @@ ifeval::["{release-state}"!="unreleased"]
 [NOTE]
 ==================================================
 
-An alternative package, `kibana-oss`,  which contains only features that are available under the
+An alternative package, `opensearch-dashboards-oss`,  which contains only features that are available under the
 Apache 2.0 license is also available. To install it, use the following sources list:
 
 ifeval::["{release-state}"=="prerelease"]
@@ -137,26 +137,26 @@ endif::[]
 
 ifeval::["{release-state}"=="unreleased"]
 
-Version {version} of Kibana has not yet been released.
+Version {version} of OpenSearchDashboards has not yet been released.
 
 endif::[]
 
 ifeval::["{release-state}"!="unreleased"]
 
-The Debian package for Kibana v{version} can be downloaded from the website and installed as follows:
+The Debian package for OpenSearchDashboards v{version} can be downloaded from the website and installed as follows:
 
 ["source","sh",subs="attributes"]
 --------------------------------------------
-wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-amd64.deb
-shasum -a 512 kibana-{version}-amd64.deb <1>
-sudo dpkg -i kibana-{version}-amd64.deb
+wget https://artifacts.elastic.co/downloads/opensearch-dashboards/opensearch-dashboards-{version}-amd64.deb
+shasum -a 512 opensearch-dashboards-{version}-amd64.deb <1>
+sudo dpkg -i opensearch-dashboards-{version}-amd64.deb
 --------------------------------------------
 <1> Compare the SHA produced by `shasum` with the
-    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-amd64.deb.sha512[published SHA].
+    https://artifacts.elastic.co/downloads/opensearch-dashboards/opensearch-dashboards-{version}-amd64.deb.sha512[published SHA].
 
 Alternatively, you can download the following package, which contains only
 features that are available under the Apache 2.0 license:
-https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-amd64.deb
+https://artifacts.elastic.co/downloads/opensearch-dashboards/opensearch-dashboards-oss-{version}-amd64.deb
 
 endif::[]
 
@@ -172,11 +172,11 @@ include::deb-init.asciidoc[]
 include::systemd.asciidoc[]
 
 [[deb-configuring]]
-==== Configure {kib} via the config file
+==== Configure {osd} via the config file
 
-Kibana loads its configuration from the `/etc/kibana/kibana.yml`
+OpenSearchDashboards loads its configuration from the `/etc/opensearch-dashboards/opensearch_dashboards.yml`
 file by default.  The format of this config file is explained in
-{kibana-ref}/settings.html[Configuring Kibana].
+{opensearch-dashboards-ref}/settings.html[Configuring OpenSearchDashboards].
 
 [[deb-layout]]
 ==== Directory layout of Debian package
@@ -189,34 +189,34 @@ locations for a Debian-based system:
 |=======================================================================
 | Type | Description | Default Location | Setting
 | home
-  | Kibana home directory or `$KIBANA_HOME`
-  | /usr/share/kibana
+  | OpenSearchDashboards home directory or `$OPENSEARCH_DASHBOARDS_HOME`
+  | /usr/share/opensearch-dashboards
  d|
 
 | bin
-  | Binary scripts including `kibana` to start the Kibana server
-    and `kibana-plugin` to install plugins
-  | /usr/share/kibana/bin
+  | Binary scripts including `opensearchDashboards` to start the OpenSearchDashboards server
+    and `opensearch-dashboards-plugin` to install plugins
+  | /usr/share/opensearch-dashboards/bin
  d|
 
 | config
-  | Configuration files including `kibana.yml`
-  | /etc/kibana
+  | Configuration files including `opensearch_dashboards.yml`
+  | /etc/opensearch-dashboards
  d|
 
 | data
-  | The location of the data files written to disk by Kibana and its plugins
-  | /var/lib/kibana
+  | The location of the data files written to disk by OpenSearchDashboards and its plugins
+  | /var/lib/opensearch-dashboards
   | path.data
 
 | logs
     | Logs files location
-    |  /var/log/kibana
+    |  /var/log/opensearch-dashboards
     | path.logs
 
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.
-  | /usr/share/kibana/plugins
+  | /usr/share/opensearch-dashboards/plugins
  d|
 
 |=======================================================================
