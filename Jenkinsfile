@@ -19,8 +19,8 @@ pipeline {
           DOCKER_IMAGE.inside {
               stage('bootstrap') {
                   echo "Bootstrap here"
-                  sh 'yarn kbn bootstrap'
-                  sh 'node scripts/build_kibana_platform_plugins --oss --no-examples --workers 10'
+                  sh 'yarn osd bootstrap'
+                  sh 'node scripts/build_opensearch_dashboards_platform_plugins --oss --no-examples --workers 10'
               }
           }
         }

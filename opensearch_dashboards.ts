@@ -28,14 +28,14 @@ export { Public, Server };
 /**
  * All exports from TS ambient definitions (where types are added for JS source in a .d.ts file).
  */
-import * as LegacyKibanaServer from './src/legacy/server/kbn_server';
+import * as LegacyOpenSearchDashboardsServer from './src/legacy/server/osd_server';
 
 /**
  *  Re-export legacy types under a namespace.
  */
 export namespace Legacy {
-  export type KibanaConfig = LegacyKibanaServer.KibanaConfig;
-  export type Request = LegacyKibanaServer.Request;
-  export type ResponseToolkit = LegacyKibanaServer.ResponseToolkit;
-  export type Server = LegacyKibanaServer.Server;
+  export type OpenSearchDashboardsConfig = LegacyOpenSearchDashboardsServer.KibanaConfig;
+  export type Request = LegacyOpenSearchDashboardsServer.Request;
+  export type ResponseToolkit = LegacyOpenSearchDashboardsServer.ResponseToolkit;
+  export type Server = LegacyOpenSearchDashboardsServer.Server;
 }

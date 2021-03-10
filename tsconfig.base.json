@@ -2,10 +2,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      // Allows for importing from `kibana` package for the exported types.
-      "kibana": ["./kibana"],
-      "kibana/public": ["src/core/public"],
-      "kibana/server": ["src/core/server"],
+      // Allows for importing from `opensearch-dashboards` package for the exported types.
+      "opensearch-dashboards": ["./kibana"],
+      "opensearch-dashboards/public": ["src/core/public"],
+      "opensearch-dashboards/server": ["src/core/server"],
       "plugins/*": ["src/legacy/core_plugins/*/public/"],
       "test_utils/*": [
         "src/test_utils/public/*"
