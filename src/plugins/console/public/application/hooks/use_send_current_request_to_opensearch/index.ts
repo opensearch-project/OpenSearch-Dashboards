@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { useSendCurrentRequestToOpenSearch } from './opensearch';
+export { useSendCurrentRequestToOpenSearch } from './use_send_current_request_to_opensearch';

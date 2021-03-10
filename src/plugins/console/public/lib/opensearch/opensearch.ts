@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import opensearch from 'jquery';
+import $ from 'jquery';
 import { stringify } from 'query-string';
 
 const opensearchVersion: string[] = [];
@@ -32,7 +32,7 @@ export function getContentType(body: any) {
 }
 
 export function send(method: string, path: string, data: any) {
-  const wrappedDfd = opensearch.Deferred();
+  const wrappedDfd = $.Deferred();
 
   const options: JQuery.AjaxSettings = {
     url: '../api/console/proxy?' + stringify({ path, method }, { sort: false }),
@@ -47,7 +47,7 @@ export function send(method: string, path: string, data: any) {
     dataType: 'text', // disable automatic guessing
   };
 
-  opensearch.ajax(options).then(
+  $.ajax(options).then(
     (responseData: any, textStatus: string, jqXHR: any) => {
       wrappedDfd.resolveWith({}, [responseData, textStatus, jqXHR]);
     },
@@ -62,7 +62,7 @@ export function send(method: string, path: string, data: any) {
   return wrappedDfd;
 }
 
-export function constructESUrl(baseUri: string, path: string) {
+export function constructOpenSearchUrl(baseUri: string, path: string) {
   baseUri = baseUri.replace(/\/+$/, '');
   path = path.replace(/^\/+/, '');
   return baseUri + '/' + path;
