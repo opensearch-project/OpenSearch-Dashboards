@@ -1,10 +1,10 @@
 [role="xpack"]
 [[xpack-reporting]]
-= Reporting from Kibana
+= Reporting from OpenSearchDashboards
 
 [partintro]
 --
-You can generate reports that contain {kib} dashboards,
+You can generate reports that contain {osd} dashboards,
 visualizations, and saved searches. The reports are exported as
 print-optimized PDF documents.
 
@@ -12,7 +12,7 @@ NOTE: On Linux, the `libfontconfig` and `libfreetype6` packages and system
 fonts are required to generate reports. If no system fonts are available,
 labels are not rendered correctly in the reports.
 
-The following Reporting button appears in the {kib} toolbar:
+The following Reporting button appears in the {osd} toolbar:
 
 image:images/reporting.jpg["Reporting",link="reporting.jpg"]
 

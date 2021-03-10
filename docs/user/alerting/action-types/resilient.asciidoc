@@ -27,7 +27,7 @@ API key secret::  The authentication key secret for HTTP Basic authentication.
    actionTypeId: .resilient
    config:
      apiUrl: https://elastic.resilient.net
-     orgId: ES
+     orgId: OPENSEARCH
    secrets:
      apiKeyId: testuser
      apiKeySecret: tokenkeystorevalue
@@ -55,7 +55,7 @@ API key secret::  The authentication key secret for HTTP Basic authentication.
 | A string that corresponds to *API key ID*.
 
 | `apiKeySecret`
-| A string that corresponds to *API Key secret*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+| A string that corresponds to *API Key secret*. Should be stored in the <<creating-keystore, {osd} keystore>>.
 
 |===
 

@@ -1,11 +1,11 @@
 [role="xpack"]
-[[kibana-authentication]]
-=== Authentication in {kib}
+[[opensearch-dashboards-authentication]]
+=== Authentication in {osd}
 ++++
 <titleabbrev>Authentication</titleabbrev>
 ++++
 
-{kib} supports the following authentication mechanisms:
+{osd} supports the following authentication mechanisms:
 
 - <<basic-authentication>>
 - <<token-authentication>>
@@ -15,7 +15,7 @@
 - <<kerberos>>
 - <<http-authentication>>
 
-Enable multiple authentication mechanisms at the same time specifying a prioritized list of the authentication _providers_ (typically of various types) in the configuration. Providers are consulted in ascending order. Make sure each configured provider has a unique name (e.g. `basic1` or `saml1` in the configuration example) and `order` setting. In the event that two or more providers have the same name or `order`, {kib} will fail to start.
+Enable multiple authentication mechanisms at the same time specifying a prioritized list of the authentication _providers_ (typically of various types) in the configuration. Providers are consulted in ascending order. Make sure each configured provider has a unique name (e.g. `basic1` or `saml1` in the configuration example) and `order` setting. In the event that two or more providers have the same name or `order`, {osd} will fail to start.
 
 When two or more providers are configured, you can choose the provider you want to use on the Login Selector UI. The order the providers appear is determined by the `order` setting. The appearance of the specific provider entry can be customized with the `description`, `hint`, and `icon` settings.
 
@@ -25,7 +25,7 @@ If you don't want a specific provider to show up at the Login Selector UI (e.g. 
 
 TIP: The Login Selector UI can also be disabled or enabled with `xpack.security.authc.selector.enabled` setting. 
 
-Here is how your `kibana.yml` and Login Selector UI can look like if you deal with multiple authentication providers:
+Here is how your `opensearch_dashboards.yml` and Login Selector UI can look like if you deal with multiple authentication providers:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -33,7 +33,7 @@ xpack.security.loginHelp: "**Help** info with a [link](...)"
 xpack.security.authc.providers:
   basic.basic1:
     order: 0
-    icon: "logoElasticsearch"
+    icon: "logoOpenSearch"
     hint: "Typically for administrators"
   saml.saml1:
     order: 1
@@ -50,16 +50,16 @@ xpack.security.authc.providers:
 --------------------------------------------------------------------------------
 
 [role="screenshot"]
-image::user/security/images/kibana-login.png["Login Selector UI"]
+image::user/security/images/opensearch-dashboards-login.png["Login Selector UI"]
 
 For more information, refer to <<authentication-security-settings, authentication security settings>>.
 
 [[basic-authentication]]
 ==== Basic authentication
 
-To successfully log in to {kib}, basic authentication requires a username and password. Basic authentication is enabled by default, and is based on the Native, LDAP, or Active Directory security realm that is provided by {es}. The basic authentication provider uses a {kib} provided login form, and supports authentication using the `Authorization` request header `Basic` scheme.
+To successfully log in to {osd}, basic authentication requires a username and password. Basic authentication is enabled by default, and is based on the Native, LDAP, or Active Directory security realm that is provided by {opensearch}. The basic authentication provider uses a {osd} provided login form, and supports authentication using the `Authorization` request header `Basic` scheme.
 
-NOTE: You can configure only one Basic provider per {kib} instance.
+NOTE: You can configure only one Basic provider per {osd} instance.
 
 For more information about basic authentication and built-in users, see
 {ref}/setting-up-authentication.html[User authentication].
@@ -67,13 +67,13 @@ For more information about basic authentication and built-in users, see
 [[token-authentication]]
 ==== Token authentication
 
-Token authentication allows users to log in using the same {kib} provided login form as basic authentication, and is based on the Native security realm or LDAP security realm that is provided by {es}. The token authentication provider is built on {es} token APIs.
+Token authentication allows users to log in using the same {osd} provided login form as basic authentication, and is based on the Native security realm or LDAP security realm that is provided by {opensearch}. The token authentication provider is built on {opensearch} token APIs.
 
-Prior to configuring {kib}, ensure token support is enabled in {es}. See the {ref}/security-api-get-token.html[{es} token API] documentation for more information.
+Prior to configuring {osd}, ensure token support is enabled in {opensearch}. See the {ref}/security-api-get-token.html[{opensearch} token API] documentation for more information.
 
-To enable the token authentication provider in {kib}, set the following value in your `kibana.yml`:
+To enable the token authentication provider in {osd}, set the following value in your `opensearch_dashboards.yml`:
 
-NOTE: You can configure only one Token provider per {kib} instance.
+NOTE: You can configure only one Token provider per {osd} instance.
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -82,23 +82,23 @@ xpack.security.authc.providers:
     order: 0
 --------------------------------------------------------------------------------
 
-Switching to the token authentication provider from basic one will make {kib} to reject requests from applications like `curl` that usually use `Authorization` request header with the `Basic` scheme for authentication. If you still want to support such applications you'll have to either switch to using `Bearer` scheme with the tokens {ref}/security-api-get-token.html[created by {es} token API] or add `Basic` scheme to the list of supported schemes for the <<http-authentication,HTTP authentication>>.
+Switching to the token authentication provider from basic one will make {osd} to reject requests from applications like `curl` that usually use `Authorization` request header with the `Basic` scheme for authentication. If you still want to support such applications you'll have to either switch to using `Bearer` scheme with the tokens {ref}/security-api-get-token.html[created by {opensearch} token API] or add `Basic` scheme to the list of supported schemes for the <<http-authentication,HTTP authentication>>.
 
 [[pki-authentication]]
 ==== Public key infrastructure (PKI) authentication
 
 [IMPORTANT]
 ============================================================================
-PKI authentication will not work if {kib} is hosted behind a TLS termination reverse proxy. In this configuration, {kib} does not have direct access to the client certificates and cannot authenticate the user.
+PKI authentication will not work if {osd} is hosted behind a TLS termination reverse proxy. In this configuration, {osd} does not have direct access to the client certificates and cannot authenticate the user.
 ============================================================================
 
-PKI authentication allows users to log into {kib} using X.509 client certificates that must be presented while connecting to {kib}. The certificates must first be accepted for authentication on the {kib} TLS layer, and then they are further validated by an {es} PKI realm. The PKI authentication provider relies on the {es} {ref}/security-api-delegate-pki-authentication.html[Delegate PKI authentication API] to exchange X.509 client certificates to access tokens. All subsequent requests to {es} APIs on behalf of users will be authenticated using these access tokens.
+PKI authentication allows users to log into {osd} using X.509 client certificates that must be presented while connecting to {osd}. The certificates must first be accepted for authentication on the {osd} TLS layer, and then they are further validated by an {opensearch} PKI realm. The PKI authentication provider relies on the {opensearch} {ref}/security-api-delegate-pki-authentication.html[Delegate PKI authentication API] to exchange X.509 client certificates to access tokens. All subsequent requests to {opensearch} APIs on behalf of users will be authenticated using these access tokens.
 
-Prior to configuring {kib}, ensure that the PKI realm is enabled in {es} and configured to permit delegation. See {ref}/configuring-pki-realm.html[Configuring a PKI realm] for more information.
+Prior to configuring {osd}, ensure that the PKI realm is enabled in {opensearch} and configured to permit delegation. See {ref}/configuring-pki-realm.html[Configuring a PKI realm] for more information.
 
-To enable the PKI authentication provider in {kib}, you must first <<configuring-tls,configure {kib} to encrypt communications between the browser and {kib} server>>. You must also enable TLS client authentication and include the certificate authority (CA) used to sign client certificates into a list of CAs trusted by {kib} in your `kibana.yml`:
+To enable the PKI authentication provider in {osd}, you must first <<configuring-tls,configure {osd} to encrypt communications between the browser and {osd} server>>. You must also enable TLS client authentication and include the certificate authority (CA) used to sign client certificates into a list of CAs trusted by {osd} in your `opensearch_dashboards.yml`:
 
-NOTE: You can configure only one PKI provider per {kib} instance.
+NOTE: You can configure only one PKI provider per {osd} instance.
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -109,10 +109,10 @@ xpack.security.authc.providers:
     order: 0
 --------------------------------------------------------------------------------
 
-NOTE: Trusted CAs can also be specified in a PKCS #12 keystore bundled with your {kib} server certificate/key using
+NOTE: Trusted CAs can also be specified in a PKCS #12 keystore bundled with your {osd} server certificate/key using
 `server.ssl.keystore.path` or in a separate trust store using `server.ssl.truststore.path`.
 
-You can also configure both PKI and basic authentication for the same {kib} instance:
+You can also configure both PKI and basic authentication for the same {osd} instance:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -124,14 +124,14 @@ xpack.security.authc.providers:
     order: 1
 --------------------------------------------------------------------------------
 
-Note that with `server.ssl.clientAuthentication` set to `required`, users are asked to provide a valid client certificate, even if they want to authenticate with username and password. Depending on the security policies, it may or may not be desired. If not, `server.ssl.clientAuthentication` can be set to `optional`. In this case, {kib} still requests a client certificate, but the client won't be required to present one. The `optional` client authentication mode might also be needed in other cases, for example, when PKI authentication is used in conjunction with Reporting.
+Note that with `server.ssl.clientAuthentication` set to `required`, users are asked to provide a valid client certificate, even if they want to authenticate with username and password. Depending on the security policies, it may or may not be desired. If not, `server.ssl.clientAuthentication` can be set to `optional`. In this case, {osd} still requests a client certificate, but the client won't be required to present one. The `optional` client authentication mode might also be needed in other cases, for example, when PKI authentication is used in conjunction with Reporting.
 
 [[saml]]
 ==== SAML single sign-on
 
-SAML authentication allows users to log in to {kib} with an external Identity Provider, such as Okta or Auth0. Make sure that SAML is enabled and configured in {es} before setting it up in {kib}. See {ref}/saml-guide.html[Configuring SAML single sign-on on the Elastic Stack].
+SAML authentication allows users to log in to {osd} with an external Identity Provider, such as Okta or Auth0. Make sure that SAML is enabled and configured in {opensearch} before setting it up in {osd}. See {ref}/saml-guide.html[Configuring SAML single sign-on on the Elastic Stack].
 
-Enable the SAML authentication specifying which SAML realm in {es} should be used:
+Enable the SAML authentication specifying which SAML realm in {opensearch} should be used:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -141,7 +141,7 @@ xpack.security.authc.providers:
     realm: saml1
 --------------------------------------------------------------------------------
 
-You can log in to {kib} via SAML Single Sign-On by navigating directly to the {kib} URL. If you aren't authenticated, you are redirected to the Identity Provider for login. Most Identity Providers maintain a long-lived session. If you log in to a different application using the same Identity Provider in the same browser, you are automatically authenticated. An exception is if {es} or the Identity Provider is configured to force you to re-authenticate. This login scenario is called _Service Provider initiated login_.
+You can log in to {osd} via SAML Single Sign-On by navigating directly to the {osd} URL. If you aren't authenticated, you are redirected to the Identity Provider for login. Most Identity Providers maintain a long-lived session. If you log in to a different application using the same Identity Provider in the same browser, you are automatically authenticated. An exception is if {opensearch} or the Identity Provider is configured to force you to re-authenticate. This login scenario is called _Service Provider initiated login_.
 
 It's also possible to configure multiple SAML authentication providers at the same time. In this case, you will need to choose which provider to use for login at the Login Selector UI:
 
@@ -161,7 +161,7 @@ xpack.security.authc.providers:
 [float]
 ===== SAML and basic authentication
 
-You can also configure both SAML and basic authentication for the same {kib} instance. This might be the case for {kib} or {es} admins whose accounts aren't linked to the Single Sign-On users database:
+You can also configure both SAML and basic authentication for the same {osd} instance. This might be the case for {osd} or {opensearch} admins whose accounts aren't linked to the Single Sign-On users database:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -181,10 +181,10 @@ To support basic authentication for the applications like `curl` or when the `Au
 [[oidc]]
 ==== OpenID Connect single sign-on
 
-Similar to SAML, authentication with OpenID Connect allows users to log in to {kib} using an OpenID Connect Provider such as Google, or Okta. OpenID Connect
-should also be configured in {es}. For more details, see {ref}/oidc-guide.html[Configuring single sign-on to the {stack} using OpenID Connect].
+Similar to SAML, authentication with OpenID Connect allows users to log in to {osd} using an OpenID Connect Provider such as Google, or Okta. OpenID Connect
+should also be configured in {opensearch}. For more details, see {ref}/oidc-guide.html[Configuring single sign-on to the {stack} using OpenID Connect].
 
-Enable the OpenID Connect authentication specifying which OpenID Connect realm in {es} should be used:
+Enable the OpenID Connect authentication specifying which OpenID Connect realm in {opensearch} should be used:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -214,7 +214,7 @@ xpack.security.authc.providers:
 [float]
 ===== OpenID Connect and basic authentication
 
-You can also configure both OpenID Connect and basic authentication for the same {kib} instance. This might be the case for {kib} or {es} admins whose accounts aren't linked to the Single Sign-On users database:
+You can also configure both OpenID Connect and basic authentication for the same {osd} instance. This might be the case for {osd} or {opensearch} admins whose accounts aren't linked to the Single Sign-On users database:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -239,38 +239,38 @@ The following sections apply both to <<saml>> and <<oidc>>
 [float]
 ===== Access and refresh tokens
 
-Once the user logs in to {kib} Single Sign-On, either using SAML or OpenID Connect, {es} issues access and refresh tokens
-that {kib} encrypts and stores as a part of its own session. This way, the user isn't redirected to the Identity Provider
-for every request that requires authentication. It also means that the {kib} session depends on the <<security-session-and-cookie-settings,
+Once the user logs in to {osd} Single Sign-On, either using SAML or OpenID Connect, {opensearch} issues access and refresh tokens
+that {osd} encrypts and stores as a part of its own session. This way, the user isn't redirected to the Identity Provider
+for every request that requires authentication. It also means that the {osd} session depends on the <<security-session-and-cookie-settings,
 `xpack.security.session.idleTimeout` and `xpack.security.session.lifespan`>> settings, and the user is automatically logged
-out if the session expires. An access token that is stored in the session can expire, in which case {kib} will
+out if the session expires. An access token that is stored in the session can expire, in which case {osd} will
 automatically renew it with a one-time-use refresh token and store it in the same session.
 
-{kib} can only determine if an access token has expired if it receives a request that requires authentication. If both access
-and refresh tokens have already expired (for example, after 24 hours of inactivity), {kib} initiates a new "handshake" and
+{osd} can only determine if an access token has expired if it receives a request that requires authentication. If both access
+and refresh tokens have already expired (for example, after 24 hours of inactivity), {osd} initiates a new "handshake" and
 redirects the user to the external authentication provider (SAML Identity Provider or OpenID Connect Provider)
-Depending on {es} and the external authentication provider configuration, the user might be asked to re-enter credentials.
+Depending on {opensearch} and the external authentication provider configuration, the user might be asked to re-enter credentials.
 
-If {kib} can't redirect the user to the external authentication provider (for example, for AJAX/XHR requests), an error
-indicates that both access and refresh tokens are expired. Reloading the current {kib} page fixes the error.
+If {osd} can't redirect the user to the external authentication provider (for example, for AJAX/XHR requests), an error
+indicates that both access and refresh tokens are expired. Reloading the current {osd} page fixes the error.
 
 [float]
 ===== Local and global logout
 
-During logout, both the {kib} session and {es} access/refresh token pair are invalidated. This is known as "local" logout.
+During logout, both the {osd} session and {opensearch} access/refresh token pair are invalidated. This is known as "local" logout.
 
-{kib} can also initiate a "global" logout or _Single Logout_ if it's supported by the external authentication provider and not
-explicitly disabled by {es}. In this case, the user is redirected to the external authentication provider for log out of
+{osd} can also initiate a "global" logout or _Single Logout_ if it's supported by the external authentication provider and not
+explicitly disabled by {opensearch}. In this case, the user is redirected to the external authentication provider for log out of
 all applications associated with the active provider session.
 
 [[kerberos]]
 ==== Kerberos single sign-on
 
-As with the previous SSOs, make sure that you have configured {es} first accordingly. See {ref}/kerberos-realm.html[Kerberos authentication].
+As with the previous SSOs, make sure that you have configured {opensearch} first accordingly. See {ref}/kerberos-realm.html[Kerberos authentication].
 
-Next, to enable Kerberos in {kib}, you will need to enable the Kerberos authentication provider in the `kibana.yml` configuration file, as follows:
+Next, to enable Kerberos in {osd}, you will need to enable the Kerberos authentication provider in the `opensearch_dashboards.yml` configuration file, as follows:
 
-NOTE: You can configure only one Kerberos provider per {kib} instance.
+NOTE: You can configure only one Kerberos provider per {osd} instance.
 
 [source,yaml]
 -----------------------------------------------
@@ -291,21 +291,21 @@ xpack.security.authc.providers:
     order: 1
 -----------------------------------------------
 
-Kibana uses SPNEGO, which wraps the Kerberos protocol for use with HTTP, extending it to web applications. At the end of the Kerberos handshake, Kibana will forward the service ticket to Elasticsearch. Elasticsearch will unpack it and it will respond with an access and refresh token which are then used for subsequent authentication.
+OpenSearchDashboards uses SPNEGO, which wraps the Kerberos protocol for use with HTTP, extending it to web applications. At the end of the Kerberos handshake, OpenSearchDashboards will forward the service ticket to OpenSearch. OpenSearch will unpack it and it will respond with an access and refresh token which are then used for subsequent authentication.
 
 [[http-authentication]]
 ==== HTTP authentication
 
 [IMPORTANT]
 ============================================================================
-Be very careful when you modify HTTP authentication settings as it may indirectly affect other important {kib} features that implicitly rely on HTTP authentication (e.g. Reporting).
+Be very careful when you modify HTTP authentication settings as it may indirectly affect other important {osd} features that implicitly rely on HTTP authentication (e.g. Reporting).
 ============================================================================
 
 HTTP protocol provides a simple authentication framework that can be used by a client to provide authentication information. It uses a case-insensitive token as a means to identify the authentication scheme, followed by additional information necessary for achieving authentication via that scheme.
 
-This type of authentication is usually useful for machine-to-machine interaction that requires authentication and where human intervention is not desired or just infeasible. There are a number of use cases when HTTP authentication support comes in handy for {kib} users as well.
+This type of authentication is usually useful for machine-to-machine interaction that requires authentication and where human intervention is not desired or just infeasible. There are a number of use cases when HTTP authentication support comes in handy for {osd} users as well.
 
-By default {kib} supports <<api-keys, `ApiKey`>> authentication scheme _and_ any scheme supported by the currently enabled authentication provider. For example, `Basic` authentication scheme is automatically supported when basic authentication provider is enabled, or `Bearer` scheme when any of the token based authentication providers is enabled (Token, SAML, OpenID Connect, PKI or Kerberos). But it's also possible to add support for any other authentication scheme in the `kibana.yml` configuration file, as follows:
+By default {osd} supports <<api-keys, `ApiKey`>> authentication scheme _and_ any scheme supported by the currently enabled authentication provider. For example, `Basic` authentication scheme is automatically supported when basic authentication provider is enabled, or `Bearer` scheme when any of the token based authentication providers is enabled (Token, SAML, OpenID Connect, PKI or Kerberos). But it's also possible to add support for any other authentication scheme in the `opensearch_dashboards.yml` configuration file, as follows:
 
 NOTE: Don't forget to explicitly specify default `apikey` scheme when you just want to add a new one to the list.
 
@@ -314,4 +314,4 @@ NOTE: Don't forget to explicitly specify default `apikey` scheme when you just w
 xpack.security.authc.http.schemes: [apikey, basic, something-custom]
 --------------------------------------------------------------------------------
 
-With this configuration, you can send requests to {kib} with the `Authorization` header using `ApiKey`, `Basic` or `Something-Custom` HTTP schemes (case insensitive). Under the hood, {kib} relays this header to {es}, then {es} authenticates the request using the credentials in the header.
+With this configuration, you can send requests to {osd} with the `Authorization` header using `ApiKey`, `Basic` or `Something-Custom` HTTP schemes (case insensitive). Under the hood, {osd} relays this header to {opensearch}, then {opensearch} authenticates the request using the credentials in the header.

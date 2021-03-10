@@ -5,7 +5,7 @@
 [partintro]
 --
 
-Canvas is a data visualization and presentation tool that sits within {kib}. With Canvas, you can pull live data directly from {es}, and combine the data with colors, images, text, and your imagination to create dynamic, multi-page, pixel-perfect displays. If you are a little bit creative, a little bit technical, and a whole lot curious, then Canvas is for you.
+Canvas is a data visualization and presentation tool that sits within {osd}. With Canvas, you can pull live data directly from {opensearch}, and combine the data with colors, images, text, and your imagination to create dynamic, multi-page, pixel-perfect displays. If you are a little bit creative, a little bit technical, and a whole lot curious, then Canvas is for you.
 
 With Canvas, you can:
 
@@ -13,7 +13,7 @@ With Canvas, you can:
 
 * Customize your workpad with your own visualizations, such as images and text.
 
-* Pull your data directly from Elasticsearch, then show it off with charts, graphs, progress monitors, and more.
+* Pull your data directly from OpenSearch, then show it off with charts, graphs, progress monitors, and more.
 
 * Focus the data you want to display with filters.
 
@@ -74,9 +74,9 @@ To begin, drag the file to the *Import workpad JSON file* field on the *Canvas w
 [[use-sample-data-workpads]]
 === Use sample data workpads
 
-Each of the {kib} sample data sets comes with a workpad that you can use for your own workpad inspiration.
+Each of the {osd} sample data sets comes with a workpad that you can use for your own workpad inspiration.
 
-. Add a {kibana-ref}/add-sample-data.html[sample data set].
+. Add a {opensearch-dashboards-ref}/add-sample-data.html[sample data set].
 
 . On the *Add Data* page, click *View data*, then select *Canvas*.
 
@@ -100,9 +100,9 @@ image::images/canvas-element-select.gif[Canvas elements]
 
 When you're ready to connect the element to your data, select *Data*, then select one of the following data sources:
 
-* *{es} SQL* &mdash; Access your data in {es} using {ref}/sql-spec.html[SQL syntax].
+* *{opensearch} SQL* &mdash; Access your data in {opensearch} using {ref}/sql-spec.html[SQL syntax].
 
-* *{es} documents* &mdash; Access your data in {es} without using aggregations. To use, select an index and fields, and optionally enter a query using the <<lucene-query,Lucene Query Syntax>>. Use the *{es} documents* data source when you have low volume datasets, to view raw documents, or to plot exact, non-aggregated values on a chart.
+* *{opensearch} documents* &mdash; Access your data in {opensearch} without using aggregations. To use, select an index and fields, and optionally enter a query using the <<lucene-query,Lucene Query Syntax>>. Use the *{opensearch} documents* data source when you have low volume datasets, to view raw documents, or to plot exact, non-aggregated values on a chart.
 
 * *Timelion* &mdash; Access your time series data using <<timelion,Timelion>> queries. To use Timelion queries, you can enter a query using the <<lucene-query,Lucene Query Syntax>>.
 
@@ -123,7 +123,7 @@ Elements are saved in *Add element > My elements*.
 
 Add <<managing-saved-objects,saved objects>> to your workpad, such as maps and visualizations.
 
-. Click *Add element > Add from {kib}*.
+. Click *Add element > Add from {osd}*.
 
 . Select the saved object you want to add.
 +
@@ -170,16 +170,16 @@ image::images/canvas-add-pages.gif[Add pages]
 
 --
 
-include::{kib-repo-dir}/canvas/canvas-edit-workpads.asciidoc[]
+include::{osd-repo-dir}/canvas/canvas-edit-workpads.asciidoc[]
 
-include::{kib-repo-dir}/canvas/canvas-present-workpad.asciidoc[]
+include::{osd-repo-dir}/canvas/canvas-present-workpad.asciidoc[]
 
-include::{kib-repo-dir}/canvas/canvas-share-workpad.asciidoc[]
+include::{osd-repo-dir}/canvas/canvas-share-workpad.asciidoc[]
 
-include::{kib-repo-dir}/canvas/canvas-tutorial.asciidoc[]
+include::{osd-repo-dir}/canvas/canvas-tutorial.asciidoc[]
 
-include::{kib-repo-dir}/canvas/canvas-expression-lifecycle.asciidoc[]
+include::{osd-repo-dir}/canvas/canvas-expression-lifecycle.asciidoc[]
 
-include::{kib-repo-dir}/canvas/canvas-function-reference.asciidoc[]
+include::{osd-repo-dir}/canvas/canvas-function-reference.asciidoc[]
 
-include::{kib-repo-dir}/canvas/canvas-tinymath-functions.asciidoc[]
+include::{osd-repo-dir}/canvas/canvas-tinymath-functions.asciidoc[]

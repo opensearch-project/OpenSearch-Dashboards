@@ -5,14 +5,14 @@
 [partintro]
 --
 
-The {kib} {monitor-features} serve two separate purposes:
+The {osd} {monitor-features} serve two separate purposes:
 
 . To visualize monitoring data from across the {stack}. You can view health and 
-performance data for {es}, {ls}, and Beats in real time, as well as analyze past 
+performance data for {opensearch}, {ls}, and Beats in real time, as well as analyze past 
 performance. 
-. To monitor {kib} itself and route that data to the monitoring cluster.
+. To monitor {osd} itself and route that data to the monitoring cluster.
 
-If you enable monitoring across the {stack}, each {es} node, {ls} node, {kib} 
+If you enable monitoring across the {stack}, each {opensearch} node, {ls} node, {osd} 
 instance, and Beat is considered unique based on its persistent
 UUID, which is written to the <<settings,`path.data`>> directory when the node
 or instance starts. 
@@ -21,6 +21,6 @@ NOTE: Watcher must be enabled to view cluster alerts. If you have a Basic
 license, Top Cluster Alerts are not displayed.
 
 For more information, see <<configuring-monitoring>> and 
-{ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].  
+{ref}/monitor-opensearch-cluster.html[Monitor a cluster].  
 
 --

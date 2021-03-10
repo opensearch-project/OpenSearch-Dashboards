@@ -2,19 +2,19 @@
 [[alert-types]]
 == Alert types
 
-{kib} supplies alert types in two ways: some are built into {kib} (these are known as stack alerts), while domain-specific alert types are registered by {kib} apps such as <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, and <<uptime-app,*Uptime*>>.
+{osd} supplies alert types in two ways: some are built into {osd} (these are known as stack alerts), while domain-specific alert types are registered by {osd} apps such as <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, and <<uptime-app,*Uptime*>>.
 
 This section covers stack alerts. For domain-specific alert types, refer to the documentation for that app.
 Users will need `all` access to the *Stack Alerts* feature to be able to create and edit any of the alerts listed below.
-See <<kibana-feature-privileges, feature privileges>> for more information on configuring roles that provide access to this feature. 
+See <<opensearch-dashboards-feature-privileges, feature privileges>> for more information on configuring roles that provide access to this feature. 
 
-Currently {kib} provides one stack alert: the <<alert-type-index-threshold>> type.
+Currently {osd} provides one stack alert: the <<alert-type-index-threshold>> type.
 
 [float]
 [[alert-type-index-threshold]]
 === Index threshold
 
-The index threshold alert type is designed to run an {es} query over indices, aggregating field values from documents, comparing them to threshold values, and scheduling actions to run when the thresholds are met.
+The index threshold alert type is designed to run an {opensearch} query over indices, aggregating field values from documents, comparing them to threshold values, and scheduling actions to run when the thresholds are met.
 
 [float]
 ==== Creating the alert
@@ -46,7 +46,7 @@ image::images/alert-types-index-threshold-preview.png[Five clauses define the co
 [float]
 === Example
 
-In this section, you will use the {kib} <<add-sample-data, weblog sample dataset>> to setup and tune the conditions on an index threshold alert. For this example, we want to detect when any of our top three sites have served more than 420,000 bytes over a 24 hour period.
+In this section, you will use the {osd} <<add-sample-data, weblog sample dataset>> to setup and tune the conditions on an index threshold alert. For this example, we want to detect when any of our top three sites have served more than 420,000 bytes over a 24 hour period.
 
 From the <<alert-management, alert management UI>>, create a new alert, and fill in the <<defining-alerts-general-details, general alert details>>. This alert will be checked every 4 hours, and will not execute actions more than once per day. Choose the index threshold alert type. 
 
@@ -57,7 +57,7 @@ Click on each clause to open a control that helps you set the value:
 
 [float]
 ==== Index clause
-The index clause control will list and allow you to search for available indices. Choose *kibana_sample_data_logs*
+The index clause control will list and allow you to search for available indices. Choose *opensearch_dashboards_sample_data_logs*
 
 [role="screenshot"]
 image::images/alert-types-index-threshold-example-index.png[Choosing an index]

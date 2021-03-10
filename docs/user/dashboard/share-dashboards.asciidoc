@@ -2,13 +2,13 @@
 == Share dashboards
 
 [[embedding-dashboards]]
-Share your dashboard outside of {kib}.
+Share your dashboard outside of {osd}.
 
 From the *Share* menu, you can:
 
-* Embed the code in a web page. Users must have {kib} access
+* Embed the code in a web page. Users must have {osd} access
 to view an embedded dashboard.
-* Share a direct link to a {kib} dashboard
+* Share a direct link to a {osd} dashboard
 * Generate a PDF report
 * Generate a PNG report
 
@@ -17,7 +17,7 @@ TIP: To create a link to a dashboard by title, use: +
 
 TIP: When sharing a link to a dashboard snapshot, use the *Short URL*. Snapshot
 URLs are long and can be problematic for Internet Explorer and other
-tools. To create a short URL, you must have write access to {kib}.
+tools. To create a short URL, you must have write access to {osd}.
 
 [float]
 [[import-dashboards]]

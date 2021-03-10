@@ -16,13 +16,13 @@ By integrating PagerDuty with alerts, you can:
 
 * Route your alerts to the right PagerDuty responder within your team, based on your structure, escalation policies, and workflows.
 * Automatically generate incidents of different types and severity based on each alert’s context.
-* Tailor the incident data to match your needs by easily passing the alerting context from Kibana to PagerDuty.
+* Tailor the incident data to match your needs by easily passing the alerting context from OpenSearchDashboards to PagerDuty.
 
 [float]
 [[pagerduty-how-it-works]]
 ===== How it works
 
-{kib} allows you to create alerts to notify you of a significant move
+{osd} allows you to create alerts to notify you of a significant move
 in your dataset.
 You can create alerts for all your Observability, Security, and Elastic Stack use cases.
 Alerts will trigger a new incident on the corresponding PagerDuty service.
@@ -30,7 +30,7 @@ Alerts will trigger a new incident on the corresponding PagerDuty service.
 [float]
 ===== Requirements
 
-In the `kibana.yml` configuration file, you must add the <<general-alert-action-settings, saved objects encryption setting>>.
+In the `opensearch_dashboards.yml` configuration file, you must add the <<general-alert-action-settings, saved objects encryption setting>>.
 This is required to encrypt parameters that must be secured, for example PagerDuty’s integration key.
 
 If you have security enabled:
@@ -38,7 +38,7 @@ If you have security enabled:
 * You must have
 application privileges to access Metrics, APM, Uptime, or Security.
 * If you are using a self-managed deployment with security, you must have
-Transport Security Layer (TLS) enabled for communication <<configuring-tls-kib-es, between Elasticsearch and Kibana>>.
+Transport Security Layer (TLS) enabled for communication <<configuring-tls-osd-opensearch, between OpenSearch and OpenSearchDashboards>>.
 Alerts uses API keys to secure background alert checks and actions,
 and API keys require {ref}/configuring-tls.html#tls-http[TLS on the HTTP interface].
 
@@ -48,9 +48,9 @@ review the <<action-settings, Actions settings>> that are available to you.
 [float]
 [[pagerduty-support]]
 ===== Support
-If you need help with this integration, get in touch with the {kib} team by visiting
-https://support.elastic.co[support.elastic.co] or by using the *Ask Elastic* option in the {kib} Help menu.
-You can also select the {kib} category at https://discuss.elastic.co/[discuss.elastic.co].
+If you need help with this integration, get in touch with the {osd} team by visiting
+https://support.elastic.co[support.elastic.co] or by using the *Ask Elastic* option in the {osd} Help menu.
+You can also select the {osd} category at https://discuss.elastic.co/[discuss.elastic.co].
 
 [float]
 [[pagerduty-integration-walkthrough]]
@@ -71,7 +71,7 @@ https://support.pagerduty.com/docs/services-and-integrations#section-configuring
 and follow the steps outlined in the *Create a New Service* section, selecting *Elastic Alerts* as the *Integration Type* in step 4.
 Continue with the <<pagerduty-in-elastic, In Elastic>> section once you have finished these steps.
 
-. Enter an *Integration Name* in the format Elastic-service-name (for example, Elastic-Alerting or Kibana-APM-Alerting)
+. Enter an *Integration Name* in the format Elastic-service-name (for example, Elastic-Alerting or OpenSearchDashboards-APM-Alerting)
 and select *Elastic Alerts* from the *Integration Type* menu.
 . Click *Add Integration* to save your new integration.
 +
@@ -85,7 +85,7 @@ image::user/alerting/images/pagerduty-integration.png[PagerDuty Integrations tab
 [[pagerduty-in-elastic]]
 *In Elastic*
 
-. Create a PagerDuty Connector in Kibana.  You can:
+. Create a PagerDuty Connector in OpenSearchDashboards.  You can:
 +
 * Create a connector as part of creating an alert by selecting PagerDuty in the *Actions*
 section of the alert configuration and selecting *Add new*.
@@ -171,7 +171,7 @@ Dedup Key::     All actions sharing this key will be associated with the same Pa
 Timestamp::     An *optional* https://v2.developer.pagerduty.com/v2/docs/types#datetime[ISO-8601 format date-time], indicating the time the event was detected or generated.
 Component::     An *optional* value indicating the component of the source machine that is responsible for the event, for example `mysql` or `eth0`.
 Group::         An *optional* value indicating the logical grouping of components of a service, for example `app-stack`.
-Source::        An *optional* value indicating the affected system, preferably a hostname or fully qualified domain name. Defaults to the {kib} saved object id of the action.
+Source::        An *optional* value indicating the affected system, preferably a hostname or fully qualified domain name. Defaults to the {osd} saved object id of the action.
 Summary::       An *optional* text summary of the event, defaults to `No summary provided`. The maximum length is 1024 characters.
 Class::         An *optional* value indicating the class/type of the event, for example `ping failure` or `cpu load`.
 

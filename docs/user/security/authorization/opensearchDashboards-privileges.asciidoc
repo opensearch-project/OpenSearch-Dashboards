@@ -1,12 +1,12 @@
 [role="xpack"]
-[[kibana-privileges]]
-=== Kibana privileges
+[[opensearch-dashboards-privileges]]
+=== OpenSearchDashboards privileges
 
-{kib} privileges grant users access to features within {kib}. Roles have privileges to determine whether users have write or read access.
+{osd} privileges grant users access to features within {osd}. Roles have privileges to determine whether users have write or read access.
 
 ==== Base privileges
-Assigning a base privilege grants access to all available features in Kibana (Discover, Visualize, Dashboard, and so on).
-[[kibana-privileges-all]]
+Assigning a base privilege grants access to all available features in OpenSearchDashboards (Discover, Visualize, Dashboard, and so on).
+[[opensearch-dashboards-privileges-all]]
 `all`:: Grants full read-write access.
 `read`:: Grants read-only access.
 
@@ -19,13 +19,13 @@ image::user/security/images/assign_base_privilege.png[Assign base privilege]
 From the <<role-management-api-put, role management API>>:
 [source,js]
 --------------------------------------------------
-PUT /api/security/role/my_kibana_role
+PUT /api/security/role/my_opensearch_dashboards_role
 {
-  "elasticsearch": {
+  "opensearch": {
     "cluster" : [ ],
     "indices" : [ ]
   },
-  "kibana": [
+  "opensearchDashboards": [
     {
       "base": ["all"],
       "feature": {},
@@ -36,7 +36,7 @@ PUT /api/security/role/my_kibana_role
 --------------------------------------------------
 
 
-[[kibana-feature-privileges]]
+[[opensearch-dashboards-feature-privileges]]
 ==== Feature privileges
 Assigning a feature privilege grants access to a specific feature.
 
@@ -56,13 +56,13 @@ image::user/security/images/assign_feature_privilege.png[Assign feature privileg
 From the <<role-management-api-put, role management API>>:
 [source,js]
 --------------------------------------------------
-PUT /api/security/role/my_kibana_role
+PUT /api/security/role/my_opensearch_dashboards_role
 {
-  "elasticsearch": {
+  "opensearch": {
     "cluster" : [ ],
     "indices" : [ ]
   },
-  "kibana": [
+  "opensearchDashboards": [
     {
       "base": [],
       "feature": {

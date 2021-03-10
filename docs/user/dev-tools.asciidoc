@@ -1,5 +1,5 @@
 
-[[devtools-kibana]]
+[[devtools-opensearch-dashboards]]
 = Dev Tools
 
 [partintro]
@@ -10,9 +10,9 @@ with your data.
 [cols="2"]
 |===
 
-a| <<console-kibana, Console>>
+a| <<console-opensearch-dashboards, Console>>
 
-| Interact with the REST API of Elasticsearch, including sending requests
+| Interact with the REST API of OpenSearch, including sending requests
 and viewing API documentation.
 
 a| <<xpack-profiler, Search&nbsp;Profiler>>
@@ -30,10 +30,10 @@ a| <<painlesslab, Painless&nbsp;Lab>>
 
 --
 
-include::{kib-repo-dir}/dev-tools/console/console.asciidoc[]
+include::{osd-repo-dir}/dev-tools/console/console.asciidoc[]
 
-include::{kib-repo-dir}/dev-tools/searchprofiler/index.asciidoc[]
+include::{osd-repo-dir}/dev-tools/searchprofiler/index.asciidoc[]
 
-include::{kib-repo-dir}/dev-tools/grokdebugger/index.asciidoc[]
+include::{osd-repo-dir}/dev-tools/grokdebugger/index.asciidoc[]
 
-include::{kib-repo-dir}/dev-tools/painlesslab/index.asciidoc[]
+include::{osd-repo-dir}/dev-tools/painlesslab/index.asciidoc[]

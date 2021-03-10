@@ -2,23 +2,23 @@
 [[reporting-network-policy]]
 === Restrict requests with a Reporting network policy
 
-When Reporting generates PDF reports, it uses the Chromium browser to fully load the {kib} page on the server. This
+When Reporting generates PDF reports, it uses the Chromium browser to fully load the {osd} page on the server. This
 potentially involves sending requests to external hosts. For example, a request might go to an external image server to show a
 field formatted as an image, or to show an image in a Markdown visualization.
 
 If the Chromium browser is asked to send a request that violates the network policy, Reporting stops processing the page
 before the request goes out, and the report is marked as a failure. Additional information about the event is in
-the Kibana server logs.
+the OpenSearchDashboards server logs.
 
 [NOTE]
 ============
-{kib} installations are not designed to be publicly accessible over the Internet. The Reporting network policy and other capabilities
+{osd} installations are not designed to be publicly accessible over the Internet. The Reporting network policy and other capabilities
 of the Elastic Stack security features do not change this condition.
 ============
 
 ==== Configure a Reporting network policy
 
-You configure the network policy by specifying the `xpack.reporting.capture.networkPolicy.rules` setting in `kibana.yml`. A policy is specified as
+You configure the network policy by specifying the `xpack.reporting.capture.networkPolicy.rules` setting in `opensearch_dashboards.yml`. A policy is specified as
 an array of objects that describe what to allow or deny based on a host or protocol. If a host or protocol
 is not specified, the rule matches any host or protocol.
 

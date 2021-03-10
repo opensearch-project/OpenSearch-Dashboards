@@ -1,6 +1,6 @@
 To automatically generate reports with a watch, you need to configure
-{watcher} to trust the {kib} server’s certificate. For more information,
-see {kibana-ref}/secure-reporting.html[Securing Reporting].
+{watcher} to trust the {osd} server’s certificate. For more information,
+see {opensearch-dashboards-ref}/secure-reporting.html[Securing Reporting].
 
 To configure a watch to email reports, you use the `reporting` attachment type
 in an `email` action. For more information, see
@@ -48,10 +48,10 @@ PUT _watcher/watch/error_report
 For more information, see
 {ref}/actions-email.html#configuring-email[Configuring email accounts].
 <2> This is an example POST URL. You can copy and paste the URL for any
-report from the Kibana UI.
+report from the OpenSearchDashboards UI.
 <3> Optional, default is 40
 <4> Optional, default is 15s
-<5> Provide user credentials for a user with permission to access Kibana and
+<5> Provide user credentials for a user with permission to access OpenSearchDashboards and
 the {report-features}.
 //For more information, see <<secure-reporting>>.
 //<<reporting-app-users, Setting up a Reporting Role>>.

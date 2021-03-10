@@ -3,7 +3,7 @@
 
 [partintro]
 --
-**_Tell {kib} where to find your data, then search and filter it for hidden insights and relationships._**
+**_Tell {osd} where to find your data, then search and filter it for hidden insights and relationships._**
 
 You’ve added your data, and now you’re ready to dig in. You have questions about your data.
 What pages on your website contain a
@@ -15,7 +15,7 @@ data and understand what’s going on at any given time.
 You’ll learn to:
 
 - **Select** data for your exploration, and then set a time range for that data,
-search it with the {kib} Query Language, and filter the results.
+search it with the {osd} Query Language, and filter the results.
 - **Explore** the details of your data, view individual documents, and create tables
 that summarize the contents of the data.
 - **Present** your findings in a visualization.
@@ -30,10 +30,10 @@ image::images/Discover-Start.png[Discover]
 [float]
 === Prerequisites
 
-- If you don’t already have {kib}, set it up with https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
-- You must have data in {es}.  This tutorial uses the
-<<gs-get-data-into-kibana,ecommerce sample data set>>, but you can use your own data.
-- You should have an understanding of {ref}/documents-indices.html[{es} documents and indices].
+- If you don’t already have {osd}, set it up with https://www.elastic.co/cloud/opensearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
+- You must have data in {opensearch}.  This tutorial uses the
+<<gs-get-data-into-opensearch-dashboards,ecommerce sample data set>>, but you can use your own data.
+- You should have an understanding of {ref}/documents-indices.html[{opensearch} documents and indices].
 
 
 [float]
@@ -58,15 +58,15 @@ know the top-selling products and on what day of the week these products sell th
 [[find-the-data-you-want-to-use]]
 === Find your data
 
-Tell {kib} where to find the data you want to explore, and then specify the time range in which to view that data.
+Tell {osd} where to find the data you want to explore, and then specify the time range in which to view that data.
 
 . Open the main menu, and select **Discover**.
 
 . Select the data you want to work with.
 +
-{kib} uses an <<index-patterns,index pattern>> to tell it where to find
-your {es} data.
-To view the ecommerce sample data, make sure the index pattern is set to **kibana_sample_data_ecommerce**.
+{osd} uses an <<index-patterns,index pattern>> to tell it where to find
+your {opensearch} data.
+To view the ecommerce sample data, make sure the index pattern is set to **opensearch_dashboards_sample_data_ecommerce**.
 +
 [role="screenshot"]
 image::images/discover-index-pattern.png[How to set the index pattern in Discover]
@@ -115,7 +115,7 @@ column header, and then use the move and sort controls.
 One of the unique capabilities of **Discover** is the ability to combine
 free text search with filtering based on structured data.
 To search all fields, enter a simple string in the **Search** field. To search particular fields and
-build more complex queries, use the <<kuery-query,Kibana Query language>>.
+build more complex queries, use the <<kuery-query,OpenSearchDashboards Query language>>.
 As you type, KQL prompts you with the fields you can search and the operators
 you can use to build a structured query.
 
@@ -185,7 +185,7 @@ visualize it from **Discover**.
 
 . From the **Selected fields** list, click  `day_of_week`, and then click **Visualize**.
 +
-{kib} creates a visualization best suited for this field.
+{osd} creates a visualization best suited for this field.
 
 . Drag `manufacturer.keyword` from the field list and drop it on
 the visualization builder pane.
@@ -201,7 +201,7 @@ image:images/visualize-from-discover.png[Visualization that opens from Discover 
 
 * <<kuery-query, Learn more about the structure of a KQL query>>.
 
-* <<kibana-discover-settings, Configure Discover>> to better meet your needs.
+* <<opensearch-dashboards-discover-settings, Configure Discover>> to better meet your needs.
 In **Advanced Settings**, you can configure the number of documents to show,
 the table columns that display by default, and more.
 
@@ -211,8 +211,8 @@ the table columns that display by default, and more.
 
 --
 
-include::{kib-repo-dir}/management/index-patterns.asciidoc[]
+include::{osd-repo-dir}/management/index-patterns.asciidoc[]
 
-include::{kib-repo-dir}/discover/set-time-filter.asciidoc[]
+include::{osd-repo-dir}/discover/set-time-filter.asciidoc[]
 
-include::{kib-repo-dir}/discover/search.asciidoc[]
+include::{osd-repo-dir}/discover/search.asciidoc[]

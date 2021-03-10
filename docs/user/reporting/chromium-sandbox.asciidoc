@@ -13,14 +13,14 @@ operating system.
 The Linux sandbox depends on user namespaces, which were introduced with the 3.8 Linux kernel. However, many
 distributions don't have user namespaces enabled by default, or they require the CAP_SYS_ADMIN capability. The {report-features}
 will automatically disable the sandbox when it is running on Debian and CentOS as additional steps are required to enable
-unprivileged usernamespaces. In these situations, you'll see the following message in your {kib} startup logs:
+unprivileged usernamespaces. In these situations, you'll see the following message in your {osd} startup logs:
 `Chromium sandbox provides an additional layer of protection, but is not supported for your OS.
 Automatically setting 'xpack.reporting.capture.browser.chromium.disableSandbox: true'.`
 
 Reporting will automatically enable the Chromium sandbox at startup when a supported OS is detected. However, if your kernel is 3.8 or newer, it's
-recommended to set `xpack.reporting.capture.browser.chromium.disableSandbox: false` in your `kibana.yml` to explicitly enable usernamespaces.
+recommended to set `xpack.reporting.capture.browser.chromium.disableSandbox: false` in your `opensearch_dashboards.yml` to explicitly enable usernamespaces.
 
 ==== Docker
-When running {kib} in a Docker container, all container processes are run within a usernamespace with seccomp-bpf and
+When running {osd} in a Docker container, all container processes are run within a usernamespace with seccomp-bpf and
 AppArmor profiles that prevent the Chromium sandbox from being used. In these situations, disabling the sandbox is recommended,
 as the container implements similar security mechanisms.

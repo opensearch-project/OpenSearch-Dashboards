@@ -7,7 +7,7 @@
 indices, clusters, licenses, UI settings, index patterns, spaces, and more.
 
 
-Access to individual features is governed by {es} and {kib} privileges.
+Access to individual features is governed by {opensearch} and {osd} privileges.
 Consult your administrator if you do not have the appropriate access.
 
 [float]
@@ -18,7 +18,7 @@ Consult your administrator if you do not have the appropriate access.
 |===
 
 | <<ingest-node-pipelines, Ingest Node Pipelines>>
-| Create and manage {es}
+| Create and manage {opensearch}
 pipelines that enable you to perform common transformations and
 enrichments on your data.
 
@@ -60,7 +60,7 @@ rolls it into a new, compact index. Rollup indices are a good way to store month
 years of historical data in combination with your raw data.
 
 | {ref}/transforms.html[Transforms]
-|Use transforms to pivot existing {es} indices into summarized or entity-centric indices.
+|Use transforms to pivot existing {opensearch} indices into summarized or entity-centric indices.
 
 | {ref}/ccr-getting-started.html[Cross-Cluster Replication]
 |Replicate indices on a remote cluster and copy them to a follower index on a local cluster.
@@ -80,7 +80,7 @@ You can add and remove remote clusters, and check their connectivity.
 |===
 
 | <<managing-alerts-and-actions, Alerts&nbsp;and Actions>>
-| Centrally manage your alerts across {kib}. Create and manage reusable
+| Centrally manage your alerts across {osd}. Create and manage reusable
 connectors for triggering actions.
 
 | <<reporting-getting-started, Reporting>>
@@ -126,14 +126,14 @@ Kerberos, PKI, OIDC, and SAML.
 |===
 
 [float]
-[[manage-kibana]]
-== {kib}
+[[manage-opensearch-dashboards]]
+== {osd}
 
 [cols="50, 50"]
 |===
 
 a| <<index-patterns, Index Patterns>>
-|Create and manage the index patterns that retrieve your data from {es}.
+|Create and manage the index patterns that retrieve your data from {opensearch}.
 
 | <<managing-saved-objects, Saved Objects>>
 | Copy, edit, delete, import, and export your saved objects.
@@ -145,7 +145,7 @@ A space is isolated from all other spaces,
 so you can tailor it to your needs without impacting others.
 
 a| <<advanced-options, Advanced Settings>>
-| Customize {kib} to suit your needs. Change the format for displaying dates, turn on dark mode,
+| Customize {osd} to suit your needs. Change the format for displaying dates, turn on dark mode,
 set the timespan for notification messages, and much more.
 
 |===
@@ -164,7 +164,7 @@ see the https://www.elastic.co/subscriptions[subscription page].
 
 | <<upgrade-assistant, Upgrade Assistant>>
 | Identify the issues that you need to address before upgrading to the
-next major version of {es}, and then reindex, if needed.
+next major version of {opensearch}, and then reindex, if needed.
 
 |===
 
@@ -172,36 +172,36 @@ next major version of {es}, and then reindex, if needed.
 
 --
 
-include::{kib-repo-dir}/management/advanced-options.asciidoc[]
+include::{osd-repo-dir}/management/advanced-options.asciidoc[]
 
-include::{kib-repo-dir}/management/alerting/alerts-and-actions-intro.asciidoc[]
+include::{osd-repo-dir}/management/alerting/alerts-and-actions-intro.asciidoc[]
 
-include::{kib-repo-dir}/management/alerting/alert-management.asciidoc[]
+include::{osd-repo-dir}/management/alerting/alert-management.asciidoc[]
 
-include::{kib-repo-dir}/management/alerting/alert-details.asciidoc[]
+include::{osd-repo-dir}/management/alerting/alert-details.asciidoc[]
 
-include::{kib-repo-dir}/management/alerting/connector-management.asciidoc[]
+include::{osd-repo-dir}/management/alerting/connector-management.asciidoc[]
 
-include::{kib-repo-dir}/management/managing-beats.asciidoc[]
+include::{osd-repo-dir}/management/managing-beats.asciidoc[]
 
-include::{kib-repo-dir}/management/ingest-pipelines/ingest-pipelines.asciidoc[]
+include::{osd-repo-dir}/management/ingest-pipelines/ingest-pipelines.asciidoc[]
 
-include::{kib-repo-dir}/management/managing-fields.asciidoc[]
+include::{osd-repo-dir}/management/managing-fields.asciidoc[]
 
-include::{kib-repo-dir}/management/managing-licenses.asciidoc[]
+include::{osd-repo-dir}/management/managing-licenses.asciidoc[]
 
-include::{kib-repo-dir}/management/numeral.asciidoc[]
+include::{osd-repo-dir}/management/numeral.asciidoc[]
 
-include::{kib-repo-dir}/management/rollups/create_and_manage_rollups.asciidoc[]
+include::{osd-repo-dir}/management/rollups/create_and_manage_rollups.asciidoc[]
 
-include::{kib-repo-dir}/management/managing-saved-objects.asciidoc[]
+include::{osd-repo-dir}/management/managing-saved-objects.asciidoc[]
 
 include::security/index.asciidoc[]
 
-include::{kib-repo-dir}/management/snapshot-restore/index.asciidoc[]
+include::{osd-repo-dir}/management/snapshot-restore/index.asciidoc[]
 
-include::{kib-repo-dir}/spaces/index.asciidoc[]
+include::{osd-repo-dir}/spaces/index.asciidoc[]
 
-include::{kib-repo-dir}/management/upgrade-assistant/index.asciidoc[]
+include::{osd-repo-dir}/management/upgrade-assistant/index.asciidoc[]
 
-include::{kib-repo-dir}/management/watcher-ui/index.asciidoc[]
+include::{osd-repo-dir}/management/watcher-ui/index.asciidoc[]

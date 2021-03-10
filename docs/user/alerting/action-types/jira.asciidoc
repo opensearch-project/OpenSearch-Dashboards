@@ -27,7 +27,7 @@ API token (or password)::  Jira API authentication token (or password) for HTTP 
    actionTypeId: .jira
    config:
      apiUrl: https://elastic.atlassian.net
-     projectKey: ES
+     projectKey: OPENSEARCH
    secrets:
      email: testuser
      apiToken: tokenkeystorevalue
@@ -55,7 +55,7 @@ API token (or password)::  Jira API authentication token (or password) for HTTP 
 | A string that corresponds to *Email*.
 
 | `apiToken`
-| A string that corresponds to *API Token*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+| A string that corresponds to *API Token*. Should be stored in the <<creating-keystore, {osd} keystore>>.
 
 |===
 

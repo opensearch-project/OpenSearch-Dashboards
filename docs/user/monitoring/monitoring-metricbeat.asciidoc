@@ -1,58 +1,58 @@
 [role="xpack"]
 [[monitoring-metricbeat]]
-= Collect {kib} monitoring data with {metricbeat}
+= Collect {osd} monitoring data with {metricbeat}
 [subs="attributes"]
 ++++
 <titleabbrev>Collect monitoring data with {metricbeat}</titleabbrev>
 ++++
 
-In 6.4 and later, you can use {metricbeat} to collect data about {kib}
+In 6.4 and later, you can use {metricbeat} to collect data about {osd}
 and ship it to the monitoring cluster, rather than routing it through the
-production cluster as described in <<monitoring-kibana>>.
+production cluster as described in <<monitoring-opensearch-dashboards>>.
 
 image::user/monitoring/images/metricbeat.png[Example monitoring architecture]
 
 To learn about monitoring in general, see
-{ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].
+{ref}/monitor-opensearch-cluster.html[Monitor a cluster].
 
 //NOTE: The tagged regions are re-used in the Stack Overview.
 
-. Disable the default collection of {kib} monitoring metrics. +
+. Disable the default collection of {osd} monitoring metrics. +
 +
 --
-// tag::disable-kibana-collection[]
-Add the following setting in the {kib} configuration file (`kibana.yml`):
+// tag::disable-opensearch-dashboards-collection[]
+Add the following setting in the {osd} configuration file (`opensearch_dashboards.yml`):
 
 [source,yaml]
 ----------------------------------
-monitoring.kibana.collection.enabled: false
+monitoring.opensearchDashboards.collection.enabled: false
 ----------------------------------
 
 Leave the `monitoring.enabled` set to its default value (`true`).
-// end::disable-kibana-collection[]
+// end::disable-opensearch-dashboards-collection[]
 For more information, see
-<<monitoring-settings-kb,Monitoring settings in {kib}>>.
+<<monitoring-settings-osd,Monitoring settings in {osd}>>.
 --
 
-. <<start-stop,Start {kib}>>.
+. <<start-stop,Start {osd}>>.
 
 . Set the `xpack.monitoring.collection.enabled` setting to `true` on
 each node in the production cluster. By default, it is disabled (`false`).
 +
 --
-NOTE: You can specify this setting in either the `elasticsearch.yml` on each
-node or across the cluster as a dynamic cluster setting. If {es}
+NOTE: You can specify this setting in either the `opensearch.yml` on each
+node or across the cluster as a dynamic cluster setting. If {opensearch}
 {security-features} are enabled, you must have `monitor` cluster privileges to
 view the cluster settings and `manage` cluster privileges to change them.
 
 --
 
-** In {kib}:
+** In {osd}:
 
-... Open {kib} in your web browser.
+... Open {osd} in your web browser.
 +
 --
-If you are running {kib} locally, go to `http://localhost:5601/`.
+If you are running {osd} locally, go to `http://localhost:5601/`.
 
 If the Elastic {security-features} are enabled, log in.
 --
@@ -78,40 +78,40 @@ PUT _cluster/settings
 }
 ----------------------------------
 
-For more information, see {ref}/monitoring-settings.html[Monitoring settings in {es}]
+For more information, see {ref}/monitoring-settings.html[Monitoring settings in {opensearch}]
 and {ref}/cluster-update-settings.html[Cluster update settings].
 --
 
 . {metricbeat-ref}/metricbeat-installation-configuration.html[Install {metricbeat}] on the
-same server as {kib}.
+same server as {osd}.
 
-. Enable the {kib} {xpack} module in {metricbeat}. +
+. Enable the {osd} {xpack} module in {metricbeat}. +
 +
 --
-// tag::enable-kibana-module[]
+// tag::enable-opensearch-dashboards-module[]
 For example, to enable the default configuration in the `modules.d` directory,
 run the following command:
 
 ["source","sh",subs="attributes,callouts"]
 ----------------------------------------------------------------------
-metricbeat modules enable kibana-xpack
+metricbeat modules enable opensearch-dashboards-xpack
 ----------------------------------------------------------------------
 
 For more information, see
 {metricbeat-ref}/configuration-metricbeat.html[Specify which modules to run] and
-{metricbeat-ref}/metricbeat-module-kibana.html[{kib} module].
-// end::enable-kibana-module[]
+{metricbeat-ref}/metricbeat-module-opensearch-dashboards.html[{osd} module].
+// end::enable-opensearch-dashboards-module[]
 --
 
-. Configure the {kib} {xpack} module in {metricbeat}. +
+. Configure the {osd} {xpack} module in {metricbeat}. +
 +
 --
-// tag::configure-kibana-module[]
-The `modules.d/kibana-xpack.yml` file contains the following settings:
+// tag::configure-opensearch-dashboards-module[]
+The `modules.d/opensearch-dashboards-xpack.yml` file contains the following settings:
 
 [source,yaml]
 ----------------------------------
-- module: kibana
+- module: opensearchDashboards
   metricsets:
     - stats
   period: 10s
@@ -122,12 +122,12 @@ The `modules.d/kibana-xpack.yml` file contains the following settings:
   xpack.enabled: true
 ----------------------------------
 
-By default, the module collects {kib} monitoring metrics from `localhost:5601`.
+By default, the module collects {osd} monitoring metrics from `localhost:5601`.
 If that host and port number are not correct, you must update the `hosts`
-setting. If you configured {kib} to use encrypted communications, you must
+setting. If you configured {osd} to use encrypted communications, you must
 access it via HTTPS. For example, use a `hosts` setting like
 `https://localhost:5601`.
-// end::configure-kibana-module[]
+// end::configure-opensearch-dashboards-module[]
 
 // tag::remote-monitoring-user[]
 If the Elastic {security-features} are enabled, you must also provide a user
@@ -138,7 +138,7 @@ ID and password so that {metricbeat} can collect metrics successfully:
 Alternatively, use the `remote_monitoring_user`
 {ref}/built-in-users.html[built-in user].
 
-.. Add the `username` and `password` settings to the {kib} module configuration
+.. Add the `username` and `password` settings to the {osd} module configuration
 file.
 // end::remote-monitoring-user[]
 --
@@ -149,7 +149,7 @@ file.
 // tag::disable-system-module[]
 By default, the {metricbeat-ref}/metricbeat-module-system.html[system module] is
 enabled. The information it collects, however, is not shown on the *Monitoring*
-page in {kib}. Unless you want to use that information for other purposes, run
+page in {osd}. Unless you want to use that information for other purposes, run
 the following command:
 
 ["source","sh",subs="attributes,callouts"]
@@ -168,14 +168,14 @@ monitoring cluster prevents production cluster outages from impacting your
 ability to access your monitoring data. It also prevents monitoring activities
 from impacting the performance of your production cluster.
 
-For example, specify the {es} output information in the {metricbeat}
+For example, specify the {opensearch} output information in the {metricbeat}
 configuration file (`metricbeat.yml`):
 
 [source,yaml]
 ----------------------------------
-output.elasticsearch:
+output.opensearch:
   # Array of hosts to connect to.
-  hosts: ["http://es-mon-1:9200", "http://es-mon2:9200"] <1>
+  hosts: ["http://opensearch-mon-1:9200", "http://opensearch-mon2:9200"] <1>
 
   # Optional protocol and basic auth credentials.
   #protocol: "https"
@@ -183,16 +183,16 @@ output.elasticsearch:
   #password: "changeme"
 ----------------------------------
 <1> In this example, the data is stored on a monitoring cluster with nodes
-`es-mon-1` and `es-mon-2`.
+`opensearch-mon-1` and `opensearch-mon-2`.
 
 If you configured the monitoring cluster to use encrypted communications, you
 must access it via HTTPS. For example, use a `hosts` setting like
-`https://es-mon-1:9200`.
+`https://opensearch-mon-1:9200`.
 
-IMPORTANT: The {es} {monitor-features} use ingest pipelines, therefore the
+IMPORTANT: The {opensearch} {monitor-features} use ingest pipelines, therefore the
 cluster that stores the monitoring data must have at least one ingest node.
 
-If the {es} {security-features} are enabled on the monitoring cluster, you
+If the {opensearch} {security-features} are enabled on the monitoring cluster, you
 must provide a valid user ID and password so that {metricbeat} can send metrics
 successfully:
 
@@ -201,13 +201,13 @@ successfully:
 Alternatively, use the `remote_monitoring_user`
 {ref}/built-in-users.html[built-in user].
 
-.. Add the `username` and `password` settings to the {es} output information in
+.. Add the `username` and `password` settings to the {opensearch} output information in
 the {metricbeat} configuration file.
 
 For more information about these configuration options, see
-{metricbeat-ref}/elasticsearch-output.html[Configure the {es} output].
+{metricbeat-ref}/opensearch-output.html[Configure the {opensearch} output].
 --
 
 . {metricbeat-ref}/metricbeat-starting.html[Start {metricbeat}].
 
-. <<monitoring-data,View the monitoring data in {kib}>>.
+. <<monitoring-data,View the monitoring data in {osd}>>.

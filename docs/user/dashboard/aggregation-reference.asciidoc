@@ -1,16 +1,16 @@
 [[aggregation-reference]]
 == Aggregation reference
 
-{kib} supports many types of {ref}/search-aggregations.html[{es} aggregations] that you can use to build complex summaries of your data. 
+{osd} supports many types of {ref}/search-aggregations.html[{opensearch} aggregations] that you can use to build complex summaries of your data. 
 
-By using a series of {es} aggregations to extract and process your data, you can create panels that tell a 
+By using a series of {opensearch} aggregations to extract and process your data, you can create panels that tell a 
 story about the trends, patterns, and outliers in your data.
 
 [float]
 [[bucket-aggregations]]
 === Bucket aggregations
 
-For information about Elasticsearch bucket aggregations, refer to {ref}/search-aggregations-bucket.html[Bucket aggregations].
+For information about OpenSearch bucket aggregations, refer to {ref}/search-aggregations-bucket.html[Bucket aggregations].
 
 [options="header"]
 |===
@@ -93,7 +93,7 @@ For information about Elasticsearch bucket aggregations, refer to {ref}/search-a
 [[metrics-aggregations]]
 === Metrics aggregations
 
-For information about Elasticsearch metrics aggregations, refer to {ref}/search-aggregations-metrics.html[Metrics aggregations].
+For information about OpenSearch metrics aggregations, refer to {ref}/search-aggregations-metrics.html[Metrics aggregations].
 
 [options="header"]
 |===
@@ -169,7 +169,7 @@ For information about Elasticsearch metrics aggregations, refer to {ref}/search-
 [[pipeline-aggregations]]
 === Pipeline aggregations
 
-For information about Elasticsearch pipeline aggregations, refer to {ref}/search-aggregations-pipeline.html[Pipeline aggregations].
+For information about OpenSearch pipeline aggregations, refer to {ref}/search-aggregations-pipeline.html[Pipeline aggregations].
 
 [options="header"]
 |===

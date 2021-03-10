@@ -2,7 +2,7 @@
 [[graph-getting-started]]
 == Create a graph
 
-You must index data into {es} before you can create a graph.
+You must index data into {opensearch} before you can create a graph.
 <<index-patterns, Learn how>> or get started with a <<add-sample-data, sample data set>>.
 
 [float]
@@ -24,7 +24,7 @@ The vertices in the graph are selected from these terms.
 . Enter a search query to discover relationships between terms in the selected
 fields.
 +
-For example, if you are using the {kib} sample web logs data set, and you want
+For example, if you are using the {osd} sample web logs data set, and you want
 to generate a graph of the successful requests to
 particular pages from different locations, you could search for the 200
 response code. The weight of the connection between two vertices indicates how strongly they

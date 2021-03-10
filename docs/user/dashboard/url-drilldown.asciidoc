@@ -7,7 +7,7 @@ The URL template input uses https://handlebarsjs.com/guide/expressions.html#expr
 
 [source, bash]
 ----
-https://github.com/elastic/kibana/issues?q={{event.value}}
+https://github.com/elastic/opensearch-dashboards/issues?q={{event.value}}
 ----
 
 A Handlebars expression is a `{{`, some contents, followed by a `}}`. When the drilldown is executed, these expressions are replaced by values from the dashboard and interaction context.
@@ -31,7 +31,7 @@ Example:
 
 
 |rison
-a|Serialize variables in https://github.com/w33ble/rison-node[rison] format. Rison is a common format for {kib} apps for storing state in the URL.
+a|Serialize variables in https://github.com/w33ble/rison-node[rison] format. Rison is a common format for {osd} apps for storing state in the URL.
 
 Example:
 
@@ -56,7 +56,7 @@ Example:
 
 The URL drilldown template has three sources for variables:
 
-* *Global* static variables that don’t change depending on the  place where the URL drilldown is used or which user interaction executed the drilldown. For example: `{{kibanaUrl}}`.
+* *Global* static variables that don’t change depending on the  place where the URL drilldown is used or which user interaction executed the drilldown. For example: `{{opensearchDashboardsUrl}}`.
 * *Context* variables that change depending on where the drilldown is created and used. These variables are extracted from a context of a panel on a dashboard. For example, `{{context.panel.filters}}` gives access to filters that applied to the current panel.
 * *Event* variables that depend on the trigger context. These variables are dynamically extracted from the interaction context when the drilldown is executed.
 
@@ -66,7 +66,7 @@ For example, `{{context.panel.filters}}` are previewed with the current filters 
 *Event* variables are extracted during drilldown execution from a user interaction with a panel (for example, from a pie slice that the user clicked on).
 
 Because there is no user interaction with a panel in preview, there is no interaction context to use in a preview.
-To work around this, {kib} provides a sample interaction that relies on a trigger.
+To work around this, {osd} provides a sample interaction that relies on a trigger.
 So in a preview, you might notice that `{{event.value}}` is replaced with `{{event.value}}` instead of with a sample from your data.
 Such previews can help you make sure that the structure of your URL template is valid.
 However, to ensure that the configured URL drilldown works as expected with your data, you have to save the dashboard and test in the panel.
@@ -82,8 +82,8 @@ You can access the full list of variables available for the current panel and se
 |Source |Variable |Description
 
 |*Global*
-| kibanaUrl
-| {kib} base URL. Useful for creating URL drilldowns that navigate within {kib}.
+| opensearchDashboardsUrl
+| {osd} base URL. Useful for creating URL drilldowns that navigate within {osd}.
 
 | *Context*
 | context.panel
@@ -99,9 +99,9 @@ You can access the full list of variables available for the current panel and se
 
 |
 | context.panel.filters
-| List of {kib} filters applied to a panel. +
+| List of {osd} filters applied to a panel. +
 Tip: Use in combination with <<helpers, rison>> helper for
-internal {kib} navigations with carrying over current filters.
+internal {osd} navigations with carrying over current filters.
 
 |
 | context.panel.query.query

@@ -1,7 +1,7 @@
 [role="xpack"]
 [[reporting-integration]]
 == Reporting integration
-Integrating a {kib} application with the {report-features} requires a minimum
+Integrating a {osd} application with the {report-features} requires a minimum
 amount of code, and the goal is to not have to modify the reporting code as we
 add additional applications. Instead, applications abide by a contract that
 {report-features} use to determine the information that is required to export
@@ -9,14 +9,14 @@ CSVs and PDFs.
 
 [IMPORTANT]
 ==============================================
-These pages document internal APIs and are not guaranteed to be supported across future versions of {kib}.
-However, these docs will be kept up-to-date to reflect the current implementation of Reporting integration in {kib}.
+These pages document internal APIs and are not guaranteed to be supported across future versions of {osd}.
+However, these docs will be kept up-to-date to reflect the current implementation of Reporting integration in {osd}.
 ==============================================
 
 [float]
 [[reporting-nav-bar-extensions]]
 === Share menu extensions
-X-Pack uses the `share` plugin of the Kibana platform to register actions in the share menu.
+X-Pack uses the `share` plugin of the OpenSearchDashboards platform to register actions in the share menu.
 
 [float]
 === Generate job URL

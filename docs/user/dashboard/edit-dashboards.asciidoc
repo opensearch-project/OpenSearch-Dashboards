@@ -25,8 +25,8 @@ To configure *Controls* for your dashboard:
 
 . Click *Options*, then configure the following:
 
-* *Update Kibana filters on each change* &mdash; When selected, all interactive inputs create filters that refresh the dashboard. When unselected,
- {kib} filters are created only when you click *Apply changes*.
+* *Update OpenSearchDashboards filters on each change* &mdash; When selected, all interactive inputs create filters that refresh the dashboard. When unselected,
+ {osd} filters are created only when you click *Apply changes*.
 
 * *Use time filter* &mdash; When selected, the aggregations that generate the options list and time range are connected to the <<set-time-filter,time filter>>.
 
@@ -79,7 +79,7 @@ Put the dashboard in *Edit* mode, then use the following options:
 * To resize, click the resize control, then drag to the new dimensions.
 
 * To delete, open the panel menu, then select *Delete from dashboard*. When you delete a panel from the dashboard, the 
-visualization or saved search from the panel is still available in Kibana.
+visualization or saved search from the panel is still available in OpenSearchDashboards.
 
 [float]
 [[clone-panels]]

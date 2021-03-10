@@ -6,7 +6,7 @@
 ++++
 
 If you are monitoring Logstash nodes, click **Overview** in the Logstash section
-of the *Stack Monitoring* page in {kib}. You can view the overall health of the
+of the *Stack Monitoring* page in {osd}. You can view the overall health of the
 Logstash nodes.
 
 [role="screenshot"]

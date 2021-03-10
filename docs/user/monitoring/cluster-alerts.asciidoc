@@ -2,26 +2,26 @@
 [[cluster-alerts]]
 = Cluster Alerts
 
-The *Stack Monitoring > Clusters* page in {kib} summarizes the status of your
+The *Stack Monitoring > Clusters* page in {osd} summarizes the status of your
 {stack}. You can drill down into the metrics to view more information about your
 cluster and specific nodes, instances, and indices.
 
 The Top Cluster Alerts shown on the Clusters page notify you of
 conditions that require your attention:
 
-* {es} Cluster Health Status is Yellow (missing at least one replica)
+* {opensearch} Cluster Health Status is Yellow (missing at least one replica)
 or Red (missing at least one primary).
-* {es} Version Mismatch. You have {es} nodes with
+* {opensearch} Version Mismatch. You have {opensearch} nodes with
 different versions in the same cluster.
-* {kib} Version Mismatch. You have {kib} instances with different
-versions running against the same {es} cluster.
+* {osd} Version Mismatch. You have {osd} instances with different
+versions running against the same {opensearch} cluster.
 * Logstash Version Mismatch. You have Logstash nodes with different
 versions reporting stats to the same monitoring cluster.
-* {es} Nodes Changed. You have {es} nodes that were recently added or removed.
-* {es} License Expiration. The cluster's license is about to expire.
+* {opensearch} Nodes Changed. You have {opensearch} nodes that were recently added or removed.
+* {opensearch} License Expiration. The cluster's license is about to expire.
 +
 --
-If you do not preserve the data directory when upgrading a {kib} or
+If you do not preserve the data directory when upgrading a {osd} or
 Logstash node, the instance is assigned a new persistent UUID and shows up
 as a new instance
 --
@@ -51,13 +51,13 @@ To receive email notifications for the Cluster Alerts:
 {ref}/actions-email.html#configuring-email[Configuring email accounts].
 2. Configure the
 `monitoring.cluster_alerts.email_notifications.email_address` setting in
-`kibana.yml` with your email address.
+`opensearch_dashboards.yml` with your email address.
 +
 --
-TIP: If you have separate production and monitoring clusters and separate {kib}
+TIP: If you have separate production and monitoring clusters and separate {osd}
 instances for those clusters, you must put the
 `monitoring.cluster_alerts.email_notifications.email_address` setting in 
-the {kib} instance that is associated with the production cluster.
+the {osd} instance that is associated with the production cluster.
 
 --
 

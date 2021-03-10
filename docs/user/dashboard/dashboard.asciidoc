@@ -36,7 +36,7 @@ then you don't have sufficient privileges to create and save dashboards. The but
 dashboards are not visible. For more information, see <<xpack-security-authorization>>.
 
 [role="screenshot"]
-image::images/dashboard-read-only-badge.png[Example of Dashboard read only access indicator in Kibana header]
+image::images/dashboard-read-only-badge.png[Example of Dashboard read only access indicator in OpenSearchDashboards header]
 
 [float]
 [[types-of-panels]]
@@ -67,14 +67,14 @@ a| *Bar*
 
 Displays bars side-by-side where each bar represents a category. Use bar charts to compare data across a
 large number of categories, display data that includes categories with negative values, and easily identify
-the categories that represent the highest and lowest values. Kibana also supports horizontal bar charts.
+the categories that represent the highest and lowest values. OpenSearchDashboards also supports horizontal bar charts.
 
 | image:images/bar.png[Bar chart]
 
 a| *Stacked bar*
 
 Displays numeric values across two or more categories. Use stacked bar charts to compare numeric values between
-levels of a categorical value. Kibana also supports stacked horizontal bar charts.
+levels of a categorical value. OpenSearchDashboards also supports stacked horizontal bar charts.
 
 | image:images/stacked_bar.png[Stacked area chart]
 
@@ -168,9 +168,9 @@ For all your mapping needs, use <<maps,Maps>>.
 [[create-panels]]
 == Create panels
 
-To create a panel, make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>>
-to retrieve the data from {es}. If you aren’t ready to use your own data, {kib} comes with several pre-built dashboards that you can test out. For more information,
-refer to <<add-sample-data, Explore {kib} using sample data>>.
+To create a panel, make sure you have {ref}/getting-started-index.html[data indexed into {opensearch}] and an <<index-patterns,index pattern>>
+to retrieve the data from {opensearch}. If you aren’t ready to use your own data, {osd} comes with several pre-built dashboards that you can test out. For more information,
+refer to <<add-sample-data, Explore {osd} using sample data>>.
 
 To begin, click *Create new*, then choose one of the following options on the
 *New Visualization* window:
@@ -182,7 +182,7 @@ To begin, click *Create new*, then choose one of the following options on the
 [role="screenshot"]
 image:images/Dashboard_add_new_visualization.png[Example add new visualization to dashboard]
 
-{kib} provides you with several editors that help you create panels.
+{osd} provides you with several editors that help you create panels.
 
 [float]
 [[create-panels-with-lens]]
@@ -281,7 +281,7 @@ Ready to try out *Lens*? Refer to the <<lens-tutorial,step-by-step tutorial>>.
 [[tsvb]]
 === Create panels with TSVB
 
-*TSVB* is a time series data visualizer that allows you to use the full power of the Elasticsearch aggregation framework. To use *TSVB*,
+*TSVB* is a time series data visualizer that allows you to use the full power of the OpenSearch aggregation framework. To use *TSVB*,
 you can combine an infinite number of <<aggregation-reference,aggregations>> to display your data.
 
 With *TSVB*, you can:
@@ -297,7 +297,7 @@ image::images/tsvb.png[TSVB UI]
 [[configure-the-data]]
 ==== Configure the data
 
-With *TSVB*, you can add and display multiple data sets to compare and analyze. {kib} uses many types of <<aggregation-reference,aggregations>> that you can use to build
+With *TSVB*, you can add and display multiple data sets to compare and analyze. {osd} uses many types of <<aggregation-reference,aggregations>> that you can use to build
 complex summaries of that data.
 
 . Select *Data*. If you are using *Table*, select *Columns*.
@@ -366,14 +366,14 @@ You can filter the data on the panels using the <<lucene-query,Lucene query synt
 
 Click *Panel options*, then enter the syntax in the *Panel Filter* field.
 
-If you want to ignore filters from all of {kib}, select *Yes* for *Ignore global filter*.
+If you want to ignore filters from all of {osd}, select *Yes* for *Ignore global filter*.
 
 [float]
 [[vega]]
 === Create custom panels with Vega
 
-Build custom visualizations using *Vega* and *Vega-Lite*, backed by one or more data sources including {es}, Elastic Map Service,
-URL, or static data. Use the {kib} extensions to embed *Vega* in your dashboard, and add interactive tools.
+Build custom visualizations using *Vega* and *Vega-Lite*, backed by one or more data sources including {opensearch}, Elastic Map Service,
+URL, or static data. Use the {osd} extensions to embed *Vega* in your dashboard, and add interactive tools.
 
 Use *Vega* and *Vega-Lite* when you want to create a visualization for:
 
@@ -397,8 +397,8 @@ image::images/vega.png[Vega UI]
 For more information about *Vega* and *Vega-Lite*, refer to:
 
 * <<vega-lite-tutorial-create-your-first-visualizations,Create your first visualization>>
-* <<vega-tutorial-update-kibana-filters-from-vega,Update Kibana filters>>
-* <<reference-for-kibana-extensions,Reference for Kibana extensions>>
+* <<vega-tutorial-update-opensearch-dashboards-filters-from-vega,Update OpenSearchDashboards filters>>
+* <<reference-for-opensearch-dashboards-extensions,Reference for OpenSearchDashboards extensions>>
 * <<resources-and-examples,Resources and examples>>
 
 [float]
@@ -416,9 +416,9 @@ For more information about *Vega* and *Vega-Lite*, refer to:
 [role="screenshot"]
 image::images/timelion.png[Timelion UI]
 
-NOTE: In 7.0 and later, *Timelion* app is deprecated. In 8.0 and later, *Timelion* app is removed from {kib}. To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
+NOTE: In 7.0 and later, *Timelion* app is deprecated. In 8.0 and later, *Timelion* app is removed from {osd}. To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
 For migration information, refer to <<deprecation-v7.10.0>>.
-Only *Timelion* app is deprecated. {kib} continues to support *Timelion*
+Only *Timelion* app is deprecated. {osd} continues to support *Timelion*
 visualizations in *Dashboard*, *Visualize*, and *Canvas*.
 
 Ready to try out Timelion? For step-by-step tutorials, refer to:

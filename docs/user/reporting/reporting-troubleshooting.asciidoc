@@ -20,18 +20,18 @@ Having trouble? Here are solutions to common problems you might encounter while 
 [[reporting-diagnostics]]
 === Reporting diagnostics
 Reporting comes with a built-in utility to try to automatically find common issues.
-When {kib} is running, navigate to the Report Listing page, and click *Run reporting diagnostics*.
-This will open up a diagnostic tool that checks various parts of the {kib} deployment and
+When {osd} is running, navigate to the Report Listing page, and click *Run reporting diagnostics*.
+This will open up a diagnostic tool that checks various parts of the {osd} deployment and
 come up with any relevant recommendations.
 
 [float]
 [[reporting-troubleshooting-system-dependencies]]
 === System dependencies
-Reporting launches a "headless" web browser called Chromium on the Kibana server. It is a custom build made by Elastic of an open source
-project, and it is intended to have minimal dependencies on OS libraries. However, the Kibana server OS might still require additional
+Reporting launches a "headless" web browser called Chromium on the OpenSearchDashboards server. It is a custom build made by Elastic of an open source
+project, and it is intended to have minimal dependencies on OS libraries. However, the OpenSearchDashboards server OS might still require additional
 dependencies to run the Chromium executable.
 
-Make sure Kibana server OS has the appropriate packages installed for the distribution.
+Make sure OpenSearchDashboards server OS has the appropriate packages installed for the distribution.
 
 If you are using CentOS/RHEL systems, install the following packages:
 
@@ -50,12 +50,12 @@ If you are using Ubuntu/Debian systems, install the following packages:
 * `fonts-liberation`
 * `libfontconfig1`
 
-If the system is missing dependencies, then Reporting will fail in a non-deterministic way. {kib} runs a self-test at server startup, and
+If the system is missing dependencies, then Reporting will fail in a non-deterministic way. {osd} runs a self-test at server startup, and
 if it encounters errors, logs them in the Console. Unfortunately, the error message does not include
 information about why Chromium failed to run. The most common error message is `Error: connect ECONNREFUSED`, which indicates
-that {kib} could not connect to the Chromium process.
+that {osd} could not connect to the Chromium process.
 
-To troubleshoot the problem, start the {kib} server with environment variables that tell Chromium to print verbose logs. See the
+To troubleshoot the problem, start the {osd} server with environment variables that tell Chromium to print verbose logs. See the
 <<reporting-troubleshooting-puppeteer-debug-logs, Puppeteer debug method>> for more information.
 
 [float]
@@ -75,13 +75,13 @@ visible on the screen, are shown in PDF reports.
 [float]
 [[reporting-troubleshooting-file-permissions]]
 === File permissions
-Ensure that the `headless_shell` binary located in your Kibana data directory is owned by the user who is running Kibana, that the
+Ensure that the `headless_shell` binary located in your OpenSearchDashboards data directory is owned by the user who is running OpenSearchDashboards, that the
 user has the execute permission, and if applicable, that the filesystem is mounted with the `exec` option.
 
 [NOTE]
 --
-The Chromium binary is located in the Kibana installation directory as `data/headless_shell-OS_TYPE/headless_shell`. The full path is logged
-the first time Kibana starts when verbose logging is enabled.
+The Chromium binary is located in the OpenSearchDashboards installation directory as `data/headless_shell-OS_TYPE/headless_shell`. The full path is logged
+the first time OpenSearchDashboards starts when verbose logging is enabled.
 --
 
 [float]
@@ -94,12 +94,12 @@ along with the solution.
 ==== Max attempts reached
 There are two primary causes of this error:
 
-* You're creating a PDF of a visualization or dashboard that spans a large amount of data and Kibana is hitting the `xpack.reporting.queue.timeout`
+* You're creating a PDF of a visualization or dashboard that spans a large amount of data and OpenSearchDashboards is hitting the `xpack.reporting.queue.timeout`
 
-* Kibana is hosted behind a reverse-proxy, and the <<reporting-kibana-server-settings, Kibana server settings>> are not configured correctly
+* OpenSearchDashboards is hosted behind a reverse-proxy, and the <<reporting-opensearch-dashboards-server-settings, OpenSearchDashboards server settings>> are not configured correctly
 
 Create a Markdown visualization and then create a PDF report. If this succeeds, increase the `xpack.reporting.queue.timeout` setting. If the
-PDF report fails with "Max attempts reached," check your <<reporting-kibana-server-settings, Kibana server settings>>.
+PDF report fails with "Max attempts reached," check your <<reporting-opensearch-dashboards-server-settings, OpenSearchDashboards server settings>>.
 
 [float]
 [[reporting-troubleshooting-nss-dependency]]
@@ -115,31 +115,31 @@ which were introduced with the 3.8 Linux kernel. However, many distributions don
 the CAP_SYS_ADMIN capability.
 
 Elastic recommends that you research the feasibility of enabling unprivileged user namespaces before disabling the sandbox. An exception
-is if you are running Kibana in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters.
+is if you are running OpenSearchDashboards in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters.
 
 [float]
 [[reporting-troubleshooting-verbose-logs]]
 === Verbose logs
-{kib} server logs have a lot of useful information for troubleshooting and understanding how things work. If you're having any issues at
-all, the full logs from Reporting will be the first place to look. In `kibana.yml`:
+{osd} server logs have a lot of useful information for troubleshooting and understanding how things work. If you're having any issues at
+all, the full logs from Reporting will be the first place to look. In `opensearch_dashboards.yml`:
 
 [source,yaml]
 --------------------------------------------------------------------------------
 logging.verbose: true
 --------------------------------------------------------------------------------
 
-For more information about logging, see <<logging-verbose,Kibana configuration settings>>.
+For more information about logging, see <<logging-verbose,OpenSearchDashboards configuration settings>>.
 
 [float]
 [[reporting-troubleshooting-puppeteer-debug-logs]]
 === Puppeteer debug logs
-The Chromium browser that {kib} launches on the server is driven by a NodeJS library for Chromium called Puppeteer. The Puppeteer library
+The Chromium browser that {osd} launches on the server is driven by a NodeJS library for Chromium called Puppeteer. The Puppeteer library
 has its own command-line method to generate its own debug logs, which can sometimes be helpful, particularly to figure out if a problem is
-caused by Kibana or Chromium. See more at https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/README.md#debugging-tips[debugging tips].
+caused by OpenSearchDashboards or Chromium. See more at https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/README.md#debugging-tips[debugging tips].
 
-Using Puppeteer's debug method when launching Kibana would look like:
+Using Puppeteer's debug method when launching OpenSearchDashboards would look like:
 ```
-env DEBUG="puppeteer:*" ./bin/kibana
+env DEBUG="puppeteer:*" ./bin/opensearch-dashboards
 ```
 The internal DevTools protocol traffic will be logged via the `debug` module under the `puppeteer` namespace.
 
@@ -149,10 +149,10 @@ The Puppeteer logs are very verbose and could possibly contain sensitive informa
 [float]
 [[reporting-troubleshooting-system-requirements]]
 === System requirements
-In Elastic Cloud, the {kib} instances that most configurations provide by default is for 1GB of RAM for the instance. That is enough for
-{kib} Reporting when the visualization or dashboard is relatively simple, such as a single pie chart or a dashboard with
+In Elastic Cloud, the {osd} instances that most configurations provide by default is for 1GB of RAM for the instance. That is enough for
+{osd} Reporting when the visualization or dashboard is relatively simple, such as a single pie chart or a dashboard with
 a few visualizations. However, certain visualization types incur more load than others. For example, a TSVB panel has a lot of network
 requests to render.
 
-If the {kib} instance doesn't have enough memory to run the report, the report fails with an error such as `Error: Page crashed!`
-In this case, try increasing the memory for the {kib} instance to 2GB.
+If the {osd} instance doesn't have enough memory to run the report, the report fails with an error such as `Error: Page crashed!`
+In this case, try increasing the memory for the {osd} instance to 2GB.

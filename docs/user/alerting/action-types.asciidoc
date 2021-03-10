@@ -2,7 +2,7 @@
 [[action-types]]
 == Action and connector types
 
-Actions are Kibana services or integrations with third-party systems that run as background tasks on the Kibana server when alert conditions are met. {kib} provides the following types of actions:
+Actions are OpenSearchDashboards services or integrations with third-party systems that run as background tasks on the OpenSearchDashboards server when alert conditions are met. {osd} provides the following types of actions:
 
 [cols="2"]
 |===
@@ -17,7 +17,7 @@ a| <<resilient-action-type, IBM Resilient>>
 
 a| <<index-action-type, Index>>
 
-| Index data into Elasticsearch.
+| Index data into OpenSearch.
 
 a| <<jira-action-type, Jira>>
 
@@ -30,7 +30,7 @@ a| <<pagerduty-action-type, PagerDuty>>
 
 a| <<server-log-action-type, ServerLog>>
 
-| Add a message to a Kibana log.
+| Add a message to a OpenSearchDashboards log.
 
 a| <<servicenow-action-type, ServiceNow>>
 
@@ -57,7 +57,7 @@ see https://www.elastic.co/subscriptions[the subscription page].
 === Preconfigured actions and connectors
 
 For out-of-the-box and standardized connectors, you can <<preconfigured-connector-example, preconfigure the connector>>
-before {kib} starts.
+before {osd} starts.
 
 If you preconfigure a connector, you can also <<preconfigured-action-type-example, preconfigure its action type>>.
 

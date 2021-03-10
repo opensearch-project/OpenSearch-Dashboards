@@ -1,0 +1,128 @@
+[role="xpack"]
+[[using-opensearch-dashboards-with-security]]
+== Configure security in {osd}
+++++
+<titleabbrev>Configure security</titleabbrev>
+++++
+
+{osd} users have to log in when {stack-security-features} are enabled on your
+cluster. You configure roles for your {osd} users to control what data those
+users can access.
+
+Most requests made through {osd} to {opensearch} are authenticated by using the
+credentials of the logged-in user. There are, however, a few internal requests
+that the {osd} server needs to make to the {opensearch} cluster. For this reason, you
+must configure credentials for the {osd} server to use for those requests.
+
+With {security-features} enabled, if you load a {osd} dashboard that accesses
+data in an index that you are not authorized to view, you get an error that
+indicates the index does not exist. The {security-features} do not currently
+provide a way to control which users can load which dashboards.
+
+To use {osd} with {security-features}:
+
+. {ref}/configuring-security.html[Configure security in {opensearch}].
+
+. Configure {osd} to use the appropriate built-in user.
++
+--
+Update the following settings in the `opensearch_dashboards.yml` configuration
+file:
+
+[source,yaml]
+-----------------------------------------------
+opensearch.username: "opensearch_dashboards_system"
+opensearch.password: "opensearchDashboardspassword"
+-----------------------------------------------
+
+The {osd} server submits requests as this user to access the cluster monitoring
+APIs and the `.opensearch-dashboards` index. The server does _not_ need access to user indices.
+
+NOTE: The password for the built-in `opensearch_dashboards_system` user is typically set as part of the security configuration process on {opensearch}. For more
+information, see {ref}/built-in-users.html[Built-in users].
+--
+
+. Set the `xpack.security.encryptionKey` property in the `opensearch_dashboards.yml`
+configuration file. You can use any text string that is 32 characters or longer
+as the encryption key.
++
+--
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.encryptionKey: "something_at_least_32_characters"
+--------------------------------------------------------------------------------
+
+For more information, see <<security-settings-osd,Security settings in {osd}>>.
+--
+
+. Configure {osd}'s session expiration settings. Set both the idle timeout and lifespan settings:
++
+--
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.session.idleTimeout: "1h"
+xpack.security.session.lifespan: "30d"
+--------------------------------------------------------------------------------
+
+For more information, see <<xpack-security-session-management, Session management in {osd}>>.
+--
+
+. Optional: <<configuring-tls,Configure {osd} to encrypt communications>>.
+
+. Optional: <<opensearch-mutual-tls,Configure {osd} to authenticate to {opensearch} with a client certificate>>.
+
+. Restart {osd}.
+
+. Temporarily log in to {osd} using the built-in `elastic` superuser so you can create new users and assign roles. If you are running {osd}
+locally, go to `https://localhost:5601` to view the login page.
++
+NOTE: The password for the built-in `elastic` user is typically set as part of the security configuration process on {opensearch}. For more
+information, see {ref}/built-in-users.html[Built-in users].
+
+. [[opensearch-dashboards-roles]]Create roles and users to grant access to {osd}.
++
+--
+To manage privileges in {osd}, open the main menu, then click *Stack Management > Roles*. The built-in `opensearch_dashboards_admin` role will grant
+access to {osd} with administrator privileges. Alternatively, you can create additional roles that grant limited access to {osd}.
+
+If you're using the default native realm with Basic Authentication, open the main menu, then click *Stack Management > Users* to create
+users and assign roles, or use the {opensearch} {ref}/security-api.html#security-user-apis[user management APIs]. For example, the following creates
+a user named `jacknich` and assigns it the `opensearch_dashboards_admin` role:
+
+[source,js]
+--------------------------------------------------------------------------------
+POST /_security/user/jacknich
+{
+  "password" : "t0pS3cr3t",
+  "roles" : [ "opensearch_dashboards_admin" ]
+}
+--------------------------------------------------------------------------------
+// CONSOLE
+
+TIP: For more information on Basic Authentication and additional methods of authenticating {osd} users, see <<opensearch-dashboards-authentication>>.
+--
+
+. Grant users access to the indices that they will be working with in {osd}.
++
+--
+TIP: You can define as many different roles for your {osd} users as you need.
+
+For example, create roles that have `read` and `view_index_metadata` privileges
+on specific index patterns. For more information, see
+{ref}/authorization.html[User authorization].
+
+--
+
+. Log out of {osd} and verify that you can log in as a normal user. If you are running {osd} locally, go to `https://localhost:5601` and
+enter the credentials for a user you've assigned a {osd} user role. For example, you could log in as the user `jacknich`.
++
+NOTE: This must be a user who has been assigned <<opensearch-dashboards-privileges, OpenSearchDashboards privileges>>. {osd} server credentials (the built-in
+`opensearch_dashboards_system` user) should only be used internally by the {osd} server.
+
+include::authentication/index.asciidoc[]
+include::securing-communications/index.asciidoc[]
+include::securing-communications/opensearch-mutual-tls.asciidoc[]
+include::audit-logging.asciidoc[]
+include::access-agreement.asciidoc[]
+include::session-management.asciidoc[]
+include::secure-saved-objects.asciidoc[]

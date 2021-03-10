@@ -6,14 +6,14 @@ experimental[]
 For additional *Vega* and *Vega-Lite* information, refer to the reference sections.
 
 [float]
-[[reference-for-kibana-extensions]]
-=== Reference for {kib} extensions
+[[reference-for-opensearch-dashboards-extensions]]
+=== Reference for {osd} extensions
 
-{kib} has extended Vega and Vega-Lite with extensions that support:
+{osd} has extended Vega and Vega-Lite with extensions that support:
 
 * Automatic sizing
-* Default theme to match {kib}
-* Writing {es} queries using the time range and filters from dashboards
+* Default theme to match {osd}
+* Writing {opensearch} queries using the time range and filters from dashboards
 * experimental[] Using the Elastic Map Service in Vega maps
 * Additional tooltip styling
 * Advanced setting to enable URL loading from any domain
@@ -25,7 +25,7 @@ For additional *Vega* and *Vega-Lite* information, refer to the reference sectio
 ==== Automatic sizing
 
 Most users will want their Vega visualizations to take the full available space, so unlike
-Vega examples, `width` and `height` are not required parameters in {kib}. To set the width
+Vega examples, `width` and `height` are not required parameters in {osd}. To set the width
 or height manually, set `autosize: none`. For example, to set the height to a specific pixel value:
 
 ```
@@ -34,7 +34,7 @@ width: container
 height: 200
 ```
 
-The default {kib} settings which are inherited by your visualizations are:
+The default {osd} settings which are inherited by your visualizations are:
 
 ```
 autosize: {
@@ -45,7 +45,7 @@ width: container
 height: container
 ```
 
-{kib} is able to merge your custom `autosize` settings with the defaults. The options `fit-x`
+{osd} is able to merge your custom `autosize` settings with the defaults. The options `fit-x`
 and `fit-y` are supported but not recommended over the default `fit` setting.
 
 To learn more, read about
@@ -54,34 +54,34 @@ in the Vega documentation.
 
 [float]
 [[vega-theme]]
-==== Default theme to match {kib}
+==== Default theme to match {osd}
 
-{kib} registers a default https://vega.github.io/vega/docs/schemes/[Vega color scheme]
+{osd} registers a default https://vega.github.io/vega/docs/schemes/[Vega color scheme]
 with the id `elastic`, and sets a default color for each `mark` type.
 Override it by providing a different `stroke`, `fill`, or `color` (Vega-Lite) value.
 
 [float]
 [[vega-queries]]
-==== Writing {es} queries in Vega
+==== Writing {opensearch} queries in Vega
 
-{kib} extends the Vega https://vega.github.io/vega/docs/data/[data] elements
-with support for direct {es} queries specified as `url`.
+{osd} extends the Vega https://vega.github.io/vega/docs/data/[data] elements
+with support for direct {opensearch} queries specified as `url`.
 
-{kib} is **unable to support dynamically loaded data**,
+{osd} is **unable to support dynamically loaded data**,
 which would otherwise work in Vega. All data is fetched before it's passed to
 the Vega renderer.
 
-To define an {es} query in Vega, set the `url` to an object. {kib} parses
-the object looking for special tokens that allow your query to integrate with {kib}.
+To define an {opensearch} query in Vega, set the `url` to an object. {osd} parses
+the object looking for special tokens that allow your query to integrate with {osd}.
 
 Tokens include the following:
 
 * `%context%: true`: Set at the top level, and replaces the `query` section with filters from dashboard
 * `%timefield%: <name>`: Set at the top level, integrates the query with the dashboard time filter
-* `{%timefilter%: true}`: Replaced by an {es} range query with upper and lower bounds
+* `{%timefilter%: true}`: Replaced by an {opensearch} range query with upper and lower bounds
 * `{%timefilter%: "min" | "max"}`: Replaced only by the upper or lower bounds
 * `{%timefilter: true, shift: -1, unit: 'hour'}`: Generates a time range query one hour in the past
-* `{%autointerval%: true}`: Replaced by the string which contains the automatic {kib} time interval, such as `1h`
+* `{%autointerval%: true}`: Replaced by the string which contains the automatic {osd} time interval, such as `1h`
 * `{%autointerval%: 10}`: Replaced by a string which is approximately dividing the time into 10 ranges, allowing
   you to influence the automatic interval
 * `"%dashboard_context-must_clause%"`: String replaced by object containing filters
@@ -93,7 +93,7 @@ For example, the following query counts the number of documents in a specific in
 [source,yaml]
 ----
 // An object instead of a string for the URL value
-// is treated as a context-aware Elasticsearch query.
+// is treated as a context-aware OpenSearch query.
 url: {
   // Specify the time filter.
   %timefield%: @timestamp
@@ -101,7 +101,7 @@ url: {
   %context%: true
 
   // Which indexes to search
-  index: kibana_sample_data_logs
+  index: opensearch_dashboards_sample_data_logs
   // The body element may contain "aggs" and "query" keys
   body: {
     aggs: {
@@ -224,7 +224,7 @@ experimental[] Access the Elastic Map Service files via the same mechanism:
 [source,yaml]
 ----
 url: {
-  // "type" defaults to "elasticsearch" otherwise
+  // "type" defaults to "opensearch" otherwise
   type: emsfile
   // Name of the file, exactly as in the Region map visualization
   name: World Countries
@@ -242,7 +242,7 @@ configuration:
 ----
 {
   "config": {
-    "kibana": {
+    "opensearchDashboards": {
       "type": "map",
 
       // Initial map position
@@ -286,14 +286,14 @@ position of the map.
 [[vega-tooltip]]
 ==== Additional tooltip styling
 
-{kib} has installed the https://vega.github.io/vega-lite/docs/tooltip.html[Vega tooltip plugin],
-so tooltips can be defined in the ways documented there. Beyond that, {kib} also supports
+{osd} has installed the https://vega.github.io/vega-lite/docs/tooltip.html[Vega tooltip plugin],
+so tooltips can be defined in the ways documented there. Beyond that, {osd} also supports
 a configuration option for changing the tooltip position and padding:
 
 ```js
 {
   config: {
-    kibana: {
+    opensearchDashboards: {
       tooltips: {
         position: 'top',
         padding: 15
@@ -307,9 +307,9 @@ a configuration option for changing the tooltip position and padding:
 [[vega-url-loading]]
 ==== Advanced setting to enable URL loading from any domain
 
-Vega can load data from any URL, but this is disabled by default in {kib}. 
-To change this, set `vis_type_vega.enableExternalUrls: true` in `kibana.yml`,
-then restart {kib}.
+Vega can load data from any URL, but this is disabled by default in {osd}. 
+To change this, set `vis_type_vega.enableExternalUrls: true` in `opensearch_dashboards.yml`,
+then restart {osd}.
 
 [float]
 [[vega-inspector]]
@@ -318,11 +318,11 @@ Use the contextual *Inspect* tool to gain insights into different elements.
 For Vega visualizations, there are two different views: *Request* and *Vega debug*.
 
 [float]
-[[inspect-elasticsearch-requests]]
-===== Inspect {es} requests
+[[inspect-opensearch-requests]]
+===== Inspect {opensearch} requests
 
-Vega uses the {ref}/search-search.html[{es} search API] to get documents and aggregation 
-results from {es}. To troubleshoot these requests, click *Inspect*, which shows the most recent requests. 
+Vega uses the {ref}/search-search.html[{opensearch} search API] to get documents and aggregation 
+results from {opensearch}. To troubleshoot these requests, click *Inspect*, which shows the most recent requests. 
 In case your specification has more than one request, you can switch between the views using the *View* dropdown.
 
 [role="screenshot"]
@@ -347,7 +347,7 @@ the <<vega-browser-debugging-console, Vega browser debugging process>>.
 [[asking-for-help-with-a-vega-spec]]
 ===== Asking for help with a Vega spec
 
-Because of the dynamic nature of the data in {es}, it is hard to help you with 
+Because of the dynamic nature of the data in {opensearch}, it is hard to help you with 
 Vega specs unless you can share a dataset. To do this, click *Inspect*, select the *Vega debug* view,
 then select the *Spec* tab:
 
@@ -370,7 +370,7 @@ on how to inspect data and signals at runtime. For Vega-Lite,
 `VEGA_DEBUG.view.data('source_0')` gets the pre-transformed data, and `VEGA_DEBUG.view.data('data_0')`
 gets the encoded data. For Vega, it uses the data name as defined in your Vega spec.
 
-* `vega_spec` &mdash; Vega JSON graph specification after some modifications by {kib}. In case
+* `vega_spec` &mdash; Vega JSON graph specification after some modifications by {osd}. In case
 of Vega-Lite, this is the output of the Vega-Lite compiler.
 
 * `vegalite_spec` &mdash; If this is a Vega-Lite graph, JSON specification of the graph before
@@ -380,29 +380,29 @@ Vega-Lite compilation.
 [[vega-expression-functions]]
 ==== (Vega only) Expression functions which can update the time range and dashboard filters
 
-{kib} has extended the Vega expression language with these functions:
+{osd} has extended the Vega expression language with these functions:
 
 ```js
 /**
   * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
-  * @param {string} [index] as defined in Kibana, or default if missing
+  * @param {string} [index] as defined in OpenSearchDashboards, or default if missing
   */
-kibanaAddFilter(query, index)
+opensearchDashboardsAddFilter(query, index)
 
 /**
   * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
-  * @param {string} [index] as defined in Kibana, or default if missing
+  * @param {string} [index] as defined in OpenSearchDashboards, or default if missing
   */
-kibanaRemoveFilter(query, index)
+opensearchDashboardsRemoveFilter(query, index)
 
-kibanaRemoveAllFilters()
+opensearchDashboardsRemoveAllFilters()
 
 /**
   * Update dashboard time filter to the new values
   * @param {number|string|Date} start
   * @param {number|string|Date} end
   */
-kibanaSetTimeFilter(start, end)
+opensearchDashboardsSetTimeFilter(start, end)
 ```
 
 [float]
@@ -413,7 +413,7 @@ kibanaSetTimeFilter(start, end)
 ----
 {
   config: {
-    kibana: {
+    opensearchDashboards: {
       // Placement of the Vega-defined signal bindings.
       // Can be `left`, `right`, `top`, or `bottom` (default).
       controlsLocation: top
@@ -438,7 +438,7 @@ experimental[] To learn more about Vega and Vega-Lite, refer to the resources an
 [[vega-editor]]
 ==== Vega editor
 The https://vega.github.io/editor/[Vega Editor] includes examples for Vega & Vega-Lite, but does not support any
-{kib}-specific features like {es} requests and interactive base maps.
+{osd}-specific features like {opensearch} requests and interactive base maps.
 
 [float]
 [[vega-lite-resources]]
@@ -454,7 +454,7 @@ The https://vega.github.io/editor/[Vega Editor] includes examples for Vega & Veg
 * https://vega.github.io/vega/docs/[Docs]
 * https://vega.github.io/vega/examples/[Examples]
 
-TIP: When you use the examples in {kib}, you may
+TIP: When you use the examples in {osd}, you may
 need to modify the "data" section to use absolute URL. For example,
 replace `"url": "data/world-110m.json"` with
 `"url": "https://vega.github.io/editor/data/world-110m.json"`.

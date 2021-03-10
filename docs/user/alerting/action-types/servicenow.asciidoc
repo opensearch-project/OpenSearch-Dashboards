@@ -50,7 +50,7 @@ Password::  Password for HTTP Basic authentication.
 | A string that corresponds to *Username*.
 
 | `password`
-| A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+| A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {osd} keystore>>.
 
 |===
 

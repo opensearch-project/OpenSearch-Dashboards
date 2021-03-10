@@ -1,0 +1,170 @@
+[role="xpack"]
+[[opensearch-mutual-tls]]
+=== Mutual TLS authentication between {osd} and {opensearch}
+++++
+<titleabbrev>Mutual TLS with {opensearch}</titleabbrev>
+++++
+
+Secure Sockets Layer (SSL) and Transport Layer Security (TLS) provide encryption for data-in-transit. While these terms are often used
+interchangeably, {osd} supports only TLS, which supersedes the old SSL protocols.
+
+TLS requires X.509 certificates to authenticate the communicating parties and perform encryption of data-in-transit. Each certificate
+contains a public key and has and an associated -- but separate -- private key; these keys are used for cryptographic operations. {osd}
+supports certificates and private keys in PEM or PKCS#12 format.
+
+In a standard TLS configuration, the server presents a signed certificate to authenticate itself to the client. In a mutual TLS
+configuration, the client also presents a signed certificate to authenticate itself to the server.
+
+When {opensearch} {security-features} is enabled on your cluster, each request that {osd} (the client) makes to {opensearch} (the server) must be
+authenticated. Most requests made by end users through {osd} to {opensearch} are authenticated by using the credentials of the logged-in user. There
+are, however, a few internal requests that {osd} needs to make to {opensearch}. For this reason, you must configure credentials for {osd} to use for
+those requests.
+
+If {osd} has `opensearch.username` and `opensearch.password` configured, it will attempt to use these to authenticate to {opensearch} via the
+{ref}/native-realm.html[native realm]. However, {osd} also supports mutual TLS authentication with {opensearch} via a {ref}/pki-realm.html[Public
+Key Infrastructure (PKI) realm]. To do so, {opensearch} needs to verify the signature on the {osd} client certificate, and it also needs to map the
+client certificate's distinguished name (DN) to the appropriate `opensearch_dashboards_system` role.
+
+NOTE: Using a PKI realm is a gold feature. For a comparison of the Elastic license levels, see https://www.elastic.co/subscriptions[the
+subscription page].
+
+To configure {osd} and {opensearch} to use mutual TLS authentication:
+
+. <<using-opensearch-dashboards-with-security,Set up {osd} to work with {stack} {security-features} with a username and password>>.
+
+. <<configuring-tls-osd-opensearch,Set up TLS encryption between {osd} and {opensearch}>>.
++
+This entails generating a "server certificate" for {opensearch} to use on the HTTP layer.
+
+. Obtain a client certificate and private key for {osd}.
++
+--
+{osd} must this "client certificate" and corresponding private key when connecting to {opensearch}.
+
+NOTE: This is not the same as the <<configuring-tls-browser-osd,server certificate>> that {osd} will present to web browsers.
+
+You may choose to generate a client certificate and private key using the {ref}/certutil.html[`opensearch-certutil`] tool. If you
+followed the {opensearch} documentation for {ref}/configuring-tls.html#node-certificates[generating node certificates], then you likely have already
+set up a certificate authority (CA) to sign the {opensearch} server certificate. You may choose to use the same CA to sign the {osd} client
+certificate. For example:
+
+[source,sh]
+--------------------------------------------------------------------------------
+bin/opensearch-certutil cert -ca elastic-stack-ca.p12 -name opensearch-dashboards-client -dns <your_opensearch_dashboards_hostname>
+--------------------------------------------------------------------------------
+
+This will generate a client certificate and private key in a PKCS#12 file named `opensearch-dashboards-client.p12`. In this example, the client certificate
+has a Common Name (CN) of `"opensearch-dashboards-client"` and a subject alternative name (SAN) of `"<your_opensearch_dashboards_hostname>"`. The SAN may be required if
+you have hostname verification enabled on {opensearch}.
+--
+
+. Obtain the certificate authority (CA) certificate chain for {osd}.
++
+--
+{opensearch} needs the appropriate CA certificate chain to properly establish trust when receiving connections from {osd}.
+
+If you followed the instructions to generate a client certificate, then you will have a PKCS#12 file for {osd}. You can extract the CA
+certificate chain from this file. For example:
+
+[source,sh]
+--------------------------------------------------------------------------------
+openssl pkcs12 -in opensearch-dashboards-client.p12 -cacerts -nokeys -out opensearch-dashboards-ca.crt
+--------------------------------------------------------------------------------
+
+This will produce a PEM-formatted file named `opensearch-dashboards-ca.crt` that contains the CA certificate from the PKCS#12 file.
+--
+
+. Configure {opensearch} with a PKI realm and a native realm.
++
+--
+By default, {opensearch} provides a native realm for authenticating with a username and password. However, to support both a PKI realm (for {osd})
+and a native realm (for end users), you must configure each realm in `opensearch.yml`:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.authc.realms.pki.realm1.order: 1
+xpack.security.authc.realms.pki.realm1.certificate_authorities: "/path/to/opensearch-dashboards-ca.crt"
+xpack.security.authc.realms.native.realm2.order: 2
+--------------------------------------------------------------------------------
+--
+
+. Configure {opensearch} to request client certificates.
++
+--
+By default, {opensearch} will not request a client certificate when establishing a TLS connection. To change this, you must set up optional client
+certificate authentication in `opensearch.yml`:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.http.ssl.client_authentication: "optional"
+--------------------------------------------------------------------------------
+--
+
+. Restart {opensearch}.
+
+. Use {osd} to create a role mapping in {opensearch} for the client certificate.
++
+--
+This role mapping will assign the `opensearch_dashboards_system` role to any user that matches the included mapping rule, which is set to equal the client
+certificate's DN attribute:
+
+[role="screenshot"]
+image:user/security/images/mutual-tls-role-mapping.png["Role mapping for the {osd} client certificate"]
+
+For more information, see <<role-mappings,role mappings>>.
+--
+
+. Configure {osd} to use the client certificate and private key.
++
+You need to specify the information required to access your client certificate and corresponding private key.
+
+.. If your certificate and private key are contained in a PKCS#12 file:
++
+--
+Specify your PKCS#12 file in `opensearch_dashboards.yml`:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+opensearch.ssl.keystore.path: "/path/to/opensearch-dashboards-client.p12"
+--------------------------------------------------------------------------------
+
+If your PKCS#12 file is encrypted, add the decryption password to your <<secure-settings,{osd} keystore>>:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+bin/opensearch-dashboards-keystore add opensearch.ssl.keystore.password
+--------------------------------------------------------------------------------
+
+TIP: If your PKCS#12 file isn't protected with a password, depending on how it was generated, you may need to set
+`opensearch.ssl.keystore.password` to an empty string.
+--
+
+.. Otherwise, if your certificate and private key are in PEM format:
++
+--
+Specify your certificate and private key in `opensearch_dashboards.yml`:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+opensearch.ssl.certificate: "/path/to/opensearch-dashboards-client.crt"
+opensearch.ssl.key: "/path/to/opensearch-dashboards-client.key"
+--------------------------------------------------------------------------------
+
+If your private key is encrypted, add the decryption password to your <<secure-settings,{osd} keystore>>:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+bin/opensearch-dashboards-keystore add opensearch.ssl.keyPassphrase
+--------------------------------------------------------------------------------
+--
+
+. Configure {osd} _not_ to use a username and password for {opensearch}.
++
+You must remove the `opensearch.username` and `opensearch.password` settings from `opensearch_dashboards.yml`. If these are present, {osd} will
+attempt to use them to authenticate to {opensearch} via the native realm.
+
+. Restart {osd}.
+
+These steps enable {osd} to authenticate to {opensearch} using a certificate. However, end users will only be able to authenticate to
+{osd} with a username and password. To allow end users to authenticate to {osd} using a client certificate, see <<pki-authentication,{osd}
+PKI authentication>>.

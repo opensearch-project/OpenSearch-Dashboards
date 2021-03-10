@@ -1,0 +1,24 @@
+[role="xpack"]
+[[opensearch-dashboards-page]]
+= {osd} Monitoring Metrics
+[subs="attributes"]
+++++
+<titleabbrev>{osd} Metrics</titleabbrev>
+++++
+
+To view the key metrics that indicate the overall health of {osd} itself,
+click **Overview** in the {osd} section of the *Stack Monitoring* page.
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-opensearch-dashboards-overview.png["OpenSearchDashboards Overview"]
+
+To view {osd} instance metrics, click **Instances**. The Instances section
+shows the status of each {osd} instance.
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-opensearch-dashboards-instances.png["OpenSearchDashboards Instances"]
+
+Click the name of an instance to view its instance statistics over time.
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-opensearch-dashboards-instance.png["OpenSearchDashboards Instance View"]

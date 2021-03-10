@@ -2,14 +2,14 @@
 [[xpack-security-access-agreement]]
 === Access agreement
 
-Some work environments require you to acknowledge and accept an agreement before you can access {kib}, which can contain sensitive information. The agreement text supports Markdown format and can be specified using the `xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message` setting.
+Some work environments require you to acknowledge and accept an agreement before you can access {osd}, which can contain sensitive information. The agreement text supports Markdown format and can be specified using the `xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message` setting.
 
 [NOTE]
 ============================================================================
-You need to acknowledge the access agreement only once per session, and {kib} reports the acknowledgement in the audit logs.
+You need to acknowledge the access agreement only once per session, and {osd} reports the acknowledgement in the audit logs.
 ============================================================================
 
-Here is how your `kibana.yml` can look like if you define an access agreement:
+Here is how your `opensearch_dashboards.yml` can look like if you define an access agreement:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -21,7 +21,7 @@ xpack.security.authc.providers:
                   By logging in, you acknowledge that (shortened ...)"
 --------------------------------------------------------------------------------
 
-When you authenticate using `basic.basic1`, you'll see the following agreement that you must acknowledge before you can access {kib}:
+When you authenticate using `basic.basic1`, you'll see the following agreement that you must acknowledge before you can access {osd}:
 
 [role="screenshot"]
 image::user/security/images/access-agreement.png["Access Agreement UI"]

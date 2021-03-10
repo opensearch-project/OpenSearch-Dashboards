@@ -2,8 +2,8 @@
 [[explore-the-underlying-data]]
 === Explore the underlying data for panels
 
-To explore the underlying data of the panels on your dashboard, {kib} opens *Discover*,
-where you can view and filter the data in the visualization panel. When {kib} opens *Discover*, the index pattern, filters, query, and time range for the visualization continue to apply.
+To explore the underlying data of the panels on your dashboard, {osd} opens *Discover*,
+where you can view and filter the data in the visualization panel. When {osd} opens *Discover*, the index pattern, filters, query, and time range for the visualization continue to apply.
 
 TIP: The *Explore underlying data* option is available only for visualization panels with a single index pattern.
 
@@ -19,7 +19,7 @@ image::images/explore_data_context_menu.png[Explore underlying data from panel c
 [role="screenshot"]
 image::images/explore_data_in_chart.png[Explore underlying data from chart]
 +
-To enable, open `kibana.yml`, then add the following:
+To enable, open `opensearch_dashboards.yml`, then add the following:
 
 ["source","yml"]
 -----------

@@ -6,7 +6,7 @@
 
 --
 
-You can generate a report that contains a {kib} dashboard, visualization,
+You can generate a report that contains a {osd} dashboard, visualization,
 saved search, or Canvas workpad. Depending on the object type, you can export the data as
 a PDF, PNG, or CSV document, which you can keep for yourself, or share with others.
 
@@ -19,11 +19,11 @@ image::user/reporting/images/share-menu.png["Share"]
 [float]
 == Setup
 
-The {report-features} are automatically enabled in {kib}. It runs a custom build of the Chromium web browser, which
-runs on the server in headless mode to load {kib} and capture the rendered {kib} charts as images.
+The {report-features} are automatically enabled in {osd}. It runs a custom build of the Chromium web browser, which
+runs on the server in headless mode to load {osd} and capture the rendered {osd} charts as images.
 
-Chromium is an open-source project not related to Elastic, but the Chromium binary for {kib} has been custom-built by Elastic to ensure it
-works with minimal setup. However, the {kib} server OS might still require additional dependencies for Chromium. See the
+Chromium is an open-source project not related to Elastic, but the Chromium binary for {osd} has been custom-built by Elastic to ensure it
+works with minimal setup. However, the {osd} server OS might still require additional dependencies for Chromium. See the
 <<reporting-troubleshooting-system-dependencies, Reporting troubleshooting>> section for more information about the system dependencies
 for different operating systems.
 
@@ -32,8 +32,8 @@ for different operating systems.
 == Roles and privileges
 
 To generate a report, you must have the `reporting_user` role. You also need
-the appropriate {kib} privileges to access the objects that you
-want to report on and the {es} indices.  See <<secure-reporting, Reporting and security>>
+the appropriate {osd} privileges to access the objects that you
+want to report on and the {opensearch} indices.  See <<secure-reporting, Reporting and security>>
 for an example.
 
 [float]
@@ -42,7 +42,7 @@ for an example.
 
 . Open the dashboard, visualization, Canvas workpad, or saved search that you want to include in the report.
 
-. In the {kib} toolbar, click *Share*.  If you are working in Canvas,
+. In the {osd} toolbar, click *Share*.  If you are working in Canvas,
 click the share icon image:user/reporting/images/canvas-share-button.png["Canvas Share button"].
 
 . Select the option appropriate for your object. You can export:
@@ -60,7 +60,7 @@ NOTE: When you export a data table or saved search from a dashboard report, the 
 [float]
 [[reporting-layout-sizing]]
 == Layout and sizing
-The layout and size of the PDF or PNG image depends on the {kib} app
+The layout and size of the PDF or PNG image depends on the {osd} app
 with which the Reporting plugin is integrated. For Canvas, the
 worksheet dimensions determine the size for Reporting. In other apps,
 the dimensions are taken on the fly by looking at
@@ -71,7 +71,7 @@ make the report output larger or smaller, you can change the size of the browser
 This resizes the shareable container before generating the
 report, so the desired dimensions are passed in the job parameters.
 
-In the following {kib} dashboard, the shareable container is highlighted.
+In the following {osd} dashboard, the shareable container is highlighted.
 The shareable container is captured when you click the
 *Generate* or *Copy POST URL* button. It might take some trial and error
 before you're satisfied with the layout and dimensions in the resulting

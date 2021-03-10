@@ -19,7 +19,7 @@ To start, you'll need to add the <<add-sample-data, sample ecommerce data>>.
 
 Drag and drop your data onto the visualization builder pane.
 
-. Select the *kibana_sample_data_ecommerce* index pattern.
+. Select the *opensearch_dashboards_sample_data_ecommerce* index pattern.
 
 . Click image:images/time-filter-calendar.png[], then click *Last 7 days*. 
 +
@@ -75,13 +75,13 @@ Now that you've created your visualization, you can add it to a <<dashboard,dash
 
 experimental[]
 
-In this tutorial, you will learn about how to edit Vega-Lite in {kib} to create
-a stacked area chart from an {es} search query. It will give you a starting point
+In this tutorial, you will learn about how to edit Vega-Lite in {osd} to create
+a stacked area chart from an {opensearch} search query. It will give you a starting point
 for a more comprehensive
 https://vega.github.io/vega-lite/tutorials/getting_started.html[introduction to Vega-Lite],
 while only covering the basics.
 
-In this tutorial, you will build a stacked area chart from one of the {kib} sample data
+In this tutorial, you will build a stacked area chart from one of the {osd} sample data
 sets.
 
 [role="screenshot"]
@@ -90,7 +90,7 @@ image::visualize/images/vega_lite_tutorial_1.png[]
 Before beginning this tutorial, install the <<add-sample-data, eCommerce sample data>>
 set.
 
-When you first open the Vega editor in {kib}, you will see a pre-populated
+When you first open the Vega editor in {osd}, you will see a pre-populated
 line chart which shows the total number of documents across all your indices
 within the time range.
 
@@ -124,7 +124,7 @@ index: _all
 to:
 
 ```yaml
-index: kibana_sample_data_ecommerce
+index: opensearch_dashboards_sample_data_ecommerce
 ```
 
 Click "Update". The result is probably not what you expect. You should see a flat
@@ -135,7 +135,7 @@ no results. You can try the <<vega-browser-debugging-console, Vega debugging pro
 but intuition may be faster for this particular problem.
 
 In this case, the problem is that you are querying the field `@timestamp`,
-which does not exist in the `kibana_sample_data_ecommerce` data. Find and replace
+which does not exist in the `opensearch_dashboards_sample_data_ecommerce` data. Find and replace
 `@timestamp` with `order_date`. This fixes the problem, leaving you with this spec:
 
 .Expand Vega-Lite spec
@@ -150,7 +150,7 @@ which does not exist in the `kibana_sample_data_ecommerce` data. Find and replac
     url: {
       %context%: true
       %timefield%: order_date
-      index: kibana_sample_data_ecommerce
+      index: opensearch_dashboards_sample_data_ecommerce
       body: {
         aggs: {
           time_buckets: {
@@ -192,14 +192,14 @@ which does not exist in the `kibana_sample_data_ecommerce` data. Find and replac
 
 Now, let's make the visualization more interesting by adding another aggregation
 to create a stacked area chart. To verify that you have constructed the right
-query, it is easiest to use the {kib} Dev Tools in a separate tab from the
+query, it is easiest to use the {osd} Dev Tools in a separate tab from the
 Vega editor. Open the Dev Tools from the Management section of the navigation.
 
 This query is roughly equivalent to the one that is used in the default
 Vega-Lite spec. Copy it into the Dev Tools:
 
 ```js
-POST kibana_sample_data_ecommerce/_search
+POST opensearch_dashboards_sample_data_ecommerce/_search
 {
   "query": {
     "range": {
@@ -229,7 +229,7 @@ will add a new
 {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation]:
 
 ```js
-POST kibana_sample_data_ecommerce/_search
+POST opensearch_dashboards_sample_data_ecommerce/_search
 {
   "query": {
     "range": {
@@ -288,8 +288,8 @@ You'll see that the response format looks different from the previous query:
 ```
 
 Now that we have data that we're happy with, it's time to convert from an
-isolated {es} query into a query with {kib} integration. Looking at the
-<<vega-queries, reference for writing {es} queries in Vega>>, you will
+isolated {opensearch} query into a query with {osd} integration. Looking at the
+<<vega-queries, reference for writing {opensearch} queries in Vega>>, you will
 see the full list of special tokens that are used in this query, such
 as `%context: true`. This query has also replaced `"fixed_interval": "1d"`
 with `interval: {%autointerval%: true}`. Copy the final query into
@@ -300,7 +300,7 @@ your spec:
     url: {
       %context%: true
       %timefield%: order_date
-      index: kibana_sample_data_ecommerce
+      index: opensearch_dashboards_sample_data_ecommerce
       body: {
         aggs: {
           categories: {
@@ -332,7 +332,7 @@ you will see a warning saying `Infinite extent for field "key": [Infinity, -Infi
 Let's use our <<vega-browser-debugging-console, Vega debugging skills>> to understand why.
 
 Vega-Lite generates data using the names `source_0` and `data_0`. `source_0` contains
-the results from the {es} query, and `data_0` contains the visually encoded results
+the results from the {opensearch} query, and `data_0` contains the visually encoded results
 which are shown in the chart. To debug this problem, you need to compare both.
 
 To look at the source, open the browser dev tools console and type
@@ -395,8 +395,8 @@ understand why. This now shows:
 
 It looks like the problem is that the `time_buckets` inner array is not being
 extracted by Vega. The solution is to use a Vega-lite
-https://vega.github.io/vega-lite/docs/flatten.html[flatten transformation], available in {kib} 7.9 and later.
-If using an older version of Kibana, the flatten transformation is available in Vega
+https://vega.github.io/vega-lite/docs/flatten.html[flatten transformation], available in {osd} 7.9 and later.
+If using an older version of OpenSearchDashboards, the flatten transformation is available in Vega
 but not Vega-Lite.
 
 Add this section in between the `data` and `encoding` section:
@@ -457,14 +457,14 @@ be fixed by making this change to the `transform` and `encoding` blocks:
 ```
 
 At this point, you have a stacked area chart that shows the top categories,
-but the chart is still missing some common features that we expect from a {kib}
+but the chart is still missing some common features that we expect from a {osd}
 visualization. Let's add hover states and tooltips next.
 
 Hover states are handled differently in Vega-Lite and Vega. In Vega-Lite this is
 done using a concept called `selection`, which has many permutations that are not
 covered in this tutorial. We will be adding a simple tooltip and hover state.
 
-Because {kib} has enabled the https://vega.github.io/vega-lite/docs/tooltip.html[Vega tooltip plugin],
+Because {osd} has enabled the https://vega.github.io/vega-lite/docs/tooltip.html[Vega tooltip plugin],
 tooltips can be defined in several ways:
 
 * Automatic tooltip based on the data, via `{ content: "data" }`
@@ -577,7 +577,7 @@ The final result of this tutorial is this spec:
     url: {
       %context%: true
       %timefield%: order_date
-      index: kibana_sample_data_ecommerce
+      index: opensearch_dashboards_sample_data_ecommerce
       body: {
         aggs: {
           categories: {
@@ -677,15 +677,15 @@ The final result of this tutorial is this spec:
 
 ====
 
-[[vega-tutorial-update-kibana-filters-from-vega]]
-=== Update {kib} filters from Vega
+[[vega-tutorial-update-opensearch-dashboards-filters-from-vega]]
+=== Update {osd} filters from Vega
 
 experimental[]
 
-In this tutorial you will build an area chart in Vega using an {es} search query,
-and add a click handler and drag handler to update {kib} filters.
+In this tutorial you will build an area chart in Vega using an {opensearch} search query,
+and add a click handler and drag handler to update {osd} filters.
 This tutorial is not a full https://vega.github.io/vega/tutorials/[Vega tutorial],
-but will cover the basics of creating Vega visualizations into {kib}.
+but will cover the basics of creating Vega visualizations into {osd}.
 
 First, create an almost-blank Vega chart by pasting this into the editor:
 
@@ -736,7 +736,7 @@ Despite being almost blank, this Vega spec still contains the minimum requiremen
 * Marks
 * (optional) Axes
 
-Next, add a valid {es} search query in the `data` block:
+Next, add a valid {opensearch} search query in the `data` block:
 
 ```yaml
   data: [
@@ -745,7 +745,7 @@ Next, add a valid {es} search query in the `data` block:
       url: {
         %context%: true
         %timefield%: order_date
-        index: kibana_sample_data_ecommerce
+        index: opensearch_dashboards_sample_data_ecommerce
         body: {
           aggs: {
             time_buckets: {
@@ -874,13 +874,13 @@ clicks on points to add a time filter with the 3-hour interval defined above.
           type: click
           markname: point
         }
-        update: '''kibanaSetTimeFilter(datum.key, datum.key + 3 * 60 * 60 * 1000)'''
+        update: '''opensearchDashboardsSetTimeFilter(datum.key, datum.key + 3 * 60 * 60 * 1000)'''
       }]
     }
   ]
 ```
 
-This event is using the {kib} custom function `kibanaSetTimeFilter` to generate a filter that
+This event is using the {osd} custom function `opensearchDashboardsSetTimeFilter` to generate a filter that
 gets applied to the entire dashboard on click.
 
 The mouse cursor does not currently indicate that the chart is interactive. Find the `marks` section,
@@ -1019,7 +1019,7 @@ the range visually by adding a new mark which only appears conditionally:
     }
 ```
 
-Finally, add a new signal which will update the {kib} time filter when the mouse is released while
+Finally, add a new signal which will update the {osd} time filter when the mouse is released while
 dragging:
 
 ```yaml
@@ -1031,7 +1031,7 @@ dragging:
           type: mouseup
           source: view
         }
-        update: '''selected[0] !== selected[1] ? kibanaSetTimeFilter(
+        update: '''selected[0] !== selected[1] ? opensearchDashboardsSetTimeFilter(
                invert('x',selected[0]),
                invert('x',selected[1])) : null'''
       }]
@@ -1039,7 +1039,7 @@ dragging:
 ```
 
 Putting this all together, your visualization now supports the main features of
-standard visualizations in {kib}, but with the potential to add even more control.
+standard visualizations in {osd}, but with the potential to add even more control.
 The final Vega spec for this tutorial is here:
 
 .Expand final Vega spec
@@ -1055,7 +1055,7 @@ The final Vega spec for this tutorial is here:
       url: {
         %context%: true
         %timefield%: order_date
-        index: kibana_sample_data_ecommerce
+        index: opensearch_dashboards_sample_data_ecommerce
         body: {
           aggs: {
             time_buckets: {
@@ -1194,7 +1194,7 @@ The final Vega spec for this tutorial is here:
           type: click
           markname: point
         }
-        update: '''kibanaSetTimeFilter(datum.key, datum.key + 3 * 60 * 60 * 1000)'''
+        update: '''opensearchDashboardsSetTimeFilter(datum.key, datum.key + 3 * 60 * 60 * 1000)'''
       }]
     }
     {
@@ -1260,7 +1260,7 @@ The final Vega spec for this tutorial is here:
           type: mouseup
           source: view
         }
-        update: '''selected[0] !== selected[1] ? kibanaSetTimeFilter(
+        update: '''selected[0] !== selected[1] ? opensearchDashboardsSetTimeFilter(
                invert('x',selected[0]),
                invert('x',selected[1])) : null'''
       }]
@@ -1284,7 +1284,7 @@ To start tracking the real-time percentage of CPU, enter the following in the *T
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='avg:system.cpu.user.pct')
 ----------------------------------
@@ -1301,10 +1301,10 @@ To compare the two data sets, add another series with data from the previous hou
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='avg:system.cpu.user.pct'),
-.es(offset=-1h,             <1>
+.opensearch(offset=-1h,             <1>
     index=metricbeat-*,
     timefield='@timestamp',
     metric='avg:system.cpu.user.pct')
@@ -1324,10 +1324,10 @@ To easily distinguish between the two data sets, add the label names:
 
 [source,text]
 ----------------------------------
-.es(offset=-1h,index=metricbeat-*,
+.opensearch(offset=-1h,index=metricbeat-*,
     timefield='@timestamp',
     metric='avg:system.cpu.user.pct').label('last hour'),
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='avg:system.cpu.user.pct').label('current hour') <1>
 ----------------------------------
@@ -1346,12 +1346,12 @@ Add a meaningful title:
 
 [source,text]
 ----------------------------------
-.es(offset=-1h,
+.opensearch(offset=-1h,
     index=metricbeat-*,
     timefield='@timestamp',
     metric='avg:system.cpu.user.pct')
   .label('last hour'),
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='avg:system.cpu.user.pct')
   .label('current hour')
@@ -1372,13 +1372,13 @@ To differentiate between the current hour data and the last hour data, change th
 
 [source,text]
 ----------------------------------
-.es(offset=-1h,
+.opensearch(offset=-1h,
     index=metricbeat-*,
     timefield='@timestamp',
     metric='avg:system.cpu.user.pct')
   .label('last hour')
   .lines(fill=1,width=0.5), <1>
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='avg:system.cpu.user.pct')
   .label('current hour')
@@ -1399,14 +1399,14 @@ To make the current hour data stand out, change the line colors:
 
 [source,text]
 ----------------------------------
-.es(offset=-1h,
+.opensearch(offset=-1h,
     index=metricbeat-*,
     timefield='@timestamp',
     metric='avg:system.cpu.user.pct')
   .label('last hour')
   .lines(fill=1,width=0.5)
   .color(gray), <1>
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='avg:system.cpu.user.pct')
   .label('current hour')
@@ -1428,14 +1428,14 @@ Change the position and style of the legend:
 
 [source,text]
 ----------------------------------
-.es(offset=-1h,
+.opensearch(offset=-1h,
     index=metricbeat-*,
     timefield='@timestamp',
     metric='avg:system.cpu.user.pct')
   .label('last hour')
   .lines(fill=1,width=0.5)
   .color(gray),
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='avg:system.cpu.user.pct')
   .label('current hour')
@@ -1463,7 +1463,7 @@ To start tracking the inbound and outbound network traffic, enter the following 
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat*,
+.opensearch(index=metricbeat*,
     timefield=@timestamp,
     metric=max:system.network.in.bytes)
 ----------------------------------
@@ -1480,7 +1480,7 @@ Change how the data is displayed so that you can easily monitor the inbound traf
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat*,
+.opensearch(index=metricbeat*,
     timefield=@timestamp,
     metric=max:system.network.in.bytes)
   .derivative() <1>
@@ -1496,11 +1496,11 @@ Add a similar calculation for outbound traffic:
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat*,
+.opensearch(index=metricbeat*,
     timefield=@timestamp,
     metric=max:system.network.in.bytes)
   .derivative(),
-.es(index=metricbeat*,
+.opensearch(index=metricbeat*,
     timefield=@timestamp,
     metric=max:system.network.out.bytes)
   .derivative()
@@ -1521,12 +1521,12 @@ To make the visualization easier to analyze, change the data metric from bytes t
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat*,
+.opensearch(index=metricbeat*,
     timefield=@timestamp,
     metric=max:system.network.in.bytes)
   .derivative()
   .divide(1048576),
-.es(index=metricbeat*,
+.opensearch(index=metricbeat*,
     timefield=@timestamp,
     metric=max:system.network.out.bytes)
   .derivative()
@@ -1548,7 +1548,7 @@ Customize and format the visualization using functions:
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat*,
+.opensearch(index=metricbeat*,
     timefield=@timestamp,
     metric=max:system.network.in.bytes)
   .derivative()
@@ -1557,7 +1557,7 @@ Customize and format the visualization using functions:
   .color(green)
   .label("Inbound traffic")         <1>
   .title("Network traffic (MB/s)"), <2>
-.es(index=metricbeat*,
+.opensearch(index=metricbeat*,
     timefield=@timestamp,
     metric=max:system.network.out.bytes)
   .derivative()
@@ -1602,7 +1602,7 @@ To chart the maximum value of `system.memory.actual.used.bytes`, enter the follo
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='max:system.memory.actual.used.bytes')
 ----------------------------------
@@ -1619,26 +1619,26 @@ To track the amount of memory used, create two thresholds:
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='max:system.memory.actual.used.bytes'),
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='max:system.memory.actual.used.bytes')
   .if(gt,                             <1>
       11300000000,                    <2>
-      .es(index=metricbeat-*,
+      .opensearch(index=metricbeat-*,
           timefield='@timestamp',
           metric='max:system.memory.actual.used.bytes'),
       null)
     .label('warning')
     .color('#FFCC11'),
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='max:system.memory.actual.used.bytes')
   .if(gt,
       11375000000,
-      .es(index=metricbeat-*,
+      .opensearch(index=metricbeat-*,
           timefield='@timestamp',
           metric='max:system.memory.actual.used.bytes'),
       null)
@@ -1661,30 +1661,30 @@ To determine the trend, create a new data series:
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='max:system.memory.actual.used.bytes'),
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='max:system.memory.actual.used.bytes')
   .if(gt,11300000000,
-      .es(index=metricbeat-*,
+      .opensearch(index=metricbeat-*,
           timefield='@timestamp',
           metric='max:system.memory.actual.used.bytes'),
       null)
       .label('warning')
       .color('#FFCC11'),
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='max:system.memory.actual.used.bytes')
   .if(gt,11375000000,
-      .es(index=metricbeat-*,
+      .opensearch(index=metricbeat-*,
           timefield='@timestamp',
           metric='max:system.memory.actual.used.bytes'),
       null).
       label('severe')
       .color('red'),
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='max:system.memory.actual.used.bytes')
   .mvavg(10) <1>
@@ -1704,36 +1704,36 @@ Customize and format the visualization using functions:
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='max:system.memory.actual.used.bytes')
   .label('max memory')                    <1>
   .title('Memory consumption over time'), <2>
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='max:system.memory.actual.used.bytes')
   .if(gt,
       11300000000,
-      .es(index=metricbeat-*,
+      .opensearch(index=metricbeat-*,
           timefield='@timestamp',
           metric='max:system.memory.actual.used.bytes'),
       null)
     .label('warning')
     .color('#FFCC11')                 <3>
     .lines(width=5),                  <4>
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='max:system.memory.actual.used.bytes')
   .if(gt,
       11375000000,
-      .es(index=metricbeat-*,
+      .opensearch(index=metricbeat-*,
           timefield='@timestamp',
           metric='max:system.memory.actual.used.bytes'),
       null)
     .label('severe')
     .color('red')
     .lines(width=5),
-.es(index=metricbeat-*,
+.opensearch(index=metricbeat-*,
     timefield='@timestamp',
     metric='max:system.memory.actual.used.bytes')
   .mvavg(10)

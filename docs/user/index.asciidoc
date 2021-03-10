@@ -2,16 +2,16 @@ include::introduction.asciidoc[]
 
 include::whats-new.asciidoc[]
 
-include::{kib-repo-dir}/getting-started/quick-start-guide.asciidoc[]
+include::{osd-repo-dir}/getting-started/quick-start-guide.asciidoc[]
 
 include::setup.asciidoc[]
 
 include::monitoring/configuring-monitoring.asciidoc[leveloffset=+1]
 include::monitoring/monitoring-metricbeat.asciidoc[leveloffset=+2]
 include::monitoring/viewing-metrics.asciidoc[leveloffset=+2]
-include::monitoring/monitoring-kibana.asciidoc[leveloffset=+2]
+include::monitoring/monitoring-opensearch-dashboards.asciidoc[leveloffset=+2]
 
-include::security/securing-kibana.asciidoc[]
+include::security/securing-opensearch-dashboards.asciidoc[]
 
 include::discover.asciidoc[]
 
@@ -19,17 +19,17 @@ include::dashboard/dashboard.asciidoc[]
 
 include::canvas.asciidoc[]
 
-include::{kib-repo-dir}/maps/index.asciidoc[]
+include::{osd-repo-dir}/maps/index.asciidoc[]
 
 include::ml/index.asciidoc[]
 
 include::graph/index.asciidoc[]
 
-include::{kib-repo-dir}/observability/index.asciidoc[]
+include::{osd-repo-dir}/observability/index.asciidoc[]
 
-include::{kib-repo-dir}/apm/index.asciidoc[]
+include::{osd-repo-dir}/apm/index.asciidoc[]
 
-include::{kib-repo-dir}/siem/index.asciidoc[]
+include::{osd-repo-dir}/siem/index.asciidoc[]
 
 include::dev-tools.asciidoc[]
 
@@ -37,7 +37,7 @@ include::monitoring/index.asciidoc[]
 
 include::management.asciidoc[]
 
-include::{kib-repo-dir}/fleet/fleet.asciidoc[]
+include::{osd-repo-dir}/fleet/fleet.asciidoc[]
 
 include::reporting/index.asciidoc[]
 

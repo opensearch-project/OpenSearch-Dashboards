@@ -4,7 +4,7 @@
 === Preconfigured connectors and action types
 
 You can preconfigure a connector or action type to have all the information it needs prior to startup
-by adding it to the `kibana.yml` file.
+by adding it to the `opensearch_dashboards.yml` file.
 
 Preconfigured connectors offer the following capabilities:
 
@@ -52,7 +52,7 @@ two out-of-the box connectors: <<slack-action-type, Slack>> and <<webhook-action
 
 [NOTE]
 ==============================================
-Sensitive properties, such as passwords, can also be stored in the <<creating-keystore, {kib} keystore>>.
+Sensitive properties, such as passwords, can also be stored in the <<creating-keystore, {osd} keystore>>.
 ==============================================
 
 ////

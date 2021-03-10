@@ -1,18 +1,18 @@
 [role="xpack"]
 [[configuring-monitoring]]
-= Configure monitoring in {kib}
+= Configure monitoring in {osd}
 ++++
 <titleabbrev>Configure monitoring</titleabbrev>
 ++++
 
 If you enable the {monitor-features} in your cluster, there are two methods to
-collect metrics about {kib}:
+collect metrics about {osd}:
 
 * <<monitoring-metricbeat,{metricbeat} collection methods>>
-* <<monitoring-kibana,Legacy collection methods>>
+* <<monitoring-opensearch-dashboards,Legacy collection methods>>
 
-You can also use {kib} to
+You can also use {osd} to
 <<monitoring-data,visualize monitoring data from across the {stack}>>.
 
 To learn about monitoring in general, see
-{ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].
+{ref}/monitor-opensearch-cluster.html[Monitor a cluster].

@@ -5,13 +5,13 @@
 Custom dashboard actions, also known as drilldowns, allow you to create
 workflows for analyzing and troubleshooting your data. Drilldowns apply only to the panel that you created the drilldown from, and are not shared across all of the panels. Each panel can have multiple drilldowns. 
 
-Third-party developers can create drilldowns. To learn how to code drilldowns, refer to {kib-repo}blob/{branch}/x-pack/examples/ui_actions_enhanced_examples[this example plugin].
+Third-party developers can create drilldowns. To learn how to code drilldowns, refer to {osd-repo}blob/{branch}/x-pack/examples/ui_actions_enhanced_examples[this example plugin].
 
 [float]
 [[supported-drilldowns]]
 === Supported drilldowns
 
-{kib} supports two types of drilldowns.
+{osd} supports two types of drilldowns.
 
 [NOTE]
 ==============================================
@@ -51,7 +51,7 @@ The <<url-template-variables,variables>> you use to create a <<url_templating-la
 
 For example, *Single click* has `{{event.value}}` and *Range selection* has `{{event.from}}` and `{{event.to}}`. 
 
-To disable URL drilldowns on your {kib} instance, disable the plugin:
+To disable URL drilldowns on your {osd} instance, disable the plugin:
 
 ["source","yml"]
 -----------
@@ -231,10 +231,10 @@ image:images/url_drilldown_go_to_github.gif[Drilldown on pie chart that navigate
 +
 [source, bash]
 ----
-https://github.com/elastic/kibana/issues?q=is:issue+is:open+{{event.value}}
+https://github.com/elastic/opensearch-dashboards/issues?q=is:issue+is:open+{{event.value}}
 ----
 +
-The example URL navigates to {kib} issues on Github. `{{event.value}}` is substituted with a value associated with a selected pie slice. In *URL preview*, `{{event.value}}` is substituted with a <<values-in-preview, dummy>> value.
+The example URL navigates to {osd} issues on Github. `{{event.value}}` is substituted with a value associated with a selected pie slice. In *URL preview*, `{{event.value}}` is substituted with a <<values-in-preview, dummy>> value.
 +
 [role="screenshot"]
 image:images/url_drilldown_url_template.png[URL template input]
@@ -252,7 +252,7 @@ If you fail to save the dashboard, the drilldown is lost when you navigate away 
 [role="screenshot"]
 image:images/url_drilldown_popup.png[URL drilldown popup]
 
-. On the page that lists the issues in the {kib} repository, verify the slice value appears in Github.
+. On the page that lists the issues in the {osd} repository, verify the slice value appears in Github.
 +
 [role="screenshot"]
 image:images/url_drilldown_github.png[Github]

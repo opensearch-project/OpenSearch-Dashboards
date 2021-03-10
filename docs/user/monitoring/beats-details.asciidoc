@@ -5,7 +5,7 @@
 <titleabbrev>Beats Metrics</titleabbrev>
 ++++
 
-If you are monitoring Beats, the *Stack Monitoring* page in {kib} contains a
+If you are monitoring Beats, the *Stack Monitoring* page in {osd} contains a
 panel for Beats in the cluster overview.
 
 [role="screenshot"]

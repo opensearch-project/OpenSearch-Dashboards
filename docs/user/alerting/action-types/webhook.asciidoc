@@ -61,7 +61,7 @@ Password::  An optional password. If set, HTTP basic authentication is used. Cur
 |A string that corresponds to *User*.
 
 |`password`
-|A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+|A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {osd} keystore>>.
 
 |===
 
