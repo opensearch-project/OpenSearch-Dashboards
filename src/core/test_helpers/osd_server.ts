@@ -174,7 +174,7 @@ export interface TestOpenSearchDashboardsUtils {
 
 export interface TestUtils {
   startOpenSearch: () => Promise<TestOpenSearchUtils>;
-  startOpenDashboards: () => Promise<TestOpenSearchDashboardsUtils>;
+  startOpenSearchDashboards: () => Promise<TestOpenSearchDashboardsUtils>;
 }
 
 /**
@@ -283,7 +283,7 @@ export function createTestServers({
         password: opensearchDashboardsServerTestUser.password,
       };
     },
-    startOpenDashboards: async () => {
+    startOpenSearchDashboards: async () => {
       const root = createRootWithCorePlugins(osdSettings);
 
       await root.setup();

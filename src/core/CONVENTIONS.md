@@ -41,7 +41,7 @@ All OpenSearch Dashboards plugins built at Elastic should follow the same struct
 
 ```
 my_plugin/
-├── opensearch-dashboards.json
+├── opensearch_dashboards.json
 ├── public
 │   ├── applications
 │   │   ├── my_app
@@ -306,7 +306,7 @@ export function registerMyPluginUsageCollector(usageCollection?: UsageCollection
     type: MY_USAGE_TYPE,
     fetch: async (callCluster: CallCluster) => {
 
-    // query OpeSearch and get some data
+    // query OpenSearch and get some data
     // summarize the data into a model
     // return the modeled object that includes whatever you want to track
 
