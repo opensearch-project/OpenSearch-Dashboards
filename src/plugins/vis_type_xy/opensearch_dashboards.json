@@ -1,6 +1,6 @@
 {
   "id": "visTypeXy",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": true,
   "ui": true,
   "requiredPlugins": ["charts", "expressions", "visualizations"]
