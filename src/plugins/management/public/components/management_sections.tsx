@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { ManagementSectionId } from '../types';
 
 const ingestTitle = i18n.translate('management.sections.ingestTitle', {
@@ -52,12 +52,12 @@ const sectionTip = i18n.translate('management.sections.section.tip', {
   defaultMessage: 'Control access to features and data',
 });
 
-const kibanaTitle = i18n.translate('management.sections.kibanaTitle', {
-  defaultMessage: 'Kibana',
+const opensearchDashboardsTitle = i18n.translate('management.sections.opensearchDashboardsTitle', {
+  defaultMessage: 'OpenSearch Dashboards',
 });
 
-const kibanaTip = i18n.translate('management.sections.kibanaTip', {
-  defaultMessage: 'Customize Kibana and manage saved objects',
+const opensearchDashboardsTip = i18n.translate('management.sections.opensearchDashboardsTip', {
+  defaultMessage: 'Customize OpenSearch Dashboards and manage saved objects',
 });
 
 const stackTitle = i18n.translate('management.sections.stackTitle', {
@@ -96,10 +96,10 @@ export const SecuritySection = {
   order: 3,
 };
 
-export const KibanaSection = {
-  id: ManagementSectionId.Kibana,
-  title: kibanaTitle,
-  tip: kibanaTip,
+export const OpenSearchDashboardsSection = {
+  id: ManagementSectionId.OpenSearchDashboards,
+  title: opensearchDashboardsTitle,
+  tip: opensearchDashboardsTip,
   order: 4,
 };
 
@@ -115,6 +115,6 @@ export const managementSections = [
   DataSection,
   InsightsAndAlertingSection,
   SecuritySection,
-  KibanaSection,
+  OpenSearchDashboardsSection,
   StackSection,
 ];
