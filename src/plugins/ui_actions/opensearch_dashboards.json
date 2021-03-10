@@ -1,0 +1,10 @@
+{
+  "id": "uiActions",
+  "version": "opensearchDashboards",
+  "server": false,
+  "ui": true,
+  "requiredBundles": [
+    "opensearchDashboardsUtils",
+    "opensearchDashboardsReact"
+  ]
+}
