@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 
 export const config = {
   schema: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
