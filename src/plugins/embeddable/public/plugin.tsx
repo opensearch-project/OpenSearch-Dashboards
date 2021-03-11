@@ -55,7 +55,7 @@ import {
   injectBaseEmbeddableInput,
   telemetryBaseEmbeddableInput,
 } from '../common/lib/migrate_base_input';
-import { PersistableState, SerializableState } from '../../kibana_utils/common';
+import { PersistableState, SerializableState } from '../../opensearch_dashboards_utils/common';
 
 export interface EmbeddableSetupDependencies {
   data: DataPublicPluginSetup;

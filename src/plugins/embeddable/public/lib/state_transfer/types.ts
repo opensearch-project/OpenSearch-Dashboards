@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Optional } from '@kbn/utility-types';
+import { Optional } from '@osd/utility-types';
 import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
 
 /**

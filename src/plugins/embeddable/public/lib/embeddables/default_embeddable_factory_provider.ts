@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectAttributes } from 'kibana/public';
+import { SavedObjectAttributes } from 'opensearch-dashboards/public';
 import { EmbeddableFactoryDefinition } from './embeddable_factory_definition';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { EmbeddableFactory } from './embeddable_factory';
@@ -41,8 +41,8 @@ export const defaultEmbeddableFactoryProvider = <
     createFromSavedObject: def.createFromSavedObject
       ? def.createFromSavedObject.bind(def)
       : (savedObjectId: string, input: Partial<I>, parent?: IContainer) => {
-          throw new Error(`Creation from saved object not supported by type ${def.type}`);
-        },
+        throw new Error(`Creation from saved object not supported by type ${def.type}`);
+      },
     create: def.create.bind(def),
     type: def.type,
     isEditable: def.isEditable.bind(def),

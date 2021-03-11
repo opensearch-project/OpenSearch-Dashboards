@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { Action } from 'src/plugins/ui_actions/public';
 import { ViewMode } from '../../../../types';
 import { IEmbeddable } from '../../../../embeddables';
@@ -37,7 +37,7 @@ export class CustomizePanelTitleAction implements Action<ActionContext> {
   public id = ACTION_CUSTOMIZE_PANEL;
   public order = 40;
 
-  constructor(private readonly getDataFromUser: GetUserData) {}
+  constructor(private readonly getDataFromUser: GetUserData) { }
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.customizePanel.action.displayName', {

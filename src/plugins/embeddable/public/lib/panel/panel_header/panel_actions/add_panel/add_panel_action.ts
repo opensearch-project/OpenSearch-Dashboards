@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
 import { NotificationsStart, OverlayStart } from 'src/core/public';
 import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
@@ -40,7 +40,7 @@ export class AddPanelAction implements Action<ActionContext> {
     private readonly overlays: OverlayStart,
     private readonly notifications: NotificationsStart,
     private readonly SavedObjectFinder: React.ComponentType<any>
-  ) {}
+  ) { }
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.addPanel.displayName', {

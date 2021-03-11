@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import {
   EuiContextMenuPanelDescriptor,
   EuiBadge,
@@ -31,7 +31,7 @@ import { Action } from 'src/plugins/ui_actions/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
 import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
-import { uiToReactComponent } from '../../../../../kibana_react/public';
+import { uiToReactComponent } from '../../../../../opensearch_dashboards_react/public';
 
 export interface PanelHeaderProps {
   title?: string;
