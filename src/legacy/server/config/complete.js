@@ -17,8 +17,8 @@
  * under the License.
  */
 
-export default function (kbnServer, server) {
+export default function (osdServer, server) {
   server.decorate('server', 'config', function () {
-    return kbnServer.config;
+    return osdServer.config;
   });
 }

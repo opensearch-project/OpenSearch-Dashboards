@@ -34,7 +34,7 @@ jest.mock('chokidar', () => ({
 
 lodash.throttle = (fn: any) => fn;
 
-const tempDir = join(tmpdir(), 'kbn_log_rotator_test');
+const tempDir = join(tmpdir(), 'osd_log_rotator_test');
 const testFilePath = join(tempDir, 'log_rotator_test_log_file.log');
 
 const createLogRotatorConfig: any = (logFilePath: string) => {
