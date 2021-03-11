@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor } from 'opensearch-dashboards/server';
 import { CoreSetup } from 'src/core/server';
 import { configSchema, ConfigSchema } from '../config';
 import { getUiSettings } from './ui_settings';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
-    includeElasticMapsService: true,
+    includeOpenSearchMapsService: true,
     layers: true,
   },
   schema: configSchema,
