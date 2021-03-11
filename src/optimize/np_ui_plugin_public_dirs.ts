@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import KbnServer from '../legacy/server/kbn_server';
+import OsdServer from '../legacy/server/osd_server';
 
 export type NpUiPluginPublicDirs = Array<{
   id: string;
   path: string;
 }>;
 
-export function getNpUiPluginPublicDirs(kbnServer: KbnServer): NpUiPluginPublicDirs {
-  return Array.from(kbnServer.newPlatform.__internals.uiPlugins.internal.entries()).map(
+export function getNpUiPluginPublicDirs(osdServer: OsdServer): NpUiPluginPublicDirs {
+  return Array.from(osdServer.newPlatform.__internals.uiPlugins.internal.entries()).map(
     ([id, { publicTargetDir }]) => ({
       id,
       path: publicTargetDir,
