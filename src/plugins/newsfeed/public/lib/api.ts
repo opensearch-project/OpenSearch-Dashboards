@@ -20,7 +20,7 @@
 import * as Rx from 'rxjs';
 import moment from 'moment';
 import uuid from 'uuid';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
 import { HttpSetup } from 'src/core/public';
 import {
@@ -34,26 +34,26 @@ import { ApiItem, NewsfeedItem, FetchResult, NewsfeedPluginBrowserConfig } from 
 type ApiConfig = NewsfeedPluginBrowserConfig['service'];
 
 export enum NewsfeedApiEndpoint {
-  KIBANA = 'kibana',
-  KIBANA_ANALYTICS = 'kibana-analytics',
+  OPENSEARCH_DASHBOARDS = 'opensearch-dashboards',
+  OPENSEARCH_DASHBOARDS_ANALYTICS = 'opensearch-dashboards-analytics',
   SECURITY_SOLUTION = 'security-solution',
   OBSERVABILITY = 'observability',
 }
 
 export class NewsfeedApiDriver {
   private readonly id = uuid.v4();
-  private readonly kibanaVersion: string;
+  private readonly opensearchDashboardsVersion: string;
   private readonly loadedTime = moment().utc(); // the date is compared to time in UTC format coming from the service
   private readonly lastFetchStorageKey: string;
   private readonly hashSetStorageKey: string;
 
   constructor(
-    kibanaVersion: string,
+    opensearchDashboardsVersion: string,
     private readonly userLanguage: string,
     private readonly fetchInterval: number
   ) {
     // The API only accepts versions in the format `X.Y.Z`, so we need to drop the `-SNAPSHOT` or any other label after it
-    this.kibanaVersion = kibanaVersion.replace(/^(\d+\.\d+\.\d+).*/, '$1');
+    this.opensearchDashboardsVersion = opensearchDashboardsVersion.replace(/^(\d+\.\d+\.\d+).*/, '$1');
     this.lastFetchStorageKey = `${NEWSFEED_LAST_FETCH_STORAGE_KEY}.${this.id}`;
     this.hashSetStorageKey = `${NEWSFEED_HASH_SET_STORAGE_KEY}.${this.id}`;
   }
@@ -96,7 +96,7 @@ export class NewsfeedApiDriver {
   }
 
   fetchNewsfeedItems(http: HttpSetup, config: ApiConfig): Rx.Observable<FetchResult> {
-    const urlPath = config.pathTemplate.replace('{VERSION}', this.kibanaVersion);
+    const urlPath = config.pathTemplate.replace('{VERSION}', this.opensearchDashboardsVersion);
     const fullUrl = (config.urlRoot || NEWSFEED_DEFAULT_SERVICE_BASE_URL) + urlPath;
 
     return Rx.from(
@@ -174,7 +174,7 @@ export class NewsfeedApiDriver {
 
     return {
       error: null,
-      kibanaVersion: this.kibanaVersion,
+      opensearchDashboardsVersion: this.opensearchDashboardsVersion,
       hasNew,
       feedItems,
     };
@@ -188,12 +188,12 @@ export class NewsfeedApiDriver {
 export function getApi(
   http: HttpSetup,
   config: NewsfeedPluginBrowserConfig,
-  kibanaVersion: string
+  opensearchDashboardsVersion: string
 ): Rx.Observable<void | FetchResult> {
   const userLanguage = i18n.getLocale();
   const fetchInterval = config.fetchInterval.asMilliseconds();
   const mainInterval = config.mainInterval.asMilliseconds();
-  const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
+  const driver = new NewsfeedApiDriver(opensearchDashboardsVersion, userLanguage, fetchInterval);
 
   return Rx.timer(0, mainInterval).pipe(
     filter(() => driver.shouldFetch()),
@@ -203,7 +203,7 @@ export function getApi(
           window.console.error(err);
           return Rx.of({
             error: err,
-            kibanaVersion,
+            opensearchDashboardsVersion,
             hasNew: false,
             feedItems: [],
           });
