@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { MarkdownOptions } from './markdown_options';
 import { SettingsOptions } from './settings_options_lazy';
