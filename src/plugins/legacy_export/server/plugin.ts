@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/server';
+import { Plugin, CoreSetup, PluginInitializerContext } from 'opensearch-dashboards/server';
 import { first } from 'rxjs/operators';
 import { registerRoutes } from './routes';
 

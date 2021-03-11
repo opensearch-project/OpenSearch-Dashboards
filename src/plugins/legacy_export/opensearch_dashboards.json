@@ -1,6 +1,6 @@
 {
   "id": "legacyExport",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": true,
   "ui": false
 }
