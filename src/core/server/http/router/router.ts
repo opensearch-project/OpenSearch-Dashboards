@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
+ * Licensed to mihson. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
+ * ownership. mihson. licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@ import {
 import { OpenSearchDashboardsRequest } from './request';
 import {
   OpenSearchDashboardsResponseFactory,
-  kibanaResponseFactory,
+  opensearchDashboardsResponseFactory,
   IOpenSearchDashboardsResponse,
   ErrorHttpResponseOptions,
 } from './response';
@@ -260,23 +260,23 @@ export class Router implements IRouter {
     handler: RequestHandlerEnhanced<P, Q, B, typeof request.method>;
     routeSchemas?: RouteValidator<P, Q, B>;
   }) {
-    let kibanaRequest: OpenSearchDashboardsRequest<P, Q, B, typeof request.method>;
+    let opensearchDashboardsRequest: OpenSearchDashboardsRequest<P, Q, B, typeof request.method>;
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
-      kibanaRequest = OpenSearchDashboardsRequest.from(request, routeSchemas);
+      opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request, routeSchemas);
     } catch (e) {
       return hapiResponseAdapter.toBadRequest(e.message);
     }
 
     try {
-      const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
-      return hapiResponseAdapter.handle(kibanaResponse);
+      const opensearchDashboardsResponse = await handler(opensearchDashboardsRequest, opensearchDashboardsResponseFactory);
+      return hapiResponseAdapter.handle(opensearchDashboardsResponse);
     } catch (e) {
       this.log.error(e);
       // forward 401 errors from OpenSearch client
       if (isOpenSearchUnauthorizedError(e)) {
         return hapiResponseAdapter.handle(
-          kibanaResponseFactory.unauthorized(convertEsUnauthorized(e))
+          opensearchDashboardsResponseFactory.unauthorized(convertEsUnauthorized(e))
         );
       }
       // forward 401 (boom) errors from legacy OpenSearch client

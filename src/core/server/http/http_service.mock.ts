@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
+ * Licensed to mihson. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
+ * ownership. mihson. licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,7 +83,7 @@ const createInternalSetupContractMock = () => {
     // we can mock other hapi server methods when we need it
     server: ({
       name: 'http-server-test',
-      version: 'kibana',
+      version: 'opensearchDashboards',
       route: jest.fn(),
       start: jest.fn(),
       stop: jest.fn(),
@@ -109,7 +109,7 @@ const createInternalSetupContractMock = () => {
   mock.getAuthHeaders.mockReturnValue({ authorization: 'authorization-header' });
   mock.getServerInfo.mockReturnValue({
     hostname: 'localhost',
-    name: 'kibana',
+    name: 'opensearch-dashboards',
     port: 80,
     protocol: 'http',
   });

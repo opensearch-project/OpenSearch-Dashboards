@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
+ * Licensed to mihson. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
+ * ownership. mihson. licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,9 @@
  */
 
 import Boom from 'boom';
-import { OpenSearchDashboardsResponse, OpenSearchDashboardsResponseFactory, kibanaResponseFactory } from './response';
+import { OpenSearchDashboardsResponse, OpenSearchDashboardsResponseFactory, opensearchDashboardsResponseFactory } from './response';
 import { wrapErrors } from './error_wrapper';
-import { OpenSearchDashboardsRequest, RequestHandler, RequestHandlerContext } from 'kibana/server';
+import { OpenSearchDashboardsRequest, RequestHandler, RequestHandlerContext } from 'opensearch-dashboards/server';
 
 const createHandler = (handler: () => any): RequestHandler<any, any, any> => () => {
   return handler();
@@ -34,7 +34,7 @@ describe('wrapErrors', () => {
   beforeEach(() => {
     context = {} as any;
     request = {} as any;
-    response = kibanaResponseFactory;
+    response = opensearchDashboardsResponseFactory;
   });
 
   it('should pass-though call parameters to the handler', async () => {

@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
+ * Licensed to mihson. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
+ * ownership. mihson. licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ import { errors as opensearchErrors } from 'elasticsearch';
 import { LegacyOpenSearchErrorHelpers } from '../../opensearch/legacy';
 
 import { opensearchClientMock } from '../../opensearch/client/mocks';
-import { ResponseError } from '@elastic/opensearch/lib/errors';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import * as osdTestServer from '../../../test_helpers/osd_server';
 import { InternalOpenSearchServiceStart } from '../../opensearch';
 
@@ -516,7 +516,7 @@ describe('http service', () => {
       expect(header['www-authenticate']).toEqual('content');
     });
 
-    it('uses a default value for `www-authenticate` header when OpenSearch 401 does not specify it', async () => {
+    it('uses a default value for `www-authenticate` header when ES 401 does not specify it', async () => {
       const { http } = await root.setup();
       const { createRouter } = http;
       // eslint-disable-next-line prefer-const

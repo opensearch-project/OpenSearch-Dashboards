@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
+ * Licensed to mihson. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
+ * ownership. mihson. licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,8 +32,8 @@ describe('OpenSearchDashboardsRequest', () => {
       const request = httpServerMock.createRawRequest({
         app: { requestId: 'fakeId' },
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
-      expect(kibanaRequest.id).toEqual('fakeId');
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
+      expect(opensearchDashboardsRequest.id).toEqual('fakeId');
     });
 
     it('generates a new UUID if request.app property is not present', () => {
@@ -41,8 +41,8 @@ describe('OpenSearchDashboardsRequest', () => {
       const request = httpServerMock.createRawRequest({
         app: undefined,
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
-      expect(kibanaRequest.id).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
+      expect(opensearchDashboardsRequest.id).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
     });
 
     it('generates a new UUID if request.app.requestId property is not present', () => {
@@ -50,8 +50,8 @@ describe('OpenSearchDashboardsRequest', () => {
       const request = httpServerMock.createRawRequest({
         app: {},
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
-      expect(kibanaRequest.id).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
+      expect(opensearchDashboardsRequest.id).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
     });
   });
 
@@ -60,8 +60,8 @@ describe('OpenSearchDashboardsRequest', () => {
       const request = httpServerMock.createRawRequest({
         app: { requestUuid: '123e4567-e89b-12d3-a456-426614174000' },
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
-      expect(kibanaRequest.uuid).toEqual('123e4567-e89b-12d3-a456-426614174000');
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
+      expect(opensearchDashboardsRequest.uuid).toEqual('123e4567-e89b-12d3-a456-426614174000');
     });
 
     it('generates a new UUID if request.app property is not present', () => {
@@ -69,8 +69,8 @@ describe('OpenSearchDashboardsRequest', () => {
       const request = httpServerMock.createRawRequest({
         app: undefined,
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
-      expect(kibanaRequest.uuid).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
+      expect(opensearchDashboardsRequest.uuid).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
     });
 
     it('generates a new UUID if request.app.requestUuid property is not present', () => {
@@ -78,8 +78,8 @@ describe('OpenSearchDashboardsRequest', () => {
       const request = httpServerMock.createRawRequest({
         app: {},
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
-      expect(kibanaRequest.uuid).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
+      expect(opensearchDashboardsRequest.uuid).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
     });
   });
 
@@ -88,8 +88,8 @@ describe('OpenSearchDashboardsRequest', () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one', authorization: 'token' },
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
-      expect(kibanaRequest.headers).toEqual({ custom: 'one', authorization: 'token' });
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
+      expect(opensearchDashboardsRequest.headers).toEqual({ custom: 'one', authorization: 'token' });
     });
   });
 
@@ -99,19 +99,19 @@ describe('OpenSearchDashboardsRequest', () => {
       const request = httpServerMock.createRawRequest({
         headers: rawRequestHeaders,
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
 
-      expect(kibanaRequest.headers).toEqual({ custom: 'one' });
-      expect(kibanaRequest.headers).not.toBe(rawRequestHeaders);
-      expect(Object.isFrozen(kibanaRequest.headers)).toBe(true);
+      expect(opensearchDashboardsRequest.headers).toEqual({ custom: 'one' });
+      expect(opensearchDashboardsRequest.headers).not.toBe(rawRequestHeaders);
+      expect(Object.isFrozen(opensearchDashboardsRequest.headers)).toBe(true);
     });
 
     it.skip("doesn't expose authorization header by default", () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one', authorization: 'token' },
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
-      expect(kibanaRequest.headers).toEqual({
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
+      expect(opensearchDashboardsRequest.headers).toEqual({
         custom: 'one',
       });
     });
@@ -120,8 +120,8 @@ describe('OpenSearchDashboardsRequest', () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one', authorization: 'token' },
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request, undefined, false);
-      expect(kibanaRequest.headers).toEqual({
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request, undefined, false);
+      expect(opensearchDashboardsRequest.headers).toEqual({
         custom: 'one',
         authorization: 'token',
       });
@@ -133,24 +133,24 @@ describe('OpenSearchDashboardsRequest', () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one' },
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
-      expect(kibanaRequest.isSystemRequest).toBe(false);
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
+      expect(opensearchDashboardsRequest.isSystemRequest).toBe(false);
     });
 
     it('is true when osd-system-request header is set to true', () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one', 'osd-system-request': 'true' },
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
-      expect(kibanaRequest.isSystemRequest).toBe(true);
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
+      expect(opensearchDashboardsRequest.isSystemRequest).toBe(true);
     });
 
     it('is false when osd-system-request header is set to false', () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one', 'osd-system-request': 'false' },
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
-      expect(kibanaRequest.isSystemRequest).toBe(false);
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
+      expect(opensearchDashboardsRequest.isSystemRequest).toBe(false);
     });
 
     // Remove support for osd-system-api header in 8.x. Only used by legacy platform.
@@ -158,24 +158,24 @@ describe('OpenSearchDashboardsRequest', () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one' },
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
-      expect(kibanaRequest.isSystemRequest).toBe(false);
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
+      expect(opensearchDashboardsRequest.isSystemRequest).toBe(false);
     });
 
     it('is true when osd-system-api header is set to true', () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one', 'osd-system-api': 'true' },
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
-      expect(kibanaRequest.isSystemRequest).toBe(true);
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
+      expect(opensearchDashboardsRequest.isSystemRequest).toBe(true);
     });
 
     it('is false when osd-system-api header is set to false', () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one', 'osd-system-api': 'false' },
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
-      expect(kibanaRequest.isSystemRequest).toBe(false);
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
+      expect(opensearchDashboardsRequest.isSystemRequest).toBe(false);
     });
   });
 
@@ -189,9 +189,9 @@ describe('OpenSearchDashboardsRequest', () => {
           },
         },
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
 
-      expect(kibanaRequest.route.options.authRequired).toBe(true);
+      expect(opensearchDashboardsRequest.route.options.authRequired).toBe(true);
     });
     it('handles required auth: false', () => {
       const auth: RouteOptions['auth'] = false;
@@ -202,9 +202,9 @@ describe('OpenSearchDashboardsRequest', () => {
           },
         },
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
 
-      expect(kibanaRequest.route.options.authRequired).toBe(false);
+      expect(opensearchDashboardsRequest.route.options.authRequired).toBe(false);
     });
     it('handles required auth: { mode: "required" }', () => {
       const auth: RouteOptions['auth'] = { mode: 'required' };
@@ -215,9 +215,9 @@ describe('OpenSearchDashboardsRequest', () => {
           },
         },
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
 
-      expect(kibanaRequest.route.options.authRequired).toBe(true);
+      expect(opensearchDashboardsRequest.route.options.authRequired).toBe(true);
     });
 
     it('handles required auth: { mode: "optional" }', () => {
@@ -229,9 +229,9 @@ describe('OpenSearchDashboardsRequest', () => {
           },
         },
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
 
-      expect(kibanaRequest.route.options.authRequired).toBe('optional');
+      expect(opensearchDashboardsRequest.route.options.authRequired).toBe('optional');
     });
 
     it('handles required auth: { mode: "try" } as "optional"', () => {
@@ -243,9 +243,9 @@ describe('OpenSearchDashboardsRequest', () => {
           },
         },
       });
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request);
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request);
 
-      expect(kibanaRequest.route.options.authRequired).toBe('optional');
+      expect(opensearchDashboardsRequest.route.options.authRequired).toBe('optional');
     });
 
     it('throws on auth: strategy name', () => {
@@ -289,17 +289,17 @@ describe('OpenSearchDashboardsRequest', () => {
         }),
         payload: body, // Set outside because the mock is using `merge` by lodash and breaks the Buffer into arrays
       } as any;
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request, {
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request, {
         params: schema.object({ id: schema.string() }),
         query: schema.object({ search: schema.string() }),
         body: schema.buffer(),
       });
-      expect(kibanaRequest.params).toStrictEqual({ id: 'params' });
-      expect(kibanaRequest.params.id.toUpperCase()).toEqual('PARAMS'); // infers it's a string
-      expect(kibanaRequest.query).toStrictEqual({ search: 'query' });
-      expect(kibanaRequest.query.search.toUpperCase()).toEqual('QUERY'); // infers it's a string
-      expect(kibanaRequest.body).toEqual(body);
-      expect(kibanaRequest.body.byteLength).toBeGreaterThan(0); // infers it's a buffer
+      expect(opensearchDashboardsRequest.params).toStrictEqual({ id: 'params' });
+      expect(opensearchDashboardsRequest.params.id.toUpperCase()).toEqual('PARAMS'); // infers it's a string
+      expect(opensearchDashboardsRequest.query).toStrictEqual({ search: 'query' });
+      expect(opensearchDashboardsRequest.query.search.toUpperCase()).toEqual('QUERY'); // infers it's a string
+      expect(opensearchDashboardsRequest.body).toEqual(body);
+      expect(opensearchDashboardsRequest.body.byteLength).toBeGreaterThan(0); // infers it's a buffer
     });
 
     it('should work with ValidationFunction', () => {
@@ -311,7 +311,7 @@ describe('OpenSearchDashboardsRequest', () => {
         }),
         payload: body, // Set outside because the mock is using `merge` by lodash and breaks the Buffer into arrays
       } as any;
-      const kibanaRequest = OpenSearchDashboardsRequest.from(request, {
+      const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request, {
         params: schema.object({ id: schema.string() }),
         query: schema.object({ search: schema.string() }),
         body: (data, { ok, badRequest }) => {
@@ -322,12 +322,12 @@ describe('OpenSearchDashboardsRequest', () => {
           }
         },
       });
-      expect(kibanaRequest.params).toStrictEqual({ id: 'params' });
-      expect(kibanaRequest.params.id.toUpperCase()).toEqual('PARAMS'); // infers it's a string
-      expect(kibanaRequest.query).toStrictEqual({ search: 'query' });
-      expect(kibanaRequest.query.search.toUpperCase()).toEqual('QUERY'); // infers it's a string
-      expect(kibanaRequest.body).toEqual(body);
-      expect(kibanaRequest.body.byteLength).toBeGreaterThan(0); // infers it's a buffer
+      expect(opensearchDashboardsRequest.params).toStrictEqual({ id: 'params' });
+      expect(opensearchDashboardsRequest.params.id.toUpperCase()).toEqual('PARAMS'); // infers it's a string
+      expect(opensearchDashboardsRequest.query).toStrictEqual({ search: 'query' });
+      expect(opensearchDashboardsRequest.query.search.toUpperCase()).toEqual('QUERY'); // infers it's a string
+      expect(opensearchDashboardsRequest.body).toEqual(body);
+      expect(opensearchDashboardsRequest.body.byteLength).toBeGreaterThan(0); // infers it's a buffer
     });
   });
 });

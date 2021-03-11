@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
+ * Licensed to mihson. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
+ * ownership. mihson. licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,7 @@ const xsrfHeader = 'osd-xsrf';
 const nameHeader = 'osd-name';
 const whitelistedTestPath = '/xsrf/test/route/whitelisted';
 const xsrfDisabledTestPath = '/xsrf/test/route/disabled';
-const kibanaName = 'my-kibana-name';
+const opensearchDashboardsName = 'my-opensearch-dashboards-name';
 const setupDeps = {
   context: contextServiceMock.createSetupContract(),
 };
@@ -59,7 +59,7 @@ describe('core lifecycle handlers', () => {
           enabled: false,
         },
         compression: { enabled: true },
-        name: kibanaName,
+        name: opensearchDashboardsName,
         customResponseHeaders: {
           'some-header': 'some-value',
         },
@@ -129,7 +129,7 @@ describe('core lifecycle handlers', () => {
       const headers = result.header as Record<string, string>;
       expect(headers).toEqual(
         expect.objectContaining({
-          [nameHeader]: kibanaName,
+          [nameHeader]: opensearchDashboardsName,
         })
       );
     });
@@ -139,7 +139,7 @@ describe('core lifecycle handlers', () => {
       const headers = result.header as Record<string, string>;
       expect(headers).toEqual(
         expect.objectContaining({
-          [nameHeader]: kibanaName,
+          [nameHeader]: opensearchDashboardsName,
         })
       );
     });

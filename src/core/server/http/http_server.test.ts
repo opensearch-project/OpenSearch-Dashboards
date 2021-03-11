@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
+ * Licensed to mihson. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
+ * ownership. mihson. licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ import {
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
-import { RequestHandlerContext } from 'kibana/server';
+import { RequestHandlerContext } from 'opensearch-dashboards/server';
 import { OSD_CERT_PATH, OSD_KEY_PATH } from '@osd/dev-utils';
 
 const cookieOptions = {
@@ -63,7 +63,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   config = {
-    name: 'kibana',
+    name: 'opensearch-dashboards',
     host: '127.0.0.1',
     maxPayload: new ByteSizeValue(1024),
     port: 10002,
@@ -1355,7 +1355,7 @@ describe('setup contract', () => {
 
       expect(getServerInfo()).toEqual({
         hostname: '127.0.0.1',
-        name: 'kibana',
+        name: 'opensearch-dashboards',
         port: 10002,
         protocol: 'http',
       });

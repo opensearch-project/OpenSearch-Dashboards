@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
+ * Licensed to mihson. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
+ * ownership. mihson. licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,9 +27,9 @@ jest.doMock('../../opensearch/legacy/scoped_cluster_client', () => ({
 }));
 
 jest.doMock('opensearch', () => {
-  const realES = jest.requireActual('opensearch');
+  const realOpenSearch = jest.requireActual('opensearch');
   return {
-    ...realES,
+    ...realOpenSearch,
     // eslint-disable-next-line object-shorthand
     Client: function () {
       return opensearchServiceMock.createLegacyOpenSearchClient();
@@ -38,8 +38,8 @@ jest.doMock('opensearch', () => {
 });
 
 export const MockOpenSearchClient = jest.fn();
-jest.doMock('@elastic/opensearch', () => {
-  const real = jest.requireActual('@elastic/opensearch');
+jest.doMock('@elastic/elasticsearch', () => {
+  const real = jest.requireActual('@elastic/elasticsearch');
   return {
     ...real,
     Client: MockOpenSearchClient,

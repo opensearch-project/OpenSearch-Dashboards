@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
+ * Licensed to mihson. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
+ * ownership. mihson. licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,8 +46,8 @@ interface RequestFixtureOptions<P = any, Q = any, B = any> {
   method?: RouteMethod;
   socket?: Socket;
   routeTags?: string[];
-  kibanaRouteOptions?: OpenSearchDashboardsRouteOptions;
-  kibanaRequestState?: OpenSearchDashboardsRequestState;
+  opensearchDashboardsRouteOptions?: OpenSearchDashboardsRouteOptions;
+  opensearchDashboardsRequestState?: OpenSearchDashboardsRequestState;
   routeAuthRequired?: false;
   validation?: {
     params?: RouteValidationSpec<P>;
@@ -67,15 +67,15 @@ function createOpenSearchDashboardsRequestMock<P = any, Q = any, B = any>({
   routeTags,
   routeAuthRequired,
   validation = {},
-  kibanaRouteOptions = { xsrfRequired: true },
-  kibanaRequestState = { requestId: '123', requestUuid: '123e4567-e89b-12d3-a456-426614174000' },
+  opensearchDashboardsRouteOptions = { xsrfRequired: true },
+  opensearchDashboardsRequestState = { requestId: '123', requestUuid: '123e4567-e89b-12d3-a456-426614174000' },
   auth = { isAuthenticated: true },
 }: RequestFixtureOptions<P, Q, B> = {}) {
   const queryString = stringify(query, { sort: false });
 
   return OpenSearchDashboardsRequest.from<P, Q, B>(
     createRawRequestMock({
-      app: kibanaRequestState,
+      app: opensearchDashboardsRequestState,
       auth,
       headers,
       params,
@@ -90,7 +90,7 @@ function createOpenSearchDashboardsRequestMock<P = any, Q = any, B = any>({
         search: queryString ? `?${queryString}` : queryString,
       },
       route: {
-        settings: { tags: routeTags, auth: routeAuthRequired, app: kibanaRouteOptions },
+        settings: { tags: routeTags, auth: routeAuthRequired, app: opensearchDashboardsRouteOptions },
       },
       raw: {
         req: {

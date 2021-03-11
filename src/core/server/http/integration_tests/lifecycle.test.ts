@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
+ * Licensed to mihson. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
+ * ownership. mihson. licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1147,7 +1147,7 @@ describe('OnPreResponse', () => {
     registerOnPreResponse((req, res, t) =>
       t.next({
         headers: {
-          'x-kibana-header': 'value',
+          'x-opensearch-dashboards-header': 'value',
         },
       })
     );
@@ -1155,7 +1155,7 @@ describe('OnPreResponse', () => {
 
     const result = await supertest(innerServer.listener).get('/').expect(200);
 
-    expect(result.header['x-kibana-header']).toBe('value');
+    expect(result.header['x-opensearch-dashboards-header']).toBe('value');
     expect(result.header['x-my-header']).toBe('foo');
   });
 
@@ -1167,12 +1167,12 @@ describe('OnPreResponse', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) =>
       res.ok({
-        headers: { 'x-kibana-header': 'value' },
+        headers: { 'x-opensearch-dashboards-header': 'value' },
       })
     );
     registerOnPreResponse((req, res, t) =>
       t.next({
-        headers: { 'x-kibana-header': 'value' },
+        headers: { 'x-opensearch-dashboards-header': 'value' },
       })
     );
     await server.start();
@@ -1182,7 +1182,7 @@ describe('OnPreResponse', () => {
     expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
-          "onPreResponseHandler rewrote a response header [x-kibana-header].",
+          "onPreResponseHandler rewrote a response header [x-opensearch-dashboards-header].",
         ],
       ]
     `);

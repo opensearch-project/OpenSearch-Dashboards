@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
+ * Licensed to mihson. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
+ * ownership. mihson. licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,17 +51,17 @@ export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler
   };
 };
 
-export const createVersionCheckPostAuthHandler = (kibanaVersion: string): OnPostAuthHandler => {
+export const createVersionCheckPostAuthHandler = (opensearchDashboardsVersion: string): OnPostAuthHandler => {
   return (request, response, toolkit) => {
     const requestVersion = request.headers[VERSION_HEADER];
-    if (requestVersion && requestVersion !== kibanaVersion) {
+    if (requestVersion && requestVersion !== opensearchDashboardsVersion) {
       return response.badRequest({
         body: {
           message:
             `Browser client is out of date, please refresh the page ` +
-            `("${VERSION_HEADER}" header was "${requestVersion}" but should be "${kibanaVersion}")`,
+            `("${VERSION_HEADER}" header was "${requestVersion}" but should be "${opensearchDashboardsVersion}")`,
           attributes: {
-            expected: kibanaVersion,
+            expected: opensearchDashboardsVersion,
             got: requestVersion,
           },
         },

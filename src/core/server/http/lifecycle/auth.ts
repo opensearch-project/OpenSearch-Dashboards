@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
+ * Licensed to mihson. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
+ * ownership. mihson. licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -171,10 +171,10 @@ export function adoptToHapiAuthFormat(
     responseToolkit: ResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
-    const kibanaRequest = OpenSearchDashboardsRequest.from(request, undefined, false);
+    const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request, undefined, false);
 
     try {
-      const result = await fn(kibanaRequest, lifecycleResponseFactory, toolkit);
+      const result = await fn(opensearchDashboardsRequest, lifecycleResponseFactory, toolkit);
 
       if (isOpenSearchDashboardsResponse(result)) {
         return hapiResponseAdapter.handle(result);
@@ -191,7 +191,7 @@ export function adoptToHapiAuthFormat(
 
       if (authResult.isRedirected(result)) {
         // we cannot redirect a user when resources with optional auth requested
-        if (kibanaRequest.route.options.authRequired === 'optional') {
+        if (opensearchDashboardsRequest.route.options.authRequired === 'optional') {
           return responseToolkit.continue;
         }
 
@@ -204,7 +204,7 @@ export function adoptToHapiAuthFormat(
       }
 
       if (authResult.isNotHandled(result)) {
-        if (kibanaRequest.route.options.authRequired === 'optional') {
+        if (opensearchDashboardsRequest.route.options.authRequired === 'optional') {
           return responseToolkit.continue;
         }
         return hapiResponseAdapter.handle(lifecycleResponseFactory.unauthorized());

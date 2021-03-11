@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
+ * Licensed to mihson. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
+ * ownership. mihson. licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,7 +81,7 @@ export interface RouteConfigOptionsBody {
   /**
    * Limits the size of incoming payloads to the specified byte count. Allowing very large payloads may cause the server to run out of memory.
    *
-   * Default value: The one set in the kibana.yml config file under the parameter `server.maxPayloadBytes`.
+   * Default value: The one set in the opensearch_dashboards.yml config file under the parameter `server.maxPayloadBytes`.
    */
   maxBytes?: number;
 

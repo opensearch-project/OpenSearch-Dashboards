@@ -1,8 +1,8 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
+ * Licensed to mihson. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
+ * ownership. mihson. licenses this file to you under
  * the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -896,7 +896,7 @@ describe('Response factory', () => {
           body: 'value',
           headers: {
             etag: '1234',
-            'x-kibana': 'key',
+            'x-opensearch-dashboards': 'key',
           },
         });
       });
@@ -907,7 +907,7 @@ describe('Response factory', () => {
 
       expect(result.text).toEqual('value');
       expect(result.header.etag).toBe('1234');
-      expect(result.header['x-kibana']).toBe('key');
+      expect(result.header['x-opensearch-dashboards']).toBe('key');
     });
 
     it('accepted headers are case-insensitive.', async () => {
@@ -1026,7 +1026,7 @@ describe('Response factory', () => {
           body: 'The document has moved',
           headers: {
             location: '/new-url',
-            'x-kibana': 'tag',
+            'x-opensearch-dashboards': 'tag',
           },
         });
       });
@@ -1037,7 +1037,7 @@ describe('Response factory', () => {
 
       expect(result.text).toBe('The document has moved');
       expect(result.header.location).toBe('/new-url');
-      expect(result.header['x-kibana']).toBe('tag');
+      expect(result.header['x-opensearch-dashboards']).toBe('tag');
     });
 
     it('throws if redirection url not provided', async () => {
@@ -1047,7 +1047,7 @@ describe('Response factory', () => {
       router.get({ path: '/', validate: false }, (context, req, res) => {
         return res.redirected({
           headers: {
-            'x-kibana': 'tag',
+            'x-opensearch-dashboards': 'tag',
           },
         } as any); // location headers is required
       });
