@@ -1,6 +1,6 @@
 {
   "id": "telemetryCollectionManager",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": true,
   "ui": false,
   "requiredPlugins": [
