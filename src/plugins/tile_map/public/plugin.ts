@@ -22,7 +22,7 @@ import {
   Plugin,
   PluginInitializerContext,
   IUiSettingsClient,
-} from 'kibana/public';
+} from 'opensearch-dashboards/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 // TODO: Determine why visualizations don't populate without this
@@ -38,10 +38,10 @@ import {
   setCoreService,
   setFormatService,
   setQueryService,
-  setKibanaLegacy,
+  setOpenSearchDashboardsLegacy,
   setShareService,
 } from './services';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
 import { SharePluginStart } from '../../share/public';
 
 export interface TileMapConfigType {
@@ -67,7 +67,7 @@ export interface TileMapPluginSetupDependencies {
 /** @internal */
 export interface TileMapPluginStartDependencies {
   data: DataPublicPluginStart;
-  kibanaLegacy: KibanaLegacyStart;
+  opensearchDashboardsLegacy: OpenSearchDashboardsLegacyStart;
   share: SharePluginStart;
 }
 
@@ -111,7 +111,7 @@ export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginSt
   public start(core: CoreStart, plugins: TileMapPluginStartDependencies) {
     setFormatService(plugins.data.fieldFormats);
     setQueryService(plugins.data.query);
-    setKibanaLegacy(plugins.kibanaLegacy);
+    setOpenSearchDashboardsLegacy(plugins.opensearchDashboardsLegacy);
     setShareService(plugins.share);
     setCoreService(core);
     return {};
