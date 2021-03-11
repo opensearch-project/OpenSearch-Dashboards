@@ -17,7 +17,7 @@ import { npSetup } from 'ui/new_platform';
 npSetup.plugins.devTools.register(/* same details here */);
 
 // For new plugins: first add 'devTools' to the list of `optionalPlugins` 
-// in your kibana.json file. Then access the plugin directly in `setup`:
+// in your opensearch_dashboards.json file. Then access the plugin directly in `setup`:
 
 class MyPlugin {
   setup(core, plugins) {
