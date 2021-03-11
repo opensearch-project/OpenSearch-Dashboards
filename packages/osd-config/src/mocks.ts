@@ -20,8 +20,8 @@
 // these CANT be exported by the main entrypoint, as it cause ts check failures
 // in `src/test` and `src/xpack/test` projects due to definition conflicts between
 // mocha and jest declaring the same globals such as `it` or `beforeAll`, as the test
-// files imports types from `core` that is importing the main `@kbn/config` entrypoint.
-// For now, these should be imported using `import {} from '@kbn/config/target/mocks'`
+// files imports types from `core` that is importing the main `@osd/config` entrypoint.
+// For now, these should be imported using `import {} from '@osd/config/target/mocks'`
 export { configMock } from './config.mock';
 export { configServiceMock } from './config_service.mock';
 export { rawConfigServiceMock } from './raw/raw_config_service.mock';

@@ -38,7 +38,7 @@ export interface CliArgs {
   repl: boolean;
   basePath: boolean;
   oss: boolean;
-  /** @deprecated use disableOptimizer to know if the @kbn/optimizer is disabled in development */
+  /** @deprecated use disableOptimizer to know if the @osd/optimizer is disabled in development */
   optimize?: boolean;
   runExamples: boolean;
   disableOptimizer: boolean;
@@ -78,12 +78,12 @@ export class Env {
   public readonly pluginSearchPaths: readonly string[];
 
   /**
-   * Information about Kibana package (version, build number etc.).
+   * Information about OpenSearch Dashboards package (version, build number etc.).
    */
   public readonly packageInfo: Readonly<PackageInfo>;
 
   /**
-   * Mode Kibana currently run in (development or production).
+   * Mode OpenSearch Dashboards  currently run in (development or production).
    */
   public readonly mode: Readonly<EnvironmentMode>;
 
@@ -100,7 +100,7 @@ export class Env {
   public readonly configs: readonly string[];
 
   /**
-   * Indicates that this Kibana instance is run as development Node Cluster master.
+   * Indicates that this OpenSearch Dashboards  instance is run as development Node Cluster master.
    * @internal
    */
   public readonly isDevClusterMaster: boolean;
@@ -114,8 +114,8 @@ export class Env {
     this.logDir = resolve(this.homeDir, 'log');
 
     /**
-     * BEWARE: this needs to stay roughly synchronized with the @kbn/optimizer
-     * `packages/kbn-optimizer/src/optimizer_config.ts` determines the paths
+     * BEWARE: this needs to stay roughly synchronized with the @osd/optimizer
+     * `packages/osd-optimizer/src/optimizer_config.ts` determines the paths
      * that should be searched for plugins to build
      */
     this.pluginSearchPaths = [
@@ -126,7 +126,7 @@ export class Env {
       ...(options.cliArgs.runExamples && !options.cliArgs.oss
         ? [resolve(this.homeDir, 'x-pack', 'examples')]
         : []),
-      resolve(this.homeDir, '..', 'kibana-extra'),
+      resolve(this.homeDir, '..', 'opensearch-dashboards-extra'),
     ];
 
     this.cliArgs = Object.freeze(options.cliArgs);
@@ -140,13 +140,13 @@ export class Env {
       prod: !isDevMode,
     });
 
-    const isKibanaDistributable = Boolean(pkg.build && pkg.build.distributable === true);
+    const isOpenSearchDashboardsDistributable = Boolean(pkg.build && pkg.build.distributable === true);
     this.packageInfo = Object.freeze({
       branch: pkg.branch,
-      buildNum: isKibanaDistributable ? pkg.build.number : Number.MAX_SAFE_INTEGER,
-      buildSha: isKibanaDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+      buildNum: isOpenSearchDashboardsDistributable ? pkg.build.number : Number.MAX_SAFE_INTEGER,
+      buildSha: isOpenSearchDashboardsDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
       version: pkg.version,
-      dist: isKibanaDistributable,
+      dist: isOpenSearchDashboardsDistributable,
     });
   }
 }
