@@ -35,10 +35,10 @@ import {
   EuiSwitchEvent,
   EuiTextArea,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 export interface OnSaveProps {
   newTitle: string;
@@ -92,7 +92,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         <form onSubmit={this.onFormSubmit}>
           <EuiModal
             data-test-subj="savedObjectSaveModal"
-            className="kbnSavedObjectSaveModal"
+            className="osdSavedObjectSaveModal"
             onClose={this.props.onClose}
           >
             <EuiModalHeader>

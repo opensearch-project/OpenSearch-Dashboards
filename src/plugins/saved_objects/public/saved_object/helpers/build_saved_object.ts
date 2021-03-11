@@ -22,29 +22,29 @@ import { intializeSavedObject } from './initialize_saved_object';
 import { serializeSavedObject } from './serialize_saved_object';
 
 import {
-  EsResponse,
+  OpenSearchResponse,
   SavedObject,
   SavedObjectConfig,
-  SavedObjectKibanaServices,
+  SavedObjectOpenSearchDashboardsServices,
   SavedObjectSaveOpts,
 } from '../../types';
-import { applyESResp } from './apply_es_resp';
+import { applyOpenSearchResp } from './apply_opensearch_resp';
 import { saveSavedObject } from './save_saved_object';
 
 export function buildSavedObject(
   savedObject: SavedObject,
   config: SavedObjectConfig = {},
-  services: SavedObjectKibanaServices
+  services: SavedObjectOpenSearchDashboardsServices
 ) {
   const { indexPatterns, savedObjectsClient } = services;
-  // type name for this object, used as the ES-type
-  const esType = config.type || '';
+  // type name for this object, used as the OpenSearch-type
+  const opensearchType = config.type || '';
 
-  savedObject.getDisplayName = () => esType;
+  savedObject.getDisplayName = () => opensearchType;
 
   // NOTE: this.type (not set in this file, but somewhere else) is the sub type, e.g. 'area' or
-  // 'data table', while esType is the more generic type - e.g. 'visualization' or 'saved search'.
-  savedObject.getEsType = () => esType;
+  // 'data table', while opensearchType is the more generic type - e.g. 'visualization' or 'saved search'.
+  savedObject.getOpenSearchType = () => opensearchType;
 
   /**
    * Flips to true during a save operation, and back to false once the save operation
@@ -66,7 +66,7 @@ export function buildSavedObject(
   savedObject.copyOnSave = false;
 
   /**
-   * After creation or fetching from ES, ensure that the searchSources index indexPattern
+   * After creation or fetching from OpenSearch, ensure that the searchSources index indexPattern
    * is an bonafide IndexPattern object.
    *
    * @return {Promise<IndexPattern | null>}
@@ -82,7 +82,7 @@ export function buildSavedObject(
    */
   savedObject.init = once(() => intializeSavedObject(savedObject, savedObjectsClient, config));
 
-  savedObject.applyESResp = (resp: EsResponse) => applyESResp(resp, savedObject, config, services);
+  savedObject.applyOpenSearchResp = (resp: OpenSearchResponse) => applyOpenSearchResp(resp, savedObject, config, services);
 
   /**
    * Serialize this object
@@ -115,13 +115,13 @@ export function buildSavedObject(
   savedObject.destroy = () => {};
 
   /**
-   * Delete this object from Elasticsearch
+   * Delete this object from OpenSearch
    * @return {promise}
    */
   savedObject.delete = () => {
     if (!savedObject.id) {
       return Promise.reject(new Error('Deleting a saved Object requires type and id'));
     }
-    return savedObjectsClient.delete(esType, savedObject.id);
+    return savedObjectsClient.delete(opensearchType, savedObject.id);
   };
 }

@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from '@kbn/i18n';
-import { OverlayStart } from 'kibana/public';
+import { i18n } from '@osd/i18n';
+import { OverlayStart } from 'opensearch-dashboards/public';
 import { SAVE_DUPLICATE_REJECTED } from '../../constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 import { SavedObject } from '../../types';

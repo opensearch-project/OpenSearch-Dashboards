@@ -35,7 +35,7 @@ export {
   saveWithConfirmation,
   isErrorNonFatal,
 } from './saved_object';
-export { SavedObjectSaveOpts, SavedObjectKibanaServices, SavedObject } from './types';
+export { SavedObjectSaveOpts, SavedObjectOpenSearchDashboardsServices, SavedObject } from './types';
 export { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 export { SavedObjectsStart } from './plugin';
 
