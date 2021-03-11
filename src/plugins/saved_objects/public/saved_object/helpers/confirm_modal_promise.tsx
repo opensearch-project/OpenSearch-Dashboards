@@ -17,10 +17,10 @@
  * under the License.
  */
 import React from 'react';
-import { OverlayStart } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
+import { OverlayStart } from 'opensearch-dashboards/public';
+import { i18n } from '@osd/i18n';
 import { EuiConfirmModal } from '@elastic/eui';
-import { toMountPoint } from '../../../../kibana_react/public';
+import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
 
 export function confirmModalPromise(
   message = '',
