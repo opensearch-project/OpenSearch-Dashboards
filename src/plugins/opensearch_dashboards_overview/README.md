@@ -1,4 +1,4 @@
-# OpenSearch-Dashboards-overview
+# opensearch-dashboards-overview
 
 > An overview page highlighting OpenSearch Dashboards apps
 

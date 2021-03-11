@@ -22,8 +22,8 @@ import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { RedirectAppLinks, useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { FeatureCatalogueEntry } from '../../../../home/public';
+import { RedirectAppLinks, useOpenSearchDashboards } from '../../../../../../src/plugins/opensearch_dashboards_react/public';
+import { FeatureCatalogueEntry } from '../../../../../../src/plugins/home/public';
 // @ts-expect-error untyped component
 import { Synopsis } from '../synopsis';
 

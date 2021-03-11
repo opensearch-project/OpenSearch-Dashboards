@@ -36,13 +36,13 @@ import {
   useOpenSearchDashboards,
   OverviewPageFooter,
   OverviewPageHeader,
-} from '../../../../opensearch_dashboards_react/public';
-import { FetchResult } from '../../../../newsfeed/public';
+} from '../../../../../../src/plugins/opensearch_dashboards_react/public';
+import { FetchResult } from '../../../../../../src/plugins/newsfeed/public';
 import {
   FeatureCatalogueEntry,
   FeatureCatalogueSolution,
   FeatureCatalogueCategory,
-} from '../../../../home/public';
+} from '../../../../../../src/plugins/home/public';
 import { PLUGIN_ID, PLUGIN_PATH } from '../../../common';
 import { AppPluginStartDependencies } from '../../types';
 import { AddData } from '../add_data';

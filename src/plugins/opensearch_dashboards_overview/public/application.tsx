@@ -20,9 +20,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@osd/i18n/react';
-import { OpenSearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
-import { NewsfeedApiEndpoint } from '../../newsfeed/public';
-import { AppMountParameters, CoreStart } from '../../../core/public';
+import { OpenSearchDashboardsContextProvider } from '../../../../src/plugins/opensearch_dashboards_react/public';
+import { NewsfeedApiEndpoint } from '../../../../src/plugins/newsfeed/public';
+import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { AppPluginStartDependencies } from './types';
 import { OpenSearchDashboardsOverviewApp } from './components/app';
 
@@ -37,7 +37,7 @@ export const renderApp = (
   const navLinks = core.chrome.navLinks.getAll();
   const solutions = home.featureCatalogue
     .getSolutions()
-    .filter(({ id }) => id !== 'opensearchdashboards')
+    .filter(({ id }) => id !== 'opensearchDashboards')
     .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
   const features = home.featureCatalogue.get();
 
