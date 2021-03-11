@@ -19,7 +19,7 @@
 import React from 'react';
 import { NotificationsStart, OverlayStart } from 'src/core/public';
 import { EmbeddableStart } from '../../../../../plugin';
-import { toMountPoint } from '../../../../../../../kibana_react/public';
+import { toMountPoint } from '../../../../../../../opensearch_dashboards_react/public';
 import { IContainer } from '../../../../containers';
 import { AddPanelFlyout } from './add_panel_flyout';
 

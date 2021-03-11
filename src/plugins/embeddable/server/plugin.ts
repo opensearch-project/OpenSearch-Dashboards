@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin, SavedObjectReference } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin, SavedObjectReference } from 'opensearch-dashboards/server';
 import { identity } from 'lodash';
 import {
   EmbeddableFactoryRegistry,
@@ -31,7 +31,7 @@ import {
   injectBaseEmbeddableInput,
   telemetryBaseEmbeddableInput,
 } from '../common/lib/migrate_base_input';
-import { SerializableState } from '../../kibana_utils/common';
+import { SerializableState } from '../../opensearch_dashboards_utils/common';
 import { EmbeddableInput } from '../common/types';
 
 export interface EmbeddableSetup {
@@ -58,7 +58,7 @@ export class EmbeddableServerPlugin implements Plugin<object, object> {
     };
   }
 
-  public stop() {}
+  public stop() { }
 
   private telemetry = (state: EmbeddableInput, telemetryData: Record<string, any> = {}) => {
     const enhancements: Record<string, any> = state.enhancements || {};

@@ -47,7 +47,7 @@ describe('embeddable state transfer', () => {
       ['testId2', { title: 'State Transfer Test App Goodbye' } as PublicAppInfo],
     ]);
     stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, undefined, appsList);
-    expect(stateTransfer.getAppNameFromId('kibanana')).toBeUndefined();
+    expect(stateTransfer.getAppNameFromId('opensearchDashboardsss')).toBeUndefined();
   });
 
   it('can fetch app titles when given app list', async () => {
@@ -68,7 +68,7 @@ describe('embeddable state transfer', () => {
   });
 
   it('can send an outgoing originating app state in append mode', async () => {
-    const historyMock = mockHistoryState({ kibanaIsNowForSports: 'extremeSportsKibana' });
+    const historyMock = mockHistoryState({ opensearchDashboardsIsNowForSports: 'extremeSportsOpenSearchDashboards' });
     stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, historyMock);
     await stateTransfer.navigateToEditor(destinationApp, {
       state: { originatingApp },
@@ -77,7 +77,7 @@ describe('embeddable state transfer', () => {
     expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
       path: undefined,
       state: {
-        kibanaIsNowForSports: 'extremeSportsKibana',
+        opensearchDashboardsIsNowForSports: 'extremeSportsOpenSearchDashboards',
         originatingApp: 'superUltraTestDashboard',
       },
     });
@@ -93,7 +93,7 @@ describe('embeddable state transfer', () => {
   });
 
   it('can send an outgoing embeddable package state in append mode', async () => {
-    const historyMock = mockHistoryState({ kibanaIsNowForSports: 'extremeSportsKibana' });
+    const historyMock = mockHistoryState({ opensearchDashboardsIsNowForSports: 'extremeSportsOpenSearchDashboards' });
     stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, historyMock);
     await stateTransfer.navigateToWithEmbeddablePackage(destinationApp, {
       state: { type: 'coolestType', input: { savedObjectId: '150' } },
@@ -102,7 +102,7 @@ describe('embeddable state transfer', () => {
     expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
       path: undefined,
       state: {
-        kibanaIsNowForSports: 'extremeSportsKibana',
+        opensearchDashboardsIsNowForSports: 'extremeSportsOpenSearchDashboards',
         type: 'coolestType',
         input: { savedObjectId: '150' },
       },
@@ -110,14 +110,14 @@ describe('embeddable state transfer', () => {
   });
 
   it('can fetch an incoming originating app state', async () => {
-    const historyMock = mockHistoryState({ originatingApp: 'extremeSportsKibana' });
+    const historyMock = mockHistoryState({ originatingApp: 'extremeSportsOpenSearchDashboards' });
     stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, historyMock);
     const fetchedState = stateTransfer.getIncomingEditorState();
-    expect(fetchedState).toEqual({ originatingApp: 'extremeSportsKibana' });
+    expect(fetchedState).toEqual({ originatingApp: 'extremeSportsOpenSearchDashboards' });
   });
 
   it('returns undefined with originating app state is not in the right shape', async () => {
-    const historyMock = mockHistoryState({ kibanaIsNowForSports: 'extremeSportsKibana' });
+    const historyMock = mockHistoryState({ opensearchDashboardsIsNowForSports: 'extremeSportsOpenSearchDashboards' });
     stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, historyMock);
     const fetchedState = stateTransfer.getIncomingEditorState();
     expect(fetchedState).toBeUndefined();
@@ -134,7 +134,7 @@ describe('embeddable state transfer', () => {
   });
 
   it('returns undefined when embeddable package is not in the right shape', async () => {
-    const historyMock = mockHistoryState({ kibanaIsNowForSports: 'extremeSportsKibana' });
+    const historyMock = mockHistoryState({ opensearchDashboardsIsNowForSports: 'extremeSportsOpenSearchDashboards' });
     stateTransfer = new EmbeddableStateTransfer(application.navigateToApp, historyMock);
     const fetchedState = stateTransfer.getIncomingEmbeddablePackage();
     expect(fetchedState).toBeUndefined();

@@ -1,6 +1,6 @@
 {
   "id": "embeddable",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": true,
   "ui": true,
   "requiredPlugins": [
@@ -9,7 +9,7 @@
   ],
   "requiredBundles": [
     "savedObjects",
-    "kibanaReact",
-    "kibanaUtils"
+    "opensearchDashboardsReact",
+    "opensearchDashboardsUtils"
   ]
 }
