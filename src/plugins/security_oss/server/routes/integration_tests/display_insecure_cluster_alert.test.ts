@@ -22,7 +22,7 @@ import { setupServer } from '../../../../../core/server/test_utils';
 import { setupDisplayInsecureClusterAlertRoute } from '../display_insecure_cluster_alert';
 import { ConfigType } from '../../config';
 import { BehaviorSubject, of } from 'rxjs';
-import { UnwrapPromise } from '@kbn/utility-types';
+import { UnwrapPromise } from '@osd/utility-types';
 import { createClusterDataCheck } from '../../check_cluster_data';
 import supertest from 'supertest';
 
