@@ -17,4 +17,22 @@
  * under the License.
  */
 
-require('@kbn/optimizer/target/cli');
+require('../src/setup_node_env/no_transpilation');
+
+var resolve = require('path').resolve;
+var pkg = require('../package.json');
+var osdOpenSearch = require('@osd/opensearch');
+
+osdOpenSearch
+  .run({
+    license: 'basic',
+    password: 'changeme',
+    version: pkg.version,
+    'source-path': resolve(__dirname, '../../opensearch'),
+    'base-path': resolve(__dirname, '../.opensearch'),
+    ssl: false,
+  })
+  .catch(function (e) {
+    console.error(e);
+    process.exitCode = 1;
+  });
