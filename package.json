@@ -2,6 +2,7 @@
   "name": "opensearch-dashboards",
   "description": "OpenSearch Dashboards is a browser based analytics and search dashboard for OpenSearch. OpeenSearch Dashboards is a snap to setup and start using. OpeenSearch Dashboards strives to be easy to get started with, while also being flexible and powerful, just like OpenSearch.",
   "keywords": [
+    "opensearch-dashboards",
     "opensearch",
     "logstash",
     "analytics",

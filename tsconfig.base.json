@@ -3,7 +3,7 @@
     "baseUrl": ".",
     "paths": {
       // Allows for importing from `opensearch-dashboards` package for the exported types.
-      "opensearch-dashboards": ["./kibana"],
+      "opensearch-dashboards": ["./opensearch_dashboards"],
       "opensearch-dashboards/public": ["src/core/public"],
       "opensearch-dashboards/server": ["src/core/server"],
       "plugins/*": ["src/legacy/core_plugins/*/public/"],
