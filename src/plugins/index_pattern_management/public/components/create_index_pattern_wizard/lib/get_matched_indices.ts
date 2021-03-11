@@ -62,7 +62,7 @@ function filterSystemIndices(indices: MatchedItem[], isIncludingSystemIndices: b
     used when the query does not end in an `*` and represents potential matches in the UI
  - `unfilteredExactMatchedIndices
     This is the result of searching against a query that already ends in `*`.
-    We call this `exact` matches because OPENSEARCH is telling us exactly what it matches
+    We call this `exact` matches because OpenSearch is telling us exactly what it matches
  */
 
 import { MatchedItem } from '../types';
