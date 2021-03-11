@@ -25,8 +25,8 @@ import { EventEmitter } from 'events';
 
 import { EditorRenderProps } from 'src/plugins/visualize/public';
 import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
-import { KibanaContextProvider, PanelsContainer, Panel } from '../../kibana_react/public';
-import { Storage } from '../../kibana_utils/public';
+import { OpenSearchDashboardsContextProvider, PanelsContainer, Panel } from '../../opensearch_dashboards_react/public';
+import { Storage } from '../../opensearch_dashboardsutils/public';
 
 import { DefaultEditorSideBar } from './components/sidebar';
 import { getInitialWidth } from './editor_size';
@@ -82,7 +82,7 @@ function DefaultEditor({
 
   return (
     <core.i18n.Context>
-      <KibanaContextProvider
+      <OpenSearchDashboardsContextProvider
         services={{
           appName: 'vis_default_editor',
           storage: localStorage,
@@ -119,7 +119,7 @@ function DefaultEditor({
             />
           </Panel>
         </PanelsContainer>
-      </KibanaContextProvider>
+      </OpenSearchDashboardsContextProvider>
     </core.i18n.Context>
   );
 }

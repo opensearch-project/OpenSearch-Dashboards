@@ -19,7 +19,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { NumberList } from './components/number_list';
 import { AggParamEditorProps } from '../agg_param_props';

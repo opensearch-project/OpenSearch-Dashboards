@@ -32,13 +32,13 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 
 import { Vis } from 'src/plugins/visualizations/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
 import { ApplicationStart } from '../../../../../core/public';
-import { useKibana } from '../../../../kibana_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
 interface LinkedSearchProps {
   savedSearch: SavedObject;
@@ -56,7 +56,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
   const [showPopover, setShowPopover] = useState(false);
   const {
     services: { application },
-  } = useKibana<{ application: ApplicationStart }>();
+  } = useOpenSearchDashboards<{ application: ApplicationStart }>();
 
   const closePopover = useCallback(() => setShowPopover(false), []);
   const onClickButtonLink = useCallback(() => setShowPopover((v) => !v), []);
