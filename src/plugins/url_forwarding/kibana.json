@@ -1,7 +1,0 @@
-{
-  "id": "urlForwarding",
-  "version": "kibana",
-  "server": false,
-  "ui": true,
-  "requiredPlugins": ["kibanaLegacy"]
-}

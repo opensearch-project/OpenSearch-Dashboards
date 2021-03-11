@@ -18,11 +18,11 @@
  */
 
 import { ForwardDefinition } from '../index';
-import { navigateToLegacyKibanaUrl } from './navigate_to_legacy_kibana_url';
+import { navigateToLegacyOpenSearchDashboardsUrl } from './navigate_to_legacy_opensearch_dashboards_url';
 import { CoreStart } from '../../../../core/public';
 import { coreMock } from '../../../../core/public/mocks';
 
-describe('migrate legacy kibana urls', () => {
+describe('migrate legacy OpenSearch Dashboards urls', () => {
   let forwardDefinitions: ForwardDefinition[];
   let coreStart: CoreStart;
 
@@ -38,7 +38,7 @@ describe('migrate legacy kibana urls', () => {
   });
 
   it('should do nothing if no forward definition is found', () => {
-    const result = navigateToLegacyKibanaUrl(
+    const result = navigateToLegacyOpenSearchDashboardsUrl(
       '/myOtherApp/deep/path',
       forwardDefinitions,
       coreStart.http.basePath,
@@ -50,7 +50,7 @@ describe('migrate legacy kibana urls', () => {
   });
 
   it('should call navigateToApp with migrated URL', () => {
-    const result = navigateToLegacyKibanaUrl(
+    const result = navigateToLegacyOpenSearchDashboardsUrl(
       '/myApp/deep/path',
       forwardDefinitions,
       coreStart.http.basePath,
