@@ -28,12 +28,12 @@ import url from 'url';
  *      protocol: 'http',
  *      hostname: 'localhost',
  *      port: 9220,
- *      auth: kibanaTestUser.username + ':' + kibanaTestUser.password
+ *      auth: opensearchDashboardsTestUser.username + ':' + opensearchDashboardsTestUser.password
  *   }
  * @param {object} app The params to append
  *   example:
  *   {
- *      pathname: 'app/kibana',
+ *      pathname: 'app/opensearch-dashboards',
  *      hash: '/discover'
  *   }
  * @return {string}
