@@ -62,7 +62,7 @@ export class StateContainersExamplesPlugin implements Plugin {
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./with_data_services/application');
-        // Get start services as specified in opensearchDashboards.json
+        // Get start services as specified in opensearch_dashboards.json
         const [coreStart, depsStart] = await core.getStartServices();
         // Render the application
         return renderApp(coreStart, depsStart as AppPluginDependencies, params);
@@ -80,7 +80,7 @@ export class StateContainersExamplesPlugin implements Plugin {
         {
           label: 'README',
           href:
-            'https://github.com/elastic/opensearchDashboards/tree/master/src/plugins/opensearch_dashboards_utils/docs/state_containers/README.md',
+            'https://github.com/elastic/kibana/tree/master/src/plugins/opensearch_dashboards_utils/docs/state_containers/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
@@ -99,7 +99,7 @@ export class StateContainersExamplesPlugin implements Plugin {
         {
           label: 'README',
           href:
-            'https://github.com/elastic/opensearchDashboards/tree/master/src/plugins/opensearch_dashboards_utils/docs/state_containers/README.md',
+            'https://github.com/elastic/kibana/tree/master/src/plugins/opensearch_dashboards_utils/docs/state_containers/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
@@ -117,7 +117,7 @@ export class StateContainersExamplesPlugin implements Plugin {
         {
           label: 'README',
           href:
-            'https://github.com/elastic/opensearchDashboards/blob/master/src/plugins/data/public/query/state_sync/README.md',
+            'https://github.com/elastic/kibana/blob/master/src/plugins/data/public/query/state_sync/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

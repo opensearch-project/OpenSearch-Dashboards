@@ -6,4 +6,4 @@
 
 ## Development
 
-See the [opensearchDashboards contributing guide](https://github.com/elastic/opensearchDashboards/blob/master/CONTRIBUTING.md) for instructions setting up your development environment.
+See the [opensearchDashboards contributing guide](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md) for instructions setting up your development environment.
