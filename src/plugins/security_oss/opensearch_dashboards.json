@@ -1,7 +1,7 @@
 {
   "id": "securityOss",
   "version": "8.0.0",
-  "kibanaVersion": "kibana",
+  "opensearchDashboardsVersion": "opensearchDashboards",
   "configPath": ["security"],
   "ui": true,
   "server": true,
