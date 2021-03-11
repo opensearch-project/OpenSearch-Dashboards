@@ -28,13 +28,13 @@ import {
   LegacyServiceSetupDeps,
 } from '../../core/server';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { LegacyConfig } from '../../core/server/legacy';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { UiPlugins } from '../../core/server/plugins';
 
 // lot of legacy code was assuming this type only had these two methods
-export type KibanaConfig = Pick<LegacyConfig, 'get' | 'has'>;
+export type OpenSearchDashboardsConfig = Pick<LegacyConfig, 'get' | 'has'>;
 
 // Extend the defaults with the plugins and server methods we need.
 declare module 'hapi' {
@@ -43,19 +43,19 @@ declare module 'hapi' {
   }
 
   interface Server {
-    config: () => KibanaConfig;
+    config: () => OpenSearchDashboardsConfig;
     logWithMetadata: (tags: string[], message: string, meta: Record<string, any>) => void;
-    newPlatform: KbnServer['newPlatform'];
+    newPlatform: OsdServer['newPlatform'];
   }
 }
 
-type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
+type OsdMixinFunc = (osdServer: OsdServer, server: Server, config: any) => Promise<any> | void;
 
 export interface PluginsSetup {
   [key: string]: object;
 }
 
-export interface KibanaCore {
+export interface OpenSearchDashboardsCore {
   __internals: {
     hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
     rendering: LegacyServiceSetupDeps['core']['rendering'];
@@ -77,30 +77,30 @@ export interface KibanaCore {
 }
 
 export interface NewPlatform {
-  __internals: KibanaCore['__internals'];
-  env: KibanaCore['env'];
+  __internals: OpenSearchDashboardsCore['__internals'];
+  env: OpenSearchDashboardsCore['env'];
   coreContext: {
-    logger: KibanaCore['logger'];
+    logger: OpenSearchDashboardsCore['logger'];
   };
-  setup: KibanaCore['setupDeps'];
-  start: KibanaCore['startDeps'];
+  setup: OpenSearchDashboardsCore['setupDeps'];
+  start: OpenSearchDashboardsCore['startDeps'];
   stop: null;
 }
 
 // eslint-disable-next-line import/no-default-export
-export default class KbnServer {
+export default class OsdServer {
   public readonly newPlatform: NewPlatform;
   public server: Server;
   public inject: Server['inject'];
 
-  constructor(settings: Record<string, any>, config: KibanaConfig, core: KibanaCore);
+  constructor(settings: Record<string, any>, config: OpenSearchDashboardsConfig, core: OpenSearchDashboardsCore);
 
   public ready(): Promise<void>;
-  public mixin(...fns: KbnMixinFunc[]): Promise<void>;
+  public mixin(...fns: OsdMixinFunc[]): Promise<void>;
   public listen(): Promise<Server>;
   public close(): Promise<void>;
   public applyLoggingConfiguration(settings: any): void;
-  public config: KibanaConfig;
+  public config: OpenSearchDashboardsConfig;
 }
 
 // Re-export commonly used hapi types.

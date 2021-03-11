@@ -23,10 +23,10 @@ import Boom from 'boom';
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathProvider } from './setup_base_path_provider';
 
-export default async function (kbnServer, server) {
-  server = kbnServer.server;
+export default async function (osdServer, server) {
+  server = osdServer.server;
 
-  setupBasePathProvider(kbnServer);
+  setupBasePathProvider(osdServer);
 
   await registerHapiPlugins(server);
 
