@@ -18,15 +18,15 @@
  */
 
 import { min, isEqual } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { KibanaMapLayer, MapTypes } from '../../maps_legacy/public';
+import { i18n } from '@osd/i18n';
+import { OpenSearchDashboardsMapLayer, MapTypes } from '../../maps_legacy/public';
 import { HeatmapMarkers } from './markers/heatmap';
 import { ScaledCirclesMarkers } from './markers/scaled_circles';
 import { ShadedCirclesMarkers } from './markers/shaded_circles';
 import { GeohashGridMarkers } from './markers/geohash_grid';
 
-export class GeohashLayer extends KibanaMapLayer {
-  constructor(featureCollection, featureCollectionMetaData, options, zoom, kibanaMap, leaflet) {
+export class GeohashLayer extends OpenSearchDashboardsMapLayer {
+  constructor(featureCollection, featureCollectionMetaData, options, zoom, opensearchDashboardsMap, leaflet) {
     super();
 
     this._featureCollection = featureCollection;
@@ -34,7 +34,7 @@ export class GeohashLayer extends KibanaMapLayer {
 
     this._geohashOptions = options;
     this._zoom = zoom;
-    this._kibanaMap = kibanaMap;
+    this._opensearchDashboardsMap = opensearchDashboardsMap;
     this._leaflet = leaflet;
     const geojson = this._leaflet.geoJson(this._featureCollection);
     this._bounds = geojson.getBounds();
@@ -57,7 +57,7 @@ export class GeohashLayer extends KibanaMapLayer {
           this._featureCollectionMetaData,
           markerOptions,
           this._zoom,
-          this._kibanaMap,
+          this._opensearchDashboardsMap,
           this._leaflet
         );
         break;
@@ -67,7 +67,7 @@ export class GeohashLayer extends KibanaMapLayer {
           this._featureCollectionMetaData,
           markerOptions,
           this._zoom,
-          this._kibanaMap,
+          this._opensearchDashboardsMap,
           this._leaflet
         );
         break;
@@ -77,7 +77,7 @@ export class GeohashLayer extends KibanaMapLayer {
           this._featureCollectionMetaData,
           markerOptions,
           this._zoom,
-          this._kibanaMap,
+          this._opensearchDashboardsMap,
           this._leaflet
         );
         break;
@@ -85,7 +85,7 @@ export class GeohashLayer extends KibanaMapLayer {
         let radius = 15;
         if (this._featureCollectionMetaData.geohashGridDimensionsAtEquator) {
           const minGridLength = min(this._featureCollectionMetaData.geohashGridDimensionsAtEquator);
-          const metersPerPixel = this._kibanaMap.getMetersPerPixel();
+          const metersPerPixel = this._opensearchDashboardsMap.getMetersPerPixel();
           radius = minGridLength / metersPerPixel / 2;
         }
         radius = radius * parseFloat(this._geohashOptions.heatmap.heatClusterSize);
@@ -94,7 +94,7 @@ export class GeohashLayer extends KibanaMapLayer {
           {
             radius: radius,
             blur: radius,
-            maxZoom: this._kibanaMap.getZoomLevel(),
+            maxZoom: this._opensearchDashboardsMap.getZoomLevel(),
             minOpacity: 0.1,
             tooltipFormatter: this._geohashOptions.tooltipFormatter,
           },
@@ -149,12 +149,12 @@ export class GeohashLayer extends KibanaMapLayer {
   updateExtent() {
     // Client-side filtering is only enabled when server-side filter is not used
     if (!this._geohashOptions.isFilteredByCollar) {
-      const bounds = this._kibanaMap.getLeafletBounds();
+      const bounds = this._opensearchDashboardsMap.getLeafletBounds();
       if (!this._lastBounds || !this._lastBounds.equals(bounds)) {
         //this removal is required to trigger the bounds filter again
-        this._kibanaMap.removeLayer(this);
+        this._opensearchDashboardsMap.removeLayer(this);
         this._createGeohashMarkers();
-        this._kibanaMap.addLayer(this);
+        this._opensearchDashboardsMap.addLayer(this);
       }
       this._lastBounds = bounds;
     }

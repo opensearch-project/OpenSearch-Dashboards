@@ -17,13 +17,13 @@
  * under the License.
  */
 import { convertToGeoJson } from '../../maps_legacy/public';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 export const createTileMapFn = () => ({
   name: 'tilemap',
   type: 'render',
   context: {
-    types: ['kibana_datatable'],
+    types: ['opensearch_dashboards_datatable'],
   },
   help: i18n.translate('tileMap.function.help', {
     defaultMessage: 'Tilemap visualization',

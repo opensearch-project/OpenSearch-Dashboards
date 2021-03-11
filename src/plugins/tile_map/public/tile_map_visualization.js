@@ -18,7 +18,7 @@
  */
 
 import { get, round } from 'lodash';
-import { getFormatService, getQueryService, getKibanaLegacy } from './services';
+import { getFormatService, getQueryService, getOpenSearchDashboardsLegacy } from './services';
 import {
   geoContains,
   mapTooltipProvider,
@@ -71,7 +71,7 @@ export const createTileMapVisualization = (dependencies) => {
         name: 'bounds',
         data: {},
       };
-      const bounds = this._kibanaMap.getBounds();
+      const bounds = this._opensearchDashboardsMap.getBounds();
       const mapCollar = scaleBounds(bounds);
       if (!geoContains(geohashAgg.aggConfigParams.boundingBox, mapCollar)) {
         updateVarsObject.data.boundingBox = {
@@ -91,14 +91,14 @@ export const createTileMapVisualization = (dependencies) => {
     };
 
     async render(esResponse, visParams) {
-      getKibanaLegacy().loadFontAwesome();
+      getOpenSearchDashboardsLegacy().loadFontAwesome();
       await super.render(esResponse, visParams);
     }
 
-    async _makeKibanaMap() {
-      await super._makeKibanaMap();
+    async _makeOpenSearchDasbhoardsMap() {
+      await super._makeOpenSearchDashboardsMap();
 
-      let previousPrecision = this._kibanaMap.getGeohashPrecision();
+      let previousPrecision = this._opensearchDashboardsMap.getGeohashPrecision();
       let precisionChange = false;
 
       const uiState = this.vis.getUiState();
@@ -108,11 +108,11 @@ export const createTileMapVisualization = (dependencies) => {
         }
       });
 
-      this._kibanaMap.on('zoomchange', () => {
-        precisionChange = previousPrecision !== this._kibanaMap.getGeohashPrecision();
-        previousPrecision = this._kibanaMap.getGeohashPrecision();
+      this._opensearchDashboardsMap.on('zoomchange', () => {
+        precisionChange = previousPrecision !== this._opensearchDashboardsMap.getGeohashPrecision();
+        previousPrecision = this._opensearchDashboardsMap.getGeohashPrecision();
       });
-      this._kibanaMap.on('zoomend', () => {
+      this._opensearchDashboardsMap.on('zoomend', () => {
         const geohashAgg = this._getGeoHashAgg();
         if (!geohashAgg) {
           return;
@@ -132,12 +132,12 @@ export const createTileMapVisualization = (dependencies) => {
         }
       });
 
-      this._kibanaMap.addDrawControl();
-      this._kibanaMap.on('drawCreated:rectangle', (event) => {
+      this._opensearchDashboardsMap.addDrawControl();
+      this._opensearchDashboardsMap.on('drawCreated:rectangle', (event) => {
         const geohashAgg = this._getGeoHashAgg();
         this.addSpatialFilter(geohashAgg, 'geo_bounding_box', event.bounds);
       });
-      this._kibanaMap.on('drawCreated:polygon', (event) => {
+      this._opensearchDashboardsMap.on('drawCreated:polygon', (event) => {
         const geohashAgg = this._getGeoHashAgg();
         this.addSpatialFilter(geohashAgg, 'geo_polygon', { points: event.points });
       });
@@ -154,13 +154,13 @@ export const createTileMapVisualization = (dependencies) => {
       }
 
       if (this._geohashLayer) {
-        this._kibanaMap.removeLayer(this._geohashLayer);
+        this._opensearchDashboardsMap.removeLayer(this._geohashLayer);
         this._geohashLayer = null;
       }
 
       if (!geojsonFeatureCollectionAndMeta) {
         this._geoJsonFeatureCollectionAndMeta = null;
-        this._kibanaMap.removeLayer(this._geohashLayer);
+        this._opensearchDashboardsMap.removeLayer(this._geohashLayer);
         this._geohashLayer = null;
         return;
       }
@@ -181,7 +181,7 @@ export const createTileMapVisualization = (dependencies) => {
       const { GeohashLayer } = await import('./geohash_layer');
 
       if (this._geohashLayer) {
-        this._kibanaMap.removeLayer(this._geohashLayer);
+        this._opensearchDashboardsMap.removeLayer(this._geohashLayer);
         this._geohashLayer = null;
       }
       const geohashOptions = this._getGeohashOptions();
@@ -189,17 +189,17 @@ export const createTileMapVisualization = (dependencies) => {
         this._geoJsonFeatureCollectionAndMeta.featureCollection,
         this._geoJsonFeatureCollectionAndMeta.meta,
         geohashOptions,
-        this._kibanaMap.getZoomLevel(),
-        this._kibanaMap,
+        this._opensearchDashboardsMap.getZoomLevel(),
+        this._opensearchDashboardsMap,
         (await lazyLoadMapsLegacyModules()).L
       );
-      this._kibanaMap.addLayer(this._geohashLayer);
+      this._opensearchDashboardsMap.addLayer(this._geohashLayer);
     }
 
     async _updateParams() {
       await super._updateParams();
 
-      this._kibanaMap.setDesaturateBaseLayer(this._params.isDesaturated);
+      this._opensearchDashboardsMap.setDesaturateBaseLayer(this._params.isDesaturated);
 
       //avoid recreating the leaflet layer when there are option-changes that do not effect the representation
       //e.g. tooltip-visibility, legend position, basemap-desaturation, ...
