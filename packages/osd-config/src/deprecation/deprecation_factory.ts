@@ -19,7 +19,7 @@
 
 import { get } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
-import { unset } from '@kbn/std';
+import { unset } from '@osd/std';
 import { ConfigDeprecation, ConfigDeprecationLogger, ConfigDeprecationFactory } from './types';
 
 const _rename = (

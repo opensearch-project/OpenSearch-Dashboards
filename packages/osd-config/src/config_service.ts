@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Type } from '@kbn/config-schema';
+import type { PublicMethodsOf } from '@osd/utility-types';
+import { Type } from '@osd/config-schema';
 import { isEqual } from 'lodash';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, first, map, shareReplay, take } from 'rxjs/operators';
-import { Logger, LoggerFactory } from '@kbn/logging';
+import { Logger, LoggerFactory } from '@osd/logging';
 
 import { Config, ConfigPath, Env } from '.';
 import { hasConfigPathIntersection } from './config';

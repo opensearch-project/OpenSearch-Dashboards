@@ -17,24 +17,22 @@
  * under the License.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { RawConfigService } from './raw_config_service';
-import { Observable, of } from 'rxjs';
+const realPath = jest.requireActual('path');
 
-const createRawConfigServiceMock = ({
-  rawConfig = {},
-  rawConfig$ = undefined,
-}: { rawConfig?: Record<string, any>; rawConfig$?: Observable<Record<string, any>> } = {}) => {
-  const mocked: jest.Mocked<PublicMethodsOf<RawConfigService>> = {
-    loadConfig: jest.fn(),
-    stop: jest.fn(),
-    reloadConfig: jest.fn(),
-    getConfig$: jest.fn().mockReturnValue(rawConfig$ || of(rawConfig)),
-  };
+jest.doMock('path', () => ({
+  ...realPath,
+  resolve(...pathSegments: string[]) {
+    return pathSegments.join('/');
+  },
+  dirname(filePath: string) {
+    return '/test/opensearchDashboardsRoot';
+  },
+}));
 
-  return mocked;
+export const mockPackage = {
+  raw: {},
 };
 
-export const rawConfigServiceMock = {
-  create: createRawConfigServiceMock,
-};
+jest.doMock('load-json-file', () => ({
+  sync: () => mockPackage.raw,
+}));

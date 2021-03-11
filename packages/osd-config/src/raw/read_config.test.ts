@@ -41,13 +41,13 @@ test('reads and merges multiple yaml files from file system and parses to json',
 });
 
 test('should inject an environment variable value when setting a value with ${ENV_VAR}', () => {
-  process.env.KBN_ENV_VAR1 = 'val1';
-  process.env.KBN_ENV_VAR2 = 'val2';
+  process.env.OSD_ENV_VAR1 = 'val1';
+  process.env.OSD_ENV_VAR2 = 'val2';
 
   const config = getConfigFromFiles([fixtureFile('/en_var_ref_config.yml')]);
 
-  delete process.env.KBN_ENV_VAR1;
-  delete process.env.KBN_ENV_VAR2;
+  delete process.env.OSD_ENV_VAR1;
+  delete process.env.OSD_ENV_VAR2;
 
   expect(config).toMatchSnapshot();
 });

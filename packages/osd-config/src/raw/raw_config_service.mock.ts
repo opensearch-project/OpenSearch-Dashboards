@@ -17,22 +17,24 @@
  * under the License.
  */
 
-const realPath = jest.requireActual('path');
+import type { PublicMethodsOf } from '@osd/utility-types';
+import { RawConfigService } from './raw_config_service';
+import { Observable, of } from 'rxjs';
 
-jest.doMock('path', () => ({
-  ...realPath,
-  resolve(...pathSegments: string[]) {
-    return pathSegments.join('/');
-  },
-  dirname(filePath: string) {
-    return '/test/kibanaRoot';
-  },
-}));
+const createRawConfigServiceMock = ({
+  rawConfig = {},
+  rawConfig$ = undefined,
+}: { rawConfig?: Record<string, any>; rawConfig$?: Observable<Record<string, any>> } = {}) => {
+  const mocked: jest.Mocked<PublicMethodsOf<RawConfigService>> = {
+    loadConfig: jest.fn(),
+    stop: jest.fn(),
+    reloadConfig: jest.fn(),
+    getConfig$: jest.fn().mockReturnValue(rawConfig$ || of(rawConfig)),
+  };
 
-export const mockPackage = {
-  raw: {},
+  return mocked;
 };
 
-jest.doMock('load-json-file', () => ({
-  sync: () => mockPackage.raw,
-}));
+export const rawConfigServiceMock = {
+  create: createRawConfigServiceMock,
+};
