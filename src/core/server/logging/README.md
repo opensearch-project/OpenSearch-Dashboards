@@ -86,7 +86,7 @@ Example of `%logger` output:
 ```bash
 server
 server.http
-server.http.OpenSearchDashboards
+server.http.opensearchDashboards
 ```
 
 #### message
@@ -212,7 +212,7 @@ Usage is very straightforward, one should just get a logger for a specific conte
 different log level. 
 
 ```typescript
-const logger = OpenSearchDashboards.logger.get('server');
+const logger = opensearchDashboards.logger.get('server');
 
 logger.trace('Message with `trace` log level.');
 logger.debug('Message with `debug` log level.');
@@ -221,7 +221,7 @@ logger.warn('Message with `warn` log level.');
 logger.error('Message with `error` log level.');
 logger.fatal('Message with `fatal` log level.');
 
-const loggerWithNestedContext = OpenSearchDashboards.logger.get('server', 'http');
+const loggerWithNestedContext = opensearchDashboards.logger.get('server', 'http');
 loggerWithNestedContext.trace('Message with `trace` log level.');
 loggerWithNestedContext.debug('Message with `debug` log level.');
 ```
