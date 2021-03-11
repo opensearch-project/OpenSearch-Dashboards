@@ -40,7 +40,7 @@ import { OpenSearchDashboardsLegacySetup, OpenSearchDashboardsLegacyStart } from
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
-import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
+import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { createOsdUrlTracker } from '../../opensearch_dashboards_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
@@ -224,7 +224,7 @@ export class DiscoverPlugin
             ),
             map(({ state }) => ({
               ...state,
-              filters: state.filters?.filter(esFilters.isFilterPinned),
+              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
             }))
           ),
         },

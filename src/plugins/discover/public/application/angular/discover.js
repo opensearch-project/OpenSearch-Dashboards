@@ -28,7 +28,7 @@ import { getState, splitState } from './discover_state';
 
 import { RequestAdapter } from '../../../../inspector/public';
 import {
-  esFilters,
+  opensearchFilters,
   indexPatterns as indexPatternsUtils,
   connectToQueryState,
   syncQueryStateWithUrl,
@@ -243,7 +243,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     data.query,
     appStateContainer,
     {
-      filters: esFilters.FilterStateStore.APP_STATE,
+      filters: opensearchFilters.FilterStateStore.APP_STATE,
       query: true,
     }
   );
@@ -978,7 +978,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     const { indexPattern } = $scope;
 
     popularizeField(indexPattern, field.name, indexPatterns);
-    const newFilters = esFilters.generateFilters(
+    const newFilters = opensearchFilters.generateFilters(
       filterManager,
       field,
       values,

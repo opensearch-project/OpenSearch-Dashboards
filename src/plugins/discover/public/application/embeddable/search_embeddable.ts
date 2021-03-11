@@ -25,7 +25,7 @@ import { i18n } from '@osd/i18n';
 import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../../ui_actions/public';
 import { RequestAdapter, Adapters } from '../../../../inspector/public';
 import {
-  esFilters,
+  opensearchFilters,
   Filter,
   TimeRange,
   FilterManager,
@@ -242,7 +242,7 @@ export class SearchEmbeddable
     };
 
     searchScope.filter = async (field, value, operator) => {
-      let filters = esFilters.generateFilters(
+      let filters = opensearchFilters.generateFilters(
         this.filterManager,
         field,
         value,
@@ -251,7 +251,7 @@ export class SearchEmbeddable
       );
       filters = filters.map((filter) => ({
         ...filter,
-        $state: { store: esFilters.FilterStateStore.APP_STATE },
+        $state: { store: opensearchFilters.FilterStateStore.APP_STATE },
       }));
 
       await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
@@ -321,7 +321,7 @@ export class SearchEmbeddable
 
   private pushContainerStateParamsToScope(searchScope: SearchScope) {
     const isFetchRequired =
-      !esFilters.onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
+      !opensearchFilters.onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !_.isEqual(this.prevQuery, this.input.query) ||
       !_.isEqual(this.prevTimeRange, this.input.timeRange) ||
       !_.isEqual(searchScope.sort, this.input.sort || this.savedSearch.sort);

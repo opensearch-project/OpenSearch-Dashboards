@@ -62,29 +62,29 @@ interface DiscoverHistogramState {
 
 function findIntervalFromDuration(
   dateValue: number,
-  esValue: number,
-  esUnit: unitOfTime.Base,
+  opensearchValue: number,
+  opensearchUnit: unitOfTime.Base,
   timeZone: string
 ) {
   const date = moment.tz(dateValue, timeZone);
-  const startOfDate = moment.tz(date, timeZone).startOf(esUnit);
-  const endOfDate = moment.tz(date, timeZone).startOf(esUnit).add(esValue, esUnit);
+  const startOfDate = moment.tz(date, timeZone).startOf(opensearchUnit);
+  const endOfDate = moment.tz(date, timeZone).startOf(opensearchUnit).add(opensearchValue, opensearchUnit);
   return endOfDate.valueOf() - startOfDate.valueOf();
 }
 
 function getIntervalInMs(
   value: number,
-  esValue: number,
-  esUnit: unitOfTime.Base,
+  opensearchValue: number,
+  opensearchUnit: unitOfTime.Base,
   timeZone: string
 ): number {
-  switch (esUnit) {
+  switch (opensearchUnit) {
     case 's':
-      return 1000 * esValue;
+      return 1000 * opensearchValue;
     case 'ms':
-      return 1 * esValue;
+      return 1 * opensearchValue;
     default:
-      return findIntervalFromDuration(value, esValue, esUnit, timeZone);
+      return findIntervalFromDuration(value, opensearchValue, opensearchUnit, timeZone);
   }
 }
 
@@ -100,8 +100,8 @@ function getTimezone(uiSettings: IUiSettingsClient) {
 
 export function findMinInterval(
   xValues: number[],
-  esValue: number,
-  esUnit: string,
+  opensearchValue: number,
+  opensearchUnit: string,
   timeZone: string
 ): number {
   return xValues.reduce((minInterval, currentXvalue, index) => {
@@ -111,8 +111,8 @@ export function findMinInterval(
     }
     const singleUnitInterval = getIntervalInMs(
       currentXvalue,
-      esValue,
-      esUnit as unitOfTime.Base,
+      opensearchValue,
+      opensearchUnit as unitOfTime.Base,
       timeZone
     );
     return Math.min(minInterval, singleUnitInterval, currentDiff);

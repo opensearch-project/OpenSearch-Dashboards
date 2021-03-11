@@ -27,7 +27,7 @@ import {
   IOsdUrlStateStorage,
   withNotifyOnErrors,
 } from '../../../../opensearch_dashboards_utils/public';
-import { esFilters, Filter, Query } from '../../../../data/public';
+import { opensearchFilters, Filter, Query } from '../../../../data/public';
 import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
 
 export interface AppState {
@@ -212,7 +212,7 @@ export function isEqualFilters(filtersA: Filter[], filtersB: Filter[]) {
   } else if (!filtersA || !filtersB) {
     return false;
   }
-  return esFilters.compareFilters(filtersA, filtersB, esFilters.COMPARE_ALL_OPTIONS);
+  return opensearchFilters.compareFilters(filtersA, filtersB, opensearchFilters.COMPARE_ALL_OPTIONS);
 }
 
 /**

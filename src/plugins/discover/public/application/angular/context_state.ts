@@ -26,7 +26,7 @@ import {
   BaseStateContainer,
   withNotifyOnErrors,
 } from '../../../../opensearch_dashboards_utils/public';
-import { esFilters, FilterManager, Filter, Query } from '../../../../data/public';
+import { opensearchFilters, FilterManager, Filter, Query } from '../../../../data/public';
 
 export interface AppState {
   /**
@@ -229,7 +229,7 @@ export function isEqualFilters(filtersA: Filter[], filtersB: Filter[]) {
   } else if (!filtersA || !filtersB) {
     return false;
   }
-  return esFilters.compareFilters(filtersA, filtersB, esFilters.COMPARE_ALL_OPTIONS);
+  return opensearchFilters.compareFilters(filtersA, filtersB, opensearchFilters.COMPARE_ALL_OPTIONS);
 }
 
 /**
@@ -246,7 +246,7 @@ function isEqualState(stateA: AppState | GlobalState, stateB: AppState | GlobalS
   const { filters: stateBFilters = [], ...stateBPartial } = stateB;
   return (
     _.isEqual(stateAPartial, stateBPartial) &&
-    esFilters.compareFilters(stateAFilters, stateBFilters, esFilters.COMPARE_ALL_OPTIONS)
+    opensearchFilters.compareFilters(stateAFilters, stateBFilters, opensearchFilters.COMPARE_ALL_OPTIONS)
   );
 }
 
