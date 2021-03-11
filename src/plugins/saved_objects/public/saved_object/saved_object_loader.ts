@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/public';
+import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'opensearch-dashboards/public';
 import { SavedObject } from '../types';
 import { StringUtils } from './helpers/string_utils';
 

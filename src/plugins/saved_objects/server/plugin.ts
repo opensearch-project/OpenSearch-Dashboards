@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin } from 'opensearch-dashboards/server';
 import { uiSettings } from './ui_settings';
 
 export class SavedObjectsServerPlugin implements Plugin<object, object> {

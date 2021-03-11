@@ -17,9 +17,9 @@
  * under the License.
  */
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { SavedObjectAttributes } from 'kibana/public';
-import { SavedObject, SavedObjectKibanaServices } from '../../types';
+import { i18n } from '@osd/i18n';
+import { SavedObjectAttributes } from 'opensearch-dashboards/public';
+import { SavedObject, SavedObjectOpenSearchDashboardsServices } from '../../types';
 import { OVERWRITE_REJECTED } from '../../constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 
@@ -27,11 +27,11 @@ import { confirmModalPromise } from './confirm_modal_promise';
  * Attempts to create the current object using the serialized source. If an object already
  * exists, a warning message requests an overwrite confirmation.
  * @param source - serialized version of this object (return value from this._serialize())
- * What will be indexed into elasticsearch.
+ * What will be indexed into opensearch.
  * @param savedObject - savedObject
- * @param esType - type of the saved object
+ * @param opensearchType - type of the saved object
  * @param options - options to pass to the saved object create method
- * @param services - provides Kibana services savedObjectsClient and overlays
+ * @param services - provides OpenSearch Dashboards services savedObjectsClient and overlays
  * @returns {Promise} - A promise that is resolved with the objects id if the object is
  * successfully indexed. If the overwrite confirmation was rejected, an error is thrown with
  * a confirmRejected = true parameter so that case can be handled differently than
@@ -41,13 +41,13 @@ import { confirmModalPromise } from './confirm_modal_promise';
 export async function createSource(
   source: SavedObjectAttributes,
   savedObject: SavedObject,
-  esType: string,
+  opensearchType: string,
   options = {},
-  services: SavedObjectKibanaServices
+  services: SavedObjectOpenSearchDashboardsServices
 ) {
   const { savedObjectsClient, overlays } = services;
   try {
-    return await savedObjectsClient.create(esType, source, options);
+    return await savedObjectsClient.create(opensearchType, source, options);
   } catch (err) {
     // record exists, confirm overwriting
     if (_.get(err, 'res.status') === 409) {
@@ -70,7 +70,7 @@ export async function createSource(
       return confirmModalPromise(confirmMessage, title, confirmButtonText, overlays)
         .then(() =>
           savedObjectsClient.create(
-            esType,
+            opensearchType,
             source,
             savedObject.creationOpts({ overwrite: true, ...options })
           )

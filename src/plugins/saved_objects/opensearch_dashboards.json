@@ -1,11 +1,11 @@
 {
   "id": "savedObjects",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": true,
   "ui": true,
   "requiredPlugins": ["data"],
   "requiredBundles": [
-    "kibanaUtils",
-    "kibanaReact"
+    "opensearchDashboardsUtils",
+    "opensearchDashboardsReact"
   ]
 }
