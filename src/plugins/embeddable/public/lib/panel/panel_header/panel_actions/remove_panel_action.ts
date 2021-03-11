@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { Action, IncompatibleActionError } from '../../../ui_actions';
 import { ContainerInput, IContainer } from '../../../containers';
 import { ViewMode } from '../../../types';
@@ -43,7 +43,7 @@ export class RemovePanelAction implements Action<ActionContext> {
   public readonly id = REMOVE_PANEL_ACTION;
   public order = 1;
 
-  constructor() {}
+  constructor() { }
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.panel.removePanel.displayName', {

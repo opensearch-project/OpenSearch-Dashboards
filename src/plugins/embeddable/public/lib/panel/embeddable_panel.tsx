@@ -22,7 +22,7 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
 import { CoreStart, OverlayStart } from '../../../../../core/public';
-import { toMountPoint } from '../../../../kibana_react/public';
+import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
 
 import { Start as InspectorStartContract } from '../inspector';
 import {

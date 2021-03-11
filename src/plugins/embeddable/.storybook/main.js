@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-module.exports = require('@kbn/storybook').defaultConfig;
+module.exports = require('@osd/storybook').defaultConfig;

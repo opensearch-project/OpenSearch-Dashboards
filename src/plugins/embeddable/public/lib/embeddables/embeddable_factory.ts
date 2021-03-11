@@ -23,7 +23,7 @@ import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { ErrorEmbeddable } from './error_embeddable';
 import { IContainer } from '../containers/i_container';
 import { PropertySpec } from '../types';
-import { PersistableState } from '../../../../kibana_utils/common';
+import { PersistableState } from '../../../../opensearch_dashboards_utils/common';
 
 export interface EmbeddableInstanceConfiguration {
   id: string;
@@ -45,7 +45,7 @@ export interface EmbeddableFactory<
     TEmbeddableOutput
   >,
   TSavedObjectAttributes extends SavedObjectAttributes = SavedObjectAttributes
-> extends PersistableState<EmbeddableInput> {
+  > extends PersistableState<EmbeddableInput> {
   // A unique identified for this factory, which will be used to map an embeddable spec to
   // a factory that can generate an instance of it.
   readonly type: string;

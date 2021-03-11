@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectAttributes } from 'kibana/public';
+import { SavedObjectAttributes } from 'opensearch-dashboards/public';
 import {
   EmbeddableFactory,
   EmbeddableInput,
@@ -29,7 +29,7 @@ import {
   PersistableState,
   PersistableStateDefinition,
   SerializableState,
-} from '../../kibana_utils/common';
+} from '../../opensearch_dashboards_utils/common';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;
 export type EnhancementsRegistry = Map<string, EnhancementRegistryItem>;
@@ -49,6 +49,6 @@ export type EmbeddableFactoryProvider = <
   O extends EmbeddableOutput = EmbeddableOutput,
   E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
   T extends SavedObjectAttributes = SavedObjectAttributes
->(
+  >(
   def: EmbeddableFactoryDefinition<I, O, E, T>
 ) => EmbeddableFactory<I, O, E, T>;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { Container, EmbeddableFactoryDefinition } from '../..';
 import {
   FilterableContainer,
@@ -32,7 +32,7 @@ export class FilterableContainerFactory
 
   constructor(
     private readonly getFactory: () => Promise<EmbeddableStart['getEmbeddableFactory']>
-  ) {}
+  ) { }
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.samples.filterableContainer.displayName', {
