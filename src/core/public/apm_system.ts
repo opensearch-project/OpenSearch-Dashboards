@@ -69,7 +69,7 @@ export class ApmSystem {
      * route-change transactions after OpenSearch Dashboards app is bootstrapped
      */
     start.application.currentAppId$.subscribe((appId) => {
-      const apmInstance = (window as any).elasticApm;
+      const apmInstance = (window as any).opensearchApm;
       if (appId && apmInstance && typeof apmInstance.startTransaction === 'function') {
         apmInstance.startTransaction(`/app/${appId}`, 'route-change', {
           managed: true,
