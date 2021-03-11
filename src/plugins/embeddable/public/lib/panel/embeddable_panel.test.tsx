@@ -22,7 +22,7 @@ import { mount } from 'enzyme';
 import { nextTick } from 'test_utils/enzyme_helpers';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@osd/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
 import { Action, UiActionsStart, ActionType } from '../../../../ui_actions/public';
 import { Trigger, ViewMode } from '../types';
@@ -101,13 +101,13 @@ test('HelloWorldContainer.addNewEmbeddable', async () => {
   const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
     CONTACT_CARD_EMBEDDABLE,
     {
-      firstName: 'Kibana',
+      firstName: 'opensearchDashboards',
     }
   );
   expect(embeddable).toBeDefined();
 
   if (!isErrorEmbeddable(embeddable)) {
-    expect(embeddable.getInput().firstName).toBe('Kibana');
+    expect(embeddable.getInput().firstName).toBe('opensearchDashboards');
   } else {
     expect(false).toBe(true);
   }

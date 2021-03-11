@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ApplicationStart } from 'kibana/public';
+import { i18n } from '@osd/i18n';
+import { ApplicationStart } from 'opensearch-dashboards/public';
 import { Action } from 'src/plugins/ui_actions/public';
 import { take } from 'rxjs/operators';
 import { ViewMode } from '../types';
@@ -83,9 +83,9 @@ export class EditPanelAction implements Action<ActionContext> {
   public async isCompatible({ embeddable }: ActionContext) {
     const canEditEmbeddable = Boolean(
       embeddable &&
-        embeddable.getOutput().editable &&
-        (embeddable.getOutput().editUrl ||
-          (embeddable.getOutput().editApp && embeddable.getOutput().editPath))
+      embeddable.getOutput().editable &&
+      (embeddable.getOutput().editUrl ||
+        (embeddable.getOutput().editApp && embeddable.getOutput().editPath))
     );
     const inDashboardEditMode = embeddable.getInput().viewMode === ViewMode.EDIT;
     return Boolean(canEditEmbeddable && inDashboardEditMode);
