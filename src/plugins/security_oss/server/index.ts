@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@osd/config-schema';
 
-import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from 'opensearch-dashboards/server';
 import { ConfigSchema } from './config';
 import { SecurityOssPlugin } from './plugin';
 
