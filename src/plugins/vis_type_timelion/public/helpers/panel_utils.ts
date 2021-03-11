@@ -22,7 +22,7 @@ import $ from 'jquery';
 import moment, { Moment } from 'moment-timezone';
 
 import { TimefilterContract } from 'src/plugins/data/public';
-import { IUiSettingsClient } from 'opensearch-dashboardspublic';
+import { IUiSettingsClient } from 'opensearch-dashboards/public';
 
 import { calculateInterval } from '../../common/lib';
 import { xaxisFormatterProvider } from './xaxis_formatter';

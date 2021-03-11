@@ -89,7 +89,7 @@ export function getTimelionRequestHandler({
       );
     }
 
-    const opensearchQueryConfigs = opensearchQuery.getEsQueryConfig(uiSettings);
+    const opensearchQueryConfigs = opensearchQuery.getOpenSearchQueryConfig(uiSettings);
 
     // parse the time range client side to make sure it behaves like other charts
     const timeRangeBounds = timefilter.calculateBounds(timeRange);
@@ -100,7 +100,7 @@ export function getTimelionRequestHandler({
           sheet: [expression],
           extended: {
             opensearch: {
-              filter: opensearchQuery.buildEsQuery(undefined, query, filters, opensearchQueryConfigs),
+              filter: opensearchQuery.buildOpenSearchQuery(undefined, query, filters, opensearchQueryConfigs),
             },
           },
           time: {

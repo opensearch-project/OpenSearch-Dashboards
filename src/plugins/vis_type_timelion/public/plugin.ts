@@ -24,7 +24,7 @@ import {
   PluginInitializerContext,
   IUiSettingsClient,
   HttpSetup,
-} from 'opensearch-dashboardspublic';
+} from 'opensearch-dashboards/public';
 import { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
 import {
   DataPublicPluginSetup,

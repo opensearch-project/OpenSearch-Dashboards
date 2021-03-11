@@ -18,11 +18,11 @@
  */
 
 import _ from 'lodash';
-import { IRouter, CoreSetup } from 'opensearch-dashboardsserver';
+import { IRouter, CoreSetup } from 'opensearch-dashboards/server';
 import { OPENSEARCH_SEARCH_STRATEGY } from '../../../data/server';
 import { TimelionPluginStartDeps } from '../plugin';
 
-export function validateEsRoute(router: IRouter, core: CoreSetup) {
+export function validateOpenSearchRoute(router: IRouter, core: CoreSetup) {
   router.get(
     {
       path: '/api/timelion/validate/opensearch',

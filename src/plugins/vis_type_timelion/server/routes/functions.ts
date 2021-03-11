@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { IRouter } from 'opensearch-dashboardsserver';
+import { IRouter } from 'opensearch-dashboards/server';
 import { LoadFunctions } from '../lib/load_functions';
 
 export function functionsRoute(router: IRouter, { functions }: { functions: LoadFunctions }) {

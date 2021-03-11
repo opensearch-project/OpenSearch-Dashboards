@@ -28,7 +28,7 @@ import { CoreSetup, PluginInitializerContext } from '../../../../src/core/server
 import { configSchema } from '../config';
 import loadFunctions from './lib/load_functions';
 import { functionsRoute } from './routes/functions';
-import { validateEsRoute } from './routes/validate_es';
+import { validateOpenSearchRoute } from './routes/validate_es';
 import { runRoute } from './routes/run';
 import { ConfigManager } from './lib/config_manager';
 
@@ -90,7 +90,7 @@ export class Plugin {
 
     functionsRoute(router, deps);
     runRoute(router, deps);
-    validateEsRoute(router, core);
+    validateOpenSearchRoute(router, core);
 
     core.uiSettings.register({
       'timelion:opensearch.timefield': {

@@ -20,7 +20,7 @@
 import moment from 'moment';
 
 import { i18n } from '@osd/i18n';
-import { IUiSettingsClient } from 'opensearch-dashboardspublic';
+import { IUiSettingsClient } from 'opensearch-dashboards/public';
 
 export function xaxisFormatterProvider(config: IUiSettingsClient) {
   function getFormat(opensearchInterval: any) {

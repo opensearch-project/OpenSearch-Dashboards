@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IRouter, Logger, CoreSetup } from 'opensearch-dashboardsserver';
+import { IRouter, Logger, CoreSetup } from 'opensearch-dashboards/server';
 import { schema } from '@osd/config-schema';
 import Bluebird from 'bluebird';
 import _ from 'lodash';
@@ -89,7 +89,7 @@ export function runRoute(
           getFunction,
           getStartServices: core.getStartServices,
           allowedGraphiteUrls: configManager.getGraphiteUrls(),
-          opensearchShardTimeout: configManager.getEsShardTimeout(),
+          opensearchShardTimeout: configManager.getOpenSearchShardTimeout(),
           savedObjectsClient: context.core.savedObjects.client,
         });
         const chainRunner = chainRunnerFn(tlConfig);
