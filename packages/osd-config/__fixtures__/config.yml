@@ -1,6 +1,6 @@
 pid:
   enabled: true
-  file: '/var/run/kibana.pid'
+  file: '/var/run/opensearch_dashboards.pid'
   obj: { val: 3 }
   arr: [1]
   empty_obj: {}
