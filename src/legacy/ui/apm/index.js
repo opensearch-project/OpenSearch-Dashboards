@@ -27,7 +27,7 @@ export function getApmConfig(requestPath) {
     return null;
   }
   const config = {
-    ...getConfig('kibana-frontend'),
+    ...getConfig('opensearch-dashboards-frontend'),
     pageLoadTransactionName: requestPath,
   };
 

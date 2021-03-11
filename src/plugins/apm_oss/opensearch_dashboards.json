@@ -1,0 +1,11 @@
+{
+  "id": "apmOss",
+  "version": "8.0.0",
+  "server": true,
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "configPath": [
+    "apm_oss"
+  ],
+  "ui": true,
+  "requiredPlugins": ["home"]
+}

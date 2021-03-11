@@ -20,10 +20,10 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import d3 from 'd3';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import * as topojson from 'topojson-client';
-import { getNotifications } from './kibana_services';
-import { colorUtil, KibanaMapLayer } from '../../maps_legacy/public';
+import { getNotifications } from './opensearch_dashboards_services';
+import { colorUtil, OpensearchDashboardsMapLayer } from '../../maps_legacy/public';
 import { truncatedColorMaps } from '../../charts/public';
 
 const EMPTY_STYLE = {
@@ -33,19 +33,19 @@ const EMPTY_STYLE = {
   fillOpacity: 0,
 };
 
-export class ChoroplethLayer extends KibanaMapLayer {
+export class ChoroplethLayer extends OpensearchDashboardsMapLayer {
   static _doInnerJoin(sortedMetrics, sortedGeojsonFeatures, joinField) {
     let j = 0;
     for (let i = 0; i < sortedGeojsonFeatures.length; i++) {
       const property = sortedGeojsonFeatures[i].properties[joinField];
-      sortedGeojsonFeatures[i].__kbnJoinedMetric = null;
+      sortedGeojsonFeatures[i].__osdJoinedMetric = null;
       const position = sortedMetrics.length
         ? compareLexicographically(property, sortedMetrics[j].term)
         : -1;
       if (position === -1) {
         //just need to cycle on
       } else if (position === 0) {
-        sortedGeojsonFeatures[i].__kbnJoinedMetric = sortedMetrics[j];
+        sortedGeojsonFeatures[i].__osdJoinedMetric = sortedMetrics[j];
       } else if (position === 1) {
         //needs to catch up
         while (j < sortedMetrics.length) {
@@ -54,7 +54,7 @@ export class ChoroplethLayer extends KibanaMapLayer {
           if (newPosition === -1) {
             //not far enough
           } else if (newPosition === 0) {
-            sortedGeojsonFeatures[i].__kbnJoinedMetric = sortedMetrics[j];
+            sortedGeojsonFeatures[i].__osdJoinedMetric = sortedMetrics[j];
             break;
           } else if (newPosition === 1) {
             //too far!
@@ -186,7 +186,7 @@ Make sure the file exists at that location.",
             {
               defaultMessage:
                 'Cannot download {name} file. Please ensure the \
-CORS configuration of the server permits requests from the Kibana application on this host.',
+CORS configuration of the server permits requests from the OpenSearch Dashboards application on this host.',
               values: { name: name },
             }
           );
@@ -231,7 +231,7 @@ CORS configuration of the server permits requests from the Kibana application on
       if (!this._showAllShapes) {
         const featureCollection = {
           type: 'FeatureCollection',
-          features: this._sortedFeatures.filter((feature) => feature.__kbnJoinedMetric),
+          features: this._sortedFeatures.filter((feature) => feature.__osdJoinedMetric),
         };
         this._leafletLayer.addData(featureCollection);
       }
@@ -440,7 +440,7 @@ CORS configuration of the server permits requests from the Kibana application on
     const boundsOfAllFeatures = new this._leaflet.LatLngBounds();
     return {
       leafletStyleFunction: (geojsonFeature) => {
-        const match = geojsonFeature.__kbnJoinedMetric;
+        const match = geojsonFeature.__osdJoinedMetric;
         if (!match) {
           return emptyStyle();
         }
@@ -463,7 +463,7 @@ CORS configuration of the server permits requests from the Kibana application on
       getMismatches: () => {
         const mismatches = this._metrics.slice();
         this._sortedFeatures.forEach((feature) => {
-          const index = mismatches.indexOf(feature.__kbnJoinedMetric);
+          const index = mismatches.indexOf(feature.__osdJoinedMetric);
           if (index >= 0) {
             mismatches.splice(index, 1);
           }

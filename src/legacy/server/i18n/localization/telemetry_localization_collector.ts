@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { i18nLoader } from '@kbn/i18n';
+import { i18nLoader } from '@osd/i18n';
 import { size } from 'lodash';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getIntegrityHashes, Integrities } from './file_integrity';
-import { KIBANA_LOCALIZATION_STATS_TYPE } from '../constants';
+import { OPENSEARCH_DASHBOARDS_LOCALIZATION_STATS_TYPE } from '../constants';
 
 export interface UsageStats {
   locale: string;
@@ -68,7 +68,7 @@ export function registerLocalizationUsageCollector(
   helpers: LocalizationUsageCollectorHelpers
 ) {
   const collector = usageCollection.makeUsageCollector({
-    type: KIBANA_LOCALIZATION_STATS_TYPE,
+    type: OPENSEARCH_DASHBOARDS_LOCALIZATION_STATS_TYPE,
     isReady: () => true,
     fetch: createCollectorFetch(helpers),
   });

@@ -18,7 +18,7 @@
  */
 
 import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { sortBy } from 'lodash';
 
 import {
@@ -30,13 +30,13 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from 'opensearch-dashboards/public';
 import { ManagementApp, ManagementSection } from '../../utils';
 
 import './management_sidebar_nav.scss';
 
 import { ManagementItem } from '../../utils/management_item';
-import { reactRouterNavigate } from '../../../../kibana_react/public';
+import { reactRouterNavigate } from '../../../../opensearch_dashboards_react/public';
 
 interface ManagementSidebarNavProps {
   sections: ManagementSection[];

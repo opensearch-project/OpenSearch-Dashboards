@@ -1,0 +1,10 @@
+{
+  "id": "telemetryCollectionManager",
+  "version": "opensearchDashboards",
+  "server": true,
+  "ui": false,
+  "requiredPlugins": [
+    "usageCollection"
+  ],
+  "optionalPlugins": []
+}

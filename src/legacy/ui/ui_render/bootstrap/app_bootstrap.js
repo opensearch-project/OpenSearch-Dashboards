@@ -22,11 +22,11 @@ import { createHash } from 'crypto';
 import { readFile } from 'fs';
 import { resolve } from 'path';
 
-import { kbnBundlesLoaderSource } from './kbn_bundles_loader_source';
+import { osdBundlesLoaderSource } from './osd_bundles_loader_source';
 
 export class AppBootstrap {
   constructor({ templateData }) {
-    this.templateData = { ...templateData, kbnBundlesLoaderSource };
+    this.templateData = { ...templateData, osdBundlesLoaderSource };
     this._rawTemplate = undefined;
   }
 

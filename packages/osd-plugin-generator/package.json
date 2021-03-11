@@ -1,0 +1,26 @@
+{
+  "name": "@osd/plugin-generator",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "main": "target/index.js",
+  "scripts": {
+    "osd:bootstrap": "node scripts/build",
+    "osd:watch": "node scripts/build --watch"
+  },
+  "dependencies": {
+    "@osd/dev-utils": "1.0.0",
+    "ejs": "^3.1.5",
+    "execa": "^4.0.2",
+    "inquirer": "^7.3.3",
+    "normalize-path": "^3.0.0",
+    "prettier": "^2.1.1",
+    "vinyl": "^2.2.0",
+    "vinyl-fs": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/ejs": "^3.0.4",
+    "@types/prettier": "^2.0.2",
+    "@types/inquirer": "^7.3.1"
+  }
+}

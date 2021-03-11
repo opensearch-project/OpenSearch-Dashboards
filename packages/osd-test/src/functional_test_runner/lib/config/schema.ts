@@ -178,7 +178,7 @@ export const schema = Joi.object()
       })
       .default(),
 
-    esTestCluster: Joi.object()
+    opensearchTestCluster: Joi.object()
       .keys({
         license: Joi.string().default('oss'),
         from: Joi.string().default('snapshot'),

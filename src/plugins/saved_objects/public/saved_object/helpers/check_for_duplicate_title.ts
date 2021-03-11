@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObject, SavedObjectKibanaServices } from '../../types';
+import { SavedObject, SavedObjectOpenSearchDashboardsServices } from '../../types';
 import { findObjectByTitle } from './find_object_by_title';
 import { SAVE_DUPLICATE_REJECTED } from '../../constants';
 import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';
@@ -33,11 +33,11 @@ import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_con
 export async function checkForDuplicateTitle(
   savedObject: Pick<
     SavedObject,
-    'id' | 'title' | 'getDisplayName' | 'lastSavedTitle' | 'copyOnSave' | 'getEsType'
+    'id' | 'title' | 'getDisplayName' | 'lastSavedTitle' | 'copyOnSave' | 'getOpenSearchType'
   >,
   isTitleDuplicateConfirmed: boolean,
   onTitleDuplicate: (() => void) | undefined,
-  services: Pick<SavedObjectKibanaServices, 'savedObjectsClient' | 'overlays'>
+  services: Pick<SavedObjectOpenSearchDashboardsServices, 'savedObjectsClient' | 'overlays'>
 ): Promise<true> {
   const { savedObjectsClient, overlays } = services;
   // Don't check for duplicates if user has already confirmed save with duplicate title
@@ -53,7 +53,7 @@ export async function checkForDuplicateTitle(
 
   const duplicate = await findObjectByTitle(
     savedObjectsClient,
-    savedObject.getEsType(),
+    savedObject.getOpenSearchType(),
     savedObject.title
   );
 

@@ -1,0 +1,6 @@
+{
+  "id": "legacyExport",
+  "version": "opensearchDashboards",
+  "server": true,
+  "ui": false
+}

@@ -1,0 +1,24 @@
+{
+  "name": "@osd/eslint-import-resolver-opensearch-dashboards",
+  "description": "eslint-plugin-import resolver for OpenSearch Dashboards",
+  "private": true,
+  "version": "2.0.0",
+  "main": "import_resolver_opensearch_dashboards.js",
+  "license": "Apache-2.0",
+  "opensearchDashboards": {
+    "devOnly": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elastic/kibana/tree/master/packages/kbn-eslint-import-resolver-kibana"
+  },
+  "dependencies": {
+    "debug": "^2.6.9",
+    "eslint-import-resolver-node": "0.3.2",
+    "eslint-import-resolver-webpack": "0.11.1",
+    "glob-all": "^3.2.1",
+    "lru-cache": "^4.1.5",
+    "resolve": "^1.7.1",
+    "webpack": "^4.41.5"
+  }
+}

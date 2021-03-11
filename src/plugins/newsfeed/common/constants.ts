@@ -25,4 +25,4 @@ export const NEWSFEED_HASH_SET_STORAGE_KEY = 'newsfeed.hashes';
 
 export const NEWSFEED_DEFAULT_SERVICE_BASE_URL = '';
 export const NEWSFEED_DEV_SERVICE_BASE_URL = '';
-export const NEWSFEED_DEFAULT_SERVICE_PATH = '/kibana/v{VERSION}.json';
+export const NEWSFEED_DEFAULT_SERVICE_PATH = '/opensearch-dashboards/v{VERSION}.json';

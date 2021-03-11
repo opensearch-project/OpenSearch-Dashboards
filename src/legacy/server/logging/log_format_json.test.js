@@ -19,11 +19,11 @@
 
 import moment from 'moment';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { attachMetaData } from '../../../../src/core/server/legacy/logging/legacy_logging_server';
 import { createListStream, createPromiseFromStreams } from '../../../core/server/utils';
 
-import KbnLoggerJsonFormat from './log_format_json';
+import OsdLoggerJsonFormat from './log_format_json';
 
 const time = +moment('2010-01-01T05:15:59Z', moment.ISO_8601);
 
@@ -32,13 +32,13 @@ const makeEvent = (eventType) => ({
   timestamp: time,
 });
 
-describe('KbnLoggerJsonFormat', () => {
+describe('OsdLoggerJsonFormat', () => {
   const config = {};
 
   describe('event types and messages', () => {
     let format;
     beforeEach(() => {
-      format = new KbnLoggerJsonFormat(config);
+      format = new OsdLoggerJsonFormat(config);
     });
 
     it('log', async () => {
@@ -248,7 +248,7 @@ describe('KbnLoggerJsonFormat', () => {
 
   describe('timezone', () => {
     it('logs in UTC', async () => {
-      const format = new KbnLoggerJsonFormat({
+      const format = new OsdLoggerJsonFormat({
         timezone: 'UTC',
       });
 
@@ -259,7 +259,7 @@ describe('KbnLoggerJsonFormat', () => {
     });
 
     it('logs in local timezone timezone is undefined', async () => {
-      const format = new KbnLoggerJsonFormat({});
+      const format = new OsdLoggerJsonFormat({});
 
       const result = await createPromiseFromStreams([createListStream([makeEvent('log')]), format]);
 

@@ -24,7 +24,7 @@ const stripColors = function (string) {
   return string.replace(/\u001b[^m]+m/g, '');
 };
 
-export default class KbnLoggerJsonFormat extends LogFormat {
+export default class OsdLoggerJsonFormat extends LogFormat {
   format(data) {
     data.message = stripColors(data.message);
     data['@timestamp'] = this.extractAndFormatTimestamp(data);

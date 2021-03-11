@@ -37,7 +37,7 @@ const createSetupContract = (): ManagementSetup => ({
       data: createManagementSectionMock(),
       insightsAndAlerting: createManagementSectionMock(),
       security: createManagementSectionMock(),
-      kibana: createManagementSectionMock(),
+      opensearchDashboards: createManagementSectionMock(),
       stack: createManagementSectionMock(),
     } as unknown) as DefinedSections,
   },

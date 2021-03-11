@@ -40,7 +40,7 @@ export async function findObjectByTitle<T extends SavedObjectAttributes>(
     return;
   }
 
-  // Elastic search will return the most relevant results first, which means exact matches should come
+  // OpenSearch will return the most relevant results first, which means exact matches should come
   // first, and so we shouldn't need to request everything. Using 10 just to be on the safe side.
   const response = await savedObjectsClient.find<T>({
     type,

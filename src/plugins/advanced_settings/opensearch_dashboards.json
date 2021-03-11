@@ -1,0 +1,9 @@
+{
+  "id": "advancedSettings",
+  "version": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["management"],
+  "optionalPlugins": ["home"],
+  "requiredBundles": ["opensearchDashboardsReact", "home"]
+}

@@ -23,7 +23,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObjectReference,
-} from 'kibana/public';
+} from 'opensearch-dashboards/public';
 import {
   DataPublicPluginStart,
   IIndexPattern,
@@ -35,14 +35,14 @@ import {
 export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
   _source: Record<string, unknown>;
-  applyESResp: (resp: EsResponse) => Promise<SavedObject>;
+  applyOpenSearchResp: (resp: OpenSearchResponse) => Promise<SavedObject>;
   copyOnSave: boolean;
   creationOpts: (opts: SavedObjectCreationOpts) => Record<string, unknown>;
   defaults: any;
   delete?: () => Promise<{}>;
   destroy: () => void;
   getDisplayName: () => string;
-  getEsType: () => string;
+  getOpenSearchType: () => string;
   getFullPath: () => string;
   hydrateIndexPattern?: (id?: string) => Promise<null | IIndexPattern>;
   id?: string;
@@ -71,7 +71,7 @@ export interface SavedObjectCreationOpts {
   overwrite?: boolean;
 }
 
-export interface SavedObjectKibanaServices {
+export interface SavedObjectOpenSearchDashboardsServices {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   search: DataPublicPluginStart['search'];
@@ -81,7 +81,7 @@ export interface SavedObjectKibanaServices {
 
 export interface SavedObjectConfig {
   // is only used by visualize
-  afterESResp?: (savedObject: SavedObject) => Promise<SavedObject>;
+  afterOpenSearchResp?: (savedObject: SavedObject) => Promise<SavedObject>;
   defaults?: any;
   extractReferences?: (opts: {
     attributes: SavedObjectAttributes;
@@ -101,4 +101,4 @@ export interface SavedObjectConfig {
   type?: string;
 }
 
-export type EsResponse = Record<string, any>;
+export type OpenSearchResponse = Record<string, any>;

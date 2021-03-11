@@ -23,13 +23,13 @@ import { collectReferencesDeep } from './collect_references_deep';
 export async function exportDashboards(
   ids: string[],
   savedObjectsClient: SavedObjectsClientContract,
-  kibanaVersion: string
+  opensearchDashboardsVersion: string
 ) {
   const objectsToExport = ids.map((id) => ({ id, type: 'dashboard' }));
 
   const objects = await collectReferencesDeep(savedObjectsClient, objectsToExport);
   return {
-    version: kibanaVersion,
+    version: opensearchDashboardsVersion,
     objects,
   };
 }

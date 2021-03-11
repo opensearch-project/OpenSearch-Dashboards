@@ -1,0 +1,11 @@
+{
+  "id": "opensearchDashboardsUtils",
+  "version": "opensearchDashboards",
+  "ui": true,
+  "server": false,
+  "extraPublicDirs": [
+    "common",
+    "demos/state_containers/todomvc",
+    "common/state_containers"
+  ]
+}

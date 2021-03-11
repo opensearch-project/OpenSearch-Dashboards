@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 import {
   EuiHorizontalRule,
@@ -55,7 +55,7 @@ export const ManagementLandingPage = ({ version, setBreadcrumbs }: ManagementLan
           <EuiText>
             <FormattedMessage
               id="management.landing.subhead"
-              defaultMessage="Manage your indices, index patterns, saved objects, Kibana settings, and more."
+              defaultMessage="Manage your indices, index patterns, saved objects, OpenSearch Dashboards settings, and more."
             />
           </EuiText>
         </div>

@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import { i18n, i18nLoader } from '@kbn/i18n';
+import { i18n, i18nLoader } from '@osd/i18n';
 import { basename } from 'path';
 import { Server } from 'hapi';
 import { fromRoot } from '../../../core/server/utils';
 import type { UsageCollectionSetup } from '../../../plugins/usage_collection/server';
 import { getTranslationPaths } from './get_translations_path';
 import { I18N_RC } from './constants';
-import KbnServer, { KibanaConfig } from '../kbn_server';
+import OsdServer, { OpenSearchDashboardsConfig } from '../osd_server';
 import { registerLocalizationUsageCollector } from './localization';
 
-export async function i18nMixin(kbnServer: KbnServer, server: Server, config: KibanaConfig) {
+export async function i18nMixin(osdServer: OsdServer, server: Server, config: OpenSearchDashboardsConfig) {
   const locale = config.get('i18n.locale') as string;
 
   const translationPaths = await Promise.all([
@@ -42,7 +42,7 @@ export async function i18nMixin(kbnServer: KbnServer, server: Server, config: Ki
       getTranslationPaths({ cwd, glob: `*/${I18N_RC}` })
     ),
     getTranslationPaths({
-      cwd: fromRoot('../kibana-extra'),
+      cwd: fromRoot('../opensearch-dashboards-extra'),
       glob: `*/${I18N_RC}`,
     }),
   ]);
@@ -64,8 +64,8 @@ export async function i18nMixin(kbnServer: KbnServer, server: Server, config: Ki
 
   server.decorate('server', 'getTranslationsFilePaths', getTranslationsFilePaths);
 
-  if (kbnServer.newPlatform.setup.plugins.usageCollection) {
-    const { usageCollection } = kbnServer.newPlatform.setup.plugins as {
+  if (osdServer.newPlatform.setup.plugins.usageCollection) {
+    const { usageCollection } = osdServer.newPlatform.setup.plugins as {
       usageCollection: UsageCollectionSetup;
     };
     registerLocalizationUsageCollector(usageCollection, {

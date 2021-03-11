@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext } from 'opensearch-dashboards/server';
 import { ManagementServerPlugin } from './plugin';
 
 export const plugin = (initContext: PluginInitializerContext) =>

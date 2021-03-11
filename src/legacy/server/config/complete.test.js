@@ -35,7 +35,7 @@ describe('server/config completeMixin()', function () {
       get: sinon.stub().returns(configValues),
     };
 
-    const kbnServer = {
+    const osdServer = {
       newPlatform: {},
       settings,
       server,
@@ -44,7 +44,7 @@ describe('server/config completeMixin()', function () {
       plugins,
     };
 
-    const callCompleteMixin = () => completeMixin(kbnServer, server, config);
+    const callCompleteMixin = () => completeMixin(osdServer, server, config);
 
     return { config, callCompleteMixin, server };
   };

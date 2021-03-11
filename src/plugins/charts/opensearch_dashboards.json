@@ -1,0 +1,7 @@
+{
+  "id": "charts",
+  "version": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["visDefaultEditor"]
+}

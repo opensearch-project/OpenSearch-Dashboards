@@ -33,10 +33,10 @@ import {
   EuiToolTip,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { isEmpty } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '../../../../../kibana_react/public';
+import { i18n } from '@osd/i18n';
+import { toMountPoint } from '../../../../../opensearch_dashboards_react/public';
 import { DocLinksStart, ToastsStart } from '../../../../../../core/public';
 
 import { getCategoryName } from '../../lib';
@@ -391,9 +391,9 @@ export class Form extends PureComponent<FormProps> {
     const hasUnsavedChanges = !isEmpty(unsavedChanges);
 
     if (hasUnsavedChanges) {
-      document.body.classList.add('kbnBody--mgtAdvancedSettingsHasBottomBar');
+      document.body.classList.add('osdBody--mgtAdvancedSettingsHasBottomBar');
     } else {
-      document.body.classList.remove('kbnBody--mgtAdvancedSettingsHasBottomBar');
+      document.body.classList.remove('osdBody--mgtAdvancedSettingsHasBottomBar');
     }
 
     categories.forEach((category) => {

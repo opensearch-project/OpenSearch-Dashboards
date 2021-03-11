@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { ManagementSetup, ManagementStart } from './types';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
@@ -53,7 +53,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { home }: ManagementSetupDependencies) {
-    const kibanaVersion = this.initializerContext.env.packageInfo.version;
+    const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
 
     if (home) {
       home.featureCatalogue.register({
@@ -62,7 +62,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
           defaultMessage: 'Stack Management',
         }),
         description: i18n.translate('management.stackManagement.managementDescription', {
-          defaultMessage: 'Your center console for managing the Elastic Stack.',
+          defaultMessage: 'Your center console for managing the OpenSearch Stack.',
         }),
         icon: 'managementApp',
         path: '/app/management',
@@ -87,7 +87,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
 
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),
-          kibanaVersion,
+          opensearchDashboardsVersion,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
         });
       },

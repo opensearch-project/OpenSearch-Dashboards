@@ -23,7 +23,7 @@ export const capabilitiesProvider = () => ({
      * Management settings correspond to management section/link ids, and should not be changed
      * without also updating those definitions.
      */
-    kibana: {
+    opensearchDashboards: {
       settings: true,
       indexPatterns: true,
       objects: true,

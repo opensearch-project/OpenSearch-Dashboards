@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defer, Defer } from '../../../kibana_utils/public';
+import { defer, Defer } from '../../../opensearch_dashboards_utils/public';
 import {
   ItemBufferParams,
   TimedItemBufferParams,

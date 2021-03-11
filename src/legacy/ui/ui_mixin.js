@@ -19,6 +19,6 @@
 
 import { uiRenderMixin } from './ui_render';
 
-export async function uiMixin(kbnServer) {
-  await kbnServer.mixin(uiRenderMixin);
+export async function uiMixin(osdServer) {
+  await osdServer.mixin(uiRenderMixin);
 }

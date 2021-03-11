@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import { IRouter, SavedObject } from 'src/core/server';
 import { importDashboards } from '../lib';
 
 export const registerImportRoute = (router: IRouter, maxImportPayloadBytes: number) => {
   router.post(
     {
-      path: '/api/kibana/dashboards/import',
+      path: '/api/opensearch-dashboards/dashboards/import',
       validate: {
         body: schema.object({
           objects: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),

@@ -17,7 +17,7 @@
  * under the License.
  */
 import _ from 'lodash';
-import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { SavedObject, SavedObjectConfig } from '../../types';
 
 /**
@@ -28,21 +28,21 @@ export async function intializeSavedObject(
   savedObjectsClient: SavedObjectsClientContract,
   config: SavedObjectConfig
 ) {
-  const esType = config.type;
-  // ensure that the esType is defined
-  if (!esType) throw new Error('You must define a type name to use SavedObject objects.');
+  const opensearchType = config.type;
+  // ensure that the opensearchType is defined
+  if (!opensearchType) throw new Error('You must define a type name to use SavedObject objects.');
 
   if (!savedObject.id) {
     // just assign the defaults and be done
     _.assign(savedObject, savedObject.defaults);
     await savedObject.hydrateIndexPattern!();
-    if (typeof config.afterESResp === 'function') {
-      savedObject = await config.afterESResp(savedObject);
+    if (typeof config.afterOpenSearchResp === 'function') {
+      savedObject = await config.afterOpenSearchResp(savedObject);
     }
     return savedObject;
   }
 
-  const resp = await savedObjectsClient.get(esType, savedObject.id);
+  const resp = await savedObjectsClient.get(opensearchType, savedObject.id);
   const respMapped = {
     _id: resp.id,
     _type: resp.type,
@@ -50,7 +50,7 @@ export async function intializeSavedObject(
     references: resp.references,
     found: !!resp._version,
   };
-  await savedObject.applyESResp(respMapped);
+  await savedObject.applyOpenSearchResp(respMapped);
   if (typeof config.init === 'function') {
     await config.init.call(savedObject);
   }

@@ -1,0 +1,25 @@
+{
+  "name": "@osd/telemetry-tools",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "main": "./target/index.js",
+  "private": true,
+  "opensearchDashboards": {
+    "devOnly": true
+  },
+  "scripts": {
+    "build": "babel src --out-dir target --delete-dir-on-start --extensions .ts --source-maps=inline",
+    "osd:bootstrap": "yarn build",
+    "osd:watch": "yarn build --watch"
+  },
+  "devDependencies": {
+    "lodash": "^4.17.20",
+    "@osd/dev-utils": "1.0.0",
+    "@osd/utility-types": "1.0.0",
+    "@types/normalize-path": "^3.0.0",
+    "normalize-path": "^3.0.0",
+    "@types/lodash": "^4.14.159",
+    "moment": "^2.24.0",
+    "typescript": "4.0.2"
+  }
+}

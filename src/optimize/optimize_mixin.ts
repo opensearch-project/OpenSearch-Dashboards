@@ -21,19 +21,19 @@ import Hapi from 'hapi';
 
 import { createBundlesRoute } from './bundles_route';
 import { getNpUiPluginPublicDirs } from './np_ui_plugin_public_dirs';
-import KbnServer, { KibanaConfig } from '../legacy/server/kbn_server';
+import OsdServer, { OpenSearchDashboardsConfig } from '../legacy/server/osd_server';
 
 export const optimizeMixin = async (
-  kbnServer: KbnServer,
+  osdServer: OsdServer,
   server: Hapi.Server,
-  config: KibanaConfig
+  config: OpenSearchDashboardsConfig
 ) => {
   server.route(
     createBundlesRoute({
       basePublicPath: config.get('server.basePath'),
-      npUiPluginPublicDirs: getNpUiPluginPublicDirs(kbnServer),
-      buildHash: kbnServer.newPlatform.env.packageInfo.buildNum.toString(),
-      isDist: kbnServer.newPlatform.env.packageInfo.dist,
+      npUiPluginPublicDirs: getNpUiPluginPublicDirs(osdServer),
+      buildHash: osdServer.newPlatform.env.packageInfo.buildNum.toString(),
+      isDist: osdServer.newPlatform.env.packageInfo.dist,
     })
   );
 };

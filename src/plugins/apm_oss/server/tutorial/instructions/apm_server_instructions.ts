@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 export const createEditConfig = () => ({
   title: i18n.translate('apmOss.tutorial.editConfig.title', {
@@ -29,8 +29,8 @@ export const createEditConfig = () => ({
 credentials in the `apm-server.yml` config file.",
   }),
   commands: [
-    'output.elasticsearch:',
-    '    hosts: ["<es_url>"]',
+    'output.opensearch:',
+    '    hosts: ["<opensearch_url>"]',
     '    username: <username>',
     '    password: <password>',
   ],
@@ -42,7 +42,7 @@ const createStartServer = () => ({
   }),
   textPre: i18n.translate('apmOss.tutorial.startServer.textPre', {
     defaultMessage:
-      'The server processes and stores application performance metrics in Elasticsearch.',
+      'The server processes and stores application performance metrics in OpenSearch.',
   }),
 });
 
@@ -74,17 +74,17 @@ const createDownloadServerTitle = () =>
 export const createDownloadServerOsx = () => ({
   title: createDownloadServerTitle(),
   commands: [
-    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-darwin-x86_64.tar.gz',
-    'tar xzvf apm-server-{config.kibana.version}-darwin-x86_64.tar.gz',
-    'cd apm-server-{config.kibana.version}-darwin-x86_64/',
+    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+    'tar xzvf apm-server-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+    'cd apm-server-{config.opensearchDashboards.version}-darwin-x86_64/',
   ],
 });
 
 export const createDownloadServerDeb = () => ({
   title: createDownloadServerTitle(),
   commands: [
-    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-amd64.deb',
-    'sudo dpkg -i apm-server-{config.kibana.version}-amd64.deb',
+    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.opensearchDashboards.version}-amd64.deb',
+    'sudo dpkg -i apm-server-{config.opensearchDashboards.version}-amd64.deb',
   ],
   textPost: i18n.translate('apmOss.tutorial.downloadServerTitle', {
     defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({downloadPageLink}).',
@@ -97,8 +97,8 @@ export const createDownloadServerDeb = () => ({
 export const createDownloadServerRpm = () => ({
   title: createDownloadServerTitle(),
   commands: [
-    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-x86_64.rpm',
-    'sudo rpm -vi apm-server-{config.kibana.version}-x86_64.rpm',
+    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.opensearchDashboards.version}-x86_64.rpm',
+    'sudo rpm -vi apm-server-{config.opensearchDashboards.version}-x86_64.rpm',
   ],
   textPost: i18n.translate('apmOss.tutorial.downloadServerRpm', {
     defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({downloadPageLink}).',
@@ -126,7 +126,7 @@ PowerShell.\n5. From the PowerShell prompt, run the following commands to instal
         values: {
           downloadPageLink: 'https://www.elastic.co/downloads/apm/apm-server',
           zipFileExtractFolder: '`C:\\Program Files`',
-          apmServerDirectory: '`apm-server-{config.kibana.version}-windows`',
+          apmServerDirectory: '`apm-server-{config.opensearchDashboards.version}-windows`',
         },
       }),
       commands: [`cd 'C:\\Program Files\\APM-Server'`, `.\\install-service-apm-server.ps1`],

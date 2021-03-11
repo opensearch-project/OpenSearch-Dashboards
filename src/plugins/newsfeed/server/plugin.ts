@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin } from 'kibana/server';
+import { Plugin } from 'opensearch-dashboards/server';
 
 export class NewsfeedPlugin implements Plugin {
   public setup() {}
