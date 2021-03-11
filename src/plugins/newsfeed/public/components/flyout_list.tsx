@@ -32,7 +32,7 @@ import {
   EuiHeaderAlert,
   EuiPortal,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { NewsfeedContext } from './newsfeed_header_nav_button';
 import { NewsfeedItem } from '../types';
 import { NewsEmptyPrompt } from './empty_news';
@@ -48,7 +48,7 @@ export const NewsfeedFlyout = () => {
         onClose={closeFlyout}
         size="s"
         aria-labelledby="flyoutSmallTitle"
-        className="kbnNews__flyout"
+        className="osdNews__flyout"
         data-test-subj="NewsfeedFlyout"
       >
         <EuiFlyoutHeader hasBorder>
@@ -56,12 +56,12 @@ export const NewsfeedFlyout = () => {
             <h2 id="flyoutSmallTitle">
               <FormattedMessage
                 id="newsfeed.flyoutList.whatsNewTitle"
-                defaultMessage="What's new at Elastic"
+                defaultMessage="What's new at OpenSearch"
               />
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody className={'kbnNews__flyoutAlerts'}>
+        <EuiFlyoutBody className={'osdNews__flyoutAlerts'}>
           {!newsFetchResult ? (
             <NewsLoadingPrompt />
           ) : newsFetchResult.feedItems.length > 0 ? (
@@ -103,7 +103,7 @@ export const NewsfeedFlyout = () => {
                     <FormattedMessage
                       id="newsfeed.flyoutList.versionTextLabel"
                       defaultMessage="{version}"
-                      values={{ version: `Version ${newsFetchResult.kibanaVersion}` }}
+                      values={{ version: `Version ${newsFetchResult.opensearchDashboardsVersion}` }}
                     />
                   </p>
                 </EuiText>

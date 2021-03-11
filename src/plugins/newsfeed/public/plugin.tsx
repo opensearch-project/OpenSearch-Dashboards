@@ -22,7 +22,7 @@ import { catchError, takeUntil, share } from 'rxjs/operators';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import moment from 'moment';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@osd/i18n/react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { NewsfeedPluginBrowserConfig, FetchResult } from './types';
 import { NewsfeedNavButton, NewsfeedApiFetchResult } from './components/newsfeed_header_nav_button';
@@ -33,12 +33,12 @@ export type NewsfeedPublicPluginStart = ReturnType<NewsfeedPublicPlugin['start']
 
 export class NewsfeedPublicPlugin
   implements Plugin<NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart> {
-  private readonly kibanaVersion: string;
+  private readonly opensearchDashboardsVersion: string;
   private readonly config: NewsfeedPluginBrowserConfig;
   private readonly stop$ = new Rx.ReplaySubject(1);
 
   constructor(initializerContext: PluginInitializerContext<NewsfeedPluginBrowserConfig>) {
-    this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.opensearchDashboardsVersion = initializerContext.env.packageInfo.version;
     const config = initializerContext.config.get();
     this.config = Object.freeze({
       ...config,
@@ -78,7 +78,7 @@ export class NewsfeedPublicPlugin
     config: NewsfeedPluginBrowserConfig
   ): Rx.Observable<FetchResult | null | void> {
     const { http } = core;
-    return getApi(http, config, this.kibanaVersion).pipe(
+    return getApi(http, config, this.opensearchDashboardsVersion).pipe(
       takeUntil(this.stop$), // stop the interval when stop method is called
       catchError(() => Rx.of(null)) // do not throw error
     );
