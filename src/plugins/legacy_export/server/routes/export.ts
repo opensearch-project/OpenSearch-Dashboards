@@ -18,14 +18,14 @@
  */
 
 import moment from 'moment';
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import { IRouter } from 'src/core/server';
 import { exportDashboards } from '../lib';
 
-export const registerExportRoute = (router: IRouter, kibanaVersion: string) => {
+export const registerExportRoute = (router: IRouter, opensearchDashboardsVersion: string) => {
   router.get(
     {
-      path: '/api/kibana/dashboards/export',
+      path: '/api/opensearch-dashboards/dashboards/export',
       validate: {
         query: schema.object({
           dashboard: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
@@ -39,8 +39,8 @@ export const registerExportRoute = (router: IRouter, kibanaVersion: string) => {
       const ids = Array.isArray(req.query.dashboard) ? req.query.dashboard : [req.query.dashboard];
       const { client } = ctx.core.savedObjects;
 
-      const exported = await exportDashboards(ids, client, kibanaVersion);
-      const filename = `kibana-dashboards.${moment.utc().format('YYYY-MM-DD-HH-mm-ss')}.json`;
+      const exported = await exportDashboards(ids, client, opensearchDashboardsVersion);
+      const filename = `opensearch-dashboards-dashboards.${moment.utc().format('YYYY-MM-DD-HH-mm-ss')}.json`;
       const body = JSON.stringify(exported, null, '  ');
 
       return res.ok({

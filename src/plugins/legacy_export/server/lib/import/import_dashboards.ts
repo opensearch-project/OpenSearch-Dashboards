@@ -25,8 +25,8 @@ export async function importDashboards(
   { overwrite, exclude }: { overwrite: boolean; exclude: string[] }
 ) {
   // The server assumes that documents with no migrationVersion are up to date.
-  // That assumption enables Kibana and other API consumers to not have to build
-  // up migrationVersion prior to creating new objects. But it means that imports
+  // That assumption enables OpenSearch Dashboards and other API consumers to not have to
+  // build up migrationVersion prior to creating new objects. But it means that imports
   // need to set migrationVersion to something other than undefined, so that imported
   // docs are not seen as automatically up-to-date.
   const docs = objects
