@@ -41,7 +41,7 @@ export type ReqFacade = FakeRequest & {
   };
   getUiSettingsService: () => IUiSettingsClient;
   getSavedObjectsClient: () => SavedObjectsClientContract;
-  getEsShardTimeout: () => Promise<number>;
+  getOpenSearchShardTimeout: () => Promise<number>;
 };
 
 export class AbstractSearchStrategy {

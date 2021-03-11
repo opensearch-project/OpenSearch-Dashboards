@@ -30,7 +30,7 @@ export function query(req, panel, annotation, opensearchQueryConfig, indexPatter
     doc.size = 0;
     const queries = !annotation.ignore_global_filters ? req.payload.query : [];
     const filters = !annotation.ignore_global_filters ? req.payload.filters : [];
-    doc.query = opensearchQuery.buildEsQuery(indexPattern, queries, filters, opensearchQueryConfig);
+    doc.query = opensearchQuery.buildOpenSearchQuery(indexPattern, queries, filters, opensearchQueryConfig);
     const timerange = {
       range: {
         [timeField]: {
@@ -44,13 +44,13 @@ export function query(req, panel, annotation, opensearchQueryConfig, indexPatter
 
     if (annotation.query_string) {
       doc.query.bool.must.push(
-        opensearchQuery.buildEsQuery(indexPattern, [annotation.query_string], [], opensearchQueryConfig)
+        opensearchQuery.buildOpenSearchQuery(indexPattern, [annotation.query_string], [], opensearchQueryConfig)
       );
     }
 
     if (!annotation.ignore_panel_filters && panel.filter) {
       doc.query.bool.must.push(
-        opensearchQuery.buildEsQuery(indexPattern, [panel.filter], [], opensearchQueryConfig)
+        opensearchQuery.buildOpenSearchQuery(indexPattern, [panel.filter], [], opensearchQueryConfig)
       );
     }
 

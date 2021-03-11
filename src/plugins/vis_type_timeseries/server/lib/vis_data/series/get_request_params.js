@@ -17,7 +17,7 @@
  * under the License.
  */
 import { buildRequestBody } from './build_request_body';
-import { getEsShardTimeout } from '../helpers/get_es_shard_timeout';
+import { getOpenSearchShardTimeout } from '../helpers/get_opensearch_shard_timeout';
 import { getIndexPatternObject } from '../helpers/get_index_pattern';
 
 export async function getSeriesRequestParams(req, panel, series, opensearchQueryConfig, capabilities) {
@@ -32,7 +32,7 @@ export async function getSeriesRequestParams(req, panel, series, opensearchQuery
     indexPatternObject,
     capabilities
   );
-  const opensearchShardTimeout = await getEsShardTimeout(req);
+  const opensearchShardTimeout = await getOpenSearchShardTimeout(req);
 
   return {
     index: indexPatternString,

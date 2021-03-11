@@ -29,7 +29,7 @@ export function splitByFilter(req, panel, series, opensearchQueryConfig, indexPa
     overwrite(
       doc,
       `aggs.${series.id}.filter`,
-      opensearchQuery.buildEsQuery(indexPattern, [series.filter], [], opensearchQueryConfig)
+      opensearchQuery.buildOpenSearchQuery(indexPattern, [series.filter], [], opensearchQueryConfig)
     );
 
     return next(doc);

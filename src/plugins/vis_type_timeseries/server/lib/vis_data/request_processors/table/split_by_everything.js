@@ -29,7 +29,7 @@ export function splitByEverything(req, panel, opensearchQueryConfig, indexPatter
           overwrite(
             doc,
             `aggs.pivot.aggs.${column.id}.filter`,
-            opensearchQuery.buildEsQuery(indexPattern, [column.filter], [], opensearchQueryConfig)
+            opensearchQuery.buildOpenSearchQuery(indexPattern, [column.filter], [], opensearchQueryConfig)
           );
         } else {
           overwrite(doc, `aggs.pivot.aggs.${column.id}.filter.match_all`, {});

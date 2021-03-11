@@ -20,7 +20,7 @@ import { buildRequestBody } from './table/build_request_body';
 import { handleErrorResponse } from './handle_error_response';
 import { get } from 'lodash';
 import { processBucket } from './table/process_bucket';
-import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
+import { getOpenSearchQueryConfig } from './helpers/get_opensearch_query_uisettings';
 import { getIndexPatternObject } from './helpers/get_index_pattern';
 
 export async function getTableData(req, panel) {
@@ -30,7 +30,7 @@ export async function getTableData(req, panel) {
     searchStrategy,
     capabilities,
   } = await req.framework.searchStrategyRegistry.getViableStrategy(req, panelIndexPattern);
-  const opensearchQueryConfig = await getEsQueryConfig(req);
+  const opensearchQueryConfig = await getOpenSearchQueryConfig(req);
   const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
 
   const meta = {

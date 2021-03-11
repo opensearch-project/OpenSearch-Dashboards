@@ -72,7 +72,7 @@ export function getVisData(
     payload: request.body,
     getUiSettingsService: () => requestContext.core.uiSettings.client,
     getSavedObjectsClient: () => requestContext.core.savedObjects.client,
-    getEsShardTimeout: async () => {
+    getOpenSearchShardTimeout: async () => {
       return await framework.globalConfig$
         .pipe(
           first(),

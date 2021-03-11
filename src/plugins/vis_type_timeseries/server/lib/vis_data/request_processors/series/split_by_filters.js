@@ -24,9 +24,9 @@ export function splitByFilters(req, panel, series, opensearchQueryConfig, indexP
   return (next) => (doc) => {
     if (series.split_mode === 'filters' && series.split_filters) {
       series.split_filters.forEach((filter) => {
-        const builtEsQuery = opensearchQuery.buildEsQuery(indexPattern, [filter.filter], [], opensearchQueryConfig);
+        const builtOpenSearchQuery = opensearchQuery.buildOpenSearchQuery(indexPattern, [filter.filter], [], opensearchQueryConfig);
 
-        overwrite(doc, `aggs.${series.id}.filters.filters.${filter.id}`, builtEsQuery);
+        overwrite(doc, `aggs.${series.id}.filters.filters.${filter.id}`, builtOpenSearchQuery);
       });
     }
     return next(doc);

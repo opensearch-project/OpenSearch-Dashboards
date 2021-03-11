@@ -17,7 +17,7 @@
  * under the License.
  */
 import { buildAnnotationRequest } from './build_request_body';
-import { getEsShardTimeout } from '../helpers/get_es_shard_timeout';
+import { getOpenSearchShardTimeout } from '../helpers/get_opensearch_shard_timeout';
 import { getIndexPatternObject } from '../helpers/get_index_pattern';
 
 export async function getAnnotationRequestParams(
@@ -27,7 +27,7 @@ export async function getAnnotationRequestParams(
   opensearchQueryConfig,
   capabilities
 ) {
-  const opensearchShardTimeout = await getEsShardTimeout(req);
+  const opensearchShardTimeout = await getOpenSearchShardTimeout(req);
   const indexPattern = annotation.index_pattern;
   const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
   const request = buildAnnotationRequest(
