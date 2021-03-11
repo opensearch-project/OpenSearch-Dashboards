@@ -23,7 +23,7 @@ import {
   Plugin,
   IUiSettingsClient,
   PluginInitializerContext,
-} from 'kibana/public';
+} from 'opensearch-dashboards/public';
 
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
