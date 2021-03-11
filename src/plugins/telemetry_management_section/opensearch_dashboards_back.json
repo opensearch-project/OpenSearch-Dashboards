@@ -1,6 +1,6 @@
 {
   "id": "telemetryManagementSection",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": false,
   "ui": true,
   "requiredPlugins": [
