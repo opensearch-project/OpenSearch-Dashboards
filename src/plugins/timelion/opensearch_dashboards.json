@@ -1,11 +1,11 @@
 {
   "id": "timelion",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "ui": true,
   "server": true,
   "requiredBundles": [
-    "kibanaLegacy",
-    "kibanaUtils",
+    "opensearchDashboardsLegacy",
+    "opensearchDashboardsUtils",
     "savedObjects",
     "visTypeTimelion"
   ],
@@ -14,6 +14,6 @@
     "data",
     "navigation",
     "visTypeTimelion",
-    "kibanaLegacy"
+    "opensearchDashboardsLegacy"
   ]
 }

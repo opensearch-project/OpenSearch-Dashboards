@@ -17,19 +17,19 @@
  * under the License.
  */
 
-import { createStateContainer, syncState, IKbnUrlStateStorage } from '../../kibana_utils/public';
+import { createStateContainer, syncState, IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
 
 import { TimelionAppState, TimelionAppStateTransitions } from './types';
 
 const STATE_STORAGE_KEY = '_a';
 
 interface Arguments {
-  kbnUrlStateStorage: IKbnUrlStateStorage;
+  osdUrlStateStorage: IOsdUrlStateStorage;
   stateDefaults: TimelionAppState;
 }
 
-export function initTimelionAppState({ stateDefaults, kbnUrlStateStorage }: Arguments) {
-  const urlState = kbnUrlStateStorage.get<TimelionAppState>(STATE_STORAGE_KEY);
+export function initTimelionAppState({ stateDefaults, osdUrlStateStorage }: Arguments) {
+  const urlState = osdUrlStateStorage.get<TimelionAppState>(STATE_STORAGE_KEY);
   const initialState = {
     ...stateDefaults,
     ...urlState,
@@ -42,7 +42,7 @@ export function initTimelionAppState({ stateDefaults, kbnUrlStateStorage }: Argu
     we update the state format at all and want to handle BWC, we must not only migrate the
     data stored with saved vis, but also any old state in the url.
   */
-  kbnUrlStateStorage.set(STATE_STORAGE_KEY, initialState, { replace: true });
+  osdUrlStateStorage.set(STATE_STORAGE_KEY, initialState, { replace: true });
 
   const stateContainer = createStateContainer<TimelionAppState, TimelionAppStateTransitions>(
     initialState,
@@ -63,7 +63,7 @@ export function initTimelionAppState({ stateDefaults, kbnUrlStateStorage }: Argu
         }
       },
     },
-    stateStorage: kbnUrlStateStorage,
+    stateStorage: osdUrlStateStorage,
   });
 
   // start syncing the appState with the ('_a') url
