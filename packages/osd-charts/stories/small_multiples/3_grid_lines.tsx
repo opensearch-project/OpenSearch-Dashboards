@@ -67,6 +67,7 @@ const getAxisStyle = (position: Position): AxisSpec['style'] => ({
     visible: false,
   },
 });
+const tickTimeFormatter = timeFormatter(niceTimeFormatByDay(numOfDays));
 
 const getAxisOptions = (
   position: Position,
@@ -77,7 +78,7 @@ const getAxisOptions = (
     id: position,
     position,
     ticks: isVertical ? 2 : undefined,
-    tickFormat: isVertical ? (d) => d.toFixed(2) : timeFormatter(niceTimeFormatByDay(numOfDays)),
+    tickFormat: isVertical ? (d) => d.toFixed(2) : tickTimeFormatter,
     domain: isVertical
       ? {
           max: 10,
@@ -113,6 +114,11 @@ export const Example = () => {
               visible: false,
             },
           },
+        }}
+        onBrushEnd={(d) => {
+          if (d.x) {
+            action('brushEvent')(tickTimeFormatter(d.x[0] ?? 0), tickTimeFormatter(d.x[1] ?? 0));
+          }
         }}
       />
       <Axis {...getAxisOptions(Position.Left)} />

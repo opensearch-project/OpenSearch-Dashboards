@@ -33,6 +33,7 @@ import {
   LIGHT_THEME,
   niceTimeFormatByDay,
   timeFormatter,
+  BrushAxis,
 } from '../../src';
 import { SeededDataGenerator } from '../../src/mocks/utils';
 import { SB_SOURCE_PANEL } from '../utils/storybook';
@@ -49,15 +50,25 @@ const data = dg.generateGroupedSeries(numOfDays, 6, 'metric ').map((d) => {
 export const Example = () => {
   const showLegend = boolean('Show Legend', true);
   const onElementClick = action('onElementClick');
+  const tickTimeFormatter = timeFormatter(niceTimeFormatByDay(numOfDays));
   return (
     <Chart className="story-chart">
-      <Settings onElementClick={onElementClick} showLegend={showLegend} />
+      <Settings
+        onElementClick={onElementClick}
+        showLegend={showLegend}
+        onBrushEnd={(d) => {
+          if (d.x) {
+            action('brushEventX')(tickTimeFormatter(d.x[0] ?? 0), tickTimeFormatter(d.x[1] ?? 0), d.y);
+          }
+        }}
+        brushAxis={BrushAxis.X}
+      />
       <Axis
         id="time"
         title="Timestamp"
         position={Position.Bottom}
         gridLine={{ visible: false }}
-        tickFormat={timeFormatter(niceTimeFormatByDay(numOfDays))}
+        tickFormat={tickTimeFormatter}
       />
       <Axis
         id="y"

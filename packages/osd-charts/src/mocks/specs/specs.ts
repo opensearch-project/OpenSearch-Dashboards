@@ -18,6 +18,7 @@
  */
 
 import { ChartTypes } from '../../chart_types';
+import { Predicate } from '../../chart_types/heatmap/utils/common';
 import { config, percentFormatter } from '../../chart_types/partition_chart/layout/config';
 import { PartitionLayout } from '../../chart_types/partition_chart/layout/types/config_types';
 import { ShapeTreeNode } from '../../chart_types/partition_chart/layout/types/viewmodel_types';
@@ -41,7 +42,7 @@ import {
   AxisSpec,
 } from '../../chart_types/xy_chart/utils/specs';
 import { ScaleType } from '../../scales/constants';
-import { SettingsSpec, SpecTypes, DEFAULT_SETTINGS_SPEC } from '../../specs';
+import { SettingsSpec, SpecTypes, DEFAULT_SETTINGS_SPEC, SmallMultiplesSpec, GroupBySpec, Spec } from '../../specs';
 import { Datum, mergePartial, Position, RecursivePartial } from '../../utils/common';
 import { LIGHT_THEME } from '../../utils/themes/light_theme';
 
@@ -293,6 +294,24 @@ export class MockGlobalSpec {
     },
   };
 
+  private static readonly smallMultipleBase: SmallMultiplesSpec = {
+    id: 'smallMultiple',
+    chartType: ChartTypes.Global,
+    specType: SpecTypes.SmallMultiples,
+    style: {
+      verticalPanelPadding: [0, 0],
+      horizontalPanelPadding: [0, 0],
+    },
+  };
+
+  private static readonly groupByBase: GroupBySpec = {
+    id: 'groupBy',
+    chartType: ChartTypes.Global,
+    specType: SpecTypes.IndexOrder,
+    by: ({ id }: Spec) => id,
+    sort: Predicate.DataIndex,
+  };
+
   static settings(partial?: Partial<SettingsSpec>): SettingsSpec {
     return mergePartial<SettingsSpec>(MockGlobalSpec.settingsBase, partial, { mergeOptionalPartialValues: true });
   }
@@ -305,6 +324,18 @@ export class MockGlobalSpec {
 
   static axis(partial?: Partial<AxisSpec>): AxisSpec {
     return mergePartial<AxisSpec>(MockGlobalSpec.axisBase, partial, { mergeOptionalPartialValues: true });
+  }
+
+  static smallMultiple(partial?: Partial<SmallMultiplesSpec>): SmallMultiplesSpec {
+    return mergePartial<SmallMultiplesSpec>(MockGlobalSpec.smallMultipleBase, partial, {
+      mergeOptionalPartialValues: true,
+    });
+  }
+
+  static groupBy(partial?: Partial<GroupBySpec>): GroupBySpec {
+    return mergePartial<GroupBySpec>(MockGlobalSpec.groupByBase, partial, {
+      mergeOptionalPartialValues: true,
+    });
   }
 }
 

@@ -36,7 +36,7 @@ export const Example = () => {
   );
   return (
     <Chart className="story-chart">
-      <Settings onBrushEnd={action('onBrushEnd')} rotation={getChartRotationKnob()} brushAxis={brushAxisSelect} />
+      <Settings rotation={getChartRotationKnob()} brushAxis={brushAxisSelect} onBrushEnd={action('brush')} />
       <Axis id="bottom" position={Position.Bottom} title="bottom" showOverlappingTicks />
       <Axis id="left" title="left" position={Position.Left} tickFormat={(d) => Number(d).toFixed(2)} />
       <Axis id="top" position={Position.Top} title="top" showOverlappingTicks />

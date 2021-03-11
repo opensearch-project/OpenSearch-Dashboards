@@ -25,6 +25,7 @@ import { Scale } from '../../../../scales';
 import { GroupBrushExtent, XYBrushArea } from '../../../../specs';
 import { BrushAxis } from '../../../../specs/constants';
 import { DragState, GlobalChartState } from '../../../../state/chart_state';
+import { getChartIdSelector } from '../../../../state/selectors/get_chart_id';
 import { getSettingsSpecSelector } from '../../../../state/selectors/get_settings_specs';
 import { maxValueWithUpperLimit, minValueWithLowerLimit, Rotation } from '../../../../utils/common';
 import { Dimensions } from '../../../../utils/dimensions';
@@ -32,7 +33,8 @@ import { hasDragged, DragCheckProps } from '../../../../utils/events';
 import { GroupId } from '../../../../utils/ids';
 import { isVerticalRotation } from '../utils/common';
 import { computeChartDimensionsSelector } from './compute_chart_dimensions';
-import { getLeftPoint, getTopPoint } from './get_brush_area';
+import { computeSmallMultipleScalesSelector, SmallMultipleScales } from './compute_small_multiple_scales';
+import { getPlotAreaRestrictedPoint, getPointsConstraintToSinglePanel, PanelPoints } from './get_brush_area';
 import { getComputedScalesSelector } from './get_computed_scales';
 import { isBrushAvailableSelector } from './is_brush_available';
 import { isHistogramModeEnabledSelector } from './is_histogram_mode_enabled';
@@ -62,6 +64,7 @@ export function createOnBrushEndCaller(): (state: GlobalChartState) => void {
           getComputedScalesSelector,
           computeChartDimensionsSelector,
           isHistogramModeEnabledSelector,
+          computeSmallMultipleScalesSelector,
         ],
         (
           lastDrag,
@@ -76,12 +79,12 @@ export function createOnBrushEndCaller(): (state: GlobalChartState) => void {
           computedScales,
           { chartDimensions },
           histogramMode,
+          smallMultipleScales,
         ): void => {
           const nextProps = {
             lastDrag,
             onBrushEnd,
           };
-
           if (lastDrag !== null && hasDragged(prevProps, nextProps) && onBrushEnd) {
             const brushArea: XYBrushArea = {};
             const { yScales, xScale } = computedScales;
@@ -93,13 +96,21 @@ export function createOnBrushEndCaller(): (state: GlobalChartState) => void {
                 rotation,
                 histogramMode,
                 xScale,
+                smallMultipleScales,
                 minBrushDelta,
                 roundHistogramBrushValues,
                 allowBrushingLastHistogramBucket,
               );
             }
             if (brushAxis === BrushAxis.Y || brushAxis === BrushAxis.Both) {
-              brushArea.y = getYBrushExtents(chartDimensions, lastDrag, rotation, yScales, minBrushDelta);
+              brushArea.y = getYBrushExtents(
+                chartDimensions,
+                lastDrag,
+                rotation,
+                yScales,
+                smallMultipleScales,
+                minBrushDelta,
+              );
             }
             if (brushArea.x !== undefined || brushArea.y !== undefined) {
               onBrushEnd(brushArea);
@@ -107,13 +118,26 @@ export function createOnBrushEndCaller(): (state: GlobalChartState) => void {
           }
           prevProps = nextProps;
         },
-      )({
-        keySelector: (state: GlobalChartState) => state.chartId,
-      });
+      )(getChartIdSelector);
     }
     if (selector) {
       selector(state);
     }
+  };
+}
+
+function scalePanelPointsToPanelCoordinates(
+  scaleXPoint: boolean,
+  { start, end, vPanelStart, hPanelStart, vPanelHeight, hPanelWidth }: PanelPoints,
+) {
+  // scale screen coordinates down to panel scale
+  const startPos = scaleXPoint ? start.x - hPanelStart : start.y - vPanelStart;
+  const endPos = scaleXPoint ? end.x - hPanelStart : end.y - vPanelStart;
+  const panelMax = scaleXPoint ? hPanelWidth : vPanelHeight;
+  return {
+    minPos: Math.min(startPos, endPos),
+    maxPos: Math.max(startPos, endPos),
+    panelMax,
   };
 }
 
@@ -123,25 +147,19 @@ function getXBrushExtent(
   rotation: Rotation,
   histogramMode: boolean,
   xScale: Scale,
+  smallMultipleScales: SmallMultipleScales,
   minBrushDelta?: number,
   roundHistogramBrushValues?: boolean,
   allowBrushingLastHistogramBucket?: boolean,
 ): [number, number] | undefined {
-  let startPos = getLeftPoint(chartDimensions, lastDrag.start.position);
-  let endPos = getLeftPoint(chartDimensions, lastDrag.end.position);
-  let chartMax = chartDimensions.width;
-
-  if (isVerticalRotation(rotation)) {
-    startPos = getTopPoint(chartDimensions, lastDrag.start.position);
-    endPos = getTopPoint(chartDimensions, lastDrag.end.position);
-    chartMax = chartDimensions.height;
-  }
-
-  let minPos = minValueWithLowerLimit(startPos, endPos, 0);
-  let maxPos = maxValueWithUpperLimit(startPos, endPos, chartMax);
+  const isXHorizontal = !isVerticalRotation(rotation);
+  // scale screen coordinates down to panel scale
+  const scaledPanelPoints = getMinMaxPos(chartDimensions, lastDrag, smallMultipleScales, isXHorizontal);
+  let { minPos, maxPos } = scaledPanelPoints;
+  // reverse the positions if chart is mirrored
   if (rotation === -90 || rotation === 180) {
-    minPos = chartMax - minPos;
-    maxPos = chartMax - maxPos;
+    minPos = scaledPanelPoints.panelMax - minPos;
+    maxPos = scaledPanelPoints.panelMax - maxPos;
   }
   if (minBrushDelta !== undefined ? Math.abs(maxPos - minPos) < minBrushDelta : maxPos === minPos) {
     // if 0 size brush, avoid computing the value
@@ -163,28 +181,41 @@ function getXBrushExtent(
   return [minValue, maxValue];
 }
 
+function getMinMaxPos(
+  chartDimensions: Dimensions,
+  lastDrag: DragState,
+  smallMultipleScales: SmallMultipleScales,
+  scaleXPoint: boolean,
+) {
+  const panelPoints = getPanelPoints(chartDimensions, lastDrag, smallMultipleScales);
+  // scale screen coordinates down to panel scale
+  return scalePanelPointsToPanelCoordinates(scaleXPoint, panelPoints);
+}
+
+function getPanelPoints(chartDimensions: Dimensions, lastDrag: DragState, smallMultipleScales: SmallMultipleScales) {
+  const plotStartPointPx = getPlotAreaRestrictedPoint(lastDrag.start.position, chartDimensions);
+  const plotEndPointPx = getPlotAreaRestrictedPoint(lastDrag.end.position, chartDimensions);
+  return getPointsConstraintToSinglePanel(plotStartPointPx, plotEndPointPx, smallMultipleScales);
+}
+
 function getYBrushExtents(
   chartDimensions: Dimensions,
   lastDrag: DragState,
   rotation: Rotation,
   yScales: Map<GroupId, Scale>,
+  smallMultipleScales: SmallMultipleScales,
   minBrushDelta?: number,
 ): GroupBrushExtent[] | undefined {
   const yValues: GroupBrushExtent[] = [];
   yScales.forEach((yScale, groupId) => {
-    let startPos = getTopPoint(chartDimensions, lastDrag.start.position);
-    let endPos = getTopPoint(chartDimensions, lastDrag.end.position);
-    let chartMax = chartDimensions.height;
-    if (isVerticalRotation(rotation)) {
-      startPos = getLeftPoint(chartDimensions, lastDrag.start.position);
-      endPos = getLeftPoint(chartDimensions, lastDrag.end.position);
-      chartMax = chartDimensions.width;
-    }
-    let minPos = minValueWithLowerLimit(startPos, endPos, 0);
-    let maxPos = maxValueWithUpperLimit(startPos, endPos, chartMax);
-    if (rotation === -90 || rotation === 180) {
-      minPos = chartMax - minPos;
-      maxPos = chartMax - maxPos;
+    const isXVertical = isVerticalRotation(rotation);
+    // scale screen coordinates down to panel scale
+    const scaledPanelPoints = getMinMaxPos(chartDimensions, lastDrag, smallMultipleScales, isXVertical);
+    let { minPos, maxPos } = scaledPanelPoints;
+
+    if (rotation === 90 || rotation === 180) {
+      minPos = scaledPanelPoints.panelMax - minPos;
+      maxPos = scaledPanelPoints.panelMax - maxPos;
     }
     if (minBrushDelta !== undefined ? Math.abs(maxPos - minPos) < minBrushDelta : maxPos === minPos) {
       // if 0 size brush, avoid computing the value
