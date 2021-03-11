@@ -19,9 +19,9 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { EuiFormRow, EuiFieldNumber, EuiFieldNumberProps, EuiIconTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../kibana_react/public';
+import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { AggParamEditorProps } from '../agg_param_props';
 import { UI_SETTINGS } from '../../../../data/public';
 
@@ -63,7 +63,7 @@ function MaxBarsParamEditor({
   setValidity,
   setTouched,
 }: SizeParamEditorProps) {
-  const { services } = useKibana();
+  const { services } = useOpenSearchDashboards();
   const uiSettingMaxBars = services.uiSettings?.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
   const isValid =
     disabled ||

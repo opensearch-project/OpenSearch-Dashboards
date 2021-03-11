@@ -19,7 +19,7 @@
 
 import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect } from 'react';
 import { isEqual } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EventEmitter } from 'events';
 

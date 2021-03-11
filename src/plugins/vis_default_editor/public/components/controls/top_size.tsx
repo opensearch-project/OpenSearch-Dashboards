@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { EuiIconTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { SizeParamEditor } from './size';
 import { getCompatibleAggs } from './top_aggregate';

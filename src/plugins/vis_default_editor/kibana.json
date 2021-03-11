@@ -1,6 +1,0 @@
-{
-  "id": "visDefaultEditor",
-  "version": "kibana",
-  "ui": true,
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "data"]
-}

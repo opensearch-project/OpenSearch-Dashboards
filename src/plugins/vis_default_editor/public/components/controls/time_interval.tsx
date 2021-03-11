@@ -20,14 +20,14 @@
 import { get, find } from 'lodash';
 import React, { useEffect } from 'react';
 import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 
 import { search, AggParamOption } from '../../../../data/public';
 import { AggParamEditorProps } from '../agg_param_props';
 const { parseEsInterval, InvalidEsCalendarIntervalError } = search.aggs;
 
-// we check if Elasticsearch interval is valid to show a user appropriate error message
+// we check if OpenSearch interval is valid to show a user appropriate error message
 // e.g. there is the case when a user inputs '14d' but it's '2w' in expression equivalent and the request will fail
 // we don't check it for 0ms because the overall time range has not yet been set
 function isValidCalendarInterval(interval: string) {
@@ -69,7 +69,7 @@ function validateInterval(
   }
 
   if (!timeBase) {
-    // we check if Elasticsearch interval is valid ES interval to show a user appropriate error message
+    // we check if OpenSearch interval is valid OpenSearch interval to show a user appropriate error message
     // we don't check if there is timeBase
     const { isValidCalendarValue, error } = isValidCalendarInterval(value);
     if (!isValidCalendarValue) {
