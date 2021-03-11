@@ -34,7 +34,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 interface Props {
   fetchExample: () => Promise<any[]>;
@@ -120,8 +120,8 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
           <FormattedMessage
             id="telemetry.callout.errorLoadingClusterStatisticsDescription"
             defaultMessage="An unexpected error occured while attempting to fetch the cluster statistics.
-              This can occur because Elasticsearch failed, Kibana failed, or there is a network error.
-              Check Kibana, then reload the page and try again."
+              This can occur because OpenSearch failed, OpenSearch Dashboards failed, or there is a network error.
+              Check OpenSearch Dashboards, then reload the page and try again."
           />
         </EuiCallOut>
       );
