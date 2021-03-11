@@ -159,7 +159,7 @@ export class ExpressionsService {
    * as the third argument, that allows functions to perform side-effects.
    *
    * ```ts
-   * expressions.run('...', null, { elasticsearchClient });
+   * expressions.run('...', null, { opensearchClient });
    * ```
    */
   public readonly run = <
