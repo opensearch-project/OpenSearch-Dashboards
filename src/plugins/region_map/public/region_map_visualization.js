@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { getFormatService, getNotifications, getKibanaLegacy } from './kibana_services';
+import { i18n } from '@osd/i18n';
+import { getFormatService, getNotifications, getOpenSearchDashboardsLegacy } from './opensearch_dashboards_services';
 import { truncatedColorMaps } from '../../charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
 import { mapTooltipProvider, ORIGIN, lazyLoadMapsLegacyModules } from '../../maps_legacy/public';
@@ -37,9 +37,9 @@ export function createRegionMapVisualization({
       this._tooltipFormatter = mapTooltipProvider(container, tooltipFormatter);
     }
 
-    async render(esResponse, visParams) {
-      getKibanaLegacy().loadFontAwesome();
-      await super.render(esResponse, visParams);
+    async render(opensearchResponse, visParams) {
+      getOpenSearchDashboardsLegacy().loadFontAwesome();
+      await super.render(opensearchResponse, visParams);
       if (this._choroplethLayer) {
         await this._choroplethLayer.whenDataLoaded();
       }
@@ -88,7 +88,7 @@ export function createRegionMapVisualization({
         );
       }
 
-      this._kibanaMap.useUiStateFromVisualization(this._vis);
+      this._opensearchDashboardsMap.useUiStateFromVisualization(this._vis);
     }
 
     async _loadConfig(fileLayerConfig) {
@@ -106,7 +106,7 @@ export function createRegionMapVisualization({
         return await serviceSettings.loadFileLayerConfig(fileLayerConfig);
       }
 
-      //Configured in the kibana.yml. Needs to be resolved through the settings.
+      //Configured in the opensearch_dashboards.yml. Needs to be resolved through the settings.
       const configuredLayer = regionmapsConfig.layers.find(
         (layer) => layer.name === fileLayerConfig.name
       );
@@ -171,7 +171,7 @@ export function createRegionMapVisualization({
 
     async _recreateChoroplethLayer(name, attribution, showAllData) {
       const selectedLayer = await this._loadConfig(this._params.selectedLayer);
-      this._kibanaMap.removeLayer(this._choroplethLayer);
+      this._opensearchDashboardsMap.removeLayer(this._choroplethLayer);
 
       if (this._choroplethLayer) {
         this._choroplethLayer = this._choroplethLayer.cloneChoroplethLayerForNewData(
@@ -233,7 +233,7 @@ export function createRegionMapVisualization({
         }
       });
 
-      this._kibanaMap.addLayer(this._choroplethLayer);
+      this._opensearchDashboardsMap.addLayer(this._choroplethLayer);
     }
 
     _hasColumns() {
