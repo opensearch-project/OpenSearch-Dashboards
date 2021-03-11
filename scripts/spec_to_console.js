@@ -17,4 +17,4 @@
  * under the License.
  */
 
-require('../packages/kbn-spec-to-console/bin/spec_to_console');
+require('../packages/osd-spec-to-console/bin/spec_to_console');

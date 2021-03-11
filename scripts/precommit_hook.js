@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('@kbn/optimizer').registerNodeAutoTranspilation();
+require('@osd/optimizer').registerNodeAutoTranspilation();
 require('../src/dev/run_precommit_hook');

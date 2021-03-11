@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('@kbn/es-archiver').runCli();
+require('../src/setup_node_env/node_version_validator');
+require('../packages/osd-pm/cli');
