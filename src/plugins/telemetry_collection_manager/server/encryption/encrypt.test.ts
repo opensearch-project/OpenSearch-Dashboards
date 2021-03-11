@@ -21,16 +21,16 @@ import { telemetryJWKS } from './telemetry_jwks';
 import { encryptTelemetry, getKID } from './encrypt';
 
 describe('getKID', () => {
-  it(`returns 'kibana_dev' kid for development`, async () => {
+  it(`returns 'opensearch_dashboards_dev' kid for development`, async () => {
     const useProdKey = false;
     const kid = getKID(useProdKey);
-    expect(kid).toBe('kibana_dev');
+    expect(kid).toBe('opensearch_dashboards_dev');
   });
 
-  it(`returns 'kibana_prod' kid for development`, async () => {
+  it(`returns 'opensearch_dashboards_prod' kid for development`, async () => {
     const useProdKey = true;
     const kid = getKID(useProdKey);
-    expect(kid).toBe('kibana');
+    expect(kid).toBe('opensearch_dashboards');
   });
 });
 
@@ -45,15 +45,15 @@ describe('encryptTelemetry', () => {
     expect(createRequestEncryptor).toBeCalledWith(telemetryJWKS);
   });
 
-  it('uses kibana kid on { useProdKey: true }', async () => {
+  it('uses opensearch_dashboards kid on { useProdKey: true }', async () => {
     const payload = { some: 'value' };
     await encryptTelemetry(payload, { useProdKey: true });
-    expect(mockEncrypt).toBeCalledWith('kibana', payload);
+    expect(mockEncrypt).toBeCalledWith('opensearch_dashboards', payload);
   });
 
-  it('uses kibana_dev kid on { useProdKey: false }', async () => {
+  it('uses opensearch_dashboards_dev kid on { useProdKey: false }', async () => {
     const payload = { some: 'value' };
     await encryptTelemetry(payload, { useProdKey: false });
-    expect(mockEncrypt).toBeCalledWith('kibana_dev', payload);
+    expect(mockEncrypt).toBeCalledWith('opensearch_dashboards_dev', payload);
   });
 });
