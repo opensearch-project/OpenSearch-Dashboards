@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 export const NewsEmptyPrompt = () => {
@@ -35,7 +35,7 @@ export const NewsEmptyPrompt = () => {
         <p>
           <FormattedMessage
             id="newsfeed.emptyPrompt.noNewsText"
-            defaultMessage="If your Kibana instance doesn’t have internet access, ask your administrator to disable this feature. Otherwise, we’ll keep trying to fetch the news."
+            defaultMessage="If your OpenSearch Dashboards instance doesn’t have internet access, ask your administrator to disable this feature. Otherwise, we’ll keep trying to fetch the news."
           />
         </p>
       }

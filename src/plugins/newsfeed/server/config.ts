@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@osd/config-schema';
 import {
   NEWSFEED_DEFAULT_SERVICE_PATH,
   NEWSFEED_DEFAULT_SERVICE_BASE_URL,
