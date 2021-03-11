@@ -35,7 +35,7 @@ const prepareDimension = (params: SchemaConfig) => {
 };
 
 export const toExpressionAst = (vis: Vis<TagCloudVisParams>, params: BuildPipelineParams) => {
-  const esaggs = buildExpressionFunction<OpenSearchaggsExpressionFunctionDefinition>('esaggs', {
+  const opensearchaggs = buildExpressionFunction<OpenSearchaggsExpressionFunctionDefinition>('opensearchaggs', {
     index: vis.data.indexPattern!.id!,
     metricsAtAllLevels: vis.isHierarchical(),
     partialRows: false,
@@ -59,7 +59,7 @@ export const toExpressionAst = (vis: Vis<TagCloudVisParams>, params: BuildPipeli
     tagcloud.addArgument('bucket', prepareDimension(schemas.segment[0]));
   }
 
-  const ast = buildExpression([esaggs, tagcloud]);
+  const ast = buildExpression([opensearchaggs, tagcloud]);
 
   return ast.toAst();
 };
