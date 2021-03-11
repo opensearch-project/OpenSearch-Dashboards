@@ -30,7 +30,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
     featureCollectionMetaData,
     options,
     targetZoom,
-    kibanaMap,
+    opensearchDasbhoardsMap,
     leaflet
   ) {
     super();
@@ -69,7 +69,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
     if (!options.isFilteredByCollar) {
       layerOptions.filter = (feature) => {
         const bucketRectBounds = feature.properties.geohash_meta.rectangle;
-        return kibanaMap.isInside(bucketRectBounds);
+        return opensearchDasbhoardsMap.isInside(bucketRectBounds);
       };
     }
     this._leafletLayer = this._leaflet.geoJson(null, layerOptions);
