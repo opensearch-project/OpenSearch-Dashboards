@@ -22,7 +22,7 @@ import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { override } from './override';
 import createDefaultSchema from './schema';
-import { unset, deepCloneWithBuffers as clone, IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+import { unset, deepCloneWithBuffers as clone, IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE } from '../../utils';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { pkg } from '../../../core/server/utils';
 const schema = Symbol('Joi Schema');
@@ -109,11 +109,11 @@ export class Config {
       notDev: !dev,
       version: _.get(pkg, 'version'),
       branch: _.get(pkg, 'branch'),
-      buildNum: IS_KIBANA_DISTRIBUTABLE ? pkg.build.number : Number.MAX_SAFE_INTEGER,
-      buildSha: IS_KIBANA_DISTRIBUTABLE
+      buildNum: IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE ? pkg.build.number : Number.MAX_SAFE_INTEGER,
+      buildSha: IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE
         ? pkg.build.sha
         : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-      dist: IS_KIBANA_DISTRIBUTABLE,
+      dist: IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE,
     };
 
     if (!context.dev && !context.prod) {
