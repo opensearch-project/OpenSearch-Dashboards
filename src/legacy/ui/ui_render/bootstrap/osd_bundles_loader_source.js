@@ -18,10 +18,10 @@
  */
 
 module.exports = {
-  kbnBundlesLoaderSource: `(${kbnBundlesLoader.toString()})();`,
+  osdBundlesLoaderSource: `(${osdBundlesLoader.toString()})();`,
 };
 
-function kbnBundlesLoader() {
+function osdBundlesLoader() {
   var modules = {};
 
   function has(prop) {
@@ -30,7 +30,7 @@ function kbnBundlesLoader() {
 
   function define(key, bundleRequire, bundleModuleKey) {
     if (has(key)) {
-      throw new Error('__kbnBundles__ already has a module defined for "' + key + '"');
+      throw new Error('__osdBundles__ already has a module defined for "' + key + '"');
     }
 
     modules[key] = {
@@ -41,7 +41,7 @@ function kbnBundlesLoader() {
 
   function get(key) {
     if (!has(key)) {
-      throw new Error('__kbnBundles__ does not have a module defined for "' + key + '"');
+      throw new Error('__osdBundles__ does not have a module defined for "' + key + '"');
     }
 
     return modules[key].bundleRequire(modules[key].bundleModuleKey);
