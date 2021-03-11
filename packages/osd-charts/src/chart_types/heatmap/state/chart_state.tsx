@@ -25,7 +25,6 @@ import { Tooltip } from '../../../components/tooltip';
 import { InternalChartState, GlobalChartState, BackwardRef } from '../../../state/chart_state';
 import { getChartContainerDimensionsSelector } from '../../../state/selectors/get_chart_container_dimensions';
 import { InitStatus } from '../../../state/selectors/get_internal_is_intialized';
-import { DebugState } from '../../../state/types';
 import { Dimensions } from '../../../utils/dimensions';
 import { Heatmap } from '../renderer/canvas/connected_component';
 import { HighlighterFromBrush } from '../renderer/dom/highlighter_brush';
@@ -33,6 +32,7 @@ import { computeChartDimensionsSelector } from './selectors/compute_chart_dimens
 import { computeLegendSelector } from './selectors/compute_legend';
 import { getBrushAreaSelector } from './selectors/get_brush_area';
 import { getPointerCursorSelector } from './selectors/get_cursor_pointer';
+import { getDebugStateSelector } from './selectors/get_debug_state';
 import { getLegendItemsLabelsSelector } from './selectors/get_legend_items_labels';
 import { getTooltipAnchorSelector } from './selectors/get_tooltip_anchor';
 import { getSpecOrNull } from './selectors/heatmap_spec';
@@ -126,9 +126,8 @@ export class HeatmapState implements InternalChartState {
     return getBrushAreaSelector(globalState);
   }
 
-  // TODO
-  getDebugState(): DebugState {
-    return {};
+  getDebugState(globalState: GlobalChartState) {
+    return getDebugStateSelector(globalState);
   }
 
   eventCallbacks(globalState: GlobalChartState) {

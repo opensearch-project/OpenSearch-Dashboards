@@ -17,6 +17,7 @@
   "scripts": {
     "autoprefix:css": "echo 'Autoprefixing...' && yarn postcss dist/*.css --no-map --use autoprefixer -d dist",
     "api:check": "yarn build:ts && yarn api:extract",
+    "api:check:local": "yarn api:check --local",
     "api:extract": "yarn api-extractor run --verbose",
     "backport": "backport",
     "build": "yarn build:ts && yarn build:css",

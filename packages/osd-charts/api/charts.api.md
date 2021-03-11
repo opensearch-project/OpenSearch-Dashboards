@@ -646,6 +646,8 @@ export interface DebugState {
     //
     // (undocumented)
     bars?: DebugStateBar[];
+    // Warning: (ae-forgotten-export) The symbol "HeatmapDebugState" needs to be exported by the entry point index.d.ts
+    heatmap?: HeatmapDebugState;
     // Warning: (ae-forgotten-export) The symbol "DebugStateLegend" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1104,8 +1106,8 @@ export interface HeatmapSpec extends Spec {
     data: Datum[];
     // (undocumented)
     highlightedData?: {
-        x: any[];
-        y: any[];
+        x: Array<string | number>;
+        y: Array<string | number>;
     };
     // (undocumented)
     name?: string;

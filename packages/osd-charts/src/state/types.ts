@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { Position } from '../utils/common';
-import { GeometryValue } from '../utils/geometry';
+import type { Cell } from '../chart_types/heatmap/layout/types/viewmodel_types';
+import type { Position } from '../utils/common';
+import type { GeometryValue } from '../utils/geometry';
 
 export interface DebugStateAxis {
   id: string;
@@ -78,6 +79,16 @@ export type DebugStateBar = DebugStateBase & {
   labels: any[];
 };
 
+type CellDebug = Pick<Cell, 'value' | 'formatted' | 'x' | 'y'> & { fill: string };
+
+type HeatmapDebugState = {
+  cells: CellDebug[];
+  selection: {
+    area: { x: number; y: number; width: number; height: number } | null;
+    data: { x: Array<string | number>; y: Array<string | number> } | null;
+  };
+};
+
 /**
  * Describes _visible_ chart state for use in functional tests
  *
@@ -89,4 +100,6 @@ export interface DebugState {
   areas?: DebugStateArea[];
   lines?: DebugStateLine[];
   bars?: DebugStateBar[];
+  /** Heatmap chart debug state */
+  heatmap?: HeatmapDebugState;
 }

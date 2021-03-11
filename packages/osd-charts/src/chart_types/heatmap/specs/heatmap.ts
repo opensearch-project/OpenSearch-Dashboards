@@ -68,7 +68,7 @@ export interface HeatmapSpec extends Spec {
   ySortPredicate: Predicate;
   xScaleType: SeriesScales['xScaleType'];
   config: RecursivePartial<Config>;
-  highlightedData?: { x: any[]; y: any[] };
+  highlightedData?: { x: Array<string | number>; y: Array<string | number> };
   name?: string;
 }
 

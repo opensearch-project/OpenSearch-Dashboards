@@ -17,54 +17,106 @@
  * under the License.
  */
 import { action } from '@storybook/addon-actions';
-import React from 'react';
+import { boolean, button } from '@storybook/addon-knobs';
+import React, { useCallback, useMemo, useState } from 'react';
+import { debounce } from 'ts-debounce';
 
-import { Chart, Heatmap, niceTimeFormatter, RecursivePartial, ScaleType, Settings } from '../../src';
+import {
+  Chart,
+  DebugState,
+  Heatmap,
+  HeatmapElementEvent,
+  niceTimeFormatter,
+  RecursivePartial,
+  ScaleType,
+  Settings,
+} from '../../src';
 import { Config } from '../../src/chart_types/heatmap/layout/types/config_types';
 import { SWIM_LANE_DATA } from '../../src/utils/data_samples/test_anomaly_swim_lane';
 
 export const Example = () => {
-  const config: RecursivePartial<Config> = {
-    grid: {
-      cellHeight: {
-        min: 20,
+  const [selection, setSelection] = useState<{ x: (string | number)[]; y: (string | number)[] } | undefined>();
+
+  const persistCellsSelection = boolean('Persist cells selection', true);
+  const debugState = boolean('Enable debug state', true);
+  const dataStateAction = action('DataState');
+
+  const handler = useCallback(() => {
+    setSelection(undefined);
+  }, []);
+
+  button('Clear cells selection', handler);
+
+  const config: RecursivePartial<Config> = useMemo(
+    () => ({
+      grid: {
+        cellHeight: {
+          min: 20,
+        },
+        stroke: {
+          width: 1,
+          color: '#D3DAE6',
+        },
       },
-      stroke: {
-        width: 1,
-        color: '#D3DAE6',
+      cell: {
+        maxWidth: 'fill',
+        maxHeight: 3,
+        label: {
+          visible: false,
+        },
+        border: {
+          stroke: '#D3DAE6',
+          strokeWidth: 0,
+        },
       },
-    },
-    cell: {
-      maxWidth: 'fill',
-      maxHeight: 3,
-      label: {
-        visible: false,
+      yAxisLabel: {
+        visible: true,
+        width: 'auto',
+        padding: { left: 10, right: 10 },
       },
-      border: {
-        stroke: '#D3DAE6',
-        strokeWidth: 0,
+      xAxisLabel: {
+        formatter: (value: string | number) => {
+          return niceTimeFormatter([1572825600000, 1572912000000])(value, { timeZone: 'UTC' });
+        },
       },
-    },
-    yAxisLabel: {
-      visible: true,
-      width: 'auto',
-      padding: { left: 10, right: 10 },
-    },
-    xAxisLabel: {
-      formatter: (value: string | number) => {
-        return niceTimeFormatter([1572825600000, 1572912000000])(value, { timeZone: 'UTC' });
-      },
-    },
-  };
+      onBrushEnd: ((e) => {
+        setSelection({ x: e.x, y: e.y });
+      }) as Config['onBrushEnd'],
+    }),
+    [],
+  );
+
+  const logDebugstate = debounce(() => {
+    if (!debugState) return;
+
+    const statusEl = document.querySelector<HTMLDivElement>('.echChartStatus');
+
+    if (statusEl) {
+      const dataState = statusEl.dataset.echDebugState
+        ? (JSON.parse(statusEl.dataset.echDebugState) as DebugState)
+        : null;
+      dataStateAction(dataState);
+    }
+  }, 100);
+
+  // @ts-ignore
+  const onElementClick: ElementClickListener = useCallback((e: HeatmapElementEvent[]) => {
+    const cell = e[0][0];
+    // @ts-ignore
+    setSelection({ x: [cell.datum.x, cell.datum.x], y: [cell.datum.y] });
+  }, []);
+
   return (
     <Chart className="story-chart">
       <Settings
-        onElementClick={action('onElementClick')}
+        onElementClick={onElementClick}
+        onRenderChange={logDebugstate}
         showLegend
         legendPosition="top"
         onBrushEnd={action('onBrushEnd')}
         brushAxis="both"
         xDomain={{ min: 1572825600000, max: 1572912000000, minInterval: 1800000 }}
+        debugState={debugState}
       />
       <Heatmap
         id="heatmap1"
@@ -72,7 +124,6 @@ export const Example = () => {
         ranges={[0, 3, 25, 50, 75]}
         colors={['#ffffff', '#d2e9f7', '#8bc8fb', '#fdec25', '#fba740', '#fe5050']}
         data={SWIM_LANE_DATA.map((v) => ({ ...v, time: v.time * 1000 }))}
-        // highlightedData={{ x: [], y: [] }}
         xAccessor={(d) => d.time}
         yAccessor={(d) => d.laneLabel}
         valueAccessor={(d) => d.value}
@@ -80,6 +131,7 @@ export const Example = () => {
         ySortPredicate="numAsc"
         xScaleType={ScaleType.Time}
         config={config}
+        highlightedData={persistCellsSelection ? selection : undefined}
       />
     </Chart>
   );
