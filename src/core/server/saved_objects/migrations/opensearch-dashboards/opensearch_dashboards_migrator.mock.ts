@@ -18,9 +18,9 @@
  */
 import type { PublicMethodsOf } from '@osd/utility-types';
 
-import { OpenSearchDashboardsMigrator, OpenSearchDashboardsMigratorStatus } from './kibana_migrator';
+import { OpenSearchDashboardsMigrator, OpenSearchDashboardsMigratorStatus } from './opensearch_dashboards_migrator';
 import { buildActiveMappings } from '../core';
-const { mergeTypes } = jest.requireActual('./kibana_migrator');
+const { mergeTypes } = jest.requireActual('./opensearch_dashboards_migrator');
 import { SavedObjectsType } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 
@@ -56,8 +56,8 @@ const createMigrator = (
           result: [
             {
               status: 'migrated',
-              destIndex: '.test-kibana_2',
-              sourceIndex: '.test-kibana_1',
+              destIndex: '.test-opensearch-dashboards_2',
+              sourceIndex: '.test-opensearch-dashboards_1',
               elapsedMs: 10,
             },
           ],

@@ -33,15 +33,15 @@ describe('ElasticIndex', () => {
         opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
 
-      const info = await Index.fetchInfo(client, '.kibana-test');
+      const info = await Index.fetchInfo(client, '.opensearch-dashboards-test');
       expect(info).toEqual({
         aliases: {},
         exists: false,
-        indexName: '.kibana-test',
+        indexName: '.opensearch-dashboards-test',
         mappings: { dynamic: 'strict', properties: {} },
       });
 
-      expect(client.indices.get).toHaveBeenCalledWith({ index: '.kibana-test' }, { ignore: [404] });
+      expect(client.indices.get).toHaveBeenCalledWith({ index: '.opensearch-dashboards-test' }, { ignore: [404] });
     });
 
     test('fails if the index doc type is unsupported', async () => {

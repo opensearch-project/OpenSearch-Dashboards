@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockOpenSearchDashboardsMigrator } from '../kibana_migrator.mock';
+import { mockOpenSearchDashboardsMigrator } from '../opensearch_dashboards_migrator.mock';
 
 export const mockOpenSearchDashboardsMigratorInstance = mockOpenSearchDashboardsMigrator.create();
 

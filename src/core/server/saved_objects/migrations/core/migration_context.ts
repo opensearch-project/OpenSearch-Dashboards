@@ -51,7 +51,7 @@ export interface MigrationOpts {
 
   /**
    * If specified, templates matching the specified pattern will be removed
-   * prior to running migrations. For example: 'kibana_index_template*'
+   * prior to running migrations. For example: 'opensearch_dashboards_index_template*'
    */
   obsoleteIndexTemplatePattern?: string;
 }
@@ -182,7 +182,7 @@ export function disableUnknownTypeMappingFields(
 
 /**
  * Gets the next index name in a sequence, based on specified current index's info.
- * We're using a numeric counter to create new indices. So, `.kibana_1`, `.kibana_2`, etc
+ * We're using a numeric counter to create new indices. So, `.opensearch-dashboards_1`, `.opensearch-dashboards_2`, etc
  * There are downsides to this, but it seemed like a simple enough approach.
  */
 function nextIndexName(indexName: string, alias: string) {

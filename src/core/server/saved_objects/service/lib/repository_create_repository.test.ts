@@ -17,7 +17,7 @@
  * under the License.
  */
 import { SavedObjectsRepository } from './repository';
-import { mockOpenSearchDashboardsMigrator } from '../../migrations/kibana/kibana_migrator.mock';
+import { mockOpenSearchDashboardsMigrator } from '../../migrations/opensearch-dashboards/opensearch_dashboards_migrator.mock';
 import { OpenSearchDashboardsMigrator } from '../../migrations';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
@@ -79,7 +79,7 @@ describe('SavedObjectsRepository#createRepository', () => {
       originalRepository.createRepository(
         (migrator as unknown) as OpenSearchDashboardsMigrator,
         typeRegistry,
-        '.kibana-test',
+        '.opensearch-dashboards-test',
         callAdminCluster,
         ['unMappedType1', 'unmappedType2']
       );
@@ -94,7 +94,7 @@ describe('SavedObjectsRepository#createRepository', () => {
     const repository = originalRepository.createRepository(
       (migrator as unknown) as OpenSearchDashboardsMigrator,
       typeRegistry,
-      '.kibana-test',
+      '.opensearch-dashboards-test',
       callAdminCluster,
       [],
       SavedObjectsRepository
@@ -112,7 +112,7 @@ describe('SavedObjectsRepository#createRepository', () => {
     const repository = originalRepository.createRepository(
       (migrator as unknown) as OpenSearchDashboardsMigrator,
       typeRegistry,
-      '.kibana-test',
+      '.opensearch-dashboards-test',
       callAdminCluster,
       ['hiddenType', 'hiddenType', 'hiddenType'],
       SavedObjectsRepository

@@ -22,7 +22,7 @@
  * (the shape of the mappings and documents in the index).
  */
 
-import { OpenSearchDashboardsConfigType } from 'src/core/server/kibana_config';
+import { OpenSearchDashboardsConfigType } from 'src/core/server/opensearch_dashboards_config';
 import { BehaviorSubject } from 'rxjs';
 
 import { Logger } from '../../../logging';
@@ -40,8 +40,8 @@ export interface OpenSearchDashboardsMigratorOptions {
   client: MigrationOpenSearchClient;
   typeRegistry: ISavedObjectTypeRegistry;
   savedObjectsConfig: SavedObjectsMigrationConfigType;
-  kibanaConfig: OpenSearchDashboardsConfigType;
-  kibanaVersion: string;
+  opensearchDashboardsConfig: OpenSearchDashboardsConfigType;
+  opensearchDashboardsVersion: string;
   logger: Logger;
 }
 
@@ -59,7 +59,7 @@ export class OpenSearchDashboardsMigrator {
   private readonly client: MigrationOpenSearchClient;
   private readonly savedObjectsConfig: SavedObjectsMigrationConfigType;
   private readonly documentMigrator: VersionedTransformer;
-  private readonly kibanaConfig: OpenSearchDashboardsConfigType;
+  private readonly opensearchDashboardsConfig: OpenSearchDashboardsConfigType;
   private readonly log: Logger;
   private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
   private readonly typeRegistry: ISavedObjectTypeRegistry;
@@ -76,20 +76,20 @@ export class OpenSearchDashboardsMigrator {
   constructor({
     client,
     typeRegistry,
-    kibanaConfig,
+    opensearchDashboardsConfig,
     savedObjectsConfig,
-    kibanaVersion,
+    opensearchDashboardsVersion,
     logger,
   }: OpenSearchDashboardsMigratorOptions) {
     this.client = client;
-    this.kibanaConfig = kibanaConfig;
+    this.opensearchDashboardsConfig = opensearchDashboardsConfig;
     this.savedObjectsConfig = savedObjectsConfig;
     this.typeRegistry = typeRegistry;
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
     this.mappingProperties = mergeTypes(this.typeRegistry.getAllTypes());
     this.log = logger;
     this.documentMigrator = new DocumentMigrator({
-      kibanaVersion,
+      opensearchDashboardsVersion,
       typeRegistry,
       log: this.log,
     });
@@ -143,7 +143,7 @@ export class OpenSearchDashboardsMigrator {
   }
 
   private runMigrationsInternal() {
-    const kibanaIndexName = this.kibanaConfig.index;
+    const kibanaIndexName = this.opensearchDashboardsConfig.index;
     const indexMap = createIndexMap({
       kibanaIndexName,
       indexMap: this.mappingProperties,
@@ -163,7 +163,7 @@ export class OpenSearchDashboardsMigrator {
         serializer: this.serializer,
         // Only necessary for the migrator of the kibana index.
         obsoleteIndexTemplatePattern:
-          index === kibanaIndexName ? 'kibana_index_template*' : undefined,
+          index === kibanaIndexName ? 'opensearch_dashboards_index_template*' : undefined,
         convertToAliasScript: indexMap[index].script,
       });
     });

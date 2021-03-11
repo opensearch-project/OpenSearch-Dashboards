@@ -14,25 +14,25 @@ All of this happens prior to OpenSearch Dashboards serving any http requests.
 Here is the gist of what happens if an index migration is necessary:
 
 * If `.kibana` (or whatever the OpenSearch Dashboards index is named) is not an alias, it will be converted to one:
-  * Reindex `.kibana` into `.kibana_1`
+  * Reindex `.kibana` into `.opensearch-dashboards_1`
   * Delete `.kibana`
-  * Create an alias `.kibana` that points to `.kibana_1`
-* Create a `.kibana_2` index
-* Copy all documents from `.kibana_1` into `.kibana_2`, running them through any applicable migrations
-* Point the `.kibana` alias to `.kibana_2`
+  * Create an alias `.kibana` that points to `.opensearch-dashboards_1`
+* Create a `.opensearch-dashboards_2` index
+* Copy all documents from `.opensearch-dashboards_1` into `.opensearch-dashboards_2`, running them through any applicable migrations
+* Point the `.kibana` alias to `.opensearch-dashboards_2`
 
 ## Migrating OpenSearch Dashboards clusters
 
 If OpenSearch Dashboards is being run in a cluster, migrations will be coordinated so that they only run on one OpenSearch Dashboards instance at a time. This is done in a fairly rudimentary way. Let's say we have two OpenSearch Dashboards instances, kibana1 and kibana2.
 
 * kibana1 and kibana2 both start simultaneously and detect that the index requires migration
-* kibana1 begins the migration and creates index `.kibana_4`
-* kibana2 tries to begin the migration, but fails with the error `.kibana_4 already exists`
+* kibana1 begins the migration and creates index `.opensearch-dashboards_4`
+* kibana2 tries to begin the migration, but fails with the error `.opensearch-dashboards_4 already exists`
 * kibana2 logs that it failed to create the migration index, and instead begins polling
   * Every few seconds, kibana2 instance checks the `.kibana` index to see if it is done migrating
   * Once `.kibana` is determined to be up to date, the kibana2 instance continues booting
 
-In this example, if the `.kibana_4` index existed prior to OpenSearch Dashboards booting, the entire migration process will fail, as all OpenSearch Dashboards instances will assume another instance is migrating to the `.kibana_4` index. This problem is only fixable by deleting the `.kibana_4` index.
+In this example, if the `.opensearch-dashboards_4` index existed prior to OpenSearch Dashboards booting, the entire migration process will fail, as all OpenSearch Dashboards instances will assume another instance is migrating to the `.opensearch-dashboards_4` index. This problem is only fixable by deleting the `.opensearch-dashboards_4` index.
 
 ## Import / export
 

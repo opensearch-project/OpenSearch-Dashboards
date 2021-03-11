@@ -33,7 +33,7 @@ import {
   InternalOpenSearchServiceSetup,
   InternalOpenSearchServiceStart,
 } from '../opensearch';
-import { OpenSearchDashboardsConfigType } from '../kibana_config';
+import { OpenSearchDashboardsConfigType } from '../opensearch_dashboards_config';
 import {
   SavedObjectsConfigType,
   SavedObjectsMigrationConfigType,
@@ -350,14 +350,14 @@ export class SavedObjectsService
 
     this.logger.debug('Starting SavedObjects service');
 
-    const kibanaConfig = await this.coreContext.configService
+    const opensearchDashboardsConfig = await this.coreContext.configService
       .atPath<OpenSearchDashboardsConfigType>('kibana')
       .pipe(first())
       .toPromise();
     const client = opensearch.client;
 
     const migrator = this.createMigrator(
-      kibanaConfig,
+      opensearchDashboardsConfig,
       this.config.migration,
       opensearch.client,
       migrationsRetryDelay
@@ -412,7 +412,7 @@ export class SavedObjectsService
       return SavedObjectsRepository.createRepository(
         migrator,
         this.typeRegistry,
-        kibanaConfig.index,
+        opensearchDashboardsConfig.index,
         opensearchClient,
         includedHiddenTypes
       );
@@ -454,7 +454,7 @@ export class SavedObjectsService
   public async stop() {}
 
   private createMigrator(
-    kibanaConfig: OpenSearchDashboardsConfigType,
+    opensearchDashboardsConfig: OpenSearchDashboardsConfigType,
     savedObjectsConfig: SavedObjectsMigrationConfigType,
     client: IClusterClient,
     migrationsRetryDelay?: number
@@ -462,9 +462,9 @@ export class SavedObjectsService
     return new OpenSearchDashboardsMigrator({
       typeRegistry: this.typeRegistry,
       logger: this.logger,
-      kibanaVersion: this.coreContext.env.packageInfo.version,
+      opensearchDashboardsVersion: this.coreContext.env.packageInfo.version,
       savedObjectsConfig,
-      kibanaConfig,
+      opensearchDashboardsConfig,
       client: createMigrationOpenSearchClient(client.asInternalUser, this.logger, migrationsRetryDelay),
     });
   }

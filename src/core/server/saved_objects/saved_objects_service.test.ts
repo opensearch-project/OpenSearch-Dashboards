@@ -212,7 +212,7 @@ describe('SavedObjectsService', () => {
         isCompatible: false,
         incompatibleNodes: [],
         warningNodes: [],
-        kibanaVersion: '8.0.0',
+        opensearchDashboardsVersion: '8.0.0',
       });
       await soService.setup(setupDeps);
       soService.start(createStartDeps());
@@ -223,7 +223,7 @@ describe('SavedObjectsService', () => {
         isCompatible: true,
         incompatibleNodes: [],
         warningNodes: [],
-        kibanaVersion: '8.0.0',
+        opensearchDashboardsVersion: '8.0.0',
       });
       setImmediate(() => {
         expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);

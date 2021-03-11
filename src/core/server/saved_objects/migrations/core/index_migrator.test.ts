@@ -92,7 +92,7 @@ describe('IndexMigrator', () => {
         },
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
       },
-      index: '.kibana_1',
+      index: '.opensearch-dashboards_1',
     });
   });
 
@@ -104,7 +104,7 @@ describe('IndexMigrator', () => {
     const result = await new IndexMigrator(testOpts).migrate();
 
     expect(result).toMatchObject({
-      destIndex: '.kibana_1',
+      destIndex: '.opensearch-dashboards_1',
       sourceIndex: '.kibana',
       status: 'migrated',
     });
@@ -115,7 +115,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        '.kibana_1': {
+        '.opensearch-dashboards_1': {
           aliases: {},
           mappings: {
             foo: { properties: {} },
@@ -139,7 +139,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        '.kibana_1': {
+        '.opensearch-dashboards_1': {
           aliases: {},
           mappings: {
             poc: {
@@ -164,7 +164,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        '.kibana_1': {
+        '.opensearch-dashboards_1': {
           aliases: {},
           mappings: {
             properties: {
@@ -214,7 +214,7 @@ describe('IndexMigrator', () => {
         },
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
       },
-      index: '.kibana_2',
+      index: '.opensearch-dashboards_2',
     });
   });
 
@@ -225,7 +225,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        '.kibana_1': {
+        '.opensearch-dashboards_1': {
           aliases: {},
           mappings: {
             properties: {
@@ -275,7 +275,7 @@ describe('IndexMigrator', () => {
         },
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
       },
-      index: '.kibana_2',
+      index: '.opensearch-dashboards_2',
     });
   });
 
@@ -288,7 +288,7 @@ describe('IndexMigrator', () => {
 
     expect(client.indices.create).toHaveBeenCalledWith(expect.any(Object));
     expect(client.indices.updateAliases).toHaveBeenCalledWith({
-      body: { actions: [{ add: { alias: '.kibana', index: '.kibana_1' } }] },
+      body: { actions: [{ add: { alias: '.kibana', index: '.opensearch-dashboards_1' } }] },
     });
   });
 
@@ -307,8 +307,8 @@ describe('IndexMigrator', () => {
     expect(client.indices.updateAliases).toHaveBeenCalledWith({
       body: {
         actions: [
-          { remove: { alias: '.kibana', index: '.kibana_1' } },
-          { add: { alias: '.kibana', index: '.kibana_2' } },
+          { remove: { alias: '.kibana', index: '.opensearch-dashboards_1' } },
+          { add: { alias: '.kibana', index: '.opensearch-dashboards_2' } },
         ],
       },
     });
@@ -358,13 +358,13 @@ describe('IndexMigrator', () => {
     expect(client.bulk).toHaveBeenCalledTimes(2);
     expect(client.bulk).toHaveBeenNthCalledWith(1, {
       body: [
-        { index: { _id: 'foo:1', _index: '.kibana_2' } },
+        { index: { _id: 'foo:1', _index: '.opensearch-dashboards_2' } },
         { foo: { name: 1 }, type: 'foo', migrationVersion: {}, references: [] },
       ],
     });
     expect(client.bulk).toHaveBeenNthCalledWith(2, {
       body: [
-        { index: { _id: 'foo:2', _index: '.kibana_2' } },
+        { index: { _id: 'foo:2', _index: '.opensearch-dashboards_2' } },
         { foo: { name: 2 }, type: 'foo', migrationVersion: {}, references: [] },
       ],
     });
@@ -400,7 +400,7 @@ function withIndex(
   opts: any = {}
 ) {
   const defaultIndex = {
-    '.kibana_1': {
+    '.opensearch-dashboards_1': {
       aliases: { '.kibana': {} },
       mappings: {
         dynamic: 'strict',
@@ -411,7 +411,7 @@ function withIndex(
     },
   };
   const defaultAlias = {
-    '.kibana_1': {},
+    '.opensearch-dashboards_1': {},
   };
   const { numOutOfDate = 0 } = opts;
   const { alias = defaultAlias } = opts;

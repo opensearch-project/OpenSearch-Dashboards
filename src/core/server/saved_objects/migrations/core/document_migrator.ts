@@ -74,7 +74,7 @@ import { SavedObjectMigrationFn } from '../types';
 export type TransformFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
 
 interface DocumentMigratorOptions {
-  kibanaVersion: string;
+  opensearchDashboardsVersion: string;
   typeRegistry: ISavedObjectTypeRegistry;
   log: Logger;
 }
@@ -108,17 +108,17 @@ export class DocumentMigrator implements VersionedTransformer {
    * Creates an instance of DocumentMigrator.
    *
    * @param {DocumentMigratorOptions} opts
-   * @prop {string} kibanaVersion - The current version of OpenSearchDashboards
+   * @prop {string} opensearchDashboardsVersion - The current version of OpenSearchDashboards
    * @prop {SavedObjectTypeRegistry} typeRegistry - The type registry to get type migrations from
    * @prop {Logger} log - The migration logger
    * @memberof DocumentMigrator
    */
-  constructor({ typeRegistry, kibanaVersion, log }: DocumentMigratorOptions) {
+  constructor({ typeRegistry, opensearchDashboardsVersion, log }: DocumentMigratorOptions) {
     validateMigrationDefinition(typeRegistry);
 
     this.migrations = buildActiveMigrations(typeRegistry, log);
     this.transformDoc = buildDocumentTransform({
-      kibanaVersion,
+      opensearchDashboardsVersion,
       migrations: this.migrations,
     });
   }
@@ -227,7 +227,7 @@ function buildActiveMigrations(
 function buildDocumentTransform({
   migrations,
 }: {
-  kibanaVersion: string;
+  opensearchDashboardsVersion: string;
   migrations: ActiveMigrations;
 }): TransformFn {
   return function transformAndValidate(doc: SavedObjectUnsanitizedDoc) {

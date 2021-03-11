@@ -46,7 +46,7 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
 describe('DocumentMigrator', () => {
   function testOpts() {
     return {
-      kibanaVersion: '25.2.3',
+      opensearchDashboardsVersion: '25.2.3',
       typeRegistry: createRegistry(),
       log: mockLogger,
     };
@@ -54,7 +54,7 @@ describe('DocumentMigrator', () => {
 
   it('validates individual migration definitions', () => {
     const invalidDefinition = {
-      kibanaVersion: '3.2.3',
+      opensearchDashboardsVersion: '3.2.3',
       typeRegistry: createRegistry({
         name: 'foo',
         migrations: _.noop as any,
@@ -68,7 +68,7 @@ describe('DocumentMigrator', () => {
 
   it('validates individual migration semvers', () => {
     const invalidDefinition = {
-      kibanaVersion: '3.2.3',
+      opensearchDashboardsVersion: '3.2.3',
       typeRegistry: createRegistry({
         name: 'foo',
         migrations: {
@@ -84,7 +84,7 @@ describe('DocumentMigrator', () => {
 
   it('validates the migration function', () => {
     const invalidDefinition = {
-      kibanaVersion: '3.2.3',
+      opensearchDashboardsVersion: '3.2.3',
       typeRegistry: createRegistry({
         name: 'foo',
         migrations: {
@@ -280,7 +280,7 @@ describe('DocumentMigrator', () => {
   it('rejects docs that belong to a newer OpenSearch Dashboards instance', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      kibanaVersion: '8.0.1',
+      opensearchDashboardsVersion: '8.0.1',
     });
     expect(() =>
       migrator.migrate({

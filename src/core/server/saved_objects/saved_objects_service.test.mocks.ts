@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { mockOpenSearchDashboardsMigrator } from './migrations/kibana/kibana_migrator.mock';
+import { mockOpenSearchDashboardsMigrator } from './migrations/opensearch-dashboards/opensearch_dashboards_migrator.mock';
 import { savedObjectsClientProviderMock } from './service/lib/scoped_client_provider.mock';
 import { typeRegistryMock } from './saved_objects_type_registry.mock';
 
 export const migratorInstanceMock = mockOpenSearchDashboardsMigrator.create();
 export const OpenSearchDashboardsMigratorMock = jest.fn().mockImplementation(() => migratorInstanceMock);
-jest.doMock('./migrations/kibana/kibana_migrator', () => ({
+jest.doMock('./migrations/opensearch-dashboards/opensearch_dashboards_migrator', () => ({
   OpenSearchDashboardsMigrator: OpenSearchDashboardsMigratorMock,
 }));
 

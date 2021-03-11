@@ -19,7 +19,7 @@
 import { take } from 'rxjs/operators';
 
 import { opensearchClientMock } from '../../../opensearch/client/mocks';
-import { OpenSearchDashboardsMigratorOptions, OpenSearchDashboardsMigrator } from './kibana_migrator';
+import { OpenSearchDashboardsMigratorOptions, OpenSearchDashboardsMigrator } from './opensearch_dashboards_migrator';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
@@ -133,7 +133,7 @@ type MockedOptions = OpenSearchDashboardsMigratorOptions & {
 const mockOptions = () => {
   const options: MockedOptions = {
     logger: loggingSystemMock.create().get(),
-    kibanaVersion: '8.2.3',
+    opensearchDashboardsVersion: '8.2.3',
     typeRegistry: createRegistry([
       {
         name: 'testtype',
@@ -159,10 +159,10 @@ const mockOptions = () => {
         migrations: {},
       },
     ]),
-    kibanaConfig: {
+    opensearchDashboardsConfig: {
       enabled: true,
       index: '.my-index',
-    } as OpenSearchDashboardsMigratorOptions['kibanaConfig'],
+    } as OpenSearchDashboardsMigratorOptions['opensearchDashboardsConfig'],
     savedObjectsConfig: {
       batchSize: 20,
       pollInterval: 20000,
