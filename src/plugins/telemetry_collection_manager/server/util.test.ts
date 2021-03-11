@@ -22,7 +22,7 @@ import { isClusterOptedIn } from './util';
 const createMockClusterUsage = (plugins: any) => {
   return {
     stack_stats: {
-      kibana: { plugins },
+      opensearch_dashboards: { plugins },
     },
   };
 };

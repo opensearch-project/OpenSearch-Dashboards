@@ -88,8 +88,8 @@ export class TelemetryCollectionManagerPlugin
     const {
       title,
       priority,
-      esCluster,
-      esClientGetter,
+      opensearchCluster,
+      opensearchClientGetter,
       statsGetter,
       clusterDetailsGetter,
       licenseGetter,
@@ -106,11 +106,11 @@ export class TelemetryCollectionManagerPlugin
       if (!statsGetter) {
         throw Error('Stats getter method not set.');
       }
-      if (!esCluster) {
-        throw Error('esCluster name must be set for the getCluster method.');
+      if (!opensearchCluster) {
+        throw Error('opensearchCluster name must be set for the getCluster method.');
       }
-      if (!esClientGetter) {
-        throw Error('esClientGetter method not set.');
+      if (!opensearchClientGetter) {
+        throw Error('opensearchClientGetter method not set.');
       }
       if (!clusterDetailsGetter) {
         throw Error('Cluster UUIds method is not set.');
@@ -123,9 +123,9 @@ export class TelemetryCollectionManagerPlugin
         licenseGetter,
         statsGetter,
         clusterDetailsGetter,
-        esCluster,
+        opensearchCluster,
         title,
-        esClientGetter,
+        opensearchClientGetter,
       });
       this.usageGetterMethodPriority = priority;
     }
@@ -134,19 +134,19 @@ export class TelemetryCollectionManagerPlugin
   private getStatsCollectionConfig(
     config: StatsGetterConfig,
     collection: Collection,
-    collectionEsClient: IClusterClient,
+    collectionOpenSearchClient: IClusterClient,
     usageCollection: UsageCollectionSetup
   ): StatsCollectionConfig {
     const { start, end, request } = config;
 
     const callCluster = config.unencrypted
-      ? collection.esCluster.asScoped(request).callAsCurrentUser
-      : collection.esCluster.callAsInternalUser;
-    // Scope the new elasticsearch Client appropriately and pass to the stats collection config
-    const esClient = config.unencrypted
-      ? collectionEsClient.asScoped(config.request).asCurrentUser
-      : collectionEsClient.asInternalUser;
-    return { callCluster, start, end, usageCollection, esClient };
+      ? collection.opensearchCluster.asScoped(request).callAsCurrentUser
+      : collection.opensearchCluster.callAsInternalUser;
+    // Scope the new OpenSearch Client appropriately and pass to the stats collection config
+    const opensearchClient = config.unencrypted
+      ? collectionOpenSearchClient.asScoped(config.request).asCurrentUser
+      : collectionOpenSearchClient.asInternalUser;
+    return { callCluster, start, end, usageCollection, opensearchClient };
   }
 
   private async getOptInStats(optInStatus: boolean, config: StatsGetterConfig) {
@@ -155,12 +155,12 @@ export class TelemetryCollectionManagerPlugin
     }
     for (const collection of this.collections) {
       // first fetch the client and make sure it's not undefined.
-      const collectionEsClient = collection.esClientGetter();
-      if (collectionEsClient !== undefined) {
+      const collectionOpenSearchClient = collection.opensearchClientGetter();
+      if (collectionOpenSearchClient !== undefined) {
         const statsCollectionConfig = this.getStatsCollectionConfig(
           config,
           collection,
-          collectionEsClient,
+          collectionOpenSearchClient,
           this.usageCollection
         );
 
@@ -214,12 +214,12 @@ export class TelemetryCollectionManagerPlugin
       return [];
     }
     for (const collection of this.collections) {
-      const collectionEsClient = collection.esClientGetter();
-      if (collectionEsClient !== undefined) {
+      const collectionOpenSearchClient = collection.opensearchClientGetter();
+      if (collectionOpenSearchClient !== undefined) {
         const statsCollectionConfig = this.getStatsCollectionConfig(
           config,
           collection,
-          collectionEsClient,
+          collectionOpenSearchClient,
           this.usageCollection
         );
         try {

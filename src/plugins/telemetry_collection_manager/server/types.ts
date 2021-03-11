@@ -20,12 +20,12 @@
 import {
   LegacyAPICaller,
   Logger,
-  KibanaRequest,
+  OpenSearchDashboardsRequest,
   ILegacyClusterClient,
   IClusterClient,
-} from 'kibana/server';
+} from 'opensearch-dashboards/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { ElasticsearchClient } from '../../../../src/core/server';
+import { OpenSearchClient } from '../../../../src/core/server';
 import { TelemetryCollectionManagerPlugin } from './plugin';
 
 export interface TelemetryCollectionManagerPluginSetup {
@@ -55,7 +55,7 @@ export interface BaseStatsGetterConfig {
   unencrypted: boolean;
   start: string;
   end: string;
-  request?: KibanaRequest;
+  request?: OpenSearchDashboardsRequest;
 }
 
 export interface EncryptedStatsGetterConfig extends BaseStatsGetterConfig {
@@ -64,7 +64,7 @@ export interface EncryptedStatsGetterConfig extends BaseStatsGetterConfig {
 
 export interface UnencryptedStatsGetterConfig extends BaseStatsGetterConfig {
   unencrypted: true;
-  request: KibanaRequest;
+  request: OpenSearchDashboardsRequest;
 }
 
 export interface ClusterDetails {
@@ -76,7 +76,7 @@ export interface StatsCollectionConfig {
   callCluster: LegacyAPICaller;
   start: string | number;
   end: string | number;
-  esClient: ElasticsearchClient;
+  opensearchClient: OpenSearchClient;
 }
 
 export interface BasicStatsPayload {
@@ -90,12 +90,12 @@ export interface BasicStatsPayload {
 }
 
 export interface UsageStatsPayload extends BasicStatsPayload {
-  license?: ESLicense;
+  license?: OpenSearchLicense;
   collectionSource: string;
 }
 
 // From https://www.elastic.co/guide/en/elasticsearch/reference/current/get-license.html
-export interface ESLicense {
+export interface OpenSearchLicense {
   status: string;
   uid: string;
   type: string;
@@ -131,7 +131,7 @@ export type LicenseGetter<CustomContext extends Record<string, any> = {}> = (
   clustersDetails: ClusterDetails[],
   config: StatsCollectionConfig,
   context: StatsCollectionContext & CustomContext
-) => Promise<{ [clusterUuid: string]: ESLicense | undefined }>;
+) => Promise<{ [clusterUuid: string]: OpenSearchLicense | undefined }>;
 
 export interface CollectionConfig<
   CustomContext extends Record<string, any> = {},
@@ -139,8 +139,8 @@ export interface CollectionConfig<
 > {
   title: string;
   priority: number;
-  esCluster: ILegacyClusterClient;
-  esClientGetter: () => IClusterClient | undefined; // --> by now we know that the client getter will return the IClusterClient but we assure that through a code check
+  opensearchCluster: ILegacyClusterClient;
+  opensearchClientGetter: () => IClusterClient | undefined; // --> by now we know that the client getter will return the IClusterClient but we assure that through a code check
   statsGetter: StatsGetter<CustomContext, T>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
   licenseGetter: LicenseGetter<CustomContext>;
@@ -155,7 +155,7 @@ export interface Collection<
   statsGetter: StatsGetter<CustomContext, T>;
   licenseGetter: LicenseGetter<CustomContext>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
-  esCluster: ILegacyClusterClient;
-  esClientGetter: () => IClusterClient | undefined; // the collection could still return undefined for the es client getter.
+  opensearchCluster: ILegacyClusterClient;
+  opensearchClientGetter: () => IClusterClient | undefined; // the collection could still return undefined for the es client getter.
   title: string;
 }
