@@ -19,7 +19,7 @@
 
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 
-import { getKbnFieldType } from '../plugins/data/common';
+import { getOsdFieldType } from '../plugins/data/common';
 import { getStubIndexPattern } from '../plugins/data/public/test_utils';
 import { uiSettingsServiceMock } from '../core/public/ui_settings/ui_settings_service.mock';
 
@@ -32,16 +32,16 @@ export default function stubbedLogstashIndexPatternService() {
   const mockLogstashFields = stubbedLogstashFields();
 
   const fields = mockLogstashFields.map(function (field) {
-    const kbnType = getKbnFieldType(field.type);
+    const osdType = getOsdFieldType(field.type);
 
-    if (!kbnType || kbnType.name === 'unknown') {
+    if (!osdType || osdType.name === 'unknown') {
       throw new TypeError(`unknown type ${field.type}`);
     }
 
     return {
       ...field,
-      sortable: 'sortable' in field ? !!field.sortable : kbnType.sortable,
-      filterable: 'filterable' in field ? !!field.filterable : kbnType.filterable,
+      sortable: 'sortable' in field ? !!field.sortable : osdType.sortable,
+      filterable: 'filterable' in field ? !!field.filterable : osdType.filterable,
       displayName: field.name,
     };
   });
