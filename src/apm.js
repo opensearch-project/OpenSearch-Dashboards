@@ -27,14 +27,14 @@ let apmConfig;
 /**
  * Flag to disable APM RUM support on all opensearch-dashboards builds by default
  */
-const isKibanaDistributable = Boolean(build && build.distributable === true);
+const isOpenSearchDashboardsDistributable = Boolean(build && build.distributable === true);
 
 module.exports = function (serviceName = name) {
   if (process.env.osdWorkerType === 'optmzr') {
     return;
   }
 
-  apmConfig = loadConfiguration(process.argv, ROOT_DIR, isKibanaDistributable);
+  apmConfig = loadConfiguration(process.argv, ROOT_DIR, isOpenSearchDashboardsDistributable);
   const conf = apmConfig.getConfig(serviceName);
   const apm = require('elastic-apm-node');
 

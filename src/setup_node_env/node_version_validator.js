@@ -19,7 +19,7 @@
 
 var pkg = require('../../package.json');
 
-// Note: This is written in OpenSearch5 so we can run this before anything else
+// Note: This is written in ES5 so we can run this before anything else
 // and gives support for older NodeJS versions
 var currentVersion = (process && process.version) || null;
 var rawRequiredVersion = (pkg && pkg.engines && pkg.engines.node) || null;
