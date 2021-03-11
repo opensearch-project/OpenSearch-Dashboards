@@ -29,7 +29,7 @@ describe('ensureValidConfiguration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     configService = configServiceMock.create();
-    configService.getUsedPaths.mockReturnValue(Promise.resolve(['core', 'elastic']));
+    configService.getUsedPaths.mockReturnValue(Promise.resolve(['core', 'opensearch']));
 
     (getUnusedConfigKeys as any).mockImplementation(() => []);
   });
@@ -44,7 +44,7 @@ describe('ensureValidConfiguration', () => {
     );
     expect(getUnusedConfigKeys).toHaveBeenCalledTimes(1);
     expect(getUnusedConfigKeys).toHaveBeenCalledWith({
-      coreHandledConfigPaths: ['core', 'elastic'],
+      coreHandledConfigPaths: ['core', 'opensearch'],
       settings: 'settings',
       legacyConfig: 'pluginExtendedConfig',
     });

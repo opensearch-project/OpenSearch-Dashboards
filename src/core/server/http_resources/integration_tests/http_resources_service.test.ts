@@ -76,7 +76,7 @@ describe('http resources service', () => {
           res.renderAnonymousCoreApp({
             headers: {
               'content-security-policy': "script-src 'unsafe-eval'",
-              'x-kibana': '42',
+              'x-opensearch-dashboards': '42',
             },
           })
         );
@@ -85,7 +85,7 @@ describe('http resources service', () => {
         const response = await osdTestServer.request.get(root, '/render-core').expect(200);
 
         expect(response.header['content-security-policy']).toBe(defaultCspRules);
-        expect(response.header['x-kibana']).toBe('42');
+        expect(response.header['x-opensearch-dashboards']).toBe('42');
       });
     });
 
@@ -165,7 +165,7 @@ describe('http resources service', () => {
             headers: {
               'content-security-policy': "script-src 'unsafe-eval'",
               'content-type': 'text/html',
-              'x-kibana': '42',
+              'x-opensearch-dashboards': '42',
             },
           })
         );
@@ -174,7 +174,7 @@ describe('http resources service', () => {
         const response = await osdTestServer.request.get(root, '/render-core').expect(200);
 
         expect(response.header['content-security-policy']).toBe(defaultCspRules);
-        expect(response.header['x-kibana']).toBe('42');
+        expect(response.header['x-opensearch-dashboards']).toBe('42');
       });
 
       it('can adjust route config', async () => {
