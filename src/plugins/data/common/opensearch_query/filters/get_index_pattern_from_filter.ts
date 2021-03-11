@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Filter } from '.';
+import { Filter } from '../filters';
 import { IIndexPattern } from '../..';
 
 export function getIndexPatternFromFilter(

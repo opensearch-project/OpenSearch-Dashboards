@@ -20,7 +20,7 @@
 import { i18n } from '@osd/i18n';
 import { IIndexPattern } from '../..';
 import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';
-import { Filter } from '.';
+import { Filter } from '../filters';
 
 function getValueFormatter(indexPattern?: IIndexPattern, key?: string) {
   // checking getFormatterForField exists because there is at least once case where an index pattern
