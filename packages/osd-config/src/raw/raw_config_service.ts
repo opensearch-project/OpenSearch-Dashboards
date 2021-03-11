@@ -56,7 +56,7 @@ export class RawConfigService {
   }
 
   /**
-   * Read the initial Kibana config.
+   * Read the initial OpenSearch Dashboards config.
    */
   public loadConfig() {
     this.rawConfigFromFile$.next(getConfigFromFiles(this.configFiles));
@@ -67,7 +67,7 @@ export class RawConfigService {
   }
 
   /**
-   * Re-read the Kibana config.
+   * Re-read the OpenSearch Dashboards config.
    */
   public reloadConfig() {
     this.loadConfig();

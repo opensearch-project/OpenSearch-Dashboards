@@ -22,7 +22,7 @@ import { mockPackage } from './env.test.mocks';
 import { Env, RawPackageInfo } from './env';
 import { getEnvOptions } from './__mocks__/env';
 
-const REPO_ROOT = '/test/kibanaRoot';
+const REPO_ROOT = '/test/opensearchDashboardsRoot';
 
 const packageInfos: RawPackageInfo = {
   branch: 'master',
@@ -46,7 +46,7 @@ test('correctly creates default environment in dev mode.', () => {
   const defaultEnv = Env.createDefault(
     REPO_ROOT,
     getEnvOptions({
-      configs: ['/test/cwd/config/kibana.yml'],
+      configs: ['/test/cwd/config/opensearch_dashboards.yml'],
       isDevClusterMaster: true,
     })
   );
@@ -69,7 +69,7 @@ test('correctly creates default environment in prod distributable mode.', () => 
     REPO_ROOT,
     getEnvOptions({
       cliArgs: { dev: false },
-      configs: ['/some/other/path/some-kibana.yml'],
+      configs: ['/some/other/path/some-opensearch-dashboards.yml'],
     })
   );
 
@@ -91,7 +91,7 @@ test('correctly creates default environment in prod non-distributable mode.', ()
     REPO_ROOT,
     getEnvOptions({
       cliArgs: { dev: false },
-      configs: ['/some/other/path/some-kibana.yml'],
+      configs: ['/some/other/path/some-opensearch-dashboards.yml'],
     })
   );
 
@@ -113,7 +113,7 @@ test('correctly creates default environment if `--env.name` is supplied.', () =>
     REPO_ROOT,
     getEnvOptions({
       cliArgs: { envName: 'development' },
-      configs: ['/some/other/path/some-kibana.yml'],
+      configs: ['/some/other/path/some-opensearch-dashboards.yml'],
     })
   );
 
@@ -121,7 +121,7 @@ test('correctly creates default environment if `--env.name` is supplied.', () =>
     REPO_ROOT,
     getEnvOptions({
       cliArgs: { dev: false, envName: 'production' },
-      configs: ['/some/other/path/some-kibana.yml'],
+      configs: ['/some/other/path/some-opensearch-dashboards.yml'],
     })
   );
 
@@ -143,7 +143,7 @@ test('correctly creates environment with constructor.', () => {
     },
     getEnvOptions({
       cliArgs: { dev: false },
-      configs: ['/some/other/path/some-kibana.yml'],
+      configs: ['/some/other/path/some-opensearch-dashboards.yml'],
     })
   );
 
