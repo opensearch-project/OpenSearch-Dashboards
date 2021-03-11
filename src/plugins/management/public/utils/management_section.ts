@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Assign } from '@kbn/utility-types';
+import { Assign } from '@osd/utility-types';
 import { CreateManagementItemArgs, ManagementSectionId } from '../types';
 import { ManagementItem } from './management_item';
 import { ManagementApp, RegisterManagementAppArgs } from './management_app';
