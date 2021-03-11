@@ -17,9 +17,9 @@
  * under the License.
  */
 
-export function setupBasePathProvider(kbnServer) {
-  kbnServer.server.decorate('request', 'getBasePath', function () {
+export function setupBasePathProvider(osdServer) {
+  osdServer.server.decorate('request', 'getBasePath', function () {
     const request = this;
-    return kbnServer.newPlatform.setup.core.http.basePath.get(request);
+    return osdServer.newPlatform.setup.core.http.basePath.get(request);
   });
 }

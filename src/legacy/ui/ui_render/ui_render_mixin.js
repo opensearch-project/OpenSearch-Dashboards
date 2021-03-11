@@ -19,31 +19,31 @@
 
 import { createHash } from 'crypto';
 import Boom from 'boom';
-import { i18n } from '@kbn/i18n';
-import * as UiSharedDeps from '@kbn/ui-shared-deps';
-import { KibanaRequest } from '../../../core/server';
+import { i18n } from '@osd/i18n';
+import * as UiSharedDeps from '@osd/ui-shared-deps';
+import { OpenSearchDashboardsRequest } from '../../../core/server';
 import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
 
 /**
- * @typedef {import('../../server/kbn_server').default} KbnServer
- * @typedef {import('../../server/kbn_server').ResponseToolkit} ResponseToolkit
+ * @typedef {import('../../server/osd_server').default} OsdServer
+ * @typedef {import('../../server/osd_server').ResponseToolkit} ResponseToolkit
  */
 
 /**
  *
- * @param {KbnServer} kbnServer
- * @param {KbnServer['server']} server
- * @param {KbnServer['config']} config
+ * @param {OsdServer} osdServer
+ * @param {OsdServer['server']} server
+ * @param {OsdServer['config']} config
  */
-export function uiRenderMixin(kbnServer, server, config) {
+export function uiRenderMixin(osdServer, server, config) {
   const translationsCache = { translations: null, hash: null };
   server.route({
     path: '/translations/{locale}.json',
     method: 'GET',
     config: { auth: false },
     handler(request, h) {
-      // Kibana server loads translations only for a single locale
+      // OpenSearch Dashboards server loads translations only for a single locale
       // that is specified in `i18n.locale` config value.
       const { locale } = request.params;
       if (i18n.getLocale() !== locale.toLowerCase()) {
@@ -76,10 +76,10 @@ export function uiRenderMixin(kbnServer, server, config) {
       auth: authEnabled ? { mode: 'try' } : false,
     },
     async handler(request, h) {
-      const soClient = kbnServer.newPlatform.start.core.savedObjects.getScopedClient(
-        KibanaRequest.from(request)
+      const soClient = osdServer.newPlatform.start.core.savedObjects.getScopedClient(
+        OpenSearchDashboardsRequest.from(request)
       );
-      const uiSettings = kbnServer.newPlatform.start.core.uiSettings.asScopedToClient(soClient);
+      const uiSettings = osdServer.newPlatform.start.core.uiSettings.asScopedToClient(soClient);
 
       const darkMode =
         !authEnabled || request.auth.isAuthenticated
@@ -97,25 +97,25 @@ export function uiRenderMixin(kbnServer, server, config) {
       const regularBundlePath = `${basePath}/${buildHash}/bundles`;
 
       const styleSheetPaths = [
-        `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
+        `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
         ...(darkMode
           ? [
               themeVersion === 'v7'
-                ? `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`
-                : `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkV8CssDistFilename}`,
-              `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
+                ? `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`
+                : `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.darkV8CssDistFilename}`,
+              `${basePath}/node_modules/@osd/ui-framework/dist/kui_dark.css`,
               `${basePath}/ui/legacy_dark_theme.css`,
             ]
           : [
               themeVersion === 'v7'
-                ? `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`
-                : `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightV8CssDistFilename}`,
-              `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
+                ? `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`
+                : `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.lightV8CssDistFilename}`,
+              `${basePath}/node_modules/@osd/ui-framework/dist/kui_light.css`,
               `${basePath}/ui/legacy_light_theme.css`,
             ]),
       ];
 
-      const kpUiPlugins = kbnServer.newPlatform.__internals.uiPlugins;
+      const kpUiPlugins = osdServer.newPlatform.__internals.uiPlugins;
       const kpPluginPublicPaths = new Map();
       const kpPluginBundlePaths = new Set();
 
@@ -135,9 +135,9 @@ export function uiRenderMixin(kbnServer, server, config) {
 
       const jsDependencyPaths = [
         ...UiSharedDeps.jsDepFilenames.map(
-          (filename) => `${regularBundlePath}/kbn-ui-shared-deps/${filename}`
+          (filename) => `${regularBundlePath}/osd-ui-shared-deps/${filename}`
         ),
-        `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
+        `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.jsFilename}`,
 
         `${regularBundlePath}/core/core.entry.js`,
         ...kpPluginBundlePaths,
@@ -147,7 +147,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       // src/optimize/bundles_route/bundles_route.ts
       const publicPathMap = JSON.stringify({
         core: `${regularBundlePath}/core/`,
-        'kbn-ui-shared-deps': `${regularBundlePath}/kbn-ui-shared-deps/`,
+        'osd-ui-shared-deps': `${regularBundlePath}/osd-ui-shared-deps/`,
         ...Object.fromEntries(kpPluginPublicPaths),
       });
 
@@ -184,11 +184,11 @@ export function uiRenderMixin(kbnServer, server, config) {
   });
 
   async function renderApp(h) {
-    const { http } = kbnServer.newPlatform.setup.core;
-    const { savedObjects } = kbnServer.newPlatform.start.core;
-    const { rendering } = kbnServer.newPlatform.__internals;
-    const req = KibanaRequest.from(h.request);
-    const uiSettings = kbnServer.newPlatform.start.core.uiSettings.asScopedToClient(
+    const { http } = osdServer.newPlatform.setup.core;
+    const { savedObjects } = osdServer.newPlatform.start.core;
+    const { rendering } = osdServer.newPlatform.__internals;
+    const req = OpenSearchDashboardsRequest.from(h.request);
+    const uiSettings = osdServer.newPlatform.start.core.uiSettings.asScopedToClient(
       savedObjects.getScopedClient(req)
     );
     const vars = {
