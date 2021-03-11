@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'opensearch-dashboards/server';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { createClusterDataCheck } from './check_cluster_data';
 import { ConfigType } from './config';

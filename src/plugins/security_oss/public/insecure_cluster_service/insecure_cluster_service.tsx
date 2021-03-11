@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, MountPoint, Toast } from 'kibana/public';
+import { CoreSetup, CoreStart, MountPoint, Toast } from 'opensearch-dashboards/public';
 
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';

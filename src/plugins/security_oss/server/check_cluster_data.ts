@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
+import { OpenSearchClient, Logger } from 'opensearch-dashboards/server';
 
 export const createClusterDataCheck = () => {
   let clusterHasUserData = false;
 
-  return async function doesClusterHaveUserData(esClient: ElasticsearchClient, log: Logger) {
+  return async function doesClusterHaveUserData(opensearchClient: OpenSearchClient, log: Logger) {
     if (!clusterHasUserData) {
       try {
-        const indices = await esClient.cat.indices<
+        const indices = await opensearchClient.cat.indices<
           Array<{ index: string; ['docs.count']: string }>
         >({
           format: 'json',
@@ -33,7 +33,7 @@ export const createClusterDataCheck = () => {
         });
         clusterHasUserData = indices.body.some((indexCount) => {
           const isInternalIndex =
-            indexCount.index.startsWith('.') || indexCount.index.startsWith('kibana_sample_');
+            indexCount.index.startsWith('.') || indexCount.index.startsWith('opensearch_dashboards_sample_');
 
           return !isInternalIndex && parseInt(indexCount['docs.count'], 10) > 0;
         });
