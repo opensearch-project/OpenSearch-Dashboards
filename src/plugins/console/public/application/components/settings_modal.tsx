@@ -122,7 +122,7 @@ export function DevToolsSettingsModal(props: Props) {
           helpText={
             <FormattedMessage
               id="console.settingsPage.refreshingDataDescription"
-              defaultMessage="Console refreshes autocomplete suggestions by querying Elasticsearch.
+              defaultMessage="Console refreshes autocomplete suggestions by querying OpenSearch.
               Automatic refreshes may be an issue if you have a large cluster or if you have network limitations."
             />
           }
