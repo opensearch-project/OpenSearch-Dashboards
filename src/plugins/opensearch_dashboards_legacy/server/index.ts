@@ -22,7 +22,7 @@ import {
   CoreSetup,
   CoreStart,
   PluginConfigDescriptor,
-} from 'opensearchDashboards/server';
+} from 'opensearch-dashboards/server';
 import { get } from 'lodash';
 
 import { configSchema, ConfigSchema } from '../config';
