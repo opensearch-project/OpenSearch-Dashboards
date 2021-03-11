@@ -21,7 +21,7 @@ import { CoreEditor, Position } from '../../types';
 import { getCurrentMethodAndTokenPaths } from './autocomplete';
 
 // @ts-ignore
-import { getTopLevelUrlCompleteComponents } from '../kb/kb';
+import { getTopLevelUrlCompleteComponents } from '../osd/osd';
 // @ts-ignore
 import { populateContext } from './engine';
 

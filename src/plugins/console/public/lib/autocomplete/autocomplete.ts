@@ -27,7 +27,7 @@ import {
   getGlobalAutocompleteComponents,
   getUnmatchedEndpointComponents,
   // @ts-ignore
-} from '../kb/kb';
+} from '../osd/osd';
 
 import * as utils from '../utils';
 

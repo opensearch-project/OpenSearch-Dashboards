@@ -34,7 +34,7 @@ describe('Console Proxy Route', () => {
       // Describe a situation where all three configured nodes reject
       (requestModule.proxyRequest as jest.Mock).mockRejectedValueOnce(new Error('ECONNREFUSED'));
       (requestModule.proxyRequest as jest.Mock).mockRejectedValueOnce(new Error('EHOSTUNREACH'));
-      (requestModule.proxyRequest as jest.Mock).mockRejectedValueOnce(new Error('OPENSEARCHOCKETTIMEDOUT'));
+      (requestModule.proxyRequest as jest.Mock).mockRejectedValueOnce(new Error('ESOCKETTIMEDOUT'));
 
       const handler = createHandler(
         getProxyRouteHandlerDeps({
