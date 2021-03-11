@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { ApplicationStart, IBasePath } from 'kibana/public';
+import { ApplicationStart, IBasePath } from 'opensearch-dashboards/public';
 import { ForwardDefinition } from '../index';
 import { normalizePath } from './normalize_path';
 
-export const navigateToLegacyKibanaUrl = (
+export const navigateToLegacyOpenSearchDashboardsUrl = (
   path: string,
   forwards: ForwardDefinition[],
   basePath: IBasePath,
