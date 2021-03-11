@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.

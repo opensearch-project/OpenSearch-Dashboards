@@ -17,8 +17,8 @@
  * under the License.
  */
 import _ from 'lodash';
-import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
-import { SavedObjectNotFound } from '../../../../kibana_utils/public';
+import { OpenSearchResponse, SavedObject, SavedObjectConfig, SavedObjectOpenSearchDashboardsServices } from '../../types';
+import { SavedObjectNotFound } from '../../../../opensearch_dashboards_utils/public';
 import {
   IndexPattern,
   injectSearchSourceReferences,
@@ -27,25 +27,25 @@ import {
 } from '../../../../data/public';
 
 /**
- * A given response of and ElasticSearch containing a plain saved object is applied to the given
+ * A given response of and OpenSearch containing a plain saved object is applied to the given
  * savedObject
  */
-export async function applyESResp(
-  resp: EsResponse,
+export async function applyOpenSearchResp(
+  resp: OpenSearchResponse,
   savedObject: SavedObject,
   config: SavedObjectConfig,
-  dependencies: SavedObjectKibanaServices
+  dependencies: SavedObjectOpenSearchDashboardsServices
 ) {
   const mapping = expandShorthand(config.mapping);
-  const esType = config.type || '';
+  const opensearchType = config.type || '';
   savedObject._source = _.cloneDeep(resp._source);
   const injectReferences = config.injectReferences;
   if (typeof resp.found === 'boolean' && !resp.found) {
-    throw new SavedObjectNotFound(esType, savedObject.id || '');
+    throw new SavedObjectNotFound(opensearchType, savedObject.id || '');
   }
 
-  const meta = resp._source.kibanaSavedObjectMeta || {};
-  delete resp._source.kibanaSavedObjectMeta;
+  const meta = resp._source.opensearchDashboardsSavedObjectMeta || {};
+  delete resp._source.opensearchDashboardsSavedObjectMeta;
 
   if (!config.indexPattern && savedObject._source.indexPattern) {
     config.indexPattern = savedObject._source.indexPattern as IndexPattern;
@@ -91,7 +91,7 @@ export async function applyESResp(
         // if parsing the search source fails because the index pattern wasn't found,
         // remember the reference - this is required for error handling on legacy imports
         savedObject.unresolvedIndexPatternReference = {
-          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
           id: JSON.parse(meta.searchSourceJSON).index,
           type: 'index-pattern',
         };
@@ -105,8 +105,8 @@ export async function applyESResp(
     injectReferences(savedObject, resp.references);
   }
 
-  if (typeof config.afterESResp === 'function') {
-    savedObject = await config.afterESResp(savedObject);
+  if (typeof config.afterOpenSearchResp === 'function') {
+    savedObject = await config.afterOpenSearchResp(savedObject);
   }
 
   return savedObject;
