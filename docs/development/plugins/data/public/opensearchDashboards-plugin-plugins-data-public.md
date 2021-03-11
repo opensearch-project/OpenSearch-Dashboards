@@ -6,179 +6,178 @@
 
 ## Classes
 
-|  Class | Description |
-|  --- | --- |
-|  [AggConfig](./opensearch-dashboards-plugin-plugins-data-public.aggconfig.md) |  |
-|  [AggConfigs](./opensearch-dashboards-plugin-plugins-data-public.aggconfigs.md) |  |
-|  [AggParamType](./opensearch-dashboards-plugin-plugins-data-public.aggparamtype.md) |  |
-|  [DuplicateIndexPatternError](./opensearch-dashboards-plugin-plugins-data-public.duplicateindexpatternerror.md) |  |
-|  [FieldFormat](./opensearch-dashboards-plugin-plugins-data-public.fieldformat.md) |  |
-|  [FilterManager](./opensearch-dashboards-plugin-plugins-data-public.filtermanager.md) |  |
-|  [IndexPattern](./opensearch-dashboards-plugin-plugins-data-public.indexpattern.md) |  |
-|  [IndexPatternField](./opensearch-dashboards-plugin-plugins-data-public.indexpatternfield.md) |  |
-|  [IndexPatternsService](./opensearch-dashboards-plugin-plugins-data-public.indexpatternsservice.md) |  |
-|  [OptionedParamType](./opensearch-dashboards-plugin-plugins-data-public.optionedparamtype.md) |  |
-|  [PainlessError](./opensearch-dashboards-plugin-plugins-data-public.painlesserror.md) |  |
-|  [Plugin](./opensearch-dashboards-plugin-plugins-data-public.plugin.md) |  |
-|  [SearchInterceptor](./opensearch-dashboards-plugin-plugins-data-public.searchinterceptor.md) |  |
-|  [SearchSource](./opensearch-dashboards-plugin-plugins-data-public.searchsource.md) | \* |
-|  [SearchTimeoutError](./opensearch-dashboards-plugin-plugins-data-public.searchtimeouterror.md) | Request Failure - When an entire multi request fails |
-|  [TimeHistory](./opensearch-dashboards-plugin-plugins-data-public.timehistory.md) |  |
+| Class                                                                                                          | Description                                          |
+| -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| [AggConfig](./opensearch-dashboards-plugin-plugins-data-public.aggconfig.md)                                   |                                                      |
+| [AggConfigs](./opensearch-dashboards-plugin-plugins-data-public.aggconfigs.md)                                 |                                                      |
+| [AggParamType](./opensearch-dashboards-plugin-plugins-data-public.aggparamtype.md)                             |                                                      |
+| [DuplicateIndexPatternError](./opensearch-dashboards-plugin-plugins-data-public.duplicateindexpatternerror.md) |                                                      |
+| [FieldFormat](./opensearch-dashboards-plugin-plugins-data-public.fieldformat.md)                               |                                                      |
+| [FilterManager](./opensearch-dashboards-plugin-plugins-data-public.filtermanager.md)                           |                                                      |
+| [IndexPattern](./opensearch-dashboards-plugin-plugins-data-public.indexpattern.md)                             |                                                      |
+| [IndexPatternField](./opensearch-dashboards-plugin-plugins-data-public.indexpatternfield.md)                   |                                                      |
+| [IndexPatternsService](./opensearch-dashboards-plugin-plugins-data-public.indexpatternsservice.md)             |                                                      |
+| [OptionedParamType](./opensearch-dashboards-plugin-plugins-data-public.optionedparamtype.md)                   |                                                      |
+| [PainlessError](./opensearch-dashboards-plugin-plugins-data-public.painlesserror.md)                           |                                                      |
+| [Plugin](./opensearch-dashboards-plugin-plugins-data-public.plugin.md)                                         |                                                      |
+| [SearchInterceptor](./opensearch-dashboards-plugin-plugins-data-public.searchinterceptor.md)                   |                                                      |
+| [SearchSource](./opensearch-dashboards-plugin-plugins-data-public.searchsource.md)                             | \*                                                   |
+| [SearchTimeoutError](./opensearch-dashboards-plugin-plugins-data-public.searchtimeouterror.md)                 | Request Failure - When an entire multi request fails |
+| [TimeHistory](./opensearch-dashboards-plugin-plugins-data-public.timehistory.md)                               |                                                      |
 
 ## Enumerations
 
-|  Enumeration | Description |
-|  --- | --- |
-|  [BUCKET\_TYPES](./opensearch-dashboards-plugin-plugins-data-public.bucket_types.md) |  |
-|  [OPENSEARCH\_FIELD\_TYPES](./opensearch-dashboards-plugin-plugins-data-public.opensearch_dashboards_field_types.md) | \* |
-|  [OSD\_FIELD\_TYPES](./opensearch-dashboards-plugin-plugins-data-public.osd_field_types.md) | \* |
-|  [METRIC\_TYPES](./opensearch-dashboards-plugin-plugins-data-public.metric_types.md) |  |
-|  [QuerySuggestionTypes](./opensearch-dashboards-plugin-plugins-data-public.querysuggestiontypes.md) |  |
-|  [SortDirection](./opensearch-dashboards-plugin-plugins-data-public.sortdirection.md) |  |
-|  [TimeoutErrorMode](./opensearch-dashboards-plugin-plugins-data-public.timeouterrormode.md) |  |
+| Enumeration                                                                                                       | Description |
+| ----------------------------------------------------------------------------------------------------------------- | ----------- |
+| [BUCKET_TYPES](./opensearch-dashboards-plugin-plugins-data-public.bucket_types.md)                                |             |
+| [OPENSEARCH_FIELD_TYPES](./opensearch-dashboards-plugin-plugins-data-public.opensearch_dashboards_field_types.md) | \*          |
+| [OSD_FIELD_TYPES](./opensearch-dashboards-plugin-plugins-data-public.osd_field_types.md)                          | \*          |
+| [METRIC_TYPES](./opensearch-dashboards-plugin-plugins-data-public.metric_types.md)                                |             |
+| [QuerySuggestionTypes](./opensearch-dashboards-plugin-plugins-data-public.querysuggestiontypes.md)                |             |
+| [SortDirection](./opensearch-dashboards-plugin-plugins-data-public.sortdirection.md)                              |             |
+| [TimeoutErrorMode](./opensearch-dashboards-plugin-plugins-data-public.timeouterrormode.md)                        |             |
 
 ## Functions
 
-|  Function | Description |
-|  --- | --- |
-|  [getDefaultQuery(language)](./opensearch-dashboards-plugin-plugins-data-public.getdefaultquery.md) |  |
-|  [getOpenSearchPreference(uiSettings, sessionId)](./opensearch-dashboards-plugin-plugins-data-public.getespreference.md) |  |
-|  [getSearchParamsFromRequest(searchRequest, dependencies)](./opensearch-dashboards-plugin-plugins-data-public.getsearchparamsfromrequest.md) |  |
-|  [getTime(indexPattern, timeRange, options)](./opensearch-dashboards-plugin-plugins-data-public.gettime.md) |  |
-|  [plugin(initializerContext)](./opensearch-dashboards-plugin-plugins-data-public.plugin.md) |  |
+| Function                                                                                                                                    | Description |
+| ------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| [getDefaultQuery(language)](./opensearch-dashboards-plugin-plugins-data-public.getdefaultquery.md)                                          |             |
+| [getOpenSearchPreference(uiSettings, sessionId)](./opensearch-dashboards-plugin-plugins-data-public.getopensearchpreference.md)             |             |
+| [getSearchParamsFromRequest(searchRequest, dependencies)](./opensearch-dashboards-plugin-plugins-data-public.getsearchparamsfromrequest.md) |             |
+| [getTime(indexPattern, timeRange, options)](./opensearch-dashboards-plugin-plugins-data-public.gettime.md)                                  |             |
+| [plugin(initializerContext)](./opensearch-dashboards-plugin-plugins-data-public.plugin.md)                                                  |             |
 
 ## Interfaces
 
-|  Interface | Description |
-|  --- | --- |
-|  [AggParamOption](./opensearch-dashboards-plugin-plugins-data-public.aggparamoption.md) |  |
-|  [ApplyGlobalFilterActionContext](./opensearch-dashboards-plugin-plugins-data-public.applyglobalfilteractioncontext.md) |  |
-|  [DataPublicPluginSetup](./opensearch-dashboards-plugin-plugins-data-public.datapublicpluginsetup.md) | Data plugin public Setup contract |
-|  [DataPublicPluginStart](./opensearch-dashboards-plugin-plugins-data-public.datapublicpluginstart.md) | Data plugin public Start contract |
-|  [DataPublicPluginStartActions](./opensearch-dashboards-plugin-plugins-data-public.datapublicpluginstartactions.md) | utilities to generate filters from action context |
-|  [DataPublicPluginStartUi](./opensearch-dashboards-plugin-plugins-data-public.datapublicpluginstartui.md) | Data plugin prewired UI components |
-|  [OpenSearchQueryConfig](./opensearch-dashboards-plugin-plugins-data-public.opensearchqueryconfig.md) |  |
-|  [FieldFormatConfig](./opensearch-dashboards-plugin-plugins-data-public.fieldformatconfig.md) |  |
-|  [FieldMappingSpec](./opensearch-dashboards-plugin-plugins-data-public.fieldmappingspec.md) |  |
-|  [IDataPluginServices](./opensearch-dashboards-plugin-plugins-data-public.idatapluginservices.md) |  |
-|  [IOpenSearchSearchRequest](./opensearch-dashboards-plugin-plugins-data-public.iessearchrequest.md) |  |
-|  [IFieldSubType](./opensearch-dashboards-plugin-plugins-data-public.ifieldsubtype.md) |  |
-|  [IFieldType](./opensearch-dashboards-plugin-plugins-data-public.ifieldtype.md) |  |
-|  [IIndexPattern](./opensearch-dashboards-plugin-plugins-data-public.iindexpattern.md) |  |
-|  [IIndexPatternFieldList](./opensearch-dashboards-plugin-plugins-data-public.iindexpatternfieldlist.md) |  |
-|  [IOpenSearchDashboardsSearchRequest](./opensearch-dashboards-plugin-plugins-data-public.iopensearchDashboardssearchrequest.md) |  |
-|  [IOpenSearchDashboardsSearchResponse](./opensearch-dashboards-plugin-plugins-data-public.iopensearchDashboardssearchresponse.md) |  |
-|  [IndexPatternAttributes](./opensearch-dashboards-plugin-plugins-data-public.indexpatternattributes.md) |  |
-|  [IndexPatternSpec](./opensearch-dashboards-plugin-plugins-data-public.indexpatternspec.md) |  |
-|  [IndexPatternTypeMeta](./opensearch-dashboards-plugin-plugins-data-public.indexpatterntypemeta.md) |  |
-|  [ISearchOptions](./opensearch-dashboards-plugin-plugins-data-public.isearchoptions.md) |  |
-|  [ISearchSetup](./opensearch-dashboards-plugin-plugins-data-public.isearchsetup.md) | The setup contract exposed by the Search plugin exposes the search strategy extension point. |
-|  [ISearchStart](./opensearch-dashboards-plugin-plugins-data-public.isearchstart.md) | search service |
-|  [ISearchStartSearchSource](./opensearch-dashboards-plugin-plugins-data-public.isearchstartsearchsource.md) | high level search service |
-|  [KueryNode](./opensearch-dashboards-plugin-plugins-data-public.kuerynode.md) |  |
-|  [OptionedValueProp](./opensearch-dashboards-plugin-plugins-data-public.optionedvalueprop.md) |  |
-|  [QueryState](./opensearch-dashboards-plugin-plugins-data-public.querystate.md) | All query state service state |
-|  [QueryStateChange](./opensearch-dashboards-plugin-plugins-data-public.querystatechange.md) |  |
-|  [QueryStringInputProps](./opensearch-dashboards-plugin-plugins-data-public.querystringinputprops.md) |  |
-|  [QuerySuggestionBasic](./opensearch-dashboards-plugin-plugins-data-public.querysuggestionbasic.md) | \* |
-|  [QuerySuggestionField](./opensearch-dashboards-plugin-plugins-data-public.querysuggestionfield.md) | \* |
-|  [QuerySuggestionGetFnArgs](./opensearch-dashboards-plugin-plugins-data-public.querysuggestiongetfnargs.md) | \* |
-|  [RangeFilterParams](./opensearch-dashboards-plugin-plugins-data-public.rangefilterparams.md) |  |
-|  [RefreshInterval](./opensearch-dashboards-plugin-plugins-data-public.refreshinterval.md) |  |
-|  [SavedQuery](./opensearch-dashboards-plugin-plugins-data-public.savedquery.md) |  |
-|  [SavedQueryService](./opensearch-dashboards-plugin-plugins-data-public.savedqueryservice.md) |  |
-|  [SearchError](./opensearch-dashboards-plugin-plugins-data-public.searcherror.md) |  |
-|  [SearchInterceptorDeps](./opensearch-dashboards-plugin-plugins-data-public.searchinterceptordeps.md) |  |
-|  [SearchSourceFields](./opensearch-dashboards-plugin-plugins-data-public.searchsourcefields.md) | search source fields |
-|  [TabbedAggColumn](./opensearch-dashboards-plugin-plugins-data-public.tabbedaggcolumn.md) | \* |
-|  [TabbedTable](./opensearch-dashboards-plugin-plugins-data-public.tabbedtable.md) | \* |
+| Interface                                                                                                                        | Description                                                                                  |
+| -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| [AggParamOption](./opensearch-dashboards-plugin-plugins-data-public.aggparamoption.md)                                           |                                                                                              |
+| [ApplyGlobalFilterActionContext](./opensearch-dashboards-plugin-plugins-data-public.applyglobalfilteractioncontext.md)           |                                                                                              |
+| [DataPublicPluginSetup](./opensearch-dashboards-plugin-plugins-data-public.datapublicpluginsetup.md)                             | Data plugin public Setup contract                                                            |
+| [DataPublicPluginStart](./opensearch-dashboards-plugin-plugins-data-public.datapublicpluginstart.md)                             | Data plugin public Start contract                                                            |
+| [DataPublicPluginStartActions](./opensearch-dashboards-plugin-plugins-data-public.datapublicpluginstartactions.md)               | utilities to generate filters from action context                                            |
+| [DataPublicPluginStartUi](./opensearch-dashboards-plugin-plugins-data-public.datapublicpluginstartui.md)                         | Data plugin prewired UI components                                                           |
+| [OpenSearchQueryConfig](./opensearch-dashboards-plugin-plugins-data-public.opensearchqueryconfig.md)                             |                                                                                              |
+| [FieldFormatConfig](./opensearch-dashboards-plugin-plugins-data-public.fieldformatconfig.md)                                     |                                                                                              |
+| [FieldMappingSpec](./opensearch-dashboards-plugin-plugins-data-public.fieldmappingspec.md)                                       |                                                                                              |
+| [IDataPluginServices](./opensearch-dashboards-plugin-plugins-data-public.idatapluginservices.md)                                 |                                                                                              |
+| [IOpenSearchSearchRequest](./opensearch-dashboards-plugin-plugins-data-public.iopensearchsearchrequest.md)                       |                                                                                              |
+| [IFieldSubType](./opensearch-dashboards-plugin-plugins-data-public.ifieldsubtype.md)                                             |                                                                                              |
+| [IFieldType](./opensearch-dashboards-plugin-plugins-data-public.ifieldtype.md)                                                   |                                                                                              |
+| [IIndexPattern](./opensearch-dashboards-plugin-plugins-data-public.iindexpattern.md)                                             |                                                                                              |
+| [IIndexPatternFieldList](./opensearch-dashboards-plugin-plugins-data-public.iindexpatternfieldlist.md)                           |                                                                                              |
+| [IOpenSearchDashboardsSearchRequest](./opensearch-dashboards-plugin-plugins-data-public.iopensearchDashboardssearchrequest.md)   |                                                                                              |
+| [IOpenSearchDashboardsSearchResponse](./opensearch-dashboards-plugin-plugins-data-public.iopensearchDashboardssearchresponse.md) |                                                                                              |
+| [IndexPatternAttributes](./opensearch-dashboards-plugin-plugins-data-public.indexpatternattributes.md)                           |                                                                                              |
+| [IndexPatternSpec](./opensearch-dashboards-plugin-plugins-data-public.indexpatternspec.md)                                       |                                                                                              |
+| [IndexPatternTypeMeta](./opensearch-dashboards-plugin-plugins-data-public.indexpatterntypemeta.md)                               |                                                                                              |
+| [ISearchOptions](./opensearch-dashboards-plugin-plugins-data-public.isearchoptions.md)                                           |                                                                                              |
+| [ISearchSetup](./opensearch-dashboards-plugin-plugins-data-public.isearchsetup.md)                                               | The setup contract exposed by the Search plugin exposes the search strategy extension point. |
+| [ISearchStart](./opensearch-dashboards-plugin-plugins-data-public.isearchstart.md)                                               | search service                                                                               |
+| [ISearchStartSearchSource](./opensearch-dashboards-plugin-plugins-data-public.isearchstartsearchsource.md)                       | high level search service                                                                    |
+| [KueryNode](./opensearch-dashboards-plugin-plugins-data-public.kuerynode.md)                                                     |                                                                                              |
+| [OptionedValueProp](./opensearch-dashboards-plugin-plugins-data-public.optionedvalueprop.md)                                     |                                                                                              |
+| [QueryState](./opensearch-dashboards-plugin-plugins-data-public.querystate.md)                                                   | All query state service state                                                                |
+| [QueryStateChange](./opensearch-dashboards-plugin-plugins-data-public.querystatechange.md)                                       |                                                                                              |
+| [QueryStringInputProps](./opensearch-dashboards-plugin-plugins-data-public.querystringinputprops.md)                             |                                                                                              |
+| [QuerySuggestionBasic](./opensearch-dashboards-plugin-plugins-data-public.querysuggestionbasic.md)                               | \*                                                                                           |
+| [QuerySuggestionField](./opensearch-dashboards-plugin-plugins-data-public.querysuggestionfield.md)                               | \*                                                                                           |
+| [QuerySuggestionGetFnArgs](./opensearch-dashboards-plugin-plugins-data-public.querysuggestiongetfnargs.md)                       | \*                                                                                           |
+| [RangeFilterParams](./opensearch-dashboards-plugin-plugins-data-public.rangefilterparams.md)                                     |                                                                                              |
+| [RefreshInterval](./opensearch-dashboards-plugin-plugins-data-public.refreshinterval.md)                                         |                                                                                              |
+| [SavedQuery](./opensearch-dashboards-plugin-plugins-data-public.savedquery.md)                                                   |                                                                                              |
+| [SavedQueryService](./opensearch-dashboards-plugin-plugins-data-public.savedqueryservice.md)                                     |                                                                                              |
+| [SearchError](./opensearch-dashboards-plugin-plugins-data-public.searcherror.md)                                                 |                                                                                              |
+| [SearchInterceptorDeps](./opensearch-dashboards-plugin-plugins-data-public.searchinterceptordeps.md)                             |                                                                                              |
+| [SearchSourceFields](./opensearch-dashboards-plugin-plugins-data-public.searchsourcefields.md)                                   | search source fields                                                                         |
+| [TabbedAggColumn](./opensearch-dashboards-plugin-plugins-data-public.tabbedaggcolumn.md)                                         | \*                                                                                           |
+| [TabbedTable](./opensearch-dashboards-plugin-plugins-data-public.tabbedtable.md)                                                 | \*                                                                                           |
 
 ## Variables
 
-|  Variable | Description |
-|  --- | --- |
-|  [ACTION\_GLOBAL\_APPLY\_FILTER](./opensearch-dashboards-plugin-plugins-data-public.action_global_apply_filter.md) |  |
-|  [AggGroupLabels](./opensearch-dashboards-plugin-plugins-data-public.agggrouplabels.md) |  |
-|  [AggGroupNames](./opensearch-dashboards-plugin-plugins-data-public.agggroupnames.md) |  |
-|  [baseFormattersPublic](./opensearch-dashboards-plugin-plugins-data-public.baseformatterspublic.md) |  |
-|  [castOpenSearchToOsdFieldTypeName](./opensearch-dashboards-plugin-plugins-data-public.castestoosdfieldtypename.md) | Get the OsdFieldType name for an opensearchType string |
-|  [connectToQueryState](./opensearch-dashboards-plugin-plugins-data-public.connecttoquerystate.md) | Helper to setup two-way syncing of global data and a state container |
-|  [createSavedQueryService](./opensearch-dashboards-plugin-plugins-data-public.createsavedqueryservice.md) |  |
-|  [OPENSEARCH\_SEARCH\_STRATEGY](./opensearch-dashboards-plugin-plugins-data-public.opensearch_dashboards_search_strategy.md) |  |
-|  [opensearchFilters](./opensearch-dashboards-plugin-plugins-data-public.opensearchfilters.md) |  |
-|  [opensearchKuery](./opensearch-dashboards-plugin-plugins-data-public.opensearchkuery.md) |  |
-|  [opensearchQuery](./opensearch-dashboards-plugin-plugins-data-public.opensearchquery.md) |  |
-|  [expandShorthand](./opensearch-dashboards-plugin-plugins-data-public.expandshorthand.md) |  |
-|  [extractSearchSourceReferences](./opensearch-dashboards-plugin-plugins-data-public.extractsearchsourcereferences.md) |  |
-|  [fieldFormats](./opensearch-dashboards-plugin-plugins-data-public.fieldformats.md) |  |
-|  [fieldList](./opensearch-dashboards-plugin-plugins-data-public.fieldlist.md) |  |
-|  [getOsdTypeNames](./opensearch-dashboards-plugin-plugins-data-public.getosdtypenames.md) | Get the opensearchTypes known by all osdFieldTypes {<!-- -->Array<string>} |
-|  [indexPatterns](./opensearch-dashboards-plugin-plugins-data-public.indexpatterns.md) |  |
-|  [injectSearchSourceReferences](./opensearch-dashboards-plugin-plugins-data-public.injectsearchsourcereferences.md) |  |
-|  [isCompleteResponse](./opensearch-dashboards-plugin-plugins-data-public.iscompleteresponse.md) |  |
-|  [isErrorResponse](./opensearch-dashboards-plugin-plugins-data-public.iserrorresponse.md) |  |
-|  [isFilter](./opensearch-dashboards-plugin-plugins-data-public.isfilter.md) |  |
-|  [isFilters](./opensearch-dashboards-plugin-plugins-data-public.isfilters.md) |  |
-|  [isPartialResponse](./opensearch-dashboards-plugin-plugins-data-public.ispartialresponse.md) |  |
-|  [isQuery](./opensearch-dashboards-plugin-plugins-data-public.isquery.md) |  |
-|  [isTimeRange](./opensearch-dashboards-plugin-plugins-data-public.istimerange.md) |  |
-|  [parseSearchSourceJSON](./opensearch-dashboards-plugin-plugins-data-public.parsesearchsourcejson.md) |  |
-|  [QueryStringInput](./opensearch-dashboards-plugin-plugins-data-public.querystringinput.md) |  |
-|  [search](./opensearch-dashboards-plugin-plugins-data-public.search.md) |  |
-|  [SearchBar](./opensearch-dashboards-plugin-plugins-data-public.searchbar.md) |  |
-|  [syncQueryStateWithUrl](./opensearch-dashboards-plugin-plugins-data-public.syncquerystatewithurl.md) | Helper to setup syncing of global data with the URL |
-|  [UI\_SETTINGS](./opensearch-dashboards-plugin-plugins-data-public.ui_settings.md) |  |
+| Variable                                                                                                                   | Description                                                                |
+| -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| [ACTION_GLOBAL_APPLY_FILTER](./opensearch-dashboards-plugin-plugins-data-public.action_global_apply_filter.md)             |                                                                            |
+| [AggGroupLabels](./opensearch-dashboards-plugin-plugins-data-public.agggrouplabels.md)                                     |                                                                            |
+| [AggGroupNames](./opensearch-dashboards-plugin-plugins-data-public.agggroupnames.md)                                       |                                                                            |
+| [baseFormattersPublic](./opensearch-dashboards-plugin-plugins-data-public.baseformatterspublic.md)                         |                                                                            |
+| [castOpenSearchToOsdFieldTypeName](./opensearch-dashboards-plugin-plugins-data-public.castopensearchtoosdfieldtypename.md) | Get the OsdFieldType name for an opensearchType string                     |
+| [connectToQueryState](./opensearch-dashboards-plugin-plugins-data-public.connecttoquerystate.md)                           | Helper to setup two-way syncing of global data and a state container       |
+| [createSavedQueryService](./opensearch-dashboards-plugin-plugins-data-public.createsavedqueryservice.md)                   |                                                                            |
+| [OPENSEARCH_SEARCH_STRATEGY](./opensearch-dashboards-plugin-plugins-data-public.opensearch_dashboards_search_strategy.md)  |                                                                            |
+| [opensearchFilters](./opensearch-dashboards-plugin-plugins-data-public.opensearchfilters.md)                               |                                                                            |
+| [opensearchKuery](./opensearch-dashboards-plugin-plugins-data-public.opensearchkuery.md)                                   |                                                                            |
+| [opensearchQuery](./opensearch-dashboards-plugin-plugins-data-public.opensearchquery.md)                                   |                                                                            |
+| [expandShorthand](./opensearch-dashboards-plugin-plugins-data-public.expandshorthand.md)                                   |                                                                            |
+| [extractSearchSourceReferences](./opensearch-dashboards-plugin-plugins-data-public.extractsearchsourcereferences.md)       |                                                                            |
+| [fieldFormats](./opensearch-dashboards-plugin-plugins-data-public.fieldformats.md)                                         |                                                                            |
+| [fieldList](./opensearch-dashboards-plugin-plugins-data-public.fieldlist.md)                                               |                                                                            |
+| [getOsdTypeNames](./opensearch-dashboards-plugin-plugins-data-public.getosdtypenames.md)                                   | Get the opensearchTypes known by all osdFieldTypes {<!-- -->Array<string>} |
+| [indexPatterns](./opensearch-dashboards-plugin-plugins-data-public.indexpatterns.md)                                       |                                                                            |
+| [injectSearchSourceReferences](./opensearch-dashboards-plugin-plugins-data-public.injectsearchsourcereferences.md)         |                                                                            |
+| [isCompleteResponse](./opensearch-dashboards-plugin-plugins-data-public.iscompleteresponse.md)                             |                                                                            |
+| [isErrorResponse](./opensearch-dashboards-plugin-plugins-data-public.iserrorresponse.md)                                   |                                                                            |
+| [isFilter](./opensearch-dashboards-plugin-plugins-data-public.isfilter.md)                                                 |                                                                            |
+| [isFilters](./opensearch-dashboards-plugin-plugins-data-public.isfilters.md)                                               |                                                                            |
+| [isPartialResponse](./opensearch-dashboards-plugin-plugins-data-public.ispartialresponse.md)                               |                                                                            |
+| [isQuery](./opensearch-dashboards-plugin-plugins-data-public.isquery.md)                                                   |                                                                            |
+| [isTimeRange](./opensearch-dashboards-plugin-plugins-data-public.istimerange.md)                                           |                                                                            |
+| [parseSearchSourceJSON](./opensearch-dashboards-plugin-plugins-data-public.parsesearchsourcejson.md)                       |                                                                            |
+| [QueryStringInput](./opensearch-dashboards-plugin-plugins-data-public.querystringinput.md)                                 |                                                                            |
+| [search](./opensearch-dashboards-plugin-plugins-data-public.search.md)                                                     |                                                                            |
+| [SearchBar](./opensearch-dashboards-plugin-plugins-data-public.searchbar.md)                                               |                                                                            |
+| [syncQueryStateWithUrl](./opensearch-dashboards-plugin-plugins-data-public.syncquerystatewithurl.md)                       | Helper to setup syncing of global data with the URL                        |
+| [UI_SETTINGS](./opensearch-dashboards-plugin-plugins-data-public.ui_settings.md)                                           |                                                                            |
 
 ## Type Aliases
 
-|  Type Alias | Description |
-|  --- | --- |
-|  [AggConfigOptions](./opensearch-dashboards-plugin-plugins-data-public.aggconfigoptions.md) |  |
-|  [AggGroupName](./opensearch-dashboards-plugin-plugins-data-public.agggroupname.md) |  |
-|  [AggParam](./opensearch-dashboards-plugin-plugins-data-public.aggparam.md) |  |
-|  [AggsStart](./opensearch-dashboards-plugin-plugins-data-public.aggsstart.md) | AggsStart represents the actual external contract as AggsCommonStart is only used internally. The difference is that AggsStart includes the typings for the registry with initialized agg types. |
-|  [AutocompleteStart](./opensearch-dashboards-plugin-plugins-data-public.autocompletestart.md) | \* |
-|  [CustomFilter](./opensearch-dashboards-plugin-plugins-data-public.customfilter.md) |  |
-|  [OpenSearchaggsExpressionFunctionDefinition](./opensearch-dashboards-plugin-plugins-data-public.opensearchaggsexpressionfunctiondefinition.md) |  |
-|  [OpenSearchdslExpressionFunctionDefinition](./opensearch-dashboards-plugin-plugins-data-public.opensearchdslexpressionfunctiondefinition.md) |  |
-|  [OpenSearchQuerySortValue](./opensearch-dashboards-plugin-plugins-data-public.opensearchquerysortvalue.md) |  |
-|  [OpenSearchRawResponseExpressionTypeDefinition](./opensearch-dashboards-plugin-plugins-data-public.opensearchrawresponseexpressiontypedefinition.md) |  |
-|  [ExistsFilter](./opensearch-dashboards-plugin-plugins-data-public.existsfilter.md) |  |
-|  [FieldFormatId](./opensearch-dashboards-plugin-plugins-data-public.fieldformatid.md) |  id type is needed for creating custom converters. |
-|  [FieldFormatsContentType](./opensearch-dashboards-plugin-plugins-data-public.fieldformatscontenttype.md) | \* |
-|  [FieldFormatsGetConfigFn](./opensearch-dashboards-plugin-plugins-data-public.fieldformatsgetconfigfn.md) |  |
-|  [FieldFormatsStart](./opensearch-dashboards-plugin-plugins-data-public.fieldformatsstart.md) |  |
-|  [Filter](./opensearch-dashboards-plugin-plugins-data-public.filter.md) |  |
-|  [IAggConfig](./opensearch-dashboards-plugin-plugins-data-public.iaggconfig.md) |  AggConfig This class represents an aggregation, which is displayed in the left-hand nav of the Visualize app. |
-|  [IAggType](./opensearch-dashboards-plugin-plugins-data-public.iaggtype.md) |  |
-|  [IOpenSearchSearchResponse](./opensearch-dashboards-plugin-plugins-data-public.iessearchresponse.md) |  |
-|  [IFieldFormat](./opensearch-dashboards-plugin-plugins-data-public.ifieldformat.md) |  |
-|  [IFieldFormatsRegistry](./opensearch-dashboards-plugin-plugins-data-public.ifieldformatsregistry.md) |  |
-|  [IFieldParamType](./opensearch-dashboards-plugin-plugins-data-public.ifieldparamtype.md) |  |
-|  [IMetricAggType](./opensearch-dashboards-plugin-plugins-data-public.imetricaggtype.md) |  |
-|  [IndexPatternAggRestrictions](./opensearch-dashboards-plugin-plugins-data-public.indexpatternaggrestrictions.md) |  |
-|  [IndexPatternsContract](./opensearch-dashboards-plugin-plugins-data-public.indexpatternscontract.md) |  |
-|  [IndexPatternSelectProps](./opensearch-dashboards-plugin-plugins-data-public.indexpatternselectprops.md) |  |
-|  [InputTimeRange](./opensearch-dashboards-plugin-plugins-data-public.inputtimerange.md) |  |
-|  [ISearch](./opensearch-dashboards-plugin-plugins-data-public.isearch.md) |  |
-|  [ISearchGeneric](./opensearch-dashboards-plugin-plugins-data-public.isearchgeneric.md) |  |
-|  [ISearchSource](./opensearch-dashboards-plugin-plugins-data-public.isearchsource.md) | search source interface |
-|  [MappingObject](./opensearch-dashboards-plugin-plugins-data-public.mappingobject.md) |  |
-|  [MatchAllFilter](./opensearch-dashboards-plugin-plugins-data-public.matchallfilter.md) |  |
-|  [ParsedInterval](./opensearch-dashboards-plugin-plugins-data-public.parsedinterval.md) |  |
-|  [PhraseFilter](./opensearch-dashboards-plugin-plugins-data-public.phrasefilter.md) |  |
-|  [PhrasesFilter](./opensearch-dashboards-plugin-plugins-data-public.phrasesfilter.md) |  |
-|  [Query](./opensearch-dashboards-plugin-plugins-data-public.query.md) |  |
-|  [QueryStart](./opensearch-dashboards-plugin-plugins-data-public.querystart.md) |  |
-|  [QuerySuggestion](./opensearch-dashboards-plugin-plugins-data-public.querysuggestion.md) | \* |
-|  [QuerySuggestionGetFn](./opensearch-dashboards-plugin-plugins-data-public.querysuggestiongetfn.md) |  |
-|  [RangeFilter](./opensearch-dashboards-plugin-plugins-data-public.rangefilter.md) |  |
-|  [RangeFilterMeta](./opensearch-dashboards-plugin-plugins-data-public.rangefiltermeta.md) |  |
-|  [SavedQueryTimeFilter](./opensearch-dashboards-plugin-plugins-data-public.savedquerytimefilter.md) |  |
-|  [SearchBarProps](./opensearch-dashboards-plugin-plugins-data-public.searchbarprops.md) |  |
-|  [StatefulSearchBarProps](./opensearch-dashboards-plugin-plugins-data-public.statefulsearchbarprops.md) |  |
-|  [TabbedAggRow](./opensearch-dashboards-plugin-plugins-data-public.tabbedaggrow.md) | \* |
-|  [TimefilterContract](./opensearch-dashboards-plugin-plugins-data-public.timefiltercontract.md) |  |
-|  [TimeHistoryContract](./opensearch-dashboards-plugin-plugins-data-public.timehistorycontract.md) |  |
-|  [TimeRange](./opensearch-dashboards-plugin-plugins-data-public.timerange.md) |  |
-
+| Type Alias                                                                                                                                           | Description                                                                                                                                                                                      |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [AggConfigOptions](./opensearch-dashboards-plugin-plugins-data-public.aggconfigoptions.md)                                                           |                                                                                                                                                                                                  |
+| [AggGroupName](./opensearch-dashboards-plugin-plugins-data-public.agggroupname.md)                                                                   |                                                                                                                                                                                                  |
+| [AggParam](./opensearch-dashboards-plugin-plugins-data-public.aggparam.md)                                                                           |                                                                                                                                                                                                  |
+| [AggsStart](./opensearch-dashboards-plugin-plugins-data-public.aggsstart.md)                                                                         | AggsStart represents the actual external contract as AggsCommonStart is only used internally. The difference is that AggsStart includes the typings for the registry with initialized agg types. |
+| [AutocompleteStart](./opensearch-dashboards-plugin-plugins-data-public.autocompletestart.md)                                                         | \*                                                                                                                                                                                               |
+| [CustomFilter](./opensearch-dashboards-plugin-plugins-data-public.customfilter.md)                                                                   |                                                                                                                                                                                                  |
+| [OpenSearchaggsExpressionFunctionDefinition](./opensearch-dashboards-plugin-plugins-data-public.opensearchaggsexpressionfunctiondefinition.md)       |                                                                                                                                                                                                  |
+| [OpenSearchdslExpressionFunctionDefinition](./opensearch-dashboards-plugin-plugins-data-public.opensearchdslexpressionfunctiondefinition.md)         |                                                                                                                                                                                                  |
+| [OpenSearchQuerySortValue](./opensearch-dashboards-plugin-plugins-data-public.opensearchquerysortvalue.md)                                           |                                                                                                                                                                                                  |
+| [OpenSearchRawResponseExpressionTypeDefinition](./opensearch-dashboards-plugin-plugins-data-public.opensearchrawresponseexpressiontypedefinition.md) |                                                                                                                                                                                                  |
+| [ExistsFilter](./opensearch-dashboards-plugin-plugins-data-public.existsfilter.md)                                                                   |                                                                                                                                                                                                  |
+| [FieldFormatId](./opensearch-dashboards-plugin-plugins-data-public.fieldformatid.md)                                                                 | id type is needed for creating custom converters.                                                                                                                                                |
+| [FieldFormatsContentType](./opensearch-dashboards-plugin-plugins-data-public.fieldformatscontenttype.md)                                             | \*                                                                                                                                                                                               |
+| [FieldFormatsGetConfigFn](./opensearch-dashboards-plugin-plugins-data-public.fieldformatsgetconfigfn.md)                                             |                                                                                                                                                                                                  |
+| [FieldFormatsStart](./opensearch-dashboards-plugin-plugins-data-public.fieldformatsstart.md)                                                         |                                                                                                                                                                                                  |
+| [Filter](./opensearch-dashboards-plugin-plugins-data-public.filter.md)                                                                               |                                                                                                                                                                                                  |
+| [IAggConfig](./opensearch-dashboards-plugin-plugins-data-public.iaggconfig.md)                                                                       | AggConfig This class represents an aggregation, which is displayed in the left-hand nav of the Visualize app.                                                                                    |
+| [IAggType](./opensearch-dashboards-plugin-plugins-data-public.iaggtype.md)                                                                           |                                                                                                                                                                                                  |
+| [IOpenSearchSearchResponse](./opensearch-dashboards-plugin-plugins-data-public.iopensearchsearchresponse.md)                                         |                                                                                                                                                                                                  |
+| [IFieldFormat](./opensearch-dashboards-plugin-plugins-data-public.ifieldformat.md)                                                                   |                                                                                                                                                                                                  |
+| [IFieldFormatsRegistry](./opensearch-dashboards-plugin-plugins-data-public.ifieldformatsregistry.md)                                                 |                                                                                                                                                                                                  |
+| [IFieldParamType](./opensearch-dashboards-plugin-plugins-data-public.ifieldparamtype.md)                                                             |                                                                                                                                                                                                  |
+| [IMetricAggType](./opensearch-dashboards-plugin-plugins-data-public.imetricaggtype.md)                                                               |                                                                                                                                                                                                  |
+| [IndexPatternAggRestrictions](./opensearch-dashboards-plugin-plugins-data-public.indexpatternaggrestrictions.md)                                     |                                                                                                                                                                                                  |
+| [IndexPatternsContract](./opensearch-dashboards-plugin-plugins-data-public.indexpatternscontract.md)                                                 |                                                                                                                                                                                                  |
+| [IndexPatternSelectProps](./opensearch-dashboards-plugin-plugins-data-public.indexpatternselectprops.md)                                             |                                                                                                                                                                                                  |
+| [InputTimeRange](./opensearch-dashboards-plugin-plugins-data-public.inputtimerange.md)                                                               |                                                                                                                                                                                                  |
+| [ISearch](./opensearch-dashboards-plugin-plugins-data-public.isearch.md)                                                                             |                                                                                                                                                                                                  |
+| [ISearchGeneric](./opensearch-dashboards-plugin-plugins-data-public.isearchgeneric.md)                                                               |                                                                                                                                                                                                  |
+| [ISearchSource](./opensearch-dashboards-plugin-plugins-data-public.isearchsource.md)                                                                 | search source interface                                                                                                                                                                          |
+| [MappingObject](./opensearch-dashboards-plugin-plugins-data-public.mappingobject.md)                                                                 |                                                                                                                                                                                                  |
+| [MatchAllFilter](./opensearch-dashboards-plugin-plugins-data-public.matchallfilter.md)                                                               |                                                                                                                                                                                                  |
+| [ParsedInterval](./opensearch-dashboards-plugin-plugins-data-public.parsedinterval.md)                                                               |                                                                                                                                                                                                  |
+| [PhraseFilter](./opensearch-dashboards-plugin-plugins-data-public.phrasefilter.md)                                                                   |                                                                                                                                                                                                  |
+| [PhrasesFilter](./opensearch-dashboards-plugin-plugins-data-public.phrasesfilter.md)                                                                 |                                                                                                                                                                                                  |
+| [Query](./opensearch-dashboards-plugin-plugins-data-public.query.md)                                                                                 |                                                                                                                                                                                                  |
+| [QueryStart](./opensearch-dashboards-plugin-plugins-data-public.querystart.md)                                                                       |                                                                                                                                                                                                  |
+| [QuerySuggestion](./opensearch-dashboards-plugin-plugins-data-public.querysuggestion.md)                                                             | \*                                                                                                                                                                                               |
+| [QuerySuggestionGetFn](./opensearch-dashboards-plugin-plugins-data-public.querysuggestiongetfn.md)                                                   |                                                                                                                                                                                                  |
+| [RangeFilter](./opensearch-dashboards-plugin-plugins-data-public.rangefilter.md)                                                                     |                                                                                                                                                                                                  |
+| [RangeFilterMeta](./opensearch-dashboards-plugin-plugins-data-public.rangefiltermeta.md)                                                             |                                                                                                                                                                                                  |
+| [SavedQueryTimeFilter](./opensearch-dashboards-plugin-plugins-data-public.savedquerytimefilter.md)                                                   |                                                                                                                                                                                                  |
+| [SearchBarProps](./opensearch-dashboards-plugin-plugins-data-public.searchbarprops.md)                                                               |                                                                                                                                                                                                  |
+| [StatefulSearchBarProps](./opensearch-dashboards-plugin-plugins-data-public.statefulsearchbarprops.md)                                               |                                                                                                                                                                                                  |
+| [TabbedAggRow](./opensearch-dashboards-plugin-plugins-data-public.tabbedaggrow.md)                                                                   | \*                                                                                                                                                                                               |
+| [TimefilterContract](./opensearch-dashboards-plugin-plugins-data-public.timefiltercontract.md)                                                       |                                                                                                                                                                                                  |
+| [TimeHistoryContract](./opensearch-dashboards-plugin-plugins-data-public.timehistorycontract.md)                                                     |                                                                                                                                                                                                  |
+| [TimeRange](./opensearch-dashboards-plugin-plugins-data-public.timerange.md)                                                                         |                                                                                                                                                                                                  |

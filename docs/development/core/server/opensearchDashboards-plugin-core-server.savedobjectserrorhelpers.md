@@ -4,41 +4,39 @@
 
 ## SavedObjectsErrorHelpers class
 
-
 <b>Signature:</b>
 
 ```typescript
-export declare class SavedObjectsErrorHelpers 
+export declare class SavedObjectsErrorHelpers
 ```
 
 ## Methods
 
-|  Method | Modifiers | Description |
-|  --- | --- | --- |
-|  [createBadRequestError(reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.createbadrequesterror.md) | <code>static</code> |  |
-|  [createConflictError(type, id)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.createconflicterror.md) | <code>static</code> |  |
-|  [createGenericNotFoundError(type, id)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.creategenericnotfounderror.md) | <code>static</code> |  |
-|  [createInvalidVersionError(versionInput)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.createinvalidversionerror.md) | <code>static</code> |  |
-|  [createTooManyRequestsError(type, id)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.createtoomanyrequestserror.md) | <code>static</code> |  |
-|  [createUnsupportedTypeError(type)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.createunsupportedtypeerror.md) | <code>static</code> |  |
-|  [decorateBadRequestError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decoratebadrequesterror.md) | <code>static</code> |  |
-|  [decorateConflictError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decorateconflicterror.md) | <code>static</code> |  |
-|  [decorateOpenSearchCannotExecuteScriptError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decorateescannotexecutescripterror.md) | <code>static</code> |  |
-|  [decorateOpenSearchUnavailableError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decorateesunavailableerror.md) | <code>static</code> |  |
-|  [decorateForbiddenError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decorateforbiddenerror.md) | <code>static</code> |  |
-|  [decorateGeneralError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decorategeneralerror.md) | <code>static</code> |  |
-|  [decorateNotAuthorizedError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decoratenotauthorizederror.md) | <code>static</code> |  |
-|  [decorateRequestEntityTooLargeError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decoraterequestentitytoolargeerror.md) | <code>static</code> |  |
-|  [decorateTooManyRequestsError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decoratetoomanyrequestserror.md) | <code>static</code> |  |
-|  [isBadRequestError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isbadrequesterror.md) | <code>static</code> |  |
-|  [isConflictError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isconflicterror.md) | <code>static</code> |  |
-|  [isOpenSearchCannotExecuteScriptError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isescannotexecutescripterror.md) | <code>static</code> |  |
-|  [isOpenSearchUnavailableError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isesunavailableerror.md) | <code>static</code> |  |
-|  [isForbiddenError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isforbiddenerror.md) | <code>static</code> |  |
-|  [isInvalidVersionError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isinvalidversionerror.md) | <code>static</code> |  |
-|  [isNotAuthorizedError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isnotauthorizederror.md) | <code>static</code> |  |
-|  [isNotFoundError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isnotfounderror.md) | <code>static</code> |  |
-|  [isRequestEntityTooLargeError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isrequestentitytoolargeerror.md) | <code>static</code> |  |
-|  [isSavedObjectsClientError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.issavedobjectsclienterror.md) | <code>static</code> |  |
-|  [isTooManyRequestsError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.istoomanyrequestserror.md) | <code>static</code> |  |
-
+| Method                                                                                                                                                                 | Modifiers           | Description |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ----------- |
+| [createBadRequestError(reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.createbadrequesterror.md)                                          | <code>static</code> |             |
+| [createConflictError(type, id)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.createconflicterror.md)                                            | <code>static</code> |             |
+| [createGenericNotFoundError(type, id)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.creategenericnotfounderror.md)                              | <code>static</code> |             |
+| [createInvalidVersionError(versionInput)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.createinvalidversionerror.md)                            | <code>static</code> |             |
+| [createTooManyRequestsError(type, id)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.createtoomanyrequestserror.md)                              | <code>static</code> |             |
+| [createUnsupportedTypeError(type)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.createunsupportedtypeerror.md)                                  | <code>static</code> |             |
+| [decorateBadRequestError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decoratebadrequesterror.md)                               | <code>static</code> |             |
+| [decorateConflictError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decorateconflicterror.md)                                   | <code>static</code> |             |
+| [decorateOpenSearchCannotExecuteScriptError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decorateescannotexecutescripterror.md) | <code>static</code> |             |
+| [decorateOpenSearchUnavailableError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decorateesunavailableerror.md)                 | <code>static</code> |             |
+| [decorateForbiddenError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decorateforbiddenerror.md)                                 | <code>static</code> |             |
+| [decorateGeneralError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decorategeneralerror.md)                                     | <code>static</code> |             |
+| [decorateNotAuthorizedError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decoratenotauthorizederror.md)                         | <code>static</code> |             |
+| [decorateRequestEntityTooLargeError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decoraterequestentitytoolargeerror.md)         | <code>static</code> |             |
+| [decorateTooManyRequestsError(error, reason)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.decoratetoomanyrequestserror.md)                     | <code>static</code> |             |
+| [isBadRequestError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isbadrequesterror.md)                                                   | <code>static</code> |             |
+| [isConflictError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isconflicterror.md)                                                       | <code>static</code> |             |
+| [isOpenSearchCannotExecuteScriptError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isopensearchcannotexecutescripterror.md)             | <code>static</code> |             |
+| [isOpenSearchUnavailableError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isopensearchunavailableerror.md)                             | <code>static</code> |             |
+| [isForbiddenError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isforbiddenerror.md)                                                     | <code>static</code> |             |
+| [isInvalidVersionError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isinvalidversionerror.md)                                           | <code>static</code> |             |
+| [isNotAuthorizedError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isnotauthorizederror.md)                                             | <code>static</code> |             |
+| [isNotFoundError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isnotfounderror.md)                                                       | <code>static</code> |             |
+| [isRequestEntityTooLargeError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.isrequestentitytoolargeerror.md)                             | <code>static</code> |             |
+| [isSavedObjectsClientError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.issavedobjectsclienterror.md)                                   | <code>static</code> |             |
+| [isTooManyRequestsError(error)](./opensearch-dashboards-plugin-core-server.savedobjectserrorhelpers.istoomanyrequestserror.md)                                         | <code>static</code> |             |
