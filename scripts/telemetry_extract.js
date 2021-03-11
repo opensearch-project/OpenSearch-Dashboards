@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env/no_transpilation');
-require('@kbn/telemetry-tools').runTelemetryExtract();
+require('@osd/telemetry-tools').runTelemetryExtract();

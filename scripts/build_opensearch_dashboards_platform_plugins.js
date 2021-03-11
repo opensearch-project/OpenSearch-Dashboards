@@ -17,22 +17,4 @@
  * under the License.
  */
 
-require('../src/setup_node_env/no_transpilation');
-
-var resolve = require('path').resolve;
-var pkg = require('../package.json');
-var kbnEs = require('@kbn/es');
-
-kbnEs
-  .run({
-    license: 'basic',
-    password: 'changeme',
-    version: pkg.version,
-    'source-path': resolve(__dirname, '../../elasticsearch'),
-    'base-path': resolve(__dirname, '../.es'),
-    ssl: false,
-  })
-  .catch(function (e) {
-    console.error(e);
-    process.exitCode = 1;
-  });
+require('@osd/optimizer/target/cli');
