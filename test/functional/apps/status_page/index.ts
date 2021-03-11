@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should display the server status', async () => {
       const titleText = await testSubjects.getVisibleText('serverStatusTitle');
-      expect(titleText).to.contain('OpenSearch Dashboardsstatus is');
+      expect(titleText).to.contain('OpenSearch Dashboards status is');
 
       const serverStatus = await testSubjects.getAttribute('serverStatusTitleBadge', 'aria-label');
       expect(serverStatus).to.be('Green');

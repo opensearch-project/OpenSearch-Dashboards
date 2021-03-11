@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This script runs OpenSearch Dashboards tests compatible with cloud.
+# This script runs OpenSearch Dashboards  tests compatible with cloud.
 #
 # The cloud instance setup is done in the elastic/elastic-stack-testing framework,
 # where the following environment variables are set pointing to the cloud instance.

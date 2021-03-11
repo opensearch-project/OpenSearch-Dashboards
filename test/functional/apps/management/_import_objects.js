@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
   describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
       beforeEach(async function () {
-        // delete .opensearch-dashboards index and then wait for OpenSearch Dashboardsto re-create it
+        // delete .opensearch-dashboards index and then wait for OpenSearch Dashboards to re-create it
         await opensearchDashboardsServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await opensearchArchiver.load('management');
@@ -202,7 +202,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('.json file', () => {
       beforeEach(async function () {
-        // delete .opensearch-dashboards index and then wait for OpenSearch Dashboardsto re-create it
+        // delete .opensearch-dashboards index and then wait for OpenSearch Dashboards to re-create it
         await opensearchDashboardsServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await opensearchArchiver.load('saved_objects_imports');
@@ -416,7 +416,7 @@ export default function ({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(true);
       });
 
-      it('should display an explicit error message when importing object from a higher OpenSearch Dashboardsversion', async () => {
+      it('should display an explicit error message when importing object from a higher OpenSearch Dashboards version', async () => {
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_higher_version.ndjson')
         );
@@ -426,7 +426,7 @@ export default function ({ getService, getPageObjects }) {
         const errorText = await PageObjects.savedObjects.getImportErrorText();
 
         expect(errorText).to.contain(
-          `has property "visualization" which belongs to a more recent version of OpenSearch Dashboards[9.15.82]`
+          `has property "visualization" which belongs to a more recent version of OpenSearch Dashboards [9.15.82]`
         );
       });
 

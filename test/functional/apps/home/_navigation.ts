@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const opensearchArchiver = getService('opensearchArchiver');
 
-  describe('OpenSearch Dashboardsbrowser back navigation should work', function describeIndexTests() {
+  describe('OpenSearch Dashboards browser back navigation should work', function describeIndexTests() {
     before(async () => {
       await opensearchArchiver.loadIfNeeded('discover');
       await opensearchArchiver.loadIfNeeded('logstash_functional');

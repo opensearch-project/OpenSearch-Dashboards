@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'home']);
   const a11y = getService('a11y');
 
-  describe('OpenSearch Dashboardsoverview', () => {
+  describe('OpenSearch Dashboards overview', () => {
     const opensearchArchiver = getService('opensearchArchiver');
 
     before(async () => {

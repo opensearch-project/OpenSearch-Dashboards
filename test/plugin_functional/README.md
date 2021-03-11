@@ -1,14 +1,14 @@
 # Plugin Functional Tests
 
 This folder contains plugin functional tests, i.e. functional tests that should be executed
-against a OpenSearch Dashboardsinstance with specific test plugins available.
+against a OpenSearch Dashboards instance with specific test plugins available.
 
 To add a plugin to the instance, just place the plugin folder in the `plugins`
 directory.
 
 Add new test suites into the `test_suites` folder and reference them from the
 `config.js` file. These test suites work the same as regular functional test
-except that they are executed against a OpenSearch Dashboardswith all plugins (from the
+except that they are executed against a OpenSearch Dashboards with all plugins (from the
 `plugins` directory) installed.
 
 ## Run the test
@@ -22,16 +22,16 @@ node scripts/functional_tests_server.js --config test/plugin_functional/config.t
 node scripts/functional_test_runner.js --config test/plugin_functional/config.ts
 ```
 
-## Run OpenSearch Dashboardswith a test plugin
+## Run OpenSearch Dashboards with a test plugin
 
-In case you want to start OpenSearch Dashboardswith one of the test plugins (e.g. for developing the
+In case you want to start OpenSearch Dashboards with one of the test plugins (e.g. for developing the
 test plugin), you can just run:
 
 ```
 yarn start --plugin-path=test/plugin_functional/plugins/<plugin_folder>
 ```
 
-If you wish to start OpenSearch Dashboardswith multiple test plugins, you can run:
+If you wish to start OpenSearch Dashboards with multiple test plugins, you can run:
 
 ```
 yarn start --plugin-path=test/plugin_functional/plugins/<plugin_folder1> --plugin-path=test/plugin_functional/plugins/<plugin_folder2> ... 

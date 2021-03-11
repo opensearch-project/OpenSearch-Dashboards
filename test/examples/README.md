@@ -13,9 +13,9 @@ node scripts/functional_tests_server.js --config test/examples/config.js
 node scripts/functional_test_runner.js --config test/examples/config.js
 ```
 
-## Run OpenSearch Dashboardswith a test plugin
+## Run OpenSearch Dashboards with a test plugin
 
-In case you want to start OpenSearch Dashboardswith the example plugins, you can just run:
+In case you want to start OpenSearch Dashboards with the example plugins, you can just run:
 
 ```
 yarn start --run-examples

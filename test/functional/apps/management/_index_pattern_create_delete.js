@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('creating and deleting default index', function describeIndexTests() {
     before(function () {
-      // Delete .opensearch-dashboards index and then wait for OpenSearch Dashboardsto re-create it
+      // Delete .opensearch-dashboards index and then wait for OpenSearch Dashboards to re-create it
       return opensearchDashboardsServer.uiSettings
         .replace({})
         .then(function () {

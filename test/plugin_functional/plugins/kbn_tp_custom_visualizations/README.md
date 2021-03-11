@@ -1,3 +1,3 @@
 # Custom visualizations
 
-This sample plugin contains exampels on how to create custom visualizations in OpenSearch Dashboards
+This sample plugin contains exampels on how to create custom visualizations in OpenSearch Dashboards 

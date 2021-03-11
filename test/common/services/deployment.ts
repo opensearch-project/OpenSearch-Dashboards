@@ -30,7 +30,7 @@ export function DeploymentProvider({ getService }: FtrProviderContext) {
 
   return {
     /**
-     * Returns OpenSearch Dashboardshost URL
+     * Returns OpenSearch Dashboards host URL
      */
     getHostPort() {
       return getUrl.baseUrl(config.get('servers.opensearchDashboards'));
@@ -44,7 +44,7 @@ export function DeploymentProvider({ getService }: FtrProviderContext) {
     },
 
     /**
-     * Helper to detect an OSS licensed OpenSearch Dashboards
+     * Helper to detect an OSS licensed OpenSearch Dashboards 
      * Useful for functional testing in cloud environment
      */
     async isOss() {

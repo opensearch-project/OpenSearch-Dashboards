@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'header', 'home']);
 
-  describe('OpenSearch Dashboardstakes you home', function describeIndexTests() {
+  describe('OpenSearch Dashboards takes you home', function describeIndexTests() {
     this.tags('includeFirefox');
 
     it('clicking on opensearch-dashboards logo should take you to home page', async () => {

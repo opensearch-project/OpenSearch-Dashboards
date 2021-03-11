@@ -23,16 +23,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'home']);
   const a11y = getService('a11y');
 
-  describe('OpenSearch DashboardsHome', () => {
+  describe('OpenSearch Dashboards Home', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('home');
     });
 
-    it('OpenSearch DashboardsHome view', async () => {
+    it('OpenSearch Dashboards Home view', async () => {
       await a11y.testAppSnapshot();
     });
 
-    it('Add OpenSearch Dashboardssample data page', async () => {
+    it('Add OpenSearch Dashboards sample data page', async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });

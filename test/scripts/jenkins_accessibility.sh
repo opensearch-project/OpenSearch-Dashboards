@@ -2,7 +2,7 @@
 
 source test/scripts/jenkins_test_setup_oss.sh
 
-checks-reporter-with-killswitch "OpenSearch Dashboardsaccessibility tests" \
+checks-reporter-with-killswitch "OpenSearch Dashboards accessibility tests" \
   node scripts/functional_tests \
     --debug --bail \
     --opensearch-dashboards-install-dir "$OPENSEARCH_DASHBOARDS_INSTALL_DIR" \

@@ -118,7 +118,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public async setScreenshotSize(width: number, height: number) {
       log.debug(`======browser======== setWindowSize ${width} ${height}`);
-      // We really want to set the OpenSearch Dashboardsapp to a specific size without regard to the browser chrome (borders)
+      // We really want to set the OpenSearch Dashboards app to a specific size without regard to the browser chrome (borders)
       // But that means we first need to figure out the display scaling factor.
       // NOTE: None of this is required when running Chrome headless because there's no scaling and no borders.
       await this.setWindowSize(1200, 800);

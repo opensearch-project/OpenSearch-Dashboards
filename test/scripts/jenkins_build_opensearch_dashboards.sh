@@ -12,7 +12,7 @@ export OSD_NP_PLUGINS_BUILT=true
 echo " -> Ensuring all functional tests are in a ciGroup"
 yarn run grunt functionalTests:ensureAllTestsInCiGroup;
 
-echo " -> building and extracting OSS OpenSearch Dashboardsdistributable for use in functional tests"
+echo " -> building and extracting OSS OpenSearch Dashboards distributable for use in functional tests"
 node scripts/build --debug --oss
 
 mkdir -p "$WORKSPACE/opensearch-dashboards-build-oss"

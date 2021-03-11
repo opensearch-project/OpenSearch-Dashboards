@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await opensearchArchiver.load('discover');
-      // delete .opensearch-dashboards index and then wait for OpenSearch Dashboardsto re-create it
+      // delete .opensearch-dashboards index and then wait for OpenSearch Dashboards to re-create it
       await opensearchDashboardsServer.uiSettings.replace({});
       await opensearchDashboardsServer.uiSettings.update({});
     });

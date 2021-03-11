@@ -31,7 +31,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     services,
 
     junit: {
-      reportName: 'OpenSearch DashboardsVisual Regression Tests',
+      reportName: 'OpenSearch Dashboards Visual Regression Tests',
     },
   };
 }

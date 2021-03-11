@@ -22,7 +22,7 @@
  2. Click on  scripted field and fill in the values
  3. Use opensearch to update the index pattern's title
  4. Try to save the scripted field
- 5. OpenSearch Dashboardsshould display the message - you need to refresh the index pattern
+ 5. OpenSearch Dashboards should display the message - you need to refresh the index pattern
 
  */
 

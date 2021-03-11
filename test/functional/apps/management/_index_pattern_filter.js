@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('index pattern filter', function describeIndexTests() {
     before(async function () {
-      // delete .opensearch-dashboards index and then wait for OpenSearch Dashboardsto re-create it
+      // delete .opensearch-dashboards index and then wait for OpenSearch Dashboards to re-create it
       await opensearchDashboardsServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();

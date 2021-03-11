@@ -54,7 +54,7 @@ function getLogMock() {
 export default ({ getService }: FtrProviderContext) => {
   const opensearchClient = getService('opensearch');
 
-  describe('OpenSearch Dashboardsindex migration', () => {
+  describe('OpenSearch Dashboards index migration', () => {
     before(() => opensearchClient.indices.delete({ index: '.migrate-*' }));
 
     it('Migrates an existing index that has never been migrated before', async () => {
@@ -284,7 +284,7 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
     });
 
-    it('Coordinates migrations across the OpenSearch Dashboardscluster', async () => {
+    it('Coordinates migrations across the OpenSearch Dashboards cluster', async () => {
       const index = '.migration-c';
       const originalDocs = [{ id: 'foo:lotr', type: 'foo', foo: { name: 'Lord of the Rings' } }];
 

@@ -48,8 +48,8 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
   class CommonPage {
     /**
-     * Logins to OpenSearch Dashboardsas default user and navigates to provided app
-     * @param appUrl OpenSearch DashboardsURL
+     * Logins to OpenSearch Dashboards as default user and navigates to provided app
+     * @param appUrl OpenSearch Dashboards URL
      */
     private async loginIfPrompted(appUrl: string, insertTimestamp: boolean) {
       // Disable the welcome screen. This is relevant for environments

@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
   // https://github.com/elastic/kibana/issues/74118
   describe.skip('filter scripted fields', function describeIndexTests() {
     before(async function () {
-      // delete .opensearch-dashboards index and then wait for OpenSearch Dashboardsto re-create it
+      // delete .opensearch-dashboards index and then wait for OpenSearch Dashboards to re-create it
       await browser.setWindowSize(1200, 800);
       await opensearchArchiver.load('management');
       await opensearchDashboardsServer.uiSettings.replace({
