@@ -142,7 +142,7 @@ describe(`VegaParser._setDefaultColors`, () => {
   );
 });
 
-describe('VegaParser._resolveEsQueries', () => {
+describe('VegaParser._resolveOpenSearchQueries', () => {
   let searchApiStub;
   const data = [
     {

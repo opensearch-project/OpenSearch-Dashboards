@@ -212,7 +212,7 @@ describe(`OpenSearchQueryParser.injectQueryContextVars`, () => {
   );
 });
 
-describe(`OpenSearchQueryParser.parseEsRequest`, () => {
+describe(`OpenSearchQueryParser.parseOpenSearchRequest`, () => {
   function check(req, ctx, expected) {
     return () => {
       create(rangeStart, rangeEnd, ctx).parseUrl({}, req);
