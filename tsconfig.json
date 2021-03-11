@@ -1,10 +1,10 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "./build/tsbuildinfo/opensearchDashboards"
+    "tsBuildInfoFile": "./build/tsbuildinfo/opensearch-dashboards"
   },
   "include": [
-    "opensearch_dashboards.d.ts",
+    "opensearch_dashboards.tsdashboards.d.ts",
     "src/**/*",
     "typings/**/*",
     "test_utils/**/*"
