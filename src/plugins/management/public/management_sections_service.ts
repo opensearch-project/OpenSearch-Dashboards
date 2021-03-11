@@ -23,7 +23,7 @@ import {
   DataSection,
   InsightsAndAlertingSection,
   SecuritySection,
-  KibanaSection,
+  OpenSearchDashboardsSection,
   StackSection,
 } from './components/management_sections';
 
@@ -34,7 +34,7 @@ import {
   DefinedSections,
   ManagementSectionsStartPrivate,
 } from './types';
-import { createGetterSetter } from '../../kibana_utils/public';
+import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 
 const [getSectionsServiceStartPrivate, setSectionsServiceStartPrivate] = createGetterSetter<
   ManagementSectionsStartPrivate
@@ -53,7 +53,7 @@ export class ManagementSectionsService {
       data: this.registerSection(DataSection),
       insightsAndAlerting: this.registerSection(InsightsAndAlertingSection),
       security: this.registerSection(SecuritySection),
-      kibana: this.registerSection(KibanaSection),
+      opensearchDashboards: this.registerSection(OpenSearchDashboardsSection),
       stack: this.registerSection(StackSection),
     };
   }

@@ -17,14 +17,14 @@
  * under the License.
  */
 import React, { useState, useEffect, useCallback } from 'react';
-import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
-import { I18nProvider } from '@kbn/i18n/react';
+import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'opensearch-dashboards/public';
+import { I18nProvider } from '@osd/i18n/react';
 import { EuiPage } from '@elastic/eui';
 import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
 
 import { ManagementRouter } from './management_router';
 import { ManagementSidebarNav } from '../management_sidebar_nav';
-import { reactRouterNavigate } from '../../../../kibana_react/public';
+import { reactRouterNavigate } from '../../../../opensearch_dashboards_react/public';
 import { SectionsServiceStart } from '../../types';
 
 import './management_app.scss';
@@ -37,7 +37,7 @@ interface ManagementAppProps {
 
 export interface ManagementAppDependencies {
   sections: SectionsServiceStart;
-  kibanaVersion: string;
+  opensearchDashboardsVersion: string;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
 }
 

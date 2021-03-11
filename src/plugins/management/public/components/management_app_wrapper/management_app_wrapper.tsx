@@ -19,7 +19,7 @@
 
 import React, { createRef, Component } from 'react';
 
-import { ChromeBreadcrumb, AppMountParameters, ScopedHistory } from 'kibana/public';
+import { ChromeBreadcrumb, AppMountParameters, ScopedHistory } from 'opensearch-dashboards/public';
 import { ManagementApp } from '../../utils';
 import { Unmount } from '../../types';
 
