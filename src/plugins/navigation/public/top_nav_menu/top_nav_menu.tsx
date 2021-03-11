@@ -22,7 +22,7 @@ import { EuiHeaderLinks } from '@elastic/eui';
 import classNames from 'classnames';
 
 import { MountPoint } from '../../../../core/public';
-import { MountPointPortal } from '../../../kibana_react/public';
+import { MountPointPortal } from '../../../opensearch_dashboards_react/public';
 import {
   StatefulSearchBarProps,
   DataPublicPluginStart,
@@ -32,7 +32,7 @@ import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 
 export type TopNavMenuProps = StatefulSearchBarProps &
-  Omit<SearchBarProps, 'kibana' | 'intl' | 'timeHistory'> & {
+  Omit<SearchBarProps, 'opensearchDashboards' | 'intl' | 'timeHistory'> & {
     config?: TopNavMenuData[];
     showSearchBar?: boolean;
     showQueryBar?: boolean;
@@ -103,8 +103,8 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
 
   function renderLayout() {
     const { setMenuMountPoint } = props;
-    const menuClassName = classNames('kbnTopNavMenu', props.className);
-    const wrapperClassName = 'kbnTopNavMenu__wrapper';
+    const menuClassName = classNames('osdTopNavMenu', props.className);
+    const wrapperClassName = 'osdTopNavMenu__wrapper';
     if (setMenuMountPoint) {
       return (
         <>
