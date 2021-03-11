@@ -18,7 +18,7 @@
  */
 
 import template from './timelion_help.html';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -65,19 +65,19 @@ export function initTimelionHelpDirective(app) {
             notValidAdvancedSettingsPath: i18n.translate(
               'timelion.help.configuration.notValid.advancedSettingsPathText',
               {
-                defaultMessage: 'Management / Kibana / Advanced Settings',
+                defaultMessage: 'Management / OpenSearch Dashboards / Advanced Settings',
               }
             ),
             validAdvancedSettingsPath: i18n.translate(
               'timelion.help.configuration.valid.advancedSettingsPathText',
               {
-                defaultMessage: 'Management/Kibana/Advanced Settings',
+                defaultMessage: 'Management/OpenSearch Dashboards/Advanced Settings',
               }
             ),
             esAsteriskQueryDescription: i18n.translate(
               'timelion.help.querying.esAsteriskQueryDescriptionText',
               {
-                defaultMessage: 'hey Elasticsearch, find everything in my default index',
+                defaultMessage: 'hey OpenSearch, find everything in my default index',
               }
             ),
             esIndexQueryDescription: i18n.translate(
@@ -116,7 +116,7 @@ export function initTimelionHelpDirective(app) {
           };
 
           getFunctions();
-          checkElasticsearch();
+          checkOpenSearch();
         }
 
         function getFunctions() {
@@ -124,14 +124,14 @@ export function initTimelionHelpDirective(app) {
             $scope.functions.list = resp.data;
           });
         }
-        $scope.recheckElasticsearch = function () {
+        $scope.recheckOpenSearch = function () {
           $scope.es.valid = null;
-          checkElasticsearch().then(function (valid) {
+          checkOpenSearch().then(function (valid) {
             if (!valid) $scope.es.invalidCount++;
           });
         };
 
-        function checkElasticsearch() {
+        function checkOpenSearch() {
           return $http.get('../api/timelion/validate/es').then(function (resp) {
             if (resp.data.ok) {
               $scope.es.valid = true;

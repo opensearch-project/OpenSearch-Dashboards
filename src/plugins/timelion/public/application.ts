@@ -26,13 +26,13 @@ import 'angular-sanitize';
 // required for ngRoute
 import 'angular-route';
 import 'angular-sortable-view';
-import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
+import { i18nDirective, i18nFilter, I18nProvider } from '@osd/i18n/angular';
 import {
   IUiSettingsClient,
   CoreStart,
   PluginInitializerContext,
   AppMountParameters,
-} from 'kibana/public';
+} from 'opensearch-dashboards/public';
 import { getTimeChart } from './panels/timechart/timechart';
 import { Panel } from './panels/panel';
 
@@ -40,7 +40,7 @@ import {
   configureAppAngularModule,
   createTopNavDirective,
   createTopNavHelper,
-} from '../../kibana_legacy/public';
+} from '../../opensearch_dashboards_legacy/public';
 import { TimelionPluginDependencies } from './plugin';
 import { DataPublicPluginStart } from '../../data/public';
 // @ts-ignore
@@ -140,8 +140,8 @@ function createLocalIconModule() {
 function createLocalTopNavModule(navigation: TimelionPluginDependencies['navigation']) {
   angular
     .module('app/timelion/TopNav', ['react'])
-    .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
+    .directive('osdTopNav', createTopNavDirective)
+    .directive('osdTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
 function createLocalI18nModule() {

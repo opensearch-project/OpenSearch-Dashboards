@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
-import { createSavedObjectClass, SavedObjectKibanaServices } from '../../../saved_objects/public';
+import { IUiSettingsClient } from 'opensearch-dashboards/public';
+import { createSavedObjectClass, SavedObjectOpenSearchDashboardsServices } from '../../../saved_objects/public';
 
 // Used only by the savedSheets service, usually no reason to change this
 export function createSavedSheetClass(
-  services: SavedObjectKibanaServices,
+  services: SavedObjectOpenSearchDashboardsServices,
   config: IUiSettingsClient
 ) {
   const SavedObjectClass = createSavedObjectClass(services);

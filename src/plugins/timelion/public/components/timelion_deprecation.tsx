@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { DocLinksStart } from '../../../../core/public';

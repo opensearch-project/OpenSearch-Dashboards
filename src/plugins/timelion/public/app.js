@@ -19,11 +19,11 @@
 
 import _ from 'lodash';
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { createHashHistory } from 'history';
 
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '../../kibana_utils/public';
+import { createOsdUrlStateStorage, withNotifyOnErrors } from '../../opensearch_dashboards_utils/public';
 import { syncQueryStateWithUrl } from '../../data/public';
 
 import { getSavedSheetBreadcrumbs, getCreateBreadcrumbs } from './breadcrumbs';
@@ -31,7 +31,7 @@ import {
   addFatalError,
   registerListenEventListener,
   watchMultiDecorator,
-} from '../../kibana_legacy/public';
+} from '../../opensearch_dashboards_legacy/public';
 import { getTimezone } from '../../vis_type_timelion/public';
 import { initCellsDirective } from './directives/cells/cells';
 import { initFullscreenDirective } from './directives/fullscreen/fullscreen';
@@ -60,8 +60,8 @@ export function initTimelionApp(app, deps) {
   const savedSheetLoader = initSavedSheetService(app, deps);
 
   app.factory('history', () => createHashHistory());
-  app.factory('kbnUrlStateStorage', (history) =>
-    createKbnUrlStateStorage({
+  app.factory('osdUrlStateStorage', (history) =>
+    createOsdUrlStateStorage({
       history,
       useHash: deps.core.uiSettings.get('state:storeInSessionStorage'),
       ...withNotifyOnErrors(deps.core.notifications.toasts),
@@ -112,7 +112,7 @@ export function initTimelionApp(app, deps) {
     $scope,
     $timeout,
     history,
-    kbnUrlStateStorage
+    osdUrlStateStorage
   ) {
     // Keeping this at app scope allows us to keep the current page when the user
     // switches to say, the timepicker.
@@ -123,12 +123,12 @@ export function initTimelionApp(app, deps) {
     timefilter.enableAutoRefreshSelector();
     timefilter.enableTimeRangeSelector();
 
-    deps.core.chrome.docTitle.change('Timelion - Kibana');
+    deps.core.chrome.docTitle.change('Timelion - OpenSearch Dashboards');
 
     // starts syncing `_g` portion of url with query services
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
       deps.plugins.data.query,
-      kbnUrlStateStorage
+      osdUrlStateStorage
     );
 
     const savedSheet = $route.current.locals.savedSheet;
@@ -145,7 +145,7 @@ export function initTimelionApp(app, deps) {
 
     const { stateContainer, stopStateSync } = initTimelionAppState({
       stateDefaults: getStateDefaults(),
-      kbnUrlStateStorage,
+      osdUrlStateStorage,
     });
 
     $scope.state = _.cloneDeep(stateContainer.getState());
