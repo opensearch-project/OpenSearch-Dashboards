@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/test').runFtrCli();
+require('@osd/test').runFtrCli();

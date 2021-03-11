@@ -28,8 +28,8 @@ export default function (grunt) {
     const htmlDocsDir = join(rootPath, 'html_docs');
 
     const env = Object.assign(process.env, {
-      KIBANA_DOCS_CONTAINER_NAME: 'kibana_docs',
-      KIBANA_DOCS_CONTEXT: rootPath,
+      OPENSEARCH_DASHBOARDS_DOCS_CONTAINER_NAME: 'opensearch_dashboards_docs',
+      OPENSEARCH_DASHBOARDS_DOCS_CONTEXT: rootPath,
     });
     const stdio = [0, 1, 2];
     const execOptions = { env, stdio };
@@ -37,7 +37,7 @@ export default function (grunt) {
     exec('docker-compose', ['-f', composePath, 'up'], execOptions);
 
     const containerId = String(
-      exec('docker-compose', ['-f', composePath, 'ps', '-q', env.KIBANA_DOCS_CONTAINER_NAME], {
+      exec('docker-compose', ['-f', composePath, 'ps', '-q', env.OPENSEARCH_DASHBOARDS_DOCS_CONTAINER_NAME], {
         env,
       })
     ).trim();
@@ -47,7 +47,7 @@ export default function (grunt) {
     grunt.log.writeln('done');
 
     grunt.log.write('Copying new docs ... ');
-    exec('docker', ['cp', `${containerId}:/home/kibana/html_docs`, htmlDocsDir]);
+    exec('docker', ['cp', `${containerId}:/home/opensearch-dashboards/html_docs`, htmlDocsDir]);
     grunt.log.writeln('done');
   });
 }
