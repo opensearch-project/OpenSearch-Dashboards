@@ -19,7 +19,7 @@
 
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import { EsQueryParser } from './es_query_parser';
+import { OpenSearchQueryParser } from './opensearch_query_parser';
 
 const second = 1000;
 const minute = 60 * second;
@@ -36,7 +36,7 @@ const ctxObj = {
 };
 
 function create(min, max, dashboardCtx) {
-  const inst = new EsQueryParser(
+  const inst = new OpenSearchQueryParser(
     {
       getTimeBounds: () => ({ min, max }),
     },
@@ -49,13 +49,13 @@ function create(min, max, dashboardCtx) {
 
 jest.mock('../services');
 
-describe(`EsQueryParser time`, () => {
+describe(`OpenSearchQueryParser time`, () => {
   test(`roundInterval(4s)`, () => {
-    expect(EsQueryParser._roundInterval(4 * second)).toBe(`1s`);
+    expect(OpenSearchQueryParser._roundInterval(4 * second)).toBe(`1s`);
   });
 
   test(`roundInterval(4hr)`, () => {
-    expect(EsQueryParser._roundInterval(4 * hour)).toBe(`3h`);
+    expect(OpenSearchQueryParser._roundInterval(4 * hour)).toBe(`3h`);
   });
 
   test(`getTimeBound`, () => {
@@ -97,7 +97,7 @@ describe(`EsQueryParser time`, () => {
   });
 });
 
-describe('EsQueryParser.populateData', () => {
+describe('OpenSearchQueryParser.populateData', () => {
   let searchApiStub;
   let data;
   let parser;
@@ -108,7 +108,7 @@ describe('EsQueryParser.populateData', () => {
         toPromise: jest.fn(() => Promise.resolve(data)),
       })),
     };
-    parser = new EsQueryParser({}, searchApiStub, undefined, undefined);
+    parser = new OpenSearchQueryParser({}, searchApiStub, undefined, undefined);
   });
 
   test('should set the timeout for each request', async () => {
@@ -131,7 +131,7 @@ describe('EsQueryParser.populateData', () => {
   });
 });
 
-describe(`EsQueryParser.injectQueryContextVars`, () => {
+describe(`OpenSearchQueryParser.injectQueryContextVars`, () => {
   function check(obj, expected, ctx) {
     return () => {
       create(rangeStart, rangeEnd, ctx)._injectContextVars(obj, true);
@@ -212,7 +212,7 @@ describe(`EsQueryParser.injectQueryContextVars`, () => {
   );
 });
 
-describe(`EsQueryParser.parseEsRequest`, () => {
+describe(`OpenSearchQueryParser.parseEsRequest`, () => {
   function check(req, ctx, expected) {
     return () => {
       create(rangeStart, rangeEnd, ctx).parseUrl({}, req);
@@ -289,10 +289,10 @@ describe(`EsQueryParser.parseEsRequest`, () => {
     })
   );
 
-  test(`no esRequest`, check({ index: '_all' }, ctxArr, { index: '_all', body: {} }));
+  test(`no opensearchRequest`, check({ index: '_all' }, ctxArr, { index: '_all', body: {} }));
 
   test(
-    `esRequest`,
+    `opensearchRequest`,
     check({ index: '_all', body: { query: 2 } }, ctxArr, {
       index: '_all',
       body: { query: 2 },

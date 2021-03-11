@@ -67,7 +67,7 @@ export function createVegaRequestHandler(
 
     timeCache.setTimeRange(timeRange);
 
-    const opensearchQueryConfigs = opensearchQuery.getEsQueryConfig(uiSettings);
+    const opensearchQueryConfigs = opensearchQuery.getOpenSearchQueryConfig(uiSettings);
     const filtersDsl = opensearchQuery.buildEsQuery(undefined, query, filters, opensearchQueryConfigs);
     const { VegaParser } = await import('./data_model/vega_parser');
     const vp = new VegaParser(visParams.spec, searchAPI, timeCache, filtersDsl, getServiceSettings);

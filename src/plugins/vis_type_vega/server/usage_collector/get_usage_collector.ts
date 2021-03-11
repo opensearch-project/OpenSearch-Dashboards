@@ -29,7 +29,7 @@ import {
 
 type UsageCollectorDependencies = Pick<VisTypeVegaPluginSetupDependencies, 'home'>;
 
-type ESResponse = SearchResponse<{ visualization: { visState: string } }>;
+type OpenSearchResponse = SearchResponse<{ visualization: { visState: string } }>;
 type VegaType = 'vega' | 'vega-lite';
 
 const VEGA_USAGE_TYPE = 'vis_type_vega';
@@ -82,8 +82,8 @@ const getStats = async (
       },
     },
   };
-  const esResponse: ESResponse = await callCluster('search', searchParams);
-  const size = esResponse?.hits?.hits?.length ?? 0;
+  const opensearchResponse: OpenSearchResponse = await callCluster('search', searchParams);
+  const size = opensearchResponse?.hits?.hits?.length ?? 0;
   let shouldPublishTelemetry = false;
 
   if (!size) {
@@ -94,7 +94,7 @@ const getStats = async (
   // in order to have more accurate results
   const excludedFromStatsVisualizations = getDefaultVegaVisualizations(home);
 
-  const finalTelemetry = esResponse.hits.hits.reduce(
+  const finalTelemetry = opensearchResponse.hits.hits.reduce(
     (telemetry, hit) => {
       const visualization = hit._source?.visualization;
       const visState = JSON.parse(visualization?.visState ?? '{}');

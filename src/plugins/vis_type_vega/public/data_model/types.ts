@@ -21,7 +21,7 @@ import { SearchResponse, SearchParams } from 'elasticsearch';
 
 import { Filter } from 'src/plugins/data/public';
 import { DslQuery } from 'src/plugins/data/common';
-import { EsQueryParser } from './es_query_parser';
+import { OpenSearchQueryParser } from './opensearch_query_parser';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 
@@ -193,7 +193,7 @@ interface Requests<TUrlData = UrlObject, TRequestDataObject = RequestDataObject<
   dataObject: TRequestDataObject;
 }
 
-export type EsQueryRequest = Requests;
+export type OpenSearchQueryRequest = Requests;
 export type EmsQueryRequest = Requests & {
   obj: UrlObject;
 };
@@ -238,7 +238,7 @@ export interface VegaConfig extends DstObj {
 
 export interface UrlParserConfig {
   [index: string]: any;
-  elasticsearch: EsQueryParser;
+  opensearch: OpenSearchQueryParser;
   emsfile: EmsFileParser;
   url: UrlParser;
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'opensearch_dashboards/public';
+import { PluginInitializerContext } from 'opensearch-dashboards/public';
 import { ConfigSchema } from '../config';
 import { VegaPlugin as Plugin } from './plugin';
 

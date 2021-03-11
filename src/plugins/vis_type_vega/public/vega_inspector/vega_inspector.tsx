@@ -19,7 +19,7 @@
 import React from 'react';
 
 import { i18n } from '@osd/i18n';
-import { IUiSettingsClient } from 'opensearch_dashboards/public';
+import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { VegaAdapter } from './vega_adapter';
 import { VegaDataInspector, VegaDataInspectorProps } from './vega_data_inspector';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';

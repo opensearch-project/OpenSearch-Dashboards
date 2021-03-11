@@ -19,7 +19,7 @@
 
 import { combineLatest } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { CoreStart, IUiSettingsClient } from 'opensearch_dashboards/public';
+import { CoreStart, IUiSettingsClient } from 'opensearch-dashboards/public';
 import {
   getSearchParamsFromRequest,
   SearchRequest,

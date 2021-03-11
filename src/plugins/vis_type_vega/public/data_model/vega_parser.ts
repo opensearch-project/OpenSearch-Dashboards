@@ -26,7 +26,7 @@ import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 // @ts-ignore
 import { vega, vegaLite } from '../lib/vega';
-import { EsQueryParser } from './es_query_parser';
+import { OpenSearchQueryParser } from './opensearch_query_parser';
 import { Utils } from './utils';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
@@ -554,7 +554,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
   }
 
   /**
-   * Replace all instances of ES requests with raw values.
+   * Replace all instances of OpenSearch requests with raw values.
    * Also handle any other type of url: {type: xxx, ...}
    * @private
    */
@@ -563,7 +563,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
       const serviceSettings = await this.getServiceSettings();
       const onWarn = this._onWarning.bind(this);
       this._urlParsers = {
-        elasticsearch: new EsQueryParser(this.timeCache, this.searchAPI, this.filters, onWarn),
+        opensearch: new OpenSearchQueryParser(this.timeCache, this.searchAPI, this.filters, onWarn),
         emsfile: new EmsFileParser(serviceSettings),
         url: new UrlParser(onWarn),
       };

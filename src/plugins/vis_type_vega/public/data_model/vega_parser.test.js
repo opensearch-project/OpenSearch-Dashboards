@@ -180,23 +180,23 @@ describe('VegaParser._resolveEsQueries', () => {
 
   test('no data', check({}, {}));
   test('no data2', check({ a: 1 }, { a: 1 }));
-  test('non-es data', check({ data: { a: 10 } }, { data: { a: 10 } }));
+  test('non-opensearch data', check({ data: { a: 10 } }, { data: { a: 10 } }));
   test(
-    'es',
+    'opensearch',
     check(
       { data: { name: 'requestId', url: { index: 'a' }, x: 1 } },
       { data: { name: 'requestId', url: { index: 'a', body: {} }, values: [42], x: 1 } }
     )
   );
   test(
-    'es 2',
+    'opensearch 2',
     check(
       { data: { name: 'requestId', url: { '%type%': 'elasticsearch', index: 'a' } } },
       { data: { name: 'requestId', url: { index: 'a', body: {} }, values: [42] } }
     )
   );
   test(
-    'es arr',
+    'opensearch arr',
     check(
       { arr: [{ data: { name: 'requestId', url: { index: 'a' }, x: 1 } }] },
       { arr: [{ data: { name: 'requestId', url: { index: 'a', body: {} }, values: [42], x: 1 } }] }

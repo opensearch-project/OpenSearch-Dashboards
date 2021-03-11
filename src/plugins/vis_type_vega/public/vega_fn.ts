@@ -22,7 +22,7 @@ import { i18n } from '@osd/i18n';
 import {
   ExecutionContext,
   ExpressionFunctionDefinition,
-  KibanaContext,
+  OpenSearchDashboardsContext,
   Render,
 } from '../../expressions/public';
 import { VegaVisualizationDependencies } from './plugin';
@@ -31,7 +31,7 @@ import { VegaInspectorAdapters } from './vega_inspector/index';
 import { TimeRange, Query } from '../../data/public';
 import { VegaParser } from './data_model/vega_parser';
 
-type Input = KibanaContext | null;
+type Input = OpenSearchDashboardsContext | null;
 type Output = Promise<Render<RenderValue>>;
 
 interface Arguments {
