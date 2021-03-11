@@ -19,7 +19,7 @@
 
 import _, { defaults } from 'lodash';
 
-import { Optional } from '@kbn/utility-types';
+import { Optional } from '@osd/utility-types';
 
 import { AggGroupNames, AggParam, AggGroupName } from '../../data/public';
 

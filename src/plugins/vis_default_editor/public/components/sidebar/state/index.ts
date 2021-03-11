@@ -24,8 +24,8 @@ import { Vis } from 'src/plugins/visualizations/public';
 import { createEditorStateReducer, initEditorState, EditorVisState } from './reducers';
 import { EditorStateActionTypes } from './constants';
 import { EditorAction } from './actions';
-import { useKibana } from '../../../../../kibana_react/public';
-import { VisDefaultEditorKibanaServices } from '../../../types';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { VisDefaultEditorOpenSearchDashboardsServices } from '../../../types';
 
 export * from './editor_form_state';
 export * from './actions';
@@ -34,7 +34,7 @@ export function useEditorReducer(
   vis: Vis,
   eventEmitter: EventEmitter
 ): [EditorVisState, React.Dispatch<EditorAction>] {
-  const { services } = useKibana<VisDefaultEditorKibanaServices>();
+  const { services } = useOpenSearchDashboards<VisDefaultEditorOpenSearchDashboardsServices>();
   const [state, dispatch] = useReducer(
     createEditorStateReducer(services.data.search),
     vis,

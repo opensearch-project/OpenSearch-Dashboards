@@ -19,7 +19,7 @@
 
 import React, { useCallback, useReducer, useEffect, useMemo } from 'react';
 import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 
 import { IAggConfig, IndexPattern, AggGroupNames } from '../../../data/public';
@@ -40,8 +40,8 @@ import {
 import { DefaultEditorCommonProps } from './agg_common_props';
 import { EditorParamConfig, TimeIntervalParam, FixedParam, getEditorConfig } from './utils';
 import { Schema, getSchemaByName } from '../schemas';
-import { useKibana } from '../../../kibana_react/public';
-import { VisDefaultEditorKibanaServices } from '../types';
+import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { VisDefaultEditorOpenSearchDashboardsServices } from '../types';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';
@@ -89,7 +89,7 @@ function DefaultEditorAggParams({
     allowedAggs,
     schema.aggFilter,
   ]);
-  const { services } = useKibana<VisDefaultEditorKibanaServices>();
+  const { services } = useOpenSearchDashboards<VisDefaultEditorOpenSearchDashboardsServices>();
   const aggTypes = useMemo(() => services.data.search.aggs.types.getAll(), [
     services.data.search.aggs.types,
   ]);

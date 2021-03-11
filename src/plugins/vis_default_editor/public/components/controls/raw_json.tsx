@@ -22,7 +22,7 @@ import 'brace/mode/json';
 import React, { useState, useMemo, useCallback } from 'react';
 
 import { EuiFormRow, EuiIconTip, EuiCodeEditor, EuiScreenReaderOnly } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { AggParamEditorProps } from '../agg_param_props';
 
@@ -42,7 +42,7 @@ function RawJsonParamEditor({
     () =>
       i18n.translate('visDefaultEditor.controls.jsonInputTooltip', {
         defaultMessage:
-          "Any JSON formatted properties you add here will be merged with the elasticsearch aggregation definition for this section. For example 'shard_size' on a terms aggregation.",
+          "Any JSON formatted properties you add here will be merged with the opensearch aggregation definition for this section. For example 'shard_size' on a terms aggregation.",
       }),
     []
   );

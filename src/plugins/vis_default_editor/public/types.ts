@@ -19,6 +19,6 @@
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 
-export interface VisDefaultEditorKibanaServices {
+export interface VisDefaultEditorOpenSearchDashboardsServices {
   data: DataPublicPluginStart;
 }

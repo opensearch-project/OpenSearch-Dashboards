@@ -20,7 +20,7 @@
 import React, { Fragment, useState, useEffect, useMemo, useCallback } from 'react';
 
 import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFormErrorText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { NumberRow, NumberRowModel } from './number_row';
 import {
   parse,

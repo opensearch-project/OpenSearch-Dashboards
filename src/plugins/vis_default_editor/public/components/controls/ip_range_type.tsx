@@ -20,7 +20,7 @@
 import React from 'react';
 
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { AggParamEditorProps } from '../agg_param_props';
 

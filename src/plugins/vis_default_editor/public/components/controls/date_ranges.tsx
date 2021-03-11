@@ -33,13 +33,13 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import dateMath from '@elastic/datemath';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 import { isEqual, omit } from 'lodash';
 import { useMount } from 'react-use';
 import { DocLinksStart } from 'src/core/public';
 
-import { useKibana } from '../../../../kibana_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { AggParamEditorProps } from '../agg_param_props';
 
 const FROM_PLACEHOLDER = '\u2212\u221E';
@@ -68,7 +68,7 @@ function DateRangesParamEditor({
   setValue,
   setValidity,
 }: AggParamEditorProps<DateRangeValues[]>) {
-  const { services } = useKibana<{ docLinks: DocLinksStart }>();
+  const { services } = useOpenSearchDashboards<{ docLinks: DocLinksStart }>();
   const [ranges, setRanges] = useState(() =>
     value.map((range) => ({ ...range, id: generateId() }))
   );
