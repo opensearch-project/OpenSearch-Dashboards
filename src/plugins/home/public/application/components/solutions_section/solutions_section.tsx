@@ -37,11 +37,11 @@ interface Props {
 
 export const SolutionsSection: FC<Props> = ({ addBasePath, solutions, directories }) => {
   // Separate OpenSearch Dashboards from other solutions
-  const opensearchDashboards = solutions.find(({ id }) => id === 'opensearchdashboards');
+  const opensearchDashboards = solutions.find(({ id }) => id === 'opensearchDashboards');
   const opensearchDashboardsApps = directories
-    .filter(({ solutionId }) => solutionId === 'opensearchdashboards')
+    .filter(({ solutionId }) => solutionId === 'opensearchDashboards')
     .sort(sortByOrder);
-  solutions = solutions.sort(sortByOrder).filter(({ id }) => id !== 'opensearchdashboards');
+  solutions = solutions.sort(sortByOrder).filter(({ id }) => id !== 'opensearchDashboards');
 
   return (
     <>

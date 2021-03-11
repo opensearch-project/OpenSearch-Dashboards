@@ -25,7 +25,7 @@ const baseUrl = getServices().addBasePath('/api/opensearch-dashboards/home/tutor
 const headers = new Headers();
 headers.append('Accept', 'application/json');
 headers.append('Content-Type', 'application/json');
-headers.append('osd-xsrf', 'opensearchdashboards');
+headers.append('osd-xsrf', 'opensearchDashboards');
 
 let tutorials = [];
 let tutorialsLoaded = false;

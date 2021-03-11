@@ -35,7 +35,7 @@ const DASHBOARD_FEATURE: FeatureCatalogueEntry = {
 };
 
 const OPENSEARCH_DASHBOARDS_SOLUTION: FeatureCatalogueSolution = {
-  id: 'opensearchdashboards',
+  id: 'opensearchDashboards',
   title: 'OpenSearch Dashboards',
   subtitle: 'Visualize & analyze',
   appDescriptions: ['Analyze data in dashboards.', 'Search and find insights.'],

@@ -29,7 +29,7 @@ export async function makeSampleDataUsageCollector(
   let index: string;
   try {
     const config = await context.config.legacy.globalConfig$.pipe(first()).toPromise();
-    index = config.opensearchdashboards.index;
+    index = config.opensearchDashboards.index;
   } catch (err) {
     return; // OpenSearch Dashboards plugin is not enabled (test environment)
   }

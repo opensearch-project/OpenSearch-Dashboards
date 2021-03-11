@@ -37,9 +37,9 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/functionbeat/functionbeat-{config.opensearchdashboards.version}-darwin-x86_64.tar.gz',
-        'tar xzvf functionbeat-{config.opensearchdashboards.version}-darwin-x86_64.tar.gz',
-        'cd functionbeat-{config.opensearchdashboards.version}-darwin-x86_64/',
+        'curl -L -O https://artifacts.elastic.co/downloads/beats/functionbeat/functionbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+        'tar xzvf functionbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+        'cd functionbeat-{config.opensearchDashboards.version}-darwin-x86_64/',
       ],
     },
     LINUX: {
@@ -56,9 +56,9 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
         }
       ),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/functionbeat/functionbeat-{config.opensearchdashboards.version}-linux-x86_64.tar.gz',
-        'tar xzvf functionbeat-{config.opensearchdashboards.version}-linux-x86_64.tar.gz',
-        'cd functionbeat-{config.opensearchdashboards.version}-linux-x86_64/',
+        'curl -L -O https://artifacts.elastic.co/downloads/beats/functionbeat/functionbeat-{config.opensearchDashboards.version}-linux-x86_64.tar.gz',
+        'tar xzvf functionbeat-{config.opensearchDashboards.version}-linux-x86_64.tar.gz',
+        'cd functionbeat-{config.opensearchDashboards.version}-linux-x86_64/',
       ],
     },
     WINDOWS: {
@@ -77,7 +77,7 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
 **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
  5. From the PowerShell prompt, go to the Functionbeat directory:',
           values: {
-            directoryName: '`functionbeat-{config.opensearchdashboards.version}-windows`',
+            directoryName: '`functionbeat-{config.opensearchDashboards.version}-windows`',
             folderPath: '`C:\\Program Files`',
             functionbeatLink:
               '{config.docs.beats.functionbeat}/functionbeat-installation-configuration.html',
@@ -133,7 +133,7 @@ OpenSearch Dashboards index pattern. It is normally safe to omit this command.',
         '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.opensearchdashboards:',
+        'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
@@ -169,7 +169,7 @@ and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.opensearchdashboards:',
+        'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],

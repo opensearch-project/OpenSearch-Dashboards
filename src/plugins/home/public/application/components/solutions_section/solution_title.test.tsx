@@ -22,7 +22,7 @@ import { shallow } from 'enzyme';
 import { SolutionTitle } from './solution_title';
 
 const solutionEntry = {
-  id: 'opensearchdashboards',
+  id: 'opensearchDashboards',
   title: 'OpenSearch Dashboards',
   subtitle: 'Visualize & analyze',
   descriptions: ['Analyze data in dashboards'],

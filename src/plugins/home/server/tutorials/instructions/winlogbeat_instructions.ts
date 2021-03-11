@@ -42,7 +42,7 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
 **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
  5. From the PowerShell prompt, run the following commands to install Winlogbeat as a Windows service.',
           values: {
-            directoryName: '`winlogbeat-{config.opensearchdashboards.version}-windows`',
+            directoryName: '`winlogbeat-{config.opensearchDashboards.version}-windows`',
             folderPath: '`C:\\Program Files`',
             winlogbeatLink:
               '{config.docs.beats.winlogbeat}/winlogbeat-installation-configuration.html',
@@ -92,7 +92,7 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
         '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.opensearchdashboards:',
+        'setup.opensearchDashboards:',
         '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],

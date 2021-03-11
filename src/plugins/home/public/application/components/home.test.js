@@ -144,7 +144,7 @@ describe('home', () => {
   describe('directories', () => {
     test('should render solutions in the "solution section"', async () => {
       const solutionEntry1 = {
-        id: 'opensearchdashboards',
+        id: 'opensearchDashboards',
         title: 'OpenSearch Dashboards',
         subtitle: 'Visualize & analyze',
         appDescriptions: ['Analyze data in dashboards'],

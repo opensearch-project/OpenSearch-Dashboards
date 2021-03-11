@@ -30,7 +30,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('opensearchdashboards.disableWelcomeScreen', 'home.disableWelcomeScreen'),
+    renameFromRoot('opensearchDashboards.disableWelcomeScreen', 'home.disableWelcomeScreen'),
   ],
 };
 
