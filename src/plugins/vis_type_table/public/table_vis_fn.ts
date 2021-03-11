@@ -39,14 +39,14 @@ interface RenderValue {
 }
 
 export const createTableVisFn = (): ExpressionFunctionDefinition<
-  'opensearch_dashboardstable',
+  'opensearch_dashboards_table',
   Input,
   Arguments,
   Render<RenderValue>
 > => ({
-  name: 'opensearch_dashboardstable',
+  name: 'opensearch_dashboards_table',
   type: 'render',
-  inputTypes: ['opensearch_dashboardsdatatable'],
+  inputTypes: ['opensearch_dashboards_datatable'],
   help: i18n.translate('visTypeTable.function.help', {
     defaultMessage: 'Table visualization',
   }),

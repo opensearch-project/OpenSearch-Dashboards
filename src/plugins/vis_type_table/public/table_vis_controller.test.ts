@@ -38,7 +38,7 @@ const { createAggConfigs } = searchServiceMock.createStartContract().aggs;
 
 const { tabifyAggResponse } = search;
 
-jest.mock('../../opensearch_dashboardslegacy/public/angular/angular_config', () => ({
+jest.mock('../../opensearch_dashboards_legacy/public/angular/angular_config', () => ({
   configureAppAngularModule: () => {},
 }));
 

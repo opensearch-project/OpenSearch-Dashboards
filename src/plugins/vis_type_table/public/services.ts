@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { createGetterSetter } from '../../opensearch_dashboardsutils/public';
+import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboardslegacy/public';
+import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
 
 export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']

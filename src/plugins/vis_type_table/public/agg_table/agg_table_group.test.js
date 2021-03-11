@@ -24,7 +24,7 @@ import expect from '@osd/expect';
 
 import { getFieldFormatsRegistry } from '../../../data/public/test_utils';
 import { coreMock } from '../../../../core/public/mocks';
-import { initAngularBootstrap } from '../../../opensearch_dashboardslegacy/public';
+import { initAngularBootstrap } from '../../../opensearch_dashboards_legacy/public';
 import { setUiSettings } from '../../../data/public/services';
 import { setFormatService } from '../services';
 import { getInnerAngular } from '../get_inner_angular';
