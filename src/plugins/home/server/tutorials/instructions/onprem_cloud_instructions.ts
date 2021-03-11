@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from 'src/plugins/home/server/tutorials/opensearch_metrics/node_modules/@osd/i18n';
+import { i18n } from '@osd/i18n';
 
 export const createTrycloudOption1 = () => ({
   title: i18n.translate('home.tutorials.common.premCloudInstructions.option1.title', {

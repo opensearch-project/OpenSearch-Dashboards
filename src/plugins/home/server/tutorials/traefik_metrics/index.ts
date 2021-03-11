@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from 'src/plugins/home/server/tutorials/opensearch_metrics/node_modules/@osd/i18n';
+import { i18n } from '@osd/i18n';
 import { TutorialsCategory, TutorialSchema } from '../../services/tutorials';
 import {
   onPremInstructions,

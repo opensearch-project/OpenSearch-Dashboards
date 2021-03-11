@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from 'src/plugins/home/server/tutorials/opensearch_metrics/node_modules/@osd/i18n';
+import { i18n } from '@osd/i18n';
 
 export const cloudPasswordAndResetLink = i18n.translate(
   'home.tutorials.common.cloudInstructions.passwordAndResetLink',

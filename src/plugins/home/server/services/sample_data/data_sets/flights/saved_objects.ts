@@ -20,7 +20,7 @@
 /* eslint max-len: 0 */
 /* eslint-disable */
 
-import { i18n } from 'src/plugins/home/server/tutorials/opensearch_metrics/node_modules/@osd/i18n';
+import { i18n } from '@osd/i18n';
 import { SavedObject } from 'opensearch-dashboards/server';
 
 export const getSavedObjects = (): SavedObject[] => [
