@@ -22,7 +22,7 @@ import React, { useState, useCallback } from 'react';
 import { useMount } from 'react-use';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { AggParam, IAggConfig, IFieldParamType, IndexPatternField } from 'src/plugins/data/public';
 import { formatListAsProse, parseCommaSeparatedList, useValidation } from './utils';

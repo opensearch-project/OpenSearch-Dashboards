@@ -25,7 +25,7 @@ import {
   DefaultEditorAggParams as PureDefaultEditorAggParams,
   DefaultEditorAggParamsProps,
 } from './agg_params';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { EditorVisState } from './sidebar/state/reducers';
 
@@ -39,9 +39,9 @@ const mockEditorConfig = {
   },
 };
 const DefaultEditorAggParams = (props: DefaultEditorAggParamsProps) => (
-  <KibanaContextProvider services={{ data: dataPluginMock.createStartContract() }}>
+  <OpenSearchDashboardsContextProvider services={{ data: dataPluginMock.createStartContract() }}>
     <PureDefaultEditorAggParams {...props} />
-  </KibanaContextProvider>
+  </OpenSearchDashboardsContextProvider>
 );
 
 jest.mock('./utils', () => ({
