@@ -1,10 +1,10 @@
-# Testing Kibana Plugins
+# Testing OpenSearch Dashboards Plugins
 
-This document outlines best practices and patterns for testing Kibana Plugins.
+This document outlines best practices and patterns for testing OpenSearch Dashboards Plugins.
 
-- [Testing Kibana Plugins](#testing-kibana-plugins)
+- [Testing OpenSearch Dashboards Plugins](#testing-opensearch-dashboards-plugins)
   - [Strategy](#strategy)
-  - [New concerns in the Kibana Platform](#new-concerns-in-the-kibana-platform)
+  - [New concerns in the OpenSearch Dashboards Platform](#new-concerns-in-the-opensearch-dashboards-platform)
   - [Core Integrations](#core-integrations)
     - [Core Mocks](#core-mocks)
       - [Example](#example)
@@ -23,7 +23,7 @@ This document outlines best practices and patterns for testing Kibana Plugins.
     - [SavedObjects](#savedobjects)
       - [Unit Tests](#unit-tests)
       - [Integration Tests](#integration-tests-1)
-    - [Elasticsearch](#elasticsearch)
+    - [OpenSearch](#opensearch)
   - [Plugin integrations](#plugin-integrations)
     - [Preconditions](#preconditions-1)
     - [Testing dependencies usages](#testing-dependencies-usages)
@@ -35,20 +35,20 @@ This document outlines best practices and patterns for testing Kibana Plugins.
 
 In general, we recommend three tiers of tests:
 - Unit tests: small, fast, exhaustive, make heavy use of mocks for external dependencies 
-- Integration tests: higher-level tests that verify interactions between systems (eg. HTTP APIs, Elasticsearch API calls, calling other plugin contracts).
+- Integration tests: higher-level tests that verify interactions between systems (eg. HTTP APIs, OpenSearch API calls, calling other plugin contracts).
 - End-to-end tests (e2e): tests that verify user-facing behavior through the browser
 
 These tiers should roughly follow the traditional ["testing pyramid"](https://martinfowler.com/articles/practical-test-pyramid.html), where there are more exhaustive testing at the unit level, fewer at the integration level, and very few at the functional level. 
 
-## New concerns in the Kibana Platform
+## New concerns in the OpenSearch Dashboards Platform
 
-The Kibana Platform introduces new concepts that legacy plugins did not have concern themselves with. Namely:
+The OpenSearch Dashboards Platform introduces new concepts that legacy plugins did not have concern themselves with. Namely:
 - **Lifecycles**: plugins now have explicit lifecycle methods that must interop with Core APIs and other plugins.
 - **Shared runtime**: plugins now all run in the same process at the same time. On the frontend, this is different behavior than the legacy plugins. Developers should take care not to break other plugins when interacting with their enviornment (Node.js or Browser).
-- **Single page application**: Kibana's frontend is now a single-page application where all plugins are running, but only one application is mounted at a time. Plugins need to handle mounting and unmounting, cleanup, and avoid overriding global browser behaviors in this shared space.
+- **Single page application**: OpenSearch Dashboards's frontend is now a single-page application where all plugins are running, but only one application is mounted at a time. Plugins need to handle mounting and unmounting, cleanup, and avoid overriding global browser behaviors in this shared space.
 - **Dependency management**: plugins must now explicitly declare their dependencies on other plugins, both required and optional. Plugins should ensure to test conditions where a optional dependency is missing.
 
-Simply porting over existing tests when migrating your plugin to the Kibana Platform will leave blind spots in test coverage. It is highly recommended that plugins add new tests that cover these new concerns.
+Simply porting over existing tests when migrating your plugin to the OpenSearch Dashboards Platform will leave blind spots in test coverage. It is highly recommended that plugins add new tests that cover these new concerns.
 
 ## Core Integrations
 
@@ -61,18 +61,18 @@ If the unit under test expects a particular response from a Core API, the test w
 #### Example
 
 ```typescript
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { opensearchServiceMock } from 'src/core/server/mocks';
 
 test('my test', async () => {
   // Setup mock and faked response
-  const esClient = elasticsearchServiceMock.createScopedClusterClient();
-  esClient.callAsCurrentUser.mockResolvedValue(/** insert ES response here */);
+  const opensearchClient = opensearchServiceMock.createScopedClusterClient();
+  opensearchClient.callAsCurrentUser.mockResolvedValue(/** insert OpenSearch response here */);
 
   // Call unit under test with mocked client
-  const result = await myFunction(esClient);
+  const result = await myFunction(opensearchClient);
 
   // Assert that client was called with expected arguments
-  expect(esClient.callAsCurrentUser).toHaveBeenCalledWith(/** expected args */);
+  expect(opensearchClient.callAsCurrentUser).toHaveBeenCalledWith(/** expected args */);
   // Expect that unit under test returns expected value based on client's response
   expect(result).toEqual(/** expected return value */)
 });
@@ -81,8 +81,8 @@ test('my test', async () => {
 ## Strategies for specific Core APIs
 
 ### HTTP Routes
-The HTTP API interface is another public contract of Kibana, although not every Kibana endpoint is for external use. When evaluating the required level of test coverage for an HTTP resource, make your judgment based on whether an endpoint is considered to be public or private. Public API is expected to have a higher level of test coverage.
-Public API tests should cover the **observable behavior** of the system, therefore they should be close to the real user interactions as much as possible, ideally by using HTTP requests to communicate with the Kibana server as a real user would do.
+The HTTP API interface is another public contract of OpenSearch Dashboards, although not every OpenSearch Dashboards endpoint is for external use. When evaluating the required level of test coverage for an HTTP resource, make your judgment based on whether an endpoint is considered to be public or private. Public API is expected to have a higher level of test coverage.
+Public API tests should cover the **observable behavior** of the system, therefore they should be close to the real user interactions as much as possible, ideally by using HTTP requests to communicate with the OpenSearch Dashboards server as a real user would do.
 
 ##### Preconditions
 We are going to add tests for `myPlugin` plugin that allows to format user-provided text, store and retrieve it later.
@@ -232,8 +232,8 @@ Main subjects for tests should be:
 - dependencies on other plugins.
 
 ##### Functional Test Runner
-If your plugin relies on the elasticsearch server to store data and supports additional configuration, you can leverage the Functional Test Runner(FTR) to implement integration tests. 
-FTR bootstraps an elasticsearch and a Kibana instance and runs the test suite against it.
+If your plugin relies on the opensearch server to store data and supports additional configuration, you can leverage the Functional Test Runner(FTR) to implement integration tests. 
+FTR bootstraps an opensearch and a OpenSearch Dashboards instance and runs the test suite against it.
 Pros:
 - runs the whole Elastic stack
 - tests cross-plugin integration
@@ -246,12 +246,12 @@ Cons:
 - brittle tests
 
 ###### Example
-You can reuse existing [api_integration](/test/api_integration/config.js) setup by registering a test file within a [test loader](/test/api_integration/apis/index.js). More about the existing FTR setup in the [contribution guide](/CONTRIBUTING.md#running-specific-kibana-tests)
+You can reuse existing [api_integration](/test/api_integration/config.js) setup by registering a test file within a [test loader](/test/api_integration/apis/index.js). More about the existing FTR setup in the [contribution guide](/CONTRIBUTING.md#running-specific-opensearch-dashboards-tests)
 
 The tests cover:
 - authenticated / non-authenticated user access (when applicable)
 ```typescript
-// TODO after https://github.com/elastic/kibana/pull/53208/
+// TODO after https://github.com/elastic/opensearch-dashboards/pull/53208/
 ```
 - request validation
 ```typescript
@@ -307,36 +307,36 @@ export default function({ getService }: FtrProviderContext) {
 ```
 
 ##### TestUtils
-It can be utilized if your plugin doesn't interact with the elasticsearch server or mocks the own methods doing so.
-Runs tests against real Kibana server instance.
+It can be utilized if your plugin doesn't interact with the opensearch server or mocks the own methods doing so.
+Runs tests against real OpenSearch Dashboards server instance.
 Pros:
-- runs the real Kibana instance
+- runs the real OpenSearch Dashboards instance
 - tests cross-plugin integration
 - emulates a real user interaction with the HTTP resources
 
 Cons:
-- faster than FTR because it doesn't run elasticsearch instance, but still slow
+- faster than FTR because it doesn't run opensearch instance, but still slow
 - hard to debug
-- doesn't cover Kibana CLI logic
+- doesn't cover OpenSearch Dashboards CLI logic
 
 ###### Example
-To have access to Kibana TestUtils, you should create `integration_tests` folder and import `test_utils` within a test file:
+To have access to OpenSearch Dashboards TestUtils, you should create `integration_tests` folder and import `test_utils` within a test file:
 ```typescript
 // src/plugins/my_plugin/server/integration_tests/formatter.test.ts
-import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
+import * as osdTestServer from 'src/core/test_helpers/osd_server';
 
 describe('myPlugin', () => {
   describe('GET /myPlugin/formatter', () => {
-    let root: ReturnType<typeof kbnTestServer.createRoot>;
+    let root: ReturnType<typeof osdTestServer.createRoot>;
     beforeAll(async () => {
-      root = kbnTestServer.createRoot();
+      root = osdTestServer.createRoot();
       await root.setup();
       await root.start();
     }, 30000);
 
     afterAll(async () => await root.shutdown());
     it('validates given text', async () => {
-      const response = await kbnTestServer.request
+      const response = await osdTestServer.request
         .get(root, '/myPlugin/formatter')
         .query({ text: 'input string'.repeat(100) })
         .expect(400);
@@ -345,7 +345,7 @@ describe('myPlugin', () => {
     });
 
     it('formats given text', async () => {
-      const response = await kbnTestServer.request
+      const response = await osdTestServer.request
         .get(root, '/myPlugin/formatter')
         .query({ text: 'input string' })
         .expect(200);
@@ -354,7 +354,7 @@ describe('myPlugin', () => {
     });
 
     it('returns BadRequest if passed string contains banned symbols', async () => {
-      await kbnTestServer.request
+      await osdTestServer.request
         .get(root, '/myPlugin/formatter')
         .query({ text: '<script>' })
         .expect(400, 'Text cannot contain unescaped HTML markup.');
@@ -372,9 +372,9 @@ import { MisformedTextError } from '../path/to/sanitizer'
 
 describe('myPlugin', () => {
   describe('GET /myPlugin/formatter', () => {
-    let root: ReturnType<typeof kbnTestServer.createRoot>;
+    let root: ReturnType<typeof osdTestServer.createRoot>;
     beforeAll(async () => {
-      root = kbnTestServer.createRoot();
+      root = osdTestServer.createRoot();
       await root.setup();
       await root.start();
     }, 30000);
@@ -383,7 +383,7 @@ describe('myPlugin', () => {
     it('returns BadRequest if Sanitizer throws MisformedTextError', async () => {
       TextFormatter.format.mockRejectedValueOnce(new MisformedTextError());
 
-      await kbnTestServer.request
+      await osdTestServer.request
         .get(root, '/myPlugin/formatter')
         .query({ text: 'any text' })
         .expect(400, 'bad bad request');
@@ -394,7 +394,7 @@ describe('myPlugin', () => {
 
 ### Applications
 
-Kibana Platform applications have less control over the page than legacy applications did. It is important that your app is built to handle it's co-habitance with other plugins in the browser. Applications are mounted and unmounted from the DOM as the user navigates between them, without full-page refreshes, as a single-page application (SPA). 
+OpenSearch Dashboards Platform applications have less control over the page than legacy applications did. It is important that your app is built to handle it's co-habitance with other plugins in the browser. Applications are mounted and unmounted from the DOM as the user navigates between them, without full-page refreshes, as a single-page application (SPA). 
 
 These long-lived sessions make cleanup more important than before. It's entirely possible a user has a single browsing session open for weeks at a time, without ever doing a full-page refresh. Common things that need to be cleaned up (and tested!) when your application is unmounted:
 - Subscriptions and polling (eg. `uiSettings.get$()`)
@@ -573,7 +573,7 @@ To unit test code that uses the Saved Objects client mock the client methods
 and make assertions against the behaviour you would expect to see.
 
 Since the Saved Objects client makes network requests to an external
-Elasticsearch cluster, it's important to include failure scenarios in your
+OpenSearch cluster, it's important to include failure scenarios in your
 test cases.
 
 When writing a view with which a user might interact, it's important to ensure
@@ -586,7 +586,7 @@ Objects client:
 ```typescript
 // src/plugins/myplugin/server/lib/short_url_lookup.ts
 import crypto from 'crypto';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'opensearch-dashboards/server';
 
 export const shortUrlLookup = {
   generateUrlId(url: string, savedObjectsClient: SavedObjectsClientContract) {
@@ -779,24 +779,24 @@ describe('saved query service', () => {
 #### Integration Tests
 To get the highest confidence in how your code behaves when using the Saved
 Objects client, you should write at least a few integration tests which loads
-data into and queries a real Elasticsearch database.
+data into and queries a real OpenSearch database.
 
 To do that we'll write a Jest integration test using `TestUtils` to start
-Kibana and esArchiver to load fixture data into Elasticsearch.
+OpenSearch Dashboards and opensearchArchiver to load fixture data into OpenSearch.
 
-1. Create the fixtures data you need in Elasticsearch
-2. Create a fixtures archive with `node scripts/es_archiver save <name> [index patterns...]`
-3. Load the fixtures in your test using esArchiver `esArchiver.load('name')`;
+1. Create the fixtures data you need in OpenSearch
+2. Create a fixtures archive with `node scripts/opensearch_archiver save <name> [index patterns...]`
+3. Load the fixtures in your test using opensearchArchiver `opensearchArchiver.load('name')`;
 
 _todo: fully worked out example_
 
-### Elasticsearch
+### OpenSearch
 
-_How to test ES clients_
+_How to test OpenSearch clients_
 
 ## Plugin integrations
 
-In the new platform, all plugin's dependencies to other plugins are explicitly declared in their `kibana.json`
+In the new platform, all plugin's dependencies to other plugins are explicitly declared in their `opensearch_dashboards.json`
 manifest. As for `core`, the dependencies `setup` and `start` contracts are injected in your plugin's respective 
 `setup` and `start` phases. One of the upsides with testing is that every usage of the dependencies is explicit,
 and that the plugin's contracts must be propagated to the parts of the code using them, meaning that isolating a 
@@ -823,7 +823,7 @@ data.
 
 ```typescript
 // src/plugins/myplugin/public/plugin.ts
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin } from 'opensearch-dashboards/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { SuggestionsService } from './suggestions';
