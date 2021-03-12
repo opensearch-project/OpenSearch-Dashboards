@@ -27,7 +27,7 @@ interface SliderValue {
   max?: string | number;
 }
 
-// Convert slider value into OpenSearch range filter
+// Convert slider value into OPENSEARCH range filter
 function toRange(sliderValue: SliderValue) {
   return {
     gte: sliderValue.min,
@@ -35,7 +35,7 @@ function toRange(sliderValue: SliderValue) {
   };
 }
 
-// Convert OpenSearch range filter into slider value
+// Convert OPENSEARCH range filter into slider value
 function fromRange(range: RangeFilterParams): SliderValue {
   const sliderValue: SliderValue = {};
   if (_.has(range, 'gte')) {

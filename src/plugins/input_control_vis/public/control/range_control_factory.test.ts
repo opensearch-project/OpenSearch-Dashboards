@@ -57,7 +57,7 @@ describe('rangeControlFactory', () => {
     });
 
     test('should disable control when there are 0 hits', async () => {
-      // OpenSearch response when the query does not match any documents
+      // OPENSEARCH response when the query does not match any documents
       const opensearchSearchResponse = {
         aggregations: {
           maxAgg: { value: null },
@@ -78,7 +78,7 @@ describe('rangeControlFactory', () => {
     });
 
     test('should disable control when response is empty', async () => {
-      // OpenSearch response for dashboardonly user who does not have read permissions on index is 200 (which is weird)
+      // OPENSEARCH response for dashboardonly user who does not have read permissions on index is 200 (which is weird)
       // and there is not aggregations key
       const opensearchSearchResponse = {};
       const searchSourceMock = getSearchSourceMock(opensearchSearchResponse);
