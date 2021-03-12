@@ -19,7 +19,7 @@
 
 import { registryMock, managerMock } from './plugin.test.mocks';
 import { SharePlugin } from './plugin';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from 'opensearch-dashboards/public';
 import { coreMock } from '../../../core/public/mocks';
 
 describe('SharePlugin', () => {

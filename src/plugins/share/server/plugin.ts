@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { i18n } from '@osd/i18n';
+import { schema } from '@osd/config-schema';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'opensearch-dashboards/server';
 import { createRoutes } from './routes/create_routes';
 import { url } from './saved_objects';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';

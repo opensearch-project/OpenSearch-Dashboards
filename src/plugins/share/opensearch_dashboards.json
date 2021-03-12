@@ -1,0 +1,7 @@
+{
+  "id": "share",
+  "version": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["opensearchDashboardsUtils"]
+}
