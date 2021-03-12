@@ -41,7 +41,7 @@ import {
   isAutoInterval,
   AUTO_INTERVAL,
 } from './lib/get_interval';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import {
   TIME_RANGE_DATA_MODES,
   TIME_RANGE_MODE_KEY,

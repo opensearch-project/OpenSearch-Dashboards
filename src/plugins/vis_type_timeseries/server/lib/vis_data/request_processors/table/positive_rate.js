@@ -22,7 +22,7 @@ import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { calculateAggRoot } from './calculate_agg_root';
 import { createPositiveRate, filter } from '../series/positive_rate';
 
-export function positiveRate(req, panel, esQueryConfig, indexPatternObject) {
+export function positiveRate(req, panel, opensearchQueryConfig, indexPatternObject) {
   return (next) => (doc) => {
     const { interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const { intervalString } = getBucketSize(req, interval);

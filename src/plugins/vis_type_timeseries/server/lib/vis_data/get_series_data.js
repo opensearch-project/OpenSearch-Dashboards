@@ -20,7 +20,7 @@ import { getSeriesRequestParams } from './series/get_request_params';
 import { handleResponseBody } from './series/handle_response_body';
 import { handleErrorResponse } from './handle_error_response';
 import { getAnnotations } from './get_annotations';
-import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
+import { getOpenSearchQueryConfig } from './helpers/get_opensearch_query_uisettings';
 import { getActiveSeries } from './helpers/get_active_series';
 
 export async function getSeriesData(req, panel) {
@@ -28,7 +28,7 @@ export async function getSeriesData(req, panel) {
     searchStrategy,
     capabilities,
   } = await req.framework.searchStrategyRegistry.getViableStrategyForPanel(req, panel);
-  const esQueryConfig = await getEsQueryConfig(req);
+  const opensearchQueryConfig = await getOpenSearchQueryConfig(req);
   const meta = {
     type: panel.type,
     uiRestrictions: capabilities.uiRestrictions,
@@ -36,7 +36,7 @@ export async function getSeriesData(req, panel) {
 
   try {
     const bodiesPromises = getActiveSeries(panel).map((series) =>
-      getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities)
+      getSeriesRequestParams(req, panel, series, opensearchQueryConfig, capabilities)
     );
 
     const searches = (await Promise.all(bodiesPromises)).reduce(
@@ -58,7 +58,7 @@ export async function getSeriesData(req, panel) {
         req,
         panel,
         series,
-        esQueryConfig,
+        opensearchQueryConfig,
         searchStrategy,
         capabilities,
       });

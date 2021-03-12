@@ -37,7 +37,7 @@ import {
   EuiFormLabel,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@osd/i18n/react';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
 import { QueryBarWrapper } from '../../query_bar_wrapper';
 
@@ -53,7 +53,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
     point_size: '',
     value_template: '{{value}}',
     offset_time: '',
-    split_color_mode: 'kibana',
+    split_color_mode: 'opensearchDashboards',
     axis_min: '',
     axis_max: '',
     stacked: STACKED_OPTIONS.NONE,
@@ -143,7 +143,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
         id: 'visTypeTimeseries.timeSeries.defaultPaletteLabel',
         defaultMessage: 'Default palette',
       }),
-      value: 'kibana',
+      value: 'opensearchDashboards',
     },
     {
       label: intl.formatMessage({

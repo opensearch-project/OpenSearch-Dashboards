@@ -15,5 +15,5 @@
 }
 
 .tvbEditorVisualization__draghandle {
-  @include kbnResizer($direction: vertical);
+  @include osdResizer($direction: vertical);
 }

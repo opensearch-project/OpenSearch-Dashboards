@@ -18,7 +18,7 @@
  */
 
 import { I18nStart, SavedObjectsStart, IUiSettingsClient, CoreStart } from 'src/core/public';
-import { createGetterSetter } from '../../kibana_utils/public';
+import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
 

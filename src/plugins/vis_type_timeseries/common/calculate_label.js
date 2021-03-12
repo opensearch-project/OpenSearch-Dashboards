@@ -19,7 +19,7 @@
 
 import { includes, startsWith } from 'lodash';
 import { lookup } from './agg_lookup';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 const paths = [
   'cumulative_sum',

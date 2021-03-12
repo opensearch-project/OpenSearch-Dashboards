@@ -17,10 +17,10 @@
  * under the License.
  */
 import { buildRequestBody } from './build_request_body';
-import { getEsShardTimeout } from '../helpers/get_es_shard_timeout';
+import { getOpenSearchShardTimeout } from '../helpers/get_opensearch_shard_timeout';
 import { getIndexPatternObject } from '../helpers/get_index_pattern';
 
-export async function getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities) {
+export async function getSeriesRequestParams(req, panel, series, opensearchQueryConfig, capabilities) {
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
   const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
@@ -28,17 +28,17 @@ export async function getSeriesRequestParams(req, panel, series, esQueryConfig, 
     req,
     panel,
     series,
-    esQueryConfig,
+    opensearchQueryConfig,
     indexPatternObject,
     capabilities
   );
-  const esShardTimeout = await getEsShardTimeout(req);
+  const opensearchShardTimeout = await getOpenSearchShardTimeout(req);
 
   return {
     index: indexPatternString,
     body: {
       ...request,
-      timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
+      timeout: opensearchShardTimeout > 0 ? `${opensearchShardTimeout}ms` : undefined,
     },
   };
 }

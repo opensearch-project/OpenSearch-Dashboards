@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@osd/config-schema';
 import { metricsItems, panel, seriesItems } from './vis_schema';
 
 export type SeriesItemsSchema = TypeOf<typeof seriesItems>;

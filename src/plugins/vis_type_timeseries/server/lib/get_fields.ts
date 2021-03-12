@@ -18,7 +18,7 @@
  */
 import { uniqBy, get } from 'lodash';
 import { first, map } from 'rxjs/operators';
-import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
+import { OpenSearchDashboardsRequest, RequestHandlerContext } from 'opensearch-dashboards/server';
 
 import { Framework } from '../plugin';
 import {
@@ -30,7 +30,7 @@ import { ReqFacade } from './search_strategies/strategies/abstract_search_strate
 
 export async function getFields(
   requestContext: RequestHandlerContext,
-  request: KibanaRequest,
+  request: OpenSearchDashboardsRequest,
   framework: Framework,
   indexPattern: string
 ) {
@@ -45,16 +45,16 @@ export async function getFields(
     payload: {},
     pre: {
       indexPatternsService: new IndexPatternsFetcher(
-        requestContext.core.elasticsearch.legacy.client.callAsCurrentUser
+        requestContext.core.opensearch.legacy.client.callAsCurrentUser
       ),
     },
     getUiSettingsService: () => requestContext.core.uiSettings.client,
     getSavedObjectsClient: () => requestContext.core.savedObjects.client,
-    getEsShardTimeout: async () => {
+    getOpenSearchShardTimeout: async () => {
       return await framework.globalConfig$
         .pipe(
           first(),
-          map((config) => config.elasticsearch.shardTimeout.asMilliseconds())
+          map((config) => config.opensearch.shardTimeout.asMilliseconds())
         )
         .toPromise();
     },

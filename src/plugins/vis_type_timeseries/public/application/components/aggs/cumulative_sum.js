@@ -24,7 +24,7 @@ import { AggSelect } from './agg_select';
 import { MetricSelect } from './metric_select';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import {
   htmlIdGenerator,
   EuiFlexGroup,

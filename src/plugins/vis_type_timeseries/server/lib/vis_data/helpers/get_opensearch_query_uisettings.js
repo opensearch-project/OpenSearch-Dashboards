@@ -17,18 +17,18 @@
  * under the License.
  */
 
-import { getEsShardTimeout } from './get_es_shard_timeout';
+import { UI_SETTINGS } from '../../../../../data/server';
 
-describe('getEsShardTimeout', () => {
-  test('should return the elasticsearch.shardTimeout', async () => {
-    const req = {
-      getEsShardTimeout: async () => {
-        return 12345;
-      },
-    };
-
-    const timeout = await getEsShardTimeout(req);
-
-    expect(timeout).toEqual(12345);
-  });
-});
+export async function getOpenSearchQueryConfig(req) {
+  const uiSettings = req.getUiSettingsService();
+  const allowLeadingWildcards = await uiSettings.get(UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS);
+  const queryStringOptions = await uiSettings.get(UI_SETTINGS.QUERY_STRING_OPTIONS);
+  const ignoreFilterIfFieldNotInIndex = await uiSettings.get(
+    UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX
+  );
+  return {
+    allowLeadingWildcards,
+    queryStringOptions: JSON.parse(queryStringOptions),
+    ignoreFilterIfFieldNotInIndex,
+  };
+}

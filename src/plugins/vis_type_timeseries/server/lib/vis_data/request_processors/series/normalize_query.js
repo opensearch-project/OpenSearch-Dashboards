@@ -43,7 +43,7 @@ function removeEmptyTopLevelAggregation(doc, series) {
 }
 
 /* Last query handler in the chain. You can use this handler
- * as the last place where you can modify the "doc" (request body) object before sending it to ES.
+ * as the last place where you can modify the "doc" (request body) object before sending it to OpenSearch.
  */
 export function normalizeQuery(req, panel, series) {
   return (next) => (doc) => {

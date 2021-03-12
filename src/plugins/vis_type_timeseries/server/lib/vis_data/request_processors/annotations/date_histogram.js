@@ -27,7 +27,7 @@ export function dateHistogram(
   req,
   panel,
   annotation,
-  esQueryConfig,
+  opensearchQueryConfig,
   indexPatternObject,
   capabilities
 ) {

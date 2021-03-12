@@ -18,13 +18,13 @@
  */
 
 import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, KibanaContext, Render } from '../../expressions/public';
+import { i18n } from '@osd/i18n';
+import { ExpressionFunctionDefinition, OpenSearchDashboardsContext, Render } from '../../expressions/public';
 
 // @ts-ignore
 import { metricsRequestHandler } from './request_handler';
 
-type Input = KibanaContext | null;
+type Input = OpenSearchDashboardsContext | null;
 type Output = Promise<Render<RenderValue>>;
 
 interface Arguments {
@@ -50,7 +50,7 @@ export const createMetricsFn = (): ExpressionFunctionDefinition<
 > => ({
   name: 'tsvb',
   type: 'render',
-  inputTypes: ['kibana_context', 'null'],
+  inputTypes: ['opensearch_dashboards_context', 'null'],
   help: i18n.translate('visTypeTimeseries.function.help', {
     defaultMessage: 'TSVB visualization',
   }),
