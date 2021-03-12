@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import reduce from '../lib/reduce.js';
 import Chainable from '../lib/classes/chainable';
 

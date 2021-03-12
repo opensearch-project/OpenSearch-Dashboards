@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import Bluebird from 'bluebird';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import moment from 'moment';
 
 import parseSheet from './lib/parse_sheet.js';

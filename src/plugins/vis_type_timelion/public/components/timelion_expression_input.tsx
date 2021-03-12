@@ -19,10 +19,10 @@
 
 import React, { useEffect, useCallback, useRef, useMemo } from 'react';
 import { EuiFormLabel } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { monaco } from '@kbn/monaco';
+import { FormattedMessage } from '@osd/i18n/react';
+import { monaco } from '@osd/monaco';
 
-import { CodeEditor, useKibana } from '../../../kibana_react/public';
+import { CodeEditor, useOpensearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { suggest, getSuggestion } from './timelion_expression_input_helpers';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
 import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
@@ -37,7 +37,7 @@ interface TimelionExpressionInputProps {
 
 function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputProps) {
   const functionList = useRef([]);
-  const kibana = useKibana();
+  const opensearchDashboards = useOpensearchDashboards();
   const argValueSuggestions = useMemo(getArgValueSuggestions, []);
 
   const provideCompletionItems = useCallback(
@@ -94,12 +94,12 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
   );
 
   useEffect(() => {
-    if (kibana.services.http) {
-      kibana.services.http.get('../api/timelion/functions').then((data) => {
+    if (opensearchDashboards.services.http) {
+      opensearchDashboards.services.http.get('../api/timelion/functions').then((data) => {
         functionList.current = data;
       });
     }
-  }, [kibana.services.http]);
+  }, [opensearchDashboards.services.http]);
 
   return (
     <div className="timExpressionInput">

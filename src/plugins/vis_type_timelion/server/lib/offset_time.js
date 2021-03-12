@@ -43,8 +43,8 @@ function timeRangeErrorMsg(offset) {
  * Calculate offset when parameter is requesting a relative offset based on requested time range.
  *
  * @param {string} offset - offset parameter value
- * @param {number} from - kibana global time 'from' in milliseconds
- * @param {number} to - kibana global time 'to' in milliseconds
+ * @param {number} from - opensearchDashboards global time 'from' in milliseconds
+ * @param {number} to - opensearchDashboards global time 'to' in milliseconds
  */
 export function preprocessOffset(offset, from, to) {
   if (!offset.startsWith('timerange')) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import loadFunctions from '../load_functions.js';
 const fitFunctions = loadFunctions('fit_functions');
 import TimelionFunction from './timelion_function';
