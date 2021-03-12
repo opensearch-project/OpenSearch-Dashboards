@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 
-# This script runs kibana tests compatible with cloud.
+# This script runs OpenSearch Dashboards  tests compatible with cloud.
 #
 # The cloud instance setup is done in the elastic/elastic-stack-testing framework,
 # where the following environment variables are set pointing to the cloud instance.
 #
-# export TEST_KIBANA_HOSTNAME
-# export TEST_KIBANA_PROTOCOL=
-# export TEST_KIBANA_PORT=
-# export TEST_KIBANA_USER=
-# export TEST_KIBANA_PASS=
+# export TEST_OPENSEARCH_DASHBOARDS_HOSTNAME
+# export TEST_OPENSEARCH_DASHBOARDS_PROTOCOL=
+# export TEST_OPENSEARCH_DASHBOARDS_PORT=
+# export TEST_OPENSEARCH_DASHBOARDS_USER=
+# export TEST_OPENSEARCH_DASHBOARDS_PASS=
 #
-# export TEST_ES_HOSTNAME=
-# export TEST_ES_PROTOCOL=
-# export TEST_ES_PORT=
-# export TEST_ES_USER=
-# export TEST_ES_PASS=
+# export TEST_OPENSEARCH_HOSTNAME=
+# export TEST_OPENSEARCH_PROTOCOL=
+# export TEST_OPENSEARCH_PORT=
+# export TEST_OPENSEARCH_USER=
+# export TEST_OPENSEARCH_PASS=
 #
 
 set -e

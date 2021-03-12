@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
-import { services as kibanaCommonServices } from '../../common/services';
-import { services as kibanaApiIntegrationServices } from '../../api_integration/services';
+import { GenericFtrProviderContext } from '@osd/test/types/ftr';
+import { services as opensearchDashboardsCommonServices } from '../../common/services';
+import { services as opensearchDashboardsApiIntegrationServices } from '../../api_integration/services';
 
 export type FtrProviderContext = GenericFtrProviderContext<
-  typeof kibanaCommonServices & { supertest: typeof kibanaApiIntegrationServices.supertest },
+  typeof opensearchDashboardsCommonServices & { supertest: typeof opensearchDashboardsApiIntegrationServices.supertest },
   {}
 >;

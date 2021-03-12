@@ -22,8 +22,8 @@ import { format as formatUrl } from 'url';
 
 import supertestAsPromised from 'supertest-as-promised';
 
-export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
+export function OpenSearchDashboardsSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
-  const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
-  return supertestAsPromised(kibanaServerUrl);
+  const opensearchDashboardsServerUrl = formatUrl(config.get('servers.opensearchDashboards'));
+  return supertestAsPromised(opensearchDashboardsServerUrl);
 }

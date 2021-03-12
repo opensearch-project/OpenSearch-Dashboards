@@ -18,7 +18,7 @@
  */
 
 import chalk from 'chalk';
-import testSubjectToCss from '@kbn/test-subj-selector';
+import testSubjectToCss from '@osd/test-subj-selector';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { AxeReport, printResult } from './axe_report';

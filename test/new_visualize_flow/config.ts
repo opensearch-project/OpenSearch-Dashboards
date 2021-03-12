@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@osd/test/types/ftr';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const commonConfig = await readConfigFile(require.resolve('../functional/config.js'));
@@ -27,12 +27,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     pageObjects: commonConfig.get('pageObjects'),
     services: commonConfig.get('services'),
     servers: commonConfig.get('servers'),
-    esTestCluster: commonConfig.get('esTestCluster'),
+    opensearchTestCluster: commonConfig.get('opensearchTestCluster'),
 
-    kbnTestServer: {
-      ...commonConfig.get('kbnTestServer'),
+    osdTestServer: {
+      ...commonConfig.get('osdTestServer'),
       serverArgs: [
-        ...commonConfig.get('kbnTestServer.serverArgs'),
+        ...commonConfig.get('osdTestServer.serverArgs'),
         '--oss',
         // '--telemetry.optIn=false',
         '--dashboard.allowByValueEmbeddables=true',
@@ -47,8 +47,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
 
     apps: {
-      kibana: {
-        pathname: '/app/kibana',
+      opensearchDashboards: {
+        pathname: '/app/opensearch-dashboards',
       },
       status_page: {
         pathname: '/status',
@@ -91,7 +91,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     security: {
       roles: {
         test_logstash_reader: {
-          elasticsearch: {
+          opensearch: {
             cluster: [],
             indices: [
               {
@@ -102,25 +102,25 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             ],
             run_as: [],
           },
-          kibana: [],
+          opensearchDashboards: [],
         },
         // for sample data - can remove but not add sample data
-        kibana_sample_admin: {
-          elasticsearch: {
+        opensearch_dashboards_sample_admin: {
+          opensearch: {
             cluster: [],
             indices: [
               {
-                names: ['kibana_sample*'],
+                names: ['opensearch_dashboards_sample*'],
                 privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
                 field_security: { grant: ['*'], except: [] },
               },
             ],
             run_as: [],
           },
-          kibana: [],
+          opensearchDashboards: [],
         },
         long_window_logstash: {
-          elasticsearch: {
+          opensearch: {
             cluster: [],
             indices: [
               {
@@ -131,11 +131,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             ],
             run_as: [],
           },
-          kibana: [],
+          opensearchDashboards: [],
         },
 
         animals: {
-          elasticsearch: {
+          opensearch: {
             cluster: [],
             indices: [
               {
@@ -146,10 +146,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             ],
             run_as: [],
           },
-          kibana: [],
+          opensearchDashboards: [],
         },
       },
-      defaultRoles: ['kibana_admin'],
+      defaultRoles: ['opensearch_dashboards_admin'],
     },
   };
 }

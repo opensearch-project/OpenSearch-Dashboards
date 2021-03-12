@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { ExpectExpression, expectExpressionProvider } from './helpers';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-// this file showcases how to use testing utilities defined in helpers.ts together with the kbn_tp_run_pipeline
+// this file showcases how to use testing utilities defined in helpers.ts together with the osd_tp_run_pipeline
 // test plugin to write automated tests for interpreter
 export default function ({
   getService,
@@ -35,16 +35,16 @@ export default function ({
 
     // we should not use this for tests like the ones below. this should be unit tested.
     // - tests against a single function could easily be written as unit tests (and should be)
-    describe('kibana function', () => {
-      it('returns kibana_context', async () => {
-        const result = await expectExpression('returns_kibana_context', 'kibana').getResponse();
-        expect(result).to.have.property('type', 'kibana_context');
+    describe('opensearchDashboards function', () => {
+      it('returns opensearch_dashboards_context', async () => {
+        const result = await expectExpression('returns_opensearch_dashboards_context', 'opensearchDashboards').getResponse();
+        expect(result).to.have.property('type', 'opensearch_dashboards_context');
       });
 
       it('correctly sets timeRange', async () => {
         const result = await expectExpression(
           'correctly_sets_timerange',
-          'kibana',
+          'opensearchDashboards',
           {},
           { timeRange: 'test' }
         ).getResponse();
@@ -54,7 +54,7 @@ export default function ({
 
     // rather we want to use this to do integration tests.
     describe('full expression', () => {
-      const expression = `kibana | kibana_context | esaggs index='logstash-*' aggConfigs='[
+      const expression = `opensearchDashboards | opensearch_dashboards_context | opensearchaggs index='logstash-*' aggConfigs='[
           {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},
           {"id":"2","enabled":true,"type":"terms","schema":"segment","params":
             {"field":"response.raw","size":4,"order":"desc","orderBy":"1"}
@@ -94,7 +94,7 @@ export default function ({
     // possible to retrieve the intermediate result and reuse it in later expressions
     describe('reusing partial results', () => {
       it('does some screenshot comparisons', async () => {
-        const expression = `kibana | kibana_context | esaggs index='logstash-*' aggConfigs='[
+        const expression = `opensearchDashboards | opensearch_dashboards_context | opensearchaggs index='logstash-*' aggConfigs='[
           {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},
           {"id":"2","enabled":true,"type":"terms","schema":"segment","params":
             {"field":"response.raw","size":4,"order":"desc","orderBy":"1"}

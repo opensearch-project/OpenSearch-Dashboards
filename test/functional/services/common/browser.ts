@@ -21,8 +21,8 @@ import { cloneDeepWith } from 'lodash';
 import { Key, Origin } from 'selenium-webdriver';
 // @ts-ignore internal modules are not typed
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
-import { ProvidedType } from '@kbn/test/types/ftr';
-import { modifyUrl } from '@kbn/std';
+import { ProvidedType } from '@osd/test/types/ftr';
+import { modifyUrl } from '@osd/std';
 
 import Jimp from 'jimp';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
@@ -118,7 +118,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public async setScreenshotSize(width: number, height: number) {
       log.debug(`======browser======== setWindowSize ${width} ${height}`);
-      // We really want to set the Kibana app to a specific size without regard to the browser chrome (borders)
+      // We really want to set the OpenSearch Dashboards app to a specific size without regard to the browser chrome (borders)
       // But that means we first need to figure out the display scaling factor.
       // NOTE: None of this is required when running Chrome headless because there's no scaling and no borders.
       await this.setWindowSize(1200, 800);

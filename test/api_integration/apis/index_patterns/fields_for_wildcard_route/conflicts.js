@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('conflicts', () => {
-    before(() => esArchiver.load('index_patterns/conflicts'));
-    after(() => esArchiver.unload('index_patterns/conflicts'));
+    before(() => opensearchArchiver.load('index_patterns/conflicts'));
+    after(() => opensearchArchiver.unload('index_patterns/conflicts'));
 
     it('flags fields with mismatched types as conflicting', () =>
       supertest
@@ -38,7 +38,7 @@ export default function ({ getService }) {
               {
                 name: '@timestamp',
                 type: 'date',
-                esTypes: ['date'],
+                opensearchTypes: ['date'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -46,7 +46,7 @@ export default function ({ getService }) {
               {
                 name: 'number_conflict',
                 type: 'number',
-                esTypes: ['integer', 'float'],
+                opensearchTypes: ['integer', 'float'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -54,7 +54,7 @@ export default function ({ getService }) {
               {
                 name: 'string_conflict',
                 type: 'string',
-                esTypes: ['text', 'keyword'],
+                opensearchTypes: ['text', 'keyword'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: false,
@@ -62,7 +62,7 @@ export default function ({ getService }) {
               {
                 name: 'success',
                 type: 'conflict',
-                esTypes: ['boolean', 'keyword'],
+                opensearchTypes: ['boolean', 'keyword'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: false,

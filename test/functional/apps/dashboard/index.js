@@ -19,25 +19,25 @@
 
 export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   async function loadCurrentData() {
     await browser.setWindowSize(1300, 900);
-    await esArchiver.unload('logstash_functional');
-    await esArchiver.loadIfNeeded('dashboard/current/data');
+    await opensearchArchiver.unload('logstash_functional');
+    await opensearchArchiver.loadIfNeeded('dashboard/current/data');
   }
 
   async function unloadCurrentData() {
-    await esArchiver.unload('dashboard/current/data');
+    await opensearchArchiver.unload('dashboard/current/data');
   }
 
   async function loadLogstash() {
     await browser.setWindowSize(1200, 900);
-    await esArchiver.loadIfNeeded('logstash_functional');
+    await opensearchArchiver.loadIfNeeded('logstash_functional');
   }
 
   async function unloadLogstash() {
-    await esArchiver.unload('logstash_functional');
+    await opensearchArchiver.unload('logstash_functional');
   }
 
   describe('dashboard app', function () {

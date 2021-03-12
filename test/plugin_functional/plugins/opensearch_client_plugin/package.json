@@ -1,0 +1,15 @@
+{
+  "name": "opensearchh_client_plugin",
+  "version": "1.0.0",
+  "opensearchDashboards": {
+    "version": "opensearchDashboards"
+  },
+  "license": "Apache-2.0",
+  "scripts": {
+    "osd": "node ../../../../scripts/osd.js",
+    "build": "rm -rf './target' && tsc"
+  },
+  "devDependencies": {
+    "typescript": "4.0.2"
+  }
+}

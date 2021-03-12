@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const PageObjects = getPageObjects(['common', 'discover', 'share', 'timePicker']);
   const browser = getService('browser');
   const toasts = getService('toasts');
@@ -40,16 +40,16 @@ export default function ({ getService, getPageObjects }) {
       baseUrl = baseUrl.replace(':80', '').replace(':443', '');
       log.debug('New baseUrl = ' + baseUrl);
 
-      // delete .kibana index and update configDoc
-      await kibanaServer.uiSettings.replace({
+      // delete .opensearch-dashboards index and update configDoc
+      await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
 
-      log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      log.debug('load opensearch-dashboards index with default index pattern');
+      await opensearchArchiver.load('discover');
+      await opensearchArchiver.loadIfNeeded('logstash_functional');
 
-      await kibanaServer.uiSettings.replace({
+      await opensearchDashboardsServer.uiSettings.replace({
         'state:storeInSessionStorage': storeStateInSessionStorage,
       });
 
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.share.clickShareTopNavButton();
 
       return async () => {
-        await kibanaServer.uiSettings.replace({
+        await opensearchDashboardsServer.uiSettings.replace({
           'state:storeInSessionStorage': undefined,
         });
       };

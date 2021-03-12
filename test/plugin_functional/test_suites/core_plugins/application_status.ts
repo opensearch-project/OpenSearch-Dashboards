@@ -18,7 +18,7 @@
  */
 
 import Url from 'url';
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import {
   AppNavLinkStatus,
   AppStatus,
@@ -27,11 +27,11 @@ import {
 import { PluginFunctionalProviderContext } from '../../services';
 import '../../plugins/core_app_status/public/types';
 
-const getKibanaUrl = (pathname?: string, search?: string) =>
+const getOpenSearchDashboardsUrl = (pathname?: string, search?: string) =>
   Url.format({
     protocol: 'http:',
-    hostname: process.env.TEST_KIBANA_HOST || 'localhost',
-    port: process.env.TEST_KIBANA_PORT || '5620',
+    hostname: process.env.TEST_OPENSEARCH_DASHBOARDS_HOST || 'localhost',
+    port: process.env.TEST_OPENSEARCH_DASHBOARDS_PORT || '5620',
     pathname,
     search,
   });
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
     it('allows to change the defaultPath of an application', async () => {
       const link = await appsMenu.getLink('App Status');
-      expect(link!.href).to.eql(getKibanaUrl('/app/app_status'));
+      expect(link!.href).to.eql(getOpenSearchDashboardsUrl('/app/app_status'));
 
       await setAppStatus({
         defaultPath: '/arbitrary/path',
@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       await retry.waitFor('link url updated with "defaultPath"', async () => {
         const updatedLink = await appsMenu.getLink('App Status');
-        return updatedLink?.href === getKibanaUrl('/app/app_status/arbitrary/path');
+        return updatedLink?.href === getOpenSearchDashboardsUrl('/app/app_status/arbitrary/path');
       });
 
       await navigateToApp('app_status');

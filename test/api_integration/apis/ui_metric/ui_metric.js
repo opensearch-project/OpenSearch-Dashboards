@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { ReportManager, METRIC_TYPE } from '@kbn/analytics';
+import expect from '@osd/expect';
+import { ReportManager, METRIC_TYPE } from '@osd/analytics';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const opensearch = getService('legacyOpenSearch');
 
   const createStatsMetric = (eventName) => ({
     eventName,
@@ -45,19 +45,19 @@ export default function ({ getService }) {
       const { report } = reportManager.assignReports([uiStatsMetric]);
       await supertest
         .post('/api/ui_metric/report')
-        .set('kbn-xsrf', 'kibana')
+        .set('osd-xsrf', 'opensearch-dashboards')
         .set('content-type', 'application/json')
         .send({ report })
         .expect(200);
 
-      const response = await es.search({ index: '.kibana', q: 'type:ui-metric' });
+      const response = await opensearch.search({ index: '.opensearch-dashboards', q: 'type:ui-metric' });
       const ids = response.hits.hits.map(({ _id }) => _id);
       expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
     });
 
     it('supports multiple events', async () => {
       const reportManager = new ReportManager();
-      const userAgentMetric = createUserAgentMetric('kibana');
+      const userAgentMetric = createUserAgentMetric('opensearchDashboards');
       const uiStatsMetric1 = createStatsMetric('myEvent');
       const hrTime = process.hrtime();
       const nano = hrTime[0] * 1000000000 + hrTime[1];
@@ -70,16 +70,16 @@ export default function ({ getService }) {
       ]);
       await supertest
         .post('/api/ui_metric/report')
-        .set('kbn-xsrf', 'kibana')
+        .set('osd-xsrf', 'opensearch-dashboards')
         .set('content-type', 'application/json')
         .send({ report })
         .expect(200);
 
-      const response = await es.search({ index: '.kibana', q: 'type:ui-metric' });
+      const response = await opensearch.search({ index: '.opensearch-dashboards', q: 'type:ui-metric' });
       const ids = response.hits.hits.map(({ _id }) => _id);
       expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
       expect(ids.includes(`ui-metric:myApp:${uniqueEventName}`)).to.eql(true);
-      expect(ids.includes(`ui-metric:kibana-user_agent:${userAgentMetric.userAgent}`)).to.eql(true);
+      expect(ids.includes(`ui-metric:opensearch-dashboards-user_agent:${userAgentMetric.userAgent}`)).to.eql(true);
     });
   });
 }

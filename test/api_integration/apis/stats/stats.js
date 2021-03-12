@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 const assertStatsAndMetrics = (body) => {
-  expect(body.kibana.name).to.be.a('string');
-  expect(body.kibana.uuid).to.be.a('string');
-  expect(body.kibana.host).to.be.a('string');
-  expect(body.kibana.transport_address).to.be.a('string');
-  expect(body.kibana.version).to.be.a('string');
-  expect(body.kibana.snapshot).to.be.a('boolean');
-  expect(body.kibana.status).to.be('green');
+  expect(body.opensearchDashboards.name).to.be.a('string');
+  expect(body.opensearchDashboards.uuid).to.be.a('string');
+  expect(body.opensearchDashboards.host).to.be.a('string');
+  expect(body.opensearchDashboards.transport_address).to.be.a('string');
+  expect(body.opensearchDashboards.version).to.be.a('string');
+  expect(body.opensearchDashboards.snapshot).to.be.a('boolean');
+  expect(body.opensearchDashboards.status).to.be('green');
 
   expect(body.process.memory.heap.total_bytes).to.be.a('number');
   expect(body.process.memory.heap.used_bytes).to.be.a('number');
@@ -55,11 +55,11 @@ const assertStatsAndMetrics = (body) => {
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
 
-  describe('kibana stats api', () => {
-    before('make sure there are some saved objects', () => esArchiver.load('saved_objects/basic'));
-    after('cleanup saved objects changes', () => esArchiver.unload('saved_objects/basic'));
+  describe('opensearch-dashboards stats api', () => {
+    before('make sure there are some saved objects', () => opensearchArchiver.load('saved_objects/basic'));
+    after('cleanup saved objects changes', () => opensearchArchiver.unload('saved_objects/basic'));
 
     describe('basic', () => {
       it('should return the stats without cluster_uuid with no query string params', () => {
@@ -84,7 +84,7 @@ export default function ({ getService }) {
       });
     });
 
-    // TODO load an es archive and verify the counts in saved object usage info
+    // TODO load an opensearch archive and verify the counts in saved object usage info
     describe('extended', () => {
       it(`should return the stats, cluster_uuid, and usage with 'extended' query string param present`, () => {
         return supertest

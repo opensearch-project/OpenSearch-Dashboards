@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
 
@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       }
 
       /**
-       * Get's part of url scoped to this app (removed kibana's host and app's pathname)
+       * Get's part of url scoped to this app (removed OpenSearch Dashboards's host and app's pathname)
        * @param url - absolute url
        */
       async function getScopedUrl(url: string): Promise<string> {

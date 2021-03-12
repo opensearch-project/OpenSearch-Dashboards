@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { join } from 'path';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('import', () => {
     // mock success results including metadata
@@ -47,10 +47,10 @@ export default function ({ getService }) {
       error: { type },
     });
 
-    describe('with kibana index', () => {
+    describe('with opensearch-dashboards index', () => {
       describe('with basic data existing', () => {
-        before(() => esArchiver.load('saved_objects/basic'));
-        after(() => esArchiver.unload('saved_objects/basic'));
+        before(() => opensearchArchiver.load('saved_objects/basic'));
+        after(() => opensearchArchiver.unload('saved_objects/basic'));
 
         it('should return 415 when no file passed in', async () => {
           await supertest

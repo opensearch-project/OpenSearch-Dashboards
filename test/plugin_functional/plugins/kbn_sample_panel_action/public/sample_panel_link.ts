@@ -27,7 +27,7 @@ export const createSamplePanelLink = (): Action =>
     type: SAMPLE_PANEL_LINK,
     getDisplayName: () => 'Sample panel Link',
     execute: async () => {
-      window.location.href = 'https://example.com/kibana/test';
+      window.location.href = 'https://example.com/opensearch-dashboards/test';
     },
-    getHref: async () => 'https://example.com/kibana/test',
+    getHref: async () => 'https://example.com/opensearch-dashboards/test',
   });

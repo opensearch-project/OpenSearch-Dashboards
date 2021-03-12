@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect/expect.js';
+import expect from '@osd/expect/expect.js';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function ErrorPageProvider({ getPageObjects }: FtrProviderContext) {

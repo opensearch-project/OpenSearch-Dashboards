@@ -19,8 +19,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters, IBasePath, ApplicationStart } from 'kibana/public';
-import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
+import { AppMountParameters, IBasePath, ApplicationStart } from 'opensearch-dashboards/public';
+import { RedirectAppLinks } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 
 const FooApp = ({
   appId,

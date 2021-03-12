@@ -18,18 +18,18 @@
  */
 
 export default function ({ getService, loadTestFile }) {
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('management', function () {
     before(async () => {
-      await esArchiver.unload('logstash_functional');
-      await esArchiver.load('empty_kibana');
-      await esArchiver.loadIfNeeded('makelogs');
+      await opensearchArchiver.unload('logstash_functional');
+      await opensearchArchiver.load('empty_opensearch_dashboards');
+      await opensearchArchiver.loadIfNeeded('makelogs');
     });
 
     after(async () => {
-      await esArchiver.unload('makelogs');
-      await esArchiver.unload('empty_kibana');
+      await opensearchArchiver.unload('makelogs');
+      await opensearchArchiver.unload('empty_opensearch_dashboards');
     });
 
     describe('', function () {
@@ -39,7 +39,7 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_index_pattern_create_delete'));
       loadTestFile(require.resolve('./_index_pattern_results_sort'));
       loadTestFile(require.resolve('./_index_pattern_popularity'));
-      loadTestFile(require.resolve('./_kibana_settings'));
+      loadTestFile(require.resolve('./_opensearch_dashboards_settings'));
       loadTestFile(require.resolve('./_scripted_fields'));
       loadTestFile(require.resolve('./_scripted_fields_preview'));
       loadTestFile(require.resolve('./_mgmt_import_saved_objects'));

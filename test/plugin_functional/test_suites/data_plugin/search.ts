@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
@@ -49,7 +49,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       it('create()', async () => {
         await supertest
           .post('/api/data_search_plugin/search_source/create')
-          .set('kbn-xsrf', 'anything')
+          .set('osd-xsrf', 'anything')
           .send(searchSourceFields)
           .expect(200)
           .expect(({ body }) => {

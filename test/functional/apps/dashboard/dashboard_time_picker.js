@@ -18,7 +18,7 @@
  */
 
 import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'timePicker']);
   const browser = getService('browser');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
   describe('dashboard time picker', function describeIndexTests() {
     before(async function () {
@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async () => {
-      await kibanaServer.uiSettings.replace({});
+      await opensearchDashboardsServer.uiSettings.replace({});
       await browser.refresh();
     });
 
@@ -77,15 +77,15 @@ export default function ({ getService, getPageObjects }) {
       });
       log.debug('added saved search');
       const currentUrl = await browser.getCurrentUrl();
-      const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
+      const opensearchDashboardsBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
       const urlQuery =
         `/create?` +
         `_g=(refreshInterval:(pause:!t,value:2000),` +
         `time:(from:'2012-11-17T00:00:00.000Z',mode:absolute,to:'2015-11-17T18:01:36.621Z'))&` +
         `_a=(description:'',filters:!()` +
         `)`;
-      log.debug('go to url' + `${kibanaBaseUrl}#${urlQuery}`);
-      await browser.get(`${kibanaBaseUrl}#${urlQuery}`, true);
+      log.debug('go to url' + `${opensearchDashboardsBaseUrl}#${urlQuery}`);
+      await browser.get(`${opensearchDashboardsBaseUrl}#${urlQuery}`, true);
       await PageObjects.header.waitUntilLoadingHasFinished();
       const time = await PageObjects.timePicker.getTimeConfig();
       const refresh = await PageObjects.timePicker.getRefreshConfig();
@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('Timepicker respects dateFormat from UI settings', async () => {
-      await kibanaServer.uiSettings.replace({ dateFormat: 'YYYY-MM-DD HH:mm:ss.SSS' });
+      await opensearchDashboardsServer.uiSettings.replace({ dateFormat: 'YYYY-MM-DD HH:mm:ss.SSS' });
       await browser.refresh();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();

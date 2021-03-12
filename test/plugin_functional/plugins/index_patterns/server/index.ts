@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializer } from 'kibana/server';
+import { PluginInitializer } from 'opensearch-dashboards/server';
 import {
   IndexPatternsTestPlugin,
   IndexPatternsTestPluginSetup,

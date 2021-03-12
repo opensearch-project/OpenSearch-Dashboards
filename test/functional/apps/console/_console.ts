@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const DEFAULT_REQUEST = `
@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show the default request', async () => {
       // collapse the help pane because we only get the VISIBLE TEXT, not the part that is scrolled
-      // on IE11, the dialog that says 'Your browser does not meet the security requirements for Kibana.'
+      // on IE11, the dialog that says 'Your browser does not meet the security requirements for OpenSearch Dashboards '
       // blocks the close help button for several seconds so just retry until we can click it.
       await retry.try(async () => {
         await PageObjects.console.collapseHelp();

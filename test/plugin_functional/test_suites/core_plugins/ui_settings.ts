@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 import '../../plugins/core_provider_plugin/types';
 

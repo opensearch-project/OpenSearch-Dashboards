@@ -24,24 +24,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('Insecure Cluster Warning', () => {
     before(async () => {
       await pageObjects.common.navigateToApp('home');
       await browser.setLocalStorageItem('insecureClusterWarningVisibility', '');
       // starting without user data
-      await esArchiver.unload('hamlet');
+      await opensearchArchiver.unload('hamlet');
     });
 
     after(async () => {
-      await esArchiver.unload('hamlet');
+      await opensearchArchiver.unload('hamlet');
     });
 
     describe('without user data', () => {
       before(async () => {
         await browser.setLocalStorageItem('insecureClusterWarningVisibility', '');
-        await esArchiver.unload('hamlet');
+        await opensearchArchiver.unload('hamlet');
       });
 
       it('should not warn when the cluster contains no user data', async () => {
@@ -58,11 +58,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await pageObjects.common.navigateToApp('home');
         await browser.setLocalStorageItem('insecureClusterWarningVisibility', '');
-        await esArchiver.load('hamlet');
+        await opensearchArchiver.load('hamlet');
       });
 
       after(async () => {
-        await esArchiver.unload('hamlet');
+        await opensearchArchiver.unload('hamlet');
       });
 
       it('should warn about an insecure cluster, and hide when dismissed', async () => {

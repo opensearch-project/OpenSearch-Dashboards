@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('query params', () => {
-    before(() => esArchiver.load('index_patterns/daily_index'));
-    after(() => esArchiver.unload('index_patterns/daily_index'));
+    before(() => opensearchArchiver.load('index_patterns/daily_index'));
+    after(() => opensearchArchiver.unload('index_patterns/daily_index'));
 
     it('requires `pattern` query param', () =>
       supertest

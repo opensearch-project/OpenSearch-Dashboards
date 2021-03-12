@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import testSubjSelector from '@kbn/test-subj-selector';
+import testSubjSelector from '@osd/test-subj-selector';
 import { map as mapAsync } from 'bluebird';
-import { ProvidedType } from '@kbn/test/types/ftr';
+import { ProvidedType } from '@osd/test/types/ftr';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

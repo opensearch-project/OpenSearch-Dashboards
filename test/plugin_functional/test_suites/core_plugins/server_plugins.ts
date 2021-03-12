@@ -30,7 +30,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     it('extend request handler context with validation', async () => {
       await supertest
         .post('/core_plugin_b')
-        .set('kbn-xsrf', 'anything')
+        .set('osd-xsrf', 'anything')
         .query({ id: 'TEST' })
         .send({ bar: 'hi!', baz: 'hi!' })
         .expect(200)
@@ -40,7 +40,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     it('extend request handler context with validation (400)', async () => {
       await supertest
         .post('/core_plugin_b')
-        .set('kbn-xsrf', 'anything')
+        .set('osd-xsrf', 'anything')
         .query({ id: 'TEST' })
         .send({ bar: 'hi!', baz: 1234 })
         .expect(400)
@@ -51,11 +51,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         });
     });
 
-    it('sets request.isSystemRequest when kbn-system-request header is set', async () => {
+    it('sets request.isSystemRequest when osd-system-request header is set', async () => {
       await supertest
         .post('/core_plugin_b/system_request')
-        .set('kbn-xsrf', 'anything')
-        .set('kbn-system-request', 'true')
+        .set('osd-xsrf', 'anything')
+        .set('osd-system-request', 'true')
         .send()
         .expect(200)
         .expect('System request? true');

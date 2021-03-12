@@ -19,7 +19,7 @@
 
 import path from 'path';
 import fs from 'fs';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@osd/test/types/ftr';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
@@ -35,10 +35,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     services: functionalConfig.get('services'),
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),
-    esTestCluster: functionalConfig.get('esTestCluster'),
+    opensearchTestCluster: functionalConfig.get('opensearchTestCluster'),
     apps: functionalConfig.get('apps'),
-    esArchiver: {
-      directory: path.resolve(__dirname, '../es_archives'),
+    opensearchArchiver: {
+      directory: path.resolve(__dirname, '../opensearch_archives'),
     },
     snapshots: {
       directory: path.resolve(__dirname, 'snapshots'),
@@ -46,10 +46,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'Interpreter Functional Tests',
     },
-    kbnTestServer: {
-      ...functionalConfig.get('kbnTestServer'),
+    osdTestServer: {
+      ...functionalConfig.get('osdTestServer'),
       serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        ...functionalConfig.get('osdTestServer.serverArgs'),
 
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',

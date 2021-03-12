@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
-  const esArchiver = getService('esArchiver');
+  const opensearch = getService('legacyOpenSearch');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   const BULK_REQUESTS = [
     {
@@ -40,9 +40,9 @@ export default function ({ getService }) {
   ];
 
   describe('_bulk_get', () => {
-    describe('with kibana index', () => {
-      before(() => esArchiver.load('saved_objects/basic'));
-      after(() => esArchiver.unload('saved_objects/basic'));
+    describe('with opensearch-dashboards index', () => {
+      before(() => opensearchArchiver.load('saved_objects/basic'));
+      after(() => opensearchArchiver.unload('saved_objects/basic'));
 
       it('should return 200 with individual responses', async () =>
         await supertest
@@ -64,14 +64,14 @@ export default function ({ getService }) {
                     // cheat for some of the more complex attributes
                     visState: resp.body.saved_objects[0].attributes.visState,
                     uiStateJSON: resp.body.saved_objects[0].attributes.uiStateJSON,
-                    kibanaSavedObjectMeta:
-                      resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta,
+                    opensearchDashboardsSavedObjectMeta:
+                      resp.body.saved_objects[0].attributes.opensearchDashboardsSavedObjectMeta,
                   },
                   migrationVersion: resp.body.saved_objects[0].migrationVersion,
                   namespaces: ['default'],
                   references: [
                     {
-                      name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                      name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
                       type: 'index-pattern',
                       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
                     },
@@ -105,12 +105,12 @@ export default function ({ getService }) {
           }));
     });
 
-    describe('without kibana index', () => {
+    describe('without opensearch-dashboards index', () => {
       before(
         async () =>
-          // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana',
+          // just in case the opensearch-dashboards server has recreated it
+          await opensearch.indices.delete({
+            index: '.opensearch-dashboards',
             ignore: [404],
           })
       );

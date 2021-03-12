@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'home', 'settings']);
 
@@ -29,8 +29,8 @@ export default function ({ getService, getPageObjects }) {
 
     const EXPECTED_FIELD_COUNT = '10006';
     before(async function () {
-      await security.testUser.setRoles(['kibana_admin', 'test_testhuge_reader']);
-      await esArchiver.loadIfNeeded('large_fields');
+      await security.testUser.setRoles(['opensearch_dashboards_admin', 'test_testhuge_reader']);
+      await opensearchArchiver.loadIfNeeded('large_fields');
       await PageObjects.settings.createIndexPattern('testhuge', 'date');
     });
 
@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('large_fields');
+      await opensearchArchiver.unload('large_fields');
     });
   });
 }

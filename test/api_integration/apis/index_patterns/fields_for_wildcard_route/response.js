@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { sortBy } from 'lodash';
 
 export default function ({ getService }) {
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const supertest = getService('supertest');
 
   const ensureFieldsAreSorted = (resp) => {
@@ -29,10 +29,10 @@ export default function ({ getService }) {
   };
 
   describe('fields_for_wildcard_route response', () => {
-    before(() => esArchiver.load('index_patterns/basic_index'));
-    after(() => esArchiver.unload('index_patterns/basic_index'));
+    before(() => opensearchArchiver.load('index_patterns/basic_index'));
+    after(() => opensearchArchiver.unload('index_patterns/basic_index'));
 
-    it('returns a flattened version of the fields in es', async () => {
+    it('returns a flattened version of the fields in opensearch', async () => {
       await supertest
         .get('/api/index_patterns/_fields_for_wildcard')
         .query({ pattern: 'basic_index' })
@@ -40,7 +40,7 @@ export default function ({ getService }) {
           fields: [
             {
               type: 'boolean',
-              esTypes: ['boolean'],
+              opensearchTypes: ['boolean'],
               searchable: true,
               aggregatable: true,
               name: 'bar',
@@ -48,7 +48,7 @@ export default function ({ getService }) {
             },
             {
               type: 'string',
-              esTypes: ['text'],
+              opensearchTypes: ['text'],
               searchable: true,
               aggregatable: false,
               name: 'baz',
@@ -56,7 +56,7 @@ export default function ({ getService }) {
             },
             {
               type: 'string',
-              esTypes: ['keyword'],
+              opensearchTypes: ['keyword'],
               searchable: true,
               aggregatable: true,
               name: 'baz.keyword',
@@ -65,7 +65,7 @@ export default function ({ getService }) {
             },
             {
               type: 'number',
-              esTypes: ['long'],
+              opensearchTypes: ['long'],
               searchable: true,
               aggregatable: true,
               name: 'foo',
@@ -73,7 +73,7 @@ export default function ({ getService }) {
             },
             {
               aggregatable: true,
-              esTypes: ['keyword'],
+              opensearchTypes: ['keyword'],
               name: 'nestedField.child',
               readFromDocValues: true,
               searchable: true,
@@ -102,7 +102,7 @@ export default function ({ getService }) {
             {
               aggregatable: true,
               name: '_id',
-              esTypes: ['_id'],
+              opensearchTypes: ['_id'],
               readFromDocValues: false,
               searchable: true,
               type: 'string',
@@ -110,14 +110,14 @@ export default function ({ getService }) {
             {
               aggregatable: false,
               name: '_source',
-              esTypes: ['_source'],
+              opensearchTypes: ['_source'],
               readFromDocValues: false,
               searchable: false,
               type: '_source',
             },
             {
               type: 'boolean',
-              esTypes: ['boolean'],
+              opensearchTypes: ['boolean'],
               searchable: true,
               aggregatable: true,
               name: 'bar',
@@ -126,14 +126,14 @@ export default function ({ getService }) {
             {
               aggregatable: false,
               name: 'baz',
-              esTypes: ['text'],
+              opensearchTypes: ['text'],
               readFromDocValues: false,
               searchable: true,
               type: 'string',
             },
             {
               type: 'string',
-              esTypes: ['keyword'],
+              opensearchTypes: ['keyword'],
               searchable: true,
               aggregatable: true,
               name: 'baz.keyword',
@@ -149,7 +149,7 @@ export default function ({ getService }) {
             },
             {
               type: 'number',
-              esTypes: ['long'],
+              opensearchTypes: ['long'],
               searchable: true,
               aggregatable: true,
               name: 'foo',
@@ -157,7 +157,7 @@ export default function ({ getService }) {
             },
             {
               aggregatable: true,
-              esTypes: ['keyword'],
+              opensearchTypes: ['keyword'],
               name: 'nestedField.child',
               readFromDocValues: true,
               searchable: true,

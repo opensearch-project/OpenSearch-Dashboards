@@ -18,9 +18,9 @@
  */
 
 import {
-  createKibanaSupertestProvider,
-  KibanaSupertestWithoutAuthProvider,
-  ElasticsearchSupertestProvider,
+  createOpenSearchDashboardsSupertestProvider,
+  OpenSearchDashboardsSupertestWithoutAuthProvider,
+  OpenSearchSupertestProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -30,20 +30,20 @@ export default async function ({ readConfigFile }) {
   return {
     services: {
       ...commonConfig.get('services'),
-      supertest: createKibanaSupertestProvider(),
-      supertestWithoutAuth: KibanaSupertestWithoutAuthProvider,
-      esSupertest: ElasticsearchSupertestProvider,
+      supertest: createOpenSearchDashboardsSupertestProvider(),
+      supertestWithoutAuth: OpenSearchDashboardsSupertestWithoutAuthProvider,
+      opensearchSupertest: OpenSearchSupertestProvider,
     },
     servers: commonConfig.get('servers'),
     junit: {
       reportName: 'Integration Tests',
     },
-    esTestCluster: commonConfig.get('esTestCluster'),
-    kbnTestServer: {
-      ...functionalConfig.get('kbnTestServer'),
+    opensearchTestCluster: commonConfig.get('opensearchTestCluster'),
+    osdTestServer: {
+      ...functionalConfig.get('osdTestServer'),
       serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'),
-        '--elasticsearch.healthCheck.delay=3600000',
+        ...functionalConfig.get('osdTestServer.serverArgs'),
+        '--opensearch.healthCheck.delay=3600000',
         '--server.xsrf.disableProtection=true',
       ],
     },

@@ -17,7 +17,7 @@
  * under the License.
  */
 import url from 'url';
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
@@ -31,25 +31,25 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const deployment = getService('deployment');
 
   const loadingScreenNotShown = async () =>
-    expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
+    expect(await testSubjects.exists('osdLoadingMessage')).to.be(false);
 
   const getAppWrapperHeight = async () => {
     const wrapper = await find.byClassName('app-wrapper');
     return (await wrapper.getSize()).height;
   };
 
-  const getKibanaUrl = (pathname?: string, search?: string) =>
+  const getOpenSearchDashboardsUrl = (pathname?: string, search?: string) =>
     url.format({
       protocol: 'http:',
-      hostname: process.env.TEST_KIBANA_HOST || 'localhost',
-      port: process.env.TEST_KIBANA_PORT || '5620',
+      hostname: process.env.TEST_OPENSEARCH_DASHBOARDS_HOST || 'localhost',
+      port: process.env.TEST_OPENSEARCH_DASHBOARDS_PORT || '5620',
       pathname,
       search,
     });
 
   /** Use retry logic to make URL assertions less flaky */
   const waitForUrlToBe = (pathname?: string, search?: string) => {
-    const expectedUrl = getKibanaUrl(pathname, search);
+    const expectedUrl = getOpenSearchDashboardsUrl(pathname, search);
     return retry.waitFor(`Url to be ${expectedUrl}`, async () => {
       return (await browser.getCurrentUrl()) === expectedUrl;
     });

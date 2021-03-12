@@ -10,7 +10,7 @@
   },
   "include": [
     "**/*",
-    "../typings/elastic__node_crypto.d.ts",
+    "../typings/opensearch__node_crypto.d.ts",
     "typings/**/*"
   ],
   "exclude": [
@@ -19,7 +19,7 @@
   ],
   "references": [
     { "path": "../src/core/tsconfig.json" },
-    { "path": "../src/plugins/kibana_utils/tsconfig.json" },
-    { "path": "../src/plugins/kibana_react/tsconfig.json" }
+    { "path": "../src/plugins/opensearch_dashboards_utils/tsconfig.json" },
+    { "path": "../src/plugins/opensearch_dashboards_react/tsconfig.json" }
   ]
 }

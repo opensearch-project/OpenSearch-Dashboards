@@ -21,31 +21,31 @@ import { format as formatUrl } from 'url';
 
 import supertestAsPromised from 'supertest-as-promised';
 
-export function createKibanaSupertestProvider({ certificateAuthorities, kibanaUrl } = {}) {
+export function createOpenSearchDashboardsSupertestProvider({ certificateAuthorities, opensearchDashboardsUrl } = {}) {
   return function ({ getService }) {
     const config = getService('config');
-    kibanaUrl = kibanaUrl ?? formatUrl(config.get('servers.kibana'));
+    opensearchDashboardsUrl = opensearchDashboardsUrl ?? formatUrl(config.get('servers.opensearchDashboards'));
 
     return certificateAuthorities
-      ? supertestAsPromised.agent(kibanaUrl, { ca: certificateAuthorities })
-      : supertestAsPromised(kibanaUrl);
+      ? supertestAsPromised.agent(opensearchDashboardsUrl, { ca: certificateAuthorities })
+      : supertestAsPromised(opensearchDashboardsUrl);
   };
 }
 
-export function KibanaSupertestWithoutAuthProvider({ getService }) {
+export function OpenSearchDashboardsSupertestWithoutAuthProvider({ getService }) {
   const config = getService('config');
-  const kibanaServerConfig = config.get('servers.kibana');
+  const opensearchDashboardsServerConfig = config.get('servers.opensearchDashboards');
 
   return supertestAsPromised(
     formatUrl({
-      ...kibanaServerConfig,
+      ...opensearchDashboardsServerConfig,
       auth: false,
     })
   );
 }
 
-export function ElasticsearchSupertestProvider({ getService }) {
+export function OpenSearchSupertestProvider({ getService }) {
   const config = getService('config');
-  const elasticSearchServerUrl = formatUrl(config.get('servers.elasticsearch'));
+  const elasticSearchServerUrl = formatUrl(config.get('servers.opensearch'));
   return supertestAsPromised(elasticSearchServerUrl);
 }

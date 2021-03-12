@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  describe('kibana status api', () => {
+  describe('opensearch-dashboards status api', () => {
     it('returns version, status and metrics fields', () => {
       return supertest
         .get('/api/status')

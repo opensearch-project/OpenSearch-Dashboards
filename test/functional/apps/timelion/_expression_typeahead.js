@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'timelion', 'settings', 'timePicker']);
@@ -32,12 +32,12 @@ export default function ({ getPageObjects }) {
       await PageObjects.timelion.setExpression('.e');
       const suggestions = await PageObjects.timelion.getSuggestionItemsText();
       expect(suggestions.length).to.eql(2);
-      expect(suggestions[0].includes('.elasticsearch()')).to.eql(true);
-      expect(suggestions[1].includes('.es()')).to.eql(true);
+      expect(suggestions[0].includes('.opensearch()')).to.eql(true);
+      expect(suggestions[1].includes('.opensearch()')).to.eql(true);
     });
 
     it('should show argument suggestions when function suggestion is selected', async () => {
-      await PageObjects.timelion.setExpression('.es');
+      await PageObjects.timelion.setExpression('.opensearch');
       await PageObjects.timelion.clickSuggestion();
       const suggestions = await PageObjects.timelion.getSuggestionItemsText();
       expect(suggestions.length).to.eql(9);
@@ -58,9 +58,9 @@ export default function ({ getPageObjects }) {
     });
 
     describe('dynamic suggestions for argument values', () => {
-      describe('.es()', () => {
+      describe('.opensearch()', () => {
         before(async () => {
-          await PageObjects.timelion.setExpression('.es');
+          await PageObjects.timelion.setExpression('.opensearch');
           await PageObjects.timelion.clickSuggestion();
         });
 

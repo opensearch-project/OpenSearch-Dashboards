@@ -1,0 +1,7 @@
+{
+  "id": "opensearch_client_plugin",
+  "version": "0.0.1",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": true,
+  "ui": false
+}

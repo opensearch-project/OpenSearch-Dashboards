@@ -14,7 +14,7 @@
         "desc"
       ],
       "version": 1,
-      "kibanaSavedObjectMeta": {
+      "opensearchDashboardsSavedObjectMeta": {
         "searchSourceJSON": "{\"index\":\"4c3f3c30-ac94-11e8-a651-614b2788174a\",\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
       }
     }
@@ -29,7 +29,7 @@
       "description": "",
       "savedSearchId": "6aea5700-ac94-11e8-a651-614b2788174a",
       "version": 1,
-      "kibanaSavedObjectMeta": {
+      "opensearchDashboardsSavedObjectMeta": {
         "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
       }
     }

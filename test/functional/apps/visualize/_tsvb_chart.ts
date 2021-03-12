@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
   const retry = getService('retry');
@@ -39,9 +39,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags('includeFirefox');
     beforeEach(async () => {
       await security.testUser.setRoles([
-        'kibana_admin',
+        'opensearch_dashboards_admin',
         'test_logstash_reader',
-        'kibana_sample_admin',
+        'opensearch_dashboards_sample_admin',
       ]);
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisualBuilder();
@@ -118,15 +118,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('switch index patterns', () => {
       beforeEach(async () => {
-        log.debug('Load kibana_sample_data_flights data');
-        await esArchiver.loadIfNeeded('kibana_sample_data_flights');
+        log.debug('Load opensearch_dashboards_sample_data_flights data');
+        await opensearchArchiver.loadIfNeeded('opensearch_dashboards_sample_data_flights');
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
       });
       after(async () => {
         await security.testUser.restoreDefaults();
-        await esArchiver.unload('kibana_sample_data_flights');
+        await opensearchArchiver.unload('opensearch_dashboards_sample_data_flights');
       });
 
       it('should be able to switch between index patterns', async () => {
@@ -138,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         // Sometimes popovers take some time to appear in Firefox (#71979)
         await retry.tryForTime(20000, async () => {
-          await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
+          await PageObjects.visualBuilder.setIndexPatternValue('opensearch_dashboards_sample_data_flights');
           await PageObjects.visualBuilder.waitForIndexPatternTimeFieldOptionsLoaded();
           await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
         });

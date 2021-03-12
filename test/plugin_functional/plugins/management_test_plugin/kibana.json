@@ -1,9 +1,0 @@
-{
-  "id": "management_test_plugin",
-  "version": "0.0.1",
-  "kibanaVersion": "kibana",
-  "configPath": ["management_test_plugin"],
-  "server": false,
-  "ui": true,
-  "requiredPlugins": ["management"]
-}
