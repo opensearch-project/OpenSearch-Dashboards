@@ -54,7 +54,7 @@ describe('AuditTrailService', () => {
         register(auditorFactory);
 
         const { asScoped } = auditTrail.start();
-        const opensearchDashboardsRequest = httpServerMock.opensearchDashboardsRequest();
+        const opensearchDashboardsRequest = httpServerMock.createOpenSearchDashboardsRequest();
         asScoped(opensearchDashboardsRequest);
 
         expect(scopedMock).toHaveBeenCalledWith(opensearchDashboardsRequest);
@@ -73,7 +73,7 @@ describe('AuditTrailService', () => {
         register(auditorFactory);
 
         const { asScoped } = auditTrail.start();
-        const opensearchDashboardsRequest = httpServerMock.opensearchDashboardsRequest();
+        const opensearchDashboardsRequest = httpServerMock.createOpenSearchDashboardsRequest();
         const auditor = asScoped(opensearchDashboardsRequest);
         const message = {
           type: 'foo',
@@ -89,8 +89,8 @@ describe('AuditTrailService', () => {
         auditTrail.setup();
         const { asScoped } = auditTrail.start();
 
-        const rawRequest1 = httpServerMock.opensearchDashboardsRequest();
-        const rawRequest2 = httpServerMock.opensearchDashboardsRequest();
+        const rawRequest1 = httpServerMock.createOpenSearchDashboardsRequest();
+        const rawRequest2 = httpServerMock.createOpenSearchDashboardsRequest();
         expect(asScoped(rawRequest1)).toBe(asScoped(rawRequest1));
         expect(asScoped(rawRequest1)).not.toBe(asScoped(rawRequest2));
       });

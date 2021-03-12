@@ -19,17 +19,17 @@
 import * as osdTestServer from '../../../test_helpers/osd_server';
 import { Root } from '../../root';
 
-const { startES } = osdTestServer.createTestServers({
+const { startOpenSearch } = osdTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
 });
-let esServer: osdTestServer.TestElasticsearchUtils;
+let opensearchServer: osdTestServer.TestOpenSearchUtils;
 
 // FLAKY: https://github.com/elastic/kibana/issues/81072
 describe.skip('default route provider', () => {
   let root: Root;
 
   beforeAll(async () => {
-    esServer = await startES();
+    opensearchServer = await startOpenSearch();
     root = osdTestServer.createRootWithCorePlugins({
       server: {
         basePath: '/hello',
@@ -41,7 +41,7 @@ describe.skip('default route provider', () => {
   });
 
   afterAll(async () => {
-    await esServer.stop();
+    await opensearchServer.stop();
     await root.shutdown();
   });
 
@@ -56,7 +56,7 @@ describe.skip('default route provider', () => {
 
   it('ignores invalid values', async function () {
     const invalidRoutes = [
-      'http://not-your-kibana.com',
+      'http://not-your-opensearch-dashboards.com',
       '///example.com',
       '//example.com',
       ' //example.com',
@@ -64,7 +64,7 @@ describe.skip('default route provider', () => {
 
     for (const url of invalidRoutes) {
       await osdTestServer.request
-        .post(root, '/api/kibana/settings/defaultRoute')
+        .post(root, '/api/opensearch-dashboards/settings/defaultRoute')
         .send({ value: url })
         .expect(400);
     }
@@ -78,7 +78,7 @@ describe.skip('default route provider', () => {
 
   it('consumes valid values', async function () {
     await osdTestServer.request
-      .post(root, '/api/kibana/settings/defaultRoute')
+      .post(root, '/api/opensearch-dashboards/settings/defaultRoute')
       .send({ value: '/valid' })
       .expect(200);
 
