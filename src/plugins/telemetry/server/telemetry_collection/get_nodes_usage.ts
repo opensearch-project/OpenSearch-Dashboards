@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ElasticsearchClient } from 'src/core/server';
+import { OpenSearchClient } from 'src/core/server';
 import { TIMEOUT } from './constants';
 
 export interface NodeAggregation {
@@ -44,7 +44,7 @@ export interface NodesFeatureUsageResponse {
 }
 
 export type NodesUsageGetter = (
-  esClient: ElasticsearchClient
+  opensearchClient: OpenSearchClient
 ) => Promise<{ nodes: NodeObj[] | Array<{}> }>;
 /**
  * Get the nodes usage data from the connected cluster.
@@ -54,9 +54,9 @@ export type NodesUsageGetter = (
  * The Nodes usage API was introduced in v6.0.0
  */
 export async function fetchNodesUsage(
-  esClient: ElasticsearchClient
+  opensearchClient: OpenSearchClient
 ): Promise<NodesFeatureUsageResponse> {
-  const { body } = await esClient.nodes.usage<NodesFeatureUsageResponse>({
+  const { body } = await opensearchClient.nodes.usage<NodesFeatureUsageResponse>({
     timeout: TIMEOUT,
   });
   return body;
@@ -67,8 +67,8 @@ export async function fetchNodesUsage(
  * @param callCluster APICaller
  * @returns Object containing array of modified usage information with the node_id nested within the data for that node.
  */
-export const getNodesUsage: NodesUsageGetter = async (esClient) => {
-  const result = await fetchNodesUsage(esClient);
+export const getNodesUsage: NodesUsageGetter = async (opensearchClient) => {
+  const result = await fetchNodesUsage(opensearchClient);
   const transformedNodes = Object.entries(result?.nodes || {}).map(([key, value]) => ({
     ...(value as NodeObj),
     node_id: key,

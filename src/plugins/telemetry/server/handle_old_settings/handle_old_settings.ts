@@ -26,7 +26,7 @@
  * @return {Boolean} {@code true} if the banner should still be displayed. {@code false} if the banner should not be displayed.
  */
 
-import { IUiSettingsClient, SavedObjectsClientContract } from 'kibana/server';
+import { IUiSettingsClient, SavedObjectsClientContract } from 'opensearch-dashboards/server';
 import { CONFIG_TELEMETRY } from '../../common/constants';
 import { updateTelemetrySavedObject } from '../telemetry_repository';
 

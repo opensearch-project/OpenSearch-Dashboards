@@ -36,7 +36,7 @@
  * under the License.
  */
 
-import { ILegacyClusterClient } from 'kibana/server';
+import { ILegacyClusterClient } from 'opensearch-dashboards/server';
 import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import { IClusterClient } from '../../../../../src/core/server';
 import { getLocalStats } from './get_local_stats';
@@ -45,12 +45,12 @@ import { getLocalLicense } from './get_local_license';
 
 export function registerCollection(
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup,
-  esCluster: ILegacyClusterClient,
-  esClientGetter: () => IClusterClient | undefined
+  opensearchCluster: ILegacyClusterClient,
+  opensearchClientGetter: () => IClusterClient | undefined
 ) {
   telemetryCollectionManager.setCollection({
-    esCluster,
-    esClientGetter,
+    opensearchCluster,
+    opensearchClientGetter,
     title: 'local',
     priority: 0,
     statsGetter: getLocalStats,

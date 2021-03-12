@@ -59,28 +59,28 @@ export class FetcherTask {
   private readonly initialCheckDelayMs = 60 * 1000 * 5;
   private readonly checkIntervalMs = 60 * 1000 * 60 * 12;
   private readonly config$: Observable<TelemetryConfigType>;
-  private readonly currentKibanaVersion: string;
+  private readonly currentOpenSearchDashboardsVersion: string;
   private readonly logger: Logger;
   private intervalId?: Subscription;
   private lastReported?: number;
   private isSending = false;
   private internalRepository?: SavedObjectsClientContract;
   private telemetryCollectionManager?: TelemetryCollectionManagerPluginStart;
-  private elasticsearchClient?: ILegacyCustomClusterClient;
+  private opensearchClient?: ILegacyCustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
     this.config$ = initializerContext.config.create();
-    this.currentKibanaVersion = initializerContext.env.packageInfo.version;
+    this.currentOpenSearchDashboardsVersion = initializerContext.env.packageInfo.version;
     this.logger = initializerContext.logger.get('fetcher');
   }
 
   public start(
-    { savedObjects, elasticsearch }: CoreStart,
+    { savedObjects, opensearch  }: CoreStart,
     { telemetryCollectionManager }: FetcherTaskDepsStart
   ) {
     this.internalRepository = new SavedObjectsClient(savedObjects.createInternalRepository());
     this.telemetryCollectionManager = telemetryCollectionManager;
-    this.elasticsearchClient = elasticsearch.legacy.createClient('telemetry-fetcher');
+    this.opensearchClient = opensearch .legacy.createClient('telemetry-fetcher');
 
     this.intervalId = timer(this.initialCheckDelayMs, this.checkIntervalMs).subscribe(() =>
       this.sendIfDue()
@@ -91,8 +91,8 @@ export class FetcherTask {
     if (this.intervalId) {
       this.intervalId.unsubscribe();
     }
-    if (this.elasticsearchClient) {
-      this.elasticsearchClient.close();
+    if (this.opensearchClient) {
+      this.opensearchClient.close();
     }
   }
 
@@ -150,7 +150,7 @@ export class FetcherTask {
   private async getCurrentConfigs(): Promise<TelemetryConfig> {
     const telemetrySavedObject = await getTelemetrySavedObject(this.internalRepository!);
     const config = await this.config$.pipe(take(1)).toPromise();
-    const currentKibanaVersion = this.currentKibanaVersion;
+    const currentOpenSearchDashboardsVersion = this.currentOpenSearchDashboardsVersion;
     const configTelemetrySendUsageFrom = config.sendUsageFrom;
     const allowChangingOptInStatus = config.allowChangingOptInStatus;
     const configTelemetryOptIn = typeof config.optIn === 'undefined' ? null : config.optIn;
@@ -161,7 +161,7 @@ export class FetcherTask {
 
     return {
       telemetryOptIn: getTelemetryOptIn({
-        currentKibanaVersion,
+        currentOpenSearchDashboardsVersion,
         telemetrySavedObject,
         allowChangingOptInStatus,
         configTelemetryOptIn,
@@ -187,7 +187,7 @@ export class FetcherTask {
   private async updateReportFailure({ failureCount }: { failureCount: number }) {
     updateTelemetrySavedObject(this.internalRepository!, {
       reportFailureCount: failureCount + 1,
-      reportFailureVersion: this.currentKibanaVersion,
+      reportFailureVersion: this.currentOpenSearchDashboardsVersion,
     });
   }
 

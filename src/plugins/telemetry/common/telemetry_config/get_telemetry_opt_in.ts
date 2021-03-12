@@ -22,7 +22,7 @@ import { TelemetrySavedObject } from './types';
 
 interface GetTelemetryOptInConfig {
   telemetrySavedObject: TelemetrySavedObject;
-  currentKibanaVersion: string;
+  currentOpenSearchDashboardsVersion: string;
   allowChangingOptInStatus: boolean;
   configTelemetryOptIn: boolean | null;
 }
@@ -31,7 +31,7 @@ type GetTelemetryOptIn = (config: GetTelemetryOptInConfig) => null | boolean;
 
 export const getTelemetryOptIn: GetTelemetryOptIn = ({
   telemetrySavedObject,
-  currentKibanaVersion,
+  currentOpenSearchDashboardsVersion,
   allowChangingOptInStatus,
   configTelemetryOptIn,
 }) => {
@@ -53,19 +53,19 @@ export const getTelemetryOptIn: GetTelemetryOptIn = ({
   if (savedOptIn === true) return savedOptIn;
 
   // Additional check if they've already opted out (enabled: false):
-  // - if the Kibana version has changed by at least a minor version,
+  // - if the OpenSearch Dashboards version has changed by at least a minor version,
   //   return null to re-prompt.
 
-  const lastKibanaVersion = telemetrySavedObject.lastVersionChecked;
+  const lastOpenSearchDashboardsVersion = telemetrySavedObject.lastVersionChecked;
 
-  // if the last kibana version isn't set, or is somehow not a string, return null
-  if (typeof lastKibanaVersion !== 'string') return null;
+  // if the last OpenSearch Dashboards version isn't set, or is somehow not a string, return null
+  if (typeof lastOpenSearchDashboardsVersion !== 'string') return null;
 
   // if version hasn't changed, just return enabled value
-  if (lastKibanaVersion === currentKibanaVersion) return savedOptIn;
+  if (lastOpenSearchDashboardsVersion === currentOpenSearchDashboardsVersion) return savedOptIn;
 
-  const lastSemver = parseSemver(lastKibanaVersion);
-  const currentSemver = parseSemver(currentKibanaVersion);
+  const lastSemver = parseSemver(lastOpenSearchDashboardsVersion);
+  const currentSemver = parseSemver(currentOpenSearchDashboardsVersion);
 
   // if either version is invalid, return null
   if (lastSemver == null || currentSemver == null) return null;

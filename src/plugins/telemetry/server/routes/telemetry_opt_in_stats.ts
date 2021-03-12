@@ -21,8 +21,8 @@
 import fetch from 'node-fetch';
 import moment from 'moment';
 
-import { IRouter } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
+import { IRouter } from 'opensearch-dashboards/server';
+import { schema } from '@osd/config-schema';
 import {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,

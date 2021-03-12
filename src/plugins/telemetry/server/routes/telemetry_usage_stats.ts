@@ -18,9 +18,9 @@
  */
 
 import moment from 'moment';
-import { schema } from '@kbn/config-schema';
-import { TypeOptions } from '@kbn/config-schema/target/types/types';
-import { IRouter } from 'kibana/server';
+import { schema } from '@osd/config-schema';
+import { TypeOptions } from '@osd/config-schema/target/types/types';
+import { IRouter } from 'opensearch-dashboards/server';
 import {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,

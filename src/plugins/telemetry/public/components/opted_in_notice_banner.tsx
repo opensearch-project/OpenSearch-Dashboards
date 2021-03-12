@@ -21,8 +21,8 @@
 
 import * as React from 'react';
 import { EuiButton, EuiLink, EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 import { PATH_TO_ADVANCED_SETTINGS, PRIVACY_STATEMENT_URL } from '../../common/constants';
 
 interface Props {
@@ -33,7 +33,7 @@ export class OptedInNoticeBanner extends React.PureComponent<Props> {
   render() {
     const { onSeenBanner } = this.props;
     const bannerTitle = i18n.translate('telemetry.telemetryOptedInNoticeTitle', {
-      defaultMessage: 'Help us improve the Elastic Stack',
+      defaultMessage: 'Help us improve the OpenSearch Stack',
     });
 
     return (

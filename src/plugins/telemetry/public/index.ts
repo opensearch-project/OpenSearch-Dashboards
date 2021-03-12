@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from 'opensearch-dashboards/public';
 import { TelemetryPlugin, TelemetryPluginConfig } from './plugin';
 export { TelemetryPluginStart, TelemetryPluginSetup } from './plugin';
 
