@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { createLegacyEsTestCluster } from './legacy_es_test_cluster.js';
-export { esTestConfig } from './es_test_config';
+export { osdTestConfig } from './osd_test_config';
+export { opensearchDashboardsTestUser, opensearchDashboardsServerTestUser, adminTestUser } from './users';

@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { runFailedTestsReporterCli } from './run_failed_tests_reporter_cli';
+export { osdTestConfig } from './osd_test_config';
+export { opensearchDashboardsTestUser, opensearchDashboardsServerTestUser, adminTestUser } from './users';

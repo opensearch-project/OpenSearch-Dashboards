@@ -19,11 +19,11 @@
 
 import url, { format as formatUrl } from 'url';
 import pkg from '../../../../package.json';
-import { adminTestUser } from '../kbn';
+import { adminTestUser } from '../osd';
 
-export const esTestConfig = new (class EsTestConfig {
+export const opensearchTestConfig = new (class OpenSearchTestConfig {
   getVersion() {
-    return process.env.TEST_ES_BRANCH || pkg.version;
+    return process.env.TEST_OPENSEARCH_BRANCH || pkg.version;
   }
 
   getPort() {
@@ -35,37 +35,37 @@ export const esTestConfig = new (class EsTestConfig {
   }
 
   getBuildFrom() {
-    return process.env.TEST_ES_FROM || 'snapshot';
+    return process.env.TEST_OPENSEARCH_FROM || 'snapshot';
   }
 
   getTransportPort() {
-    return process.env.TEST_ES_TRANSPORT_PORT || '9300-9400';
+    return process.env.TEST_OPENSEARCH_TRANSPORT_PORT || '9300-9400';
   }
 
   getUrlParts() {
-    // Allow setting one complete TEST_ES_URL for Es like https://elastic:changeme@myCloudInstance:9200
-    if (process.env.TEST_ES_URL) {
-      const testEsUrl = url.parse(process.env.TEST_ES_URL);
+    // Allow setting one complete TEST_OPENSEARCH_URL for opensearch like https://elastic:changeme@myCloudInstance:9200
+    if (process.env.TEST_OPENSEARCH_URL) {
+      const testOpenSearchUrl = url.parse(process.env.TEST_OPENSEARCH_URL);
       return {
         // have to remove the ":" off protocol
-        protocol: testEsUrl.protocol.slice(0, -1),
-        hostname: testEsUrl.hostname,
-        port: parseInt(testEsUrl.port, 10),
-        username: testEsUrl.auth.split(':')[0],
-        password: testEsUrl.auth.split(':')[1],
-        auth: testEsUrl.auth,
+        protocol: testOpenSearchUrl.protocol.slice(0, -1),
+        hostname: testOpenSearchUrl.hostname,
+        port: parseInt(testOpenSearchUrl.port, 10),
+        username: testOpenSearchUrl.auth.split(':')[0],
+        password: testOpenSearchUrl.auth.split(':')[1],
+        auth: testOpenSearchUrl.auth,
       };
     }
 
-    const username = process.env.TEST_ES_USERNAME || adminTestUser.username;
-    const password = process.env.TEST_ES_PASSWORD || adminTestUser.password;
+    const username = process.env.TEST_OPENSEARCH_USERNAME || adminTestUser.username;
+    const password = process.env.TEST_OPENSEARCH_PASSWORD || adminTestUser.password;
 
     return {
       // Allow setting any individual component(s) of the URL,
-      // or use default values (username and password from ../kbn/users.js)
-      protocol: process.env.TEST_ES_PROTOCOL || 'http',
-      hostname: process.env.TEST_ES_HOSTNAME || 'localhost',
-      port: parseInt(process.env.TEST_ES_PORT, 10) || 9220,
+      // or use default values (username and password from ../osd/users.js)
+      protocol: process.env.TEST_OPENSEARCH_PROTOCOL || 'http',
+      hostname: process.env.TEST_OPENSEARCH_HOSTNAME || 'localhost',
+      port: parseInt(process.env.TEST_OPENSEARCH_PORT, 10) || 9220,
       auth: `${username}:${password}`,
       username: username,
       password: password,
