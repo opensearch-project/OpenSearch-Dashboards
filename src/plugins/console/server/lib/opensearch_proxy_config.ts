@@ -22,9 +22,9 @@ import http from 'http';
 import https from 'https';
 import url from 'url';
 
-import { ESConfigForProxy } from '../types';
+import { OpenSearchConfigForProxy } from '../types';
 
-const createAgent = (legacyConfig: ESConfigForProxy) => {
+const createAgent = (legacyConfig: OpenSearchConfigForProxy) => {
   const target = url.parse(_.head(legacyConfig.hosts) as any);
   if (!/^https/.test(target.protocol || '')) return new http.Agent();
 
@@ -60,7 +60,7 @@ const createAgent = (legacyConfig: ESConfigForProxy) => {
   return new https.Agent(agentOptions);
 };
 
-export const getElasticsearchProxyConfig = (legacyConfig: ESConfigForProxy) => {
+export const getOpenSearchProxyConfig = (legacyConfig: OpenSearchConfigForProxy) => {
   return {
     timeout: legacyConfig.requestTimeout.asMilliseconds(),
     agent: createAgent(legacyConfig),

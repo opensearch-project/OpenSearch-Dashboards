@@ -18,5 +18,5 @@
  */
 
 export interface PluginServerConfig {
-  elasticsearchUrl: string;
+  opensearchUrl: string;
 }

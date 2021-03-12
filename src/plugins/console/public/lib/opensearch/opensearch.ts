@@ -20,10 +20,10 @@
 import $ from 'jquery';
 import { stringify } from 'query-string';
 
-const esVersion: string[] = [];
+const opensearchVersion: string[] = [];
 
 export function getVersion() {
-  return esVersion;
+  return opensearchVersion;
 }
 
 export function getContentType(body: any) {
@@ -37,7 +37,7 @@ export function send(method: string, path: string, data: any) {
   const options: JQuery.AjaxSettings = {
     url: '../api/console/proxy?' + stringify({ path, method }, { sort: false }),
     headers: {
-      'kbn-xsrf': 'kibana',
+      'osd-xsrf': 'opensearchDashboards',
     },
     data,
     contentType: getContentType(data),
@@ -54,7 +54,7 @@ export function send(method: string, path: string, data: any) {
     ((jqXHR: any, textStatus: string, errorThrown: Error) => {
       if (jqXHR.status === 0) {
         jqXHR.responseText =
-          "\n\nFailed to connect to Console's backend.\nPlease check the Kibana server is up and running";
+          "\n\nFailed to connect to Console's backend.\nPlease check the OpenSearch Dashboards server is up and running";
       }
       wrappedDfd.rejectWith({}, [jqXHR, textStatus, errorThrown]);
     }) as any
@@ -62,7 +62,7 @@ export function send(method: string, path: string, data: any) {
   return wrappedDfd;
 }
 
-export function constructESUrl(baseUri: string, path: string) {
+export function constructOpenSearchUrl(baseUri: string, path: string) {
   baseUri = baseUri.replace(/\/+$/, '');
   path = path.replace(/^\/+/, '');
   return baseUri + '/' + path;

@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { kibanaResponseFactory } from '../../../../../../../../core/server';
+import { opensearchDashboardsResponseFactory } from '../../../../../../../../core/server';
 import { getProxyRouteHandlerDeps } from './mocks';
 import { createResponseStub } from './stubs';
 import * as requestModule from '../../../../../lib/proxy_request';
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 import { createHandler } from '../create_handler';
 
@@ -42,7 +42,7 @@ describe('Console Proxy Route', () => {
           const { status } = await handler(
             {} as any,
             { query: { method: 'POST', path: '/baz/id' } } as any,
-            kibanaResponseFactory
+            opensearchDashboardsResponseFactory
           );
 
           expect(status).to.be(403);
@@ -59,7 +59,7 @@ describe('Console Proxy Route', () => {
           const { status } = await handler(
             {} as any,
             { headers: {}, query: { method: 'POST', path: '/foo/id' } } as any,
-            kibanaResponseFactory
+            opensearchDashboardsResponseFactory
           );
 
           expect(status).to.be(200);
@@ -77,7 +77,7 @@ describe('Console Proxy Route', () => {
           const { status } = await handler(
             {} as any,
             { headers: {}, query: { method: 'GET', path: '/foo/id' } } as any,
-            kibanaResponseFactory
+            opensearchDashboardsResponseFactory
           );
 
           expect(status).to.be(200);

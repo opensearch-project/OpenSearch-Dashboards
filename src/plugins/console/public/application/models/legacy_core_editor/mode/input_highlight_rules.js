@@ -18,7 +18,7 @@
  */
 
 import ace from 'brace';
-import { addXJsonToRules } from '@kbn/ace';
+import { addXJsonToRules } from '@osd/ace';
 
 export function addEOL(tokens, reg, nextIfEOL, normalNext) {
   if (typeof reg === 'object') {

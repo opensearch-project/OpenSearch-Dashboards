@@ -19,11 +19,11 @@
 
 import _ from 'lodash';
 import RowParser from '../../../lib/row_parser';
-import { XJson } from '../../../../../es_ui_shared/public';
+import { XJson } from '../../../../../opensearch_ui_shared/public';
 import * as utils from '../../../lib/utils';
 
 // @ts-ignore
-import * as es from '../../../lib/es/es';
+import * as opensearch from '../../../lib/opensearch/opensearch';
 
 import { CoreEditor, Position, Range } from '../../../types';
 import { createTokenIterator } from '../../factories';
@@ -467,7 +467,7 @@ export class SenseEditor {
     this.updateActionsBar();
   }, 25);
 
-  getRequestsAsCURL = async (elasticsearchBaseUrl: string, range?: Range): Promise<string> => {
+  getRequestsAsCURL = async (opensearchBaseUrl: string, range?: Range): Promise<string> => {
     const requests = await this.getRequestsInRange(range, true);
     const result = _.map(requests, (req) => {
       if (typeof req === 'string') {
@@ -475,21 +475,21 @@ export class SenseEditor {
         return req;
       }
 
-      const esPath = req.url;
-      const esMethod = req.method;
-      const esData = req.data;
+      const opensearchPath = req.url;
+      const opensearchMethod = req.method;
+      const opensearchData = req.data;
 
-      // this is the first url defined in elasticsearch.hosts
-      const url = es.constructESUrl(elasticsearchBaseUrl, esPath);
+      // this is the first url defined in opensearch.hosts
+      const url = opensearch.constructOpenSearchUrl(opensearchBaseUrl, opensearchPath);
 
-      let ret = 'curl -X' + esMethod + ' "' + url + '"';
-      if (esData && esData.length) {
+      let ret = 'curl -X' + opensearchMethod + ' "' + url + '"';
+      if (opensearchData && opensearchData.length) {
         ret += " -H 'Content-Type: application/json' -d'\n";
-        const dataAsString = collapseLiteralStrings(esData.join('\n'));
+        const dataAsString = collapseLiteralStrings(opensearchData.join('\n'));
 
         // We escape single quoted strings that that are wrapped in single quoted strings
         ret += dataAsString.replace(/'/g, "'\\''");
-        if (esData.length > 1) {
+        if (opensearchData.length > 1) {
           ret += '\n';
         } // end with a new line
         ret += "'";

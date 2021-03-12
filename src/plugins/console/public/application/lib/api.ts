@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { HttpSetup } from 'kibana/public';
-import { EsConfigApiResponse } from '../../../common/types/api_responses';
+import { HttpSetup } from 'opensearch-dashboards/public';
+import { OpenSearchConfigApiResponse } from '../../../common/types/api_responses';
 import { sendRequest } from '../../shared_imports';
 
 interface Dependencies {
@@ -29,9 +29,9 @@ export type Api = ReturnType<typeof createApi>;
 
 export const createApi = ({ http }: Dependencies) => {
   return {
-    getEsConfig: () => {
-      return sendRequest<EsConfigApiResponse>(http, {
-        path: '/api/console/es_config',
+    getOpenSearchConfig: () => {
+      return sendRequest<OpenSearchConfigApiResponse>(http, {
+        path: '/api/console/opensearch_config',
         method: 'get',
       });
     },

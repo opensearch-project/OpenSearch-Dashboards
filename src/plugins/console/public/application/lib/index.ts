@@ -18,4 +18,4 @@
  */
 
 export { createApi, Api } from './api';
-export { createEsHostService, EsHostService } from './es_host_service';
+export { createOpenSearchHostService, OpenSearchHostService } from './opensearch_host_service';

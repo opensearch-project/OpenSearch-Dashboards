@@ -21,18 +21,18 @@ import { Reducer } from 'react';
 import { produce } from 'immer';
 import { identity } from 'fp-ts/lib/function';
 import { BaseResponseType } from '../../types/common';
-import { ESRequestResult } from '../hooks/use_send_current_request_to_es/send_request_to_es';
+import { OpenSearchRequestResult } from '../hooks/use_send_current_request_to_opensearch/send_request_to_opensearch';
 
 export type Actions =
   | { type: 'sendRequest'; payload: undefined }
-  | { type: 'requestSuccess'; payload: { data: ESRequestResult[] } }
-  | { type: 'requestFail'; payload: ESRequestResult<string> | undefined };
+  | { type: 'requestSuccess'; payload: { data: OpenSearchRequestResult[] } }
+  | { type: 'requestFail'; payload: OpenSearchRequestResult<string> | undefined };
 
 export interface Store {
   requestInFlight: boolean;
   lastResult: {
-    data: ESRequestResult[] | null;
-    error?: ESRequestResult<string>;
+    data: OpenSearchRequestResult[] | null;
+    error?: OpenSearchRequestResult<string>;
   };
 }
 
