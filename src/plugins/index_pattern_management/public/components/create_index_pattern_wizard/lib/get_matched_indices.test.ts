@@ -26,23 +26,23 @@ jest.mock('./../constants', () => ({
 
 const tags: Tag[] = [];
 const indices = [
-  { name: 'kibana', tags },
-  { name: 'es', tags },
+  { name: 'opensearch-dashboards', tags },
+  { name: 'opensearch', tags },
   { name: 'logstash', tags },
   { name: 'packetbeat', tags },
   { name: 'metricbeat', tags },
-  { name: '.kibana', tags },
+  { name: '.opensearch-dashboards', tags },
 ] as MatchedItem[];
 
 const partialIndices = [
-  { name: 'kibana', tags },
-  { name: 'es', tags },
-  { name: '.kibana', tags },
+  { name: 'opensearch-dashboards', tags },
+  { name: 'opensearch', tags },
+  { name: '.opensearch-dashboards', tags },
 ] as MatchedItem[];
 
 const exactIndices = [
-  { name: 'kibana', tags },
-  { name: '.kibana', tags },
+  { name: 'opensearch-dashboards', tags },
+  { name: '.opensearch-dashboards', tags },
 ] as MatchedItem[];
 
 describe('getMatchedIndices', () => {
@@ -55,28 +55,28 @@ describe('getMatchedIndices', () => {
     } = getMatchedIndices(indices, partialIndices, exactIndices, true);
 
     expect(allIndices).toEqual([
-      { name: 'kibana', tags },
-      { name: 'es', tags },
+      { name: 'opensearch-dashboards', tags },
+      { name: 'opensearch', tags },
       { name: 'logstash', tags },
       { name: 'packetbeat', tags },
       { name: 'metricbeat', tags },
-      { name: '.kibana', tags },
+      { name: '.opensearch-dashboards', tags },
     ]);
 
     expect(exactMatchedIndices).toEqual([
-      { name: 'kibana', tags },
-      { name: '.kibana', tags },
+      { name: 'opensearch-dashboards', tags },
+      { name: '.opensearch-dashboards', tags },
     ]);
 
     expect(partialMatchedIndices).toEqual([
-      { name: 'kibana', tags },
-      { name: 'es', tags },
-      { name: '.kibana', tags },
+      { name: 'opensearch-dashboards', tags },
+      { name: 'opensearch', tags },
+      { name: '.opensearch-dashboards', tags },
     ]);
 
     expect(visibleIndices).toEqual([
-      { name: 'kibana', tags },
-      { name: '.kibana', tags },
+      { name: 'opensearch-dashboards', tags },
+      { name: '.opensearch-dashboards', tags },
     ]);
   });
 
@@ -89,30 +89,30 @@ describe('getMatchedIndices', () => {
     } = getMatchedIndices(indices, partialIndices, exactIndices, false);
 
     expect(allIndices).toEqual([
-      { name: 'kibana', tags },
-      { name: 'es', tags },
+      { name: 'opensearch-dashboards', tags },
+      { name: 'opensearch', tags },
       { name: 'logstash', tags },
       { name: 'packetbeat', tags },
       { name: 'metricbeat', tags },
     ]);
 
-    expect(exactMatchedIndices).toEqual([{ name: 'kibana', tags }]);
+    expect(exactMatchedIndices).toEqual([{ name: 'opensearch-dashboards', tags }]);
 
     expect(partialMatchedIndices).toEqual([
-      { name: 'kibana', tags },
-      { name: 'es', tags },
+      { name: 'opensearch-dashboards', tags },
+      { name: 'opensearch', tags },
     ]);
 
-    expect(visibleIndices).toEqual([{ name: 'kibana', tags }]);
+    expect(visibleIndices).toEqual([{ name: 'opensearch-dashboards', tags }]);
   });
 
   it('should return partial matches as visible if there are no exact', () => {
     const { visibleIndices } = getMatchedIndices(indices, partialIndices, [], true);
 
     expect(visibleIndices).toEqual([
-      { name: 'kibana', tags },
-      { name: 'es', tags },
-      { name: '.kibana', tags },
+      { name: 'opensearch-dashboards', tags },
+      { name: 'opensearch', tags },
+      { name: '.opensearch-dashboards', tags },
     ]);
   });
 

@@ -21,11 +21,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch, Route } from 'react-router-dom';
 
-import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { I18nProvider } from '@osd/i18n/react';
 import { StartServicesAccessor } from 'src/core/public';
 
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import {
   IndexPatternTableWithRouter,
@@ -78,7 +78,7 @@ export async function mountManagementSection(
   };
 
   ReactDOM.render(
-    <KibanaContextProvider services={deps}>
+    <OpenSearchDashboardsContextProvider services={deps}>
       <I18nProvider>
         <Router history={params.history}>
           <Switch>
@@ -97,7 +97,7 @@ export async function mountManagementSection(
           </Switch>
         </Router>
       </I18nProvider>
-    </KibanaContextProvider>,
+    </OpenSearchDashboardsContextProvider>,
     params.element
   );
 

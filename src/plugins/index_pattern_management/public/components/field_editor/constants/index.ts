@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { getKbnTypeNames } from '../../../../../data/public';
+import { getOsdTypeNames } from '../../../../../data/public';
 
 export const FIELD_TYPES_BY_LANG = {
   painless: ['number', 'string', 'date', 'boolean'],
   expression: ['number'],
 };
 
-export const DEFAULT_FIELD_TYPES = getKbnTypeNames();
+export const DEFAULT_FIELD_TYPES = getOsdTypeNames();

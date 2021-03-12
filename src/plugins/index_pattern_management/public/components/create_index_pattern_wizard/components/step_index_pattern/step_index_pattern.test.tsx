@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { SavedObjectsFindResponsePublic } from 'kibana/public';
+import { SavedObjectsFindResponsePublic } from 'opensearch-dashboards/public';
 import { StepIndexPattern, canPreselectTimeField } from './step_index_pattern';
 import { Header } from './components/header';
 import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
@@ -37,17 +37,17 @@ const mockIndexPatternCreationType = new IndexPatternCreationConfig({
 
 jest.mock('../../lib/get_indices', () => ({
   getIndices: ({ pattern }: { pattern: string }) => {
-    if (pattern.startsWith('e')) {
-      return [{ name: 'es', item: {} }];
+    if (pattern.startsWith('o')) {
+      return [{ name: 'opensearch', item: {} }];
     }
 
-    return [{ name: 'kibana', item: {} }];
+    return [{ name: 'opensearch-dashboards', item: {} }];
   },
 }));
 
 const allIndices = [
-  { name: 'kibana', tags: [], item: {} },
-  { name: 'es', tags: [], item: {} },
+  { name: 'opensearch-dashboards', tags: [], item: {} },
+  { name: 'opensearch', tags: [], item: {} },
 ];
 
 const goToNextStep = () => {};
@@ -82,7 +82,7 @@ describe('StepIndexPattern', () => {
         isIncludingSystemIndices: false,
         goToNextStep,
         indexPatternCreationType: mockIndexPatternCreationType,
-        initialQuery: 'kibana',
+        initialQuery: 'opensearch-dashboards',
       },
       mockContext
     );
@@ -132,7 +132,7 @@ describe('StepIndexPattern', () => {
       mockContext
     );
     const instance = component.instance() as StepIndexPattern;
-    instance.onQueryChanged({ target: { value: 'k' } } as React.ChangeEvent<HTMLInputElement>);
+    instance.onQueryChanged({ target: { value: 'o' } } as React.ChangeEvent<HTMLInputElement>);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -156,8 +156,8 @@ describe('StepIndexPattern', () => {
       mockContext
     );
     const instance = component.instance() as StepIndexPattern;
-    instance.onQueryChanged({ target: { value: 'k' } } as React.ChangeEvent<HTMLInputElement>);
-    expect(component.state('query')).toBe('k*');
+    instance.onQueryChanged({ target: { value: 'o' } } as React.ChangeEvent<HTMLInputElement>);
+    expect(component.state('query')).toBe('o*');
   });
 
   it('disables the next step if the index pattern exists', async () => {
@@ -187,21 +187,21 @@ describe('StepIndexPattern', () => {
       mockContext
     );
     const instance = component.instance() as StepIndexPattern;
-    instance.onQueryChanged({ target: { value: 'e' } } as React.ChangeEvent<HTMLInputElement>);
-    instance.lastQuery = 'k';
+    instance.onQueryChanged({ target: { value: 'o' } } as React.ChangeEvent<HTMLInputElement>);
+    instance.lastQuery = 'o';
     await new Promise((resolve) => process.nextTick(resolve));
 
     // Honesty, the state would match the result of the `k` query but
     // it's hard to mock this in tests but if remove our fix
     // (the early return if the queries do not match) then this
-    // equals [{name: 'es'}]
+    // equals [{name: 'opensearch'}]
     expect(component.state('exactMatchedIndices')).toEqual([]);
 
     // Ensure it works in the other code flow too (the other early return)
 
-    // Provide `es` so we do not auto append * and enter our other code flow
-    instance.onQueryChanged({ target: { value: 'es' } } as React.ChangeEvent<HTMLInputElement>);
-    instance.lastQuery = 'k';
+    // Provide `opensearch` so we do not auto append * and enter our other code flow
+    instance.onQueryChanged({ target: { value: 'opensearch' } } as React.ChangeEvent<HTMLInputElement>);
+    instance.lastQuery = 'o';
     await new Promise((resolve) => process.nextTick(resolve));
     expect(component.state('exactMatchedIndices')).toEqual([]);
   });

@@ -20,7 +20,7 @@
 import React from 'react';
 
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 interface CallOutsProps {
   deprecatedLangsInUse: string[];
@@ -48,7 +48,7 @@ export const CallOuts = ({ deprecatedLangsInUse, painlessDocLink }: CallOutsProp
           <FormattedMessage
             id="indexPatternManagement.editIndexPattern.scripted.deprecationLangLabel.deprecationLangDetail"
             defaultMessage="The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be
-            removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to {link} to avoid any problems."
+            removed in the next major version of OpenSearch Dashboards and OpenSearch. Convert you scripted fields to {link} to avoid any problems."
             values={{
               deprecatedLangsInUse: deprecatedLangsInUse.join(', '),
               link: (

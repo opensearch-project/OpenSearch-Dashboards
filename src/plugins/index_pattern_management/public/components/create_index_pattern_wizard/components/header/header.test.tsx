@@ -20,9 +20,9 @@
 import React from 'react';
 import { Header } from '../header';
 import { mount } from 'enzyme';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { mockManagementPlugin } from '../../../../mocks';
-import { DocLinksStart } from 'kibana/public';
+import { DocLinksStart } from 'opensearch-dashboards/public';
 
 describe('Header', () => {
   const indexPatternName = 'test index pattern';
@@ -37,7 +37,7 @@ describe('Header', () => {
     const component = mount(
       <Header indexPatternName={indexPatternName} docLinks={mockedDocLinks} />,
       {
-        wrappingComponent: KibanaContextProvider,
+        wrappingComponent: OpenSearchDashboardsContextProvider,
         wrappingComponentProps: {
           services: mockedContext,
         },
@@ -51,7 +51,7 @@ describe('Header', () => {
     const component = mount(
       <Header indexPatternName={indexPatternName} docLinks={mockedDocLinks} />,
       {
-        wrappingComponent: KibanaContextProvider,
+        wrappingComponent: OpenSearchDashboardsContextProvider,
         wrappingComponentProps: {
           services: mockedContext,
         },
@@ -70,7 +70,7 @@ describe('Header', () => {
         docLinks={mockedDocLinks}
       />,
       {
-        wrappingComponent: KibanaContextProvider,
+        wrappingComponent: OpenSearchDashboardsContextProvider,
         wrappingComponentProps: {
           services: mockedContext,
         },

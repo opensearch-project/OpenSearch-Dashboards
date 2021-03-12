@@ -18,7 +18,7 @@
  */
 
 import { Dictionary, countBy, defaults, uniq } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { IndexPattern, IndexPatternField } from '../../../../../../plugins/data/public';
 import { IndexPatternManagementStart } from '../../../../../../plugins/index_pattern_management/public';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
@@ -44,8 +44,8 @@ function getCounts(
     scripted: 0,
     sourceFilters: sourceFilters.excludes
       ? sourceFilters.excludes.filter((value) =>
-          value.toLowerCase().includes(fieldFilter.toLowerCase())
-        ).length
+        value.toLowerCase().includes(fieldFilter.toLowerCase())
+      ).length
       : 0,
   });
 
@@ -71,11 +71,10 @@ function getTitle(type: string, filteredCount: Dictionary<number>, totalCount: D
       });
       break;
   }
-  const count = ` (${
-    filteredCount[type] === totalCount[type]
+  const count = ` (${filteredCount[type] === totalCount[type]
       ? filteredCount[type]
       : filteredCount[type] + ' / ' + totalCount[type]
-  })`;
+    })`;
   return title + count;
 }
 
@@ -138,11 +137,11 @@ export function convertToEuiSelectOption(options: string[], type: string) {
   const euiOptions =
     options.length > 0
       ? [
-          {
-            value: '',
-            text: type === 'scriptedFieldLanguages' ? allLangsDropDown : allTypesDropDown,
-          },
-        ]
+        {
+          value: '',
+          text: type === 'scriptedFieldLanguages' ? allLangsDropDown : allTypesDropDown,
+        },
+      ]
       : [];
   return euiOptions.concat(
     uniq(options).map((option) => {

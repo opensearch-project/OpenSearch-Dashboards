@@ -21,9 +21,9 @@ import React, { Fragment } from 'react';
 
 import { EuiCallOut, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
-import { useKibana } from '../../../../../../../plugins/kibana_react/public';
+import { useOpenSearchDashboards } from '../../../../../../../plugins/opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../../../types';
 
 export interface ScriptingWarningCallOutProps {
@@ -31,7 +31,7 @@ export interface ScriptingWarningCallOutProps {
 }
 
 export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningCallOutProps) => {
-  const docLinksScriptedFields = useKibana<IndexPatternManagmentContext>().services.docLinks?.links
+  const docLinksScriptedFields = useOpenSearchDashboards<IndexPatternManagmentContext>().services.docLinks?.links
     .scriptedFields;
   return isVisible ? (
     <Fragment>
@@ -77,7 +77,7 @@ export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningC
           <FormattedMessage
             id="indexPatternManagement.warningCallOut.descriptionLabel"
             defaultMessage="Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and
-            if done incorrectly, can cause Kibana to be unusable. There's no safety net here. If you make a typo, unexpected exceptions
+            if done incorrectly, can cause OpenSearch Dashboards to be unusable. There's no safety net here. If you make a typo, unexpected exceptions
             will be thrown all over the place!"
           />
         </p>
