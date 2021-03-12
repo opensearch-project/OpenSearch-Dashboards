@@ -69,7 +69,7 @@ describe('GET /api/status', () => {
           dist: true,
           version: '9.9.9-SNAPSHOT',
         },
-        serverName: 'xkibana',
+        serverName: 'xopensearchDashboards',
         uuid: 'xxxx-xxxxx',
       },
       metrics,
@@ -123,7 +123,7 @@ describe('GET /api/status', () => {
     await setupServer();
     const result = await supertest(httpSetup.server.listener).get('/api/status').expect(200);
 
-    expect(result.body.name).toEqual('xkibana');
+    expect(result.body.name).toEqual('xopensearchDashboards');
     expect(result.body.uuid).toEqual('xxxx-xxxxx');
     expect(result.body.version).toEqual({
       number: '9.9.9',
@@ -159,7 +159,7 @@ describe('GET /api/status', () => {
         statuses: [
           {
             icon: 'success',
-            id: 'core:elasticsearch@9.9.9',
+            id: 'core:opensearch@9.9.9',
             message: 'Service is working',
             since: expect.any(String),
             state: 'green',
@@ -226,7 +226,7 @@ describe('GET /api/status', () => {
         statuses: [
           {
             icon: 'success',
-            id: 'core:elasticsearch@9.9.9',
+            id: 'core:opensearch@9.9.9',
             message: 'Service is working',
             since: expect.any(String),
             state: 'green',
@@ -285,7 +285,7 @@ describe('GET /api/status', () => {
         .expect(200);
       expect(result.body.status).toEqual({
         core: {
-          elasticsearch: {
+          opensearch: {
             level: 'available',
             summary: 'Service is working',
           },

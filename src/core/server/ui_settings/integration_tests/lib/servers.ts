@@ -21,21 +21,21 @@ import { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/server';
 
 import {
   createTestServers,
-  TestElasticsearchUtils,
-  TestKibanaUtils,
+  TestOpenSearchsearchUtils,
+  TestOpenSearchDashboardsUtils,
   TestUtils,
-} from '../../../../test_helpers/kbn_server';
-import { LegacyAPICaller } from '../../../elasticsearch/';
+} from '../../../../test_helpers/osd_server';
+import { LegacyAPICaller } from '../../../opensearch/';
 import { httpServerMock } from '../../../http/http_server.mocks';
 
 let servers: TestUtils;
-let esServer: TestElasticsearchUtils;
-let kbn: TestKibanaUtils;
+let opensearchServer: TestOpenSearchsearchUtils;
+let osd: TestOpenSearchDashboardsUtils;
 
-let kbnServer: TestKibanaUtils['kbnServer'];
+let osdServer: TestOpenSearchDashboardsUtils['osdServer'];
 
 interface AllServices {
-  kbnServer: TestKibanaUtils['kbnServer'];
+  osdServer: TestOpenSearchDashboardsUtils['osdServer'];
   savedObjectsClient: SavedObjectsClientContract;
   callCluster: LegacyAPICaller;
   uiSettings: IUiSettingsClient;
@@ -47,7 +47,7 @@ export async function startServers() {
   servers = createTestServers({
     adjustTimeout: (t) => jest.setTimeout(t),
     settings: {
-      kbn: {
+      osd: {
         uiSettings: {
           overrides: {
             foo: 'bar',
@@ -56,9 +56,9 @@ export async function startServers() {
       },
     },
   });
-  esServer = await servers.startES();
-  kbn = await servers.startKibana();
-  kbnServer = kbn.kbnServer;
+  opensearchServer = await servers.startES();
+  osd = await servers.startOpenSearchDashboards();
+  osdServer = osd.osdServer;
 }
 
 export function getServices() {
@@ -66,18 +66,18 @@ export function getServices() {
     return services;
   }
 
-  const callCluster = esServer.es.getCallCluster();
+  const callCluster = opensearchServer.opensearch.getCallCluster();
 
-  const savedObjectsClient = kbn.coreStart.savedObjects.getScopedClient(
-    httpServerMock.createKibanaRequest()
+  const savedObjectsClient = osd.coreStart.savedObjects.getScopedClient(
+    httpServerMock.createOpenSearchDashboardsRequest()
   );
 
-  const uiSettings = kbnServer.newPlatform.start.core.uiSettings.asScopedToClient(
+  const uiSettings = osdServer.newPlatform.start.core.uiSettings.asScopedToClient(
     savedObjectsClient
   );
 
   services = {
-    kbnServer,
+    osdServer,
     callCluster,
     savedObjectsClient,
     uiSettings,
@@ -88,9 +88,9 @@ export function getServices() {
 
 export async function stopServers() {
   services = null!;
-  kbnServer = null!;
+  osdServer = null!;
   if (servers) {
-    await esServer.stop();
-    await kbn.stop();
+    await opensearchServer.stop();
+    await osd.stop();
   }
 }

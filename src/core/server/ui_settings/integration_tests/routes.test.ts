@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
-import * as kbnTestServer from '../../../test_helpers/kbn_server';
+import { schema } from '@osd/config-schema';
+import * as osdTestServer from '../../../test_helpers/osd_server';
 
 describe('ui settings service', () => {
   describe('routes', () => {
-    let root: ReturnType<typeof kbnTestServer.createRoot>;
+    let root: ReturnType<typeof osdTestServer.createRoot>;
     beforeAll(async () => {
-      root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+      root = osdTestServer.createRoot({ plugins: { initialize: false } });
 
       const { uiSettings } = await root.setup();
       uiSettings.register({
@@ -40,8 +40,8 @@ describe('ui settings service', () => {
 
     describe('set', () => {
       it('validates value', async () => {
-        const response = await kbnTestServer.request
-          .post(root, '/api/kibana/settings/custom')
+        const response = await osdTestServer.request
+          .post(root, '/api/opensearch-dashboards/settings/custom')
           .send({ value: 100 })
           .expect(400);
 
@@ -52,8 +52,8 @@ describe('ui settings service', () => {
     });
     describe('set many', () => {
       it('validates value', async () => {
-        const response = await kbnTestServer.request
-          .post(root, '/api/kibana/settings')
+        const response = await osdTestServer.request
+          .post(root, '/api/opensearch-dashboards/settings')
           .send({ changes: { custom: 100, foo: 'bar' } })
           .expect(400);
 

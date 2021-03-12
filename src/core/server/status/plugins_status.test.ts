@@ -28,15 +28,15 @@ expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
 describe('PluginStatusService', () => {
   const coreAllAvailable$: Observable<CoreStatus> = of({
-    elasticsearch: { level: ServiceStatusLevels.available, summary: 'elasticsearch avail' },
+    opensearch: { level: ServiceStatusLevels.available, summary: 'opensearch avail' },
     savedObjects: { level: ServiceStatusLevels.available, summary: 'savedObjects avail' },
   });
   const coreOneDegraded$: Observable<CoreStatus> = of({
-    elasticsearch: { level: ServiceStatusLevels.available, summary: 'elasticsearch avail' },
+    opensearch: { level: ServiceStatusLevels.available, summary: 'opensearch avail' },
     savedObjects: { level: ServiceStatusLevels.degraded, summary: 'savedObjects degraded' },
   });
   const coreOneCriticalOneDegraded$: Observable<CoreStatus> = of({
-    elasticsearch: { level: ServiceStatusLevels.critical, summary: 'elasticsearch critical' },
+    opensearch: { level: ServiceStatusLevels.critical, summary: 'opensearch critical' },
     savedObjects: { level: ServiceStatusLevels.degraded, summary: 'savedObjects degraded' },
   });
   const pluginDependencies: Map<PluginName, PluginName[]> = new Map([
@@ -73,7 +73,7 @@ describe('PluginStatusService', () => {
       });
       expect(await serviceCritical.getDerivedStatus$('a').pipe(first()).toPromise()).toEqual({
         level: ServiceStatusLevels.critical,
-        summary: '[elasticsearch]: elasticsearch critical',
+        summary: '[opensearch]: opensearch critical',
         detail: 'See the status page for more information',
         meta: expect.any(Object),
       });
@@ -109,7 +109,7 @@ describe('PluginStatusService', () => {
       service.set('a', of({ level: ServiceStatusLevels.unavailable, summary: 'a is not working' }));
       expect(await service.getDerivedStatus$('b').pipe(first()).toPromise()).toEqual({
         level: ServiceStatusLevels.critical,
-        summary: '[elasticsearch]: elasticsearch critical',
+        summary: '[opensearch]: opensearch critical',
         detail: 'See the status page for more information',
         meta: expect.any(Object),
       });
@@ -180,19 +180,19 @@ describe('PluginStatusService', () => {
       expect(await serviceCritical.getAll$().pipe(first()).toPromise()).toEqual({
         a: {
           level: ServiceStatusLevels.critical,
-          summary: '[elasticsearch]: elasticsearch critical',
+          summary: '[opensearch]: opensearch critical',
           detail: 'See the status page for more information',
           meta: expect.any(Object),
         },
         b: {
           level: ServiceStatusLevels.critical,
-          summary: '[elasticsearch]: elasticsearch critical',
+          summary: '[opensearch]: opensearch critical',
           detail: 'See the status page for more information',
           meta: expect.any(Object),
         },
         c: {
           level: ServiceStatusLevels.critical,
-          summary: '[elasticsearch]: elasticsearch critical',
+          summary: '[opensearch]: opensearch critical',
           detail: 'See the status page for more information',
           meta: expect.any(Object),
         },

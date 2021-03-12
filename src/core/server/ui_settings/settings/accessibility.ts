@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
+import { schema } from '@osd/config-schema';
+import { i18n } from '@osd/i18n';
 import { UiSettingsParams } from '../../../types';
 
 export const getAccessibilitySettings = (): Record<string, UiSettingsParams> => {
@@ -30,7 +30,7 @@ export const getAccessibilitySettings = (): Record<string, UiSettingsParams> => 
       value: false,
       description: i18n.translate('core.ui_settings.params.disableAnimationsText', {
         defaultMessage:
-          'Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.',
+          'Turn off all unnecessary animations in the OpenSearch Dashboards UI. Refresh the page to apply the changes.',
       }),
       category: ['accessibility'],
       requiresPageReload: true,
