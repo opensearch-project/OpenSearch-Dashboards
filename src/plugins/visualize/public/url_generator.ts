@@ -21,11 +21,11 @@ import {
   TimeRange,
   Filter,
   Query,
-  esFilters,
+  opensearchFilters,
   QueryState,
   RefreshInterval,
 } from '../../data/public';
-import { setStateToKbnUrl } from '../../kibana_utils/public';
+import { setStateToOsdUrl } from '../../opensearch_dashboards_utils/public';
 import { UrlGeneratorsDefinition } from '../../share/public';
 
 const STATE_STORAGE_KEY = '_a';
@@ -112,17 +112,17 @@ export const createVisualizeUrlGenerator = (
 
     if (query) appState.query = query;
     if (filters && filters.length)
-      appState.filters = filters?.filter((f) => !esFilters.isFilterPinned(f));
+      appState.filters = filters?.filter((f) => !opensearchFilters.isFilterPinned(f));
     if (vis) appState.vis = vis;
 
     if (timeRange) queryState.time = timeRange;
     if (filters && filters.length)
-      queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
+      queryState.filters = filters?.filter((f) => opensearchFilters.isFilterPinned(f));
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
 
     let url = `${appBasePath}#/${mode}`;
-    url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, queryState, { useHash }, url);
-    url = setStateToKbnUrl(STATE_STORAGE_KEY, appState, { useHash }, url);
+    url = setStateToOsdUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, queryState, { useHash }, url);
+    url = setStateToOsdUrl(STATE_STORAGE_KEY, appState, { useHash }, url);
 
     if (indexPatternId) {
       url = `${url}&indexPattern=${indexPatternId}`;
