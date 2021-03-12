@@ -17,18 +17,18 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { first } from 'rxjs/operators';
-import { TypeOf, schema } from '@kbn/config-schema';
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { deepFreeze } from '@kbn/std';
+import { TypeOf, schema } from '@osd/config-schema';
+import { RecursiveReadonly } from '@osd/utility-types';
+import { deepFreeze } from '@osd/std';
 
 import { PluginStart } from '../../../../src/plugins/data/server';
 import { CoreSetup, PluginInitializerContext } from '../../../../src/core/server';
 import { configSchema } from '../config';
 import loadFunctions from './lib/load_functions';
 import { functionsRoute } from './routes/functions';
-import { validateEsRoute } from './routes/validate_es';
+import { validateOpenSearchRoute } from './routes/validate_es';
 import { runRoute } from './routes/run';
 import { ConfigManager } from './lib/config_manager';
 
@@ -48,7 +48,7 @@ export interface TimelionPluginStartDeps {
 }
 
 /**
- * Represents Timelion Plugin instance that will be managed by the Kibana plugin system.
+ * Represents Timelion Plugin instance that will be managed by the Opensearch Dashboards plugin system.
  */
 export class Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
@@ -90,29 +90,29 @@ export class Plugin {
 
     functionsRoute(router, deps);
     runRoute(router, deps);
-    validateEsRoute(router, core);
+    validateOpenSearchRoute(router, core);
 
     core.uiSettings.register({
-      'timelion:es.timefield': {
+      'timelion:opensearch.timefield': {
         name: i18n.translate('timelion.uiSettings.timeFieldLabel', {
           defaultMessage: 'Time field',
         }),
         value: '@timestamp',
         description: i18n.translate('timelion.uiSettings.timeFieldDescription', {
-          defaultMessage: 'Default field containing a timestamp when using {esParam}',
-          values: { esParam: '.es()' },
+          defaultMessage: 'Default field containing a timestamp when using {opensearchParam}',
+          values: { opensearchParam: '.opensearch()' },
         }),
         category: ['timelion'],
         schema: schema.string(),
       },
-      'timelion:es.default_index': {
+      'timelion:opensearch.default_index': {
         name: i18n.translate('timelion.uiSettings.defaultIndexLabel', {
           defaultMessage: 'Default index',
         }),
         value: '_all',
         description: i18n.translate('timelion.uiSettings.defaultIndexDescription', {
-          defaultMessage: 'Default elasticsearch index to search with {esParam}',
-          values: { esParam: '.es()' },
+          defaultMessage: 'Default opensearch index to search with {opensearchParam}',
+          values: { opensearchParam: '.opensearch()' },
         }),
         category: ['timelion'],
         schema: schema.string(),
