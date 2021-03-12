@@ -18,14 +18,14 @@
  */
 
 import util from 'util';
-import { KbnClient, ToolingLog } from '@kbn/dev-utils';
+import { OsdClient, ToolingLog } from '@osd/dev-utils';
 
 export class RoleMappings {
-  constructor(private log: ToolingLog, private kbnClient: KbnClient) {}
+  constructor(private log: ToolingLog, private osdClient: OsdClient) {}
 
   public async getAll() {
     this.log.debug(`Getting role mappings`);
-    const { data, status, statusText } = await this.kbnClient.request<Array<{ name: string }>>({
+    const { data, status, statusText } = await this.osdClient.request<Array<{ name: string }>>({
       path: `/internal/security/role_mapping`,
       method: 'GET',
     });
@@ -39,7 +39,7 @@ export class RoleMappings {
 
   public async create(name: string, roleMapping: Record<string, any>) {
     this.log.debug(`creating role mapping ${name}`);
-    const { data, status, statusText } = await this.kbnClient.request({
+    const { data, status, statusText } = await this.osdClient.request({
       path: `/internal/security/role_mapping/${encodeURIComponent(name)}`,
       method: 'POST',
       body: roleMapping,
@@ -54,7 +54,7 @@ export class RoleMappings {
 
   public async delete(name: string) {
     this.log.debug(`deleting role mapping ${name}`);
-    const { data, status, statusText } = await this.kbnClient.request({
+    const { data, status, statusText } = await this.osdClient.request({
       path: `/internal/security/role_mapping/${encodeURIComponent(name)}`,
       method: 'DELETE',
     });

@@ -29,8 +29,8 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   const find = getService('find');
   const retry = getService('retry');
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const renderable = getService('renderable');
@@ -45,10 +45,10 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   }
 
   class DashboardPage {
-    async initTests({ kibanaIndex = 'dashboard/legacy', defaultIndex = 'logstash-*' } = {}) {
-      log.debug('load kibana index with visualizations and log data');
-      await esArchiver.load(kibanaIndex);
-      await kibanaServer.uiSettings.replace({ defaultIndex });
+    async initTests({ opensearchDashboardsIndex = 'dashboard/legacy', defaultIndex = 'logstash-*' } = {}) {
+      log.debug('load opensearch-dashboards index with visualizations and log data');
+      await opensearchArchiver.load(opensearchDashboardsIndex);
+      await opensearchDashboardsServer.uiSettings.replace({ defaultIndex });
       await PageObjects.common.navigateToApp('dashboard');
     }
 

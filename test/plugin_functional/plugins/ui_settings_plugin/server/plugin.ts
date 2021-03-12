@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { schema } from '@kbn/config-schema';
-import { Plugin, CoreSetup } from 'kibana/server';
+import { schema } from '@osd/config-schema';
+import { Plugin, CoreSetup } from 'opensearch-dashboards/server';
 
 export class UiSettingsPlugin implements Plugin {
   public setup(core: CoreSetup) {

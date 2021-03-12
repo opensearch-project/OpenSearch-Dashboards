@@ -39,7 +39,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const { header } = getPageObjects(['header']);
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const MenuToggle = getService('MenuToggle');
 
   const quickSelectTimeMenuToggle = new MenuToggle({
@@ -69,13 +69,13 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
      * the provides a quicker way to set the timepicker to the default range, saves a few seconds
      */
     async setDefaultAbsoluteRangeViaUiSettings() {
-      await kibanaServer.uiSettings.update({
+      await opensearchDashboardsServer.uiSettings.update({
         'timepicker:timeDefaults': `{ "from": "${this.defaultStartTimeUTC}", "to": "${this.defaultEndTimeUTC}"}`,
       });
     }
 
     async resetDefaultAbsoluteRangeViaUiSettings() {
-      await kibanaServer.uiSettings.replace({});
+      await opensearchDashboardsServer.uiSettings.replace({});
     }
 
     private async getTimePickerPanel() {

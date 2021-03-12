@@ -16,20 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const testSubjects = getService('testSubjects');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardVisualizations = getService('dashboardVisualizations');
 
   describe('edit embeddable redirects', () => {
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
-      await kibanaServer.uiSettings.replace({
+      await opensearchArchiver.load('dashboard/current/opensearch-dashboards');
+      await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');

@@ -31,7 +31,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from 'opensearch-dashboards/public';
 
 const AppStatusApp = ({ appId }: { appId: string }) => (
   <EuiPage>

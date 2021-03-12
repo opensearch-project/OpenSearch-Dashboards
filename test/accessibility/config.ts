@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@osd/test/types/ftr';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
@@ -36,7 +36,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/console'),
       require.resolve('./apps/home'),
       require.resolve('./apps/filter_panel'),
-      require.resolve('./apps/kibana_overview'),
+      require.resolve('./apps/opensearch_dashboards_overview'),
     ],
     pageObjects,
     services,

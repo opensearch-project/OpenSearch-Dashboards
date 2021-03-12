@@ -18,20 +18,20 @@
  */
 
 import { DeploymentProvider } from './deployment';
-import { LegacyEsProvider } from './legacy_es';
-import { ElasticsearchProvider } from './elasticsearch';
-import { EsArchiverProvider } from './es_archiver';
-import { KibanaServerProvider } from './kibana_server';
+import { LegacyOpenSearchProvider } from './legacy_opensearch';
+import { OpenSearchearchProvider } from './opensearch';
+import { OpenSearchArchiverProvider } from './opensearch_archiver';
+import { OpenSearchDashboardsServerProvider } from './opensearch_dasboards_server';
 import { RetryProvider } from './retry';
 import { RandomnessProvider } from './randomness';
 import { SecurityServiceProvider } from './security';
 
 export const services = {
   deployment: DeploymentProvider,
-  legacyEs: LegacyEsProvider,
-  es: ElasticsearchProvider,
-  esArchiver: EsArchiverProvider,
-  kibanaServer: KibanaServerProvider,
+  legacyOpenSearch: LegacyOpenSearchProvider,
+  opensearch: OpenSearchearchProvider,
+  opensearchArchiver: OpenSearchArchiverProvider,
+  opensearchDashboardsServer: OpenSearchDashboardsServerProvider,
   retry: RetryProvider,
   randomness: RandomnessProvider,
   security: SecurityServiceProvider,

@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from 'opensearch-dashboards/public';
 import { AppPluginDependencies } from './types';
 
 export const renderApp = (

@@ -43,12 +43,12 @@ export default async function ({ readConfigFile }) {
 
     servers: commonConfig.get('servers'),
 
-    esTestCluster: commonConfig.get('esTestCluster'),
+    opensearchTestCluster: commonConfig.get('opensearchTestCluster'),
 
-    kbnTestServer: {
-      ...commonConfig.get('kbnTestServer'),
+    osdTestServer: {
+      ...commonConfig.get('osdTestServer'),
       serverArgs: [
-        ...commonConfig.get('kbnTestServer.serverArgs'),
+        ...commonConfig.get('osdTestServer.serverArgs'),
         '--oss',
         // '--telemetry.optIn=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
@@ -63,8 +63,8 @@ export default async function ({ readConfigFile }) {
     },
 
     apps: {
-      kibana: {
-        pathname: '/app/kibana',
+      opensearchDashboards: {
+        pathname: '/app/opensearch-dashboards',
       },
       status_page: {
         pathname: '/status',
@@ -114,7 +114,7 @@ export default async function ({ readConfigFile }) {
     security: {
       roles: {
         test_logstash_reader: {
-          elasticsearch: {
+          opensearch: {
             cluster: [],
             indices: [
               {
@@ -125,10 +125,10 @@ export default async function ({ readConfigFile }) {
             ],
             run_as: [],
           },
-          kibana: [],
+          opensearchDashboards: [],
         },
         test_shakespeare_reader: {
-          elasticsearch: {
+          opensearch: {
             cluster: [],
             indices: [
               {
@@ -139,10 +139,10 @@ export default async function ({ readConfigFile }) {
             ],
             run_as: [],
           },
-          kibana: [],
+          opensearchDashboards: [],
         },
         test_testhuge_reader: {
-          elasticsearch: {
+          opensearch: {
             cluster: [],
             indices: [
               {
@@ -153,10 +153,10 @@ export default async function ({ readConfigFile }) {
             ],
             run_as: [],
           },
-          kibana: [],
+          opensearchDashboards: [],
         },
         test_alias_reader: {
-          elasticsearch: {
+          opensearch: {
             cluster: [],
             indices: [
               {
@@ -167,26 +167,26 @@ export default async function ({ readConfigFile }) {
             ],
             run_as: [],
           },
-          kibana: [],
+          opensearchDashboards: [],
         },
         //for sample data - can remove but not add sample data.( not ml)- for ml use built in role.
-        kibana_sample_admin: {
-          elasticsearch: {
+        opensearch_dashboards_sample_admin: {
+          opensearch: {
             cluster: [],
             indices: [
               {
-                names: ['kibana_sample*'],
+                names: ['opensearch_dashboards_sample*'],
                 privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
                 field_security: { grant: ['*'], except: [] },
               },
             ],
             run_as: [],
           },
-          kibana: [],
+          opensearchDashboards: [],
         },
 
-        kibana_date_nanos: {
-          elasticsearch: {
+        opensearch_dashboards_date_nanos: {
+          opensearch: {
             cluster: [],
             indices: [
               {
@@ -197,11 +197,11 @@ export default async function ({ readConfigFile }) {
             ],
             run_as: [],
           },
-          kibana: [],
+          opensearchDashboards: [],
         },
 
-        kibana_date_nanos_custom: {
-          elasticsearch: {
+        opensearch_dashboards_date_nanos_custom: {
+          opensearch: {
             cluster: [],
             indices: [
               {
@@ -212,11 +212,11 @@ export default async function ({ readConfigFile }) {
             ],
             run_as: [],
           },
-          kibana: [],
+          opensearchDashboards: [],
         },
 
-        kibana_date_nanos_mixed: {
-          elasticsearch: {
+        opensearch_dashboards_date_nanos_mixed: {
+          opensearch: {
             cluster: [],
             indices: [
               {
@@ -227,11 +227,11 @@ export default async function ({ readConfigFile }) {
             ],
             run_as: [],
           },
-          kibana: [],
+          opensearchDashboards: [],
         },
 
-        kibana_timefield: {
-          elasticsearch: {
+        opensearch_dashboards_timefield: {
+          opensearch: {
             cluster: [],
             indices: [
               {
@@ -242,11 +242,11 @@ export default async function ({ readConfigFile }) {
             ],
             run_as: [],
           },
-          kibana: [],
+          opensearchDashboards: [],
         },
 
-        kibana_large_strings: {
-          elasticsearch: {
+        opensearch_dashboards_large_strings: {
+          opensearch: {
             cluster: [],
             indices: [
               {
@@ -257,11 +257,11 @@ export default async function ({ readConfigFile }) {
             ],
             run_as: [],
           },
-          kibana: [],
+          opensearchDashboards: [],
         },
 
         long_window_logstash: {
-          elasticsearch: {
+          opensearch: {
             cluster: [],
             indices: [
               {
@@ -272,11 +272,11 @@ export default async function ({ readConfigFile }) {
             ],
             run_as: [],
           },
-          kibana: [],
+          opensearchDashboards: [],
         },
 
         animals: {
-          elasticsearch: {
+          opensearch: {
             cluster: [],
             indices: [
               {
@@ -287,11 +287,11 @@ export default async function ({ readConfigFile }) {
             ],
             run_as: [],
           },
-          kibana: [],
+          opensearchDashboards: [],
         },
 
         test_alias1_reader: {
-          elasticsearch: {
+          opensearch: {
             cluster: [],
             indices: [
               {
@@ -302,7 +302,7 @@ export default async function ({ readConfigFile }) {
           },
         },
       },
-      defaultRoles: ['test_logstash_reader', 'kibana_admin'],
+      defaultRoles: ['test_logstash_reader', 'opensearch_dashboards_admin'],
     },
   };
 }

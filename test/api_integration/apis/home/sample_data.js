@@ -17,18 +17,18 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const opensearch = getService('legacyOpenSearch');
 
   const MILLISECOND_IN_WEEK = 1000 * 60 * 60 * 24 * 7;
 
   describe('sample data apis', () => {
     describe('list', () => {
       it('should return list of sample data sets with installed status', async () => {
-        const resp = await supertest.get(`/api/sample_data`).set('kbn-xsrf', 'kibana').expect(200);
+        const resp = await supertest.get(`/api/sample_data`).set('osd-xsrf', 'opensearch-dashboards').expect(200);
 
         expect(resp.body).to.be.an('array');
         expect(resp.body.length).to.be.above(0);
@@ -38,24 +38,24 @@ export default function ({ getService }) {
 
     describe('install', () => {
       it('should return 404 if id does not match any sample data sets', async () => {
-        await supertest.post(`/api/sample_data/xxxx`).set('kbn-xsrf', 'kibana').expect(404);
+        await supertest.post(`/api/sample_data/xxxx`).set('osd-xsrf', 'opensearch-dashboards').expect(404);
       });
 
       it('should return 200 if success', async () => {
         const resp = await supertest
           .post(`/api/sample_data/flights`)
-          .set('kbn-xsrf', 'kibana')
+          .set('osd-xsrf', 'opensearch-dashboards')
           .expect(200);
 
         expect(resp.body).to.eql({
-          elasticsearchIndicesCreated: { kibana_sample_data_flights: 13059 },
-          kibanaSavedObjectsLoaded: 20,
+          opensearchIndicesCreated: { opensearch_dashboards_sample_data_flights: 13059 },
+          opensearchDashboardsSavedObjectsLoaded: 20,
         });
       });
 
-      it('should load elasticsearch index containing sample data with dates relative to current time', async () => {
-        const resp = await es.search({
-          index: 'kibana_sample_data_flights',
+      it('should load opensearch index containing sample data with dates relative to current time', async () => {
+        const resp = await opensearch.search({
+          index: 'opensearch_dashboards_sample_data_flights',
         });
 
         const doc = resp.hits.hits[0];
@@ -66,14 +66,14 @@ export default function ({ getService }) {
       });
 
       describe('parameters', () => {
-        it('should load elasticsearch index containing sample data with dates relative to now parameter', async () => {
+        it('should load opensearch index containing sample data with dates relative to now parameter', async () => {
           const nowString = `2000-01-01T00:00:00`;
           await supertest
             .post(`/api/sample_data/flights?now=${nowString}`)
-            .set('kbn-xsrf', 'kibana');
+            .set('osd-xsrf', 'opensearch-dashboards');
 
-          const resp = await es.search({
-            index: 'kibana_sample_data_flights',
+          const resp = await opensearch.search({
+            index: 'opensearch_dashboards_sample_data_flights',
           });
 
           const doc = resp.hits.hits[0];
@@ -87,12 +87,12 @@ export default function ({ getService }) {
 
     describe('uninstall', () => {
       it('should uninstall sample data', async () => {
-        await supertest.delete(`/api/sample_data/flights`).set('kbn-xsrf', 'kibana').expect(204);
+        await supertest.delete(`/api/sample_data/flights`).set('osd-xsrf', 'opensearch-dashboards').expect(204);
       });
 
-      it('should remove elasticsearch index containing sample data', async () => {
-        const resp = await es.indices.exists({
-          index: 'kibana_sample_data_flights',
+      it('should remove opensearch index containing sample data', async () => {
+        const resp = await opensearch.indices.exists({
+          index: 'opensearch_dashboards_sample_data_flights',
         });
         expect(resp).to.be(false);
       });

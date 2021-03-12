@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { schema } from '@kbn/config-schema';
+import expect from '@osd/expect';
+import { schema } from '@osd/config-schema';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   const responseSchema = schema.arrayOf(
     schema.object({
@@ -45,18 +45,18 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('relationships', () => {
     before(async () => {
-      await esArchiver.load('management/saved_objects/relationships');
+      await opensearchArchiver.load('management/saved_objects/relationships');
     });
     after(async () => {
-      await esArchiver.unload('management/saved_objects/relationships');
+      await opensearchArchiver.unload('management/saved_objects/relationships');
     });
 
-    const baseApiUrl = `/api/kibana/management/saved_objects/relationships`;
+    const baseApiUrl = `/api/opensearch-dashboards/management/saved_objects/relationships`;
     const defaultTypes = ['visualization', 'index-pattern', 'search', 'dashboard'];
 
     const relationshipsUrl = (type: string, id: string, types: string[] = defaultTypes) => {
-      const typesQuery = types.map((t) => `savedObjectTypes=${t}`).join('&');
-      return `${baseApiUrl}/${type}/${id}?${typesQuery}`;
+      const typOpenSearchQuery = types.map((t) => `savedObjectTypes=${t}`).join('&');
+      return `${baseApiUrl}/${type}/${id}?${typOpenSearchQuery}`;
     };
 
     describe('searches', () => {
@@ -84,11 +84,11 @@ export default function ({ getService }: FtrProviderContext) {
               title: 'saved_objects*',
               icon: 'indexPatternApp',
               editUrl:
-                '/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path:
-                  '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'management.kibana.indexPatterns',
+                  '/app/management/opensearch-dashboards/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
               },
               namespaceType: 'single',
             },
@@ -101,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
               title: 'VisualizationFromSavedSearch',
               icon: 'visualizeApp',
               editUrl:
-                '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -127,11 +127,11 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'indexPatternApp',
               title: 'saved_objects*',
               editUrl:
-                '/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path:
-                  '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'management.kibana.indexPatterns',
+                  '/app/management/opensearch-dashboards/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
               },
               namespaceType: 'single',
             },
@@ -144,7 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'visualizeApp',
               title: 'VisualizationFromSavedSearch',
               editUrl:
-                '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -189,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'visualizeApp',
               title: 'Visualization',
               editUrl:
-                '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -205,7 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'visualizeApp',
               title: 'VisualizationFromSavedSearch',
               editUrl:
-                '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -229,7 +229,7 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'visualizeApp',
               title: 'Visualization',
               editUrl:
-                '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -245,7 +245,7 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'visualizeApp',
               title: 'VisualizationFromSavedSearch',
               editUrl:
-                '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -290,7 +290,7 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'discoverApp',
               title: 'OneRecord',
               editUrl:
-                '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
@@ -306,7 +306,7 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'dashboardApp',
               title: 'Dashboard',
               editUrl:
-                '/management/kibana/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/dashboards#/view/b70c7ae0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'dashboard.show',
@@ -332,7 +332,7 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'discoverApp',
               title: 'OneRecord',
               editUrl:
-                '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
@@ -376,7 +376,7 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'discoverApp',
               title: 'OneRecord',
               editUrl:
-                '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
@@ -392,7 +392,7 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'visualizeApp',
               title: 'Visualization',
               editUrl:
-                '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -418,7 +418,7 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'discoverApp',
               title: 'OneRecord',
               editUrl:
-                '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',

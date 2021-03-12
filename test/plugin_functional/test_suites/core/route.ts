@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { Test } from 'supertest';
 import { PluginFunctionalProviderContext } from '../../services';
 
@@ -54,7 +54,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             .post('/short_payload_timeout')
             .set('Content-Type', 'application/json')
             .set('Transfer-Encoding', 'chunked')
-            .set('kbn-xsrf', 'true');
+            .set('osd-xsrf', 'true');
 
           const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 10);
 
@@ -74,7 +74,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             .post('/longer_payload_timeout')
             .set('Content-Type', 'application/json')
             .set('Transfer-Encoding', 'chunked')
-            .set('kbn-xsrf', 'true');
+            .set('osd-xsrf', 'true');
 
           const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 10);
 
@@ -96,7 +96,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             .post('/short_idle_socket_timeout')
             .set('Content-Type', 'application/json')
             .set('Transfer-Encoding', 'chunked')
-            .set('kbn-xsrf', 'true');
+            .set('osd-xsrf', 'true');
 
           const result = writeBodyCharAtATime(request, '{"responseDelay":100}', 20);
 
@@ -116,7 +116,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             .post('/longer_idle_socket_timeout')
             .set('Content-Type', 'application/json')
             .set('Transfer-Encoding', 'chunked')
-            .set('kbn-xsrf', 'true');
+            .set('osd-xsrf', 'true');
 
           const result = writeBodyCharAtATime(request, '{"responseDelay":0}', 10);
 
@@ -136,7 +136,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             .post('/short_idle_socket_timeout')
             .set('Content-Type', 'application/json')
             .set('Transfer-Encoding', 'chunked')
-            .set('kbn-xsrf', 'true');
+            .set('osd-xsrf', 'true');
 
           const result = writeBodyCharAtATime(request, '{"responseDelay":100}', 0);
 
@@ -156,7 +156,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             .post('/longer_idle_socket_timeout')
             .set('Content-Type', 'application/json')
             .set('Transfer-Encoding', 'chunked')
-            .set('kbn-xsrf', 'true');
+            .set('osd-xsrf', 'true');
 
           const result = writeBodyCharAtATime(request, '{"responseDelay":100}', 0);
 

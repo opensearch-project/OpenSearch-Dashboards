@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
@@ -25,15 +25,15 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const pieChart = getService('pieChart');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
   describe('dashboard filter bar', () => {
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
-      await kibanaServer.uiSettings.replace({
+      await opensearchArchiver.load('dashboard/current/opensearch-dashboards');
+      await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');

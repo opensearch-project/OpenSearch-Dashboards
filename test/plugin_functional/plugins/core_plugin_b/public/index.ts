@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
+import { PluginInitializer, PluginInitializerContext } from 'opensearch-dashboards/public';
 import {
   CorePluginBDeps,
   CorePluginBPlugin,

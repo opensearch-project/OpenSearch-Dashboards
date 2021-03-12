@@ -20,10 +20,10 @@
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  describe('kibana server with ssl', () => {
+  describe('opensearch-dashboards server with ssl', () => {
     it('redirects http requests at redirect port to https', async () => {
-      const host = process.env.TEST_KIBANA_HOST || 'localhost';
-      const port = process.env.TEST_KIBANA_PORT || '5620';
+      const host = process.env.TEST_OPENSEARCH_DASHBOARDS_HOST || 'localhost';
+      const port = process.env.TEST_OPENSEARCH_DASHBOARDS_PORT || '5620';
       const url = `https://${host}:${port}/`;
 
       await supertest.get('/').expect('location', url).expect(302);

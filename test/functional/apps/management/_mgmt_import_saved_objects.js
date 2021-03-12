@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import path from 'path';
 
 export default function ({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
 
   //in 6.4.0 bug the Saved Search conflict would be resolved and get imported but the visualization
@@ -29,18 +29,18 @@ export default function ({ getService, getPageObjects }) {
 
   describe('mgmt saved objects', function describeIndexTests() {
     beforeEach(async function () {
-      await esArchiver.load('empty_kibana');
-      await esArchiver.load('discover');
+      await opensearchArchiver.load('empty_opensearch_dashboards');
+      await opensearchArchiver.load('discover');
       await PageObjects.settings.navigateTo();
     });
 
     afterEach(async function () {
-      await esArchiver.unload('discover');
-      await esArchiver.load('empty_kibana');
+      await opensearchArchiver.unload('discover');
+      await opensearchArchiver.load('empty_opensearch_dashboards');
     });
 
     it('should import saved objects mgmt', async function () {
-      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.settings.clickOpenSearchDashboardsSavedObjects();
       await PageObjects.savedObjects.importFile(
         path.join(__dirname, 'exports', 'mgmt_import_objects.json')
       );

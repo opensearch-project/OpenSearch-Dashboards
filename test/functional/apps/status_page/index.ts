@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should display the server status', async () => {
       const titleText = await testSubjects.getVisibleText('serverStatusTitle');
-      expect(titleText).to.contain('Kibana status is');
+      expect(titleText).to.contain('OpenSearch Dashboards status is');
 
       const serverStatus = await testSubjects.getAttribute('serverStatusTitleBadge', 'aria-label');
       expect(serverStatus).to.be('Green');

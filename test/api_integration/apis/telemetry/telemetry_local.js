@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import _ from 'lodash';
 
 /*
@@ -37,19 +37,19 @@ function flatKeys(source) {
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
-  const esArchiver = getService('esArchiver');
+  const opensearch = getService('opensearch');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('/api/telemetry/v2/clusters/_stats', () => {
-    before('make sure there are some saved objects', () => esArchiver.load('saved_objects/basic'));
-    after('cleanup saved objects changes', () => esArchiver.unload('saved_objects/basic'));
+    before('make sure there are some saved objects', () => opensearchArchiver.load('saved_objects/basic'));
+    after('cleanup saved objects changes', () => opensearchArchiver.unload('saved_objects/basic'));
 
     before('create some telemetry-data tracked indices', async () => {
-      return es.indices.create({ index: 'filebeat-telemetry_tests_logs' });
+      return opensearch.indices.create({ index: 'filebeat-telemetry_tests_logs' });
     });
 
     after('cleanup telemetry-data tracked indices', () => {
-      return es.indices.delete({ index: 'filebeat-telemetry_tests_logs' });
+      return opensearch.indices.delete({ index: 'filebeat-telemetry_tests_logs' });
     });
 
     it('should pull local stats and validate data types', async () => {
@@ -60,30 +60,30 @@ export default function ({ getService }) {
 
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
-        .set('kbn-xsrf', 'xxx')
+        .set('osd-xsrf', 'xxx')
         .send({ timeRange, unencrypted: true })
         .expect(200);
 
       expect(body.length).to.be(1);
       const stats = body[0];
       expect(stats.collection).to.be('local');
-      expect(stats.stack_stats.kibana.count).to.be.a('number');
-      expect(stats.stack_stats.kibana.indices).to.be.a('number');
-      expect(stats.stack_stats.kibana.os.platforms[0].platform).to.be.a('string');
-      expect(stats.stack_stats.kibana.os.platforms[0].count).to.be(1);
-      expect(stats.stack_stats.kibana.os.platformReleases[0].platformRelease).to.be.a('string');
-      expect(stats.stack_stats.kibana.os.platformReleases[0].count).to.be(1);
-      expect(stats.stack_stats.kibana.plugins.telemetry.opt_in_status).to.be(false);
-      expect(stats.stack_stats.kibana.plugins.telemetry.usage_fetcher).to.be.a('string');
-      expect(stats.stack_stats.kibana.plugins.stack_management).to.be.an('object');
-      expect(stats.stack_stats.kibana.plugins.ui_metric).to.be.an('object');
-      expect(stats.stack_stats.kibana.plugins.application_usage).to.be.an('object');
-      expect(stats.stack_stats.kibana.plugins.kql.defaultQueryLanguage).to.be.a('string');
-      expect(stats.stack_stats.kibana.plugins['tsvb-validation']).to.be.an('object');
-      expect(stats.stack_stats.kibana.plugins.localization).to.be.an('object');
-      expect(stats.stack_stats.kibana.plugins.csp.strict).to.be(false);
-      expect(stats.stack_stats.kibana.plugins.csp.warnLegacyBrowsers).to.be(true);
-      expect(stats.stack_stats.kibana.plugins.csp.rulesChangedFromDefault).to.be(false);
+      expect(stats.stack_stats.opensearchDashboards.count).to.be.a('number');
+      expect(stats.stack_stats.opensearchDashboards.indices).to.be.a('number');
+      expect(stats.stack_stats.opensearchDashboards.os.platforms[0].platform).to.be.a('string');
+      expect(stats.stack_stats.opensearchDashboards.os.platforms[0].count).to.be(1);
+      expect(stats.stack_stats.opensearchDashboards.os.platformReleases[0].platformRelease).to.be.a('string');
+      expect(stats.stack_stats.opensearchDashboards.os.platformReleases[0].count).to.be(1);
+      expect(stats.stack_stats.opensearchDashboards.plugins.telemetry.opt_in_status).to.be(false);
+      expect(stats.stack_stats.opensearchDashboards.plugins.telemetry.usage_fetcher).to.be.a('string');
+      expect(stats.stack_stats.opensearchDashboards.plugins.stack_management).to.be.an('object');
+      expect(stats.stack_stats.opensearchDashboards.plugins.ui_metric).to.be.an('object');
+      expect(stats.stack_stats.opensearchDashboards.plugins.application_usage).to.be.an('object');
+      expect(stats.stack_stats.opensearchDashboards.plugins.kql.defaultQueryLanguage).to.be.a('string');
+      expect(stats.stack_stats.opensearchDashboards.plugins['tsvb-validation']).to.be.an('object');
+      expect(stats.stack_stats.opensearchDashboards.plugins.localization).to.be.an('object');
+      expect(stats.stack_stats.opensearchDashboards.plugins.csp.strict).to.be(false);
+      expect(stats.stack_stats.opensearchDashboards.plugins.csp.warnLegacyBrowsers).to.be(true);
+      expect(stats.stack_stats.opensearchDashboards.plugins.csp.rulesChangedFromDefault).to.be(false);
 
       // Testing stack_stats.data
       expect(stats.stack_stats.data).to.be.an('object');
@@ -105,7 +105,7 @@ export default function ({ getService }) {
 
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
-        .set('kbn-xsrf', 'xxx')
+        .set('osd-xsrf', 'xxx')
         .send({ timeRange, unencrypted: true })
         .expect(200);
 
@@ -143,11 +143,11 @@ export default function ({ getService }) {
         'cluster_uuid',
         'collection',
         'collectionSource',
-        'stack_stats.kibana.count',
-        'stack_stats.kibana.indices',
-        'stack_stats.kibana.os',
-        'stack_stats.kibana.plugins',
-        'stack_stats.kibana.versions',
+        'stack_stats.opensearchDashboards.count',
+        'stack_stats.opensearchDashboards.indices',
+        'stack_stats.opensearchDashboards.os',
+        'stack_stats.opensearchDashboards.plugins',
+        'stack_stats.opensearchDashboards.versions',
         'timestamp',
         'version',
       ];
@@ -190,13 +190,13 @@ export default function ({ getService }) {
         it('should return application_usage data', async () => {
           const { body } = await supertest
             .post('/api/telemetry/v2/clusters/_stats')
-            .set('kbn-xsrf', 'xxx')
+            .set('osd-xsrf', 'xxx')
             .send({ timeRange, unencrypted: true })
             .expect(200);
 
           expect(body.length).to.be(1);
           const stats = body[0];
-          expect(stats.stack_stats.kibana.plugins.application_usage).to.eql({
+          expect(stats.stack_stats.opensearchDashboards.plugins.application_usage).to.eql({
             'test-app': {
               clicks_total: 10,
               clicks_7_days: 10,
@@ -232,8 +232,8 @@ export default function ({ getService }) {
         });
         after('clean them all', async () => {
           // The SavedObjects API does not allow bulk deleting, and deleting one by one takes ages and the tests timeout
-          await es.deleteByQuery({
-            index: '.kibana',
+          await opensearch.deleteByQuery({
+            index: '.opensearch-dashboards',
             body: { query: { term: { type: 'application_usage_transactional' } } },
           });
         });
@@ -241,13 +241,13 @@ export default function ({ getService }) {
         it("should only use the first 10k docs for the application_usage data (they'll be rolled up in a later process)", async () => {
           const { body } = await supertest
             .post('/api/telemetry/v2/clusters/_stats')
-            .set('kbn-xsrf', 'xxx')
+            .set('osd-xsrf', 'xxx')
             .send({ timeRange, unencrypted: true })
             .expect(200);
 
           expect(body.length).to.be(1);
           const stats = body[0];
-          expect(stats.stack_stats.kibana.plugins.application_usage).to.eql({
+          expect(stats.stack_stats.opensearchDashboards.plugins.application_usage).to.eql({
             'test-app': {
               clicks_total: 10000,
               clicks_7_days: 10000,

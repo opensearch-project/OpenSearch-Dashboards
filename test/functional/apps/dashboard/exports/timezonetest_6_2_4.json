@@ -17,7 +17,7 @@
         "pause": false,
         "value": 0
       },
-      "kibanaSavedObjectMeta": {
+      "opensearchDashboardsSavedObjectMeta": {
         "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
       }
     }

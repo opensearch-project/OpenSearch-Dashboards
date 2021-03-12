@@ -20,28 +20,28 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'settings']);
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
-  const es = getService('legacyEs');
+  const opensearch = getService('legacyOpenSearch');
 
   describe('index pattern empty view', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
-      await esArchiver.unload('logstash_functional');
-      await esArchiver.unload('makelogs');
-      await kibanaServer.uiSettings.replace({});
+      await opensearchArchiver.load('empty_opensearch_dashboards');
+      await opensearchArchiver.unload('logstash_functional');
+      await opensearchArchiver.unload('makelogs');
+      await opensearchDashboardsServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
-      await esArchiver.loadIfNeeded('makelogs');
+      await opensearchArchiver.unload('empty_opensearch_dashboards');
+      await opensearchArchiver.loadIfNeeded('makelogs');
       // @ts-expect-error
-      await es.transport.request({
+      await opensearch.transport.request({
         path: '/logstash-a',
         method: 'DELETE',
       });
@@ -49,20 +49,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     // create index pattern and return to verify list
     it(`shows empty views`, async () => {
-      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       log.debug(
-        `\n\nNOTE: If this test fails make sure there aren't any non-system indices in the _cat/indices output (use esArchiver.unload on them)`
+        `\n\nNOTE: If this test fails make sure there aren't any non-system indices in the _cat/indices output (use opensearchArchiver.unload on them)`
       );
       log.debug(
         // @ts-expect-error
-        await es.transport.request({
+        await opensearch.transport.request({
           path: '/_cat/indices',
           method: 'GET',
         })
       );
       await testSubjects.existOrFail('createAnyway');
       // @ts-expect-error
-      await es.transport.request({
+      await opensearch.transport.request({
         path: '/logstash-a/_doc',
         method: 'POST',
         body: { user: 'matt', message: 20 },

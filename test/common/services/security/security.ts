@@ -26,15 +26,15 @@ import { createTestUserService, TestUserSupertestProvider } from './test_user';
 export async function SecurityServiceProvider(context: FtrProviderContext) {
   const { getService } = context;
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
-  const role = new Role(log, kibanaServer);
-  const user = new User(log, kibanaServer);
+  const role = new Role(log, opensearchDashboardsServer);
+  const user = new User(log, opensearchDashboardsServer);
   const testUser = await createTestUserService(role, user, context);
   const testUserSupertest = TestUserSupertestProvider(context);
 
   return new (class SecurityService {
-    roleMappings = new RoleMappings(log, kibanaServer);
+    roleMappings = new RoleMappings(log, opensearchDashboardsServer);
     testUser = testUser;
     role = role;
     user = user;

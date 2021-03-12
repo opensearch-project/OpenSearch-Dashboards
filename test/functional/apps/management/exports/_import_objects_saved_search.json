@@ -14,7 +14,7 @@
         "desc"
       ],
       "version": 1,
-      "kibanaSavedObjectMeta": {
+      "opensearchDashboardsSavedObjectMeta": {
         "searchSourceJSON": "{\"index\":\"f1e4c910-a2e6-11e7-bb30-233be9be6a15\",\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"php\"},\"filter\":[]}"
       }
     },

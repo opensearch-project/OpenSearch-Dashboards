@@ -2,7 +2,7 @@
 
 These PKCS12 files are used to test SSL with a root CA and an intermediate CA.
 
-The files that are provided by `@kbn/dev-utils` only use a root CA, so we need additional test files for this.
+The files that are provided by `@osd/dev-utils` only use a root CA, so we need additional test files for this.
 
 To generate these additional test files, see the steps below.
 
@@ -16,12 +16,12 @@ EE='localhost'
 
 ## Step 2. Generate PKCS12 key stores
 
-Using [elasticsearch-certutil](https://www.elastic.co/guide/en/elasticsearch/reference/current/certutil.html):
+Using [opensearch-certutil](https://www.elastic.co/guide/en/opensearch/reference/current/certutil.html):
 
 ```sh
-bin/elasticsearch-certutil ca --ca-dn "CN=Test Root CA" -days 18250 --out $CA1.p12 --pass castorepass
-bin/elasticsearch-certutil ca --ca-dn "CN=Test Intermediate CA" -days 18250 --out $CA2.p12 --pass castorepass
-bin/elasticsearch-certutil cert --ca $CA2.p12 --ca-pass castorepass --name $EE --dns $EE --out $EE.p12 --pass storepass
+bin/opensearch-certutil ca --ca-dn "CN=Test Root CA" -days 18250 --out $CA1.p12 --pass castorepass
+bin/opensearch-certutil ca --ca-dn "CN=Test Intermediate CA" -days 18250 --out $CA2.p12 --pass castorepass
+bin/opensearch-certutil cert --ca $CA2.p12 --ca-pass castorepass --name $EE --dns $EE --out $EE.p12 --pass storepass
 ```
 
 ## Step 3. Convert PKCS12 key stores

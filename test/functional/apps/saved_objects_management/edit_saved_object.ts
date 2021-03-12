@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'settings', 'savedObjects']);
   const browser = getService('browser');
@@ -69,23 +69,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // Flaky: https://github.com/elastic/kibana/issues/68400
   describe.skip('saved objects edition page', () => {
     beforeEach(async () => {
-      await esArchiver.load('saved_objects_management/edit_saved_object');
+      await opensearchArchiver.load('saved_objects_management/edit_saved_object');
     });
 
     afterEach(async () => {
-      await esArchiver.unload('saved_objects_management/edit_saved_object');
+      await opensearchArchiver.unload('saved_objects_management/edit_saved_object');
     });
 
     it('allows to update the saved object when submitting', async () => {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.settings.clickOpenSearchDashboardsSavedObjects();
 
       let objects = await PageObjects.savedObjects.getRowTitles();
       expect(objects.includes('A Dashboard')).to.be(true);
 
       await PageObjects.common.navigateToUrl(
         'management',
-        'kibana/objects/savedDashboards/i-exist',
+        'opensearch-dashboards/objects/savedDashboards/i-exist',
         {
           shouldUseHashForSubUrl: false,
         }
@@ -106,7 +106,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await PageObjects.common.navigateToUrl(
         'management',
-        'kibana/objects/savedDashboards/i-exist',
+        'opensearch-dashboards/objects/savedDashboards/i-exist',
         {
           shouldUseHashForSubUrl: false,
         }
@@ -119,7 +119,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('allows to delete a saved object', async () => {
       await PageObjects.common.navigateToUrl(
         'management',
-        'kibana/objects/savedDashboards/i-exist',
+        'opensearch-dashboards/objects/savedDashboards/i-exist',
         {
           shouldUseHashForSubUrl: false,
         }
@@ -134,17 +134,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('preserves the object references when saving', async () => {
       const testVisualizationUrl =
-        'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed';
+        'opensearch-dashboards/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed';
       const visualizationRefs = [
         {
-          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
           type: 'index-pattern',
           id: 'logstash-*',
         },
       ];
 
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.settings.clickOpenSearchDashboardsSavedObjects();
 
       const objects = await PageObjects.savedObjects.getRowTitles();
       expect(objects.includes('A Pie')).to.be(true);

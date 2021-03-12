@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@osd/test/types/ftr';
 // @ts-ignore untyped module
 import getFunctionalConfig from '../../functional/config';
 
@@ -30,11 +30,11 @@ export default async ({ readConfigFile }: FtrConfigProviderContext) => {
 
     testFiles: [require.resolve('./test')],
 
-    kbnTestServer: {
-      ...functionalConfig.kbnTestServer,
+    osdTestServer: {
+      ...functionalConfig.osdTestServer,
       serverArgs: [
-        ...functionalConfig.kbnTestServer.serverArgs,
-        `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/crash.json`,
+        ...functionalConfig.osdTestServer.serverArgs,
+        `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/opensearch-dashboards/crash.json`,
       ],
     },
 

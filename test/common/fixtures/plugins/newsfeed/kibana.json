@@ -1,6 +1,0 @@
-{
-  "id": "newsfeed-fixtures",
-  "version": "kibana",
-  "server": true,
-  "ui": false
-}

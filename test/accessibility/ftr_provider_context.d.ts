@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+import { GenericFtrProviderContext } from '@osd/test/types/ftr';
 
 import { pageObjects } from './page_objects';
 import { services } from './services';

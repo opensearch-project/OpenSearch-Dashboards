@@ -22,7 +22,7 @@ const TEST_DEFAULT_CONTEXT_SIZE = 2;
 const TEST_STEP_SIZE = 2;
 
 export default function ({ getService, getPageObjects }) {
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const retry = getService('retry');
   const docTable = getService('docTable');
   const PageObjects = getPageObjects(['context']);
@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('context size', function contextSize() {
     before(async function () {
-      await kibanaServer.uiSettings.update({
+      await opensearchDashboardsServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
       });

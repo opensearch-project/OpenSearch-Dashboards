@@ -18,7 +18,7 @@
  */
 
 import path from 'path';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@osd/test/types/ftr';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
@@ -28,10 +28,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     services: functionalConfig.get('services'),
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),
-    esTestCluster: functionalConfig.get('esTestCluster'),
+    opensearchTestCluster: functionalConfig.get('opensearchTestCluster'),
     apps: {},
-    esArchiver: {
-      directory: path.resolve(__dirname, '../functional/fixtures/es_archiver'),
+    opensearchArchiver: {
+      directory: path.resolve(__dirname, '../functional/fixtures/opensearch_archiver'),
     },
     snapshots: {
       directory: path.resolve(__dirname, 'snapshots'),
@@ -39,11 +39,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'Security OSS Functional Tests',
     },
-    kbnTestServer: {
-      ...functionalConfig.get('kbnTestServer'),
+    osdTestServer: {
+      ...functionalConfig.get('osdTestServer'),
       serverArgs: [
         ...functionalConfig
-          .get('kbnTestServer.serverArgs')
+          .get('osdTestServer.serverArgs')
           .filter((arg: string) => !arg.startsWith('--security.showInsecureClusterWarning')),
         '--security.showInsecureClusterWarning=true',
         // Required to load new platform plugins via `--plugin-path` flag.

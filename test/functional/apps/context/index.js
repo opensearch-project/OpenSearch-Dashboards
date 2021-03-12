@@ -19,23 +19,23 @@
 
 export default function ({ getService, getPageObjects, loadTestFile }) {
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const PageObjects = getPageObjects(['common']);
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
   describe('context app', function () {
     this.tags('ciGroup1');
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('visualize');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await opensearchArchiver.loadIfNeeded('logstash_functional');
+      await opensearchArchiver.load('visualize');
+      await opensearchDashboardsServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.common.navigateToApp('discover');
     });
 
     after(function unloadMakelogs() {
-      return esArchiver.unload('logstash_functional');
+      return opensearchArchiver.unload('logstash_functional');
     });
 
     loadTestFile(require.resolve('./_context_navigation'));

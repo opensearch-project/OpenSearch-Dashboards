@@ -40,11 +40,11 @@ export async function createTestUserService(
   const testSubjects: TestSubjects | undefined =
     // testSubject service is not normally available in common.
     hasService('testSubjects') ? (getService('testSubjects' as any) as TestSubjects) : undefined;
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
   const enabledPlugins = config.get('security.disableTestUser')
     ? []
-    : await kibanaServer.plugins.getEnabledIds();
+    : await opensearchDashboardsServer.plugins.getEnabledIds();
   const isEnabled = () => {
     return enabledPlugins.includes('security') && !config.get('security.disableTestUser');
   };
@@ -90,9 +90,9 @@ export async function createTestUserService(
           // accept alert if it pops up
           const alert = await browser.getAlert();
           await alert?.accept();
-          if (await testSubjects.exists('kibanaChrome', { allowHidden: true })) {
+          if (await testSubjects.exists('opensearchDashboardsChrome', { allowHidden: true })) {
             await browser.refresh();
-            await testSubjects.find('kibanaChrome', config.get('timeouts.find') * 10);
+            await testSubjects.find('opensearchDashboardsChrome', config.get('timeouts.find') * 10);
           }
         }
       }
@@ -102,11 +102,11 @@ export async function createTestUserService(
 
 export function TestUserSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
-  const kibanaServerConfig = config.get('servers.kibana');
+  const opensearchDashboardsServerConfig = config.get('servers.opensearchDashboards');
 
   return supertestAsPromised(
     formatUrl({
-      ...kibanaServerConfig,
+      ...opensearchDashboardsServerConfig,
       auth: `${TEST_USER_NAME}:${TEST_USER_PASSWORD}`,
     })
   );

@@ -1,0 +1,9 @@
+{
+  "id": "index_patterns_test_plugin",
+  "version": "0.0.1",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "configPath": ["index_patterns_test_plugin"],
+  "server": true,
+  "ui": false,
+  "requiredPlugins": ["data"]
+}

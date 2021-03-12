@@ -1,0 +1,16 @@
+{
+  "id": "osd_tp_run_pipeline",
+  "version": "0.0.1",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "requiredPlugins": [
+    "data",
+    "savedObjects",
+    "opensearchDashboardsUtils",
+    "expressions"
+  ],
+  "server": false,
+  "ui": true,
+  "requiredBundles": [
+    "inspector"
+  ]
+}

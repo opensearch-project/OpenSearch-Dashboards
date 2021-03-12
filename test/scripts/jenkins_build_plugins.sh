@@ -2,10 +2,10 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-echo " -> building kibana platform plugins"
-node scripts/build_kibana_platform_plugins \
+echo " -> building OpenSearch Dashboards 's platform plugins"
+node scripts/build_opensearch_dashboards_platform_plugins \
   --oss \
-  --scan-dir "$KIBANA_DIR/test/plugin_functional/plugins" \
-  --scan-dir "$KIBANA_DIR/test/interpreter_functional/plugins" \
+  --scan-dir "$OPENSEARCH_DASHBOARDS_DIR/test/plugin_functional/plugins" \
+  --scan-dir "$OPENSEARCH_DASHBOARDS_DIR/test/interpreter_functional/plugins" \
   --workers 6 \
   --verbose

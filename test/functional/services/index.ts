@@ -51,12 +51,12 @@ import { ToastsProvider } from './toasts';
 import { DataGridProvider } from './data_grid';
 import {
   PieChartProvider,
-  ElasticChartProvider,
+  OpenSearchChartProvider,
   VegaDebugInspectorViewProvider,
 } from './visualizations';
 import { ListingTableProvider } from './listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
-import { KibanaSupertestProvider } from './supertest';
+import { OpenSearchDashboardsSupertestProvider } from './supertest';
 import { MenuToggleProvider } from './menu_toggle';
 
 export const services = {
@@ -91,8 +91,8 @@ export const services = {
   globalNav: GlobalNavProvider,
   toasts: ToastsProvider,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
-  elasticChart: ElasticChartProvider,
-  supertest: KibanaSupertestProvider,
+  opensearchChart: OpenSearchChartProvider,
+  supertest: OpenSearchDashboardsSupertestProvider,
   managementMenu: ManagementMenuProvider,
   MenuToggle: MenuToggleProvider,
 };

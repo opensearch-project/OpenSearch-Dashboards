@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Plugin, CoreSetup, CoreStart } from 'kibana/public';
+import { Plugin, CoreSetup, CoreStart } from 'opensearch-dashboards/public';
 import '../types';
 
 export const plugin = () => new CoreProviderPlugin();

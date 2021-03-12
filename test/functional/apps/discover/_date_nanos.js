@@ -17,28 +17,28 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const security = getService('security');
   const fromTime = 'Sep 22, 2019 @ 20:31:44.000';
   const toTime = 'Sep 23, 2019 @ 03:31:44.000';
 
   describe('date_nanos', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('date_nanos');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'date-nanos' });
-      await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
+      await opensearchArchiver.loadIfNeeded('date_nanos');
+      await opensearchDashboardsServer.uiSettings.replace({ defaultIndex: 'date-nanos' });
+      await security.testUser.setRoles(['opensearch_dashboards_admin', 'opensearch_dashboards_date_nanos']);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     after(async function unloadMakelogs() {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('date_nanos');
+      await opensearchArchiver.unload('date_nanos');
     });
 
     it('should show a timestamp with nanoseconds in the first result row', async function () {
