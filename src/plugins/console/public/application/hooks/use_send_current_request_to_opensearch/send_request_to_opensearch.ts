@@ -18,23 +18,23 @@
  */
 
 import { extractDeprecationMessages } from '../../../lib/utils';
-import { XJson } from '../../../../../es_ui_shared/public';
+import { XJson } from '../../../../../opensearch_ui_shared/public';
 const { collapseLiteralStrings } = XJson;
 // @ts-ignore
-import * as es from '../../../lib/es/es';
+import * as opensearch from '../../../lib/opensearch/opensearch';
 import { BaseResponseType } from '../../../types';
 
-export interface EsRequestArgs {
+export interface OpenSearchRequestArgs {
   requests: any;
 }
 
-export interface ESRequestObject {
+export interface OpenSearchRequestObject {
   path: string;
   data: any;
   method: string;
 }
 
-export interface ESResponseObject<V = unknown> {
+export interface OpenSearchResponseObject<V = unknown> {
   statusCode: number;
   statusText: string;
   timeMs: number;
@@ -42,17 +42,17 @@ export interface ESResponseObject<V = unknown> {
   value: V;
 }
 
-export interface ESRequestResult<V = unknown> {
-  request: ESRequestObject;
-  response: ESResponseObject<V>;
+export interface OpenSearchRequestResult<V = unknown> {
+  request: OpenSearchRequestObject;
+  response: OpenSearchResponseObject<V>;
 }
 
 let CURRENT_REQ_ID = 0;
-export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]> {
+export function sendRequestToOpenSearch(args: OpenSearchRequestArgs): Promise<OpenSearchRequestResult[]> {
   const requests = args.requests.slice();
   return new Promise((resolve, reject) => {
     const reqId = ++CURRENT_REQ_ID;
-    const results: ESRequestResult[] = [];
+    const results: OpenSearchRequestResult[] = [];
     if (reqId !== CURRENT_REQ_ID) {
       return;
     }
@@ -73,15 +73,15 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
         return;
       }
       const req = requests.shift();
-      const esPath = req.url;
-      const esMethod = req.method;
-      let esData = collapseLiteralStrings(req.data.join('\n'));
-      if (esData) {
-        esData += '\n';
+      const opensearchPath = req.url;
+      const opensearchMethod = req.method;
+      let opensearchData = collapseLiteralStrings(req.data.join('\n'));
+      if (opensearchData) {
+        opensearchData += '\n';
       } // append a new line for bulk requests.
 
       const startTime = Date.now();
-      es.send(esMethod, esPath, esData).always(
+      opensearch.send(opensearchMethod, opensearchPath, opensearchData).always(
         (dataOrjqXHR: any, textStatus: string, jqXhrORerrorThrown: any) => {
           if (reqId !== CURRENT_REQ_ID) {
             return;
@@ -116,9 +116,9 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
                 value,
               },
               request: {
-                data: esData,
-                method: esMethod,
-                path: esPath,
+                data: opensearchData,
+                method: opensearchMethod,
+                path: opensearchPath,
               },
             });
 
@@ -128,7 +128,7 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
             let value;
             let contentType: string;
             if (xhr.responseText) {
-              value = xhr.responseText; // ES error should be shown
+              value = xhr.responseText; // OpenSearch error should be shown
               contentType = xhr.getResponseHeader('Content-Type');
             } else {
               value = 'Request failed to get to the server (status code: ' + xhr.status + ')';
@@ -146,9 +146,9 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
                 statusText: xhr.statusText,
               },
               request: {
-                data: esData,
-                method: esMethod,
-                path: esPath,
+                data: opensearchData,
+                method: opensearchMethod,
+                path: opensearchPath,
               },
             });
           }

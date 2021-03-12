@@ -17,4 +17,28 @@
  * under the License.
  */
 
-export { send, constructESUrl, getContentType, getVersion } from './es';
+import { getContentType } from '../opensearch';
+
+const APPLICATION_JSON = 'application/json';
+describe('Content type', () => {
+  test('body', () => {
+    const contentType = getContentType(
+      [
+        JSON.stringify({
+          foo: 'baz',
+        }),
+        JSON.stringify({
+          foo: 'bar',
+        }),
+      ].join('\n')
+    );
+
+    expect(contentType).toEqual(APPLICATION_JSON);
+  });
+
+  test('no body', () => {
+    const contentType = getContentType('');
+
+    expect(contentType).toBeUndefined();
+  });
+});

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from 'opensearch-dashboards/server';
 
 import { ConfigType, config as configSchema } from './config';
 import { ConsoleServerPlugin } from './plugin';

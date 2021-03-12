@@ -17,28 +17,28 @@
  * under the License.
  */
 import { first } from 'rxjs/operators';
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'opensearch-dashboards/server';
 
 import { ProxyConfigCollection } from './lib';
-import { SpecDefinitionsService, EsLegacyConfigService } from './services';
+import { SpecDefinitionsService, OpenSearchLegacyConfigService } from './services';
 import { ConfigType } from './config';
 
 import { registerRoutes } from './routes';
 
-import { ESConfigForProxy, ConsoleSetup, ConsoleStart } from './types';
+import { OpenSearchConfigForProxy, ConsoleSetup, ConsoleStart } from './types';
 
 export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
   log: Logger;
 
   specDefinitionsService = new SpecDefinitionsService();
 
-  esLegacyConfigService = new EsLegacyConfigService();
+  opensearchLegacyConfigService = new OpenSearchLegacyConfigService();
 
   constructor(private readonly ctx: PluginInitializerContext<ConfigType>) {
     this.log = this.ctx.logger.get();
   }
 
-  async setup({ http, capabilities, getStartServices, elasticsearch }: CoreSetup) {
+  async setup({ http, capabilities, getStartServices, opensearch }: CoreSetup) {
     capabilities.registerProvider(() => ({
       dev_tools: {
         show: true,
@@ -50,7 +50,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
     const globalConfig = await this.ctx.config.legacy.globalConfig$.pipe(first()).toPromise();
     const proxyPathFilters = config.proxyFilter.map((str: string) => new RegExp(str));
 
-    this.esLegacyConfigService.setup(elasticsearch.legacy.config$);
+    this.opensearchLegacyConfigService.setup(opensearch.legacy.config$);
 
     const router = http.createRouter();
 
@@ -58,15 +58,15 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
       router,
       log: this.log,
       services: {
-        esLegacyConfigService: this.esLegacyConfigService,
+        opensearchLegacyConfigService: this.opensearchLegacyConfigService,
         specDefinitionService: this.specDefinitionsService,
       },
       proxy: {
         proxyConfigCollection: new ProxyConfigCollection(config.proxyConfig),
-        readLegacyESConfig: async (): Promise<ESConfigForProxy> => {
-          const legacyConfig = await this.esLegacyConfigService.readConfig();
+        readLegacyESConfig: async (): Promise<OpenSearchConfigForProxy> => {
+          const legacyConfig = await this.opensearchLegacyConfigService.readConfig();
           return {
-            ...globalConfig.elasticsearch,
+            ...globalConfig.opensearch,
             ...legacyConfig,
           };
         },
@@ -86,6 +86,6 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
   }
 
   stop() {
-    this.esLegacyConfigService.stop();
+    this.opensearchLegacyConfigService.stop();
   }
 }

@@ -20,7 +20,7 @@
 import { duration } from 'moment';
 import { getProxyRouteHandlerDeps } from './mocks';
 
-import { kibanaResponseFactory } from '../../../../../../../../core/server';
+import { opensearchDashboardsResponseFactory } from '../../../../../../../../core/server';
 import * as requestModule from '../../../../../lib/proxy_request';
 import { createHandler } from '../create_handler';
 
@@ -39,7 +39,7 @@ describe('Console Proxy Route', () => {
       const handler = createHandler(
         getProxyRouteHandlerDeps({
           proxy: {
-            readLegacyESConfig: async () => ({
+            readLegacyOpenSearchConfig: async () => ({
               requestTimeout: duration(30000),
               customHeaders: {},
               requestHeadersWhitelist: [],
@@ -55,11 +55,11 @@ describe('Console Proxy Route', () => {
           headers: {},
           query: { method: 'get', path: 'test' },
         } as any,
-        kibanaResponseFactory
+        opensearchDashboardsResponseFactory
       );
 
       expect(response.status).toBe(502);
-      // Return the message from the ES node we attempted last.
+      // Return the message from the OpenSearch node we attempted last.
       expect(response.payload.message).toBe('ESOCKETTIMEDOUT');
     });
   });

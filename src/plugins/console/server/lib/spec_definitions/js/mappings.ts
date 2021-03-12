@@ -96,7 +96,7 @@ export const mappings = (specService: SpecDefinitionsService) => {
           norms: BOOLEAN,
           coerce: BOOLEAN,
 
-          // Not actually available in V6 of ES. Add when updating the autocompletion system.
+          // Not actually available in V6 of OpenSearch. Add when updating the autocompletion system.
           // index_phrases: BOOLEAN,
           // index_prefixes: { min_chars, max_chars },
 

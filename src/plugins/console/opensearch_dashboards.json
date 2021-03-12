@@ -1,0 +1,9 @@
+{
+  "id": "console",
+  "version": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["devTools"],
+  "optionalPlugins": ["usageCollection", "home"],
+  "requiredBundles": ["opensearchUiShared", "opensearchDashboardsReact", "opensearchDashboardsUtils", "home"]
+}

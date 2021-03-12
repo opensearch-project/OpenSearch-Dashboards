@@ -18,7 +18,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { memoize } from 'lodash';
 import moment from 'moment';
 import {

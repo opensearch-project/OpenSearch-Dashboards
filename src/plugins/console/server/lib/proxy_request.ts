@@ -42,7 +42,7 @@ const sanitizeHostname = (hostName: string): string =>
   hostName.trim().replace(/^\[/, '').replace(/\]$/, '');
 
 // We use a modified version of Hapi's Wreck because Hapi, Axios, and Superagent don't support GET requests
-// with bodies, but ES APIs do. Similarly with DELETE requests with bodies. Another library, `request`
+// with bodies, but OpenSearch APIs do. Similarly with DELETE requests with bodies. Another library, `request`
 // diverged too much from current behaviour.
 export const proxyRequest = ({
   method,

@@ -31,7 +31,7 @@ export type ConsoleStart = ReturnType<ConsoleServerPlugin['start']> extends Prom
   : ReturnType<ConsoleServerPlugin['start']>;
 
 /** @internal */
-export interface ESConfigForProxy {
+export interface OpenSearchConfigForProxy {
   hosts: string[];
   requestHeadersWhitelist: string[];
   customHeaders: Record<string, any>;

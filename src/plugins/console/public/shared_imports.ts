@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { sendRequest, XJson } from '../../es_ui_shared/public';
+import { sendRequest, XJson } from '../../opensearch_ui_shared/public';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 

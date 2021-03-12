@@ -22,7 +22,7 @@ import { debounce } from 'lodash';
 import { EuiProgress } from '@elastic/eui';
 
 import { EditorContentSpinner } from '../../components';
-import { Panel, PanelsContainer } from '../../../../../kibana_react/public';
+import { Panel, PanelsContainer } from '../../../../../opensearch_dashboards_react/public';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { StorageKeys } from '../../../services';
 import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
