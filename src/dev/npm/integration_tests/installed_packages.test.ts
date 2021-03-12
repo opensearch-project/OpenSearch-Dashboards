@@ -21,18 +21,18 @@ import { resolve, sep } from 'path';
 
 import { uniq } from 'lodash';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@osd/utils';
 import { getInstalledPackages, InstalledPackage } from '../installed_packages';
 
 const FIXTURE1_ROOT = resolve(__dirname, '__fixtures__/fixture1');
 
 describe('src/dev/npm/installed_packages', () => {
   describe('getInstalledPackages()', function () {
-    let kibanaPackages: InstalledPackage[];
+    let opensearchDashboardsPackages: InstalledPackage[];
     let fixture1Packages: InstalledPackage[];
 
     beforeAll(async function () {
-      [kibanaPackages, fixture1Packages] = await Promise.all([
+      [opensearchDashboardsPackages, fixture1Packages] = await Promise.all([
         getInstalledPackages({
           directory: REPO_ROOT,
         }),
@@ -76,13 +76,13 @@ describe('src/dev/npm/installed_packages', () => {
     });
 
     it('returns a single entry for every package/version combo', () => {
-      const tags = kibanaPackages.map((pkg) => `${pkg.name}@${pkg.version}`);
+      const tags = opensearchDashboardsPackages.map((pkg) => `${pkg.name}@${pkg.version}`);
       expect(tags).toEqual(uniq(tags));
     });
 
     it('does not include root package in the list', () => {
-      if (kibanaPackages.find((pkg) => pkg.name === 'kibana')) {
-        throw new Error('Expected getInstalledPackages(kibana) to not include kibana pkg');
+      if (opensearchDashboardsPackages.find((pkg) => pkg.name === 'opensearch-dashboards')) {
+        throw new Error('Expected getInstalledPackages(opensearch-dashboards) to not include opensearch-dashboards pkg');
       }
 
       if (fixture1Packages.find((pkg) => pkg.name === 'fixture1')) {

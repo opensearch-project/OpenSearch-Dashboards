@@ -18,7 +18,7 @@
  */
 
 import execa from 'execa';
-import { run, ToolingLog } from '@kbn/dev-utils';
+import { run, ToolingLog } from '@osd/dev-utils';
 
 export async function buildAllRefs(log: ToolingLog) {
   await buildRefs(log, 'tsconfig.refs.json');

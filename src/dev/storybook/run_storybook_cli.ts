@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { run, createFlagError } from '@kbn/dev-utils';
+import { run, createFlagError } from '@osd/dev-utils';
 // @ts-ignore
-import { runStorybookCli } from '@kbn/storybook';
+import { runStorybookCli } from '@osd/storybook';
 import { storybookAliases } from './aliases';
 import { clean } from './commands/clean';
 

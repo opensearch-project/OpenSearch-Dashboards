@@ -32,9 +32,9 @@ function checkout_sibling {
     }
 
     function pick_clone_target {
-      echo "To develop Kibana features against a specific branch of ${project} and being able to"
+      echo "To develop OpenSearch Dashboards features against a specific branch of ${project} and being able to"
       echo "test that feature also on CI, the CI is trying to find branches on ${project} with the same name as"
-      echo "the Kibana branch (first on your fork and then upstream) before building from master."
+      echo "the OpenSearch Dashboards branch (first on your fork and then upstream) before building from master."
       echo "picking which branch of ${project} to clone:"
       if [[ -n "$PR_AUTHOR" && -n "$PR_SOURCE_BRANCH" ]]; then
         cloneAuthor="$PR_AUTHOR"
@@ -50,12 +50,12 @@ function checkout_sibling {
         return 0
       fi
 
-      cloneBranch="${PR_TARGET_BRANCH:-$KIBANA_PKG_BRANCH}"
+      cloneBranch="${PR_TARGET_BRANCH:-$OPENSEARCH_DASHBOARDS_PKG_BRANCH}"
       if clone_target_is_valid ; then
         return 0
       fi
 
-      cloneBranch="$KIBANA_PKG_BRANCH"
+      cloneBranch="$OPENSEARCH_DASHBOARDS_PKG_BRANCH"
       if clone_target_is_valid; then
         return 0
       fi
@@ -67,9 +67,9 @@ function checkout_sibling {
     function checkout_clone_target {
       pick_clone_target
 
-      if [[ "$cloneAuthor/$cloneBranch" != "elastic/$KIBANA_PKG_BRANCH" ]]; then
-        echo " -> Setting TEST_ES_FROM=source so that ES in tests will be built from $cloneAuthor/$cloneBranch"
-        export TEST_ES_FROM=source
+      if [[ "$cloneAuthor/$cloneBranch" != "elastic/$OPENSEARCH_DASHBOARDS_PKG_BRANCH" ]]; then
+        echo " -> Setting TEST_OPENSEARCH_FROM=source so that OpenSearch in tests will be built from $cloneAuthor/$cloneBranch"
+        export TEST_OPENSEARCH_FROM=source
       fi
 
       echo " -> checking out '${cloneBranch}' branch from ${cloneAuthor}/${project}..."
@@ -89,30 +89,30 @@ function checkout_sibling {
   fi
 }
 
-checkout_sibling "elasticsearch" "${WORKSPACE}/elasticsearch" "USE_EXISTING_ES"
-export TEST_ES_FROM=${TEST_ES_FROM:-snapshot}
+checkout_sibling "opensearch" "${WORKSPACE}/opensearch" "USE_EXISTING_OPENSEARCH"
+export TEST_OPENSEARCH_FROM=${TEST_OPENSEARCH_FROM:-snapshot}
 
-# Set the JAVA_HOME based on the Java property file in the ES repo
+# Set the JAVA_HOME based on the Java property file in the OpenSearch repo
 # This assumes the naming convention used on CI (ex: ~/.java/java10)
-ES_DIR="$WORKSPACE/elasticsearch"
-ES_JAVA_PROP_PATH=$ES_DIR/.ci/java-versions.properties
+OPENSEARCH_DIR="$WORKSPACE/opensearch"
+OPENSEARCH_JAVA_PROP_PATH=$OPENSEARCH_DIR/.ci/java-versions.properties
 
 
-if [ ! -f "$ES_JAVA_PROP_PATH" ]; then
-  echo "Unable to set JAVA_HOME, $ES_JAVA_PROP_PATH does not exist"
+if [ ! -f "$OPENSEARCH_JAVA_PROP_PATH" ]; then
+  echo "Unable to set JAVA_HOME, $OPENSEARCH_JAVA_PROP_PATH does not exist"
   exit 1
 fi
 
 # While sourcing the property file would currently work, we want
 # to support the case where whitespace surrounds the equals.
 # This has the added benefit of explicitly exporting property values
-ES_BUILD_JAVA="$(grep "^ES_BUILD_JAVA" "$ES_JAVA_PROP_PATH" | cut -d'=' -f2 | tr -d '[:space:]')"
-export ES_BUILD_JAVA
+OPENSEARCH_BUILD_JAVA="$(grep "^OPENSEARCH_BUILD_JAVA" "$OPENSEARCH_JAVA_PROP_PATH" | cut -d'=' -f2 | tr -d '[:space:]')"
+export OPENSEARCH_BUILD_JAVA
 
-if [ -z "$ES_BUILD_JAVA" ]; then
-  echo "Unable to set JAVA_HOME, ES_BUILD_JAVA not present in $ES_JAVA_PROP_PATH"
+if [ -z "$OPENSEARCH_BUILD_JAVA" ]; then
+  echo "Unable to set JAVA_HOME, OPENSEARCH_BUILD_JAVA not present in $OPENSEARCH_JAVA_PROP_PATH"
   exit 1
 fi
 
-echo "Setting JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA"
-export JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA
+echo "Setting JAVA_HOME=$HOME/.java/$OPENSEARCH_BUILD_JAVA"
+export JAVA_HOME=$HOME/.java/$OPENSEARCH_BUILD_JAVA

@@ -19,7 +19,7 @@
 
 import { resolve } from 'path';
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 import { assertLicensesValid } from '../valid';
 

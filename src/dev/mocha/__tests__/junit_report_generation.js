@@ -24,8 +24,8 @@ import { fromNode as fcb } from 'bluebird';
 import { parseString } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
-import expect from '@kbn/expect';
-import { getUniqueJunitReportPath } from '@kbn/test';
+import expect from '@osd/expect';
+import { getUniqueJunitReportPath } from '@osd/test';
 
 import { setupJUnitReportGeneration } from '../junit_report_generation';
 

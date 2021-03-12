@@ -21,8 +21,8 @@ import { resolve, relative } from 'path';
 
 import execa from 'execa';
 
-import { run } from '@kbn/dev-utils';
-import { REPO_ROOT } from '@kbn/utils';
+import { run } from '@osd/dev-utils';
+import { REPO_ROOT } from '@osd/utils';
 
 import { File } from '../file';
 import { PROJECTS } from './projects';

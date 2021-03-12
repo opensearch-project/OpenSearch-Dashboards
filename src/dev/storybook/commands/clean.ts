@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
-import { REPO_ROOT } from '@kbn/utils';
+import { ToolingLog } from '@osd/dev-utils';
+import { REPO_ROOT } from '@osd/utils';
 import { join } from 'path';
 import del from 'del';
 

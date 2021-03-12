@@ -20,7 +20,7 @@
 import { parse } from 'eslint/lib/options';
 
 const options = parse(process.argv);
-process.env.KIBANA_RESOLVER_HARD_CACHE = 'true';
+process.env.OPENSEARCH_DASHBOARDS_RESOLVER_HARD_CACHE = 'true';
 
 if (!options._.length && !options.printConfig) {
   process.argv.push('.');

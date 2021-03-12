@@ -19,12 +19,12 @@
 
 import glob from 'glob';
 import { resolve } from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@osd/utils';
 import { Project } from './project';
 
 export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'tsconfig.json')),
-  new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), { name: 'kibana/test' }),
+  new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), { name: 'opensearch-dashboards/test' }),
   new Project(resolve(REPO_ROOT, 'src/test_utils/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'src/core/tsconfig.json')),
 

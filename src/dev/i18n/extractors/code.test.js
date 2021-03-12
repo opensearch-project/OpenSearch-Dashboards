@@ -28,18 +28,18 @@ import {
 import { traverseNodes } from '../utils';
 
 const extractCodeMessagesSource = Buffer.from(`
-i18n('kbn.mgmt.id-1', { defaultMessage: 'Message text 1' });
+i18n('osd.mgmt.id-1', { defaultMessage: 'Message text 1' });
 
 class Component extends PureComponent {
   render() {
     return (
       <div>
         <FormattedMessage
-          id="kbn.mgmt.id-2"
+          id="osd.mgmt.id-2"
           defaultMessage="Message text 2"
           description="Message description"
         />
-        {intl.formatMessage({ id: 'kbn.mgmt.id-3', defaultMessage: 'Message text 3' })}
+        {intl.formatMessage({ id: 'osd.mgmt.id-3', defaultMessage: 'Message text 3' })}
       </div>
     );
   }
@@ -47,17 +47,17 @@ class Component extends PureComponent {
 `);
 
 const intlFormatMessageSource = `
-  formatMessage({ id: 'kbn.mgmt.id-1', defaultMessage: 'Message text 1', description: 'Message description' });
-  intl.formatMessage({ id: 'kbn.mgmt.id-2', defaultMessage: 'Message text 2', description: 'Message description' });
-  props.intl.formatMessage({ id: 'kbn.mgmt.id-5', defaultMessage: 'Message text 5', description: 'Message description' });
-  this.props.intl.formatMessage({ id: 'kbn.mgmt.id-6', defaultMessage: 'Message text 6', description: 'Message description' });
+  formatMessage({ id: 'osd.mgmt.id-1', defaultMessage: 'Message text 1', description: 'Message description' });
+  intl.formatMessage({ id: 'osd.mgmt.id-2', defaultMessage: 'Message text 2', description: 'Message description' });
+  props.intl.formatMessage({ id: 'osd.mgmt.id-5', defaultMessage: 'Message text 5', description: 'Message description' });
+  this.props.intl.formatMessage({ id: 'osd.mgmt.id-6', defaultMessage: 'Message text 6', description: 'Message description' });
 `;
 
 const formattedMessageSource = `
 function f() {
   return (
     <FormattedMessage
-      id="kbn.mgmt.id-1"
+      id="osd.mgmt.id-1"
       defaultMessage="Message text 1"
       description="Message description"
     />
