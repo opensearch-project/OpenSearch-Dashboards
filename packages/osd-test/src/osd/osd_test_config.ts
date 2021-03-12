@@ -34,7 +34,7 @@ export const osdTestConfig = new (class OsdTestConfig {
   }
 
   getUrlParts(): UrlParts {
-    // allow setting one complete TEST_OPENSEARCH_DASHBOARDS_URL for opensearch like https://elastic:changeme@example.com:9200
+    // allow setting one complete TEST_OPENSEARCH_DASHBOARDS_URL for opensearch like https://opensearch:changeme@example.com:9200
     if (process.env.TEST_OPENSEARCH_DASHBOARDS_URL) {
       const testOpenSearchDashboardsUrl = url.parse(process.env.TEST_OPENSEARCH_DASHBOARDS_URL);
       return {
