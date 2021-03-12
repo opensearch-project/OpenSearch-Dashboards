@@ -19,11 +19,11 @@
 
 import { ratios } from './filter_ratios';
 
-describe('ratios(req, panel, series, esQueryConfig, indexPatternObject)', () => {
+describe('ratios(req, panel, series, opensearchQueryConfig, indexPatternObject)', () => {
   let panel;
   let series;
   let req;
-  let esQueryConfig;
+  let opensearchQueryConfig;
   let indexPatternObject;
   beforeEach(() => {
     panel = {
@@ -53,7 +53,7 @@ describe('ratios(req, panel, series, esQueryConfig, indexPatternObject)', () => 
         },
       },
     };
-    esQueryConfig = {
+    opensearchQueryConfig = {
       allowLeadingWildcards: true,
       queryStringOptions: { analyze_wildcard: true },
       ignoreFilterIfFieldNotInIndex: false,
@@ -63,13 +63,13 @@ describe('ratios(req, panel, series, esQueryConfig, indexPatternObject)', () => 
 
   test('calls next when finished', () => {
     const next = jest.fn();
-    ratios(req, panel, series, esQueryConfig, indexPatternObject)(next)({});
+    ratios(req, panel, series, opensearchQueryConfig, indexPatternObject)(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
 
   test('returns filter ratio aggs', () => {
     const next = (doc) => doc;
-    const doc = ratios(req, panel, series, esQueryConfig, indexPatternObject)(next)({});
+    const doc = ratios(req, panel, series, opensearchQueryConfig, indexPatternObject)(next)({});
     expect(doc).toEqual({
       aggs: {
         test: {
@@ -146,7 +146,7 @@ describe('ratios(req, panel, series, esQueryConfig, indexPatternObject)', () => 
   test('returns empty object when field is not set', () => {
     delete series.metrics[0].field;
     const next = (doc) => doc;
-    const doc = ratios(req, panel, series, esQueryConfig, indexPatternObject)(next)({});
+    const doc = ratios(req, panel, series, opensearchQueryConfig, indexPatternObject)(next)({});
     expect(doc).toEqual({
       aggs: {
         test: {

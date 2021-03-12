@@ -32,8 +32,8 @@ import { extractIndexPatterns } from '../../../../../plugins/vis_type_timeseries
 import { getSavedObjectsClient, getUISettings, getDataStart, getCoreStart } from '../../services';
 
 import { CoreStartContextProvider } from '../contexts/query_input_bar_context';
-import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
-import { Storage } from '../../../../../plugins/kibana_utils/public';
+import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
+import { Storage } from '../../../../../plugins/opensearch_dashboards_utils/public';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 const APP_NAME = 'VisEditor';
@@ -161,9 +161,9 @@ export class VisEditor extends Component {
     const { model } = this.state;
 
     if (model) {
-      //TODO: Remove CoreStartContextProvider, KibanaContextProvider should be raised to the top of the plugin.
+      //TODO: Remove CoreStartContextProvider, OpenSearchDashboardsContextProvider should be raised to the top of the plugin.
       return (
-        <KibanaContextProvider
+        <OpenSearchDashboardsContextProvider
           services={{
             appName: APP_NAME,
             storage: this.localStorage,
@@ -203,7 +203,7 @@ export class VisEditor extends Component {
               </CoreStartContextProvider>
             </div>
           </div>
-        </KibanaContextProvider>
+        </OpenSearchDashboardsContextProvider>
       );
     }
 

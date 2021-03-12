@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import handlebars from 'handlebars/dist/handlebars';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 export function replaceVars(str, args = {}, vars = {}) {
   try {

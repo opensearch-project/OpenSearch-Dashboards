@@ -1,10 +1,10 @@
 {
   "id": "visTypeTimeseries",
   "version": "8.0.0",
-  "kibanaVersion": "kibana",
+  "opensearchDashboardsVersion": "opensearchDashboards",
   "server": true,
   "ui": true,
   "requiredPlugins": ["charts", "data", "expressions", "visualizations"],
   "optionalPlugins": ["usageCollection"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact"]
+  "requiredBundles": ["opensearchDashboardsUtils", "opensearchDashboardsReact"]
 }

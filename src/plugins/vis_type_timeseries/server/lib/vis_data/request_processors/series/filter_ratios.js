@@ -20,21 +20,21 @@
 const filter = (metric) => metric.type === 'filter_ratio';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import { overwrite } from '../../helpers';
-import { esQuery } from '../../../../../../data/server';
+import { opensearchQuery } from '../../../../../../data/server';
 
-export function ratios(req, panel, series, esQueryConfig, indexPatternObject) {
+export function ratios(req, panel, series, opensearchQueryConfig, indexPatternObject) {
   return (next) => (doc) => {
     if (series.metrics.some(filter)) {
       series.metrics.filter(filter).forEach((metric) => {
         overwrite(
           doc,
           `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-numerator.filter`,
-          esQuery.buildEsQuery(indexPatternObject, metric.numerator, [], esQueryConfig)
+          opensearchQuery.buildOpenSearchQuery(indexPatternObject, metric.numerator, [], opensearchQueryConfig)
         );
         overwrite(
           doc,
           `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-denominator.filter`,
-          esQuery.buildEsQuery(indexPatternObject, metric.denominator, [], esQueryConfig)
+          opensearchQuery.buildOpenSearchQuery(indexPatternObject, metric.denominator, [], opensearchQueryConfig)
         );
 
         let numeratorPath = `${metric.id}-numerator>_count`;

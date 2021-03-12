@@ -19,7 +19,7 @@
 
 import Color from 'color';
 
-export function getSplitColors(inputColor, size = 10, style = 'kibana') {
+export function getSplitColors(inputColor, size = 10, style = 'opensearchDashboards') {
   const color = new Color(inputColor);
   const colors = [];
   let workingColor = Color.hsl(color.hsl().object());

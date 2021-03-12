@@ -26,7 +26,7 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { AggSelect } from '../agg_select';
 // @ts-ignore
 import { FieldSelect } from '../field_select';

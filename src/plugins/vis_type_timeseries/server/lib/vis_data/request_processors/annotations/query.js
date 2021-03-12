@@ -19,9 +19,9 @@
 
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getTimerange } from '../../helpers/get_timerange';
-import { esQuery } from '../../../../../../data/server';
+import { opensearchQuery } from '../../../../../../data/server';
 
-export function query(req, panel, annotation, esQueryConfig, indexPattern, capabilities) {
+export function query(req, panel, annotation, opensearchQueryConfig, indexPattern, capabilities) {
   return (next) => (doc) => {
     const timeField = annotation.time_field;
     const { bucketSize } = getBucketSize(req, 'auto', capabilities);
@@ -30,7 +30,7 @@ export function query(req, panel, annotation, esQueryConfig, indexPattern, capab
     doc.size = 0;
     const queries = !annotation.ignore_global_filters ? req.payload.query : [];
     const filters = !annotation.ignore_global_filters ? req.payload.filters : [];
-    doc.query = esQuery.buildEsQuery(indexPattern, queries, filters, esQueryConfig);
+    doc.query = opensearchQuery.buildOpenSearchQuery(indexPattern, queries, filters, opensearchQueryConfig);
     const timerange = {
       range: {
         [timeField]: {
@@ -44,13 +44,13 @@ export function query(req, panel, annotation, esQueryConfig, indexPattern, capab
 
     if (annotation.query_string) {
       doc.query.bool.must.push(
-        esQuery.buildEsQuery(indexPattern, [annotation.query_string], [], esQueryConfig)
+        opensearchQuery.buildOpenSearchQuery(indexPattern, [annotation.query_string], [], opensearchQueryConfig)
       );
     }
 
     if (!annotation.ignore_panel_filters && panel.filter) {
       doc.query.bool.must.push(
-        esQuery.buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig)
+        opensearchQuery.buildOpenSearchQuery(indexPattern, [panel.filter], [], opensearchQueryConfig)
       );
     }
 

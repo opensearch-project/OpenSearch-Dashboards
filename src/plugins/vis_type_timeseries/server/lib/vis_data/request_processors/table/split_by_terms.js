@@ -18,9 +18,9 @@
  */
 
 import { overwrite } from '../../helpers';
-import { esQuery } from '../../../../../../data/server';
+import { opensearchQuery } from '../../../../../../data/server';
 
-export function splitByTerms(req, panel, esQueryConfig, indexPattern) {
+export function splitByTerms(req, panel, opensearchQueryConfig, indexPattern) {
   return (next) => (doc) => {
     panel.series
       .filter((c) => c.aggregate_by && c.aggregate_function)
@@ -32,7 +32,7 @@ export function splitByTerms(req, panel, esQueryConfig, indexPattern) {
           overwrite(
             doc,
             `aggs.pivot.aggs.${column.id}.column_filter.filter`,
-            esQuery.buildEsQuery(indexPattern, [column.filter], [], esQueryConfig)
+            opensearchQuery.buildOpenSearchQuery(indexPattern, [column.filter], [], opensearchQueryConfig)
           );
         }
       });

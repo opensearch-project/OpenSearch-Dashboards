@@ -18,15 +18,15 @@
  */
 
 import { overwrite } from '../../helpers';
-import { esQuery } from '../../../../../../data/server';
+import { opensearchQuery } from '../../../../../../data/server';
 
-export function splitByFilters(req, panel, series, esQueryConfig, indexPattern) {
+export function splitByFilters(req, panel, series, opensearchQueryConfig, indexPattern) {
   return (next) => (doc) => {
     if (series.split_mode === 'filters' && series.split_filters) {
       series.split_filters.forEach((filter) => {
-        const builtEsQuery = esQuery.buildEsQuery(indexPattern, [filter.filter], [], esQueryConfig);
+        const builtOpenSearchQuery = opensearchQuery.buildOpenSearchQuery(indexPattern, [filter.filter], [], opensearchQueryConfig);
 
-        overwrite(doc, `aggs.${series.id}.filters.filters.${filter.id}`, builtEsQuery);
+        overwrite(doc, `aggs.${series.id}.filters.filters.${filter.id}`, builtOpenSearchQuery);
       });
     }
     return next(doc);

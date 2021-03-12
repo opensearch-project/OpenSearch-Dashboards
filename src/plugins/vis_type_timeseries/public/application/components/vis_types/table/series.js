@@ -31,7 +31,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { createTextHandler } from '../../lib/create_text_handler';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@osd/i18n/react';
 import { Aggs } from '../../aggs/aggs';
 
 function TableSeriesUI(props) {
