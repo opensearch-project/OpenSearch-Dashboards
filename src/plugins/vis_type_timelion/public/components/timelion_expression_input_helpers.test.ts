@@ -21,7 +21,7 @@ import { SUGGESTION_TYPE, suggest } from './timelion_expression_input_helpers';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
 import { setIndexPatterns, setSavedObjectsClient } from '../helpers/plugin_services';
 import { IndexPatternsContract } from 'src/plugins/data/public';
-import { SavedObjectsClient } from 'kibana/public';
+import { SavedObjectsClient } from 'opensearch-dashboards/public';
 import { ITimelionFunction } from '../../common/types';
 
 describe('Timelion expression suggestions', () => {

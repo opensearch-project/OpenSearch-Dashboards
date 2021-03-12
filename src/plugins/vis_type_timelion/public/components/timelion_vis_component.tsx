@@ -24,7 +24,7 @@ import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
 import { useResizeObserver } from '@elastic/eui';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { useKibana } from '../../../kibana_react/public';
+import { useOpensearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { DEFAULT_TIME_FORMAT } from '../../common/lib';
 
 import {
@@ -85,7 +85,7 @@ function TimelionVisComponent({
   renderComplete,
   fireEvent,
 }: TimelionVisComponentProps) {
-  const kibana = useKibana<TimelionVisDependencies>();
+  const opensearchDashboards = useOpensearchDashboards<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
   const [canvasElem, setCanvasElem] = useState<HTMLDivElement>();
   const [chartElem, setChartElem] = useState<HTMLDivElement | null>(null);
@@ -198,8 +198,8 @@ function TimelionVisComponent({
       if (canvasElem && canvasElem.clientWidth > 0 && canvasElem.clientHeight > 0) {
         const options = buildOptions(
           interval,
-          kibana.services.timefilter,
-          kibana.services.uiSettings,
+          opensearchDashboards.services.timefilter,
+          opensearchDashboards.services.uiSettings,
           chartElem?.clientWidth,
           grid
         );
@@ -225,7 +225,7 @@ function TimelionVisComponent({
         updateCaption(newPlot.getData());
       }
     },
-    [canvasElem, chartElem?.clientWidth, renderComplete, kibana.services, interval, updateCaption]
+    [canvasElem, chartElem?.clientWidth, renderComplete, opensearchDashboards.services, interval, updateCaption]
   );
 
   const dimensions = useResizeObserver(chartElem);

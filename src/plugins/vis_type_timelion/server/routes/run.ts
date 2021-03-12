@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IRouter, Logger, CoreSetup } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
+import { IRouter, Logger, CoreSetup } from 'opensearch-dashboards/server';
+import { schema } from '@osd/config-schema';
 import Bluebird from 'bluebird';
 import _ from 'lodash';
 // @ts-ignore
@@ -53,7 +53,7 @@ export function runRoute(
           sheet: schema.arrayOf(schema.string()),
           extended: schema.maybe(
             schema.object({
-              es: schema.object({
+              opensearch: schema.object({
                 filter: schema.object({
                   bool: schema.object({
                     filter: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
@@ -89,7 +89,7 @@ export function runRoute(
           getFunction,
           getStartServices: core.getStartServices,
           allowedGraphiteUrls: configManager.getGraphiteUrls(),
-          esShardTimeout: configManager.getEsShardTimeout(),
+          opensearchShardTimeout: configManager.getOpenSearchShardTimeout(),
           savedObjectsClient: context.core.savedObjects.client,
         });
         const chainRunner = chainRunnerFn(tlConfig);

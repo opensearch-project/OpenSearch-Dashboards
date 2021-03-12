@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import moment from 'moment';
 import { preprocessOffset } from './offset_time';
 

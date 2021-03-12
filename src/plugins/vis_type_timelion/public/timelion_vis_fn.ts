@@ -18,10 +18,10 @@
  */
 
 import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import {
   ExpressionFunctionDefinition,
-  KibanaContext,
+  OpensearchDashboardsContext,
   Render,
 } from 'src/plugins/expressions/public';
 import {
@@ -32,7 +32,7 @@ import { TIMELION_VIS_NAME } from './timelion_vis_type';
 import { TimelionVisDependencies } from './plugin';
 import { Filter, Query, TimeRange } from '../../data/common';
 
-type Input = KibanaContext | null;
+type Input = OpensearchDashboardsContext | null;
 type Output = Promise<Render<TimelionRenderValue>>;
 interface Arguments {
   expression: string;
@@ -59,7 +59,7 @@ export const getTimelionVisualizationConfig = (
 ): TimelionExpressionFunctionDefinition => ({
   name: 'timelion_vis',
   type: 'render',
-  inputTypes: ['kibana_context', 'null'],
+  inputTypes: ['opensearch_dashboards_context', 'null'],
   help: i18n.translate('timelion.function.help', {
     defaultMessage: 'Timelion visualization',
   }),
@@ -67,7 +67,7 @@ export const getTimelionVisualizationConfig = (
     expression: {
       types: ['string'],
       aliases: ['_'],
-      default: '".es(*)"',
+      default: '".opensearch(*)"',
       help: '',
     },
     interval: {

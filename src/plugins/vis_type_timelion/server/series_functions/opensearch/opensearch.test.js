@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import es from './index';
+import opensearch from './index';
 
 import tlConfigFn from '../fixtures/tl_config';
 import * as aggResponse from './lib/agg_response_to_series_list';
 import buildRequest from './lib/build_request';
 import createDateAgg from './lib/create_date_agg';
-import esResponse from '../fixtures/es_response';
+import opensearchResponse from '../fixtures/opensearch_response';
 
 import _ from 'lodash';
 import { expect } from 'chai';
@@ -48,7 +48,7 @@ function stubRequestAndServer(response, indexPatternSavedObjects = []) {
   };
 }
 
-describe('es', () => {
+describe('opensearch', () => {
   let tlConfig;
 
   describe('seriesList processor', () => {
@@ -58,7 +58,7 @@ describe('es', () => {
           _shards: { total: 0 },
         },
       });
-      return invoke(es, [5], tlConfig)
+      return invoke(opensearch, [5], tlConfig)
         .then(expect.fail)
         .catch((e) => {
           expect(e).to.be.an('error');
@@ -66,8 +66,8 @@ describe('es', () => {
     });
 
     it('returns a seriesList', () => {
-      tlConfig = stubRequestAndServer({ rawResponse: esResponse });
-      return invoke(es, [5], tlConfig).then((r) => {
+      tlConfig = stubRequestAndServer({ rawResponse: opensearchResponse });
+      return invoke(opensearch, [5], tlConfig).then((r) => {
         expect(r.output.type).to.eql('seriesList');
       });
     });
@@ -205,7 +205,7 @@ describe('es', () => {
         expect(request.params.timeout).to.equal('30000ms');
       });
 
-      it('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
+      it('sets no timeout if opensearch.shardTimeout is set to 0', () => {
         config.index = 'beer';
         const request = fn(config, tlConfig, emptyScriptedFields, 0);
 
@@ -232,7 +232,7 @@ describe('es', () => {
         expect(request.params.ignore_throttled).to.equal(true);
       });
 
-      it('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
+      it('sets no timeout if opensearch.shardTimeout is set to 0', () => {
         tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN] = true;
         config.index = 'beer';
         const request = fn(config, tlConfig, emptyScriptedFields);
@@ -251,7 +251,7 @@ describe('es', () => {
           request: {
             body: {
               extended: {
-                es: {
+                opensearch: {
                   filter: {
                     bool: {
                       must: [{ query: { query_string: { query: 'foo' } } }],
@@ -268,16 +268,16 @@ describe('es', () => {
         });
       });
 
-      it('adds the contents of body.extended.es.filter to a filter clause of the bool', () => {
-        config.kibana = true;
+      it('adds the contents of body.extended.opensearch.filter to a filter clause of the bool', () => {
+        config.opensearchDashboards = true;
         const request = fn(config, tlConfig, emptyScriptedFields);
         const filter = request.params.body.query.bool.filter.bool;
         expect(filter.must.length).to.eql(1);
         expect(filter.must_not.length).to.eql(2);
       });
 
-      it('does not include filters if config.kibana = false', () => {
-        config.kibana = false;
+      it('does not include filters if config.opensearchDashboards = false', () => {
+        config.opensearchDashboards = false;
         const request = fn(config, tlConfig, emptyScriptedFields);
         expect(request.params.body.query.bool.filter).to.eql(undefined);
       });
@@ -295,7 +295,7 @@ describe('es', () => {
           },
         });
 
-        config.kibana = true;
+        config.opensearchDashboards = true;
         request = fn(config, tlConfig, emptyScriptedFields);
         expect(request.params.body.query.bool.must.length).to.eql(1);
       });
@@ -440,7 +440,7 @@ describe('es', () => {
     });
 
     it('should throw an error', () => {
-      expect(aggResponse.default(esResponse.aggregations, config)).to.eql([
+      expect(aggResponse.default(opensearchResponse.aggregations, config)).to.eql([
         {
           data: [
             [1000, 264],

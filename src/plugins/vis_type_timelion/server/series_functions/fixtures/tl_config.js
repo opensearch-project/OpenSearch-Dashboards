@@ -20,7 +20,7 @@
 import moment from 'moment';
 import sinon from 'sinon';
 import timelionDefaults from '../../lib/get_namespaced_settings';
-import esResponse from './es_response';
+import opensearchResponse from './opensearch_response';
 
 export default function () {
   const functions = require('../../lib/load_functions')('series_functions');
@@ -35,11 +35,11 @@ export default function () {
       .returns(
         Promise.resolve([
           {},
-          { data: { search: { search: () => Promise.resolve({ rawResponse: esResponse }) } } },
+          { data: { search: { search: () => Promise.resolve({ rawResponse: opensearchResponse }) } } },
         ])
       ),
 
-    esShardTimeout: moment.duration(30000),
+      opensearchShardTimeout: moment.duration(30000),
     allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
   });
 

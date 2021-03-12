@@ -18,7 +18,7 @@
  */
 
 import React, { lazy } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { DefaultEditorSize } from '../../vis_default_editor/public';
 import { getTimelionRequestHandler } from './helpers/timelion_request_handler';
@@ -35,7 +35,7 @@ export const TIMELION_VIS_NAME = 'timelion';
 export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) {
   const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
-  // return the visType object, which kibana will use to display and configure new
+  // return the visType object, which OpenSearch Dashboards will use to display and configure new
   // Vis object of this type.
   return {
     name: TIMELION_VIS_NAME,
@@ -46,7 +46,7 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
     }),
     visConfig: {
       defaults: {
-        expression: '.es(*)',
+        expression: '.opensearch(*)',
         interval: 'auto',
       },
     },
