@@ -17,9 +17,9 @@
  * under the License.
  */
 import { uniqBy } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { ExpressionFunctionDefinition } from '../../expression_functions';
-import { KibanaContext } from '../../expression_types';
+import { OpenSearchDashboardsContext } from '../../expression_types';
 import { Query, uniqFilters } from '../../../../data/common';
 
 interface Arguments {
@@ -29,11 +29,11 @@ interface Arguments {
   savedSearchId?: string | null;
 }
 
-export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
-  'kibana_context',
-  KibanaContext | null,
+export type ExpressionFunctionOpenSearchDashboardsContext = ExpressionFunctionDefinition<
+  'opensearch_dashboards_context',
+  OpenSearchDashboardsContext | null,
   Arguments,
-  Promise<KibanaContext>
+  Promise<OpenSearchDashboardsContext>
 >;
 
 const getParsedValue = (data: any, defaultValue: any) =>
@@ -45,40 +45,40 @@ const mergeQueries = (first: Query | Query[] = [], second: Query | Query[]) =>
     (n: any) => JSON.stringify(n.query)
   );
 
-export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
-  name: 'kibana_context',
-  type: 'kibana_context',
-  inputTypes: ['kibana_context', 'null'],
-  help: i18n.translate('expressions.functions.kibana_context.help', {
-    defaultMessage: 'Updates kibana global context',
+export const opensearchDashboardsContextFunction: ExpressionFunctionOpenSearchDashboardsContext = {
+  name: 'opensearch_dashboards_context',
+  type: 'opensearch_dashboards_context',
+  inputTypes: ['opensearch_dashboards_context', 'null'],
+  help: i18n.translate('expressions.functions.opensearch_dashboards_context.help', {
+    defaultMessage: 'Updates opensearch dashboards global context',
   }),
   args: {
     q: {
       types: ['string', 'null'],
       aliases: ['query', '_'],
       default: null,
-      help: i18n.translate('expressions.functions.kibana_context.q.help', {
-        defaultMessage: 'Specify Kibana free form text query',
+      help: i18n.translate('expressions.functions.opensearch_dashboards_context.q.help', {
+        defaultMessage: 'Specify OpenSearch Dashboards free form text query',
       }),
     },
     filters: {
       types: ['string', 'null'],
       default: '"[]"',
-      help: i18n.translate('expressions.functions.kibana_context.filters.help', {
-        defaultMessage: 'Specify Kibana generic filters',
+      help: i18n.translate('expressions.functions.opensearch_dashboards_context.filters.help', {
+        defaultMessage: 'Specify OpenSearch Dashboards generic filters',
       }),
     },
     timeRange: {
       types: ['string', 'null'],
       default: null,
-      help: i18n.translate('expressions.functions.kibana_context.timeRange.help', {
-        defaultMessage: 'Specify Kibana time range filter',
+      help: i18n.translate('expressions.functions.opensearch_dashboards_context.timeRange.help', {
+        defaultMessage: 'Specify OpenSearch Dashboards time range filter',
       }),
     },
     savedSearchId: {
       types: ['string', 'null'],
       default: null,
-      help: i18n.translate('expressions.functions.kibana_context.savedSearchId.help', {
+      help: i18n.translate('expressions.functions.opensearch_dashboards_context.savedSearchId.help', {
         defaultMessage: 'Specify saved search ID to be used for queries and filters',
       }),
     },
@@ -93,12 +93,12 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
       if (typeof getSavedObject !== 'function') {
         throw new Error(
           '"getSavedObject" function not available in execution context. ' +
-            'When you execute expression you need to add extra execution context ' +
-            'as the third argument and provide "getSavedObject" implementation.'
+          'When you execute expression you need to add extra execution context ' +
+          'as the third argument and provide "getSavedObject" implementation.'
         );
       }
       const obj = await getSavedObject('search', args.savedSearchId);
-      const search = obj.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
+      const search = obj.attributes.opensearchDashboardsSavedObjectMeta as { searchSourceJSON: string };
       const { query, filter } = getParsedValue(search.searchSourceJSON, {});
 
       if (query) {
@@ -110,7 +110,7 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
     }
 
     return {
-      type: 'kibana_context',
+      type: 'opensearch_dashboards_context',
       query: queries,
       filters: uniqFilters(filters).filter((f: any) => !f.meta?.disabled),
       timeRange,

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 import { openSans, FontLabel as FontFamily } from '../../fonts';
 import { CSSStyle, FontStyle, FontWeight, Style, TextAlignment, TextDecoration } from '../../types';

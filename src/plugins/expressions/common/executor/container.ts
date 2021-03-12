@@ -20,7 +20,7 @@
 import {
   StateContainer,
   createStateContainer,
-} from '../../../kibana_utils/common/state_containers';
+} from '../../../opensearch_dashboards_utils/common/state_containers';
 import { ExpressionFunction } from '../expression_functions';
 import { ExpressionType } from '../expression_types';
 
@@ -65,7 +65,7 @@ export const pureSelectors: ExecutorPureSelectors = {
 
 export type ExecutorContainer<
   Context extends Record<string, unknown> = Record<string, unknown>
-> = StateContainer<ExecutorState<Context>, ExecutorPureTransitions, ExecutorPureSelectors>;
+  > = StateContainer<ExecutorState<Context>, ExecutorPureTransitions, ExecutorPureSelectors>;
 
 export const createExecutorContainer = <
   Context extends Record<string, unknown> = Record<string, unknown>

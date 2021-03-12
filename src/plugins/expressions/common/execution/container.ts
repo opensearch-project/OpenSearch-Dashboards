@@ -20,7 +20,7 @@
 import {
   StateContainer,
   createStateContainer,
-} from '../../../kibana_utils/common/state_containers';
+} from '../../../opensearch_dashboards_utils/common/state_containers';
 import { ExecutorState, defaultState as executorDefaultState } from '../executor';
 import { ExpressionAstExpression } from '../ast';
 import { ExpressionValue } from '../expression_types';

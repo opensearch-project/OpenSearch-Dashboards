@@ -21,32 +21,32 @@ import { map } from 'lodash';
 import { SerializedFieldFormat } from '../../types/common';
 import { Datatable, PointSeries, PointSeriesColumn } from '.';
 
-const name = 'kibana_datatable';
+const name = 'opensearch_dashboards_datatable';
 
-export interface KibanaDatatableColumnMeta {
+export interface OpenSearchDashboardsDatatableColumnMeta {
   type: string;
   indexPatternId?: string;
   aggConfigParams?: Record<string, any>;
 }
 
-export interface KibanaDatatableColumn {
+export interface OpenSearchDashboardsDatatableColumn {
   id: string;
   name: string;
-  meta?: KibanaDatatableColumnMeta;
+  meta?: OpenSearchDashboardsDatatableColumnMeta;
   formatHint?: SerializedFieldFormat;
 }
 
-export interface KibanaDatatableRow {
+export interface OpenSearchDashboardsDatatableRow {
   [key: string]: unknown;
 }
 
-export interface KibanaDatatable {
+export interface OpenSearchDashboardsDatatable {
   type: typeof name;
-  columns: KibanaDatatableColumn[];
-  rows: KibanaDatatableRow[];
+  columns: OpenSearchDashboardsDatatableColumn[];
+  rows: OpenSearchDashboardsDatatableRow[];
 }
 
-export const kibanaDatatable = {
+export const opensearchDashboardsDatatable = {
   name,
   from: {
     datatable: (context: Datatable) => {
