@@ -1,0 +1,75 @@
+.osdFieldButton {
+  @include euiFontSizeS;
+  border-radius: $euiBorderRadius;
+  margin-bottom: $euiSizeXS;
+  display: flex;
+  align-items: center;
+  transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance,
+    background-color $euiAnimSpeedFast $euiAnimSlightResistance; // sass-lint:disable-line indentation
+
+  &:focus-within,
+  &-isActive {
+    @include euiFocusRing;
+  }
+}
+
+.osdFieldButton--isDraggable {
+  background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
+
+  &:hover,
+  &:focus,
+  &:focus-within {
+    @include euiBottomShadowMedium;
+    border-radius: $euiBorderRadius;
+    z-index: 2;
+  }
+
+  .osdFieldButton__button {
+    &:hover,
+    &:focus {
+      cursor: grab;
+    }
+  }
+}
+
+.osdFieldButton__button {
+  flex-grow: 1;
+  text-align: left;
+  padding: $euiSizeS;
+  display: flex;
+  align-items: flex-start;
+}
+
+.osdFieldButton__fieldIcon {
+  flex-shrink: 0;
+  line-height: 0;
+  margin-right: $euiSizeS;
+}
+
+.osdFieldButton__name {
+  flex-grow: 1;
+  word-break: break-word;
+}
+
+.osdFieldButton__infoIcon {
+  flex-shrink: 0;
+  margin-left: $euiSizeXS;
+}
+
+.osdFieldButton__fieldAction {
+  margin-right: $euiSizeS;
+}
+
+// Reduce text size and spacing for the small size
+.osdFieldButton--small {
+  font-size: $euiFontSizeXS;
+
+  .osdFieldButton__button {
+    padding: $euiSizeXS;
+  }
+
+  .osdFieldButton__fieldIcon,
+  .osdFieldButton__fieldAction {
+    margin-right: $euiSizeXS;
+  }
+}
