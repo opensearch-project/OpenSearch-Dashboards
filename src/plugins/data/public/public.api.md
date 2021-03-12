@@ -530,7 +530,7 @@ export const OPENSEARCH_SEARCH_STRATEGY = "opensearch";
 // Warning: (ae-missing-release-tag) "OpenSearchaggsExpressionFunctionDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type OpenSearchaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<'esaggs', Input, Arguments, Output>;
+export type OpenSearchaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<'opensearchaggs', Input, Arguments, Output>;
 
 // Warning: (ae-forgotten-export) The symbol "name" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "Input" needs to be exported by the entry point index.d.ts

@@ -51,7 +51,7 @@ import {
   setUiSettings,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
-import { esaggs } from './search/expressions';
+import { opensearchaggs } from './search/expressions';
 import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
@@ -110,7 +110,7 @@ export class DataPublicPlugin
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
-    expressions.registerFunction(esaggs);
+    expressions.registerFunction(opensearchaggs);
     expressions.registerFunction(indexPatternLoad);
 
     const queryService = this.queryService.setup({

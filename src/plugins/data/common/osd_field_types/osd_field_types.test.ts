@@ -24,12 +24,12 @@ import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from './types';
 describe('utils/osd_field_types', () => {
   describe('OsdFieldType', () => {
     test('defaults', () => {
-      const OsdFieldType = new OsdFieldType({});
+      const osdFieldType = new OsdFieldType({});
 
-      expect(OsdFieldType).toHaveProperty('name', OSD_FIELD_TYPES.UNKNOWN);
-      expect(OsdFieldType).toHaveProperty('sortable', false);
-      expect(OsdFieldType).toHaveProperty('filterable', false);
-      expect(OsdFieldType.opensearchTypes).toEqual([]);
+      expect(osdFieldType).toHaveProperty('name', OSD_FIELD_TYPES.UNKNOWN);
+      expect(osdFieldType).toHaveProperty('sortable', false);
+      expect(osdFieldType).toHaveProperty('filterable', false);
+      expect(osdFieldType.opensearchTypes).toEqual([]);
     });
 
     test('assigns name, sortable, filterable, and opensearchTypes options to itself', () => {
@@ -38,27 +38,27 @@ describe('utils/osd_field_types', () => {
       const filterable = true;
       const opensearchTypes = [OPENSEARCH_FIELD_TYPES.LONG, OPENSEARCH_FIELD_TYPES.BYTE, OPENSEARCH_FIELD_TYPES.DATE];
 
-      const OsdFieldType = new OsdFieldType({ name, sortable, filterable, opensearchTypes });
+      const osdFieldType = new OsdFieldType({ name, sortable, filterable, opensearchTypes });
 
-      expect(OsdFieldType).toHaveProperty('name', name);
-      expect(OsdFieldType).toHaveProperty('sortable', sortable);
-      expect(OsdFieldType).toHaveProperty('filterable', filterable);
-      expect(OsdFieldType.opensearchTypes).toEqual(opensearchTypes);
+      expect(osdFieldType).toHaveProperty('name', name);
+      expect(osdFieldType).toHaveProperty('sortable', sortable);
+      expect(osdFieldType).toHaveProperty('filterable', filterable);
+      expect(osdFieldType.opensearchTypes).toEqual(opensearchTypes);
     });
   });
 
   describe('getOsdFieldType()', () => {
     test('returns a OsdFieldType instance by name', () => {
-      const OsdFieldType = getOsdFieldType(OPENSEARCH_FIELD_TYPES.STRING);
+      const osdFieldType = getOsdFieldType(OPENSEARCH_FIELD_TYPES.STRING);
 
-      expect(OsdFieldType).toBeInstanceOf(OsdFieldType);
-      expect(OsdFieldType).toHaveProperty('name', OPENSEARCH_FIELD_TYPES.STRING);
+      expect(osdFieldType).toBeInstanceOf(osdFieldType);
+      expect(osdFieldType).toHaveProperty('name', OPENSEARCH_FIELD_TYPES.STRING);
     });
 
     test('returns unknown for invalid name', () => {
-      const OsdFieldType = getOsdFieldType('wrongType');
+      const osdFieldType = getOsdFieldType('wrongType');
 
-      expect(OsdFieldType).toHaveProperty('name', OSD_FIELD_TYPES.UNKNOWN);
+      expect(osdFieldType).toHaveProperty('name', OSD_FIELD_TYPES.UNKNOWN);
     });
   });
 

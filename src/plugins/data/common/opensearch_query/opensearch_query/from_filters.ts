@@ -60,7 +60,7 @@ export const buildQueryFromFilters = (
 ) => {
   filters = filters.filter((filter) => filter && !isFilterDisabled(filter));
 
-  const filtersToESQueries = (negate: boolean) => {
+  const filtersToOpenSearchQueries = (negate: boolean) => {
     return filters
       .filter(filterNegate(negate))
       .filter(
@@ -76,8 +76,8 @@ export const buildQueryFromFilters = (
 
   return {
     must: [],
-    filter: filtersToESQueries(false),
+    filter: filtersToOpenSearchQueries(false),
     should: [],
-    must_not: filtersToESQueries(true),
+    must_not: filtersToOpenSearchQueries(true),
   };
 };

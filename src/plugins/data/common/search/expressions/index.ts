@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export * from './esaggs';
+export * from './opensearchaggs';
 export * from './utils';

@@ -91,7 +91,7 @@ export const OpenSearchRawResponse: OpenSearchRawResponseExpressionTypeDefinitio
       return {
         type: 'datatable',
         meta: {
-          type: 'esdsl',
+          type: 'opensearchdsl',
           source: '*',
         },
         columns,

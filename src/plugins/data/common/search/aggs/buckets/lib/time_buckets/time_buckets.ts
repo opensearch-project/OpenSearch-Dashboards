@@ -285,17 +285,17 @@ export class TimeBuckets {
 
     // append some TimeBuckets specific props to the interval
     const decorateInterval = (interval: moment.Duration): TimeBucketsInterval => {
-      const OpenSearchInterval = useNormalizedOpenSearchInterval
+      const opensearchInterval = useNormalizedOpenSearchInterval
         ? convertDurationToNormalizedOpenSearchInterval(interval)
         : convertIntervalToOpenSearchInterval(String(this._originalInterval));
-      const prettyUnits = moment.normalizeUnits(OpenSearchInterval.unit);
+      const prettyUnits = moment.normalizeUnits(opensearchInterval.unit);
 
       return Object.assign(interval, {
         description:
-          OpenSearchInterval.value === 1 ? prettyUnits : OpenSearchInterval.value + ' ' + prettyUnits + 's',
-        opensearchValue: OpenSearchInterval.value,
-        opensearchUnit: OpenSearchInterval.unit,
-        expression: OpenSearchInterval.expression,
+          opensearchInterval.value === 1 ? prettyUnits : opensearchInterval.value + ' ' + prettyUnits + 's',
+        opensearchValue: opensearchInterval.value,
+        opensearchUnit: opensearchInterval.unit,
+        expression: opensearchInterval.expression,
       });
     };
 

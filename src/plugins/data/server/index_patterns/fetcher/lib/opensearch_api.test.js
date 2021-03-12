@@ -25,7 +25,7 @@ import * as convertOpenSearchErrorNS from './errors';
 
 import { callIndexAliasApi, callFieldCapsApi } from './opensearch_api';
 
-describe('server/index_patterns/service/lib/es_api', () => {
+describe('server/index_patterns/service/lib/opensearch_api', () => {
   describe('#callIndexAliasApi()', () => {
     let sandbox;
     beforeEach(() => (sandbox = sinon.createSandbox()));

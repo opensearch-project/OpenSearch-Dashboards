@@ -68,7 +68,7 @@ export interface RequestHandlerParams {
   abortSignal?: AbortSignal;
 }
 
-const name = 'esaggs';
+const name = 'opensearchaggs';
 
 const handleCourierRequest = async ({
   searchSource,
@@ -136,11 +136,11 @@ const handleCourierRequest = async ({
 
   inspectorAdapters.requests.reset();
   const request = inspectorAdapters.requests.start(
-    i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
+    i18n.translate('data.functions.opensearchaggs.inspector.dataRequest.title', {
       defaultMessage: 'Data',
     }),
     {
-      description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
+      description: i18n.translate('data.functions.opensearchaggs.inspector.dataRequest.description', {
         defaultMessage:
           'This request queries OpenSearch to fetch the data for the visualization.',
       }),
@@ -211,11 +211,11 @@ const handleCourierRequest = async ({
   return (searchSource as any).tabifiedResponse;
 };
 
-export const esaggs = (): OpenSearchaggsExpressionFunctionDefinition => ({
+export const opensearchaggs = (): OpenSearchaggsExpressionFunctionDefinition => ({
   name,
   type: 'opensearch_dashboards_datatable',
   inputTypes: ['opensearch_dashboards_context', 'null'],
-  help: i18n.translate('data.functions.esaggs.help', {
+  help: i18n.translate('data.functions.opensearchaggs.help', {
     defaultMessage: 'Run AggConfig aggregation',
   }),
   args: {

@@ -46,18 +46,18 @@ describe('build query', () => {
         { query: 'machine.os:osx', language: 'kuery' },
       ] as Query[];
 
-      const expectedESQueries = queries.map((query) => {
+      const expectedOpenSearchQueries = queries.map((query) => {
         return toOpenSearchQuery(fromKueryExpression(query.query), indexPattern);
       });
 
       const result = buildQueryFromKuery(indexPattern, queries, true);
 
-      expect(result.filter).toEqual(expectedESQueries);
+      expect(result.filter).toEqual(expectedOpenSearchQueries);
     });
 
     test("should accept a specific date format for a kuery query into an OpenSearch query in the bool's filter clause", () => {
       const queries = [{ query: '@timestamp:"2018-04-03T19:04:17"', language: 'kuery' }] as Query[];
-      const expectedESQueries = queries.map((query) => {
+      const expectedOpenSearchQueries = queries.map((query) => {
         return toOpenSearchQuery(fromKueryExpression(query.query), indexPattern, {
           dateFormatTZ: 'America/Phoenix',
         });
@@ -65,20 +65,20 @@ describe('build query', () => {
 
       const result = buildQueryFromKuery(indexPattern, queries, true, 'America/Phoenix');
 
-      expect(result.filter).toEqual(expectedESQueries);
+      expect(result.filter).toEqual(expectedOpenSearchQueries);
     });
 
     test('should gracefully handle date queries when no date format is provided', () => {
       const queries = [
         { query: '@timestamp:"2018-04-03T19:04:17Z"', language: 'kuery' },
       ] as Query[];
-      const expectedESQueries = queries.map((query) => {
+      const expectedOpenSearchQueries = queries.map((query) => {
         return toOpenSearchQuery(fromKueryExpression(query.query), indexPattern);
       });
 
       const result = buildQueryFromKuery(indexPattern, queries, true);
 
-      expect(result.filter).toEqual(expectedESQueries);
+      expect(result.filter).toEqual(expectedOpenSearchQueries);
     });
   });
 });

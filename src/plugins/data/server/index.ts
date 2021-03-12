@@ -37,7 +37,7 @@ import {
  * Filter helper namespace:
  */
 
-export const esFilters = {
+export const opensearchFilters = {
   buildQueryFilter,
   buildCustomFilter,
   buildEmptyFilter,

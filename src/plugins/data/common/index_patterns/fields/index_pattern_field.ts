@@ -26,13 +26,13 @@ export class IndexPatternField implements IFieldType {
   readonly spec: FieldSpec;
   // not writable or serialized
   readonly displayName: string;
-  private readonly OsdFieldType: OsdFieldType;
+  private readonly osdFieldType: OsdFieldType;
 
   constructor(spec: FieldSpec, displayName: string) {
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
     this.displayName = displayName;
 
-    this.OsdFieldType = getOsdFieldType(spec.type);
+    this.osdFieldType = getOsdFieldType(spec.type);
   }
 
   // writable attrs
@@ -117,7 +117,7 @@ export class IndexPatternField implements IFieldType {
   public get sortable() {
     return (
       this.name === '_score' ||
-      ((this.spec.indexed || this.aggregatable) && this.OsdFieldType.sortable)
+      ((this.spec.indexed || this.aggregatable) && this.osdFieldType.sortable)
     );
   }
 
@@ -125,7 +125,7 @@ export class IndexPatternField implements IFieldType {
     return (
       this.name === '_id' ||
       this.scripted ||
-      ((this.spec.indexed || this.searchable) && this.OsdFieldType.filterable)
+      ((this.spec.indexed || this.searchable) && this.osdFieldType.filterable)
     );
   }
 

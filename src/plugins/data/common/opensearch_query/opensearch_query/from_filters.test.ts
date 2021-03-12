@@ -51,11 +51,11 @@ describe('build query', () => {
         } as ExistsFilter,
       ] as Filter[];
 
-      const expectedESQueries = [{ match_all: {} }, { exists: { field: 'foo' } }];
+      const expectedOpenSearchQueries = [{ match_all: {} }, { exists: { field: 'foo' } }];
 
       const result = buildQueryFromFilters(filters, indexPattern, false);
 
-      expect(result.filter).toEqual(expectedESQueries);
+      expect(result.filter).toEqual(expectedOpenSearchQueries);
     });
 
     test('should remove disabled filters', () => {
@@ -86,11 +86,11 @@ describe('build query', () => {
         } as MatchAllFilter,
       ] as Filter[];
 
-      const expectedESQueries = [{ match_all: {} }];
+      const expectedOpenSearchQueries = [{ match_all: {} }];
 
       const result = buildQueryFromFilters(filters, indexPattern, false);
 
-      expect(result.must_not).toEqual(expectedESQueries);
+      expect(result.must_not).toEqual(expectedOpenSearchQueries);
     });
 
     test('should translate old OpenSearch filter syntax into OpenSearch 5+ query objects', () => {
@@ -101,7 +101,7 @@ describe('build query', () => {
         },
       ] as Filter[];
 
-      const expectedESQueries = [
+      const expectedOpenSearchQueries = [
         {
           exists: { field: 'foo' },
         },
@@ -109,7 +109,7 @@ describe('build query', () => {
 
       const result = buildQueryFromFilters(filters, indexPattern, false);
 
-      expect(result.filter).toEqual(expectedESQueries);
+      expect(result.filter).toEqual(expectedOpenSearchQueries);
     });
 
     test('should migrate deprecated match syntax', () => {
@@ -120,7 +120,7 @@ describe('build query', () => {
         },
       ] as Filter[];
 
-      const expectedESQueries = [
+      const expectedOpenSearchQueries = [
         {
           match_phrase: { extension: { query: 'foo' } },
         },
@@ -128,7 +128,7 @@ describe('build query', () => {
 
       const result = buildQueryFromFilters(filters, indexPattern, false);
 
-      expect(result.filter).toEqual(expectedESQueries);
+      expect(result.filter).toEqual(expectedOpenSearchQueries);
     });
 
     test('should not add query:queryString:options to query_string filters', () => {
@@ -139,10 +139,10 @@ describe('build query', () => {
         },
       ] as Filter[];
 
-      const expectedESQueries = [{ query_string: { query: 'foo' } }];
+      const expectedOpenSearchQueries = [{ query_string: { query: 'foo' } }];
       const result = buildQueryFromFilters(filters, indexPattern, false);
 
-      expect(result.filter).toEqual(expectedESQueries);
+      expect(result.filter).toEqual(expectedOpenSearchQueries);
     });
 
     test('should wrap filters targeting nested fields in a nested query', () => {
@@ -153,7 +153,7 @@ describe('build query', () => {
         },
       ];
 
-      const expectedESQueries = [
+      const expectedOpenSearchQueries = [
         {
           nested: {
             path: 'nestedField',
@@ -167,7 +167,7 @@ describe('build query', () => {
       ];
 
       const result = buildQueryFromFilters(filters, indexPattern);
-      expect(result.filter).toEqual(expectedESQueries);
+      expect(result.filter).toEqual(expectedOpenSearchQueries);
     });
   });
 });

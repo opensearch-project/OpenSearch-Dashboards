@@ -227,7 +227,7 @@ export const OPENSEARCH_SEARCH_STRATEGY = "opensearch";
 // Warning: (ae-missing-release-tag) "OpenSearchaggsExpressionFunctionDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type OpenSearchaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<'esaggs', Input, Arguments, Output>;
+export type OpenSearchaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<'opensearchaggs', Input, Arguments, Output>;
 
 // Warning: (ae-missing-release-tag) "opensearchFilters" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -248,7 +248,7 @@ export const opensearchFilters: {
 //
 // @public (undocumented)
 export const opensearchKuery: {
-    nodeTypes: import("../common/es_query/kuery/node_types").NodeTypes;
+    nodeTypes: import("../common/opensearch_query/kuery/node_types").NodeTypes;
     fromKueryExpression: (expression: any, parseOptions?: Partial<import("../common").KueryParseOptions>) => import("../common").KueryNode;
     toElasticsearchQuery: (node: import("../common").KueryNode, indexPattern?: import("../common").IIndexPattern | undefined, config?: Record<string, any> | undefined, context?: Record<string, any> | undefined) => import("../../opensearch_dashboards_utils/common").JsonObject;
 };
@@ -1106,8 +1106,8 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 
 // Warnings were encountered during analysis:
 //
-// src/plugins/data/common/es_query/filters/meta_filter.ts:53:3 - (ae-forgotten-export) The symbol "FilterState" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/es_query/filters/meta_filter.ts:54:3 - (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/opensearch_query/filters/meta_filter.ts:53:3 - (ae-forgotten-export) The symbol "FilterState" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/opensearch_query/filters/meta_filter.ts:54:3 - (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:64:45 - (ae-forgotten-export) The symbol "IndexPatternFieldMap" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:70:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:40:23 - (ae-forgotten-export) The symbol "buildCustomFilter" needs to be exported by the entry point index.d.ts

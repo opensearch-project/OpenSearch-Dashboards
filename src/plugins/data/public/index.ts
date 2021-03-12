@@ -63,7 +63,7 @@ import {
 } from './query';
 
 // Filter helpers namespace:
-export const esFilters = {
+export const opensearchFilters = {
   FilterLabel,
 
   FILTERS,

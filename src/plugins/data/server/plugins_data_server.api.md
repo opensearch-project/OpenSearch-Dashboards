@@ -227,7 +227,7 @@ export const opensearchFilters: {
 //
 // @public (undocumented)
 export const opensearchKuery: {
-    nodeTypes: import("../common/es_query/kuery/node_types").NodeTypes;
+    nodeTypes: import("../common/opensearch_query/kuery/node_types").NodeTypes;
     fromKueryExpression: (expression: any, parseOptions?: Partial<import("../common").KueryParseOptions>) => import("../common").KueryNode;
     toElasticsearchQuery: (node: import("../common").KueryNode, indexPattern?: import("../common").IIndexPattern | undefined, config?: Record<string, any> | undefined, context?: Record<string, any> | undefined) => import("../../opensearch_dashboards_utils/common").JsonObject;
 };

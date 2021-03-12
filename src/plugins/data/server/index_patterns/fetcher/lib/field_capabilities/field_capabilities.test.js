@@ -23,8 +23,8 @@ import { identity, shuffle, sortBy } from 'lodash';
 
 import { getFieldCapabilities } from '../field_capabilities';
 
-import { callFieldCapsApi } from '../es_api';
-import * as callFieldCapsApiNS from '../es_api';
+import { callFieldCapsApi } from '../opensearch_api';
+import * as callFieldCapsApiNS from '../opensearch_api';
 
 import { readFieldCapsResponse } from './field_caps_response';
 import * as readFieldCapsResponseNS from './field_caps_response';

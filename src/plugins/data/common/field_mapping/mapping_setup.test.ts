@@ -18,17 +18,17 @@
  */
 
 import { expandShorthand } from './mapping_setup';
-import { ES_FIELD_TYPES } from '../../../data/common';
+import { OPENSEARCH_FIELD_TYPES } from '../../../data/common';
 
 describe('mapping_setup', () => {
   it('allows shortcuts for field types by just setting the value to the type name', () => {
-    const mapping = expandShorthand({ foo: ES_FIELD_TYPES.BOOLEAN });
+    const mapping = expandShorthand({ foo: OPENSEARCH_FIELD_TYPES.BOOLEAN });
 
     expect(mapping.foo.type).toBe('boolean');
   });
 
   it('can set type as an option', () => {
-    const mapping = expandShorthand({ foo: { type: ES_FIELD_TYPES.INTEGER } });
+    const mapping = expandShorthand({ foo: { type: OPENSEARCH_FIELD_TYPES.INTEGER } });
 
     expect(mapping.foo.type).toBe('integer');
   });

@@ -41,13 +41,13 @@ describe('build query', () => {
         { query: 'foo:bar', language: 'lucene' },
         { query: 'bar:baz', language: 'lucene' },
       ] as unknown) as Query[];
-      const expectedESQueries = queries.map((query) => {
+      const expectedOpenSearchQueries = queries.map((query) => {
         return decorateQuery(luceneStringToDsl(query.query), {});
       });
 
       const result = buildQueryFromLucene(queries, {});
 
-      expect(result.must).toEqual(expectedESQueries);
+      expect(result.must).toEqual(expectedOpenSearchQueries);
     });
 
     test('should also accept queries in OpenSearch query DSL format, simply passing them through', () => {
@@ -64,11 +64,11 @@ describe('build query', () => {
       { query: 'bar:baz', language: 'lucene' },
     ] as unknown) as Query[];
     const dateFormatTZ = 'America/Phoenix';
-    const expectedESQueries = queries.map((query) => {
+    const expectedOpenSearchQueries = queries.map((query) => {
       return decorateQuery(luceneStringToDsl(query.query), {}, dateFormatTZ);
     });
     const result = buildQueryFromLucene(queries, {}, dateFormatTZ);
 
-    expect(result.must).toEqual(expectedESQueries);
+    expect(result.must).toEqual(expectedOpenSearchQueries);
   });
 });

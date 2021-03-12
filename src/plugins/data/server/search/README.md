@@ -9,5 +9,5 @@ The `search` plugin includes two one concrete client side implementations -
  `SYNC_SEARCH_STRATEGY` and `OPENSEARCH_SEARCH_STRATEGY` which uses `SYNC_SEARCH_STRATEGY`.  There is also one
  default server side search strategy, `OPENSEARCH_SEARCH_STRATEGY`.
 
- Includes the `esSearch` plugin in order to search for data from Elasticsearch using Elasticsearch
+ Includes the `opensearchSearch` plugin in order to search for data from Elasticsearch using Elasticsearch
 DSL.
