@@ -25,7 +25,7 @@ import Chance from 'chance';
 import { Server } from 'http';
 import supertest from 'supertest';
 
-import { ByteSizeValue } from '@kbn/config-schema';
+import { ByteSizeValue } from '@osd/config-schema';
 import { HttpConfig } from '.';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { HttpsRedirectServer } from './https_redirect_server';

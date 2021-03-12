@@ -18,7 +18,7 @@
  */
 
 import { difference } from 'lodash';
-import { getFlattenedObject } from '@kbn/std';
+import { getFlattenedObject } from '@osd/std';
 import { hasConfigPathIntersection } from '../../config';
 import { LegacyConfig, LegacyVars } from '../types';
 

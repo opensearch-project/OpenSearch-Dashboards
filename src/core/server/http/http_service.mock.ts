@@ -18,7 +18,7 @@
  */
 
 import { Server } from 'hapi';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@osd/utility-types';
 
 import { CspConfig } from '../csp';
 import { mockRouter, RouterMock } from './router/router.mock';
@@ -83,7 +83,7 @@ const createInternalSetupContractMock = () => {
     // we can mock other hapi server methods when we need it
     server: ({
       name: 'http-server-test',
-      version: 'kibana',
+      version: 'opensearchDashboards',
       route: jest.fn(),
       start: jest.fn(),
       stop: jest.fn(),
@@ -109,7 +109,7 @@ const createInternalSetupContractMock = () => {
   mock.getAuthHeaders.mockReturnValue({ authorization: 'authorization-header' });
   mock.getServerInfo.mockReturnValue({
     hostname: 'localhost',
-    name: 'kibana',
+    name: 'opensearch-dashboards',
     port: 80,
     protocol: 'http',
   });

@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { modifyUrl } from '@kbn/std';
+import { modifyUrl } from '@osd/std';
 
-import { ensureRawRequest, KibanaRequest, LegacyRequest } from './router';
+import { ensureRawRequest, OpenSearchDashboardsRequest, LegacyRequest } from './router';
 
 /**
- * Access or manipulate the Kibana base path
+ * Access or manipulate the OpenSearch Dashboards base path
  *
  * @public
  */
@@ -43,7 +43,7 @@ export class BasePath {
   /**
    * returns `basePath` value, specific for an incoming request.
    */
-  public get = (request: KibanaRequest | LegacyRequest) => {
+  public get = (request: OpenSearchDashboardsRequest | LegacyRequest) => {
     const requestScopePath = this.basePathCache.get(ensureRawRequest(request)) || '';
     return `${this.serverBasePath}${requestScopePath}`;
   };
@@ -51,9 +51,9 @@ export class BasePath {
   /**
    * sets `basePath` value, specific for an incoming request.
    *
-   * @privateRemarks should work only for KibanaRequest as soon as spaces migrate to NP
+   * @privateRemarks should work only for OpenSearchDashboardsRequest as soon as spaces migrate to NP
    */
-  public set = (request: KibanaRequest | LegacyRequest, requestSpecificBasePath: string) => {
+  public set = (request: OpenSearchDashboardsRequest | LegacyRequest, requestSpecificBasePath: string) => {
     const rawRequest = ensureRawRequest(request);
 
     if (this.basePathCache.has(rawRequest)) {
@@ -97,7 +97,7 @@ export class BasePath {
 }
 
 /**
- * Access or manipulate the Kibana base path
+ * Access or manipulate the OpenSearch Dashboards base path
  *
  * {@link BasePath}
  * @public

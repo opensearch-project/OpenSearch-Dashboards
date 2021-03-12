@@ -24,7 +24,7 @@ import {
 } from './lifecycle_handlers';
 import { httpServerMock } from './http_server.mocks';
 import { HttpConfig } from './http_config';
-import { KibanaRequest, RouteMethod, KibanaRouteOptions } from './router';
+import { OpenSearchDashboardsRequest, RouteMethod, OpenSearchDashboardsRouteOptions } from './router';
 
 const createConfig = (partial: Partial<HttpConfig>): HttpConfig => partial as HttpConfig;
 
@@ -32,18 +32,18 @@ const forgeRequest = ({
   headers = {},
   path = '/',
   method = 'get',
-  kibanaRouteOptions,
+  opensearchDashboardsRouteOptions,
 }: Partial<{
   headers: Record<string, string>;
   path: string;
   method: RouteMethod;
-  kibanaRouteOptions: KibanaRouteOptions;
-}>): KibanaRequest => {
-  return httpServerMock.createKibanaRequest({
+  opensearchDashboardsRouteOptions: OpenSearchDashboardsRouteOptions;
+}>): OpenSearchDashboardsRequest => {
+  return httpServerMock.createOpenSearchDashboardsRequest({
     headers,
     path,
     method,
-    kibanaRouteOptions,
+    opensearchDashboardsRouteOptions,
   });
 };
 
@@ -76,7 +76,7 @@ describe('xsrf post-auth handler', () => {
     it('accepts requests with xsrf header', () => {
       const config = createConfig({ xsrf: { whitelist: [], disableProtection: false } });
       const handler = createXsrfPostAuthHandler(config);
-      const request = forgeRequest({ method: 'post', headers: { 'kbn-xsrf': 'xsrf' } });
+      const request = forgeRequest({ method: 'post', headers: { 'osd-xsrf': 'xsrf' } });
 
       toolkit.next.mockReturnValue('next' as any);
 
@@ -90,7 +90,7 @@ describe('xsrf post-auth handler', () => {
     it('accepts requests with version header', () => {
       const config = createConfig({ xsrf: { whitelist: [], disableProtection: false } });
       const handler = createXsrfPostAuthHandler(config);
-      const request = forgeRequest({ method: 'post', headers: { 'kbn-version': 'some-version' } });
+      const request = forgeRequest({ method: 'post', headers: { 'osd-version': 'some-version' } });
 
       toolkit.next.mockReturnValue('next' as any);
 
@@ -114,7 +114,7 @@ describe('xsrf post-auth handler', () => {
       expect(responseFactory.badRequest).toHaveBeenCalledTimes(1);
       expect(responseFactory.badRequest.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
-          "body": "Request must contain a kbn-xsrf header.",
+          "body": "Request must contain a osd-xsrf header.",
         }
       `);
       expect(result).toEqual('badRequest');
@@ -159,7 +159,7 @@ describe('xsrf post-auth handler', () => {
         method: 'post',
         headers: {},
         path: '/some-path',
-        kibanaRouteOptions: {
+        opensearchDashboardsRouteOptions: {
           xsrfRequired: false,
         },
       });
@@ -186,7 +186,7 @@ describe('versionCheck post-auth handler', () => {
 
   it('forward the request to the next interceptor if header matches', () => {
     const handler = createVersionCheckPostAuthHandler('actual-version');
-    const request = forgeRequest({ headers: { 'kbn-version': 'actual-version' } });
+    const request = forgeRequest({ headers: { 'osd-version': 'actual-version' } });
 
     toolkit.next.mockReturnValue('next' as any);
 
@@ -199,7 +199,7 @@ describe('versionCheck post-auth handler', () => {
 
   it('returns a badRequest error if header does not match', () => {
     const handler = createVersionCheckPostAuthHandler('actual-version');
-    const request = forgeRequest({ headers: { 'kbn-version': 'another-version' } });
+    const request = forgeRequest({ headers: { 'osd-version': 'another-version' } });
 
     responseFactory.badRequest.mockReturnValue('badRequest' as any);
 
@@ -214,7 +214,7 @@ describe('versionCheck post-auth handler', () => {
             "expected": "actual-version",
             "got": "another-version",
           },
-          "message": "Browser client is out of date, please refresh the page (\\"kbn-version\\" header was \\"another-version\\" but should be \\"actual-version\\")",
+          "message": "Browser client is out of date, please refresh the page (\\"osd-version\\" header was \\"another-version\\" but should be \\"actual-version\\")",
         },
       }
     `);
@@ -242,14 +242,14 @@ describe('customHeaders pre-response handler', () => {
     toolkit = httpServerMock.createToolkit();
   });
 
-  it('adds the kbn-name header to the response', () => {
+  it('adds the osd-name header to the response', () => {
     const config = createConfig({ name: 'my-server-name' });
     const handler = createCustomHeadersPreResponseHandler(config as HttpConfig);
 
     handler({} as any, {} as any, toolkit);
 
     expect(toolkit.next).toHaveBeenCalledTimes(1);
-    expect(toolkit.next).toHaveBeenCalledWith({ headers: { 'kbn-name': 'my-server-name' } });
+    expect(toolkit.next).toHaveBeenCalledWith({ headers: { 'osd-name': 'my-server-name' } });
   });
 
   it('adds the custom headers defined in the configuration', () => {
@@ -267,18 +267,18 @@ describe('customHeaders pre-response handler', () => {
     expect(toolkit.next).toHaveBeenCalledTimes(1);
     expect(toolkit.next).toHaveBeenCalledWith({
       headers: {
-        'kbn-name': 'my-server-name',
+        'osd-name': 'my-server-name',
         headerA: 'value-A',
         headerB: 'value-B',
       },
     });
   });
 
-  it('preserve the kbn-name value from server.name if definied in custom headders ', () => {
+  it('preserve the osd-name value from server.name if definied in custom headders ', () => {
     const config = createConfig({
       name: 'my-server-name',
       customResponseHeaders: {
-        'kbn-name': 'custom-name',
+        'osd-name': 'custom-name',
         headerA: 'value-A',
         headerB: 'value-B',
       },
@@ -290,7 +290,7 @@ describe('customHeaders pre-response handler', () => {
     expect(toolkit.next).toHaveBeenCalledTimes(1);
     expect(toolkit.next).toHaveBeenCalledWith({
       headers: {
-        'kbn-name': 'my-server-name',
+        'osd-name': 'my-server-name',
         headerA: 'value-A',
         headerB: 'value-B',
       },

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SchemaTypeError } from '@kbn/config-schema';
+import { SchemaTypeError } from '@osd/config-schema';
 
 /**
  * Error to return when the validation is not successful.

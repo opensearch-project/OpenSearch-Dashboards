@@ -23,8 +23,8 @@ import {
   IRouter,
   RouteConfig,
   InternalHttpServiceSetup,
-  KibanaRequest,
-  KibanaResponseFactory,
+  OpenSearchDashboardsRequest,
+  OpenSearchDashboardsResponseFactory,
 } from '../http';
 
 import { Logger } from '../logging';
@@ -80,8 +80,8 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
   private createResponseToolkit(
     deps: SetupDeps,
     context: RequestHandlerContext,
-    request: KibanaRequest,
-    response: KibanaResponseFactory
+    request: OpenSearchDashboardsRequest,
+    response: OpenSearchDashboardsResponseFactory
   ): HttpResourcesServiceToolkit {
     const cspHeader = deps.http.csp.header;
     return {

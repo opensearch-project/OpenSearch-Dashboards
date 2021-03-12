@@ -32,7 +32,7 @@ describe('HttpResources service', () => {
   let service: HttpResourcesService;
   let setupDeps: SetupDeps;
   let router: jest.Mocked<IRouter>;
-  const kibanaRequest = httpServerMock.createKibanaRequest();
+  const opensearchDashboardsRequest = httpServerMock.createOpenSearchDashboardsRequest();
   const context = { core: coreMock.createRequestHandlerContext() };
   describe('#createRegistrar', () => {
     beforeEach(() => {
@@ -56,9 +56,9 @@ describe('HttpResources service', () => {
           const [[, routeHandler]] = router.get.mock.calls;
 
           const responseFactory = httpResourcesMock.createResponseFactory();
-          await routeHandler(context, kibanaRequest, responseFactory);
+          await routeHandler(context, opensearchDashboardsRequest, responseFactory);
           expect(setupDeps.rendering.render).toHaveBeenCalledWith(
-            kibanaRequest,
+            opensearchDashboardsRequest,
             context.core.uiSettings.client,
             {
               includeUserSettings: true,
@@ -74,7 +74,7 @@ describe('HttpResources service', () => {
             return res.renderCoreApp({
               headers: {
                 'content-security-policy': "script-src 'unsafe-eval'",
-                'x-kibana': '42',
+                'x-opensearch-dashboards': '42',
               },
             });
           });
@@ -82,12 +82,12 @@ describe('HttpResources service', () => {
           const [[, routeHandler]] = router.get.mock.calls;
 
           const responseFactory = httpResourcesMock.createResponseFactory();
-          await routeHandler(context, kibanaRequest, responseFactory);
+          await routeHandler(context, opensearchDashboardsRequest, responseFactory);
 
           expect(responseFactory.ok).toHaveBeenCalledWith({
             body: '<body />',
             headers: {
-              'x-kibana': '42',
+              'x-opensearch-dashboards': '42',
               'content-security-policy':
                 "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
             },
@@ -105,9 +105,9 @@ describe('HttpResources service', () => {
           const [[, routeHandler]] = router.get.mock.calls;
 
           const responseFactory = httpResourcesMock.createResponseFactory();
-          await routeHandler(context, kibanaRequest, responseFactory);
+          await routeHandler(context, opensearchDashboardsRequest, responseFactory);
           expect(setupDeps.rendering.render).toHaveBeenCalledWith(
-            kibanaRequest,
+            opensearchDashboardsRequest,
             context.core.uiSettings.client,
             {
               includeUserSettings: false,
@@ -123,7 +123,7 @@ describe('HttpResources service', () => {
             return res.renderAnonymousCoreApp({
               headers: {
                 'content-security-policy': "script-src 'unsafe-eval'",
-                'x-kibana': '42',
+                'x-opensearch-dashboards': '42',
               },
             });
           });
@@ -131,12 +131,12 @@ describe('HttpResources service', () => {
           const [[, routeHandler]] = router.get.mock.calls;
 
           const responseFactory = httpResourcesMock.createResponseFactory();
-          await routeHandler(context, kibanaRequest, responseFactory);
+          await routeHandler(context, opensearchDashboardsRequest, responseFactory);
 
           expect(responseFactory.ok).toHaveBeenCalledWith({
             body: '<body />',
             headers: {
-              'x-kibana': '42',
+              'x-opensearch-dashboards': '42',
               'content-security-policy':
                 "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
             },
@@ -155,7 +155,7 @@ describe('HttpResources service', () => {
           const [[, routeHandler]] = router.get.mock.calls;
 
           const responseFactory = httpResourcesMock.createResponseFactory();
-          await routeHandler(context, kibanaRequest, responseFactory);
+          await routeHandler(context, opensearchDashboardsRequest, responseFactory);
           expect(responseFactory.ok).toHaveBeenCalledWith({
             body: htmlBody,
             headers: {
@@ -177,7 +177,7 @@ describe('HttpResources service', () => {
               headers: {
                 'content-type': 'text/html5',
                 'content-security-policy': "script-src 'unsafe-eval'",
-                'x-kibana': '42',
+                'x-opensearch-dashboards': '42',
               },
             });
           });
@@ -185,13 +185,13 @@ describe('HttpResources service', () => {
           const [[, routeHandler]] = router.get.mock.calls;
 
           const responseFactory = httpResourcesMock.createResponseFactory();
-          await routeHandler(context, kibanaRequest, responseFactory);
+          await routeHandler(context, opensearchDashboardsRequest, responseFactory);
 
           expect(responseFactory.ok).toHaveBeenCalledWith({
             body: htmlBody,
             headers: {
               'content-type': 'text/html',
-              'x-kibana': '42',
+              'x-opensearch-dashboards': '42',
               'content-security-policy':
                 "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
             },
@@ -210,7 +210,7 @@ describe('HttpResources service', () => {
           const [[, routeHandler]] = router.get.mock.calls;
 
           const responseFactory = httpResourcesMock.createResponseFactory();
-          await routeHandler(context, kibanaRequest, responseFactory);
+          await routeHandler(context, opensearchDashboardsRequest, responseFactory);
           expect(responseFactory.ok).toHaveBeenCalledWith({
             body: jsBody,
             headers: {
@@ -232,7 +232,7 @@ describe('HttpResources service', () => {
               headers: {
                 'content-type': 'text/html',
                 'content-security-policy': "script-src 'unsafe-eval'",
-                'x-kibana': '42',
+                'x-opensearch-dashboards': '42',
               },
             });
           });
@@ -240,13 +240,13 @@ describe('HttpResources service', () => {
           const [[, routeHandler]] = router.get.mock.calls;
 
           const responseFactory = httpResourcesMock.createResponseFactory();
-          await routeHandler(context, kibanaRequest, responseFactory);
+          await routeHandler(context, opensearchDashboardsRequest, responseFactory);
 
           expect(responseFactory.ok).toHaveBeenCalledWith({
             body: jsBody,
             headers: {
               'content-type': 'text/javascript',
-              'x-kibana': '42',
+              'x-opensearch-dashboards': '42',
               'content-security-policy':
                 "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
             },

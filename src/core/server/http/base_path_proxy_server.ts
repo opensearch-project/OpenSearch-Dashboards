@@ -21,7 +21,7 @@ import Url from 'url';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 
 import apm from 'elastic-apm-node';
-import { ByteSizeValue } from '@kbn/config-schema';
+import { ByteSizeValue } from '@osd/config-schema';
 import { Server, Request } from 'hapi';
 import HapiProxy from 'h2o2';
 import { sampleSize } from 'lodash';
@@ -146,14 +146,14 @@ export class BasePathProxyServer {
           // Before we proxy request to a target port we may want to wait until some
           // condition is met (e.g. until target listener is ready).
           async (request, responseToolkit) => {
-            apm.setTransactionName(`${request.method.toUpperCase()} /{basePath}/{kbnPath*}`);
+            apm.setTransactionName(`${request.method.toUpperCase()} /{basePath}/{osdPath*}`);
             await delayUntil().pipe(take(1)).toPromise();
             return responseToolkit.continue;
           },
         ],
         validate: { payload: true },
       },
-      path: `${this.httpConfig.basePath}/{kbnPath*}`,
+      path: `${this.httpConfig.basePath}/{osdPath*}`,
     });
 
     this.server.route({
@@ -167,7 +167,7 @@ export class BasePathProxyServer {
               hostname: request.server.info.host,
               port: this.devConfig.basePathProxyTargetPort,
               protocol: request.server.info.protocol,
-              pathname: `${this.httpConfig.basePath}/${request.params.kbnPath}`,
+              pathname: `${this.httpConfig.basePath}/${request.params.osdPath}`,
               query: request.query,
             }),
             headers: request.headers,
@@ -186,7 +186,7 @@ export class BasePathProxyServer {
         ],
         validate: { payload: true },
       },
-      path: `/__UNSAFE_bypassBasePath/{kbnPath*}`,
+      path: `/__UNSAFE_bypassBasePath/{osdPath*}`,
     });
 
     // It may happen that basepath has changed, but user still uses the old one,
@@ -194,17 +194,17 @@ export class BasePathProxyServer {
     // same URL, but with valid basepath.
     this.server.route({
       handler: (request, responseToolkit) => {
-        const { oldBasePath, kbnPath = '' } = request.params;
+        const { oldBasePath, osdPath = '' } = request.params;
 
         const isGet = request.method === 'get';
         const isBasepathLike = oldBasePath.length === 3;
 
-        return isGet && isBasepathLike && shouldRedirectFromOldBasePath(kbnPath)
-          ? responseToolkit.redirect(`${this.httpConfig.basePath}/${kbnPath}`)
+        return isGet && isBasepathLike && shouldRedirectFromOldBasePath(osdPath)
+          ? responseToolkit.redirect(`${this.httpConfig.basePath}/${osdPath}`)
           : responseToolkit.response('Not Found').code(404);
       },
       method: '*',
-      path: `/{oldBasePath}/{kbnPath*}`,
+      path: `/{oldBasePath}/{osdPath*}`,
     });
   }
 }

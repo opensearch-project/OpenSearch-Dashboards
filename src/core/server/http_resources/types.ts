@@ -20,10 +20,10 @@
 import {
   IRouter,
   RouteConfig,
-  IKibanaResponse,
+  IOpenSearchDashboardsResponse,
   ResponseHeaders,
   HttpResponseOptions,
-  KibanaResponseFactory,
+  OpenSearchDashboardsResponseFactory,
   RequestHandler,
 } from '../http';
 
@@ -47,27 +47,27 @@ export interface HttpResourcesRenderOptions {
 export type HttpResourcesResponseOptions = HttpResponseOptions;
 
 /**
- * Extended set of {@link KibanaResponseFactory} helpers used to respond with HTML or JS resource.
+ * Extended set of {@link OpenSearchDashboardsResponseFactory} helpers used to respond with HTML or JS resource.
  * @public
  */
 export interface HttpResourcesServiceToolkit {
-  /** To respond with HTML page bootstrapping Kibana application. */
-  renderCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;
-  /** To respond with HTML page bootstrapping Kibana application without retrieving user-specific information. */
-  renderAnonymousCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;
+  /** To respond with HTML page bootstrapping OpenSearch Dashboards application. */
+  renderCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IOpenSearchDashboardsResponse>;
+  /** To respond with HTML page bootstrapping OpenSearch Dashboards application without retrieving user-specific information. */
+  renderAnonymousCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IOpenSearchDashboardsResponse>;
   /** To respond with a custom HTML page. */
-  renderHtml: (options: HttpResourcesResponseOptions) => IKibanaResponse;
+  renderHtml: (options: HttpResourcesResponseOptions) => IOpenSearchDashboardsResponse;
   /** To respond with a custom JS script file. */
-  renderJs: (options: HttpResourcesResponseOptions) => IKibanaResponse;
+  renderJs: (options: HttpResourcesResponseOptions) => IOpenSearchDashboardsResponse;
 }
 
 /**
  * Extended version of {@link RequestHandler} having access to {@link HttpResourcesServiceToolkit}
  * to respond with HTML or JS resources.
  * @param context {@link RequestHandlerContext} - the core context exposed for this request.
- * @param request {@link KibanaRequest} - object containing information about requested resource,
+ * @param request {@link OpenSearchDashboardsRequest} - object containing information about requested resource,
  * such as path, method, headers, parameters, query, body, etc.
- * @param response {@link KibanaResponseFactory} {@libk HttpResourcesServiceToolkit} - a set of helper functions used to respond to a request.
+ * @param response {@link OpenSearchDashboardsResponseFactory} {@libk HttpResourcesServiceToolkit} - a set of helper functions used to respond to a request.
  *
  *  @example
  * ```typescript
@@ -88,7 +88,7 @@ export type HttpResourcesRequestHandler<P = unknown, Q = unknown, B = unknown> =
   Q,
   B,
   'get',
-  KibanaResponseFactory & HttpResourcesServiceToolkit
+  OpenSearchDashboardsResponseFactory & HttpResourcesServiceToolkit
 >;
 
 /**
@@ -100,9 +100,9 @@ export interface InternalHttpResourcesSetup {
 }
 
 /**
- * HttpResources service is responsible for serving static & dynamic assets for Kibana application via HTTP.
+ * HttpResources service is responsible for serving static & dynamic assets for OpenSearch Dashboards application via HTTP.
  * Provides API allowing plug-ins to respond with:
- * - a pre-configured HTML page bootstrapping Kibana client app
+ * - a pre-configured HTML page bootstrapping OpenSearch Dashboards client app
  * - custom HTML page
  * - custom JS script file.
  * @public
