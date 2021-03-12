@@ -47,7 +47,7 @@ export interface CoreServicesUsageData {
 }
 
 /**
- * Usage data on this Kibana node's runtime environment.
+ * Usage data on this OpenSearch Dashboards node's runtime environment.
  * @internal
  */
 export interface CoreEnvironmentUsageData {

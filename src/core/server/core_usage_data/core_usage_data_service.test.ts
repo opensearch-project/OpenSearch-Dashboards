@@ -27,7 +27,7 @@ import { mockCoreContext } from '../core_context.mock';
 import { config as RawOpenSearchConfig } from '../opensearch/opensearch_config';
 import { config as RawHttpConfig } from '../http/http_config';
 import { config as RawLoggingConfig } from '../logging/logging_config';
-import { config as RawKibanaConfig } from '../opensearch_dashboards_config';
+import { config as RawOpenSearchDashboardsConfig } from '../opensearch_dashboards_config';
 import { savedObjectsConfig as RawSavedObjectsConfig } from '../saved_objects/saved_objects_config';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
@@ -53,7 +53,7 @@ describe('CoreUsageDataService', () => {
     } else if (path === 'savedObjects') {
       return new BehaviorSubject(RawSavedObjectsConfig.schema.validate({}));
     } else if (path === 'opensearch-dashboards') {
-      return new BehaviorSubject(RawKibanaConfig.schema.validate({}));
+      return new BehaviorSubject(RawOpenSearchDashboardsConfig.schema.validate({}));
     }
     return new BehaviorSubject({});
   });
@@ -83,7 +83,7 @@ describe('CoreUsageDataService', () => {
         opensearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
           body: [
             {
-              name: '.opensearch_dashboards_1',
+              name: '.opensearch-dashboards_1',
               'docs.count': 20,
               'docs.deleted': 20,
               'store.size': 2000,
@@ -93,7 +93,7 @@ describe('CoreUsageDataService', () => {
         } as any);
         const typeRegistry = savedObjectsServiceMock.createTypeRegistryMock();
         typeRegistry.getAllTypes.mockReturnValue([
-          { name: 'type 1', indexPattern: '.opensearch_dashboards' },
+          { name: 'type 1', indexPattern: '.opensearch-dashboards' },
           { name: 'type 2', indexPattern: '.opensearch_dashboards_task_manager' },
         ] as any);
 
@@ -202,7 +202,7 @@ describe('CoreUsageDataService', () => {
               "savedObjects": Object {
                 "indices": Array [
                   Object {
-                    "alias": ".opensearch_dashboards",
+                    "alias": ".opensearch-dashboards",
                     "docsCount": 10,
                     "docsDeleted": 10,
                     "primaryStoreSizeBytes": 2000,

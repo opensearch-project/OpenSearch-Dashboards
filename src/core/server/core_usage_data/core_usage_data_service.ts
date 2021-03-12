@@ -47,17 +47,17 @@ export interface StartDeps {
  * we need to map customized index names back to a "standard" index name.
  *
  * e.g. If a user configures `opensearchDashboards.index: .my_saved_objects` we want to the
- * collected data to be grouped under `.opensearch_dashboards` not ".my_saved_objects".
+ * collected data to be grouped under `.opensearch-dashboards` not ".my_saved_objects".
  *
  * This is rather brittle, but the option to configure index names might go
  * away completely anyway (see #60053).
  *
  * @param index The index name configured for this SO type
- * @param opensearchDashboardsConfigIndex The default opensearch_dashboards index as configured by the user
+ * @param opensearchDashboardsConfigIndex The default opensearch-dashboards index as configured by the user
  * with `opensearchDashboards.index`
  */
 const opensearchDashboardsOrTaskManagerIndex = (index: string, opensearchDashboardsConfigIndex: string) => {
-  return index === opensearchDashboardsConfigIndex ? '.opensearch_dashboards' : '.opensearch_dashboards_task_manager';
+  return index === opensearchDashboardsConfigIndex ? '.opensearch-dashboards' : '.opensearch_dashboards_task_manager';
 };
 
 export class CoreUsageDataService implements CoreService<void, CoreUsageDataStart> {
@@ -130,7 +130,7 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
       throw new Error('Unable to read config valuopensearch. Ensure that setup() has completed.');
     }
 
-    const es = this.opensearchConfig;
+    const opensearch = this.opensearchConfig;
     const soUsageData = await this.getSavedObjectIndicesUsageData(savedObjects, opensearch);
 
     const http = this.httpConfig;
