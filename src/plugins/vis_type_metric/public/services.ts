@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createGetterSetter } from '../../kibana_utils/common';
+import { createGetterSetter } from '../../opensearch_dashboards_utils/common';
 import { DataPublicPluginStart } from '../../data/public';
 
 export const [getFormatService, setFormatService] = createGetterSetter<

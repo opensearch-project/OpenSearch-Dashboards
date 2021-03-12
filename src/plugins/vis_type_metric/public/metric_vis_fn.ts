@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import {
   ExpressionFunctionDefinition,
-  KibanaDatatable,
+  OpenSearchDashboardsDatatable,
   Range,
   Render,
   Style,
@@ -29,7 +29,7 @@ import {
 import { visType, DimensionsVisParam, VisParams } from './types';
 import { ColorSchemas, vislibColorMaps, ColorModes } from '../../charts/public';
 
-export type Input = KibanaDatatable;
+export type Input = OpenSearchDashboardsDatatable;
 
 interface Arguments {
   percentageMode: boolean;
@@ -63,7 +63,7 @@ export type MetricVisExpressionFunctionDefinition = ExpressionFunctionDefinition
 export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
   name: 'metricVis',
   type: 'render',
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['opensearch_dashboards_datatable'],
   help: i18n.translate('visTypeMetric.function.help', {
     defaultMessage: 'Metric visualization',
   }),
