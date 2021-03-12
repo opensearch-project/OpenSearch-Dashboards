@@ -21,7 +21,7 @@ import { get } from 'lodash';
 import { getVisSchemas, SchemaConfig, Vis } from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { MetricVisExpressionFunctionDefinition } from './metric_vis_fn';
-import { EsaggsExpressionFunctionDefinition } from '../../data/common/search/expressions';
+import { OpenSearchaggsExpressionFunctionDefinition } from '../../data/common/search/expressions';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });
@@ -35,8 +35,8 @@ const prepareDimension = (params: SchemaConfig) => {
 };
 
 export const toExpressionAst = (vis: Vis, params: any) => {
-  // soon this becomes: const esaggs = vis.data.aggs!.toExpressionAst();
-  const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
+  // soon this becomes: const opensearchaggs = vis.data.aggs!.toExpressionAst();
+  const opensearchaggs = buildExpressionFunction<OpenSearchaggsExpressionFunctionDefinition>('opensearchaggs', {
     index: vis.data.indexPattern!.id!,
     metricsAtAllLevels: vis.isHierarchical(),
     partialRows: vis.params.showPartialRows || false,
@@ -97,7 +97,7 @@ export const toExpressionAst = (vis: Vis, params: any) => {
     metricVis.addArgument('metric', prepareDimension(metric));
   });
 
-  const ast = buildExpression([esaggs, metricVis]);
+  const ast = buildExpression([opensearchaggs, metricVis]);
 
   return ast.toAst();
 };
