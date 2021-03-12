@@ -20,11 +20,11 @@ import { Lifecycle, Request, ResponseToolkit } from 'hapi';
 import { Logger } from '../../logging';
 import {
   HapiResponseAdapter,
-  KibanaRequest,
-  IKibanaResponse,
+  OpenSearchDashboardsRequest,
+  IOpenSearchDashboardsResponse,
   lifecycleResponseFactory,
   LifecycleResponseFactory,
-  isKibanaResponse,
+  isOpenSearchDashboardsResponse,
   ResponseHeaders,
 } from '../router';
 
@@ -102,7 +102,7 @@ export interface AuthResultParams {
   state?: Record<string, any>;
   /**
    * Auth specific headers to attach to a request object.
-   * Used to perform a request to Elasticsearch on behalf of an authenticated user.
+   * Used to perform a request to  on behalf of an authenticated user.
    */
   requestHeaders?: AuthHeaders;
   /**
@@ -155,10 +155,10 @@ const toolkit: AuthToolkit = {
  * @public
  */
 export type AuthenticationHandler = (
-  request: KibanaRequest,
+  request: OpenSearchDashboardsRequest,
   response: LifecycleResponseFactory,
   toolkit: AuthToolkit
-) => AuthResult | IKibanaResponse | Promise<AuthResult | IKibanaResponse>;
+) => AuthResult | IOpenSearchDashboardsResponse | Promise<AuthResult | IOpenSearchDashboardsResponse>;
 
 /** @public */
 export function adoptToHapiAuthFormat(
@@ -171,12 +171,12 @@ export function adoptToHapiAuthFormat(
     responseToolkit: ResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
-    const kibanaRequest = KibanaRequest.from(request, undefined, false);
+    const opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request, undefined, false);
 
     try {
-      const result = await fn(kibanaRequest, lifecycleResponseFactory, toolkit);
+      const result = await fn(opensearchDashboardsRequest, lifecycleResponseFactory, toolkit);
 
-      if (isKibanaResponse(result)) {
+      if (isOpenSearchDashboardsResponse(result)) {
         return hapiResponseAdapter.handle(result);
       }
 
@@ -191,7 +191,7 @@ export function adoptToHapiAuthFormat(
 
       if (authResult.isRedirected(result)) {
         // we cannot redirect a user when resources with optional auth requested
-        if (kibanaRequest.route.options.authRequired === 'optional') {
+        if (opensearchDashboardsRequest.route.options.authRequired === 'optional') {
           return responseToolkit.continue;
         }
 
@@ -204,13 +204,13 @@ export function adoptToHapiAuthFormat(
       }
 
       if (authResult.isNotHandled(result)) {
-        if (kibanaRequest.route.options.authRequired === 'optional') {
+        if (opensearchDashboardsRequest.route.options.authRequired === 'optional') {
           return responseToolkit.continue;
         }
         return hapiResponseAdapter.handle(lifecycleResponseFactory.unauthorized());
       }
       throw new Error(
-        `Unexpected result from Authenticate. Expected AuthResult or KibanaResponse, but given: ${result}.`
+        `Unexpected result from Authenticate. Expected AuthResult or OpenSearchDashboardsResponse, but given: ${result}.`
       );
     } catch (error) {
       log.error(error);

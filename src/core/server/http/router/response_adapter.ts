@@ -23,7 +23,7 @@ import * as stream from 'stream';
 
 import {
   HttpResponsePayload,
-  KibanaResponse,
+  OpenSearchDashboardsResponse,
   ResponseError,
   ResponseErrorAttributes,
 } from './response';
@@ -62,72 +62,72 @@ export class HapiResponseAdapter {
     return error;
   }
 
-  public handle(kibanaResponse: KibanaResponse) {
-    if (!(kibanaResponse instanceof KibanaResponse)) {
+  public handle(opensearchDashboardsResponse: OpenSearchDashboardsResponse) {
+    if (!(opensearchDashboardsResponse instanceof OpenSearchDashboardsResponse)) {
       throw new Error(
-        `Unexpected result from Route Handler. Expected KibanaResponse, but given: ${typeDetect(
-          kibanaResponse
+        `Unexpected result from Route Handler. Expected OpenSearchDashboardsResponse, but given: ${typeDetect(
+          opensearchDashboardsResponse
         )}.`
       );
     }
 
-    return this.toHapiResponse(kibanaResponse);
+    return this.toHapiResponse(opensearchDashboardsResponse);
   }
 
-  private toHapiResponse(kibanaResponse: KibanaResponse) {
-    if (statusHelpers.isError(kibanaResponse.status)) {
-      return this.toError(kibanaResponse);
+  private toHapiResponse(opensearchDashboardsResponse: OpenSearchDashboardsResponse) {
+    if (statusHelpers.isError(opensearchDashboardsResponse.status)) {
+      return this.toError(opensearchDashboardsResponse);
     }
-    if (statusHelpers.isSuccess(kibanaResponse.status)) {
-      return this.toSuccess(kibanaResponse);
+    if (statusHelpers.isSuccess(opensearchDashboardsResponse.status)) {
+      return this.toSuccess(opensearchDashboardsResponse);
     }
-    if (statusHelpers.isRedirect(kibanaResponse.status)) {
-      return this.toRedirect(kibanaResponse);
+    if (statusHelpers.isRedirect(opensearchDashboardsResponse.status)) {
+      return this.toRedirect(opensearchDashboardsResponse);
     }
     throw new Error(
-      `Unexpected Http status code. Expected from 100 to 599, but given: ${kibanaResponse.status}.`
+      `Unexpected Http status code. Expected from 100 to 599, but given: ${opensearchDashboardsResponse.status}.`
     );
   }
 
-  private toSuccess(kibanaResponse: KibanaResponse<HttpResponsePayload>) {
+  private toSuccess(opensearchDashboardsResponse: OpenSearchDashboardsResponse<HttpResponsePayload>) {
     const response = this.responseToolkit
-      .response(kibanaResponse.payload)
-      .code(kibanaResponse.status);
-    setHeaders(response, kibanaResponse.options.headers);
+      .response(opensearchDashboardsResponse.payload)
+      .code(opensearchDashboardsResponse.status);
+    setHeaders(response, opensearchDashboardsResponse.options.headers);
     return response;
   }
 
-  private toRedirect(kibanaResponse: KibanaResponse<HttpResponsePayload>) {
-    const { headers } = kibanaResponse.options;
+  private toRedirect(opensearchDashboardsResponse: OpenSearchDashboardsResponse<HttpResponsePayload>) {
+    const { headers } = opensearchDashboardsResponse.options;
     if (!headers || typeof headers.location !== 'string') {
       throw new Error("expected 'location' header to be set");
     }
 
     const response = this.responseToolkit
-      .response(kibanaResponse.payload)
+      .response(opensearchDashboardsResponse.payload)
       .redirect(headers.location)
-      .code(kibanaResponse.status)
+      .code(opensearchDashboardsResponse.status)
       .takeover();
 
-    setHeaders(response, kibanaResponse.options.headers);
+    setHeaders(response, opensearchDashboardsResponse.options.headers);
     return response;
   }
 
-  private toError(kibanaResponse: KibanaResponse<ResponseError | Buffer | stream.Readable>) {
-    const { payload } = kibanaResponse;
+  private toError(opensearchDashboardsResponse: OpenSearchDashboardsResponse<ResponseError | Buffer | stream.Readable>) {
+    const { payload } = opensearchDashboardsResponse;
 
     // Special case for when we are proxying requests and want to enable streaming back error responses opaquely.
     if (Buffer.isBuffer(payload) || payload instanceof stream.Readable) {
       const response = this.responseToolkit
-        .response(kibanaResponse.payload)
-        .code(kibanaResponse.status);
-      setHeaders(response, kibanaResponse.options.headers);
+        .response(opensearchDashboardsResponse.payload)
+        .code(opensearchDashboardsResponse.status);
+      setHeaders(response, opensearchDashboardsResponse.options.headers);
       return response;
     }
 
     // we use for BWC with Boom payload for error responses - {error: string, message: string, statusCode: string}
     const error = new Boom('', {
-      statusCode: kibanaResponse.status,
+      statusCode: opensearchDashboardsResponse.status,
     });
 
     error.output.payload.message = getErrorMessage(payload);
@@ -137,7 +137,7 @@ export class HapiResponseAdapter {
       error.output.payload.attributes = attributes;
     }
 
-    const headers = kibanaResponse.options.headers;
+    const headers = opensearchDashboardsResponse.options.headers;
     if (headers) {
       // Hapi typings for header accept only strings, although string[] is a valid value
       error.output.headers = headers as any;

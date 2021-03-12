@@ -24,7 +24,7 @@ import { DetailedPeerCertificate, PeerCertificate, TLSSocket } from 'tls';
  * A tiny abstraction for TCP socket.
  * @public
  */
-export interface IKibanaSocket {
+export interface IOpenSearchDashboardsSocket {
   getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
   getPeerCertificate(detailed: false): PeerCertificate | null;
   /**
@@ -51,7 +51,7 @@ export interface IKibanaSocket {
   readonly authorizationError?: Error;
 }
 
-export class KibanaSocket implements IKibanaSocket {
+export class OpenSearchDashboardsSocket implements IOpenSearchDashboardsSocket {
   readonly authorized?: boolean;
   readonly authorizationError?: Error;
 

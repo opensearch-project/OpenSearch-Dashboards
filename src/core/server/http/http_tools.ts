@@ -26,7 +26,7 @@ import { HttpConfig } from './http_config';
 import { validateObject } from './prototype_pollution';
 
 /**
- * Converts Kibana `HttpConfig` into `ServerOptions` that are accepted by the Hapi server.
+ * Converts OpenSearch Dashboards `HttpConfig` into `ServerOptions` that are accepted by the Hapi server.
  */
 export function getServerOptions(config: HttpConfig, { configureTLS = true } = {}) {
   // Note that all connection options configured here should be exactly the same
@@ -60,7 +60,7 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
     state: {
       strictHeader: false,
       isHttpOnly: true,
-      isSameSite: false, // necessary to allow using Kibana inside an iframe
+      isSameSite: false, // necessary to allow using OpenSearch Dashboards inside an iframe
     },
   };
 

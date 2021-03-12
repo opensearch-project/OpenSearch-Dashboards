@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import { DisposableAppender, LogRecord } from '../../../logging';
 import { LegacyLoggingServer } from '../legacy_logging_server';
 import { LegacyVars } from '../../types';
@@ -28,7 +28,7 @@ export interface LegacyAppenderConfig {
 }
 
 /**
- * Simple appender that just forwards `LogRecord` to the legacy KbnServer log.
+ * Simple appender that just forwards `LogRecord` to the legacy OsdServer log.
  * @internal
  */
 export class LegacyAppender implements DisposableAppender {

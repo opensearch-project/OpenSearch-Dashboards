@@ -20,7 +20,7 @@
 import { Observable, Subscription, combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { Server } from 'hapi';
-import { pick } from '@kbn/std';
+import { pick } from '@osd/std';
 
 import { CoreService } from '../../types';
 import { Logger, LoggerFactory } from '../logging';
@@ -74,7 +74,7 @@ export class HttpService
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path),
     ]).pipe(map(([http, csp]) => new HttpConfig(http, csp)));
-    this.httpServer = new HttpServer(logger, 'Kibana');
+    this.httpServer = new HttpServer(logger, 'OpenSearchDashboards');
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
@@ -181,19 +181,19 @@ export class HttpService
     const httpServer = new HttpServer(this.logger, 'NotReady');
     const { server } = await httpServer.setup(config);
     this.notReadyServer = server;
-    // use hapi server while KibanaResponseFactory doesn't allow specifying custom headers
+    // use hapi server while OpenSearchDashboardsResponseFactory doesn't allow specifying custom headers
     // https://github.com/elastic/kibana/issues/33779
     this.notReadyServer.route({
       path: '/{p*}',
       method: '*',
       handler: (req, responseToolkit) => {
-        this.log.debug(`Kibana server is not ready yet ${req.method}:${req.url.href}.`);
+        this.log.debug(`OpenSearch Dashboards server is not ready yet ${req.method}:${req.url.href}.`);
 
         // If server is not ready yet, because plugins or core can perform
         // long running tasks (build assets, saved objects migrations etc.)
         // we should let client know that and ask to retry after 30 seconds.
         return responseToolkit
-          .response('Kibana server is not ready yet')
+          .response('OpenSearch Dashboards server is not ready yet')
           .code(503)
           .header('Retry-After', '30');
       },

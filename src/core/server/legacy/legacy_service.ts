@@ -19,8 +19,8 @@
 
 import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, tap } from 'rxjs/operators';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PathConfigType } from '@kbn/utils';
+import type { PublicMethodsOf } from '@osd/utility-types';
+import { PathConfigType } from '@osd/utils';
 
 // @ts-expect-error legacy config class
 import { Config as LegacyConfigClass } from '../../../legacy/server/config';
@@ -34,7 +34,7 @@ import { Logger } from '../logging';
 import { LegacyServiceSetupDeps, LegacyServiceStartDeps, LegacyConfig, LegacyVars } from './types';
 import { CoreSetup, CoreStart } from '..';
 
-interface LegacyKbnServer {
+interface LegacyOsdServer {
   applyLoggingConfiguration: (settings: Readonly<LegacyVars>) => void;
   listen: () => Promise<void>;
   ready: () => Promise<void>;
@@ -44,10 +44,10 @@ interface LegacyKbnServer {
 function getLegacyRawConfig(config: Config, pathConfig: PathConfigType) {
   const rawConfig = config.toRaw();
 
-  // Elasticsearch config is solely handled by the core and legacy platform
+  // OpenSearch config is solely handled by the core and legacy platform
   // shouldn't have direct access to it.
-  if (rawConfig.elasticsearch !== undefined) {
-    delete rawConfig.elasticsearch;
+  if (rawConfig.opensearch !== undefined) {
+    delete rawConfig.opensearch;
   }
 
   return {
@@ -68,7 +68,7 @@ export class LegacyService implements CoreService {
   private readonly log: Logger;
   private readonly devConfig$: Observable<DevConfig>;
   private readonly httpConfig$: Observable<HttpConfig>;
-  private kbnServer?: LegacyKbnServer;
+  private osdServer?: LegacyOsdServer;
   private configSubscription?: Subscription;
   private setupDeps?: LegacyServiceSetupDeps;
   private update$?: ConnectableObservable<[Config, PathConfigType]>;
@@ -94,8 +94,8 @@ export class LegacyService implements CoreService {
       this.coreContext.configService.atPath<PathConfigType>('path'),
     ]).pipe(
       tap(([config, pathConfig]) => {
-        if (this.kbnServer !== undefined) {
-          this.kbnServer.applyLoggingConfiguration(getLegacyRawConfig(config, pathConfig));
+        if (this.osdServer !== undefined) {
+          this.osdServer.applyLoggingConfiguration(getLegacyRawConfig(config, pathConfig));
         }
       }),
       tap({ error: (err) => this.log.error(err) }),
@@ -143,11 +143,11 @@ export class LegacyService implements CoreService {
 
     this.log.debug('starting legacy service');
 
-    // Receive initial config and create kbnServer/ClusterManager.
+    // Receive initial config and create osdServer/ClusterManager.
     if (this.coreContext.env.isDevClusterMaster) {
       await this.createClusterManager(this.legacyRawConfig!);
     } else {
-      this.kbnServer = await this.createKbnServer(
+      this.osdServer = await this.createOsdServer(
         this.settings!,
         this.legacyRawConfig!,
         setupDeps,
@@ -164,9 +164,9 @@ export class LegacyService implements CoreService {
       this.configSubscription = undefined;
     }
 
-    if (this.kbnServer !== undefined) {
-      await this.kbnServer.close();
-      this.kbnServer = undefined;
+    if (this.osdServer !== undefined) {
+      await this.osdServer.close();
+      this.osdServer = undefined;
     }
   }
 
@@ -190,7 +190,7 @@ export class LegacyService implements CoreService {
     );
   }
 
-  private async createKbnServer(
+  private async createOsdServer(
     settings: LegacyVars,
     config: LegacyConfig,
     setupDeps: LegacyServiceSetupDeps,
@@ -198,7 +198,7 @@ export class LegacyService implements CoreService {
   ) {
     const coreStart: CoreStart = {
       capabilities: startDeps.core.capabilities,
-      elasticsearch: startDeps.core.elasticsearch,
+      opensearch: startDeps.core.opensearch,
       http: {
         auth: startDeps.core.http.auth,
         basePath: startDeps.core.http.basePath,
@@ -228,8 +228,8 @@ export class LegacyService implements CoreService {
     const coreSetup: CoreSetup = {
       capabilities: setupDeps.core.capabilities,
       context: setupDeps.core.context,
-      elasticsearch: {
-        legacy: setupDeps.core.elasticsearch.legacy,
+      opensearch: {
+        legacy: setupDeps.core.opensearch.legacy,
       },
       http: {
         createCookieSessionStorageFactory: setupDeps.core.http.createCookieSessionStorageFactory,
@@ -289,8 +289,8 @@ export class LegacyService implements CoreService {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const KbnServer = require('../../../legacy/server/kbn_server');
-    const kbnServer: LegacyKbnServer = new KbnServer(settings, config, {
+    const OsdServer = require('../../../legacy/server/osd_server');
+    const osdServer: LegacyOsdServer = new OsdServer(settings, config, {
       env: {
         mode: this.coreContext.env.mode,
         packageInfo: this.coreContext.env.packageInfo,
@@ -311,27 +311,27 @@ export class LegacyService implements CoreService {
       logger: this.coreContext.logger,
     });
 
-    // The kbnWorkerType check is necessary to prevent the repl
+    // The osdWorkerType check is necessary to prevent the repl
     // from being started multiple times in different processes.
     // We only want one REPL.
-    if (this.coreContext.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
+    if (this.coreContext.env.cliArgs.repl && process.env.osdWorkerType === 'server') {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('./cli').startRepl(kbnServer);
+      require('./cli').startRepl(osdServer);
     }
 
     const { autoListen } = await this.httpConfig$.pipe(first()).toPromise();
 
     if (autoListen) {
       try {
-        await kbnServer.listen();
+        await osdServer.listen();
       } catch (err) {
-        await kbnServer.close();
+        await osdServer.close();
         throw err;
       }
     } else {
-      await kbnServer.ready();
+      await osdServer.ready();
     }
 
-    return kbnServer;
+    return osdServer;
   }
 }

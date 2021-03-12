@@ -19,7 +19,7 @@
 
 import { Router } from './router';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 
 const logger = loggingSystemMock.create().get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
@@ -47,7 +47,7 @@ describe('Router', () => {
           (context, req, res) => res.ok({})
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [params]."`
+        `"Expected a valid validation logic declared with '@osd/config-schema' package or a RouteValidationFunction at key: [params]."`
       );
     });
 

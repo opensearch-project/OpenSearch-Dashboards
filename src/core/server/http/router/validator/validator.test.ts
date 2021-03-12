@@ -18,7 +18,7 @@
  */
 
 import { RouteValidationError, RouteValidator } from './';
-import { schema, Type } from '@kbn/config-schema';
+import { schema, Type } from '@osd/config-schema';
 
 describe('Router validator', () => {
   it('should validate and infer the type from a function', () => {
