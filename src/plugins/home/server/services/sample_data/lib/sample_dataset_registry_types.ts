@@ -39,10 +39,10 @@ export enum EmbeddableTypes {
 export interface DataIndexSchema {
   id: string;
 
-  // path to newline delimented JSON file containing data relative to KIBANA_HOME
+  // path to newline delimented JSON file containing data relative to OPENSEARCH_DASHBOARDS_HOME
   dataPath: string;
 
-  // Object defining Elasticsearch field mappings (contents of index.mappings.type.properties)
+  // Object defining OpenSearch field mappings (contents of index.mappings.type.properties)
   fields: object;
 
   // times fields that will be updated relative to now when data is installed
@@ -81,8 +81,8 @@ export interface SampleDatasetSchema<T = unknown> {
   // saved object id of default index-pattern for sample data set
   defaultIndex: string;
 
-  // Kibana saved objects (index patter, visualizations, dashboard, ...)
-  // Should provide a nice demo of Kibana's functionality with the sample data set
+  // OpenSearch Dashboards saved objects (index patter, visualizations, dashboard, ...)
+  // Should provide a nice demo of OpenSearch Dashboards's functionality with the sample data set
   savedObjects: Array<SavedObject<T>>;
   dataIndices: DataIndexSchema[];
   status?: string | undefined;

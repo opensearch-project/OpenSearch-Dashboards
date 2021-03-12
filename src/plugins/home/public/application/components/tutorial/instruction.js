@@ -30,7 +30,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 export function Instruction({ commands, paramValues, textPost, textPre, replaceTemplateStrings }) {
   let pre;

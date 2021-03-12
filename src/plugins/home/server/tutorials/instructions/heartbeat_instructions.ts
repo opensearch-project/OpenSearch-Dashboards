@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
@@ -35,9 +35,9 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         values: { link: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html' },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'tar xzvf heartbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'cd heartbeat-{config.kibana.version}-darwin-x86_64/',
+        'curl -L -O https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+        'tar xzvf heartbeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+        'cd heartbeat-{config.opensearchDashboards.version}-darwin-x86_64/',
       ],
     },
     DEB: {
@@ -49,8 +49,8 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         values: { link: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html' },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-{config.kibana.version}-amd64.deb',
-        'sudo dpkg -i heartbeat-{config.kibana.version}-amd64.deb',
+        'curl -L -O https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-{config.opensearchDashboards.version}-amd64.deb',
+        'sudo dpkg -i heartbeat-{config.opensearchDashboards.version}-amd64.deb',
       ],
       textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
@@ -66,8 +66,8 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         values: { link: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html' },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-{config.kibana.version}-x86_64.rpm',
-        'sudo rpm -vi heartbeat-{config.kibana.version}-x86_64.rpm',
+        'curl -L -O https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-{config.opensearchDashboards.version}-x86_64.rpm',
+        'sudo rpm -vi heartbeat-{config.opensearchDashboards.version}-x86_64.rpm',
       ],
       textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
@@ -90,7 +90,7 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
 **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
  5. From the PowerShell prompt, run the following commands to install Heartbeat as a Windows service.',
           values: {
-            directoryName: '`heartbeat-{config.kibana.version}-windows`',
+            directoryName: '`heartbeat-{config.opensearchDashboards.version}-windows`',
             folderPath: '`C:\\Program Files`',
             heartbeatLink:
               '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html',
@@ -107,7 +107,7 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Start Heartbeat',
       }),
       textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.start.osxTextPre', {
-        defaultMessage: 'The `setup` command loads the Kibana index pattern.',
+        defaultMessage: 'The `setup` command loads the OpenSearch Dashboards index pattern.',
       }),
       commands: ['./heartbeat setup', './heartbeat -e'],
     },
@@ -116,7 +116,7 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Start Heartbeat',
       }),
       textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.start.debTextPre', {
-        defaultMessage: 'The `setup` command loads the Kibana index pattern.',
+        defaultMessage: 'The `setup` command loads the OpenSearch Dashboards index pattern.',
       }),
       commands: ['sudo heartbeat setup', 'sudo service heartbeat-elastic start'],
     },
@@ -125,7 +125,7 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Start Heartbeat',
       }),
       textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.start.rpmTextPre', {
-        defaultMessage: 'The `setup` command loads the Kibana index pattern.',
+        defaultMessage: 'The `setup` command loads the OpenSearch Dashboards index pattern.',
       }),
       commands: ['sudo heartbeat setup', 'sudo service heartbeat-elastic start'],
     },
@@ -134,7 +134,7 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Start Heartbeat',
       }),
       textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.start.windowsTextPre', {
-        defaultMessage: 'The `setup` command loads the Kibana index pattern.',
+        defaultMessage: 'The `setup` command loads the OpenSearch Dashboards index pattern.',
       }),
       commands: ['.\\heartbeat.exe setup', 'Start-Service heartbeat'],
     },
@@ -151,22 +151,22 @@ export const createHeartbeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchDashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.config.osxTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
+          opensearchUrlTemplate: '`<opensearch_url>`',
+          opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
         },
       }),
     },
@@ -181,22 +181,22 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         },
       }),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchDashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.config.debTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
+          opensearchUrlTemplate: '`<opensearch_url>`',
+          opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
         },
       }),
     },
@@ -211,22 +211,22 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         },
       }),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchDashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.config.rpmTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
+          opensearchUrlTemplate: '`<opensearch_url>`',
+          opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
         },
       }),
     },
@@ -241,24 +241,24 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         },
       }),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchDashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate(
         'home.tutorials.common.heartbeatInstructions.config.windowsTextPost',
         {
           defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+            'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           values: {
             passwordTemplate: '`<password>`',
-            esUrlTemplate: '`<es_url>`',
-            kibanaUrlTemplate: '`<kibana_url>`',
+            opensearchUrlTemplate: '`<opensearch_url>`',
+            opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
           },
         }
       ),
@@ -488,7 +488,7 @@ export function heartbeatStatusCheck() {
     error: i18n.translate('home.tutorials.common.heartbeatStatusCheck.errorText', {
       defaultMessage: 'No data has been received from Heartbeat yet',
     }),
-    esHitsCheck: {
+    opensearchHitsCheck: {
       index: 'heartbeat-*',
       query: {
         match_all: {},

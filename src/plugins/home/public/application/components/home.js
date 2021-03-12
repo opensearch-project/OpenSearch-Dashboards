@@ -19,16 +19,16 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import {
   OverviewPageFooter,
   OverviewPageHeader,
-} from '../../../../../../src/plugins/kibana_react/public';
+} from '../../../../../../src/plugins/opensearch_dashboards_react/public';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import { FeatureCatalogueCategory } from '../../services';
-import { getServices } from '../kibana_services';
+import { getServices } from '../opensearch_dashboards_services';
 import { AddData } from './add_data';
 import { ManageData } from './manage_data';
 import { SolutionsSection } from './solutions_section';
@@ -54,7 +54,7 @@ export class Home extends Component {
       // effect where home renders, and then a few ms after, the
       // welcome screen fades in.
       isLoading: isWelcomeEnabled,
-      isNewKibanaInstance: false,
+      isNewOpenSearchDashboardsInstance: false,
       isWelcomeEnabled,
     };
   }
@@ -65,13 +65,13 @@ export class Home extends Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this.fetchIsNewKibanaInstance();
+    this.fetchIsNewOpenSearchDashboardsInstance();
 
     const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
     getServices().chrome.setBreadcrumbs([{ text: homeTitle }]);
   }
 
-  fetchIsNewKibanaInstance = async () => {
+  fetchIsNewOpenSearchDashboardsInstance = async () => {
     try {
       // Set a max-time on this query so we don't hang the page too long...
       // Worst case, we don't show the welcome screen when we should.
@@ -89,7 +89,7 @@ export class Home extends Component {
         perPage: 1,
       });
 
-      this.endLoading({ isNewKibanaInstance: resp.total === 0 });
+      this.endLoading({ isNewOpenSearchDashboardsInstance: resp.total === 0 });
     } catch (err) {
       // An error here is relatively unimportant, as it only means we don't provide
       // some UI niceties.
@@ -132,7 +132,7 @@ export class Home extends Component {
 
     return (
       <main
-        aria-labelledby="kbnOverviewPageHeader__title"
+        aria-labelledby="osdOverviewPageHeader__title"
         className="homWrapper"
         data-test-subj="homeApp"
       >
@@ -154,11 +154,10 @@ export class Home extends Component {
           ) : null}
 
           <EuiFlexGroup
-            className={`homData ${
-              addDataFeatures.length === 1 && manageDataFeatures.length === 1
-                ? 'homData--compressed'
-                : 'homData--expanded'
-            }`}
+            className={`homData ${addDataFeatures.length === 1 && manageDataFeatures.length === 1
+              ? 'homData--compressed'
+              : 'homData--expanded'
+              }`}
           >
             <EuiFlexItem>
               <AddData addBasePath={addBasePath} features={addDataFeatures} />
@@ -193,13 +192,13 @@ export class Home extends Component {
   }
 
   render() {
-    const { isLoading, isWelcomeEnabled, isNewKibanaInstance } = this.state;
+    const { isLoading, isWelcomeEnabled, isNewOpenSearchDashboardsInstance } = this.state;
 
     if (isWelcomeEnabled) {
       if (isLoading) {
         return this.renderLoading();
       }
-      if (isNewKibanaInstance) {
+      if (isNewOpenSearchDashboardsInstance) {
         return this.renderWelcome();
       }
     }

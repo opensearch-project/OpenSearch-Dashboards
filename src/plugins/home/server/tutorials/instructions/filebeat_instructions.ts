@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
@@ -37,9 +37,9 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'tar xzvf filebeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'cd filebeat-{config.kibana.version}-darwin-x86_64/',
+        'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+        'tar xzvf filebeat-{config.opensearchDashboards.version}-darwin-x86_64.tar.gz',
+        'cd filebeat-{config.opensearchDashboards.version}-darwin-x86_64/',
       ],
     },
     DEB: {
@@ -53,8 +53,8 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.kibana.version}-amd64.deb',
-        'sudo dpkg -i filebeat-{config.kibana.version}-amd64.deb',
+        'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.opensearchDashboards.version}-amd64.deb',
+        'sudo dpkg -i filebeat-{config.opensearchDashboards.version}-amd64.deb',
       ],
       textPost: i18n.translate('home.tutorials.common.filebeatInstructions.install.debTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
@@ -74,8 +74,8 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.kibana.version}-x86_64.rpm',
-        'sudo rpm -vi filebeat-{config.kibana.version}-x86_64.rpm',
+        'curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{config.opensearchDashboards.version}-x86_64.rpm',
+        'sudo rpm -vi filebeat-{config.opensearchDashboards.version}-x86_64.rpm',
       ],
       textPost: i18n.translate('home.tutorials.common.filebeatInstructions.install.rpmTextPost', {
         defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({linkUrl}).',
@@ -101,7 +101,7 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
           folderPath: '`C:\\Program Files`',
           guideLinkUrl: '{config.docs.beats.filebeat}/filebeat-installation-configuration.html',
           filebeatLinkUrl: 'https://www.elastic.co/downloads/beats/filebeat',
-          directoryName: 'filebeat-{config.kibana.version}-windows',
+          directoryName: 'filebeat-{config.opensearchDashboards.version}-windows',
         },
       }),
       commands: ['cd "C:\\Program Files\\Filebeat"', '.\\install-service-filebeat.ps1'],
@@ -109,9 +109,9 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
         'home.tutorials.common.filebeatInstructions.install.windowsTextPost',
         {
           defaultMessage:
-            'Modify the settings under {propertyName} in the {filebeatPath} file to point to your Elasticsearch installation.',
+            'Modify the settings under {propertyName} in the {filebeatPath} file to point to your OpenSearch installation.',
           values: {
-            propertyName: '`output.elasticsearch`',
+            propertyName: '`output.opensearch`',
             filebeatPath: '`C:\\Program Files\\Filebeat\\filebeat.yml`',
           },
         }
@@ -125,7 +125,7 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
       }),
       textPre: i18n.translate('home.tutorials.common.filebeatInstructions.start.osxTextPre', {
         defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+          'The `setup` command loads the OpenSearch Dashboards dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: ['./filebeat setup', './filebeat -e'],
     },
@@ -135,7 +135,7 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
       }),
       textPre: i18n.translate('home.tutorials.common.filebeatInstructions.start.debTextPre', {
         defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+          'The `setup` command loads the OpenSearch Dashboards dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: ['sudo filebeat setup', 'sudo service filebeat start'],
     },
@@ -145,7 +145,7 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
       }),
       textPre: i18n.translate('home.tutorials.common.filebeatInstructions.start.rpmTextPre', {
         defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+          'The `setup` command loads the OpenSearch Dashboards dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: ['sudo filebeat setup', 'sudo service filebeat start'],
     },
@@ -155,7 +155,7 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
       }),
       textPre: i18n.translate('home.tutorials.common.filebeatInstructions.start.windowsTextPre', {
         defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+          'The `setup` command loads the OpenSearch Dashboards dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: ['.\\filebeat.exe setup', 'Start-Service filebeat'],
     },
@@ -172,22 +172,22 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
         },
       }),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchDashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('home.tutorials.common.filebeatInstructions.config.osxTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
+          opensearchUrlTemplate: '`<opensearch_url>`',
+          opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
         },
       }),
     },
@@ -202,22 +202,22 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         },
       }),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchDashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('home.tutorials.common.filebeatInstructions.config.debTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
+          opensearchUrlTemplate: '`<opensearch_url>`',
+          opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
         },
       }),
     },
@@ -232,22 +232,22 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         },
       }),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchDashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate('home.tutorials.common.filebeatInstructions.config.rpmTextPost', {
         defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+          'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
         values: {
           passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
+          opensearchUrlTemplate: '`<opensearch_url>`',
+          opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
         },
       }),
     },
@@ -262,24 +262,24 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         },
       }),
       commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
+        'output.opensearch:',
+        '  hosts: ["<opensearch_url>"]',
         '  username: "elastic"',
         '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
+        'setup.opensearchDashboards:',
+        '  host: "<opensearch_dashboards_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate(
         'home.tutorials.common.filebeatInstructions.config.windowsTextPost',
         {
           defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+            'Where {passwordTemplate} is the password of the `elastic` user, {opensearchUrlTemplate} is the URL of opensearch, \
+and {opensearchDashboardsUrlTemplate} is the URL of OpenSearch Dashboards.',
           values: {
             passwordTemplate: '`<password>`',
-            esUrlTemplate: '`<es_url>`',
-            kibanaUrlTemplate: '`<kibana_url>`',
+            opensearchUrlTemplate: '`<opensearch_url>`',
+            opensearchDashboardsUrlTemplate: '`<opensearch_dashboards_url>`',
           },
         }
       ),
@@ -423,7 +423,7 @@ export function filebeatStatusCheck(moduleName: string) {
     error: i18n.translate('home.tutorials.common.filebeatStatusCheck.errorText', {
       defaultMessage: 'No data has been received from this module yet',
     }),
-    esHitsCheck: {
+    opensearchHitsCheck: {
       index: 'filebeat-*',
       query: {
         bool: {

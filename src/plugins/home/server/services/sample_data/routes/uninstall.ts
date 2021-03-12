@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import _ from 'lodash';
 import { IRouter } from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
@@ -38,7 +38,7 @@ export function createUninstallRoute(
     async (
       {
         core: {
-          elasticsearch: {
+          opensearch: {
             legacy: {
               client: { callAsCurrentUser },
             },

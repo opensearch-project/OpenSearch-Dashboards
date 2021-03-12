@@ -18,14 +18,14 @@
  */
 
 import _ from 'lodash';
-import { getServices } from './kibana_services';
-import { i18n } from '@kbn/i18n';
+import { getServices } from './opensearch_dashboards_services';
+import { i18n } from '@osd/i18n';
 
-const baseUrl = getServices().addBasePath('/api/kibana/home/tutorials');
+const baseUrl = getServices().addBasePath('/api/opensearch-dashboards/home/tutorials');
 const headers = new Headers();
 headers.append('Accept', 'application/json');
 headers.append('Content-Type', 'application/json');
-headers.append('kbn-xsrf', 'kibana');
+headers.append('osd-xsrf', 'opensearchDashboards');
 
 let tutorials = [];
 let tutorialsLoaded = false;

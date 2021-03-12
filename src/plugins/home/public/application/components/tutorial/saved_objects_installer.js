@@ -19,7 +19,7 @@
 
 /* eslint-disable no-multi-str*/
 
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n } from '@osd/i18n/react';
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
@@ -37,7 +37,7 @@ import {
 class SavedObjectsInstallerUi extends React.Component {
   DEFAULT_BUTTON_LABEL = this.props.intl.formatMessage({
     id: 'home.tutorial.savedObject.defaultButtonLabel',
-    defaultMessage: 'Load Kibana objects',
+    defaultMessage: 'Load OpenSearch Dashboards objects',
   });
 
   state = {
@@ -128,24 +128,24 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
     const hasErrors = errors.length > 0;
     const statusMsg = hasErrors
       ? this.props.intl.formatMessage(
-          {
-            id: 'home.tutorial.savedObject.unableToAddErrorMessage',
-            defaultMessage:
-              'Unable to add {errorsLength} of {savedObjectsLength} kibana objects, Error: {errorMessage}',
-          },
-          {
-            errorsLength: errors.length,
-            savedObjectsLength: this.props.savedObjects.length,
-            errorMessage: errors[0].error.message,
-          }
-        )
+        {
+          id: 'home.tutorial.savedObject.unableToAddErrorMessage',
+          defaultMessage:
+            'Unable to add {errorsLength} of {savedObjectsLength} OpenSearch Dashboards objects, Error: {errorMessage}',
+        },
+        {
+          errorsLength: errors.length,
+          savedObjectsLength: this.props.savedObjects.length,
+          errorMessage: errors[0].error.message,
+        }
+      )
       : this.props.intl.formatMessage(
-          {
-            id: 'home.tutorial.savedObject.addedLabel',
-            defaultMessage: '{savedObjectsLength} saved objects successfully added',
-          },
-          { savedObjectsLength: this.props.savedObjects.length }
-        );
+        {
+          id: 'home.tutorial.savedObject.addedLabel',
+          defaultMessage: '{savedObjectsLength} saved objects successfully added',
+        },
+        { savedObjectsLength: this.props.savedObjects.length }
+      );
     this.setState({
       isInstalling: false,
       installStatusMsg: statusMsg,
@@ -175,9 +175,9 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
     const installMsg = this.props.installMsg
       ? this.props.installMsg
       : this.props.intl.formatMessage({
-          id: 'home.tutorial.savedObject.installLabel',
-          defaultMessage: 'Imports index pattern, visualizations and pre-defined dashboards.',
-        });
+        id: 'home.tutorial.savedObject.installLabel',
+        defaultMessage: 'Imports index pattern, visualizations and pre-defined dashboards.',
+      });
     const installStep = (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -207,7 +207,7 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
     return {
       title: this.props.intl.formatMessage({
         id: 'home.tutorial.savedObject.loadTitle',
-        defaultMessage: 'Load Kibana objects',
+        defaultMessage: 'Load OpenSearch Dashboards objects',
       }),
       status: this.state.isInstalled ? 'complete' : 'incomplete',
       children: installStep,

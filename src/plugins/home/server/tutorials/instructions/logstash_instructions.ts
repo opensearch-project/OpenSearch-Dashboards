@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 export const createLogstashInstructions = () => ({
   INSTALL: {
@@ -54,8 +54,8 @@ export const createLogstashInstructions = () => ({
           }
         ),
         commands: [
-          'curl -L -O https://artifacts.elastic.co/downloads/logstash/logstash-{config.kibana.version}.tar.gz',
-          'tar xzvf logstash-{config.kibana.version}.tar.gz',
+          'curl -L -O https://artifacts.elastic.co/downloads/logstash/logstash-{config.opensearchDashboards.version}.tar.gz',
+          'tar xzvf logstash-{config.opensearchDashboards.version}.tar.gz',
         ],
       },
     ],
@@ -96,7 +96,7 @@ export const createLogstashInstructions = () => ({
               logstashLink:
                 '{config.docs.base_url}guide/en/logstash/current/getting-started-with-logstash.html',
               elasticLink:
-                'https://artifacts.elastic.co/downloads/logstash/logstash-{config.kibana.version}.zip',
+                'https://artifacts.elastic.co/downloads/logstash/logstash-{config.opensearchDashboards.version}.zip',
             },
           }
         ),

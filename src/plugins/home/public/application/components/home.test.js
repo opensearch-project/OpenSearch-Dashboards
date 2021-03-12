@@ -24,18 +24,18 @@ import { Home } from './home';
 
 import { FeatureCatalogueCategory } from '../../services';
 
-jest.mock('../kibana_services', () => ({
+jest.mock('../opensearch_dashboards_services', () => ({
   getServices: () => ({
     getBasePath: () => 'path',
     tutorialVariables: () => ({}),
     homeConfig: { disableWelcomeScreen: false },
     chrome: {
-      setBreadcrumbs: () => {},
+      setBreadcrumbs: () => { },
     },
   }),
 }));
 
-jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('../../../../../../src/plugins/opensearch_dashboards_react/public', () => ({
   OverviewPageFooter: jest.fn().mockReturnValue(<></>),
   OverviewPageHeader: jest.fn().mockReturnValue(<></>),
 }));
@@ -49,7 +49,7 @@ describe('home', () => {
       solutions: [],
       apmUiEnabled: true,
       mlEnabled: true,
-      kibanaVersion: '99.2.1',
+      opensearchDashboardsVersion: '99.2.1',
       fetchTelemetry: jest.fn(),
       getTelemetryBannerId: jest.fn(),
       setOptIn: jest.fn(),
@@ -108,7 +108,7 @@ describe('home', () => {
       const directoryEntry = {
         id: 'stack-management',
         title: 'Management',
-        description: 'Your center console for managing the Elastic Stack.',
+        description: 'Your center console for managing the OpenSearch Stack.',
         icon: 'managementApp',
         path: 'management_landing_page',
         category: FeatureCatalogueCategory.ADMIN,
@@ -144,12 +144,12 @@ describe('home', () => {
   describe('directories', () => {
     test('should render solutions in the "solution section"', async () => {
       const solutionEntry1 = {
-        id: 'kibana',
-        title: 'Kibana',
+        id: 'opensearchDashboards',
+        title: 'OpenSearch Dashboards',
         subtitle: 'Visualize & analyze',
         appDescriptions: ['Analyze data in dashboards'],
         icon: 'logoKibana',
-        path: 'kibana_landing_page',
+        path: 'opensearch_dashboards_landing_page',
         order: 1,
       };
       const solutionEntry2 = {
@@ -209,7 +209,7 @@ describe('home', () => {
       const directoryEntry = {
         id: 'index_patterns',
         title: 'Index Patterns',
-        description: 'Manage the index patterns that help retrieve your data from Elasticsearch.',
+        description: 'Manage the index patterns that help retrieve your data from OpenSearch.',
         icon: 'indexPatternApp',
         path: 'index_management_landing_page',
         showOnHomePage: true,
@@ -227,7 +227,7 @@ describe('home', () => {
       const directoryEntry = {
         id: 'stack-management',
         title: 'Management',
-        description: 'Your center console for managing the Elastic Stack.',
+        description: 'Your center console for managing the OpenSearch Stack.',
         icon: 'managementApp',
         path: 'management_landing_page',
         showOnHomePage: false,
@@ -309,8 +309,8 @@ describe('home', () => {
     });
   });
 
-  describe('isNewKibanaInstance', () => {
-    test('should set isNewKibanaInstance to true when there are no index patterns', async () => {
+  describe('isNewOpenSearchDashboardsInstance', () => {
+    test('should set isNewOpenSearchDashboardsInstance to true when there are no index patterns', async () => {
       const component = await renderHome({
         find: () => Promise.resolve({ total: 0 }),
       });
@@ -318,7 +318,7 @@ describe('home', () => {
       expect(component).toMatchSnapshot();
     });
 
-    test('should set isNewKibanaInstance to false when there are index patterns', async () => {
+    test('should set isNewOpenSearchDashboardsInstance to false when there are index patterns', async () => {
       const component = await renderHome({
         find: () => Promise.resolve({ total: 1 }),
       });

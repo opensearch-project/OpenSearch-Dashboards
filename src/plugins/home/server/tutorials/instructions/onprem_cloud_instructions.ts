@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 export const createTrycloudOption1 = () => ({
   title: i18n.translate('home.tutorials.common.premCloudInstructions.option1.title', {
@@ -33,7 +33,7 @@ To create a cluster, in Elastic Cloud console:\n\
  2. Modify the other deployment options as needed (or not, the defaults are great to get started)\n\
  3. Click **Create Deployment**\n\
  4. Wait until deployment creation completes\n\
- 5. Go to the new Cloud Kibana instance and follow the Kibana Home instructions',
+ 5. Go to the new Cloud OpenSearch Dashboards instance and follow the OpenSearch Dashboards Home instructions',
     values: {
       link: 'https://www.elastic.co/cloud/as-a-service/signup?blade=kib',
     },
@@ -42,15 +42,15 @@ To create a cluster, in Elastic Cloud console:\n\
 
 export const createTrycloudOption2 = () => ({
   title: i18n.translate('home.tutorials.common.premCloudInstructions.option2.title', {
-    defaultMessage: 'Option 2: Connect local Kibana to a Cloud instance',
+    defaultMessage: 'Option 2: Connect local OpenSearch Dashboards to a Cloud instance',
   }),
   textPre: i18n.translate('home.tutorials.common.premCloudInstructions.option2.textPre', {
     defaultMessage:
-      'If you are running this Kibana instance against a hosted Elasticsearch instance, \
+      'If you are running this OpenSearch Dashboards instance against a hosted OpenSearch instance, \
 proceed with manual setup.\n\n\
-Save the **Elasticsearch** endpoint as {urlTemplate} and the cluster **Password** as {passwordTemplate} for your records',
+Save the **OpenSearch** endpoint as {urlTemplate} and the cluster **Password** as {passwordTemplate} for your records',
     values: {
-      urlTemplate: '`<es_url>`',
+      urlTemplate: '`<opensearch_url>`',
       passwordTemplate: '`<password>`',
     },
   }),

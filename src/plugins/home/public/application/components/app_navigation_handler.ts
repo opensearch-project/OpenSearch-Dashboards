@@ -18,7 +18,7 @@
  */
 
 import { MouseEvent } from 'react';
-import { getServices } from '../kibana_services';
+import { getServices } from '../opensearch_dashboards_services';
 
 export const createAppNavigationHandler = (targetUrl: string) => (event: MouseEvent) => {
   if (event.altKey || event.metaKey || event.ctrlKey) {

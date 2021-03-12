@@ -40,7 +40,7 @@ const INVALID_TUTORIAL: TutorialSchema = {
   completionTimeMinutes: 10,
   previewImagePath: 'path',
   onPrem: { instructionSets: [], params: [] },
-  elasticCloud: { instructionSets: [], params: [] },
+  OpenSearchCloud: { instructionSets: [], params: [] },
   onPremElasticCloud: { instructionSets: [], params: [] },
   artifacts: {
     exportedFields: { documentationUrl: 'url' },
@@ -62,7 +62,7 @@ const VALID_TUTORIAL: TutorialSchema = {
   completionTimeMinutes: 10,
   previewImagePath: 'path',
   onPrem: { instructionSets: [], params: [] },
-  elasticCloud: { instructionSets: [], params: [] },
+  OpenSearchCloud: { instructionSets: [], params: [] },
   onPremElasticCloud: { instructionSets: [], params: [] },
   artifacts: {
     exportedFields: { documentationUrl: 'url' },
@@ -80,7 +80,7 @@ describe('TutorialsRegistry', () => {
   let testProvider: TutorialProvider;
   let testScopedTutorialContextFactory: ScopedTutorialContextFactory;
 
-  describe('GET /api/kibana/home/tutorials', () => {
+  describe('GET /api/opensearch-dashboards/home/tutorials', () => {
     beforeEach(() => {
       mockCoreSetup = coreMock.createSetup();
     });
@@ -100,7 +100,7 @@ describe('TutorialsRegistry', () => {
 
     test('registerTutorial throws when registering a tutorial with an invalid schema', () => {
       const setup = new TutorialsRegistry().setup(mockCoreSetup);
-      testProvider = ({}) => invalidTutorialProvider;
+      testProvider = ({ }) => invalidTutorialProvider;
       expect(() => setup.registerTutorial(testProvider)).toThrowErrorMatchingInlineSnapshot(
         `"Unable to register tutorial spec because its invalid. ValidationError: child \\"name\\" fails because [\\"name\\" is not allowed to be empty]"`
       );
@@ -108,7 +108,7 @@ describe('TutorialsRegistry', () => {
 
     test('registerTutorial registers a tutorial with a valid schema', () => {
       const setup = new TutorialsRegistry().setup(mockCoreSetup);
-      testProvider = ({}) => validTutorialProvider;
+      testProvider = ({ }) => validTutorialProvider;
       expect(() => setup.registerTutorial(testProvider)).not.toThrowError();
     });
 
@@ -124,7 +124,7 @@ describe('TutorialsRegistry', () => {
 
     test('addScopedTutorialContextFactory adds a scopedTutorialContextFactory when given a function', () => {
       const setup = new TutorialsRegistry().setup(mockCoreSetup);
-      testScopedTutorialContextFactory = ({}) => 'string';
+      testScopedTutorialContextFactory = ({ }) => 'string';
       expect(() =>
         setup.addScopedTutorialContextFactory(testScopedTutorialContextFactory)
       ).not.toThrowError();
