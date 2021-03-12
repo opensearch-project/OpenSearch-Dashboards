@@ -33,7 +33,7 @@ export default function ({
     describe('correctly renders metric', () => {
       let dataContext: ExpressionResult;
       before(async () => {
-        const expression = `kibana | kibana_context | esaggs index='logstash-*' aggConfigs='[
+        const expression = `opensearchDashboards | opensearch_dashboards_context | opensearchaggs index='logstash-*' aggConfigs='[
           {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},
           {"id":"1","enabled":true,"type":"max","schema":"metric","params":
             {"field":"bytes"}

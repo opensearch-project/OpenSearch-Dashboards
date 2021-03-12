@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
-  const esArchiver = getService('esArchiver');
+  const opensearch = getService('legacyOpenSearch');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('create', () => {
-    describe('with kibana index', () => {
-      before(() => esArchiver.load('saved_objects/basic'));
-      after(() => esArchiver.unload('saved_objects/basic'));
+    describe('with opensearch-dashboards index', () => {
+      before(() => opensearchArchiver.load('saved_objects/basic'));
+      after(() => opensearchArchiver.unload('saved_objects/basic'));
       it('should return 200', async () => {
         await supertest
           .post(`/api/saved_objects/visualization`)
@@ -65,17 +65,17 @@ export default function ({ getService }) {
       });
     });
 
-    describe('without kibana index', () => {
+    describe('without opensearch-dashboards index', () => {
       before(
         async () =>
-          // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana',
+          // just in case the opensearch-dashboards server has recreated it
+          await opensearch.indices.delete({
+            index: '.opensearch-dashboards',
             ignore: [404],
           })
       );
 
-      it('should return 200 and create kibana index', async () => {
+      it('should return 200 and create opensearch-dashboards index', async () => {
         await supertest
           .post(`/api/saved_objects/visualization`)
           .send({
@@ -110,7 +110,7 @@ export default function ({ getService }) {
             expect(resp.body.migrationVersion).to.be.ok();
           });
 
-        expect(await es.indices.exists({ index: '.kibana' })).to.be(true);
+        expect(await opensearch.indices.exists({ index: '.opensearch-dashboards' })).to.be(true);
       });
     });
   });

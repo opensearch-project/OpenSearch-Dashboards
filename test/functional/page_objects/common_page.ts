@@ -18,7 +18,7 @@
  */
 
 import { delay } from 'bluebird';
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 // @ts-ignore
 import fetch from 'node-fetch';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -48,8 +48,8 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
   class CommonPage {
     /**
-     * Logins to Kibana as default user and navigates to provided app
-     * @param appUrl Kibana URL
+     * Logins to OpenSearch Dashboards as default user and navigates to provided app
+     * @param appUrl OpenSearch Dashboards URL
      */
     private async loginIfPrompted(appUrl: string, insertTimestamp: boolean) {
       // Disable the welcome screen. This is relevant for environments
@@ -59,7 +59,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
       let currentUrl = await browser.getCurrentUrl();
       log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
-      await testSubjects.find('kibanaChrome', 6 * defaultFindTimeout); // 60 sec waiting
+      await testSubjects.find('opensearchDashboardsChrome', 6 * defaultFindTimeout); // 60 sec waiting
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
@@ -67,15 +67,15 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         log.debug('Found login page');
         if (config.get('security.disableTestUser')) {
           await PageObjects.login.login(
-            config.get('servers.kibana.username'),
-            config.get('servers.kibana.password')
+            config.get('servers.opensearchDashboards.username'),
+            config.get('servers.opensearchDashboards.password')
           );
         } else {
           await PageObjects.login.login('test_user', 'changeme');
         }
 
         await find.byCssSelector(
-          '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
+          '[data-test-subj="opensearchDashboardsChrome"] nav:not(.ng-hide)',
           6 * defaultFindTimeout
         );
         await browser.get(appUrl, insertTimestamp);
@@ -93,7 +93,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         useActualUrl,
         insertTimestamp,
       } = navigateProps;
-      const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
+      const appUrl = getUrl.noAuth(config.get('servers.opensearchDashboards'), appConfig);
 
       await retry.try(async () => {
         if (useActualUrl) {
@@ -191,8 +191,8 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
     /**
      * Navigates browser using only the pathname from the appConfig
-     * @param appName As defined in the apps config, e.g. 'kibana'
-     * @param hash The route after the hash (#), e.g. 'management/kibana/settings'
+     * @param appName As defined in the apps config, e.g. 'opensearchDashboards'
+     * @param hash The route after the hash (#), e.g. 'management/opensearch-dashboards/settings'
      * @param args additional arguments
      */
     async navigateToActualUrl(
@@ -222,12 +222,12 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       if (config.has(['apps', appName])) {
         // Legacy applications
         const appConfig = config.get(['apps', appName]);
-        appUrl = getUrl.noAuth(config.get('servers.kibana'), {
+        appUrl = getUrl.noAuth(config.get('servers.opensearchDashboards'), {
           pathname: `${basePath}${appConfig.pathname}`,
           hash: hash || appConfig.hash,
         });
       } else {
-        appUrl = getUrl.noAuth(config.get('servers.kibana'), {
+        appUrl = getUrl.noAuth(config.get('servers.opensearchDashboards'), {
           pathname: `${basePath}/app/${appName}`,
           hash,
         });
@@ -250,8 +250,8 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
             ? await this.loginIfPrompted(appUrl, insertTimestamp)
             : await browser.getCurrentUrl();
 
-          if (currentUrl.includes('app/kibana')) {
-            await testSubjects.find('kibanaChrome');
+          if (currentUrl.includes('app/opensearch-dashboards')) {
+            await testSubjects.find('opensearchDashboardsChrome');
           }
 
           currentUrl = (await browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
@@ -449,8 +449,8 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       await input.type(path);
     }
 
-    async scrollKibanaBodyTop() {
-      await browser.setScrollToById('kibana-body', 0, 0);
+    async scrollOpenSearchDashboardsBodyTop() {
+      await browser.setScrollToById('opensearch-dashboards-body', 0, 0);
     }
   }
 

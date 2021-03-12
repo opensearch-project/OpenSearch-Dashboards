@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 /**
  * Test the querying capabilities of dashboard, and make sure visualizations show the expected results, especially
@@ -31,8 +31,8 @@ export default function ({ getService, getPageObjects }) {
   const renderable = getService('renderable');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const security = getService('security');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
@@ -41,9 +41,9 @@ export default function ({ getService, getPageObjects }) {
     this.tags('includeFirefox');
 
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
-      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
-      await kibanaServer.uiSettings.replace({
+      await opensearchArchiver.load('dashboard/current/opensearch-dashboards');
+      await security.testUser.setRoles(['opensearch_dashboards_admin', 'test_logstash_reader', 'animals']);
+      await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');

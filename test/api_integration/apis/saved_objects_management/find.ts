@@ -17,23 +17,23 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { Response } from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const opensearch = getService('legacyOpenSearch');
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('find', () => {
-    describe('with kibana index', () => {
-      before(() => esArchiver.load('saved_objects/basic'));
-      after(() => esArchiver.unload('saved_objects/basic'));
+    describe('with opensearch-dashboards index', () => {
+      before(() => opensearchArchiver.load('saved_objects/basic'));
+      after(() => opensearchArchiver.unload('saved_objects/basic'));
 
       it('should return 200 with individual responses', async () =>
         await supertest
-          .get('/api/kibana/management/saved_objects/_find?type=visualization&fields=title')
+          .get('/api/opensearch-dashboards/management/saved_objects/_find?type=visualization&fields=title')
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body).to.eql({
@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
                   references: [
                     {
                       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                      name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                      name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
                       type: 'index-pattern',
                     },
                   ],
@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
                   updated_at: '2017-09-21T18:51:23.794Z',
                   meta: {
                     editUrl:
-                      '/management/kibana/objects/savedVisualizations/dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                      '/management/opensearch-dashboards/objects/savedVisualizations/dd7caf20-9efd-11e7-acb3-3dab96693fab',
                     icon: 'visualizeApp',
                     inAppUrl: {
                       path: '/app/visualize#/edit/dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -78,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('unknown type', () => {
         it('should return 200 with empty response', async () =>
           await supertest
-            .get('/api/kibana/management/saved_objects/_find?type=wigwags')
+            .get('/api/opensearch-dashboards/management/saved_objects/_find?type=wigwags')
             .expect(200)
             .then((resp: Response) => {
               expect(resp.body).to.eql({
@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('should return 200 with empty response', async () =>
           await supertest
             .get(
-              '/api/kibana/management/saved_objects/_find?type=visualization&page=100&perPage=100'
+              '/api/opensearch-dashboards/management/saved_objects/_find?type=visualization&page=100&perPage=100'
             )
             .expect(200)
             .then((resp: Response) => {
@@ -110,7 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('unknown search field', () => {
         it('should return 400 when using searchFields', async () =>
           await supertest
-            .get('/api/kibana/management/saved_objects/_find?type=url&searchFields=a')
+            .get('/api/opensearch-dashboards/management/saved_objects/_find?type=url&searchFields=a')
             .expect(400)
             .then((resp: Response) => {
               expect(resp.body).to.eql({
@@ -122,19 +122,19 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('without kibana index', () => {
+    describe('without opensearch-dashboards index', () => {
       before(
         async () =>
-          // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana',
+          // just in case the opensearch-dashboards server has recreated it
+          await opensearch.indices.delete({
+            index: '.opensearch-dashboards',
             ignore: [404],
           })
       );
 
       it('should return 200 with empty response', async () =>
         await supertest
-          .get('/api/kibana/management/saved_objects/_find?type=visualization')
+          .get('/api/opensearch-dashboards/management/saved_objects/_find?type=visualization')
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body).to.eql({
@@ -148,7 +148,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('unknown type', () => {
         it('should return 200 with empty response', async () =>
           await supertest
-            .get('/api/kibana/management/saved_objects/_find?type=wigwags')
+            .get('/api/opensearch-dashboards/management/saved_objects/_find?type=wigwags')
             .expect(200)
             .then((resp: Response) => {
               expect(resp.body).to.eql({
@@ -163,7 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('missing type', () => {
         it('should return 400', async () =>
           await supertest
-            .get('/api/kibana/management/saved_objects/_find')
+            .get('/api/opensearch-dashboards/management/saved_objects/_find')
             .expect(400)
             .then((resp: Response) => {
               expect(resp.body).to.eql({
@@ -179,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('should return 200 with empty response', async () =>
           await supertest
             .get(
-              '/api/kibana/management/saved_objects/_find?type=visualization&page=100&perPage=100'
+              '/api/opensearch-dashboards/management/saved_objects/_find?type=visualization&page=100&perPage=100'
             )
             .expect(200)
             .then((resp: Response) => {
@@ -195,7 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('unknown search field', () => {
         it('should return 400 when using searchFields', async () =>
           await supertest
-            .get('/api/kibana/management/saved_objects/_find?type=url&searchFields=a')
+            .get('/api/opensearch-dashboards/management/saved_objects/_find?type=url&searchFields=a')
             .expect(400)
             .then((resp: Response) => {
               expect(resp.body).to.eql({
@@ -208,12 +208,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('meta attributes injected properly', () => {
-      before(() => esArchiver.load('management/saved_objects/search'));
-      after(() => esArchiver.unload('management/saved_objects/search'));
+      before(() => opensearchArchiver.load('management/saved_objects/search'));
+      after(() => opensearchArchiver.unload('management/saved_objects/search'));
 
       it('should inject meta attributes for searches', async () =>
         await supertest
-          .get('/api/kibana/management/saved_objects/_find?type=search')
+          .get('/api/opensearch-dashboards/management/saved_objects/_find?type=search')
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body.saved_objects).to.have.length(1);
@@ -221,7 +221,7 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'discoverApp',
               title: 'OneRecord',
               editUrl:
-                '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
@@ -232,7 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should inject meta attributes for dashboards', async () =>
         await supertest
-          .get('/api/kibana/management/saved_objects/_find?type=dashboard')
+          .get('/api/opensearch-dashboards/management/saved_objects/_find?type=dashboard')
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body.saved_objects).to.have.length(1);
@@ -240,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'dashboardApp',
               title: 'Dashboard',
               editUrl:
-                '/management/kibana/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/dashboards#/view/b70c7ae0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'dashboard.show',
@@ -251,7 +251,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should inject meta attributes for visualizations', async () =>
         await supertest
-          .get('/api/kibana/management/saved_objects/_find?type=visualization')
+          .get('/api/opensearch-dashboards/management/saved_objects/_find?type=visualization')
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body.saved_objects).to.have.length(2);
@@ -259,7 +259,7 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'visualizeApp',
               title: 'VisualizationFromSavedSearch',
               editUrl:
-                '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -270,7 +270,7 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'visualizeApp',
               title: 'Visualization',
               editUrl:
-                '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -281,7 +281,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should inject meta attributes for index patterns', async () =>
         await supertest
-          .get('/api/kibana/management/saved_objects/_find?type=index-pattern')
+          .get('/api/opensearch-dashboards/management/saved_objects/_find?type=index-pattern')
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body.saved_objects).to.have.length(1);
@@ -289,11 +289,11 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'indexPatternApp',
               title: 'saved_objects*',
               editUrl:
-                '/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                '/management/opensearch-dashboards/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path:
-                  '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'management.kibana.indexPatterns',
+                  '/app/management/opensearch-dashboards/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
               },
               namespaceType: 'single',
             });

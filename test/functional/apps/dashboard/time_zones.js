@@ -18,12 +18,12 @@
  */
 
 import path from 'path';
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const PageObjects = getPageObjects([
     'dashboard',
     'timePicker',
@@ -36,12 +36,12 @@ export default function ({ getService, getPageObjects }) {
     this.tags('includeFirefox');
 
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
-      await kibanaServer.uiSettings.replace({
+      await opensearchArchiver.load('dashboard/current/opensearch-dashboards');
+      await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.settings.clickOpenSearchDashboardsSavedObjects();
       await PageObjects.savedObjects.importFile(
         path.join(__dirname, 'exports', 'timezonetest_6_2_4.json')
       );
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async () => {
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+      await opensearchDashboardsServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
     });
 
     it('Exported dashboard adjusts EST time to UTC', async () => {
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('Changing timezone changes dashboard timestamp and shows the same data', async () => {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSettings();
+      await PageObjects.settings.clickOpenSearchDashboardsSettings();
       await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'Etc/GMT+5');
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('time zone test');

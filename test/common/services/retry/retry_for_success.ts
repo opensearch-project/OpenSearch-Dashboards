@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@osd/dev-utils';
 import { inspect } from 'util';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

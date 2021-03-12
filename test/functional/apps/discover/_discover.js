@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
@@ -34,14 +34,14 @@ export default function ({ getService, getPageObjects }) {
 
   describe('discover app', function describeIndexTests() {
     before(async function () {
-      // delete .kibana index and update configDoc
-      await kibanaServer.uiSettings.replace(defaultSettings);
+      // delete .opensearch-dashboards index and update configDoc
+      await opensearchDashboardsServer.uiSettings.replace(defaultSettings);
 
-      log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
+      log.debug('load opensearch-dashboards index with default index pattern');
+      await opensearchArchiver.load('discover');
 
       // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await opensearchArchiver.loadIfNeeded('logstash_functional');
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -222,9 +222,9 @@ export default function ({ getService, getPageObjects }) {
     describe('time zone switch', () => {
       // skipping this until we get an elastic-chart alternative to check the ticks value
       it.skip('should show ticks in the correct time zone after switching', async function () {
-        await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
+        await opensearchDashboardsServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.awaitKibanaChrome();
+        await PageObjects.header.awaitOpenSearchDashboardsChrome();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
 
         const maxTicks = [
@@ -247,9 +247,9 @@ export default function ({ getService, getPageObjects }) {
         });
       });
       it('should show bars in the correct time zone after switching', async function () {
-        await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
+        await opensearchDashboardsServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.awaitKibanaChrome();
+        await PageObjects.header.awaitOpenSearchDashboardsChrome();
         await queryBar.clearQuery();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
 
@@ -261,18 +261,18 @@ export default function ({ getService, getPageObjects }) {
       });
     });
     describe('usage of discover:searchOnPageLoad', () => {
-      it('should fetch data from ES initially when discover:searchOnPageLoad is false', async function () {
-        await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': false });
+      it('should fetch data from OpenSearch initially when discover:searchOnPageLoad is false', async function () {
+        await opensearchDashboardsServer.uiSettings.replace({ 'discover:searchOnPageLoad': false });
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.awaitKibanaChrome();
+        await PageObjects.header.awaitOpenSearchDashboardsChrome();
 
         expect(await PageObjects.discover.getNrOfFetches()).to.be(0);
       });
 
-      it('should not fetch data from ES initially when discover:searchOnPageLoad is true', async function () {
-        await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': true });
+      it('should not fetch data from OpenSearch initially when discover:searchOnPageLoad is true', async function () {
+        await opensearchDashboardsServer.uiSettings.replace({ 'discover:searchOnPageLoad': true });
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.awaitKibanaChrome();
+        await PageObjects.header.awaitOpenSearchDashboardsChrome();
 
         expect(await PageObjects.discover.getNrOfFetches()).to.be(1);
       });
@@ -284,7 +284,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.navigateToUrl('discover', '#/?_g=(time:(from:now-15m,to:null))', {
           useActualUrl: true,
         });
-        await PageObjects.header.awaitKibanaChrome();
+        await PageObjects.header.awaitOpenSearchDashboardsChrome();
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.be(prevTime.start);
         expect(time.end).to.be(prevTime.end);
@@ -293,11 +293,11 @@ export default function ({ getService, getPageObjects }) {
 
     describe('empty query', function () {
       it('should update the histogram timerange when the query is resubmitted', async function () {
-        await kibanaServer.uiSettings.update({
+        await opensearchDashboardsServer.uiSettings.update({
           'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
         });
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.awaitKibanaChrome();
+        await PageObjects.header.awaitOpenSearchDashboardsChrome();
         const initialTimeString = await PageObjects.discover.getChartTimespan();
         await queryBar.submitQuery();
         const refreshedTimeString = await PageObjects.discover.getChartTimespan();

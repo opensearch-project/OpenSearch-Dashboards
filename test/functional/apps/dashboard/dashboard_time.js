@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 const dashboardName = 'Dashboard Test Time';
 
@@ -80,12 +80,12 @@ export default function ({ getPageObjects, getService }) {
       // time should take precedence.
       it('should be overwritten by global state', async function () {
         const currentUrl = await browser.getCurrentUrl();
-        const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
+        const opensearchDashboardsBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
 
-        const urlWithGlobalTime = `${kibanaBaseUrl}#/view/${id}?_g=(time:(from:now-1h,to:now))`;
+        const urlWithGlobalTime = `${opensearchDashboardsBaseUrl}#/view/${id}?_g=(time:(from:now-1h,to:now))`;
         await browser.get(urlWithGlobalTime, false);
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.equal('~ an hour ago');
@@ -94,12 +94,12 @@ export default function ({ getPageObjects, getService }) {
 
       it('should use saved time, if time is missing in global state, but _g is present in the url', async function () {
         const currentUrl = await browser.getCurrentUrl();
-        const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
+        const opensearchDashboardsBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
 
-        const urlWithGlobalTime = `${kibanaBaseUrl}#/view/${id}?_g=(filters:!())`;
+        const urlWithGlobalTime = `${opensearchDashboardsBaseUrl}#/view/${id}?_g=(filters:!())`;
         await browser.get(urlWithGlobalTime, false);
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.equal(PageObjects.timePicker.defaultStartTime);

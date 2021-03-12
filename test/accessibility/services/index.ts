@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { services as kibanaFunctionalServices } from '../../functional/services';
+import { services as opensearchDashboardsFunctionalServices } from '../../functional/services';
 import { A11yProvider } from './a11y';
 
 export const services = {
-  ...kibanaFunctionalServices,
+  ...opensearchDashboardsFunctionalServices,
   a11y: A11yProvider,
 };

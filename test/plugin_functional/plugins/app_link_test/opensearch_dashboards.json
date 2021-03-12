@@ -1,0 +1,8 @@
+{
+  "id": "app_link_test",
+  "version": "0.0.1",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": false,
+  "ui": true,
+  "requiredBundles": ["opensearchDashboardsReact"]
+}

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -25,15 +25,15 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'context']);
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const retry = getService('retry');
 
   describe('doc link in discover', function contextSize() {
     beforeEach(async function () {
-      log.debug('load kibana index with default index pattern');
-      await esArchiver.loadIfNeeded('discover');
+      log.debug('load opensearch-dashboards index with default index pattern');
+      await opensearchArchiver.loadIfNeeded('discover');
 
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await opensearchArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitForDocTableLoadingComplete();

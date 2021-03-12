@@ -1,0 +1,9 @@
+{
+  "id": "osd_top_nav",
+  "version": "0.0.1",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "configPath": ["osd_top_nav"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["navigation"]
+}

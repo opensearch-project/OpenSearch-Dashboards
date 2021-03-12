@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@osd/test/types/ftr';
 import path from 'path';
 import fs from 'fs';
 
@@ -45,19 +45,19 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),
-    esTestCluster: functionalConfig.get('esTestCluster'),
+    opensearchTestCluster: functionalConfig.get('opensearchTestCluster'),
     apps: functionalConfig.get('apps'),
-    esArchiver: {
-      directory: path.resolve(__dirname, '../es_archives'),
+    opensearchArchiver: {
+      directory: path.resolve(__dirname, '../opensearch_archives'),
     },
     screenshots: functionalConfig.get('screenshots'),
     junit: {
       reportName: 'Plugin Functional Tests',
     },
-    kbnTestServer: {
-      ...functionalConfig.get('kbnTestServer'),
+    osdTestServer: {
+      ...functionalConfig.get('osdTestServer'),
       serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        ...functionalConfig.get('osdTestServer.serverArgs'),
 
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',

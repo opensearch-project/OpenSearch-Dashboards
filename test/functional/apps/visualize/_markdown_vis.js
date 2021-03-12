@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'header']);

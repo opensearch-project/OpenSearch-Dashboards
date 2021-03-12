@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
@@ -279,9 +279,9 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show round labels in different timezone', async function () {
-        await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
+        await opensearchDashboardsServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
-        await PageObjects.header.awaitKibanaChrome();
+        await PageObjects.header.awaitOpenSearchDashboardsChrome();
         await initChart();
 
         const labels = await PageObjects.visChart.getXAxisLabels();
@@ -330,7 +330,7 @@ export default function ({ getService, getPageObjects }) {
         await inspector.expectTableData(expectedTableData);
         await inspector.close();
         log.debug("set 'dateFormat:tz': 'UTC'");
-        await kibanaServer.uiSettings.replace({
+        await opensearchDashboardsServer.uiSettings.replace({
           'dateFormat:tz': 'UTC',
           defaultIndex: 'logstash-*',
         });
@@ -338,7 +338,7 @@ export default function ({ getService, getPageObjects }) {
         // the absolute time range so the timepicker is going to shift +7 hours.
         await browser.refresh();
         // wait some time before trying to check for rendering count
-        await PageObjects.header.awaitKibanaChrome();
+        await PageObjects.header.awaitOpenSearchDashboardsChrome();
         await PageObjects.visChart.waitForRenderingCount();
         log.debug('getXAxisLabels');
 
@@ -380,13 +380,13 @@ export default function ({ getService, getPageObjects }) {
       });
 
       after(async () => {
-        const timezone = await kibanaServer.uiSettings.get('dateFormat:tz');
+        const timezone = await opensearchDashboardsServer.uiSettings.get('dateFormat:tz');
 
         // make sure the timezone was set to default correctly to avoid further failures
         // for details see https://github.com/elastic/kibana/issues/63037
         if (timezone !== 'UTC') {
           log.debug("set 'dateFormat:tz': 'UTC'");
-          await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+          await opensearchDashboardsServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
         }
       });
     });

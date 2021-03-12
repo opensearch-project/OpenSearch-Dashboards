@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const pieChart = getService('pieChart');
   const queryBar = getService('queryBar');
   const retry = getService('retry');
@@ -29,8 +29,8 @@ export default function ({ getService, getPageObjects }) {
 
   describe('dashboard query bar', () => {
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
-      await kibanaServer.uiSettings.replace({
+      await opensearchArchiver.load('dashboard/current/opensearch-dashboards');
+      await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('causes panels to reload when refresh is clicked', async () => {
-      await esArchiver.unload('dashboard/current/data');
+      await opensearchArchiver.unload('dashboard/current/data');
 
       await queryBar.clickQuerySubmitButton();
       await retry.tryForTime(5000, async () => {

@@ -19,7 +19,7 @@
 
 import angular from 'angular';
 import React from 'react';
-import { Plugin, CoreSetup } from 'kibana/public';
+import { Plugin, CoreSetup } from 'opensearch-dashboards/public';
 import { DiscoverSetup } from '../../../../../src/plugins/discover/public';
 
 angular.module('myDocView', []).directive('myHit', () => ({

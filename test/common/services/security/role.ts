@@ -18,14 +18,14 @@
  */
 
 import util from 'util';
-import { KbnClient, ToolingLog } from '@kbn/dev-utils';
+import { OsdClient, ToolingLog } from '@osd/dev-utils';
 
 export class Role {
-  constructor(private log: ToolingLog, private kibanaServer: KbnClient) {}
+  constructor(private log: ToolingLog, private opensearchDashboardsServer: OsdClient) {}
 
   public async create(name: string, role: any) {
     this.log.debug(`creating role ${name}`);
-    const { data, status, statusText } = await this.kibanaServer.request({
+    const { data, status, statusText } = await this.opensearchDashboardsServer.request({
       path: `/api/security/role/${name}`,
       method: 'PUT',
       body: role,
@@ -40,7 +40,7 @@ export class Role {
 
   public async delete(name: string) {
     this.log.debug(`deleting role ${name}`);
-    const { data, status, statusText } = await this.kibanaServer.request({
+    const { data, status, statusText } = await this.opensearchDashboardsServer.request({
       path: `/api/security/role/${name}`,
       method: 'DELETE',
     });

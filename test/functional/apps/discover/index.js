@@ -18,7 +18,7 @@
  */
 
 export default function ({ getService, loadTestFile }) {
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const browser = getService('browser');
 
   describe('discover app', function () {
@@ -29,7 +29,7 @@ export default function ({ getService, loadTestFile }) {
     });
 
     after(function unloadMakelogs() {
-      return esArchiver.unload('logstash_functional');
+      return opensearchArchiver.unload('logstash_functional');
     });
 
     loadTestFile(require.resolve('./_saved_queries'));

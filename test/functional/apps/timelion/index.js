@@ -20,8 +20,8 @@
 export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
   describe('timelion app', function () {
     this.tags('ciGroup1');
@@ -29,8 +29,8 @@ export default function ({ getService, loadTestFile }) {
     before(async function () {
       log.debug('Starting timelion before method');
       await browser.setWindowSize(1280, 800);
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await opensearchArchiver.loadIfNeeded('logstash_functional');
+      await opensearchDashboardsServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
     });
 
     loadTestFile(require.resolve('./_expression_typeahead'));

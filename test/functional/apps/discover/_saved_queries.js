@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const browser = getService('browser');
 
@@ -37,12 +37,12 @@ export default function ({ getService, getPageObjects }) {
 
   describe('saved queries saved objects', function describeIndexTests() {
     before(async function () {
-      log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
+      log.debug('load opensearch-dashboards index with default index pattern');
+      await opensearchArchiver.load('discover');
 
       // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await kibanaServer.uiSettings.replace(defaultSettings);
+      await opensearchArchiver.loadIfNeeded('logstash_functional');
+      await opensearchDashboardsServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();

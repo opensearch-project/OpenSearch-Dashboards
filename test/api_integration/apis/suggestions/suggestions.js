@@ -18,22 +18,22 @@
  */
 
 export default function ({ getService }) {
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const supertest = getService('supertest');
 
   describe('Suggestions API', function () {
     before(async () => {
-      await esArchiver.load('index_patterns/basic_index');
-      await esArchiver.load('index_patterns/basic_kibana');
+      await opensearchArchiver.load('index_patterns/basic_index');
+      await opensearchArchiver.load('index_patterns/basic_opensearch_dashboards');
     });
     after(async () => {
-      await esArchiver.unload('index_patterns/basic_index');
-      await esArchiver.unload('index_patterns/basic_kibana');
+      await opensearchArchiver.unload('index_patterns/basic_index');
+      await opensearchArchiver.unload('index_patterns/basic_opensearch_dashboards');
     });
 
     it('should return 200 with special characters', () =>
       supertest
-        .post('/api/kibana/suggestions/values/basic_index')
+        .post('/api/opensearch-dashboards/suggestions/values/basic_index')
         .send({
           field: 'baz.keyword',
           query: '<something?with:lots&of^ bad characters',
@@ -42,7 +42,7 @@ export default function ({ getService }) {
 
     it('should support nested fields', () =>
       supertest
-        .post('/api/kibana/suggestions/values/basic_index')
+        .post('/api/opensearch-dashboards/suggestions/values/basic_index')
         .send({
           field: 'nestedField.child',
           query: 'nes',

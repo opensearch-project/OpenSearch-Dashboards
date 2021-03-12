@@ -19,7 +19,7 @@
 
 import { parse, join } from 'path';
 import Jimp from 'jimp';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@osd/dev-utils';
 
 /**
  * Comparing pngs and writing result to provided directory

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@osd/test/types/ftr';
 
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -27,9 +27,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     services: httpConfig.get('services'),
     servers: httpConfig.get('servers'),
     junit: {
-      reportName: 'Kibana Platform Http Integration Tests',
+      reportName: 'OpenSearch Dashboards Platform Http Integration Tests',
     },
-    esTestCluster: httpConfig.get('esTestCluster'),
-    kbnTestServer: httpConfig.get('kbnTestServer'),
+    opensearchTestCluster: httpConfig.get('opensearchTestCluster'),
+    osdTestServer: httpConfig.get('osdTestServer'),
   };
 }

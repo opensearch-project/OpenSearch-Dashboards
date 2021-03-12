@@ -275,7 +275,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     /**
      * change the data formatter for template in an `options` label tab
      *
-     * @param formatter - typeof formatter which you can use for presenting data. By default kibana show `Number` formatter
+     * @param formatter - typeof formatter which you can use for presenting data. By default opensearch-dashboards show `Number` formatter
      */
     public async changeDataFormatter(
       formatter: 'Bytes' | 'Number' | 'Percent' | 'Duration' | 'Custom'

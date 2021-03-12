@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const queryBar = getService('queryBar');
 
-  let kibanaLegacyBaseUrl;
+  let opensearchDashboardsLegacyBaseUrl;
 
   const urlQuery =
     `` +
@@ -56,8 +56,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.preserveCrossAppState();
 
       const currentUrl = await browser.getCurrentUrl();
-      kibanaLegacyBaseUrl =
-        currentUrl.substring(0, currentUrl.indexOf('/app/dashboards')) + '/app/kibana';
+      opensearchDashboardsLegacyBaseUrl =
+        currentUrl.substring(0, currentUrl.indexOf('/app/dashboards')) + '/app/opensearch-dashboards';
     });
 
     describe('5.6 urls', () => {
@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }) {
           `title:'New+Dashboard',` +
           `uiState:(),` +
           `viewMode:edit)`;
-        const url = `${kibanaLegacyBaseUrl}#/dashboard?${url56}`;
+        const url = `${opensearchDashboardsLegacyBaseUrl}#/dashboard?${url56}`;
         log.debug(`Navigating to ${url}`);
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('6.0 urls', () => {
       it('loads an unsaved dashboard', async function () {
-        const url = `${kibanaLegacyBaseUrl}#/dashboard?${urlQuery}`;
+        const url = `${opensearchDashboardsLegacyBaseUrl}#/dashboard?${urlQuery}`;
         log.debug(`Navigating to ${url}`);
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
-        const url = `${kibanaLegacyBaseUrl}#/dashboard/${id}`;
+        const url = `${opensearchDashboardsLegacyBaseUrl}#/dashboard/${id}`;
         log.debug(`Navigating to ${url}`);
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -130,7 +130,7 @@ export default function ({ getService, getPageObjects }) {
       it('uiState in url takes precedence over saved dashboard state', async function () {
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
         const updatedQuery = urlQuery.replace(/F9D9F9/g, '000000');
-        const url = `${kibanaLegacyBaseUrl}#/dashboard/${id}?${updatedQuery}`;
+        const url = `${opensearchDashboardsLegacyBaseUrl}#/dashboard/${id}?${updatedQuery}`;
         log.debug(`Navigating to ${url}`);
 
         await browser.get(url, true);
@@ -145,7 +145,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.selectedLegendColorCount('#000000', 5);
 
-        const url = `${kibanaLegacyBaseUrl}#/dashboard?${urlQuery}`;
+        const url = `${opensearchDashboardsLegacyBaseUrl}#/dashboard?${urlQuery}`;
         log.debug(`Navigating to ${url}`);
         await browser.get(url);
         await PageObjects.header.waitUntilLoadingHasFinished();

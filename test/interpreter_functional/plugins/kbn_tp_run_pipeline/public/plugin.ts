@@ -30,7 +30,7 @@ export class Plugin {
 
   public setup({ application }: CoreSetup) {
     application.register({
-      id: 'kbn_tp_run_pipeline',
+      id: 'osd_tp_run_pipeline',
       title: 'Run Pipeline',
       async mount(context, params) {
         const { renderApp } = await import('./app/app');

@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 import { TelemetrySavedObjectAttributes } from 'src/plugins/telemetry/server/telemetry_repository';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function optInTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   describe('/api/telemetry/v2/optIn API', () => {
     let defaultAttributes: TelemetrySavedObjectAttributes;
-    let kibanaVersion: any;
+    let opensearchDashboardsVersion: any;
     before(async () => {
-      const kibanaVersionAccessor = kibanaServer.version;
-      kibanaVersion = await kibanaVersionAccessor.get();
+      const opensearchDashboardsVersionAccessor = opensearchDashboardsServer.version;
+      opensearchDashboardsVersion = await opensearchDashboardsVersionAccessor.get();
       defaultAttributes =
         (await getSavedObjectAttributes(supertest).catch((err) => {
           if (err.message === 'expected 200 "OK", got 404 "Not Found"') {
@@ -39,8 +39,8 @@ export default function optInTest({ getService }: FtrProviderContext) {
           throw err;
         })) || {};
 
-      expect(typeof kibanaVersion).to.eql('string');
-      expect(kibanaVersion.length).to.be.greaterThan(0);
+      expect(typeof opensearchDashboardsVersion).to.eql('string');
+      expect(opensearchDashboardsVersion.length).to.be.greaterThan(0);
     });
 
     afterEach(async () => {
@@ -55,7 +55,7 @@ export default function optInTest({ getService }: FtrProviderContext) {
       await postTelemetryV2Optin(supertest, false, 200);
       const { enabled, lastVersionChecked } = await getSavedObjectAttributes(supertest);
       expect(enabled).to.be(false);
-      expect(lastVersionChecked).to.be(kibanaVersion);
+      expect(lastVersionChecked).to.be(opensearchDashboardsVersion);
     });
 
     it('should support sending true with allowChangingOptInStatus true', async () => {
@@ -66,7 +66,7 @@ export default function optInTest({ getService }: FtrProviderContext) {
       await postTelemetryV2Optin(supertest, true, 200);
       const { enabled, lastVersionChecked } = await getSavedObjectAttributes(supertest);
       expect(enabled).to.be(true);
-      expect(lastVersionChecked).to.be(kibanaVersion);
+      expect(lastVersionChecked).to.be(opensearchDashboardsVersion);
     });
 
     it('should not support sending false with allowChangingOptInStatus false', async () => {
@@ -98,7 +98,7 @@ export default function optInTest({ getService }: FtrProviderContext) {
 async function postTelemetryV2Optin(supertest: any, value: any, statusCode: number): Promise<any> {
   const { body } = await supertest
     .post('/api/telemetry/v2/optIn')
-    .set('kbn-xsrf', 'xxx')
+    .set('osd-xsrf', 'xxx')
     .send({ enabled: value })
     .expect(statusCode);
 
@@ -112,7 +112,7 @@ async function updateSavedObjectAttributes(
   return await supertest
     .post('/api/saved_objects/telemetry/telemetry')
     .query({ overwrite: true })
-    .set('kbn-xsrf', 'xxx')
+    .set('osd-xsrf', 'xxx')
     .send({ attributes })
     .expect(200);
 }

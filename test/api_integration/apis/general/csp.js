@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('csp smoke test', () => {
     it('app response sends content security policy headers', async () => {
-      const response = await supertest.get('/app/kibana');
+      const response = await supertest.get('/app/opensearch-dashboards');
 
       expect(response.headers).to.have.property('content-security-policy');
       const header = response.headers['content-security-policy'];

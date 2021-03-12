@@ -33,7 +33,7 @@ export default function ({
     describe('correctly renders tagcloud', () => {
       let dataContext: ExpressionResult;
       before(async () => {
-        const expression = `kibana | kibana_context | esaggs index='logstash-*' aggConfigs='[
+        const expression = `opensearchDashboards | opensearch_dashboards_context | opensearchaggs index='logstash-*' aggConfigs='[
           {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},
           {"id":"2","enabled":true,"type":"terms","schema":"segment","params":
             {"field":"response.raw","size":4,"order":"desc","orderBy":"1"}

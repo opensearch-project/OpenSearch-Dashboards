@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

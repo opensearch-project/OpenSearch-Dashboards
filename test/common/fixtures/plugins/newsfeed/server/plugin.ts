@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
-import { PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, Plugin } from 'opensearch-dashboards/server';
+import { PluginInitializerContext } from 'opensearch-dashboards/public';
 
 export class NewsFeedSimulatorPlugin implements Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
@@ -29,7 +29,7 @@ export class NewsFeedSimulatorPlugin implements Plugin {
 
     router.get(
       {
-        path: `/api/_newsfeed-FTS-external-service-simulators/kibana/v${version}.json`,
+        path: `/api/_newsfeed-FTS-external-service-simulators/opensearch-dashboards/v${version}.json`,
         validate: false,
         options: { authRequired: false },
       },
@@ -40,7 +40,7 @@ export class NewsFeedSimulatorPlugin implements Plugin {
 
     router.get(
       {
-        path: '/api/_newsfeed-FTS-external-service-simulators/kibana/crash.json',
+        path: '/api/_newsfeed-FTS-external-service-simulators/opensearch-dashboards/crash.json',
         validate: false,
         options: { authRequired: false },
       },

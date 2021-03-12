@@ -17,18 +17,18 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
-  const esArchiver = getService('esArchiver');
+  const opensearch = getService('legacyOpenSearch');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('export', () => {
-    describe('with kibana index', () => {
+    describe('with opensearch-dashboards index', () => {
       describe('basic amount of saved objects', () => {
-        before(() => esArchiver.load('saved_objects/basic'));
-        after(() => esArchiver.unload('saved_objects/basic'));
+        before(() => opensearchArchiver.load('saved_objects/basic'));
+        after(() => opensearchArchiver.unload('saved_objects/basic'));
 
         it('should return objects in dependency order', async () => {
           await supertest
@@ -220,8 +220,8 @@ export default function ({ getService }) {
       });
 
       describe('10,000 objects', () => {
-        before(() => esArchiver.load('saved_objects/10k'));
-        after(() => esArchiver.unload('saved_objects/10k'));
+        before(() => opensearchArchiver.load('saved_objects/10k'));
+        after(() => opensearchArchiver.unload('saved_objects/10k'));
 
         it('should return 400 when exporting without type or objects passed in', async () => {
           await supertest
@@ -255,9 +255,9 @@ export default function ({ getService }) {
                   attributes: {
                     description: '',
                     hits: 0,
-                    kibanaSavedObjectMeta: {
+                    opensearchDashboardsSavedObjectMeta: {
                       searchSourceJSON:
-                        objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
+                        objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON,
                     },
                     optionsJSON: objects[0].attributes.optionsJSON,
                     panelsJSON: objects[0].attributes.panelsJSON,
@@ -288,7 +288,7 @@ export default function ({ getService }) {
               ]);
               expect(objects[0].migrationVersion).to.be.ok();
               expect(() =>
-                JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
+                JSON.parse(objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON)
               ).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
@@ -314,9 +314,9 @@ export default function ({ getService }) {
                   attributes: {
                     description: '',
                     hits: 0,
-                    kibanaSavedObjectMeta: {
+                    opensearchDashboardsSavedObjectMeta: {
                       searchSourceJSON:
-                        objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
+                        objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON,
                     },
                     optionsJSON: objects[0].attributes.optionsJSON,
                     panelsJSON: objects[0].attributes.panelsJSON,
@@ -347,7 +347,7 @@ export default function ({ getService }) {
               ]);
               expect(objects[0].migrationVersion).to.be.ok();
               expect(() =>
-                JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
+                JSON.parse(objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON)
               ).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
@@ -378,9 +378,9 @@ export default function ({ getService }) {
                   attributes: {
                     description: '',
                     hits: 0,
-                    kibanaSavedObjectMeta: {
+                    opensearchDashboardsSavedObjectMeta: {
                       searchSourceJSON:
-                        objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
+                        objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON,
                     },
                     optionsJSON: objects[0].attributes.optionsJSON,
                     panelsJSON: objects[0].attributes.panelsJSON,
@@ -411,7 +411,7 @@ export default function ({ getService }) {
               ]);
               expect(objects[0].migrationVersion).to.be.ok();
               expect(() =>
-                JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
+                JSON.parse(objects[0].attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON)
               ).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
@@ -445,7 +445,7 @@ export default function ({ getService }) {
       describe('10,001 objects', () => {
         let customVisId;
         before(async () => {
-          await esArchiver.load('saved_objects/10k');
+          await opensearchArchiver.load('saved_objects/10k');
           await supertest
             .post('/api/saved_objects/visualization')
             .send({
@@ -460,7 +460,7 @@ export default function ({ getService }) {
         });
         after(async () => {
           await supertest.delete(`/api/saved_objects/visualization/${customVisId}`).expect(200);
-          await esArchiver.unload('saved_objects/10k');
+          await opensearchArchiver.unload('saved_objects/10k');
         });
 
         it('should return 400 when exporting more than 10,000', async () => {
@@ -482,12 +482,12 @@ export default function ({ getService }) {
       });
     });
 
-    describe('without kibana index', () => {
+    describe('without opensearch-dashboards index', () => {
       before(
         async () =>
-          // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana',
+          // just in case the opensearch-dashboards server has recreated it
+          await opensearch.indices.delete({
+            index: '.opensearch-dashboards',
             ignore: [404],
           })
       );

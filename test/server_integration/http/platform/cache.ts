@@ -21,7 +21,7 @@ import { FtrProviderContext } from '../../services/types';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('kibana server cache-control', () => {
+  describe('opensearch-dashboards server cache-control', () => {
     it('properly marks responses as private, with directives to disable caching', async () => {
       await supertest
         .get('/api/status')

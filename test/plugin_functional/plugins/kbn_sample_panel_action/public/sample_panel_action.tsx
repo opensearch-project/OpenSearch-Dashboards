@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup } from 'opensearch-dashboards/public';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 import { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
 import { createAction, ActionType } from '../../../../../src/plugins/ui_actions/public';
-import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 
 // Casting to ActionType is a hack - in a real situation use
 // declare module and add this id to ActionContextMapping.

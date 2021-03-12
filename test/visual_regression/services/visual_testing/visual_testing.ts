@@ -20,7 +20,7 @@
 import { postSnapshot } from '@percy/agent/dist/utils/sdk-utils';
 import { Test } from 'mocha';
 
-import testSubjSelector from '@kbn/test-subj-selector';
+import testSubjSelector from '@osd/test-subj-selector';
 
 import { pkg } from '../../../../src/core/server/utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -95,7 +95,7 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
         name: `${currentTest.fullTitle()} [${name ? name : stats.snapshotCount}]`,
         url,
         domSnapshot,
-        clientInfo: `kibana-ftr:${pkg.version}`,
+        clientInfo: `opensearch-dashboards-ftr:${pkg.version}`,
         ...DEFAULT_OPTIONS,
       });
 

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
@@ -26,7 +26,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
   describe.skip('top nav', function describeIndexTests() {
     before(async () => {
-      const url = `${deployment.getHostPort()}/app/kbn_tp_top_nav/`;
+      const url = `${deployment.getHostPort()}/app/osd_tp_top_nav/`;
       await browser.get(url);
     });
 

@@ -22,8 +22,8 @@ import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 // @ts-ignore not supported yet
 import cheerio from 'cheerio';
-import testSubjSelector from '@kbn/test-subj-selector';
-import { ToolingLog } from '@kbn/dev-utils';
+import testSubjSelector from '@osd/test-subj-selector';
+import { ToolingLog } from '@osd/dev-utils';
 import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';

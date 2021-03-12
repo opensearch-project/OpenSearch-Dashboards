@@ -17,12 +17,12 @@
  * under the License.
  */
 import { unzip } from 'lodash';
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const getTestSpec = (expression: string) => `
 {
-config: { "kibana": {"renderer": "svg"} }
+config: { "opensearchDashboards": {"renderer": "svg"} }
 $schema: https://vega.github.io/schema/vega/v5.json
 marks: [{
   type: text
@@ -93,7 +93,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('should render different data in response to filter change', async function () {
-          await PageObjects.vegaChart.typeInSpec('"config": { "kibana": {"renderer": "svg"} },');
+          await PageObjects.vegaChart.typeInSpec('"config": { "opensearchDashboards": {"renderer": "svg"} },');
           await PageObjects.visEditor.clickGo();
           await PageObjects.visChart.waitForVisualizationRenderingStabilized();
           const fullDataLabels = await PageObjects.vegaChart.getYAxisLabels();
@@ -239,8 +239,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await textElement.click();
       };
 
-      it('should update global time range by calling "kibanaSetTimeFilter" expression', async () => {
-        await fillSpecAndGo(getTestSpec('kibanaSetTimeFilter("2019", "2020")'));
+      it('should update global time range by calling "opensearchDashboardsSetTimeFilter" expression', async () => {
+        await fillSpecAndGo(getTestSpec('opensearchDashboardsSetTimeFilter("2019", "2020")'));
 
         const currentTimeRange = await PageObjects.timePicker.getTimeConfig();
 
@@ -248,33 +248,33 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(currentTimeRange.end).to.be('Jan 1, 2020 @ 00:00:00.000');
       });
 
-      it('should set filter by calling "kibanaAddFilter" expression', async () => {
+      it('should set filter by calling "opensearchDashboardsAddFilter" expression', async () => {
         await fillSpecAndGo(
-          getTestSpec('kibanaAddFilter({ query_string: { query: "response:200" }})')
+          getTestSpec('opensearchDashboardsAddFilter({ query_string: { query: "response:200" }})')
         );
 
         expect(await filterBar.getFilterCount()).to.be(1);
       });
 
-      it('should remove filter by calling "kibanaRemoveFilter" expression', async () => {
+      it('should remove filter by calling "opensearchDashboardsRemoveFilter" expression', async () => {
         await filterBar.addFilter('response', 'is', '200');
 
         expect(await filterBar.getFilterCount()).to.be(1);
 
         await fillSpecAndGo(
-          getTestSpec('kibanaRemoveFilter({ match_phrase: { response: "200" }})')
+          getTestSpec('opensearchDashboardsRemoveFilter({ match_phrase: { response: "200" }})')
         );
 
         expect(await filterBar.getFilterCount()).to.be(0);
       });
 
-      it('should remove all filters by calling "kibanaRemoveAllFilters" expression', async () => {
+      it('should remove all filters by calling "opensearchDashboardsRemoveAllFilters" expression', async () => {
         await filterBar.addFilter('response', 'is', '200');
         await filterBar.addFilter('response', 'is', '500');
 
         expect(await filterBar.getFilterCount()).to.be(2);
 
-        await fillSpecAndGo(getTestSpec('kibanaRemoveAllFilters()'));
+        await fillSpecAndGo(getTestSpec('opensearchDashboardsRemoveAllFilters()'));
 
         expect(await filterBar.getFilterCount()).to.be(0);
       });

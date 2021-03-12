@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import path from 'path';
 import { keyBy } from 'lodash';
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function ({ getService, getPageObjects }) {
-  const kibanaServer = getService('kibanaServer');
-  const esArchiver = getService('esArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
+  const opensearchArchiver = getService('opensearchArchiver');
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
   const testSubjects = getService('testSubjects');
   const log = getService('log');
@@ -33,15 +33,15 @@ export default function ({ getService, getPageObjects }) {
   describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
       beforeEach(async function () {
-        // delete .kibana index and then wait for Kibana to re-create it
-        await kibanaServer.uiSettings.replace({});
+        // delete .opensearch-dashboards index and then wait for OpenSearch Dashboards to re-create it
+        await opensearchDashboardsServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
-        await esArchiver.load('management');
-        await PageObjects.settings.clickKibanaSavedObjects();
+        await opensearchArchiver.load('management');
+        await PageObjects.settings.clickOpenSearchDashboardsSavedObjects();
       });
 
       afterEach(async function () {
-        await esArchiver.unload('management');
+        await opensearchArchiver.unload('management');
       });
 
       it('should import saved objects', async function () {
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should allow the user to override duplicate saved objects', async function () {
-        // This data has already been loaded by the "visualize" esArchive. We'll load it again
+        // This data has already been loaded by the "visualize" opensearchArchive. We'll load it again
         // so that we can override the existing visualization.
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_exists.ndjson'),
@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should allow the user to cancel overriding duplicate saved objects', async function () {
-        // This data has already been loaded by the "visualize" esArchive. We'll load it again
+        // This data has already been loaded by the "visualize" opensearchArchive. We'll load it again
         // so that we can be prompted to override the existing visualization.
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_exists.ndjson'),
@@ -202,15 +202,15 @@ export default function ({ getService, getPageObjects }) {
 
     describe('.json file', () => {
       beforeEach(async function () {
-        // delete .kibana index and then wait for Kibana to re-create it
-        await kibanaServer.uiSettings.replace({});
+        // delete .opensearch-dashboards index and then wait for OpenSearch Dashboards to re-create it
+        await opensearchDashboardsServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
-        await esArchiver.load('saved_objects_imports');
-        await PageObjects.settings.clickKibanaSavedObjects();
+        await opensearchArchiver.load('saved_objects_imports');
+        await PageObjects.settings.clickOpenSearchDashboardsSavedObjects();
       });
 
       afterEach(async function () {
-        await esArchiver.unload('saved_objects_imports');
+        await opensearchArchiver.unload('saved_objects_imports');
       });
 
       it('should import saved objects', async function () {
@@ -243,7 +243,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should allow the user to override duplicate saved objects', async function () {
-        // This data has already been loaded by the "visualize" esArchive. We'll load it again
+        // This data has already been loaded by the "visualize" opensearchArchive. We'll load it again
         // so that we can override the existing visualization.
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_exists.json'),
@@ -263,7 +263,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should allow the user to cancel overriding duplicate saved objects', async function () {
-        // This data has already been loaded by the "visualize" esArchive. We'll load it again
+        // This data has already been loaded by the "visualize" opensearchArchive. We'll load it again
         // so that we can be prompted to override the existing visualization.
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_exists.json'),
@@ -283,7 +283,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should allow the user to confirm overriding multiple duplicate saved objects', async function () {
-        // This data has already been loaded by the "visualize" esArchive. We'll load it again
+        // This data has already been loaded by the "visualize" opensearchArchive. We'll load it again
         // so that we can override the existing visualization.
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_multiple_exists.json'),
@@ -310,7 +310,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should allow the user to confirm overriding multiple duplicate index patterns', async function () {
-        // This data has already been loaded by the "visualize" esArchive. We'll load it again
+        // This data has already been loaded by the "visualize" opensearchArchive. We'll load it again
         // so that we can override the existing visualization.
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_index_patterns_multiple_exists.json'),
@@ -416,7 +416,7 @@ export default function ({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(true);
       });
 
-      it('should display an explicit error message when importing object from a higher Kibana version', async () => {
+      it('should display an explicit error message when importing object from a higher OpenSearch Dashboards version', async () => {
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_higher_version.ndjson')
         );
@@ -426,7 +426,7 @@ export default function ({ getService, getPageObjects }) {
         const errorText = await PageObjects.savedObjects.getImportErrorText();
 
         expect(errorText).to.contain(
-          `has property "visualization" which belongs to a more recent version of Kibana [9.15.82]`
+          `has property "visualization" which belongs to a more recent version of OpenSearch Dashboards [9.15.82]`
         );
       });
 

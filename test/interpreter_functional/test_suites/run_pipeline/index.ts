@@ -21,8 +21,8 @@ import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
@@ -31,9 +31,9 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     this.tags(['skipFirefox']);
 
     before(async () => {
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.load('../functional/fixtures/es_archiver/visualize_embedding');
-      await kibanaServer.uiSettings.replace({
+      await opensearchArchiver.loadIfNeeded('../functional/fixtures/opensearch_archiver/logstash_functional');
+      await opensearchArchiver.load('../functional/fixtures/opensearch_archiver/visualize_embedding');
+      await opensearchDashboardsServer.uiSettings.replace({
         'dateFormat:tz': 'Australia/North',
         defaultIndex: 'logstash-*',
       });
@@ -46,6 +46,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     loadTestFile(require.resolve('./basic'));
     loadTestFile(require.resolve('./tag_cloud'));
     loadTestFile(require.resolve('./metric'));
-    loadTestFile(require.resolve('./esaggs'));
+    loadTestFile(require.resolve('./opensearchaggs'));
   });
 }

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const retry = getService('retry');
   const security = getService('security');
   const PageObjects = getPageObjects([
@@ -44,13 +44,13 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       log.debug(
-        'Load empty_kibana and Shakespeare Getting Started data\n' +
+        'Load empty_opensearch_dashboards and Shakespeare Getting Started data\n' +
           'https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html'
       );
-      await security.testUser.setRoles(['kibana_admin', 'test_shakespeare_reader']);
-      await esArchiver.load('empty_kibana', { skipExisting: true });
+      await security.testUser.setRoles(['opensearch_dashboards_admin', 'test_shakespeare_reader']);
+      await opensearchArchiver.load('empty_opensearch_dashboards', { skipExisting: true });
       log.debug('Load shakespeare data');
-      await esArchiver.loadIfNeeded('getting_started/shakespeare');
+      await opensearchArchiver.loadIfNeeded('getting_started/shakespeare');
     });
 
     after(async () => {

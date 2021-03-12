@@ -9,7 +9,7 @@
       "description": "",
       "savedSearchId": "c45e6c50-ba72-11e7-a8f9-ad70f02e633d",
       "version": 1,
-      "kibanaSavedObjectMeta": {
+      "opensearchDashboardsSavedObjectMeta": {
         "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
       }
     },

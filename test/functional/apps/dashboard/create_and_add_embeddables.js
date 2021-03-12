@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 import { VisualizeConstants } from '../../../../src/plugins/visualize/public/application/visualize_constants';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../src/plugins/visualizations/common/constants';
@@ -26,14 +26,14 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('create and add embeddables', () => {
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
-      await kibanaServer.uiSettings.replace({
+      await opensearchArchiver.load('dashboard/current/opensearch-dashboards');
+      await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }) {
       describe('is false', () => {
         before(async () => {
           await PageObjects.header.clickStackManagement();
-          await PageObjects.settings.clickKibanaSettings();
+          await PageObjects.settings.clickOpenSearchDashboardsSettings();
           await PageObjects.settings.toggleAdvancedSettingCheckbox(VISUALIZE_ENABLE_LABS_SETTING);
         });
 
@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }) {
 
         after(async () => {
           await PageObjects.header.clickStackManagement();
-          await PageObjects.settings.clickKibanaSettings();
+          await PageObjects.settings.clickOpenSearchDashboardsSettings();
           await PageObjects.settings.clearAdvancedSettings(VISUALIZE_ENABLE_LABS_SETTING);
           await PageObjects.header.clickDashboard();
         });

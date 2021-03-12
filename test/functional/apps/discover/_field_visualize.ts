@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const filterBar = getService('filterBar');
   const inspector = getService('inspector');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const log = getService('log');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'visualize']);
@@ -37,12 +37,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // from Discover to Visualize which happens only on OSS
     this.tags(['skipCloud']);
     before(async function () {
-      log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
+      log.debug('load opensearch-dashboards index with default index pattern');
+      await opensearchArchiver.load('discover');
 
       // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await kibanaServer.uiSettings.replace(defaultSettings);
+      await opensearchArchiver.loadIfNeeded('logstash_functional');
+      await opensearchDashboardsServer.uiSettings.replace(defaultSettings);
     });
 
     beforeEach(async () => {
