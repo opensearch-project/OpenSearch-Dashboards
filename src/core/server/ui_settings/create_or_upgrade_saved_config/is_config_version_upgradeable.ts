@@ -25,28 +25,28 @@ function extractRcNumber(version: string): [string, number] {
   return match ? [match[1], parseInt(match[2], 10)] : [version, Infinity];
 }
 
-export function isConfigVersionUpgradeable(savedVersion: string, kibanaVersion: string): boolean {
+export function isConfigVersionUpgradeable(savedVersion: string, opensearchDashboardsVersion: string): boolean {
   if (
     typeof savedVersion !== 'string' ||
-    typeof kibanaVersion !== 'string' ||
-    savedVersion === kibanaVersion ||
+    typeof opensearchDashboardsVersion !== 'string' ||
+    savedVersion === opensearchDashboardsVersion ||
     /alpha|beta|snapshot/i.test(savedVersion)
   ) {
     return false;
   }
 
   const [savedReleaseVersion, savedRcNumber] = extractRcNumber(savedVersion);
-  const [kibanaReleaseVersion, kibanaRcNumber] = extractRcNumber(kibanaVersion);
+  const [opensearchDashboardsReleaseVersion, opensearchDashboardsRcNumber] = extractRcNumber(opensearchDashboardsVersion);
 
   // ensure that both release versions are valid, if not then abort
-  if (!semver.valid(savedReleaseVersion) || !semver.valid(kibanaReleaseVersion)) {
+  if (!semver.valid(savedReleaseVersion) || !semver.valid(opensearchDashboardsReleaseVersion)) {
     return false;
   }
 
-  // ultimately if the saved config is from a previous kibana version
+  // ultimately if the saved config is from a previous OpenSearch Dashboards version
   // or from an earlier rc of the same version, then we can upgrade
-  const savedIsLessThanKibana = semver.lt(savedReleaseVersion, kibanaReleaseVersion);
-  const savedIsSameAsKibana = semver.eq(savedReleaseVersion, kibanaReleaseVersion);
-  const savedRcIsLessThanKibana = savedRcNumber < kibanaRcNumber;
-  return savedIsLessThanKibana || (savedIsSameAsKibana && savedRcIsLessThanKibana);
+  const savedIsLessThanOpenSearchDashboards = semver.lt(savedReleaseVersion, opensearchDashboardsReleaseVersion);
+  const savedIsSameAsOpenSearchDashboards = semver.eq(savedReleaseVersion, opensearchDashboardsReleaseVersion);
+  const savedRcIsLessThanOpenSearchDashboards = savedRcNumber < opensearchDashboardsRcNumber;
+  return savedIsLessThanOpenSearchDashboards || (savedIsSameAsOpenSearchDashboards && savedRcIsLessThanOpenSearchDashboards);
 }

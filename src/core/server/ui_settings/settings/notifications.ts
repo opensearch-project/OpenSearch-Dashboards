@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
+import { schema } from '@osd/config-schema';
+import { i18n } from '@osd/i18n';
 import { UiSettingsParams } from '../../../types';
 
 export const getNotificationsSettings = (): Record<string, UiSettingsParams> => {

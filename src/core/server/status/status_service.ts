@@ -24,7 +24,7 @@ import { isDeepStrictEqual } from 'util';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { InternalElasticsearchServiceSetup } from '../elasticsearch';
+import { InternalOpenSearchServiceSetup } from '../opensearch';
 import { InternalHttpServiceSetup } from '../http';
 import { InternalSavedObjectsServiceSetup } from '../saved_objects';
 import { PluginName } from '../plugins';
@@ -38,7 +38,7 @@ import { getSummaryStatus } from './get_summary_status';
 import { PluginsStatusService } from './plugins_status';
 
 interface SetupDeps {
-  elasticsearch: Pick<InternalElasticsearchServiceSetup, 'status$'>;
+  opensearch: Pick<InternalOpenSearchServiceSetup, 'status$'>;
   environment: InternalEnvironmentServiceSetup;
   pluginDependencies: ReadonlyMap<PluginName, PluginName[]>;
   http: InternalHttpServiceSetup;
@@ -59,7 +59,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   }
 
   public async setup({
-    elasticsearch,
+    opensearch,
     pluginDependencies,
     http,
     metrics,
@@ -67,7 +67,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     environment,
   }: SetupDeps) {
     const statusConfig = await this.config$.pipe(take(1)).toPromise();
-    const core$ = this.setupCoreStatus({ elasticsearch, savedObjects });
+    const core$ = this.setupCoreStatus({ opensearch, savedObjects });
     this.pluginsStatus = new PluginsStatusService({ core$, pluginDependencies });
 
     const overall$: Observable<ServiceStatus> = combineLatest([
@@ -130,12 +130,12 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   }
 
   private setupCoreStatus({
-    elasticsearch,
+    opensearch,
     savedObjects,
-  }: Pick<SetupDeps, 'elasticsearch' | 'savedObjects'>): Observable<CoreStatus> {
-    return combineLatest([elasticsearch.status$, savedObjects.status$]).pipe(
-      map(([elasticsearchStatus, savedObjectsStatus]) => ({
-        elasticsearch: elasticsearchStatus,
+  }: Pick<SetupDeps, 'opensearch' | 'savedObjects'>): Observable<CoreStatus> {
+    return combineLatest([opensearch.status$, savedObjects.status$]).pipe(
+      map(([opensearchStatus, savedObjectsStatus]) => ({
+        opensearch: opensearchStatus,
         savedObjects: savedObjectsStatus,
       })),
       distinctUntilChanged(isDeepStrictEqual),

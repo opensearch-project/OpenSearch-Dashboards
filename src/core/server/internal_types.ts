@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { Type } from '@kbn/config-schema';
+import { Type } from '@osd/config-schema';
 
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { ConfigDeprecationProvider } from './config';
 import { ContextSetup } from './context';
 import {
-  InternalElasticsearchServiceSetup,
-  InternalElasticsearchServiceStart,
-} from './elasticsearch';
+  InternalOpenSearchsearchServiceSetup,
+  InternalOpenSearchsearchServiceStart,
+} from './opensearch';
 import { InternalHttpServiceSetup, InternalHttpServiceStart } from './http';
 import {
   InternalSavedObjectsServiceSetup,
@@ -46,7 +46,7 @@ export interface InternalCoreSetup {
   capabilities: CapabilitiesSetup;
   context: ContextSetup;
   http: InternalHttpServiceSetup;
-  elasticsearch: InternalElasticsearchServiceSetup;
+  opensearch: InternalOpenSearchsearchServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
   status: InternalStatusServiceSetup;
   uiSettings: InternalUiSettingsServiceSetup;
@@ -63,7 +63,7 @@ export interface InternalCoreSetup {
  */
 export interface InternalCoreStart {
   capabilities: CapabilitiesStart;
-  elasticsearch: InternalElasticsearchServiceStart;
+  opensearch: InternalOpenSearchsearchServiceStart;
   http: InternalHttpServiceStart;
   metrics: InternalMetricsServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;

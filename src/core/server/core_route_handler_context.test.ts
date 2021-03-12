@@ -21,7 +21,7 @@ import { coreMock, httpServerMock } from './mocks';
 
 describe('#auditor', () => {
   test('returns the results of coreStart.audiTrail.asScoped', () => {
-    const request = httpServerMock.createKibanaRequest();
+    const request = httpServerMock.createOpenSearchDashboardsRequest();
     const coreStart = coreMock.createInternalStart();
     const context = new CoreRouteHandlerContext(coreStart, request);
 
@@ -30,7 +30,7 @@ describe('#auditor', () => {
   });
 
   test('lazily created', () => {
-    const request = httpServerMock.createKibanaRequest();
+    const request = httpServerMock.createOpenSearchDashboardsRequest();
     const coreStart = coreMock.createInternalStart();
     const context = new CoreRouteHandlerContext(coreStart, request);
 
@@ -41,7 +41,7 @@ describe('#auditor', () => {
   });
 
   test('only creates one instance', () => {
-    const request = httpServerMock.createKibanaRequest();
+    const request = httpServerMock.createOpenSearchDashboardsRequest();
     const coreStart = coreMock.createInternalStart();
     const context = new CoreRouteHandlerContext(coreStart, request);
 
@@ -54,37 +54,37 @@ describe('#auditor', () => {
   });
 });
 
-describe('#elasticsearch', () => {
+describe('#opensearch', () => {
   describe('#client', () => {
-    test('returns the results of coreStart.elasticsearch.client.asScoped', () => {
-      const request = httpServerMock.createKibanaRequest();
+    test('returns the results of coreStart.opensearch.client.asScoped', () => {
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
       const coreStart = coreMock.createInternalStart();
       const context = new CoreRouteHandlerContext(coreStart, request);
 
-      const client = context.elasticsearch.client;
-      expect(client).toBe(coreStart.elasticsearch.client.asScoped.mock.results[0].value);
+      const client = context.opensearch.client;
+      expect(client).toBe(coreStart.opensearch.client.asScoped.mock.results[0].value);
     });
 
     test('lazily created', () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
       const coreStart = coreMock.createInternalStart();
       const context = new CoreRouteHandlerContext(coreStart, request);
 
-      expect(coreStart.elasticsearch.client.asScoped).not.toHaveBeenCalled();
-      const client = context.elasticsearch.client;
-      expect(coreStart.elasticsearch.client.asScoped).toHaveBeenCalled();
+      expect(coreStart.opensearch.client.asScoped).not.toHaveBeenCalled();
+      const client = context.opensearch.client;
+      expect(coreStart.opensearch.client.asScoped).toHaveBeenCalled();
       expect(client).toBeDefined();
     });
 
     test('only creates one instance', () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
       const coreStart = coreMock.createInternalStart();
       const context = new CoreRouteHandlerContext(coreStart, request);
 
-      const client1 = context.elasticsearch.client;
-      const client2 = context.elasticsearch.client;
-      expect(coreStart.elasticsearch.client.asScoped.mock.calls.length).toBe(1);
-      const mockResult = coreStart.elasticsearch.client.asScoped.mock.results[0].value;
+      const client1 = context.opensearch.client;
+      const client2 = context.opensearch.client;
+      expect(coreStart.opensearch.client.asScoped.mock.calls.length).toBe(1);
+      const mockResult = coreStart.opensearch.client.asScoped.mock.results[0].value;
       expect(client1).toBe(mockResult);
       expect(client2).toBe(mockResult);
     });
@@ -92,35 +92,35 @@ describe('#elasticsearch', () => {
 
   describe('#legacy', () => {
     describe('#client', () => {
-      test('returns the results of coreStart.elasticsearch.legacy.client.asScoped', () => {
-        const request = httpServerMock.createKibanaRequest();
+      test('returns the results of coreStart.opensearch.legacy.client.asScoped', () => {
+        const request = httpServerMock.createOpenSearchDashboardsRequest();
         const coreStart = coreMock.createInternalStart();
         const context = new CoreRouteHandlerContext(coreStart, request);
 
-        const client = context.elasticsearch.legacy.client;
-        expect(client).toBe(coreStart.elasticsearch.legacy.client.asScoped.mock.results[0].value);
+        const client = context.opensearch.legacy.client;
+        expect(client).toBe(coreStart.opensearch.legacy.client.asScoped.mock.results[0].value);
       });
 
       test('lazily created', () => {
-        const request = httpServerMock.createKibanaRequest();
+        const request = httpServerMock.createOpenSearchDashboardsRequest();
         const coreStart = coreMock.createInternalStart();
         const context = new CoreRouteHandlerContext(coreStart, request);
 
-        expect(coreStart.elasticsearch.legacy.client.asScoped).not.toHaveBeenCalled();
-        const client = context.elasticsearch.legacy.client;
-        expect(coreStart.elasticsearch.legacy.client.asScoped).toHaveBeenCalled();
+        expect(coreStart.opensearch.legacy.client.asScoped).not.toHaveBeenCalled();
+        const client = context.opensearch.legacy.client;
+        expect(coreStart.opensearch.legacy.client.asScoped).toHaveBeenCalled();
         expect(client).toBeDefined();
       });
 
       test('only creates one instance', () => {
-        const request = httpServerMock.createKibanaRequest();
+        const request = httpServerMock.createOpenSearchDashboardsRequest();
         const coreStart = coreMock.createInternalStart();
         const context = new CoreRouteHandlerContext(coreStart, request);
 
-        const client1 = context.elasticsearch.legacy.client;
-        const client2 = context.elasticsearch.legacy.client;
-        expect(coreStart.elasticsearch.legacy.client.asScoped.mock.calls.length).toBe(1);
-        const mockResult = coreStart.elasticsearch.legacy.client.asScoped.mock.results[0].value;
+        const client1 = context.opensearch.legacy.client;
+        const client2 = context.opensearch.legacy.client;
+        expect(coreStart.opensearch.legacy.client.asScoped.mock.calls.length).toBe(1);
+        const mockResult = coreStart.opensearch.legacy.client.asScoped.mock.results[0].value;
         expect(client1).toBe(mockResult);
         expect(client2).toBe(mockResult);
       });
@@ -131,7 +131,7 @@ describe('#elasticsearch', () => {
 describe('#savedObjects', () => {
   describe('#client', () => {
     test('returns the results of coreStart.savedObjects.getScopedClient', () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
       const coreStart = coreMock.createInternalStart();
       const context = new CoreRouteHandlerContext(coreStart, request);
 
@@ -140,7 +140,7 @@ describe('#savedObjects', () => {
     });
 
     test('lazily created', () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
       const coreStart = coreMock.createInternalStart();
       const context = new CoreRouteHandlerContext(coreStart, request);
 
@@ -152,7 +152,7 @@ describe('#savedObjects', () => {
     });
 
     test('only creates one instance', () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
       const coreStart = coreMock.createInternalStart();
       const context = new CoreRouteHandlerContext(coreStart, request);
 
@@ -167,7 +167,7 @@ describe('#savedObjects', () => {
 
   describe('#typeRegistry', () => {
     test('returns the results of coreStart.savedObjects.getTypeRegistry', () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
       const coreStart = coreMock.createInternalStart();
       const context = new CoreRouteHandlerContext(coreStart, request);
 
@@ -176,7 +176,7 @@ describe('#savedObjects', () => {
     });
 
     test('lazily created', () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
       const coreStart = coreMock.createInternalStart();
       const context = new CoreRouteHandlerContext(coreStart, request);
 
@@ -187,7 +187,7 @@ describe('#savedObjects', () => {
     });
 
     test('only creates one instance', () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
       const coreStart = coreMock.createInternalStart();
       const context = new CoreRouteHandlerContext(coreStart, request);
 
@@ -204,7 +204,7 @@ describe('#savedObjects', () => {
 describe('#uiSettings', () => {
   describe('#client', () => {
     test('returns the results of coreStart.uiSettings.asScopedToClient', () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
       const coreStart = coreMock.createInternalStart();
       const context = new CoreRouteHandlerContext(coreStart, request);
 
@@ -213,7 +213,7 @@ describe('#uiSettings', () => {
     });
 
     test('lazily created', () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
       const coreStart = coreMock.createInternalStart();
       const context = new CoreRouteHandlerContext(coreStart, request);
 
@@ -224,7 +224,7 @@ describe('#uiSettings', () => {
     });
 
     test('only creates one instance', () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
       const coreStart = coreMock.createInternalStart();
       const context = new CoreRouteHandlerContext(coreStart, request);
 

@@ -17,12 +17,12 @@
  * under the License.
  */
 import apm from 'elastic-apm-node';
-import { config as pathConfig } from '@kbn/utils';
-import { mapToObject } from '@kbn/std';
+import { config as pathConfig } from '@osd/utils';
+import { mapToObject } from '@osd/std';
 import { ConfigService, Env, RawConfigurationProvider, coreDeprecationProvider } from './config';
 import { CoreApp } from './core_app';
 import { AuditTrailService } from './audit_trail';
-import { ElasticsearchService } from './elasticsearch';
+import { OpenSearchService } from './opensearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
@@ -37,11 +37,11 @@ import { EnvironmentService, config as pidConfig } from './environment';
 import { StatusService } from './status/status_service';
 
 import { config as cspConfig } from './csp';
-import { config as elasticsearchConfig } from './elasticsearch';
+import { config as opensearchConfig } from './opensearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
-import { config as kibanaConfig } from './kibana_config';
+import { config as opensearchDashboardsConfig } from './opensearch_dashboards_config';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
@@ -58,7 +58,7 @@ export class Server {
   public readonly configService: ConfigService;
   private readonly capabilities: CapabilitiesService;
   private readonly context: ContextService;
-  private readonly elasticsearch: ElasticsearchService;
+  private readonly opensearch: OpenSearchService;
   private readonly http: HttpService;
   private readonly rendering: RenderingService;
   private readonly legacy: LegacyService;
@@ -94,7 +94,7 @@ export class Server {
     this.rendering = new RenderingService(core);
     this.plugins = new PluginsService(core);
     this.legacy = new LegacyService(core);
-    this.elasticsearch = new ElasticsearchService(core);
+    this.opensearch = new OpenSearchService(core);
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
     this.capabilities = new CapabilitiesService(core);
@@ -110,7 +110,7 @@ export class Server {
 
   public async setup() {
     this.log.debug('setting up server');
-    const setupTransaction = apm.startTransaction('server_setup', 'kibana_platform');
+    const setupTransaction = apm.startTransaction('server_setup', 'opensearch_dashboards_platform');
 
     const environmentSetup = await this.environment.setup();
 
@@ -144,13 +144,13 @@ export class Server {
 
     const capabilitiesSetup = this.capabilities.setup({ http: httpSetup });
 
-    const elasticsearchServiceSetup = await this.elasticsearch.setup({
+    const opensearchServiceSetup = await this.opensearch.setup({
       http: httpSetup,
     });
 
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
-      elasticsearch: elasticsearchServiceSetup,
+      opensearch: opensearchServiceSetup,
     });
 
     const uiSettingsSetup = await this.uiSettings.setup({
@@ -161,7 +161,7 @@ export class Server {
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
     const statusSetup = await this.status.setup({
-      elasticsearch: elasticsearchServiceSetup,
+      opensearch: opensearchServiceSetup,
       pluginDependencies: pluginTree.asNames,
       savedObjects: savedObjectsSetup,
       environment: environmentSetup,
@@ -189,7 +189,7 @@ export class Server {
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
-      elasticsearch: elasticsearchServiceSetup,
+      opensearch: opensearchServiceSetup,
       environment: environmentSetup,
       http: httpSetup,
       savedObjects: savedObjectsSetup,
@@ -220,16 +220,16 @@ export class Server {
 
   public async start() {
     this.log.debug('starting server');
-    const startTransaction = apm.startTransaction('server_start', 'kibana_platform');
+    const startTransaction = apm.startTransaction('server_start', 'opensearch_dashboards_platform');
 
     const auditTrailStart = this.auditTrail.start();
 
-    const elasticsearchStart = await this.elasticsearch.start({
+    const opensearchStart = await this.opensearch.start({
       auditTrail: auditTrailStart,
     });
     const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
-      elasticsearch: elasticsearchStart,
+      opensearch: opensearchStart,
       pluginsInitialized: this.#pluginsInitialized,
     });
     soStartSpan?.end();
@@ -238,13 +238,13 @@ export class Server {
     const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();
     const coreUsageDataStart = this.coreUsageData.start({
-      elasticsearch: elasticsearchStart,
+      opensearch: opensearchStart,
       savedObjects: savedObjectsStart,
     });
 
     this.coreStart = {
       capabilities: capabilitiesStart,
-      elasticsearch: elasticsearchStart,
+      opensearch: opensearchStart,
       http: httpStart,
       metrics: metricsStart,
       savedObjects: savedObjectsStart,
@@ -275,7 +275,7 @@ export class Server {
     await this.legacy.stop();
     await this.plugins.stop();
     await this.savedObjects.stop();
-    await this.elasticsearch.stop();
+    await this.opensearch.stop();
     await this.http.stop();
     await this.uiSettings.stop();
     await this.rendering.stop();
@@ -299,12 +299,12 @@ export class Server {
     const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
       pathConfig,
       cspConfig,
-      elasticsearchConfig,
+      opensearchConfig,
       loggingConfig,
       httpConfig,
       pluginsConfig,
       devConfig,
-      kibanaConfig,
+      opensearchDashboardsConfig,
       savedObjectsConfig,
       savedObjectsMigrationConfig,
       uiSettingsConfig,

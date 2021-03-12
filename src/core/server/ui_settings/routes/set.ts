@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { schema, ValidationError } from '@kbn/config-schema';
+import { schema, ValidationError } from '@osd/config-schema';
 
 import { IRouter } from '../../http';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
@@ -33,7 +33,7 @@ const validate = {
 
 export function registerSetRoute(router: IRouter) {
   router.post(
-    { path: '/api/kibana/settings/{key}', validate },
+    { path: '/api/opensearch-dashboards/settings/{key}', validate },
     async (context, request, response) => {
       try {
         const uiSettingsClient = context.core.uiSettings.client;
