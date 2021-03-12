@@ -17,7 +17,5 @@
  * under the License.
  */
 
-module.exports = {
-  presets: ['@kbn/babel-preset/node_preset'],
-  ignore: ['**/*.test.js'],
-};
+export { createLegacyOpenSearchTestCluster } from './legacy_opensearch_test_cluster.js';
+export { opensearchTestConfig } from './opensearch_test_config';
