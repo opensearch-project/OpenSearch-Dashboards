@@ -9,7 +9,7 @@
     "osd:bootstrap": "yarn build",
     "osd:watch": "yarn build --watch"
   },
-  "kibana": {
+  "opensearchDashboards": {
     "devOnly": true
   },
   "devDependencies": {
