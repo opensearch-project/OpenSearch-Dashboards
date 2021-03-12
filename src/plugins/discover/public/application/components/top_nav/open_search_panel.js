@@ -20,8 +20,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import rison from 'rison-node';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -33,7 +33,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { SavedObjectFinderUi } from '../../../../../saved_objects/public';
-import { getServices } from '../../../kibana_services';
+import { getServices } from '../../../opensearch_dashboards_services';
 
 const SEARCH_OBJECT_TYPE = 'search';
 
@@ -88,7 +88,7 @@ export function OpenSearchPanel(props) {
               fill
               onClick={props.onClose}
               href={addBasePath(
-                `/app/management/kibana/objects?_a=${rison.encode({ tab: SEARCH_OBJECT_TYPE })}`
+                `/app/management/opensearch-dashboards/objects?_a=${rison.encode({ tab: SEARCH_OBJECT_TYPE })}`
               )}
             >
               <FormattedMessage

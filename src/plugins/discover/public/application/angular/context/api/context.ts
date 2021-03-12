@@ -22,18 +22,18 @@ import { reverseSortDir, SortDirection } from './utils/sorting';
 import { extractNanos, convertIsoToMillis } from './utils/date_conversion';
 import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
 import { generateIntervals } from './utils/generate_intervals';
-import { getEsQuerySearchAfter } from './utils/get_es_query_search_after';
-import { getEsQuerySort } from './utils/get_es_query_sort';
-import { getServices } from '../../../../kibana_services';
+import { getOpenSearchQuerySearchAfter } from './utils/get_opensearch_query_search_after';
+import { getOpenSearchQuerySort } from './utils/get_opensearch_query_sort';
+import { getServices } from '../../../../opensearch_dashboards_services';
 
 export type SurrDocType = 'successors' | 'predecessors';
-export interface EsHitRecord {
+export interface OpenSearchHitRecord {
   fields: Record<string, any>;
   sort: number[];
   _source: Record<string, any>;
   _id: string;
 }
-export type EsHitRecordList = EsHitRecord[];
+export type OpenSearchHitRecordList = OpenSearchHitRecord[];
 
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
 
@@ -50,18 +50,18 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract) {
    *
    * @param {SurrDocType} type - `successors` or `predecessors`
    * @param {string} indexPatternId
-   * @param {EsHitRecord} anchor - anchor record
+   * @param {OpenSearchHitRecord} anchor - anchor record
    * @param {string} timeField - name of the timefield, that's sorted on
    * @param {string} tieBreakerField - name of the tie breaker, the 2nd sort field
    * @param {SortDirection} sortDir - direction of sorting
    * @param {number} size - number of records to retrieve
-   * @param {Filter[]} filters - to apply in the elastic query
+   * @param {Filter[]} filters - to apply in the query
    * @returns {Promise<object[]>}
    */
   async function fetchSurroundingDocs(
     type: SurrDocType,
     indexPatternId: string,
-    anchor: EsHitRecord,
+    anchor: OpenSearchHitRecord,
     timeField: string,
     tieBreakerField: string,
     sortDir: SortDirection,
@@ -80,7 +80,7 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract) {
       nanos !== '' ? convertIsoToMillis(anchor._source[timeField]) : anchor.sort[0];
 
     const intervals = generateIntervals(LOOKUP_OFFSETS, timeValueMillis, type, sortDir);
-    let documents: EsHitRecordList = [];
+    let documents: OpenSearchHitRecordList = [];
 
     for (const interval of intervals) {
       const remainingSize = size - documents.length;
@@ -89,9 +89,9 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract) {
         break;
       }
 
-      const searchAfter = getEsQuerySearchAfter(type, documents, timeField, anchor, nanos);
+      const searchAfter = getOpenSearchQuerySearchAfter(type, documents, timeField, anchor, nanos);
 
-      const sort = getEsQuerySort(timeField, tieBreakerField, sortDirToApply);
+      const sort = getOpenSearchQuerySort(timeField, tieBreakerField, sortDirToApply);
 
       const hits = await fetchHitsInInterval(
         searchSource,

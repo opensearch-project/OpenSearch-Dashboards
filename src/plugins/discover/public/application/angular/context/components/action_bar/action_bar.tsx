@@ -17,8 +17,8 @@
  * under the License.
  */
 import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import {
   EuiButtonEmpty,
   EuiFieldNumber,

@@ -35,7 +35,7 @@ export function* asPairs(iterable: Iterable<IntervalValue>): IterableIterator<In
 }
 
 /**
- * Returns a iterable containing intervals `[start,end]` for Elasticsearch date range queries
+ * Returns a iterable containing intervals `[start,end]` for OpenSearch date range queries
  * depending on type (`successors` or `predecessors`) and sort (`asc`, `desc`) these are ascending or descending intervals.
  */
 export function generateIntervals(
@@ -46,7 +46,7 @@ export function generateIntervals(
 ): IterableIterator<IntervalValue[]> {
   const offsetSign =
     (sort === SortDirection.asc && type === 'successors') ||
-    (sort === SortDirection.desc && type === 'predecessors')
+      (sort === SortDirection.desc && type === 'predecessors')
       ? 1
       : -1;
   // ending with `null` opens the last interval

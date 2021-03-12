@@ -19,12 +19,12 @@
 import './doc_viewer.scss';
 import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
-import { getDocViewsRegistry } from '../../../kibana_services';
+import { getDocViewsRegistry } from '../../../opensearch_dashboards_services';
 import { DocViewerTab } from './doc_viewer_tab';
 import { DocView, DocViewRenderProps } from '../../doc_views/doc_views_types';
 
 /**
- * Rendering tabs with different views of 1 Elasticsearch hit in Discover.
+ * Rendering tabs with different views of 1 OpenSearch hit in Discover.
  * The tabs are provided by the `docs_views` registry.
  * A view can contain a React `component`, or any JS framework by using
  * a `render` function.
@@ -35,7 +35,7 @@ export function DocViewer(renderProps: DocViewRenderProps) {
     .getDocViewsSorted(renderProps.hit)
     .map(({ title, render, component }: DocView, idx: number) => {
       return {
-        id: `kbn_doc_viewer_tab_${idx}`,
+        id: `osd_doc_viewer_tab_${idx}`,
         name: title,
         content: (
           <DocViewerTab
@@ -56,7 +56,7 @@ export function DocViewer(renderProps: DocViewRenderProps) {
   }
 
   return (
-    <div className="kbnDocViewer">
+    <div className="osdDocViewer">
       <EuiTabbedContent tabs={tabs} />
     </div>
   );

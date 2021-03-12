@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import { SortOrder } from './helpers';
 
@@ -59,7 +59,7 @@ export function TableHeaderColumn({
 
   const btnSortIcon = sortDirectionToIcon[sortDirection];
   const btnSortClassName =
-    sortDirection !== '' ? btnSortIcon : `kbnDocTableHeader__sortChange ${btnSortIcon}`;
+    sortDirection !== '' ? btnSortIcon : `osdDocTableHeader__sortChange ${btnSortIcon}`;
 
   const handleChangeSortOrder = () => {
     if (!onChangeSortOrder) return;
@@ -130,7 +130,7 @@ export function TableHeaderColumn({
         defaultMessage: 'Remove {columnName} column',
         values: { columnName: name },
       }),
-      className: 'fa fa-remove kbnDocTableHeader__move',
+      className: 'fa fa-remove osdDocTableHeader__move',
       onClick: () => onRemoveColumn && onRemoveColumn(name),
       testSubject: `docTableRemoveHeader-${name}`,
       tooltip: i18n.translate('discover.docTable.tableHeader.removeColumnButtonTooltip', {
@@ -144,7 +144,7 @@ export function TableHeaderColumn({
         defaultMessage: 'Move {columnName} column to the left',
         values: { columnName: name },
       }),
-      className: 'fa fa-angle-double-left kbnDocTableHeader__move',
+      className: 'fa fa-angle-double-left osdDocTableHeader__move',
       onClick: () => onMoveColumn && onMoveColumn(name, colLeftIdx),
       testSubject: `docTableMoveLeftHeader-${name}`,
       tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnLeftButtonTooltip', {
@@ -158,7 +158,7 @@ export function TableHeaderColumn({
         defaultMessage: 'Move {columnName} column to the right',
         values: { columnName: name },
       }),
-      className: 'fa fa-angle-double-right kbnDocTableHeader__move',
+      className: 'fa fa-angle-double-right osdDocTableHeader__move',
       onClick: () => onMoveColumn && onMoveColumn(name, colRightIdx),
       testSubject: `docTableMoveRightHeader-${name}`,
       tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnRightButtonTooltip', {

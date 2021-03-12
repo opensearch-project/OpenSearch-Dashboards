@@ -17,19 +17,19 @@
  * under the License.
  */
 
-import { EsQuerySortValue, SortDirection } from '../../../../../kibana_services';
+import { OpenSearchQuerySortValue, SortDirection } from '../../../../../opensearch_dashboards_services';
 
 /**
- * Returns `EsQuerySort` which is used to sort records in the ES query
+ * Returns `OpenSearchQuerySort` which is used to sort records in the OpenSearch query
  * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html
  * @param timeField
  * @param tieBreakerField
  * @param sortDir
  */
-export function getEsQuerySort(
+export function getOpenSearchQuerySort(
   timeField: string,
   tieBreakerField: string,
   sortDir: SortDirection
-): [EsQuerySortValue, EsQuerySortValue] {
+): [OpenSearchQuerySortValue, OpenSearchQuerySortValue] {
   return [{ [timeField]: sortDir }, { [tieBreakerField]: sortDir }];
 }

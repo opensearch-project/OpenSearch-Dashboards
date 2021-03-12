@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { OptionHTMLAttributes, ReactNode, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import {
   EuiFacetButton,
   EuiFieldSearch,
@@ -35,7 +35,7 @@ import {
   EuiButtonGroup,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 export interface State {
   searchable: string;

@@ -27,7 +27,7 @@ import hits from 'fixtures/real_hits';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../data/public/mocks';
 import { navigationPluginMock } from '../../../../../navigation/public/mocks';
-import { setScopedHistory, setServices } from '../../../kibana_services';
+import { setScopedHistory, setServices } from '../../../opensearch_dashboards_services';
 import { getInnerAngularModule } from '../../../get_inner_angular';
 
 let $parentScope;

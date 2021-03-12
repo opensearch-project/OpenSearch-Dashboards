@@ -19,13 +19,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import classNames from 'classnames';
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { IUiSettingsClient, MountPoint } from 'kibana/public';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
+import { IUiSettingsClient, MountPoint } from 'opensearch-dashboards/public';
 import { HitsCounter } from './hits_counter';
 import { TimechartHeader } from './timechart_header';
 import { DiscoverSidebar } from './sidebar';
-import { getServices, IndexPattern } from '../../kibana_services';
+import { getServices, IndexPattern } from '../../opensearch_dashboards_services';
 // @ts-ignore
 import { DiscoverNoResults } from '../angular/directives/no_results';
 import { DiscoverUninitialized } from '../angular/directives/uninitialized';

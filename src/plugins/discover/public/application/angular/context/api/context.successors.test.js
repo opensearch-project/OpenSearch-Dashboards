@@ -21,7 +21,7 @@ import moment from 'moment';
 import { get, last } from 'lodash';
 
 import { createIndexPatternsStub, createContextSearchSourceStub } from './_stubs';
-import { setServices } from '../../../../kibana_services';
+import { setServices } from '../../../../opensearch_dashboards_services';
 
 import { fetchContextProvider } from './context';
 

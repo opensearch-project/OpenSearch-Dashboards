@@ -18,8 +18,8 @@
  */
 
 import { DiscoverUrlGenerator } from './url_generator';
-import { hashedItemStore, getStatesFromKbnUrl } from '../../kibana_utils/public';
-import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
+import { hashedItemStore, getStatesFromOsdUrl } from '../../opensearch_dashboards_utils/public';
+import { mockStorage } from '../../opensearch_dashboards_utils/public/storage/hashed_item_store/mock';
 import { FilterStateStore } from '../../data/common';
 
 const appBasePath: string = 'xyz/app/discover';
@@ -50,7 +50,7 @@ describe('Discover url generator', () => {
   test('can create a link to Discover with no state and no saved search', async () => {
     const { generator } = await setup();
     const url = await generator.createUrl({});
-    const { _a, _g } = getStatesFromKbnUrl(url, ['_a', '_g']);
+    const { _a, _g } = getStatesFromOsdUrl(url, ['_a', '_g']);
 
     expect(url.startsWith(appBasePath)).toBe(true);
     expect(_a).toEqual({});
@@ -60,7 +60,7 @@ describe('Discover url generator', () => {
   test('can create a link to a saved search in Discover', async () => {
     const { generator } = await setup();
     const url = await generator.createUrl({ savedSearchId });
-    const { _a, _g } = getStatesFromKbnUrl(url, ['_a', '_g']);
+    const { _a, _g } = getStatesFromOsdUrl(url, ['_a', '_g']);
 
     expect(url.startsWith(`${appBasePath}#/${savedSearchId}`)).toBe(true);
     expect(_a).toEqual({});
@@ -72,7 +72,7 @@ describe('Discover url generator', () => {
     const url = await generator.createUrl({
       indexPatternId,
     });
-    const { _a, _g } = getStatesFromKbnUrl(url, ['_a', '_g']);
+    const { _a, _g } = getStatesFromOsdUrl(url, ['_a', '_g']);
 
     expect(_a).toEqual({
       index: indexPatternId,
@@ -85,7 +85,7 @@ describe('Discover url generator', () => {
     const url = await generator.createUrl({
       timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
     });
-    const { _a, _g } = getStatesFromKbnUrl(url, ['_a', '_g']);
+    const { _a, _g } = getStatesFromOsdUrl(url, ['_a', '_g']);
 
     expect(_a).toEqual({});
     expect(_g).toEqual({
@@ -105,7 +105,7 @@ describe('Discover url generator', () => {
         query: 'foo',
       },
     });
-    const { _a, _g } = getStatesFromKbnUrl(url, ['_a', '_g']);
+    const { _a, _g } = getStatesFromOsdUrl(url, ['_a', '_g']);
 
     expect(_a).toEqual({
       query: {
@@ -142,7 +142,7 @@ describe('Discover url generator', () => {
         },
       ],
     });
-    const { _a, _g } = getStatesFromKbnUrl(url, ['_a', '_g']);
+    const { _a, _g } = getStatesFromOsdUrl(url, ['_a', '_g']);
 
     expect(_a).toEqual({
       filters: [
@@ -182,7 +182,7 @@ describe('Discover url generator', () => {
         value: 666,
       },
     });
-    const { _a, _g } = getStatesFromKbnUrl(url, ['_a', '_g']);
+    const { _a, _g } = getStatesFromOsdUrl(url, ['_a', '_g']);
 
     expect(_a).toEqual({});
     expect(_g).toEqual({
@@ -201,7 +201,7 @@ describe('Discover url generator', () => {
         to: 'now',
       },
     });
-    const { _a, _g } = getStatesFromKbnUrl(url, ['_a', '_g']);
+    const { _a, _g } = getStatesFromOsdUrl(url, ['_a', '_g']);
 
     expect(_a).toEqual({});
     expect(_g).toEqual({

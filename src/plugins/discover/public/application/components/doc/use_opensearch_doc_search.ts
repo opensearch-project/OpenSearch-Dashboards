@@ -17,11 +17,11 @@
  * under the License.
  */
 import { useEffect, useState } from 'react';
-import { IndexPattern, getServices } from '../../../kibana_services';
+import { IndexPattern, getServices } from '../../../opensearch_dashboards_services';
 import { DocProps } from './doc';
-import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 
-export enum ElasticRequestState {
+export enum OpenSearchRequestState {
   Loading,
   NotFound,
   Found,
@@ -30,7 +30,7 @@ export enum ElasticRequestState {
 }
 
 /**
- * helper function to build a query body for Elasticsearch
+ * helper function to build a query body for OpenSearch
  * https://www.elastic.co/guide/en/elasticsearch/reference/current//query-dsl-ids-query.html
  */
 export function buildSearchBody(id: string, indexPattern: IndexPattern): Record<string, any> {
@@ -50,17 +50,17 @@ export function buildSearchBody(id: string, indexPattern: IndexPattern): Record<
 }
 
 /**
- * Custom react hook for querying a single doc in ElasticSearch
+ * Custom react hook for querying a single doc in OpenSearch
  */
-export function useEsDocSearch({
+export function useOpenSearchDocSearch({
   id,
   index,
   indexPatternId,
   indexPatternService,
-}: DocProps): [ElasticRequestState, ElasticSearchHit | null, IndexPattern | null] {
+}: DocProps): [OpenSearchRequestState, OpenSearchSearchHit | null, IndexPattern | null] {
   const [indexPattern, setIndexPattern] = useState<IndexPattern | null>(null);
-  const [status, setStatus] = useState(ElasticRequestState.Loading);
-  const [hit, setHit] = useState<ElasticSearchHit | null>(null);
+  const [status, setStatus] = useState(OpenSearchRequestState.Loading);
+  const [hit, setHit] = useState<OpenSearchSearchHit | null>(null);
 
   useEffect(() => {
     async function requestData() {
@@ -80,18 +80,18 @@ export function useEsDocSearch({
         const hits = rawResponse.hits;
 
         if (hits?.hits?.[0]) {
-          setStatus(ElasticRequestState.Found);
+          setStatus(OpenSearchRequestState.Found);
           setHit(hits.hits[0]);
         } else {
-          setStatus(ElasticRequestState.NotFound);
+          setStatus(OpenSearchRequestState.NotFound);
         }
       } catch (err) {
         if (err.savedObjectId) {
-          setStatus(ElasticRequestState.NotFoundIndexPattern);
+          setStatus(OpenSearchRequestState.NotFoundIndexPattern);
         } else if (err.status === 404) {
-          setStatus(ElasticRequestState.NotFound);
+          setStatus(OpenSearchRequestState.NotFound);
         } else {
-          setStatus(ElasticRequestState.Error);
+          setStatus(OpenSearchRequestState.Error);
         }
       }
     }

@@ -17,9 +17,9 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 export interface Props {
   onClick: () => void;
@@ -45,7 +45,7 @@ export function DocViewTableRowBtnFilterRemove({ onClick, disabled = false }: Pr
         aria-label={i18n.translate('discover.docViews.table.filterOutValueButtonAriaLabel', {
           defaultMessage: 'Filter out value',
         })}
-        className="kbnDocViewer__actionButton"
+        className="osdDocViewer__actionButton"
         data-test-subj="removeInclusiveFilterButton"
         disabled={disabled}
         onClick={onClick}

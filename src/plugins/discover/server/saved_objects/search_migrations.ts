@@ -18,7 +18,7 @@
  */
 
 import { flow, get } from 'lodash';
-import { SavedObjectMigrationFn } from 'kibana/server';
+import { SavedObjectMigrationFn } from 'opensearch-dashboards/server';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
 /**
@@ -28,7 +28,7 @@ import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
  * This is only a problem when you import an object from 5.x into 6.x but to be sure that all saved objects migrated we should execute it twice in 6.7.2 and 7.9.3
  */
 const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
-  const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+  const searchSourceJSON = get(doc, 'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON');
 
   if (searchSourceJSON) {
     let searchSource: any;
@@ -45,7 +45,7 @@ const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
         ...doc,
         attributes: {
           ...doc.attributes,
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({
               ...searchSource,
               query: {
@@ -63,7 +63,7 @@ const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
 };
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
-  const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+  const searchSourceJSON = get(doc, 'attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON');
   if (typeof searchSourceJSON !== 'string') {
     return doc;
   }
@@ -76,7 +76,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
   }
 
   if (searchSource.index && Array.isArray(doc.references)) {
-    searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+    searchSource.indexRefName = 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index';
     doc.references.push({
       name: searchSource.indexRefName,
       type: 'index-pattern',
@@ -89,7 +89,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
       if (!filterRow.meta || !filterRow.meta.index || !Array.isArray(doc.references)) {
         return;
       }
-      filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
+      filterRow.meta.indexRefName = `opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
       doc.references.push({
         name: filterRow.meta.indexRefName,
         type: 'index-pattern',
@@ -99,7 +99,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
     });
   }
 
-  doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
+  doc.attributes.opensearchDashboardsSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
 
   return doc;
 };
