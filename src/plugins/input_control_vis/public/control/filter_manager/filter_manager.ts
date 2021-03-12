@@ -27,7 +27,7 @@ export abstract class FilterManager {
     public fieldName: string,
     public indexPattern: IndexPattern,
     public queryFilter: QueryFilterManager
-  ) {}
+  ) { }
 
   /**
    * Convert phrases into filter
@@ -50,12 +50,12 @@ export abstract class FilterManager {
   }
 
   findFilters(): Filter[] {
-    const kbnFilters = _.flatten([
+    const osdFilters = _.flatten([
       this.queryFilter.getAppFilters(),
       this.queryFilter.getGlobalFilters(),
     ]);
-    return kbnFilters.filter((kbnFilter) => {
-      return _.get(kbnFilter, 'meta.controlledBy') === this.controlId;
+    return osdFilters.filter((osdFilter) => {
+      return _.get(osdFilter, 'meta.controlledBy') === this.controlId;
     });
   }
 }

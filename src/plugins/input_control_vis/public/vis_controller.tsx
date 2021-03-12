@@ -22,7 +22,7 @@ import { isEqual } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { Subscription } from 'rxjs';
-import { I18nStart } from 'kibana/public';
+import { I18nStart } from 'opensearch-dashboards/public';
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';
 import { getLineageMap } from './lineage';
@@ -48,7 +48,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
     constructor(public el: Element, public vis: ExprVis) {
       this.controls = [];
 
-      this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
+      this.queryBarUpdateHandler = this.updateControlsFromOsd.bind(this);
 
       this.filterManager = deps.data.query.filterManager;
       this.updateSubsciption = this.filterManager
@@ -96,7 +96,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
             controls={this.controls}
             stageFilter={this.stageFilter}
             submitFilters={this.submitFilters}
-            resetControls={this.updateControlsFromKbn}
+            resetControls={this.updateControlsFromOsd}
             clearControls={this.clearControls}
             hasChanges={this.hasChanges}
             hasValues={this.hasValues}
@@ -168,7 +168,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
       });
 
       const newFilters = stagedControls
-        .map((control) => control.getKbnFilter())
+        .map((control) => control.getOsdFilter())
         .filter((filter): filter is Filter => {
           return filter !== null;
         });
@@ -202,7 +202,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
       this.drawVis();
     };
 
-    updateControlsFromKbn = async () => {
+    updateControlsFromOsd = async () => {
       this.controls.forEach((control) => {
         control.reset();
       });
