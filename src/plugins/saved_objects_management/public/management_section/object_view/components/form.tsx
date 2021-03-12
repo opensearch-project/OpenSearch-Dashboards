@@ -28,8 +28,8 @@ import {
 } from '@elastic/eui';
 import { set } from '@elastic/safer-lodash-set';
 import { cloneDeep } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { SimpleSavedObject, SavedObjectsClientContract } from '../../../../../../core/public';
 import { SavedObjectLoader } from '../../../../../saved_objects/public';
 import { Field } from './field';

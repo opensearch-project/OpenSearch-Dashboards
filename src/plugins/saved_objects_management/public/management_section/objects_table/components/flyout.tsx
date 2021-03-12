@@ -40,8 +40,8 @@ import {
   EuiSpacer,
   EuiLink,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { OverlayStart, HttpStart } from 'src/core/public';
 import {
   IndexPatternsContract,
@@ -289,7 +289,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       .map((doc) => ({
         ...doc,
         // The server assumes that documents with no migrationVersion are up to date.
-        // That assumption enables Kibana and other API consumers to not have to build
+        // That assumption enables OpenSearch Dashboards and other API consumers to not have to build
         // up migrationVersion prior to creating new objects. But it means that imports
         // need to set migrationVersion to something other than undefined, so that imported
         // docs are not seen as automatically up-to-date.

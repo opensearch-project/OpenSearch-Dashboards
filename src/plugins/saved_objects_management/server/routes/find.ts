@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import { IRouter } from 'src/core/server';
 import { injectMetaAttributes } from '../lib';
 import { ISavedObjectsManagement } from '../services';
@@ -28,7 +28,7 @@ export const registerFindRoute = (
 ) => {
   router.get(
     {
-      path: '/api/kibana/management/saved_objects/_find',
+      path: '/api/opensearch-dashboards/management/saved_objects/_find',
       validate: {
         query: schema.object({
           perPage: schema.number({ min: 0, defaultValue: 20 }),

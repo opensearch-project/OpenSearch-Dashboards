@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from 'opensearch-dashboards/public';
 import { SavedObjectsManagementPlugin } from './plugin';
 
 export { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './plugin';

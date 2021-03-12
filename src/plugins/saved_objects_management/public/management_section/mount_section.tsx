@@ -20,8 +20,8 @@
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch, Route } from 'react-router-dom';
-import { I18nProvider } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../management/public';
@@ -59,7 +59,7 @@ export const mountManagementSection = async ({
   const capabilities = coreStart.application.capabilities;
 
   const RedirectToHomeIfUnauthorized: React.FunctionComponent = ({ children }) => {
-    const allowed = capabilities?.management?.kibana?.objects ?? false;
+    const allowed = capabilities?.management?.opensearchDashboards?.objects ?? false;
 
     if (!allowed) {
       coreStart.application.navigateToApp('home');

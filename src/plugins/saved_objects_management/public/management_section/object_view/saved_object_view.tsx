@@ -18,7 +18,7 @@
  */
 
 import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { EuiSpacer, EuiPageContent } from '@elastic/eui';
 import {
   Capabilities,
@@ -138,7 +138,7 @@ export class SavedObjectEdition extends Component<
 
     const confirmed = await overlays.openConfirm(
       i18n.translate('savedObjectsManagement.deleteConfirm.modalDescription', {
-        defaultMessage: 'This action permanently removes the object from Kibana.',
+        defaultMessage: 'This action permanently removes the object from OpenSearch Dashboards.',
       }),
       {
         confirmButtonText: i18n.translate(
@@ -150,7 +150,7 @@ export class SavedObjectEdition extends Component<
         title: i18n.translate('savedObjectsManagement.deleteConfirm.modalTitle', {
           defaultMessage: `Delete '{title}'?`,
           values: {
-            title: object?.attributes?.title || 'saved Kibana object',
+            title: object?.attributes?.title || 'saved OpenSearch Dashboards object',
           },
         }),
         buttonColor: 'danger',

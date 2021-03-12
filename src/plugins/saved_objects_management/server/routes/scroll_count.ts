@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import { IRouter, SavedObjectsFindOptions } from 'src/core/server';
 import { findAll } from '../lib';
 
 export const registerScrollForCountRoute = (router: IRouter) => {
   router.post(
     {
-      path: '/api/kibana/management/saved_objects/scroll/counts',
+      path: '/api/opensearch-dashboards/management/saved_objects/scroll/counts',
       validate: {
         body: schema.object({
           typesToInclude: schema.arrayOf(schema.string()),

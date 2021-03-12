@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ManagementSetup } from '../../management/public';
 import { DataPublicPluginStart } from '../../data/public';
@@ -90,14 +90,14 @@ export class SavedObjectsManagementPlugin
             'Import, export, and manage your saved searches, visualizations, and dashboards.',
         }),
         icon: 'savedObjectsApp',
-        path: '/app/management/kibana/objects',
+        path: '/app/management/opensearch-dashboards/objects',
         showOnHomePage: false,
         category: FeatureCatalogueCategory.ADMIN,
       });
     }
 
-    const kibanaSection = management.sections.section.kibana;
-    kibanaSection.registerApp({
+    const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
+    opensearchDashboardsSection.registerApp({
       id: 'objects',
       title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
         defaultMessage: 'Saved Objects',

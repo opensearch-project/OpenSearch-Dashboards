@@ -39,37 +39,37 @@ describe('registerRoutes', () => {
 
     expect(router.get).toHaveBeenCalledWith(
       expect.objectContaining({
-        path: '/api/kibana/management/saved_objects/_find',
+        path: '/api/opensearch-dashboards/management/saved_objects/_find',
       }),
       expect.any(Function)
     );
     expect(router.get).toHaveBeenCalledWith(
       expect.objectContaining({
-        path: '/api/kibana/management/saved_objects/{type}/{id}',
+        path: '/api/opensearch-dashboards/management/saved_objects/{type}/{id}',
       }),
       expect.any(Function)
     );
     expect(router.get).toHaveBeenCalledWith(
       expect.objectContaining({
-        path: '/api/kibana/management/saved_objects/relationships/{type}/{id}',
+        path: '/api/opensearch-dashboards/management/saved_objects/relationships/{type}/{id}',
       }),
       expect.any(Function)
     );
     expect(router.get).toHaveBeenCalledWith(
       expect.objectContaining({
-        path: '/api/kibana/management/saved_objects/_allowed_types',
+        path: '/api/opensearch-dashboards/management/saved_objects/_allowed_types',
       }),
       expect.any(Function)
     );
     expect(router.post).toHaveBeenCalledWith(
       expect.objectContaining({
-        path: '/api/kibana/management/saved_objects/scroll/counts',
+        path: '/api/opensearch-dashboards/management/saved_objects/scroll/counts',
       }),
       expect.any(Function)
     );
     expect(router.post).toHaveBeenCalledWith(
       expect.objectContaining({
-        path: '/api/kibana/management/saved_objects/scroll/export',
+        path: '/api/opensearch-dashboards/management/saved_objects/scroll/export',
       }),
       expect.any(Function)
     );
