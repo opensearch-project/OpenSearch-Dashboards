@@ -184,6 +184,7 @@ export {
   ResponseError,
   ResponseErrorAttributes,
   ResponseHeaders,
+  opensearchDashboardsResponseFactory,
   OpenSearchDashboardsResponseFactory,
   RouteConfig,
   IRouter,
