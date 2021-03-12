@@ -20,7 +20,7 @@
 import { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { InternalHttpServiceSetup, KibanaRequest } from '../http';
+import { InternalHttpServiceSetup, OpenSearchDashboardsRequest } from '../http';
 import { mergeCapabilities } from './merge_capabilities';
 import { getCapabilitiesResolver, CapabilitiesResolver } from './resolve_capabilities';
 import { registerRoutes } from './routes';
@@ -101,7 +101,7 @@ export interface CapabilitiesStart {
   /**
    * Resolve the {@link Capabilities} to be used for given request
    */
-  resolveCapabilities(request: KibanaRequest): Promise<Capabilities>;
+  resolveCapabilities(request: OpenSearchDashboardsRequest): Promise<Capabilities>;
 }
 
 interface SetupDeps {

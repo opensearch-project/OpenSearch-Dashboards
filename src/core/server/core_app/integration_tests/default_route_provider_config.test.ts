@@ -16,21 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import * as kbnTestServer from '../../../test_helpers/kbn_server';
+import * as osdTestServer from '../../../test_helpers/osd_server';
 import { Root } from '../../root';
 
-const { startES } = kbnTestServer.createTestServers({
+const { startOpenSearch } = osdTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
 });
-let esServer: kbnTestServer.TestElasticsearchUtils;
+let opensearchServer: osdTestServer.TestOpenSearchUtils;
 
 // FLAKY: https://github.com/elastic/kibana/issues/81072
 describe.skip('default route provider', () => {
   let root: Root;
 
   beforeAll(async () => {
-    esServer = await startES();
-    root = kbnTestServer.createRootWithCorePlugins({
+    opensearchServer = await startOpenSearch();
+    root = osdTestServer.createRootWithCorePlugins({
       server: {
         basePath: '/hello',
       },
@@ -41,12 +41,12 @@ describe.skip('default route provider', () => {
   });
 
   afterAll(async () => {
-    await esServer.stop();
+    await opensearchServer.stop();
     await root.shutdown();
   });
 
   it('redirects to the configured default route respecting basePath', async function () {
-    const { status, header } = await kbnTestServer.request.get(root, '/');
+    const { status, header } = await osdTestServer.request.get(root, '/');
 
     expect(status).toEqual(302);
     expect(header).toMatchObject({
@@ -56,20 +56,20 @@ describe.skip('default route provider', () => {
 
   it('ignores invalid values', async function () {
     const invalidRoutes = [
-      'http://not-your-kibana.com',
+      'http://not-your-opensearch-dashboards.com',
       '///example.com',
       '//example.com',
       ' //example.com',
     ];
 
     for (const url of invalidRoutes) {
-      await kbnTestServer.request
-        .post(root, '/api/kibana/settings/defaultRoute')
+      await osdTestServer.request
+        .post(root, '/api/opensearch-dashboards/settings/defaultRoute')
         .send({ value: url })
         .expect(400);
     }
 
-    const { status, header } = await kbnTestServer.request.get(root, '/');
+    const { status, header } = await osdTestServer.request.get(root, '/');
     expect(status).toEqual(302);
     expect(header).toMatchObject({
       location: '/hello/app/home',
@@ -77,12 +77,12 @@ describe.skip('default route provider', () => {
   });
 
   it('consumes valid values', async function () {
-    await kbnTestServer.request
-      .post(root, '/api/kibana/settings/defaultRoute')
+    await osdTestServer.request
+      .post(root, '/api/opensearch-dashboards/settings/defaultRoute')
       .send({ value: '/valid' })
       .expect(200);
 
-    const { status, header } = await kbnTestServer.request.get(root, '/');
+    const { status, header } = await osdTestServer.request.get(root, '/');
     expect(status).toEqual(302);
     expect(header).toMatchObject({
       location: '/hello/valid',

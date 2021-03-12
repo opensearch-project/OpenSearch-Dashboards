@@ -18,7 +18,7 @@
  */
 
 import { Capabilities } from '../../types/capabilities';
-import { KibanaRequest } from '../http';
+import { OpenSearchDashboardsRequest } from '../http';
 
 export { Capabilities };
 
@@ -33,6 +33,6 @@ export type CapabilitiesProvider = () => Partial<Capabilities>;
  * @public
  */
 export type CapabilitiesSwitcher = (
-  request: KibanaRequest,
+  request: OpenSearchDashboardsRequest,
   uiCapabilities: Capabilities
 ) => Partial<Capabilities> | Promise<Partial<Capabilities>>;

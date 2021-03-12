@@ -19,10 +19,10 @@
 
 import { cloneDeep } from 'lodash';
 import { Capabilities, CapabilitiesSwitcher } from './types';
-import { KibanaRequest } from '../http';
+import { OpenSearchDashboardsRequest } from '../http';
 
 export type CapabilitiesResolver = (
-  request: KibanaRequest,
+  request: OpenSearchDashboardsRequest,
   applications: string[]
 ) => Promise<Capabilities>;
 
@@ -30,7 +30,7 @@ export const getCapabilitiesResolver = (
   capabilities: () => Capabilities,
   switchers: () => CapabilitiesSwitcher[]
 ): CapabilitiesResolver => async (
-  request: KibanaRequest,
+  request: OpenSearchDashboardsRequest,
   applications: string[]
 ): Promise<Capabilities> => {
   return resolveCapabilities(capabilities(), switchers(), request, applications);
@@ -39,7 +39,7 @@ export const getCapabilitiesResolver = (
 export const resolveCapabilities = async (
   capabilities: Capabilities,
   switchers: CapabilitiesSwitcher[],
-  request: KibanaRequest,
+  request: OpenSearchDashboardsRequest,
   applications: string[]
 ): Promise<Capabilities> => {
   const mergedCaps = cloneDeep({

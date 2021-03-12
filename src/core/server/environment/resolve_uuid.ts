@@ -19,7 +19,7 @@
 
 import uuid from 'uuid';
 import { join } from 'path';
-import { PathConfigType } from '@kbn/utils';
+import { PathConfigType } from '@osd/utils';
 import { readFile, writeFile } from './fs';
 import { HttpConfigType } from '../http';
 import { Logger } from '../logging';
@@ -91,7 +91,7 @@ async function readUuidFromFile(filepath: string, logger: Logger): Promise<strin
     }
     throw new Error(
       'Unable to read Kibana UUID file, please check the uuid.server configuration ' +
-        'value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. ' +
+        'value in opensearch_dashboards.yml and ensure Kibana has sufficient permissions to read / write to this file. ' +
         `Error was: ${e.code}`
     );
   }
@@ -103,7 +103,7 @@ async function writeUuidToFile(filepath: string, uuidValue: string) {
   } catch (e) {
     throw new Error(
       'Unable to write Kibana UUID file, please check the uuid.server configuration ' +
-        'value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. ' +
+        'value in opensearch_dashboards.yml and ensure Kibana has sufficient permissions to read / write to this file. ' +
         `Error was: ${e.code}`
     );
   }

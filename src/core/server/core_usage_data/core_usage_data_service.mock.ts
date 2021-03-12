@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@osd/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import { CoreUsageDataService } from './core_usage_data_service';
 import { CoreUsageData, CoreUsageDataStart } from './types';
@@ -27,7 +27,7 @@ const createStartContractMock = () => {
     getCoreUsageData: jest.fn().mockResolvedValue(
       new BehaviorSubject<CoreUsageData>({
         config: {
-          elasticsearch: {
+          opensearch: {
             apiVersion: 'master',
             customHeadersConfigured: false,
             healthCheckDelayMs: 2500,
