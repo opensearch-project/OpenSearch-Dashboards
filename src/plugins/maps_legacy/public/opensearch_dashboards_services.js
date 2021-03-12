@@ -25,9 +25,9 @@ let uiSettings;
 export const setUiSettings = (coreUiSettings) => (uiSettings = coreUiSettings);
 export const getUiSettings = () => uiSettings;
 
-let kibanaVersion;
-export const setKibanaVersion = (version) => (kibanaVersion = version);
-export const getKibanaVersion = () => kibanaVersion;
+let opensearchDashboards;
+export const setOpenSearchDashboardsVersion = (version) => (opensearchDashboards = version);
+export const getOpenSearchDashboardsVersion = () => opensearchDashboards;
 
 let mapsLegacyConfig;
 export const setMapsLegacyConfig = (config) => (mapsLegacyConfig = config);

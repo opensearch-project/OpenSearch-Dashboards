@@ -18,7 +18,7 @@
  */
 
 // @ts-expect-error
-export { KibanaMap } from '../../map/kibana_map';
+export { OpenSearchDashboardsMap } from '../../map/opensearch_dashboards_map';
 // @ts-expect-error
 export { ServiceSettings } from '../../map/service_settings';
 // @ts-expect-error

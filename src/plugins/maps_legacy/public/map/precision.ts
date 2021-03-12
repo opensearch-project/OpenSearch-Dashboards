@@ -18,7 +18,7 @@
  */
 
 // @ts-ignore
-import { getUiSettings } from '../kibana_services';
+import { getUiSettings } from '../opensearch_dashboards_services';
 import { geohashColumns } from './decode_geo_hash';
 
 /**

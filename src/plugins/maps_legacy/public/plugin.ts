@@ -18,9 +18,9 @@
  */
 
 // @ts-ignore
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'opensearch-dashboards/public';
 // @ts-ignore
-import { setToasts, setUiSettings, setKibanaVersion, setMapsLegacyConfig } from './kibana_services';
+import { setToasts, setUiSettings, setOpenSearchDashboardsVersion, setMapsLegacyConfig } from './opensearch_dashboards_services';
 // @ts-ignore
 import { getPrecision, getZoomPrecision } from './map/precision';
 import { MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
@@ -38,11 +38,11 @@ import { getServiceSettings } from './get_service_settings';
 export const bindSetupCoreAndPlugins = (
   core: CoreSetup,
   config: MapsLegacyConfig,
-  kibanaVersion: string
+  opensearchDashboards: string
 ) => {
   setToasts(core.notifications.toasts);
   setUiSettings(core.uiSettings);
-  setKibanaVersion(kibanaVersion);
+  setOpenSearchDashboardsVersion(opensearchDashboards);
   setMapsLegacyConfig(config);
 };
 
@@ -60,9 +60,9 @@ export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegac
 
   public setup(core: CoreSetup, plugins: MapsLegacySetupDependencies) {
     const config = this._initializerContext.config.get<MapsLegacyConfig>();
-    const kibanaVersion = this._initializerContext.env.packageInfo.version;
+    const opensearchDashboards = this._initializerContext.env.packageInfo.version;
 
-    bindSetupCoreAndPlugins(core, config, kibanaVersion);
+    bindSetupCoreAndPlugins(core, config, opensearchDashboards);
 
     const getBaseMapsVis = () => new BaseMapsVisualizationProvider();
 
