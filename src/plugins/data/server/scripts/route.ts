@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from 'opensearch-dashboards/server';
 
 export function registerScriptsRoute(router: IRouter) {
   router.get(
-    { path: '/api/kibana/scripts/languages', validate: false },
+    { path: '/api/opensearch-dashboards/scripts/languages', validate: false },
     async (context, request, response) => {
       return response.ok({
         body: ['painless', 'expression'],

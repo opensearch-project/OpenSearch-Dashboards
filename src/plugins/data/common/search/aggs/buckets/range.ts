@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { OSD_FIELD_TYPES } from '../../../../common';
 import { AggTypesDependencies } from '../agg_types';
 import { BaseAggParams } from '../types';
 
@@ -93,7 +93,7 @@ export const getRangeBucketAgg = ({ getFieldFormatsStart }: RangeBucketAggDepend
       {
         name: 'field',
         type: 'field',
-        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER],
+        filterFieldTypes: [OSD_FIELD_TYPES.NUMBER],
       },
       {
         name: 'ranges',

@@ -18,7 +18,7 @@
  */
 
 import { noop } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -29,7 +29,7 @@ import {
 } from './migrate_include_exclude_format';
 import { AggConfigSerialized, BaseAggParams } from '../types';
 
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { OSD_FIELD_TYPES } from '../../../../common';
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../expressions';
 
 import {
@@ -145,11 +145,11 @@ export const getTermsBucketAgg = () =>
         name: 'field',
         type: 'field',
         filterFieldTypes: [
-          KBN_FIELD_TYPES.NUMBER,
-          KBN_FIELD_TYPES.BOOLEAN,
-          KBN_FIELD_TYPES.DATE,
-          KBN_FIELD_TYPES.IP,
-          KBN_FIELD_TYPES.STRING,
+          OSD_FIELD_TYPES.NUMBER,
+          OSD_FIELD_TYPES.BOOLEAN,
+          OSD_FIELD_TYPES.DATE,
+          OSD_FIELD_TYPES.IP,
+          OSD_FIELD_TYPES.STRING,
         ],
       },
       {
@@ -176,9 +176,9 @@ export const getTermsBucketAgg = () =>
 
           let orderAgg = agg.params.orderAgg || aggs!.getResponseAggById(agg.params.orderBy);
 
-          // TODO: This works around an Elasticsearch bug the always casts terms agg scripts to strings
+          // TODO: This works around an OpenSearch bug the always casts terms agg scripts to strings
           // thus causing issues with filtering. This probably causes other issues since float might not
-          // be able to contain the number on the elasticsearch side
+          // be able to contain the number on the OpenSearch side
           if (output.params.script) {
             output.params.value_type =
               agg.getField().type === 'number' ? 'float' : agg.getField().type;

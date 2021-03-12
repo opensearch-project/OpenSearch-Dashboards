@@ -88,16 +88,16 @@ export default class SuggestionsComponent extends Component<SuggestionsComponent
         verticalListPosition={verticalListPosition}
       >
         <div
-          className={classNames('kbnTypeahead', { 'kbnTypeahead--small': this.props.size === 's' })}
+          className={classNames('osdTypeahead', { 'osdTypeahead--small': this.props.size === 's' })}
         >
           <div
-            className={classNames('kbnTypeahead__popover', {
-              ['kbnTypeahead__popover--bottom']: isSuggestionsListFittable,
-              ['kbnTypeahead__popover--top']: !isSuggestionsListFittable,
+            className={classNames('osdTypeahead__popover', {
+              ['osdTypeahead__popover--bottom']: isSuggestionsListFittable,
+              ['osdTypeahead__popover--top']: !isSuggestionsListFittable,
             })}
           >
             <div
-              id="kbnTypeahead__items"
+              id="osdTypeahead__items"
               role="listbox"
               ref={(node) => (this.parentNode = node)}
               onScroll={this.handleScroll}

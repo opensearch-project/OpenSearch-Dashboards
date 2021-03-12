@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Assign } from '@kbn/utility-types';
+import { Assign } from '@osd/utility-types';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
 import {
   AggConfigSerialized,
@@ -112,7 +112,7 @@ export interface AggExpressionType {
 /** @internal */
 export type AggExpressionFunctionArgs<
   Name extends keyof AggParamsMapping
-> = AggParamsMapping[Name] & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
+  > = AggParamsMapping[Name] & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
 
 /**
  * A global list of the param interfaces for each agg type.

@@ -18,13 +18,13 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { uniq } from 'lodash';
 import React from 'react';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
-import { withKibana } from '../../../../../kibana_react/public';
+import { withOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 
 interface Props extends PhraseSuggestorProps {
   value?: string;
@@ -88,4 +88,4 @@ function StringComboBox(props: GenericComboBoxProps<string>) {
   return GenericComboBox(props);
 }
 
-export const PhraseValueInput = injectI18n(withKibana(PhraseValueInputUI));
+export const PhraseValueInput = injectI18n(withOpenSearchDashboards(PhraseValueInputUI));

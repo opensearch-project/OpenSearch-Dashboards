@@ -18,8 +18,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { i18n } from '@osd/i18n';
+import { CoreStart } from 'opensearch-dashboards/public';
 import { SavedQuery } from '../../../query';
 import { DataPublicPluginStart } from '../../..';
 import { populateStateFromSavedQuery } from './populate_state_from_saved_query';

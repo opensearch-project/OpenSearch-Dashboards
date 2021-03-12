@@ -18,14 +18,14 @@
  */
 
 import { first } from 'rxjs/operators';
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'opensearch-dashboards/server';
 import { registerKqlTelemetryRoute } from './route';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { makeKQLUsageCollector } from './usage_collector';
 import { kqlTelemetry } from '../saved_objects';
 
 export class KqlTelemetryService implements Plugin<void> {
-  constructor(private initializerContext: PluginInitializerContext) {}
+  constructor(private initializerContext: PluginInitializerContext) { }
 
   public setup(
     { http, getStartServices, savedObjects }: CoreSetup,
@@ -42,7 +42,7 @@ export class KqlTelemetryService implements Plugin<void> {
       this.initializerContext.config.legacy.globalConfig$
         .pipe(first())
         .toPromise()
-        .then((config) => makeKQLUsageCollector(usageCollection, config.kibana.index))
+        .then((config) => makeKQLUsageCollector(usageCollection, config.opensearchDashboards.index))
         .catch((e) => {
           this.initializerContext.logger
             .get('kql-telemetry')
@@ -51,5 +51,5 @@ export class KqlTelemetryService implements Plugin<void> {
     }
   }
 
-  public start() {}
+  public start() { }
 }

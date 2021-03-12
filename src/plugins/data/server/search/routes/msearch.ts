@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 
 import { IRouter } from 'src/core/server';
 import { SearchRouteDependencies } from '../search_service';
@@ -33,7 +33,7 @@ import { getCallMsearch } from './call_msearch';
  *
  * This route is internal and _should not be used_ in any new areas of code.
  * It only exists as a means of removing remaining dependencies on the
- * legacy ES client.
+ * legacy OpenSearch client.
  *
  * @deprecated
  */
@@ -60,7 +60,7 @@ export function registerMsearchRoute(router: IRouter, deps: SearchRouteDependenc
     },
     async (context, request, res) => {
       const callMsearch = getCallMsearch({
-        esClient: context.core.elasticsearch.client,
+        opensearchClient: context.core.elasticsearch.client,
         globalConfig$: deps.globalConfig$,
         uiSettings: context.core.uiSettings.client,
       });

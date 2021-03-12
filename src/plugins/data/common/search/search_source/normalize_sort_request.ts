@@ -18,14 +18,14 @@
  */
 
 import { IIndexPattern } from '../../index_patterns';
-import { EsQuerySortValue, SortOptions } from './types';
+import { OpenSearchQuerySortValue, SortOptions } from './types';
 
 export function normalizeSortRequest(
-  sortObject: EsQuerySortValue | EsQuerySortValue[],
+  sortObject: OpenSearchQuerySortValue | OpenSearchQuerySortValue[],
   indexPattern: IIndexPattern | string | undefined,
   defaultSortOptions: SortOptions = {}
 ) {
-  const sortArray: EsQuerySortValue[] = Array.isArray(sortObject) ? sortObject : [sortObject];
+  const sortArray: OpenSearchQuerySortValue[] = Array.isArray(sortObject) ? sortObject : [sortObject];
   return sortArray.map(function (sortable) {
     return normalize(sortable, indexPattern, defaultSortOptions);
   });
@@ -34,10 +34,10 @@ export function normalizeSortRequest(
 /**
  * Normalize the sort description to the more verbose format (e.g. { someField: "desc" } into
  * { someField: { "order": "desc"}}), and convert sorts on scripted fields into the proper script
- * for Elasticsearch. Mix in the default options according to the advanced settings.
+ * for OpenSearch. Mix in the default options according to the advanced settings.
  */
 function normalize(
-  sortable: EsQuerySortValue,
+  sortable: OpenSearchQuerySortValue,
   indexPattern: IIndexPattern | string | undefined,
   defaultSortOptions: any
 ) {
@@ -68,7 +68,7 @@ function normalize(
   };
 }
 
-// The ES API only supports sort scripts of type 'number' and 'string'
+// The OpenSearch API only supports sort scripts of type 'number' and 'string'
 function castSortType(type: string) {
   if (['number'].includes(type)) {
     return 'number';

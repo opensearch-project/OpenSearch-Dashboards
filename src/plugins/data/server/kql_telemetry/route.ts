@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { StartServicesAccessor, IRouter, Logger } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
+import { StartServicesAccessor, IRouter, Logger } from 'opensearch-dashboards/server';
+import { schema } from '@osd/config-schema';
 
 export function registerKqlTelemetryRoute(
   router: IRouter,
@@ -27,7 +27,7 @@ export function registerKqlTelemetryRoute(
 ) {
   router.post(
     {
-      path: '/api/kibana/kql_opt_in_stats',
+      path: '/api/opensearch-dashboards/kql_opt_in_stats',
       validate: {
         body: schema.object({
           opt_in: schema.boolean(),

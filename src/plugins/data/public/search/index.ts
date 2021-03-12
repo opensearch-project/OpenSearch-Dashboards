@@ -22,14 +22,14 @@ export * from './expressions';
 export { ISearchSetup, ISearchStart, ISearchStartSearchSource, SearchEnhancements } from './types';
 
 export {
-  ES_SEARCH_STRATEGY,
-  EsQuerySortValue,
+  OPENSEARCH_SEARCH_STRATEGY,
+  OpenSearchQuerySortValue,
   extractReferences as extractSearchSourceReferences,
   getSearchParamsFromRequest,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
+  IOpenSearchSearchRequest,
+  IOpenSearchSearchResponse,
+  IOpenSearchDashboardsSearchRequest,
+  IOpenSearchDashboardsSearchResponse,
   injectReferences as injectSearchSourceReferences,
   ISearch,
   ISearchGeneric,
@@ -43,7 +43,7 @@ export {
   SortDirection,
 } from '../../common/search';
 
-export { getEsPreference } from './es_search';
+export { getOpenSearchPreference } from './opensearch_search';
 
 export { SearchInterceptor, SearchInterceptorDeps } from './search_interceptor';
 export * from './errors';

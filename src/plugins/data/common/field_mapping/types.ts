@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { ES_FIELD_TYPES } from '../../../data/common';
+import { OPENSEARCH_FIELD_TYPES } from '../../../data/common';
 
 /** @public */
 export interface FieldMappingSpec {
-  type: ES_FIELD_TYPES;
+  type: OPENSEARCH_FIELD_TYPES;
   _serialize?: (mapping: any) => string | undefined;
   _deserialize?: (mapping: string) => any | undefined;
 }

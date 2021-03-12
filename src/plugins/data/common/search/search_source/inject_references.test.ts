@@ -34,11 +34,11 @@ describe('injectSearchSourceReferences', () => {
         query: 'play_name:"Henry IV"',
         language: 'kuery',
       },
-      indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+      indexRefName: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
     };
     references = [
       {
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        name: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
         id: '033af690-fde7-11ea-91f3-fb9e73f9bbe9',
       },
@@ -87,7 +87,7 @@ describe('injectSearchSourceReferences', () => {
   test('handles filters', () => {
     searchSourceJSON.filter = [
       // @ts-expect-error
-      { meta: { indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index' } },
+      { meta: { indexRefName: 'opensearchDashboardsSavedObjectMeta.searchSourceJSON.index' } },
     ];
     const actual = injectReferences(searchSourceJSON, references);
     expect(actual).toMatchInlineSnapshot(`

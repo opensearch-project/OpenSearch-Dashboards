@@ -27,18 +27,18 @@ import {
 import { convertRequestBody, getCallMsearch } from './call_msearch';
 
 describe('callMsearch', () => {
-  let esClient: DeeplyMockedKeys<IScopedClusterClient>;
+  let opensearchClient: DeeplyMockedKeys<IScopedClusterClient>;
   let globalConfig$: Observable<SharedGlobalConfig>;
   let uiSettings: IUiSettingsClient;
   let callMsearch: ReturnType<typeof getCallMsearch>;
 
   beforeEach(() => {
     const coreContext = coreMock.createRequestHandlerContext();
-    esClient = coreContext.elasticsearch.client;
+    opensearchClient = coreContext.elasticsearch.client;
     globalConfig$ = pluginInitializerContextConfigMock({}).legacy.globalConfig$;
     uiSettings = coreContext.uiSettings.client;
 
-    callMsearch = getCallMsearch({ esClient, globalConfig$, uiSettings });
+    callMsearch = getCallMsearch({ opensearchClient, globalConfig$, uiSettings });
   });
 
   it('handler calls msearch with the given request', async () => {
@@ -51,8 +51,8 @@ describe('callMsearch', () => {
       signal: new AbortController().signal,
     });
 
-    expect(esClient.asCurrentUser.msearch).toHaveBeenCalledTimes(1);
-    expect(esClient.asCurrentUser.msearch.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(opensearchClient.asCurrentUser.msearch).toHaveBeenCalledTimes(1);
+    expect(opensearchClient.asCurrentUser.msearch.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "body": "{\\"ignore_unavailable\\":true,\\"index\\":\\"foo\\"}

@@ -18,14 +18,14 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
 import React, { useState } from 'react';
 
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
-import { useKibana } from '../../../../kibana_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IIndexPattern } from '../..';
 import {
   buildEmptyFilter,
@@ -49,9 +49,9 @@ interface Props {
 
 function FilterBarUI(props: Props) {
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
-  const kibana = useKibana();
+  const opensearchDashboards = useOpenSearchDashboards();
 
-  const uiSettings = kibana.services.uiSettings;
+  const uiSettings = opensearchDashboards.services.uiSettings;
   if (!uiSettings) return null;
 
   function onFiltersUpdated(filters: Filter[]) {

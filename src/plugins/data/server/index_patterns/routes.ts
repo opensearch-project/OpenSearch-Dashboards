@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { HttpServiceSetup, RequestHandlerContext } from 'kibana/server';
+import { schema } from '@osd/config-schema';
+import { HttpServiceSetup, RequestHandlerContext } from 'opensearch-dashboards/server';
 import { IndexPatternsFetcher } from './fetcher';
 
 export function registerRoutes(http: HttpServiceSetup) {

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import moment, { unitOfTime, Duration } from 'moment';
-import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { OSD_FIELD_TYPES } from '../../osd_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
@@ -170,7 +170,7 @@ export class DurationFormat extends FieldFormat {
   static title = i18n.translate('data.fieldFormats.duration.title', {
     defaultMessage: 'Duration',
   });
-  static fieldType = KBN_FIELD_TYPES.NUMBER;
+  static fieldType = OSD_FIELD_TYPES.NUMBER;
   static inputFormats = inputFormats;
   static outputFormats = outputFormats;
   allowsNumericalAggregations = true;
@@ -195,8 +195,8 @@ export class DurationFormat extends FieldFormat {
     const prefix =
       val < 0 && human
         ? i18n.translate('data.fieldFormats.duration.negativeLabel', {
-            defaultMessage: 'minus',
-          }) + ' '
+          defaultMessage: 'minus',
+        }) + ' '
         : '';
     const duration = parseInputAsDuration(val, inputFormat) as Record<keyof Duration, Function>;
     const formatted = duration[outputFormat]();

@@ -18,7 +18,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { KbnError } from '../../../../../kibana_utils/common';
+import { OsdError } from '../../../../../opensearch_dashboards_utils/common';
 import { SearchError } from './types';
 
 /**
@@ -26,10 +26,10 @@ import { SearchError } from './types';
  * @param {Error} err - the Error that came back
  * @param {Object} resp - optional HTTP response
  */
-export class RequestFailure extends KbnError {
+export class RequestFailure extends OsdError {
   public resp?: SearchResponse<any>;
   constructor(err: SearchError | null = null, resp?: SearchResponse<any>) {
-    super(`Request to Elasticsearch failed: ${JSON.stringify(resp || err?.message)}`);
+    super(`Request to OpenSearch failed: ${JSON.stringify(resp || err?.message)}`);
 
     this.resp = resp;
   }

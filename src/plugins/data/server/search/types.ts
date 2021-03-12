@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { OpenSearchDashboardsRequest, RequestHandlerContext } from 'src/core/server';
 import {
   ISearchOptions,
   ISearchStartSearchSource,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
+  IOpenSearchDashboardsSearchRequest,
+  IOpenSearchDashboardsSearchResponse,
 } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
-import { IEsSearchRequest, IEsSearchResponse } from './es_search';
+import { IOpenSearchSearchRequest, IOpenSearchSearchResponse } from './opensearch_search';
 
 export interface SearchEnhancements {
   defaultStrategy: string;
@@ -39,9 +39,9 @@ export interface ISearchSetup {
    * strategies.
    */
   registerSearchStrategy: <
-    SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-  >(
+    SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
+    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
+    >(
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
   ) => void;
@@ -58,13 +58,13 @@ export interface ISearchSetup {
 }
 
 export interface ISearchStart<
-  SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-> {
+  SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
+  SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
+  > {
   aggs: AggsStart;
   /**
    * Get other registered search strategies. For example, if a new strategy needs to use the
-   * already-registered ES search strategy, it can use this function to accomplish that.
+   * already-registered OpenSearch search strategy, it can use this function to accomplish that.
    */
   getSearchStrategy: (
     name: string
@@ -75,7 +75,7 @@ export interface ISearchStart<
     options: ISearchOptions
   ) => Promise<SearchStrategyResponse>;
   searchSource: {
-    asScoped: (request: KibanaRequest) => Promise<ISearchStartSearchSource>;
+    asScoped: (request: OpenSearchDashboardsRequest) => Promise<ISearchStartSearchSource>;
   };
 }
 
@@ -84,9 +84,9 @@ export interface ISearchStart<
  * that resolves to a response.
  */
 export interface ISearchStrategy<
-  SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-> {
+  SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
+  SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
+  > {
   search: (
     context: RequestHandlerContext,
     request: SearchStrategyRequest,

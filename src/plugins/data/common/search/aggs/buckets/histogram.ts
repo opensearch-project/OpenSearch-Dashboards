@@ -18,9 +18,9 @@
  */
 
 import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
-import { KBN_FIELD_TYPES, UI_SETTINGS } from '../../../../common';
+import { OSD_FIELD_TYPES, UI_SETTINGS } from '../../../../common';
 import { AggTypesDependencies } from '../agg_types';
 import { BaseAggParams } from '../types';
 
@@ -92,7 +92,7 @@ export const getHistogramBucketAgg = ({
       {
         name: 'field',
         type: 'field',
-        filterFieldTypes: KBN_FIELD_TYPES.NUMBER,
+        filterFieldTypes: OSD_FIELD_TYPES.NUMBER,
       },
       {
         /*
@@ -101,7 +101,7 @@ export const getHistogramBucketAgg = ({
          */
         name: 'intervalBase',
         default: null,
-        write: () => {},
+        write: () => { },
       },
       {
         name: 'interval',
@@ -158,7 +158,7 @@ export const getHistogramBucketAgg = ({
             maxBucketsUiSettings: getConfig(UI_SETTINGS.HISTOGRAM_MAX_BARS),
             maxBucketsUserInput: aggConfig.params.maxBars,
             intervalBase: aggConfig.params.intervalBase,
-            esTypes: aggConfig.params.field?.spec?.esTypes || [],
+            opensearchTypes: aggConfig.params.field?.spec?.opensearchTypes || [],
           });
         },
       },
@@ -167,7 +167,7 @@ export const getHistogramBucketAgg = ({
         shouldShow(agg) {
           return isAutoInterval(get(agg, 'params.interval'));
         },
-        write: () => {},
+        write: () => { },
       },
       {
         name: 'min_doc_count',
@@ -183,7 +183,7 @@ export const getHistogramBucketAgg = ({
       {
         name: 'has_extended_bounds',
         default: false,
-        write: () => {},
+        write: () => { },
       },
       {
         name: 'extended_bounds',

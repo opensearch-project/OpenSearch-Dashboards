@@ -35,7 +35,7 @@ describe('get_time', () => {
             {
               name: 'date',
               type: 'date',
-              esTypes: ['date'],
+              opensearchTypes: ['date'],
               aggregatable: true,
               searchable: true,
               filterable: true,
@@ -64,7 +64,7 @@ describe('get_time', () => {
             {
               name: 'date',
               type: 'date',
-              esTypes: ['date'],
+              opensearchTypes: ['date'],
               aggregatable: true,
               searchable: true,
               filterable: true,
@@ -72,7 +72,7 @@ describe('get_time', () => {
             {
               name: 'myCustomDate',
               type: 'date',
-              esTypes: ['date'],
+              opensearchTypes: ['date'],
               aggregatable: true,
               searchable: true,
               filterable: true,

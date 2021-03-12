@@ -18,10 +18,10 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
-import { ApplicationStart } from 'kibana/public';
-import { KbnError } from '../../../../kibana_utils/common';
+import { ApplicationStart } from 'opensearch-dashboards/public';
+import { OsdError } from '../../../../opensearch_dashboards_utils/common';
 
 export enum TimeoutErrorMode {
   UPGRADE,
@@ -33,7 +33,7 @@ export enum TimeoutErrorMode {
  * Request Failure - When an entire multi request fails
  * @param {Error} err - the Error that came back
  */
-export class SearchTimeoutError extends KbnError {
+export class SearchTimeoutError extends OsdError {
   public mode: TimeoutErrorMode;
   constructor(err: Error, mode: TimeoutErrorMode) {
     super(`Request timeout: ${JSON.stringify(err?.message)}`);
@@ -82,7 +82,7 @@ export class SearchTimeoutError extends KbnError {
         break;
       case TimeoutErrorMode.CHANGE:
         application.navigateToApp('management', {
-          path: `/kibana/settings`,
+          path: `/opensearch-dashboards/settings`,
         });
         break;
     }

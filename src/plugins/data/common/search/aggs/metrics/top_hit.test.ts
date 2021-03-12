@@ -22,7 +22,7 @@ import { getTopHitMetricAgg } from './top_hit';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig } from './metric_agg_type';
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { OSD_FIELD_TYPES } from '../../../../common';
 
 describe('Top hit metric', () => {
   let aggDsl: Record<string, any>;
@@ -33,7 +33,7 @@ describe('Top hit metric', () => {
     sortOrder = 'desc',
     aggregate = 'concat',
     readFromDocValues = false,
-    fieldType = KBN_FIELD_TYPES.NUMBER,
+    fieldType = OSD_FIELD_TYPES.NUMBER,
     size = 1,
   }: any) => {
     const typesRegistry = mockAggTypesRegistry();
@@ -115,7 +115,7 @@ describe('Top hit metric', () => {
   });
 
   it('requests both source and docvalues_fields for date aggregatable fields', () => {
-    init({ fieldName: '@timestamp', readFromDocValues: true, fieldType: KBN_FIELD_TYPES.DATE });
+    init({ fieldName: '@timestamp', readFromDocValues: true, fieldType: OSD_FIELD_TYPES.DATE });
 
     expect(aggDsl.top_hits._source).toBe('@timestamp');
     expect(aggDsl.top_hits.docvalue_fields).toEqual([{ field: '@timestamp', format: 'date_time' }]);

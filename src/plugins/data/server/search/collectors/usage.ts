@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup } from 'kibana/server';
+import { CoreSetup } from 'opensearch-dashboards/server';
 import { Usage } from './register';
 
 const SAVED_OBJECT_ID = 'search-telemetry';

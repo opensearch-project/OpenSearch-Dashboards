@@ -18,7 +18,7 @@
  */
 
 import { dedupFilters } from './dedup_filters';
-import { Filter, buildRangeFilter, buildQueryFilter, FilterStateStore } from '../../es_query';
+import { Filter, buildRangeFilter, buildQueryFilter, FilterStateStore } from '../../opensearch_query';
 import { IIndexPattern, IFieldType } from '../../index_patterns';
 
 describe('filter manager utilities', () => {

@@ -45,7 +45,7 @@ const getNestedAggDSL = (aggNestedDsl: Record<string, any>, startFromAggId: stri
 /**
  * returns buckets from response for a specific other bucket
  * @param aggConfigs: configuration for the aggregations
- * @param response: response from elasticsearch
+ * @param response: response from opensearch
  * @param aggWithOtherBucket: AggConfig of the aggregation with other bucket enabled
  * @param key: key from the other bucket request for a specific other bucket
  */

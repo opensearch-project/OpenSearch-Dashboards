@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { NumeralFormat } from './numeral';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { UI_SETTINGS } from '../../constants';

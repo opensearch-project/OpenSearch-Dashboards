@@ -18,7 +18,7 @@
  */
 
 import { constant, noop, identity } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { ISearchSource } from 'src/plugins/data/public';
 import { SerializedFieldFormat } from 'src/plugins/expressions/common';
@@ -33,7 +33,7 @@ import { AggParamType } from './param_types/agg';
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
   TParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>
-> {
+  > {
   name: string;
   title: string;
   createFilter?: (aggConfig: TAggConfig, key: any, params?: any) => any;
@@ -68,7 +68,7 @@ export type IAggType = AggType;
 export class AggType<
   TAggConfig extends AggConfig = AggConfig,
   TParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>
-> {
+  > {
   /**
    * the unique, unchanging, name that we have assigned this aggType
    *
@@ -80,7 +80,7 @@ export class AggType<
   type: string;
   subtype?: string;
   /**
-   * the name of the elasticsearch aggregation that this aggType represents. Usually just this.name
+   * the name of the opensearch aggregation that this aggType represents. Usually just this.name
    *
    * @property name
    * @type {string}
@@ -264,7 +264,7 @@ export class AggType<
     }
 
     this.getRequestAggs = config.getRequestAggs || noop;
-    this.getResponseAggs = config.getResponseAggs || (() => {});
+    this.getResponseAggs = config.getResponseAggs || (() => { });
     this.decorateAggConfig = config.decorateAggConfig || (() => ({}));
     this.postFlightRequest = config.postFlightRequest || identity;
 
@@ -276,6 +276,6 @@ export class AggType<
           : {};
       });
 
-    this.getValue = config.getValue || ((agg: TAggConfig, bucket: any) => {});
+    this.getValue = config.getValue || ((agg: TAggConfig, bucket: any) => { });
   }
 }

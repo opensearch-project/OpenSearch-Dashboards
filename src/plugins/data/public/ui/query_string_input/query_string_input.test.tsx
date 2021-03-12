@@ -24,7 +24,7 @@ import {
 } from './query_string_input.test.mocks';
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@osd/i18n/react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/dom';
 import { render } from '@testing-library/react';
@@ -38,7 +38,7 @@ import type QueryStringInputUI from './query_string_input';
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { stubIndexPatternWithFields } from '../../stubs';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 
 const startMock = coreMock.createStart();
 
@@ -88,9 +88,9 @@ function wrapQueryStringInputInContext(testProps: any, storage?: any) {
 
   return (
     <I18nProvider>
-      <KibanaContextProvider services={services}>
+      <OpenSearchDashboardsContextProvider services={services}>
         <QueryStringInput {...defaultOptions} {...testProps} />
-      </KibanaContextProvider>
+      </OpenSearchDashboardsContextProvider>
     </I18nProvider>
   );
 }
@@ -168,7 +168,7 @@ describe('QueryStringInput', () => {
     );
 
     component.find(QueryLanguageSwitcher).props().onSelectLanguage('lucene');
-    expect(mockStorage.set).toHaveBeenCalledWith('kibana.userQueryLanguage', 'lucene');
+    expect(mockStorage.set).toHaveBeenCalledWith('opensearchDashboards.userQueryLanguage', 'lucene');
     expect(mockCallback).toHaveBeenCalledWith({ query: '', language: 'lucene' });
   });
 

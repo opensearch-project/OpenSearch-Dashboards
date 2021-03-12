@@ -19,7 +19,7 @@
 
 import { last } from 'lodash';
 import moment from 'moment';
-import { esFilters, IFieldType, RangeFilterParams } from '../../../public';
+import { opensearchFilters, IFieldType, RangeFilterParams } from '../../../public';
 import { getIndexPatterns } from '../../../public/services';
 import { deserializeAggConfig } from '../../search/expressions/utils';
 import type { RangeSelectContext } from '../../../../embeddable/public';
@@ -60,5 +60,5 @@ export async function createFiltersFromRangeSelectAction(event: RangeSelectConte
     range.format = 'strict_date_optional_time';
   }
 
-  return esFilters.mapAndFlattenFilters([esFilters.buildRangeFilter(field, range, indexPattern)]);
+  return opensearchFilters.mapAndFlattenFilters([opensearchFilters.buildRangeFilter(field, range, indexPattern)]);
 }

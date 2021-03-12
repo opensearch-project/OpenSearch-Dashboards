@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FILTERS } from '../../../../../common/es_query/filters';
+import { i18n } from '@osd/i18n';
+import { FILTERS } from '../../../../../common/opensearch_query/filters';
 
 export interface Operator {
   message: string;

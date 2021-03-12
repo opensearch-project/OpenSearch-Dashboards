@@ -17,12 +17,12 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EuiButton, EuiTextAlign } from '@elastic/eui';
 
 import { SearchResponse } from 'elasticsearch';
 import { getOverlays } from '../../services';
-import { toMountPoint } from '../../../../kibana_react/public';
+import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
 import { ShardFailureModal } from './shard_failure_modal';
 import { ShardFailureRequest } from './shard_failure_types';
 

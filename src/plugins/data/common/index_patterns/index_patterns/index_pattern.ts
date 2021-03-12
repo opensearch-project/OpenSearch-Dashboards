@@ -19,11 +19,11 @@
 
 import _, { each, reject } from 'lodash';
 import { SavedObjectsClientCommon } from '../..';
-import { DuplicateField } from '../../../../kibana_utils/common';
+import { DuplicateField } from '../../../../opensearch_dashboards_utils/common';
 
 import {
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
+  OPENSEARCH_FIELD_TYPES,
+  OSD_FIELD_TYPES,
   IIndexPattern,
   FieldFormatNotFoundError,
   IFieldType,
@@ -96,7 +96,7 @@ export class IndexPattern implements IIndexPattern {
     this.flattenHit = flattenHitWrapper(this, metaFields);
     this.formatHit = formatHitProvider(
       this,
-      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
+      fieldFormats.getDefaultInstance(OSD_FIELD_TYPES.STRING)
     );
     this.formatField = this.formatHit.formatField;
 
@@ -177,7 +177,7 @@ export class IndexPattern implements IIndexPattern {
         return {
           field: dateField.name,
           format:
-            dateField.esTypes && dateField.esTypes.indexOf('date_nanos') !== -1
+            dateField.opensearchTypes && dateField.opensearchTypes.indexOf('date_nanos') !== -1
               ? 'strict_date_time'
               : 'date_time',
         };
@@ -301,7 +301,7 @@ export class IndexPattern implements IIndexPattern {
 
   isTimeNanosBased(): boolean {
     const timeField: any = this.getTimeField();
-    return timeField && timeField.esTypes && timeField.esTypes.indexOf('date_nanos') !== -1;
+    return timeField && timeField.opensearchTypes && timeField.opensearchTypes.indexOf('date_nanos') !== -1;
   }
 
   getTimeField() {
@@ -356,8 +356,8 @@ export class IndexPattern implements IIndexPattern {
     return (
       this.fieldFormatMap[field.name] ||
       this.fieldFormats.getDefaultInstance(
-        field.type as KBN_FIELD_TYPES,
-        field.esTypes as ES_FIELD_TYPES[]
+        field.type as OSD_FIELD_TYPES,
+        field.opensearchTypes as OPENSEARCH_FIELD_TYPES[]
       )
     );
   }

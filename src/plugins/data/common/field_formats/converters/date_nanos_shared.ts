@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { memoize, noop } from 'lodash';
 import moment, { Moment } from 'moment';
-import { FieldFormat, FIELD_FORMAT_IDS, KBN_FIELD_TYPES } from '../../';
+import { FieldFormat, FIELD_FORMAT_IDS, OSD_FIELD_TYPES } from '../../';
 import { TextContextTypeConvert } from '../types';
 
 /**
@@ -56,7 +56,7 @@ export function formatWithNanos(
   } else {
     // Beyond SSS the precise value of the raw datetime string is used
     const valFormatted = dateMomentObj.format(fracPatternObj.patternEscaped);
-    // Extract fractional value of ES formatted timestamp, zero pad if necessary:
+    // Extract fractional value of OpenSearch formatted timestamp, zero pad if necessary:
     // 2020-05-18T20:45:05.957Z -> 957000000
     // 2020-05-18T20:45:05.957000123Z -> 957000123
     // we do not need to take care of the year 10000 bug since max year of date_nanos is 2262
@@ -73,7 +73,7 @@ export class DateNanosFormat extends FieldFormat {
   static title = i18n.translate('data.fieldFormats.date_nanos.title', {
     defaultMessage: 'Date nanos',
   });
-  static fieldType = KBN_FIELD_TYPES.DATE;
+  static fieldType = OSD_FIELD_TYPES.DATE;
 
   protected memoizedConverter: Function = noop;
   protected memoizedPattern: string = '';
@@ -110,7 +110,7 @@ export class DateNanosFormat extends FieldFormat {
 
         if (typeof value !== 'string' && date.isValid()) {
           // fallback for max/min aggregation, where unixtime in ms is returned as a number
-          // aggregations in Elasticsearch generally just return ms
+          // aggregations in OpenSearch generally just return ms
           return date.format(fallbackPattern);
         } else if (date.isValid()) {
           return formatWithNanos(date, value, fractPattern);

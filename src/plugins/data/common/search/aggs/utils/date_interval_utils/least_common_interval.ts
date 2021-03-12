@@ -19,10 +19,10 @@
 
 import dateMath from '@elastic/datemath';
 import { leastCommonMultiple } from './least_common_multiple';
-import { parseEsInterval } from './parse_es_interval';
+import { parseOpenSearchInterval } from './parse_opensearch_interval';
 
 /**
- * Finds the lowest common interval between two given ES date histogram intervals
+ * Finds the lowest common interval between two given OpenSearch date histogram intervals
  * in the format of (value)(unit)
  *
  *  - `ms` units are fixed-length intervals
@@ -35,8 +35,8 @@ import { parseEsInterval } from './parse_es_interval';
  */
 export function leastCommonInterval(a: string, b: string): string {
   const { unitsMap, unitsDesc } = dateMath;
-  const aInt = parseEsInterval(a);
-  const bInt = parseEsInterval(b);
+  const aInt = parseOpenSearchInterval(a);
+  const bInt = parseOpenSearchInterval(b);
 
   if (a === b) {
     return a;

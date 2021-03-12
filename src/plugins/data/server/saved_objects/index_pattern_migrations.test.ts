@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectMigrationContext } from 'kibana/server';
+import { SavedObjectMigrationContext } from 'opensearch-dashboards/server';
 import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migrations';
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
@@ -79,7 +79,7 @@ Object {
         attributes: {
           title: 'test',
           fields:
-            '[{"name":"customer_name","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"customer_name.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":"multi","parent":"customer_name"}]',
+            '[{"name":"customer_name","type":"string","opensearchTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"customer_name.keyword","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":"multi","parent":"customer_name"}]',
         },
       };
       const expected = {
@@ -87,7 +87,7 @@ Object {
         attributes: {
           title: 'test',
           fields:
-            '[{"name":"customer_name","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"customer_name.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent":"customer_name"}}}]',
+            '[{"name":"customer_name","type":"string","opensearchTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"customer_name.keyword","type":"string","opensearchTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent":"customer_name"}}}]',
         },
       };
 

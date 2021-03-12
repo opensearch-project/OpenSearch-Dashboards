@@ -32,7 +32,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import React, { useCallback, useEffect, useState, Fragment, useRef } from 'react';
 import { sortBy } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
@@ -210,7 +210,7 @@ export function SavedQueryManagementComponent({
         repositionOnScroll
       >
         <div
-          className="kbnSavedQueryManagement__popover"
+          className="osdSavedQueryManagement__popover"
           data-test-subj="saved-query-management-popover"
         >
           <EuiPopoverTitle id={'savedQueryManagementPopoverTitle'}>
@@ -218,20 +218,20 @@ export function SavedQueryManagementComponent({
           </EuiPopoverTitle>
           {savedQueries.length > 0 ? (
             <Fragment>
-              <EuiText size="s" color="subdued" className="kbnSavedQueryManagement__text">
+              <EuiText size="s" color="subdued" className="osdSavedQueryManagement__text">
                 <p>{savedQueryDescriptionText}</p>
               </EuiText>
-              <div className="kbnSavedQueryManagement__listWrapper">
+              <div className="osdSavedQueryManagement__listWrapper">
                 <EuiListGroup
                   flush={true}
-                  className="kbnSavedQueryManagement__list"
+                  className="osdSavedQueryManagement__list"
                   aria-labelledby={'savedQueryManagementPopoverTitle'}
                 >
                   {savedQueryRows()}
                 </EuiListGroup>
               </div>
               <EuiPagination
-                className="kbnSavedQueryManagement__pagination"
+                className="osdSavedQueryManagement__pagination"
                 pageCount={Math.ceil(count / perPage)}
                 activePage={activePage}
                 onPageClick={goToPage}
@@ -239,7 +239,7 @@ export function SavedQueryManagementComponent({
             </Fragment>
           ) : (
             <Fragment>
-              <EuiText size="s" color="subdued" className="kbnSavedQueryManagement__text">
+              <EuiText size="s" color="subdued" className="osdSavedQueryManagement__text">
                 <p>{noSavedQueriesDescriptionText}</p>
               </EuiText>
               <EuiSpacer size="s" />

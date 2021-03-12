@@ -27,7 +27,7 @@ describe('String Format', () => {
       },
       jest.fn()
     );
-    expect(string.convert('Kibana')).toBe('kibana');
+    expect(string.convert('Dashboards')).toBe('dashboards');
   });
 
   test('convert a string to upper case', () => {
@@ -37,7 +37,7 @@ describe('String Format', () => {
       },
       jest.fn()
     );
-    expect(string.convert('Kibana')).toBe('KIBANA');
+    expect(string.convert('Dashboards')).toBe('DASHBOARDS');
   });
 
   test('decode a base64 string', () => {

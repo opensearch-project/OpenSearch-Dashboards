@@ -20,7 +20,7 @@
 import {
   fieldFormats,
   FieldFormatsGetConfigFn,
-  esFilters,
+  opensearchFilters,
   IndexPatternsContract,
 } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
@@ -78,7 +78,7 @@ describe('createFiltersFromValueClick', () => {
           filter: () => [mockField],
         },
         getFormatterForField: () =>
-          new fieldFormats.BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
+          new fieldFormats.BytesFormat({}, (() => { }) as FieldFormatsGetConfigFn),
       }),
     } as unknown) as IndexPatternsContract);
   });
@@ -107,7 +107,7 @@ describe('createFiltersFromValueClick', () => {
 
     const [rangeFilter] = filters;
 
-    if (esFilters.isRangeFilter(rangeFilter)) {
+    if (opensearchFilters.isRangeFilter(rangeFilter)) {
       expect(rangeFilter.range.bytes.gte).toEqual(2048);
       expect(rangeFilter.range.bytes.lt).toEqual(2078);
     }

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { Assign } from '@kbn/utility-types';
+import { i18n } from '@osd/i18n';
+import { Assign } from '@osd/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
@@ -132,7 +132,7 @@ export const aggTerms = (): FunctionDefinition => ({
     json: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.buckets.terms.json.help', {
-        defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
+        defaultMessage: 'Advanced json to include when the agg is sent to OpenSearch',
       }),
     },
     customLabel: {
