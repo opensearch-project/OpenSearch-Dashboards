@@ -1,7 +1,7 @@
 {
   "id": "mapsLegacy",
   "version": "8.0.0",
-  "opensearchDashboards": "opensearchDashboards",
+  "opensearchDashboardsVersion": "opensearchDashboards",
   "configPath": ["map"],
   "ui": true,
   "server": true,
