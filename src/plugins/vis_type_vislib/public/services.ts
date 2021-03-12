@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { createGetterSetter } from '../../kibana_utils/public';
+import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
 
 export const [getDataActions, setDataActions] = createGetterSetter<
   DataPublicPluginStart['actions']
@@ -29,6 +29,6 @@ export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
 >('vislib data.fieldFormats');
 
-export const [getKibanaLegacy, setKibanaLegacy] = createGetterSetter<KibanaLegacyStart>(
-  'vislib kibanalegacy'
+export const [getOpenSearchDashboardsLegacy, setOpenSearchDashboardsLegacy] = createGetterSetter<OpenSearchDashboardsLegacyStart>(
+  'vislib opensearchdashboardslegacy'
 );

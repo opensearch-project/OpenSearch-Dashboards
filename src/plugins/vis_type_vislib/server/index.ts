@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import { VisTypeVislibServerPlugin } from './plugin';
 export const config = {
   schema: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),

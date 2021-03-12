@@ -20,7 +20,7 @@ import React, { BaseSyntheticEvent, KeyboardEvent, PureComponent } from 'react';
 import classNames from 'classnames';
 import { compact, uniqBy, map, every, isUndefined } from 'lodash';
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
 
 import { getDataActions } from '../../../services';
@@ -253,7 +253,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
         <button
           type="button"
           onClick={this.toggleLegend}
-          className={classNames('visLegend__toggle kbn-resetFocusState', {
+          className={classNames('visLegend__toggle osd-resetFocusState', {
             // eslint-disable-next-line @typescript-eslint/naming-convention
             'visLegend__toggle--isOpen': open,
           })}
