@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@osd/utils';
 import getopts from 'getopts';
 import globby from 'globby';
 

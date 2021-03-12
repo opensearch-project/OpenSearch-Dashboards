@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError } from '@osd/dev-utils';
 import {
   I18nConfig,
   matchEntriesWithExctractors,
@@ -46,9 +46,9 @@ export async function extractUntrackedMessagesTask({
   const ignore = availablePaths.concat([
     '**/build/**',
     '**/__fixtures__/**',
-    '**/packages/kbn-i18n/**',
-    '**/packages/kbn-plugin-generator/template/**',
-    '**/packages/kbn-ui-framework/generator-kui/**',
+    '**/packages/osd-i18n/**',
+    '**/packages/osd-plugin-generator/template/**',
+    '**/packages/osd-ui-framework/generator-kui/**',
     '**/target/**',
     '**/test/**',
     '**/scripts/**',

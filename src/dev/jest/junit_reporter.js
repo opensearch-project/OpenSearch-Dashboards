@@ -23,7 +23,7 @@ import { writeFileSync, mkdirSync } from 'fs';
 import xmlBuilder from 'xmlbuilder';
 
 import { escapeCdata } from '../xml';
-import { getUniqueJunitReportPath } from '@kbn/test';
+import { getUniqueJunitReportPath } from '@osd/test';
 
 const ROOT_DIR = dirname(require.resolve('../../../package.json'));
 

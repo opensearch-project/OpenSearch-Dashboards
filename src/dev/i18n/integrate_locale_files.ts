@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
-import { i18n } from '@kbn/i18n';
+import { ToolingLog } from '@osd/dev-utils';
+import { i18n } from '@osd/i18n';
 import path from 'path';
 
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError } from '@osd/dev-utils';
 import {
   accessAsync,
   checkValuesProperty,

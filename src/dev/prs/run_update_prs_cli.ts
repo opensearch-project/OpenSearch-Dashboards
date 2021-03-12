@@ -25,7 +25,7 @@ import chalk from 'chalk';
 import { first, tap } from 'rxjs/operators';
 import dedent from 'dedent';
 
-import { run, createFlagError } from '@kbn/dev-utils';
+import { run, createFlagError } from '@osd/dev-utils';
 import { getLine$ } from './helpers';
 import { Pr } from './pr';
 import { GithubApi } from './github_api';
@@ -110,7 +110,7 @@ run(
       await execInDir('git', ['checkout', pr.sourceBranch]);
 
       try {
-        log.info('Pulling in changes from elastic:%s', pr.targetRef);
+        log.info('Pulling in changes from opensearch:%s', pr.targetRef);
         await execInDir('git', ['pull', 'upstream', pr.targetRef, '--no-edit']);
       } catch (error) {
         if (!error.stdout.includes('Automatic merge failed;')) {

@@ -22,7 +22,7 @@ import path from 'path';
 import { extractHtmlMessages, extractCodeMessages } from './extractors';
 import { globAsync, readFileAsync, normalizePath } from './utils';
 
-import { createFailError, isFailError } from '@kbn/dev-utils';
+import { createFailError, isFailError } from '@osd/dev-utils';
 
 function addMessageToMap(targetMap, key, value, reporter) {
   const existingValue = targetMap.get(key);

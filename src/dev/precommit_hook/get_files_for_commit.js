@@ -20,7 +20,7 @@
 import SimpleGit from 'simple-git';
 import { fromNode as fcb } from 'bluebird';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@osd/utils';
 import { File } from '../file';
 
 /**

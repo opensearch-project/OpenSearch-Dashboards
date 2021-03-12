@@ -9,7 +9,7 @@ fi
 installNode=$1
 
 dir="$(pwd)"
-cacheDir="$HOME/.kibana"
+cacheDir="$HOME/.opensearch-dashboards"
 
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
@@ -25,24 +25,24 @@ export NODE_OPTIONS="$NODE_OPTIONS --max-old-space-size=4096"
 export FORCE_COLOR=1
 
 ###
-### check that we seem to be in a kibana project
+### check that we seem to be in a OpenSearch Dashboards project
 ###
 if [ -f "$dir/package.json" ] && [ -f "$dir/.node-version" ]; then
   echo "Setting up node.js and yarn in $dir"
 else
-  echo "${RED}src/dev/ci_setup/setup.sh must be run within a kibana repo${C_RESET}"
+  echo "${RED}src/dev/ci_setup/setup.sh must be run within a opensearch-dashboards repo${C_RESET}"
   exit 1
 fi
 
 
-export KIBANA_DIR="$dir"
-export XPACK_DIR="$KIBANA_DIR/x-pack"
+export OPENSEARCH_DASHBOARDS_DIR="$dir"
+export XPACK_DIR="$OPENSEARCH_DASHBOARDS_DIR/x-pack"
 
-parentDir="$(cd "$KIBANA_DIR/.."; pwd)"
+parentDir="$(cd "$OPENSEARCH_DASHBOARDS_DIR/.."; pwd)"
 export PARENT_DIR="$parentDir"
 
-kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
-export KIBANA_PKG_BRANCH="$kbnBranch"
+osdBranch="$(jq -r .branch "$OPENSEARCH_DASHBOARDS_DIR/package.json")"
+export OPENSEARCH_DASHBOARDS_PKG_BRANCH="$osdBranch"
 
 export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
 
@@ -153,22 +153,22 @@ function checks-reporter-with-killswitch() {
 
 export -f checks-reporter-with-killswitch
 
-source "$KIBANA_DIR/src/dev/ci_setup/load_env_keys.sh"
+source "$OPENSEARCH_DASHBOARDS_DIR/src/dev/ci_setup/load_env_keys.sh"
 
-ES_DIR="$WORKSPACE/elasticsearch"
-ES_JAVA_PROP_PATH=$ES_DIR/.ci/java-versions.properties
+OPENSEARCH_DIR="$WORKSPACE/opensearch"
+OPENSEARCH_JAVA_PROP_PATH=$OPENSEARCH_DIR/.ci/java-versions.properties
 
-if [[ -d "$ES_DIR" && -f "$ES_JAVA_PROP_PATH" ]]; then
-  ES_BUILD_JAVA="$(grep "^ES_BUILD_JAVA" "$ES_JAVA_PROP_PATH" | cut -d'=' -f2 | tr -d '[:space:]')"
-  export ES_BUILD_JAVA
+if [[ -d "$OPENSEARCH_DIR" && -f "$OPENSEARCH_JAVA_PROP_PATH" ]]; then
+  OPENSEARCH_BUILD_JAVA="$(grep "^OPENSEARCH_BUILD_JAVA" "$OPENSEARCH_JAVA_PROP_PATH" | cut -d'=' -f2 | tr -d '[:space:]')"
+  export OPENSEARCH_BUILD_JAVA
 
-  if [ -z "$ES_BUILD_JAVA" ]; then
-    echo "Unable to set JAVA_HOME, ES_BUILD_JAVA not present in $ES_JAVA_PROP_PATH"
+  if [ -z "$OPENSEARCH_BUILD_JAVA" ]; then
+    echo "Unable to set JAVA_HOME, OPENSEARCH_BUILD_JAVA not present in $OPENSEARCH_JAVA_PROP_PATH"
     exit 1
   fi
 
-  echo "Setting JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA"
-  export JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA
+  echo "Setting JAVA_HOME=$HOME/.java/$OPENSEARCH_BUILD_JAVA"
+  export JAVA_HOME=$HOME/.java/$OPENSEARCH_BUILD_JAVA
 fi
 
 export CI_ENV_SETUP=true

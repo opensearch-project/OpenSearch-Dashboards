@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@osd/dev-utils';
 import chalk from 'chalk';
 import dedent from 'dedent';
 import getopts from 'getopts';
@@ -67,7 +67,7 @@ export async function runTypeCheckCli() {
           {dim $} node scripts/type_check
 
           {dim # check types in a single project}
-          {dim $} node scripts/type_check --project packages/kbn-pm/tsconfig.json
+          {dim $} node scripts/type_check --project packages/osd-pm/tsconfig.json
 
         Options:
 

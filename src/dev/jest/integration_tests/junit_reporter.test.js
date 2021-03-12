@@ -24,7 +24,7 @@ import { readFileSync } from 'fs';
 import del from 'del';
 import execa from 'execa';
 import xml2js from 'xml2js';
-import { getUniqueJunitReportPath } from '@kbn/test';
+import { getUniqueJunitReportPath } from '@osd/test';
 
 const MINUTE = 1000 * 60;
 const ROOT_DIR = resolve(__dirname, '../../../../');
