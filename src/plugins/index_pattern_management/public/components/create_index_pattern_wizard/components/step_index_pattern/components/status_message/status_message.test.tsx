@@ -58,7 +58,7 @@ describe('StatusMessage', () => {
     const component = shallow(
       <StatusMessage
         matchedIndices={localMatchedIndices}
-        query={'k*'}
+        query={'o*'}
         isIncludingSystemIndices={false}
         showSystemIndices={false}
       />
@@ -71,7 +71,7 @@ describe('StatusMessage', () => {
     const component = shallow(
       <StatusMessage
         matchedIndices={matchedIndices}
-        query={'k'}
+        query={'o'}
         isIncludingSystemIndices={false}
         showSystemIndices={false}
       />
@@ -89,7 +89,7 @@ describe('StatusMessage', () => {
     const component = shallow(
       <StatusMessage
         matchedIndices={localMatchedIndices}
-        query={'k'}
+        query={'o'}
         isIncludingSystemIndices={false}
         showSystemIndices={false}
       />

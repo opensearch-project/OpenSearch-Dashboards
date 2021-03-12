@@ -37,7 +37,7 @@ const mockIndexPatternCreationType = new IndexPatternCreationConfig({
 
 jest.mock('../../lib/get_indices', () => ({
   getIndices: ({ pattern }: { pattern: string }) => {
-    if (pattern.startsWith('e')) {
+    if (pattern.startsWith('o')) {
       return [{ name: 'opensearch', item: {} }];
     }
 
@@ -132,7 +132,7 @@ describe('StepIndexPattern', () => {
       mockContext
     );
     const instance = component.instance() as StepIndexPattern;
-    instance.onQueryChanged({ target: { value: 'k' } } as React.ChangeEvent<HTMLInputElement>);
+    instance.onQueryChanged({ target: { value: 'o' } } as React.ChangeEvent<HTMLInputElement>);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -156,8 +156,8 @@ describe('StepIndexPattern', () => {
       mockContext
     );
     const instance = component.instance() as StepIndexPattern;
-    instance.onQueryChanged({ target: { value: 'k' } } as React.ChangeEvent<HTMLInputElement>);
-    expect(component.state('query')).toBe('k*');
+    instance.onQueryChanged({ target: { value: 'o' } } as React.ChangeEvent<HTMLInputElement>);
+    expect(component.state('query')).toBe('o*');
   });
 
   it('disables the next step if the index pattern exists', async () => {
@@ -187,8 +187,8 @@ describe('StepIndexPattern', () => {
       mockContext
     );
     const instance = component.instance() as StepIndexPattern;
-    instance.onQueryChanged({ target: { value: 'e' } } as React.ChangeEvent<HTMLInputElement>);
-    instance.lastQuery = 'k';
+    instance.onQueryChanged({ target: { value: 'o' } } as React.ChangeEvent<HTMLInputElement>);
+    instance.lastQuery = 'o';
     await new Promise((resolve) => process.nextTick(resolve));
 
     // Honesty, the state would match the result of the `k` query but
@@ -201,7 +201,7 @@ describe('StepIndexPattern', () => {
 
     // Provide `opensearch` so we do not auto append * and enter our other code flow
     instance.onQueryChanged({ target: { value: 'opensearch' } } as React.ChangeEvent<HTMLInputElement>);
-    instance.lastQuery = 'k';
+    instance.lastQuery = 'o';
     await new Promise((resolve) => process.nextTick(resolve));
     expect(component.state('exactMatchedIndices')).toEqual([]);
   });
