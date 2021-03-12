@@ -18,20 +18,20 @@
  */
 
 import { functionWrapper } from './utils';
-import { kibana } from '../kibana';
+import { opensearchDashboards } from '../opensearch_dashboards';
 import { ExecutionContext } from '../../../execution/types';
-import { KibanaContext, ExpressionValueSearchContext } from '../../../expression_types';
+import { OpenSearchDashboardsContext, ExpressionValueSearchContext } from '../../../expression_types';
 
-describe('interpreter/functions#kibana', () => {
-  const fn = functionWrapper(kibana);
-  let input: Partial<KibanaContext>;
+describe('interpreter/functions#opensearch-dashboards', () => {
+  const fn = functionWrapper(opensearchDashboards);
+  let input: Partial<OpenSearchDashboardsContext>;
   let search: ExpressionValueSearchContext;
   let context: ExecutionContext;
 
   beforeEach(() => {
     input = { timeRange: { from: '0', to: '1' } };
     search = {
-      type: 'kibana_context',
+      type: 'opensearch_dashboards_context',
       query: { language: 'lucene', query: 'geo.src:US' },
       filters: [
         {

@@ -21,7 +21,7 @@ import { keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { Executor, ExpressionExecOptions } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
-import { Defer, now } from '../../../kibana_utils/common';
+import { Defer, now } from '../../../opensearch_dashboards_utils/common';
 import { toPromise } from '../../../data/common/utils/abort_utils';
 import { RequestAdapter, DataAdapter, Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
@@ -47,7 +47,7 @@ const createAbortErrorValue = () =>
 
 export interface ExecutionParams<
   ExtraContext extends Record<string, unknown> = Record<string, unknown>
-> {
+  > {
   executor: Executor<any>;
   ast?: ExpressionAstExpression;
   expression?: string;
@@ -71,9 +71,9 @@ export class Execution<
   Input = unknown,
   Output = unknown,
   InspectorAdapters extends Adapters = ExtraContext['inspectorAdapters'] extends object
-    ? ExtraContext['inspectorAdapters']
-    : DefaultInspectorAdapters
-> {
+  ? ExtraContext['inspectorAdapters']
+  : DefaultInspectorAdapters
+  > {
   /**
    * Dynamic state of the execution.
    */
@@ -284,7 +284,7 @@ export class Execution<
     if (expectedType && returnType !== expectedType) {
       throw new Error(
         `Function '${fn.name}' should return '${expectedType}',` +
-          ` actually returned '${returnType}'`
+        ` actually returned '${returnType}'`
       );
     }
 

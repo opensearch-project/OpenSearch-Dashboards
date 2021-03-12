@@ -58,7 +58,7 @@ export interface ExecutionContext<Input = unknown, InspectorAdapters extends Ada
   search?: ExecutionContextSearch;
 
   /**
-   * Allows to fetch saved objects from ElasticSearch. In browser `getSavedObject`
+   * Allows to fetch saved objects from OpenSearch. In browser `getSavedObject`
    * function is provided automatically by the Expressions plugin. On the server
    * the caller of the expression has to provide this context function. The
    * reason is because on the browser we always know the user who tries to
