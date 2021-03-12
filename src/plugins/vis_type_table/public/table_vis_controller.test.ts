@@ -38,7 +38,7 @@ const { createAggConfigs } = searchServiceMock.createStartContract().aggs;
 
 const { tabifyAggResponse } = search;
 
-jest.mock('../../kibana_legacy/public/angular/angular_config', () => ({
+jest.mock('../../opensearch_dashboards_legacy/public/angular/angular_config', () => ({
   configureAppAngularModule: () => {},
 }));
 
@@ -85,7 +85,7 @@ describe('Table Vis - Controller', () => {
 
   const initLocalAngular = () => {
     const tableVisModule = getAngularModule(
-      'kibana/table_vis',
+      'opensearch-dashboards/table_vis',
       coreMock.createStart(),
       coreMock.createPluginInitializerContext()
     );
@@ -93,7 +93,7 @@ describe('Table Vis - Controller', () => {
   };
 
   beforeEach(initLocalAngular);
-  beforeEach(angular.mock.module('kibana/table_vis'));
+  beforeEach(angular.mock.module('opensearch-dashboards/table_vis'));
 
   beforeEach(
     angular.mock.inject((_$rootScope_: IRootScopeService, _$compile_: ICompileService) => {
@@ -173,7 +173,7 @@ describe('Table Vis - Controller', () => {
     };
 
     $el = $('<div>')
-      .attr('ng-controller', 'KbnTableVisController')
+      .attr('ng-controller', 'OsdTableVisController')
       .attr('ng-init', 'newScope(this)');
 
     $compile($el)($rootScope);
@@ -181,13 +181,13 @@ describe('Table Vis - Controller', () => {
 
   // put a response into the controller
   function attachEsResponseToScope(resp: object) {
-    $rootScope.esResponse = resp;
+    $rootScope.opensearchResponse = resp;
     $rootScope.$apply();
   }
 
   // remove the response from the controller
   function removeEsResponseFromScope() {
-    delete $rootScope.esResponse;
+    delete $rootScope.opensearchResponse;
     $rootScope.renderComplete = () => {};
     $rootScope.$apply();
   }

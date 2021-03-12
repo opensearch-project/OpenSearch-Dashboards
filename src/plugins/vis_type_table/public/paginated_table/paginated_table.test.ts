@@ -27,7 +27,7 @@ import { getAngularModule } from '../get_inner_angular';
 import { initTableVisLegacyModule } from '../table_vis_legacy_module';
 import { coreMock } from '../../../../core/public/mocks';
 
-jest.mock('../../../kibana_legacy/public/angular/angular_config', () => ({
+jest.mock('../../../opensearch_dashboards_legacy/public/angular/angular_config', () => ({
   configureAppAngularModule: () => {},
 }));
 
@@ -73,7 +73,7 @@ describe('Table Vis - Paginated table', () => {
 
   const initLocalAngular = () => {
     const tableVisModule = getAngularModule(
-      'kibana/table_vis',
+      'opensearch-dashboards/table_vis',
       coreMock.createStart(),
       coreMock.createPluginInitializerContext()
     );
@@ -81,7 +81,7 @@ describe('Table Vis - Paginated table', () => {
   };
 
   beforeEach(initLocalAngular);
-  beforeEach(angular.mock.module('kibana/table_vis'));
+  beforeEach(angular.mock.module('opensearch-dashboards/table_vis'));
 
   beforeEach(
     angular.mock.inject((_$rootScope_: IRootScopeService, _$compile_: ICompileService) => {
