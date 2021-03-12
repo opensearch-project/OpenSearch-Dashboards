@@ -27,7 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     services: httpConfig.get('services'),
     servers: httpConfig.get('servers'),
     junit: {
-      reportName: 'OpenSearch DashboardsPlatform Http Integration Tests',
+      reportName: 'OpenSearch Dashboards Platform Http Integration Tests',
     },
     opensearchTestCluster: httpConfig.get('opensearchTestCluster'),
     osdTestServer: httpConfig.get('osdTestServer'),

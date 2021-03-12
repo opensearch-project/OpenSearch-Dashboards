@@ -66,8 +66,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
     });
 
-    describe('kibana link redirect', () => {
-      it('redirects from old kibana app URL', async () => {
+    describe('opensearch-dashboards link redirect', () => {
+      it('redirects from old opensearch-dashboards app URL', async () => {
         const url = `${opensearchDashboardsLegacyBaseUrl}#/dashboard/${testDashboardId}`;
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
