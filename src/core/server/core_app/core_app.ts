@@ -75,8 +75,8 @@ export class CoreApp {
     coreSetup.http.registerStaticDir('/ui/{path*}', Path.resolve(__dirname, './assets'));
 
     coreSetup.http.registerStaticDir(
-      '/node_modules/@kbn/ui-framework/dist/{path*}',
-      fromRoot('node_modules/@kbn/ui-framework/dist')
+      '/node_modules/@osd/ui-framework/dist/{path*}',
+      fromRoot('node_modules/@osd/ui-framework/dist')
     );
   }
 }

@@ -32,7 +32,7 @@ const configPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
 const dataPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(process.env, 'DATA_PATH')) {
     log(
-      `Environment variable "DATA_PATH" will be removed.  It has been replaced with kibana.yml setting "path.data"`
+      `Environment variable "DATA_PATH" will be removed.  It has been replaced with opensearch_dashboards.yml setting "path.data"`
     );
   }
   return settings;
@@ -51,7 +51,7 @@ const xsrfDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
 const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(settings, 'server.basePath') && !has(settings, 'server.rewriteBasePath')) {
     log(
-      'You should set server.basePath along with server.rewriteBasePath. Starting in 7.0, Kibana ' +
+      'You should set server.basePath along with server.rewriteBasePath. Starting in 7.0, OpenSearch Dashboards ' +
         'will expect that all requests start with server.basePath rather than expecting you to rewrite ' +
         'the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the ' +
         'current behavior and silence this warning.'
@@ -104,7 +104,7 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
 const mapManifestServiceUrlDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(settings, 'map.manifestServiceUrl')) {
     log(
-      'You should no longer use the map.manifestServiceUrl setting in kibana.yml to configure the location ' +
+      'You should no longer use the map.manifestServiceUrl setting in opensearch_dashboards.yml to configure the location ' +
         'of the Elastic Maps Service settings. These settings have moved to the "map.emsTileApiUrl" and ' +
         '"map.emsFileApiUrl" settings instead. These settings are for development use only and should not be ' +
         'modified for use in production environments.'
@@ -148,8 +148,8 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot('xpack.telemetry.url', 'telemetry.url'),
   renameFromRoot('cpu.cgroup.path.override', 'ops.cGroupOverrides.cpuPath'),
   renameFromRoot('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
-  unusedFromRoot('elasticsearch.preserveHost'),
-  unusedFromRoot('elasticsearch.startupTimeout'),
+  unusedFromRoot('opensearch.preserveHost'),
+  unusedFromRoot('opensearch.startupTimeout'),
   configPathDeprecation,
   dataPathDeprecation,
   rewriteBasePathDeprecation,

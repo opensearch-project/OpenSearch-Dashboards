@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { TypeOf, schema } from '@osd/config-schema';
 
 export const config = {
   path: 'pid',

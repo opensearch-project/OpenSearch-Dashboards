@@ -22,9 +22,9 @@ import { isEqual } from 'lodash';
 /**
  * Test whether a given config value is configured based on it's schema type.
  * Our configuration schema and code often accept and ignore empty values like
- * `elasticsearch.customHeaders: {}`. However, for telemetry purposes, we're
+ * `opensearch.customHeaders: {}`. However, for telemetry purposes, we're
  * only interested when these values have been set to something that will
- * change the behaviour of Kibana.
+ * change the behaviour of OpenSearch Dashboards.
  */
 export const isConfigured = {
   /**
@@ -59,7 +59,7 @@ export const isConfigured = {
    * config is a number
    */
   number: (config?: number): boolean => {
-    // kbn-config-schema already does NaN validation, but doesn't hurt to be sure
+    // osd-config-schema already does NaN validation, but doesn't hurt to be sure
     return typeof config === 'number' && !isNaN(config);
   },
 };

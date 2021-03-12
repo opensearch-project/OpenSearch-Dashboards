@@ -68,7 +68,7 @@ describe('core deprecations', () => {
       const { messages } = applyCoreDeprecations();
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "Environment variable \\"DATA_PATH\\" will be removed.  It has been replaced with kibana.yml setting \\"path.data\\"",
+          "Environment variable \\"DATA_PATH\\" will be removed.  It has been replaced with opensearch_dashboards.yml setting \\"path.data\\"",
         ]
       `);
     });
@@ -102,7 +102,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "You should set server.basePath along with server.rewriteBasePath. Starting in 7.0, Kibana will expect that all requests start with server.basePath rather than expecting you to rewrite the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the current behavior and silence this warning.",
+          "You should set server.basePath along with server.rewriteBasePath. Starting in 7.0, OpenSearch Dashboards will expect that all requests start with server.basePath rather than expecting you to rewrite the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the current behavior and silence this warning.",
         ]
       `);
     });

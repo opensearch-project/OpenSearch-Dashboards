@@ -18,7 +18,7 @@
  */
 
 import supertest from 'supertest';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@osd/dev-utils';
 import { HttpService, InternalHttpServiceSetup } from '../../http';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
