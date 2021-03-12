@@ -18,12 +18,12 @@
  */
 
 import { sortBy } from 'lodash';
-import { HttpStart } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
+import { HttpStart } from 'opensearch-dashboards/public';
+import { i18n } from '@osd/i18n';
 import { map, scan } from 'rxjs/operators';
 import { IndexPatternCreationConfig } from '../../../../../index_pattern_management/public';
 import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
-import { DataPublicPluginStart, IEsSearchResponse } from '../../../../../data/public';
+import { DataPublicPluginStart, IOpenSearchSearchResponse } from '../../../../../data/public';
 import { MAX_SEARCH_SIZE } from '../constants';
 
 const aliasLabel = i18n.translate('indexPatternManagement.aliasLabel', { defaultMessage: 'Alias' });
@@ -42,7 +42,7 @@ const frozenLabel = i18n.translate('indexPatternManagement.frozenLabel', {
 export const searchResponseToArray = (
   getIndexTags: IndexPatternCreationConfig['getIndexTags'],
   showAllIndices: boolean
-) => (response: IEsSearchResponse<any>) => {
+) => (response: IOpenSearchSearchResponse<any>) => {
   const { rawResponse } = response;
   if (!rawResponse.aggregations) {
     return [];
@@ -181,7 +181,7 @@ export async function getIndices({
     return [];
   }
 
-  // ES does not like just a `,*` and will throw a `[string_index_out_of_bounds_exception] String index out of range: 0`
+  // OPENSEARCH does not like just a `,*` and will throw a `[string_index_out_of_bounds_exception] String index out of range: 0`
   if (pattern.startsWith(',')) {
     return [];
   }

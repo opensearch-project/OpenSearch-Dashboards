@@ -43,8 +43,8 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import {
   getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
@@ -55,11 +55,11 @@ import {
   FieldFormatInstanceType,
   IndexPattern,
   IFieldType,
-  KBN_FIELD_TYPES,
-  ES_FIELD_TYPES,
+  OSD_FIELD_TYPES,
+  OPENSEARCH_FIELD_TYPES,
   DataPublicPluginStart,
 } from '../../../../../plugins/data/public';
-import { context as contextType } from '../../../../kibana_react/public';
+import { context as contextType } from '../../../../opensearch_dashboards_react/public';
 import {
   ScriptingDisabledCallOut,
   ScriptingWarningCallOut,
@@ -81,7 +81,7 @@ const getFieldTypeFormatsList = (
   fieldFormats: DataPublicPluginStart['fieldFormats']
 ) => {
   const formatsByType = fieldFormats
-    .getByFieldType(field.type as KBN_FIELD_TYPES)
+    .getByFieldType(field.type as OSD_FIELD_TYPES)
     .map(({ id, title }) => ({
       id,
       title,
@@ -192,8 +192,8 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     spec.type = fieldTypes.includes(spec.type) ? spec.type : fieldTypes[0];
 
     const DefaultFieldFormat = data.fieldFormats.getDefaultType(
-      spec.type as KBN_FIELD_TYPES,
-      spec.esTypes as ES_FIELD_TYPES[]
+      spec.type as OSD_FIELD_TYPES,
+      spec.opensearchTypes as OPENSEARCH_FIELD_TYPES[]
     );
 
     this.setState({
@@ -219,7 +219,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     this.forceUpdate();
   };
 
-  onTypeChange = (type: KBN_FIELD_TYPES) => {
+  onTypeChange = (type: OSD_FIELD_TYPES) => {
     const { uiSettings, data } = this.context.services;
     const { spec, format } = this.state;
     const DefaultFieldFormat = data.fieldFormats.getDefaultType(type) as FieldFormatInstanceType;
@@ -357,7 +357,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
               &nbsp;
               <FormattedMessage
                 id="indexPatternManagement.warningLabel.warningDetail"
-                defaultMessage="{language} is deprecated and support will be removed in the next major version of Kibana and Elasticsearch.
+                defaultMessage="{language} is deprecated and support will be removed in the next major version of OpenSearch Dashboards and OpenSearch.
               We recommend using {painlessLink} for new scripted fields."
                 values={{
                   language: <EuiCode>{spec.lang}</EuiCode>,
@@ -407,7 +407,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           })}
           data-test-subj="editorFieldType"
           onChange={(e) => {
-            this.onTypeChange(e.target.value as KBN_FIELD_TYPES);
+            this.onTypeChange(e.target.value as OSD_FIELD_TYPES);
           }}
         />
       </EuiFormRow>
@@ -533,7 +533,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         label={i18n.translate('indexPatternManagement.popularityLabel', {
           defaultMessage: 'Popularity',
           description:
-            '"Popularity" refers to Kibana\'s measurement how popular a field is (i.e. how commonly it is used).',
+            '"Popularity" refers to OpenSearch Dashboards\'s measurement how popular a field is (i.e. how commonly it is used).',
         })}
       >
         <EuiFieldNumber

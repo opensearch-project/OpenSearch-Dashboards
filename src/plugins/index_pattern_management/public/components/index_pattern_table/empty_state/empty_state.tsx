@@ -19,9 +19,9 @@
 
 import './empty_state.scss';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { DocLinksStart, ApplicationStart } from 'kibana/public';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import { DocLinksStart, ApplicationStart } from 'opensearch-dashboards/public';
 import {
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
@@ -38,7 +38,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { reactRouterNavigate } from '../../../../../../plugins/kibana_react/public';
+import { reactRouterNavigate } from '../../../../../../plugins/opensearch_dashboards_react/public';
 import { MlCardState } from '../../../types';
 
 export const EmptyState = ({
@@ -126,7 +126,7 @@ export const EmptyState = ({
               <h2>
                 <FormattedMessage
                   id="indexPatternManagement.createIndexPattern.emptyState.noDataTitle"
-                  defaultMessage="Ready to try Kibana? First, you need data."
+                  defaultMessage="Ready to try OpenSearch Dashboards? First, you need data."
                 />
               </h2>
             </EuiTitle>
@@ -169,7 +169,7 @@ export const EmptyState = ({
                 description={
                   <FormattedMessage
                     id="indexPatternManagement.createIndexPattern.emptyState.sampleDataCardDescription"
-                    defaultMessage="Load a data set and a Kibana dashboard."
+                    defaultMessage="Load a data set and a OpenSearch Dashboards dashboard."
                   />
                 }
               />

@@ -21,10 +21,10 @@ import React from 'react';
 
 import { EuiBetaBadge, EuiSpacer, EuiTitle, EuiText, EuiCode, EuiLink } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { DocLinksStart } from 'kibana/public';
-import { useKibana } from '../../../../../../../plugins/kibana_react/public';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import { DocLinksStart } from 'opensearch-dashboards/public';
+import { useOpenSearchDashboards } from '../../../../../../../plugins/opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../../../types';
 
 export const Header = ({
@@ -38,7 +38,7 @@ export const Header = ({
   isBeta?: boolean;
   docLinks: DocLinksStart;
 }) => {
-  const changeTitle = useKibana<IndexPatternManagmentContext>().services.chrome.docTitle.change;
+  const changeTitle = useOpenSearchDashboards<IndexPatternManagmentContext>().services.chrome.docTitle.change;
   const createIndexPatternHeader = i18n.translate(
     'indexPatternManagement.createIndexPatternHeader',
     {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { MatchedItem } from '../../components/create_index_pattern_wizard/types';
 
 const indexPatternTypeName = i18n.translate(

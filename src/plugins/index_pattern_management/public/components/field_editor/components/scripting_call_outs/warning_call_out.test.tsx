@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { mockManagementPlugin } from '../../../../mocks';
 import { ScriptingWarningCallOut } from './warning_call_out';
 
@@ -28,7 +28,7 @@ describe('ScriptingWarningCallOut', () => {
 
   it('should render normally', async () => {
     const component = mount(<ScriptingWarningCallOut isVisible={true} />, {
-      wrappingComponent: KibanaContextProvider,
+      wrappingComponent: OpenSearchDashboardsContextProvider,
       wrappingComponentProps: {
         services: mockedContext,
       },
@@ -39,7 +39,7 @@ describe('ScriptingWarningCallOut', () => {
 
   it('should render nothing if not visible', async () => {
     const component = mount(<ScriptingWarningCallOut isVisible={false} />, {
-      wrappingComponent: KibanaContextProvider,
+      wrappingComponent: OpenSearchDashboardsContextProvider,
       wrappingComponentProps: {
         services: mockedContext,
       },

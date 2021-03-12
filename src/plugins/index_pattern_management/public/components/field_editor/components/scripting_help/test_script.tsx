@@ -32,11 +32,11 @@ import {
   EuiCallOut,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 
-import { esQuery, IndexPattern, Query } from '../../../../../../../plugins/data/public';
-import { context as contextType } from '../../../../../../kibana_react/public';
+import { opensearchQuery, IndexPattern, Query } from '../../../../../../../plugins/data/public';
+import { context as contextType } from '../../../../../../opensearch_dashboards_react/public';
 import { IndexPatternManagmentContextValue } from '../../../../types';
 import { ExecuteScript } from '../../types';
 
@@ -93,12 +93,12 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
 
     let query;
     if (searchContext) {
-      const esQueryConfigs = esQuery.getEsQueryConfig(this.context.services.uiSettings);
-      query = esQuery.buildEsQuery(
+      const opensearchQueryConfigs = opensearchQuery.getOpenSearchQueryConfig(this.context.services.uiSettings);
+      query = opensearchQuery.buildOpenSearchQuery(
         this.props.indexPattern,
         searchContext.query || [],
         [],
-        esQueryConfigs
+        opensearchQueryConfigs
       );
     }
 

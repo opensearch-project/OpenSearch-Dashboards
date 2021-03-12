@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
@@ -50,36 +50,36 @@ const IPM_APP_ID = 'indexPatterns';
 
 export class IndexPatternManagementPlugin
   implements
-    Plugin<
-      IndexPatternManagementSetup,
-      IndexPatternManagementStart,
-      IndexPatternManagementSetupDependencies,
-      IndexPatternManagementStartDependencies
-    > {
+  Plugin<
+  IndexPatternManagementSetup,
+  IndexPatternManagementStart,
+  IndexPatternManagementSetupDependencies,
+  IndexPatternManagementStartDependencies
+  > {
   private readonly indexPatternManagementService = new IndexPatternManagementService();
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(initializerContext: PluginInitializerContext) { }
 
   public setup(
     core: CoreSetup<IndexPatternManagementStartDependencies, IndexPatternManagementStart>,
     { management, urlForwarding }: IndexPatternManagementSetupDependencies
   ) {
-    const kibanaSection = management.sections.section.kibana;
+    const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
 
-    if (!kibanaSection) {
-      throw new Error('`kibana` management section not found.');
+    if (!opensearchDashboardsSection) {
+      throw new Error('`opensearchDashboards` management section not found.');
     }
 
-    const newAppPath = `management/kibana/${IPM_APP_ID}`;
-    const legacyPatternsPath = 'management/kibana/index_patterns';
+    const newAppPath = `management/opensearch-dashboards/${IPM_APP_ID}`;
+    const legacyPatternsPath = 'management/opensearch-dashboards/index_patterns';
 
-    urlForwarding.forwardApp('management/kibana/index_pattern', newAppPath, (path) => '/create');
+    urlForwarding.forwardApp('management/opensearch-dashboards/index_pattern', newAppPath, (path) => '/create');
     urlForwarding.forwardApp(legacyPatternsPath, newAppPath, (path) => {
       const pathInApp = path.substr(legacyPatternsPath.length + 1);
       return pathInApp && `/patterns${pathInApp}`;
     });
 
-    kibanaSection.registerApp({
+    opensearchDashboardsSection.registerApp({
       id: IPM_APP_ID,
       title: sectionsHeader,
       order: 0,

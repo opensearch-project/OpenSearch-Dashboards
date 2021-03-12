@@ -29,8 +29,8 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 
 interface TimeFieldProps {
   isVisible: boolean;
