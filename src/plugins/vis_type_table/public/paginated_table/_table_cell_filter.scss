@@ -1,10 +1,10 @@
-.kbnTableCellFilter__hover {
+.osdTableCellFilter__hover {
   position: relative;
 
   /**
    * 1. Center vertically regardless of row height.
    */
-  .kbnTableCellFilter {
+  .osdTableCellFilter {
     position: absolute;
     white-space: nowrap;
     right: 0;
@@ -14,17 +14,17 @@
   }
 
   &:hover {
-    .kbnTableCellFilter {
+    .osdTableCellFilter {
       display: inline;
     }
 
-    .kbnTableCellFilter__hover-show {
+    .osdTableCellFilter__hover-show {
       visibility: visible;
     }
   }
 }
 
-.kbnTableCellFilter__hover-show {
+.osdTableCellFilter__hover-show {
   // so that the cell doesn't change size on hover
   visibility: hidden;
 }

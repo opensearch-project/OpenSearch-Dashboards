@@ -22,7 +22,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import tableCellFilterHtml from './table_cell_filter.html';
 
-export function KbnRows($compile) {
+export function OsdRows($compile) {
   return {
     restrict: 'A',
     link: function ($scope, $el, attr) {
@@ -33,7 +33,7 @@ export function KbnRows($compile) {
 
         function createFilterableCell(value) {
           const $template = $(tableCellFilterHtml);
-          $template.addClass('kbnTableCellFilter__hover');
+          $template.addClass('osdTableCellFilter__hover');
 
           const scope = $scope.$new();
 
@@ -106,7 +106,7 @@ export function KbnRows($compile) {
         $tr.append($cell);
       }
 
-      $scope.$watchMulti([attr.kbnRows, attr.kbnRowsMin], function (vals) {
+      $scope.$watchMulti([attr.osdRows, attr.osdRowsMin], function (vals) {
         let rows = vals[0];
         const min = vals[1];
 

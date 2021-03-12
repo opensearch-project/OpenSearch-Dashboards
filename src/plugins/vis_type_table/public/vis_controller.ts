@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, PluginInitializerContext } from 'opensearch-dashboards/public';
 import angular, { IModule, auto, IRootScopeService, IScope, ICompileService } from 'angular';
 import $ from 'jquery';
 
 import { VisParams, ExprVis } from '../../visualizations/public';
 import { getAngularModule } from './get_inner_angular';
-import { getKibanaLegacy } from './services';
+import { getOpenSearchDashboardsLegacy } from './services';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
 
-const innerAngularName = 'kibana/table_vis';
+const innerAngularName = 'opensearch-dashboards/table_vis';
 
 export function getTableVisualizationControllerClass(
   core: CoreSetup,
@@ -64,8 +64,8 @@ export function getTableVisualizationControllerClass(
       }
     }
 
-    async render(esResponse: object, visParams: VisParams): Promise<void> {
-      getKibanaLegacy().loadFontAwesome();
+    async render(opensearchResponse: object, visParams: VisParams): Promise<void> {
+      getOpenSearchDashboardsLegacy().loadFontAwesome();
       await this.initLocalAngular();
 
       return new Promise(async (resolve, reject) => {
@@ -90,7 +90,7 @@ export function getTableVisualizationControllerClass(
           // the list above that it is passing through
           this.$scope.vis = this.vis;
           this.$scope.visState = { params: visParams, title: visParams.title };
-          this.$scope.esResponse = esResponse;
+          this.$scope.opensearchResponse = opensearchResponse;
 
           this.$scope.visParams = visParams;
           this.$scope.renderComplete = resolve;

@@ -29,15 +29,15 @@ export function TableVisController($scope) {
 
   /**
    * Recreate the entire table when:
-   * - the underlying data changes (esResponse)
+   * - the underlying data changes (opensearchResponse)
    * - one of the view options changes (vis.params)
    */
   $scope.$watch('renderComplete', function () {
     let tableGroups = ($scope.tableGroups = null);
     let hasSomeRows = ($scope.hasSomeRows = null);
 
-    if ($scope.esResponse) {
-      tableGroups = $scope.esResponse;
+    if ($scope.opensearchResponse) {
+      tableGroups = $scope.opensearchResponse;
 
       hasSomeRows = tableGroups.tables.some(function haveRows(table) {
         if (table.tables) return table.tables.some(haveRows);

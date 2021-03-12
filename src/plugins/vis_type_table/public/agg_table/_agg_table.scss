@@ -1,15 +1,15 @@
-kbn-agg-table,
-kbn-agg-table-group {
+osd-agg-table,
+osd-agg-table-group {
   display: block;
 }
 
-.kbnAggTable {
+.osdAggTable {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
 }
 
-.kbnAggTable__paginated {
+.osdAggTable__paginated {
   flex: 1 1 auto;
   overflow: auto;
 
@@ -19,12 +19,12 @@ kbn-agg-table-group {
   }
 
   tr:hover td,
-  .kbnTableCellFilter {
+  .osdTableCellFilter {
     background-color: $euiColorLightestShade;
   }
 }
 
-.kbnAggTable__controls {
+.osdAggTable__controls {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
