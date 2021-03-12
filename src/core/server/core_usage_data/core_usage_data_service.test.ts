@@ -24,16 +24,16 @@ import { TestScheduler } from 'rxjs/testing';
 import { configServiceMock } from '../config/mocks';
 
 import { mockCoreContext } from '../core_context.mock';
-import { config as RawElasticsearchConfig } from '../elasticsearch/elasticsearch_config';
+import { config as RawOpenSearchConfig } from '../opensearch/opensearch_config';
 import { config as RawHttpConfig } from '../http/http_config';
 import { config as RawLoggingConfig } from '../logging/logging_config';
-import { config as RawKibanaConfig } from '../kibana_config';
+import { config as RawOpenSearchDashboardsConfig } from '../opensearch_dashboards_config';
 import { savedObjectsConfig as RawSavedObjectsConfig } from '../saved_objects/saved_objects_config';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 
 import { CoreUsageDataService } from './core_usage_data_service';
-import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import { opensearchServiceMock } from '../opensearch/opensearch_service.mock';
 
 describe('CoreUsageDataService', () => {
   const getTestScheduler = () =>
@@ -44,16 +44,16 @@ describe('CoreUsageDataService', () => {
   let service: CoreUsageDataService;
   const configService = configServiceMock.create();
   configService.atPath.mockImplementation((path) => {
-    if (path === 'elasticsearch') {
-      return new BehaviorSubject(RawElasticsearchConfig.schema.validate({}));
+    if (path === 'opensearch') {
+      return new BehaviorSubject(RawOpenSearchConfig.schema.validate({}));
     } else if (path === 'server') {
       return new BehaviorSubject(RawHttpConfig.schema.validate({}));
     } else if (path === 'logging') {
       return new BehaviorSubject(RawLoggingConfig.schema.validate({}));
     } else if (path === 'savedObjects') {
       return new BehaviorSubject(RawSavedObjectsConfig.schema.validate({}));
-    } else if (path === 'kibana') {
-      return new BehaviorSubject(RawKibanaConfig.schema.validate({}));
+    } else if (path === 'opensearch-dashboards') {
+      return new BehaviorSubject(RawOpenSearchDashboardsConfig.schema.validate({}));
     }
     return new BehaviorSubject({});
   });
@@ -68,11 +68,11 @@ describe('CoreUsageDataService', () => {
       it('returns core metrics for default config', () => {
         const metrics = metricsServiceMock.createInternalSetupContract();
         service.setup({ metrics });
-        const elasticsearch = elasticsearchServiceMock.createStart();
-        elasticsearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
+        const opensearch = opensearchServiceMock.createStart();
+        opensearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
           body: [
             {
-              name: '.kibana_task_manager_1',
+              name: '.opensearch_dashboards_task_manager_1',
               'docs.count': 10,
               'docs.deleted': 10,
               'store.size': 1000,
@@ -80,10 +80,10 @@ describe('CoreUsageDataService', () => {
             },
           ],
         } as any);
-        elasticsearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
+        opensearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
           body: [
             {
-              name: '.kibana_1',
+              name: '.opensearch-dashboards_1',
               'docs.count': 20,
               'docs.deleted': 20,
               'store.size': 2000,
@@ -93,18 +93,18 @@ describe('CoreUsageDataService', () => {
         } as any);
         const typeRegistry = savedObjectsServiceMock.createTypeRegistryMock();
         typeRegistry.getAllTypes.mockReturnValue([
-          { name: 'type 1', indexPattern: '.kibana' },
-          { name: 'type 2', indexPattern: '.kibana_task_manager' },
+          { name: 'type 1', indexPattern: '.opensearch-dashboards' },
+          { name: 'type 2', indexPattern: '.opensearch_dashboards_task_manager' },
         ] as any);
 
         const { getCoreUsageData } = service.start({
           savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
-          elasticsearch,
+          opensearch,
         });
         expect(getCoreUsageData()).resolves.toMatchInlineSnapshot(`
           Object {
             "config": Object {
-              "elasticsearch": Object {
+              "opensearch": Object {
                 "apiVersion": "7.x",
                 "customHeadersConfigured": false,
                 "healthCheckDelayMs": 2500,
@@ -202,14 +202,14 @@ describe('CoreUsageDataService', () => {
               "savedObjects": Object {
                 "indices": Array [
                   Object {
-                    "alias": ".kibana",
+                    "alias": ".opensearch-dashboards",
                     "docsCount": 10,
                     "docsDeleted": 10,
                     "primaryStoreSizeBytes": 2000,
                     "storeSizeBytes": 1000,
                   },
                   Object {
-                    "alias": ".kibana_task_manager",
+                    "alias": ".opensearch_dashboards_task_manager",
                     "docsCount": 20,
                     "docsDeleted": 20,
                     "primaryStoreSizeBytes": 4000,

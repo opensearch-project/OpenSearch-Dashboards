@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { KibanaRequest } from '../http';
+import { OpenSearchDashboardsRequest } from '../http';
 
 /**
  * Event to audit.
@@ -46,7 +46,7 @@ export interface Auditor {
    * ```typescript
    * router.get({ path: '/my_endpoint', validate: false }, async (context, request, response) => {
    *   context.core.auditor.withAuditScope('my_plugin_operation');
-   *   const value = await context.core.elasticsearch.legacy.client.callAsCurrentUser('...');
+   *   const value = await context.core.opensearch.legacy.client.callAsCurrentUser('...');
    *   context.core.add({ type: 'operation.type', message: 'perform an operation in ... endpoint' });
    * ```
    */
@@ -63,7 +63,7 @@ export interface Auditor {
  * @public
  */
 export interface AuditorFactory {
-  asScoped(request: KibanaRequest): Auditor;
+  asScoped(request: OpenSearchDashboardsRequest): Auditor;
 }
 
 export interface AuditTrailSetup {

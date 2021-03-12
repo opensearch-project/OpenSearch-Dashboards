@@ -19,12 +19,12 @@
 
 import { Capabilities } from './types';
 import { resolveCapabilities } from './resolve_capabilities';
-import { KibanaRequest } from '../http';
+import { OpenSearchDashboardsRequest } from '../http';
 import { httpServerMock } from '../http/http_server.mocks';
 
 describe('resolveCapabilities', () => {
   let defaultCaps: Capabilities;
-  let request: KibanaRequest;
+  let request: OpenSearchDashboardsRequest;
 
   beforeEach(() => {
     defaultCaps = {
@@ -32,7 +32,7 @@ describe('resolveCapabilities', () => {
       catalogue: {},
       management: {},
     };
-    request = httpServerMock.createKibanaRequest();
+    request = httpServerMock.createOpenSearchDashboardsRequest();
   });
 
   it('returns the initial capabilities if no switcher are used', async () => {
@@ -48,7 +48,7 @@ describe('resolveCapabilities', () => {
         B: true,
       },
     };
-    const switcher = (req: KibanaRequest, capabilities: Capabilities) => ({
+    const switcher = (req: OpenSearchDashboardsRequest, capabilities: Capabilities) => ({
       ...capabilities,
       catalogue: {
         ...capabilities.catalogue,
@@ -76,7 +76,7 @@ describe('resolveCapabilities', () => {
         B: true,
       },
     };
-    const switcher = (req: KibanaRequest, capabilities: Capabilities) => ({
+    const switcher = (req: OpenSearchDashboardsRequest, capabilities: Capabilities) => ({
       ...capabilities,
       catalogue: {
         ...capabilities.catalogue,
@@ -98,7 +98,7 @@ describe('resolveCapabilities', () => {
         B: true,
       },
     };
-    const switcher = (req: KibanaRequest, capabilities: Capabilities) => ({
+    const switcher = (req: OpenSearchDashboardsRequest, capabilities: Capabilities) => ({
       ...capabilities,
       catalogue: {
         ...capabilities.catalogue,
@@ -121,7 +121,7 @@ describe('resolveCapabilities', () => {
         C: true,
       },
     };
-    const switcher = (req: KibanaRequest, capabilities: Capabilities) => ({
+    const switcher = (req: OpenSearchDashboardsRequest, capabilities: Capabilities) => ({
       ...capabilities,
       catalogue: Object.entries(capabilities.catalogue)
         .filter(([key]) => key !== 'B')
@@ -145,7 +145,7 @@ describe('resolveCapabilities', () => {
         },
       },
     };
-    const switcher = (req: KibanaRequest, capabilities: Capabilities) => ({
+    const switcher = (req: OpenSearchDashboardsRequest, capabilities: Capabilities) => ({
       section: {
         boolean: {
           entry: false,

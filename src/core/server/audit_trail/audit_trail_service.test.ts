@@ -54,10 +54,10 @@ describe('AuditTrailService', () => {
         register(auditorFactory);
 
         const { asScoped } = auditTrail.start();
-        const kibanaRequest = httpServerMock.createKibanaRequest();
-        asScoped(kibanaRequest);
+        const opensearchDashboardsRequest = httpServerMock.createOpenSearchDashboardsRequest();
+        asScoped(opensearchDashboardsRequest);
 
-        expect(scopedMock).toHaveBeenCalledWith(kibanaRequest);
+        expect(scopedMock).toHaveBeenCalledWith(opensearchDashboardsRequest);
       });
 
       it('passes auditable event to an auditor', () => {
@@ -73,8 +73,8 @@ describe('AuditTrailService', () => {
         register(auditorFactory);
 
         const { asScoped } = auditTrail.start();
-        const kibanaRequest = httpServerMock.createKibanaRequest();
-        const auditor = asScoped(kibanaRequest);
+        const opensearchDashboardsRequest = httpServerMock.createOpenSearchDashboardsRequest();
+        const auditor = asScoped(opensearchDashboardsRequest);
         const message = {
           type: 'foo',
           message: 'bar',
@@ -84,13 +84,13 @@ describe('AuditTrailService', () => {
         expect(addEventMock).toHaveBeenLastCalledWith(message);
       });
 
-      describe('return the same auditor instance for the same KibanaRequest', () => {
+      describe('return the same auditor instance for the same opensearchDashboardsRequest', () => {
         const auditTrail = new AuditTrailService(coreContext);
         auditTrail.setup();
         const { asScoped } = auditTrail.start();
 
-        const rawRequest1 = httpServerMock.createKibanaRequest();
-        const rawRequest2 = httpServerMock.createKibanaRequest();
+        const rawRequest1 = httpServerMock.createOpenSearchDashboardsRequest();
+        const rawRequest2 = httpServerMock.createOpenSearchDashboardsRequest();
         expect(asScoped(rawRequest1)).toBe(asScoped(rawRequest1));
         expect(asScoped(rawRequest1)).not.toBe(asScoped(rawRequest2));
       });

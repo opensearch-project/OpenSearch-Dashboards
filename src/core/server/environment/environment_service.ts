@@ -18,7 +18,7 @@
  */
 
 import { take } from 'rxjs/operators';
-import { PathConfigType, config as pathConfigDef } from '@kbn/utils';
+import { PathConfigType, config as pathConfigDef } from '@osd/utils';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { IConfigService } from '../config';
