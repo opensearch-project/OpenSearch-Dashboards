@@ -17,8 +17,8 @@
  * under the License.
  */
 
-jest.mock('../kibana_services', () => ({
-  getKibanaVersion() {
+jest.mock('../opensearch_dashboards_services', () => ({
+  getOpenSearchDashboardsVersion() {
     return '1.2.3';
   },
 }));
@@ -40,7 +40,7 @@ describe('service_settings (FKA tile_map test)', function () {
   const defaultMapConfig = {
     emsFileApiUrl,
     emsTileApiUrl,
-    includeElasticMapsService: true,
+    includeOpenSearchDashboardsMapsService: true,
     emsTileLayerId: {
       bright: 'road_map',
       desaturated: 'road_map_desaturated',
@@ -100,8 +100,8 @@ describe('service_settings (FKA tile_map test)', function () {
 
       const urlObject = url.parse(attrs.url, true);
       expect(urlObject.hostname).toEqual('tiles.foobar');
-      expect(urlObject.query.my_app_name).toEqual('kibana');
-      expect(urlObject.query.elastic_tile_service_tos).toEqual('agree');
+      expect(urlObject.query.my_app_name).toEqual('opensearchDashboards');
+      expect(urlObject.query.opensearch_tile_service_tos).toEqual('agree');
       expect(typeof urlObject.query.my_app_version).toEqual('string');
     });
 
@@ -166,13 +166,13 @@ describe('service_settings (FKA tile_map test)', function () {
           {
             attribution: '',
             url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            id: 'TMS in config/kibana.yml',
+            id: 'TMS in config/opensearch_dashboards.yml',
           },
           {
             id: 'road_map',
             name: 'Road Map - Bright',
             url:
-              'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3',
+              'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?opensearch_tile_service_tos=agree&my_app_name=opensearch-dashboards&my_app_version=1.2.3',
             minZoom: 0,
             maxZoom: 10,
             attribution:
@@ -219,19 +219,19 @@ describe('service_settings (FKA tile_map test)', function () {
         );
 
         expect(desaturationFalse.url).toEqual(
-          'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
+          'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?opensearch_tile_service_tos=agree&my_app_name=opensearch-dashboards&my_app_version=1.2.3'
         );
         expect(desaturationFalse.maxZoom).toEqual(10);
         expect(desaturationTrue.url).toEqual(
-          'https://tiles.foobar/raster/styles/osm-bright-desaturated/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
+          'https://tiles.foobar/raster/styles/osm-bright-desaturated/{z}/{x}/{y}.png?opensearch_tile_service_tos=agree&my_app_name=opensearch-dashboards&my_app_version=1.2.3'
         );
         expect(desaturationTrue.maxZoom).toEqual(18);
         expect(darkThemeDesaturationFalse.url).toEqual(
-          'https://tiles.foobar/raster/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
+          'https://tiles.foobar/raster/styles/dark-matter/{z}/{x}/{y}.png?opensearch_tile_service_tos=agree&my_app_name=opensearch-dashboards&my_app_version=1.2.3'
         );
         expect(darkThemeDesaturationFalse.maxZoom).toEqual(22);
         expect(darkThemeDesaturationTrue.url).toEqual(
-          'https://tiles.foobar/raster/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
+          'https://tiles.foobar/raster/styles/dark-matter/{z}/{x}/{y}.png?opensearch_tile_service_tos=agree&my_app_name=opensearch-dashboards&my_app_version=1.2.3'
         );
         expect(darkThemeDesaturationTrue.maxZoom).toEqual(22);
       });
@@ -239,7 +239,7 @@ describe('service_settings (FKA tile_map test)', function () {
       it('should exclude EMS', async () => {
         serviceSettings = makeServiceSettings(
           {
-            includeElasticMapsService: false,
+            includeOpenSearchDashboardsMapsService: false,
           },
           {
             url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -251,7 +251,7 @@ describe('service_settings (FKA tile_map test)', function () {
           {
             attribution: '',
             url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            id: 'TMS in config/kibana.yml',
+            id: 'TMS in config/opensearch_dashboards.yml',
           },
         ];
         expect(tilemapServices.length).toEqual(1);
@@ -263,7 +263,7 @@ describe('service_settings (FKA tile_map test)', function () {
 
       it('should exclude all when not configured', async () => {
         serviceSettings = makeServiceSettings({
-          includeElasticMapsService: false,
+          includeOpenSearchDashboardsMapsService: false,
         });
         const tilemapServices = await serviceSettings.getTMSServices();
         const expected = [];
@@ -282,7 +282,7 @@ describe('service_settings (FKA tile_map test)', function () {
         expect(fileLayer.origin).toEqual(ORIGIN.EMS);
         const fileUrl = await serviceSettings.getUrlForRegionLayer(fileLayer);
         const urlObject = url.parse(fileUrl, true);
-        Object.keys({ foo: 'bar', elastic_tile_service_tos: 'agree' }).forEach((key) => {
+        Object.keys({ foo: 'bar', opensearch_tile_service_tos: 'agree' }).forEach((key) => {
           expect(typeof urlObject.query[key]).toEqual('string');
         });
       });
@@ -293,7 +293,7 @@ describe('service_settings (FKA tile_map test)', function () {
     it('should load manifest (individual props)', async () => {
       const expected = {
         attribution:
-          '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a> | <a rel="noreferrer noopener" href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a>',
+          '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a> | <a rel="noreferrer noopener" href="https://www.elastic.co/elastic-maps-service">OpenSearch Maps Service</a>',
         format: 'geojson',
         fields: [
           { type: 'id', name: 'iso2', description: 'ISO 3166-1 alpha-2 code' },
@@ -318,7 +318,7 @@ describe('service_settings (FKA tile_map test)', function () {
 
     it('should exclude all when not configured', async () => {
       const serviceSettings = makeServiceSettings({
-        includeElasticMapsService: false,
+        includeOpenSearchDashboardsMapsService: false,
       });
       const fileLayers = await serviceSettings.getFileLayers();
       const expected = [];
@@ -329,7 +329,7 @@ describe('service_settings (FKA tile_map test)', function () {
       const serviceSettings = makeServiceSettings();
       const fileLayers = await serviceSettings.getFileLayers();
       const hotlink = await serviceSettings.getEMSHotLink(fileLayers[0]);
-      expect(hotlink).toEqual('?locale=en#file/world_countries'); //url host undefined becuase emsLandingPageUrl is set at kibana-load
+      expect(hotlink).toEqual('?locale=en#file/world_countries'); //url host undefined becuase emsLandingPageUrl is set at opensearch-dashboards-load
     });
 
     it('should sanitize EMS attribution', async () => {
@@ -339,7 +339,7 @@ describe('service_settings (FKA tile_map test)', function () {
         return layer.id === 'world_countries_with_compromised_attribution';
       });
       expect(fileLayer.attribution).toEqual(
-        '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">&lt;div onclick=\'alert(1\')&gt;Made with NaturalEarth&lt;/div&gt;</a> | <a rel="noreferrer noopener">Elastic Maps Service</a>'
+        '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">&lt;div onclick=\'alert(1\')&gt;Made with NaturalEarth&lt;/div&gt;</a> | <a rel="noreferrer noopener">OpenSearch Maps Service</a>'
       );
     });
   });

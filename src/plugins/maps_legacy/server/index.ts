@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, PluginConfigDescriptor } from 'kibana/server';
+import { Plugin, PluginConfigDescriptor } from 'opensearch-dashboards/server';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { configSchema, MapsLegacyConfig } from '../config';
@@ -25,8 +25,8 @@ import { getUiSettings } from './ui_settings';
 
 export const config: PluginConfigDescriptor<MapsLegacyConfig> = {
   exposeToBrowser: {
-    includeElasticMapsService: true,
-    proxyElasticMapsServiceInMaps: true,
+    includeOpenSearchDashboardsMapsService: true,
+    proxyOpenSearchDashboardsMapsServiceInMaps: true,
     tilemap: true,
     regionmap: true,
     manifestServiceUrl: true,

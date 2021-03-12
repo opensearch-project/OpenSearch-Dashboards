@@ -18,6 +18,7 @@
  */
 
 export const ORIGIN = {
+  // TODO: Rename EMS
   EMS: 'elastic_maps_service',
-  KIBANA_YML: 'self_hosted',
+  OPENSEARCH_DASHBOARDS_YML: 'self_hosted',
 };
