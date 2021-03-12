@@ -17,24 +17,24 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const toasts = getService('toasts');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
   describe('errors', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('invalid_scripted_field');
+      await opensearchArchiver.loadIfNeeded('logstash_functional');
+      await opensearchArchiver.load('invalid_scripted_field');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
 
     after(async function () {
-      await esArchiver.unload('invalid_scripted_field');
+      await opensearchArchiver.unload('invalid_scripted_field');
     });
 
     describe('invalid scripted field error', () => {

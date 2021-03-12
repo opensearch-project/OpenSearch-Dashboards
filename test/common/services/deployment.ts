@@ -30,27 +30,27 @@ export function DeploymentProvider({ getService }: FtrProviderContext) {
 
   return {
     /**
-     * Returns Kibana host URL
+     * Returns OpenSearch Dashboards host URL
      */
     getHostPort() {
-      return getUrl.baseUrl(config.get('servers.kibana'));
+      return getUrl.baseUrl(config.get('servers.opensearchDashboards'));
     },
 
     /**
-     * Returns ES host URL
+     * Returns OpenSearch host URL
      */
-    getEsHostPort() {
-      return getUrl.baseUrl(config.get('servers.elasticsearch'));
+    getOpenSearchHostPort() {
+      return getUrl.baseUrl(config.get('servers.opensearch'));
     },
 
     /**
-     * Helper to detect an OSS licensed Kibana
+     * Helper to detect an OSS licensed OpenSearch Dashboards 
      * Useful for functional testing in cloud environment
      */
     async isOss() {
-      const baseUrl = this.getEsHostPort();
-      const username = config.get('servers.elasticsearch.username');
-      const password = config.get('servers.elasticsearch.password');
+      const baseUrl = this.getOpenSearchHostPort();
+      const username = config.get('servers.opensearch.username');
+      const password = config.get('servers.opensearch.password');
       const response = await fetch(baseUrl + '/_xpack', {
         method: 'get',
         headers: {
@@ -63,8 +63,8 @@ export function DeploymentProvider({ getService }: FtrProviderContext) {
 
     async isCloud(): Promise<boolean> {
       const baseUrl = this.getHostPort();
-      const username = config.get('servers.kibana.username');
-      const password = config.get('servers.kibana.password');
+      const username = config.get('servers.opensearchDashboards.username');
+      const password = config.get('servers.opensearchDashboards.password');
       const response = await fetch(baseUrl + '/api/stats?extended', {
         method: 'get',
         headers: {

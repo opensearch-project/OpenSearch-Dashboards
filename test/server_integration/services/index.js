@@ -18,7 +18,7 @@
  */
 
 export {
-  createKibanaSupertestProvider,
-  KibanaSupertestWithoutAuthProvider,
-  ElasticsearchSupertestProvider,
+  createOpenSearchDashboardsSupertestProvider,
+  OpenSearchDashboardsSupertestWithoutAuthProvider,
+  OpenSearchSupertestProvider,
 } from './supertest';

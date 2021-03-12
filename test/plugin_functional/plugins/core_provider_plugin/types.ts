@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, CoreStart } from 'kibana/public';
+import { CoreSetup, CoreStart } from 'opensearch-dashboards/public';
 
 declare global {
   interface Window {

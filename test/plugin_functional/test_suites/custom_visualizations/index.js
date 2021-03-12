@@ -19,14 +19,14 @@
 
 export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
   describe('custom visualizations', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/visualize');
-      await kibanaServer.uiSettings.replace({
+      await opensearchArchiver.loadIfNeeded('../functional/fixtures/opensearch_archiver/logstash_functional');
+      await opensearchArchiver.loadIfNeeded('../functional/fixtures/opensearch_archiver/visualize');
+      await opensearchDashboardsServer.uiSettings.replace({
         'dateFormat:tz': 'Australia/North',
         defaultIndex: 'logstash-*',
       });

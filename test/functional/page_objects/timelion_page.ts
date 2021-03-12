@@ -23,17 +23,17 @@ export function TimelionPageProvider({ getService, getPageObjects }: FtrProvider
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header']);
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
   class TimelionPage {
     public async initTests() {
-      await kibanaServer.uiSettings.replace({
+      await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
 
-      log.debug('load kibana index');
-      await esArchiver.load('timelion');
+      log.debug('load opensearch-dashboards index');
+      await opensearchArchiver.load('timelion');
 
       await PageObjects.common.navigateToApp('timelion');
     }

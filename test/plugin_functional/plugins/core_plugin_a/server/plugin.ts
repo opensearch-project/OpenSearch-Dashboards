@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import { Plugin, CoreSetup } from 'opensearch-dashboards/server';
 
 export interface PluginARequestContext {
   ping: () => Promise<string>;
 }
 
-declare module 'kibana/server' {
+declare module 'opensearch-dashboards/server' {
   interface RequestHandlerContext {
     pluginA?: PluginARequestContext;
   }
@@ -34,7 +34,7 @@ export class CorePluginAPlugin implements Plugin {
     core.http.registerRouteHandlerContext('pluginA', (context) => {
       return {
         ping: () =>
-          context.core.elasticsearch.legacy.client.callAsInternalUser('ping') as Promise<string>,
+          context.core.opensearch.legacy.client.callAsInternalUser('ping') as Promise<string>,
       };
     });
   }

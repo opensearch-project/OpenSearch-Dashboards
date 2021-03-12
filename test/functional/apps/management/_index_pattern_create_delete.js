@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
@@ -29,14 +29,14 @@ export default function ({ getService, getPageObjects }) {
 
   describe('creating and deleting default index', function describeIndexTests() {
     before(function () {
-      // Delete .kibana index and then wait for Kibana to re-create it
-      return kibanaServer.uiSettings
+      // Delete .opensearch-dashboards index and then wait for OpenSearch Dashboards to re-create it
+      return opensearchDashboardsServer.uiSettings
         .replace({})
         .then(function () {
           return PageObjects.settings.navigateTo();
         })
         .then(function () {
-          return PageObjects.settings.clickKibanaIndexPatterns();
+          return PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
         });
     });
 
@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }) {
 
       after(async () => {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       });
     });
 
@@ -118,7 +118,7 @@ export default function ({ getService, getPageObjects }) {
         return retry.try(function tryingForTime() {
           return browser.getCurrentUrl().then(function (currentUrl) {
             log.debug('currentUrl = ' + currentUrl);
-            expect(currentUrl).to.contain('management/kibana/indexPatterns');
+            expect(currentUrl).to.contain('management/opensearch-dashboards/indexPatterns');
           });
         });
       });

@@ -30,12 +30,12 @@ export default async function ({ readConfigFile }) {
     junit: {
       reportName: 'API Integration Tests',
     },
-    esTestCluster: commonConfig.get('esTestCluster'),
-    kbnTestServer: {
-      ...functionalConfig.get('kbnTestServer'),
+    opensearchTestCluster: commonConfig.get('opensearchTestCluster'),
+    osdTestServer: {
+      ...functionalConfig.get('osdTestServer'),
       serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'),
-        '--elasticsearch.healthCheck.delay=3600000',
+        ...functionalConfig.get('osdTestServer.serverArgs'),
+        '--opensearch.healthCheck.delay=3600000',
         '--server.xsrf.disableProtection=true',
         '--server.compression.referrerWhitelist=["some-host.com"]',
       ],

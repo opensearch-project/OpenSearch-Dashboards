@@ -40,7 +40,7 @@ export function ContextPageProvider({ getService, getPageObjects }: FtrProviderC
         ...DEFAULT_INITIAL_STATE,
         ...overrideInitialState,
       });
-      const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
+      const appUrl = getUrl.noAuth(config.get('servers.opensearchDashboards'), {
         ...config.get('apps.context'),
         hash: `${config.get('apps.context.hash')}/${indexPattern}/${anchorId}?_a=${initialState}`,
       });

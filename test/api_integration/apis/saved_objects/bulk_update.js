@@ -17,18 +17,18 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import _ from 'lodash';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
-  const esArchiver = getService('esArchiver');
+  const opensearch = getService('legacyOpenSearch');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('bulkUpdate', () => {
-    describe('with kibana index', () => {
-      before(() => esArchiver.load('saved_objects/basic'));
-      after(() => esArchiver.unload('saved_objects/basic'));
+    describe('with opensearch-dashboards index', () => {
+      before(() => opensearchArchiver.load('saved_objects/basic'));
+      after(() => opensearchArchiver.unload('saved_objects/basic'));
       it('should return 200', async () => {
         const response = await supertest
           .put(`/api/saved_objects/_bulk_update`)
@@ -241,12 +241,12 @@ export default function ({ getService }) {
       });
     });
 
-    describe('without kibana index', () => {
+    describe('without opensearch-dashboards index', () => {
       before(
         async () =>
-          // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana',
+          // just in case the opensearch-dashboards server has recreated it
+          await opensearch.indices.delete({
+            index: '.opensearch-dashboards',
             ignore: [404],
           })
       );

@@ -18,14 +18,14 @@
  */
 
 import util from 'util';
-import { KbnClient, ToolingLog } from '@kbn/dev-utils';
+import { OsdClient, ToolingLog } from '@osd/dev-utils';
 
 export class User {
-  constructor(private log: ToolingLog, private kbnClient: KbnClient) {}
+  constructor(private log: ToolingLog, private osdClient: OsdClient) {}
 
   public async create(username: string, user: any) {
     this.log.debug(`creating user ${username}`);
-    const { data, status, statusText } = await this.kbnClient.request({
+    const { data, status, statusText } = await this.osdClient.request({
       path: `/internal/security/users/${username}`,
       method: 'POST',
       body: {
@@ -43,7 +43,7 @@ export class User {
 
   public async delete(username: string) {
     this.log.debug(`deleting user ${username}`);
-    const { data, status, statusText } = await await this.kbnClient.request({
+    const { data, status, statusText } = await await this.osdClient.request({
       path: `/internal/security/users/${username}`,
       method: 'DELETE',
     });

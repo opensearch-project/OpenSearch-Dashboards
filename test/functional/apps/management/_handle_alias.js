@@ -17,21 +17,21 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearch = getService('legacyOpenSearch');
   const retry = getService('retry');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'timePicker']);
 
   describe('Index patterns on aliases', function () {
     before(async function () {
-      await security.testUser.setRoles(['kibana_admin', 'test_alias_reader']);
-      await esArchiver.loadIfNeeded('alias');
-      await esArchiver.load('empty_kibana');
-      await es.indices.updateAliases({
+      await security.testUser.setRoles(['opensearch_dashboards_admin', 'test_alias_reader']);
+      await opensearchArchiver.loadIfNeeded('alias');
+      await opensearchArchiver.load('empty_opensearch_dashboards');
+      await opensearch.indices.updateAliases({
         body: {
           actions: [
             { add: { index: 'test1', alias: 'alias1' } },
@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('alias');
+      await opensearchArchiver.unload('alias');
     });
   });
 }

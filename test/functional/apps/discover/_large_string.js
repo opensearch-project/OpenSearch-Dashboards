@@ -17,23 +17,23 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const log = getService('log');
   const retry = getService('retry');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const queryBar = getService('queryBar');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover']);
 
   describe('test large strings', function () {
     before(async function () {
-      await security.testUser.setRoles(['kibana_admin', 'kibana_large_strings']);
-      await esArchiver.load('empty_kibana');
-      await esArchiver.loadIfNeeded('hamlet');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'testlargestring' });
+      await security.testUser.setRoles(['opensearch_dashboards_admin', 'opensearch_dashboards_large_strings']);
+      await opensearchArchiver.load('empty_opensearch_dashboards');
+      await opensearchArchiver.loadIfNeeded('hamlet');
+      await opensearchDashboardsServer.uiSettings.replace({ defaultIndex: 'testlargestring' });
     });
 
     it('verify the large string book present', async function () {
@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('hamlet');
+      await opensearchArchiver.unload('hamlet');
     });
   });
 }

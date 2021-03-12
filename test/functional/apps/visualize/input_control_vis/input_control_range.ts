@@ -17,27 +17,27 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const find = getService('find');
   const security = getService('security');
   const { visualize, visEditor } = getPageObjects(['visualize', 'visEditor']);
 
   describe('input control range', () => {
     before(async () => {
-      await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
-      await esArchiver.load('kibana_sample_data_flights_index_pattern');
+      await security.testUser.setRoles(['opensearch_dashboards_admin', 'opensearch_dashboards_sample_admin']);
+      await opensearchArchiver.load('opensearch_dashboards_sample_data_flights_index_pattern');
       await visualize.navigateToNewVisualization();
       await visualize.clickInputControlVis();
     });
 
     it('should add filter with scripted field', async () => {
       await visEditor.addInputControl('range');
-      await visEditor.setFilterParams(0, 'kibana_sample_data_flights', 'hour_of_day');
+      await visEditor.setFilterParams(0, 'opensearch_dashboards_sample_data_flights', 'hour_of_day');
       await visEditor.clickGo();
       await visEditor.setFilterRange(0, '7', '10');
       await visEditor.inputControlSubmit();
@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should add filter with price field', async () => {
       await visEditor.addInputControl('range');
-      await visEditor.setFilterParams(1, 'kibana_sample_data_flights', 'AvgTicketPrice');
+      await visEditor.setFilterParams(1, 'opensearch_dashboards_sample_data_flights', 'AvgTicketPrice');
       await visEditor.clickGo();
       await visEditor.setFilterRange(1, '400', '999');
       await visEditor.inputControlSubmit();
@@ -58,12 +58,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('kibana_sample_data_flights_index_pattern');
+      await opensearchArchiver.unload('opensearch_dashboards_sample_data_flights_index_pattern');
       // loading back default data
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('long_window_logstash');
-      await esArchiver.load('visualize');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await opensearchArchiver.loadIfNeeded('logstash_functional');
+      await opensearchArchiver.loadIfNeeded('long_window_logstash');
+      await opensearchArchiver.load('visualize');
+      await opensearchDashboardsServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await security.testUser.restoreDefaults();
     });
   });

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 /**
  * This tests both that one of each visualization can be added to a dashboard (as opposed to opening an existing
@@ -30,8 +30,8 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const find = getService('find');
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const pieChart = getService('pieChart');
   const security = getService('security');
   const dashboardExpect = getService('dashboardExpect');
@@ -101,9 +101,9 @@ export default function ({ getService, getPageObjects }) {
 
   describe.skip('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
-      await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
-      await esArchiver.load('dashboard/current/kibana');
-      await kibanaServer.uiSettings.replace({
+      await security.testUser.setRoles(['opensearch_dashboards_admin', 'animals', 'test_logstash_reader']);
+      await opensearchArchiver.load('dashboard/current/opensearch-dashboards');
+      await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');

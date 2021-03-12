@@ -1,0 +1,10 @@
+{
+  "id": "osd_sample_panel_action",
+  "version": "0.0.1",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "configPath": ["osd_sample_panel_action"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["uiActions", "embeddable"],
+  "requiredBundles": ["opensearchDashboardsReact"]
+}

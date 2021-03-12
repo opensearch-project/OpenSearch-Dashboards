@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializer } from 'kibana/public';
+import { PluginInitializer } from 'opensearch-dashboards/public';
 import { TopNavTestPlugin, TopNavTestPluginSetup, TopNavTestPluginStart } from './plugin';
 
 export const plugin: PluginInitializer<TopNavTestPluginSetup, TopNavTestPluginStart> = () =>

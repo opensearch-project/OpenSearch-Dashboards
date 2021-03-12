@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { visualize, visualBuilder } = getPageObjects(['visualBuilder', 'visualize']);
   const retry = getService('retry');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
   describe('visual builder', function describeIndexTests() {
     beforeEach(async () => {
@@ -128,7 +128,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('Dark mode', () => {
         before(async () => {
-          await kibanaServer.uiSettings.update({
+          await opensearchDashboardsServer.uiSettings.update({
             'theme:darkMode': true,
           });
         });
@@ -141,7 +141,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         after(async () => {
-          await kibanaServer.uiSettings.update({
+          await opensearchDashboardsServer.uiSettings.update({
             'theme:darkMode': false,
           });
         });

@@ -22,11 +22,11 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
   const a11y = getService('a11y');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('Visualize', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('discover');
+      await opensearchArchiver.loadIfNeeded('discover');
       await PageObjects.common.navigateToApp('visualize');
     });
 

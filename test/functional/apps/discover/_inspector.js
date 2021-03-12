@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const inspector = getService('inspector');
 
   const STATS_ROW_NAME_INDEX = 0;
@@ -37,10 +37,10 @@ export default function ({ getService, getPageObjects }) {
   // FLAKY: https://github.com/elastic/kibana/issues/39842
   describe.skip('inspect', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('discover');
-      // delete .kibana index and update configDoc
-      await kibanaServer.uiSettings.replace({
+      await opensearchArchiver.loadIfNeeded('logstash_functional');
+      await opensearchArchiver.load('discover');
+      // delete .opensearch-dashboards index and update configDoc
+      await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
 

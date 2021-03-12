@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { join } from 'path';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('resolve_import_errors', () => {
     // mock success results including metadata
@@ -42,9 +42,9 @@ export default function ({ getService }) {
       meta: { title: 'Requests', icon: 'dashboardApp' },
     };
 
-    describe('without kibana index', () => {
+    describe('without opensearch-dashboards index', () => {
       // Cleanup data that got created in import
-      after(() => esArchiver.unload('saved_objects/basic'));
+      after(() => opensearchArchiver.unload('saved_objects/basic'));
 
       it('should return 200 and import nothing when empty parameters are passed in', async () => {
         await supertest
@@ -213,10 +213,10 @@ export default function ({ getService }) {
       });
     });
 
-    describe('with kibana index', () => {
+    describe('with opensearch-dashboards index', () => {
       describe('with basic data existing', () => {
-        before(() => esArchiver.load('saved_objects/basic'));
-        after(() => esArchiver.unload('saved_objects/basic'));
+        before(() => opensearchArchiver.load('saved_objects/basic'));
+        after(() => opensearchArchiver.unload('saved_objects/basic'));
 
         it('should return 200 when skipping all the records', async () => {
           await supertest

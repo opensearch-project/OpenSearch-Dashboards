@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const browser = getService('browser');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const visualTesting = getService('visualTesting');
   const defaultSettings = {
@@ -35,22 +35,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover', function describeIndexTests() {
     before(async function () {
-      await esArchiver.load('discover');
+      await opensearchArchiver.load('discover');
 
       // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await kibanaServer.uiSettings.replace(defaultSettings);
+      await opensearchArchiver.loadIfNeeded('logstash_functional');
+      await opensearchDashboardsServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     after(function unloadMakelogs() {
-      return esArchiver.unload('logstash_functional');
+      return opensearchArchiver.unload('logstash_functional');
     });
 
     async function refreshDiscover() {
       await browser.refresh();
-      await PageObjects.header.awaitKibanaChrome();
+      await PageObjects.header.awaitOpenSearchDashboardsChrome();
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.waitForChartLoadingComplete(1);
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('time zone switch', () => {
       it('should show bars in the correct time zone after switching', async function () {
-        await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
+        await opensearchDashboardsServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await refreshDiscover();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await takeSnapshot();

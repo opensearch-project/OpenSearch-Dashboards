@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
+import { Plugin, CoreSetup } from 'opensearch-dashboards/public';
 
 export class CorePluginAPlugin implements Plugin<CorePluginAPluginSetup, CorePluginAPluginStart> {
   public setup(core: CoreSetup, deps: {}) {

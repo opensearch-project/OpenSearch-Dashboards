@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
       const actionElementTag = await actionElement.getTagName();
       expect(actionElementTag).to.be('a');
       const actionElementLink = await actionElement.getAttribute('href');
-      expect(actionElementLink).to.be('https://example.com/kibana/test');
+      expect(actionElementLink).to.be('https://example.com/opensearch-dashboards/test');
     });
 
     it('Sample action appears in context menu in view mode', async () => {

@@ -17,19 +17,19 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'timePicker']);
   const appsMenu = getService('appsMenu');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
 
-  describe('Kibana browser back navigation should work', function describeIndexTests() {
+  describe('OpenSearch Dashboards browser back navigation should work', function describeIndexTests() {
     before(async () => {
-      await esArchiver.loadIfNeeded('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await opensearchArchiver.loadIfNeeded('discover');
+      await opensearchArchiver.loadIfNeeded('logstash_functional');
     });
 
     it('detect navigate back issues', async () => {

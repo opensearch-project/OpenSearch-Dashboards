@@ -35,30 +35,30 @@ export default function ({ getService }) {
 
     it('returns gzip files when client only supports gzip', () =>
       supertest
-        // We use the kbn-ui-shared-deps for these tests since they are always built with br compressed outputs,
-        // even in dev. Bundles built by @kbn/optimizer are only built with br compression in dist mode.
-        .get(`/${buildNum}/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.js`)
+        // We use the osd-ui-shared-deps for these tests since they are always built with br compressed outputs,
+        // even in dev. Bundles built by @osd/optimizer are only built with br compression in dist mode.
+        .get(`/${buildNum}/bundles/osd-ui-shared-deps/osd-ui-shared-deps.js`)
         .set('Accept-Encoding', 'gzip')
         .expect(200)
         .expect('Content-Encoding', 'gzip'));
 
     it.skip('returns br files when client only supports br', () =>
       supertest
-        .get(`/${buildNum}/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.js`)
+        .get(`/${buildNum}/bundles/osd-ui-shared-deps/osd-ui-shared-deps.js`)
         .set('Accept-Encoding', 'br')
         .expect(200)
         .expect('Content-Encoding', 'br'));
 
     it.skip('returns br files when client only supports gzip and br', () =>
       supertest
-        .get(`/${buildNum}/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.js`)
+        .get(`/${buildNum}/bundles/osd-ui-shared-deps/osd-ui-shared-deps.js`)
         .set('Accept-Encoding', 'gzip, br')
         .expect(200)
         .expect('Content-Encoding', 'br'));
 
     it('returns gzip files when client prefers gzip', () =>
       supertest
-        .get(`/${buildNum}/bundles/kbn-ui-shared-deps/kbn-ui-shared-deps.js`)
+        .get(`/${buildNum}/bundles/osd-ui-shared-deps/osd-ui-shared-deps.js`)
         .set('Accept-Encoding', 'gzip;q=1.0, br;q=0.5')
         .expect(200)
         .expect('Content-Encoding', 'gzip'));

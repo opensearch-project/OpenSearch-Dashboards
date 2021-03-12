@@ -18,22 +18,22 @@
  */
 
 import { SuperTest, Test } from 'supertest';
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const apiUrl = '/api/kibana/management/saved_objects/scroll/counts';
+const apiUrl = '/api/opensearch-dashboards/management/saved_objects/scroll/counts';
 const defaultTypes = ['visualization', 'index-pattern', 'search', 'dashboard'];
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest') as SuperTest<Test>;
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('scroll_count', () => {
     before(async () => {
-      await esArchiver.load('management/saved_objects/scroll_count');
+      await opensearchArchiver.load('management/saved_objects/scroll_count');
     });
     after(async () => {
-      await esArchiver.unload('management/saved_objects/scroll_count');
+      await opensearchArchiver.unload('management/saved_objects/scroll_count');
     });
 
     it('returns the count for each included types', async () => {

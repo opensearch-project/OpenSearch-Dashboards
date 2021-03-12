@@ -17,26 +17,26 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { Response } from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const opensearch = getService('legacyOpenSearch');
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
 
   describe('get', () => {
     const existingObject = 'visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab';
     const nonexistentObject = 'wigwags/foo';
 
-    describe('with kibana index', () => {
-      before(() => esArchiver.load('saved_objects/basic'));
-      after(() => esArchiver.unload('saved_objects/basic'));
+    describe('with opensearch-dashboards index', () => {
+      before(() => opensearchArchiver.load('saved_objects/basic'));
+      after(() => opensearchArchiver.unload('saved_objects/basic'));
 
       it('should return 200 for object that exists and inject metadata', async () =>
         await supertest
-          .get(`/api/kibana/management/saved_objects/${existingObject}`)
+          .get(`/api/opensearch-dashboards/management/saved_objects/${existingObject}`)
           .expect(200)
           .then((resp: Response) => {
             const { body } = resp;
@@ -48,22 +48,22 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 for object that does not exist', async () =>
         await supertest
-          .get(`/api/kibana/management/saved_objects/${nonexistentObject}`)
+          .get(`/api/opensearch-dashboards/management/saved_objects/${nonexistentObject}`)
           .expect(404));
     });
 
-    describe('without kibana index', () => {
+    describe('without opensearch-dashboards index', () => {
       before(
         async () =>
-          // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana',
+          // just in case the opensearch-dashboards server has recreated it
+          await opensearch.indices.delete({
+            index: '.opensearch-dashboards',
             ignore: [404],
           })
       );
 
       it('should return 404 for object that no longer exists', async () =>
-        await supertest.get(`/api/kibana/management/saved_objects/${existingObject}`).expect(404));
+        await supertest.get(`/api/opensearch-dashboards/management/saved_objects/${existingObject}`).expect(404));
     });
   });
 }

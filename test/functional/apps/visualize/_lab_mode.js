@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../src/plugins/visualizations/common/constants';
 
 export default function ({ getService, getPageObjects }) {
@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }) {
 
       // Navigate to advanced setting and disable lab mode
       await PageObjects.header.clickStackManagement();
-      await PageObjects.settings.clickKibanaSettings();
+      await PageObjects.settings.clickOpenSearchDashboardsSettings();
       await PageObjects.settings.toggleAdvancedSettingCheckbox(VISUALIZE_ENABLE_LABS_SETTING);
 
       // Expect the discover still to list that saved visualization in the open list
@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
     after(async () => {
       await PageObjects.discover.closeLoadSaveSearchPanel();
       await PageObjects.header.clickStackManagement();
-      await PageObjects.settings.clickKibanaSettings();
+      await PageObjects.settings.clickOpenSearchDashboardsSettings();
       await PageObjects.settings.clearAdvancedSettings(VISUALIZE_ENABLE_LABS_SETTING);
     });
   });

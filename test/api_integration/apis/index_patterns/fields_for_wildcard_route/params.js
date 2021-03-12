@@ -18,13 +18,13 @@
  */
 
 export default function ({ getService }) {
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const supertest = getService('supertest');
   const randomness = getService('randomness');
 
   describe('params', () => {
-    before(() => esArchiver.load('index_patterns/basic_index'));
-    after(() => esArchiver.unload('index_patterns/basic_index'));
+    before(() => opensearchArchiver.load('index_patterns/basic_index'));
+    after(() => opensearchArchiver.unload('index_patterns/basic_index'));
 
     it('requires a pattern query param', () =>
       supertest.get('/api/index_patterns/_fields_for_wildcard').query({}).expect(400));

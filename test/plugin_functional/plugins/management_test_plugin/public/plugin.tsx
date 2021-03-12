@@ -20,7 +20,7 @@
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch, Route, Link } from 'react-router-dom';
-import { CoreSetup, Plugin } from 'kibana/public';
+import { CoreSetup, Plugin } from 'opensearch-dashboards/public';
 import { ManagementSetup } from '../../../../../src/plugins/management/public';
 
 export class ManagementTestPlugin

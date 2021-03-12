@@ -94,7 +94,7 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(`launchSampleDataSet${id}`);
     }
 
-    async clickAllKibanaPlugins() {
+    async clickAllOpenSearchDashboardsPlugins() {
       await testSubjects.click('allPlugins');
     }
 

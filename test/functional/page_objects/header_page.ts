@@ -32,13 +32,13 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
 
   class HeaderPage {
     public async clickDiscover() {
-      await appsMenu.clickLink('Discover', { category: 'kibana' });
+      await appsMenu.clickLink('Discover', { category: 'opensearchDashboards' });
       await PageObjects.common.waitForTopNavToBeVisible();
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     public async clickVisualize() {
-      await appsMenu.clickLink('Visualize', { category: 'kibana' });
+      await appsMenu.clickLink('Visualize', { category: 'opensearchDashboards' });
       await this.awaitGlobalLoadingIndicatorHidden();
       await retry.waitFor('first breadcrumb to be "Visualize"', async () => {
         const firstBreadcrumb = await globalNav.getFirstBreadcrumb();
@@ -52,7 +52,7 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     public async clickDashboard() {
-      await appsMenu.clickLink('Dashboard', { category: 'kibana' });
+      await appsMenu.clickLink('Dashboard', { category: 'opensearchDashboards' });
       await retry.waitFor('dashboard app to be loaded', async () => {
         const isNavVisible = await testSubjects.exists('top-nav');
         const isLandingPageVisible = await testSubjects.exists('dashboardLandingPage');
@@ -91,9 +91,9 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
       });
     }
 
-    public async awaitKibanaChrome() {
-      log.debug('awaitKibanaChrome');
-      await testSubjects.find('kibanaChrome', defaultFindTimeout * 10);
+    public async awaitOpenSearchDashboardsChrome() {
+      log.debug('awaitOpenSearchDashboardsChrome');
+      await testSubjects.find('opensearchDashboardsChrome', defaultFindTimeout * 10);
     }
   }
 

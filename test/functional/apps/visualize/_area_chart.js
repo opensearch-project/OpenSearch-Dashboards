@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       await security.testUser.setRoles([
-        'kibana_admin',
+        'opensearch_dashboards_admin',
         'long_window_logstash',
         'test_logstash_reader',
       ]);

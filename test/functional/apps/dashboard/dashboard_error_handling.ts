@@ -20,7 +20,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const opensearchArchiver = getService('opensearchArchiver');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
    */
   describe('dashboard error handling', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('dashboard/current/kibana');
+      await opensearchArchiver.loadIfNeeded('dashboard/current/opensearch-dashboards');
       await PageObjects.common.navigateToApp('dashboard');
     });
 

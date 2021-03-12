@@ -30,7 +30,7 @@ export function LoginPageProvider({ getService }: FtrProviderContext) {
     await testSubjects.setValue('loginPassword', pwd);
     await testSubjects.click('loginSubmit');
     await find.waitForDeletedByCssSelector('.kibanaWelcomeLogo');
-    await find.byCssSelector('[data-test-subj="kibanaChrome"]', 60000); // 60 sec waiting
+    await find.byCssSelector('[data-test-subj="opensearchDashboardsChrome"]', 60000); // 60 sec waiting
   };
 
   const samlLogin = async (user: string, pwd: string) => {
@@ -39,7 +39,7 @@ export function LoginPageProvider({ getService }: FtrProviderContext) {
       await find.setValue('input[name="email"]', user);
       await find.setValue('input[type="password"]', pwd);
       await find.clickByCssSelector('.auth0-label-submit');
-      await find.byCssSelector('[data-test-subj="kibanaChrome"]', 60000); // 60 sec waiting
+      await find.byCssSelector('[data-test-subj="opensearchDashboardsChrome"]', 60000); // 60 sec waiting
     } catch (err) {
       log.debug(`${err} \nFailed to find Auth0 login page, trying the Auth0 last login page`);
       await find.clickByCssSelector('.auth0-lock-social-button');

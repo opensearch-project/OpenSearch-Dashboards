@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const PageObjects = getPageObjects(['dashboard', 'common']);
   const browser = getService('browser');
   const globalNav = getService('globalNav');
@@ -37,8 +37,8 @@ export default function ({ getService, getPageObjects }) {
     ];
 
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
-      await kibanaServer.uiSettings.replace({
+      await opensearchArchiver.load('dashboard/current/opensearch-dashboards');
+      await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');

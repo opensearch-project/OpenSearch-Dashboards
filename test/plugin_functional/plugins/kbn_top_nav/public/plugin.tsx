@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin, AppMountParameters } from 'kibana/public';
+import { CoreSetup, Plugin, AppMountParameters } from 'opensearch-dashboards/public';
 import { NavigationPublicPluginSetup } from '../../../../../src/plugins/navigation/public';
 import { AppPluginDependencies } from './types';
 

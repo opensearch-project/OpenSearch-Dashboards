@@ -1,0 +1,6 @@
+{
+  "id": "newsfeed-fixtures",
+  "version": "opensearchDashboards",
+  "server": true,
+  "ui": false
+}

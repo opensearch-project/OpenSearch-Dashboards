@@ -19,34 +19,34 @@
 
 //import path from 'path';
 import { format as formatUrl } from 'url';
-import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
+import { opensearchTestConfig, osdTestConfig, opensearchDashboardsServerTestUser } from '@osd/test';
 import { services } from './services';
 
 export default function () {
   const servers = {
-    kibana: kbnTestConfig.getUrlParts(),
-    elasticsearch: esTestConfig.getUrlParts(),
+    opensearchDashboards: osdTestConfig.getUrlParts(),
+    opensearch: opensearchTestConfig.getUrlParts(),
   };
 
   return {
     servers,
 
-    esTestCluster: {
+    opensearchTestCluster: {
       license: 'oss',
       from: 'snapshot',
       serverArgs: [],
     },
 
-    kbnTestServer: {
+    osdTestServer: {
       buildArgs: [],
       sourceArgs: ['--no-base-path', '--env.name=development'],
       serverArgs: [
         '--logging.json=false',
-        `--server.port=${kbnTestConfig.getPort()}`,
+        `--server.port=${osdTestConfig.getPort()}`,
         '--status.allowAnonymous=true',
-        `--elasticsearch.hosts=${formatUrl(servers.elasticsearch)}`,
-        `--elasticsearch.username=${kibanaServerTestUser.username}`,
-        `--elasticsearch.password=${kibanaServerTestUser.password}`,
+        `--opensearch.hosts=${formatUrl(servers.opensearch)}`,
+        `--opensearch.username=${opensearchDashboardsServerTestUser.username}`,
+        `--opensearch.password=${opensearchDashboardsServerTestUser.password}`,
         `--home.disableWelcomeScreen=true`,
         // Needed for async search functional tests to introduce a delay
         `--data.search.aggs.shardDelay.enabled=true`,
@@ -59,8 +59,8 @@ export default function () {
         `--server.maxPayloadBytes=1679958`,
         // newsfeed mock service
         // `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'newsfeed')}`,
-        // `--newsfeed.service.urlRoot=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
-        // `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json`,
+        // `--newsfeed.service.urlRoot=${servers.opensearchDashboards.protocol}://${servers.opensearchDashboards.hostname}:${servers.opensearchDashboards.port}`,
+        // `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/opensearch-dashboards/v{VERSION}.json`,
       ],
     },
     services,

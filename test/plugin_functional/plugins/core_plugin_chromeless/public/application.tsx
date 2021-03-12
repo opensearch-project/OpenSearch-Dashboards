@@ -32,7 +32,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { AppMountContext, AppMountParameters } from 'kibana/public';
+import { AppMountContext, AppMountParameters } from 'opensearch-dashboards/public';
 
 const Home = () => (
   <EuiPageBody data-test-subj="chromelessAppHome">

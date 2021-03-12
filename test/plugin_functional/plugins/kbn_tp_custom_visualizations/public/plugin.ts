@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, Plugin } from 'kibana/public';
+import { CoreSetup, Plugin } from 'opensearch-dashboards/public';
 import { VisualizationsSetup } from '../../../../../src/plugins/visualizations/public';
 import { SelfChangingEditor } from './self_changing_vis/self_changing_editor';
 import { SelfChangingComponent } from './self_changing_vis/self_changing_components';
