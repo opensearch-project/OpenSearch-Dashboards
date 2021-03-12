@@ -38,7 +38,7 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
 
 test('mappings without index pattern goes to default index', () => {
   const result = createIndexMap({
-    kibanaIndexName: '.kibana',
+    opensearchDashboardsIndexName: '.opensearch-dashboards',
     registry: createRegistry({
       name: 'type1',
       namespaceType: 'single',
@@ -54,7 +54,7 @@ test('mappings without index pattern goes to default index', () => {
     },
   });
   expect(result).toEqual({
-    '.kibana': {
+    '.opensearch-dashboards': {
       typeMappings: {
         type1: {
           properties: {
@@ -70,11 +70,11 @@ test('mappings without index pattern goes to default index', () => {
 
 test(`mappings with custom index pattern doesn't go to default index`, () => {
   const result = createIndexMap({
-    kibanaIndexName: '.kibana',
+    opensearchDashboardsIndexName: '.opensearch-dashboards',
     registry: createRegistry({
       name: 'type1',
       namespaceType: 'single',
-      indexPattern: '.other_kibana',
+      indexPattern: '.other_opensearch_dashboards',
     }),
     indexMap: {
       type1: {
@@ -87,7 +87,7 @@ test(`mappings with custom index pattern doesn't go to default index`, () => {
     },
   });
   expect(result).toEqual({
-    '.other_kibana': {
+    '.other_opensearch_dashboards': {
       typeMappings: {
         type1: {
           properties: {
@@ -103,11 +103,11 @@ test(`mappings with custom index pattern doesn't go to default index`, () => {
 
 test('creating a script gets added to the index pattern', () => {
   const result = createIndexMap({
-    kibanaIndexName: '.kibana',
+    opensearchDashboardsIndexName: '.opensearch-dashboards',
     registry: createRegistry({
       name: 'type1',
       namespaceType: 'single',
-      indexPattern: '.other_kibana',
+      indexPattern: '.other_opensearch_dashboards',
       convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
     }),
     indexMap: {
@@ -121,7 +121,7 @@ test('creating a script gets added to the index pattern', () => {
     },
   });
   expect(result).toEqual({
-    '.other_kibana': {
+    '.other_opensearch_dashboards': {
       script: `ctx._id = ctx._source.type + ':' + ctx._id`,
       typeMappings: {
         type1: {
@@ -137,7 +137,7 @@ test('creating a script gets added to the index pattern', () => {
 });
 
 test('throws when two scripts are defined for an index pattern', () => {
-  const defaultIndex = '.kibana';
+  const defaultIndex = '.opensearch-dashboards';
   const registry = createRegistry(
     {
       name: 'type1',
@@ -169,11 +169,11 @@ test('throws when two scripts are defined for an index pattern', () => {
   };
   expect(() =>
     createIndexMap({
-      kibanaIndexName: defaultIndex,
+      opensearchDashboardsIndexName: defaultIndex,
       registry,
       indexMap,
     })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"convertToAliasScript has been defined more than once for index pattern \\".kibana\\""`
+    `"convertToAliasScript has been defined more than once for index pattern \\".opensearch-dashboards\\""`
   );
 });

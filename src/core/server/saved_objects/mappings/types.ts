@@ -102,7 +102,7 @@ export interface SavedObjectsMappingProperties {
 /**
  * Describe a {@link SavedObjectsTypeMappingDefinition | saved object type mapping} field.
  *
- * Please refer to {@link https://www.elastic.co/guide/en/opensearch/reference/current/mapping-types.html | elasticsearch documentation}
+ * Please refer to {@link https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html | elasticsearch documentation}
  * For the mapping documentation
  *
  * @public

@@ -351,7 +351,7 @@ export class SavedObjectsService
     this.logger.debug('Starting SavedObjects service');
 
     const opensearchDashboardsConfig = await this.coreContext.configService
-      .atPath<OpenSearchDashboardsConfigType>('kibana')
+      .atPath<OpenSearchDashboardsConfigType>('opensearchDashboard')
       .pipe(first())
       .toPromise();
     const client = opensearch.client;
@@ -390,13 +390,13 @@ export class SavedObjectsService
       );
 
       // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
-      this.setupDeps!.opensearch.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+      this.setupDeps!.opensearch.opensearchNodesCompatibilityNodesCompatibility$.subscribe(({ isCompatible, message }) => {
         if (!isCompatible && message) {
           this.logger.error(message);
         }
       });
 
-      await this.setupDeps!.opensearch.esNodesCompatibility$.pipe(
+      await this.setupDeps!.opensearch.opensearchNodesCompatibilityNodesCompatibility$.pipe(
         filter((nodes) => nodes.isCompatible),
         take(1)
       ).toPromise();

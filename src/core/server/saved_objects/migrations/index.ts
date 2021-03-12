@@ -18,7 +18,7 @@
  */
 
 export { MigrationResult } from './core';
-export { OpenSearchDashboardsMigrator, IOpenSearchDashboardsMigrator } from './kibana';
+export { OpenSearchDashboardsMigrator, IOpenSearchDashboardsMigrator } from './opensearch-dashboards';
 export {
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,

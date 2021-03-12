@@ -19,7 +19,7 @@
 
 import { mockUuidv4 } from './__mocks__';
 import { savedObjectsClientMock } from '../../mocks';
-import { SavedObjectReference, SavedObjectsImportRetry } from 'kibana/public';
+import { SavedObjectReference, SavedObjectsImportRetry } from 'opensearch-dashboards/public';
 import { SavedObjectsClientContract, SavedObject } from '../types';
 import { SavedObjectsErrorHelpers } from '..';
 import { checkConflicts } from './check_conflicts';

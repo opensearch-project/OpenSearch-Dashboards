@@ -34,7 +34,7 @@ describe('IndexMigrator', () => {
     testOpts = {
       batchSize: 10,
       client: opensearchClientMock.createOpenSearchClient(),
-      index: '.kibana',
+      index: '.opensearch-dashboards',
       log: loggingSystemMock.create().get(),
       mappingProperties: {},
       pollInterval: 1,
@@ -105,7 +105,7 @@ describe('IndexMigrator', () => {
 
     expect(result).toMatchObject({
       destIndex: '.opensearch-dashboards_1',
-      sourceIndex: '.kibana',
+      sourceIndex: '.opensearch-dashboards',
       status: 'migrated',
     });
   });
@@ -288,7 +288,7 @@ describe('IndexMigrator', () => {
 
     expect(client.indices.create).toHaveBeenCalledWith(expect.any(Object));
     expect(client.indices.updateAliases).toHaveBeenCalledWith({
-      body: { actions: [{ add: { alias: '.kibana', index: '.opensearch-dashboards_1' } }] },
+      body: { actions: [{ add: { alias: '.opensearch-dashboards', index: '.opensearch-dashboards_1' } }] },
     });
   });
 
@@ -307,8 +307,8 @@ describe('IndexMigrator', () => {
     expect(client.indices.updateAliases).toHaveBeenCalledWith({
       body: {
         actions: [
-          { remove: { alias: '.kibana', index: '.opensearch-dashboards_1' } },
-          { add: { alias: '.kibana', index: '.opensearch-dashboards_2' } },
+          { remove: { alias: '.opensearch-dashboards', index: '.opensearch-dashboards_1' } },
+          { add: { alias: '.opensearch-dashboards', index: '.opensearch-dashboards_2' } },
         ],
       },
     });
@@ -401,7 +401,7 @@ function withIndex(
 ) {
   const defaultIndex = {
     '.opensearch-dashboards_1': {
-      aliases: { '.kibana': {} },
+      aliases: { '.opensearch-dashboards': {} },
       mappings: {
         dynamic: 'strict',
         properties: {

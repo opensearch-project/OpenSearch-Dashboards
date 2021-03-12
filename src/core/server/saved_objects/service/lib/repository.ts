@@ -352,14 +352,14 @@ export class SavedObjectsRepository {
         value: {
           method,
           object,
-          ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
+          ...(requiresNamespacesCheck && { opensearchRequestIndex: bulkGetRequestIndexCounter++ }),
         },
       };
     });
 
     const bulkGetDocs = expectedResults
       .filter(isRight)
-      .filter(({ value }) => value.esRequestIndex !== undefined)
+      .filter(({ value }) => value.opensearchRequestIndex !== undefined)
       .map(({ value: { object: { type, id } } }) => ({
         _id: this._serializer.generateRawId(namespace, type, id),
         _index: this.getIndexForType(type),
@@ -387,13 +387,13 @@ export class SavedObjectsRepository {
       let savedObjectNamespaces;
       let versionProperties;
       const {
-        esRequestIndex,
+        opensearchRequestIndex,
         object: { initialNamespaces, version, ...object },
         method,
       } = expectedBulkGetResult.value;
-      if (esRequestIndex !== undefined) {
+      if (opensearchRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
-        const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
+        const actualResult = indexFound ? bulkGetResponse?.body.docs[opensearchRequestIndex] : undefined;
         const docFound = indexFound && actualResult.found === true;
         if (docFound && !this.rawDocExistsInNamespace(actualResult, namespace)) {
           const { id, type } = object;
@@ -422,7 +422,7 @@ export class SavedObjectsRepository {
       }
 
       const expectedResult = {
-        esRequestIndex: bulkRequestIndexCounter++,
+        opensearchRequestIndex: bulkRequestIndexCounter++,
         requestedId: object.id,
         rawMigratedDoc: this._serializer.savedObjectToRaw(
           this._migrator.migrateDocument({
@@ -466,9 +466,9 @@ export class SavedObjectsRepository {
           return expectedResult.error as any;
         }
 
-        const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
+        const { requestedId, rawMigratedDoc, opensearchRequestIndex } = expectedResult.value;
         const { error, ...rawResponse } = Object.values(
-          bulkResponse?.body.items[esRequestIndex]
+          bulkResponse?.body.items[opensearchRequestIndex]
         )[0] as any;
 
         if (error) {
@@ -524,7 +524,7 @@ export class SavedObjectsRepository {
         value: {
           type,
           id,
-          esRequestIndex: bulkGetRequestIndexCounter++,
+          opensearchRequestIndex: bulkGetRequestIndexCounter++,
         },
       };
     });
@@ -552,8 +552,8 @@ export class SavedObjectsRepository {
         return;
       }
 
-      const { type, id, esRequestIndex } = expectedResult.value;
-      const doc = bulkGetResponse?.body.docs[esRequestIndex];
+      const { type, id, opensearchRequestIndex } = expectedResult.value;
+      const doc = bulkGetResponse?.body.docs[opensearchRequestIndex];
       if (doc.found) {
         errors.push({
           id,
@@ -770,7 +770,7 @@ export class SavedObjectsRepository {
       }
     }
 
-    const esOptions = {
+    const opensearchOptions = {
       index: this.getIndicesForTypes(allowedTypes),
       size: perPage,
       from: perPage * (page - 1),
@@ -795,7 +795,7 @@ export class SavedObjectsRepository {
       },
     };
 
-    const { body, statusCode } = await this.client.search<SearchResponse<any>>(esOptions, {
+    const { body, statusCode } = await this.client.search<SearchResponse<any>>(opensearchOptions, {
       ignore: [404],
     });
     if (statusCode === 404) {
@@ -867,7 +867,7 @@ export class SavedObjectsRepository {
           type,
           id,
           fields,
-          esRequestIndex: bulkGetRequestIndexCounter++,
+          opensearchRequestIndex: bulkGetRequestIndexCounter++,
         },
       };
     });
@@ -896,8 +896,8 @@ export class SavedObjectsRepository {
           return expectedResult.error as any;
         }
 
-        const { type, id, esRequestIndex } = expectedResult.value;
-        const doc = bulkGetResponse?.body.docs[esRequestIndex];
+        const { type, id, opensearchRequestIndex } = expectedResult.value;
+        const doc = bulkGetResponse?.body.docs[opensearchRequestIndex];
 
         if (!doc.found || !this.rawDocExistsInNamespace(doc, namespace)) {
           return ({
@@ -1293,7 +1293,7 @@ export class SavedObjectsRepository {
           version,
           documentToSave,
           objectNamespace,
-          ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
+          ...(requiresNamespacesCheck && { opensearchRequestIndex: bulkGetRequestIndexCounter++ }),
         },
       };
     });
@@ -1307,7 +1307,7 @@ export class SavedObjectsRepository {
 
     const bulkGetDocs = expectedBulkGetResults
       .filter(isRight)
-      .filter(({ value }) => value.esRequestIndex !== undefined)
+      .filter(({ value }) => value.opensearchRequestIndex !== undefined)
       .map(({ value: { type, id, objectNamespace } }) => ({
         _id: this._serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
         _index: this.getIndexForType(type),
@@ -1335,7 +1335,7 @@ export class SavedObjectsRepository {
         }
 
         const {
-          esRequestIndex,
+          opensearchRequestIndex,
           id,
           type,
           version,
@@ -1345,9 +1345,9 @@ export class SavedObjectsRepository {
 
         let namespaces;
         let versionProperties;
-        if (esRequestIndex !== undefined) {
+        if (opensearchRequestIndex !== undefined) {
           const indexFound = bulkGetResponse?.statusCode !== 404;
-          const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
+          const actualResult = indexFound ? bulkGetResponse?.body.docs[opensearchRequestIndex] : undefined;
           const docFound = indexFound && actualResult.found === true;
           if (
             !docFound ||
@@ -1378,7 +1378,7 @@ export class SavedObjectsRepository {
           type,
           id,
           namespaces,
-          esRequestIndex: bulkUpdateRequestIndexCounter++,
+          opensearchRequestIndex: bulkUpdateRequestIndexCounter++,
           documentToSave: expectedBulkGetResult.value.documentToSave,
         };
 
@@ -1412,8 +1412,8 @@ export class SavedObjectsRepository {
           return expectedResult.error as any;
         }
 
-        const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;
-        const response = bulkUpdateResponse?.body.items[esRequestIndex];
+        const { type, id, namespaces, documentToSave, opensearchRequestIndex } = expectedResult.value;
+        const response = bulkUpdateResponse?.body.items[opensearchRequestIndex];
         // When a bulk update operation is completed, any fields specified in `_sourceIncludes` will be found in the "get" value of the
         // returned object. We need to retrieve the `originId` if it exists so we can return it to the consumer.
         const { error, _seq_no: seqNo, _primary_term: primaryTerm, get } = Object.values(

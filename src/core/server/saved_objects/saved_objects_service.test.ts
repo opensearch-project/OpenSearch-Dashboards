@@ -208,7 +208,7 @@ describe('SavedObjectsService', () => {
       const setupDeps = createSetupDeps();
       // Create an new subject so that we can control when isCompatible=true
       // is emitted.
-      setupDeps.opensearch.esNodesCompatibility$ = new BehaviorSubject({
+      setupDeps.opensearch.opensearchNodesCompatibility$ = new BehaviorSubject({
         isCompatible: false,
         incompatibleNodes: [],
         warningNodes: [],
@@ -217,7 +217,7 @@ describe('SavedObjectsService', () => {
       await soService.setup(setupDeps);
       soService.start(createStartDeps());
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(0);
-      ((setupDeps.opensearch.esNodesCompatibility$ as any) as BehaviorSubject<
+      ((setupDeps.opensearopensearch.opensearchNodesCompatibility$ as any) as BehaviorSubject<
         NodesVersionCompatibility
       >).next({
         isCompatible: true,

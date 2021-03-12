@@ -26,8 +26,8 @@ import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
 import { opensearchClientMock } from '../../../opensearch/client/mocks';
-import { esKuery } from '../../opensearch_query';
-const { nodeTypes } = esKuery;
+import { opensearchKuery } from '../../opensearch_query';
+const { nodeTypes } = opensearchKuery;
 
 jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
 
@@ -2453,7 +2453,7 @@ describe('SavedObjectsRepository', () => {
           total: 4,
           hits: [
             {
-              _index: '.kibana',
+              _index: '.opensearch-dashboards',
               _id: `${namespace ? `${namespace}:` : ''}index-pattern:logstash-*`,
               _score: 1,
               ...mockVersionProps,
@@ -2470,7 +2470,7 @@ describe('SavedObjectsRepository', () => {
               },
             },
             {
-              _index: '.kibana',
+              _index: '.opensearch-dashboards',
               _id: `${namespace ? `${namespace}:` : ''}config:6.0.0-alpha1`,
               _score: 2,
               ...mockVersionProps,
@@ -2485,7 +2485,7 @@ describe('SavedObjectsRepository', () => {
               },
             },
             {
-              _index: '.kibana',
+              _index: '.opensearch-dashboards',
               _id: `${namespace ? `${namespace}:` : ''}index-pattern:stocks-*`,
               _score: 3,
               ...mockVersionProps,
@@ -2501,7 +2501,7 @@ describe('SavedObjectsRepository', () => {
               },
             },
             {
-              _index: '.kibana',
+              _index: '.opensearch-dashboards',
               _id: `${NAMESPACE_AGNOSTIC_TYPE}:something`,
               _score: 4,
               ...mockVersionProps,
@@ -3120,7 +3120,7 @@ describe('SavedObjectsRepository', () => {
         opensearchClientMock.createSuccessTransportRequestPromise({
           _id: params.id,
           ...mockVersionProps,
-          _index: '.kibana',
+          _index: '.opensearch-dashboards',
           get: {
             found: true,
             _source: {
@@ -3300,7 +3300,7 @@ describe('SavedObjectsRepository', () => {
           opensearchClientMock.createSuccessTransportRequestPromise({
             _id: params.id,
             ...mockVersionProps,
-            _index: '.kibana',
+            _index: '.opensearch-dashboards',
             get: {
               found: true,
               _source: {

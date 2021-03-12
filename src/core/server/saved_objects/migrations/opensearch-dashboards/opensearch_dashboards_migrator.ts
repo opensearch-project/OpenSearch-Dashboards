@@ -104,7 +104,7 @@ export class OpenSearchDashboardsMigrator {
    *
    * @param rerun - If true, method will run a new migration when called again instead of
    * returning the result of the initial migration. This should only be used when factors external
-   * to OpenSearch Dashboards itself alter the kibana index causing the saved objects mappings or data to change
+   * to OpenSearch Dashboards itself alter the .opensearch-dashboards index causing the saved objects mappings or data to change
    * after the OpenSearch Dashboards server performed the initial migration.
    *
    * @remarks When the `rerun` parameter is set to true, no checks are performed to ensure that no migration
@@ -143,9 +143,9 @@ export class OpenSearchDashboardsMigrator {
   }
 
   private runMigrationsInternal() {
-    const kibanaIndexName = this.opensearchDashboardsConfig.index;
+    const opensearchDashboardsIndexName = this.opensearchDashboardsConfig.index;
     const indexMap = createIndexMap({
-      kibanaIndexName,
+      opensearchDashboardsIndexName,
       indexMap: this.mappingProperties,
       registry: this.typeRegistry,
     });
@@ -161,9 +161,9 @@ export class OpenSearchDashboardsMigrator {
         pollInterval: this.savedObjectsConfig.pollInterval,
         scrollDuration: this.savedObjectsConfig.scrollDuration,
         serializer: this.serializer,
-        // Only necessary for the migrator of the kibana index.
+        // Only necessary for the migrator of the opensearch-dashboards index.
         obsoleteIndexTemplatePattern:
-          index === kibanaIndexName ? 'opensearch_dashboards_index_template*' : undefined,
+          index === opensearchDashboardsIndexName ? 'opensearch_dashboards_index_template*' : undefined,
         convertToAliasScript: indexMap[index].script,
       });
     });

@@ -229,7 +229,7 @@ export async function deleteIndex(client: MigrationOpenSearchClient, index: stri
  * is a concrete index. This function will reindex `alias` into a new index, delete the `alias`
  * index, and then create an alias `alias` that points to the new index.
  *
- * @param {CallCluster} callCluster - The connection to ElasticSearch
+ * @param {CallCluster} callCluster - The connection to OpenSearch
  * @param {FullIndexInfo} info - Information about the mappings and name of the new index
  * @param {string} alias - The name of the index being converted to an alias
  */

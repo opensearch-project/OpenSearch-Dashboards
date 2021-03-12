@@ -4,7 +4,7 @@ Migrations are the mechanism by which saved object indices are kept up to date w
 
 ## Migrating the index
 
-When OpenSearch Dashboards boots, prior to serving any requests, it performs a check to see if the kibana index needs to be migrated.
+When OpenSearch Dashboards boots, prior to serving any requests, it performs a check to see if the opensearch-dashboards index needs to be migrated.
 
 - If there are out of date docs, or mapping changes, or the current index is not aliased, the index is migrated.
 - If the OpenSearch Dashboards index does not exist, it is created.
@@ -13,24 +13,24 @@ All of this happens prior to OpenSearch Dashboards serving any http requests.
 
 Here is the gist of what happens if an index migration is necessary:
 
-* If `.kibana` (or whatever the OpenSearch Dashboards index is named) is not an alias, it will be converted to one:
-  * Reindex `.kibana` into `.opensearch-dashboards_1`
-  * Delete `.kibana`
-  * Create an alias `.kibana` that points to `.opensearch-dashboards_1`
+* If `.opensearch-dashboards` (or whatever the OpenSearch Dashboards index is named) is not an alias, it will be converted to one:
+  * Reindex `.opensearch-dashboards` into `.opensearch-dashboards_1`
+  * Delete `.opensearch-dashboards`
+  * Create an alias `.opensearch-dashboards` that points to `.opensearch-dashboards_1`
 * Create a `.opensearch-dashboards_2` index
 * Copy all documents from `.opensearch-dashboards_1` into `.opensearch-dashboards_2`, running them through any applicable migrations
-* Point the `.kibana` alias to `.opensearch-dashboards_2`
+* Point the `.opensearch-dashboards` alias to `.opensearch-dashboards_2`
 
 ## Migrating OpenSearch Dashboards clusters
 
-If OpenSearch Dashboards is being run in a cluster, migrations will be coordinated so that they only run on one OpenSearch Dashboards instance at a time. This is done in a fairly rudimentary way. Let's say we have two OpenSearch Dashboards instances, kibana1 and kibana2.
+If OpenSearch Dashboards is being run in a cluster, migrations will be coordinated so that they only run on one OpenSearch Dashboards instance at a time. This is done in a fairly rudimentary way. Let's say we have two OpenSearch Dashboards instances, opensearch-dashboards-1 and opensearch-dashboards-2.
 
-* kibana1 and kibana2 both start simultaneously and detect that the index requires migration
-* kibana1 begins the migration and creates index `.opensearch-dashboards_4`
-* kibana2 tries to begin the migration, but fails with the error `.opensearch-dashboards_4 already exists`
-* kibana2 logs that it failed to create the migration index, and instead begins polling
-  * Every few seconds, kibana2 instance checks the `.kibana` index to see if it is done migrating
-  * Once `.kibana` is determined to be up to date, the kibana2 instance continues booting
+* opensearch-dashboards-1 and opensearch-dashboards-2 both start simultaneously and detect that the index requires migration
+* opensearch-dashboards-1 begins the migration and creates index `.opensearch-dashboards_4`
+* opensearch-dashboards-2 tries to begin the migration, but fails with the error `.opensearch-dashboards_4 already exists`
+* opensearch-dashboards-2 logs that it failed to create the migration index, and instead begins polling
+  * Every few seconds, opensearch-dashboards-2 instance checks the `.opensearch-dashboards` index to see if it is done migrating
+  * Once `.opensearch-dashboards` is determined to be up to date, the opensearch-dashboards-2 instance continues booting
 
 In this example, if the `.opensearch-dashboards_4` index existed prior to OpenSearch Dashboards booting, the entire migration process will fail, as all OpenSearch Dashboards instances will assume another instance is migrating to the `.opensearch-dashboards_4` index. This problem is only fixable by deleting the `.opensearch-dashboards_4` index.
 
@@ -191,8 +191,8 @@ Note, the migrationVersion property has been added, and it contains information 
 
 The migrations source code is grouped into two folders:
 
-* `core` - Contains index-agnostic, general migration logic, which could be reused for indices other than `.kibana`
-* `kibana` - Contains a relatively light-weight wrapper around core, which provides `.kibana` index-specific logic
+* `core` - Contains index-agnostic, general migration logic, which could be reused for indices other than `.opensearch-dashboards`
+* `opensearch-dashboards` - Contains a relatively light-weight wrapper around core, which provides `.opensearch-dashboards` index-specific logic
 
 Generally, the code eschews classes in favor of functions and basic data structures. The publicly exported code is all class-based, however, in an attempt to conform to OpenSearch Dashboards norms.
 
