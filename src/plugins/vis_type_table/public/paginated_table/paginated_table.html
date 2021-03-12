@@ -2,8 +2,8 @@
   ng-if="sortedRows.length"
   list="sortedRows"
   per-page-prop="perPage"
-  class="kbnAggTable">
-  <div class="kbnAggTable__paginated">
+  class="osdAggTable">
+  <div class="osdAggTable__paginated">
     <table class="table table-condensed">
       <thead data-test-subj="paginated-table-header">
         <tr>
@@ -11,7 +11,7 @@
             scope="col"
             ng-repeat="col in columns"
             ng-click="paginatedTable.sortColumn($index)"
-            kbn-accessible-click
+            osd-accessible-click
             tabindex="0"
             class="{{ col.class }}">
             <span ng-bind="::col.title"></span>
@@ -35,8 +35,8 @@
       </thead>
       <tbody
         data-test-subj="paginated-table-body"
-        kbn-rows="page"
-        kbn-rows-min="page.length"
+        osd-rows="page"
+        osd-rows-min="page.length"
       >
       </tbody>
       <tfoot ng-if="showTotal">

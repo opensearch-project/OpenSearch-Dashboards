@@ -20,11 +20,11 @@
 import $ from 'jquery';
 import angular from 'angular';
 import 'angular-mocks';
-import expect from '@kbn/expect';
+import expect from '@osd/expect';
 
 import { getFieldFormatsRegistry } from '../../../data/public/test_utils';
 import { coreMock } from '../../../../core/public/mocks';
-import { initAngularBootstrap } from '../../../kibana_legacy/public';
+import { initAngularBootstrap } from '../../../opensearch_dashboards_legacy/public';
 import { setUiSettings } from '../../../data/public/services';
 import { setFormatService } from '../services';
 import { getInnerAngular } from '../get_inner_angular';
@@ -47,7 +47,7 @@ describe('Table Vis - AggTableGroup Directive', function () {
   });
 
   const initLocalAngular = () => {
-    const tableVisModule = getInnerAngular('kibana/table_vis', core);
+    const tableVisModule = getInnerAngular('opensearch-dashboards/table_vis', core);
     initTableVisLegacyModule(tableVisModule);
   };
 
@@ -56,7 +56,7 @@ describe('Table Vis - AggTableGroup Directive', function () {
     setFormatService(getFieldFormatsRegistry(core));
     initAngularBootstrap();
     initLocalAngular();
-    angular.mock.module('kibana/table_vis');
+    angular.mock.module('opensearch-dashboards/table_vis');
     angular.mock.inject(($injector) => {
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');
@@ -82,19 +82,19 @@ describe('Table Vis - AggTableGroup Directive', function () {
       direction: null,
     };
     const $el = $(
-      '<kbn-agg-table-group dimensions="dimensions" group="group"></kbn-agg-table-group>'
+      '<osd-agg-table-group dimensions="dimensions" group="group"></osd-agg-table-group>'
     );
 
     $compile($el)($scope);
     $scope.$digest();
 
     // should create one sub-tbale
-    expect($el.find('kbn-agg-table').length).to.be(1);
+    expect($el.find('osd-agg-table').length).to.be(1);
   });
 
   it('renders nothing if the table list is empty', function () {
     const $el = $(
-      '<kbn-agg-table-group dimensions="dimensions" group="group"></kbn-agg-table-group>'
+      '<osd-agg-table-group dimensions="dimensions" group="group"></osd-agg-table-group>'
     );
 
     $scope.group = {
@@ -104,7 +104,7 @@ describe('Table Vis - AggTableGroup Directive', function () {
     $compile($el)($scope);
     $scope.$digest();
 
-    const $subTables = $el.find('kbn-agg-table');
+    const $subTables = $el.find('osd-agg-table');
     expect($subTables.length).to.be(0);
   });
 
@@ -123,15 +123,15 @@ describe('Table Vis - AggTableGroup Directive', function () {
     };
     const group = ($scope.group = tabifiedData.threeTermBucketsWithSplit);
     const $el = $(
-      '<kbn-agg-table-group dimensions="dimensions" group="group"></kbn-agg-table-group>'
+      '<osd-agg-table-group dimensions="dimensions" group="group"></osd-agg-table-group>'
     );
     $compile($el)($scope);
     $scope.$digest();
 
-    const $subTables = $el.find('kbn-agg-table');
+    const $subTables = $el.find('osd-agg-table');
     expect($subTables.length).to.be(3);
 
-    const $subTableHeaders = $el.find('.kbnAggTable__groupHeader');
+    const $subTableHeaders = $el.find('.osdAggTable__groupHeader');
     expect($subTableHeaders.length).to.be(3);
 
     $subTableHeaders.each(function (i) {

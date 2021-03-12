@@ -20,9 +20,9 @@ import _ from 'lodash';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../share/public';
 import aggTableTemplate from './agg_table.html';
 import { getFormatService } from '../services';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
-export function KbnAggTable(config, RecursionHelper) {
+export function OsdAggTable(config, RecursionHelper) {
   return {
     restrict: 'E',
     template: aggTableTemplate,
