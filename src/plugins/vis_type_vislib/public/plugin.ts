@@ -25,7 +25,7 @@ import {
   Plugin,
   IUiSettingsClient,
   PluginInitializerContext,
-} from 'kibana/public';
+} from 'opensearch-dashboards/public';
 
 import { VisTypeXyPluginSetup } from 'src/plugins/vis_type_xy/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
@@ -44,8 +44,8 @@ import {
 } from './vis_type_vislib_vis_types';
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { setFormatService, setDataActions, setKibanaLegacy } from './services';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import { setFormatService, setDataActions, setOpenSearchDashboardsLegacy } from './services';
+import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
 
 export interface VisTypeVislibDependencies {
   uiSettings: IUiSettingsClient;
@@ -63,7 +63,7 @@ export interface VisTypeVislibPluginSetupDependencies {
 /** @internal */
 export interface VisTypeVislibPluginStartDependencies {
   data: DataPublicPluginStart;
-  kibanaLegacy: KibanaLegacyStart;
+  opensearchDashboardsLegacy: OpenSearchDashboardsLegacyStart;
 }
 
 type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies, void>;
@@ -111,9 +111,9 @@ export class VisTypeVislibPlugin implements Plugin<void, void> {
     );
   }
 
-  public start(core: CoreStart, { data, kibanaLegacy }: VisTypeVislibPluginStartDependencies) {
+  public start(core: CoreStart, { data, opensearchDashboardsLegacy }: VisTypeVislibPluginStartDependencies) {
     setFormatService(data.fieldFormats);
     setDataActions(data.actions);
-    setKibanaLegacy(kibanaLegacy);
+    setOpenSearchDashboardsLegacy(opensearchDashboardsLegacy);
   }
 }

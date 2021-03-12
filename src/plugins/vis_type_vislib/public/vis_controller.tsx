@@ -25,7 +25,7 @@ import { VisTypeVislibDependencies } from './plugin';
 import { mountReactNode } from '../../../core/public/utils';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
 import { VisParams, ExprVis } from '../../visualizations/public';
-import { getKibanaLegacy } from './services';
+import { getOpenSearchDashboardsLegacy } from './services';
 
 const legendClassName = {
   top: 'visLib--legend-top',
@@ -71,7 +71,7 @@ export const createVislibVisController = (deps: VisTypeVislibDependencies) => {
         this.destroy();
       }
 
-      getKibanaLegacy().loadFontAwesome();
+      getOpenSearchDashboardsLegacy().loadFontAwesome();
 
       return new Promise(async (resolve) => {
         if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {

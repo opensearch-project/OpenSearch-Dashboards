@@ -18,8 +18,8 @@
  */
 import React, { useMemo } from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { uniq } from 'lodash';
 
 import { ValidationVisOptionsProps } from '../../common';
