@@ -1,22 +1,22 @@
 {
-  "name": "@kbn/test",
+  "name": "@osd/test",
   "version": "1.0.0",
   "private": true,
   "license": "Apache-2.0",
   "main": "./target/index.js",
   "scripts": {
     "build": "babel src --out-dir target --delete-dir-on-start --extensions .ts,.js,.tsx --ignore *.test.js,**/__tests__/** --source-maps=inline",
-    "kbn:bootstrap": "yarn build",
-    "kbn:watch": "yarn build --watch"
+    "osd:bootstrap": "yarn build",
+    "osd:watch": "yarn build --watch"
   },
-  "kibana": {
+  "opensearchDashboards": {
     "devOnly": true
   },
   "devDependencies": {
     "@babel/cli": "^7.10.5",
-    "@kbn/babel-preset": "1.0.0",
-    "@kbn/dev-utils": "1.0.0",
-    "@kbn/utils": "1.0.0",
+    "@osd/babel-preset": "1.0.0",
+    "@osd/dev-utils": "1.0.0",
+    "@osd/utils": "1.0.0",
     "@types/joi": "^13.4.2",
     "@types/lodash": "^4.14.159",
     "@types/parse-link-header": "^1.0.0",
