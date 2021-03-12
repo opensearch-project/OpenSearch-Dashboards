@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 
-import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage, InjectedIntlProps } from '@osd/i18n/react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { IIndexPattern, IFieldType } from '../../../../data/public';

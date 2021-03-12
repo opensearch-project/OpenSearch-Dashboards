@@ -20,14 +20,14 @@
 import _ from 'lodash';
 
 import { FilterManager } from './filter_manager';
-import { esFilters, RangeFilter, RangeFilterParams, IFieldType } from '../../../../data/public';
+import { opensearchFilters, RangeFilter, RangeFilterParams, IFieldType } from '../../../../data/public';
 
 interface SliderValue {
   min?: string | number;
   max?: string | number;
 }
 
-// Convert slider value into ES range filter
+// Convert slider value into OPENSEARCH range filter
 function toRange(sliderValue: SliderValue) {
   return {
     gte: sliderValue.min,
@@ -35,7 +35,7 @@ function toRange(sliderValue: SliderValue) {
   };
 }
 
-// Convert ES range filter into slider value
+// Convert OPENSEARCH range filter into slider value
 function fromRange(range: RangeFilterParams): SliderValue {
   const sliderValue: SliderValue = {};
   if (_.has(range, 'gte')) {
@@ -61,7 +61,7 @@ export class RangeFilterManager extends FilterManager {
    * @return {object} range filter
    */
   createFilter(value: SliderValue): RangeFilter {
-    const newFilter = esFilters.buildRangeFilter(
+    const newFilter = opensearchFilters.buildRangeFilter(
       // TODO: Fix type to be required
       this.indexPattern.fields.getByName(this.fieldName) as IFieldType,
       toRange(value),
@@ -73,16 +73,16 @@ export class RangeFilterManager extends FilterManager {
   }
 
   getValueFromFilterBar(): SliderValue | undefined {
-    const kbnFilters = this.findFilters();
-    if (kbnFilters.length === 0) {
+    const osdFilters = this.findFilters();
+    if (osdFilters.length === 0) {
       return;
     }
 
     let range: RangeFilterParams;
-    if (_.has(kbnFilters[0], 'script')) {
-      range = _.get(kbnFilters[0], 'script.script.params');
+    if (_.has(osdFilters[0], 'script')) {
+      range = _.get(osdFilters[0], 'script.script.params');
     } else {
-      range = _.get(kbnFilters[0], ['range', this.fieldName]);
+      range = _.get(osdFilters[0], ['range', this.fieldName]);
     }
 
     if (!range) {

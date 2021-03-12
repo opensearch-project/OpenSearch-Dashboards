@@ -17,28 +17,28 @@
  * under the License.
  */
 
-export const getSearchSourceMock = (esSearchResponse?: any) =>
+export const getSearchSourceMock = (opensearchSearchResponse?: any) =>
   jest.fn().mockImplementation(() => ({
     setParent: jest.fn(),
     setField: jest.fn(),
     fetch: jest.fn().mockResolvedValue(
-      esSearchResponse
-        ? esSearchResponse
+      opensearchSearchResponse
+        ? opensearchSearchResponse
         : {
-            aggregations: {
-              termsAgg: {
-                buckets: [
-                  {
-                    key: 'Zurich Airport',
-                    doc_count: 691,
-                  },
-                  {
-                    key: 'Xi an Xianyang International Airport',
-                    doc_count: 526,
-                  },
-                ],
-              },
+          aggregations: {
+            termsAgg: {
+              buckets: [
+                {
+                  key: 'Zurich Airport',
+                  doc_count: 691,
+                },
+                {
+                  key: 'Xi an Xianyang International Airport',
+                  doc_count: 526,
+                },
+              ],
             },
-          }
+          },
+        }
     ),
   }));
