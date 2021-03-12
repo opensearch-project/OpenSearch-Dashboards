@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
-import { ChromeStart, DocLinksStart } from 'kibana/public';
+import { ChromeStart, DocLinksStart } from 'opensearch-dashboards/public';
 import { Filter } from '../../../../data/public';
 import { VisualizeServices, VisualizeEditorVisInstance } from '../types';
 

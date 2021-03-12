@@ -89,7 +89,7 @@ describe('useVisualizeAppState', () => {
     expect(visStateToEditorState).toHaveBeenCalledWith(savedVisInstance, mockServices);
     expect(createVisualizeAppState).toHaveBeenCalledWith({
       stateDefaults: visualizeAppStateStub,
-      kbnUrlStateStorage: undefined,
+      osdUrlStateStorage: undefined,
       byValue: false,
     });
     expect(mockServices.data.query.filterManager.setAppFilters).toHaveBeenCalledWith(

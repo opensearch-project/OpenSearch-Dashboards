@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'kibana/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'opensearch-dashboards/server';
 import { capabilitiesProvider } from './capabilities_provider';
 
 export class VisualizeServerPlugin implements Plugin<object, object> {
