@@ -18,18 +18,18 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { EuiButton, EuiSpacer, EuiText, EuiCodeBlock } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { ApplicationStart } from 'kibana/public';
-import { KbnError } from '../../../../kibana_utils/common';
-import { EsError, isEsError } from './types';
-import { IKibanaSearchRequest } from '..';
+import { FormattedMessage } from '@osd/i18n/react';
+import { ApplicationStart } from 'opensearch-dashboards/public';
+import { OsdError } from '../../../../opensearch_dashboards_utils/common';
+import { OpenSearchError, isOpenSearchError } from './types';
+import { IOpenSearchDashboardsSearchRequest } from '..';
 
-export class PainlessError extends KbnError {
+export class PainlessError extends OsdError {
   painlessStack?: string;
-  constructor(err: EsError, request: IKibanaSearchRequest) {
-    const rootCause = getRootCause(err as EsError);
+  constructor(err: OpenSearchError, request: IOpenSearchDashboardsSearchRequest) {
+    const rootCause = getRootCause(err as OpenSearchError);
 
     super(
       i18n.translate('data.painlessError.painlessScriptedFieldErrorMessage', {
@@ -43,7 +43,7 @@ export class PainlessError extends KbnError {
   public getErrorMessage(application: ApplicationStart) {
     function onClick() {
       application.navigateToApp('management', {
-        path: `/kibana/indexPatterns`,
+        path: `/opensearch-dashboards/indexPatterns`,
       });
     }
 
@@ -67,21 +67,21 @@ export class PainlessError extends KbnError {
   }
 }
 
-function getFailedShards(err: EsError) {
+function getFailedShards(err: OpenSearchError) {
   const failedShards =
     err.body?.attributes?.error?.failed_shards ||
     err.body?.attributes?.error?.caused_by?.failed_shards;
   return failedShards ? failedShards[0] : undefined;
 }
 
-function getRootCause(err: EsError) {
+function getRootCause(err: OpenSearchError) {
   return getFailedShards(err)?.reason;
 }
 
-export function isPainlessError(err: Error | EsError) {
-  if (!isEsError(err)) return false;
+export function isPainlessError(err: Error | OpenSearchError) {
+  if (!isOpenSearchError(err)) return false;
 
-  const rootCause = getRootCause(err as EsError);
+  const rootCause = getRootCause(err as OpenSearchError);
   if (!rootCause) return false;
 
   const { lang } = rootCause;

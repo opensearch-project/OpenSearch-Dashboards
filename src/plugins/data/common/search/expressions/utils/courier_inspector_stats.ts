@@ -24,7 +24,7 @@
  * logger.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { SearchResponse } from 'elasticsearch';
 import { ISearchSource } from 'src/plugins/data/public';
 import { RequestStatistics } from 'src/plugins/inspector/common';
@@ -41,7 +41,7 @@ export function getRequestInspectorStats(searchSource: ISearchSource) {
       }),
       value: index.title,
       description: i18n.translate('data.search.searchSource.indexPatternDescription', {
-        defaultMessage: 'The index pattern that connected to the Elasticsearch indices.',
+        defaultMessage: 'The index pattern that connected to the OpenSearch indices.',
       }),
     };
     stats.indexPatternId = {
@@ -50,8 +50,8 @@ export function getRequestInspectorStats(searchSource: ISearchSource) {
       }),
       value: index.id!,
       description: i18n.translate('data.search.searchSource.indexPatternIdDescription', {
-        defaultMessage: 'The ID in the {kibanaIndexPattern} index.',
-        values: { kibanaIndexPattern: '.kibana' },
+        defaultMessage: 'The ID in the {opensearchDashboardsIndexPattern} index.',
+        values: { opensearchDashboardsIndexPattern: '.opensearch-dashboards' },
       }),
     };
   }
@@ -118,7 +118,7 @@ export function getResponseInspectorStats(
       }),
       description: i18n.translate('data.search.searchSource.requestTimeDescription', {
         defaultMessage:
-          'The time of the request from the browser to Elasticsearch and back. ' +
+          'The time of the request from the browser to OpenSearch and back. ' +
           'Does not include the time the requested waited in the queue.',
       }),
     };

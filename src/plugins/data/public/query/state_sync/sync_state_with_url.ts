@@ -19,24 +19,24 @@
 
 import {
   createStateContainer,
-  IKbnUrlStateStorage,
+  IOsdUrlStateStorage,
   syncState,
-} from '../../../../kibana_utils/public';
+} from '../../../../opensearch_dashboards_utils/public';
 import { QuerySetup, QueryStart } from '../query_service';
 import { connectToQueryState } from './connect_to_query_state';
 import { QueryState } from './types';
-import { FilterStateStore } from '../../../common/es_query/filters';
+import { FilterStateStore } from '../../../common/opensearch_query/filters';
 
 const GLOBAL_STATE_STORAGE_KEY = '_g';
 
 /**
  * Helper to setup syncing of global data with the URL
  * @param QueryService: either setup or start
- * @param kbnUrlStateStorage to use for syncing
+ * @param osdUrlStateStorage to use for syncing
  */
 export const syncQueryStateWithUrl = (
   query: Pick<QueryStart | QuerySetup, 'filterManager' | 'timefilter' | 'queryString' | 'state$'>,
-  kbnUrlStateStorage: IKbnUrlStateStorage
+  osdUrlStateStorage: IOsdUrlStateStorage
 ) => {
   const {
     timefilter: { timefilter },
@@ -49,7 +49,7 @@ export const syncQueryStateWithUrl = (
   };
 
   // retrieve current state from `_g` url
-  const initialStateFromUrl = kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY);
+  const initialStateFromUrl = osdUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY);
 
   // remember whether there was info in the URL
   const hasInheritedQueryFromUrl = Boolean(
@@ -72,7 +72,7 @@ export const syncQueryStateWithUrl = (
   // if there weren't any initial state in url,
   // then put _g key into url
   if (!initialStateFromUrl) {
-    kbnUrlStateStorage.set<QueryState>(GLOBAL_STATE_STORAGE_KEY, initialState, {
+    osdUrlStateStorage.set<QueryState>(GLOBAL_STATE_STORAGE_KEY, initialState, {
       replace: true,
     });
   }
@@ -81,7 +81,7 @@ export const syncQueryStateWithUrl = (
   globalQueryStateContainer.set(initialState);
 
   const { start, stop: stopSyncingWithUrl } = syncState({
-    stateStorage: kbnUrlStateStorage,
+    stateStorage: osdUrlStateStorage,
     stateContainer: {
       ...globalQueryStateContainer,
       set: (state) => {

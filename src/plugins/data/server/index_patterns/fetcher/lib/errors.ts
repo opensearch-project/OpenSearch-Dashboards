@@ -20,7 +20,7 @@
 import Boom from 'boom';
 import { get } from 'lodash';
 
-const ERR_ES_INDEX_NOT_FOUND = 'index_not_found_exception';
+const ERR_OPENSEARCH_INDEX_NOT_FOUND = 'index_not_found_exception';
 const ERR_NO_MATCHING_INDICES = 'no_matching_indices';
 
 /**
@@ -29,8 +29,8 @@ const ERR_NO_MATCHING_INDICES = 'no_matching_indices';
  *  @param  {Any}  err
  *  @return {Boolean}
  */
-export function isEsIndexNotFoundError(err: any) {
-  return get(err, ['body', 'error', 'type']) === ERR_ES_INDEX_NOT_FOUND;
+export function isOpenSearchIndexNotFoundError(err: any) {
+  return get(err, ['body', 'error', 'type']) === ERR_OPENSEARCH_INDEX_NOT_FOUND;
 }
 
 /**
@@ -61,8 +61,8 @@ export function isNoMatchingIndicesError(err: any) {
  *  @param  {Array<String>|String} indices
  *  @return {Boom}
  */
-export function convertEsError(indices: string[] | string, error: any) {
-  if (isEsIndexNotFoundError(error)) {
+export function convertOpenSearchError(indices: string[] | string, error: any) {
+  if (isOpenSearchIndexNotFoundError(error)) {
     return createNoMatchingIndicesError(indices);
   }
 

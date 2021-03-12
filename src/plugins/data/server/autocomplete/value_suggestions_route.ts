@@ -18,8 +18,8 @@
  */
 
 import { get, map } from 'lodash';
-import { schema } from '@kbn/config-schema';
-import { IRouter, SharedGlobalConfig } from 'kibana/server';
+import { schema } from '@osd/config-schema';
+import { IRouter, SharedGlobalConfig } from 'opensearch-dashboards/server';
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -33,7 +33,7 @@ export function registerValueSuggestionsRoute(
 ) {
   router.post(
     {
-      path: '/api/kibana/suggestions/values/{index}',
+      path: '/api/opensearch-dashboards/suggestions/values/{index}',
       validate: {
         params: schema.object(
           {
@@ -59,8 +59,8 @@ export function registerValueSuggestionsRoute(
       const signal = getRequestAbortedSignal(request.events.aborted$);
 
       const autocompleteSearchOptions = {
-        timeout: `${config.kibana.autocompleteTimeout.asMilliseconds()}ms`,
-        terminate_after: config.kibana.autocompleteTerminateAfter.asMilliseconds(),
+        timeout: `${config.opensearchDashboards.autocompleteTimeout.asMilliseconds()}ms`,
+        terminate_after: config.opensearchDashboards.autocompleteTerminateAfter.asMilliseconds(),
       };
 
       const indexPattern = await findIndexPatternById(context.core.savedObjects.client, index);

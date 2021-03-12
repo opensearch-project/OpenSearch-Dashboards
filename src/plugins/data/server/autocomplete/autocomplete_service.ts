@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { TypeOf } from '@osd/config-schema';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'opensearch-dashboards/server';
 import { registerRoutes } from './routes';
 import { ConfigSchema, configSchema } from '../../config';
 
@@ -36,5 +36,5 @@ export class AutocompleteService implements Plugin<void> {
       registerRoutes(core, this.initializerContext.config.legacy.globalConfig$);
   }
 
-  public start() {}
+  public start() { }
 }

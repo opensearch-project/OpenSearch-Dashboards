@@ -18,7 +18,7 @@
  */
 
 import React, { Component, RefObject, createRef } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import classNames from 'classnames';
 import {
@@ -33,13 +33,13 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { debounce, compact, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
 import { IDataPluginServices, IIndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
-import { KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
+import { OpenSearchDashboardsReactContextValue, toMountPoint } from '../../../../opensearch_dashboards_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
@@ -67,7 +67,7 @@ export interface QueryStringInputProps {
 }
 
 interface Props extends QueryStringInputProps {
-  kibana: KibanaReactContextValue<IDataPluginServices>;
+  opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
 }
 
 interface State {
@@ -111,7 +111,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
 
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
-  private services = this.props.kibana.services;
+  private services = this.props.opensearchDashboards.services;
   private componentIsUnmounting = false;
   private queryBarInputDivRefInstance: RefObject<HTMLDivElement> = createRef();
 
@@ -368,13 +368,13 @@ export default class QueryStringInputUI extends Component<Props, State> {
       'field' in suggestion &&
       suggestion.field.subType &&
       suggestion.field.subType.nested &&
-      !this.services.storage.get('kibana.KQLNestedQuerySyntaxInfoOptOut')
+      !this.services.storage.get('opensearchDashboards.KQLNestedQuerySyntaxInfoOptOut')
     ) {
       const { notifications, docLinks } = this.services;
 
       const onKQLNestedQuerySyntaxInfoOptOut = (toast: Toast) => {
         if (!this.services.storage) return;
-        this.services.storage.set('kibana.KQLNestedQuerySyntaxInfoOptOut', true);
+        this.services.storage.set('opensearchDashboards.KQLNestedQuerySyntaxInfoOptOut', true);
         notifications!.toasts.remove(toast);
       };
 
@@ -447,11 +447,11 @@ export default class QueryStringInputUI extends Component<Props, State> {
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
     // UI component's change handler.
-    this.services.http.post('/api/kibana/kql_opt_in_stats', {
+    this.services.http.post('/api/opensearch-dashboards/kql_opt_in_stats', {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    this.services.storage.set('kibana.userQueryLanguage', language);
+    this.services.storage.set('opensearchDashboards.userQueryLanguage', language);
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
@@ -593,12 +593,12 @@ export default class QueryStringInputUI extends Component<Props, State> {
 
   public render() {
     const isSuggestionsVisible = this.state.isSuggestionsVisible && {
-      'aria-controls': 'kbnTypeahead__items',
-      'aria-owns': 'kbnTypeahead__items',
+      'aria-controls': 'osdTypeahead__items',
+      'aria-owns': 'osdTypeahead__items',
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
     const className = classNames(
-      'euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap',
+      'euiFormControlLayout euiFormControlLayout--group osdQueryBar__wrap',
       this.props.className
     );
 
@@ -619,7 +619,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
           >
             <div
               role="search"
-              className="euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap"
+              className="euiFormControlLayout__childrenWrapper osdQueryBar__textareaWrap"
               ref={this.queryBarInputDivRefInstance}
             >
               <EuiTextArea
@@ -636,7 +636,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
                 onClick={this.onClickInput}
                 onBlur={this.onInputBlur}
                 onFocus={this.handleOnFocus}
-                className="kbnQueryBar__textarea"
+                className="osdQueryBar__textarea"
                 fullWidth
                 rows={1}
                 id={this.textareaId}
@@ -655,7 +655,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
                   values: { pageType: this.services.appName },
                 })}
                 aria-autocomplete="list"
-                aria-controls={this.state.isSuggestionsVisible ? 'kbnTypeahead__items' : undefined}
+                aria-controls={this.state.isSuggestionsVisible ? 'osdTypeahead__items' : undefined}
                 aria-activedescendant={
                   this.state.isSuggestionsVisible && typeof this.state.index === 'number'
                     ? `suggestion-${this.state.index}`

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'opensearch-dashboards/server';
 import { IFieldType, IndexPatternAttributes, SavedObject } from '../../common';
 
 export const getFieldByName = (

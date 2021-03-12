@@ -18,7 +18,7 @@
  */
 
 export * from './aggs';
-export * from './es_search';
+export * from './opensearch_search';
 export * from './expressions';
 export * from './search_source';
 export * from './tabify';

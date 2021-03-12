@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { OSD_FIELD_TYPES } from '../../../../common';
 import { BaseAggParams } from '../types';
 
 const averageTitle = i18n.translate('data.search.aggs.metrics.averageTitle', {
@@ -45,7 +45,7 @@ export const getAvgMetricAgg = () => {
       {
         name: 'field',
         type: 'field',
-        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM],
+        filterFieldTypes: [OSD_FIELD_TYPES.NUMBER, OSD_FIELD_TYPES.HISTOGRAM],
       },
     ],
   });

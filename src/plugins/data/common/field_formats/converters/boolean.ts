@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { i18n } from '@osd/i18n';
+import { OSD_FIELD_TYPES } from '../../osd_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
@@ -28,7 +28,7 @@ export class BoolFormat extends FieldFormat {
   static title = i18n.translate('data.fieldFormats.boolean.title', {
     defaultMessage: 'Boolean',
   });
-  static fieldType = [KBN_FIELD_TYPES.BOOLEAN, KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
+  static fieldType = [OSD_FIELD_TYPES.BOOLEAN, OSD_FIELD_TYPES.NUMBER, OSD_FIELD_TYPES.STRING];
 
   textConvert: TextContextTypeConvert = (value) => {
     if (typeof value === 'string') {

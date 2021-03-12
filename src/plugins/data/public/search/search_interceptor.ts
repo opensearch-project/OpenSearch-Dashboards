@@ -20,18 +20,18 @@
 import { get, trimEnd, debounce } from 'lodash';
 import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
-import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
+import { CoreStart, CoreSetup, ToastsSetup } from 'opensearch-dashboards/public';
 import {
   getCombinedSignal,
   AbortError,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
+  IOpenSearchDashboardsSearchRequest,
+  IOpenSearchDashboardsSearchResponse,
   ISearchOptions,
-  ES_SEARCH_STRATEGY,
+  OPENSEARCH_SEARCH_STRATEGY,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
 import { SearchTimeoutError, PainlessError, isPainlessError, TimeoutErrorMode } from './errors';
-import { toMountPoint } from '../../../kibana_react/public';
+import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 
 export interface SearchInterceptorDeps {
   http: CoreSetup['http'];
@@ -84,7 +84,7 @@ export class SearchInterceptor {
    */
   protected handleSearchError(
     e: any,
-    request: IKibanaSearchRequest,
+    request: IOpenSearchDashboardsSearchRequest,
     timeoutSignal: AbortSignal,
     appAbortSignal?: AbortSignal
   ): Error {
@@ -109,12 +109,12 @@ export class SearchInterceptor {
    * @internal
    */
   protected runSearch(
-    request: IKibanaSearchRequest,
+    request: IOpenSearchDashboardsSearchRequest,
     signal: AbortSignal,
     strategy?: string
-  ): Observable<IKibanaSearchResponse> {
+  ): Observable<IOpenSearchDashboardsSearchResponse> {
     const { id, ...searchRequest } = request;
-    const path = trimEnd(`/internal/search/${strategy || ES_SEARCH_STRATEGY}/${id || ''}`, '/');
+    const path = trimEnd(`/internal/search/${strategy || OPENSEARCH_SEARCH_STRATEGY}/${id || ''}`, '/');
     const body = JSON.stringify(searchRequest);
     return from(
       this.deps.http.fetch({
@@ -194,9 +194,9 @@ export class SearchInterceptor {
    * @returns `Observalbe` emitting the search response or an error.
    */
   public search(
-    request: IKibanaSearchRequest,
+    request: IOpenSearchDashboardsSearchRequest,
     options?: ISearchOptions
-  ): Observable<IKibanaSearchResponse> {
+  ): Observable<IOpenSearchDashboardsSearchResponse> {
     // Defer the following logic until `subscribe` is actually called
     return defer(() => {
       if (options?.abortSignal?.aborted) {

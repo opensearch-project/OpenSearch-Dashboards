@@ -46,7 +46,7 @@ export function convertRequestBody(
 }
 
 interface CallMsearchDependencies {
-  esClient: IScopedClusterClient;
+  opensearchClient: IScopedClusterClient;
   globalConfig$: Observable<SharedGlobalConfig>;
   uiSettings: IUiSettingsClient;
 }
@@ -63,7 +63,7 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
     body: MsearchRequestBody;
     signal?: AbortSignal;
   }): Promise<MsearchResponse> => {
-    const { esClient, globalConfig$, uiSettings } = dependencies;
+    const { opensearchClient, globalConfig$, uiSettings } = dependencies;
 
     // get shardTimeout
     const config = await globalConfig$.pipe(first()).toPromise();
@@ -75,7 +75,7 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
     const body = convertRequestBody(params.body, timeout);
 
     const promise = shimAbortSignal(
-      esClient.asCurrentUser.msearch(
+      opensearchClient.asCurrentUser.msearch(
         {
           body,
         },

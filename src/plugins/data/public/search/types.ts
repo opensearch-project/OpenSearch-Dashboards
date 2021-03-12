@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PackageInfo } from 'kibana/server';
+import { PackageInfo } from 'opensearch-dashboards/server';
 import { ISearchInterceptor } from './search_interceptor';
 import { SearchUsageCollector } from './collectors';
 import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';

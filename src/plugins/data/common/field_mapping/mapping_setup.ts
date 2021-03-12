@@ -20,18 +20,18 @@
 import { mapValues, isString } from 'lodash';
 import { FieldMappingSpec, MappingObject } from './types';
 
-// import from ./common/types to prevent circular dependency of kibana_utils <-> data plugin
-import { ES_FIELD_TYPES } from '../../../data/common/types';
+// import from ./common/types to prevent circular dependency of opensearch_dashboards_utils <-> data plugin
+import { OPENSEARCH_FIELD_TYPES } from '../../../data/common/types';
 
 /** @private */
-type ShorthandFieldMapObject = FieldMappingSpec | ES_FIELD_TYPES | 'json';
+type ShorthandFieldMapObject = FieldMappingSpec | OPENSEARCH_FIELD_TYPES | 'json';
 
 /** @public */
 export const expandShorthand = (sh: Record<string, ShorthandFieldMapObject>): MappingObject => {
   return mapValues(sh, (val: ShorthandFieldMapObject) => {
     const fieldMap = isString(val) ? { type: val } : val;
     const json: FieldMappingSpec = {
-      type: ES_FIELD_TYPES.TEXT,
+      type: OPENSEARCH_FIELD_TYPES.TEXT,
       _serialize(v) {
         if (v) return JSON.stringify(v);
       },

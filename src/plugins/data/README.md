@@ -67,7 +67,7 @@ It contains sub-services for each of those configurations:
     data.query.state$.subscribe(() => {
 
         // Constuct the query portion of the search request
-        const query = data.query.getEsQuery(indexPattern);
+        const query = data.query.getOpenSearchQuery(indexPattern);
         
         // Construct a request
         const request = {
@@ -91,11 +91,11 @@ It contains sub-services for each of those configurations:
 
 ## Search
 
-Provides access to Elasticsearch using the high-level `SearchSource` API or low-level `Search Strategies`.
+Provides access to OpenSearch using the high-level `SearchSource` API or low-level `Search Strategies`.
 
 ### SearchSource
 
-The `SearchSource` API is a convenient way to construct and run an Elasticsearch search query.
+The `SearchSource` API is a convenient way to construct and run an OpenSearch search query.
 
 ```.tsx
 

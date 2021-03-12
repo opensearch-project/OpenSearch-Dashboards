@@ -20,7 +20,7 @@
 import dateMath from '@elastic/datemath';
 import classNames from 'classnames';
 import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import {
   EuiButton,
@@ -33,16 +33,16 @@ import {
 } from '@elastic/eui';
 // @ts-ignore
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { Toast } from 'src/core/public';
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
-import { useKibana, toMountPoint, withKibana } from '../../../../kibana_react/public';
+import { useOpenSearchDashboards, toMountPoint, withOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import QueryStringInputUI from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
 
-const QueryStringInput = withKibana(QueryStringInputUI);
+const QueryStringInput = withOpenSearchDashboards(QueryStringInputUI);
 
 // @internal
 export interface QueryBarTopRowProps {
@@ -76,8 +76,8 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
 
-  const kibana = useKibana<IDataPluginServices>();
-  const { uiSettings, notifications, storage, appName, docLinks } = kibana.services;
+  const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
+  const { uiSettings, notifications, storage, appName, docLinks } = opensearchDashboards.services;
 
   const kueryQuerySyntaxLink: string = docLinks!.links.query.kueryQuerySyntax;
 
@@ -279,9 +279,9 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
         };
       });
 
-    const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper', {
+    const wrapperClasses = classNames('osdQueryBar__datePickerWrapper', {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      'kbnQueryBar__datePickerWrapper-isHidden': isQueryInputFocused,
+      'osdQueryBar__datePickerWrapper-isHidden': isQueryInputFocused,
     });
 
     return (
@@ -299,7 +299,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           commonlyUsedRanges={commonlyUsedRanges}
           dateFormat={uiSettings!.get('dateFormat')}
           isAutoRefreshOnly={props.showAutoRefreshOnly}
-          className="kbnQueryBar__datePicker"
+          className="osdQueryBar__datePicker"
         />
       </EuiFlexItem>
     );
@@ -311,7 +311,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     if (
       language === 'kuery' &&
       typeof query === 'string' &&
-      (!storage || !storage.get('kibana.luceneSyntaxWarningOptOut')) &&
+      (!storage || !storage.get('opensearchDashboards.luceneSyntaxWarningOptOut')) &&
       doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {
       const toast = notifications!.toasts.addWarning({
@@ -324,7 +324,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
               <FormattedMessage
                 id="data.query.queryBar.luceneSyntaxWarningMessage"
                 defaultMessage="It looks like you may be trying to use Lucene query syntax, although you
-               have Kibana Query Language (KQL) selected. Please review the KQL docs {link}."
+               have opensearchDashboards Query Language (KQL) selected. Please review the KQL docs {link}."
                 values={{
                   link: (
                     <EuiLink href={kueryQuerySyntaxLink} target="_blank">
@@ -355,12 +355,12 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
 
   function onLuceneSyntaxWarningOptOut(toast: Toast) {
     if (!storage) return;
-    storage.set('kibana.luceneSyntaxWarningOptOut', true);
+    storage.set('opensearchDashboards.luceneSyntaxWarningOptOut', true);
     notifications!.toasts.remove(toast);
   }
 
-  const classes = classNames('kbnQueryBar', {
-    'kbnQueryBar--withDatePicker': props.showDatePicker,
+  const classes = classNames('osdQueryBar', {
+    'osdQueryBar--withDatePicker': props.showDatePicker,
   });
 
   return (

@@ -24,10 +24,10 @@ import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
 import { Filter, FilterStateStore, UI_SETTINGS } from '../../../common';
 import { coreMock } from '../../../../../core/public/mocks';
 import {
-  createKbnUrlStateStorage,
-  IKbnUrlStateStorage,
+  createOsdUrlStateStorage,
+  IOsdUrlStateStorage,
   Storage,
-} from '../../../../kibana_utils/public';
+} from '../../../../opensearch_dashboards_utils/public';
 import { QueryService, QueryStart } from '../query_service';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { TimefilterContract } from '../timefilter';
@@ -56,7 +56,7 @@ describe('sync_query_state_with_url', () => {
   let queryServiceStart: QueryStart;
   let filterManager: FilterManager;
   let timefilter: TimefilterContract;
-  let kbnUrlStateStorage: IKbnUrlStateStorage;
+  let osdUrlStateStorage: IOsdUrlStateStorage;
   let history: History;
 
   let filterManagerChangeSub: Subscription;
@@ -87,7 +87,7 @@ describe('sync_query_state_with_url', () => {
 
     window.location.href = '/';
     history = createBrowserHistory();
-    kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
+    osdUrlStateStorage = createOsdUrlStateStorage({ useHash: false, history });
 
     gF = getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1');
     aF = getFilter(FilterStateStore.APP_STATE, true, true, 'key3', 'value3');
@@ -97,9 +97,9 @@ describe('sync_query_state_with_url', () => {
   });
 
   test('url is actually changed when data in services changes', () => {
-    const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
+    const { stop } = syncQueryStateWithUrl(queryServiceStart, osdUrlStateStorage);
     filterManager.setFilters([gF, aF]);
-    kbnUrlStateStorage.flush(); // sync force location change
+    osdUrlStateStorage.flush(); // sync force location change
     expect(history.location.hash).toMatchInlineSnapshot(
       `"#?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!t,index:'logstash-*',key:query,negate:!t,type:custom,value:'%7B%22match%22:%7B%22key1%22:%22value1%22%7D%7D'),query:(match:(key1:value1)))),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))"`
     );
@@ -107,16 +107,16 @@ describe('sync_query_state_with_url', () => {
   });
 
   test('when filters change, global filters synced to urlStorage', () => {
-    const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
+    const { stop } = syncQueryStateWithUrl(queryServiceStart, osdUrlStateStorage);
     filterManager.setFilters([gF, aF]);
-    expect(kbnUrlStateStorage.get<QueryState>('_g')?.filters).toHaveLength(1);
+    expect(osdUrlStateStorage.get<QueryState>('_g')?.filters).toHaveLength(1);
     stop();
   });
 
   test('when time range changes, time synced to urlStorage', () => {
-    const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
+    const { stop } = syncQueryStateWithUrl(queryServiceStart, osdUrlStateStorage);
     timefilter.setTime({ from: 'now-30m', to: 'now' });
-    expect(kbnUrlStateStorage.get<QueryState>('_g')?.time).toEqual({
+    expect(osdUrlStateStorage.get<QueryState>('_g')?.time).toEqual({
       from: 'now-30m',
       to: 'now',
     });
@@ -124,9 +124,9 @@ describe('sync_query_state_with_url', () => {
   });
 
   test('when refresh interval changes, refresh interval is synced to urlStorage', () => {
-    const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
+    const { stop } = syncQueryStateWithUrl(queryServiceStart, osdUrlStateStorage);
     timefilter.setRefreshInterval({ pause: true, value: 100 });
-    expect(kbnUrlStateStorage.get<QueryState>('_g')?.refreshInterval).toEqual({
+    expect(osdUrlStateStorage.get<QueryState>('_g')?.refreshInterval).toEqual({
       pause: true,
       value: 100,
     });
@@ -134,8 +134,8 @@ describe('sync_query_state_with_url', () => {
   });
 
   test('when url is changed, filters synced back to filterManager', () => {
-    const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
-    kbnUrlStateStorage.cancel(); // stop initial syncing pending update
+    const { stop } = syncQueryStateWithUrl(queryServiceStart, osdUrlStateStorage);
+    osdUrlStateStorage.cancel(); // stop initial syncing pending update
     history.push(pathWithFilter);
     expect(filterManager.getGlobalFilters()).toHaveLength(1);
     stop();
@@ -146,7 +146,7 @@ describe('sync_query_state_with_url', () => {
 
     const { stop, hasInheritedQueryFromUrl } = syncQueryStateWithUrl(
       queryServiceStart,
-      kbnUrlStateStorage
+      osdUrlStateStorage
     );
     expect(hasInheritedQueryFromUrl).toBe(true);
     expect(filterManager.getGlobalFilters()).toHaveLength(1);
@@ -154,7 +154,7 @@ describe('sync_query_state_with_url', () => {
   });
 
   test("url changes shouldn't trigger services updates if data didn't change", () => {
-    const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
+    const { stop } = syncQueryStateWithUrl(queryServiceStart, osdUrlStateStorage);
     filterManagerChangeTriggered.mockClear();
 
     history.push(pathWithFilter);
@@ -165,10 +165,10 @@ describe('sync_query_state_with_url', () => {
     stop();
   });
 
-  test("if data didn't change, kbnUrlStateStorage.set shouldn't be called", () => {
-    const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
+  test("if data didn't change, osdUrlStateStorage.set shouldn't be called", () => {
+    const { stop } = syncQueryStateWithUrl(queryServiceStart, osdUrlStateStorage);
     filterManager.setFilters([gF, aF]);
-    const spy = jest.spyOn(kbnUrlStateStorage, 'set');
+    const spy = jest.spyOn(osdUrlStateStorage, 'set');
     filterManager.setFilters([gF]); // global filters didn't change
     expect(spy).not.toBeCalled();
     stop();

@@ -21,7 +21,7 @@ import { EuiListGroupItem, EuiConfirmModal, EuiOverlayMask, EuiIconTip } from '@
 
 import React, { Fragment, useState } from 'react';
 import classNames from 'classnames';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { SavedQuery } from '../..';
 
 interface Props {
@@ -59,13 +59,13 @@ export const SavedQueryListItem = ({
     ? `load-saved-query-${savedQuery.attributes.title}-button saved-query-list-item-selected`
     : `load-saved-query-${savedQuery.attributes.title}-button`;
 
-  const classes = classNames('kbnSavedQueryListItem', {
-    'kbnSavedQueryListItem-selected': isSelected,
+  const classes = classNames('osdSavedQueryListItem', {
+    'osdSavedQueryListItem-selected': isSelected,
   });
 
   const label = (
-    <span className="kbnSavedQueryListItem__label">
-      <span className="kbnSavedQueryListItem__labelText">{savedQuery.attributes.title}</span>{' '}
+    <span className="osdSavedQueryListItem__label">
+      <span className="osdSavedQueryListItem__labelText">{savedQuery.attributes.title}</span>{' '}
       {savedQuery.attributes.description && (
         <EuiIconTip
           type="iInCircle"

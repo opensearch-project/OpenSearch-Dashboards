@@ -18,7 +18,7 @@
  */
 
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
-import { InjectedIntl } from '@kbn/i18n/react';
+import { InjectedIntl } from '@osd/i18n/react';
 import classNames from 'classnames';
 import React, { MouseEvent, useState, useEffect } from 'react';
 import { IUiSettingsClient } from 'src/core/public';

@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { EuiCode, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { ShardFailure } from './shard_failure_types';
 
 export function getFailurePropsForSummary(

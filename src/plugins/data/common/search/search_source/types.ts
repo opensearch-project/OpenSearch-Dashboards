@@ -43,7 +43,7 @@ export interface ISearchStartSearchSource {
   createEmpty: () => ISearchSource;
 }
 
-export type EsQuerySearchAfter = [string | number, string | number];
+export type OpenSearchQuerySearchAfter = [string | number, string | number];
 
 export enum SortDirection {
   asc = 'asc',
@@ -55,7 +55,7 @@ export interface SortDirectionNumeric {
   numeric_type?: 'double' | 'long' | 'date' | 'date_nanos';
 }
 
-export type EsQuerySortValue = Record<string, SortDirection | SortDirectionNumeric>;
+export type OpenSearchQuerySortValue = Record<string, SortDirection | SortDirectionNumeric>;
 
 /**
  * search source fields
@@ -71,9 +71,9 @@ export interface SearchSourceFields {
    */
   filter?: Filter[] | Filter | (() => Filter[] | Filter | undefined);
   /**
-   * {@link EsQuerySortValue}
+   * {@link OpenSearchQuerySortValue}
    */
-  sort?: EsQuerySortValue | EsQuerySortValue[];
+  sort?: OpenSearchQuerySortValue | OpenSearchQuerySortValue[];
   highlight?: any;
   highlightAll?: boolean;
   /**
@@ -89,7 +89,7 @@ export interface SearchSourceFields {
    * {@link IndexPatternService}
    */
   index?: IndexPattern;
-  searchAfter?: EsQuerySearchAfter;
+  searchAfter?: OpenSearchQuerySearchAfter;
   timeout?: string;
   terminate_after?: number;
 }

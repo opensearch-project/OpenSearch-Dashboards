@@ -18,13 +18,13 @@
  */
 
 import { compact } from 'lodash';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
-import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
+import { withOpenSearchDashboards, OpenSearchDashboardsReactContextValue } from '../../../../opensearch_dashboards_react/public';
 
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
@@ -35,7 +35,7 @@ import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
 
 interface SearchBarInjectedDeps {
-  kibana: KibanaReactContextValue<IDataPluginServices>;
+  opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
   timeHistory: TimeHistoryContract;
   // Filter bar
@@ -101,7 +101,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     showAutoRefreshOnly: false,
   };
 
-  private services = this.props.kibana.services;
+  private services = this.props.opensearchDashboards.services;
   private savedQueryService = this.services.data.query.savedQueries;
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
@@ -469,4 +469,4 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
-export default injectI18n(withKibana(SearchBarUI));
+export default injectI18n(withOpenSearchDashboards(SearchBarUI));

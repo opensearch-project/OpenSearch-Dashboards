@@ -20,8 +20,8 @@
 import { ReactElement, useEffect, useState } from 'react';
 import React from 'react';
 import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { i18n } from '@kbn/i18n';
+import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
+import { i18n } from '@osd/i18n';
 
 const NO_DATA_POPOVER_STORAGE_KEY = 'data.noDataPopover';
 

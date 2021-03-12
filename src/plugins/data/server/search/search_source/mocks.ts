@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import { OpenSearchDashboardsRequest } from 'src/core/server';
 
 import { searchSourceCommonMock } from '../../../common/search/search_source/mocks';
 import { ISearchStart } from '../types';
 
 function createStartContract(): MockedKeys<ISearchStart['searchSource']> {
   return {
-    asScoped: async (request: jest.Mocked<KibanaRequest>) => {
+    asScoped: async (request: jest.Mocked<OpenSearchDashboardsRequest>) => {
       return searchSourceCommonMock;
     },
   };

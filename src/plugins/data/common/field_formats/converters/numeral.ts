@@ -21,7 +21,7 @@
 import numeral from '@elastic/numeral';
 // @ts-ignore
 import numeralLanguages from '@elastic/numeral/languages';
-import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { OSD_FIELD_TYPES } from '../../osd_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert } from '../types';
 import { UI_SETTINGS } from '../../constants';
@@ -33,7 +33,7 @@ numeralLanguages.forEach((numeralLanguage: Record<string, any>) => {
 });
 
 export abstract class NumeralFormat extends FieldFormat {
-  static fieldType = KBN_FIELD_TYPES.NUMBER;
+  static fieldType = OSD_FIELD_TYPES.NUMBER;
 
   abstract id: string;
   abstract title: string;

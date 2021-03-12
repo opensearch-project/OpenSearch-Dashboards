@@ -56,7 +56,7 @@ describe('SearchTimeoutError', () => {
     expect(component.find('EuiButton').length).toBe(1);
     component.find('EuiButton').simulate('click');
     expect(startMock.application.navigateToApp).toHaveBeenCalledWith('management', {
-      path: '/kibana/settings',
+      path: '/opensearch-dashboards/settings',
     });
   });
 });

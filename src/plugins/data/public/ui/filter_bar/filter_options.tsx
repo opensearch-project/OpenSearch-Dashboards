@@ -18,7 +18,7 @@
  */
 
 import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { Component } from 'react';
 import React from 'react';
 

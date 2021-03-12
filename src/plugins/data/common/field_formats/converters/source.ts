@@ -19,7 +19,7 @@
 
 import { template, escape, keys } from 'lodash';
 import { shortenDottedString } from '../../utils';
-import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { OSD_FIELD_TYPES } from '../../osd_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { UI_SETTINGS } from '../../constants';
@@ -55,7 +55,7 @@ const doTemplate = template(noWhiteSpace(templateHtml));
 export class SourceFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS._SOURCE;
   static title = '_source';
-  static fieldType = KBN_FIELD_TYPES._SOURCE;
+  static fieldType = OSD_FIELD_TYPES._SOURCE;
 
   textConvert: TextContextTypeConvert = (value) => JSON.stringify(value);
 

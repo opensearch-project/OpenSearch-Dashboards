@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { IAggConfig } from '../agg_config';
-import { SavedObjectNotFound } from '../../../../../../plugins/kibana_utils/common';
+import { SavedObjectNotFound } from '../../../../../../plugins/opensearch_dashboards_utils/common';
 import { BaseParamType } from './base';
 import { propFilter } from '../utils';
-import { KBN_FIELD_TYPES } from '../../../kbn_field_types/types';
+import { OSD_FIELD_TYPES } from '../../../osd_field_types/types';
 import { isNestedField, IndexPatternField } from '../../../index_patterns/fields';
 
 const filterByType = propFilter('type');
 
-export type FieldTypes = KBN_FIELD_TYPES | KBN_FIELD_TYPES[] | '*';
+export type FieldTypes = OSD_FIELD_TYPES | OSD_FIELD_TYPES[] | '*';
 // TODO need to make a more explicit interface for this
 export type IFieldParamType = FieldParamType;
 

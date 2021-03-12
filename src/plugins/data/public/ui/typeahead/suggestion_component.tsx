@@ -55,7 +55,7 @@ export function SuggestionComponent(props: Props) {
     <div
       className={classNames({
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        kbnTypeahead__item: true,
+        osdTypeahead__item: true,
         active: props.selected,
       })}
       role="option"
@@ -68,15 +68,15 @@ export function SuggestionComponent(props: Props) {
         props.suggestion.type
       }-${props.suggestion.text.replace(/\s/g, '-')}`}
     >
-      <div className={'kbnSuggestionItem kbnSuggestionItem--' + props.suggestion.type}>
-        <div className="kbnSuggestionItem__type">
+      <div className={'osdSuggestionItem osdSuggestionItem--' + props.suggestion.type}>
+        <div className="osdSuggestionItem__type">
           <EuiIcon type={getEuiIconType(props.suggestion.type)} />
         </div>
-        <div className="kbnSuggestionItem__text" data-test-subj="autoCompleteSuggestionText">
+        <div className="osdSuggestionItem__text" data-test-subj="autoCompleteSuggestionText">
           {props.suggestion.text}
         </div>
         {props.shouldDisplayDescription && (
-          <div className="kbnSuggestionItem__description">{props.suggestion.description}</div>
+          <div className="osdSuggestionItem__description">{props.suggestion.description}</div>
         )}
       </div>
     </div>
