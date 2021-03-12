@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { parse } from 'query-string';
 
 import dashboardTemplate from './dashboard_app.html';
@@ -27,11 +27,11 @@ import { createHashHistory } from 'history';
 import { initDashboardAppDirective } from './dashboard_app';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import {
-  createKbnUrlStateStorage,
+  createOsdUrlStateStorage,
   redirectWhenMissing,
   SavedObjectNotFound,
   withNotifyOnErrors,
-} from '../../../kibana_utils/public';
+} from '../../../opensearch_dashboards_utils/public';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { syncQueryStateWithUrl } from '../../../data/public';
@@ -62,8 +62,8 @@ export function initDashboardApp(app, deps) {
   }
 
   app.factory('history', () => createHashHistory());
-  app.factory('kbnUrlStateStorage', (history) =>
-    createKbnUrlStateStorage({
+  app.factory('osdUrlStateStorage', (history) =>
+    createOsdUrlStateStorage({
       history,
       useHash: deps.uiSettings.get('state:storeInSessionStorage'),
       ...withNotifyOnErrors(deps.core.notifications.toasts),
@@ -98,7 +98,7 @@ export function initDashboardApp(app, deps) {
       .when(DashboardConstants.LANDING_PAGE_PATH, {
         ...defaults,
         template: dashboardListingTemplate,
-        controller: function ($scope, kbnUrlStateStorage, history) {
+        controller: function ($scope, osdUrlStateStorage, history) {
           deps.core.chrome.docTitle.change(
             i18n.translate('dashboard.dashboardPageTitle', { defaultMessage: 'Dashboards' })
           );
@@ -108,7 +108,7 @@ export function initDashboardApp(app, deps) {
           // syncs `_g` portion of url with query services
           const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
             deps.data.query,
-            kbnUrlStateStorage
+            osdUrlStateStorage
           );
 
           $scope.listingLimit = deps.savedObjects.settings.getListingLimit();
@@ -168,7 +168,7 @@ export function initDashboardApp(app, deps) {
                       history.replace(`${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`);
                       $route.reload();
                     }
-                    return new Promise(() => {});
+                    return new Promise(() => { });
                   });
               }
             });
@@ -232,12 +232,12 @@ export function initDashboardApp(app, deps) {
                         'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
                     })
                   );
-                  return new Promise(() => {});
+                  return new Promise(() => { });
                 } else {
                   // E.g. a corrupt or deleted dashboard
                   deps.core.notifications.toasts.addDanger(error.message);
                   history.push(DashboardConstants.LANDING_PAGE_PATH);
-                  return new Promise(() => {});
+                  return new Promise(() => { });
                 }
               });
           },
@@ -248,13 +248,13 @@ export function initDashboardApp(app, deps) {
           const path = window.location.hash.substr(1);
           deps.restorePreviousUrl();
           $rootScope.$applyAsync(() => {
-            const { navigated } = deps.navigateToLegacyKibanaUrl(path);
+            const { navigated } = deps.navigateToLegacyOpenSearchDashboardsUrl(path);
             if (!navigated) {
               deps.navigateToDefaultApp();
             }
           });
           // prevent angular from completing the navigation
-          return new Promise(() => {});
+          return new Promise(() => { });
         },
       });
   });

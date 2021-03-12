@@ -130,7 +130,7 @@ describe('attributeService', () => {
           return new Promise((resolve) => {
             return resolve({
               ...attributes,
-              testAttr2: { array: [1, 2, 3, 4, 5], testAttr3: 'kibanana' },
+              testAttr2: { array: [1, 2, 3, 4, 5], testAttr3: 'opensearchDashboards' },
             });
           });
         },
@@ -138,7 +138,7 @@ describe('attributeService', () => {
       });
       expect(await attributeService.unwrapAttributes(byReferenceInput)).toEqual({
         ...attributes,
-        testAttr2: { array: [1, 2, 3, 4, 5], testAttr3: 'kibanana' },
+        testAttr2: { array: [1, 2, 3, 4, 5], testAttr3: 'opensearchDashboards' },
       });
     });
   });

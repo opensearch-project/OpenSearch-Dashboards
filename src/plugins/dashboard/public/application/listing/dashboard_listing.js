@@ -20,11 +20,11 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
-import { TableListView } from '../../../../kibana_react/public';
+import { TableListView } from '../../../../opensearch_dashboards_react/public';
 
 export const EMPTY_FILTER = '';
 
@@ -103,14 +103,14 @@ export class DashboardListing extends React.Component {
             <Fragment>
               <p>
                 <FormattedMessage
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+                  id="dashboard.listing.createNewDashboard.combineDataViewFromOpenSearchDashboardsAppDescription"
+                  defaultMessage="You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place."
                 />
               </p>
               <p>
                 <FormattedMessage
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                  id="dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription"
+                  defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
                   values={{
                     sampleDataInstallLink: (
                       <EuiLink

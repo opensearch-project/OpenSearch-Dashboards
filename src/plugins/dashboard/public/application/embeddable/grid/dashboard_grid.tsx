@@ -23,7 +23,7 @@ import 'react-resizable/css/styles.css';
 // @ts-ignore
 import sizeMe from 'react-sizeme';
 
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
 import _ from 'lodash';
 import React from 'react';
@@ -33,7 +33,7 @@ import { GridData } from '../../../../common';
 import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../embeddable_plugin';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';
-import { withKibana } from '../../../../../kibana_react/public';
+import { withOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DashboardContainerInput } from '../dashboard_container';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 
@@ -114,7 +114,7 @@ const config = { monitorWidth: true };
 const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
 export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
-  kibana: DashboardReactContextValue;
+  opensearchDashboards: DashboardReactContextValue;
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
   container: DashboardContainer;
 }
@@ -164,7 +164,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       console.error(error); // eslint-disable-line no-console
 
       isLayoutInvalid = true;
-      this.props.kibana.notifications.toasts.danger({
+      this.props.opensearchDashboards.notifications.toasts.danger({
         title: this.props.intl.formatMessage({
           id: 'dashboard.dashboardGrid.toast.unableToLoadDashboardDangerMessage',
           defaultMessage: 'Unable to load dashboard.',
@@ -302,4 +302,4 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   }
 }
 
-export const DashboardGrid = injectI18n(withKibana(DashboardGridUi));
+export const DashboardGrid = injectI18n(withOpenSearchDashboards(DashboardGridUi));

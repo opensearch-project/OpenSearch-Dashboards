@@ -23,7 +23,7 @@ import { EuiIcon } from '@elastic/eui';
 import angular, { IModule } from 'angular';
 // required for `ngSanitize` angular module
 import 'angular-sanitize';
-import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
+import { i18nDirective, i18nFilter, I18nProvider } from '@osd/i18n/angular';
 import {
   ChromeStart,
   IUiSettingsClient,
@@ -32,16 +32,16 @@ import {
   PluginInitializerContext,
   ScopedHistory,
   AppMountParameters,
-} from 'kibana/public';
+} from 'opensearch-dashboards/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { Storage } from '../../../kibana_utils/public';
+import { Storage } from '../../../opensearch_dashboards_utils/public';
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
 import { EmbeddableStart } from '../../../embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../navigation/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { SharePluginStart } from '../../../share/public';
-import { KibanaLegacyStart, configureAppAngularModule } from '../../../kibana_legacy/public';
+import { OpenSearchDashboardsLegacyStart, configureAppAngularModule } from '../../../opensearch_dashboards_legacy/public';
 import { UrlForwardingStart } from '../../../url_forwarding/public';
 import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
 
@@ -57,7 +57,7 @@ export interface RenderDeps {
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
   savedDashboards: SavedObjectLoader;
-  dashboardConfig: KibanaLegacyStart['dashboardConfig'];
+  dashboardConfig: OpenSearchDashboardsLegacyStart['dashboardConfig'];
   dashboardCapabilities: any;
   embeddableCapabilities: {
     visualizeCapabilities: any;
@@ -72,7 +72,7 @@ export interface RenderDeps {
   share?: SharePluginStart;
   usageCollection?: UsageCollectionSetup;
   navigateToDefaultApp: UrlForwardingStart['navigateToDefaultApp'];
-  navigateToLegacyKibanaUrl: UrlForwardingStart['navigateToLegacyKibanaUrl'];
+  navigateToLegacyOpenSearchDashboardsUrl: UrlForwardingStart['navigateToLegacyOpenSearchDashboardsUrl'];
   scopedHistory: () => ScopedHistory;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedObjects: SavedObjectsStart;
@@ -97,7 +97,7 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
   const $injector = mountDashboardApp(appBasePath, element);
 
   return () => {
-    ($injector.get('kbnUrlStateStorage') as any).cancel();
+    ($injector.get('osdUrlStateStorage') as any).cancel();
     $injector.get('$rootScope').$destroy();
   };
 };

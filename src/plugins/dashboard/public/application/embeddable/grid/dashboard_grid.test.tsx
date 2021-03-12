@@ -30,7 +30,7 @@ import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
 } from '../../../embeddable_plugin_test_samples';
-import { KibanaContextProvider } from '../../../../../kibana_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 let dashboardContainer: DashboardContainer | undefined;
@@ -81,7 +81,7 @@ function prepare(props?: Partial<DashboardGridProps>) {
   const defaultTestProps: DashboardGridProps = {
     container: dashboardContainer,
     PanelComponent: () => <div />,
-    kibana: null as any,
+    opensearchDashboards: null as any,
     intl: null as any,
   };
 
@@ -104,9 +104,9 @@ afterAll(() => {
 test('renders DashboardGrid', () => {
   const { props, options } = prepare();
   const component = mountWithIntl(
-    <KibanaContextProvider services={options}>
+    <OpenSearchDashboardsContextProvider services={options}>
       <DashboardGrid {...props} />
-    </KibanaContextProvider>
+    </OpenSearchDashboardsContextProvider>
   );
   const panelElements = component.find('EmbeddableChildPanel');
   expect(panelElements.length).toBe(2);
@@ -115,9 +115,9 @@ test('renders DashboardGrid', () => {
 test('renders DashboardGrid with no visualizations', () => {
   const { props, options } = prepare();
   const component = mountWithIntl(
-    <KibanaContextProvider services={options}>
+    <OpenSearchDashboardsContextProvider services={options}>
       <DashboardGrid {...props} />
-    </KibanaContextProvider>
+    </OpenSearchDashboardsContextProvider>
   );
 
   props.container.updateInput({ panels: {} });
@@ -128,9 +128,9 @@ test('renders DashboardGrid with no visualizations', () => {
 test('DashboardGrid removes panel when removed from container', () => {
   const { props, options } = prepare();
   const component = mountWithIntl(
-    <KibanaContextProvider services={options}>
+    <OpenSearchDashboardsContextProvider services={options}>
       <DashboardGrid {...props} />
-    </KibanaContextProvider>
+    </OpenSearchDashboardsContextProvider>
   );
 
   const originalPanels = props.container.getInput().panels;
@@ -145,9 +145,9 @@ test('DashboardGrid removes panel when removed from container', () => {
 test('DashboardGrid renders expanded panel', () => {
   const { props, options } = prepare();
   const component = mountWithIntl(
-    <KibanaContextProvider services={options}>
+    <OpenSearchDashboardsContextProvider services={options}>
       <DashboardGrid {...props} />
-    </KibanaContextProvider>
+    </OpenSearchDashboardsContextProvider>
   );
 
   props.container.updateInput({ expandedPanelId: '1' });
@@ -171,9 +171,9 @@ test('DashboardGrid renders expanded panel', () => {
 test('DashboardGrid unmount unsubscribes', async (done) => {
   const { props, options } = prepare();
   const component = mountWithIntl(
-    <KibanaContextProvider services={options}>
+    <OpenSearchDashboardsContextProvider services={options}>
       <DashboardGrid {...props} />
-    </KibanaContextProvider>
+    </OpenSearchDashboardsContextProvider>
   );
 
   component.unmount();

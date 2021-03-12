@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { SavedObjectUnsanitizedDoc } from 'opensearch-dashboards/server';
 import { savedObjectsServiceMock } from '../../../../core/server/mocks';
 import { dashboardSavedObjectTypeMigrations as migrations } from './dashboard_migrations';
 
@@ -40,7 +40,7 @@ Object {
         id: '1',
         type: 'dashboard',
         attributes: {
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: null,
           },
           panelsJSON:
@@ -51,7 +51,7 @@ Object {
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
+    "opensearchDashboardsSavedObjectMeta": Object {
       "searchSourceJSON": null,
     },
     "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
@@ -79,7 +79,7 @@ Object {
         id: '1',
         type: 'dashboard',
         attributes: {
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: undefined,
           },
           panelsJSON:
@@ -90,7 +90,7 @@ Object {
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
+    "opensearchDashboardsSavedObjectMeta": Object {
       "searchSourceJSON": undefined,
     },
     "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
@@ -118,7 +118,7 @@ Object {
         id: '1',
         type: 'dashboard',
         attributes: {
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: 123,
           },
           panelsJSON:
@@ -128,7 +128,7 @@ Object {
       expect(migration(doc, contextMock)).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
+    "opensearchDashboardsSavedObjectMeta": Object {
       "searchSourceJSON": 123,
     },
     "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
@@ -156,7 +156,7 @@ Object {
         id: '1',
         type: 'dashboard',
         attributes: {
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: '{abc123}',
           },
           panelsJSON:
@@ -166,7 +166,7 @@ Object {
       expect(migration(doc, contextMock)).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
+    "opensearchDashboardsSavedObjectMeta": Object {
       "searchSourceJSON": "{abc123}",
     },
     "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
@@ -194,7 +194,7 @@ Object {
         id: '1',
         type: 'dashboard',
         attributes: {
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({ bar: true }),
           },
           panelsJSON:
@@ -205,7 +205,7 @@ Object {
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
+    "opensearchDashboardsSavedObjectMeta": Object {
       "searchSourceJSON": "{\\"bar\\":true}",
     },
     "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
@@ -233,7 +233,7 @@ Object {
         id: '1',
         type: 'dashboard',
         attributes: {
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({ bar: true, index: 'pattern*' }),
           },
           panelsJSON:
@@ -244,8 +244,8 @@ Object {
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+    "opensearchDashboardsSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"opensearchDashboardsSavedObjectMeta.searchSourceJSON.index\\"}",
     },
     "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
   },
@@ -253,7 +253,7 @@ Object {
   "references": Array [
     Object {
       "id": "pattern*",
-      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "name": "opensearchDashboardsSavedObjectMeta.searchSourceJSON.index",
       "type": "index-pattern",
     },
     Object {
@@ -277,7 +277,7 @@ Object {
         id: '1',
         type: 'dashboard',
         attributes: {
-          kibanaSavedObjectMeta: {
+          opensearchDashboardsSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({
               bar: true,
               filter: [
@@ -299,8 +299,8 @@ Object {
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
+    "opensearchDashboardsSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
     },
     "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
   },
@@ -308,7 +308,7 @@ Object {
   "references": Array [
     Object {
       "id": "my-index",
-      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "name": "opensearchDashboardsSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
       "type": "index-pattern",
     },
     Object {

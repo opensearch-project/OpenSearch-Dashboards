@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { EuiBadge } from '@elastic/eui';
 import {
   IEmbeddable,
@@ -27,7 +27,7 @@ import {
   isErrorEmbeddable,
 } from '../../embeddable_plugin';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
-import { reactToUiComponent } from '../../../../kibana_react/public';
+import { reactToUiComponent } from '../../../../opensearch_dashboards_react/public';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 

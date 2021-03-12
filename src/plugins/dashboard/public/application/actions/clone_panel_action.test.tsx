@@ -27,7 +27,7 @@ import {
   ContactCardEmbeddableOutput,
 } from '../../embeddable_plugin_test_samples';
 import { coreMock } from '../../../../../core/public/mocks';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from 'opensearch-dashboards/public';
 import { ClonePanelAction } from '.';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
@@ -64,7 +64,7 @@ beforeEach(async () => {
   const input = getSampleDashboardInput({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-        explicitInput: { firstName: 'Kibanana', id: '123' },
+        explicitInput: { firstName: 'opensearchDashboards', id: '123' },
         type: CONTACT_CARD_EMBEDDABLE,
       }),
     },
@@ -76,7 +76,7 @@ beforeEach(async () => {
     ContactCardEmbeddableOutput,
     ContactCardEmbeddable
   >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Kibana',
+    firstName: 'opensearchDashboards',
   });
 
   if (isErrorEmbeddable(contactCardEmbeddable)) {

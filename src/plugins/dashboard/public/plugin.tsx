@@ -20,7 +20,7 @@
 import * as React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import {
   App,
@@ -58,13 +58,13 @@ import {
 import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
-} from '../../kibana_react/public';
-import { createKbnUrlTracker, Storage } from '../../kibana_utils/public';
+} from '../../opensearch_dashboards_react/public';
+import { createOsdUrlTracker, Storage } from '../../opensearch_dashboards_utils/public';
 import {
   initAngularBootstrap,
-  KibanaLegacySetup,
-  KibanaLegacyStart,
-} from '../../kibana_legacy/public';
+  OpenSearchDashboardsLegacySetup,
+  OpenSearchDashboardsLegacyStart,
+} from '../../opensearch_dashboards_legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
@@ -125,7 +125,7 @@ interface SetupDependencies {
   data: DataPublicPluginSetup;
   embeddable: EmbeddableSetup;
   home?: HomePublicPluginSetup;
-  kibanaLegacy: KibanaLegacySetup;
+  opensearchDashboardsLegacy: OpenSearchDashboardsLegacySetup;
   urlForwarding: UrlForwardingSetup;
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
@@ -134,7 +134,7 @@ interface SetupDependencies {
 
 interface StartDependencies {
   data: DataPublicPluginStart;
-  kibanaLegacy: KibanaLegacyStart;
+  opensearchDashboardsLegacy: OpenSearchDashboardsLegacyStart;
   urlForwarding: UrlForwardingStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStartContract;
@@ -269,7 +269,7 @@ export class DashboardPlugin
       stop: stopUrlTracker,
       getActiveUrl,
       restorePreviousUrl,
-    } = createKbnUrlTracker({
+    } = createOsdUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/dashboards'),
       defaultSubUrl: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       storageKey: `lastUrl:${core.http.basePath.get()}:dashboard`,
@@ -277,7 +277,7 @@ export class DashboardPlugin
       toastNotifications: core.notifications.toasts,
       stateParams: [
         {
-          kbnUrlKey: '_g',
+          osdUrlKey: '_g',
           stateUpdate$: data.query.state$.pipe(
             filter(
               ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
@@ -304,7 +304,7 @@ export class DashboardPlugin
       euiIconType: 'logoKibana',
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
-      category: DEFAULT_APP_CATEGORIES.kibana,
+      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
         this.currentHistory = params.history;
@@ -314,8 +314,8 @@ export class DashboardPlugin
           navigation,
           share: shareStart,
           data: dataStart,
-          kibanaLegacy: { dashboardConfig },
-          urlForwarding: { navigateToDefaultApp, navigateToLegacyKibanaUrl },
+          opensearchDashboardsLegacy: { dashboardConfig },
+          urlForwarding: { navigateToDefaultApp, navigateToLegacyOpenSearchDashboardsUrl },
           savedObjects,
         } = pluginsStart;
 
@@ -324,7 +324,7 @@ export class DashboardPlugin
           core: coreStart,
           dashboardConfig,
           navigateToDefaultApp,
-          navigateToLegacyKibanaUrl,
+          navigateToLegacyOpenSearchDashboardsUrl,
           navigation,
           share: shareStart,
           data: dataStart,
@@ -405,7 +405,7 @@ export class DashboardPlugin
         path: `/app/dashboards#${DashboardConstants.LANDING_PAGE_PATH}`,
         showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
-        solutionId: 'kibana',
+        solutionId: 'opensearchDashboards',
         order: 100,
       });
     }

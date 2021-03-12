@@ -32,7 +32,7 @@ import {
   ContactCardEmbeddableOutput,
 } from '../../embeddable_plugin_test_samples';
 import { coreMock } from '../../../../../core/public/mocks';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from 'opensearch-dashboards/public';
 import { AddToLibraryAction } from '.';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { ErrorEmbeddable, ViewMode } from '../../../../embeddable/public';
@@ -69,7 +69,7 @@ beforeEach(async () => {
     ContactCardEmbeddableOutput,
     ContactCardEmbeddable
   >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Kibanana',
+    firstName: 'opensearchDashboards',
   });
 
   if (isErrorEmbeddable(contactCardEmbeddable)) {
@@ -80,7 +80,7 @@ beforeEach(async () => {
       ContactCardEmbeddableInput
     >(contactCardEmbeddable, {
       mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: contactCardEmbeddable.id },
-      mockedByValueInput: { firstName: 'Kibanana', id: contactCardEmbeddable.id },
+      mockedByValueInput: { firstName: 'opensearchDashboards', id: contactCardEmbeddable.id },
     });
     embeddable.updateInput({ viewMode: ViewMode.EDIT });
   }
@@ -128,7 +128,7 @@ test('Add to library is not compatible when embeddable is not in a dashboard con
     ContactCardEmbeddableInput
   >(orphanContactCard, {
     mockedByReferenceInput: { savedObjectId: 'test', id: orphanContactCard.id },
-    mockedByValueInput: { firstName: 'Kibanana', id: orphanContactCard.id },
+    mockedByValueInput: { firstName: 'opensearchDashboards', id: orphanContactCard.id },
   });
   const action = new AddToLibraryAction();
   expect(await action.isCompatible({ embeddable: orphanContactCard })).toBe(false);
