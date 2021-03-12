@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, PluginInitializerContext } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
+import { CoreSetup, PluginInitializerContext } from 'opensearch-dashboards/public';
+import { i18n } from '@osd/i18n';
 import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';
 import { BaseVisTypeOptions } from '../../visualizations/public';

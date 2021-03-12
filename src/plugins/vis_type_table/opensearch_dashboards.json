@@ -1,16 +1,16 @@
 {
   "id": "visTypeTable",
-  "version": "kibana",
+  "version": "opensearchDashboards",
   "server": true,
   "ui": true,
   "requiredPlugins": [
     "expressions",
     "visualizations",
     "data",
-    "kibanaLegacy"
+    "opensearchDashboardsLegacy"
   ],
   "requiredBundles": [
-    "kibanaUtils",
+    "opensearchDashboardsUtils",
     "share",
     "charts",
     "visDefaultEditor"
