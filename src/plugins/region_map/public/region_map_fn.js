@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 export const createRegionMapFn = () => ({
   name: 'regionmap',
   type: 'render',
   context: {
-    types: ['kibana_datatable'],
+    types: ['opensearch_dashboards_datatable'],
   },
   help: i18n.translate('regionMap.function.help', {
     defaultMessage: 'Regionmap visualization',

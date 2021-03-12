@@ -20,14 +20,14 @@
 import React from 'react';
 
 import { EuiRange, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from '../../../../../core/public';
 
-import { useKibana } from '../../../../kibana_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { AggParamEditorProps } from '../agg_param_props';
 
 function PrecisionParamEditor({ agg, value, setValue }: AggParamEditorProps<number>) {
-  const { services } = useKibana<{ uiSettings: IUiSettingsClient }>();
+  const { services } = useOpenSearchDashboards<{ uiSettings: IUiSettingsClient }>();
   const label = i18n.translate('visDefaultEditor.controls.precisionLabel', {
     defaultMessage: 'Precision',
   });

@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { CoreStart } from 'kibana/public';
-import { createGetterSetter } from '../../kibana_utils/public';
+import { CoreStart } from 'opensearch-dashboards/public';
+import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
 import { SharePluginStart } from '../../share/public';
 
 export const [getCoreService, setCoreService] = createGetterSetter<CoreStart>('Core');
@@ -35,6 +35,6 @@ export const [getQueryService, setQueryService] = createGetterSetter<
 
 export const [getShareService, setShareService] = createGetterSetter<SharePluginStart>('Share');
 
-export const [getKibanaLegacy, setKibanaLegacy] = createGetterSetter<KibanaLegacyStart>(
-  'KibanaLegacy'
+export const [getOpenSearchDashboardsLegacy, setOpenSearchDashboardsLegacy] = createGetterSetter<OpenSearchDashboardsLegacyStart>(
+  'OpenSearchDashboardsLegacy'
 );

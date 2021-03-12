@@ -1,0 +1,10 @@
+{
+  "id": "telemetryManagementSection",
+  "version": "opensearchDashboards",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [
+    "advancedSettings",
+    "telemetry"
+  ]
+}

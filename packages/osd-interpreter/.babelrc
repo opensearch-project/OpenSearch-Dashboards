@@ -1,0 +1,14 @@
+{
+  "presets": [
+    "@osd/babel-preset/webpack_preset"
+  ],
+  "plugins": [
+    "@babel/plugin-transform-modules-commonjs",
+    [
+      "@babel/plugin-transform-runtime",
+      {
+        "regenerator": true
+      }
+    ]
+  ]
+}

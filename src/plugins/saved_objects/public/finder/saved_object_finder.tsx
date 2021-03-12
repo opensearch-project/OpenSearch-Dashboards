@@ -40,7 +40,7 @@ import {
   IconType,
 } from '@elastic/eui';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import {
   SimpleSavedObject,
@@ -236,10 +236,10 @@ class SavedObjectFinderUi extends React.Component<
   // server-side paging not supported
   // 1) saved object client does not support sorting by title because title is only mapped as analyzed
   // 2) can not search on anything other than title because all other fields are stored in opaque JSON strings,
-  //    for example, visualizations need to be search by isLab but this is not possible in Elasticsearch side
+  //    for example, visualizations need to be search by isLab but this is not possible in OpenSearch side
   //    with the current mappings
   private getPageOfItems = () => {
-    // do not sort original list to preserve elasticsearch ranking order
+    // do not sort original list to preserve opensearch ranking order
     const items = this.state.items.slice();
     const { sortDirection } = this.state;
 

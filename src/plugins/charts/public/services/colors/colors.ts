@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup } from 'opensearch-dashboards/public';
 
 import { MappedColors } from './mapped_colors';
 import { seedColors } from './seed_colors';

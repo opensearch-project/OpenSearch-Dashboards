@@ -24,7 +24,7 @@ import { keyMap } from './key_map';
 import {
   PaginateControlsDirectiveProvider,
   PaginateDirectiveProvider,
-} from '../../../kibana_legacy/public';
+} from '../../../opensearch_dashboards_legacy/public';
 import { PER_PAGE_SETTING } from '../../../saved_objects/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../visualizations/public';
 
@@ -263,7 +263,7 @@ export function initSavedObjectFinderDirective(app, savedSheetLoader, uiSettings
           };
 
           self.manageObjects = function (type) {
-            $location.url('/management/kibana/objects?_a=' + rison.encode({ tab: type }));
+            $location.url('/management/opensearch-dashboards/objects?_a=' + rison.encode({ tab: type }));
           };
 
           self.hitCountNoun = function () {

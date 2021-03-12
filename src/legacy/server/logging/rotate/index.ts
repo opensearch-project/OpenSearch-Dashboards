@@ -20,11 +20,11 @@
 import { isMaster, isWorker } from 'cluster';
 import { Server } from 'hapi';
 import { LogRotator } from './log_rotator';
-import { KibanaConfig } from '../../kbn_server';
+import { OpenSearchDashboardsConfig } from '../../osd_server';
 
 let logRotator: LogRotator;
 
-export async function setupLoggingRotate(server: Server, config: KibanaConfig) {
+export async function setupLoggingRotate(server: Server, config: OpenSearchDashboardsConfig) {
   // If log rotate is not enabled we skip
   if (!config.get('logging.rotate.enabled')) {
     return;
@@ -32,7 +32,7 @@ export async function setupLoggingRotate(server: Server, config: KibanaConfig) {
 
   // We just want to start the logging rotate service once
   // and we choose to use the master (prod) or the worker server (dev)
-  if (!isMaster && isWorker && process.env.kbnWorkerType !== 'server') {
+  if (!isMaster && isWorker && process.env.osdWorkerType !== 'server') {
     return;
   }
 

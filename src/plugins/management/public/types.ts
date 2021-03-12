@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ScopedHistory, Capabilities } from 'kibana/public';
+import { ScopedHistory, Capabilities } from 'opensearch-dashboards/public';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import { ChromeBreadcrumb } from '../../../core/public/';
 
@@ -30,7 +30,7 @@ export interface DefinedSections {
   data: ManagementSection;
   insightsAndAlerting: ManagementSection;
   security: ManagementSection;
-  kibana: ManagementSection;
+  opensearchDashboards: ManagementSection;
   stack: ManagementSection;
 }
 
@@ -59,7 +59,7 @@ export enum ManagementSectionId {
   Data = 'data',
   InsightsAndAlerting = 'insightsAndAlerting',
   Security = 'security',
-  Kibana = 'kibana',
+  OpenSearchDashboards = 'opensearchDashboards',
   Stack = 'stack',
 }
 

@@ -20,7 +20,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from 'opensearch-dashboards/public';
 import { ManagementApp, ManagementAppDependencies } from './components/management_app';
 
 export const renderApp = async (

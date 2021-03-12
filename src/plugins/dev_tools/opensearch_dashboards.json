@@ -1,0 +1,7 @@
+{
+  "id": "devTools",
+  "version": "opensearchDashboards",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["urlForwarding"]
+}

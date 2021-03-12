@@ -19,8 +19,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { Plugin, CoreSetup, AppMountParameters } from 'src/core/public';
-import { AppUpdater } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
+import { AppUpdater } from 'opensearch-dashboards/public';
+import { i18n } from '@osd/i18n';
 import { sortBy } from 'lodash';
 
 import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
@@ -98,5 +98,5 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
     }
   }
 
-  public stop() {}
+  public stop() { }
 }

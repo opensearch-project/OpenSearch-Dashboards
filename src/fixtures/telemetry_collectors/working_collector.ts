@@ -47,7 +47,7 @@ export const myCollector = makeUsageCollector<Usage>({
   isReady: () => true,
   fetch() {
     const testString = '123';
-    // query ES and get some data
+    // query OpenSearch and get some data
 
     // summarize the data into a model
     // return the modeled object that includes whatever you want to track

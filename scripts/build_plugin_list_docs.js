@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env/no_transpilation');
-require('@kbn/dev-utils').runPluginListCli();
+require('@osd/dev-utils').runPluginListCli();

@@ -54,7 +54,7 @@ export interface NewsfeedItem {
 }
 
 export interface FetchResult {
-  kibanaVersion: string;
+  opensearchDashboardsVersion: string;
   hasNew: boolean;
   feedItems: NewsfeedItem[];
   error: Error | null;

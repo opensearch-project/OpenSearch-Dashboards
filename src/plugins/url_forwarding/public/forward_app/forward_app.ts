@@ -17,26 +17,26 @@
  * under the License.
  */
 
-import { App, AppMountParameters, CoreSetup } from 'kibana/public';
+import { App, AppMountParameters, CoreSetup } from 'opensearch-dashboards/public';
 import { AppNavLinkStatus } from '../../../../core/public';
-import { navigateToLegacyKibanaUrl } from './navigate_to_legacy_kibana_url';
+import { navigateToLegacyOpenSearchDashboardsUrl } from './navigate_to_legacy_opensearch_dashboards_url';
 import { ForwardDefinition, UrlForwardingStart } from '../plugin';
 
 export const createLegacyUrlForwardApp = (
   core: CoreSetup<{}, UrlForwardingStart>,
   forwards: ForwardDefinition[]
 ): App => ({
-  id: 'kibana',
+  id: 'opensearch-dashboards',
   chromeless: true,
   title: 'Legacy URL migration',
-  appRoute: '/app/kibana#/',
+  appRoute: '/app/opensearch-dashboards#/',
   navLinkStatus: AppNavLinkStatus.hidden,
   async mount(params: AppMountParameters) {
     const hash = params.history.location.hash.substr(1);
 
     if (!hash) {
-      const [, , kibanaLegacyStart] = await core.getStartServices();
-      kibanaLegacyStart.navigateToDefaultApp();
+      const [, , opensearchDashboardsLegacyStart] = await core.getStartServices();
+      opensearchDashboardsLegacyStart.navigateToDefaultApp();
     }
 
     const [
@@ -46,11 +46,11 @@ export const createLegacyUrlForwardApp = (
       },
     ] = await core.getStartServices();
 
-    const result = await navigateToLegacyKibanaUrl(hash, forwards, basePath, application);
+    const result = await navigateToLegacyOpenSearchDashboardsUrl(hash, forwards, basePath, application);
 
     if (!result.navigated) {
-      const [, , kibanaLegacyStart] = await core.getStartServices();
-      kibanaLegacyStart.navigateToDefaultApp();
+      const [, , opensearchDashboardsLegacyStart] = await core.getStartServices();
+      opensearchDashboardsLegacyStart.navigateToDefaultApp();
     }
 
     return () => {};

@@ -1,17 +1,17 @@
-var kbnCsp = JSON.parse(document.querySelector('kbn-csp').getAttribute('data'));
-window.__kbnStrictCsp__ = kbnCsp.strictCsp;
-window.__kbnThemeTag__ = "{{themeTag}}";
-window.__kbnPublicPath__ = {{publicPathMap}};
-window.__kbnBundles__ = {{kbnBundlesLoaderSource}}
+var osdCsp = JSON.parse(document.querySelector('osd-csp').getAttribute('data'));
+window.__osdStrictCsp__ = osdCsp.strictCsp;
+window.__osdThemeTag__ = "{{themeTag}}";
+window.__osdPublicPath__ = {{publicPathMap}};
+window.__osdBundles__ = {{osdBundlesLoaderSource}}
 
-if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
-  var legacyBrowserError = document.getElementById('kbn_legacy_browser_error');
+if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
+  var legacyBrowserError = document.getElementById('osd_legacy_browser_error');
   legacyBrowserError.style.display = 'flex';
 } else {
-  if (!window.__kbnCspNotEnforced__ && window.console) {
+  if (!window.__osdCspNotEnforced__ && window.console) {
     window.console.log("^ A single error about an inline script not firing due to content security policy is expected!");
   }
-  var loadingMessage = document.getElementById('kbn_loading_message');
+  var loadingMessage = document.getElementById('osd_loading_message');
   loadingMessage.style.display = 'flex';
 
   window.onload = function () {
@@ -77,7 +77,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
         '{{this}}',
       {{/each}}
     ], function () {
-      __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
+      __osdBundles__.get('entry/core/public').__osdBootstrap__();
 
       load([
         {{#each styleSheetPaths}}

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectsType } from 'kibana/server';
+import { SavedObjectsType } from 'opensearch-dashboards/server';
 
 export const timelionSheetSavedObjectType: SavedObjectsType = {
   name: 'timelion-sheet',
@@ -27,7 +27,7 @@ export const timelionSheetSavedObjectType: SavedObjectsType = {
     properties: {
       description: { type: 'text' },
       hits: { type: 'integer' },
-      kibanaSavedObjectMeta: {
+      opensearchDashboardsSavedObjectMeta: {
         properties: {
           searchSourceJSON: { type: 'text' },
         },

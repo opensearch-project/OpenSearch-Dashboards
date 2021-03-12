@@ -18,7 +18,7 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 export class PanelNotFoundError extends Error {
   code = 'PANEL_NOT_FOUND';
@@ -38,7 +38,7 @@ export class EmbeddableFactoryNotFoundError extends Error {
   constructor(type: string) {
     super(
       i18n.translate('embeddableApi.errors.embeddableFactoryNotFound', {
-        defaultMessage: `{type} can't be loaded. Please upgrade to the default distribution of Elasticsearch and Kibana with the appropriate license.`,
+        defaultMessage: `{type} can't be loaded. Please upgrade to the default distribution of OpenSearch and OpenSearch Dashboards with the appropriate license.`,
         values: {
           type,
         },

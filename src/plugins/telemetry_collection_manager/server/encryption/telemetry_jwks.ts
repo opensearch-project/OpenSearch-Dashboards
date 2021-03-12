@@ -23,7 +23,7 @@ export const telemetryJWKS: PublicJWKS = {
   keys: [
     {
       kty: 'RSA',
-      kid: 'kibana',
+      kid: 'opensearch_dashboads',
       use: 'enc',
       alg: 'RSA-OAEP',
       e: 'AQAB',
@@ -32,7 +32,7 @@ export const telemetryJWKS: PublicJWKS = {
     },
     {
       kty: 'RSA',
-      kid: 'kibana_dev',
+      kid: 'opensearch_dashboards_dev',
       use: 'enc',
       alg: 'RSA-OAEP',
       e: 'AQAB',

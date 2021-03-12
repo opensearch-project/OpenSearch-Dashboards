@@ -20,7 +20,7 @@
 import { useEffect, useState } from 'react';
 import { Observable, BehaviorSubject } from 'rxjs';
 
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup } from 'opensearch-dashboards/public';
 import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 
@@ -39,7 +39,7 @@ export class ThemeService {
   /** An observable of the current charts base theme */
   public chartsBaseTheme$ = this._chartsBaseTheme$.asObservable();
 
-  /** An observable boolean for dark mode of kibana */
+  /** An observable boolean for dark mode of OpenSearch Dashboards */
   public get darkModeEnabled$(): Observable<boolean> {
     if (!this._uiSettingsDarkMode$) {
       throw new Error('ThemeService not initialized');

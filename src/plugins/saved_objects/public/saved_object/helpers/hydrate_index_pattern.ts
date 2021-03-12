@@ -20,7 +20,7 @@ import { SavedObject, SavedObjectConfig } from '../../types';
 import { IndexPatternsContract } from '../../../../data/public';
 
 /**
- * After creation or fetching from ES, ensure that the searchSources index indexPattern
+ * After creation or fetching from OpenSearch, ensure that the searchSources index indexPattern
  * is an bonafide IndexPattern object.
  *
  * @return {Promise<IndexPattern | null>}

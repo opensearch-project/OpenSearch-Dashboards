@@ -1,0 +1,15 @@
+{
+  "id": "embeddable",
+  "version": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "inspector",
+    "uiActions"
+  ],
+  "requiredBundles": [
+    "savedObjects",
+    "opensearchDashboardsReact",
+    "opensearchDashboardsUtils"
+  ]
+}

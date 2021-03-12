@@ -1,0 +1,19 @@
+{
+  "name": "@osd/utils",
+  "main": "./target/index.js",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "osd:bootstrap": "yarn build",
+    "osd:watch": "yarn build --watch"
+  },
+  "dependencies": {
+    "@osd/config-schema": "1.0.0",
+    "load-json-file": "^6.2.0"
+  },
+  "devDependencies": {
+    "typescript": "4.0.2"
+  }
+}

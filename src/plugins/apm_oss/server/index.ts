@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@osd/config-schema';
 import apmIndexPattern from './tutorial/index_pattern.json';
 import { PluginInitializerContext } from '../../../core/server';
 import { APMOSSPlugin } from './plugin';

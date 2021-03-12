@@ -26,10 +26,10 @@ import { safeLoad } from 'js-yaml';
 
 const JOBS_YAML = readFileSync(resolve(__dirname, '../.ci/jobs.yml'), 'utf8');
 const TEST_TAGS = safeLoad(JOBS_YAML)
-  .JOB.filter((id) => id.startsWith('kibana-ciGroup'))
-  .map((id) => id.replace(/^kibana-/, ''));
+  .JOB.filter((id) => id.startsWith('opensearch-dashboards-ciGroup'))
+  .map((id) => id.replace(/^opensearch-dashboards-/, ''));
 
-export function getFunctionalTestGroupRunConfigs({ kibanaInstallDir } = {}) {
+export function getFunctionalTestGroupRunConfigs({ opensearchDashboardsInstallDir } = {}) {
   return {
     // include a run task for each test group
     ...TEST_TAGS.reduce(
@@ -52,8 +52,8 @@ export function getFunctionalTestGroupRunConfigs({ kibanaInstallDir } = {}) {
             // '--config', 'test/functional/config.firefox.js',
             '--bail',
             '--debug',
-            '--kibana-install-dir',
-            kibanaInstallDir,
+            '--opensearch-dashboards-install-dir',
+            opensearchDashboardsInstallDir,
           ],
         },
       }),

@@ -22,7 +22,7 @@ import React from 'react';
 
 import { EuiTabs, EuiTab } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 
 function handleClick(activateTab, tabName) {
   activateTab(tabName);

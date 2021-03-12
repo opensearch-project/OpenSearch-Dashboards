@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor } from 'opensearch-dashboards/server';
 import { configSchema, ConfigSchema } from '../config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {

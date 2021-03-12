@@ -145,12 +145,12 @@ export default () =>
       locale: Joi.string().default('en'),
     }).default(),
 
-    // temporarily moved here from the (now deleted) kibana legacy plugin
-    kibana: Joi.object({
+    // temporarily moved here from the (now deleted) opensearch-dashboards legacy plugin
+    opensearchDashboards: Joi.object({
       enabled: Joi.boolean().default(true),
-      index: Joi.string().default('.kibana'),
+      index: Joi.string().default('.opensearch-dashboards'),
       autocompleteTerminateAfter: Joi.number().integer().min(1).default(100000),
-      // TODO Also allow units here like in elasticsearch config once this is moved to the new platform
+      // TODO Also allow units here like in opensearch config once this is moved to the new platform
       autocompleteTimeout: Joi.number().integer().min(1).default(1000),
     }).default(),
 

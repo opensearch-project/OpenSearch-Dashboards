@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { I18nStart } from 'kibana/public';
+import { I18nStart } from 'opensearch-dashboards/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu_data';

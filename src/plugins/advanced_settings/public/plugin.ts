@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin } from 'kibana/public';
+import { i18n } from '@osd/i18n';
+import { CoreSetup, Plugin } from 'opensearch-dashboards/public';
 import { FeatureCatalogueCategory } from '../../home/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
@@ -31,9 +31,9 @@ const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
 export class AdvancedSettingsPlugin
   implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup> {
   public setup(core: CoreSetup, { management, home }: AdvancedSettingsPluginSetup) {
-    const kibanaSection = management.sections.section.kibana;
+    const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
 
-    kibanaSection.registerApp({
+    opensearchDashboardsSection.registerApp({
       id: 'settings',
       title,
       order: 3,
@@ -51,10 +51,10 @@ export class AdvancedSettingsPlugin
         title,
         description: i18n.translate('advancedSettings.featureCatalogueTitle', {
           defaultMessage:
-            'Customize your Kibana experience — change the date format, turn on dark mode, and more.',
+            'Customize your OpenSearch Dashboards experience — change the date format, turn on dark mode, and more.',
         }),
         icon: 'gear',
-        path: '/app/management/kibana/settings',
+        path: '/app/management/opensearch-dashboards/settings',
         showOnHomePage: false,
         category: FeatureCatalogueCategory.ADMIN,
       });

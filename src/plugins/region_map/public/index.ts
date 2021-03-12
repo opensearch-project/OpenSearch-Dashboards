@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from 'opensearch-dashboards/public';
 import { RegionMapPlugin as Plugin } from './plugin';
 
 export interface RegionMapsConfigType {
-  includeElasticMapsService: boolean;
+  includeOpenSearchMapsService: boolean;
   layers: any[];
 }
 

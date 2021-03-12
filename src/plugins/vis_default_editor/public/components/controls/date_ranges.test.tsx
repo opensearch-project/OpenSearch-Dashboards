@@ -20,7 +20,7 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DateRangesParamEditor } from './date_ranges';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import { docLinksServiceMock } from '../../../../../core/public/mocks';
 
 describe('DateRangesParamEditor component', () => {
@@ -53,9 +53,9 @@ describe('DateRangesParamEditor component', () => {
       docLinks: docLinksServiceMock.createStartContract(),
     };
     return (
-      <KibanaContextProvider services={services}>
+      <OpenSearchDashboardsContextProvider services={services}>
         <DateRangesParamEditor {...props} />
-      </KibanaContextProvider>
+      </OpenSearchDashboardsContextProvider>
     );
   }
 

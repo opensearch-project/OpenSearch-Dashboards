@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { INSTRUCTION_VARIANT } from '../../../../../../src/plugins/home/server';
 import {
   createWindowsServerInstructions,
@@ -69,7 +69,7 @@ export function onPremInstructions({
           }),
           message: i18n.translate('apmOss.tutorial.apmServer.callOut.message', {
             defaultMessage: `Please make sure your APM Server is updated to 7.0 or higher. \
-            You can also migrate your 6.x data with the migration assistant found in Kibana's management section.`,
+            You can also migrate your 6.x data with the migration assistant found in OpenSearch Dashboards's management section.`,
           }),
           iconType: 'alert',
         },
@@ -109,7 +109,7 @@ export function onPremInstructions({
             defaultMessage:
               'No APM Server detected. Please make sure it is running and you have updated to 7.0 or higher.',
           }),
-          esHitsCheck: {
+          opensearchHitsCheck: {
             index: onboardingIndices,
             query: {
               bool: {
@@ -181,7 +181,7 @@ export function onPremInstructions({
           error: i18n.translate('apmOss.tutorial.apmAgents.statusCheck.errorMessage', {
             defaultMessage: 'No data has been received from agents yet',
           }),
-          esHitsCheck: {
+          opensearchHitsCheck: {
             index: [errorIndices, transactionIndices, metricsIndices, sourcemapIndices],
             query: {
               bool: {

@@ -1,0 +1,19 @@
+{
+  "id": "timelion",
+  "version": "opensearchDashboards",
+  "ui": true,
+  "server": true,
+  "requiredBundles": [
+    "opensearchDashboardsLegacy",
+    "opensearchDashboardsUtils",
+    "savedObjects",
+    "visTypeTimelion"
+  ],
+  "requiredPlugins": [
+    "visualizations",
+    "data",
+    "navigation",
+    "visTypeTimelion",
+    "opensearchDashboardsLegacy"
+  ]
+}

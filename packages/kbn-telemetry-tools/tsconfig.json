@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/kbn-telemetry-tools"
-  },
-  "include": [
-    "src/**/*",
-  ]
-}

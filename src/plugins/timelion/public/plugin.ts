@@ -31,8 +31,8 @@ import {
   AppNavLinkStatus,
 } from '../../../core/public';
 import { Panel } from './panels/panel';
-import { initAngularBootstrap, KibanaLegacyStart } from '../../kibana_legacy/public';
-import { createKbnUrlTracker } from '../../kibana_utils/public';
+import { initAngularBootstrap, OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
+import { createOsdUrlTracker } from '../../opensearch_dashboards_utils/public';
 import { DataPublicPluginStart, esFilters, DataPublicPluginSetup } from '../../data/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { VisualizationsStart } from '../../visualizations/public';
@@ -68,7 +68,7 @@ export class TimelionPlugin implements Plugin<void, void> {
   ) {
     const timelionPanels: Map<string, Panel> = new Map();
 
-    const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
+    const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/timelion'),
       defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:timelion`,
@@ -76,7 +76,7 @@ export class TimelionPlugin implements Plugin<void, void> {
       toastNotifications: core.notifications.toasts,
       stateParams: [
         {
-          kbnUrlKey: '_g',
+          osdUrlKey: '_g',
           stateUpdate$: data.query.state$.pipe(
             filter(
               ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
@@ -102,7 +102,7 @@ export class TimelionPlugin implements Plugin<void, void> {
       order: 8000,
       defaultPath: '#/',
       euiIconType: 'logoKibana',
-      category: DEFAULT_APP_CATEGORIES.kibana,
+      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       navLinkStatus:
         visTypeTimelion.isUiEnabled === false ? AppNavLinkStatus.hidden : AppNavLinkStatus.default,
       mount: async (params: AppMountParameters) => {
@@ -133,8 +133,8 @@ export class TimelionPlugin implements Plugin<void, void> {
     });
   }
 
-  public start(core: CoreStart, { kibanaLegacy }: { kibanaLegacy: KibanaLegacyStart }) {
-    kibanaLegacy.loadFontAwesome();
+  public start(core: CoreStart, { opensearchDashboardsLegacy }: { opensearchDashboardsLegacy: OpenSearchDashboardsLegacyStart }) {
+    opensearchDashboardsLegacy.loadFontAwesome();
   }
 
   public stop(): void {

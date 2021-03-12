@@ -23,7 +23,7 @@ import {
   PluginInitializerContext,
   IUiSettingsClient,
   NotificationsStart,
-} from 'kibana/public';
+} from 'opensearch-dashboards/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 // @ts-ignore
@@ -35,14 +35,14 @@ import {
   setCoreService,
   setFormatService,
   setNotifications,
-  setKibanaLegacy,
+  setOpenSearchDashboardsLegacy,
   setQueryService,
   setShareService,
-} from './kibana_services';
+} from './opensearch_dashboards_services';
 import { DataPublicPluginStart } from '../../data/public';
 import { RegionMapsConfigType } from './index';
 import { MapsLegacyConfig } from '../../maps_legacy/config';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
 import { SharePluginStart } from '../../share/public';
 
 /** @private */
@@ -64,13 +64,13 @@ export interface RegionMapPluginSetupDependencies {
 export interface RegionMapPluginStartDependencies {
   data: DataPublicPluginStart;
   notifications: NotificationsStart;
-  kibanaLegacy: KibanaLegacyStart;
+  opensearchDashboardsLegacy: OpenSearchDashboardsLegacyStart;
   share: SharePluginStart;
 }
 
 /** @internal */
 export interface RegionMapsConfig {
-  includeElasticMapsService: boolean;
+  includeOpenSearchMapsService: boolean;
   layers: any[];
 }
 
@@ -122,7 +122,7 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
     setFormatService(plugins.data.fieldFormats);
     setQueryService(plugins.data.query);
     setNotifications(core.notifications);
-    setKibanaLegacy(plugins.kibanaLegacy);
+    setOpenSearchDashboardsLegacy(plugins.opensearchDashboardsLegacy);
     setShareService(plugins.share);
     return {};
   }

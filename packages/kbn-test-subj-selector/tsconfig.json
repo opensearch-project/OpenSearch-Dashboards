@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/kbn-test-subj-selector"
-  },
-  "include": [
-    "index.d.ts"
-  ]
-}

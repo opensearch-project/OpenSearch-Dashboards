@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@osd/config-schema';
 
 export const configSchema = schema.object({
-  includeElasticMapsService: schema.boolean({ defaultValue: true }),
+  includeOpenSearchMapsService: schema.boolean({ defaultValue: true }),
   layers: schema.arrayOf(
     schema.object({
       url: schema.string(),

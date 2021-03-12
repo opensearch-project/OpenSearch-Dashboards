@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env/no_transpilation');
-require('@kbn/release-notes').runReleaseNotesCli();
+require('@osd/release-notes').runReleaseNotesCli();

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectAttributes, SavedObjectsCreateOptions, OverlayStart } from 'kibana/public';
+import { SavedObjectAttributes, SavedObjectsCreateOptions, OverlayStart } from 'opensearch-dashboards/public';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { saveWithConfirmation } from './save_with_confirmation';
 import * as deps from './confirm_modal_promise';
@@ -29,7 +29,7 @@ describe('saveWithConfirmation', () => {
   const source: SavedObjectAttributes = {} as SavedObjectAttributes;
   const options: SavedObjectsCreateOptions = {} as SavedObjectsCreateOptions;
   const savedObject = {
-    getEsType: () => 'test type',
+    getOpenSearchType: () => 'test type',
     title: 'test title',
     displayName: 'test display name',
   };
@@ -42,7 +42,7 @@ describe('saveWithConfirmation', () => {
   test('should call create of savedObjectsClient', async () => {
     await saveWithConfirmation(source, savedObject, options, { savedObjectsClient, overlays });
     expect(savedObjectsClient.create).toHaveBeenCalledWith(
-      savedObject.getEsType(),
+      savedObject.getOpenSearchType(),
       source,
       options
     );
@@ -72,7 +72,7 @@ describe('saveWithConfirmation', () => {
       );
 
     await saveWithConfirmation(source, savedObject, options, { savedObjectsClient, overlays });
-    expect(savedObjectsClient.create).toHaveBeenLastCalledWith(savedObject.getEsType(), source, {
+    expect(savedObjectsClient.create).toHaveBeenLastCalledWith(savedObject.getOpenSearchType(), source, {
       overwrite: true,
       ...options,
     });

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function (kbnServer, server) {
+export default function (osdServer, server) {
   process.on('warning', (warning) => {
     // deprecation warnings do no reflect a current problem for
     // the user and therefor should be filtered out.

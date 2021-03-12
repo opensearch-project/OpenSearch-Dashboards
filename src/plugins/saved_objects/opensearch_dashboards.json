@@ -1,0 +1,11 @@
+{
+  "id": "savedObjects",
+  "version": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["data"],
+  "requiredBundles": [
+    "opensearchDashboardsUtils",
+    "opensearchDashboardsReact"
+  ]
+}
