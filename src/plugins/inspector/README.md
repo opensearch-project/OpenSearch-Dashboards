@@ -1,7 +1,7 @@
 # Inspector
 
 The inspector is a contextual tool to gain insights into different elements
-in Kibana, e.g. visualizations. It has the form of a flyout panel.
+in OpenSearch Dashboards, e.g. visualizations. It has the form of a flyout panel.
 
 ## Inspector Views
 
