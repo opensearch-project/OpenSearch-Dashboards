@@ -29,15 +29,15 @@ import {
   EuiSelect,
   EuiSelectOption,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { fieldWildcardMatcher } from '../../../../../kibana_utils/public';
+import { i18n } from '@osd/i18n';
+import { fieldWildcardMatcher } from '../../../../../opensearch_dashboards_utils/public';
 import {
   IndexPattern,
   IndexPatternField,
   UI_SETTINGS,
   DataPublicPluginStart,
 } from '../../../../../../plugins/data/public';
-import { useKibana } from '../../../../../../plugins/kibana_react/public';
+import { useOpenSearchDashboards } from '../../../../../../plugins/opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
@@ -74,7 +74,7 @@ const filterPlaceholder = i18n.translate(
 );
 
 export function Tabs({ indexPattern, saveIndexPattern, fields, history, location }: TabsProps) {
-  const { uiSettings, indexPatternManagementStart, docLinks } = useKibana<
+  const { uiSettings, indexPatternManagementStart, docLinks } = useOpenSearchDashboards<
     IndexPatternManagmentContext
   >().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');

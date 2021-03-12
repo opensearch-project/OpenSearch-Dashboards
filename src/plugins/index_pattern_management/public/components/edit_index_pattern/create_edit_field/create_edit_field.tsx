@@ -20,9 +20,9 @@ import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { IndexPattern, IndexPatternField } from '../../../../../../plugins/data/public';
-import { useKibana } from '../../../../../../plugins/kibana_react/public';
+import { useOpenSearchDashboards } from '../../../../../../plugins/opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { IndexHeader } from '../index_header';
 import { TAB_SCRIPTED_FIELDS, TAB_INDEXED_FIELDS } from '../constants';
@@ -44,7 +44,7 @@ const newFieldPlaceholder = i18n.translate(
 
 export const CreateEditField = withRouter(
   ({ indexPattern, mode, fieldName, history }: CreateEditFieldProps) => {
-    const { uiSettings, chrome, notifications, data } = useKibana<
+    const { uiSettings, chrome, notifications, data } = useOpenSearchDashboards<
       IndexPatternManagmentContext
     >().services;
     const spec =

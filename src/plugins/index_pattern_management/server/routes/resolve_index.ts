@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import { IRouter } from 'src/core/server';
 
 export function registerResolveIndexRoute(router: IRouter): void {
@@ -45,13 +45,12 @@ export function registerResolveIndexRoute(router: IRouter): void {
       const queryString = req.query.expand_wildcards
         ? { expand_wildcards: req.query.expand_wildcards }
         : null;
-      const result = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
+      const result = await context.core.opensearch.legacy.client.callAsCurrentUser(
         'transport.request',
         {
           method: 'GET',
-          path: `/_resolve/index/${encodeURIComponent(req.params.query)}${
-            queryString ? '?' + new URLSearchParams(queryString).toString() : ''
-          }`,
+          path: `/_resolve/index/${encodeURIComponent(req.params.query)}${queryString ? '?' + new URLSearchParams(queryString).toString() : ''
+            }`,
         }
       );
       return res.ok({ body: result });

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { HttpStart, NotificationsStart } from 'src/core/public';
 
 export function getSupportedScriptingLanguages(): string[] {
@@ -32,10 +32,10 @@ export const getEnabledScriptingLanguages = (
   http: HttpStart,
   toasts: NotificationsStart['toasts']
 ) =>
-  http.get('/api/kibana/scripts/languages').catch(() => {
+  http.get('/api/opensearch-dashboards/scripts/languages').catch(() => {
     toasts.addDanger(
       i18n.translate('indexPatternManagement.scriptingLanguages.errorFetchingToastDescription', {
-        defaultMessage: 'Error getting available scripting languages from Elasticsearch',
+        defaultMessage: 'Error getting available scripting languages from OpenSearch',
       })
     );
 

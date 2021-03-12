@@ -48,7 +48,7 @@ const successfulSearchResponse = {
   rawResponse: {
     aggregations: {
       indices: {
-        buckets: [{ key: 'kibana_sample_data_ecommerce' }, { key: '.kibana_1' }],
+        buckets: [{ key: 'opensearch_dashboards_sample_data_ecommerce' }, { key: '.opensearch-dashboards_1' }],
       },
     },
   },
@@ -70,7 +70,7 @@ describe('getIndices', () => {
     const result = await getIndices({
       http,
       getIndexTags,
-      pattern: 'kibana',
+      pattern: 'opensearch-dashboards',
       searchClient: uncalledSearchClient,
     });
     expect(http.get).toHaveBeenCalled();
@@ -82,13 +82,13 @@ describe('getIndices', () => {
 
   it('should make two calls in cross cluser case', async () => {
     http.get.mockResolvedValue(successfulResolveResponse);
-    const result = await getIndices({ http, getIndexTags, pattern: '*:kibana', searchClient });
+    const result = await getIndices({ http, getIndexTags, pattern: '*:opensearch-dashboards', searchClient });
 
     expect(http.get).toHaveBeenCalled();
     expect(result.length).toBe(4);
     expect(result[0].name).toBe('f-alias');
     expect(result[1].name).toBe('foo');
-    expect(result[2].name).toBe('kibana_sample_data_ecommerce');
+    expect(result[2].name).toBe('opensearch_dashboards_sample_data_ecommerce');
     expect(result[3].name).toBe('remoteCluster1:bar-01');
   });
 
@@ -144,7 +144,7 @@ describe('getIndices', () => {
       http.get.mockImplementationOnce(() => {
         throw new Error('Test error');
       });
-      const result = await getIndices({ http, getIndexTags, pattern: 'kibana', searchClient });
+      const result = await getIndices({ http, getIndexTags, pattern: 'opensearch-dashboards', searchClient });
       expect(result.length).toBe(0);
     });
   });

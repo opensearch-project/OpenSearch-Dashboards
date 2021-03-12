@@ -21,7 +21,7 @@ import React, { PureComponent } from 'react';
 
 import { EuiIcon, EuiInMemoryTable, EuiIconTip, EuiBasicTableColumn } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { IIndexPattern } from '../../../../../../../data/public';
 import { IndexedFieldItem } from '../../types';

@@ -29,7 +29,7 @@ jest.mock('./components/header', () => ({ Header: 'Header' }));
 jest.mock('./components/loading_state', () => ({ LoadingState: 'LoadingState' }));
 jest.mock('./lib/get_indices', () => ({
   getIndices: () => {
-    return [{ name: 'kibana' }];
+    return [{ name: 'opensearch-dashboards' }];
   },
 }));
 const routeComponentPropsMock = {
@@ -102,7 +102,7 @@ describe('CreateIndexPatternWizard', () => {
     component.setState({
       isInitiallyLoadingIndices: false,
       isIncludingSystemIndices: true,
-      allIndices: [{ name: '.kibana ' }],
+      allIndices: [{ name: '.opensearch-dashboards ' }],
     });
 
     await component.update();

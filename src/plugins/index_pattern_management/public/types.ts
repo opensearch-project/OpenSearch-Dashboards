@@ -30,7 +30,7 @@ import {
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementAppMountParams } from '../../management/public';
 import { IndexPatternManagementStart } from './index';
-import { KibanaReactContextValue } from '../../kibana_react/public';
+import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
 
 export interface IndexPatternManagmentContext {
   chrome: ChromeStart;
@@ -47,7 +47,7 @@ export interface IndexPatternManagmentContext {
   getMlCardState: () => MlCardState;
 }
 
-export type IndexPatternManagmentContextValue = KibanaReactContextValue<
+export type IndexPatternManagmentContextValue = OpenSearchDashboardsReactContextValue<
   IndexPatternManagmentContext
 >;
 
