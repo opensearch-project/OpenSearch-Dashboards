@@ -19,7 +19,7 @@
 
 import argType from './arg_type';
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 export default function validateArgFn(functionDef) {
   return function validateArg(value, name, argDef) {

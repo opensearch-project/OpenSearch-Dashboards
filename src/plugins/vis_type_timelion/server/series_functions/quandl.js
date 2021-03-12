@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import _ from 'lodash';
 import fetch from 'node-fetch';
 import moment from 'moment';
@@ -47,7 +47,7 @@ export default new Datasource('quandl', {
   help: i18n.translate('timelion.help.functions.quandlHelpText', {
     defaultMessage: `
     [experimental]
-    Pull data from quandl.com using the quandl code. Set {quandlKeyField} to your free API key in Kibana's
+    Pull data from quandl.com using the quandl code. Set {quandlKeyField} to your free API key in Opensearch Dashboards's
     Advanced Settings. The API has a really low rate limit without a key.`,
     values: {
       quandlKeyField: '"timelion:quandl.key"',

@@ -37,9 +37,9 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
   };
   bool.must.push(timeFilter);
 
-  // Use the kibana filter bar filters
-  if (config.kibana) {
-    bool.filter = _.get(tlConfig, 'request.body.extended.es.filter');
+  // Use the opensearchDashboards filter bar filters
+  if (config.opensearchDashboards) {
+    bool.filter = _.get(tlConfig, 'request.body.extended.opensearch.filter');
   }
 
   const aggs = {

@@ -18,8 +18,8 @@
  */
 
 import { get, startsWith } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
+import { i18n } from '@osd/i18n';
+import { monaco } from '@osd/monaco';
 
 import { Parser } from 'pegjs';
 

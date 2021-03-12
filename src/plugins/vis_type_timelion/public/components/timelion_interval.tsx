@@ -19,10 +19,10 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 import { search } from '../../../data/public';
-const { isValidEsInterval } = search.aggs;
+const { isValidOpenSearchInterval } = search.aggs;
 import { useValidation } from '../../../vis_default_editor/public';
 
 const intervalOptions = [
@@ -102,7 +102,7 @@ function TimelionInterval({ value, setValue, setValidity }: TimelionIntervalProp
     [value]
   );
 
-  const isValid = intervalOptions.some((int) => int.value === value) || isValidEsInterval(value);
+  const isValid = intervalOptions.some((int) => int.value === value) || isValidOpenSearchInterval(value);
 
   useValidation(setValidity, isValid);
 

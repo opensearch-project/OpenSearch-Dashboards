@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import alter from '../lib/alter.js';
 import { toMS } from '../../common/lib/to_milliseconds';
 import _ from 'lodash';

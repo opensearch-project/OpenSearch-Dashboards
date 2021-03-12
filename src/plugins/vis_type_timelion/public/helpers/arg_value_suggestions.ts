@@ -81,7 +81,7 @@ export function getArgValueSuggestions() {
   // Argument value suggestion handlers requiring custom client side code
   // Could not put with function definition since functions are defined on server
   const customHandlers = {
-    es: {
+    opensearch: {
       async index(partial: string) {
         const search = partial ? `${partial}*` : '*';
         const resp = await savedObjectsClient.find<IndexPatternAttributes>({

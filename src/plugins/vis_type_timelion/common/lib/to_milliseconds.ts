@@ -23,7 +23,7 @@ import moment, { unitOfTime } from 'moment';
 type Units = unitOfTime.Base | unitOfTime._quarter;
 type Values = { [key in Units]: number };
 
-// map of moment's short/long unit ids and elasticsearch's long unit ids
+// map of moment's short/long unit ids and opensearch's long unit ids
 // to their value in milliseconds
 const unitMappings = [
   ['ms', 'milliseconds', 'millisecond'],
