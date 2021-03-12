@@ -20,7 +20,7 @@
 import { DiscoverNoResults } from './no_results';
 import { DiscoverUninitialized } from './uninitialized';
 import { DiscoverHistogram } from './histogram';
-import { getAngularModule } from '../../../kibana_services';
+import { getAngularModule } from '../../../opensearch_dashboards_services';
 
 const app = getAngularModule();
 

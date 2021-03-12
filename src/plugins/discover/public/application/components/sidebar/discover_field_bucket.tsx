@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { EuiText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { StringFieldProgressBar } from './string_progress_bar';
 import { Bucket } from './types';
 import { IndexPatternField } from '../../../../../data/public';

@@ -52,7 +52,7 @@ describe('discover sidebar field details', function () {
       {
         name: 'bytes',
         type: 'number',
-        esTypes: ['long'],
+        opensearchTypes: ['long'],
         count: 10,
         scripted: false,
         searchable: true,
@@ -70,7 +70,7 @@ describe('discover sidebar field details', function () {
       {
         name: '_id',
         type: 'string',
-        esTypes: ['_id'],
+        opensearchTypes: ['_id'],
         count: 0,
         scripted: false,
         searchable: true,
@@ -88,7 +88,7 @@ describe('discover sidebar field details', function () {
       {
         name: 'test',
         type: 'unknown',
-        esTypes: ['double'],
+        opensearchTypes: ['double'],
         count: 0,
         scripted: false,
         searchable: true,

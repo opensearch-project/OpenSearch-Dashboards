@@ -25,10 +25,10 @@ import angular from 'angular';
 // required for `ngSanitize` angular module
 import 'angular-sanitize';
 import { EuiIcon } from '@elastic/eui';
-import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-import { CoreStart, PluginInitializerContext } from 'kibana/public';
+import { i18nDirective, i18nFilter, I18nProvider } from '@osd/i18n/angular';
+import { CoreStart, PluginInitializerContext } from 'opensearch-dashboards/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { Storage } from '../../kibana_utils/public';
+import { Storage } from '../../opensearch_dashboards_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { createDocTableDirective } from './application/angular/doc_table';
 import { createTableHeaderDirective } from './application/angular/doc_table/components/table_header';
@@ -50,15 +50,15 @@ import {
   watchMultiDecorator,
   createTopNavDirective,
   createTopNavHelper,
-} from '../../kibana_legacy/public';
+} from '../../opensearch_dashboards_legacy/public';
 import { createContextErrorMessageDirective } from './application/components/context_error_message';
 import { DiscoverStartPlugins } from './plugin';
-import { getScopedHistory } from './kibana_services';
+import { getScopedHistory } from './opensearch_dashboards_services';
 import { createDiscoverLegacyDirective } from './application/components/create_discover_legacy_directive';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
- * needs to render, so in the end the current 'kibana' angular module is no longer necessary
+ * needs to render, so in the end the current 'opensearchDashboards' angular module is no longer necessary
  */
 export function getInnerAngularModule(
   name: string,
@@ -152,8 +152,8 @@ function createLocalPrivateModule() {
 function createLocalTopNavModule(navigation: NavigationStart) {
   angular
     .module('discoverTopNav', ['react'])
-    .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
+    .directive('osdTopNav', createTopNavDirective)
+    .directive('osdTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
 function createLocalI18nModule() {
@@ -185,10 +185,10 @@ function createDocTableModule() {
   angular
     .module('discoverDocTable', ['discoverPagerFactory', 'react'])
     .directive('docTable', createDocTableDirective)
-    .directive('kbnTableHeader', createTableHeaderDirective)
+    .directive('osdTableHeader', createTableHeaderDirective)
     .directive('toolBarPagerText', createToolBarPagerTextDirective)
-    .directive('kbnTableRow', createTableRowDirective)
+    .directive('osdTableRow', createTableRowDirective)
     .directive('toolBarPagerButtons', createToolBarPagerButtonsDirective)
-    .directive('kbnInfiniteScroll', createInfiniteScrollDirective)
+    .directive('osdInfiniteScroll', createInfiniteScrollDirective)
     .directive('docViewer', createDocViewerDirective);
 }

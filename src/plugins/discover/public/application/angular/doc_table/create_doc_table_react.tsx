@@ -19,7 +19,7 @@
 import angular, { auto, ICompileService, IScope } from 'angular';
 import { render } from 'react-dom';
 import React, { useRef, useEffect } from 'react';
-import { getServices, IIndexPattern } from '../../../kibana_services';
+import { getServices, IIndexPattern } from '../../../opensearch_dashboards_services';
 import { IndexPatternField } from '../../../../../data/common/index_patterns';
 export type AngularScope = IScope;
 

@@ -19,10 +19,10 @@
 
 import _ from 'lodash';
 import { createHashHistory } from 'history';
-import { ScopedHistory, AppMountParameters } from 'kibana/public';
+import { ScopedHistory, AppMountParameters } from 'opensearch-dashboards/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { DiscoverServices } from './build_services';
-import { createGetterSetter } from '../../kibana_utils/public';
+import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 import { search } from '../../data/public';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 
@@ -76,7 +76,7 @@ export const [getDocViewsRegistry, setDocViewsRegistry] = createGetterSetter<Doc
 export const getHistory = _.once(() => createHashHistory());
 
 /**
- * Discover currently uses two `history` instances: one from Kibana Platform and
+ * Discover currently uses two `history` instances: one from OpenSearch Dashboards Platform and
  * another from `history` package. Below function is used every time Discover
  * app is loaded to synchronize both instances.
  *
@@ -93,8 +93,8 @@ export const [getScopedHistory, setScopedHistory] = createGetterSetter<ScopedHis
 );
 
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
-export { unhashUrl, redirectWhenMissing } from '../../kibana_utils/public';
-export { formatMsg, formatStack, subscribeWithScope } from '../../kibana_legacy/public';
+export { unhashUrl, redirectWhenMissing } from '../../opensearch_dashboards_utils/public';
+export { formatMsg, formatStack, subscribeWithScope } from '../../opensearch_dashboards_legacy/public';
 
 // EXPORT types
 export {
@@ -104,6 +104,6 @@ export {
   indexPatterns,
   IFieldType,
   ISearchSource,
-  EsQuerySortValue,
+  OpenSearchQuerySortValue,
   SortDirection,
 } from '../../data/public';

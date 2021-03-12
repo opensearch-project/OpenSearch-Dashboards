@@ -43,7 +43,7 @@ export function DocViewTable({
   }
 
   return (
-    <table className="table table-condensed kbnDocViewerTable">
+    <table className="table table-condensed osdDocViewerTable">
       <tbody>
         {Object.keys(flattened)
           .sort()

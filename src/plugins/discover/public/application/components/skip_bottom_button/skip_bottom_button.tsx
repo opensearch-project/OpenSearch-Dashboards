@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { EuiSkipLink } from '@elastic/eui';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 
 export interface SkipBottomButtonProps {
   /**

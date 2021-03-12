@@ -43,11 +43,11 @@ import {
   Theme,
 } from '@elastic/charts';
 
-import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from 'kibana/public';
+import { i18n } from '@osd/i18n';
+import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
 import { Subscription, combineLatest } from 'rxjs';
-import { getServices } from '../../../kibana_services';
+import { getServices } from '../../../opensearch_dashboards_services';
 import { Chart as IChart } from '../helpers/point_series';
 
 export interface DiscoverHistogramProps {
@@ -62,29 +62,29 @@ interface DiscoverHistogramState {
 
 function findIntervalFromDuration(
   dateValue: number,
-  esValue: number,
-  esUnit: unitOfTime.Base,
+  opensearchValue: number,
+  opensearchUnit: unitOfTime.Base,
   timeZone: string
 ) {
   const date = moment.tz(dateValue, timeZone);
-  const startOfDate = moment.tz(date, timeZone).startOf(esUnit);
-  const endOfDate = moment.tz(date, timeZone).startOf(esUnit).add(esValue, esUnit);
+  const startOfDate = moment.tz(date, timeZone).startOf(opensearchUnit);
+  const endOfDate = moment.tz(date, timeZone).startOf(opensearchUnit).add(opensearchValue, opensearchUnit);
   return endOfDate.valueOf() - startOfDate.valueOf();
 }
 
 function getIntervalInMs(
   value: number,
-  esValue: number,
-  esUnit: unitOfTime.Base,
+  opensearchValue: number,
+  opensearchUnit: unitOfTime.Base,
   timeZone: string
 ): number {
-  switch (esUnit) {
+  switch (opensearchUnit) {
     case 's':
-      return 1000 * esValue;
+      return 1000 * opensearchValue;
     case 'ms':
-      return 1 * esValue;
+      return 1 * opensearchValue;
     default:
-      return findIntervalFromDuration(value, esValue, esUnit, timeZone);
+      return findIntervalFromDuration(value, opensearchValue, opensearchUnit, timeZone);
   }
 }
 
@@ -100,8 +100,8 @@ function getTimezone(uiSettings: IUiSettingsClient) {
 
 export function findMinInterval(
   xValues: number[],
-  esValue: number,
-  esUnit: string,
+  opensearchValue: number,
+  opensearchUnit: string,
   timeZone: string
 ): number {
   return xValues.reduce((minInterval, currentXvalue, index) => {
@@ -111,8 +111,8 @@ export function findMinInterval(
     }
     const singleUnitInterval = getIntervalInMs(
       currentXvalue,
-      esValue,
-      esUnit as unitOfTime.Base,
+      opensearchValue,
+      opensearchUnit as unitOfTime.Base,
       timeZone
     );
     return Math.min(minInterval, singleUnitInterval, currentDiff);
@@ -222,7 +222,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
      * see https://github.com/elastic/kibana/issues/27410
      * TODO: Once the Discover query has been update, we should change the below to use the new field
      */
-    const { intervalESValue, intervalESUnit, interval } = chartData.ordered;
+    const { intervalOpenSearchValue, intervalOpenSearchUnit, interval } = chartData.ordered;
     const xInterval = interval.asMilliseconds();
 
     const xValues = chartData.xAxisOrderedValues;
@@ -238,7 +238,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     const xDomain = {
       min: domainMin,
       max: domainMax,
-      minInterval: findMinInterval(xValues, intervalESValue, intervalESUnit, timeZone),
+      minInterval: findMinInterval(xValues, intervalOpenSearchValue, intervalOpenSearchUnit, timeZone),
     };
 
     // Domain end of 'now' will be milliseconds behind current time, so we extend time by 1 minute and check if

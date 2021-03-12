@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { CONTEXT_STEP_SETTING, CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../common';
-import { getAngularModule, getServices } from '../../kibana_services';
+import { getAngularModule, getServices } from '../../opensearch_dashboards_services';
 import contextAppTemplate from './context_app.html';
 import './context/components/action_bar';
 import { getFirstSortableField } from './context/api/utils/sorting';

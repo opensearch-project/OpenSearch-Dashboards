@@ -1,11 +1,11 @@
-.kbnDocTableHeader {
+.osdDocTableHeader {
   white-space: nowrap;
 }
-.kbnDocTableHeader button {
+.osdDocTableHeader button {
   margin-left: $euiSizeXS;
 }
-.kbnDocTableHeader__move,
-.kbnDocTableHeader__sortChange {
+.osdDocTableHeader__move,
+.osdDocTableHeader__sortChange {
   opacity: 0;
   th:hover &,
   &:focus {

@@ -22,17 +22,17 @@ import {
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
 } from '../../../../../../ui_actions/public';
-import { getUiActions } from '../../../../kibana_services';
-import { IndexPatternField, KBN_FIELD_TYPES } from '../../../../../../data/public';
+import { getUiActions } from '../../../../opensearch_dashboards_services';
+import { IndexPatternField, OSD_FIELD_TYPES } from '../../../../../../data/public';
 
 function getTriggerConstant(type: string) {
-  return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE
+  return type === OSD_FIELD_TYPES.GEO_POINT || type === OSD_FIELD_TYPES.GEO_SHAPE
     ? VISUALIZE_GEO_FIELD_TRIGGER
     : VISUALIZE_FIELD_TRIGGER;
 }
 
 function getTrigger(type: string) {
-  return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE
+  return type === OSD_FIELD_TYPES.GEO_POINT || type === OSD_FIELD_TYPES.GEO_SHAPE
     ? visualizeGeoFieldTrigger
     : visualizeFieldTrigger;
 }
@@ -96,7 +96,7 @@ export async function isFieldVisualizable(
   contextualFields: string[]
 ) {
   if (field.name === '_id' || !indexPatternId) {
-    // for first condition you'd get a 'Fielddata access on the _id field is disallowed' error on ES side.
+    // for first condition you'd get a 'Fielddata access on the _id field is disallowed' error on OpenSearch side.
     return false;
   }
   const trigger = getTriggerConstant(field.type);

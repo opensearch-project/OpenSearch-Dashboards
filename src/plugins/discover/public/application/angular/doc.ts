@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { getAngularModule, getServices } from '../../kibana_services';
+import { getAngularModule, getServices } from '../../opensearch_dashboards_services';
 // @ts-ignore
 import { getRootBreadcrumbs } from '../helpers/breadcrumbs';
 import html from './doc.html';
@@ -46,7 +46,7 @@ app.config(($routeProvider: any) => {
     .when('/doc/:indexPattern/:index/:type', {
       redirectTo: '/doc/:indexPattern/:index',
     })
-    // the new route, es 7 deprecated types, es 8 removed them
+    // the new route, opensearch 7 deprecated types, opensearch 8 removed them
     .when('/doc/:indexPattern/:index', {
       // have to be written as function expression, because it's not compiled in dev mode
       // eslint-disable-next-line object-shorthand

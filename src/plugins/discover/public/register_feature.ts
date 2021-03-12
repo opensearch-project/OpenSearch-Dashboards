@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
 
 export function registerFeature(home: HomePublicPluginSetup) {
@@ -35,7 +35,7 @@ export function registerFeature(home: HomePublicPluginSetup) {
     path: '/app/discover#/',
     showOnHomePage: false,
     category: FeatureCatalogueCategory.DATA,
-    solutionId: 'kibana',
+    solutionId: 'opensearchDashboards',
     order: 200,
   });
 }

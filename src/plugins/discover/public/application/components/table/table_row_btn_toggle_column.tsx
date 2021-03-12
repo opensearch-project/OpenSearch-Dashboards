@@ -17,9 +17,9 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 
 export interface Props {
   active: boolean;
@@ -34,7 +34,7 @@ export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = fal
         aria-label={i18n.translate('discover.docViews.table.toggleColumnInTableButtonAriaLabel', {
           defaultMessage: 'Toggle column in table',
         })}
-        className="kbnDocViewer__actionButton"
+        className="osdDocViewer__actionButton"
         data-test-subj="toggleColumnButton"
         disabled
         iconType={'tableOfContents'}
@@ -57,7 +57,7 @@ export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = fal
         })}
         aria-pressed={active}
         onClick={onClick}
-        className="kbnDocViewer__actionButton"
+        className="osdDocViewer__actionButton"
         data-test-subj="toggleColumnButton"
         iconType={'tableOfContents'}
         iconSize={'s'}

@@ -18,9 +18,9 @@
  */
 
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../common';
-import { getAngularModule, getServices } from '../../kibana_services';
+import { getAngularModule, getServices } from '../../opensearch_dashboards_services';
 import './context_app';
 import { getState } from './context_state';
 import contextAppRouteTemplate from './context.html';
