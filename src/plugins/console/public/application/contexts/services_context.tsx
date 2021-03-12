@@ -18,11 +18,11 @@
  */
 
 import React, { createContext, useContext, useEffect } from 'react';
-import { NotificationsSetup } from 'kibana/public';
+import { NotificationsSetup } from 'opensearch-dashboards/public';
 import { History, Settings, Storage } from '../../services';
 import { ObjectStorageClient } from '../../../common/types';
 import { MetricsTracker } from '../../types';
-import { EsHostService } from '../lib';
+import { OpenSearchHostService } from '../lib';
 
 interface ContextServices {
   history: History;
@@ -31,7 +31,7 @@ interface ContextServices {
   notifications: NotificationsSetup;
   objectStorageClient: ObjectStorageClient;
   trackUiMetric: MetricsTracker;
-  esHostService: EsHostService;
+  opensearchHostService: OpenSearchHostService;
 }
 
 export interface ContextValue {
@@ -49,8 +49,8 @@ const ServicesContext = createContext<ContextValue>(null as any);
 export function ServicesContextProvider({ children, value }: ContextProps) {
   useEffect(() => {
     // Fire and forget, we attempt to init the host service once.
-    value.services.esHostService.init();
-  }, [value.services.esHostService]);
+    value.services.opensearchHostService.init();
+  }, [value.services.opensearchHostService]);
 
   return <ServicesContext.Provider value={value}>{children}</ServicesContext.Provider>;
 }

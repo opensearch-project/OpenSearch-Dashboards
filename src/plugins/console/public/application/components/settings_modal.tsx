@@ -19,8 +19,8 @@
 
 import _ from 'lodash';
 import React, { Fragment, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 
 import {
   EuiButton,
@@ -122,7 +122,7 @@ export function DevToolsSettingsModal(props: Props) {
           helpText={
             <FormattedMessage
               id="console.settingsPage.refreshingDataDescription"
-              defaultMessage="Console refreshes autocomplete suggestions by querying Elasticsearch.
+              defaultMessage="Console refreshes autocomplete suggestions by querying OpenSearch.
               Automatic refreshes may be an issue if you have a large cluster or if you have network limitations."
             />
           }

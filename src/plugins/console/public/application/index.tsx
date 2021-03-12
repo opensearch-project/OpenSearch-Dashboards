@@ -26,7 +26,7 @@ import { createStorage, createHistory, createSettings } from '../services';
 import * as localStorageObjectClient from '../lib/local_storage_object_client';
 import { createUsageTracker } from '../services/tracker';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { createApi, createEsHostService } from './lib';
+import { createApi, createOpenSearchHostService } from './lib';
 
 export interface BootDependencies {
   http: HttpSetup;
@@ -56,7 +56,7 @@ export function renderApp({
   const settings = createSettings({ storage });
   const objectStorageClient = localStorageObjectClient.create(storage);
   const api = createApi({ http });
-  const esHostService = createEsHostService({ api });
+  const opensearchHostService = createOpenSearchHostService({ api });
 
   render(
     <I18nContext>
@@ -64,7 +64,7 @@ export function renderApp({
         value={{
           docLinkVersion,
           services: {
-            esHostService,
+            opensearchHostService,
             storage,
             history,
             settings,

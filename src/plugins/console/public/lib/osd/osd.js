@@ -156,7 +156,7 @@ export function setActiveApi(api) {
       url: '../api/console/api_server',
       dataType: 'json', // disable automatic guessing
       headers: {
-        'kbn-xsrf': 'kibana',
+        'osd-xsrf': 'opensearch-dashboards',
       },
     }).then(
       function (data) {

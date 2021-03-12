@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
+import { METRIC_TYPE, UiStatsMetricType } from '@osd/analytics';
 import { MetricsTracker } from '../types';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 

@@ -17,10 +17,10 @@
  * under the License.
  */
 
-export interface EsConfigApiResponse {
+export interface OpenSearchConfigApiResponse {
   /**
-   * This is the first host in the hosts array that Kibana is configured to use
-   * to communicate with ES.
+   * This is the first host in the hosts array that OpenSearch Dashboards is configured to use
+   * to communicate with OpenSearch.
    *
    * At the moment this is used to power the copy as cURL functionality in Console
    * to complete the host portion of the URL.

@@ -18,18 +18,18 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { debounce } from 'lodash';
 import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import { ace } from '../../../../../../../es_ui_shared/public';
+import { ace } from '../../../../../../../opensearch_ui_shared/public';
 // @ts-ignore
 import { retrieveAutoCompleteInfo, clearSubscriptions } from '../../../../../lib/mappings/mappings';
 import { ConsoleMenu } from '../../../../components';
 import { useEditorReadContext, useServicesContext } from '../../../../contexts';
 import {
   useSaveCurrentTextObject,
-  useSendCurrentRequestToES,
+  useSendCurrentRequestToOpenSearch,
   useSetInputEditor,
 } from '../../../../hooks';
 import * as senseEditor from '../../../../models/sense_editor';
@@ -67,13 +67,13 @@ const inputId = 'ConAppInputTextarea';
 
 function EditorUI({ initialTextValue }: EditorProps) {
   const {
-    services: { history, notifications, settings: settingsService, esHostService },
+    services: { history, notifications, settings: settingsService, opensearchHostService },
     docLinkVersion,
   } = useServicesContext();
 
   const { settings } = useEditorReadContext();
   const setInputEditor = useSetInputEditor();
-  const sendCurrentRequestToES = useSendCurrentRequestToES();
+  const sendCurrentRequestToOpenSearch = useSendCurrentRequestToOpenSearch();
   const saveCurrentTextObject = useSaveCurrentTextObject();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -112,7 +112,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
           // Having dataType here is required as it doesn't allow jQuery to `eval` content
           // coming from the external source thereby preventing XSS attack.
           dataType: 'text',
-          kbnXsrfToken: false,
+          osdXsrfToken: false,
         };
 
         if (/https?:\/\/api\.github\.com/.test(url)) {
@@ -198,10 +198,10 @@ function EditorUI({ initialTextValue }: EditorProps) {
   useEffect(() => {
     registerCommands({
       senseEditor: editorInstanceRef.current!,
-      sendCurrentRequestToES,
+      sendCurrentRequestToOpenSearch,
       openDocumentation,
     });
-  }, [sendCurrentRequestToES, openDocumentation]);
+  }, [sendCurrentRequestToOpenSearch, openDocumentation]);
 
   return (
     <div style={abs} className="conApp">
@@ -220,7 +220,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
               })}
             >
               <button
-                onClick={sendCurrentRequestToES}
+                onClick={sendCurrentRequestToOpenSearch}
                 data-test-subj="sendRequestButton"
                 aria-label={i18n.translate('console.sendRequestButtonTooltip', {
                   defaultMessage: 'Click to send request',
@@ -234,7 +234,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
           <EuiFlexItem>
             <ConsoleMenu
               getCurl={() => {
-                return editorInstanceRef.current!.getRequestsAsCURL(esHostService.getHost());
+                return editorInstanceRef.current!.getRequestsAsCURL(opensearchHostService.getHost());
               }}
               getDocumentation={() => {
                 return getDocumentation(editorInstanceRef.current!, docLinkVersion);

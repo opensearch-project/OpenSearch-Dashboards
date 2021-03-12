@@ -17,7 +17,7 @@
  * under the License.
  */
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import React, { useEffect } from 'react';
 import { createReadOnlyAceEditor } from '../models/legacy_core_editor';
 

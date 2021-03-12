@@ -27,7 +27,7 @@ import { jsSpecLoaders } from '../lib';
 const PATH_TO_OSS_JSON_SPEC = resolve(__dirname, '../lib/spec_definitions/json');
 
 export class SpecDefinitionsService {
-  private readonly name = 'es';
+  private readonly name = 'opensearch';
 
   private readonly globalRules: Record<string, any> = {};
   private readonly endpoints: Record<string, any> = {};

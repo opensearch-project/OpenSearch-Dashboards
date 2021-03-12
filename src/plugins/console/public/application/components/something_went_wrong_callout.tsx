@@ -18,8 +18,8 @@
  */
 
 import React, { FunctionComponent, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 import { EuiCallOut, EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 
 interface Props {
