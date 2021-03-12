@@ -22,26 +22,26 @@ import { createZoomWarningMsg } from './map_messages';
 import $ from 'jquery';
 import { get, isEqual, escape } from 'lodash';
 import { zoomToPrecision } from './zoom_to_precision';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { ORIGIN } from '../common/constants/origin';
-import { getToasts } from '../kibana_services';
+import { getToasts } from '../opensearch_dashboards_services';
 import { L } from '../leaflet';
 
-function makeFitControl(fitContainer, kibanaMap) {
+function makeFitControl(fitContainer, opensearchDashboardsMap) {
   // eslint-disable-next-line no-undef
   const FitControl = L.Control.extend({
     options: {
       position: 'topleft',
     },
-    initialize: function (fitContainer, kibanaMap) {
+    initialize: function (fitContainer, opensearchDashboardsMap) {
       this._fitContainer = fitContainer;
-      this._kibanaMap = kibanaMap;
+      this._opensearchDashboardsMap = opensearchDashboardsMap;
       this._leafletMap = null;
     },
     onAdd: function (leafletMap) {
       this._leafletMap = leafletMap;
       const fitDatBoundsLabel = i18n.translate(
-        'maps_legacy.kibanaMap.leaflet.fitDataBoundsAriaLabel',
+        'maps_legacy.opensearchDashboardsMap.leaflet.fitDataBoundsAriaLabel',
         { defaultMessage: 'Fit Data Bounds' }
       );
       $(this._fitContainer)
@@ -50,7 +50,7 @@ function makeFitControl(fitContainer, kibanaMap) {
         )
         .on('click', (e) => {
           e.preventDefault();
-          this._kibanaMap.fitToData();
+          this._opensearchDashboardsMap.fitToData();
         });
 
       return this._fitContainer;
@@ -60,19 +60,19 @@ function makeFitControl(fitContainer, kibanaMap) {
     },
   });
 
-  return new FitControl(fitContainer, kibanaMap);
+  return new FitControl(fitContainer, opensearchDashboardsMap);
 }
 
-function makeLegendControl(container, kibanaMap, position) {
+function makeLegendControl(container, opensearchDashboardsMap, position) {
   // eslint-disable-next-line no-undef
   const LegendControl = L.Control.extend({
     options: {
       position: 'topright',
     },
 
-    initialize: function (container, kibanaMap, position) {
+    initialize: function (container, opensearchDashboardsMap, position) {
       this._legendContainer = container;
-      this._kibanaMap = kibanaMap;
+      this._opensearchDashboardsMap = opensearchDashboardsMap;
       this.options.position = position;
     },
 
@@ -80,30 +80,30 @@ function makeLegendControl(container, kibanaMap, position) {
       this._legendContainer.empty();
       const $div = $('<div>').addClass('visMapLegend');
       this._legendContainer.append($div);
-      const layers = this._kibanaMap.getLayers();
+      const layers = this._opensearchDashboardsMap.getLayers();
       layers.forEach((layer) => layer.appendLegendContents($div));
     },
 
     onAdd: function () {
       this._layerUpdateHandle = () => this.updateContents();
-      this._kibanaMap.on('layers:update', this._layerUpdateHandle);
+      this._opensearchDashboardsMap.on('layers:update', this._layerUpdateHandle);
       this.updateContents();
       return this._legendContainer.get(0);
     },
     onRemove: function () {
-      this._kibanaMap.removeListener('layers:update', this._layerUpdateHandle);
+      this._opensearchDashboardsMap.removeListener('layers:update', this._layerUpdateHandle);
       this._legendContainer.empty();
     },
   });
 
-  return new LegendControl(container, kibanaMap, position);
+  return new LegendControl(container, opensearchDashboardsMap, position);
 }
 
 /**
- * Collects map functionality required for Kibana.
+ * Collects map functionality required for OpenSearch Dashboards.
  * Serves as simple abstraction for leaflet as well.
  */
-export class KibanaMap extends EventEmitter {
+export class OpenSearchDashboardsMap extends EventEmitter {
   constructor(containerNode, options) {
     super();
     this._containerNode = containerNode;
@@ -225,7 +225,7 @@ export class KibanaMap extends EventEmitter {
     return this._layers.slice();
   }
 
-  addLayer(kibanaLayer) {
+  addLayer(opensearchDashboardsLayer) {
     const onshowTooltip = (event) => {
       if (!this._showTooltip) {
         return;
@@ -247,44 +247,44 @@ export class KibanaMap extends EventEmitter {
       }
     };
 
-    kibanaLayer.on('showTooltip', onshowTooltip);
-    this._listeners.push({ name: 'showTooltip', handle: onshowTooltip, layer: kibanaLayer });
+    opensearchDashboardsLayer.on('showTooltip', onshowTooltip);
+    this._listeners.push({ name: 'showTooltip', handle: onshowTooltip, layer: opensearchDashboardsLayer });
 
     const onHideTooltip = () => {
       this._leafletMap.closePopup();
       this._popup = null;
     };
-    kibanaLayer.on('hideTooltip', onHideTooltip);
-    this._listeners.push({ name: 'hideTooltip', handle: onHideTooltip, layer: kibanaLayer });
+    opensearchDashboardsLayer.on('hideTooltip', onHideTooltip);
+    this._listeners.push({ name: 'hideTooltip', handle: onHideTooltip, layer: opensearchDashboardsLayer });
 
     const onStyleChanged = () => {
       if (this._leafletLegendControl) {
         this._leafletLegendControl.updateContents();
       }
     };
-    kibanaLayer.on('styleChanged', onStyleChanged);
-    this._listeners.push({ name: 'styleChanged', handle: onStyleChanged, layer: kibanaLayer });
+    opensearchDashboardsLayer.on('styleChanged', onStyleChanged);
+    this._listeners.push({ name: 'styleChanged', handle: onStyleChanged, layer: opensearchDashboardsLayer });
 
-    this._layers.push(kibanaLayer);
-    kibanaLayer.addToLeafletMap(this._leafletMap);
+    this._layers.push(opensearchDashboardsLayer);
+    opensearchDashboardsLayer.addToLeafletMap(this._leafletMap);
     this.emit('layers:update');
 
-    this._addAttributions(kibanaLayer.getAttributions());
+    this._addAttributions(opensearchDashboardsLayer.getAttributions());
   }
 
-  removeLayer(kibanaLayer) {
-    if (!kibanaLayer) {
+  removeLayer(opensearchDashboardsLayer) {
+    if (!opensearchDashboardsLayer) {
       return;
     }
 
-    this._removeAttributions(kibanaLayer.getAttributions());
-    const index = this._layers.indexOf(kibanaLayer);
+    this._removeAttributions(opensearchDashboardsLayer.getAttributions());
+    const index = this._layers.indexOf(opensearchDashboardsLayer);
     if (index >= 0) {
       this._layers.splice(index, 1);
-      kibanaLayer.removeFromLeafletMap(this._leafletMap);
+      opensearchDashboardsLayer.removeFromLeafletMap(this._leafletMap);
     }
     this._listeners.forEach((listener) => {
-      if (listener.layer === kibanaLayer) {
+      if (listener.layer === opensearchDashboardsLayer) {
         listener.layer.removeListener(listener.name, listener.handle);
       }
     });

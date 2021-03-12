@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
-import { getEmsTileLayerId, getUiSettings, getToasts } from '../kibana_services';
+import { getEmsTileLayerId, getUiSettings, getToasts } from '../opensearch_dashboards_services';
 import { lazyLoadMapsLegacyModules } from '../lazy_load_bundle';
 import { getServiceSettings } from '../get_service_settings';
 
@@ -37,10 +37,10 @@ export function BaseMapsVisualizationProvider() {
     constructor(element, vis) {
       this.vis = vis;
       this._container = element;
-      this._kibanaMap = null;
+      this._opensearchDashboardsMap = null;
       this._chartData = null; //reference to data currently on the map.
       this._baseLayerDirty = true;
-      this._mapIsLoaded = this._makeKibanaMap();
+      this._mapIsLoaded = this._makeOpenSearchDashboardsMap();
     }
 
     isLoaded() {
@@ -48,44 +48,44 @@ export function BaseMapsVisualizationProvider() {
     }
 
     destroy() {
-      if (this._kibanaMap) {
-        this._kibanaMap.destroy();
-        this._kibanaMap = null;
+      if (this._opensearchDashboardsMap) {
+        this._opensearchDashboardsMap.destroy();
+        this._opensearchDashboardsMap = null;
       }
     }
 
     /**
      * Implementation of Visualization#render.
      * Child-classes can extend this method if the render-complete function requires more time until rendering has completed.
-     * @param esResponse
+     * @param opensearchResponse
      * @param status
      * @return {Promise}
      */
-    async render(esResponse, visParams) {
-      if (!this._kibanaMap) {
+    async render(opensearchResponse, visParams) {
+      if (!this._opensearchDashboardsMap) {
         //the visualization has been destroyed;
         return;
       }
 
       await this._mapIsLoaded;
-      this._kibanaMap.resize();
+      this._opensearchDashboardsMap.resize();
       this._params = visParams;
       await this._updateParams();
 
-      if (this._hasESResponseChanged(esResponse)) {
-        await this._updateData(esResponse);
+      if (this._hasOpenSearchResponseChanged(opensearchResponse)) {
+        await this._updateData(opensearchResponse);
       }
-      this._kibanaMap.useUiStateFromVisualization(this.vis);
+      this._opensearchDashboardsMap.useUiStateFromVisualization(this.vis);
 
       await this._whenBaseLayerIsLoaded();
     }
 
     /**
-     * Creates an instance of a kibana-map with a single baselayer and assigns it to the this._kibanaMap property.
+     * Creates an instance of a opensearch-dashboards-map with a single baselayer and assigns it to the this._opensearchDashboardsMap property.
      * Clients can override this method to customize the initialization.
      * @private
      */
-    async _makeKibanaMap() {
+    async _makeOpenSearchDashboardsMap() {
       const options = {};
       const uiState = this.vis.getUiState();
       const zoomFromUiState = parseInt(uiState.get('mapZoom'));
@@ -94,18 +94,18 @@ export function BaseMapsVisualizationProvider() {
       options.center = centerFromUIState ? centerFromUIState : this.vis.params.mapCenter;
 
       const modules = await lazyLoadMapsLegacyModules();
-      this._kibanaMap = new modules.KibanaMap(this._container, options);
-      this._kibanaMap.setMinZoom(WMS_MINZOOM); //use a default
-      this._kibanaMap.setMaxZoom(WMS_MAXZOOM); //use a default
+      this._opensearchDashboardsMap = new modules.OpenSearchDashboardMap(this._container, options);
+      this._opensearchDashboardsMap.setMinZoom(WMS_MINZOOM); //use a default
+      this._opensearchDashboardsMap.setMaxZoom(WMS_MAXZOOM); //use a default
 
-      this._kibanaMap.addLegendControl();
-      this._kibanaMap.addFitControl();
-      this._kibanaMap.persistUiStateForVisualization(this.vis);
+      this._opensearchDashboardsMap.addLegendControl();
+      this._opensearchDashboardsMap.addFitControl();
+      this._opensearchDashboardsMap.persistUiStateForVisualization(this.vis);
 
-      this._kibanaMap.on('baseLayer:loaded', () => {
+      this._opensearchDashboardsMap.on('baseLayer:loaded', () => {
         this._baseLayerDirty = false;
       });
-      this._kibanaMap.on('baseLayer:loading', () => {
+      this._opensearchDashboardsMap.on('baseLayer:loading', () => {
         this._baseLayerDirty = true;
       });
       await this._updateBaseLayer();
@@ -128,7 +128,7 @@ export function BaseMapsVisualizationProvider() {
     async _updateBaseLayer() {
       const emsTileLayerId = getEmsTileLayerId();
 
-      if (!this._kibanaMap) {
+      if (!this._opensearchDashboardsMap) {
         return;
       }
 
@@ -153,12 +153,12 @@ export function BaseMapsVisualizationProvider() {
 
       try {
         if (this._wmsConfigured()) {
-          if (WMS_MINZOOM > this._kibanaMap.getMaxZoomLevel()) {
-            this._kibanaMap.setMinZoom(WMS_MINZOOM);
-            this._kibanaMap.setMaxZoom(WMS_MAXZOOM);
+          if (WMS_MINZOOM > this._opensearchDashboardsMap.getMaxZoomLevel()) {
+            this._opensearchDashboardsMap.setMinZoom(WMS_MINZOOM);
+            this._opensearchDashboardsMap.setMaxZoom(WMS_MAXZOOM);
           }
 
-          this._kibanaMap.setBaseLayer({
+          this._opensearchDashboardsMap.setBaseLayer({
             baseLayerType: 'wms',
             options: {
               minZoom: WMS_MINZOOM,
@@ -177,10 +177,10 @@ export function BaseMapsVisualizationProvider() {
     }
 
     async _setTmsLayer(tmsLayer) {
-      this._kibanaMap.setMinZoom(tmsLayer.minZoom);
-      this._kibanaMap.setMaxZoom(tmsLayer.maxZoom);
-      if (this._kibanaMap.getZoomLevel() > tmsLayer.maxZoom) {
-        this._kibanaMap.setZoomLevel(tmsLayer.maxZoom);
+      this._opensearchDashboardsMap.setMinZoom(tmsLayer.minZoom);
+      this._opensearchDashboardsMap.setMaxZoom(tmsLayer.maxZoom);
+      if (this._opensearchDashboardsMap.getZoomLevel() > tmsLayer.maxZoom) {
+        this._opensearchDashboardsMap.setZoomLevel(tmsLayer.maxZoom);
       }
       let isDesaturated = this._getMapsParams().isDesaturated;
       if (typeof isDesaturated !== 'boolean') {
@@ -197,7 +197,7 @@ export function BaseMapsVisualizationProvider() {
       const options = { ...tmsLayer };
       delete options.id;
       delete options.subdomains;
-      this._kibanaMap.setBaseLayer({
+      this._opensearchDashboardsMap.setBaseLayer({
         baseLayerType: 'tms',
         options: { ...options, showZoomMessage, ...meta },
       });
@@ -211,7 +211,7 @@ export function BaseMapsVisualizationProvider() {
       );
     }
 
-    _hasESResponseChanged(data) {
+    _hasOpenSearchResponseChanged(data) {
       return this._chartData !== data;
     }
 
@@ -221,9 +221,9 @@ export function BaseMapsVisualizationProvider() {
     async _updateParams() {
       const mapParams = this._getMapsParams();
       await this._updateBaseLayer();
-      this._kibanaMap.setLegendPosition(mapParams.legendPosition);
-      this._kibanaMap.setShowTooltip(mapParams.addTooltip);
-      this._kibanaMap.useUiStateFromVisualization(this.vis);
+      this._opensearchDashboardsMap.setLegendPosition(mapParams.legendPosition);
+      this._opensearchDashboardsMap.setShowTooltip(mapParams.addTooltip);
+      this._opensearchDashboardsMap.useUiStateFromVisualization(this.vis);
     }
 
     _getMapsParams() {

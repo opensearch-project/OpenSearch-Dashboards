@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@osd/config-schema';
 import { configSchema as tilemapSchema } from '../tile_map/config';
 import { configSchema as regionmapSchema } from '../region_map/config';
 
 export const configSchema = schema.object({
-  includeElasticMapsService: schema.boolean({ defaultValue: true }),
-  proxyElasticMapsServiceInMaps: schema.boolean({ defaultValue: false }),
+  includeOpenSearchDashboardsMapsService: schema.boolean({ defaultValue: true }),
+  proxyOpenSearchDashboardsMapsServiceInMaps: schema.boolean({ defaultValue: false }),
   tilemap: tilemapSchema,
   regionmap: regionmapSchema,
   manifestServiceUrl: schema.string({ defaultValue: '' }),

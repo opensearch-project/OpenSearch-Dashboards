@@ -19,7 +19,7 @@
 
 import { lazyLoadMapsLegacyModules } from './lazy_load_bundle';
 // @ts-expect-error
-import { getMapsLegacyConfig } from './kibana_services';
+import { getMapsLegacyConfig } from './opensearch_dashboards_services';
 import { IServiceSettings } from './map/service_settings_types';
 
 let loadPromise: Promise<IServiceSettings>;
