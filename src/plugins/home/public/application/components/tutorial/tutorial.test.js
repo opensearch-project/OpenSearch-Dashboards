@@ -64,7 +64,7 @@ const tutorial = {
   euiIconType: 'logoApache',
   OpenSearchCloud: buildInstructionSet('OpenSearchCloud'),
   onPrem: buildInstructionSet('onPrem'),
-  onPremOpenSearchCloud: buildInstructionSet('onPremOpenSearchCloud'),
+  onPremElasticCloud: buildInstructionSet('onPremElasticCloud'),
 };
 const loadTutorialPromise = Promise.resolve(tutorial);
 const getTutorial = () => {
@@ -95,7 +95,7 @@ describe('isCloudEnabled is false', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('should not render instruction toggle when ON_PREM_OPENSEARCH_CLOUD instructions are not provided', async () => {
+  test('should not render instruction toggle when ON_PREM_ELASTIC_CLOUD instructions are not provided', async () => {
     const loadBasicTutorialPromise = Promise.resolve({
       name: 'jest test tutorial',
       longDescription: 'tutorial used to drive jest tests',
@@ -120,7 +120,7 @@ describe('isCloudEnabled is false', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('should display ON_PREM_OPENSEARCH_CLOUD instructions when toggle is clicked', async () => {
+  test('should display ON_PREM_ELASTIC_CLOUD instructions when toggle is clicked', async () => {
     const component = mountWithIntl(
       <Tutorial.WrappedComponent
         addBasePath={addBasePath}
@@ -133,13 +133,13 @@ describe('isCloudEnabled is false', () => {
     );
     await loadTutorialPromise;
     component.update();
-    component.find('button#onPremOpenSearchCloud').closest('div').find('input').simulate('change');
+    component.find('button#onPremElasticCloud').closest('div').find('input').simulate('change');
     component.update();
-    expect(component.state('visibleInstructions')).toBe('onPremOpenSearchCloud');
+    expect(component.state('visibleInstructions')).toBe('onPremElasticCloud');
   });
 });
 
-test('should render OPENSEARCH_CLOUD instructions when isCloudEnabled is true', async () => {
+test('should render ELASTIC_CLOUD instructions when isCloudEnabled is true', async () => {
   const component = shallowWithIntl(
     <Tutorial.WrappedComponent
       addBasePath={addBasePath}

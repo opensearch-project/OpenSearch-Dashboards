@@ -41,7 +41,7 @@ const INVALID_TUTORIAL: TutorialSchema = {
   previewImagePath: 'path',
   onPrem: { instructionSets: [], params: [] },
   OpenSearchCloud: { instructionSets: [], params: [] },
-  onPremOpenSearchCloud: { instructionSets: [], params: [] },
+  onPremElasticCloud: { instructionSets: [], params: [] },
   artifacts: {
     exportedFields: { documentationUrl: 'url' },
     dashboards: [],
@@ -63,7 +63,7 @@ const VALID_TUTORIAL: TutorialSchema = {
   previewImagePath: 'path',
   onPrem: { instructionSets: [], params: [] },
   OpenSearchCloud: { instructionSets: [], params: [] },
-  onPremOpenSearchCloud: { instructionSets: [], params: [] },
+  onPremElasticCloud: { instructionSets: [], params: [] },
   artifacts: {
     exportedFields: { documentationUrl: 'url' },
     dashboards: [],

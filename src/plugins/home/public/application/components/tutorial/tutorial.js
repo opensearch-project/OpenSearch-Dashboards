@@ -40,9 +40,9 @@ import { i18n } from '@osd/i18n';
 import { getServices } from '../../opensearch_dashboards_services';
 
 const INSTRUCTIONS_TYPE = {
-  OPENSEARCH_CLOUD: 'OpenSearchCloud',
+  ELASTIC_CLOUD: 'OpenSearchCloud',
   ON_PREM: 'onPrem',
-  ON_PREM_OPENSEARCH_CLOUD: 'onPremOpenSearchCloud',
+  ON_PREM_ELASTIC_CLOUD: 'onPremElasticCloud',
 };
 
 const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
@@ -62,7 +62,7 @@ class TutorialUi extends React.Component {
     };
 
     if (props.isCloudEnabled) {
-      this.state.visibleInstructions = INSTRUCTIONS_TYPE.OPENSEARCH_CLOUD;
+      this.state.visibleInstructions = INSTRUCTIONS_TYPE.ELASTIC_CLOUD;
     } else {
       this.state.visibleInstructions = INSTRUCTIONS_TYPE.ON_PREM;
     }
@@ -119,12 +119,12 @@ class TutorialUi extends React.Component {
     }
 
     switch (this.state.visibleInstructions) {
-      case INSTRUCTIONS_TYPE.OPENSEARCH_CLOUD:
+      case INSTRUCTIONS_TYPE.ELASTIC_CLOUD:
         return this.state.tutorial.OpenSearchCloud;
       case INSTRUCTIONS_TYPE.ON_PREM:
         return this.state.tutorial.onPrem;
-      case INSTRUCTIONS_TYPE.ON_PREM_OPENSEARCH_CLOUD:
-        return this.state.tutorial.onPremOpenSearchCloud;
+      case INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD:
+        return this.state.tutorial.onPremElasticCloud;
       default:
         throw new Error(
           this.props.intl.formatMessage(
@@ -216,14 +216,14 @@ class TutorialUi extends React.Component {
   };
 
   renderInstructionSetsToggle = () => {
-    if (!this.props.isCloudEnabled && this.state.tutorial.onPremOpenSearchCloud) {
+    if (!this.props.isCloudEnabled && this.state.tutorial.onPremElasticCloud) {
       const selfManagedLabel = this.props.intl.formatMessage({
         id: 'home.tutorial.selfManagedButtonLabel',
         defaultMessage: 'Self managed',
       });
       const cloudLabel = this.props.intl.formatMessage({
         id: 'home.tutorial.OpenSearchCloudButtonLabel',
-        defaultMessage: 'OpenSearch Cloud',
+        defaultMessage: 'Elastic Cloud',
       });
       const radioButtons = [
         {
@@ -232,7 +232,7 @@ class TutorialUi extends React.Component {
           'data-test-subj': 'selfManagedTutorial',
         },
         {
-          id: INSTRUCTIONS_TYPE.ON_PREM_OPENSEARCH_CLOUD,
+          id: INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD,
           label: cloudLabel,
           'data-test-subj': 'onCloudTutorial',
         },

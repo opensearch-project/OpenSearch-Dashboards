@@ -142,7 +142,7 @@ class TutorialDirectoryUi extends React.Component {
         name: tutorialConfig.name,
         description: tutorialConfig.shortDescription,
         url: this.props.addBasePath(`#/tutorial/${tutorialConfig.id}`),
-        opensearchCloud: tutorialConfig.opensearchCloud,
+        elasticCloud: tutorialConfig.elasticCloud,
         // Beta label is skipped on the tutorial overview page for now. Too many beta labels.
         //isBeta: tutorialConfig.isBeta,
       };
@@ -160,13 +160,13 @@ class TutorialDirectoryUi extends React.Component {
         defaultMessage: 'Get started exploring OpenSearch Dashboards with these "one click" data sets.',
       }),
       url: this.props.addBasePath('#/tutorial_directory/sampleData'),
-      opensearchCloud: true,
+      elasticCloud: true,
       onClick: this.onSelectedTabChanged.bind(null, SAMPLE_DATA_TAB_ID),
     });
 
     if (this.props.isCloudEnabled) {
       tutorialCards = tutorialCards.filter((tutorial) => {
-        return _.has(tutorial, 'opensearchCloud');
+        return _.has(tutorial, 'elasticCloud');
       });
     }
 

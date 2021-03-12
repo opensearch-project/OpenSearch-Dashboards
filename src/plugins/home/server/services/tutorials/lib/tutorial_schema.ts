@@ -125,7 +125,7 @@ export const tutorialSchema = {
   OpenSearchCloud: instructionsSchema,
 
   // OpenSearch Dashboards running on prem and OpenSearch cluster running in OpenSearch's cloud
-  onPremOpenSearchCloud: instructionsSchema,
+  onPremElasticCloud: instructionsSchema,
 
   // OpenSearch stack artifacts produced by product when it is setup and run.
   artifacts: artifactsSchema,
