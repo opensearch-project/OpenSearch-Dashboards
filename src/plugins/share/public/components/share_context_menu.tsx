@@ -19,11 +19,11 @@
 
 import React, { Component } from 'react';
 
-import { I18nProvider } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from 'opensearch-dashboards/public';
 
 import { UrlPanelContent } from './url_panel_content';
 import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';

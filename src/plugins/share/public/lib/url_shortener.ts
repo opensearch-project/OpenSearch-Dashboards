@@ -18,7 +18,7 @@
  */
 
 import url from 'url';
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from 'opensearch-dashboards/public';
 import { CREATE_PATH, getGotoPath } from '../../common/short_url_routes';
 
 export async function shortenUrl(

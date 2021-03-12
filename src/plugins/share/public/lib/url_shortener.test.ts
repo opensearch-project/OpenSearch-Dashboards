@@ -29,24 +29,24 @@ describe('Url shortener', () => {
 
   describe('Shorten without base path', () => {
     it('should shorten urls with a port', async () => {
-      const shortUrl = await shortenUrl('http://localhost:5601/app/kibana#123', {
+      const shortUrl = await shortenUrl('http://localhost:5601/app/opensearch-dashboards#123', {
         basePath: '',
         post: postStub,
       });
       expect(shortUrl).toBe(`http://localhost:5601/goto/${shareId}`);
       expect(postStub).toHaveBeenCalledWith(`/api/shorten_url`, {
-        body: '{"url":"/app/kibana#123"}',
+        body: '{"url":"/app/opensearch-dashboards#123"}',
       });
     });
 
     it('should shorten urls without a port', async () => {
-      const shortUrl = await shortenUrl('http://localhost/app/kibana#123', {
+      const shortUrl = await shortenUrl('http://localhost/app/opensearch-dashboards#123', {
         basePath: '',
         post: postStub,
       });
       expect(shortUrl).toBe(`http://localhost/goto/${shareId}`);
       expect(postStub).toHaveBeenCalledWith(`/api/shorten_url`, {
-        body: '{"url":"/app/kibana#123"}',
+        body: '{"url":"/app/opensearch-dashboards#123"}',
       });
     });
   });
@@ -55,46 +55,46 @@ describe('Url shortener', () => {
     const basePath = '/foo';
 
     it('should shorten urls with a port', async () => {
-      const shortUrl = await shortenUrl(`http://localhost:5601${basePath}/app/kibana#123`, {
+      const shortUrl = await shortenUrl(`http://localhost:5601${basePath}/app/opensearch-dashboards#123`, {
         basePath,
         post: postStub,
       });
       expect(shortUrl).toBe(`http://localhost:5601${basePath}/goto/${shareId}`);
       expect(postStub).toHaveBeenCalledWith(`/api/shorten_url`, {
-        body: '{"url":"/app/kibana#123"}',
+        body: '{"url":"/app/opensearch-dashboards#123"}',
       });
     });
 
     it('should shorten urls without a port', async () => {
-      const shortUrl = await shortenUrl(`http://localhost${basePath}/app/kibana#123`, {
+      const shortUrl = await shortenUrl(`http://localhost${basePath}/app/opensearch-dashboards#123`, {
         basePath,
         post: postStub,
       });
       expect(shortUrl).toBe(`http://localhost${basePath}/goto/${shareId}`);
       expect(postStub).toHaveBeenCalledWith(`/api/shorten_url`, {
-        body: '{"url":"/app/kibana#123"}',
+        body: '{"url":"/app/opensearch-dashboards#123"}',
       });
     });
 
     it('should shorten urls with a query string', async () => {
-      const shortUrl = await shortenUrl(`http://localhost${basePath}/app/kibana?foo#123`, {
+      const shortUrl = await shortenUrl(`http://localhost${basePath}/app/opensearch-dashboards?foo#123`, {
         basePath,
         post: postStub,
       });
       expect(shortUrl).toBe(`http://localhost${basePath}/goto/${shareId}`);
       expect(postStub).toHaveBeenCalledWith(`/api/shorten_url`, {
-        body: '{"url":"/app/kibana?foo#123"}',
+        body: '{"url":"/app/opensearch-dashboards?foo#123"}',
       });
     });
 
     it('should shorten urls without a hash', async () => {
-      const shortUrl = await shortenUrl(`http://localhost${basePath}/app/kibana`, {
+      const shortUrl = await shortenUrl(`http://localhost${basePath}/app/opensearch-dashboards`, {
         basePath,
         post: postStub,
       });
       expect(shortUrl).toBe(`http://localhost${basePath}/goto/${shareId}`);
       expect(postStub).toHaveBeenCalledWith(`/api/shorten_url`, {
-        body: '{"url":"/app/kibana"}',
+        body: '{"url":"/app/opensearch-dashboards"}',
       });
     });
 
