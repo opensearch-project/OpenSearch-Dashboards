@@ -19,7 +19,7 @@
 
 import sassLint from 'sass-lint';
 import path from 'path';
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError } from '@osd/dev-utils';
 
 /**
  * Lints a list of files with eslint. eslint reports are written to the log

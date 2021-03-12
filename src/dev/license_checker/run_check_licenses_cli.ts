@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
-import { run } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@osd/utils';
+import { run } from '@osd/dev-utils';
 import { getInstalledPackages } from '../npm';
 
 import { LICENSE_WHITELIST, DEV_ONLY_LICENSE_WHITELIST, LICENSE_OVERRIDES } from './config';

@@ -22,8 +22,8 @@ import { resolve } from 'path';
 
 import getopts from 'getopts';
 import dedent from 'dedent';
-import { REPO_ROOT } from '@kbn/utils';
-import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@osd/utils';
+import { ToolingLog, pickLevelFromFlags } from '@osd/dev-utils';
 
 import { generateNoticeFromSource } from './generate_notice_from_source';
 
@@ -69,7 +69,7 @@ if (opts.help) {
 (async function run() {
   const path = resolve(REPO_ROOT, 'NOTICE.txt');
   const newContent = await generateNoticeFromSource({
-    productName: 'Kibana source code with Kibana X-Pack source code',
+    productName: 'OpenSearch Dashboards source code with OpenSearch Dashboards X-Pack source code',
     directory: REPO_ROOT,
     log,
   });

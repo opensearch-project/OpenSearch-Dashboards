@@ -33,7 +33,7 @@ import {
   extractDescriptionValueFromNode,
 } from '../utils';
 import { DEFAULT_MESSAGE_KEY, DESCRIPTION_KEY, VALUES_KEY } from '../constants';
-import { createFailError, isFailError } from '@kbn/dev-utils';
+import { createFailError, isFailError } from '@osd/dev-utils';
 
 /**
  * Find all substrings of "{{ any text }}" pattern allowing '{' and '}' chars in single quote strings

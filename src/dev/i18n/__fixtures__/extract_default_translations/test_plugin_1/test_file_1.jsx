@@ -3,7 +3,7 @@
 // Angular service
 i18n('plugin_1.id_1', { defaultMessage: 'Message 1' });
 
-// @kbn/i18n
+// @osd/i18n
 i18n.translate('plugin_1.id_2', {
   defaultMessage: 'Message 2',
   description: 'Message description',

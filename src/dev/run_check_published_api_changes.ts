@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@osd/dev-utils';
 import {
   Extractor,
   IConfigFile,
@@ -122,7 +122,7 @@ const renameExtractedApiPackageName = async (folder: string) => {
   const jsonApiFile = `build/${folder}/${fname}.api.json`;
   log.info(`Updating ${jsonApiFile}...`);
   const json = JSON.parse(fs.readFileSync(jsonApiFile).toString());
-  json.name = json.canonicalReference = `kibana-plugin-${folder.replace(/\//g, '-')}`;
+  json.name = json.canonicalReference = `opensearch-dashboards-plugin-${folder.replace(/\//g, '-')}`;
   fs.writeFileSync(jsonApiFile, JSON.stringify(json, null, 2));
 };
 
@@ -230,8 +230,8 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
   const plugins = [
     'plugins/data/server',
     'plugins/data/public',
-    'plugins/kibana_utils/common/state_containers',
-    'plugins/kibana_utils/public/state_sync',
+    'plugins/opensearch_dashboards_utils/common/state_containers',
+    'plugins/opensearch_dashboards_utils/public/state_sync',
   ];
   const folders = [...core, ...plugins];
 
@@ -240,17 +240,17 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
       dedent(chalk`
         {dim usage:} node scripts/check_published_api_changes [...options]
 
-        Checks for any changes to the Kibana shared API
+        Checks for any changes to the OpenSearch Dashboards shared API
 
         Examples:
 
-          {dim # Checks for any changes to the Kibana shared API}
+          {dim # Checks for any changes to the OpenSearch Dashboards shared API}
           {dim $} node scripts/check_published_api_changes
 
-          {dim # Checks for any changes to the Kibana shared API and updates the documentation}
+          {dim # Checks for any changes to the OpenSearch Dashboards shared API and updates the documentation}
           {dim $} node scripts/check_published_api_changes --docs
 
-          {dim # Checks for and automatically accepts and updates documentation for any changes to the Kibana shared API}
+          {dim # Checks for and automatically accepts and updates documentation for any changes to the OpenSearch Dashboards shared API}
           {dim $} node scripts/check_published_api_changes --accept
 
           {dim # Only checks the core/public directory}
