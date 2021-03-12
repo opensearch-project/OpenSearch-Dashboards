@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { CoreSetup, IRouter } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
-import { modifyUrl } from '@kbn/std';
+import { CoreSetup, IRouter } from 'opensearch-dashboards/server';
+import { schema } from '@osd/config-schema';
+import { modifyUrl } from '@osd/std';
 
 import { shortUrlAssertValid } from './lib/short_url_assert_valid';
 import { ShortUrlLookupService } from './lib/short_url_lookup';

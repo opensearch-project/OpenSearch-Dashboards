@@ -1,12 +1,12 @@
 ## URL Generator Services
 
-Developers who maintain pages in Kibana that other developers may want to link to
+Developers who maintain pages in OpenSearch Dashboards that other developers may want to link to
 can register a direct access link generator. This provides backward compatibility support
 so the developer of the app/page has a way to change their url structure without
 breaking users of this system.  If users were to generate the urls on their own, 
 using string concatenation, those links may break often.
 
-Owners: Kibana App Arch team.
+Owners: OpenSearch Dashboards App Arch team.
 
 ## Producer Usage
 

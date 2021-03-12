@@ -36,9 +36,9 @@ import {
 
 import { format as formatUrl, parse as parseUrl } from 'url';
 
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { HttpStart } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
+import { HttpStart } from 'opensearch-dashboards/public';
+import { i18n } from '@osd/i18n';
 
 import { shortenUrl } from '../lib/url_shortener';
 import { UrlParamExtension } from '../types';
@@ -107,7 +107,7 @@ export class UrlPanelContent extends Component<Props, State> {
   public render() {
     return (
       <I18nProvider>
-        <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
+        <EuiForm className="osdShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
           {this.renderExportAsRadioGroup()}
           {this.renderUrlParamExtensions()}
           {this.renderShortUrlSwitch()}

@@ -18,7 +18,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { UrlGeneratorId, UrlGeneratorsDefinition } from './url_generator_definition';
 import { UrlGeneratorInternal } from './url_generator_internal';
 import { UrlGeneratorContract } from './url_generator_contract';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup } from 'opensearch-dashboards/public';
 import { getUrlIdFromGotoRoute, getUrlPath, GOTO_PREFIX } from '../../common/short_url_routes';
 
 export const createShortUrlRedirectApp = (core: CoreSetup, location: Location) => ({
@@ -34,7 +34,7 @@ export const createShortUrlRedirectApp = (core: CoreSetup, location: Location) =
 
     const response = await core.http.get<{ url: string }>(getUrlPath(urlId));
     const redirectUrl = response.url;
-    const { hashUrl } = await import('../../../kibana_utils/public');
+    const { hashUrl } = await import('../../../opensearch_dashboards_utils/public');
     const hashedUrl = hashUrl(redirectUrl);
     const url = core.http.basePath.prepend(hashedUrl);
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, Logger } from 'kibana/server';
+import { CoreSetup, Logger } from 'opensearch-dashboards/server';
 
 import { shortUrlLookupProvider } from './lib/short_url_lookup';
 import { createGotoRoute } from './goto';
