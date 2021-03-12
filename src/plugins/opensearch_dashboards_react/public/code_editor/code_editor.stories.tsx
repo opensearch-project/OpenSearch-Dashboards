@@ -85,7 +85,7 @@ storiesOf('CodeEditor', module)
     ),
     {
       info: {
-        text: 'The dark theme is automatically used when dark mode is enabled in OpenSearchDashboards',
+        text: 'The dark theme is automatically used when dark mode is enabled in OpenSearch Dashboards',
       },
     }
   )
