@@ -37,7 +37,7 @@ import {
   createOsdUrlStateStorage,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
-import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
+import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { SharePluginStart, SharePluginSetup } from '../../share/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
@@ -113,7 +113,7 @@ export class VisualizePlugin
             ),
             map(({ state }) => ({
               ...state,
-              filters: state.filters?.filter(esFilters.isFilterPinned),
+              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
             }))
           ),
         },

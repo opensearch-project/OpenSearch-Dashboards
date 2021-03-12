@@ -25,7 +25,7 @@ import { i18n } from '@osd/i18n';
 
 import { MarkdownSimple, toMountPoint } from '../../../../../opensearch_dashboards_react/public';
 import { migrateLegacyQuery } from '../migrate_legacy_query';
-import { esFilters, connectToQueryState } from '../../../../../data/public';
+import { opensearchFilters, connectToQueryState } from '../../../../../data/public';
 import {
   VisualizeServices,
   VisualizeAppStateContainer,
@@ -93,7 +93,7 @@ export const useVisualizeAppState = (
           ),
         },
         {
-          filters: esFilters.FilterStateStore.APP_STATE,
+          filters: opensearchFilters.FilterStateStore.APP_STATE,
           query: true,
         }
       );

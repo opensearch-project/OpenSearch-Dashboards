@@ -21,7 +21,7 @@ import {
   TimeRange,
   Filter,
   Query,
-  esFilters,
+  opensearchFilters,
   QueryState,
   RefreshInterval,
 } from '../../data/public';
@@ -112,12 +112,12 @@ export const createVisualizeUrlGenerator = (
 
     if (query) appState.query = query;
     if (filters && filters.length)
-      appState.filters = filters?.filter((f) => !esFilters.isFilterPinned(f));
+      appState.filters = filters?.filter((f) => !opensearchFilters.isFilterPinned(f));
     if (vis) appState.vis = vis;
 
     if (timeRange) queryState.time = timeRange;
     if (filters && filters.length)
-      queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
+      queryState.filters = filters?.filter((f) => opensearchFilters.isFilterPinned(f));
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
 
     let url = `${appBasePath}#/${mode}`;
