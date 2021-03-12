@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 
 interface Arguments {
@@ -35,7 +35,7 @@ export type ExpressionFunctionVarSet = ExpressionFunctionDefinition<
 export const variableSet: ExpressionFunctionVarSet = {
   name: 'var_set',
   help: i18n.translate('expressions.functions.varset.help', {
-    defaultMessage: 'Updates the Kibana global context.',
+    defaultMessage: 'Updates the OpenSearch Dashboards global context.',
   }),
   args: {
     name: {

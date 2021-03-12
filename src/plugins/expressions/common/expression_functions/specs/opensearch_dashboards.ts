@@ -17,29 +17,29 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 import { ExpressionValueSearchContext } from '../../expression_types';
 
 const toArray = <T>(query: undefined | T | T[]): T[] =>
   !query ? [] : Array.isArray(query) ? query : [query];
 
-export type ExpressionFunctionKibana = ExpressionFunctionDefinition<
-  'kibana',
+export type ExpressionFunctionOpenSearchDashboards = ExpressionFunctionDefinition<
+  'opensearchDashboards',
   // TODO: Get rid of the `null` type below.
   ExpressionValueSearchContext | null,
   object,
   ExpressionValueSearchContext
 >;
 
-export const kibana: ExpressionFunctionKibana = {
-  name: 'kibana',
-  type: 'kibana_context',
+export const opensearchDashboards: ExpressionFunctionOpenSearchDashboards = {
+  name: 'opensearchDashboards',
+  type: 'opensearch_dashboards_context',
 
-  inputTypes: ['kibana_context', 'null'],
+  inputTypes: ['opensearch_dashboards_context', 'null'],
 
-  help: i18n.translate('expressions.functions.kibana.help', {
-    defaultMessage: 'Gets kibana global context',
+  help: i18n.translate('expressions.functions.opensearch_dashboards.help', {
+    defaultMessage: 'Gets opensearch dashboards global context',
   }),
 
   args: {},
@@ -49,7 +49,7 @@ export const kibana: ExpressionFunctionKibana = {
       // TODO: This spread is left here for legacy reasons, possibly Lens uses it.
       // TODO: But it shouldn't be need.
       ...input,
-      type: 'kibana_context',
+      type: 'opensearch_dashboards_context',
       query: [...toArray(search.query), ...toArray((input || {}).query)],
       filters: [...(search.filters || []), ...((input || {}).filters || [])],
       timeRange: search.timeRange || (input ? input.timeRange : undefined),

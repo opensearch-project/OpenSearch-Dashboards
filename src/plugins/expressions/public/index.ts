@@ -22,7 +22,7 @@ import './index.scss';
 import { PluginInitializerContext } from '../../../core/public';
 import { ExpressionsPublicPlugin } from './plugin';
 
-// Kibana Platform.
+// OpenSearchDashboards Platform.
 export { ExpressionsPublicPlugin as Plugin };
 export * from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -66,7 +66,7 @@ export {
   ExpressionFunction,
   ExpressionFunctionDefinition,
   ExpressionFunctionDefinitions,
-  ExpressionFunctionKibana,
+  ExpressionFunctionOpenSearchDashboards,
   ExpressionFunctionParameter,
   ExpressionImage,
   ExpressionRenderDefinition,
@@ -96,12 +96,12 @@ export {
   InterpreterErrorType,
   IRegistry,
   isExpressionAstBuilder,
-  KIBANA_CONTEXT_NAME,
-  KibanaContext,
-  KibanaDatatable,
-  KibanaDatatableColumn,
-  KibanaDatatableColumnMeta,
-  KibanaDatatableRow,
+  OPENSEARCH_DASHBOARDS_CONTEXT_NAME,
+  OpenSearchDashboardsContext,
+  OpenSearchDashboardsDatatable,
+  OpenSearchDashboardsDatatableColumn,
+  OpenSearchDashboardsDatatableColumnMeta,
+  OpenSearchDashboardsDatatableRow,
   KnownTypeToString,
   Overflow,
   parse,
