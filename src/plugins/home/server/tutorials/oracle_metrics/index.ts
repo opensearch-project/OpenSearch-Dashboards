@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
@@ -57,7 +57,7 @@ export function oracleMetricsSpecProvider(context: TutorialContext): TutorialSch
         label: i18n.translate('home.tutorials.oracleMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/opensearch-dashboards#/discover',
       },
       dashboards: [],
       exportedFields: {

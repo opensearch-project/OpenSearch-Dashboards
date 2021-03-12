@@ -26,8 +26,8 @@ import {
   SavedObjectsClientContract,
   IUiSettingsClient,
   ApplicationStart,
-} from 'kibana/public';
-import { UiStatsMetricType } from '@kbn/analytics';
+} from 'opensearch-dashboards/public';
+import { UiStatsMetricType } from '@osd/analytics';
 import { TelemetryPluginStart } from '../../../telemetry/public';
 import { UrlForwardingStart } from '../../../url_forwarding/public';
 import { TutorialService } from '../services/tutorials';
@@ -35,9 +35,9 @@ import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
 import { EnvironmentService } from '../services/environment';
 import { ConfigSchema } from '../../config';
 
-export interface HomeKibanaServices {
+export interface HomeOpenSearchDashboardsServices {
   indexPatternService: any;
-  kibanaVersion: string;
+  opensearchDashboardsVersion: string;
   chrome: ChromeStart;
   application: ApplicationStart;
   uiSettings: IUiSettingsClient;
@@ -57,16 +57,16 @@ export interface HomeKibanaServices {
   tutorialService: TutorialService;
 }
 
-let services: HomeKibanaServices | null = null;
+let services: HomeOpenSearchDashboardsServices | null = null;
 
-export function setServices(newServices: HomeKibanaServices) {
+export function setServices(newServices: HomeOpenSearchDashboardsServices) {
   services = newServices;
 }
 
 export function getServices() {
   if (!services) {
     throw new Error(
-      'Kibana services not set - are you trying to import this module from outside of the home app?'
+      'OpenSearch Dashboards services not set - are you trying to import this module from outside of the home app?'
     );
   }
   return services;

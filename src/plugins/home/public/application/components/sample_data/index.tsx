@@ -19,8 +19,8 @@
 
 /*
  * The UI and related logic for the welcome screen that *should* show only
- * when it is enabled (the default) and there is no Kibana-consumed data
- * in Elasticsearch.
+ * when it is enabled (the default) and there is no OpenSearch Dashboards-consumed data
+ * in OpenSearch.
  */
 
 import React from 'react';
@@ -30,8 +30,8 @@ import {
   EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { getServices } from '../../kibana_services';
+import { FormattedMessage } from '@osd/i18n/react';
+import { getServices } from '../../opensearch_dashboards_services';
 
 interface Props {
   urlBasePath: string;

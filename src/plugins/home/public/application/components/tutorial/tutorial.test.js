@@ -22,18 +22,18 @@ import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Tutorial } from './tutorial';
 
-jest.mock('../../kibana_services', () => ({
+jest.mock('../../opensearch_dashboards_services', () => ({
   getServices: () => ({
     getBasePath: jest.fn(() => 'path'),
     chrome: {
-      setBreadcrumbs: () => {},
+      setBreadcrumbs: () => { },
     },
     tutorialService: {
       getModuleNotices: () => [],
     },
   }),
 }));
-jest.mock('../../../../../kibana_react/public', () => {
+jest.mock('../../../../../opensearch_dashboards_react/public', () => {
   return {
     Markdown: () => <div className="markdown" />,
   };
@@ -62,7 +62,7 @@ const tutorial = {
   name: 'jest test tutorial',
   longDescription: 'tutorial used to drive jest tests',
   euiIconType: 'logoApache',
-  elasticCloud: buildInstructionSet('elasticCloud'),
+  OpenSearchCloud: buildInstructionSet('OpenSearchCloud'),
   onPrem: buildInstructionSet('onPrem'),
   onPremElasticCloud: buildInstructionSet('onPremElasticCloud'),
 };
@@ -86,7 +86,7 @@ describe('isCloudEnabled is false', () => {
         getTutorial={getTutorial}
         replaceTemplateStrings={replaceTemplateStrings}
         tutorialId={'my_testing_tutorial'}
-        bulkCreate={() => {}}
+        bulkCreate={() => { }}
       />
     );
     await loadTutorialPromise;
@@ -99,7 +99,7 @@ describe('isCloudEnabled is false', () => {
     const loadBasicTutorialPromise = Promise.resolve({
       name: 'jest test tutorial',
       longDescription: 'tutorial used to drive jest tests',
-      elasticCloud: buildInstructionSet('elasticCloud'),
+      OpenSearchCloud: buildInstructionSet('OpenSearchCloud'),
       onPrem: buildInstructionSet('onPrem'),
     });
     const getBasicTutorial = () => {
@@ -112,7 +112,7 @@ describe('isCloudEnabled is false', () => {
         getTutorial={getBasicTutorial}
         replaceTemplateStrings={replaceTemplateStrings}
         tutorialId={'my_testing_tutorial'}
-        bulkCreate={() => {}}
+        bulkCreate={() => { }}
       />
     );
     await loadBasicTutorialPromise;
@@ -128,7 +128,7 @@ describe('isCloudEnabled is false', () => {
         getTutorial={getTutorial}
         replaceTemplateStrings={replaceTemplateStrings}
         tutorialId={'my_testing_tutorial'}
-        bulkCreate={() => {}}
+        bulkCreate={() => { }}
       />
     );
     await loadTutorialPromise;
@@ -147,7 +147,7 @@ test('should render ELASTIC_CLOUD instructions when isCloudEnabled is true', asy
       getTutorial={getTutorial}
       replaceTemplateStrings={replaceTemplateStrings}
       tutorialId={'my_testing_tutorial'}
-      bulkCreate={() => {}}
+      bulkCreate={() => { }}
     />
   );
   await loadTutorialPromise;

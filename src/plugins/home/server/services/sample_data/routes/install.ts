@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 import { IRouter, Logger, RequestHandlerContext } from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
@@ -41,15 +41,15 @@ const insertDataIntoIndex = (
       .forEach((timeFieldName: string) => {
         doc[timeFieldName] = dataIndexConfig.preserveDayOfWeekTimeOfDay
           ? translateTimeRelativeToWeek(
-              doc[timeFieldName],
-              dataIndexConfig.currentTimeMarker,
-              nowReference
-            )
+            doc[timeFieldName],
+            dataIndexConfig.currentTimeMarker,
+            nowReference
+          )
           : translateTimeRelativeToDifference(
-              doc[timeFieldName],
-              dataIndexConfig.currentTimeMarker,
-              nowReference
-            );
+            doc[timeFieldName],
+            dataIndexConfig.currentTimeMarker,
+            nowReference
+          );
       });
     return doc;
   }
@@ -61,18 +61,18 @@ const insertDataIntoIndex = (
       bulk.push(insertCmd);
       bulk.push(updateTimestamps(doc));
     });
-    const resp = await context.core.elasticsearch.legacy.client.callAsCurrentUser('bulk', {
+    const resp = await context.core.opensearch.legacy.client.callAsCurrentUser('bulk', {
       body: bulk,
     });
     if (resp.errors) {
-      const errMsg = `sample_data install errors while bulk inserting. Elasticsearch response: ${JSON.stringify(
+      const errMsg = `sample_data install errors while bulk inserting. OpenSearch response: ${JSON.stringify(
         resp,
         null,
         ''
       )}`;
       logger.warn(errMsg);
       return Promise.reject(
-        new Error(`Unable to load sample data into index "${index}", see kibana logs for details`)
+        new Error(`Unable to load sample data into index "${index}", see OpenSearch Dashboards logs for details`)
       );
     }
   };
@@ -110,7 +110,7 @@ export function createInstallRoute(
 
         // clean up any old installation of dataset
         try {
-          await context.core.elasticsearch.legacy.client.callAsCurrentUser('indices.delete', {
+          await context.core.opensearch.legacy.client.callAsCurrentUser('indices.delete', {
             index,
           });
         } catch (err) {
@@ -125,7 +125,7 @@ export function createInstallRoute(
               mappings: { properties: dataIndexConfig.fields },
             },
           };
-          await context.core.elasticsearch.legacy.client.callAsCurrentUser(
+          await context.core.opensearch.legacy.client.callAsCurrentUser(
             'indices.create',
             createIndexParams
           );
@@ -177,8 +177,8 @@ export function createInstallRoute(
       // FINALLY
       return res.ok({
         body: {
-          elasticsearchIndicesCreated: counts,
-          kibanaSavedObjectsLoaded: sampleDataset.savedObjects.length,
+          opensearchIndicesCreated: counts,
+          opensearchDashboardsSavedObjectsLoaded: sampleDataset.savedObjects.length,
         },
       });
     }

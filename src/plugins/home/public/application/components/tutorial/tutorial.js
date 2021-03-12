@@ -35,12 +35,12 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
-import { getServices } from '../../kibana_services';
+import { injectI18n, FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
+import { getServices } from '../../opensearch_dashboards_services';
 
 const INSTRUCTIONS_TYPE = {
-  ELASTIC_CLOUD: 'elasticCloud',
+  ELASTIC_CLOUD: 'OpenSearchCloud',
   ON_PREM: 'onPrem',
   ON_PREM_ELASTIC_CLOUD: 'onPremElasticCloud',
 };
@@ -120,7 +120,7 @@ class TutorialUi extends React.Component {
 
     switch (this.state.visibleInstructions) {
       case INSTRUCTIONS_TYPE.ELASTIC_CLOUD:
-        return this.state.tutorial.elasticCloud;
+        return this.state.tutorial.OpenSearchCloud;
       case INSTRUCTIONS_TYPE.ON_PREM:
         return this.state.tutorial.onPrem;
       case INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD:
@@ -181,10 +181,10 @@ class TutorialUi extends React.Component {
 
   checkInstructionSetStatus = async (instructionSetIndex) => {
     const instructionSet = this.getInstructionSets()[instructionSetIndex];
-    const esHitsCheckConfig = _.get(instructionSet, `statusCheck.esHitsCheck`);
+    const opensearchHitsCheckConfig = _.get(instructionSet, `statusCheck.opensearchHitsCheck`);
 
-    if (esHitsCheckConfig) {
-      const statusCheckState = await this.fetchEsHitsStatus(esHitsCheckConfig);
+    if (opensearchHitsCheckConfig) {
+      const statusCheckState = await this.fetchOpenSearchHitsStatus(opensearchHitsCheckConfig);
 
       this.setState((prevState) => ({
         statusCheckStates: {
@@ -197,16 +197,16 @@ class TutorialUi extends React.Component {
 
   /**
    *
-   * @param esHitsCheckConfig
+   * @param opensearchHitsCheckConfig
    * @return {Promise<string>}
    */
-  fetchEsHitsStatus = async (esHitsCheckConfig) => {
+  fetchOpenSearchHitsStatus = async (opensearchHitsCheckConfig) => {
     const { http } = getServices();
     try {
       const response = await http.post('/api/home/hits_status', {
         body: JSON.stringify({
-          index: esHitsCheckConfig.index,
-          query: esHitsCheckConfig.query,
+          index: opensearchHitsCheckConfig.index,
+          query: opensearchHitsCheckConfig.query,
         }),
       });
       return response.count > 0 ? StatusCheckStates.HAS_DATA : StatusCheckStates.NO_DATA;
@@ -222,7 +222,7 @@ class TutorialUi extends React.Component {
         defaultMessage: 'Self managed',
       });
       const cloudLabel = this.props.intl.formatMessage({
-        id: 'home.tutorial.elasticCloudButtonLabel',
+        id: 'home.tutorial.OpenSearchCloudButtonLabel',
         defaultMessage: 'Elastic Cloud',
       });
       const radioButtons = [

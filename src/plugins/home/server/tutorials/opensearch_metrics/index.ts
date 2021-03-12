@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
@@ -29,38 +29,38 @@ import {
   TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
-export function kibanaMetricsSpecProvider(context: TutorialContext): TutorialSchema {
-  const moduleName = 'kibana';
+export function opensearchMetricsSpecProvider(context: TutorialContext): TutorialSchema {
+  const moduleName = 'opensearch';
   return {
-    id: 'kibanaMetrics',
-    name: i18n.translate('home.tutorials.kibanaMetrics.nameTitle', {
-      defaultMessage: 'Kibana metrics',
+    id: 'opensearchMetrics',
+    name: i18n.translate('home.tutorials.opensearchMetrics.nameTitle', {
+      defaultMessage: 'OpenSearch metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('home.tutorials.kibanaMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from Kibana.',
+    shortDescription: i18n.translate('home.tutorials.opensearchMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from OpenSearch.',
     }),
-    longDescription: i18n.translate('home.tutorials.kibanaMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.opensearchMetrics.longDescription', {
       defaultMessage:
-        'The `kibana` Metricbeat module fetches internal metrics from Kibana. \
+        'The `opensearch` Metricbeat module fetches internal metrics from OpenSearch. \
 [Learn more]({learnMoreLink}).',
       values: {
-        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-kibana.html',
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-opensearch.html',
       },
     }),
-    euiIconType: 'logoKibana',
+    euiIconType: 'logoElasticsearch',
     artifacts: {
       application: {
-        label: i18n.translate('home.tutorials.kibanaMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.opensearchMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-kibana.html',
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-opensearch.html',
       },
     },
     completionTimeMinutes: 10,

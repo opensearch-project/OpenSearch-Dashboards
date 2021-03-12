@@ -58,7 +58,7 @@ export const SolutionPanel: FC<Props> = ({ addBasePath, solution, apps = [] }) =
     key={solution.id}
     data-test-subj={`homSolutionPanel homSolutionPanel_${solution.id}`}
     className={`${
-      solution.id === 'kibana' ? 'homSolutions__group homSolutions__group--single' : ''
+      solution.id === 'opensearchDashboards' ? 'homSolutions__group homSolutions__group--single' : ''
     } homSolutions__item`}
     grow={1}
   >

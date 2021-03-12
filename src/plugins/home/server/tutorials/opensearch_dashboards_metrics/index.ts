@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n } from '@osd/i18n';
 import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
@@ -29,38 +29,38 @@ import {
   TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
-export function elasticsearchMetricsSpecProvider(context: TutorialContext): TutorialSchema {
-  const moduleName = 'elasticsearch';
+export function opensearchDashboardsMetricsSpecProvider(context: TutorialContext): TutorialSchema {
+  const moduleName = 'opensearchDashboards';
   return {
-    id: 'elasticsearchMetrics',
-    name: i18n.translate('home.tutorials.elasticsearchMetrics.nameTitle', {
-      defaultMessage: 'Elasticsearch metrics',
+    id: 'opensearchDashboardsMetrics',
+    name: i18n.translate('home.tutorials.opensearchDashboardsMetrics.nameTitle', {
+      defaultMessage: 'OpenSearch Dashboards metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('home.tutorials.elasticsearchMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from Elasticsearch.',
+    shortDescription: i18n.translate('home.tutorials.opensearchDashboardsMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from OpenSearch Dashboards.',
     }),
-    longDescription: i18n.translate('home.tutorials.elasticsearchMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.opensearchDashboardsMetrics.longDescription', {
       defaultMessage:
-        'The `elasticsearch` Metricbeat module fetches internal metrics from Elasticsearch. \
+        'The `OpenSearch Dashboards` Metricbeat module fetches internal metrics from OpenSearch Dashboards. \
 [Learn more]({learnMoreLink}).',
       values: {
-        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-elasticsearch.html',
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-opensearch-dashboards.html',
       },
     }),
-    euiIconType: 'logoElasticsearch',
+    euiIconType: 'logoKibana',
     artifacts: {
       application: {
-        label: i18n.translate('home.tutorials.elasticsearchMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.opensearchDashboardsMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-elasticsearch.html',
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-opensearch-dashboards.html',
       },
     },
     completionTimeMinutes: 10,

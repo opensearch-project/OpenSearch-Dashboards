@@ -21,8 +21,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import { getServices } from '../kibana_services';
+import { i18n } from '@osd/i18n';
+import { getServices } from '../opensearch_dashboards_services';
 import { createAppNavigationHandler } from './app_navigation_handler';
 
 export class SampleDataViewDataButton extends React.Component {

@@ -18,7 +18,7 @@
  */
 
 import { Writer } from 'mustache';
-import { getServices } from '../../kibana_services';
+import { getServices } from '../../opensearch_dashboards_services';
 
 const TEMPLATE_TAGS = ['{', '}'];
 
@@ -33,7 +33,7 @@ mustacheWriter.escapedValue = function escapedValue(token, context) {
 };
 
 export function replaceTemplateStrings(text, params = {}) {
-  const { tutorialService, kibanaVersion, docLinks } = getServices();
+  const { tutorialService, opensearchDashboardsVersion, docLinks } = getServices();
 
   const variables = {
     // '{' and '}' can not be used in template since they are used as template tags.
@@ -55,8 +55,8 @@ export function replaceTemplateStrings(text, params = {}) {
         logstash: docLinks.links.logstash.base,
         version: docLinks.DOC_LINK_VERSION,
       },
-      kibana: {
-        version: kibanaVersion,
+      opensearchDashboards: {
+        version: opensearchDashboardsVersion,
       },
     },
     params: params,
