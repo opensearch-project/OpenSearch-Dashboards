@@ -54,7 +54,7 @@ export class OpenSearchDashboardsOverviewPlugin
       map((navLinks) => {
         const hasOpenSearchDashboardsApp = Boolean(
           navLinks.find(
-            ({ id, category, hidden }) => !hidden && category?.id === 'opensearchdashboards' && id !== PLUGIN_ID
+            ({ id, category, hidden }) => !hidden && category?.id === 'opensearchDashboards' && id !== PLUGIN_ID
           )
         );
 
@@ -94,30 +94,30 @@ export class OpenSearchDashboardsOverviewPlugin
 
     if (home) {
       home.featureCatalogue.registerSolution({
-        id: 'opensearchdashboards',
-        title: i18n.translate('opensearchDashboardsOverview.opensearchdashboards.solution.title', {
+        id: 'opensearchDashboards',
+        title: i18n.translate('opensearchDashboardsOverview.opensearchDashboards.solution.title', {
           defaultMessage: 'OpenSearch Dashboards',
         }),
-        subtitle: i18n.translate('opensearchDashboardsOverview.opensearchdashboards.solution.subtitle', {
+        subtitle: i18n.translate('opensearchDashboardsOverview.opensearchDashboards.solution.subtitle', {
           defaultMessage: 'Visualize & analyze',
         }),
         appDescriptions: [
-          i18n.translate('opensearchDashboardsOverview.opensearchdashboards.appDescription1', {
+          i18n.translate('opensearchDashboardsOverview.opensearchDashboards.appDescription1', {
             defaultMessage: 'Analyze data in dashboards.',
           }),
-          i18n.translate('opensearchDashboardsOverview.opensearchdashboards.appDescription2', {
+          i18n.translate('opensearchDashboardsOverview.opensearchDashboards.appDescription2', {
             defaultMessage: 'Search and find insights.',
           }),
-          i18n.translate('opensearchDashboardsOverview.opensearchdashboards.appDescription3', {
+          i18n.translate('opensearchDashboardsOverview.opensearchDashboards.appDescription3', {
             defaultMessage: 'Design pixel-perfect presentations.',
           }),
-          i18n.translate('opensearchDashboardsOverview.opensearchdashboards.appDescription4', {
+          i18n.translate('opensearchDashboardsOverview.opensearchDashboards.appDescription4', {
             defaultMessage: 'Plot geographic data.',
           }),
-          i18n.translate('opensearchDashboardsOverview.opensearchdashboards.appDescription5', {
+          i18n.translate('opensearchDashboardsOverview.opensearchDashboards.appDescription5', {
             defaultMessage: 'Model, predict, and detect.',
           }),
-          i18n.translate('opensearchDashboardsOverview.opensearchdashboards.appDescription6', {
+          i18n.translate('opensearchDashboardsOverview.opensearchDashboards.appDescription6', {
             defaultMessage: 'Reveal patterns and relationships.',
           }),
         ],

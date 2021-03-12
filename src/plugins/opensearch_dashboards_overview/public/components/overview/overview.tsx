@@ -79,7 +79,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     }_2x.png`;
 
   const findFeatureById = (featureId: string) => features.find(({ id }) => id === featureId);
-  const opensearchDashboardsApps = features.filter(({ solutionId }) => solutionId === 'opensearchdashboards').sort(sortByOrder);
+  const opensearchDashboardsApps = features.filter(({ solutionId }) => solutionId === 'opensearchDashboards').sort(sortByOrder);
   const addDataFeatures = getFeaturesByCategory(FeatureCatalogueCategory.DATA);
   const manageDataFeatures = getFeaturesByCategory(FeatureCatalogueCategory.ADMIN);
   const devTools = findFeatureById('console');
