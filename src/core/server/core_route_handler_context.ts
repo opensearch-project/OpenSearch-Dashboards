@@ -19,31 +19,31 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { InternalCoreStart } from './internal_types';
-import { KibanaRequest } from './http/router';
+import { OpenSearchDashboardsRequest } from './http/router';
 import { SavedObjectsClientContract } from './saved_objects/types';
 import { InternalSavedObjectsServiceStart, ISavedObjectTypeRegistry } from './saved_objects';
 import {
-  InternalElasticsearchServiceStart,
+  InternalOpenSearchServiceStart,
   IScopedClusterClient,
   LegacyScopedClusterClient,
-} from './elasticsearch';
+} from './opensearch';
 import { Auditor } from './audit_trail';
 import { InternalUiSettingsServiceStart, IUiSettingsClient } from './ui_settings';
 
-class CoreElasticsearchRouteHandlerContext {
+class CoreOpenSearchRouteHandlerContext {
   #client?: IScopedClusterClient;
   #legacy?: {
     client: Pick<LegacyScopedClusterClient, 'callAsInternalUser' | 'callAsCurrentUser'>;
   };
 
   constructor(
-    private readonly elasticsearchStart: InternalElasticsearchServiceStart,
-    private readonly request: KibanaRequest
+    private readonly opensearchStart: InternalOpenSearchServiceStart,
+    private readonly request: OpenSearchDashboardsRequest
   ) {}
 
   public get client() {
     if (this.#client == null) {
-      this.#client = this.elasticsearchStart.client.asScoped(this.request);
+      this.#client = this.opensearchStart.client.asScoped(this.request);
     }
     return this.#client;
   }
@@ -51,7 +51,7 @@ class CoreElasticsearchRouteHandlerContext {
   public get legacy() {
     if (this.#legacy == null) {
       this.#legacy = {
-        client: this.elasticsearchStart.legacy.client.asScoped(this.request),
+        client: this.opensearchStart.legacy.client.asScoped(this.request),
       };
     }
     return this.#legacy;
@@ -61,7 +61,7 @@ class CoreElasticsearchRouteHandlerContext {
 class CoreSavedObjectsRouteHandlerContext {
   constructor(
     private readonly savedObjectsStart: InternalSavedObjectsServiceStart,
-    private readonly request: KibanaRequest
+    private readonly request: OpenSearchDashboardsRequest
   ) {}
   #scopedSavedObjectsClient?: SavedObjectsClientContract;
   #typeRegistry?: ISavedObjectTypeRegistry;
@@ -101,16 +101,16 @@ class CoreUiSettingsRouteHandlerContext {
 export class CoreRouteHandlerContext {
   #auditor?: Auditor;
 
-  readonly elasticsearch: CoreElasticsearchRouteHandlerContext;
+  readonly opensearch: CoreOpenSearchRouteHandlerContext;
   readonly savedObjects: CoreSavedObjectsRouteHandlerContext;
   readonly uiSettings: CoreUiSettingsRouteHandlerContext;
 
   constructor(
     private readonly coreStart: InternalCoreStart,
-    private readonly request: KibanaRequest
+    private readonly request: OpenSearchDashboardsRequest
   ) {
-    this.elasticsearch = new CoreElasticsearchRouteHandlerContext(
-      this.coreStart.elasticsearch,
+    this.opensearch = new CoreOpenSearchRouteHandlerContext(
+      this.coreStart.opensearch,
       this.request
     );
     this.savedObjects = new CoreSavedObjectsRouteHandlerContext(

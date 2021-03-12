@@ -19,13 +19,13 @@
 
 import {
   CA_CERT_PATH,
-  ES_KEY_PATH,
-  ES_CERT_PATH,
-  ES_P12_PATH,
-  ES_P12_PASSWORD,
-  ES_EMPTYPASSWORD_P12_PATH,
-  ES_NOPASSWORD_P12_PATH,
-} from '@kbn/dev-utils';
+  OPENSEARCH_KEY_PATH,
+  OPENSEARCH_CERT_PATH,
+  OPENSEARCH_P12_PATH,
+  OPENSEARCH_P12_PASSWORD,
+  OPENSEARCH_EMPTYPASSWORD_P12_PATH,
+  OPENSEARCH_NOPASSWORD_P12_PATH,
+} from '@osd/dev-utils';
 import { NO_CA_PATH, NO_CERT_PATH, NO_KEY_PATH, TWO_CAS_PATH, TWO_KEYS_PATH } from './__fixtures__';
 import { readFileSync } from 'fs';
 
@@ -49,8 +49,8 @@ let pemKey: string;
 
 beforeAll(() => {
   pemCA = readPem(CA_CERT_PATH);
-  pemCert = readPem(ES_CERT_PATH);
-  pemKey = readPem(ES_KEY_PATH);
+  pemCert = readPem(OPENSEARCH_CERT_PATH);
+  pemKey = readPem(OPENSEARCH_KEY_PATH);
 });
 
 describe('#readPkcs12Keystore', () => {
@@ -74,7 +74,7 @@ describe('#readPkcs12Keystore', () => {
 
     beforeAll(() => {
       // this is expensive, just do it once
-      pkcs12ReadResult = readPkcs12Keystore(ES_P12_PATH, ES_P12_PASSWORD);
+      pkcs12ReadResult = readPkcs12Keystore(OPENSEARCH_P12_PATH, OPENSEARCH_P12_PASSWORD);
     });
 
     it('Extracts the PEM key', () => {
@@ -95,7 +95,7 @@ describe('#readPkcs12Keystore', () => {
 
     beforeAll(() => {
       // this is expensive, just do it once
-      pkcs12ReadResult = readPkcs12Keystore(ES_EMPTYPASSWORD_P12_PATH, '');
+      pkcs12ReadResult = readPkcs12Keystore(OPENSEARCH_EMPTYPASSWORD_P12_PATH, '');
     });
 
     it('Extracts the PEM key', () => {
@@ -116,7 +116,7 @@ describe('#readPkcs12Keystore', () => {
 
     beforeAll(() => {
       // this is expensive, just do it once
-      pkcs12ReadResult = readPkcs12Keystore(ES_NOPASSWORD_P12_PATH);
+      pkcs12ReadResult = readPkcs12Keystore(OPENSEARCH_NOPASSWORD_P12_PATH);
     });
 
     it('Extracts the PEM key', () => {
@@ -164,7 +164,7 @@ describe('#readPkcs12Keystore', () => {
 
   describe('Throws errors', () => {
     const expectError = (password?: string) => {
-      expect(() => readPkcs12Keystore(ES_P12_PATH, password)).toThrowError(
+      expect(() => readPkcs12Keystore(OPENSEARCH_P12_PATH, password)).toThrowError(
         'PKCS#12 MAC could not be verified. Invalid password?'
       );
     };
@@ -198,7 +198,7 @@ describe('#readPkcs12Keystore', () => {
 
 describe('#readPkcs12Truststore', () => {
   it('reads all certificates into one CA array and discards any certificates that have keys', () => {
-    const ca = readPkcs12Truststore(ES_P12_PATH, ES_P12_PASSWORD);
+    const ca = readPkcs12Truststore(OPENSEARCH_P12_PATH, OPENSEARCH_P12_PASSWORD);
     const result = ca?.map((x) => reformatPem(x));
     expect(result).toEqual([pemCA]);
   });

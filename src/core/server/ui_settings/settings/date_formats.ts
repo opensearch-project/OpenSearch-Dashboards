@@ -18,8 +18,8 @@
  */
 
 import moment from 'moment-timezone';
-import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
+import { schema } from '@osd/config-schema';
+import { i18n } from '@osd/i18n';
 import { UiSettingsParams } from '../../../types';
 
 export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
@@ -30,7 +30,7 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
     'Browser',
     ...moment.tz
       .names()
-      // We need to filter out some time zones, that moment.js knows about, but Elasticsearch
+      // We need to filter out some time zones, that moment.js knows about, but OpenSearch
       // does not understand and would fail thus with a 400 bad request when using them.
       .filter((tz) => !['America/Nuuk', 'EST', 'HST', 'ROC', 'MST'].includes(tz)),
   ];
@@ -152,7 +152,7 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
       }),
       value: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
       description: i18n.translate('core.ui_settings.params.dateNanosFormatText', {
-        defaultMessage: 'Used for the {dateNanosLink} datatype of Elasticsearch',
+        defaultMessage: 'Used for the {dateNanosLink} datatype of OpenSearch',
         values: {
           dateNanosLink:
             '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/date_nanos.html" target="_blank" rel="noopener noreferrer">' +

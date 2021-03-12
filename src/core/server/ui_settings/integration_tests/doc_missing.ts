@@ -20,20 +20,20 @@
 import { getServices, chance } from './lib';
 
 export function docMissingSuite() {
-  // ensure the kibana index has no documents
+  // ensure the opensearch-dashboards index has no documents
   beforeEach(async () => {
-    const { kbnServer, callCluster } = getServices();
+    const { osdServer, callCluster } = getServices();
 
-    // write a setting to ensure kibana index is created
-    await kbnServer.inject({
+    // write a setting to ensure opensearch-dashboards index is created
+    await osdServer.inject({
       method: 'POST',
-      url: '/api/kibana/settings/defaultIndex',
+      url: '/api/opensearch-dashboards/settings/defaultIndex',
       payload: { value: 'abc' },
     });
 
-    // delete all docs from kibana index to ensure savedConfig is not found
+    // delete all docs from opensearch-dashboards index to ensure savedConfig is not found
     await callCluster('deleteByQuery', {
-      index: kbnServer.config.get('kibana.index'),
+      index: osdServer.config.get('opensearchDashboards.index'),
       body: {
         query: { match_all: {} },
       },
@@ -42,11 +42,11 @@ export function docMissingSuite() {
 
   describe('get route', () => {
     it('creates doc, returns a 200 with settings', async () => {
-      const { kbnServer } = getServices();
+      const { osdServer } = getServices();
 
-      const { statusCode, result } = await kbnServer.inject({
+      const { statusCode, result } = await osdServer.inject({
         method: 'GET',
-        url: '/api/kibana/settings',
+        url: '/api/opensearch-dashboards/settings',
       });
 
       expect(statusCode).toBe(200);
@@ -66,12 +66,12 @@ export function docMissingSuite() {
 
   describe('set route', () => {
     it('creates doc, returns a 200 with value set', async () => {
-      const { kbnServer } = getServices();
+      const { osdServer } = getServices();
 
       const defaultIndex = chance.word();
-      const { statusCode, result } = await kbnServer.inject({
+      const { statusCode, result } = await osdServer.inject({
         method: 'POST',
-        url: '/api/kibana/settings/defaultIndex',
+        url: '/api/opensearch-dashboards/settings/defaultIndex',
         payload: { value: defaultIndex },
       });
 
@@ -95,12 +95,12 @@ export function docMissingSuite() {
 
   describe('setMany route', () => {
     it('creates doc, returns 200 with updated values', async () => {
-      const { kbnServer } = getServices();
+      const { osdServer } = getServices();
 
       const defaultIndex = chance.word();
-      const { statusCode, result } = await kbnServer.inject({
+      const { statusCode, result } = await osdServer.inject({
         method: 'POST',
-        url: '/api/kibana/settings',
+        url: '/api/opensearch-dashboards/settings',
         payload: {
           changes: { defaultIndex },
         },
@@ -126,11 +126,11 @@ export function docMissingSuite() {
 
   describe('delete route', () => {
     it('creates doc, returns a 200 with just buildNum', async () => {
-      const { kbnServer } = getServices();
+      const { osdServer } = getServices();
 
-      const { statusCode, result } = await kbnServer.inject({
+      const { statusCode, result } = await osdServer.inject({
         method: 'DELETE',
-        url: '/api/kibana/settings/defaultIndex',
+        url: '/api/opensearch-dashboards/settings/defaultIndex',
       });
 
       expect(statusCode).toBe(200);

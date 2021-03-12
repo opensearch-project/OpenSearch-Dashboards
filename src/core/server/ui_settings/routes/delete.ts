@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { schema } from '@kbn/config-schema';
+import { schema } from '@osd/config-schema';
 
 import { IRouter } from '../../http';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
@@ -30,7 +30,7 @@ const validate = {
 
 export function registerDeleteRoute(router: IRouter) {
   router.delete(
-    { path: '/api/kibana/settings/{key}', validate },
+    { path: '/api/opensearch-dashboards/settings/{key}', validate },
     async (context, request, response) => {
       try {
         const uiSettingsClient = context.core.uiSettings.client;

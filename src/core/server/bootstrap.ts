@@ -23,13 +23,13 @@ import { CliArgs, Env, RawConfigService } from './config';
 import { Root } from './root';
 import { CriticalError } from './errors';
 
-interface KibanaFeatures {
-  // Indicates whether we can run Kibana in a so called cluster mode in which
-  // Kibana is run as a "worker" process together with optimizer "worker" process
+interface OpenSearchDashboardsFeatures {
+  // Indicates whether we can run OpenSearch Dashboards in a so called cluster mode in which
+  // OpenSearch Dashboards is run as a "worker" process together with optimizer "worker" process
   // that are orchestrated by the "master" process (dev mode only feature).
   isClusterModeSupported: boolean;
 
-  // Indicates whether we can run Kibana in REPL mode (dev mode only feature).
+  // Indicates whether we can run OpenSearch Dashboards in REPL mode (dev mode only feature).
   isReplModeSupported: boolean;
 }
 
@@ -37,7 +37,7 @@ interface BootstrapArgs {
   configs: string[];
   cliArgs: CliArgs;
   applyConfigOverrides: (config: Record<string, any>) => Record<string, any>;
-  features: KibanaFeatures;
+  features: OpenSearchDashboardsFeatures;
 }
 
 /**
@@ -52,7 +52,7 @@ export async function bootstrap({
   features,
 }: BootstrapArgs) {
   if (cliArgs.repl && !features.isReplModeSupported) {
-    onRootShutdown('Kibana REPL mode can only be run in development mode.');
+    onRootShutdown('OpenSearch Dashboards REPL mode can only be run in development mode.');
   }
 
   if (cliArgs.optimize) {
@@ -66,7 +66,7 @@ export async function bootstrap({
   // and as `REPO_ROOT` is initialized on the fly when importing `dev-utils` and requires
   // the `fs` package, it causes failures. This is why we use a dynamic `require` here.
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { REPO_ROOT } = require('@kbn/utils');
+  const { REPO_ROOT } = require('@osd/utils');
 
   const env = Env.createDefault(REPO_ROOT, {
     configs,

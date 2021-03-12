@@ -36,7 +36,7 @@ export const uiSettingsType: SavedObjectsType = {
     importableAndExportable: true,
     getInAppUrl() {
       return {
-        path: `/app/management/kibana/settings`,
+        path: `/app/management/opensearch-dsahboards/settings`,
         uiCapabilitiesPath: 'advancedSettings.show',
       };
     },

@@ -19,7 +19,7 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { mapToObject } from '@kbn/std';
+import { mapToObject } from '@osd/std';
 
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
